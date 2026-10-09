@@ -7,7 +7,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Avalonia.Build.Tasks` |
-| FerroUI | `src/FerroUI.Build.Tasks` (not created yet) |
+| FerroUI | `src/FerroUI.Build.Tasks` (exists) |
 | Crate | `ferroui-build` |
 | Phase / priority | 2 - xaml + themes / P1 |
 | Files | 0/9 (0.0%), 1 not applicable |
@@ -33,3 +33,23 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | `XamlCompilerTaskExecutor.Helpers.cs` | `xaml_compiler_task_executor_helpers.rs` | missing | 0/1 | 0/0 |  |
 | `XamlCompilerTaskExecutor.cs` | `xaml_compiler_task_executor.rs` | missing | 0/2 | 0/4 |  |
 | `XamlFileInfo.cs` | `xaml_file_info.rs` | missing | 0/1 | 0/2 |  |
+
+## Rust-only files
+
+Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
+
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `json.rs` | the JSON the type model is written in (`.xamlmeta`): a value, its reader and its deterministic writer | `Fields`, `Json`, `Members`, `Parser` |
+| `model.rs` | the build-time type model of a crate and of the crates it is built on, and its file, the `.xamlmeta` (docs/porting/xaml.md, 9.5.1): upstream's compiler reads the types of the referenced assemblies with Mono.Cecil instead | `AccessorModel`, `AssemblyModel`, `AttributeModel`, `AttributeValueModel`, `CallForm`, `CallableModel`, `EnumMemberModel`, `ExportModel`, `GenericModel`, `MemberModel`, `ParameterModel`, `PropertyModel`, ... (20 total) |
+| `model_set.rs` | the build-time type model of a crate and of the crates it is built on, and its file, the `.xamlmeta` (docs/porting/xaml.md, 9.5.1): upstream's compiler reads the types of the referenced assemblies with Mono.Cecil instead | `ModelSet` |
+| `scanner/declarations.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly | `Accessor`, `Declaration`, `EnumMember`, `MarkupBody`, `RawAccessor`, `RawAttribute`, `RawMember`, `RawParameter`, `RawProperty`, `RawValue`, `Registration` |
+| `scanner/modules.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly | `Glob`, `Import`, `Item`, `ItemKind`, `Module`, `Modules`, `Target` |
+| `scanner/source.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly | `Category`, `Context`, `Counter`, `HandWritten`, `Invocation`, `LocalMacro`, `Located`, `RawAssembly`, `RawFunction`, `Site`, `Source`, `Text` |
+| `scanner/tests.rs` | the unit tests of the module |  |
+| `scanner/tokens.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly | `Cursor`, `ParseError`, `Piece`, `Tokens`, `TypeEnd` |
+| `type_system/model_type_system.rs` | the build-time type system of the compiler over the type models (docs/porting/xaml.md, 9.5.2, 9.5.5): the counterpart of the Cecil type system of upstream's build task (XamlX.IL.Cecil, which the tracking does not list) | `Index`, `MemberBuilder`, `Merged`, `ModelTypeSystem`, `Position` |
+| `type_system/tests.rs` | the unit tests of the module |  |
+| `type_system/types.rs` | the build-time type system of the compiler over the type models (docs/porting/xaml.md, 9.5.2, 9.5.5): the counterpart of the Cecil type system of upstream's build task (XamlX.IL.Cecil, which the tracking does not list) | `MemberSource`, `MembersInit`, `ModelAssembly`, `ModelConstructor`, `ModelCustomAttribute`, `ModelEvent`, `ModelField`, `ModelMembers`, `ModelMethod`, `ModelParameterInfo`, `ModelProperty`, `ModelType`, ... (15 total) |
+
+Tests, examples and build scripts (not scanned): `tests/fixtures/dependent/lib.rs`, `tests/fixtures/dependent/panel.rs`, `tests/fixtures/scanner/controls/border.rs`, `tests/fixtures/scanner/controls/decorator.rs`, `tests/fixtures/scanner/controls/grid.rs`, `tests/fixtures/scanner/controls/mod.rs`, `tests/fixtures/scanner/controls/text_block.rs`, `tests/fixtures/scanner/lib.rs`, `tests/fixtures/scanner/macros.rs`, `tests/fixtures/scanner/markup_types/classes.rs`, `tests/fixtures/scanner/markup_types/mod.rs`, `tests/fixtures/scanner/markup_types/plain.rs`, `tests/fixtures/scanner/media/brush.rs`, `tests/fixtures/scanner/media/mod.rs`, `tests/fixtures/scanner/not_read.rs`, `tests/fixtures/scanner/odd/inner.rs`, `tests/fixtures/scanner/odd/placed_elsewhere.rs`, `tests/fixtures/scanner/register_types.rs`, `tests/fixtures/scanner/rust_paths.rs`.

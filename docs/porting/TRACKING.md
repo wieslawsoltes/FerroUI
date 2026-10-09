@@ -44,15 +44,15 @@ Percentages are `present / (total - waived)`. Member matching is by name with re
 
 | | Ported | Total | Waived | % |
 |---|---:|---:|---:|---:|
-| C# files | 2045 | 2363 | 0 | 86.5% |
-| Types | 2636 | 3276 | 0 | 80.5% |
-| Members | 19466 | 23849 | 44 | 81.8% |
-| Contracts (interfaces) | 389 | 464 | - | 83.8% |
-| Property registrations | 1216 | 1233 | - | 98.6% |
+| C# files | 2221 | 2298 | 0 | 96.6% |
+| Types | 2821 | 3190 | 203 | 94.4% |
+| Members | 20610 | 23406 | 1888 | 95.8% |
+| Contracts (interfaces) | 421 | 461 | - | 91.3% |
+| Property registrations | 1218 | 1233 | - | 98.8% |
 | Routed events | 108 | 108 | - | 100.0% |
 | Other files (native sources, XAML, TypeScript, fonts) | 243 | 268 | - | 90.7% |
 
-51 upstream files are not applicable and not counted. Out of the current scope (platform backends, below): 524 files, 1197 types, 13006 members.
+116 upstream files are not applicable and not counted. Out of the current scope (platform backends, below): 524 files, 1197 types, 13006 members.
 
 ## Projects
 
@@ -60,11 +60,11 @@ The % column is member coverage (file coverage for plain file lists).
 
 | Project | Upstream path | FerroUI path | Crate | Files | Types | Members | % | Phase | Priority |
 |---|---|---|---|---:|---:|---:|---:|---|---|
-| [XamlX](tracking/XamlX.md) | `external/XamlX/src/XamlX` | `external/XamlX/src/XamlX` | `xamlx` | 61/62 | 171/175 | 703/865 (2 waived) | 81.5% | 2 - xaml + themes | P1 |
+| [XamlX](tracking/XamlX.md) | `external/XamlX/src/XamlX` | `external/XamlX/src/XamlX` | `xamlx` | 61/61 | 171/174 (3 waived) | 706/857 (151 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Native (native sources)](tracking/Avalonia.Native_native_sources.md) | `native/Avalonia.Native` | `native/FerroUI.Native` | (Objective-C++ sources built by ferroui-native) | 62/62 | - | - | 100.0% | 1 - desktop (macOS) | P0 |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/Avalonia.Base` | `src/FerroUI.Base` | `ferroui-base` | 1115/1286 | 1423/1709 | 9819/11739 (32 waived) | 83.9% | 0 - core | P0 |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/Avalonia.Base` | `src/FerroUI.Base` | `ferroui-base` | 1248/1248 | 1520/1659 (136 waived) | 10271/11433 (1115 waived) | 99.5% | 0 - core | P0 |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/Avalonia.Build.Tasks` | `src/FerroUI.Build.Tasks` | `ferroui-build` | 0/9 | 0/10 | 0/44 | 0.0% | 2 - xaml + themes | P1 |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/Avalonia.Controls` | `src/FerroUI.Controls` | `ferroui-controls` | 532/538 | 606/628 | 6158/6405 (1 waived) | 96.2% | 1 - controls | P0 |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/Avalonia.Controls` | `src/FerroUI.Controls` | `ferroui-controls` | 534/538 | 616/628 (7 waived) | 6199/6405 (189 waived) | 99.7% | 1 - controls | P0 |
 | [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/Avalonia.Controls.ColorPicker` | `src/FerroUI.Controls.ColorPicker` | `ferroui-controls-color-picker` | 39/39 | 41/41 | 726/726 | 100.0% | 3 - extras | P2 |
 | [Avalonia.DesignerSupport](tracking/Avalonia.DesignerSupport.md) | `src/Avalonia.DesignerSupport` | `src/FerroUI.DesignerSupport` | `ferroui-designer-support` | 0/9 | 0/18 | 0/176 | 0.0% | 4 - tooling | P3 |
 | [Avalonia.Desktop](tracking/Avalonia.Desktop.md) | `src/Avalonia.Desktop` | `src/FerroUI.Desktop` | `ferroui-desktop` | 1/1 | 1/1 | 1/1 | 100.0% | 1 - desktop (macOS) | P0 |
@@ -72,21 +72,21 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) | `src/Avalonia.Fonts.Inter` | `src/FerroUI.Fonts.Inter` | `ferroui-fonts-inter` | 2/2 | 2/2 | 2/2 | 100.0% | 3 - browser | P2 |
 | [Avalonia.Metal](tracking/Avalonia.Metal.md) | `src/Avalonia.Metal` | `src/FerroUI.Metal` | `ferroui-metal` | 0/2 | 0/7 | 0/21 | 0.0% | 1 - desktop (macOS) | P1 |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/Avalonia.MicroCom` | `src/FerroUI.MicroCom` | `ferroui-microcom` | 1/1 | 1/1 | 0/6 (6 waived) | - | 0 - core | P0 |
-| [Avalonia.Native](tracking/Avalonia.Native.md) | `src/Avalonia.Native` | `src/FerroUI.Native` | `ferroui-native` | 45/49 | 61/85 | 435/601 | 72.4% | 1 - desktop (macOS) | P0 |
-| [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/Avalonia.OpenGL` | `src/FerroUI.OpenGL` | `ferroui-opengl` | 12/39 | 16/63 | 226/639 | 35.4% | 2 - rendering backends | P2 |
+| [Avalonia.Native](tracking/Avalonia.Native.md) | `src/Avalonia.Native` | `src/FerroUI.Native` | `ferroui-native` | 47/47 | 63/75 (11 waived) | 437/528 (76 waived) | 96.7% | 1 - desktop (macOS) | P0 |
+| [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/Avalonia.OpenGL` | `src/FerroUI.OpenGL` | `ferroui-opengl` | 39/39 | 61/63 (2 waived) | 601/639 (38 waived) | 100.0% | 2 - rendering backends | P2 |
 | [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | `src/Avalonia.Remote.Protocol` | `src/FerroUI.Remote.Protocol` | `ferroui-remote-protocol` | 0/14 | 0/55 | 0/202 (1 waived) | 0.0% | 4 - tooling | P3 |
-| [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/Avalonia.Themes.Fluent` | `src/FerroUI.Themes.Fluent` | `ferroui-themes-fluent` | 5/5 | 6/6 | 68/73 | 93.2% | 2 - xaml + themes | P1 |
+| [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/Avalonia.Themes.Fluent` | `src/FerroUI.Themes.Fluent` | `ferroui-themes-fluent` | 5/5 | 6/6 | 68/73 (5 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/Avalonia.Themes.Simple` | `src/FerroUI.Themes.Simple` | `ferroui-themes-simple` | 1/1 | 1/1 | 1/1 | 100.0% | 2 - xaml + themes | P2 |
-| [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/Avalonia.Browser` | `src/Browser/FerroUI.Browser` | `ferroui-browser` | 49/49 | 53/61 | 302/426 | 70.9% | 3 - browser | P2 |
-| [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | `src/HarfBuzz/Avalonia.HarfBuzz` | `src/HarfBuzz/FerroUI.HarfBuzz` | `ferroui-harfbuzz` | 3/3 | 3/3 | 5/8 | 62.5% | 1 - rendering | P0 |
-| [Avalonia.Headless](tracking/Avalonia.Headless.md) | `src/Headless/Avalonia.Headless` | `src/Headless/FerroUI.Headless` | `ferroui-headless` | 0/11 | 0/24 | 0/251 | 0.0% | 1 - test infrastructure | P1 |
-| [Avalonia.Headless.NUnit](tracking/Avalonia.Headless.NUnit.md) | `src/Headless/Avalonia.Headless.NUnit` | `src/Headless/FerroUI.Headless.NUnit` | `ferroui-headless-nunit` | 0/4 | 0/4 | 0/4 | 0.0% | 1 - test infrastructure | P1 |
-| [Avalonia.Headless.Vnc](tracking/Avalonia.Headless.Vnc.md) | `src/Headless/Avalonia.Headless.Vnc` | `src/Headless/FerroUI.Headless.Vnc` | `ferroui-headless-vnc` | 0/3 | 0/3 | 0/11 | 0.0% | 1 - test infrastructure | P1 |
-| [Avalonia.Headless.XUnit](tracking/Avalonia.Headless.XUnit.md) | `src/Headless/Avalonia.Headless.XUnit` | `src/Headless/FerroUI.Headless.XUnit` | `ferroui-headless-xunit` | 0/14 | 0/14 | 0/26 | 0.0% | 1 - test infrastructure | P1 |
-| [Avalonia.Markup](tracking/Avalonia.Markup.md) | `src/Markup/Avalonia.Markup` | `src/Markup/FerroUI.Markup` | `ferroui-markup` | 5/7 | 5/37 | 8/67 | 11.9% | 2 - xaml + themes | P1 |
-| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/Avalonia.Markup.Xaml` | `src/Markup/FerroUI.Markup.Xaml` | `ferroui-markup-xaml` | 45/47 | 60/64 | 191/240 | 79.6% | 2 - xaml + themes | P1 |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/Avalonia.Markup.Xaml.Loader` | `src/Markup/FerroUI.Markup.Xaml.Loader` | `ferroui-markup-xaml-loader` | 65/67 | 119/127 | 398/506 | 78.7% | 2 - xaml + themes | P1 |
-| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/Avalonia.Skia` | `src/Skia/FerroUI.Skia` | `ferroui-skia` | 47/54 | 49/66 | 329/451 | 72.9% | 1 - rendering | P0 |
+| [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/Avalonia.Browser` | `src/Browser/FerroUI.Browser` | `ferroui-browser` | 50/50 | 60/62 (2 waived) | 332/428 (90 waived) | 98.2% | 3 - browser | P2 |
+| [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | `src/HarfBuzz/Avalonia.HarfBuzz` | `src/HarfBuzz/FerroUI.HarfBuzz` | `ferroui-harfbuzz` | 3/3 | 3/3 | 5/8 (3 waived) | 100.0% | 1 - rendering | P0 |
+| [Avalonia.Headless](tracking/Avalonia.Headless.md) | `src/Headless/Avalonia.Headless` | `src/Headless/FerroUI.Headless` | `ferroui-headless` | 8/8 | 18/20 (2 waived) | 223/235 (9 waived) | 98.7% | 1 - test infrastructure | P1 |
+| [Avalonia.Headless.NUnit](tracking/Avalonia.Headless.NUnit.md) | `src/Headless/Avalonia.Headless.NUnit` | `src/Headless/FerroUI.Headless.NUnit` | `ferroui-headless-nunit` | 0/0 | 0/0 | 0/0 | - | 1 - test infrastructure | P1 |
+| [Avalonia.Headless.Vnc](tracking/Avalonia.Headless.Vnc.md) | `src/Headless/Avalonia.Headless.Vnc` | `src/Headless/FerroUI.Headless.Vnc` | `ferroui-headless-vnc` | 0/0 | 0/0 | 0/0 | - | 1 - test infrastructure | P1 |
+| [Avalonia.Headless.XUnit](tracking/Avalonia.Headless.XUnit.md) | `src/Headless/Avalonia.Headless.XUnit` | `src/Headless/FerroUI.Headless.XUnit` | `ferroui-headless-xunit` | 0/0 | 0/0 | 0/0 | - | 1 - test infrastructure | P1 |
+| [Avalonia.Markup](tracking/Avalonia.Markup.md) | `src/Markup/Avalonia.Markup` | `src/Markup/FerroUI.Markup` | `ferroui-markup` | 7/7 | 7/37 (30 waived) | 12/67 (55 waived) | 100.0% | 2 - xaml + themes | P1 |
+| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/Avalonia.Markup.Xaml` | `src/Markup/FerroUI.Markup.Xaml` | `ferroui-markup-xaml` | 45/47 | 61/64 (3 waived) | 199/240 (41 waived) | 100.0% | 2 - xaml + themes | P1 |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/Avalonia.Markup.Xaml.Loader` | `src/Markup/FerroUI.Markup.Xaml.Loader` | `ferroui-markup-xaml-loader` | 65/66 | 119/126 (7 waived) | 398/505 (107 waived) | 100.0% | 2 - xaml + themes | P1 |
+| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/Avalonia.Skia` | `src/Skia/FerroUI.Skia` | `ferroui-skia` | 48/54 | 52/66 | 335/451 | 74.3% | 1 - rendering | P0 |
 | [Avalonia.Generators](tracking/Avalonia.Generators.md) | `src/tools/Avalonia.Generators` | `src/tools/FerroUI.Generators` | (merged into ferroui-build, see docs/porting/xaml.md) | 0/30 | 0/53 | 0/264 (2 waived) | 0.0% | 2 - xaml + themes | P2 |
 
 Non-C# files that belong to these projects:
@@ -131,7 +131,7 @@ Libraries.
 |---|---:|---|---|---|
 | `src/Android/Avalonia.Android` | 58 | `src/Android/FerroUI.Android` | not created | [Avalonia.Android](tracking/Avalonia.Android.md) (out of scope) |
 | `src/Avalonia.Base` | 1304 | `src/FerroUI.Base` | workspace member | [Avalonia.Base](tracking/Avalonia.Base.md) |
-| `src/Avalonia.Build.Tasks` | 10 | `src/FerroUI.Build.Tasks` | not created | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) |
+| `src/Avalonia.Build.Tasks` | 10 | `src/FerroUI.Build.Tasks` | workspace member | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) |
 | `src/Avalonia.Controls` | 539 | `src/FerroUI.Controls` | workspace member | [Avalonia.Controls](tracking/Avalonia.Controls.md) |
 | `src/Avalonia.Controls.ColorPicker` | 40 | `src/FerroUI.Controls.ColorPicker` | workspace member | [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) |
 | `src/Avalonia.DesignerSupport` | 9 | `src/FerroUI.DesignerSupport` | not created | [Avalonia.DesignerSupport](tracking/Avalonia.DesignerSupport.md) |
@@ -152,7 +152,7 @@ Libraries.
 | `src/Avalonia.X11` | 88 | `src/FerroUI.X11` | not created | [Avalonia.X11](tracking/Avalonia.X11.md) (out of scope) |
 | `src/Browser/Avalonia.Browser` | 52 | `src/Browser/FerroUI.Browser` | workspace member | [Avalonia.Browser](tracking/Avalonia.Browser.md) |
 | `src/HarfBuzz/Avalonia.HarfBuzz` | 3 | `src/HarfBuzz/FerroUI.HarfBuzz` | workspace member | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) |
-| `src/Headless/Avalonia.Headless` | 11 | `src/Headless/FerroUI.Headless` | not created | [Avalonia.Headless](tracking/Avalonia.Headless.md) |
+| `src/Headless/Avalonia.Headless` | 11 | `src/Headless/FerroUI.Headless` | workspace member | [Avalonia.Headless](tracking/Avalonia.Headless.md) |
 | `src/Headless/Avalonia.Headless.NUnit` | 4 | `src/Headless/FerroUI.Headless.NUnit` | not created | [Avalonia.Headless.NUnit](tracking/Avalonia.Headless.NUnit.md) |
 | `src/Headless/Avalonia.Headless.Vnc` | 3 | `src/Headless/FerroUI.Headless.Vnc` | not created | [Avalonia.Headless.Vnc](tracking/Avalonia.Headless.Vnc.md) |
 | `src/Headless/Avalonia.Headless.XUnit` | 14 | `src/Headless/FerroUI.Headless.XUnit` | not created | [Avalonia.Headless.XUnit](tracking/Avalonia.Headless.XUnit.md) |
@@ -305,6 +305,7 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `samples/MiniMvvm` | `samples/MiniMvvm` (not tracked) |
 | `src/Browser/FerroUI.Browser` | `src/Browser/Avalonia.Browser` |
 | `src/FerroUI.Base` | `src/Avalonia.Base` |
+| `src/FerroUI.Build.Tasks` | `src/Avalonia.Build.Tasks` |
 | `src/FerroUI.Controls` | `src/Avalonia.Controls` |
 | `src/FerroUI.Controls.ColorPicker` | `src/Avalonia.Controls.ColorPicker` |
 | `src/FerroUI.Desktop` | `src/Avalonia.Desktop` |
@@ -316,6 +317,7 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `src/FerroUI.Themes.Fluent` | `src/Avalonia.Themes.Fluent` |
 | `src/FerroUI.Themes.Simple` | `src/Avalonia.Themes.Simple` |
 | `src/HarfBuzz/FerroUI.HarfBuzz` | `src/HarfBuzz/Avalonia.HarfBuzz` |
+| `src/Headless/FerroUI.Headless` | `src/Headless/Avalonia.Headless` |
 | `src/Markup/FerroUI.Markup` | `src/Markup/Avalonia.Markup` |
 | `src/Markup/FerroUI.Markup.Xaml` | `src/Markup/Avalonia.Markup.Xaml` |
 | `src/Markup/FerroUI.Markup.Xaml.Loader` | `src/Markup/Avalonia.Markup.Xaml.Loader` |
@@ -329,332 +331,329 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-327 Rust source files have no upstream counterpart (306 without a recorded reason). They are listed at the end of each project page.
+324 Rust source files have no upstream counterpart (0 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
 | [XamlX](tracking/XamlX.md) | `external/XamlX/src/XamlX/extensions/query_interface.rs` | dynamic interface queries on AST nodes: replaces C# `is`/`as` casts to backend-generic interfaces |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/animation/animation_task.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/animation/animators/effect_animator.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/animation/cancellation.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/animation/time_span.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/animation/transitions/effect_transition.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/animation/transitions_collection.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/controls/resource_key.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/converters/composite_format.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/core/expression_nodes/reflection_indexer_node.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/core/expression_nodes/type_cast_node.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/core/plugins/markup_members.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/core/plugins/property_info_accessor_factory.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/core/plugins/untyped_accessor_plugin.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/core/value_type.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/core/weak_value.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/model/event.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/model/i_bindable_indexer.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/model/i_notify_collection_changed.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/model/i_notify_data_error_info.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/model/i_notify_property_changed.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/model/model_type.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/element_ref.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/i_support_initialize.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/input/i_command.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/input/i_scrollable.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/input/platform/clipboard_error.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/layout/layout_manager_tests_bring_into_view.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/markup_types/animation.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/markup_types/classes.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/markup_types/contracts.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/markup_types/enums.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/markup_types/named_values.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/markup_types/plain.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/markup_types/values.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/markup_types/well_known.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/effects/effect_extensions.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/fonts/tables/testing/big_endian_buffer.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/fonts/tables/testing/synthetic_font.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/fonts/testing/test_asset_loader.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/fonts/testing/test_font_builder.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/fonts/testing/test_font_manager_impl.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/fonts/testing/test_font_scope.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/fonts/testing/test_fonts.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/fonts/testing/test_platform_typeface.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/known_color_brushes.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/media_collection.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/points.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/ref_adapter.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/string_splitter.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/i_text_drawing_sink.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/testing/drawing.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/testing/fonts.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/testing/shaper.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/testing/sources.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/text_index.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/unicode/bidi_trie.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/unicode/east_asian_width_trie.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/unicode/script_extensions_data.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/unicode/segmentation_trie.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/unicode/ucd_test_data.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/unicode/unicode_data_trie.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/tile_mode.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/metadata/markup_assembly.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/metadata/markup_macros.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/metadata/markup_type.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/metadata/property_accessors.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/metadata/service_provider.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/metadata/typed_path.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/matrix3x2.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/matrix4x4.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/quaternion.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/single.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/tests.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/vector2.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/vector3.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/vector4.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/platform/i_drawing_context_impl_with_effects.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/platform/i_optional_feature_provider.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/platform/internal/asset_registry.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/platform/render_interface_access.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/platform/storage/file_io/path.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/register_types.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/auto_reset_event.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/composition_cache_mode.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/composition_solid_color_visual.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/composition_surface_visual.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_animations.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_bitmap_cache.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_brush.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_cache_mode.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_conic_gradient_brush.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_container_visual.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_experimental_acrylic_visual.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_gradient_stop.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_linear_gradient_brush.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_radial_gradient_brush.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_brush.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_conic_gradient_brush.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_geometry.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_linear_gradient_brush.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_pen.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_radial_gradient_brush.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_solid_color_brush.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_tile_brush.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_transform.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_solid_color_brush.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_solid_color_visual.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_surface_visual.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_target.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_tile_brush.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_visual.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_visual_collection.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/tests.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/i_composition_object_host.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/server/server_composition_simple_brush.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/server/server_composition_simple_transform.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/server/server_composition_visual/act.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/server/server_composition_visual/adorners.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/server/server_composition_visual/computed_properties.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/server/server_composition_visual/dirty_inputs.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/server/server_composition_visual/readback.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/server/server_composition_visual/render.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/server/server_composition_visual/update.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/server/server_composition_visual/walker.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/server/server_composition_visual_collection.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/server/server_property_host.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/test_compositor.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/i_hit_tester.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/managed_hit_tester.rs` | **unmapped** |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/animation/animation_task.rs` | the completion of an animation run, the `Task` upstream returns: completed from within a clock tick or a cancellation, so it needs no executor |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/animation/cancellation.rs` | cancellation callbacks for state of the UI thread: a cancellation token runs its callbacks on the cancelling thread, so they must be `Send`, and what an animation does on cancellation is not |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/animation/time_span.rs` | counterpart of .NET `System.TimeSpan` (signed 100-nanosecond ticks), the time type of the animation system |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/controls/resource_key.rs` | a value usable as a resource key (value equality and a hash) and the hasher of the resource tables: upstream keys are `object` |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/converters/composite_format.rs` | the composite formatting of .NET (`string.Format`), which the string format of a binding uses |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/core/plugins/markup_members.rs` | member lookup over markup metadata: what the string-path bindings use where upstream reflects over the run-time type of a source object |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/core/plugins/property_info_accessor_factory.rs` | the accessor factories of compiled binding paths for plain properties, in the crate of the paths; upstream's are in `MarkupExtensions/CompiledBindings/PropertyInfoAccessorFactory.cs` of Avalonia.Markup.Xaml |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/core/plugins/untyped_accessor_plugin.rs` | property accessors over untyped getters and setters of the markup metadata: takes the place of the accessors upstream builds from `PropertyInfo` |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/core/weak_value.rs` | a reference to a binding source that does not keep it alive: a weak reference to an object upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/model/event.rs` | the contracts of the .NET runtime library that bindings observe on a model object (`INotifyPropertyChanged`, `INotifyCollectionChanged`, `INotifyDataErrorInfo`, events, indexers) and the declaration of a model type, which takes the place of reflection over the object |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/model/i_bindable_indexer.rs` | the contracts of the .NET runtime library that bindings observe on a model object (`INotifyPropertyChanged`, `INotifyCollectionChanged`, `INotifyDataErrorInfo`, events, indexers) and the declaration of a model type, which takes the place of reflection over the object |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/model/i_notify_collection_changed.rs` | the contracts of the .NET runtime library that bindings observe on a model object (`INotifyPropertyChanged`, `INotifyCollectionChanged`, `INotifyDataErrorInfo`, events, indexers) and the declaration of a model type, which takes the place of reflection over the object |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/model/i_notify_data_error_info.rs` | the contracts of the .NET runtime library that bindings observe on a model object (`INotifyPropertyChanged`, `INotifyCollectionChanged`, `INotifyDataErrorInfo`, events, indexers) and the declaration of a model type, which takes the place of reflection over the object |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/model/i_notify_property_changed.rs` | the contracts of the .NET runtime library that bindings observe on a model object (`INotifyPropertyChanged`, `INotifyCollectionChanged`, `INotifyDataErrorInfo`, events, indexers) and the declaration of a model type, which takes the place of reflection over the object |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/data/model/model_type.rs` | the contracts of the .NET runtime library that bindings observe on a model object (`INotifyPropertyChanged`, `INotifyCollectionChanged`, `INotifyDataErrorInfo`, events, indexers) and the declaration of a model type, which takes the place of reflection over the object |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/diagnostics/perf_counters.rs` | counters of the work the framework does per operation, behind the feature `perf-counters` (docs/porting/performance, design 09): not from upstream, which is measured with the tools of its runtime |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/element_ref.rs` | a reference to an element that the holder does not own, held weakly and compared by identity: the value type of properties that point sideways or up the tree (a placement target, the target of a label), a plain object reference upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/i_support_initialize.rs` | counterpart of .NET `System.ComponentModel.ISupportInitialize` |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/input/i_command.rs` | counterpart of .NET `System.Windows.Input.ICommand` |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/input/platform/clipboard_error.rs` | the error of a failed clipboard operation, by category: upstream lets the exceptions of the platform through |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/layout/layout_manager_tests_bring_into_view.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/markup_types/animation.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/markup_types/classes.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/markup_types/contracts.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/markup_types/enums.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/markup_types/named_values.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/markup_types/plain.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/markup_types/values.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/fonts/tables/testing/big_endian_buffer.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/fonts/tables/testing/synthetic_font.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/fonts/testing/test_asset_loader.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/fonts/testing/test_font_builder.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/fonts/testing/test_font_manager_impl.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/fonts/testing/test_font_scope.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/fonts/testing/test_fonts.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/fonts/testing/test_platform_typeface.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/known_color_brushes.rs` | the brush lookups of the known colours, a part of `Media/KnownColors.cs` upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/media_collection.rs` | a reference-counted handle to an observable list that compares by identity, as the media object model shares its collections: object references upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/ref_adapter.rs` | the bridge between class handles and the media interfaces (`IBrush`, `IPen`, `ITransform`), which immutable values and mutable classes both implement: an interface cast upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/shared_brush.rs` | The values of an immutable brush or pen in a form that is Send + Sync: the handles of the brush contract are Rc, so what the render thread draws with is a copy with a stable identity (render thread, stage R1) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/i_text_drawing_sink.rs` | the drawing calls text needs, as a contract that mirrors the members of `DrawingContext` one to one and that the drawing context implements: upstream draws text onto a `DrawingContext` |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/testing/drawing.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/testing/fonts.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/testing/shaper.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/testing/sources.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/text_index.rs` | conversion between UTF-16 code unit indices, the index unit of the text subsystem, and UTF-8 byte offsets of a `&str` |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/unicode/bidi_trie.rs` | generated by scripts/convert-unicode-tries.py from the upstream data file of the same name (`*.trie.cs`) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/unicode/east_asian_width_trie.rs` | generated by scripts/convert-unicode-tries.py from the upstream data file of the same name (`*.trie.cs`) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/unicode/script_extensions_data.rs` | generated by scripts/convert-unicode-tries.py from the upstream data file `ScriptExtensions.data.cs` |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/unicode/segmentation_trie.rs` | generated by scripts/convert-unicode-tries.py from the upstream data file of the same name (`*.trie.cs`) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/unicode/ucd_test_data.rs` | helpers of the Unicode conformance tests, which read the test files of the Unicode Character Database from the repository where upstream downloads them at test time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/unicode/unicode_data_trie.rs` | generated by scripts/convert-unicode-tries.py from the upstream data file of the same name (`*.trie.cs`) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/tile_mode.rs` | the enum `TileMode`, declared in `Media/TileBrush.cs` upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/metadata/markup_macros.rs` | the declaration forms of markup metadata (`ferro_markup_type!` and its kin): take the place of the attributes and the reflection of upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/metadata/property_accessors.rs` | the Rust accessors of registered property definitions, for the Rust emitter of the XAML compiler (docs/porting/xaml.md, section 9): upstream's compiler loads a property definition from its static field |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/metadata/service_provider.rs` | counterpart of .NET `System.IServiceProvider`, the service provider contract of markup |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/metadata/typed_path.rs` | the typed path hook of a plain property declared in markup metadata, with which a compiled binding of one plain property is evaluated without boxing |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/matrix3x2.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/matrix4x4.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/quaternion.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/single.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/tests.rs` | the unit tests of the module |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/vector2.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/vector3.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/vector4.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/platform/i_drawing_context_impl_with_effects.rs` | the contract `IDrawingContextImplWithEffects`, declared in `Platform/IDrawingContextImpl.cs` upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/platform/render_interface_access.rs` | access to the platform render interface registered by the rendering backend, in one place (a service locator lookup at each site upstream) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/platform/storage/file_io/path.rs` | the path string operations of .NET `System.IO.Path` the storage helpers need |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/auto_reset_event.rs` | counterpart of .NET `AutoResetEvent` for the waits of the render thread; bare WebAssembly has no blocking wait |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/composition_cache_mode.rs` | `CompositionCacheMode` and `CompositionBitmapCache`, classes that upstream's source generator writes from `composition-schema.xml`: the only cache mode is the bitmap cache, so the abstract class is an alias of it |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/composition_solid_color_visual.rs` | `CompositionSolidColorVisual` and `CompositionSurfaceVisual`, classes that upstream's source generator writes whole from `composition-schema.xml`: the hand-written half next to the generated property block |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/composition_surface_visual.rs` | `CompositionSolidColorVisual` and `CompositionSurfaceVisual`, classes that upstream's source generator writes whole from `composition-schema.xml`: the hand-written half next to the generated property block |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_animations.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_bitmap_cache.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_cache_mode.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_conic_gradient_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_container_visual.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_experimental_acrylic_visual.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_gradient_stop.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_linear_gradient_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_radial_gradient_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_conic_gradient_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_geometry.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_linear_gradient_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_pen.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_radial_gradient_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_solid_color_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_tile_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_simple_transform.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_solid_color_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_solid_color_visual.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_surface_visual.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_target.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_tile_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_visual.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/composition_visual_collection.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/generated/tests.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/i_composition_object_host.rs` | the seam between the generated property blocks of composition objects and the hand-written classes that embed them: partial classes upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/render_interface_feature.rs` | a feature of the render interface as a handle bound to the compositor lock, which lends the feature inside the lock and is dropped there: upstream hands the feature object itself to the UI thread and the garbage collector shares it (render thread, stage R5.8) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/server/compositor_lock.rs` | The compositor lock as a type: upstream confines the server side to lock (_lock) by convention, here the lock holds the server compositor (render thread, stage R5) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/server/server_composition_cache_mode.rs` | the server side of `CompositionCacheMode`, a class that upstream's source generator writes from `composition-schema.xml`; `Rendering/Composition/Server/ServerCompositionCacheMode.cs` itself is mapped to the bitmap cache |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/server/server_composition_visual_collection.rs` | the server side of the children collection of a visual, a class that upstream's source generator writes whole from `composition-schema.xml` |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/server/server_property_host.rs` | the seam between the generated property blocks of server objects and the hand-written classes that embed them: partial classes upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/test_compositor.rs` | a compositor for the tests of the composition API that need no visual tree (upstream's `CompositorTestServices` without its top-level) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/i_hit_tester.rs` | the contract `IHitTester`, declared in `Rendering/IRenderer.cs` upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/managed_hit_tester.rs` | a hit tester that walks the visual tree directly (an implementation of `IHitTester` that needs no compositor) |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/scene_graph/scene_graph_test_support.rs` | test doubles of the scene graph unit tests (the Moq mocks of `Rendering/SceneGraph/*Tests.cs`) |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/testing/mock_drawing_context_impl.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/testing/mock_platform_render_interface.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rust_paths.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/styling/test_support.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/styling/testing.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/styling/visual_query_provider.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/threading/cancellation_token.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/threading/dispatcher_task.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/threading/dispatcher_tests_exception.rs` | **unmapped** |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/testing/mock_drawing_context_impl.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/testing/mock_platform_render_interface.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/styling/test_support.rs` | classes shared by the styling tests: the control library is a separate crate, so the tests use minimal classes in place of the controls of the upstream tests |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/styling/testing.rs` | the port of `StyleHelpers` of the upstream test projects, for this crate and the crates built on it |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/threading/cancellation_token.rs` | counterpart of .NET `CancellationToken`, `CancellationTokenSource` and `CancellationTokenRegistration` |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/threading/dispatcher_task.rs` | futures that run on a dispatcher: the executor half of what upstream gets from `Task` and its synchronization context (porting guide: asynchronous members return DispatcherTask) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/threading/dispatcher_tests_exception.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/type_system.rs` | object model runtime (Ref/WeakRef handles, TypeInfo, class macros): replaces the CLR type system, virtual dispatch and GC references |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/cancel_event_args.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/compare_info.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/culture_info.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/date_time.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/date_time_format.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/date_time_format_info.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/date_time_kind.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/date_time_net_data.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/date_time_offset.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/date_time_styles.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/day_of_week.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/decimal.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/decimal_double_conversion_data.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/event_args.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/gregorian_calendar.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/handler_list.rs` | storage for C# `event` handlers (multicast delegates have no Rust equivalent; porting guide, Types table) |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/i_culture_data_provider.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/number_format.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/number_format_info.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/number_styles.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/read_only_memory.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/ref_countable.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/test_culture_data_provider.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/text_info.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/time_zone_info.rs` | **unmapped** |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/uri.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/assigned_binding.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/command_bar/command_bar_tests_keyboard.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/command_bar/command_bar_tests_overflow.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/grid_mocks.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/i_clickable_control.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/i_command_source.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/items_source.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/layout_test_control.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/layoutable_tests_effective_viewport_changed.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/layoutable_tests_layout_rounding.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/list_box_tests_multiple.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/list_box_tests_single.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/markup_types/classes.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/markup_types/contracts.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/markup_types/converters.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/markup_types/enums.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/markup_types/lists.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/markup_types/plain.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/markup_types/values.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/metadata/pseudo_classes_attribute.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/metadata/template_part_attribute.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/mouse_test_helper.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/navigable_containers.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/page/carousel_page_tests_interaction.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/page/drawer_page_tests_lifecycle.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/page/drawer_page_tests_templates.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/page/navigation_page_tests_lifecycle.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/page/navigation_page_tests_navigating.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/page/navigation_page_tests_stack.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/page/tabbed_page_tests_data_template.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/platform/i_platform_handle.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/platform/platform_handle.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presentation_source/renderer_factory.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presenters/content_presenter_tests_in_template.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presenters/content_presenter_tests_layout.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presenters/content_presenter_tests_standalone.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presenters/content_presenter_tests_unrooted.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presenters/scroll_content_presenter_tests_i_logical_scrollable.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/primitives/popup_tests_items_control.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/primitives/selecting_items_control_tests_auto_select.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/primitives/selecting_items_control_tests_multiple.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/primitives/selecting_items_control_tests_selected_value.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/register_types.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/render_tests_culling.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/rust_paths.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/scroll_viewer_tests_i_logical_scrollable.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/selection/selection_model_tests_multiple.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/selection/selection_model_tests_single.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/size_to_content.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/styled_element_tests_resources.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/styled_element_tests_theming.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/templates/template_result.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/test_command.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/test_support.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/test_support_buttons.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/test_support_scrolling.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/test_support_shapes.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/compositor_test_services.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/mock_screen.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/mock_window_impl.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/mock_windowing_platform.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/null_renderer.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_clipboard.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_log_sink.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_services.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_services_windowing.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_theme.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_theme_autocomplete.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_theme_command_bar.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_theme_notifications.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_theme_page.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_theme_pips_pager.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_theme_pull_to_refresh.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_theme_split_view.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/unit_test_application.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/text_box_tests_data_validation.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/text_box_tests_input.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/top_level_tests_platform_features.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/utils/debug_display.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/utils/masked_text_provider.rs` | **unmapped** |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/window_decorations.rs` | **unmapped** |
-| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/assets.rs` | **unmapped** |
-| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/markup_types/classes.rs` | **unmapped** |
-| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/markup_types/converters.rs` | **unmapped** |
-| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/markup_types/enums.rs` | **unmapped** |
-| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/markup_types/palettes.rs` | **unmapped** |
-| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/register_types.rs` | **unmapped** |
-| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/rust_paths.rs` | **unmapped** |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/cancel_event_args.rs` | counterpart of .NET `System.ComponentModel.CancelEventArgs` |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/compare_info.rs` | counterpart of .NET `StringComparison`, `CompareOptions` and `CultureInfo.CompareInfo` |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/culture_info.rs` | minimal counterpart of .NET `System.Globalization.CultureInfo` |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/date_time.rs` | counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/date_time_format.rs` | counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/date_time_format_info.rs` | counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/date_time_kind.rs` | counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/date_time_net_data.rs` | expectations of the date and time tests, recorded from .NET |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/date_time_offset.rs` | counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/date_time_styles.rs` | counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/day_of_week.rs` | counterpart of .NET `System.DayOfWeek` |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/decimal.rs` | counterpart of .NET `System.Decimal` |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/decimal_double_conversion_data.rs` | expectations of the conversions between doubles and decimals, recorded from .NET |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/event_args.rs` | counterpart of .NET `System.EventArgs` |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/gregorian_calendar.rs` | counterpart of .NET `System.Globalization.GregorianCalendar` and `ISOWeek`, as far as the controls use them |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/i_culture_data_provider.rs` | the source of culture data: the base library has the invariant culture built in, the data of every other culture comes from a registered provider (.NET takes it from the operating system) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/number_format.rs` | counterpart of a .NET runtime library type: `System.Globalization.NumberFormatInfo`, `NumberStyles` and the numeric format strings |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/number_format_info.rs` | counterpart of a .NET runtime library type: `System.Globalization.NumberFormatInfo`, `NumberStyles` and the numeric format strings |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/number_styles.rs` | counterpart of a .NET runtime library type: `System.Globalization.NumberFormatInfo`, `NumberStyles` and the numeric format strings |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/read_only_memory.rs` | counterpart of .NET `ReadOnlyMemory&lt;T&gt;`: the text of the text formatting subsystem |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/test_culture_data_provider.rs` | a culture data provider for tests (`en`, `en-US`, `en-GB`, with the values .NET reports) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/text_info.rs` | minimal counterpart of .NET `System.Globalization.TextInfo` |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/thread_bound.rs` | A part of a shared render resource that stays on the thread that created it; the original relies on convention where Rust needs the object to be Send + Sync (render thread, stage R1) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/time_zone_info.rs` | minimal counterpart of .NET `System.TimeZoneInfo`: the offset of local time comes from a provider of the platform layer |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/uri.rs` | minimal counterpart of .NET `System.Uri`, covering what resource and font keys need |
+| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/json.rs` | the JSON the type model is written in (`.xamlmeta`): a value, its reader and its deterministic writer |
+| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/model.rs` | the build-time type model of a crate and of the crates it is built on, and its file, the `.xamlmeta` (docs/porting/xaml.md, 9.5.1): upstream's compiler reads the types of the referenced assemblies with Mono.Cecil instead |
+| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/model_set.rs` | the build-time type model of a crate and of the crates it is built on, and its file, the `.xamlmeta` (docs/porting/xaml.md, 9.5.1): upstream's compiler reads the types of the referenced assemblies with Mono.Cecil instead |
+| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/declarations.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly |
+| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/modules.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly |
+| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/source.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly |
+| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/tests.rs` | the unit tests of the module |
+| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/tokens.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly |
+| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/type_system/model_type_system.rs` | the build-time type system of the compiler over the type models (docs/porting/xaml.md, 9.5.2, 9.5.5): the counterpart of the Cecil type system of upstream's build task (XamlX.IL.Cecil, which the tracking does not list) |
+| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/type_system/tests.rs` | the unit tests of the module |
+| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/type_system/types.rs` | the build-time type system of the compiler over the type models (docs/porting/xaml.md, 9.5.2, 9.5.5): the counterpart of the Cecil type system of upstream's build task (XamlX.IL.Cecil, which the tracking does not list) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/assigned_binding.rs` | a binding held as the value of a property that is assigned a binding rather than bound with it; equality is identity, as of the object reference upstream |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/command_bar/command_bar_tests_keyboard.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/command_bar/command_bar_tests_overflow.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/grid_mocks.rs` | helpers shared by the grid tests (`GridMocks.cs` of the upstream test project) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/i_clickable_control.rs` | the registry of the classes that implement `IClickableControl`: a class cannot implement the trait itself, an interface cast upstream |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/i_command_source.rs` | the registry of the classes that implement `ICommandSource`: a class cannot implement the trait itself, an interface cast upstream |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/layout_test_control.rs` | the port of `LayoutTestControl.cs` and `LayoutTestRoot.cs` of the base library's test project: they derive from controls, so the layout tests that use them live with the controls |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/layoutable_tests_effective_viewport_changed.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/layoutable_tests_layout_rounding.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/list_box_tests_multiple.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/list_box_tests_single.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/markup_types/contracts.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/markup_types/converters.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/markup_types/enums.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/markup_types/lists.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/markup_types/plain.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/markup_types/values.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/metadata/pseudo_classes_attribute.rs` | the constant a control declares its pseudo-classes with in Rust code; the attribute markup reads is mapped in the base crate (`Controls/Metadata/PseudoClassesAttribute.cs` of Avalonia.Base) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/metadata/template_part_attribute.rs` | the constant a control declares its template parts with in Rust code; the attribute markup reads is mapped in the base crate (`Controls/Metadata/TemplatePartAttribute.cs` of Avalonia.Base) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/mouse_test_helper.rs` | the port of `MouseTestHelper` of the upstream test projects |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/navigable_containers.rs` | views a panel as the `INavigableContainer` it implements: an interface cast upstream |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/page/carousel_page_tests_interaction.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/page/drawer_page_tests_lifecycle.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/page/drawer_page_tests_templates.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/page/navigation_page_tests_lifecycle.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/page/navigation_page_tests_navigating.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/page/navigation_page_tests_stack.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/page/tabbed_page_tests_data_template.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/platform/i_platform_handle.rs` | `IPlatformHandle` and `PlatformHandle` declared a second time: upstream has them once, in `Platform/` of Avalonia.Base, and the base crate ports them there too (open: keep one declaration) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/platform/platform_handle.rs` | `IPlatformHandle` and `PlatformHandle` declared a second time: upstream has them once, in `Platform/` of Avalonia.Base, and the base crate ports them there too (open: keep one declaration) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presentation_source/renderer_factory.rs` | the renderer seam of the top-level layer: top-levels are written against a renderer contract, where upstream every presentation source creates a compositing renderer over the compositor of its platform implementation |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presenters/content_presenter_tests_in_template.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presenters/content_presenter_tests_layout.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presenters/content_presenter_tests_standalone.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presenters/content_presenter_tests_unrooted.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presenters/scroll_content_presenter_tests_i_logical_scrollable.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/primitives/popup_tests_items_control.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/primitives/selecting_items_control_tests_auto_select.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/primitives/selecting_items_control_tests_multiple.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/primitives/selecting_items_control_tests_selected_value.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/render_tests_culling.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/scroll_viewer_tests_i_logical_scrollable.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/selection/selection_model_tests_multiple.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/selection/selection_model_tests_single.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/size_to_content.rs` | the enum `SizeToContent`, declared in `Window.cs` upstream |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/styled_element_tests_resources.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/styled_element_tests_theming.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/templates/template_result.rs` | port of `Controls/Templates/TemplateResult.cs` and `ITemplateResult.cs` of Avalonia.Base, in the crate of their only user |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/test_command.rs` | classes, services and a command shared by the tests of the crate |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/test_support.rs` | classes, services and a command shared by the tests of the crate |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/test_support_buttons.rs` | classes, services and a command shared by the tests of the crate |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/test_support_scrolling.rs` | classes, services and a command shared by the tests of the crate |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/test_support_shapes.rs` | classes, services and a command shared by the tests of the crate |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/compositor_test_services.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/mock_screen.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/mock_window_impl.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/mock_windowing_platform.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/null_renderer.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_clipboard.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_icon_loader.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_log_sink.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_services.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_services_windowing.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_theme.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_theme_autocomplete.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_theme_command_bar.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_theme_notifications.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_theme_page.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_theme_pips_pager.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_theme_pull_to_refresh.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/test_theme_split_view.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/testing/unit_test_application.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/text_box_tests_data_validation.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/text_box_tests_input.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/top_level_tests_platform_features.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/utils/debug_display.rs` | port of `Diagnostics/DebugDisplayHelper.cs` of Avalonia.Base and of the base levels of `BuildDebugDisplay`, next to the levels the controls add |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/utils/masked_text_provider.rs` | derived from .NET `System.ComponentModel.MaskedTextProvider`, which `MaskedTextBox` uses from the runtime library upstream |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/window_decorations.rs` | the enum `WindowDecorations`, declared in `Window.cs` upstream |
+| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/assets.rs` | the embedded assets of the crate, the table generated by its build script: the counterpart of the resource items of the upstream project file |
+| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/markup_types/classes.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
+| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/markup_types/converters.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
+| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/markup_types/enums.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
+| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/markup_types/palettes.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
+| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |
+| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/FerroUI.Dialogs/assets.rs` | embeds the document of the about dialog and its font: the counterpart of the resource items of the upstream project file |
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/FerroUI.Dialogs/markup.rs` | loads the document of the about dialog with the run-time loader until the XAML compiler generates InitializeComponent |
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/FerroUI.Dialogs/register_types.rs` | the type table of the crate (porting guide, Classes): namespaces, classes, markup metadata, the document loader |
-| [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/FerroUI.Dialogs/rust_paths.rs` | **unmapped** |
+| [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/FerroUI.Dialogs/rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/FerroUI.Dialogs/task_completion_source.rs` | the TaskCompletionSource&lt;T&gt; of the base library the storage provider awaits windows, popups and flyouts with |
 | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) | `src/FerroUI.Fonts.Inter/assets.rs` | embeds the font files: the counterpart of the resource items of the upstream project file |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/FerroUI.MicroCom/com_ptr.rs` | port of the MicroCom.Runtime package, which upstream consumes as a NuGet binary |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/FerroUI.MicroCom/guid.rs` | port of the MicroCom.Runtime package, which upstream consumes as a NuGet binary |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/FerroUI.MicroCom/hresult.rs` | port of the MicroCom.Runtime package, which upstream consumes as a NuGet binary |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/FerroUI.MicroCom/unknown.rs` | port of the MicroCom.Runtime package, which upstream consumes as a NuGet binary |
-| [Avalonia.Native](tracking/Avalonia.Native.md) | `src/FerroUI.Native/frn_menu_item.rs` | **unmapped** |
+| [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/FerroUI.OpenGL/composition/task_support.rs` | what the asynchronous members of the composition interop are built from: `async` methods over `Task` upstream |
 | [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/FerroUI.OpenGL/entry_points.rs` | the entry point table macro: takes the place of the upstream source generator for GetProcAddress attributes |
+| [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/FerroUI.OpenGL/register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |
+| [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/FerroUI.OpenGL/rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |
 | [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/FerroUI.OpenGL/testing.rs` | scripted OpenGL implementation of the unit tests |
-| [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/FerroUI.Themes.Fluent/assets.rs` | **unmapped** |
-| [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/FerroUI.Themes.Fluent/compiled_xaml.rs` | **unmapped** |
-| [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/FerroUI.Themes.Fluent/register_types.rs` | **unmapped** |
-| [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/FerroUI.Themes.Fluent/rust_paths.rs` | **unmapped** |
-| [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/FerroUI.Themes.Simple/assets.rs` | **unmapped** |
-| [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/FerroUI.Themes.Simple/compiled_xaml.rs` | **unmapped** |
-| [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/FerroUI.Themes.Simple/register_types.rs` | **unmapped** |
-| [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/FerroUI.Themes.Simple/rust_paths.rs` | **unmapped** |
-| [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/FerroUI.Browser/interop/completion_helper.rs` | **unmapped** |
-| [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | `src/HarfBuzz/FerroUI.HarfBuzz/hb.rs` | **unmapped** |
-| [Avalonia.Markup](tracking/Avalonia.Markup.md) | `src/Markup/FerroUI.Markup/markup/parsers/property_parser.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/FerroUI.Markup.Xaml/converters/type_converter.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/FerroUI.Markup.Xaml/object_casts.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/FerroUI.Markup.Xaml/register_types.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/FerroUI.Markup.Xaml/rust_paths.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/FerroUI.Markup.Xaml/test_support.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_context.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/FerroUI.Markup.Xaml/xamlx_runtime.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/framework/binding_path.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/framework/helpers.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/framework/methods.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/framework/nodes.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/framework/services.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/framework/setters.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/framework/tests.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/interpreter/evaluators.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/interpreter/interpreter.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/interpreter/runtime_context.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/interpreter/services.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/core_types.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/list_converter.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/object_model.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/runtime_type.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/runtime_type_system.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/tests.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/values.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/value_parser.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/compiled.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/compiled_resources.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emitter.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/source.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/xaml_metadata.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/testing/bindings.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/testing/objects.rs` | **unmapped** |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/testing/styles.rs` | **unmapped** |
+| [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/FerroUI.Themes.Fluent/assets.rs` | the embedded assets of the crate, the table generated by its build script: the counterpart of the resource items of the upstream project file |
+| [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/FerroUI.Themes.Fluent/compiled_xaml.rs` | generated by the Rust emitter of the XAML compiler (`rust_emitter::generate_class_file`): the compiled documents of the crate, the counterpart of the IL the upstream build task writes into the assembly |
+| [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/FerroUI.Themes.Fluent/register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |
+| [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/FerroUI.Themes.Fluent/rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |
+| [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/FerroUI.Themes.Simple/assets.rs` | the embedded assets of the crate, the table generated by its build script: the counterpart of the resource items of the upstream project file |
+| [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/FerroUI.Themes.Simple/compiled_xaml.rs` | generated by the Rust emitter of the XAML compiler (`rust_emitter::generate_class_file`): the compiled documents of the crate, the counterpart of the IL the upstream build task writes into the assembly |
+| [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/FerroUI.Themes.Simple/register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |
+| [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/FerroUI.Themes.Simple/rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |
+| [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/FerroUI.Browser/interop/completion_helper.rs` | completion of the asynchronous calls into the page: upstream's runtime turns a promise of the page into a task |
+| [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/FerroUI.Browser/interop/thread_proxy.rs` | the threads of the module: the id of the calling thread and a call made on another one; upstream's runtime carries a call from one thread to another (browser stage B2.3) |
+| [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/FerroUI.Browser/rendering/browser_render_surface.rs` | the render surface of a canvas as it is handed to the compositor: upstream hands out the render target itself, which with a render worker exists on the render thread only (browser stage B2.5) |
+| [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/FerroUI.Browser/rendering/browser_surface_shared.rs` | what the thread of the user interface and the thread that renders both know about one canvas: one object read by both threads by convention upstream (browser stage B2.3) |
+| [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/FerroUI.Browser/rendering/render_statistics.rs` | where the frames of the page are drawn and what the ticks of a render thread asked of the main thread, for tests and diagnostics (browser stage B2.6): not from upstream |
+| [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | `src/HarfBuzz/FerroUI.HarfBuzz/hb.rs` | a thin safe wrapper over the HarfBuzz objects the shaper uses, with every unsafe block of the crate: the HarfBuzzSharp binding upstream |
+| [Avalonia.Headless](tracking/Avalonia.Headless.md) | `src/Headless/FerroUI.Headless/headless_window_surface.rs` | the part of `HeadlessWindowImpl.cs` that a frame uses (`Lock`, `CreateFramebufferRenderTarget`, the last rendered frame and its lock), as an object of its own; upstream implements the framebuffer surface on the window implementation |
+| [Avalonia.Headless](tracking/Avalonia.Headless.md) | `src/Headless/FerroUI.Headless/tests.rs` | the unit tests of the module |
+| [Avalonia.Markup](tracking/Avalonia.Markup.md) | `src/Markup/FerroUI.Markup/markup/parsers/property_parser.rs` | port of `Parsers/PropertyParser.cs` of Avalonia.Markup.Xaml: it lives next to the grammars that share its character reader |
+| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/FerroUI.Markup.Xaml/converters/type_converter.rs` | counterpart of .NET `System.ComponentModel.TypeConverter` and `ITypeDescriptorContext`, which the converters of the markup runtime derive from and receive |
+| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/FerroUI.Markup.Xaml/object_casts.rs` | type tests on untyped objects: the `is` / `as` casts upstream performs on the objects of a parent stack, on provide-value targets and on root objects |
+| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/FerroUI.Markup.Xaml/register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |
+| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/FerroUI.Markup.Xaml/rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |
+| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/FerroUI.Markup.Xaml/test_support.rs` | hand-built service providers and platform doubles for the tests of the crate |
+| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled.rs` | the helpers that Rust source generated from markup calls (docs/porting/xaml.md, section 9.9): upstream's compiler emits the same steps as IL |
+| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_context.rs` | the run-time context of a document being built: the class the IL back end of upstream generates for every document (`IL/RuntimeContext.cs` of XamlX) |
+| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/FerroUI.Markup.Xaml/xamlx_runtime.rs` | port of the runtime contracts of the XAML compiler (`XamlX.Runtime/Interfaces.cs`), which the tracking of XamlX does not list: the compiler crate has no runtime part |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/core_table.rs` | the closed table of runtime library (`System.*`) types markup can name, as data: what both type systems of the compiler define from it (docs/porting/xaml.md, 9.5.1 and 9.5.5) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/framework/binding_path.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/framework/helpers.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/framework/methods.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/framework/nodes.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/framework/services.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/framework/setters.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/framework/tests.rs` | the unit tests of the module |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/interpreter/evaluators.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/interpreter/interpreter.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/interpreter/runtime_context.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/interpreter/services.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/core_types.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/list_converter.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/object_model.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/runtime_type.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/runtime_type_system.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/tests.rs` | the unit tests of the module |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/values.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/value_parser.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/compiled.rs` | the Rust emitter, the ahead-of-time back end of the compiler, which takes the place of the IL emitter of upstream's build task (docs/porting/xaml.md, section 9) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/compiled_resources.rs` | the Rust emitter, the ahead-of-time back end of the compiler, which takes the place of the IL emitter of upstream's build task (docs/porting/xaml.md, section 9) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emitter.rs` | the Rust emitter, the ahead-of-time back end of the compiler, which takes the place of the IL emitter of upstream's build task (docs/porting/xaml.md, section 9) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/source.rs` | the Rust emitter, the ahead-of-time back end of the compiler, which takes the place of the IL emitter of upstream's build task (docs/porting/xaml.md, section 9) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/xaml_metadata.rs` | the Rust emitter, the ahead-of-time back end of the compiler, which takes the place of the IL emitter of upstream's build task (docs/porting/xaml.md, section 9) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/testing/bindings.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/testing/objects.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/testing/styles.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/gpu/ganesh/ganesh_gr_context.rs` | the Ganesh implementation of the backend-neutral GPU context (the binding has separate Ganesh and Graphite context types) |
-| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/gpu/graphite/graphite_gr_context.rs` | **unmapped** |
-| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/gpu/i_skia_gr_context.rs` | **unmapped** |
-| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/gpu/metal/tests.rs` | **unmapped** |
-| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/i_skia_api_lease_feature.rs` | **unmapped** |
-| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/locked_framebuffer.rs` | **unmapped** |
-| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/metal/i_metal_device.rs` | **unmapped** |
-| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/tests.rs` | **unmapped** |
+| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/gpu/graphite/graphite_gr_context.rs` | the Graphite implementation of the backend-neutral GPU context (the binding has separate Ganesh and Graphite context types) |
+| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/gpu/i_skia_gr_context.rs` | the backend-neutral GPU context of the Skia backend (the binding has separate Ganesh and Graphite context types, SkiaSharp has one `GRContext`) |
+| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/gpu/metal/tests.rs` | the unit tests of the module |
+| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/locked_framebuffer.rs` | a locked framebuffer described by plain values: the `Platform/LockedFramebuffer.cs` of Avalonia.Base, which the base crate cannot hold without unsafe code, for the surfaces of the backend |
+| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/metal/i_metal_device.rs` | port of the project Avalonia.Metal (`IMetalDevice.cs`, `IMetalExternalObjectsFeature.cs`) inside the Skia backend, its only user; the tracking of Avalonia.Metal looks in `src/FerroUI.Metal`, which does not exist, and reports the two files as missing |
+| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/metal/i_metal_external_objects_feature.rs` | port of the project Avalonia.Metal (`IMetalDevice.cs`, `IMetalExternalObjectsFeature.cs`) inside the Skia backend, its only user; the tracking of Avalonia.Metal looks in `src/FerroUI.Metal`, which does not exist, and reports the two files as missing |
+| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/tests.rs` | the unit tests of the module |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/unit_tests/hit_testing.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/unit_tests/media/custom_font_manager_impl.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/unit_tests/media/text_formatting/multi_buffer_text_source.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library |

@@ -9,18 +9,18 @@
    "detail": "full",
    "files": [
     61,
-    62,
+    61,
     0
    ],
    "types": [
     171,
-    175,
-    0
+    174,
+    3
    ],
    "members": [
-    703,
-    865,
-    2
+    706,
+    857,
+    151
    ],
    "interfaces": [
     46,
@@ -34,8 +34,9 @@
     0,
     0
    ],
-   "notApplicableFiles": 26,
+   "notApplicableFiles": 27,
    "matchKinds": {
+    "alias fn": 3,
     "const": 67,
     "field": 159,
     "fn": 426,
@@ -504,23 +505,23 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    1115,
-    1286,
+    1248,
+    1248,
     0
    ],
    "types": [
-    1423,
-    1709,
-    0
+    1520,
+    1659,
+    136
    ],
    "members": [
-    9819,
-    11739,
-    32
+    10271,
+    11433,
+    1115
    ],
    "interfaces": [
-    235,
-    263
+    247,
+    260
    ],
    "propertyRegistrations": [
     224,
@@ -530,20 +531,20 @@
     41,
     41
    ],
-   "notApplicableFiles": 13,
+   "notApplicableFiles": 51,
    "matchKinds": {
-    "alias fn": 9,
-    "const": 347,
+    "alias fn": 45,
+    "const": 381,
     "derive": 64,
-    "field": 613,
-    "fn": 6265,
-    "free fn": 10,
+    "field": 638,
+    "fn": 6570,
+    "free fn": 15,
     "free item": 16,
     "getter fn": 4,
-    "overload fn": 285,
-    "trait": 349,
-    "trait fn": 73,
-    "variant": 1784
+    "overload fn": 314,
+    "trait": 356,
+    "trait fn": 75,
+    "variant": 1793
    },
    "presentFiles": {
     "Animation/Animatable.cs": [
@@ -846,6 +847,9 @@
     "Animation/TransitionObservableBase.cs": [
      "animation/transition_observable_base.rs"
     ],
+    "Animation/Transitions.cs": [
+     "animation/transitions_collection.rs"
+    ],
     "Animation/Transitions/BoolTransition.cs": [
      "animation/transitions/bool_transition.rs"
     ],
@@ -900,6 +904,9 @@
     "AttachedProperty.cs": [
      "styled_property.rs"
     ],
+    "AvaloniaInternalException.cs": [
+     "ferro_internal_exception.rs"
+    ],
     "AvaloniaLocator.cs": [
      "ferro_locator.rs"
     ],
@@ -917,6 +924,12 @@
     ],
     "AvaloniaPropertyChangedEventArgs`1.cs": [
      "ferro_property_changed_event_args.rs"
+    ],
+    "AvaloniaPropertyChangedExtensions.cs": [
+     "ferro_property_changed_event_args.rs"
+    ],
+    "AvaloniaPropertyExtensions.cs": [
+     "media/i_affects_render.rs"
     ],
     "AvaloniaPropertyMetadata.cs": [
      "ferro_property_metadata.rs"
@@ -938,6 +951,9 @@
     ],
     "Collections/AvaloniaList.cs": [
      "collections/ferro_list.rs"
+    ],
+    "Collections/AvaloniaListConverter.cs": [
+     "markup_types/well_known.rs"
     ],
     "Collections/AvaloniaListExtensions.cs": [
      "collections/ferro_list_extensions.rs"
@@ -969,6 +985,9 @@
     "Controls/Classes.cs": [
      "controls/classes.rs"
     ],
+    "Controls/IClassesChangedListener.cs": [
+     "controls/classes.rs"
+    ],
     "Controls/IDeferredContent.cs": [
      "controls/i_deferred_content.rs"
     ],
@@ -990,8 +1009,20 @@
     "Controls/IResourceProvider.cs": [
      "controls/i_resource_provider.rs"
     ],
+    "Controls/ISetInheritanceParent.cs": [
+     "ferro_object.rs"
+    ],
+    "Controls/ISetLogicalParent.cs": [
+     "styled_element.rs"
+    ],
     "Controls/IThemeVariantProvider.cs": [
      "controls/i_theme_variant_provider.rs"
+    ],
+    "Controls/Metadata/PseudoClassesAttribute.cs": [
+     "metadata/markup_type.rs"
+    ],
+    "Controls/Metadata/TemplatePartAttribute.cs": [
+     "metadata/markup_type.rs"
     ],
     "Controls/NameScope.cs": [
      "controls/name_scope.rs"
@@ -1002,7 +1033,11 @@
     "Controls/NameScopeLocator.cs": [
      "controls/name_scope_locator.rs"
     ],
+    "Controls/Primitives/IScrollable.cs": [
+     "input/i_scrollable.rs"
+    ],
     "Controls/PseudoClassesExtensions.cs": [
+     "controls/classes.rs",
      "controls/pseudo_classes_extensions.rs"
     ],
     "Controls/ResourceDictionary.cs": [
@@ -1017,8 +1052,17 @@
     "Controls/ResourcesChangedEventArgs.cs": [
      "controls/resources_changed_event_args.rs"
     ],
+    "Controls/Templates/ITemplateResult.cs": [
+     "controls/mod.rs"
+    ],
+    "Controls/Templates/TemplateResult.cs": [
+     "controls/mod.rs"
+    ],
     "CornerRadius.cs": [
      "corner_radius.rs"
+    ],
+    "Data/AssignBindingAttribute.cs": [
+     "ferro_property.rs"
     ],
     "Data/BindingBase.cs": [
      "data/binding_base.rs"
@@ -1110,11 +1154,20 @@
     "Data/Core/ExpressionNodes/DataContextNode.cs": [
      "data/core/expression_nodes/data_context_node.rs"
     ],
+    "Data/Core/ExpressionNodes/DataContextNodeBase.cs": [
+     "data/core/expression_nodes/data_context_node.rs"
+    ],
     "Data/Core/ExpressionNodes/ExpressionNode.cs": [
      "data/core/expression_nodes/expression_node.rs"
     ],
     "Data/Core/ExpressionNodes/FuncTransformNode.cs": [
      "data/core/expression_nodes/func_transform_node.rs"
+    ],
+    "Data/Core/ExpressionNodes/IPropertyAccessorNode.cs": [
+     "data/core/expression_nodes/expression_node.rs"
+    ],
+    "Data/Core/ExpressionNodes/ISettableNode.cs": [
+     "data/core/expression_nodes/expression_node.rs"
     ],
     "Data/Core/ExpressionNodes/LogicalAncestorElementNode.cs": [
      "data/core/expression_nodes/logical_ancestor_element_node.rs"
@@ -1128,8 +1181,26 @@
     "Data/Core/ExpressionNodes/NamedElementNode.cs": [
      "data/core/expression_nodes/named_element_node.rs"
     ],
+    "Data/Core/ExpressionNodes/ParentDataContextNode.cs": [
+     "data/core/expression_nodes/data_context_node.rs"
+    ],
     "Data/Core/ExpressionNodes/PropertyAccessorNode.cs": [
      "data/core/expression_nodes/property_accessor_node.rs"
+    ],
+    "Data/Core/ExpressionNodes/Reflection/DynamicPluginPropertyAccessorNode.cs": [
+     "data/core/expression_nodes/property_accessor_node.rs"
+    ],
+    "Data/Core/ExpressionNodes/Reflection/DynamicPluginStreamNode.cs": [
+     "data/core/expression_nodes/stream_node.rs"
+    ],
+    "Data/Core/ExpressionNodes/Reflection/ReflectionIndexerNode.cs": [
+     "data/core/expression_nodes/reflection_indexer_node.rs"
+    ],
+    "Data/Core/ExpressionNodes/Reflection/ReflectionTypeCastNode.cs": [
+     "data/core/expression_nodes/type_cast_node.rs"
+    ],
+    "Data/Core/ExpressionNodes/SourceNode.cs": [
+     "data/core/expression_nodes/expression_node.rs"
     ],
     "Data/Core/ExpressionNodes/StreamNode.cs": [
      "data/core/expression_nodes/stream_node.rs"
@@ -1179,7 +1250,13 @@
     "Data/Core/Plugins/ExceptionValidationPlugin.cs": [
      "data/core/plugins/exception_validation_plugin.rs"
     ],
+    "Data/Core/Plugins/IDataValidationPlugin.cs": [
+     "data/core/plugins/i_property_accessor.rs"
+    ],
     "Data/Core/Plugins/IPropertyAccessor.cs": [
+     "data/core/plugins/i_property_accessor.rs"
+    ],
+    "Data/Core/Plugins/IPropertyAccessorPlugin.cs": [
      "data/core/plugins/i_property_accessor.rs"
     ],
     "Data/Core/Plugins/IStreamPlugin.cs": [
@@ -1194,6 +1271,12 @@
     "Data/Core/Plugins/MethodAccessorPlugin.cs": [
      "data/core/plugins/method_accessor_plugin.rs"
     ],
+    "Data/Core/Plugins/ObservableStreamPlugin.cs": [
+     "data/core/plugins/i_stream_plugin.rs"
+    ],
+    "Data/Core/Plugins/ObservableStreamPlugin`1.cs": [
+     "data/core/plugins/i_stream_plugin.rs"
+    ],
     "Data/Core/Plugins/PropertyAccessorBase.cs": [
      "data/core/plugins/property_accessor_base.rs"
     ],
@@ -1202,6 +1285,9 @@
     ],
     "Data/Core/Plugins/PropertyInfoAccessorPlugin.cs": [
      "data/core/plugins/property_info_accessor_plugin.rs"
+    ],
+    "Data/Core/Plugins/ReflectionMethodAccessorPlugin.cs": [
+     "data/core/plugins/method_accessor_plugin.rs"
     ],
     "Data/Core/Plugins/TaskStreamPlugin.cs": [
      "data/core/plugins/task_stream_plugin.rs"
@@ -1220,6 +1306,9 @@
     ],
     "Data/Core/UntypedObservableBindingExpression.cs": [
      "data/core/untyped_observable_binding_expression.rs"
+    ],
+    "Data/CultureInfoIetfLanguageTagConverter.cs": [
+     "data/culture_info_ietf_language_tag_converter.rs"
     ],
     "Data/DataValidationException.cs": [
      "data/data_validation_exception.rs"
@@ -1254,6 +1343,24 @@
     "Diagnostics/AvaloniaPropertyValue.cs": [
      "diagnostics/ferro_property_value.rs"
     ],
+    "Diagnostics/Diagnostic.Consts.cs": [
+     "diagnostics/diagnostic_consts.rs"
+    ],
+    "Diagnostics/IValueFrameDiagnostic.cs": [
+     "diagnostics/i_value_frame_diagnostic.rs"
+    ],
+    "Diagnostics/LocalValueFrameDiagnostic.cs": [
+     "diagnostics/local_value_frame_diagnostic.rs"
+    ],
+    "Diagnostics/StyleValueFrameDiagnostic.cs": [
+     "diagnostics/style_value_frame_diagnostic.rs"
+    ],
+    "Diagnostics/ValueFrameDiagnostic.cs": [
+     "diagnostics/value_frame_diagnostic.rs"
+    ],
+    "Diagnostics/ValueStoreDiagnostic.cs": [
+     "diagnostics/value_store_diagnostic.rs"
+    ],
     "DirectProperty.cs": [
      "direct_property.rs"
     ],
@@ -1266,8 +1373,26 @@
     "IDataContextProvider.cs": [
      "i_data_context_provider.rs"
     ],
+    "IDescription.cs": [
+     "data/core/untyped_binding_expression_base.rs"
+    ],
+    "IDirectPropertyAccessor.cs": [
+     "ferro_property.rs"
+    ],
+    "IDirectPropertyMetadata.cs": [
+     "ferro_property_metadata.rs"
+    ],
     "INamed.cs": [
      "i_named.rs"
+    ],
+    "IOptionalFeatureProvider.cs": [
+     "platform/i_optional_feature_provider.rs"
+    ],
+    "IStyledPropertyAccessor.cs": [
+     "ferro_property.rs"
+    ],
+    "IStyledPropertyMetadata.cs": [
+     "ferro_property_metadata.rs"
     ],
     "Input/AccessKeyHandler.cs": [
      "input/access_key_handler.rs"
@@ -1833,6 +1958,9 @@
     "Media/Brush.cs": [
      "media/brush.rs"
     ],
+    "Media/BrushConverter.cs": [
+     "media/brush.rs"
+    ],
     "Media/BrushExtensions.cs": [
      "media/brush_extensions.rs"
     ],
@@ -1892,6 +2020,18 @@
     ],
     "Media/Effects/Effect.cs": [
      "media/effects/effect.rs"
+    ],
+    "Media/Effects/EffectAnimator.cs": [
+     "animation/animators/effect_animator.rs"
+    ],
+    "Media/Effects/EffectConverter.cs": [
+     "media/effects/effect.rs"
+    ],
+    "Media/Effects/EffectExtesions.cs": [
+     "media/effects/effect_extensions.rs"
+    ],
+    "Media/Effects/EffectTransition.cs": [
+     "animation/transitions/effect_transition.rs"
     ],
     "Media/Effects/IBlurEffect.cs": [
      "media/effects/i_blur_effect.rs"
@@ -1972,6 +2112,9 @@
      "media/fonts/font_collection_base.rs"
     ],
     "Media/Fonts/FontCollectionKey.cs": [
+     "media/fonts/font_collection_key.rs"
+    ],
+    "Media/Fonts/FontCollectionKeyExtensions.cs": [
      "media/fonts/font_collection_key.rs"
     ],
     "Media/Fonts/FontFallbackScriptHints.cs": [
@@ -2151,6 +2294,9 @@
     "Media/GlyphBounds.cs": [
      "media/glyph_bounds.rs"
     ],
+    "Media/GlyphDrawingOptions.cs": [
+     "media/glyph_drawing_options.rs"
+    ],
     "Media/GlyphDrawingType.cs": [
      "media/glyph_drawing_type.rs"
     ],
@@ -2204,6 +2350,9 @@
     ],
     "Media/IFontMemory.cs": [
      "media/i_font_memory.rs"
+    ],
+    "Media/IGlyphDrawing.cs": [
+     "media/i_glyph_drawing.rs"
     ],
     "Media/IGradientBrush.cs": [
      "media/i_gradient_brush.rs"
@@ -2337,6 +2486,9 @@
     "Media/Immutable/ImmutableSolidColorBrush.cs": [
      "media/immutable/immutable_solid_color_brush.rs"
     ],
+    "Media/Immutable/ImmutableTextDecoration.cs": [
+     "media/immutable/immutable_text_decoration.rs"
+    ],
     "Media/Immutable/ImmutableTileBrush.cs": [
      "media/immutable/immutable_tile_brush.rs"
     ],
@@ -2348,6 +2500,9 @@
     ],
     "Media/ImmutableGeometry.cs": [
      "media/immutable_geometry.rs"
+    ],
+    "Media/ImmutableGeometryImpl.cs": [
+     "media/immutable_geometry_impl.rs"
     ],
     "Media/IntersectionResult.cs": [
      "media/intersection_result.rs"
@@ -2751,6 +2906,9 @@
     "Media/Transform.cs": [
      "media/transform.rs"
     ],
+    "Media/TransformConverter.cs": [
+     "media/transform.rs"
+    ],
     "Media/TransformExtensions.cs": [
      "media/transform_extensions.rs"
     ],
@@ -2781,8 +2939,62 @@
     "Media/VisualBrush.cs": [
      "media/visual_brush.rs"
     ],
+    "Metadata/AvaloniaListAttribute.cs": [
+     "metadata/markup_type.rs"
+    ],
+    "Metadata/ConstructorArgumentAttribute.cs": [
+     "metadata/markup_type.rs"
+    ],
+    "Metadata/ContentAttribute.cs": [
+     "metadata/markup_type.rs"
+    ],
+    "Metadata/ControlTemplateScopeAttribute.cs": [
+     "metadata/markup_type.rs"
+    ],
+    "Metadata/DataTypeAttribute.cs": [
+     "metadata/markup_type.rs"
+    ],
+    "Metadata/DependsOnAttribute.cs": [
+     "metadata/markup_type.rs"
+    ],
     "Metadata/IAddChild.cs": [
      "metadata/i_add_child.rs"
+    ],
+    "Metadata/InheritDataTypeFromAttribute.cs": [
+     "metadata/markup_type.rs"
+    ],
+    "Metadata/InheritDataTypeFromItemsAttribute.cs": [
+     "metadata/markup_type.rs"
+    ],
+    "Metadata/MarkupExtensionOption.cs": [
+     "metadata/markup_type.rs"
+    ],
+    "Metadata/NotClientImplementableAttribute.cs": [
+     "metadata/markup_type.rs"
+    ],
+    "Metadata/PrivateApiAttribute.cs": [
+     "metadata/markup_type.rs"
+    ],
+    "Metadata/TemplateContent.cs": [
+     "metadata/markup_type.rs"
+    ],
+    "Metadata/TrimSurroundingWhitespaceAttribute.cs": [
+     "metadata/markup_type.rs"
+    ],
+    "Metadata/UnstableAttribute.cs": [
+     "metadata/markup_type.rs"
+    ],
+    "Metadata/UsableDuringInitializationAttribute.cs": [
+     "metadata/markup_type.rs"
+    ],
+    "Metadata/WhitespaceSignificantCollectionAttribute.cs": [
+     "metadata/markup_type.rs"
+    ],
+    "Metadata/XmlnsDefinitionAttribute.cs": [
+     "metadata/markup_assembly.rs"
+    ],
+    "Metadata/XmlnsPrefixAttribute.cs": [
+     "metadata/markup_assembly.rs"
     ],
     "PixelPoint.cs": [
      "pixel_point.rs"
@@ -2865,11 +3077,20 @@
     "Platform/IPlatformThreadingInterface.cs": [
      "platform/i_platform_threading_interface.rs"
     ],
+    "Platform/IReadableBitmapImpl.cs": [
+     "platform/i_bitmap_impl.rs"
+    ],
     "Platform/IRenderTarget.cs": [
      "platform/i_render_target.rs"
     ],
+    "Platform/IRenderTargetBitmapImpl.cs": [
+     "platform/i_bitmap_impl.rs"
+    ],
     "Platform/IRuntimePlatform.cs": [
      "platform/i_runtime_platform.rs"
+    ],
+    "Platform/IScopedResource.cs": [
+     "platform/i_scoped_resource.rs"
     ],
     "Platform/IStreamGeometryContextImpl.cs": [
      "platform/i_stream_geometry_context_impl.rs"
@@ -2877,11 +3098,17 @@
     "Platform/IStreamGeometryImpl.cs": [
      "platform/i_stream_geometry_impl.rs"
     ],
+    "Platform/ISurfaceOrientation.cs": [
+     "platform/i_surface_orientation.rs"
+    ],
     "Platform/ITextShaperImpl.cs": [
      "platform/i_text_shaper_impl.rs"
     ],
     "Platform/ITransformedGeometryImpl.cs": [
      "platform/i_transformed_geometry_impl.rs"
+    ],
+    "Platform/IWriteableBitmapImpl.cs": [
+     "platform/i_bitmap_impl.rs"
     ],
     "Platform/Internal/AssemblyDescriptor.cs": [
      "platform/internal/assembly_descriptor.rs"
@@ -2894,6 +3121,9 @@
     ],
     "Platform/Internal/UnmanagedBlob.cs": [
      "platform/internal/unmanaged_blob.rs"
+    ],
+    "Platform/LockedFramebuffer.cs": [
+     "platform/retained_framebuffer.rs"
     ],
     "Platform/LtrbRect.cs": [
      "platform/ltrb_rect.rs"
@@ -2910,11 +3140,17 @@
     "Platform/PlatformColorValues.cs": [
      "platform/platform_color_values.rs"
     ],
+    "Platform/PlatformGraphicsDeviceAdapterDescription.cs": [
+     "platform/platform_graphics_device_adapter_description.rs"
+    ],
     "Platform/PlatformGraphicsExternalMemory.cs": [
      "platform/platform_graphics_external_memory.rs"
     ],
     "Platform/PlatformHandle.cs": [
      "platform/platform_handle.rs"
+    ],
+    "Platform/RenderTargetProperties.cs": [
+     "platform/i_render_target.rs"
     ],
     "Platform/RetainedFramebuffer.cs": [
      "platform/retained_framebuffer.rs"
@@ -3009,6 +3245,9 @@
     "Platform/Storage/WellKnownFolder.cs": [
      "platform/storage/well_known_folder.rs"
     ],
+    "Platform/SurfaceOrientation.cs": [
+     "platform/surface_orientation.rs"
+    ],
     "Platform/Surfaces/IFramebufferPlatformSurface.cs": [
      "platform/surfaces/i_framebuffer_platform_surface.rs"
     ],
@@ -3018,10 +3257,19 @@
     "Platform/SystemNavigationManagerImpl.cs": [
      "platform/system_navigation_manager_impl.rs"
     ],
+    "Platform/VisualQueryProvider.cs": [
+     "styling/visual_query_provider.rs"
+    ],
     "Point.cs": [
      "point.rs"
     ],
+    "Points.cs": [
+     "media/points.rs"
+    ],
     "PropertyStore/BindingEntryBase.cs": [
+     "property_store/binding_entry.rs"
+    ],
+    "PropertyStore/BindingEntryBaseNonGenericHelper.cs": [
      "property_store/binding_entry.rs"
     ],
     "PropertyStore/DirectBindingObserver.cs": [
@@ -3057,11 +3305,17 @@
     "PropertyStore/LocalValueBindingObserverBase.cs": [
      "property_store/local_value_binding_observer.rs"
     ],
+    "PropertyStore/PropertyNotifying.cs": [
+     "property_store/effective_value.rs"
+    ],
     "PropertyStore/SourceUntypedBindingEntry.cs": [
      "property_store/binding_entry.rs"
     ],
     "PropertyStore/TypedBindingEntry.cs": [
      "property_store/binding_entry.rs"
+    ],
+    "PropertyStore/UntypedValueUtils.cs": [
+     "styled_property.rs"
     ],
     "PropertyStore/ValueFrame.cs": [
      "property_store/value_frame.rs"
@@ -3072,11 +3326,32 @@
     "Reactive/AnonymousObserver.cs": [
      "reactive/anonymous_observer.rs"
     ],
+    "Reactive/AnonymousObserverNonGenericHelper.cs": [
+     "reactive/anonymous_observer_non_generic_helper.rs"
+    ],
+    "Reactive/AvaloniaPropertyBindingObservable.cs": [
+     "ferro_object_extensions.rs"
+    ],
+    "Reactive/AvaloniaPropertyChangedObservable.cs": [
+     "ferro_object_extensions.rs"
+    ],
+    "Reactive/AvaloniaPropertyObservable.cs": [
+     "ferro_object_extensions.rs"
+    ],
+    "Reactive/CombinedSubject.cs": [
+     "reactive/combined_subject.rs"
+    ],
     "Reactive/CompositeDisposable.cs": [
      "reactive/composite_disposable.rs"
     ],
     "Reactive/Disposable.cs": [
      "reactive/disposable.rs"
+    ],
+    "Reactive/DisposableMixin.cs": [
+     "reactive/disposable_mixin.rs"
+    ],
+    "Reactive/IAvaloniaSubject.cs": [
+     "reactive/i_ferro_subject.rs"
     ],
     "Reactive/LightweightObservableBase.cs": [
      "reactive/lightweight_observable_base.rs"
@@ -3087,8 +3362,20 @@
     "Reactive/Observable.cs": [
      "reactive/observable.rs"
     ],
+    "Reactive/Operators/CombineLatest.cs": [
+     "reactive/operators/combine_latest.rs"
+    ],
+    "Reactive/Operators/Sink.cs": [
+     "reactive/operators/sink.rs"
+    ],
+    "Reactive/Operators/Switch.cs": [
+     "reactive/operators/switch.rs"
+    ],
     "Reactive/SingleSubscriberObservableBase.cs": [
      "reactive/single_subscriber_observable_base.rs"
+    ],
+    "Reactive/WeakObserverSubscription.cs": [
+     "reactive/weak_observer_subscription.rs"
     ],
     "Rect.cs": [
      "rect.rs"
@@ -3101,6 +3388,12 @@
     ],
     "RelativeScalar.cs": [
      "relative_scalar.rs"
+    ],
+    "RenderTargetCorruptedException.cs": [
+     "render_target_corrupted_exception.rs"
+    ],
+    "RenderTargetNotReadyException.cs": [
+     "render_target_not_ready_exception.rs"
     ],
     "Rendering/Composition/Animations/AnimationInstanceBase.cs": [
      "rendering/composition/animations/animation_instance_base.rs"
@@ -3146,6 +3439,9 @@
     ],
     "Rendering/Composition/Brushes/ServerCompositionBrush.cs": [
      "rendering/composition/brushes/server_composition_brush.rs"
+    ],
+    "Rendering/Composition/Brushes/ServerSimpleCompositionBrush.cs": [
+     "rendering/composition/server/server_composition_simple_brush.rs"
     ],
     "Rendering/Composition/Brushes/ServerSimpleContentBrush.cs": [
      "rendering/composition/brushes/server_simple_content_brush.rs"
@@ -3195,6 +3491,9 @@
     "Rendering/Composition/CompositionTarget.cs": [
      "rendering/composition/composition_target.rs"
     ],
+    "Rendering/Composition/CompositionTransform.cs": [
+     "rendering/composition/server/server_composition_simple_transform.rs"
+    ],
     "Rendering/Composition/CompositionTransparencyLevel.cs": [
      "rendering/composition/composition_transparency_level.rs"
     ],
@@ -3205,7 +3504,8 @@
      "rendering/composition/compositor.rs"
     ],
     "Rendering/Composition/ContainerVisual.cs": [
-     "rendering/composition/container_visual.rs"
+     "rendering/composition/container_visual.rs",
+     "rendering/composition/visual.rs"
     ],
     "Rendering/Composition/Drawing/CompositionRenderData.cs": [
      "rendering/composition/drawing/composition_render_data.rs"
@@ -3247,7 +3547,7 @@
      "rendering/composition/drawing/render_data_stream_bounds.rs"
     ],
     "Rendering/Composition/Drawing/RenderDataStream.HitTest.cs": [
-     "rendering/composition/drawing/render_data_stream.rs"
+     "rendering/composition/drawing/render_data_stream_hit_test.rs"
     ],
     "Rendering/Composition/Drawing/RenderDataStream.Replay.cs": [
      "rendering/composition/drawing/render_data_stream_replay.rs"
@@ -3376,7 +3676,7 @@
      "rendering/composition/server/server_composition_bitmap_cache.rs"
     ],
     "Rendering/Composition/Server/ServerCompositionCacheMode.cs": [
-     "rendering/composition/server/server_composition_cache_mode.rs"
+     "rendering/composition/server/server_composition_bitmap_cache.rs"
     ],
     "Rendering/Composition/Server/ServerCompositionContainerVisual.cs": [
      "rendering/composition/server/server_composition_container_visual.rs"
@@ -3407,6 +3707,41 @@
     ],
     "Rendering/Composition/Server/ServerCompositionTarget.cs": [
      "rendering/composition/server/server_composition_target.rs"
+    ],
+    "Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.Act.cs": [
+     "rendering/composition/server/server_composition_visual/act.rs",
+     "rendering/composition/server/server_composition_visual/mod.rs"
+    ],
+    "Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.Adorners.cs": [
+     "rendering/composition/server/server_composition_visual/adorners.rs",
+     "rendering/composition/server/server_composition_visual/mod.rs"
+    ],
+    "Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.ComputedProperties.cs": [
+     "rendering/composition/server/server_composition_visual/computed_properties.rs",
+     "rendering/composition/server/server_composition_visual/mod.rs"
+    ],
+    "Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.DirtyInputs.cs": [
+     "rendering/composition/server/server_composition_visual/dirty_inputs.rs",
+     "rendering/composition/server/server_composition_visual/mod.rs"
+    ],
+    "Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.Readback.cs": [
+     "rendering/composition/server/server_composition_visual/readback.rs",
+     "rendering/composition/server/server_composition_visual/mod.rs"
+    ],
+    "Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.Render.cs": [
+     "rendering/composition/server/server_composition_visual/render.rs",
+     "rendering/composition/server/server_composition_visual/mod.rs"
+    ],
+    "Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.Update.cs": [
+     "rendering/composition/server/server_composition_visual/update.rs",
+     "rendering/composition/server/server_composition_visual/mod.rs"
+    ],
+    "Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.Walker.cs": [
+     "rendering/composition/server/server_composition_visual/walker.rs",
+     "rendering/composition/server/server_composition_visual/mod.rs"
+    ],
+    "Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.cs": [
+     "rendering/composition/server/server_composition_visual/mod.rs"
     ],
     "Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisualCache.cs": [
      "rendering/composition/server/server_composition_visual/server_composition_visual_cache.rs"
@@ -3444,6 +3779,9 @@
     "Rendering/Composition/Server/ServerVisualRenderContext.cs": [
      "rendering/composition/server/server_visual_render_context.rs"
     ],
+    "Rendering/Composition/Server/SimpleServerObject.cs": [
+     "rendering/composition/server/server_object.rs"
+    ],
     "Rendering/Composition/Transport/Batch.cs": [
      "rendering/composition/transport/batch.rs"
     ],
@@ -3452,6 +3790,9 @@
     ],
     "Rendering/Composition/Transport/BatchStreamArrayPool.cs": [
      "rendering/composition/transport/batch_stream_array_pool.rs"
+    ],
+    "Rendering/Composition/Transport/BatchStreamDebugMarker.cs": [
+     "rendering/composition/transport/batch_stream.rs"
     ],
     "Rendering/Composition/Transport/ServerListProxyHelper.cs": [
      "rendering/composition/transport/server_list_proxy_helper.rs"
@@ -3464,6 +3805,9 @@
     ],
     "Rendering/DefaultRenderTimer.cs": [
      "rendering/default_render_timer.rs"
+    ],
+    "Rendering/ICustomHitTest.cs": [
+     "rendering/i_custom_hit_test.rs"
     ],
     "Rendering/IPresentationSource.cs": [
      "rendering/i_presentation_source.rs"
@@ -3479,6 +3823,9 @@
     ],
     "Rendering/IRenderer.cs": [
      "rendering/i_renderer.rs"
+    ],
+    "Rendering/IVisualBrushInitialize.cs": [
+     "visual.rs"
     ],
     "Rendering/ImmediateRenderer.cs": [
      "rendering/immediate_renderer.rs"
@@ -3540,11 +3887,17 @@
     "StyledElement.cs": [
      "styled_element.rs"
     ],
+    "StyledElementExtensions.cs": [
+     "styled_element_extensions.rs"
+    ],
     "StyledProperty.cs": [
      "styled_property.rs"
     ],
     "StyledPropertyMetadata`1.cs": [
      "ferro_property_metadata.rs"
+    ],
+    "StyledPropertyNonGenericHelper.cs": [
+     "ferro_property.rs"
     ],
     "Styling/Activators/AndActivator.cs": [
      "styling/activators/and_activator.rs"
@@ -3723,6 +4076,9 @@
     "Styling/ThemeVariant.cs": [
      "styling/theme_variant.rs"
     ],
+    "Styling/ThemeVariantTypeConverter.cs": [
+     "styling/theme_variant.rs"
+    ],
     "Styling/TypeNameAndClassSelector.cs": [
      "styling/type_name_and_class_selector.rs"
     ],
@@ -3801,6 +4157,18 @@
     "Utilities/ArraySlice.cs": [
      "utilities/array_slice.rs"
     ],
+    "Utilities/AvaloniaPropertyDictionary.cs": [
+     "utilities/ferro_property_dictionary.rs"
+    ],
+    "Utilities/AvaloniaResourcesIndex.cs": [
+     "platform/internal/asset_registry.rs"
+    ],
+    "Utilities/BidiDictionary.cs": [
+     "utilities/bidi_dictionary.rs"
+    ],
+    "Utilities/BinarySearchExtension.cs": [
+     "utilities/binary_search_extension.rs"
+    ],
     "Utilities/BooleanBoxes.cs": [
      "utilities/boolean_boxes.rs"
     ],
@@ -3810,17 +4178,52 @@
     "Utilities/CharacterReader.cs": [
      "utilities/character_reader.rs"
     ],
+    "Utilities/DisposableLock.cs": [
+     "utilities/disposable_lock.rs"
+    ],
     "Utilities/IWeakEventSubscriber.cs": [
      "utilities/i_weak_event_subscriber.rs"
     ],
     "Utilities/IdentifierParser.cs": [
-     "utilities/identifier_parser.rs"
+     "utilities/identifier_parser.rs",
+     "utilities/character_reader.rs"
     ],
     "Utilities/KeywordParser.cs": [
-     "utilities/keyword_parser.rs"
+     "utilities/keyword_parser.rs",
+     "utilities/character_reader.rs"
+    ],
+    "Utilities/MappedArraySlice.cs": [
+     "utilities/mapped_array_slice.rs"
     ],
     "Utilities/MathUtilities.cs": [
      "utilities/math_utilities.rs"
+    ],
+    "Utilities/ObjectPool.cs": [
+     "utilities/object_pool.rs"
+    ],
+    "Utilities/PooledInlineList.cs": [
+     "utilities/pooled_inline_list.rs"
+    ],
+    "Utilities/Ref.cs": [
+     "utilities/ref_countable.rs"
+    ],
+    "Utilities/RefCountingSmallDictionary.cs": [
+     "utilities/ref_counting_small_dictionary.rs"
+    ],
+    "Utilities/RefTrackingDictionary.cs": [
+     "utilities/ref_tracking_dictionary.rs"
+    ],
+    "Utilities/SafeEnumerableAvaloniaList.cs": [
+     "collections/ferro_list.rs"
+    ],
+    "Utilities/SafeEnumerableHashSet.cs": [
+     "utilities/handler_list.rs"
+    ],
+    "Utilities/SingleOrQueue.cs": [
+     "utilities/single_or_queue.rs"
+    ],
+    "Utilities/SmallDictionary.cs": [
+     "utilities/small_dictionary.rs"
     ],
     "Utilities/Span.cs": [
      "utilities/span.rs"
@@ -3834,14 +4237,24 @@
     "Utilities/SpringSolver.cs": [
      "utilities/spring_solver.rs"
     ],
+    "Utilities/StringSplitter.cs": [
+     "media/string_splitter.rs"
+    ],
     "Utilities/StyleClassParser.cs": [
-     "utilities/style_class_parser.rs"
+     "utilities/style_class_parser.rs",
+     "utilities/character_reader.rs"
     ],
     "Utilities/SynchronousCompletionAsyncResult.cs": [
      "utilities/synchronous_completion_async_result.rs"
     ],
+    "Utilities/TypeUtilities.cs": [
+     "data/core/value_type.rs"
+    ],
     "Utilities/UriExtensions.cs": [
      "utilities/uri_extensions.rs"
+    ],
+    "Utilities/ValueSingleOrList.cs": [
+     "utilities/value_single_or_list.rs"
     ],
     "Utilities/ValueSpan.cs": [
      "utilities/value_span.rs"
@@ -3894,19 +4307,13 @@
    },
    "rustOnly": [
     "animation/animation_task.rs",
-    "animation/animators/effect_animator.rs",
     "animation/cancellation.rs",
     "animation/time_span.rs",
-    "animation/transitions/effect_transition.rs",
-    "animation/transitions_collection.rs",
     "controls/resource_key.rs",
     "data/converters/composite_format.rs",
-    "data/core/expression_nodes/reflection_indexer_node.rs",
-    "data/core/expression_nodes/type_cast_node.rs",
     "data/core/plugins/markup_members.rs",
     "data/core/plugins/property_info_accessor_factory.rs",
     "data/core/plugins/untyped_accessor_plugin.rs",
-    "data/core/value_type.rs",
     "data/core/weak_value.rs",
     "data/model/event.rs",
     "data/model/i_bindable_indexer.rs",
@@ -3914,10 +4321,10 @@
     "data/model/i_notify_data_error_info.rs",
     "data/model/i_notify_property_changed.rs",
     "data/model/model_type.rs",
+    "diagnostics/perf_counters.rs",
     "element_ref.rs",
     "i_support_initialize.rs",
     "input/i_command.rs",
-    "input/i_scrollable.rs",
     "input/platform/clipboard_error.rs",
     "layout/layout_manager_tests_bring_into_view.rs",
     "markup_types/animation.rs",
@@ -3927,8 +4334,6 @@
     "markup_types/named_values.rs",
     "markup_types/plain.rs",
     "markup_types/values.rs",
-    "markup_types/well_known.rs",
-    "media/effects/effect_extensions.rs",
     "media/fonts/tables/testing/big_endian_buffer.rs",
     "media/fonts/tables/testing/synthetic_font.rs",
     "media/fonts/testing/test_asset_loader.rs",
@@ -3939,9 +4344,8 @@
     "media/fonts/testing/test_platform_typeface.rs",
     "media/known_color_brushes.rs",
     "media/media_collection.rs",
-    "media/points.rs",
     "media/ref_adapter.rs",
-    "media/string_splitter.rs",
+    "media/shared_brush.rs",
     "media/text_formatting/i_text_drawing_sink.rs",
     "media/text_formatting/testing/drawing.rs",
     "media/text_formatting/testing/fonts.rs",
@@ -3955,9 +4359,7 @@
     "media/text_formatting/unicode/ucd_test_data.rs",
     "media/text_formatting/unicode/unicode_data_trie.rs",
     "media/tile_mode.rs",
-    "metadata/markup_assembly.rs",
     "metadata/markup_macros.rs",
-    "metadata/markup_type.rs",
     "metadata/property_accessors.rs",
     "metadata/service_provider.rs",
     "metadata/typed_path.rs",
@@ -3970,8 +4372,6 @@
     "numerics/vector3.rs",
     "numerics/vector4.rs",
     "platform/i_drawing_context_impl_with_effects.rs",
-    "platform/i_optional_feature_provider.rs",
-    "platform/internal/asset_registry.rs",
     "platform/render_interface_access.rs",
     "platform/storage/file_io/path.rs",
     "register_types.rs",
@@ -4007,16 +4407,9 @@
     "rendering/composition/generated/composition_visual_collection.rs",
     "rendering/composition/generated/tests.rs",
     "rendering/composition/i_composition_object_host.rs",
-    "rendering/composition/server/server_composition_simple_brush.rs",
-    "rendering/composition/server/server_composition_simple_transform.rs",
-    "rendering/composition/server/server_composition_visual/act.rs",
-    "rendering/composition/server/server_composition_visual/adorners.rs",
-    "rendering/composition/server/server_composition_visual/computed_properties.rs",
-    "rendering/composition/server/server_composition_visual/dirty_inputs.rs",
-    "rendering/composition/server/server_composition_visual/readback.rs",
-    "rendering/composition/server/server_composition_visual/render.rs",
-    "rendering/composition/server/server_composition_visual/update.rs",
-    "rendering/composition/server/server_composition_visual/walker.rs",
+    "rendering/composition/render_interface_feature.rs",
+    "rendering/composition/server/compositor_lock.rs",
+    "rendering/composition/server/server_composition_cache_mode.rs",
     "rendering/composition/server/server_composition_visual_collection.rs",
     "rendering/composition/server/server_property_host.rs",
     "rendering/composition/test_compositor.rs",
@@ -4028,7 +4421,6 @@
     "rust_paths.rs",
     "styling/test_support.rs",
     "styling/testing.rs",
-    "styling/visual_query_provider.rs",
     "threading/cancellation_token.rs",
     "threading/dispatcher_task.rs",
     "threading/dispatcher_tests_exception.rs",
@@ -4048,15 +4440,14 @@
     "utilities/decimal_double_conversion_data.rs",
     "utilities/event_args.rs",
     "utilities/gregorian_calendar.rs",
-    "utilities/handler_list.rs",
     "utilities/i_culture_data_provider.rs",
     "utilities/number_format.rs",
     "utilities/number_format_info.rs",
     "utilities/number_styles.rs",
     "utilities/read_only_memory.rs",
-    "utilities/ref_countable.rs",
     "utilities/test_culture_data_provider.rs",
     "utilities/text_info.rs",
+    "utilities/thread_bound.rs",
     "utilities/time_zone_info.rs",
     "utilities/uri.rs"
    ]
@@ -4097,7 +4488,19 @@
    "notApplicableFiles": 1,
    "matchKinds": {},
    "presentFiles": {},
-   "rustOnly": []
+   "rustOnly": [
+    "json.rs",
+    "model.rs",
+    "model_set.rs",
+    "scanner/declarations.rs",
+    "scanner/modules.rs",
+    "scanner/source.rs",
+    "scanner/tests.rs",
+    "scanner/tokens.rs",
+    "type_system/model_type_system.rs",
+    "type_system/tests.rs",
+    "type_system/types.rs"
+   ]
   },
   {
    "name": "Avalonia.Controls",
@@ -4106,26 +4509,26 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    532,
+    534,
     538,
     0
    ],
    "types": [
-    606,
+    616,
     628,
-    0
+    7
    ],
    "members": [
-    6158,
+    6199,
     6405,
-    1
+    189
    ],
    "interfaces": [
-    81,
+    83,
     83
    ],
    "propertyRegistrations": [
-    936,
+    938,
     938
    ],
    "routedEvents": [
@@ -4134,12 +4537,13 @@
    ],
    "notApplicableFiles": 1,
    "matchKinds": {
+    "alias fn": 4,
     "const": 33,
     "derive": 2,
     "field": 29,
-    "fn": 5554,
+    "fn": 5585,
     "free item": 4,
-    "overload fn": 76,
+    "overload fn": 82,
     "trait": 37,
     "variant": 423
    },
@@ -5392,6 +5796,9 @@
     "RequestBringIntoViewEventArgs.cs": [
      "request_bring_into_view_event_args.rs"
     ],
+    "ResolveByNameAttribute.cs": [
+     "markup_types/classes.rs"
+    ],
     "RowDefinition.cs": [
      "row_definition.rs"
     ],
@@ -5674,6 +6081,9 @@
     "Utils/CollectionUtils.cs": [
      "utils/collection_utils.rs"
     ],
+    "Utils/IEnumerableUtils.cs": [
+     "items_source.rs"
+    ],
     "Utils/ISelectionAdapter.cs": [
      "utils/i_selection_adapter.rs"
     ],
@@ -5748,13 +6158,11 @@
     "grid_mocks.rs",
     "i_clickable_control.rs",
     "i_command_source.rs",
-    "items_source.rs",
     "layout_test_control.rs",
     "layoutable_tests_effective_viewport_changed.rs",
     "layoutable_tests_layout_rounding.rs",
     "list_box_tests_multiple.rs",
     "list_box_tests_single.rs",
-    "markup_types/classes.rs",
     "markup_types/contracts.rs",
     "markup_types/converters.rs",
     "markup_types/enums.rs",
@@ -5805,6 +6213,7 @@
     "testing/mock_windowing_platform.rs",
     "testing/null_renderer.rs",
     "testing/test_clipboard.rs",
+    "testing/test_icon_loader.rs",
     "testing/test_log_sink.rs",
     "testing/test_services.rs",
     "testing/test_services_windowing.rs",
@@ -6396,22 +6805,22 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    45,
-    49,
+    47,
+    47,
     0
    ],
    "types": [
-    61,
-    85,
-    0
+    63,
+    75,
+    11
    ],
    "members": [
-    435,
-    601,
-    0
+    437,
+    528,
+    76
    ],
    "interfaces": [
-    0,
+    1,
     4
    ],
    "propertyRegistrations": [
@@ -6422,10 +6831,10 @@
     0,
     0
    ],
-   "notApplicableFiles": 0,
+   "notApplicableFiles": 2,
    "matchKinds": {
-    "field": 17,
-    "fn": 393,
+    "field": 18,
+    "fn": 394,
     "free fn": 6,
     "overload fn": 10,
     "trait": 1,
@@ -6511,6 +6920,9 @@
     "IAvnMenu.cs": [
      "frn_menu.rs"
     ],
+    "IAvnMenuItem.cs": [
+     "frn_menu_item.rs"
+    ],
     "IconLoader.cs": [
      "icon_loader.rs"
     ],
@@ -6531,6 +6943,9 @@
     ],
     "NativeControlHostImpl.cs": [
      "native_control_host_impl.rs"
+    ],
+    "NativeOwned.cs": [
+     "callback_base.rs"
     ],
     "NativePlatformSettings.cs": [
      "native_platform_settings.rs"
@@ -6569,9 +6984,7 @@
      "window_impl_base.rs"
     ]
    },
-   "rustOnly": [
-    "frn_menu_item.rs"
-   ]
+   "rustOnly": []
   },
   {
    "name": "Avalonia.OpenGL",
@@ -6580,22 +6993,22 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    12,
+    39,
     39,
     0
    ],
    "types": [
-    16,
+    61,
     63,
-    0
+    2
    ],
    "members": [
-    226,
+    601,
     639,
-    0
+    38
    ],
    "interfaces": [
-    6,
+    18,
     18
    ],
    "propertyRegistrations": [
@@ -6608,13 +7021,91 @@
    ],
    "notApplicableFiles": 0,
    "matchKinds": {
-    "fn": 61,
-    "free fn": 68,
-    "free item": 84,
-    "overload fn": 2,
-    "variant": 11
+    "alias fn": 1,
+    "field": 24,
+    "fn": 270,
+    "free fn": 92,
+    "free item": 181,
+    "overload fn": 4,
+    "trait fn": 3,
+    "variant": 26
    },
    "presentFiles": {
+    "Composition/CompositionGlContext.cs": [
+     "composition/composition_gl_context.rs"
+    ],
+    "Composition/CompositionGlContextOptions.cs": [
+     "composition/composition_gl_context_options.rs"
+    ],
+    "Composition/CompositionGlTexture.cs": [
+     "composition/composition_gl_texture.rs"
+    ],
+    "Composition/ICompositionGlContext.cs": [
+     "composition/i_composition_gl_context.rs"
+    ],
+    "Composition/ICompositionGlTexture.cs": [
+     "composition/i_composition_gl_texture.rs"
+    ],
+    "Composition/OpenGlCompositionInterop.cs": [
+     "composition/open_gl_composition_interop.rs"
+    ],
+    "Controls/CompositionOpenGlSwapchain.cs": [
+     "controls/composition_open_gl_swapchain.rs"
+    ],
+    "Controls/OpenGlControlBase.cs": [
+     "controls/open_gl_control_base.rs"
+    ],
+    "Controls/OpenGlControlResources.cs": [
+     "controls/open_gl_control_resources.rs"
+    ],
+    "Egl/EglConsts.cs": [
+     "egl/egl_consts.rs"
+    ],
+    "Egl/EglContext.cs": [
+     "egl/egl_context.rs"
+    ],
+    "Egl/EglDisplay.cs": [
+     "egl/egl_display.rs"
+    ],
+    "Egl/EglDisplayOptions.cs": [
+     "egl/egl_display_options.rs"
+    ],
+    "Egl/EglDisplayUtils.cs": [
+     "egl/egl_display_utils.rs"
+    ],
+    "Egl/EglErrors.cs": [
+     "egl/egl_errors.rs"
+    ],
+    "Egl/EglExternalObjectsFeature.Drm.cs": [
+     "egl/egl_external_objects_feature_drm.rs"
+    ],
+    "Egl/EglExternalObjectsFeature.cs": [
+     "egl/egl_external_objects_feature.rs"
+    ],
+    "Egl/EglGlPlatformImageSurfaceBase.cs": [
+     "egl/egl_gl_platform_image_surface_base.rs"
+    ],
+    "Egl/EglGlPlatformSurface.cs": [
+     "egl/egl_gl_platform_surface.rs"
+    ],
+    "Egl/EglGlPlatformSurfaceBase.cs": [
+     "egl/egl_gl_platform_surface_base.rs"
+    ],
+    "Egl/EglImage.cs": [
+     "egl/egl_image.rs"
+    ],
+    "Egl/EglInterface.cs": [
+     "egl/egl_interface.rs"
+    ],
+    "Egl/EglPlatformGraphics.cs": [
+     "egl/egl_platform_graphics.rs"
+    ],
+    "Egl/EglSurface.cs": [
+     "egl/egl_surface.rs"
+    ],
+    "Features/ExternalObjectsOpenGlExtensionFeature.cs": [
+     "features/external_objects_open_gl_extension_feature.rs"
+    ],
     "GlBasicInfoInterface.cs": [
      "gl_basic_info_interface.rs"
     ],
@@ -6636,6 +7127,12 @@
     "IGlContext.cs": [
      "i_gl_context.rs"
     ],
+    "IGlContextExternalObjectsFeature.cs": [
+     "i_gl_context_external_objects_feature.rs"
+    ],
+    "IOpenGlTextureSharingRenderInterfaceContextFeature.cs": [
+     "i_open_gl_texture_sharing_render_interface_context_feature.rs"
+    ],
     "IPlatformGraphicsOpenGlContextFactory.cs": [
      "i_platform_graphics_open_gl_context_factory.rs"
     ],
@@ -6653,7 +7150,10 @@
     ]
    },
    "rustOnly": [
+    "composition/task_support.rs",
     "entry_points.rs",
+    "register_types.rs",
+    "rust_paths.rs",
     "testing.rs"
    ]
   },
@@ -6714,7 +7214,7 @@
    "members": [
     68,
     73,
-    0
+    5
    ],
    "interfaces": [
     0,
@@ -6928,19 +7428,19 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    49,
-    49,
+    50,
+    50,
     0
    ],
    "types": [
-    53,
-    61,
-    0
+    60,
+    62,
+    2
    ],
    "members": [
-    302,
-    426,
-    0
+    332,
+    428,
+    90
    ],
    "interfaces": [
     0,
@@ -6954,13 +7454,13 @@
     0,
     0
    ],
-   "notApplicableFiles": 3,
+   "notApplicableFiles": 2,
    "matchKinds": {
     "const": 1,
-    "field": 3,
-    "fn": 213,
+    "field": 8,
+    "fn": 237,
     "free fn": 70,
-    "free item": 7,
+    "free item": 8,
     "overload fn": 4,
     "trait": 1,
     "variant": 3
@@ -7092,6 +7592,9 @@
     "Rendering/RenderTargetBrowserSurface.cs": [
      "rendering/render_target_browser_surface.rs"
     ],
+    "Rendering/RenderWorker.cs": [
+     "rendering/render_worker.rs"
+    ],
     "Rendering/WebRenderTarget.cs": [
      "rendering/web_render_target.rs"
     ],
@@ -7115,7 +7618,11 @@
     ]
    },
    "rustOnly": [
-    "interop/completion_helper.rs"
+    "interop/completion_helper.rs",
+    "interop/thread_proxy.rs",
+    "rendering/browser_render_surface.rs",
+    "rendering/browser_surface_shared.rs",
+    "rendering/render_statistics.rs"
    ]
   },
   {
@@ -7137,7 +7644,7 @@
    "members": [
     5,
     8,
-    0
+    3
    ],
    "interfaces": [
     0,
@@ -7177,22 +7684,22 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    0,
-    11,
+    8,
+    8,
     0
    ],
    "types": [
-    0,
-    24,
-    0
+    18,
+    20,
+    2
    ],
    "members": [
-    0,
-    251,
-    0
+    223,
+    235,
+    9
    ],
    "interfaces": [
-    0,
+    2,
     3
    ],
    "propertyRegistrations": [
@@ -7203,10 +7710,42 @@
     0,
     0
    ],
-   "notApplicableFiles": 0,
-   "matchKinds": {},
-   "presentFiles": {},
-   "rustOnly": []
+   "notApplicableFiles": 3,
+   "matchKinds": {
+    "field": 6,
+    "fn": 206,
+    "overload fn": 11
+   },
+   "presentFiles": {
+    "AvaloniaHeadlessPlatform.cs": [
+     "ferro_headless_platform.rs"
+    ],
+    "HeadlessPlatformRenderInterface.cs": [
+     "headless_platform_render_interface.rs"
+    ],
+    "HeadlessPlatformStubs.cs": [
+     "headless_platform_stubs.rs"
+    ],
+    "HeadlessRenderTimer.cs": [
+     "headless_render_timer.rs"
+    ],
+    "HeadlessWindowExtensions.cs": [
+     "headless_window_extensions.rs"
+    ],
+    "HeadlessWindowImpl.cs": [
+     "headless_window_impl.rs"
+    ],
+    "IHeadlessTouchPointer.cs": [
+     "i_headless_touch_pointer.rs"
+    ],
+    "IHeadlessWindow.cs": [
+     "i_headless_window.rs"
+    ]
+   },
+   "rustOnly": [
+    "headless_window_surface.rs",
+    "tests.rs"
+   ]
   },
   {
    "name": "Avalonia.Headless.NUnit",
@@ -7216,17 +7755,17 @@
    "detail": "full",
    "files": [
     0,
-    4,
+    0,
     0
    ],
    "types": [
     0,
-    4,
+    0,
     0
    ],
    "members": [
     0,
-    4,
+    0,
     0
    ],
    "interfaces": [
@@ -7241,7 +7780,7 @@
     0,
     0
    ],
-   "notApplicableFiles": 0,
+   "notApplicableFiles": 4,
    "matchKinds": {},
    "presentFiles": {},
    "rustOnly": []
@@ -7254,17 +7793,17 @@
    "detail": "full",
    "files": [
     0,
-    3,
+    0,
     0
    ],
    "types": [
     0,
-    3,
+    0,
     0
    ],
    "members": [
     0,
-    11,
+    0,
     0
    ],
    "interfaces": [
@@ -7279,7 +7818,7 @@
     0,
     0
    ],
-   "notApplicableFiles": 0,
+   "notApplicableFiles": 3,
    "matchKinds": {},
    "presentFiles": {},
    "rustOnly": []
@@ -7292,17 +7831,17 @@
    "detail": "full",
    "files": [
     0,
-    14,
+    0,
     0
    ],
    "types": [
     0,
-    14,
+    0,
     0
    ],
    "members": [
     0,
-    26,
+    0,
     0
    ],
    "interfaces": [
@@ -7317,7 +7856,7 @@
     0,
     0
    ],
-   "notApplicableFiles": 0,
+   "notApplicableFiles": 14,
    "matchKinds": {},
    "presentFiles": {},
    "rustOnly": []
@@ -7367,19 +7906,19 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    5,
+    7,
     7,
     0
    ],
    "types": [
-    5,
+    7,
     37,
-    0
+    30
    ],
    "members": [
-    8,
+    12,
     67,
-    0
+    55
    ],
    "interfaces": [
     0,
@@ -7395,7 +7934,7 @@
    ],
    "notApplicableFiles": 1,
    "matchKinds": {
-    "fn": 6,
+    "fn": 10,
     "overload fn": 1,
     "trait": 1
    },
@@ -7409,11 +7948,17 @@
     "Markup/Parsers/ContainerQueryGrammar.cs": [
      "markup/parsers/container_query_grammar.rs"
     ],
+    "Markup/Parsers/ContainerQueryParser.cs": [
+     "markup/parsers/container_query_parser.rs"
+    ],
     "Markup/Parsers/PropertyPathGrammar.cs": [
      "markup/parsers/property_path_grammar.rs"
     ],
     "Markup/Parsers/SelectorGrammar.cs": [
      "markup/parsers/selector_grammar.rs"
+    ],
+    "Markup/Parsers/SelectorParser.cs": [
+     "markup/parsers/selector_parser.rs"
     ]
    },
    "rustOnly": [
@@ -7432,14 +7977,14 @@
     0
    ],
    "types": [
-    60,
+    61,
     64,
-    0
+    3
    ],
    "members": [
-    191,
+    199,
     240,
-    0
+    41
    ],
    "interfaces": [
     9,
@@ -7456,7 +8001,7 @@
    "notApplicableFiles": 1,
    "matchKinds": {
     "field": 26,
-    "fn": 149,
+    "fn": 157,
     "free fn": 1,
     "overload fn": 9,
     "trait": 2,
@@ -7618,18 +8163,18 @@
    "detail": "full",
    "files": [
     65,
-    67,
+    66,
     0
    ],
    "types": [
     119,
-    127,
-    0
+    126,
+    7
    ],
    "members": [
     398,
-    506,
-    0
+    505,
+    107
    ],
    "interfaces": [
     5,
@@ -7643,7 +8188,7 @@
     0,
     0
    ],
-   "notApplicableFiles": 0,
+   "notApplicableFiles": 1,
    "matchKinds": {
     "const": 24,
     "field": 147,
@@ -7849,6 +8394,7 @@
     ]
    },
    "rustOnly": [
+    "core_table.rs",
     "runtime/framework/binding_path.rs",
     "runtime/framework/helpers.rs",
     "runtime/framework/methods.rs",
@@ -7885,22 +8431,22 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    47,
+    48,
     54,
     0
    ],
    "types": [
-    49,
+    52,
     66,
     0
    ],
    "members": [
-    329,
+    335,
     451,
     0
    ],
    "interfaces": [
-    6,
+    9,
     10
    ],
    "propertyRegistrations": [
@@ -7914,7 +8460,7 @@
    "notApplicableFiles": 0,
    "matchKinds": {
     "field": 28,
-    "fn": 256,
+    "fn": 262,
     "free fn": 33,
     "free item": 1,
     "overload fn": 10,
@@ -7996,6 +8542,9 @@
     "IDrawableBitmapImpl.cs": [
      "i_drawable_bitmap_impl.rs"
     ],
+    "ISkiaSharpApiLeaseFeature.cs": [
+     "i_skia_api_lease_feature.rs"
+    ],
     "ImmutableBitmap.cs": [
      "immutable_bitmap.rs"
     ],
@@ -8068,9 +8617,9 @@
     "gpu/graphite/graphite_gr_context.rs",
     "gpu/i_skia_gr_context.rs",
     "gpu/metal/tests.rs",
-    "i_skia_api_lease_feature.rs",
     "locked_framebuffer.rs",
     "metal/i_metal_device.rs",
+    "metal/i_metal_external_objects_feature.rs",
     "tests.rs",
     "unit_tests/hit_testing.rs",
     "unit_tests/media/custom_font_manager_impl.rs",

@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `external/XamlX/src/XamlX` (exists) |
 | Crate | `xamlx` |
 | Phase / priority | 2 - xaml + themes / P1 |
-| Files | 61/62 (98.4%), 26 not applicable |
-| Types | 171/175 (97.7%) |
-| Members | 703/865 (2 waived) (81.5%) |
+| Files | 61/61 (100.0%), 27 not applicable |
+| Types | 171/174 (3 waived) (100.0%) |
+| Members | 706/857 (151 waived) (100.0%) |
 | Contracts (interfaces) | 46/47 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -31,7 +31,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `XamlX.Ast.IXamlAstTypeReference` | public | `Ast/Common.cs` | 2/2 | present |
 | `XamlX.Ast.IXamlAstValueNode` | public | `Ast/Common.cs` | 1/1 | present |
 | `XamlX.Ast.IXamlAstVisitor` | public | `Ast/Common.cs` | 3/3 | present |
-| `XamlX.Ast.IXamlILOptimizedEmitablePropertySetter` | public | `Ast/Clr.cs` | 0/1 | missing |
+| `XamlX.Ast.IXamlILOptimizedEmitablePropertySetter` | public | `Ast/Clr.cs` | 0/1 (1 waived) | waived |
 | `XamlX.Ast.IXamlLineInfo` | public | `Ast/Common.cs` | 2/2 | present |
 | `XamlX.Ast.IXamlPropertySetter` | public | `Ast/Clr.cs` | 4/4 | present |
 | `XamlX.Ast.IXamlWrappedMethod` | public | `Ast/Clr.cs` | 4/4 | present |
@@ -80,174 +80,24 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 2/2, types 3/5, members 4/8
+### `(project root)` - files 2/2, types 3/5 (2 waived), members 4/8 (4 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Exceptions.cs` | `exceptions.rs` | partial | 2/4 | 2/6 |  |
+| `Exceptions.cs` | `exceptions.rs` | present | 2/4 (2 waived) | 2/6 (4 waived) |  |
 | `XamlNamespaces.cs` | `xaml_namespaces.rs` | present | 1/1 | 2/2 |  |
 
-<details><summary><code>Exceptions.cs</code> - 6 missing</summary>
-
-- `XamlParseException` (class): 1 missing
-  - `XamlParseException(string message, IXamlLineInfo? lineInfo, Exception? innerException = null)` *(1 of 2 constructors found)*
-- `XamlTransformException` (class, public): **type missing** (1 members)
-- `XamlLoadException` (class, public): **type missing** (1 members)
-- `XamlTypeSystemException` (class): 1 missing
-  - `XamlTypeSystemException(string message, Exception? innerException = null)`
-
-</details>
-
-### `Ast` - files 7/7, types 59/60, members 200/269 (2 waived)
+### `Ast` - files 7/7, types 59/60 (1 waived), members 203/269 (66 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Clr.cs` | `ast/clr.rs` | partial | 24/25 | 107/139 (2 waived) |  |
-| `Common.cs` | `ast/common.rs` | partial | 13/13 | 27/30 |  |
-| `CompilerHelpers.cs` | `ast/compiler_helpers.rs` | partial | 8/8 | 17/31 |  |
-| `Intrinsics.cs` | `ast/intrinsics.rs` | partial | 7/7 | 22/32 |  |
-| `Xaml.cs` | `ast/xaml.rs` | partial | 5/5 | 20/26 |  |
+| `Clr.cs` | `ast/clr.rs` | present | 24/25 (1 waived) | 109/139 (30 waived) |  |
+| `Common.cs` | `ast/common.rs` | present | 13/13 | 27/30 (3 waived) |  |
+| `CompilerHelpers.cs` | `ast/compiler_helpers.rs` | present | 8/8 | 17/31 (14 waived) |  |
+| `Intrinsics.cs` | `ast/intrinsics.rs` | present | 7/7 | 22/32 (10 waived) |  |
+| `Xaml.cs` | `ast/xaml.rs` | present | 5/5 | 20/26 (6 waived) |  |
 | `XamlDocument.cs` | `ast/xaml_document.rs` | present | 1/1 | 3/3 |  |
-| `Xml.cs` | `ast/xml.rs` | partial | 1/1 | 4/8 |  |
-
-<details><summary><code>Clr.cs</code> - 31 missing</summary>
-
-- `XamlAstClrTypeReference` (class): 1 missing
-  - `override string ToString()`
-- `XamlAstClrProperty` (class): 8 missing
-  - `string Name { get; set; }` *(getter `name` found, setter `set_name` missing)*
-  - `IXamlMethod? Getter { get; set; }` *(getter `getter` found, setter `set_getter` missing)*
-  - `List<IXamlPropertySetter> Setters { get; set; }` *(getter `setters` found, setter `set_setters` missing)*
-  - `List<IXamlCustomAttribute> CustomAttributes { get; set; }` *(getter `custom_attributes` found, setter `set_custom_attributes` missing)*
-  - `IXamlType DeclaringType { get; set; }` *(getter `declaring_type` found, setter `set_declaring_type` missing)*
-  - `XamlAstClrProperty(IXamlLineInfo lineInfo, string name, IXamlType declaringType, IXamlMethod? getter, IEnum...` *(2 of 4 constructors found)*
-  - `XamlAstClrProperty(IXamlLineInfo lineInfo, string name, IXamlType declaringType, IXamlMethod? getter)` *(2 of 4 constructors found)*
-  - `override string ToString()`
-- `IXamlILOptimizedEmitablePropertySetter` (interface, public): **type missing** (1 members)
-- `XamlDirectCallPropertySetter` (class): 3 missing
-  - `void Emit(IXamlILEmitter emitter)`
-  - `void EmitWithArguments(XamlEmitContextWithLocals<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmit...`
-  - `override bool Equals(object? obj)` *(1 of 2 overloads found)*
-  - waived (Rust: `Hash` is derived where the type can be hashed; float-based value types are not `Eq`/`Hash`): `GetHashCode`
-- `PropertySetterBinderParameters` (class): 1 missing
-  - `override bool Equals(object? obj)` *(1 of 2 overloads found)*
-  - waived (Rust: `Hash` is derived where the type can be hashed; float-based value types are not `Eq`/`Hash`): `GetHashCode`
-- `XamlMethodCallBaseNode` (class): 1 missing
-  - `IXamlWrappedMethod Method { get; set; }` *(getter `method` found, setter `set_method` missing)*
-- `XamlNoReturnMethodCallNode` (class): 1 missing
-  - `XamlNoReturnMethodCallNode(IXamlLineInfo lineInfo, IXamlWrappedMethod method, IEnumerable<IXamlAstValueNode...` *(1 of 2 constructors found)*
-- `XamlStaticOrTargetedReturnMethodCallNode` (class): 1 missing
-  - `XamlStaticOrTargetedReturnMethodCallNode(IXamlLineInfo lineInfo, IXamlMethod method, IEnumerable<IXamlAstVa...` *(1 of 2 constructors found)*
-- `XamlValueWithSideEffectNodeBase` (class): 1 missing
-  - `IXamlAstValueNode Value { get; set; }` *(getter `value` found, setter `set_value` missing)*
-- `XamlValueWithManipulationNode` (class): 1 missing
-  - `IXamlAstManipulationNode? Manipulation { get; set; }` *(getter `manipulation` found, setter `set_manipulation` missing)*
-- `XamlAstNewClrObjectNode` (class): 1 missing
-  - `IXamlAstTypeReference Type { get; set; }` *(getter `type_` found, setter `set_type` missing)*
-- `XamlAstConstructableObjectNode` (class): 1 missing
-  - `IXamlAstTypeReference Type { get; set; }` *(getter `type_` found, setter `set_type` missing)*
-- `XamlMarkupExtensionNode` (class): 1 missing
-  - `IXamlAstValueNode Value { get; set; }` *(getter `value` found, setter `set_value` missing)*
-- `XamlObjectInitializationNode` (class): 1 missing
-  - `IXamlAstManipulationNode Manipulation { get; set; }` *(getter `manipulation` found, setter `set_manipulation` missing)*
-- `XamlWrappedMethod` (class): 1 missing
-  - `void Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen, bool swall...`
-- `XamlWrappedMethodWithCasts` (class): 1 missing
-  - `void Emit(XamlEmitContextWithLocals<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen, ...`
-- `XamlMethodWithCasts` (class): 1 missing
-  - `void EmitCall(IXamlILEmitter codeGen)`
-- `XamlDeferredContentNode` (class): 2 missing
-  - `IXamlAstValueNode Value { get; set; }` *(getter `value` found, setter `set_value` missing)*
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-- `XamlDeferredContentInitializeIntermediateRootNode` (class): 2 missing
-  - `IXamlAstValueNode Value { get; set; }` *(getter `value` found, setter `set_value` missing)*
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-
-</details>
-
-<details><summary><code>Common.cs</code> - 3 missing</summary>
-
-- `XamlAstNode` (class): 2 missing
-  - `virtual bool IsSkipped { get; }`
-  - `static void VisitList<T>(T[] list, Visitor visitor) where T : IXamlAstNode` *(protected; 1 of 2 overloads found)*
-- `XamlAstExtensions` (class): 1 missing
-  - `static XamlAstClrProperty GetClrProperty(this IXamlAstPropertyReference r)`
-
-</details>
-
-<details><summary><code>CompilerHelpers.cs</code> - 14 missing</summary>
-
-- `XamlAstCompilerLocalNode` (class): 1 missing
-  - `XamlILNodeEmitResult Emit(XamlEmitContextWithLocals<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILE...`
-- `XamlAstLocalInitializationNodeEmitter` (class): 2 missing
-  - `XamlAstCompilerLocalNode Local { get; set; }` *(getter `local` found, setter `set_local` missing)*
-  - `XamlILNodeEmitResult Emit(XamlEmitContextWithLocals<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILE...`
-- `XamlValueNodeWithBeginInit` (class): 1 missing
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-- `XamlAstManipulationImperativeNode` (class): 2 missing
-  - `IXamlAstImperativeNode Imperative { get; set; }` *(getter `imperative` found, setter `set_imperative` missing)*
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-- `XamlAstImperativeValueManipulation` (class): 3 missing
-  - `IXamlAstValueNode Value { get; set; }` *(getter `value` found, setter `set_value` missing)*
-  - `IXamlAstManipulationNode Manipulation { get; set; }` *(getter `manipulation` found, setter `set_manipulation` missing)*
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-- `XamlAstContextLocalNode` (class): 1 missing
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-- `XamlAstRuntimeCastNode` (class): 3 missing
-  - `IXamlAstValueNode Value { get; set; }` *(getter `value` found, setter `set_value` missing)*
-  - `IXamlAstTypeReference Type { get; set; }` *(getter `type_` found, setter `set_type` missing)*
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-- `XamlAstNeedsParentStackValueNode` (class): 1 missing
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-
-</details>
-
-<details><summary><code>Intrinsics.cs</code> - 10 missing</summary>
-
-- `XamlNullExtensionNode` (class): 1 missing
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-- `XamlTypeExtensionNode` (class): 2 missing
-  - `IXamlAstTypeReference Value { get; set; }` *(getter `value` found, setter `set_value` missing)*
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-- `XamlStaticExtensionNode` (class): 1 missing
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-- `XamlConstantNode` (class): 1 missing
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-- `XamlRootObjectNode` (class): 2 missing
-  - `IXamlAstTypeReference Type { get; set; }` *(getter `type_` found, setter `set_type` missing)*
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-- `XamlIntermediateRootObjectNode` (class): 2 missing
-  - `IXamlAstTypeReference Type { get; set; }` *(getter `type_` found, setter `set_type` missing)*
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-- `XamlLoadMethodDelegateNode` (class): 1 missing
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-
-</details>
-
-<details><summary><code>Xaml.cs</code> - 6 missing</summary>
-
-- `XamlAstXamlPropertyValueNode` (class): 2 missing
-  - `IXamlAstPropertyReference Property { get; set; }` *(getter `property` found, setter `set_property` missing)*
-  - `XamlAstXamlPropertyValueNode(IXamlLineInfo lineInfo, IXamlAstPropertyReference property, IEnumerable<IXamlA...` *(1 of 2 constructors found)*
-- `XamlAstObjectNode` (class): 1 missing
-  - `IXamlAstTypeReference Type { get; set; }` *(getter `type_` found, setter `set_type` missing)*
-- `XamlAstTextNode` (class): 2 missing
-  - `string Text { get; set; }` *(getter `text` found, setter `set_text` missing)*
-  - `IXamlAstTypeReference Type { get; set; }` *(getter `type_` found, setter `set_type` missing)*
-- `XamlAstNamePropertyReference` (class): 1 missing
-  - `string Name { get; set; }` *(getter `name` found, setter `set_name` missing)*
-
-</details>
-
-<details><summary><code>Xml.cs</code> - 4 missing</summary>
-
-- `XamlAstXmlTypeReference` (class): 4 missing
-  - `string? XmlNamespace { get; set; }` *(getter `xml_namespace` found, setter `set_xml_namespace` missing)*
-  - `string Name { get; set; }` *(getter `name` found, setter `set_name` missing)*
-  - `bool IsMarkupExtension { get; set; }` *(getter `is_markup_extension` found, setter `set_is_markup_extension` missing)*
-  - `override string ToString()`
-
-</details>
+| `Xml.cs` | `ast/xml.rs` | present | 1/1 | 5/8 (3 waived) |  |
 
 ### `Compatibility` - files 0/0, types 0/0, members 0/0
 
@@ -265,74 +115,24 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `XamlCompiler.cs` | `compiler/xaml_compiler.rs` | present | 1/1 | 9/9 |  |
 | `XamlImperativeCompiler.cs` | `compiler/xaml_imperative_compiler.rs` | present | 1/1 | 8/8 |  |
 
-### `Diagnostics` - files 4/5, types 4/5, members 17/32
+### `Diagnostics` - files 4/4, types 4/4, members 17/24 (7 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ContextDiagnosticExtensions.cs` | `diagnostics/context_diagnostic_extensions.rs` | partial | 1/1 | 1/7 |  |
-| `TrimmingMessages.cs` | `diagnostics/trimming_messages.rs` | missing | 0/1 | 0/8 |  |
-| `XamlDiagnostic.cs` | `diagnostics/xaml_diagnostic.rs` | partial | 1/1 | 11/12 |  |
+| `ContextDiagnosticExtensions.cs` | `diagnostics/context_diagnostic_extensions.rs` | present | 1/1 | 1/7 (6 waived) |  |
+| `TrimmingMessages.cs` | - | n/a | - | - | not-applicable: justification texts of the trimming attributes of the managed compiler: no trimming attributes |
+| `XamlDiagnostic.cs` | `diagnostics/xaml_diagnostic.rs` | present | 1/1 | 11/12 (1 waived) |  |
 | `XamlDiagnosticSeverity.cs` | `diagnostics/xaml_diagnostic_severity.rs` | present | 1/1 | 4/4 |  |
 | `XamlXWellKnownDiagnosticCodes.cs` | `diagnostics/xaml_x_well_known_diagnostic_codes.rs` | present | 1/1 | 1/1 |  |
 
-<details><summary><code>ContextDiagnosticExtensions.cs</code> - 6 missing</summary>
-
-- `ContextDiagnosticExtensions` (class) (ported as module-level items): 6 missing
-  - `static IXamlAstNode? ReportDiagnostic(this AstTransformationContext context, string diagnosticCode, XamlDia...`
-  - `static IXamlAstNode ReportTransformError(this AstTransformationContext context, string title, IXamlAstNode ...`
-  - `static TReturn ReportTransformError<TReturn>(this AstTransformationContext context, string title, IXamlLine...`
-  - `static TReturn ReportError<TReturn>(this AstTransformationContext context, Exception exception, TReturn ret)`
-  - `static XamlDiagnostic ToDiagnostic(this Exception exception, AstTransformationContext context)`
-  - `static Exception ToException(this XamlDiagnostic diagnostic)`
-
-</details>
-
-<details><summary><code>XamlDiagnostic.cs</code> - 1 missing</summary>
-
-- `XamlDiagnostic` (record): 1 missing
-  - `XamlDiagnostic(string code, XamlDiagnosticSeverity severity, string title, IXamlLineInfo? lineInfo = null)` *(1 of 2 constructors found)*
-
-</details>
-
-### `Emit` - files 4/4, types 21/21, members 51/64
+### `Emit` - files 4/4, types 21/21, members 51/64 (13 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `XamlEmitContext.cs` | `emit/xaml_emit_context.rs` | partial | 10/10 | 21/29 |  |
-| `XamlEmitContextWithLocals.cs` | `emit/xaml_emit_context_with_locals.rs` | partial | 6/6 | 9/13 |  |
+| `XamlEmitContext.cs` | `emit/xaml_emit_context.rs` | present | 10/10 | 21/29 (8 waived) |  |
+| `XamlEmitContextWithLocals.cs` | `emit/xaml_emit_context_with_locals.rs` | present | 6/6 | 9/13 (4 waived) |  |
 | `XamlLanguageEmitMappings.cs` | `emit/xaml_language_emit_mappings.rs` | present | 3/3 | 3/3 |  |
-| `XamlRuntimeContext.cs` | `emit/xaml_runtime_context.rs` | partial | 2/2 | 18/19 |  |
-
-<details><summary><code>XamlEmitContext.cs</code> - 8 missing</summary>
-
-- `XamlEmitContext<TBackendEmitter, TEmitResult>` (class): 8 missing
-  - `IFileSource? File { get; }`
-  - `List<object> Emitters { get; }`
-  - `TransformerConfiguration Configuration { get; }`
-  - `XamlLanguageEmitMappings<TBackendEmitter, TEmitResult> EmitMappings { get; }`
-  - `XamlRuntimeContext<TBackendEmitter, TEmitResult> RuntimeContext { get; }`
-  - `IXamlTypeBuilder<TBackendEmitter> DeclaringType { get; }`
-  - `TBackendEmitter Emitter { get; }`
-  - `XamlEmitContext(TBackendEmitter emitter, TransformerConfiguration configuration, XamlLanguageEmitMappings<T...`
-
-</details>
-
-<details><summary><code>XamlEmitContextWithLocals.cs</code> - 4 missing</summary>
-
-- `XamlEmitContextWithLocals<TBackendEmitter, TEmitResult>` (class): 4 missing
-  - `readonly Dictionary<XamlAstCompilerLocalNode, IXamlLocal> _locals` *(protected)*
-  - `XamlEmitContextWithLocals(TBackendEmitter emitter, TransformerConfiguration configuration, XamlLanguageEmit...`
-  - `override TEmitResult? EmitNodeCore(IXamlAstNode value, TBackendEmitter codeGen, out bool foundEmitter)` *(protected)*
-  - `override bool EmitCore(IXamlWrappedMethod wrapped, TBackendEmitter codeGen, bool swallowResult)` *(protected)*
-
-</details>
-
-<details><summary><code>XamlRuntimeContext.cs</code> - 1 missing</summary>
-
-- `XamlRuntimeContext<TBackendEmitter, TEmitResult>` (class): 1 missing
-  - `Action<TBackendEmitter> Factory { get; set; }` *(getter `factory` found, setter `set_factory` missing)*
-
-</details>
+| `XamlRuntimeContext.cs` | `emit/xaml_runtime_context.rs` | present | 2/2 | 18/19 (1 waived) |  |
 
 ### `Extensions` - files 0/0, types 0/0, members 0/0
 
@@ -371,75 +171,24 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ValueWithManipulationsEmitter.cs` | - | n/a | - | - | not-applicable: IL backend: replaced by the Rust emitter and interpreter backends, runtime context becomes plain runtime structs (docs/porting/xaml.md 1.2) |
 | `XamlDynamicSetterContainerProvider.cs` | - | n/a | - | - | not-applicable: IL backend: replaced by the Rust emitter and interpreter backends, runtime context becomes plain runtime structs (docs/porting/xaml.md 1.2) |
 
-### `Parsers` - files 3/3, types 7/7, members 9/39
+### `Parsers` - files 3/3, types 7/7, members 9/39 (30 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `CommaSeparatedParenthesesTreeParser.cs` | `parsers/comma_separated_parentheses_tree_parser.rs` | present | 3/3 | 4/4 |  |
-| `CompatibleXmlReader.cs` | `parsers/compatible_xml_reader.rs` | partial | 1/1 | 1/30 |  |
-| `XDocumentXamlParser.cs` | `parsers/x_document_xaml_parser.rs` | partial | 3/3 | 4/5 |  |
+| `CompatibleXmlReader.cs` | `parsers/compatible_xml_reader.rs` | present | 1/1 | 1/30 (29 waived) |  |
+| `XDocumentXamlParser.cs` | `parsers/x_document_xaml_parser.rs` | present | 3/3 | 4/5 (1 waived) |  |
 
-<details><summary><code>CompatibleXmlReader.cs</code> - 29 missing</summary>
-
-- `CompatibleXmlReader` (class): 29 missing
-  - `override bool Read()`
-  - `override bool MoveToFirstAttribute()`
-  - `override bool MoveToNextAttribute()`
-  - `override string GetAttribute(int i)`
-  - `override string? GetAttribute(string name)`
-  - `override string? GetAttribute(string name, string? namespaceURI)`
-  - `override bool MoveToAttribute(string name)`
-  - `override bool MoveToAttribute(string name, string? ns)`
-  - `override int AttributeCount { get; }`
-  - `override string NamespaceURI { get; }`
-  - `IDictionary<string, string> GetNamespacesInScope(XmlNamespaceScope scope)`
-  - `override string? LookupNamespace(string prefix)`
-  - `string? LookupPrefix(string namespaceName)`
-  - `override string Value { get; }`
-  - `override bool ReadAttributeValue()`
-  - `override bool MoveToElement()`
-  - `override void ResolveEntity()`
-  - `override string BaseURI { get; }`
-  - `override int Depth { get; }`
-  - `override bool EOF { get; }`
-  - `override bool IsEmptyElement { get; }`
-  - `override string LocalName { get; }`
-  - `override XmlNameTable NameTable { get; }`
-  - `override XmlNodeType NodeType { get; }`
-  - `override string Prefix { get; }`
-  - `override ReadState ReadState { get; }`
-  - `bool HasLineInfo()`
-  - `int LineNumber { get; }`
-  - `int LinePosition { get; }`
-
-</details>
-
-<details><summary><code>XDocumentXamlParser.cs</code> - 1 missing</summary>
-
-- `Extensions` (class) (ported as module-level items): 1 missing
-  - `static IXamlLineInfo AsLi(this IXmlLineInfo info)`
-
-</details>
-
-### `Parsers/SystemXamlMarkupExtensionParser` - files 4/4, types 11/11, members 101/103
+### `Parsers/SystemXamlMarkupExtensionParser` - files 4/4, types 11/11, members 101/103 (2 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `KnownStrings.cs` | `parsers/system_xaml_markup_extension_parser/known_strings.rs` | present | 1/1 | 43/43 |  |
-| `MeScanner.Shims.cs` | `parsers/system_xaml_markup_extension_parser/me_scanner_shims.rs` | partial | 7/7 | 28/30 |  |
+| `MeScanner.Shims.cs` | `parsers/system_xaml_markup_extension_parser/me_scanner_shims.rs` | present | 7/7 | 28/30 (2 waived) |  |
 | `MeScanner.cs` | `parsers/system_xaml_markup_extension_parser/me_scanner.rs` | present | 2/2 | 29/29 |  |
 | `SystemXamlMarkupExtensionParser.cs` | `parsers/system_xaml_markup_extension_parser/system_xaml_markup_extension_parser.rs` | present | 1/1 | 1/1 |  |
 
-<details><summary><code>MeScanner.Shims.cs</code> - 2 missing</summary>
-
-- `MeScannerContext` (class): 1 missing
-  - `MeScannerContext FindNamespaceByPrefix { get; }`
-- `MeScannerParseException` (class): 1 missing
-  - `MeScannerParseException(string error)` *(1 of 2 constructors found)*
-
-</details>
-
-### `Transform` - files 11/11, types 16/16, members 95/98
+### `Transform` - files 11/11, types 16/16, members 95/98 (3 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -447,28 +196,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IXamlAstTransformer.cs` | `transform/i_xaml_ast_transformer.rs` | present | 1/1 | 1/1 |  |
 | `IXamlIdentifierGenerator.cs` | `transform/i_xaml_identifier_generator.rs` | present | 2/2 | 2/2 |  |
 | `NamespaceInfoHelper.cs` | `transform/namespace_info_helper.rs` | present | 2/2 | 5/5 |  |
-| `TransformerConfiguration.cs` | `transform/transformer_configuration.rs` | partial | 2/2 | 18/20 |  |
+| `TransformerConfiguration.cs` | `transform/transformer_configuration.rs` | present | 2/2 | 18/20 (2 waived) |  |
 | `WhitespaceNormalization.cs` | `transform/whitespace_normalization.rs` | present | 1/1 | 4/4 |  |
 | `XamlContextBase.cs` | `transform/xaml_context_base.rs` | present | 1/1 | 7/7 |  |
 | `XamlDiagnosticsHandler.cs` | `transform/xaml_diagnostics_handler.rs` | present | 1/1 | 4/4 |  |
-| `XamlLanguageTypeMappings.cs` | `transform/xaml_language_type_mappings.rs` | partial | 2/2 | 26/27 |  |
+| `XamlLanguageTypeMappings.cs` | `transform/xaml_language_type_mappings.rs` | present | 2/2 | 26/27 (1 waived) |  |
 | `XamlTransformHelpers.cs` | `transform/xaml_transform_helpers.rs` | present | 1/1 | 10/10 |  |
 | `XamlXmlnsMappings.cs` | `transform/xaml_xmlns_mappings.rs` | present | 1/1 | 3/3 |  |
-
-<details><summary><code>TransformerConfiguration.cs</code> - 2 missing</summary>
-
-- `TransformerConfiguration` (class): 2 missing
-  - `IEnumerable<IXamlCustomAttribute> GetCustomAttribute(IXamlProperty prop, IXamlType attributeType)` *(2 of 4 overloads found)*
-  - `IEnumerable<IXamlCustomAttribute> GetCustomAttribute(IXamlProperty prop, IEnumerable<IXamlType> types)` *(2 of 4 overloads found)*
-
-</details>
-
-<details><summary><code>XamlLanguageTypeMappings.cs</code> - 1 missing</summary>
-
-- `XamlLanguageTypeMappings` (class): 1 missing
-  - `IXamlType ServiceProvider { get; set; }` *(getter `service_provider` found, setter `set_service_provider` missing)*
-
-</details>
 
 ### `Transform/Transformers` - files 20/20, types 20/20, members 23/23
 
@@ -495,53 +229,14 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `XArgumentsTransformer.cs` | `transform/transformers/x_arguments_transformer.rs` | present | 1/1 | 1/1 |  |
 | `XamlIntrinsicsTransformer.cs` | `transform/transformers/xaml_intrinsics_transformer.rs` | present | 1/1 | 1/1 |  |
 
-### `TypeSystem` - files 4/4, types 28/28, members 186/212
+### `TypeSystem` - files 4/4, types 28/28, members 186/212 (26 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `TypeSystem.cs` | `type_system/type_system.rs` | partial | 24/24 | 140/165 |  |
+| `TypeSystem.cs` | `type_system/type_system.rs` | present | 24/24 | 140/165 (25 waived) |  |
 | `TypeSystemHelpers.cs` | `type_system/type_system_helpers.rs` | present | 1/1 | 7/7 |  |
-| `XamlLocalsPool.cs` | `type_system/xaml_locals_pool.rs` | partial | 2/2 | 4/5 |  |
+| `XamlLocalsPool.cs` | `type_system/xaml_locals_pool.rs` | present | 2/2 | 4/5 (1 waived) |  |
 | `XamlTypeWellKnownTypes.cs` | `type_system/xaml_type_well_known_types.rs` | present | 1/1 | 35/35 |  |
-
-<details><summary><code>TypeSystem.cs</code> - 25 missing</summary>
-
-- `AnonymousParameterInfo` (class): 1 missing
-  - `AnonymousParameterInfo(IXamlType type, int index)` *(1 of 2 constructors found)*
-- `XamlTypeSystemExtensions` (class) (ported as module-level items): 24 missing
-  - `static string GetFqn(this IXamlType type)`
-  - `static string GetFullName(this IXamlType type)`
-  - `static IEnumerable<IXamlMethod> FindMethods(this IXamlType type, Func<IXamlMethod, bool> criteria)`
-  - `static IXamlMethod GetMethod(this IXamlType type, Func<IXamlMethod, bool> criteria)`
-  - `static IXamlMethod? FindMethod(this IXamlType type, Func<IXamlMethod, bool> criteria)`
-  - `static IXamlMethod GetMethod(this IXamlType type, string name, IXamlType returnType, bool allowDowncast, pa...`
-  - `static IXamlMethod? FindMethod(this IXamlType type, string name, IXamlType returnType, bool allowDowncast, ...`
-  - `static IXamlMethod GetMethod(this IXamlType type, FindMethodMethodSignature signature)`
-  - `static IXamlMethod? FindMethod(this IXamlType type, FindMethodMethodSignature signature)`
-  - `static IXamlConstructor GetConstructor(this IXamlType type, List<IXamlType>? args = null)`
-  - `static IXamlConstructor? FindConstructor(this IXamlType type, List<IXamlType>? args = null)`
-  - `static bool AcceptsNull(this IXamlType type)`
-  - `static bool IsNullable(this IXamlType type)`
-  - `static bool IsNullableOf(this IXamlType type, IXamlType vtype)`
-  - `static IXamlType MakeGenericType(this IXamlType type, params IXamlType[] typeArguments)`
-  - `static IEnumerable<IXamlType> GetAllInterfaces(this IXamlType type)`
-  - `static IEnumerable<IXamlCustomAttribute> GetAllCustomAttributes(this IXamlType type)`
-  - `static IEnumerable<IXamlProperty> GetAllProperties(this IXamlType type)`
-  - `static IEnumerable<IXamlField> GetAllFields(this IXamlType type)`
-  - `static IEnumerable<IXamlEventInfo> GetAllEvents(this IXamlType type)`
-  - `static bool IsDirectlyAssignableFrom(this IXamlType type, IXamlType other)`
-  - `static IXamlType ThisOrFirstParameter(this IXamlMethod method)`
-  - `static IReadOnlyList<IXamlType> ParametersWithThis(this IXamlMethod method)`
-  - `static bool Is(this IXamlType type, string ns, string name)`
-
-</details>
-
-<details><summary><code>XamlLocalsPool.cs</code> - 1 missing</summary>
-
-- `XamlLocalsPool.PooledLocal` (class): 1 missing
-  - `PooledLocal(XamlLocalsPool parent, IXamlType type, IXamlLocal local)`
-
-</details>
 
 ## Rust-only files
 
@@ -551,4 +246,4 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 |---|---|---|
 | `extensions/query_interface.rs` | dynamic interface queries on AST nodes: replaces C# `is`/`as` casts to backend-generic interfaces |  |
 
-Tests, examples and build scripts (not scanned): `tests/emit_tests.rs`, `tests/helpers.rs`, `tests/mod.rs`, `tests/parser_tests.rs`, `tests/test_xaml_language.rs`, `tests/transformer_tests.rs`, `tests/type_system_tests.rs`, `tests/whitespace_tests.rs`.
+Tests, examples and build scripts (not scanned): `tests/ast_tests.rs`, `tests/emit_tests.rs`, `tests/helpers.rs`, `tests/mod.rs`, `tests/parser_tests.rs`, `tests/test_xaml_language.rs`, `tests/transformer_tests.rs`, `tests/type_system_tests.rs`, `tests/whitespace_tests.rs`.

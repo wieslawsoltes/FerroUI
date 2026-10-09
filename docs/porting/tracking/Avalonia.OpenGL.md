@@ -10,10 +10,10 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.OpenGL` (exists) |
 | Crate | `ferroui-opengl` |
 | Phase / priority | 2 - rendering backends / P2 |
-| Files | 12/39 (30.8%) |
-| Types | 16/63 (25.4%) |
-| Members | 226/639 (35.4%) |
-| Contracts (interfaces) | 6/18 |
+| Files | 39/39 (100.0%) |
+| Types | 61/63 (2 waived) (100.0%) |
+| Members | 601/639 (38 waived) (100.0%) |
+| Contracts (interfaces) | 18/18 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
@@ -23,20 +23,20 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 | Interface | Access | Upstream file | Members | Status |
 |---|---|---|---|---|
-| `Avalonia.OpenGL.Egl.EglGlPlatformSurface.IEglWindowGlPlatformSurfaceInfo` | public | `Egl/EglGlPlatformSurface.cs` | 0/3 | missing |
-| `Avalonia.OpenGL.Egl.EglGlPlatformSurface.IEglWindowGlPlatformSurfaceInfoWithWaitPolicy` | public | `Egl/EglGlPlatformSurface.cs` | 0/1 | missing |
-| `Avalonia.OpenGL.ICompositionGlContext` | public | `Composition/ICompositionGlContext.cs` | 0/4 | missing |
-| `Avalonia.OpenGL.ICompositionGlTexture` | public | `Composition/ICompositionGlTexture.cs` | 0/3 | missing |
-| `Avalonia.OpenGL.ICompositionGlTextureLease` | public | `Composition/ICompositionGlTexture.cs` | 0/2 | missing |
-| `Avalonia.OpenGL.ICompositionImportableOpenGlSharedTexture` | public | `IOpenGlTextureSharingRenderInterfaceContextFeature.cs` | 0/3 | missing |
+| `Avalonia.OpenGL.Egl.EglGlPlatformSurface.IEglWindowGlPlatformSurfaceInfo` | public | `Egl/EglGlPlatformSurface.cs` | 3/3 | present |
+| `Avalonia.OpenGL.Egl.EglGlPlatformSurface.IEglWindowGlPlatformSurfaceInfoWithWaitPolicy` | public | `Egl/EglGlPlatformSurface.cs` | 1/1 | present |
+| `Avalonia.OpenGL.ICompositionGlContext` | public | `Composition/ICompositionGlContext.cs` | 4/4 | present |
+| `Avalonia.OpenGL.ICompositionGlTexture` | public | `Composition/ICompositionGlTexture.cs` | 3/3 | present |
+| `Avalonia.OpenGL.ICompositionGlTextureLease` | public | `Composition/ICompositionGlTexture.cs` | 2/2 | present |
+| `Avalonia.OpenGL.ICompositionImportableOpenGlSharedTexture` | public | `IOpenGlTextureSharingRenderInterfaceContextFeature.cs` | 3/3 | present |
 | `Avalonia.OpenGL.IGlContext` | public | `IGlContext.cs` | 8/8 | present |
-| `Avalonia.OpenGL.IGlContextExternalObjectsFeature` | public | `IGlContextExternalObjectsFeature.cs` | 0/13 | missing |
-| `Avalonia.OpenGL.IGlExportableExternalImageTexture` | public | `IGlContextExternalObjectsFeature.cs` | 0/1 | missing |
-| `Avalonia.OpenGL.IGlExportableExternalSemaphore` | public | `IGlContextExternalObjectsFeature.cs` | 0/1 | missing |
-| `Avalonia.OpenGL.IGlExternalImageTexture` | public | `IGlContextExternalObjectsFeature.cs` | 0/6 | missing |
-| `Avalonia.OpenGL.IGlExternalSemaphore` | public | `IGlContextExternalObjectsFeature.cs` | 0/4 | missing |
+| `Avalonia.OpenGL.IGlContextExternalObjectsFeature` | public | `IGlContextExternalObjectsFeature.cs` | 13/13 | present |
+| `Avalonia.OpenGL.IGlExportableExternalImageTexture` | public | `IGlContextExternalObjectsFeature.cs` | 1/1 | present |
+| `Avalonia.OpenGL.IGlExportableExternalSemaphore` | public | `IGlContextExternalObjectsFeature.cs` | 1/1 | present |
+| `Avalonia.OpenGL.IGlExternalImageTexture` | public | `IGlContextExternalObjectsFeature.cs` | 6/6 | present |
+| `Avalonia.OpenGL.IGlExternalSemaphore` | public | `IGlContextExternalObjectsFeature.cs` | 4/4 | present |
 | `Avalonia.OpenGL.IGlPlatformSurfaceRenderTargetFactory` | public | `IGlContext.cs` | 2/2 | present |
-| `Avalonia.OpenGL.IOpenGlTextureSharingRenderInterfaceContextFeature` | public | `IOpenGlTextureSharingRenderInterfaceContextFeature.cs` | 0/3 | missing |
+| `Avalonia.OpenGL.IOpenGlTextureSharingRenderInterfaceContextFeature` | public | `IOpenGlTextureSharingRenderInterfaceContextFeature.cs` | 3/3 | present |
 | `Avalonia.OpenGL.IPlatformGraphicsOpenGlContextFactory` | public | `IPlatformGraphicsOpenGlContextFactory.cs` | 1/1 | present |
 | `Avalonia.OpenGL.Surfaces.IGlPlatformSurface` | public | `Surfaces/IGlPlatformSurface.cs` | 1/1 | present |
 | `Avalonia.OpenGL.Surfaces.IGlPlatformSurfaceRenderTarget` | public | `Surfaces/IGlPlatformSurfaceRenderTarget.cs` | 1/1 | present |
@@ -44,92 +44,66 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 9/11, types 13/20, members 220/258
+### `(project root)` - files 11/11, types 20/20, members 253/258 (5 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `GlBasicInfoInterface.cs` | `gl_basic_info_interface.rs` | present | 1/1 | 9/9 |  |
 | `GlConsts.cs` | `gl_consts.rs` | present | 1/1 | 84/84 |  |
-| `GlEntryPointAttribute.cs` | `gl_entry_point_attribute.rs` | partial | 2/2 | 2/6 |  |
+| `GlEntryPointAttribute.cs` | `gl_entry_point_attribute.rs` | present | 2/2 | 2/6 (4 waived) |  |
 | `GlErrors.cs` | `gl_errors.rs` | present | 1/1 | 9/9 |  |
 | `GlInterface.cs` | `gl_interface.rs` | present | 2/2 | 94/94 |  |
-| `GlVersion.cs` | `gl_version.rs` | partial | 2/2 | 7/8 |  |
+| `GlVersion.cs` | `gl_version.rs` | present | 2/2 | 7/8 (1 waived) |  |
 | `IGlContext.cs` | `i_gl_context.rs` | present | 2/2 | 10/10 |  |
-| `IGlContextExternalObjectsFeature.cs` | `i_gl_context_external_objects_feature.rs` | missing | 0/5 | 0/25 |  |
-| `IOpenGlTextureSharingRenderInterfaceContextFeature.cs` | `i_open_gl_texture_sharing_render_interface_context_feature.rs` | missing | 0/2 | 0/6 |  |
+| `IGlContextExternalObjectsFeature.cs` | `i_gl_context_external_objects_feature.rs` | present | 5/5 | 25/25 |  |
+| `IOpenGlTextureSharingRenderInterfaceContextFeature.cs` | `i_open_gl_texture_sharing_render_interface_context_feature.rs` | present | 2/2 | 6/6 |  |
 | `IPlatformGraphicsOpenGlContextFactory.cs` | `i_platform_graphics_open_gl_context_factory.rs` | present | 1/1 | 1/1 |  |
-| `OpenGlException.cs` | `open_gl_exception.rs` | partial | 1/1 | 4/6 |  |
+| `OpenGlException.cs` | `open_gl_exception.rs` | present | 1/1 | 6/6 |  |
 
-<details><summary><code>GlEntryPointAttribute.cs</code> - 4 missing</summary>
-
-- `GlMinVersionEntryPoint` (class): 2 missing
-  - `GlMinVersionEntryPoint(string entry, int minVersionMajor, int minVersionMinor)`
-  - `GlMinVersionEntryPoint(string entry, int minVersionMajor, int minVersionMinor, GlProfileType profile)`
-- `GlExtensionEntryPoint` (class): 2 missing
-  - `GlExtensionEntryPoint(string entry, string extension)`
-  - `GlExtensionEntryPoint(string entry, string extension, GlProfileType profile)`
-
-</details>
-
-<details><summary><code>GlVersion.cs</code> - 1 missing</summary>
-
-- `GlVersion` (record struct): 1 missing
-  - `GlVersion(GlProfileType type, int major, int minor, bool isCompatibilityProfile)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>OpenGlException.cs</code> - 2 missing</summary>
-
-- `OpenGlException` (class): 2 missing
-  - `static OpenGlException GetFormattedException(string funcName, int errorCode)` *(2 of 3 overloads found)*
-  - `static OpenGlException GetFormattedEglException(string funcName, int errorCode)`
-
-</details>
-
-### `Composition` - files 0/6, types 0/10, members 0/53
+### `Composition` - files 6/6, types 8/10 (2 waived), members 38/53 (15 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `CompositionGlContext.cs` | `composition/composition_gl_context.rs` | missing | 0/1 | 0/7 |  |
-| `CompositionGlContextOptions.cs` | `composition/composition_gl_context_options.rs` | missing | 0/1 | 0/1 |  |
-| `CompositionGlTexture.cs` | `composition/composition_gl_texture.rs` | missing | 0/3 | 0/30 |  |
-| `ICompositionGlContext.cs` | `composition/i_composition_gl_context.rs` | missing | 0/1 | 0/4 |  |
-| `ICompositionGlTexture.cs` | `composition/i_composition_gl_texture.rs` | missing | 0/3 | 0/10 |  |
-| `OpenGlCompositionInterop.cs` | `composition/open_gl_composition_interop.rs` | missing | 0/1 | 0/1 |  |
+| `CompositionGlContext.cs` | `composition/composition_gl_context.rs` | present | 1/1 | 7/7 |  |
+| `CompositionGlContextOptions.cs` | `composition/composition_gl_context_options.rs` | present | 1/1 | 1/1 |  |
+| `CompositionGlTexture.cs` | `composition/composition_gl_texture.rs` | present | 1/3 (2 waived) | 15/30 (15 waived) |  |
+| `ICompositionGlContext.cs` | `composition/i_composition_gl_context.rs` | present | 1/1 | 4/4 |  |
+| `ICompositionGlTexture.cs` | `composition/i_composition_gl_texture.rs` | present | 3/3 | 10/10 |  |
+| `OpenGlCompositionInterop.cs` | `composition/open_gl_composition_interop.rs` | present | 1/1 | 1/1 |  |
 
-### `Controls` - files 0/3, types 0/5, members 0/26
-
-| Upstream file | Rust file | Status | Types | Members | Notes |
-|---|---|---|---|---|---|
-| `CompositionOpenGlSwapchain.cs` | `controls/composition_open_gl_swapchain.rs` | missing | 0/3 | 0/8 |  |
-| `OpenGlControlBase.cs` | `controls/open_gl_control_base.rs` | missing | 0/1 | 0/11 |  |
-| `OpenGlControlResources.cs` | `controls/open_gl_control_resources.rs` | missing | 0/1 | 0/7 |  |
-
-### `Egl` - files 0/15, types 0/23, members 0/271
+### `Controls` - files 3/3, types 5/5, members 25/26 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `EglConsts.cs` | `egl/egl_consts.rs` | missing | 0/1 | 0/97 |  |
-| `EglContext.cs` | `egl/egl_context.rs` | missing | 0/1 | 0/21 |  |
-| `EglDisplay.cs` | `egl/egl_display.rs` | missing | 0/1 | 0/20 |  |
-| `EglDisplayOptions.cs` | `egl/egl_display_options.rs` | missing | 0/4 | 0/16 |  |
-| `EglDisplayUtils.cs` | `egl/egl_display_utils.rs` | missing | 0/2 | 0/10 |  |
-| `EglErrors.cs` | `egl/egl_errors.rs` | missing | 0/1 | 0/15 |  |
-| `EglExternalObjectsFeature.Drm.cs` | `egl/egl_external_objects_feature_drm.rs` | missing | 0/1 | 0/1 |  |
-| `EglExternalObjectsFeature.cs` | `egl/egl_external_objects_feature.rs` | missing | 0/1 | 0/13 |  |
-| `EglGlPlatformImageSurfaceBase.cs` | `egl/egl_gl_platform_image_surface_base.rs` | missing | 0/2 | 0/9 |  |
-| `EglGlPlatformSurface.cs` | `egl/egl_gl_platform_surface.rs` | missing | 0/3 | 0/6 |  |
-| `EglGlPlatformSurfaceBase.cs` | `egl/egl_gl_platform_surface_base.rs` | missing | 0/2 | 0/10 |  |
-| `EglImage.cs` | `egl/egl_image.rs` | missing | 0/1 | 0/3 |  |
-| `EglInterface.cs` | `egl/egl_interface.rs` | missing | 0/1 | 0/39 |  |
-| `EglPlatformGraphics.cs` | `egl/egl_platform_graphics.rs` | missing | 0/1 | 0/7 |  |
-| `EglSurface.cs` | `egl/egl_surface.rs` | missing | 0/1 | 0/4 |  |
+| `CompositionOpenGlSwapchain.cs` | `controls/composition_open_gl_swapchain.rs` | present | 3/3 | 7/8 (1 waived) |  |
+| `OpenGlControlBase.cs` | `controls/open_gl_control_base.rs` | present | 1/1 | 11/11 |  |
+| `OpenGlControlResources.cs` | `controls/open_gl_control_resources.rs` | present | 1/1 | 7/7 |  |
 
-### `Features` - files 0/1, types 0/2, members 0/25
+### `Egl` - files 15/15, types 23/23, members 255/271 (16 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ExternalObjectsOpenGlExtensionFeature.cs` | `features/external_objects_open_gl_extension_feature.rs` | missing | 0/2 | 0/25 |  |
+| `EglConsts.cs` | `egl/egl_consts.rs` | present | 1/1 | 97/97 |  |
+| `EglContext.cs` | `egl/egl_context.rs` | present | 1/1 | 21/21 |  |
+| `EglDisplay.cs` | `egl/egl_display.rs` | present | 1/1 | 16/20 (4 waived) |  |
+| `EglDisplayOptions.cs` | `egl/egl_display_options.rs` | present | 4/4 | 16/16 |  |
+| `EglDisplayUtils.cs` | `egl/egl_display_utils.rs` | present | 2/2 | 10/10 |  |
+| `EglErrors.cs` | `egl/egl_errors.rs` | present | 1/1 | 15/15 |  |
+| `EglExternalObjectsFeature.Drm.cs` | `egl/egl_external_objects_feature_drm.rs` | present | 1/1 | 1/1 |  |
+| `EglExternalObjectsFeature.cs` | `egl/egl_external_objects_feature.rs` | present | 1/1 | 13/13 |  |
+| `EglGlPlatformImageSurfaceBase.cs` | `egl/egl_gl_platform_image_surface_base.rs` | present | 2/2 | 5/9 (4 waived) |  |
+| `EglGlPlatformSurface.cs` | `egl/egl_gl_platform_surface.rs` | present | 3/3 | 6/6 |  |
+| `EglGlPlatformSurfaceBase.cs` | `egl/egl_gl_platform_surface_base.rs` | present | 2/2 | 5/10 (5 waived) |  |
+| `EglImage.cs` | `egl/egl_image.rs` | present | 1/1 | 3/3 |  |
+| `EglInterface.cs` | `egl/egl_interface.rs` | present | 1/1 | 37/39 (2 waived) |  |
+| `EglPlatformGraphics.cs` | `egl/egl_platform_graphics.rs` | present | 1/1 | 6/7 (1 waived) |  |
+| `EglSurface.cs` | `egl/egl_surface.rs` | present | 1/1 | 4/4 |  |
+
+### `Features` - files 1/1, types 2/2, members 24/25 (1 waived)
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `ExternalObjectsOpenGlExtensionFeature.cs` | `features/external_objects_open_gl_extension_feature.rs` | present | 2/2 | 24/25 (1 waived) |  |
 
 ### `Surfaces` - files 3/3, types 3/3, members 6/6
 
@@ -145,5 +119,8 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
+| `composition/task_support.rs` | what the asynchronous members of the composition interop are built from: `async` methods over `Task` upstream | `ServerJobTaskFuture` |
 | `entry_points.rs` | the entry point table macro: takes the place of the upstream source generator for GetProcAddress attributes | `GetProcAddress` |
+| `register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |  |
+| `rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |  |
 | `testing.rs` | scripted OpenGL implementation of the unit tests | `FakeGl`, `State` |

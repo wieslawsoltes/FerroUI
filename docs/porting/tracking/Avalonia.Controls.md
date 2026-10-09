@@ -10,11 +10,11 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.Controls` (exists) |
 | Crate | `ferroui-controls` |
 | Phase / priority | 1 - controls / P0 |
-| Files | 532/538 (98.9%), 1 not applicable |
-| Types | 606/628 (96.5%) |
-| Members | 6158/6405 (1 waived) (96.2%) |
-| Contracts (interfaces) | 81/83 |
-| Property registrations | 936/938 |
+| Files | 534/538 (99.3%), 1 not applicable |
+| Types | 616/628 (7 waived) (99.2%) |
+| Members | 6199/6405 (189 waived) (99.7%) |
+| Contracts (interfaces) | 83/83 |
+| Property registrations | 938/938 |
 | Routed events | 67/67 |
 
 ## Contracts
@@ -43,7 +43,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Controls.ApplicationLifetimes.ISingleViewApplicationLifetime` | public | `ApplicationLifetimes/ISingleViewApplicationLifetime.cs` | 1/1 | present |
 | `Avalonia.Controls.Chrome.IWindowDrawnDecorationsTemplate` | public | `Chrome/IWindowDrawnDecorationsTemplate.cs` | 1/1 | present |
 | `Avalonia.Controls.Diagnostics.IPopupHostProvider` | internal | `Diagnostics/IPopupHostProvider.cs` | 2/2 | present |
-| `Avalonia.Controls.Documents.IInlineHost` | internal | `Documents/IInlineHost.cs` | 1/2 | partial |
+| `Avalonia.Controls.Documents.IInlineHost` | internal | `Documents/IInlineHost.cs` | 1/2 (1 waived) | present |
 | `Avalonia.Controls.ICommandBarElement` | public | `CommandBar/ICommandBarElement.cs` | 2/2 | present |
 | `Avalonia.Controls.IContentControl` | internal | `IContentControl.cs` | 4/4 | present |
 | `Avalonia.Controls.IGlobalDataTemplates` | public | `IGlobalDataTemplates.cs` | 0/0 | present |
@@ -58,7 +58,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Controls.IRadioButton` | internal | `RadioButtonGroupManager.cs` | 3/3 | present |
 | `Avalonia.Controls.IScrollAnchorProvider` | public | `IScrollAnchorProvider.cs` | 3/3 | present |
 | `Avalonia.Controls.ISelectable` | public | `ISelectable.cs` | 1/1 | present |
-| `Avalonia.Controls.ITemplate<TControl>` | public | `Templates/ITemplate`1.cs` | 0/1 | missing |
+| `Avalonia.Controls.ITemplate<TControl>` | public | `Templates/ITemplate`1.cs` | 1/1 | present |
 | `Avalonia.Controls.IToolTipService` | internal | `IToolTipService.cs` | 1/1 | present |
 | `Avalonia.Controls.Notifications.IManagedNotificationManager` | public | `Notifications/IManagedNotificationManager.cs` | 2/2 | present |
 | `Avalonia.Controls.Notifications.INotification` | public | `Notifications/INotification.cs` | 6/6 | present |
@@ -78,7 +78,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Controls.Platform.IWin32OptionsTopLevelImpl` | public | `Platform/IWin32OptionsTopLevelImpl.cs` | 3/3 | present |
 | `Avalonia.Controls.Platform.IX11OptionsToplevelImplFeature` | public | `Platform/IX11OptionsToplevelImplFeature.cs` | 2/2 | present |
 | `Avalonia.Controls.Presenters.IContentPresenterHost` | internal | `Presenters/IContentPresenterHost.cs` | 2/2 | present |
-| `Avalonia.Controls.Primitives.ILogicalScrollable` | public | `Primitives/ILogicalScrollable.cs` | 7/9 | partial |
+| `Avalonia.Controls.Primitives.ILogicalScrollable` | public | `Primitives/ILogicalScrollable.cs` | 7/9 (2 waived) | present |
 | `Avalonia.Controls.Primitives.IPopupHost` | internal | `Primitives/IPopupHost.cs` | 17/17 | present |
 | `Avalonia.Controls.Primitives.IScrollSnapPointsInfo` | public | `Primitives/IScrollSnapPointsInfo.cs` | 6/6 | present |
 | `Avalonia.Controls.Primitives.PopupPositioning.IManagedPopupPositionerPopup` | public | `Primitives/PopupPositioning/ManagedPopupPositioner.cs` | 4/4 | present |
@@ -88,7 +88,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Controls.Templates.IDataTemplate` | public | `Templates/IDataTemplate.cs` | 1/1 | present |
 | `Avalonia.Controls.Templates.IDataTemplateHost` | public | `Templates/IDataTemplateHost.cs` | 2/2 | present |
 | `Avalonia.Controls.Templates.IRecyclingDataTemplate` | public | `Templates/IRecyclingDataTemplate.cs` | 1/1 | present |
-| `Avalonia.Controls.Templates.ITemplate<TParam, TControl>` | public | `Templates/ITemplate`2.cs` | 0/1 | missing |
+| `Avalonia.Controls.Templates.ITemplate<TParam, TControl>` | public | `Templates/ITemplate`2.cs` | 1/1 | present |
 | `Avalonia.Controls.Templates.ITreeDataTemplate` | public | `Templates/ITreeDataTemplate.cs` | 1/1 | present |
 | `Avalonia.Controls.Templates.ITypedDataTemplate` | public | `Templates/ITypedDataTemplate.cs` | 1/1 | present |
 | `Avalonia.Controls.Utils.ICollectionChangedListener` | internal | `Utils/CollectionChangedEventManager.cs` | 3/3 | present |
@@ -109,43 +109,43 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 146/147, types 171/178, members 2195/2293
+### `(project root)` - files 147/147, types 175/178 (3 waived), members 2212/2293 (81 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AcrylicPlatformCompensationLevels.cs` | `acrylic_platform_compensation_levels.rs` | present | 1/1 | 4/4 |  |
-| `AppBuilder.cs` | `app_builder.rs` | partial | 1/2 | 30/32 |  |
-| `Application.cs` | `application.rs` | partial | 1/1 | 30/35 |  |
+| `AppBuilder.cs` | `app_builder.rs` | present | 1/2 (1 waived) | 30/32 (2 waived) |  |
+| `Application.cs` | `application.rs` | present | 1/1 | 30/35 (5 waived) |  |
 | `Border.cs` | `border.rs` | present | 1/1 | 19/19 |  |
-| `BorderVisual.cs` | `border_visual.rs` | partial | 1/1 | 2/3 |  |
-| `Button.cs` | `button.rs` | partial | 2/2 | 45/46 |  |
+| `BorderVisual.cs` | `border_visual.rs` | present | 1/1 | 2/3 (1 waived) |  |
+| `Button.cs` | `button.rs` | present | 2/2 | 45/46 (1 waived) |  |
 | `ButtonSpinner.cs` | `button_spinner.rs` | present | 2/2 | 17/17 |  |
 | `Canvas.cs` | `canvas.rs` | present | 1/1 | 17/17 |  |
 | `Carousel.cs` | `carousel.rs` | present | 1/1 | 17/17 |  |
 | `CheckBox.cs` | `check_box.rs` | present | 1/1 | 1/1 |  |
-| `ColumnDefinition.cs` | `column_definition.rs` | partial | 1/1 | 12/14 |  |
+| `ColumnDefinition.cs` | `column_definition.rs` | present | 1/1 | 12/14 (2 waived) |  |
 | `ColumnDefinitions.cs` | `column_definitions.rs` | present | 1/1 | 4/4 |  |
 | `ComboBox.cs` | `combo_box.rs` | present | 1/1 | 41/41 |  |
 | `ComboBoxItem.cs` | `combo_box_item.rs` | present | 1/1 | 2/2 |  |
 | `ContainerClearingEventArgs.cs` | `container_clearing_event_args.rs` | present | 1/1 | 2/2 |  |
 | `ContainerIndexChangedEventArgs.cs` | `container_index_changed_event_args.rs` | present | 1/1 | 4/4 |  |
 | `ContainerPreparedEventArgs.cs` | `container_prepared_event_args.rs` | present | 1/1 | 3/3 |  |
-| `ContentControl.cs` | `content_control.rs` | partial | 1/1 | 15/16 |  |
-| `ContextMenu.cs` | `context_menu.rs` | partial | 1/1 | 31/32 |  |
+| `ContentControl.cs` | `content_control.rs` | present | 1/1 | 16/16 |  |
+| `ContextMenu.cs` | `context_menu.rs` | present | 1/1 | 31/32 (1 waived) |  |
 | `Control.cs` | `control.rs` | present | 1/1 | 39/39 |  |
-| `ControlExtensions.cs` | `control_extensions.rs` | partial | 0/1 | 0/5 |  |
-| `Controls.cs` | `controls.rs` | partial | 1/1 | 2/3 |  |
+| `ControlExtensions.cs` | `control_extensions.rs` | present | 1/1 | 5/5 | renamed: an extension class: its methods are inherent methods of the type they extend (`impl Control`) |
+| `Controls.cs` | `controls.rs` | present | 1/1 | 2/3 (1 waived) |  |
 | `DataValidationErrors.cs` | `data_validation_errors.rs` | present | 1/1 | 15/15 |  |
 | `Decorator.cs` | `decorator.rs` | present | 1/1 | 7/7 |  |
 | `DefinitionBase.cs` | `definition_base.rs` | present | 3/3 | 39/39 |  |
-| `DefinitionList.cs` | `definition_list.rs` | partial | 1/1 | 3/4 |  |
-| `Design.cs` | `design.rs` | partial | 1/1 | 27/30 |  |
-| `DesktopApplicationExtensions.cs` | `desktop_application_extensions.rs` | partial | 0/1 | 0/4 |  |
+| `DefinitionList.cs` | `definition_list.rs` | present | 1/1 | 3/4 (1 waived) |  |
+| `Design.cs` | `design.rs` | present | 1/1 | 27/30 (3 waived) |  |
+| `DesktopApplicationExtensions.cs` | `desktop_application_extensions.rs` | present | 1/1 | 4/4 | renamed: an extension class: its methods are inherent methods of the type they extend (`impl Application`) |
 | `DockPanel.cs` | `dock_panel.rs` | present | 2/2 | 16/16 |  |
 | `DropDownButton.cs` | `drop_down_button.rs` | present | 1/1 | 1/1 |  |
 | `Expander.cs` | `expander.rs` | present | 2/2 | 26/26 |  |
 | `ExperimentalAcrylicBorder.cs` | `experimental_acrylic_border.rs` | present | 1/1 | 11/11 |  |
-| `Grid.cs` | `grid.rs` | partial | 3/3 | 39/42 |  |
+| `Grid.cs` | `grid.rs` | present | 3/3 | 39/42 (3 waived) |  |
 | `GridLength.cs` | `grid_length.rs` | present | 2/2 | 20/20 |  |
 | `GridSplitter.cs` | `grid_splitter.rs` | present | 3/3 | 28/28 |  |
 | `GroupBox.cs` | `group_box.rs` | present | 1/1 | 0/0 |  |
@@ -166,58 +166,58 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Image.cs` | `image.rs` | present | 1/1 | 17/17 |  |
 | `InputPaneAwareBehavior.cs` | `input_pane_aware_behavior.rs` | present | 1/1 | 3/3 |  |
 | `InputPaneAwareDecorator.cs` | `input_pane_aware_decorator.rs` | present | 1/1 | 8/8 |  |
-| `ItemCollection.cs` | `item_collection.rs` | partial | 1/1 | 13/14 |  |
-| `ItemsControl.cs` | `items_control.rs` | partial | 1/1 | 56/58 |  |
-| `ItemsSourceView.cs` | `items_source_view.rs` | partial | 2/2 | 29/43 |  |
+| `ItemCollection.cs` | `item_collection.rs` | present | 1/1 | 13/14 (1 waived) |  |
+| `ItemsControl.cs` | `items_control.rs` | present | 1/1 | 56/58 (2 waived) |  |
+| `ItemsSourceView.cs` | `items_source_view.rs` | present | 2/2 | 29/43 (14 waived) |  |
 | `Label.cs` | `label.rs` | present | 1/1 | 7/7 |  |
 | `LayoutTransformControl.cs` | `layout_transform_control.rs` | present | 1/1 | 10/10 |  |
-| `ListBox.cs` | `list_box.rs` | partial | 1/1 | 13/16 |  |
+| `ListBox.cs` | `list_box.rs` | present | 1/1 | 13/16 (3 waived) |  |
 | `ListBoxItem.cs` | `list_box_item.rs` | present | 1/1 | 8/8 |  |
-| `LoggingExtensions.cs` | `logging_extensions.rs` | partial | 0/1 | 0/3 |  |
-| `MaskedTextBox.cs` | `masked_text_box.rs` | partial | 1/1 | 28/29 |  |
-| `Menu.cs` | `menu.rs` | partial | 1/1 | 7/8 |  |
-| `MenuBase.cs` | `menu_base.rs` | partial | 1/1 | 18/23 |  |
-| `MenuItem.cs` | `menu_item.rs` | partial | 1/1 | 58/65 |  |
-| `MenuItemAccessKeyHandler.cs` | `menu_item_access_key_handler.rs` | partial | 1/1 | 1/2 |  |
+| `LoggingExtensions.cs` | `logging_extensions.rs` | present | 1/1 | 3/3 | renamed: an extension class: its methods are inherent methods of the type they extend (`impl AppBuilder`) |
+| `MaskedTextBox.cs` | `masked_text_box.rs` | present | 1/1 | 28/29 (1 waived) |  |
+| `Menu.cs` | `menu.rs` | present | 1/1 | 7/8 (1 waived) |  |
+| `MenuBase.cs` | `menu_base.rs` | present | 1/1 | 18/23 (5 waived) |  |
+| `MenuItem.cs` | `menu_item.rs` | present | 1/1 | 58/65 (7 waived) |  |
+| `MenuItemAccessKeyHandler.cs` | `menu_item_access_key_handler.rs` | present | 1/1 | 2/2 |  |
 | `MenuItemToggleType.cs` | `menu_item_toggle_type.rs` | present | 1/1 | 3/3 |  |
 | `NativeControlHost.cs` | `native_control_host.rs` | present | 1/1 | 9/9 |  |
 | `NativeDock.cs` | `native_dock.rs` | present | 1/1 | 3/3 |  |
 | `NativeMenu.Export.cs` | `native_menu_export.rs` | present | 1/1 | 6/6 |  |
-| `NativeMenu.cs` | `native_menu.rs` | partial | 1/1 | 11/14 |  |
+| `NativeMenu.cs` | `native_menu.rs` | present | 1/1 | 11/14 (3 waived) |  |
 | `NativeMenuBar.cs` | `native_menu_bar.rs` | present | 1/1 | 5/5 |  |
 | `NativeMenuBarPresenter.cs` | `native_menu_bar_presenter.rs` | present | 1/1 | 3/3 |  |
-| `NativeMenuItem.cs` | `native_menu_item.rs` | partial | 1/1 | 28/29 |  |
+| `NativeMenuItem.cs` | `native_menu_item.rs` | present | 1/1 | 28/29 (1 waived) |  |
 | `NativeMenuItemBase.cs` | `native_menu_item_base.rs` | present | 1/1 | 3/3 |  |
 | `NativeMenuItemSeparator.cs` | `native_menu_item_separator.rs` | present | 1/1 | 1/1 |  |
-| `Panel.cs` | `panel.rs` | partial | 1/1 | 12/14 |  |
+| `Panel.cs` | `panel.rs` | present | 1/1 | 12/14 (2 waived) |  |
 | `PastingFromClipboardEventArgs.cs` | `pasting_from_clipboard_event_args.rs` | present | 1/1 | 2/2 |  |
 | `PathIcon.cs` | `path_icon.rs` | present | 1/1 | 3/3 |  |
 | `PixelPointEventArgs.cs` | `pixel_point_event_args.rs` | present | 1/1 | 2/2 |  |
 | `PlacementMode.cs` | `placement_mode.rs` | present | 1/1 | 16/16 |  |
 | `PlatformInhibitionType.cs` | `platform_inhibition_type.rs` | present | 1/1 | 1/1 |  |
 | `ProgressBar.cs` | `progress_bar.rs` | present | 2/2 | 33/33 |  |
-| `RadioButton.cs` | `radio_button.rs` | partial | 1/1 | 7/9 |  |
+| `RadioButton.cs` | `radio_button.rs` | present | 1/1 | 7/9 (2 waived) |  |
 | `RadioButtonGroupManager.cs` | `radio_button_group_manager.rs` | present | 2/2 | 7/7 |  |
 | `RelativePanel.AttachedProperties.cs` | `relative_panel.rs` | present | 1/1 | 49/49 | partial merged into main file |
-| `RelativePanel.cs` | `relative_panel.rs` | partial | 1/2 | 3/5 |  |
+| `RelativePanel.cs` | `relative_panel.rs` | present | 1/2 (1 waived) | 3/5 (2 waived) |  |
 | `RepeatButton.cs` | `repeat_button.rs` | present | 1/1 | 9/9 |  |
 | `RequestBringIntoViewEventArgs.cs` | `request_bring_into_view_event_args.rs` | present | 1/1 | 2/2 |  |
-| `ResolveByNameAttribute.cs` | `resolve_by_name_attribute.rs` | missing | 0/1 | 0/0 |  |
-| `RowDefinition.cs` | `row_definition.rs` | partial | 1/1 | 12/14 |  |
+| `ResolveByNameAttribute.cs` | `markup_types/classes.rs` | present | 0/1 (1 waived) | 0/0 | replaced: an attribute read by the markup compiler: a property states it in the `property_attributes` of its markup metadata (`metadata::attributes::RESOLVE_BY_NAME`) |
+| `RowDefinition.cs` | `row_definition.rs` | present | 1/1 | 12/14 (2 waived) |  |
 | `RowDefinitions.cs` | `row_definitions.rs` | present | 1/1 | 4/4 |  |
 | `Screens.cs` | `screens.rs` | present | 1/1 | 11/11 |  |
-| `ScrollChangedEventArgs.cs` | `scroll_changed_event_args.rs` | partial | 1/1 | 4/5 |  |
+| `ScrollChangedEventArgs.cs` | `scroll_changed_event_args.rs` | present | 1/1 | 4/5 (1 waived) |  |
 | `ScrollViewer.cs` | `scroll_viewer.rs` | present | 1/1 | 89/89 |  |
 | `SelectableTextBlock.cs` | `selectable_text_block.rs` | present | 1/1 | 27/27 |  |
 | `SelectionChangedEventArgs.cs` | `selection_changed_event_args.rs` | present | 1/1 | 3/3 |  |
 | `SelectionMode.cs` | `selection_mode.rs` | present | 1/1 | 4/4 |  |
 | `Separator.cs` | `separator.rs` | present | 1/1 | 0/0 |  |
 | `ShutdownMode.cs` | `shutdown_mode.rs` | present | 1/1 | 3/3 |  |
-| `SizeChangedEventArgs.cs` | `size_changed_event_args.rs` | partial | 1/1 | 6/7 |  |
+| `SizeChangedEventArgs.cs` | `size_changed_event_args.rs` | present | 1/1 | 6/7 (1 waived) |  |
 | `Slider.cs` | `slider.rs` | present | 2/2 | 26/26 |  |
-| `Spinner.cs` | `spinner.rs` | partial | 4/4 | 15/18 |  |
+| `Spinner.cs` | `spinner.rs` | present | 4/4 | 15/18 (3 waived) |  |
 | `StackPanel.cs` | `stack_panel.rs` | present | 1/1 | 20/20 |  |
-| `SystemFontAppBuilderExtension.cs` | `system_font_app_builder_extension.rs` | partial | 0/1 | 0/1 |  |
+| `SystemFontAppBuilderExtension.cs` | `system_font_app_builder_extension.rs` | present | 1/1 | 1/1 | renamed: an extension class: its methods are inherent methods of the type they extend (`impl AppBuilder`) |
 | `TabControl.cs` | `tab_control.rs` | present | 1/1 | 33/33 |  |
 | `TabItem.cs` | `tab_item.rs` | present | 1/1 | 18/18 |  |
 | `TableView.cs` | `table_view.rs` | present | 1/1 | 18/18 |  |
@@ -225,17 +225,17 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TableViewColumn.cs` | `table_view_column.rs` | present | 1/1 | 29/29 |  |
 | `TableViewColumnHeader.cs` | `table_view_column_header.rs` | present | 1/1 | 5/5 |  |
 | `TableViewRow.cs` | `table_view_row.rs` | present | 1/1 | 6/6 |  |
-| `TextBlock.cs` | `text_block.rs` | partial | 3/3 | 79/82 |  |
-| `TextBox.cs` | `text_box.rs` | partial | 1/1 | 124/127 |  |
+| `TextBlock.cs` | `text_block.rs` | present | 3/3 | 80/82 (2 waived) |  |
+| `TextBox.cs` | `text_box.rs` | present | 1/1 | 124/127 (3 waived) |  |
 | `TextBoxTextInputMethodClient.cs` | `text_box_text_input_method_client.rs` | present | 1/1 | 11/11 |  |
-| `TextChangedEventArgs.cs` | `text_changed_event_args.rs` | partial | 1/1 | 1/2 |  |
-| `TextChangingEventArgs.cs` | `text_changing_event_args.rs` | partial | 1/1 | 1/2 |  |
+| `TextChangedEventArgs.cs` | `text_changed_event_args.rs` | present | 1/1 | 1/2 (1 waived) |  |
+| `TextChangingEventArgs.cs` | `text_changing_event_args.rs` | present | 1/1 | 1/2 (1 waived) |  |
 | `ThemeVariantScope.cs` | `theme_variant_scope.rs` | present | 1/1 | 3/3 |  |
 | `TickBar.cs` | `tick_bar.rs` | present | 2/2 | 24/24 |  |
 | `ToggleSwitch.cs` | `toggle_switch.rs` | present | 1/1 | 16/16 |  |
 | `ToolTip.cs` | `tool_tip.rs` | present | 1/1 | 47/47 |  |
 | `ToolTipService.cs` | `tool_tip_service.rs` | present | 1/1 | 3/3 |  |
-| `TopLevel.cs` | `top_level.rs` | partial | 1/1 | 69/70 |  |
+| `TopLevel.cs` | `top_level.rs` | present | 1/1 | 69/70 (1 waived) |  |
 | `TopLevelHost.Decorations.cs` | `top_level_host_decorations.rs` | present | 1/1 | 3/3 |  |
 | `TopLevelHost.Peers.cs` | `top_level_host_peers.rs` | present | 1/1 | 2/2 |  |
 | `TopLevelHost.cs` | `top_level_host.rs` | present | 1/1 | 6/6 |  |
@@ -247,11 +247,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `UrlOpenedEventArgs.cs` | `url_opened_event_args.rs` | present | 1/1 | 2/2 |  |
 | `UserControl.cs` | `user_control.rs` | present | 1/1 | 1/1 |  |
 | `Viewbox.cs` | `viewbox.rs` | present | 1/1 | 12/12 |  |
-| `VirtualizingCarouselPanel.cs` | `virtualizing_carousel_panel.rs` | partial | 1/1 | 28/29 |  |
+| `VirtualizingCarouselPanel.cs` | `virtualizing_carousel_panel.rs` | present | 1/1 | 29/29 |  |
 | `VirtualizingPanel.cs` | `virtualizing_panel.rs` | present | 1/1 | 19/19 |  |
 | `VirtualizingStackPanel.cs` | `virtualizing_stack_panel.rs` | present | 1/1 | 32/32 |  |
-| `Window.cs` | `window.rs` | partial | 4/4 | 80/81 |  |
-| `WindowBase.cs` | `window_base.rs` | partial | 1/1 | 32/33 |  |
+| `Window.cs` | `window.rs` | present | 4/4 | 80/81 (1 waived) |  |
+| `WindowBase.cs` | `window_base.rs` | present | 1/1 | 32/33 (1 waived) |  |
 | `WindowClosingEventArgs.cs` | `window_closing_event_args.rs` | present | 2/2 | 8/8 |  |
 | `WindowEdge.cs` | `window_edge.rs` | present | 1/1 | 8/8 |  |
 | `WindowIcon.cs` | `window_icon.rs` | present | 1/1 | 5/5 |  |
@@ -261,338 +261,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `WindowTransparencyLevel.cs` | `window_transparency_level.rs` | present | 2/2 | 7/7 |  |
 | `WrapPanel.cs` | `wrap_panel.rs` | present | 2/2 | 22/22 |  |
 
-<details><summary><code>AppBuilder.cs</code> - 3 missing</summary>
-
-- `AppBuilder` (class): 2 missing
-  - `static AppBuilder Configure([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods \| Dyna...` *(internal; 2 of 3 overloads found)*
-  - `AppBuilder WithDataAnnotationsValidation()`
-- `AppBuilder.AppMainDelegate` (delegate, public): **type missing** (0 members)
-
-</details>
-
-<details><summary><code>Application.cs</code> - 5 missing</summary>
-
-- `Application` (class): 5 missing
-  - `event Action<IReadOnlyList<IStyle>>? IGlobalStyles.GlobalStylesAdded` *(explicit)*
-  - `event Action<IReadOnlyList<IStyle>>? IGlobalStyles.GlobalStylesRemoved` *(explicit)*
-  - `void IResourceHost.NotifyHostedResourcesChanged(ResourcesChangedEventArgs e)` *(explicit)*
-  - `void IStyleHost.StylesAdded(IReadOnlyList<IStyle> styles)` *(explicit)*
-  - `void IStyleHost.StylesRemoved(IReadOnlyList<IStyle> styles)` *(explicit)*
-
-</details>
-
-<details><summary><code>BorderVisual.cs</code> - 1 missing</summary>
-
-- `CompositionBorderVisual` (class): 1 missing
-  - `override void SerializeChangesCore(BatchStreamWriter writer)` *(private protected)*
-
-</details>
-
-<details><summary><code>Button.cs</code> - 1 missing</summary>
-
-- `Button` (class): 1 missing
-  - `void IClickableControl.RaiseClick()` *(explicit)*
-
-</details>
-
-<details><summary><code>ColumnDefinition.cs</code> - 2 missing</summary>
-
-- `ColumnDefinition` (class): 2 missing
-  - `ColumnDefinition(double value, GridUnitType type)` *(1 of 3 constructors found)*
-  - `ColumnDefinition(GridLength width)` *(1 of 3 constructors found)*
-
-</details>
-
-<details><summary><code>ContentControl.cs</code> - 1 missing</summary>
-
-- `ContentControl` (class): 1 missing
-  - `override void BuildDebugDisplay(StringBuilder builder, bool includeContent)` *(internal)*
-
-</details>
-
-<details><summary><code>ContextMenu.cs</code> - 1 missing</summary>
-
-- `ContextMenu` (class): 1 missing
-  - `ContextMenu(IMenuInteractionHandler interactionHandler)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>ControlExtensions.cs</code> - 6 missing</summary>
-
-- `ControlExtensions` (class, public): **type missing** (5 members)
-
-</details>
-
-<details><summary><code>Controls.cs</code> - 1 missing</summary>
-
-- `Controls` (class): 1 missing
-  - `void IAvaloniaListItemValidator<Control>.Validate(Control item)` *(explicit)*
-
-</details>
-
-<details><summary><code>DefinitionList.cs</code> - 1 missing</summary>
-
-- `DefinitionList<T>` (class): 1 missing
-  - `void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)` *(internal)*
-
-</details>
-
-<details><summary><code>Design.cs</code> - 3 missing</summary>
-
-- `Design` (class): 3 missing
-  - `static void SetPreviewWith(IStyle target, ITemplate<Control>? template)` *(6 of 8 overloads found)*
-  - `static void SetPreviewWith(IStyle target, Control? control)` *(6 of 8 overloads found)*
-  - `static Control? GetPreviewWith(IStyle target)` *(3 of 4 overloads found)*
-
-</details>
-
-<details><summary><code>DesktopApplicationExtensions.cs</code> - 5 missing</summary>
-
-- `DesktopApplicationExtensions` (class, public): **type missing** (4 members)
-
-</details>
-
-<details><summary><code>Grid.cs</code> - 3 missing</summary>
-
-- `Grid` (class): 2 missing
-  - `bool MeasureOverrideInProgress { get; set; }` *(internal; getter `measure_override_in_progress` found, setter `set_measure_override_in_progress` missing)*
-  - `bool ArrangeOverrideInProgress { get; set; }` *(internal; getter `arrange_override_in_progress` found, setter `set_arrange_override_in_progress` missing)*
-- `Grid.GridLinesRenderer` (class): 1 missing
-  - `static GridLinesRenderer()` *(static)*
-
-</details>
-
-<details><summary><code>ItemCollection.cs</code> - 1 missing</summary>
-
-- `ItemCollection` (class): 1 missing
-  - `new object? this[int index] { get; set; }`
-
-</details>
-
-<details><summary><code>ItemsControl.cs</code> - 2 missing</summary>
-
-- `ItemsControl` (class): 2 missing
-  - `int IChildIndexProvider.GetChildIndex(ILogical child)` *(explicit)*
-  - `bool IChildIndexProvider.TryGetTotalCount(out int count)` *(explicit)*
-
-</details>
-
-<details><summary><code>ItemsSourceView.cs</code> - 14 missing</summary>
-
-- `ItemsSourceView` (class): 13 missing
-  - `bool IList.IsFixedSize { get; }` *(explicit)*
-  - `bool IList.IsReadOnly { get; }` *(explicit)*
-  - `bool ICollection.IsSynchronized { get; }` *(explicit)*
-  - `object ICollection.SyncRoot { get; }` *(explicit)*
-  - `bool HasKeyIndexMapping { get; }` *(internal)*
-  - `static ItemsSourceView<T> GetOrCreate<T>(IEnumerable<T>? items)` *(2 of 3 overloads found)*
-  - `int IList.Add(object? value)` *(explicit)*
-  - `void IList.Clear()` *(explicit)*
-  - `void IList.Insert(int index, object? value)` *(explicit)*
-  - `void IList.Remove(object? value)` *(explicit)*
-  - `void IList.RemoveAt(int index)` *(explicit)*
-  - `void ICollection.CopyTo(Array array, int index)` *(explicit)*
-  - `string KeyFromIndex(int index)` *(internal)*
-- `ItemsSourceView<T>` (class): 1 missing
-  - `ItemsSourceView(IEnumerable source)` *(internal; 1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>ListBox.cs</code> - 3 missing</summary>
-
-- `ListBox` (class): 3 missing
-  - `new IList? SelectedItems { get; set; }`
-  - `new ISelectionModel Selection { get; set; }`
-  - `new SelectionMode SelectionMode { get; set; }`
-
-</details>
-
-<details><summary><code>LoggingExtensions.cs</code> - 4 missing</summary>
-
-- `LoggingExtensions` (class, public): **type missing** (3 members)
-
-</details>
-
-<details><summary><code>MaskedTextBox.cs</code> - 1 missing</summary>
-
-- `MaskedTextBox` (class): 1 missing
-  - `MaskedTextBox(MaskedTextProvider maskedTextProvider)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>Menu.cs</code> - 1 missing</summary>
-
-- `Menu` (class): 1 missing
-  - `Menu(IMenuInteractionHandler interactionHandler)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>MenuBase.cs</code> - 5 missing</summary>
-
-- `MenuBase` (class): 5 missing
-  - `MenuBase(IMenuInteractionHandler interactionHandler)` *(protected; 1 of 2 constructors found)*
-  - `TopLevel? IMenu.TopLevel { get; }` *(explicit)*
-  - `IMenuItem? IMenuElement.SelectedItem { get; set; }` *(explicit)*
-  - `IEnumerable<IMenuItem> IMenuElement.SubItems { get; }` *(explicit)*
-  - `bool IMenuElement.MoveSelection(NavigationDirection direction, bool wrap)` *(explicit)*
-
-</details>
-
-<details><summary><code>MenuItem.cs</code> - 7 missing</summary>
-
-- `MenuItem` (class): 7 missing
-  - `bool IMenuItem.IsPointerOverSubMenu { get; }` *(explicit)*
-  - `IMenuElement? IMenuItem.Parent { get; }` *(explicit)*
-  - `bool IMenuElement.MoveSelection(NavigationDirection direction, bool wrap)` *(explicit)*
-  - `IMenuItem? IMenuElement.SelectedItem { get; set; }` *(explicit)*
-  - `IEnumerable<IMenuItem> IMenuElement.SubItems { get; }` *(explicit)*
-  - `void IMenuItem.RaiseClick()` *(explicit)*
-  - `void IClickableControl.RaiseClick()` *(explicit)*
-
-</details>
-
-<details><summary><code>MenuItemAccessKeyHandler.cs</code> - 1 missing</summary>
-
-- `MenuItemAccessKeyHandler` (class): 1 missing
-  - `override void OnSetOwner(InputElement owner)` *(protected)*
-
-</details>
-
-<details><summary><code>NativeMenu.cs</code> - 3 missing</summary>
-
-- `NativeMenu` (class): 3 missing
-  - `void INativeMenuExporterEventsImplBridge.RaiseNeedsUpdate()` *(explicit)*
-  - `void INativeMenuExporterEventsImplBridge.RaiseOpening()` *(explicit)*
-  - `void INativeMenuExporterEventsImplBridge.RaiseClosed()` *(explicit)*
-
-</details>
-
-<details><summary><code>NativeMenuItem.cs</code> - 1 missing</summary>
-
-- `NativeMenuItem` (class): 1 missing
-  - `NativeMenuItem(string header)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>Panel.cs</code> - 2 missing</summary>
-
-- `Panel` (class): 2 missing
-  - `int IChildIndexProvider.GetChildIndex(ILogical child)` *(explicit)*
-  - `bool IChildIndexProvider.TryGetTotalCount(out int count)` *(explicit)*
-
-</details>
-
-<details><summary><code>RadioButton.cs</code> - 2 missing</summary>
-
-- `RadioButton` (class): 2 missing
-  - `bool IRadioButton.IsChecked { get; set; }` *(explicit)*
-  - `MenuItemToggleType IRadioButton.ToggleType { get; }` *(explicit)*
-
-</details>
-
-<details><summary><code>RelativePanel.cs</code> - 3 missing</summary>
-
-- `Extensions` (class, internal): **type missing** (2 members)
-
-</details>
-
-<details><summary><code>RowDefinition.cs</code> - 2 missing</summary>
-
-- `RowDefinition` (class): 2 missing
-  - `RowDefinition(double value, GridUnitType type)` *(1 of 3 constructors found)*
-  - `RowDefinition(GridLength height)` *(1 of 3 constructors found)*
-
-</details>
-
-<details><summary><code>ScrollChangedEventArgs.cs</code> - 1 missing</summary>
-
-- `ScrollChangedEventArgs` (class): 1 missing
-  - `ScrollChangedEventArgs(RoutedEvent? routedEvent, Vector extentDelta, Vector offsetDelta, Vector viewportDelta)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>SizeChangedEventArgs.cs</code> - 1 missing</summary>
-
-- `SizeChangedEventArgs` (class): 1 missing
-  - `SizeChangedEventArgs(RoutedEvent? routedEvent, object? source, Size previousSize, Size newSize)` *(2 of 3 constructors found)*
-
-</details>
-
-<details><summary><code>Spinner.cs</code> - 3 missing</summary>
-
-- `SpinEventArgs` (class): 3 missing
-  - `SpinEventArgs(RoutedEvent? routedEvent, SpinDirection direction)` *(1 of 4 constructors found)*
-  - `SpinEventArgs(SpinDirection direction, bool usingMouseWheel)` *(1 of 4 constructors found)*
-  - `SpinEventArgs(RoutedEvent? routedEvent, SpinDirection direction, bool usingMouseWheel)` *(1 of 4 constructors found)*
-
-</details>
-
-<details><summary><code>SystemFontAppBuilderExtension.cs</code> - 2 missing</summary>
-
-- `SystemFontAppBuilderExtension` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>TextBlock.cs</code> - 3 missing</summary>
-
-- `TextBlock` (class): 3 missing
-  - `void IInlineHost.Invalidate()` *(explicit)*
-  - `IAvaloniaList<Visual> IInlineHost.VisualChildren { get; }` *(explicit)*
-  - `override void BuildDebugDisplay(StringBuilder builder, bool includeContent)` *(internal)*
-
-</details>
-
-<details><summary><code>TextBox.cs</code> - 3 missing</summary>
-
-- `TextBox` (class): 3 missing
-  - `UndoRedoState UndoRedoHelper<UndoRedoState>.IUndoRedoHost.UndoRedoState { get; set; }` *(explicit)*
-  - `void UndoRedoHelper<UndoRedoState>.IUndoRedoHost.OnUndoStackChanged()` *(explicit)*
-  - `void UndoRedoHelper<UndoRedoState>.IUndoRedoHost.OnRedoStackChanged()` *(explicit)*
-
-</details>
-
-<details><summary><code>TextChangedEventArgs.cs</code> - 1 missing</summary>
-
-- `TextChangedEventArgs` (class): 1 missing
-  - `TextChangedEventArgs(RoutedEvent? routedEvent, Interactive? source)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>TextChangingEventArgs.cs</code> - 1 missing</summary>
-
-- `TextChangingEventArgs` (class): 1 missing
-  - `TextChangingEventArgs(RoutedEvent? routedEvent, Interactive? source)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>TopLevel.cs</code> - 1 missing</summary>
-
-- `TopLevel` (class): 1 missing
-  - `TopLevel(ITopLevelImpl impl, IAvaloniaDependencyResolver? dependencyResolver)` *(internal; 1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>VirtualizingCarouselPanel.cs</code> - 1 missing</summary>
-
-- `VirtualizingCarouselPanel` (class): 1 missing
-  - `override IInputElement? GetControl(NavigationDirection direction, IInputElement? from, bool wrap)` *(protected)*
-
-</details>
-
-<details><summary><code>Window.cs</code> - 1 missing</summary>
-
-- `Window` (class): 1 missing
-  - `Window(IWindowImpl impl)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>WindowBase.cs</code> - 1 missing</summary>
-
-- `WindowBase` (class): 1 missing
-  - `WindowBase(IWindowBaseImpl impl, IAvaloniaDependencyResolver? dependencyResolver)` *(1 of 2 constructors found)*
-
-</details>
-
 ### `Animation` - files 3/3, types 7/7, members 21/21
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
@@ -601,14 +269,14 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ConnectedAnimationConfiguration.cs` | `animation/connected_animation_configuration.rs` | present | 4/4 | 2/2 |  |
 | `ConnectedAnimationService.cs` | `animation/connected_animation_service.rs` | present | 1/1 | 7/7 |  |
 
-### `ApplicationLifetimes` - files 17/17, types 17/18, members 57/60
+### `ApplicationLifetimes` - files 17/17, types 18/18, members 60/60
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `ActivatableLifetimeBase.cs` | `application_lifetimes/activatable_lifetime_base.rs` | present | 1/1 | 8/8 |  |
 | `ActivatedEventArgs.cs` | `application_lifetimes/activated_event_args.rs` | present | 1/1 | 2/2 |  |
 | `ActivationKind.cs` | `application_lifetimes/activation_kind.rs` | present | 1/1 | 4/4 |  |
-| `ClassicDesktopStyleApplicationLifetime.cs` | `application_lifetimes/classic_desktop_style_application_lifetime.rs` | partial | 1/2 | 15/18 |  |
+| `ClassicDesktopStyleApplicationLifetime.cs` | `application_lifetimes/classic_desktop_style_application_lifetime.rs` | present | 2/2 | 18/18 | renamed: the extension class of the file is `impl AppBuilder` in the same file |
 | `ControlledApplicationLifetimeExitEventArgs.cs` | `application_lifetimes/controlled_application_lifetime_exit_event_args.rs` | present | 1/1 | 2/2 |  |
 | `FileActivatedEventArgs.cs` | `application_lifetimes/file_activated_event_args.rs` | present | 1/1 | 2/2 |  |
 | `IActivatableApplicationLifetime.cs` | `application_lifetimes/i_activatable_application_lifetime.rs` | present | 1/1 | 4/4 |  |
@@ -622,12 +290,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ProtocolActivatedEventArgs.cs` | `application_lifetimes/protocol_activated_event_args.rs` | present | 1/1 | 2/2 |  |
 | `ShutdownRequestedEventArgs.cs` | `application_lifetimes/shutdown_requested_event_args.rs` | present | 1/1 | 2/2 |  |
 | `StartupEventArgs.cs` | `application_lifetimes/startup_event_args.rs` | present | 1/1 | 2/2 |  |
-
-<details><summary><code>ClassicDesktopStyleApplicationLifetime.cs</code> - 4 missing</summary>
-
-- `ClassicDesktopStyleApplicationLifetimeExtensions` (class, public): **type missing** (3 members)
-
-</details>
 
 ### `AutoCompleteBox` - files 5/5, types 7/7, members 101/101
 
@@ -659,7 +321,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TogglePatternIdentifiers.cs` | `automation/toggle_pattern_identifiers.rs` | present | 1/1 | 1/1 |  |
 | `ValuePatternIdentifiers.cs` | `automation/value_pattern_identifiers.rs` | present | 1/1 | 2/2 |  |
 
-### `Automation/Peers` - files 52/52, types 54/54, members 514/522
+### `Automation/Peers` - files 52/52, types 54/54, members 514/522 (8 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -676,7 +338,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ControlAutomationPeer.cs` | `automation/peers/control_automation_peer.rs` | present | 1/1 | 41/41 |  |
 | `DatePickerAutomationPeer.cs` | `automation/peers/date_picker_automation_peer.rs` | present | 1/1 | 6/6 |  |
 | `DrawerPageAutomationPeer.cs` | `automation/peers/drawer_page_automation_peer.rs` | present | 1/1 | 8/8 |  |
-| `EmbeddableControlRootAutomationPeer.cs` | `automation/peers/embeddable_control_root_automation_peer.rs` | partial | 1/1 | 6/7 |  |
+| `EmbeddableControlRootAutomationPeer.cs` | `automation/peers/embeddable_control_root_automation_peer.rs` | present | 1/1 | 6/7 (1 waived) |  |
 | `ExpanderAutomationPeer.cs` | `automation/peers/expander_automation_peer.rs` | present | 1/1 | 9/9 |  |
 | `ImageAutomationPeer.cs` | `automation/peers/image_automation_peer.rs` | present | 1/1 | 3/3 |  |
 | `InteropAutomationPeer.cs` | `automation/peers/interop_automation_peer.rs` | present | 1/1 | 23/23 |  |
@@ -693,21 +355,21 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PipsPagerAutomationPeer.cs` | `automation/peers/pips_pager_automation_peer.rs` | present | 1/1 | 7/7 |  |
 | `PopupAutomationPeer.cs` | `automation/peers/popup_automation_peer.rs` | present | 1/1 | 4/4 |  |
 | `PopupRootAutomationPeer.cs` | `automation/peers/popup_root_automation_peer.rs` | present | 1/1 | 4/4 |  |
-| `ProgressBarAutomationPeer.cs` | `automation/peers/progress_bar_automation_peer.rs` | partial | 1/1 | 3/7 |  |
+| `ProgressBarAutomationPeer.cs` | `automation/peers/progress_bar_automation_peer.rs` | present | 1/1 | 3/7 (4 waived) |  |
 | `RadioButtonAutomationPeer.cs` | `automation/peers/radio_button_automation_peer.rs` | present | 1/1 | 9/9 |  |
 | `RangeBaseAutomationPeer.cs` | `automation/peers/range_base_automation_peer.rs` | present | 1/1 | 10/10 |  |
 | `ScrollBarAutomationPeer.cs` | `automation/peers/scroll_bar_automation_peer.rs` | present | 1/1 | 4/4 |  |
 | `ScrollViewerAutomationPeer.cs` | `automation/peers/scroll_viewer_automation_peer.rs` | present | 1/1 | 15/15 |  |
 | `SelectingItemsControlAutomationPeer.cs` | `automation/peers/selecting_items_control_automation_peer.rs` | present | 1/1 | 8/8 |  |
 | `SliderAutomationPeer.cs` | `automation/peers/slider_automation_peer.rs` | present | 1/1 | 3/3 |  |
-| `SplitButtonAutomationPeer.cs` | `automation/peers/split_button_automation_peer.rs` | partial | 1/1 | 10/11 |  |
+| `SplitButtonAutomationPeer.cs` | `automation/peers/split_button_automation_peer.rs` | present | 1/1 | 10/11 (1 waived) |  |
 | `TabbedPageAutomationPeer.cs` | `automation/peers/tabbed_page_automation_peer.rs` | present | 1/1 | 4/4 |  |
 | `TextBlockAutomationPeer.cs` | `automation/peers/text_block_automation_peer.rs` | present | 1/1 | 5/5 |  |
 | `TextBoxAutomationPeer.cs` | `automation/peers/text_box_automation_peer.rs` | present | 1/1 | 8/8 |  |
 | `ThumbAutomationPeer.cs` | `automation/peers/thumb_automation_peer.rs` | present | 1/1 | 3/3 |  |
 | `TimePickerAutomationPeer.cs` | `automation/peers/time_picker_automation_peer.rs` | present | 1/1 | 6/6 |  |
 | `ToggleButtonAutomationPeer.cs` | `automation/peers/toggle_button_automation_peer.rs` | present | 1/1 | 7/7 |  |
-| `ToggleSplitButtonAutomationPeer.cs` | `automation/peers/toggle_split_button_automation_peer.rs` | partial | 1/1 | 4/6 |  |
+| `ToggleSplitButtonAutomationPeer.cs` | `automation/peers/toggle_split_button_automation_peer.rs` | present | 1/1 | 4/6 (2 waived) |  |
 | `ToolTipAutomationPeer.cs` | `automation/peers/tool_tip_automation_peer.rs` | present | 1/1 | 4/4 |  |
 | `TreeViewAutomationPeer.cs` | `automation/peers/tree_view_automation_peer.rs` | present | 1/1 | 2/2 |  |
 | `TreeViewItemAutomationPeer.cs` | `automation/peers/tree_view_item_automation_peer.rs` | present | 1/1 | 7/7 |  |
@@ -715,38 +377,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `UserControlAutomationPeer.cs` | `automation/peers/user_control_automation_peer.rs` | present | 1/1 | 2/2 |  |
 | `WindowAutomationPeer.cs` | `automation/peers/window_automation_peer.rs` | present | 1/1 | 4/4 |  |
 | `WindowBaseAutomationPeer.cs` | `automation/peers/window_base_automation_peer.rs` | present | 1/1 | 10/10 |  |
-
-<details><summary><code>EmbeddableControlRootAutomationPeer.cs</code> - 1 missing</summary>
-
-- `EmbeddableControlRootAutomationPeer` (class): 1 missing
-  - `ITopLevelImpl? IRootProvider.PlatformImpl { get; }` *(explicit)*
-
-</details>
-
-<details><summary><code>ProgressBarAutomationPeer.cs</code> - 4 missing</summary>
-
-- `ProgressBarAutomationPeer` (class): 4 missing
-  - `void IRangeValueProvider.SetValue(double val)` *(explicit)*
-  - `bool IRangeValueProvider.IsReadOnly { get; }` *(explicit)*
-  - `double IRangeValueProvider.LargeChange { get; }` *(explicit)*
-  - `double IRangeValueProvider.SmallChange { get; }` *(explicit)*
-
-</details>
-
-<details><summary><code>SplitButtonAutomationPeer.cs</code> - 1 missing</summary>
-
-- `SplitButtonAutomationPeer` (class): 1 missing
-  - `void IInvokeProvider.Invoke()` *(explicit)*
-
-</details>
-
-<details><summary><code>ToggleSplitButtonAutomationPeer.cs</code> - 2 missing</summary>
-
-- `ToggleSplitButtonAutomationPeer` (class): 2 missing
-  - `ToggleState IToggleProvider.ToggleState { get; }` *(explicit)*
-  - `void IToggleProvider.Toggle()` *(explicit)*
-
-</details>
 
 ### `Automation/Provider` - files 10/10, types 12/12, members 48/48
 
@@ -763,36 +393,19 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IToggleProvider.cs` | `automation/provider/i_toggle_provider.rs` | present | 2/2 | 5/5 |  |
 | `IValueProvider.cs` | `automation/provider/i_value_provider.rs` | present | 1/1 | 3/3 |  |
 
-### `Calendar` - files 9/9, types 13/13, members 182/187
+### `Calendar` - files 9/9, types 13/13, members 182/187 (5 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Calendar.cs` | `calendar/calendar.rs` | partial | 5/5 | 97/101 |  |
+| `Calendar.cs` | `calendar/calendar.rs` | present | 5/5 | 97/101 (4 waived) |  |
 | `CalendarBlackoutDatesCollection.cs` | `calendar/calendar_blackout_dates_collection.rs` | present | 1/1 | 9/9 |  |
 | `CalendarButton.cs` | `calendar/calendar_button.rs` | present | 1/1 | 10/10 |  |
 | `CalendarDateRange.cs` | `calendar/calendar_date_range.rs` | present | 1/1 | 5/5 |  |
 | `CalendarDayButton.cs` | `calendar/calendar_day_button.rs` | present | 1/1 | 15/15 |  |
 | `CalendarExtensions.cs` | `calendar/calendar_extensions.rs` | present | 1/1 | 1/1 |  |
-| `CalendarItem.cs` | `calendar/calendar_item.rs` | partial | 1/1 | 24/25 |  |
+| `CalendarItem.cs` | `calendar/calendar_item.rs` | present | 1/1 | 24/25 (1 waived) |  |
 | `DateTimeHelper.cs` | `calendar/date_time_helper.rs` | present | 1/1 | 14/14 |  |
 | `SelectedDatesCollection.cs` | `calendar/selected_dates_collection.rs` | present | 1/1 | 7/7 |  |
-
-<details><summary><code>Calendar.cs</code> - 4 missing</summary>
-
-- `Calendar` (class): 4 missing
-  - `Collection<DateTime> RemovedItems { get; set; }` *(internal; getter `removed_items` found, setter `set_removed_items` missing)*
-  - `DateTime? LastSelectedDateInternal { get; set; }` *(internal; getter `last_selected_date_internal` found, setter `set_last_selected_date_internal` missing)*
-  - `DateTime? HoverEndInternal { get; set; }` *(internal; getter `hover_end_internal` found, setter `set_hover_end_internal` missing)*
-  - `bool HasFocusInternal { get; set; }` *(internal; getter `has_focus_internal` found, setter `set_has_focus_internal` missing)*
-
-</details>
-
-<details><summary><code>CalendarItem.cs</code> - 1 missing</summary>
-
-- `CalendarItem` (class): 1 missing
-  - `Grid? YearView { get; set; }` *(internal; getter `year_view` found, setter `set_year_view` missing)*
-
-</details>
 
 ### `CalendarDatePicker` - files 4/4, types 4/4, members 69/69
 
@@ -862,79 +475,35 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IPopupHostProvider.cs` | `diagnostics/i_popup_host_provider.rs` | present | 1/1 | 2/2 |  |
 | `ToolTipDiagnostics.cs` | `diagnostics/tool_tip_diagnostics.rs` | present | 1/1 | 1/1 |  |
 
-### `Documents` - files 12/12, types 12/12, members 98/101
+### `Documents` - files 12/12, types 12/12, members 98/101 (3 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `Bold.cs` | `documents/bold.rs` | present | 1/1 | 2/2 |  |
-| `IInlineHost.cs` | `documents/i_inline_host.rs` | partial | 1/1 | 1/2 |  |
+| `IInlineHost.cs` | `documents/i_inline_host.rs` | present | 1/1 | 1/2 (1 waived) |  |
 | `Inline.cs` | `documents/inline.rs` | present | 1/1 | 11/11 |  |
 | `InlineCollection.cs` | `documents/inline_collection.rs` | present | 1/1 | 9/9 |  |
 | `InlineRun.cs` | `documents/inline_run.rs` | present | 1/1 | 6/6 |  |
-| `InlineUIContainer.cs` | `documents/inline_ui_container.rs` | partial | 1/1 | 8/9 |  |
+| `InlineUIContainer.cs` | `documents/inline_ui_container.rs` | present | 1/1 | 8/9 (1 waived) |  |
 | `Italic.cs` | `documents/italic.rs` | present | 1/1 | 2/2 |  |
 | `LineBreak.cs` | `documents/line_break.rs` | present | 1/1 | 3/3 |  |
-| `Run.cs` | `documents/run.rs` | partial | 1/1 | 6/7 |  |
+| `Run.cs` | `documents/run.rs` | present | 1/1 | 6/7 (1 waived) |  |
 | `Span.cs` | `documents/span.rs` | present | 1/1 | 11/11 |  |
 | `TextElement.cs` | `documents/text_element.rs` | present | 1/1 | 37/37 |  |
 | `Underline.cs` | `documents/underline.rs` | present | 1/1 | 2/2 |  |
 
-<details><summary><code>IInlineHost.cs</code> - 1 missing</summary>
-
-- `IInlineHost` (interface): 1 missing
-  - `IAvaloniaList<Visual> VisualChildren { get; }`
-
-</details>
-
-<details><summary><code>InlineUIContainer.cs</code> - 1 missing</summary>
-
-- `InlineUIContainer` (class): 1 missing
-  - `InlineUIContainer(Control child)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>Run.cs</code> - 1 missing</summary>
-
-- `Run` (class): 1 missing
-  - `Run(string? text)` *(1 of 2 constructors found)*
-
-</details>
-
-### `Embedding` - files 1/1, types 1/1, members 8/11
+### `Embedding` - files 1/1, types 1/1, members 8/11 (3 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `EmbeddableControlRoot.cs` | `embedding/embeddable_control_root.rs` | partial | 1/1 | 8/11 |  |
+| `EmbeddableControlRoot.cs` | `embedding/embeddable_control_root.rs` | present | 1/1 | 8/11 (3 waived) |  |
 
-<details><summary><code>EmbeddableControlRoot.cs</code> - 3 missing</summary>
-
-- `EmbeddableControlRoot` (class): 3 missing
-  - `EmbeddableControlRoot()` *(1 of 2 constructors found)*
-  - `new void StartRendering()`
-  - `new void StopRendering()`
-
-</details>
-
-### `Embedding/Offscreen` - files 2/2, types 2/2, members 32/34
+### `Embedding/Offscreen` - files 2/2, types 2/2, members 33/34 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `OffscreenTopLevel.cs` | `embedding/offscreen/offscreen_top_level.rs` | partial | 1/1 | 4/5 |  |
-| `OffscreenTopLevelImpl.cs` | `embedding/offscreen/offscreen_top_level_impl.rs` | partial | 1/1 | 28/29 |  |
-
-<details><summary><code>OffscreenTopLevel.cs</code> - 1 missing</summary>
-
-- `OffscreenTopLevel` (class): 1 missing
-  - `OffscreenTopLevelImplBase Impl { get; }`
-
-</details>
-
-<details><summary><code>OffscreenTopLevelImpl.cs</code> - 1 missing</summary>
-
-- `OffscreenTopLevelImplBase` (class): 1 missing
-  - `Size? FrameSize { get; }`
-
-</details>
+| `OffscreenTopLevel.cs` | `embedding/offscreen/offscreen_top_level.rs` | present | 1/1 | 4/5 (1 waived) |  |
+| `OffscreenTopLevelImpl.cs` | `embedding/offscreen/offscreen_top_level_impl.rs` | present | 1/1 | 29/29 |  |
 
 ### `FlexPanel` - files 9/9, types 9/9, members 81/81
 
@@ -950,7 +519,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `FlexPanel.cs` | `flex_panel/flex_panel.rs` | present | 1/1 | 18/18 |  |
 | `FlexWrap.cs` | `flex_panel/flex_wrap.rs` | present | 1/1 | 3/3 |  |
 
-### `Flyouts` - files 7/7, types 7/7, members 80/83
+### `Flyouts` - files 7/7, types 7/7, members 80/83 (3 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -959,23 +528,8 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `FlyoutPresenter.cs` | `flyouts/flyout_presenter.rs` | present | 1/1 | 1/1 |  |
 | `FlyoutShowMode.cs` | `flyouts/flyout_show_mode.rs` | present | 1/1 | 3/3 |  |
 | `MenuFlyout.cs` | `flyouts/menu_flyout.rs` | present | 1/1 | 14/14 |  |
-| `MenuFlyoutPresenter.cs` | `flyouts/menu_flyout_presenter.rs` | partial | 1/1 | 4/5 |  |
-| `PopupFlyoutBase.cs` | `flyouts/popup_flyout_base.rs` | partial | 1/1 | 35/37 |  |
-
-<details><summary><code>MenuFlyoutPresenter.cs</code> - 1 missing</summary>
-
-- `MenuFlyoutPresenter` (class): 1 missing
-  - `MenuFlyoutPresenter(IMenuInteractionHandler menuInteractionHandler)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>PopupFlyoutBase.cs</code> - 2 missing</summary>
-
-- `PopupFlyoutBase` (class): 2 missing
-  - `IPopupHost? IPopupHostProvider.PopupHost { get; }` *(explicit)*
-  - `event Action<IPopupHost?>? IPopupHostProvider.PopupHostChanged` *(explicit)*
-
-</details>
+| `MenuFlyoutPresenter.cs` | `flyouts/menu_flyout_presenter.rs` | present | 1/1 | 4/5 (1 waived) |  |
+| `PopupFlyoutBase.cs` | `flyouts/popup_flyout_base.rs` | present | 1/1 | 35/37 (2 waived) |  |
 
 ### `Generators` - files 1/1, types 1/1, members 7/7
 
@@ -990,49 +544,28 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PressedMixin.cs` | `mixins/pressed_mixin.rs` | present | 1/1 | 1/1 |  |
 | `SelectableMixin.cs` | `mixins/selectable_mixin.rs` | present | 1/1 | 1/1 |  |
 
-### `Notifications` - files 9/9, types 9/9, members 65/67
+### `Notifications` - files 9/9, types 9/9, members 65/67 (2 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `IManagedNotificationManager.cs` | `notifications/i_managed_notification_manager.rs` | present | 1/1 | 2/2 |  |
 | `INotification.cs` | `notifications/i_notification.rs` | present | 1/1 | 6/6 |  |
 | `INotificationManager.cs` | `notifications/i_notification_manager.rs` | present | 1/1 | 3/3 |  |
-| `Notification.cs` | `notifications/notification.rs` | partial | 1/1 | 9/10 |  |
+| `Notification.cs` | `notifications/notification.rs` | present | 1/1 | 9/10 (1 waived) |  |
 | `NotificationCard.cs` | `notifications/notification_card.rs` | present | 1/1 | 15/15 |  |
 | `NotificationPosition.cs` | `notifications/notification_position.rs` | present | 1/1 | 6/6 |  |
 | `NotificationType.cs` | `notifications/notification_type.rs` | present | 1/1 | 4/4 |  |
 | `ReversibleStackPanel.cs` | `notifications/reversible_stack_panel.rs` | present | 1/1 | 4/4 |  |
-| `WindowNotificationManager.cs` | `notifications/window_notification_manager.rs` | partial | 1/1 | 16/17 |  |
+| `WindowNotificationManager.cs` | `notifications/window_notification_manager.rs` | present | 1/1 | 16/17 (1 waived) |  |
 
-<details><summary><code>Notification.cs</code> - 1 missing</summary>
-
-- `Notification` (class): 1 missing
-  - `Notification()` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>WindowNotificationManager.cs</code> - 1 missing</summary>
-
-- `WindowNotificationManager` (class): 1 missing
-  - `WindowNotificationManager()` *(1 of 2 constructors found)*
-
-</details>
-
-### `NumericUpDown` - files 2/2, types 2/2, members 73/74
+### `NumericUpDown` - files 2/2, types 2/2, members 73/74 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `NumericUpDown.cs` | `numeric_up_down/numeric_up_down.rs` | partial | 1/1 | 70/71 |  |
+| `NumericUpDown.cs` | `numeric_up_down/numeric_up_down.rs` | present | 1/1 | 70/71 (1 waived) |  |
 | `NumericUpDownValueChangedEventArgs.cs` | `numeric_up_down/numeric_up_down_value_changed_event_args.rs` | present | 1/1 | 3/3 |  |
 
-<details><summary><code>NumericUpDown.cs</code> - 1 missing</summary>
-
-- `NumericUpDown` (class): 1 missing
-  - `decimal? Value { get; set; }` *(getter `value` found, setter `set_value` missing)*
-
-</details>
-
-### `Page` - files 29/29, types 29/29, members 390/394
+### `Page` - files 29/29, types 29/29, members 390/394 (4 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1049,10 +582,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ModalPoppedEventArgs.cs` | `page/modal_popped_event_args.rs` | present | 1/1 | 2/2 |  |
 | `ModalPushedEventArgs.cs` | `page/modal_pushed_event_args.rs` | present | 1/1 | 2/2 |  |
 | `MultiPage.cs` | `page/multi_page.rs` | present | 1/1 | 13/13 |  |
-| `NavigatedFromEventArgs.cs` | `page/navigated_from_event_args.rs` | partial | 1/1 | 4/5 |  |
-| `NavigatedToEventArgs.cs` | `page/navigated_to_event_args.rs` | partial | 1/1 | 4/5 |  |
-| `NavigatingFromEventArgs.cs` | `page/navigating_from_event_args.rs` | partial | 1/1 | 5/6 |  |
-| `NavigationEventArgs.cs` | `page/navigation_event_args.rs` | partial | 1/1 | 4/5 |  |
+| `NavigatedFromEventArgs.cs` | `page/navigated_from_event_args.rs` | present | 1/1 | 4/5 (1 waived) |  |
+| `NavigatedToEventArgs.cs` | `page/navigated_to_event_args.rs` | present | 1/1 | 4/5 (1 waived) |  |
+| `NavigatingFromEventArgs.cs` | `page/navigating_from_event_args.rs` | present | 1/1 | 5/6 (1 waived) |  |
+| `NavigationEventArgs.cs` | `page/navigation_event_args.rs` | present | 1/1 | 4/5 (1 waived) |  |
 | `NavigationPage.cs` | `page/navigation_page.rs` | present | 1/1 | 99/99 |  |
 | `NavigationType.cs` | `page/navigation_type.rs` | present | 1/1 | 8/8 |  |
 | `Page.cs` | `page/page.rs` | present | 1/1 | 34/34 |  |
@@ -1066,34 +599,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TabPlacement.cs` | `page/tab_placement.rs` | present | 1/1 | 5/5 |  |
 | `TabbedPage.cs` | `page/tabbed_page.rs` | present | 1/1 | 27/27 |  |
 
-<details><summary><code>NavigatedFromEventArgs.cs</code> - 1 missing</summary>
-
-- `NavigatedFromEventArgs` (class): 1 missing
-  - `NavigatedFromEventArgs(Page? destinationPage, NavigationType navigationType, object? parameter)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>NavigatedToEventArgs.cs</code> - 1 missing</summary>
-
-- `NavigatedToEventArgs` (class): 1 missing
-  - `NavigatedToEventArgs(Page? previousPage, NavigationType navigationType, object? parameter)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>NavigatingFromEventArgs.cs</code> - 1 missing</summary>
-
-- `NavigatingFromEventArgs` (class): 1 missing
-  - `NavigatingFromEventArgs(Page? destinationPage, NavigationType navigationType, object? parameter)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>NavigationEventArgs.cs</code> - 1 missing</summary>
-
-- `NavigationEventArgs` (class): 1 missing
-  - `NavigationEventArgs(Page page, NavigationType navigationType, object? parameter)` *(1 of 2 constructors found)*
-
-</details>
-
 ### `PipsPager` - files 3/3, types 3/3, members 31/31
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
@@ -1102,22 +607,22 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PipsPagerSelectedIndexChangedEventArgs.cs` | `pips_pager/pips_pager_selected_index_changed_event_args.rs` | present | 1/1 | 3/3 |  |
 | `PipsPagerTemplateSettings.cs` | `pips_pager/pips_pager_template_settings.rs` | present | 1/1 | 3/3 |  |
 
-### `Platform` - files 31/31, types 52/53, members 291/313 (1 waived)
+### `Platform` - files 31/31, types 53/53, members 302/313 (11 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `DefaultMenuInteractionHandler.cs` | `platform/default_menu_interaction_handler.rs` | partial | 1/1 | 32/33 |  |
-| `IInputPane.cs` | `platform/i_input_pane.rs` | partial | 4/4 | 15/16 |  |
+| `DefaultMenuInteractionHandler.cs` | `platform/default_menu_interaction_handler.rs` | present | 1/1 | 32/33 (1 waived) |  |
+| `IInputPane.cs` | `platform/i_input_pane.rs` | present | 4/4 | 15/16 (1 waived) |  |
 | `IInsetsManager.cs` | `platform/i_insets_manager.rs` | present | 4/4 | 17/17 |  |
 | `IMenuInteractionHandler.cs` | `platform/i_menu_interaction_handler.rs` | present | 1/1 | 2/2 |  |
 | `INativeApplicationCommands.cs` | `platform/i_native_application_commands.rs` | present | 1/1 | 4/4 |  |
 | `INativeControlHostImpl.cs` | `platform/i_native_control_host_impl.rs` | present | 3/3 | 9/9 |  |
-| `IPlatformFeedback.cs` | `platform/i_platform_feedback.rs` | partial | 3/3 | 8/9 |  |
+| `IPlatformFeedback.cs` | `platform/i_platform_feedback.rs` | present | 3/3 | 8/9 (1 waived) |  |
 | `IPlatformIconLoader.cs` | `platform/i_platform_icon_loader.rs` | present | 1/1 | 3/3 |  |
 | `IPlatformLifetimeEventsImpl.cs` | `platform/i_platform_lifetime_events_impl.rs` | present | 1/1 | 1/1 |  |
 | `IPlatformNativeSurfaceHandle.cs` | `platform/i_platform_native_surface_handle.rs` | present | 1/1 | 2/2 |  |
 | `IPopupImpl.cs` | `platform/i_popup_impl.rs` | present | 1/1 | 4/4 |  |
-| `IScreenImpl.cs` | `platform/i_screen_impl.rs` | partial | 3/3 | 26/34 (1 waived) |  |
+| `IScreenImpl.cs` | `platform/i_screen_impl.rs` | present | 3/3 | 26/34 (8 waived) |  |
 | `ITopLevelImpl.cs` | `platform/i_top_level_impl.rs` | present | 1/1 | 24/24 |  |
 | `ITopLevelNativeMenuExporter.cs` | `platform/i_top_level_native_menu_exporter.rs` | present | 3/3 | 4/4 |  |
 | `ITrayIconImpl.cs` | `platform/i_tray_icon_impl.rs` | present | 2/2 | 6/6 |  |
@@ -1135,50 +640,8 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PlatformRequestedDrawnDecoration.cs` | `platform/platform_requested_drawn_decoration.rs` | present | 1/1 | 5/5 |  |
 | `Screen.cs` | `platform/screen.rs` | present | 2/2 | 20/20 |  |
 | `ScreenHelper.cs` | `platform/screen_helper.rs` | present | 1/1 | 3/3 |  |
-| `Win32Properties.cs` | `platform/win32_properties.rs` | partial | 4/5 | 18/29 |  |
+| `Win32Properties.cs` | `platform/win32_properties.rs` | present | 5/5 | 29/29 |  |
 | `X11Properties.cs` | `platform/x11_properties.rs` | present | 1/1 | 7/7 |  |
-
-<details><summary><code>DefaultMenuInteractionHandler.cs</code> - 1 missing</summary>
-
-- `DefaultMenuInteractionHandler` (class): 1 missing
-  - `DefaultMenuInteractionHandler(bool isContextMenu, IInputManager? inputManager, Action<Action, TimeSpan> del...` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>IInputPane.cs</code> - 1 missing</summary>
-
-- `InputPaneStateEventArgs` (class): 1 missing
-  - `InputPaneStateEventArgs(InputPaneState newState, Rect? startRect, Rect endRect)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>IPlatformFeedback.cs</code> - 1 missing</summary>
-
-- `FeedbackAction` (class): 1 missing
-  - `FeedbackAction(string label)` *(internal)*
-
-</details>
-
-<details><summary><code>IScreenImpl.cs</code> - 7 missing</summary>
-
-- `PlatformScreen` (class): 2 missing
-  - `override IPlatformHandle? TryGetPlatformHandle()`
-  - `override bool Equals(Screen? obj)`
-  - waived (Rust: `Hash` is derived where the type can be hashed; float-based value types are not `Eq`/`Hash`): `GetHashCode`
-- `ScreensBase<TKey, TScreen>` (class): 5 missing
-  - `Screen? ScreenFromWindow(IWindowBaseImpl window)`
-  - `Screen? ScreenFromTopLevel(ITopLevelImpl topLevel)`
-  - `Screen? ScreenFromPoint(PixelPoint point)`
-  - `Screen? ScreenFromRect(PixelRect rect)`
-  - `async Task<bool> RequestScreenDetails()`
-
-</details>
-
-<details><summary><code>Win32Properties.cs</code> - 12 missing</summary>
-
-- `Win32Properties` (class, public): **type missing** (11 members)
-
-</details>
 
 ### `Platform/Dialogs` - files 3/3, types 3/3, members 6/6
 
@@ -1198,11 +661,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PresentationSource.RenderRoot.cs` | `presentation_source/presentation_source_render_root.rs` | present | 1/1 | 10/10 |  |
 | `PresentationSource.cs` | `presentation_source/presentation_source.rs` | present | 1/1 | 11/11 |  |
 
-### `Presenters` - files 9/9, types 9/9, members 217/219
+### `Presenters` - files 9/9, types 9/9, members 218/219 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ContentPresenter.cs` | `presenters/content_presenter.rs` | partial | 1/1 | 62/63 |  |
+| `ContentPresenter.cs` | `presenters/content_presenter.rs` | present | 1/1 | 63/63 |  |
 | `IContentPresenterHost.cs` | `presenters/i_content_presenter_host.rs` | present | 1/1 | 2/2 |  |
 | `ItemsPresenter.cs` | `presenters/items_presenter.rs` | present | 1/1 | 27/27 |  |
 | `PanelContainerGenerator.cs` | `presenters/panel_container_generator.rs` | present | 1/1 | 3/3 |  |
@@ -1210,48 +673,34 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TableViewCellsPresenter.cs` | `presenters/table_view_cells_presenter.rs` | present | 1/1 | 7/7 |  |
 | `TableViewColumnHeadersPresenter.cs` | `presenters/table_view_column_headers_presenter.rs` | present | 1/1 | 7/7 |  |
 | `TableViewLayoutHelper.cs` | `presenters/table_view_layout_helper.rs` | present | 1/1 | 5/5 |  |
-| `TextPresenter.cs` | `presenters/text_presenter.rs` | partial | 1/1 | 70/71 |  |
+| `TextPresenter.cs` | `presenters/text_presenter.rs` | present | 1/1 | 70/71 (1 waived) |  |
 
-<details><summary><code>ContentPresenter.cs</code> - 1 missing</summary>
-
-- `ContentPresenter` (class): 1 missing
-  - `override void BuildDebugDisplay(StringBuilder builder, bool includeContent)` *(internal)*
-
-</details>
-
-<details><summary><code>TextPresenter.cs</code> - 1 missing</summary>
-
-- `TextPresenter` (class): 1 missing
-  - `TextSelectionHandleCanvas? TextSelectionHandleCanvas { get; set; }` *(internal; getter `text_selection_handle_canvas` found, setter `set_text_selection_handle_canvas` missing)*
-
-</details>
-
-### `Primitives` - files 38/38, types 39/39, members 517/534
+### `Primitives` - files 38/38, types 39/39, members 520/534 (14 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AccessText.cs` | `primitives/access_text.rs` | present | 1/1 | 11/11 |  |
 | `AdornerHelper.cs` | `primitives/adorner_helper.rs` | present | 1/1 | 2/2 |  |
-| `AdornerLayer.cs` | `primitives/adorner_layer.rs` | partial | 1/1 | 15/16 |  |
-| `HeaderedContentControl.cs` | `primitives/headered_content_control.rs` | partial | 1/1 | 7/8 |  |
+| `AdornerLayer.cs` | `primitives/adorner_layer.rs` | present | 1/1 | 15/16 (1 waived) |  |
+| `HeaderedContentControl.cs` | `primitives/headered_content_control.rs` | present | 1/1 | 8/8 |  |
 | `HeaderedItemsControl.cs` | `primitives/headered_items_control.rs` | present | 1/1 | 11/11 |  |
 | `HeaderedSelectingItemsControl.cs` | `primitives/headered_selecting_items_control.rs` | present | 1/1 | 11/11 |  |
-| `ILogicalScrollable.cs` | `primitives/i_logical_scrollable.rs` | partial | 1/1 | 7/9 |  |
+| `ILogicalScrollable.cs` | `primitives/i_logical_scrollable.rs` | present | 1/1 | 7/9 (2 waived) |  |
 | `IPopupHost.cs` | `primitives/i_popup_host.rs` | present | 1/1 | 17/17 |  |
 | `IScrollSnapPointsInfo.cs` | `primitives/i_scroll_snap_points_info.rs` | present | 1/1 | 6/6 |  |
 | `ItemSelectionEventTriggers.cs` | `primitives/item_selection_event_triggers.rs` | present | 1/1 | 5/5 |  |
 | `LightDismissOverlayLayer.cs` | `primitives/light_dismiss_overlay_layer.rs` | present | 1/1 | 5/5 |  |
 | `OverlayLayer.cs` | `primitives/overlay_layer.rs` | present | 1/1 | 7/7 |  |
-| `OverlayPopupHost.cs` | `primitives/overlay_popup_host.rs` | partial | 1/1 | 15/20 |  |
-| `Popup.cs` | `primitives/popup.rs` | partial | 1/1 | 62/63 |  |
+| `OverlayPopupHost.cs` | `primitives/overlay_popup_host.rs` | present | 1/1 | 15/20 (5 waived) |  |
+| `Popup.cs` | `primitives/popup.rs` | present | 1/1 | 62/63 (1 waived) |  |
 | `PopupOverlayLayer.cs` | `primitives/popup_overlay_layer.rs` | present | 1/1 | 5/5 |  |
-| `PopupRoot.cs` | `primitives/popup_root.rs` | partial | 1/1 | 21/22 |  |
-| `RangeBase.cs` | `primitives/range_base.rs` | partial | 1/1 | 15/16 |  |
+| `PopupRoot.cs` | `primitives/popup_root.rs` | present | 1/1 | 21/22 (1 waived) |  |
+| `RangeBase.cs` | `primitives/range_base.rs` | present | 1/1 | 15/16 (1 waived) |  |
 | `RangeBaseValueChangedEventArgs.cs` | `primitives/range_base_value_changed_event_args.rs` | present | 1/1 | 4/4 |  |
 | `ScrollBar.cs` | `primitives/scroll_bar.rs` | present | 2/2 | 42/42 |  |
 | `ScrollBarVisibility.cs` | `primitives/scroll_bar_visibility.rs` | present | 1/1 | 4/4 |  |
 | `ScrollEventType.cs` | `primitives/scroll_event_type.rs` | present | 1/1 | 6/6 |  |
-| `SelectingItemsControl.cs` | `primitives/selecting_items_control.rs` | partial | 1/1 | 52/54 |  |
+| `SelectingItemsControl.cs` | `primitives/selecting_items_control.rs` | present | 1/1 | 54/54 |  |
 | `SelectionHandleType.cs` | `primitives/selection_handle_type.rs` | present | 1/1 | 3/3 |  |
 | `SnapPointsAlignment.cs` | `primitives/snap_points_alignment.rs` | present | 1/1 | 3/3 |  |
 | `SnapPointsType.cs` | `primitives/snap_points_type.rs` | present | 1/1 | 3/3 |  |
@@ -1260,115 +709,25 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TemplateAppliedEventArgs.cs` | `primitives/template_applied_event_args.rs` | present | 1/1 | 2/2 |  |
 | `TemplatedControl.cs` | `primitives/templated_control.rs` | present | 1/1 | 45/45 |  |
 | `TextSearch.cs` | `primitives/text_search.rs` | present | 1/1 | 7/7 |  |
-| `TextSelectionCanvas.cs` | `primitives/text_selection_canvas.rs` | partial | 1/1 | 8/9 |  |
+| `TextSelectionCanvas.cs` | `primitives/text_selection_canvas.rs` | present | 1/1 | 8/9 (1 waived) |  |
 | `TextSelectionHandle.cs` | `primitives/text_selection_handle.rs` | present | 1/1 | 20/20 |  |
 | `TextSelectorLayer.cs` | `primitives/text_selector_layer.rs` | present | 1/1 | 7/7 |  |
 | `Thumb.cs` | `primitives/thumb.rs` | present | 1/1 | 16/16 |  |
-| `ToggleButton.cs` | `primitives/toggle_button.rs` | partial | 1/1 | 12/13 |  |
-| `Track.cs` | `primitives/track.rs` | partial | 1/1 | 28/29 |  |
+| `ToggleButton.cs` | `primitives/toggle_button.rs` | present | 1/1 | 12/13 (1 waived) |  |
+| `Track.cs` | `primitives/track.rs` | present | 1/1 | 28/29 (1 waived) |  |
 | `UniformGrid.cs` | `primitives/uniform_grid.rs` | present | 1/1 | 13/13 |  |
 | `VisualLayerManager.cs` | `primitives/visual_layer_manager.rs` | present | 1/1 | 14/14 |  |
 
-<details><summary><code>AdornerLayer.cs</code> - 1 missing</summary>
-
-- `AdornerLayer` (class): 1 missing
-  - `static AdornerLayer()` *(static)*
-
-</details>
-
-<details><summary><code>HeaderedContentControl.cs</code> - 1 missing</summary>
-
-- `HeaderedContentControl` (class): 1 missing
-  - `override void BuildDebugDisplay(StringBuilder builder, bool includeContent)` *(internal)*
-
-</details>
-
-<details><summary><code>ILogicalScrollable.cs</code> - 2 missing</summary>
-
-- `ILogicalScrollable` (interface): 2 missing
-  - `new bool CanHorizontallyScroll { get; set; }`
-  - `new bool CanVerticallyScroll { get; set; }`
-
-</details>
-
-<details><summary><code>OverlayPopupHost.cs</code> - 5 missing</summary>
-
-- `OverlayPopupHost` (class): 5 missing
-  - `bool IPopupHost.Topmost { get; set; }` *(explicit)*
-  - `IReadOnlyList<ManagedPopupPositionerScreenInfo> IManagedPopupPositionerPopup.Screens { get; }` *(explicit)*
-  - `Rect IManagedPopupPositionerPopup.ParentClientAreaScreenGeometry { get; }` *(explicit)*
-  - `void IManagedPopupPositionerPopup.MoveAndResize(Point devicePoint, Size virtualSize)` *(explicit)*
-  - `double IManagedPopupPositionerPopup.Scaling { get; }` *(explicit)*
-
-</details>
-
-<details><summary><code>Popup.cs</code> - 1 missing</summary>
-
-- `Popup` (class): 1 missing
-  - `IPopupHost? IPopupHostProvider.PopupHost { get; }` *(explicit)*
-
-</details>
-
-<details><summary><code>PopupRoot.cs</code> - 1 missing</summary>
-
-- `PopupRoot` (class): 1 missing
-  - `Visual IPopupHost.HostedVisualTreeRoot { get; }` *(explicit)*
-
-</details>
-
-<details><summary><code>RangeBase.cs</code> - 1 missing</summary>
-
-- `RangeBase` (class): 1 missing
-  - `double Value { get; set; }` *(getter `value` found, setter `set_value` missing)*
-
-</details>
-
-<details><summary><code>SelectingItemsControl.cs</code> - 2 missing</summary>
-
-- `SelectingItemsControl` (class): 2 missing
-  - `override void EndInit()`
-  - `new static SelectingItemsControl? ItemsControlFromItemContainer(Control container)`
-
-</details>
-
-<details><summary><code>TextSelectionCanvas.cs</code> - 1 missing</summary>
-
-- `TextSelectionHandleCanvas` (class): 1 missing
-  - `static TextSelectionHandleCanvas()` *(static)*
-
-</details>
-
-<details><summary><code>ToggleButton.cs</code> - 1 missing</summary>
-
-- `ToggleButton` (class): 1 missing
-  - `static ToggleButton()` *(static)*
-
-</details>
-
-<details><summary><code>Track.cs</code> - 1 missing</summary>
-
-- `Track` (class): 1 missing
-  - `double Value { get; set; }` *(getter `value` found, setter `set_value` missing)*
-
-</details>
-
-### `Primitives/PopupPositioning` - files 6/6, types 13/15, members 70/78
+### `Primitives/PopupPositioning` - files 6/6, types 13/15 (2 waived), members 70/78 (8 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `CustomPopupPlacement.cs` | `primitives/popup_positioning/custom_popup_placement.rs` | present | 1/1 | 9/9 |  |
 | `CustomPopupPlacementCallback.cs` | `primitives/popup_positioning/custom_popup_placement_callback.rs` | present | 1/1 | 0/0 |  |
-| `IPopupPositioner.cs` | `primitives/popup_positioning/i_popup_positioner.rs` | partial | 5/7 | 37/45 |  |
+| `IPopupPositioner.cs` | `primitives/popup_positioning/i_popup_positioner.rs` | present | 5/7 (2 waived) | 37/45 (8 waived) |  |
 | `ManagedPopupPositioner.cs` | `primitives/popup_positioning/managed_popup_positioner.rs` | present | 3/3 | 9/9 |  |
 | `ManagedPopupPositionerPopupImplHelper.cs` | `primitives/popup_positioning/managed_popup_positioner_popup_impl_helper.rs` | present | 2/2 | 5/5 |  |
 | `PopupPositionRequest.cs` | `primitives/popup_positioning/popup_position_request.rs` | present | 1/1 | 10/10 |  |
-
-<details><summary><code>IPopupPositioner.cs</code> - 10 missing</summary>
-
-- `PopupPositioningEdgeHelper` (class, internal): **type missing** (7 members)
-- `PopupPositionerExtensions` (class, internal): **type missing** (1 members)
-
-</details>
 
 ### `Properties` - files 0/0, types 0/0, members 0/0
 
@@ -1376,33 +735,19 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `AssemblyInfo.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 
-### `PullToRefresh` - files 9/9, types 9/9, members 84/86
+### `PullToRefresh` - files 9/9, types 9/9, members 84/86 (2 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `RefreshCompletionDeferral.cs` | `pull_to_refresh/refresh_completion_deferral.rs` | present | 1/1 | 3/3 |  |
 | `RefreshContainer.cs` | `pull_to_refresh/refresh_container.rs` | present | 1/1 | 15/15 |  |
 | `RefreshInfoProvider.cs` | `pull_to_refresh/refresh_info_provider.rs` | present | 1/1 | 23/23 |  |
-| `RefreshRequestedEventArgs.cs` | `pull_to_refresh/refresh_requested_event_args.rs` | partial | 1/1 | 4/5 |  |
+| `RefreshRequestedEventArgs.cs` | `pull_to_refresh/refresh_requested_event_args.rs` | present | 1/1 | 4/5 (1 waived) |  |
 | `RefreshVisualizer.cs` | `pull_to_refresh/refresh_visualizer.rs` | present | 1/1 | 14/14 |  |
 | `RefreshVisualizerOrientation.cs` | `pull_to_refresh/refresh_visualizer_orientation.rs` | present | 1/1 | 4/4 |  |
 | `RefreshVisualizerState.cs` | `pull_to_refresh/refresh_visualizer_state.rs` | present | 1/1 | 5/5 |  |
 | `ScrollViewerIRefreshInfoProviderAdapter.cs` | `pull_to_refresh/scroll_viewer_i_refresh_info_provider_adapter.rs` | present | 1/1 | 8/8 |  |
-| `ScrollablePullGestureRecognizer.cs` | `pull_to_refresh/scrollable_pull_gesture_recognizer.rs` | partial | 1/1 | 8/9 |  |
-
-<details><summary><code>RefreshRequestedEventArgs.cs</code> - 1 missing</summary>
-
-- `RefreshRequestedEventArgs` (class): 1 missing
-  - `RefreshRequestedEventArgs(RefreshCompletionDeferral completionDeferral, RoutedEvent? routedEvent)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>ScrollablePullGestureRecognizer.cs</code> - 1 missing</summary>
-
-- `ScrollablePullGestureRecognizer` (class): 1 missing
-  - `ScrollablePullGestureRecognizer()` *(1 of 2 constructors found)*
-
-</details>
+| `ScrollablePullGestureRecognizer.cs` | `pull_to_refresh/scrollable_pull_gesture_recognizer.rs` | present | 1/1 | 8/9 (1 waived) |  |
 
 ### `Remote` - files 0/2, types 0/3, members 0/9
 
@@ -1418,63 +763,20 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `RemoteServerTopLevelImpl.Framebuffer.cs` | `remote/server/remote_server_top_level_impl_framebuffer.rs` | missing | 0/1 | 0/0 |  |
 | `RemoteServerTopLevelImpl.cs` | `remote/server/remote_server_top_level_impl.rs` | missing | 0/1 | 0/8 |  |
 
-### `Selection` - files 10/10, types 16/17, members 150/176
+### `Selection` - files 10/10, types 16/17 (1 waived), members 150/176 (26 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `ISelectionModel.cs` | `selection/i_selection_model.rs` | present | 3/3 | 24/24 |  |
 | `IndexRange.cs` | `selection/index_range.rs` | present | 1/1 | 24/24 |  |
 | `InternalSelectionModel.cs` | `selection/internal_selection_model.rs` | present | 1/1 | 6/6 |  |
-| `ReadOnlySelectionListBase.cs` | `selection/read_only_selection_list_base.rs` | partial | 1/1 | 2/19 |  |
+| `ReadOnlySelectionListBase.cs` | `selection/read_only_selection_list_base.rs` | present | 1/1 | 2/19 (17 waived) |  |
 | `SelectedIndexes.cs` | `selection/selected_indexes.rs` | present | 1/1 | 6/6 |  |
 | `SelectedItems.cs` | `selection/selected_items.rs` | present | 2/2 | 10/10 |  |
-| `SelectionModel.cs` | `selection/selection_model.rs` | partial | 2/3 | 49/53 |  |
+| `SelectionModel.cs` | `selection/selection_model.rs` | present | 2/3 (1 waived) | 49/53 (4 waived) |  |
 | `SelectionModelIndexesChangedEventArgs.cs` | `selection/selection_model_indexes_changed_event_args.rs` | present | 1/1 | 3/3 |  |
-| `SelectionModelSelectionChangedEventArgs.cs` | `selection/selection_model_selection_changed_event_args.rs` | partial | 2/2 | 8/13 |  |
+| `SelectionModelSelectionChangedEventArgs.cs` | `selection/selection_model_selection_changed_event_args.rs` | present | 2/2 | 8/13 (5 waived) |  |
 | `SelectionNodeBase.cs` | `selection/selection_node_base.rs` | present | 2/2 | 18/18 |  |
-
-<details><summary><code>ReadOnlySelectionListBase.cs</code> - 17 missing</summary>
-
-- `ReadOnlySelectionListBase<T>` (class): 17 missing
-  - `abstract T? this[int index] { get; }`
-  - `abstract int Count { get; }`
-  - `object? IList.this[int index] { get; set; }` *(explicit)*
-  - `bool IList.IsFixedSize { get; }` *(explicit)*
-  - `bool IList.IsReadOnly { get; }` *(explicit)*
-  - `bool ICollection.IsSynchronized { get; }` *(explicit)*
-  - `object ICollection.SyncRoot { get; }` *(explicit)*
-  - `abstract IEnumerator<T?> GetEnumerator()`
-  - `IEnumerator IEnumerable.GetEnumerator()` *(explicit)*
-  - `int IList.Add(object? value)` *(explicit)*
-  - `void IList.Clear()` *(explicit)*
-  - `void IList.Insert(int index, object? value)` *(explicit)*
-  - `void IList.Remove(object? value)` *(explicit)*
-  - `void IList.RemoveAt(int index)` *(explicit)*
-  - `bool IList.Contains(object? value)` *(explicit)*
-  - `void ICollection.CopyTo(Array array, int index)` *(explicit)*
-  - `int IList.IndexOf(object? value)` *(explicit)*
-
-</details>
-
-<details><summary><code>SelectionModel.cs</code> - 5 missing</summary>
-
-- `SelectionModel<T>` (class): 1 missing
-  - `SelectionModel(IEnumerable<T>? source)` *(1 of 2 constructors found)*
-- `SelectionModel<T>.BatchUpdateOperation` (record struct, public): **type missing** (3 members)
-
-</details>
-
-<details><summary><code>SelectionModelSelectionChangedEventArgs.cs</code> - 5 missing</summary>
-
-- `SelectionModelSelectionChangedEventArgs` (class): 2 missing
-  - `abstract IReadOnlyList<object?> GetUntypedDeselectedItems()` *(protected)*
-  - `abstract IReadOnlyList<object?> GetUntypedSelectedItems()` *(protected)*
-- `SelectionModelSelectionChangedEventArgs<T>` (class): 3 missing
-  - `SelectionModelSelectionChangedEventArgs(IReadOnlyList<int>? deselectedIndices = null, IReadOnlyList<int>? s...`
-  - `override IReadOnlyList<object?> GetUntypedDeselectedItems()` *(protected)*
-  - `override IReadOnlyList<object?> GetUntypedSelectedItems()` *(protected)*
-
-</details>
 
 ### `Shapes` - files 9/9, types 9/9, members 77/77
 
@@ -1490,19 +792,12 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Sector.cs` | `shapes/sector.rs` | present | 1/1 | 6/6 |  |
 | `Shape.cs` | `shapes/shape.rs` | present | 1/1 | 31/31 |  |
 
-### `SplitButton` - files 2/2, types 2/2, members 49/50
+### `SplitButton` - files 2/2, types 2/2, members 49/50 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `SplitButton.cs` | `split_button/split_button.rs` | partial | 1/1 | 36/37 |  |
+| `SplitButton.cs` | `split_button/split_button.rs` | present | 1/1 | 36/37 (1 waived) |  |
 | `ToggleSplitButton.cs` | `split_button/toggle_split_button.rs` | present | 1/1 | 13/13 |  |
-
-<details><summary><code>SplitButton.cs</code> - 1 missing</summary>
-
-- `SplitButton` (class): 1 missing
-  - `void IClickableControl.RaiseClick()` *(explicit)*
-
-</details>
 
 ### `SplitView` - files 4/4, types 4/4, members 56/56
 
@@ -1513,138 +808,50 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `SplitViewPanePlacement.cs` | `split_view/split_view_pane_placement.rs` | present | 1/1 | 4/4 |  |
 | `SplitViewTemplateSettings.cs` | `split_view/split_view_template_settings.rs` | present | 1/1 | 9/9 |  |
 
-### `Templates` - files 20/20, types 16/20, members 25/37
+### `Templates` - files 20/20, types 20/20, members 30/37 (7 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `DataTemplateExtensions.cs` | `templates/data_template_extensions.rs` | partial | 0/1 | 0/1 |  |
-| `DataTemplates.cs` | `templates/data_templates.rs` | partial | 1/1 | 1/2 |  |
+| `DataTemplateExtensions.cs` | `templates/data_template_extensions.rs` | present | 1/1 | 1/1 | renamed: an extension class: its methods are inherent methods of the type they extend (`impl Control`) |
+| `DataTemplates.cs` | `templates/data_templates.rs` | present | 1/1 | 1/2 (1 waived) |  |
 | `FuncControlTemplate.cs` | `templates/func_control_template.rs` | present | 1/1 | 2/2 |  |
 | `FuncControlTemplate`2.cs` | `templates/func_control_template.rs` | present | 1/1 | 1/1 | generic arity merged |
-| `FuncDataTemplate.cs` | `templates/func_data_template.rs` | partial | 1/1 | 5/6 |  |
-| `FuncDataTemplate`1.cs` | `templates/func_data_template.rs` | partial | 1/1 | 1/3 | generic arity merged |
+| `FuncDataTemplate.cs` | `templates/func_data_template.rs` | present | 1/1 | 5/6 (1 waived) |  |
+| `FuncDataTemplate`1.cs` | `templates/func_data_template.rs` | present | 1/1 | 1/3 (2 waived) | generic arity merged |
 | `FuncTemplateNameScopeExtensions.cs` | `templates/func_template_name_scope_extensions.rs` | present | 1/1 | 1/1 |  |
 | `FuncTemplate`1.cs` | `templates/func_template.rs` | present | 1/1 | 3/3 | generic arity merged |
-| `FuncTemplate`2.cs` | `templates/func_template.rs` | partial | 1/1 | 2/3 | generic arity merged |
-| `FuncTreeDataTemplate.cs` | `templates/func_tree_data_template.rs` | partial | 1/1 | 2/3 |  |
-| `FuncTreeDataTemplate`1.cs` | `templates/func_tree_data_template.rs` | partial | 1/1 | 1/2 | generic arity merged |
+| `FuncTemplate`2.cs` | `templates/func_template.rs` | present | 1/1 | 2/3 (1 waived) | generic arity merged |
+| `FuncTreeDataTemplate.cs` | `templates/func_tree_data_template.rs` | present | 1/1 | 2/3 (1 waived) |  |
+| `FuncTreeDataTemplate`1.cs` | `templates/func_tree_data_template.rs` | present | 1/1 | 1/2 (1 waived) | generic arity merged |
 | `IControlTemplate.cs` | `templates/i_control_template.rs` | present | 1/1 | 0/0 |  |
 | `IDataTemplate.cs` | `templates/i_data_template.rs` | present | 1/1 | 1/1 |  |
 | `IDataTemplateHost.cs` | `templates/i_data_template_host.rs` | present | 1/1 | 2/2 |  |
 | `IRecyclingDataTemplate.cs` | `templates/i_recycling_data_template.rs` | present | 1/1 | 1/1 |  |
-| `ITemplate`1.cs` | `templates/i_template.rs` | partial | 0/1 | 0/1 | generic arity merged |
-| `ITemplate`2.cs` | `templates/i_template.rs` | partial | 0/1 | 0/1 | generic arity merged |
+| `ITemplate`1.cs` | `templates/i_template.rs` | present | 1/1 | 1/1 | renamed: the untyped contract `ITemplate` is in the base crate; the typed form is the trait `ITemplateOf&lt;TControl&gt;` (`build_typed`) |
+| `ITemplate`2.cs` | `templates/i_template.rs` | present | 1/1 | 1/1 | renamed: traits cannot be overloaded by arity: the template with a parameter is `ITemplateWithParam&lt;TParam, TControl&gt;` |
 | `ITreeDataTemplate.cs` | `templates/i_tree_data_template.rs` | present | 1/1 | 1/1 |  |
 | `ITypedDataTemplate.cs` | `templates/i_typed_data_template.rs` | present | 1/1 | 1/1 |  |
-| `TemplateExtensions.cs` | `templates/template_extensions.rs` | partial | 0/1 | 0/2 |  |
+| `TemplateExtensions.cs` | `templates/template_extensions.rs` | present | 1/1 | 2/2 | renamed: an extension class: its methods are inherent methods of the type they extend (`impl TemplatedControl`) |
 
-<details><summary><code>DataTemplateExtensions.cs</code> - 2 missing</summary>
-
-- `DataTemplateExtensions` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>DataTemplates.cs</code> - 1 missing</summary>
-
-- `DataTemplates` (class): 1 missing
-  - `void IAvaloniaListItemValidator<IDataTemplate>.Validate(IDataTemplate item)` *(explicit)*
-
-</details>
-
-<details><summary><code>FuncDataTemplate.cs</code> - 1 missing</summary>
-
-- `FuncDataTemplate` (class): 1 missing
-  - `FuncDataTemplate(Func<object?, bool> match, Func<object?, INameScope, Control?> build, bool supportsRecycli...` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>FuncDataTemplate`1.cs</code> - 2 missing</summary>
-
-- `FuncDataTemplate<T>` (class): 2 missing
-  - `FuncDataTemplate(Func<T, bool> match, Func<T, INameScope, Control> build, bool supportsRecycling = false)` *(1 of 3 constructors found)*
-  - `FuncDataTemplate(Func<T, bool> match, Func<T, Control> build, bool supportsRecycling = false)` *(1 of 3 constructors found)*
-
-</details>
-
-<details><summary><code>FuncTemplate`2.cs</code> - 1 missing</summary>
-
-- `FuncTemplate<TParam, TControl>` (class): 1 missing
-  - `(TControl control, INameScope nameScope) BuildWithNameScope(TParam param)` *(protected)*
-
-</details>
-
-<details><summary><code>FuncTreeDataTemplate.cs</code> - 1 missing</summary>
-
-- `FuncTreeDataTemplate` (class): 1 missing
-  - `FuncTreeDataTemplate(Func<object?, bool> match, Func<object?, INameScope, Control?> build, Func<object?, IE...` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>FuncTreeDataTemplate`1.cs</code> - 1 missing</summary>
-
-- `FuncTreeDataTemplate<T>` (class): 1 missing
-  - `FuncTreeDataTemplate(Func<T, bool> match, Func<T, INameScope, Control> build, Func<T, IEnumerable> itemsSel...` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>ITemplate`1.cs</code> - 2 missing</summary>
-
-- `ITemplate<TControl>` (interface, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>ITemplate`2.cs</code> - 2 missing</summary>
-
-- `ITemplate<TParam, TControl>` (interface, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>TemplateExtensions.cs</code> - 3 missing</summary>
-
-- `TemplateExtensions` (class, public): **type missing** (2 members)
-
-</details>
-
-### `Utils` - files 14/15, types 16/17, members 85/93
+### `Utils` - files 15/15, types 16/17 (1 waived), members 85/93 (8 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AncestorFinder.cs` | `utils/ancestor_finder.rs` | present | 1/1 | 2/2 |  |
-| `BindingEvaluator.cs` | `utils/binding_evaluator.rs` | partial | 1/1 | 6/7 |  |
+| `BindingEvaluator.cs` | `utils/binding_evaluator.rs` | present | 1/1 | 6/7 (1 waived) |  |
 | `BorderRenderHelper.cs` | `utils/border_render_helper.rs` | present | 1/1 | 1/1 |  |
 | `ClipboardHelper.cs` | `utils/clipboard_helper.rs` | present | 1/1 | 1/1 |  |
-| `CollectionChangedEventManager.cs` | `utils/collection_changed_event_manager.rs` | partial | 2/2 | 5/6 |  |
+| `CollectionChangedEventManager.cs` | `utils/collection_changed_event_manager.rs` | present | 2/2 | 5/6 (1 waived) |  |
 | `CollectionUtils.cs` | `utils/collection_utils.rs` | present | 1/1 | 2/2 |  |
-| `IEnumerableUtils.cs` | `utils/i_enumerable_utils.rs` | missing | 0/1 | 0/5 |  |
+| `IEnumerableUtils.cs` | `items_source.rs` | present | 0/1 (1 waived) | 0/5 (5 waived) | replaced: extension methods over the untyped `IEnumerable` of an items source; an items source is an `ItemsSource`, whose list contract `IItemsList` has `count`, `index_of` and `get_at` |
 | `ISelectionAdapter.cs` | `utils/i_selection_adapter.rs` | present | 1/1 | 6/6 |  |
 | `PrimarySelectionHelper.cs` | `utils/primary_selection_helper.rs` | present | 1/1 | 1/1 |  |
 | `RealizedStackElements.cs` | `utils/realized_stack_elements.rs` | present | 1/1 | 19/19 |  |
-| `SelectingItemsControlSelectionAdapter.cs` | `utils/selecting_items_control_selection_adapter.rs` | partial | 1/1 | 12/13 |  |
+| `SelectingItemsControlSelectionAdapter.cs` | `utils/selecting_items_control_selection_adapter.rs` | present | 1/1 | 12/13 (1 waived) |  |
 | `StringUtils.cs` | `utils/string_utils.rs` | present | 1/1 | 5/5 |  |
 | `TimeUtils.cs` | `utils/time_utils.rs` | present | 1/1 | 2/2 |  |
 | `UndoRedoHelper.cs` | `utils/undo_redo_helper.rs` | present | 2/2 | 18/18 |  |
 | `VirtualizingSnapPointsList.cs` | `utils/virtualizing_snap_points_list.rs` | present | 1/1 | 5/5 |  |
-
-<details><summary><code>BindingEvaluator.cs</code> - 1 missing</summary>
-
-- `BindingEvaluator<T>` (class): 1 missing
-  - `T Value { get; set; }` *(getter `value` found, setter `set_value` missing)*
-
-</details>
-
-<details><summary><code>CollectionChangedEventManager.cs</code> - 1 missing</summary>
-
-- `CollectionChangedEventManager` (class): 1 missing
-  - `static CollectionChangedEventManager Instance { get; }`
-
-</details>
-
-<details><summary><code>SelectingItemsControlSelectionAdapter.cs</code> - 1 missing</summary>
-
-- `SelectingItemsControlSelectionAdapter` (class): 1 missing
-  - `SelectingItemsControlSelectionAdapter(SelectingItemsControl selector)` *(1 of 2 constructors found)*
-
-</details>
 
 ## Rust-only files
 
@@ -1652,86 +859,85 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
-| `assigned_binding.rs` | **unmapped** | `AssignedBinding` |
-| `command_bar/command_bar_tests_keyboard.rs` | **unmapped** | `AppScope`, `VisibilityChangingCommandBarButton` |
-| `command_bar/command_bar_tests_overflow.rs` | **unmapped** |  |
-| `grid_mocks.rs` | **unmapped** | `GridAssert`, `GridMock` |
-| `i_clickable_control.rs` | **unmapped** | `Adapter` |
-| `i_command_source.rs` | **unmapped** | `Adapter` |
-| `items_source.rs` | **unmapped** | `IItemsList`, `ItemsChangedEventArgs`, `ItemsChangedHandler`, `ItemsSource`, `ItemsView`, `ItemsViewIter`, `ItemsViewSource`, `TypedItems`, `TypedItemsSource` |
-| `layout_test_control.rs` | **unmapped** | `LayoutOverride`, `LayoutTestControl`, `LayoutTestRoot` |
-| `layoutable_tests_effective_viewport_changed.rs` | **unmapped** | `TestCanvas` |
-| `layoutable_tests_layout_rounding.rs` | **unmapped** | `TestLayoutable` |
-| `list_box_tests_multiple.rs` | **unmapped** | `ReceivedArgs` |
-| `list_box_tests_single.rs` | **unmapped** | `TestStackOverflowViewModel` |
-| `markup_types/classes.rs` | **unmapped** | `RoutedEventOf` |
-| `markup_types/contracts.rs` | **unmapped** | `AddChildOf` |
-| `markup_types/converters.rs` | **unmapped** |  |
-| `markup_types/enums.rs` | **unmapped** |  |
-| `markup_types/lists.rs` | **unmapped** |  |
-| `markup_types/plain.rs` | **unmapped** | `FerroListOf` |
-| `markup_types/values.rs` | **unmapped** |  |
-| `metadata/pseudo_classes_attribute.rs` | **unmapped** | `PseudoClassesAttribute` |
-| `metadata/template_part_attribute.rs` | **unmapped** | `TemplatePartAttribute` |
-| `mouse_test_helper.rs` | **unmapped** | `MouseTestHelper` |
-| `navigable_containers.rs` | **unmapped** | `ContainerCast` |
-| `page/carousel_page_tests_interaction.rs` | **unmapped** | `DataItem`, `Hosted`, `MockGlobalClock`, `SwipeReady`, `TrackingPage` |
-| `page/drawer_page_tests_lifecycle.rs` | **unmapped** |  |
-| `page/drawer_page_tests_templates.rs` | **unmapped** | `Created` |
-| `page/navigation_page_tests_lifecycle.rs` | **unmapped** |  |
-| `page/navigation_page_tests_navigating.rs` | **unmapped** |  |
-| `page/navigation_page_tests_stack.rs` | **unmapped** | `BackButtonParts` |
-| `page/tabbed_page_tests_data_template.rs` | **unmapped** | `DataItem`, `Hosted` |
-| `platform/i_platform_handle.rs` | **unmapped** | `IPlatformHandle` |
-| `platform/platform_handle.rs` | **unmapped** | `PlatformHandle` |
-| `presentation_source/renderer_factory.rs` | **unmapped** | `IRendererFactory`, `ITopLevelRenderer`, `RenderSurfaces` |
-| `presenters/content_presenter_tests_in_template.rs` | **unmapped** | `TestViewModel` |
-| `presenters/content_presenter_tests_layout.rs` | **unmapped** |  |
-| `presenters/content_presenter_tests_standalone.rs` | **unmapped** | `MockHostParent`, `MockParent` |
-| `presenters/content_presenter_tests_unrooted.rs` | **unmapped** |  |
-| `presenters/scroll_content_presenter_tests_i_logical_scrollable.rs` | **unmapped** |  |
-| `primitives/popup_tests_items_control.rs` | **unmapped** | `PopupItemsControl` |
-| `primitives/selecting_items_control_tests_auto_select.rs` | **unmapped** | `AlwaysSelectedTestSelectorDisablingFirstContainers`, `AlwaysSelectedTestSelectorHidingFirstContainers`, `ResetOnAdd`, `TestSelector` |
-| `primitives/selecting_items_control_tests_multiple.rs` | **unmapped** | `ItemViewModel`, `ItemsViewModel`, `OldDataContextViewModel`, `Options`, `Target`, `TestContainer`, `TestSelector`, `TestSelectorWithContainers` |
-| `primitives/selecting_items_control_tests_selected_value.rs` | **unmapped** | `TestClass` |
-| `register_types.rs` | **unmapped** |  |
-| `render_tests_culling.rs` | **unmapped** | `TestControl` |
-| `rust_paths.rs` | **unmapped** |  |
-| `scroll_viewer_tests_i_logical_scrollable.rs` | **unmapped** |  |
-| `selection/selection_model_tests_multiple.rs` | **unmapped** | `ResettingList`, `Target` |
-| `selection/selection_model_tests_single.rs` | **unmapped** | `MockBinding`, `Target` |
-| `size_to_content.rs` | **unmapped** | `SizeToContent` |
-| `styled_element_tests_resources.rs` | **unmapped** |  |
-| `styled_element_tests_theming.rs` | **unmapped** | `ThemedControl`, `ThemedControl2` |
-| `templates/template_result.rs` | **unmapped** | `TemplateResult` |
-| `test_command.rs` | **unmapped** | `Handlers`, `TestCommand` |
-| `test_support.rs` | **unmapped** | `NullHitTester`, `TestRenderer`, `TestRoot`, `TestScope`, `TestSource`, `TestTextBlock` |
-| `test_support_buttons.rs` | **unmapped** | `FocusScope` |
-| `test_support_scrolling.rs` | **unmapped** | `TestScrollable` |
-| `test_support_shapes.rs` | **unmapped** | `MockRenderInterfaceScope` |
-| `testing/compositor_test_services.rs` | **unmapped** | `CompositorTestServices` |
-| `testing/mock_screen.rs` | **unmapped** | `MockScreenImpl` |
-| `testing/mock_window_impl.rs` | **unmapped** | `Hook`, `MockCall`, `MockImplKind`, `MockWindowImpl` |
-| `testing/mock_windowing_platform.rs` | **unmapped** | `MockWindowingPlatform`, `PopupImplFactory`, `TrayIconImplFactory`, `WindowImplFactory` |
-| `testing/null_renderer.rs` | **unmapped** | `NullRenderer` |
-| `testing/test_clipboard.rs` | **unmapped** | `TestClipboardFailure`, `TestClipboardImpl` |
-| `testing/test_log_sink.rs` | **unmapped** | `LogCallback`, `TestLogSink` |
-| `testing/test_services.rs` | **unmapped** | `MockRuntimePlatform`, `TestServices` |
-| `testing/test_services_windowing.rs` | **unmapped** | `CursorStub`, `HeadlessCursorFactoryStub` |
-| `testing/test_theme.rs` | **unmapped** | `FuncWindowDrawnDecorationsTemplate` |
-| `testing/test_theme_autocomplete.rs` | **unmapped** |  |
-| `testing/test_theme_command_bar.rs` | **unmapped** | `ButtonProperties` |
-| `testing/test_theme_notifications.rs` | **unmapped** |  |
-| `testing/test_theme_page.rs` | **unmapped** |  |
-| `testing/test_theme_pips_pager.rs` | **unmapped** |  |
-| `testing/test_theme_pull_to_refresh.rs` | **unmapped** | `RefreshVisualizerContentTemplate` |
-| `testing/test_theme_split_view.rs` | **unmapped** |  |
-| `testing/unit_test_application.rs` | **unmapped** | `ScopeState`, `UnitTestApplication`, `UnitTestApplicationScope` |
-| `text_box_tests_data_validation.rs` | **unmapped** | `ExceptionTest`, `IndeiStringTest`, `InvalidOperationError` |
-| `text_box_tests_input.rs` | **unmapped** | `TouchTestHelper` |
-| `top_level_tests_platform_features.rs` | **unmapped** | `Pending`, `PendingFuture`, `TestPlatformBehaviorInhibition`, `TestSystemNavigationManager` |
-| `utils/debug_display.rs` | **unmapped** |  |
-| `utils/masked_text_provider.rs` | **unmapped** | `CaseConversion`, `CharDescriptor`, `CharType`, `MaskSeparators`, `MaskedTextProvider`, `MaskedTextProviderError`, `MaskedTextResultHint` |
-| `window_decorations.rs` | **unmapped** | `WindowDecorations` |
+| `assigned_binding.rs` | a binding held as the value of a property that is assigned a binding rather than bound with it; equality is identity, as of the object reference upstream | `AssignedBinding` |
+| `command_bar/command_bar_tests_keyboard.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `AppScope`, `VisibilityChangingCommandBarButton` |
+| `command_bar/command_bar_tests_overflow.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
+| `grid_mocks.rs` | helpers shared by the grid tests (`GridMocks.cs` of the upstream test project) | `GridAssert`, `GridMock` |
+| `i_clickable_control.rs` | the registry of the classes that implement `IClickableControl`: a class cannot implement the trait itself, an interface cast upstream | `Adapter` |
+| `i_command_source.rs` | the registry of the classes that implement `ICommandSource`: a class cannot implement the trait itself, an interface cast upstream | `Adapter` |
+| `layout_test_control.rs` | the port of `LayoutTestControl.cs` and `LayoutTestRoot.cs` of the base library's test project: they derive from controls, so the layout tests that use them live with the controls | `LayoutOverride`, `LayoutTestControl`, `LayoutTestRoot` |
+| `layoutable_tests_effective_viewport_changed.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `TestCanvas` |
+| `layoutable_tests_layout_rounding.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `TestLayoutable` |
+| `list_box_tests_multiple.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `ReceivedArgs` |
+| `list_box_tests_single.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `TestStackOverflowViewModel` |
+| `markup_types/contracts.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with | `AddChildOf` |
+| `markup_types/converters.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
+| `markup_types/enums.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
+| `markup_types/lists.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
+| `markup_types/plain.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with | `FerroListOf` |
+| `markup_types/values.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
+| `metadata/pseudo_classes_attribute.rs` | the constant a control declares its pseudo-classes with in Rust code; the attribute markup reads is mapped in the base crate (`Controls/Metadata/PseudoClassesAttribute.cs` of Avalonia.Base) | `PseudoClassesAttribute` |
+| `metadata/template_part_attribute.rs` | the constant a control declares its template parts with in Rust code; the attribute markup reads is mapped in the base crate (`Controls/Metadata/TemplatePartAttribute.cs` of Avalonia.Base) | `TemplatePartAttribute` |
+| `mouse_test_helper.rs` | the port of `MouseTestHelper` of the upstream test projects | `MouseTestHelper` |
+| `navigable_containers.rs` | views a panel as the `INavigableContainer` it implements: an interface cast upstream | `ContainerCast` |
+| `page/carousel_page_tests_interaction.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `DataItem`, `Hosted`, `MockGlobalClock`, `SwipeReady`, `TrackingPage` |
+| `page/drawer_page_tests_lifecycle.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
+| `page/drawer_page_tests_templates.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `Created` |
+| `page/navigation_page_tests_lifecycle.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
+| `page/navigation_page_tests_navigating.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
+| `page/navigation_page_tests_stack.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `BackButtonParts` |
+| `page/tabbed_page_tests_data_template.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `DataItem`, `Hosted` |
+| `platform/i_platform_handle.rs` | `IPlatformHandle` and `PlatformHandle` declared a second time: upstream has them once, in `Platform/` of Avalonia.Base, and the base crate ports them there too (open: keep one declaration) | `IPlatformHandle` |
+| `platform/platform_handle.rs` | `IPlatformHandle` and `PlatformHandle` declared a second time: upstream has them once, in `Platform/` of Avalonia.Base, and the base crate ports them there too (open: keep one declaration) | `PlatformHandle` |
+| `presentation_source/renderer_factory.rs` | the renderer seam of the top-level layer: top-levels are written against a renderer contract, where upstream every presentation source creates a compositing renderer over the compositor of its platform implementation | `IRendererFactory`, `ITopLevelRenderer`, `RenderSurfaces` |
+| `presenters/content_presenter_tests_in_template.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `TestViewModel` |
+| `presenters/content_presenter_tests_layout.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
+| `presenters/content_presenter_tests_standalone.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `MockHostParent`, `MockParent` |
+| `presenters/content_presenter_tests_unrooted.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
+| `presenters/scroll_content_presenter_tests_i_logical_scrollable.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
+| `primitives/popup_tests_items_control.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `PopupItemsControl` |
+| `primitives/selecting_items_control_tests_auto_select.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `AlwaysSelectedTestSelectorDisablingFirstContainers`, `AlwaysSelectedTestSelectorHidingFirstContainers`, `ResetOnAdd`, `TestSelector` |
+| `primitives/selecting_items_control_tests_multiple.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `ItemViewModel`, `ItemsViewModel`, `OldDataContextViewModel`, `Options`, `Target`, `TestContainer`, `TestSelector`, `TestSelectorWithContainers` |
+| `primitives/selecting_items_control_tests_selected_value.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `TestClass` |
+| `register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |  |
+| `render_tests_culling.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `TestControl` |
+| `rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |  |
+| `scroll_viewer_tests_i_logical_scrollable.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
+| `selection/selection_model_tests_multiple.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `ResettingList`, `Target` |
+| `selection/selection_model_tests_single.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `MockBinding`, `Target` |
+| `size_to_content.rs` | the enum `SizeToContent`, declared in `Window.cs` upstream | `SizeToContent` |
+| `styled_element_tests_resources.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
+| `styled_element_tests_theming.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `ThemedControl`, `ThemedControl2` |
+| `templates/template_result.rs` | port of `Controls/Templates/TemplateResult.cs` and `ITemplateResult.cs` of Avalonia.Base, in the crate of their only user | `TemplateResult` |
+| `test_command.rs` | classes, services and a command shared by the tests of the crate | `Handlers`, `TestCommand` |
+| `test_support.rs` | classes, services and a command shared by the tests of the crate | `NullHitTester`, `TestRenderer`, `TestRoot`, `TestScope`, `TestSource`, `TestTextBlock` |
+| `test_support_buttons.rs` | classes, services and a command shared by the tests of the crate | `FocusScope` |
+| `test_support_scrolling.rs` | classes, services and a command shared by the tests of the crate | `TestScrollable` |
+| `test_support_shapes.rs` | classes, services and a command shared by the tests of the crate | `MockRenderInterfaceScope` |
+| `testing/compositor_test_services.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `CompositorTestServices` |
+| `testing/mock_screen.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `MockScreenImpl` |
+| `testing/mock_window_impl.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `Hook`, `MockCall`, `MockImplKind`, `MockWindowImpl` |
+| `testing/mock_windowing_platform.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `MockWindowingPlatform`, `PopupImplFactory`, `TrayIconImplFactory`, `WindowImplFactory` |
+| `testing/null_renderer.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `NullRenderer` |
+| `testing/test_clipboard.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `TestClipboardFailure`, `TestClipboardImpl` |
+| `testing/test_icon_loader.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `TestIconImpl`, `TestIconLoader` |
+| `testing/test_log_sink.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `LogCallback`, `TestLogSink` |
+| `testing/test_services.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `MockRuntimePlatform`, `TestServices` |
+| `testing/test_services_windowing.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `CursorStub`, `HeadlessCursorFactoryStub` |
+| `testing/test_theme.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `FuncWindowDrawnDecorationsTemplate` |
+| `testing/test_theme_autocomplete.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |  |
+| `testing/test_theme_command_bar.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `ButtonProperties` |
+| `testing/test_theme_notifications.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |  |
+| `testing/test_theme_page.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |  |
+| `testing/test_theme_pips_pager.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |  |
+| `testing/test_theme_pull_to_refresh.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `RefreshVisualizerContentTemplate` |
+| `testing/test_theme_split_view.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |  |
+| `testing/unit_test_application.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `ScopeState`, `UnitTestApplication`, `UnitTestApplicationScope` |
+| `text_box_tests_data_validation.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `ExceptionTest`, `IndeiStringTest`, `InvalidOperationError` |
+| `text_box_tests_input.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `TouchTestHelper` |
+| `top_level_tests_platform_features.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `Pending`, `PendingFuture`, `TestPlatformBehaviorInhibition`, `TestSystemNavigationManager` |
+| `utils/debug_display.rs` | port of `Diagnostics/DebugDisplayHelper.cs` of Avalonia.Base and of the base levels of `BuildDebugDisplay`, next to the levels the controls add |  |
+| `utils/masked_text_provider.rs` | derived from .NET `System.ComponentModel.MaskedTextProvider`, which `MaskedTextBox` uses from the runtime library upstream | `CaseConversion`, `CharDescriptor`, `CharType`, `MaskSeparators`, `MaskedTextProvider`, `MaskedTextProviderError`, `MaskedTextResultHint` |
+| `window_decorations.rs` | the enum `WindowDecorations`, declared in `Window.cs` upstream | `WindowDecorations` |
 
-Tests, examples and build scripts (not scanned): `animation/connected_animation_tests.rs`, `app_builder_tests.rs`, `application_lifetimes/classic_desktop_style_application_lifetime_tests.rs`, `application_tests.rs`, `arrange_tests.rs`, `auto_complete_box/auto_complete_box_tests.rs`, `automation/automation_properties_tests.rs`, `automation/peers/calendar_day_button_automation_peer_tests.rs`, `automation/peers/combo_box_automation_peer_tests.rs`, `automation/peers/complex_control_automation_peer_tests.rs`, `automation/peers/control_automation_peer_tests.rs`, `automation/peers/embeddable_control_root_automation_peer_tests.rs`, `automation/peers/foundation_automation_peer_tests.rs`, `automation/peers/items_automation_peer_tests.rs`, `automation/peers/menu_item_automation_peer_tests.rs`, `automation/peers/native_menu_bar_automation_peer_tests.rs`, `automation/peers/page_automation_peer_tests.rs`, `automation/peers/split_button_automation_peer_tests.rs`, `automation/peers/window_automation_peer_tests.rs`, `border_tests.rs`, `bring_into_view_tests.rs`, `button_flyout_tests.rs`, `button_tests.rs`, `button_text_tests.rs`, `calendar/calendar_tests.rs`, `calendar_date_picker/calendar_date_picker_tests.rs`, `canvas_tests.rs`, `carousel_tests.rs`, `classes_tests.rs`, `combo_box_tests.rs`, `command_bar/command_bar_tests.rs`, `compositor_hit_testing_tests.rs`, `content_control_tests.rs`, `context_menu_tests.rs`, `control_focus_adorner_tests.rs`, `converters/converters_tests.rs`, `data_validation_errors_tests.rs`, `date_time_pickers/date_picker_tests.rs`, `date_time_pickers/time_picker_tests.rs`, `decorator_tests.rs`, `design_tests.rs`, `dock_panel_tests.rs`, `documents/inline_tests.rs`, `element_ref_tests.rs`, `expander_tests.rs`, `experimental_acrylic_border_tests.rs`, `flex_panel/flex_basis_tests.rs`, `flex_panel/flex_panel_tests.rs`, `flyouts/flyout_tests.rs`, `grid_length_tests.rs`, `grid_splitter_tests.rs`, `grid_tests.rs`, `hotkey_manager_tests.rs`, `image_tests.rs`, `input_element_focus_tests.rs`, `items_control_tests.rs`, `items_source_view_tests.rs`, `label_tests.rs`, `label_text_tests.rs`, `layout_manager_tests.rs`, `layout_transform_control_tests.rs`, `layoutable_tests.rs`, `list_box_tests.rs`, `list_box_virtualization_issue_tests.rs`, `loaded_tests.rs`, `markup_types/markup_types_tests.rs`, `masked_text_box_tests.rs`, `measure_tests.rs`, `menu_item_tests.rs`, `mixins/pressed_mixin_tests.rs`, `name_scope_tests.rs`, `native_menu_tests.rs`, `navigation_tests.rs`, `notifications/notifications_tests.rs`, `notifications/reversible_stack_panel_tests.rs`, `numeric_up_down/numeric_up_down_tests.rs`, `page/carousel_page_tests.rs`, `page/content_page_tests.rs`, `page/drawer_page_tests.rs`, `page/navigation_event_args_tests.rs`, `page/navigation_page_tests.rs`, `page/page_navigation_host_tests.rs`, `page/tabbed_page_tests.rs`, `panel_tests.rs`, `pips_pager/pips_pager_tests.rs`, `platform/default_menu_interaction_handler_tests.rs`, `platform/i_screen_impl_tests.rs`, `platform/input_pane_tests.rs`, `platform/platform_manager_tests.rs`, `platform_feedback_items_tests.rs`, `presentation_source/presentation_source_tests.rs`, `presenters/content_presenter_text_tests.rs`, `presenters/items_presenter_tests.rs`, `presenters/scroll_content_presenter_tests.rs`, `presenters/table_view_layout_helper_tests.rs`, `presenters/text_presenter_tests.rs`, `primitives/access_text_tests.rs`, `primitives/adorner_layer_composition_tests.rs`, `primitives/headered_content_control_tests.rs`, `primitives/headered_items_control_tests.rs`, `primitives/popup_positioning/managed_popup_positioner_tests.rs`, `primitives/popup_root_tests.rs`, `primitives/popup_tests.rs`, `primitives/range_base_tests.rs`, `primitives/scroll_bar_tests.rs`, `primitives/selecting_items_control_tests.rs`, `primitives/tab_strip_tests.rs`, `primitives/templated_control_tests.rs`, `primitives/templated_control_text_tests.rs`, `primitives/text_selection_canvas_tests.rs`, `primitives/thumb_tests.rs`, `primitives/toggle_button_tests.rs`, `primitives/track_tests.rs`, `primitives/uniform_grid_tests.rs`, `primitives/visual_layer_manager_tests.rs`, `progress_bar_tests.rs`, `pull_to_refresh/refresh_container_tests.rs`, `pull_to_refresh/refresh_info_provider_tests.rs`, `pull_to_refresh/refresh_visualizer_tests.rs`, `pull_to_refresh/scroll_viewer_i_refresh_info_provider_adapter_tests.rs`, `pull_to_refresh/scrollable_pull_gesture_recognizer_tests.rs`, `radio_button_tests.rs`, `reference_semantics_tests.rs`, `relative_panel_tests.rs`, `scroll_viewer_tests.rs`, `selectable_text_block_tests.rs`, `selection/internal_selection_model_tests.rs`, `shapes/ellipse_tests.rs`, `shapes/path_tests.rs`, `shapes/polygon_tests.rs`, `shapes/polyline_tests.rs`, `shapes/rectangle_tests.rs`, `shapes/shape_tests.rs`, `slider_tests.rs`, `split_button/split_button_tests.rs`, `split_view/split_view_tests.rs`, `stack_panel_tests.rs`, `storage_misc_tests.rs`, `styled_element_tests.rs`, `tab_control_tests.rs`, `table_view_column_header_tests.rs`, `table_view_tests.rs`, `templates/templates_tests.rs`, `text_block_tests.rs`, `text_box_tests.rs`, `theme_variant_tests.rs`, `tick_bar_tests.rs`, `toggle_switch_tests.rs`, `tool_tip_tests.rs`, `top_level_tests.rs`, `transitioning_content_control_tests.rs`, `tray_icon_tests.rs`, `tree_view_bring_into_view_tests.rs`, `tree_view_tests.rs`, `user_control_tests.rs`, `utils/collection_changed_event_manager_tests.rs`, `viewbox_tests.rs`, `virtualizing_carousel_panel_tests.rs`, `virtualizing_stack_panel_tests.rs`, `visual_extensions_get_transformed_bounds_tests.rs`, `visual_extensions_get_visuals_at_tests.rs`, `visual_extensions_tests.rs`, `visual_tests.rs`, `window_base_tests.rs`, `window_decorations_tests.rs`, `window_tests.rs`, `wrap_panel_tests.rs`.
+Tests, examples and build scripts (not scanned): `animation/connected_animation_tests.rs`, `app_builder_tests.rs`, `application_lifetimes/classic_desktop_style_application_lifetime_tests.rs`, `application_tests.rs`, `arrange_tests.rs`, `auto_complete_box/auto_complete_box_tests.rs`, `automation/automation_properties_tests.rs`, `automation/peers/calendar_day_button_automation_peer_tests.rs`, `automation/peers/combo_box_automation_peer_tests.rs`, `automation/peers/complex_control_automation_peer_tests.rs`, `automation/peers/control_automation_peer_tests.rs`, `automation/peers/embeddable_control_root_automation_peer_tests.rs`, `automation/peers/foundation_automation_peer_tests.rs`, `automation/peers/items_automation_peer_tests.rs`, `automation/peers/menu_item_automation_peer_tests.rs`, `automation/peers/native_menu_bar_automation_peer_tests.rs`, `automation/peers/page_automation_peer_tests.rs`, `automation/peers/split_button_automation_peer_tests.rs`, `automation/peers/window_automation_peer_tests.rs`, `border_tests.rs`, `bring_into_view_tests.rs`, `button_flyout_tests.rs`, `button_tests.rs`, `button_text_tests.rs`, `calendar/calendar_tests.rs`, `calendar_date_picker/calendar_date_picker_tests.rs`, `canvas_tests.rs`, `carousel_tests.rs`, `classes_tests.rs`, `combo_box_tests.rs`, `command_bar/command_bar_tests.rs`, `compositor_hit_testing_tests.rs`, `content_control_tests.rs`, `context_menu_tests.rs`, `control_focus_adorner_tests.rs`, `converters/converters_tests.rs`, `data_validation_errors_tests.rs`, `date_time_pickers/date_picker_tests.rs`, `date_time_pickers/time_picker_tests.rs`, `decorator_tests.rs`, `design_tests.rs`, `dock_panel_tests.rs`, `documents/inline_tests.rs`, `element_ref_tests.rs`, `expander_tests.rs`, `experimental_acrylic_border_tests.rs`, `flex_panel/flex_basis_tests.rs`, `flex_panel/flex_panel_tests.rs`, `flyouts/flyout_tests.rs`, `grid_length_tests.rs`, `grid_splitter_tests.rs`, `grid_tests.rs`, `hotkey_manager_tests.rs`, `image_tests.rs`, `input_element_focus_tests.rs`, `items_control_tests.rs`, `items_source_view_tests.rs`, `label_tests.rs`, `label_text_tests.rs`, `layout_manager_tests.rs`, `layout_transform_control_tests.rs`, `layoutable_tests.rs`, `list_box_tests.rs`, `list_box_virtualization_issue_tests.rs`, `loaded_tests.rs`, `markup_types/markup_types_tests.rs`, `masked_text_box_tests.rs`, `measure_tests.rs`, `menu_item_tests.rs`, `mixins/pressed_mixin_tests.rs`, `name_scope_tests.rs`, `native_menu_tests.rs`, `navigation_tests.rs`, `notifications/notifications_tests.rs`, `notifications/reversible_stack_panel_tests.rs`, `numeric_up_down/numeric_up_down_tests.rs`, `page/carousel_page_tests.rs`, `page/content_page_tests.rs`, `page/drawer_page_tests.rs`, `page/navigation_event_args_tests.rs`, `page/navigation_page_tests.rs`, `page/page_lifetime_tests.rs`, `page/page_navigation_host_tests.rs`, `page/tabbed_page_tests.rs`, `panel_tests.rs`, `pips_pager/pips_pager_tests.rs`, `platform/default_menu_interaction_handler_tests.rs`, `platform/i_screen_impl_tests.rs`, `platform/input_pane_tests.rs`, `platform/platform_manager_tests.rs`, `platform_feedback_items_tests.rs`, `presentation_source/presentation_source_tests.rs`, `presenters/content_presenter_text_tests.rs`, `presenters/items_presenter_tests.rs`, `presenters/scroll_content_presenter_tests.rs`, `presenters/table_view_layout_helper_tests.rs`, `presenters/text_presenter_tests.rs`, `primitives/access_text_tests.rs`, `primitives/adorner_layer_composition_tests.rs`, `primitives/headered_content_control_tests.rs`, `primitives/headered_items_control_tests.rs`, `primitives/popup_positioning/managed_popup_positioner_tests.rs`, `primitives/popup_root_tests.rs`, `primitives/popup_tests.rs`, `primitives/range_base_tests.rs`, `primitives/scroll_bar_tests.rs`, `primitives/selecting_items_control_tests.rs`, `primitives/tab_strip_tests.rs`, `primitives/templated_control_tests.rs`, `primitives/templated_control_text_tests.rs`, `primitives/text_selection_canvas_tests.rs`, `primitives/thumb_tests.rs`, `primitives/toggle_button_tests.rs`, `primitives/track_tests.rs`, `primitives/uniform_grid_tests.rs`, `primitives/visual_layer_manager_tests.rs`, `progress_bar_tests.rs`, `pull_to_refresh/refresh_container_tests.rs`, `pull_to_refresh/refresh_info_provider_tests.rs`, `pull_to_refresh/refresh_visualizer_tests.rs`, `pull_to_refresh/scroll_viewer_i_refresh_info_provider_adapter_tests.rs`, `pull_to_refresh/scrollable_pull_gesture_recognizer_tests.rs`, `radio_button_tests.rs`, `reference_semantics_tests.rs`, `relative_panel_tests.rs`, `scroll_viewer_tests.rs`, `selectable_text_block_tests.rs`, `selection/internal_selection_model_tests.rs`, `shapes/ellipse_tests.rs`, `shapes/path_tests.rs`, `shapes/polygon_tests.rs`, `shapes/polyline_tests.rs`, `shapes/rectangle_tests.rs`, `shapes/shape_tests.rs`, `slider_tests.rs`, `split_button/split_button_tests.rs`, `split_view/split_view_tests.rs`, `stack_panel_tests.rs`, `storage_misc_tests.rs`, `styled_element_tests.rs`, `tab_control_tests.rs`, `table_view_column_header_tests.rs`, `table_view_tests.rs`, `templates/templates_tests.rs`, `text_block_tests.rs`, `text_box_tests.rs`, `theme_variant_tests.rs`, `tick_bar_tests.rs`, `toggle_switch_tests.rs`, `tool_tip_tests.rs`, `top_level_tests.rs`, `transitioning_content_control_tests.rs`, `tray_icon_tests.rs`, `tree_view_bring_into_view_tests.rs`, `tree_view_tests.rs`, `user_control_tests.rs`, `utils/collection_changed_event_manager_tests.rs`, `viewbox_tests.rs`, `virtualizing_carousel_panel_tests.rs`, `virtualizing_stack_panel_tests.rs`, `visual_extensions_get_transformed_bounds_tests.rs`, `visual_extensions_get_visuals_at_tests.rs`, `visual_extensions_tests.rs`, `visual_tests.rs`, `window_base_tests.rs`, `window_decorations_tests.rs`, `window_tests.rs`, `wrap_panel_tests.rs`.

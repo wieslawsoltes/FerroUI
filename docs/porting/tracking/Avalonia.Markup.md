@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Markup/FerroUI.Markup` (exists) |
 | Crate | `ferroui-markup` |
 | Phase / priority | 2 - xaml + themes / P1 |
-| Files | 5/7 (71.4%), 1 not applicable |
-| Types | 5/37 (13.5%) |
-| Members | 8/67 (11.9%) |
+| Files | 7/7 (100.0%), 1 not applicable |
+| Types | 7/37 (30 waived) (100.0%) |
+| Members | 12/67 (55 waived) (100.0%) |
 | Contracts (interfaces) | 0/4 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -23,10 +23,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 | Interface | Access | Upstream file | Members | Status |
 |---|---|---|---|---|
-| `Avalonia.Markup.Parsers.ContainerQueryGrammar.ISyntax` | public | `Markup/Parsers/ContainerQueryGrammar.cs` | 0/0 | missing |
-| `Avalonia.Markup.Parsers.PropertyPathGrammar.ISyntax` | public | `Markup/Parsers/PropertyPathGrammar.cs` | 0/0 | missing |
-| `Avalonia.Markup.Parsers.SelectorGrammar.ISyntax` | public | `Markup/Parsers/SelectorGrammar.cs` | 0/0 | missing |
-| `Avalonia.Markup.Parsers.SelectorGrammar.ITypeSyntax` | public | `Markup/Parsers/SelectorGrammar.cs` | 0/2 | missing |
+| `Avalonia.Markup.Parsers.ContainerQueryGrammar.ISyntax` | public | `Markup/Parsers/ContainerQueryGrammar.cs` | 0/0 | waived |
+| `Avalonia.Markup.Parsers.PropertyPathGrammar.ISyntax` | public | `Markup/Parsers/PropertyPathGrammar.cs` | 0/0 | waived |
+| `Avalonia.Markup.Parsers.SelectorGrammar.ISyntax` | public | `Markup/Parsers/SelectorGrammar.cs` | 0/0 | waived |
+| `Avalonia.Markup.Parsers.SelectorGrammar.ITypeSyntax` | public | `Markup/Parsers/SelectorGrammar.cs` | 0/2 (2 waived) | waived |
 
 ## Files
 
@@ -42,60 +42,15 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `DelayedBinding.cs` | `markup/data/delayed_binding.rs` | present | 1/1 | 3/3 |  |
 
-### `Markup/Parsers` - files 3/5, types 3/35, members 3/62
+### `Markup/Parsers` - files 5/5, types 5/35 (30 waived), members 7/62 (55 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ContainerQueryGrammar.cs` | `markup/parsers/container_query_grammar.rs` | partial | 1/8 | 1/7 |  |
-| `ContainerQueryParser.cs` | `markup/parsers/container_query_parser.rs` | missing | 0/1 | 0/2 |  |
-| `PropertyPathGrammar.cs` | `markup/parsers/property_path_grammar.rs` | partial | 1/7 | 1/15 |  |
-| `SelectorGrammar.cs` | `markup/parsers/selector_grammar.rs` | partial | 1/18 | 1/36 |  |
-| `SelectorParser.cs` | `markup/parsers/selector_parser.rs` | missing | 0/1 | 0/2 |  |
-
-<details><summary><code>ContainerQueryGrammar.cs</code> - 13 missing</summary>
-
-- `ContainerQueryGrammar.OrSyntax` (class, public): **type missing** (1 members)
-- `ContainerQueryGrammar.AndSyntax` (class, public): **type missing** (1 members)
-- `ContainerQueryGrammar.QuerySyntax<T>` (class, public): **type missing** (2 members)
-- `ContainerQueryGrammar.RangeSyntax` (class, public): **type missing** (0 members)
-- `ContainerQueryGrammar.WidthSyntax` (class, public): **type missing** (1 members)
-- `ContainerQueryGrammar.HeightSyntax` (class, public): **type missing** (1 members)
-- `ContainerQueryGrammar.ISyntax` (interface, public): **type missing** (0 members)
-
-</details>
-
-<details><summary><code>PropertyPathGrammar.cs</code> - 20 missing</summary>
-
-- `PropertyPathGrammar.ISyntax` (interface, public): **type missing** (0 members)
-- `PropertyPathGrammar.PropertySyntax` (class, public): **type missing** (2 members)
-- `PropertyPathGrammar.TypeQualifiedPropertySyntax` (class, public): **type missing** (4 members)
-- `PropertyPathGrammar.ChildTraversalSyntax` (class, public): **type missing** (2 members)
-- `PropertyPathGrammar.EnsureTypeSyntax` (class, public): **type missing** (3 members)
-- `PropertyPathGrammar.CastTypeSyntax` (class, public): **type missing** (3 members)
-
-</details>
-
-<details><summary><code>SelectorGrammar.cs</code> - 52 missing</summary>
-
-- `SelectorGrammar.ISyntax` (interface, public): **type missing** (0 members)
-- `SelectorGrammar.ITypeSyntax` (interface, public): **type missing** (2 members)
-- `SelectorGrammar.OfTypeSyntax` (class, public): **type missing** (3 members)
-- `SelectorGrammar.AttachedPropertySyntax` (class, public): **type missing** (5 members)
-- `SelectorGrammar.IsSyntax` (class, public): **type missing** (3 members)
-- `SelectorGrammar.ClassSyntax` (class, public): **type missing** (2 members)
-- `SelectorGrammar.NameSyntax` (class, public): **type missing** (2 members)
-- `SelectorGrammar.PropertySyntax` (class, public): **type missing** (3 members)
-- `SelectorGrammar.ChildSyntax` (class, public): **type missing** (1 members)
-- `SelectorGrammar.DescendantSyntax` (class, public): **type missing** (1 members)
-- `SelectorGrammar.TemplateSyntax` (class, public): **type missing** (1 members)
-- `SelectorGrammar.NotSyntax` (class, public): **type missing** (2 members)
-- `SelectorGrammar.NthChildSyntax` (class, public): **type missing** (3 members)
-- `SelectorGrammar.NthLastChildSyntax` (class, public): **type missing** (3 members)
-- `SelectorGrammar.CommaSyntax` (class, public): **type missing** (1 members)
-- `SelectorGrammar.NestingSyntax` (class, public): **type missing** (1 members)
-- `SelectorGrammar.DecimalSyntax` (class, public): **type missing** (2 members)
-
-</details>
+| `ContainerQueryGrammar.cs` | `markup/parsers/container_query_grammar.rs` | present | 1/8 (7 waived) | 1/7 (6 waived) |  |
+| `ContainerQueryParser.cs` | `markup/parsers/container_query_parser.rs` | present | 1/1 | 2/2 |  |
+| `PropertyPathGrammar.cs` | `markup/parsers/property_path_grammar.rs` | present | 1/7 (6 waived) | 1/15 (14 waived) |  |
+| `SelectorGrammar.cs` | `markup/parsers/selector_grammar.rs` | present | 1/18 (17 waived) | 1/36 (35 waived) |  |
+| `SelectorParser.cs` | `markup/parsers/selector_parser.rs` | present | 1/1 | 2/2 |  |
 
 ### `Properties` - files 0/0, types 0/0, members 0/0
 
@@ -109,6 +64,6 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
-| `markup/parsers/property_parser.rs` | **unmapped** | `PropertyParser`, `PropertyReference` |
+| `markup/parsers/property_parser.rs` | port of `Parsers/PropertyParser.cs` of Avalonia.Markup.Xaml: it lives next to the grammars that share its character reader | `PropertyParser`, `PropertyReference` |
 
-Tests, examples and build scripts (not scanned): `tests/binding_tests.rs`, `tests/binding_tests_converters.rs`, `tests/binding_tests_data_validation.rs`, `tests/binding_tests_delay.rs`, `tests/binding_tests_element_name.rs`, `tests/binding_tests_logging.rs`, `tests/binding_tests_method.rs`, `tests/binding_tests_relative_source.rs`, `tests/binding_tests_self.rs`, `tests/binding_tests_source.rs`, `tests/binding_tests_templated_parent.rs`, `tests/delayed_binding_tests.rs`, `tests/expression_node_factory_tests.rs`, `tests/expression_observer_builder_tests_attached_property.rs`, `tests/expression_observer_builder_tests_ferro_property.rs`, `tests/expression_observer_builder_tests_method.rs`, `tests/expression_observer_builder_tests_negation.rs`, `tests/expression_observer_builder_tests_property.rs`, `tests/mod.rs`, `tests/multi_binding_tests.rs`, `tests/multi_binding_tests_converters.rs`, `tests/template_binding_tests.rs`, `tests/test_support.rs`.
+Tests, examples and build scripts (not scanned): `tests/binding_tests.rs`, `tests/binding_tests_converters.rs`, `tests/binding_tests_data_validation.rs`, `tests/binding_tests_delay.rs`, `tests/binding_tests_element_name.rs`, `tests/binding_tests_logging.rs`, `tests/binding_tests_method.rs`, `tests/binding_tests_relative_source.rs`, `tests/binding_tests_self.rs`, `tests/binding_tests_source.rs`, `tests/binding_tests_templated_parent.rs`, `tests/container_query_parser_tests.rs`, `tests/delayed_binding_tests.rs`, `tests/expression_node_factory_tests.rs`, `tests/expression_observer_builder_tests_attached_property.rs`, `tests/expression_observer_builder_tests_ferro_property.rs`, `tests/expression_observer_builder_tests_method.rs`, `tests/expression_observer_builder_tests_negation.rs`, `tests/expression_observer_builder_tests_property.rs`, `tests/mod.rs`, `tests/multi_binding_tests.rs`, `tests/multi_binding_tests_converters.rs`, `tests/selector_parser_tests.rs`, `tests/template_binding_tests.rs`, `tests/test_support.rs`.

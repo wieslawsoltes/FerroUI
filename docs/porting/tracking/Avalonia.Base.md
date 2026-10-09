@@ -10,10 +10,10 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.Base` (exists) |
 | Crate | `ferroui-base` |
 | Phase / priority | 0 - core / P0 |
-| Files | 1115/1286 (86.7%), 13 not applicable |
-| Types | 1423/1709 (83.3%) |
-| Members | 9819/11739 (32 waived) (83.9%) |
-| Contracts (interfaces) | 235/263 |
+| Files | 1248/1248 (100.0%), 51 not applicable |
+| Types | 1520/1659 (136 waived) (99.8%) |
+| Members | 10271/11433 (1115 waived) (99.5%) |
+| Contracts (interfaces) | 247/260 |
 | Property registrations | 224/239 |
 | Routed events | 41/41 |
 
@@ -39,20 +39,20 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Collections.IAvaloniaReadOnlyDictionary<TKey, TValue>` | public | `Collections/IAvaloniaReadOnlyDictionary.cs` | 0/0 | present |
 | `Avalonia.Collections.IAvaloniaReadOnlyList<T>` | public | `Collections/IAvaloniaReadOnlyList.cs` | 0/0 | present |
 | `Avalonia.Collections.Pooled.IReadOnlyPooledList<T>` | internal | `Collections/Pooled/IReadOnlyPooledList.cs` | 0/1 | n/a |
-| `Avalonia.Controls.IClassesChangedListener` | internal | `Controls/IClassesChangedListener.cs` | 0/1 | missing |
+| `Avalonia.Controls.IClassesChangedListener` | internal | `Controls/IClassesChangedListener.cs` | 0/1 (1 waived) | waived |
 | `Avalonia.Controls.IDeferredContent` | public | `Controls/IDeferredContent.cs` | 1/1 | present |
 | `Avalonia.Controls.INameScope` | public | `Controls/INameScope.cs` | 5/5 | present |
 | `Avalonia.Controls.IPseudoClasses` | public | `Controls/IPseudoClasses.cs` | 3/3 | present |
-| `Avalonia.Controls.IResourceDictionary` | public | `Controls/IResourceDictionary.cs` | 0/2 | partial |
+| `Avalonia.Controls.IResourceDictionary` | public | `Controls/IResourceDictionary.cs` | 0/2 (2 waived) | present |
 | `Avalonia.Controls.IResourceHost` | public | `Controls/IResourceHost.cs` | 2/2 | present |
 | `Avalonia.Controls.IResourceNode` | public | `Controls/IResourceNode.cs` | 2/2 | present |
 | `Avalonia.Controls.IResourceProvider` | public | `Controls/IResourceProvider.cs` | 4/4 | present |
-| `Avalonia.Controls.ISetInheritanceParent` | public | `Controls/ISetInheritanceParent.cs` | 0/1 | missing |
-| `Avalonia.Controls.ISetLogicalParent` | public | `Controls/ISetLogicalParent.cs` | 0/1 | missing |
+| `Avalonia.Controls.ISetInheritanceParent` | public | `Controls/ISetInheritanceParent.cs` | 0/1 (1 waived) | waived |
+| `Avalonia.Controls.ISetLogicalParent` | public | `Controls/ISetLogicalParent.cs` | 0/1 (1 waived) | waived |
 | `Avalonia.Controls.IThemeVariantProvider` | public | `Controls/IThemeVariantProvider.cs` | 1/1 | present |
 | `Avalonia.Controls.Platform.ManagedDispatcherImpl.IManagedDispatcherInputProvider` | public | `Platform/ManagedDispatcherImpl.cs` | 2/2 | present |
 | `Avalonia.Controls.Primitives.IScrollable` | public | `Controls/Primitives/IScrollable.cs` | 5/5 | present |
-| `Avalonia.Controls.Templates.ITemplateResult` | public | `Controls/Templates/ITemplateResult.cs` | 0/2 | missing |
+| `Avalonia.Controls.Templates.ITemplateResult` | public | `Controls/Templates/ITemplateResult.cs` | 0/2 (2 waived) | waived |
 | `Avalonia.Data.Converters.IMultiValueConverter` | public | `Data/Converters/IMultiValueConverter.cs` | 1/1 | present |
 | `Avalonia.Data.Converters.IValueConverter` | public | `Data/Converters/IValueConverter.cs` | 2/2 | present |
 | `Avalonia.Data.Core.ExpressionNodes.IPropertyAccessorNode` | internal | `Data/Core/ExpressionNodes/IPropertyAccessorNode.cs` | 3/3 | present |
@@ -60,28 +60,28 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Data.Core.IBindingExpressionSink` | internal | `Data/Core/IBindingExpressionSink.cs` | 2/2 | present |
 | `Avalonia.Data.Core.IPropertyInfo` | public | `Data/Core/IPropertyInfo.cs` | 6/6 | present |
 | `Avalonia.Data.Core.IPropertyInfo<TSource, TValue>` | public | `Data/Core/IPropertyInfo`2.cs` | 2/2 | present |
-| `Avalonia.Data.Core.Parsers.BindingExpressionGrammar.INode` | public | `Data/Core/Parsers/BindingExpressionGrammar.cs` | 0/0 | missing |
-| `Avalonia.Data.Core.Parsers.BindingExpressionGrammar.ITransformNode` | public | `Data/Core/Parsers/BindingExpressionGrammar.cs` | 0/0 | missing |
+| `Avalonia.Data.Core.Parsers.BindingExpressionGrammar.INode` | public | `Data/Core/Parsers/BindingExpressionGrammar.cs` | 0/0 | waived |
+| `Avalonia.Data.Core.Parsers.BindingExpressionGrammar.ITransformNode` | public | `Data/Core/Parsers/BindingExpressionGrammar.cs` | 0/0 | waived |
 | `Avalonia.Data.Core.Plugins.IDataValidationPlugin` | internal | `Data/Core/Plugins/IDataValidationPlugin.cs` | 2/2 | present |
 | `Avalonia.Data.Core.Plugins.IPropertyAccessor` | public | `Data/Core/Plugins/IPropertyAccessor.cs` | 5/5 | present |
 | `Avalonia.Data.Core.Plugins.IPropertyAccessorPlugin` | internal | `Data/Core/Plugins/IPropertyAccessorPlugin.cs` | 2/2 | present |
 | `Avalonia.Data.Core.Plugins.IStreamPlugin` | internal | `Data/Core/Plugins/IStreamPlugin.cs` | 2/2 | present |
-| `Avalonia.Data.ICompiledBindingPathElement` | internal | `Data/CompiledBindingPath.cs` | 0/0 | missing |
-| `Avalonia.Data.IControlSourceBindingPathElement` | internal | `Data/CompiledBindingPath.cs` | 0/0 | missing |
-| `Avalonia.Data.IStronglyTypedStreamElement` | internal | `Data/CompiledBindingPath.cs` | 0/1 | missing |
-| `Avalonia.Data.ITypeCastElement` | internal | `Data/CompiledBindingPath.cs` | 0/2 | missing |
-| `Avalonia.Diagnostics.IAvaloniaObjectDebug` | internal | `Diagnostics/IAvaloniaObjectDebug.cs` | 0/1 | missing |
-| `Avalonia.Diagnostics.INotifyCollectionChangedDebug` | internal | `Diagnostics/INotifyCollectionChangedDebug.cs` | 0/1 | missing |
-| `Avalonia.Diagnostics.IValueFrameDiagnostic` | public | `Diagnostics/IValueFrameDiagnostic.cs` | 0/5 | missing |
+| `Avalonia.Data.ICompiledBindingPathElement` | internal | `Data/CompiledBindingPath.cs` | 0/0 | waived |
+| `Avalonia.Data.IControlSourceBindingPathElement` | internal | `Data/CompiledBindingPath.cs` | 0/0 | waived |
+| `Avalonia.Data.IStronglyTypedStreamElement` | internal | `Data/CompiledBindingPath.cs` | 0/1 (1 waived) | waived |
+| `Avalonia.Data.ITypeCastElement` | internal | `Data/CompiledBindingPath.cs` | 0/2 (2 waived) | waived |
+| `Avalonia.Diagnostics.IAvaloniaObjectDebug` | internal | `Diagnostics/IAvaloniaObjectDebug.cs` | 0/1 | n/a |
+| `Avalonia.Diagnostics.INotifyCollectionChangedDebug` | internal | `Diagnostics/INotifyCollectionChangedDebug.cs` | 0/1 | n/a |
+| `Avalonia.Diagnostics.IValueFrameDiagnostic` | public | `Diagnostics/IValueFrameDiagnostic.cs` | 5/5 | present |
 | `Avalonia.IAvaloniaDependencyResolver` | public | `AvaloniaLocator.cs` | 1/1 | present |
 | `Avalonia.IDataContextProvider` | public | `IDataContextProvider.cs` | 1/1 | present |
-| `Avalonia.IDescription` | public | `IDescription.cs` | 0/1 | missing |
-| `Avalonia.IDirectPropertyAccessor` | internal | `IDirectPropertyAccessor.cs` | 0/6 | missing |
-| `Avalonia.IDirectPropertyMetadata` | public | `IDirectPropertyMetadata.cs` | 0/2 | missing |
+| `Avalonia.IDescription` | public | `IDescription.cs` | 1/1 | present |
+| `Avalonia.IDirectPropertyAccessor` | internal | `IDirectPropertyAccessor.cs` | 0/6 (6 waived) | present |
+| `Avalonia.IDirectPropertyMetadata` | public | `IDirectPropertyMetadata.cs` | 1/2 (1 waived) | present |
 | `Avalonia.INamed` | public | `INamed.cs` | 1/1 | present |
 | `Avalonia.IOptionalFeatureProvider` | public | `IOptionalFeatureProvider.cs` | 1/1 | present |
-| `Avalonia.IStyledPropertyAccessor` | internal | `IStyledPropertyAccessor.cs` | 0/3 | missing |
-| `Avalonia.IStyledPropertyMetadata` | public | `IStyledPropertyMetadata.cs` | 0/1 | missing |
+| `Avalonia.IStyledPropertyAccessor` | internal | `IStyledPropertyAccessor.cs` | 0/3 (3 waived) | present |
+| `Avalonia.IStyledPropertyMetadata` | public | `IStyledPropertyMetadata.cs` | 1/1 | present |
 | `Avalonia.Input.IAccessKeyHandler` | internal | `Input/IAccessKeyHandler.cs` | 4/4 | present |
 | `Avalonia.Input.IAsyncDataTransfer` | public | `Input/IAsyncDataTransfer.cs` | 2/2 | present |
 | `Avalonia.Input.IAsyncDataTransferItem` | public | `Input/IAsyncDataTransferItem.cs` | 2/2 | present |
@@ -94,7 +94,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Input.IFocusManager` | public | `Input/IFocusManager.cs` | 6/6 | present |
 | `Avalonia.Input.IFocusScope` | public | `Input/IFocusScope.cs` | 0/0 | present |
 | `Avalonia.Input.IInputDevice` | public | `Input/IInputDevice.cs` | 1/1 | present |
-| `Avalonia.Input.IInputElement` | public | `Input/IInputElement.cs` | 10/25 | partial |
+| `Avalonia.Input.IInputElement` | public | `Input/IInputElement.cs` | 10/25 (15 waived) | present |
 | `Avalonia.Input.IInputManager` | public | `Input/IInputManager.cs` | 4/4 | present |
 | `Avalonia.Input.IInputRoot` | public | `Input/IInputRoot.cs` | 8/8 | present |
 | `Avalonia.Input.IKeyModifiersEventArgs` | public | `Input/IKeyModifiersEventArgs.cs` | 1/1 | present |
@@ -132,7 +132,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Media.IEffect` | public | `Media/Effects/IEffect.cs` | 0/0 | present |
 | `Avalonia.Media.IExperimentalAcrylicMaterial` | public | `Media/IExperimentalAcrylicMaterial.cs` | 5/5 | present |
 | `Avalonia.Media.IFontMemory` | public | `Media/IFontMemory.cs` | 1/1 | present |
-| `Avalonia.Media.IGlyphDrawing` | public | `Media/IGlyphDrawing.cs` | 0/3 | missing |
+| `Avalonia.Media.IGlyphDrawing` | public | `Media/IGlyphDrawing.cs` | 3/3 | present |
 | `Avalonia.Media.IGradientBrush` | public | `Media/IGradientBrush.cs` | 2/2 | present |
 | `Avalonia.Media.IGradientStop` | public | `Media/IGradientStop.cs` | 2/2 | present |
 | `Avalonia.Media.IImage` | public | `Media/IImage.cs` | 2/2 | present |
@@ -172,11 +172,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Platform.IDrawingContextLayerWithRenderContextAffinityImpl` | public | `Platform/IDrawingContextImpl.cs` | 2/2 | present |
 | `Avalonia.Platform.IDrawingContextWithAcrylicLikeSupport` | public | `Platform/IDrawingContextWithAcrylicLikeSupport.cs` | 1/1 | present |
 | `Avalonia.Platform.IExternalObjectsHandleWrapRenderInterfaceContextFeature` | public | `Platform/IExternalObjectsRenderInterfaceContextFeature.cs` | 2/2 | present |
-| `Avalonia.Platform.IExternalObjectsRenderInterfaceContextFeature` | public | `Platform/IExternalObjectsRenderInterfaceContextFeature.cs` | 8/9 | partial |
+| `Avalonia.Platform.IExternalObjectsRenderInterfaceContextFeature` | public | `Platform/IExternalObjectsRenderInterfaceContextFeature.cs` | 9/9 | present |
 | `Avalonia.Platform.IExternalObjectsWrappedGpuHandle` | public | `Platform/IExternalObjectsRenderInterfaceContextFeature.cs` | 0/0 | present |
 | `Avalonia.Platform.IFontManagerImpl` | public | `Platform/IFontManagerImpl.cs` | 6/6 | present |
 | `Avalonia.Platform.IGeometryContext` | public | `Platform/IGeometryContext.cs` | 7/7 | present |
-| `Avalonia.Platform.IGeometryImpl` | public | `Platform/IGeometryImpl.cs` | 12/13 | partial |
+| `Avalonia.Platform.IGeometryImpl` | public | `Platform/IGeometryImpl.cs` | 12/13 (1 waived) | present |
 | `Avalonia.Platform.IGlyphRunImpl` | public | `Platform/IGlyphRunImpl.cs` | 4/4 | present |
 | `Avalonia.Platform.ILockedFramebuffer` | public | `Platform/ILockedFramebuffer.cs` | 6/6 | present |
 | `Avalonia.Platform.IMacOSTopLevelPlatformHandle` | public | `Platform/IMacOSTopLevelPlatformHandle.cs` | 4/4 | present |
@@ -184,7 +184,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Platform.IPlatformGraphics` | public | `Platform/IPlatformGpu.cs` | 3/3 | present |
 | `Avalonia.Platform.IPlatformGraphicsContext` | public | `Platform/IPlatformGpu.cs` | 2/2 | present |
 | `Avalonia.Platform.IPlatformGraphicsReadyStateFeature` | public | `Platform/IPlatformGpu.cs` | 2/2 | present |
-| `Avalonia.Platform.IPlatformGraphicsWithFeatures` | public | `Platform/IPlatformGpu.cs` | 0/0 | missing |
+| `Avalonia.Platform.IPlatformGraphicsWithFeatures` | public | `Platform/IPlatformGpu.cs` | 0/0 | waived |
 | `Avalonia.Platform.IPlatformHandle` | public | `Platform/IPlatformHandle.cs` | 2/2 | present |
 | `Avalonia.Platform.IPlatformRenderInterface` | public | `Platform/IPlatformRenderInterface.cs` | 27/27 | present |
 | `Avalonia.Platform.IPlatformRenderInterfaceContext` | public | `Platform/IPlatformRenderInterface.cs` | 6/6 | present |
@@ -198,15 +198,15 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Platform.IRenderTarget` | public | `Platform/IRenderTarget.cs` | 3/3 | present |
 | `Avalonia.Platform.IRenderTargetBitmapImpl` | public | `Platform/IRenderTargetBitmapImpl.cs` | 1/1 | present |
 | `Avalonia.Platform.IRuntimePlatform` | public | `Platform/IRuntimePlatform.cs` | 1/1 | present |
-| `Avalonia.Platform.IScopedResource<T>` | public | `Platform/IScopedResource.cs` | 0/1 | missing |
+| `Avalonia.Platform.IScopedResource<T>` | public | `Platform/IScopedResource.cs` | 1/1 | present |
 | `Avalonia.Platform.IStreamGeometryContextImpl` | public | `Platform/IStreamGeometryContextImpl.cs` | 0/0 | present |
 | `Avalonia.Platform.IStreamGeometryImpl` | public | `Platform/IStreamGeometryImpl.cs` | 2/2 | present |
-| `Avalonia.Platform.ISurfaceOrientation` | internal | `Platform/ISurfaceOrientation.cs` | 0/1 | missing |
+| `Avalonia.Platform.ISurfaceOrientation` | internal | `Platform/ISurfaceOrientation.cs` | 1/1 | present |
 | `Avalonia.Platform.ISystemNavigationManagerImpl` | public | `Platform/SystemNavigationManagerImpl.cs` | 1/1 | present |
 | `Avalonia.Platform.ITextShaperImpl` | public | `Platform/ITextShaperImpl.cs` | 2/2 | present |
 | `Avalonia.Platform.ITransformedGeometryImpl` | public | `Platform/ITransformedGeometryImpl.cs` | 2/2 | present |
 | `Avalonia.Platform.IWriteableBitmapImpl` | public | `Platform/IWriteableBitmapImpl.cs` | 0/0 | present |
-| `Avalonia.Platform.Internal.IAssemblyDescriptor` | internal | `Platform/Internal/AssemblyDescriptor.cs` | 3/4 | partial |
+| `Avalonia.Platform.Internal.IAssemblyDescriptor` | internal | `Platform/Internal/AssemblyDescriptor.cs` | 3/4 (1 waived) | present |
 | `Avalonia.Platform.Internal.IAssemblyDescriptorResolver` | internal | `Platform/Internal/AssemblyDescriptorResolver.cs` | 3/3 | present |
 | `Avalonia.Platform.Internal.IAssetDescriptor` | internal | `Platform/Internal/AssetDescriptor.cs` | 2/2 | present |
 | `Avalonia.Platform.Storage.ILauncher` | public | `Platform/Storage/ILauncher.cs` | 2/2 | present |
@@ -224,9 +224,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Platform.Surfaces.IPlatformRenderSurfaceRenderTarget` | public | `Platform/Surfaces/IPlatformRenderSurface.cs` | 1/1 | present |
 | `Avalonia.PropertyStore.IValueEntry` | internal | `PropertyStore/IValueEntry.cs` | 6/6 | present |
 | `Avalonia.PropertyStore.IValueEntry<T>` | internal | `PropertyStore/IValueEntry`1.cs` | 1/1 | present |
-| `Avalonia.Reactive.IAvaloniaSubject<T>` | internal | `Reactive/IAvaloniaSubject.cs` | 0/0 | missing |
+| `Avalonia.Reactive.IAvaloniaSubject<T>` | internal | `Reactive/IAvaloniaSubject.cs` | 0/0 | present |
 | `Avalonia.Rendering.Composition.Animations.IAnimationInstance` | internal | `Rendering/Composition/Animations/IAnimationInstance.cs` | 6/6 | present |
-| `Avalonia.Rendering.Composition.Animations.ICompositionAnimationBase` | public | `Rendering/Composition/Animations/ICompositionAnimationBase.cs` | 0/1 | partial |
+| `Avalonia.Rendering.Composition.Animations.ICompositionAnimationBase` | public | `Rendering/Composition/Animations/ICompositionAnimationBase.cs` | 0/1 (1 waived) | present |
 | `Avalonia.Rendering.Composition.Animations.IInterpolator<T>` | internal | `Rendering/Composition/Animations/Interpolators.cs` | 1/1 | present |
 | `Avalonia.Rendering.Composition.Animations.IKeyFrames` | internal | `Rendering/Composition/Animations/KeyFrames.cs` | 1/1 | present |
 | `Avalonia.Rendering.Composition.Drawing.ICompositionRenderResource` | internal | `Rendering/Composition/Drawing/ICompositionRenderResource.cs` | 2/2 | present |
@@ -239,7 +239,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Rendering.Composition.Expressions.IExpressionParameterCollection` | internal | `Rendering/Composition/Expressions/ExpressionEvaluationContext.cs` | 2/2 | present |
 | `Avalonia.Rendering.Composition.HitTesting.ICompositionHitTester<T>` | internal | `Rendering/Composition/HitTesting/ICompositionHitTester.cs` | 5/5 | present |
 | `Avalonia.Rendering.Composition.ICompositionGpuImportedObject` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 2/2 | present |
-| `Avalonia.Rendering.Composition.ICompositionGpuInterop` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 9/11 | partial |
+| `Avalonia.Rendering.Composition.ICompositionGpuInterop` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 11/11 | present |
 | `Avalonia.Rendering.Composition.ICompositionImportableSharedGpuContextImage` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 0/0 | present |
 | `Avalonia.Rendering.Composition.ICompositionImportableSharedGpuContextObject` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 0/0 | present |
 | `Avalonia.Rendering.Composition.ICompositionImportableSharedGpuContextSemaphore` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 0/0 | present |
@@ -255,16 +255,16 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Rendering.Composition.Server.IServerRenderResourceHost` | internal | `Rendering/Composition/Server/ServerRenderResource.cs` | 2/2 | present |
 | `Avalonia.Rendering.Composition.Server.IServerRenderResourceObserver` | internal | `Rendering/Composition/Server/ServerRenderResource.cs` | 1/1 | present |
 | `Avalonia.Rendering.Composition.Transport.ServerListProxyHelper<TClient, TServer>.IRegisterForSerialization` | public | `Rendering/Composition/Transport/ServerListProxyHelper.cs` | 1/1 | present |
-| `Avalonia.Rendering.ICustomHitTest` | public | `Rendering/ICustomHitTest.cs` | 0/2 | missing |
+| `Avalonia.Rendering.ICustomHitTest` | public | `Rendering/ICustomHitTest.cs` | 2/2 | present |
 | `Avalonia.Rendering.IHitTester` | internal | `Rendering/IRenderer.cs` | 4/4 | present |
 | `Avalonia.Rendering.IPresentationSource` | public | `Rendering/IPresentationSource.cs` | 10/10 | present |
 | `Avalonia.Rendering.IRenderLoop` | public | `Rendering/IRenderLoop.cs` | 4/4 | present |
 | `Avalonia.Rendering.IRenderLoopTask` | internal | `Rendering/IRenderLoopTask.cs` | 1/1 | present |
 | `Avalonia.Rendering.IRenderTimer` | public | `Rendering/IRenderTimer.cs` | 2/2 | present |
 | `Avalonia.Rendering.IRenderer` | internal | `Rendering/IRenderer.cs` | 9/9 | present |
-| `Avalonia.Rendering.IRendererWithCompositor` | internal | `Rendering/IRenderer.cs` | 0/1 | missing |
+| `Avalonia.Rendering.IRendererWithCompositor` | internal | `Rendering/IRenderer.cs` | 0/1 (1 waived) | waived |
 | `Avalonia.Rendering.ISwapchainImage` | internal | `Rendering/SwapchainBase.cs` | 4/4 | present |
-| `Avalonia.Rendering.IVisualBrushInitialize` | internal | `Rendering/IVisualBrushInitialize.cs` | 0/1 | missing |
+| `Avalonia.Rendering.IVisualBrushInitialize` | internal | `Rendering/IVisualBrushInitialize.cs` | 0/1 (1 waived) | waived |
 | `Avalonia.Rendering.SceneGraph.ICustomDrawOperation` | public | `Rendering/SceneGraph/CustomDrawOperation.cs` | 4/4 | present |
 | `Avalonia.Styling.Activators.IStyleActivator` | internal | `Styling/Activators/IStyleActivator.cs` | 4/4 | present |
 | `Avalonia.Styling.Activators.IStyleActivatorSink` | internal | `Styling/Activators/IStyleActivatorSink.cs` | 1/1 | present |
@@ -282,415 +282,130 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Threading.IDispatcherImpl` | public | `Threading/IDispatcherImpl.cs` | 6/6 | present |
 | `Avalonia.Threading.IDispatcherImplWithExplicitBackgroundProcessing` | public | `Threading/IDispatcherImpl.cs` | 2/2 | present |
 | `Avalonia.Threading.IDispatcherImplWithPendingInput` | public | `Threading/IDispatcherImpl.cs` | 2/2 | present |
-| `Avalonia.Utilities.IRef<T>` | internal | `Utilities/Ref.cs` | 0/5 | missing |
+| `Avalonia.Utilities.IRef<T>` | internal | `Utilities/Ref.cs` | 5/5 | present |
 | `Avalonia.Utilities.IWeakEventSubscriber<TEventArgs>` | public | `Utilities/IWeakEventSubscriber.cs` | 1/1 | present |
-| `Avalonia.Utilities.NonPumpingLockHelper.IHelperImpl` | public | `Utilities/NonPumpingLockHelper.cs` | 0/1 | missing |
+| `Avalonia.Utilities.NonPumpingLockHelper.IHelperImpl` | public | `Utilities/NonPumpingLockHelper.cs` | 0/1 | n/a |
 | `Avalonia.VisualTree.IHostedVisualTreeRoot` | internal | `VisualTree/IHostedVisualTreeRoot.cs` | 1/1 | present |
 | `Avalonia.VisualTree.IVisualWithRoundRectClip` | internal | `VisualTree/IVisualWithRoundRectClip.cs` | 1/1 | present |
 
 ## Files
 
-### `(project root)` - files 41/59, types 49/67, members 811/942 (16 waived)
+### `(project root)` - files 55/55, types 61/63 (2 waived), members 838/923 (85 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AttachedProperty.cs` | `styled_property.rs` | present | 1/1 | 2/2 | merged: AttachedProperty&lt;T&gt; is a thin wrapper over StyledProperty&lt;T&gt; |
-| `AvaloniaInternalException.cs` | `ferro_internal_exception.rs` | missing | 0/1 | 0/1 |  |
-| `AvaloniaLocator.cs` | `ferro_locator.rs` | partial | 4/4 | 18/20 |  |
-| `AvaloniaObject.cs` | `ferro_object.rs` | partial | 1/1 | 41/55 (1 waived) |  |
-| `AvaloniaObjectExtensions.cs` | `ferro_object_extensions.rs` | partial | 1/1 | 11/17 |  |
-| `AvaloniaProperty.cs` | `ferro_property.rs` | partial | 2/2 | 41/49 |  |
-| `AvaloniaPropertyChangedEventArgs.cs` | `ferro_property_changed_event_args.rs` | partial | 1/1 | 9/12 |  |
-| `AvaloniaPropertyChangedEventArgs`1.cs` | `ferro_property_changed_event_args.rs` | partial | 1/1 | 6/8 | generic arity merged |
-| `AvaloniaPropertyChangedExtensions.cs` | `ferro_property_changed_extensions.rs` | missing | 0/1 | 0/3 |  |
-| `AvaloniaPropertyExtensions.cs` | `ferro_property_extensions.rs` | missing | 0/1 | 0/1 |  |
+| `AvaloniaInternalException.cs` | `ferro_internal_exception.rs` | present | 1/1 | 1/1 |  |
+| `AvaloniaLocator.cs` | `ferro_locator.rs` | present | 4/4 | 18/20 (2 waived) |  |
+| `AvaloniaObject.cs` | `ferro_object.rs` | present | 1/1 | 42/55 (13 waived) |  |
+| `AvaloniaObjectExtensions.cs` | `ferro_object_extensions.rs` | present | 1/1 | 15/17 (2 waived) |  |
+| `AvaloniaProperty.cs` | `ferro_property.rs` | present | 2/2 | 42/49 (7 waived) |  |
+| `AvaloniaPropertyChangedEventArgs.cs` | `ferro_property_changed_event_args.rs` | present | 1/1 | 9/12 (3 waived) |  |
+| `AvaloniaPropertyChangedEventArgs`1.cs` | `ferro_property_changed_event_args.rs` | present | 1/1 | 6/8 (2 waived) | generic arity merged |
+| `AvaloniaPropertyChangedExtensions.cs` | `ferro_property_changed_event_args.rs` | present | 1/1 | 3/3 | merged: the typed accessors (`get_old_value`, `get_new_value`, `get_old_and_new_value`) are inherent methods of the one event arguments type |
+| `AvaloniaPropertyExtensions.cs` | `media/i_affects_render.rs` | present | 1/1 | 1/1 | merged: `can_value_affect_render` is a function of the module of the contract it tests for; `Visual::affects_render` calls it with the value type of the property |
 | `AvaloniaPropertyMetadata.cs` | `ferro_property_metadata.rs` | present | 1/1 | 7/7 | merged: the three metadata classes share one file |
-| `AvaloniaPropertyRegistry.cs` | `ferro_property_registry.rs` | partial | 1/1 | 16/18 |  |
-| `AvaloniaProperty`1.cs` | `ferro_property.rs` | partial | 1/1 | 3/6 | generic arity merged |
+| `AvaloniaPropertyRegistry.cs` | `ferro_property_registry.rs` | present | 1/1 | 17/18 (1 waived) |  |
+| `AvaloniaProperty`1.cs` | `ferro_property.rs` | present | 1/1 | 3/6 (3 waived) | generic arity merged |
 | `ClassBindingManager.cs` | `class_binding_manager.rs` | present | 1/1 | 3/3 |  |
-| `CombinedGeometry.cs` | `combined_geometry.rs` | partial | 2/2 | 15/18 |  |
-| `CornerRadius.cs` | `corner_radius.rs` | partial | 1/1 | 13/15 (1 waived) |  |
-| `DirectProperty.cs` | `direct_property.rs` | partial | 1/1 | 6/10 |  |
-| `DirectPropertyBase.cs` | `direct_property.rs` | partial | 1/1 | 17/20 | merged: DirectPropertyBase&lt;T&gt; lives next to DirectProperty&lt;TOwner, T&gt; |
+| `CombinedGeometry.cs` | `combined_geometry.rs` | present | 2/2 | 15/18 (3 waived) |  |
+| `CornerRadius.cs` | `corner_radius.rs` | present | 1/1 | 13/15 (2 waived) |  |
+| `DirectProperty.cs` | `direct_property.rs` | present | 1/1 | 6/10 (4 waived) |  |
+| `DirectPropertyBase.cs` | `direct_property.rs` | present | 1/1 | 18/20 (2 waived) | merged: DirectPropertyBase&lt;T&gt; lives next to DirectProperty&lt;TOwner, T&gt; |
 | `DirectPropertyMetadata`1.cs` | `ferro_property_metadata.rs` | present | 1/1 | 5/5 | merged: the three metadata classes share one file |
-| `EnumExtensions.cs` | `enum_extensions.rs` | missing | 0/1 | 0/2 |  |
-| `GeneratedAttachedPropertyAttribute.cs` | `generated_attached_property_attribute.rs` | missing | 0/1 | 0/6 |  |
-| `GeneratedDirectPropertyAttribute.cs` | `generated_direct_property_attribute.rs` | missing | 0/1 | 0/4 |  |
-| `GeneratedStyledPropertyAttribute.cs` | `generated_styled_property_attribute.rs` | missing | 0/1 | 0/7 |  |
+| `EnumExtensions.cs` | - | n/a | - | - | not-applicable: flag tests over enums of any size through unsafe reinterpretation: flag enums are `bitflags!` types, whose `contains` and `intersects` are `HasAllFlags` and `HasAnyFlag` |
+| `GeneratedAttachedPropertyAttribute.cs` | - | n/a | - | - | not-applicable: markers read by the upstream source generator of property definitions (tools/Avalonia.Generators): properties are declared with `ferro_property!` / `ferro_properties!`, which take the same options as arguments |
+| `GeneratedDirectPropertyAttribute.cs` | - | n/a | - | - | not-applicable: markers read by the upstream source generator of property definitions (tools/Avalonia.Generators): properties are declared with `ferro_property!` / `ferro_properties!`, which take the same options as arguments |
+| `GeneratedStyledPropertyAttribute.cs` | - | n/a | - | - | not-applicable: markers read by the upstream source generator of property definitions (tools/Avalonia.Generators): properties are declared with `ferro_property!` / `ferro_properties!`, which take the same options as arguments |
 | `IDataContextProvider.cs` | `i_data_context_provider.rs` | present | 1/1 | 1/1 |  |
-| `IDescription.cs` | `i_description.rs` | missing | 0/1 | 0/1 |  |
-| `IDirectPropertyAccessor.cs` | `i_direct_property_accessor.rs` | missing | 0/1 | 0/6 |  |
-| `IDirectPropertyMetadata.cs` | `i_direct_property_metadata.rs` | missing | 0/1 | 0/2 |  |
+| `IDescription.cs` | `data/core/untyped_binding_expression_base.rs` | present | 1/1 | 1/1 | replaced: the description is a member of each contract that has one (`UntypedBindingExpression::description`, `IndexerDescriptor::description`, `TypedBindingExpression::description`); the `as IDescription` test of the property log is that member (porting guide: C# `is` on an interface becomes a virtual) |
+| `IDirectPropertyAccessor.cs` | `ferro_property.rs` | present | 1/1 | 0/6 (6 waived) | replaced: the internal untyped accessor contracts of the property kinds are the crate-internal `PropertyRoutes` trait, which `StyledProperty&lt;T&gt;` and `DirectPropertyBase&lt;T&gt;` implement (`route_get_value`, `route_set_value`, `route_get_default_value` for the default or unset value, `route_is_valid_value`); `is_read_only` and `owner` are members of the property |
+| `IDirectPropertyMetadata.cs` | `ferro_property_metadata.rs` | present | 1/1 | 1/2 (1 waived) | replaced: [NotClientImplementable] untyped views of the typed metadata: the typed metadata is reached through the typed property (`get_metadata`), the untyped default or unset value through `PropertyRoutes::route_get_default_value`, and `enable_data_validation` through the base metadata |
 | `INamed.cs` | `i_named.rs` | present | 1/1 | 1/1 |  |
-| `IOptionalFeatureProvider.cs` | `i_optional_feature_provider.rs` | missing (types found elsewhere) | 1/2 | 1/3 | types found in `platform/i_optional_feature_provider.rs` (add to path-overrides.toml) |
-| `IStyledPropertyAccessor.cs` | `i_styled_property_accessor.rs` | missing | 0/1 | 0/3 |  |
-| `IStyledPropertyMetadata.cs` | `i_styled_property_metadata.rs` | missing | 0/1 | 0/1 |  |
+| `IOptionalFeatureProvider.cs` | `platform/i_optional_feature_provider.rs` | present | 1/2 (1 waived) | 1/3 (2 waived) | renamed: the contract lives with the platform contracts that implement it |
+| `IStyledPropertyAccessor.cs` | `ferro_property.rs` | present | 1/1 | 0/3 (3 waived) | replaced: the internal untyped accessor contracts of the property kinds are the crate-internal `PropertyRoutes` trait, which `StyledProperty&lt;T&gt;` and `DirectPropertyBase&lt;T&gt;` implement (`route_get_value`, `route_set_value`, `route_get_default_value` for the default or unset value, `route_is_valid_value`); `is_read_only` and `owner` are members of the property |
+| `IStyledPropertyMetadata.cs` | `ferro_property_metadata.rs` | present | 1/1 | 1/1 | replaced: [NotClientImplementable] untyped views of the typed metadata: the typed metadata is reached through the typed property (`get_metadata`), the untyped default or unset value through `PropertyRoutes::route_get_default_value`, and `enable_data_validation` through the base metadata |
 | `Matrix.cs` | `matrix.rs` | present | 2/2 | 42/43 (1 waived) |  |
 | `PixelPoint.cs` | `pixel_point.rs` | present | 1/1 | 26/26 |  |
 | `PixelRect.cs` | `pixel_rect.rs` | present | 1/1 | 44/44 |  |
 | `PixelSize.cs` | `pixel_size.rs` | present | 1/1 | 24/24 |  |
 | `PixelVector.cs` | `pixel_vector.rs` | present | 1/1 | 20/20 |  |
 | `Point.cs` | `point.rs` | present | 1/1 | 25/27 (2 waived) |  |
-| `Points.cs` | `points.rs` | missing | 0/1 | 0/2 |  |
+| `Points.cs` | `media/points.rs` | present | 0/1 (1 waived) | 0/2 (2 waived) | renamed: the point list lives with the geometries and segments that hold it |
 | `Rect.cs` | `rect.rs` | present | 1/1 | 48/50 (2 waived) |  |
 | `RelativePoint.cs` | `relative_point.rs` | present | 2/2 | 17/18 (1 waived) |  |
 | `RelativeRect.cs` | `relative_rect.rs` | present | 1/1 | 15/16 (1 waived) |  |
 | `RelativeScalar.cs` | `relative_scalar.rs` | present | 1/1 | 13/14 (1 waived) |  |
-| `RenderTargetCorruptedException.cs` | `render_target_corrupted_exception.rs` | missing | 0/1 | 0/4 |  |
-| `RenderTargetNotReadyException.cs` | `render_target_not_ready_exception.rs` | missing | 0/1 | 0/4 |  |
-| `Rotate3DTransform.cs` | `rotate_3d_transform.rs` | partial | 1/1 | 17/18 |  |
+| `RenderTargetCorruptedException.cs` | `render_target_corrupted_exception.rs` | present | 1/1 | 4/4 |  |
+| `RenderTargetNotReadyException.cs` | `render_target_not_ready_exception.rs` | present | 1/1 | 4/4 |  |
+| `Rotate3DTransform.cs` | `rotate_3d_transform.rs` | present | 1/1 | 17/18 (1 waived) |  |
 | `RoundedRect.cs` | `rounded_rect.rs` | present | 1/1 | 23/24 (1 waived) |  |
 | `Size.cs` | `size.rs` | present | 1/1 | 26/27 (1 waived) |  |
-| `StyledElement.cs` | `styled_element.rs` | partial | 1/1 | 59/64 |  |
-| `StyledElementExtensions.cs` | `styled_element_extensions.rs` | missing | 0/1 | 0/3 |  |
-| `StyledProperty.cs` | `styled_property.rs` | partial | 1/1 | 22/24 |  |
+| `StyledElement.cs` | `styled_element.rs` | present | 1/1 | 59/64 (5 waived) |  |
+| `StyledElementExtensions.cs` | `styled_element_extensions.rs` | present | 1/1 | 2/3 (1 waived) | merged: the extension methods are inherent methods of StyledElement |
+| `StyledProperty.cs` | `styled_property.rs` | present | 1/1 | 23/24 (1 waived) |  |
 | `StyledPropertyMetadata`1.cs` | `ferro_property_metadata.rs` | present | 1/1 | 6/6 | merged: the three metadata classes share one file |
-| `StyledPropertyNonGenericHelper.cs` | `styled_property_non_generic_helper.rs` | missing | 0/1 | 0/2 |  |
-| `Thickness.cs` | `thickness.rs` | partial | 1/1 | 19/21 (1 waived) |  |
+| `StyledPropertyNonGenericHelper.cs` | `ferro_property.rs` | present | 1/1 | 0/2 (2 waived) | replaced: the non-generic throw helpers of invalid values are `FerroProperty::invalid_value_message`, `invalid_value_type` and `value_not_valid`, compiled once for all value types |
+| `Thickness.cs` | `thickness.rs` | present | 1/1 | 19/21 (2 waived) |  |
 | `Vector.cs` | `vector.rs` | present | 1/1 | 47/49 (2 waived) |  |
 | `Vector3D.cs` | `vector3d.rs` | present | 1/1 | 26/27 (1 waived) |  |
 | `Visual.Composition.cs` | `visual.rs` | present | 1/1 | 7/7 | partial merged into main file |
-| `Visual.cs` | `visual.rs` | partial | 1/1 | 59/61 |  |
+| `Visual.cs` | `visual.rs` | present | 1/1 | 59/61 (2 waived) |  |
 | `VisualExtensions.cs` | `visual_tree/visual_extensions.rs` | present | 1/1 | 4/4 | merged: the extension methods of both static classes are inherent methods of Visual |
 | `VisualTreeAttachmentEventArgs.cs` | `visual_tree_attachment_event_args.rs` | present | 1/1 | 6/6 |  |
 
-<details><summary><code>AvaloniaLocator.cs</code> - 2 missing</summary>
-
-- `AvaloniaLocator` (class): 1 missing
-  - `static AvaloniaLocator()` *(static)*
-- `AvaloniaLocator.RegistrationHelper<TService>` (class): 1 missing
-  - `RegistrationHelper(AvaloniaLocator locator)`
-
-</details>
-
-<details><summary><code>AvaloniaObject.cs</code> - 13 missing</summary>
-
-- `AvaloniaObject` (class): 13 missing
-  - `object? this[AvaloniaProperty property] { get; set; }`
-  - `BindingBase this[IndexerDescriptor binding] { get; set; }`
-  - `string DebugDisplay { get; }` *(internal)*
-  - `void ClearValue<T>(DirectPropertyBase<T> property)` *(3 of 4 overloads found)*
-  - `sealed override bool Equals(object? obj)`
-  - `void AddInheritanceChild(AvaloniaObject child)` *(internal)*
-  - `Delegate[]? IAvaloniaObjectDebug.GetPropertyChangedSubscribers()` *(explicit)*
-  - `AvaloniaPropertyValue GetDiagnosticInternal(AvaloniaProperty property)` *(internal)*
-  - `ValueStore GetValueStore()` *(internal)*
-  - `void RaisePropertyChanged<T>(AvaloniaProperty<T> property, Optional<T> oldValue, BindingValue<T> newValue, ...` *(internal; 2 of 3 overloads found)*
-  - `void SetDirectValueUnchecked<T>(DirectPropertyBase<T> property, BindingValue<T> value)` *(internal; 1 of 2 overloads found)*
-  - `string GetDebugDisplay(bool includeContent)` *(internal)*
-  - `virtual void BuildDebugDisplay(StringBuilder builder, bool includeContent)` *(internal)*
-  - waived (Rust: `Hash` is derived where the type can be hashed; float-based value types are not `Eq`/`Hash`): `GetHashCode`
-
-</details>
-
-<details><summary><code>AvaloniaObjectExtensions.cs</code> - 6 missing</summary>
-
-- `AvaloniaObjectExtensions` (class): 6 missing
-  - `static BindingBase ToBinding<T>(this IObservable<T> source)`
-  - `static IObservable<BindingValue<TResult>> GetBindingObservable<TSource, TResult>(this AvaloniaObject o, Ava...` *(3 of 4 overloads found)*
-  - `static T GetValue<T>(this AvaloniaObject target, AvaloniaProperty<T> property)`
-  - `static Optional<T> GetBaseValue<T>(this AvaloniaObject target, AvaloniaProperty<T> property)` *(1 of 2 overloads found)*
-  - `static IDisposable AddClassHandler<TTarget>(this IObservable<AvaloniaPropertyChangedEventArgs> observable, ...`
-  - `static IDisposable AddClassHandler<TTarget, TValue>(this IObservable<AvaloniaPropertyChangedEventArgs<TValu...`
-
-</details>
-
-<details><summary><code>AvaloniaProperty.cs</code> - 8 missing</summary>
-
-- `AvaloniaProperty` (class): 7 missing
-  - `AvaloniaProperty(AvaloniaProperty source, Type ownerType, AvaloniaPropertyMetadata? metadata)` *(private protected; 1 of 2 constructors found)*
-  - `static IndexerDescriptor operator !(AvaloniaProperty property)`
-  - `static IndexerDescriptor operator ~(AvaloniaProperty property)`
-  - `void Unregister(Type type)`
-  - `AvaloniaPropertyMetadata GetMetadata(AvaloniaObject owner)` *(2 of 3 overloads found)*
-  - `void OverrideMetadata(Type type, AvaloniaPropertyMetadata metadata)` *(private protected)*
-  - `abstract IObservable<AvaloniaPropertyChangedEventArgs> GetChanged()` *(private protected)*
-- `UnsetValueType` (class): 1 missing
-  - `UnsetValueType()` *(internal)*
-
-</details>
-
-<details><summary><code>AvaloniaPropertyChangedEventArgs.cs</code> - 3 missing</summary>
-
-- `AvaloniaPropertyChangedEventArgs` (class): 3 missing
-  - `AvaloniaPropertyChangedEventArgs(AvaloniaObject sender, BindingPriority priority, bool isEffectiveValueChange)` *(internal; 1 of 2 constructors found)*
-  - `void SetSender(AvaloniaObject sender)` *(internal)*
-  - `abstract AvaloniaProperty GetProperty()` *(protected)*
-
-</details>
-
-<details><summary><code>AvaloniaPropertyChangedEventArgs`1.cs</code> - 2 missing</summary>
-
-- `AvaloniaPropertyChangedEventArgs<T>` (class): 2 missing
-  - `AvaloniaPropertyChangedEventArgs(AvaloniaObject sender, AvaloniaProperty<T> property, Optional<T> oldValue,...` *(internal; 1 of 2 constructors found)*
-  - `override AvaloniaProperty GetProperty()` *(protected)*
-
-</details>
-
-<details><summary><code>AvaloniaPropertyRegistry.cs</code> - 2 missing</summary>
-
-- `AvaloniaPropertyRegistry` (class): 2 missing
-  - `bool UnregisterByModule(IEnumerable<Type> types)`
-  - `AvaloniaProperty GetRegisteredDirectUntyped(AvaloniaObject o, AvaloniaProperty property)` *(internal)*
-
-</details>
-
-<details><summary><code>AvaloniaProperty`1.cs</code> - 3 missing</summary>
-
-- `AvaloniaProperty<TValue>` (class): 3 missing
-  - `AvaloniaProperty(AvaloniaProperty<TValue> source, Type ownerType, AvaloniaPropertyMetadata? metadata)` *(private protected; 1 of 2 constructors found)*
-  - `override IObservable<AvaloniaPropertyChangedEventArgs> GetChanged()` *(private protected)*
-  - `BindingValue<object?> TryConvert(object? value)` *(private protected)*
-
-</details>
-
-<details><summary><code>CombinedGeometry.cs</code> - 3 missing</summary>
-
-- `CombinedGeometry` (class): 3 missing
-  - `CombinedGeometry(Geometry geometry1, Geometry geometry2)` *(1 of 4 constructors found)*
-  - `CombinedGeometry(GeometryCombineMode combineMode, Geometry? geometry1, Geometry? geometry2)` *(1 of 4 constructors found)*
-  - `CombinedGeometry(GeometryCombineMode combineMode, Geometry? geometry1, Geometry? geometry2, Transform? tran...` *(1 of 4 constructors found)*
-
-</details>
-
-<details><summary><code>CornerRadius.cs</code> - 1 missing</summary>
-
-- `CornerRadius` (struct): 1 missing
-  - `CornerRadius(double topLeft, double topRight, double bottomRight, double bottomLeft)` *(2 of 3 constructors found)*
-  - waived (Rust: `Hash` is derived where the type can be hashed; float-based value types are not `Eq`/`Hash`): `GetHashCode`
-
-</details>
-
-<details><summary><code>DirectProperty.cs</code> - 4 missing</summary>
-
-- `DirectProperty<TOwner, TValue>` (class): 4 missing
-  - `object? IDirectPropertyAccessor.GetValue(AvaloniaObject instance)` *(explicit)*
-  - `void IDirectPropertyAccessor.SetValue(AvaloniaObject instance, object? value)` *(explicit)*
-  - `object? IDirectPropertyAccessor.GetUnsetValue(Type type)` *(explicit)*
-  - `object? IDirectPropertyAccessor.GetUnsetValue(AvaloniaObject owner)` *(explicit)*
-
-</details>
-
-<details><summary><code>DirectPropertyBase.cs</code> - 3 missing</summary>
-
-- `DirectPropertyBase<TValue>` (class): 3 missing
-  - `DirectPropertyBase(string name, Type ownerType, AvaloniaPropertyMetadata metadata)` *(private protected)*
-  - `DirectPropertyBase(DirectPropertyBase<TValue> source, Type ownerType, AvaloniaPropertyMetadata metadata)` *(private protected)*
-  - `void OverrideMetadata(Type type, DirectPropertyMetadata<TValue> metadata)` *(1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>IOptionalFeatureProvider.cs</code> - 3 missing</summary>
-
-- `OptionalFeatureProviderExtensions` (class, public): **type missing** (2 members)
-
-</details>
-
-<details><summary><code>Rotate3DTransform.cs</code> - 1 missing</summary>
-
-- `Rotate3DTransform` (class): 1 missing
-  - `Rotate3DTransform(double angleX, double angleY, double angleZ, double centerX, double centerY, double cente...` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>StyledElement.cs</code> - 5 missing</summary>
-
-- `StyledElement` (class): 5 missing
-  - `static StyledElement()` *(static)*
-  - `SafeEnumerableAvaloniaList<ILogical> TypedLogicalChildren { get; }` *(internal)*
-  - `static ControlTheme InvalidTheme { get; }` *(internal)*
-  - `void IAvaloniaListItemValidator<ILogical>.Validate(ILogical item)` *(explicit)*
-  - `override void BuildDebugDisplay(StringBuilder builder, bool includeContent)` *(internal)*
-
-</details>
-
-<details><summary><code>StyledProperty.cs</code> - 2 missing</summary>
-
-- `StyledProperty<TValue>` (class): 2 missing
-  - `void OverrideDefaultValue(Type type, TValue defaultValue)` *(1 of 2 overloads found)*
-  - `override string ToString()`
-
-</details>
-
-<details><summary><code>Thickness.cs</code> - 1 missing</summary>
-
-- `Thickness` (struct): 1 missing
-  - `Thickness(double left, double top, double right, double bottom)` *(2 of 3 constructors found)*
-  - waived (Rust: `Hash` is derived where the type can be hashed; float-based value types are not `Eq`/`Hash`): `GetHashCode`
-
-</details>
-
-<details><summary><code>Visual.cs</code> - 2 missing</summary>
-
-- `Visual` (class): 2 missing
-  - `SafeEnumerableAvaloniaList<Visual> TypedVisualChildren { get; }` *(internal)*
-  - `void IAvaloniaListItemValidator<Visual>.Validate(Visual item)` *(explicit)*
-
-</details>
-
-### `Animation` - files 38/42, types 44/48, members 191/225
+### `Animation` - files 39/39, types 44/45 (1 waived), members 191/219 (28 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `Animatable.cs` | `animation/animatable.rs` | present | 1/1 | 8/8 |  |
-| `Animation.AnimatorRegistry.cs` | `animation/animation_animator_registry.rs` | partial | 1/1 | 2/3 |  |
-| `Animation.cs` | `animation/animation.rs` | partial | 1/1 | 18/26 |  |
+| `Animation.AnimatorRegistry.cs` | `animation/animation_animator_registry.rs` | present | 1/1 | 2/3 (1 waived) |  |
+| `Animation.cs` | `animation/animation.rs` | present | 1/1 | 18/26 (8 waived) |  |
 | `AnimationInstance`1.cs` | `animation/animation_instance.rs` | present | 1/1 | 4/4 | generic arity merged |
 | `AnimatorDrivenTransition.cs` | `animation/animator_driven_transition.rs` | present | 1/1 | 1/1 |  |
-| `AnimatorKeyFrame.cs` | `animation/animator_key_frame.rs` | partial | 1/1 | 12/13 |  |
-| `AnimatorTransitionObservable.cs` | `animation/animator_transition_observable.rs` | partial | 1/1 | 1/2 |  |
-| `Clock.cs` | `animation/clock.rs` | partial | 1/1 | 3/4 |  |
-| `ClockBase.cs` | `animation/clock_base.rs` | partial | 1/1 | 5/6 |  |
+| `AnimatorKeyFrame.cs` | `animation/animator_key_frame.rs` | present | 1/1 | 12/13 (1 waived) |  |
+| `AnimatorTransitionObservable.cs` | `animation/animator_transition_observable.rs` | present | 1/1 | 1/2 (1 waived) |  |
+| `Clock.cs` | `animation/clock.rs` | present | 1/1 | 3/4 (1 waived) |  |
+| `ClockBase.cs` | `animation/clock_base.rs` | present | 1/1 | 5/6 (1 waived) |  |
 | `CompositePageTransition.cs` | `animation/composite_page_transition.rs` | present | 1/1 | 4/4 |  |
 | `CrossFade.cs` | `animation/cross_fade.rs` | present | 1/1 | 10/10 |  |
-| `Cue.cs` | `animation/cue.rs` | partial | 1/2 | 4/6 |  |
+| `Cue.cs` | `animation/cue.rs` | present | 1/2 (1 waived) | 4/6 (2 waived) |  |
 | `DisposeAnimationInstanceSubject.cs` | `animation/dispose_animation_instance_subject.rs` | present | 1/1 | 5/5 |  |
 | `FillMode.cs` | `animation/fill_mode.rs` | present | 1/1 | 4/4 |  |
 | `IAnimation.cs` | `animation/i_animation.rs` | present | 1/1 | 2/2 |  |
 | `IAnimationSetter.cs` | `animation/i_animation_setter.rs` | present | 1/1 | 2/2 |  |
 | `IAnimator.cs` | `animation/i_animator.rs` | present | 1/1 | 2/2 |  |
 | `IClock.cs` | `animation/i_clock.rs` | present | 1/1 | 1/1 |  |
-| `ICustomAnimator.cs` | `animation/i_custom_animator.rs` | partial | 3/3 | 4/8 |  |
+| `ICustomAnimator.cs` | `animation/i_custom_animator.rs` | present | 3/3 | 4/8 (4 waived) |  |
 | `IGlobalClock.cs` | `animation/i_global_clock.rs` | present | 1/1 | 0/0 |  |
 | `IPageTransition.cs` | `animation/i_page_transition.rs` | present | 1/1 | 1/1 |  |
 | `IProgressPageTransition.cs` | `animation/i_progress_page_transition.rs` | present | 1/1 | 2/2 |  |
 | `ITransition.cs` | `animation/i_transition.rs` | present | 1/1 | 2/2 |  |
-| `InterpolatingTransitionBase.cs` | `animation/interpolating_transition_base.rs` | partial | 1/1 | 1/2 |  |
+| `InterpolatingTransitionBase.cs` | `animation/interpolating_transition_base.rs` | present | 1/1 | 1/2 (1 waived) |  |
 | `IterationCount.cs` | `animation/iteration_count.rs` | present | 2/2 | 15/15 |  |
-| `IterationCountTypeConverter.cs` | `animation/iteration_count_type_converter.rs` | missing | 0/1 | 0/2 |  |
-| `KeyFrame.cs` | `animation/key_frame.rs` | partial | 2/2 | 8/9 |  |
+| `IterationCountTypeConverter.cs` | - | n/a | - | - | not-applicable: `TypeConverter` found by reflection through an attribute on the type it converts: the markup layer converts from text with the `parse` of that type (`IterationCount::parse`, `KeySpline::parse`, `Spring::parse`, `Easing::parse`) |
+| `KeyFrame.cs` | `animation/key_frame.rs` | present | 2/2 | 8/9 (1 waived) |  |
 | `KeyFrames.cs` | `animation/key_frames.rs` | present | 1/1 | 2/2 |  |
-| `KeySpline.cs` | `animation/key_spline.rs` | partial | 1/1 | 8/9 |  |
-| `KeySplineTypeConverter.cs` | `animation/key_spline_type_converter.rs` | missing | 0/1 | 0/2 |  |
+| `KeySpline.cs` | `animation/key_spline.rs` | present | 1/1 | 8/9 (1 waived) |  |
+| `KeySplineTypeConverter.cs` | - | n/a | - | - | not-applicable: `TypeConverter` found by reflection through an attribute on the type it converts: the markup layer converts from text with the `parse` of that type (`IterationCount::parse`, `KeySpline::parse`, `Spring::parse`, `Easing::parse`) |
 | `PageSlide.cs` | `animation/page_slide.rs` | present | 2/2 | 13/13 |  |
 | `PageTransitionItem.cs` | `animation/page_transition_item.rs` | present | 1/1 | 4/4 |  |
 | `PlayState.cs` | `animation/play_state.rs` | present | 1/1 | 3/3 |  |
 | `PlaybackBehavior.cs` | `animation/playback_behavior.rs` | present | 1/1 | 3/3 |  |
 | `PlaybackDirection.cs` | `animation/playback_direction.rs` | present | 1/1 | 4/4 |  |
 | `Spring.cs` | `animation/spring.rs` | present | 1/1 | 8/8 |  |
-| `SpringTypeConverter.cs` | `animation/spring_type_converter.rs` | missing | 0/1 | 0/2 |  |
-| `Transition.cs` | `animation/transition.rs` | partial | 1/1 | 1/3 |  |
-| `TransitionBase.cs` | `animation/transition_base.rs` | partial | 1/1 | 11/12 |  |
-| `TransitionInstance.cs` | `animation/transition_instance.rs` | partial | 1/1 | 3/6 |  |
+| `SpringTypeConverter.cs` | - | n/a | - | - | not-applicable: `TypeConverter` found by reflection through an attribute on the type it converts: the markup layer converts from text with the `parse` of that type (`IterationCount::parse`, `KeySpline::parse`, `Spring::parse`, `Easing::parse`) |
+| `Transition.cs` | `animation/transition.rs` | present | 1/1 | 1/3 (2 waived) |  |
+| `TransitionBase.cs` | `animation/transition_base.rs` | present | 1/1 | 11/12 (1 waived) |  |
+| `TransitionInstance.cs` | `animation/transition_instance.rs` | present | 1/1 | 3/6 (3 waived) |  |
 | `TransitionObservableBase.cs` | `animation/transition_observable_base.rs` | present | 1/1 | 8/8 |  |
-| `Transitions.cs` | `animation/transitions.rs` | missing (types found elsewhere) | 1/1 | 2/2 | types found in `animation/transitions_collection.rs` (add to path-overrides.toml) |
+| `Transitions.cs` | `animation/transitions_collection.rs` | present | 1/1 | 2/2 | renamed: `transitions` is the name of the module of the directory `Animation/Transitions`, so the collection class has the file `transitions_collection.rs` |
 
-<details><summary><code>Animation.AnimatorRegistry.cs</code> - 1 missing</summary>
-
-- `Animation` (class) in `animation/animation.rs`: 1 missing
-  - `static Animation()` *(static)*
-
-</details>
-
-<details><summary><code>Animation.cs</code> - 8 missing</summary>
-
-- `Animation` (class): 8 missing
-  - `static readonly DirectProperty<Animation, TimeSpan> DurationProperty`
-  - `static readonly DirectProperty<Animation, IterationCount> IterationCountProperty`
-  - `static readonly DirectProperty<Animation, PlaybackDirection> PlaybackDirectionProperty`
-  - `static readonly DirectProperty<Animation, PlaybackBehavior> PlaybackBehaviorProperty`
-  - `static readonly DirectProperty<Animation, FillMode> FillModeProperty`
-  - `static readonly DirectProperty<Animation, TimeSpan> DelayProperty`
-  - `static readonly DirectProperty<Animation, TimeSpan> DelayBetweenIterationsProperty`
-  - `Task RunAsync(Animatable control, IClock? clock, CancellationToken cancellationToken)` *(internal; 2 of 3 overloads found)*
-
-</details>
-
-<details><summary><code>AnimatorKeyFrame.cs</code> - 1 missing</summary>
-
-- `AnimatorKeyFrame` (class): 1 missing
-  - `override void BuildDebugDisplay(StringBuilder builder, bool includeContent)` *(internal)*
-
-</details>
-
-<details><summary><code>AnimatorTransitionObservable.cs</code> - 1 missing</summary>
-
-- `AnimatorTransitionObservable<T, TAnimator>` (class): 1 missing
-  - `override T ProduceValue(double progress)` *(protected)*
-
-</details>
-
-<details><summary><code>Clock.cs</code> - 1 missing</summary>
-
-- `Clock` (class): 1 missing
-  - `Clock(IClock parent)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>ClockBase.cs</code> - 1 missing</summary>
-
-- `ClockBase` (class): 1 missing
-  - `virtual void Stop()` *(protected)*
-
-</details>
-
-<details><summary><code>Cue.cs</code> - 3 missing</summary>
-
-- `CueTypeConverter` (class, public): **type missing** (2 members)
-
-</details>
-
-<details><summary><code>ICustomAnimator.cs</code> - 4 missing</summary>
-
-- `InterpolatingAnimator<T>` (class): 3 missing
-  - `Type ICustomAnimator.WrapperType { get; }` *(explicit)*
-  - `IAnimator ICustomAnimator.CreateWrapper()` *(explicit)*
-  - `IAnimator CreateWrapper()` *(internal)*
-- `InterpolatingAnimator<T>.AnimatorWrapper` (class): 1 missing
-  - `AnimatorWrapper(InterpolatingAnimator<T> parent)`
-
-</details>
-
-<details><summary><code>InterpolatingTransitionBase.cs</code> - 1 missing</summary>
-
-- `InterpolatingTransitionBase<T>` (class): 1 missing
-  - `override IObservable<T> DoTransition(IObservable<double> progress, T oldValue, T newValue)` *(internal)*
-
-</details>
-
-<details><summary><code>KeyFrame.cs</code> - 1 missing</summary>
-
-- `KeyFrame` (class): 1 missing
-  - `override void BuildDebugDisplay(StringBuilder builder, bool includeContent)` *(internal)*
-
-</details>
-
-<details><summary><code>KeySpline.cs</code> - 1 missing</summary>
-
-- `KeySpline` (class): 1 missing
-  - `KeySpline(double x1, double y1, double x2, double y2)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>Transition.cs</code> - 2 missing</summary>
-
-- `Transition<T>` (class): 2 missing
-  - `static Transition()` *(static)*
-  - `override IDisposable Apply(Animatable control, IClock clock, object? oldValue, object? newValue)` *(internal)*
-
-</details>
-
-<details><summary><code>TransitionBase.cs</code> - 1 missing</summary>
-
-- `TransitionBase` (class): 1 missing
-  - `override void BuildDebugDisplay(StringBuilder builder, bool includeContent)` *(internal)*
-
-</details>
-
-<details><summary><code>TransitionInstance.cs</code> - 3 missing</summary>
-
-- `TransitionInstance` (class): 3 missing
-  - `void IObserver<TimeSpan>.OnCompleted()` *(explicit)*
-  - `void IObserver<TimeSpan>.OnError(Exception error)` *(explicit)*
-  - `void IObserver<TimeSpan>.OnNext(TimeSpan value)` *(explicit)*
-
-</details>
-
-### `Animation/Animators` - files 27/28, types 27/28, members 39/44
+### `Animation/Animators` - files 27/27, types 27/27, members 39/43 (4 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Animator`1.cs` | `animation/animators/animator.rs` | partial | 1/1 | 5/7 | generic arity merged |
+| `Animator`1.cs` | `animation/animators/animator.rs` | present | 1/1 | 5/7 (2 waived) | generic arity merged |
 | `BaseBrushAnimator.cs` | `animation/animators/base_brush_animator.rs` | present | 1/1 | 3/3 |  |
 | `BoolAnimator.cs` | `animation/animators/bool_animator.rs` | present | 1/1 | 1/1 |  |
 | `BoxShadowAnimator.cs` | `animation/animators/box_shadow_animator.rs` | present | 1/1 | 1/1 |  |
@@ -698,10 +413,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ByteAnimator.cs` | `animation/animators/byte_animator.rs` | present | 1/1 | 1/1 |  |
 | `ColorAnimator.cs` | `animation/animators/color_animator.rs` | present | 1/1 | 2/2 |  |
 | `CornerRadiusAnimator.cs` | `animation/animators/corner_radius_animator.rs` | present | 1/1 | 1/1 |  |
-| `DecimalAnimator.cs` | `animation/animators/decimal_animator.rs` | missing | 0/1 | 0/1 |  |
+| `DecimalAnimator.cs` | - | n/a | - | - | not-applicable: animator of `System.Decimal`, a 128-bit decimal floating point type that Rust and the port do not have; no property of the framework has that type |
 | `DoubleAnimator.cs` | `animation/animators/double_animator.rs` | present | 1/1 | 1/1 |  |
 | `FloatAnimator.cs` | `animation/animators/float_animator.rs` | present | 1/1 | 1/1 |  |
-| `GradientBrushAnimator.cs` | `animation/animators/gradient_brush_animator.rs` | partial | 1/1 | 2/3 |  |
+| `GradientBrushAnimator.cs` | `animation/animators/gradient_brush_animator.rs` | present | 1/1 | 2/3 (1 waived) |  |
 | `Int16Animator.cs` | `animation/animators/int16_animator.rs` | present | 1/1 | 1/1 |  |
 | `Int32Animator.cs` | `animation/animators/int32_animator.rs` | present | 1/1 | 1/1 |  |
 | `Int64Animator.cs` | `animation/animators/int64_animator.rs` | present | 1/1 | 1/1 |  |
@@ -710,7 +425,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `RelativePointAnimator.cs` | `animation/animators/relative_point_animator.rs` | present | 1/1 | 1/1 |  |
 | `RelativeScalarAnimator.cs` | `animation/animators/relative_scalar_animator.rs` | present | 1/1 | 1/1 |  |
 | `SizeAnimator.cs` | `animation/animators/size_animator.rs` | present | 1/1 | 1/1 |  |
-| `SolidColorBrushAnimator.cs` | `animation/animators/solid_color_brush_animator.rs` | partial | 1/1 | 1/2 |  |
+| `SolidColorBrushAnimator.cs` | `animation/animators/solid_color_brush_animator.rs` | present | 1/1 | 1/2 (1 waived) |  |
 | `ThicknessAnimator.cs` | `animation/animators/thickness_animator.rs` | present | 1/1 | 1/1 |  |
 | `TransformAnimator.cs` | `animation/animators/transform_animator.rs` | present | 1/1 | 2/2 |  |
 | `TransformOperationsAnimator.cs` | `animation/animators/transform_operations_animator.rs` | present | 1/1 | 4/4 |  |
@@ -719,29 +434,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `UInt64Animator.cs` | `animation/animators/uint64_animator.rs` | present | 1/1 | 1/1 |  |
 | `VectorAnimator.cs` | `animation/animators/vector_animator.rs` | present | 1/1 | 1/1 |  |
 
-<details><summary><code>Animator`1.cs</code> - 2 missing</summary>
-
-- `Animator<T>` (class): 2 missing
-  - `AvaloniaProperty? Property { get; set; }`
-  - `IDisposable? Apply(Animation animation, Animatable control, IClock? clock, IObservable<bool> match, Action?...` *(internal; 1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>GradientBrushAnimator.cs</code> - 1 missing</summary>
-
-- `GradientBrushAnimator` (class): 1 missing
-  - `override IDisposable BindAnimation(Animatable control, IObservable<IGradientBrush?> instance)`
-
-</details>
-
-<details><summary><code>SolidColorBrushAnimator.cs</code> - 1 missing</summary>
-
-- `ISolidColorBrushAnimator` (class): 1 missing
-  - `override IDisposable BindAnimation(Animatable control, IObservable<ISolidColorBrush?> instance)`
-
-</details>
-
-### `Animation/Easings` - files 35/36, types 35/36, members 48/51
+### `Animation/Easings` - files 35/35, types 35/35, members 48/49 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -758,7 +451,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `CubicEaseInOut.cs` | `animation/easings/cubic_ease_in_out.rs` | present | 1/1 | 1/1 |  |
 | `CubicEaseOut.cs` | `animation/easings/cubic_ease_out.rs` | present | 1/1 | 1/1 |  |
 | `Easing.cs` | `animation/easings/easing.rs` | present | 1/1 | 2/2 |  |
-| `EasingTypeConverter.cs` | `animation/easings/easing_type_converter.rs` | missing | 0/1 | 0/2 |  |
+| `EasingTypeConverter.cs` | - | n/a | - | - | not-applicable: `TypeConverter` found by reflection through an attribute on the type it converts: the markup layer converts from text with the `parse` of that type (`IterationCount::parse`, `KeySpline::parse`, `Spring::parse`, `Easing::parse`) |
 | `ElasticEaseIn.cs` | `animation/easings/elastic_ease_in.rs` | present | 1/1 | 1/1 |  |
 | `ElasticEaseInOut.cs` | `animation/easings/elastic_ease_in_out.rs` | present | 1/1 | 1/1 |  |
 | `ElasticEaseOut.cs` | `animation/easings/elastic_ease_out.rs` | present | 1/1 | 1/1 |  |
@@ -779,119 +472,28 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `SineEaseIn.cs` | `animation/easings/sine_ease_in.rs` | present | 1/1 | 1/1 |  |
 | `SineEaseInOut.cs` | `animation/easings/sine_ease_in_out.rs` | present | 1/1 | 1/1 |  |
 | `SineEaseOut.cs` | `animation/easings/sine_ease_out.rs` | present | 1/1 | 1/1 |  |
-| `SplineEasing.cs` | `animation/easings/spline_easing.rs` | partial | 1/1 | 7/8 |  |
+| `SplineEasing.cs` | `animation/easings/spline_easing.rs` | present | 1/1 | 7/8 (1 waived) |  |
 | `SpringEasing.cs` | `animation/easings/spring_easing.rs` | present | 1/1 | 7/7 |  |
 
-<details><summary><code>SplineEasing.cs</code> - 1 missing</summary>
-
-- `SplineEasing` (class): 1 missing
-  - `SplineEasing()` *(2 of 3 constructors found)*
-
-</details>
-
-### `Animation/Transitions` - files 15/15, types 1/15, members 6/20
+### `Animation/Transitions` - files 15/15, types 1/15 (14 waived), members 6/20 (14 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `BoolTransition.cs` | `animation/transitions/bool_transition.rs` | partial | 0/1 | 0/1 |  |
-| `BoxShadowsTransition.cs` | `animation/transitions/box_shadows_transition.rs` | partial | 0/1 | 0/1 |  |
-| `BrushTransition.cs` | `animation/transitions/brush_transition.rs` | partial | 0/1 | 0/1 |  |
-| `ColorTransition.cs` | `animation/transitions/color_transition.rs` | partial | 0/1 | 0/1 |  |
-| `CornerRadiusTransition.cs` | `animation/transitions/corner_radius_transition.rs` | partial | 0/1 | 0/1 |  |
-| `DoubleTransition.cs` | `animation/transitions/double_transition.rs` | partial | 0/1 | 0/1 |  |
-| `FloatTransition.cs` | `animation/transitions/float_transition.rs` | partial | 0/1 | 0/1 |  |
-| `IntegerTransition.cs` | `animation/transitions/integer_transition.rs` | partial | 0/1 | 0/1 |  |
-| `PointTransition.cs` | `animation/transitions/point_transition.rs` | partial | 0/1 | 0/1 |  |
-| `RelativePointTransition.cs` | `animation/transitions/relative_point_transition.rs` | partial | 0/1 | 0/1 |  |
+| `BoolTransition.cs` | `animation/transitions/bool_transition.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) |  |
+| `BoxShadowsTransition.cs` | `animation/transitions/box_shadows_transition.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) |  |
+| `BrushTransition.cs` | `animation/transitions/brush_transition.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) |  |
+| `ColorTransition.cs` | `animation/transitions/color_transition.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) |  |
+| `CornerRadiusTransition.cs` | `animation/transitions/corner_radius_transition.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) |  |
+| `DoubleTransition.cs` | `animation/transitions/double_transition.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) |  |
+| `FloatTransition.cs` | `animation/transitions/float_transition.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) |  |
+| `IntegerTransition.cs` | `animation/transitions/integer_transition.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) |  |
+| `PointTransition.cs` | `animation/transitions/point_transition.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) |  |
+| `RelativePointTransition.cs` | `animation/transitions/relative_point_transition.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) |  |
 | `Rotate3DTransition.cs` | `animation/transitions/rotate_3d_transition.rs` | present | 1/1 | 6/6 |  |
-| `SizeTransition.cs` | `animation/transitions/size_transition.rs` | partial | 0/1 | 0/1 |  |
-| `ThicknessTransition.cs` | `animation/transitions/thickness_transition.rs` | partial | 0/1 | 0/1 |  |
-| `TransformOperationsTransition.cs` | `animation/transitions/transform_operations_transition.rs` | partial | 0/1 | 0/1 |  |
-| `VectorTransition.cs` | `animation/transitions/vector_transition.rs` | partial | 0/1 | 0/1 |  |
-
-<details><summary><code>BoolTransition.cs</code> - 2 missing</summary>
-
-- `BoolTransition` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>BoxShadowsTransition.cs</code> - 2 missing</summary>
-
-- `BoxShadowsTransition` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>BrushTransition.cs</code> - 2 missing</summary>
-
-- `BrushTransition` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>ColorTransition.cs</code> - 2 missing</summary>
-
-- `ColorTransition` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>CornerRadiusTransition.cs</code> - 2 missing</summary>
-
-- `CornerRadiusTransition` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>DoubleTransition.cs</code> - 2 missing</summary>
-
-- `DoubleTransition` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>FloatTransition.cs</code> - 2 missing</summary>
-
-- `FloatTransition` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>IntegerTransition.cs</code> - 2 missing</summary>
-
-- `IntegerTransition` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>PointTransition.cs</code> - 2 missing</summary>
-
-- `PointTransition` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>RelativePointTransition.cs</code> - 2 missing</summary>
-
-- `RelativePointTransition` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>SizeTransition.cs</code> - 2 missing</summary>
-
-- `SizeTransition` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>ThicknessTransition.cs</code> - 2 missing</summary>
-
-- `ThicknessTransition` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>TransformOperationsTransition.cs</code> - 2 missing</summary>
-
-- `TransformOperationsTransition` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>VectorTransition.cs</code> - 2 missing</summary>
-
-- `VectorTransition` (class, public): **type missing** (1 members)
-
-</details>
+| `SizeTransition.cs` | `animation/transitions/size_transition.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) |  |
+| `ThicknessTransition.cs` | `animation/transitions/thickness_transition.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) |  |
+| `TransformOperationsTransition.cs` | `animation/transitions/transform_operations_transition.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) |  |
+| `VectorTransition.cs` | `animation/transitions/vector_transition.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) |  |
 
 ### `Animation/Utils` - files 2/2, types 2/2, members 2/2
 
@@ -900,14 +502,14 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `BounceEaseUtils.cs` | `animation/utils/bounce_ease_utils.rs` | present | 1/1 | 1/1 |  |
 | `EasingUtils.cs` | `animation/utils/easing_utils.rs` | present | 1/1 | 1/1 |  |
 
-### `Collections` - files 10/11, types 12/14, members 79/111 (2 waived)
+### `Collections` - files 11/11, types 12/14 (2 waived), members 81/111 (30 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaDictionary.cs` | `collections/ferro_dictionary.rs` | partial | 1/1 | 26/34 |  |
+| `AvaloniaDictionary.cs` | `collections/ferro_dictionary.rs` | present | 1/1 | 28/34 (6 waived) |  |
 | `AvaloniaDictionaryExtensions.cs` | `collections/ferro_dictionary_extensions.rs` | present | 1/1 | 1/1 |  |
-| `AvaloniaList.cs` | `collections/ferro_list.rs` | partial | 2/4 | 39/59 |  |
-| `AvaloniaListConverter.cs` | `collections/ferro_list_converter.rs` | missing (types found elsewhere) | 1/1 | 0/2 | types found in `markup_types/well_known.rs` (add to path-overrides.toml) |
+| `AvaloniaList.cs` | `collections/ferro_list.rs` | present | 2/4 (2 waived) | 39/59 (20 waived) |  |
+| `AvaloniaListConverter.cs` | `markup_types/well_known.rs` | present | 1/1 | 0/2 (2 waived) | merged: the converter is declared for the markup metadata only; a list is converted from text by the `parse` of its type |
 | `AvaloniaListExtensions.cs` | `collections/ferro_list_extensions.rs` | present | 1/1 | 3/3 |  |
 | `IAvaloniaDictionary.cs` | `collections/i_ferro_dictionary.rs` | present | 1/1 | 0/0 |  |
 | `IAvaloniaList.cs` | `collections/i_ferro_list.rs` | present | 1/1 | 6/8 (2 waived) |  |
@@ -915,48 +517,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IAvaloniaReadOnlyDictionary.cs` | `collections/i_ferro_read_only_dictionary.rs` | present | 1/1 | 0/0 |  |
 | `IAvaloniaReadOnlyList.cs` | `collections/i_ferro_read_only_list.rs` | present | 1/1 | 0/0 |  |
 | `NotifyCollectionChangedExtensions.cs` | `collections/notify_collection_changed_extensions.rs` | present | 1/1 | 3/3 |  |
-
-<details><summary><code>AvaloniaDictionary.cs</code> - 8 missing</summary>
-
-- `AvaloniaDictionary<TKey, TValue>` (class): 8 missing
-  - `bool IDictionary.IsFixedSize { get; }` *(explicit)*
-  - `bool ICollection.IsSynchronized { get; }` *(explicit)*
-  - `object ICollection.SyncRoot { get; }` *(explicit)*
-  - `void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)`
-  - `IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()`
-  - `IEnumerator IEnumerable.GetEnumerator()` *(explicit)*
-  - `void ICollection.CopyTo(Array array, int index)` *(explicit)*
-  - `IDictionaryEnumerator IDictionary.GetEnumerator()` *(explicit)*
-
-</details>
-
-<details><summary><code>AvaloniaList.cs</code> - 22 missing</summary>
-
-- `AvaloniaList<T>` (class): 12 missing
-  - `AvaloniaList(params T[] items)` *(3 of 4 constructors found)*
-  - `List<T> Inner { get; set; }` *(private protected)*
-  - `virtual void OnMutating()` *(private protected)*
-  - `bool IList.IsFixedSize { get; }` *(explicit)*
-  - `bool IList.IsReadOnly { get; }` *(explicit)*
-  - `bool ICollection.IsSynchronized { get; }` *(explicit)*
-  - `object ICollection.SyncRoot { get; }` *(explicit)*
-  - `bool ICollection<T>.IsReadOnly { get; }` *(explicit)*
-  - `IEnumerator<T> IEnumerable<T>.GetEnumerator()` *(explicit)*
-  - `IEnumerator IEnumerable.GetEnumerator()` *(explicit)*
-  - `Enumerator GetEnumerator()`
-  - `Delegate[]? INotifyCollectionChangedDebug.GetCollectionChangedSubscribers()` *(explicit)*
-- `AvaloniaList<T>.Enumerator` (struct, public): **type missing** (6 members)
-- `EventArgsCache` (class, internal): **type missing** (2 members)
-
-</details>
-
-<details><summary><code>AvaloniaListConverter.cs</code> - 2 missing</summary>
-
-- `AvaloniaListConverter<T>` (class) in `markup_types/well_known.rs`: 2 missing
-  - `override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)`
-  - `override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object? value)`
-
-</details>
 
 ### `Collections/Pooled` - files 0/0, types 0/0, members 0/0
 
@@ -978,350 +538,102 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ReferenceEqualityComparer.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 | `TrimmingAttributes.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 
-### `Controls` - files 18/21, types 16/21, members 92/118
+### `Controls` - files 21/21, types 16/21 (5 waived), members 92/118 (26 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ChildNameScope.cs` | `controls/child_name_scope.rs` | partial | 1/1 | 6/7 |  |
+| `ChildNameScope.cs` | `controls/child_name_scope.rs` | present | 1/1 | 6/7 (1 waived) |  |
 | `Classes.cs` | `controls/classes.rs` | present | 1/1 | 20/20 |  |
-| `IClassesChangedListener.cs` | `controls/i_classes_changed_listener.rs` | missing | 0/1 | 0/1 |  |
+| `IClassesChangedListener.cs` | `controls/classes.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) | replaced: listener interface of the style activators: `Classes::add_listener` and `remove_listener` take the listener as a closure |
 | `IDeferredContent.cs` | `controls/i_deferred_content.rs` | present | 1/1 | 1/1 |  |
 | `INameScope.cs` | `controls/i_name_scope.rs` | present | 1/1 | 5/5 |  |
 | `IPseudoClasses.cs` | `controls/classes.rs` | present | 1/1 | 3/3 | merged: the trait lives next to its only implementation |
-| `IResourceDictionary.cs` | `controls/i_resource_dictionary.rs` | partial | 1/1 | 0/2 |  |
+| `IResourceDictionary.cs` | `controls/i_resource_dictionary.rs` | present | 1/1 | 0/2 (2 waived) |  |
 | `IResourceHost.cs` | `controls/i_resource_host.rs` | present | 1/1 | 2/2 |  |
 | `IResourceNode.cs` | `controls/i_resource_node.rs` | present | 1/1 | 2/2 |  |
 | `IResourceProvider.cs` | `controls/i_resource_provider.rs` | present | 1/1 | 4/4 |  |
-| `ISetInheritanceParent.cs` | `controls/i_set_inheritance_parent.rs` | missing | 0/1 | 0/1 |  |
-| `ISetLogicalParent.cs` | `controls/i_set_logical_parent.rs` | missing | 0/1 | 0/1 |  |
+| `ISetInheritanceParent.cs` | `ferro_object.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) | replaced: interface implemented explicitly by the one class `AvaloniaObject`: the method `FerroObject::set_inheritance_parent` |
+| `ISetLogicalParent.cs` | `styled_element.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) | replaced: interface implemented explicitly by the one class `StyledElement`: the method `StyledElement::set_parent` |
 | `IThemeVariantProvider.cs` | `controls/i_theme_variant_provider.rs` | present | 1/1 | 1/1 |  |
-| `NameScope.cs` | `controls/name_scope.rs` | partial | 1/1 | 7/8 |  |
-| `NameScopeExtensions.cs` | `controls/name_scope_extensions.rs` | partial | 1/1 | 3/5 |  |
+| `NameScope.cs` | `controls/name_scope.rs` | present | 1/1 | 7/8 (1 waived) |  |
+| `NameScopeExtensions.cs` | `controls/name_scope_extensions.rs` | present | 1/1 | 3/5 (2 waived) |  |
 | `NameScopeLocator.cs` | `controls/name_scope_locator.rs` | present | 1/1 | 1/1 |  |
-| `PseudoClassesExtensions.cs` | `controls/pseudo_classes_extensions.rs` | partial | 0/1 | 0/1 |  |
-| `ResourceDictionary.cs` | `controls/resource_dictionary.rs` | partial | 1/1 | 24/31 |  |
-| `ResourceNodeExtensions.cs` | `controls/resource_node_extensions.rs` | partial | 0/1 | 0/8 |  |
-| `ResourceProvider.cs` | `controls/resource_provider.rs` | partial | 1/1 | 10/11 |  |
+| `PseudoClassesExtensions.cs` | `controls/classes.rs`, `controls/pseudo_classes_extensions.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) | replaced: the one extension method, `Set`, is the inherent method `set` of `dyn IPseudoClasses`, next to the trait |
+| `ResourceDictionary.cs` | `controls/resource_dictionary.rs` | present | 1/1 | 24/31 (7 waived) |  |
+| `ResourceNodeExtensions.cs` | `controls/resource_node_extensions.rs` | present | 0/1 (1 waived) | 0/8 (8 waived) | replaced: the extension methods are inherent methods of `dyn IResourceHost` (`find_resource`, `find_resource_for_theme`, `try_find_resource`) and of `ResourceHostRef` (`resource_observable`), and the free function `get_floating_resource_observable`; the overloads with a converter and with a theme are parameters of those |
+| `ResourceProvider.cs` | `controls/resource_provider.rs` | present | 1/1 | 10/11 (1 waived) |  |
 | `ResourcesChangedEventArgs.cs` | `controls/resources_changed_event_args.rs` | present | 1/1 | 3/3 |  |
 
-<details><summary><code>ChildNameScope.cs</code> - 1 missing</summary>
-
-- `ChildNameScope` (class): 1 missing
-  - `void Register(string name, object element)`
-
-</details>
-
-<details><summary><code>IResourceDictionary.cs</code> - 2 missing</summary>
-
-- `IResourceDictionary` (interface): 2 missing
-  - `IList<IResourceProvider> MergedDictionaries { get; }`
-  - `IDictionary<ThemeVariant, IThemeVariantProvider> ThemeDictionaries { get; }`
-
-</details>
-
-<details><summary><code>NameScope.cs</code> - 1 missing</summary>
-
-- `NameScope` (class): 1 missing
-  - `void Register(string name, object element)`
-
-</details>
-
-<details><summary><code>NameScopeExtensions.cs</code> - 2 missing</summary>
-
-- `NameScopeExtensions` (class): 2 missing
-  - `static T? Find<T>(this ILogical anchor, string name) where T : class` *(1 of 2 overloads found)*
-  - `static T Get<T>(this ILogical anchor, string name) where T : class` *(1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>PseudoClassesExtensions.cs</code> - 2 missing</summary>
-
-- `PseudoClassesExtensions` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>ResourceDictionary.cs</code> - 7 missing</summary>
-
-- `ResourceDictionary` (class): 7 missing
-  - `ResourceDictionary(IResourceHost owner)` *(1 of 2 constructors found)*
-  - `ICollection<object?> Values { get; }`
-  - `bool ICollection<KeyValuePair<object, object?>>.IsReadOnly { get; }` *(explicit)*
-  - `IEnumerator<KeyValuePair<object, object?>> GetEnumerator()`
-  - `bool ICollection<KeyValuePair<object, object?>>.Contains(KeyValuePair<object, object?> item)` *(explicit)*
-  - `void ICollection<KeyValuePair<object, object?>>.CopyTo(KeyValuePair<object, object?>[] array, int arrayIndex)` *(explicit)*
-  - `IEnumerator IEnumerable.GetEnumerator()` *(explicit)*
-
-</details>
-
-<details><summary><code>ResourceNodeExtensions.cs</code> - 9 missing</summary>
-
-- `ResourceNodeExtensions` (class, public): **type missing** (8 members)
-
-</details>
-
-<details><summary><code>ResourceProvider.cs</code> - 1 missing</summary>
-
-- `ResourceProvider` (class): 1 missing
-  - `ResourceProvider(IResourceHost owner)` *(1 of 2 constructors found)*
-
-</details>
-
-### `Controls/Metadata` - files 0/2, types 0/2, members 0/7
+### `Controls/Metadata` - files 2/2, types 0/2 (2 waived), members 0/7 (7 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `PseudoClassesAttribute.cs` | `controls/metadata/pseudo_classes_attribute.rs` | missing | 0/1 | 0/2 |  |
-| `TemplatePartAttribute.cs` | `controls/metadata/template_part_attribute.rs` | missing | 0/1 | 0/5 |  |
+| `PseudoClassesAttribute.cs` | `metadata/markup_type.rs` | present | 0/1 (1 waived) | 0/2 (2 waived) | replaced: the MarkupAttribute named `attributes::PSEUDO_CLASSES` in the `attributes:` of a control type; the pseudo-classes are its arguments. The constant a control declares them with in Rust code is `PseudoClassesAttribute` of the crate of the controls (`src/FerroUI.Controls/metadata/pseudo_classes_attribute.rs`) |
+| `TemplatePartAttribute.cs` | `metadata/markup_type.rs` | present | 0/1 (1 waived) | 0/5 (5 waived) | replaced: the MarkupAttribute named `attributes::TEMPLATE_PART` in the `attributes:` of a control type; Name and Type are its arguments and IsRequired a named argument (`TemplatePart("PART_Bar", type(Ref&lt;Border&gt;), IsRequired = true)`). The constant a control declares its parts with in Rust code is `TemplatePartAttribute` of the crate of the controls (`src/FerroUI.Controls/metadata/template_part_attribute.rs`) |
 
-### `Controls/Primitives` - files 0/1, types 1/1, members 5/5
-
-| Upstream file | Rust file | Status | Types | Members | Notes |
-|---|---|---|---|---|---|
-| `IScrollable.cs` | `controls/primitives/i_scrollable.rs` | missing (types found elsewhere) | 1/1 | 5/5 | types found in `input/i_scrollable.rs` (add to path-overrides.toml) |
-
-### `Controls/Templates` - files 0/2, types 0/2, members 0/7
+### `Controls/Primitives` - files 1/1, types 1/1, members 5/5
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ITemplateResult.cs` | `controls/templates/i_template_result.rs` | missing | 0/1 | 0/2 |  |
-| `TemplateResult.cs` | `controls/templates/template_result.rs` | missing | 0/1 | 0/5 |  |
+| `IScrollable.cs` | `input/i_scrollable.rs` | present | 1/1 | 5/5 | renamed: the interface is declared next to the scroll gestures of the input layer, which use it |
 
-### `Data` - files 19/21, types 27/50, members 144/282 (1 waived)
+### `Controls/Templates` - files 2/2, types 0/2 (2 waived), members 0/7 (7 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AssignBindingAttribute.cs` | `data/assign_binding_attribute.rs` | missing | 0/1 | 0/0 |  |
+| `ITemplateResult.cs` | `controls/mod.rs` | present | 0/1 (1 waived) | 0/2 (2 waived) | replaced: ported in the crate of the controls, their only user, where the tracking of `Avalonia.Controls` does not look for them: `src/FerroUI.Controls/templates/template_result.rs` (`TemplateResult&lt;T&gt;`, which also stands for `ITemplateResult`) |
+| `TemplateResult.cs` | `controls/mod.rs` | present | 0/1 (1 waived) | 0/5 (5 waived) | replaced: ported in the crate of the controls, their only user, where the tracking of `Avalonia.Controls` does not look for them: `src/FerroUI.Controls/templates/template_result.rs` (`TemplateResult&lt;T&gt;`, which also stands for `ITemplateResult`) |
+
+### `Data` - files 21/21, types 28/50 (22 waived), members 156/282 (126 waived)
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `AssignBindingAttribute.cs` | `ferro_property.rs` | present | 0/1 (1 waived) | 0/0 | replaced: an attribute read by the markup compiler: a registered property states it with `StyledPropertyOptions::assign_binding` (`FerroProperty::assign_binding`), a plain property with the `AssignBinding` attribute of its markup metadata (`metadata::attributes::ASSIGN_BINDING`) |
 | `BindingBase.cs` | `data/binding_base.rs` | present | 1/1 | 1/1 |  |
-| `BindingChainException.cs` | `data/binding_chain_exception.rs` | partial | 1/1 | 3/6 |  |
-| `BindingExpressionBase.cs` | `data/binding_expression_base.rs` | partial | 1/1 | 8/19 |  |
+| `BindingChainException.cs` | `data/binding_chain_exception.rs` | present | 1/1 | 5/6 (1 waived) |  |
+| `BindingExpressionBase.cs` | `data/binding_expression_base.rs` | present | 1/1 | 8/19 (11 waived) |  |
 | `BindingMode.cs` | `data/binding_mode.rs` | present | 1/1 | 5/5 |  |
-| `BindingNotification.cs` | `data/binding_notification.rs` | partial | 2/3 | 21/25 (1 waived) |  |
-| `BindingOperations.cs` | `data/binding_operations.rs` | partial | 2/2 | 3/4 |  |
+| `BindingNotification.cs` | `data/binding_notification.rs` | present | 2/3 (1 waived) | 21/25 (4 waived) |  |
+| `BindingOperations.cs` | `data/binding_operations.rs` | present | 2/2 | 3/4 (1 waived) |  |
 | `BindingPriority.cs` | `data/binding_priority.rs` | present | 1/1 | 7/7 |  |
-| `BindingValue.cs` | `data/binding_value.rs` | partial | 2/2 | 26/36 |  |
-| `CompiledBinding.cs` | `data/compiled_binding.rs` | partial | 1/1 | 2/18 |  |
-| `CompiledBindingPath.cs` | `data/compiled_binding_path.rs` | partial | 4/24 | 25/81 |  |
-| `CultureInfoIetfLanguageTagConverter.cs` | `data/culture_info_ietf_language_tag_converter.rs` | missing | 0/1 | 0/2 |  |
+| `BindingValue.cs` | `data/binding_value.rs` | present | 2/2 | 34/36 (2 waived) |  |
+| `CompiledBinding.cs` | `data/compiled_binding.rs` | present | 1/1 | 2/18 (16 waived) |  |
+| `CompiledBindingPath.cs` | `data/compiled_binding_path.rs` | present | 4/24 (20 waived) | 25/81 (56 waived) |  |
+| `CultureInfoIetfLanguageTagConverter.cs` | `data/culture_info_ietf_language_tag_converter.rs` | present | 1/1 | 2/2 |  |
 | `DataValidationException.cs` | `data/data_validation_exception.rs` | present | 1/1 | 2/2 |  |
 | `IndexerBinding.cs` | `data/indexer_binding.rs` | present | 1/1 | 3/3 |  |
 | `IndexerDescriptor.cs` | `data/indexer_descriptor.rs` | present | 1/1 | 11/11 |  |
-| `MultiBinding.cs` | `data/multi_binding.rs` | partial | 1/1 | 2/12 |  |
+| `MultiBinding.cs` | `data/multi_binding.rs` | present | 1/1 | 2/12 (10 waived) |  |
 | `Optional.cs` | - | n/a | - | - | not-applicable: Optional&lt;T&gt; is Rust `Option&lt;T&gt;` (porting guide, Types table) |
-| `ReflectionBinding.cs` | `data/reflection_binding.rs` | partial | 1/1 | 2/20 |  |
-| `RelativeSource.cs` | `data/relative_source.rs` | partial | 3/3 | 11/12 |  |
-| `TemplateBinding.cs` | `data/template_binding.rs` | partial | 1/1 | 3/9 |  |
+| `ReflectionBinding.cs` | `data/reflection_binding.rs` | present | 1/1 | 2/20 (18 waived) |  |
+| `RelativeSource.cs` | `data/relative_source.rs` | present | 3/3 | 11/12 (1 waived) |  |
+| `TemplateBinding.cs` | `data/template_binding.rs` | present | 1/1 | 3/9 (6 waived) |  |
 | `TemplateBindingExpression.cs` | `data/template_binding_expression.rs` | present | 1/1 | 5/5 |  |
 | `UpdateSourceTrigger.cs` | `data/update_source_trigger.rs` | present | 1/1 | 4/4 |  |
 
-<details><summary><code>BindingChainException.cs</code> - 3 missing</summary>
-
-- `BindingChainException` (class): 3 missing
-  - `BindingChainException(string message, string expression, string errorPoint)` *(2 of 3 constructors found)*
-  - `string? Expression { get; protected set; }` *(getter `expression` found, setter `set_expression` missing)*
-  - `string? ExpressionErrorPoint { get; protected set; }` *(getter `expression_error_point` found, setter `set_expression_error_point` missing)*
-
-</details>
-
-<details><summary><code>BindingExpressionBase.cs</code> - 11 missing</summary>
-
-- `BindingExpressionBase` (class): 11 missing
-  - `BindingExpressionBase(BindingPriority defaultPriority)` *(private protected)*
-  - `AvaloniaProperty IValueEntry.Property { get; }` *(explicit)*
-  - `bool IValueEntry.HasValue()` *(explicit)*
-  - `object? IValueEntry.GetValue()` *(explicit)*
-  - `bool IValueEntry.GetDataValidationState(out BindingValueType state, out Exception? error)` *(explicit)*
-  - `void IValueEntry.Unsubscribe()` *(explicit)*
-  - `virtual void Dispose()`
-  - `abstract bool HasValue()` *(private protected)*
-  - `abstract object? GetUntypedValue()` *(private protected)*
-  - `abstract bool GetDataValidationState(out BindingValueType state, out Exception? error)` *(private protected)*
-  - `abstract void Unsubscribe()` *(private protected)*
-
-</details>
-
-<details><summary><code>BindingNotification.cs</code> - 4 missing</summary>
-
-- `BindingNotification` (class): 2 missing
-  - `BindingNotification(Exception error, BindingErrorType errorType)` *(1 of 3 constructors found)*
-  - `BindingNotification(Exception error, BindingErrorType errorType, object? fallbackValue)` *(1 of 3 constructors found)*
-  - waived (Rust: `Hash` is derived where the type can be hashed; float-based value types are not `Eq`/`Hash`): `GetHashCode`
-- `BindingErrorTypeExtensions` (class, internal): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>BindingOperations.cs</code> - 1 missing</summary>
-
-- `DoNothingType` (class) in `ferro_property.rs`: 1 missing
-  - `DoNothingType()` *(internal)*
-
-</details>
-
-<details><summary><code>BindingValue.cs</code> - 10 missing</summary>
-
-- `BindingValue<T>` (record struct): 10 missing
-  - `Optional<T> ToOptional()`
-  - `override string ToString()`
-  - `object? ToUntyped()`
-  - `T? GetValueOrDefault(T defaultValue)` *(1 of 4 overloads found)*
-  - `TResult? GetValueOrDefault<TResult>()` *(1 of 4 overloads found)*
-  - `TResult? GetValueOrDefault<TResult>(TResult defaultValue)` *(1 of 4 overloads found)*
-  - `static BindingValue<T> FromUntyped(object? value)`
-  - `static BindingValue<T> FromUntyped(object? value, Type targetType)`
-  - `static BindingValue<T> BindingError(Exception e, Optional<T> fallbackValue)` *(2 of 3 overloads found)*
-  - `static BindingValue<T> DataValidationError(Exception e, Optional<T> fallbackValue)` *(2 of 3 overloads found)*
-
-</details>
-
-<details><summary><code>CompiledBinding.cs</code> - 16 missing</summary>
-
-- `CompiledBinding` (class): 16 missing
-  - `CompiledBinding(CompiledBindingPath path)` *(1 of 2 constructors found)*
-  - `static CompiledBinding Create<TIn, TOut>(Expression<Func<TIn, TOut>> expression, object? source = null, IVa...`
-  - `int Delay { get; set; }`
-  - `IValueConverter? Converter { get; set; }`
-  - `CultureInfo? ConverterCulture { get; set; }`
-  - `object? ConverterParameter { get; set; }`
-  - `object? FallbackValue { get; set; }`
-  - `BindingMode Mode { get; set; }`
-  - `CompiledBindingPath? Path { get; set; }`
-  - `BindingPriority Priority { get; set; }`
-  - `object? Source { get; set; }`
-  - `string? StringFormat { get; set; }`
-  - `object? TargetNullValue { get; set; }`
-  - `UpdateSourceTrigger UpdateSourceTrigger { get; set; }`
-  - `WeakReference? DefaultAnchor { get; set; }` *(internal)*
-  - `WeakReference<INameScope?>? NameScope { get; set; }` *(internal)*
-
-</details>
-
-<details><summary><code>CompiledBindingPath.cs</code> - 76 missing</summary>
-
-- `CompiledBindingPathBuilder` (class): 3 missing
-  - `CompiledBindingPathBuilder Method(RuntimeMethodHandle handle, RuntimeTypeHandle delegateType, bool acceptsN...` *(1 of 2 overloads found)*
-  - `CompiledBindingPathBuilder StreamTask()` *(1 of 2 overloads found)*
-  - `CompiledBindingPathBuilder StreamObservable()` *(1 of 2 overloads found)*
-- `ICompiledBindingPathElement` (interface, internal): **type missing** (0 members)
-- `IControlSourceBindingPathElement` (interface, internal): **type missing** (0 members)
-- `NotExpressionPathElement` (class, internal): **type missing** (1 members)
-- `PropertyElement` (class, internal): **type missing** (5 members)
-- `TypedPropertyElement` (class): 1 missing
-  - `TypedPropertyElement(IPropertyInfo property, Func<WeakReference<object?>, IPropertyInfo, IPropertyAccessor>...` *(protected)*
-- `TypedPropertyElement<TSource, TValue>` (class): 1 missing
-  - `TypedPropertyElement(IPropertyInfo<TSource, TValue> property, Func<WeakReference<object?>, IPropertyInfo, I...`
-- `MethodAsDelegateElement` (class, internal): **type missing** (4 members)
-- `MethodAsCommandElement` (class, internal): **type missing** (5 members)
-- `IStronglyTypedStreamElement` (interface, internal): **type missing** (1 members)
-- `ITypeCastElement` (interface, internal): **type missing** (2 members)
-- `TaskStreamPathElement<T>` (class, internal): **type missing** (2 members)
-- `TaskStreamPathElement` (class, internal): **type missing** (2 members)
-- `ObservableStreamPathElement<T>` (class, internal): **type missing** (2 members)
-- `ObservableStreamPathElement` (class, internal): **type missing** (2 members)
-- `SelfPathElement` (class, internal): **type missing** (2 members)
-- `AncestorPathElement` (class, internal): **type missing** (4 members)
-- `VisualAncestorPathElement` (class, internal): **type missing** (3 members)
-- `ElementNameElement` (class, internal): **type missing** (4 members)
-- `TemplatedParentPathElement` (class, internal): **type missing** (1 members)
-- `ArrayElementPathElement` (class, internal): **type missing** (4 members)
-- `TypeCastPathElement<T>` (class, internal): **type missing** (3 members)
-- `TypeCastPathElement` (class, internal): **type missing** (4 members)
-
-</details>
-
-<details><summary><code>MultiBinding.cs</code> - 10 missing</summary>
-
-- `MultiBinding` (class): 10 missing
-  - `IList<BindingBase> Bindings { get; set; }`
-  - `IMultiValueConverter? Converter { get; set; }`
-  - `CultureInfo? ConverterCulture { get; set; }`
-  - `object? ConverterParameter { get; set; }`
-  - `object FallbackValue { get; set; }`
-  - `object TargetNullValue { get; set; }`
-  - `BindingMode Mode { get; set; }`
-  - `BindingPriority Priority { get; set; }`
-  - `RelativeSource? RelativeSource { get; set; }`
-  - `string? StringFormat { get; set; }`
-
-</details>
-
-<details><summary><code>ReflectionBinding.cs</code> - 18 missing</summary>
-
-- `ReflectionBinding` (class): 18 missing
-  - `ReflectionBinding(string path)` *(1 of 2 constructors found)*
-  - `int Delay { get; set; }`
-  - `IValueConverter? Converter { get; set; }`
-  - `CultureInfo? ConverterCulture { get; set; }`
-  - `object? ConverterParameter { get; set; }`
-  - `string? ElementName { get; set; }`
-  - `object? FallbackValue { get; set; }`
-  - `BindingMode Mode { get; set; }`
-  - `string Path { get; set; }`
-  - `BindingPriority Priority { get; set; }`
-  - `RelativeSource? RelativeSource { get; set; }`
-  - `object? Source { get; set; }`
-  - `string? StringFormat { get; set; }`
-  - `object? TargetNullValue { get; set; }`
-  - `UpdateSourceTrigger UpdateSourceTrigger { get; set; }`
-  - `Func<string?, string, Type>? TypeResolver { get; set; }`
-  - `WeakReference? DefaultAnchor { get; set; }` *(internal)*
-  - `WeakReference<INameScope?>? NameScope { get; set; }` *(internal; getter `get_name_scope` found, setter `set_name_scope` missing)*
-
-</details>
-
-<details><summary><code>RelativeSource.cs</code> - 1 missing</summary>
-
-- `RelativeSourceMode` (enum): 1 missing
-  - `Self`
-
-</details>
-
-<details><summary><code>TemplateBinding.cs</code> - 6 missing</summary>
-
-- `TemplateBinding` (class): 6 missing
-  - `TemplateBinding([InheritDataTypeFrom(InheritDataTypeFromScopeKind.ControlTemplate)] AvaloniaProperty property)` *(1 of 2 constructors found)*
-  - `IValueConverter? Converter { get; set; }`
-  - `CultureInfo? ConverterCulture { get; set; }`
-  - `object? ConverterParameter { get; set; }`
-  - `BindingMode Mode { get; set; }`
-  - `AvaloniaProperty? Property { get; set; }`
-
-</details>
-
-### `Data/Converters` - files 11/11, types 12/13, members 41/47
+### `Data/Converters` - files 11/11, types 12/13 (1 waived), members 41/47 (6 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `BoolConverters.cs` | `data/converters/bool_converters.rs` | present | 1/1 | 3/3 |  |
 | `DefaultValueConverter.cs` | `data/converters/default_value_converter.rs` | present | 1/1 | 3/3 |  |
-| `FuncMultiValueConverter.cs` | `data/converters/func_multi_value_converter.rs` | partial | 1/1 | 2/3 |  |
+| `FuncMultiValueConverter.cs` | `data/converters/func_multi_value_converter.rs` | present | 1/1 | 2/3 (1 waived) |  |
 | `FuncValueConverter.cs` | `data/converters/func_value_converter.rs` | present | 2/2 | 8/8 |  |
 | `IMultiValueConverter.cs` | `data/converters/i_multi_value_converter.rs` | present | 1/1 | 1/1 |  |
 | `IValueConverter.cs` | `data/converters/i_value_converter.rs` | present | 1/1 | 2/2 |  |
-| `MethodToCommandConverter.cs` | `data/converters/method_to_command_converter.rs` | partial | 1/2 | 4/9 |  |
+| `MethodToCommandConverter.cs` | `data/converters/method_to_command_converter.rs` | present | 1/2 (1 waived) | 4/9 (5 waived) |  |
 | `ObjectConverters.cs` | `data/converters/object_converters.rs` | present | 1/1 | 7/7 |  |
 | `StringConverters.cs` | `data/converters/string_converters.rs` | present | 1/1 | 2/2 |  |
 | `StringFormatMultiValueConverter.cs` | `data/converters/string_format_multi_value_converter.rs` | present | 1/1 | 4/4 |  |
 | `StringFormatValueConverter.cs` | `data/converters/string_format_value_converter.rs` | present | 1/1 | 5/5 |  |
 
-<details><summary><code>FuncMultiValueConverter.cs</code> - 1 missing</summary>
-
-- `FuncMultiValueConverter<TIn, TOut>` (class): 1 missing
-  - `FuncMultiValueConverter(Func<IEnumerable<TIn?>, TOut> convert)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>MethodToCommandConverter.cs</code> - 6 missing</summary>
-
-- `MethodToCommandConverter.WeakPropertyChangedProxy` (class, internal): **type missing** (5 members)
-
-</details>
-
-### `Data/Core` - files 15/16, types 15/17, members 99/124
+### `Data/Core` - files 15/15, types 15/16 (1 waived), members 105/120 (15 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `BindingError.cs` | `data/core/binding_error.rs` | partial | 1/1 | 1/3 |  |
-| `BindingExpression.cs` | `data/core/binding_expression.rs` | partial | 1/1 | 21/22 |  |
-| `ClrPropertyInfo.cs` | `data/core/clr_property_info.rs` | partial | 1/2 | 7/8 |  |
+| `BindingError.cs` | `data/core/binding_error.rs` | present | 1/1 | 3/3 | renamed: the error state of a binding expression is `ExpressionError`; `data::BindingError` is the error object itself (the `Exception` of the original) |
+| `BindingExpression.cs` | `data/core/binding_expression.rs` | present | 1/1 | 22/22 |  |
+| `ClrPropertyInfo.cs` | `data/core/clr_property_info.rs` | present | 1/2 (1 waived) | 7/8 (1 waived) |  |
 | `ClrPropertyInfo`2.cs` | `data/core/clr_property_info.rs` | present | 1/1 | 9/9 | generic arity merged |
 | `CommonPropertyNames.cs` | `data/core/common_property_names.rs` | present | 1/1 | 1/1 |  |
 | `ExpressionParseException.cs` | `data/core/expression_parse_exception.rs` | present | 1/1 | 2/2 |  |
@@ -1329,330 +641,121 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IPropertyInfo.cs` | `data/core/i_property_info.rs` | present | 1/1 | 6/6 |  |
 | `IPropertyInfo`2.cs` | `data/core/i_property_info.rs` | present | 1/1 | 2/2 | generic arity merged |
 | `IndexerBindingExpression.cs` | `data/core/indexer_binding_expression.rs` | present | 1/1 | 5/5 |  |
-| `MultiBindingExpression.cs` | `data/core/multi_binding_expression.rs` | partial | 1/1 | 11/12 |  |
-| `StreamBindingExtensions.cs` | `data/core/stream_binding_extensions.rs` | missing | 0/1 | 0/4 |  |
+| `MultiBindingExpression.cs` | `data/core/multi_binding_expression.rs` | present | 1/1 | 12/12 |  |
+| `StreamBindingExtensions.cs` | - | n/a | - | - | not-applicable: markers for the `^` operator inside a LINQ expression tree (they throw when called); a path is built with `CompiledBindingPathBuilder::stream_task` / `stream_observable` |
 | `TargetTypeConverter.cs` | `data/core/target_type_converter.rs` | present | 1/1 | 3/3 |  |
-| `TypedBindingExpression.cs` | `data/core/typed_binding_expression.rs` | partial | 1/1 | 8/11 |  |
-| `UntypedBindingExpressionBase.cs` | `data/core/untyped_binding_expression_base.rs` | partial | 1/1 | 17/27 |  |
-| `UntypedObservableBindingExpression.cs` | `data/core/untyped_observable_binding_expression.rs` | partial | 1/1 | 4/7 |  |
+| `TypedBindingExpression.cs` | `data/core/typed_binding_expression.rs` | present | 1/1 | 9/11 (2 waived) |  |
+| `UntypedBindingExpressionBase.cs` | `data/core/untyped_binding_expression_base.rs` | present | 1/1 | 18/27 (9 waived) |  |
+| `UntypedObservableBindingExpression.cs` | `data/core/untyped_observable_binding_expression.rs` | present | 1/1 | 4/7 (3 waived) |  |
 
-<details><summary><code>BindingError.cs</code> - 2 missing</summary>
-
-- `BindingError` (class) in `data/binding_value.rs`: 2 missing
-  - `Exception Exception { get; }`
-  - `BindingErrorType ErrorType { get; }`
-
-</details>
-
-<details><summary><code>BindingExpression.cs</code> - 1 missing</summary>
-
-- `BindingExpression` (class): 1 missing
-  - `CultureInfo ConverterCulture { get; }`
-
-</details>
-
-<details><summary><code>ClrPropertyInfo.cs</code> - 2 missing</summary>
-
-- `ReflectionClrPropertyInfo` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>MultiBindingExpression.cs</code> - 1 missing</summary>
-
-- `MultiBindingExpression` (class): 1 missing
-  - `CultureInfo? ConverterCulture { get; }` *(internal)*
-
-</details>
-
-<details><summary><code>TypedBindingExpression.cs</code> - 3 missing</summary>
-
-- `TypedBindingExpression<TSource, TValue>` (class): 3 missing
-  - `override object? GetUntypedValue()` *(private protected)*
-  - `TValue IValueEntry<TValue>.GetValue()` *(explicit)*
-  - `void IWeakEventSubscriber<PropertyChangedEventArgs>.OnEvent(object? sender, WeakEvent ev, PropertyChangedEv...` *(explicit)*
-
-</details>
-
-<details><summary><code>UntypedBindingExpressionBase.cs</code> - 10 missing</summary>
-
-- `UntypedBindingExpressionBase` (class): 10 missing
-  - `static readonly object UnchangedValue` *(protected)*
-  - `abstract string Description { get; }`
-  - `override void Dispose()`
-  - `override bool GetDataValidationState(out BindingValueType state, out Exception? error)` *(private protected)*
-  - `override bool HasValue()` *(private protected)*
-  - `override object? GetUntypedValue()` *(private protected)*
-  - `override void Unsubscribe()` *(private protected)*
-  - `IAvaloniaSubject<object?> ToObservable(AvaloniaObject? target = null)` *(internal)*
-  - `void Log(AvaloniaObject target, string error, LogEventLevel level = LogEventLevel.Warning)` *(protected; 1 of 2 overloads found)*
-  - `void Stop()` *(protected)*
-
-</details>
-
-<details><summary><code>UntypedObservableBindingExpression.cs</code> - 3 missing</summary>
-
-- `UntypedObservableBindingExpression` (class): 3 missing
-  - `void IObserver<object?>.OnCompleted()` *(explicit)*
-  - `void IObserver<object?>.OnError(Exception error)` *(explicit)*
-  - `void IObserver<object?>.OnNext(object? value)` *(explicit)*
-
-</details>
-
-### `Data/Core/ExpressionNodes` - files 14/19, types 18/19, members 80/101
+### `Data/Core/ExpressionNodes` - files 19/19, types 19/19, members 82/101 (19 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `ArrayIndexerNode.cs` | `data/core/expression_nodes/array_indexer_node.rs` | present | 1/1 | 5/5 |  |
-| `AvaloniaPropertyAccessorNode.cs` | `data/core/expression_nodes/ferro_property_accessor_node.rs` | partial | 1/1 | 7/8 |  |
-| `CollectionNodeBase.cs` | `data/core/expression_nodes/collection_node_base.rs` | partial | 1/1 | 5/7 |  |
+| `AvaloniaPropertyAccessorNode.cs` | `data/core/expression_nodes/ferro_property_accessor_node.rs` | present | 1/1 | 7/8 (1 waived) |  |
+| `CollectionNodeBase.cs` | `data/core/expression_nodes/collection_node_base.rs` | present | 1/1 | 5/7 (2 waived) |  |
 | `DataContextNode.cs` | `data/core/expression_nodes/data_context_node.rs` | present | 1/1 | 2/2 |  |
-| `DataContextNodeBase.cs` | `data/core/expression_nodes/data_context_node_base.rs` | missing | 0/1 | 0/1 |  |
-| `ExpressionNode.cs` | `data/core/expression_nodes/expression_node.rs` | partial | 1/1 | 7/19 |  |
-| `FuncTransformNode.cs` | `data/core/expression_nodes/func_transform_node.rs` | partial | 1/1 | 2/3 |  |
-| `IPropertyAccessorNode.cs` | `data/core/expression_nodes/i_property_accessor_node.rs` | missing (types found elsewhere) | 1/1 | 3/3 | types found in `data/core/expression_nodes/expression_node.rs` (add to path-overrides.toml) |
-| `ISettableNode.cs` | `data/core/expression_nodes/i_settable_node.rs` | missing (types found elsewhere) | 1/1 | 2/2 | types found in `data/core/expression_nodes/expression_node.rs` (add to path-overrides.toml) |
+| `DataContextNodeBase.cs` | `data/core/expression_nodes/data_context_node.rs` | present | 1/1 | 1/1 | merged: the two data context nodes share one file; the `SelectSource` of their base class is the function `select_data_context_source` both call from `SourceNode::select_source` |
+| `ExpressionNode.cs` | `data/core/expression_nodes/expression_node.rs` | present | 1/1 | 7/19 (12 waived) |  |
+| `FuncTransformNode.cs` | `data/core/expression_nodes/func_transform_node.rs` | present | 1/1 | 3/3 |  |
+| `IPropertyAccessorNode.cs` | `data/core/expression_nodes/expression_node.rs` | present | 1/1 | 3/3 | merged: the contracts of the nodes are declared next to `ExpressionNode`, which hands them out (`as_settable`, `as_property_accessor_node`, `as_source_node`) |
+| `ISettableNode.cs` | `data/core/expression_nodes/expression_node.rs` | present | 1/1 | 2/2 | merged: the contracts of the nodes are declared next to `ExpressionNode`, which hands them out (`as_settable`, `as_property_accessor_node`, `as_source_node`) |
 | `LogicalAncestorElementNode.cs` | `data/core/expression_nodes/logical_ancestor_element_node.rs` | present | 1/1 | 6/6 |  |
 | `LogicalNotNode.cs` | `data/core/expression_nodes/logical_not_node.rs` | present | 1/1 | 5/5 |  |
-| `MethodCommandNode.cs` | `data/core/expression_nodes/method_command_node.rs` | partial | 1/1 | 4/5 |  |
+| `MethodCommandNode.cs` | `data/core/expression_nodes/method_command_node.rs` | present | 1/1 | 4/5 (1 waived) |  |
 | `NamedElementNode.cs` | `data/core/expression_nodes/named_element_node.rs` | present | 1/1 | 5/5 |  |
-| `ParentDataContextNode.cs` | `data/core/expression_nodes/parent_data_context_node.rs` | missing (types found elsewhere) | 1/1 | 2/2 | types found in `data/core/expression_nodes/data_context_node.rs` (add to path-overrides.toml) |
+| `ParentDataContextNode.cs` | `data/core/expression_nodes/data_context_node.rs` | present | 1/1 | 2/2 | merged: the two data context nodes share one file; the `SelectSource` of their base class is the function `select_data_context_source` both call from `SourceNode::select_source` |
 | `PropertyAccessorNode.cs` | `data/core/expression_nodes/property_accessor_node.rs` | present | 1/1 | 9/9 |  |
-| `SourceNode.cs` | `data/core/expression_nodes/source_node.rs` | missing (types found elsewhere) | 1/1 | 2/2 | types found in `data/core/expression_nodes/expression_node.rs` (add to path-overrides.toml) |
-| `StreamNode.cs` | `data/core/expression_nodes/stream_node.rs` | partial | 1/1 | 4/7 |  |
+| `SourceNode.cs` | `data/core/expression_nodes/expression_node.rs` | present | 1/1 | 2/2 | merged: the contracts of the nodes are declared next to `ExpressionNode`, which hands them out (`as_settable`, `as_property_accessor_node`, `as_source_node`) |
+| `StreamNode.cs` | `data/core/expression_nodes/stream_node.rs` | present | 1/1 | 4/7 (3 waived) |  |
 | `TemplatedParentNode.cs` | `data/core/expression_nodes/templated_parent_node.rs` | present | 1/1 | 4/4 |  |
 | `VisualAncestorElementNode.cs` | `data/core/expression_nodes/visual_ancestor_element_node.rs` | present | 1/1 | 6/6 |  |
 
-<details><summary><code>AvaloniaPropertyAccessorNode.cs</code> - 1 missing</summary>
-
-- `AvaloniaPropertyAccessorNode` (class): 1 missing
-  - `void OnEvent(object? sender, WeakEvent ev, AvaloniaPropertyChangedEventArgs e)`
-
-</details>
-
-<details><summary><code>CollectionNodeBase.cs</code> - 2 missing</summary>
-
-- `CollectionNodeBase` (class): 2 missing
-  - `void IWeakEventSubscriber<NotifyCollectionChangedEventArgs>.OnEvent(object? sender, WeakEvent ev, NotifyCol...` *(explicit)*
-  - `void IWeakEventSubscriber<PropertyChangedEventArgs>.OnEvent(object? sender, WeakEvent ev, PropertyChangedEv...` *(explicit)*
-
-</details>
-
-<details><summary><code>ExpressionNode.cs</code> - 12 missing</summary>
-
-- `ExpressionNode` (class): 12 missing
-  - `int Index { get; private set; }`
-  - `BindingExpression? Owner { get; private set; }`
-  - `object? Source { get; }`
-  - `object? Value { get; }`
-  - `void ClearValue()` *(protected)*
-  - `void ShortCircuitNull()` *(protected)*
-  - `void SetDataValidationError(Exception error)` *(protected)*
-  - `void SetError(string message)` *(protected)*
-  - `void SetError(Exception e)` *(protected)*
-  - `void SetValue(object? valueOrNotification)` *(protected)*
-  - `void SetValue(object? value, Exception? dataValidationError = null)` *(protected)*
-  - `bool ValidateNonNullSource([NotNullWhen(true)] object? source)` *(protected)*
-
-</details>
-
-<details><summary><code>FuncTransformNode.cs</code> - 1 missing</summary>
-
-- `FuncTransformNode` (class): 1 missing
-  - `override void BuildString(StringBuilder builder)`
-
-</details>
-
-<details><summary><code>MethodCommandNode.cs</code> - 1 missing</summary>
-
-- `MethodCommandNode` (class): 1 missing
-  - `void OnEvent(object? sender, WeakEvent ev, PropertyChangedEventArgs e)`
-
-</details>
-
-<details><summary><code>StreamNode.cs</code> - 3 missing</summary>
-
-- `StreamNode` (class): 3 missing
-  - `void IObserver<object?>.OnCompleted()` *(explicit)*
-  - `void IObserver<object?>.OnError(Exception error)` *(explicit)*
-  - `void IObserver<object?>.OnNext(object? value)` *(explicit)*
-
-</details>
-
-### `Data/Core/ExpressionNodes/Reflection` - files 0/5, types 1/5, members 9/31
+### `Data/Core/ExpressionNodes/Reflection` - files 4/4, types 4/4, members 24/24
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `DynamicPluginPropertyAccessorNode.cs` | `data/core/expression_nodes/reflection/dynamic_plugin_property_accessor_node.rs` | missing | 0/1 | 0/9 |  |
-| `DynamicPluginStreamNode.cs` | `data/core/expression_nodes/reflection/dynamic_plugin_stream_node.rs` | missing | 0/1 | 0/3 |  |
-| `ExpressionTreeIndexerNode.cs` | `data/core/expression_nodes/reflection/expression_tree_indexer_node.rs` | missing | 0/1 | 0/7 |  |
-| `ReflectionIndexerNode.cs` | `data/core/expression_nodes/reflection/reflection_indexer_node.rs` | missing (types found elsewhere) | 1/1 | 9/9 | types found in `data/core/expression_nodes/reflection_indexer_node.rs` (add to path-overrides.toml) |
-| `ReflectionTypeCastNode.cs` | `data/core/expression_nodes/reflection/reflection_type_cast_node.rs` | missing | 0/1 | 0/3 |  |
+| `DynamicPluginPropertyAccessorNode.cs` | `data/core/expression_nodes/property_accessor_node.rs` | present | 1/1 | 9/9 | merged: `PropertyAccessorNode::new_dynamic`: without a fixed plugin the node asks the registered plugins (`BindingPlugins::property_accessors`) for the first one that matches the source |
+| `DynamicPluginStreamNode.cs` | `data/core/expression_nodes/stream_node.rs` | present | 1/1 | 3/3 | merged: `StreamNode::new_dynamic`: without a fixed plugin the node asks the registered stream plugins for the first one that matches the source |
+| `ExpressionTreeIndexerNode.cs` | - | n/a | - | - | not-applicable: an indexer node built from a LINQ `IndexExpression` and compiled delegates; an indexer of a compiled path is a property element (`CompiledBindingPathBuilder::indexer_property`, `list_item`, `dictionary_item`), one of a string path is `ReflectionIndexerNode` |
+| `ReflectionIndexerNode.cs` | `data/core/expression_nodes/reflection_indexer_node.rs` | present | 1/1 | 9/9 | renamed: there is no `reflection` directory: the node resolves the indexer through the binding and markup metadata of the source |
+| `ReflectionTypeCastNode.cs` | `data/core/expression_nodes/type_cast_node.rs` | present | 1/1 | 3/3 | renamed: the cast of a string path tests the value against a `CastTarget` (a class or a value type) instead of `Type.IsInstanceOfType` |
 
-### `Data/Core/Parsers` - files 3/5, types 3/18, members 6/47
+### `Data/Core/Parsers` - files 3/3, types 3/16 (13 waived), members 7/22 (15 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ArgumentListParser.cs` | `data/core/parsers/argument_list_parser.rs` | partial | 0/1 | 0/1 |  |
-| `BindingExpressionGrammar.cs` | `data/core/parsers/binding_expression_grammar.rs` | partial | 2/14 | 4/18 |  |
-| `BindingExpressionVisitor.cs` | `data/core/parsers/binding_expression_visitor.rs` | missing | 0/1 | 0/22 |  |
-| `BindingExpressionVisitorMembers.cs` | `data/core/parsers/binding_expression_visitor_members.rs` | missing | 0/1 | 0/3 |  |
-| `ExpressionNodeFactory.cs` | `data/core/parsers/expression_node_factory.rs` | partial | 1/1 | 2/3 |  |
+| `ArgumentListParser.cs` | `data/core/parsers/argument_list_parser.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) |  |
+| `BindingExpressionGrammar.cs` | `data/core/parsers/binding_expression_grammar.rs` | present | 2/14 (12 waived) | 4/18 (14 waived) |  |
+| `BindingExpressionVisitor.cs` | - | n/a | - | - | not-applicable: visits a LINQ expression tree (`Expression&lt;Func&lt;TIn, TOut&gt;&gt;`) to build a binding path; Rust has no expression trees, the path is written with `CompiledBindingPathBuilder` (DEVIATIONS.md, Bindings) |
+| `BindingExpressionVisitorMembers.cs` | - | n/a | - | - | not-applicable: visits a LINQ expression tree (`Expression&lt;Func&lt;TIn, TOut&gt;&gt;`) to build a binding path; Rust has no expression trees, the path is written with `CompiledBindingPathBuilder` (DEVIATIONS.md, Bindings) |
+| `ExpressionNodeFactory.cs` | `data/core/parsers/expression_node_factory.rs` | present | 1/1 | 3/3 |  |
 
-<details><summary><code>ArgumentListParser.cs</code> - 2 missing</summary>
-
-- `ArgumentListParser` (class, internal): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>BindingExpressionGrammar.cs</code> - 26 missing</summary>
-
-- `BindingExpressionGrammar` (class): 1 missing
-  - `static (List<INode> Nodes, SourceMode Mode) ParseToPooledList(ref CharacterReader r)`
-- `BindingExpressionGrammar.INode` (interface, public): **type missing** (0 members)
-- `BindingExpressionGrammar.ITransformNode` (interface, public): **type missing** (0 members)
-- `BindingExpressionGrammar.EmptyExpressionNode` (class, public): **type missing** (0 members)
-- `BindingExpressionGrammar.PropertyNameNode` (class, public): **type missing** (2 members)
-- `BindingExpressionGrammar.AttachedPropertyNameNode` (class, public): **type missing** (4 members)
-- `BindingExpressionGrammar.IndexerNode` (class, public): **type missing** (1 members)
-- `BindingExpressionGrammar.NotNode` (class, public): **type missing** (0 members)
-- `BindingExpressionGrammar.StreamNode` (class, public): **type missing** (0 members)
-- `BindingExpressionGrammar.SelfNode` (class, public): **type missing** (0 members)
-- `BindingExpressionGrammar.NameNode` (class, public): **type missing** (1 members)
-- `BindingExpressionGrammar.AncestorNode` (class, public): **type missing** (3 members)
-- `BindingExpressionGrammar.TypeCastNode` (class, public): **type missing** (2 members)
-
-</details>
-
-<details><summary><code>ExpressionNodeFactory.cs</code> - 1 missing</summary>
-
-- `ExpressionNodeFactory` (class): 1 missing
-  - `static ExpressionNode CreateDataContext(AvaloniaProperty? targetProperty)`
-
-</details>
-
-### `Data/Core/Plugins` - files 14/20, types 18/20, members 47/72
+### `Data/Core/Plugins` - files 19/19, types 19/19, members 49/70 (21 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AvaloniaPropertyAccessorPlugin.cs` | `data/core/plugins/ferro_property_accessor_plugin.rs` | present | 1/1 | 2/2 |  |
-| `BindingPlugins.cs` | `data/core/plugins/binding_plugins.rs` | partial | 1/1 | 3/7 |  |
-| `DataAnnotationsValidationPlugin.cs` | `data/core/plugins/data_annotations_validation_plugin.rs` | missing | 0/1 | 0/2 |  |
-| `DataValidationBase.cs` | `data/core/plugins/data_validation_base.rs` | partial | 1/1 | 4/10 |  |
+| `BindingPlugins.cs` | `data/core/plugins/binding_plugins.rs` | present | 1/1 | 3/7 (4 waived) |  |
+| `DataAnnotationsValidationPlugin.cs` | - | n/a | - | - | not-applicable: validates against the `System.ComponentModel.DataAnnotations` attributes of a property, read by reflection: Rust has no attributes on members and the port declares none for validation (DEVIATIONS.md, Bindings) |
+| `DataValidationBase.cs` | `data/core/plugins/data_validation_base.rs` | present | 1/1 | 4/10 (6 waived) |  |
 | `ExceptionValidationPlugin.cs` | `data/core/plugins/exception_validation_plugin.rs` | present | 1/1 | 2/2 |  |
-| `IDataValidationPlugin.cs` | `data/core/plugins/i_data_validation_plugin.rs` | missing (types found elsewhere) | 1/1 | 2/2 | types found in `data/core/plugins/i_property_accessor.rs` (add to path-overrides.toml) |
+| `IDataValidationPlugin.cs` | `data/core/plugins/i_property_accessor.rs` | present | 1/1 | 2/2 | merged: the plugin contracts are declared next to the accessor contract they produce |
 | `IPropertyAccessor.cs` | `data/core/plugins/i_property_accessor.rs` | present | 1/1 | 5/5 |  |
-| `IPropertyAccessorPlugin.cs` | `data/core/plugins/i_property_accessor_plugin.rs` | missing (types found elsewhere) | 1/1 | 2/2 | types found in `data/core/plugins/i_property_accessor.rs` (add to path-overrides.toml) |
+| `IPropertyAccessorPlugin.cs` | `data/core/plugins/i_property_accessor.rs` | present | 1/1 | 2/2 | merged: the plugin contracts are declared next to the accessor contract they produce |
 | `IStreamPlugin.cs` | `data/core/plugins/i_stream_plugin.rs` | present | 1/1 | 2/2 |  |
 | `IndeiValidationPlugin.cs` | `data/core/plugins/indei_validation_plugin.rs` | present | 1/1 | 2/2 |  |
 | `InpcPropertyAccessorPlugin.cs` | `data/core/plugins/inpc_property_accessor_plugin.rs` | present | 1/1 | 2/2 |  |
-| `MethodAccessorPlugin.cs` | `data/core/plugins/method_accessor_plugin.rs` | partial | 1/1 | 2/3 |  |
-| `ObservableStreamPlugin.cs` | `data/core/plugins/observable_stream_plugin.rs` | missing (types found elsewhere) | 1/1 | 2/4 | types found in `data/core/plugins/i_stream_plugin.rs` (add to path-overrides.toml) |
-| `ObservableStreamPlugin`1.cs` | `data/core/plugins/observable_stream_plugin.rs` | missing (types found elsewhere) | 1/1 | 2/2 | types found in `data/core/plugins/i_stream_plugin.rs` (add to path-overrides.toml) |
-| `PropertyAccessorBase.cs` | `data/core/plugins/property_accessor_base.rs` | partial | 1/1 | 1/9 |  |
+| `MethodAccessorPlugin.cs` | `data/core/plugins/method_accessor_plugin.rs` | present | 1/1 | 2/3 (1 waived) |  |
+| `ObservableStreamPlugin.cs` | `data/core/plugins/i_stream_plugin.rs` | present | 1/1 | 2/4 (2 waived) | merged: one plugin for `ObservableValue` (an observable of untyped values), declared next to the stream plugin contract; the generic plugin has no separate form because the value is boxed when the observable is wrapped |
+| `ObservableStreamPlugin`1.cs` | `data/core/plugins/i_stream_plugin.rs` | present | 1/1 | 2/2 | merged: one plugin for `ObservableValue` (an observable of untyped values), declared next to the stream plugin contract; the generic plugin has no separate form because the value is boxed when the observable is wrapped |
+| `PropertyAccessorBase.cs` | `data/core/plugins/property_accessor_base.rs` | present | 1/1 | 1/9 (8 waived) |  |
 | `PropertyError.cs` | `data/core/plugins/property_error.rs` | present | 1/1 | 7/7 |  |
 | `PropertyInfoAccessorPlugin.cs` | `data/core/plugins/property_info_accessor_plugin.rs` | present | 1/1 | 3/3 |  |
-| `ReflectionMethodAccessorPlugin.cs` | `data/core/plugins/reflection_method_accessor_plugin.rs` | missing | 0/1 | 0/2 |  |
+| `ReflectionMethodAccessorPlugin.cs` | `data/core/plugins/method_accessor_plugin.rs` | present | 1/1 | 2/2 | renamed: the plugin that matches a method by name is `MethodAccessorPlugin`, which finds the method in the markup metadata (`markup_members::find_best_command_method`) or the binding metadata of the source instead of reflecting over its type |
 | `TaskStreamPlugin.cs` | `data/core/plugins/task_stream_plugin.rs` | present | 1/1 | 2/2 |  |
 | `TaskStreamPlugin`1.cs` | `data/core/plugins/task_stream_plugin.rs` | present | 1/1 | 2/2 | generic arity merged |
 
-<details><summary><code>BindingPlugins.cs</code> - 4 missing</summary>
-
-- `BindingPlugins` (class): 4 missing
-  - `static readonly List<IPropertyAccessorPlugin> s_propertyAccessors` *(internal)*
-  - `static readonly List<IDataValidationPlugin> s_dataValidators` *(internal)*
-  - `static readonly List<IStreamPlugin> s_streamHandlers` *(internal)*
-  - `static BindingPlugins()` *(static)*
-
-</details>
-
-<details><summary><code>DataValidationBase.cs</code> - 6 missing</summary>
-
-- `DataValidationBase` (class): 6 missing
-  - `override Type? PropertyType { get; }`
-  - `override object? Value { get; }`
-  - `override bool SetValue(object? value, BindingPriority priority)`
-  - `void IObserver<object?>.OnCompleted()` *(explicit)*
-  - `void IObserver<object?>.OnError(Exception error)` *(explicit)*
-  - `void IObserver<object?>.OnNext(object? value)` *(explicit)*
-
-</details>
-
-<details><summary><code>MethodAccessorPlugin.cs</code> - 1 missing</summary>
-
-- `MethodAccessorPlugin` (class): 1 missing
-  - `MethodAccessorPlugin(MethodInfo method, Type delegateType)`
-
-</details>
-
-<details><summary><code>ObservableStreamPlugin.cs</code> - 2 missing</summary>
-
-- `ObservableStreamPlugin` (class) in `data/core/plugins/i_stream_plugin.rs`: 2 missing
-  - `ObservableStreamPlugin()`
-  - `static bool MatchesType(Type type)`
-
-</details>
-
-<details><summary><code>PropertyAccessorBase.cs</code> - 8 missing</summary>
-
-- `PropertyAccessorBase` (class): 8 missing
-  - `abstract Type? PropertyType { get; }`
-  - `abstract object? Value { get; }`
-  - `void Dispose()`
-  - `abstract bool SetValue(object? value, BindingPriority priority)`
-  - `void Subscribe(Action<object?> listener)`
-  - `void Unsubscribe()`
-  - `abstract void SubscribeCore()` *(protected)*
-  - `abstract void UnsubscribeCore()` *(protected)*
-
-</details>
-
-### `Diagnostics` - files 2/15, types 2/20, members 6/118
+### `Diagnostics` - files 8/8, types 11/12 (1 waived), members 74/74
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaObjectExtensions.cs` | `diagnostics/ferro_object_extensions.rs` | partial | 1/1 | 0/2 |  |
+| `AvaloniaObjectExtensions.cs` | `diagnostics/ferro_object_extensions.rs` | present | 1/1 | 2/2 | renamed: the static class of extension methods is the trait FerroObjectDiagnosticExtensions, implemented for FerroObject (the root namespace has an extension class of the same name) |
 | `AvaloniaPropertyValue.cs` | `diagnostics/ferro_property_value.rs` | present | 1/1 | 6/6 |  |
-| `DebugDisplayHelper.cs` | `diagnostics/debug_display_helper.rs` | missing | 0/1 | 0/1 |  |
-| `Diagnostic.Activities.cs` | `diagnostics/diagnostic_activities.rs` | missing | 0/1 | 0/8 |  |
-| `Diagnostic.Consts.cs` | `diagnostics/diagnostic_consts.rs` | missing | 0/3 | 0/33 |  |
-| `Diagnostic.Metrics.cs` | `diagnostics/diagnostic_metrics.rs` | missing | 0/2 | 0/9 |  |
-| `Diagnostic.cs` | `diagnostics/diagnostic.rs` | missing | 0/1 | 0/2 |  |
-| `IAvaloniaObjectDebug.cs` | `diagnostics/i_ferro_object_debug.rs` | missing | 0/1 | 0/1 |  |
-| `INotifyCollectionChangedDebug.cs` | `diagnostics/i_notify_collection_changed_debug.rs` | missing | 0/1 | 0/1 |  |
-| `IValueFrameDiagnostic.cs` | `diagnostics/i_value_frame_diagnostic.rs` | missing | 0/3 | 0/13 |  |
-| `LocalValueFrameDiagnostic.cs` | `diagnostics/local_value_frame_diagnostic.rs` | missing | 0/1 | 0/6 |  |
-| `StyleValueFrameDiagnostic.cs` | `diagnostics/style_value_frame_diagnostic.rs` | missing | 0/1 | 0/6 |  |
-| `TrimmingMessages.cs` | `diagnostics/trimming_messages.rs` | missing | 0/1 | 0/22 |  |
-| `ValueFrameDiagnostic.cs` | `diagnostics/value_frame_diagnostic.rs` | missing | 0/1 | 0/6 |  |
-| `ValueStoreDiagnostic.cs` | `diagnostics/value_store_diagnostic.rs` | missing | 0/1 | 0/2 |  |
+| `DebugDisplayHelper.cs` | - | n/a | - | - | not-applicable: ported in the controls crate, next to the levels of BuildDebugDisplay it serves: `append_optional_value` and `append_optional_boxed_value` of `ferroui_controls::utils::debug_display` (the object model of the base crate has no description virtual; see the waivers of AvaloniaObject.BuildDebugDisplay) |
+| `Diagnostic.Activities.cs` | - | n/a | - | - | not-applicable: a facade over System.Diagnostics.ActivitySource and System.Diagnostics.Metrics (Meter, Histogram, observable counters), the instrumentation API of the .NET runtime, switched on by an AppContext switch: Rust has no such API and the port takes no tracing or metrics dependency, so nothing stands for the activity source and the meter. The values behind the three counters are ported (Interactive::total_handlers_count, Visual::rooted_visual_children_count, DispatcherTimer::active_timers_count), and the names of the meters and tags are in diagnostics/diagnostic_consts.rs |
+| `Diagnostic.Consts.cs` | `diagnostics/diagnostic_consts.rs` | present | 2/3 (1 waived) | 33/33 | renamed: the nested classes of the partial class Diagnostic are the unit structs DiagnosticMeters and DiagnosticTags; the meter names start with `ferroui.` (rule 2 of the porting guide) |
+| `Diagnostic.Metrics.cs` | - | n/a | - | - | not-applicable: a facade over System.Diagnostics.ActivitySource and System.Diagnostics.Metrics (Meter, Histogram, observable counters), the instrumentation API of the .NET runtime, switched on by an AppContext switch: Rust has no such API and the port takes no tracing or metrics dependency, so nothing stands for the activity source and the meter. The values behind the three counters are ported (Interactive::total_handlers_count, Visual::rooted_visual_children_count, DispatcherTimer::active_timers_count), and the names of the meters and tags are in diagnostics/diagnostic_consts.rs |
+| `Diagnostic.cs` | - | n/a | - | - | not-applicable: a facade over System.Diagnostics.ActivitySource and System.Diagnostics.Metrics (Meter, Histogram, observable counters), the instrumentation API of the .NET runtime, switched on by an AppContext switch: Rust has no such API and the port takes no tracing or metrics dependency, so nothing stands for the activity source and the meter. The values behind the three counters are ported (Interactive::total_handlers_count, Visual::rooted_visual_children_count, DispatcherTimer::active_timers_count), and the names of the meters and tags are in diagnostics/diagnostic_consts.rs |
+| `IAvaloniaObjectDebug.cs` | - | n/a | - | - | not-applicable: hand the delegates of an event to tests, which inspect them: the handlers of the port are closures in a HandlerList, which have no identity; the diagnostic of the object is `property_changed_subscriber_count` |
+| `INotifyCollectionChangedDebug.cs` | - | n/a | - | - | not-applicable: hand the delegates of an event to tests, which inspect them: the handlers of the port are closures in a HandlerList, which have no identity; the diagnostic of the object is `property_changed_subscriber_count` |
+| `IValueFrameDiagnostic.cs` | `diagnostics/i_value_frame_diagnostic.rs` | present | 3/3 | 13/13 |  |
+| `LocalValueFrameDiagnostic.cs` | `diagnostics/local_value_frame_diagnostic.rs` | present | 1/1 | 6/6 |  |
+| `StyleValueFrameDiagnostic.cs` | `diagnostics/style_value_frame_diagnostic.rs` | present | 1/1 | 6/6 |  |
+| `TrimmingMessages.cs` | - | n/a | - | - | not-applicable: the messages of the [RequiresUnreferencedCode], [RequiresDynamicCode] and [UnconditionalSuppressMessage] attributes for the .NET trimmer and native AOT compiler |
+| `ValueFrameDiagnostic.cs` | `diagnostics/value_frame_diagnostic.rs` | present | 1/1 | 6/6 |  |
+| `ValueStoreDiagnostic.cs` | `diagnostics/value_store_diagnostic.rs` | present | 1/1 | 2/2 |  |
 
-<details><summary><code>AvaloniaObjectExtensions.cs</code> - 2 missing</summary>
-
-- `AvaloniaObjectExtensions` (class) in `ferro_object_extensions.rs`: 2 missing
-  - `static AvaloniaPropertyValue GetDiagnostic(this AvaloniaObject o, AvaloniaProperty property)`
-  - `static ValueStoreDiagnostic GetValueStoreDiagnostic(this AvaloniaObject avaloniaObject)`
-
-</details>
-
-### `Input` - files 88/90, types 109/115, members 1091/1136
+### `Input` - files 88/88, types 111/113 (2 waived), members 1105/1136 (31 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AccessKeyHandler.cs` | `input/access_key_handler.rs` | partial | 4/4 | 22/23 |  |
-| `AsyncDataTransferExtensions.cs` | `input/async_data_transfer_extensions.rs` | partial | 1/1 | 8/10 |  |
+| `AccessKeyHandler.cs` | `input/access_key_handler.rs` | present | 4/4 | 23/23 |  |
+| `AsyncDataTransferExtensions.cs` | `input/async_data_transfer_extensions.rs` | present | 1/1 | 8/10 (2 waived) |  |
 | `AsyncDataTransferItemExtensions.cs` | `input/async_data_transfer_item_extensions.rs` | present | 1/1 | 5/5 |  |
 | `AsyncToSyncDataTransfer.cs` | `input/async_to_sync_data_transfer.rs` | present | 1/1 | 6/6 |  |
 | `AsyncToSyncDataTransferItem.cs` | `input/async_to_sync_data_transfer_item.rs` | present | 1/1 | 4/4 |  |
 | `ContextRequestedEventArgs.cs` | `input/context_requested_event_args.rs` | present | 1/1 | 7/7 |  |
-| `Cursor.cs` | `input/cursor.rs` | partial | 2/2 | 30/31 |  |
+| `Cursor.cs` | `input/cursor.rs` | present | 2/2 | 30/31 (1 waived) |  |
 | `DataFormat.cs` | `input/data_format.rs` | present | 1/1 | 19/19 |  |
 | `DataFormatKind.cs` | `input/data_format_kind.rs` | present | 1/1 | 4/4 |  |
 | `DataFormatOfT.cs` | `input/data_format_of_t.rs` | present | 1/1 | 1/1 |  |
-| `DataFormats.cs` | `input/data_formats.rs` | missing | 0/1 | 0/0 |  |
-| `DataObject.cs` | `input/data_object.rs` | missing | 0/1 | 0/0 |  |
+| `DataFormats.cs` | - | n/a | - | - | not-applicable: empty classes marked `[Obsolete(.., error: true)]` and to be removed (`TODO13: remove`): no member, and no code can name them; `DataFormat` and `DataTransfer` are their successors and are ported |
+| `DataObject.cs` | - | n/a | - | - | not-applicable: empty classes marked `[Obsolete(.., error: true)]` and to be removed (`TODO13: remove`): no member, and no code can name them; `DataFormat` and `DataTransfer` are their successors and are ported |
 | `DataTransfer.cs` | `input/data_transfer.rs` | present | 1/1 | 6/6 |  |
 | `DataTransferExtensions.cs` | `input/data_transfer_extensions.rs` | present | 1/1 | 8/8 |  |
-| `DataTransferItem.cs` | `input/data_transfer_item.rs` | partial | 1/1 | 10/12 |  |
+| `DataTransferItem.cs` | `input/data_transfer_item.rs` | present | 1/1 | 12/12 |  |
 | `DataTransferItemExtensions.cs` | `input/data_transfer_item_extensions.rs` | present | 1/1 | 5/5 |  |
 | `DragDrop.cs` | `input/drag_drop.rs` | present | 1/1 | 16/16 |  |
 | `DragDropDevice.cs` | `input/drag_drop_device.rs` | present | 1/1 | 2/2 |  |
@@ -1677,7 +780,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IFocusManager.cs` | `input/i_focus_manager.rs` | present | 1/1 | 6/6 |  |
 | `IFocusScope.cs` | `input/i_focus_scope.rs` | present | 1/1 | 0/0 |  |
 | `IInputDevice.cs` | `input/i_input_device.rs` | present | 1/1 | 1/1 |  |
-| `IInputElement.cs` | `input/i_input_element.rs` | partial | 1/1 | 10/25 |  |
+| `IInputElement.cs` | `input/i_input_element.rs` | present | 1/1 | 10/25 (15 waived) |  |
 | `IInputManager.cs` | `input/i_input_manager.rs` | present | 1/1 | 4/4 |  |
 | `IInputRoot.cs` | `input/i_input_root.rs` | present | 1/1 | 8/8 |  |
 | `IKeyModifiersEventArgs.cs` | `input/i_key_modifiers_event_args.rs` | present | 1/1 | 1/1 |  |
@@ -1691,31 +794,31 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IPointerDevice.cs` | `input/i_pointer_device.rs` | present | 1/1 | 1/1 |  |
 | `InputElement.Gestures.cs` | `input/input_element_gestures.rs` | present | 1/1 | 38/38 |  |
 | `InputElement.cs` | `input/input_element.rs` | present | 1/1 | 93/93 |  |
-| `InputExtensions.cs` | `input/input_extensions.rs` | partial | 0/1 | 0/9 |  |
+| `InputExtensions.cs` | `input/input_extensions.rs` | present | 1/1 | 8/9 (1 waived) | merged: the extension methods on IInputElement are inherent methods of InputElement, the one implementation of the interface |
 | `InputManager.cs` | `input/input_manager.rs` | present | 1/1 | 6/6 |  |
 | `InputMethod.cs` | `input/input_method.rs` | present | 1/1 | 6/6 |  |
 | `Key.cs` | `input/key.rs` | present | 1/1 | 223/223 |  |
 | `KeyBinding.cs` | `input/key_binding.rs` | present | 1/1 | 7/7 |  |
 | `KeyDeviceType.cs` | `input/key_device_type.rs` | present | 1/1 | 3/3 |  |
 | `KeyEventArgs.cs` | `input/key_event_args.rs` | present | 1/1 | 5/5 |  |
-| `KeyGesture.cs` | `input/key_gesture.rs` | partial | 1/1 | 11/12 |  |
+| `KeyGesture.cs` | `input/key_gesture.rs` | present | 1/1 | 12/12 |  |
 | `KeySymbolHelper.cs` | `input/key_symbol_helper.rs` | present | 1/1 | 1/1 |  |
 | `KeyboardDevice.cs` | `input/keyboard_device.rs` | present | 1/1 | 9/9 |  |
 | `KeyboardNavigation.cs` | `input/keyboard_navigation.rs` | present | 1/1 | 12/12 |  |
 | `KeyboardNavigationHandler.cs` | `input/keyboard_navigation_handler.rs` | present | 1/1 | 3/3 |  |
 | `KeyboardNavigationMode.cs` | `input/keyboard_navigation_mode.rs` | present | 1/1 | 6/6 |  |
-| `MouseDevice.cs` | `input/mouse_device.rs` | partial | 1/1 | 8/9 |  |
-| `NavigationDirection.cs` | `input/navigation_direction.rs` | partial | 1/2 | 10/13 |  |
+| `MouseDevice.cs` | `input/mouse_device.rs` | present | 1/1 | 8/9 (1 waived) |  |
+| `NavigationDirection.cs` | `input/navigation_direction.rs` | present | 1/2 (1 waived) | 10/13 (3 waived) |  |
 | `NavigationMethod.cs` | `input/navigation_method.rs` | present | 1/1 | 4/4 |  |
 | `PenDevice.cs` | `input/pen_device.rs` | present | 1/1 | 4/4 |  |
 | `PhysicalKey.cs` | `input/physical_key.rs` | present | 1/1 | 165/165 |  |
-| `PhysicalKeyExtensions.cs` | `input/physical_key_extensions.rs` | partial | 0/1 | 0/2 |  |
-| `PinchEventArgs.cs` | `input/pinch_event_args.rs` | partial | 2/2 | 6/7 |  |
+| `PhysicalKeyExtensions.cs` | `input/physical_key_extensions.rs` | present | 1/1 | 2/2 | merged: the extension methods are inherent methods of PhysicalKey |
+| `PinchEventArgs.cs` | `input/pinch_event_args.rs` | present | 2/2 | 6/7 (1 waived) |  |
 | `Pointer.cs` | `input/pointer.rs` | present | 2/2 | 19/19 |  |
 | `PointerDeltaEventArgs.cs` | `input/pointer_delta_event_args.rs` | present | 1/1 | 2/2 |  |
-| `PointerEventArgs.cs` | `input/pointer_event_args.rs` | partial | 6/6 | 27/29 |  |
-| `PointerOverPreProcessor.cs` | `input/pointer_over_pre_processor.rs` | partial | 1/1 | 5/6 |  |
-| `PointerPoint.cs` | `input/pointer_point.rs` | partial | 3/4 | 33/37 |  |
+| `PointerEventArgs.cs` | `input/pointer_event_args.rs` | present | 6/6 | 27/29 (2 waived) |  |
+| `PointerOverPreProcessor.cs` | `input/pointer_over_pre_processor.rs` | present | 1/1 | 5/6 (1 waived) |  |
+| `PointerPoint.cs` | `input/pointer_point.rs` | present | 3/4 (1 waived) | 33/37 (4 waived) |  |
 | `PointerWheelEventArgs.cs` | `input/pointer_wheel_event_args.rs` | present | 1/1 | 2/2 |  |
 | `PullGestureEventArgs.cs` | `input/pull_gesture_event_args.rs` | present | 3/3 | 12/12 |  |
 | `ScrollGestureEventArgs.cs` | `input/scroll_gesture_event_args.rs` | present | 3/3 | 10/10 |  |
@@ -1729,212 +832,34 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `VectorEventArgs.cs` | `input/vector_event_args.rs` | present | 1/1 | 1/1 |  |
 | `WindowDecorationsElementRole.cs` | `input/window_decorations_element_role.rs` | present | 1/1 | 16/16 |  |
 
-<details><summary><code>AccessKeyHandler.cs</code> - 1 missing</summary>
-
-- `AccessKeyHandler` (class): 1 missing
-  - `virtual void OnSetOwner(InputElement owner)` *(protected)*
-
-</details>
-
-<details><summary><code>AsyncDataTransferExtensions.cs</code> - 2 missing</summary>
-
-- `AsyncDataTransferExtensions` (class): 2 missing
-  - `static IDataTransfer ToSynchronous(this IAsyncDataTransfer asyncDataTransfer, string logArea)` *(internal)*
-  - `static IAsyncDataTransfer ToAsynchronous(this IDataTransfer dataTransfer)` *(internal)*
-
-</details>
-
-<details><summary><code>Cursor.cs</code> - 1 missing</summary>
-
-- `Cursor` (class): 1 missing
-  - `static readonly Cursor Default`
-
-</details>
-
-<details><summary><code>DataTransferItem.cs</code> - 2 missing</summary>
-
-- `DataTransferItem` (class): 2 missing
-  - `void SetFile(IStorageItem? value)`
-  - `static DataTransferItem CreateFile(IStorageItem? value)`
-
-</details>
-
-<details><summary><code>IInputElement.cs</code> - 15 missing</summary>
-
-- `IInputElement` (interface): 15 missing
-  - `event EventHandler<FocusChangedEventArgs>? GotFocus`
-  - `event EventHandler<FocusChangedEventArgs>? LostFocus`
-  - `event EventHandler<KeyEventArgs>? KeyDown`
-  - `event EventHandler<KeyEventArgs>? KeyUp`
-  - `event EventHandler<TextInputEventArgs>? TextInput`
-  - `event EventHandler<PointerEventArgs>? PointerEntered`
-  - `event EventHandler<PointerEventArgs>? PointerExited`
-  - `event EventHandler<PointerPressedEventArgs>? PointerPressed`
-  - `event EventHandler<PointerEventArgs>? PointerMoved`
-  - `event EventHandler<PointerReleasedEventArgs>? PointerReleased`
-  - `event EventHandler<PointerWheelEventArgs>? PointerWheelChanged`
-  - `List<KeyBinding> KeyBindings { get; }`
-  - `void AddHandler(RoutedEvent routedEvent, Delegate handler, RoutingStrategies routes = RoutingStrategies.Dir...`
-  - `void RemoveHandler(RoutedEvent routedEvent, Delegate handler)`
-  - `void RaiseEvent(RoutedEventArgs e)`
-
-</details>
-
-<details><summary><code>InputExtensions.cs</code> - 10 missing</summary>
-
-- `InputExtensions` (class, public): **type missing** (9 members)
-
-</details>
-
-<details><summary><code>KeyGesture.cs</code> - 1 missing</summary>
-
-- `KeyGesture` (class): 1 missing
-  - `string ToString(string? format, IFormatProvider? formatProvider)`
-
-</details>
-
-<details><summary><code>MouseDevice.cs</code> - 1 missing</summary>
-
-- `MouseDevice` (class): 1 missing
-  - `static TMouseDevice GetOrCreatePrimary<TMouseDevice>() where TMouseDevice : MouseDevice, new()` *(internal)*
-
-</details>
-
-<details><summary><code>NavigationDirection.cs</code> - 4 missing</summary>
-
-- `NavigationDirectionExtensions` (class, public): **type missing** (3 members)
-
-</details>
-
-<details><summary><code>PhysicalKeyExtensions.cs</code> - 3 missing</summary>
-
-- `PhysicalKeyExtensions` (class, public): **type missing** (2 members)
-
-</details>
-
-<details><summary><code>PinchEventArgs.cs</code> - 1 missing</summary>
-
-- `PinchEventArgs` (class): 1 missing
-  - `PinchEventArgs(double scale, Point scaleOrigin, double angle, double angleDelta)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>PointerEventArgs.cs</code> - 2 missing</summary>
-
-- `PointerEventArgs` (class): 1 missing
-  - `PointerEventArgs(RoutedEvent? routedEvent, object? source, IPointer pointer, Visual? rootVisual, Point root...` *(1 of 2 constructors found)*
-- `PointerPressedEventArgs` (class): 1 missing
-  - `PointerPressedEventArgs(object? source, IPointer pointer, Visual rootVisual, Point rootVisualPosition, ulon...` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>PointerOverPreProcessor.cs</code> - 1 missing</summary>
-
-- `PointerOverPreProcessor` (class): 1 missing
-  - `void OnError(Exception error)`
-
-</details>
-
-<details><summary><code>PointerPoint.cs</code> - 5 missing</summary>
-
-- `PointerPointProperties` (record struct): 3 missing
-  - `PointerPointProperties(RawInputModifiers modifiers, PointerUpdateKind kind, float twist, float pressure, fl...` *(3 of 6 constructors found)*
-  - `PointerPointProperties(RawInputModifiers modifiers, PointerUpdateKind kind, RawPointerPoint rawPoint)` *(internal; 3 of 6 constructors found)*
-  - `PointerPointProperties(PointerPointProperties basedOn, RawPointerPoint rawPoint)` *(internal; 3 of 6 constructors found)*
-- `PointerUpdateKindExtensions` (class, public): **type missing** (1 members)
-
-</details>
-
-### `Input/GestureRecognizers` - files 7/7, types 12/12, members 82/87
+### `Input/GestureRecognizers` - files 7/7, types 12/12, members 82/87 (5 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `GestureRecognizer.cs` | `input/gesture_recognizers/gesture_recognizer.rs` | present | 1/1 | 10/10 |  |
-| `GestureRecognizerCollection.cs` | `input/gesture_recognizers/gesture_recognizer_collection.rs` | partial | 1/1 | 8/10 |  |
+| `GestureRecognizerCollection.cs` | `input/gesture_recognizers/gesture_recognizer_collection.rs` | present | 1/1 | 8/10 (2 waived) |  |
 | `PinchGestureRecognizer.cs` | `input/gesture_recognizers/pinch_gesture_recognizer.rs` | present | 1/1 | 4/4 |  |
-| `PullGestureRecognizer.cs` | `input/gesture_recognizers/pull_gesture_recognizer.rs` | partial | 1/1 | 8/9 |  |
+| `PullGestureRecognizer.cs` | `input/gesture_recognizers/pull_gesture_recognizer.rs` | present | 1/1 | 8/9 (1 waived) |  |
 | `ScrollGestureRecognizer.cs` | `input/gesture_recognizers/scroll_gesture_recognizer.rs` | present | 1/1 | 20/20 |  |
 | `SwipeGestureRecognizer.cs` | `input/gesture_recognizers/swipe_gesture_recognizer.rs` | present | 1/1 | 14/14 |  |
-| `VelocityTracker.cs` | `input/gesture_recognizers/velocity_tracker.rs` | partial | 6/6 | 18/20 |  |
+| `VelocityTracker.cs` | `input/gesture_recognizers/velocity_tracker.rs` | present | 6/6 | 18/20 (2 waived) |  |
 
-<details><summary><code>GestureRecognizerCollection.cs</code> - 2 missing</summary>
-
-- `GestureRecognizerCollection` (class): 2 missing
-  - `IEnumerator<GestureRecognizer> GetEnumerator()`
-  - `IEnumerator IEnumerable.GetEnumerator()` *(explicit)*
-
-</details>
-
-<details><summary><code>PullGestureRecognizer.cs</code> - 1 missing</summary>
-
-- `PullGestureRecognizer` (class): 1 missing
-  - `PullGestureRecognizer()` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>VelocityTracker.cs</code> - 2 missing</summary>
-
-- `VelocityEstimate` (record): 1 missing
-  - `VelocityEstimate(Vector PixelsPerSecond, double Confidence, TimeSpan Duration, Vector Offset)`
-- `PolynomialFit` (class): 1 missing
-  - `PolynomialFit(int degree)` *(internal)*
-
-</details>
-
-### `Input/Navigation` - files 10/10, types 12/12, members 58/84
+### `Input/Navigation` - files 10/10, types 12/12, members 58/84 (26 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `TabNavigation.cs` | `input/navigation/tab_navigation.rs` | present | 1/1 | 7/7 |  |
 | `XYFocus.Bubbling.cs` | `input/navigation/xy_focus.rs` | present | 1/1 | 0/0 | partial merged into main file |
 | `XYFocus.FindElements.cs` | `input/navigation/xy_focus.rs` | present | 1/1 | 1/1 | partial merged into main file |
-| `XYFocus.Impl.cs` | `input/navigation/xy_focus.rs` | partial | 2/2 | 8/9 | partial merged into main file |
-| `XYFocus.Properties.cs` | `input/navigation/xy_focus.rs` | partial | 1/1 | 9/34 | partial merged into main file |
+| `XYFocus.Impl.cs` | `input/navigation/xy_focus.rs` | present | 2/2 | 8/9 (1 waived) | partial merged into main file |
+| `XYFocus.Properties.cs` | `input/navigation/xy_focus.rs` | present | 1/1 | 9/34 (25 waived) | partial merged into main file |
 | `XYFocusAlgorithms.cs` | `input/navigation/xy_focus_algorithms.rs` | present | 2/2 | 8/8 |  |
 | `XYFocusHelpers.cs` | `input/navigation/xy_focus_helpers.rs` | present | 1/1 | 2/2 |  |
 | `XYFocusNavigationModes.cs` | `input/navigation/xy_focus_navigation_modes.rs` | present | 1/1 | 5/5 |  |
 | `XYFocusNavigationStrategy.cs` | `input/navigation/xy_focus_navigation_strategy.rs` | present | 1/1 | 4/4 |  |
 | `XYFocusOptions.cs` | `input/navigation/xy_focus_options.rs` | present | 1/1 | 14/14 |  |
 
-<details><summary><code>XYFocus.Impl.cs</code> - 1 missing</summary>
-
-- `XYFocusParams` (record): 1 missing
-  - `XYFocusParams(InputElement Element, Rect Bounds)`
-
-</details>
-
-<details><summary><code>XYFocus.Properties.cs</code> - 25 missing</summary>
-
-- `XYFocus` (class): 25 missing
-  - `static readonly AttachedProperty<InputElement> DownProperty`
-  - `static void SetDown(InputElement obj, InputElement value)`
-  - `static InputElement GetDown(InputElement obj)`
-  - `static readonly AttachedProperty<InputElement> LeftProperty`
-  - `static void SetLeft(InputElement obj, InputElement value)`
-  - `static InputElement GetLeft(InputElement obj)`
-  - `static readonly AttachedProperty<InputElement> RightProperty`
-  - `static void SetRight(InputElement obj, InputElement value)`
-  - `static InputElement GetRight(InputElement obj)`
-  - `static readonly AttachedProperty<InputElement> UpProperty`
-  - `static void SetUp(InputElement obj, InputElement value)`
-  - `static InputElement GetUp(InputElement obj)`
-  - `static readonly AttachedProperty<XYFocusNavigationStrategy> DownNavigationStrategyProperty`
-  - `static void SetDownNavigationStrategy(InputElement obj, XYFocusNavigationStrategy value)`
-  - `static XYFocusNavigationStrategy GetDownNavigationStrategy(InputElement obj)`
-  - `static readonly AttachedProperty<XYFocusNavigationStrategy> UpNavigationStrategyProperty`
-  - `static void SetUpNavigationStrategy(InputElement obj, XYFocusNavigationStrategy value)`
-  - `static XYFocusNavigationStrategy GetUpNavigationStrategy(InputElement obj)`
-  - `static readonly AttachedProperty<XYFocusNavigationStrategy> LeftNavigationStrategyProperty`
-  - `static void SetLeftNavigationStrategy(InputElement obj, XYFocusNavigationStrategy value)`
-  - `static XYFocusNavigationStrategy GetLeftNavigationStrategy(InputElement obj)`
-  - `static readonly AttachedProperty<XYFocusNavigationStrategy> RightNavigationStrategyProperty`
-  - `static void SetRightNavigationStrategy(InputElement obj, XYFocusNavigationStrategy value)`
-  - `static XYFocusNavigationStrategy GetRightNavigationStrategy(InputElement obj)`
-  - `static XYFocus()` *(static)*
-
-</details>
-
-### `Input/Platform` - files 16/16, types 16/16, members 103/104
+### `Input/Platform` - files 16/16, types 16/16, members 103/104 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1947,7 +872,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IOwnedClipboardImpl.cs` | `input/platform/i_owned_clipboard_impl.rs` | present | 1/1 | 1/1 |  |
 | `IPlatformClipboardManagerImpl.cs` | `input/platform/i_platform_clipboard_manager_impl.rs` | present | 1/1 | 1/1 |  |
 | `IPlatformDragSource.cs` | `input/platform/i_platform_drag_source.rs` | present | 1/1 | 1/1 |  |
-| `KeyGestureFormatInfo.cs` | `input/platform/key_gesture_format_info.rs` | partial | 1/1 | 8/9 |  |
+| `KeyGestureFormatInfo.cs` | `input/platform/key_gesture_format_info.rs` | present | 1/1 | 8/9 (1 waived) |  |
 | `PlatformAsyncDataTransfer.cs` | `input/platform/platform_async_data_transfer.rs` | present | 1/1 | 9/9 |  |
 | `PlatformAsyncDataTransferItem.cs` | `input/platform/platform_async_data_transfer_item.rs` | present | 1/1 | 6/6 |  |
 | `PlatformClipboardManager.cs` | `input/platform/platform_clipboard_manager.rs` | present | 1/1 | 2/2 |  |
@@ -1955,14 +880,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PlatformDataTransferItem.cs` | `input/platform/platform_data_transfer_item.rs` | present | 1/1 | 9/9 |  |
 | `PlatformHotkeyConfiguration.cs` | `input/platform/platform_hotkey_configuration.rs` | present | 1/1 | 25/25 |  |
 
-<details><summary><code>KeyGestureFormatInfo.cs</code> - 1 missing</summary>
-
-- `KeyGestureFormatInfo` (class): 1 missing
-  - `object? GetFormat(Type? formatType)`
-
-</details>
-
-### `Input/Raw` - files 12/12, types 14/15, members 72/76
+### `Input/Raw` - files 12/12, types 15/15, members 73/76 (3 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1970,36 +888,16 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `RawDragEvent.cs` | `input/raw/raw_drag_event.rs` | present | 1/1 | 6/6 |  |
 | `RawDragEventType.cs` | `input/raw/raw_drag_event_type.rs` | present | 1/1 | 4/4 |  |
 | `RawInputEventArgs.cs` | `input/raw/raw_input_event_args.rs` | present | 1/1 | 5/5 |  |
-| `RawInputHelpers.cs` | `input/raw/raw_input_helpers.rs` | partial | 0/1 | 0/2 |  |
+| `RawInputHelpers.cs` | `input/raw/raw_input_helpers.rs` | present | 1/1 | 1/2 (1 waived) | merged: the extension methods are inherent methods of the types they extend: `RawInputModifiers::to_key_modifiers` and `RawPointerEventType::to_update_kind` |
 | `RawKeyEventArgs.cs` | `input/raw/raw_key_event_args.rs` | present | 2/2 | 9/9 |  |
 | `RawMouseWheelEventArgs.cs` | `input/raw/raw_mouse_wheel_event_args.rs` | present | 1/1 | 2/2 |  |
-| `RawPointerEventArgs.cs` | `input/raw/raw_pointer_event_args.rs` | partial | 3/3 | 38/39 |  |
+| `RawPointerEventArgs.cs` | `input/raw/raw_pointer_event_args.rs` | present | 3/3 | 38/39 (1 waived) |  |
 | `RawPointerGestureEventArgs.cs` | `input/raw/raw_pointer_gesture_event_args.rs` | present | 1/1 | 2/2 |  |
 | `RawSizeEventArgs.cs` | `input/raw/raw_size_event_args.rs` | present | 1/1 | 3/3 |  |
 | `RawTextInputEventArgs.cs` | `input/raw/raw_text_input_event_args.rs` | present | 1/1 | 2/2 |  |
-| `RawTouchEventArgs.cs` | `input/raw/raw_touch_event_args.rs` | partial | 1/1 | 1/2 |  |
+| `RawTouchEventArgs.cs` | `input/raw/raw_touch_event_args.rs` | present | 1/1 | 1/2 (1 waived) |  |
 
-<details><summary><code>RawInputHelpers.cs</code> - 3 missing</summary>
-
-- `RawInputHelpers` (class, internal): **type missing** (2 members)
-
-</details>
-
-<details><summary><code>RawPointerEventArgs.cs</code> - 1 missing</summary>
-
-- `RawPointerEventArgs` (class): 1 missing
-  - `RawPointerEventArgs(IInputDevice device, ulong timestamp, IInputRoot root, RawPointerEventType type, RawPoi...` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>RawTouchEventArgs.cs</code> - 1 missing</summary>
-
-- `RawTouchEventArgs` (class): 1 missing
-  - `RawTouchEventArgs(IInputDevice device, ulong timestamp, IInputRoot root, RawPointerEventType type, RawPoint...` *(1 of 2 constructors found)*
-
-</details>
-
-### `Input/TextInput` - files 9/9, types 11/11, members 98/99
+### `Input/TextInput` - files 9/9, types 11/11, members 98/99 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -2009,55 +907,21 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TextInputMethodClient.cs` | `input/text_input/text_input_method_client.rs` | present | 3/3 | 28/28 |  |
 | `TextInputMethodClientRequeryRequestedEventArgs.cs` | `input/text_input/text_input_method_client_requery_requested_event_args.rs` | present | 1/1 | 0/0 |  |
 | `TextInputMethodClientRequestedEventArgs.cs` | `input/text_input/text_input_method_client_requested_event_args.rs` | present | 1/1 | 1/1 |  |
-| `TextInputOptions.cs` | `input/text_input/text_input_options.rs` | partial | 1/1 | 37/38 |  |
+| `TextInputOptions.cs` | `input/text_input/text_input_options.rs` | present | 1/1 | 37/38 (1 waived) |  |
 | `TextInputReturnKeyType.cs` | `input/text_input/text_input_return_key_type.rs` | present | 1/1 | 8/8 |  |
 | `TransformTrackingHelper.cs` | `input/text_input/transform_tracking_helper.rs` | present | 1/1 | 7/7 |  |
 
-<details><summary><code>TextInputOptions.cs</code> - 1 missing</summary>
-
-- `TextInputOptions` (class): 1 missing
-  - `static readonly TextInputOptions Default`
-
-</details>
-
-### `Interactivity` - files 7/7, types 8/9, members 46/52
+### `Interactivity` - files 7/7, types 9/9, members 49/52 (3 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `CancelRoutedEventArgs.cs` | `interactivity/cancel_routed_event_args.rs` | partial | 1/1 | 3/4 |  |
+| `CancelRoutedEventArgs.cs` | `interactivity/cancel_routed_event_args.rs` | present | 1/1 | 3/4 (1 waived) |  |
 | `EventRoute.cs` | `interactivity/event_route.rs` | present | 1/1 | 6/6 |  |
-| `Interactive.cs` | `interactivity/interactive.rs` | partial | 1/1 | 7/8 |  |
-| `InteractiveExtensions.cs` | `interactivity/interactive_extensions.rs` | partial | 0/1 | 0/3 |  |
+| `Interactive.cs` | `interactivity/interactive.rs` | present | 1/1 | 7/8 (1 waived) |  |
+| `InteractiveExtensions.cs` | `interactivity/interactive_extensions.rs` | present | 1/1 | 3/3 | merged: the extension methods are inherent methods of `Interactive` |
 | `RoutedEvent.cs` | `interactivity/routed_event.rs` | present | 3/3 | 19/19 |  |
-| `RoutedEventArgs.cs` | `interactivity/routed_event_args.rs` | partial | 1/1 | 6/7 |  |
+| `RoutedEventArgs.cs` | `interactivity/routed_event_args.rs` | present | 1/1 | 6/7 (1 waived) |  |
 | `RoutedEventRegistry.cs` | `interactivity/routed_event_registry.rs` | present | 1/1 | 5/5 |  |
-
-<details><summary><code>CancelRoutedEventArgs.cs</code> - 1 missing</summary>
-
-- `CancelRoutedEventArgs` (class): 1 missing
-  - `CancelRoutedEventArgs(RoutedEvent? routedEvent, object? source)` *(2 of 3 constructors found)*
-
-</details>
-
-<details><summary><code>Interactive.cs</code> - 1 missing</summary>
-
-- `Interactive` (class): 1 missing
-  - `void RemoveHandler<TEventArgs>(RoutedEvent<TEventArgs> routedEvent, EventHandler<TEventArgs>? handler) wher...` *(1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>InteractiveExtensions.cs</code> - 4 missing</summary>
-
-- `InteractiveExtensions` (class, public): **type missing** (3 members)
-
-</details>
-
-<details><summary><code>RoutedEventArgs.cs</code> - 1 missing</summary>
-
-- `RoutedEventArgs` (class): 1 missing
-  - `RoutedEventArgs(RoutedEvent? routedEvent, object? source)` *(2 of 3 constructors found)*
-
-</details>
 
 ### `Layout` - files 13/13, types 15/15, members 122/123 (1 waived)
 
@@ -2077,34 +941,16 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `MinMax.cs` | `layout/min_max.rs` | present | 1/1 | 5/5 |  |
 | `Orientation.cs` | `layout/orientation.rs` | present | 1/1 | 2/2 |  |
 
-### `Logging` - files 6/6, types 6/6, members 38/44
+### `Logging` - files 6/6, types 6/6, members 38/44 (6 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `ILogSink.cs` | `logging/i_log_sink.rs` | present | 1/1 | 3/3 |  |
 | `LogArea.cs` | `logging/log_area.rs` | present | 1/1 | 18/18 |  |
 | `LogEventLevel.cs` | `logging/log_event_level.rs` | present | 1/1 | 6/6 |  |
-| `Logger.cs` | `logging/logger.rs` | partial | 1/1 | 3/4 |  |
-| `ParametrizedLogger.cs` | `logging/parametrized_logger.rs` | partial | 1/1 | 4/9 |  |
+| `Logger.cs` | `logging/logger.rs` | present | 1/1 | 3/4 (1 waived) |  |
+| `ParametrizedLogger.cs` | `logging/parametrized_logger.rs` | present | 1/1 | 4/9 (5 waived) |  |
 | `StringLogSink.cs` | `logging/string_log_sink.rs` | present | 1/1 | 4/4 |  |
-
-<details><summary><code>Logger.cs</code> - 1 missing</summary>
-
-- `Logger` (class): 1 missing
-  - `static bool TryGet(LogEventLevel level, string area, out ParametrizedLogger outLogger)` *(1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>ParametrizedLogger.cs</code> - 5 missing</summary>
-
-- `ParametrizedLogger` (record struct): 5 missing
-  - `void Log<T0, T1>(object? source, string messageTemplate, T0 propertyValue0, T1 propertyValue1)` *(2 of 7 overloads found)*
-  - `void Log<T0, T1, T2>(object? source, string messageTemplate, T0 propertyValue0, T1 propertyValue1, T2 prope...` *(2 of 7 overloads found)*
-  - `void Log<T0, T1, T2, T3>(object? source, string messageTemplate, T0 propertyValue0, T1 propertyValue1, T2 p...` *(2 of 7 overloads found)*
-  - `void Log<T0, T1, T2, T3, T4>(object? source, string messageTemplate, T0 propertyValue0, T1 propertyValue1, ...` *(2 of 7 overloads found)*
-  - `void Log<T0, T1, T2, T3, T4, T5>(object? source, string messageTemplate, T0 propertyValue0, T1 propertyValu...` *(2 of 7 overloads found)*
-
-</details>
 
 ### `LogicalTree` - files 7/7, types 8/8, members 36/36
 
@@ -2118,7 +964,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `LogicalExtensions.cs` | `logical_tree/logical_extensions.rs` | present | 1/1 | 11/11 | merged: the extension methods are inherent methods of StyledElement, the one implementation of ILogical |
 | `LogicalTreeAttachmentEventArgs.cs` | `logical_tree/logical_tree_attachment_event_args.rs` | present | 1/1 | 4/4 |  |
 
-### `Media` - files 160/165, types 169/184, members 1658/1768 (4 waived)
+### `Media` - files 165/165, types 174/184 (10 waived), members 1690/1768 (78 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -2131,35 +977,35 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `BaselinePixelAlignment.cs` | `media/baseline_pixel_alignment.rs` | present | 1/1 | 3/3 |  |
 | `BezierSegment .cs` | `media/bezier_segment.rs` | present | 1/1 | 8/8 |  |
 | `BitmapCache.cs` | `media/bitmap_cache.rs` | present | 1/1 | 8/8 |  |
-| `BoxShadow.cs` | `media/box_shadow.rs` | partial | 1/1 | 13/15 (1 waived) |  |
-| `BoxShadows.cs` | `media/box_shadows.rs` | partial | 1/2 | 13/17 (1 waived) |  |
-| `Brush.cs` | `media/brush.rs` | partial | 1/1 | 20/21 |  |
-| `BrushConverter.cs` | `media/brush_converter.rs` | missing | 0/1 | 0/2 |  |
-| `BrushExtensions.cs` | `media/brush_extensions.rs` | partial | 1/1 | 1/3 |  |
+| `BoxShadow.cs` | `media/box_shadow.rs` | present | 1/1 | 13/15 (2 waived) |  |
+| `BoxShadows.cs` | `media/box_shadows.rs` | present | 1/2 (1 waived) | 13/17 (4 waived) |  |
+| `Brush.cs` | `media/brush.rs` | present | 1/1 | 20/21 (1 waived) |  |
+| `BrushConverter.cs` | `media/brush.rs` | present | 1/1 | 0/2 (2 waived) | replaced: a type converter that only parses: `Brush::parse`, which the type states as its conversion from text (`parse:`, porting guide, "Text conversion") |
+| `BrushExtensions.cs` | `media/brush_extensions.rs` | present | 1/1 | 3/3 |  |
 | `BrushMappingMode.cs` | `media/brush_mapping_mode.rs` | present | 1/1 | 2/2 |  |
 | `Brushes.cs` | `media/brushes.rs` | present | 1/1 | 141/141 |  |
 | `CacheMode.cs` | `media/cache_mode.rs` | present | 1/1 | 2/2 |  |
 | `CharacterHit.cs` | `media/character_hit.rs` | present | 1/1 | 8/8 |  |
-| `Color.cs` | `media/color.rs` | partial | 1/1 | 26/27 |  |
+| `Color.cs` | `media/color.rs` | present | 1/1 | 26/27 (1 waived) |  |
 | `Colors.cs` | `media/colors.rs` | present | 1/1 | 141/141 |  |
 | `CompositeFontFamilyKey.cs` | `media/composite_font_family_key.rs` | present | 1/1 | 2/2 |  |
 | `ConicGradientBrush.cs` | `media/conic_gradient_brush.rs` | present | 1/1 | 7/7 |  |
-| `DashStyle.cs` | `media/dash_style.rs` | partial | 1/1 | 14/15 |  |
+| `DashStyle.cs` | `media/dash_style.rs` | present | 1/1 | 14/15 (1 waived) |  |
 | `Drawing.cs` | `media/drawing.rs` | present | 1/1 | 7/7 |  |
-| `DrawingBrush.cs` | `media/drawing_brush.rs` | partial | 1/1 | 8/9 |  |
-| `DrawingCollection.cs` | `media/drawing_collection.rs` | partial | 0/1 | 0/2 |  |
-| `DrawingContext.cs` | `media/drawing_context.rs` | partial | 2/2 | 47/51 |  |
+| `DrawingBrush.cs` | `media/drawing_brush.rs` | present | 1/1 | 8/9 (1 waived) |  |
+| `DrawingCollection.cs` | `media/drawing_collection.rs` | present | 0/1 (1 waived) | 0/2 (2 waived) |  |
+| `DrawingContext.cs` | `media/drawing_context.rs` | present | 2/2 | 48/51 (3 waived) |  |
 | `DrawingGroup.cs` | `media/drawing_group.rs` | present | 1/1 | 19/19 |  |
-| `DrawingImage.cs` | `media/drawing_image.rs` | partial | 1/1 | 10/11 |  |
+| `DrawingImage.cs` | `media/drawing_image.rs` | present | 1/1 | 10/11 (1 waived) |  |
 | `EdgeMode.cs` | `media/edge_mode.rs` | present | 1/1 | 3/3 |  |
-| `EllipseGeometry.cs` | `media/ellipse_geometry.rs` | partial | 1/1 | 12/13 |  |
-| `ExperimentalAcrylicMaterial.cs` | `media/experimental_acrylic_material.rs` | partial | 1/1 | 18/19 |  |
+| `EllipseGeometry.cs` | `media/ellipse_geometry.rs` | present | 1/1 | 12/13 (1 waived) |  |
+| `ExperimentalAcrylicMaterial.cs` | `media/experimental_acrylic_material.rs` | present | 1/1 | 18/19 (1 waived) |  |
 | `FillRule.cs` | `media/fill_rule.rs` | present | 1/1 | 2/2 |  |
 | `FlowDirection.cs` | `media/flow_direction.rs` | present | 1/1 | 2/2 |  |
 | `FontFallback.cs` | `media/font_fallback.rs` | present | 1/1 | 2/2 |  |
-| `FontFamily.cs` | `media/font_family.rs` | partial | 1/1 | 16/17 |  |
+| `FontFamily.cs` | `media/font_family.rs` | present | 1/1 | 16/17 (1 waived) |  |
 | `FontFeature.cs` | `media/font_feature.rs` | present | 1/1 | 7/7 |  |
-| `FontFeatureCollection.cs` | `media/font_feature_collection.rs` | partial | 0/1 | 0/4 |  |
+| `FontFeatureCollection.cs` | `media/font_feature_collection.rs` | present | 0/1 (1 waived) | 0/4 (4 waived) |  |
 | `FontManager.cs` | `media/font_manager.rs` | present | 1/1 | 17/17 |  |
 | `FontManagerOptions.cs` | `media/font_manager_options.rs` | present | 1/1 | 3/3 |  |
 | `FontMetrics.cs` | `media/font_metrics.rs` | present | 1/1 | 10/10 |  |
@@ -2169,34 +1015,34 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `FontStyle.cs` | `media/font_style.rs` | present | 1/1 | 3/3 |  |
 | `FontVariationSettings.cs` | `media/font_variation_settings.rs` | present | 2/2 | 14/14 |  |
 | `FontWeight.cs` | `media/font_weight.rs` | present | 1/1 | 18/18 |  |
-| `FormattedText.cs` | `media/formatted_text.rs` | partial | 1/1 | 46/47 |  |
-| `Geometry.cs` | `media/geometry.rs` | partial | 1/2 | 26/31 |  |
+| `FormattedText.cs` | `media/formatted_text.rs` | present | 1/1 | 47/47 |  |
+| `Geometry.cs` | `media/geometry.rs` | present | 1/2 (1 waived) | 26/31 (5 waived) |  |
 | `GeometryBuilder.cs` | `media/geometry_builder.rs` | present | 2/2 | 16/16 |  |
 | `GeometryCollection.cs` | `media/geometry_collection.rs` | present | 1/1 | 3/3 |  |
 | `GeometryDrawing.cs` | `media/geometry_drawing.rs` | present | 1/1 | 8/8 |  |
 | `GeometryGroup.cs` | `media/geometry_group.rs` | present | 1/1 | 10/10 |  |
 | `GeometryHitTestResult.cs` | `media/geometry_hit_test_result.rs` | present | 1/1 | 3/3 |  |
 | `GlyphBounds.cs` | `media/glyph_bounds.rs` | present | 1/1 | 7/7 |  |
-| `GlyphDrawingOptions.cs` | `media/glyph_drawing_options.rs` | missing | 0/1 | 0/3 |  |
+| `GlyphDrawingOptions.cs` | `media/glyph_drawing_options.rs` | present | 1/1 | 3/3 |  |
 | `GlyphDrawingType.cs` | `media/glyph_drawing_type.rs` | present | 1/1 | 4/4 |  |
 | `GlyphMetrics.cs` | `media/glyph_metrics.rs` | present | 1/1 | 10/10 |  |
-| `GlyphRun.cs` | `media/glyph_run.rs` | partial | 1/1 | 25/26 |  |
+| `GlyphRun.cs` | `media/glyph_run.rs` | present | 1/1 | 25/26 (1 waived) |  |
 | `GlyphRunDrawing.cs` | `media/glyph_run_drawing.rs` | present | 1/1 | 6/6 |  |
 | `GlyphRunMetrics.cs` | `media/glyph_run_metrics.rs` | present | 1/1 | 8/8 |  |
-| `GlyphTypeface.cs` | `media/glyph_typeface.rs` | partial | 1/1 | 32/33 |  |
+| `GlyphTypeface.cs` | `media/glyph_typeface.rs` | present | 1/1 | 33/33 |  |
 | `GradientBrush.cs` | `media/gradient_brush.rs` | present | 1/1 | 9/9 |  |
 | `GradientSpreadMethod.cs` | `media/gradient_spread_method.rs` | present | 1/1 | 3/3 |  |
-| `GradientStop.cs` | `media/gradient_stop.rs` | partial | 1/1 | 5/6 |  |
-| `GradientStops.cs` | `media/gradient_stops.rs` | partial | 0/1 | 0/2 |  |
-| `HslColor.cs` | `media/hsl_color.rs` | partial | 1/1 | 20/23 (1 waived) |  |
-| `HsvColor.cs` | `media/hsv_color.rs` | partial | 1/1 | 20/23 (1 waived) |  |
+| `GradientStop.cs` | `media/gradient_stop.rs` | present | 1/1 | 5/6 (1 waived) |  |
+| `GradientStops.cs` | `media/gradient_stops.rs` | present | 0/1 (1 waived) | 0/2 (2 waived) |  |
+| `HslColor.cs` | `media/hsl_color.rs` | present | 1/1 | 22/23 (1 waived) |  |
+| `HsvColor.cs` | `media/hsv_color.rs` | present | 1/1 | 22/23 (1 waived) |  |
 | `IAffectsRender.cs` | `media/i_affects_render.rs` | present | 1/1 | 1/1 |  |
 | `IBrush.cs` | `media/i_brush.rs` | present | 1/1 | 4/4 |  |
 | `IConicGradientBrush.cs` | `media/i_conic_gradient_brush.rs` | present | 1/1 | 2/2 |  |
 | `IDashStyle.cs` | `media/i_dash_style.rs` | present | 1/1 | 2/2 |  |
 | `IExperimentalAcrylicMaterial.cs` | `media/i_experimental_acrylic_material.rs` | present | 1/1 | 5/5 |  |
 | `IFontMemory.cs` | `media/i_font_memory.rs` | present | 1/1 | 1/1 |  |
-| `IGlyphDrawing.cs` | `media/i_glyph_drawing.rs` | missing | 0/1 | 0/3 |  |
+| `IGlyphDrawing.cs` | `media/i_glyph_drawing.rs` | present | 1/1 | 3/3 |  |
 | `IGradientBrush.cs` | `media/i_gradient_brush.rs` | present | 1/1 | 2/2 |  |
 | `IGradientStop.cs` | `media/i_gradient_stop.rs` | present | 1/1 | 2/2 |  |
 | `IImage.cs` | `media/i_image.rs` | present | 1/1 | 2/2 |  |
@@ -2215,46 +1061,46 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ITextShaperTypeface.cs` | `media/i_text_shaper_typeface.rs` | present | 1/1 | 0/0 |  |
 | `ITileBrush.cs` | `media/i_tile_brush.rs` | present | 1/1 | 6/6 |  |
 | `ITransform.cs` | `media/i_transform.rs` | present | 1/1 | 1/1 |  |
-| `ImageBrush.cs` | `media/image_brush.rs` | partial | 1/1 | 6/7 |  |
+| `ImageBrush.cs` | `media/image_brush.rs` | present | 1/1 | 6/7 (1 waived) |  |
 | `ImageDrawing.cs` | `media/image_drawing.rs` | present | 1/1 | 6/6 |  |
-| `ImmediateDrawingContext.cs` | `media/immediate_drawing_context.rs` | partial | 2/3 | 26/31 |  |
+| `ImmediateDrawingContext.cs` | `media/immediate_drawing_context.rs` | present | 2/3 (1 waived) | 27/31 (4 waived) |  |
 | `ImmutableExperimentalAcrylicMaterial.cs` | `media/immutable_experimental_acrylic_material.rs` | present | 1/1 | 12/12 |  |
 | `ImmutableGeometry.cs` | `media/immutable_geometry.rs` | present | 1/1 | 3/3 |  |
-| `ImmutableGeometryImpl.cs` | `media/immutable_geometry_impl.rs` | missing | 0/1 | 0/13 |  |
+| `ImmutableGeometryImpl.cs` | `media/immutable_geometry_impl.rs` | present | 1/1 | 13/13 |  |
 | `IntersectionResult.cs` | `media/intersection_result.rs` | present | 1/1 | 5/5 |  |
-| `KnownColors.cs` | `media/known_colors.rs` | partial | 2/2 | 147/149 |  |
-| `LineGeometry.cs` | `media/line_geometry.rs` | partial | 1/1 | 8/9 |  |
+| `KnownColors.cs` | `media/known_colors.rs` | present | 2/2 | 147/149 (2 waived) |  |
+| `LineGeometry.cs` | `media/line_geometry.rs` | present | 1/1 | 8/9 (1 waived) |  |
 | `LineSegment.cs` | `media/line_segment.rs` | present | 1/1 | 4/4 |  |
 | `LinearGradientBrush.cs` | `media/linear_gradient_brush.rs` | present | 1/1 | 7/7 |  |
 | `MaterialExtensions.cs` | `media/material_extensions.rs` | present | 1/1 | 1/1 |  |
-| `MatrixTransform.cs` | `media/matrix_transform.rs` | partial | 1/1 | 4/5 |  |
+| `MatrixTransform.cs` | `media/matrix_transform.rs` | present | 1/1 | 4/5 (1 waived) |  |
 | `MediaContext.Clock.cs` | `media/media_context_clock.rs` | present | 1/1 | 2/2 |  |
 | `MediaContext.Compositor.cs` | `media/media_context.rs` | present | 1/1 | 3/3 | partial merged into main file |
 | `MediaContext.cs` | `media/media_context.rs` | present | 1/1 | 5/5 |  |
 | `MediaExtensions.cs` | `media/media_extensions.rs` | present | 1/1 | 2/2 |  |
-| `NormalizedVariationPosition.cs` | `media/normalized_variation_position.rs` | partial | 2/2 | 13/14 |  |
+| `NormalizedVariationPosition.cs` | `media/normalized_variation_position.rs` | present | 2/2 | 14/14 |  |
 | `PathFigure.cs` | `media/path_figure.rs` | present | 1/1 | 13/13 |  |
 | `PathGeometry.cs` | `media/path_geometry.rs` | present | 1/1 | 9/9 |  |
-| `PathGeometryCollections.cs` | `media/path_geometry_collections.rs` | partial | 0/2 | 0/4 |  |
+| `PathGeometryCollections.cs` | `media/path_geometry_collections.rs` | present | 0/2 (2 waived) | 0/4 (4 waived) |  |
 | `PathMarkupParser.cs` | `media/path_markup_parser.rs` | present | 1/1 | 4/4 |  |
 | `PathSegment.cs` | `media/path_segment.rs` | present | 1/1 | 3/3 |  |
-| `Pen.cs` | `media/pen.rs` | partial | 1/1 | 20/23 |  |
+| `Pen.cs` | `media/pen.rs` | present | 1/1 | 20/23 (3 waived) |  |
 | `PenLineCap.cs` | `media/pen_line_cap.rs` | present | 1/1 | 3/3 |  |
 | `PenLineJoin.cs` | `media/pen_line_join.rs` | present | 1/1 | 3/3 |  |
-| `PlatformDrawingContext.cs` | `media/platform_drawing_context.rs` | partial | 1/1 | 25/27 |  |
+| `PlatformDrawingContext.cs` | `media/platform_drawing_context.rs` | present | 1/1 | 27/27 |  |
 | `PlatformGeometry.cs` | `media/platform_geometry.rs` | present | 1/1 | 3/3 |  |
-| `PolyBezierSegment.cs` | `media/poly_bezier_segment.rs` | partial | 1/1 | 5/6 |  |
-| `PolyLineSegment.cs` | `media/poly_line_segment.rs` | partial | 1/1 | 5/6 |  |
-| `PolylineGeometry.cs` | `media/polyline_geometry.rs` | partial | 1/1 | 9/11 |  |
-| `PreciseEllipticArcHelper.cs` | `media/precise_elliptic_arc_helper.rs` | partial | 2/2 | 40/41 |  |
+| `PolyBezierSegment.cs` | `media/poly_bezier_segment.rs` | present | 1/1 | 5/6 (1 waived) |  |
+| `PolyLineSegment.cs` | `media/poly_line_segment.rs` | present | 1/1 | 5/6 (1 waived) |  |
+| `PolylineGeometry.cs` | `media/polyline_geometry.rs` | present | 1/1 | 9/11 (2 waived) |  |
+| `PreciseEllipticArcHelper.cs` | `media/precise_elliptic_arc_helper.rs` | present | 2/2 | 40/41 (1 waived) |  |
 | `QuadraticBezierSegment .cs` | `media/quadratic_bezier_segment.rs` | present | 1/1 | 6/6 |  |
 | `RadialGradientBrush.cs` | `media/radial_gradient_brush.rs` | present | 1/1 | 11/11 |  |
-| `RectangleGeometry.cs` | `media/rectangle_geometry.rs` | partial | 1/1 | 10/12 |  |
+| `RectangleGeometry.cs` | `media/rectangle_geometry.rs` | present | 1/1 | 10/12 (2 waived) |  |
 | `RenderOptions.cs` | `media/render_options.rs` | present | 1/1 | 16/16 |  |
-| `RotateTransform.cs` | `media/rotate_transform.rs` | partial | 1/1 | 8/10 |  |
-| `ScaleTransform.cs` | `media/scale_transform.rs` | partial | 1/1 | 7/8 |  |
-| `SkewTransform.cs` | `media/skew_transform.rs` | partial | 1/1 | 7/8 |  |
-| `SolidColorBrush.cs` | `media/solid_color_brush.rs` | partial | 1/1 | 9/10 |  |
+| `RotateTransform.cs` | `media/rotate_transform.rs` | present | 1/1 | 8/10 (2 waived) |  |
+| `ScaleTransform.cs` | `media/scale_transform.rs` | present | 1/1 | 7/8 (1 waived) |  |
+| `SkewTransform.cs` | `media/skew_transform.rs` | present | 1/1 | 7/8 (1 waived) |  |
+| `SolidColorBrush.cs` | `media/solid_color_brush.rs` | present | 1/1 | 9/10 (1 waived) |  |
 | `StreamGeometry.cs` | `media/stream_geometry.rs` | present | 1/1 | 5/5 |  |
 | `StreamGeometryContext.cs` | `media/stream_geometry_context.rs` | present | 1/1 | 10/10 |  |
 | `Stretch.cs` | `media/stretch.rs` | present | 1/1 | 4/4 |  |
@@ -2263,10 +1109,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TextAlignment.cs` | `media/text_alignment.rs` | present | 1/1 | 7/7 |  |
 | `TextCollapsingCreateInfo.cs` | `media/text_collapsing_create_info.rs` | present | 1/1 | 4/4 |  |
 | `TextDecoration.cs` | `media/text_decoration.rs` | present | 1/1 | 19/19 |  |
-| `TextDecorationCollection.cs` | `media/text_decoration_collection.rs` | partial | 0/1 | 0/3 |  |
+| `TextDecorationCollection.cs` | `media/text_decoration_collection.rs` | present | 0/1 (1 waived) | 0/3 (3 waived) |  |
 | `TextDecorationLocation.cs` | `media/text_decoration_location.rs` | present | 1/1 | 4/4 |  |
 | `TextDecorationUnit.cs` | `media/text_decoration_unit.rs` | present | 1/1 | 3/3 |  |
-| `TextDecorations.cs` | `media/text_decorations.rs` | partial | 1/1 | 0/5 |  |
+| `TextDecorations.cs` | `media/text_decorations.rs` | present | 1/1 | 0/5 (5 waived) |  |
 | `TextHintingMode.cs` | `media/text_hinting_mode.rs` | present | 1/1 | 4/4 |  |
 | `TextHitTestResult.cs` | `media/text_hit_test_result.rs` | present | 1/1 | 5/5 |  |
 | `TextLeadingPrefixTrimming.cs` | `media/text_leading_prefix_trimming.rs` | present | 1/1 | 3/3 |  |
@@ -2279,407 +1125,31 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TextTrimming.cs` | `media/text_trimming.rs` | present | 1/1 | 9/9 |  |
 | `TextWrapping.cs` | `media/text_wrapping.rs` | present | 1/1 | 3/3 |  |
 | `TileBrush.cs` | `media/tile_brush.rs` | present | 2/2 | 19/19 |  |
-| `Transform.cs` | `media/transform.rs` | partial | 1/1 | 10/12 |  |
-| `TransformConverter.cs` | `media/transform_converter.rs` | missing | 0/1 | 0/2 |  |
+| `Transform.cs` | `media/transform.rs` | present | 1/1 | 10/12 (2 waived) |  |
+| `TransformConverter.cs` | `media/transform.rs` | present | 1/1 | 0/2 (2 waived) | replaced: a type converter that only parses: `Transform::parse`, which the type states as its conversion from text (`parse:`, porting guide, "Text conversion") |
 | `TransformExtensions.cs` | `media/transform_extensions.rs` | present | 1/1 | 1/1 |  |
-| `TransformGroup.cs` | `media/transform_group.rs` | partial | 1/2 | 5/5 |  |
-| `TranslateTransform.cs` | `media/translate_transform.rs` | partial | 1/1 | 7/8 |  |
+| `TransformGroup.cs` | `media/transform_group.rs` | present | 1/2 (1 waived) | 5/5 |  |
+| `TranslateTransform.cs` | `media/translate_transform.rs` | present | 1/1 | 7/8 (1 waived) |  |
 | `Typeface.cs` | `media/typeface.rs` | present | 1/1 | 14/14 |  |
 | `UnicodeRange.cs` | `media/unicode_range.rs` | present | 2/2 | 13/13 |  |
-| `VisualBrush.cs` | `media/visual_brush.rs` | partial | 1/1 | 8/9 |  |
+| `VisualBrush.cs` | `media/visual_brush.rs` | present | 1/1 | 8/9 (1 waived) |  |
 
-<details><summary><code>BoxShadow.cs</code> - 1 missing</summary>
-
-- `BoxShadow` (struct): 1 missing
-  - `void ToString(StringBuilder sb)` *(internal)*
-  - waived (Rust: `Hash` is derived where the type can be hashed; float-based value types are not `Eq`/`Hash`): `GetHashCode`
-
-</details>
-
-<details><summary><code>BoxShadows.cs</code> - 4 missing</summary>
-
-- `BoxShadows` (struct): complete
-  - waived (Rust: `Hash` is derived where the type can be hashed; float-based value types are not `Eq`/`Hash`): `GetHashCode`
-- `BoxShadows.BoxShadowsEnumerator` (struct, public): **type missing** (3 members)
-
-</details>
-
-<details><summary><code>Brush.cs</code> - 1 missing</summary>
-
-- `Brush` (class): 1 missing
-  - `SimpleServerObject? ICompositorSerializable.TryGetServer(Compositor c)` *(explicit)*
-
-</details>
-
-<details><summary><code>BrushExtensions.cs</code> - 2 missing</summary>
-
-- `BrushExtensions` (class): 2 missing
-  - `static ImmutableDashStyle ToImmutable(this IDashStyle style)` *(1 of 3 overloads found)*
-  - `static ImmutablePen ToImmutable(this IPen pen)` *(1 of 3 overloads found)*
-
-</details>
-
-<details><summary><code>Color.cs</code> - 1 missing</summary>
-
-- `Color` (struct): 1 missing
-  - `void ToString(System.Text.StringBuilder builder)` *(internal; 1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>DashStyle.cs</code> - 1 missing</summary>
-
-- `DashStyle` (class): 1 missing
-  - `DashStyle(IEnumerable<double>? dashes, double offset)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>DrawingBrush.cs</code> - 1 missing</summary>
-
-- `DrawingBrush` (class): 1 missing
-  - `DrawingBrush(Drawing visual)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>DrawingCollection.cs</code> - 3 missing</summary>
-
-- `DrawingCollection` (class, public): **type missing** (2 members)
-
-</details>
-
-<details><summary><code>DrawingContext.cs</code> - 4 missing</summary>
-
-- `DrawingContext` (class): 3 missing
-  - `abstract void DrawGeometryCore(IBrush? brush, IPen? pen, IGeometryImpl geometry)` *(protected; 1 of 2 overloads found)*
-  - `PushedState PushClip(Rect clip)` *(1 of 2 overloads found)*
-  - `abstract void PushClipCore(Rect rect)` *(protected; 1 of 2 overloads found)*
-- `DrawingContext.PushedState` (record struct): 1 missing
-  - `void Dispose()`
-
-</details>
-
-<details><summary><code>DrawingImage.cs</code> - 1 missing</summary>
-
-- `DrawingImage` (class): 1 missing
-  - `DrawingImage(Drawing drawing)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>EllipseGeometry.cs</code> - 1 missing</summary>
-
-- `EllipseGeometry` (class): 1 missing
-  - `EllipseGeometry(Rect rect)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>ExperimentalAcrylicMaterial.cs</code> - 1 missing</summary>
-
-- `ExperimentalAcrylicMaterial` (class): 1 missing
-  - `Color IExperimentalAcrylicMaterial.MaterialColor { get; }` *(explicit)*
-
-</details>
-
-<details><summary><code>FontFamily.cs</code> - 1 missing</summary>
-
-- `FontFamily` (class): 1 missing
-  - `static FontFamily()` *(static)*
-
-</details>
-
-<details><summary><code>FontFeatureCollection.cs</code> - 5 missing</summary>
-
-- `FontFeatureCollection` (class, public): **type missing** (4 members)
-
-</details>
-
-<details><summary><code>FormattedText.cs</code> - 1 missing</summary>
-
-- `FormattedText` (class): 1 missing
-  - `Geometry? BuildGeometry(Point origin)`
-
-</details>
-
-<details><summary><code>Geometry.cs</code> - 6 missing</summary>
-
-- `Geometry` (class): 3 missing
-  - `Geometry(IGeometryImpl? platformImpl)` *(private protected; 1 of 2 constructors found)*
-  - `SimpleServerObject? ICompositorSerializable.TryGetServer(Compositor c)` *(explicit)*
-  - `void ICompositorSerializable.SerializeChanges(Compositor c, BatchStreamWriter writer)` *(explicit)*
-- `GeometryTypeConverter` (class, public): **type missing** (2 members)
-
-</details>
-
-<details><summary><code>GlyphRun.cs</code> - 1 missing</summary>
-
-- `GlyphRun` (class): 1 missing
-  - `static GlyphRun()` *(static)*
-
-</details>
-
-<details><summary><code>GlyphTypeface.cs</code> - 1 missing</summary>
-
-- `GlyphTypeface` (class): 1 missing
-  - `IGeometryImpl? GetGlyphOutline(ushort glyphIndex)`
-
-</details>
-
-<details><summary><code>GradientStop.cs</code> - 1 missing</summary>
-
-- `GradientStop` (class): 1 missing
-  - `GradientStop(Color color, double offset)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>GradientStops.cs</code> - 3 missing</summary>
-
-- `GradientStops` (class, public): **type missing** (2 members)
-
-</details>
-
-<details><summary><code>HslColor.cs</code> - 2 missing</summary>
-
-- `HslColor` (struct): 2 missing
-  - `static Color ToRgb(double hue, double saturation, double lightness, double alpha = 1.0)` *(1 of 2 overloads found)*
-  - `static HsvColor ToHsv(double hue, double saturation, double lightness, double alpha = 1.0)` *(1 of 2 overloads found)*
-  - waived (Rust: `Hash` is derived where the type can be hashed; float-based value types are not `Eq`/`Hash`): `GetHashCode`
-
-</details>
-
-<details><summary><code>HsvColor.cs</code> - 2 missing</summary>
-
-- `HsvColor` (struct): 2 missing
-  - `static Color ToRgb(double hue, double saturation, double value, double alpha = 1.0)` *(1 of 2 overloads found)*
-  - `static HslColor ToHsl(double hue, double saturation, double value, double alpha = 1.0)` *(1 of 2 overloads found)*
-  - waived (Rust: `Hash` is derived where the type can be hashed; float-based value types are not `Eq`/`Hash`): `GetHashCode`
-
-</details>
-
-<details><summary><code>ImageBrush.cs</code> - 1 missing</summary>
-
-- `ImageBrush` (class): 1 missing
-  - `ImageBrush(IImageBrushSource? source)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>ImmediateDrawingContext.cs</code> - 6 missing</summary>
-
-- `ImmediateDrawingContext` (class): 2 missing
-  - `ImmediateDrawingContext(IDrawingContextImpl impl, Matrix transform, bool ownsImpl)` *(internal; 1 of 2 constructors found)*
-  - `PushedState PushClip(Rect clip)` *(1 of 2 overloads found)*
-- `ImmediateDrawingContext.PushedState` (record struct, public): **type missing** (2 members)
-- `ImmediateDrawingContext.PushedState.PushedStateType` (enum): 1 missing
-  - `None`
-
-</details>
-
-<details><summary><code>KnownColors.cs</code> - 2 missing</summary>
-
-- `KnownColors` (class): 2 missing
-  - `static KnownColors()` *(static)*
-  - `static IImmutableSolidColorBrush ToBrush(this KnownColor color)`
-
-</details>
-
-<details><summary><code>LineGeometry.cs</code> - 1 missing</summary>
-
-- `LineGeometry` (class): 1 missing
-  - `LineGeometry(Point startPoint, Point endPoint)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>MatrixTransform.cs</code> - 1 missing</summary>
-
-- `MatrixTransform` (class): 1 missing
-  - `MatrixTransform(Matrix matrix)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>NormalizedVariationPosition.cs</code> - 1 missing</summary>
-
-- `NormalizedVariationPosition` (struct): 1 missing
-  - `static NormalizedVariationPosition FromCoordinates(ReadOnlySpan<NormalizedVariationCoordinate> normalizedCo...` *(1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>PathGeometryCollections.cs</code> - 6 missing</summary>
-
-- `PathFigures` (class, public): **type missing** (1 members)
-- `PathSegments` (class, public): **type missing** (3 members)
-
-</details>
-
-<details><summary><code>Pen.cs</code> - 3 missing</summary>
-
-- `Pen` (class): 3 missing
-  - `Pen(IBrush? brush, double thickness = 1.0, IDashStyle? dashStyle = null, PenLineCap lineCap = PenLineCap.Fl...` *(2 of 3 constructors found)*
-  - `SimpleServerObject? ICompositorSerializable.TryGetServer(Compositor c)` *(explicit)*
-  - `void ICompositorSerializable.SerializeChanges(Compositor c, BatchStreamWriter writer)` *(explicit)*
-
-</details>
-
-<details><summary><code>PlatformDrawingContext.cs</code> - 2 missing</summary>
-
-- `PlatformDrawingContext` (class): 2 missing
-  - `override void DrawGeometryCore(IBrush? brush, IPen? pen, IGeometryImpl geometry)` *(protected)*
-  - `override void PushClipCore(Rect rect)` *(protected; 1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>PolyBezierSegment.cs</code> - 1 missing</summary>
-
-- `PolyBezierSegment` (class): 1 missing
-  - `PolyBezierSegment(IEnumerable<Point> points, bool isStroked)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>PolyLineSegment.cs</code> - 1 missing</summary>
-
-- `PolyLineSegment` (class): 1 missing
-  - `PolyLineSegment(IEnumerable<Point> points)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>PolylineGeometry.cs</code> - 2 missing</summary>
-
-- `PolylineGeometry` (class): 2 missing
-  - `PolylineGeometry(IEnumerable<Point> points, bool isFilled)` *(1 of 3 constructors found)*
-  - `PolylineGeometry(IEnumerable<Point> points, bool isFilled, FillRule fillRule)` *(1 of 3 constructors found)*
-
-</details>
-
-<details><summary><code>PreciseEllipticArcHelper.cs</code> - 1 missing</summary>
-
-- `PreciseEllipticArcHelper.EllipticalArc` (class): 1 missing
-  - `EllipticalArc(double cx, double cy, double a, double b, double theta)` *(4 of 5 constructors found)*
-
-</details>
-
-<details><summary><code>RectangleGeometry.cs</code> - 2 missing</summary>
-
-- `RectangleGeometry` (class): 2 missing
-  - `RectangleGeometry(Rect rect)` *(1 of 3 constructors found)*
-  - `RectangleGeometry(Rect rect, double radiusX, double radiusY)` *(1 of 3 constructors found)*
-
-</details>
-
-<details><summary><code>RotateTransform.cs</code> - 2 missing</summary>
-
-- `RotateTransform` (class): 2 missing
-  - `RotateTransform(double angle)` *(1 of 3 constructors found)*
-  - `RotateTransform(double angle, double centerX, double centerY)` *(1 of 3 constructors found)*
-
-</details>
-
-<details><summary><code>ScaleTransform.cs</code> - 1 missing</summary>
-
-- `ScaleTransform` (class): 1 missing
-  - `ScaleTransform(double scaleX, double scaleY)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>SkewTransform.cs</code> - 1 missing</summary>
-
-- `SkewTransform` (class): 1 missing
-  - `SkewTransform(double angleX, double angleY)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>SolidColorBrush.cs</code> - 1 missing</summary>
-
-- `SolidColorBrush` (class): 1 missing
-  - `SolidColorBrush(uint color)` *(2 of 3 constructors found)*
-
-</details>
-
-<details><summary><code>TextDecorationCollection.cs</code> - 4 missing</summary>
-
-- `TextDecorationCollection` (class, public): **type missing** (3 members)
-
-</details>
-
-<details><summary><code>TextDecorations.cs</code> - 5 missing</summary>
-
-- `TextDecorations` (class): 5 missing
-  - `static TextDecorations()` *(static)*
-  - `static TextDecorationCollection Underline { get; }`
-  - `static TextDecorationCollection Strikethrough { get; }`
-  - `static TextDecorationCollection Overline { get; }`
-  - `static TextDecorationCollection Baseline { get; }`
-
-</details>
-
-<details><summary><code>Transform.cs</code> - 2 missing</summary>
-
-- `Transform` (class): 2 missing
-  - `SimpleServerObject? ICompositorSerializable.TryGetServer(Compositor c)` *(explicit)*
-  - `void ICompositorSerializable.SerializeChanges(Compositor c, BatchStreamWriter writer)` *(explicit)*
-
-</details>
-
-<details><summary><code>TransformGroup.cs</code> - 1 missing</summary>
-
-- `Transforms` (class, public): **type missing** (0 members)
-
-</details>
-
-<details><summary><code>TranslateTransform.cs</code> - 1 missing</summary>
-
-- `TranslateTransform` (class): 1 missing
-  - `TranslateTransform(double x, double y)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>VisualBrush.cs</code> - 1 missing</summary>
-
-- `VisualBrush` (class): 1 missing
-  - `VisualBrush(Visual visual)` *(1 of 2 constructors found)*
-
-</details>
-
-### `Media/Effects` - files 6/10, types 18/21, members 66/76
+### `Media/Effects` - files 10/10, types 19/21 (2 waived), members 66/76 (10 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `BlurEffect.cs` | `media/effects/blur_effect.rs` | present | 1/1 | 4/4 |  |
 | `DropShadowEffect.cs` | `media/effects/drop_shadow_effect.rs` | present | 3/3 | 21/21 |  |
-| `Effect.cs` | `media/effects/effect.rs` | partial | 1/1 | 5/6 |  |
-| `EffectAnimator.cs` | `media/effects/effect_animator.rs` | missing (types found elsewhere) | 3/4 | 5/8 | types found in `animation/animators/effect_animator.rs` (add to path-overrides.toml) |
-| `EffectConverter.cs` | `media/effects/effect_converter.rs` | missing | 0/1 | 0/2 |  |
-| `EffectExtesions.cs` | `media/effects/effect_extesions.rs` | missing (types found elsewhere) | 1/1 | 3/3 | types found in `media/effects/effect_extensions.rs` (add to path-overrides.toml) |
-| `EffectTransition.cs` | `media/effects/effect_transition.rs` | missing | 0/1 | 0/1 |  |
-| `IBlurEffect.cs` | `media/effects/i_blur_effect.rs` | partial | 2/2 | 4/5 |  |
-| `IDropShadowEffect.cs` | `media/effects/i_drop_shadow_effect.rs` | partial | 4/4 | 23/25 |  |
+| `Effect.cs` | `media/effects/effect.rs` | present | 1/1 | 5/6 (1 waived) |  |
+| `EffectAnimator.cs` | `animation/animators/effect_animator.rs` | present | 3/4 (1 waived) | 5/8 (3 waived) | renamed: the animators of effects live with the other animators |
+| `EffectConverter.cs` | `media/effects/effect.rs` | present | 1/1 | 0/2 (2 waived) | replaced: a type converter that only parses: `Effect::parse`, which the type states as its conversion from text (`parse:`, porting guide, "Text conversion") |
+| `EffectExtesions.cs` | `media/effects/effect_extensions.rs` | present | 1/1 | 3/3 | renamed: the file name of the original has a typing error; the class is `EffectExtensions` in both |
+| `EffectTransition.cs` | `animation/transitions/effect_transition.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) | renamed: the class is in the namespace of the animations (`Avalonia.Animation`) and lives with the other transitions |
+| `IBlurEffect.cs` | `media/effects/i_blur_effect.rs` | present | 2/2 | 4/5 (1 waived) |  |
+| `IDropShadowEffect.cs` | `media/effects/i_drop_shadow_effect.rs` | present | 4/4 | 23/25 (2 waived) |  |
 | `IEffect.cs` | `media/effects/i_effect.rs` | present | 3/3 | 1/1 |  |
 
-<details><summary><code>Effect.cs</code> - 1 missing</summary>
-
-- `Effect` (class): 1 missing
-  - `static Effect()` *(static)*
-
-</details>
-
-<details><summary><code>EffectAnimator.cs</code> - 4 missing</summary>
-
-- `EffectAnimatorBase<T>` (class, internal): **type missing** (3 members)
-
-</details>
-
-<details><summary><code>IBlurEffect.cs</code> - 1 missing</summary>
-
-- `ImmutableBlurEffect` (class): 1 missing
-  - `static ImmutableBlurEffect()` *(static)*
-
-</details>
-
-<details><summary><code>IDropShadowEffect.cs</code> - 2 missing</summary>
-
-- `ImmutableDropShadowEffect` (class): 1 missing
-  - `static ImmutableDropShadowEffect()` *(static)*
-- `ImmutableDropShadowDirectionEffect` (class): 1 missing
-  - `static ImmutableDropShadowDirectionEffect()` *(static)*
-
-</details>
-
-### `Media/Fonts` - files 14/15, types 14/15, members 126/134
+### `Media/Fonts` - files 15/15, types 15/15, members 126/134 (8 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -2688,39 +1158,22 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `EmptySystemFontCollection.cs` | `media/fonts/empty_system_font_collection.rs` | present | 1/1 | 1/1 |  |
 | `FamilyNameCollection.cs` | `media/fonts/family_name_collection.rs` | present | 1/1 | 14/14 |  |
 | `FontCodePageCoverage.cs` | `media/fonts/font_code_page_coverage.rs` | present | 1/1 | 35/35 |  |
-| `FontCollectionBase.cs` | `media/fonts/font_collection_base.rs` | partial | 1/1 | 21/23 |  |
+| `FontCollectionBase.cs` | `media/fonts/font_collection_base.rs` | present | 1/1 | 21/23 (2 waived) |  |
 | `FontCollectionKey.cs` | `media/fonts/font_collection_key.rs` | present | 1/1 | 10/10 |  |
-| `FontCollectionKeyExtensions.cs` | `media/fonts/font_collection_key_extensions.rs` | missing | 0/1 | 0/3 |  |
+| `FontCollectionKeyExtensions.cs` | `media/fonts/font_collection_key.rs` | present | 1/1 | 0/3 (3 waived) | replaced: the three `ToFontCollectionKey` extension methods are the conversions `From&lt;&Typeface&gt;`, `From&lt;&GlyphTypeface&gt;` and `From&lt;&dyn IPlatformTypeface&gt;` of `FontCollectionKey` |
 | `FontFallbackScriptHints.cs` | `media/fonts/font_fallback_script_hints.rs` | present | 1/1 | 6/6 |  |
 | `FontFamilyKey.cs` | `media/fonts/font_family_key.rs` | present | 1/1 | 8/8 |  |
 | `FontFamilyLoader.cs` | `media/fonts/font_family_loader.rs` | present | 1/1 | 3/3 |  |
 | `IFontCollection.cs` | `media/fonts/i_font_collection.rs` | present | 1/1 | 6/6 |  |
 | `OpenTypeTag.cs` | `media/fonts/open_type_tag.rs` | present | 1/1 | 9/9 |  |
 | `SystemFontCollection.cs` | `media/fonts/system_font_collection.rs` | present | 1/1 | 6/6 |  |
-| `UnmanagedFontMemory.cs` | `media/fonts/unmanaged_font_memory.rs` | partial | 1/1 | 4/7 |  |
+| `UnmanagedFontMemory.cs` | `media/fonts/unmanaged_font_memory.rs` | present | 1/1 | 4/7 (3 waived) |  |
 
-<details><summary><code>FontCollectionBase.cs</code> - 2 missing</summary>
-
-- `FontCollectionBase` (class): 2 missing
-  - `IEnumerator<FontFamily> GetEnumerator()`
-  - `IEnumerator IEnumerable.GetEnumerator()` *(explicit)*
-
-</details>
-
-<details><summary><code>UnmanagedFontMemory.cs</code> - 3 missing</summary>
-
-- `UnmanagedFontMemory` (class): 3 missing
-  - `override MemoryHandle Pin(int elementIndex = 0)`
-  - `override void Unpin()`
-  - `override void Dispose(bool disposing)` *(protected; 1 of 2 overloads found)*
-
-</details>
-
-### `Media/Fonts/Tables` - files 20/20, types 39/39, members 392/394
+### `Media/Fonts/Tables` - files 20/20, types 39/39, members 394/394
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `BigEndianBinaryReader.cs` | `media/fonts/tables/big_endian_binary_reader.rs` | partial | 1/1 | 30/32 |  |
+| `BigEndianBinaryReader.cs` | `media/fonts/tables/big_endian_binary_reader.rs` | present | 1/1 | 32/32 |  |
 | `Decycler.cs` | `media/fonts/tables/decycler.rs` | present | 4/4 | 12/12 |  |
 | `EncodingIDExtensions.cs` | `media/fonts/tables/encoding_id_extensions.rs` | present | 1/1 | 1/1 |  |
 | `EncodingIDs.cs` | `media/fonts/tables/encoding_ids.rs` | present | 1/1 | 7/7 |  |
@@ -2740,14 +1193,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PostTable.cs` | `media/fonts/tables/post_table.rs` | present | 1/1 | 8/8 |  |
 | `ScriptListTable.cs` | `media/fonts/tables/script_list_table.rs` | present | 1/1 | 1/1 |  |
 | `VerticalHeaderTable.cs` | `media/fonts/tables/vertical_header_table.rs` | present | 1/1 | 16/16 |  |
-
-<details><summary><code>BigEndianBinaryReader.cs</code> - 2 missing</summary>
-
-- `BigEndianBinaryReader` (struct): 2 missing
-  - `TEnum ReadUInt16<TEnum>() where TEnum : struct, Enum` *(1 of 2 overloads found)*
-  - `void ReadUInt16Array(Span<ushort> buffer)` *(1 of 2 overloads found)*
-
-</details>
 
 ### `Media/Fonts/Tables/Cmap` - files 10/10, types 10/10, members 83/86
 
@@ -2828,105 +1273,52 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `NameRecord.cs` | `media/fonts/tables/name/name_record.rs` | present | 1/1 | 8/8 |  |
 | `NameTable.cs` | `media/fonts/tables/name/name_table.rs` | present | 1/1 | 12/12 |  |
 
-### `Media/Imaging` - files 14/14, types 49/49, members 176/183
+### `Media/Imaging` - files 14/14, types 49/49, members 177/183 (6 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Bitmap.cs` | `media/imaging/bitmap.rs` | partial | 1/1 | 23/26 |  |
+| `Bitmap.cs` | `media/imaging/bitmap.rs` | present | 1/1 | 24/26 (2 waived) |  |
 | `BitmapBlendingMode.cs` | `media/imaging/bitmap_blending_mode.rs` | present | 1/1 | 28/28 |  |
 | `BitmapEncoderOptions.cs` | `media/imaging/bitmap_encoder_options.rs` | present | 1/1 | 1/1 |  |
 | `BitmapInterpolationMode.cs` | `media/imaging/bitmap_interpolation_mode.rs` | present | 1/1 | 5/5 |  |
-| `BitmapMemory.cs` | `media/imaging/bitmap_memory.rs` | partial | 1/1 | 7/9 |  |
-| `CroppedBitmap.cs` | `media/imaging/cropped_bitmap.rs` | partial | 1/1 | 10/11 |  |
+| `BitmapMemory.cs` | `media/imaging/bitmap_memory.rs` | present | 1/1 | 7/9 (2 waived) |  |
+| `CroppedBitmap.cs` | `media/imaging/cropped_bitmap.rs` | present | 1/1 | 10/11 (1 waived) |  |
 | `IBitmap.cs` | `media/imaging/i_bitmap.rs` | present | 1/1 | 4/4 |  |
 | `JpegBitmapEncoderOptions.cs` | `media/imaging/jpeg_bitmap_encoder_options.rs` | present | 1/1 | 2/2 |  |
 | `PixelFormatReaders.cs` | `media/imaging/pixel_format_readers.rs` | present | 19/19 | 44/44 |  |
 | `PixelFormatTranscoder.cs` | `media/imaging/pixel_format_transcoder.rs` | present | 1/1 | 1/1 |  |
 | `PixelFormatWriter.cs` | `media/imaging/pixel_format_writer.rs` | present | 18/18 | 35/35 |  |
 | `PngBitmapEncoderOptions.cs` | `media/imaging/png_bitmap_encoder_options.rs` | present | 1/1 | 2/2 |  |
-| `RenderTargetBitmap.cs` | `media/imaging/render_target_bitmap.rs` | partial | 1/1 | 6/7 |  |
+| `RenderTargetBitmap.cs` | `media/imaging/render_target_bitmap.rs` | present | 1/1 | 6/7 (1 waived) |  |
 | `WriteableBitmap.cs` | `media/imaging/writeable_bitmap.rs` | present | 1/1 | 8/8 |  |
 
-<details><summary><code>Bitmap.cs</code> - 3 missing</summary>
-
-- `Bitmap` (class): 3 missing
-  - `void Save(Stream stream, int? quality = null)` *(2 of 4 overloads found)*
-  - `void Save(Stream stream, BitmapEncoderOptions options)` *(2 of 4 overloads found)*
-  - `void CopyPixelsCore(PixelRect sourceRect, IntPtr buffer, int bufferSize, int stride, ILockedFramebuffer fb)` *(private protected; 1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>BitmapMemory.cs</code> - 2 missing</summary>
-
-- `BitmapMemory` (class): 2 missing
-  - `~BitmapMemory()` *(protected)*
-  - `IntPtr Address { get; private set; }`
-
-</details>
-
-<details><summary><code>CroppedBitmap.cs</code> - 1 missing</summary>
-
-- `CroppedBitmap` (class): 1 missing
-  - `CroppedBitmap(IImage source, PixelRect sourceRect)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>RenderTargetBitmap.cs</code> - 1 missing</summary>
-
-- `RenderTargetBitmap` (class): 1 missing
-  - `RenderTargetBitmap(PixelSize pixelSize, Vector dpi)` *(1 of 2 constructors found)*
-
-</details>
-
-### `Media/Immutable` - files 11/12, types 11/12, members 73/85 (3 waived)
+### `Media/Immutable` - files 12/12, types 12/12, members 79/85 (6 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `ImmutableConicGradientBrush.cs` | `media/immutable/immutable_conic_gradient_brush.rs` | present | 1/1 | 5/5 |  |
 | `ImmutableDashStyle.cs` | `media/immutable/immutable_dash_style.rs` | present | 1/1 | 5/6 (1 waived) |  |
-| `ImmutableGradientBrush.cs` | `media/immutable/immutable_gradient_brush.rs` | partial | 1/1 | 8/9 |  |
+| `ImmutableGradientBrush.cs` | `media/immutable/immutable_gradient_brush.rs` | present | 1/1 | 8/9 (1 waived) |  |
 | `ImmutableGradientStop.cs` | `media/immutable/immutable_gradient_stop.rs` | present | 1/1 | 3/3 |  |
 | `ImmutableImageBrush.cs` | `media/immutable/immutable_image_brush.rs` | present | 1/1 | 3/3 |  |
 | `ImmutableLinearGradientBrush.cs` | `media/immutable/immutable_linear_gradient_brush.rs` | present | 1/1 | 5/5 |  |
 | `ImmutablePen.cs` | `media/immutable/immutable_pen.rs` | present | 1/1 | 10/11 (1 waived) |  |
-| `ImmutableRadialGradientBrush.cs` | `media/immutable/immutable_radial_gradient_brush.rs` | partial | 1/1 | 7/8 |  |
-| `ImmutableSolidColorBrush.cs` | `media/immutable/immutable_solid_color_brush.rs` | partial | 1/1 | 13/15 (1 waived) |  |
-| `ImmutableTextDecoration.cs` | `media/immutable/immutable_text_decoration.rs` | missing | 0/1 | 0/6 |  |
+| `ImmutableRadialGradientBrush.cs` | `media/immutable/immutable_radial_gradient_brush.rs` | present | 1/1 | 7/8 (1 waived) |  |
+| `ImmutableSolidColorBrush.cs` | `media/immutable/immutable_solid_color_brush.rs` | present | 1/1 | 13/15 (2 waived) |  |
+| `ImmutableTextDecoration.cs` | `media/immutable/immutable_text_decoration.rs` | present | 1/1 | 6/6 |  |
 | `ImmutableTileBrush.cs` | `media/immutable/immutable_tile_brush.rs` | present | 1/1 | 12/12 |  |
 | `ImmutableTransform.cs` | `media/immutable/immutable_transform.rs` | present | 1/1 | 2/2 |  |
 
-<details><summary><code>ImmutableGradientBrush.cs</code> - 1 missing</summary>
-
-- `ImmutableGradientBrush` (class): 1 missing
-  - `ImmutableGradientBrush(GradientBrush source)` *(protected; 2 of 3 constructors found)*
-
-</details>
-
-<details><summary><code>ImmutableRadialGradientBrush.cs</code> - 1 missing</summary>
-
-- `ImmutableRadialGradientBrush` (class): 1 missing
-  - `ImmutableRadialGradientBrush(RadialGradientBrush source)` *(3 of 4 constructors found)*
-
-</details>
-
-<details><summary><code>ImmutableSolidColorBrush.cs</code> - 1 missing</summary>
-
-- `ImmutableSolidColorBrush` (class): 1 missing
-  - `ImmutableSolidColorBrush(ISolidColorBrush source)` *(3 of 4 constructors found)*
-  - waived (Rust: `Hash` is derived where the type can be hashed; float-based value types are not `Eq`/`Hash`): `GetHashCode`
-
-</details>
-
-### `Media/TextFormatting` - files 43/43, types 47/48, members 338/353 (1 waived)
+### `Media/TextFormatting` - files 43/43, types 47/48 (1 waived), members 339/353 (14 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `BidiReorderer.cs` | `media/text_formatting/bidi_reorderer.rs` | present | 2/2 | 7/7 |  |
 | `DrawableTextRun.cs` | `media/text_formatting/drawable_text_run.rs` | present | 1/1 | 3/3 |  |
 | `FormattedTextSource.cs` | `media/text_formatting/formatted_text_source.rs` | present | 1/1 | 3/3 |  |
-| `FormattingBufferHelper.cs` | `media/text_formatting/formatting_buffer_helper.rs` | partial | 1/1 | 3/4 |  |
+| `FormattingBufferHelper.cs` | `media/text_formatting/formatting_buffer_helper.rs` | present | 1/1 | 3/4 (1 waived) |  |
 | `FormattingObjectPool.cs` | `media/text_formatting/formatting_object_pool.rs` | present | 3/3 | 8/8 |  |
-| `GenericTextParagraphProperties.cs` | `media/text_formatting/generic_text_paragraph_properties.rs` | partial | 1/1 | 15/16 |  |
+| `GenericTextParagraphProperties.cs` | `media/text_formatting/generic_text_paragraph_properties.rs` | present | 1/1 | 15/16 (1 waived) |  |
 | `GenericTextRunProperties.cs` | `media/text_formatting/generic_text_run_properties.rs` | present | 1/1 | 10/10 |  |
 | `GlyphInfo.cs` | `media/text_formatting/glyph_info.rs` | present | 1/1 | 11/11 |  |
 | `ITextSource.cs` | `media/text_formatting/i_text_source.rs` | present | 1/1 | 1/1 |  |
@@ -2935,89 +1327,37 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `JustificationProperties.cs` | `media/text_formatting/justification_properties.rs` | present | 1/1 | 2/2 |  |
 | `LogicalDirection.cs` | `media/text_formatting/logical_direction.rs` | present | 1/1 | 2/2 |  |
 | `LogicalTextRunEnumerator.cs` | `media/text_formatting/logical_text_run_enumerator.rs` | present | 1/1 | 3/3 |  |
-| `ShapedBuffer.cs` | `media/text_formatting/shaped_buffer.rs` | partial | 1/2 | 22/30 |  |
+| `ShapedBuffer.cs` | `media/text_formatting/shaped_buffer.rs` | present | 1/2 (1 waived) | 22/30 (8 waived) |  |
 | `ShapedTextRun.cs` | `media/text_formatting/shaped_text_run.rs` | present | 1/1 | 17/17 |  |
 | `SplitResult.cs` | `media/text_formatting/split_result.rs` | present | 1/1 | 4/4 |  |
 | `TextBounds.cs` | `media/text_formatting/text_bounds.rs` | present | 1/1 | 4/4 |  |
-| `TextCharacters.cs` | `media/text_formatting/text_characters.rs` | partial | 1/1 | 6/7 |  |
+| `TextCharacters.cs` | `media/text_formatting/text_characters.rs` | present | 1/1 | 6/7 (1 waived) |  |
 | `TextCollapsingProperties.cs` | `media/text_formatting/text_collapsing_properties.rs` | present | 1/1 | 5/5 |  |
 | `TextEllipsisHelper.cs` | `media/text_formatting/text_ellipsis_helper.rs` | present | 1/1 | 1/1 |  |
 | `TextEndOfLine.cs` | `media/text_formatting/text_end_of_line.rs` | present | 1/1 | 2/2 |  |
 | `TextEndOfParagraph.cs` | `media/text_formatting/text_end_of_paragraph.rs` | present | 1/1 | 2/2 |  |
 | `TextFormatter.cs` | `media/text_formatting/text_formatter.rs` | present | 1/1 | 4/4 |  |
 | `TextFormatterImpl.cs` | `media/text_formatting/text_formatter_impl.rs` | present | 1/1 | 5/5 |  |
-| `TextLayout.cs` | `media/text_formatting/text_layout.rs` | partial | 1/1 | 24/25 |  |
+| `TextLayout.cs` | `media/text_formatting/text_layout.rs` | present | 1/1 | 24/25 (1 waived) |  |
 | `TextLeadingPrefixCharacterEllipsis.cs` | `media/text_formatting/text_leading_prefix_character_ellipsis.rs` | present | 1/1 | 5/5 |  |
 | `TextLine.cs` | `media/text_formatting/text_line.rs` | present | 1/1 | 27/27 |  |
 | `TextLineBreak.cs` | `media/text_formatting/text_line_break.rs` | present | 1/1 | 4/4 |  |
 | `TextLineImpl.cs` | `media/text_formatting/text_line_impl.rs` | present | 1/1 | 35/35 |  |
 | `TextLineMetrics.cs` | `media/text_formatting/text_line_metrics.rs` | present | 1/1 | 12/12 |  |
 | `TextMetrics.cs` | `media/text_formatting/text_metrics.rs` | present | 1/1 | 11/11 |  |
-| `TextParagraphProperties.cs` | `media/text_formatting/text_paragraph_properties.rs` | partial | 1/1 | 12/13 |  |
+| `TextParagraphProperties.cs` | `media/text_formatting/text_paragraph_properties.rs` | present | 1/1 | 12/13 (1 waived) |  |
 | `TextRun.cs` | `media/text_formatting/text_run.rs` | present | 1/1 | 4/4 |  |
 | `TextRunBounds.cs` | `media/text_formatting/text_run_bounds.rs` | present | 1/1 | 5/5 |  |
 | `TextRunCache.cs` | `media/text_formatting/text_run_cache.rs` | present | 2/2 | 10/10 |  |
 | `TextRunProperties.cs` | `media/text_formatting/text_run_properties.rs` | present | 1/1 | 14/15 (1 waived) |  |
-| `TextShaper.cs` | `media/text_formatting/text_shaper.rs` | partial | 1/1 | 3/4 |  |
+| `TextShaper.cs` | `media/text_formatting/text_shaper.rs` | present | 1/1 | 4/4 |  |
 | `TextShaperOptions.cs` | `media/text_formatting/text_shaper_options.rs` | present | 1/1 | 8/8 |  |
 | `TextTrailingCharacterEllipsis.cs` | `media/text_formatting/text_trailing_character_ellipsis.rs` | present | 1/1 | 5/5 |  |
 | `TextTrailingWordEllipsis.cs` | `media/text_formatting/text_trailing_word_ellipsis.rs` | present | 1/1 | 5/5 |  |
 | `UnshapedTextRun.cs` | `media/text_formatting/unshaped_text_run.rs` | present | 1/1 | 5/5 |  |
 | `WrappingTextLineBreak.cs` | `media/text_formatting/wrapping_text_line_break.rs` | present | 1/1 | 2/2 |  |
 
-<details><summary><code>FormattingBufferHelper.cs</code> - 1 missing</summary>
-
-- `FormattingBufferHelper` (class): 1 missing
-  - `static void ClearThenResetIfTooLarge<TKey, TValue>(ref Dictionary<TKey, TValue> dictionary) where TKey : no...` *(3 of 4 overloads found)*
-
-</details>
-
-<details><summary><code>GenericTextParagraphProperties.cs</code> - 1 missing</summary>
-
-- `GenericTextParagraphProperties` (class): 1 missing
-  - `GenericTextParagraphProperties(TextParagraphProperties textParagraphProperties)` *(2 of 3 constructors found)*
-
-</details>
-
-<details><summary><code>ShapedBuffer.cs</code> - 9 missing</summary>
-
-- `ShapedBuffer` (class): 3 missing
-  - `IEnumerator<GlyphInfo> GetEnumerator()`
-  - `int IReadOnlyCollection<GlyphInfo>.Count { get; }` *(explicit)*
-  - `IEnumerator IEnumerable.GetEnumerator()` *(explicit)*
-- `ShapedBuffer.PooledArray<T>` (class, internal): **type missing** (5 members)
-
-</details>
-
-<details><summary><code>TextCharacters.cs</code> - 1 missing</summary>
-
-- `TextCharacters` (class): 1 missing
-  - `TextCharacters(ReadOnlyMemory<char> text, TextRunProperties textRunProperties)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>TextLayout.cs</code> - 1 missing</summary>
-
-- `TextLayout` (class): 1 missing
-  - `TextLayout(ITextSource textSource, TextParagraphProperties paragraphProperties, TextTrimming? textTrimming,...` *(3 of 4 constructors found)*
-
-</details>
-
-<details><summary><code>TextParagraphProperties.cs</code> - 1 missing</summary>
-
-- `TextParagraphProperties` (class): 1 missing
-  - `double LineSpacing { get; set; }` *(internal; getter `line_spacing` found, setter `set_line_spacing` missing)*
-
-</details>
-
-<details><summary><code>TextShaper.cs</code> - 1 missing</summary>
-
-- `TextShaper` (class): 1 missing
-  - `ShapedBuffer ShapeText(string text, TextShaperOptions options = default)` *(1 of 2 overloads found)*
-
-</details>
-
-### `Media/TextFormatting/Unicode` - files 32/32, types 32/32, members 510/512
+### `Media/TextFormatting/Unicode` - files 32/32, types 32/32, members 510/512 (2 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -3025,7 +1365,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `BiDiClass.cs` | `media/text_formatting/unicode/bidi_class.rs` | present | 1/1 | 23/23 |  |
 | `BiDiData.cs` | `media/text_formatting/unicode/bidi_data.rs` | present | 1/1 | 13/13 |  |
 | `BiDiPairedBracketType.cs` | `media/text_formatting/unicode/bidi_paired_bracket_type.rs` | present | 1/1 | 3/3 |  |
-| `BinaryReaderExtensions.cs` | `media/text_formatting/unicode/binary_reader_extensions.rs` | partial | 1/1 | 2/4 |  |
+| `BinaryReaderExtensions.cs` | `media/text_formatting/unicode/binary_reader_extensions.rs` | present | 1/1 | 2/4 (2 waived) |  |
 | `Codepoint.cs` | `media/text_formatting/unicode/codepoint.rs` | present | 1/1 | 25/25 |  |
 | `CodepointEnumerator.cs` | `media/text_formatting/unicode/codepoint_enumerator.rs` | present | 1/1 | 2/2 |  |
 | `EastAsianWidthClass.cs` | `media/text_formatting/unicode/east_asian_width_class.rs` | present | 1/1 | 6/6 |  |
@@ -3054,14 +1394,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `WordBreakEnumerator.cs` | `media/text_formatting/unicode/word_break_enumerator.rs` | present | 1/1 | 2/2 |  |
 | `WordSegment.cs` | `media/text_formatting/unicode/word_segment.rs` | present | 1/1 | 7/7 |  |
 
-<details><summary><code>BinaryReaderExtensions.cs</code> - 2 missing</summary>
-
-- `BinaryReaderExtensions` (class): 2 missing
-  - `static void WriteBE(this BinaryWriter writer, int value)`
-  - `static void WriteBE(this BinaryWriter writer, uint value)`
-
-</details>
-
 ### `Media/Transformation` - files 4/4, types 11/11, members 45/45
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
@@ -3071,207 +1403,103 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TransformOperations.cs` | `media/transformation/transform_operations.rs` | present | 2/2 | 16/16 |  |
 | `TransformParser.cs` | `media/transformation/transform_parser.rs` | present | 1/1 | 1/1 |  |
 
-### `Metadata` - files 1/20, types 2/23, members 2/28
+### `Metadata` - files 19/19, types 4/22 (18 waived), members 5/28 (23 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AmbientAttribute.cs` | `metadata/ambient_attribute.rs` | missing | 0/1 | 0/0 |  |
-| `AvaloniaListAttribute.cs` | `metadata/ferro_list_attribute.rs` | missing | 0/1 | 0/2 |  |
-| `ConstructorArgumentAttribute.cs` | `metadata/constructor_argument_attribute.rs` | missing | 0/1 | 0/2 |  |
-| `ContentAttribute.cs` | `metadata/content_attribute.rs` | missing | 0/1 | 0/0 |  |
-| `ControlTemplateScopeAttribute.cs` | `metadata/control_template_scope_attribute.rs` | missing | 0/1 | 0/0 |  |
-| `DataTypeAttribute.cs` | `metadata/data_type_attribute.rs` | missing | 0/1 | 0/0 |  |
-| `DependsOnAttribute.cs` | `metadata/depends_on_attribute.rs` | missing | 0/1 | 0/2 |  |
+| `AmbientAttribute.cs` | - | n/a | - | - | not-applicable: no use upstream: nothing carries [Ambient] and nothing reads it (ambient lookups of the markup compiler go by type, as do the ones of the port) |
+| `AvaloniaListAttribute.cs` | `metadata/markup_type.rs` | present | 0/1 (1 waived) | 0/2 (2 waived) | replaced: the MarkupAttribute named `attributes::FERRO_LIST` in the `attributes:` of a type or the attribute list of a property; Separators and SplitOptions are its named arguments (`FerroList(Separators = [",", " "])`) |
+| `ConstructorArgumentAttribute.cs` | `metadata/markup_type.rs` | present | 0/1 (1 waived) | 0/2 (2 waived) | replaced: the MarkupAttribute named `attributes::CONSTRUCTOR_ARGUMENT` in the attribute list of a property; ArgumentName is its argument (`ConstructorArgument("name")`) |
+| `ContentAttribute.cs` | `metadata/markup_type.rs` | present | 0/1 (1 waived) | 0/0 | replaced: `MarkupType::content_property`, stated with `content: Name` in the declaration of the type (`attributes::CONTENT` names the attribute for completeness) |
+| `ControlTemplateScopeAttribute.cs` | `metadata/markup_type.rs` | present | 0/1 (1 waived) | 0/0 | replaced: the MarkupAttribute named `attributes::CONTROL_TEMPLATE_SCOPE` in the `attributes:` of a type |
+| `DataTypeAttribute.cs` | `metadata/markup_type.rs` | present | 0/1 (1 waived) | 0/0 | replaced: the MarkupAttribute named `attributes::DATA_TYPE` in the attribute list of a property |
+| `DependsOnAttribute.cs` | `metadata/markup_type.rs` | present | 0/1 (1 waived) | 0/2 (2 waived) | replaced: the MarkupAttribute named `attributes::DEPENDS_ON` in the attribute list of a property or method; Name is its argument (`DependsOn("ContentTemplate")`) |
 | `IAddChild.cs` | `metadata/i_add_child.rs` | present | 2/2 | 2/2 |  |
-| `InheritDataTypeFromAttribute.cs` | `metadata/inherit_data_type_from_attribute.rs` | missing | 0/2 | 0/4 |  |
-| `InheritDataTypeFromItemsAttribute.cs` | `metadata/inherit_data_type_from_items_attribute.rs` | missing | 0/1 | 0/3 |  |
-| `MarkupExtensionOption.cs` | `metadata/markup_extension_option.rs` | missing | 0/2 | 0/3 |  |
-| `NotClientImplementableAttribute.cs` | `metadata/not_client_implementable_attribute.rs` | missing | 0/1 | 0/0 |  |
-| `PrivateApiAttribute.cs` | `metadata/private_api_attribute.rs` | missing | 0/1 | 0/0 |  |
-| `TemplateContent.cs` | `metadata/template_content.rs` | missing | 0/1 | 0/1 |  |
-| `TrimSurroundingWhitespaceAttribute.cs` | `metadata/trim_surrounding_whitespace_attribute.rs` | missing | 0/1 | 0/0 |  |
-| `UnstableAttribute.cs` | `metadata/unstable_attribute.rs` | missing | 0/1 | 0/3 |  |
-| `UsableDuringInitializationAttribute.cs` | `metadata/usable_during_initialization_attribute.rs` | missing | 0/1 | 0/0 |  |
-| `WhitespaceSignificantCollectionAttribute.cs` | `metadata/whitespace_significant_collection_attribute.rs` | missing | 0/1 | 0/0 |  |
-| `XmlnsDefinitionAttribute.cs` | `metadata/xmlns_definition_attribute.rs` | missing | 0/1 | 0/3 |  |
-| `XmlnsPrefixAttribute.cs` | `metadata/xmlns_prefix_attribute.rs` | missing | 0/1 | 0/3 |  |
+| `InheritDataTypeFromAttribute.cs` | `metadata/markup_type.rs` | present | 0/2 (2 waived) | 0/4 (4 waived) | replaced: the MarkupAttribute named `attributes::INHERIT_DATA_TYPE_FROM` on a constructor parameter or property; ScopeKind is its argument, the value of InheritDataTypeFromScopeKind as an integer literal (1 = Style, 2 = ControlTemplate), which the markup compiler compares with the scope kinds of its data type scopes |
+| `InheritDataTypeFromItemsAttribute.cs` | `metadata/markup_type.rs` | present | 0/1 (1 waived) | 0/3 (3 waived) | replaced: the MarkupAttribute named `attributes::INHERIT_DATA_TYPE_FROM_ITEMS` in the attribute list of a property; AncestorItemsProperty is its argument and AncestorType a named argument |
+| `MarkupExtensionOption.cs` | `metadata/markup_type.rs` | present | 0/2 (2 waived) | 0/3 (3 waived) | replaced: the MarkupAttributes named `attributes::MARKUP_EXTENSION_OPTION` (Value is its argument, Priority a named argument) and `attributes::MARKUP_EXTENSION_DEFAULT_OPTION` in the attribute list of a property of an option markup extension |
+| `NotClientImplementableAttribute.cs` | `metadata/markup_type.rs` | present | 0/1 (1 waived) | 0/0 | replaced: the MarkupAttribute named `attributes::NOT_CLIENT_IMPLEMENTABLE` in the `attributes:` of a type; the build-time analyzer that enforces it upstream has no counterpart |
+| `PrivateApiAttribute.cs` | `metadata/markup_type.rs` | present | 0/1 (1 waived) | 0/0 | replaced: the MarkupAttribute named `attributes::PRIVATE_API` in the `attributes:` of a type; in Rust code private API is `pub(crate)` or `#[doc(hidden)]` |
+| `TemplateContent.cs` | `metadata/markup_type.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) | replaced: the MarkupAttribute named `attributes::TEMPLATE_CONTENT` in the attribute list of a property; TemplateResultType is a named argument (`type(T)`) |
+| `TrimSurroundingWhitespaceAttribute.cs` | `metadata/markup_type.rs` | present | 0/1 (1 waived) | 0/0 | replaced: the MarkupAttribute named `attributes::TRIM_SURROUNDING_WHITESPACE` in the `attributes:` of a type |
+| `UnstableAttribute.cs` | `metadata/markup_type.rs` | present | 0/1 (1 waived) | 0/3 (3 waived) | replaced: the MarkupAttribute named `attributes::UNSTABLE` on a type or member; Message is its argument. Nothing warns a Rust caller: the build-time analyzer behind the attribute has no counterpart |
+| `UsableDuringInitializationAttribute.cs` | `metadata/markup_type.rs` | present | 0/1 (1 waived) | 0/0 | replaced: the MarkupAttribute named `attributes::USABLE_DURING_INITIALIZATION` in the `attributes:` of a type |
+| `WhitespaceSignificantCollectionAttribute.cs` | `metadata/markup_type.rs` | present | 0/1 (1 waived) | 0/0 | replaced: the MarkupAttribute named `attributes::WHITESPACE_SIGNIFICANT_COLLECTION` in the `attributes:` of a collection type |
+| `XmlnsDefinitionAttribute.cs` | `metadata/markup_assembly.rs` | present | 1/1 | 1/3 (2 waived) | replaced: an assembly attribute: the struct `XmlnsDefinition { xml_namespace, namespace }` in `MarkupAssembly::xmlns_definitions`, which a crate declares once and registers from its `register_types()` |
+| `XmlnsPrefixAttribute.cs` | `metadata/markup_assembly.rs` | present | 1/1 | 2/3 (1 waived) | replaced: an assembly attribute: the struct `XmlnsPrefix { xml_namespace, prefix }` in `MarkupAssembly::xmlns_prefixes`, which a crate declares once and registers from its `register_types()` |
 
-### `Platform` - files 41/51, types 75/83, members 411/451 (1 waived)
+### `Platform` - files 51/51, types 81/83 (2 waived), members 442/451 (9 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AlphaFormat.cs` | `platform/alpha_format.rs` | present | 1/1 | 3/3 |  |
-| `AssetLoader.cs` | `platform/asset_loader.rs` | partial | 1/1 | 8/9 |  |
+| `AssetLoader.cs` | `platform/asset_loader.rs` | present | 1/1 | 8/9 (1 waived) |  |
 | `DefaultPlatformSettings.cs` | `platform/default_platform_settings.rs` | present | 1/1 | 11/11 |  |
 | `IAssetLoader.cs` | `platform/i_asset_loader.rs` | present | 1/1 | 8/8 |  |
 | `IBitmapImpl.cs` | `platform/i_bitmap_impl.rs` | present | 1/1 | 4/4 |  |
 | `ICursorFactory.cs` | `platform/i_cursor_factory.rs` | present | 1/1 | 2/2 |  |
 | `ICursorImpl.cs` | `platform/i_cursor_impl.rs` | present | 1/1 | 0/0 |  |
-| `IDrawingContextImpl.cs` | `platform/i_drawing_context_impl.rs` | partial | 4/5 | 36/37 |  |
+| `IDrawingContextImpl.cs` | `platform/i_drawing_context_impl.rs` | present | 4/5 (1 waived) | 36/37 (1 waived) |  |
 | `IDrawingContextWithAcrylicLikeSupport.cs` | `platform/i_drawing_context_with_acrylic_like_support.rs` | present | 1/1 | 1/1 |  |
-| `IExternalObjectsRenderInterfaceContextFeature.cs` | `platform/i_external_objects_render_interface_context_feature.rs` | partial | 6/6 | 14/15 |  |
+| `IExternalObjectsRenderInterfaceContextFeature.cs` | `platform/i_external_objects_render_interface_context_feature.rs` | present | 6/6 | 15/15 |  |
 | `IFontManagerImpl.cs` | `platform/i_font_manager_impl.rs` | present | 1/1 | 6/6 |  |
 | `IGeometryContext.cs` | `platform/i_geometry_context.rs` | present | 1/1 | 7/7 |  |
-| `IGeometryImpl.cs` | `platform/i_geometry_impl.rs` | partial | 1/1 | 12/13 |  |
+| `IGeometryImpl.cs` | `platform/i_geometry_impl.rs` | present | 1/1 | 12/13 (1 waived) |  |
 | `IGlyphRunImpl.cs` | `platform/i_glyph_run_impl.rs` | present | 1/1 | 4/4 |  |
 | `ILockedFramebuffer.cs` | `platform/i_locked_framebuffer.rs` | present | 1/1 | 6/6 |  |
 | `IMacOSTopLevelPlatformHandle.cs` | `platform/i_mac_os_top_level_platform_handle.rs` | present | 1/1 | 4/4 |  |
 | `IPlatformBehaviorInhibition.cs` | `platform/i_platform_behavior_inhibition.rs` | present | 1/1 | 1/1 |  |
-| `IPlatformGpu.cs` | `platform/i_platform_gpu.rs` | partial | 4/5 | 7/7 |  |
+| `IPlatformGpu.cs` | `platform/i_platform_gpu.rs` | present | 4/5 (1 waived) | 7/7 |  |
 | `IPlatformHandle.cs` | `platform/i_platform_handle.rs` | present | 1/1 | 2/2 |  |
 | `IPlatformRenderInterface.cs` | `platform/i_platform_render_interface.rs` | present | 2/2 | 33/33 |  |
 | `IPlatformRenderInterfaceRegion.cs` | `platform/i_platform_render_interface_region.rs` | present | 1/1 | 7/7 |  |
 | `IPlatformSettings.cs` | `platform/i_platform_settings.rs` | present | 1/1 | 9/9 |  |
 | `IPlatformThreadingInterface.cs` | `platform/i_platform_threading_interface.rs` | present | 1/1 | 4/4 |  |
-| `IReadableBitmapImpl.cs` | `platform/i_readable_bitmap_impl.rs` | missing (types found elsewhere) | 1/1 | 3/3 | types found in `platform/i_bitmap_impl.rs` (add to path-overrides.toml) |
-| `IRenderTarget.cs` | `platform/i_render_target.rs` | partial | 2/2 | 9/10 |  |
-| `IRenderTargetBitmapImpl.cs` | `platform/i_render_target_bitmap_impl.rs` | missing (types found elsewhere) | 1/1 | 1/1 | types found in `platform/i_bitmap_impl.rs` (add to path-overrides.toml) |
+| `IReadableBitmapImpl.cs` | `platform/i_bitmap_impl.rs` | present | 1/1 | 3/3 | merged: the bitmap contracts that extend IBitmapImpl live next to it |
+| `IRenderTarget.cs` | `platform/i_render_target.rs` | present | 2/2 | 9/10 (1 waived) |  |
+| `IRenderTargetBitmapImpl.cs` | `platform/i_bitmap_impl.rs` | present | 1/1 | 1/1 | merged: the bitmap contracts that extend IBitmapImpl live next to it |
 | `IRuntimePlatform.cs` | `platform/i_runtime_platform.rs` | present | 3/3 | 9/9 |  |
-| `IScopedResource.cs` | `platform/i_scoped_resource.rs` | missing | 0/2 | 0/4 |  |
+| `IScopedResource.cs` | `platform/i_scoped_resource.rs` | present | 2/2 | 4/4 |  |
 | `IStreamGeometryContextImpl.cs` | `platform/i_stream_geometry_context_impl.rs` | present | 1/1 | 0/0 |  |
 | `IStreamGeometryImpl.cs` | `platform/i_stream_geometry_impl.rs` | present | 1/1 | 2/2 |  |
-| `ISurfaceOrientation.cs` | `platform/i_surface_orientation.rs` | missing | 0/1 | 0/1 |  |
+| `ISurfaceOrientation.cs` | `platform/i_surface_orientation.rs` | present | 1/1 | 1/1 |  |
 | `ITextShaperImpl.cs` | `platform/i_text_shaper_impl.rs` | present | 1/1 | 2/2 |  |
 | `ITransformedGeometryImpl.cs` | `platform/i_transformed_geometry_impl.rs` | present | 1/1 | 2/2 |  |
-| `IWriteableBitmapImpl.cs` | `platform/i_writeable_bitmap_impl.rs` | missing (types found elsewhere) | 1/1 | 0/0 | types found in `platform/i_bitmap_impl.rs` (add to path-overrides.toml) |
-| `LockedFramebuffer.cs` | `platform/locked_framebuffer.rs` | missing | 0/1 | 0/8 |  |
-| `LtrbRect.cs` | `platform/ltrb_rect.rs` | partial | 2/2 | 41/53 (1 waived) |  |
+| `IWriteableBitmapImpl.cs` | `platform/i_bitmap_impl.rs` | present | 1/1 | 0/0 | merged: the bitmap contracts that extend IBitmapImpl live next to it |
+| `LockedFramebuffer.cs` | `platform/retained_framebuffer.rs` | present | 1/1 | 7/8 (1 waived) | replaced: a locked framebuffer over a bare address cannot give safe access to its memory (`ILockedFramebuffer::with_data`), and unsafe code is not allowed in this crate: every owner of pixel memory implements ILockedFramebuffer over the memory it owns (RetainedLockedFramebuffer here, the deferred framebuffer of FerroUI.Native) |
+| `LtrbRect.cs` | `platform/ltrb_rect.rs` | present | 2/2 | 52/53 (1 waived) |  |
 | `ManagedDispatcherImpl.cs` | `platform/managed_dispatcher_impl.rs` | present | 2/2 | 14/14 |  |
 | `PathGeometryContext.cs` | `platform/path_geometry_context.rs` | present | 1/1 | 9/9 |  |
-| `PixelFormat.cs` | `platform/pixel_format.rs` | partial | 3/3 | 40/41 |  |
+| `PixelFormat.cs` | `platform/pixel_format.rs` | present | 3/3 | 40/41 (1 waived) |  |
 | `PlatformColorValues.cs` | `platform/platform_color_values.rs` | present | 3/3 | 10/10 |  |
-| `PlatformGraphicsDeviceAdapterDescription.cs` | `platform/platform_graphics_device_adapter_description.rs` | missing | 0/1 | 0/3 |  |
+| `PlatformGraphicsDeviceAdapterDescription.cs` | `platform/platform_graphics_device_adapter_description.rs` | present | 1/1 | 3/3 |  |
 | `PlatformGraphicsExternalMemory.cs` | `platform/platform_graphics_external_memory.rs` | present | 7/7 | 33/33 |  |
 | `PlatformHandle.cs` | `platform/platform_handle.rs` | present | 1/1 | 9/9 |  |
-| `RenderTargetProperties.cs` | `platform/render_target_properties.rs` | missing (types found elsewhere) | 3/3 | 11/11 | types found in `platform/i_render_target.rs` (add to path-overrides.toml) |
-| `RetainedFramebuffer.cs` | `platform/retained_framebuffer.rs` | partial | 1/1 | 8/9 |  |
-| `StandardAssetLoader.cs` | `platform/standard_asset_loader.rs` | partial | 1/1 | 10/11 |  |
+| `RenderTargetProperties.cs` | `platform/i_render_target.rs` | present | 3/3 | 11/11 | merged: the property records of a render target live next to IRenderTarget |
+| `RetainedFramebuffer.cs` | `platform/retained_framebuffer.rs` | present | 1/1 | 8/9 (1 waived) |  |
+| `StandardAssetLoader.cs` | `platform/standard_asset_loader.rs` | present | 1/1 | 10/11 (1 waived) |  |
 | `StandardRuntimePlatform.cs` | `platform/standard_runtime_platform.rs` | present | 1/1 | 1/1 |  |
 | `StandardRuntimePlatformServices.cs` | `platform/standard_runtime_platform_services.rs` | present | 1/1 | 1/1 |  |
-| `SurfaceOrientation.cs` | `platform/surface_orientation.rs` | missing | 0/1 | 0/4 |  |
+| `SurfaceOrientation.cs` | `platform/surface_orientation.rs` | present | 1/1 | 4/4 |  |
 | `SystemNavigationManagerImpl.cs` | `platform/system_navigation_manager_impl.rs` | present | 1/1 | 1/1 |  |
-| `VisualQueryProvider.cs` | `platform/visual_query_provider.rs` | missing (types found elsewhere) | 1/1 | 6/6 | types found in `styling/visual_query_provider.rs` (add to path-overrides.toml) |
+| `VisualQueryProvider.cs` | `styling/visual_query_provider.rs` | present | 1/1 | 6/6 | renamed: ported next to the container queries of Styling, its only users |
 
-<details><summary><code>AssetLoader.cs</code> - 1 missing</summary>
-
-- `AssetLoader` (class): 1 missing
-  - `static void RegisterResUriParsers()` *(internal)*
-
-</details>
-
-<details><summary><code>IDrawingContextImpl.cs</code> - 2 missing</summary>
-
-- `DrawingContextImplExtensions` (class, public): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>IExternalObjectsRenderInterfaceContextFeature.cs</code> - 1 missing</summary>
-
-- `IExternalObjectsRenderInterfaceContextFeature` (interface): 1 missing
-  - `IPlatformRenderInterfaceImportedImage ImportImage(ICompositionImportableSharedGpuContextImage image)` *(1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>IGeometryImpl.cs</code> - 1 missing</summary>
-
-- `IGeometryImpl` (interface): 1 missing
-  - `IGeometryImpl IRenderDataGeometry.GeometryImpl { get; }` *(explicit)*
-
-</details>
-
-<details><summary><code>IPlatformGpu.cs</code> - 1 missing</summary>
-
-- `IPlatformGraphicsWithFeatures` (interface, public): **type missing** (0 members)
-
-</details>
-
-<details><summary><code>IRenderTarget.cs</code> - 1 missing</summary>
-
-- `IRenderTarget.RenderTargetSceneInfo` (record struct): 1 missing
-  - `RenderTargetSceneInfo(PixelSize size, double scaling, CompositionTransparencyLevel transparencyLevel)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>LtrbRect.cs</code> - 11 missing</summary>
-
-- `LtrbRect` (struct): 7 missing
-  - `Point TopLeft { get; }` *(internal)*
-  - `Point TopRight { get; }` *(internal)*
-  - `Point BottomLeft { get; }` *(internal)*
-  - `Point BottomRight { get; }` *(internal)*
-  - `static LtrbRect? FullUnion(LtrbRect? left, Rect? right)` *(internal; 1 of 2 overloads found)*
-  - `override string ToString()`
-  - `bool Contains(LtrbRect rect)` *(1 of 2 overloads found)*
-  - waived (Rust: `Hash` is derived where the type can be hashed; float-based value types are not `Eq`/`Hash`): `GetHashCode`
-- `LtrbPixelRect` (struct): 4 missing
-  - `bool Contains(int x, int y)` *(internal)*
-  - `Rect ToRectUnscaled()` *(internal)*
-  - `LtrbRect ToLtrbRectUnscaled()` *(internal)*
-  - `static LtrbPixelRect FromRectUnscaled(LtrbRect rect)` *(internal)*
-
-</details>
-
-<details><summary><code>PixelFormat.cs</code> - 1 missing</summary>
-
-- `PixelFormat` (record struct): 1 missing
-  - `PixelFormatEnum FormatEnum` *(internal)*
-
-</details>
-
-<details><summary><code>RetainedFramebuffer.cs</code> - 1 missing</summary>
-
-- `RetainedFramebuffer` (class): 1 missing
-  - `RetainedFramebuffer(PixelSize size, PixelFormat format, AlphaFormat alphaFormat, int rowBytes)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>StandardAssetLoader.cs</code> - 1 missing</summary>
-
-- `StandardAssetLoader` (class): 1 missing
-  - `static void RegisterResUriParsers()`
-
-</details>
-
-### `Platform/Internal` - files 4/6, types 6/10, members 20/44
+### `Platform/Internal` - files 4/4, types 8/8, members 26/30 (4 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AssemblyDescriptor.cs` | `platform/internal/assembly_descriptor.rs` | partial | 2/2 | 7/9 |  |
+| `AssemblyDescriptor.cs` | `platform/internal/assembly_descriptor.rs` | present | 2/2 | 7/9 (2 waived) |  |
 | `AssemblyDescriptorResolver.cs` | `platform/internal/assembly_descriptor_resolver.rs` | present | 2/2 | 6/6 |  |
-| `AssetDescriptor.cs` | `platform/internal/asset_descriptor.rs` | partial | 1/3 | 2/8 |  |
-| `Constants.cs` | `platform/internal/constants.rs` | missing | 0/1 | 0/1 |  |
-| `SlicedStream.cs` | `platform/internal/sliced_stream.rs` | missing | 0/1 | 0/13 |  |
-| `UnmanagedBlob.cs` | `platform/internal/unmanaged_blob.rs` | partial | 1/1 | 5/7 |  |
+| `AssetDescriptor.cs` | `platform/internal/asset_descriptor.rs` | present | 3/3 | 8/8 | merged: the two descriptors differ in where the bytes come from (a manifest resource by name, a slice of the packed resource); both kinds of asset are registered as embedded byte slices, described by EmbeddedAssetDescriptor |
+| `Constants.cs` | - | n/a | - | - | not-applicable: the name of the manifest resource into which the build task packs the assets of an assembly: a crate registers each asset with the asset registry (platform/internal/asset_registry.rs), there is no packed resource to name |
+| `SlicedStream.cs` | - | n/a | - | - | not-applicable: a Stream over one asset inside the packed manifest resource of an assembly: an embedded asset is a `&'static [u8]` of its own, read through `AssetStream` |
+| `UnmanagedBlob.cs` | `platform/internal/unmanaged_blob.rs` | present | 1/1 | 5/7 (2 waived) |  |
 
-<details><summary><code>AssemblyDescriptor.cs</code> - 2 missing</summary>
-
-- `IAssemblyDescriptor` (interface): 1 missing
-  - `Dictionary<string, IAssetDescriptor>? AvaloniaResources { get; }`
-- `AssemblyDescriptor` (class): 1 missing
-  - `Dictionary<string, IAssetDescriptor>? AvaloniaResources { get; }`
-
-</details>
-
-<details><summary><code>AssetDescriptor.cs</code> - 8 missing</summary>
-
-- `AssemblyResourceDescriptor` (class, internal): **type missing** (3 members)
-- `AvaloniaResourceDescriptor` (class, internal): **type missing** (3 members)
-
-</details>
-
-<details><summary><code>UnmanagedBlob.cs</code> - 2 missing</summary>
-
-- `UnmanagedBlob` (class): 2 missing
-  - `static bool SuppressFinalizerWarning { get; set; }`
-  - `~UnmanagedBlob()` *(protected)*
-
-</details>
-
-### `Platform/Interop` - files 0/1, types 0/1, members 0/7
+### `Platform/Interop` - files 0/0, types 0/0, members 0/0
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Utf8Buffer.cs` | `platform/interop/utf8_buffer.rs` | missing | 0/1 | 0/7 |  |
+| `Utf8Buffer.cs` | - | n/a | - | - | not-applicable: a SafeHandle over a pinned, null-terminated UTF-8 copy of a string for P/Invoke: `std::ffi::CString` in the crates that call native code |
 
 ### `Platform/Storage` - files 19/19, types 22/24, members 95/101
 
@@ -3395,295 +1623,71 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `AssemblyInfo.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 
-### `PropertyStore` - files 16/20, types 17/22, members 129/213
+### `PropertyStore` - files 19/19, types 21/21, members 137/211 (74 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaPropertyDictionaryPool.cs` | `property_store/ferro_property_dictionary_pool.rs` | missing | 0/1 | 0/2 |  |
-| `BindingEntryBase.cs` | `property_store/binding_entry.rs` | partial | 1/1 | 13/22 | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
-| `BindingEntryBaseNonGenericHelper.cs` | `property_store/binding_entry_base_non_generic_helper.rs` | missing | 0/1 | 0/2 |  |
-| `DirectBindingObserver.cs` | `property_store/local_value_binding_observer.rs` | partial | 1/1 | 4/9 | merged: local-value and direct-property binding observers (typed and untyped) share one file |
-| `DirectUntypedBindingObserver.cs` | `property_store/local_value_binding_observer.rs` | partial | 1/1 | 4/7 | merged: local-value and direct-property binding observers (typed and untyped) share one file |
-| `EffectiveValue.cs` | `property_store/effective_value.rs` | partial | 1/1 | 20/24 |  |
-| `EffectiveValue`1.cs` | `property_store/effective_value.rs` | partial | 1/1 | 14/15 | generic arity merged |
-| `FramePriority.cs` | `property_store/frame_priority.rs` | partial | 1/2 | 0/15 |  |
+| `AvaloniaPropertyDictionaryPool.cs` | - | n/a | - | - | not-applicable: pool of the dictionaries that hold the old and new inherited values while the inheritance parent changes: `ValueStore::set_inheritance_parent` collects them in a local `Vec` |
+| `BindingEntryBase.cs` | `property_store/binding_entry.rs` | present | 1/1 | 16/22 (6 waived) | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
+| `BindingEntryBaseNonGenericHelper.cs` | `property_store/binding_entry.rs` | present | 1/1 | 0/2 (2 waived) | replaced: the `Creating` and `CreatingQuiet` sentinel disposables are variants of the private `Subscription` enum of the binding entry |
+| `DirectBindingObserver.cs` | `property_store/local_value_binding_observer.rs` | present | 1/1 | 4/9 (5 waived) | merged: local-value and direct-property binding observers (typed and untyped) share one file |
+| `DirectUntypedBindingObserver.cs` | `property_store/local_value_binding_observer.rs` | present | 1/1 | 4/7 (3 waived) | merged: local-value and direct-property binding observers (typed and untyped) share one file |
+| `EffectiveValue.cs` | `property_store/effective_value.rs` | present | 1/1 | 20/24 (4 waived) |  |
+| `EffectiveValue`1.cs` | `property_store/effective_value.rs` | present | 1/1 | 14/15 (1 waived) | generic arity merged |
+| `FramePriority.cs` | `property_store/frame_priority.rs` | present | 2/2 | 3/15 (12 waived) | renamed: the extension methods are inherent methods of FramePriority |
 | `IValueEntry.cs` | `property_store/value_entry.rs` | present | 1/1 | 6/6 | interface merged into implementation file |
 | `IValueEntry`1.cs` | `property_store/value_entry.rs` | present | 1/1 | 1/1 | generic arity merged; interface merged into implementation file |
-| `ImmediateValueEntry.cs` | `property_store/immediate_value_frame.rs` | partial | 1/1 | 5/9 | merged: the entry lives next to the frame that owns it |
-| `ImmediateValueFrame.cs` | `property_store/immediate_value_frame.rs` | partial | 1/1 | 6/8 |  |
-| `LocalValueBindingObserver.cs` | `property_store/local_value_binding_observer.rs` | partial | 1/1 | 2/3 | merged: local-value and direct-property binding observers (typed and untyped) share one file |
-| `LocalValueBindingObserverBase.cs` | `property_store/local_value_binding_observer.rs` | partial | 1/1 | 5/10 | merged: local-value and direct-property binding observers (typed and untyped) share one file |
-| `PropertyNotifying.cs` | `property_store/property_notifying.rs` | missing | 0/1 | 0/2 |  |
-| `SourceUntypedBindingEntry.cs` | `property_store/binding_entry.rs` | partial | 1/1 | 3/5 | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
-| `TypedBindingEntry.cs` | `property_store/binding_entry.rs` | partial | 1/1 | 3/6 | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
-| `UntypedValueUtils.cs` | `property_store/untyped_value_utils.rs` | missing | 0/1 | 0/1 |  |
-| `ValueFrame.cs` | `property_store/value_frame.rs` | partial | 2/2 | 8/19 |  |
-| `ValueStore.cs` | `property_store/value_store.rs` | partial | 1/1 | 35/47 |  |
+| `ImmediateValueEntry.cs` | `property_store/immediate_value_frame.rs` | present | 1/1 | 5/9 (4 waived) | merged: the entry lives next to the frame that owns it |
+| `ImmediateValueFrame.cs` | `property_store/immediate_value_frame.rs` | present | 1/1 | 6/8 (2 waived) |  |
+| `LocalValueBindingObserver.cs` | `property_store/local_value_binding_observer.rs` | present | 1/1 | 2/3 (1 waived) | merged: local-value and direct-property binding observers (typed and untyped) share one file |
+| `LocalValueBindingObserverBase.cs` | `property_store/local_value_binding_observer.rs` | present | 1/1 | 5/10 (5 waived) | merged: local-value and direct-property binding observers (typed and untyped) share one file |
+| `PropertyNotifying.cs` | `property_store/effective_value.rs` | present | 1/1 | 1/2 (1 waived) | replaced: the disposable scope that calls the `Notifying` callback of the property before and after a change notification is written out at its call sites (`EffectiveValue::notify_value_changed` and the two inherited-value notifications of `ValueStore`) |
+| `SourceUntypedBindingEntry.cs` | `property_store/binding_entry.rs` | present | 1/1 | 3/5 (2 waived) | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
+| `TypedBindingEntry.cs` | `property_store/binding_entry.rs` | present | 1/1 | 3/6 (3 waived) | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
+| `UntypedValueUtils.cs` | `styled_property.rs` | present | 1/1 | 0/1 (1 waived) | replaced: `StyledProperty::from_untyped` converts the untyped value and `BindingEntry::convert_and_validate` validates it |
+| `ValueFrame.cs` | `property_store/value_frame.rs` | present | 2/2 | 8/19 (11 waived) |  |
+| `ValueStore.cs` | `property_store/value_store.rs` | present | 1/1 | 36/47 (11 waived) |  |
 
-<details><summary><code>BindingEntryBase.cs</code> - 9 missing</summary>
-
-- `BindingEntryBase<TValue, TSource>` (class): 9 missing
-  - `BindingEntryBase(AvaloniaObject target, ValueFrame frame, AvaloniaProperty property, IObservable<TSource> s...` *(protected; 1 of 2 constructors found)*
-  - `void OnCompleted()`
-  - `void OnError(Exception error)`
-  - `void OnNext(TSource value)`
-  - `void OnNext(BindingValue<TSource> value)`
-  - `object? IValueEntry.GetValue()` *(explicit)*
-  - `abstract BindingValue<TValue> ConvertAndValidate(BindingValue<TSource> value)` *(protected; 1 of 2 overloads found)*
-  - `abstract TValue GetDefaultValue(AvaloniaObject owner)` *(protected)*
-  - `virtual void Start(bool produceValue)` *(protected; 1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>DirectBindingObserver.cs</code> - 5 missing</summary>
-
-- `DirectBindingObserver<T>` (class): 5 missing
-  - `void Start(IObservable<BindingValue<T>> source)` *(1 of 2 overloads found)*
-  - `void OnCompleted()`
-  - `void OnError(Exception error)`
-  - `void OnNext(T value)`
-  - `void OnNext(BindingValue<T> value)`
-
-</details>
-
-<details><summary><code>DirectUntypedBindingObserver.cs</code> - 3 missing</summary>
-
-- `DirectUntypedBindingObserver<T>` (class): 3 missing
-  - `void OnCompleted()`
-  - `void OnError(Exception error)`
-  - `void OnNext(object? value)`
-
-</details>
-
-<details><summary><code>EffectiveValue.cs</code> - 4 missing</summary>
-
-- `EffectiveValue` (class): 4 missing
-  - `BindingPriority Priority { get; protected set; }` *(getter `priority` found, setter `set_priority` missing)*
-  - `BindingPriority BasePriority { get; protected set; }` *(getter `base_priority` found, setter `set_base_priority` missing)*
-  - `bool HasCoercion { get; protected set; }`
-  - `abstract void CoerceDefaultValueAndRaise(ValueStore owner, AvaloniaProperty property)` *(protected)*
-
-</details>
-
-<details><summary><code>EffectiveValue`1.cs</code> - 1 missing</summary>
-
-- `EffectiveValue<T>` (class): 1 missing
-  - `override void CoerceDefaultValueAndRaise(ValueStore owner, AvaloniaProperty property)` *(protected)*
-
-</details>
-
-<details><summary><code>FramePriority.cs</code> - 16 missing</summary>
-
-- `FramePriority` (enum): 12 missing
-  - `Animation`
-  - `AnimationTemplatedParentTheme`
-  - `AnimationTheme`
-  - `StyleTrigger`
-  - `StyleTriggerTemplatedParentTheme`
-  - `StyleTriggerTheme`
-  - `Template`
-  - `TemplateTemplatedParentTheme`
-  - `TemplateTheme`
-  - `Style`
-  - `StyleTemplatedParentTheme`
-  - `StyleTheme`
-- `FramePriorityExtensions` (class, internal): **type missing** (3 members)
-
-</details>
-
-<details><summary><code>ImmediateValueEntry.cs</code> - 4 missing</summary>
-
-- `ImmediateValueEntry<T>` (class): 4 missing
-  - `ImmediateValueEntry(ImmediateValueFrame owner, StyledProperty<T> property, T value)`
-  - `object? IValueEntry.GetValue()` *(explicit)*
-  - `T IValueEntry<T>.GetValue()` *(explicit)*
-  - `bool IValueEntry.GetDataValidationState(out BindingValueType state, out Exception? error)` *(explicit)*
-
-</details>
-
-<details><summary><code>ImmediateValueFrame.cs</code> - 2 missing</summary>
-
-- `ImmediateValueFrame` (class): 2 missing
-  - `TypedBindingEntry<T> AddBinding<T>(StyledProperty<T> property, IObservable<T> source)` *(2 of 4 overloads found)*
-  - `SourceUntypedBindingEntry<T> AddBinding<T>(StyledProperty<T> property, IObservable<object?> source)` *(2 of 4 overloads found)*
-
-</details>
-
-<details><summary><code>LocalValueBindingObserver.cs</code> - 1 missing</summary>
-
-- `LocalValueBindingObserver<T>` (class): 1 missing
-  - `void OnNext(object? value)`
-
-</details>
-
-<details><summary><code>LocalValueBindingObserverBase.cs</code> - 5 missing</summary>
-
-- `LocalValueBindingObserverBase<T>` (class): 5 missing
-  - `void Start(IObservable<BindingValue<T>> source)` *(1 of 2 overloads found)*
-  - `void OnCompleted()`
-  - `void OnError(Exception error)`
-  - `void OnNext(T value)`
-  - `void OnNext(BindingValue<T> value)`
-
-</details>
-
-<details><summary><code>SourceUntypedBindingEntry.cs</code> - 2 missing</summary>
-
-- `SourceUntypedBindingEntry<TTarget>` (class): 2 missing
-  - `override BindingValue<TTarget> ConvertAndValidate(BindingValue<object?> value)` *(protected; 1 of 2 overloads found)*
-  - `override TTarget GetDefaultValue(AvaloniaObject owner)` *(protected)*
-
-</details>
-
-<details><summary><code>TypedBindingEntry.cs</code> - 3 missing</summary>
-
-- `TypedBindingEntry<T>` (class): 3 missing
-  - `TypedBindingEntry(AvaloniaObject target, ValueFrame frame, StyledProperty<T> property, IObservable<BindingV...` *(1 of 2 constructors found)*
-  - `override BindingValue<T> ConvertAndValidate(BindingValue<T> value)` *(protected; 1 of 2 overloads found)*
-  - `override T GetDefaultValue(AvaloniaObject owner)` *(protected)*
-
-</details>
-
-<details><summary><code>ValueFrame.cs</code> - 11 missing</summary>
-
-- `ValueFrame` (class): 11 missing
-  - `ValueFrame(BindingPriority priority, FrameType type)` *(protected)*
-  - `int EntryCount { get; }`
-  - `ValueStore? Owner { get; }`
-  - `BindingPriority Priority { get; }`
-  - `FramePriority FramePriority { get; }`
-  - `bool Contains(AvaloniaProperty property)`
-  - `IValueEntry GetEntry(int index)`
-  - `void SetOwner(ValueStore? owner)`
-  - `void MakeShared()` *(protected)*
-  - `void Add(IValueEntry value)` *(protected)*
-  - `void Remove(AvaloniaProperty property)` *(protected)*
-
-</details>
-
-<details><summary><code>ValueStore.cs</code> - 12 missing</summary>
-
-- `ValueStore` (class): 12 missing
-  - `AvaloniaObject Owner { get; }`
-  - `IDisposable AddBinding<T>(StyledProperty<T> property, IObservable<object?> source, BindingPriority priority)` *(3 of 7 overloads found)*
-  - `IDisposable AddBinding<T>(DirectPropertyBase<T> property, IObservable<BindingValue<T>> source)` *(3 of 7 overloads found)*
-  - `IDisposable AddBinding<T>(DirectPropertyBase<T> property, IObservable<T> source)` *(3 of 7 overloads found)*
-  - `IDisposable AddBinding<T>(DirectPropertyBase<T> property, IObservable<object?> source)` *(3 of 7 overloads found)*
-  - `void SetLocalValue<T>(StyledProperty<T> property, T value)` *(1 of 3 overloads found)*
-  - `void SetLocalValue(AvaloniaProperty property, IValueEntry entry)` *(1 of 3 overloads found)*
-  - `T GetValue<T>(StyledProperty<T> property)` *(1 of 2 overloads found)*
-  - `AvaloniaPropertyValue GetDiagnostic(AvaloniaProperty property)`
-  - `void IBindingExpressionSink.OnChanged(BindingExpressionBase instance, bool hasValueChanged, bool hasErrorCh...` *(explicit)*
-  - `void IBindingExpressionSink.OnCompleted(BindingExpressionBase instance)` *(explicit)*
-  - `ValueStoreDiagnostic GetStoreDiagnostic()`
-
-</details>
-
-### `Reactive` - files 7/15, types 9/18, members 40/95
+### `Reactive` - files 15/15, types 17/18 (1 waived), members 73/95 (22 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AnonymousObserver.cs` | `reactive/anonymous_observer.rs` | partial | 1/1 | 4/8 |  |
-| `AnonymousObserverNonGenericHelper.cs` | `reactive/anonymous_observer_non_generic_helper.rs` | missing | 0/1 | 0/2 |  |
-| `AvaloniaPropertyBindingObservable.cs` | `reactive/ferro_property_binding_observable.rs` | missing | 0/1 | 0/5 |  |
-| `AvaloniaPropertyChangedObservable.cs` | `reactive/ferro_property_changed_observable.rs` | missing | 0/1 | 0/4 |  |
-| `AvaloniaPropertyObservable.cs` | `reactive/ferro_property_observable.rs` | missing | 0/1 | 0/5 |  |
-| `CombinedSubject.cs` | `reactive/combined_subject.rs` | missing | 0/1 | 0/5 |  |
-| `CompositeDisposable.cs` | `reactive/composite_disposable.rs` | partial | 1/1 | 9/14 |  |
-| `Disposable.cs` | `reactive/disposable.rs` | partial | 3/3 | 4/9 |  |
-| `DisposableMixin.cs` | `reactive/disposable_mixin.rs` | missing | 0/1 | 0/1 |  |
-| `IAvaloniaSubject.cs` | `reactive/i_ferro_subject.rs` | missing | 0/1 | 0/0 |  |
+| `AnonymousObserver.cs` | `reactive/anonymous_observer.rs` | present | 1/1 | 7/8 (1 waived) |  |
+| `AnonymousObserverNonGenericHelper.cs` | `reactive/anonymous_observer_non_generic_helper.rs` | present | 1/1 | 2/2 |  |
+| `AvaloniaPropertyBindingObservable.cs` | `ferro_object_extensions.rs` | present | 1/1 | 2/5 (3 waived) | merged: the observables behind GetObservable and GetBindingObservable are one private struct next to the extension methods that create them: PropertyObservable&lt;TResult&gt; with a function that reads the value (plain, converted or as a BindingValue) |
+| `AvaloniaPropertyChangedObservable.cs` | `ferro_object_extensions.rs` | present | 1/1 | 0/4 (4 waived) | merged: ported next to `get_property_changed_observable`, which returns it; change notifications borrow their values, so its subscribers are closures and it is not built on LightweightObservableBase |
+| `AvaloniaPropertyObservable.cs` | `ferro_object_extensions.rs` | present | 1/1 | 2/5 (3 waived) | merged: the observables behind GetObservable and GetBindingObservable are one private struct next to the extension methods that create them: PropertyObservable&lt;TResult&gt; with a function that reads the value (plain, converted or as a BindingValue) |
+| `CombinedSubject.cs` | `reactive/combined_subject.rs` | present | 1/1 | 5/5 |  |
+| `CompositeDisposable.cs` | `reactive/composite_disposable.rs` | present | 1/1 | 14/14 |  |
+| `Disposable.cs` | `reactive/disposable.rs` | present | 3/3 | 5/9 (4 waived) |  |
+| `DisposableMixin.cs` | `reactive/disposable_mixin.rs` | present | 1/1 | 1/1 |  |
+| `IAvaloniaSubject.cs` | `reactive/i_ferro_subject.rs` | present | 1/1 | 0/0 |  |
 | `LightweightObservableBase.cs` | `reactive/lightweight_observable_base.rs` | present | 1/1 | 8/8 |  |
-| `LightweightSubject.cs` | `reactive/lightweight_subject.rs` | partial | 1/1 | 3/5 |  |
-| `Observable.cs` | `reactive/observable.rs` | partial | 1/2 | 7/17 |  |
-| `SingleSubscriberObservableBase.cs` | `reactive/single_subscriber_observable_base.rs` | partial | 1/1 | 5/7 |  |
-| `WeakObserverSubscription.cs` | `reactive/weak_observer_subscription.rs` | missing | 0/1 | 0/5 |  |
+| `LightweightSubject.cs` | `reactive/lightweight_subject.rs` | present | 1/1 | 3/5 (2 waived) |  |
+| `Observable.cs` | `reactive/observable.rs` | present | 1/2 (1 waived) | 14/17 (3 waived) |  |
+| `SingleSubscriberObservableBase.cs` | `reactive/single_subscriber_observable_base.rs` | present | 1/1 | 5/7 (2 waived) |  |
+| `WeakObserverSubscription.cs` | `reactive/weak_observer_subscription.rs` | present | 1/1 | 5/5 |  |
 
-<details><summary><code>AnonymousObserver.cs</code> - 4 missing</summary>
-
-- `AnonymousObserver<T>` (class): 4 missing
-  - `AnonymousObserver(Action<T> onNext, Action<Exception> onError, Action onCompleted)` *(1 of 5 constructors found)*
-  - `AnonymousObserver(Action<T> onNext)` *(1 of 5 constructors found)*
-  - `AnonymousObserver(Action<T> onNext, Action<Exception> onError)` *(1 of 5 constructors found)*
-  - `AnonymousObserver(Action<T> onNext, Action onCompleted)` *(1 of 5 constructors found)*
-
-</details>
-
-<details><summary><code>CompositeDisposable.cs</code> - 5 missing</summary>
-
-- `CompositeDisposable` (class): 5 missing
-  - `bool Contains(IDisposable item)`
-  - `void CopyTo(IDisposable[] array, int arrayIndex)`
-  - `bool IsReadOnly { get; }`
-  - `IEnumerator<IDisposable> GetEnumerator()`
-  - `IEnumerator IEnumerable.GetEnumerator()` *(explicit)*
-
-</details>
-
-<details><summary><code>Disposable.cs</code> - 5 missing</summary>
-
-- `Disposable` (class): 1 missing
-  - `static IDisposable Create<TState>(TState state, Action<TState> dispose)` *(1 of 2 overloads found)*
-- `Disposable.AnonymousDisposable` (class): 2 missing
-  - `AnonymousDisposable(Action dispose)`
-  - `bool IsDisposed { get; }`
-- `Disposable.AnonymousDisposable<TState>` (class): 2 missing
-  - `AnonymousDisposable(TState state, Action<TState> dispose)`
-  - `bool IsDisposed { get; }`
-
-</details>
-
-<details><summary><code>LightweightSubject.cs</code> - 2 missing</summary>
-
-- `LightweightSubject<T>` (class): 2 missing
-  - `override void Initialize()` *(protected)*
-  - `override void Deinitialize()` *(protected)*
-
-</details>
-
-<details><summary><code>Observable.cs</code> - 11 missing</summary>
-
-- `Observable` (class): 8 missing
-  - `static IObservable<TSource> StartWith<TSource>(this IObservable<TSource> source, TSource value)`
-  - `static IObservable<TSource> Switch<TSource>(this IObservable<IObservable<TSource>> sources)`
-  - `static IObservable<TResult> CombineLatest<TFirst, TSecond, TResult>(this IObservable<TFirst> first, IObserv...`
-  - `static IObservable<TInput[]> CombineLatest<TInput>(this IEnumerable<IObservable<TInput>> inputs)`
-  - `static IObservable<T> Skip<T>(this IObservable<T> source, int skipCount)`
-  - `static IObservable<T> Take<T>(this IObservable<T> source, int takeCount)`
-  - `static IObservable<EventArgs> FromEventPattern(Action<EventHandler> addHandler, Action<EventHandler> remove...`
-  - `static IObservable<T> FromEventPattern<T>(Action<EventHandler<T>> addHandler, Action<EventHandler<T>> remov...`
-- `Observable.EmptyImpl<TResult>` (class, internal): **type missing** (2 members)
-
-</details>
-
-<details><summary><code>SingleSubscriberObservableBase.cs</code> - 2 missing</summary>
-
-- `SingleSubscriberObservableBase<T>` (class): 2 missing
-  - `abstract void Unsubscribed()` *(protected)*
-  - `abstract void Subscribed()` *(protected)*
-
-</details>
-
-### `Reactive/Operators` - files 0/3, types 0/9, members 0/32
+### `Reactive/Operators` - files 3/3, types 6/9 (3 waived), members 16/32 (16 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `CombineLatest.cs` | `reactive/operators/combine_latest.rs` | missing | 0/4 | 0/9 |  |
-| `Sink.cs` | `reactive/operators/sink.rs` | missing | 0/3 | 0/16 |  |
-| `Switch.cs` | `reactive/operators/switch.rs` | missing | 0/2 | 0/7 |  |
+| `CombineLatest.cs` | `reactive/operators/combine_latest.rs` | present | 2/4 (2 waived) | 4/9 (5 waived) |  |
+| `Sink.cs` | `reactive/operators/sink.rs` | present | 3/3 | 10/16 (6 waived) |  |
+| `Switch.cs` | `reactive/operators/switch.rs` | present | 1/2 (1 waived) | 2/7 (5 waived) |  |
 
-### `Rendering` - files 19/21, types 22/25, members 90/99
+### `Rendering` - files 21/21, types 23/25 (2 waived), members 92/99 (7 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `DefaultRenderTimer.cs` | `rendering/default_render_timer.rs` | present | 1/1 | 5/5 |  |
-| `ICustomHitTest.cs` | `rendering/i_custom_hit_test.rs` | missing | 0/1 | 0/2 |  |
+| `ICustomHitTest.cs` | `rendering/i_custom_hit_test.rs` | present | 1/1 | 2/2 |  |
 | `IPresentationSource.cs` | `rendering/i_presentation_source.rs` | present | 1/1 | 10/10 |  |
 | `IRenderLoop.cs` | `rendering/i_render_loop.rs` | present | 1/1 | 4/4 |  |
 | `IRenderLoopTask.cs` | `rendering/i_render_loop_task.rs` | present | 1/1 | 1/1 |  |
 | `IRenderTimer.cs` | `rendering/i_render_timer.rs` | present | 1/1 | 2/2 |  |
-| `IRenderer.cs` | `rendering/i_renderer.rs` | partial | 2/3 | 13/14 |  |
-| `IVisualBrushInitialize.cs` | `rendering/i_visual_brush_initialize.rs` | missing | 0/1 | 0/1 |  |
+| `IRenderer.cs` | `rendering/i_renderer.rs` | present | 2/3 (1 waived) | 13/14 (1 waived) |  |
+| `IVisualBrushInitialize.cs` | `visual.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) | replaced: interface tested with `is`: the virtual `ensure_initialized_for_visual_brush` of `Visual`, which a control overrides (porting guide: C# `is` on an interface becomes a virtual) |
 | `ImmediateRenderer.cs` | `rendering/immediate_renderer.rs` | present | 1/1 | 2/2 |  |
 | `LayoutPassTiming.cs` | `rendering/layout_pass_timing.rs` | present | 1/1 | 3/3 |  |
 | `OwnedDisposable.cs` | `rendering/owned_disposable.rs` | present | 1/1 | 3/3 |  |
@@ -3693,472 +1697,131 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `RendererDiagnostics.cs` | `rendering/renderer_diagnostics.rs` | present | 1/1 | 4/4 |  |
 | `SceneInvalidatedEventArgs.cs` | `rendering/scene_invalidated_event_args.rs` | present | 1/1 | 2/2 |  |
 | `SleepLoopRenderTimer.cs` | `rendering/sleep_loop_render_timer.rs` | present | 1/1 | 4/4 |  |
-| `SwapchainBase.cs` | `rendering/swapchain_base.rs` | partial | 2/2 | 7/10 |  |
+| `SwapchainBase.cs` | `rendering/swapchain_base.rs` | present | 2/2 | 7/10 (3 waived) |  |
 | `ThreadProxyRenderTimer.cs` | `rendering/thread_proxy_render_timer.rs` | present | 1/1 | 3/3 |  |
 | `UiThreadRenderTimer.cs` | `rendering/ui_thread_render_timer.rs` | present | 1/1 | 3/3 |  |
-| `ZIndexComparer.cs` | `rendering/z_index_comparer.rs` | partial | 1/1 | 1/3 |  |
+| `ZIndexComparer.cs` | `rendering/z_index_comparer.rs` | present | 1/1 | 1/3 (2 waived) |  |
 
-<details><summary><code>IRenderer.cs</code> - 2 missing</summary>
-
-- `IRendererWithCompositor` (interface, internal): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>SwapchainBase.cs</code> - 3 missing</summary>
-
-- `SwapchainBase<TImage>` (class): 3 missing
-  - `ICompositionGpuInterop Interop { get; }` *(protected)*
-  - `CompositionDrawingSurface Target { get; }` *(protected)*
-  - `async ValueTask DisposeAsync()`
-
-</details>
-
-<details><summary><code>ZIndexComparer.cs</code> - 2 missing</summary>
-
-- `ZIndexComparer` (class): 2 missing
-  - `static readonly ZIndexComparer Instance`
-  - `static readonly Comparison<Visual> ComparisonInstance`
-
-</details>
-
-### `Rendering/Composition` - files 25/26, types 41/41, members 243/274
+### `Rendering/Composition` - files 26/26, types 41/41, members 250/274 (18 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `CompositingRenderer.cs` | `rendering/composition/compositing_renderer.rs` | partial | 1/1 | 19/20 |  |
+| `CompositingRenderer.cs` | `rendering/composition/compositing_renderer.rs` | present | 1/1 | 19/20 (1 waived) |  |
 | `CompositionCustomVisual.cs` | `rendering/composition/composition_custom_visual.rs` | present | 1/1 | 2/2 |  |
 | `CompositionCustomVisualHandler.cs` | `rendering/composition/composition_custom_visual_handler.rs` | present | 1/1 | 13/13 |  |
-| `CompositionDrawListVisual.cs` | `rendering/composition/composition_draw_list_visual.rs` | partial | 1/1 | 4/6 |  |
-| `CompositionDrawingSurface.cs` | `rendering/composition/composition_drawing_surface.rs` | partial | 1/1 | 6/8 |  |
+| `CompositionDrawListVisual.cs` | `rendering/composition/composition_draw_list_visual.rs` | present | 1/1 | 4/6 (2 waived) |  |
+| `CompositionDrawingSurface.cs` | `rendering/composition/composition_drawing_surface.rs` | present | 1/1 | 6/8 (2 waived) |  |
 | `CompositionExperimentalAcrylicVisual.cs` | `rendering/composition/composition_experimental_acrylic_visual.rs` | present | 1/1 | 1/1 |  |
-| `CompositionExternalMemory.cs` | `rendering/composition/composition_external_memory.rs` | partial | 8/8 | 15/17 |  |
+| `CompositionExternalMemory.cs` | `rendering/composition/composition_external_memory.rs` | present | 8/8 | 17/17 |  |
 | `CompositionGradientStop.cs` | `rendering/composition/composition_gradient_stop.rs` | present | 1/1 | 1/1 |  |
-| `CompositionInterop.cs` | `rendering/composition/composition_interop.rs` | partial | 4/4 | 27/31 |  |
-| `CompositionObject.cs` | `rendering/composition/composition_object.rs` | partial | 1/1 | 11/17 |  |
+| `CompositionInterop.cs` | `rendering/composition/composition_interop.rs` | partial | 4/4 | 25/31 |  |
+| `CompositionObject.cs` | `rendering/composition/composition_object.rs` | present | 1/1 | 11/17 (6 waived) |  |
 | `CompositionOptions.cs` | `rendering/composition/composition_options.rs` | present | 1/1 | 4/4 |  |
 | `CompositionPropertySet.cs` | `rendering/composition/composition_property_set.rs` | present | 2/2 | 27/27 |  |
 | `CompositionSurface.cs` | `rendering/composition/composition_surface.rs` | present | 1/1 | 1/1 |  |
 | `CompositionTarget.cs` | `rendering/composition/composition_target.rs` | present | 1/1 | 4/4 |  |
-| `CompositionTransform.cs` | `rendering/composition/composition_transform.rs` | missing (types found elsewhere) | 1/1 | 0/0 | types found in `rendering/composition/server/server_composition_simple_transform.rs` (add to path-overrides.toml) |
+| `CompositionTransform.cs` | `rendering/composition/server/server_composition_simple_transform.rs` | present | 1/1 | 0/0 | merged: the file only adds `ITransform` to the generated `ServerCompositionSimpleTransform`, which is implemented next to the class |
 | `CompositionTransparencyLevel.cs` | `rendering/composition/composition_transparency_level.rs` | present | 1/1 | 5/5 |  |
 | `Compositor.Factories.cs` | `rendering/composition/compositor_factories.rs` | present | 1/1 | 17/17 |  |
-| `Compositor.cs` | `rendering/composition/compositor.rs` | partial | 2/2 | 20/26 |  |
-| `ContainerVisual.cs` | `rendering/composition/container_visual.rs` | partial | 1/1 | 1/8 |  |
+| `Compositor.cs` | `rendering/composition/compositor.rs` | present | 2/2 | 21/26 (5 waived) |  |
+| `ContainerVisual.cs` | `rendering/composition/container_visual.rs`, `rendering/composition/visual.rs` | present | 1/1 | 7/8 (1 waived) | merged: every visual has children, so `CompositionContainerVisual` is an alias of `CompositionVisual` and its members are members of that class |
 | `ElementCompositionPreview.cs` | `rendering/composition/element_composition_preview.rs` | present | 1/1 | 3/3 |  |
 | `Enums.cs` | `rendering/composition/enums.rs` | present | 4/4 | 41/41 |  |
 | `ICompositionTargetDebugEvents.cs` | `rendering/composition/i_composition_target_debug_events.rs` | present | 1/1 | 3/3 |  |
 | `ICompositorSerializable.cs` | `rendering/composition/i_compositor_serializable.rs` | present | 1/1 | 2/2 |  |
 | `MatrixUtils.cs` | `rendering/composition/matrix_utils.rs` | present | 1/1 | 3/3 |  |
-| `Visual.cs` | `rendering/composition/visual.rs` | partial | 1/1 | 7/8 |  |
+| `Visual.cs` | `rendering/composition/visual.rs` | present | 1/1 | 7/8 (1 waived) |  |
 | `VisualCollection.cs` | `rendering/composition/visual_collection.rs` | present | 1/1 | 6/6 |  |
 
-<details><summary><code>CompositingRenderer.cs</code> - 1 missing</summary>
+<details><summary><code>CompositionInterop.cs</code> - 6 missing</summary>
 
-- `CompositingRenderer` (class): 1 missing
-  - `void Paint(Rect rect, bool catchExceptions)` *(1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>CompositionDrawListVisual.cs</code> - 2 missing</summary>
-
-- `CompositionDrawListVisual` (class): 2 missing
-  - `override bool HitTest(Point pt)` *(internal)*
-  - `override IntersectionResult HitTest(Geometry geometry)` *(internal)*
-
-</details>
-
-<details><summary><code>CompositionDrawingSurface.cs</code> - 2 missing</summary>
-
-- `CompositionDrawingSurface` (class): 2 missing
-  - `new ServerCompositionDrawingSurface Server { get; }` *(internal)*
-  - `~CompositionDrawingSurface()` *(protected)*
-
-</details>
-
-<details><summary><code>CompositionExternalMemory.cs</code> - 2 missing</summary>
-
-- `ICompositionGpuInterop` (interface): 2 missing
-  - `ICompositionImportedGpuImage ImportImage(ICompositionImportableSharedGpuContextImage image)` *(1 of 2 overloads found)*
-  - `ICompositionImportedGpuImage ImportSemaphore(ICompositionImportableSharedGpuContextSemaphore image)` *(1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>CompositionInterop.cs</code> - 4 missing</summary>
-
-- `CompositionInterop` (class): 2 missing
-  - `ICompositionImportedGpuImage ImportImage(ICompositionImportableSharedGpuContextImage image)` *(1 of 2 overloads found)*
-  - `ICompositionImportedGpuImage ImportSemaphore(ICompositionImportableSharedGpuContextSemaphore image)` *(1 of 2 overloads found)*
 - `CompositionGpuImportedObjectBase` (class): 2 missing
-  - `abstract void Import()` *(protected)*
-  - `abstract void Dispose()`
+  - `IPlatformRenderInterfaceContext Context { get; }`
+  - `IExternalObjectsRenderInterfaceContextFeature Feature { get; }`
+- `CompositionImportedGpuImage` (class): 2 missing
+  - `IPlatformRenderInterfaceImportedImage Image { get; }`
+  - `bool IsUsable { get; }`
+- `CompositionImportedGpuSemaphore` (class): 2 missing
+  - `IPlatformRenderInterfaceImportedSemaphore Semaphore { get; }`
+  - `bool IsUsable { get; }`
 
 </details>
 
-<details><summary><code>CompositionObject.cs</code> - 6 missing</summary>
-
-- `CompositionObject` (class): 6 missing
-  - `virtual void StartAnimation(string propertyName, CompositionAnimation animation, ExpressionVariant? finalVa...` *(internal; 1 of 2 overloads found)*
-  - `void StartAnimationGroup(ICompositionAnimationBase grp)`
-  - `bool StartAnimationGroup(ICompositionAnimationBase grp, string target, ExpressionVariant finalValue)` *(internal)*
-  - `void StopAnimationGroup(ICompositionAnimationBase grp)`
-  - `void ICompositorSerializable.SerializeChanges(Compositor c, BatchStreamWriter writer)` *(explicit)*
-  - `virtual void SerializeChangesCore(BatchStreamWriter writer)` *(private protected)*
-
-</details>
-
-<details><summary><code>Compositor.cs</code> - 6 missing</summary>
-
-- `Compositor` (class): 6 missing
-  - `IRenderLoop Loop { get; }` *(internal)*
-  - `Compositor(IRenderLoop loop, IPlatformGraphics? gpu, bool useUiThreadForSynchronousCommits = false)` *(internal; 1 of 3 constructors found)*
-  - `Compositor(IRenderLoop loop, IPlatformGraphics? gpu, bool useUiThreadForSynchronousCommits, ICompositorSche...` *(internal; 1 of 3 constructors found)*
-  - `Task<T> InvokeServerJobAsync<T>(Func<T> job, bool postTarget = false)` *(internal; 1 of 2 overloads found)*
-  - `ValueTask<IReadOnlyDictionary<Type, object>> GetRenderInterfacePublicFeatures()` *(internal)*
-  - `async Task<Bitmap> CreateCompositionVisualSnapshot(CompositionVisual visual, double scaling)`
-
-</details>
-
-<details><summary><code>ContainerVisual.cs</code> - 7 missing</summary>
-
-- `CompositionContainerVisual` (class): 7 missing
-  - `CompositionVisualCollection Children { get; private set; }`
-  - `override void OnRootChangedCore()` *(private protected)*
-  - `void AddHitTestChild(CompositionVisual child)` *(internal)*
-  - `void RemoveHitTestChild(CompositionVisual child)` *(internal)*
-  - `void ClearHitTestChildren()` *(internal)*
-  - `bool TryQueryHitTestChildren<THitTester, T>(T input, PooledList<CompositionVisual> results) where THitTeste...` *(internal)*
-  - `bool TryQueryFirstHitTestChild<THitTester, T>(CompositionTarget target, T input, Func<CompositionVisual, bo...` *(internal)*
-
-</details>
-
-<details><summary><code>Visual.cs</code> - 1 missing</summary>
-
-- `CompositionVisual` (class): 1 missing
-  - `virtual void OnRootChangedCore()` *(private protected)*
-
-</details>
-
-### `Rendering/Composition/Animations` - files 13/13, types 32/32, members 115/137
+### `Rendering/Composition/Animations` - files 13/13, types 32/32, members 115/137 (22 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AnimationInstanceBase.cs` | `rendering/composition/animations/animation_instance_base.rs` | partial | 1/1 | 9/12 |  |
-| `CompositionAnimation.cs` | `rendering/composition/animations/composition_animation.rs` | partial | 1/1 | 14/16 |  |
-| `CompositionAnimationGroup.cs` | `rendering/composition/animations/composition_animation_group.rs` | partial | 1/1 | 5/6 |  |
+| `AnimationInstanceBase.cs` | `rendering/composition/animations/animation_instance_base.rs` | present | 1/1 | 9/12 (3 waived) |  |
+| `CompositionAnimation.cs` | `rendering/composition/animations/composition_animation.rs` | present | 1/1 | 14/16 (2 waived) |  |
+| `CompositionAnimationGroup.cs` | `rendering/composition/animations/composition_animation_group.rs` | present | 1/1 | 5/6 (1 waived) |  |
 | `ExpressionAnimation.cs` | `rendering/composition/animations/expression_animation.rs` | present | 1/1 | 3/3 |  |
 | `ExpressionAnimationInstance.cs` | `rendering/composition/animations/expression_animation_instance.rs` | present | 1/1 | 3/3 |  |
 | `IAnimationInstance.cs` | `rendering/composition/animations/i_animation_instance.rs` | present | 1/1 | 6/6 |  |
-| `ICompositionAnimationBase.cs` | `rendering/composition/animations/i_composition_animation_base.rs` | partial | 1/1 | 0/1 |  |
-| `ImplicitAnimationCollection.cs` | `rendering/composition/animations/implicit_animation_collection.rs` | partial | 1/1 | 19/22 |  |
-| `Interpolators.cs` | `rendering/composition/animations/interpolators.rs` | partial | 13/13 | 14/26 |  |
+| `ICompositionAnimationBase.cs` | `rendering/composition/animations/i_composition_animation_base.rs` | present | 1/1 | 0/1 (1 waived) |  |
+| `ImplicitAnimationCollection.cs` | `rendering/composition/animations/implicit_animation_collection.rs` | present | 1/1 | 19/22 (3 waived) |  |
+| `Interpolators.cs` | `rendering/composition/animations/interpolators.rs` | present | 13/13 | 14/26 (12 waived) |  |
 | `KeyFrameAnimation.cs` | `rendering/composition/animations/key_frame_animation.rs` | present | 4/4 | 17/17 |  |
 | `KeyFrameAnimationInstance.cs` | `rendering/composition/animations/key_frame_animation_instance.rs` | present | 1/1 | 5/5 |  |
 | `KeyFrames.cs` | `rendering/composition/animations/key_frames.rs` | present | 4/4 | 12/12 |  |
 | `PropertySetSnapshot.cs` | `rendering/composition/animations/property_set_snapshot.rs` | present | 2/2 | 8/8 |  |
 
-<details><summary><code>AnimationInstanceBase.cs</code> - 3 missing</summary>
-
-- `AnimationInstanceBase` (class): 3 missing
-  - `void Initialize(CompositionProperty property, HashSet<(string name, string member)> trackedObjects)` *(protected; 1 of 2 overloads found)*
-  - `abstract ExpressionVariant EvaluateCore(TimeSpan now, ExpressionVariant currentValue)` *(protected)*
-  - `ExpressionVariant Evaluate(TimeSpan now, ExpressionVariant currentValue)`
-
-</details>
-
-<details><summary><code>CompositionAnimation.cs</code> - 2 missing</summary>
-
-- `CompositionAnimation` (class): 2 missing
-  - `abstract IAnimationInstance CreateInstance(ServerObject targetObject, ExpressionVariant? finalValue)` *(internal)*
-  - `void ICompositionAnimationBase.InternalOnly()` *(explicit)*
-
-</details>
-
-<details><summary><code>CompositionAnimationGroup.cs</code> - 1 missing</summary>
-
-- `CompositionAnimationGroup` (class): 1 missing
-  - `void ICompositionAnimationBase.InternalOnly()` *(explicit)*
-
-</details>
-
-<details><summary><code>ICompositionAnimationBase.cs</code> - 1 missing</summary>
-
-- `ICompositionAnimationBase` (interface): 1 missing
-  - `void InternalOnly()` *(internal)*
-
-</details>
-
-<details><summary><code>ImplicitAnimationCollection.cs</code> - 3 missing</summary>
-
-- `ImplicitAnimationCollection` (class): 3 missing
-  - `IEnumerator<KeyValuePair<string, ICompositionAnimationBase>> GetEnumerator()`
-  - `IEnumerator IEnumerable.GetEnumerator()` *(explicit)*
-  - `bool ICollection<KeyValuePair<string, ICompositionAnimationBase>>.Contains(KeyValuePair<string, ICompositio...` *(explicit)*
-
-</details>
-
-<details><summary><code>Interpolators.cs</code> - 12 missing</summary>
-
-- `ScalarInterpolator` (class): 1 missing
-  - `static ScalarInterpolator Instance { get; }`
-- `DoubleInterpolator` (class): 1 missing
-  - `static DoubleInterpolator Instance { get; }`
-- `Vector2Interpolator` (class): 1 missing
-  - `static Vector2Interpolator Instance { get; }`
-- `VectorInterpolator` (class): 1 missing
-  - `static VectorInterpolator Instance { get; }`
-- `Vector3Interpolator` (class): 1 missing
-  - `static Vector3Interpolator Instance { get; }`
-- `Vector3DInterpolator` (class): 1 missing
-  - `static Vector3DInterpolator Instance { get; }`
-- `Vector4Interpolator` (class): 1 missing
-  - `static Vector4Interpolator Instance { get; }`
-- `QuaternionInterpolator` (class): 1 missing
-  - `static QuaternionInterpolator Instance { get; }`
-- `ColorInterpolator` (class): 1 missing
-  - `static ColorInterpolator Instance { get; }`
-- `BooleanInterpolator` (class): 1 missing
-  - `static BooleanInterpolator Instance { get; }`
-- `RelativePointInterpolator` (class): 1 missing
-  - `static RelativePointInterpolator Instance { get; }`
-- `RelativeScalarInterpolator` (class): 1 missing
-  - `static RelativeScalarInterpolator Instance { get; }`
-
-</details>
-
-### `Rendering/Composition/Brushes` - files 4/5, types 5/20, members 14/32
+### `Rendering/Composition/Brushes` - files 5/5, types 5/20 (15 waived), members 14/32 (18 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `CompositionBrush.cs` | `rendering/composition/brushes/composition_brush.rs` | partial | 3/6 | 5/8 |  |
-| `ServerCompositionBrush.cs` | `rendering/composition/brushes/server_composition_brush.rs` | partial | 1/6 | 5/9 |  |
-| `ServerSimpleCompositionBrush.cs` | `rendering/composition/brushes/server_simple_composition_brush.rs` | missing (types found elsewhere) | 1/6 | 4/6 | types found in `rendering/composition/server/server_composition_simple_brush.rs` (add to path-overrides.toml) |
-| `ServerSimpleContentBrush.cs` | `rendering/composition/brushes/server_simple_content_brush.rs` | partial | 0/1 | 0/4 |  |
-| `ServerSimpleImageBrush.cs` | `rendering/composition/brushes/server_simple_image_brush.rs` | partial | 0/1 | 0/5 |  |
+| `CompositionBrush.cs` | `rendering/composition/brushes/composition_brush.rs` | present | 3/6 (3 waived) | 5/8 (3 waived) |  |
+| `ServerCompositionBrush.cs` | `rendering/composition/brushes/server_composition_brush.rs` | present | 1/6 (5 waived) | 5/9 (4 waived) |  |
+| `ServerSimpleCompositionBrush.cs` | `rendering/composition/server/server_composition_simple_brush.rs` | present | 1/6 (5 waived) | 4/6 (2 waived) | merged: the hand-written parts of the generated mutable brushes are next to the classes |
+| `ServerSimpleContentBrush.cs` | `rendering/composition/brushes/server_simple_content_brush.rs` | present | 0/1 (1 waived) | 0/4 (4 waived) |  |
+| `ServerSimpleImageBrush.cs` | `rendering/composition/brushes/server_simple_image_brush.rs` | present | 0/1 (1 waived) | 0/5 (5 waived) |  |
 
-<details><summary><code>CompositionBrush.cs</code> - 6 missing</summary>
-
-- `CompositionLinearGradientBrush` (class, internal): **type missing** (0 members)
-- `CompositionRadialGradientBrush` (class, internal): **type missing** (1 members)
-- `CompositionConicGradientBrush` (class, internal): **type missing** (0 members)
-- `CompositionGradientBrush` (class): 2 missing
-  - `new ServerCompositionGradientBrush Server { get; }` *(internal)*
-  - `override void SerializeChangesCore(BatchStreamWriter writer)` *(private protected)*
-
-</details>
-
-<details><summary><code>ServerCompositionBrush.cs</code> - 9 missing</summary>
-
-- `ServerCompositionBrush` (class, internal): **type missing** (2 members)
-- `ServerCompositionGradientBrush` (class): 1 missing
-  - `static CompositionProperty<List<IGradientStop>> s_IdOfGradientStopsProperty` *(internal)*
-- `ServerCompositionConicGradientBrush` (class, internal): **type missing** (0 members)
-- `ServerCompositionLinearGradientBrush` (class, internal): **type missing** (0 members)
-- `ServerCompositionRadialGradientBrush` (class, internal): **type missing** (1 members)
-- `ServerCompositionSolidColorBrush` (class, internal): **type missing** (0 members)
-
-</details>
-
-<details><summary><code>ServerSimpleCompositionBrush.cs</code> - 7 missing</summary>
-
-- `ServerCompositionSimpleBrush` (class, internal): **type missing** (2 members)
-- `ServerCompositionSimpleConicGradientBrush` (class, internal): **type missing** (0 members)
-- `ServerCompositionSimpleLinearGradientBrush` (class, internal): **type missing** (0 members)
-- `ServerCompositionSimpleRadialGradientBrush` (class, internal): **type missing** (0 members)
-- `ServerCompositionSimpleSolidColorBrush` (class, internal): **type missing** (0 members)
-
-</details>
-
-<details><summary><code>ServerSimpleContentBrush.cs</code> - 5 missing</summary>
-
-- `ServerCompositionSimpleContentBrush` (class, internal): **type missing** (4 members)
-
-</details>
-
-<details><summary><code>ServerSimpleImageBrush.cs</code> - 6 missing</summary>
-
-- `ServerCompositionSimpleImageBrush` (class, internal): **type missing** (5 members)
-
-</details>
-
-### `Rendering/Composition/Drawing` - files 21/21, types 42/45, members 250/302
+### `Rendering/Composition/Drawing` - files 21/21, types 44/45 (1 waived), members 280/302 (20 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `CompositionRenderData.cs` | `rendering/composition/drawing/composition_render_data.rs` | partial | 1/1 | 7/8 |  |
+| `CompositionRenderData.cs` | `rendering/composition/drawing/composition_render_data.rs` | present | 1/1 | 7/8 (1 waived) |  |
 | `CompositionRenderDataSceneBrushContent.cs` | `rendering/composition/drawing/composition_render_data_scene_brush_content.rs` | present | 2/2 | 15/15 |  |
 | `CompositorResourceHelpers.cs` | `rendering/composition/drawing/compositor_resource_helpers.rs` | present | 2/2 | 14/14 |  |
 | `ICompositionRenderResource.cs` | `rendering/composition/drawing/i_composition_render_resource.rs` | present | 2/2 | 3/3 |  |
 | `IRenderDataGeometry.cs` | `rendering/composition/drawing/i_render_data_geometry.rs` | present | 1/1 | 1/1 |  |
 | `IRenderDataVisitor.cs` | `rendering/composition/drawing/i_render_data_visitor.rs` | present | 1/1 | 17/17 |  |
 | `ImmediateRenderDataSceneBrushContent.cs` | `rendering/composition/drawing/immediate_render_data_scene_brush_content.rs` | present | 1/1 | 10/10 |  |
-| `RenderDataDrawingContext.cs` | `rendering/composition/drawing/render_data_drawing_context.rs` | partial | 1/1 | 28/30 |  |
+| `RenderDataDrawingContext.cs` | `rendering/composition/drawing/render_data_drawing_context.rs` | present | 1/1 | 30/30 |  |
 | `RenderDataOpcode.cs` | `rendering/composition/drawing/render_data_opcode.rs` | present | 1/1 | 17/17 |  |
-| `RenderDataPayloads.cs` | `rendering/composition/drawing/render_data_payloads.rs` | partial | 16/16 | 35/50 |  |
+| `RenderDataPayloads.cs` | `rendering/composition/drawing/render_data_payloads.rs` | present | 16/16 | 35/50 (15 waived) |  |
 | `RenderDataReader.cs` | `rendering/composition/drawing/render_data_reader.rs` | present | 1/1 | 7/7 |  |
 | `RenderDataResources.cs` | `rendering/composition/drawing/render_data_resources.rs` | present | 1/1 | 6/6 |  |
 | `RenderDataStream.Bounds.cs` | `rendering/composition/drawing/render_data_stream_bounds.rs` | present | 3/3 | 23/23 |  |
-| `RenderDataStream.HitTest.cs` | `rendering/composition/drawing/render_data_stream.rs` | partial | 1/3 | 0/30 | partial merged into main file |
+| `RenderDataStream.HitTest.cs` | `rendering/composition/drawing/render_data_stream_hit_test.rs` | partial | 3/3 | 28/30 |  |
 | `RenderDataStream.Replay.cs` | `rendering/composition/drawing/render_data_stream_replay.rs` | present | 3/3 | 22/22 |  |
 | `RenderDataStream.Visit.cs` | `rendering/composition/drawing/render_data_stream.rs` | present | 1/1 | 1/1 | partial merged into main file |
 | `RenderDataStream.cs` | `rendering/composition/drawing/render_data_stream.rs` | present | 1/1 | 26/26 |  |
 | `RenderDataWriter.cs` | `rendering/composition/drawing/render_data_writer.rs` | present | 1/1 | 8/8 |  |
 | `ServerCompositionRenderData.cs` | `rendering/composition/drawing/server_composition_render_data.rs` | present | 1/1 | 8/8 |  |
 | `ServerCompositionSimplePen.cs` | `rendering/composition/drawing/server_composition_simple_pen.rs` | present | 1/1 | 2/2 |  |
-| `ServerResourceHelperExtensions.cs` | `rendering/composition/drawing/server_resource_helper_extensions.rs` | partial | 0/1 | 0/4 |  |
+| `ServerResourceHelperExtensions.cs` | `rendering/composition/drawing/server_resource_helper_extensions.rs` | present | 0/1 (1 waived) | 0/4 (4 waived) |  |
 
-<details><summary><code>CompositionRenderData.cs</code> - 1 missing</summary>
+<details><summary><code>RenderDataStream.HitTest.cs</code> - 2 missing</summary>
 
-- `CompositionRenderData` (class): 1 missing
-  - `void AddResource(ICompositionRenderResource resource)`
-
-</details>
-
-<details><summary><code>RenderDataDrawingContext.cs</code> - 2 missing</summary>
-
-- `RenderDataDrawingContext` (class): 2 missing
-  - `override void DrawGeometryCore(IBrush? brush, IPen? pen, Geometry geometry)` *(protected; 1 of 2 overloads found)*
-  - `override void PushClipCore(Rect rect)` *(protected; 1 of 2 overloads found)*
+- `RenderDataStream.HitTestVisitor` (struct): 2 missing
+  - `HitTestVisitor(Geometry geometry)` *(1 of 3 constructors found)*
+  - `HitTestVisitor(Point point)` *(1 of 3 constructors found)*
 
 </details>
 
-<details><summary><code>RenderDataPayloads.cs</code> - 15 missing</summary>
-
-- `DrawLinePayload` (struct): 1 missing
-  - `static RenderDataOpcode Opcode { get; }`
-- `DrawRectanglePayload` (struct): 1 missing
-  - `static RenderDataOpcode Opcode { get; }`
-- `DrawEllipsePayload` (struct): 1 missing
-  - `static RenderDataOpcode Opcode { get; }`
-- `DrawGeometryPayload` (struct): 1 missing
-  - `static RenderDataOpcode Opcode { get; }`
-- `DrawGlyphRunPayload` (struct): 1 missing
-  - `static RenderDataOpcode Opcode { get; }`
-- `DrawBitmapPayload` (struct): 1 missing
-  - `static RenderDataOpcode Opcode { get; }`
-- `DrawCustomPayload` (struct): 1 missing
-  - `static RenderDataOpcode Opcode { get; }`
-- `PushClipPayload` (struct): 1 missing
-  - `static RenderDataOpcode Opcode { get; }`
-- `PushGeometryClipPayload` (struct): 1 missing
-  - `static RenderDataOpcode Opcode { get; }`
-- `PushOpacityPayload` (struct): 1 missing
-  - `static RenderDataOpcode Opcode { get; }`
-- `PushOpacityMaskPayload` (struct): 1 missing
-  - `static RenderDataOpcode Opcode { get; }`
-- `PushTransformPayload` (struct): 1 missing
-  - `static RenderDataOpcode Opcode { get; }`
-- `PushRenderOptionsPayload` (struct): 1 missing
-  - `static RenderDataOpcode Opcode { get; }`
-- `PushTextOptionsPayload` (struct): 1 missing
-  - `static RenderDataOpcode Opcode { get; }`
-- `PushEffectPayload` (struct): 1 missing
-  - `static RenderDataOpcode Opcode { get; }`
-
-</details>
-
-<details><summary><code>RenderDataStream.HitTest.cs</code> - 32 missing</summary>
-
-- `RenderDataStream` (class): 2 missing
-  - `bool HitTest(Point point)`
-  - `IntersectionResult HitTest(Geometry geometry)`
-- `RenderDataStream.HitTestScope` (struct, internal): **type missing** (3 members)
-- `RenderDataStream.HitTestVisitor` (struct, internal): **type missing** (25 members)
-
-</details>
-
-<details><summary><code>ServerResourceHelperExtensions.cs</code> - 5 missing</summary>
-
-- `ServerResourceHelperExtensions` (class, internal): **type missing** (4 members)
-
-</details>
-
-### `Rendering/Composition/Expressions` - files 9/9, types 25/26, members 162/210 (1 waived)
+### `Rendering/Composition/Expressions` - files 9/9, types 25/26 (1 waived), members 162/210 (48 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `BuiltInExpressionFfi.cs` | `rendering/composition/expressions/built_in_expression_ffi.rs` | present | 1/1 | 2/2 |  |
-| `DelegateExpressionFfi.cs` | `rendering/composition/expressions/delegate_expression_ffi.rs` | partial | 1/1 | 2/10 |  |
-| `Expression.cs` | `rendering/composition/expressions/expression.rs` | partial | 12/13 | 74/94 |  |
+| `DelegateExpressionFfi.cs` | `rendering/composition/expressions/delegate_expression_ffi.rs` | present | 1/1 | 2/10 (8 waived) |  |
+| `Expression.cs` | `rendering/composition/expressions/expression.rs` | present | 12/13 (1 waived) | 74/94 (20 waived) |  |
 | `ExpressionEvaluationContext.cs` | `rendering/composition/expressions/expression_evaluation_context.rs` | present | 4/4 | 10/10 |  |
 | `ExpressionParseException.cs` | `rendering/composition/expressions/expression_parse_exception.rs` | present | 1/1 | 2/2 |  |
 | `ExpressionParser.cs` | `rendering/composition/expressions/expression_parser.rs` | present | 1/1 | 1/1 |  |
 | `ExpressionTrackedValues.cs` | `rendering/composition/expressions/expression_tracked_values.rs` | present | 2/2 | 8/8 |  |
-| `ExpressionVariant.cs` | `rendering/composition/expressions/expression_variant.rs` | partial | 2/2 | 45/65 (1 waived) |  |
+| `ExpressionVariant.cs` | `rendering/composition/expressions/expression_variant.rs` | present | 2/2 | 45/65 (20 waived) |  |
 | `TokenParser.cs` | `rendering/composition/expressions/token_parser.rs` | present | 1/1 | 18/18 |  |
-
-<details><summary><code>DelegateExpressionFfi.cs</code> - 8 missing</summary>
-
-- `DelegateExpressionFfi` (class): 8 missing
-  - `IEnumerator IEnumerable.GetEnumerator()` *(explicit)*
-  - `void Add<T1>(string name, Func<T1, ExpressionVariant> cb) where T1 : struct` *(1 of 8 overloads found)*
-  - `void Add<T1, T2>(string name, Func<T1, T2, ExpressionVariant> cb) where T1 : struct where T2 : struct` *(1 of 8 overloads found)*
-  - `void Add<T1, T2, T3>(string name, Func<T1, T2, T3, ExpressionVariant> cb) where T1 : struct where T2 : stru...` *(1 of 8 overloads found)*
-  - `void Add<T1, T2, T3, T4>(string name, Func<T1, T2, T3, T4, ExpressionVariant> cb) where T1 : struct where T...` *(1 of 8 overloads found)*
-  - `void Add<T1, T2, T3, T4, T5>(string name, Func<T1, T2, T3, T4, T5, ExpressionVariant> cb) where T1 : struct...` *(1 of 8 overloads found)*
-  - `void Add<T1, T2, T3, T4, T5, T6>(string name, Func<T1, T2, T3, T4, T5, T6, ExpressionVariant> cb) where T1 ...` *(1 of 8 overloads found)*
-  - `void Add<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(string name, Func<T1, T2, T...` *(1 of 8 overloads found)*
-
-</details>
-
-<details><summary><code>Expression.cs</code> - 21 missing</summary>
-
-- `Expression` (class): 2 missing
-  - `abstract ExpressionType Type { get; }`
-  - `abstract string Print()` *(protected)*
-- `PrettyPrintStringAttribute` (class, internal): **type missing** (2 members)
-- `ConditionalExpression` (class): 2 missing
-  - `override ExpressionType Type { get; }`
-  - `override string Print()` *(protected)*
-- `ConstantExpression` (class): 2 missing
-  - `override ExpressionType Type { get; }`
-  - `override string Print()` *(protected)*
-- `FunctionCallExpression` (class): 2 missing
-  - `override ExpressionType Type { get; }`
-  - `override string Print()` *(protected)*
-- `MemberAccessExpression` (class): 2 missing
-  - `override ExpressionType Type { get; }`
-  - `override string Print()` *(protected)*
-- `ParameterExpression` (class): 2 missing
-  - `override ExpressionType Type { get; }`
-  - `override string Print()` *(protected)*
-- `KeywordExpression` (class): 2 missing
-  - `override ExpressionType Type { get; }`
-  - `override string Print()` *(protected)*
-- `UnaryExpression` (class): 2 missing
-  - `override ExpressionType Type { get; }`
-  - `override string Print()` *(protected)*
-- `BinaryExpression` (class): 2 missing
-  - `override ExpressionType Type { get; }`
-  - `override string Print()` *(protected)*
-
-</details>
-
-<details><summary><code>ExpressionVariant.cs</code> - 19 missing</summary>
-
-- `VariantType` (enum): 1 missing
-  - `AvaloniaMatrix`
-- `ExpressionVariant` (struct): 18 missing
-  - `VariantType Type`
-  - `Matrix AvaloniaMatrix`
-  - `static implicit operator ExpressionVariant(bool value)`
-  - `static implicit operator ExpressionVariant(double d)`
-  - `static implicit operator ExpressionVariant(Vector2 value)`
-  - `static implicit operator ExpressionVariant(Vector value)`
-  - `static implicit operator ExpressionVariant(Vector3 value)`
-  - `static implicit operator ExpressionVariant(Vector3D value)`
-  - `static implicit operator ExpressionVariant(Vector4 value)`
-  - `static implicit operator ExpressionVariant(Matrix3x2 value)`
-  - `static implicit operator ExpressionVariant(Matrix value)`
-  - `static implicit operator ExpressionVariant(Quaternion value)`
-  - `static implicit operator ExpressionVariant(Avalonia.Media.Color value)`
-  - `static implicit operator ExpressionVariant(RelativePoint value)`
-  - `static implicit operator ExpressionVariant(RelativeScalar value)`
-  - `static implicit operator ExpressionVariant(RelativeUnit value)`
-  - `static ExpressionVariant operator <(ExpressionVariant left, ExpressionVariant right)`
-  - `static ExpressionVariant operator >(ExpressionVariant left, ExpressionVariant right)`
-  - waived (System.Numerics interop, not applicable): `implicit operator`
-
-</details>
 
 ### `Rendering/Composition/HitTesting` - files 4/4, types 4/4, members 22/22
 
@@ -4169,166 +1832,44 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ICompositionHitTester.cs` | `rendering/composition/hit_testing/i_composition_hit_tester.rs` | present | 1/1 | 5/5 |  |
 | `PointCompositionHitTester.cs` | `rendering/composition/hit_testing/point_composition_hit_tester.rs` | present | 1/1 | 5/5 |  |
 
-### `Rendering/Composition/Server` - files 33/34, types 38/41, members 205/261
+### `Rendering/Composition/Server` - files 34/34, types 41/41, members 212/261 (49 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `CompositionProperty.cs` | `rendering/composition/server/composition_property.rs` | partial | 2/2 | 7/9 |  |
+| `CompositionProperty.cs` | `rendering/composition/server/composition_property.rs` | present | 2/2 | 7/9 (2 waived) |  |
 | `CompositionTargetOverlays.cs` | `rendering/composition/server/composition_target_overlays.rs` | present | 1/1 | 8/8 |  |
-| `CompositorPools.cs` | `rendering/composition/server/compositor_pools.rs` | partial | 2/2 | 8/9 |  |
+| `CompositorPools.cs` | `rendering/composition/server/compositor_pools.rs` | present | 2/2 | 8/9 (1 waived) |  |
 | `DiagnosticTextRenderer.cs` | `rendering/composition/server/diagnostic_text_renderer.rs` | present | 1/1 | 4/4 |  |
 | `DrawingContextProxy.PendingCommands.cs` | `rendering/composition/server/drawing_context_proxy.rs` | present | 1/1 | 3/3 | partial merged into main file |
 | `DrawingContextProxy.cs` | `rendering/composition/server/drawing_context_proxy.rs` | present | 1/1 | 34/34 |  |
 | `FpsCounter.cs` | `rendering/composition/server/fps_counter.rs` | present | 1/1 | 4/4 |  |
 | `FrameTimeGraph.cs` | `rendering/composition/server/frame_time_graph.rs` | present | 1/1 | 5/5 |  |
 | `IServerClockItem.cs` | `rendering/composition/server/i_server_clock_item.rs` | present | 1/1 | 1/1 |  |
-| `ReadbackIndices.cs` | `rendering/composition/server/readback_indices.rs` | partial | 1/1 | 6/7 |  |
+| `ReadbackIndices.cs` | `rendering/composition/server/readback_indices.rs` | present | 1/1 | 6/7 (1 waived) |  |
 | `ServerCompositionBitmapCache.cs` | `rendering/composition/server/server_composition_bitmap_cache.rs` | present | 1/1 | 0/0 |  |
-| `ServerCompositionCacheMode.cs` | `rendering/composition/server/server_composition_cache_mode.rs` | partial | 0/1 | 0/3 |  |
-| `ServerCompositionContainerVisual.cs` | `rendering/composition/server/server_composition_container_visual.rs` | partial | 1/1 | 0/1 |  |
+| `ServerCompositionCacheMode.cs` | `rendering/composition/server/server_composition_bitmap_cache.rs` | present | 1/1 | 3/3 | merged: the bitmap cache is the only cache mode, so the members of the abstract class (the visuals attached to the mode) are members of `ServerCompositionBitmapCache`, and `ServerCompositionCacheMode` is an alias of it |
+| `ServerCompositionContainerVisual.cs` | `rendering/composition/server/server_composition_container_visual.rs` | present | 1/1 | 0/1 (1 waived) |  |
 | `ServerCompositionDrawListVisual.cs` | `rendering/composition/server/server_composition_draw_list_visual.rs` | present | 1/1 | 5/5 |  |
 | `ServerCompositionDrawingSurface.cs` | `rendering/composition/server/server_composition_drawing_surface.rs` | present | 1/1 | 7/7 |  |
 | `ServerCompositionExperimentalAcrylicVisual.cs` | `rendering/composition/server/server_composition_experimental_acrylic_visual.rs` | present | 1/1 | 4/4 |  |
 | `ServerCompositionGradientStop.cs` | `rendering/composition/server/server_composition_gradient_stop.rs` | present | 1/1 | 0/0 |  |
 | `ServerCompositionSimpleGeometry.cs` | `rendering/composition/server/server_composition_simple_geometry.rs` | present | 1/1 | 0/0 |  |
 | `ServerCompositionSolidColorVisual.cs` | `rendering/composition/server/server_composition_solid_color_visual.rs` | present | 1/1 | 1/1 |  |
-| `ServerCompositionSurface.cs` | `rendering/composition/server/server_composition_surface.rs` | partial | 0/1 | 0/3 |  |
+| `ServerCompositionSurface.cs` | `rendering/composition/server/server_composition_surface.rs` | present | 1/1 | 1/3 (2 waived) | merged: the abstract class is the trait `IServerCompositionSurface` (`bitmap`, `changed`), implemented by `ServerCompositionDrawingSurface` |
 | `ServerCompositionSurfaceVisual.cs` | `rendering/composition/server/server_composition_surface_visual.rs` | present | 1/1 | 3/3 |  |
-| `ServerCompositionTarget.cs` | `rendering/composition/server/server_composition_target.rs` | partial | 1/1 | 15/18 |  |
+| `ServerCompositionTarget.cs` | `rendering/composition/server/server_composition_target.rs` | present | 1/1 | 15/18 (3 waived) |  |
 | `ServerCompositor.Passes.cs` | `rendering/composition/server/server_compositor.rs` | present | 1/1 | 4/4 | partial merged into main file |
 | `ServerCompositor.UserApis.cs` | `rendering/composition/server/server_compositor.rs` | present | 1/1 | 5/5 | partial merged into main file |
-| `ServerCompositor.cs` | `rendering/composition/server/server_compositor.rs` | partial | 1/1 | 18/26 |  |
+| `ServerCompositor.cs` | `rendering/composition/server/server_compositor.rs` | present | 1/1 | 18/26 (8 waived) |  |
 | `ServerCompositorAnimations.cs` | `rendering/composition/server/server_compositor_animations.rs` | present | 1/1 | 5/5 |  |
-| `ServerCustomCompositionVisual.cs` | `rendering/composition/server/server_custom_composition_visual.rs` | partial | 1/1 | 7/10 |  |
-| `ServerList.cs` | `rendering/composition/server/server_list.rs` | partial | 1/1 | 3/4 |  |
-| `ServerObject.cs` | `rendering/composition/server/server_object.rs` | partial | 1/1 | 10/12 |  |
+| `ServerCustomCompositionVisual.cs` | `rendering/composition/server/server_custom_composition_visual.rs` | present | 1/1 | 7/10 (3 waived) |  |
+| `ServerList.cs` | `rendering/composition/server/server_list.rs` | present | 1/1 | 3/4 (1 waived) |  |
+| `ServerObject.cs` | `rendering/composition/server/server_object.rs` | present | 1/1 | 10/12 (2 waived) |  |
 | `ServerObjectAnimations.cs` | `rendering/composition/server/server_object_animations.rs` | present | 1/1 | 11/11 |  |
-| `ServerRenderResource.cs` | `rendering/composition/server/server_render_resource.rs` | partial | 6/6 | 23/43 |  |
-| `ServerSizeDependantVisual.cs` | `rendering/composition/server/server_size_dependant_visual.rs` | partial | 1/1 | 2/3 |  |
+| `ServerRenderResource.cs` | `rendering/composition/server/server_render_resource.rs` | present | 6/6 | 23/43 (20 waived) |  |
+| `ServerSizeDependantVisual.cs` | `rendering/composition/server/server_size_dependant_visual.rs` | present | 1/1 | 2/3 (1 waived) |  |
 | `ServerVisualRenderContext.cs` | `rendering/composition/server/server_visual_render_context.rs` | present | 1/1 | 2/2 |  |
-| `SimpleServerObject.cs` | `rendering/composition/server/simple_server_object.rs` | missing | 0/1 | 0/7 |  |
-
-<details><summary><code>CompositionProperty.cs</code> - 2 missing</summary>
-
-- `CompositionProperty<T>` (class): 2 missing
-  - `Func<SimpleServerObject, T> GetField { get; }`
-  - `Action<SimpleServerObject, T> SetField { get; }`
-
-</details>
-
-<details><summary><code>CompositorPools.cs</code> - 1 missing</summary>
-
-- `CompositorPools.StackPool<T>` (class): 1 missing
-  - `void Return(Stack<T>? stack)` *(1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>ReadbackIndices.cs</code> - 1 missing</summary>
-
-- `ReadbackIndices` (class): 1 missing
-  - `void EndWrite()`
-
-</details>
-
-<details><summary><code>ServerCompositionCacheMode.cs</code> - 4 missing</summary>
-
-- `ServerCompositionCacheMode` (class, internal): **type missing** (3 members)
-
-</details>
-
-<details><summary><code>ServerCompositionContainerVisual.cs</code> - 1 missing</summary>
-
-- `ServerCompositionContainerVisual` (class) in `rendering/composition/server/server_composition_visual/mod.rs`: 1 missing
-  - `new ServerCompositionVisualCollection Children { get; }`
-
-</details>
-
-<details><summary><code>ServerCompositionSurface.cs</code> - 4 missing</summary>
-
-- `ServerCompositionSurface` (class, internal): **type missing** (3 members)
-
-</details>
-
-<details><summary><code>ServerCompositionTarget.cs</code> - 3 missing</summary>
-
-- `ServerCompositionTarget` (class): 3 missing
-  - `ulong Revision { get; private set; }`
-  - `int RenderedVisuals { get; set; }` *(getter `rendered_visuals` found, setter `set_rendered_visuals` missing)*
-  - `int VisitedVisuals { get; set; }` *(getter `visited_visuals` found, setter `set_visited_visuals` missing)*
-
-</details>
-
-<details><summary><code>ServerCompositor.cs</code> - 8 missing</summary>
-
-- `ServerCompositor` (class): 8 missing
-  - `BatchStreamObjectPool<object?> BatchObjectPool` *(internal)*
-  - `BatchStreamMemoryPool BatchMemoryPool` *(internal)*
-  - `static readonly object RenderThreadDisposeStartMarker` *(internal)*
-  - `static readonly object RenderThreadJobsStartMarker` *(internal)*
-  - `static readonly object RenderThreadJobsEndMarker` *(internal)*
-  - `static readonly object RenderThreadPostTargetJobsStartMarker` *(internal)*
-  - `static readonly object RenderThreadPostTargetJobsEndMarker` *(internal)*
-  - `void EnqueueBatch(CompositionBatch batch)`
-
-</details>
-
-<details><summary><code>ServerCustomCompositionVisual.cs</code> - 3 missing</summary>
-
-- `ServerCompositionCustomVisual` (class): 3 missing
-  - `void OnTick()`
-  - `void HandlerInvalidate()` *(internal)*
-  - `void HandlerInvalidate(Rect rc)` *(internal)*
-
-</details>
-
-<details><summary><code>ServerList.cs</code> - 1 missing</summary>
-
-- `ServerList<T>` (class): 1 missing
-  - `List<T>.Enumerator GetEnumerator()`
-
-</details>
-
-<details><summary><code>ServerObject.cs</code> - 2 missing</summary>
-
-- `ServerObject` (class): 2 missing
-  - `void SetAnimatedValue<T>(CompositionProperty property, out T field, T value)` *(protected; 1 of 2 overloads found)*
-  - `virtual void NotifyAnimatedValueChanged(CompositionProperty property)`
-
-</details>
-
-<details><summary><code>ServerRenderResource.cs</code> - 20 missing</summary>
-
-- `SimpleServerRenderResource` (class): 10 missing
-  - `new void SetValue<T>(CompositionProperty prop, ref T field, T value)` *(protected)*
-  - `void SetValue<T>(ref T field, T value)` *(protected)*
-  - `void Invalidated()` *(protected)*
-  - `override void ValuesInvalidated()` *(protected)*
-  - `void RemoveObserversFromProperty<T>(ref T field)` *(protected)*
-  - `virtual void Dispose()`
-  - `virtual void PropertyChanged()` *(protected)*
-  - `void AddObserver(IServerRenderResourceObserver observer)`
-  - `void RemoveObserver(IServerRenderResourceObserver observer)`
-  - `void IServerRenderResourceHost.ResourcePropertyChanged()` *(explicit)*
-- `ServerRenderResource` (class): 10 missing
-  - `new void SetValue<T>(CompositionProperty prop, ref T field, T value)` *(protected)*
-  - `void SetValue<T>(ref T field, T value)` *(protected)*
-  - `void Invalidated()` *(protected)*
-  - `override void ValuesInvalidated()` *(protected)*
-  - `void RemoveObserversFromProperty<T>(ref T field)` *(protected)*
-  - `virtual void Dispose()`
-  - `virtual void PropertyChanged()` *(protected)*
-  - `void AddObserver(IServerRenderResourceObserver observer)`
-  - `void RemoveObserver(IServerRenderResourceObserver observer)`
-  - `void IServerRenderResourceHost.ResourcePropertyChanged()` *(explicit)*
-
-</details>
-
-<details><summary><code>ServerSizeDependantVisual.cs</code> - 1 missing</summary>
-
-- `ServerSizeDependantVisual` (class): 1 missing
-  - `ServerSizeDependantVisual(ServerCompositor compositor)`
-
-</details>
+| `SimpleServerObject.cs` | `rendering/composition/server/server_object.rs` | present | 1/1 | 3/7 (4 waived) | merged: the base class of the server objects is the trait `IServerObject` (`deserialize_changes`, `deserialize_changes_core`, `values_invalidated`), declared next to `ServerObject` |
 
 ### `Rendering/Composition/Server/DirtyRects` - files 6/6, types 7/7, members 37/37
 
@@ -4341,85 +1882,30 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `RegionDirtyRectTracker.cs` | `rendering/composition/server/dirty_rects/region_dirty_rect_tracker.rs` | present | 1/1 | 9/9 |  |
 | `SingleDirtyRectTracker.cs` | `rendering/composition/server/dirty_rects/single_dirty_rect_tracker.rs` | present | 1/1 | 8/8 |  |
 
-### `Rendering/Composition/Server/ServerCompositionVisual` - files 1/10, types 10/12, members 36/46
+### `Rendering/Composition/Server/ServerCompositionVisual` - files 10/10, types 12/12, members 43/46 (3 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ServerCompositionVisual.Act.cs` | `rendering/composition/server/server_composition_visual/server_composition_visual_act.rs` | missing (types found elsewhere) | 1/1 | 3/3 | types found in `rendering/composition/server/server_composition_visual/mod.rs` (add to path-overrides.toml) |
-| `ServerCompositionVisual.Adorners.cs` | `rendering/composition/server/server_composition_visual/server_composition_visual_adorners.rs` | missing (types found elsewhere) | 1/1 | 2/2 | types found in `rendering/composition/server/server_composition_visual/mod.rs` (add to path-overrides.toml) |
-| `ServerCompositionVisual.ComputedProperties.cs` | `rendering/composition/server/server_composition_visual/server_composition_visual_computed_properties.rs` | missing (types found elsewhere) | 1/1 | 5/5 | types found in `rendering/composition/server/server_composition_visual/mod.rs` (add to path-overrides.toml) |
-| `ServerCompositionVisual.DirtyInputs.cs` | `rendering/composition/server/server_composition_visual/server_composition_visual_dirty_inputs.rs` | missing (types found elsewhere) | 1/1 | 9/9 | types found in `rendering/composition/server/server_composition_visual/mod.rs` (add to path-overrides.toml) |
-| `ServerCompositionVisual.Readback.cs` | `rendering/composition/server/server_composition_visual/server_composition_visual_readback.rs` | missing (types found elsewhere) | 1/2 | 2/7 | types found in `rendering/composition/server/server_composition_visual/mod.rs` (add to path-overrides.toml) |
-| `ServerCompositionVisual.Render.cs` | `rendering/composition/server/server_composition_visual/server_composition_visual_render.rs` | missing (types found elsewhere) | 1/1 | 2/2 | types found in `rendering/composition/server/server_composition_visual/mod.rs` (add to path-overrides.toml) |
-| `ServerCompositionVisual.Update.cs` | `rendering/composition/server/server_composition_visual/server_composition_visual_update.rs` | missing (types found elsewhere) | 1/1 | 1/2 | types found in `rendering/composition/server/server_composition_visual/mod.rs` (add to path-overrides.toml) |
-| `ServerCompositionVisual.Walker.cs` | `rendering/composition/server/server_composition_visual/server_composition_visual_walker.rs` | missing (types found elsewhere) | 1/2 | 0/3 | types found in `rendering/composition/server/server_composition_visual/mod.rs` (add to path-overrides.toml) |
-| `ServerCompositionVisual.cs` | `rendering/composition/server/server_composition_visual/server_composition_visual.rs` | missing (types found elsewhere) | 1/1 | 6/6 | types found in `rendering/composition/server/server_composition_visual/mod.rs` (add to path-overrides.toml) |
-| `ServerCompositionVisualCache.cs` | `rendering/composition/server/server_composition_visual/server_composition_visual_cache.rs` | partial | 1/1 | 6/7 |  |
+| `ServerCompositionVisual.Act.cs` | `rendering/composition/server/server_composition_visual/act.rs`, `rendering/composition/server/server_composition_visual/mod.rs` | present | 1/1 | 3/3 | renamed: the parts of the partial class are the files of the module `server_composition_visual`, named after the part |
+| `ServerCompositionVisual.Adorners.cs` | `rendering/composition/server/server_composition_visual/adorners.rs`, `rendering/composition/server/server_composition_visual/mod.rs` | present | 1/1 | 2/2 | renamed: the parts of the partial class are the files of the module `server_composition_visual`, named after the part |
+| `ServerCompositionVisual.ComputedProperties.cs` | `rendering/composition/server/server_composition_visual/computed_properties.rs`, `rendering/composition/server/server_composition_visual/mod.rs` | present | 1/1 | 5/5 | renamed: the parts of the partial class are the files of the module `server_composition_visual`, named after the part |
+| `ServerCompositionVisual.DirtyInputs.cs` | `rendering/composition/server/server_composition_visual/dirty_inputs.rs`, `rendering/composition/server/server_composition_visual/mod.rs` | present | 1/1 | 9/9 | renamed: the parts of the partial class are the files of the module `server_composition_visual`, named after the part |
+| `ServerCompositionVisual.Readback.cs` | `rendering/composition/server/server_composition_visual/readback.rs`, `rendering/composition/server/server_composition_visual/mod.rs` | present | 2/2 | 7/7 | renamed: the parts of the partial class are the files of the module `server_composition_visual`, named after the part |
+| `ServerCompositionVisual.Render.cs` | `rendering/composition/server/server_composition_visual/render.rs`, `rendering/composition/server/server_composition_visual/mod.rs` | present | 1/1 | 2/2 | renamed: the parts of the partial class are the files of the module `server_composition_visual`, named after the part |
+| `ServerCompositionVisual.Update.cs` | `rendering/composition/server/server_composition_visual/update.rs`, `rendering/composition/server/server_composition_visual/mod.rs` | present | 1/1 | 1/2 (1 waived) | renamed: the parts of the partial class are the files of the module `server_composition_visual`, named after the part |
+| `ServerCompositionVisual.Walker.cs` | `rendering/composition/server/server_composition_visual/walker.rs`, `rendering/composition/server/server_composition_visual/mod.rs` | present | 2/2 | 2/3 (1 waived) | renamed: the parts of the partial class are the files of the module `server_composition_visual`, named after the part |
+| `ServerCompositionVisual.cs` | `rendering/composition/server/server_composition_visual/mod.rs` | present | 1/1 | 6/6 | renamed: the main file of the partial class is the module file of its directory |
+| `ServerCompositionVisualCache.cs` | `rendering/composition/server/server_composition_visual/server_composition_visual_cache.rs` | present | 1/1 | 6/7 (1 waived) |  |
 
-<details><summary><code>ServerCompositionVisual.Readback.cs</code> - 6 missing</summary>
-
-- `ServerCompositionVisual.ReadbackData` (class, public): **type missing** (5 members)
-
-</details>
-
-<details><summary><code>ServerCompositionVisual.Update.cs</code> - 1 missing</summary>
-
-- `ServerCompositionVisual` (class) in `rendering/composition/server/server_composition_visual/mod.rs`: 1 missing
-  - `virtual bool HasEffect { get; }` *(protected)*
-
-</details>
-
-<details><summary><code>ServerCompositionVisual.Walker.cs</code> - 4 missing</summary>
-
-- `ServerCompositionVisual.TreeWalkerFrame` (record struct, public): **type missing** (3 members)
-
-</details>
-
-<details><summary><code>ServerCompositionVisualCache.cs</code> - 1 missing</summary>
-
-- `ServerCompositionVisualCache` (class): 1 missing
-  - `IDirtyRectCollector DirtyRectCollector { get; private set; }`
-
-</details>
-
-### `Rendering/Composition/Transport` - files 4/5, types 9/12, members 50/64
+### `Rendering/Composition/Transport` - files 5/5, types 9/12 (3 waived), members 50/64 (14 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Batch.cs` | `rendering/composition/transport/batch.rs` | partial | 1/1 | 6/8 |  |
-| `BatchStream.cs` | `rendering/composition/transport/batch_stream.rs` | partial | 3/5 | 12/19 |  |
+| `Batch.cs` | `rendering/composition/transport/batch.rs` | present | 1/1 | 6/8 (2 waived) |  |
+| `BatchStream.cs` | `rendering/composition/transport/batch_stream.rs` | present | 3/5 (2 waived) | 12/19 (7 waived) |  |
 | `BatchStreamArrayPool.cs` | `rendering/composition/transport/batch_stream_array_pool.rs` | present | 3/3 | 18/18 |  |
-| `BatchStreamDebugMarker.cs` | `rendering/composition/transport/batch_stream_debug_marker.rs` | missing | 0/1 | 0/2 |  |
-| `ServerListProxyHelper.cs` | `rendering/composition/transport/server_list_proxy_helper.rs` | partial | 2/2 | 14/17 |  |
-
-<details><summary><code>Batch.cs</code> - 2 missing</summary>
-
-- `CompositionBatch` (class): 2 missing
-  - `BatchStreamData Changes { get; private set; }` *(internal)*
-  - `TimeSpan CommittedAt { get; set; }` *(internal)*
-
-</details>
-
-<details><summary><code>BatchStream.cs</code> - 9 missing</summary>
-
-- `BatchStreamSegment<TData>` (record struct, public): **type missing** (2 members)
-- `UnalignedMemoryHelper` (class, internal): **type missing** (2 members)
-- `BatchStreamWriter` (class): 1 missing
-  - `void Dispose()`
-- `BatchStreamReader` (class): 2 missing
-  - `object? ReadObject()` *(1 of 2 overloads found)*
-  - `void Dispose()`
-
-</details>
-
-<details><summary><code>ServerListProxyHelper.cs</code> - 3 missing</summary>
-
-- `ServerListProxyHelper<TClient, TServer>` (class): 3 missing
-  - `IEnumerator<TClient> IEnumerable<TClient>.GetEnumerator()` *(explicit)*
-  - `List<TClient>.Enumerator GetEnumerator()`
-  - `IEnumerator IEnumerable.GetEnumerator()` *(explicit)*
-
-</details>
+| `BatchStreamDebugMarker.cs` | `rendering/composition/transport/batch_stream.rs` | present | 0/1 (1 waived) | 0/2 (2 waived) | replaced: the two debug markers written after the changes of an object are `BatchMarker::ObjectEnd` (instead of a marker object compared by reference) and the constant `OBJECT_END_MAGIC` of `server_compositor.rs` (instead of a GUID created at start-up) |
+| `ServerListProxyHelper.cs` | `rendering/composition/transport/server_list_proxy_helper.rs` | present | 2/2 | 14/17 (3 waived) |  |
 
 ### `Rendering/SceneGraph` - files 2/2, types 2/2, members 7/7
 
@@ -4434,16 +1920,16 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `TileBrushCalculator.cs` | `rendering/utilities/tile_brush_calculator.rs` | present | 1/1 | 12/12 |  |
 
-### `Styling` - files 44/46, types 46/48, members 292/337
+### `Styling` - files 45/45, types 47/47, members 294/329 (35 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AndQuery.cs` | `styling/and_query.rs` | present | 1/1 | 6/6 |  |
 | `ChildSelector.cs` | `styling/child_selector.rs` | present | 1/1 | 8/8 |  |
 | `Container.cs` | `styling/container.rs` | present | 1/1 | 8/8 |  |
-| `ContainerQuery.cs` | `styling/container_query.rs` | partial | 1/1 | 5/7 |  |
+| `ContainerQuery.cs` | `styling/container_query.rs` | present | 1/1 | 5/7 (2 waived) |  |
 | `ContainerSizing.cs` | `styling/container_sizing.rs` | present | 1/1 | 4/4 |  |
-| `ControlTheme.cs` | `styling/control_theme.rs` | partial | 1/1 | 5/7 |  |
+| `ControlTheme.cs` | `styling/control_theme.rs` | present | 1/1 | 5/7 (2 waived) |  |
 | `DescendentSelector.cs` | `styling/descendent_selector.rs` | present | 1/1 | 8/8 |  |
 | `DirectPropertySetterBindingInstance.cs` | `styling/direct_property_setter_binding_instance.rs` | present | 1/1 | 0/0 |  |
 | `DirectPropertySetterInstance.cs` | `styling/direct_property_setter_instance.rs` | present | 1/1 | 0/0 |  |
@@ -4458,160 +1944,34 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IThemeVariantRoot.cs` | `styling/i_theme_variant_root.rs` | present | 1/1 | 1/1 |  |
 | `NestingSelector.cs` | `styling/nesting_selector.rs` | present | 1/1 | 7/7 |  |
 | `NotSelector.cs` | `styling/not_selector.rs` | present | 1/1 | 8/8 |  |
-| `NthChildSelector.cs` | `styling/nth_child_selector.rs` | partial | 1/1 | 11/12 |  |
+| `NthChildSelector.cs` | `styling/nth_child_selector.rs` | present | 1/1 | 11/12 (1 waived) |  |
 | `NthLastChildSelector.cs` | `styling/nth_last_child_selector.rs` | present | 1/1 | 1/1 |  |
 | `OrQuery.cs` | `styling/or_query.rs` | present | 1/1 | 6/6 |  |
 | `OrSelector.cs` | `styling/or_selector.rs` | present | 1/1 | 10/10 |  |
 | `PropertyEqualsSelector.cs` | `styling/property_equals_selector.rs` | present | 1/1 | 9/9 |  |
-| `PropertySetterInstance.cs` | `styling/property_setter_instance.rs` | missing | 0/1 | 0/8 |  |
-| `PropertySetterTemplateInstance.cs` | `styling/property_setter_template_instance.rs` | partial | 1/1 | 5/6 |  |
-| `ScreenQueries.cs` | `styling/screen_queries.rs` | partial | 2/2 | 8/10 |  |
+| `PropertySetterInstance.cs` | - | n/a | - | - | not-applicable: no caller upstream: since the value store works on value frames, Setter.Instance returns the setter itself (a value entry), a PropertySetterTemplateInstance or one of the direct property instances, and nothing constructs PropertySetterInstance&lt;T&gt; |
+| `PropertySetterTemplateInstance.cs` | `styling/property_setter_template_instance.rs` | present | 1/1 | 5/6 (1 waived) |  |
+| `ScreenQueries.cs` | `styling/screen_queries.rs` | present | 2/2 | 8/10 (2 waived) |  |
 | `Selector.cs` | `styling/selector.rs` | present | 1/1 | 11/11 |  |
-| `SelectorMatch.cs` | `styling/selector_match.rs` | partial | 2/2 | 15/16 |  |
-| `Selectors.cs` | `styling/selectors.rs` | partial | 1/1 | 17/18 |  |
-| `Setter.cs` | `styling/setter.rs` | partial | 1/1 | 9/11 |  |
+| `SelectorMatch.cs` | `styling/selector_match.rs` | present | 2/2 | 15/16 (1 waived) |  |
+| `Selectors.cs` | `styling/selectors.rs` | present | 1/1 | 17/18 (1 waived) |  |
+| `Setter.cs` | `styling/setter.rs` | present | 1/1 | 9/11 (2 waived) |  |
 | `SetterBase.cs` | `styling/setter_base.rs` | present | 1/1 | 1/1 |  |
-| `Style.cs` | `styling/style.rs` | partial | 1/1 | 4/6 |  |
-| `StyleBase.cs` | `styling/style_base.rs` | partial | 1/1 | 18/19 |  |
-| `StyleChildren.cs` | `styling/style_children.rs` | partial | 1/1 | 1/4 |  |
+| `Style.cs` | `styling/style.rs` | present | 1/1 | 4/6 (2 waived) |  |
+| `StyleBase.cs` | `styling/style_base.rs` | present | 1/1 | 18/19 (1 waived) |  |
+| `StyleChildren.cs` | `styling/style_children.rs` | present | 1/1 | 1/4 (3 waived) |  |
 | `StyleInstance.cs` | `styling/style_instance.rs` | present | 1/1 | 11/11 |  |
-| `StyleQueries.cs` | `styling/style_queries.rs` | partial | 1/1 | 4/6 |  |
+| `StyleQueries.cs` | `styling/style_queries.rs` | present | 1/1 | 4/6 (2 waived) |  |
 | `StyleQuery.cs` | `styling/style_query.rs` | present | 1/1 | 8/8 |  |
 | `StyleQueryComparisonOperator.cs` | `styling/style_query_comparison_operator.rs` | present | 1/1 | 6/6 |  |
-| `Styles.cs` | `styling/styles.rs` | partial | 1/1 | 26/34 |  |
+| `Styles.cs` | `styling/styles.rs` | present | 1/1 | 26/34 (8 waived) |  |
 | `TemplateSelector.cs` | `styling/template_selector.rs` | present | 1/1 | 8/8 |  |
-| `ThemeVariant.cs` | `styling/theme_variant.rs` | partial | 1/1 | 12/15 |  |
-| `ThemeVariantTypeConverter.cs` | `styling/theme_variant_type_converter.rs` | missing | 0/1 | 0/2 |  |
+| `ThemeVariant.cs` | `styling/theme_variant.rs` | present | 1/1 | 14/15 (1 waived) |  |
+| `ThemeVariantTypeConverter.cs` | `styling/theme_variant.rs` | present | 1/1 | 0/2 (2 waived) | replaced: a TypeConverter that only converts from text: `FromStr for ThemeVariant`, which the markup metadata of the type names as its `parse` (porting guide, Text conversion) |
 | `TypeNameAndClassSelector.cs` | `styling/type_name_and_class_selector.rs` | present | 1/1 | 14/14 |  |
-| `ValueStyleQuery.cs` | `styling/value_style_query.rs` | partial | 1/1 | 2/6 |  |
+| `ValueStyleQuery.cs` | `styling/value_style_query.rs` | present | 1/1 | 2/6 (4 waived) |  |
 
-<details><summary><code>ContainerQuery.cs</code> - 2 missing</summary>
-
-- `ContainerQuery` (class): 2 missing
-  - `ContainerQuery(Func<StyleQuery?, StyleQuery> query, string? containerName = null)` *(1 of 2 constructors found)*
-  - `override string ToString()`
-
-</details>
-
-<details><summary><code>ControlTheme.cs</code> - 2 missing</summary>
-
-- `ControlTheme` (class): 2 missing
-  - `ControlTheme(Type targetType)` *(1 of 2 constructors found)*
-  - `override string ToString()`
-
-</details>
-
-<details><summary><code>NthChildSelector.cs</code> - 1 missing</summary>
-
-- `NthChildSelector` (class): 1 missing
-  - `NthChildSelector(Selector? previous, int step, int offset, bool reversed)` *(protected internal; 1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>PropertySetterTemplateInstance.cs</code> - 1 missing</summary>
-
-- `PropertySetterTemplateInstance` (class): 1 missing
-  - `bool IValueEntry.GetDataValidationState(out BindingValueType state, out Exception? error)` *(explicit)*
-
-</details>
-
-<details><summary><code>ScreenQueries.cs</code> - 2 missing</summary>
-
-- `WidthQuery` (class): 1 missing
-  - `override string ToString(ContainerQuery? owner)` *(1 of 2 overloads found)*
-- `HeightQuery` (class): 1 missing
-  - `override string ToString(ContainerQuery? owner)` *(1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>SelectorMatch.cs</code> - 1 missing</summary>
-
-- `SelectorMatch` (record struct): 1 missing
-  - `SelectorMatch(SelectorMatchResult result)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>Selectors.cs</code> - 1 missing</summary>
-
-- `Selectors` (class): 1 missing
-  - `static Selector Or(IReadOnlyList<Selector> selectors)` *(1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>Setter.cs</code> - 2 missing</summary>
-
-- `Setter` (class): 2 missing
-  - `object? IValueEntry.GetValue()` *(explicit)*
-  - `bool IValueEntry.GetDataValidationState(out BindingValueType state, out Exception? error)` *(explicit)*
-
-</details>
-
-<details><summary><code>Style.cs</code> - 2 missing</summary>
-
-- `Style` (class): 2 missing
-  - `Style(Func<Selector?, Selector> selector)` *(1 of 2 constructors found)*
-  - `override string ToString()`
-
-</details>
-
-<details><summary><code>StyleBase.cs</code> - 1 missing</summary>
-
-- `StyleBase` (class): 1 missing
-  - `bool IResourceNode.HasResources { get; }` *(explicit)*
-
-</details>
-
-<details><summary><code>StyleChildren.cs</code> - 3 missing</summary>
-
-- `StyleChildren` (class): 3 missing
-  - `override void InsertItem(int index, IStyle item)` *(protected)*
-  - `override void RemoveItem(int index)` *(protected)*
-  - `override void SetItem(int index, IStyle item)` *(protected)*
-
-</details>
-
-<details><summary><code>StyleQueries.cs</code> - 2 missing</summary>
-
-- `StyleQueries` (class): 2 missing
-  - `static StyleQuery Or(IReadOnlyList<StyleQuery> query)` *(1 of 2 overloads found)*
-  - `static StyleQuery And(IReadOnlyList<StyleQuery> query)` *(1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>Styles.cs</code> - 8 missing</summary>
-
-- `Styles` (class): 8 missing
-  - `Styles(IResourceHost owner)` *(1 of 2 constructors found)*
-  - `bool ICollection<IStyle>.IsReadOnly { get; }` *(explicit)*
-  - `IReadOnlyList<IStyle> IStyle.Children { get; }` *(explicit)*
-  - `void CopyTo(IStyle[] array, int arrayIndex)`
-  - `AvaloniaList<IStyle>.Enumerator GetEnumerator()`
-  - `IEnumerator<IStyle> IEnumerable<IStyle>.GetEnumerator()` *(explicit)*
-  - `IEnumerator IEnumerable.GetEnumerator()` *(explicit)*
-  - `void IAvaloniaListItemValidator<IStyle>.Validate(IStyle item)` *(explicit)*
-
-</details>
-
-<details><summary><code>ThemeVariant.cs</code> - 3 missing</summary>
-
-- `ThemeVariant` (record): 3 missing
-  - `static ThemeVariant()` *(static)*
-  - `static explicit operator ThemeVariant(PlatformThemeVariant themeVariant)`
-  - `static explicit operator PlatformThemeVariant?(ThemeVariant? themeVariant)`
-
-</details>
-
-<details><summary><code>ValueStyleQuery.cs</code> - 4 missing</summary>
-
-- `ValueStyleQuery<T>` (class): 4 missing
-  - `override bool IsCombinator { get; }` *(internal)*
-  - `override string ToString(ContainerQuery? owner)`
-  - `override StyleQuery? MovePrevious()` *(private protected)*
-  - `override StyleQuery? MovePreviousOrParent()` *(private protected)*
-
-</details>
-
-### `Styling/Activators` - files 17/17, types 18/18, members 73/85
+### `Styling/Activators` - files 17/17, types 18/18, members 73/85 (12 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -4619,7 +1979,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `AndActivatorBuilder.cs` | `styling/activators/and_activator_builder.rs` | present | 1/1 | 2/2 |  |
 | `AndQueryActivator.cs` | `styling/activators/and_query_activator.rs` | present | 1/1 | 7/7 |  |
 | `AndQueryActivatorBuilder.cs` | `styling/activators/and_query_activator_builder.rs` | present | 1/1 | 4/4 |  |
-| `ContainerQueryActivatorBase.cs` | `styling/activators/container_query_activator_base.rs` | partial | 1/1 | 3/6 |  |
+| `ContainerQueryActivatorBase.cs` | `styling/activators/container_query_activator_base.rs` | present | 1/1 | 3/6 (3 waived) |  |
 | `IStyleActivator.cs` | `styling/activators/i_style_activator.rs` | present | 1/1 | 4/4 |  |
 | `IStyleActivatorSink.cs` | `styling/activators/i_style_activator_sink.rs` | present | 1/1 | 1/1 |  |
 | `NotActivator.cs` | `styling/activators/not_activator.rs` | present | 1/1 | 5/5 |  |
@@ -4628,372 +1988,90 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `OrActivatorBuilder.cs` | `styling/activators/or_activator_builder.rs` | present | 1/1 | 3/3 |  |
 | `OrQueryActivator.cs` | `styling/activators/or_query_activator.rs` | present | 1/1 | 7/7 |  |
 | `OrQueryActivatorBuilder.cs` | `styling/activators/or_query_activator_builder.rs` | present | 1/1 | 4/4 |  |
-| `PropertyEqualsActivator.cs` | `styling/activators/property_equals_activator.rs` | partial | 1/1 | 4/7 |  |
+| `PropertyEqualsActivator.cs` | `styling/activators/property_equals_activator.rs` | present | 1/1 | 4/7 (3 waived) |  |
 | `ScreenActivator.cs` | `styling/activators/screen_activator.rs` | present | 2/2 | 4/4 |  |
-| `StyleActivatorBase.cs` | `styling/activators/style_activator_base.rs` | partial | 1/1 | 4/9 |  |
-| `StyleClassActivator.cs` | `styling/activators/style_class_activator.rs` | partial | 1/1 | 5/6 |  |
+| `StyleActivatorBase.cs` | `styling/activators/style_activator_base.rs` | present | 1/1 | 4/9 (5 waived) |  |
+| `StyleClassActivator.cs` | `styling/activators/style_class_activator.rs` | present | 1/1 | 5/6 (1 waived) |  |
 
-<details><summary><code>ContainerQueryActivatorBase.cs</code> - 3 missing</summary>
-
-- `ContainerQueryActivatorBase` (class): 3 missing
-  - `void IStyleActivatorSink.OnNext(bool value)` *(explicit)*
-  - `override void Initialize()` *(protected)*
-  - `override void Deinitialize()` *(protected)*
-
-</details>
-
-<details><summary><code>PropertyEqualsActivator.cs</code> - 3 missing</summary>
-
-- `PropertyEqualsActivator` (class): 3 missing
-  - `void IObserver<object?>.OnCompleted()` *(explicit)*
-  - `void IObserver<object?>.OnError(Exception error)` *(explicit)*
-  - `void IObserver<object?>.OnNext(object? value)` *(explicit)*
-
-</details>
-
-<details><summary><code>StyleActivatorBase.cs</code> - 5 missing</summary>
-
-- `StyleActivatorBase` (class): 5 missing
-  - `bool GetIsActive()`
-  - `void Subscribe(IStyleActivatorSink sink)`
-  - `void Unsubscribe(IStyleActivatorSink sink)`
-  - `void Dispose()`
-  - `bool ReevaluateIsActive()` *(protected)*
-
-</details>
-
-<details><summary><code>StyleClassActivator.cs</code> - 1 missing</summary>
-
-- `StyleClassActivator` (class): 1 missing
-  - `void IClassesChangedListener.Changed()` *(explicit)*
-
-</details>
-
-### `Threading` - files 21/23, types 33/38, members 205/271
+### `Threading` - files 21/21, types 33/36 (3 waived), members 205/263 (58 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaSynchronizationContext.cs` | `threading/ferro_synchronization_context.rs` | partial | 2/2 | 11/15 |  |
-| `CulturePreservingExecutionContext.cs` | `threading/culture_preserving_execution_context.rs` | missing | 0/1 | 0/2 |  |
-| `Dispatcher.Exceptions.cs` | `threading/dispatcher_exceptions.rs` | partial | 1/1 | 5/6 |  |
-| `Dispatcher.Invoke.cs` | `threading/dispatcher_invoke.rs` | partial | 1/1 | 27/28 |  |
-| `Dispatcher.MainLoop.cs` | `threading/dispatcher_main_loop.rs` | partial | 2/2 | 11/14 |  |
+| `AvaloniaSynchronizationContext.cs` | `threading/ferro_synchronization_context.rs` | present | 2/2 | 11/15 (4 waived) |  |
+| `CulturePreservingExecutionContext.cs` | - | n/a | - | - | not-applicable: wraps the .NET ExecutionContext so that a culture set by a dispatcher callback survives it: there is no execution context and no thread culture to flow; `OperationCore::execute` runs the callback directly |
+| `Dispatcher.Exceptions.cs` | `threading/dispatcher_exceptions.rs` | present | 1/1 | 5/6 (1 waived) |  |
+| `Dispatcher.Invoke.cs` | `threading/dispatcher_invoke.rs` | present | 1/1 | 27/28 (1 waived) |  |
+| `Dispatcher.MainLoop.cs` | `threading/dispatcher_main_loop.rs` | present | 2/2 | 11/14 (3 waived) |  |
 | `Dispatcher.Queue.cs` | `threading/dispatcher_queue.rs` | present | 1/1 | 10/10 |  |
 | `Dispatcher.ThreadStorage.cs` | `threading/dispatcher_thread_storage.rs` | present | 1/1 | 6/6 |  |
 | `Dispatcher.Timers.cs` | `threading/dispatcher_timers.rs` | present | 1/1 | 6/6 |  |
-| `Dispatcher.cs` | `threading/dispatcher.rs` | partial | 1/1 | 9/11 |  |
-| `DispatcherEventArgs.cs` | `threading/dispatcher_event_args.rs` | partial | 1/1 | 1/2 |  |
-| `DispatcherFrame.cs` | `threading/dispatcher_frame.rs` | partial | 1/1 | 5/7 |  |
-| `DispatcherOperation.cs` | `threading/dispatcher_operation.rs` | partial | 3/4 | 16/42 |  |
+| `Dispatcher.cs` | `threading/dispatcher.rs` | present | 1/1 | 9/11 (2 waived) |  |
+| `DispatcherEventArgs.cs` | `threading/dispatcher_event_args.rs` | present | 1/1 | 1/2 (1 waived) |  |
+| `DispatcherFrame.cs` | `threading/dispatcher_frame.rs` | present | 1/1 | 5/7 (2 waived) |  |
+| `DispatcherOperation.cs` | `threading/dispatcher_operation.rs` | present | 3/4 (1 waived) | 16/42 (26 waived) |  |
 | `DispatcherOptions.cs` | `threading/dispatcher_options.rs` | present | 1/1 | 1/1 |  |
 | `DispatcherPriority.cs` | `threading/dispatcher_priority.rs` | present | 1/1 | 37/37 |  |
-| `DispatcherPriorityAwaitable.cs` | `threading/dispatcher_priority_awaitable.rs` | partial | 2/4 | 2/12 |  |
-| `DispatcherPriorityQueue.cs` | `threading/dispatcher_priority_queue.rs` | partial | 2/2 | 15/16 |  |
-| `DispatcherTimer.cs` | `threading/dispatcher_timer.rs` | partial | 1/1 | 13/18 |  |
-| `DispatcherUnhandledExceptionEventArgs.cs` | `threading/dispatcher_unhandled_exception_event_args.rs` | partial | 2/2 | 3/4 |  |
-| `DispatcherUnhandledExceptionFilterEventArgs.cs` | `threading/dispatcher_unhandled_exception_filter_event_args.rs` | partial | 2/2 | 3/4 |  |
+| `DispatcherPriorityAwaitable.cs` | `threading/dispatcher_priority_awaitable.rs` | present | 2/4 (2 waived) | 2/12 (10 waived) |  |
+| `DispatcherPriorityQueue.cs` | `threading/dispatcher_priority_queue.rs` | present | 2/2 | 15/16 (1 waived) |  |
+| `DispatcherTimer.cs` | `threading/dispatcher_timer.rs` | present | 1/1 | 13/18 (5 waived) |  |
+| `DispatcherUnhandledExceptionEventArgs.cs` | `threading/dispatcher_unhandled_exception_event_args.rs` | present | 2/2 | 3/4 (1 waived) |  |
+| `DispatcherUnhandledExceptionFilterEventArgs.cs` | `threading/dispatcher_unhandled_exception_filter_event_args.rs` | present | 2/2 | 3/4 (1 waived) |  |
 | `IDispatcher.cs` | `threading/i_dispatcher.rs` | present | 1/1 | 3/3 |  |
 | `IDispatcherImpl.cs` | `threading/i_dispatcher_impl.rs` | present | 5/5 | 18/18 |  |
-| `NonPumpingSyncContext.cs` | `threading/non_pumping_sync_context.rs` | missing | 0/1 | 0/6 |  |
+| `NonPumpingSyncContext.cs` | - | n/a | - | - | not-applicable: a .NET SynchronizationContext that redirects the wait of the runtime to `NonPumpingLockHelper.IHelperImpl` (only the Win32 backend binds one, for COM STA threads): blocking primitives never run a message pump here, see the type comment of `FerroSynchronizationContext` |
 | `ThreadSafeObjectPool.cs` | `threading/thread_safe_object_pool.rs` | present | 1/1 | 3/3 |  |
 
-<details><summary><code>AvaloniaSynchronizationContext.cs</code> - 4 missing</summary>
-
-- `AvaloniaSynchronizationContext` (class): 4 missing
-  - `AvaloniaSynchronizationContext(Dispatcher dispatcher, DispatcherPriority priority, bool isStaThread)` *(internal; 1 of 4 constructors found)*
-  - `AvaloniaSynchronizationContext(DispatcherPriority priority)` *(1 of 4 constructors found)*
-  - `AvaloniaSynchronizationContext(Dispatcher dispatcher, DispatcherPriority priority)` *(1 of 4 constructors found)*
-  - `override int Wait(IntPtr[] waitHandles, bool waitAll, int millisecondsTimeout)`
-
-</details>
-
-<details><summary><code>Dispatcher.Exceptions.cs</code> - 1 missing</summary>
-
-- `Dispatcher` (class) in `threading/dispatcher.rs`: 1 missing
-  - `static readonly object ExceptionDataKey` *(internal)*
-
-</details>
-
-<details><summary><code>Dispatcher.Invoke.cs</code> - 1 missing</summary>
-
-- `Dispatcher` (class) in `threading/dispatcher.rs`: 1 missing
-  - `DispatcherPriorityAwaitable<T> AwaitWithPriority<T>(Task<T> task, DispatcherPriority priority)` *(1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>Dispatcher.MainLoop.cs</code> - 3 missing</summary>
-
-- `Dispatcher` (class) in `threading/dispatcher.rs`: 1 missing
-  - `int DisabledProcessingCount { get; set; }` *(internal)*
-- `Dispatcher.DispatcherProcessingDisabled` (record struct): 2 missing
-  - `DispatcherProcessingDisabled(Dispatcher dispatcher)` *(internal)*
-  - `DispatcherProcessingDisabled(Dispatcher dispatcher, SynchronizationContext? oldContext)` *(internal)*
-
-</details>
-
-<details><summary><code>Dispatcher.cs</code> - 2 missing</summary>
-
-- `Dispatcher` (class): 2 missing
-  - `object InstanceLock { get; }` *(internal)*
-  - `bool IsSta { get; }` *(internal)*
-
-</details>
-
-<details><summary><code>DispatcherEventArgs.cs</code> - 1 missing</summary>
-
-- `DispatcherEventArgs` (class): 1 missing
-  - `DispatcherEventArgs(Dispatcher dispatcher)` *(internal)*
-
-</details>
-
-<details><summary><code>DispatcherFrame.cs</code> - 2 missing</summary>
-
-- `DispatcherFrame` (class): 2 missing
-  - `DispatcherFrame(bool exitWhenRequested)` *(1 of 3 constructors found)*
-  - `DispatcherFrame(Dispatcher dispatcher, bool exitWhenRequested)` *(internal; 1 of 3 constructors found)*
-
-</details>
-
-<details><summary><code>DispatcherOperation.cs</code> - 27 missing</summary>
-
-- `DispatcherOperation` (class): 18 missing
-  - `readonly bool ThrowOnUiThread` *(protected)*
-  - `DispatcherOperationStatus Status { get; internal set; }` *(getter `status` found, setter `set_status` missing)*
-  - `object? Callback` *(protected internal)*
-  - `object? TaskSource` *(protected)*
-  - `DispatcherOperation? SequentialPrev { get; set; }` *(internal)*
-  - `DispatcherOperation? SequentialNext { get; set; }` *(internal)*
-  - `DispatcherOperation? PriorityPrev { get; set; }` *(internal)*
-  - `DispatcherOperation? PriorityNext { get; set; }` *(internal)*
-  - `PriorityChain? Chain { get; set; }` *(internal)*
-  - `bool IsQueued { get; }` *(internal)*
-  - `string DebugDisplay { get; }` *(internal)*
-  - `Task GetTask()`
-  - `TaskAwaiter GetAwaiter()`
-  - `void CallAbortCallbacks()` *(internal)*
-  - `void Execute()` *(internal)*
-  - `virtual void InvokeCore()` *(protected)*
-  - `virtual void AbortTask()` *(protected)*
-  - `virtual Task GetTaskCore()` *(protected)*
-- `DispatcherOperation<T>` (class): 6 missing
-  - `new TaskAwaiter<T> GetAwaiter()`
-  - `new Task<T> GetTask()`
-  - `override Task GetTaskCore()` *(protected)*
-  - `override void AbortTask()` *(protected)*
-  - `override object? GetResult()` *(internal)*
-  - `override void InvokeCore()` *(protected)*
-- `SendOrPostCallbackDispatcherOperation` (class, internal): **type missing** (2 members)
-
-</details>
-
-<details><summary><code>DispatcherPriorityAwaitable.cs</code> - 12 missing</summary>
-
-- `DispatcherPriorityAwaitable` (struct): 1 missing
-  - `DispatcherPriorityAwaiter GetAwaiter()`
-- `DispatcherPriorityAwaiter` (struct, public): **type missing** (4 members)
-- `DispatcherPriorityAwaitable<T>` (struct): 1 missing
-  - `DispatcherPriorityAwaiter<T> GetAwaiter()`
-- `DispatcherPriorityAwaiter<T>` (struct, public): **type missing** (4 members)
-
-</details>
-
-<details><summary><code>DispatcherPriorityQueue.cs</code> - 1 missing</summary>
-
-- `PriorityChain` (class): 1 missing
-  - `DispatcherPriority Priority { get; set; }`
-
-</details>
-
-<details><summary><code>DispatcherTimer.cs</code> - 5 missing</summary>
-
-- `DispatcherTimer` (class): 5 missing
-  - `DispatcherTimer(DispatcherPriority priority)` *(1 of 6 constructors found)*
-  - `DispatcherTimer(DispatcherPriority priority, Dispatcher dispatcher)` *(1 of 6 constructors found)*
-  - `DispatcherTimer(TimeSpan interval, DispatcherPriority priority, Dispatcher dispatcher)` *(1 of 6 constructors found)*
-  - `DispatcherTimer(TimeSpan interval, DispatcherPriority priority, EventHandler callback)` *(1 of 6 constructors found)*
-  - `DispatcherTimer(TimeSpan interval, DispatcherPriority priority, Dispatcher dispatcher, EventHandler callback)` *(1 of 6 constructors found)*
-
-</details>
-
-<details><summary><code>DispatcherUnhandledExceptionEventArgs.cs</code> - 1 missing</summary>
-
-- `DispatcherUnhandledExceptionEventArgs` (class): 1 missing
-  - `void Initialize(Exception exception, bool handled)` *(internal)*
-
-</details>
-
-<details><summary><code>DispatcherUnhandledExceptionFilterEventArgs.cs</code> - 1 missing</summary>
-
-- `DispatcherUnhandledExceptionFilterEventArgs` (class): 1 missing
-  - `void Initialize(Exception exception, bool requestCatch)` *(internal)*
-
-</details>
-
-### `Utilities` - files 21/46, types 29/74, members 170/489 (1 waived)
+### `Utilities` - files 39/39, types 50/56 (6 waived), members 275/332 (57 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ArrayBuilder.cs` | `utilities/array_builder.rs` | partial | 1/1 | 10/11 |  |
-| `ArraySlice.cs` | `utilities/array_slice.rs` | partial | 1/1 | 14/18 |  |
-| `AsyncEnumerableHelper.cs` | `utilities/async_enumerable_helper.rs` | missing | 0/1 | 0/1 |  |
-| `AvaloniaPropertyDictionary.cs` | `utilities/ferro_property_dictionary.rs` | missing | 0/1 | 0/14 |  |
-| `AvaloniaResourcesIndex.cs` | `utilities/ferro_resources_index.rs` | missing | 0/3 | 0/10 |  |
-| `BidiDictionary.cs` | `utilities/bidi_dictionary.rs` | missing | 0/1 | 0/6 |  |
-| `BinarySearchExtension.cs` | `utilities/binary_search_extension.rs` | missing | 0/1 | 0/2 |  |
+| `ArrayBuilder.cs` | `utilities/array_builder.rs` | present | 1/1 | 11/11 |  |
+| `ArraySlice.cs` | `utilities/array_slice.rs` | present | 1/1 | 14/18 (4 waived) |  |
+| `AsyncEnumerableHelper.cs` | - | n/a | - | - | not-applicable: wraps an IEnumerable&lt;T&gt; as IAsyncEnumerable&lt;T&gt; for `await foreach`; no caller upstream, and the port has no asynchronous enumeration (porting guide: async members return DispatcherTask) |
+| `AvaloniaPropertyDictionary.cs` | `utilities/ferro_property_dictionary.rs` | present | 1/1 | 14/14 |  |
+| `AvaloniaResourcesIndex.cs` | `platform/internal/asset_registry.rs` | present | 0/3 (3 waived) | 0/10 (10 waived) | replaced: reader and writer of the index of the one manifest resource into which the build task packs the assets of an assembly: a crate registers each embedded asset as a (path, bytes) pair, there is no packed resource to index |
+| `BidiDictionary.cs` | `utilities/bidi_dictionary.rs` | present | 1/1 | 6/6 |  |
+| `BinarySearchExtension.cs` | `utilities/binary_search_extension.rs` | present | 1/1 | 2/2 |  |
 | `BooleanBoxes.cs` | `utilities/boolean_boxes.rs` | present | 1/1 | 3/3 |  |
 | `ByteSizeHelper.cs` | `utilities/byte_size_helper.rs` | present | 1/1 | 1/1 |  |
 | `CharacterReader.cs` | `utilities/character_reader.rs` | present | 1/1 | 14/14 |  |
-| `DisposableLock.cs` | `utilities/disposable_lock.rs` | missing | 0/1 | 0/2 |  |
-| `FrugalList.cs` | `utilities/frugal_list.rs` | missing | 0/11 | 0/139 |  |
+| `DisposableLock.cs` | `utilities/disposable_lock.rs` | present | 1/1 | 2/2 |  |
+| `FrugalList.cs` | - | n/a | - | - | not-applicable: list storage tuned to the managed heap (one object with 1, 3 or 6 item fields before an array, to save an object and its header per list): Vec&lt;T&gt; allocates nothing until the first item and is one allocation; the callers (FontFamily, FamilyNameCollection, SpanVector) hold a Vec. FrugalObjectList has no caller upstream |
 | `HashCode.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 | `IWeakEventSubscriber.cs` | `utilities/i_weak_event_subscriber.rs` | present | 3/3 | 5/5 |  |
-| `IdentifierParser.cs` | `utilities/identifier_parser.rs` | partial | 0/1 | 0/3 |  |
-| `ImmutableReadOnlyListStructEnumerator.cs` | `utilities/immutable_read_only_list_struct_enumerator.rs` | missing | 0/1 | 0/6 |  |
-| `KeywordParser.cs` | `utilities/keyword_parser.rs` | partial | 0/1 | 0/2 |  |
-| `MappedArraySlice.cs` | `utilities/mapped_array_slice.rs` | missing | 0/1 | 0/3 |  |
-| `MathUtilities.cs` | `utilities/math_utilities.rs` | partial | 1/1 | 31/32 |  |
-| `NonPumpingLockHelper.cs` | `utilities/non_pumping_lock_helper.rs` | missing | 0/2 | 0/2 |  |
-| `ObjectPool.cs` | `utilities/object_pool.rs` | missing | 0/1 | 0/3 |  |
-| `PooledInlineList.cs` | `utilities/pooled_inline_list.rs` | missing | 0/2 | 0/17 |  |
-| `Ref.cs` | `utilities/ref.rs` | missing (types found elsewhere) | 1/2 | 1/6 | types found in `utilities/ref_countable.rs` (add to path-overrides.toml) |
-| `RefCountingSmallDictionary.cs` | `utilities/ref_counting_small_dictionary.rs` | missing | 0/1 | 0/5 |  |
-| `RefTrackingDictionary.cs` | `utilities/ref_tracking_dictionary.rs` | missing | 0/1 | 0/2 |  |
-| `SafeEnumerableAvaloniaList.cs` | `utilities/safe_enumerable_ferro_list.rs` | missing | 0/2 | 0/11 |  |
-| `SafeEnumerableHashSet.cs` | `utilities/safe_enumerable_hash_set.rs` | missing | 0/2 | 0/13 |  |
-| `SingleOrQueue.cs` | `utilities/single_or_queue.rs` | missing | 0/1 | 0/3 |  |
-| `SmallDictionary.cs` | `utilities/small_dictionary.rs` | missing | 0/2 | 0/20 |  |
-| `Span.cs` | `utilities/span.rs` | partial | 6/6 | 30/31 |  |
-| `SpanHelpers.cs` | `utilities/span_helpers.rs` | partial | 1/1 | 5/7 |  |
-| `SpanStringTokenizer.cs` | `utilities/span_string_tokenizer.rs` | partial | 1/1 | 12/16 |  |
+| `IdentifierParser.cs` | `utilities/identifier_parser.rs`, `utilities/character_reader.rs` | present | 1/1 | 3/3 | merged: the extension methods of the static class are inherent methods of CharacterReader, in an `impl` block of identifier_parser.rs |
+| `ImmutableReadOnlyListStructEnumerator.cs` | - | n/a | - | - | not-applicable: allocation-free IEnumerator&lt;T&gt; over an IReadOnlyList&lt;T&gt;: std::slice::Iter (the callers ArraySlice, FamilyNameCollection and NameTable iterate a slice) |
+| `KeywordParser.cs` | `utilities/keyword_parser.rs`, `utilities/character_reader.rs` | present | 1/1 | 2/2 | merged: the extension methods of the static class are inherent methods of CharacterReader, in an `impl` block of keyword_parser.rs |
+| `MappedArraySlice.cs` | `utilities/mapped_array_slice.rs` | present | 1/1 | 3/3 |  |
+| `MathUtilities.cs` | `utilities/math_utilities.rs` | present | 1/1 | 32/32 |  |
+| `NonPumpingLockHelper.cs` | - | n/a | - | - | not-applicable: installs a SynchronizationContext whose Wait override keeps the CLR from pumping Win32 messages while the UI thread waits on a lock (IHelperImpl is implemented by Avalonia.Win32 only): a Rust lock never pumps messages and there is no synchronization context to replace |
+| `ObjectPool.cs` | `utilities/object_pool.rs` | present | 1/1 | 3/3 |  |
+| `PooledInlineList.cs` | `utilities/pooled_inline_list.rs` | present | 2/2 | 17/17 |  |
+| `Ref.cs` | `utilities/ref_countable.rs` | present | 2/2 | 6/6 | renamed: IRef&lt;T&gt; has one implementation, the private class Ref&lt;T&gt;: the struct RefCounted&lt;T&gt; is both (`Ref` names the object handle of the class model) |
+| `RefCountingSmallDictionary.cs` | `utilities/ref_counting_small_dictionary.rs` | present | 1/1 | 5/5 |  |
+| `RefTrackingDictionary.cs` | `utilities/ref_tracking_dictionary.rs` | present | 1/1 | 2/2 |  |
+| `SafeEnumerableAvaloniaList.cs` | `collections/ferro_list.rs` | present | 1/2 (1 waived) | 0/11 (11 waived) | replaced: the copy-on-write-while-enumerated behaviour is the behaviour of every FerroList&lt;T&gt;: enumeration works on a snapshot (`snapshot`, `for_each`) and a mutation copies the storage only while a snapshot is alive |
+| `SafeEnumerableHashSet.cs` | `utilities/handler_list.rs` | present | 1/2 (1 waived) | 2/13 (11 waived) | replaced: its one user is the listener set of Classes; the listeners of the port are closures in a HandlerList, which is invoked on a snapshot that is copied only when the list changes. HandlerList itself has no upstream file: it is the storage of the handlers of a C# `event` (multicast delegates have no Rust equivalent; porting guide, Types table) |
+| `SingleOrQueue.cs` | `utilities/single_or_queue.rs` | present | 1/1 | 3/3 |  |
+| `SmallDictionary.cs` | `utilities/small_dictionary.rs` | present | 2/2 | 20/20 |  |
+| `Span.cs` | `utilities/span.rs` | present | 6/6 | 30/31 (1 waived) |  |
+| `SpanHelpers.cs` | `utilities/span_helpers.rs` | present | 1/1 | 5/7 (2 waived) |  |
+| `SpanStringTokenizer.cs` | `utilities/span_string_tokenizer.rs` | present | 1/1 | 13/16 (3 waived) |  |
 | `SpringSolver.cs` | `utilities/spring_solver.rs` | present | 1/1 | 4/4 |  |
-| `StopwatchHelper.cs` | `utilities/stopwatch_helper.rs` | missing | 0/1 | 0/3 |  |
-| `StringBuilderCache.cs` | `utilities/string_builder_cache.rs` | missing | 0/1 | 0/4 |  |
-| `StringSplitter.cs` | `utilities/string_splitter.rs` | missing | 0/1 | 0/2 |  |
-| `StyleClassParser.cs` | `utilities/style_class_parser.rs` | partial | 0/1 | 0/1 |  |
-| `SynchronousCompletionAsyncResult.cs` | `utilities/synchronous_completion_async_result.rs` | partial | 2/2 | 10/12 |  |
-| `ThrowHelper.cs` | `utilities/throw_helper.rs` | missing | 0/1 | 0/2 |  |
-| `TypeUtilities.cs` | `utilities/type_utilities.rs` | missing (types found elsewhere) | 1/2 | 0/14 | types found in `markup_types/well_known.rs` (add to path-overrides.toml) |
-| `UriExtensions.cs` | `utilities/uri_extensions.rs` | partial | 1/1 | 7/8 |  |
-| `ValueSingleOrList.cs` | `utilities/value_single_or_list.rs` | missing | 0/1 | 0/6 |  |
+| `StopwatchHelper.cs` | - | n/a | - | - | not-applicable: polyfill of Stopwatch.GetElapsedTime of .NET 7; the port reads no process clock in core paths (porting guide, rule 4): its callers take the time of the dispatcher (`Dispatcher::now`) |
+| `StringBuilderCache.cs` | - | n/a | - | - | not-applicable: per-thread cache of one StringBuilder, to save the builder object and its buffer when a string is built: a Rust `String` is its own builder and becomes the result without a copy, so no buffer is left to cache |
+| `StringSplitter.cs` | `media/string_splitter.rs` | present | 1/1 | 1/2 (1 waived) | renamed: ported next to its two callers (BoxShadow, BoxShadows) as the module function `split_respecting_brackets`; the upstream tests are in utilities/string_splitter_tests.rs |
+| `StyleClassParser.cs` | `utilities/style_class_parser.rs`, `utilities/character_reader.rs` | present | 1/1 | 1/1 | merged: the extension method of the static class is an inherent method of CharacterReader, in an `impl` block of style_class_parser.rs |
+| `SynchronousCompletionAsyncResult.cs` | `utilities/synchronous_completion_async_result.rs` | present | 2/2 | 10/12 (2 waived) |  |
+| `ThrowHelper.cs` | - | n/a | - | - | not-applicable: polyfills of ArgumentNullException.ThrowIfNull (.NET 6) and ArgumentException.ThrowIfNullOrEmpty (.NET 8): a Rust reference or value cannot be null, and the empty-string checks of its one caller of ThrowIfNullOrEmpty (DataFormat) are made in place |
+| `TypeUtilities.cs` | `data/core/value_type.rs` | present | 1/2 (1 waived) | 4/14 (10 waived) | replaced: conversions over System.Type by reflection (IConvertible, TypeDescriptor, op_Implicit/op_Explicit lookup): `ValueTypes` makes the conversions between the registered value types (`try_convert`, `try_cast`, `accepts_null`, `identity_equals`) |
+| `UriExtensions.cs` | `utilities/uri_extensions.rs` | present | 1/1 | 8/8 |  |
+| `ValueSingleOrList.cs` | `utilities/value_single_or_list.rs` | present | 1/1 | 6/6 |  |
 | `ValueSpan.cs` | `utilities/value_span.rs` | present | 1/1 | 4/4 |  |
-| `WeakEvent.cs` | `utilities/weak_event.rs` | partial | 2/2 | 6/7 |  |
+| `WeakEvent.cs` | `utilities/weak_event.rs` | present | 2/2 | 6/7 (1 waived) |  |
 | `WeakEventHandlerManager.cs` | `utilities/weak_event_handler_manager.rs` | present | 1/1 | 2/2 |  |
 | `WeakEvents.cs` | `utilities/weak_events.rs` | present | 1/1 | 3/4 (1 waived) |  |
 | `WeakHashList.cs` | `utilities/weak_hash_list.rs` | present | 1/1 | 8/8 |  |
-
-<details><summary><code>ArrayBuilder.cs</code> - 1 missing</summary>
-
-- `ArrayBuilder<T>` (struct): 1 missing
-  - `ArraySlice<T> AsSlice(int start, int length)` *(2 of 3 overloads found)*
-
-</details>
-
-<details><summary><code>ArraySlice.cs</code> - 4 missing</summary>
-
-- `ArraySlice<T>` (struct): 4 missing
-  - `ImmutableReadOnlyListStructEnumerator<T> GetEnumerator()`
-  - `IEnumerator<T> IEnumerable<T>.GetEnumerator()` *(explicit)*
-  - `IEnumerator IEnumerable.GetEnumerator()` *(explicit)*
-  - `int IReadOnlyCollection<T>.Count { get; }` *(explicit)*
-
-</details>
-
-<details><summary><code>IdentifierParser.cs</code> - 4 missing</summary>
-
-- `IdentifierParser` (class, internal): **type missing** (3 members)
-
-</details>
-
-<details><summary><code>KeywordParser.cs</code> - 3 missing</summary>
-
-- `KeywordParser` (class, internal): **type missing** (2 members)
-
-</details>
-
-<details><summary><code>MathUtilities.cs</code> - 1 missing</summary>
-
-- `MathUtilities` (class): 1 missing
-  - `static int Clamp(int val, int min, int max)` *(3 of 4 overloads found)*
-
-</details>
-
-<details><summary><code>Ref.cs</code> - 6 missing</summary>
-
-- `IRef<T>` (interface, internal): **type missing** (5 members)
-
-</details>
-
-<details><summary><code>Span.cs</code> - 1 missing</summary>
-
-- `SpanRider` (struct): 1 missing
-  - `SpanRider(SpanVector spans, SpanPosition latestPosition = new SpanPosition(), int cp = 0)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>SpanHelpers.cs</code> - 2 missing</summary>
-
-- `SpanHelpers` (class) (ported as module-level items): 2 missing
-  - `static bool TryParseInt(this ReadOnlySpan<char> span, NumberStyles style, IFormatProvider provider, out int...` *(1 of 2 overloads found)*
-  - `static bool TryParseEnum<TEnum>(this ReadOnlySpan<char> span, bool ignoreCase, out TEnum value) where TEnum...`
-
-</details>
-
-<details><summary><code>SpanStringTokenizer.cs</code> - 4 missing</summary>
-
-- `SpanStringTokenizer` (struct): 4 missing
-  - `SpanStringTokenizer(string s, char separator = DefaultSeparatorChar, string? exceptionMessage = null)` *(1 of 4 constructors found)*
-  - `SpanStringTokenizer(ReadOnlySpan<char> s, IFormatProvider formatProvider, string? exceptionMessage = null)` *(1 of 4 constructors found)*
-  - `SpanStringTokenizer(ReadOnlySpan<char> s, char separator = DefaultSeparatorChar, string? exceptionMessage =...` *(1 of 4 constructors found)*
-  - `void Dispose()`
-
-</details>
-
-<details><summary><code>StyleClassParser.cs</code> - 2 missing</summary>
-
-- `StyleClassParser` (class, internal): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>SynchronousCompletionAsyncResult.cs</code> - 2 missing</summary>
-
-- `SynchronousCompletionAsyncResult<T>` (record struct): 2 missing
-  - `SynchronousCompletionAsyncResult(SynchronousCompletionAsyncResultSource<T> source)` *(internal; 1 of 2 constructors found)*
-  - `SynchronousCompletionAsyncResult<T> GetAwaiter()`
-
-</details>
-
-<details><summary><code>TypeUtilities.cs</code> - 15 missing</summary>
-
-- `TypeUtilities` (class) in `markup_types/well_known.rs`: 12 missing
-  - `static bool AcceptsNull(Type type)`
-  - `static bool AcceptsNull<T>()`
-  - `static bool CanCast<T>(object? value)`
-  - `static bool TryConvert(Type to, object? value, CultureInfo? culture, out object? result)`
-  - `static bool TryConvertImplicit(Type to, object? value, out object? result)`
-  - `static object? ConvertOrDefault(object? value, Type type, CultureInfo culture)`
-  - `static object? ConvertImplicitOrDefault(object? value, Type type)`
-  - `static T ConvertImplicit<T>(object? value)`
-  - `static object? Default(Type type)`
-  - `static bool IsNumeric(Type type)`
-  - `static MethodInfo? FindTypeConversionOperatorMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTy...` *(internal)*
-  - `static bool IdentityEquals(object? a, object? b, Type type)` *(internal)*
-- `TypeUtilities.OperatorType` (enum, internal): **type missing** (2 members)
-
-</details>
-
-<details><summary><code>UriExtensions.cs</code> - 1 missing</summary>
-
-- `UriExtensions` (class): 1 missing
-  - `static bool IsAvares(this Uri uri)`
-
-</details>
-
-<details><summary><code>WeakEvent.cs</code> - 1 missing</summary>
-
-- `WeakEvent<TSender, TEventArgs>` (class): 1 missing
-  - `WeakEvent(Func<TSender, EventHandler<TEventArgs>, Action> subscribe)` *(internal; 1 of 2 constructors found)*
-
-</details>
 
 ### `VisualTree` - files 5/5, types 5/5, members 44/45 (1 waived)
 
@@ -5011,171 +2089,149 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
-| `animation/animation_task.rs` | **unmapped** | `AnimationTask`, `State` |
-| `animation/animators/effect_animator.rs` | **unmapped** | `BlurEffectAnimator`, `DropShadowEffectAnimator`, `EffectAnimator`, `EffectValue` |
-| `animation/cancellation.rs` | **unmapped** | `LocalCancellationRegistration` |
-| `animation/time_span.rs` | **unmapped** | `TimeSpan` |
-| `animation/transitions/effect_transition.rs` | **unmapped** | `EffectValue` |
-| `animation/transitions_collection.rs` | **unmapped** | `Transitions` |
-| `controls/resource_key.rs` | **unmapped** | `ResourceKey`, `ResourceKeyObject` |
-| `data/converters/composite_format.rs` | **unmapped** | `Float`, `FormatArg`, `FormatError`, `Number`, `Specifier` |
-| `data/core/expression_nodes/reflection_indexer_node.rs` | **unmapped** | `Indexer`, `ReflectionIndexerNode` |
-| `data/core/expression_nodes/type_cast_node.rs` | **unmapped** | `CastTarget`, `TypeCastNode` |
-| `data/core/plugins/markup_members.rs` | **unmapped** | `MarkupPropertyInfo`, `MethodLookup` |
-| `data/core/plugins/property_info_accessor_factory.rs` | **unmapped** | `IndexerAccessor`, `PropertyInfoAccessorFactory` |
-| `data/core/plugins/untyped_accessor_plugin.rs` | **unmapped** | `UntypedAccessor`, `UntypedAccessorPlugin`, `UntypedCanExecute`, `UntypedCommand`, `UntypedCreateDelegate`, `UntypedExecute`, `UntypedGetter`, `UntypedMember`, `UntypedSetter` |
-| `data/core/value_type.rs` | **unmapped** | `AnyConvertFn`, `ConvertFn`, `DisplayFn`, `FromObjectFn`, `IdHasher`, `IdMap`, `InterfaceFn`, `NullFn`, `NumericCast`, `ObjectFn`, `ReferenceCast`, `Registry`, ... (15 total) |
-| `data/core/weak_value.rs` | **unmapped** | `WeakValue` |
-| `data/model/event.rs` | **unmapped** | `Event` |
-| `data/model/i_bindable_indexer.rs` | **unmapped** | `BindableArray`, `BindableDictionary`, `IBindableArray`, `IBindableIndexer` |
-| `data/model/i_notify_collection_changed.rs` | **unmapped** | `BindableList`, `CollectionChange`, `IBindableList`, `INotifyCollectionChanged` |
-| `data/model/i_notify_data_error_info.rs` | **unmapped** | `INotifyDataErrorInfo` |
-| `data/model/i_notify_property_changed.rs` | **unmapped** | `INotifyPropertyChanged` |
-| `data/model/model_type.rs` | **unmapped** | `Model`, `ModelMethod`, `ModelType`, `ModelTypeBuilder`, `ModelTypes` |
-| `element_ref.rs` | **unmapped** | `ElementRef` |
-| `i_support_initialize.rs` | **unmapped** | `ISupportInitialize`, `InitializationError`, `StyledElementInitialize` |
-| `input/i_command.rs` | **unmapped** | `ICommand` |
-| `input/i_scrollable.rs` | **unmapped** | `IScrollable` |
-| `input/platform/clipboard_error.rs` | **unmapped** | `ClipboardError`, `ClipboardErrorKind` |
-| `layout/layout_manager_tests_bring_into_view.rs` | **unmapped** | `LayoutTestControl`, `TestRequest` |
-| `markup_types/animation.rs` | **unmapped** |  |
-| `markup_types/classes.rs` | **unmapped** |  |
-| `markup_types/contracts.rs` | **unmapped** |  |
-| `markup_types/enums.rs` | **unmapped** |  |
-| `markup_types/named_values.rs` | **unmapped** |  |
-| `markup_types/plain.rs` | **unmapped** |  |
-| `markup_types/values.rs` | **unmapped** |  |
-| `markup_types/well_known.rs` | **unmapped** | `ClrPropertyInfoOf`, `FerroListConverter`, `FerroObjectExtensionsClass`, `PropertyInfoOf`, `TypeUtilities` |
-| `media/effects/effect_extensions.rs` | **unmapped** | `EffectExtensions` |
-| `media/fonts/tables/testing/big_endian_buffer.rs` | **unmapped** | `BigEndianBuffer` |
-| `media/fonts/tables/testing/synthetic_font.rs` | **unmapped** | `SyntheticFont`, `SyntheticFontMemory` |
-| `media/fonts/testing/test_asset_loader.rs` | **unmapped** | `TestAssetLoader` |
-| `media/fonts/testing/test_font_builder.rs` | **unmapped** | `TestFontBuilder` |
-| `media/fonts/testing/test_font_manager_impl.rs` | **unmapped** | `TestFontManagerImpl` |
-| `media/fonts/testing/test_font_scope.rs` | **unmapped** | `TestFontScope` |
-| `media/fonts/testing/test_fonts.rs` | **unmapped** |  |
-| `media/fonts/testing/test_platform_typeface.rs` | **unmapped** | `TestPlatformTypeface` |
-| `media/known_color_brushes.rs` | **unmapped** |  |
-| `media/media_collection.rs` | **unmapped** | `MediaCollection` |
-| `media/points.rs` | **unmapped** |  |
-| `media/ref_adapter.rs` | **unmapped** | `RefAdapter` |
-| `media/string_splitter.rs` | **unmapped** | `StringSplitOptions` |
-| `media/text_formatting/i_text_drawing_sink.rs` | **unmapped** | `ITextDrawingSink` |
-| `media/text_formatting/testing/drawing.rs` | **unmapped** | `DrawCall`, `RecordingDrawingSink` |
-| `media/text_formatting/testing/fonts.rs` | **unmapped** | `TestFont`, `TestFontManagerImpl`, `TestPlatformTypeface` |
-| `media/text_formatting/testing/shaper.rs` | **unmapped** | `TestTextShaperImpl`, `TestTextShaperTypeface` |
-| `media/text_formatting/testing/sources.rs` | **unmapped** | `CustomDrawableRun`, `EndOfLineTextSource`, `InvisibleRun`, `ListTextSource`, `MultiBufferTextSource`, `SingleBufferTextSource` |
-| `media/text_formatting/text_index.rs` | **unmapped** |  |
-| `media/text_formatting/unicode/bidi_trie.rs` | **unmapped** | `BiDiTrie` |
-| `media/text_formatting/unicode/east_asian_width_trie.rs` | **unmapped** | `EastAsianWidthTrie` |
-| `media/text_formatting/unicode/script_extensions_data.rs` | **unmapped** |  |
-| `media/text_formatting/unicode/segmentation_trie.rs` | **unmapped** | `SegmentationTrie` |
-| `media/text_formatting/unicode/ucd_test_data.rs` | **unmapped** |  |
-| `media/text_formatting/unicode/unicode_data_trie.rs` | **unmapped** | `UnicodeDataTrie` |
-| `media/tile_mode.rs` | **unmapped** | `TileMode` |
-| `metadata/markup_assembly.rs` | **unmapped** | `MarkupAssembly`, `XmlnsDefinition`, `XmlnsPrefix` |
-| `metadata/markup_macros.rs` | **unmapped** |  |
-| `metadata/markup_type.rs` | **unmapped** | `CompilerMetadata`, `MarkupArguments`, `MarkupAttribute`, `MarkupAttributeValue`, `MarkupConstructor`, `MarkupDelegate`, `MarkupDelegateMethod`, `MarkupEmit`, `MarkupEnumMember`, `MarkupEvent`, `MarkupField`, `MarkupGeneric`, ... (26 total) |
-| `metadata/property_accessors.rs` | **unmapped** | `PropertyAccessor` |
-| `metadata/service_provider.rs` | **unmapped** | `EmptyServiceProvider`, `IServiceProvider` |
-| `metadata/typed_path.rs` | **unmapped** | `TypedPathElement`, `TypedPathFallback`, `TypedPathGetter`, `TypedPathNotifying`, `TypedPathProbe`, `TypedPathSetter`, `TypedPathShared` |
-| `numerics/matrix3x2.rs` | **unmapped** | `Matrix3x2` |
-| `numerics/matrix4x4.rs` | **unmapped** | `Matrix4x4` |
-| `numerics/quaternion.rs` | **unmapped** | `Quaternion` |
-| `numerics/single.rs` | **unmapped** | `InvariantF32`, `StackBuf` |
-| `numerics/tests.rs` | **unmapped** |  |
-| `numerics/vector2.rs` | **unmapped** | `Vector2` |
-| `numerics/vector3.rs` | **unmapped** | `Vector3` |
-| `numerics/vector4.rs` | **unmapped** | `Vector4` |
-| `platform/i_drawing_context_impl_with_effects.rs` | **unmapped** | `IDrawingContextImplWithEffects` |
-| `platform/i_optional_feature_provider.rs` | **unmapped** | `IOptionalFeatureProvider` |
-| `platform/internal/asset_registry.rs` | **unmapped** | `Assets`, `RegisteredAssembly` |
-| `platform/render_interface_access.rs` | **unmapped** |  |
-| `platform/storage/file_io/path.rs` | **unmapped** |  |
-| `register_types.rs` | **unmapped** |  |
-| `rendering/auto_reset_event.rs` | **unmapped** | `AutoResetEvent` |
-| `rendering/composition/composition_cache_mode.rs` | **unmapped** | `CompositionBitmapCache`, `CompositionCacheMode` |
-| `rendering/composition/composition_solid_color_visual.rs` | **unmapped** | `CompositionSolidColorVisual` |
-| `rendering/composition/composition_surface_visual.rs` | **unmapped** | `CompositionSurfaceVisual` |
-| `rendering/composition/generated/composition_animations.rs` | **unmapped** |  |
-| `rendering/composition/generated/composition_bitmap_cache.rs` | **unmapped** | `CompositionBitmapCacheChangedFields`, `CompositionBitmapCacheHooks`, `CompositionBitmapCacheProps`, `ServerCompositionBitmapCacheHooks`, `ServerCompositionBitmapCacheProps` |
-| `rendering/composition/generated/composition_brush.rs` | **unmapped** | `CompositionBrushChangedFields`, `CompositionBrushHooks`, `CompositionBrushProps`, `ServerCompositionBrushHooks`, `ServerCompositionBrushProps` |
-| `rendering/composition/generated/composition_cache_mode.rs` | **unmapped** | `CompositionCacheModeHooks`, `CompositionCacheModeProps`, `ServerCompositionCacheModeHooks`, `ServerCompositionCacheModeProps` |
-| `rendering/composition/generated/composition_conic_gradient_brush.rs` | **unmapped** | `CompositionConicGradientBrushChangedFields`, `CompositionConicGradientBrushHooks`, `CompositionConicGradientBrushProps`, `ServerCompositionConicGradientBrushHooks`, `ServerCompositionConicGradientBrushProps` |
-| `rendering/composition/generated/composition_container_visual.rs` | **unmapped** | `CompositionContainerVisualHooks`, `CompositionContainerVisualProps`, `ServerCompositionContainerVisualHooks`, `ServerCompositionContainerVisualProps` |
-| `rendering/composition/generated/composition_experimental_acrylic_visual.rs` | **unmapped** | `CompositionExperimentalAcrylicVisualChangedFields`, `CompositionExperimentalAcrylicVisualHooks`, `CompositionExperimentalAcrylicVisualProps`, `ServerCompositionExperimentalAcrylicVisualHooks`, `ServerCompositionExperimentalAcrylicVisualProps` |
-| `rendering/composition/generated/composition_gradient_stop.rs` | **unmapped** | `CompositionGradientStopChangedFields`, `CompositionGradientStopHooks`, `CompositionGradientStopProps`, `ServerCompositionGradientStopHooks`, `ServerCompositionGradientStopProps` |
-| `rendering/composition/generated/composition_linear_gradient_brush.rs` | **unmapped** | `CompositionLinearGradientBrushChangedFields`, `CompositionLinearGradientBrushHooks`, `CompositionLinearGradientBrushProps`, `ServerCompositionLinearGradientBrushHooks`, `ServerCompositionLinearGradientBrushProps` |
-| `rendering/composition/generated/composition_radial_gradient_brush.rs` | **unmapped** | `CompositionRadialGradientBrushChangedFields`, `CompositionRadialGradientBrushHooks`, `CompositionRadialGradientBrushProps`, `ServerCompositionRadialGradientBrushHooks`, `ServerCompositionRadialGradientBrushProps` |
-| `rendering/composition/generated/composition_simple_brush.rs` | **unmapped** | `CompositionSimpleBrushChangedFields`, `ServerCompositionSimpleBrushHooks`, `ServerCompositionSimpleBrushProps` |
-| `rendering/composition/generated/composition_simple_conic_gradient_brush.rs` | **unmapped** | `CompositionSimpleConicGradientBrushChangedFields`, `ServerCompositionSimpleConicGradientBrushHooks`, `ServerCompositionSimpleConicGradientBrushProps` |
-| `rendering/composition/generated/composition_simple_geometry.rs` | **unmapped** | `CompositionSimpleGeometryChangedFields`, `ServerCompositionSimpleGeometryHooks`, `ServerCompositionSimpleGeometryProps` |
-| `rendering/composition/generated/composition_simple_linear_gradient_brush.rs` | **unmapped** | `CompositionSimpleLinearGradientBrushChangedFields`, `ServerCompositionSimpleLinearGradientBrushHooks`, `ServerCompositionSimpleLinearGradientBrushProps` |
-| `rendering/composition/generated/composition_simple_pen.rs` | **unmapped** | `CompositionSimplePenChangedFields`, `ServerCompositionSimplePenHooks`, `ServerCompositionSimplePenProps` |
-| `rendering/composition/generated/composition_simple_radial_gradient_brush.rs` | **unmapped** | `CompositionSimpleRadialGradientBrushChangedFields`, `ServerCompositionSimpleRadialGradientBrushHooks`, `ServerCompositionSimpleRadialGradientBrushProps` |
-| `rendering/composition/generated/composition_simple_solid_color_brush.rs` | **unmapped** | `CompositionSimpleSolidColorBrushChangedFields`, `ServerCompositionSimpleSolidColorBrushHooks`, `ServerCompositionSimpleSolidColorBrushProps` |
-| `rendering/composition/generated/composition_simple_tile_brush.rs` | **unmapped** | `CompositionSimpleTileBrushChangedFields`, `ServerCompositionSimpleTileBrushHooks`, `ServerCompositionSimpleTileBrushProps` |
-| `rendering/composition/generated/composition_simple_transform.rs` | **unmapped** | `CompositionSimpleTransformChangedFields`, `ServerCompositionSimpleTransformHooks`, `ServerCompositionSimpleTransformProps` |
-| `rendering/composition/generated/composition_solid_color_brush.rs` | **unmapped** | `CompositionSolidColorBrushChangedFields`, `CompositionSolidColorBrushHooks`, `CompositionSolidColorBrushProps`, `ServerCompositionSolidColorBrushHooks`, `ServerCompositionSolidColorBrushProps` |
-| `rendering/composition/generated/composition_solid_color_visual.rs` | **unmapped** | `CompositionSolidColorVisualChangedFields`, `CompositionSolidColorVisualHooks`, `CompositionSolidColorVisualProps`, `ServerCompositionSolidColorVisualHooks`, `ServerCompositionSolidColorVisualProps` |
-| `rendering/composition/generated/composition_surface_visual.rs` | **unmapped** | `CompositionSurfaceVisualChangedFields`, `CompositionSurfaceVisualHooks`, `CompositionSurfaceVisualProps`, `ServerCompositionSurfaceVisualHooks`, `ServerCompositionSurfaceVisualProps` |
-| `rendering/composition/generated/composition_target.rs` | **unmapped** | `CompositionTargetChangedFields`, `CompositionTargetHooks`, `CompositionTargetProps`, `ServerCompositionTargetHooks`, `ServerCompositionTargetProps` |
-| `rendering/composition/generated/composition_tile_brush.rs` | **unmapped** | `CompositionTileBrushChangedFields`, `ServerCompositionTileBrushHooks`, `ServerCompositionTileBrushProps` |
-| `rendering/composition/generated/composition_visual.rs` | **unmapped** | `CompositionVisualChangedFields`, `CompositionVisualHooks`, `CompositionVisualProps`, `ServerCompositionVisualHooks`, `ServerCompositionVisualProps` |
-| `rendering/composition/generated/composition_visual_collection.rs` | **unmapped** | `CompositionVisualCollectionHooks`, `CompositionVisualCollectionProps`, `ServerCompositionVisualCollectionHooks`, `ServerCompositionVisualCollectionProps` |
-| `rendering/composition/generated/tests.rs` | **unmapped** | `ClientBlock`, `FakeAnimation`, `FakeAnimationInstance`, `FakeAnimationState`, `Fixture`, `ServerBlock`, `SolidColorVisualServer`, `StartedAnimation`, `TestClient`, `TestServer`, `TestVisual` |
-| `rendering/composition/i_composition_object_host.rs` | **unmapped** | `ICompositionObject`, `ICompositionObjectHost`, `PendingAnimations` |
-| `rendering/composition/server/server_composition_simple_brush.rs` | **unmapped** | `ServerCompositionSimpleGradientBrush` |
-| `rendering/composition/server/server_composition_simple_transform.rs` | **unmapped** | `ServerCompositionSimpleTransform` |
-| `rendering/composition/server/server_composition_visual/act.rs` | **unmapped** | `ActSubscriber`, `AttHelper` |
-| `rendering/composition/server/server_composition_visual/adorners.rs` | **unmapped** |  |
-| `rendering/composition/server/server_composition_visual/computed_properties.rs` | **unmapped** |  |
-| `rendering/composition/server/server_composition_visual/dirty_inputs.rs` | **unmapped** |  |
-| `rendering/composition/server/server_composition_visual/readback.rs` | **unmapped** | `ReadbackData`, `Slot`, `VisualReadback` |
-| `rendering/composition/server/server_composition_visual/render.rs` | **unmapped** | `RenderContext` |
-| `rendering/composition/server/server_composition_visual/update.rs` | **unmapped** | `UpdateContext` |
-| `rendering/composition/server/server_composition_visual/walker.rs` | **unmapped** | `IServerTreeVisitor`, `TreeWalkContext`, `TreeWalkerFrame` |
-| `rendering/composition/server/server_composition_visual_collection.rs` | **unmapped** | `ServerCompositionVisualCollection` |
-| `rendering/composition/server/server_property_host.rs` | **unmapped** | `AsServerRenderResource`, `IServerAnimatedPropertyHost`, `IServerPropertyHost`, `ServerPropertyValue`, `ServerResourceRef`, `ServerValueChange` |
-| `rendering/composition/test_compositor.rs` | **unmapped** | `TestCompositor` |
-| `rendering/i_hit_tester.rs` | **unmapped** | `IHitTester` |
-| `rendering/managed_hit_tester.rs` | **unmapped** | `ManagedHitTester` |
-| `rendering/scene_graph/scene_graph_test_support.rs` | test doubles of the scene graph unit tests (the Moq mocks of `Rendering/SceneGraph/*Tests.cs`) | `TestBitmapImpl`, `TestCustomOperation`, `TestGeometryImpl` |
-| `rendering/testing/mock_drawing_context_impl.rs` | **unmapped** | `DrawingLog`, `MockDrawingContextImpl`, `MockDrawingContextLayerImpl`, `MockRenderTargetBitmapImpl` |
-| `rendering/testing/mock_platform_render_interface.rs` | **unmapped** | `MockGeometryImpl`, `MockGlyphRunImpl`, `MockPlatformRenderInterface`, `MockPlatformRenderInterfaceContext`, `MockRegion`, `MockRenderTarget`, `MockStreamGeometryContext`, `MockStreamGeometryImpl` |
-| `rust_paths.rs` | **unmapped** |  |
-| `styling/test_support.rs` | **unmapped** | `ChildIndexHandlers`, `Class1`, `Class2`, `Class3`, `PanelIndexProvider`, `StyledAsClass1`, `TestPanel`, `TestRoot` |
-| `styling/testing.rs` | **unmapped** |  |
-| `styling/visual_query_provider.rs` | **unmapped** | `Inner`, `VisualQueryProvider` |
-| `threading/cancellation_token.rs` | **unmapped** | `Callback`, `Callbacks`, `CancellationToken`, `CancellationTokenRegistration`, `CancellationTokenSource`, `Inner` |
-| `threading/dispatcher_task.rs` | **unmapped** | `DispatcherTask`, `LocalTask`, `TaskCompletion`, `TaskShared`, `TaskState`, `TaskStatus`, `TaskWaker` |
-| `threading/dispatcher_tests_exception.rs` | **unmapped** | `DispatcherTests` |
+| `animation/animation_task.rs` | the completion of an animation run, the `Task` upstream returns: completed from within a clock tick or a cancellation, so it needs no executor | `AnimationTask`, `State` |
+| `animation/cancellation.rs` | cancellation callbacks for state of the UI thread: a cancellation token runs its callbacks on the cancelling thread, so they must be `Send`, and what an animation does on cancellation is not | `LocalCancellationRegistration` |
+| `animation/time_span.rs` | counterpart of .NET `System.TimeSpan` (signed 100-nanosecond ticks), the time type of the animation system | `TimeSpan` |
+| `controls/resource_key.rs` | a value usable as a resource key (value equality and a hash) and the hasher of the resource tables: upstream keys are `object` | `ResourceKey`, `ResourceKeyBuildHasher`, `ResourceKeyHasher`, `ResourceKeyObject` |
+| `data/converters/composite_format.rs` | the composite formatting of .NET (`string.Format`), which the string format of a binding uses | `Float`, `FormatArg`, `FormatError`, `Number`, `Specifier` |
+| `data/core/plugins/markup_members.rs` | member lookup over markup metadata: what the string-path bindings use where upstream reflects over the run-time type of a source object | `MarkupPropertyInfo`, `MethodLookup` |
+| `data/core/plugins/property_info_accessor_factory.rs` | the accessor factories of compiled binding paths for plain properties, in the crate of the paths; upstream's are in `MarkupExtensions/CompiledBindings/PropertyInfoAccessorFactory.cs` of Avalonia.Markup.Xaml | `IndexerAccessor`, `PropertyInfoAccessorFactory` |
+| `data/core/plugins/untyped_accessor_plugin.rs` | property accessors over untyped getters and setters of the markup metadata: takes the place of the accessors upstream builds from `PropertyInfo` | `UntypedAccessor`, `UntypedAccessorPlugin`, `UntypedCanExecute`, `UntypedCommand`, `UntypedCreateDelegate`, `UntypedExecute`, `UntypedGetter`, `UntypedMember`, `UntypedSetter` |
+| `data/core/weak_value.rs` | a reference to a binding source that does not keep it alive: a weak reference to an object upstream | `WeakValue` |
+| `data/model/event.rs` | the contracts of the .NET runtime library that bindings observe on a model object (`INotifyPropertyChanged`, `INotifyCollectionChanged`, `INotifyDataErrorInfo`, events, indexers) and the declaration of a model type, which takes the place of reflection over the object | `Event` |
+| `data/model/i_bindable_indexer.rs` | the contracts of the .NET runtime library that bindings observe on a model object (`INotifyPropertyChanged`, `INotifyCollectionChanged`, `INotifyDataErrorInfo`, events, indexers) and the declaration of a model type, which takes the place of reflection over the object | `BindableArray`, `BindableDictionary`, `IBindableArray`, `IBindableIndexer` |
+| `data/model/i_notify_collection_changed.rs` | the contracts of the .NET runtime library that bindings observe on a model object (`INotifyPropertyChanged`, `INotifyCollectionChanged`, `INotifyDataErrorInfo`, events, indexers) and the declaration of a model type, which takes the place of reflection over the object | `BindableList`, `CollectionChange`, `IBindableList`, `INotifyCollectionChanged` |
+| `data/model/i_notify_data_error_info.rs` | the contracts of the .NET runtime library that bindings observe on a model object (`INotifyPropertyChanged`, `INotifyCollectionChanged`, `INotifyDataErrorInfo`, events, indexers) and the declaration of a model type, which takes the place of reflection over the object | `INotifyDataErrorInfo` |
+| `data/model/i_notify_property_changed.rs` | the contracts of the .NET runtime library that bindings observe on a model object (`INotifyPropertyChanged`, `INotifyCollectionChanged`, `INotifyDataErrorInfo`, events, indexers) and the declaration of a model type, which takes the place of reflection over the object | `INotifyPropertyChanged` |
+| `data/model/model_type.rs` | the contracts of the .NET runtime library that bindings observe on a model object (`INotifyPropertyChanged`, `INotifyCollectionChanged`, `INotifyDataErrorInfo`, events, indexers) and the declaration of a model type, which takes the place of reflection over the object | `Model`, `ModelMethod`, `ModelType`, `ModelTypeBuilder`, `ModelTypes` |
+| `diagnostics/perf_counters.rs` | counters of the work the framework does per operation, behind the feature `perf-counters` (docs/porting/performance, design 09): not from upstream, which is measured with the tools of its runtime | `PerfCountersSnapshot` |
+| `element_ref.rs` | a reference to an element that the holder does not own, held weakly and compared by identity: the value type of properties that point sideways or up the tree (a placement target, the target of a label), a plain object reference upstream | `ElementRef` |
+| `i_support_initialize.rs` | counterpart of .NET `System.ComponentModel.ISupportInitialize` | `ISupportInitialize`, `InitializationError`, `StyledElementInitialize` |
+| `input/i_command.rs` | counterpart of .NET `System.Windows.Input.ICommand` | `ICommand` |
+| `input/platform/clipboard_error.rs` | the error of a failed clipboard operation, by category: upstream lets the exceptions of the platform through | `ClipboardError`, `ClipboardErrorKind` |
+| `layout/layout_manager_tests_bring_into_view.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `LayoutTestControl`, `TestRequest` |
+| `markup_types/animation.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
+| `markup_types/classes.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
+| `markup_types/contracts.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
+| `markup_types/enums.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
+| `markup_types/named_values.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
+| `markup_types/plain.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
+| `markup_types/values.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
+| `media/fonts/tables/testing/big_endian_buffer.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `BigEndianBuffer` |
+| `media/fonts/tables/testing/synthetic_font.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `SyntheticFont`, `SyntheticFontMemory` |
+| `media/fonts/testing/test_asset_loader.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `TestAssetLoader` |
+| `media/fonts/testing/test_font_builder.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `TestFontBuilder` |
+| `media/fonts/testing/test_font_manager_impl.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `TestFontManagerImpl` |
+| `media/fonts/testing/test_font_scope.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `TestFontScope` |
+| `media/fonts/testing/test_fonts.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |  |
+| `media/fonts/testing/test_platform_typeface.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `TestPlatformTypeface` |
+| `media/known_color_brushes.rs` | the brush lookups of the known colours, a part of `Media/KnownColors.cs` upstream |  |
+| `media/media_collection.rs` | a reference-counted handle to an observable list that compares by identity, as the media object model shares its collections: object references upstream | `MediaCollection` |
+| `media/ref_adapter.rs` | the bridge between class handles and the media interfaces (`IBrush`, `IPen`, `ITransform`), which immutable values and mutable classes both implement: an interface cast upstream | `RefAdapter` |
+| `media/shared_brush.rs` | The values of an immutable brush or pen in a form that is Send + Sync: the handles of the brush contract are Rc, so what the render thread draws with is a copy with a stable identity (render thread, stage R1) | `BrushValues`, `Gradient`, `Kind`, `PenValues`, `SharedBrush`, `SharedImageSource`, `SharedPen`, `Tile` |
+| `media/text_formatting/i_text_drawing_sink.rs` | the drawing calls text needs, as a contract that mirrors the members of `DrawingContext` one to one and that the drawing context implements: upstream draws text onto a `DrawingContext` | `ITextDrawingSink` |
+| `media/text_formatting/testing/drawing.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `DrawCall`, `RecordingDrawingSink` |
+| `media/text_formatting/testing/fonts.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `TestFont`, `TestFontManagerImpl`, `TestPlatformTypeface` |
+| `media/text_formatting/testing/shaper.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `TestTextShaperImpl`, `TestTextShaperTypeface` |
+| `media/text_formatting/testing/sources.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `CustomDrawableRun`, `EndOfLineTextSource`, `InvisibleRun`, `ListTextSource`, `MultiBufferTextSource`, `SingleBufferTextSource` |
+| `media/text_formatting/text_index.rs` | conversion between UTF-16 code unit indices, the index unit of the text subsystem, and UTF-8 byte offsets of a `&str` |  |
+| `media/text_formatting/unicode/bidi_trie.rs` | generated by scripts/convert-unicode-tries.py from the upstream data file of the same name (`*.trie.cs`) | `BiDiTrie` |
+| `media/text_formatting/unicode/east_asian_width_trie.rs` | generated by scripts/convert-unicode-tries.py from the upstream data file of the same name (`*.trie.cs`) | `EastAsianWidthTrie` |
+| `media/text_formatting/unicode/script_extensions_data.rs` | generated by scripts/convert-unicode-tries.py from the upstream data file `ScriptExtensions.data.cs` |  |
+| `media/text_formatting/unicode/segmentation_trie.rs` | generated by scripts/convert-unicode-tries.py from the upstream data file of the same name (`*.trie.cs`) | `SegmentationTrie` |
+| `media/text_formatting/unicode/ucd_test_data.rs` | helpers of the Unicode conformance tests, which read the test files of the Unicode Character Database from the repository where upstream downloads them at test time |  |
+| `media/text_formatting/unicode/unicode_data_trie.rs` | generated by scripts/convert-unicode-tries.py from the upstream data file of the same name (`*.trie.cs`) | `UnicodeDataTrie` |
+| `media/tile_mode.rs` | the enum `TileMode`, declared in `Media/TileBrush.cs` upstream | `TileMode` |
+| `metadata/markup_macros.rs` | the declaration forms of markup metadata (`ferro_markup_type!` and its kin): take the place of the attributes and the reflection of upstream |  |
+| `metadata/property_accessors.rs` | the Rust accessors of registered property definitions, for the Rust emitter of the XAML compiler (docs/porting/xaml.md, section 9): upstream's compiler loads a property definition from its static field | `PropertyAccessor` |
+| `metadata/service_provider.rs` | counterpart of .NET `System.IServiceProvider`, the service provider contract of markup | `EmptyServiceProvider`, `IServiceProvider` |
+| `metadata/typed_path.rs` | the typed path hook of a plain property declared in markup metadata, with which a compiled binding of one plain property is evaluated without boxing | `TypedPathElement`, `TypedPathFallback`, `TypedPathGetter`, `TypedPathNotifying`, `TypedPathProbe`, `TypedPathSetter`, `TypedPathShared` |
+| `numerics/matrix3x2.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream | `Matrix3x2` |
+| `numerics/matrix4x4.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream | `Matrix4x4` |
+| `numerics/quaternion.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream | `Quaternion` |
+| `numerics/single.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream | `InvariantF32`, `StackBuf` |
+| `numerics/tests.rs` | the unit tests of the module |  |
+| `numerics/vector2.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream | `Vector2` |
+| `numerics/vector3.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream | `Vector3` |
+| `numerics/vector4.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream | `Vector4` |
+| `platform/i_drawing_context_impl_with_effects.rs` | the contract `IDrawingContextImplWithEffects`, declared in `Platform/IDrawingContextImpl.cs` upstream | `IDrawingContextImplWithEffects` |
+| `platform/render_interface_access.rs` | access to the platform render interface registered by the rendering backend, in one place (a service locator lookup at each site upstream) |  |
+| `platform/storage/file_io/path.rs` | the path string operations of .NET `System.IO.Path` the storage helpers need |  |
+| `register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |  |
+| `rendering/auto_reset_event.rs` | counterpart of .NET `AutoResetEvent` for the waits of the render thread; bare WebAssembly has no blocking wait | `AutoResetEvent` |
+| `rendering/composition/composition_cache_mode.rs` | `CompositionCacheMode` and `CompositionBitmapCache`, classes that upstream's source generator writes from `composition-schema.xml`: the only cache mode is the bitmap cache, so the abstract class is an alias of it | `CompositionBitmapCache`, `CompositionCacheMode` |
+| `rendering/composition/composition_solid_color_visual.rs` | `CompositionSolidColorVisual` and `CompositionSurfaceVisual`, classes that upstream's source generator writes whole from `composition-schema.xml`: the hand-written half next to the generated property block | `CompositionSolidColorVisual` |
+| `rendering/composition/composition_surface_visual.rs` | `CompositionSolidColorVisual` and `CompositionSurfaceVisual`, classes that upstream's source generator writes whole from `composition-schema.xml`: the hand-written half next to the generated property block | `CompositionSurfaceVisual` |
+| `rendering/composition/generated/composition_animations.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time |  |
+| `rendering/composition/generated/composition_bitmap_cache.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionBitmapCacheChangedFields`, `CompositionBitmapCacheHooks`, `CompositionBitmapCacheProps`, `ServerCompositionBitmapCacheHooks`, `ServerCompositionBitmapCacheProps` |
+| `rendering/composition/generated/composition_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionBrushChangedFields`, `CompositionBrushHooks`, `CompositionBrushProps`, `ServerCompositionBrushHooks`, `ServerCompositionBrushProps` |
+| `rendering/composition/generated/composition_cache_mode.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionCacheModeHooks`, `CompositionCacheModeProps`, `ServerCompositionCacheModeHooks`, `ServerCompositionCacheModeProps` |
+| `rendering/composition/generated/composition_conic_gradient_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionConicGradientBrushChangedFields`, `CompositionConicGradientBrushHooks`, `CompositionConicGradientBrushProps`, `ServerCompositionConicGradientBrushHooks`, `ServerCompositionConicGradientBrushProps` |
+| `rendering/composition/generated/composition_container_visual.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionContainerVisualHooks`, `CompositionContainerVisualProps`, `ServerCompositionContainerVisualHooks`, `ServerCompositionContainerVisualProps` |
+| `rendering/composition/generated/composition_experimental_acrylic_visual.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionExperimentalAcrylicVisualChangedFields`, `CompositionExperimentalAcrylicVisualHooks`, `CompositionExperimentalAcrylicVisualProps`, `ServerCompositionExperimentalAcrylicVisualHooks`, `ServerCompositionExperimentalAcrylicVisualProps` |
+| `rendering/composition/generated/composition_gradient_stop.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionGradientStopChangedFields`, `CompositionGradientStopHooks`, `CompositionGradientStopProps`, `ServerCompositionGradientStopHooks`, `ServerCompositionGradientStopProps` |
+| `rendering/composition/generated/composition_linear_gradient_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionLinearGradientBrushChangedFields`, `CompositionLinearGradientBrushHooks`, `CompositionLinearGradientBrushProps`, `ServerCompositionLinearGradientBrushHooks`, `ServerCompositionLinearGradientBrushProps` |
+| `rendering/composition/generated/composition_radial_gradient_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionRadialGradientBrushChangedFields`, `CompositionRadialGradientBrushHooks`, `CompositionRadialGradientBrushProps`, `ServerCompositionRadialGradientBrushHooks`, `ServerCompositionRadialGradientBrushProps` |
+| `rendering/composition/generated/composition_simple_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionSimpleBrushChangedFields`, `ServerCompositionSimpleBrushHooks`, `ServerCompositionSimpleBrushProps` |
+| `rendering/composition/generated/composition_simple_conic_gradient_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionSimpleConicGradientBrushChangedFields`, `ServerCompositionSimpleConicGradientBrushHooks`, `ServerCompositionSimpleConicGradientBrushProps` |
+| `rendering/composition/generated/composition_simple_geometry.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionSimpleGeometryChangedFields`, `ServerCompositionSimpleGeometryHooks`, `ServerCompositionSimpleGeometryProps` |
+| `rendering/composition/generated/composition_simple_linear_gradient_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionSimpleLinearGradientBrushChangedFields`, `ServerCompositionSimpleLinearGradientBrushHooks`, `ServerCompositionSimpleLinearGradientBrushProps` |
+| `rendering/composition/generated/composition_simple_pen.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionSimplePenChangedFields`, `ServerCompositionSimplePenHooks`, `ServerCompositionSimplePenProps` |
+| `rendering/composition/generated/composition_simple_radial_gradient_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionSimpleRadialGradientBrushChangedFields`, `ServerCompositionSimpleRadialGradientBrushHooks`, `ServerCompositionSimpleRadialGradientBrushProps` |
+| `rendering/composition/generated/composition_simple_solid_color_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionSimpleSolidColorBrushChangedFields`, `ServerCompositionSimpleSolidColorBrushHooks`, `ServerCompositionSimpleSolidColorBrushProps` |
+| `rendering/composition/generated/composition_simple_tile_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionSimpleTileBrushChangedFields`, `ServerCompositionSimpleTileBrushHooks`, `ServerCompositionSimpleTileBrushProps` |
+| `rendering/composition/generated/composition_simple_transform.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionSimpleTransformChangedFields`, `ServerCompositionSimpleTransformHooks`, `ServerCompositionSimpleTransformProps` |
+| `rendering/composition/generated/composition_solid_color_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionSolidColorBrushChangedFields`, `CompositionSolidColorBrushHooks`, `CompositionSolidColorBrushProps`, `ServerCompositionSolidColorBrushHooks`, `ServerCompositionSolidColorBrushProps` |
+| `rendering/composition/generated/composition_solid_color_visual.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionSolidColorVisualChangedFields`, `CompositionSolidColorVisualHooks`, `CompositionSolidColorVisualProps`, `ServerCompositionSolidColorVisualHooks`, `ServerCompositionSolidColorVisualProps` |
+| `rendering/composition/generated/composition_surface_visual.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionSurfaceVisualChangedFields`, `CompositionSurfaceVisualHooks`, `CompositionSurfaceVisualProps`, `ServerCompositionSurfaceVisualHooks`, `ServerCompositionSurfaceVisualProps` |
+| `rendering/composition/generated/composition_target.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionTargetChangedFields`, `CompositionTargetHooks`, `CompositionTargetProps`, `ServerCompositionTargetHooks`, `ServerCompositionTargetProps` |
+| `rendering/composition/generated/composition_tile_brush.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionTileBrushChangedFields`, `ServerCompositionTileBrushHooks`, `ServerCompositionTileBrushProps` |
+| `rendering/composition/generated/composition_visual.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionVisualChangedFields`, `CompositionVisualHooks`, `CompositionVisualProps`, `ServerCompositionVisualHooks`, `ServerCompositionVisualProps` |
+| `rendering/composition/generated/composition_visual_collection.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `CompositionVisualCollectionHooks`, `CompositionVisualCollectionProps`, `ServerCompositionVisualCollectionHooks`, `ServerCompositionVisualCollectionProps` |
+| `rendering/composition/generated/tests.rs` | generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time | `ClientBlock`, `FakeAnimation`, `FakeAnimationInstance`, `FakeAnimationState`, `Fixture`, `ServerBlock`, `SolidColorVisualServer`, `StartedAnimation`, `TestClient`, `TestServer`, `TestVisual` |
+| `rendering/composition/i_composition_object_host.rs` | the seam between the generated property blocks of composition objects and the hand-written classes that embed them: partial classes upstream | `ICompositionObject`, `ICompositionObjectHost`, `PendingAnimations` |
+| `rendering/composition/render_interface_feature.rs` | a feature of the render interface as a handle bound to the compositor lock, which lends the feature inside the lock and is dropped there: upstream hands the feature object itself to the UI thread and the garbage collector shares it (render thread, stage R5.8) | `RenderInterfaceFeature` |
+| `rendering/composition/server/compositor_lock.rs` | The compositor lock as a type: upstream confines the server side to lock (_lock) by convention, here the lock holds the server compositor (render thread, stage R5) | `CompositorLock`, `CompositorLockGuard`, `LockBound`, `LockState`, `LockedServerCompositor` |
+| `rendering/composition/server/server_composition_cache_mode.rs` | the server side of `CompositionCacheMode`, a class that upstream's source generator writes from `composition-schema.xml`; `Rendering/Composition/Server/ServerCompositionCacheMode.cs` itself is mapped to the bitmap cache |  |
+| `rendering/composition/server/server_composition_visual_collection.rs` | the server side of the children collection of a visual, a class that upstream's source generator writes whole from `composition-schema.xml` | `ServerCompositionVisualCollection` |
+| `rendering/composition/server/server_property_host.rs` | the seam between the generated property blocks of server objects and the hand-written classes that embed them: partial classes upstream | `AsServerRenderResource`, `IServerAnimatedPropertyHost`, `IServerPropertyHost`, `ServerPropertyValue`, `ServerResourceRef`, `ServerValueChange` |
+| `rendering/composition/test_compositor.rs` | a compositor for the tests of the composition API that need no visual tree (upstream's `CompositorTestServices` without its top-level) | `TestCompositor` |
+| `rendering/i_hit_tester.rs` | the contract `IHitTester`, declared in `Rendering/IRenderer.cs` upstream | `IHitTester` |
+| `rendering/managed_hit_tester.rs` | a hit tester that walks the visual tree directly (an implementation of `IHitTester` that needs no compositor) | `ManagedHitTester` |
+| `rendering/scene_graph/scene_graph_test_support.rs` | test doubles of the scene graph unit tests (the Moq mocks of `Rendering/SceneGraph/*Tests.cs`) | `Counter`, `TestBitmapImpl`, `TestCustomOperation`, `TestGeometryImpl`, `TestPen` |
+| `rendering/testing/mock_drawing_context_impl.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `DrawingLog`, `MockDrawingContextImpl`, `MockDrawingContextLayerImpl`, `MockRenderTargetBitmapImpl` |
+| `rendering/testing/mock_platform_render_interface.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `BackendContextFactory`, `MockGeometryImpl`, `MockGlyphRunImpl`, `MockPlatformRenderInterface`, `MockPlatformRenderInterfaceContext`, `MockRegion`, `MockRenderTarget`, `MockStreamGeometryContext`, `MockStreamGeometryImpl` |
+| `rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |  |
+| `styling/test_support.rs` | classes shared by the styling tests: the control library is a separate crate, so the tests use minimal classes in place of the controls of the upstream tests | `ChildIndexHandlers`, `Class1`, `Class2`, `Class3`, `PanelIndexProvider`, `StyledAsClass1`, `TestPanel`, `TestRoot` |
+| `styling/testing.rs` | the port of `StyleHelpers` of the upstream test projects, for this crate and the crates built on it |  |
+| `threading/cancellation_token.rs` | counterpart of .NET `CancellationToken`, `CancellationTokenSource` and `CancellationTokenRegistration` | `Callback`, `Callbacks`, `CancellationToken`, `CancellationTokenRegistration`, `CancellationTokenSource`, `Inner` |
+| `threading/dispatcher_task.rs` | futures that run on a dispatcher: the executor half of what upstream gets from `Task` and its synchronization context (porting guide: asynchronous members return DispatcherTask) | `DispatcherTask`, `LocalTask`, `TaskCompletion`, `TaskShared`, `TaskState`, `TaskStatus`, `TaskWaker` |
+| `threading/dispatcher_tests_exception.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `DispatcherTests` |
 | `type_system.rs` | object model runtime (Ref/WeakRef handles, TypeInfo, class macros): replaces the CLR type system, virtual dispatch and GC references | `ClassDefaults`, `IntoRef`, `Nullable`, `ObjectType`, `Ref`, `StaticType`, `Subclassable`, `TypeInfo`, `TypeRegistry`, `Upcast`, `WeakRef` |
-| `utilities/cancel_event_args.rs` | **unmapped** | `CancelEventArgs` |
-| `utilities/compare_info.rs` | **unmapped** | `CompareInfo`, `CompareOptions`, `ICompareRules`, `OrdinalUnits`, `StringComparison` |
-| `utilities/culture_info.rs` | **unmapped** | `CultureInfo` |
-| `utilities/date_time.rs` | **unmapped** | `DateTime`, `UtcNowProvider` |
-| `utilities/date_time_format.rs` | **unmapped** | `Cursor`, `DateNumber`, `DateOrder`, `Fields`, `FormatContext`, `Parsed` |
-| `utilities/date_time_format_info.rs` | **unmapped** | `CalendarWeekRule`, `DateTimeFormatInfo`, `DateTimeFormatInfoRef`, `DateTimeFormatProvider` |
-| `utilities/date_time_kind.rs` | **unmapped** | `DateTimeKind` |
-| `utilities/date_time_net_data.rs` | **unmapped** |  |
-| `utilities/date_time_offset.rs` | **unmapped** | `DateTimeOffset` |
-| `utilities/date_time_styles.rs` | **unmapped** | `DateTimeStyles` |
-| `utilities/day_of_week.rs` | **unmapped** | `DayOfWeek` |
-| `utilities/decimal.rs` | **unmapped** | `Decimal` |
-| `utilities/decimal_double_conversion_data.rs` | **unmapped** |  |
-| `utilities/event_args.rs` | **unmapped** | `EventArgs` |
-| `utilities/gregorian_calendar.rs` | **unmapped** | `GregorianCalendar`, `IsoWeek` |
-| `utilities/handler_list.rs` | storage for C# `event` handlers (multicast delegates have no Rust equivalent; porting guide, Types table) | `HandlerIds`, `HandlerList`, `MakeMutOrClone` |
-| `utilities/i_culture_data_provider.rs` | **unmapped** | `ICultureDataProvider` |
-| `utilities/number_format.rs` | **unmapped** | `NumberBuffer`, `NumberParseError` |
-| `utilities/number_format_info.rs` | **unmapped** | `NumberFormatInfo` |
-| `utilities/number_styles.rs` | **unmapped** | `NumberStyles` |
-| `utilities/read_only_memory.rs` | **unmapped** | `ReadOnlyMemory` |
-| `utilities/ref_countable.rs` | **unmapped** | `RefCountable`, `RefCounted`, `RefCounter` |
-| `utilities/test_culture_data_provider.rs` | **unmapped** | `TestCultureDataProvider` |
-| `utilities/text_info.rs` | **unmapped** | `TextInfo` |
-| `utilities/time_zone_info.rs` | **unmapped** | `LocalUtcOffsetProvider`, `TimeZoneInfo` |
-| `utilities/uri.rs` | **unmapped** | `Uri`, `UriFormatError`, `UriKind` |
+| `utilities/cancel_event_args.rs` | counterpart of .NET `System.ComponentModel.CancelEventArgs` | `CancelEventArgs` |
+| `utilities/compare_info.rs` | counterpart of .NET `StringComparison`, `CompareOptions` and `CultureInfo.CompareInfo` | `CompareInfo`, `CompareOptions`, `ICompareRules`, `OrdinalUnits`, `StringComparison` |
+| `utilities/culture_info.rs` | minimal counterpart of .NET `System.Globalization.CultureInfo` | `CultureInfo`, `CultureTypes` |
+| `utilities/date_time.rs` | counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings | `DateTime`, `UtcNowProvider` |
+| `utilities/date_time_format.rs` | counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings | `Cursor`, `DateNumber`, `DateOrder`, `Fields`, `FormatContext`, `Parsed` |
+| `utilities/date_time_format_info.rs` | counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings | `CalendarWeekRule`, `DateTimeFormatInfo`, `DateTimeFormatInfoRef`, `DateTimeFormatProvider` |
+| `utilities/date_time_kind.rs` | counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings | `DateTimeKind` |
+| `utilities/date_time_net_data.rs` | expectations of the date and time tests, recorded from .NET |  |
+| `utilities/date_time_offset.rs` | counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings | `DateTimeOffset` |
+| `utilities/date_time_styles.rs` | counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings | `DateTimeStyles` |
+| `utilities/day_of_week.rs` | counterpart of .NET `System.DayOfWeek` | `DayOfWeek` |
+| `utilities/decimal.rs` | counterpart of .NET `System.Decimal` | `Decimal` |
+| `utilities/decimal_double_conversion_data.rs` | expectations of the conversions between doubles and decimals, recorded from .NET |  |
+| `utilities/event_args.rs` | counterpart of .NET `System.EventArgs` | `EventArgs` |
+| `utilities/gregorian_calendar.rs` | counterpart of .NET `System.Globalization.GregorianCalendar` and `ISOWeek`, as far as the controls use them | `GregorianCalendar`, `IsoWeek` |
+| `utilities/i_culture_data_provider.rs` | the source of culture data: the base library has the invariant culture built in, the data of every other culture comes from a registered provider (.NET takes it from the operating system) | `ICultureDataProvider` |
+| `utilities/number_format.rs` | counterpart of a .NET runtime library type: `System.Globalization.NumberFormatInfo`, `NumberStyles` and the numeric format strings | `NumberBuffer`, `NumberParseError` |
+| `utilities/number_format_info.rs` | counterpart of a .NET runtime library type: `System.Globalization.NumberFormatInfo`, `NumberStyles` and the numeric format strings | `NumberFormatInfo` |
+| `utilities/number_styles.rs` | counterpart of a .NET runtime library type: `System.Globalization.NumberFormatInfo`, `NumberStyles` and the numeric format strings | `NumberStyles` |
+| `utilities/read_only_memory.rs` | counterpart of .NET `ReadOnlyMemory&lt;T&gt;`: the text of the text formatting subsystem | `ReadOnlyMemory` |
+| `utilities/test_culture_data_provider.rs` | a culture data provider for tests (`en`, `en-US`, `en-GB`, with the values .NET reports) | `TestCultureDataProvider` |
+| `utilities/text_info.rs` | minimal counterpart of .NET `System.Globalization.TextInfo` | `TextInfo` |
+| `utilities/thread_bound.rs` | A part of a shared render resource that stays on the thread that created it; the original relies on convention where Rust needs the object to be Send + Sync (render thread, stage R1) | `ThreadBound` |
+| `utilities/time_zone_info.rs` | minimal counterpart of .NET `System.TimeZoneInfo`: the offset of local time comes from a provider of the platform layer | `LocalUtcOffsetProvider`, `TimeZoneInfo` |
+| `utilities/uri.rs` | minimal counterpart of .NET `System.Uri`, covering what resource and font keys need | `Uri`, `UriFormatError`, `UriKind` |
 
-Tests, examples and build scripts (not scanned): `animation/tests/animatable_tests.rs`, `animation/tests/animation_iteration_tests.rs`, `animation/tests/brush_transition_tests.rs`, `animation/tests/effect_tests.rs`, `animation/tests/key_spline_tests.rs`, `animation/tests/mod.rs`, `animation/tests/page_transition_tests.rs`, `animation/tests/spring_tests.rs`, `animation/tests/style_animation_tests.rs`, `animation/tests/transitions_tests.rs`, `controls/resource_tests.rs`, `data/converters/composite_format_tests.rs`, `data/core/plugins/markup_members_tests.rs`, `diagnostics/diagnostics_tests.rs`, `ferro_object_tests.rs`, `input/data_transfer_tests.rs`, `input/input_tests.rs`, `interactivity/interactive_tests.rs`, `layout/layout_helper_tests.rs`, `layout/layout_queue_tests.rs`, `logical_tree/logical_extensions_tests.rs`, `markup_types/markup_types_tests.rs`, `media/color_tests.rs`, `media/drawing_context_tests.rs`, `media/font_manager_tests.rs`, `media/fonts/font_collection_tests.rs`, `media/fonts/tables/cmap/cmap_table_tests.rs`, `media/fonts/tables/glyf/glyf_table_contour_walk_tests.rs`, `media/fonts/tables/glyf/glyf_table_point_matching_tests.rs`, `media/fonts/tables/glyf/glyf_table_tests.rs`, `media/formatted_text_tests.rs`, `media/glyph_typeface_tests.rs`, `media/imaging/imaging_tests.rs`, `media/media_context_tests.rs`, `media/text_formatting/shaped_buffer_tests.rs`, `media/text_formatting/split_text_runs_tests.rs`, `media/text_formatting/text_characters_tests.rs`, `media/text_formatting/text_collapsing_bidi_tests.rs`, `media/text_formatting/text_formatter_tests.rs`, `media/text_formatting/text_formatter_wrap_characterization_tests.rs`, `media/text_formatting/text_layout_tests.rs`, `media/text_formatting/text_line_tests.rs`, `media/text_formatting/text_run_cache_tests.rs`, `media/text_formatting/unicode/bidi_algorithm_tests.rs`, `media/text_formatting/unicode/bidi_class_tests.rs`, `media/text_formatting/unicode/codepoint_has_script_extension_tests.rs`, `media/text_formatting/unicode/codepoint_tests.rs`, `media/text_formatting/unicode/grapheme_break_class_trie_generator_tests.rs`, `media/text_formatting/unicode/line_break_enumerator_tests.rs`, `media/text_formatting/unicode/property_value_alias_helper_tests.rs`, `media/text_formatting/unicode/sentence_break_enumerator_tests.rs`, `media/text_formatting/unicode/unicode_data_tests.rs`, `media/text_formatting/unicode/unicode_trie_tests.rs`, `media/text_formatting/unicode/utf16_utils_tests.rs`, `media/text_formatting/unicode/word_break_enumerator_tests.rs`, `metadata/markup_type_tests.rs`, `platform/storage/file_io/bcl_storage_tests.rs`, `platform/storage/file_io/storage_provider_helper_tests.rs`, `platform/storage/storage_tests.rs`, `rendering/composition/animations/composition_animation_tests.rs`, `rendering/composition/brushes/composition_brush_tests.rs`, `rendering/composition/composition_drawing_surface_tests.rs`, `rendering/composition/compositor_tests.rs`, `rendering/composition/drawing/render_data_stream_hit_test.rs`, `rendering/composition/drawing/render_data_tests.rs`, `rendering/composition/drawing/render_resource_tests.rs`, `rendering/composition/expressions/expression_tests.rs`, `rendering/i_custom_hit_test.rs`, `rendering/scene_graph/draw_operation_tests.rs`, `rendering/scene_graph/render_data_resources_tests.rs`, `rendering/scene_graph/render_data_stream_bounds_tests.rs`, `rendering/scene_graph/render_data_stream_effect_tests.rs`, `rendering/scene_graph/render_data_stream_ellipse_hit_test_tests.rs`, `rendering/scene_graph/render_data_stream_hit_test_tests.rs`, `rendering/scene_graph/render_data_stream_line_hit_test_tests.rs`, `rendering/scene_graph/render_data_stream_serialization_tests.rs`, `rendering/scene_graph/render_data_stream_tests.rs`, `rendering/scene_graph/render_data_writer_reader_tests.rs`, `styling/container_tests.rs`, `styling/selector_tests.rs`, `styling/style_tests.rs`, `tests/attached_property_tests.rs`, `tests/binding_default_value_converter_tests.rs`, `tests/binding_expression_observer_indexer_tests.rs`, `tests/binding_expression_tests_attached_property.rs`, `tests/binding_expression_tests_data_validation.rs`, `tests/binding_expression_tests_ferro_property.rs`, `tests/binding_expression_tests_get_value.rs`, `tests/binding_expression_tests_indexer.rs`, `tests/binding_expression_tests_mode.rs`, `tests/binding_expression_tests_negation.rs`, `tests/binding_expression_tests_observable.rs`, `tests/binding_expression_tests_property.rs`, `tests/binding_expression_tests_set_value.rs`, `tests/binding_expression_tests_task.rs`, `tests/binding_expression_tests_update_source_trigger.rs`, `tests/binding_model_tests.rs`, `tests/binding_null_conditional_tests.rs`, `tests/binding_operations_tests.rs`, `tests/binding_plugin_tests.rs`, `tests/binding_setter_tests.rs`, `tests/binding_test_support.rs`, `tests/binding_typed_expression_tests.rs`, `tests/class_registration_tests.rs`, `tests/compiled_binding_tests_create.rs`, `tests/direct_property_tests.rs`, `tests/ferro_object_tests_add_owner.rs`, `tests/ferro_object_tests_attached.rs`, `tests/ferro_object_tests_binding.rs`, `tests/ferro_object_tests_binding_two_way.rs`, `tests/ferro_object_tests_coercion.rs`, `tests/ferro_object_tests_data_validation.rs`, `tests/ferro_object_tests_direct.rs`, `tests/ferro_object_tests_get_observable.rs`, `tests/ferro_object_tests_get_value.rs`, `tests/ferro_object_tests_inheritance.rs`, `tests/ferro_object_tests_metadata.rs`, `tests/ferro_object_tests_on_property_changed.rs`, `tests/ferro_object_tests_reentrancy.rs`, `tests/ferro_object_tests_set_current_value.rs`, `tests/ferro_object_tests_set_value.rs`, `tests/ferro_object_tests_validation.rs`, `tests/ferro_property_registry_tests.rs`, `tests/ferro_property_tests.rs`, `tests/mod.rs`, `tests/property_registration_tests.rs`, `tests/property_store/frame_priority_extensions_tests.rs`, `tests/property_store/mod.rs`, `tests/property_store/value_store_tests_frames.rs`, `tests/property_store/value_store_tests_inheritance.rs`, `tests/reference_semantics_tests.rs`, `tests/styled_property_tests.rs`, `threading/dispatcher_priority_queue_tests.rs`, `threading/dispatcher_tests.rs`, `tree_tests.rs`, `utilities/date_time_net_tests.rs`, `utilities/date_time_tests.rs`, `utilities/number_format_net_tests.rs`, `visual_render_tests.rs`.
+Tests, examples and build scripts (not scanned): `animation/tests/animatable_tests.rs`, `animation/tests/animation_iteration_tests.rs`, `animation/tests/brush_transition_tests.rs`, `animation/tests/effect_tests.rs`, `animation/tests/key_spline_tests.rs`, `animation/tests/mod.rs`, `animation/tests/page_transition_tests.rs`, `animation/tests/spring_tests.rs`, `animation/tests/style_animation_tests.rs`, `animation/tests/transitions_tests.rs`, `controls/resource_tests.rs`, `data/converters/composite_format_tests.rs`, `data/core/plugins/markup_members_tests.rs`, `diagnostics/diagnostics_tests.rs`, `diagnostics/perf_counters_tests.rs`, `ferro_object_tests.rs`, `input/data_transfer_tests.rs`, `input/input_tests.rs`, `interactivity/interactive_tests.rs`, `layout/layout_helper_tests.rs`, `layout/layout_queue_tests.rs`, `logical_tree/logical_extensions_tests.rs`, `markup_types/markup_types_tests.rs`, `media/color_tests.rs`, `media/drawing_context_tests.rs`, `media/font_manager_tests.rs`, `media/fonts/font_collection_tests.rs`, `media/fonts/tables/cmap/cmap_table_tests.rs`, `media/fonts/tables/glyf/glyf_table_contour_walk_tests.rs`, `media/fonts/tables/glyf/glyf_table_point_matching_tests.rs`, `media/fonts/tables/glyf/glyf_table_tests.rs`, `media/formatted_text_tests.rs`, `media/glyph_typeface_tests.rs`, `media/imaging/imaging_tests.rs`, `media/media_context_tests.rs`, `media/text_formatting/shaped_buffer_tests.rs`, `media/text_formatting/split_text_runs_tests.rs`, `media/text_formatting/text_characters_tests.rs`, `media/text_formatting/text_collapsing_bidi_tests.rs`, `media/text_formatting/text_formatter_tests.rs`, `media/text_formatting/text_formatter_wrap_characterization_tests.rs`, `media/text_formatting/text_layout_tests.rs`, `media/text_formatting/text_line_tests.rs`, `media/text_formatting/text_run_cache_tests.rs`, `media/text_formatting/unicode/bidi_algorithm_tests.rs`, `media/text_formatting/unicode/bidi_class_tests.rs`, `media/text_formatting/unicode/codepoint_has_script_extension_tests.rs`, `media/text_formatting/unicode/codepoint_tests.rs`, `media/text_formatting/unicode/grapheme_break_class_trie_generator_tests.rs`, `media/text_formatting/unicode/line_break_enumerator_tests.rs`, `media/text_formatting/unicode/property_value_alias_helper_tests.rs`, `media/text_formatting/unicode/sentence_break_enumerator_tests.rs`, `media/text_formatting/unicode/unicode_data_tests.rs`, `media/text_formatting/unicode/unicode_trie_tests.rs`, `media/text_formatting/unicode/utf16_utils_tests.rs`, `media/text_formatting/unicode/word_break_enumerator_tests.rs`, `metadata/markup_type_tests.rs`, `platform/storage/file_io/bcl_storage_tests.rs`, `platform/storage/file_io/storage_provider_helper_tests.rs`, `platform/storage/storage_tests.rs`, `rendering/composition/animations/composition_animation_tests.rs`, `rendering/composition/brushes/composition_brush_tests.rs`, `rendering/composition/composition_drawing_surface_tests.rs`, `rendering/composition/compositor_tests.rs`, `rendering/composition/drawing/render_data_tests.rs`, `rendering/composition/drawing/render_resource_tests.rs`, `rendering/composition/expressions/expression_tests.rs`, `rendering/composition/render_thread_tests.rs`, `rendering/scene_graph/draw_operation_tests.rs`, `rendering/scene_graph/render_data_resources_tests.rs`, `rendering/scene_graph/render_data_stream_bounds_tests.rs`, `rendering/scene_graph/render_data_stream_effect_tests.rs`, `rendering/scene_graph/render_data_stream_ellipse_hit_test_tests.rs`, `rendering/scene_graph/render_data_stream_hit_test_tests.rs`, `rendering/scene_graph/render_data_stream_line_hit_test_tests.rs`, `rendering/scene_graph/render_data_stream_serialization_tests.rs`, `rendering/scene_graph/render_data_stream_tests.rs`, `rendering/scene_graph/render_data_writer_reader_tests.rs`, `styling/container_tests.rs`, `styling/selector_tests.rs`, `styling/style_tests.rs`, `tests/attached_property_tests.rs`, `tests/binding_default_value_converter_tests.rs`, `tests/binding_expression_observer_indexer_tests.rs`, `tests/binding_expression_tests_attached_property.rs`, `tests/binding_expression_tests_data_validation.rs`, `tests/binding_expression_tests_ferro_property.rs`, `tests/binding_expression_tests_get_value.rs`, `tests/binding_expression_tests_indexer.rs`, `tests/binding_expression_tests_mode.rs`, `tests/binding_expression_tests_negation.rs`, `tests/binding_expression_tests_observable.rs`, `tests/binding_expression_tests_property.rs`, `tests/binding_expression_tests_set_value.rs`, `tests/binding_expression_tests_task.rs`, `tests/binding_expression_tests_update_source_trigger.rs`, `tests/binding_model_tests.rs`, `tests/binding_null_conditional_tests.rs`, `tests/binding_operations_tests.rs`, `tests/binding_plugin_tests.rs`, `tests/binding_setter_tests.rs`, `tests/binding_test_support.rs`, `tests/binding_typed_expression_tests.rs`, `tests/class_registration_tests.rs`, `tests/compiled_binding_tests_create.rs`, `tests/direct_property_tests.rs`, `tests/ferro_object_tests_add_owner.rs`, `tests/ferro_object_tests_attached.rs`, `tests/ferro_object_tests_binding.rs`, `tests/ferro_object_tests_binding_two_way.rs`, `tests/ferro_object_tests_coercion.rs`, `tests/ferro_object_tests_data_validation.rs`, `tests/ferro_object_tests_direct.rs`, `tests/ferro_object_tests_get_observable.rs`, `tests/ferro_object_tests_get_value.rs`, `tests/ferro_object_tests_inheritance.rs`, `tests/ferro_object_tests_metadata.rs`, `tests/ferro_object_tests_on_property_changed.rs`, `tests/ferro_object_tests_reentrancy.rs`, `tests/ferro_object_tests_set_current_value.rs`, `tests/ferro_object_tests_set_value.rs`, `tests/ferro_object_tests_validation.rs`, `tests/ferro_property_registry_tests.rs`, `tests/ferro_property_tests.rs`, `tests/mod.rs`, `tests/property_registration_tests.rs`, `tests/property_store/frame_priority_extensions_tests.rs`, `tests/property_store/mod.rs`, `tests/property_store/value_store_tests_frames.rs`, `tests/property_store/value_store_tests_inheritance.rs`, `tests/reference_semantics_tests.rs`, `tests/styled_property_tests.rs`, `threading/dispatcher_priority_queue_tests.rs`, `threading/dispatcher_tests.rs`, `tree_tests.rs`, `utilities/date_time_net_tests.rs`, `utilities/date_time_tests.rs`, `utilities/number_format_net_tests.rs`, `utilities/string_splitter_tests.rs`, `visual_render_tests.rs`.
