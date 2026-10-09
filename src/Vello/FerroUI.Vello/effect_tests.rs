@@ -235,6 +235,15 @@ impl IVelloSceneSink for SinkWithoutFilters {
         self.count_edge(anti_alias);
         self.inner.stroke(path, stroke, transform, paint, anti_alias);
     }
+    fn draw_glyph_run(
+        &mut self,
+        glyph_run: &crate::scene::VelloSceneGlyphRun<'_>,
+        transform: Affine,
+        paint: &VelloScenePaint,
+        anti_alias: bool,
+    ) {
+        self.inner.draw_glyph_run(glyph_run, transform, paint, anti_alias);
+    }
     fn push_clip(&mut self, path: &BezPath, fill_rule: Fill, transform: Affine, anti_alias: bool) {
         self.count_edge(anti_alias);
         self.inner.push_clip(path, fill_rule, transform, anti_alias);
