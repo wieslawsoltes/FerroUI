@@ -182,18 +182,25 @@ impl<T: FerroObjectImpl> Subclassable<T> for FerroObject {
         // slot itself is taken, so that a call reaches the implementation
         // without a forwarding function of every class in between. A change
         // of a property goes through two of these members.
-        let forwards =
-            |member: &str| __forwards_to_parent::<T, FerroObjectVTable>(<T as FerroObjectImpl>::__OVERRIDES, member);
-        if forwards("constructed") {
+        let forwards: [bool; 4] = const {
+            let overrides = <T as FerroObjectImpl>::__OVERRIDES;
+            [
+                __forwards_to_parent::<T, FerroObjectVTable>(overrides, "constructed"),
+                __forwards_to_parent::<T, FerroObjectVTable>(overrides, "on_property_changed_core"),
+                __forwards_to_parent::<T, FerroObjectVTable>(overrides, "on_property_changed"),
+                __forwards_to_parent::<T, FerroObjectVTable>(overrides, "update_data_validation"),
+            ]
+        };
+        if forwards[0] {
             table.constructed = parent_vtable::<T, FerroObjectVTable>().constructed;
         }
-        if forwards("on_property_changed_core") {
+        if forwards[1] {
             table.on_property_changed_core = parent_vtable::<T, FerroObjectVTable>().on_property_changed_core;
         }
-        if forwards("on_property_changed") {
+        if forwards[2] {
             table.on_property_changed = parent_vtable::<T, FerroObjectVTable>().on_property_changed;
         }
-        if forwards("update_data_validation") {
+        if forwards[3] {
             table.update_data_validation = parent_vtable::<T, FerroObjectVTable>().update_data_validation;
         }
         table
