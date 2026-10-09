@@ -182,7 +182,11 @@ impl IRenderLoopTask for RenderThreadLoopTask {
             Some(None) => {
                 // The last job of the render thread: the graph, and with it
                 // every render target and the graphics context, is dropped
-                // here.
+                // here. What it drew with is released first, while its own
+                // graphics context is current: a thread that renders several
+                // compositors has several contexts, and between two frames
+                // any of them, or none, is the current one.
+                self.server.try_with(|server| server.release_gpu_resources());
                 self.server.release();
                 self.remove_from_loop();
                 false
@@ -446,6 +450,20 @@ impl Compositor {
     /// it.
     pub fn with_server<R>(&self, f: impl FnOnce(&Rc<ServerCompositor>) -> R) -> R {
         self.server.with(f)
+    }
+
+    /// The server compositor behind its lock, as a handle that may cross to
+    /// the thread that renders: for work of that thread that cannot be a job
+    /// of a batch, because it has to run whether or not this compositor
+    /// commits again and whether or not its graphics are ready (the release
+    /// of a surface that is closed). The work enters the graph with
+    /// [`try_with`](super::server::LockedServerCompositor::try_with), which
+    /// answers `None` once the graph is released.
+    ///
+    /// Not from upstream, where such work captures the server compositor
+    /// itself.
+    pub fn locked_server(&self) -> Arc<super::server::LockedServerCompositor> {
+        self.server.clone()
     }
 
     /// Binds `value` to the compositor lock: an object of the server side
@@ -1090,6 +1108,11 @@ impl Drop for Compositor {
                 self.server.release();
             }
         }
+        // No frame of this compositor applies a batch from here on. The
+        // batches that are still in the queue are completed as they are:
+        // the media context commits no compositor while one of the batches
+        // it committed is not processed.
+        self.batches.complete_all();
         let key = self.key;
         // The registry may already be gone when the thread is exiting.
         let _ = COMPOSITORS.try_with(|compositors| {

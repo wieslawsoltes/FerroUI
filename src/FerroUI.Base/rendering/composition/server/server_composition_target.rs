@@ -400,14 +400,22 @@ impl ServerCompositionTarget {
             return;
         }
         let current = self.compositor().map(|compositor| compositor.render_interface().ensure_current());
+        self.release_render_target();
+        if let Some(current) = current {
+            current.dispose();
+        }
+    }
+
+    /// Releases the layer and the render target of the target, in the
+    /// graphics context that is current: the caller has made the context of
+    /// the compositor current, without asking for a backend context (see
+    /// [`ServerCompositor::release_gpu_resources`]).
+    pub(crate) fn release_render_target(&self) {
         if let Some(layer) = self.layer.borrow_mut().take() {
             layer.dispose();
         }
         if let Some(render_target) = self.render_target.borrow_mut().take() {
             render_target.dispose();
-        }
-        if let Some(current) = current {
-            current.dispose();
         }
     }
 
