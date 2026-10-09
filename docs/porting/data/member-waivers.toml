@@ -1404,9 +1404,15 @@ type = "Avalonia.Threading.DispatcherUnhandledException*EventArgs"
 member = "Initialize"
 reason = "re-initialises the one instance the dispatcher reuses for every exception: the arguments borrow the exception, so `Dispatcher::exception_filter` and `catch_exception` create them with `new` for each raise"
 
-# Rendering/Composition (triage of 2026-10-08). The UI-thread objects are ported as one
-# `CompositionVisual` with a kind per upstream class, and the server compositor runs on the thread
-# of its compositor (row 12 of CRITICAL-PATH.md), so several members have another home.
+# Rendering/Composition (triage of 2026-10-08; the reasons read again against the render thread on
+# 2026-10-09). The UI-thread objects are ported as one `CompositionVisual` with a kind per upstream
+# class. The server compositor is rendered by the thread of its compositor (a render loop of the UI
+# thread), by the thread of the render loop under the compositor lock (the render-thread mode,
+# render-thread.md R5), or by that thread alone (a compositor confined to its render thread,
+# browser-render-worker.md B2.4). What the two sides share is what is `Send`: the queue of batches,
+# the readback indices, the handle of a batch and the jobs; an object of the server side is named by
+# its id or bound to the lock (`LockBound`) where upstream holds the object itself. Several members
+# have another home for one of these reasons; none of the waivers below depends on the mode.
 
 [[waive]]
 project = "Avalonia.Base"
@@ -1424,7 +1430,7 @@ reason = "ported as `DrawListData::hit_test` and `hit_test_geometry`, which `Com
 project = "Avalonia.Base"
 type = "Avalonia.Rendering.Composition.CompositionDrawingSurface"
 member = "Server"
-reason = "typed re-declaration (`new`) of `CompositionObject.Server`: a server object is named by its id (`ServerObjectId`), and `CompositionDrawingSurface::invoke` resolves the id to the `ServerCompositionDrawingSurface` on the server side"
+reason = "typed re-declaration (`new`) of `CompositionObject.Server`: a server object is named by its id (`ServerObjectId`), which may cross to the thread that renders where the object may not, and `CompositionDrawingSurface::invoke` posts a job (`Compositor::invoke_server_object_job_async`) that is handed the `ServerCompositionDrawingSurface` of the id on the server side, under the compositor lock"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -1454,7 +1460,7 @@ reason = "ported as `Compositor::render_loop` (`loop` is a keyword)"
 project = "Avalonia.Base"
 type = "Avalonia.Rendering.Composition.Compositor"
 member = "Compositor(*"
-reason = "ported as `Compositor::new` (the render loop of the locator) and `Compositor::with_scheduler` (every argument); the overload that only adds the render loop to the first one is `with_scheduler` with the defaults"
+reason = "the three constructors chain to one upstream, which serves every threading mode; here the mode is a constructor: `Compositor::with_scheduler` (every argument; the thread of the compositor renders), `Compositor::with_render_thread` (every argument; the thread that ticks the render loop renders under the compositor lock, and alone when the thread of the compositor never renders) and `Compositor::new` (the render loop of the locator, which picks one of the two by where the loop runs). The overload that only adds the render loop to the public one is either of the two with the defaults"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -1652,7 +1658,7 @@ reason = "the setters of `RenderedVisuals` and `VisitedVisuals` are private stat
 project = "Avalonia.Base"
 type = "Avalonia.Rendering.Composition*ServerCompositor"
 member = "Batch*Pool"
-reason = "pools of the segments of a batch stream, shared with the UI thread: a batch stream is one `BatchStreamData` (a queue of objects and a byte vector), recycled through `BatchQueue::rent_data` and `return_data`"
+reason = "pools of the segments of a batch stream, shared with the UI thread: a batch stream is one `BatchStreamData` (a queue of objects and a byte vector), rented by the UI thread with `BatchQueue::rent_data` and given back by the thread that renders with `return_data`, both under the lock of the pool"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -1664,7 +1670,7 @@ reason = "marker objects compared by reference in the object stream: the cases o
 project = "Avalonia.Base"
 type = "Avalonia.Rendering.Composition*ServerCompositor"
 member = "EnqueueBatch"
-reason = "ported as `BatchQueue::enqueue`: the queue of committed batches is its own struct, shared by the compositor and its server compositor (the one place that changes if the server moves to another thread, see its type comment)"
+reason = "ported as `BatchQueue::enqueue`: the queue of committed batches is its own struct (`Arc<BatchQueue>`, `Send + Sync`), shared by the compositor, which enqueues on the UI thread, and its server compositor, which dequeues on the thread that renders, both under the lock of the queue"
 
 [[waive]]
 project = "Avalonia.Base"
