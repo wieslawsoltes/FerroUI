@@ -6,7 +6,8 @@ use crate::styling::Setter;
 use crate::threading::CancellationToken;
 
 #[test]
-fn can_parse_key_spline() {
+// The type converter of the reference class is `KeySpline::parse`.
+fn can_parse_key_spline_via_type_converter() {
     for input in ["1,2 3,4", "1 2 3 4", "1 2,3 4", "1,2,3,4"] {
         let spline = KeySpline::parse(input).unwrap();
         assert_eq!(spline.control_point_x1(), 1.0);
@@ -17,7 +18,7 @@ fn can_parse_key_spline() {
 }
 
 #[test]
-fn can_handle_invalid_string_key_spline() {
+fn can_handle_invalid_string_key_spline_via_type_converter() {
     for input in ["1,2F,3,4", "Foo,Bar,Fee,Buzz"] {
         assert!(KeySpline::parse(input).is_err());
     }
