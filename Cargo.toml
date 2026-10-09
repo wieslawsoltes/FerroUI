@@ -19,6 +19,7 @@ members = [
     "src/FerroUI.Themes.Simple",
     "src/FerroUI.Themes.Fluent",
     "src/FerroUI.OpenGL",
+    "src/FerroUI.Metal",
     "src/FerroUI.Remote.Protocol",
     "src/FerroUI.DesignerSupport",
     "src/Skia/FerroUI.Skia",
@@ -66,6 +67,7 @@ ferroui-dialogs = { path = "src/FerroUI.Dialogs" }
 ferroui-themes-simple = { path = "src/FerroUI.Themes.Simple" }
 ferroui-themes-fluent = { path = "src/FerroUI.Themes.Fluent" }
 ferroui-opengl = { path = "src/FerroUI.OpenGL" }
+ferroui-metal = { path = "src/FerroUI.Metal" }
 ferroui-remote-protocol = { path = "src/FerroUI.Remote.Protocol" }
 ferroui-designer-support = { path = "src/FerroUI.DesignerSupport" }
 ferroui-skia = { path = "src/Skia/FerroUI.Skia" }

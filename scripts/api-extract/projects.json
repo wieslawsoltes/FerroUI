@@ -19,7 +19,7 @@
       "patterns": ["*.h", "*.mm", "*.m", "*.cpp", "*.c"], "crate": "(Objective-C++ sources built by ferroui-native)", "phase": "1 - desktop (macOS)", "priority": "P0" },
     { "path": "src/Avalonia.MicroCom", "detail": "full", "crate": "ferroui-microcom", "phase": "0 - core", "priority": "P0" },
     { "path": "src/Avalonia.OpenGL", "detail": "full", "crate": "ferroui-opengl", "phase": "2 - rendering backends", "priority": "P2" },
-    { "path": "src/Avalonia.Metal", "detail": "full", "rust": "src/Skia/FerroUI.Skia/metal", "crate": "ferroui-skia (module metal)", "phase": "1 - desktop (macOS)", "priority": "P1" },
+    { "path": "src/Avalonia.Metal", "detail": "full", "rust": "src/FerroUI.Metal", "crate": "ferroui-metal", "phase": "1 - desktop (macOS)", "priority": "P1" },
     { "path": "src/Avalonia.Themes.Fluent", "detail": "full", "crate": "ferroui-themes-fluent", "phase": "2 - xaml + themes", "priority": "P1",
       "extraFiles": [ { "label": "axaml", "patterns": ["*.axaml", "*.xaml"] } ] },
     { "path": "src/Avalonia.Themes.Simple", "detail": "full", "crate": "ferroui-themes-simple", "phase": "2 - xaml + themes", "priority": "P2",
