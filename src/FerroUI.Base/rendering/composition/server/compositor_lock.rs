@@ -96,6 +96,16 @@ pub struct LockedServerCompositor {
 // the map of features holds, which lends the feature inside the lock and
 // never the handle.
 //
+// What the graph shares with the thread of the compositor is shared by
+// contract or held where it cannot be cloned: the platform graphics and
+// their ready state feature are `Arc`s of `Send + Sync` objects, the clock of
+// the render-thread mode is an `Arc` of a `Send + Sync` function with one
+// `Rc` over it per side, and the handle of the render interface, an `Rc`
+// whose other handles the UI thread clones and drops freely, is a private
+// field of the context manager, which lends it by reference and has it
+// dropped by the UI thread (`release_platform_handles` before the render
+// thread releases the graph, `release` on the UI thread otherwise).
+//
 // What the type cannot check, and stays on the caller:
 //
 // - a caller of `with` (`Compositor::with_server`) gets the server
@@ -104,7 +114,13 @@ pub struct LockedServerCompositor {
 // - an object of the graph that returns an `Rc` from one of its methods to
 //   a caller that will keep it outside the lock (a feature that creates a
 //   context for its caller) must return one that shares no count with the
-//   graph.
+//   graph;
+// - the render interface is called by both threads (the UI thread creates
+//   geometries and bitmaps with it while a frame creates the backend
+//   context): its contract is not `Sync`, so an implementation has to be
+//   safe for that by itself, and its handle must only be looked up
+//   (`capture_platform_render_interface`) by the thread whose service
+//   locator holds it.
 unsafe impl Send for LockedServerCompositor {}
 unsafe impl Sync for LockedServerCompositor {}
 
@@ -188,8 +204,8 @@ impl LockedServerCompositor {
 
     /// Releases the server compositor, under the lock, on the calling
     /// thread. The compositor does this when it is dropped: the graph holds
-    /// handles that it shares with objects of the UI thread (the render
-    /// interface, the platform graphics), so it is released there and not by
+    /// a handle that it shares with the UI thread and whose count is not
+    /// atomic (the render interface), so it is released there and not by
     /// whichever thread drops the last handle to this object.
     ///
     /// Where the graph is confined to the render thread it is the other way

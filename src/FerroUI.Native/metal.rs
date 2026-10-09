@@ -24,6 +24,22 @@ pub struct MetalPlatformGraphics {
     display: ComPtr<IFrnMetalDisplay>,
 }
 
+// SAFETY: the platform graphics are shared by the UI thread and the thread
+// that renders (`IPlatformGraphics: Send + Sync`), and each may call
+// `CreateDevice` and drop its handle. The display is a process-lifetime
+// singleton of the native side (`FrnMetalDisplay`, held by a `ComStaticPtr`
+// in `native/FerroUI.Native/src/OSX/metal.mm`) without state: `CreateDevice`
+// reads nothing of the object and makes a new device and command queue per
+// call, so two threads may be inside it at once. The pointer is never
+// replaced, and the reference this object holds is taken once and given
+// back once, by whichever thread drops the last handle: the reference count
+// of a native object is atomic (`ComObject` in
+// `native/FerroUI.Native/inc/comimpl.h`). The device a call returns belongs
+// to the thread that asked.
+unsafe impl Send for MetalPlatformGraphics {}
+// SAFETY: see `Send`.
+unsafe impl Sync for MetalPlatformGraphics {}
+
 impl MetalPlatformGraphics {
     /// Obtains the Metal display of the native side; fails when Metal is
     /// not available.
@@ -38,6 +54,11 @@ impl MetalPlatformGraphics {
         Ok(MetalDevice::new(native))
     }
 }
+
+const _: fn() = || {
+    fn assert_send_sync<T: Send + Sync>() {}
+    assert_send_sync::<MetalPlatformGraphics>();
+};
 
 impl IPlatformGraphics for MetalPlatformGraphics {
     fn uses_shared_context(&self) -> bool {

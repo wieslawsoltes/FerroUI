@@ -246,7 +246,7 @@ mod macos {
         SkiaPlatform::initialize();
 
         let locator = FerroLocator::current();
-        let graphics = locator.get_service::<dyn IPlatformGraphics>();
+        let graphics = locator.get_service::<std::sync::Arc<dyn IPlatformGraphics>>();
         println!("Mode: {}, platform graphics: {}", if metal { "metal" } else { "software" }, graphics.is_some());
         if metal && graphics.is_none() {
             eprintln!("platform_window failed: Metal is not available");

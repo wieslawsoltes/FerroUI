@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
+use std::sync::Arc;
 
 use super::OwnedDisposable;
 use crate::platform::surfaces::IPlatformRenderSurface;
@@ -18,27 +19,38 @@ use crate::{FerroLocator, LocatorExtensions};
 /// was created on.
 pub struct PlatformRenderInterfaceContextManager {
     weak_self: Weak<PlatformRenderInterfaceContextManager>,
-    /// In cells with the render interface below: the three handles the
-    /// manager shares with the thread that created it, which takes them back
-    /// with [`release_platform_handles`](Self::release_platform_handles).
-    graphics: RefCell<Option<Rc<dyn IPlatformGraphics>>>,
+    /// The platform graphics and their ready state feature: shared with the
+    /// thread of the platform by their contracts (`Arc`, `Send + Sync`), so
+    /// the thread that renders may hold, call and drop these handles. In
+    /// cells because [`release_platform_handles`](Self::release_platform_handles)
+    /// empties them with the render interface below.
+    graphics: RefCell<Option<Arc<dyn IPlatformGraphics>>>,
     backend: RefCell<Option<Rc<dyn IPlatformRenderInterfaceContext>>>,
     gpu_context: RefCell<Option<OwnedDisposable<dyn IPlatformGraphicsContext>>>,
-    ready_state_feature: RefCell<Option<Rc<dyn IPlatformGraphicsReadyStateFeature>>>,
+    ready_state_feature: RefCell<Option<Arc<dyn IPlatformGraphicsReadyStateFeature>>>,
     /// The render interface of the platform, looked up where the manager is
     /// created: the service locator belongs to a thread, and the context may
     /// be created by another one (the render thread).
+    ///
+    /// The one handle the manager shares with its thread whose count is not
+    /// atomic. Nothing outside this type reaches the field: the handle is
+    /// cloned from the locator by the thread that has the services (`new`,
+    /// `capture_platform_render_interface`), lent by reference
+    /// (`with_platform_render_interface`, the creation of the backend
+    /// context), and dropped by that thread
+    /// (`release_platform_handles`, or the release of the server compositor
+    /// where its thread renders too).
     render_interface: RefCell<Option<Rc<dyn IPlatformRenderInterface>>>,
     context_disposed: HandlerList<dyn Fn()>,
     context_created: HandlerList<dyn Fn(&Rc<dyn IPlatformRenderInterfaceContext>)>,
 }
 
 impl PlatformRenderInterfaceContextManager {
-    pub fn new(graphics: Option<Rc<dyn IPlatformGraphics>>) -> Rc<PlatformRenderInterfaceContextManager> {
+    pub fn new(graphics: Option<Arc<dyn IPlatformGraphics>>) -> Rc<PlatformRenderInterfaceContextManager> {
         let ready_state_feature = graphics
             .as_ref()
             .and_then(|graphics| graphics.as_feature_provider())
-            .and_then(|features| features.try_get::<dyn IPlatformGraphicsReadyStateFeature>());
+            .and_then(|features| features.try_get_shared::<dyn IPlatformGraphicsReadyStateFeature>());
 
         Rc::new_cyclic(|weak_self| PlatformRenderInterfaceContextManager {
             weak_self: weak_self.clone(),
@@ -80,10 +92,11 @@ impl PlatformRenderInterfaceContextManager {
 
     /// Lets go of the handles the manager shares with the thread that
     /// created it: the platform graphics, its ready state feature and the
-    /// render interface. Their counts are not atomic, so they are dropped
-    /// here, by that thread, when the rest of the manager is about to be
-    /// released by the render thread (a compositor that is confined to it).
-    /// The manager creates no backend context afterwards.
+    /// render interface. The count of the render interface is not atomic, so
+    /// its handle is dropped here, by that thread, when the rest of the
+    /// manager is about to be released by the render thread (a compositor
+    /// that is confined to it). The other two may be dropped by any thread
+    /// and go with it: the manager creates no backend context afterwards.
     pub fn release_platform_handles(&self) {
         let graphics = self.graphics.borrow_mut().take();
         let ready_state_feature = self.ready_state_feature.borrow_mut().take();
@@ -228,8 +241,9 @@ impl PlatformRenderInterfaceContextManager {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Arc;
     use super::*;
+    use crate::utilities::ThreadBound;
+    use std::sync::atomic::{AtomicBool, Ordering};
     use crate::media::imaging::BitmapInterpolationMode;
     use crate::media::{FillRule, GeometryCombineMode};
     use crate::platform::{
@@ -286,35 +300,52 @@ mod tests {
     }
 
     struct ReadyState {
-        is_ready: Cell<bool>,
-        uses_contexts: Cell<bool>,
+        is_ready: AtomicBool,
+        uses_contexts: AtomicBool,
     }
 
     impl IPlatformGraphicsReadyStateFeature for ReadyState {
         fn is_ready(&self) -> bool {
-            self.is_ready.get()
+            self.is_ready.load(Ordering::SeqCst)
         }
 
         fn uses_contexts(&self) -> bool {
-            self.uses_contexts.get()
+            self.uses_contexts.load(Ordering::SeqCst)
         }
     }
 
+    /// The platform graphics of these tests: the log and the contexts it
+    /// hands out are objects of the test thread, so they are bound to it,
+    /// as the display of an implementation that belongs to one thread is.
     struct Graphics {
+        state: ThreadBound<GraphicsState>,
+        ready_state: Option<Arc<ReadyState>>,
+    }
+
+    struct GraphicsState {
         log: Log,
         uses_shared_context: bool,
         shared: Rc<GraphicsContext>,
         created: RefCell<Vec<Rc<GraphicsContext>>>,
-        ready_state: Option<Rc<ReadyState>>,
+    }
+
+    impl std::ops::Deref for Graphics {
+        type Target = GraphicsState;
+
+        fn deref(&self) -> &GraphicsState {
+            self.state.get()
+        }
     }
 
     impl Graphics {
-        fn new(log: &Log, uses_shared_context: bool, ready_state: Option<Rc<ReadyState>>) -> Rc<Graphics> {
-            Rc::new(Graphics {
-                log: log.clone(),
-                uses_shared_context,
-                shared: Rc::new(GraphicsContext { id: 0, log: log.clone(), is_lost: Cell::new(false) }),
-                created: RefCell::new(Vec::new()),
+        fn new(log: &Log, uses_shared_context: bool, ready_state: Option<Arc<ReadyState>>) -> Arc<Graphics> {
+            Arc::new(Graphics {
+                state: ThreadBound::new(GraphicsState {
+                    log: log.clone(),
+                    uses_shared_context,
+                    shared: Rc::new(GraphicsContext { id: 0, log: log.clone(), is_lost: Cell::new(false) }),
+                    created: RefCell::new(Vec::new()),
+                }),
                 ready_state,
             })
         }
@@ -323,7 +354,7 @@ mod tests {
     impl IOptionalFeatureProvider for Graphics {
         fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
             if feature_type == TypeId::of::<dyn IPlatformGraphicsReadyStateFeature>() {
-                let feature: Rc<dyn IPlatformGraphicsReadyStateFeature> = self.ready_state.clone()?;
+                let feature: Arc<dyn IPlatformGraphicsReadyStateFeature> = self.ready_state.clone()?;
                 return Some(Rc::new(feature));
             }
             None
@@ -332,7 +363,7 @@ mod tests {
 
     impl IPlatformGraphics for Graphics {
         fn uses_shared_context(&self) -> bool {
-            self.uses_shared_context
+            self.state.get().uses_shared_context
         }
 
         fn create_context(&self) -> Rc<dyn IPlatformGraphicsContext> {
@@ -620,9 +651,9 @@ mod tests {
             Fixture { log, render_interface, scope }
         }
 
-        fn manager(&self, graphics: Option<Rc<Graphics>>) -> Rc<PlatformRenderInterfaceContextManager> {
+        fn manager(&self, graphics: Option<Arc<Graphics>>) -> Rc<PlatformRenderInterfaceContextManager> {
             let manager =
-                PlatformRenderInterfaceContextManager::new(graphics.map(|graphics| graphics as Rc<dyn IPlatformGraphics>));
+                PlatformRenderInterfaceContextManager::new(graphics.map(|graphics| graphics as Arc<dyn IPlatformGraphics>));
             let log = self.log.clone();
             manager.context_disposed(move || record(&log, "ContextDisposed"));
             let log = self.log.clone();
@@ -787,7 +818,8 @@ mod tests {
     #[test]
     fn ready_state_feature_controls_readiness_and_context_use() {
         let fixture = Fixture::new();
-        let ready_state = Rc::new(ReadyState { is_ready: Cell::new(false), uses_contexts: Cell::new(false) });
+        let ready_state =
+            Arc::new(ReadyState { is_ready: AtomicBool::new(false), uses_contexts: AtomicBool::new(false) });
         let graphics = Graphics::new(&fixture.log, false, Some(ready_state.clone()));
         let manager = fixture.manager(Some(graphics));
 
@@ -797,7 +829,7 @@ mod tests {
         assert!(failed.is_err());
         assert!(take(&fixture.log).is_empty());
 
-        ready_state.is_ready.set(true);
+        ready_state.is_ready.store(true, Ordering::SeqCst);
         assert!(manager.is_ready());
         manager.ensure_valid_backend_context();
         // The graphics do not use contexts: the backend is created without one.
@@ -805,7 +837,7 @@ mod tests {
         assert!(manager.gpu_context().is_none());
 
         manager.reset();
-        ready_state.uses_contexts.set(true);
+        ready_state.uses_contexts.store(true, Ordering::SeqCst);
         manager.ensure_valid_backend_context();
         assert_eq!(
             take(&fixture.log),

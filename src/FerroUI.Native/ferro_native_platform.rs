@@ -78,7 +78,7 @@ impl IFrnGCHandleDeallocatorCallbackImpl for GCHandleDeallocator {
 pub struct FerroNativePlatform {
     factory: RefCell<Option<ComPtr<IFerroNativeFactory>>>,
     options: RefCell<Option<FerroNativePlatformOptions>>,
-    platform_graphics: RefCell<Option<Rc<dyn IPlatformGraphics>>>,
+    platform_graphics: RefCell<Option<Arc<dyn IPlatformGraphics>>>,
     is_disposed: Cell<bool>,
     /// The exporters of the application menu and of the dock menu.
     application_menu_exporter: RefCell<Option<Rc<FerroNativeMenuExporter>>>,
@@ -348,7 +348,7 @@ impl FerroNativePlatform {
                         continue;
                     };
                     context.dispose();
-                    *self.platform_graphics.borrow_mut() = Some(Rc::new(metal));
+                    *self.platform_graphics.borrow_mut() = Some(Arc::new(metal));
                     break;
                 }
                 FerroNativeRenderingMode::Software => break,
@@ -357,7 +357,10 @@ impl FerroNativePlatform {
 
         let platform_graphics = self.platform_graphics.borrow().clone();
         if let Some(platform_graphics) = &platform_graphics {
-            locator.bind::<dyn IPlatformGraphics>().to_constant(platform_graphics.clone());
+            // One object for the services of this thread and for the
+            // thread that renders, as in the reference: shared by its
+            // contract.
+            locator.bind::<Arc<dyn IPlatformGraphics>>().to_constant(Rc::new(platform_graphics.clone()));
         }
 
         // The render loop of this platform runs on the thread of the render

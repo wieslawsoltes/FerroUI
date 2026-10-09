@@ -2,20 +2,31 @@ use super::EglDisplay;
 use crate::OpenGlException;
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::platform::{IPlatformGraphics, IPlatformGraphicsContext};
+use ferroui_base::utilities::ThreadBound;
 use std::rc::Rc;
 
 /// The platform graphics of an EGL display: every context is a new context of the display.
+///
+/// The platform graphics are shared by threads (`IPlatformGraphics: Send + Sync`), and the
+/// display is not: it is an `Rc` whose contexts each hold a handle to it, and the EGL
+/// objects behind it were not read for use by two threads. So the display stays bound to
+/// the thread that created the platform graphics: that thread creates the contexts, and a
+/// call from another thread panics instead of touching the display. A compositor that
+/// renders on another thread needs a display that may be shared before it can use these
+/// graphics; no platform creates them yet.
 pub struct EglPlatformGraphics {
-    display: Rc<EglDisplay>,
+    display: ThreadBound<Rc<EglDisplay>>,
 }
 
 impl EglPlatformGraphics {
     pub fn new(display: Rc<EglDisplay>) -> Self {
-        Self { display }
+        Self { display: ThreadBound::new(display) }
     }
 
+    /// # Panics
+    /// Panics on a thread other than the one that created the platform graphics.
     pub fn display(&self) -> &Rc<EglDisplay> {
-        &self.display
+        self.display.get()
     }
 
     /// Creates the platform graphics of the display `display_factory` creates; a failure of
@@ -46,9 +57,10 @@ impl IPlatformGraphics for EglPlatformGraphics {
     }
 
     /// # Panics
-    /// Panics when the context cannot be created (the exception of the original).
+    /// Panics when the context cannot be created (the exception of the original), and on a
+    /// thread other than the one that created the platform graphics.
     fn create_context(&self) -> Rc<dyn IPlatformGraphicsContext> {
-        match self.display.create_context(None) {
+        match self.display().create_context(None) {
             Ok(context) => context,
             Err(error) => panic!("{error}"),
         }
