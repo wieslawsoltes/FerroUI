@@ -466,3 +466,17 @@ impl IGeometryContext for RecordingGeometryContext {
 
     fn dispose(&mut self) {}
 }
+
+// The one test of the reference file that needs the real font.
+#[test]
+fn try_load_succeeds_for_inter() {
+    let typeface = crate::media::glyph_typeface_tests::load_inter();
+    let font = &**typeface.platform_typeface();
+    let head = HeadTable::try_load(font).unwrap().unwrap();
+    let maxp = MaxpTable::load(font).unwrap();
+
+    let glyf = GlyfTable::try_load(font, &head, &maxp);
+
+    assert!(glyf.is_some());
+    assert!(glyf.unwrap().glyph_count() > 0);
+}
