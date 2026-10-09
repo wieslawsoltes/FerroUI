@@ -2,7 +2,7 @@ use crate::data::{BindingBase, BindingError, BindingExpressionBase, BindingPrior
 use crate::property_store::{BindingSource, ValueStore};
 use crate::reactive::{Disposable, IDisposable, IObservable};
 use crate::threading::Dispatcher;
-use crate::type_system::{cast_this, parent_vtable};
+use crate::type_system::{__forwards_to_parent, cast_this, parent_vtable};
 use crate::utilities::HandlerList;
 use crate::{
     BoxedValue, DirectPropertyBase, FerroProperty, FerroPropertyChangedEventArgs, FerroPropertyRegistry,
@@ -90,6 +90,14 @@ unsafe impl ObjectType for FerroObject {
 
 /// The overridable members of [`FerroObject`].
 pub trait FerroObjectImpl: ObjectType {
+    /// The names of the members this implementation overrides, where it
+    /// states them: `None` for an implementation written as a plain `impl`.
+    /// Set by [`ferro_impl_classes!`](crate::ferro_impl_classes) and
+    /// [`ferro_overrides!`](crate::ferro_overrides), never by hand: the
+    /// table of the class is built from it.
+    #[doc(hidden)]
+    const __OVERRIDES: Option<&'static [&'static str]> = None;
+
     /// Called once, right after the object has been allocated. This is where
     /// constructor logic that needs a reference to the object runs. Overrides
     /// must call `parent_constructed` first.
@@ -155,7 +163,7 @@ impl<T: FerroObjectImpl> Subclassable<T> for FerroObject {
     fn build_vtable() -> FerroObjectVTable {
         // SAFETY (all casts): the table is only attached to objects whose
         // most-derived class is `T`.
-        FerroObjectVTable {
+        let mut table = FerroObjectVTable {
             type_info: T::TYPE,
             constructed: |this| T::constructed(unsafe { cast_this::<FerroObject, T>(this) }),
             on_property_changed_core: |this, change| {
@@ -167,7 +175,28 @@ impl<T: FerroObjectImpl> Subclassable<T> for FerroObject {
             update_data_validation: |this, property, state, error| {
                 T::update_data_validation(unsafe { cast_this::<FerroObject, T>(this) }, property, state, error)
             },
+        };
+
+        // A member `T` states it does not override is the default, which
+        // calls the same slot of the parent table and does nothing else: the
+        // slot itself is taken, so that a call reaches the implementation
+        // without a forwarding function of every class in between. A change
+        // of a property goes through two of these members.
+        let forwards =
+            |member: &str| __forwards_to_parent::<T, FerroObjectVTable>(<T as FerroObjectImpl>::__OVERRIDES, member);
+        if forwards("constructed") {
+            table.constructed = parent_vtable::<T, FerroObjectVTable>().constructed;
         }
+        if forwards("on_property_changed_core") {
+            table.on_property_changed_core = parent_vtable::<T, FerroObjectVTable>().on_property_changed_core;
+        }
+        if forwards("on_property_changed") {
+            table.on_property_changed = parent_vtable::<T, FerroObjectVTable>().on_property_changed;
+        }
+        if forwards("update_data_validation") {
+            table.update_data_validation = parent_vtable::<T, FerroObjectVTable>().update_data_validation;
+        }
+        table
     }
 }
 
