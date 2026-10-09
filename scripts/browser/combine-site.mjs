@@ -112,8 +112,13 @@ for (const name of plainFiles) {
     compared++;
     if (!fs.readFileSync(path.join(plain, name)).equals(fs.readFileSync(path.join(threaded, name)))) { problems.push(`${name}: differs between the two sites`); }
 }
+// A module whose workers load its script under another name than the script has (an application
+// with a hyphen in its name, scripts/build-browser.sh) comes with that script too: one line that
+// imports the script of the module. It belongs to the module with threads and moves with it.
+const workerScripts = threadedFiles.filter((name) => !name.includes("/") && name.endsWith(".js") && !plainSet.has(name)
+    && fs.readFileSync(path.join(threaded, name), "utf8").trim() === `import "./${module.script}";`);
 for (const name of threadedFiles) {
-    if (!plainSet.has(name) && name !== CHECK) { problems.push(`${name}: only in the site with threads`); }
+    if (!plainSet.has(name) && name !== CHECK && !workerScripts.includes(name)) { problems.push(`${name}: only in the site with threads`); }
 }
 if (problems.length > 0) {
     fail(`the two sites do not share their files (build both from the same sources):\n  ${problems.join("\n  ")}`);
@@ -126,8 +131,13 @@ const threadedScript = fs.readFileSync(path.join(threaded, module.script), "utf8
 // Import statements start a line there; a comment that quotes one does not.
 const imports = new Set();
 for (const match of threadedScript.matchAll(/^[ \t]*import\b[^;\n]*?["'](\.{1,2}\/[^"']+)["']/gm)) { imports.add(match[1]); }
-const unknown = [...imports].filter((specifier) => specifier !== `./${PLATFORM}`);
-if (unknown.length > 0) { fail(`the script of the module with threads imports ${unknown.join(", ")}: only ./${PLATFORM} is provided in ${THREADS_DIRECTORY}/`); }
+// Besides the script module of the platform, an application's own scripts (the wasm-bindgen
+// imports of its host): each is a shared file at the root of the site, re-exported from the
+// directory of the module with threads so that the page and the module use one instance.
+const reexported = [...imports].map((specifier) => specifier.slice(2));
+const unknown = reexported.filter((name) => name.includes("/") || ofModule.has(name) || !plainSet.has(name));
+if (unknown.length > 0) { fail(`the script of the module with threads imports ${unknown.join(", ")}: not a shared file at the root of the site`); }
+if (!reexported.includes(PLATFORM)) { fail(`the script of the module with threads does not import ./${PLATFORM}`); }
 if (!threadedScript.includes("ferrouiThreads")) { fail(`${path.join(threaded, module.script)} does not say it was built with threads (no export ferrouiThreads)`); }
 
 // The host page: no preload of either file of the module, and the element the loader reads.
@@ -151,9 +161,12 @@ fs.cpSync(plain, out, { recursive: true });
 fs.writeFileSync(path.join(out, "index.html"), page);
 fs.mkdirSync(path.join(out, THREADS_DIRECTORY));
 for (const name of ofModule) { fs.copyFileSync(path.join(threaded, name), path.join(out, THREADS_DIRECTORY, name)); }
-fs.writeFileSync(path.join(out, THREADS_DIRECTORY, PLATFORM),
-    `// The script of the module with threads imports ./${PLATFORM}; the host page imports the one of the site.\n`
-    + `// They have to be one instance (scripts/browser/combine-site.mjs).\nexport * from "../${PLATFORM}";\n`);
+for (const name of workerScripts) { fs.copyFileSync(path.join(threaded, name), path.join(out, THREADS_DIRECTORY, name)); }
+for (const name of reexported) {
+    fs.writeFileSync(path.join(out, THREADS_DIRECTORY, name),
+        `// The script of the module with threads imports ./${name}; the host page imports the one of the site.\n`
+        + `// They have to be one instance (scripts/browser/combine-site.mjs).\nexport * from "../${name}";\n`);
+}
 
 const megabytes = (bytes) => `${(bytes / 1_000_000).toFixed(2)} MB`;
 const sizeOf = (directory, name) => fs.statSync(path.join(directory, name)).size;
