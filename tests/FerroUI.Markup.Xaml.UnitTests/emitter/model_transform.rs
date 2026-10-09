@@ -38,7 +38,7 @@ use super::corpus::DOCUMENTS;
 /// library the scanner did not read, a closure that states its return type); with that
 /// crate in the drift test of the type systems (`type_system_drift`) and this crate
 /// scanned as the crate that is compiled, every document agrees.
-const IDENTICAL: usize = 120;
+const IDENTICAL: usize = 121;
 
 fn transformed(
     type_system: &Rc<dyn IXamlTypeSystem>,

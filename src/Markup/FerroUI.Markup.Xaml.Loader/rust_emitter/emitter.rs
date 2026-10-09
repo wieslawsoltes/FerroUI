@@ -211,6 +211,10 @@ impl IXamlAstVisitor for ParentStackNodes {
 /// reference; [`ValueType`](ferroui_base::data::core::ValueType) and
 /// `TypeId` the canonical handle; each also as `Option<_>`. `None` if the
 /// type has no such representation.
+/// The Rust type that holds an untyped value (`object`), as generated code names it: the
+/// type `ValueType::object()` is the value type of.
+const OBJECT_TYPE_NAME: &str = "::core::option::Option<::ferroui_base::BoxedValue>";
+
 fn system_type_as(
     types: &dyn EmitTypes,
     class: Option<&dyn EmitClass>,
@@ -652,7 +656,12 @@ impl<'a> Emitter<'a> {
                 Some(_) => None,
                 None => self.types.metadata_of(&*type_),
             };
-            let primitive = self.types.handle_of(&*type_).and_then(|handle| self.types.primitive_type_name(handle.id()));
+            let primitive = self.types.handle_of(&*type_).and_then(|handle| match handle.is_object() {
+                // `typeof(object)`: the type of a target that takes any value, which is
+                // the type that holds an untyped value (`ValueType::object()`).
+                true => Some(OBJECT_TYPE_NAME),
+                false => self.types.primitive_type_name(handle.id()),
+            });
             if class.is_none() && markup.is_none() && primitive.is_none() {
                 return Err(unsupported(node, format!("{} has no metadata", type_.full_name())));
             }

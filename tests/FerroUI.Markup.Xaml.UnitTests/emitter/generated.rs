@@ -4886,6 +4886,81 @@ fn build_list_text_held_collection_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `type_extension_object.xaml`.
+static BUILD_TYPE_EXTENSION_OBJECT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/type_extension_object.xaml"), namespaces: XML_NAMESPACES_0 };
+
+/// Generated from `type_extension_object.xaml`.
+pub fn build_type_extension_object_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+    // type_extension_object.xaml(1,2) StackPanel
+    let stack_panel_0 = ::ferroui_controls::StackPanel::new();
+    let context = rt::populate_context(service_provider, &BUILD_TYPE_EXTENSION_OBJECT_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
+    let name_scope = context.name_scope_field();
+    stack_panel_0.begin_init();
+    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    // type_extension_object.xaml(2,4) Children
+    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // type_extension_object.xaml(2,4) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    border_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
+    // type_extension_object.xaml(2,11) Tag
+    border_0.set_value(::ferroui_controls::Control::tag_property(), rt::boxed(::ferroui_base::data::core::ValueType::of::<::core::option::Option<::ferroui_base::BoxedValue>>()));
+    rt::invoked(border_0.try_end_init(), 2, 4)?;
+    // type_extension_object.xaml(3,4) Children
+    let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // type_extension_object.xaml(3,4) ContentControl
+    let content_control_0 = ::ferroui_controls::ContentControl::new();
+    content_control_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_controls::Control>());
+    context.push_parent(rt::to_value(content_control_0.clone()));
+    // type_extension_object.xaml(3,19) Content
+    content_control_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::std::string::String::from("text")));
+    // type_extension_object.xaml(5,8) ContentTemplate
+    let data_template_0 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
+    context.push_parent(rt::to_value(data_template_0.clone()));
+    // type_extension_object.xaml(5,8) DataType
+    ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_DataType(&data_template_0, ::core::option::Option::Some(::ferroui_base::data::core::ValueType::of::<::core::option::Option<::ferroui_base::BoxedValue>>()));
+    // type_extension_object.xaml(6,10) Content
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_type_extension_object_xaml_deferred_0, 6, 10)?;
+    ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
+    context.pop_parent();
+    content_control_0.set_value(::ferroui_controls::ContentControl::content_template_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&data_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IDataTemplate>));
+    context.pop_parent();
+    rt::invoked(content_control_0.try_end_init(), 3, 4)?;
+    context.pop_parent();
+    rt::invoked(stack_panel_0.try_end_init(), 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(stack_panel_0)
+}
+
+/// Builds the deferred content at `type_extension_object.xaml(6,10)` (a template or a deferred resource).
+fn build_type_extension_object_xaml_deferred_0(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let context = rt::deferred_context(service_provider, &BUILD_TYPE_EXTENSION_OBJECT_XAML_DOCUMENT);
+    // type_extension_object.xaml(6,10) TextBlock
+    let text_block_0 = ::ferroui_controls::TextBlock::new();
+    context.set_intermediate_root_object(rt::to_value(text_block_0.clone()));
+    text_block_0.begin_init();
+    context.push_parent(rt::to_value(text_block_0.clone()));
+    // type_extension_object.xaml(6,20) Text
+    let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
+    let provided_0 = rt::provide_value(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 6, 20)?;
+    context.pop_parent();
+    rt::invoked(text_block_0.try_end_init(), 6, 10)?;
+    ::core::result::Result::Ok(rt::to_value(text_block_0.clone()))
+}
+
+fn build_type_extension_object_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_type_extension_object_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// The build function of every eligible public document, by document name.
 pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("border_empty.xaml", build_border_empty_xaml_untyped as BuildDocument),
@@ -5008,6 +5083,7 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("class_value.xaml", build_class_value_xaml_untyped as BuildDocument),
     ("class_binding.xaml", build_class_binding_xaml_untyped as BuildDocument),
     ("list_text_held_collection.xaml", build_list_text_held_collection_xaml_untyped as BuildDocument),
+    ("type_extension_object.xaml", build_type_extension_object_xaml_untyped as BuildDocument),
 ];
 
 /// The loader of the compiled markup of the assembly: builds the document with the URI

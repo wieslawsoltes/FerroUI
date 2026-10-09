@@ -666,6 +666,18 @@
     {"file_lines": [4862, 4865], "document": "list_text_held_collection.xaml", "line": 5, "position": 4},
     {"file_lines": [4866, 4868], "document": "list_text_held_collection.xaml", "line": 5, "position": 4},
     {"file_lines": [4869, 4871], "document": "list_text_held_collection.xaml", "line": 5, "position": 9},
-    {"file_lines": [4872, 4879], "document": "list_text_held_collection.xaml", "line": 5, "position": 9}
+    {"file_lines": [4872, 4879], "document": "list_text_held_collection.xaml", "line": 5, "position": 9},
+    {"file_lines": [4896, 4901], "document": "type_extension_object.xaml", "line": 1, "position": 2},
+    {"file_lines": [4902, 4903], "document": "type_extension_object.xaml", "line": 2, "position": 4},
+    {"file_lines": [4904, 4907], "document": "type_extension_object.xaml", "line": 2, "position": 4},
+    {"file_lines": [4908, 4910], "document": "type_extension_object.xaml", "line": 2, "position": 11},
+    {"file_lines": [4911, 4912], "document": "type_extension_object.xaml", "line": 3, "position": 4},
+    {"file_lines": [4913, 4917], "document": "type_extension_object.xaml", "line": 3, "position": 4},
+    {"file_lines": [4918, 4919], "document": "type_extension_object.xaml", "line": 3, "position": 19},
+    {"file_lines": [4920, 4922], "document": "type_extension_object.xaml", "line": 5, "position": 8},
+    {"file_lines": [4923, 4924], "document": "type_extension_object.xaml", "line": 5, "position": 8},
+    {"file_lines": [4925, 4935], "document": "type_extension_object.xaml", "line": 6, "position": 10},
+    {"file_lines": [4943, 4947], "document": "type_extension_object.xaml", "line": 6, "position": 10},
+    {"file_lines": [4948, 4954], "document": "type_extension_object.xaml", "line": 6, "position": 20}
   ]
 }
