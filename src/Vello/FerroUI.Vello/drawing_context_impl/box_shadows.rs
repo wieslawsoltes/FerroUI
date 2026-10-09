@@ -181,7 +181,8 @@ impl DrawingContextImpl {
         let transform = self.device_transform();
         let mut clip = self.target_path();
         clip.extend(transform * rounded_rect_path(*rect));
-        self.sink().push_clip(&clip, Fill::EvenOdd, Affine::IDENTITY, is_rounded);
+        let anti_alias = self.edge_anti_alias(is_rounded);
+        self.sink().push_clip(&clip, Fill::EvenOdd, Affine::IDENTITY, anti_alias);
 
         if let Some(shape) = shape {
             self.with_box_shadow_offset(shadow, |context| {
