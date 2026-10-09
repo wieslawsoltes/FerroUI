@@ -7,9 +7,11 @@
 //! The type models are the ones the build scripts of the crates would export, written
 //! here with the export of those scripts (`ferroui_build::export::Export`): the base
 //! crate, the controls, the XAML runtime library, the dialogs and the two themes (with
-//! their compiled documents), which export a model today, and the colour picker, the
-//! OpenGL controls and the view model library of the samples, which do not have a build
-//! script that exports one yet. The model of the sample is the scan of its sources.
+//! their compiled documents), which export a model today, and the OpenGL controls and the
+//! view model library of the samples, which do not have a build script that exports one
+//! yet. The colour picker is built as its build script builds it (its theme documents
+//! compiled as one group), so that its model has the compiled documents `App.xaml`
+//! includes. The model of the sample is the scan of its sources.
 //!
 //! Every document is compiled as a group of its own (a document with a class as the
 //! document of its class, with the documents of the sample it includes), so that a
@@ -336,8 +338,36 @@ fn measure_the_control_catalog_against_the_models() {
         &[&base, &controls, &dialogs, &markup_xaml],
         Some("compiled_xaml.xamlmeta"),
     );
-    // These three have no build script that exports a model yet.
-    let color_picker = export("src/FerroUI.Controls.ColorPicker", "ferroui-controls-color-picker", &[&base, &controls], None);
+    // The colour picker, as its build script builds it: its theme documents compiled as one
+    // group, with compiled bindings as their default.
+    let color_picker = {
+        let directory = repository.join("src/FerroUI.Controls.ColorPicker");
+        let mut documents = Vec::new();
+        documents_below(&directory, &directory.join("Themes"), &mut documents);
+        let borrowed: Vec<(&str, &str)> = documents.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
+        let out_dir = out.join("ferroui-controls-color-picker");
+        fs::create_dir_all(&out_dir).expect("the directory of the model");
+        let outcome = Build::new(directory, out_dir.clone(), "ferroui-controls-color-picker", vec![base.clone(), controls.clone(), markup_xaml.clone()])
+            .type_system(TypeSystem::Model)
+            .default_compile_bindings(true)
+            .compile_group(XamlGroup::new("compiled_xaml").documents(&borrowed))
+            .execute();
+        assert!(outcome.errors.is_empty(), "the colour picker is not built: {:?}", outcome.errors);
+        let path = out_dir.join("ferroui_controls_color_picker.xamlmeta");
+        let model = fs::read_to_string(&path).map_err(|error| error.to_string()).and_then(|text| AssemblyModel::parse(&text));
+        let model = model.unwrap_or_else(|error| panic!("the model of the colour picker cannot be read: {error}"));
+        println!(
+            "the model of ferroui-controls-color-picker: {} types, {} compiled documents (of {} theme documents); registrations with the untyped value conversions not read: {}",
+            model.types.len(),
+            model.documents.len(),
+            documents.len(),
+            unread_of(&model)
+        );
+        assert_eq!(model.documents.len(), documents.len(), "every theme document of the colour picker is compiled");
+        models.borrow_mut().push(model);
+        path
+    };
+    // These two have no build script that exports a model yet.
     let open_gl = export("src/FerroUI.OpenGL", "ferroui-opengl", &[&base, &controls], None);
     let mini_mvvm = export("samples/MiniMvvm", "mini-mvvm", &[&base], None);
 
