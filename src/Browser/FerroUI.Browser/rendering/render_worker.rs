@@ -1,8 +1,10 @@
 use super::web_render_target::{worker_started, PENDING_RENDER_THREAD};
-use super::{BrowserRenderTimer, BrowserSurfaceShared};
+use super::{BrowserRenderTimer, BrowserSurfaceShared, RenderStatistics};
 use crate::interop::thread_proxy;
+use std::any::Any;
+use std::panic::{Location, PanicHookInfo};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, Once};
 
 /// The render thread of the page: a thread of the module whose worker takes
 /// the canvases of the views and draws to them.
@@ -26,6 +28,13 @@ use std::sync::Arc;
 ///   target.
 ///
 /// There is one render thread for the life of the page; it never ends.
+///
+/// A panic of the thread does not end it either. A frame that panics is
+/// caught by the render loop (`DefaultRenderLoop`, as upstream's loop
+/// catches the exception of a frame and logs it), and the loop goes on with
+/// its next tick. The panic is reported to the thread of the page, which
+/// logs it on the console of the page ([`on_panic`](Self::on_panic)): what
+/// the thread itself logs stays in its worker.
 ///
 /// The platform starts it when it is registered, for the frame loop of the
 /// page ([`BrowserSharedRenderLoop::start_render_thread`](super::BrowserSharedRenderLoop::start_render_thread)).
@@ -154,7 +163,10 @@ impl RenderWorker {
             thread_proxy::run_on_thread(STATE.page_thread(), Box::new(Self::announce));
         });
         match spawned {
-            Ok(()) => Ok(true),
+            Ok(()) => {
+                Self::report_panics();
+                Ok(true)
+            }
             Err(error) => {
                 STATE.abandon();
                 Err(error)
@@ -210,6 +222,51 @@ impl RenderWorker {
         BrowserSurfaceShared::report_target(target_id, kind);
     }
 
+    /// The thread that started the render thread and creates the canvases,
+    /// as [`thread_proxy::current_thread`] names it there; 0 without a
+    /// render thread.
+    pub fn page_thread() -> usize {
+        if STATE.exists() {
+            STATE.page_thread()
+        } else {
+            0
+        }
+    }
+
+    /// Makes the panics of the render thread known to the page, from here
+    /// on: the panic hook of the process is wrapped, once. The hook that was
+    /// there runs first, as before.
+    fn report_panics() {
+        static WRAPPED: Once = Once::new();
+        WRAPPED.call_once(|| {
+            let previous = std::panic::take_hook();
+            std::panic::set_hook(Box::new(move |info| {
+                previous(info);
+                Self::on_panic(info);
+            }));
+        });
+    }
+
+    /// A thread of the module panics. When it is the render thread, the
+    /// panic is counted ([`RenderStatistics::render_thread_panics`]) and a
+    /// call is queued for the thread of the page, which logs the message as
+    /// an error on the console of the page
+    /// ([`thread_proxy::report_render_thread_panic`]). Nothing waits for
+    /// that call. The panic itself goes on as it would have: it unwinds to
+    /// whoever catches it, which for a frame is the render loop.
+    fn on_panic(info: &PanicHookInfo<'_>) {
+        let thread = thread_proxy::current_thread();
+        if thread == 0 || thread != STATE.thread() {
+            return;
+        }
+        RenderStatistics::render_thread_panicked();
+        let message = panic_message(info.payload(), info.location());
+        thread_proxy::run_on_thread(
+            STATE.page_thread(),
+            Box::new(move || thread_proxy::report_render_thread_panic(&message)),
+        );
+    }
+
     /// Tells the script of the thread of the page that the render thread
     /// takes canvases, once. Does nothing on another thread and before the
     /// render thread has reported itself.
@@ -217,6 +274,19 @@ impl RenderWorker {
         if let Some(thread_id) = STATE.take_announcement(thread_proxy::current_thread()) {
             worker_started(thread_id);
         }
+    }
+}
+
+/// The message of a panic and where it was raised, as the page is told.
+fn panic_message(payload: &(dyn Any + Send), location: Option<&Location<'_>>) -> String {
+    let message = payload
+        .downcast_ref::<&str>()
+        .copied()
+        .or_else(|| payload.downcast_ref::<String>().map(String::as_str))
+        .unwrap_or("a panic without a message");
+    match location {
+        Some(location) => format!("{message} ({}:{})", location.file(), location.line()),
+        None => message.to_string(),
     }
 }
 
@@ -321,6 +391,18 @@ mod tests {
         assert_eq!(0, RenderWorker::thread_id());
         assert_eq!(0, RenderWorker::canvas_thread_id());
         assert!(!RenderWorker::post(|| panic!("there is no thread to run this")));
+    }
+
+    #[test]
+    fn the_message_of_a_panic_names_what_was_said_and_where() {
+        let here = Location::caller();
+        let text: Box<dyn Any + Send> = Box::new("the frame failed");
+        let owned: Box<dyn Any + Send> = Box::new(String::from("the frame failed again"));
+        let other: Box<dyn Any + Send> = Box::new(7);
+
+        assert_eq!(format!("the frame failed ({}:{})", here.file(), here.line()), panic_message(&*text, Some(here)));
+        assert_eq!("the frame failed again", panic_message(&*owned, None));
+        assert_eq!("a panic without a message", panic_message(&*other, None));
     }
 
     #[test]
