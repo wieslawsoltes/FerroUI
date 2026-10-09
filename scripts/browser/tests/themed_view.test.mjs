@@ -812,7 +812,10 @@ if (threaded) {
         measured(`frames while the page was hidden: ${Number(still.frames) - Number(hidden.frames)}, ticks: ${Number(still.ticks) - Number(hidden.ticks)}`);
         assert(Number(still.frames) - Number(hidden.frames) <= 3, `the render thread drew ${Number(still.frames) - Number(hidden.frames)} frames of a hidden page in 2.5 s`);
 
+        // Shown again, the page draws its changes at the pace of its animation frames again. (The
+        // change made while it was hidden is already drawn, so another one is made.)
         await setHidden(page, false);
+        await page.evaluate(`(themedView.themedViewNativeHost("size", 120, 40), true)`);
         const shown = await framesAfter(page, still.frames);
         assertDrawnByRenderThread(shown);
         assert(page.errors.length === 0, `the page reported errors:\n${page.errors.join("\n")}`);
