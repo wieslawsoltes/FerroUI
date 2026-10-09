@@ -1190,3 +1190,337 @@ fn interaction_control_survivors() {
         }
     }
 }
+
+/// C331: the server visual of an adorner subscribes to the transforms of
+/// the visual it adorns. Upstream the subscription is a delegate in a set of
+/// the adorned visual, removed only when the adorner is given another visual
+/// to adorn; here the entry is a weak reference, and the entry of an adorner
+/// that was disposed stayed, with the memory of its server visual: a control
+/// kept an entry for every focus adorner it ever had, one for each time the
+/// keyboard moved the focus to it (0.9 KB each, for as long as the control
+/// lives). A server visual that is disposed takes its entry out.
+#[test]
+fn gap_c331_focus_adorners_of_a_control_the_keyboard_focuses_again_and_again() {
+    use ferroui_base::rendering::composition::server::ServerCompositionVisual;
+    use ferroui_base::rendering::composition::ElementComposition;
+    let bench = Bench::start(false);
+    let control = load(&format!(
+        "<StackPanel {XMLNS} HorizontalAlignment='Left' VerticalAlignment='Top'><Button Content='One'/><Button Content='Two'/></StackPanel>"
+    ));
+    bench.tour.set_content(Some(&control));
+    bench.tour.settle();
+    let buttons = all::<Button>(&control);
+    let subscribers = |button: &Ref<Button>| {
+        let visual = ElementComposition::get_element_visual(button).expect("the composition visual of the button");
+        let server = bench.tour.compositor().server().get::<ServerCompositionVisual>(visual.server()).expect("its server visual");
+        server.ancestor_transform_subscriber_count()
+    };
+    bench.click(bench.centre(&buttons[0]));
+    assert_eq!(0, subscribers(&buttons[0]), "a press shows no focus adorner");
+    // The keyboard moves the focus from one button to the other and back.
+    let mut adorned = 0;
+    for _ in 0..12 {
+        bench.key(Key::Tab, PhysicalKey::Tab);
+        bench.frames(2);
+        let focused = buttons.iter().position(|button| button.is_focused()).expect("a button has the focus");
+        adorned = adorned.max(subscribers(&buttons[focused]));
+        bench.key_with(Key::Tab, PhysicalKey::Tab, RawInputModifiers::SHIFT);
+        bench.frames(2);
+    }
+    assert_eq!(1, adorned, "the focus adorner of the focused button follows the button");
+    for button in &buttons {
+        assert!(subscribers(button) <= 1, "{} adorners are subscribed to a button", subscribers(button));
+    }
+    bench.tour.set_content(None);
+}
+
+/// What repeating an interaction with a control that stays in the tree adds:
+/// the control is shown, the interaction is made ten times, and what is
+/// alive in the process is read after ten and after twenty more. An
+/// interaction that leaves something each time (a handler that is added when
+/// a popup opens and never removed, a list that is never cleared) shows as a
+/// growth of both; what the first times fill and the later ones reuse does
+/// not.
+#[test]
+#[ignore = "measurement: run with --features count-allocations --ignored --nocapture --test-threads=1"]
+fn interaction_repeat_memory() {
+    use super::allocation_trace as trace;
+    use super::allocations;
+    let wanted = tour::environment("INTERACTION_SCENARIO");
+    let traced = tour::environment("CATALOG_TOUR_TRACE").is_some();
+    if traced {
+        trace::start();
+    }
+    let repeated: Vec<(&str, String, Box<dyn Fn(&Bench, &Ref<Control>, usize)>)> = vec![
+        (
+            "combo box: open, hover, Escape",
+            format!(
+                "<ComboBox {XMLNS} SelectedIndex='0' Width='200' HorizontalAlignment='Left' VerticalAlignment='Top'>\
+                   <ComboBoxItem>one</ComboBoxItem><ComboBoxItem>two</ComboBoxItem><ComboBoxItem>three</ComboBoxItem>\
+                 </ComboBox>"
+            ),
+            Box::new(|bench, control, _| {
+                bench.click(bench.centre(control));
+                bench.in_popup(0.5, 0.5, false);
+                bench.close();
+            }),
+        ),
+        (
+            "combo box: open, press an item",
+            format!(
+                "<ComboBox {XMLNS} SelectedIndex='0' Width='200' HorizontalAlignment='Left' VerticalAlignment='Top'>\
+                   <ComboBoxItem>one</ComboBoxItem><ComboBoxItem>two</ComboBoxItem><ComboBoxItem>three</ComboBoxItem>\
+                 </ComboBox>"
+            ),
+            Box::new(|bench, control, round| {
+                bench.click(bench.centre(control));
+                bench.in_popup(0.5, if round % 2 == 0 { 0.2 } else { 0.8 }, true);
+                bench.close();
+            }),
+        ),
+        (
+            "button: open its flyout, Escape",
+            format!(
+                "<Button {XMLNS} Content='Flyout' HorizontalAlignment='Left' VerticalAlignment='Top'>\
+                   <Button.Flyout><Flyout><StackPanel><TextBlock Text='content'/><Button Content='inner'/></StackPanel></Flyout></Button.Flyout>\
+                 </Button>"
+            ),
+            Box::new(|bench, control, _| {
+                bench.click(bench.centre(control));
+                bench.in_popup(0.5, 0.5, false);
+                bench.close();
+            }),
+        ),
+        (
+            "context menu: open, press an item",
+            format!(
+                "<Border {XMLNS} Background='Red' Width='200' Height='80' HorizontalAlignment='Left' VerticalAlignment='Top'>\
+                   <Border.ContextMenu><ContextMenu><MenuItem Header='one'/><MenuItem Header='two'/></ContextMenu></Border.ContextMenu>\
+                 </Border>"
+            ),
+            Box::new(|bench, control, _| {
+                bench.right_click(bench.centre(control));
+                bench.in_popup(0.5, 0.5, true);
+                bench.close();
+            }),
+        ),
+        (
+            "menu: open, sub menu, Escape",
+            format!(
+                "<Menu {XMLNS} HorizontalAlignment='Left' VerticalAlignment='Top'>\
+                   <MenuItem Header='File'><MenuItem Header='Open'/><MenuItem Header='Recent'><MenuItem Header='one'/></MenuItem><MenuItem Header='Close'/></MenuItem>\
+                 </Menu>"
+            ),
+            Box::new(|bench, control, _| {
+                bench.click(bench.centre(&first::<MenuItem>(control)));
+                bench.in_popup(0.5, 0.5, false);
+                bench.timers();
+                bench.close();
+            }),
+        ),
+        (
+            "tooltip: open, close",
+            format!(
+                "<Border {XMLNS} Background='Red' Width='200' Height='80' HorizontalAlignment='Left' VerticalAlignment='Top' ToolTip.Tip='A tip'/>"
+            ),
+            Box::new(|bench, control, _| {
+                bench.move_to(bench.centre(control));
+                bench.timers();
+                bench.move_to(Point::new(1200.0, 700.0));
+                bench.timers();
+            }),
+        ),
+        (
+            "calendar date picker: open, Escape",
+            format!("<CalendarDatePicker {XMLNS} Width='250' HorizontalAlignment='Left' VerticalAlignment='Top'/>"),
+            Box::new(|bench, control, _| {
+                bench.click(bench.centre(&first::<Button>(control)));
+                bench.in_popup(0.5, 0.5, false);
+                bench.close();
+            }),
+        ),
+        (
+            "date picker: open, Escape",
+            format!("<DatePicker {XMLNS} HorizontalAlignment='Left' VerticalAlignment='Top'/>"),
+            Box::new(|bench, control, _| {
+                bench.click(bench.centre(&first::<Button>(control)));
+                bench.in_popup(0.5, 0.5, false);
+                bench.close();
+            }),
+        ),
+        (
+            "text box: type, undo, select all, delete",
+            format!("<TextBox {XMLNS} Width='300' HorizontalAlignment='Left' VerticalAlignment='Top'/>"),
+            Box::new(|bench, control, _| {
+                let text_box = first::<TextBox>(control);
+                bench.click(bench.centre(control));
+                for _ in 0..20 {
+                    bench.text("a");
+                }
+                bench.timers();
+                for _ in 0..5 {
+                    text_box.undo();
+                }
+                text_box.select_all();
+                bench.key(Key::Back, PhysicalKey::Backspace);
+                bench.timers();
+            }),
+        ),
+        (
+            "list box of 10 000: to the end and back, a press",
+            format!("<ListBox {XMLNS} Width='300' Height='400' HorizontalAlignment='Left' VerticalAlignment='Top'/>"),
+            Box::new(|bench, control, round| {
+                if round == 0 {
+                    first::<ListBox>(control).set_items_source(Some(items(10_000)));
+                    bench.frames(2);
+                }
+                let scroll_viewer = first::<ScrollViewer>(control);
+                let end = scroll_viewer.extent().height - scroll_viewer.viewport().height;
+                for part in [0.25, 0.5, 0.75, 1.0, 0.5, 0.0] {
+                    scroll_viewer.set_offset(Vector::new(0.0, end * part));
+                    bench.frame();
+                }
+                bench.click(bench.centre(control));
+            }),
+        ),
+        (
+            "buttons: Tab over them, Space",
+            format!(
+                "<StackPanel {XMLNS} HorizontalAlignment='Left' VerticalAlignment='Top'>\
+                   <Button Content='One'/><Button Content='Two'/><CheckBox Content='Three'/><ToggleSwitch/>\
+                 </StackPanel>"
+            ),
+            Box::new(|bench, control, round| {
+                if round == 0 {
+                    bench.click(bench.centre(&first::<Button>(control)));
+                }
+                for _ in 0..5 {
+                    bench.key(Key::Tab, PhysicalKey::Tab);
+                }
+                bench.key(Key::Space, PhysicalKey::Space);
+            }),
+        ),
+        (
+            "slider: a drag",
+            format!("<Slider {XMLNS} Width='300' Maximum='100' Value='50' HorizontalAlignment='Left' VerticalAlignment='Top'/>"),
+            Box::new(|bench, control, round| {
+                let middle = bench.centre(control);
+                let to = Point::new(middle.x + if round % 2 == 0 { 60.0 } else { -60.0 }, middle.y);
+                bench.press(middle);
+                bench.drag_to(to);
+                bench.release(to);
+            }),
+        ),
+        (
+            "expander and carousel: transitions",
+            format!(
+                "<StackPanel {XMLNS} HorizontalAlignment='Left' VerticalAlignment='Top'>\
+                   <Expander Header='header' Width='200'><TextBlock Text='content'/></Expander>\
+                   <Carousel Width='200' Height='60'>\
+                     <Carousel.PageTransition><PageSlide Duration='0:0:0.3' Orientation='Horizontal'/></Carousel.PageTransition>\
+                     <TextBlock Text='a'/><TextBlock Text='b'/><TextBlock Text='c'/>\
+                   </Carousel>\
+                 </StackPanel>"
+            ),
+            Box::new(|bench, control, round| {
+                bench.click(bench.centre(&first::<ToggleButton>(control)));
+                let carousel = first::<Carousel>(control);
+                if round % 4 < 2 {
+                    carousel.next();
+                } else {
+                    carousel.previous();
+                }
+                bench.frames(8);
+            }),
+        ),
+        (
+            "tab control and tree view: select, expand, collapse",
+            format!(
+                "<StackPanel {XMLNS} HorizontalAlignment='Left' VerticalAlignment='Top'>\
+                   <TabControl Width='400' Height='120'>\
+                     <TabItem Header='One'><Button Content='first'/></TabItem><TabItem Header='Two'><TextBox Text='second'/></TabItem>\
+                   </TabControl>\
+                   <TreeView Width='400' Height='160'>\
+                     <TreeViewItem Header='root'><TreeViewItem Header='a'><TreeViewItem Header='a1'/></TreeViewItem><TreeViewItem Header='b'/></TreeViewItem>\
+                   </TreeView>\
+                 </StackPanel>"
+            ),
+            Box::new(|bench, control, round| {
+                let tabs = all::<TabItem>(control);
+                bench.click(bench.centre(&tabs[round % 2]));
+                let root = first::<TreeViewItem>(control);
+                let header = bench.centre(&root);
+                bench.click(Point::new(header.x, header.y - root.bounds().size().height / 2.0 + 12.0));
+                bench.key(Key::Right, PhysicalKey::ArrowRight);
+                bench.key(Key::Down, PhysicalKey::ArrowDown);
+                bench.key(Key::Right, PhysicalKey::ArrowRight);
+                bench.key(Key::Up, PhysicalKey::ArrowUp);
+                bench.key(Key::Left, PhysicalKey::ArrowLeft);
+            }),
+        ),
+        (
+            "auto complete box: type until it opens, clear",
+            format!("<AutoCompleteBox {XMLNS} Width='250' HorizontalAlignment='Left' VerticalAlignment='Top'/>"),
+            Box::new(|bench, control, round| {
+                if round == 0 {
+                    first::<AutoCompleteBox>(control).set_items_source(Some(ItemsSource::from_strs(["Alabama", "Alaska", "Arizona"])));
+                }
+                bench.click(bench.centre(control));
+                bench.text("a");
+                bench.timers();
+                bench.text("l");
+                bench.timers();
+                bench.key(Key::Back, PhysicalKey::Backspace);
+                bench.key(Key::Back, PhysicalKey::Backspace);
+                bench.timers();
+                bench.close();
+            }),
+        ),
+    ];
+    for overlay in [false, true] {
+        println!("{}:", if overlay { "popups in the overlay layer" } else { "popups of the platform" });
+        println!("  {:<52} {:>10} {:>8} | {:>10} {:>8}", "ten times more", "KB", "blocks", "KB", "blocks");
+        let bench = Bench::start(overlay);
+        for (name, xaml, action) in &repeated {
+            if wanted.as_ref().is_some_and(|wanted| !name.contains(wanted.as_str())) {
+                continue;
+            }
+            let control = load(xaml);
+            bench.tour.set_content(Some(&control));
+            bench.tour.settle();
+            let mut round = 0;
+            let mut ten_times = || {
+                for _ in 0..10 {
+                    action(&bench, &control, round);
+                    round += 1;
+                }
+                bench.driver.fire_timers();
+                bench.frames(4);
+                bench.window().clear_calls();
+                allocations::live()
+            };
+            let first = ten_times();
+            let epoch = if traced { trace::next_epoch() } else { 0 };
+            let second = ten_times();
+            if traced {
+                trace::next_epoch();
+            }
+            let third = ten_times();
+            if traced {
+                // What the second ten left and the third ten did not free.
+                tour::print_recording(name, epoch);
+            }
+            println!(
+                "  {:<52} {:>+10.1} {:>8} | {:>+10.1} {:>8}",
+                name,
+                (second.bytes - first.bytes) as f64 / 1024.0,
+                second.allocations - first.allocations,
+                (third.bytes - second.bytes) as f64 / 1024.0,
+                third.allocations - second.allocations,
+            );
+            bench.tour.set_content(None);
+            drop(control);
+            bench.tour.settle();
+        }
+    }
+}

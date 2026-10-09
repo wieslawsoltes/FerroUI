@@ -68,6 +68,14 @@ impl ServerCompositionVisual {
         ActSubscriber::AdornedVisualWorldTransformChanged(self.this.clone())
     }
 
+    /// The number of subscribers to the transforms of the ancestor chain of
+    /// the visual: the adorners of the visual, and its children that have
+    /// subscribers of their own (a diagnostics member, used by tests to
+    /// verify that subscriptions are released).
+    pub fn ancestor_transform_subscriber_count(&self) -> usize {
+        self.att_helper.ancestor_chain_transform_subscribers.borrow().len()
+    }
+
     pub(super) fn att_helper_combined_transform_changed(&self) {
         if self.att_helper.ancestor_chain_transform_subscribers.borrow().is_empty() {
             return;

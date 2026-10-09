@@ -129,8 +129,19 @@ pub fn start_catalog_compositor_application() -> CompositorTestServices {
 /// and page transitions of the application run to their end.
 pub fn start_catalog_compositor_application_with_clock(clock: Rc<TestGlobalClock>) -> CompositorTestServices {
     register_types();
+    // The input services an application has: the input manager and the
+    // keyboard device of a platform, and for every top-level the keyboard
+    // navigation and the access keys the application registers. Without
+    // them Tab moves nothing, no element gets a focus adorner and no access
+    // key is found (`interaction_tour.rs` sends keys).
+    use ferroui_base::input::{
+        AccessKeyHandler, IAccessKeyHandler, IKeyboardDevice, IKeyboardNavigationHandler, KeyboardDevice, KeyboardNavigationHandler,
+    };
     let services = catalog_services_with_clock(clock)
         .with_input_manager(Rc::new(ferroui_base::input::InputManager::new()))
+        .with_keyboard_device(|| Some(KeyboardDevice::new() as Rc<dyn IKeyboardDevice>))
+        .with_keyboard_navigation(|| Some(KeyboardNavigationHandler::new() as Rc<dyn IKeyboardNavigationHandler>))
+        .with_access_key_handler(|| Some(AccessKeyHandler::new() as Rc<dyn IAccessKeyHandler>))
         .with_theme(|| ferroui_themes_fluent::FluentTheme::new().as_style());
     let services = CompositorTestServices::start(services);
     FerroRuntimeXamlLoader::register();
