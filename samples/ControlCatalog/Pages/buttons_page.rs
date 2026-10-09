@@ -6,7 +6,8 @@ use crate::markup::xaml_class;
 use ferroui_base::input::ICommand;
 use ferroui_base::interactivity::{IRoutedEventArgs, RoutedEventArgs};
 use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_base::{ferro_class_info, instantiate, BoxedValue, Ref};
+use ferroui_base::data::core::ValueTypes;
+use ferroui_base::{ferro_class_info, instantiate, BoxedValue, ElementRef, Ref};
 use ferroui_controls::{Button, TextBlock};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -94,7 +95,12 @@ impl ButtonsPage {
             move || weak.upgrade().is_some_and(|this| this.can_count())
         };
         *this.count_command.borrow_mut() = Some(RelayCommand::new(execute, can_execute));
-        this.set_data_context(Some(Rc::new(this.clone()) as BoxedValue));
+        // `DataContext = this;` in the managed original, where the collector frees a
+        // page that holds itself. Here the page is its data context as an element
+        // reference, which holds it weakly: the bindings of the document read the page
+        // through it (`((pages:ButtonsPage)DataContext).CountCommand`).
+        ValueTypes::register_element_ref::<ButtonsPage>();
+        this.set_data_context(Some(Rc::new(ElementRef::of(&this)) as BoxedValue));
         this
     }
 

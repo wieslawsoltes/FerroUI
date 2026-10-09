@@ -443,3 +443,31 @@ fn gap_c325_dynamic_resource_in_a_style_declared_under_an_element() {
     .expect("a control");
     show_and_release(control);
 }
+
+/// C326: the buttons page of the sample is its own data context (`DataContext = this`), and its
+/// document binds to it.
+#[test]
+fn gap_c326_page_that_is_its_own_data_context() {
+    use ferroui_base::data::core::ValueTypes;
+    let _app = start_catalog_application();
+    let page = crate::pages::ButtonsPage::new();
+    let context = page.data_context().expect("the data context of the page");
+    assert!(ValueTypes::as_object(&*context).is_some_and(|object| object == page));
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&page)));
+    window.show();
+    run_jobs();
+    // `Command="{Binding $parent[controls:SamplePage].((pages:ButtonsPage)DataContext).CountCommand}"`.
+    let bound = page
+        .get_visual_descendants()
+        .filter_map(|visual| visual.cast::<ferroui_controls::Button>())
+        .filter(|button| button.get_value(ferroui_controls::Button::command_property()).is_some())
+        .count();
+    assert_eq!(1, bound);
+    window.set_content(None);
+    run_jobs();
+    let weak = page.downgrade();
+    drop((page, context));
+    assert!(weak.upgrade().is_none());
+    window.close();
+}
