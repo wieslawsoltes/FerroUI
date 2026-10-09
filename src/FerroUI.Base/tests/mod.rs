@@ -61,6 +61,7 @@ mod ferro_property_tests;
 mod property_registration_tests;
 mod property_store;
 mod styled_property_tests;
+mod virtual_dispatch_tests;
 
 /// Declares a test class without fields or overrides.
 macro_rules! test_class {

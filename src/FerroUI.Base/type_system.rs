@@ -17,6 +17,10 @@
 //!   its base implementation with `parent_<member>`.
 //! * Dispatch goes through one per-class table of function pointers. An
 //!   object holds a single pointer to the table of its most-derived class.
+//! * The slot of a member a class does not override holds the implementation
+//!   the member falls through to, where the class states what it overrides
+//!   ([`ferro_impl_classes!`], [`ferro_overrides!`]); otherwise it holds a
+//!   function of the class that forwards to the table of its base class.
 //!
 //! All `unsafe` needed for this lives in this module and in the macros it
 //! exports, and rests on two invariants that the macros establish and check
@@ -628,6 +632,31 @@ pub fn parent_vtable<T: ObjectType, V>() -> &'static V {
     unsafe { &*(table as *const V) }
 }
 
+/// Whether the slot of `member` in the table of `T` takes the slot of the
+/// table of `T`'s parent class, instead of a function of `T` that forwards
+/// to it. `V` is the table of the class that introduced the member.
+///
+/// `overrides` is what the implementation of `T` states about itself
+/// (`__OVERRIDES` of the implementation trait): `None` when it states
+/// nothing, else the names of the members it overrides. A member that is
+/// not among them has the default of the implementation trait, which calls
+/// the same slot of the parent table and does nothing else, so the slot of
+/// the parent is the same implementation with one call less.
+///
+/// The slot is not taken where the parent class has no table `V`: the class
+/// that introduced a member has to implement it, and its default panics
+/// when it is called (see [`parent_vtable`]), not when the table is built.
+#[doc(hidden)]
+pub fn __forwards_to_parent<T: ObjectType, V>(overrides: Option<&'static [&'static str]>, member: &str) -> bool {
+    match overrides {
+        Some(overrides) => {
+            std::mem::size_of::<<T::Parent as ObjectType>::VTable>() >= std::mem::size_of::<V>()
+                && !overrides.iter().any(|name| *name == member)
+        }
+        None => false,
+    }
+}
+
 /// A strong reference to an object of class `T` or a class derived from it.
 ///
 /// Cloning the handle shares the object. Equality and hashing are by object
@@ -897,7 +926,9 @@ pub fn instantiate<T: ObjectType>(value: T) -> Ref<T> {
 /// * `LayoutableVTable`, the table of the new members;
 /// * `trait LayoutableImpl`, with one associated function per member taking
 ///   `this: &Self`. Every class deriving from `Layoutable` implements it
-///   (`impl LayoutableImpl for Border {}`) and overrides what it needs;
+///   (`impl LayoutableImpl for Border {}`) and overrides what it needs
+///   ([`ferro_impl_classes!`] and [`ferro_overrides!`] write the same
+///   implementation and state what it overrides, which shortens the calls);
 /// * `LayoutableImplExt::parent_<member>`, to call the base implementation
 ///   from an override;
 /// * `Layoutable::<member>(&self, ..)`, which performs the virtual call.
@@ -1080,6 +1111,14 @@ macro_rules! ferro_class {
 
             /// The overridable members introduced by the class.
             pub trait $impl_trait: $parent_impl + $crate::Upcast<$name> {
+                /// The names of the members this implementation overrides,
+                /// where it states them: `None` for an implementation
+                /// written as a plain `impl`. Set by `ferro_impl_classes!`
+                /// and `ferro_overrides!`, never by hand: the table of the
+                /// class is built from it.
+                #[doc(hidden)]
+                const __OVERRIDES: ::std::option::Option<&'static [&'static str]> = ::std::option::Option::None;
+
                 $(
                     $(#[$meta])*
                     #[allow(unused_variables)]
@@ -1111,9 +1150,23 @@ macro_rules! ferro_class {
                     [<$name VTable>] {
                         base: <$base as $crate::Subclassable<T>>::build_vtable(),
                         $(
-                            // SAFETY: this table is only attached to objects
-                            // whose most-derived class is `T`.
-                            $method: |this $(, $arg)*| T::$method(unsafe { $crate::cast_this::<$name, T>(this) } $(, $arg)*),
+                            $method: {
+                                // SAFETY: this table is only attached to objects
+                                // whose most-derived class is `T`.
+                                let own: fn(&$name $(, $arg_ty)*) $(-> $ret)? =
+                                    |this $(, $arg)*| T::$method(unsafe { $crate::cast_this::<$name, T>(this) } $(, $arg)*);
+                                // A member `T` states it does not override is
+                                // the default, which calls this slot of the
+                                // parent table: the slot itself is taken.
+                                if $crate::__forwards_to_parent::<T, [<$name VTable>]>(
+                                    <T as $impl_trait>::__OVERRIDES,
+                                    ::std::stringify!($method),
+                                ) {
+                                    $crate::parent_vtable::<T, [<$name VTable>]>().$method
+                                } else {
+                                    own
+                                }
+                            },
                         )*
                     }
                 }
@@ -1322,9 +1375,63 @@ macro_rules! ferro_static_type {
 /// ```ignore
 /// ferro_impl_classes!(Border: FerroObjectImpl, StyledElementImpl, VisualImpl);
 /// ```
+///
+/// Unlike `impl VisualImpl for Border {}`, which means the same, this form
+/// states that nothing is overridden, and the table of the class is built
+/// from that: every slot of the members of these traits is the slot of the
+/// base class, so a call reaches the implementation without passing through
+/// a forwarding function of this class.
 #[macro_export]
 macro_rules! ferro_impl_classes {
     ($name:ty : $($trait_:path),+ $(,)?) => {
-        $(impl $trait_ for $name {})+
+        $(
+            impl $trait_ for $name {
+                const __OVERRIDES: ::std::option::Option<&'static [&'static str]> = ::std::option::Option::Some(&[]);
+            }
+        )+
+    };
+}
+
+/// Implements a class `Impl` trait and states which of its members the
+/// implementation overrides: the ones written in the block.
+///
+/// ```ignore
+/// ferro_overrides! { impl FerroObjectImpl for Border {
+///     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
+///         Self::parent_on_property_changed(this, change);
+///         // ..
+///     }
+/// } }
+/// ```
+///
+/// The implementation is the one a plain `impl FerroObjectImpl for Border`
+/// with the same functions gives. What the macro adds is the list of their
+/// names, from which the table of the class is built: the slot of a member
+/// that is not in the block is the slot of the base class, so a call of it
+/// reaches the implementation without passing through a forwarding function
+/// of this class. The list is taken from the functions themselves and cannot
+/// differ from them.
+///
+/// The block holds functions only, each with its attributes and
+/// documentation, as the members of an `Impl` trait are.
+#[macro_export]
+macro_rules! ferro_overrides {
+    (
+        impl $trait_:ident for $name:ident {
+            $(
+                $(#[$meta:meta])*
+                fn $method:ident ( $($params:tt)* ) $(-> $ret:ty)? $body:block
+            )*
+        }
+    ) => {
+        impl $trait_ for $name {
+            const __OVERRIDES: ::std::option::Option<&'static [&'static str]> =
+                ::std::option::Option::Some(&[$(::std::stringify!($method)),*]);
+
+            $(
+                $(#[$meta])*
+                fn $method($($params)*) $(-> $ret)? $body
+            )*
+        }
     };
 }
