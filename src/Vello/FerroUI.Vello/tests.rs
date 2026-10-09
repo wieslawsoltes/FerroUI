@@ -915,64 +915,6 @@ fn opacity_save_layer_option_is_read_from_the_locator() {
 }
 
 #[test]
-#[should_panic(expected = "does not draw brushes that paint a scene")]
-fn scene_brushes_fail_with_their_stage() {
-    use ferroui_base::media::{ISceneBrush, ISceneBrushContent, ITransform};
-
-    struct SceneBrush;
-    impl IBrush for SceneBrush {
-        fn opacity(&self) -> f64 {
-            1.0
-        }
-        fn transform(&self) -> Option<Rc<dyn ITransform>> {
-            None
-        }
-        fn transform_origin(&self) -> RelativePoint {
-            RelativePoint::default()
-        }
-        fn relative_transform(&self) -> Option<Rc<dyn ITransform>> {
-            None
-        }
-        fn as_any(&self) -> &dyn Any {
-            self
-        }
-        fn as_scene_brush(&self) -> Option<&dyn ISceneBrush> {
-            Some(self)
-        }
-    }
-    impl ferroui_base::media::ITileBrush for SceneBrush {
-        fn alignment_x(&self) -> ferroui_base::media::AlignmentX {
-            ferroui_base::media::AlignmentX::Center
-        }
-        fn alignment_y(&self) -> ferroui_base::media::AlignmentY {
-            ferroui_base::media::AlignmentY::Center
-        }
-        fn destination_rect(&self) -> ferroui_base::RelativeRect {
-            ferroui_base::RelativeRect::FILL
-        }
-        fn source_rect(&self) -> ferroui_base::RelativeRect {
-            ferroui_base::RelativeRect::FILL
-        }
-        fn stretch(&self) -> ferroui_base::media::Stretch {
-            ferroui_base::media::Stretch::Fill
-        }
-        fn tile_mode(&self) -> ferroui_base::media::TileMode {
-            ferroui_base::media::TileMode::None
-        }
-    }
-    impl ISceneBrush for SceneBrush {
-        fn create_content(&self) -> Option<Rc<dyn ISceneBrushContent>> {
-            None
-        }
-    }
-
-    let target = Target::new();
-    target.draw(|context| {
-        context.draw_rectangle(Some(&SceneBrush), None, rect(0.0, 0.0, 10.0, 10.0), &no_shadows());
-    });
-}
-
-#[test]
 fn a_clear_inside_a_clip_replaces_the_pixels_of_the_clip() {
     // What the compositor does with a dirty rectangle of a target that
     // keeps its frames: the rectangle is clipped, cleared and drawn again.

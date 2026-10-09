@@ -844,3 +844,543 @@ mod effects {
         assert!(in_the_scene.largest_difference(&as_an_image) <= 1);
     }
 }
+
+// ---------------------------------------------------------------------------
+// Scene brushes
+// ---------------------------------------------------------------------------
+
+mod scene_brushes {
+    use super::*;
+    use ferroui_base::media::imaging::BitmapInterpolationMode;
+    use ferroui_base::media::immutable::ImmutableImageBrush;
+    use ferroui_base::media::{
+        AlignmentX, AlignmentY, IBrush, IImmutableBrush, ISceneBrush, ISceneBrushContent, ITileBrush, ITransform,
+        ImmutableSceneBrush, Stretch, TileMode,
+    };
+    use ferroui_base::{Matrix, RelativePoint, RelativeRect, RelativeUnit};
+    use std::any::Any;
+    use std::cell::Cell;
+
+    struct BrushSpec {
+        alignment_x: AlignmentX,
+        alignment_y: AlignmentY,
+        destination_rect: Option<RelativeRect>,
+        source_rect: Option<RelativeRect>,
+        stretch: Stretch,
+        tile_mode: TileMode,
+        opacity: f64,
+    }
+
+    impl Default for BrushSpec {
+        fn default() -> Self {
+            Self {
+                alignment_x: AlignmentX::Center,
+                alignment_y: AlignmentY::Center,
+                destination_rect: None,
+                source_rect: None,
+                stretch: Stretch::Uniform,
+                tile_mode: TileMode::None,
+                opacity: 1.0,
+            }
+        }
+    }
+
+    fn fill_with(brush: &dyn IBrush, area: Rect) -> Target {
+        let target = Target::new();
+        target.draw(|context| {
+            context.push_render_options(RenderOptions {
+                edge_mode: EdgeMode::Aliased,
+                bitmap_interpolation_mode: BitmapInterpolationMode::None,
+                ..RenderOptions::default()
+            });
+            context.draw_rectangle(Some(brush), None, RoundedRect::from_rect(area), &no_shadows());
+            context.pop_render_options();
+        });
+        target
+    }
+
+    /// Scene brush content that draws a red and a blue 10x10 square side by
+    /// side.
+    struct TwoSquares {
+        parameters: Rc<ImmutableSceneBrush>,
+        scalable: bool,
+        disposed: Rc<Cell<bool>>,
+        transform: Option<Matrix>,
+        ellipse: bool,
+    }
+
+    macro_rules! brush_members {
+        () => {
+            fn opacity(&self) -> f64 {
+                self.parameters.opacity()
+            }
+            fn transform_origin(&self) -> RelativePoint {
+                RelativePoint::default()
+            }
+            fn relative_transform(&self) -> Option<Rc<dyn ITransform>> {
+                None
+            }
+            fn as_any(&self) -> &dyn Any {
+                self
+            }
+        };
+    }
+
+    impl IBrush for TwoSquares {
+        brush_members!();
+
+        fn transform(&self) -> Option<Rc<dyn ITransform>> {
+            self.transform.map(|transform| {
+                Rc::new(ferroui_base::media::immutable::ImmutableTransform::new(transform)) as Rc<dyn ITransform>
+            })
+        }
+    }
+
+    impl IImmutableBrush for TwoSquares {}
+
+    impl ISceneBrushContent for TwoSquares {
+        fn brush(&self) -> Rc<dyn ITileBrush> {
+            self.parameters.clone()
+        }
+        fn rect(&self) -> Rect {
+            Rect::new(0.0, 0.0, 20.0, 10.0)
+        }
+        fn render(&self, context: &mut dyn IDrawingContextImpl, transform: Option<Matrix>) {
+            if let Some(transform) = transform {
+                context.set_transform(transform);
+            }
+            if self.ellipse {
+                // An ellipse with anti-aliased edges instead.
+                context.draw_ellipse(Some(&solid(Colors::RED)), None, Rect::new(0.0, 0.0, 20.0, 10.0));
+                return;
+            }
+            context.push_render_options(aliased());
+            context.draw_rectangle(Some(&solid(Colors::RED)), None, rect(0.0, 0.0, 10.0, 10.0), &no_shadows());
+            context.draw_rectangle(Some(&solid(Colors::BLUE)), None, rect(10.0, 0.0, 10.0, 10.0), &no_shadows());
+            context.pop_render_options();
+        }
+        fn use_scalable_rasterization(&self) -> bool {
+            self.scalable
+        }
+        fn dispose(&self) {
+            self.disposed.set(true);
+        }
+    }
+
+    struct TwoSquaresBrush {
+        parameters: Rc<ImmutableSceneBrush>,
+        scalable: bool,
+        has_content: bool,
+        disposed: Rc<Cell<bool>>,
+        content_transform: Option<Matrix>,
+        ellipse: bool,
+    }
+
+    impl IBrush for TwoSquaresBrush {
+        brush_members!();
+
+        fn transform(&self) -> Option<Rc<dyn ITransform>> {
+            None
+        }
+        fn as_tile_brush(&self) -> Option<&dyn ITileBrush> {
+            Some(self)
+        }
+        fn as_scene_brush(&self) -> Option<&dyn ISceneBrush> {
+            Some(self)
+        }
+    }
+
+    impl IImmutableBrush for TwoSquaresBrush {}
+
+    impl ITileBrush for TwoSquaresBrush {
+        fn alignment_x(&self) -> AlignmentX {
+            self.parameters.alignment_x()
+        }
+        fn alignment_y(&self) -> AlignmentY {
+            self.parameters.alignment_y()
+        }
+        fn destination_rect(&self) -> RelativeRect {
+            self.parameters.destination_rect()
+        }
+        fn source_rect(&self) -> RelativeRect {
+            self.parameters.source_rect()
+        }
+        fn stretch(&self) -> Stretch {
+            self.parameters.stretch()
+        }
+        fn tile_mode(&self) -> TileMode {
+            self.parameters.tile_mode()
+        }
+    }
+
+    impl ISceneBrush for TwoSquaresBrush {
+        fn create_content(&self) -> Option<Rc<dyn ISceneBrushContent>> {
+            if !self.has_content {
+                return None;
+            }
+            Some(Rc::new(TwoSquares {
+                parameters: self.parameters.clone(),
+                scalable: self.scalable,
+                disposed: self.disposed.clone(),
+                transform: self.content_transform,
+                ellipse: self.ellipse,
+            }))
+        }
+    }
+
+    fn scene_brush(spec: BrushSpec, scalable: bool, has_content: bool) -> TwoSquaresBrush {
+        let parameters = ImmutableImageBrush::new(
+            None,
+            spec.alignment_x,
+            spec.alignment_y,
+            spec.destination_rect,
+            spec.opacity,
+            None,
+            RelativePoint::default(),
+            spec.source_rect,
+            spec.stretch,
+            spec.tile_mode,
+            None,
+        );
+        TwoSquaresBrush {
+            parameters: Rc::new(ImmutableSceneBrush::new(&parameters)),
+            scalable,
+            has_content,
+            disposed: Rc::new(Cell::new(false)),
+            content_transform: None,
+            ellipse: false,
+        }
+    }
+
+    #[test]
+    fn scene_brush_content_is_rendered_through_a_surface_or_a_picture() {
+        for scalable in [false, true] {
+            // Stretched over the whole area.
+            let brush = scene_brush(BrushSpec { stretch: Stretch::Fill, ..BrushSpec::default() }, scalable, true);
+            let target = fill_with(&brush, Rect::new(0.0, 0.0, 100.0, 100.0));
+            assert_eq!(RED, target.pixel(25, 10), "scalable: {scalable}");
+            assert_eq!(BLUE, target.pixel(75, 90), "scalable: {scalable}");
+            assert!(brush.disposed.get(), "the content is released, scalable: {scalable}");
+
+            // Tiled with an absolute 20x10 tile.
+            let brush = scene_brush(
+                BrushSpec {
+                    stretch: Stretch::Fill,
+                    tile_mode: TileMode::Tile,
+                    destination_rect: Some(RelativeRect::new(0.0, 0.0, 20.0, 10.0, RelativeUnit::Absolute)),
+                    ..BrushSpec::default()
+                },
+                scalable,
+                true,
+            );
+            let target = fill_with(&brush, Rect::new(0.0, 0.0, 100.0, 100.0));
+            assert_eq!(RED, target.pixel(5, 5), "scalable: {scalable}");
+            assert_eq!(BLUE, target.pixel(15, 5), "scalable: {scalable}");
+            assert_eq!(RED, target.pixel(45, 35), "scalable: {scalable}");
+            assert_eq!(BLUE, target.pixel(55, 35), "scalable: {scalable}");
+
+            // The source rect picks the blue square.
+            let brush = scene_brush(
+                BrushSpec {
+                    stretch: Stretch::Fill,
+                    source_rect: Some(RelativeRect::new(0.5, 0.0, 0.5, 1.0, RelativeUnit::Relative)),
+                    ..BrushSpec::default()
+                },
+                scalable,
+                true,
+            );
+            let target = fill_with(&brush, Rect::new(0.0, 0.0, 100.0, 100.0));
+            assert_eq!(BLUE, target.pixel(10, 50), "scalable: {scalable}");
+            assert_eq!(BLUE, target.pixel(90, 50), "scalable: {scalable}");
+        }
+    }
+
+    #[test]
+    fn scene_brush_without_content_paints_nothing() {
+        let brush = scene_brush(BrushSpec::default(), false, false);
+        let target = fill_with(&brush, Rect::new(0.0, 0.0, 100.0, 100.0));
+        assert_eq!(TRANSPARENT, target.pixel(50, 50));
+    }
+
+    // What follows is not from the Skia backend's tests.
+
+    #[test]
+    fn a_scene_brush_keeps_its_aspect_ratio_and_follows_the_alignment() {
+        for scalable in [false, true] {
+            // 20x10 content in a 100x100 area, uniform: 100x50, centred.
+            let brush = scene_brush(BrushSpec::default(), scalable, true);
+            let target = fill_with(&brush, Rect::new(0.0, 0.0, 100.0, 100.0));
+            assert_eq!(TRANSPARENT, target.pixel(50, 20), "scalable: {scalable}");
+            assert_eq!(RED, target.pixel(25, 50), "scalable: {scalable}");
+            assert_eq!(BLUE, target.pixel(75, 50), "scalable: {scalable}");
+            assert_eq!(TRANSPARENT, target.pixel(50, 80), "scalable: {scalable}");
+
+            // Not stretched, at the bottom right: 20x10 pixels.
+            let brush = scene_brush(
+                BrushSpec {
+                    stretch: Stretch::None,
+                    alignment_x: AlignmentX::Right,
+                    alignment_y: AlignmentY::Bottom,
+                    ..BrushSpec::default()
+                },
+                scalable,
+                true,
+            );
+            let target = fill_with(&brush, Rect::new(0.0, 0.0, 100.0, 100.0));
+            assert_eq!(RED, target.pixel(85, 95), "scalable: {scalable}");
+            assert_eq!(BLUE, target.pixel(95, 95), "scalable: {scalable}");
+            assert_eq!(TRANSPARENT, target.pixel(75, 95), "scalable: {scalable}");
+            assert_eq!(TRANSPARENT, target.pixel(95, 85), "scalable: {scalable}");
+        }
+    }
+
+    #[test]
+    fn a_scene_brush_is_tiled_in_every_tile_mode() {
+        for scalable in [false, true] {
+            let tiled = |tile_mode| {
+                let brush = scene_brush(
+                    BrushSpec {
+                        stretch: Stretch::Fill,
+                        tile_mode,
+                        destination_rect: Some(RelativeRect::new(0.0, 0.0, 20.0, 10.0, RelativeUnit::Absolute)),
+                        ..BrushSpec::default()
+                    },
+                    scalable,
+                    true,
+                );
+                fill_with(&brush, Rect::new(0.0, 0.0, 100.0, 100.0))
+            };
+
+            // One tile only.
+            let target = tiled(TileMode::None);
+            assert_eq!(RED, target.pixel(5, 5), "scalable: {scalable}");
+            assert_eq!(BLUE, target.pixel(15, 5), "scalable: {scalable}");
+            assert_eq!(TRANSPARENT, target.pixel(25, 5), "scalable: {scalable}");
+            assert_eq!(TRANSPARENT, target.pixel(5, 15), "scalable: {scalable}");
+
+            // Repeated as it is.
+            let target = tiled(TileMode::Tile);
+            assert_eq!(RED, target.pixel(25, 15), "scalable: {scalable}");
+            assert_eq!(BLUE, target.pixel(35, 15), "scalable: {scalable}");
+
+            // Every second column mirrored.
+            let target = tiled(TileMode::FlipX);
+            assert_eq!(BLUE, target.pixel(25, 15), "scalable: {scalable}");
+            assert_eq!(RED, target.pixel(35, 15), "scalable: {scalable}");
+            assert_eq!(RED, target.pixel(45, 15), "scalable: {scalable}");
+
+            // Every second row mirrored: the tile is the same upside down.
+            let target = tiled(TileMode::FlipY);
+            assert_eq!(RED, target.pixel(25, 15), "scalable: {scalable}");
+            assert_eq!(BLUE, target.pixel(35, 15), "scalable: {scalable}");
+
+            let target = tiled(TileMode::FlipXY);
+            assert_eq!(BLUE, target.pixel(25, 15), "scalable: {scalable}");
+            assert_eq!(RED, target.pixel(35, 15), "scalable: {scalable}");
+        }
+    }
+
+    #[test]
+    fn scalable_content_is_replayed_at_the_resolution_of_the_target() {
+        // An ellipse of 20 by 10 units shown ten times as large. The pixels
+        // of a row that its edge covers in part: two or three at each of
+        // the two crossings when the content is replayed at the resolution
+        // of the target, and ten for every pixel of the picture of the
+        // content at its own size.
+        let pixels_on_the_edge = |scalable: bool| {
+            let mut brush = scene_brush(BrushSpec { stretch: Stretch::Fill, ..BrushSpec::default() }, scalable, true);
+            brush.ellipse = true;
+            let target = Target::with_size(200, 100);
+            target.draw(|context| {
+                context.draw_rectangle(Some(&brush), None, rect(0.0, 0.0, 200.0, 100.0), &no_shadows());
+            });
+            assert_eq!(RED, target.pixel(100, 50), "scalable: {scalable}");
+            (0..200).filter(|x| !matches!(target.pixel(*x, 25).3, 0 | 255)).count()
+        };
+
+        let (scalable, surface) = (pixels_on_the_edge(true), pixels_on_the_edge(false));
+        assert!((2..=8).contains(&scalable), "{scalable}");
+        assert!(surface >= 20 && surface % 10 == 0, "{surface}");
+    }
+
+    #[test]
+    fn a_scene_brush_has_the_opacity_and_the_transform_of_its_content() {
+        for scalable in [false, true] {
+            let mut brush =
+                scene_brush(BrushSpec { stretch: Stretch::Fill, opacity: 0.5, ..BrushSpec::default() }, scalable, true);
+            let target = fill_with(&brush, Rect::new(0.0, 0.0, 100.0, 100.0));
+            let (r, _, _, a) = target.pixel(25, 50);
+            assert!((a as i32 - 127).abs() <= 1 && (r as i32 - 127).abs() <= 1, "scalable: {scalable}");
+
+            // The transform of the content moves a scalable tile, as in the
+            // Skia backend; the picture of content that is not scalable is
+            // the image of a tile brush with the parameters of the brush,
+            // which have no transform.
+            brush.content_transform = Some(Matrix::create_translation(50.0, 0.0));
+            let target = fill_with(&brush, Rect::new(0.0, 0.0, 100.0, 100.0));
+            if scalable {
+                assert_eq!(TRANSPARENT, target.pixel(25, 50));
+                assert!((target.pixel(75, 50).0 as i32 - 127).abs() <= 1, "{:?}", target.pixel(75, 50));
+            } else {
+                assert!((target.pixel(25, 50).0 as i32 - 127).abs() <= 1, "{:?}", target.pixel(25, 50));
+            }
+        }
+    }
+
+    #[test]
+    fn a_scene_brush_strokes_and_masks() {
+        let brush = scene_brush(BrushSpec { stretch: Stretch::Fill, ..BrushSpec::default() }, true, true);
+
+        let target = Target::new();
+        target.draw(|context| {
+            let pen = ferroui_base::media::immutable::ImmutablePen::with_brush(
+                Some(Rc::new(scene_brush(BrushSpec { stretch: Stretch::Fill, ..BrushSpec::default() }, true, true))),
+                20.0,
+            );
+            context.push_render_options(aliased());
+            context.draw_rectangle(None, Some(&pen), rect(10.0, 10.0, 80.0, 80.0), &no_shadows());
+            context.pop_render_options();
+        });
+        assert_eq!(RED, target.pixel(10, 50));
+        assert_eq!(BLUE, target.pixel(90, 50));
+        assert_eq!(TRANSPARENT, target.pixel(50, 50));
+
+        // As an opacity mask: opaque everywhere, so everything is kept.
+        let target = Target::new();
+        target.draw(|context| {
+            context.push_opacity_mask(&brush, Rect::new(0.0, 0.0, 100.0, 100.0));
+            context.draw_rectangle(Some(&solid(Colors::GREEN)), None, rect(0.0, 0.0, 100.0, 100.0), &no_shadows());
+            context.pop_opacity_mask();
+        });
+        assert_eq!((0, 128, 0, 255), target.pixel(50, 50));
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Acrylic
+// ---------------------------------------------------------------------------
+
+mod acrylic {
+    use super::*;
+    use ferroui_base::media::{AcrylicBackgroundSource, IExperimentalAcrylicMaterial};
+    use ferroui_base::platform::IDrawingContextWithAcrylicLikeSupport;
+    use std::any::Any;
+
+    struct Material {
+        background_source: AcrylicBackgroundSource,
+        tint_color: Color,
+        material_color: Color,
+    }
+
+    impl IExperimentalAcrylicMaterial for Material {
+        fn background_source(&self) -> AcrylicBackgroundSource {
+            self.background_source
+        }
+        fn tint_color(&self) -> Color {
+            self.tint_color
+        }
+        fn tint_opacity(&self) -> f64 {
+            1.0
+        }
+        fn material_color(&self) -> Color {
+            self.material_color
+        }
+        fn fallback_color(&self) -> Color {
+            Colors::GRAY
+        }
+        fn as_any(&self) -> &dyn Any {
+            self
+        }
+    }
+
+    #[test]
+    fn acrylic_rectangle_is_tinted() {
+        // An opaque tint hides the material colour; the noise on top is
+        // barely visible.
+        let target = Target::new();
+        target.draw_impl(|context| {
+            let material = Material {
+                background_source: AcrylicBackgroundSource::None,
+                tint_color: Colors::BLUE,
+                material_color: Colors::RED,
+            };
+            context.draw_rectangle_with_material(&material, rect(10.0, 10.0, 80.0, 80.0));
+            // Degenerate rectangles are ignored.
+            context.draw_rectangle_with_material(&material, rect(0.0, 0.0, 0.0, 10.0));
+        });
+
+        let (r, g, b, a) = target.pixel(50, 50);
+        assert!(a == 255 && b > 240 && r < 12 && g < 12, "tinted blue: {:?}", (r, g, b, a));
+        assert_eq!(TRANSPARENT, target.pixel(5, 5));
+
+        // The noise makes the fill slightly uneven.
+        let distinct: std::collections::HashSet<_> = (20..80).map(|x| target.pixel(x, 50)).collect();
+        assert!(distinct.len() > 1, "the noise texture is applied");
+    }
+
+    #[test]
+    fn acrylic_translucent_tint_lets_the_material_colour_through() {
+        let target = Target::new();
+        target.draw_impl(|context| {
+            let material = Material {
+                background_source: AcrylicBackgroundSource::None,
+                tint_color: Color::from_argb(128, 0, 0, 255),
+                material_color: Colors::RED,
+            };
+            context.draw_rectangle_with_material(
+                &material,
+                RoundedRect::from_radius(Rect::new(0.0, 0.0, 100.0, 100.0), 30.0),
+            );
+        });
+
+        let (r, _, b, a) = target.pixel(50, 50);
+        assert!(a == 255 && (r as i32 - 127).abs() < 12 && (b as i32 - 128).abs() < 12, "{:?}", target.pixel(50, 50));
+        // Rounded corners.
+        assert_eq!(TRANSPARENT, target.pixel(2, 2));
+    }
+
+    #[test]
+    fn acrylic_digger_replaces_what_is_underneath() {
+        let material = |background_source| Material {
+            background_source,
+            tint_color: Color::from_argb(0, 0, 0, 0),
+            material_color: Color::from_argb(0, 0, 0, 0),
+        };
+
+        // Blended normally a transparent material leaves the background.
+        let blended = Target::new();
+        blended.draw_impl(|context| {
+            context.clear(Colors::RED);
+            context.draw_rectangle_with_material(&material(AcrylicBackgroundSource::None), rect(0.0, 0.0, 100.0, 100.0));
+        });
+        let (r, _, _, a) = blended.pixel(50, 50);
+        assert!(a == 255 && r > 240, "the background shows through: {:?}", blended.pixel(50, 50));
+
+        // The digger cuts through it.
+        let dug = Target::new();
+        dug.draw_impl(|context| {
+            context.clear(Colors::RED);
+            context.draw_rectangle_with_material(&material(AcrylicBackgroundSource::Digger), rect(0.0, 0.0, 50.0, 100.0));
+        });
+        assert!(dug.pixel(25, 50).3 < 12, "the material replaced the background: {:?}", dug.pixel(25, 50));
+        assert_eq!(RED, dug.pixel(75, 50));
+    }
+
+    // Not from the Skia backend's tests.
+    #[test]
+    fn the_contract_gives_the_context_with_acrylic() {
+        let target = Target::new();
+        target.draw(|context| {
+            let acrylic = context.as_drawing_context_with_acrylic_like_support().expect("a context with acrylic");
+            acrylic.draw_rectangle_with_material(
+                &Material {
+                    background_source: AcrylicBackgroundSource::None,
+                    tint_color: Colors::BLUE,
+                    material_color: Colors::RED,
+                },
+                rect(0.0, 0.0, 100.0, 100.0),
+            );
+        });
+        assert!(target.pixel(50, 50).2 > 240);
+    }
+}
