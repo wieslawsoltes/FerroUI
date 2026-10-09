@@ -1,8 +1,8 @@
 //! A measure of the ControlCatalog (`samples/ControlCatalog`) against the build-time type
-//! system: what a build of the sample that compiled its documents would do today. The
-//! sample is not changed and nothing is written into it: the build is run here, as a build
-//! script would run it (`ferroui_build::Build` with `TypeSystem::Model`), over the files of
-//! the sample, into a temporary directory.
+//! system: what the build of the sample, which compiles its documents, emits and refuses.
+//! Nothing is written into the sample: the build is run here, as its build script runs it
+//! (`ferroui_build::Build` with `TypeSystem::Model`), over the files of the sample as they
+//! are (without the placeholder artwork its build puts in), into a temporary directory.
 //!
 //! The type models are the ones the build scripts of the crates would export, written
 //! here with the export of those scripts (`ferroui_build::export::Export`): the base
@@ -27,9 +27,10 @@
 //! taken once, and the test fails if a model has a cast the scan did not read.
 //!
 //! "Compiled" here is what the build emits. That rustc compiles it and that it loads to
-//! the tree of the run-time loader is proven by the fixture `tests/XamlCatalogFixture`,
-//! whose build with the feature `catalog` compiles every document but the ones its list
-//! `documents::REFUSED` names; the measure fails when the documents it finds refused are
+//! the tree of the run-time loader is proven by the sample itself, whose build compiles
+//! every document but the ones its list names (`build/compiled_documents.rs`, `REFUSED`)
+//! and whose tests compare every compiled class with the run-time loader's
+//! (`tests/compiled_markup.rs`); the measure fails when the documents it finds refused are
 //! not exactly that list, so the two cannot drift apart.
 //!
 //! ```text
@@ -47,10 +48,10 @@ use ferroui_build::model::AssemblyModel;
 use ferroui_build::scanner::{scan_crate, ScanOptions, Severity};
 use ferroui_build::{Build, TypeSystem, XamlGroup};
 
-/// The lists of the fixture that compiles the catalog (`tests/XamlCatalogFixture`).
+/// The lists of the build of the sample (`samples/ControlCatalog/build.rs`).
 #[allow(dead_code)]
-#[path = "../../XamlCatalogFixture/documents.rs"]
-mod fixture_documents;
+#[path = "../../../samples/ControlCatalog/build/compiled_documents.rs"]
+mod compiled_documents;
 
 /// How a question the type models cannot answer starts in the reason of a refusal.
 const CANNOT_ANSWER: &str = "the type system of the host cannot answer: ";
@@ -396,9 +397,9 @@ fn measure_the_control_catalog_against_the_models() {
 
     let _ = fs::remove_dir_all(&out);
     assert!(measured.questions.is_empty(), "the type models cannot answer: {:?}", measured.questions);
-    // The documents the fixture leaves out of its build are the refused ones, no more and
+    // The documents the sample leaves out of its build are the refused ones, no more and
     // no fewer: every other document is compiled by rustc and compared there.
     let refused: std::collections::BTreeSet<&str> = measured.kinds.values().flatten().map(String::as_str).collect();
-    let listed: std::collections::BTreeSet<&str> = fixture_documents::REFUSED.iter().map(|(name, _)| *name).collect();
-    assert_eq!(refused, listed, "the refused documents and the list of the fixture (tests/XamlCatalogFixture/documents.rs, REFUSED) differ");
+    let listed: std::collections::BTreeSet<&str> = compiled_documents::REFUSED.iter().map(|(name, _)| *name).collect();
+    assert_eq!(refused, listed, "the refused documents and the list of the sample (samples/ControlCatalog/build/compiled_documents.rs, REFUSED) differ");
 }

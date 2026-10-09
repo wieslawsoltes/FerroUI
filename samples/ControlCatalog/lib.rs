@@ -5,15 +5,24 @@
 //! application of the port. The entry point is the crate
 //! `control-catalog-desktop`.
 //!
-//! The sample is markup: one document per page, loaded by the class the
-//! document names. The documents are converted from the upstream sample by
-//! `scripts/sync-control-catalog.sh` (names only) and embedded as assets of
-//! the assembly `ControlCatalog`, addressable as
-//! `ferres://ControlCatalog/<path>`. Documents that do not load yet are
-//! listed in `excluded.txt` with what they wait for.
+//! The sample is markup: one document per page, which populates the class
+//! the document names. The documents are converted from the upstream sample
+//! by `scripts/sync-control-catalog.sh` (names only) and compiled by the
+//! build of the crate (`build.rs`, docs/porting/xaml.md 9.5.22): a class is
+//! populated by the compiled markup of its document, and a document of the
+//! assembly `ControlCatalog` is addressable as
+//! `ferres://ControlCatalog/<path>` through the loader table of the compiled
+//! markup. Documents that do not load yet are listed in `excluded.txt` with
+//! what they wait for. With the feature `runtime-markup` the documents are
+//! embedded as assets instead and loaded by the run-time loader.
 //!
 //! The directories and files mirror the upstream sample: the document
 //! `Pages/ButtonsPage.xaml` and its class in `Pages/buttons_page.rs`.
+
+// The compiled markup of a document without a class (`CustomThemes.xaml`) names the types of
+// this crate by the name of the crate, as the compiled markup of another crate would; the
+// compiled markup of a class names them through `crate`.
+extern crate self as control_catalog;
 
 use crate::markup::XamlClass;
 use ferroui_base::metadata::MarkupType;
@@ -43,6 +52,13 @@ pub mod pages;
 pub mod view_models;
 #[path = "Views/mod.rs"]
 pub mod views;
+
+// One module per compiled document (`compiled_pages_border_page`, ..: the function `populate`
+// of the document of a class, the build function of a document without one) and
+// `compiled_markup` (the loader table of the compiled markup of the crate and `register()`),
+// which the build script of the crate generates.
+#[cfg(not(feature = "runtime-markup"))]
+ferroui_markup_xaml::include_compiled_xaml!();
 
 pub use app::App;
 pub use assets::{documents, excluded, excluded_documents, ExcludedDocument};

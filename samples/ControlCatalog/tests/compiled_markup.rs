@@ -1,123 +1,80 @@
 //! Not from upstream: the classes of the sample, populated by the compiled markup the
-//! build script wrote and rustc compiled into this crate, against the same classes
-//! populated by the run-time loader from the same documents (the files of the sample).
+//! build script wrote and rustc compiled into this crate (what the sample runs with),
+//! against the same classes populated by the run-time loader from the same documents
+//! (docs/porting/xaml.md, 9.5.19 and 9.5.22).
 //!
 //! The two object trees are compared by a dump: every object with its class, the
 //! registered properties that are set on it with their values and priorities, and its
 //! logical children, recursively.
 //!
 //! `documents` has one test per compiled document with a class (written by the build
-//! script): [`compare`]. The other tests look closer at the pages a build without the
-//! feature `catalog` compiles.
+//! script): [`compare`]. The other tests look closer at a few pages.
 
 use std::rc::Rc;
 
+use ferroui_base::controls::IResourceProvider;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::diagnostics::FerroObjectDiagnosticExtensions as _;
-use ferroui_base::{instantiate, BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, ObjectType, Ref, StyledElement};
-use ferroui_base::controls::IResourceProvider;
 use ferroui_base::metadata::from_markup_value;
-use ferroui_controls::testing::{TestIconLoader, TestServices, UnitTestApplication, UnitTestApplicationScope};
+use ferroui_base::{instantiate, BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, ObjectType, Ref, StyledElement};
+use ferroui_controls::testing::UnitTestApplicationScope;
 use ferroui_controls::{Application, ItemsControl};
 use ferroui_markup_xaml::XamlLoadException;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
-use ferroui_themes_simple::SimpleTheme;
 
-use crate::fixture_documents::{NOT_LOADED, PAGES};
+use super::support::{start_catalog_app, start_catalog_services};
 use crate::markup::{describe, is_compiled, populate_compiled, try_load_document, XamlClass};
 use crate::pages::{ButtonSpinnerPage, CanvasPage, CheckBoxPage, ImagePage, ProgressBarPage, SliderPage, WrapPanelPage};
 use crate::view_models::WrapPanelPageViewModel;
+
+/// The lists of the build (`build/compiled_documents.rs`).
+#[allow(dead_code)]
+#[path = "../build/compiled_documents.rs"]
+mod compiled_documents;
+use compiled_documents::{NOT_LOADED, REFUSED};
 
 mod documents {
     include!(concat!(env!("OUT_DIR"), "/compiled_document_tests.rs"));
 }
 
-/// The global clock of the tests: animations a page starts subscribe to it; it never ticks.
-#[derive(Default)]
-struct TestGlobalClock {
-    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::TimeSpan>,
-    play_state: std::cell::Cell<Option<ferroui_base::animation::PlayState>>,
-}
-
-impl ferroui_base::reactive::IObservable<ferroui_base::animation::TimeSpan> for TestGlobalClock {
-    fn subscribe(
-        &self,
-        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::TimeSpan>>,
-    ) -> Rc<dyn ferroui_base::reactive::IDisposable> {
-        self.subject.subscribe(observer)
-    }
-}
-
-impl ferroui_base::animation::IClock for TestGlobalClock {
-    fn play_state(&self) -> ferroui_base::animation::PlayState {
-        self.play_state.get().unwrap_or(ferroui_base::animation::PlayState::Run)
-    }
-
-    fn set_play_state(&self, value: ferroui_base::animation::PlayState) {
-        self.play_state.set(Some(value))
-    }
-}
-
-impl ferroui_base::animation::IGlobalClock for TestGlobalClock {}
-
-/// The test services of the catalog, as the tests of the sample have them
-/// (`samples/ControlCatalog/tests/support.rs`): the services of a styled window with the
-/// Skia render interface and font manager and the HarfBuzz text shaper in place of the
-/// mock ones (bitmaps decode, text is laid out), a global clock that never ticks and the
-/// icon loader of tests.
-fn catalog_services() -> TestServices {
-    TestServices::styled_window()
-        .with_render_interface(Rc::new(ferroui_skia::PlatformRenderInterface::new(None, None)))
-        .with_font_manager_impl(Rc::new(ferroui_skia::FontManagerImpl::new()))
-        .with_text_shaper_impl(Rc::new(ferroui_harfbuzz::HarfBuzzTextShaper::new()))
-        .with_global_clock(Rc::new(TestGlobalClock::default()))
-        .with_icon_loader(Rc::new(TestIconLoader))
-}
-
-/// The application the test of a document starts, as the tests of the sample choose it
-/// (`test_applications.txt`).
+/// The application the test of a document starts, as the generated tests of the sample
+/// choose it (`test_applications.txt`).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum TestApplication {
     /// A unit test application with the test services of the catalog, the Simple theme as
     /// the theme of the application, the run-time loader registered (and not used until
     /// the test loads with it), and the resources the application of the sample gives its
-    /// pages (`CustomThemes.xaml`, which `App.xaml` merges), from their compiled markup
-    /// when the build compiled the document.
+    /// pages (`CustomThemes.xaml`, which `App.xaml` merges), from their compiled markup.
     UnitTest,
     /// The application of the catalog (`App`) with the test services of the catalog: it
-    /// loads `App.xaml` and applies the Fluent theme. For what reads the application class.
+    /// populates itself from the compiled `App.xaml` and applies the Fluent theme. For
+    /// what reads the application class.
     Catalog,
 }
 
 impl TestApplication {
     fn start(self) -> UnitTestApplicationScope {
-        crate::register_types();
         match self {
             TestApplication::UnitTest => {
-                let scope = UnitTestApplication::start(catalog_services().with_theme(|| SimpleTheme::new().as_style()));
+                let scope = start_catalog_services(None);
                 FerroRuntimeXamlLoader::register();
-                // The resources of the application: `CustomThemes.xaml` from its compiled markup
-                // when the build compiled it (the feature `catalog`), and from the run-time
-                // loader otherwise. With the compiled document nothing has asked the run-time
-                // loader for anything when the first tree of a test is populated and dumped: the
-                // thread of the test is then a process that has loaded compiled markup alone,
-                // and the values of that tree read as they do after the run-time loader has
-                // created its type system (docs/porting/xaml.md, 9.5.21).
+                // The resources of the application, from the compiled `CustomThemes.xaml`:
+                // nothing has asked the run-time loader for anything when the first tree of a
+                // test is populated and dumped. The thread of the test is then a process that
+                // has loaded compiled markup alone, and the values of that tree read as they do
+                // after the run-time loader has created its type system (docs/porting/xaml.md,
+                // 9.5.21).
                 let uri = crate::markup::document_uri("/CustomThemes.xaml");
                 let custom_themes = match crate::compiled_markup::try_load(None, &uri) {
                     Ok(Some(compiled)) => compiled,
-                    Ok(None) => try_load_document("/CustomThemes.xaml", None).unwrap_or_else(|error| panic!("/CustomThemes.xaml: {}", describe(&error))),
+                    Ok(None) => panic!("/CustomThemes.xaml is not compiled by the build"),
                     Err(error) => panic!("/CustomThemes.xaml: the compiled markup fails: {}", describe(&error)),
                 };
                 let provider = from_markup_value::<Rc<dyn IResourceProvider>>(&Some(custom_themes)).expect("CustomThemes.xaml is a resource provider");
                 Application::current().expect("the unit test application").resources().merged_dictionaries().add(provider);
                 scope
             }
-            TestApplication::Catalog => {
-                let mut services = catalog_services();
-                services.theme = None;
-                UnitTestApplication::start_with(services, || crate::App::new().upcast())
-            }
+            TestApplication::Catalog => start_catalog_app(),
         }
     }
 }
@@ -127,9 +84,8 @@ fn application() -> UnitTestApplicationScope {
     TestApplication::UnitTest.start()
 }
 
-/// Populates `root` from the document `path` of the sample with the run-time loader, as
-/// the sample loads it: the URI of the document, the assembly, compiled bindings as the
-/// default.
+/// Populates `root` from the document `path` of the sample with the run-time loader: the
+/// URI of the document, the assembly, compiled bindings as the default.
 fn load(path: &str, root: BoxedValue) -> Result<(), XamlLoadException> {
     try_load_document(path, Some(root)).map(|_| ())
 }
@@ -268,10 +224,8 @@ fn objects_of(dump: &str, name: &str) -> usize {
 }
 
 /// The document without a class (`CustomThemes.xaml`, the resources the application of the
-/// sample gives its pages) is compiled by a build with the feature `catalog`: its compiled
-/// markup, from the loader table of the crate, holds the resources the run-time loader
-/// builds from the document, by their number.
-#[cfg(feature = "catalog")]
+/// sample gives its pages): its compiled markup, from the loader table of the crate, holds
+/// the resources the run-time loader builds from the document, by their number.
 #[test]
 fn the_resources_of_the_application_are_compiled() {
     use ferroui_base::controls::IResourceDictionary;
@@ -284,16 +238,28 @@ fn the_resources_of_the_application_are_compiled() {
     assert_eq!(compiled, loaded);
 }
 
-/// The pages of a build without the feature `catalog` are compiled by every build, and
-/// each has its class in the table of the sample.
+/// Every document of the sample with a class is compiled by the build, but the ones the
+/// compiler refuses (`REFUSED`), and each compiled document has its class in the table of
+/// the sample; a refused document is still an asset of the assembly.
 #[test]
-fn the_pages_of_the_fixture_are_compiled() {
+fn every_document_the_compiler_does_not_refuse_is_compiled() {
     crate::register_types();
-    for page in PAGES {
-        let path = format!("/{page}");
-        assert!(is_compiled(&path), "{path} is not compiled");
-        assert!(XamlClass::find(&path).is_some(), "{path} has no class");
+    let mut compiled = 0;
+    for (path, class) in crate::documents() {
+        let refused = REFUSED.iter().any(|(document, _)| path.strip_prefix('/') == Some(*document));
+        if class.is_none() {
+            continue;
+        }
+        assert_eq!(is_compiled(path), !refused, "{path}");
+        match refused {
+            true => assert!(crate::assets::asset(path).is_some(), "{path} is refused and is not an asset"),
+            false => {
+                assert!(XamlClass::find(path).is_some(), "{path} has no class");
+                compiled += 1;
+            }
+        }
     }
+    assert!(compiled > 200, "{compiled} documents with a class are compiled");
 }
 
 /// Two pages without code of their own: the tree of the compiled markup is the tree the

@@ -6,6 +6,8 @@
 //! document `excluded.txt` lists is ignored with the reason of the list.
 //! The tests of a document start the application `test_applications.txt`
 //! names for it.
+//! `compiled_markup` compares each class populated by its compiled markup
+//! with the same class populated by the run-time loader.
 //! `gaps` holds the minimal reproductions of the gaps of the framework the
 //! list names.
 
@@ -14,6 +16,8 @@ mod allocations;
 mod asset_files;
 mod auto_complete_box_page;
 mod catalog_tour;
+#[cfg(not(feature = "runtime-markup"))]
+mod compiled_markup;
 mod gaps;
 mod gaps_a;
 mod gaps_b;

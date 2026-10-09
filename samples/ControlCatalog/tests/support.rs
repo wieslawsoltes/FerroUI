@@ -81,16 +81,20 @@ fn catalog_services_with_clock(clock: Rc<TestGlobalClock>) -> TestServices {
 
 /// Starts the application of the catalog ([`App`]) as the application of
 /// the test, with the test services of the catalog in place of the services
-/// of a platform: the application loads `App.xaml` (which registers the
-/// run-time loader and merges `CustomThemes.xaml`) and applies the Fluent
-/// theme, as it does when the application builder starts it. For what
-/// reads the application class, as `{x:Static local:App.CurrentTheme}` does.
+/// of a platform: the application populates itself from `App.xaml` (which
+/// merges `CustomThemes.xaml`) and applies the Fluent theme, as it does when
+/// the application builder starts it. For what reads the application class,
+/// as `{x:Static local:App.CurrentTheme}` does. The run-time loader is
+/// registered for the tests that load a document with it: the application
+/// itself registers it only when it loads its own documents at run time.
 pub fn start_catalog_app() -> UnitTestApplicationScope {
     register_types();
     // The themes are the ones of the application.
     let mut services = catalog_services();
     services.theme = None;
-    UnitTestApplication::start_with(services, || App::new().upcast())
+    let scope = UnitTestApplication::start_with(services, || App::new().upcast());
+    FerroRuntimeXamlLoader::register();
+    scope
 }
 
 /// The application the generated tests of a document start; see
