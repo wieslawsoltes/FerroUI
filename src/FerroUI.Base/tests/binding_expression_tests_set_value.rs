@@ -1,7 +1,7 @@
 //! Port of the upstream `BindingExpressionTests.SetValue` tests.
 //!
-//! Not ported here: `Should_Write_Indexed_Value_To_Source` (indexers are
-//! covered by the indexer suite).
+//! `Should_Write_Indexed_Value_To_Source` is in `binding_expression_tests_indexer.rs`, which has the data with an
+//! array and its paths.
 
 use crate::utilities::CultureInfo;
 use super::binding_test_support::*;

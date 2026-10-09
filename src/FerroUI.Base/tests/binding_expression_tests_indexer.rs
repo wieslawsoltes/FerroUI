@@ -415,6 +415,18 @@ fn should_set_array_index(f: Flavor) {
     assert_eq!("baz", data.foo.get(&[1]));
 }
 
+/// Upstream `Should_Write_Indexed_Value_To_Source` of `BindingExpressionTests.SetValue.cs` (`o => o.Foo[0]` over
+/// an array of strings): written here, on the data and the paths of the indexer suite.
+fn should_write_indexed_value_to_source(f: Flavor) {
+    let data = StringArrayData::new(BindableArray::new(strings(&["foo"])));
+    let target =
+        create_target_with_source(data.clone(), array_nodes(f, &[0]), TargetClass::string_property(), BindingMode::TwoWay);
+
+    target.set_string(Some("bar"));
+
+    assert_eq!("bar", data.foo.get(&[0]));
+}
+
 fn should_set_existing_dictionary_entry(f: Flavor) {
     let data = IntDictionaryData::new(BindableDictionary::new([(s("foo"), 1)]));
     let target =
@@ -496,6 +508,7 @@ both_flavors!(
     should_track_incc_reset,
     should_track_non_integer_indexer,
     should_set_array_index,
+    should_write_indexed_value_to_source,
     should_set_existing_dictionary_entry,
     should_add_new_dictionary_entry,
     should_set_non_integer_indexer,
