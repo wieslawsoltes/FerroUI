@@ -850,3 +850,23 @@ What is most likely wrong before any of that, in the author's order:
 5. The run time of the scan of the controls with dependencies (two clones of the model of the
    base crate, one canonical rewrite of every type text) and of `ModelTypeSystem::new` (the
    companion lookup is quadratic in the types of a model); both are bounded and not measured.
+
+### The second stage on the real crates (validated 2026-10-09)
+
+It built unchanged. With the model of `ferroui_base` attached, the scan of `ferroui_controls` has no unresolved type text left (18 before) and 2 registered properties without a name (7 before): `Application::actual_theme_variant_property` and `Application::requested_theme_variant_property`. Their source is `ThemeVariant::..._property`, an accessor that `ferro_property!(for StyledElement; ..)` declares inside `impl ThemeVariant`: the model lists it under `StyledElement` and does not record the type whose function it is, so the added owner is not followed to its declaration. The next stage adds that to the model (the type an accessor is a function of, when it is not the type it is listed under) and to `ModelSet::find_accessor`; the test of the real crates names the two as known until then. The result of the drift test is recorded below it.
+
+The drift test (`cargo test -p ferroui-markup-xaml-tests --lib type_system_drift -- --ignored --nocapture`) compares the build-time type system with the run-time one over the registered types of the two crates. First result:
+
+| Kind | Count | |
+|---|---:|---|
+| The kind of a type, its base, its interfaces, the type of a member, the shape of a member, the custom attributes, the value of an enumeration member | 0 each | agree |
+| A type only at run time | 0 | agree |
+| A type only in the model | 5 | must be empty |
+| A member only at run time | 63 | must be empty |
+| A member only in the model | 3 | must be empty |
+| A Rust type the run-time type system maps and the model does not | 42 | open |
+| An enumeration member whose value the scanner did not evaluate | 34 | known |
+| A type under a `cfg` condition only in the model | 1 | known |
+| The base of a collection declared as a notifying list | 1 | known |
+
+So the two type systems agree on everything they both have; what is left is 71 entries that one side lacks and 42 handle mappings. The test is ignored until the next stage has brought the "must be empty" kinds to zero; its output lists every entry.
