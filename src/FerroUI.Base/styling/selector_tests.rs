@@ -822,6 +822,42 @@ fn property_equals_compares_untyped_property_values_by_content() {
     assert!(!PropertyEqualsSelector::compare(&boxed(None::<BoxedValue>), &value));
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum FooBar {
+    Foo,
+    Bar,
+}
+
+// The untyped property of the reference test is the tag of a control; here it
+// is the data context. The enumeration states its conversion from text, as a
+// type that markup can name does.
+#[test]
+fn property_equals_matches_when_property_has_matching_value_and_different_type() {
+    use crate::data::core::ValueTypes;
+
+    ValueTypes::register_parse::<FooBar>(|s| match s {
+        "Foo" => Some(FooBar::Foo),
+        "Bar" => Some(FooBar::Bar),
+        _ => None,
+    });
+
+    let rows: [(&str, BoxedValue); 3] = [("Bar", boxed(FooBar::Bar)), ("352", boxed(352_i32)), ("0.1", boxed(0.1_f64))];
+    for (literal, value) in rows {
+        let control = Class3::new();
+        let target =
+            Selectors::property_equals_untyped(None, StyledElement::data_context_property().as_property(), boxed(literal.to_string()));
+        let match_ = target.match_(&element(&control), None, true);
+        assert!(match_.activator().is_some());
+        let (sink, _activator) = ActivatorSink::new(&match_);
+
+        assert!(!sink.active(), "{literal}");
+        control.set_data_context(Some(value));
+        assert!(sink.active(), "{literal}");
+        control.set_data_context(None);
+        assert!(!sink.active(), "{literal}");
+    }
+}
+
 // --- multiple ----------------------------------------------------------------
 
 #[test]
