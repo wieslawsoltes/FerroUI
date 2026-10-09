@@ -35,7 +35,7 @@ mod wrap_panel_page_view_model;
 pub use application_view_model::ApplicationViewModel;
 pub use combo_box_page_view_model::{ComboBoxPageViewModel, IdAndName};
 pub use context_page_view_model::ContextPageViewModel;
-pub use cursor_page_view_model::{CursorPageViewModel, StandardCursorModel};
+pub use cursor_page_view_model::{CursorPageViewModel, StandardCursorList, StandardCursorModel};
 pub use data_validation_view_model::DataValidationViewModel;
 pub use expander_page_view_model::ExpanderPageViewModel;
 pub use flex_item_view_model::FlexItemViewModel;
@@ -53,12 +53,12 @@ pub use section_view_model::SectionViewModel;
 pub use settings_view_model::SettingsViewModel;
 pub use split_view_page_view_model::SplitViewPageViewModel;
 pub use tab_control_page_view_model::{TabControlPageViewModel, TabControlPageViewModelItem};
-pub use table_view_page_view_model::{Country, TableViewPageViewModel};
+pub use table_view_page_view_model::{Country, CountryList, TableViewPageViewModel};
 pub use transitioning_content_control_page_view_model::{
     CustomTransition, PageTransition, TransitioningContentControlPageViewModel,
 };
-pub use tree_view_page_view_model::{Node, TreeViewPageViewModel};
-pub use wrap_panel_page_view_model::{WrapPanelItemViewModel, WrapPanelPageViewModel};
+pub use tree_view_page_view_model::{Node, NodeList, TreeViewPageViewModel};
+pub use wrap_panel_page_view_model::{WrapPanelItemList, WrapPanelItemViewModel, WrapPanelPageViewModel};
 
 /// The classes of this namespace (`X::TYPE`).
 pub(crate) const TYPES: &[&TypeInfo] = &[];
