@@ -7,13 +7,13 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Avalonia.Metal` |
-| FerroUI | `src/FerroUI.Metal` (not created yet) |
-| Crate | `ferroui-metal` |
+| FerroUI | `src/Skia/FerroUI.Skia/metal` (exists) |
+| Crate | `ferroui-skia (module metal)` |
 | Phase / priority | 1 - desktop (macOS) / P1 |
-| Files | 0/2 (0.0%) |
-| Types | 0/7 (0.0%) |
-| Members | 0/21 (0.0%) |
-| Contracts (interfaces) | 0/7 |
+| Files | 2/2 (100.0%) |
+| Types | 7/7 (100.0%) |
+| Members | 21/21 (100.0%) |
+| Contracts (interfaces) | 7/7 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
@@ -23,19 +23,19 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 | Interface | Access | Upstream file | Members | Status |
 |---|---|---|---|---|
-| `Avalonia.Metal.IMetalDevice` | public | `IMetalDevice.cs` | 0/2 | missing |
-| `Avalonia.Metal.IMetalExternalObjectsFeature` | public | `IMetalExternalObjectsFeature.cs` | 0/8 | missing |
-| `Avalonia.Metal.IMetalExternalTexture` | public | `IMetalExternalObjectsFeature.cs` | 0/4 | missing |
-| `Avalonia.Metal.IMetalPlatformSurface` | public | `IMetalDevice.cs` | 0/1 | missing |
-| `Avalonia.Metal.IMetalPlatformSurfaceRenderTarget` | public | `IMetalDevice.cs` | 0/1 | missing |
-| `Avalonia.Metal.IMetalPlatformSurfaceRenderingSession` | public | `IMetalDevice.cs` | 0/4 | missing |
-| `Avalonia.Metal.IMetalSharedEvent` | public | `IMetalExternalObjectsFeature.cs` | 0/1 | missing |
+| `Avalonia.Metal.IMetalDevice` | public | `IMetalDevice.cs` | 2/2 | present |
+| `Avalonia.Metal.IMetalExternalObjectsFeature` | public | `IMetalExternalObjectsFeature.cs` | 8/8 | present |
+| `Avalonia.Metal.IMetalExternalTexture` | public | `IMetalExternalObjectsFeature.cs` | 4/4 | present |
+| `Avalonia.Metal.IMetalPlatformSurface` | public | `IMetalDevice.cs` | 1/1 | present |
+| `Avalonia.Metal.IMetalPlatformSurfaceRenderTarget` | public | `IMetalDevice.cs` | 1/1 | present |
+| `Avalonia.Metal.IMetalPlatformSurfaceRenderingSession` | public | `IMetalDevice.cs` | 4/4 | present |
+| `Avalonia.Metal.IMetalSharedEvent` | public | `IMetalExternalObjectsFeature.cs` | 1/1 | present |
 
 ## Files
 
-### `(project root)` - files 0/2, types 0/7, members 0/21
+### `(project root)` - files 2/2, types 7/7, members 21/21
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `IMetalDevice.cs` | `i_metal_device.rs` | missing | 0/4 | 0/8 |  |
-| `IMetalExternalObjectsFeature.cs` | `i_metal_external_objects_feature.rs` | missing | 0/3 | 0/13 |  |
+| `IMetalDevice.cs` | `i_metal_device.rs` | present | 4/4 | 8/8 |  |
+| `IMetalExternalObjectsFeature.cs` | `i_metal_external_objects_feature.rs` | present | 3/3 | 13/13 |  |

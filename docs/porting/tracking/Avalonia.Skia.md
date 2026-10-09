@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Skia/FerroUI.Skia` (exists) |
 | Crate | `ferroui-skia` |
 | Phase / priority | 1 - rendering / P0 |
-| Files | 48/54 (88.9%) |
-| Types | 52/66 (78.8%) |
-| Members | 335/451 (74.3%) |
+| Files | 48/51 (94.1%), 3 not applicable |
+| Types | 56/62 (90.3%) |
+| Members | 345/420 (32 waived) (88.9%) |
 | Contracts (interfaces) | 9/10 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -29,131 +29,50 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Skia.ISkiaGpu` | internal | `Gpu/ISkiaGpu.cs` | 5/5 | present |
 | `Avalonia.Skia.ISkiaGpuRenderSession` | public | `Gpu/ISkiaGpuRenderSession.cs` | 4/4 | present |
 | `Avalonia.Skia.ISkiaGpuRenderTarget` | public | `Gpu/ISkiaGpuRenderTarget.cs` | 2/2 | present |
-| `Avalonia.Skia.ISkiaSharpApiLease` | public | `ISkiaSharpApiLeaseFeature.cs` | 4/5 | partial |
+| `Avalonia.Skia.ISkiaSharpApiLease` | public | `ISkiaSharpApiLeaseFeature.cs` | 4/5 (1 waived) | present |
 | `Avalonia.Skia.ISkiaSharpApiLeaseFeature` | public | `ISkiaSharpApiLeaseFeature.cs` | 1/1 | present |
 | `Avalonia.Skia.ISkiaSharpPlatformGraphicsApiLease` | public | `ISkiaSharpApiLeaseFeature.cs` | 1/1 | present |
 | `Avalonia.Skia.ISkiaSurface` | public | `Gpu/ISkiaGpu.cs` | 3/3 | present |
 
 ## Files
 
-### `(project root)` - files 33/33, types 34/38, members 262/300
+### `(project root)` - files 33/33, types 38/38, members 272/300 (27 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `CombinedGeometryImpl.cs` | `combined_geometry_impl.rs` | partial | 1/1 | 5/6 |  |
+| `CombinedGeometryImpl.cs` | `combined_geometry_impl.rs` | present | 1/1 | 5/6 (1 waived) |  |
 | `DrawingContextImpl.Effects.cs` | `drawing_context_impl.rs` | present | 1/1 | 2/2 | partial merged into main file |
 | `DrawingContextImpl.cs` | `drawing_context_impl.rs` | present | 3/3 | 50/50 |  |
-| `EllipseGeometryImpl.cs` | `ellipse_geometry_impl.rs` | partial | 1/1 | 3/4 |  |
+| `EllipseGeometryImpl.cs` | `ellipse_geometry_impl.rs` | present | 1/1 | 3/4 (1 waived) |  |
 | `FontManagerImpl.cs` | `font_manager_impl.rs` | present | 1/1 | 6/6 |  |
 | `FramebufferRenderTarget.cs` | `framebuffer_render_target.rs` | present | 1/1 | 5/5 |  |
-| `GeometryGroupImpl.cs` | `geometry_group_impl.rs` | partial | 1/1 | 3/4 |  |
-| `GeometryImpl.cs` | `geometry_impl.rs` | partial | 1/1 | 13/15 |  |
+| `GeometryGroupImpl.cs` | `geometry_group_impl.rs` | present | 1/1 | 3/4 (1 waived) |  |
+| `GeometryImpl.cs` | `geometry_impl.rs` | present | 1/1 | 13/15 (2 waived) |  |
 | `GlyphRunImpl.cs` | `glyph_run_impl.rs` | present | 1/1 | 7/7 |  |
 | `IDrawableBitmapImpl.cs` | `i_drawable_bitmap_impl.rs` | present | 1/1 | 1/1 |  |
-| `ISkiaSharpApiLeaseFeature.cs` | `i_skia_api_lease_feature.rs` | partial | 3/3 | 6/7 | renamed: the binding is not SkiaSharp, so the contracts are named after Skia: `ISkiaApiLeaseFeature`, `ISkiaApiLease`, `ISkiaPlatformGraphicsApiLease` |
-| `ImmutableBitmap.cs` | `immutable_bitmap.rs` | partial | 1/1 | 13/14 |  |
-| `LineGeometryImpl.cs` | `line_geometry_impl.rs` | partial | 1/1 | 3/4 |  |
+| `ISkiaSharpApiLeaseFeature.cs` | `i_skia_api_lease_feature.rs` | present | 3/3 | 6/7 (1 waived) | renamed: the binding is not SkiaSharp, so the contracts are named after Skia: `ISkiaApiLeaseFeature`, `ISkiaApiLease`, `ISkiaPlatformGraphicsApiLease` |
+| `ImmutableBitmap.cs` | `immutable_bitmap.rs` | present | 1/1 | 13/14 (1 waived) |  |
+| `LineGeometryImpl.cs` | `line_geometry_impl.rs` | present | 1/1 | 3/4 (1 waived) |  |
 | `PictureRenderTarget.cs` | `picture_render_target.rs` | present | 1/1 | 4/4 |  |
 | `PlatformRenderInterface.cs` | `platform_render_interface.rs` | present | 1/1 | 28/28 |  |
-| `RectangleGeometryImpl.cs` | `rectangle_geometry_impl.rs` | partial | 1/1 | 3/4 |  |
+| `RectangleGeometryImpl.cs` | `rectangle_geometry_impl.rs` | present | 1/1 | 3/4 (1 waived) |  |
 | `RenderTargetBitmapImpl.cs` | `render_target_bitmap_impl.rs` | present | 1/1 | 5/5 |  |
-| `SKCacheBase.cs` | `sk_cache_base.rs` | partial | 0/1 | 0/6 |  |
-| `SKPaintCache.cs` | `sk_paint_cache.rs` | partial | 0/1 | 0/1 |  |
-| `SKRoundRectCache.cs` | `sk_round_rect_cache.rs` | partial | 0/1 | 0/4 |  |
-| `SKTextBlobBuilderCache.cs` | `sk_text_blob_builder_cache.rs` | partial | 0/1 | 0/0 |  |
+| `SKCacheBase.cs` | `sk_cache_base.rs` | present | 1/1 | 5/6 (1 waived) | renamed: Rust spelling of the acronym: `SkCacheBase&lt;TCachedItem&gt;` of `sk_cache_base.rs`; the second type parameter of upstream (the cache itself, for its static instance) is not needed, since each cache keeps its own instance |
+| `SKPaintCache.cs` | `sk_paint_cache.rs` | present | 1/1 | 1/1 | renamed: Rust spelling of the acronym: `SkPaintCache` of `sk_paint_cache.rs` |
+| `SKRoundRectCache.cs` | `sk_round_rect_cache.rs` | present | 1/1 | 4/4 | renamed: Rust spelling of the acronym: `SkRoundRectCache` of `sk_round_rect_cache.rs` |
+| `SKTextBlobBuilderCache.cs` | `sk_text_blob_builder_cache.rs` | present | 1/1 | 0/0 | renamed: Rust spelling of the acronym: `SkTextBlobBuilderCache` of `sk_text_blob_builder_cache.rs` |
 | `SkiaApplicationExtensions.cs` | `skia_application_extensions.rs` | present | 1/1 | 1/1 |  |
 | `SkiaBackendContext.cs` | `skia_backend_context.rs` | partial | 1/1 | 8/9 |  |
 | `SkiaOptions.cs` | `skia_options.rs` | present | 1/1 | 4/4 |  |
 | `SkiaPlatform.cs` | `skia_platform.rs` | present | 1/1 | 3/3 |  |
 | `SkiaRegionImpl.cs` | `skia_region_impl.rs` | present | 1/1 | 9/9 |  |
-| `SkiaSharpExtensions.cs` | `skia_sharp_extensions.rs` | partial | 1/1 | 17/31 |  |
+| `SkiaSharpExtensions.cs` | `skia_sharp_extensions.rs` | present | 1/1 | 17/31 (14 waived) |  |
 | `SkiaTypeface.cs` | `skia_typeface.rs` | present | 1/1 | 11/11 |  |
-| `StreamGeometryImpl.cs` | `stream_geometry_impl.rs` | partial | 1/1 | 5/7 |  |
+| `StreamGeometryImpl.cs` | `stream_geometry_impl.rs` | present | 1/1 | 5/7 (2 waived) |  |
 | `SurfaceRenderTarget.cs` | `surface_render_target.rs` | present | 2/2 | 25/25 |  |
-| `TransformedGeometryImpl.cs` | `transformed_geometry_impl.rs` | partial | 1/1 | 5/6 |  |
+| `TransformedGeometryImpl.cs` | `transformed_geometry_impl.rs` | present | 1/1 | 5/6 (1 waived) |  |
 | `TwoLevelCache.cs` | `two_level_cache.rs` | present | 1/1 | 4/4 |  |
 | `WriteableBitmapImpl.cs` | `writeable_bitmap_impl.rs` | present | 1/1 | 13/13 |  |
-
-<details><summary><code>CombinedGeometryImpl.cs</code> - 1 missing</summary>
-
-- `CombinedGeometryImpl` (class): 1 missing
-  - `override SKPath? FillPath { get; }`
-
-</details>
-
-<details><summary><code>EllipseGeometryImpl.cs</code> - 1 missing</summary>
-
-- `EllipseGeometryImpl` (class): 1 missing
-  - `override SKPath FillPath { get; }`
-
-</details>
-
-<details><summary><code>GeometryGroupImpl.cs</code> - 1 missing</summary>
-
-- `GeometryGroupImpl` (class): 1 missing
-  - `override SKPath FillPath { get; }`
-
-</details>
-
-<details><summary><code>GeometryImpl.cs</code> - 2 missing</summary>
-
-- `GeometryImpl` (class): 2 missing
-  - `abstract Rect Bounds { get; }`
-  - `void InvalidateCaches()` *(protected)*
-
-</details>
-
-<details><summary><code>ISkiaSharpApiLeaseFeature.cs</code> - 1 missing</summary>
-
-- `ISkiaSharpApiLease` (interface): 1 missing
-  - `SKCanvas SkCanvas { get; }`
-
-</details>
-
-<details><summary><code>ImmutableBitmap.cs</code> - 1 missing</summary>
-
-- `ImmutableBitmap` (class): 1 missing
-  - `ImmutableBitmap(PixelSize size, Vector dpi, int stride, PixelFormat format, AlphaFormat alphaFormat, IntPtr...` *(4 of 5 constructors found)*
-
-</details>
-
-<details><summary><code>LineGeometryImpl.cs</code> - 1 missing</summary>
-
-- `LineGeometryImpl` (class): 1 missing
-  - `override SKPath? FillPath { get; }`
-
-</details>
-
-<details><summary><code>RectangleGeometryImpl.cs</code> - 1 missing</summary>
-
-- `RectangleGeometryImpl` (class): 1 missing
-  - `override SKPath? FillPath { get; }`
-
-</details>
-
-<details><summary><code>SKCacheBase.cs</code> - 7 missing</summary>
-
-- `SKCacheBase<TCachedItem, TCache>` (class, internal): **type missing** (6 members)
-
-</details>
-
-<details><summary><code>SKPaintCache.cs</code> - 2 missing</summary>
-
-- `SKPaintCache` (class, internal): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>SKRoundRectCache.cs</code> - 5 missing</summary>
-
-- `SKRoundRectCache` (class, internal): **type missing** (4 members)
-
-</details>
-
-<details><summary><code>SKTextBlobBuilderCache.cs</code> - 1 missing</summary>
-
-- `SKTextBlobBuilderCache` (class, internal): **type missing** (0 members)
-
-</details>
 
 <details><summary><code>SkiaBackendContext.cs</code> - 1 missing</summary>
 
@@ -162,56 +81,14 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>SkiaSharpExtensions.cs</code> - 14 missing</summary>
-
-- `SkiaSharpExtensions` (class) (ported as module-level items): 14 missing
-  - `static SKSamplingOptions ToSKSamplingOptions(this BitmapInterpolationMode interpolationMode, bool isUpscaling)` *(internal; 1 of 2 overloads found)*
-  - `static SKPoint ToSKPoint(this Vector p)` *(1 of 2 overloads found)*
-  - `static SKRect ToSKRect(this LtrbRect r)` *(internal; 1 of 2 overloads found)*
-  - `static SKRectI ToSKRectI(this LtrbPixelRect r)` *(internal; 1 of 2 overloads found)*
-  - `static Rect ToAvaloniaRect(this SKRect r)`
-  - `static PixelRect ToAvaloniaPixelRect(this SKRectI r)`
-  - `static LtrbPixelRect ToAvaloniaLtrbPixelRect(this SKRectI r)` *(internal)*
-  - `static Matrix ToAvaloniaMatrix(this SKMatrix m)` *(internal)*
-  - `static Matrix ToAvaloniaMatrix(this SKMatrix44 m)` *(internal)*
-  - `static PixelFormat? ToAvalonia(this SKColorType colorType)`
-  - `static TextAlignment ToAvalonia(this SKTextAlign a)`
-  - `static FontStyle ToAvalonia(this SKFontStyleSlant slant)`
-  - `static SKFontStyleSlant ToSkia(this FontStyle style)`
-  - `static SKPath? Clone(this SKPath? src)`
-
-</details>
-
-<details><summary><code>StreamGeometryImpl.cs</code> - 2 missing</summary>
-
-- `StreamGeometryImpl` (class): 2 missing
-  - `override SKPath? FillPath { get; }`
-  - `override Rect Bounds { get; }`
-
-</details>
-
-<details><summary><code>TransformedGeometryImpl.cs</code> - 1 missing</summary>
-
-- `TransformedGeometryImpl` (class): 1 missing
-  - `override SKPath? FillPath { get; }`
-
-</details>
-
-### `Gpu` - files 4/4, types 5/5, members 19/20
+### `Gpu` - files 4/4, types 5/5, members 19/20 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `ISkiaGpu.cs` | `gpu/i_skia_gpu.rs` | present | 2/2 | 8/8 |  |
 | `ISkiaGpuRenderSession.cs` | `gpu/i_skia_gpu_render_session.rs` | present | 1/1 | 4/4 |  |
 | `ISkiaGpuRenderTarget.cs` | `gpu/i_skia_gpu_render_target.rs` | present | 1/1 | 2/2 |  |
-| `SkiaGpuRenderTarget.cs` | `gpu/skia_gpu_render_target.rs` | partial | 1/1 | 5/6 |  |
-
-<details><summary><code>SkiaGpuRenderTarget.cs</code> - 1 missing</summary>
-
-- `SkiaGpuRenderTarget` (class): 1 missing
-  - `IDrawingContextImpl CreateDrawingContext(IRenderTarget.RenderTargetSceneInfo sceneInfo, out RenderTargetDra...` *(1 of 2 overloads found)*
-
-</details>
+| `SkiaGpuRenderTarget.cs` | `gpu/skia_gpu_render_target.rs` | present | 1/1 | 5/6 (1 waived) |  |
 
 ### `Gpu/Metal` - files 2/3, types 4/5, members 23/32
 
@@ -239,40 +116,40 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Gpu/Vulkan` - files 0/3, types 0/4, members 0/31
+### `Gpu/Vulkan` - files 0/0, types 0/0, members 0/0
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `VulkanSkiaExternalObjectsFeature.cs` | `gpu/vulkan/vulkan_skia_external_objects_feature.rs` | missing | 0/1 | 0/9 |  |
-| `VulkanSkiaGpu.cs` | `gpu/vulkan/vulkan_skia_gpu.rs` | missing | 0/1 | 0/12 |  |
-| `VulkanSkiaRenderTarget.cs` | `gpu/vulkan/vulkan_skia_render_target.rs` | missing | 0/2 | 0/10 |  |
+| `VulkanSkiaExternalObjectsFeature.cs` | - | n/a | - | - | not-applicable: import of external images and semaphores into the Skia context on Vulkan (`IVulkanContextExternalObjectsFeature` of Avalonia.Vulkan): out of scope while Avalonia.Vulkan is (scripts/api-extract/projects.json). Applicable when a platform with Vulkan is ported, after the external objects of the backend on OpenGL and Metal |
+| `VulkanSkiaGpu.cs` | - | n/a | - | - | not-applicable: the GPU of the backend over a Vulkan platform graphics context (`IVulkanPlatformGraphicsContext` of Avalonia.Vulkan): out of scope while Avalonia.Vulkan is (scripts/api-extract/projects.json). Applicable when a platform with Vulkan is ported |
+| `VulkanSkiaRenderTarget.cs` | - | n/a | - | - | not-applicable: the render target and render session of the backend over a Vulkan render target (`IVulkanRenderTarget` of Avalonia.Vulkan): out of scope while Avalonia.Vulkan is (scripts/api-extract/projects.json). Applicable when a platform with Vulkan is ported |
 
-### `Helpers` - files 5/5, types 5/5, members 6/13
+### `Helpers` - files 5/5, types 5/5, members 6/13 (4 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `DrawingContextHelper.cs` | `helpers/drawing_context_helper.rs` | partial | 1/1 | 1/4 |  |
-| `ImageSavingHelper.cs` | `helpers/image_saving_helper.rs` | partial | 1/1 | 1/5 |  |
+| `DrawingContextHelper.cs` | `helpers/drawing_context_helper.rs` | partial | 1/1 | 1/4 (1 waived) |  |
+| `ImageSavingHelper.cs` | `helpers/image_saving_helper.rs` | partial | 1/1 | 1/5 (3 waived) |  |
 | `PenHelper.cs` | `helpers/pen_helper.rs` | present | 1/1 | 1/1 |  |
 | `PixelFormatHelper.cs` | `helpers/pixel_format_helper.rs` | present | 1/1 | 1/1 |  |
 | `SKPathHelper.cs` | `helpers/sk_path_helper.rs` | present | 1/1 | 2/2 |  |
 
-<details><summary><code>DrawingContextHelper.cs</code> - 3 missing</summary>
+<details><summary><code>DrawingContextHelper.cs</code> - 2 missing</summary>
 
-- `DrawingContextHelper` (class) (ported as module-level items): 3 missing
+- `DrawingContextHelper` (class) (ported as module-level items): 2 missing
   - `static Task RenderAsync(SKCanvas canvas, Visual visual)`
   - `static Task RenderAsync(SKCanvas canvas, Visual visual, Rect clipRect, Vector dpi)`
-  - `static IDrawingContextImpl WrapSkiaCanvas(SKCanvas canvas, Vector dpi)` *(internal)*
+  - waived (ported as the free function `wrap_skia_surface` of `helpers/drawing_context_helper.rs`: a canvas of the binding is borrowed from its surface, so the context is created from the surface (`CanvasSource::Surface`)): `WrapSkiaCanvas`
 
 </details>
 
-<details><summary><code>ImageSavingHelper.cs</code> - 4 missing</summary>
+<details><summary><code>ImageSavingHelper.cs</code> - 1 missing</summary>
 
-- `ImageSavingHelper` (class) (ported as module-level items): 4 missing
-  - `static void SaveImage(SKImage image, string fileName, BitmapEncoderOptions options)` *(1 of 4 overloads found)*
-  - `static void SaveImage(SKImage image, Stream stream, int? quality = null)` *(1 of 4 overloads found)*
-  - `static void SaveImage(SKImage image, Stream stream, BitmapEncoderOptions options)` *(1 of 4 overloads found)*
+- `ImageSavingHelper` (class) (ported as module-level items): 1 missing
   - `static void SavePicture(SKPicture picture, float scale, string path)` *(internal)*
+  - waived (obsolete overloads (to a file and to a stream) that ignore the quality and save a PNG with the default options: not ported, a caller passes `BitmapEncoderOptions::Png` to `save_image_to_file` or `save_image`): `SaveImage`
+  - waived (ported as the free function `save_image_to_file` of `helpers/image_saving_helper.rs`): `SaveImage`
+  - waived (ported as the free function `save_image` of `helpers/image_saving_helper.rs`, which the scanner counts for the first overload of the name): `SaveImage`
 
 </details>
 
@@ -287,8 +164,6 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `gpu/i_skia_gr_context.rs` | the backend-neutral GPU context of the Skia backend (the binding has separate Ganesh and Graphite context types, SkiaSharp has one `GRContext`) | `ISkiaGrContext`, `SkiaGpuBackend` |
 | `gpu/metal/tests.rs` | the unit tests of the module | `GraphiteTarget`, `Id`, `LogSink`, `Sel`, `TestMetalDevice`, `TextureRenderTarget`, `TextureSession`, `TextureSurface` |
 | `locked_framebuffer.rs` | a locked framebuffer described by plain values: the `Platform/LockedFramebuffer.cs` of Avalonia.Base, which the base crate cannot hold without unsafe code, for the surfaces of the backend | `LockedFramebuffer` |
-| `metal/i_metal_device.rs` | port of the project Avalonia.Metal (`IMetalDevice.cs`, `IMetalExternalObjectsFeature.cs`) inside the Skia backend, its only user; the tracking of Avalonia.Metal looks in `src/FerroUI.Metal`, which does not exist, and reports the two files as missing | `IMetalDevice`, `IMetalPlatformSurface`, `IMetalPlatformSurfaceRenderTarget`, `IMetalPlatformSurfaceRenderingSession` |
-| `metal/i_metal_external_objects_feature.rs` | port of the project Avalonia.Metal (`IMetalDevice.cs`, `IMetalExternalObjectsFeature.cs`) inside the Skia backend, its only user; the tracking of Avalonia.Metal looks in `src/FerroUI.Metal`, which does not exist, and reports the two files as missing | `IMetalExternalObjectsFeature`, `IMetalExternalTexture`, `IMetalSharedEvent` |
 | `tests.rs` | the unit tests of the module | `BrushSpec`, `Material`, `MockFramebuffer`, `MockSurface`, `Target`, `TwoSquares`, `TwoSquaresBrush` |
 | `unit_tests/hit_testing.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library | `CompositorTestServices`, `LocatorScope` |
 | `unit_tests/media/custom_font_manager_impl.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library | `CustomFontManagerImpl` |

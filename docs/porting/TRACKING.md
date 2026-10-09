@@ -44,15 +44,15 @@ Percentages are `present / (total - waived)`. Member matching is by name with re
 
 | | Ported | Total | Waived | % |
 |---|---:|---:|---:|---:|
-| C# files | 2221 | 2298 | 0 | 96.6% |
-| Types | 2821 | 3190 | 203 | 94.4% |
-| Members | 20610 | 23406 | 1888 | 95.8% |
-| Contracts (interfaces) | 421 | 461 | - | 91.3% |
+| C# files | 2230 | 2262 | 0 | 98.6% |
+| Types | 2842 | 3132 | 203 | 97.0% |
+| Members | 20669 | 23122 | 2001 | 97.9% |
+| Contracts (interfaces) | 429 | 458 | - | 93.7% |
 | Property registrations | 1218 | 1233 | - | 98.8% |
 | Routed events | 108 | 108 | - | 100.0% |
 | Other files (native sources, XAML, TypeScript, fonts) | 243 | 268 | - | 90.7% |
 
-116 upstream files are not applicable and not counted. Out of the current scope (platform backends, below): 524 files, 1197 types, 13006 members.
+152 upstream files are not applicable and not counted. Out of the current scope (platform backends, below): 524 files, 1197 types, 13006 members.
 
 ## Projects
 
@@ -60,34 +60,34 @@ The % column is member coverage (file coverage for plain file lists).
 
 | Project | Upstream path | FerroUI path | Crate | Files | Types | Members | % | Phase | Priority |
 |---|---|---|---|---:|---:|---:|---:|---|---|
-| [XamlX](tracking/XamlX.md) | `external/XamlX/src/XamlX` | `external/XamlX/src/XamlX` | `xamlx` | 61/61 | 171/174 (3 waived) | 706/857 (151 waived) | 100.0% | 2 - xaml + themes | P1 |
+| [XamlX](tracking/XamlX.md) | `external/XamlX/src/XamlX` | `external/XamlX/src/XamlX` | `xamlx` | 62/62 | 172/177 (5 waived) | 713/878 (165 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Native (native sources)](tracking/Avalonia.Native_native_sources.md) | `native/Avalonia.Native` | `native/FerroUI.Native` | (Objective-C++ sources built by ferroui-native) | 62/62 | - | - | 100.0% | 1 - desktop (macOS) | P0 |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/Avalonia.Base` | `src/FerroUI.Base` | `ferroui-base` | 1248/1248 | 1520/1659 (136 waived) | 10271/11433 (1115 waived) | 99.5% | 0 - core | P0 |
-| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/Avalonia.Build.Tasks` | `src/FerroUI.Build.Tasks` | `ferroui-build` | 0/9 | 0/10 | 0/44 | 0.0% | 2 - xaml + themes | P1 |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/Avalonia.Base` | `src/FerroUI.Base` | `ferroui-base` | 1248/1248 | 1523/1659 (136 waived) | 10280/11433 (1153 waived) | 100.0% | 0 - core | P0 |
+| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/Avalonia.Build.Tasks` | `src/FerroUI.Build.Tasks` | `ferroui-build` | 4/6 | 5/7 | 3/35 (28 waived) | 42.9% | 2 - xaml + themes | P1 |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/Avalonia.Controls` | `src/FerroUI.Controls` | `ferroui-controls` | 534/538 | 616/628 (7 waived) | 6199/6405 (189 waived) | 99.7% | 1 - controls | P0 |
 | [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/Avalonia.Controls.ColorPicker` | `src/FerroUI.Controls.ColorPicker` | `ferroui-controls-color-picker` | 39/39 | 41/41 | 726/726 | 100.0% | 3 - extras | P2 |
 | [Avalonia.DesignerSupport](tracking/Avalonia.DesignerSupport.md) | `src/Avalonia.DesignerSupport` | `src/FerroUI.DesignerSupport` | `ferroui-designer-support` | 0/9 | 0/18 | 0/176 | 0.0% | 4 - tooling | P3 |
 | [Avalonia.Desktop](tracking/Avalonia.Desktop.md) | `src/Avalonia.Desktop` | `src/FerroUI.Desktop` | `ferroui-desktop` | 1/1 | 1/1 | 1/1 | 100.0% | 1 - desktop (macOS) | P0 |
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/Avalonia.Dialogs` | `src/FerroUI.Dialogs` | `ferroui-dialogs` | 17/17 | 18/18 | 94/94 | 100.0% | 3 - extras | P3 |
 | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) | `src/Avalonia.Fonts.Inter` | `src/FerroUI.Fonts.Inter` | `ferroui-fonts-inter` | 2/2 | 2/2 | 2/2 | 100.0% | 3 - browser | P2 |
-| [Avalonia.Metal](tracking/Avalonia.Metal.md) | `src/Avalonia.Metal` | `src/FerroUI.Metal` | `ferroui-metal` | 0/2 | 0/7 | 0/21 | 0.0% | 1 - desktop (macOS) | P1 |
+| [Avalonia.Metal](tracking/Avalonia.Metal.md) | `src/Avalonia.Metal` | `src/Skia/FerroUI.Skia/metal` | `ferroui-skia (module metal)` | 2/2 | 7/7 | 21/21 | 100.0% | 1 - desktop (macOS) | P1 |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/Avalonia.MicroCom` | `src/FerroUI.MicroCom` | `ferroui-microcom` | 1/1 | 1/1 | 0/6 (6 waived) | - | 0 - core | P0 |
-| [Avalonia.Native](tracking/Avalonia.Native.md) | `src/Avalonia.Native` | `src/FerroUI.Native` | `ferroui-native` | 47/47 | 63/75 (11 waived) | 437/528 (76 waived) | 96.7% | 1 - desktop (macOS) | P0 |
+| [Avalonia.Native](tracking/Avalonia.Native.md) | `src/Avalonia.Native` | `src/FerroUI.Native` | `ferroui-native` | 47/47 | 63/75 (11 waived) | 443/528 (77 waived) | 98.2% | 1 - desktop (macOS) | P0 |
 | [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/Avalonia.OpenGL` | `src/FerroUI.OpenGL` | `ferroui-opengl` | 39/39 | 61/63 (2 waived) | 601/639 (38 waived) | 100.0% | 2 - rendering backends | P2 |
 | [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | `src/Avalonia.Remote.Protocol` | `src/FerroUI.Remote.Protocol` | `ferroui-remote-protocol` | 0/14 | 0/55 | 0/202 (1 waived) | 0.0% | 4 - tooling | P3 |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/Avalonia.Themes.Fluent` | `src/FerroUI.Themes.Fluent` | `ferroui-themes-fluent` | 5/5 | 6/6 | 68/73 (5 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/Avalonia.Themes.Simple` | `src/FerroUI.Themes.Simple` | `ferroui-themes-simple` | 1/1 | 1/1 | 1/1 | 100.0% | 2 - xaml + themes | P2 |
-| [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/Avalonia.Browser` | `src/Browser/FerroUI.Browser` | `ferroui-browser` | 50/50 | 60/62 (2 waived) | 332/428 (90 waived) | 98.2% | 3 - browser | P2 |
+| [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/Avalonia.Browser` | `src/Browser/FerroUI.Browser` | `ferroui-browser` | 50/50 | 60/62 (2 waived) | 333/428 (93 waived) | 99.4% | 3 - browser | P2 |
 | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | `src/HarfBuzz/Avalonia.HarfBuzz` | `src/HarfBuzz/FerroUI.HarfBuzz` | `ferroui-harfbuzz` | 3/3 | 3/3 | 5/8 (3 waived) | 100.0% | 1 - rendering | P0 |
-| [Avalonia.Headless](tracking/Avalonia.Headless.md) | `src/Headless/Avalonia.Headless` | `src/Headless/FerroUI.Headless` | `ferroui-headless` | 8/8 | 18/20 (2 waived) | 223/235 (9 waived) | 98.7% | 1 - test infrastructure | P1 |
+| [Avalonia.Headless](tracking/Avalonia.Headless.md) | `src/Headless/Avalonia.Headless` | `src/Headless/FerroUI.Headless` | `ferroui-headless` | 8/8 | 18/20 (2 waived) | 223/235 (11 waived) | 99.6% | 1 - test infrastructure | P1 |
 | [Avalonia.Headless.NUnit](tracking/Avalonia.Headless.NUnit.md) | `src/Headless/Avalonia.Headless.NUnit` | `src/Headless/FerroUI.Headless.NUnit` | `ferroui-headless-nunit` | 0/0 | 0/0 | 0/0 | - | 1 - test infrastructure | P1 |
 | [Avalonia.Headless.Vnc](tracking/Avalonia.Headless.Vnc.md) | `src/Headless/Avalonia.Headless.Vnc` | `src/Headless/FerroUI.Headless.Vnc` | `ferroui-headless-vnc` | 0/0 | 0/0 | 0/0 | - | 1 - test infrastructure | P1 |
 | [Avalonia.Headless.XUnit](tracking/Avalonia.Headless.XUnit.md) | `src/Headless/Avalonia.Headless.XUnit` | `src/Headless/FerroUI.Headless.XUnit` | `ferroui-headless-xunit` | 0/0 | 0/0 | 0/0 | - | 1 - test infrastructure | P1 |
 | [Avalonia.Markup](tracking/Avalonia.Markup.md) | `src/Markup/Avalonia.Markup` | `src/Markup/FerroUI.Markup` | `ferroui-markup` | 7/7 | 7/37 (30 waived) | 12/67 (55 waived) | 100.0% | 2 - xaml + themes | P1 |
-| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/Avalonia.Markup.Xaml` | `src/Markup/FerroUI.Markup.Xaml` | `ferroui-markup-xaml` | 45/47 | 61/64 (3 waived) | 199/240 (41 waived) | 100.0% | 2 - xaml + themes | P1 |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/Avalonia.Markup.Xaml.Loader` | `src/Markup/FerroUI.Markup.Xaml.Loader` | `ferroui-markup-xaml-loader` | 65/66 | 119/126 (7 waived) | 398/505 (107 waived) | 100.0% | 2 - xaml + themes | P1 |
-| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/Avalonia.Skia` | `src/Skia/FerroUI.Skia` | `ferroui-skia` | 48/54 | 52/66 | 335/451 | 74.3% | 1 - rendering | P0 |
-| [Avalonia.Generators](tracking/Avalonia.Generators.md) | `src/tools/Avalonia.Generators` | `src/tools/FerroUI.Generators` | (merged into ferroui-build, see docs/porting/xaml.md) | 0/30 | 0/53 | 0/264 (2 waived) | 0.0% | 2 - xaml + themes | P2 |
+| [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/Avalonia.Markup.Xaml` | `src/Markup/FerroUI.Markup.Xaml` | `ferroui-markup-xaml` | 46/46 | 61/63 (2 waived) | 199/239 (40 waived) | 100.0% | 2 - xaml + themes | P1 |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/Avalonia.Markup.Xaml.Loader` | `src/Markup/FerroUI.Markup.Xaml.Loader` | `ferroui-markup-xaml-loader` | 66/66 | 120/126 (6 waived) | 400/505 (105 waived) | 100.0% | 2 - xaml + themes | P1 |
+| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/Avalonia.Skia` | `src/Skia/FerroUI.Skia` | `ferroui-skia` | 48/51 | 56/62 | 345/420 (32 waived) | 88.9% | 1 - rendering | P0 |
+| [Avalonia.Generators](tracking/Avalonia.Generators.md) | `src/tools/Avalonia.Generators` | `src/tools/FerroUI.Generators` | (merged into ferroui-build, see docs/porting/xaml.md) | 0/0 | 0/0 | 0/0 | - | 2 - xaml + themes | P2 |
 
 Non-C# files that belong to these projects:
 
@@ -140,7 +140,7 @@ Libraries.
 | `src/Avalonia.Fonts.Inter` | 3 | `src/FerroUI.Fonts.Inter` | workspace member | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) |
 | `src/Avalonia.FreeDesktop` | 18 | `src/FerroUI.FreeDesktop` | not created | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) (out of scope) |
 | `src/Avalonia.FreeDesktop.AtSpi` | 27 | `src/FerroUI.FreeDesktop.AtSpi` | not created | [Avalonia.FreeDesktop.AtSpi](tracking/Avalonia.FreeDesktop.AtSpi.md) (out of scope) |
-| `src/Avalonia.Metal` | 2 | `src/FerroUI.Metal` | not created | [Avalonia.Metal](tracking/Avalonia.Metal.md) |
+| `src/Avalonia.Metal` | 2 | `src/Skia/FerroUI.Skia/metal` | directory exists | [Avalonia.Metal](tracking/Avalonia.Metal.md) |
 | `src/Avalonia.MicroCom` | 1 | `src/FerroUI.MicroCom` | workspace member | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) |
 | `src/Avalonia.Native` | 49 | `src/FerroUI.Native` | workspace member | [Avalonia.Native](tracking/Avalonia.Native.md) |
 | `src/Avalonia.OpenGL` | 39 | `src/FerroUI.OpenGL` | workspace member | [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) |
@@ -331,7 +331,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-324 Rust source files have no upstream counterpart (0 without a recorded reason). They are listed at the end of each project page.
+322 Rust source files have no upstream counterpart (0 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
@@ -651,8 +651,6 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/gpu/i_skia_gr_context.rs` | the backend-neutral GPU context of the Skia backend (the binding has separate Ganesh and Graphite context types, SkiaSharp has one `GRContext`) |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/gpu/metal/tests.rs` | the unit tests of the module |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/locked_framebuffer.rs` | a locked framebuffer described by plain values: the `Platform/LockedFramebuffer.cs` of Avalonia.Base, which the base crate cannot hold without unsafe code, for the surfaces of the backend |
-| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/metal/i_metal_device.rs` | port of the project Avalonia.Metal (`IMetalDevice.cs`, `IMetalExternalObjectsFeature.cs`) inside the Skia backend, its only user; the tracking of Avalonia.Metal looks in `src/FerroUI.Metal`, which does not exist, and reports the two files as missing |
-| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/metal/i_metal_external_objects_feature.rs` | port of the project Avalonia.Metal (`IMetalDevice.cs`, `IMetalExternalObjectsFeature.cs`) inside the Skia backend, its only user; the tracking of Avalonia.Metal looks in `src/FerroUI.Metal`, which does not exist, and reports the two files as missing |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/tests.rs` | the unit tests of the module |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/unit_tests/hit_testing.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/unit_tests/media/custom_font_manager_impl.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library |

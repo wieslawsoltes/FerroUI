@@ -12,7 +12,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 1 - test infrastructure / P1 |
 | Files | 8/8 (100.0%), 3 not applicable |
 | Types | 18/20 (2 waived) (100.0%) |
-| Members | 223/235 (9 waived) (98.7%) |
+| Members | 223/235 (11 waived) (99.6%) |
 | Contracts (interfaces) | 2/3 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -29,7 +29,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 8/8, types 18/20 (2 waived), members 223/235 (9 waived)
+### `(project root)` - files 8/8, types 18/20 (2 waived), members 223/235 (11 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -39,9 +39,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `HeadlessPlatformStubs.cs` | `headless_platform_stubs.rs` | present | 7/8 (1 waived) | 35/36 (1 waived) |  |
 | `HeadlessRenderTimer.cs` | `headless_render_timer.rs` | present | 1/1 | 4/4 |  |
 | `HeadlessUnitTestIsolationAttribute.cs` | - | n/a | - | - | not-applicable: assembly attributes that tell the xUnit and NUnit integrations which application to build and how to isolate the tests of an assembly: there are no assembly attributes and no test framework integration; a test sets up its application with `AppBuilder` and `use_headless` (the `PerTest` isolation), as `tests.rs` of the crate does |
-| `HeadlessUnitTestSession.cs` | - | n/a | - | - | not-applicable: not ported for now: the session of the xUnit and NUnit integrations, which runs the tests of an assembly on a dispatcher thread of its own and finds the application through reflection (the assembly attribute, a `BuildAvaloniaApp` method); the test harness of cargo runs a test on a thread of its own, where the test sets up its application. A session that shares one application between tests (the `PerAssembly` isolation) has no counterpart and is an open decision |
+| `HeadlessUnitTestSession.cs` | - | n/a | - | - | not-applicable: not ported for now: the session of the xUnit and NUnit integrations, which runs the tests of an assembly on a dispatcher thread of its own and finds the application through reflection (the assembly attribute, a `BuildAvaloniaApp` method); the test harness of cargo runs a test on a thread of its own, where the test sets up its application. Applicable if the owner decides that tests of a crate share one application (the `PerAssembly` isolation, which has no counterpart today): the session is then the object that owns the dispatcher thread and runs each test on it |
 | `HeadlessWindowExtensions.cs` | `headless_window_extensions.rs` | present | 1/1 | 16/16 |  |
-| `HeadlessWindowImpl.cs` | `headless_window_impl.rs` | partial | 1/1 | 78/84 (4 waived) |  |
+| `HeadlessWindowImpl.cs` | `headless_window_impl.rs` | present | 1/1 | 78/84 (6 waived) |  |
 | `IHeadlessTouchPointer.cs` | `i_headless_touch_pointer.rs` | present | 1/1 | 0/0 |  |
 | `IHeadlessWindow.cs` | `i_headless_window.rs` | present | 1/1 | 11/11 |  |
 
@@ -52,18 +52,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 - `HeadlessPlatformRenderInterface.HeadlessGlyphRunStub` (class): 1 missing
   - `GlyphTypeface GlyphTypeface { get; }`
 - `HeadlessPlatformRenderInterface.IHeadlessGeometryWithEdges` (interface): waived - interface with default members, tested with `is`: the free functions `edge_points_of` (the test and `Points`), `projection_on_axis` and `get_axes` of `headless_platform_render_interface.rs`
-
-</details>
-
-<details><summary><code>HeadlessWindowImpl.cs</code> - 2 missing</summary>
-
-- `HeadlessWindowImpl` (class): 2 missing
-  - `ILockedFramebuffer Lock()`
-  - `IFramebufferRenderTarget CreateFramebufferRenderTarget()`
-  - waived (empty public method that is not a member of the window interface any more and that nothing calls): `SetSystemDecorations`
-  - waived (the public setter of the auto-property is only used by the class itself: the field `client_size`, set by `do_resize`): `ClientSize`
-  - waived (the public setter of the auto-property is only used by the class itself: the field `position`, set by `move_` and by the popup positioner): `Position`
-  - waived (the public setter of the auto-property is only used by the class itself: the field `transparency_level`, set by `set_transparency_level_hint`): `TransparencyLevel`
 
 </details>
 

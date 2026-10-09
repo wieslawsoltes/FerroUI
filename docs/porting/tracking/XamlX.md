@@ -10,10 +10,10 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `external/XamlX/src/XamlX` (exists) |
 | Crate | `xamlx` |
 | Phase / priority | 2 - xaml + themes / P1 |
-| Files | 61/61 (100.0%), 27 not applicable |
-| Types | 171/174 (3 waived) (100.0%) |
-| Members | 706/857 (151 waived) (100.0%) |
-| Contracts (interfaces) | 46/47 |
+| Files | 62/62 (100.0%), 26 not applicable |
+| Types | 172/177 (5 waived) (100.0%) |
+| Members | 713/878 (165 waived) (100.0%) |
+| Contracts (interfaces) | 47/48 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
@@ -53,7 +53,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `XamlX.IL.Emitters.IXamlDynamicSetterContainerProvider` | public | `IL/Emitters/XamlDynamicSetterContainerProvider.cs` | 0/1 | n/a |
 | `XamlX.IL.IXamlAstILEmitableNode` | public | `IL/XamlIlCompiler.cs` | 0/0 | n/a |
 | `XamlX.IL.IXamlILAstNodeEmitter` | public | `IL/XamlIlCompiler.cs` | 0/0 | n/a |
-| `XamlX.IL.IXamlILContextDefinition<TBackendEmitter>` | public | `IL/RuntimeContext.cs` | 0/7 | n/a |
+| `XamlX.IL.IXamlILContextDefinition<TBackendEmitter>` | public | `IL/RuntimeContext.cs` | 7/7 | present |
 | `XamlX.IL.IXamlILEmitter` | public | `IL/IXamlILEmitter.cs` | 0/18 | n/a |
 | `XamlX.IL.IXamlILLocal` | public | `IL/IXamlILLocal.cs` | 0/1 | n/a |
 | `XamlX.Transform.IXamlAstTransformer` | public | `Transform/IXamlAstTransformer.cs` | 1/1 | present |
@@ -140,7 +140,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `TypeExtensions.cs` | - | n/a | - | - | not-applicable: .NET polyfills (docs/porting/xaml.md 6.1) |
 
-### `IL` - files 0/0, types 0/0, members 0/0
+### `IL` - files 1/1, types 1/3 (2 waived), members 7/21 (14 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -151,7 +151,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IXamlILLocal.cs` | - | n/a | - | - | not-applicable: IL backend: replaced by the Rust emitter and interpreter backends, runtime context becomes plain runtime structs (docs/porting/xaml.md 1.2) |
 | `NamespaceInfoProvider.cs` | - | n/a | - | - | not-applicable: IL backend: replaced by the Rust emitter and interpreter backends, runtime context becomes plain runtime structs (docs/porting/xaml.md 1.2) |
 | `RecordingIlEmitter.cs` | - | n/a | - | - | not-applicable: IL backend: replaced by the Rust emitter and interpreter backends, runtime context becomes plain runtime structs (docs/porting/xaml.md 1.2) |
-| `RuntimeContext.cs` | - | n/a | - | - | not-applicable: IL backend: replaced by the Rust emitter and interpreter backends, runtime context becomes plain runtime structs (docs/porting/xaml.md 1.2) |
+| `RuntimeContext.cs` | `emit/xaml_language_emit_mappings.rs` | present | 1/3 (2 waived) | 7/21 (14 waived) | replaced: the run-time context of a document. The interface `IXamlILContextDefinition` is ported, as a trait of `emit/xaml_language_emit_mappings.rs`, because the emit mappings refer to it. The class the IL back end generates for every document (`XamlILContextDefinition`, with its fields, `GetService` and the parent stack) is written once as `XamlIlContext` and `XamlIlContextDefinition` of `src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_context.rs`, which the interpreter and the generated Rust source both create (docs/porting/xaml.md 1.2; 9.12, ruling 7). `RuntimeContext`, the factory that emits the IL which constructs it, has no counterpart |
 | `SreTypeSystem.cs` | - | n/a | - | - | not-applicable: IL backend: replaced by the Rust emitter and interpreter backends, runtime context becomes plain runtime structs (docs/porting/xaml.md 1.2) |
 | `XamlILEmitterExtensions.cs` | - | n/a | - | - | not-applicable: IL backend: replaced by the Rust emitter and interpreter backends, runtime context becomes plain runtime structs (docs/porting/xaml.md 1.2) |
 | `XamlIlCompiler.cs` | - | n/a | - | - | not-applicable: IL backend: replaced by the Rust emitter and interpreter backends, runtime context becomes plain runtime structs (docs/porting/xaml.md 1.2) |

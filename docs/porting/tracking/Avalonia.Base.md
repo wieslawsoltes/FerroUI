@@ -11,8 +11,8 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Crate | `ferroui-base` |
 | Phase / priority | 0 - core / P0 |
 | Files | 1248/1248 (100.0%), 51 not applicable |
-| Types | 1520/1659 (136 waived) (99.8%) |
-| Members | 10271/11433 (1115 waived) (99.5%) |
+| Types | 1523/1659 (136 waived) (100.0%) |
+| Members | 10280/11433 (1153 waived) (100.0%) |
 | Contracts (interfaces) | 247/260 |
 | Property registrations | 224/239 |
 | Routed events | 41/41 |
@@ -216,7 +216,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Platform.Storage.IStorageFile` | public | `Platform/Storage/IStorageFile.cs` | 2/2 | present |
 | `Avalonia.Platform.Storage.IStorageFolder` | public | `Platform/Storage/IStorageFolder.cs` | 5/5 | present |
 | `Avalonia.Platform.Storage.IStorageItem` | public | `Platform/Storage/IStorageItem.cs` | 8/8 | present |
-| `Avalonia.Platform.Storage.IStorageItemWithFileSystemInfo` | internal | `Platform/Storage/IStorageBookmarkItem.cs` | 0/1 | partial |
+| `Avalonia.Platform.Storage.IStorageItemWithFileSystemInfo` | internal | `Platform/Storage/IStorageBookmarkItem.cs` | 0/1 (1 waived) | present |
 | `Avalonia.Platform.Storage.IStorageProvider` | public | `Platform/Storage/IStorageProvider.cs` | 13/13 | present |
 | `Avalonia.Platform.Surfaces.IFramebufferPlatformSurface` | public | `Platform/Surfaces/IFramebufferPlatformSurface.cs` | 1/1 | present |
 | `Avalonia.Platform.Surfaces.IFramebufferRenderTarget` | public | `Platform/Surfaces/IFramebufferPlatformSurface.cs` | 2/2 | present |
@@ -1194,68 +1194,33 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ScriptListTable.cs` | `media/fonts/tables/script_list_table.rs` | present | 1/1 | 1/1 |  |
 | `VerticalHeaderTable.cs` | `media/fonts/tables/vertical_header_table.rs` | present | 1/1 | 16/16 |  |
 
-### `Media/Fonts/Tables/Cmap` - files 10/10, types 10/10, members 83/86
+### `Media/Fonts/Tables/Cmap` - files 10/10, types 10/10, members 83/86 (3 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `CharacterToGlyphMap.cs` | `media/fonts/tables/cmap/character_to_glyph_map.rs` | partial | 1/1 | 9/10 |  |
+| `CharacterToGlyphMap.cs` | `media/fonts/tables/cmap/character_to_glyph_map.rs` | present | 1/1 | 9/10 (1 waived) |  |
 | `CharacterToGlyphMapDictionary.cs` | `media/fonts/tables/cmap/character_to_glyph_map_dictionary.rs` | present | 1/1 | 9/9 |  |
 | `CmapEncoding.cs` | `media/fonts/tables/cmap/cmap_encoding.rs` | present | 1/1 | 22/22 |  |
 | `CmapFormat.cs` | `media/fonts/tables/cmap/cmap_format.rs` | present | 1/1 | 9/9 |  |
-| `CmapFormat12Or13Table.cs` | `media/fonts/tables/cmap/cmap_format12_or13_table.rs` | partial | 1/1 | 8/9 |  |
-| `CmapFormat4Table.cs` | `media/fonts/tables/cmap/cmap_format4_table.rs` | partial | 1/1 | 7/8 |  |
+| `CmapFormat12Or13Table.cs` | `media/fonts/tables/cmap/cmap_format12_or13_table.rs` | present | 1/1 | 8/9 (1 waived) |  |
+| `CmapFormat4Table.cs` | `media/fonts/tables/cmap/cmap_format4_table.rs` | present | 1/1 | 7/8 (1 waived) |  |
 | `CmapSubtableEntry.cs` | `media/fonts/tables/cmap/cmap_subtable_entry.rs` | present | 1/1 | 6/6 |  |
 | `CmapTable.cs` | `media/fonts/tables/cmap/cmap_table.rs` | present | 1/1 | 3/3 |  |
 | `CodepointRange.cs` | `media/fonts/tables/cmap/codepoint_range.rs` | present | 1/1 | 7/7 |  |
 | `CodepointRangeEnumerator.cs` | `media/fonts/tables/cmap/codepoint_range_enumerator.rs` | present | 1/1 | 3/3 |  |
 
-<details><summary><code>CharacterToGlyphMap.cs</code> - 1 missing</summary>
-
-- `CharacterToGlyphMap` (struct): 1 missing
-  - `ushort this[int codePoint] { get; }`
-
-</details>
-
-<details><summary><code>CmapFormat12Or13Table.cs</code> - 1 missing</summary>
-
-- `CmapFormat12Or13Table` (class): 1 missing
-  - `ushort this[int codePoint] { get; }`
-
-</details>
-
-<details><summary><code>CmapFormat4Table.cs</code> - 1 missing</summary>
-
-- `CmapFormat4Table` (class): 1 missing
-  - `ushort this[int codePoint] { get; }`
-
-</details>
-
-### `Media/Fonts/Tables/Glyf` - files 8/8, types 8/8, members 59/61
+### `Media/Fonts/Tables/Glyf` - files 8/8, types 8/8, members 59/61 (2 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `CompositeFlags.cs` | `media/fonts/tables/glyf/composite_flags.rs` | present | 1/1 | 13/13 |  |
-| `CompositeGlyph.cs` | `media/fonts/tables/glyf/composite_glyph.rs` | partial | 1/1 | 4/5 |  |
+| `CompositeGlyph.cs` | `media/fonts/tables/glyf/composite_glyph.rs` | present | 1/1 | 4/5 (1 waived) |  |
 | `GlyfTable.cs` | `media/fonts/tables/glyf/glyf_table.rs` | present | 1/1 | 8/8 |  |
 | `GlyphComponent.cs` | `media/fonts/tables/glyf/glyph_component.rs` | present | 1/1 | 9/9 |  |
 | `GlyphDecycler.cs` | `media/fonts/tables/glyf/glyph_decycler.rs` | present | 1/1 | 4/4 |  |
 | `GlyphDescriptor.cs` | `media/fonts/tables/glyf/glyph_descriptor.rs` | present | 1/1 | 6/6 |  |
 | `GlyphFlag.cs` | `media/fonts/tables/glyf/glyph_flag.rs` | present | 1/1 | 9/9 |  |
-| `SimpleGlyph.cs` | `media/fonts/tables/glyf/simple_glyph.rs` | partial | 1/1 | 6/7 |  |
-
-<details><summary><code>CompositeGlyph.cs</code> - 1 missing</summary>
-
-- `CompositeGlyph` (struct): 1 missing
-  - `void Dispose()`
-
-</details>
-
-<details><summary><code>SimpleGlyph.cs</code> - 1 missing</summary>
-
-- `SimpleGlyph` (struct): 1 missing
-  - `void Dispose()`
-
-</details>
+| `SimpleGlyph.cs` | `media/fonts/tables/glyf/simple_glyph.rs` | present | 1/1 | 6/7 (1 waived) |  |
 
 ### `Media/Fonts/Tables/Metrics` - files 4/4, types 4/4, members 21/21
 
@@ -1501,7 +1466,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `Utf8Buffer.cs` | - | n/a | - | - | not-applicable: a SafeHandle over a pinned, null-terminated UTF-8 copy of a string for P/Invoke: `std::ffi::CString` in the crates that call native code |
 
-### `Platform/Storage` - files 19/19, types 22/24, members 95/101
+### `Platform/Storage` - files 19/19, types 24/24, members 99/101 (2 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1511,8 +1476,8 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `FilePickerOpenOptions.cs` | `platform/storage/file_picker_open_options.rs` | present | 1/1 | 3/3 |  |
 | `FilePickerSaveOptions.cs` | `platform/storage/file_picker_save_options.rs` | present | 1/1 | 4/4 |  |
 | `FolderPickerOpenOptions.cs` | `platform/storage/folder_picker_open_options.rs` | present | 1/1 | 1/1 |  |
-| `ILauncher.cs` | `platform/storage/i_launcher.rs` | partial | 2/3 | 4/6 |  |
-| `IStorageBookmarkItem.cs` | `platform/storage/i_storage_bookmark_item.rs` | partial | 4/4 | 1/2 |  |
+| `ILauncher.cs` | `platform/storage/i_launcher.rs` | present | 3/3 | 6/6 | merged: the extension methods of `LauncherExtensions` are inherent functions of the trait object (`impl dyn ILauncher`: `launch_file_info_async`, `launch_directory_info_async`) in the file of the trait |
+| `IStorageBookmarkItem.cs` | `platform/storage/i_storage_bookmark_item.rs` | present | 4/4 | 1/2 (1 waived) |  |
 | `IStorageFile.cs` | `platform/storage/i_storage_file.rs` | present | 1/1 | 2/2 |  |
 | `IStorageFolder.cs` | `platform/storage/i_storage_folder.rs` | present | 1/1 | 5/5 |  |
 | `IStorageItem.cs` | `platform/storage/i_storage_item.rs` | present | 1/1 | 8/8 |  |
@@ -1522,100 +1487,28 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PickerOptions.cs` | `platform/storage/picker_options.rs` | present | 1/1 | 3/3 |  |
 | `SaveFilePickerResult.cs` | `platform/storage/save_file_picker_result.rs` | present | 1/1 | 2/2 |  |
 | `StorageItemProperties.cs` | `platform/storage/storage_item_properties.rs` | present | 1/1 | 4/4 |  |
-| `StorageProviderExtensions.cs` | `platform/storage/storage_provider_extensions.rs` | partial | 0/1 | 0/3 |  |
+| `StorageProviderExtensions.cs` | `platform/storage/storage_provider_extensions.rs` | present | 1/1 | 2/3 (1 waived) | merged: the extension methods are inherent functions of the trait objects in `storage_provider_extensions.rs`: `impl dyn IStorageProvider` (`try_get_file_from_path_str_async`, `try_get_folder_from_path_str_async`) and `impl dyn IStorageItem` (`try_get_local_path`) |
 | `WellKnownFolder.cs` | `platform/storage/well_known_folder.rs` | present | 1/1 | 6/6 |  |
 
-<details><summary><code>ILauncher.cs</code> - 3 missing</summary>
-
-- `LauncherExtensions` (class, public): **type missing** (2 members)
-
-</details>
-
-<details><summary><code>IStorageBookmarkItem.cs</code> - 1 missing</summary>
-
-- `IStorageItemWithFileSystemInfo` (interface): 1 missing
-  - `FileSystemInfo FileSystemInfo { get; }`
-
-</details>
-
-<details><summary><code>StorageProviderExtensions.cs</code> - 4 missing</summary>
-
-- `StorageProviderExtensions` (class, public): **type missing** (3 members)
-
-</details>
-
-### `Platform/Storage/FileIO` - files 8/8, types 9/9, members 66/93
+### `Platform/Storage/FileIO` - files 8/8, types 9/9, members 71/93 (22 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `BclLauncher.cs` | `platform/storage/file_io/bcl_launcher.rs` | present | 1/1 | 3/3 |  |
 | `BclStorageFile.cs` | `platform/storage/file_io/bcl_storage_file.rs` | present | 1/1 | 3/3 |  |
 | `BclStorageFolder.cs` | `platform/storage/file_io/bcl_storage_folder.rs` | present | 1/1 | 6/6 |  |
-| `BclStorageItem.cs` | `platform/storage/file_io/bcl_storage_item.rs` | partial | 1/1 | 18/25 |  |
-| `BclStorageProvider.cs` | `platform/storage/file_io/bcl_storage_provider.rs` | partial | 1/1 | 13/15 |  |
-| `SecurityScopedStream.cs` | `platform/storage/file_io/security_scoped_stream.rs` | partial | 1/1 | 10/28 |  |
+| `BclStorageItem.cs` | `platform/storage/file_io/bcl_storage_item.rs` | present | 1/1 | 23/25 (2 waived) |  |
+| `BclStorageProvider.cs` | `platform/storage/file_io/bcl_storage_provider.rs` | present | 1/1 | 13/15 (2 waived) |  |
+| `SecurityScopedStream.cs` | `platform/storage/file_io/security_scoped_stream.rs` | present | 1/1 | 10/28 (18 waived) |  |
 | `StorageBookmarkHelper.cs` | `platform/storage/file_io/storage_bookmark_helper.rs` | present | 2/2 | 8/8 |  |
 | `StorageProviderHelpers.cs` | `platform/storage/file_io/storage_provider_helpers.rs` | present | 1/1 | 5/5 |  |
 
-<details><summary><code>BclStorageItem.cs</code> - 7 missing</summary>
-
-- `BclStorageItem` (class): 7 missing
-  - `Task<StorageItemProperties> GetBasicPropertiesAsync()`
-  - `Task<IStorageFolder?> GetParentAsync()`
-  - `Task DeleteAsync()`
-  - `Task<IStorageItem?> MoveAsync(IStorageFolder destination)`
-  - `Task<string?> SaveBookmarkAsync()`
-  - `Task ReleaseBookmarkAsync()`
-  - `void Dispose()`
-
-</details>
-
-<details><summary><code>BclStorageProvider.cs</code> - 2 missing</summary>
-
-- `BclStorageProvider` (class): 2 missing
-  - `async Task<IReadOnlyList<IStorageFile>> OpenFilePickerAsync(FilePickerOpenOptions options)`
-  - `async Task<IStorageFile?> SaveFilePickerAsync(FilePickerSaveOptions options)`
-
-</details>
-
-<details><summary><code>SecurityScopedStream.cs</code> - 18 missing</summary>
-
-- `SecurityScopedStream` (class): 18 missing
-  - `override bool CanRead { get; }`
-  - `override bool CanSeek { get; }`
-  - `override bool CanWrite { get; }`
-  - `override long Position { get; set; }`
-  - `override Task FlushAsync(CancellationToken cancellationToken)`
-  - `override int ReadByte()`
-  - `override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)`
-  - `override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)`
-  - `override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)`
-  - `override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)`
-  - `override void WriteByte(byte value)`
-  - `override void CopyTo(Stream destination, int bufferSize)`
-  - `override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)`
-  - `override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)`
-  - `override int EndRead(IAsyncResult asyncResult)`
-  - `override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)`
-  - `override void EndWrite(IAsyncResult asyncResult)`
-  - `override async ValueTask DisposeAsync()`
-
-</details>
-
-### `Platform/Surfaces` - files 2/2, types 6/7, members 11/12
+### `Platform/Surfaces` - files 2/2, types 7/7, members 11/12 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `IFramebufferPlatformSurface.cs` | `platform/surfaces/i_framebuffer_platform_surface.rs` | partial | 4/5 | 9/10 |  |
+| `IFramebufferPlatformSurface.cs` | `platform/surfaces/i_framebuffer_platform_surface.rs` | present | 5/5 | 9/10 (1 waived) | renamed: the nested delegate `FuncFramebufferRenderTarget.LockFramebufferDelegate` is the type alias `LockFramebuffer` of the file: a closure that returns the framebuffer with its properties, since Rust has no `out` parameter |
 | `IPlatformRenderSurface.cs` | `platform/surfaces/i_platform_render_surface.rs` | present | 2/2 | 2/2 |  |
-
-<details><summary><code>IFramebufferPlatformSurface.cs</code> - 2 missing</summary>
-
-- `FuncFramebufferRenderTarget` (class): 1 missing
-  - `FuncFramebufferRenderTarget(LockFramebufferDelegate lockFramebuffer, bool retainsFrameContents = false)` *(1 of 2 constructors found)*
-- `FuncFramebufferRenderTarget.LockFramebufferDelegate` (delegate, public): **type missing** (0 members)
-
-</details>
 
 ### `Properties` - files 0/0, types 0/0, members 0/0
 
@@ -1702,7 +1595,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `UiThreadRenderTimer.cs` | `rendering/ui_thread_render_timer.rs` | present | 1/1 | 3/3 |  |
 | `ZIndexComparer.cs` | `rendering/z_index_comparer.rs` | present | 1/1 | 1/3 (2 waived) |  |
 
-### `Rendering/Composition` - files 26/26, types 41/41, members 250/274 (18 waived)
+### `Rendering/Composition` - files 26/26, types 41/41, members 250/274 (24 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1714,7 +1607,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `CompositionExperimentalAcrylicVisual.cs` | `rendering/composition/composition_experimental_acrylic_visual.rs` | present | 1/1 | 1/1 |  |
 | `CompositionExternalMemory.cs` | `rendering/composition/composition_external_memory.rs` | present | 8/8 | 17/17 |  |
 | `CompositionGradientStop.cs` | `rendering/composition/composition_gradient_stop.rs` | present | 1/1 | 1/1 |  |
-| `CompositionInterop.cs` | `rendering/composition/composition_interop.rs` | partial | 4/4 | 25/31 |  |
+| `CompositionInterop.cs` | `rendering/composition/composition_interop.rs` | present | 4/4 | 25/31 (6 waived) |  |
 | `CompositionObject.cs` | `rendering/composition/composition_object.rs` | present | 1/1 | 11/17 (6 waived) |  |
 | `CompositionOptions.cs` | `rendering/composition/composition_options.rs` | present | 1/1 | 4/4 |  |
 | `CompositionPropertySet.cs` | `rendering/composition/composition_property_set.rs` | present | 2/2 | 27/27 |  |
@@ -1732,20 +1625,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `MatrixUtils.cs` | `rendering/composition/matrix_utils.rs` | present | 1/1 | 3/3 |  |
 | `Visual.cs` | `rendering/composition/visual.rs` | present | 1/1 | 7/8 (1 waived) |  |
 | `VisualCollection.cs` | `rendering/composition/visual_collection.rs` | present | 1/1 | 6/6 |  |
-
-<details><summary><code>CompositionInterop.cs</code> - 6 missing</summary>
-
-- `CompositionGpuImportedObjectBase` (class): 2 missing
-  - `IPlatformRenderInterfaceContext Context { get; }`
-  - `IExternalObjectsRenderInterfaceContextFeature Feature { get; }`
-- `CompositionImportedGpuImage` (class): 2 missing
-  - `IPlatformRenderInterfaceImportedImage Image { get; }`
-  - `bool IsUsable { get; }`
-- `CompositionImportedGpuSemaphore` (class): 2 missing
-  - `IPlatformRenderInterfaceImportedSemaphore Semaphore { get; }`
-  - `bool IsUsable { get; }`
-
-</details>
 
 ### `Rendering/Composition/Animations` - files 13/13, types 32/32, members 115/137 (22 waived)
 
@@ -1775,7 +1654,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ServerSimpleContentBrush.cs` | `rendering/composition/brushes/server_simple_content_brush.rs` | present | 0/1 (1 waived) | 0/4 (4 waived) |  |
 | `ServerSimpleImageBrush.cs` | `rendering/composition/brushes/server_simple_image_brush.rs` | present | 0/1 (1 waived) | 0/5 (5 waived) |  |
 
-### `Rendering/Composition/Drawing` - files 21/21, types 44/45 (1 waived), members 280/302 (20 waived)
+### `Rendering/Composition/Drawing` - files 21/21, types 44/45 (1 waived), members 280/302 (22 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1792,7 +1671,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `RenderDataReader.cs` | `rendering/composition/drawing/render_data_reader.rs` | present | 1/1 | 7/7 |  |
 | `RenderDataResources.cs` | `rendering/composition/drawing/render_data_resources.rs` | present | 1/1 | 6/6 |  |
 | `RenderDataStream.Bounds.cs` | `rendering/composition/drawing/render_data_stream_bounds.rs` | present | 3/3 | 23/23 |  |
-| `RenderDataStream.HitTest.cs` | `rendering/composition/drawing/render_data_stream_hit_test.rs` | partial | 3/3 | 28/30 |  |
+| `RenderDataStream.HitTest.cs` | `rendering/composition/drawing/render_data_stream_hit_test.rs` | present | 3/3 | 28/30 (2 waived) |  |
 | `RenderDataStream.Replay.cs` | `rendering/composition/drawing/render_data_stream_replay.rs` | present | 3/3 | 22/22 |  |
 | `RenderDataStream.Visit.cs` | `rendering/composition/drawing/render_data_stream.rs` | present | 1/1 | 1/1 | partial merged into main file |
 | `RenderDataStream.cs` | `rendering/composition/drawing/render_data_stream.rs` | present | 1/1 | 26/26 |  |
@@ -1800,14 +1679,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ServerCompositionRenderData.cs` | `rendering/composition/drawing/server_composition_render_data.rs` | present | 1/1 | 8/8 |  |
 | `ServerCompositionSimplePen.cs` | `rendering/composition/drawing/server_composition_simple_pen.rs` | present | 1/1 | 2/2 |  |
 | `ServerResourceHelperExtensions.cs` | `rendering/composition/drawing/server_resource_helper_extensions.rs` | present | 0/1 (1 waived) | 0/4 (4 waived) |  |
-
-<details><summary><code>RenderDataStream.HitTest.cs</code> - 2 missing</summary>
-
-- `RenderDataStream.HitTestVisitor` (struct): 2 missing
-  - `HitTestVisitor(Geometry geometry)` *(1 of 3 constructors found)*
-  - `HitTestVisitor(Point point)` *(1 of 3 constructors found)*
-
-</details>
 
 ### `Rendering/Composition/Expressions` - files 9/9, types 25/26 (1 waived), members 162/210 (48 waived)
 

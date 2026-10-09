@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Markup/FerroUI.Markup.Xaml` (exists) |
 | Crate | `ferroui-markup-xaml` |
 | Phase / priority | 2 - xaml + themes / P1 |
-| Files | 45/47 (95.7%), 1 not applicable |
-| Types | 61/64 (3 waived) (100.0%) |
-| Members | 199/240 (41 waived) (100.0%) |
+| Files | 46/46 (100.0%), 2 not applicable |
+| Types | 61/63 (2 waived) (100.0%) |
+| Members | 199/239 (40 waived) (100.0%) |
 | Contracts (interfaces) | 9/9 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -94,17 +94,17 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PropertyInfoAccessorFactory.cs` | `markup_extensions/compiled_bindings/property_info_accessor_factory.rs` | present | 3/4 (1 waived) | 11/24 (13 waived) |  |
 | `TaskStreamPlugin.cs` | `markup_extensions/compiled_bindings/task_stream_plugin.rs` | present | 1/1 | 2/2 |  |
 
-### `Parsers` - files 0/1, types 0/1 (1 waived), members 0/2 (2 waived)
+### `Parsers` - files 1/1, types 0/1 (1 waived), members 0/2 (2 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `PropertyParser.cs` | `parsers/property_parser.rs` | missing | 0/1 (1 waived) | 0/2 (2 waived) |  |
+| `PropertyParser.cs` | `parsers/mod.rs` | present | 0/1 (1 waived) | 0/2 (2 waived) | renamed: the port is `src/Markup/FerroUI.Markup/markup/parsers/property_parser.rs`, in the crate of the grammars: the compiler extensions use the parser too and must not depend on the markup runtime. `parsers/mod.rs` of this crate re-exports `PropertyParser` and `PropertyReference` from there, which is all the tracking can name inside the crate |
 
-### `PortableXaml` - files 0/1, types 0/1 (1 waived), members 0/1 (1 waived)
+### `PortableXaml` - files 0/0, types 0/0, members 0/0
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaResourceXamlInfo.cs` | `portable_xaml/ferro_resource_xaml_info.rs` | missing | 0/1 (1 waived) | 0/1 (1 waived) |  |
+| `AvaloniaResourceXamlInfo.cs` | - | n/a | - | - | not-applicable: the serialised index from class to resource path that the resources task of upstream packs into an assembly (`!AvaloniaResourceXamlInfo`): dropped by docs/porting/xaml.md 6.3. The document of a class is registered with the class (`FerroRuntimeXamlLoader::class_document`) or compiled, and then listed in the `.xamlmeta` of its crate |
 
 ### `Properties` - files 0/0, types 0/0, members 0/0
 
