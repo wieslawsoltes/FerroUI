@@ -399,7 +399,7 @@ name = "ferroui-themes-fluent"
 version = "0.1.0"
 dependencies = [
  "ferroui-base",
- "ferroui-build-scan",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-dialogs",
  "ferroui-markup-xaml",
