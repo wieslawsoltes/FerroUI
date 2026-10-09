@@ -33,6 +33,9 @@ mod support_bindings;
 mod converters;
 
 #[cfg(test)]
+mod selector_tests_property_equals;
+
+#[cfg(test)]
 mod setter_tests;
 
 #[cfg(test)]
