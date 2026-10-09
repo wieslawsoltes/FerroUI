@@ -11,10 +11,18 @@
 
 use crate::Backend;
 use ferroui_base::media::effects::{ImmutableBlurEffect, ImmutableDropShadowEffect};
-use ferroui_base::media::immutable::ImmutableSolidColorBrush;
-use ferroui_base::media::{BoxShadow, BoxShadows, Color, Colors};
+use ferroui_base::media::immutable::{ImmutableImageBrush, ImmutablePen, ImmutableSolidColorBrush, ImmutableTransform};
+use ferroui_base::media::{
+    AcrylicBackgroundSource, AlignmentX, AlignmentY, BoxShadow, BoxShadows, Color, Colors, IBrush,
+    IExperimentalAcrylicMaterial, IImmutableBrush, ISceneBrush, ISceneBrushContent, ITileBrush, ITransform,
+    ImmutableSceneBrush, Stretch, TileMode,
+};
 use ferroui_base::platform::IDrawingContextImpl;
-use ferroui_base::{Matrix, PixelSize, Rect, RoundedRect, Vector};
+use ferroui_base::{
+    Matrix, PixelSize, Point, Rect, RelativePoint, RelativeRect, RelativeUnit, RoundedRect, Vector,
+};
+use std::any::Any;
+use std::rc::Rc;
 
 /// The size of every scene in pixels.
 pub const SCENE_SIZE: PixelSize = PixelSize::new(200, 200);
@@ -222,6 +230,292 @@ fn effect_drop_shadow_transformed(_: &Backend, context: &mut dyn IDrawingContext
     context.pop_clip();
 }
 
+/// A brush that paints a scene: an ellipse, a rounded rectangle and a line
+/// in 60 by 40 units, as the content of a visual brush or a drawing brush.
+struct SceneBrush {
+    parameters: Rc<ImmutableSceneBrush>,
+    scalable: bool,
+}
+
+/// The content of a [`SceneBrush`].
+struct SceneBrushContent {
+    parameters: Rc<ImmutableSceneBrush>,
+    scalable: bool,
+}
+
+macro_rules! brush_members {
+    () => {
+        fn opacity(&self) -> f64 {
+            self.parameters.opacity()
+        }
+        fn transform(&self) -> Option<Rc<dyn ITransform>> {
+            self.parameters.transform()
+        }
+        fn transform_origin(&self) -> RelativePoint {
+            self.parameters.transform_origin()
+        }
+        fn relative_transform(&self) -> Option<Rc<dyn ITransform>> {
+            None
+        }
+        fn as_any(&self) -> &dyn Any {
+            self
+        }
+    };
+}
+
+impl IBrush for SceneBrush {
+    brush_members!();
+
+    fn as_tile_brush(&self) -> Option<&dyn ITileBrush> {
+        Some(self)
+    }
+    fn as_scene_brush(&self) -> Option<&dyn ISceneBrush> {
+        Some(self)
+    }
+}
+
+impl IImmutableBrush for SceneBrush {}
+
+impl ITileBrush for SceneBrush {
+    fn alignment_x(&self) -> AlignmentX {
+        self.parameters.alignment_x()
+    }
+    fn alignment_y(&self) -> AlignmentY {
+        self.parameters.alignment_y()
+    }
+    fn destination_rect(&self) -> RelativeRect {
+        self.parameters.destination_rect()
+    }
+    fn source_rect(&self) -> RelativeRect {
+        self.parameters.source_rect()
+    }
+    fn stretch(&self) -> Stretch {
+        self.parameters.stretch()
+    }
+    fn tile_mode(&self) -> TileMode {
+        self.parameters.tile_mode()
+    }
+}
+
+impl ISceneBrush for SceneBrush {
+    fn create_content(&self) -> Option<Rc<dyn ISceneBrushContent>> {
+        Some(Rc::new(SceneBrushContent { parameters: self.parameters.clone(), scalable: self.scalable }))
+    }
+}
+
+impl IBrush for SceneBrushContent {
+    brush_members!();
+}
+
+impl IImmutableBrush for SceneBrushContent {}
+
+impl ISceneBrushContent for SceneBrushContent {
+    fn brush(&self) -> Rc<dyn ITileBrush> {
+        self.parameters.clone()
+    }
+    fn rect(&self) -> Rect {
+        Rect::new(0.0, 0.0, 60.0, 40.0)
+    }
+    fn render(&self, context: &mut dyn IDrawingContextImpl, transform: Option<Matrix>) {
+        if let Some(transform) = transform {
+            context.set_transform(transform);
+        }
+        context.draw_rectangle(Some(&solid(TEAL)), None, rounded(2.0, 2.0, 34.0, 36.0, 8.0), &no_shadows());
+        context.draw_ellipse(Some(&solid(ORANGE)), None, Rect::new(22.5, 6.5, 35.0, 27.0));
+        context.draw_line(
+            Some(&ImmutablePen::with_brush(Some(Rc::new(solid(NAVY))), 3.0)),
+            Point::new(4.0, 36.0),
+            Point::new(56.0, 4.0),
+        );
+    }
+    fn use_scalable_rasterization(&self) -> bool {
+        self.scalable
+    }
+    fn dispose(&self) {}
+}
+
+/// The parameters of a scene brush.
+struct SceneBrushSpec {
+    scalable: bool,
+    tile_mode: TileMode,
+    stretch: Stretch,
+    destination_rect: Option<RelativeRect>,
+    source_rect: Option<RelativeRect>,
+    alignment: (AlignmentX, AlignmentY),
+    opacity: f64,
+    transform: Option<Matrix>,
+}
+
+impl SceneBrushSpec {
+    /// A tile of 48 by 32 units that is repeated.
+    fn tiled(scalable: bool, tile_mode: TileMode) -> Self {
+        Self {
+            scalable,
+            tile_mode,
+            stretch: Stretch::Fill,
+            destination_rect: Some(RelativeRect::new(6.0, 4.0, 48.0, 32.0, RelativeUnit::Absolute)),
+            source_rect: None,
+            alignment: (AlignmentX::Center, AlignmentY::Center),
+            opacity: 1.0,
+            transform: None,
+        }
+    }
+
+    fn brush(self) -> SceneBrush {
+        let parameters = ImmutableImageBrush::new(
+            None,
+            self.alignment.0,
+            self.alignment.1,
+            self.destination_rect,
+            self.opacity,
+            self.transform.map(|transform| Rc::new(ImmutableTransform::new(transform))),
+            RelativePoint::default(),
+            self.source_rect,
+            self.stretch,
+            self.tile_mode,
+            None,
+        );
+
+        SceneBrush { parameters: Rc::new(ImmutableSceneBrush::new(&parameters)), scalable: self.scalable }
+    }
+}
+
+fn fill_with_scene_brush(context: &mut dyn IDrawingContextImpl, spec: SceneBrushSpec) {
+    background(context);
+    context.draw_rectangle(Some(&spec.brush()), None, rect(10.0, 10.0, 180.0, 180.0), &no_shadows());
+}
+
+fn scene_brush_single(_: &Backend, context: &mut dyn IDrawingContextImpl) {
+    fill_with_scene_brush(context, SceneBrushSpec::tiled(true, TileMode::None));
+}
+
+fn scene_brush_tile(_: &Backend, context: &mut dyn IDrawingContextImpl) {
+    fill_with_scene_brush(context, SceneBrushSpec::tiled(true, TileMode::Tile));
+}
+
+fn scene_brush_flip_x(_: &Backend, context: &mut dyn IDrawingContextImpl) {
+    fill_with_scene_brush(context, SceneBrushSpec::tiled(true, TileMode::FlipX));
+}
+
+fn scene_brush_flip_y(_: &Backend, context: &mut dyn IDrawingContextImpl) {
+    fill_with_scene_brush(context, SceneBrushSpec::tiled(true, TileMode::FlipY));
+}
+
+fn scene_brush_flip_xy(_: &Backend, context: &mut dyn IDrawingContextImpl) {
+    fill_with_scene_brush(context, SceneBrushSpec::tiled(true, TileMode::FlipXY));
+}
+
+/// The picture of the content at its own size as the tile.
+fn scene_brush_surface_single(_: &Backend, context: &mut dyn IDrawingContextImpl) {
+    fill_with_scene_brush(context, SceneBrushSpec::tiled(false, TileMode::None));
+}
+
+fn scene_brush_surface_tile(_: &Backend, context: &mut dyn IDrawingContextImpl) {
+    fill_with_scene_brush(context, SceneBrushSpec::tiled(false, TileMode::Tile));
+}
+
+fn scene_brush_surface_flip_xy(_: &Backend, context: &mut dyn IDrawingContextImpl) {
+    fill_with_scene_brush(context, SceneBrushSpec::tiled(false, TileMode::FlipXY));
+}
+
+/// The whole area as one tile, the content keeping its aspect ratio at the
+/// bottom right; then a part of the content, stretched.
+fn scene_brush_stretched(_: &Backend, context: &mut dyn IDrawingContextImpl) {
+    background(context);
+    let uniform = SceneBrushSpec {
+        stretch: Stretch::Uniform,
+        destination_rect: None,
+        alignment: (AlignmentX::Right, AlignmentY::Bottom),
+        ..SceneBrushSpec::tiled(true, TileMode::None)
+    };
+    context.draw_rectangle(Some(&uniform.brush()), None, rect(10.0, 10.0, 180.0, 90.0), &no_shadows());
+
+    let part = SceneBrushSpec {
+        destination_rect: None,
+        source_rect: Some(RelativeRect::new(0.25, 0.1, 0.5, 0.8, RelativeUnit::Relative)),
+        opacity: 0.7,
+        ..SceneBrushSpec::tiled(true, TileMode::None)
+    };
+    context.draw_ellipse(Some(&part.brush()), None, Rect::new(30.0, 105.0, 140.0, 85.0));
+}
+
+/// A tiled scene brush with a transform of its own, under a transform of
+/// the context, as the fill and the pen of a shape.
+fn scene_brush_transformed(_: &Backend, context: &mut dyn IDrawingContextImpl) {
+    background(context);
+    let fill = SceneBrushSpec {
+        transform: Some(Matrix::create_rotation(0.3) * Matrix::create_scale(1.2, 0.9)),
+        ..SceneBrushSpec::tiled(true, TileMode::Tile)
+    };
+    let stroke = SceneBrushSpec::tiled(true, TileMode::FlipXY);
+
+    context.set_transform(Matrix::create_scale(1.5, 1.5) * Matrix::create_rotation(-0.15) * Matrix::create_translation(5.0, 35.0));
+    context.draw_rectangle(
+        Some(&fill.brush()),
+        Some(&ImmutablePen::with_brush(Some(Rc::new(stroke.brush())), 12.0)),
+        rounded(15.0, 10.0, 95.0, 70.0, 12.0),
+        &no_shadows(),
+    );
+    context.set_transform(Matrix::IDENTITY);
+}
+
+/// A material color.
+struct Material {
+    background_source: AcrylicBackgroundSource,
+    tint_color: Color,
+    material_color: Color,
+}
+
+impl IExperimentalAcrylicMaterial for Material {
+    fn background_source(&self) -> AcrylicBackgroundSource {
+        self.background_source
+    }
+    fn tint_color(&self) -> Color {
+        self.tint_color
+    }
+    fn tint_opacity(&self) -> f64 {
+        1.0
+    }
+    fn material_color(&self) -> Color {
+        self.material_color
+    }
+    fn fallback_color(&self) -> Color {
+        Colors::GRAY
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
+/// Rectangles of acrylic materials: opaque, translucent over a shape, and
+/// one that replaces what is under it.
+fn acrylic(_: &Backend, context: &mut dyn IDrawingContextImpl) {
+    background(context);
+    context.draw_ellipse(Some(&solid(ORANGE)), None, Rect::new(20.0, 20.0, 160.0, 160.0));
+
+    let acrylic = context.as_drawing_context_with_acrylic_like_support().expect("a drawing context with acrylic");
+    acrylic.draw_rectangle_with_material(
+        &Material { background_source: AcrylicBackgroundSource::None, tint_color: NAVY, material_color: TEAL },
+        rounded(10.0, 10.0, 80.0, 80.0, 14.0),
+    );
+    acrylic.draw_rectangle_with_material(
+        &Material {
+            background_source: AcrylicBackgroundSource::None,
+            tint_color: Color::from_argb(120, 20, 40, 120),
+            material_color: Color::from_argb(90, 255, 255, 255),
+        },
+        rect(100.5, 30.5, 85.0, 70.0),
+    );
+    acrylic.draw_rectangle_with_material(
+        &Material {
+            background_source: AcrylicBackgroundSource::Digger,
+            tint_color: Color::from_argb(60, 0, 150, 136),
+            material_color: Color::from_argb(40, 0, 0, 0),
+        },
+        rounded(40.0, 110.0, 120.0, 70.0, 20.0),
+    );
+}
+
 /// The scenes with the bounds of each.
 pub fn scenes() -> Vec<EffectScene> {
     macro_rules! scene {
@@ -244,5 +538,16 @@ pub fn scenes() -> Vec<EffectScene> {
         scene!(effect_blur_bounded, 100.0, 255.0),
         scene!(effect_drop_shadow, 100.0, 255.0),
         scene!(effect_drop_shadow_transformed, 100.0, 255.0),
+        scene!(scene_brush_single, 100.0, 255.0),
+        scene!(scene_brush_tile, 100.0, 255.0),
+        scene!(scene_brush_flip_x, 100.0, 255.0),
+        scene!(scene_brush_flip_y, 100.0, 255.0),
+        scene!(scene_brush_flip_xy, 100.0, 255.0),
+        scene!(scene_brush_surface_single, 100.0, 255.0),
+        scene!(scene_brush_surface_tile, 100.0, 255.0),
+        scene!(scene_brush_surface_flip_xy, 100.0, 255.0),
+        scene!(scene_brush_stretched, 100.0, 255.0),
+        scene!(scene_brush_transformed, 100.0, 255.0),
+        scene!(acrylic, 100.0, 255.0),
     ]
 }
