@@ -22,7 +22,7 @@ mod setters;
 use std::rc::Rc;
 
 use xamlx::exceptions::XamlResult;
-use xamlx::transform::{TransformerConfiguration, XamlLanguageTypeMappings};
+use xamlx::transform::TransformerConfiguration;
 
 use crate::compiler_extensions::group_transformers::XamlRuntimeIncludeFallback;
 use crate::compiler_extensions::{FerroXamlIlLanguageEmitMappings, XamlCompileTimeValueParsers};
@@ -35,6 +35,7 @@ pub use methods::{
     FrameworkMethodEvaluator, RuntimeDocumentTypeBuilderProvider, XamlMemberException,
 };
 pub(crate) use methods::load_exception;
+pub use crate::back_end::adapt_type_mappings;
 pub use nodes::{provide_value_target_property, FrameworkNodeEvaluator};
 pub use services::FerroRuntimeContextServices;
 pub use setters::FrameworkSetterEvaluator;
@@ -133,16 +134,6 @@ pub const FRAMEWORK_EVALUATORS: &[(&str, FrameworkEvaluatorKind)] = {
         ("XamlIlTrampolineBuilder", EmitHelper),
     ]
 };
-
-/// Adapts the type mappings of the language to the run-time back end: the
-/// deferred content customisation becomes the generic method definition the
-/// back end can call ([`DeferredTransformationFactoryMethod`]).
-pub fn adapt_type_mappings(mappings: &mut XamlLanguageTypeMappings) {
-    if let Some(customization) = mappings.deferred_content_executor_customization.take() {
-        mappings.deferred_content_executor_customization =
-            Some(DeferredTransformationFactoryMethod::new(customization));
-    }
-}
 
 /// Registers what the run-time back end adds to a configuration of the
 /// framework language: the compile-time value parser over the run-time

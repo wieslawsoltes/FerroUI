@@ -47,7 +47,10 @@ ferroui-controls = { path = "src/FerroUI.Controls" }
 ferroui-controls-color-picker = { path = "src/FerroUI.Controls.ColorPicker" }
 ferroui-markup = { path = "src/Markup/FerroUI.Markup" }
 ferroui-markup-xaml = { path = "src/Markup/FerroUI.Markup.Xaml" }
-ferroui-markup-xaml-loader = { path = "src/Markup/FerroUI.Markup.Xaml.Loader" }
+# Without the default features: the default is the run-time back end, which links the XAML runtime library
+# and the controls, and the build tool (`ferroui-build`) takes the compiler alone. Every crate that loads
+# markup at run time states the `runtime` feature.
+ferroui-markup-xaml-loader = { path = "src/Markup/FerroUI.Markup.Xaml.Loader", default-features = false }
 ferroui-build-scan = { path = "src/FerroUI.Build.Scan" }
 ferroui-build = { path = "src/FerroUI.Build.Tasks" }
 xamlx = { path = "external/XamlX/src/XamlX" }

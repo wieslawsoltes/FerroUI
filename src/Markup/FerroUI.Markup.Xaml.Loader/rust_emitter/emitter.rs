@@ -41,9 +41,7 @@ use crate::compiler_extensions::{
     BindingSetter, BindingWithPrioritySetter, SetValueWithPrioritySetter, UnsetValueSetter, XamlIlBindingPathElementNode, XamlIlBindingPathNode, XamlIlFerroPropertyFieldNode,
     XamlIlFerroPropertyHelper, XamlIlFerroPropertyNode, XamlIlProvideValueTargetProperty,
 };
-use crate::runtime::interpreter::{context_definition, numeric_constant, plan_setters};
-
-use ferroui_markup_xaml::xaml_il::runtime::compiled::FRAMEWORK_CONTEXT;
+use crate::back_end::{context_definition, numeric_constant, plan_setters, FRAMEWORK_CONTEXT};
 
 use super::emit_types::{EmitClass, EmitMarkup, EmitProperty, EmitTypes, FieldValue, FrameworkType, Handle, Known, MethodInfo, TypeKey};
 use super::source::rust_string_literal;
