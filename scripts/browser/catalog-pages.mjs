@@ -220,11 +220,6 @@ export function catalogPages(file = PAGE_LIST) {
 // Escape (the focus is in its text box) and no entry of the drawer can be clicked any more.
 // `skip`: the page is not opened, with the reason.
 export const PAGE_ACTIONS = {
-    // The page asks the font manager for the installed fonts and creates a typeface of each; a browser
-    // has no system fonts, the typeface of the first family it names cannot be created, and the panic
-    // ends the application (seen on 2026-10-09 with the module without threads: "Could not create
-    // glyphTypeface. Font family: Cascadia Mono (key: fonts:SystemFonts)", typeface.rs).
-    "ComboBox": { skip: "the page panics in a browser (a typeface of a system font cannot be created) and the application does not recover" },
     "ListBox": { wheel: 30 },
     "TableView": { wheel: 30 },
     "TreeView": { wheel: 12 },
