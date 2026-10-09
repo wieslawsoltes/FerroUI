@@ -406,3 +406,80 @@ fn template_focus_target_is_the_marked_template_child() {
 
     assert!(target.get_template_focus_target().unwrap().is::<Border>());
 }
+
+/// A content control with the resource "red" whose template is a content
+/// presenter with the background bound to that resource.
+fn content_control_with_resource_bound_presenter() -> Ref<ContentControl> {
+    use crate::templates::FuncTemplateNameScopeExtensions;
+    use ferroui_base::controls::ResourceHostRef;
+    use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+    use ferroui_base::media::{Brushes, IBrush};
+    use ferroui_base::reactive::ObservableExt;
+
+    let target = ContentControl::new();
+    target.resources().add_value("red", Brushes::red());
+    target.set_template(Some(FuncControlTemplate::for_type::<ContentControl>(|x, scope| {
+        let result = ContentPresenter::new();
+        result.set_name(Some("PART_ContentPresenter".to_string()));
+        let parent_object: &FerroObject = x;
+        FerroObject::bind(
+            &result,
+            ContentPresenter::content_property(),
+            FerroObjectExtensions::get_observable(parent_object, ContentControl::content_property()),
+            BindingPriority::LocalValue,
+        );
+        let result = result.register_in_name_scope(&**scope);
+
+        // The observable of a resource is untyped; the brush is taken out of
+        // the value for the typed binding.
+        let background =
+            ResourceHostRef::from(&result).resource_observable("red", None).select(|value: Option<BoxedValue>| {
+                let brush = value.and_then(|value| value.downcast_ref::<Rc<ImmutableSolidColorBrush>>().cloned())?;
+                Some(brush as Rc<dyn IBrush>)
+            });
+        result.bind(ContentPresenter::background_property(), background, BindingPriority::LocalValue);
+
+        result.upcast()
+    })));
+    target
+}
+
+fn assert_same_brush(
+    expected: &Rc<ferroui_base::media::immutable::ImmutableSolidColorBrush>,
+    actual: Option<Rc<dyn ferroui_base::media::IBrush>>,
+) {
+    let actual = actual.expect("a background");
+    assert_eq!(Rc::as_ptr(expected) as *const (), Rc::as_ptr(&actual) as *const ());
+}
+
+#[test]
+fn templated_child_should_find_resource_in_templated_parent() {
+    use ferroui_base::media::Brushes;
+
+    let _scope = test_scope();
+    let target = content_control_with_resource_bound_presenter();
+
+    let _root = TestRoot::with_child(&target);
+    target.apply_template();
+
+    let content_presenter = single_visual_child(&target).cast::<ContentPresenter>().expect("a content presenter");
+    assert_same_brush(&Brushes::red(), content_presenter.background());
+}
+
+#[test]
+fn changing_resource_in_templated_parent_should_affect_templated_child() {
+    use ferroui_base::media::Brushes;
+
+    let _scope = test_scope();
+    let target = content_control_with_resource_bound_presenter();
+
+    let _root = TestRoot::with_child(&target);
+    target.apply_template();
+
+    let content_presenter = single_visual_child(&target).cast::<ContentPresenter>().expect("a content presenter");
+    assert_same_brush(&Brushes::red(), content_presenter.background());
+
+    target.resources().set("red", Some(Rc::new(Brushes::green())));
+
+    assert_same_brush(&Brushes::green(), content_presenter.background());
+}
