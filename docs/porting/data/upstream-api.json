@@ -399714,9 +399714,9 @@
    "name": "Avalonia.iOS",
    "path": "src/iOS/Avalonia.iOS",
    "detail": "full",
-   "scope": "out",
-   "phase": "not started / out of current scope",
-   "priority": "-",
+   "scope": "in",
+   "phase": "6 - mobile (iOS)",
+   "priority": "P2",
    "files": [
     {
      "path": "ActivatableLifetime.cs",

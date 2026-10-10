@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.X11` (exists) |
 | Crate | `ferroui-x11` |
 | Phase / priority | 5 - desktop (Linux) / P1 |
-| Files | 48/88 (54.5%) |
-| Types | 120/291 (108 waived) (65.6%) |
-| Members | 3248/4897 (1085 waived) (85.2%) |
+| Files | 60/88 (68.2%) |
+| Types | 132/291 (107 waived) (71.7%) |
+| Members | 3348/4897 (1076 waived) (87.6%) |
 | Contracts (interfaces) | 7/8 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -34,22 +34,22 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 26/37, types 86/216 (107 waived), members 3125/4427 (1083 waived)
+### `(project root)` - files 29/37, types 90/216 (106 waived), members 3156/4427 (1074 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `ActivityTrackingHelper.cs` | `activity_tracking_helper.rs` | present | 1/1 | 7/7 |  |
 | `ICELib.cs` | `ice_lib.rs` | missing | 0/4 | 0/6 |  |
 | `Keysyms.cs` | `keysyms.rs` | present | 1/1 | 2099/2099 |  |
-| `LibC.cs` | `lib_c.rs` | missing | 0/1 | 0/7 |  |
+| `LibC.cs` | `lib_c.rs` | present | 1/1 | 7/7 |  |
 | `SMLib.cs` | `sm_lib.rs` | missing | 0/10 | 0/12 |  |
 | `TransparencyHelper.cs` | `transparency_helper.rs` | present | 1/1 | 5/5 |  |
 | `X11ActiveWindowTracker.cs` | `x11_active_window_tracker.rs` | present | 1/1 | 3/3 |  |
 | `X11AtSpiAccessibility.cs` | `x11_at_spi_accessibility.rs` | missing | 0/1 | 0/5 |  |
 | `X11Atoms.cs` | `x11_atoms.rs` | present | 1/1 | 166/166 |  |
 | `X11CursorFactory.cs` | `x11_cursor_factory.rs` | partial | 2/2 | 7/9 |  |
-| `X11DeferredDisplayDispatcher.cs` | `x11_deferred_display_dispatcher.rs` | missing | 0/1 | 0/4 |  |
-| `X11EglHelper.cs` | `x11_egl_helper.rs` | missing | 0/1 | 0/3 |  |
+| `X11DeferredDisplayDispatcher.cs` | `x11_deferred_display_dispatcher.rs` | present | 1/1 | 4/4 |  |
+| `X11EglHelper.cs` | `x11_egl_helper.rs` | partial | 1/1 | 2/3 |  |
 | `X11EnumExtensions.cs` | `x11_enum_extensions.rs` | present | 1/1 | 1/1 |  |
 | `X11Enums.cs` | `x11_enums.rs` | present | 5/5 | 78/78 |  |
 | `X11Exception.cs` | `x11_exception.rs` | present | 1/1 | 1/1 |  |
@@ -62,7 +62,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `X11NativeControlHost.cs` | `x11_native_control_host.rs` | missing | 0/1 | 0/6 |  |
 | `X11Platform.cs` | `x11_platform.rs` | partial | 4/4 | 50/54 |  |
 | `X11PlatformLifetimeEvents.cs` | `x11_platform_lifetime_events.rs` | missing | 0/1 | 0/3 |  |
-| `X11Structs.cs` | `x11_structs.rs` | present | 35/123 (88 waived) | 387/1353 (966 waived) | replaced: the event, request and hint structures are those of the Xlib bindings (`x11-dl`, used through `xlib.rs`), which declare them with the layout of the C headers; the enumerations and the Motif hints are ported (docs/porting/x11-platform.md, section 2) |
+| `X11Structs.cs` | `x11_structs.rs` | present | 36/123 (87 waived) | 396/1353 (957 waived) | replaced: the event, request and hint structures are those of the Xlib bindings (`x11-dl`, used through `xlib.rs`), which declare them with the layout of the C headers; the enumerations and the Motif hints are ported (docs/porting/x11-platform.md, section 2) |
 | `X11Window.Ime.cs` | `x11_window_ime.rs` | present | 1/1 | 0/0 | renamed: the keyboard part is ported (the input context, the key of a key event, its text); the input method part (`InitializeIme`, `FilterIme`, `ProcessNextImeEvent`, the forwarded keys) is stage 2 of docs/porting/x11-platform.md |
 | `X11Window.Xim.cs` | `x11_window_xim.rs` | missing (types found elsewhere) | 1/1 | 0/0 | types found in `x11_window.rs` (add to path-overrides.toml) |
 | `X11Window.cs` | `x11_window.rs` | partial | 2/2 | 83/86 |  |
@@ -73,7 +73,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `XI2Manager.cs` | `xi2_manager.rs` | present | 3/3 | 21/21 |  |
 | `XIStructs.cs` | `xi_structs.rs` | present | 11/28 (17 waived) | 72/185 (113 waived) | replaced: the structures of the X Input extension are those of the Xlib bindings and the copies `xlib.rs` makes of them (`XIDeviceEventData`, `XIClassInfo`, ...); the enumerations are ported |
 | `XLib.Helpers.cs` | `xlib.rs` | present | 1/1 | 3/3 | merged: the helpers of the partial class are functions of the same module as the calls |
-| `XLib.cs` | `xlib.rs` | partial | 3/6 (2 waived) | 80/233 (4 waived) |  |
+| `XLib.cs` | `xlib.rs` | partial | 3/6 (2 waived) | 89/233 (4 waived) |  |
 | `XResources.cs` | `x_resources.rs` | present | 1/1 | 3/3 |  |
 
 <details><summary><code>X11CursorFactory.cs</code> - 2 missing</summary>
@@ -81,6 +81,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 - `CursorImpl` (class): 2 missing
   - `CursorImpl(IntPtr handle)` *(1 of 2 constructors found)*
   - `IntPtr Handle { get; protected set; }` *(getter `handle` found, setter `set_handle` missing)*
+
+</details>
+
+<details><summary><code>X11EglHelper.cs</code> - 1 missing</summary>
+
+- `X11EglHelper` (class) (ported as module-level items): 1 missing
+  - `static XVisualInfo? GetVisualInfo(X11Info x11, EglDisplay display)` *(1 of 2 overloads found)*
 
 </details>
 
@@ -111,16 +118,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>XLib.cs</code> - 150 missing</summary>
+<details><summary><code>XLib.cs</code> - 141 missing</summary>
 
-- `XLib` (class) (ported as module-level items): 142 missing
+- `XLib` (class) (ported as module-level items): 133 missing
   - `static int XShmQueryExtension(IntPtr display)`
   - `static int XShmQueryVersion(IntPtr display, out int major, out int minor, out bool pixmaps)`
-  - `static int XShmGetEventBase(IntPtr display)`
-  - `static int XShmPutImage(IntPtr display, IntPtr drawable, IntPtr gc, XImage* image, int src_x, int src_y, in...`
-  - `static int XShmAttach(IntPtr display, XShmSegmentInfo* shminfo)`
-  - `static int XShmDetach(IntPtr display, XShmSegmentInfo* shminfo)`
-  - `static XImage* XShmCreateImage(IntPtr display, IntPtr visual, uint depth, int format, IntPtr data, XShmSegm...`
   - `static int XCloseDisplay(IntPtr display)`
   - `static IntPtr XSynchronize(IntPtr display, bool onoff)`
   - `static IntPtr XCreateSimpleWindow(IntPtr display, IntPtr parent, int x, int y, int width, int height, int b...`
@@ -175,8 +177,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
   - `static int XChangeProperty(IntPtr display, IntPtr window, IntPtr property, IntPtr type, int format, Propert...`
   - `static int XChangeProperty(IntPtr display, IntPtr window, IntPtr property, IntPtr type, int format, Propert...`
   - `static int XDeleteProperty(IntPtr display, IntPtr window, IntPtr property)`
-  - `static IntPtr XCreateGC(IntPtr display, IntPtr window, IntPtr valuemask, ref XGCValues values)`
-  - `static int XFreeGC(IntPtr display, IntPtr gc)`
   - `static int XSetFunction(IntPtr display, IntPtr gc, GXFunction function)`
   - `static int XSetLineAttributes(IntPtr display, IntPtr gc, int line_width, GCLineStyle line_style, GCCapStyle...` *(internal)*
   - `static int XDrawLine(IntPtr display, IntPtr drawable, IntPtr gc, int x1, int y1, int x2, int y2)`
@@ -213,16 +213,14 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
   - `static void XPeekEvent(IntPtr display, out XEvent xevent)`
   - `static IntPtr XLockDisplay(IntPtr display)`
   - `static IntPtr XUnlockDisplay(IntPtr display)`
-  - `static IntPtr XCreateGC(IntPtr display, IntPtr drawable, ulong valuemask, IntPtr values)`
+  - `static IntPtr XCreateGC(IntPtr display, IntPtr drawable, ulong valuemask, IntPtr values)` *(1 of 2 overloads found)*
   - `static int XInitImage(ref XImage image)`
-  - `static int XDestroyImage(ref XImage image)`
-  - `static int XDestroyImage(XImage* image)`
+  - `static int XDestroyImage(XImage* image)` *(1 of 2 overloads found)*
   - `static int XPutImage(IntPtr display, IntPtr drawable, IntPtr gc, ref XImage image, int srcx, int srcy, int ...`
   - `static int XPutImage(IntPtr display, IntPtr drawable, IntPtr gc, XImage* image, int srcx, int srcy, int des...`
   - `static int XFreeColormap(IntPtr display, IntPtr colormap)`
   - `const long VisualIDMask`
   - `static IntPtr XGetVisualInfo(IntPtr display, IntPtr vinfo_mask, ref XVisualInfo vinfo_template, out int nit...`
-  - `static XVisualInfo? XGetVisualInfoById(IntPtr display, IntPtr visualId)`
   - `static XKeySym XLookupKeysym(in XKeyEvent key_event, int index)`
   - `static bool XkbIgnoreExtension(bool ignore)`
   - `static IntPtr XGetIMValues(IntPtr xim, string name, out XIMStyles* value, IntPtr terminator)`
@@ -275,16 +273,38 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `X11EventDispatcher.cs` | `dispatching/x11_event_dispatcher.rs` | present | 3/3 | 7/7 |  |
 | `X11PlatformThreading.cs` | `dispatching/x11_platform_threading.rs` | present | 1/1 | 11/11 |  |
 
-### `Glx` - files 0/6, types 0/6, members 0/157
+### `Glx` - files 6/6, types 5/6, members 57/157
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Glx.cs` | `glx/glx.rs` | missing | 0/1 | 0/24 |  |
-| `GlxConsts.cs` | `glx/glx_consts.rs` | missing | 0/1 | 0/96 |  |
-| `GlxContext.cs` | `glx/glx_context.rs` | missing | 0/1 | 0/18 |  |
-| `GlxDisplay.cs` | `glx/glx_display.rs` | missing | 0/1 | 0/9 |  |
-| `GlxGlPlatformSurface.cs` | `glx/glx_gl_platform_surface.rs` | missing | 0/1 | 0/2 |  |
-| `GlxPlatformFeature.cs` | `glx/glx_platform_feature.rs` | missing | 0/1 | 0/8 |  |
+| `Glx.cs` | `glx/glx.rs` | partial | 1/1 | 21/24 |  |
+| `GlxConsts.cs` | `glx/glx_consts.rs` | partial | 0/1 | 0/96 |  |
+| `GlxContext.cs` | `glx/glx_context.rs` | present | 1/1 | 18/18 |  |
+| `GlxDisplay.cs` | `glx/glx_display.rs` | partial | 1/1 | 8/9 |  |
+| `GlxGlPlatformSurface.cs` | `glx/glx_gl_platform_surface.rs` | present | 1/1 | 2/2 |  |
+| `GlxPlatformFeature.cs` | `glx/glx_platform_feature.rs` | present | 1/1 | 8/8 |  |
+
+<details><summary><code>Glx.cs</code> - 3 missing</summary>
+
+- `GlxInterface` (class): 3 missing
+  - `XVisualInfo* ChooseVisual(IntPtr dpy, int screen, int[] attribList)`
+  - `IntPtr CreateContext(IntPtr dpy, XVisualInfo* vis, IntPtr shareList, bool direct)`
+  - `int GlGetError()`
+
+</details>
+
+<details><summary><code>GlxConsts.cs</code> - 97 missing</summary>
+
+- `GlxConsts` (class, internal): **type missing** (96 members)
+
+</details>
+
+<details><summary><code>GlxDisplay.cs</code> - 1 missing</summary>
+
+- `GlxDisplay` (class): 1 missing
+  - `X11Info X11Info { get; }`
+
+</details>
 
 ### `Interop` - files 0/2, types 0/7, members 0/29
 
@@ -410,13 +430,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `XShm` - files 0/3, types 0/3, members 0/12
+### `XShm` - files 3/3, types 3/3, members 12/12
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `X11ShmFramebufferRenderTarget.cs` | `x_shm/x11_shm_framebuffer_render_target.rs` | missing | 0/1 | 0/3 |  |
-| `X11ShmFramebufferSurface.cs` | `x_shm/x11_shm_framebuffer_surface.rs` | missing | 0/1 | 0/2 |  |
-| `X11ShmImage.cs` | `x_shm/x11_shm_image.rs` | missing | 0/1 | 0/7 |  |
+| `X11ShmFramebufferRenderTarget.cs` | `x_shm/x11_shm_framebuffer_render_target.rs` | present | 1/1 | 3/3 |  |
+| `X11ShmFramebufferSurface.cs` | `x_shm/x11_shm_framebuffer_surface.rs` | present | 1/1 | 2/2 |  |
+| `X11ShmImage.cs` | `x_shm/x11_shm_image.rs` | present | 1/1 | 7/7 |  |
 
 ## Rust-only files
 

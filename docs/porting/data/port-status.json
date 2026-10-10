@@ -2,26 +2,26 @@
  "upstreamCommit": "17350180c33b063f0e98abbfd19aa3cae63f5d56",
  "inScope": {
   "files": [
-   2347,
-   2453,
+   2382,
+   2493,
    0
   ],
   "types": [
-   3164,
-   3717,
+   3202,
+   3774,
    311
   ],
   "members": [
-   25928,
-   30744,
-   2850
+   26142,
+   31075,
+   2858
   ]
  },
  "allProjects": {
-  "membersPresent": 25928,
+  "membersPresent": 26142,
   "members": 37391,
   "membersNotApplicable": 1132,
-  "membersOutOfScope": 5515
+  "membersOutOfScope": 5184
  },
  "projects": [
   {
@@ -7558,19 +7558,19 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    48,
+    60,
     88,
     0
    ],
    "types": [
-    120,
+    132,
     291,
-    108
+    107
    ],
    "members": [
-    3248,
+    3348,
     4897,
-    1085
+    1076
    ],
    "interfaces": [
     7,
@@ -7587,13 +7587,13 @@
    "notApplicableFiles": 0,
    "matchKinds": {
     "alias field": 1,
-    "const": 1,
-    "field": 238,
-    "fn": 290,
-    "free fn": 82,
-    "free item": 7,
-    "overload fn": 3,
-    "trait": 1,
+    "const": 2,
+    "field": 247,
+    "fn": 359,
+    "free fn": 97,
+    "free item": 10,
+    "overload fn": 5,
+    "trait": 2,
     "trait fn": 4,
     "variant": 2621
    },
@@ -7610,8 +7610,29 @@
     "Dispatching/X11PlatformThreading.cs": [
      "dispatching/x11_platform_threading.rs"
     ],
+    "Glx/Glx.cs": [
+     "glx/glx.rs"
+    ],
+    "Glx/GlxConsts.cs": [
+     "glx/glx_consts.rs"
+    ],
+    "Glx/GlxContext.cs": [
+     "glx/glx_context.rs"
+    ],
+    "Glx/GlxDisplay.cs": [
+     "glx/glx_display.rs"
+    ],
+    "Glx/GlxGlPlatformSurface.cs": [
+     "glx/glx_gl_platform_surface.rs"
+    ],
+    "Glx/GlxPlatformFeature.cs": [
+     "glx/glx_platform_feature.rs"
+    ],
     "Keysyms.cs": [
      "keysyms.rs"
+    ],
+    "LibC.cs": [
+     "lib_c.rs"
     ],
     "Screens/X11Screen.Providers.cs": [
      "screens/x11_screen_providers.rs"
@@ -7672,6 +7693,12 @@
     ],
     "X11CursorFactory.cs": [
      "x11_cursor_factory.rs"
+    ],
+    "X11DeferredDisplayDispatcher.cs": [
+     "x11_deferred_display_dispatcher.rs"
+    ],
+    "X11EglHelper.cs": [
+     "x11_egl_helper.rs"
     ],
     "X11EnumExtensions.cs": [
      "x11_enum_extensions.rs"
@@ -7741,6 +7768,15 @@
     ],
     "XResources.cs": [
      "x_resources.rs"
+    ],
+    "XShm/X11ShmFramebufferRenderTarget.cs": [
+     "x_shm/x11_shm_framebuffer_render_target.rs"
+    ],
+    "XShm/X11ShmFramebufferSurface.cs": [
+     "x_shm/x11_shm_framebuffer_surface.rs"
+    ],
+    "XShm/X11ShmImage.cs": [
+     "x_shm/x11_shm_image.rs"
     ]
    },
    "rustOnly": [
@@ -9267,25 +9303,25 @@
    "name": "Avalonia.iOS",
    "path": "src/iOS/Avalonia.iOS",
    "rust": "src/iOS/FerroUI.iOS",
-   "scope": "out",
+   "scope": "in",
    "detail": "full",
    "files": [
-    0,
+    23,
     40,
     0
    ],
    "types": [
-    0,
+    26,
     57,
-    0
+    1
    ],
    "members": [
-    0,
+    114,
     331,
-    0
+    17
    ],
    "interfaces": [
-    0,
+    2,
     3
    ],
    "propertyRegistrations": [
@@ -9297,8 +9333,84 @@
     0
    ],
    "notApplicableFiles": 1,
-   "matchKinds": {},
-   "presentFiles": {},
+   "matchKinds": {
+    "const": 1,
+    "field": 2,
+    "fn": 106,
+    "overload fn": 3,
+    "variant": 2
+   },
+   "presentFiles": {
+    "ActivatableLifetime.cs": [
+     "activatable_lifetime.rs"
+    ],
+    "AvaloniaAppDelegate.cs": [
+     "ferro_app_delegate.rs"
+    ],
+    "AvaloniaSceneDelegate.cs": [
+     "ferro_scene_delegate.rs"
+    ],
+    "AvaloniaView.Automation.cs": [
+     "ferro_view.rs"
+    ],
+    "AvaloniaView.Text.cs": [
+     "ferro_view.rs"
+    ],
+    "AvaloniaView.cs": [
+     "ferro_view.rs"
+    ],
+    "DispatcherImpl.cs": [
+     "dispatcher_impl.rs"
+    ],
+    "DisplayLinkTimer.cs": [
+     "display_link_timer.rs"
+    ],
+    "Extensions.cs": [
+     "extensions.rs"
+    ],
+    "InputHandler.cs": [
+     "input_handler.rs"
+    ],
+    "InsetsManager.cs": [
+     "insets_manager.rs"
+    ],
+    "Interop.cs": [
+     "interop.rs"
+    ],
+    "Metal/MetalDevice.cs": [
+     "metal/metal_device.rs"
+    ],
+    "Metal/MetalDrawingSession.cs": [
+     "metal/metal_drawing_session.rs"
+    ],
+    "Metal/MetalPlatformGraphics.cs": [
+     "metal/metal_platform_graphics.rs"
+    ],
+    "Metal/MetalPlatformSurface.cs": [
+     "metal/metal_platform_surface.rs"
+    ],
+    "Metal/MetalRenderTarget.cs": [
+     "metal/metal_render_target.rs"
+    ],
+    "NativeControlHostImpl.cs": [
+     "native_control_host_impl.rs"
+    ],
+    "Platform.cs": [
+     "platform.rs"
+    ],
+    "SingleViewLifetime.cs": [
+     "single_view_lifetime.rs"
+    ],
+    "Stubs.cs": [
+     "stubs.rs"
+    ],
+    "ViewController.cs": [
+     "view_controller.rs"
+    ],
+    "iOSScreens.cs": [
+     "ios_screens.rs"
+    ]
+   },
    "rustOnly": []
   },
   {

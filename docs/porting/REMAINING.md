@@ -8,8 +8,8 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. The s
 
 | | Present | Total | Missing | Waived | Not applicable | Out of scope | Share |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Members of the projects in scope | 25928 | 30744 | 1966 | 2850 | - | - | 93.0% of total less waived |
-| Members of every upstream source project of the extraction | 25928 | 37391 | 1966 | 2850 | 1132 | 5515 | 69.3% of total |
+| Members of the projects in scope | 26142 | 31075 | 2075 | 2858 | - | - | 92.6% of total less waived |
+| Members of every upstream source project of the extraction | 26142 | 37391 | 2075 | 2858 | 1132 | 5184 | 69.9% of total |
 
 The first row is the headline of the tracking: it leaves out the waived members and everything out of scope. The second row leaves out nothing: every member of every C# project the extraction reads, whether or not the port will ever have it. A member is *present* when an item of the mapped name exists; names are matched, not behaviour.
 
@@ -35,7 +35,7 @@ Files, types and members as present / missing / waived. *n/a* counts the files m
 | [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | in | 14 / 0 / 0 | 54 / 0 / 1 | 198 / 1 / 3 | 0 (0) | 98.0% |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | in | 5 / 0 / 0 | 6 / 0 / 0 | 68 / 0 / 5 | 1 (0) | 93.2% |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | in | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 | 1 (0) | 100.0% |
-| [Avalonia.X11](tracking/Avalonia.X11.md) | in | 48 / 40 / 0 | 120 / 63 / 108 | 3248 / 564 / 1085 | 0 (0) | 66.3% |
+| [Avalonia.X11](tracking/Avalonia.X11.md) | in | 60 / 28 / 0 | 132 / 52 / 107 | 3348 / 473 / 1076 | 0 (0) | 68.4% |
 | [Avalonia.Browser](tracking/Avalonia.Browser.md) | in | 50 / 0 / 0 | 60 / 0 / 2 | 340 / 0 / 88 | 2 (13) | 77.1% |
 | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | in | 3 / 0 / 0 | 3 / 0 / 0 | 5 / 0 / 3 | 0 (0) | 62.5% |
 | [Avalonia.Headless](tracking/Avalonia.Headless.md) | in | 11 / 0 / 0 | 22 / 0 / 2 | 238 / 0 / 13 | 0 (0) | 94.8% |
@@ -46,6 +46,7 @@ Files, types and members as present / missing / waived. *n/a* counts the files m
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | in | 66 / 0 / 0 | 120 / 0 / 6 | 422 / 0 / 83 | 1 (1) | 83.4% |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | in | 51 / 3 / 0 | 62 / 4 / 0 | 398 / 32 / 21 | 0 (0) | 88.2% |
 | [Avalonia.Win32](tracking/Avalonia.Win32.md) | in | 33 / 62 / 0 | 110 / 166 / 0 | 1315 / 1290 / 0 | 0 (0) | 50.5% |
+| [Avalonia.iOS](tracking/Avalonia.iOS.md) | in | 23 / 17 / 0 | 26 / 30 / 1 | 114 / 200 / 17 | 1 (0) | 34.4% |
 | [Avalonia.Generators](tracking/Avalonia.Generators.md) | in: every file not applicable | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 / 0 | 31 (264) | 0.0% |
 | [Avalonia.Android](tracking/Avalonia.Android.md) | out (not started) | 58 files | 88 types | 447 members | 0 (0) | 0.0% |
 | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | out (not started) | 18 files | 26 types | 216 members | 0 (0) | 0.0% |
@@ -57,7 +58,6 @@ Files, types and members as present / missing / waived. *n/a* counts the files m
 | [Avalonia.Win32.Automation](tracking/Avalonia.Win32.Automation.md) | out (not started) | 40 files | 64 types | 598 members | 1 (0) | 0.0% |
 | [Avalonia.Win32.Interoperability](tracking/Avalonia.Win32.Interoperability.md) | out (not started) | 2 files | 2 types | 11 members | 0 (0) | 0.0% |
 | [Avalonia.WinUI](tracking/Avalonia.WinUI.md) | out (not started) | 15 files | 16 types | 88 members | 0 (0) | 0.0% |
-| [Avalonia.iOS](tracking/Avalonia.iOS.md) | out (not started) | 40 files | 57 types | 331 members | 1 (0) | 0.0% |
 
 Files that are not C#:
 
@@ -135,7 +135,7 @@ Test projects that are not counted (no report; `CONTINUATION.md` has the reasons
 | Upstream test project | C# files | FerroUI directory |
 |---|---:|---|
 | `tests/Avalonia.Analyzers.Tests` | 4 | none |
-| `tests/Avalonia.Benchmarks` | 60 | none |
+| `tests/Avalonia.Benchmarks` | 60 | `tests/FerroUI.Benchmarks` |
 | `tests/Avalonia.DesignerSupport.TestApp` | 3 | none |
 | `tests/Avalonia.Generators.Tests` | 12 | none |
 | `tests/Avalonia.Headless.NUnit.PerAssembly.UnitTests` | 1 | none |
@@ -144,7 +144,7 @@ Test projects that are not counted (no report; `CONTINUATION.md` has the reasons
 | `tests/Avalonia.Headless.XUnit.PerTest.UnitTests` | 1 | none |
 | `tests/Avalonia.IntegrationTests.Appium` | 32 | none |
 | `tests/Avalonia.IntegrationTests.Win32` | 13 | none |
-| `tests/Avalonia.LeakTests` | 8 | none |
+| `tests/Avalonia.LeakTests` | 8 | `tests/FerroUI.LeakTests` |
 | `tests/Avalonia.RenderTests.WpfCompare` | 4 | none |
 | `tests/Avalonia.Skia.RenderTests` | 1 | none |
 | `tests/Avalonia.UnitTests` | 32 | none |
@@ -165,38 +165,38 @@ From `docs/porting/data/samples.toml`; a sample counts as ported when the direct
 
 | Upstream sample | C# files | State | FerroUI directory | Note |
 |---|---:|---|---|---|
-| `samples/AppWithoutLifetime` | 4 | not ported | - | not listed in samples.toml |
-| `samples/BindingDemo` | 11 | not ported | - | not listed in samples.toml |
+| `samples/AppWithoutLifetime` | 4 | ported | `samples/AppWithoutLifetime` |  |
+| `samples/BindingDemo` | 11 | ported | `samples/BindingDemo` |  |
 | `samples/ControlCatalog` | 284 | ported | `samples/ControlCatalog` | the pages and what a page still lacks: samples/ControlCatalog/GAPS.md |
 | `samples/ControlCatalog.Android` | 3 | not ported | - | the head of the catalog for Avalonia.Android, which is out of scope |
 | `samples/ControlCatalog.Browser` | 2 | ported | `samples/ControlCatalog.Browser` |  |
 | `samples/ControlCatalog.Desktop` | 7 | ported | `samples/ControlCatalog.Desktop` |  |
 | `samples/ControlCatalog.MacCatalyst` | 0 | not ported | - | the head of the catalog for Mac Catalyst (Avalonia.iOS); no C# sources of its own |
-| `samples/ControlCatalog.iOS` | 3 | not ported | - | the head of the catalog for Avalonia.iOS |
+| `samples/ControlCatalog.iOS` | 3 | ported | `samples/ControlCatalog.iOS` | the head of the catalog for Avalonia.iOS |
 | `samples/ControlCatalog.tvOS` | 0 | not ported | - | the head of the catalog for tvOS (Avalonia.iOS); no C# sources of its own |
 | `samples/ControlGallery.WinUI` | 2 | not ported | - | needs Avalonia.WinUI, which is out of scope |
 | `samples/Generators.Sandbox` | 6 | not applicable | - | exercises the source generators of tools/Avalonia.Generators, which the port replaces (docs/porting/xaml.md 3.8) |
 | `samples/GpuInterop` | 26 | not ported | - | not listed in samples.toml |
-| `samples/IntegrationTestApp` | 38 | not ported | - | not listed in samples.toml |
+| `samples/IntegrationTestApp` | 38 | ported | `samples/IntegrationTestApp` | the application the integration tests drive |
 | `samples/MiniMvvm` | 3 | ported | `samples/MiniMvvm` | the view model library of the catalog |
 | `samples/PlatformSanityChecks` | 2 | not ported | - | not listed in samples.toml |
-| `samples/RenderDemo` | 29 | not ported | - | not listed in samples.toml |
+| `samples/RenderDemo` | 29 | ported | `samples/RenderDemo` |  |
 | `samples/SafeAreaDemo` | 5 | not ported | - | not listed in samples.toml |
 | `samples/SafeAreaDemo.Android` | 2 | not ported | - | the head of the safe area demo for Avalonia.Android, which is out of scope |
 | `samples/SafeAreaDemo.Desktop` | 1 | not ported | - | not listed in samples.toml |
 | `samples/SafeAreaDemo.iOS` | 2 | not ported | - | the head of the safe area demo for Avalonia.iOS |
-| `samples/SampleControls` | 1 | not ported | - | not listed in samples.toml |
-| `samples/Sandbox` | 3 | not ported | - | not listed in samples.toml |
+| `samples/SampleControls` | 1 | ported | `samples/SampleControls` | the controls the samples share |
+| `samples/Sandbox` | 3 | ported | `samples/Sandbox` |  |
 | `samples/SingleProjectSandbox` | 9 | not ported | - | not listed in samples.toml |
-| `samples/TextTestApp` | 7 | not ported | - | not listed in samples.toml |
+| `samples/TextTestApp` | 7 | ported | `samples/TextTestApp` |  |
 | `samples/UnloadableAssemblyLoadContext/UnloadableAssemblyLoadContext` | 5 | not applicable | - | unloading of a collectible AssemblyLoadContext of the .NET runtime |
 | `samples/UnloadableAssemblyLoadContext/UnloadableAssemblyLoadContextPlug` | 3 | not applicable | - | the plug-in assembly of the sample above |
-| `samples/VirtualizationDemo` | 13 | not ported | - | not listed in samples.toml |
+| `samples/VirtualizationDemo` | 13 | ported | `samples/VirtualizationDemo` |  |
 | `samples/WinUIEmbedSample` | 4 | not ported | - | needs Avalonia.WinUI, which is out of scope |
 | `samples/XEmbedSample` | 3 | not ported | - | embedding through XEmbed of the X11 backend |
 | `samples/interop/WindowsInteropTest` | 5 | not ported | - | needs Avalonia.Win32.Interoperability (hosting in WinForms and WPF), which is out of scope |
 
-4 of 30 samples are ported.
+13 of 30 samples are ported.
 
 ## Missing, by project
 
@@ -237,11 +237,11 @@ Files without a Rust file, types without a Rust type, and members without a Rust
 
 ### [Avalonia.X11](tracking/Avalonia.X11.md)
 
-40 files, 63 types and 564 members missing (399 members of the missing types, 165 members of types that exist).
+28 files, 52 types and 473 members missing (312 members of the missing types, 161 members of types that exist).
 
-- **Files (40):** `Dispatching/GLibDispatcherImpl.cs`, `Dispatching/GlibDispatcherImplBase.cs`, `Glx/Glx.cs`, `Glx/GlxConsts.cs`, `Glx/GlxContext.cs`, `Glx/GlxDisplay.cs`, `Glx/GlxGlPlatformSurface.cs`, `Glx/GlxPlatformFeature.cs`, `ICELib.cs`, `Interop/Glib.cs`, `Interop/GtkInteropHelper.cs`, `LibC.cs`, `NativeDialogs/Gtk.cs`, `NativeDialogs/GtkNativeFileDialogs.cs`, `SMLib.cs`, `Selections/DragDrop/DragDropDataProvider.cs`, `Selections/DragDrop/DragDropDataReader.cs`, `Selections/DragDrop/DragDropDataTransfer.cs`, `Selections/DragDrop/DragDropDataTransferItem.cs`, `Selections/DragDrop/DragDropTimeoutManager.cs`, `Selections/DragDrop/IXdndWindow.cs`, `Selections/DragDrop/SynchronousXEventWaiter.cs`, `Selections/DragDrop/X11DragSource.cs`, `Selections/DragDrop/X11DropTarget.cs`, `Selections/DragDrop/XdndActionHelper.cs`, `Selections/DragDrop/XdndConstants.cs`, `Vulkan/VulkanNativeInterop.cs`, `Vulkan/VulkanSupport.cs`, `X11AtSpiAccessibility.cs`, `X11DeferredDisplayDispatcher.cs`, `X11EglHelper.cs`, `X11NativeControlHost.cs`, `X11PlatformLifetimeEvents.cs`, `X11Window.Xim.cs`, `X11WindowModes/XEmbedClientWindowMode.cs`, `XEmbedPlug.cs`, `XEmbedTrayIconImpl.cs`, `XShm/X11ShmFramebufferRenderTarget.cs`, `XShm/X11ShmFramebufferSurface.cs`, `XShm/X11ShmImage.cs`
-- **Types (63):** `DragDropDataProvider`, `DragDropDataReader`, `DragDropDataTransfer`, `DragDropDataTransferItem`, `DragDropTimeoutManager`, `GSList`, `Glib`, `Glib.GDestroyNotify`, `Glib.GIOCondition`, `Glib.GSourceFunc`, `Glib.GUnixFDSourceFunc`, `GlibDispatcherImpl`, `GlibDispatcherImplBase`, `GlxConsts`, `GlxContext`, `GlxDisplay`, `GlxGlPlatformSurface`, `GlxInterface`, `GlxPlatformGraphics`, `Gtk`, `Gtk.signal_dialog_response`, `Gtk.signal_generic`, `GtkFileChooserAction`, `GtkInteropHelper`, `GtkResponseType`, `GtkSystemDialog`, `ICELib`, `ICELib.IceErrorHandler`, `ICELib.IceIOErrorHandler`, `ICELib.IceProcessMessagesStatus`, `IXdndWindow`, `LibC`, `SMLib`, `SMLib.IceWatchProc`, `SMLib.SmDialogValue`, `SMLib.SmcCallbacks`, `SMLib.SmcDieProc`, `SMLib.SmcErrorHandler`, `SMLib.SmcInteractProc`, `SMLib.SmcSaveCompleteProc`, `SMLib.SmcSaveYourselfProc`, `SMLib.SmcShutdownCancelledProc`, `SynchronousXEventWaiter`, `VkXlibSurfaceCreateInfoKHR`, `VulkanSupport`, `VulkanSupport.VulkanSurfaceFactory`, `X11AtSpiAccessibility`, `X11DeferredDisplayDispatcher`, `X11DragSource`, `X11DropTarget`, `X11EglHelper`, `X11NativeControlHost`, `X11PlatformLifetimeEvents`, `X11ShmFramebufferRenderTarget`, `X11ShmFramebufferSurface`, `X11ShmImage`, `X11VulkanInterface`, `X11Window.XEmbedClientWindowMode`, `XEmbedPlug`, `XEmbedTrayIconImpl`, `XLib.GrabResult`, `XdndActionHelper`, `XdndConstants`
-- **Members of types that exist (165), by type:** `XLib` 142, `X11Window.X11WindowMode` 7, `AvaloniaX11Platform` 4, `CursorImpl` 2, `X11Window` 2, `XLib.XGeometry` 2, `DataFormatHelper` 1, `SelectionDataProvider` 1, `X11FramebufferSurface` 1, `X11Window.DefaultTopLevelWindowMode` 1, `X11Window.InputProxyWindowMode` 1, `X11Window.SurfacePlatformHandle` 1
+- **Files (28):** `Dispatching/GLibDispatcherImpl.cs`, `Dispatching/GlibDispatcherImplBase.cs`, `ICELib.cs`, `Interop/Glib.cs`, `Interop/GtkInteropHelper.cs`, `NativeDialogs/Gtk.cs`, `NativeDialogs/GtkNativeFileDialogs.cs`, `SMLib.cs`, `Selections/DragDrop/DragDropDataProvider.cs`, `Selections/DragDrop/DragDropDataReader.cs`, `Selections/DragDrop/DragDropDataTransfer.cs`, `Selections/DragDrop/DragDropDataTransferItem.cs`, `Selections/DragDrop/DragDropTimeoutManager.cs`, `Selections/DragDrop/IXdndWindow.cs`, `Selections/DragDrop/SynchronousXEventWaiter.cs`, `Selections/DragDrop/X11DragSource.cs`, `Selections/DragDrop/X11DropTarget.cs`, `Selections/DragDrop/XdndActionHelper.cs`, `Selections/DragDrop/XdndConstants.cs`, `Vulkan/VulkanNativeInterop.cs`, `Vulkan/VulkanSupport.cs`, `X11AtSpiAccessibility.cs`, `X11NativeControlHost.cs`, `X11PlatformLifetimeEvents.cs`, `X11Window.Xim.cs`, `X11WindowModes/XEmbedClientWindowMode.cs`, `XEmbedPlug.cs`, `XEmbedTrayIconImpl.cs`
+- **Types (52):** `DragDropDataProvider`, `DragDropDataReader`, `DragDropDataTransfer`, `DragDropDataTransferItem`, `DragDropTimeoutManager`, `GSList`, `Glib`, `Glib.GDestroyNotify`, `Glib.GIOCondition`, `Glib.GSourceFunc`, `Glib.GUnixFDSourceFunc`, `GlibDispatcherImpl`, `GlibDispatcherImplBase`, `GlxConsts`, `Gtk`, `Gtk.signal_dialog_response`, `Gtk.signal_generic`, `GtkFileChooserAction`, `GtkInteropHelper`, `GtkResponseType`, `GtkSystemDialog`, `ICELib`, `ICELib.IceErrorHandler`, `ICELib.IceIOErrorHandler`, `ICELib.IceProcessMessagesStatus`, `IXdndWindow`, `SMLib`, `SMLib.IceWatchProc`, `SMLib.SmDialogValue`, `SMLib.SmcCallbacks`, `SMLib.SmcDieProc`, `SMLib.SmcErrorHandler`, `SMLib.SmcInteractProc`, `SMLib.SmcSaveCompleteProc`, `SMLib.SmcSaveYourselfProc`, `SMLib.SmcShutdownCancelledProc`, `SynchronousXEventWaiter`, `VkXlibSurfaceCreateInfoKHR`, `VulkanSupport`, `VulkanSupport.VulkanSurfaceFactory`, `X11AtSpiAccessibility`, `X11DragSource`, `X11DropTarget`, `X11NativeControlHost`, `X11PlatformLifetimeEvents`, `X11VulkanInterface`, `X11Window.XEmbedClientWindowMode`, `XEmbedPlug`, `XEmbedTrayIconImpl`, `XLib.GrabResult`, `XdndActionHelper`, `XdndConstants`
+- **Members of types that exist (161), by type:** `XLib` 133, `X11Window.X11WindowMode` 7, `AvaloniaX11Platform` 4, `GlxInterface` 3, `CursorImpl` 2, `X11Window` 2, `XLib.XGeometry` 2, `DataFormatHelper` 1, `GlxDisplay` 1, `SelectionDataProvider` 1, `X11EglHelper` 1, `X11FramebufferSurface` 1, `X11Window.DefaultTopLevelWindowMode` 1, `X11Window.InputProxyWindowMode` 1, `X11Window.SurfacePlatformHandle` 1
 
 ### [Avalonia.Skia](tracking/Avalonia.Skia.md)
 
@@ -258,3 +258,11 @@ Files without a Rust file, types without a Rust type, and members without a Rust
 - **Files (62):** `ClipboardFormatRegistry.cs`, `DComposition/DirectCompositedWindow.cs`, `DComposition/DirectCompositedWindowSurface.cs`, `DComposition/DirectCompositionConnection.cs`, `DComposition/DirectCompositionShared.cs`, `DComposition/NativeMethods.cs`, `DComposition/NativeStructs.cs`, `DataTransferToOleDataObjectWrapper.cs`, `DirectX/DxgiConnection.cs`, `DirectX/DxgiRenderTarget.cs`, `DirectX/DxgiSwapchainWindow.cs`, `DirectX/IDirect3D11TexturePlatformSurface.cs`, `DragSource.cs`, `IBlurHost.cs`, `IWindowsSurfaceFactory.cs`, `IconImpl.cs`, `Input/Imm32CaretManager.cs`, `Input/Imm32InputMethod.cs`, `Input/WindowsInputPane.cs`, `Interop/TaskBarList.cs`, `Interop/Win32Icon.cs`, `NonPumpingWaitHelperImpl.cs`, `OleContext.cs`, `OleDataObjectHelper.cs`, `OleDataObjectToDataTransferItemWrapper.cs`, `OleDataObjectToDataTransferWrapper.cs`, `OleDragSource.cs`, `OleDropTarget.cs`, `OleVirtualFileData.cs`, `OpenGl/Angle/AngleD3DTextureFeature.cs`, `OpenGl/Angle/AngleExternalD3D11Texture2D.cs`, `OpenGl/Angle/AngleExternalObjectsFeature.cs`, `OpenGl/Angle/SwapChainGlSurface.cs`, `OpenGl/WglConsts.cs`, `OpenGl/WglContext.cs`, `OpenGl/WglDisplay.cs`, `OpenGl/WglGdiResourceManager.cs`, `OpenGl/WglGlPlatformSurface.cs`, `OpenGl/WglPlatformOpenGlInterface.cs`, `OpenGl/WglRestoreContext.cs`, `SwapChainTopLevelImpl.cs`, `TrayIconImpl.cs`, `Vulkan/VulkanNativeInterop.cs`, `Vulkan/VulkanSupport.cs`, `Win32NativeControlHost.cs`, `Win32NativeToManagedMenuExporter.cs`, `Win32StorageProvider.cs`, `WinRT/Composition/D2DEffects.cs`, `WinRT/Composition/WinUIEffectBase.cs`, `WinRT/Composition/WinUiCompositedWindow.cs`, `WinRT/Composition/WinUiCompositedWindowSurface.cs`, `WinRT/Composition/WinUiCompositionShared.cs`, `WinRT/Composition/WinUiCompositionUtils.cs`, `WinRT/Composition/WinUiCompositorConnection.cs`, `WinRT/NativeWinRTMethods.cs`, `WinRT/WinRTApiInformation.cs`, `WinRT/WinRTColor.cs`, `WinRT/WinRTInspectable.cs`, `WinRT/WinRTPropertyValue.cs`, `WindowImpl.CustomCaptionProc.cs`, `WindowsMountedVolumeInfoListener.cs`, `WindowsMountedVolumeInfoProvider.cs`
 - **Types (166):** `AngleD3DTextureFeature`, `AngleExternalMemoryD3D11ExportedTexture2D`, `AngleExternalMemoryD3D11Texture2D`, `AngleExternalObjectsFeature`, `AppBarMessage`, `BlendEffect`, `BlurEffect`, `BorderEffect`, `ClipboardFormatRegistry`, `ColorSourceEffect`, `CompositeStepEffect`, `D2DEffects`, `D3D11_BIND_FLAG`, `D3D11_RESOURCE_DIMENSION`, `D3D11_RESOURCE_MISC_FLAG`, `D3D11_USAGE`, `D3D_DRIVER_TYPE`, `D3D_FEATURE_LEVEL`, `DCOMPOSITION_FRAME_STATISTICS`, `DXGI_ALPHA_MODE`, `DXGI_ERROR`, `DXGI_MODE_ROTATION`, `DXGI_MWA`, `DXGI_RESIDENCY`, `DXGI_SCALING`, `DXGI_SWAP_CHAIN_FLAG`, `DXGI_SWAP_EFFECT`, `DataTransferToOleDataObjectWrapper`, `DirectCompositedWindow`, `DirectCompositedWindowRenderTarget`, `DirectCompositedWindowSurface`, `DirectCompositionConnection`, `DirectCompositionShared`, `DragSource`, `DxgiConnection`, `DxgiRenderTarget`, `DxgiSwapchainWindow`, `HStringInterop`, `ICompositionEffectsSurface`, `IDirect3D11TexturePlatformSurface`, `IDirect3D11TexturePlatformSurface2`, `IDirect3D11TextureRenderTarget`, `IDirect3D11TextureRenderTarget2`, `IDirect3D11TextureRenderTargetRenderSession`, `IWindowsSurfaceFactory`, `IconImpl`, `Imm32CaretManager`, `Imm32InputMethod`, `NIF`, `NIIF`, `NIM`, `NOTIFYICONDATA`, `NativeMethods`, `NativeWinRTMethods`, `NativeWinRTMethods.DISPATCHERQUEUE_THREAD_APARTMENTTYPE`, `NativeWinRTMethods.DISPATCHERQUEUE_THREAD_TYPE`, `NativeWinRTMethods.DispatcherQueueOptions`, `NativeWinRTMethods.RO_INIT_TYPE`, `NonPumpingWaitHelperImpl`, `OleContext`, `OleDataObjectHelper`, `OleDataObjectToDataTransferItemWrapper`, `OleDataObjectToDataTransferWrapper`, `OleDragSource`, `OleDropTarget`, `OleVirtualFileData`, `OleVirtualFileData.Descriptor`, `OpacityEffect`, `PixelFormatDescriptor`, `PixelFormatDescriptorFlags`, `SaturationEffect`, `SwapChainGlRenderTarget`, `SwapChainGlSurface`, `SwapChainGlSurface.DXGI_MATRIX_3X2_F`, `SwapChainTopLevelImpl`, `TaskBarList`, `TrayIconImpl`, `UnmanagedMethods.APPBARDATA`, `UnmanagedMethods.AccentFlags`, `UnmanagedMethods.AccentPolicy`, `UnmanagedMethods.AccentState`, `UnmanagedMethods.BITMAP`, `UnmanagedMethods.BITMAPV5HEADER`, `UnmanagedMethods.BitmapColorSpace`, `UnmanagedMethods.BitmapCompressionMode`, `UnmanagedMethods.BitmapIntent`, `UnmanagedMethods.CANDIDATEFORM`, `UnmanagedMethods.CIEXYZ`, `UnmanagedMethods.CIEXYZTRIPLE`, `UnmanagedMethods.COMDLG_FILTERSPEC`, `UnmanagedMethods.COMPOSITIONFORM`, `UnmanagedMethods.DIBColorTable`, `UnmanagedMethods.DROPFILES`, `UnmanagedMethods.DWM_BLURBEHIND`, `UnmanagedMethods.EnumWindowsProc`, `UnmanagedMethods.FILEDESCRIPTORW`, `UnmanagedMethods.FORMATETC`, `UnmanagedMethods.GCS`, `UnmanagedMethods.GetAncestorFlags`, `UnmanagedMethods.HRESULT`, `UnmanagedMethods.HrInit`, `UnmanagedMethods.ICONINFO`, `UnmanagedMethods.ITaskBarList3VTable`, `UnmanagedMethods.LOGFONT`, `UnmanagedMethods.LayeredWindowFlags`, `UnmanagedMethods.MSG`, `UnmanagedMethods.MarkFullscreenWindow`, `UnmanagedMethods.MessageFilterFlag`, `UnmanagedMethods.NCCALCSIZE_PARAMS`, `UnmanagedMethods.OpenFileNameFlags`, `UnmanagedMethods.PAINTSTRUCT`, `UnmanagedMethods.POINTER_INFO`, `UnmanagedMethods.POINTER_PEN_INFO`, `UnmanagedMethods.POINTER_TOUCH_INFO`, `UnmanagedMethods.PenMask`, `UnmanagedMethods.PointerDeviceChangeFlags`, `UnmanagedMethods.RGBQUAD`, `UnmanagedMethods.RTL_OSVERSIONINFOEX`, `UnmanagedMethods.SIZE`, `UnmanagedMethods.SIZE_F`, and 46 more
 - **Members of types that exist (195), by type:** `UnmanagedMethods` 166, `PopupImpl` 9, `WindowImpl` 3, `ClipboardImpl` 2, `HANDLE` 2, `UnmanagedMethods.MONITORINFOEX` 2, `Win32PlatformSettings` 2, `AngleWin32EglDisplay` 1, `CursorFactory` 1, `CursorImpl` 1, `DirectXUnmanagedMethods` 1, `EmbeddedWindowImpl` 1, `SimpleWindow` 1, `UnmanagedMethods.WINDOWPLACEMENT` 1, `Win32PlatformOptions` 1, `Win32TypeExtensions` 1
+
+### [Avalonia.iOS](tracking/Avalonia.iOS.md)
+
+17 files, 30 types and 200 members missing (191 members of the missing types, 9 members of types that exist).
+
+- **Files (17):** `AutomationPeerWrapper.cs`, `Clipboard/ClipboardDataFormatHelper.cs`, `Clipboard/ClipboardImpl.cs`, `Clipboard/PasteboardItemToDataTransferItemWrapper.cs`, `Clipboard/PasteboardToDataTransferWrapper.cs`, `CombinedSpan3.cs`, `Eagl/EaglDisplay.cs`, `Eagl/EaglLayerSurface.cs`, `Eagl/LayerFbo.cs`, `IOSLauncher.cs`, `IOSPlatformFeedback.cs`, `PlatformSettings.cs`, `Storage/IOSStorageItem.cs`, `Storage/IOSStorageProvider.cs`, `TextInputResponder.Properties.cs`, `TextInputResponder.cs`, `UIKitInputPane.cs`
+- **Types (30):** `AutomationPeerWrapper`, `AvaloniaAppDelegate<TApp>`, `AvaloniaSceneDelegate`, `AvaloniaView`, `ClipboardDataFormatHelper`, `ClipboardImpl`, `CombinedSpan3<T>`, `DefaultAvaloniaViewController`, `EaglLayerSurface`, `EaglPlatformGraphics`, `Extensions`, `GlContext`, `IAvaloniaAppInternalDelegate`, `IOSLauncher`, `IOSPlatformFeedback`, `IOSStorageFile`, `IOSStorageFolder`, `IOSStorageItem`, `IOSStorageProvider`, `LayerFbo`, `NativeControlHostImpl`, `PasteboardItemToDataTransferItemWrapper`, `PasteboardToDataTransferWrapper`, `PlatformSettings`, `SizeSynchronizedLayerFbo`, `UIKitInputPane`
+- **Members of types that exist (9):** `AvaloniaView.TopLevelImpl.Invalidate`, `AvaloniaView.TopLevelImpl.FrameSize`, `DisplayLinkTimer.TimerThread`, `IOSApplicationExtensions.UseiOS`, `InputHandler.Handle`, `InputHandler.Handle`, `InputHandler.HandleScrollWheel`, `MetalRenderTarget.PendingLayout`, `UIViewControlHandle.Destroy`

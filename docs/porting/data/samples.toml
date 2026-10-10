@@ -29,11 +29,46 @@ rust = "samples/MiniMvvm"
 note = "the view model library of the catalog"
 
 [[sample]]
+upstream = "samples/RenderDemo"
+rust = "samples/RenderDemo"
+
+[[sample]]
+upstream = "samples/BindingDemo"
+rust = "samples/BindingDemo"
+
+[[sample]]
+upstream = "samples/VirtualizationDemo"
+rust = "samples/VirtualizationDemo"
+
+[[sample]]
+upstream = "samples/TextTestApp"
+rust = "samples/TextTestApp"
+
+[[sample]]
+upstream = "samples/Sandbox"
+rust = "samples/Sandbox"
+
+[[sample]]
+upstream = "samples/AppWithoutLifetime"
+rust = "samples/AppWithoutLifetime"
+
+[[sample]]
+upstream = "samples/IntegrationTestApp"
+rust = "samples/IntegrationTestApp"
+note = "the application the integration tests drive"
+
+[[sample]]
+upstream = "samples/SampleControls"
+rust = "samples/SampleControls"
+note = "the controls the samples share"
+
+[[sample]]
 upstream = "samples/ControlCatalog.Android"
 note = "the head of the catalog for Avalonia.Android, which is out of scope"
 
 [[sample]]
 upstream = "samples/ControlCatalog.iOS"
+rust = "samples/ControlCatalog.iOS"
 note = "the head of the catalog for Avalonia.iOS"
 
 [[sample]]
