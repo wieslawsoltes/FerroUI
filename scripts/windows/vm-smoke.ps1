@@ -52,7 +52,12 @@
 
 .PARAMETER Desktop
   Also build ferroui-desktop and run its example hello_window for two seconds (Skia: a published
-  binary of Skia for the target is needed, or Skia is built from source, which takes an hour).
+  binary of Skia for the target is needed, or Skia is built from source, which takes an hour):
+  with the default options, with each rendering mode alone, and with ANGLE on the UI thread.
+
+.PARAMETER HelloRepeat
+  How many times the run of hello_window with the default options is made (to look for a failure
+  that does not happen every time). Default: 1.
 
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\windows\vm-smoke.ps1 -TargetDir D:\ferroui-target -Jobs 3
@@ -71,6 +76,7 @@ param(
     [string]$RustupHome = '',
     [string]$LibclangPath = '',
     [switch]$Desktop,
+    [int]$HelloRepeat = 1,
     [switch]$SkipBuild,
     [switch]$SkipTests
 )
@@ -287,11 +293,23 @@ if ($Desktop) {
         Tail 'desktop-build' 40
     } else {
         $hello = Join-Path $TargetDir 'debug\examples\hello_window.exe'
-        $env:FERROUI_SMOKE_EXIT_MS = '2000'
-        $commandLine = "set FERROUI_SMOKE_EXIT_MS=2000&& `"$hello`""
-        $code = if ($InteractiveUser) { Run-Interactive 'hello-window' $commandLine } else { Run 'hello-window' $commandLine }
-        if ($code -ne 0) { $failed.Add('hello_window') }
-        Tail 'hello-window' 30
+        # The default options (ANGLE first, the render thread), then each rendering mode alone,
+        # and ANGLE on the UI thread: which of them works says where a failure is.
+        $variants = @(
+            @('default', ''),
+            @('software', 'set FERROUI_SMOKE_RENDERING=software&& '),
+            @('angle', 'set FERROUI_SMOKE_RENDERING=angle&& '),
+            @('angle-ui-thread', 'set FERROUI_SMOKE_RENDERING=angle&& set FERROUI_SMOKE_RENDER_ON_UI_THREAD=1&& ')
+        )
+        for ($i = 2; $i -le $HelloRepeat; $i++) { $variants += ,@("default-$i", '') }
+        foreach ($variant in $variants) {
+            $name = "hello-window-$($variant[0])"
+            $commandLine = "set FERROUI_SMOKE_EXIT_MS=2000&& set FERROUI_SMOKE_LOG=1&& $($variant[1])`"$hello`""
+            $code = if ($InteractiveUser) { Run-Interactive $name $commandLine } else { Run $name $commandLine }
+            if ($code -ne 0) { $failed.Add("hello_window ($($variant[0]))") }
+            # A repetition that passed is one line of the report.
+            if ($code -ne 0 -or $variant[0] -notmatch '^default-') { Tail $name 30 '^(?!WARN: driver_utils)' }
+        }
     }
 }
 

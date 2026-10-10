@@ -86,14 +86,17 @@ jobs:
   # The Windows platform backend (docs/porting/win32-platform.md, section 10.3). This job is the
   # only place the backend runs: it is written and checked for the Windows target on other
   # systems. Like the macOS job it does not run for a push to main.
-  # - The first three steps are the backend itself and fail the job: it links, its tests pass on
-  #   the real target, and the smoke run of a window passes every check it prints (frames through
-  #   the software surface, a resize, maximize and restore, posted key and mouse input, clipboard
-  #   text, a wake-up of the message loop from another thread, close). Read the log of the smoke
-  #   run: it prints what it saw for every check.
-  # - The steps after them are the first time anything of the port is compiled with MSVC and the
-  #   first time the whole stack runs on Windows. They are informative (continue-on-error) until
-  #   their first green run, after which the marker is to be removed.
+  # - The first three steps are the backend without ANGLE and fail the job: it links, its tests
+  #   pass on the real target, and the smoke run of a window passes every check it prints (frames
+  #   through the software surface, a resize, maximize and restore, posted key and mouse input,
+  #   clipboard text, a wake-up of the message loop from another thread, close). Read the log of
+  #   the smoke run: it prints what it saw for every check.
+  # - Then the default features: ANGLE (the crate mozangle) is built, and the smoke run goes
+  #   through the platform graphics of ANGLE, with every frame read back from the GPU.
+  # - Then the whole stack with MSVC: the Skia backend with Ganesh on OpenGL, HarfBuzz, the
+  #   desktop entry point and hello_window through the compositor and the render thread. These
+  #   steps ran green first on 2026-10-10 and fail the job since. The step that asks which Skia
+  #   binaries are published stays informative: it gates them.
   windows:
     name: Build, test and smoke run (Windows platform backend)
     if: github.event_name != 'push'
@@ -138,9 +141,7 @@ jobs:
       # (the WARP device of the runner), an EGL window surface on the window, frames drawn with
       # OpenGL ES; every frame is read back with glReadPixels before the swap and compared with
       # what was drawn. The probe adds what ANGLE reports of itself on Direct3D 11 and 9.
-      - name: Smoke run through ANGLE with the ANGLE probe (informative until its first green run)
-        if: ${{ !cancelled() }}
-        continue-on-error: true
+      - name: Smoke run through ANGLE with the ANGLE probe
         timeout-minutes: 5
         run: cargo run --locked -p ferroui-win32 --example win32_window -- --smoke --rendering angle --angle-probe
       - name: Skia binaries published for Windows (informative)
@@ -169,14 +170,12 @@ jobs:
                      ganesh-gl-graphite-jpegd-jpege-pdf-vulkan d3d-ganesh-gl-graphite-jpegd-jpege-pdf-vulkan; do
             if published "$key"; then echo "published:     $key"; else echo "not published: $key"; fi
           done
-      - name: Build and test the desktop entry point (informative until its first green run)
-        if: ${{ !cancelled() && steps.skia.outputs.raster == 'true' }}
-        continue-on-error: true
+      - name: Build and test the desktop entry point
+        if: ${{ steps.skia.outputs.raster == 'true' }}
         timeout-minutes: 60
         run: cargo test --locked -p ferroui-desktop --lib
-      - name: hello_window for two seconds (informative until its first green run)
-        if: ${{ !cancelled() && steps.skia.outputs.raster == 'true' }}
-        continue-on-error: true
+      - name: hello_window for two seconds
+        if: ${{ steps.skia.outputs.raster == 'true' }}
         timeout-minutes: 30
         env:
           FERROUI_SMOKE_EXIT_MS: 2000

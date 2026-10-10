@@ -11,6 +11,13 @@
 //! milliseconds, which ends the main loop; the process exits with the exit
 //! code the lifetime returns.
 //!
+//! For runs without a person on Windows: `FERROUI_SMOKE_RENDERING=software`
+//! or `angle` asks for one rendering mode without a fallback,
+//! `FERROUI_SMOKE_RENDER_ON_UI_THREAD=1` renders on the UI thread,
+//! `FERROUI_SMOKE_LOG=1` writes the warnings and errors the framework logs
+//! to the error stream, and a fatal exception of the system is reported
+//! with its code before the process ends.
+//!
 //! The window content is painted by the compositing renderer through the
 //! compositor the platform registers.
 
@@ -292,9 +299,115 @@ mod main_menu_probe {
     }
 }
 
+/// On Windows, a fatal exception of the system (an access violation in a
+/// library, for one) ends the process without a word, where a panic says
+/// what failed. This prints the code and the address of such an exception
+/// before the system goes on to end the process, so a run without a person
+/// leaves something to read.
+#[cfg(all(windows, not(target_arch = "x86")))]
+mod fatal_exceptions {
+    use std::ffi::c_void;
+
+    #[repr(C)]
+    struct ExceptionRecord {
+        code: u32,
+        flags: u32,
+        record: *mut ExceptionRecord,
+        address: *mut c_void,
+    }
+
+    #[repr(C)]
+    struct ExceptionPointers {
+        record: *mut ExceptionRecord,
+        context: *mut c_void,
+    }
+
+    #[link(name = "kernel32", kind = "raw-dylib")]
+    extern "system" {
+        fn AddVectoredExceptionHandler(
+            first: u32,
+            handler: unsafe extern "system" fn(info: *mut ExceptionPointers) -> i32,
+        ) -> *mut c_void;
+    }
+
+    /// `EXCEPTION_CONTINUE_SEARCH`: the exception goes on to the handlers
+    /// it would have reached without this one.
+    const CONTINUE_SEARCH: i32 = 0;
+
+    unsafe extern "system" fn handler(info: *mut ExceptionPointers) -> i32 {
+        // SAFETY: the system passes the record of the exception that is
+        // being dispatched, valid for the length of this call.
+        let (code, address) = unsafe {
+            let record = (*info).record;
+            ((*record).code, (*record).address)
+        };
+        // The errors of the system (the severity bits 11); the exceptions a
+        // language runtime throws and catches, and debug output, are not.
+        if code >= 0xC000_0000 {
+            let thread = std::thread::current();
+            eprintln!(
+                "Fatal exception {code:#010x} at {address:p} on thread {:?} ({:?})",
+                thread.name().unwrap_or("unnamed"),
+                thread.id()
+            );
+        }
+        CONTINUE_SEARCH
+    }
+
+    pub fn install() {
+        // SAFETY: the handler is a function of this program with the
+        // signature the system calls, and it stays for the life of the
+        // process.
+        unsafe {
+            AddVectoredExceptionHandler(1, handler);
+        }
+    }
+}
+
+/// The options of a smoke run on Windows, from the environment:
+/// `FERROUI_SMOKE_RENDERING=software|angle` asks for that rendering mode
+/// alone (no fallback, so a mode that does not work fails the run), and
+/// `FERROUI_SMOKE_RENDER_ON_UI_THREAD=1` renders on the UI thread.
+#[cfg(windows)]
+fn smoke_platform_options(builder: AppBuilder) -> AppBuilder {
+    use ferroui_win32::{Win32CompositionMode, Win32PlatformOptions, Win32RenderingMode};
+
+    let rendering = std::env::var("FERROUI_SMOKE_RENDERING").ok();
+    let on_ui_thread = std::env::var_os("FERROUI_SMOKE_RENDER_ON_UI_THREAD").is_some();
+    if rendering.is_none() && !on_ui_thread {
+        return builder;
+    }
+    let mut options = Win32PlatformOptions { should_render_on_ui_thread: on_ui_thread, ..Default::default() };
+    match rendering.as_deref() {
+        Some("software") => options.rendering_mode = vec![Win32RenderingMode::Software],
+        Some("angle") => {
+            options.rendering_mode = vec![Win32RenderingMode::AngleEgl];
+            options.composition_mode = vec![Win32CompositionMode::RedirectionSurface];
+        }
+        Some(other) => println!("FERROUI_SMOKE_RENDERING: unknown mode {other:?} (software, angle); the default order is used"),
+        None => {}
+    }
+    println!("Rendering modes: {:?}; render on the UI thread: {on_ui_thread}", options.rendering_mode);
+    builder.with(Rc::new(options))
+}
+
+#[cfg(not(windows))]
+fn smoke_platform_options(builder: AppBuilder) -> AppBuilder {
+    builder
+}
+
 fn main() -> std::process::ExitCode {
+    #[cfg(all(windows, not(target_arch = "x86")))]
+    fatal_exceptions::install();
+
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let exit_code = AppBuilder::configure::<App>().use_platform_detect().start_with_classic_desktop_lifetime(&args);
+    let mut builder = smoke_platform_options(AppBuilder::configure::<App>());
+    // `FERROUI_SMOKE_LOG=1`: what the framework logs at the level of
+    // warnings and above, to the error stream.
+    if std::env::var_os("FERROUI_SMOKE_LOG").is_some() {
+        builder = builder.log_to_text_writer(std::io::stderr(), ferroui_base::logging::LogEventLevel::Warning, &[]);
+    }
+    let exit_code = builder.use_platform_detect().start_with_classic_desktop_lifetime(&args);
     println!("start_with_classic_desktop_lifetime returned {exit_code}");
     std::process::ExitCode::from(exit_code as u8)
 }
