@@ -1,15 +1,12 @@
+use crate::i_activity_result_handler::IActivityResultHandler;
+use crate::i_android_navigation_service::IActivityNavigationService;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::BoxedValue;
 use ferroui_controls::application_lifetimes::ActivatedEventArgs;
 use std::rc::Rc;
 
 /// An activity that shows content of the framework.
-///
-/// The reference contract also carries the results of activities and the
-/// navigation service of the back button (`IActivityResultHandler`,
-/// `IActivityNavigationService`): stage 2 of
-/// docs/porting/android-platform.md.
-pub trait IFerroActivity {
+pub trait IFerroActivity: IActivityResultHandler + IActivityNavigationService {
     /// The content of the view of the activity.
     fn content(&self) -> Option<BoxedValue>;
 

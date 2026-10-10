@@ -89,8 +89,17 @@ adb_shell settings put secure show_ime_with_hard_keyboard 1 >/dev/null 2>&1 || t
 #   keyevent CODE...      key codes, each pressed and released
 #   text TEXT             text, as the keys of a virtual keyboard
 #   night yes|no          the night mode of the system
+#   home                  the home button: the application goes to the background
+#   resume                the activity is started as the launcher starts it: an activity that
+#                         is in the background comes back, one that finished is created again
+#   rotate 0..3           the rotation of the display, in quarter turns
+#   view URI              an intent with the URI for the activity that runs
+#   back                  the back button
 # Everything but a picture is left out with --no-input.
 night_changed=0
+rotated=0
+# How the launcher starts the activity: an intent that equals this one brings its task back.
+launch="-a android.intent.action.MAIN -c android.intent.category.LAUNCHER"
 smoke_request() {
     local mode="$1" command="$2"
     shift 2
@@ -107,6 +116,14 @@ smoke_request() {
         keyevent) adb_shell input keyevent "$@" >/dev/null 2>&1 || true ;;
         text) adb_shell input text "$1" >/dev/null 2>&1 || true ;;
         night) night_changed=1; adb_shell cmd uimode night "$1" >/dev/null 2>&1 || true ;;
+        home) adb_shell input keyevent HOME >/dev/null 2>&1 || true ;;
+        resume) adb_shell am start $launch -n "$activity" >/dev/null 2>&1 || true ;;
+        rotate)
+            rotated=1
+            adb_shell settings put system accelerometer_rotation 0 >/dev/null 2>&1 || true
+            adb_shell settings put system user_rotation "$1" >/dev/null 2>&1 || true ;;
+        view) adb_shell am start --activity-single-top -a android.intent.action.VIEW -d "'$1'" -n "$activity" >/dev/null 2>&1 || true ;;
+        back) adb_shell input keyevent BACK >/dev/null 2>&1 || true ;;
         *) echo "   script: unknown request '$command'" ;;
     esac
 }
@@ -120,7 +137,7 @@ for mode in $modes; do
 input=$input"
     adb_shell "run-as $application_id rm -f files/smoke-report.txt" >/dev/null 2>&1 || true
     adb_do logcat -c >/dev/null 2>&1 || true
-    if ! adb_shell am start -W -n "$activity" > "$out/am-start-$mode.txt" 2>&1; then
+    if ! adb_shell am start -W $launch -n "$activity" > "$out/am-start-$mode.txt" 2>&1; then
         echo "[FAIL] the activity could not be started:"
         cat "$out/am-start-$mode.txt"
         failed=1
@@ -167,6 +184,10 @@ EOF
         # A run that ended early may have left the night mode on.
         adb_shell cmd uimode night no >/dev/null 2>&1 || true
         night_changed=0
+    fi
+    if [ "$rotated" = 1 ]; then
+        adb_shell settings put system user_rotation 0 >/dev/null 2>&1 || true
+        rotated=0
     fi
     ADB_TIMEOUT=30 adb_do logcat -d -v threadtime > "$out/logcat-$mode.txt" 2>/dev/null || true
     ADB_TIMEOUT=30 adb_do logcat -d -b crash -v threadtime > "$out/crash-$mode.txt" 2>/dev/null || true

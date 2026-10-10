@@ -21,12 +21,16 @@ use crate::platform::specific::helpers::android_keyboard_events_helper::{
 use crate::platform::specific::helpers::android_motion_events_helper::{
     AndroidMotionEventsHelper, IMotionEventsTopLevel,
 };
-use crate::platform::{AndroidInsetsManager, AndroidScreens};
+use crate::ferro_activity::FerroActivity;
+use crate::i_android_navigation_service::IActivityNavigationService;
+use crate::platform::{AndroidInsetsManager, AndroidScreens, AndroidSystemNavigationManagerImpl};
 use ferroui_base::input::raw::{IRawInputEventArgs, RawTextInputEventArgs};
 use ferroui_base::input::text_input::ITextInputMethodImpl;
 use ferroui_base::input::{IInputDevice, IInputRoot, NavigationDirection};
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
-use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider, PlatformThemeVariant};
+use ferroui_base::platform::{
+    ICursorImpl, IOptionalFeatureProvider, ISystemNavigationManagerImpl, PlatformThemeVariant,
+};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::{PixelPoint, PixelSize, Point, Rect, Size};
@@ -124,6 +128,7 @@ pub struct TopLevelImpl {
     keyboard_helper: AndroidKeyboardEventsHelper,
     text_input_method: Rc<AndroidInputMethod>,
     text_input_host: Rc<ViewInputMethodHost>,
+    system_navigation_manager: Rc<AndroidSystemNavigationManagerImpl>,
     pointer_helper: AndroidMotionEventsHelper,
     insets_manager: Option<Rc<AndroidInsetsManager>>,
     screens: Rc<AndroidScreens>,
@@ -155,10 +160,14 @@ impl TopLevelImpl {
         let shared = view.shared().clone();
 
         // Stage 2 of docs/porting/android-platform.md, each with the files that build it:
-        // the clipboard, the platform feedback, the storage provider, the launcher, the
-        // native control host and the system navigation manager.
+        // the clipboard, the platform feedback, the storage provider, the launcher and the
+        // native control host.
         // `try_get_feature` answers that the top-level does not have them.
         let is_activity = is_instance_of(context, "android/app/Activity");
+        // `context as IActivityNavigationService`: the activity of this backend the context is.
+        let navigation_service = FerroActivity::from_java(context)
+            .map(|activity| activity as Rc<dyn IActivityNavigationService>);
+        let system_navigation_manager = AndroidSystemNavigationManagerImpl::new(navigation_service);
         let text_input_host = Rc::new(ViewInputMethodHost::new(ferro_view.clone(), context));
         let text_input_method = {
             let host: Rc<dyn IInputMethodHost> = text_input_host.clone();
@@ -195,6 +204,7 @@ impl TopLevelImpl {
                 keyboard_helper: AndroidKeyboardEventsHelper::new(keyboard_top_level, sdk_int()),
                 text_input_method,
                 text_input_host,
+                system_navigation_manager,
                 pointer_helper: AndroidMotionEventsHelper::new(motion_top_level),
                 insets_manager,
                 screens: AndroidScreens::new(context),
@@ -489,6 +499,7 @@ impl IInsetsTopLevel for TopLevelImpl {
 
 impl IDisposable for TopLevelImpl {
     fn dispose(&self) {
+        self.system_navigation_manager.dispose();
         self.pointer_helper.dispose();
         let view = self.view.borrow_mut().take();
         if let Some(view) = view {
@@ -503,6 +514,11 @@ impl IOptionalFeatureProvider for TopLevelImpl {
         if feature_type == TypeId::of::<dyn ITextInputMethodImpl>() {
             let text_input_method: Rc<dyn ITextInputMethodImpl> = self.text_input_method.clone();
             return Some(Rc::new(text_input_method));
+        }
+
+        if feature_type == TypeId::of::<dyn ISystemNavigationManagerImpl>() {
+            let system_navigation_manager: Rc<dyn ISystemNavigationManagerImpl> = self.system_navigation_manager.clone();
+            return Some(Rc::new(system_navigation_manager));
         }
 
         if feature_type == TypeId::of::<dyn IInsetsManager>() {
