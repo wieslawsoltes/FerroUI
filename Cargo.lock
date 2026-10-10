@@ -267,6 +267,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "control-catalog-ios"
+version = "0.1.0-preview.1"
+dependencies = [
+ "control-catalog",
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-ios",
+]
+
+[[package]]
 name = "convert_case"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

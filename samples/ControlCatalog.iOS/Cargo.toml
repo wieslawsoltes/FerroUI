@@ -1,0 +1,22 @@
+[package]
+name = "control-catalog-ios"
+description = "The iOS entry point of the ControlCatalog sample of FerroUI"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+autobenches = false
+autoexamples = false
+
+[[bin]]
+name = "control-catalog-ios"
+path = "main.rs"
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-ios = { workspace = true }
+control-catalog = { path = "../ControlCatalog" }

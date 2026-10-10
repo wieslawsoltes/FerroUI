@@ -231,7 +231,7 @@ Sample applications. Same directory names; binary crates.
 | `samples/ControlCatalog.Browser` | 2 | `samples/ControlCatalog.Browser` | workspace member | not tracked |
 | `samples/ControlCatalog.Desktop` | 7 | `samples/ControlCatalog.Desktop` | workspace member | not tracked |
 | `samples/ControlCatalog.MacCatalyst` | 0 | `samples/ControlCatalog.MacCatalyst` | not created | not tracked |
-| `samples/ControlCatalog.iOS` | 3 | `samples/ControlCatalog.iOS` | not created | not tracked |
+| `samples/ControlCatalog.iOS` | 3 | `samples/ControlCatalog.iOS` | workspace member | not tracked |
 | `samples/ControlCatalog.tvOS` | 0 | `samples/ControlCatalog.tvOS` | not created | not tracked |
 | `samples/ControlGallery.WinUI` | 2 | `samples/ControlGallery.WinUI` | not created | not tracked |
 | `samples/Generators.Sandbox` | 6 | `samples/Generators.Sandbox` | not created | not tracked |
@@ -302,6 +302,7 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `samples/ControlCatalog` | `samples/ControlCatalog` (not tracked) |
 | `samples/ControlCatalog.Browser` | `samples/ControlCatalog.Browser` (not tracked) |
 | `samples/ControlCatalog.Desktop` | `samples/ControlCatalog.Desktop` (not tracked) |
+| `samples/ControlCatalog.iOS` | `samples/ControlCatalog.iOS` (not tracked) |
 | `samples/MiniMvvm` | `samples/MiniMvvm` (not tracked) |
 | `src/Browser/FerroUI.Browser` | `src/Browser/Avalonia.Browser` |
 | `src/FerroUI.Base` | `src/Avalonia.Base` |
