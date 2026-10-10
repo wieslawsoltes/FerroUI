@@ -797,7 +797,8 @@ mod app {
 
         fn wait_for_destroy(state: &Rc<State>) {
             let destroyed = FerroActivity::current_main_activity().is_none();
-            if !destroyed && elapsed(state) < Duration::from_secs(10) {
+            // The close transition of the system comes first; on an emulator it takes seconds.
+            if !destroyed && elapsed(state) < Duration::from_secs(40) {
                 return;
             }
             check(
