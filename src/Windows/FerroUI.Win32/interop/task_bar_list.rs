@@ -79,7 +79,13 @@ mod imp {
         fn drop(&mut self) {
             // SAFETY: `Release` of the interface, with the pointer whose
             // reference this value holds and does not use again.
+            if ferroui_microcom::release_trace() {
+                eprintln!("teardown: release of the task bar list begins");
+            }
             unsafe { (self.vtable().i_unknown3)(self.0.cast()) };
+            if ferroui_microcom::release_trace() {
+                eprintln!("teardown: release of the task bar list returned");
+            }
         }
     }
 

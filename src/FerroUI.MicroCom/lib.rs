@@ -33,7 +33,7 @@ mod hresult;
 mod unknown;
 
 pub use com_object::{make_com, ComObject, ImplementedBy};
-pub use com_ptr::ComPtr;
+pub use com_ptr::{release_trace, set_release_trace, ComPtr};
 pub use guid::Guid;
 pub use hresult::{
     HResult, RawHResult, COR_E_INVALIDOPERATION, COR_E_OBJECTDISPOSED, E_ABORT, E_FAIL, E_HANDLE,

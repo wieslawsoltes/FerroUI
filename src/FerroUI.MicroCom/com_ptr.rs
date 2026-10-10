@@ -6,6 +6,22 @@ use std::ptr::NonNull;
 
 use crate::{HResult, Interface, E_NOINTERFACE, S_OK};
 
+/// Diagnostics of the end of a process (the Windows backend, finding 1 of
+/// `docs/porting/win32-platform.md`, section 11.2): when set, every release
+/// of a pointer is written to the standard error stream before and after
+/// the call, so that a release that does not return is the last line.
+static RELEASE_TRACE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// Turns the trace of releases on or off.
+pub fn set_release_trace(enabled: bool) {
+    RELEASE_TRACE.store(enabled, std::sync::atomic::Ordering::SeqCst);
+}
+
+/// Whether releases are traced.
+pub fn release_trace() -> bool {
+    RELEASE_TRACE.load(std::sync::atomic::Ordering::Relaxed)
+}
+
 /// Owning, non-null COM interface pointer: holds exactly one reference.
 ///
 /// Not `Send`/`Sync`: the native objects are UI-thread affine.
@@ -102,6 +118,13 @@ impl<T: Interface> Clone for ComPtr<T> {
 impl<T: Interface> Drop for ComPtr<T> {
     #[inline]
     fn drop(&mut self) {
+        if release_trace() {
+            eprintln!("teardown: release of {} {:p} begins", T::NAME, self.ptr.as_ptr());
+            // SAFETY: we own one reference.
+            let left = unsafe { self.as_unknown().release() };
+            eprintln!("teardown: release of {} returned {left}", T::NAME);
+            return;
+        }
         // SAFETY: we own one reference.
         unsafe { self.as_unknown().release() };
     }

@@ -38,13 +38,196 @@ fn main() {
 
 #[cfg(windows)]
 fn main() -> std::process::ExitCode {
-    let code = windows::run();
+    // `--teardown-trace`: what the end of the process does is written to the standard error
+    // stream (finding 1 of docs/porting/win32-platform.md, section 11.2: a run through
+    // DirectComposition printed that it passed and then did not end on one runner).
+    let trace = std::env::args().any(|argument| argument == "--teardown-trace");
+    if trace {
+        teardown::at_start();
+    }
+    // `--on-thread`: the run is made by a thread of its own, which ends (and whose values are
+    // destroyed) while every other thread of the process is alive.
+    let code = if std::env::args().any(|argument| argument == "--on-thread") {
+        std::thread::Builder::new()
+            .name("smoke run".to_owned())
+            .spawn(|| {
+                let code = windows::run();
+                println!("the thread of the run returns");
+                code
+            })
+            .expect("the thread of the run")
+            .join()
+            .unwrap_or(std::process::ExitCode::from(101))
+    } else {
+        windows::run()
+    };
     // The last line the program prints itself: what follows is the end of the process (the
-    // values of the thread, the libraries). A run through DirectComposition printed that it
-    // passed and then did not end on one runner (run 38066650638); this line tells whether the
-    // program had returned by then.
+    // values of the thread, the libraries).
     println!("main returns");
+    if trace {
+        teardown::at_return();
+    }
     code
+}
+
+/// Diagnostics of the end of the process: the threads that are alive when `main` returns,
+/// a line per second while they still run, and a line when the handlers of the C runtime
+/// and the destructors of the values of the main thread run.
+#[cfg(windows)]
+mod teardown {
+    use std::ffi::c_void;
+
+    #[repr(C)]
+    struct ThreadEntry32 {
+        size: u32,
+        usage: u32,
+        thread_id: u32,
+        owner_process_id: u32,
+        base_priority: i32,
+        delta_priority: i32,
+        flags: u32,
+    }
+
+    #[link(name = "kernel32")]
+    unsafe extern "system" {
+        fn CreateToolhelp32Snapshot(flags: u32, process_id: u32) -> isize;
+        fn Thread32First(snapshot: isize, entry: *mut ThreadEntry32) -> i32;
+        fn Thread32Next(snapshot: isize, entry: *mut ThreadEntry32) -> i32;
+        fn CloseHandle(handle: isize) -> i32;
+        fn GetCurrentProcessId() -> u32;
+        fn GetCurrentThreadId() -> u32;
+        fn GetCurrentProcess() -> isize;
+        fn TerminateProcess(process: isize, code: u32) -> i32;
+        fn OpenThread(access: u32, inherit: i32, thread_id: u32) -> isize;
+        fn GetThreadDescription(thread: isize, description: *mut *mut u16) -> i32;
+        fn LocalFree(memory: *mut c_void) -> *mut c_void;
+        fn GetModuleHandleExW(flags: u32, address: *const c_void, module: *mut isize) -> i32;
+        fn GetModuleFileNameW(module: isize, name: *mut u16, size: u32) -> u32;
+    }
+
+    #[link(name = "ntdll")]
+    unsafe extern "system" {
+        fn NtQueryInformationThread(thread: isize, class: u32, information: *mut c_void, length: u32, returned: *mut u32) -> i32;
+    }
+
+    unsafe extern "C" {
+        fn atexit(callback: extern "C" fn()) -> i32;
+    }
+
+    struct Marker(&'static str);
+
+    impl Drop for Marker {
+        fn drop(&mut self) {
+            eprintln!("teardown: {}", self.0);
+        }
+    }
+
+    thread_local! {
+        static FIRST: Marker = const { Marker("the value of the main thread that was registered first is destroyed (the last of them)") };
+        static LAST: Marker = const { Marker("the values of the main thread are being destroyed (the one registered last is the first)") };
+    }
+
+    extern "C" fn at_exit() {
+        eprintln!("teardown: the handlers of the C runtime run (the one registered when main started)");
+    }
+
+    /// The name and the module of the start address of every thread of the process.
+    fn threads() -> Vec<String> {
+        let mut list = Vec::new();
+        // SAFETY (the block): calls of the system with values and buffers of this function;
+        // every handle that is opened is closed, and the description is freed.
+        unsafe {
+            let (process, current) = (GetCurrentProcessId(), GetCurrentThreadId());
+            let snapshot = CreateToolhelp32Snapshot(0x4, 0);
+            if snapshot == -1 {
+                return list;
+            }
+            let mut entry: ThreadEntry32 = std::mem::zeroed();
+            entry.size = size_of::<ThreadEntry32>() as u32;
+            let mut more = Thread32First(snapshot, &mut entry);
+            while more != 0 {
+                if entry.owner_process_id == process {
+                    let mut line = format!("thread {}", entry.thread_id);
+                    if entry.thread_id == current {
+                        line.push_str(" (this thread)");
+                    }
+                    // THREAD_QUERY_INFORMATION
+                    let thread = OpenThread(0x0040, 0, entry.thread_id);
+                    if thread != 0 {
+                        let mut description: *mut u16 = std::ptr::null_mut();
+                        if GetThreadDescription(thread, &mut description) >= 0 && !description.is_null() {
+                            let mut length = 0;
+                            while *description.add(length) != 0 {
+                                length += 1;
+                            }
+                            let name = String::from_utf16_lossy(std::slice::from_raw_parts(description, length));
+                            if !name.is_empty() {
+                                line.push_str(&format!(" \"{name}\""));
+                            }
+                            LocalFree(description.cast());
+                        }
+                        // ThreadQuerySetWin32StartAddress
+                        let mut start: usize = 0;
+                        let status = NtQueryInformationThread(
+                            thread,
+                            9,
+                            (&raw mut start).cast(),
+                            size_of::<usize>() as u32,
+                            std::ptr::null_mut(),
+                        );
+                        if status >= 0 {
+                            let mut module = 0isize;
+                            // GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT
+                            if GetModuleHandleExW(0x4 | 0x2, start as *const c_void, &mut module) != 0 {
+                                let mut name = [0u16; 512];
+                                let length = GetModuleFileNameW(module, name.as_mut_ptr(), name.len() as u32) as usize;
+                                let path = String::from_utf16_lossy(&name[..length]);
+                                let file = path.rsplit(['\\', '/']).next().unwrap_or(&path).to_owned();
+                                line.push_str(&format!(", started in {file}+{:#x}", start.wrapping_sub(module as usize)));
+                            } else {
+                                line.push_str(&format!(", started at {start:#x}"));
+                            }
+                        }
+                        CloseHandle(thread);
+                    }
+                    list.push(line);
+                }
+                more = Thread32Next(snapshot, &mut entry);
+            }
+            CloseHandle(snapshot);
+        }
+        list
+    }
+
+    pub fn at_start() {
+        FIRST.with(|_| {});
+        // SAFETY: a function of this program that takes nothing and returns.
+        unsafe { atexit(at_exit) };
+    }
+
+    pub fn at_return() {
+        let alive = threads();
+        eprintln!("teardown: {} thread(s) when main returns", alive.len());
+        for thread in &alive {
+            eprintln!("teardown:   {thread}");
+        }
+        LAST.with(|_| {});
+        ferroui_microcom::set_release_trace(true);
+        let _ = std::thread::Builder::new().name("teardown watchdog".to_owned()).spawn(|| {
+            for second in 1..=20 {
+                std::thread::sleep(std::time::Duration::from_secs(1));
+                eprintln!("teardown: {second} s after main returned the threads of the process still run");
+                if second == 5 {
+                    for thread in threads() {
+                        eprintln!("teardown:   {thread}");
+                    }
+                }
+            }
+            eprintln!("teardown: the process did not end in 20 s while its threads ran: it is terminated with the code 97");
+            // SAFETY: ends this process.
+            unsafe { TerminateProcess(GetCurrentProcess(), 97) };
+        });
+    }
 }
 
 #[cfg(windows)]
