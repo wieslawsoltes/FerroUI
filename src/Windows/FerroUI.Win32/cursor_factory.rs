@@ -46,6 +46,7 @@ pub use imp::{CursorFactory, CursorImpl};
 mod imp {
     use super::*;
     use crate::interop::unmanaged_methods::{get_module_handle, load_cursor};
+    use crate::interop::win32_icon::Win32Icon;
     use crate::platform_constants::PlatformConstants;
     use ferroui_base::media::imaging::Bitmap;
     use ferroui_base::platform::{ICursorFactory, ICursorImpl};
@@ -99,23 +100,26 @@ mod imp {
             cursor
         }
 
-        /// # Panics
-        /// Panics: cursors made from bitmaps need the icons of the backend
-        /// (`Win32Icon`), which stage 2 builds.
-        fn create_cursor(&self, _cursor: &Bitmap, _hot_spot: PixelPoint) -> Rc<dyn ICursorImpl> {
-            crate::not_built("CursorFactory::create_cursor (a cursor from a bitmap)", 2)
+        fn create_cursor(&self, cursor: &Bitmap, hot_spot: PixelPoint) -> Rc<dyn ICursorImpl> {
+            Rc::new(CursorImpl::from_icon(Win32Icon::from_bitmap(cursor, hot_spot)))
         }
     }
 
     /// A cursor of the system.
     pub struct CursorImpl {
         handle: Cell<isize>,
+        icon: RefCell<Option<Win32Icon>>,
     }
 
     impl CursorImpl {
         /// Wraps a cursor handle the system owns.
         pub fn new(handle: isize) -> Self {
-            Self { handle: Cell::new(handle) }
+            Self { handle: Cell::new(handle), icon: RefCell::new(None) }
+        }
+
+        /// A cursor made from a bitmap, which owns its icon.
+        pub(crate) fn from_icon(icon: Win32Icon) -> Self {
+            Self { handle: Cell::new(icon.handle()), icon: RefCell::new(Some(icon)) }
         }
 
         /// The cursor handle.
@@ -131,9 +135,14 @@ mod imp {
 
     impl ICursorImpl for CursorImpl {
         /// A cursor of the system is shared and owned by the system:
-        /// nothing is released. (A cursor made from a bitmap owns its icon;
-        /// those arrive with stage 2.)
-        fn dispose(&self) {}
+        /// nothing is released. A cursor made from a bitmap owns its icon,
+        /// which is destroyed.
+        fn dispose(&self) {
+            if let Some(icon) = self.icon.borrow_mut().take() {
+                icon.dispose();
+                self.handle.set(0);
+            }
+        }
 
         fn as_any(&self) -> &dyn Any {
             self

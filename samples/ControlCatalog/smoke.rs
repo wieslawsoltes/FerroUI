@@ -30,6 +30,50 @@ pub fn pages(view_model: &MainWindowViewModel) -> Vec<Rc<PageItem>> {
     pages
 }
 
+/// Navigates to the pages of the catalog whose headers are given, in that
+/// order, each for `interval`. `shown` is called with the index and the
+/// header of a page when its interval is over (the page has been laid out
+/// and drawn by then), and `done` after the last page. A header no page
+/// has is reported and passed over; headers compare without regard to
+/// case.
+///
+/// This is what a run that takes a picture of some pages is built on
+/// (`FERROUI_SMOKE_SCREENSHOTS` of the desktop entry point).
+pub fn show_pages(headers: Vec<String>, interval: Duration, shown: impl Fn(usize, &str) + 'static, done: impl Fn() + 'static) {
+    let next = Cell::new(0usize);
+    let current: RefCell<Option<(usize, String)>> = RefCell::new(None);
+    let timer: Rc<RefCell<Option<Rc<dyn IDisposable>>>> = Rc::new(RefCell::new(None));
+    let stop = timer.clone();
+    let subscription = DispatcherTimer::run(
+        move || {
+            let Some(view_model) = main_view_model() else { return true };
+            if let Some((index, header)) = current.borrow_mut().take() {
+                shown(index, &header);
+            }
+            let pages = pages(&view_model);
+            while let Some(wanted) = headers.get(next.get()) {
+                let index = next.get();
+                next.set(index + 1);
+                match pages.iter().find(|item| item.header().eq_ignore_ascii_case(wanted)) {
+                    Some(item) => {
+                        println!("Selecting {}", item.header());
+                        view_model.navigate_to_item(item);
+                        *current.borrow_mut() = Some((index, item.header()));
+                        return true;
+                    }
+                    None => println!("No page has the header {wanted:?}"),
+                }
+            }
+            done();
+            stop.borrow_mut().take();
+            false
+        },
+        interval,
+        DispatcherPriority::NORMAL,
+    );
+    *timer.borrow_mut() = Some(subscription);
+}
+
 /// Navigates to the pages of the catalog one after the other, each for
 /// `interval`, and prints the header of each.
 pub fn show_every_page(interval: Duration) {

@@ -201,6 +201,37 @@ jobs:
         if: ${{ steps.skia.outputs.raster == 'true' }}
         timeout-minutes: 30
         run: cargo test --locked -p ferroui-integration-tests-win32 --test integration
+      # The catalog on Windows, for a person to look at: its desktop host shows the home page and
+      # a handful of others and writes two pictures of each, the frame the framework draws
+      # through its own render target and the client area of its window as the system composed
+      # it (the window alone, never the desktop), once with software rendering and once through
+      # ANGLE. Informative until its first green run: the log says what stops the catalog.
+      - name: Pictures of the catalog (software rendering and ANGLE)
+        if: ${{ steps.skia.outputs.raster == 'true' }}
+        continue-on-error: true
+        timeout-minutes: 60
+        env:
+          FERROUI_SMOKE_PAGES: 2500
+          FERROUI_SMOKE_EXIT_MS: 120000
+          RUST_BACKTRACE: 1
+        run: |
+          cargo build --locked -p control-catalog-desktop
+          result=0
+          for mode in software angle; do
+            echo "::group::The catalog with the rendering mode $mode"
+            FERROUI_SMOKE_RENDERING=$mode FERROUI_SMOKE_SCREENSHOTS=target/screenshots/$mode \
+              ./target/debug/control-catalog-desktop.exe || { echo "::error::the catalog ended with an error (rendering mode $mode)"; result=1; }
+            echo "::endgroup::"
+            ls -l "target/screenshots/$mode" || result=1
+          done
+          exit $result
+      - name: Keep the pictures of the catalog
+        if: ${{ always() && steps.skia.outputs.raster == 'true' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: control-catalog-windows-screenshots
+          path: target/screenshots
+          if-no-files-found: ignore
 
   # The same backend on Windows for ARM64 (the owner's test machine is one): whether ANGLE builds
   # for the target and runs there. Informative as a whole until its first green run.
