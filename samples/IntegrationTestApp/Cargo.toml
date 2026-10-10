@@ -1,0 +1,50 @@
+[package]
+name = "integration-test-app"
+description = "The IntegrationTestApp sample of FerroUI: the application the user interface automation tests drive, one page per control or platform feature"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+build = "build.rs"
+
+# Unit tests live next to the code (`tests/` modules of the library), not as integration test
+# targets.
+autotests = false
+autobenches = false
+autoexamples = false
+autobins = false
+
+[lib]
+path = "lib.rs"
+
+# The desktop entry point: `Program.cs` of the upstream sample.
+[[bin]]
+name = "integration-test-app"
+path = "program.rs"
+
+[dependencies]
+# The compiled markup of the crate calls the typed functions of the declared members.
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+ferroui-markup = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+ferroui-themes-fluent = { workspace = true }
+# The entry point.
+ferroui-desktop = { workspace = true }
+# The commands of the application (`App.xaml.cs`).
+mini-mvvm = { path = "../MiniMvvm" }
+sample-support = { path = "../SampleSupport" }
+
+# The options of the macOS backend the entry point sets (`OverlayPopups`).
+[target.'cfg(target_os = "macos")'.dependencies]
+ferroui-native = { workspace = true }
+
+[build-dependencies]
+sample-build = { path = "../SampleBuild" }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+sample-testing = { path = "../SampleTesting" }

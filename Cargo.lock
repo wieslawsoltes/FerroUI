@@ -1111,6 +1111,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "integration-test-app"
+version = "0.1.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-markup",
+ "ferroui-markup-xaml",
+ "ferroui-native",
+ "ferroui-themes-fluent",
+ "mini-mvvm",
+ "sample-build",
+ "sample-support",
+ "sample-testing",
+]
+
+[[package]]
 name = "itertools"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
