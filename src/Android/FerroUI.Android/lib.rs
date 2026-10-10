@@ -26,6 +26,8 @@ mod android_platform;
 mod android_runtime_platform;
 mod application_lifetime;
 mod cursor_factory;
+mod i_activity_result_handler;
+mod i_android_navigation_service;
 mod i_ferro_activity;
 mod i_init_editor_info;
 mod platform_icon_loader;
@@ -37,6 +39,8 @@ mod android_dispatcher_impl;
 mod android_egl;
 #[cfg(target_os = "android")]
 mod android_view_control_handle;
+#[cfg(target_os = "android")]
+mod back_pressed_callback;
 #[cfg(target_os = "android")]
 mod choreographer_timer;
 #[cfg(target_os = "android")]
@@ -53,6 +57,11 @@ mod ferro_view_input;
 pub use android_platform::{AndroidPlatformOptions, AndroidRenderingMode};
 pub use application_lifetime::ApplicationLifetime;
 pub use cursor_factory::CursorFactory;
+pub use i_activity_result_handler::{
+    ActivityResultHandler, IActivityResultHandler, Intent, RequestPermissionsResultHandler, PERMISSION_DENIED,
+    PERMISSION_GRANTED, RESULT_CANCELED, RESULT_FIRST_USER, RESULT_OK,
+};
+pub use i_android_navigation_service::{AndroidBackRequestedEventArgs, IActivityNavigationService};
 pub use i_ferro_activity::IFerroActivity;
 pub use platform_icon_loader::PlatformIconLoader;
 pub use stubs::{PlatformIconLoaderStub, WindowingPlatformStub};

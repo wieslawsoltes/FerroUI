@@ -128,6 +128,35 @@ mod tests {
         }
     }
 
+    impl crate::i_activity_result_handler::IActivityResultHandler for Activity {
+        fn activity_result(&self) -> Option<crate::i_activity_result_handler::ActivityResultHandler> {
+            None
+        }
+
+        fn set_activity_result(&self, _value: Option<crate::i_activity_result_handler::ActivityResultHandler>) {}
+
+        fn request_permissions_result(
+            &self,
+        ) -> Option<crate::i_activity_result_handler::RequestPermissionsResultHandler> {
+            None
+        }
+
+        fn set_request_permissions_result(
+            &self,
+            _value: Option<crate::i_activity_result_handler::RequestPermissionsResultHandler>,
+        ) {
+        }
+    }
+
+    impl crate::i_android_navigation_service::IActivityNavigationService for Activity {
+        fn back_requested(
+            &self,
+            _handler: Rc<dyn Fn(&crate::i_android_navigation_service::AndroidBackRequestedEventArgs)>,
+        ) -> Rc<dyn IDisposable> {
+            ferroui_base::reactive::Disposable::create(|| {})
+        }
+    }
+
     impl IFerroActivity for Activity {
         fn content(&self) -> Option<BoxedValue> {
             None

@@ -31,7 +31,7 @@ logs=""
 apk=""
 build=0
 gpu="swiftshader_indirect"
-pages="Home;Buttons;TextBlock;ListBox;Image;Calendar"
+pages="Home;Buttons;TextBlock;TextBox;ListBox;Image;Calendar"
 page_ms=8000
 software=0
 while [ $# -gt 0 ]; do
@@ -93,6 +93,7 @@ trap cleanup EXIT
 
 emu_start "$gpu" "$logs/emulator.log" || exit 1
 emu_install "$apk" "$application_id" || exit 1
+adb_shell settings put secure show_ime_with_hard_keyboard 1 >/dev/null 2>&1 || true
 
 if [ "$software" = 1 ]; then
     emu_write_file "$application_id" ferroui.properties "rendering=software"
@@ -127,6 +128,13 @@ while [ "$waited" -lt "$limit" ]; do
         name="$(printf '%s' "$header" | tr -c 'A-Za-z0-9' '_')"
         echo "   page $pictured: $header"
         emu_screencap "$out/catalog-$(printf '%02d' "$pictured")-$name.png" || true
+        if [ "$header" = TextBox ]; then
+            # A tap into a text box: the soft keyboard comes up over the page, and a key of it
+            # is typed into the box.
+            adb_shell input tap "${FERROUI_CATALOG_TEXTBOX_TAP:-400 620}" >/dev/null 2>&1 || true
+            sleep 3
+            emu_screencap "$out/catalog-$(printf '%02d' "$pictured")-$name-keyboard.png" || true
+        fi
         pictured=$((pictured + 1))
     done
     if printf '%s\n' "$lines" | grep -q '^CATALOG DONE'; then

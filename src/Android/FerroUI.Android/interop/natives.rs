@@ -13,7 +13,7 @@
 //! stops as one with an uncaught exception does.
 
 use super::java::{
-    call_static_int, new_string, read_float_array, read_int_array, read_string, register_natives, throw_runtime_exception,
+    call_static_int, new_string, read_float_array, string_array_of, read_int_array, read_string, register_natives, throw_runtime_exception,
     JavaClass, JavaObject, NativeMethod,
 };
 use super::panic_message;
@@ -166,6 +166,31 @@ fn register_all() {
             &[
                 native!(c"nativeOnCreate", c"(Z)J", activity_on_create as unsafe extern "system" fn(_, _, _) -> _),
                 native!(c"nativeOnCreated", c"(J)V", activity_on_created as unsafe extern "system" fn(_, _, _)),
+                native!(
+                    c"nativeHandleIntent",
+                    c"(JLandroid/net/Uri;)V",
+                    activity_handle_intent as unsafe extern "system" fn(_, _, _, _)
+                ),
+                native!(
+                    c"nativeOnActivityResult",
+                    c"(JIILandroid/content/Intent;)V",
+                    activity_on_activity_result as unsafe extern "system" fn(_, _, _, _, _, _)
+                ),
+                native!(
+                    c"nativeOnRequestPermissionsResult",
+                    c"(JI[Ljava/lang/String;[I)V",
+                    activity_on_request_permissions_result as unsafe extern "system" fn(_, _, _, _, _, _)
+                ),
+                native!(
+                    c"nativeOnBackPressed",
+                    c"(J)Z",
+                    activity_on_back_pressed as unsafe extern "system" fn(_, _, _) -> _
+                ),
+                native!(
+                    c"nativeHandleOnBackPressed",
+                    c"(J)Z",
+                    activity_handle_on_back_pressed as unsafe extern "system" fn(_, _, _) -> _
+                ),
                 native!(c"nativeOnStart", c"(J)V", activity_on_start as unsafe extern "system" fn(_, _, _)),
                 native!(c"nativeOnStop", c"(J)V", activity_on_stop as unsafe extern "system" fn(_, _, _)),
                 native!(c"nativeOnResume", c"(J)V", activity_on_resume as unsafe extern "system" fn(_, _, _)),
@@ -392,6 +417,71 @@ unsafe extern "system" fn activity_on_created(_env: *mut JNIEnv, _class: jobject
             activity.on_created();
         }
     });
+}
+
+unsafe extern "system" fn activity_handle_intent(_env: *mut JNIEnv, _class: jobject, handle: jlong, data: jobject) {
+    guard((), || {
+        // SAFETY: `data` is the argument of the method, a reference or null.
+        let data = unsafe { JavaObject::from_raw(data) };
+        if let Some(activity) = FerroActivity::from_handle(handle) {
+            activity.handle_intent(data);
+        }
+    });
+}
+
+unsafe extern "system" fn activity_on_activity_result(
+    _env: *mut JNIEnv,
+    _class: jobject,
+    handle: jlong,
+    request_code: jint,
+    result_code: jint,
+    data: jobject,
+) {
+    guard((), || {
+        // SAFETY: `data` is the argument of the method, a reference or null.
+        let data = unsafe { JavaObject::from_raw(data) };
+        if let Some(activity) = FerroActivity::from_handle(handle) {
+            activity.on_activity_result(request_code, result_code, data);
+        }
+    });
+}
+
+unsafe extern "system" fn activity_on_request_permissions_result(
+    _env: *mut JNIEnv,
+    _class: jobject,
+    handle: jlong,
+    request_code: jint,
+    permissions: jobject,
+    grant_results: jarray,
+) {
+    guard((), || {
+        // SAFETY: the two references are the `String[]` and the `int[]` of the signature,
+        // or null.
+        let (permissions, grant_results) =
+            unsafe { (JavaObject::from_raw(permissions), read_int_array(grant_results)) };
+        let permissions = permissions.map(|permissions| string_array_of(&permissions)).unwrap_or_default();
+        if let Some(activity) = FerroActivity::from_handle(handle) {
+            activity.on_request_permissions_result(request_code, &permissions, &grant_results);
+        }
+    });
+}
+
+unsafe extern "system" fn activity_on_back_pressed(_env: *mut JNIEnv, _class: jobject, handle: jlong) -> JBoolean {
+    guard(0, || match FerroActivity::from_handle(handle) {
+        Some(activity) => activity.on_back_pressed() as JBoolean,
+        None => 0,
+    })
+}
+
+unsafe extern "system" fn activity_handle_on_back_pressed(
+    _env: *mut JNIEnv,
+    _class: jobject,
+    handle: jlong,
+) -> JBoolean {
+    guard(1, || match FerroActivity::from_handle(handle) {
+        Some(activity) => activity.handle_on_back_pressed() as JBoolean,
+        None => 1,
+    })
 }
 
 unsafe extern "system" fn activity_on_start(_env: *mut JNIEnv, _class: jobject, handle: jlong) {
