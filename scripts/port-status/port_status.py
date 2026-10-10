@@ -644,7 +644,8 @@ def scan_project(project: dict, repo: str, overrides: Overrides, waivers: Waiver
         mapped_rust.update(fr["rust"])
 
         for ut in types:
-            tr = scan_type(ut, name, crate, fr, members_mode, waivers, detail, result["how"])
+            tr = scan_type(ut, name, crate, fr, members_mode, waivers, detail, result["how"],
+                           match_types=detail == "types" and result["scope"] == "in")
             fr["types"].append(tr)
         if fr["status"] == "missing":
             # types found elsewhere in the crate: suggest an override
@@ -719,7 +720,8 @@ def scan_project(project: dict, repo: str, overrides: Overrides, waivers: Waiver
     return result
 
 
-def scan_type(ut: dict, project: str, crate: RustCrate, fr: dict, members_mode: str, waivers: Waivers, detail: str, how: Counter) -> dict:
+def scan_type(ut: dict, project: str, crate: RustCrate, fr: dict, members_mode: str, waivers: Waivers, detail: str, how: Counter,
+              match_types: bool = False) -> dict:
     uname = ut["name"]
     names = [map_name(uname)]
     renamed = fr.get("typeMap", {}).get(uname)
@@ -741,6 +743,19 @@ def scan_type(ut: dict, project: str, crate: RustCrate, fr: dict, members_mode: 
         tr["members"] = [{"m": m, "status": "n/a", "how": ""} for m in members]
         return tr
     if detail != "full":
+        if match_types:
+            # A project in scope whose extraction has no member names yet (detail "types"): its types are
+            # matched by name, in the mapped file first and then anywhere in the crate; members stay totals.
+            mapped = [rel for rel in fr["rust"] if rel in crate.files]
+            for cand in names:
+                if any(crate.files[rel].types.get(cand) is not None and crate.files[rel].types[cand].defined for rel in mapped):
+                    tr["status"], tr["rustName"] = "present", cand
+                    break
+            else:
+                for cand in (names[1:] if outer else names):
+                    if crate.defined.get(cand):
+                        tr["status"], tr["where"], tr["rustName"] = "present", crate.defined[cand][0], cand
+                        break
         return tr
 
     in_files = [rel for rel in fr["rust"] if rel in crate.files]
@@ -936,7 +951,12 @@ def render_project(pr: dict, counts: dict, commit: str) -> str:
         w(f"| Property registrations | {ratio(counts['properties'])} |")
         w(f"| Routed events | {ratio(counts['events'])} |")
     w("")
-    if detail == "types":
+    if detail == "types" and pr["scope"] == "in":
+        w("This backend is in scope. Its upstream extraction holds files, types and member counts but no member names yet, "
+          "so files and types are matched and the member counts are totals: run `scripts/port-status/run.sh --force` "
+          "(needs the .NET SDK; `scripts/api-extract/projects.json` already asks for full detail) to track its members.")
+        w("")
+    elif detail == "types":
         w("This backend is outside the current porting scope. It is tracked at file and type granularity only; member counts are totals.")
         w("")
     if detail == "files":
@@ -999,7 +1019,19 @@ def render_project(pr: dict, counts: dict, commit: str) -> str:
             w("|---|---|---|---|")
             for fr in files:
                 names = ", ".join(code(tr["name"]) for tr in fr["types"]) or "-"
-                w(f"| `{fr['path'].rsplit('/', 1)[-1]}` | {names} | {sum(tr['memberCount'] for tr in fr['types'])} | not started |")
+                status = "not started"
+                if pr["scope"] == "in":
+                    present = sum(1 for tr in fr["types"] if tr["status"] == "present")
+                    rust = ", ".join(f"`{x}`" for x in fr["rust"])
+                    if fr["status"] == "n/a":
+                        status = "n/a"
+                    elif fr["status"] == "present":
+                        status = f"{rust}: types {present}/{len(fr['types'])}"
+                    elif present:
+                        status = f"missing (types {present}/{len(fr['types'])} elsewhere in the crate)"
+                    else:
+                        status = "missing"
+                w(f"| `{fr['path'].rsplit('/', 1)[-1]}` | {names} | {sum(tr['memberCount'] for tr in fr['types'])} | {status} |")
             w("")
             continue
         w("| Upstream file | Rust file | Status | Types | Members | Notes |")
@@ -1216,7 +1248,7 @@ def render_tracking(index: dict, projects: list, counts: dict, repo: str, worksp
             if p["detail"] == "files":
                 yield f"| {link} | `{p['path']}` | `{p['rust']}` | {crate} | {ratio(c['files'])} | - | - | {pct(*c['files'])} | {p['phase']} | {p['priority']} |"
             else:
-                mp = pct(*c["members"]) if p["detail"] == "full" else "0.0%"
+                mp = pct(*c["members"]) if p["detail"] == "full" else ("types " + pct(*c["types"]) if p["scope"] == "in" else "0.0%")
                 yield (f"| {link} | `{p['path']}` | `{p['rust']}` | {crate} | {ratio(c['files'])} | {ratio(c['types'])} | {ratio(c['members'])} | {mp} | {p['phase']} | {p['priority']} |")
 
     w("## Projects")

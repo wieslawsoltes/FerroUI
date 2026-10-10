@@ -52,7 +52,7 @@ Percentages are `present / (total - waived)`. Member matching is by name with re
 | Routed events | 108 | 108 | - | 100.0% |
 | Other files (native sources, XAML, TypeScript, fonts) | 243 | 268 | - | 90.7% |
 
-148 upstream files are not applicable and not counted. Out of the current scope (platform backends, below): 524 files, 1197 types, 13006 members.
+148 upstream files are not applicable and not counted. Out of the current scope (platform backends, below): 429 files, 921 types, 10401 members.
 
 ## Projects
 
@@ -87,6 +87,7 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/Avalonia.Markup.Xaml` | `src/Markup/FerroUI.Markup.Xaml` | `ferroui-markup-xaml` | 46/46 | 61/63 (2 waived) | 199/239 (40 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/Avalonia.Markup.Xaml.Loader` | `src/Markup/FerroUI.Markup.Xaml.Loader` | `ferroui-markup-xaml-loader` | 66/66 | 120/126 (6 waived) | 400/505 (105 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/Avalonia.Skia` | `src/Skia/FerroUI.Skia` | `ferroui-skia` | 51/51 | 62/62 | 386/420 (33 waived) | 99.7% | 1 - rendering | P0 |
+| [Avalonia.Win32](tracking/Avalonia.Win32.md) | `src/Windows/Avalonia.Win32` | `src/Windows/FerroUI.Win32` | `ferroui-win32` | 0/95 | 0/276 | 0/2605 | types 0.0% | 1 - desktop (Windows) | P0 |
 | [Avalonia.Generators](tracking/Avalonia.Generators.md) | `src/tools/Avalonia.Generators` | `src/tools/FerroUI.Generators` | (merged into ferroui-build, see docs/porting/xaml.md) | 0/0 | 0/0 | 0/0 | - | 2 - xaml + themes | P2 |
 
 Non-C# files that belong to these projects:
@@ -113,7 +114,6 @@ Tracked at file and type granularity so that the size of the remaining work is k
 | [Avalonia.Wayland](tracking/Avalonia.Wayland.md) | `src/Avalonia.Wayland` | `src/FerroUI.Wayland` | `ferroui-wayland` | 0/81 | 0/123 | 0/816 | 0.0% | not started / out of current scope | - |
 | [Avalonia.X11](tracking/Avalonia.X11.md) | `src/Avalonia.X11` | `src/FerroUI.X11` | `ferroui-x11` | 0/88 | 0/291 | 0/4897 | 0.0% | not started / out of current scope | - |
 | [Avalonia.LinuxFramebuffer](tracking/Avalonia.LinuxFramebuffer.md) | `src/Linux/Avalonia.LinuxFramebuffer` | `src/Linux/FerroUI.LinuxFramebuffer` | `ferroui-linuxframebuffer` | 0/30 | 0/76 | 0/529 | 0.0% | not started / out of current scope | - |
-| [Avalonia.Win32](tracking/Avalonia.Win32.md) | `src/Windows/Avalonia.Win32` | `src/Windows/FerroUI.Win32` | `ferroui-win32` | 0/95 | 0/276 | 0/2605 | 0.0% | not started / out of current scope | - |
 | [Avalonia.Win32.Automation](tracking/Avalonia.Win32.Automation.md) | `src/Windows/Avalonia.Win32.Automation` | `src/Windows/FerroUI.Win32.Automation` | `ferroui-win32-automation` | 0/40 | 0/64 | 0/598 | 0.0% | not started / out of current scope | - |
 | [Avalonia.Win32.Interoperability](tracking/Avalonia.Win32.Interoperability.md) | `src/Windows/Avalonia.Win32.Interoperability` | `src/Windows/FerroUI.Win32.Interoperability` | `ferroui-win32-interoperability` | 0/2 | 0/2 | 0/11 | 0.0% | not started / out of current scope | - |
 | [Avalonia.WinUI](tracking/Avalonia.WinUI.md) | `src/Windows/Avalonia.WinUI` | `src/Windows/FerroUI.WinUI` | `ferroui-winui` | 0/15 | 0/16 | 0/88 | 0.0% | not started / out of current scope | - |
@@ -140,7 +140,7 @@ Libraries.
 | `src/Avalonia.Fonts.Inter` | 3 | `src/FerroUI.Fonts.Inter` | workspace member | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) |
 | `src/Avalonia.FreeDesktop` | 18 | `src/FerroUI.FreeDesktop` | not created | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) (out of scope) |
 | `src/Avalonia.FreeDesktop.AtSpi` | 27 | `src/FerroUI.FreeDesktop.AtSpi` | not created | [Avalonia.FreeDesktop.AtSpi](tracking/Avalonia.FreeDesktop.AtSpi.md) (out of scope) |
-| `src/Avalonia.Metal` | 2 | `src/FerroUI.Metal` | directory exists | [Avalonia.Metal](tracking/Avalonia.Metal.md) |
+| `src/Avalonia.Metal` | 2 | `src/FerroUI.Metal` | workspace member | [Avalonia.Metal](tracking/Avalonia.Metal.md) |
 | `src/Avalonia.MicroCom` | 1 | `src/FerroUI.MicroCom` | workspace member | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) |
 | `src/Avalonia.Native` | 49 | `src/FerroUI.Native` | workspace member | [Avalonia.Native](tracking/Avalonia.Native.md) |
 | `src/Avalonia.OpenGL` | 39 | `src/FerroUI.OpenGL` | workspace member | [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) |
@@ -161,7 +161,7 @@ Libraries.
 | `src/Markup/Avalonia.Markup.Xaml` | 48 | `src/Markup/FerroUI.Markup.Xaml` | workspace member | [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) |
 | `src/Markup/Avalonia.Markup.Xaml.Loader` | 67 | `src/Markup/FerroUI.Markup.Xaml.Loader` | workspace member | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) |
 | `src/Skia/Avalonia.Skia` | 54 | `src/Skia/FerroUI.Skia` | workspace member | [Avalonia.Skia](tracking/Avalonia.Skia.md) |
-| `src/Windows/Avalonia.Win32` | 95 | `src/Windows/FerroUI.Win32` | not created | [Avalonia.Win32](tracking/Avalonia.Win32.md) (out of scope) |
+| `src/Windows/Avalonia.Win32` | 95 | `src/Windows/FerroUI.Win32` | not created | [Avalonia.Win32](tracking/Avalonia.Win32.md) |
 | `src/Windows/Avalonia.Win32.Automation` | 41 | `src/Windows/FerroUI.Win32.Automation` | not created | [Avalonia.Win32.Automation](tracking/Avalonia.Win32.Automation.md) (out of scope) |
 | `src/Windows/Avalonia.Win32.Interoperability` | 2 | `src/Windows/FerroUI.Win32.Interoperability` | not created | [Avalonia.Win32.Interoperability](tracking/Avalonia.Win32.Interoperability.md) (out of scope) |
 | `src/Windows/Avalonia.WinUI` | 15 | `src/Windows/FerroUI.WinUI` | not created | [Avalonia.WinUI](tracking/Avalonia.WinUI.md) (out of scope) |
@@ -313,6 +313,7 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `src/FerroUI.Desktop` | `src/Avalonia.Desktop` |
 | `src/FerroUI.Dialogs` | `src/Avalonia.Dialogs` |
 | `src/FerroUI.Fonts.Inter` | `src/Avalonia.Fonts.Inter` |
+| `src/FerroUI.Metal` | `src/Avalonia.Metal` |
 | `src/FerroUI.MicroCom` | `src/Avalonia.MicroCom` |
 | `src/FerroUI.Native` | `src/Avalonia.Native` |
 | `src/FerroUI.OpenGL` | `src/Avalonia.OpenGL` |
@@ -325,8 +326,10 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `src/Markup/FerroUI.Markup.Xaml` | `src/Markup/Avalonia.Markup.Xaml` |
 | `src/Markup/FerroUI.Markup.Xaml.Loader` | `src/Markup/Avalonia.Markup.Xaml.Loader` |
 | `src/Skia/FerroUI.Skia` | `src/Skia/Avalonia.Skia` |
+| `src/Vello/FerroUI.Vello` | none (FerroUI only) |
 | `src/tools/MicroCom.CodeGenerator` | none (FerroUI only) |
 | `tests/FerroUI.Markup.Xaml.UnitTests` | `tests/Avalonia.Markup.Xaml.UnitTests` (not tracked) |
+| `tests/FerroUI.RenderBackends.Comparison` | none (FerroUI only) |
 | `tests/XamlIncludeFixture/Application` | none (FerroUI only) |
 | `tests/XamlIncludeFixture/Theme` | none (FerroUI only) |
 

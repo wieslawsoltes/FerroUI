@@ -540,12 +540,12 @@
     "const": 381,
     "derive": 64,
     "field": 638,
-    "fn": 6574,
+    "fn": 6571,
     "free fn": 15,
     "free item": 16,
     "getter fn": 4,
     "overload fn": 314,
-    "trait": 357,
+    "trait": 360,
     "trait fn": 75,
     "variant": 1793
    },
@@ -8804,7 +8804,7 @@
    "name": "Avalonia.Win32",
    "path": "src/Windows/Avalonia.Win32",
    "rust": "src/Windows/FerroUI.Win32",
-   "scope": "out",
+   "scope": "in",
    "detail": "types",
    "files": [
     0,
