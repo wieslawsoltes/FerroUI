@@ -23,6 +23,7 @@ mod native {
         pub fn GetSystemMetrics(index: i32) -> i32;
         pub fn GetClientRect(hwnd: isize, rect: *mut RECT) -> i32;
         pub fn GetWindowRect(hwnd: isize, rect: *mut RECT) -> i32;
+        pub fn GetPropW(hwnd: isize, name: *const u16) -> isize;
     }
 }
 
@@ -66,4 +67,14 @@ pub fn get_client_rect(_hwnd: isize) -> Option<RECT> {
 #[cfg(not(windows))]
 pub fn get_window_rect(_hwnd: isize) -> Option<RECT> {
     None
+}
+
+/// `GetProp`: the value of a property of a window, or 0 when the window has
+/// no property of the name.
+#[cfg(windows)]
+pub fn get_prop(hwnd: isize, name: &str) -> isize {
+    let name: Vec<u16> = name.encode_utf16().chain(std::iter::once(0)).collect();
+    // SAFETY: a null-terminated string that outlives the call; a handle
+    // that is not a window makes the call return 0.
+    unsafe { native::GetPropW(hwnd, name.as_ptr()) }
 }

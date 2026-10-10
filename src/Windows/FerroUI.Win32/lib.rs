@@ -27,9 +27,14 @@ pub mod win32_com;
 pub mod win_rt;
 
 mod angle_options;
+mod clipboard_format_registry;
 mod cursor_factory;
 mod framebuffer_manager;
 mod icon_impl;
+mod ole_data_object_helper;
+mod ole_drag_source;
+mod ole_drop_target;
+mod ole_virtual_file_data;
 mod win32_dispatcher_impl;
 mod win32_gl_manager;
 mod platform_constants;
@@ -43,11 +48,21 @@ mod window_impl_app_wnd_proc;
 #[cfg(windows)]
 mod clipboard_impl;
 #[cfg(windows)]
+mod data_transfer_to_ole_data_object_wrapper;
+#[cfg(windows)]
+mod drag_source;
+#[cfg(windows)]
 mod embedded_window_impl;
 #[cfg(windows)]
 mod offscreen_parent_window;
 #[cfg(windows)]
 mod ole_context;
+#[cfg(windows)]
+mod ole_data_object_to_data_transfer_item_wrapper;
+#[cfg(windows)]
+mod ole_data_object_to_data_transfer_wrapper;
+#[cfg(all(windows, test))]
+mod ole_tests;
 #[cfg(windows)]
 mod popup_impl;
 #[cfg(windows)]

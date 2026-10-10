@@ -205,10 +205,10 @@ jobs:
       # a handful of others and writes two pictures of each, the frame the framework draws
       # through its own render target and the client area of its window as the system composed
       # it (the window alone, never the desktop), once with software rendering and once through
-      # ANGLE. Informative until its first green run: the log says what stops the catalog.
+      # ANGLE. Required since its second green run (2026-10-10): the catalog has to start, show
+      # its pages and end in both modes.
       - name: Pictures of the catalog (software rendering and ANGLE)
         if: ${{ steps.skia.outputs.raster == 'true' }}
-        continue-on-error: true
         timeout-minutes: 60
         env:
           FERROUI_SMOKE_PAGES: 2500

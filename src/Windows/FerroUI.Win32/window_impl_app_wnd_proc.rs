@@ -408,9 +408,11 @@ mod imp {
                     // The first and foremost thing to do - notify the TopLevel
                     self.invoke_closed();
 
-                    // The automation provider of the window, the input
-                    // method and the drop target are released here by the
-                    // reference: they arrive with their stages.
+                    // The automation provider of the window and the input
+                    // method are released here by the reference: they
+                    // arrive with their stages.
+
+                    self.release_drop_target();
 
                     self.framebuffer().dispose();
 

@@ -10,24 +10,24 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Windows/FerroUI.Win32` (exists) |
 | Crate | `ferroui-win32` |
 | Phase / priority | 1 - desktop (Windows) / P0 |
-| Files | 41/95 (43.2%) |
-| Types | 127/276 (46.0%) |
+| Files | 50/95 (52.6%) |
+| Types | 141/276 (51.1%) |
 | Members | 0/2605 (0.0%) |
 
 This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
 
 ## Files
 
-### `(project root)` - files 23/43, types 31/52, members 0/358
+### `(project root)` - files 32/43, types 41/52, members 0/358
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
 | `AngleOptions.cs` | `angle_options.rs` | present | 2/2 | - | 4 |  |
-| `ClipboardFormatRegistry.cs` | `clipboard_format_registry.rs` | missing | 0/1 | `ClipboardFormatRegistry` | 9 |  |
+| `ClipboardFormatRegistry.cs` | `clipboard_format_registry.rs` | present | 1/1 | - | 9 |  |
 | `ClipboardImpl.cs` | `clipboard_impl.rs` | present | 1/1 | - | 5 |  |
 | `CursorFactory.cs` | `cursor_factory.rs` | present | 2/2 | - | 9 |  |
-| `DataTransferToOleDataObjectWrapper.cs` | `data_transfer_to_ole_data_object_wrapper.rs` | missing | 0/1 | `DataTransferToOleDataObjectWrapper` | 15 |  |
-| `DragSource.cs` | `drag_source.rs` | missing | 0/1 | `DragSource` | 1 |  |
+| `DataTransferToOleDataObjectWrapper.cs` | `data_transfer_to_ole_data_object_wrapper.rs` | present | 1/1 | - | 15 |  |
+| `DragSource.cs` | `drag_source.rs` | present | 1/1 | - | 1 |  |
 | `EmbeddedWindowImpl.cs` | `embedded_window_impl.rs` | present | 1/1 | - | 2 |  |
 | `FramebufferManager.cs` | `framebuffer_manager.rs` | present | 1/1 | - | 4 |  |
 | `IBlurHost.cs` | `i_blur_host.rs` | missing | 0/2 | `BlurEffect`, `ICompositionEffectsSurface` | 6 |  |
@@ -36,12 +36,12 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `NonPumpingWaitHelperImpl.cs` | `non_pumping_wait_helper_impl.rs` | missing | 0/1 | `NonPumpingWaitHelperImpl` | 2 |  |
 | `OffscreenParentWindow.cs` | `offscreen_parent_window.rs` | present | 1/1 | - | 1 |  |
 | `OleContext.cs` | `ole_context.rs` | present | 1/1 | - | 3 |  |
-| `OleDataObjectHelper.cs` | `ole_data_object_helper.rs` | missing | 0/1 | `OleDataObjectHelper` | 6 |  |
-| `OleDataObjectToDataTransferItemWrapper.cs` | `ole_data_object_to_data_transfer_item_wrapper.rs` | missing | 0/1 | `OleDataObjectToDataTransferItemWrapper` | 3 |  |
-| `OleDataObjectToDataTransferWrapper.cs` | `ole_data_object_to_data_transfer_wrapper.rs` | missing | 0/1 | `OleDataObjectToDataTransferWrapper` | 4 |  |
-| `OleDragSource.cs` | `ole_drag_source.rs` | missing | 0/1 | `OleDragSource` | 2 |  |
-| `OleDropTarget.cs` | `ole_drop_target.rs` | missing | 0/1 | `OleDropTarget` | 9 |  |
-| `OleVirtualFileData.cs` | `ole_virtual_file_data.rs` | missing | 0/2 | `OleVirtualFileData`, `OleVirtualFileData.Descriptor` | 7 |  |
+| `OleDataObjectHelper.cs` | `ole_data_object_helper.rs` | present | 1/1 | - | 6 |  |
+| `OleDataObjectToDataTransferItemWrapper.cs` | `ole_data_object_to_data_transfer_item_wrapper.rs` | present | 1/1 | - | 3 |  |
+| `OleDataObjectToDataTransferWrapper.cs` | `ole_data_object_to_data_transfer_wrapper.rs` | present | 1/1 | - | 4 |  |
+| `OleDragSource.cs` | `ole_drag_source.rs` | present | 1/1 | - | 2 |  |
+| `OleDropTarget.cs` | `ole_drop_target.rs` | present | 1/1 | - | 9 |  |
+| `OleVirtualFileData.cs` | `ole_virtual_file_data.rs` | present | 2/2 | - | 7 |  |
 | `PlatformConstants.cs` | `platform_constants.rs` | present | 1/1 | - | 7 |  |
 | `PopupImpl.cs` | `popup_impl.rs` | present | 1/1 | - | 10 |  |
 | `ScreenImpl.cs` | `screen_impl.rs` | present | 1/1 | - | 10 |  |
@@ -100,12 +100,12 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `WindowsKeyboardDevice.cs` | `input/windows_keyboard_device.rs` | present | 1/1 | - | 2 |  |
 | `WindowsMouseDevice.cs` | `input/windows_mouse_device.rs` | present | 2/2 | - | 4 |  |
 
-### `Interop` - files 2/3, types 59/119, members 0/1564
+### `Interop` - files 2/3, types 63/119, members 0/1564
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
 | `TaskBarList.cs` | `interop/task_bar_list.rs` | missing | 0/1 | `TaskBarList` | 2 |  |
-| `UnmanagedMethods.cs` | `interop/unmanaged_methods.rs` | partial | 57/115 | `UnmanagedMethods.TimerProc`, `UnmanagedMethods.TimeCallback`, `UnmanagedMethods.WaitOrTimerCallback`, `UnmanagedMethods.PointerDeviceChangeFlags`, `UnmanagedMethods.BitmapCompressionMode`, `UnmanagedMethods.BitmapColorSpace`, `UnmanagedMethods.BitmapIntent`, `UnmanagedMethods.DIBColorTable`, `UnmanagedMethods.TrackPopupMenuFlags`, `UnmanagedMethods.PenMask`, `UnmanagedMethods.TouchFlags`, `UnmanagedMethods.POINTER_TOUCH_INFO`, `UnmanagedMethods.POINTER_PEN_INFO`, `UnmanagedMethods.POINTER_INFO`, `UnmanagedMethods.RGBQUAD`, `UnmanagedMethods.BITMAP`, `UnmanagedMethods.BITMAPV5HEADER`, `UnmanagedMethods.CIEXYZTRIPLE`, `UnmanagedMethods.CIEXYZ`, `UnmanagedMethods.EnumWindowsProc`, `UnmanagedMethods.GetAncestorFlags`, `UnmanagedMethods.MessageFilterFlag`, `UnmanagedMethods.LayeredWindowFlags`, `UnmanagedMethods.DWM_BLURBEHIND`, `UnmanagedMethods.RTL_OSVERSIONINFOEX`, `UnmanagedMethods.GCS`, `UnmanagedMethods.CANDIDATEFORM`, `UnmanagedMethods.COMPOSITIONFORM`, `UnmanagedMethods.LOGFONT`, `UnmanagedMethods.WindowCompositionAttributeData`, `UnmanagedMethods.WindowCompositionAttribute`, `UnmanagedMethods.AccentState`, `UnmanagedMethods.AccentFlags`, `UnmanagedMethods.AccentPolicy`, `UnmanagedMethods.MSG`, `UnmanagedMethods.PAINTSTRUCT`, `UnmanagedMethods.NCCALCSIZE_PARAMS`, `UnmanagedMethods.TRACKMOUSEEVENT`, `UnmanagedMethods.WNDCLASSEX`, `UnmanagedMethods.TOUCHINPUT`, `UnmanagedMethods.ICONINFO`, `UnmanagedMethods.OpenFileNameFlags`, `UnmanagedMethods.COMDLG_FILTERSPEC`, `UnmanagedMethods.MarkFullscreenWindow`, `UnmanagedMethods.SetOverlayIcon`, `UnmanagedMethods.HrInit`, `UnmanagedMethods.ITaskBarList3VTable`, `UnmanagedMethods.APPBARDATA`, `UnmanagedMethods.DROPFILES`, `UnmanagedMethods.FILEDESCRIPTORW`, `UnmanagedMethods.STATSTG`, `PixelFormatDescriptorFlags`, `PixelFormatDescriptor`, `NIM`, `AppBarMessage`, `NIF`, `NIIF`, `NOTIFYICONDATA` | 1542 |  |
+| `UnmanagedMethods.cs` | `interop/unmanaged_methods.rs` | partial | 61/115 | `UnmanagedMethods.TimerProc`, `UnmanagedMethods.TimeCallback`, `UnmanagedMethods.WaitOrTimerCallback`, `UnmanagedMethods.PointerDeviceChangeFlags`, `UnmanagedMethods.BitmapColorSpace`, `UnmanagedMethods.BitmapIntent`, `UnmanagedMethods.DIBColorTable`, `UnmanagedMethods.TrackPopupMenuFlags`, `UnmanagedMethods.PenMask`, `UnmanagedMethods.TouchFlags`, `UnmanagedMethods.POINTER_TOUCH_INFO`, `UnmanagedMethods.POINTER_PEN_INFO`, `UnmanagedMethods.POINTER_INFO`, `UnmanagedMethods.RGBQUAD`, `UnmanagedMethods.BITMAP`, `UnmanagedMethods.CIEXYZTRIPLE`, `UnmanagedMethods.CIEXYZ`, `UnmanagedMethods.EnumWindowsProc`, `UnmanagedMethods.GetAncestorFlags`, `UnmanagedMethods.MessageFilterFlag`, `UnmanagedMethods.LayeredWindowFlags`, `UnmanagedMethods.DWM_BLURBEHIND`, `UnmanagedMethods.RTL_OSVERSIONINFOEX`, `UnmanagedMethods.GCS`, `UnmanagedMethods.CANDIDATEFORM`, `UnmanagedMethods.COMPOSITIONFORM`, `UnmanagedMethods.LOGFONT`, `UnmanagedMethods.WindowCompositionAttributeData`, `UnmanagedMethods.WindowCompositionAttribute`, `UnmanagedMethods.AccentState`, `UnmanagedMethods.AccentFlags`, `UnmanagedMethods.AccentPolicy`, `UnmanagedMethods.MSG`, `UnmanagedMethods.PAINTSTRUCT`, `UnmanagedMethods.NCCALCSIZE_PARAMS`, `UnmanagedMethods.TRACKMOUSEEVENT`, `UnmanagedMethods.WNDCLASSEX`, `UnmanagedMethods.TOUCHINPUT`, `UnmanagedMethods.ICONINFO`, `UnmanagedMethods.OpenFileNameFlags`, `UnmanagedMethods.COMDLG_FILTERSPEC`, `UnmanagedMethods.MarkFullscreenWindow`, `UnmanagedMethods.SetOverlayIcon`, `UnmanagedMethods.HrInit`, `UnmanagedMethods.ITaskBarList3VTable`, `UnmanagedMethods.APPBARDATA`, `UnmanagedMethods.DROPFILES`, `PixelFormatDescriptorFlags`, `PixelFormatDescriptor`, `NIM`, `AppBarMessage`, `NIF`, `NIIF`, `NOTIFYICONDATA` | 1542 |  |
 | `Win32Icon.cs` | `interop/win32_icon.rs` | partial | 2/3 | `Win32Icon.ICONDIR` | 20 |  |
 
 ### `OpenGl` - files 0/7, types 0/7, members 0/90
@@ -172,4 +172,4 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `win_rt/numerics.rs` | The vector, quaternion and matrix values the interfaces of `winrt.idl` pass, by their layout: upstream maps the names to the types of the numerics library of its runtime | `Matrix4x4`, `Quaternion`, `Vector2`, `Vector3` |
 | `wnd_proc_guard.rs` | Keeps a panic from unwinding out of a window procedure through the frames of the system: caught, kept, and raised again by the message loop (docs/porting/win32-platform.md, section 5) |  |
 
-Tests, examples and build scripts (not scanned): `build.rs`, `examples/win32_window.rs`, `win_rt/win_rt_tests.rs`.
+Tests, examples and build scripts (not scanned): `build.rs`, `examples/win32_window.rs`, `ole_tests.rs`, `win_rt/win_rt_tests.rs`.

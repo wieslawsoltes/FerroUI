@@ -397,6 +397,9 @@ mod imp {
         class_name: RefCell<Option<String>>,
         hwnd: Cell<isize>,
         owner: RefCell<Option<Rc<dyn IInputRoot>>>,
+        /// The drop target that is registered for the window, from the
+        /// moment the window has an input root until it is destroyed.
+        drop_target: RefCell<Option<ferroui_microcom::ComPtr<crate::win32_com::IDropTarget>>>,
         window_properties: Cell<WindowProperties>,
         tracking_mouse: Cell<bool>,
         topmost: Cell<bool>,
@@ -504,6 +507,7 @@ mod imp {
                 class_name: RefCell::new(None),
                 hwnd: Cell::new(0),
                 owner: RefCell::new(None),
+                drop_target: RefCell::new(None),
                 window_properties: Cell::new(window_properties),
                 tracking_mouse: Cell::new(false),
                 topmost: Cell::new(false),
@@ -1120,6 +1124,39 @@ mod imp {
 
         /// The window is gone (`WM_DESTROY`): its handle is forgotten and
         /// the window is no longer rooted by the list of windows.
+        fn top_level_handle(&self) -> Option<Rc<dyn IPlatformHandle>> {
+            let handle = self.handle.borrow().clone()?;
+            Some(Rc::new(TopLevelHandle(handle)))
+        }
+
+        fn create_drop_target(&self, input_root: Rc<dyn IInputRoot>) {
+            use ferroui_base::input::raw::IDragDropDevice;
+
+            if let Some(drag_drop_device) = FerroLocator::current().get_service::<dyn IDragDropDevice>() {
+                let odt = crate::ole_drop_target::OleDropTarget::new(self.this.clone(), input_root, drag_drop_device);
+
+                let handle = self.top_level_handle();
+                let registered = crate::ole_context::OleContext::current()
+                    .is_some_and(|context| context.register_drag_drop(handle.as_deref(), Some(&odt)));
+                if registered {
+                    *self.drop_target.borrow_mut() = Some(odt);
+                }
+            }
+        }
+
+        /// Removes the drop target of the window, when it has one (the
+        /// window is being destroyed).
+        pub(crate) fn release_drop_target(&self) {
+            let drop_target = self.drop_target.borrow_mut().take();
+            if let Some(drop_target) = drop_target {
+                let handle = self.top_level_handle();
+                if let Some(context) = crate::ole_context::OleContext::current() {
+                    context.unregister_drag_drop(handle.as_deref());
+                }
+                drop(drop_target);
+            }
+        }
+
         pub(crate) fn on_destroyed(&self) {
             let hwnd = self.hwnd.replace(0);
             if let Some(handle) = self.handle.borrow().as_ref() {
@@ -1918,11 +1955,12 @@ mod imp {
             set(&self.platform_specific_scene_info_changed, value);
         }
 
-        /// Sets the input root. (The reference registers the window as a
-        /// drop target here: drag and drop is stage 2.)
+        /// Sets the input root, and registers the window as a drop target
+        /// for it.
         fn set_input_root(&self, input_root: Rc<dyn IInputRoot>) {
-            let old = self.owner.replace(Some(input_root));
+            let old = self.owner.replace(Some(input_root.clone()));
             drop(old);
+            self.create_drop_target(input_root);
         }
 
         fn point_to_client(&self, point: PixelPoint) -> Point {

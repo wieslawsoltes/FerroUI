@@ -278,10 +278,11 @@ impl Win32Platform {
             locator.bind::<Arc<dyn IPlatformGraphics>>().to_constant(Rc::new(custom_platform_graphics.clone()));
         }
 
-        // OLE is initialised on the UI thread here. The reference binds
-        // the drag source of the platform when it is available: drag and
-        // drop is stage 2d.
-        let _ole_context = OleContext::current();
+        if OleContext::current().is_some() {
+            let drag_source: Rc<dyn ferroui_base::input::platform::IPlatformDragSource> =
+                Rc::new(crate::drag_source::DragSource);
+            locator.bind::<dyn ferroui_base::input::platform::IPlatformDragSource>().to_constant(drag_source);
+        }
 
         Self::update_timer_fps();
 
