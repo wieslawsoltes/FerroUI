@@ -5,6 +5,8 @@
 #   ANDROID_HOME          the SDK (required; ANDROID_SDK_ROOT is taken when it is not set)
 #   FERROUI_ANDROID_NDK   the NDK directory; default: the pinned version under $ANDROID_HOME/ndk
 #   FERROUI_ANDROID_API   the API level the native code is built for; default 26
+#   FERROUI_ANDROID_RUST_TOOLCHAIN   the nightly toolchain (with rust-src) that builds the native
+#                         library together with the standard library; default below
 #
 # ANDROID_NDK is deliberately not exported: the build script of the Skia bindings reads it only when
 # it builds Skia from source, which this project never does (a published binary is used); without
@@ -13,6 +15,7 @@
 FERROUI_ANDROID_NDK_VERSION="28.2.13676358"
 FERROUI_ANDROID_BUILD_TOOLS_VERSION="36.0.0"
 FERROUI_ANDROID_PLATFORM="android-36"
+: "${FERROUI_ANDROID_RUST_TOOLCHAIN:=nightly-2026-07-01}"
 : "${FERROUI_ANDROID_API:=26}"
 
 if [ -z "${ANDROID_HOME:-}" ] && [ -n "${ANDROID_SDK_ROOT:-}" ]; then
