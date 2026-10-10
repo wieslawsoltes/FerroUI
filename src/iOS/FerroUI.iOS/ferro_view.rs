@@ -1,10 +1,12 @@
 //! The view: a `UIView` with a Metal layer that hosts a top-level of the
 //! framework and can be embedded into the view tree of an application.
 //!
-//! Stage 3 of `docs/porting/ios-platform.md` adds what the reference's view
-//! has beyond this file: accessibility. The swipe gestures of a
+//! The view is the accessibility container of its top-level: it answers
+//! the questions of the container protocol from the wrapper of the root
+//! automation peer (`automation_peer_wrapper.rs`). The swipe gestures of a
 //! remote, which the reference adds on tvOS, are not ported.
 
+use crate::automation_peer_wrapper::{element_object_of, wrapper_of, AutomationPeerWrapper, ViewWrapperHost, NOT_FOUND};
 use crate::input_handler::InputHandler;
 use crate::insets_manager::InsetsManager;
 use crate::ios_launcher::IosLauncher;
@@ -28,6 +30,7 @@ use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, PixelSize, Point, Rect, Ref, Size};
+use ferroui_controls::automation::peers::ControlAutomationPeer;
 use ferroui_controls::embedding::EmbeddableControlRoot;
 use ferroui_controls::platform::{
     IInputPane, IInsetsManager, INativeControlHostImpl, IPlatformFeedback, IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, PlatformThemeVariant,
@@ -37,9 +40,9 @@ use ferroui_controls::{
     AcrylicPlatformCompensationLevels, Control, TopLevel, WindowResizeReason, WindowTransparencyLevel,
 };
 use objc2::rc::{Retained, Weak};
-use objc2::runtime::AnyClass;
+use objc2::runtime::{AnyClass, AnyObject};
 use objc2::{define_class, msg_send, sel, ClassType, DefinedClass, MainThreadMarker, MainThreadOnly, Message};
-use objc2_foundation::{NSObjectProtocol, NSSet};
+use objc2_foundation::{NSInteger, NSObjectProtocol, NSSet};
 use objc2_quartz_core::{CADisplayLink, CAMetalLayer};
 use objc2_ui_kit::{
     UIEvent, UIPanGestureRecognizer, UIPasteboard, UIPress, UIPressesEvent, UIResponder, UIScreen, UIScrollTypeMask, UITouch,
@@ -57,6 +60,7 @@ struct ViewState {
     top_level_impl: Rc<TopLevelImpl>,
     top_level: Ref<EmbeddableControlRoot>,
     input: InputHandler,
+    access_wrapper: Rc<AutomationPeerWrapper>,
 }
 
 /// The instance variables of the view.
@@ -243,6 +247,35 @@ define_class!(
             // SAFETY: the method of the superclass this one overrides.
             let _: () = unsafe { msg_send![super(self), layoutSubviews] };
         }
+
+        // The view as an accessibility container: the four members of
+        // the container protocol, answered by the wrapper of the root
+        // automation peer.
+
+        #[unsafe(method(accessibilityContainerType))]
+        fn accessibility_container_type(&self) -> NSInteger {
+            self.ivars().state.get().map_or(0, |state| state.access_wrapper.accessibility_container_type() as NSInteger)
+        }
+
+        #[unsafe(method(accessibilityElementCount))]
+        fn accessibility_element_count(&self) -> NSInteger {
+            self.ivars().state.get().map_or(0, |state| state.access_wrapper.accessibility_element_count())
+        }
+
+        #[unsafe(method_id(accessibilityElementAtIndex:))]
+        fn get_accessibility_element_at(&self, index: NSInteger) -> Option<Retained<AnyObject>> {
+            let child =
+                self.ivars().state.get().and_then(|state| state.access_wrapper.get_accessibility_element_at(index));
+            child.and_then(|child| element_object_of(&child))
+        }
+
+        #[unsafe(method(indexOfAccessibilityElement:))]
+        fn get_index_of_accessibility_element(&self, element: &AnyObject) -> NSInteger {
+            match self.ivars().state.get() {
+                Some(state) => state.access_wrapper.get_index_of_accessibility_element(wrapper_of(element).as_deref()),
+                None => NOT_FOUND,
+            }
+        }
     }
 
     unsafe impl NSObjectProtocol for FerroView {}
@@ -269,7 +302,10 @@ impl FerroView {
         let platform_impl: Rc<dyn ITopLevelImpl> = top_level_impl.clone();
         let top_level = EmbeddableControlRoot::with_impl(platform_impl);
         top_level_impl.set_top_level(&top_level);
-        let _ = this.ivars().state.set(ViewState { top_level_impl, top_level: top_level.clone(), input });
+        let access_wrapper =
+            AutomationPeerWrapper::new(ViewWrapperHost::new(&this), ControlAutomationPeer::create_peer_for_element(&top_level));
+        let _ =
+            this.ivars().state.set(ViewState { top_level_impl, top_level: top_level.clone(), input, access_wrapper });
 
         top_level.prepare();
 
@@ -418,6 +454,11 @@ impl FerroView {
     /// The top-level of the view.
     pub fn top_level(&self) -> Ref<TopLevel> {
         self.state().top_level.clone().upcast()
+    }
+
+    /// The top-level of the view, once the view is created.
+    pub(crate) fn try_top_level(&self) -> Option<Ref<TopLevel>> {
+        self.ivars().state.get().map(|state| state.top_level.clone().upcast())
     }
 
     /// Gives the view the view controller that shows it.

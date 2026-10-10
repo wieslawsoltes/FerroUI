@@ -40,6 +40,17 @@
 //! in bounds, hidden and removed, and its superview, frame and visibility
 //! are compared after each.
 //!
+//! The checks of stage 3 (the module `stage3`): accessibility, as far as
+//! an application can read itself without VoiceOver. The view is asked as
+//! an accessibility container (`accessibilityElementCount`,
+//! `accessibilityElementAtIndex:`), the elements under it are walked, and
+//! the elements of a button, a text box, a check box and a slider are
+//! compared with the controls: label, value, traits, frame, and the
+//! index of an element in its container. Then the actions: activating the
+//! element of the button has to raise its click, activating the element
+//! of the check box has to check it, and incrementing the element of the
+//! slider has to change its value.
+//!
 //! What the smoke mode cannot check: input. An application cannot
 //! synthesize a touch, a key press or a scroll event for itself without
 //! private interfaces, so their translation is covered by the tests of the
@@ -63,8 +74,12 @@ mod app {
     use ferroui_base::styling::Styles;
     use ferroui_base::{ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, Ref, Thickness};
     use ferroui_controls::shapes::Ellipse;
+    use ferroui_base::BoxedValue;
+    use ferroui_controls::automation::AutomationProperties;
+    use ferroui_controls::primitives::RangeBase;
     use ferroui_controls::{
-        Application, ApplicationImpl, ApplicationImplExt, Border, Control, NewApplication, Panel, TextBlock, TextBox,
+        Application, ApplicationImpl, ApplicationImplExt, Border, Button, CheckBox, Control, NewApplication, Panel,
+        Slider, StackPanel, TextBlock, TextBox,
     };
     use ferroui_themes_simple::SimpleTheme;
     use std::rc::Rc;
@@ -89,6 +104,19 @@ mod app {
     /// The distance of the text box from the top edge and its width.
     pub const TEXT_BOX_TOP: f64 = 230.0;
     pub const TEXT_BOX_WIDTH: f64 = 220.0;
+    /// The distance of the controls of the accessibility checks from the
+    /// bottom edge (above the circle), and the value of the slider.
+    pub const CONTROLS_BOTTOM: f64 = 240.0;
+    pub const SLIDER_VALUE: f64 = 4.0;
+
+    /// The controls the checks talk to.
+    pub struct MainView {
+        pub marker: Ref<Border>,
+        pub text_box: Ref<TextBox>,
+        pub button: Ref<Button>,
+        pub check_box: Ref<CheckBox>,
+        pub slider: Ref<Slider>,
+    }
 
     /// Gives the marker the colour of the given step.
     pub fn set_marker(marker: &Ref<Border>, step: u32) {
@@ -121,11 +149,11 @@ mod app {
             if let Some(single_view) =
                 lifetime.as_ref().and_then(|lifetime| lifetime.as_single_view_application_lifetime())
             {
-                let (main_view, marker, text_box) = create_main_view();
+                let (main_view, controls) = create_main_view();
                 single_view.set_main_view(Some(main_view));
 
                 if std::env::args().any(|arg| arg == "--smoke") {
-                    super::smoke::start(marker, text_box);
+                    super::smoke::start(controls);
                 }
             }
 
@@ -139,7 +167,7 @@ mod app {
 
     /// The main view, and the marker in its corner: a small square the
     /// smoke mode changes the colour of, so that frames are drawn.
-    fn create_main_view() -> (Ref<Control>, Ref<Border>, Ref<TextBox>) {
+    fn create_main_view() -> (Ref<Control>, MainView) {
         let background = Border::new();
         background.set_background(brush(FILL));
 
@@ -184,11 +212,39 @@ mod app {
         text_box.set_horizontal_alignment(HorizontalAlignment::Center);
         text_box.set_vertical_alignment(VerticalAlignment::Top);
         text_box.set_margin(Thickness::new(0.0, TEXT_BOX_TOP, 0.0, 0.0));
+        AutomationProperties::set_name(&text_box, Some("Name"));
+
+        // The controls of the accessibility checks, between the square
+        // and the circle.
+        let button = Button::new();
+        button.set_content(Some(Rc::new("Press".to_string()) as BoxedValue));
+        AutomationProperties::set_name(&button, Some("Press"));
+        let check_box = CheckBox::new();
+        check_box.set_content(Some(Rc::new("Agree".to_string()) as BoxedValue));
+        AutomationProperties::set_name(&check_box, Some("Agree"));
+        let slider = Slider::new();
+        {
+            let range: &RangeBase = &slider;
+            range.set_minimum(0.0);
+            range.set_maximum(10.0);
+            range.set_small_change(1.0);
+            range.set_range_value(SLIDER_VALUE);
+        }
+        AutomationProperties::set_name(&slider, Some("Volume"));
+        let controls = StackPanel::new();
+        controls.set_width(TEXT_BOX_WIDTH);
+        controls.set_horizontal_alignment(HorizontalAlignment::Center);
+        controls.set_vertical_alignment(VerticalAlignment::Bottom);
+        controls.set_margin(Thickness::new(0.0, 0.0, 0.0, CONTROLS_BOTTOM));
+        controls.children().add(button.clone());
+        controls.children().add(check_box.clone());
+        controls.children().add(slider.clone());
 
         panel.children().add(text);
         panel.children().add(text_box.clone());
+        panel.children().add(controls);
         panel.children().add(marker.clone());
-        (panel.upcast(), marker, text_box)
+        (panel.upcast(), MainView { marker, text_box, button, check_box, slider })
     }
 }
 
@@ -198,7 +254,7 @@ mod smoke {
     use super::app::{CIRCLE, CIRCLE_BOTTOM, CIRCLE_DIAMETER, FILL, SQUARE, TEXT_SIZE, TEXT_TOP};
     use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
     use ferroui_base::{Rect, Ref, Size, Thickness};
-    use ferroui_controls::{Application, Border, TextBox, TopLevel};
+    use ferroui_controls::{Application, TopLevel};
     use ferroui_ios::metal::FrameCapture;
     use ferroui_ios::single_view_lifetime::SingleViewLifetime;
     use ferroui_ios::view_controller::safe_area_padding_of;
@@ -231,7 +287,10 @@ mod smoke {
 
     /// Starts the checks: they are tried until all of them pass or the
     /// attempts are used up, and then the process exits.
-    pub fn start(marker: Ref<Border>, text_box: Ref<TextBox>) {
+    pub fn start(controls: super::app::MainView) {
+        let marker = controls.marker.clone();
+        let stage3 = super::stage3::State::new(&controls);
+        let text_box = controls.text_box;
         let attempt = Rc::new(Cell::new(0u32));
         let capture: Arc<Mutex<Option<FrameCapture>>> = Arc::new(Mutex::new(None));
         let capture_requested = Rc::new(Cell::new(false));
@@ -260,6 +319,15 @@ mod smoke {
                 if let Some(view) = view() {
                     for (name, passed, detail) in stage2.run(&view) {
                         check(&mut checks, name, passed, detail);
+                    }
+                    // Accessibility after text input, which moves the
+                    // focus and changes the text the element reads.
+                    if stage2.text_done() {
+                        for (name, passed, detail) in stage3.run(&view) {
+                            check(&mut checks, name, passed, detail);
+                        }
+                    } else {
+                        check(&mut checks, "accessibility", false, "after the checks of text input".to_string());
                     }
                 }
                 let passed = checks.iter().all(|check| check.passed);
@@ -619,6 +687,11 @@ mod stage2 {
                 color_events: Rc::new(RefCell::new(Vec::new())),
                 subscription: RefCell::new(None),
             })
+        }
+
+        /// Whether the steps of text input are over.
+        pub fn text_done(&self) -> bool {
+            self.text_step.get() >= TEXT_STEPS
         }
 
         /// The checks of an attempt.
@@ -1240,6 +1313,321 @@ mod stage2 {
             ));
 
             checks
+        }
+    }
+}
+
+/// The checks of stage 3: the accessibility of the view, read the way
+/// assistive technology reads it (the accessibility protocols of UIKit),
+/// without VoiceOver.
+#[cfg(target_os = "ios")]
+mod stage3 {
+    use super::app::{MainView, SLIDER_VALUE};
+    use ferroui_base::{Point, Rect, Ref, Visual};
+    use ferroui_controls::primitives::RangeBase;
+    use ferroui_controls::{Button, CheckBox, Slider, TextBox};
+    use ferroui_ios::automation_peer_wrapper::{AccessibilityContainerType, AccessibilityTraits, NOT_FOUND};
+    use ferroui_ios::FerroView;
+    use objc2::msg_send;
+    use objc2::rc::Retained;
+    use objc2::runtime::AnyObject;
+    use objc2::Message;
+    use objc2_core_foundation::CGRect;
+    use objc2_foundation::NSString;
+    use objc2_ui_kit::{
+        UIAccessibilityTraitAdjustable, UIAccessibilityTraitButton, UIAccessibilityTraitHeader, UIAccessibilityTraitImage,
+        UIAccessibilityTraitLink, UIAccessibilityTraitNotEnabled, UIAccessibilityTraitSelected,
+    };
+    use std::cell::{Cell, RefCell};
+    use std::rc::Rc;
+
+    type Checks = Vec<(&'static str, bool, String)>;
+
+    /// What the checks keep between the attempts.
+    pub struct State {
+        text_box: Ref<TextBox>,
+        button: Ref<Button>,
+        check_box: Ref<CheckBox>,
+        slider: Ref<Slider>,
+        clicks: Rc<Cell<u32>>,
+        step: Cell<u32>,
+        checks: RefCell<Checks>,
+        /// The element of the slider, asked again after the increment.
+        slider_element: RefCell<Option<Retained<AnyObject>>>,
+    }
+
+    /// An accessibility element as the protocols of UIKit describe it.
+    struct Element {
+        object: Retained<AnyObject>,
+        container: Retained<AnyObject>,
+        index: isize,
+        class_name: String,
+        is_element: bool,
+        label: Option<String>,
+        value: Option<String>,
+        traits: u64,
+        frame: Rect,
+    }
+
+    // SAFETY (the messages of this module): every object of the Objective-C
+    // runtime answers the informal accessibility protocols of UIKit
+    // (categories of `NSObject`); the selectors are sent with the argument
+    // and return types UIKit declares for them.
+
+    fn label_of(object: &AnyObject) -> Option<String> {
+        let text: Option<Retained<NSString>> = unsafe { msg_send![object, accessibilityLabel] };
+        text.map(|text| text.to_string())
+    }
+
+    fn value_of(object: &AnyObject) -> Option<String> {
+        let text: Option<Retained<NSString>> = unsafe { msg_send![object, accessibilityValue] };
+        text.map(|text| text.to_string())
+    }
+
+    fn describe(object: Retained<AnyObject>, container: &Retained<AnyObject>, index: isize) -> Element {
+        let frame: CGRect = unsafe { msg_send![&*object, accessibilityFrame] };
+        Element {
+            class_name: object.class().name().to_string_lossy().into_owned(),
+            is_element: unsafe { msg_send![&*object, isAccessibilityElement] },
+            label: label_of(&object),
+            value: value_of(&object),
+            traits: unsafe { msg_send![&*object, accessibilityTraits] },
+            frame: Rect::new(frame.origin.x, frame.origin.y, frame.size.width, frame.size.height),
+            container: container.clone(),
+            index,
+            object,
+        }
+    }
+
+    /// The elements under an accessibility container, depth first.
+    fn walk(container: &Retained<AnyObject>, depth: u32, elements: &mut Vec<Element>) {
+        if depth > 32 {
+            return;
+        }
+        let count: isize = unsafe { msg_send![&**container, accessibilityElementCount] };
+        // A container that does not list its elements answers with the
+        // "not found" of Foundation.
+        if count == NOT_FOUND {
+            return;
+        }
+        for index in 0..count {
+            let child: Option<Retained<AnyObject>> =
+                unsafe { msg_send![&**container, accessibilityElementAtIndex: index] };
+            if let Some(child) = child {
+                elements.push(describe(child.clone(), container, index));
+                walk(&child, depth + 1, elements);
+            }
+        }
+    }
+
+    /// The frame the wrapper gives an element of a control: the corners
+    /// of the bounds in the coordinates of the top-level, each truncated.
+    fn expected_frame(control: &Visual, root: &Visual) -> Option<Rect> {
+        let size = control.bounds().size();
+        let top_left = control.translate_point(Point::new(0.0, 0.0), root)?;
+        let (left, top) = (top_left.x as i32, top_left.y as i32);
+        let (right, bottom) = ((top_left.x + size.width) as i32, (top_left.y + size.height) as i32);
+        Some(Rect::new(f64::from(left), f64::from(top), f64::from(right - left), f64::from(bottom - top)))
+    }
+
+    impl State {
+        pub fn new(controls: &MainView) -> Rc<Self> {
+            let clicks = Rc::new(Cell::new(0));
+            let counter = clicks.clone();
+            controls.button.click(move |_, _| counter.set(counter.get() + 1));
+            Rc::new(Self {
+                text_box: controls.text_box.clone(),
+                button: controls.button.clone(),
+                check_box: controls.check_box.clone(),
+                slider: controls.slider.clone(),
+                clicks,
+                step: Cell::new(0),
+                checks: RefCell::new(Checks::new()),
+                slider_element: RefCell::new(None),
+            })
+        }
+
+        /// The checks of an attempt: the tree and the actions in the
+        /// first, what the actions did in the second.
+        pub fn run(&self, view: &FerroView) -> Checks {
+            match self.step.get() {
+                0 => {
+                    let checks = self.read_and_act(view);
+                    self.checks.borrow_mut().extend(checks);
+                    self.step.set(1);
+                }
+                1 => {
+                    let checks = self.after_actions();
+                    self.checks.borrow_mut().extend(checks);
+                    self.step.set(2);
+                }
+                _ => {}
+            }
+
+            let mut checks = self.checks.borrow().clone();
+            if self.step.get() < 2 {
+                checks.push(("accessibility", false, format!("step {} of 2", self.step.get())));
+            }
+            checks
+        }
+
+        fn read_and_act(&self, view: &FerroView) -> Checks {
+            let mut checks = Checks::new();
+
+            // SAFETY: the constants of UIKit are set when the framework
+            // is loaded and never change.
+            let constants = unsafe {
+                [
+                    (AccessibilityTraits::BUTTON, UIAccessibilityTraitButton),
+                    (AccessibilityTraits::LINK, UIAccessibilityTraitLink),
+                    (AccessibilityTraits::IMAGE, UIAccessibilityTraitImage),
+                    (AccessibilityTraits::SELECTED, UIAccessibilityTraitSelected),
+                    (AccessibilityTraits::NOT_ENABLED, UIAccessibilityTraitNotEnabled),
+                    (AccessibilityTraits::ADJUSTABLE, UIAccessibilityTraitAdjustable),
+                    (AccessibilityTraits::HEADER, UIAccessibilityTraitHeader),
+                ]
+            };
+            checks.push((
+                "accessibility traits",
+                constants.iter().all(|(port, system)| port.bits() == *system),
+                format!(
+                    "the traits of the port and the constants of UIKit: {:?}",
+                    constants.iter().map(|(port, system)| (port.bits(), *system)).collect::<Vec<_>>()
+                ),
+            ));
+
+            let top_level = view.top_level();
+            let root: &Visual = &top_level;
+            let view_object: Retained<AnyObject> = {
+                let view: &AnyObject = view;
+                view.retain()
+            };
+            let container_type: isize = unsafe { msg_send![&*view_object, accessibilityContainerType] };
+            let view_is_element: bool = unsafe { msg_send![&*view_object, isAccessibilityElement] };
+            let direct: isize = unsafe { msg_send![&*view_object, accessibilityElementCount] };
+            let mut elements = Vec::new();
+            walk(&view_object, 0, &mut elements);
+            let exposed: Vec<&Element> = elements.iter().filter(|element| element.is_element).collect();
+            checks.push((
+                "accessibility container",
+                container_type == AccessibilityContainerType::SemanticGroup as isize
+                    && !view_is_element
+                    && direct > 0
+                    && elements.iter().all(|element| element.class_name == "FerroAutomationPeerElement"),
+                format!(
+                    "the view is a container of type {container_type} with {direct} element(s) and is no element itself: \
+                     {}; {} object(s) under it, of which {} are accessibility elements: {:?}",
+                    !view_is_element,
+                    elements.len(),
+                    exposed.len(),
+                    exposed.iter().map(|element| element.label.clone().unwrap_or_default()).collect::<Vec<_>>()
+                ),
+            ));
+
+            // An element by its label, and what it has to say.
+            let find =
+                |label: &str| elements.iter().find(|element| element.is_element && element.label.as_deref() == Some(label));
+            let mut describe_control =
+                |name: &'static str, label: &str, control: &Visual, traits: AccessibilityTraits, value: Option<String>| {
+                    let expected = expected_frame(control, root);
+                    match find(label) {
+                        Some(element) => {
+                            // The element in its container: the index of
+                            // the element is the index it was found at.
+                            let index: isize =
+                                unsafe { msg_send![&*element.container, indexOfAccessibilityElement: &*element.object] };
+                            let frame_matches = expected.is_some_and(|expected| expected == element.frame)
+                                && element.frame.width > 0.0
+                                && element.frame.height > 0.0;
+                            checks.push((
+                                name,
+                                element.traits == traits.bits()
+                                    && element.value == value
+                                    && frame_matches
+                                    && index == element.index,
+                                format!(
+                                    "\"{label}\": traits {} (expected {}), value {:?} (expected {value:?}), frame {:?} \
+                                     (the control: {expected:?}), index {index} (found at {})",
+                                    element.traits,
+                                    traits.bits(),
+                                    element.value,
+                                    element.frame,
+                                    element.index
+                                ),
+                            ));
+                        }
+                        None => {
+                            checks.push((name, false, format!("no accessibility element with the label \"{label}\"")))
+                        }
+                    }
+                };
+            describe_control("accessibility button", "Press", &self.button, AccessibilityTraits::BUTTON, None);
+            describe_control(
+                "accessibility text box",
+                "Name",
+                &self.text_box,
+                AccessibilityTraits::empty(),
+                self.text_box.text(),
+            );
+            describe_control("accessibility check box", "Agree", &self.check_box, AccessibilityTraits::empty(), None);
+            // The reference sets the traits of an element anew from the
+            // control type after it set the adjustable trait, so a slider
+            // has none (docs/porting/ios-platform.md, section 10c).
+            describe_control(
+                "accessibility slider",
+                "Volume",
+                &self.slider,
+                AccessibilityTraits::empty(),
+                Some(format!("{SLIDER_VALUE}")),
+            );
+
+            // The actions of assistive technology.
+            let activate = |label: &str| -> Option<bool> {
+                find(label).map(|element| unsafe { msg_send![&*element.object, accessibilityActivate] })
+            };
+            let button_activated = activate("Press");
+            let check_box_activated = activate("Agree");
+            let text_box_activated = activate("Name");
+            if let Some(element) = find("Volume") {
+                let _: () = unsafe { msg_send![&*element.object, accessibilityIncrement] };
+                *self.slider_element.borrow_mut() = Some(element.object.clone());
+            }
+            checks.push((
+                "accessibility activate",
+                button_activated == Some(true) && check_box_activated == Some(true) && text_box_activated == Some(false),
+                format!(
+                    "accessibilityActivate: the button {button_activated:?}, the check box {check_box_activated:?}, the \
+                     text box (no default action) {text_box_activated:?}"
+                ),
+            ));
+
+            checks
+        }
+
+        fn after_actions(&self) -> Checks {
+            let range: &RangeBase = &self.slider;
+            let slider_value = self.slider_element.borrow().as_ref().and_then(|element| value_of(element));
+            vec![
+                (
+                    "accessibility click",
+                    self.clicks.get() == 1,
+                    format!("activating the element of the button raised {} click(s)", self.clicks.get()),
+                ),
+                (
+                    "accessibility toggle",
+                    self.check_box.is_checked() == Some(true),
+                    format!("activating the element of the check box: checked {:?}", self.check_box.is_checked()),
+                ),
+                (
+                    "accessibility increment",
+                    range.value() == SLIDER_VALUE + 1.0 && slider_value == Some(format!("{}", SLIDER_VALUE + 1.0)),
+                    format!(
+                        "incrementing the element of the slider: the slider has {} (from {SLIDER_VALUE}), the element \
+                         says {slider_value:?}",
+                        range.value()
+                    ),
+                ),
+            ]
         }
     }
 }
