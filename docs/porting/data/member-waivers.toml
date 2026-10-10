@@ -5140,3 +5140,25 @@ project = "Avalonia.DesignerSupport"
 type = "Avalonia.DesignerSupport.Remote.HtmlTransport.SimpleWebSocket"
 member = "*SendMessage(bool isText, byte[] data, int offset, int length)*"
 reason = "the overload with an offset and a length is `SimpleWebSocket::send_message` with a slice"
+
+# ---------------------------------------------------------------- Avalonia.X11
+
+[[waive]]
+project = "Avalonia.X11"
+type = "Avalonia.X11.XLib.XClassHint"
+reason = "the structure of the Xlib bindings, filled in by `xlib::x_set_class_hint`"
+
+[[waive]]
+project = "Avalonia.X11"
+type = "Avalonia.X11.XLib.XSyncValue"
+reason = "the structure of the Xlib bindings (`x11_dl::sync::XSyncValue`), re-exported by `xlib.rs`"
+
+[[waive]]
+project = "Avalonia.X11"
+type = "Avalonia.X11.XLib.GrabResult"
+reason = "the result of `XGrabPointer`, which the drag source uses (stage 2 of docs/porting/x11-platform.md)"
+
+[[waive]]
+project = "Avalonia.X11"
+type = "Avalonia.X11.Screens.X11Screens.FallBackScreen"
+reason = "`X11Screen::new_fall_back`: a screen of the same type without a scaling provider, whose refresh does nothing"

@@ -52,7 +52,7 @@ Percentages are `present / (total - waived)`. Member matching is by name with re
 | Routed events | 108 | 108 | - | 100.0% |
 | Other files (native sources, XAML, TypeScript, fonts) | 243 | 268 | - | 90.7% |
 
-148 upstream files are not applicable and not counted. Out of the current scope (platform backends, below): 524 files, 1197 types, 13006 members.
+148 upstream files are not applicable and not counted. Out of the current scope (platform backends, below): 436 files, 906 types, 8109 members.
 
 ## Projects
 
@@ -77,6 +77,7 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | `src/Avalonia.Remote.Protocol` | `src/FerroUI.Remote.Protocol` | `ferroui-remote-protocol` | 14/14 | 54/55 (1 waived) | 196/202 (3 waived) | 98.5% | 4 - tooling | P3 |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/Avalonia.Themes.Fluent` | `src/FerroUI.Themes.Fluent` | `ferroui-themes-fluent` | 5/5 | 6/6 | 68/73 (5 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/Avalonia.Themes.Simple` | `src/FerroUI.Themes.Simple` | `ferroui-themes-simple` | 1/1 | 1/1 | 1/1 | 100.0% | 2 - xaml + themes | P2 |
+| [Avalonia.X11](tracking/Avalonia.X11.md) | `src/Avalonia.X11` | `src/FerroUI.X11` | `ferroui-x11` | 48/88 | 121/291 (108 waived) | 0/4897 | 0.0% | 5 - desktop (Linux) | P1 |
 | [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/Avalonia.Browser` | `src/Browser/FerroUI.Browser` | `ferroui-browser` | 50/50 | 60/62 (2 waived) | 333/428 (95 waived) | 100.0% | 3 - browser | P2 |
 | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | `src/HarfBuzz/Avalonia.HarfBuzz` | `src/HarfBuzz/FerroUI.HarfBuzz` | `ferroui-harfbuzz` | 3/3 | 3/3 | 5/8 (3 waived) | 100.0% | 1 - rendering | P0 |
 | [Avalonia.Headless](tracking/Avalonia.Headless.md) | `src/Headless/Avalonia.Headless` | `src/Headless/FerroUI.Headless` | `ferroui-headless` | 11/11 | 22/24 (2 waived) | 238/251 (13 waived) | 100.0% | 1 - test infrastructure | P1 |
@@ -111,7 +112,6 @@ Tracked at file and type granularity so that the size of the remaining work is k
 | [Avalonia.FreeDesktop.AtSpi](tracking/Avalonia.FreeDesktop.AtSpi.md) | `src/Avalonia.FreeDesktop.AtSpi` | `src/FerroUI.FreeDesktop.AtSpi` | `ferroui-freedesktop-atspi` | 0/27 | 0/27 | 0/434 | 0.0% | not started / out of current scope | - |
 | [Avalonia.Vulkan](tracking/Avalonia.Vulkan.md) | `src/Avalonia.Vulkan` | `src/FerroUI.Vulkan` | `ferroui-vulkan` | 0/30 | 0/151 | 0/2034 | 0.0% | not started / out of current scope | - |
 | [Avalonia.Wayland](tracking/Avalonia.Wayland.md) | `src/Avalonia.Wayland` | `src/FerroUI.Wayland` | `ferroui-wayland` | 0/81 | 0/123 | 0/816 | 0.0% | not started / out of current scope | - |
-| [Avalonia.X11](tracking/Avalonia.X11.md) | `src/Avalonia.X11` | `src/FerroUI.X11` | `ferroui-x11` | 0/88 | 0/291 | 0/4897 | 0.0% | not started / out of current scope | - |
 | [Avalonia.LinuxFramebuffer](tracking/Avalonia.LinuxFramebuffer.md) | `src/Linux/Avalonia.LinuxFramebuffer` | `src/Linux/FerroUI.LinuxFramebuffer` | `ferroui-linuxframebuffer` | 0/30 | 0/76 | 0/529 | 0.0% | not started / out of current scope | - |
 | [Avalonia.Win32](tracking/Avalonia.Win32.md) | `src/Windows/Avalonia.Win32` | `src/Windows/FerroUI.Win32` | `ferroui-win32` | 0/95 | 0/276 | 0/2605 | 0.0% | not started / out of current scope | - |
 | [Avalonia.Win32.Automation](tracking/Avalonia.Win32.Automation.md) | `src/Windows/Avalonia.Win32.Automation` | `src/Windows/FerroUI.Win32.Automation` | `ferroui-win32-automation` | 0/40 | 0/64 | 0/598 | 0.0% | not started / out of current scope | - |
@@ -140,7 +140,7 @@ Libraries.
 | `src/Avalonia.Fonts.Inter` | 3 | `src/FerroUI.Fonts.Inter` | workspace member | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) |
 | `src/Avalonia.FreeDesktop` | 18 | `src/FerroUI.FreeDesktop` | not created | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) (out of scope) |
 | `src/Avalonia.FreeDesktop.AtSpi` | 27 | `src/FerroUI.FreeDesktop.AtSpi` | not created | [Avalonia.FreeDesktop.AtSpi](tracking/Avalonia.FreeDesktop.AtSpi.md) (out of scope) |
-| `src/Avalonia.Metal` | 2 | `src/FerroUI.Metal` | directory exists | [Avalonia.Metal](tracking/Avalonia.Metal.md) |
+| `src/Avalonia.Metal` | 2 | `src/FerroUI.Metal` | workspace member | [Avalonia.Metal](tracking/Avalonia.Metal.md) |
 | `src/Avalonia.MicroCom` | 1 | `src/FerroUI.MicroCom` | workspace member | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) |
 | `src/Avalonia.Native` | 49 | `src/FerroUI.Native` | workspace member | [Avalonia.Native](tracking/Avalonia.Native.md) |
 | `src/Avalonia.OpenGL` | 39 | `src/FerroUI.OpenGL` | workspace member | [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) |
@@ -149,7 +149,7 @@ Libraries.
 | `src/Avalonia.Themes.Simple` | 2 | `src/FerroUI.Themes.Simple` | workspace member | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) |
 | `src/Avalonia.Vulkan` | 30 | `src/FerroUI.Vulkan` | not created | [Avalonia.Vulkan](tracking/Avalonia.Vulkan.md) (out of scope) |
 | `src/Avalonia.Wayland` | 81 | `src/FerroUI.Wayland` | not created | [Avalonia.Wayland](tracking/Avalonia.Wayland.md) (out of scope) |
-| `src/Avalonia.X11` | 88 | `src/FerroUI.X11` | not created | [Avalonia.X11](tracking/Avalonia.X11.md) (out of scope) |
+| `src/Avalonia.X11` | 88 | `src/FerroUI.X11` | workspace member | [Avalonia.X11](tracking/Avalonia.X11.md) |
 | `src/Browser/Avalonia.Browser` | 52 | `src/Browser/FerroUI.Browser` | workspace member | [Avalonia.Browser](tracking/Avalonia.Browser.md) |
 | `src/HarfBuzz/Avalonia.HarfBuzz` | 3 | `src/HarfBuzz/FerroUI.HarfBuzz` | workspace member | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) |
 | `src/Headless/Avalonia.Headless` | 11 | `src/Headless/FerroUI.Headless` | workspace member | [Avalonia.Headless](tracking/Avalonia.Headless.md) |
@@ -313,20 +313,24 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `src/FerroUI.Desktop` | `src/Avalonia.Desktop` |
 | `src/FerroUI.Dialogs` | `src/Avalonia.Dialogs` |
 | `src/FerroUI.Fonts.Inter` | `src/Avalonia.Fonts.Inter` |
+| `src/FerroUI.Metal` | `src/Avalonia.Metal` |
 | `src/FerroUI.MicroCom` | `src/Avalonia.MicroCom` |
 | `src/FerroUI.Native` | `src/Avalonia.Native` |
 | `src/FerroUI.OpenGL` | `src/Avalonia.OpenGL` |
 | `src/FerroUI.Remote.Protocol` | `src/Avalonia.Remote.Protocol` |
 | `src/FerroUI.Themes.Fluent` | `src/Avalonia.Themes.Fluent` |
 | `src/FerroUI.Themes.Simple` | `src/Avalonia.Themes.Simple` |
+| `src/FerroUI.X11` | `src/Avalonia.X11` |
 | `src/HarfBuzz/FerroUI.HarfBuzz` | `src/HarfBuzz/Avalonia.HarfBuzz` |
 | `src/Headless/FerroUI.Headless` | `src/Headless/Avalonia.Headless` |
 | `src/Markup/FerroUI.Markup` | `src/Markup/Avalonia.Markup` |
 | `src/Markup/FerroUI.Markup.Xaml` | `src/Markup/Avalonia.Markup.Xaml` |
 | `src/Markup/FerroUI.Markup.Xaml.Loader` | `src/Markup/Avalonia.Markup.Xaml.Loader` |
 | `src/Skia/FerroUI.Skia` | `src/Skia/Avalonia.Skia` |
+| `src/Vello/FerroUI.Vello` | none (FerroUI only) |
 | `src/tools/MicroCom.CodeGenerator` | none (FerroUI only) |
 | `tests/FerroUI.Markup.Xaml.UnitTests` | `tests/Avalonia.Markup.Xaml.UnitTests` (not tracked) |
+| `tests/FerroUI.RenderBackends.Comparison` | none (FerroUI only) |
 | `tests/XamlIncludeFixture/Application` | none (FerroUI only) |
 | `tests/XamlIncludeFixture/Theme` | none (FerroUI only) |
 
@@ -334,7 +338,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-334 Rust source files have no upstream counterpart (7 without a recorded reason). They are listed at the end of each project page.
+337 Rust source files have no upstream counterpart (7 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
@@ -605,6 +609,9 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/FerroUI.Themes.Simple/compiled_xaml.rs` | generated by the Rust emitter of the XAML compiler (`rust_emitter::generate_class_file`): the compiled documents of the crate, the counterpart of the IL the upstream build task writes into the assembly |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/FerroUI.Themes.Simple/register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/FerroUI.Themes.Simple/rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |
+| [Avalonia.X11](tracking/Avalonia.X11.md) | `src/FerroUI.X11/event.rs` | The multicast events of the backend's own classes (a C# `event Action` of the original): a list of handlers with tokens to remove them |
+| [Avalonia.X11](tracking/Avalonia.X11.md) | `src/FerroUI.X11/pixel_buffer.rs` | A framebuffer over pixels the crate owns, for what the original makes with the `LockedFramebuffer` constructor over memory of its own (cursor and icon pixels) |
+| [Avalonia.X11](tracking/Avalonia.X11.md) | `src/FerroUI.X11/raw_event_grouping.rs` | The port of `src/Shared/RawEventGrouping.cs`, a source file the original compiles into every backend that queues its input (it belongs to no project of the tracking) |
 | [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/FerroUI.Browser/interop/completion_helper.rs` | completion of the asynchronous calls into the page: upstream's runtime turns a promise of the page into a task |
 | [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/FerroUI.Browser/interop/thread_proxy.rs` | the threads of the module: the id of the calling thread and a call made on another one; upstream's runtime carries a call from one thread to another (browser stage B2.3) |
 | [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/FerroUI.Browser/rendering/browser_render_surface.rs` | the render surface of a canvas as it is handed to the compositor: upstream hands out the render target itself, which with a render worker exists on the render thread only (browser stage B2.5) |
