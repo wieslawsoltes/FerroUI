@@ -2037,6 +2037,20 @@ mod native {
         (info.dwMajorVersion, info.dwMinorVersion, info.dwBuildNumber)
     }
 
+    /// Whether the process is ending (`RtlDllShutdownInProgress`): the
+    /// system has ended every thread but the calling one, wherever each
+    /// was, and what is still destroyed must not wait for any of them.
+    pub fn process_is_shutting_down() -> bool {
+        #[cfg_attr(not(target_arch = "x86"), link(name = "ntdll", kind = "raw-dylib"))]
+        #[cfg_attr(target_arch = "x86", link(name = "ntdll", kind = "raw-dylib", import_name_type = "undecorated"))]
+        extern "system" {
+            fn RtlDllShutdownInProgress() -> u8;
+        }
+
+        // SAFETY: takes nothing and reads a flag of the loader.
+        unsafe { RtlDllShutdownInProgress() != 0 }
+    }
+
     // ----------------------------------------------------------------
     // DPI awareness
     // ----------------------------------------------------------------

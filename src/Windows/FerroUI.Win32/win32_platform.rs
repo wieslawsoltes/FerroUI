@@ -49,7 +49,42 @@ const SPI_SETWORKAREA: usize = 0x002F;
 thread_local! {
     static INSTANCE: RefCell<Option<Rc<Win32Platform>>> = const { RefCell::new(None) };
     static OPTIONS: RefCell<Option<Win32PlatformOptions>> = const { RefCell::new(None) };
-    static COMPOSITOR: RefCell<Option<Rc<Compositor>>> = const { RefCell::new(None) };
+    static COMPOSITOR: RefCell<Option<KeptForTheProcess<Rc<Compositor>>>> = const { RefCell::new(None) };
+}
+
+/// A value of the UI thread that lives as long as the process, as a static
+/// of the reference does: it is never dropped.
+///
+/// The values of the main thread are destroyed while the process ends,
+/// after the system has ended every other thread, wherever each was. The
+/// compositor is dropped under the locks it shares with the thread that
+/// renders (the render loop, the server compositor); a render thread that
+/// was ended inside one of them never leaves it, and the process then
+/// waits for ever (`docs/porting/win32-platform.md`, section 11.2). The
+/// reference releases nothing when the process ends.
+struct KeptForTheProcess<T>(std::mem::ManuallyDrop<T>);
+
+impl<T> KeptForTheProcess<T> {
+    fn new(value: T) -> KeptForTheProcess<T> {
+        KeptForTheProcess(std::mem::ManuallyDrop::new(value))
+    }
+}
+
+impl<T> Drop for KeptForTheProcess<T> {
+    fn drop(&mut self) {
+        // Diagnosis of the finding, to be removed with the trace of
+        // releases: with the variable set the value is dropped after all.
+        if ferroui_microcom::release_trace() {
+            if std::env::var_os("FERROUI_WIN32_TEARDOWN_DROP").is_some() {
+                eprintln!("teardown: the drop of the compositor of the platform begins");
+                // SAFETY: the value is not used again: this is its drop.
+                unsafe { std::mem::ManuallyDrop::drop(&mut self.0) };
+                eprintln!("teardown: the drop of the compositor of the platform returned");
+            } else {
+                eprintln!("teardown: the compositor of the platform is kept");
+            }
+        }
+    }
 }
 
 /// Selects the Windows backend for an application.
@@ -176,7 +211,7 @@ impl Win32Platform {
     /// # Panics
     /// Panics when the platform has not been initialized.
     pub(crate) fn compositor() -> Rc<Compositor> {
-        match COMPOSITOR.with(|compositor| compositor.borrow().clone()) {
+        match COMPOSITOR.with(|compositor| compositor.borrow().as_ref().map(|kept| Rc::clone(&kept.0))) {
             Some(compositor) => compositor,
             None => panic!("Win32Platform hasn't been initialized"),
         }
@@ -287,7 +322,7 @@ impl Win32Platform {
         Self::update_timer_fps();
 
         let compositor = Compositor::new(platform_graphics, false);
-        COMPOSITOR.with(|slot| *slot.borrow_mut() = Some(compositor.clone()));
+        COMPOSITOR.with(|slot| *slot.borrow_mut() = Some(KeptForTheProcess::new(compositor.clone())));
         locator.bind_to_self(compositor);
     }
 

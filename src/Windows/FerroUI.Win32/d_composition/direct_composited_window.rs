@@ -74,6 +74,17 @@ impl DirectCompositedWindow {
 
 impl Drop for DirectCompositedWindow {
     fn drop(&mut self) {
+        // A window that is still alive when the process ends is destroyed
+        // with the values of the main thread, after the thread that
+        // renders was ended, possibly inside the lock of a frame: nothing
+        // is released then, as in the reference, and nothing is waited for.
+        #[cfg(windows)]
+        if crate::interop::unmanaged_methods::process_is_shutting_down() {
+            if let Some(objects) = self.objects.lock().unwrap_or_else(PoisonError::into_inner).take() {
+                std::mem::forget(objects);
+            }
+            return;
+        }
         self.dispose();
     }
 }
