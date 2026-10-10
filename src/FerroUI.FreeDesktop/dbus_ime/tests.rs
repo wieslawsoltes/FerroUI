@@ -334,42 +334,47 @@ impl TestBus {
     fn new() -> TestBus {
         let log: Log = Arc::new(Mutex::new(Vec::new()));
 
+        // The services are part of the connection from the moment it is
+        // built: an object server that is started later, by the first
+        // object that is added, was seen not to answer calls now and then.
+        let serve = |builder: zbus::blocking::connection::Builder<'static>, log: &Log| {
+            builder
+                .serve_at("/org/freedesktop/IBus", IBusPortal { log: log.clone() })?
+                .serve_at(IBUS_CONTEXT_PATH, IBusContext { log: log.clone() })?
+                .serve_at(IBUS_CONTEXT_PATH, IBusService { log: log.clone() })?
+                .serve_at("/inputmethod", Fcitx4Method { log: log.clone() })?
+                .serve_at(FCITX4_CONTEXT_PATH, Fcitx4Context { log: log.clone() })?
+                .serve_at("/inputmethod", Fcitx5Method { log: log.clone() })?
+                .serve_at(FCITX5_CONTEXT_PATH, Fcitx5Context { log: log.clone() })
+        };
+
         let (client, service, owners) = if on_session_bus() {
             let client = DBusHelper::try_create_new_connection(None).expect("a session bus");
-            let service = zbus::blocking::connection::Builder::session().unwrap().build().unwrap();
+            let service = serve(zbus::blocking::connection::Builder::session().unwrap(), &log).unwrap().build().unwrap();
             (client, service, None)
         } else {
             let (client_end, service_end) = std::os::unix::net::UnixStream::pair().unwrap();
             let guid = zbus::Guid::generate();
+            let owners = Arc::new(Mutex::new(HashMap::new()));
             // Both ends take part in the handshake, so one is built on
             // another thread.
-            let service = std::thread::spawn(move || {
-                zbus::blocking::connection::Builder::async_io_unix_stream(service_end)
-                    .server(guid)
-                    .unwrap()
-                    .p2p()
-                    .build()
-                    .unwrap()
-            });
+            let service = {
+                let (owners, log) = (owners.clone(), log.clone());
+                std::thread::spawn(move || {
+                    let builder = zbus::blocking::connection::Builder::async_io_unix_stream(service_end)
+                        .server(guid)
+                        .unwrap()
+                        .p2p()
+                        .serve_at("/org/freedesktop/DBus", FakeBus { owners })
+                        .unwrap();
+                    serve(builder, &log).unwrap().build().unwrap()
+                })
+            };
             let client =
                 zbus::blocking::connection::Builder::async_io_unix_stream(client_end).p2p().build().unwrap().into_inner();
             let service = service.join().unwrap();
-
-            let owners = Arc::new(Mutex::new(HashMap::new()));
-            service.object_server().at("/org/freedesktop/DBus", FakeBus { owners: owners.clone() }).unwrap();
             (client, service, Some(owners))
         };
-
-        {
-        let server = service.object_server();
-        server.at("/org/freedesktop/IBus", IBusPortal { log: log.clone() }).unwrap();
-        server.at(IBUS_CONTEXT_PATH, IBusContext { log: log.clone() }).unwrap();
-        server.at(IBUS_CONTEXT_PATH, IBusService { log: log.clone() }).unwrap();
-        server.at("/inputmethod", Fcitx4Method { log: log.clone() }).unwrap();
-        server.at(FCITX4_CONTEXT_PATH, Fcitx4Context { log: log.clone() }).unwrap();
-        server.at("/inputmethod", Fcitx5Method { log: log.clone() }).unwrap();
-        server.at(FCITX5_CONTEXT_PATH, Fcitx5Context { log: log.clone() }).unwrap();
-        }
 
         TestBus { client, service, owners, log }
     }
