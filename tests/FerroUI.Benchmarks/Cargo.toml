@@ -1,0 +1,30 @@
+[package]
+name = "ferroui-benchmarks"
+description = "The benchmarks of FerroUI: layout, styling, bindings, text, rendering and collections, measured with the clock of the standard library"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+# Makes the global allocator of the crate one that counts the blocks and bytes each thread allocates,
+# so that the table of a run has what an operation allocated (harness.rs). Off by default: counting
+# costs time.
+count-allocations = []
+
+[dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-markup = { workspace = true }
+ferroui-themes-fluent = { workspace = true }
+ferroui-themes-simple = { workspace = true }
+ferroui-harfbuzz = { workspace = true }
+ferroui-skia = { workspace = true }

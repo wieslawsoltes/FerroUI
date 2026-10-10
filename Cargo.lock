@@ -494,6 +494,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-benchmarks"
+version = "0.1.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-harfbuzz",
+ "ferroui-markup",
+ "ferroui-skia",
+ "ferroui-themes-fluent",
+ "ferroui-themes-simple",
+]
+
+[[package]]
 name = "ferroui-browser"
 version = "0.1.0-preview.1"
 dependencies = [

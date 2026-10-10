@@ -35,6 +35,7 @@ members = [
     "tests/XamlIncludeFixture/Application",
     "tests/FerroUI.RenderBackends.Comparison",
     "tests/FerroUI.RenderTests",
+    "tests/FerroUI.Benchmarks",
     "samples/MiniMvvm",
     "samples/ControlCatalog",
     "samples/ControlCatalog.Desktop",
