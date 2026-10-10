@@ -132,6 +132,52 @@ a11y_dump() {
 }
 night_changed=0
 rotated=0
+
+# A touch of the script must not be lost. On a device that has just booted the transition that
+# starts the activity can still be shown when the application asks for its first tap, and the
+# system does not deliver a touch under a window of the transition ("InputDispatcher: Dropping
+# untrusted touch event due to .../1000", with "transition snapshot" among the obscuring windows:
+# seen on 2026-10-10, the first run after a boot). So the first tap of a run waits until the
+# window of the activity has the input focus, and a tap or a swipe the system says it dropped is
+# injected again, with a line that says so.
+first_touch=1
+wait_for_input_focus() {
+    local waited=0
+    while [ "$waited" -lt 30 ]; do
+        if adb_shell dumpsys window 2>/dev/null | grep 'mCurrentFocus' | grep -q "$application_id"; then
+            if [ "$waited" -gt 0 ]; then
+                echo "   script: the window of the activity has the input focus after $waited s"
+            fi
+            return 0
+        fi
+        sleep 1
+        waited=$((waited + 1))
+    done
+    echo "   script: the window of the activity did not get the input focus within 30 s; the tap is injected anyway"
+}
+dropped_touches() {
+    ADB_TIMEOUT=20 adb_do logcat -d -v raw -s InputDispatcher:W 2>/dev/null | grep -c 'Dropping untrusted touch event' || true
+}
+# touch_checked tap X Y | swipe X1 Y1 X2 Y2 MS
+touch_checked() {
+    local attempt=0 before after
+    while :; do
+        before="$(dropped_touches)"
+        adb_shell input "$@" >/dev/null 2>&1 || true
+        sleep 1
+        after="$(dropped_touches)"
+        if [ "${after:-0}" -le "${before:-0}" ]; then
+            return 0
+        fi
+        attempt=$((attempt + 1))
+        if [ "$attempt" -ge 5 ]; then
+            echo "   script: the system dropped the $1 $attempt times (InputDispatcher: Dropping untrusted touch event); given up"
+            return 0
+        fi
+        echo "   script: the system dropped the $1 (InputDispatcher: Dropping untrusted touch event: a window of the start transition is over the activity); injected again in 2 s"
+        sleep 2
+    done
+}
 # How the launcher starts the activity: an intent that equals this one brings its task back.
 launch="-a android.intent.action.MAIN -c android.intent.category.LAUNCHER"
 smoke_request() {
@@ -149,8 +195,13 @@ smoke_request() {
     [ "$input" = 1 ] || return 0
     echo "   script: $command $*"
     case "$command" in
-        tap) adb_shell input tap "$1" "$2" >/dev/null 2>&1 || true; sleep 1 ;;
-        swipe) adb_shell input swipe "$1" "$2" "$3" "$4" "$5" >/dev/null 2>&1 || true ;;
+        tap)
+            if [ "$first_touch" = 1 ]; then
+                first_touch=0
+                wait_for_input_focus
+            fi
+            touch_checked tap "$1" "$2" ;;
+        swipe) touch_checked swipe "$1" "$2" "$3" "$4" "$5" ;;
         keyevent) adb_shell input keyevent "$@" >/dev/null 2>&1 || true ;;
         text) adb_shell input text "$1" >/dev/null 2>&1 || true ;;
         night) night_changed=1; adb_shell cmd uimode night "$1" >/dev/null 2>&1 || true ;;
@@ -175,6 +226,7 @@ for mode in $modes; do
 input=$input"
     adb_shell "run-as $application_id rm -f files/smoke-report.txt" >/dev/null 2>&1 || true
     adb_do logcat -c >/dev/null 2>&1 || true
+    first_touch=1
     if ! adb_shell am start -W $launch -n "$activity" > "$out/am-start-$mode.txt" 2>&1; then
         echo "[FAIL] the activity could not be started:"
         cat "$out/am-start-$mode.txt"
