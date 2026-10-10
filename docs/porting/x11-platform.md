@@ -354,6 +354,32 @@ What these runs found, and what was changed:
 
 Nothing else had to be changed: GLX and EGL rendered the first time they ran, on the render thread, popups included.
 
+### Measured for stages 2c, 2d and the first parts of 2e (2026-10-10) **[VM]** **[CI]**
+
+The virtual machine (the same as above; `dbus`, `dbus-daemon` and `x11-xserver-utils` installed for these runs), commit `9e233a7e`, and the CI job on the same commit (run 38052443593, x86-64), which passed with the same steps:
+
+| Run | Result |
+|---|---|
+| `cargo test -p ferroui-freedesktop` (the doubles over a socket pair) | 48 passed, eleven times in a row **[VM]**; passes in the job **[CI]** |
+| The same on a private session bus (`dbus-run-session`, `FERROUI_FREEDESKTOP_TEST_BUS=session`, one test at a time, the tests named `dbus`) | 38 run, all pass **[VM]**; passes in the job **[CI]** |
+| `cargo test -p ferroui-x11` | 218 passed **[VM]** |
+| Smoke, bare Xvfb and under `openbox`, software (no regression) | 33 of 33 each **[VM]** |
+| `--ime=ibus` under `openbox`, on a private session bus | 28 of 28: the factory is registered; the service was asked for an input context (with the name of the application) and for its focus; the key "a" (key code 38) arrives as the committed text and as no key event, "b" (key code 56) as a key with its text; the text box has both; the service was offered the four key events in order (`0x0` and `0x40000000` as their states); the cursor location reported, (352, 333, 1, 18), lies in the window at (320, 320) **[VM]**; passes in the job **[CI]** |
+| `--ime=xim` under `openbox`, `XMODIFIERS=@im=local`, locale `en_US.UTF-8` and `C.UTF-8` | 23 of 23 each: `XOpenIM` gave an input method and no factory is registered; "a" arrives through the input context; the compose key, an apostrophe and "e" arrive as one key press without a key code and the text "é", and the text box has both **[VM]**; passes in the job with `en_US.UTF-8` **[CI]** |
+| The same without a window manager | The compose sequence composes; the check that the window is active fails, as it has to: without a window manager no window is ever active (activation follows `_NET_ACTIVE_WINDOW`, `_NET_WM_STATE_FOCUSED` or focus events, and nobody gives a window the focus). An input method is told about focus only for an active window, so this is not a configuration the input method phase can check; the job runs it under `openbox` |
+| `--dnd`, bare Xvfb, under `openbox`, and rendered through GLX | 25 of 25, 25 of 25 and 30 of 30: the window announces `XdndAware` 5; the drag inside the window ends with the copy effect and the content got the text (with its non-ASCII characters); the event hook is removed afterwards; the second process is another client with a window that announces the protocol; it printed the dropped text and the copy effect; the drag ended with the copy effect; the source window got no drop **[VM]**; the bare run passes in the job **[CI]** |
+
+What these runs found, and what was changed:
+
+| Finding | Change |
+|---|---|
+| A test of the FreeDesktop crate failed now and then (one of 27 in the virtual machine, 24 of 60 runs under load on macOS): the first call for the owner of a name was never answered. The doubles were added to an object server that was started after the connection had been built | Not the port: the harness. The doubles are given to the connection builder (`serve_at`); 80 of 80 runs pass. To remember for the services the port will export (menu, tray icon) |
+| The first job run and the first run in the virtual machine failed both input method phases on a bare server: no window is ever active without a window manager, so the input method was told "no focus" and filtered nothing | Not the platform (upstream activates the same way): the phases run under `openbox` |
+| The compose sequence did not compose under `openbox`, and its text did not reach the text box without it: the key that had been given the compose symbol was the menu key, which the framework takes as the context menu key; the context menu took the focus, and the input context was reset in the middle of the sequence | Not the platform: the compose symbol is given to the scroll lock key |
+| On the session bus of the virtual machine the tests that call a portal nobody owns made the bus start the installed `xdg-desktop-portal`, which took the name the other doubles need (after the tests had ended, by luck) | Those two tests return at once on a session bus |
+
+Verified nowhere: a real `ibus-daemon` or Fcitx, an XIM server other than the one Xlib has built in, a real `xdg-desktop-portal` with a file chooser backend (the one of the virtual machine was activated without a display and its GTK backend failed to start), another toolkit as the source or the target of a drag.
+
 ### Measured by the CI job (run 38045428868, 2026-10-10) **[CI]**
 
 Ubuntu 24.04 on x86-64 (`ubuntu-latest`), Mesa 25.2.8 (`llvmpipe (LLVM 20.1.2, 256 bits)`), commit `0be4a818`:
