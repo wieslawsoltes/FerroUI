@@ -186,7 +186,7 @@ impl RenderDataStream {
     /// (upstream's caller passes `source.Clone()`).
     pub fn draw_bitmap(
         &mut self,
-        bitmap: Option<std::sync::Arc<crate::platform::SharedBitmapImpl>>,
+        bitmap: Option<crate::utilities::RefCounted<crate::platform::SharedBitmapImpl>>,
         opacity: f64,
         source_rect: Rect,
         dest_rect: Rect,
@@ -433,7 +433,7 @@ impl RenderDataStream {
                 }
                 RenderDataOpcode::DrawBitmap => {
                     let p = reader.read_payload::<DrawBitmapPayload>();
-                    visitor.on_draw_bitmap(resources.bitmap(p.bitmap), p.opacity, p.source_rect, p.dest_rect);
+                    visitor.on_draw_bitmap(resources.bitmap(p.bitmap).as_ref(), p.opacity, p.source_rect, p.dest_rect);
                 }
                 RenderDataOpcode::DrawCustom => {
                     let p = reader.read_payload::<DrawCustomPayload>();

@@ -350,7 +350,7 @@ impl IImage for Bitmap {
     }
 
     fn draw(&self, context: &mut DrawingContext<'_>, source_rect: Rect, dest_rect: Rect) {
-        context.draw_bitmap(&self.platform_impl.item(), 1.0, source_rect, dest_rect);
+        context.draw_bitmap(&self.platform_impl, 1.0, source_rect, dest_rect);
     }
 
     fn as_any(&self) -> &dyn Any {

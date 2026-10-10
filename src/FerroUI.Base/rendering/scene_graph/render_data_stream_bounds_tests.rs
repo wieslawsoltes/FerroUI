@@ -51,7 +51,10 @@ fn stroked_ellipse_bounds_are_inflated_by_thickness() {
 
 #[test]
 fn bitmap_bounds_are_the_destination_rect() {
-    let bitmap: std::sync::Arc<crate::platform::SharedBitmapImpl> = std::sync::Arc::new(TestBitmapImpl);
+    let bitmap = crate::utilities::RefCountable::create(
+        std::sync::Arc::new(TestBitmapImpl) as std::sync::Arc<crate::platform::SharedBitmapImpl>,
+        || {},
+    );
 
     let mut stream = RenderDataStream::new();
     stream.draw_bitmap(Some(bitmap), 1.0, Rect::new(0.0, 0.0, 10.0, 10.0), Rect::new(5.0, 5.0, 20.0, 20.0));

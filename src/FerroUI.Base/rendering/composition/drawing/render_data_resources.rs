@@ -29,7 +29,7 @@ pub enum RenderDataResource {
     GlyphRun(Arc<Arc<dyn IGlyphRunImpl>>),
     /// A recorded bitmap: one counted reference (`IRef<IBitmapImpl>`
     /// upstream), shared as a glyph run is.
-    Bitmap(Arc<Arc<crate::platform::SharedBitmapImpl>>),
+    Bitmap(Arc<crate::utilities::RefCounted<crate::platform::SharedBitmapImpl>>),
     CustomDrawOperation(std::sync::Arc<dyn ICustomDrawOperation>),
     Effect(Arc<dyn crate::media::IImmutableEffect>),
     ServerBrush { server: ServerObjectId, client: Rc<dyn IBrush> },
@@ -162,9 +162,9 @@ impl RenderDataResources {
         }
     }
 
-    pub fn bitmap(&self, handle: i32) -> Option<&std::sync::Arc<crate::platform::SharedBitmapImpl>> {
+    pub fn bitmap(&self, handle: i32) -> Option<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
         match self.get(handle)? {
-            RenderDataResource::Bitmap(bitmap) => Some(&**bitmap),
+            RenderDataResource::Bitmap(bitmap) => Some(bitmap.item()),
             _ => panic!("the render data resource is not a bitmap"),
         }
     }

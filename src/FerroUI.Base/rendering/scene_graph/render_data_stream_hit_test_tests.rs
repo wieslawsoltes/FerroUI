@@ -61,7 +61,10 @@ fn geometry_is_hit_via_fill_contains() {
 
 #[test]
 fn bitmap_is_hit_within_its_destination_rect() {
-    let bitmap: std::sync::Arc<crate::platform::SharedBitmapImpl> = std::sync::Arc::new(TestBitmapImpl);
+    let bitmap = crate::utilities::RefCountable::create(
+        std::sync::Arc::new(TestBitmapImpl) as std::sync::Arc<crate::platform::SharedBitmapImpl>,
+        || {},
+    );
 
     let mut stream = RenderDataStream::new();
     stream.draw_bitmap(Some(bitmap), 1.0, Rect::new(0.0, 0.0, 10.0, 10.0), Rect::new(20.0, 20.0, 30.0, 30.0));

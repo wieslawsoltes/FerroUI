@@ -295,11 +295,13 @@ impl IDrawingContextCore for RenderDataDrawingContext {
         self.stream().draw_ellipse(server_brush, server_pen, client_pen, rect);
     }
 
-    fn draw_bitmap(&mut self, source: &std::sync::Arc<crate::platform::SharedBitmapImpl>, opacity: f64, source_rect: Rect, dest_rect: Rect) {
+    fn draw_bitmap(&mut self, source: &crate::utilities::RefCounted<crate::platform::SharedBitmapImpl>, opacity: f64, source_rect: Rect, dest_rect: Rect) {
         if source_rect.is_empty() || dest_rect.is_empty() {
             return;
         }
-        self.stream().draw_bitmap(Some(source.clone()), opacity, source_rect, dest_rect);
+        // `source.Clone()`: the record has a counted reference of its own, so the bitmap outlives a caller
+        // that disposes its reference before the compositor plays the record.
+        self.stream().draw_bitmap(Some(source.clone_ref()), opacity, source_rect, dest_rect);
     }
 
     fn custom(&mut self, custom: &std::sync::Arc<dyn ICustomDrawOperation>) {
