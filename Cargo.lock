@@ -454,6 +454,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-desktop",
  "ferroui-vello",
+ "ferroui-win32",
 ]
 
 [[package]]
