@@ -28,7 +28,14 @@
 //! as the keyboard of the system would (`insertText:`, `textInRange:`,
 //! marked text, `deleteBackward`, the traits of the keyboard) and compares
 //! with the text of the text box; the input pane is checked with a
-//! keyboard notification the example posts itself.
+//! keyboard notification the example posts itself. Then the clipboard (a
+//! text is set through the clipboard of the top-level, found on the
+//! general pasteboard, and read back), the storage provider (a file in
+//! the Documents folder is created, written, read, listed, bookmarked,
+//! found again by its bookmark and by its path, moved and deleted) and
+//! the activations (the methods of the application delegate UIKit calls
+//! for a URL are called with a URL of a scheme and with a file URL, and
+//! the activatable lifetime has to report both).
 //!
 //! What the smoke mode cannot check: input. An application cannot
 //! synthesize a touch, a key press or a scroll event for itself without
@@ -512,7 +519,14 @@ mod stage2 {
     use ferroui_base::input::text_input::{TextInputContentType, TextInputOptions};
     use ferroui_base::input::{KeyModifiers, NavigationMethod};
     use ferroui_base::{Rect, Ref};
+    use ferroui_base::input::platform::ClipboardExtensions;
+    use ferroui_base::platform::storage::WellKnownFolder;
+    use ferroui_controls::application_lifetimes::{ActivationKind, IActivatableLifetime};
     use ferroui_controls::platform::{FeedbackAction, FeedbackType, IPlatformFeedback, InputPaneState};
+    use ferroui_controls::Application;
+    use objc2_foundation::NSURL;
+    use objc2_ui_kit::{UIApplication, UIPasteboard};
+    use std::io::{Read, Write};
     use ferroui_controls::TextBox;
     use ferroui_ios::FerroView;
     use objc2::rc::Retained;
@@ -890,6 +904,173 @@ mod stage2 {
             ));
         }
 
+        /// The clipboard: a round trip through the general pasteboard.
+        fn check_clipboard(&self, view: &FerroView, checks: &mut Checks) {
+            let Some(clipboard) = view.top_level().clipboard() else {
+                checks.push(("clipboard", false, "the top-level has no clipboard".to_string()));
+                return;
+            };
+            let text = format!("FerroUI clipboard {}", std::process::id());
+            let set = poll_once(&mut clipboard.set_text_async(Some(&text))).map(|result| result.is_ok());
+            // SAFETY: a property of the general pasteboard, read on the
+            // main thread.
+            let on_pasteboard = unsafe { UIPasteboard::generalPasteboard().string() }.map(|string| string.to_string());
+            let read = poll_once(&mut clipboard.try_get_text_async()).and_then(Result::ok).flatten();
+            let cleared = poll_once(&mut clipboard.clear_async()).map(|result| result.is_ok());
+            let after_clear = poll_once(&mut clipboard.try_get_text_async()).and_then(Result::ok).flatten();
+            checks.push((
+                "clipboard",
+                set == Some(true)
+                    && on_pasteboard.as_deref() == Some(text.as_str())
+                    && read.as_deref() == Some(text.as_str())
+                    && cleared == Some(true)
+                    && after_clear.is_none(),
+                format!(
+                    "set {text:?}: {set:?}; the general pasteboard has {on_pasteboard:?}; read back {read:?}; \
+                     after clearing: {after_clear:?}"
+                ),
+            ));
+        }
+
+        /// The storage provider, in the Documents folder of the
+        /// application.
+        fn check_storage(&self, view: &FerroView, checks: &mut Checks) {
+            let provider = view.top_level().storage_provider();
+            let run = || -> Result<String, String> {
+                let step = |name: &str| format!("{name} failed");
+                let documents = poll_once(&mut provider.try_get_well_known_folder_async(WellKnownFolder::Documents))
+                    .flatten()
+                    .ok_or(step("the Documents folder"))?;
+                let name = "ferroui smoke.txt";
+                // What an earlier run left behind.
+                if let Some(old) = poll_once(&mut documents.get_file_async(name)).flatten() {
+                    let _ = poll_once(&mut old.delete_async());
+                }
+                if let Some(old) = poll_once(&mut documents.get_folder_async("ferroui smoke")).flatten() {
+                    let _ = poll_once(&mut old.delete_async());
+                }
+
+                let file = poll_once(&mut documents.create_file_async(name))
+                    .and_then(Result::ok)
+                    .flatten()
+                    .ok_or(step("create_file"))?;
+                let content = b"written by the smoke mode";
+                {
+                    let mut stream = poll_once(&mut file.open_write_async()).and_then(Result::ok).ok_or(step("open_write"))?;
+                    stream.write_all(content).map_err(|error| error.to_string())?;
+                }
+                let mut read = Vec::new();
+                {
+                    let mut stream = poll_once(&mut file.open_read_async()).and_then(Result::ok).ok_or(step("open_read"))?;
+                    stream.read_to_end(&mut read).map_err(|error| error.to_string())?;
+                }
+                if read != content {
+                    return Err(format!("read back {} bytes that are not what was written", read.len()));
+                }
+
+                let properties = poll_once(&mut file.get_basic_properties_async()).ok_or(step("properties"))?;
+                if properties.size() != Some(content.len() as u64) || properties.date_modified().is_none() {
+                    return Err(format!("the properties are {properties:?}"));
+                }
+
+                let items = poll_once(&mut documents.get_items_async()).and_then(Result::ok).ok_or(step("get_items"))?;
+                if !items.iter().any(|item| item.name() == file.name()) {
+                    return Err(format!("the folder lists {} item(s) without the file", items.len()));
+                }
+
+                // A bookmark, and the file again by it and by its path.
+                let bookmark = poll_once(&mut file.save_bookmark_async()).flatten().ok_or(step("save_bookmark"))?;
+                let bookmarked = poll_once(&mut provider.open_file_bookmark_async(&bookmark)).flatten().ok_or(step("open bookmark"))?;
+                let by_path =
+                    poll_once(&mut provider.try_get_file_from_path_async(&file.path())).flatten().ok_or(step("file from path"))?;
+                let not_a_folder = poll_once(&mut provider.try_get_folder_from_path_async(&file.path())).flatten().is_none();
+                if bookmarked.name() != file.name() || by_path.name() != file.name() || !not_a_folder {
+                    return Err(format!("the bookmark gave {:?}, the path {:?}", bookmarked.name(), by_path.name()));
+                }
+
+                // A folder, the file moved into it, and both deleted.
+                let folder = poll_once(&mut documents.create_folder_async("ferroui smoke"))
+                    .and_then(Result::ok)
+                    .flatten()
+                    .ok_or(step("create_folder"))?;
+                let moved = poll_once(&mut file.move_async(folder.clone())).and_then(Result::ok).flatten().ok_or(step("move"))?;
+                let in_folder = poll_once(&mut folder.get_file_async(name)).flatten().is_some();
+                let left = poll_once(&mut documents.get_file_async(name)).flatten().is_some();
+                let parent = poll_once(&mut moved.get_parent_async()).flatten().map(|parent| parent.name());
+                poll_once(&mut folder.delete_async()).and_then(Result::ok).ok_or(step("delete"))?;
+                let gone = poll_once(&mut documents.get_folder_async("ferroui smoke")).flatten().is_none();
+                if !in_folder || left || !gone {
+                    return Err(format!("after the move: in the folder {in_folder}, left behind {left}; deleted {gone}"));
+                }
+
+                Ok(format!(
+                    "in {:?}: {:?} created, written, read ({} bytes), listed among {} item(s), bookmarked ({} characters) and \
+                     found by bookmark and path, moved into {parent:?}, deleted",
+                    documents.name(),
+                    file.name(),
+                    read.len(),
+                    items.len(),
+                    bookmark.len()
+                ))
+            };
+            match run() {
+                Ok(detail) => checks.push(("storage", provider.can_open() && provider.can_save() && provider.can_pick_folder(), detail)),
+                Err(detail) => checks.push(("storage", false, detail)),
+            }
+        }
+
+        /// The activations: the two methods of the application delegate
+        /// that UIKit calls with a URL.
+        fn check_activations(&self, checks: &mut Checks) {
+            let lifetime = Application::current().and_then(|application| application.try_get::<dyn IActivatableLifetime>());
+            let (Some(lifetime), Some(mtm)) = (lifetime, MainThreadMarker::new()) else {
+                checks.push(("activations", false, "the application has no activatable lifetime".to_string()));
+                return;
+            };
+            let seen = Rc::new(RefCell::new(Vec::new()));
+            let log = seen.clone();
+            let subscription = lifetime.activated(Rc::new(move |args| {
+                let detail = match (args.as_protocol_activated(), args.as_file_activated()) {
+                    (Some(protocol), _) => protocol.uri().absolute_uri().to_string(),
+                    (_, Some(file)) => file.files().iter().map(|file| file.name()).collect::<Vec<_>>().join(", "),
+                    _ => String::new(),
+                };
+                log.borrow_mut().push((args.kind(), detail));
+            }));
+
+            // SAFETY: the delegate of the application is the delegate of
+            // the platform, which implements `application:openURL:options:`
+            // with these argument types.
+            let open = |url: &str| -> bool {
+                let application = UIApplication::sharedApplication(mtm);
+                let Some(url) = NSURL::URLWithString(&NSString::from_str(url)) else {
+                    return false;
+                };
+                let options = NSDictionary::<NSString, AnyObject>::new();
+                unsafe {
+                    match application.delegate() {
+                        Some(delegate) => msg_send![&*delegate, application: &*application, openURL: &*url, options: &*options],
+                        None => false,
+                    }
+                }
+            };
+            let protocol = open("ferroui-smoke://activation/1?x=2");
+            let file = open("file:///tmp/activated.txt");
+            subscription.dispose();
+
+            let seen = seen.borrow();
+            checks.push((
+                "activations",
+                protocol
+                    && file
+                    && seen.len() == 2
+                    && seen[0] == (ActivationKind::OpenUri, "ferroui-smoke://activation/1?x=2".to_string())
+                    && seen[1].0 == ActivationKind::File
+                    && seen[1].1.starts_with("activated"),
+                format!("a URL of a scheme and a file URL were given to the application delegate: {seen:?}"),
+            ));
+        }
+
         fn run_once(&self, view: &FerroView, settings: &Rc<dyn IPlatformSettings>) -> Checks {
             let mut checks = Checks::new();
 
@@ -952,6 +1133,10 @@ mod stage2 {
                     launcher.is_some()
                 ),
             ));
+
+            self.check_clipboard(view, &mut checks);
+            self.check_storage(view, &mut checks);
+            self.check_activations(&mut checks);
 
             // The feedback: the sound of a click is played (the haptic
             // engine of a simulator does nothing), holding has no sound.

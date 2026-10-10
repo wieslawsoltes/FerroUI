@@ -22,5 +22,8 @@ only, each pinned to an exact version in the manifest (`docs/porting/ios-platfor
 All seven are parts of the objc2 project (https://github.com/madsmtm/objc2). On Apple targets the crate
 also uses `libc` (MIT OR Apache-2.0) for one function of the C library.
 
-Nothing of these crates is copied into this one. The declarations of `interop.rs` are written from the
+Nothing of these crates is copied into this one. Two frameworks of the system are called without a bindings
+crate: one function of AudioToolbox (`AudioServicesPlaySystemSound`, declared in `ios_platform_feedback.rs` from
+`AudioToolbox/AudioServices.h`) and the class `UTType` with five constants of UniformTypeIdentifiers (found by
+name and declared in `storage/ios_storage_provider.rs` from `UniformTypeIdentifiers/UTCoreTypes.h`). The declarations of `interop.rs` are written from the
 system headers of Core Foundation and libdispatch, as the declarations of the upstream file are.

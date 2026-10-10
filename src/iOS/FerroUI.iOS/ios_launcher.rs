@@ -27,9 +27,9 @@ impl IosLauncher {
 /// The URL of the file a storage item stands for: the URL of an item of
 /// the storage provider of the platform, or the local path of another.
 fn url_of_storage_item(storage_item: &Rc<dyn IStorageItem>) -> Option<Retained<NSURL>> {
-    // Stage 2c of docs/porting/ios-platform.md: the items of the storage
-    // provider of the platform, which answer with their own URL.
-    storage_item.try_get_local_path().map(|local_path| NSURL::fileURLWithPath(&NSString::from_str(&local_path)))
+    crate::storage::ios_storage_item::url_of(&**storage_item).or_else(|| {
+        storage_item.try_get_local_path().map(|local_path| NSURL::fileURLWithPath(&NSString::from_str(&local_path)))
+    })
 }
 
 impl ILauncher for IosLauncher {

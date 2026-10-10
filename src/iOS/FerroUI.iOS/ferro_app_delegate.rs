@@ -2,9 +2,10 @@
 //! launched, gives each scene its delegate, and reports the activations of
 //! the application.
 
+use ferroui_base::platform::storage::IStorageItem;
 use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_base::utilities::HandlerList;
-use ferroui_controls::application_lifetimes::ActivatedEventArgs;
+use ferroui_base::utilities::{HandlerList, Uri, UriKind};
+use ferroui_controls::application_lifetimes::{ActivatedEventArgs, FileActivatedEventArgs, ProtocolActivatedEventArgs};
 use ferroui_controls::AppBuilder;
 use std::rc::{Rc, Weak};
 
@@ -65,6 +66,37 @@ impl AppDelegateEvents {
         }
     }
 
+    /// The application was asked to open a URL: a file activation with
+    /// the storage item `create_item` makes for a file URL, a protocol
+    /// activation for any other. False for what is not an absolute URI.
+    pub fn open_url(&self, url: &str, create_item: impl FnOnce() -> Rc<dyn IStorageItem>) -> bool {
+        if let Some(uri) = Uri::try_create(url, UriKind::Absolute) {
+            if uri.scheme() == "file" {
+                self.on_activated(FileActivatedEventArgs::new(vec![create_item()]).into());
+            } else {
+                self.on_activated(ProtocolActivatedEventArgs::new(uri).into());
+            }
+
+            return true;
+        }
+
+        false
+    }
+
+    /// The application was asked to continue a user activity: a protocol
+    /// activation with the URL of the web page of an activity of browsing
+    /// the web. False for any other activity.
+    pub fn continue_user_activity(&self, activity_type: &str, web_page_url: Option<&str>) -> bool {
+        if activity_type == USER_ACTIVITY_TYPE_BROWSING_WEB {
+            if let Some(uri) = web_page_url.and_then(|url| Uri::try_create(url, UriKind::RelativeOrAbsolute)) {
+                self.on_activated(ProtocolActivatedEventArgs::new(uri).into());
+                return true;
+            }
+        }
+
+        false
+    }
+
     fn subscribe(
         &self,
         select: fn(&AppDelegateEvents) -> &HandlerList<dyn Fn(&ActivatedEventArgs)>,
@@ -90,6 +122,12 @@ impl IFerroAppDelegate for AppDelegateEvents {
     }
 }
 
+/// The type of the user activity of browsing the web
+/// (`NSUserActivityTypeBrowsingWeb`).
+pub const USER_ACTIVITY_TYPE_BROWSING_WEB: &str = "NSUserActivityTypeBrowsingWeb";
+
+#[cfg(target_os = "ios")]
+pub(crate) use uikit::IFerroAppInternalDelegate;
 #[cfg(target_os = "ios")]
 pub use uikit::{run_application, run_application_with, FerroAppDelegate};
 
@@ -105,9 +143,12 @@ mod uikit {
     use objc2::rc::{Allocated, Retained};
     use objc2::runtime::AnyObject;
     use objc2::{define_class, msg_send, ClassType, DefinedClass, MainThreadMarker, MainThreadOnly, Message};
+    use objc2::runtime::ProtocolObject;
     use objc2_foundation::{
-        NSDictionary, NSNotification, NSNotificationCenter, NSNotificationName, NSObjectProtocol, NSString,
+        NSArray, NSDictionary, NSNotification, NSNotificationCenter, NSNotificationName, NSObjectProtocol, NSString,
+        NSURL, NSUserActivity,
     };
+    use objc2_ui_kit::UIUserActivityRestoring;
     use objc2_ui_kit::{
         UIApplication, UIApplicationDelegate, UIApplicationDidEnterBackgroundNotification,
         UIApplicationLaunchOptionsKey, UIApplicationWillEnterForegroundNotification, UIResponder,
@@ -232,8 +273,55 @@ mod uikit {
 
                 true
             }
+
+            #[unsafe(method(application:openURL:options:))]
+            fn open_url(
+                &self,
+                _app: &UIApplication,
+                url: &NSURL,
+                _options: &NSDictionary<NSString, AnyObject>,
+            ) -> bool {
+                IFerroAppInternalDelegate::open_url(self, url)
+            }
+
+            #[unsafe(method(application:continueUserActivity:restorationHandler:))]
+            fn continue_user_activity(
+                &self,
+                _application: &UIApplication,
+                user_activity: &NSUserActivity,
+                _completion_handler: &block2::DynBlock<dyn Fn(*mut NSArray<ProtocolObject<dyn UIUserActivityRestoring>>)>,
+            ) -> bool {
+                IFerroAppInternalDelegate::continue_user_activity(self, user_activity)
+            }
         }
     );
+
+    /// What the scene delegate asks of the application delegate: the
+    /// activations a scene is connected with or receives.
+    pub(crate) trait IFerroAppInternalDelegate {
+        fn continue_user_activity(&self, user_activity: &NSUserActivity) -> bool;
+        fn open_url(&self, url: &NSURL) -> bool;
+    }
+
+    impl IFerroAppInternalDelegate for FerroAppDelegate {
+        fn open_url(&self, url: &NSURL) -> bool {
+            let Some(absolute) = url.absoluteString() else {
+                return false;
+            };
+            self.ivars().events.open_url(&absolute.to_string(), || {
+                crate::storage::ios_storage_item::create_item(url.retain(), None)
+            })
+        }
+
+        fn continue_user_activity(&self, user_activity: &NSUserActivity) -> bool {
+            const _: () = assert!(super::USER_ACTIVITY_TYPE_BROWSING_WEB.len() == 29);
+            let web_page_url =
+                user_activity.webpageURL().and_then(|url| url.absoluteString()).map(|url| url.to_string());
+            self.ivars()
+                .events
+                .continue_user_activity(&user_activity.activityType().to_string(), web_page_url.as_deref())
+        }
+    }
 
     /// Calls `handler` on the main thread for every notification of the
     /// name. The subscription lasts as long as the process, as the one of
@@ -319,5 +407,46 @@ mod tests {
         subscription.dispose();
         events.on_activated(ActivatedEventArgs::new(ActivationKind::Background));
         assert_eq!(1, count.get());
+    }
+
+    fn recorded(events: &Rc<AppDelegateEvents>) -> (Rc<std::cell::RefCell<Vec<String>>>, Rc<dyn IDisposable>) {
+        let seen = Rc::new(std::cell::RefCell::new(Vec::new()));
+        let log = seen.clone();
+        let subscription = events.activated(Rc::new(move |args: &ActivatedEventArgs| {
+            let detail = match (args.as_protocol_activated(), args.as_file_activated()) {
+                (Some(protocol), _) => format!("{:?} {}", args.kind(), protocol.uri().original_string()),
+                (_, Some(file)) => format!("{:?} {} file(s)", args.kind(), file.files().len()),
+                _ => format!("{:?}", args.kind()),
+            };
+            log.borrow_mut().push(detail);
+        }));
+        (seen, subscription)
+    }
+
+    #[test]
+    fn a_url_of_a_scheme_is_a_protocol_activation() {
+        let events = AppDelegateEvents::new();
+        let (seen, _subscription) = recorded(&events);
+        assert!(events.open_url("myapp://open/item?id=7", || panic!("not a file")));
+        assert_eq!(vec!["OpenUri myapp://open/item?id=7".to_string()], *seen.borrow());
+    }
+
+    #[test]
+    fn what_is_not_an_absolute_uri_is_not_opened() {
+        let events = AppDelegateEvents::new();
+        let (seen, _subscription) = recorded(&events);
+        assert!(!events.open_url("relative/path", || panic!("not a file")));
+        assert!(!events.open_url("", || panic!("not a file")));
+        assert!(seen.borrow().is_empty());
+    }
+
+    #[test]
+    fn only_an_activity_of_browsing_the_web_with_a_url_is_continued() {
+        let events = AppDelegateEvents::new();
+        let (seen, _subscription) = recorded(&events);
+        assert!(events.continue_user_activity(USER_ACTIVITY_TYPE_BROWSING_WEB, Some("https://example.org/page")));
+        assert!(!events.continue_user_activity(USER_ACTIVITY_TYPE_BROWSING_WEB, None));
+        assert!(!events.continue_user_activity("com.example.editing", Some("https://example.org/page")));
+        assert_eq!(vec!["OpenUri https://example.org/page".to_string()], *seen.borrow());
     }
 }

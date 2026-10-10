@@ -2,10 +2,8 @@
 //! framework and can be embedded into the view tree of an application.
 //!
 //! Later stages of `docs/porting/ios-platform.md` add what the reference's
-//! view has beyond this file: the features of a top-level that are
-//! services of their own (stage 2c: the storage provider and the
-//! clipboard; stage 2d: the native control host), and accessibility
-//! (stage 3). The swipe gestures of a
+//! view has beyond this file: the native control host (stage 2d) and
+//! accessibility (stage 3). The swipe gestures of a
 //! remote, which the reference adds on tvOS, are not ported.
 
 use crate::input_handler::InputHandler;
@@ -14,15 +12,18 @@ use crate::ios_launcher::IosLauncher;
 use crate::ios_platform_feedback::IosPlatformFeedback;
 use crate::metal::{FrameCapture, MetalPlatformSurface, SurfaceShared};
 use crate::native_control_host_impl::UIViewControlHandle;
+use crate::clipboard::clipboard_impl::ClipboardImpl;
 use crate::platform::Platform;
+use crate::storage::ios_storage_provider::IosStorageProvider;
 use crate::text_input_responder::{current_ferro_responder, set_current_ferro_responder, TextInputResponder};
 use crate::ui_kit_input_pane::UIKitInputPane;
 use crate::view_controller::{IFerroViewController, StatusBarStyle};
 use ferroui_base::data::BindingPriority;
+use ferroui_base::input::platform::{Clipboard, IClipboard};
 use ferroui_base::input::raw::IRawInputEventArgs;
 use ferroui_base::input::text_input::{ITextInputMethodImpl, TextInputMethodClient, TextInputOptions};
 use ferroui_base::input::IInputRoot;
-use ferroui_base::platform::storage::ILauncher;
+use ferroui_base::platform::storage::{ILauncher, IStorageProvider};
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider};
 use ferroui_base::reactive::IDisposable;
@@ -42,7 +43,7 @@ use objc2::{define_class, msg_send, sel, ClassType, DefinedClass, MainThreadMark
 use objc2_foundation::{NSObjectProtocol, NSSet};
 use objc2_quartz_core::{CADisplayLink, CAMetalLayer};
 use objc2_ui_kit::{
-    UIEvent, UIPanGestureRecognizer, UIPress, UIPressesEvent, UIResponder, UIScreen, UIScrollTypeMask, UITouch,
+    UIEvent, UIPanGestureRecognizer, UIPasteboard, UIPress, UIPressesEvent, UIResponder, UIScreen, UIScrollTypeMask, UITouch,
     UITraitCollection, UIView,
 };
 use std::any::{Any, TypeId};
@@ -519,6 +520,8 @@ pub struct TopLevelImpl {
     feedback: Rc<dyn IPlatformFeedback>,
     text_input_method: Rc<dyn ITextInputMethodImpl>,
     input_pane: Rc<dyn IInputPane>,
+    storage_provider: Rc<dyn IStorageProvider>,
+    clipboard: Rc<dyn IClipboard>,
     pub(crate) shared: Arc<SurfaceShared>,
     top_level: RefCell<Option<ferroui_base::WeakRef<EmbeddableControlRoot>>>,
     padding_insets: Rc<RefCell<Option<Rc<dyn IDisposable>>>>,
@@ -545,6 +548,8 @@ impl TopLevelImpl {
             feedback: Rc::new(IosPlatformFeedback::new(Weak::from_retained(view))),
             text_input_method: Rc::new(ViewTextInputMethod { view: Weak::from_retained(view) }),
             input_pane: UIKitInputPane::instance(),
+            storage_provider: IosStorageProvider::new(Weak::from_retained(view)),
+            clipboard: Clipboard::new(Rc::new(ClipboardImpl::new(UIPasteboard::generalPasteboard()))),
             shared: SurfaceShared::new(),
             top_level: RefCell::new(None),
             padding_insets: Rc::new(RefCell::new(None)),
@@ -615,6 +620,14 @@ impl IOptionalFeatureProvider for TopLevelImpl {
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
         if feature_type == TypeId::of::<dyn ITextInputMethodImpl>() {
             return Some(Rc::new(self.text_input_method.clone()));
+        }
+
+        if feature_type == TypeId::of::<dyn IClipboard>() {
+            return Some(Rc::new(self.clipboard.clone()));
+        }
+
+        if feature_type == TypeId::of::<dyn IStorageProvider>() {
+            return Some(Rc::new(self.storage_provider.clone()));
         }
 
         if feature_type == TypeId::of::<dyn IInputPane>() {
