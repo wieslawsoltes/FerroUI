@@ -156,7 +156,7 @@ jobs:
       # what was drawn. The probe adds what ANGLE reports of itself on Direct3D 11 and 9.
       - name: Smoke run through ANGLE with the ANGLE probe
         timeout-minutes: 5
-        run: cargo run --locked -p ferroui-win32 --example win32_window -- --smoke --rendering angle --angle-probe --teardown-trace
+        run: cargo run --locked -p ferroui-win32 --example win32_window -- --smoke --rendering angle --angle-probe
       # The same run presented through DirectComposition (stage 2c): the window has no redirection
       # bitmap, the context of ANGLE renders into the texture of a composition surface, and the
       # client area the system composed is read back as in the other runs.
@@ -167,10 +167,12 @@ jobs:
       # The process has to end after the run, every time: in runs 38066650638 and 38067972798 it
       # did not on this runner, and in run 38071416065 it did not on the ARM64 runner (the values
       # of the main thread were destroyed after the system had ended the thread that renders:
-      # docs/porting/win32-platform.md, section 11.2). Ten runs, each with a time limit.
+      # docs/porting/win32-platform.md, section 11.2). Ten runs. A process that does not end is
+      # stopped by the time limit of the step: `timeout` of the shell does not end a process
+      # that waits inside its own exit (run 38072903035).
       - name: The process ends after a run through DirectComposition (ten runs)
         if: ${{ !cancelled() }}
-        timeout-minutes: 15
+        timeout-minutes: 5
         run: |
           exe=target/debug/examples/win32_window.exe
           for run in 1 2 3 4 5 6 7 8 9 10; do
@@ -183,27 +185,6 @@ jobs:
             fi
             echo "run $run: $(tail -n 2 "smoke-$run.log" | tr '\n' ' ')"
           done
-      # Diagnosis of the same finding: with the compositor of the platform dropped when the
-      # process ends, as it was before, how many of ten runs do not end, and where they stop.
-      - name: The same with the compositor dropped at the end (diagnosis, informative)
-        if: ${{ !cancelled() }}
-        continue-on-error: true
-        timeout-minutes: 10
-        env:
-          FERROUI_WIN32_TEARDOWN_DROP: "1"
-        run: |
-          exe=target/debug/examples/win32_window.exe
-          hung=0
-          for run in 1 2 3 4 5 6 7 8 9 10; do
-            code=0
-            timeout 20 "$exe" --smoke --rendering angle --composition dcomp --teardown-trace > "drop-$run.log" 2>&1 || code=$?
-            echo "run $run: code $code"
-            if [ "$code" != 0 ]; then
-              hung=$((hung + 1))
-              grep -a "teardown:" "drop-$run.log" | tail -n 8
-            fi
-          done
-          echo "::notice::with the compositor dropped at the end, $hung of 10 runs did not end ($RUNNER_ARCH)"
       - name: Skia binaries published for Windows (informative)
         id: skia
         if: ${{ !cancelled() }}
@@ -368,10 +349,12 @@ jobs:
       # The process has to end after the run, every time: in runs 38066650638 and 38067972798 it
       # did not on this runner, and in run 38071416065 it did not on the ARM64 runner (the values
       # of the main thread were destroyed after the system had ended the thread that renders:
-      # docs/porting/win32-platform.md, section 11.2). Ten runs, each with a time limit.
+      # docs/porting/win32-platform.md, section 11.2). Ten runs. A process that does not end is
+      # stopped by the time limit of the step: `timeout` of the shell does not end a process
+      # that waits inside its own exit (run 38072903035).
       - name: The process ends after a run through DirectComposition (ten runs)
         if: ${{ !cancelled() }}
-        timeout-minutes: 15
+        timeout-minutes: 5
         run: |
           exe=target/aarch64-pc-windows-msvc/debug/examples/win32_window.exe
           for run in 1 2 3 4 5 6 7 8 9 10; do
@@ -384,27 +367,6 @@ jobs:
             fi
             echo "run $run: $(tail -n 2 "smoke-$run.log" | tr '\n' ' ')"
           done
-      # Diagnosis of the same finding: with the compositor of the platform dropped when the
-      # process ends, as it was before, how many of ten runs do not end, and where they stop.
-      - name: The same with the compositor dropped at the end (diagnosis, informative)
-        if: ${{ !cancelled() }}
-        continue-on-error: true
-        timeout-minutes: 10
-        env:
-          FERROUI_WIN32_TEARDOWN_DROP: "1"
-        run: |
-          exe=target/aarch64-pc-windows-msvc/debug/examples/win32_window.exe
-          hung=0
-          for run in 1 2 3 4 5 6 7 8 9 10; do
-            code=0
-            timeout 20 "$exe" --smoke --rendering angle --composition dcomp --teardown-trace > "drop-$run.log" 2>&1 || code=$?
-            echo "run $run: code $code"
-            if [ "$code" != 0 ]; then
-              hung=$((hung + 1))
-              grep -a "teardown:" "drop-$run.log" | tail -n 8
-            fi
-          done
-          echo "::notice::with the compositor dropped at the end, $hung of 10 runs did not end ($RUNNER_ARCH)"
       - name: Skia binaries published for Windows on ARM64
         if: ${{ !cancelled() }}
         run: |
