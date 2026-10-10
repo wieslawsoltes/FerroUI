@@ -35,8 +35,8 @@ Options
 What is counted
 
     Upstream: every method of a `.cs` file of the project that carries an attribute whose name ends in `Fact`,
-    `Theory`, `Test` or `TestCase` (`[Fact]`, `[Theory]`, `[AvaloniaFact]`, `[Fact(Skip = "...")]`, the NUnit
-    `[Test]`, ...). A `[Theory]` is one test, however many `[InlineData]` rows it has. Comments, strings and
+    `Theory`, `Test`, `TestCase` or `Benchmark` (`[Fact]`, `[Theory]`, `[AvaloniaFact]`, `[Fact(Skip = "...")]`, the
+    NUnit `[Test]`, the `[Benchmark]` of the benchmark project, ...). A `[Theory]` is one test, however many `[InlineData]` rows it has. Comments, strings and
     preprocessor lines are blanked before the search; code in an inactive `#if` branch is therefore counted too.
     A method that two classes of one file declare is one test per class, listed as `Class.Method` (the class is
     the one declared last before the method); overloads within a class are one test.
@@ -134,6 +134,8 @@ PROJECTS = [
     # The render tests: the sources are in this project; `Avalonia.Skia.RenderTests` compiles them and has no
     # tests of its own.
     ("tests/Avalonia.RenderTests", "render"),
+    ("tests/Avalonia.LeakTests", "leak-tests"),
+    ("tests/Avalonia.Benchmarks", "benchmarks"),
 ]
 
 # --------------------------------------------------------------------------------------------------------------
@@ -227,7 +229,7 @@ def blank_csharp(text: str) -> str:
     return "".join(out)
 
 
-TEST_ATTRIBUTE = re.compile(r"\[\s*(?:[A-Za-z_][\w.]*\.)?\w*(?:Fact|Theory|Test|TestCase)(?:Attribute)?\s*[\](,]")
+TEST_ATTRIBUTE = re.compile(r"\[\s*(?:[A-Za-z_][\w.]*\.)?\w*(?:Fact|Theory|Test|TestCase|Benchmark)(?:Attribute)?\s*[\](,]")
 # The declaration that follows the attributes: modifiers, a return type, the name, `(` or `<`.
 METHOD = re.compile(
     r"(?:\b(?:public|internal|private|protected|static|async|virtual|override|sealed|unsafe|new)\s+)*"
