@@ -440,6 +440,18 @@ The CI job on commit `58d05d30` (run 38062705423, x86-64, GTK 3.24 and GLib 2.80
 
 The virtual machine ran the first commit of this part (`daf2271b`: GTK 3.24.41, GLib 2.80.0): the 239 tests of then passed, the 20 of GLib and GTK among them; `--gtk-dialog` 19 of 19 twice, and 19 of 19 on a private session bus (the portal turned off by the option); the plain smoke run 33 of 33.
 
+The virtual machine then ran the sources of commit `20e5fa51` (`stage2f.sh`; `libsm6`, `libice6`, `mplayer` and `imagemagick` installed for it), every step with exit code 0 **[VM]**:
+
+| Run | Result |
+|---|---|
+| `cargo test -p ferroui-x11` | 252 passed |
+| Smoke, bare Xvfb, software | 33 of 33 |
+| `--glib`, bare Xvfb (twice), under `openbox`, and rendered through GLX | 36 of 36, 36 of 36, 36 of 36 and 41 of 41: the dispatcher over the main loop of GLib after its correction, which the first run in this machine had failed |
+| `--gtk-dialog` under `openbox`, and with `--glib` | 19 of 19 and 22 of 22 |
+| `--embed`: bare Xvfb, under `openbox`, through GLX, and with `--glib` | 28 of 28, 28 of 28, 33 of 33 and 31 of 31 |
+| The ControlCatalog host (`control-catalog-desktop`) with the native control demo | Builds; all 75 pages selected and pictured under Xvfb, the window closed on its timer |
+| The Native Embed page of the catalog (picture `software-69-Native-Embed.png`, taken 1.5 s after the page was selected) | The lower host shows the file chooser of GTK, embedded and drawn. The upper host is empty in the picture. The log of the run says that `mplayer` started, found the video, chose the output `x11` and was decoding frames from about the moment of the picture until the page was left, without an error of the server in that time (the errors that follow are those of a player whose window was destroyed: the reference does not stop the player either). Whether the picture was taken before the first frame or the window of the player is not shown is not established by that log: `embed-picture.sh` of the scripts in the virtual machine takes pictures at three later moments with the window tree of the server, and has not run |
+
 What these runs found, and what was changed:
 
 | Finding | Change |
@@ -447,7 +459,7 @@ What these runs found, and what was changed:
 | On the main loop of GLib (the first job run, 38061862342, and the virtual machine) a button press arrived after its release was synthesized, a wheel step and a large clipboard transfer not in time, and the window did not close on `WM_DELETE_WINDOW`; 3 to 4 checks of 36 failed, differently per run | The dispatcher: a job that makes a round trip to the server lets Xlib read the socket and queue the events before the answer, and the descriptor source, which fires when the socket can be read, never saw them. Queued events get a source of their own after jobs ran (section 5; DEVIATIONS.md). 36 of 36 since |
 | A test removed a timeout source twice to see that it was gone: GLib logs a critical warning for an identifier it does not know | The test does not ask twice; the dispatcher clears the tag of a timer that fired, where upstream removes it again (DEVIATIONS.md) |
 
-Verified nowhere: a session manager (no run had one: the state machine is tested against a recorder, the open against the library without a manager; `xsm` or the session of a desktop would be the manager); a native control of another toolkit than Xlib in the smoke run; an embedder of another toolkit (a GTK socket, the `XEmbedSample` of upstream, which is not ported); the catalog's native control demo on the screen (`mplayer`, the GTK file chooser: the virtual machine run of the catalog is in the hand-over); GTK 4 (upstream uses GTK 3 only).
+Verified nowhere: a session manager (no run had one: the state machine is tested against a recorder, the open against the library without a manager; `xsm` or the session of a desktop would be the manager); a native control of another toolkit than Xlib in the smoke run; an embedder of another toolkit (a GTK socket, the `XEmbedSample` of upstream, which is not ported); the video of `mplayer` in the first native control of the catalog (above; the GTK file chooser in the second is shown); GTK 4 (upstream uses GTK 3 only).
 
 ### Measured by the CI job (run 38045428868, 2026-10-10) **[CI]**
 

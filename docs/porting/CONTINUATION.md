@@ -279,7 +279,8 @@ Open in the X11 project and around it, in order:
    - Tests: a private bus (`dbus-run-session`, or the socket pair of `test_support.rs`) with a mock registry (`org.a11y.atspi.Registry` at `/org/a11y/atspi/registry`: `RegisterEvent`, `GetRegisteredEvents`, and `Embed` on the root socket), and a peer that walks the tree (`GetChildren`, `GetRole`, `GetState`, `Name`). In the virtual machine: `at-spi2-core` gives the real bus and registry (`/usr/libexec/at-spi-bus-launcher --launch-immediately`, `busctl --address=...` to walk the tree from a script).
 2. **`samples/XEmbedSample`** (3 files upstream: a GTK# window with a socket that embeds a plug). Not ported: it needs GTK as the host toolkit. The smoke run plays the embedder with Xlib.
 3. **A session manager in a run** (`xsm`, or a double over the server side of `libSM`), to see the shutdown request arrive from a real manager.
-4. Vulkan, Wayland and the framebuffer backend: as described in the section above this one.
+4. **The first native control of the catalog's Native Embed page** (the window `mplayer` plays in) is empty in the one picture taken of it, while the second (the GTK file chooser) is shown: `x11-platform.md`, section 13, has what the log says. Run `ferroui-vm-linux/scripts/embed-picture.sh` (no build; ten minutes) and read `logs/embed-picture-tree.log`: if the window of the player is mapped inside its holder and the later pictures show the video, it was the moment of the picture; if not, the host or the default child window is at fault.
+5. Vulkan, Wayland and the framebuffer backend: as described in the section above this one.
 
 ## In flight on 2026-10-09
 
