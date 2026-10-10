@@ -131,6 +131,9 @@ PROJECTS = [
     ("tests/Avalonia.Themes.UnitTests", "themes"),
     ("tests/Avalonia.Build.Tasks.UnitTest", "build-tasks"),
     ("tests/Avalonia.DesignerSupport.Tests", "designer-support"),
+    # The render tests: the sources are in this project; `Avalonia.Skia.RenderTests` compiles them and has no
+    # tests of its own.
+    ("tests/Avalonia.RenderTests", "render"),
 ]
 
 # --------------------------------------------------------------------------------------------------------------
