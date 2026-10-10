@@ -2,6 +2,19 @@
 
 This page is the hand-over point for the next working period: what was finished, what is in flight, the tasks that come next in order, and how to run them. Read it after `CLOUD-WORKERS.md`, which stays the standing brief of every worker. Update it at the end of each period.
 
+## What is left: one place to look (2026-10-10)
+
+[`REMAINING.md`](REMAINING.md) is the single list of what the port does not have. It is generated with the tracking pages (`scripts/port-status/run.sh`; `--check` covers it), so it cannot drift from them: per upstream project its scope and its files, types and members present, missing and waived, and for the projects out of scope their size; the upstream test projects with their tests present, missing and waived; the upstream samples, ported or not; then, by project, the names of the missing files, types and members. Lists of what is left that older sections of this page hold are history of the day they were written; where they differ from `REMAINING.md`, it is right.
+
+The tracking has two headline numbers since 2026-10-10 (`TRACKING.md`, Headline):
+
+- of the projects in scope, 25,928 of 30,744 members have a counterpart, 2,850 are waived and 1,966 are missing: 93.0 % of the total less the waived. The Windows and X11 backends are counted with their members since that day (1,315 of 2,605 and 3,248 of 4,897); before, the same headline read 100.0 % because their members were not extracted;
+- of every member of every upstream source project the extraction reads, in scope or not, the port has 25,928 of 37,391: 69.3 %.
+
+What is declared not ported was audited entry by entry on 2026-10-10 ([`waiver-audit.md`](waiver-audit.md)): 238 members that were waived are found under their Rust names now, and behaviour that was declared not applicable is reported as missing (the OpenGL graphics of the macOS backend, the Skia backend on Vulkan, loading the EGL library by name and the display lock of EGL, `GrabResult` of the X11 backend; the VNC server of the headless platform is listed out of scope).
+
+How the tracking is regenerated changed with it: `run.sh` reads the tracked commit of upstream, not the `HEAD` of the checkout (it exports the tree of that commit and of its submodules to a temporary directory and removes it); a waiver that names the Rust item should be an `[[alias]]`, which is checked at every run (constructors with `member = ".ctor"`, properties, fields and events too); a sample that is ported gets its `rust` directory in `docs/porting/data/samples.toml`.
+
 ## State at the hand-over of 2026-10-07
 
 Merged this period, in order: #26, #34, #33, #31, #27, #32, #29, #30, #36, #35, #28, #37, #38, #40, #41, #39, #42, #43.
@@ -521,7 +534,7 @@ The mapping data was reviewed and the pages regenerated twice on 2026-10-09, aga
 
 No project lost a file or a member in either regeneration. Read the member coverage with its waivers: 2001 members are counted out because `member-waivers.toml` says where each one is under another name or why it has no counterpart, 1153 of them in the base library. The scanner matches names and nothing else (`scripts/port-status/README.md`, Limits).
 
-What is still missing, by project: `Avalonia.Remote.Protocol` 201 members in 14 files, `Avalonia.DesignerSupport` 176 in 9, `Avalonia.Skia` 43 (3 files missing, 4 with gaps), `Avalonia.Controls` 17 in 4, `Avalonia.Native` 8 in one file that exists, `Avalonia.Build.Tasks` 4 in 2, `Avalonia.Browser` 2, `Avalonia.Headless` 1. Every other project in scope has no missing file and no missing member, the base library and `Avalonia.Metal` among them; `Avalonia.Generators` has no file left to port.
+What was still missing on 2026-10-09, by project, is not repeated here: the list of the day is in the history of this file, and the current one is [`REMAINING.md`](REMAINING.md), generated with the pages. The table below keeps its rows because other pages quote their numbers.
 
 The gaps, by missing members. The rows keep the numbers of the table of the first review, which other pages quote. **gap** is work to port.
 

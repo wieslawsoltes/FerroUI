@@ -979,12 +979,6 @@ reason = "the extension methods are inherent methods of `dyn IResourceHost` (`fi
 
 [[map]]
 project = "Avalonia.Native"
-upstream = ["AvaloniaNativeGlPlatformGraphics.cs"]
-kind = "not-applicable"
-reason = "not ported for now (row 18 of CRITICAL-PATH.md): the desktop build of the Skia backend has Graphite on Metal and no Ganesh, so nothing could draw through the OpenGL platform graphics of the macOS backend. Applicable when the desktop build has Ganesh on OpenGL: the file is then ported to `avalonia_native_gl_platform_graphics.rs` under the mapped name, with the Skia side of the external objects on OpenGL (`Gpu/OpenGl/GlSkiaExternalObjectsFeature.cs`, reported as missing); the contracts it implements are in `ferroui-opengl` already (`i_gl_context_external_objects_feature.rs`)"
-
-[[map]]
-project = "Avalonia.Native"
 upstream = ["IAvnMenuItem.cs"]
 kind = "merged"
 rust = "frn_menu_item.rs"
@@ -1016,12 +1010,6 @@ project = "Avalonia.Headless.NUnit"
 upstream = ["*"]
 kind = "not-applicable"
 reason = "glue between the headless platform and the NUnit test framework (test attributes, commands): there is no such framework to integrate with; tests use the harness of cargo"
-
-[[map]]
-project = "Avalonia.Headless.Vnc"
-upstream = ["*"]
-kind = "not-applicable"
-reason = "out of scope: a VNC server that shows the frames of a headless application, built on a .NET VNC library; nothing in the port depends on it"
 
 # Input (triage of 2026-10-08)
 
@@ -1203,12 +1191,6 @@ path = "external/XamlX/src/XamlX/extensions/query_interface.rs"
 reason = "dynamic interface queries on AST nodes: replaces C# `is`/`as` casts to backend-generic interfaces"
 
 # ------------------------------------------------ Avalonia.Native (native sources)
-
-[[map]]
-project = "Avalonia.Native (native sources)"
-upstream = ["inc/avalonia-native.h"]
-kind = "not-applicable"
-reason = "generated header: produced at build time from frn.idl by microcom-codegen (scripts/sync-native.sh)"
 
 # ------------------------------------------------------------ Avalonia.OpenGL
 
@@ -2088,24 +2070,6 @@ reason = "the serialised index from class to resource path that the resources ta
 # TRACKING.md): no platform of the port has Vulkan. When a Vulkan platform is ported, these three
 # entries are removed and the files go to `src/Skia/FerroUI.Skia/gpu/vulkan/`.
 
-[[map]]
-project = "Avalonia.Skia"
-upstream = ["Gpu/Vulkan/VulkanSkiaGpu.cs"]
-kind = "not-applicable"
-reason = "the GPU of the backend over a Vulkan platform graphics context (`IVulkanPlatformGraphicsContext` of Avalonia.Vulkan): out of scope while Avalonia.Vulkan is (scripts/api-extract/projects.json). Applicable when a platform with Vulkan is ported"
-
-[[map]]
-project = "Avalonia.Skia"
-upstream = ["Gpu/Vulkan/VulkanSkiaRenderTarget.cs"]
-kind = "not-applicable"
-reason = "the render target and render session of the backend over a Vulkan render target (`IVulkanRenderTarget` of Avalonia.Vulkan): out of scope while Avalonia.Vulkan is (scripts/api-extract/projects.json). Applicable when a platform with Vulkan is ported"
-
-[[map]]
-project = "Avalonia.Skia"
-upstream = ["Gpu/Vulkan/VulkanSkiaExternalObjectsFeature.cs"]
-kind = "not-applicable"
-reason = "import of external images and semaphores into the Skia context on Vulkan (`IVulkanContextExternalObjectsFeature` of Avalonia.Vulkan): out of scope while Avalonia.Vulkan is (scripts/api-extract/projects.json). Applicable when a platform with Vulkan is ported, after the external objects of the backend on OpenGL and Metal"
-
 # ---------------------------------------------------------------- Avalonia.Remote.Protocol
 #
 # Every upstream file has the Rust file of the default rule (`MetsysBson.cs` -> `metsys_bson.rs`,
@@ -2169,7 +2133,8 @@ path = "src/Windows/FerroUI.Win32/win_rt/win_rt_tests.rs"
 reason = "Tests of the Windows Runtime helpers (string handles, activation, the API information, a property value through its COM interface) against the system; they run on Windows"
 
 # ---------------------------------------------------------------- Avalonia.X11
-# The project is tracked at file and type granularity until its members are extracted (TRACKING.md).
+# The members of the project are extracted since 2026-10-10. The structures of the two `replaced` files below are those
+# of the bindings crate: what the port does not declare of those files is waived by that rule, not member by member.
 
 [[map]]
 project = "Avalonia.X11"

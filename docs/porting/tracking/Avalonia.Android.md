@@ -12,109 +12,246 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 6 - mobile (Android) / P1 |
 | Files | 23/58 (39.7%) |
 | Types | 32/88 (36.4%) |
-| Members | 0/447 (0.0%) |
+| Members | 153/447 (34.2%) |
+| Contracts (interfaces) | 1/7 |
+| Property registrations | 0/0 |
+| Routed events | 0/0 |
 
-This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
+## Contracts
+
+Every interface of the project. Each becomes a `pub trait` with the same name (the `I` prefix is kept).
+
+| Interface | Access | Upstream file | Members | Status |
+|---|---|---|---|---|
+| `Avalonia.Android.Automation.INodeInfoProvider` | public | `Automation/INodeInfoProvider.cs` | 0/3 | missing |
+| `Avalonia.Android.IActivityNavigationService` | public | `IAndroidNavigationService.cs` | 0/1 | missing |
+| `Avalonia.Android.IActivityResultHandler` | public | `IActivityResultHandler.cs` | 0/2 | missing |
+| `Avalonia.Android.IAndroidApplication` | internal | `AvaloniaAndroidApplication.cs` | 0/1 | missing |
+| `Avalonia.Android.IAvaloniaActivity` | public | `IAvaloniaActivity.cs` | 3/3 | present |
+| `Avalonia.Android.IInitEditorInfo` | internal | `IInitEditorInfo.cs` | 0/1 | missing |
+| `Avalonia.Android.Platform.Input.IAndroidInputMethod` | internal | `Platform/Input/AndroidInputMethod.cs` | 0/5 | missing |
 
 ## Files
 
-### `(project root)` - files 15/20, types 22/29, members 0/110
+### `(project root)` - files 15/20, types 22/29, members 70/110
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `AndroidDispatcherImpl.cs` | `android_dispatcher_impl.rs` | present | 1/1 | - | 11 |  |
-| `AndroidPlatform.cs` | `android_platform.rs` | present | 4/4 | - | 10 |  |
-| `AndroidRuntimePlatform.cs` | `android_runtime_platform.rs` | present | 2/2 | - | 3 |  |
-| `AndroidViewControlHandle.cs` | `android_view_control_handle.rs` | present | 1/1 | - | 4 |  |
-| `ApplicationLifetime.cs` | `application_lifetime.rs` | present | 1/1 | - | 2 |  |
-| `AvaloniaAccessHelper.cs` | `ferro_access_helper.rs` | missing | 0/1 | `AvaloniaAccessHelper` | 5 |  |
-| `AvaloniaActivity.cs` | `ferro_activity.rs` | present | 1/1 | - | 19 |  |
-| `AvaloniaAndroidApplication.cs` | `ferro_android_application.rs` | partial | 1/2 | `IAndroidApplication` | 6 |  |
-| `AvaloniaMainActivity.cs` | `ferro_main_activity.rs` | present | 1/1 | - | 3 |  |
-| `AvaloniaView.Input.cs` | `ferro_view_input.rs` | present | 1/1 | - | 7 |  |
-| `AvaloniaView.cs` | `ferro_view.rs` | present | 1/1 | - | 10 |  |
-| `BackPressedCallback.cs` | `back_pressed_callback.rs` | missing | 0/1 | `BackPressedCallback` | 2 |  |
-| `ChoreographerTimer.cs` | `choreographer_timer.rs` | present | 1/1 | - | 3 |  |
-| `CursorFactory.cs` | `cursor_factory.rs` | present | 1/1 | - | 2 |  |
-| `IActivityResultHandler.cs` | `i_activity_result_handler.rs` | missing | 0/1 | `IActivityResultHandler` | 2 |  |
-| `IAndroidNavigationService.cs` | `i_android_navigation_service.rs` | missing | 0/2 | `IActivityNavigationService`, `AndroidBackRequestedEventArgs` | 2 |  |
-| `IAvaloniaActivity.cs` | `i_ferro_activity.rs` | present | 1/1 | - | 3 |  |
-| `IInitEditorInfo.cs` | `i_init_editor_info.rs` | missing | 0/1 | `IInitEditorInfo` | 1 |  |
-| `PlatformIconLoader.cs` | `platform_icon_loader.rs` | present | 2/2 | - | 5 |  |
-| `Stubs.cs` | `stubs.rs` | present | 3/3 | - | 10 |  |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `AndroidDispatcherImpl.cs` | `android_dispatcher_impl.rs` | present | 1/1 | 11/11 |  |
+| `AndroidPlatform.cs` | `android_platform.rs` | partial | 4/4 | 9/10 |  |
+| `AndroidRuntimePlatform.cs` | `android_runtime_platform.rs` | present | 2/2 | 3/3 |  |
+| `AndroidViewControlHandle.cs` | `android_view_control_handle.rs` | present | 1/1 | 4/4 |  |
+| `ApplicationLifetime.cs` | `application_lifetime.rs` | present | 1/1 | 2/2 |  |
+| `AvaloniaAccessHelper.cs` | `ferro_access_helper.rs` | missing | 0/1 | 0/5 |  |
+| `AvaloniaActivity.cs` | `ferro_activity.rs` | partial | 1/1 | 9/19 |  |
+| `AvaloniaAndroidApplication.cs` | `ferro_android_application.rs` | partial | 1/2 | 1/6 |  |
+| `AvaloniaMainActivity.cs` | `ferro_main_activity.rs` | partial | 1/1 | 2/3 |  |
+| `AvaloniaView.Input.cs` | `ferro_view_input.rs` | partial | 1/1 | 0/7 |  |
+| `AvaloniaView.cs` | `ferro_view.rs` | partial | 1/1 | 6/10 |  |
+| `BackPressedCallback.cs` | `back_pressed_callback.rs` | missing | 0/1 | 0/2 |  |
+| `ChoreographerTimer.cs` | `choreographer_timer.rs` | present | 1/1 | 3/3 |  |
+| `CursorFactory.cs` | `cursor_factory.rs` | present | 1/1 | 2/2 |  |
+| `IActivityResultHandler.cs` | `i_activity_result_handler.rs` | missing | 0/1 | 0/2 |  |
+| `IAndroidNavigationService.cs` | `i_android_navigation_service.rs` | missing | 0/2 | 0/2 |  |
+| `IAvaloniaActivity.cs` | `i_ferro_activity.rs` | present | 1/1 | 3/3 |  |
+| `IInitEditorInfo.cs` | `i_init_editor_info.rs` | missing | 0/1 | 0/1 |  |
+| `PlatformIconLoader.cs` | `platform_icon_loader.rs` | present | 2/2 | 5/5 |  |
+| `Stubs.cs` | `stubs.rs` | present | 3/3 | 10/10 |  |
+
+<details><summary><code>AndroidPlatform.cs</code> - 1 missing</summary>
+
+- `AndroidPlatform` (class): 1 missing
+  - `static readonly AndroidPlatform Instance`
+
+</details>
+
+<details><summary><code>AvaloniaActivity.cs</code> - 10 missing</summary>
+
+- `AvaloniaActivity` (class): 10 missing
+  - `Action<int, Result, Intent?>? ActivityResult { get; set; }`
+  - `Action<int, string[], Permission[]>? RequestPermissionsResult { get; set; }`
+  - `event EventHandler<AndroidBackRequestedEventArgs>? BackRequested`
+  - `bool ShouldNavigateBack { get; }` *(internal)*
+  - `override void OnBackPressed()`
+  - `override void OnNewIntent(Intent? intent)` *(protected)*
+  - `override void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent? data)` *(protected)*
+  - `override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)`
+  - `virtual void InitializeAvaloniaView(object? initialContent)` *(private protected)*
+  - `void OnBackInvoked()`
+
+</details>
+
+<details><summary><code>AvaloniaAndroidApplication.cs</code> - 6 missing</summary>
+
+- `IAndroidApplication` (interface, internal): **type missing** (1 members)
+- `AvaloniaAndroidApplication<TApp>` (class): 4 missing
+  - `ApplicationLifetime? IAndroidApplication.Lifetime { get; set; }` *(explicit; getter `lifetime` found, setter `set_lifetime` missing)*
+  - `AvaloniaAndroidApplication(nint javaReference, JniHandleOwnership transfer)` *(protected)*
+  - `virtual AppBuilder CreateAppBuilder()` *(protected)*
+  - `virtual AppBuilder CustomizeAppBuilder(AppBuilder builder)` *(protected)*
+
+</details>
+
+<details><summary><code>AvaloniaMainActivity.cs</code> - 1 missing</summary>
+
+- `AvaloniaMainActivity` (class): 1 missing
+  - `override void InitializeAvaloniaView(object? initialContent)` *(private protected)*
+
+</details>
+
+<details><summary><code>AvaloniaView.Input.cs</code> - 7 missing</summary>
+
+- `AvaloniaView` (class) in `ferro_view.rs`: 7 missing
+  - `override IInputConnection OnCreateInputConnection(EditorInfo? outAttrs)`
+  - `void IInitEditorInfo.InitEditorInfo(Func<TopLevelImpl, EditorInfo, IInputConnection> init)` *(explicit)*
+  - `override void OnFocusChanged(bool gainFocus, FocusSearchDirection direction, global::Android.Graphics.Rect?...` *(protected)*
+  - `override bool DispatchHoverEvent(MotionEvent? e)` *(protected)*
+  - `override bool DispatchGenericPointerEvent(MotionEvent? e)` *(protected)*
+  - `override bool DispatchTouchEvent(MotionEvent? e)`
+  - `override bool DispatchKeyEvent(KeyEvent? e)`
+
+</details>
+
+<details><summary><code>AvaloniaView.cs</code> - 4 missing</summary>
+
+- `AvaloniaView` (class): 4 missing
+  - `override void OnAttachedToWindow()` *(protected)*
+  - `override void OnVisibilityAggregated(bool isVisible)`
+  - `void OnVisibilityChanged(bool isVisible)` *(internal; 1 of 2 overloads found)*
+  - `override void OnConfigurationChanged(Configuration? newConfig)` *(protected)*
+
+</details>
 
 ### `Automation` - files 0/9, types 0/10, members 0/33
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `ExpandCollapseNodeInfoProvider.cs` | `automation/expand_collapse_node_info_provider.rs` | missing | 0/1 | `ExpandCollapseNodeInfoProvider` | 3 |  |
-| `INodeInfoProvider.cs` | `automation/i_node_info_provider.rs` | missing | 0/1 | `INodeInfoProvider` | 3 |  |
-| `InvokeNodeInfoProvider.cs` | `automation/invoke_node_info_provider.rs` | missing | 0/1 | `InvokeNodeInfoProvider` | 3 |  |
-| `NodeInfoProvider.cs` | `automation/node_info_provider.rs` | missing | 0/2 | `NodeInfoProviderInitializer`, `NodeInfoProvider<T>` | 8 |  |
-| `RangeValueNodeInfoProvider.cs` | `automation/range_value_node_info_provider.rs` | missing | 0/1 | `RangeValueNodeInfoProvider` | 3 |  |
-| `ScrollNodeInfoProvider.cs` | `automation/scroll_node_info_provider.rs` | missing | 0/1 | `ScrollNodeInfoProvider` | 3 |  |
-| `SelectionItemNodeInfoProvider.cs` | `automation/selection_item_node_info_provider.rs` | missing | 0/1 | `SelectionItemNodeInfoProvider` | 3 |  |
-| `ToggleNodeInfoProvider.cs` | `automation/toggle_node_info_provider.rs` | missing | 0/1 | `ToggleNodeInfoProvider` | 3 |  |
-| `ValueNodeInfoProvider.cs` | `automation/value_node_info_provider.rs` | missing | 0/1 | `ValueNodeInfoProvider` | 4 |  |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `ExpandCollapseNodeInfoProvider.cs` | `automation/expand_collapse_node_info_provider.rs` | missing | 0/1 | 0/3 |  |
+| `INodeInfoProvider.cs` | `automation/i_node_info_provider.rs` | missing | 0/1 | 0/3 |  |
+| `InvokeNodeInfoProvider.cs` | `automation/invoke_node_info_provider.rs` | missing | 0/1 | 0/3 |  |
+| `NodeInfoProvider.cs` | `automation/node_info_provider.rs` | missing | 0/2 | 0/8 |  |
+| `RangeValueNodeInfoProvider.cs` | `automation/range_value_node_info_provider.rs` | missing | 0/1 | 0/3 |  |
+| `ScrollNodeInfoProvider.cs` | `automation/scroll_node_info_provider.rs` | missing | 0/1 | 0/3 |  |
+| `SelectionItemNodeInfoProvider.cs` | `automation/selection_item_node_info_provider.rs` | missing | 0/1 | 0/3 |  |
+| `ToggleNodeInfoProvider.cs` | `automation/toggle_node_info_provider.rs` | missing | 0/1 | 0/3 |  |
+| `ValueNodeInfoProvider.cs` | `automation/value_node_info_provider.rs` | missing | 0/1 | 0/4 |  |
 
-### `Platform` - files 3/13, types 4/15, members 0/68
+### `Platform` - files 3/13, types 4/15, members 26/68
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `AndroidActivatableLifetime.cs` | `platform/android_activatable_lifetime.rs` | present | 1/1 | - | 3 |  |
-| `AndroidDataFormatHelper.cs` | `platform/android_data_format_helper.rs` | missing | 0/1 | `AndroidDataFormatHelper` | 2 |  |
-| `AndroidInsetsManager.cs` | `platform/android_insets_manager.rs` | partial | 1/2 | `AnimationEasing` | 19 |  |
-| `AndroidLauncher.cs` | `platform/android_launcher.rs` | missing | 0/1 | `AndroidLauncher` | 3 |  |
-| `AndroidNativeControlHostImpl.cs` | `platform/android_native_control_host_impl.rs` | missing | 0/1 | `AndroidNativeControlHostImpl` | 5 |  |
-| `AndroidPlatformFeedback.cs` | `platform/android_platform_feedback.rs` | missing | 0/1 | `AndroidPlatformFeedback` | 2 |  |
-| `AndroidPlatformSettings.cs` | `platform/android_platform_settings.rs` | missing | 0/1 | `AndroidPlatformSettings` | 7 |  |
-| `AndroidScreens.cs` | `platform/android_screens.rs` | present | 2/2 | - | 10 |  |
-| `AndroidSystemNavigationManager.cs` | `platform/android_system_navigation_manager.rs` | missing | 0/1 | `AndroidSystemNavigationManagerImpl` | 3 |  |
-| `ClipDataItemToDataTransferItemWrapper.cs` | `platform/clip_data_item_to_data_transfer_item_wrapper.rs` | missing | 0/1 | `ClipDataItemToDataTransferItemWrapper` | 3 |  |
-| `ClipDataToDataTransferWrapper.cs` | `platform/clip_data_to_data_transfer_wrapper.rs` | missing | 0/1 | `ClipDataToDataTransferWrapper` | 5 |  |
-| `ClipboardImpl.cs` | `platform/clipboard_impl.rs` | missing | 0/1 | `ClipboardImpl` | 4 |  |
-| `PlatformSupport.cs` | `platform/platform_support.rs` | missing | 0/1 | `PlatformSupport` | 2 |  |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `AndroidActivatableLifetime.cs` | `platform/android_activatable_lifetime.rs` | present | 1/1 | 3/3 |  |
+| `AndroidDataFormatHelper.cs` | `platform/android_data_format_helper.rs` | missing | 0/1 | 0/2 |  |
+| `AndroidInsetsManager.cs` | `platform/android_insets_manager.rs` | partial | 1/2 | 14/19 |  |
+| `AndroidLauncher.cs` | `platform/android_launcher.rs` | missing | 0/1 | 0/3 |  |
+| `AndroidNativeControlHostImpl.cs` | `platform/android_native_control_host_impl.rs` | missing | 0/1 | 0/5 |  |
+| `AndroidPlatformFeedback.cs` | `platform/android_platform_feedback.rs` | missing | 0/1 | 0/2 |  |
+| `AndroidPlatformSettings.cs` | `platform/android_platform_settings.rs` | missing | 0/1 | 0/7 |  |
+| `AndroidScreens.cs` | `platform/android_screens.rs` | partial | 2/2 | 9/10 |  |
+| `AndroidSystemNavigationManager.cs` | `platform/android_system_navigation_manager.rs` | missing | 0/1 | 0/3 |  |
+| `ClipDataItemToDataTransferItemWrapper.cs` | `platform/clip_data_item_to_data_transfer_item_wrapper.rs` | missing | 0/1 | 0/3 |  |
+| `ClipDataToDataTransferWrapper.cs` | `platform/clip_data_to_data_transfer_wrapper.rs` | missing | 0/1 | 0/5 |  |
+| `ClipboardImpl.cs` | `platform/clipboard_impl.rs` | missing | 0/1 | 0/4 |  |
+| `PlatformSupport.cs` | `platform/platform_support.rs` | missing | 0/1 | 0/2 |  |
+
+<details><summary><code>AndroidInsetsManager.cs</code> - 6 missing</summary>
+
+- `AndroidInsetsManager` (class): 3 missing
+  - `void OnGlobalLayout()`
+  - `override WindowInsetsAnimationCompat.BoundsCompat? OnStart(WindowInsetsAnimationCompat? animation, WindowIn...`
+  - `override WindowInsetsCompat? OnProgress(WindowInsetsCompat? insets, IList<WindowInsetsAnimationCompat>? run...`
+- `AnimationEasing` (class, internal): **type missing** (2 members)
+
+</details>
+
+<details><summary><code>AndroidScreens.cs</code> - 1 missing</summary>
+
+- `AndroidScreens` (class): 1 missing
+  - `void Dispose()`
+
+</details>
 
 ### `Platform/Input` - files 0/5, types 0/15, members 0/85
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `AndroidInputMethod.cs` | `platform/input/android_input_method.rs` | missing | 0/3 | `IAndroidInputMethod`, `CustomImeFlags`, `AndroidInputMethod<TView>` | 22 |  |
-| `AndroidKeyboardDevice.cs` | `platform/input/android_keyboard_device.rs` | missing | 0/1 | `AndroidKeyboardDevice` | 1 |  |
-| `AvaloniaInputConnection.cs` | `platform/input/ferro_input_connection.rs` | missing | 0/1 | `AvaloniaInputConnection` | 35 |  |
-| `EditCommand.cs` | `platform/input/edit_command.rs` | missing | 0/9 | `EditCommand`, `SelectionCommand`, `CompositionRegionCommand`, `DeleteRegionCommand`, `DeleteRegionInCodePointsCommand`, `CompositionTextCommand`, `CommitTextCommand`, `FinishComposingCommand`, `KeyEventCommand` | 16 |  |
-| `TextEditBuffer.cs` | `platform/input/text_edit_buffer.rs` | missing | 0/1 | `TextEditBuffer` | 11 |  |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `AndroidInputMethod.cs` | `platform/input/android_input_method.rs` | missing | 0/3 | 0/22 |  |
+| `AndroidKeyboardDevice.cs` | `platform/input/android_keyboard_device.rs` | missing | 0/1 | 0/1 |  |
+| `AvaloniaInputConnection.cs` | `platform/input/ferro_input_connection.rs` | missing | 0/1 | 0/35 |  |
+| `EditCommand.cs` | `platform/input/edit_command.rs` | missing | 0/9 | 0/16 |  |
+| `TextEditBuffer.cs` | `platform/input/text_edit_buffer.rs` | missing | 0/1 | 0/11 |  |
 
-### `Platform/SkiaPlatform` - files 4/4, types 5/7, members 0/83
+### `Platform/SkiaPlatform` - files 4/4, types 5/7, members 54/83
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `AndroidFramebuffer.cs` | `platform/skia_platform/android_framebuffer.rs` | partial | 2/4 | `AndroidFramebuffer.ARect`, `AndroidFramebuffer.ANativeWindow_Buffer` | 29 |  |
-| `FramebufferManager.cs` | `platform/skia_platform/framebuffer_manager.rs` | present | 1/1 | - | 3 |  |
-| `InvalidationAwareSurfaceView.cs` | `platform/skia_platform/invalidation_aware_surface_view.rs` | present | 1/1 | - | 13 |  |
-| `TopLevelImpl.cs` | `platform/skia_platform/top_level_impl.rs` | present | 1/1 | - | 38 |  |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `AndroidFramebuffer.cs` | `platform/skia_platform/android_framebuffer.rs` | partial | 2/4 | 7/29 |  |
+| `FramebufferManager.cs` | `platform/skia_platform/framebuffer_manager.rs` | present | 1/1 | 3/3 |  |
+| `InvalidationAwareSurfaceView.cs` | `platform/skia_platform/invalidation_aware_surface_view.rs` | partial | 1/1 | 11/13 |  |
+| `TopLevelImpl.cs` | `platform/skia_platform/top_level_impl.rs` | partial | 1/1 | 33/38 |  |
 
-### `Platform/Specific/Helpers` - files 1/3, types 1/3, members 0/8
+<details><summary><code>AndroidFramebuffer.cs</code> - 24 missing</summary>
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `AndroidKeyInterop.cs` | `platform/specific/helpers/android_key_interop.rs` | missing | 0/1 | `AndroidKeyInterop` | 1 |  |
-| `AndroidKeyboardEventsHelper.cs` | `platform/specific/helpers/android_keyboard_events_helper.rs` | missing | 0/1 | `AndroidKeyboardEventsHelper<TView>` | 4 |  |
-| `AndroidMotionEventsHelper.cs` | `platform/specific/helpers/android_motion_events_helper.rs` | present | 1/1 | - | 3 |  |
+- `AndroidFramebuffer` (class): 10 missing
+  - `IntPtr Address { get; set; }` *(getter `address` found, setter `set_address` missing)*
+  - `static IntPtr ANativeWindow_fromSurface(IntPtr jniEnv, IntPtr handle)` *(internal)*
+  - `static int ANativeWindow_getWidth(IntPtr window)` *(internal)*
+  - `static int ANativeWindow_getHeight(IntPtr window)` *(internal)*
+  - `static void ANativeWindow_release(IntPtr window)` *(internal)*
+  - `static void ANativeWindow_unlockAndPost(IntPtr window)` *(internal)*
+  - `static IntPtr AChoreographer_getInstance()` *(internal)*
+  - `static void AChoreographer_postFrameCallback(IntPtr choreographer, delegate* unmanaged<int, IntPtr, void> c...` *(internal)*
+  - `static void AChoreographer_postFrameCallback64(IntPtr choreographer, delegate* unmanaged<long, IntPtr, void...` *(internal)*
+  - `static int ANativeWindow_lock(IntPtr window, ANativeWindow_Buffer* outBuffer, ARect* inOutDirtyBounds)` *(internal)*
+- `AndroidFramebuffer.AndroidPixelFormat` (enum): 3 missing
+  - `WINDOW_FORMAT_RGBA_8888 = 1`
+  - `WINDOW_FORMAT_RGBX_8888 = 2`
+  - `WINDOW_FORMAT_RGB_565 = 4`
+- `AndroidFramebuffer.ARect` (struct, internal): **type missing** (4 members)
+- `AndroidFramebuffer.ANativeWindow_Buffer` (struct, internal): **type missing** (5 members)
+
+</details>
+
+<details><summary><code>InvalidationAwareSurfaceView.cs</code> - 2 missing</summary>
+
+- `InvalidationAwareSurfaceView` (class): 2 missing
+  - `IntPtr IPlatformHandle.Handle { get; }` *(explicit)*
+  - `string IPlatformHandle.HandleDescriptor { get; }` *(explicit)*
+
+</details>
+
+<details><summary><code>TopLevelImpl.cs</code> - 5 missing</summary>
+
+- `TopLevelImpl` (class): 5 missing
+  - `bool EglGlPlatformSurface.IEglWindowGlPlatformSurfaceInfoWithWaitPolicy.SkipWaits { get; }` *(explicit)*
+  - `PixelSize EglGlPlatformSurface.IEglWindowGlPlatformSurfaceInfo.Size { get; }` *(explicit)*
+  - `double EglGlPlatformSurface.IEglWindowGlPlatformSurfaceInfo.Scaling { get; }` *(explicit)*
+  - `AndroidKeyboardEventsHelper<TopLevelImpl> KeyboardHelper { get; }` *(internal)*
+  - `void TextInput(string text)` *(internal)*
+
+</details>
+
+### `Platform/Specific/Helpers` - files 1/3, types 1/3, members 3/8
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `AndroidKeyInterop.cs` | `platform/specific/helpers/android_key_interop.rs` | missing | 0/1 | 0/1 |  |
+| `AndroidKeyboardEventsHelper.cs` | `platform/specific/helpers/android_keyboard_events_helper.rs` | missing | 0/1 | 0/4 |  |
+| `AndroidMotionEventsHelper.cs` | `platform/specific/helpers/android_motion_events_helper.rs` | present | 1/1 | 3/3 |  |
 
 ### `Platform/Storage` - files 0/2, types 0/5, members 0/50
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `AndroidStorageItem.cs` | `platform/storage/android_storage_item.rs` | missing | 0/4 | `AndroidStorageItem`, `AndroidStorageFolder`, `WellKnownAndroidStorageFolder`, `AndroidStorageFile` | 35 |  |
-| `AndroidStorageProvider.cs` | `platform/storage/android_storage_provider.rs` | missing | 0/1 | `AndroidStorageProvider` | 15 |  |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `AndroidStorageItem.cs` | `platform/storage/android_storage_item.rs` | missing | 0/4 | 0/35 |  |
+| `AndroidStorageProvider.cs` | `platform/storage/android_storage_provider.rs` | missing | 0/1 | 0/15 |  |
 
 ### `Platform/Vulkan` - files 0/2, types 0/4, members 0/10
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `VulkanNativeInterop.cs` | `platform/vulkan/vulkan_native_interop.rs` | missing | 0/2 | `AndroidVulkanInterface`, `VkAndroidSurfaceCreateInfoKHR` | 7 |  |
-| `VulkanSupport.cs` | `platform/vulkan/vulkan_support.rs` | missing | 0/2 | `VulkanSupport`, `VulkanSupport.VulkanSurfaceFactory` | 3 |  |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `VulkanNativeInterop.cs` | `platform/vulkan/vulkan_native_interop.rs` | missing | 0/2 | 0/7 |  |
+| `VulkanSupport.cs` | `platform/vulkan/vulkan_support.rs` | missing | 0/2 | 0/3 |  |
 
 ## Rust-only files
 

@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.Native` (exists) |
 | Crate | `ferroui-native` |
 | Phase / priority | 1 - desktop (macOS) / P0 |
-| Files | 48/48 (100.0%), 1 not applicable |
-| Types | 65/76 (11 waived) (100.0%) |
-| Members | 455/531 (76 waived) (100.0%) |
+| Files | 48/49 (98.0%) |
+| Types | 67/85 (10 waived) (89.3%) |
+| Members | 473/601 (59 waived) (87.3%) |
 | Contracts (interfaces) | 1/4 |
 | Property registrations | 1/1 |
 | Routed events | 0/0 |
@@ -30,16 +30,16 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 48/48, types 65/76 (11 waived), members 455/531 (76 waived)
+### `(project root)` - files 48/49, types 67/85 (10 waived), members 473/601 (59 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AvaloniaNativeApplicationPlatform.cs` | `ferro_native_application_platform.rs` | present | 1/1 | 11/11 |  |
 | `AvaloniaNativeDragSource.cs` | `ferro_native_drag_source.rs` | present | 1/1 | 2/2 |  |
-| `AvaloniaNativeGlPlatformGraphics.cs` | - | n/a | - | - | not-applicable: not ported for now (row 18 of CRITICAL-PATH.md): the desktop build of the Skia backend has Graphite on Metal and no Ganesh, so nothing could draw through the OpenGL platform graphics of the macOS backend. Applicable when the desktop build has Ganesh on OpenGL: the file is then ported to `avalonia_native_gl_platform_graphics.rs` under the mapped name, with the Skia side of the external objects on OpenGL (`Gpu/OpenGl/GlSkiaExternalObjectsFeature.cs`, reported as missing); the contracts it implements are in `ferroui-opengl` already (`i_gl_context_external_objects_feature.rs`) |
-| `AvaloniaNativeMenuExporter.cs` | `ferro_native_menu_exporter.rs` | present | 2/2 | 10/13 (3 waived) |  |
+| `AvaloniaNativeGlPlatformGraphics.cs` | `ferro_native_gl_platform_graphics.rs` | missing (types found elsewhere) | 1/9 | 1/70 | types found in `metal.rs` (add to path-overrides.toml) |
+| `AvaloniaNativeMenuExporter.cs` | `ferro_native_menu_exporter.rs` | present | 2/2 | 13/13 |  |
 | `AvaloniaNativePlatform.cs` | `ferro_native_platform.rs` | present | 1/1 | 13/13 |  |
-| `AvaloniaNativePlatformExtensions.cs` | `ferro_native_platform_extensions.rs` | present | 4/4 | 10/13 (3 waived) |  |
+| `AvaloniaNativePlatformExtensions.cs` | `ferro_native_platform_extensions.rs` | present | 4/4 | 13/13 |  |
 | `AvaloniaNativeRenderTimer.cs` | `ferro_native_render_timer.rs` | present | 1/1 | 3/4 (1 waived) |  |
 | `AvaloniaNativeTextInputMethod.cs` | `ferro_native_text_input_method.rs` | present | 1/1 | 6/6 |  |
 | `AvnAutomationPeer.cs` | `frn_automation_peer.rs` | present | 2/2 | 71/71 |  |
@@ -60,7 +60,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `EmbeddableTopLevelImpl.cs` | `embeddable_top_level_impl.rs` | present | 1/1 | 1/1 |  |
 | `Extensions.cs` | `extensions.rs` | present | 1/1 | 2/2 |  |
 | `GpuHandleWrapFeature.cs` | `gpu_handle_wrap_feature.rs` | present | 1/1 | 3/3 |  |
-| `Helpers.cs` | `helpers.rs` | present | 0/1 (1 waived) | 0/10 (10 waived) |  |
+| `Helpers.cs` | `helpers.rs` | present | 1/1 | 10/10 |  |
 | `IAvnMenu.cs` | `frn_menu.rs` | present | 1/3 (2 waived) | 3/16 (13 waived) | interface merged into implementation file |
 | `IAvnMenuItem.cs` | `frn_menu_item.rs` | present | 2/2 | 3/4 (1 waived) | merged: the members the file adds to the generated proxy of the native menu item are members of `FrnMenuItem`, the struct that wraps the native item |
 | `IconLoader.cs` | `icon_loader.rs` | present | 1/1 | 3/3 |  |
@@ -79,10 +79,31 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `StorageItem.cs` | `storage_item.rs` | present | 3/3 | 23/24 (1 waived) |  |
 | `StorageProviderApi.cs` | `storage_provider_api.rs` | present | 3/3 | 23/26 (3 waived) |  |
 | `StorageProviderImpl.cs` | `storage_provider_impl.rs` | present | 1/1 | 14/14 |  |
-| `TopLevelImpl.cs` | `top_level_impl.rs` | present | 3/3 | 56/62 (6 waived) |  |
+| `TopLevelImpl.cs` | `top_level_impl.rs` | present | 3/3 | 57/62 (5 waived) |  |
 | `TrayIconImpl.cs` | `tray_icon_impl.rs` | present | 1/1 | 8/8 |  |
 | `WindowImpl.cs` | `window_impl.rs` | present | 1/1 | 31/32 (1 waived) |  |
 | `WindowImplBase.cs` | `window_impl_base.rs` | present | 1/2 (1 waived) | 19/23 (4 waived) |  |
+
+<details><summary><code>AvaloniaNativeGlPlatformGraphics.cs</code> - 77 missing</summary>
+
+- `AvaloniaNativeGlPlatformGraphics` (class, internal): **type missing** (8 members)
+- `GlDisplay` (class, internal): **type missing** (8 members)
+- `GlContext` (class, internal): **type missing** (15 members)
+- `GlPlatformSurfaceRenderTarget` (class, internal): **type missing** (4 members)
+- `GlPlatformSurfaceRenderingSession` (class, internal): **type missing** (6 members)
+- `GlPlatformSurface` (class, internal): **type missing** (2 members)
+- `GlExternalObjectsFeature` (class, internal): **type missing** (13 members)
+- `MtlEventSemaphore` (class, internal): **type missing** (6 members)
+- `ImportedTexture` (class) in `metal.rs`: 7 missing
+  - `ImportedTexture(GlContext context, int type, int id, int internalFormat, PlatformGraphicsExternalImagePrope...`
+  - `void AcquireKeyedMutex(uint key)`
+  - `void ReleaseKeyedMutex(uint key)`
+  - `int TextureId { get; }`
+  - `int InternalFormat { get; }`
+  - `int TextureType { get; }`
+  - `PlatformGraphicsExternalImageProperties Properties { get; }`
+
+</details>
 
 ## IDL contracts: `avn.idl` -> `frn.idl`
 

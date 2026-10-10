@@ -12,7 +12,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 4 - tooling / P3 |
 | Files | 14/14 (100.0%) |
 | Types | 54/55 (1 waived) (100.0%) |
-| Members | 196/202 (3 waived) (98.5%) |
+| Members | 198/202 (3 waived) (99.5%) |
 | Contracts (interfaces) | 4/4 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -30,7 +30,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 14/14, types 54/55 (1 waived), members 196/202 (3 waived)
+### `(project root)` - files 14/14, types 54/55 (1 waived), members 198/202 (3 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -43,21 +43,17 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IMessageTypeResolver.cs` | `i_message_type_resolver.rs` | present | 1/1 | 2/2 |  |
 | `ITransport.cs` | `i_transport.rs` | present | 1/1 | 4/4 |  |
 | `InputMessages.cs` | `input_messages.rs` | present | 10/10 | 23/23 |  |
-| `MetsysBson.cs` | `metsys_bson.rs` | partial | 22/23 (1 waived) | 101/106 (2 waived) |  |
+| `MetsysBson.cs` | `metsys_bson.rs` | partial | 22/23 (1 waived) | 103/106 (2 waived) |  |
 | `TcpTransportBase.cs` | `tcp_transport_base.rs` | present | 1/1 | 3/4 (1 waived) |  |
 | `TransportConnectionWrapper.cs` | `transport_connection_wrapper.rs` | present | 1/1 | 6/6 |  |
 | `TransportMessages.cs` | `transport_messages.rs` | present | 1/1 | 1/1 |  |
 | `ViewportMessages.cs` | `viewport_messages.rs` | present | 8/8 | 24/24 |  |
 
-<details><summary><code>MetsysBson.cs</code> - 3 missing</summary>
+<details><summary><code>MetsysBson.cs</code> - 1 missing</summary>
 
-- `MagicProperty` (class): 1 missing
-  - `Type Type { get; }`
 - `TypeHelper` (class): 1 missing
   - `static PropertyInfo FindProperty(Type type, string name)` *(2 of 3 overloads found)*
 - `ExpressionHelper` (class): waived - walks an expression tree (`x =&gt; x.Name`) to the name of a member: a property is named by its declared name here (`ITypeConfiguration::use_alias("Name", ..)`), so there is nothing to walk
-- `BsonException` (class): 1 missing
-  - `BsonException(string message, Exception innerException)` *(2 of 3 constructors found)*
 
 </details>
 

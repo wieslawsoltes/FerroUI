@@ -11,160 +11,444 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Crate | `ferroui-x11` |
 | Phase / priority | 5 - desktop (Linux) / P1 |
 | Files | 73/88 (83.0%) |
-| Types | 145/291 (107 waived) (78.8%) |
-| Members | 0/4897 (0.0%) |
+| Types | 144/291 (107 waived) (78.3%) |
+| Members | 3402/4897 (1076 waived) (89.0%) |
+| Contracts (interfaces) | 8/8 |
+| Property registrations | 0/0 |
+| Routed events | 0/0 |
 
-This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
+## Contracts
+
+Every interface of the project. Each becomes a `pub trait` with the same name (the `I` prefix is kept).
+
+| Interface | Access | Upstream file | Members | Status |
+|---|---|---|---|---|
+| `Avalonia.X11.Dispatching.IX11PlatformDispatcher` | internal | `Dispatching/IX11PlatformDispatcher.cs` | 1/1 | present |
+| `Avalonia.X11.IXI2Client` | internal | `XI2Manager.cs` | 6/6 | present |
+| `Avalonia.X11.Screens.X11Screens.IScalingProvider` | internal | `Screens/X11Screens.Scaling.cs` | 1/1 | present |
+| `Avalonia.X11.Screens.X11Screens.IX11RawScreenInfoProvider` | internal | `Screens/X11Screen.Providers.cs` | 4/4 | present |
+| `Avalonia.X11.Screens.X11Screens.IX11RawScreenInfoProviderWithRefreshRate` | internal | `Screens/X11Screen.Providers.cs` | 1/1 | present |
+| `Avalonia.X11.Selections.DragDrop.IXdndWindow` | internal | `Selections/DragDrop/IXdndWindow.cs` | 3/3 | present |
+| `Avalonia.X11.Selections.IXEventWaiter` | internal | `Selections/IXEventWaiter.cs` | 1/1 | present |
+| `Avalonia.X11.X11EventDispatcher.IEventHook` | public | `Dispatching/X11EventDispatcher.cs` | 1/1 | present |
 
 ## Files
 
-### `(project root)` - files 31/37, types 92/216 (106 waived), members 0/4427
+### `(project root)` - files 31/37, types 91/216 (106 waived), members 3166/4427 (1074 waived)
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `ActivityTrackingHelper.cs` | `activity_tracking_helper.rs` | present | 1/1 | - | 7 |  |
-| `ICELib.cs` | `ice_lib.rs` | missing | 0/4 | `ICELib`, `ICELib.IceProcessMessagesStatus`, `ICELib.IceErrorHandler`, `ICELib.IceIOErrorHandler` | 6 |  |
-| `Keysyms.cs` | `keysyms.rs` | present | 1/1 | - | 2099 |  |
-| `LibC.cs` | `lib_c.rs` | present | 1/1 | - | 7 |  |
-| `SMLib.cs` | `sm_lib.rs` | missing | 0/10 | `SMLib`, `SMLib.SmDialogValue`, `SMLib.SmcCallbacks`, `SMLib.IceWatchProc`, `SMLib.SmcDieProc`, `SMLib.SmcInteractProc`, `SMLib.SmcSaveCompleteProc`, `SMLib.SmcSaveYourselfProc`, `SMLib.SmcShutdownCancelledProc`, `SMLib.SmcErrorHandler` | 12 |  |
-| `TransparencyHelper.cs` | `transparency_helper.rs` | present | 1/1 | - | 5 |  |
-| `X11ActiveWindowTracker.cs` | `x11_active_window_tracker.rs` | present | 1/1 | - | 3 |  |
-| `X11AtSpiAccessibility.cs` | `x11_at_spi_accessibility.rs` | missing | 0/1 | `X11AtSpiAccessibility` | 5 |  |
-| `X11Atoms.cs` | `x11_atoms.rs` | present | 1/1 | - | 166 |  |
-| `X11CursorFactory.cs` | `x11_cursor_factory.rs` | present | 2/2 | - | 9 |  |
-| `X11DeferredDisplayDispatcher.cs` | `x11_deferred_display_dispatcher.rs` | present | 1/1 | - | 4 |  |
-| `X11EglHelper.cs` | `x11_egl_helper.rs` | present | 1/1 | - | 3 |  |
-| `X11EnumExtensions.cs` | `x11_enum_extensions.rs` | present | 1/1 | - | 1 |  |
-| `X11Enums.cs` | `x11_enums.rs` | present | 5/5 | - | 78 |  |
-| `X11Exception.cs` | `x11_exception.rs` | present | 1/1 | - | 1 |  |
-| `X11FocusProxy.cs` | `x11_focus_proxy.rs` | present | 1/1 | - | 3 |  |
-| `X11FramebufferSurface.cs` | `x11_framebuffer_surface.rs` | present | 1/1 | - | 3 |  |
-| `X11Globals.cs` | `x11_globals.rs` | present | 2/2 | - | 15 |  |
-| `X11IconLoader.cs` | `x11_icon_loader.rs` | present | 2/2 | - | 6 |  |
-| `X11Info.cs` | `x11_info.rs` | present | 1/1 | - | 25 |  |
-| `X11KeyTransform.cs` | `x11_key_transform.rs` | present | 1/1 | - | 2 |  |
-| `X11NativeControlHost.cs` | `x11_native_control_host.rs` | missing | 0/1 | `X11NativeControlHost` | 6 |  |
-| `X11Platform.cs` | `x11_platform.rs` | present | 4/4 | - | 54 |  |
-| `X11PlatformLifetimeEvents.cs` | `x11_platform_lifetime_events.rs` | missing | 0/1 | `X11PlatformLifetimeEvents` | 3 |  |
-| `X11Structs.cs` | `x11_structs.rs` | present | 37/123 (86 waived) | - | 1353 | replaced: the event, request and hint structures are those of the Xlib bindings (`x11-dl`, used through `xlib.rs`), which declare them with the layout of the C headers; the enumerations and the Motif hints are ported (docs/porting/x11-platform.md, section 2) |
-| `X11Window.Ime.cs` | `x11_window_ime.rs` | present | 1/1 | - | 0 | renamed: the keyboard part is ported (the input context, the key of a key event, its text); the input method part (`InitializeIme`, `FilterIme`, `ProcessNextImeEvent`, the forwarded keys) is stage 2 of docs/porting/x11-platform.md |
-| `X11Window.Xim.cs` | `x11_window_xim.rs` | present | 1/1 | - | 0 | renamed: not ported yet: the input method of the server (`XimInputMethod`) is stage 2 of docs/porting/x11-platform.md |
-| `X11Window.cs` | `x11_window.rs` | present | 2/2 | - | 86 |  |
-| `X11WindowInfo.cs` | `x11_window_info.rs` | present | 1/1 | - | 3 |  |
-| `XEmbedPlug.cs` | `x_embed_plug.rs` | missing | 0/1 | `XEmbedPlug` | 8 |  |
-| `XEmbedTrayIconImpl.cs` | `x_embed_tray_icon_impl.rs` | present | 1/1 | - | 6 |  |
-| `XError.cs` | `x_error.rs` | present | 1/1 | - | 3 |  |
-| `XI2Manager.cs` | `xi2_manager.rs` | present | 3/3 | - | 21 |  |
-| `XIStructs.cs` | `xi_structs.rs` | present | 11/28 (17 waived) | - | 185 | replaced: the structures of the X Input extension are those of the Xlib bindings and the copies `xlib.rs` makes of them (`XIDeviceEventData`, `XIClassInfo`, ...); the enumerations are ported |
-| `XLib.Helpers.cs` | `xlib.rs` | present | 1/1 | - | 3 | merged: the helpers of the partial class are functions of the same module as the calls |
-| `XLib.cs` | `xlib.rs` | present | 3/6 (3 waived) | - | 233 |  |
-| `XResources.cs` | `x_resources.rs` | present | 1/1 | - | 3 |  |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `ActivityTrackingHelper.cs` | `activity_tracking_helper.rs` | present | 1/1 | 7/7 |  |
+| `ICELib.cs` | `ice_lib.rs` | missing | 0/4 | 0/6 |  |
+| `Keysyms.cs` | `keysyms.rs` | present | 1/1 | 2099/2099 |  |
+| `LibC.cs` | `lib_c.rs` | present | 1/1 | 7/7 |  |
+| `SMLib.cs` | `sm_lib.rs` | missing | 0/10 | 0/12 |  |
+| `TransparencyHelper.cs` | `transparency_helper.rs` | present | 1/1 | 5/5 |  |
+| `X11ActiveWindowTracker.cs` | `x11_active_window_tracker.rs` | present | 1/1 | 3/3 |  |
+| `X11AtSpiAccessibility.cs` | `x11_at_spi_accessibility.rs` | missing | 0/1 | 0/5 |  |
+| `X11Atoms.cs` | `x11_atoms.rs` | present | 1/1 | 166/166 |  |
+| `X11CursorFactory.cs` | `x11_cursor_factory.rs` | partial | 2/2 | 7/9 |  |
+| `X11DeferredDisplayDispatcher.cs` | `x11_deferred_display_dispatcher.rs` | present | 1/1 | 4/4 |  |
+| `X11EglHelper.cs` | `x11_egl_helper.rs` | partial | 1/1 | 2/3 |  |
+| `X11EnumExtensions.cs` | `x11_enum_extensions.rs` | present | 1/1 | 1/1 |  |
+| `X11Enums.cs` | `x11_enums.rs` | present | 5/5 | 78/78 |  |
+| `X11Exception.cs` | `x11_exception.rs` | present | 1/1 | 1/1 |  |
+| `X11FocusProxy.cs` | `x11_focus_proxy.rs` | present | 1/1 | 3/3 |  |
+| `X11FramebufferSurface.cs` | `x11_framebuffer_surface.rs` | partial | 1/1 | 2/3 |  |
+| `X11Globals.cs` | `x11_globals.rs` | present | 2/2 | 15/15 |  |
+| `X11IconLoader.cs` | `x11_icon_loader.rs` | present | 2/2 | 6/6 |  |
+| `X11Info.cs` | `x11_info.rs` | present | 1/1 | 25/25 |  |
+| `X11KeyTransform.cs` | `x11_key_transform.rs` | present | 1/1 | 2/2 |  |
+| `X11NativeControlHost.cs` | `x11_native_control_host.rs` | missing | 0/1 | 0/6 |  |
+| `X11Platform.cs` | `x11_platform.rs` | partial | 4/4 | 50/54 |  |
+| `X11PlatformLifetimeEvents.cs` | `x11_platform_lifetime_events.rs` | missing | 0/1 | 0/3 |  |
+| `X11Structs.cs` | `x11_structs.rs` | present | 36/123 (87 waived) | 396/1353 (957 waived) | replaced: the event, request and hint structures are those of the Xlib bindings (`x11-dl`, used through `xlib.rs`), which declare them with the layout of the C headers; the enumerations and the Motif hints are ported (docs/porting/x11-platform.md, section 2) |
+| `X11Window.Ime.cs` | `x11_window_ime.rs` | present | 1/1 | 0/0 | renamed: the keyboard part is ported (the input context, the key of a key event, its text); the input method part (`InitializeIme`, `FilterIme`, `ProcessNextImeEvent`, the forwarded keys) is stage 2 of docs/porting/x11-platform.md |
+| `X11Window.Xim.cs` | `x11_window_xim.rs` | present | 1/1 | 0/0 | renamed: not ported yet: the input method of the server (`XimInputMethod`) is stage 2 of docs/porting/x11-platform.md |
+| `X11Window.cs` | `x11_window.rs` | partial | 2/2 | 84/86 |  |
+| `X11WindowInfo.cs` | `x11_window_info.rs` | present | 1/1 | 3/3 |  |
+| `XEmbedPlug.cs` | `x_embed_plug.rs` | missing | 0/1 | 0/8 |  |
+| `XEmbedTrayIconImpl.cs` | `x_embed_tray_icon_impl.rs` | present | 1/1 | 6/6 |  |
+| `XError.cs` | `x_error.rs` | present | 1/1 | 3/3 |  |
+| `XI2Manager.cs` | `xi2_manager.rs` | present | 3/3 | 21/21 |  |
+| `XIStructs.cs` | `xi_structs.rs` | present | 11/28 (17 waived) | 72/185 (113 waived) | replaced: the structures of the X Input extension are those of the Xlib bindings and the copies `xlib.rs` makes of them (`XIDeviceEventData`, `XIClassInfo`, ...); the enumerations are ported |
+| `XLib.Helpers.cs` | `xlib.rs` | present | 1/1 | 3/3 | merged: the helpers of the partial class are functions of the same module as the calls |
+| `XLib.cs` | `xlib.rs` | partial | 3/6 (2 waived) | 92/233 (4 waived) |  |
+| `XResources.cs` | `x_resources.rs` | present | 1/1 | 3/3 |  |
 
-### `Dispatching` - files 3/5, types 5/7, members 0/39
+<details><summary><code>X11CursorFactory.cs</code> - 2 missing</summary>
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `GLibDispatcherImpl.cs` | `dispatching/g_lib_dispatcher_impl.rs` | missing | 0/1 | `GlibDispatcherImpl` | 4 |  |
-| `GlibDispatcherImplBase.cs` | `dispatching/glib_dispatcher_impl_base.rs` | missing | 0/1 | `GlibDispatcherImplBase` | 16 |  |
-| `IX11PlatformDispatcher.cs` | `dispatching/i_x11_platform_dispatcher.rs` | present | 1/1 | - | 1 |  |
-| `X11EventDispatcher.cs` | `dispatching/x11_event_dispatcher.rs` | present | 3/3 | - | 7 |  |
-| `X11PlatformThreading.cs` | `dispatching/x11_platform_threading.rs` | present | 1/1 | - | 11 |  |
+- `CursorImpl` (class): 2 missing
+  - `CursorImpl(IntPtr handle)` *(1 of 2 constructors found)*
+  - `IntPtr Handle { get; protected set; }` *(getter `handle` found, setter `set_handle` missing)*
 
-### `Glx` - files 6/6, types 5/6, members 0/157
+</details>
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `Glx.cs` | `glx/glx.rs` | present | 1/1 | - | 24 |  |
-| `GlxConsts.cs` | `glx/glx_consts.rs` | partial | 0/1 | `GlxConsts` | 96 |  |
-| `GlxContext.cs` | `glx/glx_context.rs` | present | 1/1 | - | 18 |  |
-| `GlxDisplay.cs` | `glx/glx_display.rs` | present | 1/1 | - | 9 |  |
-| `GlxGlPlatformSurface.cs` | `glx/glx_gl_platform_surface.rs` | present | 1/1 | - | 2 |  |
-| `GlxPlatformFeature.cs` | `glx/glx_platform_feature.rs` | present | 1/1 | - | 8 |  |
+<details><summary><code>X11EglHelper.cs</code> - 1 missing</summary>
+
+- `X11EglHelper` (class) (ported as module-level items): 1 missing
+  - `static XVisualInfo? GetVisualInfo(X11Info x11, EglDisplay display)` *(1 of 2 overloads found)*
+
+</details>
+
+<details><summary><code>X11FramebufferSurface.cs</code> - 1 missing</summary>
+
+- `X11FramebufferSurface` (class): 1 missing
+  - `ILockedFramebuffer Lock(IRenderTarget.RenderTargetSceneInfo _, out FramebufferLockProperties properties)`
+
+</details>
+
+<details><summary><code>X11Platform.cs</code> - 4 missing</summary>
+
+- `AvaloniaX11Platform` (class): 4 missing
+  - `AtSpiServer? AtSpiServer { get; }` *(internal)*
+  - `IntPtr DeferredDisplay { get; set; }` *(getter `deferred_display` found, setter `set_deferred_display` missing)*
+  - `IntPtr Display { get; set; }` *(getter `display` found, setter `set_display` missing)*
+  - `X11DeferredDisplayDispatcher DeferredDisplayDispatcher { get; }` *(internal)*
+
+</details>
+
+<details><summary><code>X11Window.cs</code> - 2 missing</summary>
+
+- `X11Window` (class): 1 missing
+  - `X11Window(AvaloniaX11Platform platform, IWindowImpl? popupParent, X11WindowMode mode, bool overrideRedirect...` *(1 of 2 constructors found)*
+- `X11Window.SurfacePlatformHandle` (class): 1 missing
+  - `SurfacePlatformHandle(X11Window owner)`
+
+</details>
+
+<details><summary><code>XLib.cs</code> - 138 missing</summary>
+
+- `XLib` (class) (ported as module-level items): 130 missing
+  - `static int XShmQueryExtension(IntPtr display)`
+  - `static int XShmQueryVersion(IntPtr display, out int major, out int minor, out bool pixmaps)`
+  - `static int XCloseDisplay(IntPtr display)`
+  - `static IntPtr XSynchronize(IntPtr display, bool onoff)`
+  - `static IntPtr XCreateSimpleWindow(IntPtr display, IntPtr parent, int x, int y, int width, int height, int b...`
+  - `static int XMapWindow(IntPtr display, IntPtr window)`
+  - `static int XUnmapWindow(IntPtr display, IntPtr window)`
+  - `static int XMapSubindows(IntPtr display, IntPtr window)`
+  - `static int XUnmapSubwindows(IntPtr display, IntPtr window)`
+  - `static IntPtr XRootWindow(IntPtr display, int screen_number)`
+  - `static IntPtr XDefaultRootWindow(IntPtr display)`
+  - `static int XNextEvent(IntPtr display, XEvent* xevent)` *(1 of 2 overloads found)*
+  - `static int XConnectionNumber(IntPtr diplay)`
+  - `static int XPending(IntPtr diplay)`
+  - `static IntPtr XSelectInput(IntPtr display, IntPtr window, IntPtr mask)`
+  - `static int XDestroyWindow(IntPtr display, IntPtr window)`
+  - `static int XReparentWindow(IntPtr display, IntPtr window, IntPtr parent, int x, int y)`
+  - `static int XMoveResizeWindow(IntPtr display, IntPtr window, int x, int y, int width, int height)`
+  - `static int XResizeWindow(IntPtr display, IntPtr window, int width, int height)`
+  - `static int XFlush(IntPtr display)`
+  - `static int XSetWMName(IntPtr display, IntPtr window, ref XTextProperty text_prop)`
+  - `static int XFree(IntPtr data)`
+  - `static int XFree(void* data)`
+  - `static int XRaiseWindow(IntPtr display, IntPtr window)`
+  - `static uint XLowerWindow(IntPtr display, IntPtr window)`
+  - `static uint XConfigureResizeWindow(IntPtr display, IntPtr window, int width, int height)` *(1 of 2 overloads found)*
+  - `static IntPtr XGetAtomName(IntPtr display, IntPtr atom)`
+  - `static GrabResult XGrabPointer(IntPtr display, IntPtr window, bool owner_events, EventMask event_mask, Grab...`
+  - `static int XUngrabPointer(IntPtr display, IntPtr timestamp)`
+  - `static bool XGetGeometry(IntPtr display, IntPtr window, IntPtr root, out int x, out int y, out int width, o...` *(1 of 5 overloads found)*
+  - `static bool XGetGeometry(IntPtr display, IntPtr window, IntPtr root, out int x, out int y, IntPtr width, In...` *(1 of 5 overloads found)*
+  - `static bool XGetGeometry(IntPtr display, IntPtr window, IntPtr root, IntPtr x, IntPtr y, out int width, out...` *(1 of 5 overloads found)*
+  - `static uint XWarpPointer(IntPtr display, IntPtr src_w, IntPtr dest_w, int src_x, int src_y, uint src_width,...`
+  - `static int XClearWindow(IntPtr display, IntPtr window)`
+  - `static int XClearArea(IntPtr display, IntPtr window, int x, int y, int width, int height, bool exposures)`
+  - `static IntPtr XDefaultScreenOfDisplay(IntPtr display)`
+  - `static int XScreenNumberOfScreen(IntPtr display, IntPtr Screen)`
+  - `static IntPtr XDefaultVisual(IntPtr display, int screen_number)`
+  - `static uint XDefaultDepth(IntPtr display, int screen_number)`
+  - `static int XDefaultScreen(IntPtr display)`
+  - `static IntPtr XDefaultColormap(IntPtr display, int screen_number)`
+  - `static int XLookupColor(IntPtr display, IntPtr Colormap, string Coloranem, ref XColor exact_def_color, ref ...`
+  - `static int XAllocColor(IntPtr display, IntPtr Colormap, ref XColor colorcell_def)`
+  - `static int XSetTransientForHint(IntPtr display, IntPtr window, IntPtr parent)`
+  - `static int XChangeProperty(IntPtr display, IntPtr window, IntPtr property, IntPtr type, int format, Propert...`
+  - `static int XChangeProperty(IntPtr display, IntPtr window, IntPtr property, IntPtr type, int format, Propert...`
+  - `static int XChangeProperty(IntPtr display, IntPtr window, IntPtr property, IntPtr type, int format, Propert...`
+  - `static int XChangeProperty(IntPtr display, IntPtr window, IntPtr property, IntPtr type, int format, Propert...`
+  - `static int XChangeProperty(IntPtr display, IntPtr window, IntPtr property, IntPtr type, int format, Propert...`
+  - `static int XChangeProperty(IntPtr display, IntPtr window, IntPtr property, IntPtr type, int format, Propert...`
+  - `static int XChangeProperty(IntPtr display, IntPtr window, IntPtr property, IntPtr type, int format, Propert...`
+  - `static int XChangeProperty(IntPtr display, IntPtr window, IntPtr property, IntPtr type, int format, Propert...`
+  - `static int XChangeProperty(IntPtr display, IntPtr window, IntPtr property, IntPtr type, int format, Propert...`
+  - `static int XChangeProperty(IntPtr display, IntPtr window, IntPtr property, IntPtr type, int format, Propert...`
+  - `static int XDeleteProperty(IntPtr display, IntPtr window, IntPtr property)`
+  - `static int XSetFunction(IntPtr display, IntPtr gc, GXFunction function)`
+  - `static int XSetLineAttributes(IntPtr display, IntPtr gc, int line_width, GCLineStyle line_style, GCCapStyle...` *(internal)*
+  - `static int XDrawLine(IntPtr display, IntPtr drawable, IntPtr gc, int x1, int y1, int x2, int y2)`
+  - `static int XDrawRectangle(IntPtr display, IntPtr drawable, IntPtr gc, int x1, int y1, int width, int height)`
+  - `static int XFillRectangle(IntPtr display, IntPtr drawable, IntPtr gc, int x1, int y1, int width, int height)`
+  - `static int XSetWindowBackground(IntPtr display, IntPtr window, IntPtr background)`
+  - `static int XCopyArea(IntPtr display, IntPtr src, IntPtr dest, IntPtr gc, int src_x, int src_y, int width, i...`
+  - `static int XSetInputFocus(IntPtr display, IntPtr window, RevertTo revert_to, IntPtr time)`
+  - `static int XIconifyWindow(IntPtr display, IntPtr window, int screen_number)`
+  - `static int XDefineCursor(IntPtr display, IntPtr window, IntPtr cursor)`
+  - `static int XUndefineCursor(IntPtr display, IntPtr window)`
+  - `static int XFreeCursor(IntPtr display, IntPtr cursor)`
+  - `static IntPtr XCreateFontCursor(IntPtr display, CursorFontShape shape)`
+  - `static IntPtr XCreatePixmapFromBitmapData(IntPtr display, IntPtr drawable, byte[] data, int width, int heig...`
+  - `static IntPtr XCreatePixmap(IntPtr display, IntPtr d, int width, int height, int depth)`
+  - `static IntPtr XFreePixmap(IntPtr display, IntPtr pixmap)`
+  - `static int XQueryBestCursor(IntPtr display, IntPtr drawable, int width, int height, out int best_width, out...`
+  - `static IntPtr XWhitePixel(IntPtr display, int screen_no)`
+  - `static IntPtr XBlackPixel(IntPtr display, int screen_no)`
+  - `static void XGrabServer(IntPtr display)`
+  - `static void XUngrabServer(IntPtr display)`
+  - `static void XSetZoomHints(IntPtr display, IntPtr window, ref XSizeHints hints)`
+  - `static int XGetIconSizes(IntPtr display, IntPtr window, out IntPtr size_list, out int count)`
+  - `static IntPtr XGetErrorText(IntPtr display, byte code, StringBuilder buffer, int length)`
+  - `static int XConvertSelection(IntPtr display, IntPtr selection, IntPtr target, IntPtr property, IntPtr reque...`
+  - `static IntPtr XGetSelectionOwner(IntPtr display, IntPtr selection)`
+  - `static int XSetSelectionOwner(IntPtr display, IntPtr selection, IntPtr owner, IntPtr time)`
+  - `static int XSetPlaneMask(IntPtr display, IntPtr gc, IntPtr mask)`
+  - `static int XSetForeground(IntPtr display, IntPtr gc, UIntPtr foreground)`
+  - `static int XSetBackground(IntPtr display, IntPtr gc, UIntPtr background)`
+  - `static int XBell(IntPtr display, int percent)`
+  - `static bool XFilterEvent(XEvent* xevent, IntPtr window)` *(1 of 2 overloads found)*
+  - `static void XPeekEvent(IntPtr display, out XEvent xevent)`
+  - `static IntPtr XLockDisplay(IntPtr display)`
+  - `static IntPtr XUnlockDisplay(IntPtr display)`
+  - `static IntPtr XCreateGC(IntPtr display, IntPtr drawable, ulong valuemask, IntPtr values)` *(1 of 2 overloads found)*
+  - `static int XInitImage(ref XImage image)`
+  - `static int XDestroyImage(XImage* image)` *(1 of 2 overloads found)*
+  - `static int XPutImage(IntPtr display, IntPtr drawable, IntPtr gc, ref XImage image, int srcx, int srcy, int ...`
+  - `static int XPutImage(IntPtr display, IntPtr drawable, IntPtr gc, XImage* image, int srcx, int srcy, int des...`
+  - `static int XFreeColormap(IntPtr display, IntPtr colormap)`
+  - `const long VisualIDMask`
+  - `static IntPtr XGetVisualInfo(IntPtr display, IntPtr vinfo_mask, ref XVisualInfo vinfo_template, out int nit...`
+  - `static bool XkbIgnoreExtension(bool ignore)`
+  - `static IntPtr XGetIMValues(IntPtr xim, string name, out XIMStyles* value, IntPtr terminator)`
+  - `static IntPtr XCreateIC(IntPtr xim, string name, IntPtr value, string name2, IntPtr value2, string name3, I...`
+  - `static IntPtr XCreateIC(IntPtr xim, string name, IntPtr value, string name2, IntPtr value2, string name3, I...`
+  - `static IntPtr XCreateIC(IntPtr xim, string xnClientWindow, IntPtr handle, string xnInputStyle, IntPtr value...`
+  - `static IntPtr XCreateIC(IntPtr xim, string xnClientWindow, IntPtr handle, string xnFocusWindow, IntPtr valu...`
+  - `static IntPtr XVaCreateNestedList(int unused, Utf8Buffer name, ref XPoint point, IntPtr terminator)`
+  - `static IntPtr XVaCreateNestedList(int unused, Utf8Buffer xnArea, XRectangle* point, Utf8Buffer xnSpotLocati...`
+  - `static IntPtr XVaCreateNestedList(int unused, Utf8Buffer xnSpotLocation, XPoint* value2, Utf8Buffer xnFontS...`
+  - `static IntPtr XSetICValues(IntPtr ic, string name, IntPtr data, IntPtr terminator)`
+  - `static void XCloseIM(IntPtr xim)`
+  - `static IntPtr XMaxRequestSize(IntPtr display)`
+  - `static IntPtr XExtendedMaxRequestSize(IntPtr display)`
+  - `static int XFixesQueryExtension(IntPtr dpy, out int event_base_return, out int error_base_return)`
+  - `static int XFixesQueryVersion(IntPtr dpy, out int major_version_return, out int minor_version_return)`
+  - `static IntPtr XFixesCreateRegion(IntPtr dpy, XRectangle* rectangles, int nrectangles)`
+  - `static void XFixesSetWindowShapeRegion(IntPtr dpy, IntPtr win, ShapeKind shape_kind, int x_off, int y_off, ...`
+  - `static void XFixesDestroyRegion(IntPtr dpy, IntPtr region)`
+  - `static void XRRFreeMonitors(XRRMonitorInfo* monitors)`
+  - `static XRRScreenResources * XRRGetScreenResources(IntPtr dpy, IntPtr window)`
+  - `static void XRRFreeScreenResources(XRRScreenResources* resources)`
+  - `static XRROutputInfo * XRRGetOutputInfo(IntPtr dpy, XRRScreenResources *resources, IntPtr output)`
+  - `static void XRRFreeOutputInfo(XRROutputInfo* outputInfo)`
+  - `static XRRCrtcInfo* XRRGetCrtcInfo(IntPtr dpy, XRRScreenResources* resources, IntPtr crtc)`
+  - `static void XRRFreeCrtcInfo(XRRCrtcInfo* crtcInfo)`
+  - `static IntPtr* XRRListOutputProperties(IntPtr dpy, IntPtr output, out int count)`
+  - `static void XIFreeDeviceInfo(XIDeviceInfo* info)`
+  - `static void XISetMask(ref int mask, XiEventType ev)`
+  - `static int XiEventMaskLen { get; }`
+  - `static XClassHint* XAllocClassHint()`
+  - `static bool XGetGeometry(IntPtr display, IntPtr window, out XGeometry geo)` *(1 of 5 overloads found)*
+  - `static IntPtr CreateEventWindow(AvaloniaX11Platform plat, X11EventDispatcher.EventHandler handler)`
+- `XLib.XGeometry` (struct): 2 missing
+  - `int bw`
+  - `int d`
+- `XLib.XClassHint` (struct): waived - the structure of the Xlib bindings, filled in by `xlib::x_set_class_hint`
+- `XLib.XSyncValue` (struct): waived - the structure of the Xlib bindings (`x11_dl::sync::XSyncValue`), re-exported by `xlib.rs`
+- `XLib.GrabResult` (enum, public): **type missing** (5 members)
+
+</details>
+
+### `Dispatching` - files 3/5, types 5/7, members 19/39
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `GLibDispatcherImpl.cs` | `dispatching/g_lib_dispatcher_impl.rs` | missing | 0/1 | 0/4 |  |
+| `GlibDispatcherImplBase.cs` | `dispatching/glib_dispatcher_impl_base.rs` | missing | 0/1 | 0/16 |  |
+| `IX11PlatformDispatcher.cs` | `dispatching/i_x11_platform_dispatcher.rs` | present | 1/1 | 1/1 |  |
+| `X11EventDispatcher.cs` | `dispatching/x11_event_dispatcher.rs` | present | 3/3 | 7/7 |  |
+| `X11PlatformThreading.cs` | `dispatching/x11_platform_threading.rs` | present | 1/1 | 11/11 |  |
+
+### `Glx` - files 6/6, types 5/6, members 57/157
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `Glx.cs` | `glx/glx.rs` | partial | 1/1 | 21/24 |  |
+| `GlxConsts.cs` | `glx/glx_consts.rs` | partial | 0/1 | 0/96 |  |
+| `GlxContext.cs` | `glx/glx_context.rs` | present | 1/1 | 18/18 |  |
+| `GlxDisplay.cs` | `glx/glx_display.rs` | partial | 1/1 | 8/9 |  |
+| `GlxGlPlatformSurface.cs` | `glx/glx_gl_platform_surface.rs` | present | 1/1 | 2/2 |  |
+| `GlxPlatformFeature.cs` | `glx/glx_platform_feature.rs` | present | 1/1 | 8/8 |  |
+
+<details><summary><code>Glx.cs</code> - 3 missing</summary>
+
+- `GlxInterface` (class): 3 missing
+  - `XVisualInfo* ChooseVisual(IntPtr dpy, int screen, int[] attribList)`
+  - `IntPtr CreateContext(IntPtr dpy, XVisualInfo* vis, IntPtr shareList, bool direct)`
+  - `int GlGetError()`
+
+</details>
+
+<details><summary><code>GlxConsts.cs</code> - 97 missing</summary>
+
+- `GlxConsts` (class, internal): **type missing** (96 members)
+
+</details>
+
+<details><summary><code>GlxDisplay.cs</code> - 1 missing</summary>
+
+- `GlxDisplay` (class): 1 missing
+  - `X11Info X11Info { get; }`
+
+</details>
 
 ### `Interop` - files 0/2, types 0/7, members 0/29
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `Glib.cs` | `interop/glib.rs` | missing | 0/6 | `Glib`, `Glib.GSourceFunc`, `Glib.GDestroyNotify`, `Glib.GIOCondition`, `Glib.GUnixFDSourceFunc`, `GSList` | 28 |  |
-| `GtkInteropHelper.cs` | `interop/gtk_interop_helper.rs` | missing | 0/1 | `GtkInteropHelper` | 1 |  |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `Glib.cs` | `interop/glib.rs` | missing | 0/6 | 0/28 |  |
+| `GtkInteropHelper.cs` | `interop/gtk_interop_helper.rs` | missing | 0/1 | 0/1 |  |
 
 ### `NativeDialogs` - files 0/2, types 0/6, members 0/48
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `Gtk.cs` | `native_dialogs/gtk.rs` | missing | 0/5 | `GtkFileChooserAction`, `GtkResponseType`, `Gtk`, `Gtk.signal_generic`, `Gtk.signal_dialog_response` | 41 |  |
-| `GtkNativeFileDialogs.cs` | `native_dialogs/gtk_native_file_dialogs.rs` | missing | 0/1 | `GtkSystemDialog` | 7 |  |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `Gtk.cs` | `native_dialogs/gtk.rs` | missing | 0/5 | 0/41 |  |
+| `GtkNativeFileDialogs.cs` | `native_dialogs/gtk_native_file_dialogs.rs` | missing | 0/1 | 0/7 |  |
 
-### `Screens` - files 3/3, types 8/9 (1 waived), members 0/27
+### `Screens` - files 3/3, types 8/9 (1 waived), members 25/27 (2 waived)
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `X11Screen.Providers.cs` | `screens/x11_screen_providers.rs` | present | 5/6 (1 waived) | - | 20 |  |
-| `X11Screens.Scaling.cs` | `screens/x11_screens_scaling.rs` | present | 2/2 | - | 1 |  |
-| `X11Screens.cs` | `screens/x11_screens.rs` | present | 1/1 | - | 6 |  |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `X11Screen.Providers.cs` | `screens/x11_screen_providers.rs` | present | 5/6 (1 waived) | 18/20 (2 waived) |  |
+| `X11Screens.Scaling.cs` | `screens/x11_screens_scaling.rs` | present | 2/2 | 1/1 |  |
+| `X11Screens.cs` | `screens/x11_screens.rs` | present | 1/1 | 6/6 |  |
 
-### `Selections` - files 7/7, types 8/8, members 0/39
+### `Selections` - files 7/7, types 8/8, members 37/39
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `DataFormatHelper.cs` | `selections/data_format_helper.rs` | present | 1/1 | - | 11 |  |
-| `IXEventWaiter.cs` | `selections/i_x_event_waiter.rs` | present | 1/1 | - | 1 |  |
-| `SelectionDataProvider.cs` | `selections/selection_data_provider.rs` | present | 1/1 | - | 9 |  |
-| `SelectionDataReader.cs` | `selections/selection_data_reader.rs` | present | 1/1 | - | 7 |  |
-| `SelectionHelper.cs` | `selections/selection_helper.rs` | present | 1/1 | - | 1 |  |
-| `SelectionReadSession.cs` | `selections/selection_read_session.rs` | present | 2/2 | - | 8 |  |
-| `UriListHelper.cs` | `selections/uri_list_helper.rs` | present | 1/1 | - | 2 |  |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `DataFormatHelper.cs` | `selections/data_format_helper.rs` | partial | 1/1 | 10/11 |  |
+| `IXEventWaiter.cs` | `selections/i_x_event_waiter.rs` | present | 1/1 | 1/1 |  |
+| `SelectionDataProvider.cs` | `selections/selection_data_provider.rs` | partial | 1/1 | 8/9 |  |
+| `SelectionDataReader.cs` | `selections/selection_data_reader.rs` | present | 1/1 | 7/7 |  |
+| `SelectionHelper.cs` | `selections/selection_helper.rs` | present | 1/1 | 1/1 |  |
+| `SelectionReadSession.cs` | `selections/selection_read_session.rs` | present | 2/2 | 8/8 |  |
+| `UriListHelper.cs` | `selections/uri_list_helper.rs` | present | 1/1 | 2/2 |  |
 
-### `Selections/Clipboard` - files 6/6, types 6/6, members 0/23
+<details><summary><code>DataFormatHelper.cs</code> - 1 missing</summary>
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `ClipboardDataReader.cs` | `selections/clipboard/clipboard_data_reader.rs` | present | 1/1 | - | 5 |  |
-| `ClipboardDataTransfer.cs` | `selections/clipboard/clipboard_data_transfer.rs` | present | 1/1 | - | 4 |  |
-| `ClipboardDataTransferItem.cs` | `selections/clipboard/clipboard_data_transfer_item.rs` | present | 1/1 | - | 3 |  |
-| `ClipboardReadSessionFactory.cs` | `selections/clipboard/clipboard_read_session_factory.rs` | present | 1/1 | - | 1 |  |
-| `EventStreamWindow.cs` | `selections/clipboard/event_stream_window.rs` | present | 1/1 | - | 4 |  |
-| `X11ClipboardImpl.cs` | `selections/clipboard/x11_clipboard_impl.rs` | present | 1/1 | - | 6 |  |
+- `DataFormatHelper` (class) (ported as module-level items): 1 missing
+  - `static IntPtr[] ToAtoms(IReadOnlyList<DataFormat> formats, X11Atoms atoms)` *(1 of 2 overloads found)*
 
-### `Selections/DragDrop` - files 11/11, types 11/11, members 0/48
+</details>
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `DragDropDataProvider.cs` | `selections/drag_drop/drag_drop_data_provider.rs` | present | 1/1 | - | 6 |  |
-| `DragDropDataReader.cs` | `selections/drag_drop/drag_drop_data_reader.rs` | present | 1/1 | - | 6 |  |
-| `DragDropDataTransfer.cs` | `selections/drag_drop/drag_drop_data_transfer.rs` | present | 1/1 | - | 11 |  |
-| `DragDropDataTransferItem.cs` | `selections/drag_drop/drag_drop_data_transfer_item.rs` | present | 1/1 | - | 3 |  |
-| `DragDropTimeoutManager.cs` | `selections/drag_drop/drag_drop_timeout_manager.rs` | present | 1/1 | - | 4 |  |
-| `IXdndWindow.cs` | `selections/drag_drop/i_xdnd_window.rs` | present | 1/1 | - | 3 |  |
-| `SynchronousXEventWaiter.cs` | `selections/drag_drop/synchronous_x_event_waiter.rs` | present | 1/1 | - | 4 |  |
-| `X11DragSource.cs` | `selections/drag_drop/x11_drag_source.rs` | present | 1/1 | - | 2 |  |
-| `X11DropTarget.cs` | `selections/drag_drop/x11_drop_target.rs` | present | 1/1 | - | 5 |  |
-| `XdndActionHelper.cs` | `selections/drag_drop/xdnd_action_helper.rs` | present | 1/1 | - | 2 |  |
-| `XdndConstants.cs` | `selections/drag_drop/xdnd_constants.rs` | present | 1/1 | - | 2 |  |
+<details><summary><code>SelectionDataProvider.cs</code> - 1 missing</summary>
+
+- `SelectionDataProvider` (class): 1 missing
+  - `abstract void Dispose()`
+
+</details>
+
+### `Selections/Clipboard` - files 6/6, types 6/6, members 23/23
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `ClipboardDataReader.cs` | `selections/clipboard/clipboard_data_reader.rs` | present | 1/1 | 5/5 |  |
+| `ClipboardDataTransfer.cs` | `selections/clipboard/clipboard_data_transfer.rs` | present | 1/1 | 4/4 |  |
+| `ClipboardDataTransferItem.cs` | `selections/clipboard/clipboard_data_transfer_item.rs` | present | 1/1 | 3/3 |  |
+| `ClipboardReadSessionFactory.cs` | `selections/clipboard/clipboard_read_session_factory.rs` | present | 1/1 | 1/1 |  |
+| `EventStreamWindow.cs` | `selections/clipboard/event_stream_window.rs` | present | 1/1 | 4/4 |  |
+| `X11ClipboardImpl.cs` | `selections/clipboard/x11_clipboard_impl.rs` | present | 1/1 | 6/6 |  |
+
+### `Selections/DragDrop` - files 11/11, types 11/11, members 44/48
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `DragDropDataProvider.cs` | `selections/drag_drop/drag_drop_data_provider.rs` | partial | 1/1 | 4/6 |  |
+| `DragDropDataReader.cs` | `selections/drag_drop/drag_drop_data_reader.rs` | present | 1/1 | 6/6 |  |
+| `DragDropDataTransfer.cs` | `selections/drag_drop/drag_drop_data_transfer.rs` | partial | 1/1 | 9/11 |  |
+| `DragDropDataTransferItem.cs` | `selections/drag_drop/drag_drop_data_transfer_item.rs` | present | 1/1 | 3/3 |  |
+| `DragDropTimeoutManager.cs` | `selections/drag_drop/drag_drop_timeout_manager.rs` | present | 1/1 | 4/4 |  |
+| `IXdndWindow.cs` | `selections/drag_drop/i_xdnd_window.rs` | present | 1/1 | 3/3 |  |
+| `SynchronousXEventWaiter.cs` | `selections/drag_drop/synchronous_x_event_waiter.rs` | present | 1/1 | 4/4 |  |
+| `X11DragSource.cs` | `selections/drag_drop/x11_drag_source.rs` | present | 1/1 | 2/2 |  |
+| `X11DropTarget.cs` | `selections/drag_drop/x11_drop_target.rs` | present | 1/1 | 5/5 |  |
+| `XdndActionHelper.cs` | `selections/drag_drop/xdnd_action_helper.rs` | present | 1/1 | 2/2 |  |
+| `XdndConstants.cs` | `selections/drag_drop/xdnd_constants.rs` | present | 1/1 | 2/2 |  |
+
+<details><summary><code>DragDropDataProvider.cs</code> - 2 missing</summary>
+
+- `DragDropDataProvider` (class): 2 missing
+  - `Action? Activity { get; set; }`
+  - `override void OnActivity()` *(protected)*
+
+</details>
+
+<details><summary><code>DragDropDataTransfer.cs</code> - 2 missing</summary>
+
+- `DragDropDataTransfer` (class): 2 missing
+  - `override DataFormat[] ProvideFormats()` *(protected)*
+  - `override PlatformDataTransferItem[] ProvideItems()` *(protected)*
+
+</details>
 
 ### `Vulkan` - files 0/2, types 0/4, members 0/12
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `VulkanNativeInterop.cs` | `vulkan/vulkan_native_interop.rs` | missing | 0/2 | `X11VulkanInterface`, `VkXlibSurfaceCreateInfoKHR` | 8 |  |
-| `VulkanSupport.cs` | `vulkan/vulkan_support.rs` | missing | 0/2 | `VulkanSupport`, `VulkanSupport.VulkanSurfaceFactory` | 4 |  |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `VulkanNativeInterop.cs` | `vulkan/vulkan_native_interop.rs` | missing | 0/2 | 0/8 |  |
+| `VulkanSupport.cs` | `vulkan/vulkan_support.rs` | missing | 0/2 | 0/4 |  |
 
-### `X11WindowModes` - files 3/4, types 7/8, members 0/36
+### `X11WindowModes` - files 3/4, types 7/8, members 19/36
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `DefaultWindowMode.cs` | `x11_window_modes/default_window_mode.rs` | present | 2/2 | - | 6 |  |
-| `InputProxyWindowMode.cs` | `x11_window_modes/input_proxy_window_mode.rs` | present | 2/2 | - | 5 |  |
-| `WindowMode.cs` | `x11_window_modes/window_mode.rs` | present | 2/2 | - | 17 |  |
-| `XEmbedClientWindowMode.cs` | `x11_window_modes/x_embed_client_window_mode.rs` | missing | 1/2 | `X11Window.XEmbedClientWindowMode` | 8 | types found in `x11_window.rs` (add to path-overrides.toml) |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `DefaultWindowMode.cs` | `x11_window_modes/default_window_mode.rs` | partial | 2/2 | 5/6 |  |
+| `InputProxyWindowMode.cs` | `x11_window_modes/input_proxy_window_mode.rs` | partial | 2/2 | 4/5 |  |
+| `WindowMode.cs` | `x11_window_modes/window_mode.rs` | partial | 2/2 | 10/17 |  |
+| `XEmbedClientWindowMode.cs` | `x11_window_modes/x_embed_client_window_mode.rs` | missing (types found elsewhere) | 1/2 | 0/8 | types found in `x11_window.rs` (add to path-overrides.toml) |
 
-### `XShm` - files 3/3, types 3/3, members 0/12
+<details><summary><code>DefaultWindowMode.cs</code> - 1 missing</summary>
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `X11ShmFramebufferRenderTarget.cs` | `x_shm/x11_shm_framebuffer_render_target.rs` | present | 1/1 | - | 3 |  |
-| `X11ShmFramebufferSurface.cs` | `x_shm/x11_shm_framebuffer_surface.rs` | present | 1/1 | - | 2 |  |
-| `X11ShmImage.cs` | `x_shm/x11_shm_image.rs` | present | 1/1 | - | 7 |  |
+- `X11Window.DefaultTopLevelWindowMode` (class): 1 missing
+  - `virtual void OnManualXRaiseWindow()` *(protected)*
+
+</details>
+
+<details><summary><code>InputProxyWindowMode.cs</code> - 1 missing</summary>
+
+- `X11Window.InputProxyWindowMode` (class): 1 missing
+  - `override void OnManualXRaiseWindow()` *(protected)*
+
+</details>
+
+<details><summary><code>WindowMode.cs</code> - 7 missing</summary>
+
+- `X11Window.X11WindowMode` (class): 7 missing
+  - `X11Window Window { get; private set; }`
+  - `IntPtr Display` *(protected)*
+  - `X11Info X11` *(protected)*
+  - `AvaloniaX11Platform Platform` *(protected)*
+  - `IntPtr Handle { get; }` *(protected)*
+  - `IntPtr RenderHandle { get; }` *(protected)*
+  - `void Init(X11Window window)`
+
+</details>
+
+<details><summary><code>XEmbedClientWindowMode.cs</code> - 9 missing</summary>
+
+- `X11Window.XEmbedClientWindowMode` (class, public): **type missing** (8 members)
+
+</details>
+
+### `XShm` - files 3/3, types 3/3, members 12/12
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `X11ShmFramebufferRenderTarget.cs` | `x_shm/x11_shm_framebuffer_render_target.rs` | present | 1/1 | 3/3 |  |
+| `X11ShmFramebufferSurface.cs` | `x_shm/x11_shm_framebuffer_surface.rs` | present | 1/1 | 2/2 |  |
+| `X11ShmImage.cs` | `x_shm/x11_shm_image.rs` | present | 1/1 | 7/7 |  |
 
 ## Rust-only files
 
