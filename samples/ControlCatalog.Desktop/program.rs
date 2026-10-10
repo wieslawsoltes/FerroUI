@@ -289,11 +289,12 @@ fn screenshot_run(directory: PathBuf) {
     let _timer = DispatcherTimer::run_once(
         || match main_window() {
             Some(window) => {
-                fit_window_to_screen(&window);
                 // With `FERROUI_SMOKE_EXTEND_CLIENT_AREA` the pictures are
                 // of a window whose client area extends into its frame:
                 // the title bar and the caption buttons are drawn by the
-                // framework and are part of what is captured.
+                // framework and are part of what is captured. The window
+                // is fitted to its screen after that: with the caption as
+                // client area the window takes the size it asks for again.
                 if std::env::var_os("FERROUI_SMOKE_EXTEND_CLIENT_AREA").is_some_and(|value| !value.is_empty()) {
                     window.set_extend_client_area_to_decorations_hint(true);
                     println!(
@@ -301,6 +302,7 @@ fn screenshot_run(directory: PathBuf) {
                         window.is_extended_into_window_decorations()
                     );
                 }
+                fit_window_to_screen(&window);
             }
             None => println!("Screenshots: there is no main window to fit to its screen"),
         },
