@@ -472,6 +472,37 @@ Still kept for a decision (each is a judgement on sources or structure, not on d
 - The heading of the waivers of `Rendering/Composition` in `member-waivers.toml` (triage of 2026-10-08) said that the server compositor runs on the thread of its compositor. Done on the branch `small-gaps`: the heading states the three modes and what crosses between the two sides, and every waiver under it (to the end of `Rendering/Composition/Transport`) was read against the code; four reasons that still described one thread are rewritten (the server object of a drawing surface, the constructors of the compositor, the pools of a batch stream, `EnqueueBatch`), the others hold in every mode, and none is unused (the tracking script reports no unused waiver).
 - `Rendering/WebRenderTarget.cs` of the browser has a `renamed` entry to the path the default rule gives; it is kept for its reason.
 
+## Samples, leak tests and benchmarks (2026-10-10)
+
+Ported, each as one crate with its documents compiled by its build, its desktop entry point (`FERROUI_SMOKE_EXIT_MS`) and its tests (the generated tests of the documents and classes, the comparison of the compiled markup with the run-time loader, a shell test that runs the real application headless through the compositor with Skia), on what the small samples share (`samples/SampleBuild`, `samples/SampleSupport`, `samples/SampleTesting`, and `samples/SampleControls`, the assembly `ControlSamples` with the hamburger menu):
+
+| Sample | Tests | Gaps (`GAPS.md` of the sample) |
+|---|---:|---|
+| `samples/RenderDemo` | 64 | R001 fixed (the attached property `Animation.Animator`); R002, R003 findings in the sample itself |
+| `samples/BindingDemo` | 32 | B003, B008, B009, B010 fixed; B001 (validation by data annotations) and B002 (a reflection binding through the members of a selection model) open |
+| `samples/VirtualizationDemo` | 31 | none open in the framework |
+| `samples/TextTestApp` | 16 | T001 fixed (`FontManager` in markup); T003 open |
+| `samples/Sandbox` | 9 | none |
+| `samples/AppWithoutLifetime` | 13 | none |
+| `samples/IntegrationTestApp` | 87 | I001, I008 fixed; the application only (below) |
+
+`tests/FerroUI.LeakTests` (45 tests, 2 ignored with the open findings L001 and L002 of its README) and `tests/FerroUI.Benchmarks` (65 tests: every benchmark class runs once; its README lists the seven upstream files that are not ported, which wait for internals of the framework to be exposed through the `testing` features) are ported.
+
+Not ported, with what each waits for:
+
+| Upstream | Why not | Waits for |
+|---|---|---|
+| `tests/Avalonia.IntegrationTests.Appium` | The tests drive the application from outside through a platform automation backend. | On macOS: an Appium server with the `mac2` driver (XCTest, Xcode, the accessibility permission for the helper and the terminal); the application as a registered bundle launched by its bundle identifier (the upstream `bundle.sh`: an `Info.plist` with the identifier, the binary under `Contents/MacOS`, an ad-hoc signature); the automation bridge to AppKit accessibility proven from outside the process for what the tests use (identifier, title, value, selected, enabled, frame, press: the bridge has them, `src/FerroUI.Native/tests/accessibility_tree.rs` proves a button and a check box in process), and for what is not proven yet: typed keys reaching the focused view through the text input client, popups, menus and context menus as accessibility children of their own windows, the native menu bar, dock menu and tray, the embedded native text view as a child of its host, real drag sessions, the ordered index and the buttons of the title bar of a window, pixels of transparent windows. The identifiers of the window chrome of an extended client area differ from upstream's by the name of the project. Then either the upstream tests as they are (the .NET SDK, two constants changed) or a harness in Rust over the WebDriver protocol; a cheaper first step is to walk the accessibility tree of this application in process as that test does. |
+| `samples/SafeAreaDemo` and its hosts | Its hosts are the mobile platforms and a desktop host that only frames the mobile view. | A mobile platform. |
+| `samples/GpuInterop` | OpenGL, Vulkan and Direct3D textures shared with the compositor. | The platform graphics of Vulkan and Direct3D, and shared textures in a backend (no backend creates them yet). |
+| `samples/SingleProjectSandbox` | One project for the desktop, the browser and the mobile platforms. | The mobile platforms; the desktop part is `Sandbox`. |
+| `samples/Generators.Sandbox` | A sample of the source generators of named elements. | Nothing: the port has no source generators, the build compiles markup instead. |
+| `samples/PlatformSanityChecks` | A console program of checks of a .NET runtime (threading, the dispatcher of the platform). | Not planned: a .NET concept. |
+| `samples/UnloadableAssemblyLoadContext` | Unloading an assembly load context. | Not planned: a .NET concept. |
+| `samples/ControlGallery.WinUI`, `samples/interop/WinUIEmbedSample`, `samples/interop/WindowsInteropTest`, `samples/XEmbedSample` | Embedding in or of the windows of other platforms and toolkits. | The embedding interfaces of the Windows and Linux platform crates. |
+| `samples/ControlCatalog.Android`, `.iOS`, `.MacCatalyst`, `.tvOS` | Mobile hosts of the catalog. | A mobile platform. |
+| `samples/IntegrationTestApp`: `Embedding/Win32TextBoxFactory.cs`, `Win32WindowControlHandle.cs`, `WinApi.cs` | The Windows half of the embedding page. | The Windows platform crate. |
+
 ## How to run the next period
 
 - All work is done in the local session (owner, 2026-10-08). No new cloud sessions are started; `CLOUD-WORKERS.md` and `cloud-tasks/` stay as the record of how the cloud workers were briefed, and their rules for an exact port, for tests and for delivery apply to local work unchanged.
