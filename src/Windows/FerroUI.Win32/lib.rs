@@ -21,7 +21,9 @@
 
 pub mod input;
 pub mod interop;
+pub mod open_gl;
 
+mod angle_options;
 mod cursor_factory;
 mod framebuffer_manager;
 mod win32_dispatcher_impl;
@@ -53,6 +55,7 @@ mod win_screen;
 #[cfg(windows)]
 mod wnd_proc_guard;
 
+pub use angle_options::{AngleOptions, PlatformApi};
 pub use cursor_factory::cursor_resource_id;
 pub use platform_constants::{PlatformConstants, Version};
 pub use win32_platform_options::{Win32CompositionMode, Win32DpiAwareness, Win32PlatformOptions, Win32RenderingMode};

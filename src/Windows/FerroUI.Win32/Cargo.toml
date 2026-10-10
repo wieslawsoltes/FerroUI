@@ -10,9 +10,19 @@ repository.workspace = true
 [lib]
 path = "lib.rs"
 
+[features]
+# OpenGL ES through ANGLE on Direct3D 11, the rendering mode `AngleEgl`
+# (docs/porting/win32-platform.md, section 6.2). ANGLE is the crate `mozangle`, which compiles it
+# from C++ source and links it into the application: building with this feature needs the MSVC
+# C++ tools and libclang (LLVM) where the application is built. Without it the mode fails to
+# initialise with a message that says so, and the backend goes on to the next mode of the options.
+angle = ["dep:mozangle"]
+
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
+# The EGL the ANGLE rendering mode drives, and the OpenGL contracts of the surfaces of a window.
+ferroui-opengl.workspace = true
 bitflags.workspace = true
 
 # The bindings of the Windows API (docs/porting/win32-platform.md, section 2): declarations only,
@@ -34,6 +44,13 @@ windows-sys = { workspace = true, features = [
     "Win32_UI_Input_Touch",
     "Win32_UI_WindowsAndMessaging",
 ] }
+
+# ANGLE (BSD-3-Clause): Mozilla's fork as the Servo project packages it. Its `egl` feature builds
+# the EGL and OpenGL ES implementation on Direct3D 11 as static libraries.
+[target.'cfg(windows)'.dependencies.mozangle]
+workspace = true
+features = ["egl"]
+optional = true
 
 [dev-dependencies]
 # The example of a window draws through the render interface of the Vello backend in its CPU

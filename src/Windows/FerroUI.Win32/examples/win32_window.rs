@@ -519,8 +519,122 @@ mod windows {
         }
     }
 
+    /// What the ANGLE of this build does on this machine, display by
+    /// display: the strings of EGL and of the context, and a frame cleared
+    /// to a colour on a window surface and read back before it is
+    /// presented. Run with `--angle-probe`; without the feature `angle` of
+    /// the crate there is no ANGLE to load, and the probe says so.
+    fn angle_probe(report: &Report) {
+        use ferroui_base::reactive::IDisposable;
+        use ferroui_base::platform::IPlatformGraphicsContext;
+        use ferroui_opengl::gl_consts::{GL_COLOR_BUFFER_BIT, GL_RGBA, GL_UNSIGNED_BYTE};
+        use ferroui_opengl::IGlContext;
+        use ferroui_win32::open_gl::angle::{AngleWin32EglDisplay, Win32AngleEglInterface};
+
+        const EGL_VENDOR: i32 = 0x3053;
+        const EGL_VERSION: i32 = 0x3054;
+        const EGL_EXTENSIONS: i32 = 0x3055;
+
+        println!("-- ANGLE");
+        let egl = match Win32AngleEglInterface::new() {
+            Ok(egl) => egl,
+            Err(error) => {
+                report.check("ANGLE loads", false, format!("{error}"));
+                return;
+            }
+        };
+        report.check("ANGLE loads", true, "the entry points of EGL are resolved");
+        report.info("EGL client extensions", format!("{:?}", egl.egl().query_string(0, EGL_EXTENSIONS)));
+        report.info("eglCreateDeviceANGLE", format!("available: {}", egl.is_create_device_angle_available()));
+
+        // A window of its own: a window that was drawn to through its
+        // device context is not given to a swap chain.
+        let windowing_platform = FerroLocator::current().get_required_service::<dyn IWindowingPlatform>();
+
+        type Create = fn(&Win32AngleEglInterface) -> Result<AngleWin32EglDisplay, ferroui_opengl::OpenGlException>;
+        let displays: [(&str, bool, Create); 2] = [
+            ("Direct3D 11", true, AngleWin32EglDisplay::create_shared_d3d11_display),
+            ("Direct3D 9", false, AngleWin32EglDisplay::create_d3d9_display),
+        ];
+        for (name, required, create) in displays {
+            let outcome = |ok: bool, detail: String| {
+                if required {
+                    report.check(&format!("ANGLE on {name}"), ok, detail);
+                } else {
+                    report.info(&format!("ANGLE on {name}"), format!("{}: {detail}", if ok { "works" } else { "does not work" }));
+                }
+            };
+            let display = match create(&egl) {
+                Ok(display) => display,
+                Err(error) => {
+                    outcome(false, format!("the display: {error}"));
+                    continue;
+                }
+            };
+            let handle = display.handle();
+            report.info(
+                &format!("EGL on {name}"),
+                format!(
+                    "vendor {:?}, version {:?}, extensions {:?}",
+                    egl.egl().query_string(handle, EGL_VENDOR),
+                    egl.egl().query_string(handle, EGL_VERSION),
+                    egl.egl().query_string(handle, EGL_EXTENSIONS)
+                ),
+            );
+            report.info(&format!("Direct3D device of {name}"), format!("{:?}", display.get_direct3d_device().map(|device| device != 0)));
+            let context = match display.create_context(None) {
+                Ok(context) => context,
+                Err(error) => {
+                    outcome(false, format!("the context: {error}"));
+                    display.dispose();
+                    continue;
+                }
+            };
+            let window = windowing_platform.create_window();
+            window.resize(Size::new(200.0, 120.0), WindowResizeReason::Application);
+            window.show(false, false);
+            let hwnd = window.handle().map_or(0, |handle| handle.handle());
+            let result = (|| -> Result<String, String> {
+                let surface = display.create_window_surface(hwnd).map_err(|error| format!("the window surface: {error}"))?;
+                let current = context.make_current_with_surface(Some(&surface)).map_err(|error| format!("make current: {error}"))?;
+                let gl = context.gl_interface();
+                let strings = format!(
+                    "{:?} by {:?} on {:?}, OpenGL ES {}.{}",
+                    gl.version(),
+                    gl.vendor(),
+                    gl.renderer(),
+                    context.version().major(),
+                    context.version().minor()
+                );
+                gl.viewport(0, 0, 200, 120);
+                gl.clear_color(1.0, 0.5, 0.0, 1.0);
+                gl.clear(GL_COLOR_BUFFER_BIT);
+                let mut pixel = [0u8; 4];
+                // SAFETY: one pixel of four bytes is read into four bytes.
+                unsafe { gl.read_pixels(10, 10, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel.as_mut_ptr().cast()) };
+                let error = gl.get_error();
+                surface.swap_buffers();
+                current.dispose();
+                surface.dispose();
+                if pixel == [255, 128, 0, 255] || pixel == [255, 127, 0, 255] {
+                    Ok(format!("{strings}; a frame cleared to orange reads back as {pixel:?} (GL error {error:#x})"))
+                } else {
+                    Err(format!("{strings}; a frame cleared to orange reads back as {pixel:?} (GL error {error:#x})"))
+                }
+            })();
+            match result {
+                Ok(detail) => outcome(true, detail),
+                Err(detail) => outcome(false, detail),
+            }
+            context.dispose();
+            display.dispose();
+            window.dispose();
+        }
+    }
+
     pub fn run() -> ExitCode {
         let smoke = std::env::args().any(|argument| argument == "--smoke");
+        let probe_angle = std::env::args().any(|argument| argument == "--angle-probe");
 
         let options =
             Win32PlatformOptions { rendering_mode: vec![Win32RenderingMode::Software], ..Win32PlatformOptions::default() };
@@ -761,6 +875,10 @@ mod windows {
                 smoke_frames.get() == SMOKE_FRAMES,
                 format!("{} of {SMOKE_FRAMES}", smoke_frames.get()),
             );
+        }
+
+        if probe_angle {
+            angle_probe(&state.report);
         }
 
         let failures = state.report.failures.borrow().clone();

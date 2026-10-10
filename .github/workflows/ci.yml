@@ -105,8 +105,29 @@ jobs:
       # source (an hour, with LLVM). This asks the release of the bindings which sets exist for
       # the target: the raster set the desktop entry point needs today, which gates the steps
       # below, and the GPU sets stage 2 chooses from (win32-platform.md, section 6.2).
+      # ANGLE for the rendering mode AngleEgl is the crate mozangle, compiled from C++ source by
+      # its build script (bindgen needs libclang, which the image has). Informative: how long it
+      # takes on the runner, and what that ANGLE does there (win32-platform.md, section 6.2): the
+      # probe of the example creates the displays of Direct3D 11 and Direct3D 9, a context and a
+      # window surface, clears a frame and reads a pixel of it back.
+      - name: Build with ANGLE (informative; the time of the mozangle build)
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        timeout-minutes: 60
+        run: |
+          clang --version || true
+          echo "LIBCLANG_PATH=${LIBCLANG_PATH:-unset}"
+          start=$(date +%s)
+          cargo build --locked -p ferroui-win32 --features angle --examples
+          echo "::notice::ferroui-win32 with the feature angle built in $(( $(date +%s) - start )) s on $RUNNER_ARCH"
+      - name: Smoke run with the ANGLE probe (informative)
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        timeout-minutes: 5
+        run: cargo run --locked -p ferroui-win32 --features angle --example win32_window -- --smoke --angle-probe
       - name: Skia binaries published for Windows (informative)
         id: skia
+        if: ${{ !cancelled() }}
         continue-on-error: true
         run: |
           echo "raster=false" >> "$GITHUB_OUTPUT"
@@ -130,17 +151,60 @@ jobs:
             if published "$key"; then echo "published:     $key"; else echo "not published: $key"; fi
           done
       - name: Build and test the desktop entry point (informative until its first green run)
-        if: steps.skia.outputs.raster == 'true'
+        if: ${{ !cancelled() && steps.skia.outputs.raster == 'true' }}
         continue-on-error: true
         timeout-minutes: 60
         run: cargo test --locked -p ferroui-desktop --lib
       - name: hello_window for two seconds (informative until its first green run)
-        if: steps.skia.outputs.raster == 'true'
+        if: ${{ !cancelled() && steps.skia.outputs.raster == 'true' }}
         continue-on-error: true
         timeout-minutes: 30
         env:
           FERROUI_SMOKE_EXIT_MS: 2000
         run: cargo run --locked -p ferroui-desktop --example hello_window
+
+  # The same backend on Windows for ARM64 (the owner's test machine is one): whether ANGLE builds
+  # for the target and runs there. Informative as a whole until its first green run.
+  windows-arm64:
+    name: Build, test and smoke run (Windows platform backend, ARM64; informative)
+    if: github.event_name != 'push'
+    runs-on: windows-11-arm
+    continue-on-error: true
+    timeout-minutes: 120
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          targets: aarch64-pc-windows-msvc
+      - name: The toolchain and LLVM of the image
+        run: |
+          rustc -vV
+          clang --version || true
+          echo "LIBCLANG_PATH=${LIBCLANG_PATH:-unset}"
+      - name: Build the backend and its example
+        run: cargo build --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --examples
+      - name: Tests of the backend
+        run: cargo test --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --no-fail-fast
+      - name: Smoke run of a window
+        timeout-minutes: 5
+        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke
+      - name: Build with ANGLE (the time of the mozangle build)
+        if: ${{ !cancelled() }}
+        timeout-minutes: 90
+        run: |
+          start=$(date +%s)
+          cargo build --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --features angle --examples
+          echo "::notice::ferroui-win32 with the feature angle built in $(( $(date +%s) - start )) s on $RUNNER_ARCH"
+      - name: Smoke run with the ANGLE probe
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --features angle --example win32_window -- --smoke --angle-probe
 
   browser:
     name: Check (browser, wasm32-unknown-emscripten)

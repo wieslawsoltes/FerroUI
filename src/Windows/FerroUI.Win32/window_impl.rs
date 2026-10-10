@@ -1619,7 +1619,10 @@ mod imp {
                 return;
             }
 
-            self.set_parent_impl(self.parent.borrow().clone());
+            // Read in a statement of its own: the borrow of an argument lasts until the call
+            // returns, and the call replaces what the cell holds.
+            let parent = self.parent.borrow().clone();
+            self.set_parent_impl(parent);
             self.show_window(self.show_window_state.get(), activate);
         }
 
