@@ -86,10 +86,14 @@ impl TestBase {
 
         let expected = Rgba32Image::load(&expected_path);
 
-        let compare = |output_type: &str, allowed_error: f64| {
+        // Upstream fails at the first output that is beyond the allowed error. Here every output is
+        // measured first, so that the record of the run (`results.tsv`) has the error of each, and the test
+        // then fails as upstream does, with the outputs that are beyond the allowed error in its message.
+        let mut failures = Vec::new();
+        let mut compare = |output_type: &str, allowed_error: f64| {
             let actual_path = self.output_path.join(format!("{test_name}.{output_type}.out.png"));
             if let Err(message) = test_render_helper::compare_output(&actual_path, &expected, allowed_error) {
-                panic!("{message} (expected: {})", expected_path.display());
+                failures.push(message);
             }
         };
 
@@ -99,6 +103,10 @@ impl TestBase {
 
         if !options.skip_compositor {
             compare("composited", ALLOWED_ERROR);
+        }
+
+        if !failures.is_empty() {
+            panic!("{} (expected: {})", failures.join("; "), expected_path.display());
         }
     }
 

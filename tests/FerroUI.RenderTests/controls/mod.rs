@@ -1,0 +1,16 @@
+mod adorner_tests;
+mod border_tests;
+mod carousel_page_tests;
+mod carousel_tests;
+mod command_bar_tests;
+mod content_page_tests;
+mod custom_render_tests;
+mod drawer_page_tests;
+mod image_blend_tests;
+mod image_composition_tests;
+mod image_tests;
+mod navigation_page_tests;
+mod pips_pager_tests;
+mod tabbed_page_tests;
+mod text_block_tests;
+mod text_box_tests;
