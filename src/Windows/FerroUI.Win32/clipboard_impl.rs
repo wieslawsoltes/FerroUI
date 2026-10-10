@@ -1,25 +1,21 @@
-//! The clipboard of the system: text.
-//!
-//! The reference puts an OLE data object on the clipboard and reads the
-//! data object that is there, which carries every format a data transfer
-//! can hold (text, files, bitmaps, the formats of applications). The data
-//! objects need the COM interop of the backend, which is stage 2. This
-//! stage builds the clipboard for the one format every application starts
-//! with, Unicode text, through the clipboard functions of the system; a
-//! data transfer without text cannot be put on the clipboard yet and fails
-//! with a message that says so. The retry discipline of the reference (the
-//! clipboard may be held open by another process for a moment) is kept.
+//! The clipboard of the system, through OLE: a data transfer is put on the
+//! clipboard as a data object the system asks for its formats and their
+//! data, and what is on the clipboard is read as the data object of the
+//! system. The retry discipline of the reference (the clipboard may be held
+//! open by another process for a moment) is kept.
 
+use crate::data_transfer_to_ole_data_object_wrapper::DataTransferToOleDataObjectWrapper;
 use crate::interop::unmanaged_methods::{
-    close_clipboard, empty_clipboard, get_clipboard_unicode_text, get_last_error, open_clipboard,
-    set_clipboard_unicode_text,
+    self, close_clipboard, empty_clipboard, ole_flush_clipboard, ole_get_clipboard, open_clipboard, HRESULT,
 };
-use ferroui_base::input::platform::{ClipboardError, IClipboardImpl};
-use ferroui_base::input::{
-    DataTransfer, DataTransferExtensions, DataTransferItem, IAsyncDataTransfer, IDataTransfer, LocalBoxFuture,
-};
+use crate::ole_data_object_to_data_transfer_wrapper::OleDataObjectToDataTransferWrapper;
+use crate::win32_com::IDataObject;
+use ferroui_base::input::platform::{ClipboardError, IClipboardImpl, IFlushableClipboardImpl, IOwnedClipboardImpl};
+use ferroui_base::input::{IAsyncDataTransfer, LocalBoxFuture};
 use ferroui_base::logging::LogArea;
-use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
+use ferroui_base::reactive::IDisposable;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
+use ferroui_microcom::ComPtr;
 use std::cell::{Cell, RefCell};
 use std::future::Future;
 use std::pin::Pin;
@@ -30,8 +26,31 @@ use std::time::Duration;
 const OLE_RETRY_COUNT: i32 = 10;
 const OLE_RETRY_DELAY: u64 = 100;
 
+/// The amount of time in milliseconds to sleep before flushing the clipboard after a set.
+///
+/// This is mitigation for clipboard listener issues.
+const OLE_FLUSH_DELAY: u64 = 10;
+
+/// The data object this clipboard stored last, while the system holds it.
+#[derive(Default)]
+struct LastStored {
+    data_object: RefCell<Option<Rc<DataTransferToOleDataObjectWrapper>>>,
+    /// The address of the COM object of `data_object`; 0 when there is
+    /// none.
+    data_object_int_ptr: Cell<usize>,
+}
+
+impl LastStored {
+    fn clear(&self) {
+        self.data_object.borrow_mut().take();
+        self.data_object_int_ptr.set(0);
+    }
+}
+
 /// The system clipboard.
-pub struct ClipboardImpl;
+pub struct ClipboardImpl {
+    last_stored: Rc<LastStored>,
+}
 
 struct DelayState {
     done: Cell<bool>,
@@ -92,77 +111,174 @@ impl Drop for OpenClipboard {
 }
 
 /// Opens the clipboard, trying again for a second while another process
-/// holds it. `owner` is the window that owns the clipboard once it is
-/// emptied (0 for a caller that only reads or clears).
-async fn open_clipboard_async(owner: isize) -> Result<OpenClipboard, ClipboardError> {
+/// holds it.
+async fn open_clipboard_async() -> Result<OpenClipboard, ClipboardError> {
     let mut i = OLE_RETRY_COUNT;
 
-    while !open_clipboard(owner) {
+    while !open_clipboard(0) {
         i -= 1;
         if i == 0 {
             return Err(ClipboardError::timeout("Timeout opening clipboard."));
         }
-        delay(OLE_RETRY_DELAY).await;
+        delay(100).await;
     }
 
     Ok(OpenClipboard)
+}
+
+fn hresult_error(hr: u32, message: &str) -> ClipboardError {
+    ClipboardError::platform(hr as i32, format!("{message} (result code 0x{hr:08X})"))
 }
 
 impl ClipboardImpl {
     /// Creates the clipboard.
     #[allow(clippy::new_without_default)]
     pub fn new() -> ClipboardImpl {
-        ClipboardImpl
+        ClipboardImpl { last_stored: Rc::default() }
     }
 }
 
 impl IClipboardImpl for ClipboardImpl {
     fn try_get_data_async(&self) -> LocalBoxFuture<Result<Option<Rc<dyn IAsyncDataTransfer>>, ClipboardError>> {
         Box::pin(async {
-            let text = {
-                let _clipboard = open_clipboard_async(0).await?;
-                get_clipboard_unicode_text()
-            };
+            Dispatcher::ui_thread().verify_access();
+            let mut i = OLE_RETRY_COUNT;
 
-            // A clipboard without a format this stage reads has nothing to
-            // offer, as a data object without formats in the reference.
-            let Some(text) = text else {
-                return Ok(None);
-            };
+            loop {
+                let (hr, data_object) = ole_get_clipboard();
 
-            let data_transfer = DataTransfer::new();
-            data_transfer.add(DataTransferItem::create_text(Some(&text)));
-            let data_transfer: Rc<dyn IDataTransfer> = data_transfer;
-            Ok(Some(data_transfer.to_asynchronous()))
+                if hr == 0 {
+                    // SAFETY: the system returned a data object, of which
+                    // this code owns the reference.
+                    let Some(proxy) = (unsafe { ComPtr::from_raw(data_object as *mut IDataObject) }) else {
+                        return Ok(None);
+                    };
+                    let wrapper = OleDataObjectToDataTransferWrapper::new(&proxy);
+
+                    if wrapper.try_formats()?.is_empty() {
+                        wrapper.dispose();
+                        return Ok(None);
+                    }
+
+                    let wrapper: Rc<dyn IAsyncDataTransfer> = wrapper;
+                    return Ok(Some(wrapper));
+                }
+
+                i -= 1;
+                if i == 0 {
+                    return Err(hresult_error(hr, "The clipboard could not be read."));
+                }
+
+                delay(OLE_RETRY_DELAY).await;
+            }
         })
     }
 
     fn set_data_async(&self, data_transfer: Rc<dyn IAsyncDataTransfer>) -> LocalBoxFuture<Result<(), ClipboardError>> {
+        let last_stored = self.last_stored.clone();
         Box::pin(async move {
-            let data_transfer = data_transfer.to_synchronous(LogArea::WIN32_PLATFORM);
-            let Some(text) = data_transfer.try_get_text() else {
-                return Err(ClipboardError::other(
-                    "Only text can be put on the clipboard: the data objects of the Windows platform backend are \
-                     stage 2 (docs/porting/win32-platform.md).",
-                ));
-            };
+            Dispatcher::ui_thread().verify_access();
 
-            // The message window of the platform owns the text: the system
-            // takes no data from a thread that emptied the clipboard
-            // without an owner.
-            let owner = crate::win32_platform::Win32Platform::instance().handle();
-            let _clipboard = open_clipboard_async(owner).await?;
-            if !empty_clipboard() || !set_clipboard_unicode_text(&text) {
-                return Err(ClipboardError::platform(get_last_error() as i32, "The clipboard could not be set."));
+            let (wrapper, data_object) =
+                DataTransferToOleDataObjectWrapper::new(data_transfer.to_synchronous(LogArea::WIN32_PLATFORM));
+            let mut i = OLE_RETRY_COUNT;
+
+            loop {
+                let ptr = data_object.as_ptr();
+                // SAFETY: a live data object, held by this future.
+                let hr = unsafe { unmanaged_methods::ole_set_clipboard(ptr.cast()) };
+
+                if hr == 0 {
+                    *last_stored.data_object.borrow_mut() = Some(wrapper.clone());
+                    last_stored.data_object_int_ptr.set(ptr as usize);
+                    let stored = Rc::downgrade(&last_stored);
+                    wrapper.on_destroyed(move || {
+                        if let Some(stored) = stored.upgrade() {
+                            if stored.data_object_int_ptr.get() == ptr as usize {
+                                stored.clear();
+                            }
+                        }
+                    });
+                    break;
+                }
+
+                i -= 1;
+                if i == 0 {
+                    return Err(hresult_error(hr, "The clipboard could not be set."));
+                }
+
+                delay(OLE_RETRY_DELAY).await;
             }
+
+            // The reference of this future is released here; the system
+            // holds its own while the data is on the clipboard.
+            drop(data_object);
             Ok(())
         })
     }
 
     fn clear_async(&self) -> LocalBoxFuture<Result<(), ClipboardError>> {
-        Box::pin(async {
-            let _clipboard = open_clipboard_async(0).await?;
+        let last_stored = self.last_stored.clone();
+        Box::pin(async move {
+            let _clipboard = open_clipboard_async().await?;
             empty_clipboard();
+            last_stored.clear();
+            Ok(())
+        })
+    }
+
+    fn as_flushable_clipboard_impl(&self) -> Option<&dyn IFlushableClipboardImpl> {
+        Some(self)
+    }
+
+    fn as_owned_clipboard_impl(&self) -> Option<&dyn IOwnedClipboardImpl> {
+        Some(self)
+    }
+}
+
+impl IOwnedClipboardImpl for ClipboardImpl {
+    fn is_current_owner_async(&self) -> LocalBoxFuture<Result<bool, ClipboardError>> {
+        let last_stored = &self.last_stored;
+        let stored = last_stored.data_object.borrow().clone();
+        let ptr = last_stored.data_object_int_ptr.get();
+        let is_current = stored.is_some_and(|stored| !stored.is_disposed())
+            && ptr != 0
+            // SAFETY: the wrapper still has its data transfer, which it
+            // gives up when its COM object is destroyed: the object at the
+            // address is alive.
+            && unsafe { unmanaged_methods::ole_is_current_clipboard(ptr as *mut std::ffi::c_void) } == HRESULT::S_OK;
+
+        if !is_current {
+            last_stored.clear();
+        }
+
+        Box::pin(std::future::ready(Ok(is_current)))
+    }
+}
+
+impl IFlushableClipboardImpl for ClipboardImpl {
+    fn flush_async(&self) -> LocalBoxFuture<Result<(), ClipboardError>> {
+        Box::pin(async {
+            delay(OLE_FLUSH_DELAY).await;
+
+            // Retry OLE operations several times as mitigation for clipboard locking issues in TS sessions.
+
+            let mut i = OLE_RETRY_COUNT;
+
+            loop {
+                let hr = ole_flush_clipboard();
+
+                if hr == 0 {
+                    break;
+                }
+
+                i -= 1;
+                if i == 0 {
+                    return Err(hresult_error(hr, "The clipboard could not be flushed."));
+                }
+
+                delay(OLE_RETRY_DELAY).await;
+            }
             Ok(())
         })
     }

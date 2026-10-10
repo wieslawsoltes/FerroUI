@@ -48,8 +48,10 @@ mod windows {
         IRawInputEventArgs, RawKeyEventArgs, RawKeyEventType, RawMouseWheelEventArgs, RawPointerEventArgs,
         RawPointerEventType, RawTextInputEventArgs,
     };
+    use ferroui_base::platform::storage::file_io::{BclStorageItemHandle, StorageProviderHelpers};
+    use ferroui_base::platform::storage::IStorageItem;
     use ferroui_base::input::{
-        DataTransfer, DataTransferExtensions, DataTransferItem, FocusManager, IDataTransfer, IInputRoot, InputElement, Key,
+        DataFormat, DataTransfer, DataTransferExtensions, DataTransferItem, FocusManager, IDataTransfer, IInputRoot, InputElement, Key,
         PhysicalKey,
     };
     use ferroui_base::logging::LogArea;
@@ -678,24 +680,87 @@ mod windows {
                 report.check("mouse wheel", seen.wheel.get() == Some(1.0), format!("{:?} notch(es)", seen.wheel.get()));
 
                 println!("-- clipboard");
+                // The clipboard goes through OLE: the data transfer is a
+                // data object the system asks for its formats, and what is
+                // read back is the data object of the system.
                 let clipboard = FerroLocator::current().get_required_service::<dyn IClipboardImpl>();
-                let text = format!("FerroUI win32_window {}", std::process::id());
+                let text = format!("FerroUI win32_window {} za\u{17c}\u{f3}\u{142}\u{107}", std::process::id());
+                let string_format = DataFormat::create_string_application_format("win32-window-smoke.text");
+                let bytes_format = DataFormat::create_bytes_application_format("win32-window-smoke.bytes");
+                let bytes: Rc<[u8]> = Rc::from(vec![0u8, 1, 2, 0, 254, 255]);
+                let executable = std::env::current_exe().ok().map(|path| path.to_string_lossy().to_string());
+                let file = StorageProviderHelpers::try_create_bcl_storage_item(executable.as_deref()).map(|item| match item {
+                    BclStorageItemHandle::Folder(folder) => folder as Rc<dyn IStorageItem>,
+                    BclStorageItemHandle::File(file) => file as Rc<dyn IStorageItem>,
+                });
+                // The path as the storage item of the file has it.
+                let executable = file.as_ref().and_then(|file| file.try_get_local_path());
+                let item = DataTransferItem::create_text(Some(&text));
+                item.set(&string_format, Some("a string of the application".to_string()));
+                item.set(&bytes_format, Some(bytes.clone()));
                 let data_transfer = DataTransfer::new();
-                data_transfer.add(DataTransferItem::create_text(Some(&text)));
+                data_transfer.add(item);
+                data_transfer.add(DataTransferItem::create_file(file));
                 let data_transfer: Rc<dyn IDataTransfer> = data_transfer;
                 match poll_once(clipboard.set_data_async(data_transfer.to_asynchronous())) {
                     Some(Ok(())) => match poll_once(clipboard.try_get_data_async()) {
                         Some(Ok(Some(read))) => {
-                            let read = read.to_synchronous(LogArea::WIN32_PLATFORM).try_get_text();
-                            report.check("clipboard text", read.as_deref() == Some(text.as_str()), format!("{read:?}"));
+                            let read = read.to_synchronous(LogArea::WIN32_PLATFORM);
+                            let read_text = read.try_get_text();
+                            report.check("clipboard text", read_text.as_deref() == Some(text.as_str()), format!("{read_text:?}"));
+                            let read_string = read.try_get_value(&string_format);
+                            report.check(
+                                "clipboard string of an application format",
+                                read_string.as_deref() == Some("a string of the application"),
+                                format!("{read_string:?}"),
+                            );
+                            let read_bytes = read.try_get_value(&bytes_format);
+                            report.check(
+                                "clipboard bytes of an application format",
+                                read_bytes.as_ref().is_some_and(|read| read.len() >= bytes.len() && read[..bytes.len()] == *bytes),
+                                format!("{read_bytes:?}"),
+                            );
+                            let read_files: Vec<Option<String>> =
+                                read.try_get_files().unwrap_or_default().iter().map(|file| file.try_get_local_path()).collect();
+                            report.check(
+                                "clipboard file",
+                                executable.is_some() && read_files == [executable.clone()],
+                                format!("{read_files:?} (set: {executable:?})"),
+                            );
+                            report.info("clipboard formats", format!("{:?}", read.formats()));
+                            read.dispose();
+
+                            let owned = clipboard.as_owned_clipboard_impl().and_then(|owned| poll_once(owned.is_current_owner_async()));
+                            report.check("clipboard owner", matches!(owned, Some(Ok(true))), format!("{owned:?} after setting"));
+                            let cleared = poll_once(clipboard.clear_async());
+                            let owned = clipboard.as_owned_clipboard_impl().and_then(|owned| poll_once(owned.is_current_owner_async()));
+                            let empty = poll_once(clipboard.try_get_data_async());
+                            report.check(
+                                "clipboard cleared",
+                                matches!(cleared, Some(Ok(()))) && matches!(owned, Some(Ok(false))) && matches!(empty, Some(Ok(None))),
+                                format!(
+                                    "cleared: {cleared:?}, owner: {owned:?}, data afterwards: {}",
+                                    match &empty {
+                                        Some(Ok(None)) => "none".to_string(),
+                                        Some(Ok(Some(data))) => format!("{:?}", data.formats()),
+                                        Some(Err(error)) => format!("{error:?}"),
+                                        None => "not read".to_string(),
+                                    }
+                                ),
+                            );
                         }
-                        Some(Ok(None)) => report.check("clipboard text", false, "the clipboard has no text after it was set"),
+                        Some(Ok(None)) => report.check("clipboard text", false, "the clipboard has no data after it was set"),
                         Some(Err(error)) => report.check("clipboard text", false, format!("reading failed: {error:?}")),
                         None => report.info("clipboard text", "the clipboard is held open by another process"),
                     },
                     Some(Err(error)) => report.check("clipboard text", false, format!("setting failed: {error:?}")),
                     None => report.info("clipboard text", "the clipboard is held open by another process"),
                 }
+                report.check(
+                    "drag source",
+                    FerroLocator::current().get_service::<dyn ferroui_base::input::platform::IPlatformDragSource>().is_some(),
+                    "the platform registered its drag source",
+                );
 
                 println!("-- platform settings");
                 // The colours and the language are read through the Windows

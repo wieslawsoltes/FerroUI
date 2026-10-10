@@ -1337,3 +1337,23 @@ fn platform_async_data_transfer_item_reports_the_failure_of_the_backend() {
     assert!(ready(item.try_get_raw_async(&DataFormat::bitmap())).is_none());
     assert_eq!(8, backend.calls.get());
 }
+
+/// A typed format carries the type of its values, which is not part of
+/// its identity (the managed original asks whether a format object is a
+/// `DataFormat<string>` or a `DataFormat<byte[]>`).
+#[test]
+fn a_typed_format_carries_the_type_of_its_values() {
+    use std::any::TypeId;
+
+    let text = DataFormat::create_string_application_format("my-format");
+    let bytes = DataFormat::create_bytes_application_format("my-format");
+    assert_eq!(text.data_type(), Some(TypeId::of::<String>()));
+    assert_eq!(bytes.data_type(), Some(TypeId::of::<Rc<[u8]>>()));
+    assert_eq!(DataFormat::text().data_type(), Some(TypeId::of::<String>()));
+    // Formats that differ in the type alone are the same format.
+    assert_eq!(*text, *bytes);
+    // The untyped format of a typed one keeps the type.
+    let untyped: DataFormat = text.clone().into();
+    assert_eq!(untyped.data_type(), Some(TypeId::of::<String>()));
+    assert_eq!(text.as_data_format().clone().data_type(), Some(TypeId::of::<String>()));
+}

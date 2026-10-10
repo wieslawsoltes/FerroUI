@@ -1,7 +1,9 @@
 use super::{DataFormatKind, DataFormatOf};
 use crate::media::imaging::Bitmap;
 use crate::platform::storage::IStorageItem;
+use std::any::TypeId;
 use std::fmt;
+use std::hash::{Hash, Hasher};
 use std::rc::Rc;
 
 /// Represents a format usable with the clipboard and drag-and-drop.
@@ -9,10 +11,29 @@ use std::rc::Rc;
 /// A format is a value: two formats are equal when their kind and their
 /// identifier are equal. The typed counterpart, which also carries the type
 /// of the data, is [`DataFormatOf`]; it dereferences to `DataFormat`.
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Clone)]
 pub struct DataFormat {
     kind: DataFormatKind,
     identifier: Rc<str>,
+    /// The type of the values of the format, when the format was created
+    /// as a typed format (the type argument of the managed
+    /// `DataFormat<T>`). Not part of the identity of the format.
+    data_type: Option<TypeId>,
+}
+
+impl PartialEq for DataFormat {
+    fn eq(&self, other: &DataFormat) -> bool {
+        self.kind == other.kind && self.identifier == other.identifier
+    }
+}
+
+impl Eq for DataFormat {}
+
+impl Hash for DataFormat {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.kind.hash(state);
+        self.identifier.hash(state);
+    }
 }
 
 thread_local! {
@@ -22,8 +43,19 @@ thread_local! {
 }
 
 impl DataFormat {
-    pub(super) fn new(kind: DataFormatKind, identifier: &str) -> Self {
-        Self { kind, identifier: Rc::from(identifier) }
+    pub(super) fn new(kind: DataFormatKind, identifier: &str, data_type: Option<TypeId>) -> Self {
+        Self { kind, identifier: Rc::from(identifier), data_type }
+    }
+
+    /// The type of the values of the format (`String` for a format of
+    /// strings, `Rc<[u8]>` for a format of bytes), when the format was
+    /// created with one: the counterpart of asking whether a format of the
+    /// managed original is a `DataFormat<string>` or a `DataFormat<byte[]>`,
+    /// which a platform backend does to decide how to read data the system
+    /// does not describe. Two formats that differ in it alone are equal.
+    #[inline]
+    pub fn data_type(&self) -> Option<TypeId> {
+        self.data_type
     }
 
     /// The kind of the data format.
@@ -76,7 +108,7 @@ impl DataFormat {
         }
     }
 
-    fn create_universal_format<T>(identifier: &str) -> DataFormatOf<T> {
+    fn create_universal_format<T: 'static>(identifier: &str) -> DataFormatOf<T> {
         DataFormatOf::new(DataFormatKind::Universal, identifier)
     }
 
@@ -115,7 +147,7 @@ impl DataFormat {
     ///
     /// # Panics
     /// Panics if the identifier is empty.
-    pub fn create_in_process_format<T>(identifier: &str) -> DataFormatOf<T> {
+    pub fn create_in_process_format<T: 'static>(identifier: &str) -> DataFormatOf<T> {
         if identifier.is_empty() {
             panic!("The value cannot be an empty string. (Parameter 'identifier')");
         }
@@ -123,7 +155,7 @@ impl DataFormat {
         DataFormatOf::new(DataFormatKind::InProcess, identifier)
     }
 
-    fn create_application_format<T>(identifier: &str) -> DataFormatOf<T> {
+    fn create_application_format<T: 'static>(identifier: &str) -> DataFormatOf<T> {
         if !Self::is_valid_application_format_identifier(identifier) {
             panic!("Invalid application identifier (Parameter 'identifier')");
         }
@@ -153,7 +185,7 @@ impl DataFormat {
         Self::create_platform_format(identifier)
     }
 
-    fn create_platform_format<T>(identifier: &str) -> DataFormatOf<T> {
+    fn create_platform_format<T: 'static>(identifier: &str) -> DataFormatOf<T> {
         if identifier.is_empty() {
             panic!("The value cannot be an empty string. (Parameter 'identifier')");
         }
@@ -166,7 +198,7 @@ impl DataFormat {
     /// `application_prefix` is the system prefix used to recognize the name
     /// as an application format. This is an implementation detail of the
     /// platform backends.
-    pub fn from_system_name<T>(system_name: &str, application_prefix: &str) -> DataFormatOf<T> {
+    pub fn from_system_name<T: 'static>(system_name: &str, application_prefix: &str) -> DataFormatOf<T> {
         let prefix_length = application_prefix.len();
         let has_prefix = system_name
             .as_bytes()
