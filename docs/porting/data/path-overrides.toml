@@ -2180,6 +2180,10 @@ path = "src/FerroUI.X11/event.rs"
 reason = "The multicast events of the backend's own classes (a C# `event Action` of the original): a list of handlers with tokens to remove them"
 
 [[rust_only]]
+path = "src/FerroUI.X11/interop/native_library.rs"
+reason = "A shared library opened at run time and its functions resolved by name: what the runtime of the original does for a platform invoke (`DllImport`) of GLib, GTK, libSM and libICE"
+
+[[rust_only]]
 path = "src/FerroUI.X11/pixel_buffer.rs"
 reason = "A framebuffer over pixels the crate owns, for what the original makes with the `LockedFramebuffer` constructor over memory of its own (cursor and icon pixels)"
 

@@ -23,9 +23,13 @@ pub type SmcSaveYourselfProc = unsafe extern "C" fn(
     interact_style: c_int,
     fast: c_int,
 );
-/// `SmcDieProc`, `SmcSaveCompleteProc`, `SmcShutdownCancelledProc` and
-/// `SmcInteractProc`: a connection and the client data.
+/// A connection and the client data: the shape of the four callbacks
+/// below.
 pub type SmcProc = unsafe extern "C" fn(smc_conn: *mut c_void, client_data: *mut c_void);
+pub type SmcDieProc = SmcProc;
+pub type SmcInteractProc = SmcProc;
+pub type SmcSaveCompleteProc = SmcProc;
+pub type SmcShutdownCancelledProc = SmcProc;
 /// `SmcErrorHandler` (and `IceErrorHandler`, which has the same shape).
 pub type SmcErrorHandler = unsafe extern "C" fn(
     conn: *mut c_void,
@@ -45,18 +49,18 @@ pub type IceWatchProc =
 pub struct SmcCallbacks {
     pub save_yourself: Option<SmcSaveYourselfProc>,
     pub save_yourself_client_data: *mut c_void,
-    pub die: Option<SmcProc>,
+    pub die: Option<SmcDieProc>,
     pub die_client_data: *mut c_void,
-    pub save_complete: Option<SmcProc>,
+    pub save_complete: Option<SmcSaveCompleteProc>,
     pub save_complete_client_data: *mut c_void,
-    pub shutdown_cancelled: Option<SmcProc>,
+    pub shutdown_cancelled: Option<SmcShutdownCancelledProc>,
     pub shutdown_cancelled_client_data: *mut c_void,
 }
 
 native_functions! {
     /// The functions, as C declares them (a `Bool` is an `int`).
-    pub struct SmLibApi(sm) {
-        sm::SmcOpenConnection: unsafe extern "C" fn(
+    pub struct SMLib(sm) {
+        sm::smc_open_connection as "SmcOpenConnection": unsafe extern "C" fn(
             *const c_char,
             *mut c_void,
             c_int,
@@ -68,19 +72,19 @@ native_functions! {
             c_int,
             *mut c_char,
         ) -> *mut c_void;
-        sm::SmcCloseConnection: unsafe extern "C" fn(*mut c_void, c_int, *mut *mut c_char) -> c_int;
-        sm::SmcSaveYourselfDone: unsafe extern "C" fn(*mut c_void, c_int);
-        sm::SmcInteractRequest: unsafe extern "C" fn(*mut c_void, c_int, SmcProc, *mut c_void) -> c_int;
-        sm::SmcInteractDone: unsafe extern "C" fn(*mut c_void, c_int);
-        sm::SmcGetIceConnection: unsafe extern "C" fn(*mut c_void) -> *mut c_void;
-        sm::SmcSetErrorHandler: unsafe extern "C" fn(Option<SmcErrorHandler>) -> Option<SmcErrorHandler>;
+        sm::smc_close_connection as "SmcCloseConnection": unsafe extern "C" fn(*mut c_void, c_int, *mut *mut c_char) -> c_int;
+        sm::smc_save_yourself_done as "SmcSaveYourselfDone": unsafe extern "C" fn(*mut c_void, c_int);
+        sm::smc_interact_request as "SmcInteractRequest": unsafe extern "C" fn(*mut c_void, c_int, SmcInteractProc, *mut c_void) -> c_int;
+        sm::smc_interact_done as "SmcInteractDone": unsafe extern "C" fn(*mut c_void, c_int);
+        sm::smc_get_ice_connection as "SmcGetIceConnection": unsafe extern "C" fn(*mut c_void) -> *mut c_void;
+        sm::smc_set_error_handler as "SmcSetErrorHandler": unsafe extern "C" fn(Option<SmcErrorHandler>) -> Option<SmcErrorHandler>;
     }
 }
 
 /// The library, opened at the first call.
-pub fn sm_lib() -> Result<&'static SmLibApi, NativeLibraryError> {
-    static API: OnceLock<Result<SmLibApi, NativeLibraryError>> = OnceLock::new();
-    API.get_or_init(|| SmLibApi::load(&NativeLibrary::open(LIB_SM)?)).as_ref().map_err(Clone::clone)
+pub fn sm_lib() -> Result<&'static SMLib, NativeLibraryError> {
+    static API: OnceLock<Result<SMLib, NativeLibraryError>> = OnceLock::new();
+    API.get_or_init(|| SMLib::load(&NativeLibrary::open(LIB_SM)?)).as_ref().map_err(Clone::clone)
 }
 
 #[cfg(test)]

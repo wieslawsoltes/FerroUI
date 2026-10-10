@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.X11` (exists) |
 | Crate | `ferroui-x11` |
 | Phase / priority | 5 - desktop (Linux) / P1 |
-| Files | 73/88 (83.0%) |
-| Types | 144/291 (107 waived) (78.3%) |
-| Members | 3402/4897 (1076 waived) (89.0%) |
+| Files | 85/88 (96.6%) |
+| Types | 175/291 (107 waived) (95.1%) |
+| Members | 3525/4897 (1076 waived) (92.3%) |
 | Contracts (interfaces) | 8/8 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -34,15 +34,15 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 31/37, types 91/216 (106 waived), members 3166/4427 (1074 waived)
+### `(project root)` - files 36/37, types 108/216 (106 waived), members 3189/4427 (1074 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `ActivityTrackingHelper.cs` | `activity_tracking_helper.rs` | present | 1/1 | 7/7 |  |
-| `ICELib.cs` | `ice_lib.rs` | missing | 0/4 | 0/6 |  |
+| `ICELib.cs` | `ice_lib.rs` | partial | 4/4 | 1/6 |  |
 | `Keysyms.cs` | `keysyms.rs` | present | 1/1 | 2099/2099 |  |
 | `LibC.cs` | `lib_c.rs` | present | 1/1 | 7/7 |  |
-| `SMLib.cs` | `sm_lib.rs` | missing | 0/10 | 0/12 |  |
+| `SMLib.cs` | `sm_lib.rs` | partial | 10/10 | 5/12 |  |
 | `TransparencyHelper.cs` | `transparency_helper.rs` | present | 1/1 | 5/5 |  |
 | `X11ActiveWindowTracker.cs` | `x11_active_window_tracker.rs` | present | 1/1 | 3/3 |  |
 | `X11AtSpiAccessibility.cs` | `x11_at_spi_accessibility.rs` | missing | 0/1 | 0/5 |  |
@@ -59,15 +59,15 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `X11IconLoader.cs` | `x11_icon_loader.rs` | present | 2/2 | 6/6 |  |
 | `X11Info.cs` | `x11_info.rs` | present | 1/1 | 25/25 |  |
 | `X11KeyTransform.cs` | `x11_key_transform.rs` | present | 1/1 | 2/2 |  |
-| `X11NativeControlHost.cs` | `x11_native_control_host.rs` | missing | 0/1 | 0/6 |  |
+| `X11NativeControlHost.cs` | `x11_native_control_host.rs` | present | 1/1 | 6/6 |  |
 | `X11Platform.cs` | `x11_platform.rs` | partial | 4/4 | 50/54 |  |
-| `X11PlatformLifetimeEvents.cs` | `x11_platform_lifetime_events.rs` | missing | 0/1 | 0/3 |  |
+| `X11PlatformLifetimeEvents.cs` | `x11_platform_lifetime_events.rs` | present | 1/1 | 3/3 |  |
 | `X11Structs.cs` | `x11_structs.rs` | present | 36/123 (87 waived) | 396/1353 (957 waived) | replaced: the event, request and hint structures are those of the Xlib bindings (`x11-dl`, used through `xlib.rs`), which declare them with the layout of the C headers; the enumerations and the Motif hints are ported (docs/porting/x11-platform.md, section 2) |
 | `X11Window.Ime.cs` | `x11_window_ime.rs` | present | 1/1 | 0/0 | renamed: the keyboard part is ported (the input context, the key of a key event, its text); the input method part (`InitializeIme`, `FilterIme`, `ProcessNextImeEvent`, the forwarded keys) is stage 2 of docs/porting/x11-platform.md |
 | `X11Window.Xim.cs` | `x11_window_xim.rs` | present | 1/1 | 0/0 | renamed: not ported yet: the input method of the server (`XimInputMethod`) is stage 2 of docs/porting/x11-platform.md |
 | `X11Window.cs` | `x11_window.rs` | partial | 2/2 | 84/86 |  |
 | `X11WindowInfo.cs` | `x11_window_info.rs` | present | 1/1 | 3/3 |  |
-| `XEmbedPlug.cs` | `x_embed_plug.rs` | missing | 0/1 | 0/8 |  |
+| `XEmbedPlug.cs` | `x_embed_plug.rs` | present | 1/1 | 8/8 |  |
 | `XEmbedTrayIconImpl.cs` | `x_embed_tray_icon_impl.rs` | present | 1/1 | 6/6 |  |
 | `XError.cs` | `x_error.rs` | present | 1/1 | 3/3 |  |
 | `XI2Manager.cs` | `xi2_manager.rs` | present | 3/3 | 21/21 |  |
@@ -75,6 +75,30 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `XLib.Helpers.cs` | `xlib.rs` | present | 1/1 | 3/3 | merged: the helpers of the partial class are functions of the same module as the calls |
 | `XLib.cs` | `xlib.rs` | partial | 3/6 (2 waived) | 92/233 (4 waived) |  |
 | `XResources.cs` | `x_resources.rs` | present | 1/1 | 3/3 |  |
+
+<details><summary><code>ICELib.cs</code> - 5 missing</summary>
+
+- `ICELib` (class): 5 missing
+  - `static int IceAddConnectionWatch(IntPtr watchProc, IntPtr clientData)`
+  - `static void IceRemoveConnectionWatch(IntPtr watchProc, IntPtr clientData)`
+  - `static IceProcessMessagesStatus IceProcessMessages(IntPtr iceConn, out IntPtr replyWait, out bool replyRead...`
+  - `static IntPtr IceSetErrorHandler(IntPtr handler)`
+  - `static IntPtr IceSetIOErrorHandler(IntPtr handler)`
+
+</details>
+
+<details><summary><code>SMLib.cs</code> - 7 missing</summary>
+
+- `SMLib` (class): 7 missing
+  - `static IntPtr SmcOpenConnection([MarshalAs(UnmanagedType.LPStr)] string? networkId, IntPtr content, int xsm...`
+  - `static int SmcCloseConnection(IntPtr smcConn, int count, string[] reasonMsgs)`
+  - `static void SmcSaveYourselfDone(IntPtr smcConn, bool success)`
+  - `static int SmcInteractRequest(IntPtr smcConn, SmDialogValue dialogType, IntPtr interactProc, IntPtr clientD...`
+  - `static void SmcInteractDone(IntPtr smcConn, bool success)`
+  - `static IntPtr SmcGetIceConnection(IntPtr smcConn)`
+  - `static IntPtr SmcSetErrorHandler(IntPtr handler)`
+
+</details>
 
 <details><summary><code>X11CursorFactory.cs</code> - 2 missing</summary>
 
@@ -259,12 +283,12 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Dispatching` - files 3/5, types 5/7, members 19/39
+### `Dispatching` - files 5/5, types 7/7, members 39/39
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `GLibDispatcherImpl.cs` | `dispatching/g_lib_dispatcher_impl.rs` | missing | 0/1 | 0/4 |  |
-| `GlibDispatcherImplBase.cs` | `dispatching/glib_dispatcher_impl_base.rs` | missing | 0/1 | 0/16 |  |
+| `GLibDispatcherImpl.cs` | `dispatching/g_lib_dispatcher_impl.rs` | present | 1/1 | 4/4 |  |
+| `GlibDispatcherImplBase.cs` | `dispatching/glib_dispatcher_impl_base.rs` | present | 1/1 | 16/16 |  |
 | `IX11PlatformDispatcher.cs` | `dispatching/i_x11_platform_dispatcher.rs` | present | 1/1 | 1/1 |  |
 | `X11EventDispatcher.cs` | `dispatching/x11_event_dispatcher.rs` | present | 3/3 | 7/7 |  |
 | `X11PlatformThreading.cs` | `dispatching/x11_platform_threading.rs` | present | 1/1 | 11/11 |  |
@@ -302,19 +326,37 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Interop` - files 0/2, types 0/7, members 0/29
+### `Interop` - files 2/2, types 7/7, members 24/29
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Glib.cs` | `interop/glib.rs` | missing | 0/6 | 0/28 |  |
-| `GtkInteropHelper.cs` | `interop/gtk_interop_helper.rs` | missing | 0/1 | 0/1 |  |
+| `Glib.cs` | `interop/glib.rs` | partial | 6/6 | 23/28 |  |
+| `GtkInteropHelper.cs` | `interop/gtk_interop_helper.rs` | present | 1/1 | 1/1 |  |
 
-### `NativeDialogs` - files 0/2, types 0/6, members 0/48
+<details><summary><code>Glib.cs</code> - 5 missing</summary>
+
+- `Glib` (class): 5 missing
+  - `static void g_main_loop_quit(IntPtr loop)`
+  - `static void g_main_loop_run(IntPtr loop)`
+  - `static void g_main_loop_unref(IntPtr loop)`
+  - `static IntPtr g_main_context_find_source_by_id(IntPtr context, uint source_id)`
+  - `static uint g_unix_fd_add_full(int priority, int fd, GIOCondition condition, Func<int, GIOCondition, bool> cb)` *(1 of 2 overloads found)*
+
+</details>
+
+### `NativeDialogs` - files 2/2, types 4/6, members 48/48
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Gtk.cs` | `native_dialogs/gtk.rs` | missing | 0/5 | 0/41 |  |
-| `GtkNativeFileDialogs.cs` | `native_dialogs/gtk_native_file_dialogs.rs` | missing | 0/1 | 0/7 |  |
+| `Gtk.cs` | `native_dialogs/gtk.rs` | partial | 3/5 | 41/41 |  |
+| `GtkNativeFileDialogs.cs` | `native_dialogs/gtk_native_file_dialogs.rs` | present | 1/1 | 7/7 |  |
+
+<details><summary><code>Gtk.cs</code> - 2 missing</summary>
+
+- `Gtk.signal_generic` (delegate, public): **type missing** (0 members)
+- `Gtk.signal_dialog_response` (delegate, public): **type missing** (0 members)
+
+</details>
 
 ### `Screens` - files 3/3, types 8/9 (1 waived), members 25/27 (2 waived)
 
@@ -400,14 +442,14 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `VulkanNativeInterop.cs` | `vulkan/vulkan_native_interop.rs` | missing | 0/2 | 0/8 |  |
 | `VulkanSupport.cs` | `vulkan/vulkan_support.rs` | missing | 0/2 | 0/4 |  |
 
-### `X11WindowModes` - files 3/4, types 7/8, members 19/36
+### `X11WindowModes` - files 4/4, types 8/8, members 27/36
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `DefaultWindowMode.cs` | `x11_window_modes/default_window_mode.rs` | partial | 2/2 | 5/6 |  |
 | `InputProxyWindowMode.cs` | `x11_window_modes/input_proxy_window_mode.rs` | partial | 2/2 | 4/5 |  |
 | `WindowMode.cs` | `x11_window_modes/window_mode.rs` | partial | 2/2 | 10/17 |  |
-| `XEmbedClientWindowMode.cs` | `x11_window_modes/x_embed_client_window_mode.rs` | missing (types found elsewhere) | 1/2 | 0/8 | types found in `x11_window.rs` (add to path-overrides.toml) |
+| `XEmbedClientWindowMode.cs` | `x11_window_modes/x_embed_client_window_mode.rs` | present | 2/2 | 8/8 |  |
 
 <details><summary><code>DefaultWindowMode.cs</code> - 1 missing</summary>
 
@@ -436,12 +478,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>XEmbedClientWindowMode.cs</code> - 9 missing</summary>
-
-- `X11Window.XEmbedClientWindowMode` (class, public): **type missing** (8 members)
-
-</details>
-
 ### `XShm` - files 3/3, types 3/3, members 12/12
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
@@ -456,6 +492,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
+| `interop/native_library.rs` | A shared library opened at run time and its functions resolved by name: what the runtime of the original does for a platform invoke (`DllImport`) of GLib, GTK, libSM and libICE | `NativeLibrary`, `NativeLibraryError` |
 | `pixel_buffer.rs` | A framebuffer over pixels the crate owns, for what the original makes with the `LockedFramebuffer` constructor over memory of its own (cursor and icon pixels) | `PixelBuffer` |
 | `raw_event_grouping.rs` | The port of `src/Shared/RawEventGrouping.cs`, a source file the original compiles into every backend that queues its input (it belongs to no project of the tracking) | `AutomaticRawEventGrouperDispatchQueue`, `GrouperState`, `IRawEventGrouperDispatchQueue`, `ManualRawEventGrouperDispatchQueue`, `MergedPoints`, `RawEvent`, `RawEventGrouper`, `RawEventHandler` |
 | `selections/drag_drop/x11_drag_source/tests.rs` | the unit tests of the module | `Call`, `FakeHost` |

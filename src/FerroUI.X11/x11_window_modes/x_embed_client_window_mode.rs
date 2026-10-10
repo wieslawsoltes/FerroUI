@@ -95,14 +95,14 @@ impl EmbedState {
 
 impl XEmbedClientWindowMode {
     pub fn new() -> Self {
-        Self::ensure_listening();
+        Self::static_constructor();
         Self::default()
     }
 
     /// The static constructor of the reference: when the focus moves to an
     /// element of an embedded top-level, the element is remembered and the
     /// embedder is asked for the focus.
-    fn ensure_listening() {
+    fn static_constructor() {
         if LISTENING.with(Cell::get) {
             return;
         }

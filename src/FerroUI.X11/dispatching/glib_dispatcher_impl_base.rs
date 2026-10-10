@@ -191,9 +191,9 @@ impl ManagedLoopFrame {
         let external_registration = self.external_token.register(move || link.cancel());
         *self.cancelled.borrow_mut() = internal.token();
         let main_loop = self.main_loop.clone();
-        let registration = internal.token().register(move || main_loop.quit());
+        let registration = internal.token().register(move || main_loop.g_main_loop_quit());
 
-        self.main_loop.run();
+        self.main_loop.g_main_loop_run();
 
         registration.dispose();
         external_registration.dispose();
@@ -574,10 +574,10 @@ mod tests {
             20,
             Box::new(move || {
                 d.store(true, Ordering::SeqCst);
-                l.quit();
+                l.g_main_loop_quit();
             }),
         );
-        main_loop.run();
+        main_loop.g_main_loop_run();
         assert!(done.load(Ordering::SeqCst));
         assert_eq!(seen.borrow().as_deref(), Some("outside a frame"));
     }
