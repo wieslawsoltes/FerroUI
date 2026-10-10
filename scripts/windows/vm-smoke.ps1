@@ -234,10 +234,15 @@ $example = Join-Path $TargetDir 'debug\examples\win32_window.exe'
 # Starts a command line in the session of a logged-on user and waits for it: a scheduled task
 # that is created, run once and deleted.
 function Run-Interactive([string]$name, [string]$commandLine) {
-    $log = Join-Path $logs "$name.log"
-    $done = Join-Path $logs "$name.exit"
+    # The files of the task are on the disk of the machine: a drive that is mapped for the
+    # account of this process (a folder shared from a virtual machine host) need not exist in the
+    # session of the user. The log is copied to the log directory afterwards.
+    $local = Join-Path $TargetDir 'vm-smoke-interactive'
+    New-Item -ItemType Directory -Force -Path $local | Out-Null
+    $log = Join-Path $local "$name.log"
+    $done = Join-Path $local "$name.exit"
     Remove-Item $done, $log -ErrorAction SilentlyContinue
-    $wrapper = Join-Path $logs "$name.cmd"
+    $wrapper = Join-Path $local "$name.cmd"
     Set-Content -Path $wrapper -Encoding ASCII -Value @(
         '@echo off',
         "set RUST_BACKTRACE=1",
@@ -251,9 +256,10 @@ function Run-Interactive([string]$name, [string]$commandLine) {
     $waited = 0
     while (-not (Test-Path $done) -and $waited -lt 180) { Start-Sleep -Seconds 1; $waited++ }
     cmd /c "schtasks /delete /f /tn $task > nul 2>&1" | Out-Null
+    if (Test-Path $log) { Copy-Item $log (Join-Path $logs "$name.log") -Force }
     if (-not (Test-Path $done)) { Say "${name}: no result after $waited s (is $InteractiveUser logged on?)"; return 1 }
     $code = [int]((Get-Content $done | Select-Object -First 1).Trim())
-    Say ("{0}: exit code {1}, in the session of {2}, log {3}" -f $name, $code, $InteractiveUser, $log)
+    Say ("{0}: exit code {1}, in the session of {2}, log {3}" -f $name, $code, $InteractiveUser, (Join-Path $logs "$name.log"))
     return $code
 }
 
