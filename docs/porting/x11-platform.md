@@ -1,6 +1,6 @@
 # The Linux platform: X11 and the FreeDesktop services
 
-The design of the Linux desktop backend of FerroUI, the decisions it rests on, the file table of the port and its stages. Upstream: `src/Avalonia.X11` (88 files, 291 types, 4897 members) with `src/Avalonia.FreeDesktop` (18 files, 26 types, 216 members) at the tracked commit (`TRACKING.md`). `Avalonia.FreeDesktop.AtSpi` (27 files, accessibility), `Avalonia.Wayland` (81 files) and `Avalonia.LinuxFramebuffer` (30 files) are later stages, named at the end.
+The design of the Linux desktop backend of FerroUI, the decisions it rests on, the file table of the port and its stages. Upstream: `src/Avalonia.X11` (88 files, 291 types, 4897 members) with `src/Avalonia.FreeDesktop` (18 files, 26 types, 216 members) at the tracked commit (`TRACKING.md`). `Avalonia.FreeDesktop.AtSpi` (27 files, accessibility) is stage 3 and has its own document, `atspi.md`; `Avalonia.Wayland` (81 files) and `Avalonia.LinuxFramebuffer` (30 files) are later stages, named at the end.
 
 Marks, as in `browser-platform.md`: **[V]** verified from sources (the upstream files, the sources of a crate in the cargo registry, `cargo info`), **[M]** measured here (a build or a test run on this machine), **[R]** recalled and not verified here, **[CI]** to be shown by the CI job on a real X server. **[VM]** measured in a virtual machine on the development machine (Ubuntu 24.04, ARM64, section 13). The development machine is a Mac; the CI job runs on x86-64 and had not run when this was written.
 
@@ -181,6 +181,8 @@ The handler of a drag has the protocol and reaches the connection and the platfo
 - **Platform settings** (`DBusPlatformSettings`, built): colour scheme and accent colour from `org.freedesktop.portal.Settings` (`org.freedesktop.appearance`; `ReadOne` from version 2 of the portal, the deprecated `Read` before), with change notifications (`SettingChanged`). Without a session bus or a portal, the defaults of the framework. Upstream reads nothing else at the tracked commit: no contrast preference. The X11 platform registers it as the platform settings.
 - **Mounted volumes** (`LinuxMountedVolumeInfoProvider`, built): `/proc/partitions`, `/proc/mounts` and `/dev/disk/by-label`, polled every second; the X11 platform registers it for the managed file dialogs.
 
+- **Accessibility** (stage 3, built; `atspi.md`): the platform starts the AT-SPI server of the FreeDesktop crate (`X11AtSpiAccessibility`), every window that is shown adds the root of its automation tree to it and removes it when it is cleaned up. Every start of the platform therefore asks the session bus for the accessibility bus; without a session bus or without `org.a11y.Bus` the attempt is logged at the level of warnings and the application runs without accessibility.
+
 Stage 2f (built), the rest of the X11 project but accessibility and Vulkan:
 
 - **Session management** (`X11PlatformLifetimeEvents`, with `sm_lib.rs` and `ice_lib.rs`). The platform connects to the session manager of the environment (`SESSION_MANAGER`) with `SmcOpenConnection` and reads its messages on a thread of its own (`IceProcessMessages`), where the library calls the handlers. A save-yourself for a shutdown that is not "fast" asks for the turn to interact; when it is granted, a job of the UI dispatcher raises the shutdown request of the application lifetime (when `enable_session_management` is on), answers `SmcInteractDone` with whether the application refused, and ends the phase unless it did. Other save-yourself requests are answered at once. What the two threads share is the connection and the phase, as atomics; the calls to the library are behind a trait, which the tests replace. Without a session manager the open fails and is logged, as upstream; without the libraries the platform logs that and has no session management (upstream fails to start).
@@ -202,7 +204,7 @@ One row per upstream file. "built" files are on the branch; the stage of an open
 | `TransparencyHelper.cs` | 112 | `transparency_helper.rs` | 1 | built |  |
 | `X11ActiveWindowTracker.cs` | 55 | `x11_active_window_tracker.rs` | 1 | built |  |
 | `X11Atoms.cs` | 275 | `x11_atoms.rs` | 1 | built |  |
-| `X11AtSpiAccessibility.cs` | 176 | `x11_at_spi_accessibility.rs` | 3 | open |  |
+| `X11AtSpiAccessibility.cs` | 176 | `x11_at_spi_accessibility.rs` | 3 | built | the server is in the FreeDesktop crate (`atspi.md`) |
 | `X11CursorFactory.cs` | 182 | `x11_cursor_factory.rs` | 1 | built |  |
 | `X11DeferredDisplayDispatcher.cs` | 98 | `x11_deferred_display_dispatcher.rs` | 2b | built |  |
 | `X11EglHelper.cs` | 97 | `x11_egl_helper.rs` | 2a | built | with the display factory of `InitializeGraphics`, the loader of `libEGL` and the platform graphics of EGL (`X11EglPlatformGraphics`) |
@@ -492,7 +494,7 @@ Verified nowhere yet: a GPU with a hardware driver (the visual preference and th
 | 2d (built) | Drag and drop (XDND source and target) | The smoke run with `--dnd`: a drag inside the window, and a drag to a second process of the example, driven with XTEST. Both sides of the protocol are this port's: another toolkit as source or target was not run |
 | 2e (built) | FreeDesktop services: the portal file chooser, tray icon, global menu, platform settings, mounted volumes; in the X11 project the GTK dialogs and the dispatcher over the main loop of GLib | Services against a session bus in the job (`dbus-run-session`), with test doubles of the portal interfaces, of the registrar and of the watcher; the smoke run with `--menu`. A real registrar (a global menu applet) and a real tray host were not run. GTK 3 is installed in the job: the sources of GLib and the dispatcher in the tests of the crate, the whole smoke run with `--glib`, and `--gtk-dialog` with GTK on its own thread and on the UI thread |
 | 2f (built) | Session management, the native control host, XEmbed, the catalog's native control demo | The smoke run with `--embed`: a native window in the host, a plug embedded in a socket window of the example. The state machine of session management against a recorder; no session manager runs in the job (the open fails and is logged) |
-| 3 | Accessibility: `X11AtSpiAccessibility` and `Avalonia.FreeDesktop.AtSpi` (27 files) | The tree read back over the accessibility bus |
+| 3 (built) | Accessibility: `X11AtSpiAccessibility` and `Avalonia.FreeDesktop.AtSpi` (27 files): `atspi.md` | The smoke run with `--a11y` (the example is the registry; a client on a second connection walks the tree, acts and listens) and with `--a11y=real` (the bus launcher and the registry daemon of `at-spi2-core`). A screen reader was not run |
 | 4 | Wayland (`Avalonia.Wayland`, 81 files), sharing the FreeDesktop crate | A headless compositor in the job |
 | 5 | The framebuffer backend (`Avalonia.LinuxFramebuffer`, 30 files: DRM and fbdev) | To be designed |
 

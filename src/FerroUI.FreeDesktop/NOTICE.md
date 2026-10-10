@@ -11,6 +11,16 @@ IBus, `org.fcitx.Fcitx.InputMethod`, `.InputContext`, `.InputMethod1` and
 `dbus_ime/ibus/ibus_enums.rs` and `dbus_ime/fcitx/fcitx_enums.rs` are the
 values of those projects' protocols, as the upstream files have them.
 
+The module `at_spi` is ported from the `Avalonia.FreeDesktop.AtSpi` project of
+Avalonia (MIT), and its `at_spi/dbus` from the parts of the D-Bus library that
+project compiles in, `Avalonia.DBus` (MIT; Copyright (c) 2023 affederaffe,
+Copyright (c) 2026 AvaloniaUI OÜ): the object table and the dispatch of a
+connection, and the built-in properties and introspection handlers. The
+interfaces it serves are those of AT-SPI (`org.a11y.atspi.*`, `org.a11y.Bus`,
+`org.a11y.Status`), written from the descriptions the upstream project keeps in
+`DBusXml/`; the role and state numbers of `at_spi_role.rs` and
+`at_spi_state.rs` are the values of that protocol.
+
 ## Dependencies
 
 | Crate | Version | Licence | Used for |
