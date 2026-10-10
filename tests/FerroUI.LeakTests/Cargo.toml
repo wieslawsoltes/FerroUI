@@ -1,0 +1,37 @@
+[package]
+name = "ferroui-leak-tests"
+description = "Test crate: the leak tests of the upstream project, a scenario each, on reference counts: an element that left the tree is freed once the test drops its handles"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+# The tests are modules of the library (`lib.rs`), not integration test targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+# Records where every block of the test build was allocated (`holder_trace.rs`: the global allocator of
+# the test build becomes the system allocator behind a recorder), so that a failed "freed" assertion
+# names the call stacks of the blocks that still point at the survivor, and marks the weak references
+# of the object model so that they are told from the strong ones. Call stacks are read on macOS on
+# ARM only. Slow: for looking into a failure.
+#
+#   cargo test -p ferroui-leak-tests --features trace-holders -- --test-threads=1
+trace-holders = ["ferroui-base/tagged-weak-references"]
+
+# The scenarios use plain controls, the unit test application and the test services of the controls
+# crate, and the Simple theme as the theme of the application (the styled window services of the
+# reference test suite).
+[dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-themes-simple = { workspace = true }
+# The compiled binding markup extension of the object tests.
+ferroui-markup-xaml = { workspace = true }
