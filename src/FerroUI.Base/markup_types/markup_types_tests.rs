@@ -1837,3 +1837,20 @@ fn the_animator_of_a_setter_is_an_attached_property_of_the_animation() {
     let contract = MarkupType::find("FerroUI.Animation", "CustomAnimatorBase").unwrap();
     assert!(std::ptr::eq(MarkupType::find_by_handle(ValueType::of::<Rc<dyn ICustomAnimator>>().id()).unwrap(), contract));
 }
+
+#[test]
+fn the_font_manager_declares_its_current_instance_and_the_system_fonts() {
+    crate::register_types();
+    // `{Binding SystemFonts, Source={x:Static FontManager.Current}}`.
+    let font_manager = MarkupType::find("FerroUI.Media", "FontManager").unwrap();
+    let current = font_manager.find_static_property("Current").unwrap();
+    assert!(current.get.is_some());
+    assert_eq!((current.type_)().id(), ValueType::of::<Rc<crate::media::FontManager>>().id());
+    let system_fonts = font_manager.find_property("SystemFonts").unwrap();
+    assert_eq!((system_fonts.type_)().id(), ValueType::of::<Rc<dyn crate::media::fonts::IFontCollection>>().id());
+    let collection = MarkupType::find("FerroUI.Media.Fonts", "IFontCollection").unwrap();
+    assert!(std::ptr::eq(
+        MarkupType::find_by_handle(ValueType::of::<Rc<dyn crate::media::fonts::IFontCollection>>().id()).unwrap(),
+        collection
+    ));
+}

@@ -91,6 +91,18 @@ ferro_markup_type!(interface dyn crate::media::imaging::IBitmap as "IBitmap" {
     handles: [Rc<dyn crate::media::imaging::IBitmap>, Option<Rc<dyn crate::media::imaging::IBitmap>>],
 });
 
+// The collection of the fonts of the system (`FontManager.SystemFonts`): a read-only list of
+// font families, which a binding delivers to the items of an items control.
+ferro_markup_type!(interface dyn crate::media::fonts::IFontCollection as "IFontCollection" {
+    namespace: "FerroUI.Media.Fonts",
+    handles: [Rc<dyn crate::media::fonts::IFontCollection>, Option<Rc<dyn crate::media::fonts::IFontCollection>>],
+    this: Rc<dyn crate::media::fonts::IFontCollection>,
+    properties: [
+        Key: crate::utilities::Uri { get: |fonts: &Rc<dyn crate::media::fonts::IFontCollection>| fonts.key() },
+        Count: i32 { get: |fonts: &Rc<dyn crate::media::fonts::IFontCollection>| fonts.count() as i32 },
+    ],
+});
+
 ferro_markup_type!(interface dyn crate::media::ITransform as "ITransform" {
     namespace: "FerroUI.Media",
     handles: [Rc<dyn crate::media::ITransform>, Option<Rc<dyn crate::media::ITransform>>],
@@ -353,6 +365,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <dyn crate::media::IImageBrushSource as MarkupTyped>::MARKUP,
     <dyn crate::media::imaging::IBitmap as MarkupTyped>::MARKUP,
     <dyn crate::media::ITransform as MarkupTyped>::MARKUP,
+    <dyn crate::media::fonts::IFontCollection as MarkupTyped>::MARKUP,
     <dyn crate::media::IPen as MarkupTyped>::MARKUP,
     <dyn crate::media::IDashStyle as MarkupTyped>::MARKUP,
     <dyn crate::media::IExperimentalAcrylicMaterial as MarkupTyped>::MARKUP,
@@ -410,6 +423,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<Rc<dyn crate::media::IImageBrushSource>>();
     ValueTypes::register_nullable::<Rc<dyn crate::media::imaging::IBitmap>>();
     ValueTypes::register_nullable::<Rc<dyn crate::media::ITransform>>();
+    ValueTypes::register_nullable::<Rc<dyn crate::media::fonts::IFontCollection>>();
     ValueTypes::register_nullable::<Rc<dyn crate::media::IPen>>();
     ValueTypes::register_nullable::<Rc<dyn crate::media::IDashStyle>>();
     ValueTypes::register_nullable::<Rc<dyn crate::media::IExperimentalAcrylicMaterial>>();
