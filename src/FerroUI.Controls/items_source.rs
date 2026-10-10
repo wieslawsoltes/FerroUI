@@ -495,6 +495,13 @@ pub trait IItemsList {
     /// Unsubscribes a handler.
     fn remove_collection_changed(&self, _token: u64) {}
 
+    /// The identity of the collection, for a list that is a handle to a collection
+    /// (a [`FerroList`]): two handles to one collection are the same collection. `None`
+    /// for a list that is the collection itself, whose identity is its address.
+    fn identity(&self) -> Option<usize> {
+        None
+    }
+
     /// The collection as [`Any`], to get back to the typed collection.
     fn as_any(&self) -> &dyn Any;
 }
@@ -557,6 +564,10 @@ impl<T: PropertyValue> IItemsList for FerroList<T> {
 
     fn remove_collection_changed(&self, token: u64) {
         FerroList::remove_collection_changed(self, token);
+    }
+
+    fn identity(&self) -> Option<usize> {
+        Some(ferroui_base::utilities::WeakEventSender::sender_address(self))
     }
 
     fn as_any(&self) -> &dyn Any {
@@ -666,7 +677,7 @@ impl ItemsSource {
     /// The identity of the underlying collection.
     #[inline]
     pub fn identity(&self) -> usize {
-        Rc::as_ptr(&self.0) as *const () as usize
+        self.0.identity().unwrap_or(Rc::as_ptr(&self.0) as *const () as usize)
     }
 
     /// Whether two handles refer to the same collection.
@@ -817,5 +828,30 @@ mod reference_equals_tests {
 
         assert!(!reference_equals(&Some(Control::boxed(first.clone())), &Some(Control::boxed(second))));
         assert!(!reference_equals(&Some(Control::boxed(first)), &boxed("able".to_string())));
+    }
+}
+
+#[cfg(test)]
+mod identity_tests {
+    // Not from upstream: the identity of an items source over a handle to a collection.
+    use super::ItemsSource;
+    use ferroui_base::collections::FerroList;
+    use std::rc::Rc;
+
+    #[test]
+    fn two_handles_to_one_list_are_the_same_collection() {
+        let list = FerroList::from_items([1, 2, 3]);
+        let first = ItemsSource::from(Rc::new(list.clone()));
+        let second = ItemsSource::from(Rc::new(list.clone()));
+        assert!(first.ptr_eq(&second));
+        assert_eq!(first, second);
+
+        let other = ItemsSource::from(Rc::new(FerroList::from_items([1, 2, 3])));
+        assert!(!first.ptr_eq(&other));
+
+        // A list that is the collection itself is identified by its address.
+        let vector = ItemsSource::from(vec![None, None]);
+        assert!(vector.ptr_eq(&vector.clone()));
+        assert!(!vector.ptr_eq(&ItemsSource::from(vec![None, None])));
     }
 }
