@@ -58,6 +58,22 @@ impl ItemsControlImpl for NativeMenuBarPresenter {
     }
 }
 
+/// The container of an item of a native menu that is shown as a managed
+/// menu: a separator, or a menu item bound to the native item; `None` for
+/// an item that is not one of a native menu.
+///
+/// `NativeMenuBarPresenter.CreateContainerForNativeItem` of the reference,
+/// which is internal there and reached by the Windows backend (the menu of
+/// its tray icon) through a friend declaration.
+#[doc(hidden)]
+pub fn create_container_for_native_item(
+    item: &Option<BoxedValue>,
+    index: i32,
+    recycle_key: Option<RecycleKey>,
+) -> Option<Ref<Control>> {
+    NativeMenuBarPresenter::create_container_for_native_item(item, index, recycle_key)
+}
+
 impl NativeMenuBarPresenter {
     pub(crate) fn new() -> Ref<Self> {
         instantiate(Self { base: Menu::construct() })

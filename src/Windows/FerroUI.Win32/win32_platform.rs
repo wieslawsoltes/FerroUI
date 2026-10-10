@@ -115,7 +115,7 @@ impl Win32Platform {
         instance
     }
 
-    fn try_instance() -> Option<Rc<Win32Platform>> {
+    pub(crate) fn try_instance() -> Option<Rc<Win32Platform>> {
         INSTANCE.try_with(|instance| instance.try_borrow().ok().and_then(|instance| instance.clone())).ok().flatten()
     }
 
@@ -343,8 +343,7 @@ impl Win32Platform {
             self.dispatcher.fire_timer();
         }
 
-        // The messages of the tray icons are handled here by the
-        // reference: tray icons are stage 2.
+        crate::tray_icon_impl::TrayIconImpl::proc_wnd(hwnd, msg, w_param, l_param);
 
         def_window_proc(hwnd, msg, w_param, l_param)
     }
@@ -382,8 +381,7 @@ impl Win32Platform {
             panic!("The message window could not be created (error code {})", get_last_error());
         }
 
-        // The reference lets the messages of the taskbar through the
-        // message filter of the window here: tray icons are stage 2.
+        crate::tray_icon_impl::TrayIconImpl::change_window_message_filter(hwnd);
 
         hwnd
     }
@@ -474,10 +472,8 @@ impl IWindowingPlatform for Win32Platform {
         embedded
     }
 
-    /// The platform has no tray icons before stage 2 builds them: `None`,
-    /// which the contract defines as a platform without tray icons.
     fn create_tray_icon(&self) -> Option<Rc<dyn ITrayIconImpl>> {
-        None
+        Some(crate::tray_icon_impl::TrayIconImpl::new())
     }
 
     fn get_windows_z_order(&self, windows: &[Rc<dyn IWindowImpl>], z_order: &mut [i64]) {
