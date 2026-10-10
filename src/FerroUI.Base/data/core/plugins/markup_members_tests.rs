@@ -675,6 +675,10 @@ fn a_command_of_a_method_of_the_object_that_owns_its_control_keeps_neither_alive
 
 #[test]
 fn overloads_that_cannot_be_chosen_are_binding_errors() {
+    // The namespaces of the crate, which the full name of a type reads: registered here, so
+    // that the name the test expects and the name of the error are read in one state (a
+    // test of another thread registers them at a time of its own).
+    crate::register_types();
     let vm = MemberVm::new("Ann");
     register();
     let source: BoxedValue = vm.clone();
