@@ -89,7 +89,7 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/Avalonia.Markup.Xaml` | `src/Markup/FerroUI.Markup.Xaml` | `ferroui-markup-xaml` | 46/46 | 61/63 (2 waived) | 199/239 (40 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/Avalonia.Markup.Xaml.Loader` | `src/Markup/FerroUI.Markup.Xaml.Loader` | `ferroui-markup-xaml-loader` | 66/66 | 120/126 (6 waived) | 400/505 (105 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/Avalonia.Skia` | `src/Skia/FerroUI.Skia` | `ferroui-skia` | 51/51 | 62/62 | 386/420 (33 waived) | 99.7% | 1 - rendering | P0 |
-| [Avalonia.Win32](tracking/Avalonia.Win32.md) | `src/Windows/Avalonia.Win32` | `src/Windows/FerroUI.Win32` | `ferroui-win32` | 33/95 | 111/276 | 0/2605 | 0.0% | 1 - desktop (Windows) | P0 |
+| [Avalonia.Win32](tracking/Avalonia.Win32.md) | `src/Windows/Avalonia.Win32` | `src/Windows/FerroUI.Win32` | `ferroui-win32` | 57/95 | 155/276 | 0/2605 | 0.0% | 1 - desktop (Windows) | P0 |
 | [Avalonia.iOS](tracking/Avalonia.iOS.md) | `src/iOS/Avalonia.iOS` | `src/iOS/FerroUI.iOS` | `ferroui-ios` | 23/40 | 27/57 (1 waived) | 0/331 | 0.0% | 6 - mobile (iOS) | P2 |
 | [Avalonia.Generators](tracking/Avalonia.Generators.md) | `src/tools/Avalonia.Generators` | `src/tools/FerroUI.Generators` | (merged into ferroui-build, see docs/porting/xaml.md) | 0/0 | 0/0 | 0/0 | - | 2 - xaml + themes | P2 |
 
@@ -274,7 +274,7 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `tests/Avalonia.Headless.XUnit.PerAssembly.UnitTests` | 1 | `tests/FerroUI.Headless.XUnit.PerAssembly.UnitTests` | not created | not tracked |
 | `tests/Avalonia.Headless.XUnit.PerTest.UnitTests` | 1 | `tests/FerroUI.Headless.XUnit.PerTest.UnitTests` | not created | not tracked |
 | `tests/Avalonia.IntegrationTests.Appium` | 32 | `tests/FerroUI.IntegrationTests.Appium` | not created | not tracked |
-| `tests/Avalonia.IntegrationTests.Win32` | 13 | `tests/FerroUI.IntegrationTests.Win32` | not created | not tracked |
+| `tests/Avalonia.IntegrationTests.Win32` | 13 | `tests/FerroUI.IntegrationTests.Win32` | workspace member | not tracked |
 | `tests/Avalonia.LeakTests` | 8 | `tests/FerroUI.LeakTests` | workspace member | not tracked |
 | `tests/Avalonia.Markup.UnitTests` | 26 | `tests/FerroUI.Markup.UnitTests` | not created | not tracked |
 | `tests/Avalonia.Markup.Xaml.UnitTests` | 62 | `tests/FerroUI.Markup.Xaml.UnitTests` | workspace member | not tracked |
@@ -345,6 +345,7 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `src/iOS/FerroUI.iOS` | `src/iOS/Avalonia.iOS` |
 | `src/tools/MicroCom.CodeGenerator` | none (FerroUI only) |
 | `tests/FerroUI.Benchmarks` | `tests/Avalonia.Benchmarks` (not tracked) |
+| `tests/FerroUI.IntegrationTests.Win32` | `tests/Avalonia.IntegrationTests.Win32` (not tracked) |
 | `tests/FerroUI.LeakTests` | `tests/Avalonia.LeakTests` (not tracked) |
 | `tests/FerroUI.Markup.Xaml.UnitTests` | `tests/Avalonia.Markup.Xaml.UnitTests` (not tracked) |
 | `tests/FerroUI.RenderBackends.Comparison` | none (FerroUI only) |
@@ -356,7 +357,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-348 Rust source files have no upstream counterpart (14 without a recorded reason). They are listed at the end of each project page.
+349 Rust source files have no upstream counterpart (14 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
@@ -707,4 +708,5 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/unit_tests/media/text_formatting/multi_buffer_text_source.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/unit_tests/media/text_formatting/single_buffer_text_source.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/unit_tests/test_font_manager.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library |
+| [Avalonia.Win32](tracking/Avalonia.Win32.md) | `src/Windows/FerroUI.Win32/win_rt/numerics.rs` | The vector, quaternion and matrix values the interfaces of `winrt.idl` pass, by their layout: upstream maps the names to the types of the numerics library of its runtime |
 | [Avalonia.Win32](tracking/Avalonia.Win32.md) | `src/Windows/FerroUI.Win32/wnd_proc_guard.rs` | Keeps a panic from unwinding out of a window procedure through the frames of the system: caught, kept, and raised again by the message loop (docs/porting/win32-platform.md, section 5) |
