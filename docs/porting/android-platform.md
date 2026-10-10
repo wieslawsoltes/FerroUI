@@ -2,7 +2,7 @@
 
 The design of the Android backend of FerroUI, the decisions it rests on, the file table of the port and its stages. Upstream: `src/Android/Avalonia.Android` (58 files, 88 types, 447 members, 7068 lines) at the tracked commit (`TRACKING.md`), and the host of the sample, `samples/ControlCatalog.Android`.
 
-Marks, as in the other platform documents: **[V]** verified from sources (the upstream files, the sources of a crate in the cargo registry, `cargo info`, the files of the SDK), **[M]** measured here (a build or a test run on the development machine, a Mac), **[E]** shown by a run on the emulator (the orchestrator runs the scripts of section 10; nothing of this kind was run when the document was first written), **[R]** recalled and not verified here.
+Marks, as in the other platform documents: **[V]** verified from sources (the upstream files, the sources of a crate in the cargo registry, `cargo info`, the files of the SDK), **[M]** measured here (a build or a test run on the development machine, a Mac), **[E]** shown by a run on the emulator (the scripts of section 10, run on 2026-10-10: section 10.1), **[R]** recalled and not verified here.
 
 ## 1. What is ported, and the crate
 
@@ -154,7 +154,7 @@ The recommendation of this document: (a) until the owner decides; (b) if Android
 
 **The surface of a top-level** is, as upstream, three surfaces: an `EglGlPlatformSurface` over what the surface view publishes (handle, size, scaling; waits skipped), the framebuffer manager, and the handle of the native window. The renderer takes the first it can use.
 
-**Emulator.** The scripts start the emulator with `-gpu swiftshader_indirect` by default: a software implementation of OpenGL ES inside the emulator, which needs neither a window nor the GPU of the host, so a headless run draws the same on every machine **[R]**; `--gpu host` selects the host GPU. Which works headless on Apple Silicon is what the first run shows **[E]**.
+**Emulator.** The scripts start the emulator with `-gpu swiftshader_indirect` by default: a software implementation of OpenGL ES inside the emulator, which needs neither a window nor the GPU of the host, so a headless run draws the same on every machine; `--gpu host` selects the host GPU. On Apple Silicon the default works without a window **[E]**: the emulator reports `gles_mode_selected:swangle` (ANGLE on the Vulkan of SwiftShader), and the EGL mode of the platform draws through it. `--gpu host` was not tried.
 
 ## 7. The top-level, the view and input
 
@@ -228,7 +228,7 @@ Files of the port without an upstream file: `interop/java.rs` (JNI, section 2.1)
 
 `scripts/android/apk.sh` builds an installable package from a cargo target with the tools of the SDK alone (`scripts/android/env.sh` names them and the pinned versions: NDK 28.2.13676358, build tools 36.0.0, platform `android-36`, Java 17):
 
-1. `cargo build --target aarch64-linux-android` of the example or the library, with the clang of the NDK as the linker and as the C and C++ compiler through cargo's variables (`CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER`, `CC_aarch64_linux_android`, `CXX_...`, `AR_...`). The result is `lib<name>.so`; `llvm-strip --strip-unneeded` of the NDK removes what the loader does not need.
+1. `cargo build --target aarch64-linux-android` of the example or the library, with the pinned nightly toolchain and the standard library built along (section 5.1), with the clang of the NDK as the linker and as the C and C++ compiler through cargo's variables (`CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER`, `CC_aarch64_linux_android`, `CXX_...`, `AR_...`), and with the static C++ runtime named for the build scripts that compile C++ (`CXXSTDLIB_<target>=c++_static`: the `cc` crate names the shared runtime by default, and the package would have to carry `libc++_shared.so`; the Skia binary links the static one, so the library has one C++ runtime). The result is `lib<name>.so`; `llvm-strip --strip-unneeded` of the NDK removes what the loader does not need. The script refuses a library that exports no `JNI_OnLoad` or that needs anything but libraries of the system.
 2. `javac` compiles the Java layer (and the Java sources of the application, if it has any) against `android.jar` of the platform; `d8` turns the classes into `classes.dex`.
 3. `aapt2 compile` and `aapt2 link` make the package from the manifest and the resources (the manifest is a template of the script: the application id, the label, the library name, the activity class; an application may bring its own).
 4. `zip` adds `classes.dex` and `lib/arm64-v8a/lib<name>.so`; `zipalign` aligns; `apksigner` signs with a debug key that `keytool` generates once under the build directory.
@@ -257,16 +257,32 @@ The smoke example (`examples/android_smoke.rs`, an APK) asks the system and not 
 | a touch sequence injected by the script (`input tap`, `input swipe`) arrives as pointer pressed, moved and released at the right logical position | pointer input |
 | the activity finishes itself and the top-level is disposed | the lifecycle of stage 1 |
 
-The script runs the example twice: with the default options (EGL) and with `Software` (an intent extra).
+The script runs the example twice: with the default options (EGL) and with `Software` (a properties file in the files directory of the application, because the platform is initialised before an activity and its intent exist). The touch position the script injects is a pixel of the view, which is a pixel of the screen while the window is displayed edge to edge (always on API 35 and later).
 
 **What an emulator run cannot show:** a real GPU driver (the emulator's OpenGL ES is SwiftShader or a translation to the host), more than one finger (the shell injects one pointer), a stylus or a mouse, a hardware keyboard, rotation and multi-window during a frame, other API levels than 36, other densities than the device's, 16 KB page devices, and performance.
+
+### 10.1 Measured on the emulator (2026-10-10) **[E]**
+
+The device `ferroui_api36` (Pixel 7, Android 16, API 36, `arm64-v8a`, 1080 by 2400 at 420 dpi), headless on an Apple Silicon Mac, `-gpu swiftshader_indirect`. Three runs:
+
+| Run | Result |
+|---|---|
+| 1 | The application aborted at start, in both modes, before any code of the backend ran: the keys of thread-local storage (section 5.1). |
+| 2, the library built with the standard library | **Software: every check passes.** EGL: every check but the last; the activity was destroyed nine seconds after `finish` (the close transition of the system), one second after the application stopped waiting. The catalog did not load: its library needed `libc++_shared.so` (section 9, step 1). |
+| 3, the wait raised to 40 s, the C++ runtime static | **Both modes pass every check** (`SMOKE PASSED`), and **the ControlCatalog starts and shows its pages** (`CATALOG PASSED`: Home, Buttons, TextBlock, ListBox, Image, Calendar, a picture of each). |
+
+What the checks of run 3 say, the same in both modes unless noted: the client size is 411.43 by 914.29 at scaling 2.625, a surface of 1080 by 2400 pixels; one screen, primary, "Built-in Screen", bounds 1080 by 2400, scaling 2.625, portrait; the window is displayed edge to edge (forced on API 36) with a safe area of 51.8 at the top and 24 at the bottom; the dispatcher timer fires and a job posted from a thread the virtual machine did not start runs on the main thread; three frames are drawn on the thread `Render Thread` and read back from a Skia surface of 1080 by 2400 pixels (EGL: a GPU surface; software: raster, the buffer of the native window); the three pixels read back are exactly the colours drawn; the line of text has 8495 nearly white pixels (8493 in software): the font manager of Skia on Android finds the default font of the system; the tap arrives as a pointer pressed within a fifth of a logical pixel of where it was injected, and the tap and the swipe as 2 pressed, 8 to 14 moved and 2 released events; the activity finishes, the view is released and the top-level disposed.
+
+The catalog (a debug build, 230 MB of library in a package of 62 MB, EGL): five seconds from loading the library to the main view, with the Fluent theme from compiled markup, the embedded assets and the fonts of the system; no warning or error of the framework in the log during the run. Pictures: `images/control_catalog_android.png`, `images/control_catalog_android_buttons.png`, `images/android_smoke.png`.
+
+Nothing of the platform code had to be changed for these runs: the two changes were to how the library is built, and one to how long the smoke application waits. What the runs did not exercise: more than one activity, a second start of the activity in the same process, rotation and other configuration changes, the surface lost and created again (pause and resume), the transparency levels, system bar colours and visibility set by an application, more than one pointer, a mouse or a pen, `--gpu host`.
 
 ## 11. Stages
 
 | Stage | Content | What its emulator run proves |
 |---|---|---|
-| **1** | the crate, the Java layer, the bindings; platform initialisation and options; the application, the activity, the view; the top-level over the surface; the dispatcher; the choreographer timer; software and EGL rendering; pointer input; screens; insets; the smoke example; the packaging and emulator scripts | section 10, level 3 |
-| **1b** | the host of the ControlCatalog (`samples/ControlCatalog.Android`) and its script | the catalog starts with the Fluent theme, shows its pages, and a picture of each of a handful is taken |
+| **1** (built and run, 2026-10-10) | the crate, the Java layer, the bindings; platform initialisation and options; the application, the activity, the view; the top-level over the surface; the dispatcher; the choreographer timer; software and EGL rendering; pointer input; screens; insets; the smoke example; the packaging and emulator scripts | section 10, level 3 |
+| **1b** (built and run, 2026-10-10) | the host of the ControlCatalog (`samples/ControlCatalog.Android`) and its script | the catalog starts with the Fluent theme, shows its pages, and a picture of each of a handful is taken |
 | 2a | keyboard: `AndroidKeyboardEventsHelper`, `AndroidKeyInterop`, `AndroidKeyboardDevice` | key events injected by the script (`input keyevent`, `input text`) arrive as key down, up and text |
 | 2b | the input method: `AndroidInputMethod`, the input connection (`AvaloniaInputConnection`), `TextEditBuffer`, `EditCommand`, the insets animation of the input pane | text composed through the soft keyboard of the emulator; upstream's editing tests of the buffer on the host |
 | 2c | lifecycle: pause and resume, surface loss and re-creation, `onNewIntent` and protocol and file activation, configuration changes (rotation, night mode), the back button (`BackPressedCallback`, `AndroidSystemNavigationManager`) | the script sends the application to the background and back, rotates, presses back |
@@ -278,7 +294,9 @@ The script runs the example twice: with the default options (EGL) and with `Soft
 
 ## 12. CI
 
-A job on the Ubuntu runner builds the native library of the smoke example and its package. The runner image has an Android SDK (`ANDROID_HOME`) with build tools, platforms and several NDK versions; the job installs the pinned NDK version with `sdkmanager` when it is missing and names it to the script. No emulator runs in CI: a hosted Linux runner can run the x86-64 emulator with KVM, but the Skia binary for `x86_64-linux-android` is not verified (section 5) and a boot costs minutes of a job that would be flaky; the emulator run stays with the development machine until that is worth it.
+The job `android` of `.github/workflows/ci.yml`, on the Ubuntu runner: the host tests of the crate; the package of the smoke application built by `scripts/android/apk.sh` (with the nightly toolchain of section 5.1, installed with `rustup` and its component `rust-src`); the Skia feature set of the target checked; the ControlCatalog host checked for the target with the stable toolchain. The runner image has an Android SDK (`ANDROID_HOME`) with build tools, platforms and several NDK versions **[R]**; the job prints what it has and installs the pinned NDK, build tools and platform with `sdkmanager` when they are missing. The job had not run when this was written.
+
+No emulator runs in CI: a hosted Linux runner can run the x86-64 emulator with KVM, but the Skia binary for `x86_64-linux-android` is not verified (section 5) and a boot costs minutes of a job that would be flaky; the emulator runs stay with the development machine (section 10.1) until that is worth it.
 
 ## 13. Deviations
 
