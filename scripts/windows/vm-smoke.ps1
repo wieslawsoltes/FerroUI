@@ -64,8 +64,10 @@
   Run although the sources carry no mark of a completed sync. By default the script refuses a
   source tree without the file .vm-sync-commit (written last by scripts/windows/vm-sync.sh, with
   the commit that was synced) or with the file .vm-sync-in-progress (a sync that is running or was
-  interrupted): a run once built a tree that was half synced. A checkout with Git needs no mark:
-  its commit is asked of Git.
+  interrupted): a run once built a tree that was half synced. The files are then compared with the
+  manifest of the sync (.vm-sync-manifest: sizes and SHA-256), and a tree that differs from it or
+  has none is refused too: a machine that was suspended during a sync once served old contents of
+  replaced files. A checkout with Git needs no mark: its commit is asked of Git.
 
 .PARAMETER HelloRepeat
   How many times the run of hello_window with the default options is made (to look for a failure
@@ -80,7 +82,7 @@
   on every machine or after every start), never through its UNC path, which cmd refuses as a
   working directory. <S> stands for that letter:
 
-  powershell -NoProfile -ExecutionPolicy Bypass -File <S>:\ferroui-vm-windows\src\scripts\windows\vm-smoke.ps1 -TargetDir C:\ferroui-target -Jobs 3 -InteractiveUser <user> -Desktop -Report <S>:\ferroui-vm-windows\vm-smoke-report.txt
+  powershell -NoProfile -ExecutionPolicy Bypass -File <S>:\ferroui-vm-windows\src-<commit>\scripts\windows\vm-smoke.ps1 -TargetDir C:\ferroui-target -Jobs 3 -InteractiveUser <user> -Desktop -Report <S>:\ferroui-vm-windows\vm-smoke-report.txt
 #>
 param(
     [Parameter(Mandatory = $true)][string]$TargetDir,
@@ -180,7 +182,60 @@ if (Test-Path $syncRunning) {
     exit 3
 }
 if (Test-Path $syncCommit) {
-    Say ("sources: commit {0} (synced {1})" -f ((Get-Content $syncCommit) -join ' '), (Get-Item $syncCommit).LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss'))
+    # Read through the file API and not through the provider of the shell: on a shared folder the
+    # two once disagreed about a file that had just been replaced (the test saw it, the read
+    # returned nothing).
+    $markText = ''
+    $markTime = 'at an unknown time'
+    try {
+        $markText = ([System.IO.File]::ReadAllText($syncCommit)).Trim()
+        $markTime = [System.IO.File]::GetLastWriteTime($syncCommit).ToString('yyyy-MM-dd HH:mm:ss')
+    } catch {
+        $markText = ''
+    }
+    if (-not $markText) {
+        Say "REFUSED: the mark of the sync ($syncCommit) exists and cannot be read, or is empty: the machine does not see the folder as the host wrote it. Sync again (a new directory) and start the script from there."
+        exit 3
+    }
+    Say "sources: commit $markText (synced $markTime)"
+
+    # The sync lists every file with its size and its SHA-256. What this machine reads is compared
+    # with the list: a machine that was suspended during a sync served old contents of replaced
+    # files afterwards, under the mark of the new commit.
+    $manifest = Join-Path $Source '.vm-sync-manifest'
+    if (Test-Path $manifest) {
+        $listed = 0
+        $different = New-Object System.Collections.Generic.List[string]
+        $sha = [System.Security.Cryptography.SHA256]::Create()
+        foreach ($line in [System.IO.File]::ReadAllLines($manifest)) {
+            if (-not $line) { continue }
+            $parts = $line -split '  ', 3
+            if ($parts.Count -ne 3) { continue }
+            $listed++
+            $file = Join-Path $Source ($parts[2] -replace '/', '\')
+            try {
+                $bytes = [System.IO.File]::ReadAllBytes($file)
+                $sum = -join ($sha.ComputeHash($bytes) | ForEach-Object { $_.ToString('x2') })
+                if (($bytes.Length -ne [int64]$parts[1]) -or ($sum -ne $parts[0])) {
+                    $different.Add(("{0} ({1} byte(s) here, {2} in the manifest)" -f $parts[2], $bytes.Length, $parts[1]))
+                }
+            } catch {
+                $different.Add("$($parts[2]) (cannot be read: $($_.Exception.Message))")
+            }
+        }
+        if ($different.Count -gt 0) {
+            Say ("REFUSED: {0} of {1} file(s) differ from the manifest of the sync: the machine does not see the folder as the host wrote it." -f $different.Count, $listed)
+            $different | Select-Object -First 10 | ForEach-Object { Say "    $_" }
+            Say "Sync again (scripts/windows/vm-sync.sh makes a new directory) and start the script from there."
+            exit 3
+        }
+        Say "sources: $listed file(s) are the ones of the manifest of the sync (sizes and SHA-256)"
+    } elseif ($AllowUnmarkedSource) {
+        Say "sources: NOT COMPARED: the tree has no manifest of its sync (.vm-sync-manifest); run because of -AllowUnmarkedSource"
+    } else {
+        Say "REFUSED: the sources have no manifest of their sync ($manifest): they were synced by an older vm-sync.sh. Sync again, or pass -AllowUnmarkedSource."
+        exit 3
+    }
 } elseif ((Test-Path (Join-Path $Source '.git')) -and (Get-Command git.exe -ErrorAction SilentlyContinue)) {
     $head = (cmd /c "git -C `"$Source`" rev-parse HEAD 2>&1") -join ' '
     $dirty = @(cmd /c "git -C `"$Source`" status --porcelain 2>&1").Count

@@ -2298,6 +2298,18 @@ mod native {
         unsafe { ime::ImmSetCandidateWindow(himc(context), (candidate as *const super::CANDIDATEFORM).cast()) != 0 }
     }
 
+    /// `ImmIsIME`: whether a keyboard layout has an input method editor.
+    pub fn imm_is_ime(hkl: isize) -> bool {
+        // SAFETY: a handle.
+        unsafe { ime::ImmIsIME(h(hkl)) != 0 }
+    }
+
+    /// `ImmGetOpenStatus`: whether the input method of a context is open.
+    pub fn imm_get_open_status(context: isize) -> bool {
+        // SAFETY: a handle.
+        unsafe { ime::ImmGetOpenStatus(himc(context)) != 0 }
+    }
+
     /// `ImmGetCandidateWindow`: where the candidate window of an index was
     /// last put; `None` when the context has no such form.
     pub fn imm_get_candidate_window(context: isize, index: u32) -> Option<super::CANDIDATEFORM> {

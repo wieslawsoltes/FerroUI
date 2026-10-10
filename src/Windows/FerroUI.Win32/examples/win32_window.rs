@@ -258,8 +258,9 @@ mod windows {
         ITextInputMethodImpl, TextInputMethodClient, TextInputMethodClientEvents, TextSelection,
     };
     use ferroui_win32::interop::unmanaged_methods::{
-        get_active_window, get_caret_pos, imm_get_candidate_window, imm_get_context, imm_notify_ime, imm_release_context,
-        imm_set_composition_string, post_message, send_message, WindowsMessage,
+        get_active_window, get_caret_pos, get_keyboard_layout, imm_get_candidate_window, imm_get_composition_string,
+        imm_get_context, imm_get_open_status, imm_is_ime, imm_notify_ime, imm_release_context, imm_set_composition_string,
+        post_message, send_message, WindowsMessage,
     };
     use ferroui_win32::{Win32CompositionMode, Win32Platform, Win32PlatformOptions, Win32RenderingMode};
     use std::cell::{Cell, RefCell};
@@ -774,26 +775,49 @@ mod windows {
         let text = state.seen.text.borrow().clone();
         report.check("character after composing", text.as_deref() == Some("y"), format!("text input seen: {text:?}"));
 
-        // With an input method editor in the session the system takes a
-        // composition string and sends the messages itself.
+        // The system is asked to take a composition string and then to
+        // complete it. What it sends for the first depends on the session:
+        // an input method editor reports the string with composition
+        // messages (at once, or later through its own queue); without one
+        // the input context only keeps the string. Completing it is the
+        // same everywhere: the system starts a composition, sends the
+        // result and ends it, and the result has to arrive as raw text
+        // input of the window, through the arm of `WM_IME_COMPOSITION`.
+        let layout = get_keyboard_layout(0);
+        report.info(
+            "keyboard layout",
+            format!(
+                "{:#010x}; it has an input method editor: {}; the input method of the context is open: {}",
+                layout as usize & 0xFFFF_FFFF,
+                imm_is_ime(layout),
+                imm_get_open_status(himc)
+            ),
+        );
+        const COMPOSED: &str = "\u{306b}\u{307b}\u{3093}";
         client.preedit.borrow_mut().clear();
         *state.seen.text.borrow_mut() = None;
-        let taken = imm_set_composition_string(himc, "\u{306b}\u{307b}\u{3093}");
-        if taken {
+        if imm_set_composition_string(himc, COMPOSED) {
+            let held = imm_get_composition_string(himc, 0x0008 /* GCS_COMPSTR */);
             let preedit = client.preedit.borrow().clone();
-            report.check(
-                "composition string through the system",
-                preedit.iter().any(|(text, _)| text.as_deref() == Some("\u{306b}\u{307b}\u{3093}")),
-                format!("ImmSetCompositionString was taken; the client was given {preedit:?}"),
+            report.info(
+                "composition string taken by the system",
+                format!(
+                    "the input context holds {held:?}; composition messages so far gave the client {preedit:?} (none without an input method editor, which is what reports a string)"
+                ),
             );
-            // The composition is completed: its text is committed.
+            client.preedit.borrow_mut().clear();
             imm_notify_ime(himc, 21 /* NI_COMPOSITIONSTR */, 1 /* CPS_COMPLETE */, 0);
             let text = state.seen.text.borrow().clone();
-            report.info("composition completed", format!("text input seen: {text:?}; the client was given {:?}", client.preedit.borrow()));
+            let preedit = client.preedit.borrow().clone();
+            report.check(
+                "composition completed by the system",
+                text.as_deref() == Some(COMPOSED) && preedit.last() == Some(&(None, None)),
+                format!("text input seen: {text:?}; the client was given {preedit:?}"),
+            );
         } else {
             report.info(
                 "composition string through the system",
-                "ImmSetCompositionString was refused: the keyboard layout of the session has no input method editor",
+                "ImmSetCompositionString was refused: the input context of the session takes no composition string",
             );
         }
         imm_release_context(hwnd, himc);
