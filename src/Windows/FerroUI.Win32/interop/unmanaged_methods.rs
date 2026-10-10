@@ -1643,6 +1643,17 @@ pub struct BgraPixels {
     pub height: i32,
 }
 
+/// `COMDLG_FILTERSPEC` of the interop declarations: a file type of a
+/// file dialog, as two strings of UTF-16 code units with a terminator that
+/// the caller keeps alive while the dialog reads them.
+#[repr(C)]
+#[derive(Clone, Copy, Debug)]
+#[allow(missing_docs)]
+pub struct COMDLG_FILTERSPEC {
+    pub psz_name: *const u16,
+    pub psz_spec: *const u16,
+}
+
 /// `MessageFilterFlag` of the interop declarations: the values the system uses, as constants.
 pub struct MessageFilterFlag;
 
@@ -1824,6 +1835,7 @@ mod native {
     use windows_sys::Win32::Foundation as wf;
     use windows_sys::Win32::Graphics::Dwm as dwm;
     use windows_sys::Win32::Graphics::Gdi as gdi;
+    use windows_sys::Win32::Storage::FileSystem as fs;
     use windows_sys::Win32::System::DataExchange as dx;
     use windows_sys::Win32::System::Com as com;
     use windows_sys::Win32::System::Com::Marshal as marshal;
@@ -2979,6 +2991,127 @@ mod native {
     pub const APTTYPE_STA: i32 = com::APTTYPE_STA;
     /// `APTTYPE_MAINSTA`: the main single-threaded apartment.
     pub const APTTYPE_MAINSTA: i32 = com::APTTYPE_MAINSTA;
+
+    /// `SetParent`: makes a window a child of another; the previous
+    /// parent, 0 when the call fails.
+    pub fn set_parent(child: isize, new_parent: isize) -> isize {
+        // SAFETY: two handles; a handle that is not a window makes the
+        // call fail.
+        unsafe { wm::SetParent(h(child), h(new_parent)) as isize }
+    }
+
+    /// `MoveWindow`: the position and the size of a window in the
+    /// coordinates of its parent.
+    pub fn move_window(hwnd: isize, x: i32, y: i32, width: i32, height: i32, repaint: bool) -> bool {
+        // SAFETY: plain values.
+        unsafe { wm::MoveWindow(h(hwnd), x, y, width, height, repaint as i32) != 0 }
+    }
+
+    /// `SetLayeredWindowAttributes` with `LWA_ALPHA`: the opacity of a
+    /// layered window, 255 for opaque.
+    pub fn set_layered_window_alpha(hwnd: isize, alpha: u8) -> bool {
+        // SAFETY: plain values; no colour key.
+        unsafe { wm::SetLayeredWindowAttributes(h(hwnd), 0, alpha, wm::LWA_ALPHA) != 0 }
+    }
+
+    /// `InvalidateRect` without a rectangle: the whole client area of a
+    /// window needs painting.
+    pub fn invalidate_window(hwnd: isize, erase: bool) -> bool {
+        // SAFETY: a null rectangle stands for the whole client area.
+        unsafe { gdi::InvalidateRect(h(hwnd), std::ptr::null(), erase as i32) != 0 }
+    }
+
+    /// The window procedure of a window that does nothing of its own: the
+    /// default processing of the system.
+    ///
+    /// # Safety
+    /// Called by the system with the parameters of a message.
+    pub unsafe extern "system" fn default_wnd_proc(hwnd: wf::HWND, msg: u32, w_param: usize, l_param: isize) -> isize {
+        // SAFETY: the parameters of the message, passed on unchanged.
+        unsafe { wm::DefWindowProcW(hwnd, msg, w_param, l_param) }
+    }
+
+    /// `GetLogicalDrives`: the drive letters in use, bit 0 for `A`.
+    pub fn get_logical_drives() -> u32 {
+        // SAFETY: the call takes nothing.
+        unsafe { fs::GetLogicalDrives() }
+    }
+
+    /// `GetVolumeInformation` for the root directory of a drive (`C:\`):
+    /// the label of its volume. `None` when the call fails (a drive
+    /// without a medium).
+    pub fn get_volume_label(root: &str) -> Option<String> {
+        let root = to_wide(root);
+        let mut label = [0u16; 261];
+        // SAFETY: a null-terminated path and a buffer of the length given,
+        // which the system writes a terminated string to; nothing else is
+        // asked for.
+        let ok = unsafe {
+            fs::GetVolumeInformationW(
+                root.as_ptr(),
+                label.as_mut_ptr(),
+                label.len() as u32,
+                std::ptr::null_mut(),
+                std::ptr::null_mut(),
+                std::ptr::null_mut(),
+                std::ptr::null_mut(),
+                0,
+            )
+        } != 0;
+        ok.then(|| from_wide(&label))
+    }
+
+    /// `GetDiskFreeSpaceEx` for a directory: the size of its volume in
+    /// bytes. `None` when the call fails.
+    pub fn get_disk_total_size(root: &str) -> Option<u64> {
+        let root = to_wide(root);
+        let mut total = 0u64;
+        // SAFETY: a null-terminated path and a number of this frame the
+        // system writes to; the other two numbers are not asked for.
+        let ok = unsafe { fs::GetDiskFreeSpaceExW(root.as_ptr(), std::ptr::null_mut(), &mut total, std::ptr::null_mut()) } != 0;
+        ok.then_some(total)
+    }
+
+    /// `CoInitializeEx` for a single-threaded apartment: COM on the
+    /// calling thread. The result code (`S_OK`, `S_FALSE` when the thread
+    /// already has COM, or a failure).
+    pub fn co_initialize_apartment_threaded() -> i32 {
+        // SAFETY: the reserved argument is null; the flag is
+        // `COINIT_APARTMENTTHREADED`.
+        unsafe { com::CoInitializeEx(std::ptr::null(), 2) }
+    }
+
+    /// `CoUninitialize`: ends what a successful `CoInitializeEx` of the
+    /// calling thread began.
+    pub fn co_uninitialize() {
+        // SAFETY: the caller pairs it with an initialisation of the thread
+        // that succeeded; no interface pointer of the thread is used after.
+        unsafe { com::CoUninitialize() }
+    }
+
+    /// `SHCreateItemFromParsingName` without a bind context: an interface
+    /// pointer of the shell item of a path, which the caller owns, or the
+    /// failure code.
+    pub fn sh_create_item_from_parsing_name(path: &str, iid: &ferroui_microcom::Guid) -> Result<*mut c_void, i32> {
+        let path = to_wide(path);
+        let mut item = std::ptr::null_mut();
+        // SAFETY: a null-terminated string and an identifier that live
+        // through the call; the result is written to a pointer of this
+        // frame.
+        let result = unsafe {
+            shell::SHCreateItemFromParsingName(
+                path.as_ptr(),
+                std::ptr::null_mut(),
+                (iid as *const ferroui_microcom::Guid).cast(),
+                &mut item,
+            )
+        };
+        if result == 0 {
+            Ok(item)
+        } else {
+            Err(result)
+        }
+    }
 
     /// `GetCursorPos`: the position of the cursor on the desktop, in
     /// pixels; the origin when the call fails.

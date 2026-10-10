@@ -1065,6 +1065,59 @@ mod windows {
                     None => report.check("tray icon", false, "the platform creates no tray icon"),
                 }
 
+                println!("-- native control host");
+                // The window offers a host of native controls. The host
+                // makes a child window of its own kind (the default
+                // child), which is attached to the window through a
+                // holder; shown in bounds the child has their size in
+                // pixels and is visible, hidden it is not.
+                {
+                    use ferroui_controls::platform::INativeControlHostImpl;
+                    use ferroui_win32::interop::unmanaged_methods::{get_client_rect, is_window_visible};
+
+                    let host = window
+                        .try_get_feature(std::any::TypeId::of::<dyn INativeControlHostImpl>())
+                        .and_then(|feature| feature.downcast::<Rc<dyn INativeControlHostImpl>>().ok());
+                    match (host, window.handle()) {
+                        (Some(host), Some(parent)) => {
+                            let host: Rc<dyn INativeControlHostImpl> = (*host).clone();
+                            let compatible = host.is_compatible_with(&*parent);
+                            let child = host.create_default_child(parent);
+                            let child_handle: Rc<dyn ferroui_controls::platform::IPlatformHandle> = child.clone();
+                            let attachment = host.create_new_attachment(child_handle);
+                            let scaling = window.render_scaling();
+                            attachment.show_in_bounds(Rect::new(20.0, 30.0, 120.0, 60.0));
+                            let shown = get_client_rect(child.handle());
+                            let visible = is_window_visible(child.handle());
+                            let expected = ((120.0 * scaling) as i32, (60.0 * scaling) as i32);
+                            attachment.hide_with_size(Size::new(120.0, 60.0));
+                            let hidden = is_window_visible(child.handle());
+                            report.check(
+                                "native control host",
+                                compatible
+                                    && child.handle() != 0
+                                    && (shown.right - shown.left, shown.bottom - shown.top) == expected
+                                    && visible
+                                    && !hidden
+                                    && attachment.attached_to().is_some(),
+                                format!(
+                                    "a child window {:#x} attached; shown in 120 by 60 at scaling {scaling} it is {} by {} pixels (visible: {visible}); visible after hiding: {hidden}",
+                                    child.handle(),
+                                    shown.right - shown.left,
+                                    shown.bottom - shown.top
+                                ),
+                            );
+                            attachment.dispose();
+                            child.destroy();
+                        }
+                        (host, _) => report.check(
+                            "native control host",
+                            false,
+                            format!("the window offers a host of native controls: {}", host.is_some()),
+                        ),
+                    }
+                }
+
                 println!("-- dispatcher");
                 // Work posted from another thread has to wake the message
                 // loop: the signal of the dispatcher.

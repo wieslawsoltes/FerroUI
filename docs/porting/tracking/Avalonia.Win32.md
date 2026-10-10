@@ -10,15 +10,15 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Windows/FerroUI.Win32` (exists) |
 | Crate | `ferroui-win32` |
 | Phase / priority | 1 - desktop (Windows) / P0 |
-| Files | 53/95 (55.8%) |
-| Types | 150/276 (54.3%) |
+| Files | 57/95 (60.0%) |
+| Types | 155/276 (56.2%) |
 | Members | 0/2605 (0.0%) |
 
 This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
 
 ## Files
 
-### `(project root)` - files 34/43, types 43/52, members 0/358
+### `(project root)` - files 38/43, types 47/52, members 0/358
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
@@ -50,12 +50,12 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `TrayIconImpl.cs` | `tray_icon_impl.rs` | present | 1/1 | - | 11 |  |
 | `Win32DispatcherImpl.cs` | `win32_dispatcher_impl.rs` | present | 1/1 | - | 14 |  |
 | `Win32GlManager.cs` | `win32_gl_manager.rs` | present | 1/1 | - | 1 |  |
-| `Win32NativeControlHost.cs` | `win32_native_control_host.rs` | missing | 0/1 | `Win32NativeControlHost` | 6 |  |
+| `Win32NativeControlHost.cs` | `win32_native_control_host.rs` | present | 1/1 | - | 6 |  |
 | `Win32NativeToManagedMenuExporter.cs` | `win32_native_to_managed_menu_exporter.rs` | present | 1/1 | - | 2 |  |
 | `Win32Platform.cs` | `win32_platform.rs` | present | 2/2 | - | 23 |  |
 | `Win32PlatformOptions.cs` | `win32_platform_options.rs` | present | 4/4 | - | 20 |  |
 | `Win32PlatformSettings.cs` | `win32_platform_settings.rs` | present | 1/1 | - | 7 |  |
-| `Win32StorageProvider.cs` | `win32_storage_provider.rs` | missing | 0/1 | `Win32StorageProvider` | 7 |  |
+| `Win32StorageProvider.cs` | `win32_storage_provider.rs` | present | 1/1 | - | 7 |  |
 | `Win32TopLevelSceneInfo.cs` | `win32_top_level_scene_info.rs` | present | 1/1 | - | 2 |  |
 | `Win32TypeExtensions.cs` | `win32_type_extensions.rs` | present | 1/1 | - | 2 |  |
 | `WinScreen.cs` | `win_screen.rs` | present | 1/1 | - | 3 |  |
@@ -63,8 +63,8 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `WindowImpl.CustomCaptionProc.cs` | `window_impl_custom_caption_proc.rs` | missing | 1/1 | - | 1 | types found in `window_impl.rs` (add to path-overrides.toml) |
 | `WindowImpl.WndProc.cs` | `window_impl.rs` | present | 1/1 | - | 3 | partial merged into main file |
 | `WindowImpl.cs` | `window_impl.rs` | present | 2/2 | - | 90 |  |
-| `WindowsMountedVolumeInfoListener.cs` | `windows_mounted_volume_info_listener.rs` | missing | 0/1 | `WindowsMountedVolumeInfoListener` | 3 |  |
-| `WindowsMountedVolumeInfoProvider.cs` | `windows_mounted_volume_info_provider.rs` | missing | 0/1 | `WindowsMountedVolumeInfoProvider` | 1 |  |
+| `WindowsMountedVolumeInfoListener.cs` | `windows_mounted_volume_info_listener.rs` | present | 1/1 | - | 3 |  |
+| `WindowsMountedVolumeInfoProvider.cs` | `windows_mounted_volume_info_provider.rs` | present | 1/1 | - | 1 |  |
 
 ### `DComposition` - files 0/6, types 1/8, members 0/34
 
@@ -100,12 +100,12 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `WindowsKeyboardDevice.cs` | `input/windows_keyboard_device.rs` | present | 1/1 | - | 2 |  |
 | `WindowsMouseDevice.cs` | `input/windows_mouse_device.rs` | present | 2/2 | - | 4 |  |
 
-### `Interop` - files 3/3, types 70/119, members 0/1564
+### `Interop` - files 3/3, types 71/119, members 0/1564
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
 | `TaskBarList.cs` | `interop/task_bar_list.rs` | present | 1/1 | - | 2 |  |
-| `UnmanagedMethods.cs` | `interop/unmanaged_methods.rs` | partial | 67/115 | `UnmanagedMethods.TimerProc`, `UnmanagedMethods.TimeCallback`, `UnmanagedMethods.WaitOrTimerCallback`, `UnmanagedMethods.PointerDeviceChangeFlags`, `UnmanagedMethods.BitmapColorSpace`, `UnmanagedMethods.BitmapIntent`, `UnmanagedMethods.DIBColorTable`, `UnmanagedMethods.TrackPopupMenuFlags`, `UnmanagedMethods.PenMask`, `UnmanagedMethods.TouchFlags`, `UnmanagedMethods.POINTER_TOUCH_INFO`, `UnmanagedMethods.POINTER_PEN_INFO`, `UnmanagedMethods.POINTER_INFO`, `UnmanagedMethods.RGBQUAD`, `UnmanagedMethods.BITMAP`, `UnmanagedMethods.CIEXYZTRIPLE`, `UnmanagedMethods.CIEXYZ`, `UnmanagedMethods.EnumWindowsProc`, `UnmanagedMethods.GetAncestorFlags`, `UnmanagedMethods.LayeredWindowFlags`, `UnmanagedMethods.DWM_BLURBEHIND`, `UnmanagedMethods.RTL_OSVERSIONINFOEX`, `UnmanagedMethods.GCS`, `UnmanagedMethods.CANDIDATEFORM`, `UnmanagedMethods.COMPOSITIONFORM`, `UnmanagedMethods.LOGFONT`, `UnmanagedMethods.WindowCompositionAttributeData`, `UnmanagedMethods.WindowCompositionAttribute`, `UnmanagedMethods.AccentState`, `UnmanagedMethods.AccentFlags`, `UnmanagedMethods.AccentPolicy`, `UnmanagedMethods.MSG`, `UnmanagedMethods.PAINTSTRUCT`, `UnmanagedMethods.NCCALCSIZE_PARAMS`, `UnmanagedMethods.TRACKMOUSEEVENT`, `UnmanagedMethods.WNDCLASSEX`, `UnmanagedMethods.TOUCHINPUT`, `UnmanagedMethods.ICONINFO`, `UnmanagedMethods.OpenFileNameFlags`, `UnmanagedMethods.COMDLG_FILTERSPEC`, `UnmanagedMethods.MarkFullscreenWindow`, `UnmanagedMethods.SetOverlayIcon`, `UnmanagedMethods.HrInit`, `UnmanagedMethods.ITaskBarList3VTable`, `UnmanagedMethods.DROPFILES`, `PixelFormatDescriptorFlags`, `PixelFormatDescriptor`, `NIIF` | 1542 |  |
+| `UnmanagedMethods.cs` | `interop/unmanaged_methods.rs` | partial | 68/115 | `UnmanagedMethods.TimerProc`, `UnmanagedMethods.TimeCallback`, `UnmanagedMethods.WaitOrTimerCallback`, `UnmanagedMethods.PointerDeviceChangeFlags`, `UnmanagedMethods.BitmapColorSpace`, `UnmanagedMethods.BitmapIntent`, `UnmanagedMethods.DIBColorTable`, `UnmanagedMethods.TrackPopupMenuFlags`, `UnmanagedMethods.PenMask`, `UnmanagedMethods.TouchFlags`, `UnmanagedMethods.POINTER_TOUCH_INFO`, `UnmanagedMethods.POINTER_PEN_INFO`, `UnmanagedMethods.POINTER_INFO`, `UnmanagedMethods.RGBQUAD`, `UnmanagedMethods.BITMAP`, `UnmanagedMethods.CIEXYZTRIPLE`, `UnmanagedMethods.CIEXYZ`, `UnmanagedMethods.EnumWindowsProc`, `UnmanagedMethods.GetAncestorFlags`, `UnmanagedMethods.LayeredWindowFlags`, `UnmanagedMethods.DWM_BLURBEHIND`, `UnmanagedMethods.RTL_OSVERSIONINFOEX`, `UnmanagedMethods.GCS`, `UnmanagedMethods.CANDIDATEFORM`, `UnmanagedMethods.COMPOSITIONFORM`, `UnmanagedMethods.LOGFONT`, `UnmanagedMethods.WindowCompositionAttributeData`, `UnmanagedMethods.WindowCompositionAttribute`, `UnmanagedMethods.AccentState`, `UnmanagedMethods.AccentFlags`, `UnmanagedMethods.AccentPolicy`, `UnmanagedMethods.MSG`, `UnmanagedMethods.PAINTSTRUCT`, `UnmanagedMethods.NCCALCSIZE_PARAMS`, `UnmanagedMethods.TRACKMOUSEEVENT`, `UnmanagedMethods.WNDCLASSEX`, `UnmanagedMethods.TOUCHINPUT`, `UnmanagedMethods.ICONINFO`, `UnmanagedMethods.OpenFileNameFlags`, `UnmanagedMethods.MarkFullscreenWindow`, `UnmanagedMethods.SetOverlayIcon`, `UnmanagedMethods.HrInit`, `UnmanagedMethods.ITaskBarList3VTable`, `UnmanagedMethods.DROPFILES`, `PixelFormatDescriptorFlags`, `PixelFormatDescriptor`, `NIIF` | 1542 |  |
 | `Win32Icon.cs` | `interop/win32_icon.rs` | partial | 2/3 | `Win32Icon.ICONDIR` | 20 |  |
 
 ### `OpenGl` - files 0/7, types 0/7, members 0/90

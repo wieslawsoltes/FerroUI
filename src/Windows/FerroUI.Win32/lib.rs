@@ -41,6 +41,11 @@ mod platform_constants;
 mod win32_platform_options;
 mod win32_platform_settings;
 mod tray_icon_impl;
+mod win32_native_control_host;
+mod win32_storage_provider;
+mod windows_mounted_volume_info_listener;
+#[cfg(windows)]
+mod windows_mounted_volume_info_provider;
 mod win32_top_level_scene_info;
 mod win32_type_extensions;
 mod window_impl;
