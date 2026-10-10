@@ -63,7 +63,7 @@ use ferroui_base::logging::LogEventLevel;
 use ferroui_base::media::imaging::{Bitmap, BitmapEncoderOptions, PngBitmapEncoderOptions, RenderTargetBitmap};
 use ferroui_base::platform::{AlphaFormat, PixelFormat};
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
-use ferroui_base::{PixelSize, Ref, Vector, Visual};
+use ferroui_base::{PixelPoint, PixelRect, PixelSize, Ref, Size, Vector, Visual};
 use ferroui_controls::{AppBuilder, Application, Window};
 use ferroui_desktop::AppBuilderDesktopExtensions;
 use std::path::{Path, PathBuf};
@@ -306,34 +306,63 @@ fn fit_window_to_screen(window: &Ref<Window>) {
         return;
     };
     let area = screen.working_area();
-    let scaling = window.render_scaling();
+    let scaling = window.desktop_scaling();
     let client = window.client_size();
     let frame = window.frame_size().unwrap_or(client);
     let position = window.position();
-    let (frame_width, frame_height) = ((frame.width * scaling).ceil() as i32, (frame.height * scaling).ceil() as i32);
     println!(
-        "Screenshots: the window is at {}, {} with a frame of {frame_width} by {frame_height} pixels (client {} by {} at scaling {scaling}); the working area of its screen is {area:?}",
-        position.x, position.y, client.width, client.height
+        "Screenshots: the window is at {}, {} with a frame of {} by {} and a client area of {} by {} (render scaling {}); the working area of its screen is {area:?}, in units of which a unit of the window is {scaling}",
+        position.x,
+        position.y,
+        frame.width,
+        frame.height,
+        client.width,
+        client.height,
+        window.render_scaling()
     );
+    let Some(fitted) = client_size_that_fits(area, position, client, frame, scaling) else {
+        return;
+    };
+    window.set_width(fitted.width);
+    window.set_height(fitted.height);
+    window.set_position(area.position());
+    println!(
+        "Screenshots: the window did not fit its screen: moved to {}, {} with a client area of {} by {}",
+        area.x, area.y, fitted.width, fitted.height
+    );
+}
+
+/// The client size with which a window fits a working area once it is
+/// moved to the corner of the area, or `None` when the window lies within
+/// the area already.
+///
+/// `area` and `position` are in the units of the desktop (what the
+/// platform places windows and reports screens in), `client` and `frame`
+/// in the units of the window, and `desktop_scaling` is how many units of
+/// the desktop one unit of the window is (`Window::desktop_scaling`). It
+/// is not the scaling the window renders with: where the system works in
+/// physical pixels the two are the same (Windows, X11), and where the
+/// system works in logical units it is 1 whatever the window renders with
+/// (Wayland, macOS).
+fn client_size_that_fits(
+    area: PixelRect,
+    position: PixelPoint,
+    client: Size,
+    frame: Size,
+    desktop_scaling: f64,
+) -> Option<Size> {
+    let (frame_width, frame_height) =
+        ((frame.width * desktop_scaling).ceil() as i32, (frame.height * desktop_scaling).ceil() as i32);
     let fits = position.x >= area.x
         && position.y >= area.y
         && position.x + frame_width <= area.right()
         && position.y + frame_height <= area.bottom();
     if fits {
-        return;
+        return None;
     }
-    let width = client.width.min(f64::from(area.width) / scaling - (frame.width - client.width));
-    let height = client.height.min(f64::from(area.height) / scaling - (frame.height - client.height));
-    window.set_width(width.floor());
-    window.set_height(height.floor());
-    window.set_position(area.position());
-    println!(
-        "Screenshots: the window did not fit its screen: moved to {}, {} with a client area of {} by {}",
-        area.x,
-        area.y,
-        width.floor(),
-        height.floor()
-    );
+    let width = client.width.min(f64::from(area.width) / desktop_scaling - (frame.width - client.width));
+    let height = client.height.min(f64::from(area.height) / desktop_scaling - (frame.height - client.height));
+    Some(Size::new(width.floor(), height.floor()))
 }
 
 /// The screenshot run asked for with `FERROUI_SMOKE_SCREENSHOTS`.
@@ -407,5 +436,72 @@ fn smoke_run() {
             Duration::from_millis(ms),
             DispatcherPriority::NORMAL,
         );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::client_size_that_fits;
+    use ferroui_base::{PixelPoint, PixelRect, Size};
+
+    const CATALOG: Size = Size::new(1100.0, 800.0);
+
+    fn frame(client: Size, horizontal: f64, vertical: f64) -> Size {
+        Size::new(client.width + horizontal, client.height + vertical)
+    }
+
+    /// Windows and X11 at scaling 1: the desktop is in pixels and a unit of the window is one.
+    #[test]
+    fn a_window_within_the_working_area_is_left_alone() {
+        let area = PixelRect::new(0, 0, 1920, 1040);
+        let fitted = client_size_that_fits(area, PixelPoint::new(100, 100), CATALOG, frame(CATALOG, 16.0, 39.0), 1.0);
+        assert_eq!(fitted, None);
+    }
+
+    #[test]
+    fn a_window_larger_than_the_working_area_is_shrunk_to_it() {
+        let area = PixelRect::new(0, 0, 1024, 728);
+        let fitted = client_size_that_fits(area, PixelPoint::new(0, 0), CATALOG, frame(CATALOG, 16.0, 39.0), 1.0);
+        assert_eq!(fitted, Some(Size::new(1008.0, 689.0)));
+    }
+
+    #[test]
+    fn a_window_over_the_edge_keeps_its_size_when_it_fits_from_the_corner() {
+        let area = PixelRect::new(0, 0, 1920, 1040);
+        let fitted = client_size_that_fits(area, PixelPoint::new(1500, 600), CATALOG, frame(CATALOG, 16.0, 39.0), 1.0);
+        assert_eq!(fitted, Some(CATALOG));
+    }
+
+    /// Windows and X11 at scaling 2: the desktop is in pixels, the window in units of two pixels.
+    #[test]
+    fn a_desktop_in_pixels_is_divided_by_the_scaling() {
+        let area = PixelRect::new(0, 0, 1920, 1040);
+        let fitted = client_size_that_fits(area, PixelPoint::new(0, 0), CATALOG, frame(CATALOG, 16.0, 39.0), 2.0);
+        assert_eq!(fitted, Some(Size::new(944.0, 481.0)));
+        // 1100 by 800 units are 2200 by 1600 pixels: within a desktop of 3840 by 2160.
+        let large = PixelRect::new(0, 0, 3840, 2120);
+        assert_eq!(client_size_that_fits(large, PixelPoint::new(200, 200), CATALOG, CATALOG, 2.0), None);
+    }
+
+    /// Wayland on an output of scale 2: the screen is 1280 by 800 logical units, the window
+    /// renders at 2 and its desktop scaling is 1. Dividing by the render scaling here gave a
+    /// window of 640 by 400.
+    #[test]
+    fn a_desktop_in_logical_units_is_not_divided_by_the_render_scaling() {
+        let area = PixelRect::new(0, 0, 1280, 800);
+        let tiled = Size::new(1280.0, 800.0);
+        assert_eq!(client_size_that_fits(area, PixelPoint::new(0, 0), tiled, tiled, 1.0), None);
+        assert_eq!(client_size_that_fits(area, PixelPoint::new(0, 0), CATALOG, CATALOG, 1.0), None);
+        let small = PixelRect::new(0, 0, 640, 360);
+        assert_eq!(client_size_that_fits(small, PixelPoint::new(0, 0), CATALOG, CATALOG, 1.0), Some(Size::new(640.0, 360.0)));
+    }
+
+    /// A working area that does not start at the origin (a task bar at the left or the top).
+    #[test]
+    fn a_window_before_the_start_of_the_working_area_is_moved() {
+        let area = PixelRect::new(60, 30, 1860, 1050);
+        let client = Size::new(800.0, 600.0);
+        assert_eq!(client_size_that_fits(area, PixelPoint::new(0, 0), client, client, 1.0), Some(client));
+        assert_eq!(client_size_that_fits(area, PixelPoint::new(60, 30), client, client, 1.0), None);
     }
 }
