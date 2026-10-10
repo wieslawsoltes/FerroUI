@@ -1414,6 +1414,17 @@ mod windows {
 
     pub fn run() -> ExitCode {
         let smoke = std::env::args().any(|argument| argument == "--smoke");
+        if smoke {
+            // A run without a person must end: a panic inside a callback of the dispatcher is
+            // caught there and would leave the steps of the run waiting until the job is
+            // stopped (run 38065160851 waited five minutes after one). The message and the
+            // backtrace are printed, then the process ends with the code of a panic.
+            let default_hook = std::panic::take_hook();
+            std::panic::set_hook(Box::new(move |info| {
+                default_hook(info);
+                std::process::exit(101);
+            }));
+        }
         let probe_angle = std::env::args().any(|argument| argument == "--angle-probe");
 
         // `--rendering software|angle`: the one rendering mode of the run,

@@ -25,6 +25,18 @@ fn main() {
     let manifest_dir = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());
     let out_dir = PathBuf::from(env::var_os("OUT_DIR").unwrap());
 
+    // The example of a window is linked with its application manifest (the versions of Windows
+    // it supports: `examples/win32_window.manifest` says why). The linker of the MSVC tools
+    // embeds a manifest it is given; no resource compiler is needed.
+    let windows_msvc = env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows")
+        && env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("msvc");
+    if windows_msvc {
+        let manifest = manifest_dir.join("examples").join("win32_window.manifest");
+        println!("cargo:rerun-if-changed={}", manifest.display());
+        println!("cargo:rustc-link-arg-examples=/MANIFEST:EMBED");
+        println!("cargo:rustc-link-arg-examples=/MANIFESTINPUT:{}", manifest.display());
+    }
+
     for (idl, generated) in COMPILED {
         let idl_path = manifest_dir.join(idl);
         println!("cargo:rerun-if-changed={}", idl_path.display());
