@@ -32,6 +32,27 @@ Merged, by area (pull requests 89 to 112). The sections below have the state of 
 - **Performance.** Design 09: the native recycling benchmark, allocation counting and the counters behind the feature `perf-counters` (#108). Designs 04 and 03: four changes of the port's machinery, behaviour unchanged (#111).
 - **Tracking.** The mapping data reviewed and the pages regenerated (branch `tracking-and-continuation`), then the entries that need no code written and the pages regenerated again (branch `tracking-false-negatives`); see "What the tracking pages show (2026-10-09)".
 
+## The Linux platform, stage 1 (2026-10-10)
+
+Branch `x11-platform` (not pushed): the crate `ferroui-x11` with stage 1 of `x11-platform.md`, the design document, the tracking of `Avalonia.X11` moved into scope, the Linux branch of `use_platform_detect`, and the CI job `x11`. `CRITICAL-PATH.md`, row 26, has the summary; `DEVIATIONS.md`, "X11 platform", the differences and what is not built.
+
+What was verified, and what was not:
+
+- Compiled for `x86_64-unknown-linux-gnu` from the Mac (`cargo check -p ferroui-x11 --target x86_64-unknown-linux-gnu --all-targets`), and whole on macOS; 163 tests pass on macOS without a server (`cargo test -p ferroui-x11`).
+- **Nothing was run against an X server.** The example cannot be compiled for Linux from the Mac (Skia and HarfBuzz are native), so the first Linux build of the Skia backend and of the HarfBuzz crate in this repository is also the first run of the job. `ferroui-skia`, `ferroui-harfbuzz` and `ferroui-desktop` have never been built for Linux before.
+- The selection and clipboard files and the three screens files were written by sub-agents without a compiler and then compiled and tested here; they compiled with few changes and their tests pass, but they have had less review against upstream than the rest.
+
+What to look for in the first run of the job, step by step:
+
+1. "Skia features of the target" prints an empty list. If the build of `skia-bindings` then starts cloning from `chromium.googlesource.com`, no binary is published for the default feature set on Linux: stop the job and decide the feature set (`x11-platform.md`, section 4).
+2. "Tests of the X11 crate": the same 163 tests as on macOS. A difference would be a type size (`c_ulong`, `c_long`) or a system call (`epoll`, `pipe2` are compiled only on Linux).
+3. "The desktop entry point selects X11 on Linux": the first compile of `ferroui-desktop` for Linux.
+4. "A window on a real X server": the lines `[ok]` or `[FAILED]` per check, then `SMOKE PASSED`. Likely first failures and where to look: the libraries (`Unable to load libX11`: a package is missing from the `apt` list; `x11-dl` opens a library only when every symbol it declares resolves); no pixels (the frame did not arrive: the render thread, `x11_framebuffer_surface.rs`, or the depth of the window, printed by the `depth` check); the size (the scaling Xvfb reports, printed with the check); the close (the route of a client message through `X11EventDispatcher` and `X11Window::on_event`).
+
+Next, in the order of `x11-platform.md`, section 14: 2a GPU rendering (decide the Skia feature set for Linux first: which `gl`/`egl`/`x11`/`vulkan` combination has a published binary; then `X11EglHelper`, `Glx/`, the Ganesh GL GPU of the Skia backend enabled for Linux, then Vulkan); 2b the shared memory framebuffer; 2c input methods (starts the crate `ferroui-freedesktop` with `zbus`); 2d drag and drop; 2e the FreeDesktop services, the GTK dialogs and the GLib dispatcher; 2f session management, the native control host, XEmbed; 3 AT-SPI; 4 Wayland; 5 the framebuffer backend. Before 2a, extend the job with a window manager and synthetic input (section 13 of the design), so that the `_NET_WM` paths and the input translation run against real events.
+
+Tracking: `Avalonia.X11` is in scope at file and type granularity (48 of 88 files, 121 of 291 types with 108 waived as structures of the bindings); its members (4897) are not extracted, because the extraction of that project holds types only. Running the upstream extractor with `"detail": "full"` for the project gives member tracking; the scanner needed two small changes for a project in scope without members (`port_status.py`: the planning data of `projects.json` is overlaid on the extraction, and types are looked for in such a project).
+
 ## In flight on 2026-10-09
 
 Nothing runs in the cloud. In flight locally, each on its own branch, written by a sub-agent without a compiler and validated in the main checkout:
