@@ -23,6 +23,8 @@ pub mod direct_x;
 pub mod input;
 pub mod interop;
 pub mod open_gl;
+pub mod win32_com;
+pub mod win_rt;
 
 mod angle_options;
 mod cursor_factory;
@@ -31,6 +33,7 @@ mod win32_dispatcher_impl;
 mod win32_gl_manager;
 mod platform_constants;
 mod win32_platform_options;
+mod win32_platform_settings;
 mod win32_top_level_scene_info;
 mod win32_type_extensions;
 mod window_impl;
@@ -43,6 +46,8 @@ mod embedded_window_impl;
 #[cfg(windows)]
 mod offscreen_parent_window;
 #[cfg(windows)]
+mod ole_context;
+#[cfg(windows)]
 mod popup_impl;
 #[cfg(windows)]
 mod screen_impl;
@@ -50,8 +55,6 @@ mod screen_impl;
 mod simple_window;
 #[cfg(windows)]
 mod win32_platform;
-#[cfg(windows)]
-mod win32_platform_settings;
 #[cfg(windows)]
 mod win_screen;
 #[cfg(windows)]

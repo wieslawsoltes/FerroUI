@@ -668,6 +668,47 @@ mod windows {
                     None => report.info("clipboard text", "the clipboard is held open by another process"),
                 }
 
+                println!("-- platform settings");
+                // The colours and the language are read through the Windows
+                // Runtime on a system that has its types: the settings
+                // answer either way, and what they answer is printed.
+                let settings = FerroLocator::current().get_required_service::<dyn ferroui_base::platform::IPlatformSettings>();
+                let color_values = settings.get_color_values();
+                report.check(
+                    "colour values",
+                    color_values == settings.get_color_values(),
+                    format!(
+                        "theme {:?}, contrast {:?}, accent {:?}",
+                        color_values.theme_variant(),
+                        color_values.contrast_preference(),
+                        color_values.accent_color1()
+                    ),
+                );
+                let language = settings.preferred_application_language();
+                report.check("preferred language", !language.is_empty(), format!("{language:?}"));
+                // A change of a setting of the system is a message to the
+                // message window of the platform: one that names the colours
+                // makes the settings read them again, and nothing changed,
+                // so no change is reported.
+                let changes = Rc::new(Cell::new(0u32));
+                let subscription = {
+                    let changes = changes.clone();
+                    settings.color_values_changed(Rc::new(move |_| changes.set(changes.get() + 1)))
+                };
+                let setting: Vec<u16> = "ImmersiveColorSet\0".encode_utf16().collect();
+                ferroui_win32::interop::unmanaged_methods::send_message(
+                    Win32Platform::message_window(),
+                    WindowsMessage::WM_SETTINGCHANGE,
+                    0,
+                    setting.as_ptr() as isize,
+                );
+                subscription.dispose();
+                report.check(
+                    "setting change",
+                    changes.get() == 0 && settings.get_color_values() == color_values,
+                    format!("a colour setting change with the same colours reported {} change(s)", changes.get()),
+                );
+
                 println!("-- dispatcher");
                 // Work posted from another thread has to wake the message
                 // loop: the signal of the dispatcher.
