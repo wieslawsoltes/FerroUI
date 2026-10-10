@@ -16,9 +16,7 @@ pub struct IndeiValidationPlugin;
 
 impl IDataValidationPlugin for IndeiValidationPlugin {
     fn match_(&self, reference: &WeakValue, _member_name: &str) -> bool {
-        reference
-            .upgrade()
-            .is_some_and(|t| ModelTypes::find(&*t).is_some_and(|m| m.as_notify_data_error_info(&*t).is_some()))
+        instance(reference).is_some_and(|t| ModelTypes::find(&*t).is_some_and(|m| m.as_notify_data_error_info(&*t).is_some()))
     }
 
     fn start(
@@ -37,6 +35,13 @@ impl IDataValidationPlugin for IndeiValidationPlugin {
     }
 }
 
+/// The object the reference of a binding refers to, as the object whose contracts are
+/// looked up: the object form of a reference type held as its handle (a view model a
+/// binding read from a property typed with the handle), the value itself otherwise.
+fn instance(reference: &WeakValue) -> Option<BoxedValue> {
+    reference.upgrade().map(|target| super::markup_members::instance_of(&target))
+}
+
 struct Validator {
     this: Weak<Validator>,
     validation: DataValidationBase,
@@ -47,7 +52,7 @@ struct Validator {
 
 impl Validator {
     fn create_binding_notification(&self, value: Option<BoxedValue>) -> BoxedValue {
-        if let Some(target) = self.reference.upgrade() {
+        if let Some(target) = instance(&self.reference) {
             if let Some(model) = ModelTypes::find(&*target) {
                 if let Some(indei) = model.as_notify_data_error_info(&*target) {
                     let errors = indei.get_errors(Some(&self.name));
@@ -66,7 +71,7 @@ impl Validator {
 
     fn remove_handler(&self) {
         if let Some(token) = self.token.take() {
-            if let Some(target) = self.reference.upgrade() {
+            if let Some(target) = instance(&self.reference) {
                 if let Some(model) = ModelTypes::find(&*target) {
                     if let Some(indei) = model.as_notify_data_error_info(&*target) {
                         indei.errors_changed().remove(token);
@@ -110,7 +115,7 @@ impl IPropertyAccessor for Validator {
 
     fn subscribe(&self, listener: AccessorListener) {
         self.validation.base.set_listener(listener);
-        if let Some(target) = self.reference.upgrade() {
+        if let Some(target) = instance(&self.reference) {
             if let Some(model) = ModelTypes::find(&*target) {
                 if let Some(indei) = model.as_notify_data_error_info(&*target) {
                     let weak = self.this.clone();
