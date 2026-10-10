@@ -43,6 +43,7 @@ bitflags.workspace = true
 # target on any host. One feature per API namespace the backend calls.
 [target.'cfg(windows)'.dependencies]
 windows-sys = { workspace = true, features = [
+    "Win32_Devices_Display",
     "Win32_Foundation",
     "Win32_Graphics_Dwm",
     "Win32_Graphics_Gdi",

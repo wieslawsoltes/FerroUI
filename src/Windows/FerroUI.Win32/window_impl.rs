@@ -1112,9 +1112,8 @@ mod imp {
             send_message(hwnd, WindowsMessage::WM_SETICON, Icons::ICON_SMALL as usize, self.load_icon(Icons::ICON_SMALL, dpi));
             send_message(hwnd, WindowsMessage::WM_SETICON, Icons::ICON_BIG as usize, self.load_icon(Icons::ICON_BIG, dpi));
 
-            // The reference sets no overlay icon on the taskbar button here,
-            // which prompts the taskbar to redraw the icon: the taskbar list
-            // is stage 2e.
+            // This will prompt the taskbar to redraw the icon
+            crate::interop::task_bar_list::TaskBarList::set_overlay_icon(hwnd, 0, None);
         }
 
         /// The DPI of the window.
@@ -1407,9 +1406,7 @@ mod imp {
                 self.update_window_properties(self.window_properties.get(), true);
             }
 
-            // The reference tells the taskbar that the window is full
-            // screen here (the task bar list of the shell, a COM object):
-            // stage 2.
+            crate::interop::task_bar_list::TaskBarList::mark_fullscreen(self.hwnd.get(), fullscreen);
 
             self.extend_client_area();
         }

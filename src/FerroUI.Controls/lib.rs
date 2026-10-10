@@ -174,6 +174,8 @@ pub use i_native_menu_item_exporter_events_impl_bridge::INativeMenuItemExporterE
 pub use native_dock::NativeDock;
 pub use native_menu::NativeMenu;
 pub use native_menu_bar::NativeMenuBar;
+#[doc(hidden)]
+pub use native_menu_bar_presenter::create_container_for_native_item;
 pub use native_menu_item::NativeMenuItem;
 pub use native_menu_item_base::NativeMenuItemBase;
 pub use native_menu_item_separator::NativeMenuItemSeparator;

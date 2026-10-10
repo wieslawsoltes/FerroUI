@@ -40,6 +40,7 @@ mod win32_gl_manager;
 mod platform_constants;
 mod win32_platform_options;
 mod win32_platform_settings;
+mod tray_icon_impl;
 mod win32_top_level_scene_info;
 mod win32_type_extensions;
 mod window_impl;
@@ -69,6 +70,8 @@ mod popup_impl;
 mod screen_impl;
 #[cfg(windows)]
 mod simple_window;
+#[cfg(windows)]
+mod win32_native_to_managed_menu_exporter;
 #[cfg(windows)]
 mod win32_platform;
 #[cfg(windows)]
