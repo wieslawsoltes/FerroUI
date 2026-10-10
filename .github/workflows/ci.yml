@@ -407,6 +407,47 @@ jobs:
       - name: Sizes of the site with both modules
         run: node scripts/browser/module-sizes.mjs target/browser-both/control-catalog-browser >> "$GITHUB_STEP_SUMMARY"
 
+  # The iOS platform (docs/porting/ios-platform.md, section 12). The crate and its example are built
+  # for the simulator, the crate is checked for the device target, the tests that need no UIKit run
+  # on the host (the dispatcher among them, on the run loop of a macOS process), and the example is
+  # put into an application bundle with an ad hoc signature. No simulator is booted here: the smoke
+  # mode in a simulator is run with scripts/ios/sim-smoke.sh on the development machine.
+  ios:
+    name: Build and test (iOS, simulator target)
+    if: github.event_name != 'push'
+    runs-on: macos-15
+    timeout-minutes: 90
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          targets: aarch64-apple-ios-sim,aarch64-apple-ios
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: ios
+      - name: Skia features of the target
+        run: |
+          # Graphite on Metal, as on macOS: the feature set a Skia binary is published for. Another
+          # set would make the Skia bindings build Skia from source.
+          features="$(cargo tree --locked -p ferroui-skia -e features,normal --target aarch64-apple-ios-sim | grep -oE 'skia-bindings feature "(gl|ganesh|graphite|metal|vulkan|d3d)"' | sort -u | tr '\n' ' ')"
+          echo "GPU features: '$features'"
+          test "$features" = 'skia-bindings feature "graphite" skia-bindings feature "metal" '
+      - name: Tests of the iOS crate on the host (no UIKit needed)
+        run: cargo test --locked -p ferroui-ios --no-fail-fast
+      - name: Build the crate and the example for the simulator
+        run: cargo build --locked -p ferroui-ios --features example --example ios_view --target aarch64-apple-ios-sim
+      - name: Check the crate and the example for the device
+        run: cargo check --locked -p ferroui-ios --features example --example ios_view --target aarch64-apple-ios
+      - name: The application bundle for the simulator
+        run: |
+          app="$(scripts/ios/bundle.sh --no-build | tail -n 1)"
+          plutil -p "$app/Info.plist"
+          codesign --verify --verbose "$app"
+          bash -n scripts/ios/sim-smoke.sh
+
   # The Linux desktop platform on a real X server (docs/porting/x11-platform.md, section 13). The
   # crate is developed on a Mac, where it is compiled for Linux and its tests run without a server;
   # this job is where it meets one: the crate is built and tested on Linux, and the smoke mode of its
