@@ -70,6 +70,7 @@ Package `org.ferroui.android`, sources in `src/Android/FerroUI.Android/java/org/
 | `FerroInputConnection` | `android.view.inputmethod.InputConnection` | `AvaloniaInputConnection` | every call of the input method of the system that upstream answers with more than a constant (section 7.1) |
 | `ConfigurationChangedReceiver` | `android.content.BroadcastReceiver` | `AndroidPlatformSettings.ConfigurationChangedReceiver` | `onReceive` of `ACTION_CONFIGURATION_CHANGED` |
 | `NativeClickListener` | `View.OnClickListener` | (the event binding of the managed runtime) | `onClick`, for a view an application written in Rust creates (`interop::listeners`) |
+| `StorageHelper` | (static) | the calls of `AndroidStorageItem` and `AndroidStorageProvider` that upstream wraps in `try`/`catch`, and the queries `DocumentFile` makes | the columns of a document, the children of a tree, create, delete and move of a document, the persistable permissions, the descriptors of the streams; an exception is caught in Java and its text kept for the native side |
 | `PlatformHelper` | (static) | calls upstream makes inline on framework objects that return more than one value, or that set fields | the insets of a window, the displays, the system features, the insets listener and the insets animation callback of the decor view, the colour and input values of the platform settings, the fields of an `EditorInfo`, an `ExtractedText`, the layout parameters of a native control |
 
 ### 3.1 Objects on both sides
@@ -186,6 +187,15 @@ Positions are UTF-16 code units on both sides (the text of the framework is a `S
 
 **The input pane.** From API 30 the decor view has a `WindowInsetsAnimation.Callback` (dispatch mode "stop"); `onStart` of an animation whose type mask has the input method reports the state with the rectangles of the lower and the upper bound, the duration and the interpolator as an easing (`AnimationEasing`, which calls `getInterpolation`). Below API 30 the global layout of the decor view sets the state. Measured **[E]**: the keyboard of the emulator opens to 312.4 logical pixels (820 px) over a client of 914.3, in 285 ms.
 
+### 7.2 Services of a top-level (stage 2d)
+
+- **Clipboard** (`ClipboardImpl`, the two clip data wrappers, `AndroidDataFormatHelper`): the primary clip of the clipboard manager as a data transfer. Formats are the MIME types of the clip description (text, a URI list as files, images as the bitmap format, `text/*` as formats of text, anything else as formats of bytes, with the prefix `application/frn-fmt.` for the formats of an application); an item answers text with `coerceToText`, a file with the storage item of its URI, a bitmap and bytes by reading that file. Setting data makes a `ClipData` from the first value each item has (text, the URI of a file, a string). A format does not carry the type of its values at run time in the port, so where upstream asks "is this a format of text" the port looks at the MIME type when reading and at the value when writing.
+- **Storage** (`AndroidStorageProvider`, `AndroidStorageItem` with its file and folder, `PlatformSupport`): the pickers of the storage access framework (`ACTION_OPEN_DOCUMENT`, `ACTION_CREATE_DOCUMENT`, `ACTION_OPEN_DOCUMENT_TREE`, started for a result with a request code; the result arrives in `onActivityResult` of the activity and completes the future), bookmarks (persistable URI permissions), the well-known folders, items from paths, and the files and folders behind document URIs: properties from the columns of the provider, children of a tree, create, delete, move, streams over the file descriptor the content resolver opens (detached and owned by a `std::fs::File`). What `DocumentFile` of AndroidX does is done with `DocumentsContract` and queries of the content resolver in `StorageHelper`. A permission is asked for with `requestPermissions` and answered in `onRequestPermissionsResult`.
+- **Launcher** (`AndroidLauncher`): a view intent for a URI or for the URI of a storage item; "no activity found" and "file URI exposed" are caught in Java (`PlatformHelper.tryStartActivity`) and answer false.
+- **Platform feedback** (`AndroidPlatformFeedback`): the click sound of the audio manager, the haptic feedback of the view.
+- **Native control host** (`AndroidNativeControlHostImpl`): a native control is a view of the system added to the Java view of the framework (a frame layout) over the surface, placed with frame layout parameters in pixels (the bounds times the scaling), hidden with visibility "gone". The default child is a frame layout. The catalog's embed page (`samples/ControlCatalog.Android/embed_sample_android.rs`) shows a button of the system that counts its clicks (its click listener is `interop::listeners::set_on_click_listener`, the stand-in for the event of the managed binding) and a web view.
+- **File activation**: an intent whose data is a file or content URI raises the activation with the storage item of the URI.
+
 ## 8. File table
 
 One row per upstream file. "Java" names the class of the Java layer that belongs to the file.
@@ -198,7 +208,7 @@ One row per upstream file. "Java" names the class of the Java layer that belongs
 | `AndroidViewControlHandle.cs` | 26 | `android_view_control_handle.rs` | | 1 | |
 | `ApplicationLifetime.cs` | 28 | `application_lifetime.rs` | | 1 | |
 | `AvaloniaAccessHelper.cs` | 339 | `ferro_access_helper.rs` | (a node provider) | 3 | accessibility |
-| `AvaloniaActivity.cs` | 259 | `ferro_activity.rs` | `FerroActivity` | 1, 2c | 2d: the file activation |
+| `AvaloniaActivity.cs` | 259 | `ferro_activity.rs` | `FerroActivity` | 1, 2c, 2d | |
 | `AvaloniaAndroidApplication.cs` | 45 | `ferro_android_application.rs` | `FerroApplication` | 1 | with `android_application!` |
 | `AvaloniaMainActivity.cs` | 47 | `ferro_main_activity.rs` | `FerroMainActivity` | 1 | the main activity is a kind of the activity |
 | `AvaloniaView.cs` | 155 | `ferro_view.rs` | `FerroView` | 1 | |
@@ -214,18 +224,18 @@ One row per upstream file. "Java" names the class of the Java layer that belongs
 | `Stubs.cs` | 60 | `stubs.rs` | | 1 | |
 | `Automation/*.cs` (9 files) | 359 | `automation/*.rs` | | 3 | the node info providers |
 | `Platform/AndroidActivatableLifetime.cs` | 75 | `platform/android_activatable_lifetime.rs` | | 1 | |
-| `Platform/AndroidDataFormatHelper.cs` | 43 | `platform/android_data_format_helper.rs` | | 2 | |
+| `Platform/AndroidDataFormatHelper.cs` | 43 | `platform/android_data_format_helper.rs` | | 2d | |
 | `Platform/AndroidInsetsManager.cs` | 380 | `platform/android_insets_manager.rs` | `PlatformHelper` | 1, 2b | |
-| `Platform/AndroidLauncher.cs` | 62 | `platform/android_launcher.rs` | | 2 | |
-| `Platform/AndroidNativeControlHostImpl.cs` | 137 | `platform/android_native_control_host_impl.rs` | | 2 | |
-| `Platform/AndroidPlatformFeedback.cs` | 43 | `platform/android_platform_feedback.rs` | | 2 | |
+| `Platform/AndroidLauncher.cs` | 62 | `platform/android_launcher.rs` | `PlatformHelper` | 2d | |
+| `Platform/AndroidNativeControlHostImpl.cs` | 137 | `platform/android_native_control_host_impl.rs` | `PlatformHelper` | 2d | |
+| `Platform/AndroidPlatformFeedback.cs` | 43 | `platform/android_platform_feedback.rs` | | 2d | |
 | `Platform/AndroidPlatformSettings.cs` | 205 | `platform/android_platform_settings.rs` | `ConfigurationChangedReceiver`, `PlatformHelper` | 2a | |
 | `Platform/AndroidScreens.cs` | 154 | `platform/android_screens.rs` | `PlatformHelper` | 1 | |
 | `Platform/AndroidSystemNavigationManager.cs` | 39 | `platform/android_system_navigation_manager.rs` | | 2c | |
-| `Platform/ClipDataItemToDataTransferItemWrapper.cs` | 108 | `platform/clip_data_item_to_data_transfer_item_wrapper.rs` | | 2 | |
-| `Platform/ClipDataToDataTransferWrapper.cs` | 58 | `platform/clip_data_to_data_transfer_wrapper.rs` | | 2 | |
-| `Platform/ClipboardImpl.cs` | 149 | `platform/clipboard_impl.rs` | | 2 | |
-| `Platform/PlatformSupport.cs` | 51 | `platform/platform_support.rs` | | 2 | |
+| `Platform/ClipDataItemToDataTransferItemWrapper.cs` | 108 | `platform/clip_data_item_to_data_transfer_item_wrapper.rs` | | 2d | |
+| `Platform/ClipDataToDataTransferWrapper.cs` | 58 | `platform/clip_data_to_data_transfer_wrapper.rs` | | 2d | |
+| `Platform/ClipboardImpl.cs` | 149 | `platform/clipboard_impl.rs` | | 2d | |
+| `Platform/PlatformSupport.cs` | 51 | `platform/platform_support.rs` | | 2d | with the completion that stands in for a task completion source |
 | `Platform/Input/AndroidInputMethod.cs` | 235 | `platform/input/android_input_method.rs` | | 2b | |
 | `Platform/Input/AndroidKeyboardDevice.cs` | 224 | `platform/input/android_keyboard_device.rs` | | 2a | |
 | `Platform/Input/AvaloniaInputConnection.cs` | 341 | `platform/input/ferro_input_connection.rs` | `FerroInputConnection` | 2b | |
@@ -238,8 +248,8 @@ One row per upstream file. "Java" names the class of the Java layer that belongs
 | `Platform/Specific/Helpers/AndroidKeyInterop.cs` | 198 | `platform/specific/helpers/android_key_interop.rs` | | 2a | |
 | `Platform/Specific/Helpers/AndroidKeyboardEventsHelper.cs` | 180 | `platform/specific/helpers/android_keyboard_events_helper.rs` | `FerroView` | 2a | |
 | `Platform/Specific/Helpers/AndroidMotionEventsHelper.cs` | 252 | `platform/specific/helpers/android_motion_events_helper.rs` | `FerroView` | 1 | |
-| `Platform/Storage/AndroidStorageItem.cs` | 671 | `platform/storage/android_storage_item.rs` | | 2 | |
-| `Platform/Storage/AndroidStorageProvider.cs` | 344 | `platform/storage/android_storage_provider.rs` | | 2 | |
+| `Platform/Storage/AndroidStorageItem.cs` | 671 | `platform/storage/android_storage_item.rs` | `StorageHelper` | 2d | |
+| `Platform/Storage/AndroidStorageProvider.cs` | 344 | `platform/storage/android_storage_provider.rs` | | 2d | |
 | `Platform/Vulkan/VulkanNativeInterop.cs` | 25 | `platform/vulkan/vulkan_native_interop.rs` | | later | with the Vulkan project |
 | `Platform/Vulkan/VulkanSupport.cs` | 71 | `platform/vulkan/vulkan_support.rs` | | later | |
 
@@ -284,6 +294,9 @@ The smoke example (`examples/android_smoke.rs`, an APK) asks the system and not 
 | an intent with a URI for the running activity is a protocol activation with that URI (2c) | `onNewIntent`, `HandleIntent` |
 | the back button raises the back request of the top-level; handled, the activity stays; not handled, the default action of the system follows (2c) | the back callback, the navigation manager |
 | the activity is started again in the process: surface, screen, insets, dispatcher, frames and pixels again (2c) | a second activity object, a second view and top-level |
+| text set on the clipboard reads back, with characters outside the basic plane; cleared, the clipboard has no text (2d) | `ClipboardImpl`, the clip data wrappers |
+| the feedback performs a haptic hold and a click sound, and no hold as a sound; a URI nobody handles is not launched; the storage provider can open, save and pick folders and has a documents folder (2d) | the features of the top-level, `tryStartActivity`, the well-known folders |
+| a default child of the native control host, attached and shown in a rectangle, is a visible child view at those pixels; hidden it is gone; disposed it has no parent (2d) | `AndroidNativeControlHostImpl` |
 | the activity finishes itself and the top-level is disposed | the lifecycle of stage 1 |
 
 The script runs the example twice: with the default options (EGL) and with `Software` (a properties file in the files directory of the application, because the platform is initialised before an activity and its intent exist). The application asks the script for what only the outside can do with lines `SCRIPT <command> <arguments>` in its log (a picture, a tap, a swipe, key codes, text, the night mode, home, start, rotate, an intent with a URI, back); the script does each once, in order (`emu-smoke.sh` lists them). The touch position is a pixel of the view, which is a pixel of the screen while the window is displayed edge to edge (always on API 35 and later).
@@ -322,6 +335,25 @@ The catalog: the TextBox page is in the list. The first run of the script tapped
 
 Not exercised by these runs: the transparency levels, system bar colours and visibility set by an application, more than one pointer, a mouse or a pen, `--gpu host`, the paths of other API levels.
 
+### 10.3 Stage 2d on the emulator (2026-10-10) **[E]**
+
+One run of `emu-smoke.sh` and two of `emu-catalog.sh` on the device of 10.1.
+
+**The smoke application: both modes pass every check** (`SMOKE PASSED`). What the checks of stage 2d say, the same in both modes: the text "FerroUI żółw" with a character outside the basic plane, set on the clipboard of the system, reads back the same, and after a clear the clipboard has no text; the feedback performs a haptic hold and a click sound and refuses a hold as a sound; a URI of a scheme nobody handles is answered with false by the launcher (the exception of `startActivity` caught in Java); the storage provider can open, save and pick folders, and its documents folder is `file:///storage/emulated/0/Android/data/org.ferroui.smoke/files/Documents/`; a default child of the native control host shown in the rectangle (20, 30, 100, 50) is a visible child of the Java view at (52, 78) with 262 by 131 px, which is the rectangle times 2.625 truncated, hidden it has the visibility "gone", and disposed it has no parent.
+
+**The catalog passes with eight pages.** The TextBox page: the script opens the first sample, taps into its text box, and `dumpsys input_method` reports the keyboard shown; the picture has the box focused with the word the script typed, the text bound to it updated beside it, and the keyboard of the system over the page (`catalog-03-TextBox-keyboard.png`).
+
+**The Native Embed page, and what the first picture of it showed.** In the first run the page had its own controls and two empty areas where the button and the web view belong, although both views existed (the log has the web view loading its page). The second run printed the children of the Java view half way through the page, laid the main view out once more, and printed them again:
+
+| | Button | WebView |
+|---|---|---|
+| before the layout | at (1132, 566), 976 by 809 px, visible | at (1132, 1473), 976 by 809 px, visible |
+| after the layout | at (52, 566), 976 by 811 px, visible | at (52, 1475), 976 by 810 px, visible |
+
+The view is 1080 px wide: before the layout both native views were exactly one view width to the right of where the page shows them. This is the case the iOS backend met (`ios-platform.md`, section 12): the page slides in with a render transform, and `NativeControlHost` places its control when its bounds or the bounds or visibility of an ancestor change, not when a render transform does (the port matches upstream there), so the controls stay where the page was when it was laid out until the next change of layout. It is not the z-order: the native views are the second and third child of the frame layout, after the surface view, whose surface is behind the window of the activity, and after the layout they are drawn over the page (`catalog-07-Native_Embed.png`: the button of the system with "Hello world", the web view with the page of android.com). The catalog host does in its smoke run what the iOS host does (one more layout of the main view per page, with the two lines in the log); the behaviour of the control itself is open in the same place as for iOS, for whoever owns `NativeControlHost`.
+
+**Not proven by a run:** the pickers (they need a person, or automation of the picker of the system), and with them bookmarks, document trees, the streams of a picked file and the permission request; the file activation; the launcher with a URI that is handled (it leaves the application); a click on the native button; clipboard formats other than text.
+
 ## 11. Stages
 
 | Stage | Content | What its emulator run proves |
@@ -331,9 +363,7 @@ Not exercised by these runs: the transparency levels, system bar colours and vis
 | **2a** (built and run, 2026-10-10) | keyboard: `AndroidKeyboardEventsHelper`, `AndroidKeyInterop`, `AndroidKeyboardDevice`; the platform settings (`AndroidPlatformSettings`) | key events injected by the script arrive as key down, up and text; the theme follows `cmd uimode night` |
 | **2b** (built and run, 2026-10-10) | the input method: `AndroidInputMethod`, the input connection (`AvaloniaInputConnection`), `TextEditBuffer`, `EditCommand`, `IInitEditorInfo`, the insets animation of the input pane | the soft keyboard of the emulator opens for an editor, its keys arrive as text, it closes; the editing commands and the connection in host tests |
 | **2c** (built and run, 2026-10-10) | lifecycle: the surface lost and created again, `onNewIntent` and protocol activation, activity and permission results, rotation, the back button (`BackPressedCallback`, `IActivityNavigationService`, `AndroidSystemNavigationManagerImpl`) | the script sends the application to the background and back, rotates, sends an intent, presses back, starts the activity a second time |
-| 2d | services: the clipboard, the launcher, the platform feedback | clipboard round trip in the application |
-| 2e | the storage provider and items (the storage access framework), activity results, permissions | the pickers need a person; bookmarks and items against the media store of the emulator |
-| 2f | the native control host | the embed page of the catalog shows a button and a web view |
+| **2d** (built and run, 2026-10-10; with what this table had as 2e and 2f) | services: the clipboard, the launcher, the platform feedback; the storage provider and items; the native control host and the embed sample of the catalog | the checks of 10.3; the pickers themselves need a person |
 | 3 | accessibility: the access helper and the node info providers | the node tree read with `uiautomator dump` |
 | later | Vulkan, with the Vulkan project of the port | |
 
