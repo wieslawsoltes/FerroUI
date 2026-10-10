@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck disable=SC3043  # `local`: dash and bash have it
 # Prints the accessibility tree of the applications on the accessibility bus of the session, read
 # with gdbus (the package libglib2.0-bin) as any client of AT-SPI reads it: the address of the bus
 # from org.a11y.Bus on the session bus, the applications from the root of the registry, then
@@ -20,10 +21,11 @@ if [ -z "$address" ]; then
 fi
 echo "accessibility bus: $address"
 
+# Standard input is kept away from gdbus: the calls are made inside loops that read their lines from it.
 call() {
-  dest="$1"; path="$2"; method="$3"
+  local call_dest="$1" call_path="$2" call_method="$3"
   shift 3
-  gdbus call --address "$address" --dest "$dest" --object-path "$path" --method "$method" "$@" 2>&1
+  gdbus call --address "$address" --dest "$call_dest" --object-path "$call_path" --method "$call_method" "$@" 2>&1 < /dev/null
 }
 
 # The value of a reply with one string: ('text',) or (<'text'>,)
@@ -37,7 +39,7 @@ references() {
 }
 
 walk() {
-  dest="$1"; path="$2"; indent="$3"
+  local dest="$1" path="$2" indent="$3" count role name child_dest child_path
   count=$(($(cat "$count_file") + 1))
   echo "$count" > "$count_file"
   if [ "$count" -gt "$budget" ]; then
@@ -54,14 +56,14 @@ walk() {
 found=0
 applications="$(call org.a11y.atspi.Registry /org/a11y/atspi/accessible/root org.a11y.atspi.Accessible.GetChildren | references)"
 echo "applications the registry lists: $(echo "$applications" | grep -c .)"
-echo "$applications" | while read -r dest path; do
-  [ -n "$dest" ] || continue
-  name="$(call "$dest" "$path" org.freedesktop.DBus.Properties.Get org.a11y.atspi.Application ToolkitName | text)"
-  if [ -n "$toolkit" ] && [ "$name" != "$toolkit" ]; then
+echo "$applications" | while read -r app_dest app_path; do
+  [ -n "$app_dest" ] || continue
+  app_toolkit="$(call "$app_dest" "$app_path" org.freedesktop.DBus.Properties.Get org.a11y.atspi.Application ToolkitName | text)"
+  if [ -n "$toolkit" ] && [ "$app_toolkit" != "$toolkit" ]; then
     continue
   fi
-  echo "application $dest (toolkit $name):"
-  walk "$dest" "$path" "  "
+  echo "application $app_dest (toolkit $app_toolkit):"
+  walk "$app_dest" "$app_path" "  "
   echo found >> "$count_file.found"
 done
 objects="$(cat "$count_file")"
