@@ -542,6 +542,12 @@ jobs:
         run: |
           xvfb-run -a --server-args="-screen 0 1280x1024x24" \
             timeout 300 target/debug/examples/x11_window --smoke --mode=egl
+      # Software rendering with the frames sent through the shared memory extension (MIT-SHM).
+      - name: The same through the shared memory framebuffer
+        if: ${{ !cancelled() }}
+        run: |
+          xvfb-run -a --server-args="-screen 0 1280x1024x24" \
+            timeout 300 target/debug/examples/x11_window --smoke --shm
       # Without the override GLX refuses llvmpipe, and the list of modes goes on to software.
       - name: GLX refuses the software rasterizer and software rendering takes over
         if: ${{ !cancelled() }}

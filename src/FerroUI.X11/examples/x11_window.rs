@@ -14,9 +14,12 @@
 //! `FERROUI_GLX_IGNORE_RENDERER_BLACKLIST=1` is set; `--expect-fallback`
 //! makes the smoke mode expect exactly that refusal.
 //!
+//! `--shm` sends the frames of software rendering through the shared
+//! memory extension of the server (`X11PlatformOptions::use_x_shm_framebuffer`).
+//!
 //! With `--smoke` the example checks itself against the server and exits.
 //! Every check prints a line; the exit code is 0 only when all of them
-//! passed. The phases, in order (`--skip=gpu,input,popup,screens,clipboard`
+//! passed. The phases, in order (`--skip=gpu,input,popup,resize,screens,clipboard`
 //! leaves some out):
 //!
 //! - **window**: it asks the server (not the framework) whether the window
@@ -39,6 +42,12 @@
 //!   an override-redirect window of this process at the expected place
 //!   with the expected pixels; a press inside the popup leaves it open and
 //!   a press on the window beside it dismisses it.
+//! - **shm** (with `--shm`): the server has the extension and the first
+//!   surface of the window is the shared memory one, so the pixels of the
+//!   other phases arrived through it.
+//! - **resize**: the window is given another size; the server has to
+//!   show it, and the fill colour at the new bottom right corner, which
+//!   needs frames of the new size.
 //! - **screens**: the screens of the platform have to cover the root
 //!   window without overlapping, and to be as many as
 //!   `--expect-screens=N` says (the caller makes them, with
@@ -162,6 +171,7 @@ mod app {
                     && !arg.starts_with("--expect-screens=")
                     && !arg.starts_with("--mode=")
                     && arg != "--expect-fallback"
+                    && arg != "--shm"
             })
             .collect();
 
@@ -171,6 +181,10 @@ mod app {
             "egl" => vec![X11RenderingMode::Egl, X11RenderingMode::Software],
             _ => vec![X11RenderingMode::Software],
         };
+
+        if std::env::args().any(|arg| arg == "--shm") {
+            options.use_x_shm_framebuffer = Some(true);
+        }
 
         let mut builder = AppBuilder::configure::<App>();
         if smoke {
@@ -464,6 +478,10 @@ mod app {
                     report.phase("gpu");
                     gpu_checks(&report, &platform, &window, &mode);
                 }
+                if std::env::args().any(|arg| arg == "--shm") {
+                    report.phase("shm");
+                    shm_checks(&report, &platform, &window);
+                }
                 if options.runs("input") {
                     report.phase("input");
                     input_checks(&report, &platform, &window).await;
@@ -471,6 +489,10 @@ mod app {
                 if options.runs("popup") {
                     report.phase("popup");
                     popup_checks(&report, &platform, &window, &content).await;
+                }
+                if options.runs("resize") {
+                    report.phase("resize");
+                    resize_checks(&report, &platform, &window).await;
                 }
                 if options.runs("screens") {
                     report.phase("screens");
@@ -782,6 +804,70 @@ mod app {
             }
 
             IPlatformGraphicsContext::dispose(&*context);
+        }
+
+        /// Software rendering through the shared memory extension: the
+        /// server has it, and the surface the renderer takes first is the
+        /// shared memory one.
+        fn shm_checks(report: &Report, platform: &Rc<FerroX11Platform>, window: &Ref<Window>) {
+            use ferroui_x11::x_shm::X11ShmFramebufferSurface;
+
+            let has_extension = platform.info().has_x_shm();
+            report.check("extension (MIT-SHM)", has_extension, format!("the server has the extension: {has_extension}"));
+            let Some(window_impl) = window.platform_impl() else {
+                report.check("surface", false, "the window has no platform implementation".to_string());
+                return;
+            };
+            let surfaces = window_impl.surfaces();
+            let first_is_shm =
+                surfaces.first().is_some_and(|surface| surface.as_any().downcast_ref::<X11ShmFramebufferSurface>().is_some());
+            report.check(
+                "surface",
+                first_is_shm,
+                format!("the window has {} surfaces; the first is the shared memory framebuffer: {first_is_shm}", surfaces.len()),
+            );
+        }
+
+        /// Another size: the server has to show the window with it and the
+        /// fill colour up to its new corner, which takes frames of the new
+        /// size (a new framebuffer, new shared memory images, a resized
+        /// render window).
+        async fn resize_checks(report: &Report, platform: &Rc<FerroX11Platform>, window: &Ref<Window>) {
+            const NEW_SIZE: (f64, f64) = (520.0, 320.0);
+            let info = platform.info();
+            let display = info.display();
+            let Some(xid) = xid_of(window) else {
+                report.check("handle", false, "the window has no platform handle".to_string());
+                return;
+            };
+            let scaling = window.render_scaling();
+            let expected = ((NEW_SIZE.0 * scaling) as i32, (NEW_SIZE.1 * scaling) as i32);
+            window.set_width(NEW_SIZE.0);
+            window.set_height(NEW_SIZE.1);
+
+            let fill = rgb(FILL);
+            let mut seen = (None, None, None);
+            let resized = wait_for(STEP_TIMEOUT, || {
+                xlib::x_sync(display, false);
+                let size = xlib::x_get_geometry(display, xid).map(|geometry| (geometry.width, geometry.height));
+                let corner = xlib::x_get_pixel(display, xid, expected.0 - 5, expected.1 - 5).map(|pixel| pixel as u64);
+                let centre = xlib::x_get_pixel(display, xid, expected.0 / 2, expected.1 / 2).map(|pixel| pixel as u64);
+                seen = (size, corner, centre);
+                size == Some(expected)
+                    && corner.map(|pixel| pixel & 0x00ff_ffff) == Some(fill)
+                    && centre.map(|pixel| pixel & 0x00ff_ffff) == Some(fill)
+            })
+            .await;
+            let client_size = window.client_size();
+            report.check(
+                "size and pixels after a resize",
+                resized,
+                format!(
+                    "{:?} on the server, {expected:?} asked for, {}x{} in the framework; bottom right {:x?}, centre {:x?}, \
+                     {fill:#08x} expected in the low 24 bits",
+                    seen.0, client_size.width, client_size.height, seen.1, seen.2
+                ),
+            );
         }
 
         fn rgb(colour: (u8, u8, u8)) -> u64 {

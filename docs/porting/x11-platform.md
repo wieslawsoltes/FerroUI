@@ -32,7 +32,7 @@ The alternatives, and why not:
 | `x11rb` 0.14 (the protocol in pure Rust, no Xlib) | The behaviour to port is, in several places, the behaviour of Xlib's client side and not of the protocol: the event queue (`XPending`, `XNextEvent`, `XPutBackEvent`), `XFilterEvent` and the input methods (XIM is an Xlib facility), `XLookupString` and `Xutf8LookupString` (compose sequences and the locale), `XkbLookupKeySym` and `XkbTranslateKeySym`, the cursor theme lookup of `libXcursor`, the error handler. Each would have to be re-implemented or replaced by another library with other behaviour (`xkbcommon` for keys). GLX needs a `Display*`, and EGL and Vulkan are created upstream from the Xlib display. A hybrid (Xlib for those, `x11rb` over the same connection through `XGetXCBConnection`) puts two event readers on one socket. |
 | Per extension, decided separately | Every extension the backend uses has an Xlib-side library that `x11-dl` declares, and all of them share the display and the event queue; mixing would gain nothing. |
 
-How the port keeps the `unsafe` of a C binding contained: `xlib.rs` is the port of `XLib.cs` and `XLib.Helpers.cs` and the one module that calls the libraries. Every call is a safe function there, with its safety argument; results are copied out of C memory and freed before the function returns (`WindowProperty` for `XGetWindowProperty`, `XIDeviceEventData` for an `XIDeviceEvent`, `MonitorInfo` for `XRRGetMonitors`). A connection is the type `XDisplay`, made only by `x_open_display` and never closed (as upstream), which is what lets calls that take only a connection and identifiers be safe. An event (`XEvent`, a C union of plain data) is read through views (`button_event(&ev)`, `configure_event(&ev)`), sound for any event because every bit pattern is valid for every member. Outside `xlib.rs` there are four places with `unsafe`: the system calls of the event loop (`dispatching/x11_platform_threading.rs`), the error handler Xlib calls (`x_error.rs`), the blit of a framebuffer by address (`x11_framebuffer_surface.rs`), and tests that build C events.
+How the port keeps the `unsafe` of a C binding contained: `xlib.rs` is the port of `XLib.cs` and `XLib.Helpers.cs` and the one module that calls the libraries. Every call is a safe function there, with its safety argument; results are copied out of C memory and freed before the function returns (`WindowProperty` for `XGetWindowProperty`, `XIDeviceEventData` for an `XIDeviceEvent`, `MonitorInfo` for `XRRGetMonitors`). A connection is the type `XDisplay`, made only by `x_open_display` and never closed (as upstream), which is what lets calls that take only a connection and identifiers be safe. An event (`XEvent`, a C union of plain data) is read through views (`button_event(&ev)`, `configure_event(&ev)`), sound for any event because every bit pattern is valid for every member. `x_shm/x11_shm_image.rs` owns the two allocations of a shared memory image, `lib_c.rs` has the four shared memory calls of the C library; `glx/glx.rs` is the same for `libGL` (the port of `Glx.cs`), and `x11_egl_helper.rs` loads `libEGL` with `dlopen` and resolves its entry points with `dlsym`. Outside these there are four places with `unsafe`: the system calls of the event loop (`dispatching/x11_platform_threading.rs`), the error handler Xlib calls (`x_error.rs`), the blit of a framebuffer by address (`x11_framebuffer_surface.rs`), and tests that build C events.
 
 The structures of `X11Structs.cs` and `XIStructs.cs` are therefore not ported: they are those of `x11-dl`. Their enumerations are (`x11_structs.rs`, `x11_enums.rs`, `xi_structs.rs`), converted mechanically from the upstream files: flags as `bitflags`, enumerations with equal members as sets of constants.
 
@@ -57,10 +57,11 @@ Upstream's `DBusCallQueue` (one call in flight, in order) is ported as it is, ov
 
 ## 4. Skia on Linux
 
-- The Skia backend of the port builds with the features of its target (`src/Skia/FerroUI.Skia/Cargo.toml`): Graphite on Metal for Apple targets, Ganesh on WebGL for the browser, and **no GPU feature for Linux**, so a Linux build has the raster back end only **[V]**. That is what stage 1 renders with: Skia draws into memory and the X11 platform sends the pixels to the server.
+- The Skia backend of the port builds with the features of its target (`src/Skia/FerroUI.Skia/Cargo.toml`): Graphite on Metal for Apple targets, Ganesh on WebGL for the browser, Ganesh on OpenGL ES for Windows, and since stage 2a **Ganesh on OpenGL for Linux** (the feature `gl` of `skia-safe`, and the configuration `ferro_skia_ganesh_gl` from `build.rs`, as for Windows). Raster is always present: it is what the software mode renders with (Skia draws into memory and the X11 platform sends the pixels to the server).
 - `skia-bindings` 0.153.3 has, for Linux, the features `gl` (with `egl`, `x11`, `wayland` selecting the window system libraries it links: `EGL`, `GL`, `wayland-egl`), `vulkan`, and `graphite` as an engine feature; a Linux build links `freetype2` and `fontconfig` found through `pkg-config`, and `stdc++` **[V]** (`build_support/platform/linux.rs`, `features.rs` of the crate in the cargo registry).
-- Which feature sets have a **published binary** for `x86_64-unknown-linux-gnu` cannot be read from the crate: the key of a binary is built from the feature list, but the list of published keys is in the workflow files of the rust-skia repository. **[R]**: binaries are published for Linux without a GPU feature, with `gl`, with `vulkan`, and with combinations including `gl` with `x11`, `egl` and `wayland`; whether a Graphite binary with Vulkan exists is not known. A combination without a binary makes the build fall back to compiling Skia from source (`browser-platform.md`, section 3), which must not happen: the CI job states the feature set it expects and fails otherwise, as the browser job does.
-- Consequence for the rendering modes: EGL and GLX (stage 2a) need Ganesh on GL (`skia-safe` with `gl`, plus `egl` and `x11`), which is the GPU of the Skia backend the browser already uses (`gpu/open_gl`, behind the configuration `ferro_skia_ganesh_gl`). Vulkan needs `vulkan` and the Vulkan GPU of the Skia backend, which is not ported (`CRITICAL-PATH.md`, row 16). One Linux binary has to carry every mode the platform may choose at run time, so the feature set for Linux is decided once, in stage 2a, after checking which combination is published.
+- **The feature set for Linux is `gl` alone** (the bindings then have `ganesh` and `gl`; the key of the binary is `ganesh-gl-jpegd-jpege-pdf`). The features `x11`, `egl` and `wayland` of the bindings only add the window system libraries (`GL`, `EGL`, `wayland-egl`) with which Skia would create a native interface of its own; the backend never asks Skia for one: it gives Skia the entry points of the context the platform created (`glXGetProcAddress`, `eglGetProcAddress`), as on Windows and in the browser. So one binary serves GLX and EGL, and nothing of the window system is linked: the X11 crate opens `libGL` and `libEGL` at run time.
+- **Published binaries.** The key of a binary is built from the feature list, and the list of published keys is in the workflow files of the rust-skia repository, so it is asked, not read: the job `x11` of CI asks the release of the bindings for both keys (raster and `ganesh-gl`) for `x86_64-unknown-linux-gnu` and `aarch64-unknown-linux-gnu` and fails without the `ganesh-gl` one **[CI]**. For `aarch64-unknown-linux-gnu` the binary with `gl` was downloaded in the virtual machine (the build of the example with the new feature took 1 min 41 s; a source build of Skia takes about an hour) **[VM]**. A combination without a binary would make the build fall back to compiling Skia from source (`browser-platform.md`, section 3).
+- Vulkan needs `vulkan` and the Vulkan GPU of the Skia backend, which is not ported (`CRITICAL-PATH.md`, row 16); whether a binary with `gl` and `vulkan` together is published for Linux has to be asked the same way when that is built.
 
 ## 5. The event loop
 
@@ -94,12 +95,18 @@ What crosses to the render thread is `Send + Sync` by construction:
 | Mode | Upstream | Stage | Notes |
 |---|---|---|---|
 | Software, `XPutImage` | `X11FramebufferSurface.cs` | 1, built | A retained framebuffer (BGRA, premultiplied) of the size of the window (`XGetGeometry`), sent with `XPutImage` under `XLockDisplay`, followed by `XSync`. Kept between frames only with `use_retained_framebuffer`. The window has the visual of depth 32 when the screen has one, else depth 24. |
-| Software, shared memory | `XShm/*`, `X11DeferredDisplayDispatcher.cs`, `LibC.cs` | 2b | `XShmCreateImage` over a System V segment, `XShmPutImage` with a completion event, at most two frames in flight, images pooled by size. Only with `use_x_shm_framebuffer`, depth 32 and the extension. Until built, the option fails with a message. |
-| EGL | `X11EglHelper.cs`, `EglPlatformGraphics` of the OpenGL project (ported) | 2a | The display through `EGL_PLATFORM_X11` when the extension is there; configurations probed by creating a window surface (an nvidia workaround); a child window as the render window. Needs Skia with Ganesh on GL. |
-| GLX | `Glx/*` | 2a | `libGL` through `glXGetProcAddress`; a frame buffer configuration with a preference for depth 32; a pixel buffer as the default drawable of a context; the renderer blacklist (`llvmpipe`, `SVGA3D`, overridden by an environment variable). Upstream's default mode list is GLX, then software. |
-| Vulkan | `Vulkan/*` | 2a, after the Vulkan GPU of the Skia backend | `VK_KHR_xlib_surface` over the window. |
+| Software, shared memory | `XShm/*`, `X11DeferredDisplayDispatcher.cs`, `LibC.cs` | 2b, built | `XShmCreateImage` over a System V segment (`shmget`, `shmat`), `XShmPutImage` with a completion event, at most two frames in flight (a third `lock` waits on the events of the render connection), images pooled by size and disposed in the order of the extension's specification (detach, destroy the image, detach and remove the segment). Only with `use_x_shm_framebuffer`, depth 32 and the extension; the surface comes before the `XPutImage` one in the list of the window. The dispatcher of the completion events is an object of the thread that renders (`X11DeferredDisplayDispatcher::for_current_thread`); upstream creates it on the platform and uses it from the render thread. The completion event is declared in `xlib.rs`: the declaration of the bindings has two members of other sizes, which moves the segment identifier. |
+| EGL | `X11EglHelper.cs`, `EglPlatformGraphics` of the OpenGL project (ported) | 2a, built | `libEGL.so.1` loaded by name; the display through `EGL_PLATFORM_X11` when the client extensions have it; configurations probed by creating a window surface on a throwaway window, those with a visual of depth 32 first (an nvidia workaround); the window takes the visual of the configuration; a child window as the render window; the `EglGlPlatformSurface` of the OpenGL crate. |
+| GLX | `Glx/*` | 2a, built | `libGL` opened at run time, `glXCreateContextAttribsARB` through `glXGetProcAddress`; a frame buffer configuration with a preference for a visual of depth 32; a pixel buffer as the default drawable of a context; the profiles of the options tried in order; the renderer blacklist (`llvmpipe`, `SVGA3D`; `FERROUI_GLX_IGNORE_RENDERER_BLACKLIST=1` overrides it); the render window resized from the compositor at the beginning of a frame. Upstream's default mode list is GLX, then software. |
+| Vulkan | `Vulkan/*` | 2a, open: after the Vulkan GPU of the Skia backend | `VK_KHR_xlib_surface` over the window. Until then the mode is passed over like one that failed to initialize. |
 
-`FerroX11Platform::initialize_graphics` walks `rendering_mode` as upstream. Until stage 2a the three GPU modes count as modes that failed to initialize, so the default list (GLX, software) gives software; an empty list, or a list without a mode that applies, fails with upstream's messages.
+`FerroX11Platform::initialize_graphics` walks `rendering_mode` as upstream: software ends the walk without platform graphics; GLX and EGL are tried, and the first that initializes gives the graphics; a mode that does not is logged (area `OpenGL`) and passed over; an empty list, or a list in which nothing applies, fails with upstream's messages. The walk is a function over a factory, tested on every host.
+
+**Threads and the GPU modes.** Upstream shares its GLX display and its EGL display between the UI thread, which probes them and reads the visual for its windows, and the render thread, which creates the contexts. In the port the platform graphics are the object the two threads share (`IPlatformGraphics: Send + Sync`), and what belongs to one thread stays there:
+
+- `GlxDisplay` holds the connection, the frame buffer configuration, the visual, the extension list and the version that worked (behind a lock): values and identifiers of the GLX library, which locks the connection. The probe context (`DeferredContext`) is kept for the thread that created the display. A `GlxContext` is an object of the thread that created it, so the monitor upstream guards it with is not needed.
+- The EGL display of the OpenGL crate is an object of one thread. `X11EglPlatformGraphics` (in `x11_egl_helper.rs`) keeps the display it was probed with for the UI thread and gives another thread a display object of its own over the same connection: EGL has one display per native connection, so both are the same display of the library with the same configuration. The visual of the configuration is read once and kept as a value.
+- The window asks the platform which of its graphics it registered (`glx_graphics()`, `egl_graphics()`), where upstream casts the registered service.
 
 ## 7. Windows
 
@@ -161,15 +168,15 @@ One row per upstream file. "built" files are on the branch; the stage of an open
 | `ActivityTrackingHelper.cs` | 115 | `activity_tracking_helper.rs` | 1 | built |  |
 | `ICELib.cs` | 60 | `ice_lib.rs` | 2f | open |  |
 | `Keysyms.cs` | 2108 | `keysyms.rs` | 1 | built | a set of constants: the enumeration has members with equal values |
-| `LibC.cs` | 34 | `lib_c.rs` | 2b | open | the shared memory calls, with the shared memory framebuffer |
+| `LibC.cs` | 34 | `lib_c.rs` | 2b | built | the shared memory calls, with the shared memory framebuffer |
 | `SMLib.cs` | 132 | `sm_lib.rs` | 2f | open |  |
 | `TransparencyHelper.cs` | 112 | `transparency_helper.rs` | 1 | built |  |
 | `X11ActiveWindowTracker.cs` | 55 | `x11_active_window_tracker.rs` | 1 | built |  |
 | `X11Atoms.cs` | 275 | `x11_atoms.rs` | 1 | built |  |
 | `X11AtSpiAccessibility.cs` | 176 | `x11_at_spi_accessibility.rs` | 3 | open |  |
 | `X11CursorFactory.cs` | 182 | `x11_cursor_factory.rs` | 1 | built |  |
-| `X11DeferredDisplayDispatcher.cs` | 98 | `x11_deferred_display_dispatcher.rs` | 2b | open |  |
-| `X11EglHelper.cs` | 97 | `x11_egl_helper.rs` | 2a | open |  |
+| `X11DeferredDisplayDispatcher.cs` | 98 | `x11_deferred_display_dispatcher.rs` | 2b | built |  |
+| `X11EglHelper.cs` | 97 | `x11_egl_helper.rs` | 2a | built | with the display factory of `InitializeGraphics`, the loader of `libEGL` and the platform graphics of EGL (`X11EglPlatformGraphics`) |
 | `X11EnumExtensions.cs` | 30 | `x11_enum_extensions.rs` | 1 | built |  |
 | `X11Enums.cs` | 121 | `x11_enums.rs` | 1 | built |  |
 | `X11Exception.cs` | 12 | `x11_exception.rs` | 1 | built |  |
@@ -200,12 +207,12 @@ One row per upstream file. "built" files are on the branch; the stage of an open
 | `Dispatching/IX11PlatformDispatcher.cs` | 8 | `dispatching/i_x11_platform_dispatcher.rs` | 1 | built |  |
 | `Dispatching/X11EventDispatcher.cs` | 72 | `dispatching/x11_event_dispatcher.rs` | 1 | built |  |
 | `Dispatching/X11PlatformThreading.cs` | 206 | `dispatching/x11_platform_threading.rs` | 1 | built |  |
-| `Glx/Glx.cs` | 126 | `glx/glx.rs` | 2a | open |  |
-| `Glx/GlxConsts.cs` | 108 | `glx/glx_consts.rs` | 2a | open |  |
-| `Glx/GlxContext.cs` | 139 | `glx/glx_context.rs` | 2a | open |  |
-| `Glx/GlxDisplay.cs` | 195 | `glx/glx_display.rs` | 2a | open |  |
-| `Glx/GlxGlPlatformSurface.cs` | 102 | `glx/glx_gl_platform_surface.rs` | 2a | open |  |
-| `Glx/GlxPlatformFeature.cs` | 38 | `glx/glx_platform_feature.rs` | 2a | open |  |
+| `Glx/Glx.cs` | 126 | `glx/glx.rs` | 2a | built |  |
+| `Glx/GlxConsts.cs` | 108 | `glx/glx_consts.rs` | 2a | built |  |
+| `Glx/GlxContext.cs` | 139 | `glx/glx_context.rs` | 2a | built |  |
+| `Glx/GlxDisplay.cs` | 195 | `glx/glx_display.rs` | 2a | built |  |
+| `Glx/GlxGlPlatformSurface.cs` | 102 | `glx/glx_gl_platform_surface.rs` | 2a | built |  |
+| `Glx/GlxPlatformFeature.cs` | 38 | `glx/glx_platform_feature.rs` | 2a | built |  |
 | `Interop/Glib.cs` | 192 | `interop/glib.rs` | 2e | open |  |
 | `Interop/GtkInteropHelper.cs` | 15 | `interop/gtk_interop_helper.rs` | 2e | open |  |
 | `NativeDialogs/Gtk.cs` | 243 | `native_dialogs/gtk.rs` | 2e | open |  |
@@ -237,15 +244,15 @@ One row per upstream file. "built" files are on the branch; the stage of an open
 | `Selections/SelectionHelper.cs` | 8 | `selections/selection_helper.rs` | 1 | built |  |
 | `Selections/SelectionReadSession.cs` | 150 | `selections/selection_read_session.rs` | 1 | built |  |
 | `Selections/UriListHelper.cs` | 54 | `selections/uri_list_helper.rs` | 1 | built |  |
-| `Vulkan/VulkanNativeInterop.cs` | 29 | `vulkan/vulkan_native_interop.rs` | 2a | open |  |
-| `Vulkan/VulkanSupport.cs` | 95 | `vulkan/vulkan_support.rs` | 2a | open |  |
+| `Vulkan/VulkanNativeInterop.cs` | 29 | `vulkan/vulkan_native_interop.rs` | 2a | open | waits for the Vulkan project of the port and the Vulkan GPU of the Skia backend |
+| `Vulkan/VulkanSupport.cs` | 95 | `vulkan/vulkan_support.rs` | 2a | open | as above |
 | `X11WindowModes/DefaultWindowMode.cs` | 87 | `x11_window_modes/default_window_mode.rs` | 1 | built |  |
 | `X11WindowModes/InputProxyWindowMode.cs` | 55 | `x11_window_modes/input_proxy_window_mode.rs` | 1 | built |  |
 | `X11WindowModes/WindowMode.cs` | 61 | `x11_window_modes/window_mode.rs` | 1 | built |  |
 | `X11WindowModes/XEmbedClientWindowMode.cs` | 208 | `x11_window_modes/x_embed_client_window_mode.rs` | 2f | open |  |
-| `XShm/X11ShmFramebufferRenderTarget.cs` | 176 | `x_shm/x11_shm_framebuffer_render_target.rs` | 2b | open |  |
-| `XShm/X11ShmFramebufferSurface.cs` | 31 | `x_shm/x11_shm_framebuffer_surface.rs` | 2b | open |  |
-| `XShm/X11ShmImage.cs` | 105 | `x_shm/x11_shm_image.rs` | 2b | open |  |
+| `XShm/X11ShmFramebufferRenderTarget.cs` | 176 | `x_shm/x11_shm_framebuffer_render_target.rs` | 2b | built |  |
+| `XShm/X11ShmFramebufferSurface.cs` | 31 | `x_shm/x11_shm_framebuffer_surface.rs` | 2b | built |  |
+| `XShm/X11ShmImage.cs` | 105 | `x_shm/x11_shm_image.rs` | 2b | built |  |
 
 | Upstream file (`src/Avalonia.FreeDesktop`) | Lines | Rust file (`src/FerroUI.FreeDesktop`) | Stage | State | Notes |
 |---|---:|---|---|---|---|
@@ -275,10 +282,22 @@ One row per upstream file. "built" files are on the branch; the stage of an open
 Three levels, because an X application cannot run on the development machine:
 
 1. **Compilation for Linux**: `cargo check -p ferroui-x11 --target x86_64-unknown-linux-gnu --all-targets` **[M]**, and the host: the crate compiles whole on macOS.
-2. **Tests without a server** (`cargo test -p ferroui-x11`, 163 tests **[M][VM]**), of everything that is logic and not a round trip: the key tables; atoms and property decoding; Motif, size and state hints, window state from `_NET_WM_STATE`, allowed actions, frame extents; the translation of X Input events (built as the C structures the library delivers, copied as the dispatcher copies them); scaling from `Xft.dpi`, the environment and physical sizes, EDID, refresh rates, working areas; the resource database; the selection protocol with a mock connection (targets, multiple, incremental transfers in both directions, timeouts), formats and encodings, uri lists; the wake-up pipe and the timer wait of the event loop; the cursor tables; icon data; the options and the input method decisions.
-3. **A real server in CI** (the job `x11` of `.github/workflows/ci.yml`, Ubuntu, Xvfb): the crate is built for Linux, its tests run on Linux, and `examples/x11_window.rs --smoke` runs under `xvfb-run`. The smoke mode asks the server, not the framework: the window is viewable, has the expected size, `WM_NAME` and `_NET_WM_NAME`, `_NET_WM_PID`, `WM_PROTOCOLS`, `WM_CLASS`, `_NET_WM_WINDOW_TYPE`, and pixels read back with `XGetImage` at three points have the fill colour; it then sends itself `WM_DELETE_WINDOW`, which has to close the window and end the application. Every check prints a line and the exit code is the result.
+2. **Tests without a server** (`cargo test -p ferroui-x11`, 173 tests **[M]**; 163 at the end of stage 1 **[VM]**), of everything that is logic and not a round trip: the key tables; atoms and property decoding; Motif, size and state hints, window state from `_NET_WM_STATE`, allowed actions, frame extents; the translation of X Input events (built as the C structures the library delivers, copied as the dispatcher copies them); scaling from `Xft.dpi`, the environment and physical sizes, EDID, refresh rates, working areas; the resource database; the selection protocol with a mock connection (targets, multiple, incremental transfers in both directions, timeouts), formats and encodings, uri lists; the wake-up pipe and the timer wait of the event loop; the cursor tables; icon data; the options and the input method decisions; the walk of the rendering modes with a mock of the graphics; the choice of the frame buffer configuration, the context attributes of a version and the renderer blacklist of GLX; the probe order of the EGL configurations and the test for the X11 platform extension.
+3. **A real server** (the job `x11` of `.github/workflows/ci.yml`, Ubuntu, Xvfb; and the virtual machine): the crate is built for Linux, its tests run on Linux, and `examples/x11_window.rs --smoke` runs under `xvfb-run`. The smoke mode asks the server, not the framework, wherever it can. Every check prints a line and the exit code is the result. Its phases:
 
-The job runs the smoke mode twice: on a bare Xvfb, and under a window manager (`openbox`) on a screen narrower than the window, where the window manager clamps the window and the framework has to follow (the size check compares the server with the framework, and with the requested size only without a window manager).
+| Phase | What is done | What is asked of whom |
+|---|---|---|
+| window | The window is shown | The server: viewable, the expected size, `WM_NAME` and `_NET_WM_NAME`, `_NET_WM_PID`, `WM_PROTOCOLS`, `WM_CLASS`, `_NET_WM_WINDOW_TYPE`, and pixels read back with `XGetImage` at three points have the fill colour |
+| gpu (`--mode=glx`, `--mode=egl`) | Nothing more: the window is rendered through the mode | The platform: it registered the graphics of the mode and did not fall back. The server: the render window is a viewable child of the window with its size. OpenGL: a context of the platform graphics clears an offscreen framebuffer and `glReadPixels` returns the colour; with GLX a second context is made current on the render window and `glReadPixels` finds the frame in one of its buffers (on Mesa's software rasterizer the back buffer, which keeps the frame after the swap; the front buffer reads as zero). With EGL the frame is checked through the server alone: a window has one EGL surface, and it belongs to the compositor. `--expect-fallback` is the opposite check: the mode is refused and software rendering takes over |
+| input | The server synthesizes input through the XTEST extension: two pointer moves, the left button down and up, the wheel up and down (buttons 4 and 5), the key that produces "a" down and up | The input callback of the window (`ITopLevelImpl::input`, with a recorder in front of the framework's handler): a move at the expected position, the button events there, wheel deltas of one step, the key with its symbol, and the text "a" |
+| popup | A `Popup` with light dismiss is opened over the window at an offset; XTEST presses inside it and then on the window beside it | The server: one more viewable override-redirect child of the root with the process identifier of the application, at the origin of the window plus the offset, of the expected size, with the popup's colour at its centre. The framework: the popup stays open after the press inside and is closed (the closed event raised, the window gone from the server) after the press outside. The platform takes no pointer grab for a popup, as upstream: the framework dismisses it when the press arrives at its parent |
+| shm (`--shm`) | The frames of software rendering go through the shared memory extension | The server has MIT-SHM; the first surface of the window is the shared memory one, so the pixels of every other phase arrived through it |
+| resize | The window is given another size (520 by 320) | The server: the window has that size, and the fill colour at its centre and near its new bottom right corner, which takes frames of the new size (a new framebuffer, new shared memory images, a render window resized by the compositor) |
+| screens | Nothing, or two monitors made by the caller with `xrandr --setmonitor` | The screens of the platform lie inside the root window, do not overlap and cover it; `--expect-screens=N` states their number |
+| clipboard | Text is set and another client (`xclip`) reads it; `xclip` owns text and the framework reads it; each once with a short text with non-ASCII characters and once with three mebibytes | The bytes the other client printed, and the text the framework read. Three mebibytes are more than the largest property the platform writes (one mebibyte) and than the part size of `xclip`, so each side transfers in parts (`INCR`) |
+| close | A `WM_DELETE_WINDOW` message is sent to the window | The window closes and the application ends with exit code 0 |
+
+The job runs the smoke mode on a bare Xvfb; rendered through GLX and through EGL (Mesa's `llvmpipe`, with `FERROUI_GLX_IGNORE_RENDERER_BLACKLIST=1` for GLX); through the shared memory framebuffer; with GLX asked for and refused (the fallback); under a window manager (`openbox`) on a screen narrower than the window, where the window manager clamps the window and the framework has to follow (the size check compares the server with the framework, and with the requested size only without a window manager); and with two monitors side by side (`xrandr --setmonitor`, the server started with `-noreset`: an Xvfb resets when its last client disconnects, and the monitors `xrandr` made would be gone before the application starts).
 
 ### Measured in the virtual machine (2026-10-10) **[VM]**
 
@@ -294,15 +313,39 @@ Ubuntu 24.04.3 on ARM64 (`aarch64-unknown-linux-gnu`, Rust 1.97.1), the sources 
 | `cargo test -p ferroui-desktop --lib` | `platform_detect_selects_the_linux_subsystems` passes |
 | `hello_window` of `ferroui-desktop` under `xvfb-run` (`use_platform_detect`) | Opens, closes after its timer, exit code 0 |
 
-Nothing had to be changed in the platform for these runs. Only in CI so far: the build for x86-64 (whether `skia-bindings` has a binary for that target with the default features is **[R]**). Verified nowhere yet: input from real devices or synthetic input (`xdotool`), the clipboard between two clients, popups, more than one screen, a compositing manager under plain X11.
+Nothing had to be changed in the platform for these runs.
+
+### Measured in the virtual machine for stage 2 (2026-10-10) **[VM]**
+
+The same machine (Mesa 25.2.8, `llvmpipe`; `xclip` 0.13 and `mesa-utils` installed for these runs), the smoke mode of section 13 under `xvfb-run`:
+
+| Run | Result |
+|---|---|
+| Bare Xvfb, software | 32 of 32 checks: window, input (XTEST through the X Input extension: move, button, wheel, key code 38 with the symbol and the text "a"), popup (at (50, 40) of the root for a window at (10, 10), 120 by 80, its colour, kept by a press inside, dismissed by a press outside), one screen covering the root, the clipboard in both directions, small and in parts |
+| Under `openbox`, 600 by 500, software | 32 of 32; the window at (1, 22) of the root, the popup relative to it |
+| Two monitors (`xrandr --setmonitor`, `-noreset`), software, without the clipboard | 27 of 27; the screens `FERRO-A` (0, 0, 640 by 1024) and `FERRO-B` (640, 0, 640 by 1024) |
+| `--mode=glx`, `FERROUI_GLX_IGNORE_RENDERER_BLACKLIST=1` | 37 of 37: the platform graphics of GLX; a render window, child of the window; an OpenGL 4.0 core context (Mesa reports 4.5, `llvmpipe (LLVM 20.1.2, 128 bits)`, 8 stencil bits); the offscreen draw read back as (51, 102, 153, 255); the frame read back with `glReadPixels` from the back buffer of the render window (the front buffer reads (0, 0, 0, 0)); the pixels of the window and of the popup on the server (`XGetImage`) as in software |
+| `--mode=egl` | 36 of 36: the platform graphics of EGL, the render window, the same context and offscreen read back, the pixels of the window and of the popup on the server |
+
+What these runs found, and what was changed:
+
+| Finding | Change |
+|---|---|
+| The text `xclip` owns was not read when it was larger than `xclip`'s part size: "the clipboard has no text". `xclip` announces an incremental transfer with an empty property of the type `INCR`; the reader returned nothing for an answer without items before looking at its type, as upstream does | The type is looked at first (`SelectionReadSession::send_data_request`; DEVIATIONS.md; a test with that announcement) |
+| Two monitors made with `xrandr --setmonitor` were gone when the application started | Not the platform: an Xvfb resets when its last client disconnects. The server of that run is started with `-noreset` |
+| With GLX on Mesa's software rasterizer, a second context current on the render window reads zero from the front buffer | Not the platform (the window on the server has the frame): the check reads both buffers and expects the frame in one |
+
+Nothing else had to be changed: GLX and EGL rendered the first time they ran, on the render thread, popups included.
+
+Only in CI: everything on x86-64. Verified nowhere yet: a GPU with a hardware driver (the visual preference and the configuration probe exist for nvidia; the blacklist for `llvmpipe` and `SVGA3D` is only exercised as a refusal), input from a real device, a compositing manager under plain X11, more than one X screen (the platform uses the default screen, as upstream).
 
 ## 14. Stages
 
 | Stage | Content | What its CI run proves |
 |---|---|---|
-| 1 (built) | The crate and bindings; platform initialisation and options; atoms; the event loop; windows (creation, events, states, hints, activation, transparency, popups); screens with RandR and scaling; cursors; the software framebuffer; the render timer; pointer, touch and keyboard input; the clipboard; `use_x11` and `use_platform_detect` on Linux; the example | Section 13, level 3 |
-| 2a | GPU rendering: EGL, GLX, then Vulkan; the Skia feature set for Linux | The smoke run per mode on Mesa's software GL (`llvmpipe` needs the blacklist override), pixels read back |
-| 2b | The shared memory framebuffer | The smoke run with `use_x_shm_framebuffer` |
+| 1 (built; its unverified items closed in stage 2) | The crate and bindings; platform initialisation and options; atoms; the event loop; windows (creation, events, states, hints, activation, transparency, popups); screens with RandR and scaling; cursors; the software framebuffer; the render timer; pointer, touch and keyboard input; the clipboard; `use_x11` and `use_platform_detect` on Linux; the example | Section 13, level 3 |
+| 2a (built, but Vulkan) | GPU rendering: GLX and EGL with Skia's Ganesh on OpenGL; the Skia feature set for Linux. Open: Vulkan, which waits for the Vulkan project of the port and the Vulkan GPU of the Skia backend | The Skia binaries for Linux asked of the release; the smoke run per mode on Mesa's software GL (`llvmpipe` needs the blacklist override), with `glReadPixels` and `XGetImage`; GLX refused and software taking over |
+| 2b (built) | The shared memory framebuffer | The smoke run with `--shm` (`use_x_shm_framebuffer`): the extension, the surface, the pixels of every phase and of a resized window through it |
 | 2c | Input methods: the key event queue, XIM, IBus and Fcitx over D-Bus (starts `ferroui-freedesktop`) | Text committed by an IBus daemon in the job |
 | 2d | Drag and drop (XDND source and target) | A drag between two windows of the test, driven with `xdotool` |
 | 2e | FreeDesktop services: the portal file chooser, the GTK dialogs and the GLib dispatcher, tray icon, global menu, platform settings, mounted volumes | Services against a session bus in the job (`dbus-run-session`), with test doubles of the portal interfaces |

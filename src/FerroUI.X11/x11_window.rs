@@ -18,6 +18,7 @@ use crate::x11_structs::{
     MotifWmHints, NetWmMoveResize, NotifyDetail, SetWindowValuemask, XEventName, XSizeHintsFlags, XWMHintsFlags,
 };
 use crate::x11_window_info::X11WindowInfo;
+use crate::x_shm::X11ShmFramebufferSurface;
 use crate::x11_window_modes::{DefaultTopLevelWindowMode, InputProxyWindowMode, X11WindowMode};
 use crate::xi2_manager::IXI2Client;
 use crate::xlib::{self, Atom, PropertyMode, XConfigureEvent, XDisplay, XEvent, XSyncValue, XIC, XID};
@@ -740,9 +741,14 @@ impl X11Window {
         // XShm needs a 32-bit visual (other depths would require a slow XShmPutImage conversion) and the
         // MIT-SHM extension, probed once by X11Info on the deferred display.
         if platform.options().use_x_shm_framebuffer == Some(true) && depth == 32 && x11.has_x_shm() {
-            panic!(
-                "X11PlatformOptions::use_x_shm_framebuffer: the shared memory framebuffer (X11ShmFramebufferSurface) \
-                 is not built yet (stage 2 of docs/porting/x11-platform.md)"
+            surfaces.insert(
+                0,
+                Arc::new(X11ShmFramebufferSurface::new(
+                    x11.deferred_display(),
+                    render_handle,
+                    xlib::VisualPointer::new(visual),
+                    depth,
+                )),
             );
         }
 
