@@ -2,26 +2,26 @@
  "upstreamCommit": "17350180c33b063f0e98abbfd19aa3cae63f5d56",
  "inScope": {
   "files": [
-   2382,
-   2493,
+   2410,
+   2511,
    0
   ],
   "types": [
-   3202,
-   3774,
+   3236,
+   3800,
    311
   ],
   "members": [
-   26142,
-   31075,
+   26346,
+   31291,
    2858
   ]
  },
  "allProjects": {
-  "membersPresent": 26142,
+  "membersPresent": 26346,
   "members": 37391,
   "membersNotApplicable": 1132,
-  "membersOutOfScope": 5184
+  "membersOutOfScope": 4968
  },
  "projects": [
   {
@@ -6737,25 +6737,25 @@
    "name": "Avalonia.FreeDesktop",
    "path": "src/Avalonia.FreeDesktop",
    "rust": "src/FerroUI.FreeDesktop",
-   "scope": "out",
+   "scope": "in",
    "detail": "full",
    "files": [
-    0,
+    16,
     18,
     0
    ],
    "types": [
-    0,
+    23,
     26,
     0
    ],
    "members": [
-    0,
+    156,
     216,
     0
    ],
    "interfaces": [
-    0,
+    3,
     3
    ],
    "propertyRegistrations": [
@@ -6767,9 +6767,73 @@
     0
    ],
    "notApplicableFiles": 0,
-   "matchKinds": {},
-   "presentFiles": {},
-   "rustOnly": []
+   "matchKinds": {
+    "field": 4,
+    "fn": 87,
+    "free fn": 1,
+    "overload fn": 1,
+    "trait fn": 8,
+    "variant": 55
+   },
+   "presentFiles": {
+    "DBusCallQueue.cs": [
+     "dbus_call_queue.rs"
+    ],
+    "DBusHelper.cs": [
+     "dbus_helper.rs"
+    ],
+    "DBusIme/DBusTextInputMethodBase.cs": [
+     "dbus_ime/dbus_text_input_method_base.rs"
+    ],
+    "DBusIme/Fcitx/FcitxEnums.cs": [
+     "dbus_ime/fcitx/fcitx_enums.rs"
+    ],
+    "DBusIme/Fcitx/FcitxICWrapper.cs": [
+     "dbus_ime/fcitx/fcitx_ic_wrapper.rs"
+    ],
+    "DBusIme/Fcitx/FcitxX11TextInputMethod.cs": [
+     "dbus_ime/fcitx/fcitx_x11_text_input_method.rs"
+    ],
+    "DBusIme/IBus/IBusEnums.cs": [
+     "dbus_ime/ibus/ibus_enums.rs"
+    ],
+    "DBusIme/IBus/IBusX11TextInputMethod.cs": [
+     "dbus_ime/ibus/ibus_x11_text_input_method.rs"
+    ],
+    "DBusIme/X11DBusImeHelper.cs": [
+     "dbus_ime/x11_dbus_ime_helper.rs"
+    ],
+    "DBusPlatformSettings.cs": [
+     "dbus_platform_settings.rs"
+    ],
+    "DBusSystemDialog.cs": [
+     "dbus_system_dialog.rs"
+    ],
+    "IPortalParentLease.cs": [
+     "i_portal_parent_lease.rs"
+    ],
+    "IX11InputMethod.cs": [
+     "ix11_input_method.rs"
+    ],
+    "LinuxMountedVolumeInfoListener.cs": [
+     "linux_mounted_volume_info_listener.rs"
+    ],
+    "LinuxMountedVolumeInfoProvider.cs": [
+     "linux_mounted_volume_info_provider.rs"
+    ],
+    "NativeMethods.cs": [
+     "native_methods.rs"
+    ]
+   },
+   "rustOnly": [
+    "dbus_ime/fcitx/dbus.rs",
+    "dbus_ime/ibus/dbus.rs",
+    "dbus_ime/tests.rs",
+    "dbus_system_dialog/tests.rs",
+    "event.rs",
+    "signal_watch.rs",
+    "test_support.rs"
+   ]
   },
   {
    "name": "Avalonia.FreeDesktop.AtSpi",
@@ -7558,22 +7622,22 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    60,
+    72,
     88,
     0
    ],
    "types": [
-    132,
+    143,
     291,
     107
    ],
    "members": [
-    3348,
+    3396,
     4897,
     1076
    ],
    "interfaces": [
-    7,
+    8,
     8
    ],
    "propertyRegistrations": [
@@ -7589,11 +7653,11 @@
     "alias field": 1,
     "const": 2,
     "field": 247,
-    "fn": 359,
-    "free fn": 97,
-    "free item": 10,
+    "fn": 399,
+    "free fn": 102,
+    "free item": 12,
     "overload fn": 5,
-    "trait": 2,
+    "trait": 3,
     "trait fn": 4,
     "variant": 2621
    },
@@ -7663,6 +7727,39 @@
     ],
     "Selections/DataFormatHelper.cs": [
      "selections/data_format_helper.rs"
+    ],
+    "Selections/DragDrop/DragDropDataProvider.cs": [
+     "selections/drag_drop/drag_drop_data_provider.rs"
+    ],
+    "Selections/DragDrop/DragDropDataReader.cs": [
+     "selections/drag_drop/drag_drop_data_reader.rs"
+    ],
+    "Selections/DragDrop/DragDropDataTransfer.cs": [
+     "selections/drag_drop/drag_drop_data_transfer.rs"
+    ],
+    "Selections/DragDrop/DragDropDataTransferItem.cs": [
+     "selections/drag_drop/drag_drop_data_transfer_item.rs"
+    ],
+    "Selections/DragDrop/DragDropTimeoutManager.cs": [
+     "selections/drag_drop/drag_drop_timeout_manager.rs"
+    ],
+    "Selections/DragDrop/IXdndWindow.cs": [
+     "selections/drag_drop/i_xdnd_window.rs"
+    ],
+    "Selections/DragDrop/SynchronousXEventWaiter.cs": [
+     "selections/drag_drop/synchronous_x_event_waiter.rs"
+    ],
+    "Selections/DragDrop/X11DragSource.cs": [
+     "selections/drag_drop/x11_drag_source.rs"
+    ],
+    "Selections/DragDrop/X11DropTarget.cs": [
+     "selections/drag_drop/x11_drop_target.rs"
+    ],
+    "Selections/DragDrop/XdndActionHelper.cs": [
+     "selections/drag_drop/xdnd_action_helper.rs"
+    ],
+    "Selections/DragDrop/XdndConstants.cs": [
+     "selections/drag_drop/xdnd_constants.rs"
     ],
     "Selections/IXEventWaiter.cs": [
      "selections/i_x_event_waiter.rs"
@@ -7736,6 +7833,9 @@
     "X11Window.Ime.cs": [
      "x11_window_ime.rs"
     ],
+    "X11Window.Xim.cs": [
+     "x11_window_xim.rs"
+    ],
     "X11Window.cs": [
      "x11_window.rs"
     ],
@@ -7780,9 +7880,10 @@
     ]
    },
    "rustOnly": [
-    "event.rs",
     "pixel_buffer.rs",
-    "raw_event_grouping.rs"
+    "raw_event_grouping.rs",
+    "selections/drag_drop/x11_drag_source/tests.rs",
+    "selections/drag_drop/x11_drop_target/tests.rs"
    ]
   },
   {

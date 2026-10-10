@@ -7,7 +7,9 @@ use crate::raw_event_grouping::ManualRawEventGrouperDispatchQueue;
 use crate::screens::X11Screens;
 use crate::selections::clipboard::X11ClipboardImpl;
 use crate::x11_active_window_tracker::X11ActiveWindowTracker;
+use crate::selections::drag_drop::X11DragSource;
 use crate::x11_cursor_factory::X11CursorFactory;
+use ferroui_base::input::platform::IPlatformDragSource;
 use crate::x11_egl_helper::X11EglPlatformGraphics;
 use crate::x11_exception::X11Exception;
 use crate::x11_globals::X11Globals;
@@ -24,12 +26,14 @@ use ferroui_base::input::platform::{
     PlatformClipboardManager, PlatformHotkeyConfiguration,
 };
 use ferroui_base::input::{IKeyboardDevice, KeyModifiers, KeyboardDevice};
-use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::platform::{DefaultPlatformSettings, ICursorFactory, IPlatformGraphics, IPlatformSettings};
+use ferroui_base::platform::{ICursorFactory, IPlatformGraphics, IPlatformSettings};
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::rendering::{IRenderLoop, IRenderTimer, RenderLoop, SleepLoopRenderTimer, UiThreadRenderTimer};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{FerroLocator, LocatorExtensions};
+use ferroui_controls::platform::IMountedVolumeInfoProvider;
+use ferroui_freedesktop::dbus_ime::X11DBusImeHelper;
+use ferroui_freedesktop::{DBusPlatformSettings, LinuxMountedVolumeInfoProvider};
 use ferroui_controls::platform::{
     IPlatformIconLoader, IScreenImpl, ITopLevelImpl, ITrayIconImpl, IWindowImpl, IWindowingPlatform,
 };
@@ -42,7 +46,7 @@ use std::sync::Arc;
 
 /// The environment variable that chooses the input method module of an
 /// application of this framework, before the ones of the other toolkits.
-pub const IM_MODULE_VARIABLE: &str = "FERROUI_IM_MODULE";
+pub const IM_MODULE_VARIABLE: &str = ferroui_freedesktop::dbus_ime::IM_MODULE_VARIABLE;
 /// The environment variable that turns the session management off (`0`).
 pub const USE_SESSION_MANAGEMENT_VARIABLE: &str = "FERROUI_X11_USE_SESSION_MANAGEMENT";
 
@@ -66,6 +70,7 @@ pub struct FerroX11Platform {
     display: Cell<Option<XDisplay>>,
     glx_graphics: OnceCell<Arc<GlxPlatformGraphics>>,
     egl_graphics: OnceCell<Arc<X11EglPlatformGraphics>>,
+    cursor_factory: OnceCell<Rc<X11CursorFactory>>,
 }
 
 fn initialized<T>(cell: &OnceCell<T>) -> &T {
@@ -95,6 +100,7 @@ impl FerroX11Platform {
             display: Cell::new(None),
             glx_graphics: OnceCell::new(),
             egl_graphics: OnceCell::new(),
+            cursor_factory: OnceCell::new(),
         })
     }
 
@@ -185,6 +191,13 @@ impl FerroX11Platform {
 
     /// The platform graphics of GLX, when they are the ones the platform
     /// registered (`glfeature as GlxPlatformGraphics` of the reference).
+    /// The cursor factory of the platform, as its own type (the cast of
+    /// the registered service in the reference): the drag source takes
+    /// the cursors of a drag from it.
+    pub fn cursor_factory(&self) -> Option<Rc<X11CursorFactory>> {
+        self.cursor_factory.get().cloned()
+    }
+
     pub fn glx_graphics(&self) -> Option<Arc<GlxPlatformGraphics>> {
         self.glx_graphics.get().cloned()
     }
@@ -205,32 +218,22 @@ impl FerroX11Platform {
         let options = Rc::new(options);
         let _ = self.options.set(options.clone());
 
-        let use_xim = false;
+        let mut use_xim = false;
         if Self::enable_ime(
             &options,
             std::env::var(IM_MODULE_VARIABLE).ok().as_deref(),
             std::env::var("LANG").ok().as_deref(),
         ) {
             // Attempt to configure DBus-based input method and check if we can fall back to XIM
-            //
-            // Stage 2 of docs/porting/x11-platform.md: the input methods
-            // over D-Bus (`X11DBusImeHelper.DetectAndRegister`) and the
-            // input method of the server (`XimInputMethod`) are not built,
-            // so keys produce text through the keyboard mapping alone.
-            let xim_configured = Self::should_use_xim(
-                std::env::var(IM_MODULE_VARIABLE).ok().as_deref(),
-                std::env::var("GTK_IM_MODULE").ok().as_deref(),
-                std::env::var("QT_IM_MODULE").ok().as_deref(),
-                std::env::var("XMODIFIERS").ok().as_deref(),
-            );
-            if xim_configured {
-                if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::X11_PLATFORM) {
-                    logger.log(
-                        None,
-                        "An input method of the X server is configured, and input methods are not available yet on \
-                         this platform: text is produced by the keyboard layout only.",
-                    );
-                }
+            if !X11DBusImeHelper::detect_and_register()
+                && Self::should_use_xim(
+                    std::env::var(IM_MODULE_VARIABLE).ok().as_deref(),
+                    std::env::var("GTK_IM_MODULE").ok().as_deref(),
+                    std::env::var("QT_IM_MODULE").ok().as_deref(),
+                    std::env::var("XMODIFIERS").ok().as_deref(),
+                )
+            {
+                use_xim = true;
             }
         }
 
@@ -296,7 +299,10 @@ impl FerroX11Platform {
 
         let render_loop: Arc<dyn IRenderLoop> = RenderLoop::from_timer(timer);
         let weak = self.this.clone();
-        let cursor_factory: Rc<dyn ICursorFactory> = Rc::new(X11CursorFactory::new(display));
+        let x11_cursor_factory = Rc::new(X11CursorFactory::new(display));
+        let _ = self.cursor_factory.set(x11_cursor_factory.clone());
+        let cursor_factory: Rc<dyn ICursorFactory> = x11_cursor_factory;
+        let drag_source: Rc<dyn IPlatformDragSource> = Rc::new(X11DragSource::new(self));
         let clipboard_impl: Rc<dyn IClipboardImpl> = clipboard_impl;
         let clipboard: Rc<dyn IClipboard> = clipboard;
         let clipboard_manager: Rc<dyn IPlatformClipboardManagerImpl> = clipboard_manager;
@@ -304,7 +310,8 @@ impl FerroX11Platform {
         // desktop portal (`DBusPlatformSettings`, the colour scheme and
         // the accent colour) are a service of the FreeDesktop crate; until
         // it is built the defaults of the framework answer.
-        let platform_settings: Rc<dyn IPlatformSettings> = Rc::new(DefaultPlatformSettings::new());
+        let platform_settings: Rc<dyn IPlatformSettings> = DBusPlatformSettings::new();
+        let mounted_volumes: Rc<dyn IMountedVolumeInfoProvider> = Rc::new(LinuxMountedVolumeInfoProvider::new());
         let icon_loader: Rc<dyn IPlatformIconLoader> = Rc::new(X11IconLoader);
         locator
             .bind::<Arc<dyn IRenderLoop>>()
@@ -324,9 +331,13 @@ impl FerroX11Platform {
             .bind::<dyn IPlatformSettings>()
             .to_constant(platform_settings)
             .bind::<dyn IPlatformIconLoader>()
-            .to_constant(icon_loader);
+            .to_constant(icon_loader)
+            .bind::<dyn IPlatformDragSource>()
+            .to_constant(drag_source)
+            .bind::<dyn IMountedVolumeInfoProvider>()
+            .to_constant(mounted_volumes);
         // Not bound yet, each with the stage of docs/porting/x11-platform.md
-        // that builds it: the drag source (`X11DragSource`, stage 2), the
+        // that builds it: the
         // mounted volumes (`LinuxMountedVolumeInfoProvider`, with the
         // FreeDesktop crate) and the lifetime events of the session
         // manager (`X11PlatformLifetimeEvents`, stage 2).

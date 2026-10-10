@@ -8,8 +8,8 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. The s
 
 | | Present | Total | Missing | Waived | Not applicable | Out of scope | Share |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Members of the projects in scope | 26142 | 31075 | 2075 | 2858 | - | - | 92.6% of total less waived |
-| Members of every upstream source project of the extraction | 26142 | 37391 | 2075 | 2858 | 1132 | 5184 | 69.9% of total |
+| Members of the projects in scope | 26346 | 31291 | 2087 | 2858 | - | - | 92.7% of total less waived |
+| Members of every upstream source project of the extraction | 26346 | 37391 | 2087 | 2858 | 1132 | 4968 | 70.5% of total |
 
 The first row is the headline of the tracking: it leaves out the waived members and everything out of scope. The second row leaves out nothing: every member of every C# project the extraction reads, whether or not the port will ever have it. A member is *present* when an item of the mapped name exists; names are matched, not behaviour.
 
@@ -28,6 +28,7 @@ Files, types and members as present / missing / waived. *n/a* counts the files m
 | [Avalonia.Desktop](tracking/Avalonia.Desktop.md) | in | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 | 0 (0) | 100.0% |
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | in | 17 / 0 / 0 | 18 / 0 / 0 | 94 / 0 / 0 | 0 (0) | 100.0% |
 | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) | in | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 | 1 (0) | 100.0% |
+| [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | in | 16 / 2 / 0 | 23 / 3 / 0 | 156 / 60 / 0 | 0 (0) | 72.2% |
 | [Avalonia.Metal](tracking/Avalonia.Metal.md) | in | 2 / 0 / 0 | 7 / 0 / 0 | 21 / 0 / 0 | 0 (0) | 100.0% |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | in | 1 / 0 / 0 | 1 / 0 / 0 | 0 / 0 / 6 | 0 (0) | 0.0% |
 | [Avalonia.Native](tracking/Avalonia.Native.md) | in | 48 / 1 / 0 | 67 / 8 / 10 | 473 / 69 / 59 | 0 (0) | 78.7% |
@@ -35,7 +36,7 @@ Files, types and members as present / missing / waived. *n/a* counts the files m
 | [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | in | 14 / 0 / 0 | 54 / 0 / 1 | 198 / 1 / 3 | 0 (0) | 98.0% |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | in | 5 / 0 / 0 | 6 / 0 / 0 | 68 / 0 / 5 | 1 (0) | 93.2% |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | in | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 | 1 (0) | 100.0% |
-| [Avalonia.X11](tracking/Avalonia.X11.md) | in | 60 / 28 / 0 | 132 / 52 / 107 | 3348 / 473 / 1076 | 0 (0) | 68.4% |
+| [Avalonia.X11](tracking/Avalonia.X11.md) | in | 72 / 16 / 0 | 143 / 41 / 107 | 3396 / 425 / 1076 | 0 (0) | 69.3% |
 | [Avalonia.Browser](tracking/Avalonia.Browser.md) | in | 50 / 0 / 0 | 60 / 0 / 2 | 340 / 0 / 88 | 2 (13) | 77.1% |
 | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | in | 3 / 0 / 0 | 3 / 0 / 0 | 5 / 0 / 3 | 0 (0) | 62.5% |
 | [Avalonia.Headless](tracking/Avalonia.Headless.md) | in | 11 / 0 / 0 | 22 / 0 / 2 | 238 / 0 / 13 | 0 (0) | 94.8% |
@@ -49,7 +50,6 @@ Files, types and members as present / missing / waived. *n/a* counts the files m
 | [Avalonia.iOS](tracking/Avalonia.iOS.md) | in | 23 / 17 / 0 | 26 / 30 / 1 | 114 / 200 / 17 | 1 (0) | 34.4% |
 | [Avalonia.Generators](tracking/Avalonia.Generators.md) | in: every file not applicable | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 / 0 | 31 (264) | 0.0% |
 | [Avalonia.Android](tracking/Avalonia.Android.md) | out (not started) | 58 files | 88 types | 447 members | 0 (0) | 0.0% |
-| [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | out (not started) | 18 files | 26 types | 216 members | 0 (0) | 0.0% |
 | [Avalonia.FreeDesktop.AtSpi](tracking/Avalonia.FreeDesktop.AtSpi.md) | out (not started) | 27 files | 27 types | 434 members | 0 (0) | 0.0% |
 | [Avalonia.Vulkan](tracking/Avalonia.Vulkan.md) | out (not started) | 30 files | 151 types | 2034 members | 0 (0) | 0.0% |
 | [Avalonia.Wayland](tracking/Avalonia.Wayland.md) | out (not started) | 81 files | 123 types | 816 members | 0 (0) | 0.0% |
@@ -215,6 +215,14 @@ Files without a Rust file, types without a Rust type, and members without a Rust
 - **Types (1):** `ITransportWithEnforcedMethod`
 - **Members of types that exist (1):** `PreviewerWindowImpl.OnMessage`
 
+### [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md)
+
+2 files, 3 types and 60 members missing (40 members of the missing types, 20 members of types that exist).
+
+- **Files (2):** `DBusMenuExporter.cs`, `DBusTrayIconImpl.cs`
+- **Types (3):** `DBusMenuExporter`, `DBusTrayIconImpl`, `StatusNotifierItemDbusObj`
+- **Members of types that exist (20):** `FcitxKeyState.FcitxKeyState_None`, `FcitxKeyState.FcitxKeyState_Shift`, `FcitxKeyState.FcitxKeyState_CapsLock`, `FcitxKeyState.FcitxKeyState_Ctrl`, `FcitxKeyState.FcitxKeyState_Alt`, `FcitxKeyState.FcitxKeyState_Alt_Shift`, `FcitxKeyState.FcitxKeyState_Ctrl_Shift`, `FcitxKeyState.FcitxKeyState_Ctrl_Alt`, `FcitxKeyState.FcitxKeyState_Ctrl_Alt_Shift`, `FcitxKeyState.FcitxKeyState_NumLock`, `FcitxKeyState.FcitxKeyState_Super`, `FcitxKeyState.FcitxKeyState_ScrollLock`, `FcitxKeyState.FcitxKeyState_MousePressed`, `FcitxKeyState.FcitxKeyState_HandledMask`, `FcitxKeyState.FcitxKeyState_IgnoredMask`, `FcitxKeyState.FcitxKeyState_Super2`, `FcitxKeyState.FcitxKeyState_Hyper`, `FcitxKeyState.FcitxKeyState_Meta`, `FcitxKeyState.FcitxKeyState_UsedMask`, `LinuxMountedVolumeInfoListener.Dispose`
+
 ### [Avalonia.Native](tracking/Avalonia.Native.md)
 
 1 files, 8 types and 69 members missing (62 members of the missing types, 7 members of types that exist).
@@ -237,11 +245,11 @@ Files without a Rust file, types without a Rust type, and members without a Rust
 
 ### [Avalonia.X11](tracking/Avalonia.X11.md)
 
-28 files, 52 types and 473 members missing (312 members of the missing types, 161 members of types that exist).
+16 files, 41 types and 425 members missing (264 members of the missing types, 161 members of types that exist).
 
-- **Files (28):** `Dispatching/GLibDispatcherImpl.cs`, `Dispatching/GlibDispatcherImplBase.cs`, `ICELib.cs`, `Interop/Glib.cs`, `Interop/GtkInteropHelper.cs`, `NativeDialogs/Gtk.cs`, `NativeDialogs/GtkNativeFileDialogs.cs`, `SMLib.cs`, `Selections/DragDrop/DragDropDataProvider.cs`, `Selections/DragDrop/DragDropDataReader.cs`, `Selections/DragDrop/DragDropDataTransfer.cs`, `Selections/DragDrop/DragDropDataTransferItem.cs`, `Selections/DragDrop/DragDropTimeoutManager.cs`, `Selections/DragDrop/IXdndWindow.cs`, `Selections/DragDrop/SynchronousXEventWaiter.cs`, `Selections/DragDrop/X11DragSource.cs`, `Selections/DragDrop/X11DropTarget.cs`, `Selections/DragDrop/XdndActionHelper.cs`, `Selections/DragDrop/XdndConstants.cs`, `Vulkan/VulkanNativeInterop.cs`, `Vulkan/VulkanSupport.cs`, `X11AtSpiAccessibility.cs`, `X11NativeControlHost.cs`, `X11PlatformLifetimeEvents.cs`, `X11Window.Xim.cs`, `X11WindowModes/XEmbedClientWindowMode.cs`, `XEmbedPlug.cs`, `XEmbedTrayIconImpl.cs`
-- **Types (52):** `DragDropDataProvider`, `DragDropDataReader`, `DragDropDataTransfer`, `DragDropDataTransferItem`, `DragDropTimeoutManager`, `GSList`, `Glib`, `Glib.GDestroyNotify`, `Glib.GIOCondition`, `Glib.GSourceFunc`, `Glib.GUnixFDSourceFunc`, `GlibDispatcherImpl`, `GlibDispatcherImplBase`, `GlxConsts`, `Gtk`, `Gtk.signal_dialog_response`, `Gtk.signal_generic`, `GtkFileChooserAction`, `GtkInteropHelper`, `GtkResponseType`, `GtkSystemDialog`, `ICELib`, `ICELib.IceErrorHandler`, `ICELib.IceIOErrorHandler`, `ICELib.IceProcessMessagesStatus`, `IXdndWindow`, `SMLib`, `SMLib.IceWatchProc`, `SMLib.SmDialogValue`, `SMLib.SmcCallbacks`, `SMLib.SmcDieProc`, `SMLib.SmcErrorHandler`, `SMLib.SmcInteractProc`, `SMLib.SmcSaveCompleteProc`, `SMLib.SmcSaveYourselfProc`, `SMLib.SmcShutdownCancelledProc`, `SynchronousXEventWaiter`, `VkXlibSurfaceCreateInfoKHR`, `VulkanSupport`, `VulkanSupport.VulkanSurfaceFactory`, `X11AtSpiAccessibility`, `X11DragSource`, `X11DropTarget`, `X11NativeControlHost`, `X11PlatformLifetimeEvents`, `X11VulkanInterface`, `X11Window.XEmbedClientWindowMode`, `XEmbedPlug`, `XEmbedTrayIconImpl`, `XLib.GrabResult`, `XdndActionHelper`, `XdndConstants`
-- **Members of types that exist (161), by type:** `XLib` 133, `X11Window.X11WindowMode` 7, `AvaloniaX11Platform` 4, `GlxInterface` 3, `CursorImpl` 2, `X11Window` 2, `XLib.XGeometry` 2, `DataFormatHelper` 1, `GlxDisplay` 1, `SelectionDataProvider` 1, `X11EglHelper` 1, `X11FramebufferSurface` 1, `X11Window.DefaultTopLevelWindowMode` 1, `X11Window.InputProxyWindowMode` 1, `X11Window.SurfacePlatformHandle` 1
+- **Files (16):** `Dispatching/GLibDispatcherImpl.cs`, `Dispatching/GlibDispatcherImplBase.cs`, `ICELib.cs`, `Interop/Glib.cs`, `Interop/GtkInteropHelper.cs`, `NativeDialogs/Gtk.cs`, `NativeDialogs/GtkNativeFileDialogs.cs`, `SMLib.cs`, `Vulkan/VulkanNativeInterop.cs`, `Vulkan/VulkanSupport.cs`, `X11AtSpiAccessibility.cs`, `X11NativeControlHost.cs`, `X11PlatformLifetimeEvents.cs`, `X11WindowModes/XEmbedClientWindowMode.cs`, `XEmbedPlug.cs`, `XEmbedTrayIconImpl.cs`
+- **Types (41):** `GSList`, `Glib`, `Glib.GDestroyNotify`, `Glib.GIOCondition`, `Glib.GSourceFunc`, `Glib.GUnixFDSourceFunc`, `GlibDispatcherImpl`, `GlibDispatcherImplBase`, `GlxConsts`, `Gtk`, `Gtk.signal_dialog_response`, `Gtk.signal_generic`, `GtkFileChooserAction`, `GtkInteropHelper`, `GtkResponseType`, `GtkSystemDialog`, `ICELib`, `ICELib.IceErrorHandler`, `ICELib.IceIOErrorHandler`, `ICELib.IceProcessMessagesStatus`, `SMLib`, `SMLib.IceWatchProc`, `SMLib.SmDialogValue`, `SMLib.SmcCallbacks`, `SMLib.SmcDieProc`, `SMLib.SmcErrorHandler`, `SMLib.SmcInteractProc`, `SMLib.SmcSaveCompleteProc`, `SMLib.SmcSaveYourselfProc`, `SMLib.SmcShutdownCancelledProc`, `VkXlibSurfaceCreateInfoKHR`, `VulkanSupport`, `VulkanSupport.VulkanSurfaceFactory`, `X11AtSpiAccessibility`, `X11NativeControlHost`, `X11PlatformLifetimeEvents`, `X11VulkanInterface`, `X11Window.XEmbedClientWindowMode`, `XEmbedPlug`, `XEmbedTrayIconImpl`, `XLib.GrabResult`
+- **Members of types that exist (161), by type:** `XLib` 130, `X11Window.X11WindowMode` 7, `AvaloniaX11Platform` 4, `GlxInterface` 3, `CursorImpl` 2, `DragDropDataProvider` 2, `DragDropDataTransfer` 2, `XLib.XGeometry` 2, `DataFormatHelper` 1, `GlxDisplay` 1, `SelectionDataProvider` 1, `X11EglHelper` 1, `X11FramebufferSurface` 1, `X11Window` 1, `X11Window.DefaultTopLevelWindowMode` 1, `X11Window.InputProxyWindowMode` 1, `X11Window.SurfacePlatformHandle` 1
 
 ### [Avalonia.Skia](tracking/Avalonia.Skia.md)
 

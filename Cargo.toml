@@ -15,6 +15,7 @@ members = [
     "src/FerroUI.Desktop",
     "src/FerroUI.X11",
     "src/iOS/FerroUI.iOS",
+    "src/FerroUI.FreeDesktop",
     "src/Browser/FerroUI.Browser",
     "src/Headless/FerroUI.Headless",
     "src/FerroUI.Fonts.Inter",
@@ -91,6 +92,7 @@ ferroui-win32 = { version = "=0.1.0-preview.1", path = "src/Windows/FerroUI.Win3
 ferroui-desktop = { version = "=0.1.0-preview.1", path = "src/FerroUI.Desktop" }
 ferroui-x11 = { version = "=0.1.0-preview.1", path = "src/FerroUI.X11" }
 ferroui-ios = { version = "=0.1.0-preview.1", path = "src/iOS/FerroUI.iOS" }
+ferroui-freedesktop = { version = "=0.1.0-preview.1", path = "src/FerroUI.FreeDesktop" }
 ferroui-browser = { version = "=0.1.0-preview.1", path = "src/Browser/FerroUI.Browser" }
 ferroui-headless = { version = "=0.1.0-preview.1", path = "src/Headless/FerroUI.Headless" }
 ferroui-fonts-inter = { version = "=0.1.0-preview.1", path = "src/FerroUI.Fonts.Inter" }
@@ -115,6 +117,11 @@ mozangle = { version = "=0.7.1" }
 # at run time, and the C library for the event loop (epoll, the wake-up pipe) and shared memory.
 x11-dl = "2.21"
 libc = "0.2"
+# D-Bus for the FreeDesktop services (docs/porting/x11-platform.md, section 3): pure Rust, its own
+# executor thread per connection (the default features), no Tokio. `futures-util` for the streams of
+# signals and for waiting on one of two futures.
+zbus = { version = "=5.19.0" }
+futures-util = { version = "0.3", default-features = false, features = ["std"] }
 paste = "1"
 cc = "1"
 skia-safe = { version = "0.153" }

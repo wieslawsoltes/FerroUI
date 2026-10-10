@@ -18,6 +18,7 @@ path = "lib.rs"
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
 ferroui-dialogs.workspace = true
+ferroui-freedesktop.workspace = true
 ferroui-opengl.workspace = true
 bitflags.workspace = true
 
@@ -33,6 +34,11 @@ ferroui-themes-simple = { workspace = true, optional = true }
 [target.'cfg(unix)'.dependencies]
 x11-dl.workspace = true
 libc.workspace = true
+
+# The example is also the service its input method phase talks to (a double of the portal of
+# IBus on a private session bus).
+[target.'cfg(unix)'.dev-dependencies]
+zbus.workspace = true
 
 [features]
 # Builds `examples/x11_window.rs`: a window with the Skia renderer in software, the HarfBuzz text

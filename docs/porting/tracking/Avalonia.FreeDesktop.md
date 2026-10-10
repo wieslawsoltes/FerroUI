@@ -7,13 +7,13 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Avalonia.FreeDesktop` |
-| FerroUI | `src/FerroUI.FreeDesktop` (not created yet) |
+| FerroUI | `src/FerroUI.FreeDesktop` (exists) |
 | Crate | `ferroui-freedesktop` |
-| Phase / priority | not started / out of current scope / - |
-| Files | 0/18 (0.0%) |
-| Types | 0/26 (0.0%) |
-| Members | 0/216 (0.0%) |
-| Contracts (interfaces) | 0/3 |
+| Phase / priority | 5 - desktop (Linux) / P1 |
+| Files | 16/18 (88.9%) |
+| Types | 23/26 (88.5%) |
+| Members | 156/216 (72.2%) |
+| Contracts (interfaces) | 3/3 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
@@ -23,46 +23,92 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 | Interface | Access | Upstream file | Members | Status |
 |---|---|---|---|---|
-| `Avalonia.FreeDesktop.IPortalParentLease` | internal | `IPortalParentLease.cs` | 0/1 | missing |
-| `Avalonia.FreeDesktop.IX11InputMethodControl` | internal | `IX11InputMethod.cs` | 0/6 | missing |
-| `Avalonia.FreeDesktop.IX11InputMethodFactory` | internal | `IX11InputMethod.cs` | 0/1 | missing |
+| `Avalonia.FreeDesktop.IPortalParentLease` | internal | `IPortalParentLease.cs` | 1/1 | present |
+| `Avalonia.FreeDesktop.IX11InputMethodControl` | internal | `IX11InputMethod.cs` | 6/6 | present |
+| `Avalonia.FreeDesktop.IX11InputMethodFactory` | internal | `IX11InputMethod.cs` | 1/1 | present |
 
 ## Files
 
-### `(project root)` - files 0/11, types 0/15, members 0/76
+### `(project root)` - files 9/11, types 12/15, members 35/76
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `DBusCallQueue.cs` | `d_bus_call_queue.rs` | missing | 0/1 | 0/5 |  |
-| `DBusHelper.cs` | `d_bus_helper.rs` | missing | 0/1 | 0/2 |  |
+| `DBusCallQueue.cs` | `dbus_call_queue.rs` | present | 1/1 | 5/5 |  |
+| `DBusHelper.cs` | `dbus_helper.rs` | present | 1/1 | 2/2 |  |
 | `DBusMenuExporter.cs` | `d_bus_menu_exporter.rs` | missing | 0/1 | 0/3 |  |
-| `DBusPlatformSettings.cs` | `d_bus_platform_settings.rs` | missing | 0/1 | 0/2 |  |
-| `DBusSystemDialog.cs` | `d_bus_system_dialog.rs` | missing | 0/1 | 0/7 |  |
+| `DBusPlatformSettings.cs` | `dbus_platform_settings.rs` | present | 1/1 | 2/2 |  |
+| `DBusSystemDialog.cs` | `dbus_system_dialog.rs` | present | 1/1 | 7/7 |  |
 | `DBusTrayIconImpl.cs` | `d_bus_tray_icon_impl.rs` | missing | 0/2 | 0/37 |  |
-| `IPortalParentLease.cs` | `i_portal_parent_lease.rs` | missing | 0/2 | 0/4 |  |
-| `IX11InputMethod.cs` | `ix11_input_method.rs` | missing | 0/3 | 0/11 |  |
-| `LinuxMountedVolumeInfoListener.cs` | `linux_mounted_volume_info_listener.rs` | missing | 0/1 | 0/3 |  |
-| `LinuxMountedVolumeInfoProvider.cs` | `linux_mounted_volume_info_provider.rs` | missing | 0/1 | 0/1 |  |
-| `NativeMethods.cs` | `native_methods.rs` | missing | 0/1 | 0/1 |  |
+| `IPortalParentLease.cs` | `i_portal_parent_lease.rs` | present | 2/2 | 4/4 |  |
+| `IX11InputMethod.cs` | `ix11_input_method.rs` | present | 3/3 | 11/11 |  |
+| `LinuxMountedVolumeInfoListener.cs` | `linux_mounted_volume_info_listener.rs` | partial | 1/1 | 2/3 |  |
+| `LinuxMountedVolumeInfoProvider.cs` | `linux_mounted_volume_info_provider.rs` | present | 1/1 | 1/1 |  |
+| `NativeMethods.cs` | `native_methods.rs` | present | 1/1 | 1/1 |  |
 
-### `DBusIme` - files 0/2, types 0/3, members 0/33
+<details><summary><code>LinuxMountedVolumeInfoListener.cs</code> - 1 missing</summary>
 
-| Upstream file | Rust file | Status | Types | Members | Notes |
-|---|---|---|---|---|---|
-| `DBusTextInputMethodBase.cs` | `d_bus_ime/d_bus_text_input_method_base.rs` | missing | 0/2 | 0/32 |  |
-| `X11DBusImeHelper.cs` | `d_bus_ime/x11d_bus_ime_helper.rs` | missing | 0/1 | 0/1 |  |
+- `LinuxMountedVolumeInfoListener` (class): 1 missing
+  - `virtual void Dispose(bool disposing)` *(protected; 1 of 2 overloads found)*
 
-### `DBusIme/Fcitx` - files 0/3, types 0/5, members 0/70
+</details>
 
-| Upstream file | Rust file | Status | Types | Members | Notes |
-|---|---|---|---|---|---|
-| `FcitxEnums.cs` | `d_bus_ime/fcitx/fcitx_enums.rs` | missing | 0/3 | 0/47 |  |
-| `FcitxICWrapper.cs` | `d_bus_ime/fcitx/fcitx_ic_wrapper.rs` | missing | 0/1 | 0/12 |  |
-| `FcitxX11TextInputMethod.cs` | `d_bus_ime/fcitx/fcitx_x11_text_input_method.rs` | missing | 0/1 | 0/11 |  |
-
-### `DBusIme/IBus` - files 0/2, types 0/3, members 0/37
+### `DBusIme` - files 2/2, types 3/3, members 33/33
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `IBusEnums.cs` | `d_bus_ime/i_bus/i_bus_enums.rs` | missing | 0/2 | 0/27 |  |
-| `IBusX11TextInputMethod.cs` | `d_bus_ime/i_bus/i_bus_x11_text_input_method.rs` | missing | 0/1 | 0/10 |  |
+| `DBusTextInputMethodBase.cs` | `dbus_ime/dbus_text_input_method_base.rs` | present | 2/2 | 32/32 |  |
+| `X11DBusImeHelper.cs` | `dbus_ime/x11_dbus_ime_helper.rs` | present | 1/1 | 1/1 |  |
+
+### `DBusIme/Fcitx` - files 3/3, types 5/5, members 51/70
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `FcitxEnums.cs` | `dbus_ime/fcitx/fcitx_enums.rs` | partial | 3/3 | 28/47 |  |
+| `FcitxICWrapper.cs` | `dbus_ime/fcitx/fcitx_ic_wrapper.rs` | present | 1/1 | 12/12 |  |
+| `FcitxX11TextInputMethod.cs` | `dbus_ime/fcitx/fcitx_x11_text_input_method.rs` | present | 1/1 | 11/11 |  |
+
+<details><summary><code>FcitxEnums.cs</code> - 19 missing</summary>
+
+- `FcitxKeyState` (enum): 19 missing
+  - `FcitxKeyState_None = 0`
+  - `FcitxKeyState_Shift = 1 << 0`
+  - `FcitxKeyState_CapsLock = 1 << 1`
+  - `FcitxKeyState_Ctrl = 1 << 2`
+  - `FcitxKeyState_Alt = 1 << 3`
+  - `FcitxKeyState_Alt_Shift = FcitxKeyState_Alt \| FcitxKeyState_Shift`
+  - `FcitxKeyState_Ctrl_Shift = FcitxKeyState_Ctrl \| FcitxKeyState_Shift`
+  - `FcitxKeyState_Ctrl_Alt = FcitxKeyState_Ctrl \| FcitxKeyState_Alt`
+  - `FcitxKeyState_Ctrl_Alt_Shift = FcitxKeyState_Ctrl \| FcitxKeyState_Alt \| FcitxKeyState_Shift`
+  - `FcitxKeyState_NumLock = 1 << 4`
+  - `FcitxKeyState_Super = 1 << 6`
+  - `FcitxKeyState_ScrollLock = 1 << 7`
+  - `FcitxKeyState_MousePressed = 1 << 8`
+  - `FcitxKeyState_HandledMask = 1 << 24`
+  - `FcitxKeyState_IgnoredMask = 1 << 25`
+  - `FcitxKeyState_Super2 = 1 << 26`
+  - `FcitxKeyState_Hyper = 1 << 27`
+  - `FcitxKeyState_Meta = 1 << 28`
+  - `FcitxKeyState_UsedMask = 0x5c001fff`
+
+</details>
+
+### `DBusIme/IBus` - files 2/2, types 3/3, members 37/37
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `IBusEnums.cs` | `dbus_ime/ibus/ibus_enums.rs` | present | 2/2 | 27/27 |  |
+| `IBusX11TextInputMethod.cs` | `dbus_ime/ibus/ibus_x11_text_input_method.rs` | present | 1/1 | 10/10 |  |
+
+## Rust-only files
+
+Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
+
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `dbus_ime/fcitx/dbus.rs` | **unmapped** | `InputContext`, `InputContext1`, `InputMethod`, `InputMethod1` |
+| `dbus_ime/ibus/dbus.rs` | **unmapped** | `InputContext`, `Portal`, `Service` |
+| `dbus_ime/tests.rs` | the unit tests of the module | `Fcitx4Context`, `Fcitx4Method`, `Fcitx5Context`, `Fcitx5Method`, `IBusContext`, `IBusPortal`, `IBusService`, `Recorded`, `TestBus`, `TestClient`, `TestDevice`, `TestRoot` |
+| `dbus_system_dialog/tests.rs` | the unit tests of the module | `Answer`, `Fixture`, `Portal` |
+| `event.rs` | **unmapped** | `Event` |
+| `signal_watch.rs` | **unmapped** | `CancellationFlag`, `CancellationState`, `Cancelled`, `Subscription` |
+| `test_support.rs` | **unmapped** | `FakeBus`, `Log`, `ServiceBuilder`, `TestConnections` |

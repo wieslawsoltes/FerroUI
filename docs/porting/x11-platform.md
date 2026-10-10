@@ -9,7 +9,7 @@ Marks, as in `browser-platform.md`: **[V]** verified from sources (the upstream 
 | Crate | Directory | Upstream | Enabled by |
 |---|---|---|---|
 | `ferroui-x11` | `src/FerroUI.X11` | `Avalonia.X11`, and `src/Shared/RawEventGrouping.cs`, which that project compiles in | `AppBuilder::use_x11()` (`FerroX11PlatformExtensions`); `use_platform_detect()` of `ferroui-desktop` on Linux |
-| `ferroui-freedesktop` | `src/FerroUI.FreeDesktop` (not created yet) | `Avalonia.FreeDesktop` | used by `ferroui-x11` (and later by the Wayland backend), as upstream's project reference |
+| `ferroui-freedesktop` | `src/FerroUI.FreeDesktop` (since stage 2c) | `Avalonia.FreeDesktop` | used by `ferroui-x11` (and later by the Wayland backend), as upstream's project reference |
 
 `ferroui-x11` depends on `ferroui-base`, `ferroui-controls`, `ferroui-dialogs` (the managed storage provider, the last of the storage providers of a window) and `ferroui-opengl` (`GlVersion` in the options, the GL contracts of stage 2a). Its content is compiled on Unix systems (`cfg(unix)`): the X libraries exist wherever an X server does, and compiling the whole crate on the development machine is what lets its tests run there. The two key tables are plain data and compile everywhere. The crate is empty on Windows.
 
@@ -40,12 +40,15 @@ The structures of `X11Structs.cs` and `XIStructs.cs` are therefore not ported: t
 
 Upstream's FreeDesktop project references `Tmds.DBus.Protocol` and generates its proxies and handlers from the interface descriptions in `DBusXml/` with `Tmds.DBus.Generator` **[V]**. The interfaces: `org.freedesktop.portal.FileChooser`, `.Request` and `.Settings`, `org.kde.StatusNotifierWatcher` and `.StatusNotifierItem`, `com.canonical.dbusmenu` and `com.canonical.AppMenu.Registrar`, `org.freedesktop.DBus`, `org.freedesktop.IBus.Portal` (with `InputContext` and `Service`), and the four Fcitx interfaces **[V]**.
 
-The port will use **`zbus` 5.x** (5.19.0 at the time of writing; MIT; pure Rust; minimum Rust 1.87, the workspace is at 1.89) **[V]**:
+The port uses **`zbus` 5.19.0**, pinned exactly (MIT; pure Rust; minimum Rust 1.87, the workspace is at 1.89; `cargo info zbus`, 2026-10-10) **[V]**:
 
-- Pure Rust, so the FreeDesktop crate checks for Linux from another system like the X11 crate does, and needs no `libdbus` on the machine that runs the application.
-- Proxies and interfaces are written as traits and `impl` blocks with attribute macros (`#[proxy]`, `#[interface]`), the counterpart of upstream's generated code; the descriptions in `DBusXml/` are the specification they are written from, kept under `docs/porting/` data or the crate as reference.
-- Runtime: its default feature set (`async-io`, `blocking-api`) runs the socket on an executor of its own (a background thread per connection, `internal_executor`), and every call is a future that can be awaited on any executor **[V]** (features from `cargo info zbus`). The futures are awaited on the dispatcher of the UI thread (`Dispatcher::invoke_async_task_local`): a completion wakes the dispatcher through its signal handle (the wake-up pipe of section 5), so handlers run on the UI thread like upstream's continuations, which resume on the synchronization context. The `tokio` feature stays off: the port has no Tokio runtime.
-- Signals (`SettingChanged`, `Response`, `NameOwnerChanged`, the input method signals) are streams; each subscription is a task of the UI dispatcher.
+- Pure Rust, so the FreeDesktop crate checks for Linux from another system like the X11 crate does **[M]**, and needs no `libdbus` on the machine that runs the application.
+- Proxies and interfaces are written as traits and `impl` blocks with attribute macros (`#[proxy]`, `#[interface]`), the counterpart of upstream's generated code; the descriptions in upstream's `DBusXml/` are the specification they are written from. A proxy has the members the port calls and the signals it listens to, not the whole interface.
+- **Asynchronous calls on the UI dispatcher, a blocking connect.** With its default features (`async-io`, `blocking-api`) a connection reads its socket on a thread of its own (the internal executor of the library), and every call is a future that any executor can await **[V]**. The port awaits them as tasks of the dispatcher of the UI thread (`Dispatcher::invoke_async_task_local`): a reply or a signal that arrives on the thread of the library wakes the task by posting a job to the dispatcher, so every handler runs on the UI thread, like upstream's continuations, which resume on the synchronization context. Measured: the tests of the crate make calls and receive signals this way, against a service on another connection, and the order in which a signal and the reply that follows it are handled is the order they were sent in (the test of the text IBus commits while it is being reset depends on it) **[M]**. Only the connection itself is made blocking (`DBusHelper::try_create_new_connection`, the blocking builder of the library), as upstream connects synchronously. The `tokio` feature stays off: the port has no Tokio runtime.
+- Signals (`NameOwnerChanged`, the input method signals; later `SettingChanged`, `Response`) are streams; a subscription is a task of the UI dispatcher that ends when its handle is disposed (`signal_watch.rs`, the counterpart of the `IDisposable` upstream's `Watch...Async` returns).
+- Watching the owner of a name (upstream: `WatchNameOwnerAsync` of its library) is the signal `NameOwnerChanged` of the bus for that name, subscribed before `GetNameOwner` is asked, so that no change is lost.
+
+How it is tested without a bus: the feature `p2p` of the library (in the tests only) connects two ends of a socket pair. The second end serves doubles of the IBus and Fcitx services and of the bus itself (`GetNameOwner`, `NameOwnerChanged`), and gives its signals the sender a bus would give them, because the proxies of the library filter signals by the unique name of the owner. The same tests run on a real bus with `FERROUI_FREEDESKTOP_TEST_BUS=session` under `dbus-run-session`, where the doubles take and release the well-known names.
 
 | Alternative | Why not |
 |---|---|
@@ -53,7 +56,7 @@ The port will use **`zbus` 5.x** (5.19.0 at the time of writing; MIT; pure Rust;
 | `rustbus` 0.19 | Pure Rust but synchronous only, with no proxy or interface macros: the message loop and every interface would be written by hand. |
 | Port upstream's D-Bus stack | `Tmds.DBus` is a third-party library, not part of the framework. |
 
-Upstream's `DBusCallQueue` (one call in flight, in order) is ported as it is, over `zbus` calls: it orders the calls of an input method context, which `zbus` does not do by itself.
+Upstream's `DBusCallQueue` (one call in flight, in order) is ported as it is, over `zbus` calls: it orders the calls of an input method context, which `zbus` does not do by itself. Its `async void` loop is a task of the UI dispatcher, which starts with the next job of the dispatcher and not inside the call that queued (DEVIATIONS.md).
 
 ## 4. Skia on Linux
 
@@ -133,7 +136,9 @@ Several parties subscribe to the change of the screens upstream (`Changed +=`); 
 - **Pointer, touch, pen, scroll: the X Input extension, version 2** (`xi2_manager.rs`). The master pointer's motion, button, enter and leave events, and touch events unless `enable_multi_touch` is off, are selected per window; device changes on the root. Scroll valuators give smooth wheel deltas (the difference to the previous value over the increment, the first value after a reset or a leave only remembered); buttons 4 to 7 give wheel steps unless the server emulated them from the valuators; pressure and tilt valuators make the device a pen, and a slave device named "eraser" sets the eraser modifier; touch contacts carry pressure and a contact rectangle from the major and minor axes scaled to the screen. The translation is a function over copied event data (`translate_device_event`), which is what the tests drive.
 - **Core pointer events** are handled as upstream when the extension is missing.
 - **Keyboard** (`x11_window_ime.rs`, `x11_key_transform.rs`, `keysyms.rs`). The physical key from the key code (the scan code table); the key from the key symbol of the current keyboard group (`XkbLookupKeySym`), trying the other groups when the symbol maps to no key (a Latin key for a non-Latin layout), digits always from the physical key, and a QWERTY fallback; without Xkb, `XLookupString`. The key symbol text through `XkbTranslateKeySym`; the text of a key press through the input context (`Xutf8LookupString`), without control characters. Detectable auto-repeat is set once.
-- **Input methods** (stage 2c): the queue that lets an input method filter key events (`FilterIme`), the input method of the server (`XimInputMethod`: focus, reset, spot location), and the D-Bus input methods of the FreeDesktop crate (IBus through its portal, Fcitx 4 and 5; chosen from this framework's module variable, `GTK_IM_MODULE`, `QT_IM_MODULE`, then `XMODIFIERS`). Until then keys produce text through the keyboard mapping alone, the platform never asks for the input method of the server, and it logs a warning when one is configured.
+- **Input methods** (stage 2c, built). The platform decides at start (`FerroX11Platform::initialize`, when `enable_ime` and the environment allow input methods): an input method over D-Bus when the environment names one this port has (`X11DBusImeHelper`: this framework's module variable, `GTK_IM_MODULE`, `QT_IM_MODULE`, then `@im=` of `XMODIFIERS`; `ibus`, `fcitx`, `fcitx5`) and the session bus can be reached; otherwise the input method of the server when `XMODIFIERS` is set and no other module is asked for (`should_use_xim`), which makes `X11Info` open it with the modifiers of the environment. A window then has an input method (`initialize_ime`), offered as its `ITextInputMethodImpl` feature, which is what the framework gives the focused text control as its client.
+  - **Over D-Bus** (`ferroui-freedesktop`, `dbus_ime/`): `DBusTextInputMethodBase` watches the names of the service, connects to the first that is there (again after the service is gone and back), and reports focus (the window is active and a client is set), capabilities and the cursor rectangle in screen pixels through the call queue, each only when it changed. `IBusX11TextInputMethod` talks to the portal of IBus (`org.freedesktop.portal.IBus`), `FcitxX11TextInputMethod` to Fcitx 4 (`org.fcitx.Fcitx`) or 5 (`org.freedesktop.portal.Fcitx`) through `FcitxICWrapper`. While such an input method is enabled, a key event of the window goes to its queue first (`filter_ime`): the events are offered to the input method one at a time, in order, and those it does not consume go on to the application (the release of a modifier key always does). Committed text arrives as text input; a forwarded key as a key event without a physical key.
+  - **The input method of the server** (`x11_window_xim.rs`, `XimInputMethod`): the input context of the window gets and loses the focus with the window and the client, is reset, and is told the spot of the pre-edit (the bottom left of the cursor rectangle, in a job at background priority). The text comes through the input context when a key is looked up (`Xutf8LookupString`), after `XFilterEvent` gave the event to the input method; this class filters nothing itself.
 - Raw input is queued and grouped (`raw_event_grouping.rs`): consecutive moves of one device with the same modifiers become one event with intermediate points.
 
 ## 10. Clipboard and selections
@@ -147,15 +152,20 @@ Several parties subscribe to the change of the screens upstream (`Changed +=`); 
 
 The protocol steps are state machines over a small connection trait (`ISelectionConnection`), which the tests drive with a mock; the asynchronous waits are futures on the UI dispatcher.
 
-Drag and drop (stage 2d) is XDND version 5 (minimum 3): `X11DropTarget` per window (`XdndAware`, enter, position, status, drop, finished) and `X11DragSource` as an event hook of the dispatcher during a drag (target lookup through the window tree and `XdndProxy`, in-process windows without the protocol, a timeout of five seconds, cursors from the cursor theme).
+Drag and drop (stage 2d, built; `selections/drag_drop/`) is XDND version 5 (minimum 3):
+
+- **Target** (`X11DropTarget`, one per window, when the drag and drop device of the framework is registered). The window announces `XdndAware`. `XdndEnter` gives the source, its version (a source outside 3 to 5 is ignored) and its formats (the three of the message, or `XdndTypeList` of the source window when the message says there are more); `XdndPosition` raises a drag event at the point of the window (the first one enters, the following ones move over) and answers with `XdndStatus` and the action of the effects the handlers chose; `XdndLeave` raises the leave; `XdndDrop` raises the drop where the pointer last was and answers with `XdndFinished` and the action of the drop. The data is read when a handler asks for it, as the selection `XdndSelection`, into a property of the window itself, through `SynchronousXEventWaiter`: a wait inside the call that takes events off the queue of the connection until the answer comes (at most five seconds) and puts the others back in their order.
+- **Source** (`X11DragSource`, registered as the drag source of the platform). A drag has a handler that is the event hook of the dispatcher while it lasts. It assumes the implicit pointer grab of the press that started the drag: pointer events of any window are the drag's (core events, and the events of the X Input extension), and the cursor of the grab shows the current effect (the drag cursors of the cursor theme). The target under the pointer is the first window from the root down that is a top-level of the application or has `XdndAware` (itself or the window its `XdndProxy` names, when that names itself). A window of the application gets its drag events directly, without the protocol. Another client gets `XdndEnter` and `XdndPosition` with the action of the effects that are allowed with the modifier keys that are down (control: copy; shift: move; alt: link); positions are sent one at a time, the last one kept until `XdndStatus` answers; a release sends `XdndDrop` (after the pending answer), or `XdndLeave` when the target refused; `XdndFinished` ends the drag with the action of the target (version 5), limited to the allowed effects. A target that does not answer within five seconds ends the drag without an effect (`DragDropTimeoutManager`; sending data to the target restarts the time). The data is offered as the selection `XdndSelection` by `DragDropDataProvider`, the provider of the clipboard for another selection.
+
+The handler of a drag has the protocol and reaches the connection and the platform through a host (`IDragSourceHost`), and the drop target through a connection trait (`IXdndTargetConnection`), like the selection transfers: the tests drive both with doubles (a tree of windows with properties; a recording connection, a window at a known place and a drag and drop device that answers with chosen effects).
 
 ## 11. FreeDesktop services (stage 2e)
 
-- **Storage provider.** A window offers a fallback chain, as upstream: the file chooser portal (`DBusSystemDialog`, `org.freedesktop.portal.FileChooser` on `org.freedesktop.portal.Desktop`, version checked; the parent window as `x11:<hex id>`; the response awaited on the request object, subscribed before the call), then the GTK dialogs (`NativeDialogs/Gtk*`: `libgtk-3`, a thread running the GTK main loop unless the GLib dispatcher is used, the parent set through a foreign GDK window), then the managed dialogs. Stage 1 has the last link.
+- **Storage provider.** A window offers a fallback chain, as upstream: the file chooser portal (`DBusSystemDialog`, built: `org.freedesktop.portal.FileChooser` on `org.freedesktop.portal.Desktop`, available when the portal answers for its version; folders from version 3; the parent window as `x11:<hex id>` through a lease; filters as globs or MIME types with the suggested one as `current_filter`; the response awaited on the request object, which is subscribed before the call, and whose path the call has to return; the chosen filter given back as the file type object of the options when it matches one), then the GTK dialogs (`NativeDialogs/Gtk*`, open: `libgtk-3`, a thread running the GTK main loop unless the GLib dispatcher is used, the parent set through a foreign GDK window), then the managed dialogs. The option `use_d_bus_file_picker` (on by default) turns the first off.
 - **Tray icon** (`DBusTrayIconImpl`): a `StatusNotifierItem` on a connection of its own, registered with `org.kde.StatusNotifierWatcher`, with the menu exported by `DBusMenuExporter`. Upstream's fallback (`XEmbedTrayIconImpl`) only logs. Until built, the platform has no tray icon.
 - **Global menu** (`DBusMenuExporter`): `com.canonical.dbusmenu`, registered per window with `com.canonical.AppMenu.Registrar` (option `use_d_bus_menu`).
-- **Platform settings** (`DBusPlatformSettings`): colour scheme and accent colour from `org.freedesktop.portal.Settings` (`org.freedesktop.appearance`), with change notifications. Until built, the defaults of the framework.
-- **Mounted volumes** (`LinuxMountedVolumeInfoProvider`): `/proc/partitions`, `/proc/mounts` and `/dev/disk/by-label`, polled every second.
+- **Platform settings** (`DBusPlatformSettings`, built): colour scheme and accent colour from `org.freedesktop.portal.Settings` (`org.freedesktop.appearance`; `ReadOne` from version 2 of the portal, the deprecated `Read` before), with change notifications (`SettingChanged`). Without a session bus or a portal, the defaults of the framework. Upstream reads nothing else at the tracked commit: no contrast preference. The X11 platform registers it as the platform settings.
+- **Mounted volumes** (`LinuxMountedVolumeInfoProvider`, built): `/proc/partitions`, `/proc/mounts` and `/dev/disk/by-label`, polled every second; the X11 platform registers it for the managed file dialogs.
 
 Stage 2f, the rest of the X11 project: session management (`X11PlatformLifetimeEvents` over `libSM` and `libICE`: the shutdown request of the session manager), the native control host (`X11NativeControlHost`), XEmbed (`XEmbedPlug`, `XEmbedClientWindowMode`).
 
@@ -191,8 +201,8 @@ One row per upstream file. "built" files are on the branch; the stage of an open
 | `X11PlatformLifetimeEvents.cs` | 274 | `x11_platform_lifetime_events.rs` | 2f | open |  |
 | `X11Structs.cs` | 2027 | `x11_structs.rs` | 1 | built | enumerations and Motif hints; structures are those of `x11-dl` |
 | `X11Window.cs` | 1818 | `x11_window.rs` | 1 | built |  |
-| `X11Window.Ime.cs` | 377 | `x11_window_ime.rs` | 1 | built | keyboard part built; the input method queue is stage 2c |
-| `X11Window.Xim.cs` | 126 | `x11_window_xim.rs` | 2c | open |  |
+| `X11Window.Ime.cs` | 377 | `x11_window_ime.rs` | 1, 2c | built | the keyboard part in stage 1, the input method of the window and its key queue in stage 2c |
+| `X11Window.Xim.cs` | 126 | `x11_window_xim.rs` | 2c | built |  |
 | `X11WindowInfo.cs` | 7 | `x11_window_info.rs` | 1 | built |  |
 | `XEmbedPlug.cs` | 84 | `x_embed_plug.rs` | 2f | open |  |
 | `XEmbedTrayIconImpl.cs` | 47 | `x_embed_tray_icon_impl.rs` | 2f | open |  |
@@ -227,17 +237,17 @@ One row per upstream file. "built" files are on the branch; the stage of an open
 | `Selections/Clipboard/EventStreamWindow.cs` | 103 | `selections/clipboard/event_stream_window.rs` | 1 | built |  |
 | `Selections/Clipboard/X11ClipboardImpl.cs` | 146 | `selections/clipboard/x11_clipboard_impl.rs` | 1 | built |  |
 | `Selections/DataFormatHelper.cs` | 177 | `selections/data_format_helper.rs` | 1 | built |  |
-| `Selections/DragDrop/DragDropDataProvider.cs` | 30 | `selections/drag_drop/drag_drop_data_provider.rs` | 2d | open |  |
-| `Selections/DragDrop/DragDropDataReader.cs` | 49 | `selections/drag_drop/drag_drop_data_reader.rs` | 2d | open |  |
-| `Selections/DragDrop/DragDropDataTransfer.cs` | 40 | `selections/drag_drop/drag_drop_data_transfer.rs` | 2d | open |  |
-| `Selections/DragDrop/DragDropDataTransferItem.cs` | 31 | `selections/drag_drop/drag_drop_data_transfer_item.rs` | 2d | open |  |
-| `Selections/DragDrop/DragDropTimeoutManager.cs` | 41 | `selections/drag_drop/drag_drop_timeout_manager.rs` | 2d | open |  |
-| `Selections/DragDrop/IXdndWindow.cs` | 13 | `selections/drag_drop/i_xdnd_window.rs` | 2d | open |  |
-| `Selections/DragDrop/SynchronousXEventWaiter.cs` | 124 | `selections/drag_drop/synchronous_x_event_waiter.rs` | 2d | open |  |
-| `Selections/DragDrop/X11DragSource.cs` | 766 | `selections/drag_drop/x11_drag_source.rs` | 2d | open |  |
-| `Selections/DragDrop/X11DropTarget.cs` | 204 | `selections/drag_drop/x11_drop_target.rs` | 2d | open |  |
-| `Selections/DragDrop/XdndActionHelper.cs` | 29 | `selections/drag_drop/xdnd_action_helper.rs` | 2d | open |  |
-| `Selections/DragDrop/XdndConstants.cs` | 8 | `selections/drag_drop/xdnd_constants.rs` | 2d | open |  |
+| `Selections/DragDrop/DragDropDataProvider.cs` | 30 | `selections/drag_drop/drag_drop_data_provider.rs` | 2d | built |  |
+| `Selections/DragDrop/DragDropDataReader.cs` | 49 | `selections/drag_drop/drag_drop_data_reader.rs` | 2d | built |  |
+| `Selections/DragDrop/DragDropDataTransfer.cs` | 40 | `selections/drag_drop/drag_drop_data_transfer.rs` | 2d | built | holds the data transfer of the base library |
+| `Selections/DragDrop/DragDropDataTransferItem.cs` | 31 | `selections/drag_drop/drag_drop_data_transfer_item.rs` | 2d | built |  |
+| `Selections/DragDrop/DragDropTimeoutManager.cs` | 41 | `selections/drag_drop/drag_drop_timeout_manager.rs` | 2d | built | a timer of the UI dispatcher |
+| `Selections/DragDrop/IXdndWindow.cs` | 13 | `selections/drag_drop/i_xdnd_window.rs` | 2d | built |  |
+| `Selections/DragDrop/SynchronousXEventWaiter.cs` | 124 | `selections/drag_drop/synchronous_x_event_waiter.rs` | 2d | built |  |
+| `Selections/DragDrop/X11DragSource.cs` | 766 | `selections/drag_drop/x11_drag_source.rs` | 2d | built | the handler over a host (`IDragSourceHost`); tests in `x11_drag_source/tests.rs` |
+| `Selections/DragDrop/X11DropTarget.cs` | 204 | `selections/drag_drop/x11_drop_target.rs` | 2d | built | over a connection trait; tests in `x11_drop_target/tests.rs` |
+| `Selections/DragDrop/XdndActionHelper.cs` | 29 | `selections/drag_drop/xdnd_action_helper.rs` | 2d | built |  |
+| `Selections/DragDrop/XdndConstants.cs` | 8 | `selections/drag_drop/xdnd_constants.rs` | 2d | built |  |
 | `Selections/IXEventWaiter.cs` | 9 | `selections/i_x_event_waiter.rs` | 1 | built |  |
 | `Selections/SelectionDataProvider.cs` | 261 | `selections/selection_data_provider.rs` | 1 | built |  |
 | `Selections/SelectionDataReader.cs` | 108 | `selections/selection_data_reader.rs` | 1 | built |  |
@@ -256,33 +266,33 @@ One row per upstream file. "built" files are on the branch; the stage of an open
 
 | Upstream file (`src/Avalonia.FreeDesktop`) | Lines | Rust file (`src/FerroUI.FreeDesktop`) | Stage | State | Notes |
 |---|---:|---|---|---|---|
-| `DBusCallQueue.cs` | 105 | `dbus_call_queue.rs` | 2e | open | one call in flight, in order |
-| `DBusHelper.cs` | 57 | `dbus_helper.rs` | 2e | open | the session bus connection |
+| `DBusCallQueue.cs` | 105 | `dbus_call_queue.rs` | 2c | built | one call in flight, in order |
+| `DBusHelper.cs` | 57 | `dbus_helper.rs` | 2c | built | the session bus connection |
 | `DBusMenuExporter.cs` | 355 | `dbus_menu_exporter.rs` | 2e | open | `com.canonical.dbusmenu`, `com.canonical.AppMenu.Registrar` |
-| `DBusPlatformSettings.cs` | 148 | `dbus_platform_settings.rs` | 2e | open | `org.freedesktop.portal.Settings`: colour scheme, accent colour |
-| `DBusSystemDialog.cs` | 294 | `dbus_system_dialog.rs` | 2e | open | `org.freedesktop.portal.FileChooser` |
+| `DBusPlatformSettings.cs` | 148 | `dbus_platform_settings.rs` | 2e | built | `org.freedesktop.portal.Settings`: colour scheme, accent colour; holds the default settings |
+| `DBusSystemDialog.cs` | 294 | `dbus_system_dialog.rs` | 2e | built | `org.freedesktop.portal.FileChooser`, `.Request`; tests in `dbus_system_dialog/tests.rs` |
 | `DBusTrayIconImpl.cs` | 444 | `dbus_tray_icon_impl.rs` | 2e | open | `org.kde.StatusNotifierItem` |
-| `IPortalParentLease.cs` | 29 | `i_portal_parent_lease.rs` | 2e | open |  |
-| `IX11InputMethod.cs` | 34 | `ix11_input_method.rs` | 2c | open | with the input methods (stage 2c) |
-| `LinuxMountedVolumeInfoListener.cs` | 103 | `linux_mounted_volume_info_listener.rs` | 2e | open |  |
-| `LinuxMountedVolumeInfoProvider.cs` | 15 | `linux_mounted_volume_info_provider.rs` | 2e | open |  |
-| `NativeMethods.cs` | 40 | `native_methods.rs` | 2e | open | `readlink`: `std::fs::read_link` |
-| `DBusIme/DBusTextInputMethodBase.cs` | 358 | `dbus_ime/dbus_text_input_method_base.rs` | 2c | open |  |
-| `DBusIme/Fcitx/FcitxEnums.cs` | 67 | `dbus_ime/fcitx/fcitx_enums.rs` | 2c | open |  |
-| `DBusIme/Fcitx/FcitxICWrapper.cs` | 60 | `dbus_ime/fcitx/fcitx_ic_wrapper.rs` | 2c | open |  |
-| `DBusIme/Fcitx/FcitxX11TextInputMethod.cs` | 200 | `dbus_ime/fcitx/fcitx_x11_text_input_method.rs` | 2c | open |  |
-| `DBusIme/IBus/IBusEnums.cs` | 45 | `dbus_ime/ibus/ibus_enums.rs` | 2c | open |  |
-| `DBusIme/IBus/IBusX11TextInputMethod.cs` | 185 | `dbus_ime/ibus/ibus_x11_text_input_method.rs` | 2c | open |  |
-| `DBusIme/X11DBusImeHelper.cs` | 65 | `dbus_ime/x11_dbus_ime_helper.rs` | 2c | open |  |
+| `IPortalParentLease.cs` | 29 | `i_portal_parent_lease.rs` | 2e | built |  |
+| `IX11InputMethod.cs` | 34 | `ix11_input_method.rs` | 2c | built |  |
+| `LinuxMountedVolumeInfoListener.cs` | 103 | `linux_mounted_volume_info_listener.rs` | 2e | built | the parsing as functions over text |
+| `LinuxMountedVolumeInfoProvider.cs` | 15 | `linux_mounted_volume_info_provider.rs` | 2e | built |  |
+| `NativeMethods.cs` | 40 | `native_methods.rs` | 2e | built | `readlink`: `std::fs::read_link` |
+| `DBusIme/DBusTextInputMethodBase.cs` | 358 | `dbus_ime/dbus_text_input_method_base.rs` | 2c | built | the base is the object and holds the part that differs (`DBusTextInputMethodCore`) |
+| `DBusIme/Fcitx/FcitxEnums.cs` | 67 | `dbus_ime/fcitx/fcitx_enums.rs` | 2c | built |  |
+| `DBusIme/Fcitx/FcitxICWrapper.cs` | 60 | `dbus_ime/fcitx/fcitx_ic_wrapper.rs` | 2c | built | an enumeration of the two proxies |
+| `DBusIme/Fcitx/FcitxX11TextInputMethod.cs` | 200 | `dbus_ime/fcitx/fcitx_x11_text_input_method.rs` | 2c | built |  |
+| `DBusIme/IBus/IBusEnums.cs` | 45 | `dbus_ime/ibus/ibus_enums.rs` | 2c | built |  |
+| `DBusIme/IBus/IBusX11TextInputMethod.cs` | 185 | `dbus_ime/ibus/ibus_x11_text_input_method.rs` | 2c | built |  |
+| `DBusIme/X11DBusImeHelper.cs` | 65 | `dbus_ime/x11_dbus_ime_helper.rs` | 2c | built |  |
 
-`RawEventGrouping.cs` of `src/Shared` is `raw_event_grouping.rs` (built). Two files of the port have no upstream file: `event.rs` (the multicast events of the backend's own classes) and `pixel_buffer.rs` (a framebuffer over pixels the crate owns).
+`RawEventGrouping.cs` of `src/Shared` is `raw_event_grouping.rs` (built). Files of the port without an upstream file: in the X11 crate `pixel_buffer.rs` (a framebuffer over pixels the crate owns); in the FreeDesktop crate `event.rs` (the multicast events of the backends' own classes; it moved there from the X11 crate, which re-exports it), `signal_watch.rs` (a subscription to a signal as a disposable handle, and a cancellation flag: facilities of upstream's D-Bus library and runtime) and the proxy traits `dbus_ime/ibus/dbus.rs` and `dbus_ime/fcitx/dbus.rs` (the code upstream generates from `DBusXml/`).
 
 ## 13. Verification
 
 Three levels, because an X application cannot run on the development machine:
 
 1. **Compilation for Linux**: `cargo check -p ferroui-x11 --target x86_64-unknown-linux-gnu --all-targets` **[M]**, and the host: the crate compiles whole on macOS.
-2. **Tests without a server** (`cargo test -p ferroui-x11`, 173 tests **[M]**; 163 at the end of stage 1 **[VM]**), of everything that is logic and not a round trip: the key tables; atoms and property decoding; Motif, size and state hints, window state from `_NET_WM_STATE`, allowed actions, frame extents; the translation of X Input events (built as the C structures the library delivers, copied as the dispatcher copies them); scaling from `Xft.dpi`, the environment and physical sizes, EDID, refresh rates, working areas; the resource database; the selection protocol with a mock connection (targets, multiple, incremental transfers in both directions, timeouts), formats and encodings, uri lists; the wake-up pipe and the timer wait of the event loop; the cursor tables; icon data; the options and the input method decisions; the walk of the rendering modes with a mock of the graphics; the choice of the frame buffer configuration, the context attributes of a version and the renderer blacklist of GLX; the probe order of the EGL configurations and the test for the X11 platform extension.
+2. **Tests without a server** (`cargo test -p ferroui-x11`, 218 tests at the end of stage 2d, of which 34 are of drag and drop, and `cargo test -p ferroui-freedesktop`, 48 tests, of which 9 run the input methods against doubles of the IBus and Fcitx services, 4 the platform settings against a double of the settings portal and 5 the file dialogs against a double of the file chooser portal **[M]**; 184 at the end of stage 2c; 173 at the end of stage 2b; 163 at the end of stage 1 **[VM]**), of everything that is logic and not a round trip: the key tables; atoms and property decoding; Motif, size and state hints, window state from `_NET_WM_STATE`, allowed actions, frame extents; the translation of X Input events (built as the C structures the library delivers, copied as the dispatcher copies them); scaling from `Xft.dpi`, the environment and physical sizes, EDID, refresh rates, working areas; the resource database; the selection protocol with a mock connection (targets, multiple, incremental transfers in both directions, timeouts), formats and encodings, uri lists; the wake-up pipe and the timer wait of the event loop; the cursor tables; icon data; the options and the input method decisions; the walk of the rendering modes with a mock of the graphics; the choice of the frame buffer configuration, the context attributes of a version and the renderer blacklist of GLX; the probe order of the EGL configurations and the test for the X11 platform extension.
 3. **A real server** (the job `x11` of `.github/workflows/ci.yml`, Ubuntu, Xvfb; and the virtual machine): the crate is built for Linux, its tests run on Linux, and `examples/x11_window.rs --smoke` runs under `xvfb-run`. The smoke mode asks the server, not the framework, wherever it can. Every check prints a line and the exit code is the result. Its phases:
 
 | Phase | What is done | What is asked of whom |
@@ -295,6 +305,9 @@ Three levels, because an X application cannot run on the development machine:
 | resize | The window is given another size (520 by 320) | The server: the window has that size, and the fill colour at its centre and near its new bottom right corner, which takes frames of the new size (a new framebuffer, new shared memory images, a render window resized by the compositor) |
 | screens | Nothing, or two monitors made by the caller with `xrandr --setmonitor` | The screens of the platform lie inside the root window, do not overlap and cover it; `--expect-screens=N` states their number |
 | clipboard | Text is set and another client (`xclip`) reads it; `xclip` owns text and the framework reads it; each once with a short text with non-ASCII characters and once with three mebibytes | The bytes the other client printed, and the text the framework read. Three mebibytes are more than the largest property the platform writes (one mebibyte) and than the part size of `xclip`, so each side transfers in parts (`INCR`) |
+| ime (`--ime=ibus`) | The example is also a service on the session bus that answers as the portal of IBus does, consumes the key "a" and commits another text for it. A text box gets the focus; XTEST presses "a", then "b" | The platform registered the factory of the input method; the window has a text input method; the service was asked for an input context and for its focus; the input callback of the window gets the committed text and no key event for "a", then the key "b" with its text, and the text box has both; the service was offered the four key events in order, each with the key code of the server and the release bit; the cursor location it was told lies inside the window as the server has it |
+| ime (`--ime=xim`) | `XMODIFIERS=@im=local`: the input method Xlib has built in. A text box gets the focus; XTEST presses "a", then the compose key, an apostrophe and "e" (the caller gives the scroll lock key the compose symbol with `xmodmap`; the run needs a window manager, as the one with `--ime=ibus`: without one no window is ever active, and an input method is told about focus only then) | The platform opened the input method of the server and registered no factory; the window has a text input method; "a" arrives as text through the input context; the compose sequence arrives as the one character it composes, which only an input method produces |
+| dnd (`--dnd`) | A square in the window starts a drag of a text when it is pressed. XTEST presses it, moves in steps and releases: first over the window itself, then over the window of a second process (the example started with `--dnd-target=X,Y`: a window that accepts text and prints what is dropped) | The window announces `XdndAware` 5. Inside the window: the content gets the drop with the text and the drag ends with the copy effect; afterwards the event hook is removed and the window does not own `XdndSelection`. To the other process: its window is viewable, announces the protocol and is not a window of this process; it prints the dropped text and the effect; the drag of this process ends with the copy effect, the action the target finished with; the window of this process got no drop |
 | close | A `WM_DELETE_WINDOW` message is sent to the window | The window closes and the application ends with exit code 0 |
 
 The job runs the smoke mode on a bare Xvfb; rendered through GLX and through EGL (Mesa's `llvmpipe`, with `FERROUI_GLX_IGNORE_RENDERER_BLACKLIST=1` for GLX); through the shared memory framebuffer; with GLX asked for and refused (the fallback); under a window manager (`openbox`) on a screen narrower than the window, where the window manager clamps the window and the framework has to follow (the size check compares the server with the framework, and with the requested size only without a window manager); and with two monitors side by side (`xrandr --setmonitor`, the server started with `-noreset`: an Xvfb resets when its last client disconnects, and the monitors `xrandr` made would be gone before the application starts).
@@ -341,6 +354,32 @@ What these runs found, and what was changed:
 
 Nothing else had to be changed: GLX and EGL rendered the first time they ran, on the render thread, popups included.
 
+### Measured for stages 2c, 2d and the first parts of 2e (2026-10-10) **[VM]** **[CI]**
+
+The virtual machine (the same as above; `dbus`, `dbus-daemon` and `x11-xserver-utils` installed for these runs), commit `9e233a7e`, and the CI job on the same commit (run 38052443593, x86-64), which passed with the same steps:
+
+| Run | Result |
+|---|---|
+| `cargo test -p ferroui-freedesktop` (the doubles over a socket pair) | 48 passed, eleven times in a row **[VM]**; passes in the job **[CI]** |
+| The same on a private session bus (`dbus-run-session`, `FERROUI_FREEDESKTOP_TEST_BUS=session`, one test at a time, the tests named `dbus`) | 38 run, all pass **[VM]**; passes in the job **[CI]** |
+| `cargo test -p ferroui-x11` | 218 passed **[VM]** |
+| Smoke, bare Xvfb and under `openbox`, software (no regression) | 33 of 33 each **[VM]** |
+| `--ime=ibus` under `openbox`, on a private session bus | 28 of 28: the factory is registered; the service was asked for an input context (with the name of the application) and for its focus; the key "a" (key code 38) arrives as the committed text and as no key event, "b" (key code 56) as a key with its text; the text box has both; the service was offered the four key events in order (`0x0` and `0x40000000` as their states); the cursor location reported, (352, 333, 1, 18), lies in the window at (320, 320) **[VM]**; passes in the job **[CI]** |
+| `--ime=xim` under `openbox`, `XMODIFIERS=@im=local`, locale `en_US.UTF-8` and `C.UTF-8` | 23 of 23 each: `XOpenIM` gave an input method and no factory is registered; "a" arrives through the input context; the compose key, an apostrophe and "e" arrive as one key press without a key code and the text "é", and the text box has both **[VM]**; passes in the job with `en_US.UTF-8` **[CI]** |
+| The same without a window manager | The compose sequence composes; the check that the window is active fails, as it has to: without a window manager no window is ever active (activation follows `_NET_ACTIVE_WINDOW`, `_NET_WM_STATE_FOCUSED` or focus events, and nobody gives a window the focus). An input method is told about focus only for an active window, so this is not a configuration the input method phase can check; the job runs it under `openbox` |
+| `--dnd`, bare Xvfb, under `openbox`, and rendered through GLX | 25 of 25, 25 of 25 and 30 of 30: the window announces `XdndAware` 5; the drag inside the window ends with the copy effect and the content got the text (with its non-ASCII characters); the event hook is removed afterwards; the second process is another client with a window that announces the protocol; it printed the dropped text and the copy effect; the drag ended with the copy effect; the source window got no drop **[VM]**; the bare run passes in the job **[CI]** |
+
+What these runs found, and what was changed:
+
+| Finding | Change |
+|---|---|
+| A test of the FreeDesktop crate failed now and then (one of 27 in the virtual machine, 24 of 60 runs under load on macOS): the first call for the owner of a name was never answered. The doubles were added to an object server that was started after the connection had been built | Not the port: the harness. The doubles are given to the connection builder (`serve_at`); 80 of 80 runs pass. To remember for the services the port will export (menu, tray icon) |
+| The first job run and the first run in the virtual machine failed both input method phases on a bare server: no window is ever active without a window manager, so the input method was told "no focus" and filtered nothing | Not the platform (upstream activates the same way): the phases run under `openbox` |
+| The compose sequence did not compose under `openbox`, and its text did not reach the text box without it: the key that had been given the compose symbol was the menu key, which the framework takes as the context menu key; the context menu took the focus, and the input context was reset in the middle of the sequence | Not the platform: the compose symbol is given to the scroll lock key |
+| On the session bus of the virtual machine the tests that call a portal nobody owns made the bus start the installed `xdg-desktop-portal`, which took the name the other doubles need (after the tests had ended, by luck) | Those two tests return at once on a session bus |
+
+Verified nowhere: a real `ibus-daemon` or Fcitx, an XIM server other than the one Xlib has built in, a real `xdg-desktop-portal` with a file chooser backend (the one of the virtual machine was activated without a display and its GTK backend failed to start), another toolkit as the source or the target of a drag.
+
 ### Measured by the CI job (run 38045428868, 2026-10-10) **[CI]**
 
 Ubuntu 24.04 on x86-64 (`ubuntu-latest`), Mesa 25.2.8 (`llvmpipe (LLVM 20.1.2, 256 bits)`), commit `0be4a818`:
@@ -368,9 +407,9 @@ Verified nowhere yet: a GPU with a hardware driver (the visual preference and th
 | 1 (built; its unverified items closed in stage 2) | The crate and bindings; platform initialisation and options; atoms; the event loop; windows (creation, events, states, hints, activation, transparency, popups); screens with RandR and scaling; cursors; the software framebuffer; the render timer; pointer, touch and keyboard input; the clipboard; `use_x11` and `use_platform_detect` on Linux; the example | Section 13, level 3 |
 | 2a (built, but Vulkan) | GPU rendering: GLX and EGL with Skia's Ganesh on OpenGL; the Skia feature set for Linux. Open: Vulkan, which waits for the Vulkan project of the port and the Vulkan GPU of the Skia backend | The Skia binaries for Linux asked of the release; the smoke run per mode on Mesa's software GL (`llvmpipe` needs the blacklist override), with `glReadPixels` and `XGetImage`; GLX refused and software taking over |
 | 2b (built) | The shared memory framebuffer | The smoke run with `--shm` (`use_x_shm_framebuffer`): the extension, the surface, the pixels of every phase and of a resized window through it |
-| 2c | Input methods: the key event queue, XIM, IBus and Fcitx over D-Bus (starts `ferroui-freedesktop`) | Text committed by an IBus daemon in the job |
-| 2d | Drag and drop (XDND source and target) | A drag between two windows of the test, driven with `xdotool` |
-| 2e | FreeDesktop services: the portal file chooser, the GTK dialogs and the GLib dispatcher, tray icon, global menu, platform settings, mounted volumes | Services against a session bus in the job (`dbus-run-session`), with test doubles of the portal interfaces |
+| 2c (built) | Input methods: the key event queue, XIM, IBus and Fcitx over D-Bus (starts `ferroui-freedesktop`) | The input methods against doubles of the services, without a bus and on a private session bus (`dbus-run-session`); the smoke run with `--ime=ibus` (the example is the service) and with `--ime=xim` (the input method Xlib has built in, a compose sequence). A real `ibus-daemon` is not used: which engine it starts, and when, is not deterministic; Fcitx is covered by the doubles only |
+| 2d (built) | Drag and drop (XDND source and target) | The smoke run with `--dnd`: a drag inside the window, and a drag to a second process of the example, driven with XTEST. Both sides of the protocol are this port's: another toolkit as source or target was not run |
+| 2e (in part: platform settings, mounted volumes, the portal file chooser) | FreeDesktop services: the portal file chooser, the GTK dialogs and the GLib dispatcher, tray icon, global menu, platform settings, mounted volumes | Services against a session bus in the job (`dbus-run-session`), with test doubles of the portal interfaces |
 | 2f | Session management, the native control host, XEmbed | A plug embedded in a socket window of the test |
 | 3 | Accessibility: `X11AtSpiAccessibility` and `Avalonia.FreeDesktop.AtSpi` (27 files) | The tree read back over the accessibility bus |
 | 4 | Wayland (`Avalonia.Wayland`, 81 files), sharing the FreeDesktop crate | A headless compositor in the job |

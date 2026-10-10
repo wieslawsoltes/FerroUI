@@ -491,7 +491,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            xvfb xauth x11-utils x11-xserver-utils xclip openbox \
+            xvfb xauth x11-utils x11-xserver-utils xclip openbox dbus dbus-daemon locales \
             libx11-6 libxi6 libxrandr2 libxcursor1 libxfixes3 libxext6 libxtst6 \
             libgl1 libglx-mesa0 libegl1 libegl-mesa0 libgl1-mesa-dri mesa-utils \
             libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config
@@ -526,9 +526,22 @@ jobs:
           test "$missing" = 0
       - name: Tests of the X11 crate (no server needed)
         run: cargo test --locked -p ferroui-x11 --no-fail-fast
+      # The input methods over D-Bus against doubles of the IBus and Fcitx services: first over a
+      # socket pair, without a bus (as on every host), then on a private session bus, where the
+      # doubles take and release the well-known names for real (one test at a time: the names are
+      # the real ones).
+      - name: Tests of the FreeDesktop crate (no bus needed)
+        run: cargo test --locked -p ferroui-freedesktop --no-fail-fast
+      - name: The D-Bus services against doubles on a session bus
+        if: ${{ !cancelled() }}
+        run: |
+          FERROUI_FREEDESKTOP_TEST_BUS=session dbus-run-session -- \
+            cargo test --locked -p ferroui-freedesktop --no-fail-fast -- --test-threads=1 dbus
       - name: The desktop entry point selects X11 on Linux
+        if: ${{ !cancelled() }}
         run: cargo test --locked -p ferroui-desktop --lib
       - name: Build the window example
+        if: ${{ !cancelled() }}
         run: cargo build --locked -p ferroui-x11 --features example --example x11_window
       - name: A window on a real X server (Xvfb)
         run: |
@@ -577,6 +590,40 @@ jobs:
       # Two monitors of the RandR extension, side by side: the first takes the output of the
       # server (which removes the monitor the server derives from it), the second has none. The
       # server must not reset when xrandr, its only client, disconnects: the monitors would be gone.
+      # Text through an input method over D-Bus: the example is also the service (a double of the
+      # portal of IBus on a private session bus) that consumes the key "a" and commits another text
+      # for it. A real daemon is not used: which engine it starts, and when, is not deterministic.
+      # Under a window manager: an input method is told about focus when its window is active,
+      # and without a window manager no window ever is.
+      - name: Text through an input method over D-Bus (a double of the IBus portal)
+        if: ${{ !cancelled() }}
+        run: |
+          dbus-run-session -- xvfb-run -a --server-args="-screen 0 1280x1024x24" sh -c '
+            openbox & sleep 2
+            timeout 300 target/debug/examples/x11_window --smoke --ime=ibus --skip=popup,resize,screens,clipboard'
+      # Text through the input method of the server: the one Xlib has built in (@im=local), with a
+      # compose sequence, which only an input method produces. A key gets the compose symbol (the
+      # scroll lock key: the framework has no action for it, where the menu key would open the
+      # context menu of the text box); the server must not reset when xmodmap disconnects, or the
+      # mapping would be gone.
+      - name: Text through the input method of the server (XIM, a compose sequence)
+        if: ${{ !cancelled() }}
+        run: |
+          sudo locale-gen en_US.UTF-8
+          LANG=en_US.UTF-8 xvfb-run -a --server-args="-screen 0 1280x1024x24 -noreset" sh -c '
+            set -e
+            xmodmap -e "keycode 78 = Multi_key"
+            openbox & sleep 2
+            timeout 300 target/debug/examples/x11_window --smoke --ime=xim --skip=popup,resize,screens,clipboard'
+      # Drag and drop: the server synthesizes a press on a square that starts a drag, the movement
+      # and the release; first over the window itself, then over the window of a second process
+      # (the same example, as a drop target), so that the source side of one process and the target
+      # side of the other speak XDND through the server and the text crosses as a selection.
+      - name: Drag and drop inside a window and to another process (XDND)
+        if: ${{ !cancelled() }}
+        run: |
+          xvfb-run -a --server-args="-screen 0 1280x1024x24" \
+            timeout 300 target/debug/examples/x11_window --smoke --dnd --skip=popup,resize,screens,clipboard
       - name: The same with two monitors (xrandr --setmonitor)
         if: ${{ !cancelled() }}
         run: |

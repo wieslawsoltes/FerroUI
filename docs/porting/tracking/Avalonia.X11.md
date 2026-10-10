@@ -10,10 +10,10 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.X11` (exists) |
 | Crate | `ferroui-x11` |
 | Phase / priority | 5 - desktop (Linux) / P1 |
-| Files | 60/88 (68.2%) |
-| Types | 132/291 (107 waived) (71.7%) |
-| Members | 3348/4897 (1076 waived) (87.6%) |
-| Contracts (interfaces) | 7/8 |
+| Files | 72/88 (81.8%) |
+| Types | 143/291 (107 waived) (77.7%) |
+| Members | 3396/4897 (1076 waived) (88.9%) |
+| Contracts (interfaces) | 8/8 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
@@ -28,13 +28,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.X11.Screens.X11Screens.IScalingProvider` | internal | `Screens/X11Screens.Scaling.cs` | 1/1 | present |
 | `Avalonia.X11.Screens.X11Screens.IX11RawScreenInfoProvider` | internal | `Screens/X11Screen.Providers.cs` | 4/4 | present |
 | `Avalonia.X11.Screens.X11Screens.IX11RawScreenInfoProviderWithRefreshRate` | internal | `Screens/X11Screen.Providers.cs` | 1/1 | present |
-| `Avalonia.X11.Selections.DragDrop.IXdndWindow` | internal | `Selections/DragDrop/IXdndWindow.cs` | 0/3 | missing |
+| `Avalonia.X11.Selections.DragDrop.IXdndWindow` | internal | `Selections/DragDrop/IXdndWindow.cs` | 3/3 | present |
 | `Avalonia.X11.Selections.IXEventWaiter` | internal | `Selections/IXEventWaiter.cs` | 1/1 | present |
 | `Avalonia.X11.X11EventDispatcher.IEventHook` | public | `Dispatching/X11EventDispatcher.cs` | 1/1 | present |
 
 ## Files
 
-### `(project root)` - files 29/37, types 90/216 (106 waived), members 3156/4427 (1074 waived)
+### `(project root)` - files 30/37, types 90/216 (106 waived), members 3160/4427 (1074 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -64,8 +64,8 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `X11PlatformLifetimeEvents.cs` | `x11_platform_lifetime_events.rs` | missing | 0/1 | 0/3 |  |
 | `X11Structs.cs` | `x11_structs.rs` | present | 36/123 (87 waived) | 396/1353 (957 waived) | replaced: the event, request and hint structures are those of the Xlib bindings (`x11-dl`, used through `xlib.rs`), which declare them with the layout of the C headers; the enumerations and the Motif hints are ported (docs/porting/x11-platform.md, section 2) |
 | `X11Window.Ime.cs` | `x11_window_ime.rs` | present | 1/1 | 0/0 | renamed: the keyboard part is ported (the input context, the key of a key event, its text); the input method part (`InitializeIme`, `FilterIme`, `ProcessNextImeEvent`, the forwarded keys) is stage 2 of docs/porting/x11-platform.md |
-| `X11Window.Xim.cs` | `x11_window_xim.rs` | missing (types found elsewhere) | 1/1 | 0/0 | types found in `x11_window.rs` (add to path-overrides.toml) |
-| `X11Window.cs` | `x11_window.rs` | partial | 2/2 | 83/86 |  |
+| `X11Window.Xim.cs` | `x11_window_xim.rs` | present | 1/1 | 0/0 | renamed: not ported yet: the input method of the server (`XimInputMethod`) is stage 2 of docs/porting/x11-platform.md |
+| `X11Window.cs` | `x11_window.rs` | partial | 2/2 | 84/86 |  |
 | `X11WindowInfo.cs` | `x11_window_info.rs` | present | 1/1 | 3/3 |  |
 | `XEmbedPlug.cs` | `x_embed_plug.rs` | missing | 0/1 | 0/8 |  |
 | `XEmbedTrayIconImpl.cs` | `x_embed_tray_icon_impl.rs` | missing | 0/1 | 0/6 |  |
@@ -73,7 +73,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `XI2Manager.cs` | `xi2_manager.rs` | present | 3/3 | 21/21 |  |
 | `XIStructs.cs` | `xi_structs.rs` | present | 11/28 (17 waived) | 72/185 (113 waived) | replaced: the structures of the X Input extension are those of the Xlib bindings and the copies `xlib.rs` makes of them (`XIDeviceEventData`, `XIClassInfo`, ...); the enumerations are ported |
 | `XLib.Helpers.cs` | `xlib.rs` | present | 1/1 | 3/3 | merged: the helpers of the partial class are functions of the same module as the calls |
-| `XLib.cs` | `xlib.rs` | partial | 3/6 (2 waived) | 89/233 (4 waived) |  |
+| `XLib.cs` | `xlib.rs` | partial | 3/6 (2 waived) | 92/233 (4 waived) |  |
 | `XResources.cs` | `x_resources.rs` | present | 1/1 | 3/3 |  |
 
 <details><summary><code>X11CursorFactory.cs</code> - 2 missing</summary>
@@ -108,19 +108,18 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>X11Window.cs</code> - 3 missing</summary>
+<details><summary><code>X11Window.cs</code> - 2 missing</summary>
 
-- `X11Window` (class): 2 missing
+- `X11Window` (class): 1 missing
   - `X11Window(AvaloniaX11Platform platform, IWindowImpl? popupParent, X11WindowMode mode, bool overrideRedirect...` *(1 of 2 constructors found)*
-  - `IDragDropDevice? DragDropDevice { get; }`
 - `X11Window.SurfacePlatformHandle` (class): 1 missing
   - `SurfacePlatformHandle(X11Window owner)`
 
 </details>
 
-<details><summary><code>XLib.cs</code> - 141 missing</summary>
+<details><summary><code>XLib.cs</code> - 138 missing</summary>
 
-- `XLib` (class) (ported as module-level items): 133 missing
+- `XLib` (class) (ported as module-level items): 130 missing
   - `static int XShmQueryExtension(IntPtr display)`
   - `static int XShmQueryVersion(IntPtr display, out int major, out int minor, out bool pixmaps)`
   - `static int XCloseDisplay(IntPtr display)`
@@ -133,7 +132,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
   - `static IntPtr XRootWindow(IntPtr display, int screen_number)`
   - `static IntPtr XDefaultRootWindow(IntPtr display)`
   - `static int XNextEvent(IntPtr display, XEvent* xevent)` *(1 of 2 overloads found)*
-  - `static int XPutBackEvent(IntPtr display, in XEvent evt)`
   - `static int XConnectionNumber(IntPtr diplay)`
   - `static int XPending(IntPtr diplay)`
   - `static IntPtr XSelectInput(IntPtr display, IntPtr window, IntPtr mask)`
@@ -208,7 +206,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
   - `static int XSetForeground(IntPtr display, IntPtr gc, UIntPtr foreground)`
   - `static int XSetBackground(IntPtr display, IntPtr gc, UIntPtr background)`
   - `static int XBell(IntPtr display, int percent)`
-  - `static int XChangeActivePointerGrab(IntPtr display, EventMask event_mask, IntPtr cursor, IntPtr time)`
   - `static bool XFilterEvent(XEvent* xevent, IntPtr window)` *(1 of 2 overloads found)*
   - `static void XPeekEvent(IntPtr display, out XEvent xevent)`
   - `static IntPtr XLockDisplay(IntPtr display)`
@@ -221,7 +218,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
   - `static int XFreeColormap(IntPtr display, IntPtr colormap)`
   - `const long VisualIDMask`
   - `static IntPtr XGetVisualInfo(IntPtr display, IntPtr vinfo_mask, ref XVisualInfo vinfo_template, out int nit...`
-  - `static XKeySym XLookupKeysym(in XKeyEvent key_event, int index)`
   - `static bool XkbIgnoreExtension(bool ignore)`
   - `static IntPtr XGetIMValues(IntPtr xim, string name, out XIMStyles* value, IntPtr terminator)`
   - `static IntPtr XCreateIC(IntPtr xim, string name, IntPtr value, string name2, IntPtr value2, string name3, I...`
@@ -365,21 +361,37 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `EventStreamWindow.cs` | `selections/clipboard/event_stream_window.rs` | present | 1/1 | 4/4 |  |
 | `X11ClipboardImpl.cs` | `selections/clipboard/x11_clipboard_impl.rs` | present | 1/1 | 6/6 |  |
 
-### `Selections/DragDrop` - files 0/11, types 0/11, members 0/48
+### `Selections/DragDrop` - files 11/11, types 11/11, members 44/48
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `DragDropDataProvider.cs` | `selections/drag_drop/drag_drop_data_provider.rs` | missing | 0/1 | 0/6 |  |
-| `DragDropDataReader.cs` | `selections/drag_drop/drag_drop_data_reader.rs` | missing | 0/1 | 0/6 |  |
-| `DragDropDataTransfer.cs` | `selections/drag_drop/drag_drop_data_transfer.rs` | missing | 0/1 | 0/11 |  |
-| `DragDropDataTransferItem.cs` | `selections/drag_drop/drag_drop_data_transfer_item.rs` | missing | 0/1 | 0/3 |  |
-| `DragDropTimeoutManager.cs` | `selections/drag_drop/drag_drop_timeout_manager.rs` | missing | 0/1 | 0/4 |  |
-| `IXdndWindow.cs` | `selections/drag_drop/i_xdnd_window.rs` | missing | 0/1 | 0/3 |  |
-| `SynchronousXEventWaiter.cs` | `selections/drag_drop/synchronous_x_event_waiter.rs` | missing | 0/1 | 0/4 |  |
-| `X11DragSource.cs` | `selections/drag_drop/x11_drag_source.rs` | missing | 0/1 | 0/2 |  |
-| `X11DropTarget.cs` | `selections/drag_drop/x11_drop_target.rs` | missing | 0/1 | 0/5 |  |
-| `XdndActionHelper.cs` | `selections/drag_drop/xdnd_action_helper.rs` | missing | 0/1 | 0/2 |  |
-| `XdndConstants.cs` | `selections/drag_drop/xdnd_constants.rs` | missing | 0/1 | 0/2 |  |
+| `DragDropDataProvider.cs` | `selections/drag_drop/drag_drop_data_provider.rs` | partial | 1/1 | 4/6 |  |
+| `DragDropDataReader.cs` | `selections/drag_drop/drag_drop_data_reader.rs` | present | 1/1 | 6/6 |  |
+| `DragDropDataTransfer.cs` | `selections/drag_drop/drag_drop_data_transfer.rs` | partial | 1/1 | 9/11 |  |
+| `DragDropDataTransferItem.cs` | `selections/drag_drop/drag_drop_data_transfer_item.rs` | present | 1/1 | 3/3 |  |
+| `DragDropTimeoutManager.cs` | `selections/drag_drop/drag_drop_timeout_manager.rs` | present | 1/1 | 4/4 |  |
+| `IXdndWindow.cs` | `selections/drag_drop/i_xdnd_window.rs` | present | 1/1 | 3/3 |  |
+| `SynchronousXEventWaiter.cs` | `selections/drag_drop/synchronous_x_event_waiter.rs` | present | 1/1 | 4/4 |  |
+| `X11DragSource.cs` | `selections/drag_drop/x11_drag_source.rs` | present | 1/1 | 2/2 |  |
+| `X11DropTarget.cs` | `selections/drag_drop/x11_drop_target.rs` | present | 1/1 | 5/5 |  |
+| `XdndActionHelper.cs` | `selections/drag_drop/xdnd_action_helper.rs` | present | 1/1 | 2/2 |  |
+| `XdndConstants.cs` | `selections/drag_drop/xdnd_constants.rs` | present | 1/1 | 2/2 |  |
+
+<details><summary><code>DragDropDataProvider.cs</code> - 2 missing</summary>
+
+- `DragDropDataProvider` (class): 2 missing
+  - `Action? Activity { get; set; }`
+  - `override void OnActivity()` *(protected)*
+
+</details>
+
+<details><summary><code>DragDropDataTransfer.cs</code> - 2 missing</summary>
+
+- `DragDropDataTransfer` (class): 2 missing
+  - `override DataFormat[] ProvideFormats()` *(protected)*
+  - `override PlatformDataTransferItem[] ProvideItems()` *(protected)*
+
+</details>
 
 ### `Vulkan` - files 0/2, types 0/4, members 0/12
 
@@ -444,8 +456,9 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
-| `event.rs` | The multicast events of the backend's own classes (a C# `event Action` of the original): a list of handlers with tokens to remove them | `Event` |
 | `pixel_buffer.rs` | A framebuffer over pixels the crate owns, for what the original makes with the `LockedFramebuffer` constructor over memory of its own (cursor and icon pixels) | `PixelBuffer` |
 | `raw_event_grouping.rs` | The port of `src/Shared/RawEventGrouping.cs`, a source file the original compiles into every backend that queues its input (it belongs to no project of the tracking) | `AutomaticRawEventGrouperDispatchQueue`, `GrouperState`, `IRawEventGrouperDispatchQueue`, `ManualRawEventGrouperDispatchQueue`, `MergedPoints`, `RawEvent`, `RawEventGrouper`, `RawEventHandler` |
+| `selections/drag_drop/x11_drag_source/tests.rs` | the unit tests of the module | `Call`, `FakeHost` |
+| `selections/drag_drop/x11_drop_target/tests.rs` | the unit tests of the module | `FakeConnection`, `FakeItems`, `FakeWindow`, `Fixture`, `RecordingDevice`, `Seen`, `TestRoot` |
 
 Tests, examples and build scripts (not scanned): `examples/x11_window.rs`.

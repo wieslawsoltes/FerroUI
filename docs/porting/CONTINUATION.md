@@ -118,6 +118,39 @@ Next: 2c, input methods. It starts the crate `ferroui-freedesktop` (what `docs/r
 
 Not verified anywhere: a GPU with a hardware driver, input from a real device, a compositing manager under plain X11.
 
+## The Linux platform, stage 2c: input methods (2026-10-10)
+
+Branch `x11-platform-3` (on top of `x11-platform-2`). `x11-platform.md`, sections 3, 9 and 13, has the detail; in short:
+
+- **The crate `ferroui-freedesktop`** (`src/FerroUI.FreeDesktop`, published, group platforms) with `zbus` 5.19.0: the connection (`DBusHelper`), the call queue (`DBusCallQueue`), the input method interface of a window (`IX11InputMethodControl`, `IX11InputMethodFactory`), the base of the input methods over D-Bus and the two of them (IBus through its portal; Fcitx 4 and 5), and the detection from the environment (`X11DBusImeHelper`). Calls and signals are tasks of the UI dispatcher; only the connect blocks.
+- **In the X11 crate**: the input method of a window and its key queue (`x11_window_ime.rs`), the input method of the server (`x11_window_xim.rs`), `use_xim` decided as upstream.
+- **Tests**: 27 in the FreeDesktop crate (the input methods against doubles of the services over a socket pair; the same on a session bus with `FERROUI_FREEDESKTOP_TEST_BUS=session` under `dbus-run-session`), 184 in the X11 crate. The smoke mode has `--ime=ibus` (the example is the service) and `--ime=xim` (a compose sequence through the input method Xlib has built in); the CI job runs both.
+- Tracking: `Avalonia.FreeDesktop` is in scope (10 of 18 files, 16 of 26 types); `Avalonia.X11` 61 of 88 files.
+
+Entry points for what follows. 2d, drag and drop: `selections/` has the selection protocol the drop target and the drag source read and write with (`SelectionDataProvider`, `SelectionReadSession`); the event hook of the dispatcher (`X11EventDispatcher`) is where `X11DragSource` listens during a drag; the XDND client messages arrive in `X11Window::on_event`. 2e: the rest of the FreeDesktop crate. The scanner expects the files of upstream's `DBus*.cs` under the names `d_bus_menu_exporter.rs`, `d_bus_platform_settings.rs`, `d_bus_system_dialog.rs`, `d_bus_tray_icon_impl.rs` unless `path-overrides.toml` says otherwise (the two files of stage 2c are found as `dbus_call_queue.rs` and `dbus_helper.rs`). A proxy for another interface is a trait beside its user, like `dbus_ime/ibus/dbus.rs`; a service the port exports (`com.canonical.dbusmenu`, `org.kde.StatusNotifierItem`) is an `#[interface]` block, as the doubles in `dbus_ime/tests.rs` show.
+
+Not verified anywhere: a real `ibus-daemon` or Fcitx (the doubles answer as the interface descriptions say; what a real engine sends for a pre-edit with attributes was not seen), an XIM server other than the one Xlib has built in.
+
+## The Linux platform, stage 2d: drag and drop (2026-10-10)
+
+Branch `x11-platform-3`. `x11-platform.md`, section 10, has the detail; in short: `selections/drag_drop/` is the port of upstream's eleven files. The drop target of a window (`X11DropTarget`) and the drag source of the platform (`X11DragSource`, bound as `IPlatformDragSource`; its handler is the event hook of the dispatcher during a drag) speak XDND 5; windows of the application get their drag events without the protocol. 34 tests drive both sides with doubles. The smoke mode has `--dnd`: a drag inside the window, and a drag to a second process of the example (`--dnd-target=X,Y`), with XTEST; the CI job runs it. Tracking: `Avalonia.X11` 72 of 88 files.
+
+Not verified anywhere: another toolkit as the source or the target of a drag (GTK and Qt applications; a file manager dragging files, which exercises `text/uri-list` and `XdndTypeList`), a window manager that proxies drops (`XdndProxy` on the root or on frames), a drag started by touch.
+
+## The Linux platform, stage 2e, first part (2026-10-10)
+
+Built: the platform settings over the settings portal (`dbus_platform_settings.rs`: colour scheme and accent colour, which is all upstream reads at the tracked commit), the mounted volumes for the managed file dialogs (`linux_mounted_volume_info_listener.rs`, `linux_mounted_volume_info_provider.rs`, `native_methods.rs`) and the portal parent lease (`i_portal_parent_lease.rs`); the X11 platform registers the first two. The tests of the D-Bus services share two connections and a double of the bus (`test_support.rs`); 41 tests in the FreeDesktop crate.
+
+Also built: `DBusSystemDialog` (`dbus_system_dialog.rs`, the file chooser portal; the first storage provider of a window, with `TrivialPortalParentLease("x11:<hex>")`; 48 tests in the crate). It was not run against a real `xdg-desktop-portal`: the double answers as the interface description and the portal documentation say.
+
+Open in stage 2e, in the order to build them: `DBusMenuExporter` (`com.canonical.dbusmenu` as an exported interface, registered with `com.canonical.AppMenu.Registrar`), `DBusTrayIconImpl` (`org.kde.StatusNotifierItem` on a connection of its own, with the menu exporter; `FerroX11Platform::create_tray_icon`), then in the X11 crate the GTK dialogs (`NativeDialogs/Gtk*.cs`, `Interop/Glib.cs`, `Interop/GtkInteropHelper.cs`: `libgtk-3`, `libgdk-3`, `libglib-2.0` and `libgobject-2.0` opened at run time; the bindings in use do not declare them, so their functions are declared in the port as `dlsym` entries, like `x11_egl_helper.rs` does for EGL) and the GLib dispatcher (`Dispatching/GLibDispatcherImpl.cs`, `GlibDispatcherImplBase.cs`). One finding to keep in mind for the two services the port exports: with `zbus` 5.19.0 an object server that is started by the first `object_server().at(..)` after the connection was built did not answer calls now and then in the tests; objects given to the connection builder (`serve_at`) did, 80 runs of 80. Upstream's launcher of a window is `BclLauncher` and is built since stage 1; there is no system dialog other than the file chooser in the FreeDesktop project.
+
+## The Linux platform: where the work on `x11-platform-3` stopped (2026-10-10)
+
+Stages 2c and 2d are built and verified (the CI job `x11`, run 38052443593, and the virtual machine: `x11-platform.md`, section 13, "Measured for stages 2c, 2d and the first parts of 2e"). Of stage 2e the platform settings, the mounted volumes and the file chooser portal are built and tested against doubles. The work stopped there, at the end of a part.
+
+Next, in order: the rest of 2e (`DBusMenuExporter`, `DBusTrayIconImpl` with `FerroX11Platform::create_tray_icon` and upstream's `XEmbedTrayIconImpl`, which only logs; then the GTK dialogs and the GLib dispatcher in the X11 crate); 2f (`X11PlatformLifetimeEvents` over `libSM` and `libICE`, `X11NativeControlHost`, `XEmbedPlug`, `XEmbedClientWindowMode`; the transparency helper and the `_NET_WM` hints are built since stage 1); 3 (`X11AtSpiAccessibility` and `Avalonia.FreeDesktop.AtSpi`, 27 files, which is present at the tracked commit and out of scope in `projects.json`). To run the smoke phases in the virtual machine: `ferroui-vm-linux/scripts/stage2d.sh` on the share (it copies nothing: the sources go to `ferroui-vm-linux/src` first).
+
 ## In flight on 2026-10-09
 
 Nothing runs in the cloud. In flight locally, each on its own branch, written by a sub-agent without a compiler and validated in the main checkout:

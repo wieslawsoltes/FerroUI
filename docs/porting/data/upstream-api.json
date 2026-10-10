@@ -268420,9 +268420,10 @@
    "name": "Avalonia.FreeDesktop",
    "path": "src/Avalonia.FreeDesktop",
    "detail": "full",
-   "scope": "out",
-   "phase": "not started / out of current scope",
-   "priority": "-",
+   "scope": "in",
+   "crate": "ferroui-freedesktop",
+   "phase": "5 - desktop (Linux)",
+   "priority": "P1",
    "files": [
     {
      "path": "DBusCallQueue.cs",
