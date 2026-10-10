@@ -538,14 +538,14 @@
    "matchKinds": {
     "alias fn": 50,
     "const": 381,
-    "derive": 64,
+    "derive": 62,
     "field": 638,
     "fn": 6571,
     "free fn": 15,
     "free item": 16,
     "getter fn": 4,
     "overload fn": 314,
-    "trait": 360,
+    "trait": 362,
     "trait fn": 75,
     "variant": 1793
    },
@@ -9088,12 +9088,12 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    41,
+    50,
     95,
     0
    ],
    "types": [
-    127,
+    141,
     276,
     0
    ],
@@ -9120,11 +9120,17 @@
     "AngleOptions.cs": [
      "angle_options.rs"
     ],
+    "ClipboardFormatRegistry.cs": [
+     "clipboard_format_registry.rs"
+    ],
     "ClipboardImpl.cs": [
      "clipboard_impl.rs"
     ],
     "CursorFactory.cs": [
      "cursor_factory.rs"
+    ],
+    "DataTransferToOleDataObjectWrapper.cs": [
+     "data_transfer_to_ole_data_object_wrapper.rs"
     ],
     "DirectX/DirectXEnums.cs": [
      "direct_x/direct_x_enums.rs"
@@ -9134,6 +9140,9 @@
     ],
     "DirectX/DirectXUnmanagedMethods.cs": [
      "direct_x/direct_x_unmanaged_methods.rs"
+    ],
+    "DragSource.cs": [
+     "drag_source.rs"
     ],
     "EmbeddedWindowImpl.cs": [
      "embedded_window_impl.rs"
@@ -9164,6 +9173,24 @@
     ],
     "OleContext.cs": [
      "ole_context.rs"
+    ],
+    "OleDataObjectHelper.cs": [
+     "ole_data_object_helper.rs"
+    ],
+    "OleDataObjectToDataTransferItemWrapper.cs": [
+     "ole_data_object_to_data_transfer_item_wrapper.rs"
+    ],
+    "OleDataObjectToDataTransferWrapper.cs": [
+     "ole_data_object_to_data_transfer_wrapper.rs"
+    ],
+    "OleDragSource.cs": [
+     "ole_drag_source.rs"
+    ],
+    "OleDropTarget.cs": [
+     "ole_drop_target.rs"
+    ],
+    "OleVirtualFileData.cs": [
+     "ole_virtual_file_data.rs"
     ],
     "OpenGl/Angle/AngleEglInterface.cs": [
      "open_gl/angle/angle_egl_interface.rs"

@@ -1473,6 +1473,176 @@ pub fn from_wide(value: &[u16]) -> String {
     String::from_utf16_lossy(&value[..end])
 }
 
+// --------------------------------------------------------------------
+// Data transfer (the clipboard and drag and drop over OLE)
+// --------------------------------------------------------------------
+
+/// `DATADIR_GET`: the formats a data object can be asked for. The reference
+/// takes the type from the COM types of its runtime.
+pub const DATADIR_GET: i32 = 1;
+
+/// `BitmapCompressionMode` of the interop declarations: the values the
+/// system uses, as constants.
+pub struct BitmapCompressionMode;
+
+#[allow(missing_docs)]
+impl BitmapCompressionMode {
+    pub const BI_RGB: u32 = 0;
+    pub const BI_RLE8: u32 = 1;
+    pub const BI_RLE4: u32 = 2;
+    pub const BI_BITFIELDS: u32 = 3;
+    pub const BI_JPEG: u32 = 4;
+    pub const BI_PNG: u32 = 5;
+}
+
+/// `BitmapColorSpace.LCS_sRGB` of the interop declarations.
+pub const LCS_SRGB: u32 = 0x7352_4742;
+/// `BitmapIntent.LCS_GM_ABS_COLORIMETRIC` of the interop declarations.
+pub const LCS_GM_ABS_COLORIMETRIC: u32 = 8;
+
+/// The size of a `BITMAPV5HEADER`, in bytes.
+pub const SIZE_OF_BITMAPV5HEADER: u32 = 124;
+
+/// `BITMAPV5HEADER`, with the members the reference sets; the others
+/// (the resolution, the colour counts, the end points, the gamma values
+/// and the profile) are zero.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[allow(missing_docs)]
+pub struct BITMAPV5HEADER {
+    pub b_v5_width: i32,
+    pub b_v5_height: i32,
+    pub b_v5_planes: u16,
+    pub b_v5_bit_count: u16,
+    pub b_v5_compression: u32,
+    pub b_v5_size_image: u32,
+    pub b_v5_red_mask: u32,
+    pub b_v5_green_mask: u32,
+    pub b_v5_blue_mask: u32,
+    pub b_v5_alpha_mask: u32,
+    pub b_v5_cs_type: u32,
+    pub b_v5_intent: u32,
+}
+
+impl BITMAPV5HEADER {
+    /// The structure as the system lays it out, with its size as its first
+    /// member (`Init` of the reference).
+    pub fn to_bytes(&self) -> [u8; SIZE_OF_BITMAPV5HEADER as usize] {
+        let mut bytes = [0u8; SIZE_OF_BITMAPV5HEADER as usize];
+        let mut put = |offset: usize, value: &[u8]| bytes[offset..offset + value.len()].copy_from_slice(value);
+        put(0, &SIZE_OF_BITMAPV5HEADER.to_le_bytes());
+        put(4, &self.b_v5_width.to_le_bytes());
+        put(8, &self.b_v5_height.to_le_bytes());
+        put(12, &self.b_v5_planes.to_le_bytes());
+        put(14, &self.b_v5_bit_count.to_le_bytes());
+        put(16, &self.b_v5_compression.to_le_bytes());
+        put(20, &self.b_v5_size_image.to_le_bytes());
+        put(40, &self.b_v5_red_mask.to_le_bytes());
+        put(44, &self.b_v5_green_mask.to_le_bytes());
+        put(48, &self.b_v5_blue_mask.to_le_bytes());
+        put(52, &self.b_v5_alpha_mask.to_le_bytes());
+        put(56, &self.b_v5_cs_type.to_le_bytes());
+        put(108, &self.b_v5_intent.to_le_bytes());
+        bytes
+    }
+}
+
+impl BITMAPINFOHEADER {
+    /// The structure as the system lays it out.
+    pub fn to_bytes(&self) -> [u8; SIZE_OF_BITMAPINFOHEADER as usize] {
+        let mut bytes = [0u8; SIZE_OF_BITMAPINFOHEADER as usize];
+        let mut put = |offset: usize, value: &[u8]| bytes[offset..offset + value.len()].copy_from_slice(value);
+        put(0, &self.bi_size.to_le_bytes());
+        put(4, &self.bi_width.to_le_bytes());
+        put(8, &self.bi_height.to_le_bytes());
+        put(12, &self.bi_planes.to_le_bytes());
+        put(14, &self.bi_bit_count.to_le_bytes());
+        put(16, &self.bi_compression.to_le_bytes());
+        put(20, &self.bi_size_image.to_le_bytes());
+        put(24, &self.bi_x_pels_per_meter.to_le_bytes());
+        put(28, &self.bi_y_pels_per_meter.to_le_bytes());
+        put(32, &self.bi_clr_used.to_le_bytes());
+        put(36, &self.bi_clr_important.to_le_bytes());
+        bytes
+    }
+
+    /// Reads the structure from the start of the bytes of a device
+    /// independent bitmap; `None` when there are fewer bytes than it has.
+    pub fn from_bytes(bytes: &[u8]) -> Option<BITMAPINFOHEADER> {
+        if bytes.len() < SIZE_OF_BITMAPINFOHEADER as usize {
+            return None;
+        }
+        let u32_at = |offset: usize| u32::from_le_bytes([bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]]);
+        let u16_at = |offset: usize| u16::from_le_bytes([bytes[offset], bytes[offset + 1]]);
+        Some(BITMAPINFOHEADER {
+            bi_size: u32_at(0),
+            bi_width: u32_at(4) as i32,
+            bi_height: u32_at(8) as i32,
+            bi_planes: u16_at(12),
+            bi_bit_count: u16_at(14),
+            bi_compression: u32_at(16),
+            bi_size_image: u32_at(20),
+            bi_x_pels_per_meter: u32_at(24) as i32,
+            bi_y_pels_per_meter: u32_at(28) as i32,
+            bi_clr_used: u32_at(32),
+            bi_clr_important: u32_at(36),
+        })
+    }
+}
+
+/// The size of a `DROPFILES`, in bytes: the offset of the file names, a
+/// point, and two flags of four bytes each.
+pub const SIZE_OF_DROPFILES: u32 = 20;
+
+/// `FILEDESCRIPTORW` of the interop declarations: its layout as constants.
+pub struct FILEDESCRIPTORW;
+
+impl FILEDESCRIPTORW {
+    /// `FD_FILESIZE`: the size members are valid.
+    pub const FD_FILESIZE: u32 = 0x0000_0040;
+    /// The number of UTF-16 units of the name member (`MAX_PATH`).
+    pub const FILE_NAME_LENGTH: usize = 260;
+    /// The size of the structure, in bytes.
+    pub const SIZE: usize = 592;
+    /// The offset of `dwFlags`.
+    pub const OFFSET_OF_FLAGS: usize = 0;
+    /// The offset of `nFileSizeHigh`.
+    pub const OFFSET_OF_FILE_SIZE_HIGH: usize = 64;
+    /// The offset of `nFileSizeLow`.
+    pub const OFFSET_OF_FILE_SIZE_LOW: usize = 68;
+    /// The offset of `cFileName`.
+    pub const OFFSET_OF_FILE_NAME: usize = 72;
+}
+
+/// `STATSTG`: what a stream reports of itself.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default)]
+#[allow(missing_docs)]
+pub struct STATSTG {
+    pub pwcs_name: isize,
+    pub type_: u32,
+    pub cb_size: u64,
+    pub mtime: u64,
+    pub ctime: u64,
+    pub atime: u64,
+    pub grf_mode: u32,
+    pub grf_locks_supported: u32,
+    pub clsid: [u8; 16],
+    pub grf_state_bits: u32,
+    pub reserved: u32,
+}
+
+/// The pixels of a bitmap of the system, 32 bits each (blue first), rows
+/// from the top.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct BgraPixels {
+    #[allow(missing_docs)]
+    pub pixels: Vec<u8>,
+    #[allow(missing_docs)]
+    pub width: i32,
+    #[allow(missing_docs)]
+    pub height: i32,
+}
+
 #[cfg(windows)]
 pub use native::*;
 
@@ -1488,6 +1658,8 @@ mod native {
     use windows_sys::Win32::Graphics::Gdi as gdi;
     use windows_sys::Win32::System::DataExchange as dx;
     use windows_sys::Win32::System::Com as com;
+    use windows_sys::Win32::System::Com::Marshal as marshal;
+    use windows_sys::Win32::System::Com::StructuredStorage as storage;
     use windows_sys::Win32::System::LibraryLoader as ll;
     use windows_sys::Win32::System::Ole as ole;
     use windows_sys::Win32::System::Memory as mem;
@@ -1496,6 +1668,7 @@ mod native {
     use windows_sys::Win32::UI::Input::KeyboardAndMouse as kbm;
     use windows_sys::Win32::UI::Input::Pointer as ptr_input;
     use windows_sys::Win32::UI::Input::Touch as touch;
+    use windows_sys::Win32::UI::Shell as shell;
     use windows_sys::Win32::UI::WindowsAndMessaging as wm;
 
     /// The signature of a window procedure.
@@ -2585,6 +2758,440 @@ mod native {
     pub unsafe fn co_task_mem_free(block: *mut c_void) {
         // SAFETY: the contract of this function.
         unsafe { com::CoTaskMemFree(block) }
+    }
+
+    // ----------------------------------------------------------------
+    // Data transfer: clipboard formats, global memory, OLE, GDI bitmaps
+    // ----------------------------------------------------------------
+
+    /// `GetClipboardFormatName`: the name of a registered clipboard format;
+    /// `None` for a format without one (the formats of the system).
+    pub fn get_clipboard_format_name(format: u16) -> Option<String> {
+        let mut buffer = [0u16; 260];
+        // SAFETY: a buffer of this frame and its length in characters.
+        let length = unsafe { dx::GetClipboardFormatNameW(u32::from(format), buffer.as_mut_ptr(), buffer.len() as i32) };
+        (length > 0).then(|| String::from_utf16_lossy(&buffer[..length as usize]))
+    }
+
+    /// `RegisterClipboardFormat`: the identifier of the format of a name,
+    /// registered if it was not; 0 on failure.
+    pub fn register_clipboard_format(name: &str) -> u32 {
+        let name = to_wide(name);
+        // SAFETY: a null-terminated string that outlives the call.
+        unsafe { dx::RegisterClipboardFormatW(name.as_ptr()) }
+    }
+
+    /// `GlobalAlloc`: a block of global memory; 0 on failure.
+    pub fn global_alloc(flags: GlobalAllocFlags, size: usize) -> isize {
+        // SAFETY: allocates; the caller owns the block.
+        unsafe { mem::GlobalAlloc(flags.bits(), size) as isize }
+    }
+
+    /// `GlobalSize`: the size of a block of global memory; 0 for a handle
+    /// that is not one.
+    pub fn global_size(h_global: isize) -> usize {
+        // SAFETY: the system validates the handle.
+        unsafe { mem::GlobalSize(h(h_global)) }
+    }
+
+    /// `GlobalFree`.
+    ///
+    /// # Safety
+    /// `h_global` is a block of global memory the caller owns and does not
+    /// use again.
+    pub unsafe fn global_free(h_global: isize) {
+        // SAFETY: the contract of this function.
+        unsafe { wf::GlobalFree(h(h_global)) };
+    }
+
+    /// The bytes of a block of global memory (`GlobalLock`, a copy of
+    /// `GlobalSize` bytes, `GlobalUnlock`); `None` when it cannot be
+    /// locked.
+    ///
+    /// # Safety
+    /// `h_global` is a live block of global memory.
+    pub unsafe fn read_global(h_global: isize) -> Option<Vec<u8>> {
+        // SAFETY: by the contract the block is live; it is locked while
+        // its bytes, as many as the system says it has, are copied.
+        unsafe {
+            let source = mem::GlobalLock(h(h_global)) as *const u8;
+            if source.is_null() {
+                return None;
+            }
+            let size = mem::GlobalSize(h(h_global));
+            let data = std::slice::from_raw_parts(source, size).to_vec();
+            mem::GlobalUnlock(h(h_global));
+            Some(data)
+        }
+    }
+
+    /// Copies bytes to the start of a block of global memory; `false` when
+    /// the block is smaller than the bytes or cannot be locked.
+    ///
+    /// # Safety
+    /// `h_global` is a live block of global memory.
+    pub unsafe fn write_global(h_global: isize, data: &[u8]) -> bool {
+        // SAFETY: by the contract the block is live; the bytes are copied
+        // only when the block has room for them, while it is locked.
+        unsafe {
+            if data.len() > mem::GlobalSize(h(h_global)) {
+                return false;
+            }
+            let destination = mem::GlobalLock(h(h_global)) as *mut u8;
+            if destination.is_null() {
+                return false;
+            }
+            std::ptr::copy_nonoverlapping(data.as_ptr(), destination, data.len());
+            mem::GlobalUnlock(h(h_global));
+            true
+        }
+    }
+
+    /// The file names of a `CF_HDROP` block (`DragQueryFile`).
+    ///
+    /// # Safety
+    /// `h_global` is a live block of global memory.
+    pub unsafe fn drag_query_file_names(h_global: isize) -> Vec<String> {
+        // SAFETY: the system reads the block, which is live by the
+        // contract, and writes at most the length given into the buffer.
+        unsafe {
+            let file_count = shell::DragQueryFileW(h(h_global), u32::MAX, std::ptr::null_mut(), 0);
+            let mut files = Vec::with_capacity(file_count as usize);
+            for i in 0..file_count {
+                let path_length = shell::DragQueryFileW(h(h_global), i, std::ptr::null_mut(), 0);
+                let mut buffer = vec![0u16; path_length as usize + 1];
+                if shell::DragQueryFileW(h(h_global), i, buffer.as_mut_ptr(), buffer.len() as u32) == path_length {
+                    files.push(String::from_utf16_lossy(&buffer[..path_length as usize]));
+                }
+            }
+            files
+        }
+    }
+
+    /// `ReleaseStgMedium`.
+    ///
+    /// # Safety
+    /// `medium` was filled by a data object and is not used again.
+    pub unsafe fn release_stg_medium(medium: &mut STGMEDIUM) {
+        // SAFETY: the structure has the layout of the system's (tested in
+        // `win32_com`); the rest is the contract of this function.
+        unsafe { ole::ReleaseStgMedium((medium as *mut STGMEDIUM).cast()) }
+    }
+
+    /// `OleSetClipboard`. Returns the result code.
+    ///
+    /// # Safety
+    /// `data_object` is null or a live COM object that implements
+    /// `IDataObject`.
+    pub unsafe fn ole_set_clipboard(data_object: *mut c_void) -> u32 {
+        // SAFETY: the contract of this function.
+        unsafe { ole::OleSetClipboard(data_object) as u32 }
+    }
+
+    /// `OleGetClipboard`: the result code and the data object of the
+    /// clipboard, of which the caller owns a reference.
+    pub fn ole_get_clipboard() -> (u32, *mut c_void) {
+        let mut data_object = std::ptr::null_mut();
+        // SAFETY: a pointer of this frame the system writes to.
+        let result = unsafe { ole::OleGetClipboard(&mut data_object) };
+        (result as u32, data_object)
+    }
+
+    /// `OleIsCurrentClipboard`. Returns the result code.
+    ///
+    /// # Safety
+    /// `data_object` is a live COM object that implements `IDataObject`.
+    pub unsafe fn ole_is_current_clipboard(data_object: *mut c_void) -> u32 {
+        // SAFETY: the contract of this function.
+        unsafe { ole::OleIsCurrentClipboard(data_object) as u32 }
+    }
+
+    /// `OleFlushClipboard`. Returns the result code.
+    pub fn ole_flush_clipboard() -> u32 {
+        // SAFETY: no arguments.
+        unsafe { ole::OleFlushClipboard() as u32 }
+    }
+
+    /// `DoDragDrop`: runs a drag and drop operation, with a message loop of
+    /// its own, until it ends. Returns the result code and the effect.
+    ///
+    /// # Safety
+    /// `data_object` and `drop_source` are live COM objects that implement
+    /// `IDataObject` and `IDropSource`.
+    pub unsafe fn do_drag_drop(data_object: *mut c_void, drop_source: *mut c_void, ok_effects: i32) -> (u32, i32) {
+        let mut effect = 0u32;
+        // SAFETY: the contract of this function; the effect is a number of
+        // this frame.
+        let result = unsafe { ole::DoDragDrop(data_object, drop_source, ok_effects as u32, &mut effect) };
+        (result as u32, effect as i32)
+    }
+
+    /// `CoMarshalInterThreadInterfaceInStream`: a stream that holds an
+    /// interface pointer for another thread of the process, or the result
+    /// code of the failure.
+    ///
+    /// # Safety
+    /// `unknown` is a live COM object that implements the interface.
+    pub unsafe fn co_marshal_inter_thread_interface_in_stream(
+        iid: &ferroui_microcom::Guid,
+        unknown: *mut c_void,
+    ) -> Result<*mut c_void, u32> {
+        let mut stream = std::ptr::null_mut();
+        // SAFETY: the identifier has the layout of the system's; the rest
+        // is the contract of this function.
+        let result = unsafe {
+            marshal::CoMarshalInterThreadInterfaceInStream((iid as *const ferroui_microcom::Guid).cast(), unknown, &mut stream)
+        };
+        if result < 0 || stream.is_null() {
+            Err(result as u32)
+        } else {
+            Ok(stream)
+        }
+    }
+
+    /// `CoGetInterfaceAndReleaseStream`: the interface pointer a stream of
+    /// [`co_marshal_inter_thread_interface_in_stream`] holds, for the
+    /// calling thread; the call releases a reference of the stream.
+    ///
+    /// # Safety
+    /// `stream` is a live stream made by that function, of which the
+    /// caller gives a reference away.
+    pub unsafe fn co_get_interface_and_release_stream(
+        stream: *mut c_void,
+        iid: &ferroui_microcom::Guid,
+    ) -> Result<*mut c_void, u32> {
+        let mut pointer = std::ptr::null_mut();
+        // SAFETY: as above.
+        let result = unsafe {
+            storage::CoGetInterfaceAndReleaseStream(stream, (iid as *const ferroui_microcom::Guid).cast(), &mut pointer)
+        };
+        if result < 0 || pointer.is_null() {
+            Err(result as u32)
+        } else {
+            Ok(pointer)
+        }
+    }
+
+    /// A device context of the screen with the memory contexts and the
+    /// bitmaps made for a conversion, released when dropped.
+    struct ScreenContexts {
+        screen: gdi::HDC,
+        memory: Vec<gdi::HDC>,
+        objects: Vec<gdi::HGDIOBJ>,
+    }
+
+    impl ScreenContexts {
+        fn new() -> Option<ScreenContexts> {
+            // SAFETY: the context of the whole screen, released when the
+            // value is dropped.
+            let screen = unsafe { gdi::GetDC(std::ptr::null_mut()) };
+            (!screen.is_null()).then(|| ScreenContexts { screen, memory: Vec::new(), objects: Vec::new() })
+        }
+
+        fn memory_context(&mut self) -> Option<gdi::HDC> {
+            // SAFETY: a context compatible with a live one; deleted when
+            // the value is dropped.
+            let context = unsafe { gdi::CreateCompatibleDC(self.screen) };
+            if context.is_null() {
+                return None;
+            }
+            self.memory.push(context);
+            Some(context)
+        }
+
+        /// A section selected into a memory context: the context and the
+        /// memory of the pixels, which lives as long as this value.
+        fn section(&mut self, header: &[u8]) -> Option<(gdi::HDC, *mut u8)> {
+            let context = self.memory_context()?;
+            let mut bits: *mut c_void = std::ptr::null_mut();
+            // SAFETY: the header is a bitmap header of the size its first
+            // member says, without a colour table (more than 8 bits a
+            // pixel; the masks of a version 5 header are in the header).
+            let section =
+                unsafe { gdi::CreateDIBSection(context, header.as_ptr().cast(), 0, &mut bits, std::ptr::null_mut(), 0) };
+            if section.is_null() || bits.is_null() {
+                return None;
+            }
+            self.objects.push(section);
+            // SAFETY: a live context and a live bitmap.
+            unsafe { gdi::SelectObject(context, section) };
+            Some((context, bits.cast()))
+        }
+    }
+
+    impl Drop for ScreenContexts {
+        fn drop(&mut self) {
+            // SAFETY: the contexts and objects this value created. The
+            // memory contexts are deleted before the bitmaps selected into
+            // them. (The reference releases its memory contexts with
+            // `ReleaseDC`, which does not free them.)
+            unsafe {
+                for &context in &self.memory {
+                    gdi::DeleteDC(context);
+                }
+                for &object in &self.objects {
+                    gdi::DeleteObject(object);
+                }
+                gdi::ReleaseDC(std::ptr::null_mut(), self.screen);
+            }
+        }
+    }
+
+    fn header_32(width: i32, height: i32) -> BITMAPINFOHEADER {
+        let mut header = BITMAPINFOHEADER {
+            bi_width: width,
+            bi_height: height,
+            bi_planes: 1,
+            bi_bit_count: 32,
+            bi_compression: BitmapCompressionMode::BI_RGB,
+            bi_size_image: (width as u32).wrapping_mul(4).wrapping_mul(height.unsigned_abs()),
+            ..Default::default()
+        };
+        header.init();
+        header
+    }
+
+    /// The pixels of a bitmap handle (`CF_BITMAP`), drawn into a section
+    /// of 32 bits a pixel (`ReadDataFromGdi` of the reference).
+    ///
+    /// # Safety
+    /// `bitmap_handle` is a live bitmap that is selected into no context.
+    pub unsafe fn hbitmap_to_bgra(bitmap_handle: isize) -> Option<BgraPixels> {
+        let mut bitmap = gdi::BITMAP {
+            bmType: 0,
+            bmWidth: 0,
+            bmHeight: 0,
+            bmWidthBytes: 0,
+            bmPlanes: 0,
+            bmBitsPixel: 0,
+            bmBits: std::ptr::null_mut(),
+        };
+        // SAFETY: a structure of this frame of the size given.
+        let read = unsafe {
+            gdi::GetObjectW(
+                h(bitmap_handle),
+                std::mem::size_of::<gdi::BITMAP>() as i32,
+                (&mut bitmap as *mut gdi::BITMAP).cast(),
+            )
+        };
+        if read == 0 || bitmap.bmWidth <= 0 || bitmap.bmHeight <= 0 {
+            return None;
+        }
+        let (width, height) = (bitmap.bmWidth, bitmap.bmHeight);
+
+        let mut contexts = ScreenContexts::new()?;
+        // A negative height: the rows of the section run from the top, so
+        // the bitmap is copied as it is. (The reference makes a section
+        // whose rows run from the bottom and mirrors the copy.)
+        let (destination, bits) = contexts.section(&header_32(width, -height).to_bytes())?;
+        let source = contexts.memory_context()?;
+        // SAFETY: live contexts; the bitmap is selected into the source
+        // context for the copy and taken out of it again; the section has
+        // `width * height * 4` bytes, read after the drawing is flushed.
+        unsafe {
+            let previous = gdi::SelectObject(source, h(bitmap_handle));
+            let copied = gdi::BitBlt(destination, 0, 0, width, height, source, 0, 0, gdi::SRCCOPY) != 0;
+            gdi::SelectObject(source, previous);
+            if !copied {
+                return None;
+            }
+            gdi::GdiFlush();
+            let pixels = std::slice::from_raw_parts(bits, width as usize * height as usize * 4).to_vec();
+            Some(BgraPixels { pixels, width, height })
+        }
+    }
+
+    /// The pixels of a device independent bitmap (`CF_DIB`: a header, the
+    /// colour table or masks `extra_header_size` bytes long, the pixels),
+    /// drawn into a section of 32 bits a pixel (`StretchDIBits`).
+    pub fn dib_to_bgra(data: &[u8], extra_header_size: usize) -> Option<BgraPixels> {
+        let source_header = BITMAPINFOHEADER::from_bytes(data)?;
+        let (width, height) = (source_header.bi_width, source_header.bi_height.checked_abs()?);
+        let bits_offset = (source_header.bi_size as usize).checked_add(extra_header_size)?;
+        if width <= 0 || height <= 0 || bits_offset > data.len() {
+            return None;
+        }
+        // The bytes the pixels need, so that the system does not read
+        // beyond the block: rows are padded to four bytes.
+        if source_header.bi_compression == BitmapCompressionMode::BI_RGB
+            || source_header.bi_compression == BitmapCompressionMode::BI_BITFIELDS
+        {
+            let row = (width as usize).checked_mul(usize::from(source_header.bi_bit_count))?.checked_add(31)? / 32 * 4;
+            if row.checked_mul(height as usize)? > data.len() - bits_offset {
+                return None;
+            }
+        } else if source_header.bi_size_image as usize > data.len() - bits_offset {
+            return None;
+        }
+
+        let mut contexts = ScreenContexts::new()?;
+        let (destination, bits) = contexts.section(&header_32(width, -height).to_bytes())?;
+        // SAFETY: a live context; the header and the pixels are inside
+        // `data` (checked above); the section has `width * height * 4`
+        // bytes, read after the drawing is flushed.
+        unsafe {
+            let lines = gdi::StretchDIBits(
+                destination,
+                0,
+                0,
+                width,
+                height,
+                0,
+                0,
+                width,
+                height,
+                data.as_ptr().add(bits_offset).cast(),
+                data.as_ptr().cast(),
+                0,
+                gdi::SRCCOPY,
+            );
+            if lines == 0 {
+                return None;
+            }
+            gdi::GdiFlush();
+            let pixels = std::slice::from_raw_parts(bits, width as usize * height as usize * 4).to_vec();
+            Some(BgraPixels { pixels, width, height })
+        }
+    }
+
+    /// A bitmap handle compatible with the screen that holds the pixels
+    /// given, whose layout the version 5 header describes
+    /// (`WriteDataToGdi` of the reference); 0 on failure. The caller owns
+    /// the bitmap.
+    pub fn pixels_to_hbitmap(pixels: &[u8], width: i32, height: i32, header: &BITMAPV5HEADER) -> isize {
+        if width <= 0 || height <= 0 {
+            return 0;
+        }
+        let Some(mut contexts) = ScreenContexts::new() else { return 0 };
+        let Some((source, bits)) = contexts.section(&header.to_bytes()) else { return 0 };
+        let Some(destination) = contexts.memory_context() else { return 0 };
+        // The bytes of a row of a section: padded to four bytes.
+        let row = (width as usize * usize::from(header.b_v5_bit_count)).div_ceil(32) * 4;
+        let source_row = pixels.len() / height as usize;
+        // SAFETY: the section has `row * height` bytes; every row of the
+        // pixels is copied into its row of the section, no more of it than
+        // either has. The bitmap is created for the screen, selected into
+        // a context for the copy and taken out of it before it is handed
+        // over.
+        unsafe {
+            for y in 0..height as usize {
+                let count = row.min(source_row);
+                std::ptr::copy_nonoverlapping(pixels.as_ptr().add(y * source_row), bits.add(y * row), count);
+            }
+            let bitmap = gdi::CreateCompatibleBitmap(contexts.screen, width, height);
+            if bitmap.is_null() {
+                return 0;
+            }
+            let previous = gdi::SelectObject(destination, bitmap);
+            let copied = gdi::BitBlt(destination, 0, 0, width, height, source, 0, 0, gdi::SRCCOPY) != 0;
+            gdi::SelectObject(destination, previous);
+            gdi::GdiFlush();
+            if !copied {
+                gdi::DeleteObject(bitmap);
+                return 0;
+            }
+            bitmap as isize
+        }
     }
 
     // ----------------------------------------------------------------

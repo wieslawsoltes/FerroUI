@@ -3,7 +3,7 @@
 
 use crate::interop::unmanaged_methods::{self, co_get_apartment_type, APTTYPE_MAINSTA, APTTYPE_STA, HRESULT};
 use crate::win32_com::IDropTarget;
-use ferroui_base::platform::IPlatformHandle;
+use ferroui_controls::platform::IPlatformHandle;
 use ferroui_base::threading::Dispatcher;
 use ferroui_microcom::ComPtr;
 use std::cell::RefCell;
@@ -60,7 +60,6 @@ impl OleContext {
             && matches!(co_get_apartment_type(), None | Some(APTTYPE_STA) | Some(APTTYPE_MAINSTA))
     }
 
-    #[allow(dead_code)] // The drop target of a window is registered in stage 2d.
     pub(crate) fn register_drag_drop(&self, hwnd: Option<&dyn IPlatformHandle>, target: Option<&ComPtr<IDropTarget>>) -> bool {
         let (Some(hwnd), Some(target)) = (hwnd, target) else {
             return false;
@@ -75,7 +74,6 @@ impl OleContext {
         unsafe { unmanaged_methods::register_drag_drop(hwnd.handle(), trg_ptr.cast()) == HRESULT::S_OK }
     }
 
-    #[allow(dead_code)]
     pub(crate) fn unregister_drag_drop(&self, hwnd: Option<&dyn IPlatformHandle>) -> bool {
         let Some(hwnd) = hwnd else {
             return false;

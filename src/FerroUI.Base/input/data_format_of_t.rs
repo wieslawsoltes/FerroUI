@@ -23,10 +23,16 @@ pub struct DataFormatOf<T> {
     _data_type: PhantomData<fn() -> T>,
 }
 
-impl<T> DataFormatOf<T> {
+impl<T: 'static> DataFormatOf<T> {
     pub(super) fn new(kind: DataFormatKind, identifier: &str) -> Self {
-        Self { format: DataFormat::new(kind, identifier), _data_type: PhantomData }
+        Self {
+            format: DataFormat::new(kind, identifier, Some(std::any::TypeId::of::<T>())),
+            _data_type: PhantomData,
+        }
     }
+}
+
+impl<T> DataFormatOf<T> {
 
     /// The format without its data type.
     #[inline]
