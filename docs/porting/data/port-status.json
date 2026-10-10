@@ -2,23 +2,23 @@
  "upstreamCommit": "17350180c33b063f0e98abbfd19aa3cae63f5d56",
  "inScope": {
   "files": [
-   2560,
+   2582,
    2596,
    0
   ],
   "types": [
-   3467,
+   3503,
    3915,
    311
   ],
   "members": [
-   27859,
+   28176,
    32172,
    2868
   ]
  },
  "allProjects": {
-  "membersPresent": 27859,
+  "membersPresent": 28176,
   "members": 37391,
   "membersNotApplicable": 1132,
   "membersOutOfScope": 4087
@@ -9481,17 +9481,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    70,
+    92,
     95,
     0
    ],
    "types": [
-    182,
+    218,
     276,
     0
    ],
    "members": [
-    1763,
+    2080,
     2605,
     0
    ],
@@ -9510,15 +9510,15 @@
    "notApplicableFiles": 0,
    "matchKinds": {
     "alias fn": 1,
-    "const": 15,
+    "const": 61,
     "derive": 2,
-    "field": 270,
-    "fn": 403,
-    "free fn": 128,
-    "free item": 30,
-    "overload fn": 9,
-    "trait": 11,
-    "variant": 894
+    "field": 309,
+    "fn": 572,
+    "free fn": 157,
+    "free item": 45,
+    "overload fn": 10,
+    "trait": 14,
+    "variant": 909
    },
    "presentFiles": {
     "AngleOptions.cs": [
@@ -9563,6 +9563,15 @@
     "DirectX/DirectXUnmanagedMethods.cs": [
      "direct_x/direct_x_unmanaged_methods.rs"
     ],
+    "DirectX/DxgiConnection.cs": [
+     "direct_x/dxgi_connection.rs"
+    ],
+    "DirectX/DxgiRenderTarget.cs": [
+     "direct_x/dxgi_render_target.rs"
+    ],
+    "DirectX/DxgiSwapchainWindow.cs": [
+     "direct_x/dxgi_swapchain_window.rs"
+    ],
     "DirectX/IDirect3D11TexturePlatformSurface.cs": [
      "direct_x/i_direct3_d11_texture_platform_surface.rs"
     ],
@@ -9584,8 +9593,17 @@
     "IconImpl.cs": [
      "icon_impl.rs"
     ],
+    "Input/Imm32CaretManager.cs": [
+     "input/imm32_caret_manager.rs"
+    ],
+    "Input/Imm32InputMethod.cs": [
+     "input/imm32_input_method.rs"
+    ],
     "Input/KeyInterop.cs": [
      "input/key_interop.rs"
+    ],
+    "Input/WindowsInputPane.cs": [
+     "input/windows_input_pane.rs"
     ],
     "Input/WindowsKeyboardDevice.cs": [
      "input/windows_keyboard_device.rs"
@@ -9650,6 +9668,30 @@
     "OpenGl/Angle/D3D9AngleWin32PlatformGraphics.cs": [
      "open_gl/angle/d3d9_angle_win32_platform_graphics.rs"
     ],
+    "OpenGl/Angle/SwapChainGlSurface.cs": [
+     "open_gl/angle/swap_chain_gl_surface.rs"
+    ],
+    "OpenGl/WglConsts.cs": [
+     "open_gl/wgl_consts.rs"
+    ],
+    "OpenGl/WglContext.cs": [
+     "open_gl/wgl_context.rs"
+    ],
+    "OpenGl/WglDisplay.cs": [
+     "open_gl/wgl_display.rs"
+    ],
+    "OpenGl/WglGdiResourceManager.cs": [
+     "open_gl/wgl_gdi_resource_manager.rs"
+    ],
+    "OpenGl/WglGlPlatformSurface.cs": [
+     "open_gl/wgl_gl_platform_surface.rs"
+    ],
+    "OpenGl/WglPlatformOpenGlInterface.cs": [
+     "open_gl/wgl_platform_open_gl_interface.rs"
+    ],
+    "OpenGl/WglRestoreContext.cs": [
+     "open_gl/wgl_restore_context.rs"
+    ],
     "PlatformConstants.cs": [
      "platform_constants.rs"
     ],
@@ -9661,6 +9703,9 @@
     ],
     "SimpleWindow.cs": [
      "simple_window.rs"
+    ],
+    "SwapChainTopLevelImpl.cs": [
+     "swap_chain_top_level_impl.rs"
     ],
     "TrayIconImpl.cs": [
      "tray_icon_impl.rs"
@@ -9694,6 +9739,27 @@
     ],
     "Win32TypeExtensions.cs": [
      "win32_type_extensions.rs"
+    ],
+    "WinRT/Composition/D2DEffects.cs": [
+     "win_rt/composition/d2d_effects.rs"
+    ],
+    "WinRT/Composition/WinUIEffectBase.cs": [
+     "win_rt/composition/win_ui_effect_base.rs"
+    ],
+    "WinRT/Composition/WinUiCompositedWindow.cs": [
+     "win_rt/composition/win_ui_composited_window.rs"
+    ],
+    "WinRT/Composition/WinUiCompositedWindowSurface.cs": [
+     "win_rt/composition/win_ui_composited_window_surface.rs"
+    ],
+    "WinRT/Composition/WinUiCompositionShared.cs": [
+     "win_rt/composition/win_ui_composition_shared.rs"
+    ],
+    "WinRT/Composition/WinUiCompositionUtils.cs": [
+     "win_rt/composition/win_ui_composition_utils.rs"
+    ],
+    "WinRT/Composition/WinUiCompositorConnection.cs": [
+     "win_rt/composition/win_ui_compositor_connection.rs"
     ],
     "WinRT/NativeWinRTMethods.cs": [
      "win_rt/native_win_rt_methods.rs"

@@ -7,6 +7,7 @@
 
 #![allow(non_camel_case_types)]
 
+pub(crate) mod composition;
 pub mod numerics;
 
 #[cfg(windows)]

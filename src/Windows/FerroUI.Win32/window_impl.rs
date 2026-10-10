@@ -222,9 +222,14 @@ mod imp {
     use crate::framebuffer_manager::FramebufferManager;
     use crate::icon_impl::IconImpl;
     use crate::interop::win32_icon::Win32Icon;
-    use crate::input::WindowsMouseDevice;
+    use crate::input::{Imm32InputMethod, Imm32Parent, WindowsInputPane, WindowsKeyboardDevice, WindowsMouseDevice};
+    use ferroui_base::input::text_input::ITextInputMethodImpl;
+    use ferroui_base::input::raw::{RawKeyEventArgs, RawKeyEventType, RawTextInputEventArgs};
+    use ferroui_base::input::{IInputDevice, Key, KeyDeviceType, PhysicalKey, RawInputModifiers};
+    use ferroui_controls::platform::IInputPane;
     use crate::interop::unmanaged_methods::*;
     use crate::offscreen_parent_window::OffscreenParentWindow;
+    use crate::open_gl::WglGlPlatformSurface;
     use crate::platform_constants::{PlatformConstants, Version};
     use crate::screen_impl::ScreenImpl;
     use crate::win32_gl_manager::{Win32GlManager, Win32PlatformGraphicsKind};
@@ -437,6 +442,13 @@ mod imp {
         shown: Cell<bool>,
         hidden_window_is_parent: Cell<bool>,
         ignore_wm_char: Cell<bool>,
+        /// The language of the keyboard layout the input method was last
+        /// given for this window.
+        langid: Cell<u32>,
+        /// The window lost the focus while an input method composed: the
+        /// toolkit is told when the composition ends.
+        kill_focus_requested: Cell<bool>,
+        input_pane: RefCell<Option<Rc<WindowsInputPane>>>,
         /// The first half of a character of two `WM_CHAR` messages.
         pending_high_surrogate: Cell<Option<u16>>,
         /// The surface of the window when it is one of a composition mode
@@ -567,6 +579,9 @@ mod imp {
                 shown: Cell::new(false),
                 hidden_window_is_parent: Cell::new(false),
                 ignore_wm_char: Cell::new(false),
+                langid: Cell::new(0),
+                kill_focus_requested: Cell::new(false),
+                input_pane: RefCell::new(None),
                 pending_high_surrogate: Cell::new(None),
                 composition_effects_surface: RefCell::new(None),
                 gl_surface_dispose: RefCell::new(None),
@@ -602,9 +617,7 @@ mod imp {
             // The surface of the platform graphics: the one of the surface
             // factory (a composition mode), or the one that fits the
             // platform graphics; the reference tests their type, the
-            // graphics manager remembers what it registered. The surface
-            // of the OpenGL of the system (WGL) is a later step of stage
-            // 2b.
+            // graphics manager remembers what it registered.
             if gl_platform.is_some() {
                 if let Some(handle) = this.handle.borrow().clone() {
                     if let Some(surface_factory) = &surface_factory {
@@ -615,14 +628,16 @@ mod imp {
                     } else if Win32GlManager::platform_graphics_kind() == Some(Win32PlatformGraphicsKind::AngleD3D11) {
                         let gl_surface: Arc<dyn IPlatformRenderSurface> = EglGlPlatformSurface::new(handle);
                         *this.gl_surface.borrow_mut() = Some(gl_surface);
+                    } else if Win32GlManager::platform_graphics_kind() == Some(Win32PlatformGraphicsKind::Wgl) {
+                        let gl_surface: Arc<dyn IPlatformRenderSurface> = WglGlPlatformSurface::new(handle);
+                        *this.gl_surface.borrow_mut() = Some(gl_surface);
                     }
                 }
             }
 
-            // The input method of the keyboard layout (for a window that is
-            // not a popup), the storage provider, the input pane and the
-            // native control host are created here by the reference: they
-            // arrive with their stages.
+            // (The storage provider and the native control host are
+            // created when they are first asked for.)
+            *this.input_pane.borrow_mut() = WindowsInputPane::try_create(&this);
 
             INSTANCES.with(|instances| instances.borrow_mut().push(this.clone()));
 
@@ -737,6 +752,37 @@ mod imp {
 
         pub(crate) fn set_ignore_wm_char(&self, value: bool) {
             self.ignore_wm_char.set(value);
+        }
+
+        pub(crate) fn kill_focus_requested(&self) -> bool {
+            self.kill_focus_requested.get()
+        }
+
+        pub(crate) fn set_kill_focus_requested(&self, value: bool) {
+            self.kill_focus_requested.set(value);
+        }
+
+        /// Gives the input method of the thread this window and the
+        /// language of a keyboard layout (`UpdateInputMethod`).
+        pub(crate) fn update_input_method(&self, hkl: isize) {
+            // note: for non-ime language, also create it so that emoji panel tracks cursor
+            let langid = lgid(hkl);
+
+            if langid == self.langid.get() && Imm32InputMethod::current().hwnd() == self.hwnd.get() {
+                return;
+            }
+
+            self.langid.set(langid);
+
+            let parent: Weak<dyn Imm32Parent> = self.this.clone();
+            Imm32InputMethod::current().set_language_and_window(parent, self.hwnd.get(), hkl);
+        }
+
+        pub(crate) fn dispose_input_pane(&self) {
+            let input_pane = self.input_pane.borrow_mut().take();
+            if let Some(input_pane) = input_pane {
+                input_pane.dispose();
+            }
         }
 
         /// The text of a `WM_CHAR` message of this window, if the message
@@ -1169,6 +1215,7 @@ mod imp {
 
         /// Destroys the window if it still exists.
         pub(crate) fn dispose_impl(&self) {
+            self.dispose_input_pane();
             if self.hwnd.get() != 0 {
                 // Detect if we are being closed programmatically - this would mean that WM_CLOSE was not called
                 // and we didn't prepare this window for destruction.
@@ -1990,11 +2037,63 @@ mod imp {
         }
     }
 
+    impl Imm32Parent for WindowImpl {
+        fn desktop_scaling(&self) -> f64 {
+            self.scaling.get()
+        }
+
+        fn set_ignore_wm_char(&self, value: bool) {
+            self.ignore_wm_char.set(value);
+        }
+
+        fn raw_text_input(&self, timestamp: u64, text: &str) -> bool {
+            let Some(input) = self.input_callback() else {
+                return false;
+            };
+            let device: Rc<dyn IInputDevice> = WindowsKeyboardDevice::instance();
+            input(Rc::new(RawTextInputEventArgs::new(device, timestamp, self.owner(), text.to_owned())));
+            true
+        }
+
+        fn raw_key_press(&self, key: Key, physical_key: PhysicalKey) {
+            let Some(input) = self.input_callback() else {
+                return;
+            };
+            // The reference stamps the two events with the ticks of the
+            // clock; here they carry the time of the message being
+            // processed, like every other event of the window.
+            let timestamp = u64::from(get_message_time() as u32);
+            for event_type in [RawKeyEventType::KeyDown, RawKeyEventType::KeyUp] {
+                let device: Rc<dyn IInputDevice> = WindowsKeyboardDevice::instance();
+                input(Rc::new(RawKeyEventArgs::new(
+                    device,
+                    timestamp,
+                    self.owner(),
+                    event_type,
+                    key,
+                    RawInputModifiers::NONE,
+                    physical_key,
+                    None,
+                    KeyDeviceType::Keyboard,
+                )));
+            }
+        }
+    }
+
     impl IOptionalFeatureProvider for WindowImpl {
-        /// The optional features of a window. The features whose
-        /// implementations arrive with later stages (the text input
-        /// method, the input pane, the launcher) are absent.
+        /// The optional features of a window. The launcher, whose
+        /// implementation arrives with a later stage, is absent.
         fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+            if feature_type == TypeId::of::<dyn ITextInputMethodImpl>() {
+                let input_method: Rc<dyn ITextInputMethodImpl> = Imm32InputMethod::current();
+                return Some(Rc::new(input_method));
+            }
+
+            if feature_type == TypeId::of::<dyn IInputPane>() {
+                let input_pane: Rc<dyn IInputPane> = self.input_pane.borrow().clone()?;
+                return Some(Rc::new(input_pane));
+            }
+
             if feature_type == TypeId::of::<dyn IScreenImpl>() {
                 let screens: Rc<dyn IScreenImpl> = self.screen.clone();
                 return Some(Rc::new(screens));

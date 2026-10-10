@@ -147,6 +147,13 @@ pub(crate) fn should_ignore_touch_emulated_message(extra_info: i64) -> bool {
     (extra_info & MARKER) == MARKER
 }
 
+/// The parameter of `WM_IME_SETCONTEXT` that is passed to the default
+/// processing: without the flag that shows the composition window of the
+/// system.
+pub(crate) fn ime_set_context_l_param(l_param: isize) -> isize {
+    l_param & !(crate::interop::unmanaged_methods::ISC_SHOWUICOMPOSITIONWINDOW as isize)
+}
+
 /// The text of a `WM_CHAR` message, which carries one UTF-16 code unit.
 ///
 /// A character outside the basic plane arrives as two messages, a high and
@@ -443,7 +450,7 @@ pub(crate) fn intermediate_mouse_points(
 #[cfg(windows)]
 mod imp {
     use super::*;
-    use crate::input::{KeyInterop, WindowsKeyboardDevice};
+    use crate::input::{Imm32InputMethod, KeyInterop, WindowsKeyboardDevice};
     use crate::interop::unmanaged_methods::*;
     use crate::win32_platform::Win32Platform;
     use crate::win32_type_extensions::Win32TypeExtensions;
@@ -695,14 +702,19 @@ mod imp {
                     // The first and foremost thing to do - notify the TopLevel
                     self.invoke_closed();
 
-                    // The automation provider of the window and the input
-                    // method are released here by the reference: they
-                    // arrive with their stages.
+                    // The automation provider of the window is released
+                    // here by the reference: it arrives with its stage.
+
+                    // We need to release IMM context and state to avoid leaks.
+                    if Imm32InputMethod::current().hwnd() == hwnd {
+                        Imm32InputMethod::current().clear_language_and_window();
+                    }
 
                     self.release_drop_target();
 
                     self.framebuffer().dispose();
                     self.dispose_gl_surface();
+                    self.dispose_input_pane();
 
                     //Window doesn't exist anymore
                     self.on_destroyed();
@@ -785,8 +797,9 @@ mod imp {
                 }
 
                 WindowsMessage::WM_CHAR => {
-                    // (While an input method composes, the reference
-                    // ignores the message: stage 2.)
+                    if Imm32InputMethod::current().is_composing() {
+                        return def_window_proc(hwnd, msg, w_param, l_param);
+                    }
 
                     // Ignore control chars and chars that were handled in WM_KEYDOWN.
                     if to_int32(w_param as isize) >= 32 && !self.ignore_wm_char() {
@@ -1227,17 +1240,58 @@ mod imp {
                 }
 
                 WindowsMessage::WM_KILLFOCUS => {
-                    // (While an input method composes, the reference
-                    // delays the notification until the composition ends:
-                    // stage 2.)
-                    self.invoke_lost_focus();
+                    if Imm32InputMethod::current().is_composing() {
+                        self.set_kill_focus_requested(true);
+                    } else {
+                        self.invoke_lost_focus();
+                    }
                 }
 
-                // WM_INPUTLANGCHANGE and the WM_IME_* messages: the input
-                // method of the backend (Imm32) is stage 2; the messages
-                // get the default processing of the system, which shows
-                // its own composition window.
-                //
+                WindowsMessage::WM_INPUTLANGCHANGE => {
+                    self.update_input_method(l_param);
+                    // call DefWindowProc to pass to all children
+                }
+
+                WindowsMessage::WM_IME_SETCONTEXT => {
+                    // The composition window of the system is not shown:
+                    // the composition is drawn by the text input client.
+                    def_window_proc(hwnd, msg, w_param, ime_set_context_l_param(l_param));
+
+                    self.update_input_method(get_keyboard_layout(0));
+
+                    return 0;
+                }
+
+                WindowsMessage::WM_IME_COMPOSITION => {
+                    Imm32InputMethod::current().handle_composition(w_param, l_param, timestamp);
+                }
+
+                WindowsMessage::WM_IME_SELECT
+                | WindowsMessage::WM_IME_CHAR
+                | WindowsMessage::WM_IME_COMPOSITIONFULL
+                | WindowsMessage::WM_IME_CONTROL
+                | WindowsMessage::WM_IME_KEYDOWN
+                | WindowsMessage::WM_IME_KEYUP
+                | WindowsMessage::WM_IME_NOTIFY => {}
+
+                WindowsMessage::WM_IME_STARTCOMPOSITION => {
+                    Imm32InputMethod::current().handle_composition_start();
+
+                    return 0;
+                }
+
+                WindowsMessage::WM_IME_ENDCOMPOSITION => {
+                    Imm32InputMethod::current().handle_composition_end(timestamp);
+
+                    if self.kill_focus_requested() {
+                        self.invoke_lost_focus();
+
+                        self.set_kill_focus_requested(false);
+                    }
+
+                    return 0;
+                }
+
                 // WM_GETOBJECT: the automation provider of the window
                 // belongs to the automation project of the backend.
                 WindowsMessage::WM_WINDOWPOSCHANGED => {
@@ -1520,6 +1574,16 @@ mod imp {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_default_processing_of_the_input_context_is_told_not_to_show_the_composition_window() {
+        // ISC_SHOWUIALL: every candidate window, the guide line and the
+        // composition window.
+        assert_eq!(0x4000_000F, ime_set_context_l_param(0xC000_000F_u32 as isize) & 0xFFFF_FFFF);
+        assert_eq!(0x0000_000F, ime_set_context_l_param(0x0000_000F));
+        // The parameter as a 32-bit value that was sign extended.
+        assert_eq!(0x4000_000F, ime_set_context_l_param(0xC000_000F_u32 as i32 as isize) & 0xFFFF_FFFF);
+    }
 
     /// A message parameter that packs two 16-bit values.
     fn make_l_param(low: i16, high: i16) -> isize {

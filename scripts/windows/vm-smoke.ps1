@@ -60,6 +60,15 @@
   of the catalog (control-catalog-desktop with FERROUI_SMOKE_SCREENSHOTS) in both rendering modes;
   the pictures are copied to vm-smoke-screenshots beside the report.
 
+.PARAMETER AllowUnmarkedSource
+  Run although the sources carry no mark of a completed sync. By default the script refuses a
+  source tree without the file .vm-sync-commit (written last by scripts/windows/vm-sync.sh, with
+  the commit that was synced) or with the file .vm-sync-in-progress (a sync that is running or was
+  interrupted): a run once built a tree that was half synced. The files are then compared with the
+  manifest of the sync (.vm-sync-manifest: sizes and SHA-256), and a tree that differs from it or
+  has none is refused too: a machine that was suspended during a sync once served old contents of
+  replaced files. A checkout with Git needs no mark: its commit is asked of Git.
+
 .PARAMETER HelloRepeat
   How many times the run of hello_window with the default options is made (to look for a failure
   that does not happen every time). Default: 1.
@@ -73,7 +82,7 @@
   on every machine or after every start), never through its UNC path, which cmd refuses as a
   working directory. <S> stands for that letter:
 
-  powershell -NoProfile -ExecutionPolicy Bypass -File <S>:\ferroui-vm-windows\src\scripts\windows\vm-smoke.ps1 -TargetDir C:\ferroui-target -Jobs 3 -InteractiveUser <user> -Desktop -Report <S>:\ferroui-vm-windows\vm-smoke-report.txt
+  powershell -NoProfile -ExecutionPolicy Bypass -File <S>:\ferroui-vm-windows\src-<commit>\scripts\windows\vm-smoke.ps1 -TargetDir C:\ferroui-target -Jobs 3 -InteractiveUser <user> -Desktop -Report <S>:\ferroui-vm-windows\vm-smoke-report.txt
 #>
 param(
     [Parameter(Mandatory = $true)][string]$TargetDir,
@@ -91,7 +100,8 @@ param(
     [switch]$Desktop,
     [int]$HelloRepeat = 1,
     [switch]$SkipBuild,
-    [switch]$SkipTests
+    [switch]$SkipTests,
+    [switch]$AllowUnmarkedSource
 )
 
 # Native tools write progress to the error stream; that is not a failure.
@@ -160,6 +170,104 @@ if ($Source.StartsWith('\\')) {
     exit 2
 }
 Say "target directory: $TargetDir"
+
+# ---- which sources these are ------------------------------------------------------------------
+# A tree on a shared folder is copied there from the host (scripts/windows/vm-sync.sh), and the
+# machine has no Git: the copy says which commit it is, in a file that is written when the copy
+# is complete. A tree that is being copied, or whose copy was interrupted, is not built.
+$syncCommit = Join-Path $Source '.vm-sync-commit'
+$syncRunning = Join-Path $Source '.vm-sync-in-progress'
+if (Test-Path $syncRunning) {
+    Say ("REFUSED: the sources are being synced, or a sync was interrupted ({0}, {1}). Sync again and start the script when the sync has ended." -f $syncRunning, ((Get-Content $syncRunning -ErrorAction SilentlyContinue) -join ' '))
+    exit 3
+}
+if (Test-Path $syncCommit) {
+    # Read through the file API and not through the provider of the shell: on a shared folder the
+    # two once disagreed about a file that had just been replaced (the test saw it, the read
+    # returned nothing).
+    $markText = ''
+    $markTime = 'at an unknown time'
+    try {
+        $markText = ([System.IO.File]::ReadAllText($syncCommit)).Trim()
+        $markTime = [System.IO.File]::GetLastWriteTime($syncCommit).ToString('yyyy-MM-dd HH:mm:ss')
+    } catch {
+        $markText = ''
+    }
+    if (-not $markText) {
+        Say "REFUSED: the mark of the sync ($syncCommit) exists and cannot be read, or is empty: the machine does not see the folder as the host wrote it. Sync again (a new directory) and start the script from there."
+        exit 3
+    }
+    Say "sources: commit $markText (synced $markTime)"
+
+    # The sync lists every file with its size and its SHA-256. What this machine reads is compared
+    # with the list: a machine that was suspended during a sync served old contents of replaced
+    # files afterwards, under the mark of the new commit.
+    $manifest = Join-Path $Source '.vm-sync-manifest'
+    if (Test-Path $manifest) {
+        $listed = 0
+        $different = New-Object System.Collections.Generic.List[string]
+        $sha = [System.Security.Cryptography.SHA256]::Create()
+        foreach ($line in [System.IO.File]::ReadAllLines($manifest)) {
+            if (-not $line) { continue }
+            $parts = $line -split '  ', 3
+            if ($parts.Count -ne 3) { continue }
+            $listed++
+            $file = Join-Path $Source ($parts[2] -replace '/', '\')
+            try {
+                $bytes = [System.IO.File]::ReadAllBytes($file)
+                $sum = -join ($sha.ComputeHash($bytes) | ForEach-Object { $_.ToString('x2') })
+                if (($bytes.Length -ne [int64]$parts[1]) -or ($sum -ne $parts[0])) {
+                    $different.Add(("{0} ({1} byte(s) here, {2} in the manifest)" -f $parts[2], $bytes.Length, $parts[1]))
+                }
+            } catch {
+                $different.Add("$($parts[2]) (cannot be read: $($_.Exception.Message))")
+            }
+        }
+        if ($different.Count -gt 0) {
+            Say ("REFUSED: {0} of {1} file(s) differ from the manifest of the sync: the machine does not see the folder as the host wrote it." -f $different.Count, $listed)
+            $different | Select-Object -First 10 | ForEach-Object { Say "    $_" }
+            Say "Sync again (scripts/windows/vm-sync.sh makes a new directory) and start the script from there."
+            exit 3
+        }
+        Say "sources: $listed file(s) are the ones of the manifest of the sync (sizes and SHA-256)"
+    } elseif ($AllowUnmarkedSource) {
+        Say "sources: NOT COMPARED: the tree has no manifest of its sync (.vm-sync-manifest); run because of -AllowUnmarkedSource"
+    } else {
+        Say "REFUSED: the sources have no manifest of their sync ($manifest): they were synced by an older vm-sync.sh. Sync again, or pass -AllowUnmarkedSource."
+        exit 3
+    }
+} elseif ((Test-Path (Join-Path $Source '.git')) -and (Get-Command git.exe -ErrorAction SilentlyContinue)) {
+    $head = (cmd /c "git -C `"$Source`" rev-parse HEAD 2>&1") -join ' '
+    $dirty = @(cmd /c "git -C `"$Source`" status --porcelain 2>&1").Count
+    Say "sources: commit $head of a checkout ($dirty changed file(s))"
+} elseif ($AllowUnmarkedSource) {
+    Say "sources: UNKNOWN COMMIT: the tree has no mark of a completed sync (.vm-sync-commit); run because of -AllowUnmarkedSource"
+} else {
+    Say "REFUSED: the sources have no mark of a completed sync ($syncCommit). Sync them with scripts/windows/vm-sync.sh on the host, which writes the commit there when it is done, or pass -AllowUnmarkedSource."
+    exit 3
+}
+
+# ---- nobody else builds into the target directory ---------------------------------------------
+# cargo holds the file .cargo-lock of a profile directory open while it builds into it. A second
+# cargo would wait for it without a word and then build on top of what the first one left, which
+# a report cannot tell from its own build: the script does not start then.
+$heldLocks = New-Object System.Collections.Generic.List[string]
+$lockFiles = @(Get-ChildItem -Path $TargetDir -Filter '.cargo-lock' -Recurse -Depth 2 -Force -ErrorAction SilentlyContinue)
+foreach ($lockFile in $lockFiles) {
+    try {
+        # No sharing: fails while any other process has the file open.
+        $handle = [System.IO.File]::Open($lockFile.FullName, [System.IO.FileMode]::Open, [System.IO.FileAccess]::ReadWrite, [System.IO.FileShare]::None)
+        $handle.Close()
+    } catch {
+        $heldLocks.Add($lockFile.FullName)
+    }
+}
+if ($heldLocks.Count -gt 0) {
+    $builders = @(Get-Process -Name cargo, rustc -ErrorAction SilentlyContinue | ForEach-Object { "{0} (process {1}, started {2})" -f $_.ProcessName, $_.Id, $_.StartTime.ToString('HH:mm:ss') })
+    Say ("REFUSED: another build holds the lock of the target directory: {0}. Running: {1}. Wait for it to end, or stop it, and start the script again." -f ($heldLocks -join ', '), ($builders -join '; '))
+    exit 4
+}
+Say ("build lock: free ({0} lock file(s) looked at)" -f $lockFiles.Count)
 
 # ---- what the build needs ---------------------------------------------------------------------
 Say ""
@@ -252,6 +360,9 @@ if (-not $SkipTests -and -not $failed.Contains('build')) {
 if ($Modes.Count -eq 0) {
     $Modes = @('software')
     if ($angle) { $Modes += 'angle' }
+    # The OpenGL of the system, or software rendering where the system has no driver for it:
+    # the run prints which ("WGL: active" or "WGL: not available").
+    $Modes += 'wgl'
 }
 $example = Join-Path $TargetDir 'debug\examples\win32_window.exe'
 
@@ -302,7 +413,7 @@ if (-not (Test-Path $example)) {
     }
     # Through ANGLE with each composition mode that presents through a surface of its own.
     if ($Modes -contains 'angle') {
-        foreach ($composition in @('dcomp')) {
+        foreach ($composition in @('dcomp', 'winui', 'dxgi')) {
             $name = "smoke-angle-$composition"
             $commandLine = "`"$example`" --smoke --rendering angle --composition $composition"
             $code = if ($InteractiveUser) { Run-Interactive $name $commandLine } else { Run $name $commandLine }
@@ -327,6 +438,7 @@ if ($Desktop) {
             @('default', ''),
             @('software', 'set FERROUI_SMOKE_RENDERING=software&& '),
             @('angle', 'set FERROUI_SMOKE_RENDERING=angle&& '),
+            @('wgl', 'set FERROUI_SMOKE_RENDERING=wgl&& '),
             @('angle-ui-thread', 'set FERROUI_SMOKE_RENDERING=angle&& set FERROUI_SMOKE_RENDER_ON_UI_THREAD=1&& ')
         )
         for ($i = 2; $i -le $HelloRepeat; $i++) { $variants += ,@("default-$i", '') }
@@ -360,14 +472,14 @@ if ($Desktop) {
             Tail 'integration' 80 'FAILED|^test result|^running|panicked|^failures|^    '
             # What a window presents reaches the edges of its client area, with each rendering
             # mode alone (the run above had the default options).
-            foreach ($mode in @('software', 'angle')) {
+            foreach ($mode in @('software', 'angle', 'wgl')) {
                 $name = "integration-presented-$mode"
                 $commandLine = "set FERROUI_SMOKE_RENDERING=$mode&& `"$($binary.FullName)`" presented_frame_tests"
                 $code = if ($InteractiveUser) { Run-Interactive $name $commandLine 300 } else { Run $name $commandLine }
                 if ($code -ne 0) { $failed.Add("presented frames ($mode)") }
                 Tail $name 20 'FAILED|^test |^test result|panicked|^    '
             }
-            foreach ($composition in @('dcomp')) {
+            foreach ($composition in @('dcomp', 'winui', 'dxgi')) {
                 $name = "integration-presented-angle-$composition"
                 $commandLine = "set FERROUI_SMOKE_RENDERING=angle&& set FERROUI_SMOKE_COMPOSITION=$composition&& `"$($binary.FullName)`" presented_frame_tests"
                 $code = if ($InteractiveUser) { Run-Interactive $name $commandLine 300 } else { Run $name $commandLine }
@@ -392,7 +504,12 @@ if ($Desktop) {
         # The third run is of a window whose client area extends into its frame (the title bar
         # and the caption buttons drawn by the framework), through ANGLE, with the page of the
         # window customizations among its pages.
-        foreach ($mode in @('software', 'angle', 'extended', 'dcomp')) {
+        # The runs named winui-* are through Windows.UI.Composition with a window that asks for
+        # that transparency level (acrylic blur, mica): what is behind the window shows through,
+        # blurred, where the system has the effect. The capture of the window shows what the
+        # system composed of the window itself; the backdrop is the desktop's, so the picture
+        # to look at is the screen of the machine.
+        foreach ($mode in @('software', 'angle', 'extended', 'dcomp', 'winui', 'winui-acrylic', 'winui-mica')) {
             $name = "catalog-$mode"
             $directory = Join-Path $pictures $mode
             New-Item -ItemType Directory -Force -Path $directory | Out-Null
@@ -401,7 +518,11 @@ if ($Desktop) {
             if ($mode -eq 'extended') {
                 $commandLine = "set FERROUI_SMOKE_PAGES=2500&& set FERROUI_SMOKE_EXIT_MS=120000&& set FERROUI_SMOKE_RENDERING=angle&& set FERROUI_SMOKE_EXTEND_CLIENT_AREA=1&& set FERROUI_SMOKE_SCREENSHOT_PAGES=Home,Window Customizations,Buttons&& set FERROUI_SMOKE_SCREENSHOTS=$directory&& `"$catalog`""
             }
-            if ($mode -eq 'dcomp') {
+            if ($mode -like 'winui-*') {
+                $level = $mode.Substring(6)
+                $commandLine = "set FERROUI_SMOKE_PAGES=2500&& set FERROUI_SMOKE_EXIT_MS=120000&& set FERROUI_SMOKE_RENDERING=angle&& set FERROUI_SMOKE_COMPOSITION=winui&& set FERROUI_SMOKE_TRANSPARENCY=$level&& set FERROUI_SMOKE_SCREENSHOT_PAGES=Home,Window Customizations,Buttons&& set FERROUI_SMOKE_SCREENSHOTS=$directory&& `"$catalog`""
+            }
+            if ($mode -eq 'dcomp' -or $mode -eq 'winui') {
                 # Presented through a composition mode, with the page that sets the transparency
                 # level of the window among the pages.
                 $commandLine = "set FERROUI_SMOKE_PAGES=2500&& set FERROUI_SMOKE_EXIT_MS=120000&& set FERROUI_SMOKE_RENDERING=angle&& set FERROUI_SMOKE_COMPOSITION=$mode&& set FERROUI_SMOKE_SCREENSHOT_PAGES=Home,Window Customizations,Buttons&& set FERROUI_SMOKE_SCREENSHOTS=$directory&& `"$catalog`""
@@ -411,7 +532,7 @@ if ($Desktop) {
             $count = @(Get-ChildItem $directory -Filter '*.png' -ErrorAction SilentlyContinue).Count
             Say "    $count picture(s) in $directory"
             if ($count -eq 0) { $failed.Add("catalog pictures ($mode)") }
-            Tail $name 40 'content reaches|colour\(s\)|panicked|error|moved|extended'
+            Tail $name 40 'content reaches|colour\(s\)|panicked|error|moved|extended|transparency'
             $copy = Join-Path (Join-Path (Split-Path -Parent $Report) 'vm-smoke-screenshots') $mode
             New-Item -ItemType Directory -Force -Path $copy | Out-Null
             Copy-Item (Join-Path $directory '*.png') $copy -Force -ErrorAction SilentlyContinue

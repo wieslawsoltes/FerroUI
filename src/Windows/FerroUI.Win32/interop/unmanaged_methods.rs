@@ -1367,6 +1367,120 @@ impl MONITOR {
     pub const MONITOR_DEFAULTTONEAREST: u32 = 0x00000002;
 }
 
+/// `GCS` of the interop declarations: what a `WM_IME_COMPOSITION` message
+/// says has changed, and what `ImmGetCompositionString` is asked for.
+pub struct GCS;
+
+#[allow(missing_docs)]
+impl GCS {
+    pub const GCS_COMPREADSTR: u32 = 0x0001;
+    pub const GCS_COMPREADATTR: u32 = 0x0002;
+    pub const GCS_COMPREADCLAUSE: u32 = 0x0004;
+    pub const GCS_COMPSTR: u32 = 0x0008;
+    pub const GCS_COMPATTR: u32 = 0x0010;
+    pub const GCS_COMPCLAUSE: u32 = 0x0020;
+    pub const GCS_CURSORPOS: u32 = 0x0080;
+    pub const GCS_DELTASTART: u32 = 0x0100;
+    pub const GCS_RESULTREADSTR: u32 = 0x0200;
+    pub const GCS_RESULTREADCLAUSE: u32 = 0x0400;
+    pub const GCS_RESULTSTR: u32 = 0x0800;
+    pub const GCS_RESULTCLAUSE: u32 = 0x1000;
+}
+
+pub const SORT_DEFAULT: i32 = 0;
+pub const LANG_ZH: i32 = 0x0004;
+pub const LANG_JA: i32 = 0x0011;
+pub const LANG_KO: i32 = 0x0012;
+
+pub const CFS_FORCE_POSITION: i32 = 0x0020;
+pub const CFS_CANDIDATEPOS: i32 = 0x0040;
+pub const CFS_EXCLUDE: i32 = 0x0080;
+pub const CFS_POINT: i32 = 0x0002;
+pub const CFS_RECT: i32 = 0x0001;
+
+pub const NI_COMPOSITIONSTR: i32 = 21;
+pub const CPS_COMPLETE: i32 = 1;
+pub const CPS_CONVERT: i32 = 2;
+pub const CPS_REVERT: i32 = 3;
+pub const CPS_CANCEL: i32 = 4;
+
+/// `PRIMARYLANGID`: the primary language of a language identifier.
+pub fn primary_lang_id(lgid: u32) -> u16 {
+    (lgid & 0x3ff) as u16
+}
+
+/// `LGID`: the language identifier of a keyboard layout handle.
+pub fn lgid(hkl: isize) -> u32 {
+    (hkl as usize & 0xffff) as u32
+}
+
+/// `CANDIDATEFORM` of the interop declarations: where the candidate window
+/// of an input method goes.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[allow(missing_docs, non_snake_case)]
+pub struct CANDIDATEFORM {
+    pub dwIndex: i32,
+    pub dwStyle: i32,
+    pub ptCurrentPos: POINT,
+    pub rcArea: RECT,
+}
+
+/// `COMPOSITIONFORM` of the interop declarations: where the composition
+/// window of an input method goes.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[allow(missing_docs, non_snake_case)]
+pub struct COMPOSITIONFORM {
+    pub dwStyle: i32,
+    pub ptCurrentPos: POINT,
+    pub rcArea: RECT,
+}
+
+/// `PixelFormatDescriptorFlags` of the interop declarations.
+pub struct PixelFormatDescriptorFlags;
+
+#[allow(missing_docs)]
+impl PixelFormatDescriptorFlags {
+    pub const PFD_DOUBLEBUFFER: u32 = 0x00000001;
+    pub const PFD_DRAW_TO_WINDOW: u32 = 0x00000004;
+    pub const PFD_SUPPORT_OPENGL: u32 = 0x00000020;
+}
+
+/// `PixelFormatDescriptor` of the interop declarations: the layout of the
+/// `PIXELFORMATDESCRIPTOR` of the system (40 bytes).
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[allow(missing_docs)]
+pub struct PixelFormatDescriptor {
+    pub size: u16,
+    pub version: u16,
+    pub flags: u32,
+    pub pixel_type: u8,
+    pub color_bits: u8,
+    pub red_bits: u8,
+    pub red_shift: u8,
+    pub green_bits: u8,
+    pub green_shift: u8,
+    pub blue_bits: u8,
+    pub blue_shift: u8,
+    pub alpha_bits: u8,
+    pub alpha_shift: u8,
+    pub accum_bits: u8,
+    pub accum_red_bits: u8,
+    pub accum_green_bits: u8,
+    pub accum_blue_bits: u8,
+    pub accum_alpha_bits: u8,
+    pub depth_bits: u8,
+    pub stencil_bits: u8,
+    pub aux_buffers: u8,
+    pub layer_type: u8,
+    pub reserved: u8,
+    pub layer_mask: u32,
+    pub visible_mask: u32,
+    pub damage_mask: u32,
+}
+
 /// `DEVICECAP` of the interop declarations: the values the system uses, as constants.
 pub struct DEVICECAP;
 
@@ -1941,6 +2055,8 @@ mod native {
     use windows_sys::Win32::Foundation as wf;
     use windows_sys::Win32::Graphics::Dwm as dwm;
     use windows_sys::Win32::Graphics::Gdi as gdi;
+    use windows_sys::Win32::Graphics::OpenGL as gl;
+    use windows_sys::Win32::UI::Input::Ime as ime;
     use windows_sys::Win32::Storage::FileSystem as fs;
     use windows_sys::Win32::System::DataExchange as dx;
     use windows_sys::Win32::System::Com as com;
@@ -2013,6 +2129,286 @@ mod native {
         // SAFETY: the module handle came from the loader and the name is a
         // null-terminated string.
         unsafe { ll::GetProcAddress(h(module), name.as_ptr().cast()) }
+    }
+
+    /// The device context of the client area of a window; 0 if the call
+    /// fails. It is released with [`release_dc`], by the thread that got it.
+    pub fn get_dc(hwnd: isize) -> isize {
+        // SAFETY: a stale handle makes the call fail.
+        unsafe { gdi::GetDC(h(hwnd)) as isize }
+    }
+
+    /// Releases a device context of [`get_dc`].
+    pub fn release_dc(hwnd: isize, dc: isize) -> bool {
+        // SAFETY: handles; stale ones make the call fail.
+        unsafe { gdi::ReleaseDC(h(hwnd), h(dc)) != 0 }
+    }
+
+    /// `GetDeviceCaps`: 0 for a device context that is not valid.
+    pub fn get_device_caps(dc: isize, index: i32) -> i32 {
+        // SAFETY: a handle and a number.
+        unsafe { gdi::GetDeviceCaps(h(dc), index) }
+    }
+
+    /// Posts a message to the queue of a thread. Fails while the thread has
+    /// no message queue.
+    pub fn post_thread_message(thread_id: u32, msg: u32, w_param: usize, l_param: isize) -> bool {
+        // SAFETY: plain numbers.
+        unsafe { wm::PostThreadMessageW(thread_id, msg, w_param, l_param) != 0 }
+    }
+
+    /// Takes a message off the queue of the calling thread, if there is
+    /// one (`PeekMessage` with `PM_REMOVE`). The first call creates the
+    /// queue.
+    pub fn peek_message() -> Option<Msg> {
+        // SAFETY: zeroed plain data, filled by the call.
+        let mut msg: wm::MSG = unsafe { std::mem::zeroed() };
+        // SAFETY: a valid out structure; no window or range filter.
+        let found = unsafe { wm::PeekMessageW(&mut msg, std::ptr::null_mut(), 0, 0, wm::PM_REMOVE) != 0 };
+        found.then_some(Msg(msg))
+    }
+
+    /// An overlapped window of a class, never shown: what the device
+    /// context of an OpenGL context belongs to.
+    pub fn create_offscreen_gl_window(atom: u16) -> isize {
+        create_window_ex(0, atom, super::WindowStyles::WS_OVERLAPPEDWINDOW.bits(), 0, 0, 640, 480, 0)
+    }
+
+    fn pfd(descriptor: &super::PixelFormatDescriptor) -> *const gl::PIXELFORMATDESCRIPTOR {
+        // The two structures have the same layout (`repr(C)`, the fields of
+        // the header in their order; the size is tested).
+        (descriptor as *const super::PixelFormatDescriptor).cast()
+    }
+
+    /// `ChoosePixelFormat`: the index of the pixel format of the device
+    /// context that fits the descriptor best; 0 if there is none.
+    pub fn choose_pixel_format(dc: isize, descriptor: &super::PixelFormatDescriptor) -> i32 {
+        // SAFETY: the descriptor is read during the call.
+        unsafe { gl::ChoosePixelFormat(h(dc), pfd(descriptor)) }
+    }
+
+    /// `SetPixelFormat`.
+    pub fn set_pixel_format(dc: isize, format: i32, descriptor: &super::PixelFormatDescriptor) -> bool {
+        // SAFETY: the descriptor is read during the call.
+        unsafe { gl::SetPixelFormat(h(dc), format, pfd(descriptor)) != 0 }
+    }
+
+    /// `DescribePixelFormat`: the descriptor of a pixel format of the
+    /// device context; `None` if the call fails.
+    pub fn describe_pixel_format(dc: isize, format: i32) -> Option<super::PixelFormatDescriptor> {
+        let mut descriptor = super::PixelFormatDescriptor::default();
+        let size = std::mem::size_of::<super::PixelFormatDescriptor>() as u32;
+        // SAFETY: the system writes at most `size` bytes, the size of the
+        // structure, whose layout is the one of the system.
+        let result = unsafe {
+            gl::DescribePixelFormat(h(dc), format, size, (&mut descriptor as *mut super::PixelFormatDescriptor).cast())
+        };
+        (result != 0).then_some(descriptor)
+    }
+
+    /// `SwapBuffers`.
+    pub fn swap_buffers(dc: isize) -> bool {
+        // SAFETY: a handle.
+        unsafe { gl::SwapBuffers(h(dc)) != 0 }
+    }
+
+    /// `wglCreateContext`: 0 if no context can be created for the pixel
+    /// format of the device context.
+    pub fn wgl_create_context(dc: isize) -> isize {
+        // SAFETY: a handle.
+        unsafe { gl::wglCreateContext(h(dc)) as isize }
+    }
+
+    /// `wglDeleteContext`.
+    pub fn wgl_delete_context(context: isize) -> bool {
+        // SAFETY: a handle; a stale one makes the call fail.
+        unsafe { gl::wglDeleteContext(h(context)) != 0 }
+    }
+
+    /// `wglMakeCurrent`: makes a context current on the calling thread with
+    /// a device context; two zeros release the current context.
+    pub fn wgl_make_current(dc: isize, context: isize) -> bool {
+        // SAFETY: handles.
+        unsafe { gl::wglMakeCurrent(h(dc), h(context)) != 0 }
+    }
+
+    /// The context that is current on the calling thread; 0 if none is.
+    pub fn wgl_get_current_context() -> isize {
+        // SAFETY: no arguments.
+        unsafe { gl::wglGetCurrentContext() as isize }
+    }
+
+    /// The device context of the current context; 0 if none is current.
+    pub fn wgl_get_current_dc() -> isize {
+        // SAFETY: no arguments.
+        unsafe { gl::wglGetCurrentDC() as isize }
+    }
+
+    /// `wglGetProcAddress`: the address of an entry point of the driver of
+    /// the current context that the system library does not export; null
+    /// if it has none, or if no context is current.
+    pub fn wgl_get_proc_address(name: &std::ffi::CStr) -> *const c_void {
+        // SAFETY: a null-terminated string that lives through the call.
+        match unsafe { gl::wglGetProcAddress(name.as_ptr().cast()) } {
+            Some(entry) => entry as *const c_void,
+            None => std::ptr::null(),
+        }
+    }
+
+    fn himc(context: isize) -> ime::HIMC {
+        context as ime::HIMC
+    }
+
+    /// `ImmGetContext`: the input context of a window; 0 if it has none.
+    /// It is given back with [`imm_release_context`].
+    pub fn imm_get_context(hwnd: isize) -> isize {
+        // SAFETY: a handle; a stale one makes the call fail.
+        unsafe { ime::ImmGetContext(h(hwnd)) as isize }
+    }
+
+    /// `ImmCreateContext`: a new input context; 0 if the call fails.
+    pub fn imm_create_context() -> isize {
+        // SAFETY: no arguments.
+        unsafe { ime::ImmCreateContext() as isize }
+    }
+
+    /// `ImmAssociateContext`: gives a window an input context (0 for
+    /// none) and returns the one it had.
+    pub fn imm_associate_context(hwnd: isize, context: isize) -> isize {
+        // SAFETY: handles.
+        unsafe { ime::ImmAssociateContext(h(hwnd), himc(context)) as isize }
+    }
+
+    /// `ImmReleaseContext`.
+    pub fn imm_release_context(hwnd: isize, context: isize) -> bool {
+        // SAFETY: handles.
+        unsafe { ime::ImmReleaseContext(h(hwnd), himc(context)) != 0 }
+    }
+
+    /// `ImmNotifyIME`.
+    pub fn imm_notify_ime(context: isize, action: i32, index: i32, value: i32) -> bool {
+        // SAFETY: a handle and numbers.
+        unsafe { ime::ImmNotifyIME(himc(context), action as u32, index as u32, value as u32) != 0 }
+    }
+
+    /// `ImmSetCandidateWindow`.
+    pub fn imm_set_candidate_window(context: isize, candidate: &super::CANDIDATEFORM) -> bool {
+        // SAFETY: the structure has the layout of the system (two numbers,
+        // a point, a rectangle) and is read during the call.
+        unsafe { ime::ImmSetCandidateWindow(himc(context), (candidate as *const super::CANDIDATEFORM).cast()) != 0 }
+    }
+
+    /// `ImmIsIME`: whether a keyboard layout has an input method editor.
+    pub fn imm_is_ime(hkl: isize) -> bool {
+        // SAFETY: a handle.
+        unsafe { ime::ImmIsIME(h(hkl)) != 0 }
+    }
+
+    /// `ImmGetOpenStatus`: whether the input method of a context is open.
+    pub fn imm_get_open_status(context: isize) -> bool {
+        // SAFETY: a handle.
+        unsafe { ime::ImmGetOpenStatus(himc(context)) != 0 }
+    }
+
+    /// `ImmGetCandidateWindow`: where the candidate window of an index was
+    /// last put; `None` when the context has no such form.
+    pub fn imm_get_candidate_window(context: isize, index: u32) -> Option<super::CANDIDATEFORM> {
+        let mut form = super::CANDIDATEFORM::default();
+        // SAFETY: the structure has the layout of the system and is
+        // written during the call.
+        let ok = unsafe {
+            ime::ImmGetCandidateWindow(himc(context), index, (&mut form as *mut super::CANDIDATEFORM).cast()) != 0
+        };
+        ok.then_some(form)
+    }
+
+    /// `ImmSetCompositionWindow`.
+    pub fn imm_set_composition_window(context: isize, form: &super::COMPOSITIONFORM) -> bool {
+        // SAFETY: the structure has the layout of the system (a number, a
+        // point, a rectangle) and is read during the call.
+        unsafe { ime::ImmSetCompositionWindow(himc(context), (form as *const super::COMPOSITIONFORM).cast()) != 0 }
+    }
+
+    /// `ImmSetCompositionFont` with a font of a height and a quality, the
+    /// rest of the description zero.
+    pub fn imm_set_composition_font(context: isize, height: i32, quality: u8) -> bool {
+        // SAFETY: zeroed plain data is a valid description of a font.
+        let mut font: gdi::LOGFONTW = unsafe { std::mem::zeroed() };
+        font.lfHeight = height;
+        font.lfQuality = quality as _;
+        // SAFETY: the description is read during the call.
+        unsafe { ime::ImmSetCompositionFontW(himc(context), &font) != 0 }
+    }
+
+    /// `ImmGetCompositionString` for a value that is a number (the cursor
+    /// position): the answer of the call, negative for an error.
+    pub fn imm_get_composition_value(context: isize, index: u32) -> i32 {
+        // SAFETY: no buffer: the call answers a number or a length.
+        unsafe { ime::ImmGetCompositionStringW(himc(context), index, std::ptr::null_mut(), 0) }
+    }
+
+    /// `ImmGetCompositionString` for a string of the composition: `None`
+    /// when the context has none (or the string is empty, as the helper of
+    /// the reference answers).
+    pub fn imm_get_composition_string(context: isize, index: u32) -> Option<String> {
+        let buffer_length = imm_get_composition_value(context, index);
+        if buffer_length <= 0 {
+            return None;
+        }
+        // The length is in bytes; the buffer is of UTF-16 code units.
+        let mut buffer = vec![0u16; (buffer_length as usize).div_ceil(2)];
+        // SAFETY: the system writes at most `buffer_length` bytes into a
+        // buffer of at least that size.
+        let result = unsafe {
+            ime::ImmGetCompositionStringW(himc(context), index, buffer.as_mut_ptr().cast(), buffer_length as u32)
+        };
+        (result >= 0).then(|| String::from_utf16_lossy(&buffer[..(result as usize / 2).min(buffer.len())]))
+    }
+
+    /// `ImmSetCompositionString` with `SCS_SETSTR`: asks the input method
+    /// of the context to take `text` as its composition string. False when
+    /// the context has no input method that does.
+    pub fn imm_set_composition_string(context: isize, text: &str) -> bool {
+        let text: Vec<u16> = text.encode_utf16().collect();
+        // SAFETY: the buffer and its length in bytes; no reading string.
+        unsafe {
+            ime::ImmSetCompositionStringW(
+                himc(context),
+                ime::SCS_SETSTR,
+                text.as_ptr().cast(),
+                (text.len() * 2) as u32,
+                std::ptr::null(),
+                0,
+            ) != 0
+        }
+    }
+
+    /// `CreateCaret` without a bitmap: a caret of the window of a width
+    /// and a height.
+    pub fn create_caret(hwnd: isize, width: i32, height: i32) -> bool {
+        // SAFETY: a handle and numbers.
+        unsafe { wm::CreateCaret(h(hwnd), std::ptr::null_mut(), width, height) != 0 }
+    }
+
+    /// `SetCaretPos`.
+    pub fn set_caret_pos(x: i32, y: i32) -> bool {
+        // SAFETY: numbers.
+        unsafe { wm::SetCaretPos(x, y) != 0 }
+    }
+
+    /// `GetCaretPos`: where the caret of the thread is, in the client
+    /// coordinates of its window.
+    pub fn get_caret_pos() -> Option<(i32, i32)> {
+        let mut point = wf::POINT { x: 0, y: 0 };
+        // SAFETY: a valid out structure.
+        let ok = unsafe { wm::GetCaretPos(&mut point) != 0 };
+        ok.then_some((point.x, point.y))
+    }
+
+    /// `DestroyCaret`.
+    pub fn destroy_caret() -> bool {
+        // SAFETY: no arguments.
+        unsafe { wm::DestroyCaret() != 0 }
     }
 
     /// The version of the system as `RtlGetVersion` reports it: major,
@@ -2903,6 +3299,13 @@ mod native {
         unsafe { dwm::DwmSetWindowAttribute(h(hwnd), attribute, (&value as *const i32).cast(), std::mem::size_of::<i32>() as u32) }
     }
 
+    /// `DwmFlush`: waits until the desktop window manager has composed
+    /// its next frame.
+    pub fn dwm_flush() {
+        // SAFETY: no arguments.
+        unsafe { dwm::DwmFlush() };
+    }
+
     /// `DwmEnableBlurBehindWindow` over the whole window (a region that
     /// covers nothing visible, which the system reads as "transparent
     /// without a blur" since Windows 8). Returns whether the call succeeded.
@@ -3342,12 +3745,31 @@ mod native {
 
     /// The kind of COM apartment of the calling thread (`APTTYPE`), or
     /// `None` when COM is not initialised on it.
+    ///
+    /// A thread that has not initialised COM is reported by the system as
+    /// a thread of the multithreaded apartment as soon as any thread of
+    /// the process has created that apartment (the implicit multithreaded
+    /// apartment: the qualifier says so). Such a thread has no apartment
+    /// of its own and can still enter a single-threaded one, so it is
+    /// `None` here. The Windows.UI.Composition mode showed it: the
+    /// libraries of the compositor create the multithreaded apartment on
+    /// their threads before the UI thread initialises OLE (run
+    /// 38077851321: the drag source was not registered and the clipboard
+    /// was not opened in that mode).
     pub fn co_get_apartment_type() -> Option<i32> {
         let mut apartment_type = 0;
         let mut qualifier = 0;
         // SAFETY: two numbers of this frame the system writes to.
         let result = unsafe { com::CoGetApartmentType(&mut apartment_type, &mut qualifier) };
-        (result >= 0).then_some(apartment_type)
+        apartment_of(result, apartment_type, qualifier)
+    }
+
+    /// `APTTYPEQUALIFIER_IMPLICIT_MTA`.
+    const APTTYPEQUALIFIER_IMPLICIT_MTA: i32 = 1;
+
+    /// The apartment of a thread from what `CoGetApartmentType` answered.
+    pub(crate) fn apartment_of(result: i32, apartment_type: i32, qualifier: i32) -> Option<i32> {
+        (result >= 0 && qualifier != APTTYPEQUALIFIER_IMPLICIT_MTA).then_some(apartment_type)
     }
 
     /// `APTTYPE_STA`: a single-threaded apartment.

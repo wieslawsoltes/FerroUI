@@ -20,7 +20,9 @@
 //! The renderer is the Vello backend in its CPU mode: it has no C or C++
 //! sources, so the example is checked for a Windows target on any host. The
 //! window is drawn through the framebuffer surface with
-//! `--rendering software` (the default).
+//! `--rendering software` (the default). `--rendering wgl` asks for the
+//! OpenGL of the system and, where the system has no driver for it, checks
+//! that the mode is passed over and the window renders in software.
 //!
 //! With `--rendering angle` (the crate built with its feature `angle`) the
 //! platform graphics are ANGLE on Direct3D 11, and the frames are drawn
@@ -252,7 +254,14 @@ mod windows {
     use ferroui_opengl::IGlContext;
     use ferroui_controls::{WindowResizeReason, WindowState};
     use ferroui_vello::{VelloOptions, VelloPlatform, VelloRenderingMode};
-    use ferroui_win32::interop::unmanaged_methods::{post_message, WindowsMessage};
+    use ferroui_base::input::text_input::{
+        ITextInputMethodImpl, TextInputMethodClient, TextInputMethodClientEvents, TextSelection,
+    };
+    use ferroui_win32::interop::unmanaged_methods::{
+        get_active_window, get_caret_pos, get_keyboard_layout, imm_get_candidate_window, imm_get_composition_string,
+        imm_get_context, imm_get_open_status, imm_is_ime, imm_notify_ime, imm_release_context, imm_set_composition_string,
+        post_message, send_message, WindowsMessage,
+    };
     use ferroui_win32::{Win32CompositionMode, Win32Platform, Win32PlatformOptions, Win32RenderingMode};
     use std::cell::{Cell, RefCell};
     use std::future::Future;
@@ -261,6 +270,10 @@ mod windows {
     use std::rc::Rc;
     use std::sync::atomic::{AtomicBool, Ordering};
     use std::sync::Arc;
+
+    /// Whether the run presents through Windows.UI.Composition: the checks of the transparency
+    /// levels expect the effects of that mode then.
+    static WIN_UI_COMPOSITION: AtomicBool = AtomicBool::new(false);
     use std::task::{Context, Poll, Waker};
     use std::time::Duration;
 
@@ -520,8 +533,32 @@ mod windows {
             // composed had every pixel). The offset is what is blank at the start; the pixels
             // it hides count as painted, and the places that are compared move with it.
             let leading = |blank: &[i32], full: i32| blank.iter().take_while(|&&count| count == full).count() as i32;
-            let (offset_x, offset_y) =
+            let (mut offset_x, mut offset_y) =
                 if flipped { (leading(&blank_in_column, height), leading(&blank_in_row, width)) } else { (0, 0) };
+            // A drawing surface of Windows.UI.Composition also hands its frames out at an offset,
+            // and what lies before the frame in its texture is not always blank (the first
+            // frame after the resize in run 38077851321 read back at an offset no blank column
+            // told of). When the three places do not hold what was drawn at the offset the
+            // blank columns and rows give, the offsets up to 16 pixels are tried, and the one
+            // at which all three hold is the offset of the frame.
+            if flipped {
+                let near_at = |x: i32, y: i32, color: [u8; 3]| {
+                    let (x, y) = (x.min(width - 1), y.min(height - 1));
+                    let index = (y as usize * width as usize + x as usize) * 4;
+                    pixels[index + 3] == 255 && (0..3).all(|i| (i32::from(pixels[index + i]) - i32::from(color[i])).abs() <= 1)
+                };
+                let holds = |offset_x: i32, offset_y: i32| {
+                    near_at(box_x + box_w / 2 + offset_x, box_y + box_h / 2 + offset_y, box_color)
+                        && near_at(card_x + card_w / 2 + offset_x, card_y + 2 + offset_y, [0xf0, 0xf0, 0xf0])
+                        && near_at(1 + offset_x, 1 + offset_y, [0x1e, 0x3a, 0x8a])
+                };
+                if !holds(offset_x, offset_y) {
+                    let found = (0..=16).flat_map(|y| (0..=16).map(move |x| (x, y))).find(|&(x, y)| holds(x, y));
+                    if let Some(found) = found {
+                        (offset_x, offset_y) = found;
+                    }
+                }
+            }
             if (offset_x, offset_y) != self.read_offset.get() {
                 self.read_offset.set((offset_x, offset_y));
                 println!(
@@ -584,6 +621,211 @@ mod windows {
         wake_waits: Cell<u32>,
         report: Report,
         verbose_input: bool,
+        /// The text input client of the text input checks of a smoke run.
+        text_client: RefCell<Option<Rc<SmokeTextClient>>>,
+        /// How often the window said it lost the focus.
+        lost_focus: Cell<u32>,
+        /// Where the caret of the system has to be once the input method
+        /// was given the rectangle of the text cursor, in pixels; `None`
+        /// when the window was not the active one.
+        caret_expected: Cell<Option<(i32, i32)>>,
+    }
+
+    /// A text input client that records the preedit text an input method
+    /// gives it.
+    struct SmokeTextClient {
+        events: TextInputMethodClientEvents,
+        preedit: RefCell<Vec<(Option<String>, Option<i32>)>>,
+    }
+
+    impl TextInputMethodClient for SmokeTextClient {
+        fn events(&self) -> &TextInputMethodClientEvents {
+            &self.events
+        }
+
+        fn text_view_visual(&self) -> Ref<ferroui_base::Visual> {
+            unreachable!("the input method of the system does not ask for the visual")
+        }
+
+        fn supports_preedit(&self) -> bool {
+            true
+        }
+
+        fn supports_surrounding_text(&self) -> bool {
+            false
+        }
+
+        fn surrounding_text(&self) -> String {
+            String::new()
+        }
+
+        fn cursor_rectangle(&self) -> Rect {
+            Rect::new(60.0, 40.0, 1.0, 16.0)
+        }
+
+        fn selection(&self) -> TextSelection {
+            TextSelection::new(0, 0)
+        }
+
+        fn set_selection(&self, _value: TextSelection) {}
+
+        fn set_preedit_text_with_cursor(&self, preedit_text: Option<&str>, cursor_pos: Option<i32>) {
+            self.preedit.borrow_mut().push((preedit_text.map(str::to_owned), cursor_pos));
+        }
+    }
+
+    /// The checks of the input method: what can be checked without a person
+    /// typing through an input method editor. The window procedure is sent
+    /// the messages an input method sends, and the system is asked what the
+    /// backend told it.
+    fn text_input_checks(state: &Rc<State>, hwnd: isize) {
+        let report = &state.report;
+        let window = &state.window;
+        let features: &dyn ferroui_base::platform::IOptionalFeatureProvider = &**window;
+        let input_method = features.try_get::<dyn ITextInputMethodImpl>();
+        report.check("input method feature", input_method.is_some(), "the window has the text input method of the system as a feature");
+        let (Some(input_method), Some(client)) = (input_method, state.text_client.borrow().clone()) else {
+            return;
+        };
+
+        // The client enabled the input context of the window.
+        let himc = imm_get_context(hwnd);
+        report.check("input context", himc != 0, format!("ImmGetContext of the window: {himc:#x}"));
+
+        // The rectangle of the text cursor went to the caret of the system
+        // (its lower right corner) and to the candidate window.
+        match state.caret_expected.get() {
+            Some(expected) => {
+                let caret = get_caret_pos();
+                report.check(
+                    "caret of the system",
+                    caret == Some(expected),
+                    format!("at {caret:?}; the text cursor ends at {expected:?} (pixels of the client area)"),
+                );
+                let candidate = imm_get_candidate_window(himc, 0);
+                report.info(
+                    "candidate window",
+                    match candidate {
+                        Some(form) => format!(
+                            "style {:#x}, position ({}, {}), kept clear of ({}, {})-({}, {})",
+                            form.dwStyle,
+                            form.ptCurrentPos.x,
+                            form.ptCurrentPos.y,
+                            form.rcArea.left,
+                            form.rcArea.top,
+                            form.rcArea.right,
+                            form.rcArea.bottom
+                        ),
+                        None => "the input context reports no candidate form".to_string(),
+                    },
+                );
+            }
+            None => report.info("caret of the system", "the window was not the active one: the input method is not given the text cursor"),
+        }
+
+        // A composition as the messages of an input method: its start
+        // clears the preedit text of the client.
+        client.preedit.borrow_mut().clear();
+        send_message(hwnd, WindowsMessage::WM_IME_STARTCOMPOSITION, 0, 0);
+        let at_start = client.preedit.borrow().clone();
+        report.check("composition start", at_start == vec![(None, None)], format!("the client was given {at_start:?}"));
+
+        // While it composes a character message is not text.
+        *state.seen.text.borrow_mut() = None;
+        send_message(hwnd, WindowsMessage::WM_CHAR, 0x78, 0);
+        let text = state.seen.text.borrow().clone();
+        report.check("character while composing", text.is_none(), format!("text input seen: {text:?}"));
+
+        // A change of the composition string reaches the client, with the
+        // string the input context has (none without an input method
+        // editor).
+        client.preedit.borrow_mut().clear();
+        send_message(hwnd, WindowsMessage::WM_IME_COMPOSITION, 0, 0x0008 /* GCS_COMPSTR */);
+        let changed = client.preedit.borrow().clone();
+        report.check("composition change", changed.len() == 1, format!("the client was given {changed:?}"));
+        // A message without flags empties the preedit text.
+        client.preedit.borrow_mut().clear();
+        send_message(hwnd, WindowsMessage::WM_IME_COMPOSITION, 0, 0);
+        let emptied = client.preedit.borrow().clone();
+        report.check(
+            "composition emptied",
+            emptied == vec![(Some(String::new()), None)],
+            format!("the client was given {emptied:?}"),
+        );
+
+        // Losing the focus while composing is told when the composition
+        // ends.
+        let lost_before = state.lost_focus.get();
+        send_message(hwnd, WindowsMessage::WM_KILLFOCUS, 0, 0);
+        let lost_while_composing = state.lost_focus.get() - lost_before;
+        client.preedit.borrow_mut().clear();
+        send_message(hwnd, WindowsMessage::WM_IME_ENDCOMPOSITION, 0, 0);
+        let lost_after = state.lost_focus.get() - lost_before;
+        let at_end = client.preedit.borrow().clone();
+        report.check(
+            "composition end",
+            lost_while_composing == 0 && lost_after == 1 && at_end == vec![(None, None)],
+            format!(
+                "focus lost while composing: {lost_while_composing}, after the end: {lost_after}; the client was given {at_end:?}"
+            ),
+        );
+
+        // Afterwards a character message is text again.
+        send_message(hwnd, WindowsMessage::WM_CHAR, 0x79, 0);
+        let text = state.seen.text.borrow().clone();
+        report.check("character after composing", text.as_deref() == Some("y"), format!("text input seen: {text:?}"));
+
+        // The system is asked to take a composition string and then to
+        // complete it. What it sends for the first depends on the session:
+        // an input method editor reports the string with composition
+        // messages (at once, or later through its own queue); without one
+        // the input context only keeps the string. Completing it is the
+        // same everywhere: the system starts a composition, sends the
+        // result and ends it, and the result has to arrive as raw text
+        // input of the window, through the arm of `WM_IME_COMPOSITION`.
+        let layout = get_keyboard_layout(0);
+        report.info(
+            "keyboard layout",
+            format!(
+                "{:#010x}; it has an input method editor: {}; the input method of the context is open: {}",
+                layout as usize & 0xFFFF_FFFF,
+                imm_is_ime(layout),
+                imm_get_open_status(himc)
+            ),
+        );
+        const COMPOSED: &str = "\u{306b}\u{307b}\u{3093}";
+        client.preedit.borrow_mut().clear();
+        *state.seen.text.borrow_mut() = None;
+        if imm_set_composition_string(himc, COMPOSED) {
+            let held = imm_get_composition_string(himc, 0x0008 /* GCS_COMPSTR */);
+            let preedit = client.preedit.borrow().clone();
+            report.info(
+                "composition string taken by the system",
+                format!(
+                    "the input context holds {held:?}; composition messages so far gave the client {preedit:?} (none without an input method editor, which is what reports a string)"
+                ),
+            );
+            client.preedit.borrow_mut().clear();
+            imm_notify_ime(himc, 21 /* NI_COMPOSITIONSTR */, 1 /* CPS_COMPLETE */, 0);
+            let text = state.seen.text.borrow().clone();
+            let preedit = client.preedit.borrow().clone();
+            report.check(
+                "composition completed by the system",
+                text.as_deref() == Some(COMPOSED) && preedit.last() == Some(&(None, None)),
+                format!("text input seen: {text:?}; the client was given {preedit:?}"),
+            );
+        } else {
+            report.info(
+                "composition string through the system",
+                "ImmSetCompositionString was refused: the input context of the session takes no composition string",
+            );
+        }
+        imm_release_context(hwnd, himc);
+
+        // Without a client the input context is taken from the window
+        // (when the dispatcher runs what this posts).
+        input_method.set_client(None);
+        *state.text_client.borrow_mut() = None;
     }
 
     /// What the timer does after a step of a smoke run.
@@ -779,7 +1021,16 @@ mod windows {
                     println!("Input: pointer {:?} at {:?} modifiers {:?}", e.type_(), e.position(), e.input_modifiers());
                 }
                 match e.type_() {
-                    RawPointerEventType::Move => self.seen.mouse_move.set(Some(e.position())),
+                    // The move the run posted is at (100, 50). The cursor of the session can
+                    // lie over the window and send a move of its own afterwards (run
+                    // 38093722092 saw one at (444, 293)): once the posted move was seen, a
+                    // later one elsewhere does not replace it.
+                    RawPointerEventType::Move => {
+                        let posted = |point: Point| (point.x - 100.0).abs() <= 1.0 && (point.y - 50.0).abs() <= 1.0;
+                        if !self.seen.mouse_move.get().is_some_and(posted) {
+                            self.seen.mouse_move.set(Some(e.position()));
+                        }
+                    }
                     RawPointerEventType::LeftButtonDown => self.seen.left_down.set(Some(e.position())),
                     RawPointerEventType::LeftButtonUp => self.seen.left_up.set(true),
                     _ => {}
@@ -1084,6 +1335,23 @@ mod windows {
                     (120usize) << 16,
                     make_l_param(screen_point.x, screen_point.y),
                 );
+
+                // Text input: the window gives the input method of the
+                // system as a feature. It is given a client and the
+                // rectangle of the text cursor; both act when the
+                // dispatcher runs what they post, before the next step.
+                let features: &dyn ferroui_base::platform::IOptionalFeatureProvider = &**window;
+                if let Some(input_method) = features.try_get::<dyn ITextInputMethodImpl>() {
+                    let client = Rc::new(SmokeTextClient { events: TextInputMethodClientEvents::new(), preedit: RefCell::new(Vec::new()) });
+                    input_method.set_client(Some(client.clone()));
+                    *state.text_client.borrow_mut() = Some(client.clone());
+                    if get_active_window() == hwnd {
+                        let rect = client.cursor_rectangle();
+                        input_method.set_cursor_rect(rect);
+                        let bottom_right = rect.bottom_right();
+                        state.caret_expected.set(Some(((bottom_right.x * scaling) as i32, (bottom_right.y * scaling) as i32)));
+                    }
+                }
                 Step::Next
             }
             3 => {
@@ -1106,6 +1374,9 @@ mod windows {
                 report.check("left button down", near(seen.left_down.get()), format!("{:?}", seen.left_down.get()));
                 report.check("left button up", seen.left_up.get(), format!("seen: {}", seen.left_up.get()));
                 report.check("mouse wheel", seen.wheel.get() == Some(1.0), format!("{:?} notch(es)", seen.wheel.get()));
+
+                println!("-- text input (the input method of the system)");
+                text_input_checks(state, hwnd);
 
                 println!("-- clipboard");
                 // The clipboard goes through OLE: the data transfer is a
@@ -1465,11 +1736,24 @@ mod windows {
                     let taken = window.transparency_level();
                     window.set_transparency_level_hint(&[WindowTransparencyLevel::none()]);
                     let none = window.transparency_level();
+                    // Through Windows.UI.Composition the window has the
+                    // effects of that mode: mica on Windows 11, acrylic
+                    // blur before.
+                    let expected = if WIN_UI_COMPOSITION.load(Ordering::SeqCst) {
+                        if Win32Platform::windows_version().build >= 22000 {
+                            vec![WindowTransparencyLevel::mica()]
+                        } else {
+                            vec![WindowTransparencyLevel::acrylic_blur()]
+                        }
+                    } else {
+                        vec![WindowTransparencyLevel::transparent(), WindowTransparencyLevel::none()]
+                    };
                     report.check(
                         "transparency levels",
-                        (taken == WindowTransparencyLevel::transparent() || taken == WindowTransparencyLevel::none())
-                            && none == WindowTransparencyLevel::none(),
-                        format!("of mica, acrylic blur, blur and transparent the window took {taken:?}; of none, {none:?}"),
+                        expected.contains(&taken) && none == WindowTransparencyLevel::none(),
+                        format!(
+                            "of mica, acrylic blur, blur and transparent the window took {taken:?} (expected one of {expected:?}); of none, {none:?}"
+                        ),
                     );
 
                     // The frame in the dark and in the light theme, and
@@ -1651,14 +1935,15 @@ mod windows {
         let rendering_mode = match rendering {
             "software" => Win32RenderingMode::Software,
             "angle" => Win32RenderingMode::AngleEgl,
+            "wgl" => Win32RenderingMode::Wgl,
             other => {
-                eprintln!("win32_window: unknown rendering mode '{other}' (software, angle)");
+                eprintln!("win32_window: unknown rendering mode '{other}' (software, angle, wgl)");
                 return ExitCode::from(2);
             }
         };
         println!("Rendering mode: {rendering_mode:?}");
 
-        // `--composition redirection|dcomp`: the one composition mode of
+        // `--composition redirection|dcomp|winui|dxgi`: the one composition mode of
         // the run (with ANGLE), without a fallback. The default is the
         // redirection surface of the window.
         let composition = arguments
@@ -1669,23 +1954,73 @@ mod windows {
         let composition_mode = match composition {
             "redirection" => Win32CompositionMode::RedirectionSurface,
             "dcomp" => Win32CompositionMode::DirectComposition,
+            "winui" => Win32CompositionMode::WinUIComposition,
+            "dxgi" => Win32CompositionMode::LowLatencyDxgiSwapChain,
             other => {
-                eprintln!("win32_window: unknown composition mode '{other}' (redirection, dcomp)");
+                eprintln!("win32_window: unknown composition mode '{other}' (redirection, dcomp, winui, dxgi)");
                 return ExitCode::from(2);
             }
         };
         if rendering_mode == Win32RenderingMode::AngleEgl {
             println!("Composition mode: {composition_mode:?}");
         }
-        let composed = rendering_mode == Win32RenderingMode::AngleEgl && composition_mode != Win32CompositionMode::RedirectionSurface;
+        // The modes whose surface hands out textures of Direct3D 11 and whose window has no
+        // redirection bitmap. The DXGI swap chain mode is not one of them: its surface is an
+        // OpenGL surface of the window, like the EGL window surface.
+        let composed = rendering_mode == Win32RenderingMode::AngleEgl
+            && matches!(composition_mode, Win32CompositionMode::DirectComposition | Win32CompositionMode::WinUIComposition);
 
         let options = Win32PlatformOptions {
-            rendering_mode: vec![rendering_mode],
+            // The OpenGL of the system is the one mode with a fallback: a
+            // system without a driver that has the extensions of WGL (the
+            // generic implementation of the system is OpenGL 1.1) has to
+            // pass the mode over and render in software, and that is what
+            // the run then checks.
+            rendering_mode: if rendering_mode == Win32RenderingMode::Wgl {
+                vec![Win32RenderingMode::Wgl, Win32RenderingMode::Software]
+            } else {
+                vec![rendering_mode]
+            },
             composition_mode: vec![composition_mode],
             ..Win32PlatformOptions::default()
         };
         Win32Platform::initialize(options);
+        let wgl_active = rendering_mode == Win32RenderingMode::Wgl
+            && FerroLocator::current().get_service::<Arc<dyn IPlatformGraphics>>().is_some();
+        if rendering_mode == Win32RenderingMode::Wgl {
+            if wgl_active {
+                println!("WGL: active: the system created a context of one of the profiles of the options");
+            } else {
+                println!(
+                    "WGL: not available: the system created no context of OpenGL 4.0 or 3.2; the mode was passed over and the run renders in software (the fallback is what this run checks)"
+                );
+            }
+        }
+        // The modes that draw with a context of OpenGL through the surface of the window.
+        let gl_mode = rendering_mode == Win32RenderingMode::AngleEgl || wgl_active;
         VelloPlatform::initialize_with_options(VelloOptions::with_rendering_mode(VelloRenderingMode::Cpu));
+
+        // The compositor of the Windows Runtime commits what was changed when its thread asks it
+        // to, and the thread of the mode asks while the render loop has something to render: a
+        // renderer of the framework renders in the tick of that loop. This example draws on the
+        // UI thread from a timer of the dispatcher, so it gives the loop a task that always wants
+        // the next tick; its frames then reach the screen with the next commit.
+        if composed && composition_mode == Win32CompositionMode::WinUIComposition {
+            WIN_UI_COMPOSITION.store(true, Ordering::SeqCst);
+            struct KeepCommitting;
+            impl ferroui_base::rendering::IRenderLoopTask for KeepCommitting {
+                fn render(&self) -> bool {
+                    true
+                }
+            }
+            match FerroLocator::current().get_service::<Arc<dyn ferroui_base::rendering::IRenderLoop>>() {
+                Some(render_loop) => render_loop.add(Arc::new(KeepCommitting)),
+                None => {
+                    eprintln!("win32_window: the composition mode registered no render loop");
+                    return ExitCode::from(1);
+                }
+            }
+        }
 
         let version = Win32Platform::windows_version();
         println!("Windows {}.{} build {}", version.major, version.minor, version.build);
@@ -1712,13 +2047,13 @@ mod windows {
         let windowing_platform = locator.get_required_service::<dyn IWindowingPlatform>();
         let window = windowing_platform.create_window();
         let early_report = Report::default();
-        let gl = if rendering_mode == Win32RenderingMode::AngleEgl {
+        let gl = if gl_mode {
             println!("-- platform graphics");
             GlPainter::new(&window, &early_report)
         } else {
             None
         };
-        let gl_failed = rendering_mode == Win32RenderingMode::AngleEgl && gl.is_none();
+        let gl_failed = gl_mode && gl.is_none();
         let state = Rc::new(State {
             window: window.clone(),
             gl,
@@ -1733,9 +2068,12 @@ mod windows {
             wake_waits: Cell::new(0),
             report: early_report,
             verbose_input: true,
+            text_client: RefCell::new(None),
+            lost_focus: Cell::new(0),
+            caret_expected: Cell::new(None),
         });
         if gl_failed {
-            eprintln!("win32_window: the rendering mode ANGLE has no painter; see the failed check above");
+            eprintln!("win32_window: the rendering mode has no painter; see the failed check above");
             return ExitCode::FAILURE;
         }
         let report = &state.report;
@@ -1760,8 +2098,8 @@ mod windows {
             // With ANGLE a window has a third surface: its OpenGL surface,
             // or in a composition mode the surface of that mode, which is
             // not an OpenGL surface itself.
-            let expected_gl_surfaces = usize::from(rendering_mode == Win32RenderingMode::AngleEgl && !composed);
-            let expected_surfaces = 2 + usize::from(rendering_mode == Win32RenderingMode::AngleEgl);
+            let expected_gl_surfaces = usize::from(gl_mode && !composed);
+            let expected_surfaces = 2 + usize::from(gl_mode);
             report.check(
                 "surfaces",
                 surfaces.len() == expected_surfaces
@@ -1820,6 +2158,13 @@ mod windows {
         window.set_scaling_changed(Some(Rc::new(|scaling| println!("ScalingChanged: {scaling}"))));
         window.set_position_changed(Some(Rc::new(|position: PixelPoint| {
             println!("PositionChanged: ({}, {})", position.x, position.y)
+        })));
+        let weak = Rc::downgrade(&state);
+        window.set_lost_focus(Some(Rc::new(move || {
+            println!("LostFocus");
+            if let Some(state) = weak.upgrade() {
+                state.lost_focus.set(state.lost_focus.get() + 1);
+            }
         })));
         window.set_activated(Some(Rc::new(|| println!("Activated"))));
         window.set_deactivated(Some(Rc::new(|| println!("Deactivated"))));

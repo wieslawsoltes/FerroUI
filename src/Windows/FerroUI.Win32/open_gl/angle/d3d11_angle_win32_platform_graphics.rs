@@ -17,6 +17,15 @@ use std::any::TypeId;
 use std::collections::HashMap;
 use std::rc::Rc;
 
+/// The display of ANGLE of a context, with the context as its shared
+/// handle: a feature of every context of these graphics
+/// (`try_get_feature(TypeId::of::<AngleContextDisplay>())`).
+#[allow(dead_code)] // Read by the render target of the DXGI swap chain mode, which is Windows only.
+pub(crate) struct AngleContextDisplay {
+    pub display: Rc<AngleWin32EglDisplay>,
+    pub context: std::rc::Weak<EglContext>,
+}
+
 /// The platform graphics of ANGLE on Direct3D 11.
 ///
 /// The reference keeps the EGL interface and the display it probed with,
@@ -101,6 +110,20 @@ impl D3D11AngleWin32PlatformGraphics {
                     };
                     let feature: Rc<dyn IGlContextExternalObjectsFeature> = feature;
                     EglContextFeature { feature: Rc::new(feature), disposable: Some(disposable) }
+                }),
+            );
+        }
+
+        // The display of ANGLE itself: the reference casts the display of
+        // a context where it needs it (the render target of the DXGI swap
+        // chain mode); a context of the port has it as a feature.
+        {
+            let angle = angle.clone();
+            extra_features.insert(
+                TypeId::of::<AngleContextDisplay>(),
+                Rc::new(move |context: &Rc<EglContext>| EglContextFeature {
+                    feature: Rc::new(AngleContextDisplay { display: angle.clone(), context: Rc::downgrade(context) }),
+                    disposable: None,
                 }),
             );
         }

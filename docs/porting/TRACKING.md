@@ -10,8 +10,8 @@ The master status of the port: every upstream project, file, type and member (pu
 
 Two numbers, because one hides what the other shows.
 
-1. **Of what is in scope: 95.1%.** The 32 upstream projects that are in scope have 32172 members (public, protected and internal) in files that apply to the port. 27859 have a counterpart, 1445 are missing and 2868 are waived: declared not ported, each with a reason ([waiver-audit.md](waiver-audit.md)). The percentage is `present / (total - waived)`. It says nothing about projects that are out of scope, and it counts a waived member as if it did not exist.
-2. **Of everything upstream has: 74.5%.** Every C# source project of the extraction, in scope or not, has 37391 members; the port has a counterpart for 27859. The total includes the 2868 waived members, the 1132 members of files marked not applicable and the 4087 members of projects that are out of scope or not started. The rest of that distance is what [REMAINING.md](REMAINING.md) lists; part of it is never ported by design (the waived and not applicable members), so this number does not reach 100.
+1. **Of what is in scope: 96.2%.** The 32 upstream projects that are in scope have 32172 members (public, protected and internal) in files that apply to the port. 28176 have a counterpart, 1128 are missing and 2868 are waived: declared not ported, each with a reason ([waiver-audit.md](waiver-audit.md)). The percentage is `present / (total - waived)`. It says nothing about projects that are out of scope, and it counts a waived member as if it did not exist.
+2. **Of everything upstream has: 75.4%.** Every C# source project of the extraction, in scope or not, has 37391 members; the port has a counterpart for 28176. The total includes the 2868 waived members, the 1132 members of files marked not applicable and the 4087 members of projects that are out of scope or not started. The rest of that distance is what [REMAINING.md](REMAINING.md) lists; part of it is never ported by design (the waived and not applicable members), so this number does not reach 100.
 
 Both numbers match names, not behaviour (Legend, below). Projects the extraction does not read (analyzers, generators of upstream's own build, the D-Bus library) are listed in REMAINING.md with their size in files.
 
@@ -55,9 +55,9 @@ Percentages are `present / (total - waived)`. Member matching is by name with re
 
 | | Ported | Total | Waived | % |
 |---|---:|---:|---:|---:|
-| C# files | 2560 | 2596 | 0 | 98.6% |
-| Types | 3467 | 3915 | 311 | 96.2% |
-| Members | 27859 | 32172 | 2868 | 95.1% |
+| C# files | 2582 | 2596 | 0 | 99.5% |
+| Types | 3503 | 3915 | 311 | 97.2% |
+| Members | 28176 | 32172 | 2868 | 96.2% |
 | Contracts (interfaces) | 461 | 486 | - | 94.9% |
 | Property registrations | 1218 | 1233 | - | 98.8% |
 | Routed events | 108 | 108 | - | 100.0% |
@@ -101,7 +101,7 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/Avalonia.Markup.Xaml` | `src/Markup/FerroUI.Markup.Xaml` | `ferroui-markup-xaml` | 46/46 | 61/63 (2 waived) | 208/239 (31 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/Avalonia.Markup.Xaml.Loader` | `src/Markup/FerroUI.Markup.Xaml.Loader` | `ferroui-markup-xaml-loader` | 66/66 | 120/126 (6 waived) | 422/505 (83 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/Avalonia.Skia` | `src/Skia/FerroUI.Skia` | `ferroui-skia` | 51/54 | 62/66 | 398/451 (21 waived) | 92.6% | 1 - rendering | P0 |
-| [Avalonia.Win32](tracking/Avalonia.Win32.md) | `src/Windows/Avalonia.Win32` | `src/Windows/FerroUI.Win32` | `ferroui-win32` | 70/95 | 182/276 | 1763/2605 | 67.7% | 1 - desktop (Windows) | P0 |
+| [Avalonia.Win32](tracking/Avalonia.Win32.md) | `src/Windows/Avalonia.Win32` | `src/Windows/FerroUI.Win32` | `ferroui-win32` | 92/95 | 218/276 | 2080/2605 | 79.8% | 1 - desktop (Windows) | P0 |
 | [Avalonia.iOS](tracking/Avalonia.iOS.md) | `src/iOS/Avalonia.iOS` | `src/iOS/FerroUI.iOS` | `ferroui-ios` | 37/40 | 51/57 (1 waived) | 254/331 (17 waived) | 80.9% | 6 - mobile (iOS) | P2 |
 | [Avalonia.Generators](tracking/Avalonia.Generators.md) | `src/tools/Avalonia.Generators` | `src/tools/FerroUI.Generators` | (merged into ferroui-build, see docs/porting/xaml.md) | 0/0 | 0/0 | 0/0 | - | 2 - xaml + themes | P2 |
 
