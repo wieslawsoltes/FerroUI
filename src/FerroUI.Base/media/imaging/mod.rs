@@ -22,6 +22,8 @@ mod render_target_bitmap;
 mod writeable_bitmap;
 
 pub use bitmap::Bitmap;
+#[doc(hidden)]
+pub use bitmap_memory::BitmapMemory;
 pub use bitmap_encoder_options::BitmapEncoderOptions;
 pub use cropped_bitmap::{CroppedBitmap, CroppedBitmapImpl, CroppedBitmapImplExt, CroppedBitmapVTable};
 pub use i_bitmap::IBitmap;

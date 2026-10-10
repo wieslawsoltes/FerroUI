@@ -60,6 +60,8 @@ pub use i_render_target::{
 };
 pub use system_navigation_manager_impl::ISystemNavigationManagerImpl;
 pub use ltrb_rect::{LtrbPixelRect, LtrbRect};
+#[doc(hidden)]
+pub use pixel_format::PixelFormatEnum;
 pub use pixel_format::{PixelFormat, PixelFormats};
 pub use retained_framebuffer::RetainedFramebuffer;
 pub use i_platform_threading_interface::{IPlatformThreadingInterface, PlatformTimerHandle};
