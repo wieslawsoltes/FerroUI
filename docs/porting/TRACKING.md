@@ -52,7 +52,7 @@ Percentages are `present / (total - waived)`. Member matching is by name with re
 | Routed events | 108 | 108 | - | 100.0% |
 | Other files (native sources, XAML, TypeScript, fonts) | 243 | 268 | - | 90.7% |
 
-148 upstream files are not applicable and not counted. Out of the current scope (platform backends, below): 341 files, 630 types, 5504 members.
+148 upstream files are not applicable and not counted. Out of the current scope (platform backends, below): 301 files, 573 types, 5173 members.
 
 ## Projects
 
@@ -89,6 +89,7 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/Avalonia.Markup.Xaml.Loader` | `src/Markup/FerroUI.Markup.Xaml.Loader` | `ferroui-markup-xaml-loader` | 66/66 | 120/126 (6 waived) | 400/505 (105 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/Avalonia.Skia` | `src/Skia/FerroUI.Skia` | `ferroui-skia` | 51/51 | 62/62 | 386/420 (33 waived) | 99.7% | 1 - rendering | P0 |
 | [Avalonia.Win32](tracking/Avalonia.Win32.md) | `src/Windows/Avalonia.Win32` | `src/Windows/FerroUI.Win32` | `ferroui-win32` | 33/95 | 111/276 | 0/2605 | 0.0% | 1 - desktop (Windows) | P0 |
+| [Avalonia.iOS](tracking/Avalonia.iOS.md) | `src/iOS/Avalonia.iOS` | `src/iOS/FerroUI.iOS` | `ferroui-ios` | 23/40 | 27/57 (1 waived) | 0/331 | 0.0% | 6 - mobile (iOS) | P2 |
 | [Avalonia.Generators](tracking/Avalonia.Generators.md) | `src/tools/Avalonia.Generators` | `src/tools/FerroUI.Generators` | (merged into ferroui-build, see docs/porting/xaml.md) | 0/0 | 0/0 | 0/0 | - | 2 - xaml + themes | P2 |
 
 Non-C# files that belong to these projects:
@@ -117,7 +118,6 @@ Tracked at file and type granularity so that the size of the remaining work is k
 | [Avalonia.Win32.Automation](tracking/Avalonia.Win32.Automation.md) | `src/Windows/Avalonia.Win32.Automation` | `src/Windows/FerroUI.Win32.Automation` | `ferroui-win32-automation` | 0/40 | 0/64 | 0/598 | 0.0% | not started / out of current scope | - |
 | [Avalonia.Win32.Interoperability](tracking/Avalonia.Win32.Interoperability.md) | `src/Windows/Avalonia.Win32.Interoperability` | `src/Windows/FerroUI.Win32.Interoperability` | `ferroui-win32-interoperability` | 0/2 | 0/2 | 0/11 | 0.0% | not started / out of current scope | - |
 | [Avalonia.WinUI](tracking/Avalonia.WinUI.md) | `src/Windows/Avalonia.WinUI` | `src/Windows/FerroUI.WinUI` | `ferroui-winui` | 0/15 | 0/16 | 0/88 | 0.0% | not started / out of current scope | - |
-| [Avalonia.iOS](tracking/Avalonia.iOS.md) | `src/iOS/Avalonia.iOS` | `src/iOS/FerroUI.iOS` | `ferroui-ios` | 0/40 | 0/57 | 0/331 | 0.0% | not started / out of current scope | - |
 
 ## Project structure
 
@@ -165,7 +165,7 @@ Libraries.
 | `src/Windows/Avalonia.Win32.Automation` | 41 | `src/Windows/FerroUI.Win32.Automation` | not created | [Avalonia.Win32.Automation](tracking/Avalonia.Win32.Automation.md) (out of scope) |
 | `src/Windows/Avalonia.Win32.Interoperability` | 2 | `src/Windows/FerroUI.Win32.Interoperability` | not created | [Avalonia.Win32.Interoperability](tracking/Avalonia.Win32.Interoperability.md) (out of scope) |
 | `src/Windows/Avalonia.WinUI` | 15 | `src/Windows/FerroUI.WinUI` | not created | [Avalonia.WinUI](tracking/Avalonia.WinUI.md) (out of scope) |
-| `src/iOS/Avalonia.iOS` | 41 | `src/iOS/FerroUI.iOS` | not created | [Avalonia.iOS](tracking/Avalonia.iOS.md) (out of scope) |
+| `src/iOS/Avalonia.iOS` | 41 | `src/iOS/FerroUI.iOS` | workspace member | [Avalonia.iOS](tracking/Avalonia.iOS.md) |
 | `src/tools/Avalonia.Analyzers.CSharp` | 12 | `src/tools/FerroUI.Analyzers.CSharp` | not created | not tracked |
 | `src/tools/Avalonia.Analyzers.CodeFixes.CSharp` | 3 | `src/tools/FerroUI.Analyzers.CodeFixes.CSharp` | not created | not tracked |
 | `src/tools/Avalonia.Analyzers.VisualBasic` | 1 | `src/tools/FerroUI.Analyzers.VisualBasic` | not created | not tracked |
@@ -329,9 +329,11 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `src/Skia/FerroUI.Skia` | `src/Skia/Avalonia.Skia` |
 | `src/Vello/FerroUI.Vello` | none (FerroUI only) |
 | `src/Windows/FerroUI.Win32` | `src/Windows/Avalonia.Win32` |
+| `src/iOS/FerroUI.iOS` | `src/iOS/Avalonia.iOS` |
 | `src/tools/MicroCom.CodeGenerator` | none (FerroUI only) |
 | `tests/FerroUI.Markup.Xaml.UnitTests` | `tests/Avalonia.Markup.Xaml.UnitTests` (not tracked) |
 | `tests/FerroUI.RenderBackends.Comparison` | none (FerroUI only) |
+| `tests/FerroUI.RenderTests` | none (FerroUI only) |
 | `tests/XamlIncludeFixture/Application` | none (FerroUI only) |
 | `tests/XamlIncludeFixture/Theme` | none (FerroUI only) |
 

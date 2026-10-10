@@ -2209,3 +2209,63 @@ reason = "The multicast events of the backend's own classes (a C# `event Action`
 [[rust_only]]
 path = "src/FerroUI.X11/pixel_buffer.rs"
 reason = "A framebuffer over pixels the crate owns, for what the original makes with the `LockedFramebuffer` constructor over memory of its own (cursor and icon pixels)"
+
+# ---------------------------------------------------------------- Avalonia.iOS
+# The project is tracked at file and type granularity (TRACKING.md); docs/porting/ios-platform.md has the file table
+# and the stage of every file. The classes of the Objective-C runtime are declared with a macro of the bindings
+# (`define_class!`), and the types whose names begin with a lower-case "iOS" follow the naming of Rust.
+
+[[map]]
+project = "Avalonia.iOS"
+upstream = ["AvaloniaAppDelegate.cs"]
+kind = "renamed"
+rust = "ferro_app_delegate.rs"
+types = { "AvaloniaAppDelegate<TApp>" = "FerroAppDelegate", IAvaloniaAppDelegate = "IFerroAppDelegate" }
+reason = "the generic delegate class an application derives from is one class of the Objective-C runtime (`FerroAppDelegate`) and the trait `FerroApplicationDelegate` for the two overridable members; `IAvaloniaAppInternalDelegate` (URLs and user activities) is stage 2 of docs/porting/ios-platform.md"
+
+[[map]]
+project = "Avalonia.iOS"
+upstream = ["AvaloniaSceneDelegate.cs"]
+kind = "renamed"
+rust = "ferro_scene_delegate.rs"
+types = { AvaloniaSceneDelegate = "FerroSceneDelegate" }
+reason = "the window of a scene with the view in it is ported; the activations a scene is connected with or receives are stage 2"
+
+[[map]]
+project = "Avalonia.iOS"
+upstream = ["AvaloniaView.cs"]
+kind = "renamed"
+rust = "ferro_view.rs"
+types = { AvaloniaView = "FerroView" }
+reason = "the view, its layer, its layout, touches and its top-level are ported; key presses, the settings that follow the traits and the features that are services of their own are stage 2"
+
+[[map]]
+project = "Avalonia.iOS"
+upstream = ["Interop.cs"]
+kind = "replaced"
+rust = "interop.rs"
+reason = "the static class of platform invokes is a module of `extern` declarations: the same functions of Core Foundation and libdispatch"
+
+[[map]]
+project = "Avalonia.iOS"
+upstream = ["Platform.cs"]
+kind = "renamed"
+rust = "platform.rs"
+types = { iOSRenderingMode = "IosRenderingMode", iOSPlatformOptions = "IosPlatformOptions", IOSApplicationExtensions = "IosApplicationExtensions" }
+reason = "the names follow the naming of Rust"
+
+[[map]]
+project = "Avalonia.iOS"
+upstream = ["ViewController.cs"]
+kind = "renamed"
+rust = "view_controller.rs"
+types = { DefaultAvaloniaViewController = "DefaultFerroViewController", IAvaloniaViewController = "IFerroViewController" }
+reason = "the view controller class forwards to `ViewControllerState`, which is what the view holds of it and what the tests drive"
+
+[[map]]
+project = "Avalonia.iOS"
+upstream = ["iOSScreens.cs"]
+kind = "renamed"
+rust = "ios_screens.rs"
+types = { iOSScreen = "IosScreen", iOSScreens = "IosScreens" }
+reason = "the names follow the naming of Rust"

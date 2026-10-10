@@ -9209,17 +9209,17 @@
    "name": "Avalonia.iOS",
    "path": "src/iOS/Avalonia.iOS",
    "rust": "src/iOS/FerroUI.iOS",
-   "scope": "out",
+   "scope": "in",
    "detail": "types",
    "files": [
-    0,
+    23,
     40,
     0
    ],
    "types": [
-    0,
+    27,
     57,
-    0
+    1
    ],
    "members": [
     0,
@@ -9227,7 +9227,7 @@
     0
    ],
    "interfaces": [
-    0,
+    2,
     3
    ],
    "propertyRegistrations": [
@@ -9240,7 +9240,77 @@
    ],
    "notApplicableFiles": 1,
    "matchKinds": {},
-   "presentFiles": {},
+   "presentFiles": {
+    "ActivatableLifetime.cs": [
+     "activatable_lifetime.rs"
+    ],
+    "AvaloniaAppDelegate.cs": [
+     "ferro_app_delegate.rs"
+    ],
+    "AvaloniaSceneDelegate.cs": [
+     "ferro_scene_delegate.rs"
+    ],
+    "AvaloniaView.Automation.cs": [
+     "ferro_view.rs"
+    ],
+    "AvaloniaView.Text.cs": [
+     "ferro_view.rs"
+    ],
+    "AvaloniaView.cs": [
+     "ferro_view.rs"
+    ],
+    "DispatcherImpl.cs": [
+     "dispatcher_impl.rs"
+    ],
+    "DisplayLinkTimer.cs": [
+     "display_link_timer.rs"
+    ],
+    "Extensions.cs": [
+     "extensions.rs"
+    ],
+    "InputHandler.cs": [
+     "input_handler.rs"
+    ],
+    "InsetsManager.cs": [
+     "insets_manager.rs"
+    ],
+    "Interop.cs": [
+     "interop.rs"
+    ],
+    "Metal/MetalDevice.cs": [
+     "metal/metal_device.rs"
+    ],
+    "Metal/MetalDrawingSession.cs": [
+     "metal/metal_drawing_session.rs"
+    ],
+    "Metal/MetalPlatformGraphics.cs": [
+     "metal/metal_platform_graphics.rs"
+    ],
+    "Metal/MetalPlatformSurface.cs": [
+     "metal/metal_platform_surface.rs"
+    ],
+    "Metal/MetalRenderTarget.cs": [
+     "metal/metal_render_target.rs"
+    ],
+    "NativeControlHostImpl.cs": [
+     "native_control_host_impl.rs"
+    ],
+    "Platform.cs": [
+     "platform.rs"
+    ],
+    "SingleViewLifetime.cs": [
+     "single_view_lifetime.rs"
+    ],
+    "Stubs.cs": [
+     "stubs.rs"
+    ],
+    "ViewController.cs": [
+     "view_controller.rs"
+    ],
+    "iOSScreens.cs": [
+     "ios_screens.rs"
+    ]
+   },
    "rustOnly": []
   },
   {
