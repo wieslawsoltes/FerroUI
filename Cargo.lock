@@ -567,6 +567,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-ios"
+version = "0.1.0-preview.1"
+dependencies = [
+ "bitflags",
+ "block2",
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-harfbuzz",
+ "ferroui-metal",
+ "ferroui-skia",
+ "ferroui-themes-simple",
+ "libc",
+ "objc2",
+ "objc2-core-foundation",
+ "objc2-foundation",
+ "objc2-metal",
+ "objc2-quartz-core",
+ "objc2-ui-kit",
+]
+
+[[package]]
 name = "ferroui-markup"
 version = "0.1.0-preview.1"
 dependencies = [
@@ -1493,6 +1514,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3e0adef53c21f888deb4fa59fc59f7eb17404926ee8a6f59f5df0fd7f9f3272"
 dependencies = [
  "bitflags",
+ "block2",
  "objc2",
  "objc2-core-foundation",
 ]
@@ -1542,6 +1564,20 @@ dependencies = [
  "objc2-core-graphics",
  "objc2-foundation",
  "objc2-metal",
+]
+
+[[package]]
+name = "objc2-ui-kit"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d87d638e33c06f577498cbcc50491496a3ed4246998a7fbba7ccb98b1e7eab22"
+dependencies = [
+ "bitflags",
+ "block2",
+ "objc2",
+ "objc2-core-foundation",
+ "objc2-foundation",
+ "objc2-quartz-core",
 ]
 
 [[package]]

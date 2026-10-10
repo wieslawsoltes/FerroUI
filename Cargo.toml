@@ -14,6 +14,7 @@ members = [
     "src/Windows/FerroUI.Win32",
     "src/FerroUI.Desktop",
     "src/FerroUI.X11",
+    "src/iOS/FerroUI.iOS",
     "src/Browser/FerroUI.Browser",
     "src/Headless/FerroUI.Headless",
     "src/FerroUI.Fonts.Inter",
@@ -75,6 +76,7 @@ ferroui-native = { version = "=0.1.0-preview.1", path = "src/FerroUI.Native" }
 ferroui-win32 = { version = "=0.1.0-preview.1", path = "src/Windows/FerroUI.Win32" }
 ferroui-desktop = { version = "=0.1.0-preview.1", path = "src/FerroUI.Desktop" }
 ferroui-x11 = { version = "=0.1.0-preview.1", path = "src/FerroUI.X11" }
+ferroui-ios = { version = "=0.1.0-preview.1", path = "src/iOS/FerroUI.iOS" }
 ferroui-browser = { version = "=0.1.0-preview.1", path = "src/Browser/FerroUI.Browser" }
 ferroui-headless = { version = "=0.1.0-preview.1", path = "src/Headless/FerroUI.Headless" }
 ferroui-fonts-inter = { version = "=0.1.0-preview.1", path = "src/FerroUI.Fonts.Inter" }
