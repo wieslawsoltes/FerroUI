@@ -56,6 +56,7 @@ use ferroui_controls::{
     AcrylicPlatformCompensationLevels, TopLevel, WindowCloseReason, WindowDecorations, WindowEdge,
     WindowResizeReason, WindowState, WindowTransparencyLevel,
 };
+use crate::native_dialogs::GtkSystemDialog;
 use ferroui_dialogs::ManagedStorageProvider;
 use ferroui_freedesktop::dbus_system_dialog::ParentLeaseProvider;
 use ferroui_controls::platform::ITopLevelNativeMenuExporter;
@@ -896,9 +897,8 @@ impl X11Window {
         }
 
         // The storage providers of the reference, in its order: the file
-        // chooser of the desktop portal over D-Bus, the GTK dialogs
-        // (stage 2e of docs/porting/x11-platform.md, not built) and the
-        // managed dialogs.
+        // chooser of the desktop portal over D-Bus, the GTK dialogs and
+        // the managed dialogs.
         let storage_window = weak.clone();
         let use_d_bus_file_picker = platform.options().use_d_bus_file_picker;
         let portal_provider: StorageProviderFactory = Rc::new(move || {
@@ -911,7 +911,9 @@ impl X11Window {
             });
             Box::pin(DBusSystemDialog::try_create_async(Some(parent_lease_provider)))
         });
-        let storage_provider: Rc<dyn IStorageProvider> = Rc::new(FallbackStorageProvider::new(vec![portal_provider, Rc::new(move || {
+        let gtk_provider: StorageProviderFactory =
+            Rc::new(move || Box::pin(GtkSystemDialog::try_create(handle as usize)));
+        let storage_provider: Rc<dyn IStorageProvider> = Rc::new(FallbackStorageProvider::new(vec![portal_provider, gtk_provider, Rc::new(move || {
             // TODO: This will be incompatible with "root element is not a TopLevel" scenarios,
             // HACK: this relies on focus root being TopLevel which currently is true
             let provider: Option<Rc<dyn IStorageProvider>> = storage_window

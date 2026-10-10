@@ -557,7 +557,8 @@ jobs:
             xvfb xauth x11-utils x11-xserver-utils xclip openbox dbus dbus-daemon locales \
             libx11-6 libxi6 libxrandr2 libxcursor1 libxfixes3 libxext6 libxtst6 \
             libgl1 libglx-mesa0 libegl1 libegl-mesa0 libgl1-mesa-dri mesa-utils \
-            libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config
+            libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config \
+            libglib2.0-0 libgtk-3-0
       - name: Skia features of the target
         run: |
           # Ganesh on OpenGL, for the rendering modes GLX and EGL of the platform, and nothing
@@ -696,6 +697,31 @@ jobs:
         run: |
           dbus-run-session -- xvfb-run -a --server-args="-screen 0 1280x1024x24" \
             timeout 300 target/debug/examples/x11_window --smoke --menu --skip=input,popup,resize,screens,clipboard
+      # The dispatcher over the main loop of GLib (the option use_g_lib_main_loop): the whole smoke
+      # run on it, then a source of the application in the same loop and a job from another thread.
+      # GLib is opened at run time; the tests of the crate above ran its sources and the dispatcher
+      # without a server.
+      - name: The same on the main loop of GLib
+        if: ${{ !cancelled() }}
+        run: |
+          xvfb-run -a --server-args="-screen 0 1280x1024x24" \
+            timeout 300 target/debug/examples/x11_window --smoke --glib
+      # The file dialogs of GTK 3, the storage provider of a window after the portal (turned off
+      # here): a dialog that saves is answered with the Return key, one that opens is closed with
+      # the Escape key, both synthesized by the server. Under a window manager, which gives the
+      # dialog the focus. Once with GTK on a thread of its own, once on the UI thread (GLib loop).
+      - name: The file dialogs of GTK (on the thread of GTK)
+        if: ${{ !cancelled() }}
+        run: |
+          xvfb-run -a --server-args="-screen 0 1280x1024x24" sh -c '
+            openbox & sleep 2
+            timeout 300 target/debug/examples/x11_window --smoke --gtk-dialog --skip=input,popup,resize,screens,clipboard'
+      - name: The file dialogs of GTK (on the UI thread, with the main loop of GLib)
+        if: ${{ !cancelled() }}
+        run: |
+          xvfb-run -a --server-args="-screen 0 1280x1024x24" sh -c '
+            openbox & sleep 2
+            timeout 300 target/debug/examples/x11_window --smoke --glib --gtk-dialog --skip=input,popup,resize,screens,clipboard'
       - name: The same with two monitors (xrandr --setmonitor)
         if: ${{ !cancelled() }}
         run: |
