@@ -9088,12 +9088,12 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    53,
+    57,
     95,
     0
    ],
    "types": [
-    150,
+    155,
     276,
     0
    ],
@@ -9231,6 +9231,9 @@
     "Win32GlManager.cs": [
      "win32_gl_manager.rs"
     ],
+    "Win32NativeControlHost.cs": [
+     "win32_native_control_host.rs"
+    ],
     "Win32NativeToManagedMenuExporter.cs": [
      "win32_native_to_managed_menu_exporter.rs"
     ],
@@ -9242,6 +9245,9 @@
     ],
     "Win32PlatformSettings.cs": [
      "win32_platform_settings.rs"
+    ],
+    "Win32StorageProvider.cs": [
+     "win32_storage_provider.rs"
     ],
     "Win32TopLevelSceneInfo.cs": [
      "win32_top_level_scene_info.rs"
@@ -9275,6 +9281,12 @@
     ],
     "WindowImpl.cs": [
      "window_impl.rs"
+    ],
+    "WindowsMountedVolumeInfoListener.cs": [
+     "windows_mounted_volume_info_listener.rs"
+    ],
+    "WindowsMountedVolumeInfoProvider.cs": [
+     "windows_mounted_volume_info_provider.rs"
     ]
    },
    "rustOnly": [
