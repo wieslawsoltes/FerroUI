@@ -577,6 +577,77 @@ Reading:
 | 8 | Windows and Linux | `fontique` has DirectWrite and fontconfig backends; nothing here was run on them |
 | 9 | The browser | done (section 11): `fontique` as it is, whose backend on the target has no fonts, and the fonts an application registers with the font manager of the base library |
 
+### Upstream's render tests (2026-10-10)
+
+`cargo test -p ferroui-render-tests --features vello` runs the port of upstream's render tests (`docs/porting/render-tests.md`) on the CPU mode: every scene through the immediate renderer and through the compositor, compared with **upstream's expected images, which Skia drew**, by upstream's measure (the root mean square error over the premultiplied channels) and upstream's threshold (0.022). 393 test functions: 369 pass, 1 fails, 23 are ignored by upstream's own condition (text in a system font, Windows only). 318 images are compared; 317 are within the allowed error. The mean error of an output is 0.0037 (the Skia backend of the port: 0.0022). The measure is a mean over the image, so the difference of the two glyph rasterizers (3 to 6 % of the pixels of a text scene beyond the tolerance of the harness above) is 0.014 to 0.017 where a test is mostly text and less elsewhere: no test fails for the weight of its text. Every output with its error is in `docs/porting/data/render-tests-vello.md`.
+
+| Directory | Tests | Within the allowed error | Largest error |
+|---|---|---|---|
+| `CrossTests/Media/DrawingContext` | 1 | 1 | 0.0000 |
+| `CrossTests/Media/Geometry` | 4 | 4 | 0.0057 |
+| `CrossTests/Media/ImageScaling` | 2 | 2 | 0.0192 |
+| `CrossTests/Media/RadialGradientBrush` | 1 | 1 | 0.0028 |
+| `CrossTests/Media/RelativeTransformBrush` | 9 | 9 | 0.0169 |
+| `CrossTests/Media/TileBrushes` | 7 | 7 | 0.0105 |
+| `Skia/BugRepros` | 1 | 1 | 0.0007 |
+| `Skia/Composition/DirectFb` | 4 | 4 | 0.0000 |
+| `Skia/Controls/Adorner` | 2 | 2 | 0.0000 |
+| `Skia/Controls/Border` | 13 | 13 | 0.0185 |
+| `Skia/Controls/Carousel` | 1 | 1 | 0.0022 |
+| `Skia/Controls/CarouselPage` | 6 | 6 | 0.0079 |
+| `Skia/Controls/CommandBar` | 2 | 2 | 0.0108 |
+| `Skia/Controls/ContentPage` | 2 | 2 | 0.0052 |
+| `Skia/Controls/CustomRender` | 6 | 6 | 0.0064 |
+| `Skia/Controls/DrawerPage` | 17 | 17 | 0.0149 |
+| `Skia/Controls/Image` | 7 | 7 | 0.0066 |
+| `Skia/Controls/Image/blend` | 17 | 17 | 0.0036 |
+| `Skia/Controls/Image/composition` | 11 | 11 | 0.0002 |
+| `Skia/Controls/NavigationPage` | 3 | 3 | 0.0117 |
+| `Skia/Controls/PipsPager` | 2 | 2 | 0.0046 |
+| `Skia/Controls/TabbedPage` | 10 | 10 | 0.0179 |
+| `Skia/Controls/TextBox` | 3 | 3 | 0.0167 |
+| `Skia/GeometryClipping` | 1 | 1 | 0.0002 |
+| `Skia/Media/Bitmap` | 35 | 35 | 0.0065 |
+| `Skia/Media/BoxShadow` | 1 | 1 | 0.0000 |
+| `Skia/Media/CombinedGeometry` | 5 | 5 | 0.0165 |
+| `Skia/Media/ConicGradientBrush` | 10 | 10 | 0.0056 |
+| `Skia/Media/DrawingBrush` | 3 | 3 | 0.0102 |
+| `Skia/Media/DrawingContent` | 2 | 2 | 0.0000 |
+| `Skia/Media/DrawingContext` | 2 | 2 | 0.0146 |
+| `Skia/Media/Effects` | 3 | 3 | 0.0062 |
+| `Skia/Media/GeometryGroup` | 3 | 3 | 0.0204 |
+| `Skia/Media/GlyphOutline` | 5 | 5 | 0.0063 |
+| `Skia/Media/GlyphRun` | 1 | 1 | 0.0095 |
+| `Skia/Media/ImageBrush` | 22 | 22 | 0.0066 |
+| `Skia/Media/ImageDrawing` | 4 | 4 | 0.0047 |
+| `Skia/Media/LinearGradientBrush` | 5 | 5 | 0.0047 |
+| `Skia/Media/RadialGradientBrush` | 13 | 13 | 0.0150 |
+| `Skia/Media/RelativeTransformBrush` | 5 | 5 | 0.0113 |
+| `Skia/Media/RenderTargetBitmap` | 1 | 1 | 0.0066 |
+| `Skia/Media/VisualBrush` | 23 | 23 | 0.0199 |
+| `Skia/OpacityMask` | 2 | 2 | 0.0059 |
+| `Skia/SVGPath` | 1 | 1 | 0.0114 |
+| `Skia/Shapes/Ellipse` | 3 | 2 | 0.0321 |
+| `Skia/Shapes/Line` | 4 | 4 | 0.0008 |
+| `Skia/Shapes/Path` | 19 | 19 | 0.0196 |
+| `Skia/Shapes/Polygon` | 4 | 4 | 0.0078 |
+| `Skia/Shapes/Polyline` | 5 | 5 | 0.0046 |
+| `Skia/Shapes/Rectangle` | 5 | 5 | 0.0000 |
+| **all** | **318** | **317** | |
+
+The one failure, and the outputs that pass with an error of 0.011 or more where the Skia backend has less than 0.002:
+
+| Test | Error (Skia backend) | Result | Why |
+|---|---|---|---|
+| `Shapes/EllipseTests.cs`: `Should_Render_Circle_Aliased` | 0.0321 (0.0043) | **fail** | Aliased edges. The renderer decides a pixel by its coverage (`set_aliasing_threshold`), Skia by the center of the pixel: 55 pixels of the ring of 3.5 pixels are on in one image and off in the other, and a pixel that differs is a whole pixel. Not a defect of the scene; the anti-aliased circle of the same suite is at 0.0126 |
+| `Media/GeometryGroupTests.cs`: `Child_Transform` (0.0204), `FillRule_Stroke_NonZero`, `_EvenOdd` (0.014); `Media/CombinedGeometryTests.cs`: `Geometry1_Transform` (0.0165); `Shapes/PathTests.cs`: `GetWidenedPathGeometry_Line` (0.0196) | (0.0001) | pass | **Open.** A stroke one pixel wide along a diagonal or a curve is drawn heavier than Skia draws it: at the same place, with more coverage on both sides (the pixel beside the stroke: alpha 78 of 255 against 18). The shapes and their fills are the same. Suspected: the stroke is expanded to its outline at the flattening tolerance of the scene and filled, where Skia draws a thin stroke as a hairline with its own coverage; not looked into further |
+| `Media/VisualBrushTests.cs`: `VisualBrush_Grip_144_Dpi` | 0.0184 (0.0000) | pass | **Open.** A tiled visual brush of small dots at 144 DPI: the dots are at the same places and slightly darker (a channel 98 against 122) |
+| `Controls/TextBoxTests.cs`: `Placeholder_With_*` (3) | 0.014 to 0.017 (0.0000) | pass | text weight: the image is 200 by 50 and mostly one line of text |
+| `Controls/TabbedPageTests.cs`, `Controls/DrawerPageTests.cs`, `Controls/NavigationPageTests.cs` (the outputs with headers and labels) | 0.010 to 0.016 (0.0001) | pass | text weight |
+| `Media/DrawingContextTests.cs`: `Should_Render_DrawingGroup_With_Effect`; `Shapes/EllipseTests.cs`: `Should_Render_Circle_Antialiased` | 0.013 (0.0003) | pass | the blur of the drop shadow (the backend's own passes against Skia's filter); the anti-aliasing of a ring 3.5 pixels wide |
+
+The run found two defects of the backend, both fixed: the tight bounds of a path left out the points of its moves (a shape whose path data ends in moves that give it its extent was measured smaller and drawn centered: `Arc_*` at 0.43 and `CubicBezier_*` at 0.19 of `Shapes/PathTests.cs`; `VelloPath::tight_bounds`), and the path of an ellipse reached beyond its rectangle by 0.002 of 200 (`Media/GeometryDrawingTests.cs` asserts the bounds exactly; `ellipse_path` is four quarter arcs now).
+
 ## 9. Gaps and risks
 
 | # | Gap or risk | Plan |

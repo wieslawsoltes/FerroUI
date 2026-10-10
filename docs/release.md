@@ -65,6 +65,7 @@ Each states `publish = false`.
 | `xaml-include-fixture-theme` | `tests/XamlIncludeFixture/Theme` | Test fixture |
 | `xaml-include-fixture-application` | `tests/XamlIncludeFixture/Application` | Test fixture |
 | `ferroui-render-backends-comparison` | `tests/FerroUI.RenderBackends.Comparison` | Comparison harness of the render backends |
+| `ferroui-render-tests` | `tests/FerroUI.RenderTests` | Upstream's render tests against its expected images |
 
 ### 1.3 Dependency order
 
