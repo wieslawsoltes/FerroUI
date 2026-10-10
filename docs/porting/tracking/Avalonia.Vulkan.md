@@ -7,7 +7,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Avalonia.Vulkan` |
-| FerroUI | `src/FerroUI.Vulkan` (not created yet) |
+| FerroUI | `src/FerroUI.Vulkan` (exists) |
 | Crate | `ferroui-vulkan` |
 | Phase / priority | not started / out of current scope / - |
 | Files | 0/30 (0.0%) |

@@ -7,7 +7,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Headless/Avalonia.Headless.Vnc` |
-| FerroUI | `src/Headless/FerroUI.Headless.Vnc` (not created yet) |
+| FerroUI | `src/Headless/FerroUI.Headless.Vnc` (exists) |
 | Crate | `ferroui-headless-vnc` |
 | Phase / priority | not started / out of current scope / - |
 | Files | 0/3 (0.0%) |

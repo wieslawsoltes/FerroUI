@@ -7,7 +7,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Windows/Avalonia.WinUI` |
-| FerroUI | `src/Windows/FerroUI.WinUI` (not created yet) |
+| FerroUI | `src/Windows/FerroUI.WinUI` (exists) |
 | Crate | `ferroui-winui` |
 | Phase / priority | not started / out of current scope / - |
 | Files | 0/15 (0.0%) |
