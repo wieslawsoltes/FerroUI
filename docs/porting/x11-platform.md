@@ -382,6 +382,27 @@ What these runs found, and what was changed:
 
 Verified nowhere: a real `ibus-daemon` or Fcitx, an XIM server other than the one Xlib has built in, a real `xdg-desktop-portal` with a file chooser backend (the one of the virtual machine was activated without a display and its GTK backend failed to start), another toolkit as the source or the target of a drag.
 
+### Measured for the menu and the tray icon of stage 2e (2026-10-10) **[VM]** **[CI]**
+
+The virtual machine (the same as above, nothing installed for these runs), commit `544d0a8c`, and the CI job on the same commit (run 38059456865, x86-64), whose every step passed:
+
+| Run | Result |
+|---|---|
+| `cargo test -p ferroui-freedesktop` (the doubles over a socket pair) | 65 passed, 21 times in a row **[VM]**; passes in the job **[CI]** |
+| The same on a private session bus (`dbus-run-session`, one test at a time, the tests named `dbus`) | 53 run, all pass, 6 times in a row: the exporter and the tray icon answer a peer through a real bus, the tray item's name is owned, kept when the watcher goes and given back when the icon is hidden **[VM]**; passes in the job **[CI]** |
+| `cargo test -p ferroui-x11` | 219 passed **[VM]** **[CI]** |
+| Smoke, bare Xvfb, software, and `--ime=ibus` under `openbox` (no regression: every window now also has a menu exporter when there is a session bus) | 33 of 33 and 28 of 28 **[VM]**; pass in the job **[CI]** |
+| `--menu` on a private session bus: bare Xvfb (twice), under `openbox`, and rendered through GLX | 25 of 25, 25 of 25, 25 of 25 and 30 of 30: the window offers a menu exporter; the registrar was told the window and a generated path; the layout a host is given is the menu that was set; the window says its menu is exported; the click event raises the click once; the watcher was told the name of the item, which the bus says is owned; title, status, category, id and menu path of the item; the layout of its menu; activation raises the click of the tray icon once; hidden, the name has no owner; shown again, the item is registered once more under its name **[VM]**; the bare run passes in the job **[CI]** |
+
+What these runs found, and what was changed:
+
+| Finding | Change |
+|---|---|
+| The watcher was never told about the tray icon of the example (the first job run, 38055618613) | Not the platform: a tray icon has a platform implementation only while its collection is the one of the application; the example gives it to the application |
+| The watcher was told about the item twice, under one name (the virtual machine and the second job run) | Not the platform, and the same upstream: the framework hides a new tray icon while it sets its properties and then shows it; the show and the first answer about the owner of the watcher's name each start `CreateTrayIcon`, both wait for the one name request and both register the item (only the export is guarded). The check asks that every registration names the one item, and that showing a hidden item registers it exactly once more |
+
+Verified nowhere: a real registrar of application menus (a global menu applet), a real tray host (the KDE system tray, the AppIndicator extension of GNOME, `snixembed`), the icon of a tray item as a host draws it (the conversion of the pixels is covered by a test).
+
 ### Measured by the CI job (run 38045428868, 2026-10-10) **[CI]**
 
 Ubuntu 24.04 on x86-64 (`ubuntu-latest`), Mesa 25.2.8 (`llvmpipe (LLVM 20.1.2, 256 bits)`), commit `0be4a818`:
