@@ -38,7 +38,13 @@ fn main() {
 
 #[cfg(windows)]
 fn main() -> std::process::ExitCode {
-    windows::run()
+    let code = windows::run();
+    // The last line the program prints itself: what follows is the end of the process (the
+    // values of the thread, the libraries). A run through DirectComposition printed that it
+    // passed and then did not end on one runner (run 38066650638); this line tells whether the
+    // program had returned by then.
+    println!("main returns");
+    code
 }
 
 #[cfg(windows)]
@@ -1781,6 +1787,7 @@ mod windows {
         state.context.dispose();
         drop(state);
         drop(window);
+        println!("the window is released");
 
         if smoke {
             if failures.is_empty() {
