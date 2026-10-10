@@ -963,3 +963,36 @@ mod metadata_typed_path {
         assert_eq!(source.value.get(), 7);
     }
 }
+
+/// A notifying list held by value, registered as a notifying collection: bindings find
+/// its change notifications, and the type stays a value (a handle), not a reference type.
+#[test]
+fn a_registered_notifying_collection_is_found_by_its_value() {
+    use crate::collections::FerroList;
+    use crate::data::core::ValueTypes;
+    use crate::data::model::{CollectionChange, ModelTypes};
+    use std::any::TypeId;
+
+    struct Marker;
+    impl PartialEq for Marker {
+        fn eq(&self, other: &Self) -> bool {
+            std::ptr::eq(self, other)
+        }
+    }
+
+    let list: FerroList<Rc<Marker>> = FerroList::new();
+    let value: BoxedValue = Rc::new(list.clone());
+    assert!(ModelTypes::find(&*value).is_none());
+
+    ModelTypes::register_notifying_collection::<FerroList<Rc<Marker>>>();
+    ModelTypes::register_notifying_collection::<FerroList<Rc<Marker>>>();
+    let model = ModelTypes::find(&*value).expect("the registered collection");
+    let notifier = model.as_notify_collection_changed(&*value).expect("the change notifications of the list");
+    let changes = Rc::new(Cell::new(0));
+    let seen = changes.clone();
+    let token = notifier.collection_changed().add(Rc::new(move |_: &CollectionChange| seen.set(seen.get() + 1)));
+    list.add(Rc::new(Marker));
+    assert_eq!(1, changes.get());
+    notifier.collection_changed().remove(token);
+    assert!(!ValueTypes::is_reference(TypeId::of::<FerroList<Rc<Marker>>>()));
+}
