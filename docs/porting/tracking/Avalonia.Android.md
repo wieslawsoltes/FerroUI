@@ -10,10 +10,10 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Android/FerroUI.Android` (exists) |
 | Crate | `ferroui-android` |
 | Phase / priority | 6 - mobile (Android) / P1 |
-| Files | 46/58 (79.3%) |
-| Types | 61/88 (69.3%) |
-| Members | 311/447 (69.6%) |
-| Contracts (interfaces) | 5/7 |
+| Files | 56/58 (96.6%) |
+| Types | 71/88 (80.7%) |
+| Members | 347/447 (77.6%) |
+| Contracts (interfaces) | 6/7 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
@@ -23,7 +23,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 | Interface | Access | Upstream file | Members | Status |
 |---|---|---|---|---|
-| `Avalonia.Android.Automation.INodeInfoProvider` | public | `Automation/INodeInfoProvider.cs` | 0/3 | missing |
+| `Avalonia.Android.Automation.INodeInfoProvider` | public | `Automation/INodeInfoProvider.cs` | 3/3 | present |
 | `Avalonia.Android.IActivityNavigationService` | public | `IAndroidNavigationService.cs` | 1/1 | present |
 | `Avalonia.Android.IActivityResultHandler` | public | `IActivityResultHandler.cs` | 2/2 | present |
 | `Avalonia.Android.IAndroidApplication` | internal | `AvaloniaAndroidApplication.cs` | 0/1 | missing |
@@ -33,7 +33,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 19/20, types 27/29, members 87/110
+### `(project root)` - files 20/20, types 28/29, members 93/110
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -42,11 +42,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `AndroidRuntimePlatform.cs` | `android_runtime_platform.rs` | present | 2/2 | 3/3 |  |
 | `AndroidViewControlHandle.cs` | `android_view_control_handle.rs` | present | 1/1 | 4/4 |  |
 | `ApplicationLifetime.cs` | `application_lifetime.rs` | present | 1/1 | 2/2 |  |
-| `AvaloniaAccessHelper.cs` | `ferro_access_helper.rs` | missing | 0/1 | 0/5 |  |
+| `AvaloniaAccessHelper.cs` | `ferro_access_helper.rs` | present | 1/1 | 5/5 |  |
 | `AvaloniaActivity.cs` | `ferro_activity.rs` | partial | 1/1 | 17/19 |  |
 | `AvaloniaAndroidApplication.cs` | `ferro_android_application.rs` | partial | 1/2 | 1/6 |  |
 | `AvaloniaMainActivity.cs` | `ferro_main_activity.rs` | partial | 1/1 | 2/3 |  |
-| `AvaloniaView.Input.cs` | `ferro_view_input.rs` | partial | 1/1 | 2/7 |  |
+| `AvaloniaView.Input.cs` | `ferro_view_input.rs` | partial | 1/1 | 3/7 |  |
 | `AvaloniaView.cs` | `ferro_view.rs` | partial | 1/1 | 6/10 |  |
 | `BackPressedCallback.cs` | `back_pressed_callback.rs` | present | 1/1 | 2/2 |  |
 | `ChoreographerTimer.cs` | `choreographer_timer.rs` | present | 1/1 | 3/3 |  |
@@ -91,11 +91,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>AvaloniaView.Input.cs</code> - 5 missing</summary>
+<details><summary><code>AvaloniaView.Input.cs</code> - 4 missing</summary>
 
-- `AvaloniaView` (class) in `ferro_view.rs`: 5 missing
+- `AvaloniaView` (class) in `ferro_view.rs`: 4 missing
   - `void IInitEditorInfo.InitEditorInfo(Func<TopLevelImpl, EditorInfo, IInputConnection> init)` *(explicit)*
-  - `override void OnFocusChanged(bool gainFocus, FocusSearchDirection direction, global::Android.Graphics.Rect?...` *(protected)*
   - `override bool DispatchHoverEvent(MotionEvent? e)` *(protected)*
   - `override bool DispatchGenericPointerEvent(MotionEvent? e)` *(protected)*
   - `override bool DispatchTouchEvent(MotionEvent? e)`
@@ -112,19 +111,29 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Automation` - files 0/9, types 0/10, members 0/33
+### `Automation` - files 9/9, types 9/10, members 30/33
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ExpandCollapseNodeInfoProvider.cs` | `automation/expand_collapse_node_info_provider.rs` | missing | 0/1 | 0/3 |  |
-| `INodeInfoProvider.cs` | `automation/i_node_info_provider.rs` | missing | 0/1 | 0/3 |  |
-| `InvokeNodeInfoProvider.cs` | `automation/invoke_node_info_provider.rs` | missing | 0/1 | 0/3 |  |
-| `NodeInfoProvider.cs` | `automation/node_info_provider.rs` | missing | 0/2 | 0/8 |  |
-| `RangeValueNodeInfoProvider.cs` | `automation/range_value_node_info_provider.rs` | missing | 0/1 | 0/3 |  |
-| `ScrollNodeInfoProvider.cs` | `automation/scroll_node_info_provider.rs` | missing | 0/1 | 0/3 |  |
-| `SelectionItemNodeInfoProvider.cs` | `automation/selection_item_node_info_provider.rs` | missing | 0/1 | 0/3 |  |
-| `ToggleNodeInfoProvider.cs` | `automation/toggle_node_info_provider.rs` | missing | 0/1 | 0/3 |  |
-| `ValueNodeInfoProvider.cs` | `automation/value_node_info_provider.rs` | missing | 0/1 | 0/4 |  |
+| `ExpandCollapseNodeInfoProvider.cs` | `automation/expand_collapse_node_info_provider.rs` | present | 1/1 | 3/3 |  |
+| `INodeInfoProvider.cs` | `automation/i_node_info_provider.rs` | present | 1/1 | 3/3 |  |
+| `InvokeNodeInfoProvider.cs` | `automation/invoke_node_info_provider.rs` | present | 1/1 | 3/3 |  |
+| `NodeInfoProvider.cs` | `automation/node_info_provider.rs` | partial | 1/2 | 5/8 |  |
+| `RangeValueNodeInfoProvider.cs` | `automation/range_value_node_info_provider.rs` | present | 1/1 | 3/3 |  |
+| `ScrollNodeInfoProvider.cs` | `automation/scroll_node_info_provider.rs` | present | 1/1 | 3/3 |  |
+| `SelectionItemNodeInfoProvider.cs` | `automation/selection_item_node_info_provider.rs` | present | 1/1 | 3/3 |  |
+| `ToggleNodeInfoProvider.cs` | `automation/toggle_node_info_provider.rs` | present | 1/1 | 3/3 |  |
+| `ValueNodeInfoProvider.cs` | `automation/value_node_info_provider.rs` | present | 1/1 | 4/4 |  |
+
+<details><summary><code>NodeInfoProvider.cs</code> - 4 missing</summary>
+
+- `NodeInfoProviderInitializer` (delegate, internal): **type missing** (0 members)
+- `NodeInfoProvider<T>` (class): 3 missing
+  - `virtual void PeerPropertyChanged(object? sender, AutomationPropertyChangedEventArgs e)` *(protected)*
+  - `abstract bool PerformNodeAction(int action, Bundle? arguments)`
+  - `abstract void PopulateNodeInfo(AccessibilityNodeInfoCompat nodeInfo)`
+
+</details>
 
 ### `Platform` - files 13/13, types 15/15, members 64/68
 
@@ -310,6 +319,8 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | Rust file | Reason | Types defined |
 |---|---|---|
 | `android_egl.rs` | **unmapped** | `AndroidEglPlatformGraphics`, `EglGetProcAddress`, `EglLibrary` |
+| `automation/node_info.rs` | **unmapped** | `NodeInfo`, `RangeInfo` |
+| `explore_by_touch_helper.rs` | **unmapped** | `ExploreByTouchHelper`, `IAccessibilityHost`, `IExploreByTouchCallbacks`, `IVirtualViewOwner` |
 | `interop/java.rs` | **unmapped** | `Attachment`, `JavaClass`, `JavaLocal`, `JavaObject`, `JavaRef`, `JavaValue`, `NativeMethod`, `Returned`, `Target` |
 | `interop/listeners.rs` | **unmapped** |  |
 | `interop/natives.rs` | **unmapped** | `JBoolean` |

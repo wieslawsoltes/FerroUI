@@ -2,23 +2,23 @@
  "upstreamCommit": "17350180c33b063f0e98abbfd19aa3cae63f5d56",
  "inScope": {
   "files": [
-   2521,
+   2532,
    2569,
    0
   ],
   "types": [
-   3428,
+   3439,
    3888,
    311
   ],
   "members": [
-   27377,
+   27430,
    31738,
    2857
   ]
  },
  "allProjects": {
-  "membersPresent": 27377,
+  "membersPresent": 27430,
   "members": 37391,
   "membersNotApplicable": 1132,
   "membersOutOfScope": 4521
@@ -494,22 +494,22 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    46,
+    56,
     58,
     0
    ],
    "types": [
-    61,
+    71,
     88,
     0
    ],
    "members": [
-    311,
+    347,
     447,
     0
    ],
    "interfaces": [
-    5,
+    6,
     7
    ],
    "propertyRegistrations": [
@@ -523,10 +523,10 @@
    "notApplicableFiles": 0,
    "matchKinds": {
     "field": 1,
-    "fn": 288,
+    "fn": 323,
     "free fn": 3,
     "free item": 2,
-    "overload fn": 7,
+    "overload fn": 8,
     "variant": 10
    },
    "presentFiles": {
@@ -544,6 +544,36 @@
     ],
     "ApplicationLifetime.cs": [
      "application_lifetime.rs"
+    ],
+    "Automation/ExpandCollapseNodeInfoProvider.cs": [
+     "automation/expand_collapse_node_info_provider.rs"
+    ],
+    "Automation/INodeInfoProvider.cs": [
+     "automation/i_node_info_provider.rs"
+    ],
+    "Automation/InvokeNodeInfoProvider.cs": [
+     "automation/invoke_node_info_provider.rs"
+    ],
+    "Automation/NodeInfoProvider.cs": [
+     "automation/node_info_provider.rs"
+    ],
+    "Automation/RangeValueNodeInfoProvider.cs": [
+     "automation/range_value_node_info_provider.rs"
+    ],
+    "Automation/ScrollNodeInfoProvider.cs": [
+     "automation/scroll_node_info_provider.rs"
+    ],
+    "Automation/SelectionItemNodeInfoProvider.cs": [
+     "automation/selection_item_node_info_provider.rs"
+    ],
+    "Automation/ToggleNodeInfoProvider.cs": [
+     "automation/toggle_node_info_provider.rs"
+    ],
+    "Automation/ValueNodeInfoProvider.cs": [
+     "automation/value_node_info_provider.rs"
+    ],
+    "AvaloniaAccessHelper.cs": [
+     "ferro_access_helper.rs"
     ],
     "AvaloniaActivity.cs": [
      "ferro_activity.rs"
@@ -671,6 +701,8 @@
    },
    "rustOnly": [
     "android_egl.rs",
+    "automation/node_info.rs",
+    "explore_by_touch_helper.rs",
     "interop/java.rs",
     "interop/listeners.rs",
     "interop/natives.rs",
@@ -9726,17 +9758,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    36,
+    37,
     40,
     0
    ],
    "types": [
-    50,
+    51,
     57,
     1
    ],
    "members": [
-    237,
+    254,
     331,
     17
    ],
@@ -9756,7 +9788,7 @@
    "matchKinds": {
     "const": 1,
     "field": 5,
-    "fn": 212,
+    "fn": 229,
     "free fn": 5,
     "free item": 5,
     "overload fn": 5,
@@ -9766,6 +9798,9 @@
    "presentFiles": {
     "ActivatableLifetime.cs": [
      "activatable_lifetime.rs"
+    ],
+    "AutomationPeerWrapper.cs": [
+     "automation_peer_wrapper.rs"
     ],
     "AvaloniaAppDelegate.cs": [
      "ferro_app_delegate.rs"

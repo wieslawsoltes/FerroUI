@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/iOS/FerroUI.iOS` (exists) |
 | Crate | `ferroui-ios` |
 | Phase / priority | 6 - mobile (iOS) / P2 |
-| Files | 36/40 (90.0%), 1 not applicable |
-| Types | 50/57 (1 waived) (89.3%) |
-| Members | 237/331 (17 waived) (75.5%) |
+| Files | 37/40 (92.5%), 1 not applicable |
+| Types | 51/57 (1 waived) (91.1%) |
+| Members | 254/331 (17 waived) (80.9%) |
 | Contracts (interfaces) | 3/3 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -29,15 +29,15 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 25/26, types 37/39 (1 waived), members 157/211 (17 waived)
+### `(project root)` - files 26/26, types 38/39 (1 waived), members 174/211 (17 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `ActivatableLifetime.cs` | `activatable_lifetime.rs` | present | 1/1 | 1/1 |  |
-| `AutomationPeerWrapper.cs` | `automation_peer_wrapper.rs` | missing | 0/1 | 0/15 |  |
+| `AutomationPeerWrapper.cs` | `automation_peer_wrapper.rs` | partial | 1/1 | 13/15 |  |
 | `AvaloniaAppDelegate.cs` | `ferro_app_delegate.rs` | partial | 3/3 | 13/16 | renamed: the generic delegate class an application derives from is one class of the Objective-C runtime (`FerroAppDelegate`) and the trait `FerroApplicationDelegate` for the two overridable members; `IAvaloniaAppInternalDelegate` (URLs and user activities) is stage 2 of docs/porting/ios-platform.md |
 | `AvaloniaSceneDelegate.cs` | `ferro_scene_delegate.rs` | present | 1/1 | 5/5 | renamed: the window of a scene with the view in it is ported; the activations a scene is connected with or receives are stage 2 |
-| `AvaloniaView.Automation.cs` | `ferro_view.rs` | partial | 1/1 | 0/4 | partial merged into main file |
+| `AvaloniaView.Automation.cs` | `ferro_view.rs` | present | 1/1 | 4/4 | partial merged into main file |
 | `AvaloniaView.Text.cs` | `ferro_view.rs` | partial | 1/1 | 3/6 | partial merged into main file |
 | `AvaloniaView.cs` | `ferro_view.rs` | partial | 2/2 | 47/50 | renamed: the view, its layer, its layout, touches and its top-level are ported; key presses, the settings that follow the traits and the features that are services of their own are stage 2 |
 | `CombinedSpan3.cs` | `combined_span3.rs` | present | 1/1 | 6/6 |  |
@@ -60,22 +60,20 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ViewController.cs` | `view_controller.rs` | partial | 2/2 | 7/11 | renamed: the view controller class forwards to `ViewControllerState`, which is what the view holds of it and what the tests drive |
 | `iOSScreens.cs` | `ios_screens.rs` | present | 2/2 | 9/9 | renamed: the names follow the naming of Rust |
 
+<details><summary><code>AutomationPeerWrapper.cs</code> - 2 missing</summary>
+
+- `AutomationPeerWrapper` (class): 2 missing
+  - `UIAccessibilityContainerType AccessibilityContainerType { get; set; }` *(getter `accessibility_container_type` found, setter `set_accessibility_container_type` missing)*
+  - `static implicit operator AutomationPeer(AutomationPeerWrapper instance)`
+
+</details>
+
 <details><summary><code>AvaloniaAppDelegate.cs</code> - 3 missing</summary>
 
 - `AvaloniaAppDelegate<TApp>` (class): 3 missing
   - `AvaloniaAppDelegate()`
   - `event EventHandler<ActivatedEventArgs> IAvaloniaAppDelegate.Activated` *(explicit)*
   - `event EventHandler<ActivatedEventArgs> IAvaloniaAppDelegate.Deactivated` *(explicit)*
-
-</details>
-
-<details><summary><code>AvaloniaView.Automation.cs</code> - 4 missing</summary>
-
-- `AvaloniaView` (class): 4 missing
-  - `UIAccessibilityContainerType AccessibilityContainerType { get; }`
-  - `nint AccessibilityElementCount()`
-  - `NSObject GetAccessibilityElementAt(nint index)`
-  - `nint GetIndexOfAccessibilityElement(NSObject element)`
 
 </details>
 
