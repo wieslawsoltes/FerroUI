@@ -219,6 +219,13 @@ impl SelectionReadSession {
     pub async fn send_data_request(&self, format: Atom, timestamp: Time) -> Option<GetDataResult> {
         let res = self.convert_selection_and_get_property(format, format, timestamp).await?;
 
+        // The announcement of an incremental transfer is recognised by its type before its
+        // length is looked at: there are owners that announce with an empty property (xclip),
+        // where the convention asks for a lower bound of the size. The reference looks at
+        // the length first and reads nothing from such an owner (DEVIATIONS.md).
+        if res.actual_type == self.incr_atom && res.actual_type != 0 {
+            return self.read_incr(format).await;
+        }
         if res.nitems == 0 {
             return None;
         }
@@ -420,6 +427,34 @@ mod tests {
         );
         assert_eq!(waiter.waits.get(), 4);
         assert_eq!(waiter.rejected.get(), 0);
+    }
+
+    #[test]
+    fn an_incremental_transfer_announced_with_an_empty_property_is_read() {
+        // What xclip sends: the type of the announcement without the lower bound of the size.
+        let atoms = atoms();
+        let target = atoms.UTF8_STRING;
+        let connection = MockConnection::new([
+            longs_property(atoms.INCR, &[]),
+            bytes_property(target, b"hello "),
+            bytes_property(target, b"world"),
+            bytes_property(target, b""),
+        ]);
+        let waiter = MockEventWaiter::new([
+            selection_notify(WINDOW, SELECTION, target),
+            property_notify(WINDOW, target, PROPERTY_NEW_VALUE),
+            property_notify(WINDOW, target, PROPERTY_NEW_VALUE),
+            property_notify(WINDOW, target, PROPERTY_NEW_VALUE),
+        ]);
+
+        let result = run_ready(session(&connection, &waiter, &atoms).send_data_request(target, 0)).unwrap();
+        assert_eq!(result.type_atom(), target);
+        assert_eq!(result.as_bytes(), b"hello world");
+
+        // A property that does not exist (a refusal) is still no data.
+        let connection = MockConnection::new([WindowProperty::default()]);
+        let waiter = MockEventWaiter::new([selection_notify(WINDOW, SELECTION, target)]);
+        assert_eq!(run_ready(session(&connection, &waiter, &atoms).send_data_request(target, 0)), None);
     }
 
     #[test]

@@ -506,11 +506,12 @@ jobs:
           xvfb-run -a --server-args="-screen 0 600x500x24" \
             sh -c 'openbox & sleep 2; timeout 300 target/debug/examples/x11_window --smoke'
       # Two monitors of the RandR extension, side by side: the first takes the output of the
-      # server (which removes the monitor the server derives from it), the second has none.
+      # server (which removes the monitor the server derives from it), the second has none. The
+      # server must not reset when xrandr, its only client, disconnects: the monitors would be gone.
       - name: The same with two monitors (xrandr --setmonitor)
         if: ${{ !cancelled() }}
         run: |
-          xvfb-run -a --server-args="-screen 0 1280x1024x24" sh -c '
+          xvfb-run -a --server-args="-screen 0 1280x1024x24 -noreset" sh -c '
             set -e
             xrandr --listmonitors
             output="$(xrandr --listmonitors | awk "NR==2 { print \$NF }")"
