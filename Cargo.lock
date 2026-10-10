@@ -464,6 +464,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-desktop",
  "ferroui-vello",
+ "ferroui-wayland",
  "ferroui-win32",
  "ferroui-x11",
 ]

@@ -7,7 +7,12 @@
 //! FERROUI_SMOKE_EXIT_MS=20000 FERROUI_SMOKE_PAGES=150 cargo run -p control-catalog-desktop
 //! FERROUI_SMOKE_SCREENSHOTS=target/screenshots cargo run -p control-catalog-desktop
 //! FERROUI_CATALOG_THEME=simple cargo run -p control-catalog-desktop
+//! FERROUI_CATALOG_WAYLAND=1 cargo run -p control-catalog-desktop
 //! ```
+//!
+//! On Linux `FERROUI_CATALOG_WAYLAND=1` (or `software`, for rendering
+//! through shared memory buffers alone) selects the Wayland backend, with
+//! the backend of the platform detection as its fallback.
 //!
 //! With `FERROUI_SMOKE_EXIT_MS=<n>` the main window is closed after `n`
 //! milliseconds, which ends the main loop; the process exits with the exit
@@ -35,7 +40,7 @@
 //! yet: the command line switches `--wait-for-attach`, `--fbdev`, `--vnc`,
 //! `--full-headless`, `--drm`, `--dxgi` (with `--scaling`,
 //! `--orientation`, `--card`), and of the application builder the data
-//! annotations validation, the Wayland, X11, Vulkan and composition
+//! annotations validation, the X11, Vulkan and composition
 //! options, the Inter font, the developer tools and the native control
 //! samples of `NativeControls/` for Windows and macOS
 //! (`EmbedSample.Implementation`). The one for Linux is ported
@@ -80,6 +85,8 @@ fn main() -> std::process::ExitCode {
 /// The application builder of the catalog.
 pub fn build_ferro_app() -> AppBuilder {
     let builder = smoke_platform_options(AppBuilder::configure::<App>()).use_platform_detect();
+    #[cfg(target_os = "linux")]
+    let builder = use_wayland_of_the_environment(builder);
     #[cfg(feature = "vello")]
     let builder = use_renderer_of_the_environment(builder);
     builder
@@ -91,6 +98,29 @@ pub fn build_ferro_app() -> AppBuilder {
             smoke_run()
         })
         .log_to_trace(LogEventLevel::Warning, &[])
+}
+
+/// The Wayland backend, when `FERROUI_CATALOG_WAYLAND` asks for it: `1` (or `egl`) with the
+/// rendering of its options (EGL when the compositor and the driver have it), `software` through
+/// shared memory buffers alone. With a compositor that cannot be used the backend of the
+/// platform detection takes over.
+///
+/// The original calls `UseWaylandWithFallback()` always. Here it is asked for, because the
+/// Wayland backend has no popups yet (stage 2 of `docs/porting/wayland-platform.md`): a
+/// catalog that moved to Wayland by itself on a Wayland session would fail at its first
+/// popup.
+#[cfg(target_os = "linux")]
+fn use_wayland_of_the_environment(builder: AppBuilder) -> AppBuilder {
+    use ferroui_wayland::{FerroWaylandPlatformExtensions, WaylandPlatformOptions};
+    let mut options = WaylandPlatformOptions::new();
+    match std::env::var("FERROUI_CATALOG_WAYLAND").ok().as_deref() {
+        Some("1") | Some("egl") => {}
+        // No profile to make a context with: no display of EGL is created.
+        Some("software") => options.gl_profiles = Vec::new(),
+        _ => return builder,
+    }
+    println!("ControlCatalog: the Wayland backend, with the backend of the platform detection as its fallback");
+    builder.with(std::rc::Rc::new(options)).use_wayland_with_fallback()
 }
 
 /// The render backend asked for with `FERROUI_RENDERER`: `vello` (the modes
