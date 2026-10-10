@@ -111,6 +111,18 @@ Next, in the order of `ios-platform.md`, section 14:
 
 Tracking: `Avalonia.iOS` is in scope at file and type granularity; the numbers are in `TRACKING.md`. The scanner reads the items of a macro called with parentheses since stage 2 (`scripts/port-status/rustscan.py`), so the classes declared inside `define_class!` count (35 of 57 types at the end of stage 1, no other project changed); `path-overrides.toml` has the type names. The 331 members are totals only. `DEVIATIONS.md` has the section of the backend, and the sections that file had twice on main (the X11 platform word for word, Diagnostics and Bindings each as two sections with different rows) are one each, with every row kept.
 
+## The Android platform, stages 2a to 2c (2026-10-10)
+
+Built and run on the emulator after stage 1 (`android-platform.md`, sections 7, 7.1 and 10.2): the keyboard and the platform settings (2a), the input method with its connection, edit buffer and commands and the animated input pane (2b), the lifecycle: intents, results, the back button, and the surface lost and created again, rotation and a second start verified (2c). 113 host tests. What to know when working on it:
+
+- The smoke application drives the script: a line `SCRIPT <command>` in its log is done once by `emu-smoke.sh`. A new check that needs the outside adds a command there.
+- A key of the shell has no scan code; text of the soft keyboard is typed by tapping into the rectangle of the input pane.
+- The first run after a boot is slow in everything the system broadcasts; waits of the application are generous for that reason.
+- `emu-catalog.sh` shows the TextBox page with the keyboard up (two taps whose positions are variables of the script).
+- Open: the local night mode of an activity (`SetFrameThemeVariant`), everything below API 33/30 never ran, the access helper's part of key and hover dispatch (stage 3).
+
+The stage list of the section below is as it was written after stage 1; its items 1 to 3 are done, and the platform settings of item 4.
+
 ## The Android platform, stages 1 and 1b (2026-10-10)
 
 Design, decisions, file table, what was measured and the stages: `android-platform.md`. Row 29 of `CRITICAL-PATH.md`.
