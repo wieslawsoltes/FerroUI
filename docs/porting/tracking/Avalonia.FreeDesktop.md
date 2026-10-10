@@ -10,29 +10,29 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.FreeDesktop` (exists) |
 | Crate | `ferroui-freedesktop` |
 | Phase / priority | 5 - desktop (Linux) / P1 |
-| Files | 10/18 (55.6%) |
-| Types | 16/26 (61.5%) |
+| Files | 15/18 (83.3%) |
+| Types | 22/26 (84.6%) |
 | Members | 0/216 (0.0%) |
 
 This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
 
 ## Files
 
-### `(project root)` - files 3/11, types 5/15, members 0/76
+### `(project root)` - files 8/11, types 11/15, members 0/76
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
 | `DBusCallQueue.cs` | `dbus_call_queue.rs` | present | 1/1 | - | 5 |  |
 | `DBusHelper.cs` | `dbus_helper.rs` | present | 1/1 | - | 2 |  |
 | `DBusMenuExporter.cs` | `d_bus_menu_exporter.rs` | missing | 0/1 | `DBusMenuExporter` | 3 |  |
-| `DBusPlatformSettings.cs` | `d_bus_platform_settings.rs` | missing | 0/1 | `DBusPlatformSettings` | 2 |  |
+| `DBusPlatformSettings.cs` | `dbus_platform_settings.rs` | present | 1/1 | - | 2 |  |
 | `DBusSystemDialog.cs` | `d_bus_system_dialog.rs` | missing | 0/1 | `DBusSystemDialog` | 7 |  |
 | `DBusTrayIconImpl.cs` | `d_bus_tray_icon_impl.rs` | missing | 0/2 | `DBusTrayIconImpl`, `StatusNotifierItemDbusObj` | 37 |  |
-| `IPortalParentLease.cs` | `i_portal_parent_lease.rs` | missing | 0/2 | `IPortalParentLease`, `TrivialPortalParentLease` | 4 |  |
+| `IPortalParentLease.cs` | `i_portal_parent_lease.rs` | present | 2/2 | - | 4 |  |
 | `IX11InputMethod.cs` | `ix11_input_method.rs` | present | 3/3 | - | 11 |  |
-| `LinuxMountedVolumeInfoListener.cs` | `linux_mounted_volume_info_listener.rs` | missing | 0/1 | `LinuxMountedVolumeInfoListener` | 3 |  |
-| `LinuxMountedVolumeInfoProvider.cs` | `linux_mounted_volume_info_provider.rs` | missing | 0/1 | `LinuxMountedVolumeInfoProvider` | 1 |  |
-| `NativeMethods.cs` | `native_methods.rs` | missing | 0/1 | `NativeMethods` | 1 |  |
+| `LinuxMountedVolumeInfoListener.cs` | `linux_mounted_volume_info_listener.rs` | present | 1/1 | - | 3 |  |
+| `LinuxMountedVolumeInfoProvider.cs` | `linux_mounted_volume_info_provider.rs` | present | 1/1 | - | 1 |  |
+| `NativeMethods.cs` | `native_methods.rs` | present | 1/1 | - | 1 |  |
 
 ### `DBusIme` - files 2/2, types 3/3, members 0/33
 
