@@ -235,11 +235,14 @@ mod imp {
     use ferroui_base::input::platform::IClipboard;
     use ferroui_base::input::raw::IRawInputEventArgs;
     use crate::i_blur_host::{BlurEffect, ICompositionEffectsSurface};
+    use crate::i_windows_surface_factory::{IWindowsSurfaceFactory, WindowsSurface};
     use ferroui_base::input::{IInputRoot, PenDevice, PointerPressedEventArgs, TouchDevice};
     use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
     use ferroui_base::platform::surfaces::IPlatformRenderSurface;
     use ferroui_opengl::egl::{EglGlPlatformSurface, IEglWindowGlPlatformSurfaceInfo};
-    use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider, IPlatformSettings, PlatformThemeVariant};
+    use ferroui_base::platform::{
+        ICursorImpl, IOptionalFeatureProvider, IPlatformGraphics, IPlatformSettings, PlatformThemeVariant,
+    };
     use ferroui_base::reactive::IDisposable;
     use ferroui_base::rendering::composition::Compositor;
     use ferroui_base::threading::{Dispatcher, DispatcherPriority};
@@ -441,6 +444,10 @@ mod imp {
         /// ICompositionEffectsSurface` in the reference). No surface of
         /// the backend is one before the composition modes of stage 2c.
         composition_effects_surface: RefCell<Option<Arc<dyn ICompositionEffectsSurface>>>,
+        /// Releases what the surface of a composition mode holds of the
+        /// window (the reference disposes the surface when it is
+        /// disposable).
+        gl_surface_dispose: RefCell<Option<Arc<dyn Fn() + Send + Sync>>>,
         transparency_level: Cell<WindowTransparencyLevel>,
         default_transparency_level: WindowTransparencyLevel,
         corner_preference: Cell<WindowCornerPreference>,
@@ -502,9 +509,16 @@ mod imp {
         }
 
         pub(crate) fn create(kind: WindowKind, window_properties: WindowProperties) -> Rc<WindowImpl> {
-            // No surface factory and no platform graphics before stage 2:
-            // the window is drawn through its redirection surface.
-            let use_redirection_bitmap = true;
+            // A window is drawn through its redirection surface unless the
+            // composition mode that was registered presents through a
+            // surface of its own.
+            let locator = FerroLocator::current();
+            let gl_platform = locator.get_service::<Arc<dyn IPlatformGraphics>>();
+            let surface_factory = locator.get_service::<dyn IWindowsSurfaceFactory>();
+            let use_redirection_bitmap = match &surface_factory {
+                Some(surface_factory) => gl_platform.is_none() || !surface_factory.requires_no_redirection_bitmap(),
+                None => true,
+            };
 
             let default_transparency_level = if use_redirection_bitmap {
                 WindowTransparencyLevel::none()
@@ -555,6 +569,7 @@ mod imp {
                 ignore_wm_char: Cell::new(false),
                 pending_high_surrogate: Cell::new(None),
                 composition_effects_surface: RefCell::new(None),
+                gl_surface_dispose: RefCell::new(None),
                 transparency_level: Cell::new(default_transparency_level),
                 default_transparency_level,
                 corner_preference: Cell::new(WindowCornerPreference::default()),
@@ -584,16 +599,23 @@ mod imp {
             this.create_window();
             *this.framebuffer.borrow_mut() = Some(Arc::new(FramebufferManager::new(this.hwnd.get())));
 
-            // The surface of the platform graphics. The reference asks a
-            // surface factory first (the composition modes register one:
-            // stage 2c) and tests the type of the platform graphics
-            // otherwise; the graphics manager remembers what it registered.
-            // The surface of the OpenGL of the system (WGL) is a later step
-            // of stage 2b.
-            if Win32GlManager::platform_graphics_kind() == Some(Win32PlatformGraphicsKind::AngleD3D11) {
+            // The surface of the platform graphics: the one of the surface
+            // factory (a composition mode), or the one that fits the
+            // platform graphics; the reference tests their type, the
+            // graphics manager remembers what it registered. The surface
+            // of the OpenGL of the system (WGL) is a later step of stage
+            // 2b.
+            if gl_platform.is_some() {
                 if let Some(handle) = this.handle.borrow().clone() {
-                    let gl_surface: Arc<dyn IPlatformRenderSurface> = EglGlPlatformSurface::new(handle);
-                    *this.gl_surface.borrow_mut() = Some(gl_surface);
+                    if let Some(surface_factory) = &surface_factory {
+                        let WindowsSurface { surface, effects, dispose } = surface_factory.create_surface(handle);
+                        *this.gl_surface.borrow_mut() = Some(surface);
+                        *this.composition_effects_surface.borrow_mut() = effects;
+                        *this.gl_surface_dispose.borrow_mut() = dispose;
+                    } else if Win32GlManager::platform_graphics_kind() == Some(Win32PlatformGraphicsKind::AngleD3D11) {
+                        let gl_surface: Arc<dyn IPlatformRenderSurface> = EglGlPlatformSurface::new(handle);
+                        *this.gl_surface.borrow_mut() = Some(gl_surface);
+                    }
                 }
             }
 
@@ -648,6 +670,15 @@ mod imp {
 
         pub(crate) fn framebuffer(&self) -> Arc<FramebufferManager> {
             self.framebuffer.borrow().clone().expect("the framebuffer exists once the window is created")
+        }
+
+        /// Releases what the surface of a composition mode holds of the
+        /// window.
+        pub(crate) fn dispose_gl_surface(&self) {
+            let dispose = self.gl_surface_dispose.borrow_mut().take();
+            if let Some(dispose) = dispose {
+                dispose();
+            }
         }
 
         pub(crate) fn screen(&self) -> &Rc<ScreenImpl> {

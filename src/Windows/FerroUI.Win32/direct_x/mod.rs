@@ -12,6 +12,7 @@ mod direct_x_enums;
 mod direct_x_structs;
 #[cfg(windows)]
 mod direct_x_unmanaged_methods;
+mod i_direct3_d11_texture_platform_surface;
 
 #[allow(
     clippy::all,
@@ -31,3 +32,4 @@ pub use direct_x_structs::*;
 #[cfg(windows)]
 pub use direct_x_unmanaged_methods::DirectXUnmanagedMethods;
 pub use directx::*;
+pub use i_direct3_d11_texture_platform_surface::*;
