@@ -9342,12 +9342,12 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    30,
+    36,
     40,
     0
    ],
    "types": [
-    40,
+    50,
     57,
     1
    ],
@@ -9357,7 +9357,7 @@
     0
    ],
    "interfaces": [
-    2,
+    3,
     3
    ],
    "propertyRegistrations": [
@@ -9388,6 +9388,18 @@
     ],
     "AvaloniaView.cs": [
      "ferro_view.rs"
+    ],
+    "Clipboard/ClipboardDataFormatHelper.cs": [
+     "clipboard/clipboard_data_format_helper.rs"
+    ],
+    "Clipboard/ClipboardImpl.cs": [
+     "clipboard/clipboard_impl.rs"
+    ],
+    "Clipboard/PasteboardItemToDataTransferItemWrapper.cs": [
+     "clipboard/pasteboard_item_to_data_transfer_item_wrapper.rs"
+    ],
+    "Clipboard/PasteboardToDataTransferWrapper.cs": [
+     "clipboard/pasteboard_to_data_transfer_wrapper.rs"
     ],
     "CombinedSpan3.cs": [
      "combined_span3.rs"
@@ -9442,6 +9454,12 @@
     ],
     "SingleViewLifetime.cs": [
      "single_view_lifetime.rs"
+    ],
+    "Storage/IOSStorageItem.cs": [
+     "storage/ios_storage_item.rs"
+    ],
+    "Storage/IOSStorageProvider.cs": [
+     "storage/ios_storage_provider.rs"
     ],
     "Stubs.cs": [
      "stubs.rs"

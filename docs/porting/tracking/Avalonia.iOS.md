@@ -10,21 +10,21 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/iOS/FerroUI.iOS` (exists) |
 | Crate | `ferroui-ios` |
 | Phase / priority | 6 - mobile (iOS) / P2 |
-| Files | 30/40 (75.0%), 1 not applicable |
-| Types | 40/57 (1 waived) (71.4%) |
+| Files | 36/40 (90.0%), 1 not applicable |
+| Types | 50/57 (1 waived) (89.3%) |
 | Members | 0/331 (0.0%) |
 
 This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
 
 ## Files
 
-### `(project root)` - files 25/26, types 35/39 (1 waived), members 0/211
+### `(project root)` - files 25/26, types 37/39 (1 waived), members 0/211
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
 | `ActivatableLifetime.cs` | `activatable_lifetime.rs` | present | 1/1 | - | 1 |  |
 | `AutomationPeerWrapper.cs` | `automation_peer_wrapper.rs` | missing | 0/1 | `AutomationPeerWrapper` | 15 |  |
-| `AvaloniaAppDelegate.cs` | `ferro_app_delegate.rs` | partial | 2/3 | `IAvaloniaAppInternalDelegate` | 16 | renamed: the generic delegate class an application derives from is one class of the Objective-C runtime (`FerroAppDelegate`) and the trait `FerroApplicationDelegate` for the two overridable members; `IAvaloniaAppInternalDelegate` (URLs and user activities) is stage 2 of docs/porting/ios-platform.md |
+| `AvaloniaAppDelegate.cs` | `ferro_app_delegate.rs` | present | 3/3 | - | 16 | renamed: the generic delegate class an application derives from is one class of the Objective-C runtime (`FerroAppDelegate`) and the trait `FerroApplicationDelegate` for the two overridable members; `IAvaloniaAppInternalDelegate` (URLs and user activities) is stage 2 of docs/porting/ios-platform.md |
 | `AvaloniaSceneDelegate.cs` | `ferro_scene_delegate.rs` | present | 1/1 | - | 5 | renamed: the window of a scene with the view in it is ported; the activations a scene is connected with or receives are stage 2 |
 | `AvaloniaView.Automation.cs` | `ferro_view.rs` | present | 1/1 | - | 4 | partial merged into main file |
 | `AvaloniaView.Text.cs` | `ferro_view.rs` | present | 1/1 | - | 6 | partial merged into main file |
@@ -38,7 +38,7 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `InputHandler.cs` | `input_handler.rs` | present | 1/1 | - | 5 |  |
 | `InsetsManager.cs` | `insets_manager.rs` | present | 1/1 | - | 6 |  |
 | `Interop.cs` | `interop.rs` | present | 1/2 (1 waived) | - | 17 | replaced: the static class of platform invokes is a module of `extern` declarations: the same functions of Core Foundation and libdispatch |
-| `NativeControlHostImpl.cs` | `native_control_host_impl.rs` | partial | 1/2 | `NativeControlHostImpl` | 9 |  |
+| `NativeControlHostImpl.cs` | `native_control_host_impl.rs` | present | 2/2 | - | 9 |  |
 | `Platform.cs` | `platform.rs` | present | 4/4 | - | 10 | renamed: the names follow the naming of Rust |
 | `PlatformSettings.cs` | `platform_settings.rs` | present | 1/1 | - | 4 |  |
 | `SingleViewLifetime.cs` | `single_view_lifetime.rs` | present | 1/1 | - | 3 |  |
@@ -49,14 +49,14 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `ViewController.cs` | `view_controller.rs` | present | 2/2 | - | 11 | renamed: the view controller class forwards to `ViewControllerState`, which is what the view holds of it and what the tests drive |
 | `iOSScreens.cs` | `ios_screens.rs` | present | 2/2 | - | 9 | renamed: the names follow the naming of Rust |
 
-### `Clipboard` - files 0/4, types 0/4, members 0/18
+### `Clipboard` - files 4/4, types 4/4, members 0/18
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
-| `ClipboardDataFormatHelper.cs` | `clipboard/clipboard_data_format_helper.rs` | missing | 0/1 | `ClipboardDataFormatHelper` | 6 |  |
-| `ClipboardImpl.cs` | `clipboard/clipboard_impl.rs` | missing | 0/1 | `ClipboardImpl` | 5 |  |
-| `PasteboardItemToDataTransferItemWrapper.cs` | `clipboard/pasteboard_item_to_data_transfer_item_wrapper.rs` | missing | 0/1 | `PasteboardItemToDataTransferItemWrapper` | 3 |  |
-| `PasteboardToDataTransferWrapper.cs` | `clipboard/pasteboard_to_data_transfer_wrapper.rs` | missing | 0/1 | `PasteboardToDataTransferWrapper` | 4 |  |
+| `ClipboardDataFormatHelper.cs` | `clipboard/clipboard_data_format_helper.rs` | present | 1/1 | - | 6 |  |
+| `ClipboardImpl.cs` | `clipboard/clipboard_impl.rs` | present | 1/1 | - | 5 |  |
+| `PasteboardItemToDataTransferItemWrapper.cs` | `clipboard/pasteboard_item_to_data_transfer_item_wrapper.rs` | present | 1/1 | - | 3 |  |
+| `PasteboardToDataTransferWrapper.cs` | `clipboard/pasteboard_to_data_transfer_wrapper.rs` | present | 1/1 | - | 4 |  |
 
 ### `Eagl` - files 0/3, types 0/5, members 0/36
 
@@ -82,12 +82,12 @@ This backend is being ported. It is tracked at file and type granularity: the me
 |---|---|---|---|---|---:|---|
 | `AssemblyInfo.cs` | - | n/a | 0/0 | - | 0 | no non-private types (assembly attributes, global usings or file-local helpers) |
 
-### `Storage` - files 0/2, types 0/4, members 0/41
+### `Storage` - files 2/2, types 4/4, members 0/41
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
-| `IOSStorageItem.cs` | `storage/ios_storage_item.rs` | missing | 0/3 | `IOSStorageItem`, `IOSStorageFile`, `IOSStorageFolder` | 26 |  |
-| `IOSStorageProvider.cs` | `storage/ios_storage_provider.rs` | missing | 0/1 | `IOSStorageProvider` | 15 |  |
+| `IOSStorageItem.cs` | `storage/ios_storage_item.rs` | present | 3/3 | - | 26 | renamed: the names follow the naming of Rust |
+| `IOSStorageProvider.cs` | `storage/ios_storage_provider.rs` | present | 1/1 | - | 15 | renamed: the name follows the naming of Rust |
 
 ## Rust-only files
 

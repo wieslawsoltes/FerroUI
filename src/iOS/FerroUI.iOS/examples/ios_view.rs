@@ -35,7 +35,10 @@
 //! found again by its bookmark and by its path, moved and deleted) and
 //! the activations (the methods of the application delegate UIKit calls
 //! for a URL are called with a URL of a scheme and with a file URL, and
-//! the activatable lifetime has to report both).
+//! the activatable lifetime has to report both). And the native control
+//! host: a view of UIKit is attached to the view of the top-level, shown
+//! in bounds, hidden and removed, and its superview, frame and visibility
+//! are compared after each.
 //!
 //! What the smoke mode cannot check: input. An application cannot
 //! synthesize a touch, a key press or a scroll event for itself without
@@ -522,7 +525,12 @@ mod stage2 {
     use ferroui_base::input::platform::ClipboardExtensions;
     use ferroui_base::platform::storage::WellKnownFolder;
     use ferroui_controls::application_lifetimes::{ActivationKind, IActivatableLifetime};
-    use ferroui_controls::platform::{FeedbackAction, FeedbackType, IPlatformFeedback, InputPaneState};
+    use ferroui_controls::platform::{
+        FeedbackAction, FeedbackType, INativeControlHostImpl, IPlatformFeedback, IPlatformHandle, InputPaneState,
+    };
+    use ferroui_base::Size;
+    use ferroui_ios::UIViewControlHandle;
+    use objc2_ui_kit::{UIColor, UIView};
     use ferroui_controls::Application;
     use objc2_foundation::NSURL;
     use objc2_ui_kit::{UIApplication, UIPasteboard};
@@ -531,7 +539,7 @@ mod stage2 {
     use ferroui_ios::FerroView;
     use objc2::rc::Retained;
     use objc2::runtime::AnyObject;
-    use objc2::{msg_send, MainThreadMarker};
+    use objc2::{msg_send, MainThreadMarker, Message};
     use objc2_core_foundation::{CGPoint, CGRect, CGSize};
     use objc2_foundation::{NSDictionary, NSLocale, NSNotificationCenter, NSNumber, NSRange, NSString, NSValue};
     use objc2_ui_kit::{
@@ -1019,6 +1027,86 @@ mod stage2 {
             }
         }
 
+        /// The native control host: a view of UIKit as a native control.
+        fn check_native_control_host(&self, view: &FerroView, checks: &mut Checks) {
+            let top_level = view.top_level();
+            let platform_impl = top_level.platform_impl();
+            let host = platform_impl
+                .as_ref()
+                .map(|platform_impl| -> &dyn IOptionalFeatureProvider { &**platform_impl })
+                .and_then(|provider| provider.try_get::<dyn INativeControlHostImpl>());
+            let (Some(host), Some(mtm)) = (host, MainThreadMarker::new()) else {
+                checks.push(("native control", false, "the top-level has no native control host".to_string()));
+                return;
+            };
+
+            let native = UIView::new(mtm);
+            native.setBackgroundColor(Some(&UIColor::greenColor()));
+            let handle_view = native.clone();
+            let parent_was_the_view = Rc::new(Cell::new(false));
+            let parent_seen = parent_was_the_view.clone();
+            let expected_parent = Retained::as_ptr(&view.retain()) as isize;
+            let attachment = host.create_new_attachment_with(Rc::new(move |parent: Rc<dyn IPlatformHandle>| {
+                parent_seen.set(parent.handle() == expected_parent && parent.handle_descriptor() == Some("UIView"));
+                Rc::new(UIViewControlHandle::new(handle_view.clone())) as Rc<dyn IPlatformHandle>
+            }));
+
+            let is_subview = |native: &UIView| {
+                native.superview().is_some_and(|superview| Retained::as_ptr(&superview) as isize == expected_parent)
+            };
+            let frame = |native: &UIView| {
+                let frame = native.frame();
+                (frame.origin.x, frame.origin.y, frame.size.width, frame.size.height)
+            };
+            let attached = is_subview(&native);
+            attachment.show_in_bounds(Rect::new(20.0, 300.0, 120.0, 0.0));
+            let shown = (frame(&native), native.isHidden());
+            // Visible means: in the window of the view, in front of
+            // everything else of the view (the last of its subviews; the
+            // Metal layer of the view is behind its subviews), and where
+            // the bounds say in the coordinates of the window.
+            let in_window = native.window().is_some_and(|window| {
+                view.window().is_some_and(|own| Retained::as_ptr(&window) == Retained::as_ptr(&own))
+            });
+            let in_front = view
+                .subviews()
+                .iter()
+                .last()
+                .is_some_and(|last| Retained::as_ptr(&last) == Retained::as_ptr(&native));
+            let in_window_frame = native.convertRect_toView(native.bounds(), None);
+            let view_origin = view.convertPoint_toView(CGPoint::new(0.0, 0.0), None);
+            let placed = (in_window_frame.origin.x - view_origin.x, in_window_frame.origin.y - view_origin.y)
+                == (20.0, 300.0)
+                && native.alpha() == 1.0;
+            attachment.hide_with_size(Size::new(50.0, 60.0));
+            let hidden = (frame(&native), native.isHidden());
+            attachment.dispose();
+            let removed = native.superview().is_none();
+
+            let default_child = host.create_default_child(Rc::new(UIViewControlHandle::new(native.clone())));
+            let compatible = host.is_compatible_with(&*default_child);
+            default_child.destroy();
+
+            checks.push((
+                "native control",
+                parent_was_the_view.get()
+                    && attached
+                    && in_window
+                    && in_front
+                    && placed
+                    && shown == ((20.0, 300.0, 120.0, 1.0), false)
+                    && hidden == ((0.0, 0.0, 50.0, 60.0), true)
+                    && removed
+                    && compatible,
+                format!(
+                    "a view of UIKit was attached under the view: {attached} (in its window: {in_window}, in front: \
+                     {in_front}, at its place in the window: {placed}); shown at {:?} (hidden {}), hidden at {:?} \
+                     (hidden {}), removed: {removed}; the default child is a compatible handle: {compatible}",
+                    shown.0, shown.1, hidden.0, hidden.1
+                ),
+            ));
+        }
+
         /// The activations: the two methods of the application delegate
         /// that UIKit calls with a URL.
         fn check_activations(&self, checks: &mut Checks) {
@@ -1137,6 +1225,7 @@ mod stage2 {
             self.check_clipboard(view, &mut checks);
             self.check_storage(view, &mut checks);
             self.check_activations(&mut checks);
+            self.check_native_control_host(view, &mut checks);
 
             // The feedback: the sound of a click is played (the haptic
             // engine of a simulator does nothing), holding has no sound.

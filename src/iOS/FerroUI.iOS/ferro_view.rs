@@ -1,9 +1,8 @@
 //! The view: a `UIView` with a Metal layer that hosts a top-level of the
 //! framework and can be embedded into the view tree of an application.
 //!
-//! Later stages of `docs/porting/ios-platform.md` add what the reference's
-//! view has beyond this file: the native control host (stage 2d) and
-//! accessibility (stage 3). The swipe gestures of a
+//! Stage 3 of `docs/porting/ios-platform.md` adds what the reference's view
+//! has beyond this file: accessibility. The swipe gestures of a
 //! remote, which the reference adds on tvOS, are not ported.
 
 use crate::input_handler::InputHandler;
@@ -11,7 +10,7 @@ use crate::insets_manager::InsetsManager;
 use crate::ios_launcher::IosLauncher;
 use crate::ios_platform_feedback::IosPlatformFeedback;
 use crate::metal::{FrameCapture, MetalPlatformSurface, SurfaceShared};
-use crate::native_control_host_impl::UIViewControlHandle;
+use crate::native_control_host_impl::{NativeControlHostImpl, UIViewControlHandle};
 use crate::clipboard::clipboard_impl::ClipboardImpl;
 use crate::platform::Platform;
 use crate::storage::ios_storage_provider::IosStorageProvider;
@@ -31,7 +30,7 @@ use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, PixelSize, Point, Rect, Ref, Size};
 use ferroui_controls::embedding::EmbeddableControlRoot;
 use ferroui_controls::platform::{
-    IInputPane, IInsetsManager, IPlatformFeedback, IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, PlatformThemeVariant,
+    IInputPane, IInsetsManager, INativeControlHostImpl, IPlatformFeedback, IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, PlatformThemeVariant,
 };
 use ferroui_controls::primitives::TemplatedControl;
 use ferroui_controls::{
@@ -522,6 +521,7 @@ pub struct TopLevelImpl {
     input_pane: Rc<dyn IInputPane>,
     storage_provider: Rc<dyn IStorageProvider>,
     clipboard: Rc<dyn IClipboard>,
+    native_control_host: Rc<dyn INativeControlHostImpl>,
     pub(crate) shared: Arc<SurfaceShared>,
     top_level: RefCell<Option<ferroui_base::WeakRef<EmbeddableControlRoot>>>,
     padding_insets: Rc<RefCell<Option<Rc<dyn IDisposable>>>>,
@@ -549,6 +549,7 @@ impl TopLevelImpl {
             text_input_method: Rc::new(ViewTextInputMethod { view: Weak::from_retained(view) }),
             input_pane: UIKitInputPane::instance(),
             storage_provider: IosStorageProvider::new(Weak::from_retained(view)),
+            native_control_host: NativeControlHostImpl::new(Weak::from_retained(view)),
             clipboard: Clipboard::new(Rc::new(ClipboardImpl::new(UIPasteboard::generalPasteboard()))),
             shared: SurfaceShared::new(),
             top_level: RefCell::new(None),
@@ -632,6 +633,10 @@ impl IOptionalFeatureProvider for TopLevelImpl {
 
         if feature_type == TypeId::of::<dyn IInputPane>() {
             return Some(Rc::new(self.input_pane.clone()));
+        }
+
+        if feature_type == TypeId::of::<dyn INativeControlHostImpl>() {
+            return Some(Rc::new(self.native_control_host.clone()));
         }
 
         if feature_type == TypeId::of::<dyn IInsetsManager>() {

@@ -454,6 +454,8 @@ jobs:
         run: cargo build --locked -p ferroui-ios --features example --example ios_view --target aarch64-apple-ios-sim
       - name: Check the crate and the example for the device
         run: cargo check --locked -p ferroui-ios --features example --example ios_view --target aarch64-apple-ios
+      - name: The catalog host (the native control demo calls UIKit directly)
+        run: cargo check --locked -p control-catalog-ios --target aarch64-apple-ios-sim
       - name: The application bundle for the simulator
         run: |
           app="$(scripts/ios/bundle.sh --no-build | tail -n 1)"

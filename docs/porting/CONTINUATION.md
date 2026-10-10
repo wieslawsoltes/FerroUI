@@ -48,6 +48,31 @@ Branch `win32-platform-2` (on top of `win32-platform`, pull request 156). The de
   4. *2c.* Composition: the surface factory, the texture features of an ANGLE context, DirectComposition, Windows.UI.Composition, the DXGI swap chain. Then 2d (OLE data, clipboard, drag and drop), 2e (icons, taskbar, tray, storage, native control host), 2f (pointer and touch, input methods, the custom caption).
 - **When the branch is rebased onto main** after the release-preparation change: give `ferroui-win32` what `docs/release.md` section 1.4 asks of a published crate (the inherited metadata keys, `[package.metadata.release] group`, the two symlinks `LICENSE` and `NOTICE-PROJECT.md`); the job `packaging` checks it.
 
+## The iOS platform, stage 2 (2026-10-10)
+
+Branch `ios-platform-2`, on top of `ios-platform` (stage 1, pull request 166). Stage 2 of `ios-platform.md` is built in four parts, each with its section there (9, 10, 10a, 10b), its checks in the smoke mode of the example (section 12) and its rows in `DEVIATIONS.md`, "iOS platform":
+
+- **2a**: key presses with the key table, text from keys, the scroll gesture with inertia; the platform settings with the trait and tint changes of the view; the launcher; the feedback; the colour conversion.
+- **2b**: text input. The text input responder (`UITextInput`, `UIKeyInput`, the keyboard traits), the text input method of the view with the first responder rules, `CombinedSpan3`, the input pane.
+- **2c**: the clipboard over `UIPasteboard`; the storage provider (the document pickers, the image picker, bookmarks, well-known folders) and the storage items (security scopes); the URL and user activity activations of the two delegates.
+- **2d**: the native control host, and the native control demo of the catalog's host (`samples/ControlCatalog.iOS/embed_sample_ios.rs`).
+
+What was verified, and what was not:
+
+- Built for `aarch64-apple-ios-sim` and checked for `aarch64-apple-ios`; `cargo test -p ferroui-ios` on the Mac (91 tests and the ten checks of the dispatcher); the simulator runs are listed in `ios-platform.md`, section 12, with what each proved. The orchestrator runs the simulator (never while a virtual machine runs).
+- Never exercised, because an application cannot do it for itself and no run was made by hand: a real touch, key press or scroll event; typing on the keyboard of the system (the example sends the responder the messages the keyboard sends); the pickers of the storage provider and security scopes of files outside the container; a URL or user activity delivered by the system; images and files on the clipboard; anything on a device.
+- One thing the simulator run changed in the understanding of upstream: the accent colour stays the default of the framework, because upstream passes over a tint with a component of zero and the blue of the system has no red.
+
+- Two faults that only the simulator found, both nulls where the headers of the system (and so the bindings) say there is never one: the URL contexts and user activities of a scene's connection options, and the localized name of a document. A property of UIKit the bindings return without `Option` is not proof that it is never null: where upstream's code tests for null, read it as optional (`msg_send!` with an `Option` return).
+- Open, in the controls crate and by reading the same in upstream: a native control of a page that slides in stays one page width off until the next change of layout (`ios-platform.md`, section 12, "Open"). The catalog host's smoke run lays the main view out again for its pictures.
+
+Next:
+
+1. Stage 3: accessibility (`AutomationPeerWrapper.cs`, 486 lines, and `AvaloniaView.Automation.cs`: the view as an accessibility container over automation peers). The tracking counts `AvaloniaView.Automation.cs` as present because the partial class is found in `ferro_view.rs`; it is not built.
+2. Stage 4: OpenGL ES over EAGL as a build of its own, and a signed build for a device.
+3. By hand, on a simulator or a device: touches, a hardware keyboard, the software keyboard with an input method that marks text (Pinyin), the pickers, a URL scheme in the property list of a bundle (`bundle.sh` writes none) with `simctl openurl`.
+4. The members of the project are tracked as totals only (331): the extraction of `Avalonia.iOS` has type detail.
+
 ## The iOS platform, stage 1 (2026-10-10)
 
 Branch `ios-platform` (not pushed): the crate `ferroui-ios` with stage 1 of `ios-platform.md`, the design document, the tracking of `Avalonia.iOS` moved into scope, `scripts/ios/bundle.sh` and `scripts/ios/sim-smoke.sh`, and the CI job `ios`. `CRITICAL-PATH.md`, row 28.

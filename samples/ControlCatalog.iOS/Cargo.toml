@@ -20,3 +20,19 @@ ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-ios = { workspace = true }
 control-catalog = { path = "../ControlCatalog" }
+
+# The native control demo (`embed_sample_ios.rs`) makes a button of UIKit: the crates the platform
+# calls UIKit through, in the versions the platform pins (src/iOS/FerroUI.iOS/NOTICE.md).
+[target.'cfg(target_os = "ios")'.dependencies]
+objc2 = { version = "=0.6.5" }
+objc2-foundation = { version = "=0.3.2", default-features = false, features = ["std", "NSObject", "NSString", "NSURL"] }
+objc2-core-foundation = { version = "=0.3.2", default-features = false, features = ["std", "CFCGTypes"] }
+objc2-ui-kit = { version = "=0.3.2", default-features = false, features = [
+    "std",
+    "objc2-core-foundation",
+    "UIButton",
+    "UIColor",
+    "UIControl",
+    "UIResponder",
+    "UIView",
+] }

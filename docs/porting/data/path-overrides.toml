@@ -2304,3 +2304,19 @@ kind = "renamed"
 rust = "ui_kit_input_pane.rs"
 reason = "the file name splits the acronym as the naming of Rust does"
 
+[[map]]
+project = "Avalonia.iOS"
+upstream = ["Storage/IOSStorageItem.cs"]
+kind = "renamed"
+rust = "storage/ios_storage_item.rs"
+types = { IOSStorageItem = "IosStorageItem", IOSStorageFile = "IosStorageFile", IOSStorageFolder = "IosStorageFolder" }
+reason = "the names follow the naming of Rust"
+
+[[map]]
+project = "Avalonia.iOS"
+upstream = ["Storage/IOSStorageProvider.cs"]
+kind = "renamed"
+rust = "storage/ios_storage_provider.rs"
+types = { IOSStorageProvider = "IosStorageProvider" }
+reason = "the name follows the naming of Rust"
+
