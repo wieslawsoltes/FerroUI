@@ -24,7 +24,7 @@ A file with both kinds has its logic at the top and its UIKit part in a module `
 
 The example (`examples/ios_view.rs`) needs a theme, an optional dependency behind the feature `example`, as in the X11 crate.
 
-Minimum system: iOS 13.4. Upstream supports earlier systems with branches (`OperatingSystem.IsIOSVersionAtLeast(13)`, `(13, 4)`): a window created by the application delegate where there are no scenes, no modifier keys and button masks on touch events. The port takes the later branch everywhere and does not have the earlier ones (DEVIATIONS.md). The Rust targets set their own minimum (the simulator executable built here states 14.0 **[M]**, which is also the minimum of the published Skia binary for the simulator on Apple silicon **[V]**).
+Minimum system: iOS 14.0. Upstream supports earlier systems with branches (`OperatingSystem.IsIOSVersionAtLeast(13)`, `(13, 4)`, `(14)`): a window created by the application delegate where there are no scenes, no modifier keys and button masks on touch events, no preferred tint colour. The port takes the later branch everywhere and does not have the earlier ones (DEVIATIONS.md); the tint colour is what sets 14.0, because the constant of UIKit it is read through is linked by name. The one check of a version that remains is for the feedback generator of a view (iOS 17.5, `available!`). The Rust targets set their own minimum (the simulator executable built here states 14.0 **[M]**, which is also the minimum of the published Skia binary for the simulator on Apple silicon **[V]**).
 
 tvOS and Mac Catalyst, which the upstream project also targets, are not targets of the port: their branches (`#if TVOS`, `#if MACCATALYST`, the remote's swipe gestures) are left out and listed with the files.
 
@@ -135,7 +135,12 @@ Stage 1: **touches**. `touchesBegan/Moved/Ended/Cancelled:withEvent:` go to the 
 
 The mapping is in functions over plain values, tested on the host (seven tests). What a test cannot do, on the host or in the simulator, is deliver a touch: an application cannot synthesize one for itself without private interfaces (section 12).
 
-Stage 2: key presses (`pressesBegan:` and the three others, the key table, text from keys), the scroll wheel (a pan gesture recogniser for scroll events with inertia on a second display link), then text input (section 10).
+Stage 2a adds the rest of the handler:
+
+- **Key presses.** `pressesBegan/Changed/Ended/Cancelled:withEvent:` go to the input handler, and a press nothing handled goes on to the superclass. A press with a key (`UIKey`) the key table has is a keyboard press: the physical key of its HID usage (the table of upstream, 120 rows, each compared at build time with the constant of UIKit it is named after), the modifiers, and the characters unless they are the name of an input constant (`UIKey...`). Any other press is taken by its type (the arrows, select, menu, play/pause, page up and down) as a press of a remote. The key of the event is the QWERTY key of the physical key; a press without one is skipped. Began, changed and stationary are key down, the rest key up. A key down nothing handled that has characters is followed by a text input event.
+- **The scroll wheel.** A pan gesture recognizer that takes no touches and both kinds of scroll events. While it changes, a wheel event with the velocity over 3000 at the location the gesture began; when it ends, inertia: the velocity over 800, multiplied by 0.95 at every tick of a display link on the main run loop, a wheel event per tick, until the magnitude is under 0.0001.
+
+Both are plain functions and a small state (`translate_press`, `key_event_type`, `MomentumScrolling`) with the UIKit part around them; 13 tests on the host. What no test can do is deliver a press or a scroll event (section 12). Text input is section 10.
 
 ## 10. Text input (stage 2)
 
@@ -166,7 +171,17 @@ What the smoke mode proves, each a line `[ ok ]` or `[FAIL]`:
 | pixels | In that frame: the fill, the square in the middle and the circle above the bottom edge have their colours where layout puts them. Proves Skia's Graphite on Metal drew, at the right scale and the right way up. |
 | text | The band of the text line has pixels that are not the fill: a system font was found, shaped by HarfBuzz and drawn. |
 
-What it cannot prove: touch input (no synthetic touches from inside an application; `simctl` has no touch command); rotation and a change of the safe area; the background and foreground transitions; the launch screen. The screenshot the script takes shows what the simulator composited, for a person to look at; it is not compared.
+The checks of stage 2 (the module `stage2` of the example), in the same report:
+
+| Check | Stage | What it compares |
+|---|---|---|
+| settings | 2a | The theme variant of the platform settings = the user interface style of the traits of the view; the preferred language = the first of `NSLocale.preferredLanguages`. The contrast and the accent colour are printed. |
+| trait change | 2a | The example gives its window the other user interface style (`overrideUserInterfaceStyle`): the view's `traitCollectionDidChange:` has to reach the settings, which have to raise `color_values_changed` with the other variant and answer with it afterwards. |
+| scroll gesture | 2a | The view has one pan gesture recognizer, for no touches and both kinds of scroll events. |
+| launcher | 2a | The top-level has a launcher; a URI of a scheme no application has is answered with `false` at once. |
+| feedback | 2a | The top-level has its feedback: the sound of a click is performed, holding has no sound, the tap of holding is performed (the haptic engine of a simulator does nothing with it). |
+
+What it cannot prove: touch input, key presses and scroll events (no synthetic input from inside an application; `simctl` has no touch or key command), so that the handlers are reached at all is shown only by hand; that a launched URI opens (it would leave the application); that the sound is heard; rotation and a change of the safe area; the background and foreground transitions; the launch screen. The screenshot the script takes shows what the simulator composited, for a person to look at; it is not compared.
 
 Runs in the simulator (2026-10-10, "iPhone 17 Pro", iOS 26.4, a debug build; the orchestrator of the port runs the script, because the simulator may only run while no virtual machine does) **[S]**:
 
@@ -200,21 +215,21 @@ One row per upstream file. "built" files are on the branch; "part" means the fil
 | `AutomationPeerWrapper.cs` | 486 | `automation_peer_wrapper.rs` | 3 | open | accessibility elements over automation peers |
 | `AvaloniaAppDelegate.cs` | 142 | `ferro_app_delegate.rs` | 1 | part | the delegate, the builder, scenes, background and foreground; URLs and user activities (`IAvaloniaAppInternalDelegate`) are stage 2 |
 | `AvaloniaSceneDelegate.cs` | 88 | `ferro_scene_delegate.rs` | 1 | part | the window of a scene; the activations a scene carries are stage 2 |
-| `AvaloniaView.cs` | 444 | `ferro_view.rs` | 1 | part | the view, layer, layout, touches, the top-level with the insets manager and the screens; presses, trait changes and the other features are stage 2; the tvOS gestures are not ported |
+| `AvaloniaView.cs` | 444 | `ferro_view.rs` | 1, 2a | part | the view, layer, layout, touches, presses, the scroll gesture, trait and tint changes, the top-level with the insets manager, the screens, the launcher and the feedback; the text input method and the input pane are 2b, the clipboard and the storage provider 2c, the native control host 2d; the tvOS gestures are not ported |
 | `AvaloniaView.Text.cs` | 52 | `ferro_view.rs` | 2 | open | the text input method of the view |
 | `AvaloniaView.Automation.cs` | 24 | `ferro_view.rs` | 3 | open | the accessibility container |
 | `CombinedSpan3.cs` | 40 | `combined_span3.rs` | 2 | open | a helper of the text input responder |
 | `DispatcherImpl.cs` | 133 | `dispatcher_impl.rs` | 1 | built | |
 | `DisplayLinkTimer.cs` | 45 | `display_link_timer.rs` | 1 | built | |
-| `Extensions.cs` | 23 | `extensions.rs` | 1 | part | sizes, points; the colour conversion is stage 2 |
-| `IOSLauncher.cs` | 45 | `ios_launcher.rs` | 2 | open | |
-| `IOSPlatformFeedback.cs` | 56 | `ios_platform_feedback.rs` | 2 | open | sound and haptics |
-| `InputHandler.cs` | 570 | `input_handler.rs` | 1 | part | touches; keys and the scroll wheel are stage 2; the swipe gestures of a remote are not ported |
+| `Extensions.cs` | 23 | `extensions.rs` | 1, 2a | built | |
+| `IOSLauncher.cs` | 45 | `ios_launcher.rs` | 2a | part | the URL of an item of the storage provider is 2c |
+| `IOSPlatformFeedback.cs` | 56 | `ios_platform_feedback.rs` | 2a | built | sound and haptics |
+| `InputHandler.cs` | 570 | `input_handler.rs` | 1, 2a | built | touches, presses with the key table, the scroll wheel with its inertia; the swipe gestures of a remote (tvOS) are not ported |
 | `InsetsManager.cs` | 55 | `insets_manager.rs` | 1 | built | |
 | `Interop.cs` | 58 | `interop.rs` | 1 | built | `extern` declarations |
 | `NativeControlHostImpl.cs` | 154 | `native_control_host_impl.rs` | 1 | part | `UIViewControlHandle`; the host is stage 2 |
-| `Platform.cs` | 140 | `platform.rs` | 1 | built | the default platform settings are bound until stage 2 |
-| `PlatformSettings.cs` | 95 | `platform_settings.rs` | 2 | open | colour scheme, contrast, tint, language |
+| `Platform.cs` | 140 | `platform.rs` | 1, 2a | built | |
+| `PlatformSettings.cs` | 95 | `platform_settings.rs` | 2a | built | colour scheme, contrast, tint, language |
 | `SingleViewLifetime.cs` | 40 | `single_view_lifetime.rs` | 1 | built | |
 | `Stubs.cs` | 73 | `stubs.rs` | 1 | built | |
 | `TextInputResponder.cs` | 587 | `text_input_responder.rs` | 2 | open | `UITextInput` |
@@ -245,7 +260,7 @@ Stage 1 has 23 of the 40 files, 17 complete and 6 in part. `samples/ControlCatal
 | Stage | Content | What a simulator run proves |
 |---|---|---|
 | 1 (built) | The crate, the platform and its options, the application delegate, scenes, the single-view lifetime, the view and its top-level, the dispatcher, the display link timer, Metal with the Skia GPU, touches, the safe area and the insets manager, the screens, the example with its smoke mode, the bundle and simulator scripts, the CI job | Section 12 |
-| 2a | Keys (`presses*`, the key table), the scroll wheel, platform settings (colour scheme, accent, language) with trait changes, the launcher, feedback | A hardware keyboard event through `simctl` is not available either; the settings can be checked against the simulator's appearance setting (`simctl ui appearance dark`), which the script can switch |
+| 2a (built) | Keys (`presses*`, the key table), the scroll wheel, platform settings (colour scheme, accent, language) with trait changes, the launcher, feedback | The settings against the traits and the locale; a change of the traits (the example gives its window the other style); the scroll gesture is attached; the launcher refuses an unknown scheme; the feedback. Not: a key press or a scroll event, which an application cannot make for itself (section 12) |
 | 2b | Text input: `TextInputResponder`, the keyboard traits, the input pane | The keyboard appears for a focused text box (the input pane reports its frame); text entry itself needs a person or UI automation |
 | 2c | Clipboard (`UIPasteboard`), the storage provider with the document pickers and storage items, activations by URL and user activity (`simctl openurl`) | The clipboard round trip (`simctl pbcopy`/`pbpaste` against the application); a URL activation; the pickers need a person |
 | 1b (built) | The catalog's iOS host (`control-catalog-ios`) and `scripts/ios/sim-catalog.sh` | The catalog starts, selects pages and is photographed (section 12) |

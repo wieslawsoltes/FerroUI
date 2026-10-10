@@ -79,10 +79,11 @@ mod uikit {
     use crate::ferro_app_delegate::IFerroAppDelegate;
     use crate::ios_screens::IosScreens;
     use crate::metal::MetalPlatformGraphics;
+    use crate::platform_settings::PlatformSettings;
     use crate::stubs::{CursorFactoryStub, PlatformIconLoaderStub, WindowingPlatformStub};
     use ferroui_base::input::platform::{KeyGestureFormatInfo, PlatformHotkeyConfiguration};
     use ferroui_base::input::{IKeyboardDevice, Key, KeyModifiers, KeyboardDevice};
-    use ferroui_base::platform::{DefaultPlatformSettings, ICursorFactory, IPlatformGraphics, IPlatformSettings};
+    use ferroui_base::platform::{ICursorFactory, IPlatformGraphics, IPlatformSettings};
     use ferroui_base::rendering::composition::Compositor;
     use ferroui_base::rendering::{IRenderLoop, IRenderTimer, RenderLoop};
     use ferroui_base::threading::Dispatcher;
@@ -133,6 +134,7 @@ mod uikit {
         graphics: Option<Arc<dyn IPlatformGraphics>>,
         timer: Option<Arc<DisplayLinkTimer>>,
         compositor: Option<Rc<Compositor>>,
+        settings: Option<Rc<PlatformSettings>>,
     }
 
     thread_local! {
@@ -166,6 +168,19 @@ mod uikit {
             STATE.with(|state| state.borrow().compositor.clone())
         }
 
+        /// The settings of the platform, once the platform is registered.
+        /// They are created when first asked for, here or through the
+        /// locator. The reference finds them in the locator and casts
+        /// them to their class; the contract of the port has no cast, so
+        /// the platform keeps the object it registers.
+        pub(crate) fn settings() -> Option<Rc<PlatformSettings>> {
+            STATE.with(|state| {
+                let mut state = state.borrow_mut();
+                state.options.as_ref()?;
+                Some(state.settings.get_or_insert_with(PlatformSettings::new).clone())
+            })
+        }
+
         /// Registers the services of the platform.
         ///
         /// # Panics
@@ -193,11 +208,6 @@ mod uikit {
 
             let cursor_factory: Rc<dyn ICursorFactory> = Rc::new(CursorFactoryStub);
             let windowing_platform: Rc<dyn IWindowingPlatform> = Rc::new(WindowingPlatformStub);
-            // Stage 2 of docs/porting/ios-platform.md: the settings of the
-            // system (`PlatformSettings`: the colour scheme, the contrast,
-            // the tint colour and the preferred language) are not built;
-            // until then the defaults of the framework answer.
-            let platform_settings: Rc<dyn IPlatformSettings> = Rc::new(DefaultPlatformSettings::new());
             let icon_loader: Rc<dyn IPlatformIconLoader> = Rc::new(PlatformIconLoaderStub);
             let key_names = HashMap::from([
                 (Key::Back, "\u{232B}".to_string()),
@@ -227,7 +237,7 @@ mod uikit {
                 .bind::<dyn IWindowingPlatform>()
                 .to_constant(windowing_platform)
                 .bind::<dyn IPlatformSettings>()
-                .to_constant(platform_settings)
+                .to_lazy(|| Platform::settings().map(|settings| settings as Rc<dyn IPlatformSettings>))
                 .bind::<dyn IPlatformIconLoader>()
                 .to_constant(icon_loader)
                 .bind::<dyn IScreenImpl>()

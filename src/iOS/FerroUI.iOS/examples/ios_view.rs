@@ -18,10 +18,16 @@
 //! container of the application; the exit code is 0 only when all of them
 //! passed.
 //!
+//! The checks of stage 2 (the module `stage2`) follow: the settings of
+//! the platform against the traits and the locale UIKit reports, a change
+//! of the traits (the window is given the other user interface style, and
+//! the settings have to raise their change), the scroll gesture of the
+//! view, the launcher and the feedback of the top-level.
+//!
 //! What the smoke mode cannot check: input. An application cannot
-//! synthesize a touch for itself without private interfaces, so the
-//! translation of touches is covered by the tests of the crate, and the
-//! delivery of touches by trying the application by hand.
+//! synthesize a touch, a key press or a scroll event for itself without
+//! private interfaces, so their translation is covered by the tests of the
+//! crate, and their delivery by trying the application by hand.
 
 #[cfg(not(target_os = "ios"))]
 fn main() {
@@ -201,6 +207,7 @@ mod smoke {
         let attempt = Rc::new(Cell::new(0u32));
         let capture: Arc<Mutex<Option<FrameCapture>>> = Arc::new(Mutex::new(None));
         let capture_requested = Rc::new(Cell::new(false));
+        let stage2 = super::stage2::State::new();
 
         let _timer = DispatcherTimer::run(
             move || {
@@ -221,7 +228,12 @@ mod smoke {
                 trace(attempt.get(), &capture);
 
                 let frame = capture.lock().unwrap_or_else(PoisonError::into_inner).clone();
-                let checks = run_checks(frame.as_ref());
+                let mut checks = run_checks(frame.as_ref());
+                if let Some(view) = view() {
+                    for (name, passed, detail) in stage2.run(&view) {
+                        check(&mut checks, name, passed, detail);
+                    }
+                }
                 let passed = checks.iter().all(|check| check.passed);
                 if !passed && attempt.get() < ATTEMPTS {
                     return true;
@@ -467,5 +479,202 @@ mod smoke {
             }
         }
         check(checks, "text", drawn > 50, format!("{drawn} pixels of the text band are not the fill"));
+    }
+}
+
+/// The checks of stage 2 of the platform (`docs/porting/ios-platform.md`,
+/// section 12).
+#[cfg(target_os = "ios")]
+mod stage2 {
+    use ferroui_base::platform::storage::ILauncher;
+    use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformSettings, PlatformColorValues, PlatformThemeVariant};
+    use ferroui_base::reactive::IDisposable;
+    use ferroui_base::utilities::Uri;
+    use ferroui_base::{FerroLocator, LocatorExtensions};
+    use ferroui_controls::platform::{FeedbackAction, FeedbackType, IPlatformFeedback};
+    use ferroui_ios::FerroView;
+    use objc2_foundation::NSLocale;
+    use objc2_ui_kit::{UIPanGestureRecognizer, UIScrollTypeMask, UITraitEnvironment, UIUserInterfaceStyle};
+    use std::cell::{Cell, RefCell};
+    use std::future::Future;
+    use std::pin::Pin;
+    use std::rc::Rc;
+    use std::sync::Arc;
+    use std::task::{Context, Poll, Wake, Waker};
+
+    type Checks = Vec<(&'static str, bool, String)>;
+
+    struct NoopWaker;
+
+    impl Wake for NoopWaker {
+        fn wake(self: Arc<Self>) {}
+    }
+
+    /// Polls a future once: the value of one that is ready.
+    fn poll_once<T>(future: &mut Pin<Box<dyn Future<Output = T>>>) -> Option<T> {
+        let waker = Waker::from(Arc::new(NoopWaker));
+        match future.as_mut().poll(&mut Context::from_waker(&waker)) {
+            Poll::Ready(value) => Some(value),
+            Poll::Pending => None,
+        }
+    }
+
+    fn is_dark(view: &FerroView) -> bool {
+        // SAFETY: a trait of the collection of a view, read on the main
+        // thread.
+        unsafe { view.traitCollection().userInterfaceStyle() == UIUserInterfaceStyle::Dark }
+    }
+
+    fn variant_of(dark: bool) -> PlatformThemeVariant {
+        if dark {
+            PlatformThemeVariant::Dark
+        } else {
+            PlatformThemeVariant::Light
+        }
+    }
+
+    /// What the checks keep between the attempts.
+    pub struct State {
+        /// The checks that are made once, when the view is in its window.
+        once: RefCell<Option<Checks>>,
+        /// The style the view had before the window was given the other.
+        initial_dark: Cell<bool>,
+        color_events: Rc<RefCell<Vec<PlatformColorValues>>>,
+        subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    }
+
+    impl State {
+        pub fn new() -> Rc<Self> {
+            Rc::new(Self {
+                once: RefCell::new(None),
+                initial_dark: Cell::new(false),
+                color_events: Rc::new(RefCell::new(Vec::new())),
+                subscription: RefCell::new(None),
+            })
+        }
+
+        /// The checks of an attempt.
+        pub fn run(&self, view: &FerroView) -> Checks {
+            let Some(window) = view.window() else {
+                return Vec::new();
+            };
+            let Some(settings) = FerroLocator::current().get_service::<dyn IPlatformSettings>() else {
+                return vec![("settings", false, "the platform has no settings".to_string())];
+            };
+
+            if self.once.borrow().is_none() {
+                let checks = self.run_once(view, &settings);
+                *self.once.borrow_mut() = Some(checks);
+
+                // The change of the traits: the window gets the other
+                // style, and the settings have to say so.
+                let events = self.color_events.clone();
+                *self.subscription.borrow_mut() = Some(settings.color_values_changed(Rc::new(
+                    move |values: &PlatformColorValues| events.borrow_mut().push(*values),
+                )));
+                window.setOverrideUserInterfaceStyle(if self.initial_dark.get() {
+                    UIUserInterfaceStyle::Light
+                } else {
+                    UIUserInterfaceStyle::Dark
+                });
+            }
+
+            let mut checks = self.once.borrow().clone().unwrap_or_default();
+
+            let expected = variant_of(!self.initial_dark.get());
+            let events = self.color_events.borrow();
+            checks.push((
+                "trait change",
+                is_dark(view) != self.initial_dark.get()
+                    && events.last().is_some_and(|values| values.theme_variant() == expected)
+                    && settings.get_color_values().theme_variant() == expected,
+                format!(
+                    "the window was given the other style: the view is {:?}, the settings raised {} change(s) and say {:?}",
+                    variant_of(is_dark(view)),
+                    events.len(),
+                    settings.get_color_values().theme_variant()
+                ),
+            ));
+
+            checks
+        }
+
+        fn run_once(&self, view: &FerroView, settings: &Rc<dyn IPlatformSettings>) -> Checks {
+            let mut checks = Checks::new();
+
+            // The settings: the variant is the style of the traits of
+            // the view, the language the first preferred language.
+            self.initial_dark.set(is_dark(view));
+            let values = settings.get_color_values();
+            let language = settings.preferred_application_language();
+            let preferred = NSLocale::preferredLanguages().iter().next().map(|language| language.to_string());
+            checks.push((
+                "settings",
+                values.theme_variant() == variant_of(self.initial_dark.get())
+                    && preferred.as_deref() == Some(language.as_str()),
+                format!(
+                    "the theme variant is {:?}, the contrast {:?}, the accent {:?}, the language {language:?} \
+                     (UIKit: dark {}, the first preferred language {preferred:?})",
+                    values.theme_variant(),
+                    values.contrast_preference(),
+                    values.accent_color1(),
+                    self.initial_dark.get()
+                ),
+            ));
+
+            // The scroll gesture: a pan gesture that takes no touches and
+            // both kinds of scroll events.
+            let recognizers = view.gestureRecognizers();
+            let pans: Vec<_> = recognizers
+                .iter()
+                .flat_map(|recognizers| recognizers.iter())
+                .filter_map(|recognizer| recognizer.downcast::<UIPanGestureRecognizer>().ok())
+                .collect();
+            checks.push((
+                "scroll gesture",
+                pans.len() == 1
+                    && pans[0].maximumNumberOfTouches() == 0
+                    && pans[0].allowedScrollTypesMask() == UIScrollTypeMask::Discrete | UIScrollTypeMask::Continuous,
+                format!(
+                    "the view has {} pan gesture recognizer(s); it takes at most {:?} touches",
+                    pans.len(),
+                    pans.first().map(|pan| pan.maximumNumberOfTouches())
+                ),
+            ));
+
+            let top_level = view.top_level();
+            let platform_impl = top_level.platform_impl();
+            let provider = platform_impl.as_ref().map(|platform_impl| -> &dyn IOptionalFeatureProvider { &**platform_impl });
+
+            // The launcher: a URI of a scheme no application has is not
+            // launched, and the answer is there at once.
+            let launcher = provider.and_then(|provider| provider.try_get::<dyn ILauncher>());
+            let launched = launcher.as_ref().and_then(|launcher| {
+                let uri = Uri::absolute("ferroui-no-such-scheme://nothing").ok()?;
+                poll_once(&mut launcher.launch_uri_async(&uri))
+            });
+            checks.push((
+                "launcher",
+                launched == Some(false),
+                format!(
+                    "the top-level has a launcher: {}; a URI of an unknown scheme was launched: {launched:?}",
+                    launcher.is_some()
+                ),
+            ));
+
+            // The feedback: the sound of a click is played (the haptic
+            // engine of a simulator does nothing), holding has no sound.
+            let feedback = provider.and_then(|provider| provider.try_get::<dyn IPlatformFeedback>());
+            let click = feedback.as_ref().map(|feedback| feedback.perform(FeedbackAction::click(), FeedbackType::Sound));
+            let hold = feedback.as_ref().map(|feedback| feedback.perform(FeedbackAction::hold(), FeedbackType::Sound));
+            let tap = feedback.as_ref().map(|feedback| feedback.perform(FeedbackAction::hold(), FeedbackType::Haptic));
+            checks.push((
+                "feedback",
+                click == Some(true) && hold == Some(false) && tap == Some(true),
+                format!("the sound of a click: {click:?}, of holding: {hold:?}; the tap of holding: {tap:?}"),
+            ));
+
+            checks
+        }
     }
 }

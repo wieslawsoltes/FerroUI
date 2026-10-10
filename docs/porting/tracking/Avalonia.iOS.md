@@ -10,15 +10,15 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/iOS/FerroUI.iOS` (exists) |
 | Crate | `ferroui-ios` |
 | Phase / priority | 6 - mobile (iOS) / P2 |
-| Files | 23/40 (57.5%), 1 not applicable |
-| Types | 35/57 (1 waived) (62.5%) |
+| Files | 26/40 (65.0%), 1 not applicable |
+| Types | 38/57 (1 waived) (67.9%) |
 | Members | 0/331 (0.0%) |
 
 This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
 
 ## Files
 
-### `(project root)` - files 18/26, types 30/39 (1 waived), members 0/211
+### `(project root)` - files 21/26, types 33/39 (1 waived), members 0/211
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
@@ -33,14 +33,14 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `DispatcherImpl.cs` | `dispatcher_impl.rs` | present | 1/1 | - | 9 |  |
 | `DisplayLinkTimer.cs` | `display_link_timer.rs` | present | 1/1 | - | 4 |  |
 | `Extensions.cs` | `extensions.rs` | present | 1/1 | - | 3 |  |
-| `IOSLauncher.cs` | `ios_launcher.rs` | missing | 0/1 | `IOSLauncher` | 2 |  |
-| `IOSPlatformFeedback.cs` | `ios_platform_feedback.rs` | missing | 0/1 | `IOSPlatformFeedback` | 2 |  |
+| `IOSLauncher.cs` | `ios_launcher.rs` | present | 1/1 | - | 2 | renamed: the name follows the naming of Rust |
+| `IOSPlatformFeedback.cs` | `ios_platform_feedback.rs` | present | 1/1 | - | 2 | renamed: the name follows the naming of Rust |
 | `InputHandler.cs` | `input_handler.rs` | present | 1/1 | - | 5 |  |
 | `InsetsManager.cs` | `insets_manager.rs` | present | 1/1 | - | 6 |  |
 | `Interop.cs` | `interop.rs` | present | 1/2 (1 waived) | - | 17 | replaced: the static class of platform invokes is a module of `extern` declarations: the same functions of Core Foundation and libdispatch |
 | `NativeControlHostImpl.cs` | `native_control_host_impl.rs` | partial | 1/2 | `NativeControlHostImpl` | 9 |  |
 | `Platform.cs` | `platform.rs` | present | 4/4 | - | 10 | renamed: the names follow the naming of Rust |
-| `PlatformSettings.cs` | `platform_settings.rs` | missing | 0/1 | `PlatformSettings` | 4 |  |
+| `PlatformSettings.cs` | `platform_settings.rs` | present | 1/1 | - | 4 |  |
 | `SingleViewLifetime.cs` | `single_view_lifetime.rs` | present | 1/1 | - | 3 |  |
 | `Stubs.cs` | `stubs.rs` | present | 4/4 | - | 12 |  |
 | `TextInputResponder.Properties.cs` | `text_input_responder_properties.rs` | missing | 1/1 | - | 0 | types found in `ferro_view.rs` (add to path-overrides.toml) |
@@ -92,5 +92,9 @@ This backend is being ported. It is tracked at file and type granularity: the me
 ## Rust-only files
 
 Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
+
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `completion.rs` | A value set once on the main thread and the future that waits for it: what stands for the tasks the original completes from the completion handlers of UIKit | `Completion`, `CompletionFuture`, `State` |
 
 Tests, examples and build scripts (not scanned): `examples/ios_view.rs`, `tests/dispatcher_main_loop.rs`.
