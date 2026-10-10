@@ -19,8 +19,17 @@
 //!
 //! The renderer is the Vello backend in its CPU mode: it has no C or C++
 //! sources, so the example is checked for a Windows target on any host. The
-//! window is drawn through the framebuffer surface, the one rendering mode
-//! of stage 1.
+//! window is drawn through the framebuffer surface with
+//! `--rendering software` (the default).
+//!
+//! With `--rendering angle` (the crate built with its feature `angle`) the
+//! platform graphics are ANGLE on Direct3D 11, and the frames are drawn
+//! with OpenGL ES itself through what the backend gives a renderer: the
+//! platform graphics of the services, a context of them, the OpenGL surface
+//! among the surfaces of the window, and its render target. Every frame is
+//! read back with `glReadPixels` before it is presented and compared with
+//! what was drawn, so the path to the GPU is checked, not assumed.
+//! `--angle-probe` adds what ANGLE reports of itself.
 
 #[cfg(not(windows))]
 fn main() {
@@ -57,11 +66,16 @@ mod windows {
         FerroLocator, LocatorExtensions, Matrix, PixelPoint, PixelSize, Point, Rect, Ref, RelativePoint, RelativeUnit,
         RoundedRect, Size,
     };
+    use ferroui_base::platform::surfaces::IPlatformRenderSurface;
+    use ferroui_base::platform::{IPlatformGraphics, IPlatformGraphicsContext};
     use ferroui_controls::platform::{IScreenImpl, IWindowImpl, IWindowingPlatform};
+    use ferroui_opengl::gl_consts::{GL_COLOR_BUFFER_BIT, GL_RGBA, GL_SCISSOR_TEST, GL_UNSIGNED_BYTE};
+    use ferroui_opengl::surfaces::{try_get_gl_surface, IGlPlatformSurfaceRenderTarget};
+    use ferroui_opengl::IGlContext;
     use ferroui_controls::{WindowResizeReason, WindowState};
     use ferroui_vello::{VelloOptions, VelloPlatform, VelloRenderingMode};
     use ferroui_win32::interop::unmanaged_methods::{post_message, WindowsMessage};
-    use ferroui_win32::{Win32Platform, Win32PlatformOptions, Win32RenderingMode};
+    use ferroui_win32::{Win32CompositionMode, Win32Platform, Win32PlatformOptions, Win32RenderingMode};
     use std::cell::{Cell, RefCell};
     use std::future::Future;
     use std::pin::Pin;
@@ -154,9 +168,163 @@ mod windows {
         wheel: Cell<Option<f64>>,
     }
 
+    /// What draws the frames with OpenGL ES in the rendering mode ANGLE.
+    struct GlPainter {
+        context: Rc<dyn IPlatformGraphicsContext>,
+        render_target: Rc<dyn IGlPlatformSurfaceRenderTarget>,
+        /// The frames whose pixels were not the ones drawn, with what was
+        /// read.
+        mismatches: RefCell<Vec<String>>,
+        /// The frame that was read back last: its size, the pixels that
+        /// are not blank, a checksum.
+        last_frame: Cell<Option<(PixelSize, usize, u64)>>,
+    }
+
+    type Scissor = unsafe extern "system" fn(x: i32, y: i32, width: i32, height: i32);
+
+    impl GlPainter {
+        /// The context and the render target of the window, through the
+        /// services of the platform and the surfaces of the window.
+        fn new(window: &Rc<dyn IWindowImpl>, report: &Report) -> Option<GlPainter> {
+            let Some(graphics) = FerroLocator::current().get_service::<Arc<dyn IPlatformGraphics>>() else {
+                report.check("platform graphics", false, "the platform registered no platform graphics");
+                return None;
+            };
+            let surfaces: Vec<Arc<dyn IPlatformRenderSurface>> = window.surfaces();
+            let Some(gl_surface) = surfaces.iter().find_map(|surface| try_get_gl_surface(&**surface)) else {
+                report.check("OpenGL surface", false, "the window has no OpenGL surface among its surfaces");
+                return None;
+            };
+            let context = graphics.create_context();
+            let features: &dyn ferroui_base::platform::IOptionalFeatureProvider = &*context;
+            let Some(gl_context) = features.try_get::<dyn IGlContext>() else {
+                report.check("OpenGL context", false, "the context of the platform graphics is not an OpenGL context");
+                return None;
+            };
+            let current = gl_context.make_current();
+            let gl = gl_context.gl_interface();
+            report.check(
+                "OpenGL context",
+                true,
+                format!(
+                    "{:?} by {:?} on {:?}; OpenGL ES {}.{}, {} sample(s), {} stencil bit(s)",
+                    gl.version(),
+                    gl.vendor(),
+                    gl.renderer(),
+                    gl_context.version().major(),
+                    gl_context.version().minor(),
+                    gl_context.sample_count(),
+                    gl_context.stencil_size()
+                ),
+            );
+            current.dispose();
+            let render_target = gl_surface.create_gl_render_target(&gl_context);
+            Some(GlPainter { context, render_target, mismatches: RefCell::new(Vec::new()), last_frame: Cell::new(None) })
+        }
+
+        /// Draws a frame of rectangles (the number of the frame moves one of
+        /// them), reads it back and presents it.
+        fn paint(&self, frame: u32, pixel_size: PixelSize, scaling: f64) {
+            let scene_info = RenderTargetSceneInfo::new(pixel_size, scaling, CompositionTransparencyLevel::None);
+            let session = self.render_target.begin_draw(&scene_info);
+            let size = session.size();
+            let (width, height) = (size.width, size.height);
+            let gl = session.context().gl_interface();
+            let scissor = gl.get_proc_address("glScissor");
+            if scissor.is_null() {
+                self.mismatches.borrow_mut().push("the context has no glScissor".to_string());
+                session.dispose();
+                return;
+            }
+            // SAFETY: the address is the entry point `glScissor` of the
+            // context, whose signature is the one of the type.
+            let scissor = unsafe { std::mem::transmute::<*const std::ffi::c_void, Scissor>(scissor) };
+
+            // A rectangle from the top-left corner, as the window sees it:
+            // the rows of OpenGL count from the bottom.
+            let fill = |x: i32, y: i32, w: i32, h: i32, color: [u8; 3]| {
+                // SAFETY: plain values; the context of the session is
+                // current.
+                unsafe { scissor(x, height - y - h, w, h) };
+                gl.clear_color(f32::from(color[0]) / 255.0, f32::from(color[1]) / 255.0, f32::from(color[2]) / 255.0, 1.0);
+                gl.clear(GL_COLOR_BUFFER_BIT);
+            };
+
+            gl.viewport(0, 0, width, height);
+            gl.disable(GL_SCISSOR_TEST);
+            gl.clear_color(1.0, 1.0, 1.0, 1.0);
+            gl.clear(GL_COLOR_BUFFER_BIT);
+            gl.enable(GL_SCISSOR_TEST);
+            // Bands from blue to amber, a card, and a rectangle that moves
+            // with every frame and does not come back.
+            let bands = 8;
+            for band in 0..bands {
+                let t = band * 255 / (bands - 1);
+                let color = [(0x1e + (0xf5 - 0x1e) * t / 255) as u8, (0x3a + (0x9e - 0x3a) * t / 255) as u8, (0x8a - (0x8a - 0x0b) * t / 255) as u8];
+                fill(width * band / bands, 0, width / bands + 1, height, color);
+            }
+            let (card_x, card_y, card_w, card_h) = (width * 15 / 100, height / 5, width * 70 / 100, height * 3 / 5);
+            fill(card_x, card_y, card_w, card_h, [0xf0, 0xf0, 0xf0]);
+            let step = (frame as i32).min(48);
+            let (box_w, box_h) = (60.min(card_w / 4).max(4), 40.min(card_h / 4).max(4));
+            let box_x = card_x + (card_w - box_w) * step / 48;
+            let box_y = card_y + (card_h - box_h) / 2;
+            let box_color = [0xdc, 0x26, 0x26];
+            fill(box_x, box_y, box_w, box_h, box_color);
+            gl.disable(GL_SCISSOR_TEST);
+
+            let mut pixels = vec![0u8; width as usize * height as usize * 4];
+            // SAFETY: the buffer holds four bytes for every pixel of the
+            // rectangle that is read.
+            unsafe { gl.read_pixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.as_mut_ptr().cast()) };
+            let error = gl.get_error();
+            let mut painted = 0usize;
+            let mut checksum = 0xcbf2_9ce4_8422_2325_u64;
+            for pixel in pixels.chunks_exact(4) {
+                if pixel != [0, 0, 0, 0] {
+                    painted += 1;
+                }
+                for &byte in pixel {
+                    checksum = (checksum ^ u64::from(byte)).wrapping_mul(0x0000_0100_0000_01b3);
+                }
+            }
+            // The pixel at a point of the window, in the rows of OpenGL.
+            let pixel_at = |x: i32, y: i32| -> [u8; 4] {
+                let index = ((height - 1 - y) as usize * width as usize + x as usize) * 4;
+                [pixels[index], pixels[index + 1], pixels[index + 2], pixels[index + 3]]
+            };
+            let near = |pixel: [u8; 4], color: [u8; 3]| {
+                pixel[3] == 255 && (0..3).all(|i| (i32::from(pixel[i]) - i32::from(color[i])).abs() <= 1)
+            };
+            let in_box = pixel_at(box_x + box_w / 2, box_y + box_h / 2);
+            let in_card = pixel_at(card_x + card_w / 2, card_y + 2);
+            let in_first_band = pixel_at(1, 1);
+            if error != 0 || !near(in_box, box_color) || !near(in_card, [0xf0, 0xf0, 0xf0]) || !near(in_first_band, [0x1e, 0x3a, 0x8a]) {
+                self.mismatches.borrow_mut().push(format!(
+                    "frame {frame} ({width}x{height}): the moving rectangle reads {in_box:?} (drawn {box_color:?}), the card {in_card:?} (drawn [240, 240, 240]), the first band {in_first_band:?} (drawn [30, 58, 138]), GL error {error:#x}"
+                ));
+            }
+            if frame < 3 {
+                println!("Frame #{frame}: {width}x{height} px by OpenGL ES; the moving rectangle reads back as {in_box:?}");
+            }
+            self.last_frame.set(Some((size, painted, checksum)));
+
+            // Presents the frame.
+            session.dispose();
+        }
+
+        fn dispose(&self) {
+            self.render_target.dispose();
+            self.context.dispose();
+        }
+    }
+
     /// What the callbacks share.
     struct State {
         window: Rc<dyn IWindowImpl>,
+        /// The painter of the rendering mode ANGLE; `None` in the software
+        /// mode, whose frames the render interface draws.
+        gl: Option<GlPainter>,
         context: Rc<dyn IPlatformRenderInterfaceContext>,
         render_target: RefCell<Option<Rc<dyn IRenderTarget>>>,
         frames: Cell<u32>,
@@ -194,6 +362,12 @@ mod windows {
             let scaling = self.window.render_scaling();
             let pixel_size = PixelSize::from_size(client_size, scaling);
             if pixel_size.width <= 0 || pixel_size.height <= 0 {
+                return;
+            }
+
+            if let Some(gl) = &self.gl {
+                gl.paint(frame, pixel_size, scaling);
+                self.frames.set(frame + 1);
                 return;
             }
 
@@ -292,6 +466,10 @@ mod windows {
         /// while the size of the window stays): its size, how many of its
         /// pixels are not blank and a checksum of its bytes.
         fn read_back(&self) -> Option<(PixelSize, usize, u64)> {
+            // A frame of OpenGL was read back before it was presented.
+            if let Some(gl) = &self.gl {
+                return gl.last_frame.get();
+            }
             let surfaces = self.window.surfaces();
             let framebuffer_surface = surfaces.iter().find_map(|surface| surface.as_framebuffer_surface())?;
             let render_target = framebuffer_surface.create_framebuffer_render_target();
@@ -636,8 +814,32 @@ mod windows {
         let smoke = std::env::args().any(|argument| argument == "--smoke");
         let probe_angle = std::env::args().any(|argument| argument == "--angle-probe");
 
-        let options =
-            Win32PlatformOptions { rendering_mode: vec![Win32RenderingMode::Software], ..Win32PlatformOptions::default() };
+        // `--rendering software|angle`: the one rendering mode of the run,
+        // without a fallback, so that a mode that does not initialise fails
+        // the run instead of being passed over.
+        let arguments: Vec<String> = std::env::args().collect();
+        let rendering = arguments
+            .iter()
+            .position(|argument| argument == "--rendering")
+            .and_then(|index| arguments.get(index + 1))
+            .map_or("software", String::as_str);
+        let rendering_mode = match rendering {
+            "software" => Win32RenderingMode::Software,
+            "angle" => Win32RenderingMode::AngleEgl,
+            other => {
+                eprintln!("win32_window: unknown rendering mode '{other}' (software, angle)");
+                return ExitCode::from(2);
+            }
+        };
+        println!("Rendering mode: {rendering_mode:?}");
+
+        let options = Win32PlatformOptions {
+            rendering_mode: vec![rendering_mode],
+            // The window is presented through its redirection surface: the
+            // composition modes are a later stage.
+            composition_mode: vec![Win32CompositionMode::RedirectionSurface],
+            ..Win32PlatformOptions::default()
+        };
         Win32Platform::initialize(options);
         VelloPlatform::initialize_with_options(VelloOptions::with_rendering_mode(VelloRenderingMode::Cpu));
 
@@ -665,8 +867,17 @@ mod windows {
 
         let windowing_platform = locator.get_required_service::<dyn IWindowingPlatform>();
         let window = windowing_platform.create_window();
+        let early_report = Report::default();
+        let gl = if rendering_mode == Win32RenderingMode::AngleEgl {
+            println!("-- platform graphics");
+            GlPainter::new(&window, &early_report)
+        } else {
+            None
+        };
+        let gl_failed = rendering_mode == Win32RenderingMode::AngleEgl && gl.is_none();
         let state = Rc::new(State {
             window: window.clone(),
+            gl,
             context,
             render_target: RefCell::new(None),
             frames: Cell::new(0),
@@ -676,9 +887,13 @@ mod windows {
             closed: Cell::new(false),
             seen: SeenInput::default(),
             wake_waits: Cell::new(0),
-            report: Report::default(),
+            report: early_report,
             verbose_input: true,
         });
+        if gl_failed {
+            eprintln!("win32_window: the rendering mode ANGLE has no painter; see the failed check above");
+            return ExitCode::FAILURE;
+        }
         let report = &state.report;
         let loop_cancellation = CancellationTokenSource::new();
 
@@ -697,10 +912,17 @@ mod windows {
                 format!("{hwnd:#x}"),
             );
             let surfaces = window.surfaces();
+            let gl_surfaces = surfaces.iter().filter(|surface| try_get_gl_surface(&***surface).is_some()).count();
+            let expected_gl_surfaces = usize::from(rendering_mode == Win32RenderingMode::AngleEgl);
             report.check(
                 "surfaces",
-                surfaces.len() == 2 && surfaces.iter().any(|surface| surface.as_framebuffer_surface().is_some()),
-                format!("{} surface(s): the window handle and the framebuffer", surfaces.len()),
+                surfaces.len() == 2 + expected_gl_surfaces
+                    && gl_surfaces == expected_gl_surfaces
+                    && surfaces.iter().any(|surface| surface.as_framebuffer_surface().is_some()),
+                format!(
+                    "{} surface(s): the window handle, {gl_surfaces} OpenGL surface(s) and the framebuffer",
+                    surfaces.len()
+                ),
             );
         }
 
@@ -751,6 +973,9 @@ mod windows {
                 let render_target = state.render_target.borrow_mut().take();
                 if let Some(render_target) = render_target {
                     render_target.dispose();
+                }
+                if let Some(gl) = &state.gl {
+                    gl.dispose();
                 }
             }
             cancel.cancel();
@@ -829,11 +1054,24 @@ mod windows {
                                 "frames",
                                 checksums.len() == SMOKE_FRAMES as usize && distinct.len() == checksums.len(),
                                 format!(
-                                    "{} frame(s) drawn and read back from the framebuffer, {} of them different (the shapes move)",
+                                    "{} frame(s) drawn and read back from the {}, {} of them different (the shapes move)",
                                     checksums.len(),
+                                    if state.gl.is_some() { "default framebuffer of OpenGL ES before the swap" } else { "framebuffer" },
                                     distinct.len()
                                 ),
                             );
+                            if let Some(gl) = &state.gl {
+                                let mismatches = gl.mismatches.borrow();
+                                state.report.check(
+                                    "frames of the GPU hold what was drawn",
+                                    mismatches.is_empty(),
+                                    if mismatches.is_empty() {
+                                        "every frame read back with glReadPixels has the colours drawn at three places".to_string()
+                                    } else {
+                                        mismatches.join("; ")
+                                    },
+                                );
+                            }
                             let resizes = state.resizes.borrow();
                             state.report.check(
                                 "resize half way",

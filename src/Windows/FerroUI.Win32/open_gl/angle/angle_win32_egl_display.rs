@@ -4,12 +4,72 @@
 
 use super::Win32AngleEglInterface;
 use crate::angle_options::{AngleOptions, PlatformApi};
+use crate::win32_platform_options::GraphicsAdapterSelectionCallback;
+use ferroui_base::platform::PlatformGraphicsDeviceAdapterDescription;
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_opengl::egl::egl_consts::*;
 use ferroui_opengl::egl::{EglDisplay, EglDisplayOptions, EglInterface, EglSurface};
-use ferroui_opengl::{GlProfileType, OpenGlException};
+use ferroui_opengl::{GlVersion, OpenGlException};
 use std::ops::Deref;
 use std::rc::Rc;
+
+/// How the adapter of the Direct3D 11 device of a display is chosen.
+///
+/// The reference chooses on every creation of a display, with the callback
+/// of the platform options. A display of the port is created on the thread
+/// that renders with it, and the callback is a value of the UI thread: the
+/// choice is made once, on the UI thread, when the platform graphics are
+/// probed ([`Select`](Self::Select)), and the displays that are created
+/// later ask for the adapter that was chosen then
+/// ([`Chosen`](Self::Chosen)).
+#[derive(Clone)]
+pub enum D3D11Adapter {
+    /// Choose now: with the callback when there is one, and away from an
+    /// Adreno adapter on ARM64.
+    Select(Option<GraphicsAdapterSelectionCallback>),
+    /// The adapter with this identifier (`None`: the first adapter of the
+    /// system, which is what the reference takes when nothing chooses).
+    Chosen(Option<u64>),
+}
+
+/// The index of the adapter to create the device on, among the adapters of
+/// the system, and whether the choice moved away from an Adreno adapter.
+///
+/// `None` when nothing redefines the default adapter: no callback, and not
+/// ARM64.
+pub(crate) fn choose_adapter_index(
+    adapters: &[PlatformGraphicsDeviceAdapterDescription],
+    selection_callback: Option<&GraphicsAdapterSelectionCallback>,
+    apply_arm_adreno_blacklist: bool,
+) -> Result<(usize, bool), OpenGlException> {
+    if adapters.is_empty() {
+        return Err(OpenGlException::new("No adapters found"));
+    }
+
+    // The Adreno blacklist now only moves the *default* selection away
+    // from Adreno GPUs - it no longer hides adapters from the selection callback, so
+    // an application can deliberately opt back into hardware acceleration.
+    let mut chosen_adapter_index = 0usize;
+    let mut moved_from_adreno = false;
+    if let Some(selection_callback) = selection_callback {
+        let index = selection_callback(adapters);
+        // The reference indexes its list with the answer and fails with the
+        // exception of the index.
+        chosen_adapter_index = usize::try_from(index)
+            .ok()
+            .filter(|index| *index < adapters.len())
+            .ok_or_else(|| OpenGlException::new(format!("The graphics adapter selection callback chose the adapter {index} of {}", adapters.len())))?;
+    } else if apply_arm_adreno_blacklist && adapters.len() > 1 {
+        let first_non_adreno =
+            adapters.iter().position(|a| !a.description.as_deref().is_some_and(|description| description.contains("adreno")));
+        if let Some(first_non_adreno) = first_non_adreno.filter(|index| *index > 0) {
+            chosen_adapter_index = first_non_adreno;
+            moved_from_adreno = true;
+        }
+    }
+
+    Ok((chosen_adapter_index, moved_from_adreno))
+}
 
 /// A display of ANGLE.
 ///
@@ -32,17 +92,27 @@ impl Deref for AngleWin32EglDisplay {
 }
 
 impl AngleWin32EglDisplay {
+    /// The versions of OpenGL ES the options of ANGLE ask for: the options
+    /// registered with the services of the calling thread, `None` without
+    /// them (the display then asks for its default versions).
+    pub fn gl_versions_of_options() -> Option<Vec<GlVersion>> {
+        FerroLocator::current().get_service::<AngleOptions>().map(|options| options.open_gl_es_profiles())
+    }
+
+    /// The reference reads the versions from the services where the options
+    /// are built; here the caller passes them, because a display is also
+    /// created on the render thread, whose services are not the ones of the
+    /// UI thread.
     pub(super) fn get_display_options(
         egl: &Rc<EglInterface>,
+        gl_versions: Option<Vec<GlVersion>>,
         device_lost_check_callback: Option<Rc<dyn Fn() -> bool>>,
         dispose_callback: Option<Rc<dyn Fn()>>,
     ) -> EglDisplayOptions {
         EglDisplayOptions {
             egl: Some(egl.clone()),
             context_loss_is_display_loss: true,
-            gl_versions: FerroLocator::current().get_service::<AngleOptions>().map(|options| {
-                options.gl_profiles.iter().copied().filter(|x| x.type_() == GlProfileType::OpenGLES).collect()
-            }),
+            gl_versions,
             device_lost_check_callback,
             dispose_callback,
             ..Default::default()
@@ -57,7 +127,7 @@ impl AngleWin32EglDisplay {
             Some(&[EGL_PLATFORM_ANGLE_TYPE_ANGLE, EGL_PLATFORM_ANGLE_TYPE_D3D9_ANGLE, EGL_NONE]),
         );
 
-        Self::new(display, egl.egl(), Self::get_display_options(egl.egl(), None, None), PlatformApi::DirectX9)
+        Self::new(display, egl.egl(), Self::get_display_options(egl.egl(), Self::gl_versions_of_options(), None, None), PlatformApi::DirectX9)
     }
 
     /// The display of ANGLE on Direct3D 11, with the device ANGLE creates
@@ -69,7 +139,189 @@ impl AngleWin32EglDisplay {
             Some(&[EGL_PLATFORM_ANGLE_TYPE_ANGLE, EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE, EGL_NONE]),
         );
 
-        Self::new(display, egl.egl(), Self::get_display_options(egl.egl(), None, None), PlatformApi::DirectX11)
+        Self::new(display, egl.egl(), Self::get_display_options(egl.egl(), Self::gl_versions_of_options(), None, None), PlatformApi::DirectX11)
+    }
+
+    /// The display of ANGLE on a Direct3D 11 device this backend creates on
+    /// the adapter that is chosen, and the identifier of that adapter
+    /// (`None` when the first adapter of the system was taken without a
+    /// choice).
+    #[cfg(windows)]
+    pub fn create_d3d11_display(
+        egl: &Rc<Win32AngleEglInterface>,
+        gl_versions: Option<Vec<GlVersion>>,
+        adapter: &D3D11Adapter,
+    ) -> Result<(AngleWin32EglDisplay, Option<u64>), OpenGlException> {
+        use crate::direct_x::{DirectXUnmanagedMethods, IDXGIAdapter1, D3D_DRIVER_TYPE, D3D_FEATURE_LEVEL};
+        use ferroui_base::logging::{LogEventLevel, Logger};
+        use ferroui_microcom::ComPtr;
+        use std::cell::{Cell, RefCell};
+
+        let feature_levels = [
+            D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_1,
+            D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_0,
+            D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_10_1,
+            D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_10_0,
+            D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_9_3,
+            D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_9_2,
+            D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_9_1,
+        ];
+
+        let factory = DirectXUnmanagedMethods::create_dxgi_factory1()
+            .map_err(|error| OpenGlException::new(format!("CreateDXGIFactory1 failed: {error}")))?;
+        let mut chosen_adapter: Option<ComPtr<IDXGIAdapter1>> = None;
+        let mut chosen_luid = None;
+        if let Some(factory) = factory {
+            // The adapter at an index: the reference of the factory, owned.
+            let adapter_at = |index: u32| -> Option<ComPtr<IDXGIAdapter1>> {
+                let mut p_adapter = std::ptr::null_mut();
+                // SAFETY: the pointer is valid for the one interface pointer
+                // the factory writes, which is an adapter of the first
+                // version (the method is `EnumAdapters1`).
+                if unsafe { factory.enum_adapters1(index, &mut p_adapter) } != 0 {
+                    return None;
+                }
+                // SAFETY: the call succeeded: the pointer is null or a
+                // reference to an adapter this call owns.
+                unsafe { ComPtr::from_raw(p_adapter.cast()) }
+            };
+            let enumerate = || -> Result<Vec<(ComPtr<IDXGIAdapter1>, PlatformGraphicsDeviceAdapterDescription, u64)>, OpenGlException> {
+                let mut adapters = Vec::new();
+                let mut adapter_index = 0u32;
+                while let Some(adapter) = adapter_at(adapter_index) {
+                    let desc = adapter
+                        .get_desc1()
+                        .map_err(|error| OpenGlException::new(format!("IDXGIAdapter1::GetDesc1 failed: {error}")))?;
+                    let length = desc.description.iter().position(|c| *c == 0).unwrap_or(desc.description.len());
+                    let name = String::from_utf16_lossy(&desc.description[..length]).to_lowercase();
+                    let luid = desc.adapter_luid.to_le_bytes().to_vec();
+                    adapters.push((
+                        adapter,
+                        PlatformGraphicsDeviceAdapterDescription {
+                            description: Some(name),
+                            device_luid: Some(luid),
+                            ..Default::default()
+                        },
+                        desc.adapter_luid,
+                    ));
+                    adapter_index += 1;
+                }
+                Ok(adapters)
+            };
+
+            match adapter {
+                D3D11Adapter::Select(selection_callback) => {
+                    let apply_arm_adreno_blacklist = cfg!(target_arch = "aarch64");
+
+                    // As for now, we only need to redefine default adapter only on ARM64 just in case of Adreno GPU.
+                    let redefine_default_adapter = selection_callback.is_some() || apply_arm_adreno_blacklist;
+
+                    if redefine_default_adapter {
+                        let mut adapters = enumerate()?;
+                        let descriptions: Vec<_> = adapters.iter().map(|a| a.1.clone()).collect();
+                        let (chosen_adapter_index, moved_from_adreno) =
+                            choose_adapter_index(&descriptions, selection_callback.as_ref(), apply_arm_adreno_blacklist)?;
+                        if moved_from_adreno {
+                            if let Some(logger) = Logger::try_get(LogEventLevel::Warning, "OpenGL") {
+                                let fallback = descriptions[chosen_adapter_index].description.clone().unwrap_or_default();
+                                logger.log_with_values(
+                                    None,
+                                    "ARM64 Adreno GPU detected; the Adreno rendering blocklist is forcing a \
+                                     fallback to '{FallbackAdapter}' (typically a software renderer). Set \
+                                     Win32PlatformOptions.graphics_adapter_selection_callback to choose an adapter \
+                                     explicitly, or switch Win32PlatformOptions.rendering_mode to Vulkan or Wgl.",
+                                    &[&fallback],
+                                );
+                            }
+                        }
+
+                        let (adapter, _, luid) = adapters.swap_remove(chosen_adapter_index);
+                        chosen_adapter = Some(adapter);
+                        chosen_luid = Some(luid);
+                    } else {
+                        chosen_adapter = Some(adapter_at(0).ok_or_else(|| OpenGlException::new("No adapters found"))?);
+                    }
+                }
+                D3D11Adapter::Chosen(Some(luid)) => {
+                    // The adapter that was chosen; the first one when it is
+                    // gone (an adapter that was removed).
+                    let mut adapters = enumerate()?;
+                    if adapters.is_empty() {
+                        return Err(OpenGlException::new("No adapters found"));
+                    }
+                    let index = adapters.iter().position(|a| a.2 == *luid).unwrap_or(0);
+                    let (adapter, _, luid) = adapters.swap_remove(index);
+                    chosen_adapter = Some(adapter);
+                    chosen_luid = Some(luid);
+                }
+                D3D11Adapter::Chosen(None) => {
+                    chosen_adapter = Some(adapter_at(0).ok_or_else(|| OpenGlException::new("No adapters found"))?);
+                }
+            }
+        }
+
+        let (d3d_device, _) = DirectXUnmanagedMethods::d3d11_create_device(
+            chosen_adapter.as_deref(),
+            D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN,
+            0,
+            &feature_levels,
+            7,
+        )
+        .map_err(|error| OpenGlException::new(format!("D3D11CreateDevice failed: {error}")))?;
+        drop(chosen_adapter);
+
+        let Some(d3d_device) = d3d_device else {
+            return Err(OpenGlException::new("Unable to create D3D11 Device"));
+        };
+        let p_d3d_device = d3d_device.as_ptr() as isize;
+
+        // What `Cleanup` of the reference releases: the device of EGL and
+        // the reference to the device of Direct3D.
+        let angle_device = Rc::new(Cell::new(0isize));
+        let device_slot = Rc::new(RefCell::new(Some(d3d_device.clone())));
+        let cleanup: Rc<dyn Fn()> = {
+            let (egl, angle_device, device_slot) = (egl.clone(), angle_device.clone(), device_slot.clone());
+            Rc::new(move || {
+                let device = angle_device.replace(0);
+                if device != 0 {
+                    egl.release_device_angle(device);
+                }
+                let d3d_device = device_slot.borrow_mut().take();
+                drop(d3d_device);
+            })
+        };
+
+        let mut display = 0;
+        let result = (|| {
+            angle_device.set(egl.create_device_angle(EGL_D3D11_DEVICE_ANGLE, p_d3d_device, None));
+            if angle_device.get() == 0 {
+                return Err(OpenGlException::get_formatted_exception_for_egl("eglCreateDeviceANGLE", egl.egl()));
+            }
+
+            display = egl.egl().get_platform_display_ext(EGL_PLATFORM_DEVICE_EXT, angle_device.get(), None);
+            if display == 0 {
+                return Err(OpenGlException::get_formatted_exception_for_egl("eglGetPlatformDisplayEXT", egl.egl()));
+            }
+
+            let device_lost_check: Rc<dyn Fn() -> bool> = Rc::new(move || d3d_device.get_device_removed_reason() != 0);
+            Self::new(
+                display,
+                egl.egl(),
+                Self::get_display_options(egl.egl(), gl_versions, Some(device_lost_check), Some(cleanup.clone())),
+                PlatformApi::DirectX11,
+            )
+        })();
+
+        match result {
+            Ok(rv) => Ok((rv, chosen_luid)),
+            Err(error) => {
+                if display != 0 {
+                    egl.egl().terminate(display);
+                }
+                cleanup();
+                Err(error)
+            }
+        }
     }
 
     /// Wraps a display of EGL.
@@ -320,6 +572,19 @@ pub(crate) mod tests {
 
     unsafe extern "system" fn destroy_surface(_display: isize, _surface: isize) {}
 
+    unsafe extern "system" fn query_api() -> i32 {
+        EGL_OPENGL_ES_API
+    }
+
+    unsafe extern "system" fn create_pbuffer_surface(_display: isize, _config: isize, _attrs: *const i32) -> isize {
+        55
+    }
+
+    /// This EGL creates no context.
+    unsafe extern "system" fn create_context(_display: isize, _config: isize, _share: isize, _attrs: *const i32) -> isize {
+        0
+    }
+
     unsafe extern "system" fn other() {}
 
     /// A loader of an EGL that initialises, has one configuration, and
@@ -339,6 +604,9 @@ pub(crate) mod tests {
             "eglQueryDisplayAttribEXT" => query_display_attrib as *const c_void,
             "eglQueryDeviceAttribEXT" => query_device_attrib as *const c_void,
             "eglDestroySurface" => destroy_surface as *const c_void,
+            "eglQueryAPI" => query_api as *const c_void,
+            "eglCreatePbufferSurface" => create_pbuffer_surface as *const c_void,
+            "eglCreateContext" => create_context as *const c_void,
             name if name.ends_with("ANGLE") => device_creation.as_ref().map_or(std::ptr::null(), |get| get(name)),
             name if name.ends_with("EXT") || name.ends_with("KHR") => std::ptr::null(),
             _ => other as *const c_void,
@@ -453,6 +721,54 @@ pub(crate) mod tests {
         let display = AngleWin32EglDisplay::create_d3d9_display(&egl()).expect("a display");
 
         let _ = display.wrap_direct3d11_texture(77);
+    }
+
+    fn adapter(name: &str) -> PlatformGraphicsDeviceAdapterDescription {
+        PlatformGraphicsDeviceAdapterDescription { description: Some(name.to_string()), ..Default::default() }
+    }
+
+    #[test]
+    fn the_first_adapter_is_the_default_choice() {
+        let adapters = [adapter("nvidia geforce"), adapter("microsoft basic render driver")];
+
+        assert_eq!(Ok((0, false)), choose_adapter_index(&adapters, None, false));
+        assert_eq!(Ok((0, false)), choose_adapter_index(&adapters, None, true));
+        assert_eq!(
+            Err(OpenGlException::new("No adapters found")),
+            choose_adapter_index(&[], None, true)
+        );
+    }
+
+    #[test]
+    fn the_default_choice_moves_away_from_an_adreno_adapter_on_arm64() {
+        let adapters = [adapter("qualcomm(r) adreno(tm) 690 gpu"), adapter("microsoft basic render driver")];
+
+        assert_eq!(Ok((1, true)), choose_adapter_index(&adapters, None, true));
+        // Not on other architectures, not when it is the only adapter, and
+        // not when every adapter is one.
+        assert_eq!(Ok((0, false)), choose_adapter_index(&adapters, None, false));
+        assert_eq!(Ok((0, false)), choose_adapter_index(&adapters[..1], None, true));
+        assert_eq!(Ok((0, false)), choose_adapter_index(&[adapters[0].clone(), adapters[0].clone()], None, true));
+    }
+
+    #[test]
+    fn the_callback_chooses_among_all_adapters_and_may_choose_adreno() {
+        let adapters = [adapter("qualcomm(r) adreno(tm) 690 gpu"), adapter("microsoft basic render driver")];
+        let seen = Rc::new(Cell::new(0));
+        let s = seen.clone();
+        let adreno: GraphicsAdapterSelectionCallback = Rc::new(move |adapters| {
+            s.set(adapters.len());
+            0
+        });
+        let second: GraphicsAdapterSelectionCallback = Rc::new(|_| 1);
+        let outside: GraphicsAdapterSelectionCallback = Rc::new(|_| 2);
+        let negative: GraphicsAdapterSelectionCallback = Rc::new(|_| -1);
+
+        assert_eq!(Ok((0, false)), choose_adapter_index(&adapters, Some(&adreno), true));
+        assert_eq!(2, seen.get());
+        assert_eq!(Ok((1, false)), choose_adapter_index(&adapters, Some(&second), true));
+        assert!(choose_adapter_index(&adapters, Some(&outside), true).is_err());
+        assert!(choose_adapter_index(&adapters, Some(&negative), false).is_err());
     }
 
     #[test]

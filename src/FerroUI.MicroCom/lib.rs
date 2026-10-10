@@ -13,13 +13,18 @@
 //! * **Rust -> native callbacks** (COM callable wrappers): [`ComObject<T>`]
 //!   is a heap object whose first word is a vtable pointer, followed by an
 //!   atomic reference count and the Rust value. Generated code provides the
-//!   vtables (`extern "C"` thunks) for every `T` implementing the interface's
+//!   vtables (`extern "system"` thunks) for every `T` implementing the interface's
 //!   `...Impl` trait through [`ImplementedBy`].
 //!
 //! ABI: Itanium C++ single-inheritance layout — slot 0..2 are
 //! `QueryInterface`, `AddRef`, `Release`, followed by the methods of each
 //! interface in the chain in declaration order; `this` is the first argument
-//! of every slot and the C calling convention is used.
+//! of every slot. The calling convention is the one of the system
+//! (`extern "system"`): the C convention on every target but 32-bit x86
+//! Windows, where COM is `stdcall`. On that target a virtual method of the
+//! system's COM returns a structure through a hidden parameter after `this`,
+//! which the generated signatures do not model: no interface the port binds
+//! returns one.
 
 mod com_object;
 mod com_ptr;

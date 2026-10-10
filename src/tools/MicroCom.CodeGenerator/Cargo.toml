@@ -17,4 +17,8 @@ path = "main.rs"
 name = "cpp_header"
 path = "tests/cpp_header.rs"
 
+[[test]]
+name = "win32_idl"
+path = "tests/win32_idl.rs"
+
 [dependencies]

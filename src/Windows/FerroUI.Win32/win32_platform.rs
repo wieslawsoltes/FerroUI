@@ -9,7 +9,8 @@ use crate::interop::unmanaged_methods::*;
 use crate::platform_constants::Version;
 use crate::screen_impl::ScreenImpl;
 use crate::win32_dispatcher_impl::{Win32DispatcherImpl, SIGNAL_L, SIGNAL_W};
-use crate::win32_platform_options::{Win32DpiAwareness, Win32PlatformOptions, Win32RenderingMode};
+use crate::win32_gl_manager::Win32GlManager;
+use crate::win32_platform_options::{Win32DpiAwareness, Win32PlatformOptions};
 use crate::win32_platform_settings::Win32PlatformSettings;
 use crate::win_screen::WinScreen;
 use crate::window_impl::WindowImpl;
@@ -251,11 +252,12 @@ impl Win32Platform {
 
                 Some(custom_platform_graphics.clone())
             }
-            None => Self::initialize_platform_graphics(&options),
+            // The manager registers what it chooses with the services.
+            None => Win32GlManager::initialize(&options),
         };
 
-        if let Some(platform_graphics) = &platform_graphics {
-            locator.bind::<Arc<dyn IPlatformGraphics>>().to_constant(Rc::new(platform_graphics.clone()));
+        if let Some(custom_platform_graphics) = &options.custom_platform_graphics {
+            locator.bind::<Arc<dyn IPlatformGraphics>>().to_constant(Rc::new(custom_platform_graphics.clone()));
         }
 
         // The drag source of the platform is bound here by the reference
@@ -266,36 +268,6 @@ impl Win32Platform {
         let compositor = Compositor::new(platform_graphics, false);
         COMPOSITOR.with(|slot| *slot.borrow_mut() = Some(compositor.clone()));
         locator.bind_to_self(compositor);
-    }
-
-    /// The platform graphics of the first rendering mode that can be
-    /// initialized (the graphics manager of the reference).
-    ///
-    /// The GPU modes (ANGLE over Direct3D, the OpenGL of the system and
-    /// Vulkan) are stage 2 of this backend: a GPU mode is passed over like
-    /// a mode that failed to initialize, so the default order ends at the
-    /// software mode, which has no platform graphics.
-    ///
-    /// # Panics
-    /// Panics, as the reference throws, when the list of rendering modes is
-    /// empty and when none of its modes could be applied (before stage 2: a
-    /// list without the software mode).
-    fn initialize_platform_graphics(options: &Win32PlatformOptions) -> Option<Arc<dyn IPlatformGraphics>> {
-        if options.rendering_mode.is_empty() {
-            panic!("Win32PlatformOptions.rendering_mode must not be empty or null");
-        }
-
-        for mode in &options.rendering_mode {
-            match mode {
-                Win32RenderingMode::Software => return None,
-                Win32RenderingMode::AngleEgl | Win32RenderingMode::Wgl | Win32RenderingMode::Vulkan => continue,
-            }
-        }
-
-        panic!(
-            "Win32PlatformOptions.rendering_mode has a value of \"{}\", but no options were applied.",
-            options.rendering_mode.iter().map(|mode| format!("{mode:?}")).collect::<Vec<_>>().join(", ")
-        );
     }
 
     /// The window procedure of the message window.

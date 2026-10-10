@@ -19,6 +19,7 @@
 // on every host.
 #![cfg_attr(not(windows), allow(dead_code))]
 
+pub mod direct_x;
 pub mod input;
 pub mod interop;
 pub mod open_gl;
@@ -27,6 +28,7 @@ mod angle_options;
 mod cursor_factory;
 mod framebuffer_manager;
 mod win32_dispatcher_impl;
+mod win32_gl_manager;
 mod platform_constants;
 mod win32_platform_options;
 mod win32_top_level_scene_info;

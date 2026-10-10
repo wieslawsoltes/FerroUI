@@ -225,6 +225,7 @@ mod imp {
     use crate::offscreen_parent_window::OffscreenParentWindow;
     use crate::platform_constants::{PlatformConstants, Version};
     use crate::screen_impl::ScreenImpl;
+    use crate::win32_gl_manager::{Win32GlManager, Win32PlatformGraphicsKind};
     use crate::win32_platform::Win32Platform;
     use crate::win32_top_level_scene_info::Win32TopLevelSceneInfo;
     use crate::win32_type_extensions::Win32TypeExtensions;
@@ -234,6 +235,7 @@ mod imp {
     use ferroui_base::input::{IInputRoot, PointerPressedEventArgs};
     use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
     use ferroui_base::platform::surfaces::IPlatformRenderSurface;
+    use ferroui_opengl::egl::{EglGlPlatformSurface, IEglWindowGlPlatformSurfaceInfo};
     use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider, IPlatformSettings, PlatformThemeVariant};
     use ferroui_base::reactive::IDisposable;
     use ferroui_base::rendering::composition::Compositor;
@@ -319,6 +321,24 @@ mod imp {
         }
     }
 
+    /// What an EGL window surface needs of the window, read by the thread
+    /// that renders.
+    impl IEglWindowGlPlatformSurfaceInfo for WindowImplPlatformHandle {
+        fn handle(&self) -> isize {
+            self.hwnd.load(Ordering::Acquire)
+        }
+
+        fn size(&self) -> PixelSize {
+            let rect = get_client_rect(self.hwnd.load(Ordering::Acquire));
+
+            PixelSize::new((rect.right - rect.left).max(1), (rect.bottom - rect.top).max(1))
+        }
+
+        fn scaling(&self) -> f64 {
+            f64::from_bits(self.scaling_bits.load(Ordering::Acquire))
+        }
+    }
+
     impl INativePlatformHandleSurface for WindowImplPlatformHandle {
         fn size(&self) -> PixelSize {
             self.client_pixel_size()
@@ -335,7 +355,7 @@ mod imp {
 
     impl IPlatformHandle for TopLevelHandle {
         fn handle(&self) -> isize {
-            self.0.handle()
+            IPlatformHandle::handle(&*self.0)
         }
 
         fn handle_descriptor(&self) -> Option<&str> {
@@ -367,6 +387,9 @@ mod imp {
 
         mouse_device: Rc<WindowsMouseDevice>,
         framebuffer: RefCell<Option<Arc<FramebufferManager>>>,
+        /// The surface the platform graphics render the window through,
+        /// when the platform has graphics.
+        gl_surface: RefCell<Option<Arc<dyn IPlatformRenderSurface>>>,
         handle: RefCell<Option<Arc<WindowImplPlatformHandle>>>,
 
         class_name: RefCell<Option<String>>,
@@ -471,6 +494,7 @@ mod imp {
                 resize_reason: Cell::new(WindowResizeReason::Unspecified),
                 mouse_device: WindowsMouseDevice::instance(),
                 framebuffer: RefCell::new(None),
+                gl_surface: RefCell::new(None),
                 handle: RefCell::new(None),
                 class_name: RefCell::new(None),
                 hwnd: Cell::new(0),
@@ -519,6 +543,19 @@ mod imp {
 
             this.create_window();
             *this.framebuffer.borrow_mut() = Some(Arc::new(FramebufferManager::new(this.hwnd.get())));
+
+            // The surface of the platform graphics. The reference asks a
+            // surface factory first (the composition modes register one:
+            // stage 2c) and tests the type of the platform graphics
+            // otherwise; the graphics manager remembers what it registered.
+            // The surface of the OpenGL of the system (WGL) is a later step
+            // of stage 2b.
+            if Win32GlManager::platform_graphics_kind() == Some(Win32PlatformGraphicsKind::AngleD3D11) {
+                if let Some(handle) = this.handle.borrow().clone() {
+                    let gl_surface: Arc<dyn IPlatformRenderSurface> = EglGlPlatformSurface::new(handle);
+                    *this.gl_surface.borrow_mut() = Some(gl_surface);
+                }
+            }
 
             // The input method of the keyboard layout (for a window that is
             // not a popup), the storage provider, the input pane and the
@@ -1727,6 +1764,9 @@ mod imp {
             let mut surfaces: Vec<Arc<dyn IPlatformRenderSurface>> = Vec::new();
             if let Some(handle) = self.handle.borrow().clone() {
                 surfaces.push(handle);
+            }
+            if let Some(gl_surface) = self.gl_surface.borrow().clone() {
+                surfaces.push(gl_surface);
             }
             if let Some(framebuffer) = self.framebuffer.borrow().clone() {
                 surfaces.push(framebuffer);

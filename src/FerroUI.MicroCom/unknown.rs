@@ -34,13 +34,13 @@ pub unsafe trait Interface: Sized + 'static {
 
 #[repr(C)]
 pub struct IUnknownVtbl {
-    pub query_interface: unsafe extern "C" fn(
+    pub query_interface: unsafe extern "system" fn(
         this: *mut c_void,
         riid: *const Guid,
         ppv: *mut *mut c_void,
     ) -> RawHResult,
-    pub add_ref: unsafe extern "C" fn(this: *mut c_void) -> u32,
-    pub release: unsafe extern "C" fn(this: *mut c_void) -> u32,
+    pub add_ref: unsafe extern "system" fn(this: *mut c_void) -> u32,
+    pub release: unsafe extern "system" fn(this: *mut c_void) -> u32,
 }
 
 /// The root interface. A `*mut IUnknown` is a native `IUnknown*`.

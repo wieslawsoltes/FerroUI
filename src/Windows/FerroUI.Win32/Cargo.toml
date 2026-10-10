@@ -6,6 +6,9 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+# The build script generates the bindings of the COM interfaces from the interface definition
+# files of the crate (`build.rs`).
+build = "build.rs"
 
 [lib]
 path = "lib.rs"
@@ -23,6 +26,8 @@ ferroui-base.workspace = true
 ferroui-controls.workspace = true
 # The EGL the ANGLE rendering mode drives, and the OpenGL contracts of the surfaces of a window.
 ferroui-opengl.workspace = true
+# The COM runtime of the bindings the build script generates.
+ferroui-microcom.workspace = true
 bitflags.workspace = true
 
 # The bindings of the Windows API (docs/porting/win32-platform.md, section 2): declarations only,
@@ -51,6 +56,10 @@ windows-sys = { workspace = true, features = [
 workspace = true
 features = ["egl"]
 optional = true
+
+[build-dependencies]
+# The port's MicroCom generator: the standard library alone.
+microcom-codegen = { path = "../../tools/MicroCom.CodeGenerator" }
 
 [dev-dependencies]
 # The example of a window draws through the render interface of the Vello backend in its CPU

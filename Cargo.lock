@@ -740,8 +740,10 @@ dependencies = [
  "bitflags",
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-microcom",
  "ferroui-opengl",
  "ferroui-vello",
+ "microcom-codegen",
  "mozangle",
  "windows-sys",
 ]
