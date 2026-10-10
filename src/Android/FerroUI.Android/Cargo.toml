@@ -1,0 +1,46 @@
+[package]
+name = "ferroui-android"
+description = "The Android platform of FerroUI: a view in an activity, rendered through EGL or to the native window"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-opengl.workspace = true
+
+# What exists on Android only. The renderer and the text shaper are selected by `use_android`, as
+# the reference does; the declarations of the Java Native Interface and the C library (`dlopen` for
+# the EGL library of the system) are what `interop/` is written against. On another system the
+# crate is the logic of the backend alone, which is what its tests run there
+# (docs/porting/android-platform.md, section 10).
+[target.'cfg(target_os = "android")'.dependencies]
+ferroui-skia.workspace = true
+ferroui-harfbuzz.workspace = true
+jni-sys.workspace = true
+libc.workspace = true
+
+# The smoke application reads the frames it draws back from their Skia surface.
+[target.'cfg(target_os = "android")'.dev-dependencies]
+skia-safe.workspace = true
+
+# The smoke application: a shared library that `scripts/android/apk.sh` packages
+# (docs/porting/android-platform.md, sections 9 and 10). Empty on another system.
+[[example]]
+name = "android_smoke"
+path = "examples/android_smoke.rs"
+crate-type = ["cdylib"]
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "platforms"

@@ -7,41 +7,41 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Android/Avalonia.Android` |
-| FerroUI | `src/Android/FerroUI.Android` (not created yet) |
+| FerroUI | `src/Android/FerroUI.Android` (exists) |
 | Crate | `ferroui-android` |
 | Phase / priority | 6 - mobile (Android) / P1 |
-| Files | 0/58 (0.0%) |
-| Types | 0/88 (0.0%) |
+| Files | 23/58 (39.7%) |
+| Types | 32/88 (36.4%) |
 | Members | 0/447 (0.0%) |
 
 This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
 
 ## Files
 
-### `(project root)` - files 0/20, types 0/29, members 0/110
+### `(project root)` - files 15/20, types 22/29, members 0/110
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
-| `AndroidDispatcherImpl.cs` | `android_dispatcher_impl.rs` | missing | 0/1 | `AndroidDispatcherImpl` | 11 |  |
-| `AndroidPlatform.cs` | `android_platform.rs` | missing | 0/4 | `AndroidApplicationExtensions`, `AndroidRenderingMode`, `AndroidPlatformOptions`, `AndroidPlatform` | 10 |  |
-| `AndroidRuntimePlatform.cs` | `android_runtime_platform.rs` | missing | 0/2 | `AndroidRuntimePlatformServices`, `AndroidRuntimePlatform` | 3 |  |
-| `AndroidViewControlHandle.cs` | `android_view_control_handle.rs` | missing | 0/1 | `AndroidViewControlHandle` | 4 |  |
-| `ApplicationLifetime.cs` | `application_lifetime.rs` | missing | 0/1 | `ApplicationLifetime` | 2 |  |
+| `AndroidDispatcherImpl.cs` | `android_dispatcher_impl.rs` | present | 1/1 | - | 11 |  |
+| `AndroidPlatform.cs` | `android_platform.rs` | present | 4/4 | - | 10 |  |
+| `AndroidRuntimePlatform.cs` | `android_runtime_platform.rs` | present | 2/2 | - | 3 |  |
+| `AndroidViewControlHandle.cs` | `android_view_control_handle.rs` | present | 1/1 | - | 4 |  |
+| `ApplicationLifetime.cs` | `application_lifetime.rs` | present | 1/1 | - | 2 |  |
 | `AvaloniaAccessHelper.cs` | `ferro_access_helper.rs` | missing | 0/1 | `AvaloniaAccessHelper` | 5 |  |
-| `AvaloniaActivity.cs` | `ferro_activity.rs` | missing | 0/1 | `AvaloniaActivity` | 19 |  |
-| `AvaloniaAndroidApplication.cs` | `ferro_android_application.rs` | missing | 0/2 | `IAndroidApplication`, `AvaloniaAndroidApplication<TApp>` | 6 |  |
-| `AvaloniaMainActivity.cs` | `ferro_main_activity.rs` | missing | 0/1 | `AvaloniaMainActivity` | 3 |  |
-| `AvaloniaView.Input.cs` | `ferro_view_input.rs` | missing | 0/1 | `AvaloniaView` | 7 |  |
-| `AvaloniaView.cs` | `ferro_view.rs` | missing | 0/1 | `AvaloniaView` | 10 |  |
+| `AvaloniaActivity.cs` | `ferro_activity.rs` | present | 1/1 | - | 19 |  |
+| `AvaloniaAndroidApplication.cs` | `ferro_android_application.rs` | partial | 1/2 | `IAndroidApplication` | 6 |  |
+| `AvaloniaMainActivity.cs` | `ferro_main_activity.rs` | present | 1/1 | - | 3 |  |
+| `AvaloniaView.Input.cs` | `ferro_view_input.rs` | present | 1/1 | - | 7 |  |
+| `AvaloniaView.cs` | `ferro_view.rs` | present | 1/1 | - | 10 |  |
 | `BackPressedCallback.cs` | `back_pressed_callback.rs` | missing | 0/1 | `BackPressedCallback` | 2 |  |
-| `ChoreographerTimer.cs` | `choreographer_timer.rs` | missing | 0/1 | `ChoreographerTimer` | 3 |  |
-| `CursorFactory.cs` | `cursor_factory.rs` | missing | 0/1 | `CursorFactory` | 2 |  |
+| `ChoreographerTimer.cs` | `choreographer_timer.rs` | present | 1/1 | - | 3 |  |
+| `CursorFactory.cs` | `cursor_factory.rs` | present | 1/1 | - | 2 |  |
 | `IActivityResultHandler.cs` | `i_activity_result_handler.rs` | missing | 0/1 | `IActivityResultHandler` | 2 |  |
 | `IAndroidNavigationService.cs` | `i_android_navigation_service.rs` | missing | 0/2 | `IActivityNavigationService`, `AndroidBackRequestedEventArgs` | 2 |  |
-| `IAvaloniaActivity.cs` | `i_ferro_activity.rs` | missing | 0/1 | `IAvaloniaActivity` | 3 |  |
+| `IAvaloniaActivity.cs` | `i_ferro_activity.rs` | present | 1/1 | - | 3 |  |
 | `IInitEditorInfo.cs` | `i_init_editor_info.rs` | missing | 0/1 | `IInitEditorInfo` | 1 |  |
-| `PlatformIconLoader.cs` | `platform_icon_loader.rs` | missing | 0/2 | `PlatformIconLoader`, `FakeIcon` | 5 |  |
-| `Stubs.cs` | `stubs.rs` | missing | 0/3 | `WindowingPlatformStub`, `PlatformIconLoaderStub`, `IconStub` | 10 |  |
+| `PlatformIconLoader.cs` | `platform_icon_loader.rs` | present | 2/2 | - | 5 |  |
+| `Stubs.cs` | `stubs.rs` | present | 3/3 | - | 10 |  |
 
 ### `Automation` - files 0/9, types 0/10, members 0/33
 
@@ -57,18 +57,18 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `ToggleNodeInfoProvider.cs` | `automation/toggle_node_info_provider.rs` | missing | 0/1 | `ToggleNodeInfoProvider` | 3 |  |
 | `ValueNodeInfoProvider.cs` | `automation/value_node_info_provider.rs` | missing | 0/1 | `ValueNodeInfoProvider` | 4 |  |
 
-### `Platform` - files 0/13, types 0/15, members 0/68
+### `Platform` - files 3/13, types 4/15, members 0/68
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
-| `AndroidActivatableLifetime.cs` | `platform/android_activatable_lifetime.rs` | missing | 0/1 | `AndroidActivatableLifetime` | 3 |  |
+| `AndroidActivatableLifetime.cs` | `platform/android_activatable_lifetime.rs` | present | 1/1 | - | 3 |  |
 | `AndroidDataFormatHelper.cs` | `platform/android_data_format_helper.rs` | missing | 0/1 | `AndroidDataFormatHelper` | 2 |  |
-| `AndroidInsetsManager.cs` | `platform/android_insets_manager.rs` | missing | 0/2 | `AndroidInsetsManager`, `AnimationEasing` | 19 |  |
+| `AndroidInsetsManager.cs` | `platform/android_insets_manager.rs` | partial | 1/2 | `AnimationEasing` | 19 |  |
 | `AndroidLauncher.cs` | `platform/android_launcher.rs` | missing | 0/1 | `AndroidLauncher` | 3 |  |
 | `AndroidNativeControlHostImpl.cs` | `platform/android_native_control_host_impl.rs` | missing | 0/1 | `AndroidNativeControlHostImpl` | 5 |  |
 | `AndroidPlatformFeedback.cs` | `platform/android_platform_feedback.rs` | missing | 0/1 | `AndroidPlatformFeedback` | 2 |  |
 | `AndroidPlatformSettings.cs` | `platform/android_platform_settings.rs` | missing | 0/1 | `AndroidPlatformSettings` | 7 |  |
-| `AndroidScreens.cs` | `platform/android_screens.rs` | missing | 0/2 | `AndroidScreen`, `AndroidScreens` | 10 |  |
+| `AndroidScreens.cs` | `platform/android_screens.rs` | present | 2/2 | - | 10 |  |
 | `AndroidSystemNavigationManager.cs` | `platform/android_system_navigation_manager.rs` | missing | 0/1 | `AndroidSystemNavigationManagerImpl` | 3 |  |
 | `ClipDataItemToDataTransferItemWrapper.cs` | `platform/clip_data_item_to_data_transfer_item_wrapper.rs` | missing | 0/1 | `ClipDataItemToDataTransferItemWrapper` | 3 |  |
 | `ClipDataToDataTransferWrapper.cs` | `platform/clip_data_to_data_transfer_wrapper.rs` | missing | 0/1 | `ClipDataToDataTransferWrapper` | 5 |  |
@@ -85,22 +85,22 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `EditCommand.cs` | `platform/input/edit_command.rs` | missing | 0/9 | `EditCommand`, `SelectionCommand`, `CompositionRegionCommand`, `DeleteRegionCommand`, `DeleteRegionInCodePointsCommand`, `CompositionTextCommand`, `CommitTextCommand`, `FinishComposingCommand`, `KeyEventCommand` | 16 |  |
 | `TextEditBuffer.cs` | `platform/input/text_edit_buffer.rs` | missing | 0/1 | `TextEditBuffer` | 11 |  |
 
-### `Platform/SkiaPlatform` - files 0/4, types 0/7, members 0/83
+### `Platform/SkiaPlatform` - files 4/4, types 5/7, members 0/83
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
-| `AndroidFramebuffer.cs` | `platform/skia_platform/android_framebuffer.rs` | missing | 0/4 | `AndroidFramebuffer`, `AndroidFramebuffer.AndroidPixelFormat`, `AndroidFramebuffer.ARect`, `AndroidFramebuffer.ANativeWindow_Buffer` | 29 |  |
-| `FramebufferManager.cs` | `platform/skia_platform/framebuffer_manager.rs` | missing | 0/1 | `FramebufferManager` | 3 |  |
-| `InvalidationAwareSurfaceView.cs` | `platform/skia_platform/invalidation_aware_surface_view.rs` | missing | 0/1 | `InvalidationAwareSurfaceView` | 13 |  |
-| `TopLevelImpl.cs` | `platform/skia_platform/top_level_impl.rs` | missing | 0/1 | `TopLevelImpl` | 38 |  |
+| `AndroidFramebuffer.cs` | `platform/skia_platform/android_framebuffer.rs` | partial | 2/4 | `AndroidFramebuffer.ARect`, `AndroidFramebuffer.ANativeWindow_Buffer` | 29 |  |
+| `FramebufferManager.cs` | `platform/skia_platform/framebuffer_manager.rs` | present | 1/1 | - | 3 |  |
+| `InvalidationAwareSurfaceView.cs` | `platform/skia_platform/invalidation_aware_surface_view.rs` | present | 1/1 | - | 13 |  |
+| `TopLevelImpl.cs` | `platform/skia_platform/top_level_impl.rs` | present | 1/1 | - | 38 |  |
 
-### `Platform/Specific/Helpers` - files 0/3, types 0/3, members 0/8
+### `Platform/Specific/Helpers` - files 1/3, types 1/3, members 0/8
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
 | `AndroidKeyInterop.cs` | `platform/specific/helpers/android_key_interop.rs` | missing | 0/1 | `AndroidKeyInterop` | 1 |  |
 | `AndroidKeyboardEventsHelper.cs` | `platform/specific/helpers/android_keyboard_events_helper.rs` | missing | 0/1 | `AndroidKeyboardEventsHelper<TView>` | 4 |  |
-| `AndroidMotionEventsHelper.cs` | `platform/specific/helpers/android_motion_events_helper.rs` | missing | 0/1 | `AndroidMotionEventsHelper` | 3 |  |
+| `AndroidMotionEventsHelper.cs` | `platform/specific/helpers/android_motion_events_helper.rs` | present | 1/1 | - | 3 |  |
 
 ### `Platform/Storage` - files 0/2, types 0/5, members 0/50
 
@@ -115,3 +115,18 @@ This backend is being ported. It is tracked at file and type granularity: the me
 |---|---|---|---|---|---:|---|
 | `VulkanNativeInterop.cs` | `platform/vulkan/vulkan_native_interop.rs` | missing | 0/2 | `AndroidVulkanInterface`, `VkAndroidSurfaceCreateInfoKHR` | 7 |  |
 | `VulkanSupport.cs` | `platform/vulkan/vulkan_support.rs` | missing | 0/2 | `VulkanSupport`, `VulkanSupport.VulkanSurfaceFactory` | 3 |  |
+
+## Rust-only files
+
+Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
+
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `android_egl.rs` | **unmapped** | `AndroidEglPlatformGraphics`, `EglGetProcAddress`, `EglLibrary` |
+| `interop/java.rs` | **unmapped** | `Attachment`, `JavaClass`, `JavaLocal`, `JavaObject`, `JavaRef`, `JavaValue`, `NativeMethod`, `Returned`, `Target` |
+| `interop/natives.rs` | **unmapped** | `JBoolean` |
+| `interop/ndk.rs` | **unmapped** | `AChoreographer`, `ALooper`, `ANativeWindow`, `ANativeWindowBuffer`, `ARect`, `Choreographer`, `FrameCallback`, `FrameCallback64`, `IFrameCallback`, `LockedBuffer`, `NativeWindow`, `PostFrameCallback64` |
+| `interop/signature.rs` | **unmapped** | `JavaType` |
+| `log.rs` | **unmapped** | `LogPriority` |
+
+Tests, examples and build scripts (not scanned): `examples/android_smoke.rs`.
