@@ -16,7 +16,7 @@ use ferroui_base::rendering::testing::ManualRenderLoop;
 use ferroui_base::styling::IThemeVariantHost;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{FerroLocator, Point, Rect, Ref, Visual};
-use ferroui_controls::platform::{ITopLevelImpl, IWindowImpl};
+use ferroui_controls::platform::{IPopupImpl, ITopLevelImpl, IWindowImpl};
 use ferroui_controls::presentation_source::IRendererFactory;
 use ferroui_controls::testing::{
     CompositorTestServices, MockWindowImpl, MockWindowingPlatform, TestLogSink, UnitTestApplication, UnitTestApplicationScope,
@@ -91,6 +91,18 @@ impl Shell {
                 let surface = FrameSurface::new();
                 window_impl.setup_surfaces(vec![surface.clone() as Arc<dyn IPlatformRenderSurface>]);
                 windows.borrow_mut().push((window_impl.clone(), surface));
+                // The popups of the window render through the compositor too (a popup the
+                // mock creates on its own has none, and a control that opens one could not
+                // create its renderer).
+                let compositor = compositor.clone();
+                let weak_window_impl = Rc::downgrade(&window_impl);
+                window_impl.setup_create_popup(move |_| {
+                    let parent: Rc<dyn ITopLevelImpl> = weak_window_impl.upgrade()?;
+                    let popup = MockWindowingPlatform::create_popup_mock(parent);
+                    popup.setup_compositor(compositor.borrow().clone());
+                    popup.setup_surfaces(vec![FrameSurface::new() as Arc<dyn IPlatformRenderSurface>]);
+                    Some(popup as Rc<dyn IPopupImpl>)
+                });
                 window_impl as Rc<dyn IWindowImpl>
             })
         };

@@ -52,6 +52,7 @@ members = [
     "samples/TextTestApp",
     "samples/Sandbox",
     "samples/AppWithoutLifetime",
+    "samples/IntegrationTestApp",
 ]
 
 [workspace.package]
