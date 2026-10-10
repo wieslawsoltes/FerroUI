@@ -17,10 +17,8 @@
 //! without it); with `FERROUI_SMOKE_EXIT_MS=<n>` the process exits after
 //! `n` milliseconds, and without it after the last page.
 //!
-//! Not ported yet: the native control samples (`EmbedSample.iOS.cs`: a
-//! web view and a button as native controls), which wait for the native
-//! control host of the platform (stage 2 of
-//! `docs/porting/ios-platform.md`), and the launch screen
+//! The native control demo of iOS (`EmbedSampleIos`) is in
+//! [`embed_sample_ios`]. Not ported: the launch screen
 //! (`Resources/LaunchScreen.xib`: the bundle states an empty launch
 //! screen instead).
 
@@ -35,13 +33,19 @@ fn main() {
 }
 
 #[cfg(target_os = "ios")]
+mod embed_sample_ios;
+
+#[cfg(target_os = "ios")]
 mod host {
+    use crate::embed_sample_ios::EmbedSampleIos;
+    use control_catalog::pages::EmbedSample;
     use control_catalog::models::PageItem;
     use control_catalog::view_models::MainWindowViewModel;
     use control_catalog::App;
     use ferroui_base::logging::LogEventLevel;
     use ferroui_base::metadata::from_markup_value;
     use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
+    use ferroui_base::Thickness;
     use ferroui_controls::{AppBuilder, Application, PageNavigationHost};
     use ferroui_ios::{FerroApplicationDelegate, IFerroAppDelegate, IosApplicationExtensions};
     use std::cell::Cell;
@@ -58,7 +62,12 @@ mod host {
         }
 
         fn customize_app_builder(&self, builder: AppBuilder) -> AppBuilder {
-            builder.after_setup(|_| smoke_run()).log_to_trace(LogEventLevel::Warning, &[])
+            builder
+                .after_setup(|_| {
+                    EmbedSample::set_implementation(Some(Rc::new(EmbedSampleIos)));
+                })
+                .after_setup(|_| smoke_run())
+                .log_to_trace(LogEventLevel::Warning, &[])
         }
     }
 
@@ -106,6 +115,52 @@ mod host {
         selected
     }
 
+    /// The views of UIKit under the view of the application: what the
+    /// native control hosts of the page that is shown attached, each with
+    /// its class, its frame and whether it is hidden. For the smoke run,
+    /// whose screenshots a person compares with it.
+    fn native_views() -> String {
+        let lifetime = Application::current().and_then(|application| application.application_lifetime());
+        let view = lifetime
+            .as_ref()
+            .and_then(|lifetime| lifetime.as_any().downcast_ref::<ferroui_ios::single_view_lifetime::SingleViewLifetime>())
+            .and_then(|lifetime| lifetime.view());
+        let Some(view) = view else {
+            return "no view".to_string();
+        };
+        let subviews: Vec<String> = view
+            .subviews()
+            .iter()
+            .map(|subview| {
+                let frame = subview.frame();
+                format!(
+                    "{} at ({}, {}) {}x{}{}{}",
+                    subview.class().name().to_string_lossy(),
+                    frame.origin.x,
+                    frame.origin.y,
+                    frame.size.width,
+                    frame.size.height,
+                    if subview.isHidden() { ", hidden" } else { "" },
+                    if subview.window().is_some() { "" } else { ", in no window" }
+                )
+            })
+            .collect();
+        format!("{} [{}]", subviews.len(), subviews.join("; "))
+    }
+
+    /// Changes the bounds of the main view by a point and back at the
+    /// next change, so that what depends on the bounds of its ancestors
+    /// is placed again.
+    fn nudge_layout() {
+        let lifetime = Application::current().and_then(|application| application.application_lifetime());
+        let main_view =
+            lifetime.as_ref().and_then(|lifetime| lifetime.as_single_view_application_lifetime()).and_then(|l| l.main_view());
+        if let Some(main_view) = main_view {
+            let nudged = main_view.margin().bottom != 0.0;
+            main_view.set_margin(Thickness::new(0.0, 0.0, 0.0, if nudged { 0.0 } else { 1.0 }));
+        }
+    }
+
     /// The smoke run asked for with `FERROUI_SMOKE_PAGES`,
     /// `FERROUI_SMOKE_PAGE_NAMES` and `FERROUI_SMOKE_EXIT_MS`.
     fn smoke_run() {
@@ -131,6 +186,31 @@ mod host {
                         println!("Selecting {}", item.header());
                         view_model.navigate_to_item(item);
                         next.set(index + 1);
+                        // A native control host places its control when
+                        // its bounds or those of an ancestor change, not
+                        // when a render transform does: a page that
+                        // slides in keeps its native controls where the
+                        // page was when it was laid out, until the next
+                        // such change (as in the reference). So that the
+                        // pictures of the smoke run show the page as a
+                        // person sees it after any change of layout, the
+                        // main view is laid out once more when the
+                        // transition is over.
+                        let header = item.header();
+                        let _relayout = DispatcherTimer::run_once(
+                            move || {
+                                println!("Native views of {header} before a layout: {}", native_views());
+                                nudge_layout();
+                                let header = header.clone();
+                                let _report = DispatcherTimer::run_once(
+                                    move || println!("Native views of {header} after a layout: {}", native_views()),
+                                    Duration::from_millis(500),
+                                    DispatcherPriority::NORMAL,
+                                );
+                            },
+                            Duration::from_millis(ms / 2),
+                            DispatcherPriority::NORMAL,
+                        );
                         return true;
                     }
                     println!("Selected every page ({})", pages.len());

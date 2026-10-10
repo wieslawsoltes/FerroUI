@@ -25,6 +25,7 @@ pub mod extensions;
 pub mod ferro_app_delegate;
 pub mod input_handler;
 pub mod insets_manager;
+pub mod native_control_host_impl;
 pub mod ios_platform_feedback;
 pub mod ios_screens;
 pub mod platform;
@@ -50,8 +51,6 @@ pub mod ferro_view;
 pub mod ios_launcher;
 #[cfg(target_os = "ios")]
 pub mod metal;
-#[cfg(target_os = "ios")]
-pub mod native_control_host_impl;
 #[cfg(target_os = "ios")]
 pub mod single_view_lifetime;
 
