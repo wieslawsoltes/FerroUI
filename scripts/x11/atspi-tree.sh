@@ -33,9 +33,10 @@ text() {
   sed "s/^(<\\{0,1\\}['\"]//; s/['\"]>\\{0,1\\},)\$//"
 }
 
-# The references of a reply, one per line: "name path"
+# The references of a reply, one per line: "name path". gdbus writes the type of the path
+# ("objectpath") for the first element of an array only.
 references() {
-  grep -o "('[^']*', objectpath '[^']*')" | sed "s/^('//; s/', objectpath '/ /; s/')\$//"
+  grep -oE "\('[^']*', (objectpath )?'[^']*'\)" | sed -E "s/^\('//; s/', (objectpath )?'/ /; s/'\)\$//"
 }
 
 walk() {
