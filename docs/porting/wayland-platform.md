@@ -1,6 +1,6 @@
 # The Linux platform: Wayland
 
-The design of the Wayland backend of FerroUI, the decisions it rests on, the file table of the port and its stages. Upstream: `src/Avalonia.Wayland` at the tracked commit (`TRACKING.md`): 84 source files (11 341 lines), a README and the project file. The backend shares the FreeDesktop crate with the X11 backend (`x11-platform.md`), and three source files of the X11 project, which upstream compiles into both.
+The design of the Wayland backend of FerroUI, the decisions it rests on, the file table of the port and its stages. Upstream: `src/Avalonia.Wayland` at the tracked commit (`TRACKING.md`): 84 source files (11 341 lines), a README and the project file; the tracker counts the 81 files that declare types, with 123 types and 816 members (`tracking/Avalonia.Wayland.md`), and `tests/Avalonia.Wayland.UnitTests` has 12 tests in 2 files. The backend shares the FreeDesktop crate with the X11 backend (`x11-platform.md`), and three source files of the X11 project, which upstream compiles into both.
 
 Marks, as in `x11-platform.md`: **[V]** verified from sources (the upstream files, the sources of a crate in the cargo registry, `cargo info`), **[M]** measured here (a build or a test run on the development machine, a Mac), **[R]** recalled and not verified here, **[CI]** shown by the CI job on a compositor, **[VM]** measured in the virtual machine (Ubuntu 24.04, ARM64).
 
