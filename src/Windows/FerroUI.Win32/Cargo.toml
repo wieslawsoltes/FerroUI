@@ -1,0 +1,47 @@
+[package]
+name = "ferroui-win32"
+description = "The Windows platform backend: windows, the message loop, input, screens and the software surface over the Win32 API"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+bitflags.workspace = true
+
+# The bindings of the Windows API (docs/porting/win32-platform.md, section 2): declarations only,
+# linked through `windows-link` without import libraries, so the crate is checked for a Windows
+# target on any host. One feature per API namespace the backend calls.
+[target.'cfg(windows)'.dependencies]
+windows-sys = { workspace = true, features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Dwm",
+    "Win32_Graphics_Gdi",
+    "Win32_System_DataExchange",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Memory",
+    "Win32_System_SystemInformation",
+    "Win32_System_Threading",
+    "Win32_UI_Controls",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_Input_Pointer",
+    "Win32_UI_Input_Touch",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+[dev-dependencies]
+# The example of a window draws through the render interface of the Vello backend in its CPU
+# mode: a renderer without C or C++ sources, so the example is checked for a Windows target on
+# any host like the crate itself (the Skia backend is not: its bindings are built with a C++
+# toolchain of the target).
+ferroui-vello.workspace = true
+
+[[example]]
+name = "win32_window"
+path = "examples/win32_window.rs"

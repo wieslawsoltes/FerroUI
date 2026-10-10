@@ -8,7 +8,7 @@ pub trait AppBuilderDesktopExtensions {
     ///
     /// # Panics
     /// Panics on an operating system whose windowing backend is not
-    /// supported yet (everything but macOS).
+    /// supported yet (everything but macOS and Windows).
     fn use_platform_detect(&self) -> AppBuilder;
 }
 
@@ -23,16 +23,22 @@ impl AppBuilderDesktopExtensions for AppBuilder {
             load_skia(self);
         }
 
-        #[cfg(not(target_os = "macos"))]
+        #[cfg(windows)]
+        {
+            load_win32(self);
+            load_skia(self);
+        }
+
+        #[cfg(not(any(target_os = "macos", windows)))]
         {
             panic!(
                 "use_platform_detect: the windowing backend for this operating system ({}) is not supported yet; \
-                 only macOS is.",
+                 only macOS and Windows are.",
                 std::env::consts::OS
             );
         }
 
-        #[cfg(target_os = "macos")]
+        #[cfg(any(target_os = "macos", windows))]
         self.clone()
     }
 }
@@ -43,7 +49,13 @@ fn load_ferro_native(builder: &AppBuilder) {
     builder.use_ferro_native();
 }
 
-#[cfg(target_os = "macos")]
+#[cfg(windows)]
+fn load_win32(builder: &AppBuilder) {
+    use ferroui_win32::Win32ApplicationExtensions;
+    builder.use_win32();
+}
+
+#[cfg(any(target_os = "macos", windows))]
 fn load_skia(builder: &AppBuilder) {
     use ferroui_skia::SkiaApplicationExtensions;
     builder.use_skia();
@@ -66,6 +78,28 @@ mod tests {
         assert_eq!(builder.text_shaping_subsystem_name().as_deref(), Some("HarfBuzz"));
         assert_eq!(builder.rendering_subsystem_name().as_deref(), Some("Skia"));
         assert_eq!(builder.windowing_subsystem_name().as_deref(), Some("FerroNative"));
+        assert_eq!(builder.runtime_platform_services_name().as_deref(), Some("StandardRuntimePlatform"));
+        assert!(builder.text_shaping_subsystem_initializer().is_some());
+        assert!(builder.rendering_subsystem_initializer().is_some());
+        assert!(builder.windowing_subsystem_initializer().is_some());
+        assert!(builder.runtime_platform_services_initializer().is_some());
+        // Nothing is initialized until the application is set up.
+        assert!(builder.instance().is_none());
+    }
+}
+
+#[cfg(all(test, windows))]
+mod windows_tests {
+    use super::*;
+    use ferroui_controls::Application;
+
+    #[test]
+    fn platform_detect_selects_the_windows_subsystems() {
+        let builder = AppBuilder::configure::<Application>().use_platform_detect();
+
+        assert_eq!(builder.text_shaping_subsystem_name().as_deref(), Some("HarfBuzz"));
+        assert_eq!(builder.rendering_subsystem_name().as_deref(), Some("Skia"));
+        assert_eq!(builder.windowing_subsystem_name().as_deref(), Some("Win32"));
         assert_eq!(builder.runtime_platform_services_name().as_deref(), Some("StandardRuntimePlatform"));
         assert!(builder.text_shaping_subsystem_initializer().is_some());
         assert!(builder.rendering_subsystem_initializer().is_some());

@@ -8807,12 +8807,12 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    0,
+    23,
     95,
     0
    ],
    "types": [
-    0,
+    80,
     276,
     0
    ],
@@ -8835,8 +8835,80 @@
    ],
    "notApplicableFiles": 0,
    "matchKinds": {},
-   "presentFiles": {},
-   "rustOnly": []
+   "presentFiles": {
+    "ClipboardImpl.cs": [
+     "clipboard_impl.rs"
+    ],
+    "CursorFactory.cs": [
+     "cursor_factory.rs"
+    ],
+    "EmbeddedWindowImpl.cs": [
+     "embedded_window_impl.rs"
+    ],
+    "FramebufferManager.cs": [
+     "framebuffer_manager.rs"
+    ],
+    "Input/KeyInterop.cs": [
+     "input/key_interop.rs"
+    ],
+    "Input/WindowsKeyboardDevice.cs": [
+     "input/windows_keyboard_device.rs"
+    ],
+    "Input/WindowsMouseDevice.cs": [
+     "input/windows_mouse_device.rs"
+    ],
+    "Interop/UnmanagedMethods.cs": [
+     "interop/unmanaged_methods.rs"
+    ],
+    "OffscreenParentWindow.cs": [
+     "offscreen_parent_window.rs"
+    ],
+    "PlatformConstants.cs": [
+     "platform_constants.rs"
+    ],
+    "PopupImpl.cs": [
+     "popup_impl.rs"
+    ],
+    "ScreenImpl.cs": [
+     "screen_impl.rs"
+    ],
+    "SimpleWindow.cs": [
+     "simple_window.rs"
+    ],
+    "Win32DispatcherImpl.cs": [
+     "win32_dispatcher_impl.rs"
+    ],
+    "Win32Platform.cs": [
+     "win32_platform.rs"
+    ],
+    "Win32PlatformOptions.cs": [
+     "win32_platform_options.rs"
+    ],
+    "Win32PlatformSettings.cs": [
+     "win32_platform_settings.rs"
+    ],
+    "Win32TopLevelSceneInfo.cs": [
+     "win32_top_level_scene_info.rs"
+    ],
+    "Win32TypeExtensions.cs": [
+     "win32_type_extensions.rs"
+    ],
+    "WinScreen.cs": [
+     "win_screen.rs"
+    ],
+    "WindowImpl.AppWndProc.cs": [
+     "window_impl_app_wnd_proc.rs"
+    ],
+    "WindowImpl.WndProc.cs": [
+     "window_impl.rs"
+    ],
+    "WindowImpl.cs": [
+     "window_impl.rs"
+    ]
+   },
+   "rustOnly": [
+    "wnd_proc_guard.rs"
+   ]
   },
   {
    "name": "Avalonia.Win32.Automation",

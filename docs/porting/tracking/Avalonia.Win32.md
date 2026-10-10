@@ -7,34 +7,34 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Windows/Avalonia.Win32` |
-| FerroUI | `src/Windows/FerroUI.Win32` (not created yet) |
+| FerroUI | `src/Windows/FerroUI.Win32` (exists) |
 | Crate | `ferroui-win32` |
 | Phase / priority | 1 - desktop (Windows) / P0 |
-| Files | 0/95 (0.0%) |
-| Types | 0/276 (0.0%) |
+| Files | 23/95 (24.2%) |
+| Types | 80/276 (29.0%) |
 | Members | 0/2605 (0.0%) |
 
 This backend is in scope. Its upstream extraction holds files, types and member counts but no member names yet, so files and types are matched and the member counts are totals: run `scripts/port-status/run.sh --force` (needs the .NET SDK; `scripts/api-extract/projects.json` already asks for full detail) to track its members.
 
 ## Files
 
-### `(project root)` - files 0/43, types 0/52, members 0/358
+### `(project root)` - files 19/43, types 26/52, members 0/358
 
 | Upstream file | Types | Members | Status |
 |---|---|---|---|
 | `AngleOptions.cs` | `AngleOptions`, `AngleOptions.PlatformApi` | 4 | missing |
 | `ClipboardFormatRegistry.cs` | `ClipboardFormatRegistry` | 9 | missing |
-| `ClipboardImpl.cs` | `ClipboardImpl` | 5 | missing |
-| `CursorFactory.cs` | `CursorFactory`, `CursorImpl` | 9 | missing |
+| `ClipboardImpl.cs` | `ClipboardImpl` | 5 | `clipboard_impl.rs`: types 1/1 |
+| `CursorFactory.cs` | `CursorFactory`, `CursorImpl` | 9 | `cursor_factory.rs`: types 2/2 |
 | `DataTransferToOleDataObjectWrapper.cs` | `DataTransferToOleDataObjectWrapper` | 15 | missing |
 | `DragSource.cs` | `DragSource` | 1 | missing |
-| `EmbeddedWindowImpl.cs` | `EmbeddedWindowImpl` | 2 | missing |
-| `FramebufferManager.cs` | `FramebufferManager` | 4 | missing |
+| `EmbeddedWindowImpl.cs` | `EmbeddedWindowImpl` | 2 | `embedded_window_impl.rs`: types 1/1 |
+| `FramebufferManager.cs` | `FramebufferManager` | 4 | `framebuffer_manager.rs`: types 1/1 |
 | `IBlurHost.cs` | `BlurEffect`, `ICompositionEffectsSurface` | 6 | missing |
 | `IWindowsSurfaceFactory.cs` | `IWindowsSurfaceFactory` | 2 | missing |
 | `IconImpl.cs` | `IconImpl` | 6 | missing |
 | `NonPumpingWaitHelperImpl.cs` | `NonPumpingWaitHelperImpl` | 2 | missing |
-| `OffscreenParentWindow.cs` | `OffscreenParentWindow` | 1 | missing |
+| `OffscreenParentWindow.cs` | `OffscreenParentWindow` | 1 | `offscreen_parent_window.rs`: types 1/1 |
 | `OleContext.cs` | `OleContext` | 3 | missing |
 | `OleDataObjectHelper.cs` | `OleDataObjectHelper` | 6 | missing |
 | `OleDataObjectToDataTransferItemWrapper.cs` | `OleDataObjectToDataTransferItemWrapper` | 3 | missing |
@@ -42,27 +42,27 @@ This backend is in scope. Its upstream extraction holds files, types and member 
 | `OleDragSource.cs` | `OleDragSource` | 2 | missing |
 | `OleDropTarget.cs` | `OleDropTarget` | 9 | missing |
 | `OleVirtualFileData.cs` | `OleVirtualFileData`, `OleVirtualFileData.Descriptor` | 7 | missing |
-| `PlatformConstants.cs` | `PlatformConstants` | 7 | missing |
-| `PopupImpl.cs` | `PopupImpl` | 10 | missing |
-| `ScreenImpl.cs` | `ScreenImpl` | 10 | missing |
-| `SimpleWindow.cs` | `SimpleWindow` | 4 | missing |
+| `PlatformConstants.cs` | `PlatformConstants` | 7 | `platform_constants.rs`: types 1/1 |
+| `PopupImpl.cs` | `PopupImpl` | 10 | `popup_impl.rs`: types 1/1 |
+| `ScreenImpl.cs` | `ScreenImpl` | 10 | `screen_impl.rs`: types 1/1 |
+| `SimpleWindow.cs` | `SimpleWindow` | 4 | `simple_window.rs`: types 1/1 |
 | `SwapChainTopLevelImpl.cs` | `SwapChainTopLevelImpl` | 28 | missing |
 | `TrayIconImpl.cs` | `TrayIconImpl` | 11 | missing |
-| `Win32DispatcherImpl.cs` | `Win32DispatcherImpl` | 14 | missing |
+| `Win32DispatcherImpl.cs` | `Win32DispatcherImpl` | 14 | `win32_dispatcher_impl.rs`: types 1/1 |
 | `Win32GlManager.cs` | `Win32GlManager` | 1 | missing |
 | `Win32NativeControlHost.cs` | `Win32NativeControlHost` | 6 | missing |
 | `Win32NativeToManagedMenuExporter.cs` | `Win32NativeToManagedMenuExporter` | 2 | missing |
-| `Win32Platform.cs` | `Win32ApplicationExtensions`, `Win32Platform` | 23 | missing |
-| `Win32PlatformOptions.cs` | `Win32RenderingMode`, `Win32DpiAwareness`, `Win32CompositionMode`, `Win32PlatformOptions` | 20 | missing |
-| `Win32PlatformSettings.cs` | `Win32PlatformSettings` | 7 | missing |
+| `Win32Platform.cs` | `Win32ApplicationExtensions`, `Win32Platform` | 23 | `win32_platform.rs`: types 2/2 |
+| `Win32PlatformOptions.cs` | `Win32RenderingMode`, `Win32DpiAwareness`, `Win32CompositionMode`, `Win32PlatformOptions` | 20 | `win32_platform_options.rs`: types 4/4 |
+| `Win32PlatformSettings.cs` | `Win32PlatformSettings` | 7 | `win32_platform_settings.rs`: types 1/1 |
 | `Win32StorageProvider.cs` | `Win32StorageProvider` | 7 | missing |
-| `Win32TopLevelSceneInfo.cs` | `Win32TopLevelSceneInfo` | 2 | missing |
-| `Win32TypeExtensions.cs` | `Win32TypeExtensions` | 2 | missing |
-| `WinScreen.cs` | `WinScreen` | 3 | missing |
-| `WindowImpl.AppWndProc.cs` | `WindowImpl` | 3 | missing |
-| `WindowImpl.CustomCaptionProc.cs` | `WindowImpl` | 1 | missing |
-| `WindowImpl.WndProc.cs` | `WindowImpl` | 3 | missing |
-| `WindowImpl.cs` | `WindowImpl`, `WindowImpl.WindowProperties` | 90 | missing |
+| `Win32TopLevelSceneInfo.cs` | `Win32TopLevelSceneInfo` | 2 | `win32_top_level_scene_info.rs`: types 1/1 |
+| `Win32TypeExtensions.cs` | `Win32TypeExtensions` | 2 | `win32_type_extensions.rs`: types 1/1 |
+| `WinScreen.cs` | `WinScreen` | 3 | `win_screen.rs`: types 1/1 |
+| `WindowImpl.AppWndProc.cs` | `WindowImpl` | 3 | `window_impl_app_wnd_proc.rs`: types 1/1 |
+| `WindowImpl.CustomCaptionProc.cs` | `WindowImpl` | 1 | missing (types 1/1 elsewhere in the crate) |
+| `WindowImpl.WndProc.cs` | `WindowImpl` | 3 | `window_impl.rs`: types 1/1 |
+| `WindowImpl.cs` | `WindowImpl`, `WindowImpl.WindowProperties` | 90 | `window_impl.rs`: types 2/2 |
 | `WindowsMountedVolumeInfoListener.cs` | `WindowsMountedVolumeInfoListener` | 3 | missing |
 | `WindowsMountedVolumeInfoProvider.cs` | `WindowsMountedVolumeInfoProvider` | 1 | missing |
 
@@ -89,23 +89,23 @@ This backend is in scope. Its upstream extraction holds files, types and member 
 | `DxgiSwapchainWindow.cs` | `DxgiSwapchainWindow` | 2 | missing |
 | `IDirect3D11TexturePlatformSurface.cs` | `IDirect3D11TexturePlatformSurface`, `IDirect3D11TexturePlatformSurface2`, `IDirect3D11TextureRenderTarget`, `IDirect3D11TextureRenderTarget2`, `IDirect3D11TextureRenderTargetRenderSession` | 8 | missing |
 
-### `Input` - files 0/6, types 0/7, members 0/38
+### `Input` - files 3/6, types 4/7, members 0/38
 
 | Upstream file | Types | Members | Status |
 |---|---|---|---|
 | `Imm32CaretManager.cs` | `Imm32CaretManager` | 3 | missing |
 | `Imm32InputMethod.cs` | `Imm32InputMethod` | 22 | missing |
-| `KeyInterop.cs` | `KeyInterop` | 5 | missing |
+| `KeyInterop.cs` | `KeyInterop` | 5 | `input/key_interop.rs`: types 1/1 |
 | `WindowsInputPane.cs` | `WindowsInputPane` | 2 | missing |
-| `WindowsKeyboardDevice.cs` | `WindowsKeyboardDevice` | 2 | missing |
-| `WindowsMouseDevice.cs` | `WindowsMouseDevice`, `WindowsMouseDevice.WindowsMousePointer` | 4 | missing |
+| `WindowsKeyboardDevice.cs` | `WindowsKeyboardDevice` | 2 | `input/windows_keyboard_device.rs`: types 1/1 |
+| `WindowsMouseDevice.cs` | `WindowsMouseDevice`, `WindowsMouseDevice.WindowsMousePointer` | 4 | `input/windows_mouse_device.rs`: types 2/2 |
 
-### `Interop` - files 0/3, types 0/119, members 0/1564
+### `Interop` - files 1/3, types 50/119, members 0/1564
 
 | Upstream file | Types | Members | Status |
 |---|---|---|---|
 | `TaskBarList.cs` | `TaskBarList` | 2 | missing |
-| `UnmanagedMethods.cs` | `UnmanagedMethods`, `UnmanagedMethods.TimerProc`, `UnmanagedMethods.TimeCallback`, `UnmanagedMethods.WaitOrTimerCallback`, `UnmanagedMethods.WndProc`, `UnmanagedMethods.Cursor`, `UnmanagedMethods.MouseActivate`, `UnmanagedMethods.SetWindowPosFlags`, `UnmanagedMethods.WindowPosZOrder`, `UnmanagedMethods.SizeCommand`, `UnmanagedMethods.ShowWindowCommand`, `UnmanagedMethods.SystemMetric`, `UnmanagedMethods.ModifierKeys`, `UnmanagedMethods.VirtualKeyStates`, `UnmanagedMethods.WindowActivate`, `UnmanagedMethods.HitTestValues`, `UnmanagedMethods.WindowStyles`, `UnmanagedMethods.ClassStyles`, `UnmanagedMethods.PointerDeviceChangeFlags`, `UnmanagedMethods.PointerInputType`, `UnmanagedMethods.WindowsMessage`, `UnmanagedMethods.SystemParametersInfo`, `UnmanagedMethods.DwmWindowAttribute`, `UnmanagedMethods.DwmWindowCornerPreference`, `UnmanagedMethods.DwmNCRenderingPolicy`, `UnmanagedMethods.MapVirtualKeyMapTypes`, `UnmanagedMethods.BitmapCompressionMode`, `UnmanagedMethods.BitmapColorSpace`, `UnmanagedMethods.BitmapIntent`, `UnmanagedMethods.DIBColorTable`, `UnmanagedMethods.WindowLongParam`, `UnmanagedMethods.MenuCharParam`, `UnmanagedMethods.SysCommands`, `UnmanagedMethods.TrackPopupMenuFlags`, `UnmanagedMethods.PointerFlags`, `UnmanagedMethods.PointerButtonChangeType`, `UnmanagedMethods.PenFlags`, `UnmanagedMethods.PenMask`, `UnmanagedMethods.TouchFlags`, `UnmanagedMethods.TouchMask`, `UnmanagedMethods.POINTER_TOUCH_INFO`, `UnmanagedMethods.POINTER_PEN_INFO`, `UnmanagedMethods.POINTER_INFO`, `UnmanagedMethods.RGBQUAD`, `UnmanagedMethods.BITMAP`, `UnmanagedMethods.BITMAPINFOHEADER`, `UnmanagedMethods.BITMAPV5HEADER`, `UnmanagedMethods.CIEXYZTRIPLE`, `UnmanagedMethods.CIEXYZ`, `UnmanagedMethods.MINMAXINFO`, `UnmanagedMethods.MOUSEMOVEPOINT`, `UnmanagedMethods.EnumWindowsProc`, `UnmanagedMethods.GetAncestorFlags`, `UnmanagedMethods.ClassLongIndex`, `UnmanagedMethods.MessageFilterFlag`, `UnmanagedMethods.LayeredWindowFlags`, `UnmanagedMethods.DWM_BB`, `UnmanagedMethods.DWM_BLURBEHIND`, `UnmanagedMethods.RTL_OSVERSIONINFOEX`, `UnmanagedMethods.QueueStatusFlags`, `UnmanagedMethods.MsgWaitForMultipleObjectsFlags`, `UnmanagedMethods.GCS`, `UnmanagedMethods.CANDIDATEFORM`, `UnmanagedMethods.COMPOSITIONFORM`, `UnmanagedMethods.LOGFONT`, `UnmanagedMethods.WindowCompositionAttributeData`, `UnmanagedMethods.WindowCompositionAttribute`, `UnmanagedMethods.AccentState`, `UnmanagedMethods.AccentFlags`, `UnmanagedMethods.AccentPolicy`, `UnmanagedMethods.MARGINS`, `UnmanagedMethods.MONITOR`, `UnmanagedMethods.MONITORINFOEX`, `UnmanagedMethods.DEVICECAP`, `UnmanagedMethods.PROCESS_DPI_AWARENESS`, `UnmanagedMethods.MONITOR_DPI_TYPE`, `UnmanagedMethods.ClipboardFormat`, `UnmanagedMethods.MSG`, `UnmanagedMethods.PAINTSTRUCT`, `UnmanagedMethods.POINT`, `UnmanagedMethods.SIZE`, `UnmanagedMethods.SIZE_F`, `UnmanagedMethods.RECT`, `UnmanagedMethods.WINDOWPOS`, `UnmanagedMethods.NCCALCSIZE_PARAMS`, `UnmanagedMethods.TRACKMOUSEEVENT`, `UnmanagedMethods.WindowPlacementFlags`, `UnmanagedMethods.WINDOWPLACEMENT`, `UnmanagedMethods.WNDCLASSEX`, `UnmanagedMethods.TOUCHINPUT`, `UnmanagedMethods.ICONINFO`, `UnmanagedMethods.TouchInputFlags`, `UnmanagedMethods.OpenFileNameFlags`, `UnmanagedMethods.HRESULT`, `UnmanagedMethods.Icons`, `UnmanagedMethods.ShellIds`, `UnmanagedMethods.COMDLG_FILTERSPEC`, `UnmanagedMethods.MarkFullscreenWindow`, `UnmanagedMethods.SetOverlayIcon`, `UnmanagedMethods.HrInit`, `UnmanagedMethods.ITaskBarList3VTable`, `UnmanagedMethods.APPBARDATA`, `UnmanagedMethods.DROPFILES`, `UnmanagedMethods.STGMEDIUM`, `UnmanagedMethods.FORMATETC`, `UnmanagedMethods.FILEDESCRIPTORW`, `UnmanagedMethods.STATSTG`, `UnmanagedMethods.GlobalAllocFlags`, `PixelFormatDescriptorFlags`, `PixelFormatDescriptor`, `NIM`, `AppBarMessage`, `NIF`, `NIIF`, `NOTIFYICONDATA` | 1542 | missing |
+| `UnmanagedMethods.cs` | `UnmanagedMethods`, `UnmanagedMethods.TimerProc`, `UnmanagedMethods.TimeCallback`, `UnmanagedMethods.WaitOrTimerCallback`, `UnmanagedMethods.WndProc`, `UnmanagedMethods.Cursor`, `UnmanagedMethods.MouseActivate`, `UnmanagedMethods.SetWindowPosFlags`, `UnmanagedMethods.WindowPosZOrder`, `UnmanagedMethods.SizeCommand`, `UnmanagedMethods.ShowWindowCommand`, `UnmanagedMethods.SystemMetric`, `UnmanagedMethods.ModifierKeys`, `UnmanagedMethods.VirtualKeyStates`, `UnmanagedMethods.WindowActivate`, `UnmanagedMethods.HitTestValues`, `UnmanagedMethods.WindowStyles`, `UnmanagedMethods.ClassStyles`, `UnmanagedMethods.PointerDeviceChangeFlags`, `UnmanagedMethods.PointerInputType`, `UnmanagedMethods.WindowsMessage`, `UnmanagedMethods.SystemParametersInfo`, `UnmanagedMethods.DwmWindowAttribute`, `UnmanagedMethods.DwmWindowCornerPreference`, `UnmanagedMethods.DwmNCRenderingPolicy`, `UnmanagedMethods.MapVirtualKeyMapTypes`, `UnmanagedMethods.BitmapCompressionMode`, `UnmanagedMethods.BitmapColorSpace`, `UnmanagedMethods.BitmapIntent`, `UnmanagedMethods.DIBColorTable`, `UnmanagedMethods.WindowLongParam`, `UnmanagedMethods.MenuCharParam`, `UnmanagedMethods.SysCommands`, `UnmanagedMethods.TrackPopupMenuFlags`, `UnmanagedMethods.PointerFlags`, `UnmanagedMethods.PointerButtonChangeType`, `UnmanagedMethods.PenFlags`, `UnmanagedMethods.PenMask`, `UnmanagedMethods.TouchFlags`, `UnmanagedMethods.TouchMask`, `UnmanagedMethods.POINTER_TOUCH_INFO`, `UnmanagedMethods.POINTER_PEN_INFO`, `UnmanagedMethods.POINTER_INFO`, `UnmanagedMethods.RGBQUAD`, `UnmanagedMethods.BITMAP`, `UnmanagedMethods.BITMAPINFOHEADER`, `UnmanagedMethods.BITMAPV5HEADER`, `UnmanagedMethods.CIEXYZTRIPLE`, `UnmanagedMethods.CIEXYZ`, `UnmanagedMethods.MINMAXINFO`, `UnmanagedMethods.MOUSEMOVEPOINT`, `UnmanagedMethods.EnumWindowsProc`, `UnmanagedMethods.GetAncestorFlags`, `UnmanagedMethods.ClassLongIndex`, `UnmanagedMethods.MessageFilterFlag`, `UnmanagedMethods.LayeredWindowFlags`, `UnmanagedMethods.DWM_BB`, `UnmanagedMethods.DWM_BLURBEHIND`, `UnmanagedMethods.RTL_OSVERSIONINFOEX`, `UnmanagedMethods.QueueStatusFlags`, `UnmanagedMethods.MsgWaitForMultipleObjectsFlags`, `UnmanagedMethods.GCS`, `UnmanagedMethods.CANDIDATEFORM`, `UnmanagedMethods.COMPOSITIONFORM`, `UnmanagedMethods.LOGFONT`, `UnmanagedMethods.WindowCompositionAttributeData`, `UnmanagedMethods.WindowCompositionAttribute`, `UnmanagedMethods.AccentState`, `UnmanagedMethods.AccentFlags`, `UnmanagedMethods.AccentPolicy`, `UnmanagedMethods.MARGINS`, `UnmanagedMethods.MONITOR`, `UnmanagedMethods.MONITORINFOEX`, `UnmanagedMethods.DEVICECAP`, `UnmanagedMethods.PROCESS_DPI_AWARENESS`, `UnmanagedMethods.MONITOR_DPI_TYPE`, `UnmanagedMethods.ClipboardFormat`, `UnmanagedMethods.MSG`, `UnmanagedMethods.PAINTSTRUCT`, `UnmanagedMethods.POINT`, `UnmanagedMethods.SIZE`, `UnmanagedMethods.SIZE_F`, `UnmanagedMethods.RECT`, `UnmanagedMethods.WINDOWPOS`, `UnmanagedMethods.NCCALCSIZE_PARAMS`, `UnmanagedMethods.TRACKMOUSEEVENT`, `UnmanagedMethods.WindowPlacementFlags`, `UnmanagedMethods.WINDOWPLACEMENT`, `UnmanagedMethods.WNDCLASSEX`, `UnmanagedMethods.TOUCHINPUT`, `UnmanagedMethods.ICONINFO`, `UnmanagedMethods.TouchInputFlags`, `UnmanagedMethods.OpenFileNameFlags`, `UnmanagedMethods.HRESULT`, `UnmanagedMethods.Icons`, `UnmanagedMethods.ShellIds`, `UnmanagedMethods.COMDLG_FILTERSPEC`, `UnmanagedMethods.MarkFullscreenWindow`, `UnmanagedMethods.SetOverlayIcon`, `UnmanagedMethods.HrInit`, `UnmanagedMethods.ITaskBarList3VTable`, `UnmanagedMethods.APPBARDATA`, `UnmanagedMethods.DROPFILES`, `UnmanagedMethods.STGMEDIUM`, `UnmanagedMethods.FORMATETC`, `UnmanagedMethods.FILEDESCRIPTORW`, `UnmanagedMethods.STATSTG`, `UnmanagedMethods.GlobalAllocFlags`, `PixelFormatDescriptorFlags`, `PixelFormatDescriptor`, `NIM`, `AppBarMessage`, `NIF`, `NIIF`, `NOTIFYICONDATA` | 1542 | `interop/unmanaged_methods.rs`: types 50/115 |
 | `Win32Icon.cs` | `Win32Icon`, `Win32Icon.ICONDIR`, `Win32Icon.ICONDIRENTRY` | 20 | missing |
 
 ### `OpenGl` - files 0/7, types 0/7, members 0/90
@@ -162,3 +162,13 @@ This backend is in scope. Its upstream extraction holds files, types and member 
 | `WinUiCompositionShared.cs` | `WinUiCompositionShared` | 12 | missing |
 | `WinUiCompositionUtils.cs` | `WinUiCompositionUtils` | 5 | missing |
 | `WinUiCompositorConnection.cs` | `WinUiCompositorConnection` | 7 | missing |
+
+## Rust-only files
+
+Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
+
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `wnd_proc_guard.rs` | Keeps a panic from unwinding out of a window procedure through the frames of the system: caught, kept, and raised again by the message loop (docs/porting/win32-platform.md, section 5) |  |
+
+Tests, examples and build scripts (not scanned): `examples/win32_window.rs`.

@@ -519,6 +519,7 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-native",
  "ferroui-skia",
+ "ferroui-win32",
 ]
 
 [[package]]
@@ -728,6 +729,17 @@ dependencies = [
  "zune-bmp",
  "zune-core",
  "zune-jpeg",
+]
+
+[[package]]
+name = "ferroui-win32"
+version = "0.1.0"
+dependencies = [
+ "bitflags",
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-vello",
+ "windows-sys",
 ]
 
 [[package]]

@@ -2144,3 +2144,18 @@ reason = "How a handler on the reader thread of a connection reaches an object o
 [[rust_only]]
 path = "src/FerroUI.DesignerSupport/remote/test_connection.rs"
 reason = "A connection for the tests of the crate, which records what is sent and raises what a test tells it to"
+
+# ---------------------------------------------------------------- Avalonia.Win32
+# The project is in scope with the detail the upstream extraction has for it today (files and types; see
+# docs/porting/win32-platform.md, section 12). Files map by the default rule.
+
+[[map]]
+project = "Avalonia.Win32"
+upstream = ["WindowImpl.CustomCaptionProc.cs"]
+kind = "renamed"
+rust = "window_impl_custom_caption_proc.rs"
+reason = "a part of the window class with a file of its own, which stage 2 builds: without this entry the rule for partial classes would count it as present in `window_impl.rs`"
+
+[[rust_only]]
+path = "src/Windows/FerroUI.Win32/wnd_proc_guard.rs"
+reason = "Keeps a panic from unwinding out of a window procedure through the frames of the system: caught, kept, and raised again by the message loop (docs/porting/win32-platform.md, section 5)"

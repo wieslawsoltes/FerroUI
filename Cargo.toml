@@ -11,6 +11,7 @@ members = [
     "src/FerroUI.Build.Tasks",
     "src/FerroUI.MicroCom",
     "src/FerroUI.Native",
+    "src/Windows/FerroUI.Win32",
     "src/FerroUI.Desktop",
     "src/Browser/FerroUI.Browser",
     "src/Headless/FerroUI.Headless",
@@ -59,6 +60,7 @@ ferroui-build = { path = "src/FerroUI.Build.Tasks" }
 xamlx = { path = "external/XamlX/src/XamlX" }
 ferroui-microcom = { path = "src/FerroUI.MicroCom" }
 ferroui-native = { path = "src/FerroUI.Native" }
+ferroui-win32 = { path = "src/Windows/FerroUI.Win32" }
 ferroui-desktop = { path = "src/FerroUI.Desktop" }
 ferroui-browser = { path = "src/Browser/FerroUI.Browser" }
 ferroui-headless = { path = "src/Headless/FerroUI.Headless" }
@@ -74,6 +76,9 @@ ferroui-skia = { path = "src/Skia/FerroUI.Skia" }
 ferroui-vello = { path = "src/Vello/FerroUI.Vello" }
 ferroui-harfbuzz = { path = "src/HarfBuzz/FerroUI.HarfBuzz" }
 bitflags = "2"
+# The bindings of the Windows API for the Windows platform backend (docs/porting/win32-platform.md,
+# section 2). Without features here: the backend names the API namespaces it calls.
+windows-sys = { version = "0.61.2" }
 paste = "1"
 cc = "1"
 skia-safe = { version = "0.153" }
