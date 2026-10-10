@@ -606,6 +606,25 @@ pub fn string_array_of(object: &dyn JavaRef) -> Vec<String> {
     }
 }
 
+/// Copies a `String` argument of a native method; `None` for null.
+///
+/// # Safety
+/// `string` is null or a valid reference to a `java.lang.String`.
+pub(crate) unsafe fn read_string(string: jobject) -> Option<String> {
+    if string.is_null() {
+        return None;
+    }
+    let env = env();
+    // SAFETY: the reference is a string (the contract); the region read is its whole
+    // length and the buffer has that many units.
+    unsafe {
+        let length = jni!(env, GetStringLength, string);
+        let mut buffer = vec![0u16; length.max(0) as usize];
+        jni!(env, GetStringRegion, string, 0, length, buffer.as_mut_ptr());
+        Some(String::from_utf16_lossy(&buffer))
+    }
+}
+
 /// Copies an `int[]` argument of a native method.
 ///
 /// # Safety
