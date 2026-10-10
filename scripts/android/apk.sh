@@ -133,6 +133,14 @@ if [ "$strip" = 1 ]; then
 else
     cp "$built" "$work/stage/lib/$abi/lib$library.so"
 fi
+# The library needs nothing but libraries of the system: the package carries no other library.
+needed="$("$FERROUI_ANDROID_TOOLCHAIN/llvm-readelf" -d "$work/stage/lib/$abi/lib$library.so" | sed -n 's/.*Shared library: \[\(.*\)\]/\1/p' | tr '\n' ' ')"
+for needed_library in $needed; do
+    case "$needed_library" in
+        libandroid.so|liblog.so|libEGL.so|libGLESv2.so|libGLESv3.so|libdl.so|libm.so|libc.so) ;;
+        *) echo "lib$library.so needs $needed_library, which is not a library of the system (needed: $needed)" >&2; exit 1 ;;
+    esac
+done
 # The library exports the one symbol the virtual machine looks for.
 if ! "$FERROUI_ANDROID_TOOLCHAIN/llvm-nm" -D --defined-only "$work/stage/lib/$abi/lib$library.so" | grep -q ' JNI_OnLoad$'; then
     echo "lib$library.so does not export JNI_OnLoad (the application lacks ferroui_android::android_application!)" >&2

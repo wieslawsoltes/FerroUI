@@ -47,6 +47,12 @@ export CC_aarch64_linux_android="$FERROUI_ANDROID_TOOLCHAIN/aarch64-linux-androi
 export CXX_aarch64_linux_android="$FERROUI_ANDROID_TOOLCHAIN/aarch64-linux-android$FERROUI_ANDROID_API-clang++"
 export AR_aarch64_linux_android="$FERROUI_ANDROID_TOOLCHAIN/llvm-ar"
 
+# The C++ runtime is the static one, which is what the Skia binary is linked with: a build script
+# that compiles C++ with the cc crate would otherwise name the shared runtime, and the package would
+# have to carry libc++_shared.so.
+export CXXSTDLIB_aarch64_linux_android="c++_static"
+export CXXSTDLIB_x86_64_linux_android="c++_static"
+
 export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER="$FERROUI_ANDROID_TOOLCHAIN/x86_64-linux-android$FERROUI_ANDROID_API-clang"
 export CC_x86_64_linux_android="$FERROUI_ANDROID_TOOLCHAIN/x86_64-linux-android$FERROUI_ANDROID_API-clang"
 export CXX_x86_64_linux_android="$FERROUI_ANDROID_TOOLCHAIN/x86_64-linux-android$FERROUI_ANDROID_API-clang++"
