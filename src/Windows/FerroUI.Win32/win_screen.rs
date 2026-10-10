@@ -1,7 +1,8 @@
 //! A screen of the system, identified by its monitor handle.
 
 use crate::interop::unmanaged_methods::{
-    enum_current_display_settings, get_dpi_for_monitor, get_monitor_info, has_get_dpi_for_monitor,
+    display_config_source_name, display_config_target_name, enum_current_display_settings, get_dpi_for_monitor,
+    get_monitor_info, has_get_dpi_for_monitor, query_active_display_paths,
     screen_dpi_from_device_caps, MONITOR_DPI_TYPE,
 };
 use crate::win32_type_extensions::Win32TypeExtensions;
@@ -31,6 +32,33 @@ pub(crate) fn orientation_from_display_orientation(orientation: u32) -> ScreenOr
         3 => ScreenOrientation::PortraitFlipped,
         _ => ScreenOrientation::None,
     }
+}
+
+/// The name of the display of a device among the active paths of the
+/// display configuration: the friendly name of the monitor of the first
+/// path whose source is the device. The walk ends at a path whose source
+/// or whose monitor the system does not name; the name is then the device
+/// name, as it is when no path has the device as its source.
+pub(crate) fn display_name_from_paths<P>(
+    device_name: &str,
+    paths: &[P],
+    source_name: impl Fn(&P) -> Option<String>,
+    target_name: impl Fn(&P) -> Option<String>,
+) -> Option<String> {
+    for path in paths {
+        let Some(source) = source_name(path) else { break };
+
+        if source != device_name {
+            continue;
+        }
+
+        let Some(target) = target_name(path) else { break };
+
+        return Some(target);
+    }
+
+    // Fallback to MONITORINFOEX - \\DISPLAY1.
+    Some(device_name.to_string())
 }
 
 impl WinScreen {
@@ -66,14 +94,17 @@ impl WinScreen {
         self.base.set_current_orientation(orientation_from_display_orientation(orientation));
     }
 
-    /// The name of the display: the device name of the monitor.
-    ///
-    /// The reference first asks the display configuration of the system for
-    /// the friendly name of the monitor (`QueryDisplayConfig`) and falls
-    /// back to the device name; that query is stage 2 of this backend
-    /// (docs/porting/win32-platform.md), so the name is the fallback of the
-    /// reference: `\\.\DISPLAY1`.
+    /// The name of the display: the friendly name of the monitor from the
+    /// display configuration of the system, or the device name of the
+    /// monitor.
     fn get_display_name(&self, device_name: &str) -> Option<String> {
+        if crate::win32_platform::Win32Platform::windows_version() >= crate::platform_constants::PlatformConstants::WINDOWS7 {
+            let paths = query_active_display_paths()?;
+
+            return display_name_from_paths(device_name, &paths, display_config_source_name, display_config_target_name);
+        }
+
+        // Fallback to MONITORINFOEX - \\DISPLAY1.
         Some(device_name.to_string())
     }
 
@@ -85,5 +116,62 @@ impl WinScreen {
         };
 
         dpi / 96.0
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn names(pairs: &[(Option<&str>, Option<&str>)], device: &str) -> Option<String> {
+        let paths: Vec<usize> = (0..pairs.len()).collect();
+        display_name_from_paths(
+            device,
+            &paths,
+            |&index| pairs[index].0.map(str::to_string),
+            |&index| pairs[index].1.map(str::to_string),
+        )
+    }
+
+    #[test]
+    fn the_name_is_the_monitor_of_the_path_whose_source_is_the_device() {
+        let pairs = [(Some(r"\\.\DISPLAY1"), Some("First")), (Some(r"\\.\DISPLAY2"), Some("Second"))];
+        assert_eq!(names(&pairs, r"\\.\DISPLAY2").as_deref(), Some("Second"));
+        assert_eq!(names(&pairs, r"\\.\DISPLAY1").as_deref(), Some("First"));
+        // A monitor without a friendly name has the empty name.
+        assert_eq!(names(&[(Some(r"\\.\DISPLAY1"), Some(""))], r"\\.\DISPLAY1").as_deref(), Some(""));
+    }
+
+    #[test]
+    fn the_name_is_the_device_name_when_no_path_has_the_device_or_the_walk_ends() {
+        let pairs = [(Some(r"\\.\DISPLAY1"), Some("First"))];
+        assert_eq!(names(&pairs, r"\\.\DISPLAY3").as_deref(), Some(r"\\.\DISPLAY3"));
+        assert_eq!(names(&[], r"\\.\DISPLAY1").as_deref(), Some(r"\\.\DISPLAY1"));
+        // A source the system does not name ends the walk before the path
+        // of the device is reached.
+        let pairs = [(None, Some("First")), (Some(r"\\.\DISPLAY2"), Some("Second"))];
+        assert_eq!(names(&pairs, r"\\.\DISPLAY2").as_deref(), Some(r"\\.\DISPLAY2"));
+        // So does a monitor the system does not name.
+        let pairs = [(Some(r"\\.\DISPLAY2"), None), (Some(r"\\.\DISPLAY2"), Some("Second"))];
+        assert_eq!(names(&pairs, r"\\.\DISPLAY2").as_deref(), Some(r"\\.\DISPLAY2"));
+    }
+
+    /// Against the system: the active paths of the display configuration
+    /// are read, and every source the system names is a GDI device.
+    #[test]
+    fn the_system_names_the_sources_of_its_active_paths() {
+        let Some(paths) = query_active_display_paths() else {
+            // A session without a display configuration (a service).
+            println!("the system has no display configuration to query");
+            return;
+        };
+        for path in &paths {
+            let source = display_config_source_name(path);
+            let target = display_config_target_name(path);
+            println!("path {path:?}: source {source:?}, monitor {target:?}");
+            if let Some(source) = source {
+                assert!(source.starts_with(r"\\.\DISPLAY"), "{source:?}");
+            }
+        }
     }
 }

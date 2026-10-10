@@ -1020,6 +1020,51 @@ mod windows {
                     Err(error) => report.check("icon loaded", false, format!("{error}")),
                 }
 
+                println!("-- tray icon");
+                // The platform creates a tray icon, which is given an icon
+                // and a tip and added to the notification area. The shell
+                // tells the message window of the platform about the mouse
+                // over an icon; the message of a left button released over
+                // the first icon of the thread, sent here, has to reach the
+                // click action, and no longer once the icon is disposed.
+                let platform = FerroLocator::current().get_required_service::<dyn IWindowingPlatform>();
+                match platform.create_tray_icon() {
+                    Some(tray) => {
+                        let clicks = Rc::new(Cell::new(0u32));
+                        {
+                            let clicks = clicks.clone();
+                            tray.set_on_clicked(Some(Rc::new(move || clicks.set(clicks.get() + 1))));
+                        }
+                        let icon = loader.load_icon_from_stream(&mut std::io::Cursor::new(icon_file())).ok();
+                        let has_icon = icon.is_some();
+                        tray.set_icon(icon);
+                        tray.set_tool_tip_text(Some("FerroUI win32_window"));
+                        tray.set_is_visible(true);
+                        let send = ferroui_win32::interop::unmanaged_methods::send_message;
+                        let tray_mouse = WindowsMessage::WM_USER + 1024;
+                        send(Win32Platform::message_window(), tray_mouse, 1, WindowsMessage::WM_LBUTTONUP as isize);
+                        send(Win32Platform::message_window(), tray_mouse, 1, WindowsMessage::WM_MOUSEMOVE as isize);
+                        report.check(
+                            "tray icon",
+                            has_icon && clicks.get() == 1 && tray.menu_exporter().is_some(),
+                            format!(
+                                "created with an icon ({has_icon}), a tip and a menu exporter; a left button released over it reached the click action {} time(s)",
+                                clicks.get()
+                            ),
+                        );
+                        tray.set_is_visible(false);
+                        tray.set_is_visible(true);
+                        tray.dispose();
+                        send(Win32Platform::message_window(), tray_mouse, 1, WindowsMessage::WM_LBUTTONUP as isize);
+                        report.check(
+                            "tray icon disposed",
+                            clicks.get() == 1,
+                            format!("{} click(s) after a message for the icon that was disposed", clicks.get()),
+                        );
+                    }
+                    None => report.check("tray icon", false, "the platform creates no tray icon"),
+                }
+
                 println!("-- dispatcher");
                 // Work posted from another thread has to wake the message
                 // loop: the signal of the dispatcher.

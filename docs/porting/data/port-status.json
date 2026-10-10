@@ -9088,12 +9088,12 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    50,
+    53,
     95,
     0
    ],
    "types": [
-    141,
+    150,
     276,
     0
    ],
@@ -9162,6 +9162,9 @@
     "Input/WindowsMouseDevice.cs": [
      "input/windows_mouse_device.rs"
     ],
+    "Interop/TaskBarList.cs": [
+     "interop/task_bar_list.rs"
+    ],
     "Interop/UnmanagedMethods.cs": [
      "interop/unmanaged_methods.rs"
     ],
@@ -9219,11 +9222,17 @@
     "SimpleWindow.cs": [
      "simple_window.rs"
     ],
+    "TrayIconImpl.cs": [
+     "tray_icon_impl.rs"
+    ],
     "Win32DispatcherImpl.cs": [
      "win32_dispatcher_impl.rs"
     ],
     "Win32GlManager.cs": [
      "win32_gl_manager.rs"
+    ],
+    "Win32NativeToManagedMenuExporter.cs": [
+     "win32_native_to_managed_menu_exporter.rs"
     ],
     "Win32Platform.cs": [
      "win32_platform.rs"

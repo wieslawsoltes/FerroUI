@@ -1643,6 +1643,173 @@ pub struct BgraPixels {
     pub height: i32,
 }
 
+/// `MessageFilterFlag` of the interop declarations: the values the system uses, as constants.
+pub struct MessageFilterFlag;
+
+#[allow(missing_docs)]
+impl MessageFilterFlag {
+    pub const MSGFLT_RESET: u32 = 0;
+    pub const MSGFLT_ALLOW: u32 = 1;
+    pub const MSGFLT_DISALLOW: u32 = 2;
+}
+
+/// `NIM` of the interop declarations: the values the system uses, as constants.
+pub struct NIM;
+
+#[allow(missing_docs)]
+impl NIM {
+    pub const ADD: u32 = 0x00000000;
+    pub const MODIFY: u32 = 0x00000001;
+    pub const DELETE: u32 = 0x00000002;
+    pub const SETFOCUS: u32 = 0x00000003;
+    pub const SETVERSION: u32 = 0x00000004;
+}
+
+/// `AppBarMessage` of the interop declarations: the values the system uses, as constants.
+pub struct AppBarMessage;
+
+#[allow(missing_docs)]
+impl AppBarMessage {
+    pub const ABM_GETSTATE: u32 = 0x00000004;
+    pub const ABM_GETTASKBARPOS: u32 = 0x00000005;
+}
+
+bitflags::bitflags! {
+    /// `NIF` of the interop declarations.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+    pub struct NIF: u32 {
+        const MESSAGE = 0x00000001;
+        const ICON = 0x00000002;
+        const TIP = 0x00000004;
+        const STATE = 0x00000008;
+        const INFO = 0x00000010;
+        const GUID = 0x00000020;
+        const REALTIME = 0x00000040;
+        const SHOWTIP = 0x00000080;
+    }
+}
+
+/// `APPBARDATA` of the interop declarations.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[allow(missing_docs)]
+pub struct APPBARDATA {
+    pub cb_size: i32,
+    pub h_wnd: isize,
+    pub u_callback_message: u32,
+    pub u_edge: u32,
+    pub rc: RECT,
+    pub l_param: i32,
+}
+
+impl Default for APPBARDATA {
+    fn default() -> Self {
+        Self {
+            cb_size: std::mem::size_of::<APPBARDATA>() as i32,
+            h_wnd: 0,
+            u_callback_message: 0,
+            u_edge: 0,
+            rc: RECT::default(),
+            l_param: 0,
+        }
+    }
+}
+
+/// `NOTIFYICONDATA` of the interop declarations: the structure of a
+/// notification icon up to the flags of its balloon, which is the version
+/// of the structure its size announces to the system. The three texts are
+/// buffers of UTF-16 code units with a terminator.
+#[repr(C)]
+#[derive(Clone, Copy)]
+#[allow(missing_docs)]
+pub struct NOTIFYICONDATA {
+    pub cb_size: i32,
+    pub h_wnd: isize,
+    pub u_id: i32,
+    pub u_flags: u32,
+    pub u_callback_message: i32,
+    pub h_icon: isize,
+    pub sz_tip: [u16; 128],
+    pub dw_state: i32,
+    pub dw_state_mask: i32,
+    pub sz_info: [u16; 256],
+    pub u_timeout_or_version: i32,
+    pub sz_info_title: [u16; 64],
+    pub dw_info_flags: u32,
+}
+
+impl Default for NOTIFYICONDATA {
+    fn default() -> Self {
+        Self {
+            cb_size: std::mem::size_of::<NOTIFYICONDATA>() as i32,
+            h_wnd: 0,
+            u_id: 0,
+            u_flags: 0,
+            u_callback_message: 0,
+            h_icon: 0,
+            sz_tip: [0; 128],
+            dw_state: 0,
+            dw_state_mask: 0,
+            sz_info: [0; 256],
+            u_timeout_or_version: 0,
+            sz_info_title: [0; 64],
+            dw_info_flags: 0,
+        }
+    }
+}
+
+impl NOTIFYICONDATA {
+    /// Sets the tip: as much of the text as fits the buffer with its
+    /// terminator, cut between characters (the marshaling of the reference
+    /// cuts between code units).
+    pub fn set_tip(&mut self, text: &str) {
+        self.sz_tip = [0; 128];
+        let mut length = 0;
+        let mut units = [0u16; 2];
+        for character in text.chars() {
+            let encoded = character.encode_utf16(&mut units);
+            if length + encoded.len() > self.sz_tip.len() - 1 {
+                break;
+            }
+            self.sz_tip[length..length + encoded.len()].copy_from_slice(encoded);
+            length += encoded.len();
+        }
+    }
+}
+
+/// A path of the display configuration (`DISPLAYCONFIG_PATH_INFO`), as far
+/// as the backend reads it: the adapter of its target (the two halves of
+/// its identifier), and the identifiers of its source and of its target.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct DisplayConfigPath {
+    #[allow(missing_docs)]
+    pub adapter_id: (u32, i32),
+    #[allow(missing_docs)]
+    pub source_id: u32,
+    #[allow(missing_docs)]
+    pub target_id: u32,
+}
+
+/// The class and interface identifiers of the shell the backend names.
+#[allow(non_snake_case)]
+pub mod ShellIds {
+    use ferroui_microcom::Guid;
+
+    #[allow(missing_docs)]
+    pub const OPEN_FILE_DIALOG: Guid = Guid::from_u128(0xDC1C5A9C_E88A_4DDE_A5A1_60F82A20AEF7);
+    #[allow(missing_docs)]
+    pub const SAVE_FILE_DIALOG: Guid = Guid::from_u128(0xC0B4E2F3_BA21_4773_8DBA_335EC946EB8B);
+    #[allow(missing_docs)]
+    pub const I_FILE_DIALOG: Guid = Guid::from_u128(0x42F85136_DB7E_439C_85F1_E4075D135FC8);
+    #[allow(missing_docs)]
+    pub const I_SHELL_ITEM: Guid = Guid::from_u128(0x43826D1E_E718_42EE_BC55_A1E261C37BFE);
+    #[allow(missing_docs)]
+    pub const TASK_BAR_LIST: Guid = Guid::from_u128(0x56FDF344_FD6D_11D0_958A_006097C9A090);
+    /// The identifier the reference asks the task bar list for under this
+    /// name; it is the one of the third version of the interface.
+    pub const I_TASK_BAR_LIST2: Guid = Guid::from_u128(0xea1afb91_9e28_4b86_90e9_9e9f8a5eefaf);
+}
+
 #[cfg(windows)]
 pub use native::*;
 
@@ -1653,6 +1820,7 @@ pub use native::*;
 mod native {
     use super::*;
     use std::ffi::c_void;
+    use windows_sys::Win32::Devices::Display as display;
     use windows_sys::Win32::Foundation as wf;
     use windows_sys::Win32::Graphics::Dwm as dwm;
     use windows_sys::Win32::Graphics::Gdi as gdi;
@@ -2403,6 +2571,75 @@ mod native {
         ok.then(|| (mode.dmDisplayFrequency, unsafe { mode.Anonymous1.Anonymous2.dmDisplayOrientation }))
     }
 
+    /// `GetDisplayConfigBufferSizes` and `QueryDisplayConfig` for the
+    /// active paths of the display configuration: the adapter, the source
+    /// and the target of each path. `None` when either call fails.
+    pub fn query_active_display_paths() -> Option<Vec<DisplayConfigPath>> {
+        let (mut num_path_info, mut num_mode_info) = (0u32, 0u32);
+        // SAFETY: two numbers of this frame the system writes to.
+        if unsafe { display::GetDisplayConfigBufferSizes(display::QDC_ONLY_ACTIVE_PATHS, &mut num_path_info, &mut num_mode_info) } != 0 {
+            return None;
+        }
+
+        let mut paths = vec![display::DISPLAYCONFIG_PATH_INFO::default(); num_path_info as usize];
+        let mut modes = vec![display::DISPLAYCONFIG_MODE_INFO::default(); num_mode_info as usize];
+        // SAFETY: the two buffers have the numbers of elements the two
+        // counts say, which the system reads before it writes and updates
+        // to what it wrote; the topology is not asked for with this flag.
+        let result = unsafe {
+            display::QueryDisplayConfig(
+                display::QDC_ONLY_ACTIVE_PATHS,
+                &mut num_path_info,
+                paths.as_mut_ptr(),
+                &mut num_mode_info,
+                modes.as_mut_ptr(),
+                std::ptr::null_mut(),
+            )
+        };
+        if result != 0 {
+            return None;
+        }
+
+        paths.truncate(num_path_info as usize);
+        Some(
+            paths
+                .iter()
+                .map(|path| DisplayConfigPath {
+                    adapter_id: (path.targetInfo.adapterId.LowPart, path.targetInfo.adapterId.HighPart),
+                    source_id: path.sourceInfo.id,
+                    target_id: path.targetInfo.id,
+                })
+                .collect(),
+        )
+    }
+
+    /// `DisplayConfigGetDeviceInfo` for the source of a path: the name of
+    /// its GDI device (`\\.\DISPLAY1`). `None` when the call fails.
+    pub fn display_config_source_name(path: &DisplayConfigPath) -> Option<String> {
+        let mut source_name = display::DISPLAYCONFIG_SOURCE_DEVICE_NAME::default();
+        source_name.header.r#type = display::DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME;
+        source_name.header.size = std::mem::size_of::<display::DISPLAYCONFIG_SOURCE_DEVICE_NAME>() as u32;
+        source_name.header.adapterId = wf::LUID { LowPart: path.adapter_id.0, HighPart: path.adapter_id.1 };
+        source_name.header.id = path.source_id;
+        // SAFETY: the header is the start of a structure of the size it
+        // announces, which the system fills.
+        (unsafe { display::DisplayConfigGetDeviceInfo(&mut source_name.header) } == 0)
+            .then(|| from_wide(&source_name.viewGdiDeviceName))
+    }
+
+    /// `DisplayConfigGetDeviceInfo` for the target of a path: the friendly
+    /// name of its monitor. `None` when the call fails.
+    pub fn display_config_target_name(path: &DisplayConfigPath) -> Option<String> {
+        let mut target_name = display::DISPLAYCONFIG_TARGET_DEVICE_NAME::default();
+        target_name.header.r#type = display::DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME;
+        target_name.header.size = std::mem::size_of::<display::DISPLAYCONFIG_TARGET_DEVICE_NAME>() as u32;
+        target_name.header.adapterId = wf::LUID { LowPart: path.adapter_id.0, HighPart: path.adapter_id.1 };
+        target_name.header.id = path.target_id;
+        // SAFETY: as `display_config_source_name`.
+        (unsafe { display::DisplayConfigGetDeviceInfo(&mut target_name.header) } == 0)
+            .then(|| from_wide(&target_name.monitorFriendlyDeviceName))
+    }
+
     /// The scaling of the primary display computed from the capabilities of
     /// the screen device context (the path for systems without
     /// `GetDpiForMonitor`): the DPI.
@@ -2742,6 +2979,78 @@ mod native {
     pub const APTTYPE_STA: i32 = com::APTTYPE_STA;
     /// `APTTYPE_MAINSTA`: the main single-threaded apartment.
     pub const APTTYPE_MAINSTA: i32 = com::APTTYPE_MAINSTA;
+
+    /// `GetCursorPos`: the position of the cursor on the desktop, in
+    /// pixels; the origin when the call fails.
+    pub fn get_cursor_pos() -> POINT {
+        let mut point = wf::POINT { x: 0, y: 0 };
+        // SAFETY: a point of this frame the system writes to.
+        unsafe { wm::GetCursorPos(&mut point) };
+        POINT { x: point.x, y: point.y }
+    }
+
+    /// `Shell_NotifyIcon` with a [`NIM`] message: adds, changes or removes
+    /// a notification icon. Whether the shell took it.
+    pub fn shell_notify_icon(message: u32, data: &NOTIFYICONDATA) -> bool {
+        // SAFETY: the structure starts with its size, which tells the
+        // shell which version of `NOTIFYICONDATAW` it is: the members up
+        // to the flags of the balloon, laid out as the system lays them
+        // out. It lives through the call.
+        unsafe { shell::Shell_NotifyIconW(message, (data as *const NOTIFYICONDATA).cast()) != 0 }
+    }
+
+    /// `SHAppBarMessage` with an [`AppBarMessage`]: asks the shell about
+    /// the task bar; the answer is in the result and in the structure.
+    pub fn sh_app_bar_message(message: u32, data: &mut APPBARDATA) -> usize {
+        // SAFETY: a structure of the layout of the system with its size
+        // set, which the shell reads and writes during the call.
+        unsafe { shell::SHAppBarMessage(message, (data as *mut APPBARDATA).cast()) }
+    }
+
+    /// `RegisterWindowMessage`: the number of a message with a name, the
+    /// same for every process of the session; 0 when the call fails.
+    pub fn register_window_message(name: &str) -> u32 {
+        let name = to_wide(name);
+        // SAFETY: a null-terminated string that lives through the call.
+        unsafe { wm::RegisterWindowMessageW(name.as_ptr()) }
+    }
+
+    /// `ChangeWindowMessageFilterEx` with a [`MessageFilterFlag`]: lets a
+    /// message through to the window from processes of a lower integrity
+    /// level. Whether the call succeeded.
+    pub fn change_window_message_filter_ex(hwnd: isize, message: u32, action: u32) -> bool {
+        // SAFETY: plain values; the structure of the result is not asked
+        // for.
+        unsafe { wm::ChangeWindowMessageFilterEx(h(hwnd), message, action, std::ptr::null_mut()) != 0 }
+    }
+
+    /// `CoCreateInstance` without an outer object: an interface pointer of
+    /// a new object of the class, which the caller owns (one reference),
+    /// or the failure code.
+    pub fn co_create_instance(
+        clsid: &ferroui_microcom::Guid,
+        context: u32,
+        iid: &ferroui_microcom::Guid,
+    ) -> Result<*mut c_void, i32> {
+        let mut instance = std::ptr::null_mut();
+        // SAFETY: the two identifiers are structures of the layout of the
+        // system that live through the call; the result is written to a
+        // pointer of this frame.
+        let result = unsafe {
+            com::CoCreateInstance(
+                (clsid as *const ferroui_microcom::Guid).cast(),
+                std::ptr::null_mut(),
+                context,
+                (iid as *const ferroui_microcom::Guid).cast(),
+                &mut instance,
+            )
+        };
+        if result == 0 {
+            Ok(instance)
+        } else {
+            Err(result)
+        }
+    }
 
     /// `CoTaskMemAlloc`: memory of the COM allocator, which the receiver of
     /// an out parameter frees. Null when there is none.
