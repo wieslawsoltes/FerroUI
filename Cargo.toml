@@ -54,6 +54,7 @@ members = [
     "samples/Sandbox",
     "samples/AppWithoutLifetime",
     "samples/IntegrationTestApp",
+    "samples/ControlCatalog.Android",
 ]
 
 [workspace.package]
