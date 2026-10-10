@@ -433,6 +433,7 @@ mod imp {
                     // this procedure is processing.
                     let new_display_rect = unsafe { read_rect(l_param) };
                     self.set_dpi(dpi);
+                    self.refresh_icon();
                     self.invoke_scaling_changed(self.scaling());
 
                     let old = self.set_resize_reason(WindowResizeReason::DpiChange);
@@ -450,9 +451,19 @@ mod imp {
                     return 0;
                 }
 
-                // WM_GETICON: the window has no icon before stage 2 builds
-                // the icons, so the message is left to the system, as the
-                // reference does for a window without an icon.
+                WindowsMessage::WM_GETICON => {
+                    if self.has_icon() {
+                        let request_icon = w_param as i32;
+                        let mut request_dpi = l_param as u32;
+
+                        if request_dpi == 0 {
+                            request_dpi = self.dpi();
+                        }
+
+                        return self.load_icon(request_icon, request_dpi);
+                    }
+                }
+
                 WindowsMessage::WM_KEYDOWN => {
                     e = self.try_create_raw_key_event_args(RawKeyEventType::KeyDown, timestamp, w_param, l_param, true);
                 }

@@ -91,7 +91,7 @@ Upstream registers a window class per window with a delegate of the instance as 
 ## 4. File table
 
 <!-- FILE-TABLE-START -->
-101 files of the upstream project directory (the 95 C# files the tracking counts, the four interface definition files, the project file and the binding list): 31 built, 11 built in part, 56 not built (one of them an interface definition file that is in the crate and generated, not yet compiled), 3 not applicable.
+101 files of the upstream project directory (the 95 C# files the tracking counts, the four interface definition files, the project file and the binding list): 34 built, 10 built in part, 54 not built (one of them an interface definition file that is in the crate and generated, not yet compiled), 3 not applicable.
 
 | Upstream file | Lines | FerroUI file | Stage | State and notes |
 |---|---:|---|---|---|
@@ -99,13 +99,13 @@ Upstream registers a window class per window with a delegate of the instance as 
 | `Avalonia.Win32.csproj` | 47 | - | - | not applicable: project file: `Cargo.toml` |
 | `ClipboardFormatRegistry.cs` | 90 | `clipboard_format_registry.rs` | 2d | not built: clipboard format names and identifiers |
 | `ClipboardImpl.cs` | 163 | `clipboard_impl.rs` | 1 | built in part: Unicode text through the clipboard functions; the OLE data object, ownership and flushing are 2d |
-| `CursorFactory.cs` | 126 | `cursor_factory.rs` | 1 | built in part: the cursors of the system; a cursor from a bitmap needs `Win32Icon` (2e) |
+| `CursorFactory.cs` | 126 | `cursor_factory.rs` | 1 | built: the cursors of the system, and since the icons of 2e a cursor from a bitmap |
 | `DataTransferToOleDataObjectWrapper.cs` | 225 | `data_transfer_to_ole_data_object_wrapper.rs` | 2d | not built |
 | `DragSource.cs` | 36 | `drag_source.rs` | 2d | not built |
 | `EmbeddedWindowImpl.cs` | 40 | `embedded_window_impl.rs` | 1 | built: a window implementation of the embedded kind |
 | `FramebufferManager.cs` | 192 | `framebuffer_manager.rs` | 1 | built |
 | `IBlurHost.cs` | 15 | `i_blur_host.rs` | 2c | not built |
-| `IconImpl.cs` | 88 | `icon_impl.rs` | 2e | not built |
+| `IconImpl.cs` | 88 | `icon_impl.rs` | 2e | built (ahead of the rest of 2e: the catalog loads an icon when it starts) |
 | `IWindowsSurfaceFactory.cs` | 13 | `i_windows_surface_factory.rs` | 2c | not built: the composition modes register it |
 | `NativeMethods.txt` | 9 | - | - | not applicable: the list for the C# binding generator: the bindings come from `windows-sys` |
 | `NonPumpingWaitHelperImpl.cs` | 13 | `non_pumping_wait_helper_impl.rs` | - | not applicable: the base library has no `NonPumpingLockHelper`: Rust locks do not pump messages |
@@ -127,14 +127,14 @@ Upstream registers a window class per window with a delegate of the instance as 
 | `Win32GlManager.cs` | 116 | `win32_gl_manager.rs` | 2b | built in part: the order of the rendering modes with ANGLE and software; WGL and Vulkan are passed over (not built); the composition modes of 2c are passed over, so a list ends at the redirection surface |
 | `Win32NativeControlHost.cs` | 218 | `win32_native_control_host.rs` | 2e | not built |
 | `Win32NativeToManagedMenuExporter.cs` | 16 | `win32_native_to_managed_menu_exporter.rs` | 2e | not built: Windows has no native menu: the exporter of the managed menu |
-| `Win32Platform.cs` | 378 | `win32_platform.rs` | 1 | built in part: left: the tray icon messages and the icon loader (2e), the drag source (2d) |
+| `Win32Platform.cs` | 378 | `win32_platform.rs` | 1 | built in part: left: the tray icon messages (2e), the drag source (2d) |
 | `Win32PlatformOptions.cs` | 179 | `win32_platform_options.rs` | 1 | built in part: left: `WglProfiles` (2b, needs the OpenGL crate) |
 | `Win32PlatformSettings.cs` | 138 | `win32_platform_settings.rs` | 2a | built: the gesture metrics, and the colour values and the language through the Windows Runtime with their change notifications |
 | `Win32StorageProvider.cs` | 318 | `win32_storage_provider.rs` | 2e | not built |
 | `Win32TopLevelSceneInfo.cs` | 10 | `win32_top_level_scene_info.rs` | 1 | built |
 | `Win32TypeExtensions.cs` | 19 | `win32_type_extensions.rs` | 1 | built |
 | `WindowImpl.AppWndProc.cs` | 1529 | `window_impl_app_wnd_proc.rs` | 1 | built in part: left: the pointer and touch messages and the mouse history (2f), the input method messages (2f), the automation provider (the automation project) |
-| `WindowImpl.cs` | 1722 | `window_impl.rs` | 1 | built in part: left: icons and the taskbar (2e), the blur, acrylic and mica levels and the surface factory of the composition modes (2c), the WGL surface (2b), the drop target (2d), the features of later stages |
+| `WindowImpl.cs` | 1722 | `window_impl.rs` | 1 | built in part: left: the taskbar (2e; the icon of a window is built), the blur, acrylic and mica levels and the surface factory of the composition modes (2c), the WGL surface (2b), the drop target (2d), the features of later stages |
 | `WindowImpl.CustomCaptionProc.cs` | 380 | `window_impl_custom_caption_proc.rs` | 2f | not built: the client area is not extended into the frame before it |
 | `WindowImpl.WndProc.cs` | 34 | `window_impl.rs` | 1 | built: in `window_impl.rs` |
 | `WindowsMountedVolumeInfoListener.cs` | 82 | `windows_mounted_volume_info_listener.rs` | 2e | not built |
@@ -163,7 +163,7 @@ Upstream registers a window class per window with a delegate of the instance as 
 | `Input/WindowsMouseDevice.cs` | 47 | `input/windows_mouse_device.rs` | 1 | built: holds a mouse device of the base library (section 8) |
 | `Interop/TaskBarList.cs` | 76 | `interop/task_bar_list.rs` | 2e | not built: full-screen mark and overlay icon of the taskbar |
 | `Interop/UnmanagedMethods.cs` | 2847 | `interop/unmanaged_methods.rs` | 1 | built in part: the constants and structures the built files use, and the system calls behind safe functions; grows with every stage |
-| `Interop/Win32Icon.cs` | 364 | `interop/win32_icon.rs` | 2e | not built |
+| `Interop/Win32Icon.cs` | 364 | `interop/win32_icon.rs` | 2e | built (ahead of the rest of 2e): the choice of the image of an icon file and the mask of a bitmap are functions of values, tested on every host |
 | `OpenGl/Angle/AngleD3DTextureFeature.cs` | 107 | `open_gl/angle/angle_d3d_texture_feature.rs` | 2c | not built: a render target over a Direct3D 11 texture, which the composition modes use |
 | `OpenGl/Angle/AngleEglInterface.cs` | 48 | `open_gl/angle/angle_egl_interface.rs` | 2b | built: over the loader of the crate `mozangle` (feature `angle`) |
 | `OpenGl/Angle/AngleExternalD3D11Texture2D.cs` | 107 | `open_gl/angle/angle_external_d3d11_texture2_d.rs` | 2c | not built |
@@ -198,7 +198,7 @@ Upstream registers a window class per window with a delegate of the instance as 
 | `WinRT/WinRTPropertyValue.cs` | 108 | `win_rt/win_rt_property_value.rs` | 2a | built |
 <!-- FILE-TABLE-END -->
 
-The members of the built files that are left for a later stage are named in the notes above and at their place in the sources. A member that is not built is absent, or fails with a message that names its stage (`not_built` in `lib.rs`: the icon loader, a window icon, a cursor from a bitmap); nothing returns a made-up result. Three members answer what the contract defines for a platform without the feature, and say so: `create_tray_icon` returns `None` ("the platform has no tray icons"), the transparency levels that need a composition surface are not supported (the level stays the default), and the hint to extend the client area into the frame is not honoured (the window reports that its client area is not extended).
+The members of the built files that are left for a later stage are named in the notes above and at their place in the sources. A member that is not built is absent, or fails with a message that names its stage (`not_built` in `lib.rs`; no member fails that way at present); nothing returns a made-up result. Three members answer what the contract defines for a platform without the feature, and say so: `create_tray_icon` returns `None` ("the platform has no tray icons"), the transparency levels that need a composition surface are not supported (the level stays the default), and the hint to extend the client area into the frame is not honoured (the window reports that its client area is not extended).
 
 ## 5. Threads
 
@@ -345,7 +345,8 @@ A window is created with `WS_EX_NOREDIRECTIONBITMAP` when the composition mode d
 | Service | State |
 |---|---|
 | Screens (`ScreenImpl`, `WinScreen`) | the monitors of the desktop, their bounds, working areas, scaling (`GetDpiForMonitor`), primary flag, orientation and refresh rate; changes on `WM_DISPLAYCHANGE` and on a change of the work area. The display name is the device name, upstream's fallback; the friendly name is 2e |
-| Cursors (`CursorFactory`) | the cursors of the system and the drag cursors of ole32; a cursor from a bitmap is 2e |
+| Cursors (`CursorFactory`) | the cursors of the system and the drag cursors of ole32; a cursor from a bitmap (`Win32Icon` from the bitmap with its hot spot, destroyed when the cursor is disposed) |
+| Icons (`IconImpl`, `Win32Icon`), ahead of the rest of 2e | the icon loader of the platform (a file, a stream, a bitmap through its PNG encoding); an icon holds the bytes it was loaded from and makes an icon of the system for a size from the image of the icon file that fits best (`CreateIconFromResourceEx`), or from the decoded image when the bytes are not an icon file (`CreateIconIndirect` with a colour and a mask bitmap). A window keeps the icons made for it by kind and DPI, sets them with `WM_SETICON` when its icon or its DPI changes, and answers `WM_GETICON`. Not built with them: the taskbar list, whose overlay icon the reference resets to make the taskbar redraw the icon |
 | Clipboard (`ClipboardImpl`) | Unicode text, with upstream's retries while another process holds the clipboard. Upstream goes through an OLE data object for every format; that is 2d |
 | Platform settings (`Win32PlatformSettings`) | the tap and double-tap sizes and the double-click time of the system. **Since 2a**: the theme variant (from the background colour of `UISettings`, or from the name of the high contrast scheme), the accent colour, the contrast preference (`AccessibilitySettings`) and the preferred language (the first language of `GlobalizationPreferences`), read once and kept; `WM_SETTINGCHANGE` of the message window with `ImmersiveColorSet` or `WindowsThemeElement` reads the colours again, with `intl` the language, and each raises its change event when the value differs. On a system without the types: the light theme and the language of the process, as upstream |
 | Hotkeys | Control as the command modifier, Shift+F10 for the context menu, "Win" as the name of the meta key |
@@ -364,7 +365,7 @@ That is also why the example draws with **the Vello backend in its CPU mode** an
 
 ### 10.2 Host tests
 
-`cargo test -p ferroui-win32` on any host: 90 tests **[V]** of what is logic (section 3.1). Since stage 2a: the theme variant of a background colour and of a high contrast scheme, the settings the platform listens for, the layout of the colour of the Windows Runtime and of the structures of a data transfer, the identifiers of generated interfaces. On Windows four more tests run against the system (`win_rt/win_rt_tests.rs`, section 10.3). Since stage 2b: the ANGLE interface, display, platform graphics and factory against an EGL made of functions of the test modules (which display is asked for with which attributes, the Direct3D device of a display, a texture wrapped whole and as a rectangle, the flexible surface attribute, the probe that fails when no context can be created, a build without ANGLE); the adapter choice (the default, the Adreno rule of ARM64, the callback and its bounds); the order of the rendering modes and of the composition modes in the graphics manager; the values of the Direct3D enumerations and the sizes of the structures passed to the system; the options of ANGLE. Before stage 2: The key tables in both directions and the generic modifiers; the physical keys with the extended bit; key symbols with dead keys; the modifiers of a keyboard state; message parameters (signed coordinates, the low 32 bits, sizes, the wheel, the DPI, system commands); the raw events of the button messages and their modifiers; emulated mouse messages; the styles of every combination the decisions branch on; show commands; the state of a size message and of a placement; the placement of a resize, including the minimized cases; the track sizes; the captionless maximized rectangle and the frame of an extended client area against a model frame; the bitmap header and the minimum size of a framebuffer; the cursor table; the timer interval and the signal parameters of the dispatcher; the options and their defaults; version comparison.
+`cargo test -p ferroui-win32` on any host: 98 tests **[V]** of what is logic (section 3.1). Since the icons: which image of an icon file is chosen for a size and a display depth (the rules of the system the reference follows), data that is not an icon file, the mask of a bitmap, the scaled sizes of the small and the taskbar icon. Since stage 2a: the theme variant of a background colour and of a high contrast scheme, the settings the platform listens for, the layout of the colour of the Windows Runtime and of the structures of a data transfer, the identifiers of generated interfaces. On Windows four more tests run against the system (`win_rt/win_rt_tests.rs`, section 10.3). Since stage 2b: the ANGLE interface, display, platform graphics and factory against an EGL made of functions of the test modules (which display is asked for with which attributes, the Direct3D device of a display, a texture wrapped whole and as a rectangle, the flexible surface attribute, the probe that fails when no context can be created, a build without ANGLE); the adapter choice (the default, the Adreno rule of ARM64, the callback and its bounds); the order of the rendering modes and of the composition modes in the graphics manager; the values of the Direct3D enumerations and the sizes of the structures passed to the system; the options of ANGLE. Before stage 2: The key tables in both directions and the generic modifiers; the physical keys with the extended bit; key symbols with dead keys; the modifiers of a keyboard state; message parameters (signed coordinates, the low 32 bits, sizes, the wheel, the DPI, system commands); the raw events of the button messages and their modifiers; emulated mouse messages; the styles of every combination the decisions branch on; show commands; the state of a size message and of a placement; the placement of a resize, including the minimized cases; the track sizes; the captionless maximized rectangle and the frame of an extended client area against a model frame; the bitmap header and the minimum size of a framebuffer; the cursor table; the timer interval and the signal parameters of the dispatcher; the options and their defaults; version comparison.
 
 Upstream's own tests of this backend are `tests/Avalonia.IntegrationTests.Win32`: they create `Window` controls on a live desktop and compare client sizes with the working area for every screen, state, decoration and resizability (`StandardWindowTests`, `ExtendClientAreaWindowTests`), drag a window (`BeginMoveDragTests`), and test the virtual files of a drag (`OleVirtualFileDataTests`) and the automation nodes. **Ported since stage 2.0** as the test crate `tests/FerroUI.IntegrationTests.Win32` (package `ferroui-integration-tests-win32`):
 
@@ -400,8 +401,9 @@ Two jobs in `.github/workflows/ci.yml`, beside the macOS job, with the same pinn
 5. input: key, mouse and wheel messages posted to the window have to arrive as raw events with the right key, physical key, text and positions;
 6. the clipboard: text set and read back (a clipboard held by another process is reported, not failed);
 7. the platform settings (since 2a): the colour values (printed: theme variant, contrast preference, accent colour) and the preferred language, which must not be empty; a `WM_SETTINGCHANGE` that names the colours, sent to the message window, makes the settings read the colours again and must report no change, since nothing changed;
-8. the dispatcher: work posted from another thread has to wake the message loop;
-9. closing: the closed callback ends the main loop.
+8. the icon of the window (since the icons of 2e): an icon file with one image, made by the run, is loaded through the icon loader of the platform and saves the bytes it was loaded from; the window takes it and answers `WM_GETICON` for the small icon, the big icon and the small icon at 192 DPI with an icon handle, the same handle for the same question; after the icon is removed the answer is null;
+9. the dispatcher: work posted from another thread has to wake the message loop;
+10. closing: the closed callback ends the main loop.
 
 The exit code is 0 only if every frame was drawn and every check passed.
 
@@ -412,6 +414,8 @@ The exit code is 0 only if every frame was drawn and every check passed.
 **`--angle-probe`** adds what ANGLE reports of itself: the client extensions, and for the display of Direct3D 11 and of Direct3D 9 the vendor, version and extensions of EGL, the Direct3D device, the strings of a context, and a frame cleared to a colour on a window surface and read back.
 
 The Rust-only renderer of the example is the reason the GPU run does not draw with Skia: the example has to stay checkable on any host. Skia on the context of ANGLE is what `hello_window` of `ferroui-desktop` runs.
+
+**Pictures of the catalog** (since 2026-10-10, the job `windows`, informative). The desktop host of the catalog (`samples/ControlCatalog.Desktop`) has a screenshot run: with `FERROUI_SMOKE_SCREENSHOTS=<directory>` it shows the home page and a handful of others (`FERROUI_SMOKE_SCREENSHOT_PAGES`, headers separated by commas), each for `FERROUI_SMOKE_PAGES` milliseconds, writes two PNG pictures of each and closes its window. `NN-<header>.png` is the window drawn into a bitmap through the render target of the framework (the same on every platform). `NN-<header>-window.png`, on Windows, is the client area of the window as the system composed it: the window prints itself into a bitmap (`PrintWindow` with the client-only and full-content flags, in `window_capture.rs` of the host), so what ANGLE presented through its swap chain is in the picture; nothing but the window of the application is captured. The log says for every capture how many different colours a grid of samples of it has: one colour is a capture that shows nothing. The step runs the host once with `FERROUI_SMOKE_RENDERING=software` and once with `angle` and uploads `target/screenshots` as the artifact `control-catalog-windows-screenshots`.
 
 ### 10.4 The virtual machine
 

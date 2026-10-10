@@ -4,6 +4,7 @@
 use crate::clipboard_impl::ClipboardImpl;
 use crate::cursor_factory::CursorFactory;
 use crate::embedded_window_impl::EmbeddedWindowImpl;
+use crate::icon_impl::IconImpl;
 use crate::input::WindowsKeyboardDevice;
 use crate::ole_context::OleContext;
 use crate::interop::unmanaged_methods::*;
@@ -18,6 +19,7 @@ use crate::window_impl::WindowImpl;
 use crate::wnd_proc_guard;
 use ferroui_base::input::platform::{Clipboard, IClipboard, IClipboardImpl, KeyGestureFormatInfo, PlatformHotkeyConfiguration};
 use ferroui_base::input::{IKeyboardDevice, Key, KeyGesture, KeyModifiers};
+use ferroui_base::media::imaging::{BitmapEncoderOptions, PngBitmapEncoderOptions};
 use ferroui_base::platform::{ICursorFactory, IPlatformGraphics, IPlatformSettings, SharedBitmapImpl};
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::rendering::composition::Compositor;
@@ -503,19 +505,27 @@ impl IWindowingPlatform for Win32Platform {
     }
 }
 
-/// The icons of the backend (`IconImpl`, `Win32Icon`: decoding an image
-/// into an icon of the system for each size the shell asks for) are stage
-/// 2: loading one fails with a message that says so.
 impl IPlatformIconLoader for Win32Platform {
-    fn load_icon_from_file(&self, _file_name: &str) -> io::Result<Rc<dyn IWindowIconImpl>> {
-        crate::not_built("Win32Platform::load_icon_from_file (window icons)", 2)
+    fn load_icon_from_file(&self, file_name: &str) -> io::Result<Rc<dyn IWindowIconImpl>> {
+        let mut stream = std::fs::File::open(file_name)?;
+        Ok(IconImpl::new(&mut stream)?)
     }
 
-    fn load_icon_from_stream(&self, _stream: &mut dyn io::Read) -> io::Result<Rc<dyn IWindowIconImpl>> {
-        crate::not_built("Win32Platform::load_icon_from_stream (window icons)", 2)
+    fn load_icon_from_stream(&self, stream: &mut dyn io::Read) -> io::Result<Rc<dyn IWindowIconImpl>> {
+        Ok(IconImpl::new(stream)?)
     }
 
-    fn load_icon_from_bitmap(&self, _bitmap: Arc<SharedBitmapImpl>) -> Rc<dyn IWindowIconImpl> {
-        crate::not_built("Win32Platform::load_icon_from_bitmap (window icons)", 2)
+    /// # Panics
+    /// Panics when the bitmap cannot be encoded or the icon cannot be made
+    /// from it.
+    fn load_icon_from_bitmap(&self, bitmap: Arc<SharedBitmapImpl>) -> Rc<dyn IWindowIconImpl> {
+        let mut memory_stream = Vec::new();
+        let icon = bitmap
+            .save(&mut memory_stream, &BitmapEncoderOptions::Png(PngBitmapEncoderOptions::DEFAULT))
+            .and_then(|()| IconImpl::new(&mut io::Cursor::new(memory_stream)));
+        match icon {
+            Ok(icon) => icon,
+            Err(error) => panic!("The icon could not be made from the bitmap: {error}"),
+        }
     }
 }

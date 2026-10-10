@@ -2244,6 +2244,92 @@ mod native {
         }
     }
 
+    /// The number of bits of a pixel of the screen: the bits of a plane
+    /// times the planes.
+    pub fn screen_bit_depth() -> u32 {
+        // SAFETY: the device context of the screen, released below.
+        unsafe {
+            let dc = gdi::GetDC(std::ptr::null_mut());
+            let mut bit_depth = gdi::GetDeviceCaps(dc, gdi::BITSPIXEL as i32);
+            bit_depth *= gdi::GetDeviceCaps(dc, gdi::PLANES as i32);
+            gdi::ReleaseDC(std::ptr::null_mut(), dc);
+            bit_depth.max(0) as u32
+        }
+    }
+
+    // ----------------------------------------------------------------
+    // Icons
+    // ----------------------------------------------------------------
+
+    /// `CreateBitmap`: a bitmap of the system with the pixels given, rows
+    /// of `(width * bits_per_pixel + 7) / 8` bytes. The caller deletes it;
+    /// 0 when it cannot be created.
+    pub fn create_bitmap(width: i32, height: i32, planes: u32, bits_per_pixel: u32, bits: &[u8]) -> isize {
+        // The system reads rows that are a whole number of 16-bit words
+        // long. The reference hands it rows of whole bytes, which the
+        // system reads past for a width whose row has an odd number of
+        // bytes: the bytes go into a block that is as long as what the
+        // system reads, unchanged.
+        let word_aligned_row = ((width.max(0) as usize * bits_per_pixel as usize * planes as usize + 15) / 16) * 2;
+        let mut block = vec![0u8; (word_aligned_row * height.max(0) as usize).max(bits.len())];
+        block[..bits.len()].copy_from_slice(bits);
+        // SAFETY: the block is at least as long as the rows the system
+        // reads for this size and depth; the system copies the pixels.
+        unsafe { gdi::CreateBitmap(width, height, planes, bits_per_pixel, block.as_ptr().cast()) as isize }
+    }
+
+    /// `DeleteObject`: deletes a bitmap (or another GDI object) the caller
+    /// owns; 0 is ignored.
+    pub fn delete_object(object: isize) {
+        if object != 0 {
+            // SAFETY: an object of the caller that is not used again.
+            unsafe {
+                gdi::DeleteObject(h(object));
+            }
+        }
+    }
+
+    /// `CreateIconIndirect`: an icon, or a cursor with its hot spot, from a
+    /// mask bitmap and a colour bitmap, which the system copies. The
+    /// caller destroys it; 0 when it cannot be created.
+    pub fn create_icon_indirect(is_icon: bool, x_hotspot: i32, y_hotspot: i32, mask_bitmap: isize, color_bitmap: isize) -> isize {
+        let info = wm::ICONINFO {
+            fIcon: i32::from(is_icon),
+            xHotspot: x_hotspot as u32,
+            yHotspot: y_hotspot as u32,
+            hbmMask: h(mask_bitmap),
+            hbmColor: h(color_bitmap),
+        };
+        // SAFETY: a structure of this frame with two bitmaps of the caller.
+        unsafe { wm::CreateIconIndirect(&info) as isize }
+    }
+
+    /// `CreateIconFromResourceEx`: an icon from the bytes of one image of
+    /// an icon file. The caller destroys it; 0 when the bytes are not an
+    /// image the system takes.
+    pub fn create_icon_from_resource_ex(res_bits: &[u8], icon: bool, version: u32, cx_desired: i32, cy_desired: i32, flags: u32) -> isize {
+        // SAFETY: the bytes are valid for the length that is passed, and
+        // the system copies what it needs.
+        unsafe {
+            wm::CreateIconFromResourceEx(
+                res_bits.as_ptr(),
+                res_bits.len() as u32,
+                i32::from(icon),
+                version,
+                cx_desired,
+                cy_desired,
+                flags,
+            ) as isize
+        }
+    }
+
+    /// `DestroyIcon`: destroys an icon or a cursor the caller created.
+    pub fn destroy_icon(icon: isize) -> bool {
+        // SAFETY: an icon of the caller that is not used again; a handle
+        // that is not an icon makes the call fail.
+        unsafe { wm::DestroyIcon(h(icon)) != 0 }
+    }
+
     // ----------------------------------------------------------------
     // Desktop window manager
     // ----------------------------------------------------------------

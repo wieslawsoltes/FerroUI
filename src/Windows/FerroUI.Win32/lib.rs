@@ -29,6 +29,7 @@ pub mod win_rt;
 mod angle_options;
 mod cursor_factory;
 mod framebuffer_manager;
+mod icon_impl;
 mod win32_dispatcher_impl;
 mod win32_gl_manager;
 mod platform_constants;
@@ -76,6 +77,8 @@ pub use embedded_window_impl::EmbeddedWindowImpl;
 #[cfg(windows)]
 pub use framebuffer_manager::FramebufferManager;
 #[cfg(windows)]
+pub use icon_impl::IconImpl;
+#[cfg(windows)]
 pub use popup_impl::PopupImpl;
 #[cfg(windows)]
 pub use screen_impl::ScreenImpl;
@@ -92,7 +95,7 @@ pub use window_impl::WindowImpl;
 
 /// Fails for a member of the backend that a later stage builds: the message
 /// names the member and the stage of `docs/porting/win32-platform.md`.
-#[cfg_attr(not(windows), allow(dead_code))]
+#[allow(dead_code)] // Nothing fails this way at present; the members of later stages do.
 #[track_caller]
 pub(crate) fn not_built(member: &str, stage: u32) -> ! {
     panic!("{member} is not built yet: it belongs to stage {stage} of the Windows platform backend (docs/porting/win32-platform.md)")

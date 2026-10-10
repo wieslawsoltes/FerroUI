@@ -552,6 +552,35 @@ mod windows {
         }
     }
 
+    /// The bytes of an icon file with one image: 16 by 16 pixels of 32
+    /// bits, an opaque blue square with a white border.
+    fn icon_file() -> Vec<u8> {
+        const SIZE: u32 = 16;
+        let image_size = 40 + SIZE * SIZE * 4 + SIZE * 4;
+        let mut data = vec![0, 0, 1, 0, 1, 0];
+        // The directory entry: width, height, colours, reserved, planes,
+        // bits, the size of the image and where it starts.
+        data.extend_from_slice(&[SIZE as u8, SIZE as u8, 0, 0, 1, 0, 32, 0]);
+        data.extend_from_slice(&image_size.to_le_bytes());
+        data.extend_from_slice(&22u32.to_le_bytes());
+        // The bitmap header: the height counts the colour rows and the
+        // mask rows.
+        data.extend_from_slice(&40u32.to_le_bytes());
+        data.extend_from_slice(&SIZE.to_le_bytes());
+        data.extend_from_slice(&(SIZE * 2).to_le_bytes());
+        data.extend_from_slice(&[1, 0, 32, 0]);
+        data.extend_from_slice(&[0; 24]);
+        for y in 0..SIZE {
+            for x in 0..SIZE {
+                let border = x == 0 || y == 0 || x == SIZE - 1 || y == SIZE - 1;
+                data.extend_from_slice(if border { &[0xff, 0xff, 0xff, 0xff] } else { &[0xd7, 0x78, 0x00, 0xff] });
+            }
+        }
+        // The mask: nothing is transparent.
+        data.extend_from_slice(&vec![0; (SIZE * 4) as usize]);
+        data
+    }
+
     fn make_l_param(x: i32, y: i32) -> isize {
         (((y as u16 as u32) << 16) | (x as u16 as u32)) as isize
     }
@@ -708,6 +737,39 @@ mod windows {
                     changes.get() == 0 && settings.get_color_values() == color_values,
                     format!("a colour setting change with the same colours reported {} change(s)", changes.get()),
                 );
+
+                println!("-- window icon");
+                // An icon file with one image of 16 by 16 pixels, made here:
+                // the loader of the platform makes the icon, the window
+                // takes it, and the window answers the system's question
+                // for its small and its big icon with an icon handle.
+                let loader = FerroLocator::current().get_required_service::<dyn ferroui_controls::platform::IPlatformIconLoader>();
+                match loader.load_icon_from_stream(&mut std::io::Cursor::new(icon_file())) {
+                    Ok(icon) => {
+                        let mut saved = Vec::new();
+                        let saved_ok = icon.save(&mut saved).is_ok() && saved == icon_file();
+                        report.check("icon loaded", saved_ok, format!("the icon saves the {} bytes it was loaded from", saved.len()));
+                        window.set_icon(Some(icon));
+                        let send = ferroui_win32::interop::unmanaged_methods::send_message;
+                        let small = send(hwnd, WindowsMessage::WM_GETICON, 0, 0);
+                        let big = send(hwnd, WindowsMessage::WM_GETICON, 1, 0);
+                        let small_at_192 = send(hwnd, WindowsMessage::WM_GETICON, 2, 192);
+                        report.check(
+                            "icon of the window",
+                            small != 0 && big != 0 && small_at_192 != 0,
+                            format!("WM_GETICON: small {small:#x}, big {big:#x}, small at 192 DPI {small_at_192:#x}"),
+                        );
+                        report.check(
+                            "icon cached",
+                            send(hwnd, WindowsMessage::WM_GETICON, 0, 0) == small,
+                            "the same question gets the same icon handle",
+                        );
+                        window.set_icon(None);
+                        let none = send(hwnd, WindowsMessage::WM_GETICON, 0, 0);
+                        report.check("icon removed", none == 0, format!("WM_GETICON after the icon was removed: {none:#x}"));
+                    }
+                    Err(error) => report.check("icon loaded", false, format!("{error}")),
+                }
 
                 println!("-- dispatcher");
                 // Work posted from another thread has to wake the message

@@ -67,7 +67,7 @@ pub use main_view::MainView;
 pub use main_window::MainWindow;
 pub use page_assets::{IPageAssets, PageAssets, PageAssetsFuture};
 pub use register_types::{register_types, ASSEMBLY};
-pub use smoke::show_every_page;
+pub use smoke::{show_every_page, show_pages};
 pub use transparent_styles::TransparentStyles;
 
 /// The classes of the root namespace `ControlCatalog` (`X::TYPE`).
