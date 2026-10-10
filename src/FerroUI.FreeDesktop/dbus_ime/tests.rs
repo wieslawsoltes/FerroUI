@@ -2,23 +2,14 @@
 //!
 //! Not from the reference, which has no tests of these classes.
 //!
-//! The services are test doubles on a second connection. Two set-ups:
-//!
-//! - By default the two connections are the two ends of a socket pair,
-//!   without a bus, and the double also answers for the bus itself (who
-//!   owns a name, and the signal that the owner changed). This runs on
-//!   every Unix system.
-//! - With `FERROUI_FREEDESKTOP_TEST_BUS=session` both connect to the
-//!   session bus of the environment (a private one: `dbus-run-session`),
-//!   and the double takes and releases the well-known names for real. The
-//!   names are the real ones, so these runs need `--test-threads=1`.
+//! The services are doubles on a second connection (`test_support.rs`:
+//! without a bus by default, on a session bus when the environment asks).
 
 use super::fcitx::{FcitxCapabilityFlags, FcitxKeyState, FcitxX11TextInputMethod};
 use super::ibus::{IBusCapability, IBusModifierMask, IBusX11TextInputMethod};
 use super::DBusTextInputMethodBase;
-use crate::dbus_helper::DBusHelper;
 use crate::ix11_input_method::{IX11InputMethodControl, X11InputMethodForwardedKey};
-use crate::test_support::{pump_until, scope};
+use crate::test_support::{emit_from_service, log, pump_until, scope, Log, ServiceBuilder, TestConnections};
 use ferroui_base::input::raw::{IRawInputEventArgs, RawKeyEventArgs, RawKeyEventType};
 use ferroui_base::input::text_input::{
     ITextInputMethodImpl, TextInputContentType, TextInputMethodClient, TextInputMethodClientEvents, TextInputOptions,
@@ -36,46 +27,12 @@ use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use zbus::zvariant::{ObjectPath, OwnedObjectPath, Structure, Value};
 
-type Log = Arc<Mutex<Vec<String>>>;
-
-fn log(log: &Log, entry: impl Into<String>) {
-    log.lock().unwrap().push(entry.into());
-}
-
 const IBUS_NAME: &str = "org.freedesktop.portal.IBus";
 const IBUS_CONTEXT_PATH: &str = "/org/freedesktop/IBus/InputContext_1";
 const FCITX4_NAME: &str = "org.fcitx.Fcitx";
 const FCITX4_CONTEXT_PATH: &str = "/inputcontext_7";
 const FCITX5_NAME: &str = "org.freedesktop.portal.Fcitx";
 const FCITX5_CONTEXT_PATH: &str = "/org/freedesktop/portal/inputcontext/3";
-
-/// The unique name the double of the bus gives the services, and the name
-/// of the bus itself.
-const SERVICE_UNIQUE_NAME: &str = ":1.42";
-const BUS_NAME: &str = "org.freedesktop.DBus";
-
-/// A signal as it arrives through a bus: with the unique name of its
-/// sender. Without a bus a connection has no name, and a signal would
-/// carry none; with one, the name is the one the bus gave the connection.
-fn signal<B>(connection: &zbus::Connection, sender: &str, path: &str, interface: &str, name: &str, body: &B) -> zbus::Message
-where
-    B: zbus::export::serde::ser::Serialize + zbus::zvariant::DynamicType,
-{
-    let builder = zbus::Message::signal(path, interface, name).unwrap();
-    match connection.unique_name() {
-        Some(own) => builder.sender(own.as_str()).unwrap(),
-        None => builder.sender(sender).unwrap(),
-    }
-    .build(body)
-    .unwrap()
-}
-
-async fn emit_from_service<B>(connection: &zbus::Connection, path: &str, interface: &str, name: &str, body: &B)
-where
-    B: zbus::export::serde::ser::Serialize + zbus::zvariant::DynamicType,
-{
-    connection.send(&signal(connection, SERVICE_UNIQUE_NAME, path, interface, name, body)).await.unwrap();
-}
 
 /// The key symbols the doubles treat specially.
 const KEY_A: u32 = 0x61;
@@ -89,28 +46,6 @@ fn ibus_text(text: &str) -> Value<'static> {
         text.to_string(),
         Value::from(0u32),
     )))
-}
-
-// ---------------------------------------------------------------------
-// The bus, when there is none.
-
-struct FakeBus {
-    owners: Arc<Mutex<HashMap<String, String>>>,
-}
-
-#[zbus::interface(name = "org.freedesktop.DBus")]
-impl FakeBus {
-    fn get_name_owner(&self, name: &str) -> zbus::fdo::Result<String> {
-        if name == BUS_NAME {
-            return Ok(BUS_NAME.to_string());
-        }
-        self.owners
-            .lock()
-            .unwrap()
-            .get(name)
-            .cloned()
-            .ok_or_else(|| zbus::fdo::Error::NameHasNoOwner(format!("Could not get owner of name '{name}': no such name")))
-    }
 }
 
 // ---------------------------------------------------------------------
@@ -319,102 +254,37 @@ impl Fcitx5Context {
 // The two connections.
 
 struct TestBus {
-    client: zbus::Connection,
-    service: zbus::blocking::Connection,
-    /// The owners the double of the bus answers with; `None` on a real bus.
-    owners: Option<Arc<Mutex<HashMap<String, String>>>>,
+    connections: TestConnections,
     log: Log,
 }
 
-fn on_session_bus() -> bool {
-    std::env::var("FERROUI_FREEDESKTOP_TEST_BUS").as_deref() == Ok("session")
+impl std::ops::Deref for TestBus {
+    type Target = TestConnections;
+
+    fn deref(&self) -> &TestConnections {
+        &self.connections
+    }
 }
 
 impl TestBus {
     fn new() -> TestBus {
         let log: Log = Arc::new(Mutex::new(Vec::new()));
 
-        // The services are part of the connection from the moment it is
-        // built: an object server that is started later, by the first
-        // object that is added, was seen not to answer calls now and then.
-        let serve = |builder: zbus::blocking::connection::Builder<'static>, log: &Log| {
-            builder
-                .serve_at("/org/freedesktop/IBus", IBusPortal { log: log.clone() })?
-                .serve_at(IBUS_CONTEXT_PATH, IBusContext { log: log.clone() })?
-                .serve_at(IBUS_CONTEXT_PATH, IBusService { log: log.clone() })?
-                .serve_at("/inputmethod", Fcitx4Method { log: log.clone() })?
-                .serve_at(FCITX4_CONTEXT_PATH, Fcitx4Context { log: log.clone() })?
-                .serve_at("/inputmethod", Fcitx5Method { log: log.clone() })?
-                .serve_at(FCITX5_CONTEXT_PATH, Fcitx5Context { log: log.clone() })
+        let serve = {
+            let log = log.clone();
+            move |builder: ServiceBuilder| {
+                builder
+                    .serve_at("/org/freedesktop/IBus", IBusPortal { log: log.clone() })?
+                    .serve_at(IBUS_CONTEXT_PATH, IBusContext { log: log.clone() })?
+                    .serve_at(IBUS_CONTEXT_PATH, IBusService { log: log.clone() })?
+                    .serve_at("/inputmethod", Fcitx4Method { log: log.clone() })?
+                    .serve_at(FCITX4_CONTEXT_PATH, Fcitx4Context { log: log.clone() })?
+                    .serve_at("/inputmethod", Fcitx5Method { log: log.clone() })?
+                    .serve_at(FCITX5_CONTEXT_PATH, Fcitx5Context { log: log.clone() })
+            }
         };
 
-        let (client, service, owners) = if on_session_bus() {
-            let client = DBusHelper::try_create_new_connection(None).expect("a session bus");
-            let service = serve(zbus::blocking::connection::Builder::session().unwrap(), &log).unwrap().build().unwrap();
-            (client, service, None)
-        } else {
-            let (client_end, service_end) = std::os::unix::net::UnixStream::pair().unwrap();
-            let guid = zbus::Guid::generate();
-            let owners = Arc::new(Mutex::new(HashMap::new()));
-            // Both ends take part in the handshake, so one is built on
-            // another thread.
-            let service = {
-                let (owners, log) = (owners.clone(), log.clone());
-                std::thread::spawn(move || {
-                    let builder = zbus::blocking::connection::Builder::async_io_unix_stream(service_end)
-                        .server(guid)
-                        .unwrap()
-                        .p2p()
-                        .serve_at("/org/freedesktop/DBus", FakeBus { owners })
-                        .unwrap();
-                    serve(builder, &log).unwrap().build().unwrap()
-                })
-            };
-            let client =
-                zbus::blocking::connection::Builder::async_io_unix_stream(client_end).p2p().build().unwrap().into_inner();
-            let service = service.join().unwrap();
-            (client, service, Some(owners))
-        };
-
-        TestBus { client, service, owners, log }
-    }
-
-    /// The service appears on the bus under `name`.
-    fn start(&self, name: &str) {
-        match &self.owners {
-            Some(owners) => {
-                owners.lock().unwrap().insert(name.to_string(), SERVICE_UNIQUE_NAME.to_string());
-                self.name_owner_changed(&(name, "", SERVICE_UNIQUE_NAME));
-            }
-            None => self.service.request_name(name).unwrap(),
-        }
-    }
-
-    /// The service is gone from the bus (it crashed).
-    fn stop(&self, name: &str) {
-        match &self.owners {
-            Some(owners) => {
-                owners.lock().unwrap().remove(name);
-                self.name_owner_changed(&(name, SERVICE_UNIQUE_NAME, ""));
-            }
-            None => {
-                self.service.release_name(name).unwrap();
-            }
-        }
-    }
-
-    fn emit<B>(&self, path: &str, interface: &str, signal: &str, body: &B)
-    where
-        B: zbus::export::serde::ser::Serialize + zbus::zvariant::DynamicType,
-    {
-        self.service.send(&self::signal(self.service.inner(), SERVICE_UNIQUE_NAME, path, interface, signal, body)).unwrap();
-    }
-
-    /// The signal of the double of the bus that the owner of a name changed.
-    fn name_owner_changed(&self, body: &(&str, &str, &str)) {
-        let message =
-            self::signal(self.service.inner(), BUS_NAME, "/org/freedesktop/DBus", BUS_NAME, "NameOwnerChanged", body);
-        self.service.send(&message).unwrap();
+        TestBus { connections: TestConnections::new("/org/freedesktop/IBus", serve), log }
     }
 
     fn take_log(&self) -> Vec<String> {
@@ -424,46 +294,7 @@ impl TestBus {
     /// Runs the dispatcher until the services were called with `entries`,
     /// in that order and nothing else, and forgets those calls.
     fn expect_calls(&self, entries: &[&str]) {
-        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
-        loop {
-            ferroui_base::threading::Dispatcher::ui_thread().run_jobs(None);
-            if self.log.lock().unwrap().len() >= entries.len() {
-                break;
-            }
-            assert!(
-                std::time::Instant::now() < deadline,
-                "expected the calls {entries:?}, got {:?}",
-                self.log.lock().unwrap()
-            );
-            std::thread::sleep(std::time::Duration::from_millis(1));
-        }
-        self.settle();
-        assert_eq!(self.take_log(), entries);
-    }
-
-    /// Lets what is in flight arrive: a round trip to the service and
-    /// back, behind everything that was sent before it in either
-    /// direction, and the jobs that follow from what arrived.
-    fn settle(&self) {
-        for _ in 0..2 {
-            let done = Rc::new(RefCell::new(false));
-            let (client, flag) = (self.client.clone(), done.clone());
-            let service_name = self.service.unique_name().map(|name| name.to_string());
-            drop(ferroui_base::threading::Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                let peer = zbus::fdo::PeerProxy::builder(&client)
-                    .destination(service_name.unwrap_or_else(|| "org.freedesktop.DBus".to_string()))
-                    .unwrap()
-                    .path("/org/freedesktop/IBus")
-                    .unwrap()
-                    .build()
-                    .await
-                    .unwrap();
-                peer.ping().await.unwrap();
-                *flag.borrow_mut() = true;
-            }));
-            pump_until(|| *done.borrow());
-            ferroui_base::threading::Dispatcher::ui_thread().run_jobs(None);
-        }
+        crate::test_support::expect_calls(&self.connections, &self.log, entries);
     }
 }
 
