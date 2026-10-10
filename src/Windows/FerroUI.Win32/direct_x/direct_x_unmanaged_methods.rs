@@ -1,11 +1,12 @@
 //! The functions of DXGI and Direct3D 11 the backend calls.
 
-use super::{ID3D11Device, IDXGIAdapter1, IDXGIFactory1, D3D_DRIVER_TYPE, D3D_FEATURE_LEVEL};
+use super::{ID3D11Device, IDXGIAdapter1, IDXGIFactory, IDXGIFactory1, D3D_DRIVER_TYPE, D3D_FEATURE_LEVEL};
 use ferroui_microcom::{ComPtr, Guid, HResult, Interface, RawHResult};
 use std::ffi::c_void;
 
 #[link(name = "dxgi", kind = "raw-dylib")]
 extern "system" {
+    fn CreateDXGIFactory(riid: *const Guid, pp_factory: *mut *mut c_void) -> RawHResult;
     fn CreateDXGIFactory1(riid: *const Guid, pp_factory: *mut *mut c_void) -> RawHResult;
 }
 
@@ -27,11 +28,22 @@ extern "system" {
 
 /// The functions of DXGI and Direct3D 11.
 ///
-/// The reference declares `CreateDXGIFactory` as well and calls only
-/// `CreateDXGIFactory1`, which is the one declared here.
 pub struct DirectXUnmanagedMethods;
 
 impl DirectXUnmanagedMethods {
+    /// `CreateDXGIFactory` for the factory of the first version of DXGI:
+    /// what the timer of the swap chain mode enumerates the outputs with.
+    /// The failure of the call is the error.
+    pub fn create_dxgi_factory() -> Result<Option<ComPtr<IDXGIFactory>>, HResult> {
+        let mut factory = std::ptr::null_mut();
+        // SAFETY: the identifier is the one of the interface the result is
+        // read as, and the pointer is valid for the one pointer written.
+        HResult::check(unsafe { CreateDXGIFactory(&IDXGIFactory::IID, &mut factory) })?;
+        // SAFETY: the call succeeded, so the pointer is null or a reference
+        // to a factory this call owns.
+        Ok(unsafe { ComPtr::from_raw(factory.cast()) })
+    }
+
     /// `CreateDXGIFactory1` for the first version of the factory. The
     /// failure of the call is the error (the reference lets the runtime
     /// throw for it).

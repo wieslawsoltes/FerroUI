@@ -524,8 +524,32 @@ mod windows {
             // composed had every pixel). The offset is what is blank at the start; the pixels
             // it hides count as painted, and the places that are compared move with it.
             let leading = |blank: &[i32], full: i32| blank.iter().take_while(|&&count| count == full).count() as i32;
-            let (offset_x, offset_y) =
+            let (mut offset_x, mut offset_y) =
                 if flipped { (leading(&blank_in_column, height), leading(&blank_in_row, width)) } else { (0, 0) };
+            // A drawing surface of Windows.UI.Composition also hands its frames out at an offset,
+            // and what lies before the frame in its texture is not always blank (the first
+            // frame after the resize in run 38077851321 read back at an offset no blank column
+            // told of). When the three places do not hold what was drawn at the offset the
+            // blank columns and rows give, the offsets up to 16 pixels are tried, and the one
+            // at which all three hold is the offset of the frame.
+            if flipped {
+                let near_at = |x: i32, y: i32, color: [u8; 3]| {
+                    let (x, y) = (x.min(width - 1), y.min(height - 1));
+                    let index = (y as usize * width as usize + x as usize) * 4;
+                    pixels[index + 3] == 255 && (0..3).all(|i| (i32::from(pixels[index + i]) - i32::from(color[i])).abs() <= 1)
+                };
+                let holds = |offset_x: i32, offset_y: i32| {
+                    near_at(box_x + box_w / 2 + offset_x, box_y + box_h / 2 + offset_y, box_color)
+                        && near_at(card_x + card_w / 2 + offset_x, card_y + 2 + offset_y, [0xf0, 0xf0, 0xf0])
+                        && near_at(1 + offset_x, 1 + offset_y, [0x1e, 0x3a, 0x8a])
+                };
+                if !holds(offset_x, offset_y) {
+                    let found = (0..=16).flat_map(|y| (0..=16).map(move |x| (x, y))).find(|&(x, y)| holds(x, y));
+                    if let Some(found) = found {
+                        (offset_x, offset_y) = found;
+                    }
+                }
+            }
             if (offset_x, offset_y) != self.read_offset.get() {
                 self.read_offset.set((offset_x, offset_y));
                 println!(
@@ -1675,7 +1699,7 @@ mod windows {
         };
         println!("Rendering mode: {rendering_mode:?}");
 
-        // `--composition redirection|dcomp|winui`: the one composition mode of
+        // `--composition redirection|dcomp|winui|dxgi`: the one composition mode of
         // the run (with ANGLE), without a fallback. The default is the
         // redirection surface of the window.
         let composition = arguments
@@ -1687,15 +1711,20 @@ mod windows {
             "redirection" => Win32CompositionMode::RedirectionSurface,
             "dcomp" => Win32CompositionMode::DirectComposition,
             "winui" => Win32CompositionMode::WinUIComposition,
+            "dxgi" => Win32CompositionMode::LowLatencyDxgiSwapChain,
             other => {
-                eprintln!("win32_window: unknown composition mode '{other}' (redirection, dcomp, winui)");
+                eprintln!("win32_window: unknown composition mode '{other}' (redirection, dcomp, winui, dxgi)");
                 return ExitCode::from(2);
             }
         };
         if rendering_mode == Win32RenderingMode::AngleEgl {
             println!("Composition mode: {composition_mode:?}");
         }
-        let composed = rendering_mode == Win32RenderingMode::AngleEgl && composition_mode != Win32CompositionMode::RedirectionSurface;
+        // The modes whose surface hands out textures of Direct3D 11 and whose window has no
+        // redirection bitmap. The DXGI swap chain mode is not one of them: its surface is an
+        // OpenGL surface of the window, like the EGL window surface.
+        let composed = rendering_mode == Win32RenderingMode::AngleEgl
+            && matches!(composition_mode, Win32CompositionMode::DirectComposition | Win32CompositionMode::WinUIComposition);
 
         let options = Win32PlatformOptions {
             rendering_mode: vec![rendering_mode],

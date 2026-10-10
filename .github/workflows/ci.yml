@@ -210,6 +210,15 @@ jobs:
             fi
             echo "run $run: $(tail -n 2 "smoke-winui-$run.log" | tr '\n' ' ')"
           done
+      # The same run presented through a DXGI swap chain of the window (the low-latency mode, the
+      # rest of stage 2c): a flip-model swap chain that allows tearing, on the device of ANGLE.
+      # Informative until its first green run: whether the software device of a runner creates
+      # such a swap chain is what the run says.
+      - name: Smoke run through ANGLE, presented through a DXGI swap chain (informative)
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        timeout-minutes: 5
+        run: cargo run --locked -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition dxgi --teardown-trace
       - name: Skia binaries published for Windows (informative)
         id: skia
         if: ${{ !cancelled() }}
@@ -430,6 +439,15 @@ jobs:
             fi
             echo "run $run: $(tail -n 2 "smoke-winui-$run.log" | tr '\n' ' ')"
           done
+      # The same run presented through a DXGI swap chain of the window (the low-latency mode, the
+      # rest of stage 2c): a flip-model swap chain that allows tearing, on the device of ANGLE.
+      # Informative until its first green run: whether the software device of a runner creates
+      # such a swap chain is what the run says.
+      - name: Smoke run through ANGLE, presented through a DXGI swap chain (informative)
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        timeout-minutes: 5
+        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition dxgi --teardown-trace
       - name: Skia binaries published for Windows on ARM64
         if: ${{ !cancelled() }}
         run: |

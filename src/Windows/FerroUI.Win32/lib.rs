@@ -38,6 +38,7 @@ mod ole_data_object_helper;
 mod ole_drag_source;
 mod ole_drop_target;
 mod ole_virtual_file_data;
+mod swap_chain_top_level_impl;
 mod sync_root;
 mod win32_dispatcher_impl;
 mod win32_gl_manager;

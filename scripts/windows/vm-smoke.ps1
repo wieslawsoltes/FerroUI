@@ -355,7 +355,7 @@ if (-not (Test-Path $example)) {
     }
     # Through ANGLE with each composition mode that presents through a surface of its own.
     if ($Modes -contains 'angle') {
-        foreach ($composition in @('dcomp', 'winui')) {
+        foreach ($composition in @('dcomp', 'winui', 'dxgi')) {
             $name = "smoke-angle-$composition"
             $commandLine = "`"$example`" --smoke --rendering angle --composition $composition"
             $code = if ($InteractiveUser) { Run-Interactive $name $commandLine } else { Run $name $commandLine }

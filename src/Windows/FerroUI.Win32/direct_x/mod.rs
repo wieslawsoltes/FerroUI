@@ -12,6 +12,11 @@ mod direct_x_enums;
 mod direct_x_structs;
 #[cfg(windows)]
 mod direct_x_unmanaged_methods;
+mod dxgi_connection;
+#[cfg(windows)]
+mod dxgi_render_target;
+#[cfg(windows)]
+mod dxgi_swapchain_window;
 mod i_direct3_d11_texture_platform_surface;
 
 #[allow(
@@ -32,4 +37,6 @@ pub use direct_x_structs::*;
 #[cfg(windows)]
 pub use direct_x_unmanaged_methods::DirectXUnmanagedMethods;
 pub use directx::*;
+#[cfg(windows)]
+pub(crate) use dxgi_connection::DxgiConnection;
 pub use i_direct3_d11_texture_platform_surface::*;
