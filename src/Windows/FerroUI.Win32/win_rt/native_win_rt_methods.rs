@@ -1,9 +1,6 @@
-//! The functions of the Windows Runtime: string handles and activation.
-//!
-//! Not built here, with the stage that calls them (2c, composition): the
-//! activation factory of the composition library
-//! (`GetWindowsUICompositionActivationFactory`) and the dispatcher queue
-//! controller (`CreateDispatcherQueueController` with its options).
+//! The functions of the Windows Runtime: string handles, activation, the
+//! activation factory of the composition library and the dispatcher queue
+//! controller.
 
 use crate::interop::unmanaged_methods::{co_get_apartment_type, APTTYPE_MAINSTA, APTTYPE_STA};
 use ferroui_base::threading::Dispatcher;
@@ -31,6 +28,35 @@ extern "system" {
     fn RoInitialize(init_type: i32) -> i32;
     fn RoActivateInstance(activatable_class_id: isize, instance: *mut *mut c_void) -> i32;
     fn RoGetActivationFactory(activatable_class_id: isize, iid: *const Guid, factory: *mut *mut c_void) -> i32;
+}
+
+/// The apartment of the thread of a dispatcher queue.
+#[repr(i32)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(non_camel_case_types, clippy::upper_case_acronyms, dead_code)]
+pub(crate) enum DISPATCHERQUEUE_THREAD_APARTMENTTYPE {
+    DQTAT_COM_NONE = 0,
+    DQTAT_COM_ASTA = 1,
+    DQTAT_COM_STA = 2,
+}
+
+/// The thread of a dispatcher queue: one the system starts, or the caller's.
+#[repr(i32)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(non_camel_case_types, clippy::upper_case_acronyms, dead_code)]
+pub(crate) enum DISPATCHERQUEUE_THREAD_TYPE {
+    DQTYPE_THREAD_DEDICATED = 1,
+    DQTYPE_THREAD_CURRENT = 2,
+}
+
+/// The options of `CreateDispatcherQueueController`.
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(dead_code)] // Created by the composition connection, the next part of stage 2c, and by the tests.
+pub(crate) struct DispatcherQueueOptions {
+    pub dw_size: i32,
+    pub thread_type: DISPATCHERQUEUE_THREAD_TYPE,
+    pub apartment_type: DISPATCHERQUEUE_THREAD_APARTMENTTYPE,
 }
 
 /// How the Windows Runtime is initialised on a thread.
@@ -129,6 +155,61 @@ impl NativeWinRTMethods {
         // SAFETY: as `create_instance`.
         let unk = unsafe { ComPtr::<IUnknown>::from_raw(p_unk.cast()) }.ok_or(HResult::POINTER)?;
         unk.cast::<TFactory>()
+    }
+
+    /// The activation factory of a class of the composition library
+    /// (`DllGetActivationFactory` of `Windows.UI.Composition.dll`, which
+    /// activates without the registration of the class).
+    ///
+    /// The library is loaded when this is first called, as an import of
+    /// the reference is: a system without it fails here with a result
+    /// code, not when the process starts.
+    #[allow(dead_code)] // Called by the composition connection, the next part of stage 2c, and by the tests.
+    pub(crate) fn get_windows_ui_composition_activation_factory(
+        class_name: &str,
+    ) -> Result<ComPtr<super::IActivationFactory>, HResult> {
+        use crate::interop::unmanaged_methods::{get_proc_address, load_library};
+
+        //"Windows.UI.Composition.Compositor"
+        let s = HStringInterop::new(Some(class_name))?;
+        let function = get_proc_address(load_library("Windows.UI.Composition.dll"), c"DllGetActivationFactory")
+            .ok_or(HResult::NOTIMPL)?;
+        // SAFETY: the export has this signature: a string handle and the
+        // place of the factory.
+        let function: unsafe extern "system" fn(isize, *mut *mut c_void) -> i32 =
+            unsafe { std::mem::transmute(function) };
+        let mut factory = std::ptr::null_mut();
+        // SAFETY: a string handle that lives through the call, and a
+        // pointer of this frame the library writes the factory to.
+        check(unsafe { function(s.handle(), &mut factory) })?;
+        // SAFETY: the call succeeded, so the pointer is the factory, whose
+        // reference this function owns.
+        unsafe { ComPtr::<super::IActivationFactory>::from_raw(factory.cast()) }.ok_or(HResult::POINTER)
+    }
+
+    /// `CreateDispatcherQueueController` of `coremessaging.dll`: a
+    /// dispatcher queue for the calling thread or on a thread of its own.
+    /// The library is loaded when this is first called (Windows 10 1709
+    /// and later have it).
+    #[allow(dead_code)] // As above.
+    pub(crate) fn create_dispatcher_queue_controller(
+        options: DispatcherQueueOptions,
+    ) -> Result<ComPtr<super::IDispatcherQueueController>, HResult> {
+        use crate::interop::unmanaged_methods::{get_proc_address, load_library};
+
+        let function = get_proc_address(load_library("coremessaging.dll"), c"CreateDispatcherQueueController")
+            .ok_or(HResult::NOTIMPL)?;
+        // SAFETY: the export has this signature: the options by value and
+        // the place of the controller.
+        let function: unsafe extern "system" fn(DispatcherQueueOptions, *mut *mut c_void) -> i32 =
+            unsafe { std::mem::transmute(function) };
+        let mut controller = std::ptr::null_mut();
+        // SAFETY: plain values, and a pointer of this frame the system
+        // writes the controller to.
+        check(unsafe { function(options, &mut controller) })?;
+        // SAFETY: the call succeeded, so the pointer is the controller,
+        // whose reference this function owns.
+        unsafe { ComPtr::<super::IDispatcherQueueController>::from_raw(controller.cast()) }.ok_or(HResult::POINTER)
     }
 
     /// Initialises the Windows Runtime on the calling thread before its

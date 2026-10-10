@@ -22,6 +22,11 @@ mod win_rt_property_value;
 #[cfg(windows)]
 pub(crate) use native_win_rt_methods::{HStringInterop, NativeWinRTMethods};
 #[cfg(windows)]
+#[allow(unused_imports)] // The composition connection of stage 2c creates the queue.
+pub(crate) use native_win_rt_methods::{
+    DispatcherQueueOptions, DISPATCHERQUEUE_THREAD_APARTMENTTYPE, DISPATCHERQUEUE_THREAD_TYPE,
+};
+#[cfg(windows)]
 pub(crate) use win_rt_api_information::WinRTApiInformation;
 pub use win_rt_color::WinRTColor;
 #[cfg(windows)]
