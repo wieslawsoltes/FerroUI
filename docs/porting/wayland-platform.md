@@ -1,6 +1,6 @@
 # The Linux platform: Wayland
 
-The design of the Wayland backend of FerroUI, the decisions it rests on, the file table of the port and its stages. Upstream: `src/Avalonia.Wayland` at the tracked commit (`TRACKING.md`): 84 source files (11 341 lines), a README and the project file; the tracker counts the 81 files that declare types, with 123 types and 816 members (`tracking/Avalonia.Wayland.md`), and `tests/Avalonia.Wayland.UnitTests` has 12 tests in 2 files. The backend shares the FreeDesktop crate with the X11 backend (`x11-platform.md`), and three source files of the X11 project, which upstream compiles into both.
+The design of the Wayland backend of FerroUI, the decisions it rests on, the file table of the port and its stages. Upstream: `src/Avalonia.Wayland` at the tracked commit (`TRACKING.md`): 84 source files (11 341 lines), a README and the project file; the tracker counts the 81 files that declare types, with 123 types and 816 members (`tracking/Avalonia.Wayland.md`), and `tests/Avalonia.Wayland.UnitTests` has 12 tests in 2 files. After stage 1 the tracker finds 53 of the 81 files, 73 of the 123 types and 384 of the 816 members (47.1 %); the rest is stages 2 and 3, the three declaration files the bindings replace, and members that are written differently (a proxy method posts a closure; a listener is a `Dispatch` implementation). The backend shares the FreeDesktop crate with the X11 backend (`x11-platform.md`), and three source files of the X11 project, which upstream compiles into both.
 
 Marks, as in `x11-platform.md`: **[V]** verified from sources (the upstream files, the sources of a crate in the cargo registry, `cargo info`), **[M]** measured here (a build or a test run on the development machine, a Mac), **[R]** recalled and not verified here, **[CI]** shown by the CI job on a compositor, **[VM]** measured in the virtual machine (Ubuntu 24.04, ARM64).
 
@@ -19,7 +19,7 @@ Protocols it binds **[V]** (`Server/Transient/WaylandGlobals.cs`), with the vers
 |---|---|---|---|
 | `wl_compositor` | 4 to 6 | yes | surfaces, regions (the input region of a surface that is not hit-test visible), `preferred_buffer_scale` (6) |
 | `wl_shm` | 1 | yes | software frames, bitmap cursors, the cursor theme |
-| `xdg_wm_base` | 3 to 4 | yes | `xdg_surface`, `xdg_toplevel` (with `configure_bounds`, 4), `xdg_popup` with `reposition` (3), `xdg_positioner` |
+| `xdg_wm_base` | 3 to 4 (the port: 2 to 4, section 11.1) | yes | `xdg_surface`, `xdg_toplevel` (with `configure_bounds`, 4), `xdg_popup` with `reposition` (3), `xdg_positioner` |
 | `wl_seat` | 5 to 9 | no | pointer (frames, `axis_value120` from 8), keyboard, touch |
 | `wl_output` | 2 to 4 | no (a top-level needs one) | screens; name and description (4) |
 | `zxdg_output_manager_v1` | 3 | no | logical position and size of an output |
@@ -96,7 +96,7 @@ It depends on `ferroui-base`, `ferroui-controls`, `ferroui-dialogs`, `ferroui-fr
 
 The part of the crate that talks to a compositor is compiled for Linux only (`cfg(target_os = "linux")`: upstream runs on Linux only, and a frame needs `memfd_create`). What is plain logic compiles and is tested on every host: the key tables and the key resolution over a keymap trait, the states of a configure, the window geometry and the size limits, the scale of a surface, the logical geometry of an output, the frames of pointer and touch events, the wake-up flag of the render loop, the options.
 
-The example (`examples/wayland_window.rs`) needs a renderer, a text shaper, a theme and the protocols of a test client, behind the feature `example`, like the X11 example.
+The example (`examples/wayland_window.rs`) needs a renderer, a text shaper, a theme and the protocols of a test client, behind the feature `example`, like the X11 example. A second feature, `example-check`, is `example` without the renderer, the text shaper and the theme, whose native libraries cannot be built for Linux on another system: with it the example is type-checked from the Mac (it does not run built that way).
 
 ## 4. Threads and the event loop
 
@@ -182,8 +182,8 @@ Stage 1 is what this document's first implementation builds; 2 and 3 are the han
 
 | Upstream file | Port | Stage |
 |---|---|---|
-| `AvaloniaWaylandException.cs` | `wayland_exception.rs` | 1 |
-| `AvaloniaWaylandPlatformExtensions.cs` | `wayland_platform_extensions.rs` | 1 |
+| `AvaloniaWaylandException.cs` | `ferro_wayland_exception.rs` | 1 |
+| `AvaloniaWaylandPlatformExtensions.cs` | `ferro_wayland_platform_extensions.rs` | 1 |
 | `WaylandPlatform.cs` | `wayland_platform.rs` | 1 (the clipboard and the drag source bind in 2) |
 | `WaylandPlatformOptions.cs` | `wayland_platform_options.rs` | 1 |
 | `WaylandTopLevelFactory.cs` | `wayland_top_level_factory.rs` | 1 |
@@ -230,8 +230,8 @@ Stage 1 is what this document's first implementation builds; 2 and 3 are the han
 
 Three levels, as for X11, because a Wayland client cannot run on the development machine:
 
-1. **Compilation for Linux** from the Mac: `cargo check -p ferroui-wayland --target x86_64-unknown-linux-gnu --all-targets` **[M]**.
-2. **Tests without a compositor** (`cargo test -p ferroui-wayland`, on every host): the logic named in section 3.
+1. **Compilation for Linux** from the Mac: `cargo check -p ferroui-wayland --features example-check --target x86_64-unknown-linux-gnu --all-targets` **[M]** (the crate, its tests and the example).
+2. **Tests without a compositor** (`cargo test -p ferroui-wayland`): the logic named in section 3, 32 tests on the Mac **[M]**; on Linux also the wrappers of the C library (the pipe, the wait, a memory file and its mappings), the keymap compiled by `libxkbcommon` (two layouts, modifiers, the fallback to another layout), the mapping of a configure to the state of a window, and the fallback of the application builder.
 3. **A compositor**: the CI job `wayland` (Ubuntu, x86-64) and the virtual machine, with the smoke mode of `examples/wayland_window.rs`: every check prints a line beginning `[ ok ]` or `[FAILED]`, and the exit code is the result.
 
 ### 11.1 The compositor of the tests: `sway` on the headless backend of wlroots
@@ -245,6 +245,8 @@ A Wayland client cannot ask the compositor about its own window, synthesize inpu
 | **`sway`** (wlroots) with `WLR_BACKENDS=headless` | `zwlr_virtual_pointer_v1` and `zwp_virtual_keyboard_v1`, for any client | `zwlr_screencopy_manager_v1`, for any client (what `grim` uses) | Its IPC (`swaymsg -t get_tree`): title, application identifier, geometry, focus, fullscreen; `swaymsg` changes the output (mode, scale) and closes a window |
 
 So the job runs **`sway`**, with `WLR_BACKENDS=headless`, `WLR_LIBINPUT_NO_DEVICES=1` and `WLR_RENDERER=pixman` (no GPU on the runner), on a configuration file of the job: no bar, no borders, so the one tiled window covers the output exactly and a point of the window is the same point of the screen. The example is itself the test client: a second connection of its own binds the virtual pointer, the virtual keyboard (with a keymap it compiles with `libxkbcommon`) and the screen copy manager. That keeps the run to one process and three packages (`sway`, which brings `swaymsg`; the libraries; Mesa for EGL), and makes every check a comparison in one place. `wtype`, `wlrctl` and `grim` do the same from outside and are used by the catalog script only (`grim`).
+
+One thing the choice costs: sway 1.9 (Ubuntu 24.04) has `xdg_wm_base` at version 2, and upstream requires 3, for `xdg_popup.reposition` **[CI]** (the first run of the job failed with "Required wayland global xdg_wm_base (>=3) not found"). The port accepts version 2 (DEVIATIONS.md): nothing of stage 1 uses a request of version 3, and a backend that refuses the compositor of the current Ubuntu LTS and of the tests would be verified nowhere. Stage 2 has to decide what a reposition is on version 2.
 
 Touch cannot be injected: wlroots has no virtual touch protocol. The touch handler is covered by the tests of its framing only.
 
@@ -265,14 +267,49 @@ Touch cannot be injected: wlroots has no virtual touch protocol. The touch handl
 
 The job runs the smoke mode in software and through EGL (Mesa's `llvmpipe`, `LIBGL_ALWAYS_SOFTWARE=1`), each on an output of scale 1 and of scale 2.
 
+### Measured by the CI job (run 38083641943, 2026-10-10) **[CI]**
+
+Ubuntu 24.04 on x86-64 (`ubuntu-latest`), sway 1.9, Mesa's `llvmpipe` for EGL (`LIBGL_ALWAYS_SOFTWARE=1`), commit `c3f096bf`:
+
+| Step | Result |
+|---|---|
+| Tests of the crate | 45 passed (the 32 of every host and 13 of Linux: the C library wrappers and the wake-up pipe, the keymap of two layouts compiled by `libxkbcommon`, the configure of a window, the key repeat interval, the cursor names, the fallback of the builder) |
+| Smoke through `wl_shm` buffers, scale 1 | 39 of 39 |
+| Smoke through EGL, scale 1 | 39 of 39: the worker has a display of EGL, and the frames the compositor composed have the colours |
+| Smoke through `wl_shm` buffers, scale 2 | 39 of 39: the window renders at 2, the output of 1280 by 720 pixels is 640 by 360 logical units, the marker is at twice its logical place |
+| Smoke through EGL, scale 2 | 39 of 39 |
+| Without a compositor | The backend fails with "Unable to connect to Wayland display" and what it tried |
+
+What the 39 checks are, from the log of the run: the services of the platform and the render loop of the worker; the screen against `get_outputs` (HEADLESS-1, its logical rectangle); the view of the compositor with the title and the application identifier, focused and active, covering the output, with the client size and the scale; six pixels of the composed output (fill at three points, the marker, beside the marker) and its size; two pointer moves at their logical positions, a button press and release there, a wheel notch each way (deltas of -1 and 1); the key of "a" with its physical key and symbol, the text "a", and 24 key-down events for "b" held for a second and a half (the compositor announces 25 a second after 600 milliseconds; none after the release); a themed cursor with an image, a bitmap cursor with a surface, both released; the output given the mode 1024 by 600, the framework and the view following, the composed output of that size with the fill at its new corner; fullscreen and back, as the platform and the compositor report it; a title changed and restored; size limits whose minimum exceeds the maximum, after which the connection is still there.
+
+The first run of the job (38083227527) had the tests and the build pass and every smoke step fail at start for want of `xdg_wm_base` 3 (section 11.1).
+
+### Measured in the virtual machine (2026-10-10) **[VM]**
+
+Ubuntu 24.04.3 on ARM64 (`aarch64-unknown-linux-gnu`), sway 1.9 and grim from the distribution, the sources and the build directory on the shared folder (`ferroui-vm-wayland/scripts/stage1b.sh`, commit `3c93449f`):
+
+| Step | Result |
+|---|---|
+| Tests of the crate | 45 passed |
+| Smoke through `wl_shm` buffers, scale 1 and scale 2 | 39 of 39 each |
+| Smoke through EGL with `LIBGL_ALWAYS_SOFTWARE=1`, scale 1 and scale 2 | 39 of 39 each |
+| Smoke through EGL with the driver the machine chooses by itself | 39 of 39 |
+| The ControlCatalog (`FERROUI_CATALOG_WAYLAND`), through `wl_shm` buffers and through EGL, output of 1280 by 800 | 7 pages each (Home, Buttons, TextBlock, ListBox, Image, Calendar, Slider), a picture of the output per page taken by `grim`: `ferroui-screenshots/wayland/software-NN-<page>.png` and `egl-NN-<page>.png`; the window covers the output and the pages look as they do under X11 |
+| The same on an output of 2560 by 1600 at scale 2, through `wl_shm` buffers | 7 pictures in `ferroui-screenshots/wayland/scale2/`: the catalog renders at scale 2 (text and icons at twice the resolution) |
+
+Two things the catalog runs showed:
+
+- The first run, with the backend still refusing sway for its `xdg_wm_base` version, ended in the panic of the fallback (the X11 backend finds no display under a headless compositor) with no word about Wayland on the error stream: the warning upstream logs goes to the log sink only. `use_wayland_with_fallback` now also writes the reason to the error stream when the fallback fails (DEVIATIONS.md).
+- At scale 2 the window in the pictures is 640 by 400 logical units in the middle of the output, not the whole output. That is the catalog's own smoke helper (`fit_window_to_screen` of the desktop host, which shrinks the window to its screen): it divides the bounds of the screen by the scaling of the window, and a screen of this backend has logical bounds and a scaling of 1 by upstream's design (section 6), so the helper halves them. The window then has a size other than the one the compositor configured for a tiled view, which sway shows centred. Not a fault of the backend's rendering (the smoke mode at scale 2 covers the output); open: either the helper learns that a platform may report logical screens, or the question goes upstream's way when its sample does the same.
+
 Verified nowhere: a desktop compositor (GNOME's Mutter, KDE's KWin: fractional scaling, their decoration answers, their popups), a GPU with a hardware driver (the nvidia workarounds of the EGL surface), input from a real device, touch, a compositor restart.
 
 ## 12. Stages
 
 | Stage | Content | What its run proves |
 |---|---|---|
-| 1 | The crate and bindings; `use_wayland`, `use_wayland_with_fallback`, the options; the worker, the connection, the globals; outputs as screens; the top-level; the render timer; software and EGL rendering; pointer, keyboard and touch; cursors; the example and the CI job | Section 11 |
-| 1b | The ControlCatalog on Wayland when asked (`FERROUI_CATALOG_WAYLAND=1`), with pictures from `grim` | The script of the virtual machine: a picture per page |
+| 1 (built) | The crate and bindings; `use_wayland`, `use_wayland_with_fallback`, the options; the worker, the connection, the globals; outputs as screens; the top-level; the render timer; software and EGL rendering; pointer, keyboard and touch; cursors; the example and the CI job | Section 11 |
+| 1b (built) | The ControlCatalog on Wayland when asked (`FERROUI_CATALOG_WAYLAND=1`), with pictures from `grim` (`scripts/wayland/catalog-pictures.sh`) | The script of the virtual machine: a picture per page, 21 pictures |
 | 2 | Popups (`xdg_popup` and the positioner), fractional scaling and the viewport, the clipboard and drag and drop (`wl_data_device`), text input (`text-input-v3`), the portal parent through `xdg-foreign`, the storage provider chain; the protocol tracer | The smoke mode grows a phase for each; the clipboard against `wl-copy` and `wl-paste` |
 | 3 | The dmabuf swapchain (GBM, DRM, feedback) | A compositor with a render node: the virtual machine |
 
