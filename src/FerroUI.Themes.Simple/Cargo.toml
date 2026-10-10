@@ -6,6 +6,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 build = "build.rs"
 # The build script hands the path of `compiled_xaml.xamlmeta` to the build scripts of the crates that
 # depend on this one (`DEP_FERROUI_THEMES_SIMPLE_XAML_XAMLMETA`; docs/porting/xaml.md, 9.6.3).
@@ -51,3 +55,7 @@ ferroui-themes-fluent = { workspace = true }
 [[example]]
 name = "themed_window"
 path = "examples/themed_window.rs"
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"

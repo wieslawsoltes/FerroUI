@@ -1,11 +1,19 @@
 [package]
 name = "ferroui-skia"
+description = "The Skia render backend of FerroUI: Graphite on Metal, Ganesh on WebGL and raster"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 build = "build.rs"
+# The fonts and images of the tests (about 32 MB; crates.io accepts 10 MB) stay out of the package.
+# Nothing but the tests reads them.
+exclude = ["test_assets/"]
 
 [lib]
 path = "lib.rs"
@@ -35,3 +43,7 @@ skia-safe = { workspace = true, features = ["graphite", "metal"] }
 
 [target.'cfg(target_os = "emscripten")'.dependencies]
 skia-safe = { workspace = true, features = ["gl"] }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "rendering"

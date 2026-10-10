@@ -6,6 +6,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 [lib]
 path = "lib.rs"
@@ -35,3 +39,7 @@ path = "examples/storage_view/main.rs"
 [[example]]
 name = "render_worker_clear"
 path = "examples/render_worker_clear/main.rs"
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "platforms"

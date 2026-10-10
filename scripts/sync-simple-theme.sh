@@ -7,5 +7,5 @@ UPSTREAM="${1:?usage: sync-simple-theme.sh <upstream checkout> [--check]}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 python3 "$ROOT/scripts/convert_theme_xaml.py" \
     "$UPSTREAM/src/Avalonia.Themes.Simple" "$ROOT/src/FerroUI.Themes.Simple" \
-    --link "$UPSTREAM/src/Avalonia.Themes.Fluent/Strings/InvariantResources.xaml=../FerroUI.Themes.Fluent/Strings/InvariantResources.xaml" \
+    --link "$UPSTREAM/src/Avalonia.Themes.Fluent/Strings/InvariantResources.xaml=Strings/InvariantResources.xaml" \
     --exclude-list "$ROOT/src/FerroUI.Themes.Simple/Controls/excluded.txt" $2

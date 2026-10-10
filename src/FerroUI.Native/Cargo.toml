@@ -1,10 +1,15 @@
 [package]
 name = "ferroui-native"
+description = "The macOS platform of FerroUI: windows, input, clipboard, drag and drop, menus and Metal graphics over a native library"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 [lib]
 path = "lib.rs"
@@ -26,7 +31,7 @@ ferroui-skia.workspace = true
 
 [build-dependencies]
 cc.workspace = true
-microcom-codegen = { path = "../tools/MicroCom.CodeGenerator" }
+microcom-codegen.workspace = true
 
 [[example]]
 name = "raw_window"
@@ -41,3 +46,12 @@ path = "examples/platform_window.rs"
 name = "accessibility_tree"
 path = "tests/accessibility_tree.rs"
 harness = false
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "platforms"
+
+# The crate is empty on every target but macOS, so its documentation is the one of that target.
+[package.metadata.docs.rs]
+default-target = "aarch64-apple-darwin"
+targets = ["aarch64-apple-darwin", "x86_64-apple-darwin"]

@@ -1,10 +1,15 @@
 [package]
 name = "ferroui-markup"
+description = "The markup support of FerroUI: binding path parsing and reflection-style bindings"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 # Unit tests live in `tests/` as a module tree of the library (`mod tests;`),
 # not as integration test targets.
@@ -21,3 +26,7 @@ ferroui-base.workspace = true
 # of the template binding tests, and the test of a content control with delayed bindings. The controls
 # are not built on this crate.
 ferroui-controls = { workspace = true, features = ["testing"] }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "markup"

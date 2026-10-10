@@ -1,8 +1,12 @@
 //! Embeds the markup documents of the theme as assets.
 //!
 //! The counterpart of the resource items of the upstream project file:
-//! every `.xaml` file under the crate directory, plus the string resources
-//! linked from the Fluent theme project as `Strings/InvariantResources.xaml`.
+//! every `.xaml` file under the crate directory. The string resources the
+//! upstream project links from the Fluent theme project are a file of this
+//! crate, `Strings/InvariantResources.xaml`, converted from the same upstream
+//! document as the one of the Fluent theme (scripts/sync-simple-theme.sh):
+//! a published crate is built from its package, which holds no file of
+//! another crate.
 //! The table is written to `$OUT_DIR/assets.rs` as `(rooted path, bytes)`
 //! pairs and registered with the asset loader by `register_types()`, next
 //! to the table of the documents `Controls/excluded.txt` leaves out of the
@@ -24,11 +28,6 @@ use std::env;
 use std::fmt::Write as _;
 use std::fs;
 use std::path::{Path, PathBuf};
-
-/// Files of other projects that are assets of this one: (path relative to
-/// the crate directory, rooted asset path).
-const LINKED: &[(&str, &str)] =
-    &[("../FerroUI.Themes.Fluent/Strings/InvariantResources.xaml", "/Strings/InvariantResources.xaml")];
 
 /// The list of the control theme documents that are embedded but not merged
 /// into the theme yet.
@@ -66,11 +65,6 @@ fn main() {
 
     let mut assets = Vec::new();
     collect(&root, &root, &mut assets);
-    for (relative, asset_path) in LINKED {
-        let path = root.join(relative);
-        println!("cargo::rerun-if-changed={}", path.display());
-        assets.push(((*asset_path).to_string(), path));
-    }
     assets.sort();
 
     // The control theme documents that are left out of the theme: `<file> | <missing types>` per line.

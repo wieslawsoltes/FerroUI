@@ -1,10 +1,15 @@
 [package]
 name = "microcom-codegen"
+description = "Code generator of the FerroUI interop runtime: a C++ header and Rust bindings from an interface definition file"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords = ["com", "interop", "codegen", "idl"]
+categories = ["development-tools::build-utils", "development-tools::ffi"]
 
 [lib]
 path = "lib.rs"
@@ -18,3 +23,7 @@ name = "cpp_header"
 path = "tests/cpp_header.rs"
 
 [dependencies]
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "tools"

@@ -41,10 +41,14 @@ mod viewport_messages;
 // library, as the upstream project file does (`<Compile Include>` of
 // `Input/Key.cs` and `Input/PhysicalKey.cs`, which put the types in the
 // input namespace of the protocol when they are built here): the library
-// stays a leaf and the numbers of the keys cannot drift apart.
-#[path = "../FerroUI.Base/input/key.rs"]
+// stays a leaf. The two files under `input/` are copies of the files of the
+// base library, because a published crate is built from its package, which
+// holds no file of another crate; a test keeps the copies identical to their
+// originals (`tests/remote_protocol_tests.rs`), so the numbers of the keys
+// cannot drift apart.
+#[path = "input/key.rs"]
 mod key;
-#[path = "../FerroUI.Base/input/physical_key.rs"]
+#[path = "input/physical_key.rs"]
 mod physical_key;
 
 #[cfg(test)]

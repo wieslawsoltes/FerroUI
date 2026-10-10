@@ -1,10 +1,15 @@
 [package]
 name = "ferroui-desktop"
+description = "The desktop entry point of FerroUI: platform detection with the default render and text shaping backends"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 [lib]
 path = "lib.rs"
@@ -26,3 +31,7 @@ ferroui-controls = { workspace = true, features = ["testing"] }
 [[example]]
 name = "hello_window"
 path = "examples/hello_window.rs"
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "platforms"

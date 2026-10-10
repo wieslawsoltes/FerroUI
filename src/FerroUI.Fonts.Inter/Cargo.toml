@@ -6,6 +6,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 [lib]
 path = "lib.rs"
@@ -15,5 +19,12 @@ ferroui-base.workspace = true
 ferroui-controls.workspace = true
 
 [dev-dependencies]
-# The font manager that reads the embedded fonts in the tests.
-ferroui-skia.workspace = true
+# The font manager that reads the embedded fonts in the tests. A path and no version: the Skia
+# backend has this crate among its development dependencies, and Cargo leaves a development
+# dependency without a version out of the package, which breaks the cycle between the two packages
+# (docs/release.md, "Dependency order").
+ferroui-skia = { path = "../Skia/FerroUI.Skia" }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"

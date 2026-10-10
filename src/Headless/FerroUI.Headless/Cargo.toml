@@ -6,6 +6,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 [lib]
 path = "lib.rs"
@@ -23,3 +27,7 @@ ferroui-controls = { workspace = true, features = ["testing"] }
 # headless platform (`unit_tests/headless_probe_tests.rs`) have the theme. Neither crate is built on this one.
 ferroui-themes-simple = { workspace = true }
 ferroui-skia = { workspace = true }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "platforms"

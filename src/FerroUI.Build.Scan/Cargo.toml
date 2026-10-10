@@ -6,6 +6,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords = ["gui", "xaml", "build", "codegen"]
+categories = ["gui", "development-tools::build-utils"]
 autotests = false
 autobenches = false
 autoexamples = false
@@ -23,3 +27,7 @@ path = "lib.rs"
 proc-macro2 = { version = "1", default-features = false, features = ["span-locations"] }
 quote = { version = "1", default-features = false }
 syn = { version = "2", default-features = false, features = ["full", "parsing", "printing", "visit"] }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "markup"
