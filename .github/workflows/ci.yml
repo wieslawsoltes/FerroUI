@@ -39,6 +39,21 @@ jobs:
       - name: Generated composition code is up to date
         run: python3 scripts/generate_composition.py --check
 
+  # The crates that are published stay publishable (docs/release.md): the manifests state what
+  # crates.io needs, the crates of the workspace are pinned to one another at the version of the
+  # workspace, every package is assembled and is below the size limit, and the crate table of the
+  # README is current. Nothing is compiled and nothing is published: about two minutes, most of it
+  # the toolchain and the index.
+  packaging:
+    name: Packages of the published crates
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - name: Package without building
+        run: scripts/release/publish.sh --dry-run --no-verify
+
   # Reduced for the time being (2026-10-08), to shorten the wait for a pull request while many are
   # in flight; the job took 22 minutes, 20 of them compiling. What is left out, and how to get it
   # back:
