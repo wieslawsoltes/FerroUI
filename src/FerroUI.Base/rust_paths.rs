@@ -365,6 +365,7 @@ crate::ferro_rust_paths! {
         crate::animation::IAnimation,
         crate::animation::IAnimationSetter,
         crate::animation::IClock,
+        crate::animation::ICustomAnimator,
         crate::animation::IPageTransition,
         crate::animation::ITransition,
         crate::animation::easings::IEasing,

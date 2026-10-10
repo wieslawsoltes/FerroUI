@@ -160,6 +160,10 @@ ferro_class_info!(Animation {
         properties: [
             Children: KeyFrames { get: Animation::children },
         ],
+        methods: [
+            static fn SetAnimator(Rc<dyn IAnimationSetter>, Rc<dyn ICustomAnimator>) =>
+            |setter: Rc<dyn IAnimationSetter>, value: Rc<dyn ICustomAnimator>| Animation::set_animator(&setter, value),
+        ],
     },
 });
 

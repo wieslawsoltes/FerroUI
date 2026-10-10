@@ -1817,3 +1817,23 @@ fn the_handle_of_a_class_of_the_type_table_is_registered_before_the_class_is_ini
     .join()
     .expect("the thread of the test");
 }
+
+// Not from upstream: `Animation.SetAnimator(IAnimationSetter, CustomAnimatorBase)` is what
+// makes `Animation.Animator` an attached property of a setter in markup; the compiler of the
+// managed original finds the static setter by reflection.
+#[test]
+fn the_animator_of_a_setter_is_an_attached_property_of_the_animation() {
+    use crate::animation::{Animation, IAnimationSetter, ICustomAnimator};
+    crate::register_types();
+    let types = |types: &[crate::metadata::TypeOf]| types.iter().map(|t| t()).collect::<Vec<_>>();
+    let animation = class_markup::<Animation>();
+    let set_animator = animation.find_methods("SetAnimator").next().unwrap();
+    assert!(set_animator.is_static);
+    assert_eq!(
+        types(set_animator.parameters),
+        [ValueType::of::<Rc<dyn IAnimationSetter>>(), ValueType::of::<Rc<dyn ICustomAnimator>>()]
+    );
+    // The value is a handle of the contract that stands for the base class of the custom animators.
+    let contract = MarkupType::find("FerroUI.Animation", "CustomAnimatorBase").unwrap();
+    assert!(std::ptr::eq(MarkupType::find_by_handle(ValueType::of::<Rc<dyn ICustomAnimator>>().id()).unwrap(), contract));
+}

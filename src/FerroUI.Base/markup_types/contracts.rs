@@ -255,6 +255,13 @@ ferro_markup_type!(interface dyn crate::animation::IAnimationSetter as "IAnimati
     handles: [Rc<dyn crate::animation::IAnimationSetter>, Option<Rc<dyn crate::animation::IAnimationSetter>>],
 });
 
+// The base class of the custom animators of the managed original, the type of the value of
+// the attached property `Animation.Animator`.
+ferro_markup_type!(interface dyn crate::animation::ICustomAnimator as "CustomAnimatorBase" {
+    namespace: "FerroUI.Animation",
+    handles: [Rc<dyn crate::animation::ICustomAnimator>, Option<Rc<dyn crate::animation::ICustomAnimator>>],
+});
+
 ferro_markup_type!(interface dyn crate::animation::IPageTransition as "IPageTransition" {
     namespace: "FerroUI.Animation",
     handles: [Rc<dyn crate::animation::IPageTransition>, Option<Rc<dyn crate::animation::IPageTransition>>],
@@ -366,6 +373,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <dyn crate::animation::ITransition as MarkupTyped>::MARKUP,
     <dyn crate::animation::IAnimation as MarkupTyped>::MARKUP,
     <dyn crate::animation::IAnimationSetter as MarkupTyped>::MARKUP,
+    <dyn crate::animation::ICustomAnimator as MarkupTyped>::MARKUP,
     <dyn crate::animation::IPageTransition as MarkupTyped>::MARKUP,
     <dyn crate::animation::IClock as MarkupTyped>::MARKUP,
     <dyn crate::metadata::IServiceProvider as MarkupTyped>::MARKUP,
@@ -425,6 +433,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<Rc<dyn crate::animation::easings::IEasing>>();
     ValueTypes::register_nullable::<Rc<dyn crate::animation::IAnimation>>();
     ValueTypes::register_nullable::<Rc<dyn crate::animation::IAnimationSetter>>();
+    ValueTypes::register_nullable::<Rc<dyn crate::animation::ICustomAnimator>>();
     ValueTypes::register_nullable::<Rc<dyn crate::data::BindingBase>>();
 
 }

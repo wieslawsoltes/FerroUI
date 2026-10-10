@@ -58,6 +58,12 @@ BASE = {
         'note': """// The key of a resource is any object in the managed original; `resource_key` converts the kinds of key the
 // port has.""",
     },
+    'Animation': {
+        'methods': [
+            """static fn SetAnimator(Rc<dyn IAnimationSetter>, Rc<dyn ICustomAnimator>) =>
+            |setter: Rc<dyn IAnimationSetter>, value: Rc<dyn ICustomAnimator>| Animation::set_animator(&setter, value)""",
+        ],
+    },
     'NameScope': {
         'methods': [
             """static fn GetNameScope(Ref<StyledElement>) -> Option<NameScopeRef> =>

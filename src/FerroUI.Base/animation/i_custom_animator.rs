@@ -17,6 +17,15 @@ pub trait ICustomAnimator: 'static {
     fn wrapper_type(&self) -> TypeId;
 }
 
+/// Two custom animators are equal when they are the same object, as the
+/// references of the managed original compare.
+impl PartialEq for dyn ICustomAnimator {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::addr_eq(self as *const Self, other as *const Self)
+    }
+}
+
 /// The base of user-defined animators: an interpolation function for a
 /// value type.
 pub trait InterpolatingAnimator: 'static {
