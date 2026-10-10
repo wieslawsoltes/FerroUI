@@ -329,6 +329,18 @@ impl ModelTypes {
         }
     }
 
+    /// Registers a collection type whose only metadata is its change notifications: a
+    /// collection held by value as a handle (an instantiation of the notifying list that
+    /// a typed list declaration names). An indexer of a binding path over such a
+    /// collection follows its changes. Unlike [`register`](Self::register) it does not
+    /// make the type a reference type: its values are handles.
+    pub fn register_notifying_collection<T: INotifyCollectionChanged + PartialEq + 'static>() {
+        if !Self::is_registered(TypeId::of::<T>()) {
+            let model = Rc::new(ModelTypeBuilder::<T>::new().notify_collection_changed().model);
+            MODELS.with(|m| m.borrow_mut().insert(TypeId::of::<T>(), model));
+        }
+    }
+
     pub fn is_registered(id: TypeId) -> bool {
         MODELS.with(|m| m.borrow().contains_key(&id))
     }

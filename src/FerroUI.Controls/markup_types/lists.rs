@@ -24,7 +24,8 @@
 /// generates a carrier type named as given, with the markup metadata of the list (the
 /// instantiation ``FerroList`1`` of the item type: a constructor, `Count`, `Add`, the
 /// indexer) and `register()`, which makes the metadata known and lets bindings deliver the
-/// list to an items source property on every thread.
+/// list to an items source property and an indexer of a binding path follow its changes,
+/// on every thread.
 #[macro_export]
 macro_rules! ferro_markup_list {
     ($visibility:vis $carrier:ident : $item:ty) => {
@@ -74,6 +75,11 @@ macro_rules! ferro_markup_list {
                     $crate::ItemsSource::register_binding_conversion_with::<
                         ::ferroui_base::collections::FerroList<$item>,
                     >(|list| ::std::rc::Rc::new(list.clone()).into());
+                    // The list notifies of its changes: an indexer of a binding path over it
+                    // (`Items[1]`) follows them.
+                    ::ferroui_base::data::model::ModelTypes::register_notifying_collection::<
+                        ::ferroui_base::collections::FerroList<$item>,
+                    >();
                 });
             }
         }
