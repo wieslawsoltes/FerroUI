@@ -24,6 +24,8 @@ pub mod dispatching;
 #[cfg(unix)]
 pub mod event;
 #[cfg(unix)]
+pub mod glx;
+#[cfg(unix)]
 pub(crate) mod pixel_buffer;
 #[cfg(unix)]
 pub mod raw_event_grouping;
@@ -39,6 +41,8 @@ pub mod x11_active_window_tracker;
 pub mod x11_atoms;
 #[cfg(unix)]
 pub mod x11_cursor_factory;
+#[cfg(unix)]
+pub mod x11_egl_helper;
 #[cfg(unix)]
 pub mod x11_enum_extensions;
 #[cfg(unix)]

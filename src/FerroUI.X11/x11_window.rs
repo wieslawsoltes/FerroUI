@@ -8,6 +8,7 @@ use crate::transparency_helper::TransparencyHelper;
 use crate::x11_cursor_factory::CursorImpl;
 use crate::x11_enum_extensions::X11EnumExtensions;
 use crate::x11_enums::{XEventMask, XModifierMask};
+use crate::glx::GlxGlPlatformSurface;
 use crate::x11_framebuffer_surface::X11FramebufferSurface;
 use crate::x11_icon_loader::X11IconData;
 use crate::x11_info::X11Info;
@@ -50,6 +51,7 @@ use ferroui_controls::{
     WindowResizeReason, WindowState, WindowTransparencyLevel,
 };
 use ferroui_dialogs::ManagedStorageProvider;
+use ferroui_opengl::egl::{EglGlPlatformSurface, IEglWindowGlPlatformSurfaceInfo};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::collections::HashSet;
@@ -94,6 +96,35 @@ impl WindowShared {
 
     fn real_size(&self) -> PixelSize {
         PixelSize::new(self.real_width.load(Ordering::SeqCst), self.real_height.load(Ordering::SeqCst))
+    }
+}
+
+/// What a surface of EGL or GLX reads of the window (`SurfaceInfo`), on the
+/// thread that renders: the render window, the size of its parent (which
+/// the render window is given on the way) and the scaling.
+struct SurfaceInfo {
+    shared: Arc<WindowShared>,
+    display: XDisplay,
+    parent: XID,
+    handle: XID,
+}
+
+impl IEglWindowGlPlatformSurfaceInfo for SurfaceInfo {
+    fn handle(&self) -> isize {
+        self.handle as isize
+    }
+
+    fn size(&self) -> PixelSize {
+        xlib::x_lock_display(self.display);
+        // The reference reads the geometry unchecked; a window that is gone has no size.
+        let geo = xlib::x_get_geometry(self.display, self.parent).unwrap_or_default();
+        xlib::x_resize_window(self.display, self.handle, geo.width as _, geo.height as _);
+        xlib::x_unlock_display(self.display);
+        PixelSize::new(geo.width, geo.height)
+    }
+
+    fn scaling(&self) -> f64 {
+        self.shared.scaling()
     }
 }
 
@@ -481,13 +512,24 @@ impl X11Window {
         // OpenGL seems to be do weird things to it's current window which breaks resize sometimes
         let use_render_window = glfeature.is_some();
 
-        // Stage 2 of docs/porting/x11-platform.md: with the platform
-        // graphics of GLX or EGL the visual is the one of their
-        // configuration (and GLX resizes the render window from the
-        // compositor). Without platform graphics, as now, it is the
-        // visual of depth 32 when the screen has one.
-        let use_compositor_driven_render_window_resize = false;
-        let visual_info = if glfeature.is_none() { x11.transparent_visual_info() } else { None };
+        // The reference tests the registered graphics for their type. The
+        // platform graphics of the port are a contract without a way to
+        // ask for the type, so the platform remembers which of its own it
+        // registered.
+        let glx = platform.glx_graphics();
+        let egl = platform.egl_graphics();
+        let mut use_compositor_driven_render_window_resize = false;
+        let mut visual_info = None;
+        if let Some(glx) = &glx {
+            visual_info = Some(glx.display().visual_info());
+            // TODO: We should use this for all backends, but need to actually test the change
+            // TODO: We probably need to resize the window from the compositor thread too
+            use_compositor_driven_render_window_resize = true;
+        } else if let Some(egl) = &egl {
+            visual_info = egl.visual_info();
+        } else if glfeature.is_none() {
+            visual_info = x11.transparent_visual_info();
+        }
 
         let mut visual = std::ptr::null_mut();
         let mut depth = 24;
@@ -704,8 +746,28 @@ impl X11Window {
             );
         }
 
-        // Stage 2: the surfaces of EGL and GLX come first here, when the
-        // platform has the graphics of one of them.
+        if egl.is_some() {
+            surfaces.insert(
+                0,
+                EglGlPlatformSurface::new(Arc::new(SurfaceInfo {
+                    shared: window.shared.clone(),
+                    display: x11.deferred_display(),
+                    parent: handle,
+                    handle: render_handle,
+                })),
+            );
+        }
+        if glx.is_some() {
+            surfaces.insert(
+                0,
+                GlxGlPlatformSurface::new(Arc::new(SurfaceInfo {
+                    shared: window.shared.clone(),
+                    display: x11.deferred_display(),
+                    parent: handle,
+                    handle: render_handle,
+                })),
+            );
+        }
 
         surfaces.push(Arc::new(SurfacePlatformHandle { shared: window.shared.clone() }));
 

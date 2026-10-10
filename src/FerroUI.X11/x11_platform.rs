@@ -2,11 +2,13 @@
 //! connections, registers the platform services and creates the windows.
 
 use crate::dispatching::{IX11PlatformDispatcher, X11PlatformThreading};
+use crate::glx::GlxPlatformGraphics;
 use crate::raw_event_grouping::ManualRawEventGrouperDispatchQueue;
 use crate::screens::X11Screens;
 use crate::selections::clipboard::X11ClipboardImpl;
 use crate::x11_active_window_tracker::X11ActiveWindowTracker;
 use crate::x11_cursor_factory::X11CursorFactory;
+use crate::x11_egl_helper::X11EglPlatformGraphics;
 use crate::x11_exception::X11Exception;
 use crate::x11_globals::X11Globals;
 use crate::x11_icon_loader::X11IconLoader;
@@ -62,6 +64,8 @@ pub struct FerroX11Platform {
     dispatcher_impl: OnceCell<Rc<X11PlatformThreading>>,
     deferred_display: Cell<Option<XDisplay>>,
     display: Cell<Option<XDisplay>>,
+    glx_graphics: OnceCell<Arc<GlxPlatformGraphics>>,
+    egl_graphics: OnceCell<Arc<X11EglPlatformGraphics>>,
 }
 
 fn initialized<T>(cell: &OnceCell<T>) -> &T {
@@ -89,6 +93,8 @@ impl FerroX11Platform {
             dispatcher_impl: OnceCell::new(),
             deferred_display: Cell::new(None),
             display: Cell::new(None),
+            glx_graphics: OnceCell::new(),
+            egl_graphics: OnceCell::new(),
         })
     }
 
@@ -175,6 +181,18 @@ impl FerroX11Platform {
     /// The connection of the UI thread.
     pub fn display(&self) -> XDisplay {
         self.display.get().expect("the X11 platform is initialized")
+    }
+
+    /// The platform graphics of GLX, when they are the ones the platform
+    /// registered (`glfeature as GlxPlatformGraphics` of the reference).
+    pub fn glx_graphics(&self) -> Option<Arc<GlxPlatformGraphics>> {
+        self.glx_graphics.get().cloned()
+    }
+
+    /// The platform graphics of EGL, when they are the ones the platform
+    /// registered (`glfeature as EglPlatformGraphics` of the reference).
+    pub fn egl_graphics(&self) -> Option<Arc<X11EglPlatformGraphics>> {
+        self.egl_graphics.get().cloned()
     }
 
     /// Opens the connections and registers the services of the platform.
@@ -331,7 +349,24 @@ impl FerroX11Platform {
             *self.xi2.borrow_mut() = XI2Manager::try_create(self);
         }
 
-        let graphics = Self::initialize_graphics(&options);
+        let graphics = Self::initialize_graphics(&options, &mut |rendering_mode| match rendering_mode {
+            X11RenderingMode::Glx => {
+                let glx = Arc::new(GlxPlatformGraphics::try_create(&info, &options.gl_profiles)?);
+                let _ = self.glx_graphics.set(glx.clone());
+                Some(glx as Arc<dyn IPlatformGraphics>)
+            }
+            X11RenderingMode::Egl => {
+                let egl = Arc::new(X11EglPlatformGraphics::try_create(&info, &options.gl_profiles)?);
+                let _ = self.egl_graphics.set(egl.clone());
+                Some(egl as Arc<dyn IPlatformGraphics>)
+            }
+            // Stage 2a of docs/porting/x11-platform.md, its last part: the platform graphics of
+            // Vulkan (`VulkanSupport.TryInitialize`) wait for the Vulkan project of the port and
+            // the Vulkan GPU of the Skia backend. Until then the mode is passed over like one
+            // that failed to initialize.
+            X11RenderingMode::Vulkan => None,
+            X11RenderingMode::Software => None,
+        });
         if let Some(graphics) = &graphics {
             locator.bind::<Arc<dyn IPlatformGraphics>>().to_constant(Rc::new(graphics.clone()));
         }
@@ -404,19 +439,25 @@ impl FerroX11Platform {
         false
     }
 
-    fn initialize_graphics(opts: &X11PlatformOptions) -> Option<Arc<dyn IPlatformGraphics>> {
+    /// Walks the rendering modes of the options (`InitializeGraphics`):
+    /// software ends the walk without platform graphics, and each other
+    /// mode is tried with `try_create`, the first that gives graphics
+    /// ending it.
+    fn initialize_graphics(
+        opts: &X11PlatformOptions,
+        try_create: &mut dyn FnMut(X11RenderingMode) -> Option<Arc<dyn IPlatformGraphics>>,
+    ) -> Option<Arc<dyn IPlatformGraphics>> {
         if opts.rendering_mode.is_empty() {
             panic!("X11PlatformOptions.RenderingMode must not be empty or null");
         }
 
         for rendering_mode in &opts.rendering_mode {
-            match rendering_mode {
-                X11RenderingMode::Software => return None,
-                // Stage 2 of docs/porting/x11-platform.md: the platform
-                // graphics of GLX, EGL and Vulkan are not built, so each
-                // of these modes is passed over like a mode that failed
-                // to initialize.
-                X11RenderingMode::Glx | X11RenderingMode::Egl | X11RenderingMode::Vulkan => {}
+            if *rendering_mode == X11RenderingMode::Software {
+                return None;
+            }
+
+            if let Some(graphics) = try_create(*rendering_mode) {
+                return Some(graphics);
             }
         }
 
@@ -819,12 +860,55 @@ mod tests {
         assert_eq!(z_order, [2, 4, 1, -1]);
     }
 
+    struct MockGraphics;
+
+    impl IPlatformGraphics for MockGraphics {
+        fn uses_shared_context(&self) -> bool {
+            false
+        }
+
+        fn create_context(&self) -> Rc<dyn ferroui_base::platform::IPlatformGraphicsContext> {
+            unreachable!()
+        }
+
+        fn get_shared_context(&self) -> Rc<dyn ferroui_base::platform::IPlatformGraphicsContext> {
+            unreachable!()
+        }
+    }
+
+    /// Walks the modes with graphics available for `available`, and returns whether graphics
+    /// were chosen and the modes that were tried.
+    fn walk(options: &X11PlatformOptions, available: &[X11RenderingMode]) -> (bool, Vec<X11RenderingMode>) {
+        let mut tried = Vec::new();
+        let graphics = FerroX11Platform::initialize_graphics(options, &mut |mode| {
+            tried.push(mode);
+            available.contains(&mode).then(|| Arc::new(MockGraphics) as Arc<dyn IPlatformGraphics>)
+        });
+        (graphics.is_some(), tried)
+    }
+
     #[test]
     fn the_software_mode_has_no_platform_graphics() {
         let mut options = X11PlatformOptions::new();
-        assert!(FerroX11Platform::initialize_graphics(&options).is_none());
+        // The default list: GLX fails to initialize, software follows.
+        assert_eq!(walk(&options, &[]), (false, vec![X11RenderingMode::Glx]));
         options.rendering_mode = vec![X11RenderingMode::Egl, X11RenderingMode::Vulkan, X11RenderingMode::Software];
-        assert!(FerroX11Platform::initialize_graphics(&options).is_none());
+        assert_eq!(walk(&options, &[]), (false, vec![X11RenderingMode::Egl, X11RenderingMode::Vulkan]));
+        // Software is never asked for graphics, and nothing after it is tried.
+        options.rendering_mode = vec![X11RenderingMode::Software, X11RenderingMode::Glx];
+        assert_eq!(walk(&options, &[X11RenderingMode::Glx]), (false, vec![]));
+    }
+
+    #[test]
+    fn the_first_mode_that_initializes_gives_the_graphics() {
+        let mut options = X11PlatformOptions::new();
+        assert_eq!(walk(&options, &[X11RenderingMode::Glx]), (true, vec![X11RenderingMode::Glx]));
+        options.rendering_mode = vec![X11RenderingMode::Glx, X11RenderingMode::Egl, X11RenderingMode::Software];
+        assert_eq!(
+            walk(&options, &[X11RenderingMode::Egl]),
+            (true, vec![X11RenderingMode::Glx, X11RenderingMode::Egl])
+        );
+        assert_eq!(walk(&options, &[X11RenderingMode::Glx, X11RenderingMode::Egl]), (true, vec![X11RenderingMode::Glx]));
     }
 
     #[test]
@@ -832,7 +916,7 @@ mod tests {
     fn modes_that_do_not_apply_are_an_error() {
         let mut options = X11PlatformOptions::new();
         options.rendering_mode = vec![X11RenderingMode::Glx];
-        FerroX11Platform::initialize_graphics(&options);
+        walk(&options, &[]);
     }
 
     #[test]
@@ -840,6 +924,6 @@ mod tests {
     fn empty_rendering_modes_are_refused() {
         let mut options = X11PlatformOptions::new();
         options.rendering_mode.clear();
-        FerroX11Platform::initialize_graphics(&options);
+        walk(&options, &[]);
     }
 }

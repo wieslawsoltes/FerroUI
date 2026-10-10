@@ -81,6 +81,17 @@ impl XDisplay {
     fn raw(self) -> *mut xl::Display {
         self.0
     }
+
+    /// A connection another library reports (the connection of the
+    /// current context of GLX); `None` for null.
+    ///
+    /// # Safety
+    /// A pointer that is not null must be a connection that
+    /// [`x_open_display`] opened: those are never closed, which is what
+    /// the functions of this module rely on.
+    pub unsafe fn from_ptr(display: *mut c_void) -> Option<XDisplay> {
+        (!display.is_null()).then_some(XDisplay(display.cast()))
+    }
 }
 
 /// The libraries of the X Window System the backend calls.
@@ -297,6 +308,35 @@ pub fn x_match_visual_info(display: XDisplay, screen: c_int, depth: c_int, class
     let found = unsafe { (x().XMatchVisualInfo)(display.raw(), screen, depth, class, &mut info) };
     (found != 0).then_some(VisualInfo { visual: info.visual, visual_id: info.visualid, depth: info.depth })
 }
+
+/// `XGetVisualInfo` by the identifier of a visual (`XGetVisualInfoById`):
+/// the visual of the connection with that identifier, when it has one.
+pub fn x_get_visual_info_by_id(display: XDisplay, visual_id: c_ulong) -> Option<VisualInfo> {
+    // SAFETY: the template is a valid structure of which Xlib reads the member the mask
+    // names; the result is null or an array of `count` structures the caller frees with
+    // `XFree`, which is done here after the first was copied (the visual it names belongs to
+    // the connection).
+    unsafe {
+        let mut template: XVisualInfo = std::mem::zeroed();
+        template.visualid = visual_id;
+        let mut count = 0;
+        let infos = (x().XGetVisualInfo)(display.raw(), xl::VisualIDMask, &mut template, &mut count);
+        if infos.is_null() {
+            return None;
+        }
+        let result = (count > 0).then(|| VisualInfo {
+            visual: (*infos).visual,
+            visual_id: (*infos).visualid,
+            depth: (*infos).depth,
+        });
+        (x().XFree)(infos.cast());
+        result
+    }
+}
+
+plain!(
+    /// `XFreeColormap`.
+    x_free_colormap => XFreeColormap(colormap: XID) -> c_int);
 
 /// `XCreateColormap` for a visual of the connection.
 pub fn x_create_colormap(display: XDisplay, window: XID, visual: &VisualInfo, alloc: c_int) -> XID {

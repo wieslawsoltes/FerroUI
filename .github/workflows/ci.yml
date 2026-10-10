@@ -415,7 +415,8 @@ jobs:
   # the server synthesize input (XTEST: pointer, button, wheel, a key with its text), opens and
   # dismisses a popup, compares the screens with the root window, exchanges the clipboard with
   # another client (xclip) in both directions, also in parts (INCR), and then has the window closed
-  # by a WM_DELETE_WINDOW message; on a bare Xvfb, under a window manager, and with two monitors
+  # by a WM_DELETE_WINDOW message; on a bare Xvfb, rendered through GLX and through EGL (Mesa's
+  # software rasterizer, with frames read back), under a window manager, and with two monitors
   # (xrandr --setmonitor). No compositing manager: that is not covered here.
   x11:
     name: Build and test (Linux, X11 under Xvfb)
@@ -438,15 +439,37 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             xvfb xauth x11-utils x11-xserver-utils xclip openbox \
             libx11-6 libxi6 libxrandr2 libxcursor1 libxfixes3 libxext6 libxtst6 \
+            libgl1 libglx-mesa0 libegl1 libegl-mesa0 libgl1-mesa-dri mesa-utils \
             libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config
       - name: Skia features of the target
         run: |
-          # A Linux build renders in software until the GPU modes of the platform are ported: a GPU
-          # feature here would ask for a Skia binary that may not be published, and the build would
-          # fall back to compiling Skia from source.
-          features="$(cargo tree --locked -p ferroui-skia -e features,normal --target x86_64-unknown-linux-gnu | grep -oE 'skia-bindings feature "(gl|ganesh|graphite|metal|vulkan|d3d)"' | sort -u | tr '\n' ' ')"
+          # Ganesh on OpenGL, for the rendering modes GLX and EGL of the platform, and nothing
+          # else: a feature set without a published binary would make the Skia bindings build
+          # Skia from source.
+          features="$(cargo tree --locked -p ferroui-skia -e features,normal --target x86_64-unknown-linux-gnu | grep -oE 'skia-bindings feature "(gl|egl|x11|wayland|ganesh|graphite|metal|vulkan|d3d)"' | sort -u | tr '\n' ' ')"
           echo "GPU features: '$features'"
-          test -z "$features"
+          test "$features" = 'skia-bindings feature "ganesh" skia-bindings feature "gl" '
+      # The release of the Skia bindings is asked which binaries it has for Linux with that
+      # feature set: the build below must download one and not compile Skia (an hour).
+      - name: Skia binaries published for Linux
+        run: |
+          cargo fetch --locked --target x86_64-unknown-linux-gnu
+          info="$(ls "${CARGO_HOME:-$HOME/.cargo}"/registry/src/*/skia-bindings-*/.cargo_vcs_info.json | head -n 1)"
+          version="$(basename "$(dirname "$info")" | sed 's/^skia-bindings-//')"
+          hash="$(grep -o '"sha1": *"[0-9a-f]*"' "$info" | grep -o '[0-9a-f]\{40\}' | cut -c1-20)"
+          echo "skia-bindings $version, commit $hash"
+          missing=0
+          for target in x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu; do
+            for key in jpegd-jpege-pdf ganesh-gl-jpegd-jpege-pdf; do
+              if curl -sfL -r 0-0 -o /dev/null "https://github.com/rust-skia/skia-binaries/releases/download/$version/skia-binaries-$hash-$target-$key.tar.gz"; then
+                echo "::notice::Skia binary published for $target: $key"
+              else
+                echo "::warning::no Skia binary for $target with the features $key"
+                if [ "$key" = ganesh-gl-jpegd-jpege-pdf ]; then missing=1; fi
+              fi
+            done
+          done
+          test "$missing" = 0
       - name: Tests of the X11 crate (no server needed)
         run: cargo test --locked -p ferroui-x11 --no-fail-fast
       - name: The desktop entry point selects X11 on Linux
@@ -457,6 +480,33 @@ jobs:
         run: |
           xvfb-run -a --server-args="-screen 0 1280x1024x24" \
             timeout 300 target/debug/examples/x11_window --smoke
+      # The GPU rendering modes on Mesa's software rasterizer (llvmpipe), which GLX refuses unless
+      # told otherwise. The smoke mode then also checks that the platform did not fall back, that
+      # a context of the platform graphics draws and reads back (glReadPixels), with GLX that the
+      # frame is in the buffers of the render window (glReadPixels), and, as in every mode, the
+      # pixels of the window on the server (XGetImage).
+      - name: What the server offers for OpenGL
+        if: ${{ !cancelled() }}
+        run: |
+          xvfb-run -a --server-args="-screen 0 1280x1024x24" sh -c 'glxinfo -B; eglinfo -B -p x11 || true' || true
+      - name: The same rendered through GLX
+        if: ${{ !cancelled() }}
+        env:
+          FERROUI_GLX_IGNORE_RENDERER_BLACKLIST: 1
+        run: |
+          xvfb-run -a --server-args="-screen 0 1280x1024x24" \
+            timeout 300 target/debug/examples/x11_window --smoke --mode=glx
+      - name: The same rendered through EGL
+        if: ${{ !cancelled() }}
+        run: |
+          xvfb-run -a --server-args="-screen 0 1280x1024x24" \
+            timeout 300 target/debug/examples/x11_window --smoke --mode=egl
+      # Without the override GLX refuses llvmpipe, and the list of modes goes on to software.
+      - name: GLX refuses the software rasterizer and software rendering takes over
+        if: ${{ !cancelled() }}
+        run: |
+          xvfb-run -a --server-args="-screen 0 1280x1024x24" \
+            timeout 300 target/debug/examples/x11_window --smoke --mode=glx --expect-fallback --skip=input,popup,screens,clipboard
       # A window manager clamps the window to a screen narrower than it: the server and the
       # framework have to agree on the size the window got.
       - name: The same under a window manager (openbox)
