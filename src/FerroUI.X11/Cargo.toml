@@ -6,6 +6,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 [lib]
 path = "lib.rs"
@@ -39,3 +43,7 @@ example = ["dep:ferroui-harfbuzz", "dep:ferroui-skia", "dep:ferroui-themes-simpl
 name = "x11_window"
 path = "examples/x11_window.rs"
 required-features = ["example"]
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "platforms"
