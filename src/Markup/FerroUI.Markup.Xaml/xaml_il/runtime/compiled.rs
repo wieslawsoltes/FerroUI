@@ -573,6 +573,72 @@ pub fn path_property(
     }
 }
 
+/// The element of a compiled binding path for the indexer with one 32-bit integer
+/// argument that `markup` declares, at `index`
+/// (`builder.Property(indexer info, accessorFactory)`): the description of the indexer over
+/// its declared accessors, named as the indexer of a type is, and the accessor factory
+/// the run-time loader takes: the one that follows the collection changes of the owner
+/// when the indexed type is a notifying collection (`notifying`), else the one that
+/// follows its property change notifications.
+///
+/// # Panics
+/// Panics if `markup` declares no such indexer: the emitter writes the call only for a
+/// declared indexer.
+pub fn path_indexer(
+    builder: &CompiledBindingPathBuilder,
+    markup: &'static MarkupType,
+    index: i32,
+    notifying: bool,
+) -> CompiledBindingPathBuilder {
+    let declared = markup
+        .indexers
+        .iter()
+        .find(|indexer| matches!(indexer.parameters, [parameter] if parameter().is::<i32>()))
+        .unwrap_or_else(|| panic!("{} declares no indexer with one 32-bit integer argument", markup.full_name()));
+    let owner = markup.full_name();
+    let invoke = move |accessor: &str, invoke: MarkupInvoke, arguments: &[MarkupValue]| -> Result<MarkupValue, BindingError> {
+        let result = invoke(arguments).map_err(|error| {
+            let error = match error {
+                MarkupInvokeError::Failed(message) => MarkupInvokeError::Failed(format!("{owner}.{accessor}_Item: {message}")),
+                other => other,
+            };
+            BindingError::message(error.to_string())
+        })?;
+        Ok(result.map(normalize_object))
+    };
+    let invoke = Rc::new(invoke);
+    let argument = move || into_markup_value(index);
+    let getter: Option<FalliblePropertyGetter> = declared.get.map(|get| {
+        let invoke = invoke.clone();
+        Rc::new(move |target: &dyn AnyValue| invoke("get", get, &[owner_handle(target)?, argument()])) as FalliblePropertyGetter
+    });
+    let setter: Option<PropertySetter> = declared.set.map(|set| {
+        let invoke = invoke.clone();
+        Rc::new(move |target: &dyn AnyValue, value: Option<&BoxedValue>| {
+            invoke("set", set, &[owner_handle(target)?, argument(), value.cloned()]).map(|_| ())
+        }) as PropertySetter
+    });
+    let boxed_getter: Option<BoxedPropertyGetter> = declared.get.map(|get| {
+        let invoke = invoke.clone();
+        Rc::new(move |target: &BoxedValue| invoke("get", get, &[Some(target.clone()), argument()])) as BoxedPropertyGetter
+    });
+    let boxed_setter: Option<BoxedPropertySetter> = declared.set.map(|set| {
+        let invoke = invoke.clone();
+        Rc::new(move |target: &BoxedValue, value: Option<&BoxedValue>| {
+            invoke("set", set, &[Some(target.clone()), argument(), value.cloned()]).map(|_| ())
+        }) as BoxedPropertySetter
+    });
+    let info: Rc<dyn IPropertyInfo> = Rc::new(
+        ClrPropertyInfo::new_fallible(ferroui_base::data::core::INDEXER_NAME, getter, setter, (declared.type_)())
+            .with_boxed_accessors(boxed_getter, boxed_setter),
+    );
+    let factory: PropertyAccessorFactory = match notifying {
+        true => Rc::new(move |target, property| PropertyInfoAccessorFactory::create_indexer_property_accessor(target, property, index)),
+        false => Rc::new(PropertyInfoAccessorFactory::create_inpc_property_accessor),
+    };
+    builder.property(info, factory)
+}
+
 /// The name scope of an element name in a binding path: the name scope field
 /// of the context; none is the loader's error.
 pub fn path_name_scope(scope: Option<&Rc<dyn INameScope>>, line: i32, position: i32) -> Result<NameScopeRef, XamlLoadException> {

@@ -42,7 +42,7 @@ use crate::compiler_extensions::transformers::{
 };
 use crate::compiler_extensions::{
     BindingSetter, BindingWithPrioritySetter, SetValueWithPrioritySetter, UnsetValueSetter, XamlIlBindingPathElementNode, XamlIlBindingPathNode,
-    XamlIlClrMethodAsCommandPathElementNode, XamlIlFerroPropertyFieldNode,
+    XamlIlClrIndexerPathElementNode, XamlIlClrMethodAsCommandPathElementNode, XamlIlFerroPropertyFieldNode,
     XamlIlFerroPropertyHelper, XamlIlFerroPropertyNode, XamlIlProvideValueTargetProperty,
 };
 use crate::back_end::{context_definition, numeric_constant, plan_setters, FRAMEWORK_CONTEXT};
@@ -2428,6 +2428,40 @@ impl<'a> Emitter<'a> {
         ))
     }
 
+    /// The builder call of an indexer of a binding path (`XamlIlClrIndexerPathElementNode`):
+    /// `builder.Property(indexer info, accessor factory)`, for an indexer with one 32-bit
+    /// integer argument that markup metadata declares. The run-time library builds the
+    /// description of the indexer from the declaration and takes the accessor factory the
+    /// node chooses (`rt::path_indexer`). An indexer with other arguments is refused.
+    fn path_indexer(&mut self, node: &Rc<dyn IXamlAstNode>, element: &XamlIlClrIndexerPathElementNode) -> EmitResult<String> {
+        let [value] = element.values.as_slice() else {
+            return Err(unsupported(node, "a binding path with an indexer that does not take one argument"));
+        };
+        let value_node = value.clone().as_node();
+        let constant = value_node
+            .cast::<XamlConstantNode>()
+            .ok_or_else(|| unsupported(node, "a binding path with an indexer whose argument is not a constant"))?;
+        let argument_type = IXamlAstValueNode::type_(&*constant).get_clr_type().map_err(|e| failed(node, e))?;
+        if !argument_type.is("System", "Int32") {
+            return Err(unsupported(node, "a binding path with an indexer whose argument is not a 32-bit integer"));
+        }
+        let (integer, _) = numeric_constant(&constant.constant)
+            .ok_or_else(|| unsupported(node, format!("the constant {:?}", constant.constant)))?;
+        let index = i32::try_from(integer).map_err(|_| unsupported(node, format!("{integer} is out of the range of a 32-bit integer")))?;
+        let accessor = element
+            .property
+            .getter()
+            .or_else(|| element.property.setter())
+            .ok_or_else(|| unsupported(node, "an indexer without accessors"))?;
+        let runtime = self
+            .types
+            .method(accessor.as_ref())
+            .ok_or_else(|| unsupported(node, "an indexer whose accessor is not a method of the run-time type system"))?;
+        let declaring = runtime.declaring_type.clone().ok_or_else(|| unsupported(node, "an indexer whose declaring type is gone"))?;
+        let markup = self.markup_expr(node, &declaring)?;
+        Ok(format!("rt::path_indexer(&builder, {markup}, {index}_i32, {})", element.is_notifying_collection))
+    }
+
     /// A compiled binding path (`XamlIlBindingPathNode`): a builder, the
     /// builder call of each transform element and then of each element, as
     /// the interpreter's `binding_path::evaluate` makes them, then `build()`.
@@ -2693,7 +2727,7 @@ impl<'a> Emitter<'a> {
                     ),
                 }
             }
-            XamlIlBindingPathElementNode::ClrIndexer(_) => return Err(unsupported(node, "a binding path with an indexer")),
+            XamlIlBindingPathElementNode::ClrIndexer(e) => self.path_indexer(node, e)?,
             XamlIlBindingPathElementNode::ClrMethod(_) => return Err(unsupported(node, "a binding path with a method")),
             XamlIlBindingPathElementNode::ClrMethodAsCommand(e) => self.path_command(node, e)?,
         })
