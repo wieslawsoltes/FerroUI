@@ -10,7 +10,11 @@ use std::sync::OnceLock;
 const LIB_ICE: &CStr = c"libICE.so.6";
 
 /// `IceProcessMessagesStatus`: the one value that is looked at.
-pub const ICE_PROCESS_MESSAGES_IO_ERROR: c_int = 1;
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[repr(i32)]
+pub enum IceProcessMessagesStatus {
+    IceProcessMessagesIoError = 1,
+}
 
 /// `IceErrorHandler`: the shape of the error handler of the session
 /// management library.
@@ -20,19 +24,19 @@ pub type IceIOErrorHandler = unsafe extern "C" fn(ice_conn: *mut c_void);
 
 native_functions! {
     /// The functions, as C declares them.
-    pub struct IceLibApi(ice) {
-        ice::IceAddConnectionWatch: unsafe extern "C" fn(IceWatchProc, *mut c_void) -> c_int;
-        ice::IceRemoveConnectionWatch: unsafe extern "C" fn(IceWatchProc, *mut c_void);
-        ice::IceProcessMessages: unsafe extern "C" fn(*mut c_void, *mut c_void, *mut c_int) -> c_int;
-        ice::IceSetErrorHandler: unsafe extern "C" fn(Option<IceErrorHandler>) -> Option<IceErrorHandler>;
-        ice::IceSetIOErrorHandler: unsafe extern "C" fn(Option<IceIOErrorHandler>) -> Option<IceIOErrorHandler>;
+    pub struct ICELib(ice) {
+        ice::ice_add_connection_watch as "IceAddConnectionWatch": unsafe extern "C" fn(IceWatchProc, *mut c_void) -> c_int;
+        ice::ice_remove_connection_watch as "IceRemoveConnectionWatch": unsafe extern "C" fn(IceWatchProc, *mut c_void);
+        ice::ice_process_messages as "IceProcessMessages": unsafe extern "C" fn(*mut c_void, *mut c_void, *mut c_int) -> c_int;
+        ice::ice_set_error_handler as "IceSetErrorHandler": unsafe extern "C" fn(Option<IceErrorHandler>) -> Option<IceErrorHandler>;
+        ice::ice_set_io_error_handler as "IceSetIOErrorHandler": unsafe extern "C" fn(Option<IceIOErrorHandler>) -> Option<IceIOErrorHandler>;
     }
 }
 
 /// The library, opened at the first call.
-pub fn ice_lib() -> Result<&'static IceLibApi, NativeLibraryError> {
-    static API: OnceLock<Result<IceLibApi, NativeLibraryError>> = OnceLock::new();
-    API.get_or_init(|| IceLibApi::load(&NativeLibrary::open(LIB_ICE)?)).as_ref().map_err(Clone::clone)
+pub fn ice_lib() -> Result<&'static ICELib, NativeLibraryError> {
+    static API: OnceLock<Result<ICELib, NativeLibraryError>> = OnceLock::new();
+    API.get_or_init(|| ICELib::load(&NativeLibrary::open(LIB_ICE)?)).as_ref().map_err(Clone::clone)
 }
 
 #[cfg(test)]
