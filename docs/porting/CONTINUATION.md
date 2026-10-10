@@ -138,6 +138,16 @@ Stages 2c and 2d are built and verified (the CI job `x11`, run 38052443593, and 
 
 Next, in order: the rest of 2e (`DBusMenuExporter`, `DBusTrayIconImpl` with `FerroX11Platform::create_tray_icon` and upstream's `XEmbedTrayIconImpl`, which only logs; then the GTK dialogs and the GLib dispatcher in the X11 crate); 2f (`X11PlatformLifetimeEvents` over `libSM` and `libICE`, `X11NativeControlHost`, `XEmbedPlug`, `XEmbedClientWindowMode`; the transparency helper and the `_NET_WM` hints are built since stage 1); 3 (`X11AtSpiAccessibility` and `Avalonia.FreeDesktop.AtSpi`, 27 files, which is present at the tracked commit and out of scope in `projects.json`). To run the smoke phases in the virtual machine: `ferroui-vm-linux/scripts/stage2d.sh` on the share (it copies nothing: the sources go to `ferroui-vm-linux/src` first).
 
+## The Linux platform, stage 2e: the menu and the tray icon over D-Bus (2026-10-10)
+
+Branch `x11-platform-4` (on top of `x11-platform-3`). `x11-platform.md`, section 11, has the detail; in short: `dbus_menu_exporter.rs` exports the menu of a window (`com.canonical.dbusmenu`, registered with `com.canonical.AppMenu.Registrar`; the window offers it as `ITopLevelNativeMenuExporter` unless `use_d_bus_menu` is off) and the menu of a tray icon; `dbus_tray_icon_impl.rs` is the tray icon (`org.kde.StatusNotifierItem` on a connection of its own, following the owner of `org.kde.StatusNotifierWatcher`), which `FerroX11Platform::create_tray_icon` gives, or `XEmbedTrayIconImpl` without a session bus. The FreeDesktop project is whole: 18 of 18 files.
+
+Two things a later service of this crate needs. An exported object is called on the thread of the connection: it reaches the object of the UI thread through `UiThreadHandle` (`ui_thread_object.rs`), and its methods await the answer of a job of the UI dispatcher. And objects are added to a connection whose object server is already running: `DBusHelper::with_object_server` gives every connection of the crate one object at build time, after which `object_server().at(..)` from a task of the dispatcher answers reliably (100 runs of 100 of the 65 tests under load).
+
+Tests: a peer on the second connection of the test set-up calls the exported objects from a thread of its own while the test thread runs the dispatcher (`test_support::peer_call`). The smoke mode has `--menu`: the example owns the names of the registrar and of the watcher on a private session bus and asks the application what a desktop shell asks. Not run: a real registrar (a global menu applet such as the one of KDE or `vala-panel-appmenu`) and a real tray host (the KDE system tray, the AppIndicator extension of GNOME, `snixembed`).
+
+Next: the GTK dialogs (`NativeDialogs/Gtk.cs`, `GtkNativeFileDialogs.cs`, `Interop/Glib.cs`, `Interop/GtkInteropHelper.cs`) and the GLib dispatcher (`Dispatching/GLibDispatcherImpl.cs`, `GlibDispatcherImplBase.cs`) in the X11 crate, with `libgtk-3`, `libgdk-3`, `libglib-2.0` and `libgobject-2.0` opened at run time (no link-time dependency), then stage 2f.
+
 ## In flight on 2026-10-09
 
 Nothing runs in the cloud. In flight locally, each on its own branch, written by a sub-agent without a compiler and validated in the main checkout:

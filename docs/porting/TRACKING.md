@@ -70,7 +70,7 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Desktop](tracking/Avalonia.Desktop.md) | `src/Avalonia.Desktop` | `src/FerroUI.Desktop` | `ferroui-desktop` | 1/1 | 1/1 | 1/1 | 100.0% | 1 - desktop (macOS) | P0 |
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/Avalonia.Dialogs` | `src/FerroUI.Dialogs` | `ferroui-dialogs` | 17/17 | 18/18 | 94/94 | 100.0% | 3 - extras | P3 |
 | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) | `src/Avalonia.Fonts.Inter` | `src/FerroUI.Fonts.Inter` | `ferroui-fonts-inter` | 2/2 | 2/2 | 2/2 | 100.0% | 3 - browser | P2 |
-| [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/Avalonia.FreeDesktop` | `src/FerroUI.FreeDesktop` | `ferroui-freedesktop` | 16/18 | 23/26 | 0/216 | 0.0% | 5 - desktop (Linux) | P1 |
+| [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/Avalonia.FreeDesktop` | `src/FerroUI.FreeDesktop` | `ferroui-freedesktop` | 18/18 | 26/26 | 0/216 | 0.0% | 5 - desktop (Linux) | P1 |
 | [Avalonia.Metal](tracking/Avalonia.Metal.md) | `src/Avalonia.Metal` | `src/FerroUI.Metal` | `ferroui-metal` | 2/2 | 7/7 | 21/21 | 100.0% | 1 - desktop (macOS) | P1 |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/Avalonia.MicroCom` | `src/FerroUI.MicroCom` | `ferroui-microcom` | 1/1 | 1/1 | 0/6 (6 waived) | - | 0 - core | P0 |
 | [Avalonia.Native](tracking/Avalonia.Native.md) | `src/Avalonia.Native` | `src/FerroUI.Native` | `ferroui-native` | 48/48 | 65/76 (11 waived) | 455/531 (76 waived) | 100.0% | 1 - desktop (macOS) | P0 |
@@ -78,7 +78,7 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | `src/Avalonia.Remote.Protocol` | `src/FerroUI.Remote.Protocol` | `ferroui-remote-protocol` | 14/14 | 54/55 (1 waived) | 196/202 (3 waived) | 98.5% | 4 - tooling | P3 |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/Avalonia.Themes.Fluent` | `src/FerroUI.Themes.Fluent` | `ferroui-themes-fluent` | 5/5 | 6/6 | 68/73 (5 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/Avalonia.Themes.Simple` | `src/FerroUI.Themes.Simple` | `ferroui-themes-simple` | 1/1 | 1/1 | 1/1 | 100.0% | 2 - xaml + themes | P2 |
-| [Avalonia.X11](tracking/Avalonia.X11.md) | `src/Avalonia.X11` | `src/FerroUI.X11` | `ferroui-x11` | 72/88 | 144/291 (107 waived) | 0/4897 | 0.0% | 5 - desktop (Linux) | P1 |
+| [Avalonia.X11](tracking/Avalonia.X11.md) | `src/Avalonia.X11` | `src/FerroUI.X11` | `ferroui-x11` | 73/88 | 145/291 (107 waived) | 0/4897 | 0.0% | 5 - desktop (Linux) | P1 |
 | [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/Avalonia.Browser` | `src/Browser/FerroUI.Browser` | `ferroui-browser` | 50/50 | 60/62 (2 waived) | 333/428 (95 waived) | 100.0% | 3 - browser | P2 |
 | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | `src/HarfBuzz/Avalonia.HarfBuzz` | `src/HarfBuzz/FerroUI.HarfBuzz` | `ferroui-harfbuzz` | 3/3 | 3/3 | 5/8 (3 waived) | 100.0% | 1 - rendering | P0 |
 | [Avalonia.Headless](tracking/Avalonia.Headless.md) | `src/Headless/Avalonia.Headless` | `src/Headless/FerroUI.Headless` | `ferroui-headless` | 11/11 | 22/24 (2 waived) | 238/251 (13 waived) | 100.0% | 1 - test infrastructure | P1 |
@@ -356,7 +356,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-348 Rust source files have no upstream counterpart (14 without a recorded reason). They are listed at the end of each project page.
+351 Rust source files have no upstream counterpart (13 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
@@ -609,10 +609,13 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/dbus_ime/fcitx/dbus.rs` | **unmapped** |
 | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/dbus_ime/ibus/dbus.rs` | **unmapped** |
 | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/dbus_ime/tests.rs` | the unit tests of the module |
+| [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/dbus_menu_exporter/tests.rs` | the unit tests of the module |
 | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/dbus_system_dialog/tests.rs` | the unit tests of the module |
+| [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/dbus_tray_icon_impl/tests.rs` | the unit tests of the module |
 | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/event.rs` | **unmapped** |
-| [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/signal_watch.rs` | **unmapped** |
+| [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/signal_watch.rs` | A subscription to a D-Bus signal as a disposable handle, and a cancellation flag: facilities of the D-Bus library and of the runtime of the original (`Watch...Async`, `CancellationTokenSource`) |
 | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/test_support.rs` | **unmapped** |
+| [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/ui_thread_object.rs` | How an object exported on a connection answers from the object of the UI thread it stands for: the D-Bus library of the original calls a handler on the synchronization context of the thread that made the connection |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/FerroUI.MicroCom/com_ptr.rs` | port of the MicroCom.Runtime package, which upstream consumes as a NuGet binary |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/FerroUI.MicroCom/guid.rs` | port of the MicroCom.Runtime package, which upstream consumes as a NuGet binary |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/FerroUI.MicroCom/hresult.rs` | port of the MicroCom.Runtime package, which upstream consumes as a NuGet binary |

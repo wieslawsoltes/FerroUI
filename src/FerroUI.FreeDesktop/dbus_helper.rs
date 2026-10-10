@@ -38,6 +38,7 @@ impl DBusHelper {
             Some(address) => zbus::blocking::connection::Builder::address(address),
             None => zbus::blocking::connection::Builder::session(),
         }
+        .and_then(Self::with_object_server)
         .and_then(|builder| builder.build())
         .map(zbus::blocking::Connection::into_inner);
 
@@ -50,6 +51,26 @@ impl DBusHelper {
                 None
             }
         }
+    }
+}
+
+impl DBusHelper {
+    /// Makes a connection answer method calls from the moment it is built.
+    ///
+    /// The services of the crate (a menu, a tray icon) are exported on a
+    /// connection after it was made, as the reference adds method
+    /// handlers. The object server of the D-Bus library starts with the
+    /// first object: when that is given to the builder, the server is
+    /// listening before the connection reads its first message; when it is
+    /// added later, the server starts in a task of its own, and a call
+    /// that arrives before that task ran is never answered (measured in
+    /// the tests of the input methods: docs/porting/x11-platform.md,
+    /// section 13). So every connection of the crate is built with one
+    /// object, the standard object manager at the root.
+    pub fn with_object_server(
+        builder: zbus::blocking::connection::Builder<'_>,
+    ) -> zbus::Result<zbus::blocking::connection::Builder<'_>> {
+        builder.serve_at("/", zbus::fdo::ObjectManager)
     }
 }
 

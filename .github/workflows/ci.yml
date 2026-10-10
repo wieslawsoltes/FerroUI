@@ -624,6 +624,15 @@ jobs:
         run: |
           xvfb-run -a --server-args="-screen 0 1280x1024x24" \
             timeout 300 target/debug/examples/x11_window --smoke --dnd --skip=popup,resize,screens,clipboard
+      # The menu of the window and a tray icon over D-Bus: the example is also the registrar of
+      # application menus and the watcher of status notifier items on a private session bus, and
+      # asks the application what a desktop shell asks (the layout of a menu, a click, the
+      # properties and the activation of the tray item, its name on the bus when it is hidden).
+      - name: The window menu and a tray icon over D-Bus (doubles of the registrar and the watcher)
+        if: ${{ !cancelled() }}
+        run: |
+          dbus-run-session -- xvfb-run -a --server-args="-screen 0 1280x1024x24" \
+            timeout 300 target/debug/examples/x11_window --smoke --menu --skip=input,popup,resize,screens,clipboard
       - name: The same with two monitors (xrandr --setmonitor)
         if: ${{ !cancelled() }}
         run: |

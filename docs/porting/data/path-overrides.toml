@@ -2210,6 +2210,14 @@ reason = "The multicast events of the backend's own classes (a C# `event Action`
 path = "src/FerroUI.X11/pixel_buffer.rs"
 reason = "A framebuffer over pixels the crate owns, for what the original makes with the `LockedFramebuffer` constructor over memory of its own (cursor and icon pixels)"
 
+[[rust_only]]
+path = "src/FerroUI.FreeDesktop/signal_watch.rs"
+reason = "A subscription to a D-Bus signal as a disposable handle, and a cancellation flag: facilities of the D-Bus library and of the runtime of the original (`Watch...Async`, `CancellationTokenSource`)"
+
+[[rust_only]]
+path = "src/FerroUI.FreeDesktop/ui_thread_object.rs"
+reason = "How an object exported on a connection answers from the object of the UI thread it stands for: the D-Bus library of the original calls a handler on the synchronization context of the thread that made the connection"
+
 # ---------------------------------------------------------------- Avalonia.iOS
 # The project is tracked at file and type granularity (TRACKING.md); docs/porting/ios-platform.md has the file table
 # and the stage of every file. The classes of the Objective-C runtime are declared with a macro of the bindings
