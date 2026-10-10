@@ -1,6 +1,7 @@
 //! The interface definition files of the Windows platform backend must parse and generate Rust
-//! bindings: the backend compiles one of them today (`directx.idl`, in its build script) and the
-//! others from the stages that use them, so this is what holds the other three until then.
+//! bindings: the backend compiles three of them (`directx.idl`, `winrt.idl` and `win32.idl`, in
+//! its build script) and `dcomp.idl` from the stage that uses it, so this is what holds that one
+//! until then, and what says of the others how the generator reads them.
 
 use std::path::PathBuf;
 

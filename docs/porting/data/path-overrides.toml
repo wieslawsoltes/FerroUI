@@ -2160,6 +2160,14 @@ reason = "a part of the window class with a file of its own, which stage 2 build
 path = "src/Windows/FerroUI.Win32/wnd_proc_guard.rs"
 reason = "Keeps a panic from unwinding out of a window procedure through the frames of the system: caught, kept, and raised again by the message loop (docs/porting/win32-platform.md, section 5)"
 
+[[rust_only]]
+path = "src/Windows/FerroUI.Win32/win_rt/numerics.rs"
+reason = "The vector, quaternion and matrix values the interfaces of `winrt.idl` pass, by their layout: upstream maps the names to the types of the numerics library of its runtime"
+
+[[rust_only]]
+path = "src/Windows/FerroUI.Win32/win_rt/win_rt_tests.rs"
+reason = "Tests of the Windows Runtime helpers (string handles, activation, the API information, a property value through its COM interface) against the system; they run on Windows"
+
 # ---------------------------------------------------------------- Avalonia.X11
 # The project is tracked at file and type granularity until its members are extracted (TRACKING.md).
 

@@ -9088,12 +9088,12 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    33,
+    39,
     95,
     0
    ],
    "types": [
-    111,
+    124,
     276,
     0
    ],
@@ -9156,6 +9156,9 @@
     "OffscreenParentWindow.cs": [
      "offscreen_parent_window.rs"
     ],
+    "OleContext.cs": [
+     "ole_context.rs"
+    ],
     "OpenGl/Angle/AngleEglInterface.cs": [
      "open_gl/angle/angle_egl_interface.rs"
     ],
@@ -9204,6 +9207,21 @@
     "Win32TypeExtensions.cs": [
      "win32_type_extensions.rs"
     ],
+    "WinRT/NativeWinRTMethods.cs": [
+     "win_rt/native_win_rt_methods.rs"
+    ],
+    "WinRT/WinRTApiInformation.cs": [
+     "win_rt/win_rt_api_information.rs"
+    ],
+    "WinRT/WinRTColor.cs": [
+     "win_rt/win_rt_color.rs"
+    ],
+    "WinRT/WinRTInspectable.cs": [
+     "win_rt/win_rt_inspectable.rs"
+    ],
+    "WinRT/WinRTPropertyValue.cs": [
+     "win_rt/win_rt_property_value.rs"
+    ],
     "WinScreen.cs": [
      "win_screen.rs"
     ],
@@ -9218,6 +9236,7 @@
     ]
    },
    "rustOnly": [
+    "win_rt/numerics.rs",
     "wnd_proc_guard.rs"
    ]
   },
