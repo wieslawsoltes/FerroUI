@@ -28,7 +28,7 @@ use super::wayland_dispatch_priority::WaylandDispatchPriority;
 use super::wayland_platform_graphics::WaylandPlatformGraphics;
 use super::wayland_worker_render_timer::{RenderLoopImpl, WaylandRenderTimer};
 use crate::screens::i_wayland_outputs_sink::WaylandOutputsSinkProxy;
-use crate::wayland_exception::FerroWaylandException;
+use crate::ferro_wayland_exception::FerroWaylandException;
 use crate::wayland_platform_options::WaylandWorkerOptions;
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::rendering::composition::server::LockedServerCompositor;

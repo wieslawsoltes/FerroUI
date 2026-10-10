@@ -3,7 +3,7 @@
 
 use super::unsafe_native_methods::poll_two;
 use crate::server::wayland_worker::WaylandWorkerState;
-use crate::wayland_exception::{
+use crate::ferro_wayland_exception::{
     FerroWaylandException, FerroWaylandFlushException, FerroWaylandPollException, FerroWaylandProtocolErrorException,
     FerroWaylandReadException,
 };

@@ -18,7 +18,7 @@
 
 pub mod screens;
 pub mod server;
-pub mod wayland_exception;
+pub mod ferro_wayland_exception;
 pub mod wayland_platform_options;
 pub mod xkb_key_transform;
 
@@ -28,7 +28,7 @@ pub mod wayland_cursor_factory;
 pub mod wayland_glib_dispatcher;
 #[cfg(target_os = "linux")]
 pub mod wayland_platform;
-pub mod wayland_platform_extensions;
+pub mod ferro_wayland_platform_extensions;
 #[cfg(target_os = "linux")]
 pub mod wayland_surface_create_result;
 #[cfg(target_os = "linux")]
@@ -52,9 +52,9 @@ pub mod xkb_compose_table;
 #[cfg(target_os = "linux")]
 pub mod xkb_context;
 
-pub use wayland_exception::{
+pub use ferro_wayland_exception::{
     FerroWaylandException, FerroWaylandFlushException, FerroWaylandNetworkException, FerroWaylandPollException,
     FerroWaylandProtocolErrorException, FerroWaylandReadException,
 };
-pub use wayland_platform_extensions::FerroWaylandPlatformExtensions;
+pub use ferro_wayland_platform_extensions::FerroWaylandPlatformExtensions;
 pub use wayland_platform_options::WaylandPlatformOptions;

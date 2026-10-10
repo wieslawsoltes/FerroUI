@@ -8,7 +8,7 @@ use crate::screens::snapshot_screens_impl::SnapshotScreensImpl;
 use crate::server::wayland_worker::WaylandWorker;
 use crate::server::wayland_worker_client::WaylandWorkerClient;
 use crate::wayland_cursor_factory::WaylandCursorFactory;
-use crate::wayland_exception::FerroWaylandException;
+use crate::ferro_wayland_exception::FerroWaylandException;
 use crate::wayland_glib_dispatcher::WaylandGlibDispatcher;
 use crate::wayland_platform_options::WaylandPlatformOptions;
 use crate::wayland_top_level_factory::WaylandTopLevelFactory;

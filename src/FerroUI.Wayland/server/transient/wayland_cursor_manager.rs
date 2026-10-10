@@ -7,7 +7,7 @@
 
 use crate::server::persistent::w_surface::WlSurfaceData;
 use crate::server::wayland_worker::WaylandWorkerState;
-use crate::wayland_exception::FerroWaylandException;
+use crate::ferro_wayland_exception::FerroWaylandException;
 use ferroui_base::input::StandardCursorType;
 use std::collections::HashMap;
 use wayland_client::protocol::wl_compositor::WlCompositor;

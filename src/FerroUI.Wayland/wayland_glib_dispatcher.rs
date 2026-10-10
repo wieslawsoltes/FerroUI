@@ -1,7 +1,7 @@
 //! The dispatcher of the UI thread over the main loop of GLib (the port of
 //! `WaylandGlibDispatcher.cs`).
 
-use crate::wayland_exception::FerroWaylandException;
+use crate::ferro_wayland_exception::FerroWaylandException;
 use ferroui_x11::dispatching::glib_dispatcher_impl_base::GlibDispatcherImplBase;
 use ferroui_x11::interop::glib::Glib;
 use std::any::Any;

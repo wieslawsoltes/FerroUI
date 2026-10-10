@@ -174,7 +174,7 @@ mod imp {
     };
     use crate::server::transient::wayland_globals::WaylandGlobals;
     use crate::server::wayland_worker::{WaylandWorker, WaylandWorkerState};
-    use crate::wayland_exception::FerroWaylandException;
+    use crate::ferro_wayland_exception::FerroWaylandException;
     use ferroui_base::platform::{PlatformRenderTargetState, RenderTargetSceneInfo};
     use std::rc::{Rc, Weak};
     use std::sync::mpsc::Sender;

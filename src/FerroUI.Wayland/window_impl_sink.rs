@@ -9,7 +9,7 @@ use crate::server::persistent::i_w_surface_event_sink::{
 };
 use crate::server::persistent::i_w_xdg_top_level::{IWXdgShellSurface, IWXdgTopLevel, WXdgTopLevelProxy};
 use crate::server::persistent::xdg_configure_batch::XdgConfigureBatch;
-use crate::wayland_exception::FerroWaylandException;
+use crate::ferro_wayland_exception::FerroWaylandException;
 use crate::window_impl::WindowImpl;
 use crate::window_impl_base::{ISinkOwner, Sink};
 use ferroui_base::input::raw::RawPointerEventType;

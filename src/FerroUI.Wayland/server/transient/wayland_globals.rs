@@ -16,7 +16,7 @@ use super::wayland_outputs_tracker::WaylandOutputsTracker;
 use crate::server::interop::wayland_connection::WaylandConnection;
 use crate::server::wayland_platform_graphics::IWaylandGraphics;
 use crate::server::wayland_worker::WaylandWorkerState;
-use crate::wayland_exception::FerroWaylandException;
+use crate::ferro_wayland_exception::FerroWaylandException;
 use ferroui_base::logging::{LogEventLevel, Logger};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -30,6 +30,7 @@ use wayland_protocols::xdg::xdg_output::zv1::client::zxdg_output_manager_v1::Zxd
 
 const SEAT_MIN_VERSION: u32 = 5;
 const SEAT_MAX_VERSION: u32 = 9;
+const XDG_WM_BASE_MIN_VERSION: u32 = 2;
 
 /// What the registry announced before the globals of the connection exist.
 #[derive(Default)]
@@ -80,7 +81,12 @@ impl WaylandGlobals {
 
         let wl_shm: WlShm = Self::bind_required(&registry, &known_globals, 1, 1, &queue_handle)?;
         let wl_compositor: WlCompositor = Self::bind_required(&registry, &known_globals, 4, 6, &queue_handle)?;
-        let xdg_wm_base: XdgWmBase = Self::bind_required(&registry, &known_globals, 3, 4, &queue_handle)?;
+        // The reference asks for version 3 at least, for `xdg_popup.reposition`. Nothing built so
+        // far needs more than version 2, which is what sway 1.9 has (the compositor of the
+        // tests, and of Ubuntu 24.04): the port takes it, and the popups of stage 2 have to do
+        // without the request there.
+        let xdg_wm_base: XdgWmBase =
+            Self::bind_required(&registry, &known_globals, XDG_WM_BASE_MIN_VERSION, 4, &queue_handle)?;
 
         let cursor_manager = WaylandCursorManager::new(connection.display(), &wl_shm, &wl_compositor, &queue_handle)?;
 
