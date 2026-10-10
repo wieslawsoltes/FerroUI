@@ -722,6 +722,19 @@ jobs:
           xvfb-run -a --server-args="-screen 0 1280x1024x24" sh -c '
             openbox & sleep 2
             timeout 300 target/debug/examples/x11_window --smoke --glib --gtk-dialog --skip=input,popup,resize,screens,clipboard'
+      # Stage 2f: a window of another client held by the native control host of the window (its
+      # holder window, bounds, hiding, release), an XEmbed plug in a socket window of the example
+      # (announced, embedded, drawn, resized by the embedder, destroyed), and the lifetime events.
+      - name: The native control host and an XEmbed plug
+        if: ${{ !cancelled() }}
+        run: |
+          xvfb-run -a --server-args="-screen 0 1280x1024x24" \
+            timeout 300 target/debug/examples/x11_window --smoke --embed --skip=input,popup,resize,screens,clipboard
+      # The desktop host of the ControlCatalog with its native control demo for Linux (a window of
+      # the X server for mplayer, a file chooser of GTK): compiled, not run.
+      - name: The ControlCatalog host with the native control demo compiles
+        if: ${{ !cancelled() }}
+        run: cargo check --locked -p control-catalog-desktop
       - name: The same with two monitors (xrandr --setmonitor)
         if: ${{ !cancelled() }}
         run: |

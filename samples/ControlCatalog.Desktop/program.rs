@@ -37,10 +37,21 @@
 //! `--orientation`, `--card`), and of the application builder the data
 //! annotations validation, the Wayland, X11, Vulkan and composition
 //! options, the Inter font, the developer tools and the native control
-//! samples of `NativeControls/` (`EmbedSample.Implementation`).
+//! samples of `NativeControls/` for Windows and macOS
+//! (`EmbedSample.Implementation`). The one for Linux is ported
+//! (`NativeControls/Gtk`).
 
 #[cfg(windows)]
 mod window_capture;
+
+/// The native control demo of Linux (`NativeControls/Gtk` of the
+/// reference).
+#[cfg(target_os = "linux")]
+#[path = "NativeControls/Gtk/embed_sample_gtk.rs"]
+mod embed_sample_gtk;
+#[cfg(target_os = "linux")]
+#[path = "NativeControls/Gtk/gtk_helper.rs"]
+mod gtk_helper;
 
 use control_catalog::App;
 use ferroui_base::logging::LogEventLevel;
@@ -71,7 +82,15 @@ pub fn build_ferro_app() -> AppBuilder {
     let builder = smoke_platform_options(AppBuilder::configure::<App>()).use_platform_detect();
     #[cfg(feature = "vello")]
     let builder = use_renderer_of_the_environment(builder);
-    builder.after_setup(|_| smoke_run()).log_to_trace(LogEventLevel::Warning, &[])
+    builder
+        .after_setup(|_| {
+            #[cfg(target_os = "linux")]
+            control_catalog::pages::EmbedSample::set_implementation(Some(std::rc::Rc::new(
+                embed_sample_gtk::EmbedSampleGtk::default(),
+            )));
+            smoke_run()
+        })
+        .log_to_trace(LogEventLevel::Warning, &[])
 }
 
 /// The render backend asked for with `FERROUI_RENDERER`: `vello` (the modes

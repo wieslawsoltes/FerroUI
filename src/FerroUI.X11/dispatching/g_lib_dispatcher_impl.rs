@@ -13,6 +13,7 @@ use ferroui_base::threading::{
     IDispatcherImplWithExplicitBackgroundProcessing, IDispatcherImplWithPendingInput, IDispatcherSignal,
 };
 use ferroui_base::utilities::ThreadBound;
+use std::cell::Cell;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::{Rc, Weak};
 use std::sync::Arc;
@@ -23,6 +24,10 @@ pub struct GlibDispatcherImpl {
     base: Rc<GlibDispatcherImplBase>,
     platform: Weak<FerroX11Platform>,
     x11_events: Rc<X11EventDispatcher>,
+    /// Whether a source that hands out the events Xlib has queued is
+    /// waiting to run.
+    queued_events_source_added: Cell<bool>,
+    this: Weak<GlibDispatcherImpl>,
 }
 
 impl GlibDispatcherImpl {
@@ -38,7 +43,13 @@ impl GlibDispatcherImpl {
         let base =
             GlibDispatcherImplBase::new(glib, platform.options().external_g_lib_main_loop_exception_logger.clone());
         let x11_events = X11EventDispatcher::new(platform);
-        let this = Rc::new(Self { base, platform: Rc::downgrade(platform), x11_events });
+        let this = Rc::new_cyclic(|this| Self {
+            base,
+            platform: Rc::downgrade(platform),
+            x11_events,
+            queued_events_source_added: Cell::new(false),
+            this: this.clone(),
+        });
         let backend: Rc<dyn GlibDispatcherBackend> = this.clone();
         this.base.set_backend(Rc::downgrade(&backend));
 
@@ -98,6 +109,37 @@ impl GlibDispatcherImpl {
 impl GlibDispatcherBackend for GlibDispatcherImpl {
     fn flush(&self) {
         self.x11_events.flush();
+        self.dispatch_queued_events_later();
+    }
+}
+
+impl GlibDispatcherImpl {
+    /// Not in the reference (DEVIATIONS.md). The source of the connection
+    /// runs when the socket can be read. A job of the framework that waits
+    /// for an answer of the server (`XSync`, a property that is read) makes
+    /// Xlib read the socket and queue the events that came before the
+    /// answer: the socket is then empty, the source does not run, and the
+    /// events stay in the queue until something else arrives. So after
+    /// jobs ran, events that are queued get a source of their own, at the
+    /// priority of the source of the connection.
+    fn dispatch_queued_events_later(&self) {
+        if self.queued_events_source_added.get() || !self.x11_events.is_pending() {
+            return;
+        }
+        self.queued_events_source_added.set(true);
+        let bound = ThreadBound::new(self.this.clone());
+        self.base.glib().g_idle_add_full(
+            G_PRIORITY_DEFAULT,
+            Box::new(move || {
+                if bound.is_on_thread() {
+                    if let Some(this) = bound.get().upgrade() {
+                        this.queued_events_source_added.set(false);
+                        this.x11_source_callback(this.x11_events.fd(), GIOCondition::G_IO_IN);
+                    }
+                }
+                false
+            }),
+        );
     }
 }
 

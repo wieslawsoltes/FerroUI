@@ -229,6 +229,15 @@ plain!(
     /// `XResizeWindow`.
     x_resize_window => XResizeWindow(window: XID, width: c_uint, height: c_uint) -> c_int);
 plain!(
+    /// `XMoveResizeWindow`.
+    x_move_resize_window => XMoveResizeWindow(window: XID, x: c_int, y: c_int, width: c_uint, height: c_uint) -> c_int);
+plain!(
+    /// `XReparentWindow`.
+    x_reparent_window => XReparentWindow(window: XID, parent: XID, x: c_int, y: c_int) -> c_int);
+plain!(
+    /// `XSetWindowBackground`.
+    x_set_window_background => XSetWindowBackground(window: XID, background: c_ulong) -> c_int);
+plain!(
     /// `XIconifyWindow`.
     x_iconify_window => XIconifyWindow(window: XID, screen: c_int) -> c_int);
 plain!(

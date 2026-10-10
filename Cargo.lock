@@ -465,6 +465,7 @@ dependencies = [
  "ferroui-desktop",
  "ferroui-vello",
  "ferroui-win32",
+ "ferroui-x11",
 ]
 
 [[package]]
