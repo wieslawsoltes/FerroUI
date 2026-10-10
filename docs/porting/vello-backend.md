@@ -1098,3 +1098,74 @@ The other way is the second configuration of `browser-platform.md`: `wasm32-unkn
 | 9 | Blurs and shadows of the hybrid mode are images of the CPU mode | 10.6, item 7, for both renderers of `vello_gpu` |
 | 10 | Only Chrome was run; Firefox and Safari not | the harness drives Chromium |
 | 11 | `scripts/build-browser.sh --both --features vello` (the composed site of two modules with both backends) was not run | it composes what the two builds wrote, which were both built and tested |
+
+## 13. Open work, in one list (2026-10-10)
+
+The owner will supply patches for this backend; no optimization or tuning is in progress (the backend is kept building and its tests green). This section gathers every open item of the sections above in one place, so that a patch can be checked against it. Each row names where the evidence is. Nothing here is new; where a section and this list disagree, the section is the record.
+
+### 13.1 Wrong output (correctness)
+
+| # | What | Mode | Where |
+|---|---|---|---|
+| C1 | `SrcIn`, `DestIn`, `SrcOut`, `DestAtop` of a bitmap take out what is below in a band of up to 15 pixels around it, and inside a clip in the part of the shape the clip hides (about 11 % of those scenes; bounded per mode in the harness) | GPU | 10.6 item 14, 11.6 |
+| C2 | A frame that blends above the fourth layer of a pixel beyond the fixed memory of the renderer is not drawn, without a message (24 nested layers over 256 by 256 pixels) | GPU | 11.6 |
+| C3 | Edges without anti-aliasing exist only for rectangles on the axes: other aliased shapes, aliased clips that are rotated, and aliased text are anti-aliased | GPU | 10.6 item 13, section 8 (modes table) |
+| C4 | Two renders of the same scene differ in one to five pixels of 40,000 by one digit in text scenes (the tests allow 16); the mechanism is inferred, not proven | GPU | 11.6 |
+| C5 | An aliased circle differs from Skia beyond the threshold of the render tests: the renderer decides an edge pixel by coverage, Skia by the pixel centre (`Should_Render_Circle_Aliased`, the one render test that fails) | CPU | section 8 (render tests) |
+| C6 | Strokes of one pixel that are diagonal or curved are drawn heavier than Skia draws them (render tests that pass near the threshold: `Child_Transform`, `GetWidenedPathGeometry_Line`, `Geometry1_Transform`, `FillRule_Stroke_*`); the dots of `VisualBrush_Grip_144_Dpi` are darker. Cause not found | CPU | section 8 (render tests) |
+| C7 | Perspective transforms are dropped | all | section 9 item 2 |
+| C8 | The exit code 1 of a desktop window through the default options, seen once on the first launch of a fresh build in a Windows virtual machine, is the Skia path, not this backend; listed here only so that it is not searched for in Vello | none | `win32-platform.md` |
+
+### 13.2 Text
+
+| # | What | Where |
+|---|---|---|
+| T1 | No sub-pixel (LCD) text in any renderer; the option gives the grey-scale pixels | section 9 item 1 |
+| T2 | Text is the fill of the outlines: on macOS about an eighth lighter than Skia's, which draws through CoreText (3.2 % of pixels over 13 scenes) | section 8, "Text" |
+| T3 | Glyph curves are flattened at a quarter pixel by the glyph renderer (0.26 to 1.27 % from Skia's outlines, where path fills of the backend are at 0.13 to 0.43 %) | section 8, "Text" |
+| T4 | Hinting is vertical only, the same for light and strong, off under rotation and for emboldened runs | section 8, "Text" |
+| T5 | Colour fonts: SVG glyphs draw as outlines; bitmaps other than PNG and palettes other than the first are not supported; a font without a `head` table draws nothing | section 8, "Text" |
+| T6 | Families whose outlines are in Apple's `hvgl` table (PingFang) are not offered; Heiti SC is the Han fallback | section 8, "Text" |
+| T7 | Fallback is by the script of the character with a coverage check, since the font library falls back by script and language: 4 of 18 test characters fall back to another family than with Skia | section 8, "Text" |
+| T8 | Variation coordinates have no member in the contracts: shaping and advances use the default instance | section 8, "Text" |
+| T9 | The font stack was run on macOS only (and with registered collections in the browser) | section 8, "Text"; 12.1 |
+
+### 13.3 Speed and memory (not being worked on)
+
+| # | What | Mode | Where |
+|---|---|---|---|
+| P1 | The strips of every path and glyph are made on the processor every frame (1.4 to 4.1 ms of a whole page) | hybrid | 11.5 item 1 |
+| P2 | No blur in the renderer: effects and most shadows are scenes of the CPU renderer, uploaded (47 of 55 ms of the effects page) | GPU | 11.5 item 2, section 9 item 3 |
+| P3 | The whole frame of a surface is drawn every time | GPU | 11.5 item 3 |
+| P4 | In a window the whole frame is rendered over and uploaded although little changed | CPU | 11.5 item 4, section 9 item 7 |
+| P5 | The first frame after a new build takes 1.2 to 1.9 s once (shaders compiled by Metal) | hybrid, GPU | 11.5 item 5 |
+| P6 | 1.25 GB at the peak of the catalog tour | GPU | 11.5 item 6 |
+| P7 | The levels of a mipmap and the picture of a shadow that is not in closed form are made for every draw; an uploaded image is kept for sixteen renders | all | 10.6 item 2, 11.5 item 7 |
+| P8 | Curves are flattened on every draw | all | section 9 item 8 |
+| P9 | An effect under a clip is drawn into a scene of its own and composed (on the device in the hybrid mode; as pixels in the CPU mode): a clip open when a filter layer is pushed cuts before the blur in the CPU renderer | CPU, GPU | 10.1, 10.6 item 1 |
+| P10 | List scrolling was not measured on the three modes | all | 11.4 |
+| P11 | Browser: the hybrid mode draws every frame whole; the CPU mode renders the whole frame, converts it and draws it back in (27 ms a frame against 8 for Skia raster); the module is built without `simd128`; glyphs are filled from outlines every frame; the thread pool of the CPU renderer is not usable | hybrid, CPU | 12.7 items 3 to 6, 8 |
+
+### 13.4 Not built
+
+| # | What | Where |
+|---|---|---|
+| N1 | The GPU mode in a browser: `wgpu` has no WebGPU backend on the Emscripten target | 12.6 |
+| N2 | Filters of the GPU sink (its renderer has none) and of the WebGL sink of the hybrid mode in the browser: both go through images of the CPU mode | 10.6 item 7, 12.7 item 9 |
+| N3 | A lost WebGL context is not restored | 12.7 item 7 |
+| N4 | Vulkan and Direct3D 12 (`wgpu` is built with Metal alone); the Windows and Linux windows of the backend; the external objects feature of a context | 10.6 item 17 |
+| N5 | `render_async` and the wrapping of a foreign surface | 10.6 item 3 |
+| N6 | The `HitTesting` suite of the Skia backend is not ported to this backend | 10.6 item 4 |
+| N7 | WebP is not decoded (as with the Skia backend of this workspace); the JPEG encoder writes standard Huffman tables because a file with optimized tables is decoded as black by the JPEG decoder (files about a third larger) | 10.6 items 5, 6 |
+| N8 | A site with both backends in one module is over the budget of a published module (14.19 against 14 MB gzip): a module without Skia, chosen by the loader, is proposed and not built | 12.5, 12.7 item 1 |
+| N9 | The backend-neutral code that both backends have a copy of is listed and not moved | section 3, section 9 item 10 |
+
+### 13.5 Not verified
+
+| # | What | Where |
+|---|---|---|
+| V1 | Whether the macOS runner of CI gives `wgpu` an adapter: the hybrid and GPU tests print that they were skipped when there is none, and a passing test's output is not shown | 10.6 item 18 |
+| V2 | The picture in a desktop window was not looked at: the smoke runs open, draw, read back from textures and close | 4.2 |
+| V3 | That a frame scheduled on the backend's own command queue is always in order with the present of the platform | 11.2 |
+| V4 | Browsers other than Chrome; a real loss of a WebGL context; a scaling other than 1 in the browser; the composed site of two modules with both backends | 12.4, 12.7 items 10, 11 |
+| V5 | Dependencies that describe themselves as early: `linesweeper` for combined geometries (a panic in it is caught and gives the empty geometry), the glyph atlas of the hybrid renderer for bitmap fonts | section 9 item 6, 4.1 |
