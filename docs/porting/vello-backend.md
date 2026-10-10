@@ -1186,6 +1186,7 @@ The owner will supply patches for this backend; no optimization or tuning is in 
 | C6 | Strokes of one pixel that are diagonal or curved are drawn heavier than Skia draws them (render tests that pass near the threshold: `Child_Transform`, `GetWidenedPathGeometry_Line`, `Geometry1_Transform`, `FillRule_Stroke_*`); the dots of `VisualBrush_Grip_144_Dpi` are darker. Cause not found | CPU | section 8 (render tests) |
 | C7 | Perspective transforms are dropped | all | section 9 item 2 |
 | C8 | The exit code 1 of a desktop window through the default options, seen once on the first launch of a fresh build in a Windows virtual machine, is the Skia path, not this backend; listed here only so that it is not searched for in Vello | none | `win32-platform.md` |
+| C9 | On the macOS runner of CI a scene of the comparison harness now and then fails though nothing changed: `blend_saturation` over its bound (GPU), `pixel_formats` wholly different from Skia, 100 % of the pixels (hybrid), an effect scene not the same in two draws (`a_backend_draws_an_effect_scene_the_same_way_twice`). Seen three times on 2026-10-10 in pull requests that do not touch the backend; each passed when run again. Not reproduced locally and the cause is not looked for; the CI step of the harness tries a failure again, twice at most | GPU, hybrid | `.github/workflows/ci.yml`, the step of the comparison |
 
 ### 13.2 Text
 

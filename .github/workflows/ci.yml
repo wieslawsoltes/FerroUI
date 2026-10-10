@@ -81,7 +81,20 @@ jobs:
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
       - name: Test
-        run: cargo test --workspace --locked --no-fail-fast --lib --tests
+        run: cargo test --workspace --locked --no-fail-fast --lib --tests --exclude ferroui-render-backends-comparison
+      # The comparison of the Vello backend with the Skia backend, apart from the other tests: on
+      # the runner one scene of a GPU mode now and then comes out wholly different or differs
+      # between two draws (docs/porting/vello-backend.md, section 13). A failure is tried again,
+      # twice at most; a scene that fails three times in a row fails the job.
+      - name: Test (the render backends compared)
+        run: |
+          for attempt in 1 2 3; do
+            if cargo test --locked -p ferroui-render-backends-comparison --no-fail-fast --lib --tests; then
+              exit 0
+            fi
+            echo "::warning::the comparison of the render backends failed in attempt $attempt"
+          done
+          exit 1
 
   # The Windows platform backend (docs/porting/win32-platform.md, section 10.3). This job is the
   # only place the backend runs: it is written and checked for the Windows target on other
