@@ -10,6 +10,7 @@ use crate::direct_x::{
 };
 use crate::i_blur_host::{BlurEffect, ICompositionEffectsSurface};
 use crate::interop::unmanaged_methods::RECT;
+use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
 use ferroui_base::platform::{IPlatformGraphicsContext, PlatformRenderTargetState, RenderTargetSceneInfo};
 use ferroui_base::rendering::composition::CompositionTransparencyLevel;
@@ -121,6 +122,21 @@ impl ICompositionEffectsSurface for DirectCompositedWindowSurface {
     }
 }
 
+/// Says which step of beginning a frame failed, with the result code of the
+/// system, the size of the scene and of the surface, and the window.
+fn log_frame_failure(stage: &str, error: HResult, scene: PixelSize, surface: PixelSize, handle: isize) {
+    if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::WIN32_PLATFORM) {
+        logger.log(
+            None,
+            &format!(
+                "DirectComposition: a frame could not be begun: {stage} failed with {:#010X}; the scene is {} by {} pixels, \
+                 the surface {} by {}, the window {handle:#x}",
+                error.0, scene.width, scene.height, surface.width, surface.height
+            ),
+        );
+    }
+}
+
 pub(crate) struct DirectCompositedWindowRenderTarget {
     context: Rc<dyn IPlatformGraphicsContext>,
     shared: Arc<DirectCompositionShared>,
@@ -198,7 +214,13 @@ impl DirectCompositedWindowRenderTarget {
         // A failure here is an exception that is not the corrupted render
         // target in the reference; the contract of the port has the one
         // error, with the failure of the system as its cause.
-        let failed = |error: HResult| RenderTargetCorruptedException::new_with_inner_exception(Rc::new(error));
+        let failed = |stage: &'static str| {
+            let (size, surface_size, handle) = (scene_info.size, self.size.get(), self.window.window_info().handle());
+            move |error: HResult| {
+                log_frame_failure(stage, error, size, surface_size, handle);
+                RenderTargetCorruptedException::new_with_inner_exception(Rc::new(error))
+            }
+        };
 
         let is_transparency = scene_info.transparency_level != CompositionTransparencyLevel::None;
         let existing = self.surface.borrow().clone();
@@ -206,7 +228,7 @@ impl DirectCompositedWindowRenderTarget {
             Some(surface) if is_transparency == self.is_surface_support_transparency.get() => surface,
             _ => {
                 *self.surface.borrow_mut() = None;
-                let surface = self.create_surface(scene_info).map_err(failed)?;
+                let surface = self.create_surface(scene_info).map_err(failed("creating the virtual surface"))?;
                 *self.surface.borrow_mut() = Some(surface.clone());
                 surface
             }
@@ -216,11 +238,11 @@ impl DirectCompositedWindowRenderTarget {
         let scale = scene_info.scaling;
 
         if self.size.get() != size {
-            surface.resize(size.width as u32, size.height as u32).map_err(failed)?;
+            surface.resize(size.width as u32, size.height as u32).map_err(failed("resizing the virtual surface"))?;
             self.size.set(size);
         }
         let surface_interop: &IDCompositionSurface = &surface;
-        self.window.set_surface(surface_interop).map_err(failed)?;
+        self.window.set_surface(surface_interop).map_err(failed("setting the content of the visual"))?;
 
         let mut rect = RECT { left: 0, top: 0, right: size.width, bottom: size.height };
         let mut iid = IID_ID3D11_TEXTURE2D;
@@ -232,7 +254,7 @@ impl DirectCompositedWindowRenderTarget {
             Ok(offset) => offset,
             Err(error) => {
                 self.lost.set(true);
-                return Err(failed(error));
+                return Err(failed("beginning the draw on the virtual surface")(error));
             }
         };
 
@@ -240,7 +262,7 @@ impl DirectCompositedWindowRenderTarget {
         // for, with a reference the caller owns.
         let Some(texture) = (unsafe { ComPtr::<IUnknown>::from_raw(texture.cast()) }) else {
             let _ = surface.end_draw();
-            return Err(failed(HResult::POINTER));
+            return Err(failed("taking the texture of the frame")(HResult::POINTER));
         };
 
         Ok(Rc::new(Session {

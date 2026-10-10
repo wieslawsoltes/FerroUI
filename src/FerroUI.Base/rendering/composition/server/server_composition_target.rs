@@ -6,8 +6,7 @@ use super::{
 use crate::media::Colors;
 use crate::platform::surfaces::IPlatformRenderSurface;
 use crate::platform::{
-    IDrawingContextImpl, IDrawingContextLayerImpl, IRenderTarget, LtrbRect,
-    RenderTargetSceneInfo,
+    IDrawingContextImpl, IDrawingContextLayerImpl, IRenderTarget, LtrbRect, RenderTargetError, RenderTargetSceneInfo,
 };
 use crate::rendering::composition::generated::{
     CompositionTargetChangedFields, ServerCompositionTargetHooks, ServerCompositionTargetProps,
@@ -288,7 +287,14 @@ impl ServerCompositionTarget {
             transparency_level: self.transparency_level(),
             platform_specific_scene_info: self.platform_specific_scene_info(),
         };
-        let (mut render_target_context, properties) = render_target.create_drawing_context(&scene_info);
+        let (mut render_target_context, properties) = match render_target.try_create_drawing_context(&scene_info) {
+            Ok(created) => created,
+            Err(RenderTargetError::NotReady(_)) => {
+                self.is_waiting_for_ready_render_target.set(self.is_enabled());
+                return;
+            }
+            Err(RenderTargetError::Corrupted(_)) => return,
+        };
 
         {
             let mut full_redraw = false;

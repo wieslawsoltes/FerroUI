@@ -55,8 +55,8 @@ pub use platform_graphics_external_memory::{
 pub use i_platform_render_interface::{IPlatformRenderInterface, IPlatformRenderInterfaceContext};
 pub use i_platform_render_interface_region::IPlatformRenderInterfaceRegion;
 pub use i_render_target::{
-    IRenderTarget, PlatformRenderTargetState, RenderTargetDrawingContextProperties, RenderTargetProperties,
-    RenderTargetSceneInfo,
+    IRenderTarget, PlatformRenderTargetState, RenderTargetDrawingContextProperties, RenderTargetError,
+    RenderTargetProperties, RenderTargetSceneInfo,
 };
 pub use system_navigation_manager_impl::ISystemNavigationManagerImpl;
 pub use ltrb_rect::{LtrbPixelRect, LtrbRect};

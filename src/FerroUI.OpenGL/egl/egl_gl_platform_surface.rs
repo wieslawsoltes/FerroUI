@@ -5,7 +5,7 @@ use super::{EglContext, EglSurface};
 use crate::surfaces::{IGlPlatformSurface, IGlPlatformSurfaceRenderTarget, IGlPlatformSurfaceRenderingSession};
 use crate::IGlContext;
 use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
-use ferroui_base::platform::{PlatformRenderTargetState, RenderTargetSceneInfo};
+use ferroui_base::platform::{PlatformRenderTargetState, RenderTargetError, RenderTargetSceneInfo};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::PixelSize;
 use std::any::{Any, TypeId};
@@ -176,6 +176,13 @@ impl IPlatformRenderSurfaceRenderTarget for RenderTarget {
 impl IGlPlatformSurfaceRenderTarget for RenderTarget {
     fn begin_draw(&self, scene_info: &RenderTargetSceneInfo) -> Rc<dyn IGlPlatformSurfaceRenderingSession> {
         EglPlatformSurfaceRenderTarget::begin_draw(self, scene_info)
+    }
+
+    fn try_begin_draw(
+        &self,
+        scene_info: &RenderTargetSceneInfo,
+    ) -> Result<Rc<dyn IGlPlatformSurfaceRenderingSession>, RenderTargetError> {
+        EglPlatformSurfaceRenderTarget::try_begin_draw(self, scene_info)
     }
 
     fn dispose(&self) {

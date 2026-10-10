@@ -13,14 +13,14 @@ use crate::platform::surfaces::IPlatformRenderSurface;
 use crate::platform::{
     IDrawingContextImpl, IDrawingContextLayerImpl, IOptionalFeatureProvider, IPlatformGraphics,
     IPlatformGraphicsContext, IPlatformGraphicsReadyStateFeature, IPlatformRenderInterfaceContext, IRenderTarget,
-    RenderTargetDrawingContextProperties, RenderTargetProperties, RenderTargetSceneInfo,
+    RenderTargetDrawingContextProperties, RenderTargetError, RenderTargetProperties, RenderTargetSceneInfo,
 };
 use crate::reactive::{Disposable, IDisposable};
 use crate::rendering::testing::{
     DrawingLog, ManualRenderLoop, MockDrawingContextLayerImpl, MockPlatformRenderInterface, MockRenderTarget,
 };
 use crate::threading::Dispatcher;
-use crate::{PixelSize, Size, Vector};
+use crate::{PixelSize, RenderTargetCorruptedException, RenderTargetNotReadyException, Size, Vector};
 use std::any::{Any, TypeId};
 use std::cell::Cell;
 use std::collections::HashMap;
@@ -207,6 +207,9 @@ struct ConfinementLog {
     owner: Mutex<Option<ThreadId>>,
     events: Mutex<Vec<&'static str>>,
     violations: Mutex<Vec<String>>,
+    /// What the render target answers when a frame is begun: 0 a drawing
+    /// context, 1 that it is corrupted, 2 that it is not ready.
+    failing: AtomicUsize,
 }
 
 impl ConfinementLog {
@@ -232,6 +235,11 @@ impl ConfinementLog {
     /// Whether the owner did `what`.
     fn saw(&self, what: &str) -> bool {
         self.events.lock().unwrap_or_else(|e| e.into_inner()).iter().any(|event| *event == what)
+    }
+
+    /// How often the owner did `what`.
+    fn count(&self, what: &str) -> usize {
+        self.events.lock().unwrap_or_else(|e| e.into_inner()).iter().filter(|event| **event == what).count()
     }
 
     fn violations(&self) -> Vec<String> {
@@ -411,6 +419,23 @@ impl IRenderTarget for ConfinedRenderTarget {
         self.inner.create_drawing_context(scene_info)
     }
 
+    fn try_create_drawing_context(
+        &self,
+        scene_info: &RenderTargetSceneInfo,
+    ) -> Result<(Box<dyn IDrawingContextImpl>, RenderTargetDrawingContextProperties), RenderTargetError> {
+        match self.log.failing.load(Ordering::SeqCst) {
+            1 => {
+                self.log.touch("a frame could not be begun: corrupted");
+                Err(RenderTargetCorruptedException::new().into())
+            }
+            2 => {
+                self.log.touch("a frame could not be begun: not ready");
+                Err(RenderTargetNotReadyException::new().into())
+            }
+            _ => Ok(self.create_drawing_context(scene_info)),
+        }
+    }
+
     fn dispose(&self) {
         self.log.touch("the render target is disposed");
         self.inner.dispose();
@@ -570,6 +595,47 @@ fn a_confined_compositor_keeps_what_renders_on_the_render_thread() {
 
     assert_eq!(Vec::<String>::new(), log.violations());
     assert!(log.owner().is_some_and(|owner| owner != test_thread));
+}
+
+/// The compositor of the reference catches the two exceptions a render
+/// target throws when a frame cannot be begun and leaves the frame out. A
+/// panic of the double would end the render thread of this test, and the
+/// frames after it would never be drawn.
+#[test]
+fn a_frame_that_a_render_target_cannot_begin_is_left_out() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, render_interface) = MockPlatformRenderInterface::install();
+    let confined = ConfinedCompositor::new(&render_interface);
+    let render_thread = RenderThread::start(&confined.render_loop);
+
+    let (target, root) = confined.show();
+    let drawn = confined.log.count("the render target is drawn to");
+    assert!(drawn >= 1);
+
+    let resize = |width: f64| {
+        root.set_size(Vector::new(width, 150.0));
+        target.set_size(Size::new(width, 150.0));
+        MediaContext::instance().immediate_render_requested(&confined.compositor);
+    };
+
+    for (answer, event) in [(1, "a frame could not be begun: corrupted"), (2, "a frame could not be begun: not ready")] {
+        let drawn = confined.log.count("the render target is drawn to");
+        confined.log.failing.store(answer, Ordering::SeqCst);
+        resize(200.0 + answer as f64);
+        assert!(confined.log.saw(event));
+        assert_eq!(drawn, confined.log.count("the render target is drawn to"));
+
+        // The frame is still wanted, and is drawn once the target begins one.
+        confined.log.failing.store(0, Ordering::SeqCst);
+        resize(300.0 + answer as f64);
+        wait_until("the frame is drawn", || confined.log.count("the render target is drawn to") > drawn);
+    }
+
+    confined.dispose(target, root);
+    let (render_loop, log) = confined.drop_compositor();
+    wait_until("the task of the compositor has left the loop", || render_loop.task_count() == 0);
+    drop(render_thread);
+    assert_eq!(Vec::<String>::new(), log.violations());
 }
 
 #[test]

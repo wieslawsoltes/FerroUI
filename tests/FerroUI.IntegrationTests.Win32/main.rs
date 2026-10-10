@@ -31,6 +31,44 @@ use ferroui_base::Ref;
 use ferroui_controls::Window;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::process::ExitCode;
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+/// The panics of threads other than the thread of the tests. A test that
+/// fails panics on the thread of the tests; a panic of another thread (the
+/// thread that renders, a thread of a dialog) fails no test by itself, so
+/// the run counts them and fails when there was one. Not from upstream,
+/// whose test runner reports an unhandled exception of any thread.
+static PANICS_OF_OTHER_THREADS: AtomicUsize = AtomicUsize::new(0);
+
+/// The errors the framework logged: an exception the render loop caught
+/// among them.
+static LOGGED_ERRORS: AtomicUsize = AtomicUsize::new(0);
+
+/// Counts the panics of other threads, and writes what the framework logs
+/// as a warning or an error to the standard error stream of the run.
+fn watch_other_threads_and_the_log() {
+    use ferroui_base::logging::{LogEventLevel, Logger, StringLogSink};
+
+    let tests_thread = std::thread::current().id();
+    let default_hook = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        if std::thread::current().id() != tests_thread {
+            PANICS_OF_OTHER_THREADS.fetch_add(1, Ordering::SeqCst);
+        }
+        default_hook(info);
+    }));
+
+    Logger::set_sink(Some(std::sync::Arc::new(StringLogSink::new(
+        |line| {
+            if line.contains("Exception in render loop") {
+                LOGGED_ERRORS.fetch_add(1, Ordering::SeqCst);
+            }
+            eprintln!("log: {line}");
+        },
+        LogEventLevel::Warning,
+        &[],
+    ))));
+}
 
 /// A test: its name and what it runs.
 pub struct TestCase {
@@ -62,6 +100,7 @@ fn main() -> ExitCode {
         return ExitCode::SUCCESS;
     }
 
+    watch_other_threads_and_the_log();
     infrastructure::app_manager::ensure_app_initialized();
 
     let mut cases = Vec::new();
@@ -103,6 +142,15 @@ fn main() -> ExitCode {
         failed.len(),
         cases.len() - selected.len()
     );
+
+    let (panics, errors) = (PANICS_OF_OTHER_THREADS.load(Ordering::SeqCst), LOGGED_ERRORS.load(Ordering::SeqCst));
+    if panics != 0 || errors != 0 {
+        println!(
+            "\n{panics} panic(s) on threads other than the thread of the tests, {errors} exception(s) the render loop caught: \
+             the run fails"
+        );
+        return ExitCode::FAILURE;
+    }
 
     if failed.is_empty() {
         ExitCode::SUCCESS

@@ -1,6 +1,6 @@
 use crate::gpu::ganesh::GaneshGrContext;
 use crate::gpu::{ISkiaGpuRenderSession, ISkiaGpuRenderTarget, ISkiaGrContext, SkiaSurfaceOrigin};
-use ferroui_base::platform::{PlatformRenderTargetState, RenderTargetSceneInfo};
+use ferroui_base::platform::{PlatformRenderTargetState, RenderTargetError, RenderTargetSceneInfo};
 use ferroui_opengl::gl_consts::{GL_FRAMEBUFFER_BINDING, GL_RGBA8};
 use ferroui_opengl::surfaces::{
     IGlPlatformSurface, IGlPlatformSurfaceRenderTarget, IGlPlatformSurfaceRenderingSession,
@@ -110,7 +110,17 @@ impl Drop for SessionGuard {
 
 impl ISkiaGpuRenderTarget for GlRenderTarget {
     fn begin_rendering_session(&self, scene_info: &RenderTargetSceneInfo) -> Rc<dyn ISkiaGpuRenderSession> {
-        let gl_session = self.surface.begin_draw(scene_info);
+        match self.try_begin_rendering_session(scene_info) {
+            Ok(session) => session,
+            Err(error) => panic!("{error}"),
+        }
+    }
+
+    fn try_begin_rendering_session(
+        &self,
+        scene_info: &RenderTargetSceneInfo,
+    ) -> Result<Rc<dyn ISkiaGpuRenderSession>, RenderTargetError> {
+        let gl_session = self.surface.try_begin_draw(scene_info)?;
 
         let guard = SessionGuard { gl_session: gl_session.clone(), success: Cell::new(false) };
 
@@ -158,7 +168,7 @@ impl ISkiaGpuRenderTarget for GlRenderTarget {
 
         guard.success.set(true);
 
-        Rc::new(GlGpuSession::new(self.gr_context.clone(), render_target, surface, gl_session))
+        Ok(Rc::new(GlGpuSession::new(self.gr_context.clone(), render_target, surface, gl_session)))
     }
 
     fn state(&self) -> PlatformRenderTargetState {
