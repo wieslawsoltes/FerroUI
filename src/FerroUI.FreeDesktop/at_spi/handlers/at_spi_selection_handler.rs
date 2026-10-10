@@ -23,11 +23,19 @@ impl AtSpiSelectionHandler {
         Self { server, node }
     }
 
+    fn version() -> u32 {
+        SELECTION_VERSION
+    }
+
+    fn n_selected_children(node: &AtSpiNode) -> i32 {
+        Self::provider(node).map_or(0, |provider| to_i32(provider.get_selection().len()))
+    }
+
     fn provider(node: &AtSpiNode) -> Option<Rc<dyn ISelectionProvider>> {
         node.peer().get_provider::<dyn ISelectionProvider>()
     }
 
-    fn get_selected_child(server: &AtSpiServer, node: &AtSpiNode, selected_child_index: i32) -> AtSpiObjectReference {
+    fn get_selected_child_async(server: &AtSpiServer, node: &AtSpiNode, selected_child_index: i32) -> AtSpiObjectReference {
         node.ensure_children();
         let Some(provider) = Self::provider(node) else { return server.get_null_reference() };
 
@@ -42,14 +50,14 @@ impl AtSpiSelectionHandler {
         }
     }
 
-    fn select_child(node: &AtSpiNode, child_index: i32) -> Result<bool, DBusError> {
+    fn select_child_async(node: &AtSpiNode, child_index: i32) -> Result<bool, DBusError> {
         let items = Self::collect_selectable_items(node.peer());
         let Some(item) = item_at(&items, child_index) else { return Ok(false) };
         item.add_to_selection().map_err(DBusError::failed)?;
         Ok(true)
     }
 
-    fn deselect_selected_child(node: &AtSpiNode, selected_child_index: i32) -> Result<bool, DBusError> {
+    fn deselect_selected_child_async(node: &AtSpiNode, selected_child_index: i32) -> Result<bool, DBusError> {
         let Some(provider) = Self::provider(node) else { return Ok(false) };
 
         let selection = provider.get_selection();
@@ -62,12 +70,12 @@ impl AtSpiSelectionHandler {
         Ok(true)
     }
 
-    fn is_child_selected(node: &AtSpiNode, child_index: i32) -> bool {
+    fn is_child_selected_async(node: &AtSpiNode, child_index: i32) -> bool {
         let items = Self::collect_selectable_items(node.peer());
         item_at(&items, child_index).is_some_and(|item| item.is_selected())
     }
 
-    fn select_all(node: &AtSpiNode) -> Result<bool, DBusError> {
+    fn select_all_async(node: &AtSpiNode) -> Result<bool, DBusError> {
         if !Self::provider(node).is_some_and(|provider| provider.can_select_multiple()) {
             return Ok(false);
         }
@@ -78,7 +86,7 @@ impl AtSpiSelectionHandler {
         Ok(true)
     }
 
-    fn clear_selection(node: &AtSpiNode) -> Result<bool, DBusError> {
+    fn clear_selection_async(node: &AtSpiNode) -> Result<bool, DBusError> {
         let Some(provider) = Self::provider(node) else { return Ok(false) };
 
         for selected_peer in provider.get_selection() {
@@ -89,7 +97,7 @@ impl AtSpiSelectionHandler {
         Ok(true)
     }
 
-    fn deselect_child(node: &AtSpiNode, child_index: i32) -> Result<bool, DBusError> {
+    fn deselect_child_async(node: &AtSpiNode, child_index: i32) -> Result<bool, DBusError> {
         let items = Self::collect_selectable_items(node.peer());
         let Some(item) = item_at(&items, child_index) else { return Ok(false) };
         item.remove_from_selection().map_err(DBusError::failed)?;
@@ -123,13 +131,13 @@ impl DBusInterface for AtSpiSelectionHandler {
     fn call(&self, member: &str, body: &zbus::message::Body) -> CallResult {
         let (server, node) = (server_of(&self.server)?, node_of(&self.node)?);
         match member {
-            "GetSelectedChild" => reply((Self::get_selected_child(&server, &node, args::<i32>(body)?).to_wire(),)),
-            "SelectChild" => reply((Self::select_child(&node, args::<i32>(body)?)?,)),
-            "DeselectSelectedChild" => reply((Self::deselect_selected_child(&node, args::<i32>(body)?)?,)),
-            "IsChildSelected" => reply((Self::is_child_selected(&node, args::<i32>(body)?),)),
-            "SelectAll" => reply((Self::select_all(&node)?,)),
-            "ClearSelection" => reply((Self::clear_selection(&node)?,)),
-            "DeselectChild" => reply((Self::deselect_child(&node, args::<i32>(body)?)?,)),
+            "GetSelectedChild" => reply((Self::get_selected_child_async(&server, &node, args::<i32>(body)?).to_wire(),)),
+            "SelectChild" => reply((Self::select_child_async(&node, args::<i32>(body)?)?,)),
+            "DeselectSelectedChild" => reply((Self::deselect_selected_child_async(&node, args::<i32>(body)?)?,)),
+            "IsChildSelected" => reply((Self::is_child_selected_async(&node, args::<i32>(body)?),)),
+            "SelectAll" => reply((Self::select_all_async(&node)?,)),
+            "ClearSelection" => reply((Self::clear_selection_async(&node)?,)),
+            "DeselectChild" => reply((Self::deselect_child_async(&node, args::<i32>(body)?)?,)),
             _ => Err(DBusError::unknown_method()),
         }
     }
@@ -137,10 +145,8 @@ impl DBusInterface for AtSpiSelectionHandler {
     fn get_property(&self, name: &str) -> Option<Value<'static>> {
         let node = self.node.upgrade()?;
         Some(match name {
-            "version" => Value::from(SELECTION_VERSION),
-            "NSelectedChildren" => {
-                Value::from(Self::provider(&node).map_or(0, |provider| to_i32(provider.get_selection().len())))
-            }
+            "version" => Value::from(Self::version()),
+            "NSelectedChildren" => Value::from(Self::n_selected_children(&node)),
             _ => return None,
         })
     }

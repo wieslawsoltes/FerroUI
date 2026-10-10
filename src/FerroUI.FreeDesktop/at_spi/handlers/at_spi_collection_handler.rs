@@ -173,6 +173,56 @@ impl AtSpiCollectionHandler {
         Self { server, node }
     }
 
+    fn version() -> u32 {
+        COLLECTION_VERSION
+    }
+
+    fn get_matches_async(
+        server: &AtSpiServer,
+        node: &Rc<AtSpiNode>,
+        rule: &AtSpiMatchRule,
+        _sortby: u32,
+        count: i32,
+        traverse: bool,
+    ) -> Vec<AtSpiObjectReference> {
+        let mut results = Vec::new();
+        Self::collect_matches(server, node, rule, count, traverse, &mut results);
+        results
+    }
+
+    // GetMatchesTo: find matches after currentObject in tree order
+    fn get_matches_to_async(
+        server: &AtSpiServer,
+        node: &Rc<AtSpiNode>,
+        current_object: &str,
+        rule: &AtSpiMatchRule,
+        count: i32,
+        traverse: bool,
+    ) -> Vec<AtSpiObjectReference> {
+        let (mut results, mut found) = (Vec::new(), false);
+        Self::collect_matches_ordered(server, node, rule, count, traverse, &mut results, current_object, &mut found, true);
+        results
+    }
+
+    // GetMatchesFrom: find matches before currentObject in tree order
+    fn get_matches_from_async(
+        server: &AtSpiServer,
+        node: &Rc<AtSpiNode>,
+        current_object: &str,
+        rule: &AtSpiMatchRule,
+        count: i32,
+        traverse: bool,
+    ) -> Vec<AtSpiObjectReference> {
+        let (mut results, mut found) = (Vec::new(), false);
+        Self::collect_matches_ordered(server, node, rule, count, traverse, &mut results, current_object, &mut found, false);
+        results
+    }
+
+    // Not implemented in most toolkits
+    fn get_active_descendant_async(server: &AtSpiServer) -> AtSpiObjectReference {
+        server.get_null_reference()
+    }
+
     fn collect_matches(
         server: &AtSpiServer,
         parent: &Rc<AtSpiNode>,
@@ -258,43 +308,32 @@ impl DBusInterface for AtSpiCollectionHandler {
 
     fn call(&self, member: &str, body: &zbus::message::Body) -> CallResult {
         let (server, node) = (server_of(&self.server)?, node_of(&self.node)?);
-        let mut results = Vec::new();
         match member {
             "GetMatches" => {
-                let (rule, _sortby, count, traverse) = args::<(AtSpiMatchRuleWire, u32, i32, bool)>(body)?;
-                Self::collect_matches(&server, &node, &rule.into(), count, traverse, &mut results);
-                reply((wire(&results),))
+                let (rule, sortby, count, traverse) = args::<(AtSpiMatchRuleWire, u32, i32, bool)>(body)?;
+                reply((wire(&Self::get_matches_async(&server, &node, &rule.into(), sortby, count, traverse)),))
             }
             "GetMatchesTo" => {
-                // GetMatchesTo: find matches after currentObject in tree order
                 let (current_object, rule, _sortby, _tree, _limit_scope, count, traverse) =
                     args::<(OwnedObjectPath, AtSpiMatchRuleWire, u32, u32, bool, i32, bool)>(body)?;
-                let mut found = false;
-                Self::collect_matches_ordered(
-                    &server, &node, &rule.into(), count, traverse, &mut results, current_object.as_str(), &mut found,
-                    true,
-                );
+                let results =
+                    Self::get_matches_to_async(&server, &node, current_object.as_str(), &rule.into(), count, traverse);
                 reply((wire(&results),))
             }
             "GetMatchesFrom" => {
-                // GetMatchesFrom: find matches before currentObject in tree order
                 let (current_object, rule, _sortby, _tree, count, traverse) =
                     args::<(OwnedObjectPath, AtSpiMatchRuleWire, u32, u32, i32, bool)>(body)?;
-                let mut found = false;
-                Self::collect_matches_ordered(
-                    &server, &node, &rule.into(), count, traverse, &mut results, current_object.as_str(), &mut found,
-                    false,
-                );
+                let results =
+                    Self::get_matches_from_async(&server, &node, current_object.as_str(), &rule.into(), count, traverse);
                 reply((wire(&results),))
             }
-            // Not implemented in most toolkits
-            "GetActiveDescendant" => reply((server.get_null_reference().to_wire(),)),
+            "GetActiveDescendant" => reply((Self::get_active_descendant_async(&server).to_wire(),)),
             _ => Err(DBusError::unknown_method()),
         }
     }
 
     fn get_property(&self, name: &str) -> Option<Value<'static>> {
-        (name == "version").then(|| Value::from(COLLECTION_VERSION))
+        (name == "version").then(|| Value::from(Self::version()))
     }
 }
 

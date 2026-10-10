@@ -59,18 +59,36 @@ impl AtSpiEditableTextHandler {
         Ok(true)
     }
 
-    fn set_text_contents(node: &AtSpiNode, new_contents: &str) -> Result<bool, DBusError> {
+    fn set_text_contents_async(node: &AtSpiNode, new_contents: &str) -> Result<bool, DBusError> {
         let Some(provider) = Self::provider(node) else { return Ok(false) };
         Self::set(&*provider, new_contents)
     }
 
-    fn insert_text(node: &AtSpiNode, position: i32, text: &str, length: i32) -> Result<bool, DBusError> {
+    fn version() -> u32 {
+        EDITABLE_TEXT_VERSION
+    }
+
+    fn copy_text_async(_start_pos: i32, _end_pos: i32) {
+        // Clipboard operations not supported via IValueProvider
+    }
+
+    fn cut_text_async(_start_pos: i32, _end_pos: i32) -> bool {
+        // Clipboard operations not supported via IValueProvider
+        false
+    }
+
+    fn paste_text_async(_position: i32) -> bool {
+        // Clipboard operations not supported via IValueProvider
+        false
+    }
+
+    fn insert_text_async(node: &AtSpiNode, position: i32, text: &str, length: i32) -> Result<bool, DBusError> {
         let Some(provider) = Self::provider(node) else { return Ok(false) };
         let current = provider.value().unwrap_or_default();
         Self::set(&*provider, &insert_text(&current, position, text, length))
     }
 
-    fn delete_text(node: &AtSpiNode, start_pos: i32, end_pos: i32) -> Result<bool, DBusError> {
+    fn delete_text_async(node: &AtSpiNode, start_pos: i32, end_pos: i32) -> Result<bool, DBusError> {
         let Some(provider) = Self::provider(node) else { return Ok(false) };
         let current = provider.value().unwrap_or_default();
         match delete_text(&current, start_pos, end_pos) {
@@ -88,36 +106,31 @@ impl DBusInterface for AtSpiEditableTextHandler {
     fn call(&self, member: &str, body: &zbus::message::Body) -> CallResult {
         let node = node_of(&self.node)?;
         match member {
-            "SetTextContents" => reply((Self::set_text_contents(&node, &args::<String>(body)?)?,)),
+            "SetTextContents" => reply((Self::set_text_contents_async(&node, &args::<String>(body)?)?,)),
             "InsertText" => {
                 let (position, text, length) = args::<(i32, String, i32)>(body)?;
-                reply((Self::insert_text(&node, position, &text, length)?,))
+                reply((Self::insert_text_async(&node, position, &text, length)?,))
             }
             "CopyText" => {
-                // Clipboard operations not supported via IValueProvider
-                args::<(i32, i32)>(body)?;
+                let (start_pos, end_pos) = args::<(i32, i32)>(body)?;
+                Self::copy_text_async(start_pos, end_pos);
                 reply(())
             }
             "CutText" => {
-                // Clipboard operations not supported via IValueProvider
-                args::<(i32, i32)>(body)?;
-                reply((false,))
+                let (start_pos, end_pos) = args::<(i32, i32)>(body)?;
+                reply((Self::cut_text_async(start_pos, end_pos),))
             }
             "DeleteText" => {
                 let (start_pos, end_pos) = args::<(i32, i32)>(body)?;
-                reply((Self::delete_text(&node, start_pos, end_pos)?,))
+                reply((Self::delete_text_async(&node, start_pos, end_pos)?,))
             }
-            "PasteText" => {
-                // Clipboard operations not supported via IValueProvider
-                args::<i32>(body)?;
-                reply((false,))
-            }
+            "PasteText" => reply((Self::paste_text_async(args::<i32>(body)?),)),
             _ => Err(DBusError::unknown_method()),
         }
     }
 
     fn get_property(&self, name: &str) -> Option<Value<'static>> {
-        (name == "version").then(|| Value::from(EDITABLE_TEXT_VERSION))
+        (name == "version").then(|| Value::from(Self::version()))
     }
 }
 

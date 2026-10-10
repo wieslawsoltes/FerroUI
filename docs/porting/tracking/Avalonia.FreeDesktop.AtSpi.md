@@ -7,50 +7,66 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Avalonia.FreeDesktop.AtSpi` |
-| FerroUI | `src/FerroUI.FreeDesktop.AtSpi` (not created yet) |
-| Crate | `ferroui-freedesktop-atspi` |
-| Phase / priority | not started / out of current scope / - |
-| Files | 0/27 (0.0%) |
-| Types | 0/27 (0.0%) |
-| Members | 0/434 (0.0%) |
-
-This backend is outside the current porting scope. It is tracked at file and type granularity only; member counts are totals.
+| FerroUI | `src/FerroUI.FreeDesktop/at_spi` (exists) |
+| Crate | `ferroui-freedesktop` |
+| Phase / priority | 5 - desktop (Linux) / P1 |
+| Files | 27/27 (100.0%) |
+| Types | 27/27 (100.0%) |
+| Members | 423/434 (11 waived) (100.0%) |
+| Contracts (interfaces) | 0/0 |
+| Property registrations | 0/0 |
+| Routed events | 0/0 |
 
 ## Files
 
-### `(project root)` - files 0/15, types 0/15, members 0/310
+### `(project root)` - files 15/15, types 15/15, members 299/310 (11 waived)
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `ApplicationAccessibleHandler.cs` | `ApplicationAccessibleHandler` | 20 | not started |
-| `ApplicationAtSpiNode.cs` | `ApplicationAtSpiNode` | 7 | not started |
-| `ApplicationNodeApplicationHandler.cs` | `ApplicationNodeApplicationHandler` | 9 | not started |
-| `AtSpiAccessibilityWatcher.cs` | `AtSpiAccessibilityWatcher` | 4 | not started |
-| `AtSpiCacheHandler.cs` | `AtSpiCacheHandler` | 2 | not started |
-| `AtSpiConstants.cs` | `AtSpiConstants` | 39 | not started |
-| `AtSpiCoordType.cs` | `AtSpiCoordType` | 3 | not started |
-| `AtSpiNode.RoleMapping.cs` | `AtSpiNode` | 2 | not started |
-| `AtSpiNode.StateMapping.cs` | `AtSpiNode` | 1 | not started |
-| `AtSpiNode.cs` | `AtSpiNode` | 31 | not started |
-| `AtSpiRegistryEventTracker.cs` | `AtSpiRegistryEventTracker` | 4 | not started |
-| `AtSpiRole.cs` | `AtSpiRole` | 118 | not started |
-| `AtSpiServer.cs` | `AtSpiServer` | 19 | not started |
-| `AtSpiState.cs` | `AtSpiState` | 44 | not started |
-| `RootAtSpiNode.cs` | `RootAtSpiNode` | 7 | not started |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `ApplicationAccessibleHandler.cs` | `application_accessible_handler.rs` | present | 1/1 | 20/20 |  |
+| `ApplicationAtSpiNode.cs` | `application_at_spi_node.rs` | present | 1/1 | 7/7 |  |
+| `ApplicationNodeApplicationHandler.cs` | `application_node_application_handler.rs` | present | 1/1 | 9/9 |  |
+| `AtSpiAccessibilityWatcher.cs` | `at_spi_accessibility_watcher.rs` | present | 1/1 | 4/4 |  |
+| `AtSpiCacheHandler.cs` | `at_spi_cache_handler.rs` | present | 1/1 | 2/2 |  |
+| `AtSpiConstants.cs` | `at_spi_constants.rs` | present | 1/1 | 39/39 |  |
+| `AtSpiCoordType.cs` | `at_spi_coord_type.rs` | present | 1/1 | 3/3 |  |
+| `AtSpiNode.RoleMapping.cs` | `at_spi_node_role_mapping.rs` | present | 1/1 | 2/2 |  |
+| `AtSpiNode.StateMapping.cs` | `at_spi_node_state_mapping.rs` | present | 1/1 | 1/1 |  |
+| `AtSpiNode.cs` | `at_spi_node.rs` | present | 1/1 | 21/31 (10 waived) |  |
+| `AtSpiRegistryEventTracker.cs` | `at_spi_registry_event_tracker.rs` | present | 1/1 | 4/4 |  |
+| `AtSpiRole.cs` | `at_spi_role.rs` | present | 1/1 | 118/118 |  |
+| `AtSpiServer.cs` | `at_spi_server.rs` | present | 1/1 | 18/19 (1 waived) |  |
+| `AtSpiState.cs` | `at_spi_state.rs` | present | 1/1 | 44/44 |  |
+| `RootAtSpiNode.cs` | `root_at_spi_node.rs` | present | 1/1 | 7/7 |  |
 
-### `Handlers` - files 0/12, types 0/12, members 0/124
+### `Handlers` - files 12/12, types 12/12, members 124/124
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `AtSpiAccessibleHandler.cs` | `AtSpiAccessibleHandler` | 20 | not started |
-| `AtSpiActionHandler.cs` | `AtSpiActionHandler` | 9 | not started |
-| `AtSpiCollectionHandler.cs` | `AtSpiCollectionHandler` | 6 | not started |
-| `AtSpiComponentHandler.cs` | `AtSpiComponentHandler` | 16 | not started |
-| `AtSpiCoordinateHelper.cs` | `AtSpiCoordinateHelper` | 4 | not started |
-| `AtSpiEditableTextHandler.cs` | `AtSpiEditableTextHandler` | 8 | not started |
-| `AtSpiEventObjectHandler.cs` | `AtSpiEventObjectHandler` | 7 | not started |
-| `AtSpiEventWindowHandler.cs` | `AtSpiEventWindowHandler` | 3 | not started |
-| `AtSpiImageHandler.cs` | `AtSpiImageHandler` | 7 | not started |
-| `AtSpiSelectionHandler.cs` | `AtSpiSelectionHandler` | 10 | not started |
-| `AtSpiTextHandler.cs` | `AtSpiTextHandler` | 27 | not started |
-| `AtSpiValueHandler.cs` | `AtSpiValueHandler` | 7 | not started |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `AtSpiAccessibleHandler.cs` | `handlers/at_spi_accessible_handler.rs` | present | 1/1 | 20/20 |  |
+| `AtSpiActionHandler.cs` | `handlers/at_spi_action_handler.rs` | present | 1/1 | 9/9 |  |
+| `AtSpiCollectionHandler.cs` | `handlers/at_spi_collection_handler.rs` | present | 1/1 | 6/6 |  |
+| `AtSpiComponentHandler.cs` | `handlers/at_spi_component_handler.rs` | present | 1/1 | 16/16 |  |
+| `AtSpiCoordinateHelper.cs` | `handlers/at_spi_coordinate_helper.rs` | present | 1/1 | 4/4 |  |
+| `AtSpiEditableTextHandler.cs` | `handlers/at_spi_editable_text_handler.rs` | present | 1/1 | 8/8 |  |
+| `AtSpiEventObjectHandler.cs` | `handlers/at_spi_event_object_handler.rs` | present | 1/1 | 7/7 |  |
+| `AtSpiEventWindowHandler.cs` | `handlers/at_spi_event_window_handler.rs` | present | 1/1 | 3/3 |  |
+| `AtSpiImageHandler.cs` | `handlers/at_spi_image_handler.rs` | present | 1/1 | 7/7 |  |
+| `AtSpiSelectionHandler.cs` | `handlers/at_spi_selection_handler.rs` | present | 1/1 | 10/10 |  |
+| `AtSpiTextHandler.cs` | `handlers/at_spi_text_handler.rs` | present | 1/1 | 27/27 |  |
+| `AtSpiValueHandler.cs` | `handlers/at_spi_value_handler.rs` | present | 1/1 | 7/7 |  |
+
+## Rust-only files
+
+Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
+
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `dbus/built_in_introspection_handler.rs` | **unmapped** | `IntrospectionData` |
+| `dbus/built_in_properties_handler.rs` | **unmapped** |  |
+| `dbus/connection.rs` | **unmapped** | `AtSpiConnection`, `ObjectTable` |
+| `dbus/descriptions.rs` | **unmapped** |  |
+| `dbus/interface.rs` | **unmapped** | `CallResult`, `DBusError`, `DBusInterface`, `InterfaceDescription`, `MethodDescription`, `Reply`, `ReplyBody` |
+| `dbus/proxies.rs` | **unmapped** | `OrgA11yAtspiRegistry`, `OrgA11yAtspiSocket`, `OrgA11yBus` |
+| `dbus/types.rs` | **unmapped** | `AtSpiAccessibleCacheItem`, `AtSpiAction`, `AtSpiAttributeSet`, `AtSpiEventListener`, `AtSpiMatchRule`, `AtSpiMatchRuleWire`, `AtSpiObjectReference`, `AtSpiRect`, `AtSpiRelationEntry`, `AtSpiTextRange`, `ObjectReferenceWire` |
+| `tests.rs` | the unit tests of the module | `Fixture`, `Listeners`, `RegistryDouble`, `SocketDouble`, `Ui` |

@@ -9,6 +9,16 @@ use zbus::zvariant::Value;
 
 pub(crate) struct AtSpiCacheHandler;
 
+impl AtSpiCacheHandler {
+    fn version(&self) -> u32 {
+        CACHE_VERSION
+    }
+
+    fn get_items_async(&self) -> Vec<AtSpiAccessibleCacheItem> {
+        Vec::new()
+    }
+}
+
 impl DBusInterface for AtSpiCacheHandler {
     fn description(&self) -> &'static InterfaceDescription {
         &CACHE
@@ -16,12 +26,12 @@ impl DBusInterface for AtSpiCacheHandler {
 
     fn call(&self, member: &str, _body: &zbus::message::Body) -> CallResult {
         match member {
-            "GetItems" => reply((Vec::<AtSpiAccessibleCacheItem>::new(),)),
+            "GetItems" => reply((self.get_items_async(),)),
             _ => Err(DBusError::unknown_method()),
         }
     }
 
     fn get_property(&self, name: &str) -> Option<Value<'static>> {
-        (name == "version").then(|| Value::from(CACHE_VERSION))
+        (name == "version").then(|| Value::from(self.version()))
     }
 }

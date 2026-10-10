@@ -275639,10 +275639,12 @@
   {
    "name": "Avalonia.FreeDesktop.AtSpi",
    "path": "src/Avalonia.FreeDesktop.AtSpi",
-   "detail": "types",
-   "scope": "out",
-   "phase": "not started / out of current scope",
-   "priority": "-",
+   "detail": "full",
+   "scope": "in",
+   "rust": "src/FerroUI.FreeDesktop/at_spi",
+   "crate": "ferroui-freedesktop",
+   "phase": "5 - desktop (Linux)",
+   "priority": "P1",
    "files": [
     {
      "path": "ApplicationAccessibleHandler.cs",
@@ -275661,7 +275663,204 @@
        "bases": [
         "IOrgA11yAtspiAccessible"
        ],
-       "memberCount": 20,
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "signature": "ApplicationAccessibleHandler(AtSpiServer server, ApplicationAtSpiNode appNode)",
+         "accessibility": "public",
+         "params": 2,
+         "primary": true,
+         "line": 12
+        },
+        {
+         "kind": "property",
+         "name": "Version",
+         "accessibility": "public",
+         "line": 21,
+         "type": "uint",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "uint Version { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Name",
+         "accessibility": "public",
+         "line": 22,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string Name { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Description",
+         "accessibility": "public",
+         "line": 23,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string Description { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Parent",
+         "accessibility": "public",
+         "line": 25,
+         "type": "AtSpiObjectReference",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "AtSpiObjectReference Parent { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "ChildCount",
+         "accessibility": "public",
+         "line": 28,
+         "type": "int",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "int ChildCount { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Locale",
+         "accessibility": "public",
+         "line": 29,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string Locale { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "AccessibleId",
+         "accessibility": "public",
+         "line": 30,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string AccessibleId { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "HelpText",
+         "accessibility": "public",
+         "line": 31,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string HelpText { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "GetChildAtIndexAsync",
+         "accessibility": "public",
+         "line": 33,
+         "type": "ValueTask<AtSpiObjectReference>",
+         "params": 1,
+         "signature": "ValueTask<AtSpiObjectReference> GetChildAtIndexAsync(int index)"
+        },
+        {
+         "kind": "method",
+         "name": "GetChildrenAsync",
+         "accessibility": "public",
+         "line": 41,
+         "type": "ValueTask<List<AtSpiObjectReference>>",
+         "params": 0,
+         "signature": "ValueTask<List<AtSpiObjectReference>> GetChildrenAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetIndexInParentAsync",
+         "accessibility": "public",
+         "line": 50,
+         "type": "ValueTask<int>",
+         "params": 0,
+         "signature": "ValueTask<int> GetIndexInParentAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetRelationSetAsync",
+         "accessibility": "public",
+         "line": 52,
+         "type": "ValueTask<List<AtSpiRelationEntry>>",
+         "params": 0,
+         "signature": "ValueTask<List<AtSpiRelationEntry>> GetRelationSetAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetRoleAsync",
+         "accessibility": "public",
+         "line": 55,
+         "type": "ValueTask<uint>",
+         "params": 0,
+         "signature": "ValueTask<uint> GetRoleAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetRoleNameAsync",
+         "accessibility": "public",
+         "line": 57,
+         "type": "ValueTask<string>",
+         "params": 0,
+         "signature": "ValueTask<string> GetRoleNameAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetLocalizedRoleNameAsync",
+         "accessibility": "public",
+         "line": 59,
+         "type": "ValueTask<string>",
+         "params": 0,
+         "signature": "ValueTask<string> GetLocalizedRoleNameAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetStateAsync",
+         "accessibility": "public",
+         "line": 61,
+         "type": "ValueTask<List<uint>>",
+         "params": 0,
+         "signature": "ValueTask<List<uint>> GetStateAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetAttributesAsync",
+         "accessibility": "public",
+         "line": 64,
+         "type": "ValueTask<AtSpiAttributeSet>",
+         "params": 0,
+         "signature": "ValueTask<AtSpiAttributeSet> GetAttributesAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetApplicationAsync",
+         "accessibility": "public",
+         "line": 67,
+         "type": "ValueTask<AtSpiObjectReference>",
+         "params": 0,
+         "signature": "ValueTask<AtSpiObjectReference> GetApplicationAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetInterfacesAsync",
+         "accessibility": "public",
+         "line": 70,
+         "type": "ValueTask<List<string>>",
+         "params": 0,
+         "signature": "ValueTask<List<string>> GetInterfacesAsync()"
+        }
+       ],
        "privateMembers": 1
       }
      ]
@@ -275680,7 +275879,79 @@
        "modifiers": [
         "sealed"
        ],
-       "memberCount": 7,
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "signature": "ApplicationAtSpiNode(string? applicationName)",
+         "accessibility": "public",
+         "params": 1,
+         "primary": true,
+         "line": 13
+        },
+        {
+         "kind": "property",
+         "name": "Path",
+         "accessibility": "public",
+         "line": 17,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string Path { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Name",
+         "accessibility": "public",
+         "line": 18,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string Name { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Role",
+         "accessibility": "public",
+         "line": 22,
+         "type": "AtSpiRole",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "AtSpiRole Role { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "WindowChildren",
+         "accessibility": "public",
+         "line": 23,
+         "type": "List<RootAtSpiNode>",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "List<RootAtSpiNode> WindowChildren { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "AddWindowChild",
+         "accessibility": "public",
+         "line": 25,
+         "type": "void",
+         "params": 1,
+         "signature": "void AddWindowChild(RootAtSpiNode windowNode)"
+        },
+        {
+         "kind": "method",
+         "name": "RemoveWindowChild",
+         "accessibility": "public",
+         "line": 26,
+         "type": "void",
+         "params": 1,
+         "signature": "void RemoveWindowChild(RootAtSpiNode windowNode)"
+        }
+       ],
        "privateMembers": 1
       }
      ]
@@ -275702,7 +275973,101 @@
        "bases": [
         "IOrgA11yAtspiApplication"
        ],
-       "memberCount": 9
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 11,
+         "params": 0,
+         "signature": "ApplicationNodeApplicationHandler()"
+        },
+        {
+         "kind": "property",
+         "name": "ToolkitName",
+         "accessibility": "public",
+         "line": 21,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string ToolkitName { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Version",
+         "accessibility": "public",
+         "line": 22,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string Version { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "ToolkitVersion",
+         "accessibility": "public",
+         "line": 23,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string ToolkitVersion { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "AtspiVersion",
+         "accessibility": "public",
+         "line": 24,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string AtspiVersion { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "InterfaceVersion",
+         "accessibility": "public",
+         "line": 25,
+         "type": "uint",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "uint InterfaceVersion { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Id",
+         "accessibility": "public",
+         "line": 26,
+         "type": "int",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "int Id { get; set; }"
+        },
+        {
+         "kind": "method",
+         "name": "GetLocaleAsync",
+         "accessibility": "public",
+         "line": 28,
+         "type": "ValueTask<string>",
+         "params": 1,
+         "signature": "ValueTask<string> GetLocaleAsync(uint lctype)"
+        },
+        {
+         "kind": "method",
+         "name": "GetApplicationBusAddressAsync",
+         "accessibility": "public",
+         "line": 31,
+         "type": "ValueTask<string>",
+         "params": 0,
+         "signature": "ValueTask<string> GetApplicationBusAddressAsync()"
+        }
+       ]
       }
      ]
     },
@@ -275723,7 +276088,52 @@
        "bases": [
         "IAsyncDisposable"
        ],
-       "memberCount": 4,
+       "members": [
+        {
+         "kind": "property",
+         "name": "IsEnabled",
+         "accessibility": "public",
+         "line": 18,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "bool IsEnabled { get; private set; }"
+        },
+        {
+         "kind": "event",
+         "name": "IsEnabledChanged",
+         "accessibility": "public",
+         "line": 19,
+         "type": "EventHandler<bool>?",
+         "signature": "event EventHandler<bool>? IsEnabledChanged"
+        },
+        {
+         "kind": "method",
+         "name": "InitAsync",
+         "accessibility": "public",
+         "modifiers": [
+          "async"
+         ],
+         "line": 21,
+         "type": "Task",
+         "params": 0,
+         "signature": "async Task InitAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "DisposeAsync",
+         "accessibility": "public",
+         "modifiers": [
+          "async"
+         ],
+         "line": 62,
+         "type": "ValueTask",
+         "params": 0,
+         "signature": "async ValueTask DisposeAsync()"
+        }
+       ],
        "privateMembers": 2
       }
      ]
@@ -275745,7 +276155,28 @@
        "bases": [
         "IOrgA11yAtspiCache"
        ],
-       "memberCount": 2
+       "members": [
+        {
+         "kind": "property",
+         "name": "Version",
+         "accessibility": "public",
+         "line": 13,
+         "type": "uint",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "uint Version { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "GetItemsAsync",
+         "accessibility": "public",
+         "line": 15,
+         "type": "ValueTask<List<AtSpiAccessibleCacheItem>>",
+         "params": 0,
+         "signature": "ValueTask<List<AtSpiAccessibleCacheItem>> GetItemsAsync()"
+        }
+       ]
       }
      ]
     },
@@ -275763,7 +276194,440 @@
        "modifiers": [
         "static"
        ],
-       "memberCount": 39
+       "members": [
+        {
+         "kind": "field",
+         "name": "RootPath",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 12,
+         "type": "string",
+         "signature": "const string RootPath"
+        },
+        {
+         "kind": "field",
+         "name": "CachePath",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 13,
+         "type": "string",
+         "signature": "const string CachePath"
+        },
+        {
+         "kind": "field",
+         "name": "NullPath",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 14,
+         "type": "string",
+         "signature": "const string NullPath"
+        },
+        {
+         "kind": "field",
+         "name": "AppPathPrefix",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 15,
+         "type": "string",
+         "signature": "const string AppPathPrefix"
+        },
+        {
+         "kind": "field",
+         "name": "RegistryPath",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 16,
+         "type": "string",
+         "signature": "const string RegistryPath"
+        },
+        {
+         "kind": "field",
+         "name": "IfaceAccessible",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 19,
+         "type": "string",
+         "signature": "const string IfaceAccessible"
+        },
+        {
+         "kind": "field",
+         "name": "IfaceApplication",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 20,
+         "type": "string",
+         "signature": "const string IfaceApplication"
+        },
+        {
+         "kind": "field",
+         "name": "IfaceComponent",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 21,
+         "type": "string",
+         "signature": "const string IfaceComponent"
+        },
+        {
+         "kind": "field",
+         "name": "IfaceAction",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 22,
+         "type": "string",
+         "signature": "const string IfaceAction"
+        },
+        {
+         "kind": "field",
+         "name": "IfaceValue",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 23,
+         "type": "string",
+         "signature": "const string IfaceValue"
+        },
+        {
+         "kind": "field",
+         "name": "IfaceEventObject",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 24,
+         "type": "string",
+         "signature": "const string IfaceEventObject"
+        },
+        {
+         "kind": "field",
+         "name": "IfaceEventWindow",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 25,
+         "type": "string",
+         "signature": "const string IfaceEventWindow"
+        },
+        {
+         "kind": "field",
+         "name": "IfaceCache",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 26,
+         "type": "string",
+         "signature": "const string IfaceCache"
+        },
+        {
+         "kind": "field",
+         "name": "IfaceSelection",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 27,
+         "type": "string",
+         "signature": "const string IfaceSelection"
+        },
+        {
+         "kind": "field",
+         "name": "IfaceImage",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 28,
+         "type": "string",
+         "signature": "const string IfaceImage"
+        },
+        {
+         "kind": "field",
+         "name": "IfaceText",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 29,
+         "type": "string",
+         "signature": "const string IfaceText"
+        },
+        {
+         "kind": "field",
+         "name": "IfaceEditableText",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 30,
+         "type": "string",
+         "signature": "const string IfaceEditableText"
+        },
+        {
+         "kind": "field",
+         "name": "IfaceCollection",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 31,
+         "type": "string",
+         "signature": "const string IfaceCollection"
+        },
+        {
+         "kind": "field",
+         "name": "BusNameRegistry",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 34,
+         "type": "string",
+         "signature": "const string BusNameRegistry"
+        },
+        {
+         "kind": "field",
+         "name": "BusNameA11y",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 35,
+         "type": "string",
+         "signature": "const string BusNameA11y"
+        },
+        {
+         "kind": "field",
+         "name": "PathA11y",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 36,
+         "type": "string",
+         "signature": "const string PathA11y"
+        },
+        {
+         "kind": "field",
+         "name": "AccessibleVersion",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 39,
+         "type": "uint",
+         "signature": "const uint AccessibleVersion"
+        },
+        {
+         "kind": "field",
+         "name": "ApplicationVersion",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 40,
+         "type": "uint",
+         "signature": "const uint ApplicationVersion"
+        },
+        {
+         "kind": "field",
+         "name": "ComponentVersion",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 41,
+         "type": "uint",
+         "signature": "const uint ComponentVersion"
+        },
+        {
+         "kind": "field",
+         "name": "ActionVersion",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 42,
+         "type": "uint",
+         "signature": "const uint ActionVersion"
+        },
+        {
+         "kind": "field",
+         "name": "ValueVersion",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 43,
+         "type": "uint",
+         "signature": "const uint ValueVersion"
+        },
+        {
+         "kind": "field",
+         "name": "EventObjectVersion",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 44,
+         "type": "uint",
+         "signature": "const uint EventObjectVersion"
+        },
+        {
+         "kind": "field",
+         "name": "EventWindowVersion",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 45,
+         "type": "uint",
+         "signature": "const uint EventWindowVersion"
+        },
+        {
+         "kind": "field",
+         "name": "CacheVersion",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 46,
+         "type": "uint",
+         "signature": "const uint CacheVersion"
+        },
+        {
+         "kind": "field",
+         "name": "ImageVersion",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 47,
+         "type": "uint",
+         "signature": "const uint ImageVersion"
+        },
+        {
+         "kind": "field",
+         "name": "SelectionVersion",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 48,
+         "type": "uint",
+         "signature": "const uint SelectionVersion"
+        },
+        {
+         "kind": "field",
+         "name": "TextVersion",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 49,
+         "type": "uint",
+         "signature": "const uint TextVersion"
+        },
+        {
+         "kind": "field",
+         "name": "EditableTextVersion",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 50,
+         "type": "uint",
+         "signature": "const uint EditableTextVersion"
+        },
+        {
+         "kind": "field",
+         "name": "CollectionVersion",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 51,
+         "type": "uint",
+         "signature": "const uint CollectionVersion"
+        },
+        {
+         "kind": "field",
+         "name": "WidgetLayer",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 53,
+         "type": "uint",
+         "signature": "const uint WidgetLayer"
+        },
+        {
+         "kind": "field",
+         "name": "WindowLayer",
+         "accessibility": "internal",
+         "modifiers": [
+          "const"
+         ],
+         "line": 54,
+         "type": "uint",
+         "signature": "const uint WindowLayer"
+        },
+        {
+         "kind": "method",
+         "name": "BuildStateSet",
+         "accessibility": "internal",
+         "modifiers": [
+          "static"
+         ],
+         "line": 56,
+         "type": "List<uint>",
+         "params": 1,
+         "signature": "static List<uint> BuildStateSet(IReadOnlyCollection<AtSpiState>? states)"
+        },
+        {
+         "kind": "method",
+         "name": "ResolveLocale",
+         "accessibility": "internal",
+         "modifiers": [
+          "static"
+         ],
+         "line": 75,
+         "type": "string",
+         "params": 0,
+         "signature": "static string ResolveLocale()"
+        },
+        {
+         "kind": "method",
+         "name": "ResolveToolkitVersion",
+         "accessibility": "internal",
+         "modifiers": [
+          "static"
+         ],
+         "line": 83,
+         "type": "string",
+         "params": 0,
+         "signature": "static string ResolveToolkitVersion()"
+        }
+       ]
       }
      ]
     },
@@ -275781,7 +276645,26 @@
        "bases": [
         "uint"
        ],
-       "memberCount": 3
+       "members": [
+        {
+         "kind": "enum member",
+         "name": "Screen",
+         "signature": "Screen = 0",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Window",
+         "signature": "Window = 1",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Parent",
+         "signature": "Parent = 2",
+         "accessibility": "public"
+        }
+       ]
       }
      ]
     },
@@ -275800,7 +276683,32 @@
         "partial"
        ],
        "partial": true,
-       "memberCount": 2
+       "members": [
+        {
+         "kind": "method",
+         "name": "ToAtSpiRole",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 8,
+         "type": "AtSpiRole",
+         "params": 2,
+         "signature": "static AtSpiRole ToAtSpiRole(AutomationControlType controlType, AutomationPeer? peer = null)"
+        },
+        {
+         "kind": "method",
+         "name": "ToAtSpiRoleName",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 61,
+         "type": "string",
+         "params": 1,
+         "signature": "static string ToAtSpiRoleName(AtSpiRole role)"
+        }
+       ]
       }
      ]
     },
@@ -275819,7 +276727,17 @@
         "partial"
        ],
        "partial": true,
-       "memberCount": 1,
+       "members": [
+        {
+         "kind": "method",
+         "name": "ComputeStates",
+         "accessibility": "public",
+         "line": 11,
+         "type": "List<uint>",
+         "params": 0,
+         "signature": "List<uint> ComputeStates()"
+        }
+       ],
        "privateMembers": 1
       }
      ]
@@ -275839,7 +276757,346 @@
         "partial"
        ],
        "partial": true,
-       "memberCount": 31,
+       "members": [
+        {
+         "kind": "field",
+         "name": "_detached",
+         "accessibility": "private protected",
+         "line": 21,
+         "type": "bool",
+         "signature": "bool _detached"
+        },
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "protected",
+         "line": 28,
+         "params": 2,
+         "signature": "AtSpiNode(AutomationPeer peer, AtSpiServer server)"
+        },
+        {
+         "kind": "property",
+         "name": "Peer",
+         "accessibility": "public",
+         "line": 35,
+         "type": "AutomationPeer",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "AutomationPeer Peer { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Server",
+         "accessibility": "public",
+         "line": 36,
+         "type": "AtSpiServer",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "AtSpiServer Server { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Path",
+         "accessibility": "public",
+         "line": 37,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string Path { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsAttached",
+         "accessibility": "internal",
+         "line": 38,
+         "type": "bool",
+         "accessors": {
+          "get": "internal"
+         },
+         "signature": "bool IsAttached { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Parent",
+         "accessibility": "internal",
+         "line": 39,
+         "type": "AtSpiNode?",
+         "accessors": {
+          "get": "internal",
+          "set": "private"
+         },
+         "signature": "AtSpiNode? Parent { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "AttachedChildren",
+         "accessibility": "internal",
+         "line": 40,
+         "type": "IReadOnlyList<AtSpiNode>",
+         "accessors": {
+          "get": "internal"
+         },
+         "signature": "IReadOnlyList<AtSpiNode> AttachedChildren { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "PathRegistrationTask",
+         "accessibility": "internal",
+         "line": 41,
+         "type": "Task<IDisposable>?",
+         "accessors": {
+          "get": "internal",
+          "set": "private"
+         },
+         "signature": "Task<IDisposable>? PathRegistrationTask { get; private set; }"
+        },
+        {
+         "kind": "method",
+         "name": "GetSupportedInterfaces",
+         "accessibility": "public",
+         "line": 43,
+         "type": "HashSet<string>",
+         "params": 0,
+         "signature": "HashSet<string> GetSupportedInterfaces()"
+        },
+        {
+         "kind": "property",
+         "name": "AccessibleHandler",
+         "accessibility": "internal",
+         "line": 56,
+         "type": "AtSpiAccessibleHandler?",
+         "accessors": {
+          "get": "internal",
+          "set": "private"
+         },
+         "signature": "AtSpiAccessibleHandler? AccessibleHandler { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "ApplicationHandler",
+         "accessibility": "internal",
+         "line": 57,
+         "type": "ApplicationNodeApplicationHandler?",
+         "accessors": {
+          "get": "internal",
+          "set": "private"
+         },
+         "signature": "ApplicationNodeApplicationHandler? ApplicationHandler { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "ComponentHandler",
+         "accessibility": "internal",
+         "line": 58,
+         "type": "AtSpiComponentHandler?",
+         "accessors": {
+          "get": "internal",
+          "set": "private"
+         },
+         "signature": "AtSpiComponentHandler? ComponentHandler { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "ActionHandler",
+         "accessibility": "internal",
+         "line": 59,
+         "type": "AtSpiActionHandler?",
+         "accessors": {
+          "get": "internal",
+          "set": "private"
+         },
+         "signature": "AtSpiActionHandler? ActionHandler { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "ValueHandler",
+         "accessibility": "internal",
+         "line": 60,
+         "type": "AtSpiValueHandler?",
+         "accessors": {
+          "get": "internal",
+          "set": "private"
+         },
+         "signature": "AtSpiValueHandler? ValueHandler { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "SelectionHandler",
+         "accessibility": "internal",
+         "line": 61,
+         "type": "AtSpiSelectionHandler?",
+         "accessors": {
+          "get": "internal",
+          "set": "private"
+         },
+         "signature": "AtSpiSelectionHandler? SelectionHandler { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "TextHandler",
+         "accessibility": "internal",
+         "line": 62,
+         "type": "AtSpiTextHandler?",
+         "accessors": {
+          "get": "internal",
+          "set": "private"
+         },
+         "signature": "AtSpiTextHandler? TextHandler { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "EditableTextHandler",
+         "accessibility": "internal",
+         "line": 63,
+         "type": "AtSpiEditableTextHandler?",
+         "accessors": {
+          "get": "internal",
+          "set": "private"
+         },
+         "signature": "AtSpiEditableTextHandler? EditableTextHandler { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "ImageHandler",
+         "accessibility": "internal",
+         "line": 64,
+         "type": "AtSpiImageHandler?",
+         "accessors": {
+          "get": "internal",
+          "set": "private"
+         },
+         "signature": "AtSpiImageHandler? ImageHandler { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "EventObjectHandler",
+         "accessibility": "internal",
+         "line": 65,
+         "type": "AtSpiEventObjectHandler?",
+         "accessors": {
+          "get": "internal",
+          "set": "private"
+         },
+         "signature": "AtSpiEventObjectHandler? EventObjectHandler { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "EventWindowHandler",
+         "accessibility": "internal",
+         "line": 66,
+         "type": "AtSpiEventWindowHandler?",
+         "accessors": {
+          "get": "internal",
+          "set": "private"
+         },
+         "signature": "AtSpiEventWindowHandler? EventWindowHandler { get; private set; }"
+        },
+        {
+         "kind": "method",
+         "name": "BuildAndRegisterHandlers",
+         "accessibility": "internal",
+         "line": 68,
+         "type": "void",
+         "params": 2,
+         "signature": "void BuildAndRegisterHandlers(IDBusConnection connection, SynchronizationContext? synchronizationContext = null)"
+        },
+        {
+         "kind": "method",
+         "name": "Create",
+         "accessibility": "internal",
+         "modifiers": [
+          "static"
+         ],
+         "line": 125,
+         "type": "AtSpiNode",
+         "params": 2,
+         "signature": "static AtSpiNode Create(AutomationPeer peer, AtSpiServer server)"
+        },
+        {
+         "kind": "method",
+         "name": "GetAccessibleName",
+         "accessibility": "internal",
+         "modifiers": [
+          "static"
+         ],
+         "line": 132,
+         "type": "string",
+         "params": 1,
+         "signature": "static string GetAccessibleName(AutomationPeer peer)"
+        },
+        {
+         "kind": "method",
+         "name": "Attach",
+         "accessibility": "internal",
+         "line": 142,
+         "type": "void",
+         "params": 1,
+         "signature": "void Attach(AtSpiNode? parent)"
+        },
+        {
+         "kind": "method",
+         "name": "SetParent",
+         "accessibility": "internal",
+         "line": 163,
+         "type": "void",
+         "params": 1,
+         "signature": "void SetParent(AtSpiNode? parent)"
+        },
+        {
+         "kind": "method",
+         "name": "RemoveAttachedChild",
+         "accessibility": "internal",
+         "line": 165,
+         "type": "bool",
+         "params": 1,
+         "signature": "bool RemoveAttachedChild(AtSpiNode child)"
+        },
+        {
+         "kind": "method",
+         "name": "EnsureChildren",
+         "accessibility": "internal",
+         "line": 191,
+         "type": "IReadOnlyList<AtSpiNode>",
+         "params": 0,
+         "signature": "IReadOnlyList<AtSpiNode> EnsureChildren()"
+        },
+        {
+         "kind": "method",
+         "name": "Detach",
+         "accessibility": "public",
+         "modifiers": [
+          "virtual"
+         ],
+         "line": 227,
+         "type": "void",
+         "params": 0,
+         "signature": "virtual void Detach()"
+        },
+        {
+         "kind": "method",
+         "name": "DisposePathRegistrationAsync",
+         "accessibility": "internal",
+         "modifiers": [
+          "async"
+         ],
+         "line": 242,
+         "type": "Task",
+         "params": 0,
+         "signature": "async Task DisposePathRegistrationAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "DisposePathRegistration",
+         "accessibility": "internal",
+         "line": 249,
+         "type": "void",
+         "params": 0,
+         "signature": "void DisposePathRegistration()"
+        }
+       ],
        "privateMembers": 10
       }
      ]
@@ -275861,7 +277118,49 @@
        "bases": [
         "IDisposable"
        ],
-       "memberCount": 4,
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "internal",
+         "line": 26,
+         "params": 1,
+         "signature": "AtSpiRegistryEventTracker(DBusConnection connection)"
+        },
+        {
+         "kind": "property",
+         "name": "HasEventListeners",
+         "accessibility": "internal",
+         "line": 35,
+         "type": "bool",
+         "accessors": {
+          "get": "internal",
+          "set": "private"
+         },
+         "signature": "bool HasEventListeners { get; private set; }"
+        },
+        {
+         "kind": "method",
+         "name": "InitializeAsync",
+         "accessibility": "internal",
+         "modifiers": [
+          "async"
+         ],
+         "line": 37,
+         "type": "Task",
+         "params": 0,
+         "signature": "async Task InitializeAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "Dispose",
+         "accessibility": "public",
+         "line": 75,
+         "type": "void",
+         "params": 0,
+         "signature": "void Dispose()"
+        }
+       ],
        "privateMembers": 12
       }
      ]
@@ -275877,7 +277176,716 @@
        "fullName": "Avalonia.FreeDesktop.AtSpi.AtSpiRole",
        "accessibility": "internal",
        "line": 6,
-       "memberCount": 118
+       "members": [
+        {
+         "kind": "enum member",
+         "name": "Invalid",
+         "signature": "Invalid = 0",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Accelerator",
+         "signature": "Accelerator = 1",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Alert",
+         "signature": "Alert = 2",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Animation",
+         "signature": "Animation = 3",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Arrow",
+         "signature": "Arrow = 4",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Calendar",
+         "signature": "Calendar = 5",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Canvas",
+         "signature": "Canvas = 6",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "CheckBox",
+         "signature": "CheckBox = 7",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "CheckMenuItem",
+         "signature": "CheckMenuItem = 8",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "ColorChooser",
+         "signature": "ColorChooser = 9",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "ColumnHeader",
+         "signature": "ColumnHeader = 10",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "ComboBox",
+         "signature": "ComboBox = 11",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "DateEditor",
+         "signature": "DateEditor = 12",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "DesktopIcon",
+         "signature": "DesktopIcon = 13",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "DesktopFrame",
+         "signature": "DesktopFrame = 14",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Dial",
+         "signature": "Dial = 15",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Dialog",
+         "signature": "Dialog = 16",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "DirectoryPane",
+         "signature": "DirectoryPane = 17",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "DrawingArea",
+         "signature": "DrawingArea = 18",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "FileChooser",
+         "signature": "FileChooser = 19",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Filler",
+         "signature": "Filler = 20",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "FocusTraversable",
+         "signature": "FocusTraversable = 21",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Frame",
+         "signature": "Frame = 23",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "GlassPane",
+         "signature": "GlassPane = 24",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "HtmlContainer",
+         "signature": "HtmlContainer = 25",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Icon",
+         "signature": "Icon = 26",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Image",
+         "signature": "Image = 27",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "InternalFrame",
+         "signature": "InternalFrame = 28",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Label",
+         "signature": "Label = 29",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "LayeredPane",
+         "signature": "LayeredPane = 30",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "List",
+         "signature": "List = 31",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "ListItem",
+         "signature": "ListItem = 32",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Menu",
+         "signature": "Menu = 33",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "MenuBar",
+         "signature": "MenuBar = 34",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "MenuItem",
+         "signature": "MenuItem = 35",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "OptionPane",
+         "signature": "OptionPane = 36",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "PageTab",
+         "signature": "PageTab = 37",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "PageTabList",
+         "signature": "PageTabList = 38",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Panel",
+         "signature": "Panel = 39",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "PasswordText",
+         "signature": "PasswordText = 40",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "PopupMenu",
+         "signature": "PopupMenu = 41",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "ProgressBar",
+         "signature": "ProgressBar = 42",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "PushButton",
+         "signature": "PushButton = 43",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "RadioButton",
+         "signature": "RadioButton = 44",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "RadioMenuItem",
+         "signature": "RadioMenuItem = 45",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "RootPane",
+         "signature": "RootPane = 46",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "RowHeader",
+         "signature": "RowHeader = 47",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "ScrollBar",
+         "signature": "ScrollBar = 48",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "ScrollPane",
+         "signature": "ScrollPane = 49",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Separator",
+         "signature": "Separator = 50",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Slider",
+         "signature": "Slider = 51",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "SpinButton",
+         "signature": "SpinButton = 52",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "SplitPane",
+         "signature": "SplitPane = 53",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "StatusBar",
+         "signature": "StatusBar = 54",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Table",
+         "signature": "Table = 55",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "TableCell",
+         "signature": "TableCell = 56",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "TableColumnHeader",
+         "signature": "TableColumnHeader = 57",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "TableRowHeader",
+         "signature": "TableRowHeader = 58",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "TearoffMenuItem",
+         "signature": "TearoffMenuItem = 59",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Terminal",
+         "signature": "Terminal = 60",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Text",
+         "signature": "Text = 61",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "ToggleButton",
+         "signature": "ToggleButton = 62",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "ToolBar",
+         "signature": "ToolBar = 63",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "ToolTip",
+         "signature": "ToolTip = 64",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Tree",
+         "signature": "Tree = 65",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "TreeTable",
+         "signature": "TreeTable = 66",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Unknown",
+         "signature": "Unknown = 67",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Viewport",
+         "signature": "Viewport = 68",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Window",
+         "signature": "Window = 69",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Extended",
+         "signature": "Extended = 70",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Header",
+         "signature": "Header = 71",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Footer",
+         "signature": "Footer = 72",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Paragraph",
+         "signature": "Paragraph = 73",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Ruler",
+         "signature": "Ruler = 74",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Application",
+         "signature": "Application = 75",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "AutoComplete",
+         "signature": "AutoComplete = 76",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "EditBar",
+         "signature": "EditBar = 77",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Embedded",
+         "signature": "Embedded = 78",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Entry",
+         "signature": "Entry = 79",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Heading",
+         "signature": "Heading = 81",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Page",
+         "signature": "Page = 82",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Document",
+         "signature": "Document = 83",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Section",
+         "signature": "Section = 84",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "RedundantObject",
+         "signature": "RedundantObject = 85",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Form",
+         "signature": "Form = 86",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Link",
+         "signature": "Link = 87",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "InputMethodWindow",
+         "signature": "InputMethodWindow = 88",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "TableRow",
+         "signature": "TableRow = 89",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "TreeItem",
+         "signature": "TreeItem = 90",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "DocumentSpreadsheet",
+         "signature": "DocumentSpreadsheet = 91",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "DocumentPresentation",
+         "signature": "DocumentPresentation = 92",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "DocumentText",
+         "signature": "DocumentText = 93",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "DocumentWeb",
+         "signature": "DocumentWeb = 94",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "DocumentEmail",
+         "signature": "DocumentEmail = 95",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Comment",
+         "signature": "Comment = 96",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "ListBox",
+         "signature": "ListBox = 97",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Grouping",
+         "signature": "Grouping = 98",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "ImageMap",
+         "signature": "ImageMap = 99",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Notification",
+         "signature": "Notification = 100",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "InfoBar",
+         "signature": "InfoBar = 101",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "LevelBar",
+         "signature": "LevelBar = 102",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "TitleBar",
+         "signature": "TitleBar = 103",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "BlockQuote",
+         "signature": "BlockQuote = 104",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Audio",
+         "signature": "Audio = 105",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Video",
+         "signature": "Video = 106",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Definition",
+         "signature": "Definition = 107",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Article",
+         "signature": "Article = 108",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Landmark",
+         "signature": "Landmark = 109",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Log",
+         "signature": "Log = 110",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Marquee",
+         "signature": "Marquee = 111",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Math",
+         "signature": "Math = 112",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Rating",
+         "signature": "Rating = 113",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Timer",
+         "signature": "Timer = 114",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Static",
+         "signature": "Static = 116",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "MathFraction",
+         "signature": "MathFraction = 117",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "MathRoot",
+         "signature": "MathRoot = 118",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Subscript",
+         "signature": "Subscript = 119",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Superscript",
+         "signature": "Superscript = 120",
+         "accessibility": "public"
+        }
+       ]
       }
      ]
     },
@@ -275898,7 +277906,193 @@
        "bases": [
         "IAsyncDisposable"
        ],
-       "memberCount": 19,
+       "members": [
+        {
+         "kind": "property",
+         "name": "A11yConnection",
+         "accessibility": "internal",
+         "line": 38,
+         "type": "DBusConnection?",
+         "accessors": {
+          "get": "internal"
+         },
+         "signature": "DBusConnection? A11yConnection { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "SyncContext",
+         "accessibility": "internal",
+         "line": 39,
+         "type": "SynchronizationContext?",
+         "accessors": {
+          "get": "internal"
+         },
+         "signature": "SynchronizationContext? SyncContext { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "UniqueName",
+         "accessibility": "internal",
+         "line": 40,
+         "type": "string",
+         "accessors": {
+          "get": "internal"
+         },
+         "signature": "string UniqueName { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "HasEventListeners",
+         "accessibility": "internal",
+         "line": 46,
+         "type": "bool",
+         "accessors": {
+          "get": "internal"
+         },
+         "signature": "bool HasEventListeners { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "StartAsync",
+         "accessibility": "public",
+         "modifiers": [
+          "async"
+         ],
+         "line": 56,
+         "type": "Task",
+         "params": 0,
+         "signature": "async Task StartAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "AddWindow",
+         "accessibility": "public",
+         "line": 88,
+         "type": "void",
+         "params": 1,
+         "signature": "void AddWindow(AutomationPeer windowPeer)"
+        },
+        {
+         "kind": "method",
+         "name": "RemoveWindow",
+         "accessibility": "public",
+         "line": 190,
+         "type": "void",
+         "params": 1,
+         "signature": "void RemoveWindow(AutomationPeer windowPeer)"
+        },
+        {
+         "kind": "method",
+         "name": "DisposeAsync",
+         "accessibility": "public",
+         "modifiers": [
+          "async"
+         ],
+         "line": 211,
+         "type": "ValueTask",
+         "params": 0,
+         "signature": "async ValueTask DisposeAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetReference",
+         "accessibility": "internal",
+         "line": 252,
+         "type": "AtSpiObjectReference",
+         "params": 1,
+         "signature": "AtSpiObjectReference GetReference(AtSpiNode? node)"
+        },
+        {
+         "kind": "method",
+         "name": "GetNullReference",
+         "accessibility": "internal",
+         "line": 260,
+         "type": "AtSpiObjectReference",
+         "params": 0,
+         "signature": "AtSpiObjectReference GetNullReference()"
+        },
+        {
+         "kind": "method",
+         "name": "GetRootReference",
+         "accessibility": "internal",
+         "line": 265,
+         "type": "AtSpiObjectReference",
+         "params": 0,
+         "signature": "AtSpiObjectReference GetRootReference()"
+        },
+        {
+         "kind": "method",
+         "name": "EmitWindowActivationChange",
+         "accessibility": "internal",
+         "line": 270,
+         "type": "void",
+         "params": 2,
+         "signature": "void EmitWindowActivationChange(RootAtSpiNode windowNode, bool active)"
+        },
+        {
+         "kind": "method",
+         "name": "EmitFocusChange",
+         "accessibility": "internal",
+         "line": 287,
+         "type": "void",
+         "params": 1,
+         "signature": "void EmitFocusChange(AtSpiNode? focusedNode)"
+        },
+        {
+         "kind": "method",
+         "name": "AllocateNodePath",
+         "accessibility": "internal",
+         "line": 296,
+         "type": "string",
+         "params": 0,
+         "signature": "string AllocateNodePath()"
+        },
+        {
+         "kind": "method",
+         "name": "GetOrCreateNode",
+         "accessibility": "internal",
+         "line": 301,
+         "type": "AtSpiNode",
+         "params": 1,
+         "signature": "AtSpiNode GetOrCreateNode(AutomationPeer peer)"
+        },
+        {
+         "kind": "method",
+         "name": "TryGetNode",
+         "accessibility": "internal",
+         "line": 311,
+         "type": "AtSpiNode?",
+         "params": 1,
+         "signature": "AtSpiNode? TryGetNode(AutomationPeer? peer)"
+        },
+        {
+         "kind": "method",
+         "name": "TryGetAttachedNode",
+         "accessibility": "internal",
+         "line": 320,
+         "type": "AtSpiNode?",
+         "params": 1,
+         "signature": "AtSpiNode? TryGetAttachedNode(AutomationPeer? peer)"
+        },
+        {
+         "kind": "method",
+         "name": "AttachNode",
+         "accessibility": "internal",
+         "line": 326,
+         "type": "bool",
+         "params": 2,
+         "signature": "bool AttachNode(AtSpiNode node, AtSpiNode? parent)"
+        },
+        {
+         "kind": "method",
+         "name": "DetachSubtreeRecursive",
+         "accessibility": "internal",
+         "line": 355,
+         "type": "void",
+         "params": 1,
+         "signature": "void DetachSubtreeRecursive(AtSpiNode rootNode)"
+        }
+       ],
        "privateMembers": 26
       }
      ]
@@ -275917,7 +278111,272 @@
        "bases": [
         "uint"
        ],
-       "memberCount": 44
+       "members": [
+        {
+         "kind": "enum member",
+         "name": "Invalid",
+         "signature": "Invalid = 0",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Active",
+         "signature": "Active = 1",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Armed",
+         "signature": "Armed = 2",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Busy",
+         "signature": "Busy = 3",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Checked",
+         "signature": "Checked = 4",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Collapsed",
+         "signature": "Collapsed = 5",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Defunct",
+         "signature": "Defunct = 6",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Editable",
+         "signature": "Editable = 7",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Enabled",
+         "signature": "Enabled = 8",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Expandable",
+         "signature": "Expandable = 9",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Expanded",
+         "signature": "Expanded = 10",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Focusable",
+         "signature": "Focusable = 11",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Focused",
+         "signature": "Focused = 12",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "HasToolTip",
+         "signature": "HasToolTip = 13",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Horizontal",
+         "signature": "Horizontal = 14",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Iconified",
+         "signature": "Iconified = 15",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Modal",
+         "signature": "Modal = 16",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "MultiLine",
+         "signature": "MultiLine = 17",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "MultiSelectable",
+         "signature": "MultiSelectable = 18",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Opaque",
+         "signature": "Opaque = 19",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Pressed",
+         "signature": "Pressed = 20",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Resizable",
+         "signature": "Resizable = 21",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Selectable",
+         "signature": "Selectable = 22",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Selected",
+         "signature": "Selected = 23",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Sensitive",
+         "signature": "Sensitive = 24",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Showing",
+         "signature": "Showing = 25",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "SingleLine",
+         "signature": "SingleLine = 26",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Stale",
+         "signature": "Stale = 27",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Transient",
+         "signature": "Transient = 28",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Vertical",
+         "signature": "Vertical = 29",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Visible",
+         "signature": "Visible = 30",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "ManagesDescendants",
+         "signature": "ManagesDescendants = 31",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Indeterminate",
+         "signature": "Indeterminate = 32",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Required",
+         "signature": "Required = 33",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Truncated",
+         "signature": "Truncated = 34",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Animated",
+         "signature": "Animated = 35",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "InvalidEntry",
+         "signature": "InvalidEntry = 36",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "SupportsAutoCompletion",
+         "signature": "SupportsAutoCompletion = 37",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "SelectableText",
+         "signature": "SelectableText = 38",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "IsDefault",
+         "signature": "IsDefault = 39",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Visited",
+         "signature": "Visited = 40",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Checkable",
+         "signature": "Checkable = 41",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "HasPopup",
+         "signature": "HasPopup = 42",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "ReadOnly",
+         "signature": "ReadOnly = 43",
+         "accessibility": "public"
+        }
+       ]
       }
      ]
     },
@@ -275938,7 +278397,80 @@
        "bases": [
         "AtSpiNode"
        ],
-       "memberCount": 7,
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 13,
+         "params": 2,
+         "signature": "RootAtSpiNode(AutomationPeer peer, AtSpiServer server)"
+        },
+        {
+         "kind": "property",
+         "name": "RootProvider",
+         "accessibility": "public",
+         "line": 27,
+         "type": "IRootProvider",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "IRootProvider RootProvider { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "WindowImpl",
+         "accessibility": "public",
+         "line": 28,
+         "type": "IWindowBaseImpl?",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "IWindowBaseImpl? WindowImpl { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "AppRoot",
+         "accessibility": "public",
+         "line": 29,
+         "type": "ApplicationAtSpiNode?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "ApplicationAtSpiNode? AppRoot { get; set; }"
+        },
+        {
+         "kind": "method",
+         "name": "ToScreen",
+         "accessibility": "public",
+         "line": 31,
+         "type": "Rect",
+         "params": 1,
+         "signature": "Rect ToScreen(Rect rect)"
+        },
+        {
+         "kind": "method",
+         "name": "PointToClient",
+         "accessibility": "public",
+         "line": 41,
+         "type": "Point",
+         "params": 1,
+         "signature": "Point PointToClient(PixelPoint point)"
+        },
+        {
+         "kind": "method",
+         "name": "Detach",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 72,
+         "type": "void",
+         "params": 0,
+         "signature": "override void Detach()"
+        }
+       ],
        "privateMembers": 3
       }
      ]
@@ -275960,7 +278492,204 @@
        "bases": [
         "IOrgA11yAtspiAccessible"
        ],
-       "memberCount": 20
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "signature": "AtSpiAccessibleHandler(AtSpiServer server, AtSpiNode node)",
+         "accessibility": "public",
+         "params": 2,
+         "primary": true,
+         "line": 14
+        },
+        {
+         "kind": "property",
+         "name": "Version",
+         "accessibility": "public",
+         "line": 16,
+         "type": "uint",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "uint Version { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Name",
+         "accessibility": "public",
+         "line": 18,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string Name { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Description",
+         "accessibility": "public",
+         "line": 20,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string Description { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Parent",
+         "accessibility": "public",
+         "line": 22,
+         "type": "AtSpiObjectReference",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "AtSpiObjectReference Parent { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "ChildCount",
+         "accessibility": "public",
+         "line": 35,
+         "type": "int",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "int ChildCount { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Locale",
+         "accessibility": "public",
+         "line": 37,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string Locale { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "AccessibleId",
+         "accessibility": "public",
+         "line": 39,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string AccessibleId { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "HelpText",
+         "accessibility": "public",
+         "line": 41,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string HelpText { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "GetChildAtIndexAsync",
+         "accessibility": "public",
+         "line": 43,
+         "type": "ValueTask<AtSpiObjectReference>",
+         "params": 1,
+         "signature": "ValueTask<AtSpiObjectReference> GetChildAtIndexAsync(int index)"
+        },
+        {
+         "kind": "method",
+         "name": "GetChildrenAsync",
+         "accessibility": "public",
+         "line": 52,
+         "type": "ValueTask<List<AtSpiObjectReference>>",
+         "params": 0,
+         "signature": "ValueTask<List<AtSpiObjectReference>> GetChildrenAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetIndexInParentAsync",
+         "accessibility": "public",
+         "line": 64,
+         "type": "ValueTask<int>",
+         "params": 0,
+         "signature": "ValueTask<int> GetIndexInParentAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetRelationSetAsync",
+         "accessibility": "public",
+         "line": 96,
+         "type": "ValueTask<List<AtSpiRelationEntry>>",
+         "params": 0,
+         "signature": "ValueTask<List<AtSpiRelationEntry>> GetRelationSetAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetRoleAsync",
+         "accessibility": "public",
+         "line": 114,
+         "type": "ValueTask<uint>",
+         "params": 0,
+         "signature": "ValueTask<uint> GetRoleAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetRoleNameAsync",
+         "accessibility": "public",
+         "line": 120,
+         "type": "ValueTask<string>",
+         "params": 0,
+         "signature": "ValueTask<string> GetRoleNameAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetLocalizedRoleNameAsync",
+         "accessibility": "public",
+         "line": 126,
+         "type": "ValueTask<string>",
+         "params": 0,
+         "signature": "ValueTask<string> GetLocalizedRoleNameAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetStateAsync",
+         "accessibility": "public",
+         "line": 132,
+         "type": "ValueTask<List<uint>>",
+         "params": 0,
+         "signature": "ValueTask<List<uint>> GetStateAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetAttributesAsync",
+         "accessibility": "public",
+         "line": 137,
+         "type": "ValueTask<AtSpiAttributeSet>",
+         "params": 0,
+         "signature": "ValueTask<AtSpiAttributeSet> GetAttributesAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetApplicationAsync",
+         "accessibility": "public",
+         "line": 160,
+         "type": "ValueTask<AtSpiObjectReference>",
+         "params": 0,
+         "signature": "ValueTask<AtSpiObjectReference> GetApplicationAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetInterfacesAsync",
+         "accessibility": "public",
+         "line": 165,
+         "type": "ValueTask<List<string>>",
+         "params": 0,
+         "signature": "ValueTask<List<string>> GetInterfacesAsync()"
+        }
+       ]
       }
      ]
     },
@@ -275981,7 +278710,92 @@
        "bases": [
         "IOrgA11yAtspiAction"
        ],
-       "memberCount": 9,
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 19,
+         "params": 2,
+         "signature": "AtSpiActionHandler(AtSpiServer server, AtSpiNode node)"
+        },
+        {
+         "kind": "property",
+         "name": "Version",
+         "accessibility": "public",
+         "line": 26,
+         "type": "uint",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "uint Version { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "NActions",
+         "accessibility": "public",
+         "line": 28,
+         "type": "int",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "int NActions { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "GetDescriptionAsync",
+         "accessibility": "public",
+         "line": 30,
+         "type": "ValueTask<string>",
+         "params": 1,
+         "signature": "ValueTask<string> GetDescriptionAsync(int index)"
+        },
+        {
+         "kind": "method",
+         "name": "GetNameAsync",
+         "accessibility": "public",
+         "line": 37,
+         "type": "ValueTask<string>",
+         "params": 1,
+         "signature": "ValueTask<string> GetNameAsync(int index)"
+        },
+        {
+         "kind": "method",
+         "name": "GetLocalizedNameAsync",
+         "accessibility": "public",
+         "line": 44,
+         "type": "ValueTask<string>",
+         "params": 1,
+         "signature": "ValueTask<string> GetLocalizedNameAsync(int index)"
+        },
+        {
+         "kind": "method",
+         "name": "GetKeyBindingAsync",
+         "accessibility": "public",
+         "line": 51,
+         "type": "ValueTask<string>",
+         "params": 1,
+         "signature": "ValueTask<string> GetKeyBindingAsync(int index)"
+        },
+        {
+         "kind": "method",
+         "name": "GetActionsAsync",
+         "accessibility": "public",
+         "line": 58,
+         "type": "ValueTask<List<AtSpiAction>>",
+         "params": 0,
+         "signature": "ValueTask<List<AtSpiAction>> GetActionsAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "DoActionAsync",
+         "accessibility": "public",
+         "line": 65,
+         "type": "ValueTask<bool>",
+         "params": 1,
+         "signature": "ValueTask<bool> DoActionAsync(int index)"
+        }
+       ],
        "privateMembers": 5
       }
      ]
@@ -276003,7 +278817,64 @@
        "bases": [
         "IOrgA11yAtspiCollection"
        ],
-       "memberCount": 6,
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "signature": "AtSpiCollectionHandler(AtSpiServer server, AtSpiNode node)",
+         "accessibility": "public",
+         "params": 2,
+         "primary": true,
+         "line": 14
+        },
+        {
+         "kind": "property",
+         "name": "Version",
+         "accessibility": "public",
+         "line": 25,
+         "type": "uint",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "uint Version { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "GetMatchesAsync",
+         "accessibility": "public",
+         "line": 27,
+         "type": "ValueTask<List<AtSpiObjectReference>>",
+         "params": 4,
+         "signature": "ValueTask<List<AtSpiObjectReference>> GetMatchesAsync(AtSpiMatchRule rule, uint sortby, int count, bool traverse)"
+        },
+        {
+         "kind": "method",
+         "name": "GetMatchesToAsync",
+         "accessibility": "public",
+         "line": 35,
+         "type": "ValueTask<List<AtSpiObjectReference>>",
+         "params": 7,
+         "signature": "ValueTask<List<AtSpiObjectReference>> GetMatchesToAsync(DBusObjectPath currentObject, AtSpiMatchRule rule, uint sortby, uint tree, bool limitScope, int count, bool traverse)"
+        },
+        {
+         "kind": "method",
+         "name": "GetMatchesFromAsync",
+         "accessibility": "public",
+         "line": 47,
+         "type": "ValueTask<List<AtSpiObjectReference>>",
+         "params": 6,
+         "signature": "ValueTask<List<AtSpiObjectReference>> GetMatchesFromAsync(DBusObjectPath currentObject, AtSpiMatchRule rule, uint sortby, uint tree, int count, bool traverse)"
+        },
+        {
+         "kind": "method",
+         "name": "GetActiveDescendantAsync",
+         "accessibility": "public",
+         "line": 59,
+         "type": "ValueTask<AtSpiObjectReference>",
+         "params": 0,
+         "signature": "ValueTask<AtSpiObjectReference> GetActiveDescendantAsync()"
+        }
+       ],
        "privateMembers": 14
       }
      ]
@@ -276025,7 +278896,154 @@
        "bases": [
         "IOrgA11yAtspiComponent"
        ],
-       "memberCount": 16,
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "signature": "AtSpiComponentHandler(AtSpiServer server, AtSpiNode node)",
+         "accessibility": "public",
+         "params": 2,
+         "primary": true,
+         "line": 13
+        },
+        {
+         "kind": "property",
+         "name": "Version",
+         "accessibility": "public",
+         "line": 16,
+         "type": "uint",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "uint Version { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "ContainsAsync",
+         "accessibility": "public",
+         "line": 18,
+         "type": "ValueTask<bool>",
+         "params": 3,
+         "signature": "ValueTask<bool> ContainsAsync(int x, int y, uint coordType)"
+        },
+        {
+         "kind": "method",
+         "name": "GetAccessibleAtPointAsync",
+         "accessibility": "public",
+         "line": 26,
+         "type": "ValueTask<AtSpiObjectReference>",
+         "params": 3,
+         "signature": "ValueTask<AtSpiObjectReference> GetAccessibleAtPointAsync(int x, int y, uint coordType)"
+        },
+        {
+         "kind": "method",
+         "name": "GetExtentsAsync",
+         "accessibility": "public",
+         "line": 38,
+         "type": "ValueTask<AtSpiRect>",
+         "params": 1,
+         "signature": "ValueTask<AtSpiRect> GetExtentsAsync(uint coordType)"
+        },
+        {
+         "kind": "method",
+         "name": "GetPositionAsync",
+         "accessibility": "public",
+         "line": 47,
+         "type": "ValueTask<(int X, int Y)>",
+         "params": 1,
+         "signature": "ValueTask<(int X, int Y)> GetPositionAsync(uint coordType)"
+        },
+        {
+         "kind": "method",
+         "name": "GetSizeAsync",
+         "accessibility": "public",
+         "line": 54,
+         "type": "ValueTask<(int Width, int Height)>",
+         "params": 0,
+         "signature": "ValueTask<(int Width, int Height)> GetSizeAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetLayerAsync",
+         "accessibility": "public",
+         "line": 60,
+         "type": "ValueTask<uint>",
+         "params": 0,
+         "signature": "ValueTask<uint> GetLayerAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetMDIZOrderAsync",
+         "accessibility": "public",
+         "line": 69,
+         "type": "ValueTask<short>",
+         "params": 0,
+         "signature": "ValueTask<short> GetMDIZOrderAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GrabFocusAsync",
+         "accessibility": "public",
+         "line": 71,
+         "type": "ValueTask<bool>",
+         "params": 0,
+         "signature": "ValueTask<bool> GrabFocusAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetAlphaAsync",
+         "accessibility": "public",
+         "line": 77,
+         "type": "ValueTask<double>",
+         "params": 0,
+         "signature": "ValueTask<double> GetAlphaAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "SetExtentsAsync",
+         "accessibility": "public",
+         "line": 79,
+         "type": "ValueTask<bool>",
+         "params": 5,
+         "signature": "ValueTask<bool> SetExtentsAsync(int x, int y, int width, int height, uint coordType)"
+        },
+        {
+         "kind": "method",
+         "name": "SetPositionAsync",
+         "accessibility": "public",
+         "line": 85,
+         "type": "ValueTask<bool>",
+         "params": 3,
+         "signature": "ValueTask<bool> SetPositionAsync(int x, int y, uint coordType)"
+        },
+        {
+         "kind": "method",
+         "name": "SetSizeAsync",
+         "accessibility": "public",
+         "line": 95,
+         "type": "ValueTask<bool>",
+         "params": 2,
+         "signature": "ValueTask<bool> SetSizeAsync(int width, int height)"
+        },
+        {
+         "kind": "method",
+         "name": "ScrollToAsync",
+         "accessibility": "public",
+         "line": 100,
+         "type": "ValueTask<bool>",
+         "params": 1,
+         "signature": "ValueTask<bool> ScrollToAsync(uint type)"
+        },
+        {
+         "kind": "method",
+         "name": "ScrollToPointAsync",
+         "accessibility": "public",
+         "line": 105,
+         "type": "ValueTask<bool>",
+         "params": 3,
+         "signature": "ValueTask<bool> ScrollToPointAsync(uint coordType, int x, int y)"
+        }
+       ],
        "privateMembers": 1
       }
      ]
@@ -276044,7 +279062,56 @@
        "modifiers": [
         "static"
        ],
-       "memberCount": 4
+       "members": [
+        {
+         "kind": "method",
+         "name": "GetScreenExtents",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 8,
+         "type": "Rect",
+         "params": 1,
+         "signature": "static Rect GetScreenExtents(AtSpiNode node)"
+        },
+        {
+         "kind": "method",
+         "name": "TranslateRect",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 25,
+         "type": "Rect",
+         "params": 3,
+         "signature": "static Rect TranslateRect(AtSpiNode node, Rect screenRect, uint coordType)"
+        },
+        {
+         "kind": "method",
+         "name": "GetWindowRect",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 56,
+         "type": "Rect",
+         "params": 1,
+         "signature": "static Rect GetWindowRect(AtSpiNode node)"
+        },
+        {
+         "kind": "method",
+         "name": "GetParentScreenRect",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 67,
+         "type": "Rect",
+         "params": 1,
+         "signature": "static Rect GetParentScreenRect(AtSpiNode node)"
+        }
+       ]
       }
      ]
     },
@@ -276065,7 +279132,82 @@
        "bases": [
         "IOrgA11yAtspiEditableText"
        ],
-       "memberCount": 8
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "signature": "AtSpiEditableTextHandler(AtSpiNode node)",
+         "accessibility": "public",
+         "params": 1,
+         "primary": true,
+         "line": 12
+        },
+        {
+         "kind": "property",
+         "name": "Version",
+         "accessibility": "public",
+         "line": 14,
+         "type": "uint",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "uint Version { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "SetTextContentsAsync",
+         "accessibility": "public",
+         "line": 16,
+         "type": "ValueTask<bool>",
+         "params": 1,
+         "signature": "ValueTask<bool> SetTextContentsAsync(string newContents)"
+        },
+        {
+         "kind": "method",
+         "name": "InsertTextAsync",
+         "accessibility": "public",
+         "line": 25,
+         "type": "ValueTask<bool>",
+         "params": 3,
+         "signature": "ValueTask<bool> InsertTextAsync(int position, string text, int length)"
+        },
+        {
+         "kind": "method",
+         "name": "CopyTextAsync",
+         "accessibility": "public",
+         "line": 38,
+         "type": "ValueTask",
+         "params": 2,
+         "signature": "ValueTask CopyTextAsync(int startPos, int endPos)"
+        },
+        {
+         "kind": "method",
+         "name": "CutTextAsync",
+         "accessibility": "public",
+         "line": 44,
+         "type": "ValueTask<bool>",
+         "params": 2,
+         "signature": "ValueTask<bool> CutTextAsync(int startPos, int endPos)"
+        },
+        {
+         "kind": "method",
+         "name": "DeleteTextAsync",
+         "accessibility": "public",
+         "line": 50,
+         "type": "ValueTask<bool>",
+         "params": 2,
+         "signature": "ValueTask<bool> DeleteTextAsync(int startPos, int endPos)"
+        },
+        {
+         "kind": "method",
+         "name": "PasteTextAsync",
+         "accessibility": "public",
+         "line": 66,
+         "type": "ValueTask<bool>",
+         "params": 1,
+         "signature": "ValueTask<bool> PasteTextAsync(int position)"
+        }
+       ]
       }
      ]
     },
@@ -276086,7 +279228,73 @@
        "bases": [
         "IOrgA11yAtspiEventObject"
        ],
-       "memberCount": 7,
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "signature": "AtSpiEventObjectHandler(AtSpiServer server, string path)",
+         "accessibility": "public",
+         "params": 2,
+         "primary": true,
+         "line": 12
+        },
+        {
+         "kind": "property",
+         "name": "Version",
+         "accessibility": "public",
+         "line": 14,
+         "type": "uint",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "uint Version { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "EmitChildrenChangedSignal",
+         "accessibility": "public",
+         "line": 16,
+         "type": "void",
+         "params": 3,
+         "signature": "void EmitChildrenChangedSignal(string operation, int indexInParent, DBusVariant child)"
+        },
+        {
+         "kind": "method",
+         "name": "EmitPropertyChangeSignal",
+         "accessibility": "public",
+         "line": 21,
+         "type": "void",
+         "params": 2,
+         "signature": "void EmitPropertyChangeSignal(string propertyName, DBusVariant value)"
+        },
+        {
+         "kind": "method",
+         "name": "EmitStateChangedSignal",
+         "accessibility": "public",
+         "line": 26,
+         "type": "void",
+         "params": 3,
+         "signature": "void EmitStateChangedSignal(string stateName, int detail1, DBusVariant value)"
+        },
+        {
+         "kind": "method",
+         "name": "EmitSelectionChangedSignal",
+         "accessibility": "public",
+         "line": 31,
+         "type": "void",
+         "params": 0,
+         "signature": "void EmitSelectionChangedSignal()"
+        },
+        {
+         "kind": "method",
+         "name": "EmitBoundsChangedSignal",
+         "accessibility": "public",
+         "line": 36,
+         "type": "void",
+         "params": 0,
+         "signature": "void EmitBoundsChangedSignal()"
+        }
+       ],
        "privateMembers": 2
       }
      ]
@@ -276108,7 +279316,35 @@
        "bases": [
         "IOrgA11yAtspiEventWindow"
        ],
-       "memberCount": 3,
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "signature": "AtSpiEventWindowHandler(AtSpiServer server, string path)",
+         "accessibility": "public",
+         "params": 2,
+         "primary": true,
+         "line": 12
+        },
+        {
+         "kind": "method",
+         "name": "EmitActivateSignal",
+         "accessibility": "public",
+         "line": 14,
+         "type": "void",
+         "params": 0,
+         "signature": "void EmitActivateSignal()"
+        },
+        {
+         "kind": "method",
+         "name": "EmitDeactivateSignal",
+         "accessibility": "public",
+         "line": 19,
+         "type": "void",
+         "params": 0,
+         "signature": "void EmitDeactivateSignal()"
+        }
+       ],
        "privateMembers": 2
       }
      ]
@@ -276130,7 +279366,76 @@
        "bases": [
         "IOrgA11yAtspiImage"
        ],
-       "memberCount": 7,
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 14,
+         "params": 2,
+         "signature": "AtSpiImageHandler(AtSpiServer server, AtSpiNode node)"
+        },
+        {
+         "kind": "property",
+         "name": "Version",
+         "accessibility": "public",
+         "line": 20,
+         "type": "uint",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "uint Version { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "ImageDescription",
+         "accessibility": "public",
+         "line": 22,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string ImageDescription { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "ImageLocale",
+         "accessibility": "public",
+         "line": 24,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string ImageLocale { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "GetImageExtentsAsync",
+         "accessibility": "public",
+         "line": 26,
+         "type": "ValueTask<AtSpiRect>",
+         "params": 1,
+         "signature": "ValueTask<AtSpiRect> GetImageExtentsAsync(uint coordType)"
+        },
+        {
+         "kind": "method",
+         "name": "GetImagePositionAsync",
+         "accessibility": "public",
+         "line": 35,
+         "type": "ValueTask<(int X, int Y)>",
+         "params": 1,
+         "signature": "ValueTask<(int X, int Y)> GetImagePositionAsync(uint coordType)"
+        },
+        {
+         "kind": "method",
+         "name": "GetImageSizeAsync",
+         "accessibility": "public",
+         "line": 42,
+         "type": "ValueTask<(int Width, int Height)>",
+         "params": 0,
+         "signature": "ValueTask<(int Width, int Height)> GetImageSizeAsync()"
+        }
+       ],
        "privateMembers": 1
       }
      ]
@@ -276152,7 +279457,102 @@
        "bases": [
         "IOrgA11yAtspiSelection"
        ],
-       "memberCount": 10,
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "signature": "AtSpiSelectionHandler(AtSpiServer server, AtSpiNode node)",
+         "accessibility": "public",
+         "params": 2,
+         "primary": true,
+         "line": 11
+        },
+        {
+         "kind": "property",
+         "name": "Version",
+         "accessibility": "public",
+         "line": 13,
+         "type": "uint",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "uint Version { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "NSelectedChildren",
+         "accessibility": "public",
+         "line": 15,
+         "type": "int",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "int NSelectedChildren { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "GetSelectedChildAsync",
+         "accessibility": "public",
+         "line": 24,
+         "type": "ValueTask<AtSpiObjectReference>",
+         "params": 1,
+         "signature": "ValueTask<AtSpiObjectReference> GetSelectedChildAsync(int selectedChildIndex)"
+        },
+        {
+         "kind": "method",
+         "name": "SelectChildAsync",
+         "accessibility": "public",
+         "line": 44,
+         "type": "ValueTask<bool>",
+         "params": 1,
+         "signature": "ValueTask<bool> SelectChildAsync(int childIndex)"
+        },
+        {
+         "kind": "method",
+         "name": "DeselectSelectedChildAsync",
+         "accessibility": "public",
+         "line": 54,
+         "type": "ValueTask<bool>",
+         "params": 1,
+         "signature": "ValueTask<bool> DeselectSelectedChildAsync(int selectedChildIndex)"
+        },
+        {
+         "kind": "method",
+         "name": "IsChildSelectedAsync",
+         "accessibility": "public",
+         "line": 72,
+         "type": "ValueTask<bool>",
+         "params": 1,
+         "signature": "ValueTask<bool> IsChildSelectedAsync(int childIndex)"
+        },
+        {
+         "kind": "method",
+         "name": "SelectAllAsync",
+         "accessibility": "public",
+         "line": 81,
+         "type": "ValueTask<bool>",
+         "params": 0,
+         "signature": "ValueTask<bool> SelectAllAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "ClearSelectionAsync",
+         "accessibility": "public",
+         "line": 93,
+         "type": "ValueTask<bool>",
+         "params": 0,
+         "signature": "ValueTask<bool> ClearSelectionAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "DeselectChildAsync",
+         "accessibility": "public",
+         "line": 109,
+         "type": "ValueTask<bool>",
+         "params": 1,
+         "signature": "ValueTask<bool> DeselectChildAsync(int childIndex)"
+        }
+       ],
        "privateMembers": 2
       }
      ]
@@ -276174,7 +279574,257 @@
        "bases": [
         "IOrgA11yAtspiText"
        ],
-       "memberCount": 27,
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "signature": "AtSpiTextHandler(AtSpiNode node)",
+         "accessibility": "public",
+         "params": 1,
+         "primary": true,
+         "line": 14
+        },
+        {
+         "kind": "property",
+         "name": "Version",
+         "accessibility": "public",
+         "line": 36,
+         "type": "uint",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "uint Version { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "CharacterCount",
+         "accessibility": "public",
+         "line": 38,
+         "type": "int",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "int CharacterCount { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "CaretOffset",
+         "accessibility": "public",
+         "line": 40,
+         "type": "int",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "int CaretOffset { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "GetStringAtOffsetAsync",
+         "accessibility": "public",
+         "line": 42,
+         "type": "ValueTask<(string Text, int StartOffset, int EndOffset)>",
+         "params": 2,
+         "signature": "ValueTask<(string Text, int StartOffset, int EndOffset)> GetStringAtOffsetAsync(int offset, uint granularity)"
+        },
+        {
+         "kind": "method",
+         "name": "GetTextAsync",
+         "accessibility": "public",
+         "line": 78,
+         "type": "ValueTask<string>",
+         "params": 2,
+         "signature": "ValueTask<string> GetTextAsync(int startOffset, int endOffset)"
+        },
+        {
+         "kind": "method",
+         "name": "SetCaretOffsetAsync",
+         "accessibility": "public",
+         "line": 94,
+         "type": "ValueTask<bool>",
+         "params": 1,
+         "signature": "ValueTask<bool> SetCaretOffsetAsync(int offset)"
+        },
+        {
+         "kind": "method",
+         "name": "GetTextBeforeOffsetAsync",
+         "accessibility": "public",
+         "line": 99,
+         "type": "ValueTask<(string Text, int StartOffset, int EndOffset)>",
+         "params": 2,
+         "signature": "ValueTask<(string Text, int StartOffset, int EndOffset)> GetTextBeforeOffsetAsync(int offset, uint type)"
+        },
+        {
+         "kind": "method",
+         "name": "GetTextAtOffsetAsync",
+         "accessibility": "public",
+         "line": 143,
+         "type": "ValueTask<(string Text, int StartOffset, int EndOffset)>",
+         "params": 2,
+         "signature": "ValueTask<(string Text, int StartOffset, int EndOffset)> GetTextAtOffsetAsync(int offset, uint type)"
+        },
+        {
+         "kind": "method",
+         "name": "GetTextAfterOffsetAsync",
+         "accessibility": "public",
+         "line": 149,
+         "type": "ValueTask<(string Text, int StartOffset, int EndOffset)>",
+         "params": 2,
+         "signature": "ValueTask<(string Text, int StartOffset, int EndOffset)> GetTextAfterOffsetAsync(int offset, uint type)"
+        },
+        {
+         "kind": "method",
+         "name": "GetCharacterAtOffsetAsync",
+         "accessibility": "public",
+         "line": 195,
+         "type": "ValueTask<int>",
+         "params": 1,
+         "signature": "ValueTask<int> GetCharacterAtOffsetAsync(int offset)"
+        },
+        {
+         "kind": "method",
+         "name": "GetAttributeValueAsync",
+         "accessibility": "public",
+         "line": 204,
+         "type": "ValueTask<string>",
+         "params": 2,
+         "signature": "ValueTask<string> GetAttributeValueAsync(int offset, string attributeName)"
+        },
+        {
+         "kind": "method",
+         "name": "GetAttributesAsync",
+         "accessibility": "public",
+         "line": 209,
+         "type": "ValueTask<(AtSpiAttributeSet Attributes, int StartOffset, int EndOffset)>",
+         "params": 1,
+         "signature": "ValueTask<(AtSpiAttributeSet Attributes, int StartOffset, int EndOffset)> GetAttributesAsync(int offset)"
+        },
+        {
+         "kind": "method",
+         "name": "GetDefaultAttributesAsync",
+         "accessibility": "public",
+         "line": 215,
+         "type": "ValueTask<AtSpiAttributeSet>",
+         "params": 0,
+         "signature": "ValueTask<AtSpiAttributeSet> GetDefaultAttributesAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetCharacterExtentsAsync",
+         "accessibility": "public",
+         "line": 220,
+         "type": "ValueTask<(int X, int Y, int Width, int Height)>",
+         "params": 2,
+         "signature": "ValueTask<(int X, int Y, int Width, int Height)> GetCharacterExtentsAsync(int offset, uint coordType)"
+        },
+        {
+         "kind": "method",
+         "name": "GetOffsetAtPointAsync",
+         "accessibility": "public",
+         "line": 226,
+         "type": "ValueTask<int>",
+         "params": 3,
+         "signature": "ValueTask<int> GetOffsetAtPointAsync(int x, int y, uint coordType)"
+        },
+        {
+         "kind": "method",
+         "name": "GetNSelectionsAsync",
+         "accessibility": "public",
+         "line": 231,
+         "type": "ValueTask<int>",
+         "params": 0,
+         "signature": "ValueTask<int> GetNSelectionsAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "GetSelectionAsync",
+         "accessibility": "public",
+         "line": 236,
+         "type": "ValueTask<(int StartOffset, int EndOffset)>",
+         "params": 1,
+         "signature": "ValueTask<(int StartOffset, int EndOffset)> GetSelectionAsync(int selectionNum)"
+        },
+        {
+         "kind": "method",
+         "name": "AddSelectionAsync",
+         "accessibility": "public",
+         "line": 241,
+         "type": "ValueTask<bool>",
+         "params": 2,
+         "signature": "ValueTask<bool> AddSelectionAsync(int startOffset, int endOffset)"
+        },
+        {
+         "kind": "method",
+         "name": "RemoveSelectionAsync",
+         "accessibility": "public",
+         "line": 246,
+         "type": "ValueTask<bool>",
+         "params": 1,
+         "signature": "ValueTask<bool> RemoveSelectionAsync(int selectionNum)"
+        },
+        {
+         "kind": "method",
+         "name": "SetSelectionAsync",
+         "accessibility": "public",
+         "line": 251,
+         "type": "ValueTask<bool>",
+         "params": 3,
+         "signature": "ValueTask<bool> SetSelectionAsync(int selectionNum, int startOffset, int endOffset)"
+        },
+        {
+         "kind": "method",
+         "name": "GetRangeExtentsAsync",
+         "accessibility": "public",
+         "line": 256,
+         "type": "ValueTask<(int X, int Y, int Width, int Height)>",
+         "params": 3,
+         "signature": "ValueTask<(int X, int Y, int Width, int Height)> GetRangeExtentsAsync(int startOffset, int endOffset, uint coordType)"
+        },
+        {
+         "kind": "method",
+         "name": "GetBoundedRangesAsync",
+         "accessibility": "public",
+         "line": 262,
+         "type": "ValueTask<List<AtSpiTextRange>>",
+         "params": 7,
+         "signature": "ValueTask<List<AtSpiTextRange>> GetBoundedRangesAsync(int x, int y, int width, int height, uint coordType, uint xClipType, uint yClipType)"
+        },
+        {
+         "kind": "method",
+         "name": "GetAttributeRunAsync",
+         "accessibility": "public",
+         "line": 268,
+         "type": "ValueTask<(AtSpiAttributeSet Attributes, int StartOffset, int EndOffset)>",
+         "params": 2,
+         "signature": "ValueTask<(AtSpiAttributeSet Attributes, int StartOffset, int EndOffset)> GetAttributeRunAsync(int offset, bool includeDefaults)"
+        },
+        {
+         "kind": "method",
+         "name": "GetDefaultAttributeSetAsync",
+         "accessibility": "public",
+         "line": 275,
+         "type": "ValueTask<AtSpiAttributeSet>",
+         "params": 0,
+         "signature": "ValueTask<AtSpiAttributeSet> GetDefaultAttributeSetAsync()"
+        },
+        {
+         "kind": "method",
+         "name": "ScrollSubstringToAsync",
+         "accessibility": "public",
+         "line": 280,
+         "type": "ValueTask<bool>",
+         "params": 3,
+         "signature": "ValueTask<bool> ScrollSubstringToAsync(int startOffset, int endOffset, uint type)"
+        },
+        {
+         "kind": "method",
+         "name": "ScrollSubstringToPointAsync",
+         "accessibility": "public",
+         "line": 285,
+         "type": "ValueTask<bool>",
+         "params": 5,
+         "signature": "ValueTask<bool> ScrollSubstringToPointAsync(int startOffset, int endOffset, uint coordType, int x, int y)"
+        }
+       ],
        "privateMembers": 3
       }
      ]
@@ -276196,7 +279846,83 @@
        "bases": [
         "IOrgA11yAtspiValue"
        ],
-       "memberCount": 7,
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 15,
+         "params": 2,
+         "signature": "AtSpiValueHandler(AtSpiServer server, AtSpiNode node)"
+        },
+        {
+         "kind": "property",
+         "name": "Version",
+         "accessibility": "public",
+         "line": 21,
+         "type": "uint",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "uint Version { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "MinimumValue",
+         "accessibility": "public",
+         "line": 23,
+         "type": "double",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "double MinimumValue { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "MaximumValue",
+         "accessibility": "public",
+         "line": 26,
+         "type": "double",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "double MaximumValue { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "MinimumIncrement",
+         "accessibility": "public",
+         "line": 29,
+         "type": "double",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "double MinimumIncrement { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Text",
+         "accessibility": "public",
+         "line": 32,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string Text { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "CurrentValue",
+         "accessibility": "public",
+         "line": 34,
+         "type": "double",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "double CurrentValue { get; set; }"
+        }
+       ],
        "privateMembers": 1
       }
      ]

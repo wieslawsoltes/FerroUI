@@ -181,14 +181,140 @@ pub(crate) struct AtSpiTextHandler {
     node: Weak<AtSpiNode>,
 }
 
+type Extents = (i32, i32, i32, i32);
+type AttributeRun = (AtSpiAttributeSet, i32, i32);
+
 impl AtSpiTextHandler {
     pub(crate) fn new(node: Weak<AtSpiNode>) -> Self {
         Self { node }
     }
 
-    fn text_of(node: &AtSpiNode) -> Vec<u16> {
-        node.peer()
-            .get_provider::<dyn IValueProvider>()
+    pub(crate) fn version(&self) -> u32 {
+        TEXT_VERSION
+    }
+
+    pub(crate) fn character_count(&self) -> i32 {
+        length(&self.get_text())
+    }
+
+    pub(crate) fn caret_offset(&self) -> i32 {
+        0
+    }
+
+    pub(crate) fn get_string_at_offset_async(&self, offset: i32, granularity: u32) -> TextSegment {
+        get_string_at_offset(&self.get_text(), offset, granularity)
+    }
+
+    pub(crate) fn get_text_async(&self, start_offset: i32, end_offset: i32) -> String {
+        get_text(&self.get_text(), start_offset, end_offset)
+    }
+
+    pub(crate) fn set_caret_offset_async(&self, _offset: i32) -> bool {
+        false
+    }
+
+    pub(crate) fn get_text_before_offset_async(&self, offset: i32, boundary_type: u32) -> TextSegment {
+        get_text_before_offset(&self.get_text(), offset, boundary_type)
+    }
+
+    pub(crate) fn get_text_at_offset_async(&self, offset: i32, boundary_type: u32) -> TextSegment {
+        self.get_string_at_offset_async(offset, boundary_type)
+    }
+
+    pub(crate) fn get_text_after_offset_async(&self, offset: i32, boundary_type: u32) -> TextSegment {
+        get_text_after_offset(&self.get_text(), offset, boundary_type)
+    }
+
+    pub(crate) fn get_character_at_offset_async(&self, offset: i32) -> i32 {
+        get_character_at_offset(&self.get_text(), offset)
+    }
+
+    pub(crate) fn get_attribute_value_async(&self, _offset: i32, _attribute_name: &str) -> String {
+        String::new()
+    }
+
+    pub(crate) fn get_attributes_async(&self, _offset: i32) -> AttributeRun {
+        (AtSpiAttributeSet::new(), 0, self.character_count())
+    }
+
+    pub(crate) fn get_default_attributes_async(&self) -> AtSpiAttributeSet {
+        AtSpiAttributeSet::new()
+    }
+
+    pub(crate) fn get_character_extents_async(&self, _offset: i32, _coord_type: u32) -> Extents {
+        (0, 0, 0, 0)
+    }
+
+    pub(crate) fn get_offset_at_point_async(&self, _x: i32, _y: i32, _coord_type: u32) -> i32 {
+        -1
+    }
+
+    pub(crate) fn get_n_selections_async(&self) -> i32 {
+        0
+    }
+
+    pub(crate) fn get_selection_async(&self, _selection_num: i32) -> (i32, i32) {
+        (0, 0)
+    }
+
+    pub(crate) fn add_selection_async(&self, _start_offset: i32, _end_offset: i32) -> bool {
+        false
+    }
+
+    pub(crate) fn remove_selection_async(&self, _selection_num: i32) -> bool {
+        false
+    }
+
+    pub(crate) fn set_selection_async(&self, _selection_num: i32, _start_offset: i32, _end_offset: i32) -> bool {
+        false
+    }
+
+    pub(crate) fn get_range_extents_async(&self, _start_offset: i32, _end_offset: i32, _coord_type: u32) -> Extents {
+        (0, 0, 0, 0)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn get_bounded_ranges_async(
+        &self,
+        _x: i32,
+        _y: i32,
+        _width: i32,
+        _height: i32,
+        _coord_type: u32,
+        _x_clip_type: u32,
+        _y_clip_type: u32,
+    ) -> Vec<AtSpiTextRange> {
+        Vec::new()
+    }
+
+    pub(crate) fn get_attribute_run_async(&self, _offset: i32, _include_defaults: bool) -> AttributeRun {
+        (AtSpiAttributeSet::new(), 0, self.character_count())
+    }
+
+    pub(crate) fn get_default_attribute_set_async(&self) -> AtSpiAttributeSet {
+        AtSpiAttributeSet::new()
+    }
+
+    pub(crate) fn scroll_substring_to_async(&self, _start_offset: i32, _end_offset: i32, _scroll_type: u32) -> bool {
+        false
+    }
+
+    pub(crate) fn scroll_substring_to_point_async(
+        &self,
+        _start_offset: i32,
+        _end_offset: i32,
+        _coord_type: u32,
+        _x: i32,
+        _y: i32,
+    ) -> bool {
+        false
+    }
+
+    /// The value of the provider as UTF-16 code units (`GetText`).
+    fn get_text(&self) -> Vec<u16> {
+        self.node
+            .upgrade()
+            .and_then(|node| node.peer().get_provider::<dyn IValueProvider>())
             .and_then(|provider| provider.value())
             .unwrap_or_default()
             .encode_utf16()
@@ -202,94 +328,87 @@ impl DBusInterface for AtSpiTextHandler {
     }
 
     fn call(&self, member: &str, body: &zbus::message::Body) -> CallResult {
-        let node = node_of(&self.node)?;
-        let text = Self::text_of(&node);
+        node_of(&self.node)?;
         match member {
-            "GetStringAtOffset" | "GetTextAtOffset" => {
+            "GetStringAtOffset" => {
                 let (offset, granularity) = args::<(i32, u32)>(body)?;
-                reply(get_string_at_offset(&text, offset, granularity))
+                reply(self.get_string_at_offset_async(offset, granularity))
             }
             "GetText" => {
                 let (start_offset, end_offset) = args::<(i32, i32)>(body)?;
-                reply((get_text(&text, start_offset, end_offset),))
+                reply((self.get_text_async(start_offset, end_offset),))
             }
-            "SetCaretOffset" => {
-                args::<i32>(body)?;
-                reply((false,))
-            }
+            "SetCaretOffset" => reply((self.set_caret_offset_async(args::<i32>(body)?),)),
             "GetTextBeforeOffset" => {
                 let (offset, boundary_type) = args::<(i32, u32)>(body)?;
-                reply(get_text_before_offset(&text, offset, boundary_type))
+                reply(self.get_text_before_offset_async(offset, boundary_type))
+            }
+            "GetTextAtOffset" => {
+                let (offset, boundary_type) = args::<(i32, u32)>(body)?;
+                reply(self.get_text_at_offset_async(offset, boundary_type))
             }
             "GetTextAfterOffset" => {
                 let (offset, boundary_type) = args::<(i32, u32)>(body)?;
-                reply(get_text_after_offset(&text, offset, boundary_type))
+                reply(self.get_text_after_offset_async(offset, boundary_type))
             }
-            "GetCharacterAtOffset" => reply((get_character_at_offset(&text, args::<i32>(body)?),)),
+            "GetCharacterAtOffset" => reply((self.get_character_at_offset_async(args::<i32>(body)?),)),
             "GetAttributeValue" => {
-                args::<(i32, String)>(body)?;
-                reply((String::new(),))
+                let (offset, attribute_name) = args::<(i32, String)>(body)?;
+                reply((self.get_attribute_value_async(offset, &attribute_name),))
             }
-            "GetAttributes" => {
-                args::<i32>(body)?;
-                reply((AtSpiAttributeSet::new(), 0i32, length(&text)))
-            }
+            "GetAttributes" => reply(self.get_attributes_async(args::<i32>(body)?)),
             "GetAttributeRun" => {
-                args::<(i32, bool)>(body)?;
-                reply((AtSpiAttributeSet::new(), 0i32, length(&text)))
+                let (offset, include_defaults) = args::<(i32, bool)>(body)?;
+                reply(self.get_attribute_run_async(offset, include_defaults))
             }
-            "GetDefaultAttributes" | "GetDefaultAttributeSet" => reply((AtSpiAttributeSet::new(),)),
+            "GetDefaultAttributes" => reply((self.get_default_attributes_async(),)),
+            "GetDefaultAttributeSet" => reply((self.get_default_attribute_set_async(),)),
             "GetCharacterExtents" => {
-                args::<(i32, u32)>(body)?;
-                reply((0i32, 0i32, 0i32, 0i32))
+                let (offset, coord_type) = args::<(i32, u32)>(body)?;
+                reply(self.get_character_extents_async(offset, coord_type))
             }
             "GetOffsetAtPoint" => {
-                args::<(i32, i32, u32)>(body)?;
-                reply((-1i32,))
+                let (x, y, coord_type) = args::<(i32, i32, u32)>(body)?;
+                reply((self.get_offset_at_point_async(x, y, coord_type),))
             }
-            "GetNSelections" => reply((0i32,)),
-            "GetSelection" => {
-                args::<i32>(body)?;
-                reply((0i32, 0i32))
-            }
+            "GetNSelections" => reply((self.get_n_selections_async(),)),
+            "GetSelection" => reply(self.get_selection_async(args::<i32>(body)?)),
             "AddSelection" => {
-                args::<(i32, i32)>(body)?;
-                reply((false,))
+                let (start_offset, end_offset) = args::<(i32, i32)>(body)?;
+                reply((self.add_selection_async(start_offset, end_offset),))
             }
-            "RemoveSelection" => {
-                args::<i32>(body)?;
-                reply((false,))
-            }
+            "RemoveSelection" => reply((self.remove_selection_async(args::<i32>(body)?),)),
             "SetSelection" => {
-                args::<(i32, i32, i32)>(body)?;
-                reply((false,))
+                let (selection_num, start_offset, end_offset) = args::<(i32, i32, i32)>(body)?;
+                reply((self.set_selection_async(selection_num, start_offset, end_offset),))
             }
             "GetRangeExtents" => {
-                args::<(i32, i32, u32)>(body)?;
-                reply((0i32, 0i32, 0i32, 0i32))
+                let (start_offset, end_offset, coord_type) = args::<(i32, i32, u32)>(body)?;
+                reply(self.get_range_extents_async(start_offset, end_offset, coord_type))
             }
             "GetBoundedRanges" => {
-                args::<(i32, i32, i32, i32, u32, u32, u32)>(body)?;
-                reply((Vec::<AtSpiTextRange>::new(),))
+                let (x, y, width, height, coord_type, x_clip_type, y_clip_type) =
+                    args::<(i32, i32, i32, i32, u32, u32, u32)>(body)?;
+                reply((self.get_bounded_ranges_async(x, y, width, height, coord_type, x_clip_type, y_clip_type),))
             }
             "ScrollSubstringTo" => {
-                args::<(i32, i32, u32)>(body)?;
-                reply((false,))
+                let (start_offset, end_offset, scroll_type) = args::<(i32, i32, u32)>(body)?;
+                reply((self.scroll_substring_to_async(start_offset, end_offset, scroll_type),))
             }
             "ScrollSubstringToPoint" => {
-                args::<(i32, i32, u32, i32, i32)>(body)?;
-                reply((false,))
+                let (start_offset, end_offset, coord_type, x, y) = args::<(i32, i32, u32, i32, i32)>(body)?;
+                reply((self.scroll_substring_to_point_async(start_offset, end_offset, coord_type, x, y),))
             }
             _ => Err(DBusError::unknown_method()),
         }
     }
 
     fn get_property(&self, name: &str) -> Option<Value<'static>> {
-        let node = self.node.upgrade()?;
+        self.node.upgrade()?;
         Some(match name {
-            "version" => Value::from(TEXT_VERSION),
-            "CharacterCount" => Value::from(length(&Self::text_of(&node))),
-            "CaretOffset" => Value::from(0i32),
+            "version" => Value::from(self.version()),
+            "CharacterCount" => Value::from(self.character_count()),
+            "CaretOffset" => Value::from(self.caret_offset()),
             _ => return None,
         })
     }
