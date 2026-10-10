@@ -16,6 +16,11 @@
 # <mode>-popup-NN-<page>.png: a popup is a surface of its own, which only the compositor's
 # picture shows. Use it with FERROUI_SMOKE_SCREENSHOT_PAGES=ComboBox (or Menu).
 #
+# With CATALOG_DECORATED=1 the window of the catalog gives up the decorations of the compositor
+# (FERROUI_SMOKE_DRAWN_DECORATIONS) and is made a floating window (swaymsg), so that the title
+# bar, the border and the shadow the framework draws are in the picture:
+# <mode>-decorated-NN-<page>.png. Use an output larger than the window (sway-run.sh --size).
+#
 # Needs: grim. Prints the number of pictures; fails when there is none or the catalog failed.
 set -u
 
@@ -43,6 +48,11 @@ if [ -n "${CATALOG_POPUP:-}" ]; then
     export FERROUI_SMOKE_OPEN_POPUP="$CATALOG_POPUP"
 fi
 
+if [ -n "${CATALOG_DECORATED:-}" ]; then
+    prefix="$mode-decorated"
+    export FERROUI_SMOKE_DRAWN_DECORATIONS=1
+fi
+
 index=0
 FERROUI_CATALOG_WAYLAND="$wayland" \
 FERROUI_SMOKE_SCREENSHOTS="$out/framework-$mode" \
@@ -53,6 +63,9 @@ FERROUI_SMOKE_PAGES="$interval" \
         "Selecting "*)
             page="$(echo "${line#Selecting }" | tr -c 'A-Za-z0-9\n' '-' | sed 's/--*/-/g; s/^-//; s/-$//')"
             index=$((index + 1))
+            if [ -n "${CATALOG_DECORATED:-}" ] && [ "$index" -eq 1 ]; then
+                swaymsg floating enable >>"$log" 2>&1
+            fi
             sleep "$settle"
             grim "$out/$prefix-$(printf '%02d' "$index")-$page.png" 2>>"$log"
             ;;

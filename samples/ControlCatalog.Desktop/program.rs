@@ -31,7 +31,10 @@
 //! a screenshot run `FERROUI_SMOKE_OPEN_POPUP=combobox` (or `menu`) opens
 //! the first combo box (or the first menu item) of each page that is shown,
 //! so that a picture taken from outside (the compositor's, on Wayland) has a
-//! popup in it; the frame the framework draws of the window does not. On
+//! popup in it; the frame the framework draws of the window does not. With
+//! `FERROUI_SMOKE_DRAWN_DECORATIONS` the window asks once for less than
+//! full decorations before the first page, after which a Wayland compositor
+//! leaves the decorations to the framework. On
 //! Windows the client area of the window is captured as well, as the
 //! system composed it (`NN-<header>-window.png`); only the window of the
 //! application is captured, never the desktop. The system does not draw
@@ -68,7 +71,7 @@ use ferroui_base::media::imaging::{Bitmap, BitmapEncoderOptions, PngBitmapEncode
 use ferroui_base::platform::{AlphaFormat, PixelFormat};
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::{PixelPoint, PixelRect, PixelSize, Ref, Size, Vector, Visual};
-use ferroui_controls::{AppBuilder, Application, ComboBox, MenuItem, Window};
+use ferroui_controls::{AppBuilder, Application, ComboBox, MenuItem, Window, WindowDecorations};
 use ferroui_desktop::AppBuilderDesktopExtensions;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
@@ -445,6 +448,15 @@ fn screenshot_run(directory: PathBuf) {
                         "Screenshots: the client area is extended into the frame: {}",
                         window.is_extended_into_window_decorations()
                     );
+                }
+                // With `FERROUI_SMOKE_DRAWN_DECORATIONS` the window asks once for less
+                // than full decorations and then for full ones again. On Wayland that
+                // ends the decorations of the compositor for the window for good, and
+                // the framework draws the title bar, the border and the shadow.
+                if std::env::var_os("FERROUI_SMOKE_DRAWN_DECORATIONS").is_some_and(|value| !value.is_empty()) {
+                    window.set_window_decorations(WindowDecorations::BorderOnly);
+                    window.set_window_decorations(WindowDecorations::Full);
+                    println!("Screenshots: the window asked for less than full decorations once");
                 }
                 fit_window_to_screen(&window);
             }

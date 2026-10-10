@@ -34,7 +34,7 @@
 //!   backend.
 //! - `--expect-scale=N`: the scale of the output, which the window has to
 //!   take.
-//! - `--skip=a,b`: phases to leave out (`screens`, `frames`, `input`, `popup`,
+//! - `--skip=a,b`: phases to leave out (`screens`, `frames`, `input`, `popup`, `decorations`,
 //!   `cursor`, `resize`, `state`, `title`).
 //!
 //! Touch is not checked: wlroots has no protocol that synthesizes it.
@@ -759,8 +759,10 @@ mod app {
         use ferroui_base::rendering::IRenderLoop;
         use ferroui_base::{PixelPoint, PixelSize, Point, Size, Vector};
         use ferroui_controls::platform::{IScreenImpl, IWindowingPlatform};
+        use ferroui_base::input::WindowDecorationsElementRole;
+        use ferroui_controls::platform::PlatformRequestedDrawnDecoration;
         use ferroui_controls::primitives::Popup;
-        use ferroui_controls::{PlacementMode, WindowState};
+        use ferroui_controls::{PlacementMode, WindowDecorations, WindowState};
         use wayland_client::Proxy;
         use ferroui_wayland::screens::SnapshotScreensImpl;
         use ferroui_wayland::server::wayland_worker_client::WaylandWorkerClient;
@@ -946,6 +948,14 @@ mod app {
                 if options.runs("title") {
                     report.phase("title");
                     title_checks(&report, probe, &window).await;
+                }
+            }
+
+            // Last: the window is drawn with its own decorations from here on, and floats.
+            if let Some(probe) = &mut probe {
+                if options.runs("decorations") {
+                    report.phase("decorations");
+                    decorations_checks(&report, probe, &window, client.as_ref()).await;
                 }
             }
 
@@ -1321,6 +1331,185 @@ mod app {
             }
 
             window_impl.set_input(framework_input);
+        }
+
+        /// The window geometry the worker last gave the compositor for the first top-level.
+        fn window_geometry(client: &Rc<WaylandWorkerClient>) -> Option<(i32, i32, i32, i32)> {
+            client
+                .invoke_oob(|worker| worker.state.top_levels.values().next().and_then(|top_level| top_level.shell().last_window_geometry()))
+                .recv_timeout(STEP_TIMEOUT)
+                .ok()
+                .flatten()
+        }
+
+        /// The rectangle of the view of the window in the compositor.
+        fn view_rect() -> Option<(i32, i32, i32, i32)> {
+            sway::view(TITLE).and_then(|view| sway::rect(&view, "rect"))
+        }
+
+        /// A press at a point of the output, a drag by an offset in steps, and a release.
+        fn drag(probe: &mut Probe, from: (i32, i32), by: (i32, i32), extent: (u32, u32)) -> Result<(), String> {
+            let clamp = |value: i32, limit: u32| value.clamp(0, limit as i32 - 1) as u32;
+            probe.pointer_move(clamp(from.0, extent.0), clamp(from.1, extent.1), extent)?;
+            probe.pointer_button(true)?;
+            for step in 1..=8 {
+                let x = from.0 + by.0 * step / 8;
+                let y = from.1 + by.1 * step / 8;
+                probe.pointer_move(clamp(x, extent.0), clamp(y, extent.1), extent)?;
+                std::thread::sleep(Duration::from_millis(30));
+            }
+            probe.pointer_button(false)
+        }
+
+        /// Decorations: what the compositor answered about them; then the application asks
+        /// for less than full decorations once, after which the framework draws them for
+        /// good (title bar, border, resize grips, shadow) and the window geometry leaves the
+        /// shadow out; a press on the drawn title bar moves the floating window and a press on
+        /// a drawn resize grip resizes it, both done by the compositor.
+        async fn decorations_checks(report: &Report, probe: &mut Probe, window: &Ref<Window>, client: Option<&Rc<WaylandWorkerClient>>) {
+            let (Some(client), Some(window_impl)) = (client, window.platform_impl()) else {
+                report.check("decorations", false, "the worker client or the platform window is missing".to_string());
+                return;
+            };
+            let all = PlatformRequestedDrawnDecoration::TITLE_BAR
+                | PlatformRequestedDrawnDecoration::BORDER
+                | PlatformRequestedDrawnDecoration::RESIZE_GRIPS
+                | PlatformRequestedDrawnDecoration::SHADOW;
+
+            let has_manager = client
+                .invoke_oob(|worker| worker.state.globals.as_ref().is_some_and(|globals| globals.xdg_decoration_manager.is_some()))
+                .recv_timeout(STEP_TIMEOUT)
+                .unwrap_or(false);
+            let drawn_before = window_impl.requested_drawn_decorations();
+            report.check(
+                "decoration mode",
+                if has_manager {
+                    !window_impl.needs_managed_decorations() && drawn_before == PlatformRequestedDrawnDecoration::NONE
+                } else {
+                    window_impl.needs_managed_decorations() && drawn_before == all
+                },
+                format!(
+                    "the compositor has {} decoration manager; the framework is asked to draw {drawn_before:?}",
+                    if has_manager { "a" } else { "no" }
+                ),
+            );
+
+            // Less than full decorations once: the decoration object is destroyed for good and
+            // the framework draws from then on, also when full decorations are asked for again.
+            window.set_window_decorations(WindowDecorations::BorderOnly);
+            delay(Duration::from_millis(200)).await;
+            window.set_window_decorations(WindowDecorations::Full);
+            let scaling = window.render_scaling();
+            let column = ((MARKER_ORIGIN.0 + MARKER_SIZE / 2.0) * scaling) as u32;
+            // The first row of the marker in the composed output: it moves down by the title bar.
+            let marker_row = |picture: &Picture| (0..picture.height).find(|y| close_to(picture.pixel(column, *y), MARKER_FILL));
+            let started = std::time::Instant::now();
+            let mut title_bar = None;
+            let mut top_pixel = None;
+            while started.elapsed() < STEP_TIMEOUT {
+                if let Ok(picture) = probe.capture() {
+                    let moved = marker_row(&picture).map(|row| f64::from(row) / scaling - MARKER_ORIGIN.1);
+                    if moved.is_some_and(|moved| moved >= 8.0) {
+                        title_bar = moved;
+                        top_pixel = picture.pixel(picture.width / 2, 4);
+                        break;
+                    }
+                }
+                delay(Duration::from_millis(200)).await;
+            }
+            let geometry = window_geometry(client);
+            let view = view_rect();
+            let drawn = window_impl.requested_drawn_decorations();
+            report.check(
+                "drawn decorations",
+                window_impl.needs_managed_decorations() && drawn == all,
+                format!("after the application asked for less than full decorations the framework is asked to draw {drawn:?}"),
+            );
+            report.check(
+                "title bar",
+                title_bar.is_some_and(|height| (8.0..=80.0).contains(&height)) && !close_to(top_pixel, FILL),
+                format!("the content moved down by {title_bar:?} in the composed output, and the top of the window is {top_pixel:?}"),
+            );
+            report.check(
+                "window geometry",
+                match (geometry, view) {
+                    (Some((left, top, width, height)), Some((_, _, view_width, view_height))) => {
+                        left >= 0 && top >= 0 && (width, height) == (view_width, view_height)
+                    }
+                    _ => false,
+                },
+                format!("the window geometry sent with the frame is {geometry:?} (left, top, width, height); the view of the compositor is {view:?}"),
+            );
+            let (Some(title_bar), Some(_)) = (title_bar, geometry) else {
+                return;
+            };
+
+            // A floating window, which the compositor lets the pointer move and resize.
+            let floated = sway::message(&["floating", "enable"]).is_some();
+            delay(Duration::from_millis(800)).await;
+            let (Some(view), Some(geometry), Some(((output_width, output_height), _, _))) =
+                (view_rect(), window_geometry(client), output_geometry())
+            else {
+                report.check("floating", false, format!("the compositor did not float the window (asked: {floated})"));
+                return;
+            };
+            let extent = (output_width as u32, output_height as u32);
+            // A point of the client area in the coordinates of the output.
+            let to_output = |x: f64, y: f64| (view.0 + x as i32 - geometry.0, view.1 + y as i32 - geometry.1);
+            let input_root = window.input_root();
+
+            let title_point = (f64::from(geometry.0) + f64::from(geometry.2) / 2.0, f64::from(geometry.1) + title_bar / 2.0);
+            let role = input_root.hit_test_chrome_element(Point::new(title_point.0, title_point.1));
+            let from = to_output(title_point.0, title_point.1);
+            let sent = drag(probe, from, (90, 60), extent);
+            let moved = wait_for(STEP_TIMEOUT, || view_rect().is_some_and(|now| (now.0 - view.0).abs() >= 40 || (now.1 - view.1).abs() >= 25)).await;
+            let after_move = view_rect();
+            report.check(
+                "interactive move",
+                role == Some(WindowDecorationsElementRole::TitleBar) && sent.is_ok() && moved,
+                format!(
+                    "a drag of the drawn title bar (role {role:?}) from {from:?} by (90, 60): the view went from {view:?} to {after_move:?}: {sent:?}"
+                ),
+            );
+
+            // The grip of the bottom right corner: the first point along the diagonal through
+            // the corner of the window geometry that the decorations name so.
+            let (Some(view), Some(geometry)) = (view_rect(), window_geometry(client)) else {
+                report.check("interactive resize", false, "the view or the window geometry is gone".to_string());
+                return;
+            };
+            let to_output = |x: f64, y: f64| (view.0 + x as i32 - geometry.0, view.1 + y as i32 - geometry.1);
+            let corner = (f64::from(geometry.0 + geometry.2), f64::from(geometry.1 + geometry.3));
+            let grip = (-16..=24).map(|d| (corner.0 + f64::from(d), corner.1 + f64::from(d))).find(|point| {
+                input_root.hit_test_chrome_element(Point::new(point.0, point.1)) == Some(WindowDecorationsElementRole::ResizeSE)
+            });
+            let Some(grip) = grip else {
+                report.check(
+                    "interactive resize",
+                    false,
+                    format!("no point around the corner {corner:?} of the window geometry {geometry:?} is the bottom right resize grip"),
+                );
+                return;
+            };
+            let from = to_output(grip.0, grip.1);
+            let size_before = window.client_size();
+            let sent = drag(probe, from, (70, 50), extent);
+            let resized = wait_for(STEP_TIMEOUT, || {
+                view_rect().is_some_and(|now| now.2 - view.2 >= 30 && now.3 - view.3 >= 20)
+                    && window.client_size().width - size_before.width >= 30.0
+            })
+            .await;
+            let after_resize = view_rect();
+            report.check(
+                "interactive resize",
+                sent.is_ok() && resized,
+                format!(
+                    "a drag of the drawn grip at {grip:?} of the client area ({from:?} of the output) by (70, 50): the view went from {view:?} to {after_resize:?}, the client size from {size_before:?} to {:?}: {sent:?}",
+                    window.client_size()
+                ),
+            );
+            let alive = probe.alive() && sway::view(TITLE).is_some();
+            report.check("after the decorations", alive, "the connection and the window are still there".to_string());
         }
 
         /// What the worker has of popups: how many are registered, how many have their role
