@@ -6,7 +6,8 @@ use crate::platform::{AlphaFormat, PixelFormat};
 use crate::PixelSize;
 
 /// A zero-initialised block of pixel memory with rows padded to 4 bytes.
-pub(crate) struct BitmapMemory {
+#[doc(hidden)]
+pub struct BitmapMemory {
     data: Vec<u8>,
     size: PixelSize,
     row_bytes: i32,

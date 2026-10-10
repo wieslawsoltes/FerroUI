@@ -1,7 +1,8 @@
 use std::fmt;
 
+#[doc(hidden)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub(crate) enum PixelFormatEnum {
+pub enum PixelFormatEnum {
     Rgb565,
     Rgba8888,
     Bgra8888,
@@ -32,7 +33,8 @@ impl PixelFormat {
     pub const RGB32: PixelFormat = PixelFormats::RGB32;
     pub const BGRA8888: PixelFormat = PixelFormats::BGRA8888;
 
-    const fn new(format: PixelFormatEnum) -> Self {
+    #[doc(hidden)]
+    pub const fn new(format: PixelFormatEnum) -> Self {
         Self { format }
     }
 
