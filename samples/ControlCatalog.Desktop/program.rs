@@ -7,7 +7,12 @@
 //! FERROUI_SMOKE_EXIT_MS=20000 FERROUI_SMOKE_PAGES=150 cargo run -p control-catalog-desktop
 //! FERROUI_SMOKE_SCREENSHOTS=target/screenshots cargo run -p control-catalog-desktop
 //! FERROUI_CATALOG_THEME=simple cargo run -p control-catalog-desktop
+//! FERROUI_CATALOG_WAYLAND=1 cargo run -p control-catalog-desktop
 //! ```
+//!
+//! On Linux `FERROUI_CATALOG_WAYLAND=1` (or `software`, for rendering
+//! through shared memory buffers alone) selects the Wayland backend, with
+//! the backend of the platform detection as its fallback.
 //!
 //! With `FERROUI_SMOKE_EXIT_MS=<n>` the main window is closed after `n`
 //! milliseconds, which ends the main loop; the process exits with the exit
@@ -23,6 +28,13 @@
 //! handful of others) are shown one after the other, `FERROUI_SMOKE_PAGES`
 //! milliseconds each (1500 by default), and each is drawn into a bitmap
 //! through the render target of the framework (`NN-<header>.png`). On
+//! a screenshot run `FERROUI_SMOKE_OPEN_POPUP=combobox` (or `menu`) opens
+//! the first combo box (or the first menu item) of each page that is shown,
+//! so that a picture taken from outside (the compositor's, on Wayland) has a
+//! popup in it; the frame the framework draws of the window does not. With
+//! `FERROUI_SMOKE_DRAWN_DECORATIONS` the window asks once for less than
+//! full decorations before the first page, after which a Wayland compositor
+//! leaves the decorations to the framework. On
 //! Windows the client area of the window is captured as well, as the
 //! system composed it (`NN-<header>-window.png`); only the window of the
 //! application is captured, never the desktop. The system does not draw
@@ -35,7 +47,7 @@
 //! yet: the command line switches `--wait-for-attach`, `--fbdev`, `--vnc`,
 //! `--full-headless`, `--drm`, `--dxgi` (with `--scaling`,
 //! `--orientation`, `--card`), and of the application builder the data
-//! annotations validation, the Wayland, X11, Vulkan and composition
+//! annotations validation, the X11, Vulkan and composition
 //! options, the Inter font, the developer tools and the native control
 //! samples of `NativeControls/` for Windows and macOS
 //! (`EmbedSample.Implementation`). The one for Linux is ported
@@ -58,8 +70,8 @@ use ferroui_base::logging::LogEventLevel;
 use ferroui_base::media::imaging::{Bitmap, BitmapEncoderOptions, PngBitmapEncoderOptions, RenderTargetBitmap};
 use ferroui_base::platform::{AlphaFormat, PixelFormat};
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
-use ferroui_base::{PixelSize, Ref, Vector, Visual};
-use ferroui_controls::{AppBuilder, Application, Window};
+use ferroui_base::{PixelPoint, PixelRect, PixelSize, Ref, Size, Vector, Visual};
+use ferroui_controls::{AppBuilder, Application, ComboBox, MenuItem, Window, WindowDecorations};
 use ferroui_desktop::AppBuilderDesktopExtensions;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
@@ -80,6 +92,8 @@ fn main() -> std::process::ExitCode {
 /// The application builder of the catalog.
 pub fn build_ferro_app() -> AppBuilder {
     let builder = smoke_platform_options(AppBuilder::configure::<App>()).use_platform_detect();
+    #[cfg(target_os = "linux")]
+    let builder = use_wayland_of_the_environment(builder);
     #[cfg(feature = "vello")]
     let builder = use_renderer_of_the_environment(builder);
     builder
@@ -91,6 +105,29 @@ pub fn build_ferro_app() -> AppBuilder {
             smoke_run()
         })
         .log_to_trace(LogEventLevel::Warning, &[])
+}
+
+/// The Wayland backend, when `FERROUI_CATALOG_WAYLAND` asks for it: `1` (or `egl`) with the
+/// rendering of its options (EGL when the compositor and the driver have it), `software` through
+/// shared memory buffers alone. With a compositor that cannot be used the backend of the
+/// platform detection takes over.
+///
+/// The original calls `UseWaylandWithFallback()` always. Here it is asked for, because the
+/// Wayland backend has no clipboard, no drag and drop and no input method yet (the later
+/// parts of stage 2 of `docs/porting/wayland-platform.md`): a catalog that moved to Wayland by
+/// itself on a Wayland session would lose what it has there through the X11 backend.
+#[cfg(target_os = "linux")]
+fn use_wayland_of_the_environment(builder: AppBuilder) -> AppBuilder {
+    use ferroui_wayland::{FerroWaylandPlatformExtensions, WaylandPlatformOptions};
+    let mut options = WaylandPlatformOptions::new();
+    match std::env::var("FERROUI_CATALOG_WAYLAND").ok().as_deref() {
+        Some("1") | Some("egl") => {}
+        // No profile to make a context with: no display of EGL is created.
+        Some("software") => options.gl_profiles = Vec::new(),
+        _ => return builder,
+    }
+    println!("ControlCatalog: the Wayland backend, with the backend of the platform detection as its fallback");
+    builder.with(std::rc::Rc::new(options)).use_wayland_with_fallback()
 }
 
 /// The render backend asked for with `FERROUI_RENDERER`: `vello` (the modes
@@ -276,35 +313,214 @@ fn fit_window_to_screen(window: &Ref<Window>) {
         return;
     };
     let area = screen.working_area();
-    let scaling = window.render_scaling();
+    let scaling = window.desktop_scaling();
     let client = window.client_size();
     let frame = window.frame_size().unwrap_or(client);
     let position = window.position();
-    let (frame_width, frame_height) = ((frame.width * scaling).ceil() as i32, (frame.height * scaling).ceil() as i32);
     println!(
-        "Screenshots: the window is at {}, {} with a frame of {frame_width} by {frame_height} pixels (client {} by {} at scaling {scaling}); the working area of its screen is {area:?}",
-        position.x, position.y, client.width, client.height
+        "Screenshots: the window is at {}, {} with a frame of {} by {} and a client area of {} by {} (render scaling {}); the working area of its screen is {area:?}, in units of which a unit of the window is {scaling}",
+        position.x,
+        position.y,
+        frame.width,
+        frame.height,
+        client.width,
+        client.height,
+        window.render_scaling()
     );
+    let Some(fitted) = client_size_that_fits(area, position, client, frame, scaling) else {
+        return;
+    };
+    window.set_width(fitted.width);
+    window.set_height(fitted.height);
+    window.set_position(area.position());
+    println!(
+        "Screenshots: the window did not fit its screen: moved to {}, {} with a client area of {} by {}",
+        area.x, area.y, fitted.width, fitted.height
+    );
+}
+
+/// The client size with which a window fits a working area once it is
+/// moved to the corner of the area, or `None` when the window lies within
+/// the area already.
+///
+/// `area` and `position` are in the units of the desktop (what the
+/// platform places windows and reports screens in), `client` and `frame`
+/// in the units of the window, and `desktop_scaling` is how many units of
+/// the desktop one unit of the window is (`Window::desktop_scaling`). It
+/// is not the scaling the window renders with: where the system works in
+/// physical pixels the two are the same (Windows, X11), and where the
+/// system works in logical units it is 1 whatever the window renders with
+/// (Wayland, macOS).
+fn client_size_that_fits(
+    area: PixelRect,
+    position: PixelPoint,
+    client: Size,
+    frame: Size,
+    desktop_scaling: f64,
+) -> Option<Size> {
+    let (frame_width, frame_height) =
+        ((frame.width * desktop_scaling).ceil() as i32, (frame.height * desktop_scaling).ceil() as i32);
     let fits = position.x >= area.x
         && position.y >= area.y
         && position.x + frame_width <= area.right()
         && position.y + frame_height <= area.bottom();
     if fits {
+        return None;
+    }
+    let width = client.width.min(f64::from(area.width) / desktop_scaling - (frame.width - client.width));
+    let height = client.height.min(f64::from(area.height) / desktop_scaling - (frame.height - client.height));
+    Some(Size::new(width.floor(), height.floor()))
+}
+
+/// With `FERROUI_SMOKE_OPEN_POPUP` in a screenshot run: looks at the window four times a
+/// page and opens the first combo box (`combobox`, or `1`) or the first menu item (`menu`)
+/// that was not there at the look before, which is the first of the page that was just
+/// shown. The first look only remembers what the window has by itself. The control is opened
+/// once it is at the same place at two looks: a page comes in with a transition that slides
+/// its content, and a popup takes its place from where its control is when it opens (the
+/// first pictures had the popups at the edge of the output the page came in from).
+fn open_popups_of_pages(interval: Duration) {
+    let menu = match std::env::var("FERROUI_SMOKE_OPEN_POPUP").ok().as_deref() {
+        Some("menu") => true,
+        Some("combobox") | Some("1") => false,
+        _ => return,
+    };
+    let seen: std::cell::RefCell<Option<Vec<Ref<Visual>>>> = std::cell::RefCell::new(None);
+    let opened: std::cell::RefCell<Option<Ref<Visual>>> = std::cell::RefCell::new(None);
+    let candidate: std::cell::RefCell<Option<(Ref<Visual>, Option<ferroui_base::Point>)>> = std::cell::RefCell::new(None);
+    let timer = DispatcherTimer::run(
+        move || {
+            let Some(window) = main_window() else { return true };
+            // One look after a popup was opened: where the platform put it.
+            if let Some(control) = opened.borrow_mut().take() {
+                report_popup_placement(&window, &control);
+            }
+            let candidates: Vec<Ref<Visual>> = window
+                .clone()
+                .upcast::<Visual>()
+                .get_visual_descendants()
+                .filter(|visual| if menu { visual.cast::<MenuItem>().is_some() } else { visual.cast::<ComboBox>().is_some() })
+                .collect();
+            let mut seen = seen.borrow_mut();
+            let first_look = seen.is_none();
+            let known = seen.get_or_insert_with(Vec::new);
+            let new: Vec<Ref<Visual>> =
+                candidates.into_iter().filter(|visual| !known.iter().any(|seen| seen.ptr_eq(visual))).collect();
+            known.extend(new.iter().cloned());
+            if first_look {
+                return true;
+            }
+            if let Some(first) = new.into_iter().find(|visual| visual.is_effectively_visible()) {
+                let window_visual = window.clone().upcast::<Visual>();
+                println!(
+                    "Screenshots: a control to open appeared at {:?} of the window",
+                    first.translate_point(ferroui_base::Point::new(0.0, 0.0), &window_visual)
+                );
+                *candidate.borrow_mut() = Some((first, None));
+                return true;
+            }
+            let window_visual = window.clone().upcast::<Visual>();
+            let settled = {
+                let mut candidate = candidate.borrow_mut();
+                match candidate.as_mut() {
+                    Some((control, last)) => {
+                        let now = control.translate_point(ferroui_base::Point::new(0.0, 0.0), &window_visual);
+                        if now.is_some() && now == *last {
+                            println!("Screenshots: the control stays at {now:?} of the window");
+                            true
+                        } else {
+                            *last = now;
+                            false
+                        }
+                    }
+                    None => false,
+                }
+            };
+            let first = if settled { candidate.borrow_mut().take().map(|(control, _)| control) } else { None };
+            if let Some(first) = first {
+                if let Some(combo_box) = first.cast::<ComboBox>() {
+                    println!("Screenshots: opening the drop-down of a combo box");
+                    combo_box.set_is_drop_down_open(true);
+                } else if let Some(menu_item) = first.cast::<MenuItem>() {
+                    println!("Screenshots: opening a menu item");
+                    menu_item.open();
+                }
+                *opened.borrow_mut() = Some(first);
+            }
+            true
+        },
+        interval / 4,
+        DispatcherPriority::BACKGROUND,
+    );
+    // The timer lives as long as the run.
+    std::mem::forget(timer);
+}
+
+/// Says where the popup of a control that was just opened is, on a platform that can tell: on
+/// the Wayland backend the compositor places a popup, and the line compares the place it
+/// reported (relative to the window geometry of the window) with the control the popup
+/// belongs to. A popup that is not below its control, at its left edge or centred under it,
+/// is a line with `[FAILED]`.
+#[cfg(target_os = "linux")]
+fn report_popup_placement(window: &Ref<Window>, control: &Ref<Visual>) {
+    use ferroui_base::{FerroLocator, LocatorExtensions, Point};
+    use ferroui_wayland::server::wayland_worker_client::WaylandWorkerClient;
+    let Some(client) = FerroLocator::current().get_service::<WaylandWorkerClient>() else {
+        return;
+    };
+    let window_visual = window.clone().upcast::<Visual>();
+    let Some(origin) = control.translate_point(Point::new(0.0, 0.0), &window_visual) else {
+        println!("Popup placement: [FAILED] the control is not in the window");
+        return;
+    };
+    let size = control.bounds().size();
+    let placements = client
+        .invoke_oob(|worker| {
+            let state = &worker.state;
+            // The popups whose parent is a window: a popup of a popup is placed against its parent.
+            state
+                .popups
+                .values()
+                .filter(|popup| state.top_levels.contains_key(&popup.parent()))
+                .map(|popup| popup.placement())
+                .collect::<Vec<_>>()
+        })
+        .recv_timeout(Duration::from_secs(5))
+        .unwrap_or_default();
+    if placements.is_empty() {
+        println!("Popup placement: [FAILED] the worker has no popup of the window; the control is at {origin:?} with {size:?}");
         return;
     }
-    let width = client.width.min(f64::from(area.width) / scaling - (frame.width - client.width));
-    let height = client.height.min(f64::from(area.height) / scaling - (frame.height - client.height));
-    window.set_width(width.floor());
-    window.set_height(height.floor());
-    window.set_position(area.position());
-    println!(
-        "Screenshots: the window did not fit its screen: moved to {}, {} with a client area of {} by {}",
-        area.x,
-        area.y,
-        width.floor(),
-        height.floor()
-    );
+    for placement in placements {
+        let (left, top) = placement.parent_geometry.map_or((0, 0), |(left, top, _, _)| (left, top));
+        let verdict = match placement.configure {
+            Some(configure) => {
+                let x = f64::from(configure.x + left);
+                let y = f64::from(configure.y + top);
+                let width = f64::from(configure.width);
+                let below = (y - (origin.y + size.height)).abs() <= 12.0;
+                let centred = (x + width / 2.0 - (origin.x + size.width / 2.0)).abs() <= 12.0;
+                let left_aligned = (x - origin.x).abs() <= 12.0;
+                below && (centred || left_aligned)
+            }
+            None => false,
+        };
+        println!(
+            "Popup placement: [{}] the control is at ({}, {}) with {} by {} in the window; the positioner was {:?} against the window geometry {:?}; the compositor configured {:?}",
+            if verdict { "ok" } else { "FAILED" },
+            origin.x,
+            origin.y,
+            size.width,
+            size.height,
+            (placement.positioner, placement.requested_anchor_rect),
+            placement.parent_geometry,
+            placement.configure
+        );
+    }
 }
+
+#[cfg(not(target_os = "linux"))]
+fn report_popup_placement(_window: &Ref<Window>, _control: &Ref<Visual>) {}
 
 /// The screenshot run asked for with `FERROUI_SMOKE_SCREENSHOTS`.
 fn screenshot_run(directory: PathBuf) {
@@ -317,6 +533,7 @@ fn screenshot_run(directory: PathBuf) {
         pages.split(',').map(str::trim).filter(|header| !header.is_empty()).map(str::to_string).collect();
     let interval = Duration::from_millis(environment_milliseconds("FERROUI_SMOKE_PAGES").unwrap_or(1500));
     println!("Screenshots of {headers:?} to {}, {interval:?} a page", directory.display());
+    open_popups_of_pages(interval);
     // Before the first page is shown: the window is made to fit its screen.
     // The timer stops itself after its only tick.
     let _timer = DispatcherTimer::run_once(
@@ -334,6 +551,15 @@ fn screenshot_run(directory: PathBuf) {
                         "Screenshots: the client area is extended into the frame: {}",
                         window.is_extended_into_window_decorations()
                     );
+                }
+                // With `FERROUI_SMOKE_DRAWN_DECORATIONS` the window asks once for less
+                // than full decorations and then for full ones again. On Wayland that
+                // ends the decorations of the compositor for the window for good, and
+                // the framework draws the title bar, the border and the shadow.
+                if std::env::var_os("FERROUI_SMOKE_DRAWN_DECORATIONS").is_some_and(|value| !value.is_empty()) {
+                    window.set_window_decorations(WindowDecorations::BorderOnly);
+                    window.set_window_decorations(WindowDecorations::Full);
+                    println!("Screenshots: the window asked for less than full decorations once");
                 }
                 fit_window_to_screen(&window);
             }
@@ -377,5 +603,72 @@ fn smoke_run() {
             Duration::from_millis(ms),
             DispatcherPriority::NORMAL,
         );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::client_size_that_fits;
+    use ferroui_base::{PixelPoint, PixelRect, Size};
+
+    const CATALOG: Size = Size::new(1100.0, 800.0);
+
+    fn frame(client: Size, horizontal: f64, vertical: f64) -> Size {
+        Size::new(client.width + horizontal, client.height + vertical)
+    }
+
+    /// Windows and X11 at scaling 1: the desktop is in pixels and a unit of the window is one.
+    #[test]
+    fn a_window_within_the_working_area_is_left_alone() {
+        let area = PixelRect::new(0, 0, 1920, 1040);
+        let fitted = client_size_that_fits(area, PixelPoint::new(100, 100), CATALOG, frame(CATALOG, 16.0, 39.0), 1.0);
+        assert_eq!(fitted, None);
+    }
+
+    #[test]
+    fn a_window_larger_than_the_working_area_is_shrunk_to_it() {
+        let area = PixelRect::new(0, 0, 1024, 728);
+        let fitted = client_size_that_fits(area, PixelPoint::new(0, 0), CATALOG, frame(CATALOG, 16.0, 39.0), 1.0);
+        assert_eq!(fitted, Some(Size::new(1008.0, 689.0)));
+    }
+
+    #[test]
+    fn a_window_over_the_edge_keeps_its_size_when_it_fits_from_the_corner() {
+        let area = PixelRect::new(0, 0, 1920, 1040);
+        let fitted = client_size_that_fits(area, PixelPoint::new(1500, 600), CATALOG, frame(CATALOG, 16.0, 39.0), 1.0);
+        assert_eq!(fitted, Some(CATALOG));
+    }
+
+    /// Windows and X11 at scaling 2: the desktop is in pixels, the window in units of two pixels.
+    #[test]
+    fn a_desktop_in_pixels_is_divided_by_the_scaling() {
+        let area = PixelRect::new(0, 0, 1920, 1040);
+        let fitted = client_size_that_fits(area, PixelPoint::new(0, 0), CATALOG, frame(CATALOG, 16.0, 39.0), 2.0);
+        assert_eq!(fitted, Some(Size::new(944.0, 481.0)));
+        // 1100 by 800 units are 2200 by 1600 pixels: within a desktop of 3840 by 2160.
+        let large = PixelRect::new(0, 0, 3840, 2120);
+        assert_eq!(client_size_that_fits(large, PixelPoint::new(200, 200), CATALOG, CATALOG, 2.0), None);
+    }
+
+    /// Wayland on an output of scale 2: the screen is 1280 by 800 logical units, the window
+    /// renders at 2 and its desktop scaling is 1. Dividing by the render scaling here gave a
+    /// window of 640 by 400.
+    #[test]
+    fn a_desktop_in_logical_units_is_not_divided_by_the_render_scaling() {
+        let area = PixelRect::new(0, 0, 1280, 800);
+        let tiled = Size::new(1280.0, 800.0);
+        assert_eq!(client_size_that_fits(area, PixelPoint::new(0, 0), tiled, tiled, 1.0), None);
+        assert_eq!(client_size_that_fits(area, PixelPoint::new(0, 0), CATALOG, CATALOG, 1.0), None);
+        let small = PixelRect::new(0, 0, 640, 360);
+        assert_eq!(client_size_that_fits(small, PixelPoint::new(0, 0), CATALOG, CATALOG, 1.0), Some(Size::new(640.0, 360.0)));
+    }
+
+    /// A working area that does not start at the origin (a task bar at the left or the top).
+    #[test]
+    fn a_window_before_the_start_of_the_working_area_is_moved() {
+        let area = PixelRect::new(60, 30, 1860, 1050);
+        let client = Size::new(800.0, 600.0);
+        assert_eq!(client_size_that_fits(area, PixelPoint::new(0, 0), client, client, 1.0), Some(client));
+        assert_eq!(client_size_that_fits(area, PixelPoint::new(60, 30), client, client, 1.0), None);
     }
 }

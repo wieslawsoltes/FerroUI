@@ -8,8 +8,8 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. The s
 
 | | Present | Total | Missing | Waived | Not applicable | Out of scope | Share |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Members of the projects in scope | 27859 | 32172 | 1445 | 2868 | - | - | 95.1% of total less waived |
-| Members of every upstream source project of the extraction | 27859 | 37391 | 1445 | 2868 | 1132 | 4087 | 74.5% of total |
+| Members of the projects in scope | 28277 | 32988 | 1843 | 2868 | - | - | 93.9% of total less waived |
+| Members of every upstream source project of the extraction | 28277 | 37391 | 1843 | 2868 | 1132 | 3271 | 75.6% of total |
 
 The first row is the headline of the tracking: it leaves out the waived members and everything out of scope. The second row leaves out nothing: every member of every C# project the extraction reads, whether or not the port will ever have it. A member is *present* when an item of the mapped name exists; names are matched, not behaviour.
 
@@ -38,6 +38,7 @@ Files, types and members as present / missing / waived. *n/a* counts the files m
 | [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | in | 14 / 0 / 0 | 54 / 0 / 1 | 198 / 1 / 3 | 0 (0) | 98.0% |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | in | 5 / 0 / 0 | 6 / 0 / 0 | 68 / 0 / 5 | 1 (0) | 93.2% |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | in | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 | 1 (0) | 100.0% |
+| [Avalonia.Wayland](tracking/Avalonia.Wayland.md) | in | 58 / 23 / 0 | 80 / 43 / 0 | 418 / 398 / 0 | 0 (0) | 51.2% |
 | [Avalonia.X11](tracking/Avalonia.X11.md) | in | 86 / 2 / 0 | 176 / 8 / 107 | 3531 / 290 / 1076 | 0 (0) | 72.1% |
 | [Avalonia.Browser](tracking/Avalonia.Browser.md) | in | 50 / 0 / 0 | 60 / 0 / 2 | 340 / 0 / 88 | 2 (13) | 77.1% |
 | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | in | 3 / 0 / 0 | 3 / 0 / 0 | 5 / 0 / 3 | 0 (0) | 62.5% |
@@ -52,7 +53,6 @@ Files, types and members as present / missing / waived. *n/a* counts the files m
 | [Avalonia.iOS](tracking/Avalonia.iOS.md) | in | 37 / 3 / 0 | 51 / 5 / 1 | 254 / 60 / 17 | 1 (0) | 76.7% |
 | [Avalonia.Generators](tracking/Avalonia.Generators.md) | in: every file not applicable | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 / 0 | 31 (264) | 0.0% |
 | [Avalonia.Vulkan](tracking/Avalonia.Vulkan.md) | out (started) | 30 files | 151 types | 2034 members | 0 (0) | 0.0% |
-| [Avalonia.Wayland](tracking/Avalonia.Wayland.md) | out (started) | 81 files | 123 types | 816 members | 0 (0) | 0.0% |
 | [Avalonia.Headless.Vnc](tracking/Avalonia.Headless.Vnc.md) | out (started) | 3 files | 3 types | 11 members | 0 (0) | 0.0% |
 | [Avalonia.LinuxFramebuffer](tracking/Avalonia.LinuxFramebuffer.md) | out (started) | 30 files | 76 types | 529 members | 0 (0) | 0.0% |
 | [Avalonia.Win32.Automation](tracking/Avalonia.Win32.Automation.md) | out (not started) | 40 files | 64 types | 598 members | 1 (0) | 0.0% |
@@ -248,6 +248,14 @@ Files without a Rust file, types without a Rust type, and members without a Rust
 0 files, 0 types and 1 members missing (0 members of the missing types, 1 members of types that exist).
 
 - **Members of types that exist (1):** `TypeHelper.FindProperty`
+
+### [Avalonia.Wayland](tracking/Avalonia.Wayland.md)
+
+23 files, 43 types and 398 members missing (278 members of the missing types, 120 members of types that exist).
+
+- **Files (23):** `Clipboard/WaylandClipboardImpl.cs`, `Clipboard/WaylandDataTransfer.cs`, `Clipboard/WaylandDragSource.cs`, `Clipboard/WaylandMimeMapper.cs`, `Clipboard/WaylandOutgoingTransfer.cs`, `IWaylandXdgTopLevelExport.cs`, `Server/Interop/DrmGbmUnsafeNativeMethods.cs`, `Server/Interop/Pipe2Stream.cs`, `Server/Interop/WaylandEglNativeMethods.cs`, `Server/Interop/XkbCommonNativeMethods.cs`, `Server/Transient/Clipboard/WaylandDataDevice.cs`, `Server/Transient/Clipboard/WaylandDataOffer.cs`, `Server/Transient/Clipboard/WaylandDataSource.cs`, `Server/Transient/Clipboard/WaylandOfferCookie.cs`, `Server/Transient/IWaylandTextInputV3Events.cs`, `Server/Transient/Rendering/WaylandDmabufFeedback.cs`, `Server/Transient/Rendering/WaylandEglDisplay.cs`, `Server/Transient/Rendering/WaylandEglDmaBufPlatformGraphics.cs`, `Server/Transient/Rendering/WaylandEglDmaBufSurface.cs`, `Server/Transient/WaylandTextInputV3.cs`, `Server/Transient/XdgToplevelExport.cs`, `TextInputOptionsConverter.cs`, `WaylandTextUtils.cs`
+- **Types (43):** `DmabufFormatModifierPair`, `DmabufTranche`, `DrmDevice`, `DrmGbmUnsafeNativeMethods`, `GbmBoFlags`, `GbmBoHandle`, `IWaylandTextInputV3Events`, `IWaylandXdgTopLevelExport`, `Pipe2Stream`, `TextInputOptionsConverter`, `UnsafeNativeMethods`, `UnsafeNativeMethods.Errno`, `UnsafeNativeMethods.PollEvents`, `UnsafeNativeMethods.pollfd`, `UnsafeNativeMethods.wl_cursor`, `UnsafeNativeMethods.wl_cursor_image`, `WXdgPopup.PopupListener`, `WXdgShellSurface.XdgSurfaceListener`, `WXdgTopLevel.TopLevelListener`, `WaylandClipboardImpl`, `WaylandConversionExtensions`, `WaylandDataDevice`, `WaylandDataDeviceListener`, `WaylandDataOffer`, `WaylandDataOfferListener`, `WaylandDataSource`, `WaylandDataSourceListener`, `WaylandDataTransfer`, `WaylandDataTransferItem`, `WaylandDmabufFeedback`, `WaylandDmabufFeedback.FeedbackListener`, `WaylandDragSource`, `WaylandEglDisplay`, `WaylandEglDmaBufPlatformGraphics`, `WaylandEglDmaBufSurface`, `WaylandEglNativeMethods`, `WaylandMimeMapper`, `WaylandOfferCookie`, `WaylandOutgoingTransfer`, `WaylandTextInputV3`, `WaylandTextUtils`, `XdgToplevelExport`, `XkbCommonNativeMethods`
+- **Members of types that exist (120), by type:** `WindowBaseImpl` 24, `WSurface` 17, `WaylandWorker` 11, `IWSurface` 7, `WaylandGlobals` 7, `AvaloniaWaylandProtocolErrorException` 5, `IWSurfaceEventSink` 4, `WaylandInputDispatcher` 4, `WXdgShellSurface` 3, `WXdgTopLevel` 3, `WaylandConnection` 3, `WindowBaseImpl.Sink` 3, `AvaloniaWaylandException` 2, `AvaloniaWaylandFlushException` 2, `AvaloniaWaylandNetworkException` 2, `AvaloniaWaylandPollException` 2, `AvaloniaWaylandReadException` 2, `WakeupFd` 2, `WaylandBitmapCursor` 2, `IWXdgTopLevel` 1, `IWaylandFramebufferSurface` 1, `WaylandCursor` 1, `WaylandCursorImage` 1, `WaylandCursorManager.CursorEntry` 1, `WaylandEglWsiPlatformGraphics` 1, `WaylandInputEventCookie` 1, `WaylandOutputSnapshot` 1, `WaylandOutputsTracker.Output` 1, `WaylandPlatformGraphics.IWaylandGraphics` 1, `WaylandStandardCursor` 1, `WaylandSurfaceCreateResult<T>` 1, `WaylandWorkerClient` 1, `XdgPopupPositionerParams` 1, `XdgToplevelStates` 1
 
 ### [Avalonia.X11](tracking/Avalonia.X11.md)
 

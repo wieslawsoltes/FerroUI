@@ -29,6 +29,8 @@ ferroui-win32 = { workspace = true }
 # The native control demo of Linux: a window of the X server and a file chooser of GTK.
 [target.'cfg(target_os = "linux")'.dependencies]
 ferroui-x11 = { workspace = true }
+# The Wayland backend, which `FERROUI_CATALOG_WAYLAND` selects.
+ferroui-wayland = { workspace = true }
 
 [features]
 # The Vello render backend beside Skia: `FERROUI_RENDERER=vello` (the default order of its modes),

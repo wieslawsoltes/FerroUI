@@ -835,6 +835,120 @@ jobs:
             xrandr --listmonitors
             timeout 300 target/debug/examples/x11_window --smoke --expect-screens=2 --skip=clipboard'
 
+  # The Wayland platform (docs/porting/wayland-platform.md, section 11): the tests of the crate, and
+  # a window on a compositor. The compositor is sway on the headless backend of wlroots with its
+  # software renderer (scripts/wayland/sway-run.sh). The example asks the compositor what it knows
+  # of the window and of the outputs (its IPC), and is its own test client on a second connection:
+  # it reads the composed output (screen copy) and synthesizes pointer and keyboard input (the
+  # virtual pointer and virtual keyboard protocols). Rendered through wl_shm buffers and through
+  # EGL (Mesa's software rasterizer), on an output of scale 1 and of scale 2. Not covered: a
+  # desktop compositor (Mutter, KWin), a hardware GPU, touch, a compositor restart.
+  wayland:
+    name: Build and test (Linux, Wayland under headless sway)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: wayland
+      # libwayland-client, libwayland-egl, libEGL and libxkbcommon are opened at run time (nothing
+      # links them); Skia links FreeType and Fontconfig, and needs a font to answer for the default
+      # family. xkb-data has the keymap the virtual keyboard of the example gives the compositor.
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            sway libwayland-client0 libwayland-egl1 libxkbcommon0 xkb-data \
+            libegl1 libegl-mesa0 libgl1 libgles2 libgl1-mesa-dri \
+            libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config
+          sway --version
+      - name: Tests of the Wayland crate (no compositor needed)
+        run: cargo test --locked -p ferroui-wayland --no-fail-fast
+      - name: Build the window example
+        if: ${{ !cancelled() }}
+        run: cargo build --locked -p ferroui-wayland --features example --example wayland_window
+      - name: A window on a compositor, rendered through wl_shm buffers
+        run: |
+          scripts/wayland/sway-run.sh -- \
+            timeout 300 target/debug/examples/wayland_window --smoke
+      - name: The same rendered through EGL
+        if: ${{ !cancelled() }}
+        env:
+          LIBGL_ALWAYS_SOFTWARE: 1
+        run: |
+          scripts/wayland/sway-run.sh -- \
+            timeout 300 target/debug/examples/wayland_window --smoke --mode=egl
+      - name: On an output of scale 2, through wl_shm buffers
+        if: ${{ !cancelled() }}
+        run: |
+          scripts/wayland/sway-run.sh --scale 2 -- \
+            timeout 300 target/debug/examples/wayland_window --smoke --expect-scale=2
+      - name: On an output of scale 2, through EGL
+        if: ${{ !cancelled() }}
+        env:
+          LIBGL_ALWAYS_SOFTWARE: 1
+        run: |
+          scripts/wayland/sway-run.sh --scale 2 -- \
+            timeout 300 target/debug/examples/wayland_window --smoke --mode=egl --expect-scale=2
+      # Fractional scaling: the compositor announces the scale through wp_fractional_scale_v1 and
+      # the buffer is mapped to the logical size through wp_viewport. The mode of the output is one
+      # that 1.5 divides; the resize phase, whose mode it does not divide, is left out.
+      - name: On an output of scale 1.5, through wl_shm buffers
+        if: ${{ !cancelled() }}
+        run: |
+          scripts/wayland/sway-run.sh --size 1200x720 --scale 1.5 -- \
+            timeout 300 target/debug/examples/wayland_window --smoke --expect-scale=1.5 --skip=resize
+      - name: On an output of scale 1.5, through EGL
+        if: ${{ !cancelled() }}
+        env:
+          LIBGL_ALWAYS_SOFTWARE: 1
+        run: |
+          scripts/wayland/sway-run.sh --size 1200x720 --scale 1.5 -- \
+            timeout 300 target/debug/examples/wayland_window --smoke --mode=egl --expect-scale=1.5 --skip=resize
+      # The ControlCatalog on the Wayland backend with a combo box and a menu open: the catalog
+      # says where the compositor put each popup, and the step fails when that is not at the
+      # control the popup belongs to. The pictures the compositor took are an artifact.
+      - name: Build the ControlCatalog
+        if: ${{ !cancelled() }}
+        run: |
+          sudo apt-get install -y --no-install-recommends grim
+          cargo build --locked -p control-catalog-desktop
+      - name: The popups of the ControlCatalog are at their controls
+        if: ${{ !cancelled() }}
+        run: |
+          result=0
+          for popup in combobox menu; do
+            case "$popup" in combobox) page=ComboBox ;; menu) page=Menu ;; esac
+            for scale in 1 1.5 2; do
+              FERROUI_SMOKE_SCREENSHOT_PAGES="$page" CATALOG_POPUP="$popup" \
+                scripts/wayland/sway-run.sh --size 1920x1200 --scale "$scale" -- \
+                sh scripts/wayland/catalog-pictures.sh target/debug/control-catalog-desktop "catalog-pictures/scale-$scale" software 4000 || result=1
+            done
+          done
+          exit $result
+      - name: Upload the pictures of the catalog
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: wayland-catalog-pictures
+          path: catalog-pictures
+          if-no-files-found: ignore
+      # Without a compositor the backend does not start, and says why.
+      - name: Without a compositor the probe fails with a message
+        if: ${{ !cancelled() }}
+        run: |
+          set +e
+          out="$(env -u WAYLAND_DISPLAY -u WAYLAND_SOCKET XDG_RUNTIME_DIR=/nonexistent timeout 60 target/debug/examples/wayland_window 2>&1)"
+          status=$?
+          echo "$out"
+          test $status -ne 0
+          echo "$out" | grep -q "Unable to connect to Wayland display"
+
 
   # The Android platform (docs/porting/android-platform.md, section 12): the tests of what is logic,
   # and the package of the smoke application built without Gradle. Nothing runs on a device here:
