@@ -7,51 +7,65 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Avalonia.FreeDesktop` |
-| FerroUI | `src/FerroUI.FreeDesktop` (not created yet) |
+| FerroUI | `src/FerroUI.FreeDesktop` (exists) |
 | Crate | `ferroui-freedesktop` |
-| Phase / priority | not started / out of current scope / - |
-| Files | 0/18 (0.0%) |
-| Types | 0/26 (0.0%) |
+| Phase / priority | 5 - desktop (Linux) / P1 |
+| Files | 16/18 (88.9%) |
+| Types | 23/26 (88.5%) |
 | Members | 0/216 (0.0%) |
 
-This backend is outside the current porting scope. It is tracked at file and type granularity only; member counts are totals.
+This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
 
 ## Files
 
-### `(project root)` - files 0/11, types 0/15, members 0/76
+### `(project root)` - files 9/11, types 12/15, members 0/76
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `DBusCallQueue.cs` | `DBusCallQueue` | 5 | not started |
-| `DBusHelper.cs` | `DBusHelper` | 2 | not started |
-| `DBusMenuExporter.cs` | `DBusMenuExporter` | 3 | not started |
-| `DBusPlatformSettings.cs` | `DBusPlatformSettings` | 2 | not started |
-| `DBusSystemDialog.cs` | `DBusSystemDialog` | 7 | not started |
-| `DBusTrayIconImpl.cs` | `DBusTrayIconImpl`, `StatusNotifierItemDbusObj` | 37 | not started |
-| `IPortalParentLease.cs` | `IPortalParentLease`, `TrivialPortalParentLease` | 4 | not started |
-| `IX11InputMethod.cs` | `IX11InputMethodFactory`, `X11InputMethodForwardedKey`, `IX11InputMethodControl` | 11 | not started |
-| `LinuxMountedVolumeInfoListener.cs` | `LinuxMountedVolumeInfoListener` | 3 | not started |
-| `LinuxMountedVolumeInfoProvider.cs` | `LinuxMountedVolumeInfoProvider` | 1 | not started |
-| `NativeMethods.cs` | `NativeMethods` | 1 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `DBusCallQueue.cs` | `dbus_call_queue.rs` | present | 1/1 | - | 5 |  |
+| `DBusHelper.cs` | `dbus_helper.rs` | present | 1/1 | - | 2 |  |
+| `DBusMenuExporter.cs` | `d_bus_menu_exporter.rs` | missing | 0/1 | `DBusMenuExporter` | 3 |  |
+| `DBusPlatformSettings.cs` | `dbus_platform_settings.rs` | present | 1/1 | - | 2 |  |
+| `DBusSystemDialog.cs` | `dbus_system_dialog.rs` | present | 1/1 | - | 7 |  |
+| `DBusTrayIconImpl.cs` | `d_bus_tray_icon_impl.rs` | missing | 0/2 | `DBusTrayIconImpl`, `StatusNotifierItemDbusObj` | 37 |  |
+| `IPortalParentLease.cs` | `i_portal_parent_lease.rs` | present | 2/2 | - | 4 |  |
+| `IX11InputMethod.cs` | `ix11_input_method.rs` | present | 3/3 | - | 11 |  |
+| `LinuxMountedVolumeInfoListener.cs` | `linux_mounted_volume_info_listener.rs` | present | 1/1 | - | 3 |  |
+| `LinuxMountedVolumeInfoProvider.cs` | `linux_mounted_volume_info_provider.rs` | present | 1/1 | - | 1 |  |
+| `NativeMethods.cs` | `native_methods.rs` | present | 1/1 | - | 1 |  |
 
-### `DBusIme` - files 0/2, types 0/3, members 0/33
+### `DBusIme` - files 2/2, types 3/3, members 0/33
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `DBusTextInputMethodBase.cs` | `DBusInputMethodFactory<T>`, `DBusTextInputMethodBase` | 32 | not started |
-| `X11DBusImeHelper.cs` | `X11DBusImeHelper` | 1 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `DBusTextInputMethodBase.cs` | `dbus_ime/dbus_text_input_method_base.rs` | present | 2/2 | - | 32 |  |
+| `X11DBusImeHelper.cs` | `dbus_ime/x11_dbus_ime_helper.rs` | present | 1/1 | - | 1 |  |
 
-### `DBusIme/Fcitx` - files 0/3, types 0/5, members 0/70
+### `DBusIme/Fcitx` - files 3/3, types 5/5, members 0/70
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `FcitxEnums.cs` | `FcitxKeyEventType`, `FcitxCapabilityFlags`, `FcitxKeyState` | 47 | not started |
-| `FcitxICWrapper.cs` | `FcitxICWrapper` | 12 | not started |
-| `FcitxX11TextInputMethod.cs` | `FcitxX11TextInputMethod` | 11 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `FcitxEnums.cs` | `dbus_ime/fcitx/fcitx_enums.rs` | present | 3/3 | - | 47 |  |
+| `FcitxICWrapper.cs` | `dbus_ime/fcitx/fcitx_ic_wrapper.rs` | present | 1/1 | - | 12 |  |
+| `FcitxX11TextInputMethod.cs` | `dbus_ime/fcitx/fcitx_x11_text_input_method.rs` | present | 1/1 | - | 11 |  |
 
-### `DBusIme/IBus` - files 0/2, types 0/3, members 0/37
+### `DBusIme/IBus` - files 2/2, types 3/3, members 0/37
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `IBusEnums.cs` | `IBusModifierMask`, `IBusCapability` | 27 | not started |
-| `IBusX11TextInputMethod.cs` | `IBusX11TextInputMethod` | 10 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `IBusEnums.cs` | `dbus_ime/ibus/ibus_enums.rs` | present | 2/2 | - | 27 |  |
+| `IBusX11TextInputMethod.cs` | `dbus_ime/ibus/ibus_x11_text_input_method.rs` | present | 1/1 | - | 10 |  |
+
+## Rust-only files
+
+Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
+
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `dbus_ime/fcitx/dbus.rs` | **unmapped** | `InputContext`, `InputContext1`, `InputMethod`, `InputMethod1` |
+| `dbus_ime/ibus/dbus.rs` | **unmapped** | `InputContext`, `Portal`, `Service` |
+| `dbus_ime/tests.rs` | the unit tests of the module | `Fcitx4Context`, `Fcitx4Method`, `Fcitx5Context`, `Fcitx5Method`, `IBusContext`, `IBusPortal`, `IBusService`, `Recorded`, `TestBus`, `TestClient`, `TestDevice`, `TestRoot` |
+| `dbus_system_dialog/tests.rs` | the unit tests of the module | `Answer`, `Fixture`, `Portal` |
+| `event.rs` | **unmapped** | `Event` |
+| `signal_watch.rs` | **unmapped** | `CancellationFlag`, `CancellationState`, `Cancelled`, `Subscription` |
+| `test_support.rs` | **unmapped** | `FakeBus`, `Log`, `ServiceBuilder`, `TestConnections` |

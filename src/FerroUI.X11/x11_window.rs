@@ -4,6 +4,9 @@
 
 use crate::activity_tracking_helper::WindowActivationTrackingHelper;
 use crate::raw_event_grouping::{IRawEventGrouperDispatchQueue, RawEventGrouper};
+use crate::selections::drag_drop::x11_drop_target::{XdndTargetAtoms, XlibXdndTargetConnection};
+use crate::selections::drag_drop::xdnd_action_helper::XdndActions;
+use crate::selections::drag_drop::{IXdndWindow, X11DropTarget};
 use crate::transparency_helper::TransparencyHelper;
 use crate::x11_cursor_factory::CursorImpl;
 use crate::x11_enum_extensions::X11EnumExtensions;
@@ -17,6 +20,7 @@ use crate::x11_structs::{
     ChangeWindowFlags, CreateWindowArgs, EventMask, Gravity, MotifDecorations, MotifFlags, MotifFunctions,
     MotifWmHints, NetWmMoveResize, NotifyDetail, SetWindowValuemask, XEventName, XSizeHintsFlags, XWMHintsFlags,
 };
+use crate::x11_window_ime::QueuedImeKey;
 use crate::x11_window_info::X11WindowInfo;
 use crate::x_shm::X11ShmFramebufferSurface;
 use crate::x11_window_modes::{DefaultTopLevelWindowMode, InputProxyWindowMode, X11WindowMode};
@@ -24,15 +28,16 @@ use crate::xi2_manager::IXI2Client;
 use crate::xlib::{self, Atom, PropertyMode, XConfigureEvent, XDisplay, XEvent, XSyncValue, XIC, XID};
 use ferroui_base::input::platform::{IClipboard, IPlatformClipboardManagerImpl};
 use ferroui_base::input::raw::{
-    IRawInputEventArgs, RawDragEvent, RawMouseWheelEventArgs, RawPointerEventArgs, RawPointerEventType,
+    IDragDropDevice, IRawInputEventArgs, RawDragEvent, RawMouseWheelEventArgs, RawPointerEventArgs, RawPointerEventType,
     RawTextInputEventArgs,
 };
 use ferroui_base::input::{
     IInputDevice, IInputRoot, IKeyboardDevice, MouseDevice, PenDevice, PointerPressedEventArgs, TouchDevice,
     WindowDecorationsElementRole,
 };
+use ferroui_base::input::text_input::ITextInputMethodImpl;
 use ferroui_base::platform::storage::file_io::BclLauncher;
-use ferroui_base::platform::storage::{FallbackStorageProvider, ILauncher, IStorageProvider};
+use ferroui_base::platform::storage::{FallbackStorageProvider, ILauncher, IStorageProvider, StorageProviderFactory};
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider, IPlatformGraphics, PlatformThemeVariant};
 use ferroui_base::reactive::IDisposable;
@@ -52,10 +57,12 @@ use ferroui_controls::{
     WindowResizeReason, WindowState, WindowTransparencyLevel,
 };
 use ferroui_dialogs::ManagedStorageProvider;
+use ferroui_freedesktop::dbus_system_dialog::ParentLeaseProvider;
+use ferroui_freedesktop::{DBusSystemDialog, IPortalParentLease, IX11InputMethodControl, TrivialPortalParentLease};
 use ferroui_opengl::egl::{EglGlPlatformSurface, IEglWindowGlPlatformSurfaceInfo};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
-use std::collections::HashSet;
+use std::collections::{HashSet, VecDeque};
 use std::rc::{Rc, Weak};
 use std::sync::atomic::{AtomicI32, AtomicU64, Ordering};
 use std::sync::Arc;
@@ -393,7 +400,7 @@ fn is_handled_leave_enter_detail(detail: i32) -> bool {
 
 /// A window of the X11 platform.
 pub struct X11Window {
-    this: Weak<X11Window>,
+    pub(crate) this: Weak<X11Window>,
     platform: Rc<FerroX11Platform>,
     popup: bool,
     override_redirect: bool,
@@ -412,6 +419,12 @@ pub struct X11Window {
     cleaning_up: Cell<bool>,
     handle: Cell<XID>,
     pub(crate) xic: Cell<XIC>,
+    drag_drop_device: RefCell<Option<Rc<dyn IDragDropDevice>>>,
+    drop_target: RefCell<Option<Rc<X11DropTarget>>>,
+    pub(crate) ime: RefCell<Option<Rc<dyn ITextInputMethodImpl>>>,
+    pub(crate) ime_control: RefCell<Option<Rc<dyn IX11InputMethodControl>>>,
+    pub(crate) processing_ime: Cell<bool>,
+    pub(crate) ime_queue: RefCell<VecDeque<QueuedImeKey>>,
     render_handle: Cell<XID>,
     x_sync_counter: Cell<XID>,
     x_sync_value: Cell<XSyncValue>,
@@ -635,6 +648,12 @@ impl X11Window {
             cleaning_up: Cell::new(false),
             handle: Cell::new(handle),
             xic: Cell::new(std::ptr::null_mut()),
+            drag_drop_device: RefCell::new(None),
+            drop_target: RefCell::new(None),
+            ime: RefCell::new(None),
+            ime_control: RefCell::new(None),
+            processing_ime: Cell::new(false),
+            ime_queue: RefCell::new(VecDeque::new()),
             render_handle: Cell::new(render_handle),
             x_sync_counter: Cell::new(0),
             x_sync_value: Cell::new(XSyncValue { hi: 0, lo: 0 }),
@@ -834,11 +853,11 @@ impl X11Window {
             let positioner: Rc<dyn IPopupPositioner> = Rc::new(ManagedPopupPositioner::new(Rc::new(helper)));
             *window.popup_positioner.borrow_mut() = Some(positioner);
         }
-        // Stage 2 of docs/porting/x11-platform.md, in the order of the
-        // reference: the exporter of the native menu over D-Bus
-        // (`DBusMenuExporter`, with `X11PlatformOptions::use_d_bus_menu`),
-        // the native control host (`X11NativeControlHost`) and the input
-        // method of the window (`InitializeIme`).
+        // Stages 2e and 2f of docs/porting/x11-platform.md, in the order
+        // of the reference: the exporter of the native menu over D-Bus
+        // (`DBusMenuExporter`, with `X11PlatformOptions::use_d_bus_menu`)
+        // and the native control host (`X11NativeControlHost`).
+        window.initialize_ime();
 
         let mut data = vec![x11.atoms().WM_DELETE_WINDOW, x11.atoms()._NET_WM_SYNC_REQUEST];
 
@@ -867,11 +886,22 @@ impl X11Window {
         }
 
         // The storage providers of the reference, in its order: the file
-        // chooser of the desktop portal over D-Bus and the GTK dialogs
-        // (both stage 2 of docs/porting/x11-platform.md), then the managed
-        // dialogs, which is the one provider there is until then.
+        // chooser of the desktop portal over D-Bus, the GTK dialogs
+        // (stage 2e of docs/porting/x11-platform.md, not built) and the
+        // managed dialogs.
         let storage_window = weak.clone();
-        let storage_provider: Rc<dyn IStorageProvider> = Rc::new(FallbackStorageProvider::new(vec![Rc::new(move || {
+        let use_d_bus_file_picker = platform.options().use_d_bus_file_picker;
+        let portal_provider: StorageProviderFactory = Rc::new(move || {
+            if !use_d_bus_file_picker {
+                return Box::pin(std::future::ready(None));
+            }
+            let parent_lease_provider: ParentLeaseProvider = Rc::new(move || {
+                let lease: Rc<dyn IPortalParentLease> = Rc::new(TrivialPortalParentLease::new(format!("x11:{handle:X}")));
+                Box::pin(std::future::ready(Some(lease)))
+            });
+            Box::pin(DBusSystemDialog::try_create_async(Some(parent_lease_provider)))
+        });
+        let storage_provider: Rc<dyn IStorageProvider> = Rc::new(FallbackStorageProvider::new(vec![portal_provider, Rc::new(move || {
             // TODO: This will be incompatible with "root element is not a TopLevel" scenarios,
             // HACK: this relies on focus root being TopLevel which currently is true
             let provider: Option<Rc<dyn IStorageProvider>> = storage_window
@@ -883,8 +913,22 @@ impl X11Window {
         })]));
         *window.storage_provider.borrow_mut() = Some(storage_provider);
 
-        // Stage 2: the drop target of the window (`X11DropTarget`), when
-        // the drag and drop device is registered.
+        if let Some(drag_drop_device) = FerroLocator::current().get_service::<dyn IDragDropDevice>() {
+            *window.drag_drop_device.borrow_mut() = Some(drag_drop_device.clone());
+            let xdnd_window: Weak<dyn IXdndWindow> = weak.clone();
+            let atoms = x11.atoms();
+            *window.drop_target.borrow_mut() = Some(Rc::new(X11DropTarget::new(
+                drag_drop_device,
+                xdnd_window,
+                handle,
+                XlibXdndTargetConnection::new(x11.clone()),
+                XdndTargetAtoms {
+                    status: atoms.XdndStatus,
+                    finished: atoms.XdndFinished,
+                    actions: XdndActions::new(atoms),
+                },
+            )));
+        }
 
         window.screens_subscription.set(platform.x11_screens().changed_event.subscribe({
             let weak = weak.clone();
@@ -1211,10 +1255,17 @@ impl X11Window {
                     self.x_sync_state.set(XSyncState::WaitConfigure);
                 }
             }
-            // Stage 2 of docs/porting/x11-platform.md: the messages of the
-            // drag and drop protocol (`XdndEnter`, `XdndPosition`,
-            // `XdndLeave`, `XdndDrop`) go to the drop target of the
-            // window, which is not built.
+            else if let Some(drop_target) = self.drop_target.borrow().clone() {
+                if message_type == atoms.XdndEnter {
+                    drop_target.on_xdnd_enter(&message);
+                } else if message_type == atoms.XdndPosition {
+                    drop_target.on_xdnd_position(&message);
+                } else if message_type == atoms.XdndLeave {
+                    drop_target.on_xdnd_leave(&message);
+                } else if message_type == atoms.XdndDrop {
+                    drop_target.on_xdnd_drop(&message);
+                }
+            }
         } else if event_type == XEventName::KeyPress as i32 || event_type == XEventName::KeyRelease as i32 {
             if self.activate_transient_child_if_needed() {
                 return;
@@ -1262,10 +1313,18 @@ impl X11Window {
             if let Some(activated) = get(&self.activated) {
                 activated();
             }
-            // Stage 2: the input method of the window is told that the
-            // window is active (`_imeControl.SetWindowActive`).
-        } else if let Some(deactivated) = get(&self.deactivated) {
-            deactivated();
+            let ime_control = self.ime_control.borrow().clone();
+            if let Some(ime_control) = ime_control {
+                ime_control.set_window_active(true);
+            }
+        } else {
+            let ime_control = self.ime_control.borrow().clone();
+            if let Some(ime_control) = ime_control {
+                ime_control.set_window_active(false);
+            }
+            if let Some(deactivated) = get(&self.deactivated) {
+                deactivated();
+            }
         }
     }
 
@@ -1376,6 +1435,21 @@ impl X11Window {
             if let Some(activation_tracker) = activation_tracker {
                 activation_tracker.on_net_wm_state_changed(&state_atoms);
             }
+        }
+    }
+
+    /// The drag and drop device the window raises drag events with
+    /// (`DragDropDevice`): the registered one, when the window was made.
+    pub fn drag_drop_device(&self) -> Option<Rc<dyn IDragDropDevice>> {
+        self.drag_drop_device.borrow().clone()
+    }
+
+    /// Tells the input method of the window where the window is
+    /// (`UpdateImePosition`).
+    fn update_ime_position(&self) {
+        let ime_control = self.ime_control.borrow().clone();
+        if let Some(ime_control) = ime_control {
+            ime_control.update_window_info(self.position.get().unwrap_or_default(), self.scaling());
         }
     }
 
@@ -1538,6 +1612,12 @@ impl X11Window {
         let transparency_helper = self.transparency_helper.borrow_mut().take();
         if let Some(transparency_helper) = transparency_helper {
             transparency_helper.dispose();
+        }
+
+        let ime_control = self.ime_control.borrow_mut().take();
+        if let Some(ime_control) = ime_control {
+            ime_control.dispose();
+            *self.ime.borrow_mut() = None;
         }
 
         if !self.xic.get().is_null() {
@@ -1782,10 +1862,6 @@ impl X11Window {
         !self.disabled.get() && !self.mode.block_input()
     }
 
-    /// Places the input method of the window (`UpdateImePosition`). The
-    /// input methods are stage 2 of docs/porting/x11-platform.md; until
-    /// then there is none to place.
-    fn update_ime_position(&self) {}
 }
 
 /// `_NET_WM_STATE` with atoms added or removed (`ChangeWMAtoms` for a
@@ -1834,8 +1910,13 @@ pub(crate) fn encode_ascii(text: &str) -> Vec<u8> {
 impl IOptionalFeatureProvider for X11Window {
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
         // Not available yet, each a feature the reference answers here:
-        // the exporter of the native menu, the input method and the native
-        // control host (stage 2 of docs/porting/x11-platform.md).
+        // the exporter of the native menu and the native control host
+        // (stages 2e and 2f of docs/porting/x11-platform.md).
+
+        if feature_type == TypeId::of::<dyn ITextInputMethodImpl>() {
+            let ime = self.ime.borrow().clone()?;
+            return Some(Rc::new(ime));
+        }
 
         if feature_type == TypeId::of::<dyn IStorageProvider>() {
             let storage_provider = self.storage_provider.borrow().clone()?;
@@ -2470,6 +2551,20 @@ impl IXI2Client for X11Window {
 
     fn touch_device(&self) -> Rc<dyn IInputDevice> {
         self.touch.clone()
+    }
+}
+
+impl IXdndWindow for X11Window {
+    fn handle(&self) -> XID {
+        self.handle.get()
+    }
+
+    fn input_root(&self) -> Option<Rc<dyn IInputRoot>> {
+        self.input_root_or_none()
+    }
+
+    fn point_to_client(&self, point: PixelPoint) -> Point {
+        self.mode.point_to_client(self, point)
     }
 }
 

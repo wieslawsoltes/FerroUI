@@ -56,6 +56,29 @@
 //!   once small and once larger than a property may be, so that it is
 //!   transferred incrementally (`INCR`) in each direction. The other
 //!   client is `xclip`, which has to be installed.
+//! - **ime** (with `--ime=ibus` or `--ime=xim`): a text box gets the
+//!   focus and the server synthesizes keys. With `ibus` the input method
+//!   is the one over D-Bus, and this example is also the service it talks
+//!   to (a double of the portal of IBus on the session bus, so the run
+//!   needs one: `dbus-run-session`): the key "a" is consumed and another
+//!   text is committed for it, the key "b" passes. With `xim` it is the
+//!   input method of the server, the one Xlib has built in
+//!   (`XMODIFIERS=@im=local`): a key produces its text through the input
+//!   context, and a compose sequence produces one character (the caller
+//!   gives a key the compose symbol: `xmodmap -e "keycode 78 = Multi_key"`,
+//!   the scroll lock key, for which the framework has no action). Both
+//!   need a window manager: an input method is told about focus when its
+//!   window is active, and without a window manager no window ever is.
+//! - **dnd** (with `--dnd`): a square in the window starts a drag of a
+//!   text when it is pressed; the server synthesizes the press, the
+//!   movement and the release. First the drag ends over the window
+//!   itself, which gets its drag events without the protocol. Then this
+//!   example is started a second time (`--dnd-target=X,Y`: a small window
+//!   that accepts text and prints what is dropped), and the drag ends over
+//!   the window of that process: the source side here and the target side
+//!   there speak XDND through the server, and the text crosses as a
+//!   selection. The other process has to print the text, and the drag has
+//!   to end with the action the target finished with.
 //!
 //! It then asks the window to close the way a window manager does (a
 //! `WM_DELETE_WINDOW` message), which has to end the application.
@@ -149,6 +172,21 @@ mod app {
         window.opened(|| println!("Window opened"));
         window.closed(|| println!("Window closed"));
 
+        if let Some((x, y)) = dnd::target_position() {
+            // The process that only takes drops: a small window at the place it is told, whose
+            // content accepts text and prints what is dropped.
+            window.set_width(dnd::TARGET_SIZE.0);
+            window.set_height(dnd::TARGET_SIZE.1);
+            window.set_position(ferroui_base::PixelPoint::new(x, y));
+            dnd::accept_text(&border, &Rc::default());
+            let opened = window.clone();
+            window.opened(move || {
+                if let Some(handle) = opened.try_get_platform_handle() {
+                    println!("DND TARGET READY {}", handle.handle());
+                }
+            });
+        }
+
         if std::env::args().any(|arg| arg == "--smoke") {
             smoke::start(&window, &border);
         }
@@ -162,6 +200,7 @@ mod app {
     }
 
     pub fn run() -> ExitCode {
+        prepare_ime();
         let smoke = std::env::args().any(|arg| arg == "--smoke");
         let args: Vec<String> = std::env::args()
             .skip(1)
@@ -170,6 +209,9 @@ mod app {
                     && !arg.starts_with("--skip=")
                     && !arg.starts_with("--expect-screens=")
                     && !arg.starts_with("--mode=")
+                    && !arg.starts_with("--ime=")
+                    && !arg.starts_with("--dnd-target=")
+                    && arg != "--dnd"
                     && arg != "--expect-fallback"
                     && arg != "--shm"
             })
@@ -213,6 +255,253 @@ mod app {
         }
     }
 
+    /// A service that answers as the portal of IBus does, on the session
+    /// bus of the environment (a private one: `dbus-run-session`). Not
+    /// part of the platform: the smoke mode uses it to stand in for an
+    /// input method daemon, so that what the input method does with a key
+    /// is known.
+    mod ibus_double {
+        use std::sync::{Arc, Mutex, OnceLock};
+        use zbus::zvariant::{ObjectPath, OwnedObjectPath, Structure, Value};
+
+        pub const NAME: &str = "org.freedesktop.portal.IBus";
+        const CONTEXT_PATH: &str = "/org/freedesktop/IBus/InputContext_1";
+        const CONTEXT_INTERFACE: &str = "org.freedesktop.IBus.InputContext";
+        /// The key symbol the double consumes, and the text it commits for it.
+        pub const CONSUMED_KEY: u32 = 0x61;
+        pub const COMMITTED_TEXT: &str = "\u{3042}";
+        /// The bit of the state of a key event that says "release".
+        const RELEASE_MASK: u32 = 1 << 30;
+
+        type Log = Arc<Mutex<Vec<String>>>;
+
+        struct Portal {
+            log: Log,
+        }
+
+        #[zbus::interface(name = "org.freedesktop.IBus.Portal")]
+        impl Portal {
+            fn create_input_context(&self, client_name: &str) -> OwnedObjectPath {
+                self.log.lock().unwrap().push(format!("CreateInputContext({client_name})"));
+                ObjectPath::try_from(CONTEXT_PATH).unwrap().into()
+            }
+        }
+
+        struct Context {
+            log: Log,
+        }
+
+        #[zbus::interface(name = "org.freedesktop.IBus.InputContext")]
+        impl Context {
+            async fn process_key_event(
+                &self,
+                keyval: u32,
+                keycode: u32,
+                state: u32,
+                #[zbus(connection)] connection: &zbus::Connection,
+            ) -> bool {
+                self.log.lock().unwrap().push(format!("ProcessKeyEvent({keyval:#x}, {keycode}, {state:#x})"));
+                if keyval != CONSUMED_KEY {
+                    return false;
+                }
+                if state & RELEASE_MASK == 0 {
+                    // An IBusText: (sa{sv}sv), the text is its third member.
+                    let attachments: std::collections::HashMap<String, Value<'static>> = Default::default();
+                    let text = Value::Structure(Structure::from((
+                        "IBusText".to_string(),
+                        attachments,
+                        COMMITTED_TEXT.to_string(),
+                        Value::from(0u32),
+                    )));
+                    let _ = connection
+                        .emit_signal(Option::<&str>::None, CONTEXT_PATH, CONTEXT_INTERFACE, "CommitText", &(text,))
+                        .await;
+                }
+                true
+            }
+
+            fn set_cursor_location(&self, x: i32, y: i32, w: i32, h: i32) {
+                self.log.lock().unwrap().push(format!("SetCursorLocation({x}, {y}, {w}, {h})"));
+            }
+
+            fn focus_in(&self) {
+                self.log.lock().unwrap().push("FocusIn".to_string());
+            }
+
+            fn focus_out(&self) {
+                self.log.lock().unwrap().push("FocusOut".to_string());
+            }
+
+            fn reset(&self) {
+                self.log.lock().unwrap().push("Reset".to_string());
+            }
+
+            fn set_capabilities(&self, caps: u32) {
+                self.log.lock().unwrap().push(format!("SetCapabilities({caps})"));
+            }
+        }
+
+        struct Service {
+            log: Log,
+        }
+
+        #[zbus::interface(name = "org.freedesktop.IBus.Service")]
+        impl Service {
+            fn destroy(&self) {
+                self.log.lock().unwrap().push("Destroy".to_string());
+            }
+        }
+
+        struct Double {
+            _connection: zbus::blocking::Connection,
+            log: Log,
+        }
+
+        static DOUBLE: OnceLock<Result<Double, String>> = OnceLock::new();
+
+        /// Puts the service on the session bus. An error says why it could not.
+        pub fn start() -> Result<(), String> {
+            DOUBLE
+                .get_or_init(|| {
+                    let log: Log = Arc::default();
+                    let connection = zbus::blocking::connection::Builder::session()
+                        .and_then(|builder| builder.serve_at("/org/freedesktop/IBus", Portal { log: log.clone() }))
+                        .and_then(|builder| builder.serve_at(CONTEXT_PATH, Context { log: log.clone() }))
+                        .and_then(|builder| builder.serve_at(CONTEXT_PATH, Service { log: log.clone() }))
+                        .and_then(|builder| builder.name(NAME))
+                        .and_then(|builder| builder.build())
+                        .map_err(|error| error.to_string())?;
+                    Ok(Double { _connection: connection, log })
+                })
+                .as_ref()
+                .map(|_| ())
+                .map_err(Clone::clone)
+        }
+
+        /// The calls the service got so far.
+        pub fn calls() -> Vec<String> {
+            match DOUBLE.get() {
+                Some(Ok(double)) => double.log.lock().unwrap().clone(),
+                _ => Vec::new(),
+            }
+        }
+    }
+
+    /// The input method `--ime=` asks for: `ibus` (over D-Bus, against the
+    /// double of this example) or `xim` (the input method of the server).
+    fn ime() -> Option<String> {
+        std::env::args().find_map(|arg| arg.strip_prefix("--ime=").map(str::to_string))
+    }
+
+    /// Sets the environment of the input method that is asked for, before
+    /// the platform reads it, and starts the double of IBus.
+    fn prepare_ime() {
+        match ime().as_deref() {
+            Some("ibus") => {
+                std::env::set_var("FERROUI_IM_MODULE", "ibus");
+                if let Err(error) = ibus_double::start() {
+                    println!("The double of the input method service did not start: {error}");
+                }
+            }
+            Some("xim") => {
+                std::env::set_var("FERROUI_IM_MODULE", "xim");
+                // The input method Xlib has built in: compose sequences, no server needed.
+                if std::env::var_os("XMODIFIERS").is_none() {
+                    std::env::set_var("XMODIFIERS", "@im=local");
+                }
+            }
+            _ => {}
+        }
+    }
+    /// What the drag and drop phase of the smoke mode puts into the
+    /// windows: a square that starts a drag of a text when it is pressed,
+    /// and a window content that accepts text.
+    mod dnd {
+        use super::*;
+        use ferroui_base::input::{
+            DataFormat, DataTransfer, DataTransferExtensions, DataTransferItem, DragDrop, DragDropEffects, IDataTransfer,
+            InputElement,
+        };
+        use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
+        use ferroui_base::Thickness;
+
+        pub const DRAGGED_TEXT: &str = "FerroUI drag: za\u{17c}\u{f3}\u{142}\u{107}";
+        /// Where the square that starts a drag is, in the window, and how large.
+        pub const SOURCE_ORIGIN: (f64, f64) = (20.0, 20.0);
+        pub const SOURCE_SIZE: f64 = 80.0;
+        /// The size of the window of the second process.
+        pub const TARGET_SIZE: (f64, f64) = (300.0, 200.0);
+
+        /// The position `--dnd-target=X,Y` gives the window of a process
+        /// that only takes drops.
+        pub fn target_position() -> Option<(i32, i32)> {
+            let value = std::env::args().find_map(|arg| arg.strip_prefix("--dnd-target=").map(str::to_string))?;
+            let (x, y) = value.split_once(',')?;
+            Some((x.parse().ok()?, y.parse().ok()?))
+        }
+
+        /// What the drag events of a drop zone were, as lines.
+        pub type DropLog = Rc<RefCell<Vec<String>>>;
+
+        /// Makes `zone` accept text: a drag over it is answered with
+        /// "copy", and a drop is recorded (and printed, for the process
+        /// that started the drag to read).
+        pub fn accept_text(zone: &Ref<Border>, log: &DropLog) {
+            DragDrop::set_allow_drop(zone, true);
+            {
+                let log = log.clone();
+                DragDrop::add_drag_enter_handler(zone, move |_, _| {
+                    log.borrow_mut().push("enter".to_string());
+                });
+            }
+            DragDrop::add_drag_over_handler(zone, move |_, e| {
+                let has_text = e.data_transfer().contains(&DataFormat::text());
+                e.set_drag_effects(if has_text { e.drag_effects() & DragDropEffects::COPY } else { DragDropEffects::NONE });
+            });
+            let log = log.clone();
+            DragDrop::add_drop_handler(zone, move |_, e| {
+                e.set_drag_effects(e.drag_effects() & DragDropEffects::COPY);
+                let text = e.data_transfer().try_get_text();
+                let line = format!("DND DROP: effects={:?} text={:?}", e.drag_effects(), text);
+                println!("{line}");
+                log.borrow_mut().push(line);
+            });
+        }
+
+        /// A square in the corner of `content` that starts a drag of
+        /// [`DRAGGED_TEXT`] when it is pressed. The result of every drag
+        /// that ended is pushed to `results`.
+        pub fn add_source(content: &Ref<Border>, results: &Rc<RefCell<Vec<DragDropEffects>>>) -> Ref<Border> {
+            let source = Border::new();
+            source.set_background(Some(Rc::new(ImmutableSolidColorBrush::new(Color::from_rgb(0xee, 0xaa, 0x00)))));
+            source.set_width(SOURCE_SIZE);
+            source.set_height(SOURCE_SIZE);
+            source.set_horizontal_alignment(HorizontalAlignment::Left);
+            source.set_vertical_alignment(VerticalAlignment::Top);
+            source.set_margin(Thickness::new(SOURCE_ORIGIN.0, SOURCE_ORIGIN.1, 0.0, 0.0));
+
+            let results = results.clone();
+            source.add_handler(InputElement::pointer_pressed_event(), move |_, e| {
+                let e = e.clone();
+                let results = results.clone();
+                drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                    let data = DataTransfer::new();
+                    data.add(DataTransferItem::create(&DataFormat::text(), Some(DRAGGED_TEXT.to_string())));
+                    let data_transfer: Rc<dyn IDataTransfer> = data;
+                    let result = DragDrop::do_drag_drop_async(
+                        &e,
+                        data_transfer,
+                        DragDropEffects::COPY | DragDropEffects::MOVE,
+                    )
+                    .await;
+                    results.borrow_mut().push(result);
+                }));
+            });
+
+            content.set_child(&source);
+            source
+        }
+    }
 
     /// Input the server synthesizes (the XTEST extension, `libXtst`). Not
     /// part of the platform, which never fakes input: the smoke mode uses
@@ -290,8 +579,13 @@ mod app {
             IRawInputEventArgs, RawKeyEventArgs, RawKeyEventType, RawMouseWheelEventArgs, RawPointerEventArgs,
             RawPointerEventType, RawTextInputEventArgs,
         };
-        use ferroui_base::input::Key;
-        use ferroui_base::{Point, Vector};
+        use ferroui_base::input::text_input::ITextInputMethodImpl;
+        use ferroui_base::input::{DragDropEffects, Key};
+        use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
+        use ferroui_base::{Point, Thickness, Vector};
+        use ferroui_controls::TextBox;
+        use ferroui_freedesktop::IX11InputMethodFactory;
+        use std::any::TypeId;
         use ferroui_controls::primitives::popup_positioning::{PopupAnchor, PopupGravity};
         use ferroui_controls::primitives::Popup;
         use ferroui_controls::PlacementMode;
@@ -501,6 +795,14 @@ mod app {
                 if options.runs("clipboard") {
                     report.phase("clipboard");
                     clipboard_checks(&report, &window).await;
+                }
+                if let Some(kind) = ime() {
+                    report.phase("ime");
+                    ime_checks(&report, &platform, &window, &content, &kind).await;
+                }
+                if std::env::args().any(|arg| arg == "--dnd") {
+                    report.phase("dnd");
+                    dnd_checks(&report, &platform, &window, &content).await;
                 }
             }
 
@@ -1318,6 +1620,463 @@ mod app {
             } else {
                 format!("{} bytes", text.len())
             }
+        }
+
+        /// Presses and releases the key that produces `key_sym`; false
+        /// when no key of the keyboard mapping does.
+        async fn tap(display: xlib::XDisplay, key_sym: u64) -> bool {
+            let key_code = xtest::key_code(display, key_sym);
+            if key_code == 0 {
+                return false;
+            }
+            xtest::key(display, key_code, true);
+            delay(Duration::from_millis(50)).await;
+            xtest::key(display, key_code, false);
+            delay(Duration::from_millis(50)).await;
+            true
+        }
+
+        /// Text input through an input method: a text box gets the focus,
+        /// the server synthesizes keys, and the text has to arrive the way
+        /// the input method decides.
+        ///
+        /// With `ibus` the input method is the one over D-Bus, against the
+        /// double of this example: it consumes the key "a" and commits
+        /// another text for it, and lets every other key pass. With `xim`
+        /// it is the input method of the server (the one Xlib has built
+        /// in): keys produce their text through the input context, and a
+        /// compose sequence produces one character.
+        async fn ime_checks(
+            report: &Report,
+            platform: &Rc<FerroX11Platform>,
+            window: &Ref<Window>,
+            content: &Ref<Border>,
+            kind: &str,
+        ) {
+            let info = platform.info();
+            let display = info.display();
+            if !xtest::available(display) {
+                report.check("XTEST", false, "libXtst is missing or the server has no XTEST extension".to_string());
+                return;
+            }
+            let (Some(xid), Some(window_impl)) = (xid_of(window), window.platform_impl()) else {
+                report.check("handle", false, "the window has no platform implementation".to_string());
+                return;
+            };
+
+            let has_factory = FerroLocator::current().get_service::<dyn IX11InputMethodFactory>().is_some();
+            let has_feature = window_impl.try_get_feature(TypeId::of::<dyn ITextInputMethodImpl>()).is_some();
+            match kind {
+                "ibus" => {
+                    report.check(
+                        "input method over D-Bus",
+                        has_factory,
+                        format!(
+                            "the platform registered {} input method factory for {}=ibus",
+                            if has_factory { "an" } else { "no" },
+                            ferroui_x11::x11_platform::IM_MODULE_VARIABLE
+                        ),
+                    );
+                    let created = wait_for(STEP_TIMEOUT, || {
+                        ibus_double::calls().iter().any(|call| call.starts_with("CreateInputContext("))
+                    })
+                    .await;
+                    report.check(
+                        "input context",
+                        created,
+                        format!("the service was called with {:?}", ibus_double::calls()),
+                    );
+                }
+                _ => {
+                    report.check(
+                        "input method of the server",
+                        info.has_xim() && !has_factory,
+                        format!(
+                            "XOpenIM for XMODIFIERS={:?} gave {} input method; a factory over D-Bus is {}",
+                            std::env::var("XMODIFIERS").unwrap_or_default(),
+                            if info.has_xim() { "an" } else { "no" },
+                            if has_factory { "registered" } else { "not registered" }
+                        ),
+                    );
+                }
+            }
+            report.check(
+                "input method of the window",
+                has_feature,
+                format!("the window has {} text input method", if has_feature { "a" } else { "no" }),
+            );
+
+            // A text box in the corner of the window, with the focus, in an active window.
+            let text_box = TextBox::new();
+            text_box.set_width(240.0);
+            text_box.set_height(32.0);
+            text_box.set_horizontal_alignment(HorizontalAlignment::Left);
+            text_box.set_vertical_alignment(VerticalAlignment::Top);
+            text_box.set_margin(Thickness::uniform(8.0));
+            content.set_child(&text_box);
+            delay(Duration::from_millis(300)).await;
+            // Key events go to the window with the focus or, without a window manager, to the one
+            // under the pointer.
+            if let Some((origin_x, origin_y, _)) = xlib::x_translate_coordinates(display, xid, info.root_window(), 0, 0) {
+                xtest::motion(display, origin_x + 300, origin_y + 200);
+            }
+            window.activate();
+            let focused = text_box.focus();
+            let active = wait_for(STEP_TIMEOUT, || window.is_active()).await;
+            report.check(
+                "focus",
+                focused && active,
+                format!("the text box took the focus: {focused}; the window is active: {active}"),
+            );
+
+            // The callback of the contract, with a recorder in front of the one of the framework.
+            let log: Rc<RefCell<Vec<Recorded>>> = Rc::new(RefCell::new(Vec::new()));
+            let framework_input = window_impl.input();
+            {
+                let log = log.clone();
+                let framework_input = framework_input.clone();
+                window_impl.set_input(Some(Rc::new(move |args: Rc<dyn IRawInputEventArgs>| {
+                    if let Some(recorded) = record(&args) {
+                        log.borrow_mut().push(recorded);
+                    }
+                    if let Some(framework_input) = &framework_input {
+                        framework_input(args);
+                    }
+                })));
+            }
+            let seen = |wanted: &dyn Fn(&Recorded) -> bool| log.borrow().iter().any(|recorded| wanted(recorded));
+            let tail = || {
+                let log = log.borrow();
+                format!("{:?}", &log[log.len().saturating_sub(8)..])
+            };
+            let text_is = |expected: &str| text_box.text().as_deref() == Some(expected);
+
+            if kind == "ibus" {
+                let focus_in = wait_for(STEP_TIMEOUT, || ibus_double::calls().iter().any(|call| call == "FocusIn")).await;
+                report.check(
+                    "focus of the input context",
+                    focus_in,
+                    format!("the service was called with {:?}", ibus_double::calls()),
+                );
+
+                // The key the input method consumes: the application gets the committed text and
+                // not the key.
+                let committed = ibus_double::COMMITTED_TEXT;
+                let tapped = tap(display, u64::from(ibus_double::CONSUMED_KEY)).await;
+                let text = wait_for(STEP_TIMEOUT, || seen(&|recorded| *recorded == Recorded::Text(committed.to_string()))).await;
+                delay(Duration::from_millis(300)).await;
+                let key_passed = seen(&|recorded| matches!(recorded, Recorded::Key(_, Key::A, _)));
+                report.check(
+                    "committed text",
+                    tapped && text && !key_passed,
+                    format!(
+                        "expected the text {committed:?} and no key event for the consumed key (seen: {key_passed}); \
+                         last input {}",
+                        tail()
+                    ),
+                );
+                let in_text_box = wait_for(STEP_TIMEOUT, || text_is(committed)).await;
+                report.check(
+                    "committed text in the text box",
+                    in_text_box,
+                    format!("the text box has {:?}, expected {committed:?}", text_box.text()),
+                );
+
+                // A key the input method lets pass: the key and its text, after the text before.
+                log.borrow_mut().clear();
+                let tapped = tap(display, 0x62).await;
+                let key_down = wait_for(STEP_TIMEOUT, || {
+                    seen(&|recorded| matches!(recorded, Recorded::Key(RawKeyEventType::KeyDown, Key::B, _)))
+                })
+                .await;
+                let key_up = wait_for(STEP_TIMEOUT, || {
+                    seen(&|recorded| matches!(recorded, Recorded::Key(RawKeyEventType::KeyUp, Key::B, _)))
+                })
+                .await;
+                let expected = format!("{committed}b");
+                let in_text_box = wait_for(STEP_TIMEOUT, || text_is(&expected)).await;
+                report.check(
+                    "a key the input method passes on",
+                    tapped && key_down && key_up && in_text_box,
+                    format!(
+                        "down {key_down}, up {key_up}; the text box has {:?}, expected {expected:?}; last input {}",
+                        text_box.text(),
+                        tail()
+                    ),
+                );
+
+                // The input method was offered both keys, each press before its release.
+                let offered: Vec<String> =
+                    ibus_double::calls().into_iter().filter(|call| call.starts_with("ProcessKeyEvent(")).collect();
+                let key_code_a = xtest::key_code(display, 0x61);
+                let key_code_b = xtest::key_code(display, 0x62);
+                let expected_calls = vec![
+                    format!("ProcessKeyEvent(0x61, {key_code_a}, 0x0)"),
+                    format!("ProcessKeyEvent(0x61, {key_code_a}, 0x40000000)"),
+                    format!("ProcessKeyEvent(0x62, {key_code_b}, 0x0)"),
+                    format!("ProcessKeyEvent(0x62, {key_code_b}, 0x40000000)"),
+                ];
+                report.check(
+                    "keys offered to the input method",
+                    offered == expected_calls,
+                    format!("{offered:?}, expected {expected_calls:?}"),
+                );
+
+                // The cursor of the text box is reported in pixels of the screen: a place inside the
+                // window as the server has it.
+                let origin = xlib::x_translate_coordinates(display, xid, info.root_window(), 0, 0);
+                let attributes = xlib::x_get_window_attributes(display, xid);
+                let location = ibus_double::calls().iter().rev().find_map(|call| {
+                    let numbers = call.strip_prefix("SetCursorLocation(")?.strip_suffix(')')?;
+                    let numbers: Vec<i32> = numbers.split(", ").filter_map(|number| number.parse().ok()).collect();
+                    (numbers.len() == 4).then(|| (numbers[0], numbers[1], numbers[2], numbers[3]))
+                });
+                let inside = match (location, origin, &attributes) {
+                    (Some((x, y, _, height)), Some((origin_x, origin_y, _)), Some(attributes)) => {
+                        x >= origin_x
+                            && y >= origin_y
+                            && x <= origin_x + attributes.width
+                            && y + height <= origin_y + attributes.height
+                            && height > 0
+                    }
+                    _ => false,
+                };
+                report.check(
+                    "cursor location",
+                    inside,
+                    format!(
+                        "the last location reported is {location:?}; the window is at {:?} of the root",
+                        origin.map(|(x, y, _)| (x, y))
+                    ),
+                );
+            } else {
+                // A key produces its text through the input context.
+                let tapped = tap(display, 0x61).await;
+                let text = wait_for(STEP_TIMEOUT, || seen(&|recorded| *recorded == Recorded::Text("a".to_string()))).await;
+                let in_text_box = wait_for(STEP_TIMEOUT, || text_is("a")).await;
+                report.check(
+                    "text through the input context",
+                    tapped && text && in_text_box,
+                    format!("the text box has {:?}, expected \"a\"; last input {}", text_box.text(), tail()),
+                );
+
+                // A compose sequence (the compose key, an apostrophe, "e") is one character. The
+                // input method filters the keys of the sequence, so only the input method of the
+                // server gives this text. The caller gives a key the compose symbol
+                // (`xmodmap -e "keycode 78 = Multi_key"`: the scroll lock key. Not the menu key,
+                // which opens the context menu of the text box and takes the focus with it).
+                log.borrow_mut().clear();
+                let composed = "\u{e9}";
+                if xtest::key_code(display, 0xff20) == 0 {
+                    report.check(
+                        "compose sequence",
+                        false,
+                        "no key of the keyboard mapping is the compose key (Multi_key)".to_string(),
+                    );
+                } else {
+                    let tapped = tap(display, 0xff20).await && tap(display, 0x27).await && tap(display, 0x65).await;
+                    let text =
+                        wait_for(STEP_TIMEOUT, || seen(&|recorded| *recorded == Recorded::Text(composed.to_string()))).await;
+                    let expected = format!("a{composed}");
+                    let in_text_box = wait_for(STEP_TIMEOUT, || text_is(&expected)).await;
+                    report.check(
+                        "compose sequence",
+                        tapped && text && in_text_box,
+                        format!(
+                            "the text box has {:?}, expected {expected:?} (locale {:?}); last input {}",
+                            text_box.text(),
+                            std::env::var("LANG").unwrap_or_default(),
+                            tail()
+                        ),
+                    );
+                }
+            }
+
+            window_impl.set_input(framework_input);
+            content.set_child(None::<Ref<Control>>);
+        }
+
+        /// Moves the pointer from one point of the screen to another in
+        /// steps, as a hand does: a drag target is found, entered and
+        /// asked on the way.
+        async fn glide(display: xlib::XDisplay, from: (i32, i32), to: (i32, i32)) {
+            const STEPS: i32 = 8;
+            for step in 1..=STEPS {
+                let x = from.0 + (to.0 - from.0) * step / STEPS;
+                let y = from.1 + (to.1 - from.1) * step / STEPS;
+                xtest::motion(display, x, y);
+                delay(Duration::from_millis(60)).await;
+            }
+        }
+
+        /// Drag and drop, both sides of the XDND protocol.
+        ///
+        /// First inside the window: a drag from the square to the window
+        /// content, which a window of the same application gets without
+        /// the protocol. Then to a second process (this example started
+        /// with `--dnd-target`), which is another client of the server:
+        /// the source side of this process and the target side of the
+        /// other talk through the server, and the data crosses as a
+        /// selection.
+        async fn dnd_checks(report: &Report, platform: &Rc<FerroX11Platform>, window: &Ref<Window>, content: &Ref<Border>) {
+            let info = platform.info();
+            let display = info.display();
+            if !xtest::available(display) {
+                report.check("XTEST", false, "libXtst is missing or the server has no XTEST extension".to_string());
+                return;
+            }
+            let Some(xid) = xid_of(window) else {
+                report.check("handle", false, "the window has no platform handle".to_string());
+                return;
+            };
+            let Some((origin_x, origin_y, _)) = xlib::x_translate_coordinates(display, xid, info.root_window(), 0, 0) else {
+                report.check("origin", false, "XTranslateCoordinates failed".to_string());
+                return;
+            };
+            let scaling = window.render_scaling();
+            let scaled = |value: f64| (value * scaling) as i32;
+
+            let aware = xlib::x_get_window_property_as_int_ptr(display, xid, info.atoms().XdndAware, info.atoms().ATOM);
+            report.check(
+                "XdndAware",
+                aware == Some(5),
+                format!("the window announces the version {aware:?} of the protocol, expected 5"),
+            );
+
+            let drops: dnd::DropLog = Rc::default();
+            let results: Rc<RefCell<Vec<DragDropEffects>>> = Rc::default();
+            dnd::accept_text(content, &drops);
+            let _source = dnd::add_source(content, &results);
+            delay(Duration::from_millis(300)).await;
+
+            let source_point = (
+                origin_x + scaled(dnd::SOURCE_ORIGIN.0 + dnd::SOURCE_SIZE / 2.0),
+                origin_y + scaled(dnd::SOURCE_ORIGIN.1 + dnd::SOURCE_SIZE / 2.0),
+            );
+
+            // Inside the window.
+            let inside = (origin_x + scaled(360.0), origin_y + scaled(260.0));
+            xtest::motion(display, source_point.0 - 5, source_point.1 - 5);
+            delay(Duration::from_millis(100)).await;
+            xtest::motion(display, source_point.0, source_point.1);
+            delay(Duration::from_millis(100)).await;
+            xtest::button(display, 1, true);
+            delay(Duration::from_millis(200)).await;
+            glide(display, source_point, inside).await;
+            delay(Duration::from_millis(200)).await;
+            xtest::button(display, 1, false);
+            let ended = wait_for(STEP_TIMEOUT, || !results.borrow().is_empty()).await;
+            let expected_drop = format!("DND DROP: effects={:?} text={:?}", DragDropEffects::COPY, Some(dnd::DRAGGED_TEXT));
+            report.check(
+                "drag inside the window",
+                ended && results.borrow().first() == Some(&DragDropEffects::COPY) && drops.borrow().contains(&expected_drop),
+                format!(
+                    "the drag ended with {:?}, expected [COPY]; the window content saw {:?}",
+                    results.borrow(),
+                    drops.borrow()
+                ),
+            );
+            let hook_removed = platform.dispatcher_impl().event_dispatcher().event_hook().is_none();
+            let owner = xlib::x_get_selection_owner(display, info.atoms().XdndSelection);
+            report.check(
+                "the drag is cleaned up",
+                hook_removed && owner != xid,
+                format!("the event hook is {}; the owner of XdndSelection is {owner:#x}", if hook_removed { "removed" } else { "still installed" }),
+            );
+
+            // To another process.
+            results.borrow_mut().clear();
+            drops.borrow_mut().clear();
+            let target_position = (origin_x + scaled(WIDTH) + 20, origin_y);
+            let child = std::env::current_exe().and_then(|exe| {
+                Command::new(exe)
+                    .arg(format!("--dnd-target={},{}", target_position.0, target_position.1))
+                    .stdout(Stdio::piped())
+                    .stderr(Stdio::inherit())
+                    .spawn()
+            });
+            let mut child = match child {
+                Ok(child) => child,
+                Err(error) => {
+                    report.check("second process", false, format!("it could not be started: {error}"));
+                    return;
+                }
+            };
+            let lines: Arc<Mutex<Vec<String>>> = Arc::default();
+            if let Some(stdout) = child.stdout.take() {
+                let lines = lines.clone();
+                std::thread::spawn(move || {
+                    use std::io::BufRead;
+                    for line in std::io::BufReader::new(stdout).lines().map_while(Result::ok) {
+                        lines.lock().unwrap().push(line);
+                    }
+                });
+            }
+            let target_xid = || {
+                lines.lock().unwrap().iter().find_map(|line| {
+                    line.strip_prefix("DND TARGET READY ").and_then(|xid| xid.trim().parse::<u64>().ok())
+                })
+            };
+            let ready = wait_for(Duration::from_secs(20), || {
+                target_xid().is_some_and(|xid| {
+                    xlib::x_get_window_attributes(display, xid as xlib::XID).is_some_and(|attributes| attributes.map_state == 2)
+                })
+            })
+            .await;
+            let target = target_xid().unwrap_or(0) as xlib::XID;
+            let target_origin =
+                if ready { xlib::x_translate_coordinates(display, target, info.root_window(), 0, 0) } else { None };
+            let target_aware = xlib::x_get_window_property_as_int_ptr(display, target, info.atoms().XdndAware, info.atoms().ATOM);
+            report.check(
+                "second process",
+                ready && target_origin.is_some() && target_aware == Some(5) && platform.get_window(target).is_none(),
+                format!(
+                    "its window {target:#x} is {}, at {:?} of the root, announces the version {target_aware:?}, and is \
+                     {} window of this process",
+                    if ready { "viewable" } else { "not viewable" },
+                    target_origin.map(|(x, y, _)| (x, y)),
+                    if platform.get_window(target).is_some() { "a" } else { "no" }
+                ),
+            );
+
+            if let Some((target_x, target_y, _)) = target_origin {
+                delay(Duration::from_millis(500)).await;
+                let over_target =
+                    (target_x + scaled(dnd::TARGET_SIZE.0 / 2.0), target_y + scaled(dnd::TARGET_SIZE.1 / 2.0));
+                xtest::motion(display, source_point.0 - 5, source_point.1 - 5);
+                delay(Duration::from_millis(100)).await;
+                xtest::motion(display, source_point.0, source_point.1);
+                delay(Duration::from_millis(100)).await;
+                xtest::button(display, 1, true);
+                delay(Duration::from_millis(200)).await;
+                glide(display, source_point, over_target).await;
+                // The target answers the last position before the button goes up.
+                delay(Duration::from_millis(500)).await;
+                xtest::button(display, 1, false);
+
+                let ended = wait_for(Duration::from_secs(10), || !results.borrow().is_empty()).await;
+                let dropped = wait_for(STEP_TIMEOUT, || lines.lock().unwrap().iter().any(|line| *line == expected_drop)).await;
+                report.check(
+                    "drop in the other process",
+                    dropped,
+                    format!("the other process printed {:?}; expected the line {expected_drop:?}", lines.lock().unwrap()),
+                );
+                report.check(
+                    "result of the drag",
+                    ended && *results.borrow() == [DragDropEffects::COPY],
+                    format!("the drag ended with {:?}, expected [COPY] (the action the target finished with)", results.borrow()),
+                );
+                // The window of this process was left on the way and got no drop.
+                report.check(
+                    "no drop in the source window",
+                    drops.borrow().iter().all(|line| !line.starts_with("DND DROP")),
+                    format!("the window content saw {:?}", drops.borrow()),
+                );
+            }
+
+            let _ = child.kill();
+            let _ = child.wait();
+            content.set_child(None::<Ref<Control>>);
         }
 
         /// The clipboard between this client and another one, in both
