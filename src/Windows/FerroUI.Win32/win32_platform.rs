@@ -5,13 +5,14 @@ use crate::clipboard_impl::ClipboardImpl;
 use crate::cursor_factory::CursorFactory;
 use crate::embedded_window_impl::EmbeddedWindowImpl;
 use crate::input::WindowsKeyboardDevice;
+use crate::ole_context::OleContext;
 use crate::interop::unmanaged_methods::*;
 use crate::platform_constants::Version;
 use crate::screen_impl::ScreenImpl;
 use crate::win32_dispatcher_impl::{Win32DispatcherImpl, SIGNAL_L, SIGNAL_W};
 use crate::win32_gl_manager::Win32GlManager;
 use crate::win32_platform_options::{Win32DpiAwareness, Win32PlatformOptions};
-use crate::win32_platform_settings::Win32PlatformSettings;
+use crate::win32_platform_settings::{setting_change, SettingChange, Win32PlatformSettings};
 use crate::win_screen::WinScreen;
 use crate::window_impl::WindowImpl;
 use crate::wnd_proc_guard;
@@ -76,6 +77,11 @@ pub struct Win32Platform {
     hwnd: Cell<isize>,
     dispatcher: Rc<Win32DispatcherImpl>,
     screen: RefCell<Option<Rc<ScreenImpl>>>,
+    /// The platform settings the platform registered, which it tells about
+    /// the changes of the settings of the system. The reference asks the
+    /// services for the settings and tells them when they are of this
+    /// type.
+    win32_platform_settings: RefCell<Option<Rc<Win32PlatformSettings>>>,
     /// The render timer, when it is the timer of the sleep loop, whose rate
     /// follows the displays.
     sleep_loop_render_timer: RefCell<Option<Arc<SleepLoopRenderTimer>>>,
@@ -90,6 +96,7 @@ impl Win32Platform {
             hwnd: Cell::new(hwnd),
             dispatcher: Rc::new(Win32DispatcherImpl::new(hwnd)),
             screen: RefCell::new(None),
+            win32_platform_settings: RefCell::new(None),
             sleep_loop_render_timer: RefCell::new(None),
             shutdown_requested: HandlerList::new(),
         })
@@ -110,7 +117,7 @@ impl Win32Platform {
         INSTANCE.try_with(|instance| instance.try_borrow().ok().and_then(|instance| instance.clone())).ok().flatten()
     }
 
-    #[allow(dead_code)] // Told about the changes of the system settings in stage 2.
+    #[allow(dead_code)]
     pub(crate) fn platform_settings(&self) -> Rc<dyn IPlatformSettings> {
         FerroLocator::current().get_required_service::<dyn IPlatformSettings>()
     }
@@ -129,6 +136,13 @@ impl Win32Platform {
     /// The handle of the message window.
     pub(crate) fn handle(&self) -> isize {
         self.hwnd.get()
+    }
+
+    /// The handle of the message window of the platform of the calling
+    /// thread: the window the system tells about the changes of its
+    /// settings.
+    pub fn message_window() -> isize {
+        Self::instance().handle()
     }
 
     /// Gets the actual version of Windows: what `RtlGetVersion` reports.
@@ -202,7 +216,9 @@ impl Win32Platform {
 
         let cursor_factory: Rc<dyn ICursorFactory> = CursorFactory::instance();
         let keyboard_device: Rc<dyn IKeyboardDevice> = WindowsKeyboardDevice::instance();
-        let platform_settings: Rc<dyn IPlatformSettings> = Win32PlatformSettings::new();
+        let win32_platform_settings = Win32PlatformSettings::new();
+        *instance.win32_platform_settings.borrow_mut() = Some(win32_platform_settings.clone());
+        let platform_settings: Rc<dyn IPlatformSettings> = win32_platform_settings;
         let render_loop: Arc<dyn IRenderLoop> = RenderLoop::from_timer(render_timer);
         let windowing_platform: Rc<dyn IWindowingPlatform> = instance.clone();
         let icon_loader: Rc<dyn IPlatformIconLoader> = instance.clone();
@@ -260,8 +276,10 @@ impl Win32Platform {
             locator.bind::<Arc<dyn IPlatformGraphics>>().to_constant(Rc::new(custom_platform_graphics.clone()));
         }
 
-        // The drag source of the platform is bound here by the reference
-        // when OLE is available: drag and drop is stage 2.
+        // OLE is initialised on the UI thread here. The reference binds
+        // the drag source of the platform when it is available: drag and
+        // drop is stage 2d.
+        let _ole_context = OleContext::current();
 
         Self::update_timer_fps();
 
@@ -298,11 +316,17 @@ impl Win32Platform {
         }
 
         if msg == WindowsMessage::WM_SETTINGCHANGE {
-            // The reference tells the platform settings here that the
-            // colours ("ImmersiveColorSet", "WindowsThemeElement") or the
-            // language ("intl") of the system changed. The settings read
-            // both through the Windows Runtime, which is stage 2; until
-            // then the settings have nothing that changes.
+            let win32_platform_settings = self.win32_platform_settings.borrow().clone();
+            if let Some(win32_platform_settings) = win32_platform_settings {
+                // SAFETY: the second parameter of this message names the
+                // setting that changed, or is null.
+                let changed_setting = unsafe { read_setting_name(l_param) };
+                match setting_change(changed_setting.as_deref()) {
+                    Some(SettingChange::ColorValues) => win32_platform_settings.on_color_values_changed(),
+                    Some(SettingChange::Language) => win32_platform_settings.on_language_changed(),
+                    None => {}
+                }
+            }
 
             // Notify WorkingArea changed to Screens
             if w_param == SPI_SETWORKAREA {

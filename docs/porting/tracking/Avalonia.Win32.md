@@ -10,15 +10,15 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Windows/FerroUI.Win32` (exists) |
 | Crate | `ferroui-win32` |
 | Phase / priority | 1 - desktop (Windows) / P0 |
-| Files | 33/95 (34.7%) |
-| Types | 111/276 (40.2%) |
+| Files | 39/95 (41.1%) |
+| Types | 124/276 (44.9%) |
 | Members | 0/2605 (0.0%) |
 
 This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
 
 ## Files
 
-### `(project root)` - files 21/43, types 29/52, members 0/358
+### `(project root)` - files 22/43, types 30/52, members 0/358
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
@@ -35,7 +35,7 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `IconImpl.cs` | `icon_impl.rs` | missing | 0/1 | `IconImpl` | 6 |  |
 | `NonPumpingWaitHelperImpl.cs` | `non_pumping_wait_helper_impl.rs` | missing | 0/1 | `NonPumpingWaitHelperImpl` | 2 |  |
 | `OffscreenParentWindow.cs` | `offscreen_parent_window.rs` | present | 1/1 | - | 1 |  |
-| `OleContext.cs` | `ole_context.rs` | missing | 0/1 | `OleContext` | 3 |  |
+| `OleContext.cs` | `ole_context.rs` | present | 1/1 | - | 3 |  |
 | `OleDataObjectHelper.cs` | `ole_data_object_helper.rs` | missing | 0/1 | `OleDataObjectHelper` | 6 |  |
 | `OleDataObjectToDataTransferItemWrapper.cs` | `ole_data_object_to_data_transfer_item_wrapper.rs` | missing | 0/1 | `OleDataObjectToDataTransferItemWrapper` | 3 |  |
 | `OleDataObjectToDataTransferWrapper.cs` | `ole_data_object_to_data_transfer_wrapper.rs` | missing | 0/1 | `OleDataObjectToDataTransferWrapper` | 4 |  |
@@ -100,12 +100,12 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `WindowsKeyboardDevice.cs` | `input/windows_keyboard_device.rs` | present | 1/1 | - | 2 |  |
 | `WindowsMouseDevice.cs` | `input/windows_mouse_device.rs` | present | 2/2 | - | 4 |  |
 
-### `Interop` - files 1/3, types 52/119, members 0/1564
+### `Interop` - files 1/3, types 57/119, members 0/1564
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
 | `TaskBarList.cs` | `interop/task_bar_list.rs` | missing | 0/1 | `TaskBarList` | 2 |  |
-| `UnmanagedMethods.cs` | `interop/unmanaged_methods.rs` | partial | 52/115 | `UnmanagedMethods.TimerProc`, `UnmanagedMethods.TimeCallback`, `UnmanagedMethods.WaitOrTimerCallback`, `UnmanagedMethods.PointerDeviceChangeFlags`, `UnmanagedMethods.BitmapCompressionMode`, `UnmanagedMethods.BitmapColorSpace`, `UnmanagedMethods.BitmapIntent`, `UnmanagedMethods.DIBColorTable`, `UnmanagedMethods.TrackPopupMenuFlags`, `UnmanagedMethods.PenMask`, `UnmanagedMethods.TouchFlags`, `UnmanagedMethods.POINTER_TOUCH_INFO`, `UnmanagedMethods.POINTER_PEN_INFO`, `UnmanagedMethods.POINTER_INFO`, `UnmanagedMethods.RGBQUAD`, `UnmanagedMethods.BITMAP`, `UnmanagedMethods.BITMAPV5HEADER`, `UnmanagedMethods.CIEXYZTRIPLE`, `UnmanagedMethods.CIEXYZ`, `UnmanagedMethods.EnumWindowsProc`, `UnmanagedMethods.GetAncestorFlags`, `UnmanagedMethods.MessageFilterFlag`, `UnmanagedMethods.LayeredWindowFlags`, `UnmanagedMethods.DWM_BLURBEHIND`, `UnmanagedMethods.RTL_OSVERSIONINFOEX`, `UnmanagedMethods.GCS`, `UnmanagedMethods.CANDIDATEFORM`, `UnmanagedMethods.COMPOSITIONFORM`, `UnmanagedMethods.LOGFONT`, `UnmanagedMethods.WindowCompositionAttributeData`, `UnmanagedMethods.WindowCompositionAttribute`, `UnmanagedMethods.AccentState`, `UnmanagedMethods.AccentFlags`, `UnmanagedMethods.AccentPolicy`, `UnmanagedMethods.MSG`, `UnmanagedMethods.PAINTSTRUCT`, `UnmanagedMethods.SIZE`, `UnmanagedMethods.SIZE_F`, `UnmanagedMethods.NCCALCSIZE_PARAMS`, `UnmanagedMethods.TRACKMOUSEEVENT`, `UnmanagedMethods.WNDCLASSEX`, `UnmanagedMethods.TOUCHINPUT`, `UnmanagedMethods.ICONINFO`, `UnmanagedMethods.OpenFileNameFlags`, `UnmanagedMethods.HRESULT`, `UnmanagedMethods.COMDLG_FILTERSPEC`, `UnmanagedMethods.MarkFullscreenWindow`, `UnmanagedMethods.SetOverlayIcon`, `UnmanagedMethods.HrInit`, `UnmanagedMethods.ITaskBarList3VTable`, `UnmanagedMethods.APPBARDATA`, `UnmanagedMethods.DROPFILES`, `UnmanagedMethods.STGMEDIUM`, `UnmanagedMethods.FORMATETC`, `UnmanagedMethods.FILEDESCRIPTORW`, `UnmanagedMethods.STATSTG`, `PixelFormatDescriptorFlags`, `PixelFormatDescriptor`, `NIM`, `AppBarMessage`, `NIF`, `NIIF`, `NOTIFYICONDATA` | 1542 |  |
+| `UnmanagedMethods.cs` | `interop/unmanaged_methods.rs` | partial | 57/115 | `UnmanagedMethods.TimerProc`, `UnmanagedMethods.TimeCallback`, `UnmanagedMethods.WaitOrTimerCallback`, `UnmanagedMethods.PointerDeviceChangeFlags`, `UnmanagedMethods.BitmapCompressionMode`, `UnmanagedMethods.BitmapColorSpace`, `UnmanagedMethods.BitmapIntent`, `UnmanagedMethods.DIBColorTable`, `UnmanagedMethods.TrackPopupMenuFlags`, `UnmanagedMethods.PenMask`, `UnmanagedMethods.TouchFlags`, `UnmanagedMethods.POINTER_TOUCH_INFO`, `UnmanagedMethods.POINTER_PEN_INFO`, `UnmanagedMethods.POINTER_INFO`, `UnmanagedMethods.RGBQUAD`, `UnmanagedMethods.BITMAP`, `UnmanagedMethods.BITMAPV5HEADER`, `UnmanagedMethods.CIEXYZTRIPLE`, `UnmanagedMethods.CIEXYZ`, `UnmanagedMethods.EnumWindowsProc`, `UnmanagedMethods.GetAncestorFlags`, `UnmanagedMethods.MessageFilterFlag`, `UnmanagedMethods.LayeredWindowFlags`, `UnmanagedMethods.DWM_BLURBEHIND`, `UnmanagedMethods.RTL_OSVERSIONINFOEX`, `UnmanagedMethods.GCS`, `UnmanagedMethods.CANDIDATEFORM`, `UnmanagedMethods.COMPOSITIONFORM`, `UnmanagedMethods.LOGFONT`, `UnmanagedMethods.WindowCompositionAttributeData`, `UnmanagedMethods.WindowCompositionAttribute`, `UnmanagedMethods.AccentState`, `UnmanagedMethods.AccentFlags`, `UnmanagedMethods.AccentPolicy`, `UnmanagedMethods.MSG`, `UnmanagedMethods.PAINTSTRUCT`, `UnmanagedMethods.NCCALCSIZE_PARAMS`, `UnmanagedMethods.TRACKMOUSEEVENT`, `UnmanagedMethods.WNDCLASSEX`, `UnmanagedMethods.TOUCHINPUT`, `UnmanagedMethods.ICONINFO`, `UnmanagedMethods.OpenFileNameFlags`, `UnmanagedMethods.COMDLG_FILTERSPEC`, `UnmanagedMethods.MarkFullscreenWindow`, `UnmanagedMethods.SetOverlayIcon`, `UnmanagedMethods.HrInit`, `UnmanagedMethods.ITaskBarList3VTable`, `UnmanagedMethods.APPBARDATA`, `UnmanagedMethods.DROPFILES`, `UnmanagedMethods.FILEDESCRIPTORW`, `UnmanagedMethods.STATSTG`, `PixelFormatDescriptorFlags`, `PixelFormatDescriptor`, `NIM`, `AppBarMessage`, `NIF`, `NIIF`, `NOTIFYICONDATA` | 1542 |  |
 | `Win32Icon.cs` | `interop/win32_icon.rs` | missing | 0/3 | `Win32Icon`, `Win32Icon.ICONDIR`, `Win32Icon.ICONDIRENTRY` | 20 |  |
 
 ### `OpenGl` - files 0/7, types 0/7, members 0/90
@@ -141,15 +141,15 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `VulkanNativeInterop.cs` | `vulkan/vulkan_native_interop.rs` | missing | 0/2 | `Win32VulkanInterface`, `VkWin32SurfaceCreateInfoKHR` | 8 |  |
 | `VulkanSupport.cs` | `vulkan/vulkan_support.rs` | missing | 0/2 | `VulkanSupport`, `VulkanSupport.VulkanSurfaceFactory` | 3 |  |
 
-### `WinRT` - files 0/5, types 0/10, members 0/84
+### `WinRT` - files 5/5, types 7/10, members 0/84
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
-| `NativeWinRTMethods.cs` | `win_rt/native_win_rt_methods.rs` | missing | 0/6 | `NativeWinRTMethods`, `NativeWinRTMethods.DISPATCHERQUEUE_THREAD_APARTMENTTYPE`, `NativeWinRTMethods.DISPATCHERQUEUE_THREAD_TYPE`, `NativeWinRTMethods.DispatcherQueueOptions`, `NativeWinRTMethods.RO_INIT_TYPE`, `HStringInterop` | 23 |  |
-| `WinRTApiInformation.cs` | `win_rt/win_rt_api_information.rs` | missing | 0/1 | `WinRTApiInformation` | 10 |  |
-| `WinRTColor.cs` | `win_rt/win_rt_color.rs` | missing | 0/1 | `WinRTColor` | 6 |  |
-| `WinRTInspectable.cs` | `win_rt/win_rt_inspectable.rs` | missing | 0/1 | `WinRTInspectable` | 3 |  |
-| `WinRTPropertyValue.cs` | `win_rt/win_rt_property_value.rs` | missing | 0/1 | `WinRTPropertyValue` | 42 |  |
+| `NativeWinRTMethods.cs` | `win_rt/native_win_rt_methods.rs` | partial | 3/6 | `NativeWinRTMethods.DISPATCHERQUEUE_THREAD_APARTMENTTYPE`, `NativeWinRTMethods.DISPATCHERQUEUE_THREAD_TYPE`, `NativeWinRTMethods.DispatcherQueueOptions` | 23 |  |
+| `WinRTApiInformation.cs` | `win_rt/win_rt_api_information.rs` | present | 1/1 | - | 10 |  |
+| `WinRTColor.cs` | `win_rt/win_rt_color.rs` | present | 1/1 | - | 6 |  |
+| `WinRTInspectable.cs` | `win_rt/win_rt_inspectable.rs` | present | 1/1 | - | 3 |  |
+| `WinRTPropertyValue.cs` | `win_rt/win_rt_property_value.rs` | present | 1/1 | - | 42 |  |
 
 ### `WinRT/Composition` - files 0/7, types 0/15, members 0/121
 
@@ -169,6 +169,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
+| `win_rt/numerics.rs` | The vector, quaternion and matrix values the interfaces of `winrt.idl` pass, by their layout: upstream maps the names to the types of the numerics library of its runtime | `Matrix4x4`, `Quaternion`, `Vector2`, `Vector3` |
 | `wnd_proc_guard.rs` | Keeps a panic from unwinding out of a window procedure through the frames of the system: caught, kept, and raised again by the message loop (docs/porting/win32-platform.md, section 5) |  |
 
-Tests, examples and build scripts (not scanned): `build.rs`, `examples/win32_window.rs`.
+Tests, examples and build scripts (not scanned): `build.rs`, `examples/win32_window.rs`, `win_rt/win_rt_tests.rs`.
