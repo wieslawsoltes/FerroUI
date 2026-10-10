@@ -9,6 +9,8 @@ use crate::raw_event_grouping::ManualRawEventGrouperDispatchQueue;
 use crate::screens::X11Screens;
 use crate::selections::clipboard::X11ClipboardImpl;
 use crate::x11_active_window_tracker::X11ActiveWindowTracker;
+use crate::x11_at_spi_accessibility::X11AtSpiAccessibility;
+use ferroui_freedesktop::at_spi::AtSpiServer;
 use crate::selections::drag_drop::X11DragSource;
 use crate::x11_cursor_factory::X11CursorFactory;
 use ferroui_base::input::platform::IPlatformDragSource;
@@ -64,6 +66,7 @@ pub struct FerroX11Platform {
     info: OnceCell<Rc<X11Info>>,
     x11_screens: OnceCell<Rc<X11Screens>>,
     compositor: OnceCell<Rc<Compositor>>,
+    accessibility: OnceCell<Rc<X11AtSpiAccessibility>>,
     options: OnceCell<Rc<X11PlatformOptions>>,
     orphaned_window: Cell<XID>,
     globals: OnceCell<Rc<X11Globals>>,
@@ -94,6 +97,7 @@ impl FerroX11Platform {
             info: OnceCell::new(),
             x11_screens: OnceCell::new(),
             compositor: OnceCell::new(),
+            accessibility: OnceCell::new(),
             options: OnceCell::new(),
             orphaned_window: Cell::new(0),
             globals: OnceCell::new(),
@@ -385,17 +389,30 @@ impl FerroX11Platform {
         let _ = self.compositor.set(compositor.clone());
         locator.bind_to_self(compositor);
 
-        // Stage 3 of docs/porting/x11-platform.md: the accessibility
-        // bridge (`X11AtSpiAccessibility`) is not built.
+        let accessibility = X11AtSpiAccessibility::new();
+        accessibility.initialize();
+        let _ = self.accessibility.set(accessibility);
     }
 
-    /// `TrackWindow`: tells the accessibility bridge about a window that
-    /// is shown. The bridge is stage 3 of docs/porting/x11-platform.md;
-    /// until then there is nothing to tell.
-    pub(crate) fn track_window(&self, _window: &X11Window) {}
+    /// The accessibility server, once it is started (`AtSpiServer`).
+    pub(crate) fn at_spi_server(&self) -> Option<Rc<AtSpiServer>> {
+        self.accessibility.get().and_then(|accessibility| accessibility.server())
+    }
+
+    /// `TrackWindow`: remembers a window that is shown for the
+    /// accessibility server, which may start after the window.
+    pub(crate) fn track_window(&self, window: &X11Window) {
+        if let Some(accessibility) = self.accessibility.get() {
+            accessibility.track_window(window);
+        }
+    }
 
     /// `UntrackWindow`: see [`track_window`](Self::track_window).
-    pub(crate) fn untrack_window(&self, _window: &X11Window) {}
+    pub(crate) fn untrack_window(&self, window: &X11Window) {
+        if let Some(accessibility) = self.accessibility.get() {
+            accessibility.untrack_window(window);
+        }
+    }
 
     /// Whether input methods are wanted (`EnableIme`).
     pub(crate) fn enable_ime(options: &X11PlatformOptions, im_module: Option<&str>, lang: Option<&str>) -> bool {

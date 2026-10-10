@@ -48,6 +48,8 @@ pub mod transparency_helper;
 #[cfg(unix)]
 pub mod x11_active_window_tracker;
 #[cfg(unix)]
+pub(crate) mod x11_at_spi_accessibility;
+#[cfg(unix)]
 pub mod x11_atoms;
 #[cfg(unix)]
 pub mod x11_cursor_factory;
