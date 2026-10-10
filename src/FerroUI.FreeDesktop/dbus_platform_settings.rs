@@ -480,6 +480,13 @@ mod tests {
     #[test]
     fn a_portal_that_is_not_there_leaves_the_defaults() {
         let _scope = scope();
+        if crate::test_support::on_session_bus() {
+            // On a session bus a call to a name nobody owns makes the bus start the service that
+            // is installed for it: the real portal would come up and keep the name the doubles of
+            // the other tests need. (Seen in the virtual machine, where the portal was activated
+            // by this test and only owned the name after the other tests had ended.)
+            return;
+        }
         // The connection is there and nobody answers for the portal.
         let connections = TestConnections::new("/org/freedesktop/DBus", Ok);
         let settings = DBusPlatformSettings::with_connection(Some(connections.client.clone()));

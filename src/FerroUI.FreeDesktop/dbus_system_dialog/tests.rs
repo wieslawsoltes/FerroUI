@@ -221,6 +221,12 @@ fn the_chosen_filter_is_the_file_type_of_the_options_when_it_matches_one() {
 #[test]
 fn without_a_portal_there_is_no_provider() {
     let _scope = scope();
+    if crate::test_support::on_session_bus() {
+        // On a session bus a call to a name nobody owns makes the bus start the service that is
+        // installed for it: the real portal would come up and keep the name the doubles of the
+        // other tests need.
+        return;
+    }
     let connections = TestConnections::new("/org/freedesktop/DBus", Ok);
     assert!(wait(DBusSystemDialog::try_create_with_connection_async(connections.client.clone(), None)).is_none());
 }
