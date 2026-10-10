@@ -224,6 +224,34 @@ mod indei_validation_plugin_tests {
         );
     }
 
+    /// Not from upstream: a model object a binding read from a property typed with its
+    /// handle is held as the handle (`Rc<T>` in the box); the validator finds the
+    /// contract of the object behind it.
+    #[test]
+    fn validates_a_model_held_as_its_handle() {
+        let inpc_accessor_plugin = InpcPropertyAccessorPlugin;
+        let validator_plugin = IndeiValidationPlugin;
+        let data = Data::new(5);
+        let object = WeakValue::new(&(data.clone() as BoxedValue));
+        let handle: BoxedValue = Rc::new(data.clone());
+        let reference = WeakValue::new(&handle);
+        assert!(validator_plugin.match_(&reference, "Value"));
+
+        let accessor = inpc_accessor_plugin.start(&object, "Value").expect("an accessor");
+        let validator = validator_plugin.start(&reference, "Value", accessor);
+        let result = Recorder::new();
+        let recorder = result.clone();
+        validator.subscribe(Rc::new(move |x| recorder.push(x)));
+        assert_eq!(data.errors_changed_subscription_count(), 1);
+        validator.set_value(Some(&boxed(6)), BindingPriority::LocalValue).unwrap();
+        assert_notifications(
+            &result.get(),
+            &[BindingNotification::new(Some(boxed(0))), BindingNotification::new(Some(boxed(6))), validation_error()],
+        );
+        validator.unsubscribe();
+        assert_eq!(data.errors_changed_subscription_count(), 0);
+    }
+
     #[test]
     fn subscribes_and_unsubscribes() {
         let inpc_accessor_plugin = InpcPropertyAccessorPlugin;
