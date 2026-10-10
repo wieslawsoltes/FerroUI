@@ -17,8 +17,8 @@
 #   --build           build the package first (scripts/android/apk.sh catalog)
 #   --gpu MODE        the GPU mode of the emulator: swiftshader_indirect (default) or host
 #   --pages "A;B"     the headers of the pages to show
-#                     (default: Home;Buttons;TextBlock;ListBox;Image;Calendar)
-#   --page-ms N       how long each page is shown, in milliseconds (default 8000)
+#                     (default: Home;Buttons;TextBlock;TextBox;ListBox;Image;Calendar)
+#   --page-ms N       how long each page is shown, in milliseconds (default 12000)
 #   --software        render through the native window instead of EGL
 #
 # The emulator may only run while no virtual machine does on the development machine: this script is
@@ -32,7 +32,7 @@ apk=""
 build=0
 gpu="swiftshader_indirect"
 pages="Home;Buttons;TextBlock;TextBox;ListBox;Image;Calendar"
-page_ms=8000
+page_ms=12000
 software=0
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -98,6 +98,8 @@ adb_shell settings put secure show_ime_with_hard_keyboard 1 >/dev/null 2>&1 || t
 if [ "$software" = 1 ]; then
     emu_write_file "$application_id" ferroui.properties "rendering=software"
 fi
+# The pictures of an earlier run have other numbers when the pages changed.
+rm -f "$out"/catalog-*.png
 adb_do logcat -c >/dev/null 2>&1 || true
 echo "== starting the catalog: pages $pages, $page_ms ms each"
 adb_shell am start -W -n "$activity" \
@@ -129,10 +131,23 @@ while [ "$waited" -lt "$limit" ]; do
         echo "   page $pictured: $header"
         emu_screencap "$out/catalog-$(printf '%02d' "$pictured")-$name.png" || true
         if [ "$header" = TextBox ]; then
-            # A tap into a text box: the soft keyboard comes up over the page, and a key of it
-            # is typed into the box.
-            adb_shell input tap "${FERROUI_CATALOG_TEXTBOX_TAP:-400 620}" >/dev/null 2>&1 || true
-            sleep 3
+            # The page is a list of samples: the first one is opened, a tap into its text box
+            # makes the box the client of the input method, and the picture is taken once the
+            # system says the soft keyboard is shown, with a word typed into the box.
+            adb_shell input tap ${FERROUI_CATALOG_SAMPLE_TAP:-400 620} >/dev/null 2>&1 || true
+            sleep 2
+            adb_shell input tap ${FERROUI_CATALOG_TEXTBOX_TAP:-516 652} >/dev/null 2>&1 || true
+            shown_ime=0
+            for _ in 1 2 3 4 5 6 7 8 9 10; do
+                if adb_shell dumpsys input_method 2>/dev/null | grep -q 'mInputShown=true'; then
+                    shown_ime=1
+                    break
+                fi
+                sleep 1
+            done
+            echo "   the soft keyboard is shown: $shown_ime"
+            adb_shell input text FerroUI >/dev/null 2>&1 || true
+            sleep 1
             emu_screencap "$out/catalog-$(printf '%02d' "$pictured")-$name-keyboard.png" || true
         fi
         pictured=$((pictured + 1))
