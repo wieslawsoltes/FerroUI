@@ -176,7 +176,7 @@ fn framebuffer_render_results_should_be_usable_as_bitmap(fmte: PixelFormatEnum) 
             ctx.draw_rectangle(Some(&pink), None, Rect::new(0.0, 20.0, 100.0, 10.0), 0.0, 0.0, &BoxShadows::default());
 
             let rc = Rect::new(0.0, 0.0, 60.0, 60.0);
-            ctx.draw_bitmap(&bmp.platform_impl().item(), 1.0, rc, rc);
+            ctx.draw_bitmap(bmp.platform_impl(), 1.0, rc, rc);
             ctx.dispose();
         }
         save(&rtb, &t.output_path().join(format!("{test_name}.out.png")));

@@ -516,7 +516,7 @@ impl IDrawingContextCore for DrawingGroupDrawingContext {
         self.add_new_geometry_drawing(brush, pen, PlatformGeometry::new(geometry).upcast());
     }
 
-    fn draw_bitmap(&mut self, _source: &std::sync::Arc<crate::platform::SharedBitmapImpl>, _opacity: f64, _source_rect: Rect, _dest_rect: Rect) {
+    fn draw_bitmap(&mut self, _source: &crate::utilities::RefCounted<crate::platform::SharedBitmapImpl>, _opacity: f64, _source_rect: Rect, _dest_rect: Rect) {
         panic!("Drawing a bitmap into a DrawingGroup is not implemented.");
     }
 
@@ -863,7 +863,7 @@ mod tests {
         fn draw_rectangle_core(&mut self, _: Option<&Rc<dyn IBrush>>, _: Option<&Rc<dyn IPen>>, _: RoundedRect, _: &BoxShadows) {
         }
         fn draw_ellipse_core(&mut self, _: Option<&Rc<dyn IBrush>>, _: Option<&Rc<dyn IPen>>, _: Rect) {}
-        fn draw_bitmap(&mut self, _: &std::sync::Arc<crate::platform::SharedBitmapImpl>, _: f64, _: Rect, _: Rect) {}
+        fn draw_bitmap(&mut self, _: &crate::utilities::RefCounted<crate::platform::SharedBitmapImpl>, _: f64, _: Rect, _: Rect) {}
         fn custom(&mut self, _: &std::sync::Arc<dyn ICustomDrawOperation>) {}
         fn draw_glyph_run(&mut self, _: Option<&Rc<dyn IBrush>>, _: &Rc<GlyphRun>) {}
         fn push_clip_core(&mut self, _: Rect) {}
@@ -1251,10 +1251,11 @@ mod tests {
     #[should_panic(expected = "Drawing a bitmap into a DrawingGroup is not implemented.")]
     fn open_does_not_record_bitmaps() {
         let (_scope, render_interface) = MockPlatformRenderInterface::install();
-        let bitmap: std::sync::Arc<crate::platform::SharedBitmapImpl> = std::sync::Arc::new(crate::rendering::testing::MockDrawingContextLayerImpl::new(
+        let bitmap_impl: std::sync::Arc<crate::platform::SharedBitmapImpl> = std::sync::Arc::new(crate::rendering::testing::MockDrawingContextLayerImpl::new(
             render_interface.log().clone(),
             crate::PixelSize::new(1, 1),
         ));
+        let bitmap = crate::utilities::RefCountable::create(bitmap_impl, || {});
         let group = DrawingGroup::new();
         let mut context = group.open();
         context.draw_bitmap(&bitmap, 1.0, Rect::default(), Rect::default());
