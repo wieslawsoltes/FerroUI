@@ -1,7 +1,9 @@
 package org.ferroui.android;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -11,6 +13,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
+import android.os.FileUriExposedException;
 import android.os.LocaleList;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
@@ -26,6 +29,7 @@ import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
+import android.widget.FrameLayout;
 
 import java.util.List;
 import java.util.Locale;
@@ -470,6 +474,31 @@ final class PlatformHelper {
         if (manager != null && listener instanceof DisplayManager.DisplayListener) {
             manager.unregisterDisplayListener((DisplayManager.DisplayListener) listener);
         }
+    }
+
+    // ---- launcher ------------------------------------------------------------------------------
+
+    /**
+     * Starts an activity for the intent; false when no activity is found for it or when it would
+     * expose a file URI to another application.
+     */
+    static boolean tryStartActivity(Context context, Intent intent) {
+        try {
+            context.startActivity(intent);
+            return true;
+        } catch (ActivityNotFoundException | FileUriExposedException e) {
+            return false;
+        }
+    }
+
+    // ---- native controls -----------------------------------------------------------------------
+
+    /** Places a view in its parent, a frame layout: a size and the margins at the left and the top. */
+    static void setFrameLayoutParams(View view, int width, int height, int leftMargin, int topMargin) {
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(width, height);
+        params.leftMargin = leftMargin;
+        params.topMargin = topMargin;
+        view.setLayoutParams(params);
     }
 
     // ---- input method --------------------------------------------------------------------------

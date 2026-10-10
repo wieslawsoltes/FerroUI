@@ -4,9 +4,6 @@
 //! (`FerroActivity`), which forwards its lifecycle; this is the object
 //! behind it, from `onCreate` to `onDestroy`.
 //!
-//! Stage 2d of docs/porting/android-platform.md: the activation with a
-//! file (an intent whose data is a file or a content URI), with the storage
-//! items.
 
 use crate::back_pressed_callback::BackPressedCallback;
 use crate::ferro_main_activity::FerroMainActivity;
@@ -20,7 +17,9 @@ use crate::platform::AndroidActivatableLifetime;
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::utilities::{HandlerList, Uri, UriKind};
 use ferroui_base::{BoxedValue, FerroLocator, LocatorExtensions};
-use ferroui_controls::application_lifetimes::{ActivatedEventArgs, ActivationKind, ProtocolActivatedEventArgs};
+use ferroui_controls::application_lifetimes::{
+    ActivatedEventArgs, ActivationKind, FileActivatedEventArgs, ProtocolActivatedEventArgs,
+};
 use ferroui_controls::{Application, Control};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -160,13 +159,8 @@ impl FerroActivity {
         };
 
         if uri.scheme() == "file" || uri.scheme() == "content" {
-            // Stage 2d of docs/porting/android-platform.md: `AndroidStorageItem.CreateItem`
-            // and the file activation.
-            panic!(
-                "The activation with a file ({}) needs the storage items of the Android backend, which are not \
-                 built: stage 2d of docs/porting/android-platform.md.",
-                uri.original_string()
-            );
+            let item = crate::platform::storage::android_storage_item::create_item(&self.java, android_uri);
+            raise(&self.on_activated, FileActivatedEventArgs::new(vec![item]).into());
         } else {
             raise(&self.on_activated, ProtocolActivatedEventArgs::new(uri).into());
         }

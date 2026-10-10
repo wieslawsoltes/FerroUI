@@ -14,11 +14,12 @@
 //! attributes, which are the manifest `scripts/android/apk.sh` writes: the
 //! activity is the main activity class of the Java layer of the backend.
 //!
-//! Not ported yet: the native control demo (`EmbedSample.Android.cs`, with
-//! the native control host of the backend, stage 2 of
-//! `docs/porting/android-platform.md`), the activity for the `OpenUri`
-//! activation (`DataSchemeActivity`, with the intents of stage 2), and the
-//! splash screen resources.
+//! The native control demo of Android (`EmbedSampleAndroid`) is in
+//! [`embed_sample_android`].
+//!
+//! Not ported yet: the activity for the `OpenUri` activation
+//! (`DataSchemeActivity`: a second activity class and its manifest entry),
+//! and the splash screen resources.
 //!
 //! Additions of the port, for the smoke runs
 //! (`scripts/android/emu-catalog.sh`), with the names of the options of the
@@ -48,11 +49,17 @@
 ferroui_android::android_application!(application::build);
 
 #[cfg(target_os = "android")]
+mod embed_sample_android;
+
+#[cfg(target_os = "android")]
 mod application {
+    use crate::embed_sample_android::EmbedSampleAndroid;
     use control_catalog::models::PageItem;
+    use control_catalog::pages::EmbedSample;
     use control_catalog::view_models::MainWindowViewModel;
     use control_catalog::{App, MainView};
-    use ferroui_android::interop::java::{call_object, string_of};
+    use ferroui_android::interop::java::{call_int, call_object, string_of, JavaValue};
+    use ferroui_base::Thickness;
     use ferroui_android::log::{self, LogPriority};
     use ferroui_android::{
         AndroidApplicationExtensions, AndroidPlatformOptions, AndroidRenderingMode, FerroActivity,
@@ -97,8 +104,8 @@ mod application {
         }
         note(format!("ControlCatalog: rendering modes {:?}", options.rendering_mode));
 
-        // The reference sets the native control demo of the embed page here
-        // (`EmbedSampleAndroid`): with the native control host of the backend.
+        EmbedSample::set_implementation(Some(Rc::new(EmbedSampleAndroid)));
+
         AppBuilder::configure::<App>()
             .with(Rc::new(options))
             .use_android()
@@ -146,6 +153,52 @@ mod application {
         );
     }
 
+    /// The children of the Java view of the main activity, in the order they
+    /// are drawn in (a later one is above an earlier one; the surface the
+    /// framework renders to is behind the window of the activity, so every
+    /// other child is above it): the class, the rectangle in pixels and
+    /// whether the child is visible.
+    fn native_views() -> String {
+        let Some(view) = FerroActivity::current_main_activity().and_then(|activity| activity.view()) else {
+            return "no view".to_string();
+        };
+        let view = view.java_object();
+        let count = call_int(view, "getChildCount", "()I", &[]);
+        let children: Vec<String> = (0..count)
+            .filter_map(|index| call_object(view, "getChildAt", "(I)Landroid/view/View;", &[JavaValue::Int(index)]))
+            .map(|child| {
+                let class = call_object(&child, "getClass", "()Ljava/lang/Class;", &[])
+                    .and_then(|class| call_object(&class, "getSimpleName", "()Ljava/lang/String;", &[]))
+                    .map(|name| string_of(&name))
+                    .unwrap_or_default();
+                let int = |name: &str| call_int(&child, name, "()I", &[]);
+                format!(
+                    "{class} at ({}, {}) {}x{} {}",
+                    int("getLeft"),
+                    int("getTop"),
+                    int("getWidth"),
+                    int("getHeight"),
+                    if int("getVisibility") == 0 { "visible" } else { "not visible" }
+                )
+            })
+            .collect();
+        format!("{} child(ren) of a view {} px wide: {}", count, call_int(view, "getWidth", "()I", &[]), children.join("; "))
+    }
+
+    /// Changes the bounds of the main view by a point and back at the next
+    /// change, so that what depends on the bounds of its ancestors is placed
+    /// again.
+    fn nudge_layout() {
+        let main_view = FerroActivity::current_main_activity()
+            .and_then(|activity| activity.view())
+            .and_then(|view| view.top_level())
+            .and_then(|top_level| top_level.get_visual_descendants().find_map(|visual| visual.cast::<MainView>()));
+        if let Some(main_view) = main_view {
+            let nudged = main_view.margin().bottom != 0.0;
+            main_view.set_margin(Thickness::new(0.0, 0.0, 0.0, if nudged { 0.0 } else { 1.0 }));
+        }
+    }
+
     /// The smoke run asked for with the extras of the intent: waits for the
     /// main view, then shows the pages and finishes the activity as asked.
     fn smoke_run() {
@@ -158,6 +211,8 @@ mod application {
         let waited = Cell::new(0u32);
         // The ticks of the timer that are left of the current half of the time of a page.
         let countdown = Cell::new(0u64);
+        // Whether the main view was laid out once more for the current page.
+        let nudged = Cell::new(false);
 
         let _timer = DispatcherTimer::run(
             move || {
@@ -210,10 +265,26 @@ mod application {
                 let half = (page_ms / 2).div_ceil(250).max(1) - 1;
 
                 // The second half of the time of a page begins: it is drawn.
-                if !announced.replace(true) {
+                if !announced.get() {
                     let index = next.get() - 1;
+                    // A native control host places its control when its bounds or those of
+                    // an ancestor change, not when a render transform does: a page that
+                    // slides in keeps its native controls where the page was when it was
+                    // laid out, until the next such change (as in the reference). So that
+                    // the pictures of the smoke run show the page as a person sees it after
+                    // any change of layout, the main view is laid out once more when the
+                    // transition is over, and the line of the page follows two ticks later.
+                    if !nudged.replace(true) {
+                        note(format!("Native views of {} before a layout: {}", pages[index].header(), native_views()));
+                        nudge_layout();
+                        countdown.set(1);
+                        return true;
+                    }
+                    nudged.set(false);
+                    announced.set(true);
+                    note(format!("Native views of {} after a layout: {}", pages[index].header(), native_views()));
                     note(format!("PAGE-SHOWN {index} {}", pages[index].header()));
-                    countdown.set(half);
+                    countdown.set(half.saturating_sub(2));
                     return true;
                 }
 

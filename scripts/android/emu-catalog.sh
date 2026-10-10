@@ -17,7 +17,7 @@
 #   --build           build the package first (scripts/android/apk.sh catalog)
 #   --gpu MODE        the GPU mode of the emulator: swiftshader_indirect (default) or host
 #   --pages "A;B"     the headers of the pages to show
-#                     (default: Home;Buttons;TextBlock;TextBox;ListBox;Image;Calendar)
+#                     (default: Home;Buttons;TextBlock;TextBox;ListBox;Image;Calendar;Native Embed)
 #   --page-ms N       how long each page is shown, in milliseconds (default 12000)
 #   --software        render through the native window instead of EGL
 #
@@ -31,7 +31,7 @@ logs=""
 apk=""
 build=0
 gpu="swiftshader_indirect"
-pages="Home;Buttons;TextBlock;TextBox;ListBox;Image;Calendar"
+pages="Home;Buttons;TextBlock;TextBox;ListBox;Image;Calendar;Native Embed"
 page_ms=12000
 software=0
 while [ $# -gt 0 ]; do

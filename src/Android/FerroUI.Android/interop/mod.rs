@@ -8,6 +8,8 @@ pub(crate) mod signature;
 #[cfg(target_os = "android")]
 pub mod java;
 #[cfg(target_os = "android")]
+pub mod listeners;
+#[cfg(target_os = "android")]
 pub(crate) mod natives;
 #[cfg(target_os = "android")]
 pub(crate) mod ndk;
