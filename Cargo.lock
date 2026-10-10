@@ -35,6 +35,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "940b3a0ca603d1eade50a4846a2afffd5ef57a9feac2c0e2ec2e14f9ead76000"
 
 [[package]]
+name = "app-without-lifetime"
+version = "0.1.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-markup",
+ "ferroui-markup-xaml",
+ "ferroui-themes-fluent",
+ "sample-build",
+ "sample-support",
+ "sample-testing",
+]
+
+[[package]]
 name = "arrayvec"
 version = "0.7.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -80,7 +95,7 @@ dependencies = [
 
 [[package]]
 name = "binding-demo"
-version = "0.1.0"
+version = "0.1.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
@@ -1986,6 +2001,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "sandbox"
+version = "0.1.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-markup",
+ "ferroui-markup-xaml",
+ "ferroui-themes-fluent",
+ "sample-build",
+ "sample-support",
+ "sample-testing",
+]
+
+[[package]]
 name = "scopeguard"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2211,6 +2241,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d8c27177b12a6399ffc08b98f76f7c9a1f4fe9fc967c784c5a071fa8d93cf7e1"
 dependencies = [
  "windows-sys",
+]
+
+[[package]]
+name = "text-test-app"
+version = "0.1.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-markup",
+ "ferroui-markup-xaml",
+ "ferroui-themes-fluent",
+ "sample-build",
+ "sample-support",
+ "sample-testing",
 ]
 
 [[package]]
@@ -2463,7 +2508,7 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "virtualization-demo"
-version = "0.1.0"
+version = "0.1.0-preview.1"
 dependencies = [
  "control-samples",
  "ferroui-base",
