@@ -41,9 +41,11 @@ impl Win32GlManager {
         let angle_options = locator.get_service::<AngleOptions>().map_or_else(AngleOptions::default, |options| (*options).clone());
         let selection_callback = opts.graphics_adapter_selection_callback.clone();
 
-        let gl = Self::initialize_core(opts, &mut || {
-            AngleWin32PlatformGraphicsFactory::try_create(Some(&angle_options), selection_callback.clone())
-        })?;
+        let gl = Self::initialize_core(
+            opts,
+            &mut || AngleWin32PlatformGraphicsFactory::try_create(Some(&angle_options), selection_callback.clone()),
+            &mut Self::try_create_and_register_composition,
+        )?;
 
         KIND.with(|kind| kind.set(Some(Win32PlatformGraphicsKind::AngleD3D11)));
         let open_gl_factory: Rc<dyn IPlatformGraphicsOpenGlContextFactory> = Rc::new(gl.clone());
@@ -63,8 +65,35 @@ impl Win32GlManager {
         KIND.with(Cell::get)
     }
 
+    /// Registers a composition mode that presents through a surface of its
+    /// own, when the system supports it and it initializes.
+    ///
+    /// Not built yet, and passed over like a mode the system does not
+    /// support: Windows.UI.Composition and the DXGI swap chain (the rest of
+    /// stage 2c).
+    #[cfg(windows)]
+    fn try_create_and_register_composition(composition_mode: Win32CompositionMode) -> bool {
+        use crate::d_composition::DirectCompositionConnection;
+        use crate::win32_platform::Win32Platform;
+
+        match composition_mode {
+            Win32CompositionMode::DirectComposition => {
+                DirectCompositionConnection::is_supported(Win32Platform::windows_version())
+                    && DirectCompositionConnection::try_create_and_register()
+            }
+            Win32CompositionMode::WinUIComposition | Win32CompositionMode::LowLatencyDxgiSwapChain => false,
+            Win32CompositionMode::RedirectionSurface => false,
+        }
+    }
+
+    #[cfg(not(windows))]
+    fn try_create_and_register_composition(_composition_mode: Win32CompositionMode) -> bool {
+        false
+    }
+
     /// The loop over the rendering modes. `try_create_angle` creates the
-    /// platform graphics of ANGLE.
+    /// platform graphics of ANGLE; `try_register_composition` registers a
+    /// composition mode other than the redirection surface.
     ///
     /// The modes that are not built yet are passed over like a mode that
     /// fails to initialize: the OpenGL of the system (WGL, a later step of
@@ -72,6 +101,7 @@ impl Win32GlManager {
     pub(crate) fn initialize_core(
         opts: &Win32PlatformOptions,
         try_create_angle: &mut dyn FnMut() -> Option<AnglePlatformGraphics>,
+        try_register_composition: &mut dyn FnMut(Win32CompositionMode) -> bool,
     ) -> Option<D3D11AngleWin32PlatformGraphics> {
         if opts.rendering_mode.is_empty() {
             panic!("Win32PlatformOptions.rendering_mode must not be empty or null");
@@ -82,7 +112,7 @@ impl Win32GlManager {
                 Win32RenderingMode::Software => return None,
                 Win32RenderingMode::AngleEgl => match try_create_angle() {
                     Some(AnglePlatformGraphics::D3D11(egl)) => {
-                        Self::try_register_composition(opts);
+                        Self::try_register_composition(opts, try_register_composition);
                         return Some(egl);
                     }
                     // As in the reference, the graphics of Direct3D 9 are
@@ -101,22 +131,23 @@ impl Win32GlManager {
         );
     }
 
-    /// The loop over the composition modes. The three modes that present
-    /// through a surface of their own (Windows.UI.Composition,
-    /// DirectComposition and the DXGI swap chain) are stage 2c: they are
-    /// passed over like a mode the system does not support, so a list ends
-    /// at the redirection surface or fails.
-    fn try_register_composition(opts: &Win32PlatformOptions) {
+    /// The loop over the composition modes: the redirection surface needs
+    /// nothing; any other mode has to register itself.
+    fn try_register_composition(
+        opts: &Win32PlatformOptions,
+        try_register_composition: &mut dyn FnMut(Win32CompositionMode) -> bool,
+    ) {
         if opts.composition_mode.is_empty() {
             panic!("Win32PlatformOptions.composition_mode must not be empty or null");
         }
 
         for composition_mode in &opts.composition_mode {
-            match composition_mode {
-                Win32CompositionMode::RedirectionSurface => return,
-                Win32CompositionMode::WinUIComposition
-                | Win32CompositionMode::DirectComposition
-                | Win32CompositionMode::LowLatencyDxgiSwapChain => {}
+            if *composition_mode == Win32CompositionMode::RedirectionSurface {
+                return;
+            }
+
+            if try_register_composition(*composition_mode) {
+                return;
             }
         }
 
@@ -143,22 +174,37 @@ mod tests {
     #[test]
     fn the_default_order_takes_angle_when_it_initializes() {
         let mut asked = 0;
-        let gl = Win32GlManager::initialize_core(&Win32PlatformOptions::default(), &mut || {
-            asked += 1;
-            d3d11()
-        });
+        let mut composition = Vec::new();
+        let gl = Win32GlManager::initialize_core(
+            &Win32PlatformOptions::default(),
+            &mut || {
+                asked += 1;
+                d3d11()
+            },
+            &mut |mode| {
+                composition.push(mode);
+                false
+            },
+        );
 
         assert_eq!(Some(7), gl.expect("the graphics of ANGLE").adapter_luid());
         assert_eq!(1, asked);
+        // The default order, up to the redirection surface, which needs
+        // nothing registered.
+        assert_eq!(vec![Win32CompositionMode::WinUIComposition, Win32CompositionMode::DirectComposition], composition);
     }
 
     #[test]
     fn the_default_order_falls_back_to_software_when_angle_does_not_initialize() {
         let mut asked = 0;
-        let gl = Win32GlManager::initialize_core(&Win32PlatformOptions::default(), &mut || {
-            asked += 1;
-            None
-        });
+        let gl = Win32GlManager::initialize_core(
+            &Win32PlatformOptions::default(),
+            &mut || {
+                asked += 1;
+                None
+            },
+            &mut |_| panic!("no composition without ANGLE"),
+        );
 
         assert!(gl.is_none());
         assert_eq!(1, asked);
@@ -173,6 +219,7 @@ mod tests {
                 asked += 1;
                 d3d11()
             },
+            &mut |_| false,
         );
 
         assert!(gl.is_none());
@@ -185,13 +232,14 @@ mod tests {
         Win32GlManager::initialize_core(
             &options(vec![Win32RenderingMode::AngleEgl, Win32RenderingMode::Wgl, Win32RenderingMode::Vulkan]),
             &mut || None,
+            &mut |_| false,
         );
     }
 
     #[test]
     #[should_panic(expected = "rendering_mode must not be empty or null")]
     fn an_empty_list_is_an_error() {
-        Win32GlManager::initialize_core(&options(Vec::new()), &mut || None);
+        Win32GlManager::initialize_core(&options(Vec::new()), &mut || None, &mut |_| false);
     }
 
     #[test]
@@ -202,7 +250,40 @@ mod tests {
             ..Default::default()
         };
 
-        Win32GlManager::initialize_core(&opts, &mut d3d11);
+        Win32GlManager::initialize_core(&opts, &mut d3d11, &mut |_| false);
+    }
+
+    #[test]
+    fn the_first_composition_mode_that_registers_ends_the_list() {
+        let opts = Win32PlatformOptions {
+            composition_mode: vec![
+                Win32CompositionMode::LowLatencyDxgiSwapChain,
+                Win32CompositionMode::DirectComposition,
+                Win32CompositionMode::WinUIComposition,
+            ],
+            ..Default::default()
+        };
+        let mut asked = Vec::new();
+
+        let gl = Win32GlManager::initialize_core(&opts, &mut d3d11, &mut |mode| {
+            asked.push(mode);
+            mode == Win32CompositionMode::DirectComposition
+        });
+
+        assert!(gl.is_some());
+        assert_eq!(vec![Win32CompositionMode::LowLatencyDxgiSwapChain, Win32CompositionMode::DirectComposition], asked);
+    }
+
+    #[test]
+    fn the_redirection_surface_ends_the_list_without_registering() {
+        let opts = Win32PlatformOptions {
+            composition_mode: vec![Win32CompositionMode::RedirectionSurface, Win32CompositionMode::DirectComposition],
+            ..Default::default()
+        };
+
+        let gl = Win32GlManager::initialize_core(&opts, &mut d3d11, &mut |_| panic!("nothing is registered"));
+
+        assert!(gl.is_some());
     }
 
     #[test]
@@ -210,6 +291,6 @@ mod tests {
     fn angle_with_an_empty_list_of_composition_modes_is_an_error() {
         let opts = Win32PlatformOptions { composition_mode: Vec::new(), ..Default::default() };
 
-        Win32GlManager::initialize_core(&opts, &mut d3d11);
+        Win32GlManager::initialize_core(&opts, &mut d3d11, &mut |_| false);
     }
 }

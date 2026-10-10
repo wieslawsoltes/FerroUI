@@ -300,6 +300,16 @@ if (-not (Test-Path $example)) {
         if ($code -ne 0) { $failed.Add("smoke run ($mode)") }
         Tail $name 200 '^\[(FAIL|info| ok )\]|^smoke run|panicked|^Windows |^Screens|^  '
     }
+    # Through ANGLE with each composition mode that presents through a surface of its own.
+    if ($Modes -contains 'angle') {
+        foreach ($composition in @('dcomp')) {
+            $name = "smoke-angle-$composition"
+            $commandLine = "`"$example`" --smoke --rendering angle --composition $composition"
+            $code = if ($InteractiveUser) { Run-Interactive $name $commandLine } else { Run $name $commandLine }
+            if ($code -ne 0) { $failed.Add("smoke run (angle, $composition)") }
+            Tail $name 200 '^\[(FAIL|info| ok )\]|^smoke run|panicked|^Windows |^Screens|^  '
+        }
+    }
 }
 
 # ---- the desktop entry point ------------------------------------------------------------------
@@ -357,6 +367,13 @@ if ($Desktop) {
                 if ($code -ne 0) { $failed.Add("presented frames ($mode)") }
                 Tail $name 20 'FAILED|^test |^test result|panicked|^    '
             }
+            foreach ($composition in @('dcomp')) {
+                $name = "integration-presented-angle-$composition"
+                $commandLine = "set FERROUI_SMOKE_RENDERING=angle&& set FERROUI_SMOKE_COMPOSITION=$composition&& `"$($binary.FullName)`" presented_frame_tests"
+                $code = if ($InteractiveUser) { Run-Interactive $name $commandLine 300 } else { Run $name $commandLine }
+                if ($code -ne 0) { $failed.Add("presented frames (angle, $composition)") }
+                Tail $name 20 'FAILED|^test |^test result|panicked|^    '
+            }
         }
     }
 
@@ -375,7 +392,7 @@ if ($Desktop) {
         # The third run is of a window whose client area extends into its frame (the title bar
         # and the caption buttons drawn by the framework), through ANGLE, with the page of the
         # window customizations among its pages.
-        foreach ($mode in @('software', 'angle', 'extended')) {
+        foreach ($mode in @('software', 'angle', 'extended', 'dcomp')) {
             $name = "catalog-$mode"
             $directory = Join-Path $pictures $mode
             New-Item -ItemType Directory -Force -Path $directory | Out-Null
@@ -383,6 +400,11 @@ if ($Desktop) {
             $commandLine = "set FERROUI_SMOKE_PAGES=2500&& set FERROUI_SMOKE_EXIT_MS=120000&& set FERROUI_SMOKE_RENDERING=$mode&& set FERROUI_SMOKE_SCREENSHOTS=$directory&& `"$catalog`""
             if ($mode -eq 'extended') {
                 $commandLine = "set FERROUI_SMOKE_PAGES=2500&& set FERROUI_SMOKE_EXIT_MS=120000&& set FERROUI_SMOKE_RENDERING=angle&& set FERROUI_SMOKE_EXTEND_CLIENT_AREA=1&& set FERROUI_SMOKE_SCREENSHOT_PAGES=Home,Window Customizations,Buttons&& set FERROUI_SMOKE_SCREENSHOTS=$directory&& `"$catalog`""
+            }
+            if ($mode -eq 'dcomp') {
+                # Presented through a composition mode, with the page that sets the transparency
+                # level of the window among the pages.
+                $commandLine = "set FERROUI_SMOKE_PAGES=2500&& set FERROUI_SMOKE_EXIT_MS=120000&& set FERROUI_SMOKE_RENDERING=angle&& set FERROUI_SMOKE_COMPOSITION=$mode&& set FERROUI_SMOKE_SCREENSHOT_PAGES=Home,Window Customizations,Buttons&& set FERROUI_SMOKE_SCREENSHOTS=$directory&& `"$catalog`""
             }
             $code = if ($InteractiveUser) { Run-Interactive $name $commandLine 600 } else { Run $name $commandLine }
             if ($code -ne 0) { $failed.Add("catalog ($mode)") }

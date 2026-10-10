@@ -370,7 +370,7 @@ mod fatal_exceptions {
 /// `FERROUI_SMOKE_RENDER_ON_UI_THREAD=1` renders on the UI thread.
 #[cfg(windows)]
 fn smoke_platform_options(builder: AppBuilder) -> AppBuilder {
-    use ferroui_win32::{Win32CompositionMode, Win32PlatformOptions, Win32RenderingMode};
+    use ferroui_win32::{Win32PlatformOptions, Win32RenderingMode};
 
     let rendering = std::env::var("FERROUI_SMOKE_RENDERING").ok();
     let on_ui_thread = std::env::var_os("FERROUI_SMOKE_RENDER_ON_UI_THREAD").is_some();
@@ -382,13 +382,30 @@ fn smoke_platform_options(builder: AppBuilder) -> AppBuilder {
         Some("software") => options.rendering_mode = vec![Win32RenderingMode::Software],
         Some("angle") => {
             options.rendering_mode = vec![Win32RenderingMode::AngleEgl];
-            options.composition_mode = vec![Win32CompositionMode::RedirectionSurface];
+            options.composition_mode = vec![smoke_composition_mode()];
         }
         Some(other) => println!("FERROUI_SMOKE_RENDERING: unknown mode {other:?} (software, angle); the default order is used"),
         None => {}
     }
-    println!("Rendering modes: {:?}; render on the UI thread: {on_ui_thread}", options.rendering_mode);
+    println!(
+        "Rendering modes: {:?}; composition modes: {:?}; render on the UI thread: {on_ui_thread}",
+        options.rendering_mode, options.composition_mode
+    );
     builder.with(Rc::new(options))
+}
+
+/// The composition mode of a smoke run through ANGLE, without a fallback:
+/// `FERROUI_SMOKE_COMPOSITION=redirection|dcomp`; the redirection surface
+/// of the window when the variable is not set.
+#[cfg(windows)]
+fn smoke_composition_mode() -> ferroui_win32::Win32CompositionMode {
+    use ferroui_win32::Win32CompositionMode;
+
+    match std::env::var("FERROUI_SMOKE_COMPOSITION").ok().as_deref() {
+        None | Some("redirection") => Win32CompositionMode::RedirectionSurface,
+        Some("dcomp") => Win32CompositionMode::DirectComposition,
+        Some(other) => panic!("FERROUI_SMOKE_COMPOSITION: unknown mode {other:?} (redirection, dcomp)"),
+    }
 }
 
 #[cfg(not(windows))]

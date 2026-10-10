@@ -1,13 +1,20 @@
 //! The platform graphics of ANGLE on Direct3D 11: every context has a
 //! display, and a device of Direct3D, of its own.
 
+use super::angle_d3d_texture_feature::AngleD3DTextureFeature;
+use super::angle_external_objects_feature::AngleExternalObjectsFeature;
 use super::{AngleWin32EglDisplay, D3D11Adapter, Win32AngleEglInterface};
 use crate::win32_platform_options::GraphicsAdapterSelectionCallback;
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::platform::{IPlatformGraphics, IPlatformGraphicsContext};
-use ferroui_base::reactive::IDisposable;
-use ferroui_opengl::egl::{EglContext, EglContextOptions};
-use ferroui_opengl::{GlProfileType, GlVersion, IGlContext, IPlatformGraphicsOpenGlContextFactory, OpenGlException};
+use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_opengl::egl::{EglContext, EglContextFeature, EglContextFeatureFactory, EglContextOptions};
+use ferroui_opengl::{
+    GlProfileType, GlVersion, IGlContext, IGlContextExternalObjectsFeature, IGlPlatformSurfaceRenderTargetFactory,
+    IPlatformGraphicsOpenGlContextFactory, OpenGlException,
+};
+use std::any::TypeId;
+use std::collections::HashMap;
 use std::rc::Rc;
 
 /// The platform graphics of ANGLE on Direct3D 11.
@@ -53,17 +60,54 @@ impl D3D11AngleWin32PlatformGraphics {
         Err(OpenGlException::new("Direct3D 11 exists on Windows only"))
     }
 
-    /// The context of a display, which the context disposes with itself.
+    /// The context of a display, which the context disposes with itself,
+    /// with the two features the reference adds to it: a render target over
+    /// a texture of Direct3D 11 (what the composition modes render through)
+    /// and the import and export of textures as external objects.
     ///
-    /// The features the reference adds to the context (a render target over
-    /// a texture of Direct3D 11 and the import of external objects) belong
-    /// to the composition modes and arrive with them (stage 2c): a context
-    /// answers that it does not have them.
+    /// # Panics
+    /// Panics when the feature of the external objects cannot be created
+    /// (the exception the reference throws from the creation of the
+    /// context).
     pub(super) fn create_context_for_display(display: AngleWin32EglDisplay) -> Result<Rc<EglContext>, OpenGlException> {
-        let egl_display = display.display().clone();
+        let angle = Rc::new(display);
+        let egl_display = angle.display().clone();
         let dispose_display = egl_display.clone();
+
+        let mut extra_features: HashMap<TypeId, EglContextFeatureFactory> = HashMap::new();
+        {
+            let angle = angle.clone();
+            extra_features.insert(
+                TypeId::of::<dyn IGlPlatformSurfaceRenderTargetFactory>(),
+                Rc::new(move |context: &Rc<EglContext>| {
+                    let feature: Rc<dyn IGlPlatformSurfaceRenderTargetFactory> =
+                        Rc::new(AngleD3DTextureFeature::new(context, angle.clone()));
+                    EglContextFeature { feature: Rc::new(feature), disposable: None }
+                }),
+            );
+        }
+        {
+            let angle = angle.clone();
+            extra_features.insert(
+                TypeId::of::<dyn IGlContextExternalObjectsFeature>(),
+                Rc::new(move |context: &Rc<EglContext>| {
+                    let feature = match AngleExternalObjectsFeature::new(context, &angle) {
+                        Ok(feature) => Rc::new(feature),
+                        Err(error) => panic!("{error}"),
+                    };
+                    let disposable = {
+                        let feature = feature.clone();
+                        Disposable::create(move || feature.dispose())
+                    };
+                    let feature: Rc<dyn IGlContextExternalObjectsFeature> = feature;
+                    EglContextFeature { feature: Rc::new(feature), disposable: Some(disposable) }
+                }),
+            );
+        }
+
         let result = egl_display.create_context(Some(EglContextOptions {
             dispose_callback: Some(Rc::new(move || dispose_display.dispose())),
+            extra_features: Some(extra_features),
             ..Default::default()
         }));
         if result.is_err() {

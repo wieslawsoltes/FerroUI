@@ -157,6 +157,13 @@ jobs:
       - name: Smoke run through ANGLE with the ANGLE probe
         timeout-minutes: 5
         run: cargo run --locked -p ferroui-win32 --example win32_window -- --smoke --rendering angle --angle-probe
+      # The same run presented through DirectComposition (stage 2c): the window has no redirection
+      # bitmap, the context of ANGLE renders into the texture of a composition surface, and the
+      # client area the system composed is read back as in the other runs.
+      - name: Smoke run through ANGLE, presented through DirectComposition
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        run: cargo run --locked -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition dcomp
       - name: Skia binaries published for Windows (informative)
         id: skia
         if: ${{ !cancelled() }}
@@ -212,6 +219,11 @@ jobs:
           for mode in software angle; do
             FERROUI_SMOKE_RENDERING=$mode cargo test --locked -p ferroui-integration-tests-win32 --test integration -- presented_frame_tests || result=1
           done
+          # Through ANGLE with each composition mode that presents through a surface of its own.
+          for composition in dcomp; do
+            FERROUI_SMOKE_RENDERING=angle FERROUI_SMOKE_COMPOSITION=$composition \
+              cargo test --locked -p ferroui-integration-tests-win32 --test integration -- presented_frame_tests || result=1
+          done
           exit $result
       # The catalog on Windows, for a person to look at: its desktop host shows the home page and
       # a handful of others and writes two pictures of each, the frame the framework draws
@@ -235,6 +247,18 @@ jobs:
               ./target/debug/control-catalog-desktop.exe || { echo "::error::the catalog ended with an error (rendering mode $mode)"; result=1; }
             echo "::endgroup::"
             ls -l "target/screenshots/$mode" || result=1
+          done
+          # Through ANGLE with each composition mode that presents through a surface of its own
+          # (stage 2c), with the page of the window customizations, which sets the transparency
+          # level, among the pages.
+          for composition in dcomp; do
+            echo "::group::The catalog presented through the composition mode $composition"
+            FERROUI_SMOKE_RENDERING=angle FERROUI_SMOKE_COMPOSITION=$composition \
+              FERROUI_SMOKE_SCREENSHOT_PAGES="Home,Window Customizations,Buttons" \
+              FERROUI_SMOKE_SCREENSHOTS=target/screenshots/$composition \
+              ./target/debug/control-catalog-desktop.exe || { echo "::error::the catalog ended with an error (composition mode $composition)"; result=1; }
+            echo "::endgroup::"
+            ls -l "target/screenshots/$composition" || result=1
           done
           # Once more with the client area of the window extended into its frame (stage 2f of the
           # backend): the title bar and the caption buttons are drawn by the framework, and the
@@ -297,6 +321,10 @@ jobs:
         if: ${{ !cancelled() }}
         timeout-minutes: 5
         run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke --rendering angle --angle-probe
+      - name: Smoke run through ANGLE, presented through DirectComposition
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition dcomp
       - name: Skia binaries published for Windows on ARM64
         if: ${{ !cancelled() }}
         run: |

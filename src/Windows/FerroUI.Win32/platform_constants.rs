@@ -25,6 +25,18 @@ impl Version {
     }
 }
 
+impl std::fmt::Display for Version {
+    /// The numbers with points between them; the build number when the
+    /// version has one.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}.{}", self.major, self.minor)?;
+        if self.build != 0 {
+            write!(f, ".{}", self.build)?;
+        }
+        Ok(())
+    }
+}
+
 /// The constants of the platform.
 pub struct PlatformConstants;
 
