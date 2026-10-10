@@ -2,23 +2,23 @@
  "upstreamCommit": "17350180c33b063f0e98abbfd19aa3cae63f5d56",
  "inScope": {
   "files": [
-   2475,
+   2498,
    2569,
    0
   ],
   "types": [
-   3348,
+   3377,
    3888,
    311
   ],
   "members": [
-   27019,
+   27177,
    31738,
    2858
   ]
  },
  "allProjects": {
-  "membersPresent": 27019,
+  "membersPresent": 27177,
   "members": 37391,
   "membersNotApplicable": 1132,
   "membersOutOfScope": 4521
@@ -494,22 +494,22 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    23,
+    46,
     58,
     0
    ],
    "types": [
-    32,
+    61,
     88,
     0
    ],
    "members": [
-    153,
+    311,
     447,
     0
    ],
    "interfaces": [
-    1,
+    5,
     7
    ],
    "propertyRegistrations": [
@@ -523,10 +523,11 @@
    "notApplicableFiles": 0,
    "matchKinds": {
     "field": 1,
-    "fn": 142,
-    "free item": 1,
-    "overload fn": 6,
-    "variant": 3
+    "fn": 288,
+    "free fn": 3,
+    "free item": 2,
+    "overload fn": 7,
+    "variant": 10
    },
    "presentFiles": {
     "AndroidDispatcherImpl.cs": [
@@ -559,23 +560,80 @@
     "AvaloniaView.cs": [
      "ferro_view.rs"
     ],
+    "BackPressedCallback.cs": [
+     "back_pressed_callback.rs"
+    ],
     "ChoreographerTimer.cs": [
      "choreographer_timer.rs"
     ],
     "CursorFactory.cs": [
      "cursor_factory.rs"
     ],
+    "IActivityResultHandler.cs": [
+     "i_activity_result_handler.rs"
+    ],
+    "IAndroidNavigationService.cs": [
+     "i_android_navigation_service.rs"
+    ],
     "IAvaloniaActivity.cs": [
      "i_ferro_activity.rs"
+    ],
+    "IInitEditorInfo.cs": [
+     "i_init_editor_info.rs"
     ],
     "Platform/AndroidActivatableLifetime.cs": [
      "platform/android_activatable_lifetime.rs"
     ],
+    "Platform/AndroidDataFormatHelper.cs": [
+     "platform/android_data_format_helper.rs"
+    ],
     "Platform/AndroidInsetsManager.cs": [
      "platform/android_insets_manager.rs"
     ],
+    "Platform/AndroidLauncher.cs": [
+     "platform/android_launcher.rs"
+    ],
+    "Platform/AndroidNativeControlHostImpl.cs": [
+     "platform/android_native_control_host_impl.rs"
+    ],
+    "Platform/AndroidPlatformFeedback.cs": [
+     "platform/android_platform_feedback.rs"
+    ],
+    "Platform/AndroidPlatformSettings.cs": [
+     "platform/android_platform_settings.rs"
+    ],
     "Platform/AndroidScreens.cs": [
      "platform/android_screens.rs"
+    ],
+    "Platform/AndroidSystemNavigationManager.cs": [
+     "platform/android_system_navigation_manager.rs"
+    ],
+    "Platform/ClipDataItemToDataTransferItemWrapper.cs": [
+     "platform/clip_data_item_to_data_transfer_item_wrapper.rs"
+    ],
+    "Platform/ClipDataToDataTransferWrapper.cs": [
+     "platform/clip_data_to_data_transfer_wrapper.rs"
+    ],
+    "Platform/ClipboardImpl.cs": [
+     "platform/clipboard_impl.rs"
+    ],
+    "Platform/Input/AndroidInputMethod.cs": [
+     "platform/input/android_input_method.rs"
+    ],
+    "Platform/Input/AndroidKeyboardDevice.cs": [
+     "platform/input/android_keyboard_device.rs"
+    ],
+    "Platform/Input/AvaloniaInputConnection.cs": [
+     "platform/input/ferro_input_connection.rs"
+    ],
+    "Platform/Input/EditCommand.cs": [
+     "platform/input/edit_command.rs"
+    ],
+    "Platform/Input/TextEditBuffer.cs": [
+     "platform/input/text_edit_buffer.rs"
+    ],
+    "Platform/PlatformSupport.cs": [
+     "platform/platform_support.rs"
     ],
     "Platform/SkiaPlatform/AndroidFramebuffer.cs": [
      "platform/skia_platform/android_framebuffer.rs"
@@ -589,8 +647,20 @@
     "Platform/SkiaPlatform/TopLevelImpl.cs": [
      "platform/skia_platform/top_level_impl.rs"
     ],
+    "Platform/Specific/Helpers/AndroidKeyInterop.cs": [
+     "platform/specific/helpers/android_key_interop.rs"
+    ],
+    "Platform/Specific/Helpers/AndroidKeyboardEventsHelper.cs": [
+     "platform/specific/helpers/android_keyboard_events_helper.rs"
+    ],
     "Platform/Specific/Helpers/AndroidMotionEventsHelper.cs": [
      "platform/specific/helpers/android_motion_events_helper.rs"
+    ],
+    "Platform/Storage/AndroidStorageItem.cs": [
+     "platform/storage/android_storage_item.rs"
+    ],
+    "Platform/Storage/AndroidStorageProvider.cs": [
+     "platform/storage/android_storage_provider.rs"
     ],
     "PlatformIconLoader.cs": [
      "platform_icon_loader.rs"
@@ -602,6 +672,7 @@
    "rustOnly": [
     "android_egl.rs",
     "interop/java.rs",
+    "interop/listeners.rs",
     "interop/natives.rs",
     "interop/ndk.rs",
     "interop/signature.rs",
