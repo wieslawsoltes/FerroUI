@@ -2903,6 +2903,13 @@ mod native {
         unsafe { dwm::DwmSetWindowAttribute(h(hwnd), attribute, (&value as *const i32).cast(), std::mem::size_of::<i32>() as u32) }
     }
 
+    /// `DwmFlush`: waits until the desktop window manager has composed
+    /// its next frame.
+    pub fn dwm_flush() {
+        // SAFETY: no arguments.
+        unsafe { dwm::DwmFlush() };
+    }
+
     /// `DwmEnableBlurBehindWindow` over the whole window (a region that
     /// covers nothing visible, which the system reads as "transparent
     /// without a blur" since Windows 8). Returns whether the call succeeded.
@@ -3342,12 +3349,31 @@ mod native {
 
     /// The kind of COM apartment of the calling thread (`APTTYPE`), or
     /// `None` when COM is not initialised on it.
+    ///
+    /// A thread that has not initialised COM is reported by the system as
+    /// a thread of the multithreaded apartment as soon as any thread of
+    /// the process has created that apartment (the implicit multithreaded
+    /// apartment: the qualifier says so). Such a thread has no apartment
+    /// of its own and can still enter a single-threaded one, so it is
+    /// `None` here. The Windows.UI.Composition mode showed it: the
+    /// libraries of the compositor create the multithreaded apartment on
+    /// their threads before the UI thread initialises OLE (run
+    /// 38077851321: the drag source was not registered and the clipboard
+    /// was not opened in that mode).
     pub fn co_get_apartment_type() -> Option<i32> {
         let mut apartment_type = 0;
         let mut qualifier = 0;
         // SAFETY: two numbers of this frame the system writes to.
         let result = unsafe { com::CoGetApartmentType(&mut apartment_type, &mut qualifier) };
-        (result >= 0).then_some(apartment_type)
+        apartment_of(result, apartment_type, qualifier)
+    }
+
+    /// `APTTYPEQUALIFIER_IMPLICIT_MTA`.
+    const APTTYPEQUALIFIER_IMPLICIT_MTA: i32 = 1;
+
+    /// The apartment of a thread from what `CoGetApartmentType` answered.
+    pub(crate) fn apartment_of(result: i32, apartment_type: i32, qualifier: i32) -> Option<i32> {
+        (result >= 0 && qualifier != APTTYPEQUALIFIER_IMPLICIT_MTA).then_some(apartment_type)
     }
 
     /// `APTTYPE_STA`: a single-threaded apartment.
