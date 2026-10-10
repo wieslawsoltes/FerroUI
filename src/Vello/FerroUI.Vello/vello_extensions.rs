@@ -159,8 +159,32 @@ pub fn rect_path(r: Rect) -> BezPath {
 }
 
 /// The path of the ellipse inscribed in a rectangle.
+///
+/// The ellipse is four quarter arcs, so the four points where it touches
+/// the rectangle are points of the path and the tight bounds of the path
+/// are the rectangle (as the bounds of the oval of the Skia backend are):
+/// the path kurbo makes of a whole ellipse divides it into as many equal
+/// arcs as the tolerance asks for, whose ends need not be those points, and
+/// its curves then reach beyond the rectangle by a little (0.002 of 200).
 pub fn ellipse_path(r: Rect) -> BezPath {
-    kurbo::Ellipse::from_rect(to_kurbo_rect(r)).to_path(PATH_TOLERANCE)
+    let rect = to_kurbo_rect(r);
+    let center = rect.center();
+    let radii = kurbo::Vec2::new(rect.width() / 2.0, rect.height() / 2.0);
+
+    let mut path = BezPath::new();
+    path.move_to((center.x + radii.x, center.y));
+    for quarter in 0..4 {
+        let arc = kurbo::Arc::new(
+            center,
+            radii,
+            f64::from(quarter) * std::f64::consts::FRAC_PI_2,
+            std::f64::consts::FRAC_PI_2,
+            0.0,
+        );
+        path.extend(arc.append_iter(PATH_TOLERANCE));
+    }
+    path.close_path();
+    path
 }
 
 /// The path of a rounded rectangle with elliptical corner radii, clockwise
