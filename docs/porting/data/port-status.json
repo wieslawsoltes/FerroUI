@@ -7328,6 +7328,8 @@
     "assembly.rs",
     "error.rs",
     "guid.rs",
+    "input/key.rs",
+    "input/physical_key.rs",
     "task.rs"
    ]
   },

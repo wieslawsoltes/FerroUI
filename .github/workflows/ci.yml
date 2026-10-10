@@ -39,6 +39,21 @@ jobs:
       - name: Generated composition code is up to date
         run: python3 scripts/generate_composition.py --check
 
+  # The crates that are published stay publishable (docs/release.md): the manifests state what
+  # crates.io needs, the crates of the workspace are pinned to one another at the version of the
+  # workspace, every package is assembled and is below the size limit, and the crate table of the
+  # README is current. Nothing is compiled and nothing is published: about two minutes, most of it
+  # the toolchain and the index.
+  packaging:
+    name: Packages of the published crates
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - name: Package without building
+        run: scripts/release/publish.sh --dry-run --no-verify
+
   # Reduced for the time being (2026-10-08), to shorten the wait for a pull request while many are
   # in flight; the job took 22 minutes, 20 of them compiling. What is left out, and how to get it
   # back:
@@ -258,6 +273,15 @@ jobs:
           -p ferroui-browser -p control-catalog-browser
       - name: Check the examples of the browser crate
         run: cargo check --locked --target wasm32-unknown-emscripten -p ferroui-browser --examples
+      # The Vello backend in the browser is behind a feature that no site built here turns on: without
+      # this its sink for WebGL is compiled by nothing, and a change of the scene interface breaks it
+      # unseen (docs/porting/vello-backend.md, section 12).
+      - name: Check the browser crate and the catalog host with the Vello backend
+        run: >
+          cargo check --locked --target wasm32-unknown-emscripten
+          -p ferroui-browser --features vello --examples
+          && cargo check --locked --target wasm32-unknown-emscripten
+          -p control-catalog-browser --features vello
       - name: Build the themed view site
         run: scripts/build-browser.sh themed_view
       - name: Behaviour tests in headless Chrome

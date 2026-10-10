@@ -13,7 +13,10 @@
 //! Build and assemble the site with `scripts/build-browser.sh themed_view`
 //! and serve `target/browser/themed_view` with any static web server. The
 //! query string selects the rendering mode and the theme variant:
-//! `?RenderingMode=Software2D`, `?ThemeVariant=dark`.
+//! `?RenderingMode=Software2D`, `?ThemeVariant=dark`. `?Renderer=Vello`
+//! draws with the Vello backend in a module built with the feature `vello`
+//! of the crate (the hybrid mode for `WebGL2`, the CPU mode for
+//! `Software2D`); Skia draws otherwise.
 //!
 //! Built with threads (`scripts/build-browser.sh themed_view --threads`,
 //! served cross-origin isolated) the view is rendered by a render thread:
@@ -36,12 +39,13 @@ use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::{Uri, UriKind};
 use ferroui_base::platform::{AlphaFormat, PixelFormat};
 use ferroui_base::{
-    ferro_class, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, PixelSize, Ref, Thickness, Vector,
+    ferro_class, ferro_impl_classes, instantiate, BoxedValue, FerroLocator, FerroObjectImpl, LocatorExtensions,
+    PixelSize, Ref, Thickness, Vector,
 };
 use ferroui_browser::interop::canvas_helper::{RENDER_TARGET_KIND_SOFTWARE, RENDER_TARGET_KIND_WEB_GL};
 use ferroui_browser::interop::{navigation_helper, thread_proxy};
 use ferroui_browser::rendering::{BrowserSharedRenderLoop, RenderStatistics, RenderWorker};
-use ferroui_browser::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderingMode, FerroView};
+use ferroui_browser::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderer, BrowserRenderingMode, FerroView};
 use ferroui_controls::{
     AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Border, Button, CheckBox, Control, ListBox,
     NativeControlHost, NewApplication, ProgressBar, Slider, StackPanel, TextBlock, TextBox, TopLevel,
@@ -559,7 +563,9 @@ pub fn themed_view_decode_damaged() -> String {
 ///   index of the function of the last one in the script of the module (-1
 ///   for none);
 /// - `released`: the canvases of closed views the thread that renders has
-///   released, and `panics`: the panics of the render thread.
+///   released, and `panics`: the panics of the render thread;
+/// - `renderer`: the render backend the application was started with
+///   (`Skia` or `Vello`).
 #[wasm_bindgen(js_name = themedViewRendering)]
 pub fn themed_view_rendering() -> String {
     let statistics = RenderStatistics::current();
@@ -570,7 +576,7 @@ pub fn themed_view_rendering() -> String {
         _ => "none",
     };
     format!(
-        "frames={};frame_thread={};page_thread={};other_thread={};render_thread={};on_render_thread={};kind={};gl={};size={}x{};ticks={};proxied={};last_proxied={};released={};panics={}",
+        "frames={};frame_thread={};page_thread={};other_thread={};render_thread={};on_render_thread={};kind={};gl={};size={}x{};ticks={};proxied={};last_proxied={};released={};panics={};renderer={}",
         statistics.frames,
         statistics.frame_thread,
         page_thread,
@@ -586,7 +592,13 @@ pub fn themed_view_rendering() -> String {
         statistics.last_proxied_function,
         statistics.canvases_released,
         statistics.render_thread_panics,
+        renderer_name(),
     )
+}
+
+/// The render backend the application was started with: `Skia` or `Vello`.
+fn renderer_name() -> &'static str {
+    FerroLocator::current().get_service::<BrowserPlatformOptions>().map_or(BrowserRenderer::Skia, |options| options.renderer).name()
 }
 
 /// Opens (`open`) a second view in the element `second` of the page, which
@@ -643,6 +655,15 @@ fn parse_args(query: &str) -> BrowserPlatformOptions {
             .collect();
         if !modes.is_empty() {
             options.rendering_mode = modes;
+        }
+    }
+    // The Vello backend, in a module that has it. A module without it keeps
+    // Skia and says so: the page asked for something that is not there.
+    if let Some(renderer) = query_value(query, "Renderer").as_deref().and_then(BrowserRenderer::parse) {
+        if renderer.is_available() {
+            options.renderer = renderer;
+        } else {
+            eprintln!("themed_view: ?Renderer={} is not in this module (built without the feature `vello`); Skia draws", renderer.name());
         }
     }
     // A module built with threads renders on a render thread unless the page

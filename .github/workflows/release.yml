@@ -1,0 +1,142 @@
+name: Release
+
+# Publishes the crates of the workspace to crates.io (docs/release.md). Two ways in:
+#
+# - By hand (workflow_dispatch), with the version and `dry_run`, which is on unless it is switched
+#   off: a dry run tests the workspace, packages every published crate and builds each from its
+#   package, and publishes nothing.
+# - A pushed tag `v<version>`: a real release of the tagged commit.
+#
+# A real release cannot be taken back (a version of a crate can be yanked, never removed), so the
+# job that publishes runs only after the job that verifies, in the environment `crates-io`, which
+# the repository can protect with required reviewers.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The version to release; it has to be the version of the workspace (for example 0.1.0-preview.1)
+        required: true
+      dry_run:
+        description: Package and verify every crate and publish nothing
+        type: boolean
+        default: true
+  push:
+    tags: ['v*']
+
+# One release at a time, and a release that is running is never cancelled half way.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  # Everything that can be known before anything is uploaded. On macOS: the one desktop platform
+  # the workspace builds for, so every crate is built from its package with its real backend.
+  verify:
+    name: Test, package and verify
+    runs-on: macos-15
+    timeout-minutes: 240
+    permissions:
+      contents: read
+      # The conclusion of the CI run of the commit.
+      actions: read
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      publish: ${{ steps.version.outputs.publish }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      # The tag or the input has to name the version the manifests state: the version is set by a
+      # commit (scripts/release/set-version.sh), never by this workflow.
+      - name: Version of the release
+        id: version
+        env:
+          EVENT: ${{ github.event_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          workspace="$(python3 scripts/release/crates.py version)"
+          if [ "$EVENT" = "push" ]; then
+            requested="${REF_NAME#v}"
+            publish=true
+          else
+            requested="${INPUT_VERSION#v}"
+            if [ "$INPUT_DRY_RUN" = "false" ]; then publish=true; else publish=false; fi
+          fi
+          if [ "$requested" != "$workspace" ]; then
+            echo "::error::the release names the version $requested, and the workspace is at $workspace (scripts/release/set-version.sh)"
+            exit 1
+          fi
+          echo "version=$workspace" >> "$GITHUB_OUTPUT"
+          echo "publish=$publish" >> "$GITHUB_OUTPUT"
+          echo "Version $workspace, publish: $publish" >> "$GITHUB_STEP_SUMMARY"
+      - name: The changelog has an entry for the version
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: grep -q -F "## [$VERSION]" CHANGELOG.md
+      # The browser jobs of the continuous integration are not repeated here: a real release
+      # requires that the CI run of this commit succeeded.
+      - name: The CI run of the commit is green
+        if: steps.version.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          conclusions="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --commit "$GITHUB_SHA" --json conclusion --jq '.[].conclusion')"
+          echo "CI runs of $GITHUB_SHA: ${conclusions:-none}"
+          if ! echo "$conclusions" | grep -q -x success; then
+            echo "::error::no successful CI run for $GITHUB_SHA; run the CI workflow on this commit first"
+            exit 1
+          fi
+      # The tests of the workspace, as the CI job of a pull request runs them: that job does not
+      # run for a push to main, so the commit of a release was not necessarily tested as it is.
+      - name: Test
+        run: cargo test --workspace --locked --no-fail-fast --lib --tests
+      - name: Package every crate and build each from its package
+        run: scripts/release/publish.sh --dry-run
+
+  # The upload. On Linux: nothing is built here (the job above built every package), and the wait
+  # crates.io imposes between new crates is hours for a first release (docs/release.md, "Rate limits").
+  publish:
+    name: Publish to crates.io
+    needs: verify
+    if: needs.verify.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    environment: crates-io
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      # In dependency order, a version that is on crates.io already skipped, so a run that stopped
+      # is run again. Not built again here: `verify` built every crate from the same packages.
+      - name: Publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: scripts/release/publish.sh --publish --no-verify
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          if gh release view "v$VERSION" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "the release v$VERSION exists"
+            exit 0
+          fi
+          options=(--repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "FerroUI $VERSION" --generate-notes)
+          # A version with a pre-release identifier is a preview.
+          case "$VERSION" in *-*) options+=(--prerelease) ;; esac
+          gh release create "v$VERSION" "${options[@]}"

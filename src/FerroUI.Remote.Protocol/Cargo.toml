@@ -6,6 +6,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 [lib]
 path = "lib.rs"
@@ -14,3 +18,7 @@ path = "lib.rs"
 # external crate. The two key enumerations are compiled in from the sources of
 # the base library (see `lib.rs`), as the upstream project file does.
 [dependencies]
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "tools"

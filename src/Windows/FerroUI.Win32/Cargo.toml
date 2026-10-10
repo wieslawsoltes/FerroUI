@@ -6,6 +6,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 # The build script generates the bindings of the COM interfaces from the interface definition
 # files of the crate (`build.rs`).
 build = "build.rs"
@@ -63,7 +67,7 @@ optional = true
 
 [build-dependencies]
 # The port's MicroCom generator: the standard library alone.
-microcom-codegen = { path = "../../tools/MicroCom.CodeGenerator" }
+microcom-codegen.workspace = true
 
 [dev-dependencies]
 # The example of a window draws through the render interface of the Vello backend in its CPU
@@ -75,3 +79,7 @@ ferroui-vello.workspace = true
 [[example]]
 name = "win32_window"
 path = "examples/win32_window.rs"
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "platforms"

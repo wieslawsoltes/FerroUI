@@ -26,6 +26,12 @@ ferroui-fonts-inter = { workspace = true }
 control-catalog = { path = "../ControlCatalog" }
 wasm-bindgen = { workspace = true }
 
+# The Vello render backend beside Skia in the module, chosen with `?Renderer=Vello`
+# (docs/porting/vello-backend.md, section 12). Off by default: the published module is the Skia one.
+[features]
+default = []
+vello = ["ferroui-browser/vello"]
+
 # The published site carries the artwork of this project instead of the upstream brand assets of the
 # sample (see `samples/ControlCatalog/PlaceholderAssets`); the feature is a default of the sample and
 # is named here so that the site cannot lose it. The pictures and fonts of the sample are

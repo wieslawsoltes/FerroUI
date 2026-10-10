@@ -63,11 +63,11 @@ use ferroui_base::rendering::composition::transport::CompositionBatch;
 use ferroui_base::rendering::composition::ElementComposition;
 use ferroui_base::rendering::RendererDebugOverlays;
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::{Point, Ref, Visual};
+use ferroui_base::{FerroLocator, LocatorExtensions, Point, Ref, Visual};
 use ferroui_browser::interop::canvas_helper::{RENDER_TARGET_KIND_SOFTWARE, RENDER_TARGET_KIND_WEB_GL};
 use ferroui_browser::interop::thread_proxy;
 use ferroui_browser::rendering::{BrowserSharedRenderLoop, RenderStatistics, RenderWorker};
-use ferroui_browser::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderingMode};
+use ferroui_browser::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderer, BrowserRenderingMode};
 use ferroui_controls::{AppBuilder, Application, Button, Image, NavigationPage, TextBlock, TextBox, TopLevel};
 use ferroui_fonts_inter::AppBuilderExtension;
 use std::cell::RefCell;
@@ -222,7 +222,9 @@ pub fn catalog_state() -> String {
 ///   index of the function of the last one in the script of the module (-1
 ///   for none);
 /// - `released`: the canvases of closed views the thread that renders has
-///   released, and `panics`: the panics of the render thread.
+///   released, and `panics`: the panics of the render thread;
+/// - `renderer`: the render backend the application was started with
+///   (`Skia` or `Vello`).
 ///
 /// Not a port.
 #[wasm_bindgen(js_name = catalogRendering)]
@@ -235,7 +237,7 @@ pub fn catalog_rendering() -> String {
         _ => "none",
     };
     format!(
-        "frames={};frame_thread={};page_thread={};other_thread={};render_thread={};on_render_thread={};kind={};gl={};size={}x{};ticks={};proxied={};last_proxied={};released={};panics={}",
+        "frames={};frame_thread={};page_thread={};other_thread={};render_thread={};on_render_thread={};kind={};gl={};size={}x{};ticks={};proxied={};last_proxied={};released={};panics={};renderer={}",
         statistics.frames,
         statistics.frame_thread,
         page_thread,
@@ -251,6 +253,7 @@ pub fn catalog_rendering() -> String {
         statistics.last_proxied_function,
         statistics.canvases_released,
         statistics.render_thread_panics,
+        FerroLocator::current().get_service::<BrowserPlatformOptions>().map_or(BrowserRenderer::Skia, |options| options.renderer).name(),
     )
 }
 
@@ -463,6 +466,28 @@ fn parse_args(args: &[&str]) -> Option<BrowserPlatformOptions> {
         options.rendering_mode = modes;
     }
 
+    // Addition of the port: the render backend, `?Renderer=Vello` in a
+    // module built with the feature `vello` (the hybrid mode for `WebGL2`,
+    // the CPU mode for `Software2D`). A name that is no backend fails as an
+    // unknown rendering mode does; a backend the module does not have
+    // leaves Skia, and the line below says which one draws.
+    if let Some(name) = query_value(query, "Renderer") {
+        match BrowserRenderer::parse(&name) {
+            Some(renderer) if renderer.is_available() => options.renderer = renderer,
+            Some(renderer) => println!(
+                "DemoBrowserPlatformOptions.Renderer: {} is not in this module (built without the feature `vello`)",
+                renderer.name()
+            ),
+            None => {
+                println!(
+                    "ParseArgs of DemoBrowserPlatformOptions failed: \
+                     Requested value '{name}' was not found in BrowserRenderer."
+                );
+                return None;
+            }
+        }
+    }
+
     // Addition of the port: a module built with threads renders on a render
     // thread unless the page asks for one thread. A value `bool.TryParse`
     // rejects keeps the default, as for the option above.
@@ -473,6 +498,7 @@ fn parse_args(args: &[&str]) -> Option<BrowserPlatformOptions> {
     println!("DemoBrowserPlatformOptions.PreferFileDialogPolyfill: {}", if options.prefer_file_dialog_polyfill { "True" } else { "False" });
     let rendering_mode: Vec<&str> = options.rendering_mode.iter().map(|mode| mode.name()).collect();
     println!("DemoBrowserPlatformOptions.RenderingMode: {}", rendering_mode.join(";"));
+    println!("DemoBrowserPlatformOptions.Renderer: {}", options.renderer.name());
     Some(options)
 }
 
@@ -536,6 +562,17 @@ mod tests {
         assert!(!parse_args(&["http://localhost/?RenderingMode=WebGL2&renderthread=False"]).unwrap().render_thread);
         assert!(parse_args(&["http://localhost/?RenderThread=true"]).unwrap().render_thread);
         assert!(parse_args(&["http://localhost/?RenderThread=no"]).unwrap().render_thread);
+    }
+
+    // Not from upstream: the render backend is an option of the port.
+    #[test]
+    fn the_renderer_is_read_from_the_query_string() {
+        assert_eq!(BrowserRenderer::Skia, parse_args(&["http://localhost/"]).unwrap().renderer);
+        assert_eq!(BrowserRenderer::Skia, parse_args(&["http://localhost/?Renderer=skia"]).unwrap().renderer);
+        // A module without the backend keeps Skia; one with it draws with it.
+        let expected = if BrowserRenderer::Vello.is_available() { BrowserRenderer::Vello } else { BrowserRenderer::Skia };
+        assert_eq!(expected, parse_args(&["http://localhost/?RenderingMode=WebGL2&renderer=VELLO"]).unwrap().renderer);
+        assert_eq!(None, parse_args(&["http://localhost/?Renderer=Direct2D"]));
     }
 
     // Not from upstream: the probes of the behaviour tests are additions of the port.

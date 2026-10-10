@@ -277,7 +277,7 @@ The owner's rule "the Skia backend uses Graphite" cannot be met on Windows throu
 | `ganesh-gl-graphite-jpegd-jpege-pdf-vulkan` | no |
 | `d3d-ganesh-gl-graphite-jpegd-jpege-pdf-vulkan` | no |
 
-So the Skia backend asks for the feature `gl` of the bindings on Windows (`src/Skia/FerroUI.Skia/Cargo.toml`, a target table of its own beside the Apple and the browser tables, which are unchanged) and sets its `ferro_skia_ganesh_gl` configuration there (`build.rs`): the Ganesh GPU of the backend (`gpu/open_gl`), built for the browser alone until now, is built for Windows, and nothing is built from source on x86-64. Ganesh and Graphite together have no binary, as on the other platforms, so Graphite on Vulkan will need its own choice of feature set when the Vulkan stage comes. SKIA-ARM64-PLACEHOLDER
+So the Skia backend asks for the feature `gl` of the bindings on Windows (`src/Skia/FerroUI.Skia/Cargo.toml`, a target table of its own beside the Apple and the browser tables, which are unchanged) and sets its `ferro_skia_ganesh_gl` configuration there (`build.rs`): the Ganesh GPU of the backend (`gpu/open_gl`), built for the browser alone until now, is built for Windows, and nothing is built from source on x86-64. Ganesh and Graphite together have no binary, as on the other platforms, so Graphite on Vulkan will need its own choice of feature set when the Vulkan stage comes. For aarch64-pc-windows-msvc the ARM64 job asks the same question (run pending).
 
 ### 6.2.1 ANGLE: the crate `mozangle` (owner's decision, 2026-10-10)
 
@@ -423,12 +423,12 @@ What the machine needs installed (done once, by the owner's authorisation, on 20
 | | CI x86-64 (`windows-latest`) | CI ARM64 (`windows-11-arm`) | Virtual machine (Windows 11 ARM64) |
 |---|---|---|---|
 | The crate builds and links, without ANGLE | yes | yes | yes |
-| The tests of the crate on the target | yes | yes | VM-TESTS |
+| The tests of the crate on the target | yes | yes | yes (80 with ANGLE built in) |
 | Smoke run, software rendering: all 23 checks | yes (scaling 1) | yes (scaling 1) | yes, in the user's session (scaling 2) |
 | `mozangle` builds | yes, 528 s | yes, 363 s | yes, 429 s |
-| ANGLE probe: displays on Direct3D 11 and 9, a context, a cleared frame read back | yes (WARP) | yes (WARP) | VM-PROBE |
-| Smoke run through ANGLE: frames through the platform graphics, read back with `glReadPixels` | CI-ANGLE-X64 | CI-ANGLE-ARM | VM-ANGLE |
-| `ferroui-desktop` builds; `hello_window` | CI-DESKTOP | not run | not run |
+| ANGLE probe: displays on Direct3D 11 and 9, a context, a cleared frame read back | yes (WARP) | yes (WARP) | yes (the Parallels display adapter, Direct3D 11 and 9) |
+| Smoke run through ANGLE: frames through the platform graphics, read back with `glReadPixels` | run pending | run pending | yes, in the user's session: 27 of 27 checks, OpenGL ES 3.0 on the Parallels display adapter, 12 frames read back with the colours drawn |
+| `ferroui-desktop` builds; `hello_window` | run pending | not run | not run |
 
 Verified nowhere: a frame on the physical screen (nothing captures the desktop); the rendering modes that are not built; a GPU other than the software device of the runners and the device of the virtual machine; a 32-bit target; the adapter selection callback and the Adreno rule on a machine with more than one adapter (their logic is tested on the host); device loss.
 

@@ -7,7 +7,9 @@
 //! on the processor, and with the features `hybrid` and `gpu` of the crate
 //! the sparse-strips renderer on the GPU (`vello_gpu`) and the compute
 //! renderer (`vello`), into memory and into the window of a platform that
-//! renders on a graphics device (`gpu`).
+//! renders on a graphics device (`gpu`). In a web page the hybrid mode
+//! draws with the WebGL2 renderer of `vello_gpu` into the canvas of a view
+//! (the feature `hybrid-webgl`, `web_gl`).
 //!
 //! The backend is an addition of the port (the original has no such
 //! backend): its files follow the Skia backend's, name by name, so that the
@@ -20,6 +22,8 @@ pub mod helpers;
 pub mod perf;
 pub mod scene;
 pub mod vello_extensions;
+#[cfg(feature = "hybrid-webgl")]
+pub mod web_gl;
 
 mod combined_geometry_impl;
 mod drawing_context_impl;

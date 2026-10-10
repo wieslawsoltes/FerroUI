@@ -1,7 +1,7 @@
 // Tests of the ControlCatalog site in headless Chrome.
 //
 //   scripts/build-browser.sh control-catalog-browser
-//   node scripts/browser/tests/control_catalog.test.mjs [<site directory>] [--screenshot <file.png>]
+//   node scripts/browser/tests/control_catalog.test.mjs [<site directory>] [--screenshot <file.png>] [--query <parameters>]
 //
 // The site directory defaults to target/browser/control-catalog-browser. The checks:
 //
@@ -56,6 +56,12 @@
 // (the `catalogMemory` export): the number a site built with threads, whose memory is fixed, is
 // sized by.
 //
+// With --query every page is opened with more parameters in its query string. `--query Renderer=Vello`
+// runs the checks with the Vello render backend, against a site whose module has it
+// (scripts/build-browser.sh control-catalog-browser --features vello; docs/porting/vello-backend.md,
+// section 11): the hybrid mode where the checks ask for WebGL2, the CPU mode where they ask for the 2D
+// canvas, and one more check, that this backend is the one that draws.
+//
 // With --screenshot the picture of the WebGL2 run at the first size is written to the given file.
 import fs from "node:fs";
 import path from "node:path";
@@ -69,10 +75,13 @@ import {
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const argv = process.argv.slice(2);
 let screenshotFile;
+// More parameters of the query string of every page, and whether they ask for the Vello backend.
+let always = "";
 const positional = [];
 for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === "--screenshot") { screenshotFile = path.resolve(argv[++i]); } else { positional.push(argv[i]); }
+    if (argv[i] === "--screenshot") { screenshotFile = path.resolve(argv[++i]); } else if (argv[i] === "--query") { always = `&${argv[++i].replace(/^[?&]/, "")}`; } else { positional.push(argv[i]); }
 }
+const vello = /&Renderer=Vello(&|$)/i.test(always);
 const site = path.resolve(positional[0] ?? path.join(process.env.CARGO_TARGET_DIR ?? path.join(root, "target"), "browser", "control-catalog-browser"));
 if (!fs.existsSync(path.join(site, "index.html"))) {
     console.error(`no site at ${site}: build it with scripts/build-browser.sh control-catalog-browser`);
@@ -102,6 +111,7 @@ const NARROW_SIZE = { width: 600, height: 700 };
 
 /** Opens the site in a page of `size` and waits until the application has started and drawn. */
 async function start({ mode = "WebGL2", size = FIRST_SIZE, query = "" } = {}) {
+    query += always;
     const page = await open(site, { query: `?RenderingMode=${mode}${query}`, width: size.width, height: size.height, isolated: threaded, initScript: SPLASH_PROBE });
     const started = Date.now();
     // Whether a render thread draws the view: a module built with threads, unless the page keeps it
@@ -516,6 +526,23 @@ async function framesAfter(page, frames, timeout = FRAME_TIMEOUT) {
         if (Number(rendering.frames) > Number(frames)) { return rendering; }
     }
     throw new Error(`no frame was drawn within ${timeout} ms: ${JSON.stringify(rendering)}`);
+}
+
+// --- the Vello render backend (stage 9 of docs/porting/vello-backend.md): with --query Renderer=Vello only ---
+
+if (vello) {
+    for (const [mode, kind, gl] of [["WebGL2", "webgl", "3"], ["Software2D", "software", "0"]]) {
+        check(`the Vello backend draws the catalog (${mode})`, async (page) => {
+            let rendering = await page.rendering();
+            assert(rendering.renderer === "Vello", `the catalog is not drawn by the Vello backend: ${JSON.stringify(rendering)}`);
+            assert(rendering.kind === kind && rendering.gl === gl, `expected ${kind} with OpenGL ES ${gl}: ${JSON.stringify(rendering)}`);
+            // A page with text, images and controls is reached and drawn.
+            await navigate(page, "Basic Input");
+            rendering = await framesAfter(page, rendering.frames);
+            assert(rendering.panics === "0", `the render thread panicked: ${JSON.stringify(rendering)}`);
+            assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
+        }, { mode });
+    }
 }
 
 if (threaded) {

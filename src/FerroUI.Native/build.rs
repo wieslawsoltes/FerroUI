@@ -5,6 +5,15 @@
 //!    `$OUT_DIR/frn_interop.rs` (included by the `interop` module);
 //! 2. compiles the Objective-C++ backend in `native/FerroUI.Native/src/OSX`
 //!    into static libraries and links them plus the system frameworks.
+//!
+//! The native sources are reached through `native`, a symbolic link of the
+//! crate directory to `native/FerroUI.Native` of the repository: the package
+//! of the published crate holds the files behind it, so the crate builds
+//! from its package as it does in the repository.
+//!
+//! On docs.rs (`DOCS_RS`) the second step is left out: the documentation of
+//! the macOS target is generated on a Linux host, which has no compiler for
+//! Objective-C++ against the macOS SDK, and generating it links nothing.
 
 use std::path::{Path, PathBuf};
 use std::{env, fs};
@@ -17,7 +26,10 @@ fn main() {
 
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let native_dir = manifest_dir.join("../../native/FerroUI.Native");
+    // A checkout without symbolic links (the link is then a file) has the sources at their place
+    // in the repository.
+    let linked = manifest_dir.join("native");
+    let native_dir = if linked.is_dir() { linked } else { manifest_dir.join("../../native/FerroUI.Native") };
     let inc_dir = native_dir.join("inc");
     let src_dir = native_dir.join("src/OSX");
 
@@ -36,6 +48,9 @@ fn main() {
     write_if_changed(&out_dir.join("frn_interop.rs"), &bindings);
 
     // --- 2. native library --------------------------------------------------
+    if env::var_os("DOCS_RS").is_some() {
+        return;
+    }
     println!("cargo:rerun-if-changed={}", inc_dir.display());
     println!("cargo:rerun-if-changed={}", src_dir.display());
     let mut arc_sources = Vec::new();

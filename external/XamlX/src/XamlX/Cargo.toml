@@ -6,6 +6,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords = ["xaml", "compiler", "markup", "parser"]
+categories = ["compilers", "parser-implementations"]
 autotests = false
 autobenches = false
 autoexamples = false
@@ -19,3 +23,7 @@ testing = []
 
 [dependencies]
 roxmltree = { workspace = true }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "markup"

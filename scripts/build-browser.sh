@@ -2,6 +2,7 @@
 # Builds a browser application and assembles its site.
 #
 #   scripts/build-browser.sh <application> [--debug] [--out <directory>] [--threads | --both]
+#                            [--features <list>]
 #
 # <application> is either an example of the browser crate (src/Browser/FerroUI.Browser/examples/
 # <application>, with its host page in wwwroot/) or a binary package of the workspace with its host
@@ -16,6 +17,13 @@
 #
 # The module is built with the `browser` profile of the workspace (optimised for size, see
 # docs/porting/browser-platform.md, section 18), or with the `dev` profile with --debug.
+#
+# --features <list> turns on features of the package that is built (cargo's --features): `vello`
+# adds the Vello render backend to the module beside Skia (the feature of the browser crate for its
+# examples, of control-catalog-browser for the catalog; docs/porting/vello-backend.md, section 12),
+# which a page then chooses with `?Renderer=Vello`. The site of such a module is written next to the
+# site without the features: target/browser-<list>/<application> (browser-threads-<list> with
+# --threads, browser-both-<list> with --both; a comma of the list becomes a hyphen).
 #
 # Needs: the Emscripten SDK activated in the shell (emsdk 6.0.10: `source emsdk_env.sh`), the Rust
 # target wasm32-unknown-emscripten, the wasm-bindgen command-line tool of the version of the
@@ -59,21 +67,28 @@ PROFILE="browser"
 OUT=""
 THREADS=""
 BOTH=""
+FEATURES=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --debug) PROFILE="debug";;
     --out) shift; OUT="$1";;
     --threads) THREADS="1";;
     --both) BOTH="1";;
+    --features) shift; FEATURES="$1";;
     -*) echo "unknown option: $1" >&2; exit 2;;
     *) APPLICATION="$1";;
   esac
   shift
 done
 if [ -z "$APPLICATION" ]; then
-  echo "usage: scripts/build-browser.sh <application> [--debug] [--out <directory>] [--threads | --both]" >&2
+  echo "usage: scripts/build-browser.sh <application> [--debug] [--out <directory>] [--threads | --both] [--features <list>]" >&2
   exit 2
 fi
+case "$FEATURES" in
+  *[!A-Za-z0-9_,-]*) echo "--features takes a list of feature names separated by commas: $FEATURES" >&2; exit 2;;
+esac
+# The suffix of the site directories of a build with features.
+SITE_SUFFIX="${FEATURES:+-${FEATURES//,/-}}"
 if [ -n "$BOTH" ] && [ -n "$THREADS" ]; then
   echo "--both builds the site with threads too: give one of --threads and --both" >&2
   exit 2
@@ -91,6 +106,7 @@ if [ -n "$BOTH" ]; then
   command -v node >/dev/null || { echo "node is not on PATH" >&2; exit 1; }
   MODE=()
   [ "$PROFILE" = "debug" ] && MODE+=(--debug)
+  [ -n "$FEATURES" ] && MODE+=(--features "$FEATURES")
   "$0" "$APPLICATION" ${MODE[@]+"${MODE[@]}"}
   "$0" "$APPLICATION" ${MODE[@]+"${MODE[@]}"} --threads
   echo "== site with both modules"
@@ -98,13 +114,13 @@ if [ -n "$BOTH" ]; then
   # may restore it without the files combine-site.mjs knows an earlier output by, and that script
   # refuses to replace a directory it does not recognise. A directory given with --out is left to
   # that check.
-  [ -z "$OUT" ] && rm -rf "$TARGET_DIR/browser-both/$APPLICATION"
-  exec node "$ROOT/scripts/browser/combine-site.mjs" "$TARGET_DIR/browser/$APPLICATION" \
-    "$TARGET_DIR/browser-threads/$APPLICATION" "${OUT:-$TARGET_DIR/browser-both/$APPLICATION}"
+  [ -z "$OUT" ] && rm -rf "$TARGET_DIR/browser-both$SITE_SUFFIX/$APPLICATION"
+  exec node "$ROOT/scripts/browser/combine-site.mjs" "$TARGET_DIR/browser$SITE_SUFFIX/$APPLICATION" \
+    "$TARGET_DIR/browser-threads$SITE_SUFFIX/$APPLICATION" "${OUT:-$TARGET_DIR/browser-both$SITE_SUFFIX/$APPLICATION}"
 fi
 if [ -n "$THREADS" ]; then
   BUILD_DIR="$TARGET_DIR/threads"
-  OUT="${OUT:-$TARGET_DIR/browser-threads/$APPLICATION}"
+  OUT="${OUT:-$TARGET_DIR/browser-threads$SITE_SUFFIX/$APPLICATION}"
   THREAD_POOL_SIZE="${FERROUI_BROWSER_THREAD_POOL_SIZE:-2}"
   case "$THREAD_POOL_SIZE" in
     ''|*[!0-9]*) echo "FERROUI_BROWSER_THREAD_POOL_SIZE is not a number: $THREAD_POOL_SIZE" >&2; exit 2;;
@@ -126,7 +142,7 @@ if [ -n "$THREADS" ]; then
   export RUSTUP_TOOLCHAIN="$NIGHTLY"
   cargo --version >/dev/null 2>&1 || { echo "the toolchain $NIGHTLY is not installed: run scripts/browser/setup.sh --threads" >&2; exit 1; }
 fi
-OUT="${OUT:-$TARGET_DIR/browser/$APPLICATION}"
+OUT="${OUT:-$TARGET_DIR/browser$SITE_SUFFIX/$APPLICATION}"
 
 command -v node >/dev/null || { echo "node is not on PATH" >&2; exit 1; }
 # An example of the browser crate, or else the binary of the workspace package of that name.
@@ -238,6 +254,7 @@ echo "== script module"
 echo "== WebAssembly module ($PROFILE${THREADS:+, threads})"
 FLAGS=()
 [ "$PROFILE" = "browser" ] && FLAGS+=(--profile browser)
+[ -n "$FEATURES" ] && FLAGS+=(--features "$FEATURES")
 if [ -n "$THREADS" ]; then
   # The standard library that ships with a toolchain is built without atomics and cannot be linked
   # into a module with shared memory: it is rebuilt from rust-src with the flags of the build.

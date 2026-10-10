@@ -1,10 +1,15 @@
 [package]
 name = "ferroui-harfbuzz"
+description = "The HarfBuzz text shaping backend of FerroUI"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 [lib]
 path = "lib.rs"
@@ -17,3 +22,7 @@ harfbuzz-sys.workspace = true
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "rendering"

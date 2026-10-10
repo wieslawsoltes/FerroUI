@@ -13,6 +13,8 @@ mod vello_cpu_scene_sink;
 mod vello_gpu_scene_sink;
 #[cfg(feature = "hybrid")]
 mod vello_hybrid_scene_sink;
+#[cfg(feature = "hybrid-webgl")]
+mod vello_web_gl_scene_sink;
 
 pub use i_vello_scene_sink::{
     IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneGlyph, VelloSceneGlyphRun, VelloSceneImage,
@@ -26,6 +28,8 @@ pub use vello_cpu_scene_sink::VelloCpuSceneSink;
 pub use vello_gpu_scene_sink::{VelloGpuAntiAliasing, VelloGpuSceneSink};
 #[cfg(feature = "hybrid")]
 pub use vello_hybrid_scene_sink::VelloHybridSceneSink;
+#[cfg(feature = "hybrid-webgl")]
+pub use vello_web_gl_scene_sink::VelloWebGlSceneSink;
 
 use crate::vello_options::VelloRenderingMode;
 
@@ -66,7 +70,16 @@ pub fn try_create_scene_sink(
             Ok(device) => Ok(Box::new(VelloHybridSceneSink::new(device, width, height))),
             Err(error) => Err(VelloRenderingModeUnavailable { mode, reason: error.to_string() }),
         },
-        #[cfg(not(feature = "hybrid"))]
+        // The renderer over WebGL2 draws to the canvas of its context and
+        // nowhere else: a scene in memory is not one of its.
+        #[cfg(all(not(feature = "hybrid"), feature = "hybrid-webgl"))]
+        VelloRenderingMode::Hybrid => Err(VelloRenderingModeUnavailable {
+            mode,
+            reason: "the crate was built without its feature `hybrid`: the renderer of `hybrid-webgl` draws to the \
+                     canvas of a view, and a scene that ends in memory is drawn by the CPU mode"
+                .to_string(),
+        }),
+        #[cfg(not(any(feature = "hybrid", feature = "hybrid-webgl")))]
         VelloRenderingMode::Hybrid => Err(VelloRenderingModeUnavailable {
             mode,
             reason: "the crate was built without its feature `hybrid`".to_string(),

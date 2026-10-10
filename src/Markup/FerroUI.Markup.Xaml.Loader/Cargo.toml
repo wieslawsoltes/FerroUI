@@ -6,6 +6,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 autotests = false
 autobenches = false
 autoexamples = false
@@ -49,3 +53,7 @@ ferroui-build-scan = { workspace = true, optional = true }
 # for them with the `runtime` feature), which needs the accessor table of the base crate.
 ferroui-base = { workspace = true, features = ["compiler-metadata"] }
 ferroui-build-scan = { workspace = true }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "markup"

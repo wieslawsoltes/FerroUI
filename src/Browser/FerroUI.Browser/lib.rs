@@ -47,7 +47,7 @@ mod win_stubs;
 mod windowing_platform;
 
 pub use browser_activatable_lifetime::BrowserActivatableLifetime;
-pub use browser_app_builder::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderingMode};
+pub use browser_app_builder::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderer, BrowserRenderingMode};
 pub use browser_input_handler::BrowserInputHandler;
 pub use browser_insets_manager::BrowserInsetsManager;
 pub use browser_input_pane::BrowserInputPane;
