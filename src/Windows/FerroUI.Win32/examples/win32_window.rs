@@ -261,6 +261,10 @@ mod windows {
     use std::rc::Rc;
     use std::sync::atomic::{AtomicBool, Ordering};
     use std::sync::Arc;
+
+    /// Whether the run presents through Windows.UI.Composition: the checks of the transparency
+    /// levels expect the effects of that mode then.
+    static WIN_UI_COMPOSITION: AtomicBool = AtomicBool::new(false);
     use std::task::{Context, Poll, Waker};
     use std::time::Duration;
 
@@ -1465,11 +1469,24 @@ mod windows {
                     let taken = window.transparency_level();
                     window.set_transparency_level_hint(&[WindowTransparencyLevel::none()]);
                     let none = window.transparency_level();
+                    // Through Windows.UI.Composition the window has the
+                    // effects of that mode: mica on Windows 11, acrylic
+                    // blur before.
+                    let expected = if WIN_UI_COMPOSITION.load(Ordering::SeqCst) {
+                        if Win32Platform::windows_version().build >= 22000 {
+                            vec![WindowTransparencyLevel::mica()]
+                        } else {
+                            vec![WindowTransparencyLevel::acrylic_blur()]
+                        }
+                    } else {
+                        vec![WindowTransparencyLevel::transparent(), WindowTransparencyLevel::none()]
+                    };
                     report.check(
                         "transparency levels",
-                        (taken == WindowTransparencyLevel::transparent() || taken == WindowTransparencyLevel::none())
-                            && none == WindowTransparencyLevel::none(),
-                        format!("of mica, acrylic blur, blur and transparent the window took {taken:?}; of none, {none:?}"),
+                        expected.contains(&taken) && none == WindowTransparencyLevel::none(),
+                        format!(
+                            "of mica, acrylic blur, blur and transparent the window took {taken:?} (expected one of {expected:?}); of none, {none:?}"
+                        ),
                     );
 
                     // The frame in the dark and in the light theme, and
@@ -1658,7 +1675,7 @@ mod windows {
         };
         println!("Rendering mode: {rendering_mode:?}");
 
-        // `--composition redirection|dcomp`: the one composition mode of
+        // `--composition redirection|dcomp|winui`: the one composition mode of
         // the run (with ANGLE), without a fallback. The default is the
         // redirection surface of the window.
         let composition = arguments
@@ -1669,8 +1686,9 @@ mod windows {
         let composition_mode = match composition {
             "redirection" => Win32CompositionMode::RedirectionSurface,
             "dcomp" => Win32CompositionMode::DirectComposition,
+            "winui" => Win32CompositionMode::WinUIComposition,
             other => {
-                eprintln!("win32_window: unknown composition mode '{other}' (redirection, dcomp)");
+                eprintln!("win32_window: unknown composition mode '{other}' (redirection, dcomp, winui)");
                 return ExitCode::from(2);
             }
         };
@@ -1686,6 +1704,28 @@ mod windows {
         };
         Win32Platform::initialize(options);
         VelloPlatform::initialize_with_options(VelloOptions::with_rendering_mode(VelloRenderingMode::Cpu));
+
+        // The compositor of the Windows Runtime commits what was changed when its thread asks it
+        // to, and the thread of the mode asks while the render loop has something to render: a
+        // renderer of the framework renders in the tick of that loop. This example draws on the
+        // UI thread from a timer of the dispatcher, so it gives the loop a task that always wants
+        // the next tick; its frames then reach the screen with the next commit.
+        if composed && composition_mode == Win32CompositionMode::WinUIComposition {
+            WIN_UI_COMPOSITION.store(true, Ordering::SeqCst);
+            struct KeepCommitting;
+            impl ferroui_base::rendering::IRenderLoopTask for KeepCommitting {
+                fn render(&self) -> bool {
+                    true
+                }
+            }
+            match FerroLocator::current().get_service::<Arc<dyn ferroui_base::rendering::IRenderLoop>>() {
+                Some(render_loop) => render_loop.add(Arc::new(KeepCommitting)),
+                None => {
+                    eprintln!("win32_window: the composition mode registered no render loop");
+                    return ExitCode::from(1);
+                }
+            }
+        }
 
         let version = Win32Platform::windows_version();
         println!("Windows {}.{} build {}", version.major, version.minor, version.build);

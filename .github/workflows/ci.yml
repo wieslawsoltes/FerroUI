@@ -185,6 +185,31 @@ jobs:
             fi
             echo "run $run: $(tail -n 2 "smoke-$run.log" | tr '\n' ' ')"
           done
+      # The same run presented through Windows.UI.Composition (the rest of stage 2c): the compositor
+      # of the Windows Runtime on a thread with a dispatcher queue, the tree of the window with
+      # the visuals of the blur effects, a drawing surface of a composition graphics device; of
+      # mica, acrylic blur, blur and transparent the window takes the effect the system has.
+      - name: Smoke run through ANGLE, presented through Windows.UI.Composition
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        run: cargo run --locked -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition winui --teardown-trace
+      # And the process ends after such a run, every time (the thread of the mode is in its
+      # message loop when the system ends it). Ten runs.
+      - name: The process ends after a run through Windows.UI.Composition (ten runs)
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        run: |
+          exe=target/debug/examples/win32_window.exe
+          for run in 1 2 3 4 5 6 7 8 9 10; do
+            code=0
+            timeout 60 "$exe" --smoke --rendering angle --composition winui > "smoke-winui-$run.log" 2>&1 || code=$?
+            if [ "$code" != 0 ]; then
+              tail -n 40 "smoke-winui-$run.log"
+              echo "::error::run $run ended with the code $code (124: the process did not end in a minute)"
+              exit 1
+            fi
+            echo "run $run: $(tail -n 2 "smoke-winui-$run.log" | tr '\n' ' ')"
+          done
       - name: Skia binaries published for Windows (informative)
         id: skia
         if: ${{ !cancelled() }}
@@ -241,7 +266,7 @@ jobs:
             FERROUI_SMOKE_RENDERING=$mode cargo test --locked -p ferroui-integration-tests-win32 --test integration -- presented_frame_tests || result=1
           done
           # Through ANGLE with each composition mode that presents through a surface of its own.
-          for composition in dcomp; do
+          for composition in dcomp winui; do
             FERROUI_SMOKE_RENDERING=angle FERROUI_SMOKE_COMPOSITION=$composition \
               cargo test --locked -p ferroui-integration-tests-win32 --test integration -- presented_frame_tests || result=1
           done
@@ -272,7 +297,7 @@ jobs:
           # Through ANGLE with each composition mode that presents through a surface of its own
           # (stage 2c), with the page of the window customizations, which sets the transparency
           # level, among the pages.
-          for composition in dcomp; do
+          for composition in dcomp winui; do
             echo "::group::The catalog presented through the composition mode $composition"
             FERROUI_SMOKE_RENDERING=angle FERROUI_SMOKE_COMPOSITION=$composition \
               FERROUI_SMOKE_SCREENSHOT_PAGES="Home,Window Customizations,Buttons" \
@@ -280,6 +305,19 @@ jobs:
               ./target/debug/control-catalog-desktop.exe || { echo "::error::the catalog ended with an error (composition mode $composition)"; result=1; }
             echo "::endgroup::"
             ls -l "target/screenshots/$composition" || result=1
+          done
+          # Through Windows.UI.Composition with a window that asks for a transparency level that is
+          # an effect of that mode: acrylic blur, and mica (Windows 11 and the server systems of
+          # its line). The log says which level the window has. The capture is of the window
+          # alone: where the effect shows, it is over a backdrop the capture does not hold.
+          for level in acrylic mica; do
+            echo "::group::The catalog through Windows.UI.Composition with the transparency level $level"
+            FERROUI_SMOKE_RENDERING=angle FERROUI_SMOKE_COMPOSITION=winui FERROUI_SMOKE_TRANSPARENCY=$level \
+              FERROUI_SMOKE_SCREENSHOT_PAGES="Home,Window Customizations,Buttons" \
+              FERROUI_SMOKE_SCREENSHOTS=target/screenshots/winui-$level \
+              ./target/debug/control-catalog-desktop.exe || { echo "::error::the catalog ended with an error (Windows.UI.Composition, $level)"; result=1; }
+            echo "::endgroup::"
+            ls -l "target/screenshots/winui-$level" || result=1
           done
           # Once more with the client area of the window extended into its frame (stage 2f of the
           # backend): the title bar and the caption buttons are drawn by the framework, and the
@@ -366,6 +404,31 @@ jobs:
               exit 1
             fi
             echo "run $run: $(tail -n 2 "smoke-$run.log" | tr '\n' ' ')"
+          done
+      # The same run presented through Windows.UI.Composition (the rest of stage 2c): the compositor
+      # of the Windows Runtime on a thread with a dispatcher queue, the tree of the window with
+      # the visuals of the blur effects, a drawing surface of a composition graphics device; of
+      # mica, acrylic blur, blur and transparent the window takes the effect the system has.
+      - name: Smoke run through ANGLE, presented through Windows.UI.Composition
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition winui --teardown-trace
+      # And the process ends after such a run, every time (the thread of the mode is in its
+      # message loop when the system ends it). Ten runs.
+      - name: The process ends after a run through Windows.UI.Composition (ten runs)
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        run: |
+          exe=target/aarch64-pc-windows-msvc/debug/examples/win32_window.exe
+          for run in 1 2 3 4 5 6 7 8 9 10; do
+            code=0
+            timeout 60 "$exe" --smoke --rendering angle --composition winui > "smoke-winui-$run.log" 2>&1 || code=$?
+            if [ "$code" != 0 ]; then
+              tail -n 40 "smoke-winui-$run.log"
+              echo "::error::run $run ended with the code $code (124: the process did not end in a minute)"
+              exit 1
+            fi
+            echo "run $run: $(tail -n 2 "smoke-winui-$run.log" | tr '\n' ' ')"
           done
       - name: Skia binaries published for Windows on ARM64
         if: ${{ !cancelled() }}

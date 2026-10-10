@@ -132,7 +132,7 @@ fn smoke_platform_options(builder: AppBuilder) -> AppBuilder {
 }
 
 /// The composition mode of a smoke run through ANGLE, without a fallback:
-/// `FERROUI_SMOKE_COMPOSITION=redirection|dcomp`; the redirection surface
+/// `FERROUI_SMOKE_COMPOSITION=redirection|dcomp|winui`; the redirection surface
 /// of the window when the variable is not set.
 #[cfg(windows)]
 fn smoke_composition_mode() -> ferroui_win32::Win32CompositionMode {
@@ -141,7 +141,8 @@ fn smoke_composition_mode() -> ferroui_win32::Win32CompositionMode {
     match std::env::var("FERROUI_SMOKE_COMPOSITION").ok().as_deref() {
         None | Some("redirection") => Win32CompositionMode::RedirectionSurface,
         Some("dcomp") => Win32CompositionMode::DirectComposition,
-        Some(other) => panic!("FERROUI_SMOKE_COMPOSITION: unknown mode {other:?} (redirection, dcomp)"),
+        Some("winui") => Win32CompositionMode::WinUIComposition,
+        Some(other) => panic!("FERROUI_SMOKE_COMPOSITION: unknown mode {other:?} (redirection, dcomp, winui)"),
     }
 }
 
@@ -306,6 +307,34 @@ fn fit_window_to_screen(window: &Ref<Window>) {
     );
 }
 
+/// With `FERROUI_SMOKE_TRANSPARENCY=mica|acrylic|blur|transparent` the
+/// pictures are of a window that asks for that transparency level, as the
+/// settings page of the catalog does for a person: the hint is set, and
+/// when the platform took a level the background of the window becomes a
+/// grey of one fifth opacity, so that what is behind the window shows
+/// through. The level the platform took is printed.
+fn apply_smoke_transparency(window: &Window) {
+    use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+    use ferroui_base::media::{Colors, IBrush};
+    use ferroui_controls::{WindowTransparencyLevel, WindowTransparencyLevelCollection};
+
+    let level = match std::env::var("FERROUI_SMOKE_TRANSPARENCY").ok().as_deref() {
+        None | Some("") => return,
+        Some("mica") => WindowTransparencyLevel::mica(),
+        Some("acrylic") => WindowTransparencyLevel::acrylic_blur(),
+        Some("blur") => WindowTransparencyLevel::blur(),
+        Some("transparent") => WindowTransparencyLevel::transparent(),
+        Some(other) => panic!("FERROUI_SMOKE_TRANSPARENCY: unknown level {other:?} (mica, acrylic, blur, transparent)"),
+    };
+    window.set_transparency_level_hint(WindowTransparencyLevelCollection::new(vec![level.clone()]));
+    let actual = window.actual_transparency_level();
+    println!("Screenshots: transparency level asked for: {level:?}; the window has: {actual:?}");
+    if actual != WindowTransparencyLevel::none() {
+        let brush: std::rc::Rc<dyn IBrush> = std::rc::Rc::new(ImmutableSolidColorBrush::with_opacity(Colors::GRAY, 0.2));
+        window.set_background(Some(brush));
+    }
+}
+
 /// The screenshot run asked for with `FERROUI_SMOKE_SCREENSHOTS`.
 fn screenshot_run(directory: PathBuf) {
     if let Err(error) = std::fs::create_dir_all(&directory) {
@@ -336,6 +365,7 @@ fn screenshot_run(directory: PathBuf) {
                     );
                 }
                 fit_window_to_screen(&window);
+                apply_smoke_transparency(&window);
             }
             None => println!("Screenshots: there is no main window to fit to its screen"),
         },

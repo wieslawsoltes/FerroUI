@@ -32,7 +32,8 @@ mod dcomp {
 pub use dcomp::*;
 pub(crate) use direct_composited_window::DirectCompositedWindow;
 pub(crate) use direct_composited_window_surface::DirectCompositedWindowSurface;
-pub(crate) use direct_composition_connection::DirectCompositionConnection;
+#[allow(unused_imports)] // The tick is shared with the Windows.UI.Composition mode, which is Windows only.
+pub(crate) use direct_composition_connection::{CompositionTimerTick, DirectCompositionConnection};
 pub(crate) use direct_composition_shared::DirectCompositionShared;
 #[cfg(windows)]
 pub use native_methods::NativeMethods;

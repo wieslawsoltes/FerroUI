@@ -69,19 +69,22 @@ impl Win32GlManager {
     /// own, when the system supports it and it initializes.
     ///
     /// Not built yet, and passed over like a mode the system does not
-    /// support: Windows.UI.Composition and the DXGI swap chain (the rest of
-    /// stage 2c).
+    /// support: the DXGI swap chain (the rest of stage 2c).
     #[cfg(windows)]
     fn try_create_and_register_composition(composition_mode: Win32CompositionMode) -> bool {
         use crate::d_composition::DirectCompositionConnection;
         use crate::win32_platform::Win32Platform;
+        use crate::win_rt::composition::WinUiCompositorConnection;
 
         match composition_mode {
+            Win32CompositionMode::WinUIComposition => {
+                WinUiCompositorConnection::is_supported() && WinUiCompositorConnection::try_create_and_register()
+            }
             Win32CompositionMode::DirectComposition => {
                 DirectCompositionConnection::is_supported(Win32Platform::windows_version())
                     && DirectCompositionConnection::try_create_and_register()
             }
-            Win32CompositionMode::WinUIComposition | Win32CompositionMode::LowLatencyDxgiSwapChain => false,
+            Win32CompositionMode::LowLatencyDxgiSwapChain => false,
             Win32CompositionMode::RedirectionSurface => false,
         }
     }
