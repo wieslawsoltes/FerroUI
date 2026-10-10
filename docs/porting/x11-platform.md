@@ -337,7 +337,25 @@ What these runs found, and what was changed:
 
 Nothing else had to be changed: GLX and EGL rendered the first time they ran, on the render thread, popups included.
 
-Only in CI: everything on x86-64. Verified nowhere yet: a GPU with a hardware driver (the visual preference and the configuration probe exist for nvidia; the blacklist for `llvmpipe` and `SVGA3D` is only exercised as a refusal), input from a real device, a compositing manager under plain X11, more than one X screen (the platform uses the default screen, as upstream).
+### Measured by the CI job (run 38045428868, 2026-10-10) **[CI]**
+
+Ubuntu 24.04 on x86-64 (`ubuntu-latest`), Mesa 25.2.8 (`llvmpipe (LLVM 20.1.2, 256 bits)`), commit `0be4a818`:
+
+| Step | Result |
+|---|---|
+| Skia features of the target | `ganesh` and `gl`, nothing else |
+| Skia binaries published for Linux (`skia-bindings` 0.153.3, commit `b7f043e0b1e2a850e702`) | published for `x86_64-unknown-linux-gnu` and for `aarch64-unknown-linux-gnu`, each with the keys `jpegd-jpege-pdf` (raster) and `ganesh-gl-jpegd-jpege-pdf` |
+| Tests of the crate | 173 passed |
+| Smoke, bare Xvfb, software | 32 of 32 |
+| Smoke through GLX | 37 of 37: an OpenGL 4.0 core context on Mesa 4.5, the offscreen read back, the frame in the back buffer |
+| Smoke through EGL | 36 of 36 |
+| GLX refused (`llvmpipe` on the blacklist), software takes over | 13 of 13 |
+| Smoke under `openbox`, 600 by 500 | 32 of 32 |
+| Smoke with two monitors | 27 of 27: `FERRO-A` and `FERRO-B`, 640 by 1024 each |
+
+The first run of the extended job (29e3c0ac) failed in its three smoke steps and was superseded before its log could be read; the virtual machine had shown the same two causes by then (the announcement of `xclip`, and the monitors lost to the reset of the server), and the run above has both fixes.
+
+Verified nowhere yet: a GPU with a hardware driver (the visual preference and the configuration probe exist for nvidia; the blacklist for `llvmpipe` and `SVGA3D` is only exercised as a refusal), input from a real device, a compositing manager under plain X11, more than one X screen (the platform uses the default screen, as upstream).
 
 ## 14. Stages
 
