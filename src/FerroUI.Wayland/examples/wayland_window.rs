@@ -1440,14 +1440,14 @@ mod app {
                 return;
             };
 
-            // A floating window of a size and at a place that leave room on the output, which
-            // the compositor lets the pointer move and resize. Its window geometry is the view
-            // of the compositor: the shadow lies outside it.
-            let floated = sway::message(&["floating", "enable"]).is_some()
-                && sway::message(&["resize", "set", "width", "400", "px", "height", "240", "px"]).is_some()
-                && sway::message(&["move", "position", "40", "30"]).is_some();
+            // A floating window with its top left corner at a place that leaves room on the
+            // output, which the compositor lets the pointer move and resize. Its window geometry
+            // is the view of the compositor: the shadow lies outside it.
+            let floated =
+                sway::message(&["floating", "enable"]).is_some() && sway::message(&["move", "position", "40", "30"]).is_some();
             let settled = wait_for(STEP_TIMEOUT, || {
-                matches!((view_rect(), window_geometry(client)), (Some(view), Some(geometry)) if view.2 == 400 && (geometry.2, geometry.3) == (view.2, view.3))
+                matches!((view_rect(), window_geometry(client)), (Some(view), Some(geometry))
+                    if (view.0, view.1) == (40, 30) && (geometry.2, geometry.3) == (view.2, view.3))
             })
             .await;
             delay(Duration::from_millis(300)).await;
@@ -1483,28 +1483,32 @@ mod app {
                 ),
             );
 
-            // The grip of the bottom right corner: the first point along the diagonal through
+            // The grip of the top left corner, which is on the output whatever size the
+            // compositor gave the floating window: the first point along the diagonal through
             // the corner of the window geometry that the decorations name so.
             let (Some(view), Some(geometry)) = (view_rect(), window_geometry(client)) else {
                 report.check("interactive resize", false, "the view or the window geometry is gone".to_string());
                 return;
             };
             let to_output = |x: f64, y: f64| (view.0 + x as i32 - geometry.0, view.1 + y as i32 - geometry.1);
-            let corner = (f64::from(geometry.0 + geometry.2), f64::from(geometry.1 + geometry.3));
-            let grip = (-16..=24).map(|d| (corner.0 + f64::from(d), corner.1 + f64::from(d))).find(|point| {
-                input_root.hit_test_chrome_element(Point::new(point.0, point.1)) == Some(WindowDecorationsElementRole::ResizeSE)
-            });
+            let corner = (f64::from(geometry.0), f64::from(geometry.1));
+            let grip = (-6..=12)
+                .map(|d| (corner.0 - f64::from(d), corner.1 - f64::from(d)))
+                .filter(|point| point.0 >= 0.0 && point.1 >= 0.0)
+                .find(|point| {
+                    input_root.hit_test_chrome_element(Point::new(point.0, point.1)) == Some(WindowDecorationsElementRole::ResizeNW)
+                });
             let Some(grip) = grip else {
                 report.check(
                     "interactive resize",
                     false,
-                    format!("no point around the corner {corner:?} of the window geometry {geometry:?} is the bottom right resize grip"),
+                    format!("no point around the corner {corner:?} of the window geometry {geometry:?} is the top left resize grip"),
                 );
                 return;
             };
             let from = to_output(grip.0, grip.1);
             let size_before = window.client_size();
-            let sent = drag(probe, from, (-60, -40), extent).await;
+            let sent = drag(probe, from, (60, 40), extent).await;
             let resized = wait_for(STEP_TIMEOUT, || {
                 view_rect().is_some_and(|now| view.2 - now.2 >= 30 && view.3 - now.3 >= 20)
                     && size_before.width - window.client_size().width >= 30.0
@@ -1515,7 +1519,7 @@ mod app {
                 "interactive resize",
                 sent.is_ok() && resized,
                 format!(
-                    "a drag of the drawn grip at {grip:?} of the client area ({from:?} of the output) by (-60, -40): the view went from {view:?} to {after_resize:?}, the client size from {size_before:?} to {:?}: {sent:?}",
+                    "a drag of the drawn grip at {grip:?} of the client area ({from:?} of the output) by (60, 40): the view went from {view:?} to {after_resize:?}, the client size from {size_before:?} to {:?}: {sent:?}",
                     window.client_size()
                 ),
             );
