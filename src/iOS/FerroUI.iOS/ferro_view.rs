@@ -2,16 +2,17 @@
 //! framework and can be embedded into the view tree of an application.
 //!
 //! Later stages of `docs/porting/ios-platform.md` add what the reference's
-//! view has beyond this file: key presses and the scroll wheel (stage 2,
-//! with the input handler), the text input method (stage 2:
-//! `ITextInputMethodImpl`, the first responder rules), the platform
-//! settings that follow the traits of the view (stage 2), the features of
-//! a top-level that are services of their own (stage 2: the storage
-//! provider, the clipboard, the input pane, the launcher, the native
-//! control host, the feedback), and accessibility (stage 3).
+//! view has beyond this file: the text input method (stage 2b:
+//! `ITextInputMethodImpl`, the first responder rules), the features of a
+//! top-level that are services of their own (stage 2b: the input pane;
+//! stage 2c: the storage provider and the clipboard; stage 2d: the native
+//! control host), and accessibility (stage 3). The swipe gestures of a
+//! remote, which the reference adds on tvOS, are not ported.
 
 use crate::input_handler::InputHandler;
 use crate::insets_manager::InsetsManager;
+use crate::ios_launcher::IosLauncher;
+use crate::ios_platform_feedback::IosPlatformFeedback;
 use crate::metal::{FrameCapture, MetalPlatformSurface, SurfaceShared};
 use crate::native_control_host_impl::UIViewControlHandle;
 use crate::platform::Platform;
@@ -19,6 +20,7 @@ use crate::view_controller::{IFerroViewController, StatusBarStyle};
 use ferroui_base::data::BindingPriority;
 use ferroui_base::input::raw::IRawInputEventArgs;
 use ferroui_base::input::IInputRoot;
+use ferroui_base::platform::storage::ILauncher;
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider};
 use ferroui_base::reactive::IDisposable;
@@ -26,7 +28,7 @@ use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, PixelSize, Point, Rect, Ref, Size};
 use ferroui_controls::embedding::EmbeddableControlRoot;
 use ferroui_controls::platform::{
-    IInsetsManager, IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, PlatformThemeVariant,
+    IInsetsManager, IPlatformFeedback, IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, PlatformThemeVariant,
 };
 use ferroui_controls::primitives::TemplatedControl;
 use ferroui_controls::{
@@ -34,10 +36,13 @@ use ferroui_controls::{
 };
 use objc2::rc::{Retained, Weak};
 use objc2::runtime::AnyClass;
-use objc2::{define_class, msg_send, ClassType, DefinedClass, MainThreadMarker, MainThreadOnly};
+use objc2::{define_class, msg_send, sel, ClassType, DefinedClass, MainThreadMarker, MainThreadOnly};
 use objc2_foundation::{NSObjectProtocol, NSSet};
-use objc2_quartz_core::CAMetalLayer;
-use objc2_ui_kit::{UIEvent, UIScreen, UITouch, UIView};
+use objc2_quartz_core::{CADisplayLink, CAMetalLayer};
+use objc2_ui_kit::{
+    UIEvent, UIPanGestureRecognizer, UIPress, UIPressesEvent, UIScreen, UIScrollTypeMask, UITouch,
+    UITraitCollection, UIView,
+};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
@@ -110,6 +115,81 @@ define_class!(
             self.handle_touches(touches, evt);
         }
 
+        #[unsafe(method(pressesBegan:withEvent:))]
+        fn presses_began(&self, presses: &NSSet<UIPress>, evt: Option<&UIPressesEvent>) {
+            if !self.handle_presses(presses, evt) {
+                // SAFETY: the method of the superclass this one overrides,
+                // with its arguments.
+                let _: () = unsafe { msg_send![super(self), pressesBegan: presses, withEvent: evt] };
+            }
+        }
+
+        #[unsafe(method(pressesChanged:withEvent:))]
+        fn presses_changed(&self, presses: &NSSet<UIPress>, evt: Option<&UIPressesEvent>) {
+            if !self.handle_presses(presses, evt) {
+                // The reference passes a changed press on as one that
+                // began (DEVIATIONS.md, iOS platform).
+                // SAFETY: as above.
+                let _: () = unsafe { msg_send![super(self), pressesChanged: presses, withEvent: evt] };
+            }
+        }
+
+        #[unsafe(method(pressesEnded:withEvent:))]
+        fn presses_ended(&self, presses: &NSSet<UIPress>, evt: Option<&UIPressesEvent>) {
+            if !self.handle_presses(presses, evt) {
+                // SAFETY: as above.
+                let _: () = unsafe { msg_send![super(self), pressesEnded: presses, withEvent: evt] };
+            }
+        }
+
+        #[unsafe(method(pressesCancelled:withEvent:))]
+        fn presses_cancelled(&self, presses: &NSSet<UIPress>, evt: Option<&UIPressesEvent>) {
+            if !self.handle_presses(presses, evt) {
+                // SAFETY: as above.
+                let _: () = unsafe { msg_send![super(self), pressesCancelled: presses, withEvent: evt] };
+            }
+        }
+
+        // Deprecated since iOS 17 in favour of the registration of trait
+        // changes; it is what the reference overrides, and it is called
+        // on every system the port runs on.
+        #[unsafe(method(traitCollectionDidChange:))]
+        fn trait_collection_did_change(&self, previous_trait_collection: Option<&UITraitCollection>) {
+            // SAFETY: the method of the superclass this one overrides,
+            // with its argument.
+            let _: () = unsafe { msg_send![super(self), traitCollectionDidChange: previous_trait_collection] };
+
+            if let Some(settings) = Platform::settings() {
+                settings.trait_collection_did_change();
+            }
+        }
+
+        #[unsafe(method(tintColorDidChange))]
+        fn tint_color_did_change(&self) {
+            // SAFETY: the method of the superclass this one overrides.
+            let _: () = unsafe { msg_send![super(self), tintColorDidChange] };
+
+            if let Some(settings) = Platform::settings() {
+                settings.trait_collection_did_change();
+            }
+        }
+
+        /// The action of the pan gesture that only takes scroll events.
+        #[unsafe(method(ferroHandleScrollWheel:))]
+        fn ferro_handle_scroll_wheel(&self, recognizer: &UIPanGestureRecognizer) {
+            if let Some(state) = self.ivars().state.get() {
+                state.input.handle_scroll_wheel(recognizer);
+            }
+        }
+
+        /// The tick of the display link of inertia scrolling.
+        #[unsafe(method(ferroUpdateInertiaScrolling:))]
+        fn ferro_update_inertia_scrolling(&self, _link: &CADisplayLink) {
+            if let Some(state) = self.ivars().state.get() {
+                state.input.update_inertia_scrolling();
+            }
+        }
+
         #[unsafe(method(layoutSubviews))]
         fn layout_subviews(&self) {
             if let Some(state) = self.ivars().state.get() {
@@ -171,10 +251,26 @@ impl FerroView {
 
         this.init_layer_surface(mtm);
 
-        // The reference adds the swipe gestures of a remote on tvOS and,
-        // on iOS, a pan gesture that only takes scroll events; both are
-        // stage 2, with the rest of the input handler.
+        // The reference adds the swipe gestures of a remote on tvOS,
+        // which is not a target of the port.
         this.setMultipleTouchEnabled(true);
+
+        // SAFETY: the view responds to the selector (its class declares
+        // `ferroHandleScrollWheel:`, which takes the recognizer, the one
+        // argument of an action of a gesture recognizer); a recognizer
+        // does not retain its target, and the view, which is the target,
+        // owns the recognizer.
+        let scroll_gesture_recognizer = unsafe {
+            UIPanGestureRecognizer::initWithTarget_action(
+                mtm.alloc(),
+                Some(&this),
+                Some(sel!(ferroHandleScrollWheel:)),
+            )
+        };
+        // Only respond to scroll events, not touches
+        scroll_gesture_recognizer.setMaximumNumberOfTouches(0);
+        scroll_gesture_recognizer.setAllowedScrollTypesMask(UIScrollTypeMask::Discrete | UIScrollTypeMask::Continuous);
+        this.addGestureRecognizer(&scroll_gesture_recognizer);
 
         this
     }
@@ -205,6 +301,13 @@ impl FerroView {
     fn handle_touches(&self, touches: &NSSet<UITouch>, evt: Option<&UIEvent>) {
         if let Some(state) = self.ivars().state.get() {
             state.input.handle(touches, evt);
+        }
+    }
+
+    fn handle_presses(&self, presses: &NSSet<UIPress>, evt: Option<&UIPressesEvent>) -> bool {
+        match self.ivars().state.get() {
+            Some(state) => state.input.handle_presses(presses, evt),
+            None => false,
         }
     }
 
@@ -286,6 +389,7 @@ impl FerroView {
 pub struct TopLevelImpl {
     view: Weak<FerroView>,
     pub(crate) insets_manager: Rc<InsetsManager>,
+    feedback: Rc<dyn IPlatformFeedback>,
     pub(crate) shared: Arc<SurfaceShared>,
     top_level: RefCell<Option<ferroui_base::WeakRef<EmbeddableControlRoot>>>,
     padding_insets: Rc<RefCell<Option<Rc<dyn IDisposable>>>>,
@@ -309,6 +413,7 @@ impl TopLevelImpl {
         let this = Rc::new(Self {
             view: Weak::from_retained(view),
             insets_manager: insets_manager.clone(),
+            feedback: Rc::new(IosPlatformFeedback::new(Weak::from_retained(view))),
             shared: SurfaceShared::new(),
             top_level: RefCell::new(None),
             padding_insets: Rc::new(RefCell::new(None)),
@@ -382,9 +487,18 @@ impl IOptionalFeatureProvider for TopLevelImpl {
             return Some(Rc::new(insets_manager));
         }
 
+        if feature_type == TypeId::of::<dyn ILauncher>() {
+            let launcher: Rc<dyn ILauncher> = Rc::new(IosLauncher::new());
+            return Some(Rc::new(launcher));
+        }
+
         if feature_type == TypeId::of::<dyn IScreenImpl>() {
             let service = FerroLocator::current().get_required_service::<dyn IScreenImpl>();
             return Some(Rc::new(service));
+        }
+
+        if feature_type == TypeId::of::<dyn IPlatformFeedback>() {
+            return Some(Rc::new(self.feedback.clone()));
         }
 
         None

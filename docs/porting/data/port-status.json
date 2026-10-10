@@ -9342,12 +9342,12 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    23,
+    26,
     40,
     0
    ],
    "types": [
-    35,
+    38,
     57,
     1
    ],
@@ -9398,6 +9398,12 @@
     "Extensions.cs": [
      "extensions.rs"
     ],
+    "IOSLauncher.cs": [
+     "ios_launcher.rs"
+    ],
+    "IOSPlatformFeedback.cs": [
+     "ios_platform_feedback.rs"
+    ],
     "InputHandler.cs": [
      "input_handler.rs"
     ],
@@ -9428,6 +9434,9 @@
     "Platform.cs": [
      "platform.rs"
     ],
+    "PlatformSettings.cs": [
+     "platform_settings.rs"
+    ],
     "SingleViewLifetime.cs": [
      "single_view_lifetime.rs"
     ],
@@ -9441,7 +9450,9 @@
      "ios_screens.rs"
     ]
    },
-   "rustOnly": []
+   "rustOnly": [
+    "completion.rs"
+   ]
   },
   {
    "name": "Avalonia.Generators",

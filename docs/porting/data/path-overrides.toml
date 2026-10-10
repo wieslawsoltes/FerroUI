@@ -2269,3 +2269,24 @@ kind = "renamed"
 rust = "ios_screens.rs"
 types = { iOSScreen = "IosScreen", iOSScreens = "IosScreens" }
 reason = "the names follow the naming of Rust"
+
+[[map]]
+project = "Avalonia.iOS"
+upstream = ["IOSLauncher.cs"]
+kind = "renamed"
+rust = "ios_launcher.rs"
+types = { IOSLauncher = "IosLauncher" }
+reason = "the name follows the naming of Rust"
+
+[[map]]
+project = "Avalonia.iOS"
+upstream = ["IOSPlatformFeedback.cs"]
+kind = "renamed"
+rust = "ios_platform_feedback.rs"
+types = { IOSPlatformFeedback = "IosPlatformFeedback" }
+reason = "the name follows the naming of Rust"
+
+[[rust_only]]
+path = "src/iOS/FerroUI.iOS/completion.rs"
+reason = "A value set once on the main thread and the future that waits for it: what stands for the tasks the original completes from the completion handlers of UIKit"
+
