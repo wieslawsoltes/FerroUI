@@ -11,8 +11,8 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Crate | `ferroui-base` |
 | Phase / priority | 0 - core / P0 |
 | Files | 1248/1248 (100.0%), 51 not applicable |
-| Types | 1523/1659 (136 waived) (100.0%) |
-| Members | 10281/11433 (1152 waived) (100.0%) |
+| Types | 1524/1659 (135 waived) (100.0%) |
+| Members | 10398/11433 (1035 waived) (100.0%) |
 | Contracts (interfaces) | 247/260 |
 | Property registrations | 224/239 |
 | Routed events | 41/41 |
@@ -206,7 +206,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Platform.ITextShaperImpl` | public | `Platform/ITextShaperImpl.cs` | 2/2 | present |
 | `Avalonia.Platform.ITransformedGeometryImpl` | public | `Platform/ITransformedGeometryImpl.cs` | 2/2 | present |
 | `Avalonia.Platform.IWriteableBitmapImpl` | public | `Platform/IWriteableBitmapImpl.cs` | 0/0 | present |
-| `Avalonia.Platform.Internal.IAssemblyDescriptor` | internal | `Platform/Internal/AssemblyDescriptor.cs` | 3/4 (1 waived) | present |
+| `Avalonia.Platform.Internal.IAssemblyDescriptor` | internal | `Platform/Internal/AssemblyDescriptor.cs` | 4/4 | present |
 | `Avalonia.Platform.Internal.IAssemblyDescriptorResolver` | internal | `Platform/Internal/AssemblyDescriptorResolver.cs` | 3/3 | present |
 | `Avalonia.Platform.Internal.IAssetDescriptor` | internal | `Platform/Internal/AssetDescriptor.cs` | 2/2 | present |
 | `Avalonia.Platform.Storage.ILauncher` | public | `Platform/Storage/ILauncher.cs` | 2/2 | present |
@@ -290,26 +290,26 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 55/55, types 61/63 (2 waived), members 838/923 (85 waived)
+### `(project root)` - files 55/55, types 61/63 (2 waived), members 851/923 (72 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AttachedProperty.cs` | `styled_property.rs` | present | 1/1 | 2/2 | merged: AttachedProperty&lt;T&gt; is a thin wrapper over StyledProperty&lt;T&gt; |
 | `AvaloniaInternalException.cs` | `ferro_internal_exception.rs` | present | 1/1 | 1/1 |  |
 | `AvaloniaLocator.cs` | `ferro_locator.rs` | present | 4/4 | 18/20 (2 waived) |  |
-| `AvaloniaObject.cs` | `ferro_object.rs` | present | 1/1 | 42/55 (13 waived) |  |
+| `AvaloniaObject.cs` | `ferro_object.rs` | present | 1/1 | 44/55 (11 waived) |  |
 | `AvaloniaObjectExtensions.cs` | `ferro_object_extensions.rs` | present | 1/1 | 15/17 (2 waived) |  |
-| `AvaloniaProperty.cs` | `ferro_property.rs` | present | 2/2 | 42/49 (7 waived) |  |
-| `AvaloniaPropertyChangedEventArgs.cs` | `ferro_property_changed_event_args.rs` | present | 1/1 | 9/12 (3 waived) |  |
+| `AvaloniaProperty.cs` | `ferro_property.rs` | present | 2/2 | 43/49 (6 waived) |  |
+| `AvaloniaPropertyChangedEventArgs.cs` | `ferro_property_changed_event_args.rs` | present | 1/1 | 10/12 (2 waived) |  |
 | `AvaloniaPropertyChangedEventArgs`1.cs` | `ferro_property_changed_event_args.rs` | present | 1/1 | 6/8 (2 waived) | generic arity merged |
 | `AvaloniaPropertyChangedExtensions.cs` | `ferro_property_changed_event_args.rs` | present | 1/1 | 3/3 | merged: the typed accessors (`get_old_value`, `get_new_value`, `get_old_and_new_value`) are inherent methods of the one event arguments type |
 | `AvaloniaPropertyExtensions.cs` | `media/i_affects_render.rs` | present | 1/1 | 1/1 | merged: `can_value_affect_render` is a function of the module of the contract it tests for; `Visual::affects_render` calls it with the value type of the property |
 | `AvaloniaPropertyMetadata.cs` | `ferro_property_metadata.rs` | present | 1/1 | 7/7 | merged: the three metadata classes share one file |
 | `AvaloniaPropertyRegistry.cs` | `ferro_property_registry.rs` | present | 1/1 | 17/18 (1 waived) |  |
-| `AvaloniaProperty`1.cs` | `ferro_property.rs` | present | 1/1 | 3/6 (3 waived) | generic arity merged |
+| `AvaloniaProperty`1.cs` | `ferro_property.rs` | present | 1/1 | 4/6 (2 waived) | generic arity merged |
 | `ClassBindingManager.cs` | `class_binding_manager.rs` | present | 1/1 | 3/3 |  |
-| `CombinedGeometry.cs` | `combined_geometry.rs` | present | 2/2 | 15/18 (3 waived) |  |
-| `CornerRadius.cs` | `corner_radius.rs` | present | 1/1 | 13/15 (2 waived) |  |
+| `CombinedGeometry.cs` | `combined_geometry.rs` | present | 2/2 | 18/18 |  |
+| `CornerRadius.cs` | `corner_radius.rs` | present | 1/1 | 14/15 (1 waived) |  |
 | `DirectProperty.cs` | `direct_property.rs` | present | 1/1 | 6/10 (4 waived) |  |
 | `DirectPropertyBase.cs` | `direct_property.rs` | present | 1/1 | 18/20 (2 waived) | merged: DirectPropertyBase&lt;T&gt; lives next to DirectProperty&lt;TOwner, T&gt; |
 | `DirectPropertyMetadata`1.cs` | `ferro_property_metadata.rs` | present | 1/1 | 5/5 | merged: the three metadata classes share one file |
@@ -338,23 +338,23 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `RelativeScalar.cs` | `relative_scalar.rs` | present | 1/1 | 13/14 (1 waived) |  |
 | `RenderTargetCorruptedException.cs` | `render_target_corrupted_exception.rs` | present | 1/1 | 4/4 |  |
 | `RenderTargetNotReadyException.cs` | `render_target_not_ready_exception.rs` | present | 1/1 | 4/4 |  |
-| `Rotate3DTransform.cs` | `rotate_3d_transform.rs` | present | 1/1 | 17/18 (1 waived) |  |
+| `Rotate3DTransform.cs` | `rotate_3d_transform.rs` | present | 1/1 | 18/18 |  |
 | `RoundedRect.cs` | `rounded_rect.rs` | present | 1/1 | 23/24 (1 waived) |  |
 | `Size.cs` | `size.rs` | present | 1/1 | 26/27 (1 waived) |  |
-| `StyledElement.cs` | `styled_element.rs` | present | 1/1 | 59/64 (5 waived) |  |
+| `StyledElement.cs` | `styled_element.rs` | present | 1/1 | 60/64 (4 waived) |  |
 | `StyledElementExtensions.cs` | `styled_element_extensions.rs` | present | 1/1 | 2/3 (1 waived) | merged: the extension methods are inherent methods of StyledElement |
 | `StyledProperty.cs` | `styled_property.rs` | present | 1/1 | 23/24 (1 waived) |  |
 | `StyledPropertyMetadata`1.cs` | `ferro_property_metadata.rs` | present | 1/1 | 6/6 | merged: the three metadata classes share one file |
 | `StyledPropertyNonGenericHelper.cs` | `ferro_property.rs` | present | 1/1 | 0/2 (2 waived) | replaced: the non-generic throw helpers of invalid values are `FerroProperty::invalid_value_message`, `invalid_value_type` and `value_not_valid`, compiled once for all value types |
-| `Thickness.cs` | `thickness.rs` | present | 1/1 | 19/21 (2 waived) |  |
+| `Thickness.cs` | `thickness.rs` | present | 1/1 | 20/21 (1 waived) |  |
 | `Vector.cs` | `vector.rs` | present | 1/1 | 47/49 (2 waived) |  |
 | `Vector3D.cs` | `vector3d.rs` | present | 1/1 | 26/27 (1 waived) |  |
 | `Visual.Composition.cs` | `visual.rs` | present | 1/1 | 7/7 | partial merged into main file |
-| `Visual.cs` | `visual.rs` | present | 1/1 | 59/61 (2 waived) |  |
+| `Visual.cs` | `visual.rs` | present | 1/1 | 60/61 (1 waived) |  |
 | `VisualExtensions.cs` | `visual_tree/visual_extensions.rs` | present | 1/1 | 4/4 | merged: the extension methods of both static classes are inherent methods of Visual |
 | `VisualTreeAttachmentEventArgs.cs` | `visual_tree_attachment_event_args.rs` | present | 1/1 | 6/6 |  |
 
-### `Animation` - files 39/39, types 44/45 (1 waived), members 191/219 (28 waived)
+### `Animation` - files 39/39, types 44/45 (1 waived), members 193/219 (26 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -365,7 +365,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `AnimatorDrivenTransition.cs` | `animation/animator_driven_transition.rs` | present | 1/1 | 1/1 |  |
 | `AnimatorKeyFrame.cs` | `animation/animator_key_frame.rs` | present | 1/1 | 12/13 (1 waived) |  |
 | `AnimatorTransitionObservable.cs` | `animation/animator_transition_observable.rs` | present | 1/1 | 1/2 (1 waived) |  |
-| `Clock.cs` | `animation/clock.rs` | present | 1/1 | 3/4 (1 waived) |  |
+| `Clock.cs` | `animation/clock.rs` | present | 1/1 | 4/4 |  |
 | `ClockBase.cs` | `animation/clock_base.rs` | present | 1/1 | 5/6 (1 waived) |  |
 | `CompositePageTransition.cs` | `animation/composite_page_transition.rs` | present | 1/1 | 4/4 |  |
 | `CrossFade.cs` | `animation/cross_fade.rs` | present | 1/1 | 10/10 |  |
@@ -386,7 +386,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IterationCountTypeConverter.cs` | - | n/a | - | - | not-applicable: `TypeConverter` found by reflection through an attribute on the type it converts: the markup layer converts from text with the `parse` of that type (`IterationCount::parse`, `KeySpline::parse`, `Spring::parse`, `Easing::parse`) |
 | `KeyFrame.cs` | `animation/key_frame.rs` | present | 2/2 | 8/9 (1 waived) |  |
 | `KeyFrames.cs` | `animation/key_frames.rs` | present | 1/1 | 2/2 |  |
-| `KeySpline.cs` | `animation/key_spline.rs` | present | 1/1 | 8/9 (1 waived) |  |
+| `KeySpline.cs` | `animation/key_spline.rs` | present | 1/1 | 9/9 |  |
 | `KeySplineTypeConverter.cs` | - | n/a | - | - | not-applicable: `TypeConverter` found by reflection through an attribute on the type it converts: the markup layer converts from text with the `parse` of that type (`IterationCount::parse`, `KeySpline::parse`, `Spring::parse`, `Easing::parse`) |
 | `PageSlide.cs` | `animation/page_slide.rs` | present | 2/2 | 13/13 |  |
 | `PageTransitionItem.cs` | `animation/page_transition_item.rs` | present | 1/1 | 4/4 |  |
@@ -401,11 +401,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TransitionObservableBase.cs` | `animation/transition_observable_base.rs` | present | 1/1 | 8/8 |  |
 | `Transitions.cs` | `animation/transitions_collection.rs` | present | 1/1 | 2/2 | renamed: `transitions` is the name of the module of the directory `Animation/Transitions`, so the collection class has the file `transitions_collection.rs` |
 
-### `Animation/Animators` - files 27/27, types 27/27, members 39/43 (4 waived)
+### `Animation/Animators` - files 27/27, types 27/27, members 40/43 (3 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Animator`1.cs` | `animation/animators/animator.rs` | present | 1/1 | 5/7 (2 waived) | generic arity merged |
+| `Animator`1.cs` | `animation/animators/animator.rs` | present | 1/1 | 6/7 (1 waived) | generic arity merged |
 | `BaseBrushAnimator.cs` | `animation/animators/base_brush_animator.rs` | present | 1/1 | 3/3 |  |
 | `BoolAnimator.cs` | `animation/animators/bool_animator.rs` | present | 1/1 | 1/1 |  |
 | `BoxShadowAnimator.cs` | `animation/animators/box_shadow_animator.rs` | present | 1/1 | 1/1 |  |
@@ -434,7 +434,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `UInt64Animator.cs` | `animation/animators/uint64_animator.rs` | present | 1/1 | 1/1 |  |
 | `VectorAnimator.cs` | `animation/animators/vector_animator.rs` | present | 1/1 | 1/1 |  |
 
-### `Animation/Easings` - files 35/35, types 35/35, members 48/49 (1 waived)
+### `Animation/Easings` - files 35/35, types 35/35, members 49/49
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -472,7 +472,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `SineEaseIn.cs` | `animation/easings/sine_ease_in.rs` | present | 1/1 | 1/1 |  |
 | `SineEaseInOut.cs` | `animation/easings/sine_ease_in_out.rs` | present | 1/1 | 1/1 |  |
 | `SineEaseOut.cs` | `animation/easings/sine_ease_out.rs` | present | 1/1 | 1/1 |  |
-| `SplineEasing.cs` | `animation/easings/spline_easing.rs` | present | 1/1 | 7/8 (1 waived) |  |
+| `SplineEasing.cs` | `animation/easings/spline_easing.rs` | present | 1/1 | 8/8 |  |
 | `SpringEasing.cs` | `animation/easings/spring_easing.rs` | present | 1/1 | 7/7 |  |
 
 ### `Animation/Transitions` - files 15/15, types 1/15 (14 waived), members 6/20 (14 waived)
@@ -538,7 +538,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ReferenceEqualityComparer.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 | `TrimmingAttributes.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 
-### `Controls` - files 21/21, types 16/21 (5 waived), members 92/118 (26 waived)
+### `Controls` - files 21/21, types 16/21 (5 waived), members 94/118 (24 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -559,9 +559,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `NameScopeExtensions.cs` | `controls/name_scope_extensions.rs` | present | 1/1 | 3/5 (2 waived) |  |
 | `NameScopeLocator.cs` | `controls/name_scope_locator.rs` | present | 1/1 | 1/1 |  |
 | `PseudoClassesExtensions.cs` | `controls/classes.rs`, `controls/pseudo_classes_extensions.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) | replaced: the one extension method, `Set`, is the inherent method `set` of `dyn IPseudoClasses`, next to the trait |
-| `ResourceDictionary.cs` | `controls/resource_dictionary.rs` | present | 1/1 | 24/31 (7 waived) |  |
+| `ResourceDictionary.cs` | `controls/resource_dictionary.rs` | present | 1/1 | 25/31 (6 waived) |  |
 | `ResourceNodeExtensions.cs` | `controls/resource_node_extensions.rs` | present | 0/1 (1 waived) | 0/8 (8 waived) | replaced: the extension methods are inherent methods of `dyn IResourceHost` (`find_resource`, `find_resource_for_theme`, `try_find_resource`) and of `ResourceHostRef` (`resource_observable`), and the free function `get_floating_resource_observable`; the overloads with a converter and with a theme are parameters of those |
-| `ResourceProvider.cs` | `controls/resource_provider.rs` | present | 1/1 | 10/11 (1 waived) |  |
+| `ResourceProvider.cs` | `controls/resource_provider.rs` | present | 1/1 | 11/11 |  |
 | `ResourcesChangedEventArgs.cs` | `controls/resources_changed_event_args.rs` | present | 1/1 | 3/3 |  |
 
 ### `Controls/Metadata` - files 2/2, types 0/2 (2 waived), members 0/7 (7 waived)
@@ -584,7 +584,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ITemplateResult.cs` | `controls/mod.rs` | present | 0/1 (1 waived) | 0/2 (2 waived) | replaced: ported in the crate of the controls, their only user, where the tracking of `Avalonia.Controls` does not look for them: `src/FerroUI.Controls/templates/template_result.rs` (`TemplateResult&lt;T&gt;`, which also stands for `ITemplateResult`) |
 | `TemplateResult.cs` | `controls/mod.rs` | present | 0/1 (1 waived) | 0/5 (5 waived) | replaced: ported in the crate of the controls, their only user, where the tracking of `Avalonia.Controls` does not look for them: `src/FerroUI.Controls/templates/template_result.rs` (`TemplateResult&lt;T&gt;`, which also stands for `ITemplateResult`) |
 
-### `Data` - files 21/21, types 28/50 (22 waived), members 156/282 (126 waived)
+### `Data` - files 21/21, types 28/50 (22 waived), members 161/282 (121 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -593,11 +593,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `BindingChainException.cs` | `data/binding_chain_exception.rs` | present | 1/1 | 5/6 (1 waived) |  |
 | `BindingExpressionBase.cs` | `data/binding_expression_base.rs` | present | 1/1 | 8/19 (11 waived) |  |
 | `BindingMode.cs` | `data/binding_mode.rs` | present | 1/1 | 5/5 |  |
-| `BindingNotification.cs` | `data/binding_notification.rs` | present | 2/3 (1 waived) | 21/25 (4 waived) |  |
+| `BindingNotification.cs` | `data/binding_notification.rs` | present | 2/3 (1 waived) | 23/25 (2 waived) |  |
 | `BindingOperations.cs` | `data/binding_operations.rs` | present | 2/2 | 3/4 (1 waived) |  |
 | `BindingPriority.cs` | `data/binding_priority.rs` | present | 1/1 | 7/7 |  |
 | `BindingValue.cs` | `data/binding_value.rs` | present | 2/2 | 34/36 (2 waived) |  |
-| `CompiledBinding.cs` | `data/compiled_binding.rs` | present | 1/1 | 2/18 (16 waived) |  |
+| `CompiledBinding.cs` | `data/compiled_binding.rs` | present | 1/1 | 3/18 (15 waived) |  |
 | `CompiledBindingPath.cs` | `data/compiled_binding_path.rs` | present | 4/24 (20 waived) | 25/81 (56 waived) |  |
 | `CultureInfoIetfLanguageTagConverter.cs` | `data/culture_info_ietf_language_tag_converter.rs` | present | 1/1 | 2/2 |  |
 | `DataValidationException.cs` | `data/data_validation_exception.rs` | present | 1/1 | 2/2 |  |
@@ -605,9 +605,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IndexerDescriptor.cs` | `data/indexer_descriptor.rs` | present | 1/1 | 11/11 |  |
 | `MultiBinding.cs` | `data/multi_binding.rs` | present | 1/1 | 2/12 (10 waived) |  |
 | `Optional.cs` | - | n/a | - | - | not-applicable: Optional&lt;T&gt; is Rust `Option&lt;T&gt;` (porting guide, Types table) |
-| `ReflectionBinding.cs` | `data/reflection_binding.rs` | present | 1/1 | 2/20 (18 waived) |  |
+| `ReflectionBinding.cs` | `data/reflection_binding.rs` | present | 1/1 | 3/20 (17 waived) |  |
 | `RelativeSource.cs` | `data/relative_source.rs` | present | 3/3 | 11/12 (1 waived) |  |
-| `TemplateBinding.cs` | `data/template_binding.rs` | present | 1/1 | 3/9 (6 waived) |  |
+| `TemplateBinding.cs` | `data/template_binding.rs` | present | 1/1 | 4/9 (5 waived) |  |
 | `TemplateBindingExpression.cs` | `data/template_binding_expression.rs` | present | 1/1 | 5/5 |  |
 | `UpdateSourceTrigger.cs` | `data/update_source_trigger.rs` | present | 1/1 | 4/4 |  |
 
@@ -737,7 +737,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ValueFrameDiagnostic.cs` | `diagnostics/value_frame_diagnostic.rs` | present | 1/1 | 6/6 |  |
 | `ValueStoreDiagnostic.cs` | `diagnostics/value_store_diagnostic.rs` | present | 1/1 | 2/2 |  |
 
-### `Input` - files 88/88, types 111/113 (2 waived), members 1105/1136 (31 waived)
+### `Input` - files 88/88, types 111/113 (2 waived), members 1112/1136 (24 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -747,7 +747,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `AsyncToSyncDataTransfer.cs` | `input/async_to_sync_data_transfer.rs` | present | 1/1 | 6/6 |  |
 | `AsyncToSyncDataTransferItem.cs` | `input/async_to_sync_data_transfer_item.rs` | present | 1/1 | 4/4 |  |
 | `ContextRequestedEventArgs.cs` | `input/context_requested_event_args.rs` | present | 1/1 | 7/7 |  |
-| `Cursor.cs` | `input/cursor.rs` | present | 2/2 | 30/31 (1 waived) |  |
+| `Cursor.cs` | `input/cursor.rs` | present | 2/2 | 31/31 |  |
 | `DataFormat.cs` | `input/data_format.rs` | present | 1/1 | 19/19 |  |
 | `DataFormatKind.cs` | `input/data_format_kind.rs` | present | 1/1 | 4/4 |  |
 | `DataFormatOfT.cs` | `input/data_format_of_t.rs` | present | 1/1 | 1/1 |  |
@@ -813,12 +813,12 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PenDevice.cs` | `input/pen_device.rs` | present | 1/1 | 4/4 |  |
 | `PhysicalKey.cs` | `input/physical_key.rs` | present | 1/1 | 165/165 |  |
 | `PhysicalKeyExtensions.cs` | `input/physical_key_extensions.rs` | present | 1/1 | 2/2 | merged: the extension methods are inherent methods of PhysicalKey |
-| `PinchEventArgs.cs` | `input/pinch_event_args.rs` | present | 2/2 | 6/7 (1 waived) |  |
+| `PinchEventArgs.cs` | `input/pinch_event_args.rs` | present | 2/2 | 7/7 |  |
 | `Pointer.cs` | `input/pointer.rs` | present | 2/2 | 19/19 |  |
 | `PointerDeltaEventArgs.cs` | `input/pointer_delta_event_args.rs` | present | 1/1 | 2/2 |  |
-| `PointerEventArgs.cs` | `input/pointer_event_args.rs` | present | 6/6 | 27/29 (2 waived) |  |
+| `PointerEventArgs.cs` | `input/pointer_event_args.rs` | present | 6/6 | 29/29 |  |
 | `PointerOverPreProcessor.cs` | `input/pointer_over_pre_processor.rs` | present | 1/1 | 5/6 (1 waived) |  |
-| `PointerPoint.cs` | `input/pointer_point.rs` | present | 3/4 (1 waived) | 33/37 (4 waived) |  |
+| `PointerPoint.cs` | `input/pointer_point.rs` | present | 3/4 (1 waived) | 36/37 (1 waived) |  |
 | `PointerWheelEventArgs.cs` | `input/pointer_wheel_event_args.rs` | present | 1/1 | 2/2 |  |
 | `PullGestureEventArgs.cs` | `input/pull_gesture_event_args.rs` | present | 3/3 | 12/12 |  |
 | `ScrollGestureEventArgs.cs` | `input/scroll_gesture_event_args.rs` | present | 3/3 | 10/10 |  |
@@ -832,14 +832,14 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `VectorEventArgs.cs` | `input/vector_event_args.rs` | present | 1/1 | 1/1 |  |
 | `WindowDecorationsElementRole.cs` | `input/window_decorations_element_role.rs` | present | 1/1 | 16/16 |  |
 
-### `Input/GestureRecognizers` - files 7/7, types 12/12, members 82/87 (5 waived)
+### `Input/GestureRecognizers` - files 7/7, types 12/12, members 83/87 (4 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `GestureRecognizer.cs` | `input/gesture_recognizers/gesture_recognizer.rs` | present | 1/1 | 10/10 |  |
 | `GestureRecognizerCollection.cs` | `input/gesture_recognizers/gesture_recognizer_collection.rs` | present | 1/1 | 8/10 (2 waived) |  |
 | `PinchGestureRecognizer.cs` | `input/gesture_recognizers/pinch_gesture_recognizer.rs` | present | 1/1 | 4/4 |  |
-| `PullGestureRecognizer.cs` | `input/gesture_recognizers/pull_gesture_recognizer.rs` | present | 1/1 | 8/9 (1 waived) |  |
+| `PullGestureRecognizer.cs` | `input/gesture_recognizers/pull_gesture_recognizer.rs` | present | 1/1 | 9/9 |  |
 | `ScrollGestureRecognizer.cs` | `input/gesture_recognizers/scroll_gesture_recognizer.rs` | present | 1/1 | 20/20 |  |
 | `SwipeGestureRecognizer.cs` | `input/gesture_recognizers/swipe_gesture_recognizer.rs` | present | 1/1 | 14/14 |  |
 | `VelocityTracker.cs` | `input/gesture_recognizers/velocity_tracker.rs` | present | 6/6 | 18/20 (2 waived) |  |
@@ -880,7 +880,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PlatformDataTransferItem.cs` | `input/platform/platform_data_transfer_item.rs` | present | 1/1 | 9/9 |  |
 | `PlatformHotkeyConfiguration.cs` | `input/platform/platform_hotkey_configuration.rs` | present | 1/1 | 25/25 |  |
 
-### `Input/Raw` - files 12/12, types 15/15, members 73/76 (3 waived)
+### `Input/Raw` - files 12/12, types 15/15, members 75/76 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -891,13 +891,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `RawInputHelpers.cs` | `input/raw/raw_input_helpers.rs` | present | 1/1 | 1/2 (1 waived) | merged: the extension methods are inherent methods of the types they extend: `RawInputModifiers::to_key_modifiers` and `RawPointerEventType::to_update_kind` |
 | `RawKeyEventArgs.cs` | `input/raw/raw_key_event_args.rs` | present | 2/2 | 9/9 |  |
 | `RawMouseWheelEventArgs.cs` | `input/raw/raw_mouse_wheel_event_args.rs` | present | 1/1 | 2/2 |  |
-| `RawPointerEventArgs.cs` | `input/raw/raw_pointer_event_args.rs` | present | 3/3 | 38/39 (1 waived) |  |
+| `RawPointerEventArgs.cs` | `input/raw/raw_pointer_event_args.rs` | present | 3/3 | 39/39 |  |
 | `RawPointerGestureEventArgs.cs` | `input/raw/raw_pointer_gesture_event_args.rs` | present | 1/1 | 2/2 |  |
 | `RawSizeEventArgs.cs` | `input/raw/raw_size_event_args.rs` | present | 1/1 | 3/3 |  |
 | `RawTextInputEventArgs.cs` | `input/raw/raw_text_input_event_args.rs` | present | 1/1 | 2/2 |  |
-| `RawTouchEventArgs.cs` | `input/raw/raw_touch_event_args.rs` | present | 1/1 | 1/2 (1 waived) |  |
+| `RawTouchEventArgs.cs` | `input/raw/raw_touch_event_args.rs` | present | 1/1 | 2/2 |  |
 
-### `Input/TextInput` - files 9/9, types 11/11, members 98/99 (1 waived)
+### `Input/TextInput` - files 9/9, types 11/11, members 99/99
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -907,7 +907,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TextInputMethodClient.cs` | `input/text_input/text_input_method_client.rs` | present | 3/3 | 28/28 |  |
 | `TextInputMethodClientRequeryRequestedEventArgs.cs` | `input/text_input/text_input_method_client_requery_requested_event_args.rs` | present | 1/1 | 0/0 |  |
 | `TextInputMethodClientRequestedEventArgs.cs` | `input/text_input/text_input_method_client_requested_event_args.rs` | present | 1/1 | 1/1 |  |
-| `TextInputOptions.cs` | `input/text_input/text_input_options.rs` | present | 1/1 | 37/38 (1 waived) |  |
+| `TextInputOptions.cs` | `input/text_input/text_input_options.rs` | present | 1/1 | 38/38 |  |
 | `TextInputReturnKeyType.cs` | `input/text_input/text_input_return_key_type.rs` | present | 1/1 | 8/8 |  |
 | `TransformTrackingHelper.cs` | `input/text_input/transform_tracking_helper.rs` | present | 1/1 | 7/7 |  |
 
@@ -964,7 +964,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `LogicalExtensions.cs` | `logical_tree/logical_extensions.rs` | present | 1/1 | 11/11 | merged: the extension methods are inherent methods of StyledElement, the one implementation of ILogical |
 | `LogicalTreeAttachmentEventArgs.cs` | `logical_tree/logical_tree_attachment_event_args.rs` | present | 1/1 | 4/4 |  |
 
-### `Media` - files 165/165, types 174/184 (10 waived), members 1690/1768 (78 waived)
+### `Media` - files 165/165, types 174/184 (10 waived), members 1714/1768 (54 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -990,15 +990,15 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Colors.cs` | `media/colors.rs` | present | 1/1 | 141/141 |  |
 | `CompositeFontFamilyKey.cs` | `media/composite_font_family_key.rs` | present | 1/1 | 2/2 |  |
 | `ConicGradientBrush.cs` | `media/conic_gradient_brush.rs` | present | 1/1 | 7/7 |  |
-| `DashStyle.cs` | `media/dash_style.rs` | present | 1/1 | 14/15 (1 waived) |  |
+| `DashStyle.cs` | `media/dash_style.rs` | present | 1/1 | 15/15 |  |
 | `Drawing.cs` | `media/drawing.rs` | present | 1/1 | 7/7 |  |
-| `DrawingBrush.cs` | `media/drawing_brush.rs` | present | 1/1 | 8/9 (1 waived) |  |
+| `DrawingBrush.cs` | `media/drawing_brush.rs` | present | 1/1 | 9/9 |  |
 | `DrawingCollection.cs` | `media/drawing_collection.rs` | present | 0/1 (1 waived) | 0/2 (2 waived) |  |
 | `DrawingContext.cs` | `media/drawing_context.rs` | present | 2/2 | 48/51 (3 waived) |  |
 | `DrawingGroup.cs` | `media/drawing_group.rs` | present | 1/1 | 19/19 |  |
-| `DrawingImage.cs` | `media/drawing_image.rs` | present | 1/1 | 10/11 (1 waived) |  |
+| `DrawingImage.cs` | `media/drawing_image.rs` | present | 1/1 | 11/11 |  |
 | `EdgeMode.cs` | `media/edge_mode.rs` | present | 1/1 | 3/3 |  |
-| `EllipseGeometry.cs` | `media/ellipse_geometry.rs` | present | 1/1 | 12/13 (1 waived) |  |
+| `EllipseGeometry.cs` | `media/ellipse_geometry.rs` | present | 1/1 | 13/13 |  |
 | `ExperimentalAcrylicMaterial.cs` | `media/experimental_acrylic_material.rs` | present | 1/1 | 18/19 (1 waived) |  |
 | `FillRule.cs` | `media/fill_rule.rs` | present | 1/1 | 2/2 |  |
 | `FlowDirection.cs` | `media/flow_direction.rs` | present | 1/1 | 2/2 |  |
@@ -1016,7 +1016,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `FontVariationSettings.cs` | `media/font_variation_settings.rs` | present | 2/2 | 14/14 |  |
 | `FontWeight.cs` | `media/font_weight.rs` | present | 1/1 | 18/18 |  |
 | `FormattedText.cs` | `media/formatted_text.rs` | present | 1/1 | 47/47 |  |
-| `Geometry.cs` | `media/geometry.rs` | present | 1/2 (1 waived) | 26/31 (5 waived) |  |
+| `Geometry.cs` | `media/geometry.rs` | present | 1/2 (1 waived) | 27/31 (4 waived) |  |
 | `GeometryBuilder.cs` | `media/geometry_builder.rs` | present | 2/2 | 16/16 |  |
 | `GeometryCollection.cs` | `media/geometry_collection.rs` | present | 1/1 | 3/3 |  |
 | `GeometryDrawing.cs` | `media/geometry_drawing.rs` | present | 1/1 | 8/8 |  |
@@ -1032,7 +1032,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `GlyphTypeface.cs` | `media/glyph_typeface.rs` | present | 1/1 | 33/33 |  |
 | `GradientBrush.cs` | `media/gradient_brush.rs` | present | 1/1 | 9/9 |  |
 | `GradientSpreadMethod.cs` | `media/gradient_spread_method.rs` | present | 1/1 | 3/3 |  |
-| `GradientStop.cs` | `media/gradient_stop.rs` | present | 1/1 | 5/6 (1 waived) |  |
+| `GradientStop.cs` | `media/gradient_stop.rs` | present | 1/1 | 6/6 |  |
 | `GradientStops.cs` | `media/gradient_stops.rs` | present | 0/1 (1 waived) | 0/2 (2 waived) |  |
 | `HslColor.cs` | `media/hsl_color.rs` | present | 1/1 | 22/23 (1 waived) |  |
 | `HsvColor.cs` | `media/hsv_color.rs` | present | 1/1 | 22/23 (1 waived) |  |
@@ -1061,19 +1061,19 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ITextShaperTypeface.cs` | `media/i_text_shaper_typeface.rs` | present | 1/1 | 0/0 |  |
 | `ITileBrush.cs` | `media/i_tile_brush.rs` | present | 1/1 | 6/6 |  |
 | `ITransform.cs` | `media/i_transform.rs` | present | 1/1 | 1/1 |  |
-| `ImageBrush.cs` | `media/image_brush.rs` | present | 1/1 | 6/7 (1 waived) |  |
+| `ImageBrush.cs` | `media/image_brush.rs` | present | 1/1 | 7/7 |  |
 | `ImageDrawing.cs` | `media/image_drawing.rs` | present | 1/1 | 6/6 |  |
-| `ImmediateDrawingContext.cs` | `media/immediate_drawing_context.rs` | present | 2/3 (1 waived) | 27/31 (4 waived) |  |
+| `ImmediateDrawingContext.cs` | `media/immediate_drawing_context.rs` | present | 2/3 (1 waived) | 28/31 (3 waived) |  |
 | `ImmutableExperimentalAcrylicMaterial.cs` | `media/immutable_experimental_acrylic_material.rs` | present | 1/1 | 12/12 |  |
 | `ImmutableGeometry.cs` | `media/immutable_geometry.rs` | present | 1/1 | 3/3 |  |
 | `ImmutableGeometryImpl.cs` | `media/immutable_geometry_impl.rs` | present | 1/1 | 13/13 |  |
 | `IntersectionResult.cs` | `media/intersection_result.rs` | present | 1/1 | 5/5 |  |
 | `KnownColors.cs` | `media/known_colors.rs` | present | 2/2 | 147/149 (2 waived) |  |
-| `LineGeometry.cs` | `media/line_geometry.rs` | present | 1/1 | 8/9 (1 waived) |  |
+| `LineGeometry.cs` | `media/line_geometry.rs` | present | 1/1 | 9/9 |  |
 | `LineSegment.cs` | `media/line_segment.rs` | present | 1/1 | 4/4 |  |
 | `LinearGradientBrush.cs` | `media/linear_gradient_brush.rs` | present | 1/1 | 7/7 |  |
 | `MaterialExtensions.cs` | `media/material_extensions.rs` | present | 1/1 | 1/1 |  |
-| `MatrixTransform.cs` | `media/matrix_transform.rs` | present | 1/1 | 4/5 (1 waived) |  |
+| `MatrixTransform.cs` | `media/matrix_transform.rs` | present | 1/1 | 5/5 |  |
 | `MediaContext.Clock.cs` | `media/media_context_clock.rs` | present | 1/1 | 2/2 |  |
 | `MediaContext.Compositor.cs` | `media/media_context.rs` | present | 1/1 | 3/3 | partial merged into main file |
 | `MediaContext.cs` | `media/media_context.rs` | present | 1/1 | 5/5 |  |
@@ -1084,23 +1084,23 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PathGeometryCollections.cs` | `media/path_geometry_collections.rs` | present | 0/2 (2 waived) | 0/4 (4 waived) |  |
 | `PathMarkupParser.cs` | `media/path_markup_parser.rs` | present | 1/1 | 4/4 |  |
 | `PathSegment.cs` | `media/path_segment.rs` | present | 1/1 | 3/3 |  |
-| `Pen.cs` | `media/pen.rs` | present | 1/1 | 20/23 (3 waived) |  |
+| `Pen.cs` | `media/pen.rs` | present | 1/1 | 21/23 (2 waived) |  |
 | `PenLineCap.cs` | `media/pen_line_cap.rs` | present | 1/1 | 3/3 |  |
 | `PenLineJoin.cs` | `media/pen_line_join.rs` | present | 1/1 | 3/3 |  |
 | `PlatformDrawingContext.cs` | `media/platform_drawing_context.rs` | present | 1/1 | 27/27 |  |
 | `PlatformGeometry.cs` | `media/platform_geometry.rs` | present | 1/1 | 3/3 |  |
-| `PolyBezierSegment.cs` | `media/poly_bezier_segment.rs` | present | 1/1 | 5/6 (1 waived) |  |
-| `PolyLineSegment.cs` | `media/poly_line_segment.rs` | present | 1/1 | 5/6 (1 waived) |  |
-| `PolylineGeometry.cs` | `media/polyline_geometry.rs` | present | 1/1 | 9/11 (2 waived) |  |
+| `PolyBezierSegment.cs` | `media/poly_bezier_segment.rs` | present | 1/1 | 6/6 |  |
+| `PolyLineSegment.cs` | `media/poly_line_segment.rs` | present | 1/1 | 6/6 |  |
+| `PolylineGeometry.cs` | `media/polyline_geometry.rs` | present | 1/1 | 11/11 |  |
 | `PreciseEllipticArcHelper.cs` | `media/precise_elliptic_arc_helper.rs` | present | 2/2 | 40/41 (1 waived) |  |
 | `QuadraticBezierSegment .cs` | `media/quadratic_bezier_segment.rs` | present | 1/1 | 6/6 |  |
 | `RadialGradientBrush.cs` | `media/radial_gradient_brush.rs` | present | 1/1 | 11/11 |  |
-| `RectangleGeometry.cs` | `media/rectangle_geometry.rs` | present | 1/1 | 10/12 (2 waived) |  |
+| `RectangleGeometry.cs` | `media/rectangle_geometry.rs` | present | 1/1 | 12/12 |  |
 | `RenderOptions.cs` | `media/render_options.rs` | present | 1/1 | 16/16 |  |
-| `RotateTransform.cs` | `media/rotate_transform.rs` | present | 1/1 | 8/10 (2 waived) |  |
-| `ScaleTransform.cs` | `media/scale_transform.rs` | present | 1/1 | 7/8 (1 waived) |  |
-| `SkewTransform.cs` | `media/skew_transform.rs` | present | 1/1 | 7/8 (1 waived) |  |
-| `SolidColorBrush.cs` | `media/solid_color_brush.rs` | present | 1/1 | 9/10 (1 waived) |  |
+| `RotateTransform.cs` | `media/rotate_transform.rs` | present | 1/1 | 10/10 |  |
+| `ScaleTransform.cs` | `media/scale_transform.rs` | present | 1/1 | 8/8 |  |
+| `SkewTransform.cs` | `media/skew_transform.rs` | present | 1/1 | 8/8 |  |
+| `SolidColorBrush.cs` | `media/solid_color_brush.rs` | present | 1/1 | 10/10 |  |
 | `StreamGeometry.cs` | `media/stream_geometry.rs` | present | 1/1 | 5/5 |  |
 | `StreamGeometryContext.cs` | `media/stream_geometry_context.rs` | present | 1/1 | 10/10 |  |
 | `Stretch.cs` | `media/stretch.rs` | present | 1/1 | 4/4 |  |
@@ -1129,10 +1129,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TransformConverter.cs` | `media/transform.rs` | present | 1/1 | 0/2 (2 waived) | replaced: a type converter that only parses: `Transform::parse`, which the type states as its conversion from text (`parse:`, porting guide, "Text conversion") |
 | `TransformExtensions.cs` | `media/transform_extensions.rs` | present | 1/1 | 1/1 |  |
 | `TransformGroup.cs` | `media/transform_group.rs` | present | 1/2 (1 waived) | 5/5 |  |
-| `TranslateTransform.cs` | `media/translate_transform.rs` | present | 1/1 | 7/8 (1 waived) |  |
+| `TranslateTransform.cs` | `media/translate_transform.rs` | present | 1/1 | 8/8 |  |
 | `Typeface.cs` | `media/typeface.rs` | present | 1/1 | 14/14 |  |
 | `UnicodeRange.cs` | `media/unicode_range.rs` | present | 2/2 | 13/13 |  |
-| `VisualBrush.cs` | `media/visual_brush.rs` | present | 1/1 | 8/9 (1 waived) |  |
+| `VisualBrush.cs` | `media/visual_brush.rs` | present | 1/1 | 9/9 |  |
 
 ### `Media/Effects` - files 10/10, types 19/21 (2 waived), members 66/76 (10 waived)
 
@@ -1238,7 +1238,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `NameRecord.cs` | `media/fonts/tables/name/name_record.rs` | present | 1/1 | 8/8 |  |
 | `NameTable.cs` | `media/fonts/tables/name/name_table.rs` | present | 1/1 | 12/12 |  |
 
-### `Media/Imaging` - files 14/14, types 49/49, members 177/183 (6 waived)
+### `Media/Imaging` - files 14/14, types 49/49, members 179/183 (4 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1247,17 +1247,17 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `BitmapEncoderOptions.cs` | `media/imaging/bitmap_encoder_options.rs` | present | 1/1 | 1/1 |  |
 | `BitmapInterpolationMode.cs` | `media/imaging/bitmap_interpolation_mode.rs` | present | 1/1 | 5/5 |  |
 | `BitmapMemory.cs` | `media/imaging/bitmap_memory.rs` | present | 1/1 | 7/9 (2 waived) |  |
-| `CroppedBitmap.cs` | `media/imaging/cropped_bitmap.rs` | present | 1/1 | 10/11 (1 waived) |  |
+| `CroppedBitmap.cs` | `media/imaging/cropped_bitmap.rs` | present | 1/1 | 11/11 |  |
 | `IBitmap.cs` | `media/imaging/i_bitmap.rs` | present | 1/1 | 4/4 |  |
 | `JpegBitmapEncoderOptions.cs` | `media/imaging/jpeg_bitmap_encoder_options.rs` | present | 1/1 | 2/2 |  |
 | `PixelFormatReaders.cs` | `media/imaging/pixel_format_readers.rs` | present | 19/19 | 44/44 |  |
 | `PixelFormatTranscoder.cs` | `media/imaging/pixel_format_transcoder.rs` | present | 1/1 | 1/1 |  |
 | `PixelFormatWriter.cs` | `media/imaging/pixel_format_writer.rs` | present | 18/18 | 35/35 |  |
 | `PngBitmapEncoderOptions.cs` | `media/imaging/png_bitmap_encoder_options.rs` | present | 1/1 | 2/2 |  |
-| `RenderTargetBitmap.cs` | `media/imaging/render_target_bitmap.rs` | present | 1/1 | 6/7 (1 waived) |  |
+| `RenderTargetBitmap.cs` | `media/imaging/render_target_bitmap.rs` | present | 1/1 | 7/7 |  |
 | `WriteableBitmap.cs` | `media/imaging/writeable_bitmap.rs` | present | 1/1 | 8/8 |  |
 
-### `Media/Immutable` - files 12/12, types 12/12, members 79/85 (6 waived)
+### `Media/Immutable` - files 12/12, types 12/12, members 81/85 (4 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1268,13 +1268,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ImmutableImageBrush.cs` | `media/immutable/immutable_image_brush.rs` | present | 1/1 | 3/3 |  |
 | `ImmutableLinearGradientBrush.cs` | `media/immutable/immutable_linear_gradient_brush.rs` | present | 1/1 | 5/5 |  |
 | `ImmutablePen.cs` | `media/immutable/immutable_pen.rs` | present | 1/1 | 10/11 (1 waived) |  |
-| `ImmutableRadialGradientBrush.cs` | `media/immutable/immutable_radial_gradient_brush.rs` | present | 1/1 | 7/8 (1 waived) |  |
-| `ImmutableSolidColorBrush.cs` | `media/immutable/immutable_solid_color_brush.rs` | present | 1/1 | 13/15 (2 waived) |  |
+| `ImmutableRadialGradientBrush.cs` | `media/immutable/immutable_radial_gradient_brush.rs` | present | 1/1 | 8/8 |  |
+| `ImmutableSolidColorBrush.cs` | `media/immutable/immutable_solid_color_brush.rs` | present | 1/1 | 14/15 (1 waived) |  |
 | `ImmutableTextDecoration.cs` | `media/immutable/immutable_text_decoration.rs` | present | 1/1 | 6/6 |  |
 | `ImmutableTileBrush.cs` | `media/immutable/immutable_tile_brush.rs` | present | 1/1 | 12/12 |  |
 | `ImmutableTransform.cs` | `media/immutable/immutable_transform.rs` | present | 1/1 | 2/2 |  |
 
-### `Media/TextFormatting` - files 43/43, types 47/48 (1 waived), members 339/353 (14 waived)
+### `Media/TextFormatting` - files 43/43, types 47/48 (1 waived), members 341/353 (12 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1283,7 +1283,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `FormattedTextSource.cs` | `media/text_formatting/formatted_text_source.rs` | present | 1/1 | 3/3 |  |
 | `FormattingBufferHelper.cs` | `media/text_formatting/formatting_buffer_helper.rs` | present | 1/1 | 3/4 (1 waived) |  |
 | `FormattingObjectPool.cs` | `media/text_formatting/formatting_object_pool.rs` | present | 3/3 | 8/8 |  |
-| `GenericTextParagraphProperties.cs` | `media/text_formatting/generic_text_paragraph_properties.rs` | present | 1/1 | 15/16 (1 waived) |  |
+| `GenericTextParagraphProperties.cs` | `media/text_formatting/generic_text_paragraph_properties.rs` | present | 1/1 | 16/16 |  |
 | `GenericTextRunProperties.cs` | `media/text_formatting/generic_text_run_properties.rs` | present | 1/1 | 10/10 |  |
 | `GlyphInfo.cs` | `media/text_formatting/glyph_info.rs` | present | 1/1 | 11/11 |  |
 | `ITextSource.cs` | `media/text_formatting/i_text_source.rs` | present | 1/1 | 1/1 |  |
@@ -1296,7 +1296,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ShapedTextRun.cs` | `media/text_formatting/shaped_text_run.rs` | present | 1/1 | 17/17 |  |
 | `SplitResult.cs` | `media/text_formatting/split_result.rs` | present | 1/1 | 4/4 |  |
 | `TextBounds.cs` | `media/text_formatting/text_bounds.rs` | present | 1/1 | 4/4 |  |
-| `TextCharacters.cs` | `media/text_formatting/text_characters.rs` | present | 1/1 | 6/7 (1 waived) |  |
+| `TextCharacters.cs` | `media/text_formatting/text_characters.rs` | present | 1/1 | 7/7 |  |
 | `TextCollapsingProperties.cs` | `media/text_formatting/text_collapsing_properties.rs` | present | 1/1 | 5/5 |  |
 | `TextEllipsisHelper.cs` | `media/text_formatting/text_ellipsis_helper.rs` | present | 1/1 | 1/1 |  |
 | `TextEndOfLine.cs` | `media/text_formatting/text_end_of_line.rs` | present | 1/1 | 2/2 |  |
@@ -1393,7 +1393,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `XmlnsDefinitionAttribute.cs` | `metadata/markup_assembly.rs` | present | 1/1 | 1/3 (2 waived) | replaced: an assembly attribute: the struct `XmlnsDefinition { xml_namespace, namespace }` in `MarkupAssembly::xmlns_definitions`, which a crate declares once and registers from its `register_types()` |
 | `XmlnsPrefixAttribute.cs` | `metadata/markup_assembly.rs` | present | 1/1 | 2/3 (1 waived) | replaced: an assembly attribute: the struct `XmlnsPrefix { xml_namespace, prefix }` in `MarkupAssembly::xmlns_prefixes`, which a crate declares once and registers from its `register_types()` |
 
-### `Platform` - files 51/51, types 81/83 (2 waived), members 442/451 (9 waived)
+### `Platform` - files 51/51, types 81/83 (2 waived), members 445/451 (6 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1431,17 +1431,17 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ITextShaperImpl.cs` | `platform/i_text_shaper_impl.rs` | present | 1/1 | 2/2 |  |
 | `ITransformedGeometryImpl.cs` | `platform/i_transformed_geometry_impl.rs` | present | 1/1 | 2/2 |  |
 | `IWriteableBitmapImpl.cs` | `platform/i_bitmap_impl.rs` | present | 1/1 | 0/0 | merged: the bitmap contracts that extend IBitmapImpl live next to it |
-| `LockedFramebuffer.cs` | `platform/retained_framebuffer.rs` | present | 1/1 | 7/8 (1 waived) | replaced: a locked framebuffer over a bare address cannot give safe access to its memory (`ILockedFramebuffer::with_data`), and unsafe code is not allowed in this crate: every owner of pixel memory implements ILockedFramebuffer over the memory it owns (RetainedLockedFramebuffer here, the deferred framebuffer of FerroUI.Native) |
+| `LockedFramebuffer.cs` | `platform/retained_framebuffer.rs` | present | 1/1 | 8/8 | replaced: a locked framebuffer over a bare address cannot give safe access to its memory (`ILockedFramebuffer::with_data`), and unsafe code is not allowed in this crate: every owner of pixel memory implements ILockedFramebuffer over the memory it owns (RetainedLockedFramebuffer here, the deferred framebuffer of FerroUI.Native) |
 | `LtrbRect.cs` | `platform/ltrb_rect.rs` | present | 2/2 | 52/53 (1 waived) |  |
 | `ManagedDispatcherImpl.cs` | `platform/managed_dispatcher_impl.rs` | present | 2/2 | 14/14 |  |
 | `PathGeometryContext.cs` | `platform/path_geometry_context.rs` | present | 1/1 | 9/9 |  |
-| `PixelFormat.cs` | `platform/pixel_format.rs` | present | 3/3 | 40/41 (1 waived) |  |
+| `PixelFormat.cs` | `platform/pixel_format.rs` | present | 3/3 | 41/41 |  |
 | `PlatformColorValues.cs` | `platform/platform_color_values.rs` | present | 3/3 | 10/10 |  |
 | `PlatformGraphicsDeviceAdapterDescription.cs` | `platform/platform_graphics_device_adapter_description.rs` | present | 1/1 | 3/3 |  |
 | `PlatformGraphicsExternalMemory.cs` | `platform/platform_graphics_external_memory.rs` | present | 7/7 | 33/33 |  |
 | `PlatformHandle.cs` | `platform/platform_handle.rs` | present | 1/1 | 9/9 |  |
 | `RenderTargetProperties.cs` | `platform/i_render_target.rs` | present | 3/3 | 11/11 | merged: the property records of a render target live next to IRenderTarget |
-| `RetainedFramebuffer.cs` | `platform/retained_framebuffer.rs` | present | 1/1 | 8/9 (1 waived) |  |
+| `RetainedFramebuffer.cs` | `platform/retained_framebuffer.rs` | present | 1/1 | 9/9 |  |
 | `StandardAssetLoader.cs` | `platform/standard_asset_loader.rs` | present | 1/1 | 10/11 (1 waived) |  |
 | `StandardRuntimePlatform.cs` | `platform/standard_runtime_platform.rs` | present | 1/1 | 1/1 |  |
 | `StandardRuntimePlatformServices.cs` | `platform/standard_runtime_platform_services.rs` | present | 1/1 | 1/1 |  |
@@ -1449,11 +1449,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `SystemNavigationManagerImpl.cs` | `platform/system_navigation_manager_impl.rs` | present | 1/1 | 1/1 |  |
 | `VisualQueryProvider.cs` | `styling/visual_query_provider.rs` | present | 1/1 | 6/6 | renamed: ported next to the container queries of Styling, its only users |
 
-### `Platform/Internal` - files 4/4, types 8/8, members 26/30 (4 waived)
+### `Platform/Internal` - files 4/4, types 8/8, members 28/30 (2 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AssemblyDescriptor.cs` | `platform/internal/assembly_descriptor.rs` | present | 2/2 | 7/9 (2 waived) |  |
+| `AssemblyDescriptor.cs` | `platform/internal/assembly_descriptor.rs` | present | 2/2 | 9/9 |  |
 | `AssemblyDescriptorResolver.cs` | `platform/internal/assembly_descriptor_resolver.rs` | present | 2/2 | 6/6 |  |
 | `AssetDescriptor.cs` | `platform/internal/asset_descriptor.rs` | present | 3/3 | 8/8 | merged: the two descriptors differ in where the bytes come from (a manifest resource by name, a slice of the packed resource); both kinds of asset are registered as embedded byte slices, described by EmbeddedAssetDescriptor |
 | `Constants.cs` | - | n/a | - | - | not-applicable: the name of the manifest resource into which the build task packs the assets of an assembly: a crate registers each asset with the asset registry (platform/internal/asset_registry.rs), there is no packed resource to name |
@@ -1503,11 +1503,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `StorageBookmarkHelper.cs` | `platform/storage/file_io/storage_bookmark_helper.rs` | present | 2/2 | 8/8 |  |
 | `StorageProviderHelpers.cs` | `platform/storage/file_io/storage_provider_helpers.rs` | present | 1/1 | 5/5 |  |
 
-### `Platform/Surfaces` - files 2/2, types 7/7, members 11/12 (1 waived)
+### `Platform/Surfaces` - files 2/2, types 7/7, members 12/12
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `IFramebufferPlatformSurface.cs` | `platform/surfaces/i_framebuffer_platform_surface.rs` | present | 5/5 | 9/10 (1 waived) | renamed: the nested delegate `FuncFramebufferRenderTarget.LockFramebufferDelegate` is the type alias `LockFramebuffer` of the file: a closure that returns the framebuffer with its properties, since Rust has no `out` parameter |
+| `IFramebufferPlatformSurface.cs` | `platform/surfaces/i_framebuffer_platform_surface.rs` | present | 5/5 | 10/10 | renamed: the nested delegate `FuncFramebufferRenderTarget.LockFramebufferDelegate` is the type alias `LockFramebuffer` of the file: a closure that returns the framebuffer with its properties, since Rust has no `out` parameter |
 | `IPlatformRenderSurface.cs` | `platform/surfaces/i_platform_render_surface.rs` | present | 2/2 | 2/2 |  |
 
 ### `Properties` - files 0/0, types 0/0, members 0/0
@@ -1516,17 +1516,17 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `AssemblyInfo.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 
-### `PropertyStore` - files 19/19, types 21/21, members 137/211 (74 waived)
+### `PropertyStore` - files 19/19, types 21/21, members 144/211 (67 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AvaloniaPropertyDictionaryPool.cs` | - | n/a | - | - | not-applicable: pool of the dictionaries that hold the old and new inherited values while the inheritance parent changes: `ValueStore::set_inheritance_parent` collects them in a local `Vec` |
-| `BindingEntryBase.cs` | `property_store/binding_entry.rs` | present | 1/1 | 16/22 (6 waived) | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
+| `BindingEntryBase.cs` | `property_store/binding_entry.rs` | present | 1/1 | 17/22 (5 waived) | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
 | `BindingEntryBaseNonGenericHelper.cs` | `property_store/binding_entry.rs` | present | 1/1 | 0/2 (2 waived) | replaced: the `Creating` and `CreatingQuiet` sentinel disposables are variants of the private `Subscription` enum of the binding entry |
 | `DirectBindingObserver.cs` | `property_store/local_value_binding_observer.rs` | present | 1/1 | 4/9 (5 waived) | merged: local-value and direct-property binding observers (typed and untyped) share one file |
 | `DirectUntypedBindingObserver.cs` | `property_store/local_value_binding_observer.rs` | present | 1/1 | 4/7 (3 waived) | merged: local-value and direct-property binding observers (typed and untyped) share one file |
-| `EffectiveValue.cs` | `property_store/effective_value.rs` | present | 1/1 | 20/24 (4 waived) |  |
-| `EffectiveValue`1.cs` | `property_store/effective_value.rs` | present | 1/1 | 14/15 (1 waived) | generic arity merged |
+| `EffectiveValue.cs` | `property_store/effective_value.rs` | present | 1/1 | 21/24 (3 waived) |  |
+| `EffectiveValue`1.cs` | `property_store/effective_value.rs` | present | 1/1 | 15/15 | generic arity merged |
 | `FramePriority.cs` | `property_store/frame_priority.rs` | present | 2/2 | 3/15 (12 waived) | renamed: the extension methods are inherent methods of FramePriority |
 | `IValueEntry.cs` | `property_store/value_entry.rs` | present | 1/1 | 6/6 | interface merged into implementation file |
 | `IValueEntry`1.cs` | `property_store/value_entry.rs` | present | 1/1 | 1/1 | generic arity merged; interface merged into implementation file |
@@ -1535,11 +1535,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `LocalValueBindingObserver.cs` | `property_store/local_value_binding_observer.rs` | present | 1/1 | 2/3 (1 waived) | merged: local-value and direct-property binding observers (typed and untyped) share one file |
 | `LocalValueBindingObserverBase.cs` | `property_store/local_value_binding_observer.rs` | present | 1/1 | 5/10 (5 waived) | merged: local-value and direct-property binding observers (typed and untyped) share one file |
 | `PropertyNotifying.cs` | `property_store/effective_value.rs` | present | 1/1 | 1/2 (1 waived) | replaced: the disposable scope that calls the `Notifying` callback of the property before and after a change notification is written out at its call sites (`EffectiveValue::notify_value_changed` and the two inherited-value notifications of `ValueStore`) |
-| `SourceUntypedBindingEntry.cs` | `property_store/binding_entry.rs` | present | 1/1 | 3/5 (2 waived) | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
-| `TypedBindingEntry.cs` | `property_store/binding_entry.rs` | present | 1/1 | 3/6 (3 waived) | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
+| `SourceUntypedBindingEntry.cs` | `property_store/binding_entry.rs` | present | 1/1 | 4/5 (1 waived) | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
+| `TypedBindingEntry.cs` | `property_store/binding_entry.rs` | present | 1/1 | 4/6 (2 waived) | merged: one generic BindingEntry&lt;T&gt; with a BindingSource enum replaces the base class and its typed/untyped subclasses |
 | `UntypedValueUtils.cs` | `styled_property.rs` | present | 1/1 | 0/1 (1 waived) | replaced: `StyledProperty::from_untyped` converts the untyped value and `BindingEntry::convert_and_validate` validates it |
 | `ValueFrame.cs` | `property_store/value_frame.rs` | present | 2/2 | 8/19 (11 waived) |  |
-| `ValueStore.cs` | `property_store/value_store.rs` | present | 1/1 | 36/47 (11 waived) |  |
+| `ValueStore.cs` | `property_store/value_store.rs` | present | 1/1 | 38/47 (9 waived) |  |
 
 ### `Reactive` - files 15/15, types 17/18 (1 waived), members 73/95 (22 waived)
 
@@ -1569,7 +1569,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Sink.cs` | `reactive/operators/sink.rs` | present | 3/3 | 10/16 (6 waived) |  |
 | `Switch.cs` | `reactive/operators/switch.rs` | present | 1/2 (1 waived) | 2/7 (5 waived) |  |
 
-### `Rendering` - files 21/21, types 23/25 (2 waived), members 92/99 (7 waived)
+### `Rendering` - files 21/21, types 23/25 (2 waived), members 93/99 (6 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1590,12 +1590,12 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `RendererDiagnostics.cs` | `rendering/renderer_diagnostics.rs` | present | 1/1 | 4/4 |  |
 | `SceneInvalidatedEventArgs.cs` | `rendering/scene_invalidated_event_args.rs` | present | 1/1 | 2/2 |  |
 | `SleepLoopRenderTimer.cs` | `rendering/sleep_loop_render_timer.rs` | present | 1/1 | 4/4 |  |
-| `SwapchainBase.cs` | `rendering/swapchain_base.rs` | present | 2/2 | 7/10 (3 waived) |  |
+| `SwapchainBase.cs` | `rendering/swapchain_base.rs` | present | 2/2 | 8/10 (2 waived) |  |
 | `ThreadProxyRenderTimer.cs` | `rendering/thread_proxy_render_timer.rs` | present | 1/1 | 3/3 |  |
 | `UiThreadRenderTimer.cs` | `rendering/ui_thread_render_timer.rs` | present | 1/1 | 3/3 |  |
 | `ZIndexComparer.cs` | `rendering/z_index_comparer.rs` | present | 1/1 | 1/3 (2 waived) |  |
 
-### `Rendering/Composition` - files 26/26, types 41/41, members 250/274 (24 waived)
+### `Rendering/Composition` - files 26/26, types 41/41, members 253/274 (21 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1616,7 +1616,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `CompositionTransform.cs` | `rendering/composition/server/server_composition_simple_transform.rs` | present | 1/1 | 0/0 | merged: the file only adds `ITransform` to the generated `ServerCompositionSimpleTransform`, which is implemented next to the class |
 | `CompositionTransparencyLevel.cs` | `rendering/composition/composition_transparency_level.rs` | present | 1/1 | 5/5 |  |
 | `Compositor.Factories.cs` | `rendering/composition/compositor_factories.rs` | present | 1/1 | 17/17 |  |
-| `Compositor.cs` | `rendering/composition/compositor.rs` | present | 2/2 | 21/26 (5 waived) |  |
+| `Compositor.cs` | `rendering/composition/compositor.rs` | present | 2/2 | 24/26 (2 waived) |  |
 | `ContainerVisual.cs` | `rendering/composition/container_visual.rs`, `rendering/composition/visual.rs` | present | 1/1 | 7/8 (1 waived) | merged: every visual has children, so `CompositionContainerVisual` is an alias of `CompositionVisual` and its members are members of that class |
 | `ElementCompositionPreview.cs` | `rendering/composition/element_composition_preview.rs` | present | 1/1 | 3/3 |  |
 | `Enums.cs` | `rendering/composition/enums.rs` | present | 4/4 | 41/41 |  |
@@ -1626,7 +1626,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Visual.cs` | `rendering/composition/visual.rs` | present | 1/1 | 7/8 (1 waived) |  |
 | `VisualCollection.cs` | `rendering/composition/visual_collection.rs` | present | 1/1 | 6/6 |  |
 
-### `Rendering/Composition/Animations` - files 13/13, types 32/32, members 115/137 (22 waived)
+### `Rendering/Composition/Animations` - files 13/13, types 32/32, members 116/137 (21 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1637,24 +1637,24 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ExpressionAnimationInstance.cs` | `rendering/composition/animations/expression_animation_instance.rs` | present | 1/1 | 3/3 |  |
 | `IAnimationInstance.cs` | `rendering/composition/animations/i_animation_instance.rs` | present | 1/1 | 6/6 |  |
 | `ICompositionAnimationBase.cs` | `rendering/composition/animations/i_composition_animation_base.rs` | present | 1/1 | 0/1 (1 waived) |  |
-| `ImplicitAnimationCollection.cs` | `rendering/composition/animations/implicit_animation_collection.rs` | present | 1/1 | 19/22 (3 waived) |  |
+| `ImplicitAnimationCollection.cs` | `rendering/composition/animations/implicit_animation_collection.rs` | present | 1/1 | 20/22 (2 waived) |  |
 | `Interpolators.cs` | `rendering/composition/animations/interpolators.rs` | present | 13/13 | 14/26 (12 waived) |  |
 | `KeyFrameAnimation.cs` | `rendering/composition/animations/key_frame_animation.rs` | present | 4/4 | 17/17 |  |
 | `KeyFrameAnimationInstance.cs` | `rendering/composition/animations/key_frame_animation_instance.rs` | present | 1/1 | 5/5 |  |
 | `KeyFrames.cs` | `rendering/composition/animations/key_frames.rs` | present | 4/4 | 12/12 |  |
 | `PropertySetSnapshot.cs` | `rendering/composition/animations/property_set_snapshot.rs` | present | 2/2 | 8/8 |  |
 
-### `Rendering/Composition/Brushes` - files 5/5, types 5/20 (15 waived), members 14/32 (18 waived)
+### `Rendering/Composition/Brushes` - files 5/5, types 5/20 (15 waived), members 15/32 (17 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `CompositionBrush.cs` | `rendering/composition/brushes/composition_brush.rs` | present | 3/6 (3 waived) | 5/8 (3 waived) |  |
-| `ServerCompositionBrush.cs` | `rendering/composition/brushes/server_composition_brush.rs` | present | 1/6 (5 waived) | 5/9 (4 waived) |  |
+| `ServerCompositionBrush.cs` | `rendering/composition/brushes/server_composition_brush.rs` | present | 1/6 (5 waived) | 6/9 (3 waived) |  |
 | `ServerSimpleCompositionBrush.cs` | `rendering/composition/server/server_composition_simple_brush.rs` | present | 1/6 (5 waived) | 4/6 (2 waived) | merged: the hand-written parts of the generated mutable brushes are next to the classes |
 | `ServerSimpleContentBrush.cs` | `rendering/composition/brushes/server_simple_content_brush.rs` | present | 0/1 (1 waived) | 0/4 (4 waived) |  |
 | `ServerSimpleImageBrush.cs` | `rendering/composition/brushes/server_simple_image_brush.rs` | present | 0/1 (1 waived) | 0/5 (5 waived) |  |
 
-### `Rendering/Composition/Drawing` - files 21/21, types 44/45 (1 waived), members 280/302 (22 waived)
+### `Rendering/Composition/Drawing` - files 21/21, types 45/45, members 286/302 (16 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1671,27 +1671,27 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `RenderDataReader.cs` | `rendering/composition/drawing/render_data_reader.rs` | present | 1/1 | 7/7 |  |
 | `RenderDataResources.cs` | `rendering/composition/drawing/render_data_resources.rs` | present | 1/1 | 6/6 |  |
 | `RenderDataStream.Bounds.cs` | `rendering/composition/drawing/render_data_stream_bounds.rs` | present | 3/3 | 23/23 |  |
-| `RenderDataStream.HitTest.cs` | `rendering/composition/drawing/render_data_stream_hit_test.rs` | present | 3/3 | 28/30 (2 waived) |  |
+| `RenderDataStream.HitTest.cs` | `rendering/composition/drawing/render_data_stream_hit_test.rs` | present | 3/3 | 30/30 |  |
 | `RenderDataStream.Replay.cs` | `rendering/composition/drawing/render_data_stream_replay.rs` | present | 3/3 | 22/22 |  |
 | `RenderDataStream.Visit.cs` | `rendering/composition/drawing/render_data_stream.rs` | present | 1/1 | 1/1 | partial merged into main file |
 | `RenderDataStream.cs` | `rendering/composition/drawing/render_data_stream.rs` | present | 1/1 | 26/26 |  |
 | `RenderDataWriter.cs` | `rendering/composition/drawing/render_data_writer.rs` | present | 1/1 | 8/8 |  |
 | `ServerCompositionRenderData.cs` | `rendering/composition/drawing/server_composition_render_data.rs` | present | 1/1 | 8/8 |  |
 | `ServerCompositionSimplePen.cs` | `rendering/composition/drawing/server_composition_simple_pen.rs` | present | 1/1 | 2/2 |  |
-| `ServerResourceHelperExtensions.cs` | `rendering/composition/drawing/server_resource_helper_extensions.rs` | present | 0/1 (1 waived) | 0/4 (4 waived) |  |
+| `ServerResourceHelperExtensions.cs` | `rendering/composition/drawing/server_resource_helper_extensions.rs` | present | 1/1 | 4/4 |  |
 
-### `Rendering/Composition/Expressions` - files 9/9, types 25/26 (1 waived), members 162/210 (48 waived)
+### `Rendering/Composition/Expressions` - files 9/9, types 25/26 (1 waived), members 166/210 (44 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `BuiltInExpressionFfi.cs` | `rendering/composition/expressions/built_in_expression_ffi.rs` | present | 1/1 | 2/2 |  |
 | `DelegateExpressionFfi.cs` | `rendering/composition/expressions/delegate_expression_ffi.rs` | present | 1/1 | 2/10 (8 waived) |  |
-| `Expression.cs` | `rendering/composition/expressions/expression.rs` | present | 12/13 (1 waived) | 74/94 (20 waived) |  |
+| `Expression.cs` | `rendering/composition/expressions/expression.rs` | present | 12/13 (1 waived) | 77/94 (17 waived) |  |
 | `ExpressionEvaluationContext.cs` | `rendering/composition/expressions/expression_evaluation_context.rs` | present | 4/4 | 10/10 |  |
 | `ExpressionParseException.cs` | `rendering/composition/expressions/expression_parse_exception.rs` | present | 1/1 | 2/2 |  |
 | `ExpressionParser.cs` | `rendering/composition/expressions/expression_parser.rs` | present | 1/1 | 1/1 |  |
 | `ExpressionTrackedValues.cs` | `rendering/composition/expressions/expression_tracked_values.rs` | present | 2/2 | 8/8 |  |
-| `ExpressionVariant.cs` | `rendering/composition/expressions/expression_variant.rs` | present | 2/2 | 45/65 (20 waived) |  |
+| `ExpressionVariant.cs` | `rendering/composition/expressions/expression_variant.rs` | present | 2/2 | 46/65 (19 waived) |  |
 | `TokenParser.cs` | `rendering/composition/expressions/token_parser.rs` | present | 1/1 | 18/18 |  |
 
 ### `Rendering/Composition/HitTesting` - files 4/4, types 4/4, members 22/22
@@ -1791,16 +1791,16 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `TileBrushCalculator.cs` | `rendering/utilities/tile_brush_calculator.rs` | present | 1/1 | 12/12 |  |
 
-### `Styling` - files 45/45, types 47/47, members 294/329 (35 waived)
+### `Styling` - files 45/45, types 47/47, members 304/329 (25 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AndQuery.cs` | `styling/and_query.rs` | present | 1/1 | 6/6 |  |
 | `ChildSelector.cs` | `styling/child_selector.rs` | present | 1/1 | 8/8 |  |
 | `Container.cs` | `styling/container.rs` | present | 1/1 | 8/8 |  |
-| `ContainerQuery.cs` | `styling/container_query.rs` | present | 1/1 | 5/7 (2 waived) |  |
+| `ContainerQuery.cs` | `styling/container_query.rs` | present | 1/1 | 7/7 |  |
 | `ContainerSizing.cs` | `styling/container_sizing.rs` | present | 1/1 | 4/4 |  |
-| `ControlTheme.cs` | `styling/control_theme.rs` | present | 1/1 | 5/7 (2 waived) |  |
+| `ControlTheme.cs` | `styling/control_theme.rs` | present | 1/1 | 7/7 |  |
 | `DescendentSelector.cs` | `styling/descendent_selector.rs` | present | 1/1 | 8/8 |  |
 | `DirectPropertySetterBindingInstance.cs` | `styling/direct_property_setter_binding_instance.rs` | present | 1/1 | 0/0 |  |
 | `DirectPropertySetterInstance.cs` | `styling/direct_property_setter_instance.rs` | present | 1/1 | 0/0 |  |
@@ -1815,7 +1815,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IThemeVariantRoot.cs` | `styling/i_theme_variant_root.rs` | present | 1/1 | 1/1 |  |
 | `NestingSelector.cs` | `styling/nesting_selector.rs` | present | 1/1 | 7/7 |  |
 | `NotSelector.cs` | `styling/not_selector.rs` | present | 1/1 | 8/8 |  |
-| `NthChildSelector.cs` | `styling/nth_child_selector.rs` | present | 1/1 | 11/12 (1 waived) |  |
+| `NthChildSelector.cs` | `styling/nth_child_selector.rs` | present | 1/1 | 12/12 |  |
 | `NthLastChildSelector.cs` | `styling/nth_last_child_selector.rs` | present | 1/1 | 1/1 |  |
 | `OrQuery.cs` | `styling/or_query.rs` | present | 1/1 | 6/6 |  |
 | `OrSelector.cs` | `styling/or_selector.rs` | present | 1/1 | 10/10 |  |
@@ -1824,18 +1824,18 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PropertySetterTemplateInstance.cs` | `styling/property_setter_template_instance.rs` | present | 1/1 | 5/6 (1 waived) |  |
 | `ScreenQueries.cs` | `styling/screen_queries.rs` | present | 2/2 | 8/10 (2 waived) |  |
 | `Selector.cs` | `styling/selector.rs` | present | 1/1 | 11/11 |  |
-| `SelectorMatch.cs` | `styling/selector_match.rs` | present | 2/2 | 15/16 (1 waived) |  |
+| `SelectorMatch.cs` | `styling/selector_match.rs` | present | 2/2 | 16/16 |  |
 | `Selectors.cs` | `styling/selectors.rs` | present | 1/1 | 17/18 (1 waived) |  |
-| `Setter.cs` | `styling/setter.rs` | present | 1/1 | 9/11 (2 waived) |  |
+| `Setter.cs` | `styling/setter.rs` | present | 1/1 | 10/11 (1 waived) |  |
 | `SetterBase.cs` | `styling/setter_base.rs` | present | 1/1 | 1/1 |  |
-| `Style.cs` | `styling/style.rs` | present | 1/1 | 4/6 (2 waived) |  |
+| `Style.cs` | `styling/style.rs` | present | 1/1 | 6/6 |  |
 | `StyleBase.cs` | `styling/style_base.rs` | present | 1/1 | 18/19 (1 waived) |  |
 | `StyleChildren.cs` | `styling/style_children.rs` | present | 1/1 | 1/4 (3 waived) |  |
 | `StyleInstance.cs` | `styling/style_instance.rs` | present | 1/1 | 11/11 |  |
 | `StyleQueries.cs` | `styling/style_queries.rs` | present | 1/1 | 4/6 (2 waived) |  |
 | `StyleQuery.cs` | `styling/style_query.rs` | present | 1/1 | 8/8 |  |
 | `StyleQueryComparisonOperator.cs` | `styling/style_query_comparison_operator.rs` | present | 1/1 | 6/6 |  |
-| `Styles.cs` | `styling/styles.rs` | present | 1/1 | 26/34 (8 waived) |  |
+| `Styles.cs` | `styling/styles.rs` | present | 1/1 | 27/34 (7 waived) |  |
 | `TemplateSelector.cs` | `styling/template_selector.rs` | present | 1/1 | 8/8 |  |
 | `ThemeVariant.cs` | `styling/theme_variant.rs` | present | 1/1 | 14/15 (1 waived) |  |
 | `ThemeVariantTypeConverter.cs` | `styling/theme_variant.rs` | present | 1/1 | 0/2 (2 waived) | replaced: a TypeConverter that only converts from text: `FromStr for ThemeVariant`, which the markup metadata of the type names as its `parse` (porting guide, Text conversion) |
@@ -1864,11 +1864,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `StyleActivatorBase.cs` | `styling/activators/style_activator_base.rs` | present | 1/1 | 4/9 (5 waived) |  |
 | `StyleClassActivator.cs` | `styling/activators/style_class_activator.rs` | present | 1/1 | 5/6 (1 waived) |  |
 
-### `Threading` - files 21/21, types 33/36 (3 waived), members 205/263 (58 waived)
+### `Threading` - files 21/21, types 33/36 (3 waived), members 214/263 (49 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaSynchronizationContext.cs` | `threading/ferro_synchronization_context.rs` | present | 2/2 | 11/15 (4 waived) |  |
+| `AvaloniaSynchronizationContext.cs` | `threading/ferro_synchronization_context.rs` | present | 2/2 | 13/15 (2 waived) |  |
 | `CulturePreservingExecutionContext.cs` | - | n/a | - | - | not-applicable: wraps the .NET ExecutionContext so that a culture set by a dispatcher callback survives it: there is no execution context and no thread culture to flow; `OperationCore::execute` runs the callback directly |
 | `Dispatcher.Exceptions.cs` | `threading/dispatcher_exceptions.rs` | present | 1/1 | 5/6 (1 waived) |  |
 | `Dispatcher.Invoke.cs` | `threading/dispatcher_invoke.rs` | present | 1/1 | 27/28 (1 waived) |  |
@@ -1878,13 +1878,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Dispatcher.Timers.cs` | `threading/dispatcher_timers.rs` | present | 1/1 | 6/6 |  |
 | `Dispatcher.cs` | `threading/dispatcher.rs` | present | 1/1 | 9/11 (2 waived) |  |
 | `DispatcherEventArgs.cs` | `threading/dispatcher_event_args.rs` | present | 1/1 | 1/2 (1 waived) |  |
-| `DispatcherFrame.cs` | `threading/dispatcher_frame.rs` | present | 1/1 | 5/7 (2 waived) |  |
+| `DispatcherFrame.cs` | `threading/dispatcher_frame.rs` | present | 1/1 | 7/7 |  |
 | `DispatcherOperation.cs` | `threading/dispatcher_operation.rs` | present | 3/4 (1 waived) | 16/42 (26 waived) |  |
 | `DispatcherOptions.cs` | `threading/dispatcher_options.rs` | present | 1/1 | 1/1 |  |
 | `DispatcherPriority.cs` | `threading/dispatcher_priority.rs` | present | 1/1 | 37/37 |  |
 | `DispatcherPriorityAwaitable.cs` | `threading/dispatcher_priority_awaitable.rs` | present | 2/4 (2 waived) | 2/12 (10 waived) |  |
 | `DispatcherPriorityQueue.cs` | `threading/dispatcher_priority_queue.rs` | present | 2/2 | 15/16 (1 waived) |  |
-| `DispatcherTimer.cs` | `threading/dispatcher_timer.rs` | present | 1/1 | 13/18 (5 waived) |  |
+| `DispatcherTimer.cs` | `threading/dispatcher_timer.rs` | present | 1/1 | 18/18 |  |
 | `DispatcherUnhandledExceptionEventArgs.cs` | `threading/dispatcher_unhandled_exception_event_args.rs` | present | 2/2 | 3/4 (1 waived) |  |
 | `DispatcherUnhandledExceptionFilterEventArgs.cs` | `threading/dispatcher_unhandled_exception_filter_event_args.rs` | present | 2/2 | 3/4 (1 waived) |  |
 | `IDispatcher.cs` | `threading/i_dispatcher.rs` | present | 1/1 | 3/3 |  |
@@ -1892,7 +1892,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `NonPumpingSyncContext.cs` | - | n/a | - | - | not-applicable: a .NET SynchronizationContext that redirects the wait of the runtime to `NonPumpingLockHelper.IHelperImpl` (only the Win32 backend binds one, for COM STA threads): blocking primitives never run a message pump here, see the type comment of `FerroSynchronizationContext` |
 | `ThreadSafeObjectPool.cs` | `threading/thread_safe_object_pool.rs` | present | 1/1 | 3/3 |  |
 
-### `Utilities` - files 39/39, types 50/56 (6 waived), members 276/332 (56 waived)
+### `Utilities` - files 39/39, types 50/56 (6 waived), members 280/332 (52 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1925,9 +1925,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `SafeEnumerableHashSet.cs` | `utilities/handler_list.rs` | present | 1/2 (1 waived) | 2/13 (11 waived) | replaced: its one user is the listener set of Classes; the listeners of the port are closures in a HandlerList, which is invoked on a snapshot that is copied only when the list changes. HandlerList itself has no upstream file: it is the storage of the handlers of a C# `event` (multicast delegates have no Rust equivalent; porting guide, Types table) |
 | `SingleOrQueue.cs` | `utilities/single_or_queue.rs` | present | 1/1 | 3/3 |  |
 | `SmallDictionary.cs` | `utilities/small_dictionary.rs` | present | 2/2 | 20/20 |  |
-| `Span.cs` | `utilities/span.rs` | present | 6/6 | 30/31 (1 waived) |  |
+| `Span.cs` | `utilities/span.rs` | present | 6/6 | 31/31 |  |
 | `SpanHelpers.cs` | `utilities/span_helpers.rs` | present | 1/1 | 5/7 (2 waived) |  |
-| `SpanStringTokenizer.cs` | `utilities/span_string_tokenizer.rs` | present | 1/1 | 13/16 (3 waived) |  |
+| `SpanStringTokenizer.cs` | `utilities/span_string_tokenizer.rs` | present | 1/1 | 15/16 (1 waived) |  |
 | `SpringSolver.cs` | `utilities/spring_solver.rs` | present | 1/1 | 4/4 |  |
 | `StopwatchHelper.cs` | - | n/a | - | - | not-applicable: polyfill of Stopwatch.GetElapsedTime of .NET 7; the port reads no process clock in core paths (porting guide, rule 4): its callers take the time of the dispatcher (`Dispatcher::now`) |
 | `StringBuilderCache.cs` | - | n/a | - | - | not-applicable: per-thread cache of one StringBuilder, to save the builder object and its buffer when a string is built: a Rust `String` is its own builder and becomes the result without a copy, so no buffer is left to cache |
@@ -1941,7 +1941,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ValueSpan.cs` | `utilities/value_span.rs` | present | 1/1 | 4/4 |  |
 | `WeakEvent.cs` | `utilities/weak_event.rs` | present | 2/2 | 6/7 (1 waived) |  |
 | `WeakEventHandlerManager.cs` | `utilities/weak_event_handler_manager.rs` | present | 1/1 | 2/2 |  |
-| `WeakEvents.cs` | `utilities/weak_events.rs` | present | 1/1 | 3/4 (1 waived) |  |
+| `WeakEvents.cs` | `utilities/weak_events.rs` | present | 1/1 | 4/4 |  |
 | `WeakHashList.cs` | `utilities/weak_hash_list.rs` | present | 1/1 | 8/8 |  |
 
 ### `VisualTree` - files 5/5, types 5/5, members 44/45 (1 waived)

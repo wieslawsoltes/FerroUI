@@ -12,7 +12,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 2 - xaml + themes / P1 |
 | Files | 62/62 (100.0%), 26 not applicable |
 | Types | 172/177 (5 waived) (100.0%) |
-| Members | 713/878 (165 waived) (100.0%) |
+| Members | 722/878 (156 waived) (100.0%) |
 | Contracts (interfaces) | 47/48 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -87,15 +87,15 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Exceptions.cs` | `exceptions.rs` | present | 2/4 (2 waived) | 2/6 (4 waived) |  |
 | `XamlNamespaces.cs` | `xaml_namespaces.rs` | present | 1/1 | 2/2 |  |
 
-### `Ast` - files 7/7, types 59/60 (1 waived), members 203/269 (66 waived)
+### `Ast` - files 7/7, types 59/60 (1 waived), members 208/269 (61 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Clr.cs` | `ast/clr.rs` | present | 24/25 (1 waived) | 109/139 (30 waived) |  |
+| `Clr.cs` | `ast/clr.rs` | present | 24/25 (1 waived) | 113/139 (26 waived) |  |
 | `Common.cs` | `ast/common.rs` | present | 13/13 | 27/30 (3 waived) |  |
 | `CompilerHelpers.cs` | `ast/compiler_helpers.rs` | present | 8/8 | 17/31 (14 waived) |  |
 | `Intrinsics.cs` | `ast/intrinsics.rs` | present | 7/7 | 22/32 (10 waived) |  |
-| `Xaml.cs` | `ast/xaml.rs` | present | 5/5 | 20/26 (6 waived) |  |
+| `Xaml.cs` | `ast/xaml.rs` | present | 5/5 | 21/26 (5 waived) |  |
 | `XamlDocument.cs` | `ast/xaml_document.rs` | present | 1/1 | 3/3 |  |
 | `Xml.cs` | `ast/xml.rs` | present | 1/1 | 5/8 (3 waived) |  |
 
@@ -115,11 +115,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `XamlCompiler.cs` | `compiler/xaml_compiler.rs` | present | 1/1 | 9/9 |  |
 | `XamlImperativeCompiler.cs` | `compiler/xaml_imperative_compiler.rs` | present | 1/1 | 8/8 |  |
 
-### `Diagnostics` - files 4/4, types 4/4, members 17/24 (7 waived)
+### `Diagnostics` - files 4/4, types 4/4, members 18/24 (6 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ContextDiagnosticExtensions.cs` | `diagnostics/context_diagnostic_extensions.rs` | present | 1/1 | 1/7 (6 waived) |  |
+| `ContextDiagnosticExtensions.cs` | `diagnostics/context_diagnostic_extensions.rs` | present | 1/1 | 2/7 (5 waived) |  |
 | `TrimmingMessages.cs` | - | n/a | - | - | not-applicable: justification texts of the trimming attributes of the managed compiler: no trimming attributes |
 | `XamlDiagnostic.cs` | `diagnostics/xaml_diagnostic.rs` | present | 1/1 | 11/12 (1 waived) |  |
 | `XamlDiagnosticSeverity.cs` | `diagnostics/xaml_diagnostic_severity.rs` | present | 1/1 | 4/4 |  |
@@ -188,7 +188,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `MeScanner.cs` | `parsers/system_xaml_markup_extension_parser/me_scanner.rs` | present | 2/2 | 29/29 |  |
 | `SystemXamlMarkupExtensionParser.cs` | `parsers/system_xaml_markup_extension_parser/system_xaml_markup_extension_parser.rs` | present | 1/1 | 1/1 |  |
 
-### `Transform` - files 11/11, types 16/16, members 95/98 (3 waived)
+### `Transform` - files 11/11, types 16/16, members 97/98 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -196,7 +196,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IXamlAstTransformer.cs` | `transform/i_xaml_ast_transformer.rs` | present | 1/1 | 1/1 |  |
 | `IXamlIdentifierGenerator.cs` | `transform/i_xaml_identifier_generator.rs` | present | 2/2 | 2/2 |  |
 | `NamespaceInfoHelper.cs` | `transform/namespace_info_helper.rs` | present | 2/2 | 5/5 |  |
-| `TransformerConfiguration.cs` | `transform/transformer_configuration.rs` | present | 2/2 | 18/20 (2 waived) |  |
+| `TransformerConfiguration.cs` | `transform/transformer_configuration.rs` | present | 2/2 | 20/20 |  |
 | `WhitespaceNormalization.cs` | `transform/whitespace_normalization.rs` | present | 1/1 | 4/4 |  |
 | `XamlContextBase.cs` | `transform/xaml_context_base.rs` | present | 1/1 | 7/7 |  |
 | `XamlDiagnosticsHandler.cs` | `transform/xaml_diagnostics_handler.rs` | present | 1/1 | 4/4 |  |
@@ -229,11 +229,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `XArgumentsTransformer.cs` | `transform/transformers/x_arguments_transformer.rs` | present | 1/1 | 1/1 |  |
 | `XamlIntrinsicsTransformer.cs` | `transform/transformers/xaml_intrinsics_transformer.rs` | present | 1/1 | 1/1 |  |
 
-### `TypeSystem` - files 4/4, types 28/28, members 186/212 (26 waived)
+### `TypeSystem` - files 4/4, types 28/28, members 187/212 (25 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `TypeSystem.cs` | `type_system/type_system.rs` | present | 24/24 | 140/165 (25 waived) |  |
+| `TypeSystem.cs` | `type_system/type_system.rs` | present | 24/24 | 141/165 (24 waived) |  |
 | `TypeSystemHelpers.cs` | `type_system/type_system_helpers.rs` | present | 1/1 | 7/7 |  |
 | `XamlLocalsPool.cs` | `type_system/xaml_locals_pool.rs` | present | 2/2 | 4/5 (1 waived) |  |
 | `XamlTypeWellKnownTypes.cs` | `type_system/xaml_type_well_known_types.rs` | present | 1/1 | 35/35 |  |

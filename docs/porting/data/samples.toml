@@ -1,0 +1,120 @@
+# The upstream samples and where each is ported. Read by scripts/port-status/port_status.py for
+# docs/porting/REMAINING.md. Regenerate after editing: scripts/port-status/run.sh
+#
+# [[sample]]
+#   upstream = directory of the sample in the upstream checkout
+#   rust     = directory of its port in this repository; the sample counts as ported when it exists.
+#              Omit it for a sample that is not ported.
+#   state    = for a sample without `rust`: "not ported" (the default) or "not applicable"
+#   note     = shown in the table
+#
+# A sample of upstream that has no entry is reported as not ported and not listed.
+
+[[sample]]
+upstream = "samples/ControlCatalog"
+rust = "samples/ControlCatalog"
+note = "the pages and what a page still lacks: samples/ControlCatalog/GAPS.md"
+
+[[sample]]
+upstream = "samples/ControlCatalog.Desktop"
+rust = "samples/ControlCatalog.Desktop"
+
+[[sample]]
+upstream = "samples/ControlCatalog.Browser"
+rust = "samples/ControlCatalog.Browser"
+
+[[sample]]
+upstream = "samples/MiniMvvm"
+rust = "samples/MiniMvvm"
+note = "the view model library of the catalog"
+
+[[sample]]
+upstream = "samples/RenderDemo"
+rust = "samples/RenderDemo"
+
+[[sample]]
+upstream = "samples/BindingDemo"
+rust = "samples/BindingDemo"
+
+[[sample]]
+upstream = "samples/VirtualizationDemo"
+rust = "samples/VirtualizationDemo"
+
+[[sample]]
+upstream = "samples/TextTestApp"
+rust = "samples/TextTestApp"
+
+[[sample]]
+upstream = "samples/Sandbox"
+rust = "samples/Sandbox"
+
+[[sample]]
+upstream = "samples/AppWithoutLifetime"
+rust = "samples/AppWithoutLifetime"
+
+[[sample]]
+upstream = "samples/IntegrationTestApp"
+rust = "samples/IntegrationTestApp"
+note = "the application the integration tests drive"
+
+[[sample]]
+upstream = "samples/SampleControls"
+rust = "samples/SampleControls"
+note = "the controls the samples share"
+
+[[sample]]
+upstream = "samples/ControlCatalog.Android"
+rust = "samples/ControlCatalog.Android"
+note = "the head of the catalog for Avalonia.Android"
+
+[[sample]]
+upstream = "samples/ControlCatalog.iOS"
+rust = "samples/ControlCatalog.iOS"
+note = "the head of the catalog for Avalonia.iOS"
+
+[[sample]]
+upstream = "samples/ControlCatalog.MacCatalyst"
+note = "the head of the catalog for Mac Catalyst (Avalonia.iOS); no C# sources of its own"
+
+[[sample]]
+upstream = "samples/ControlCatalog.tvOS"
+note = "the head of the catalog for tvOS (Avalonia.iOS); no C# sources of its own"
+
+[[sample]]
+upstream = "samples/ControlGallery.WinUI"
+note = "needs Avalonia.WinUI, which is out of scope"
+
+[[sample]]
+upstream = "samples/WinUIEmbedSample"
+note = "needs Avalonia.WinUI, which is out of scope"
+
+[[sample]]
+upstream = "samples/interop/WindowsInteropTest"
+note = "needs Avalonia.Win32.Interoperability (hosting in WinForms and WPF), which is out of scope"
+
+[[sample]]
+upstream = "samples/XEmbedSample"
+note = "embedding through XEmbed of the X11 backend"
+
+[[sample]]
+upstream = "samples/SafeAreaDemo.Android"
+note = "the head of the safe area demo for Avalonia.Android, which is out of scope"
+
+[[sample]]
+upstream = "samples/SafeAreaDemo.iOS"
+note = "the head of the safe area demo for Avalonia.iOS"
+
+[[sample]]
+upstream = "samples/Generators.Sandbox"
+state = "not applicable"
+note = "exercises the source generators of tools/Avalonia.Generators, which the port replaces (docs/porting/xaml.md 3.8)"
+
+[[sample]]
+upstream = "samples/UnloadableAssemblyLoadContext/UnloadableAssemblyLoadContext"
+state = "not applicable"
+note = "unloading of a collectible AssemblyLoadContext of the .NET runtime"
+
+[[sample]]
+upstream = "samples/UnloadableAssemblyLoadContext/UnloadableAssemblyLoadContextPlug"
+state = "not applicable"
+note = "the plug-in assembly of the sample above"

@@ -12,7 +12,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 2 - xaml + themes / P1 |
 | Files | 46/46 (100.0%), 2 not applicable |
 | Types | 61/63 (2 waived) (100.0%) |
-| Members | 199/239 (40 waived) (100.0%) |
+| Members | 208/239 (31 waived) (100.0%) |
 | Contracts (interfaces) | 9/9 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -73,25 +73,25 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `XamlSourceInfo.cs` | `diagnostics/xaml_source_info.rs` | present | 1/1 | 9/9 |  |
 
-### `MarkupExtensions` - files 9/9, types 14/14, members 40/57 (17 waived)
+### `MarkupExtensions` - files 9/9, types 14/14, members 45/57 (12 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `CompiledBindingExtension.cs` | `markup_extensions/compiled_binding_extension.rs` | present | 1/1 | 3/4 (1 waived) |  |
-| `DynamicResourceExtension.cs` | `markup_extensions/dynamic_resource_extension.rs` | present | 1/1 | 4/5 (1 waived) |  |
+| `CompiledBindingExtension.cs` | `markup_extensions/compiled_binding_extension.rs` | present | 1/1 | 4/4 |  |
+| `DynamicResourceExtension.cs` | `markup_extensions/dynamic_resource_extension.rs` | present | 1/1 | 5/5 |  |
 | `On.cs` | `markup_extensions/on.rs` | present | 2/2 | 2/2 |  |
 | `OnFormFactorExtension.cs` | `markup_extensions/on_form_factor_extension.rs` | present | 3/3 | 6/12 (6 waived) |  |
 | `OnPlatformExtension.cs` | `markup_extensions/on_platform_extension.rs` | present | 3/3 | 10/16 (6 waived) |  |
-| `ReflectionBindingExtension.cs` | `markup_extensions/reflection_binding_extension.rs` | present | 1/1 | 2/3 (1 waived) |  |
-| `RelativeSourceExtension.cs` | `markup_extensions/relative_source_extension.rs` | present | 1/1 | 6/7 (1 waived) |  |
+| `ReflectionBindingExtension.cs` | `markup_extensions/reflection_binding_extension.rs` | present | 1/1 | 3/3 |  |
+| `RelativeSourceExtension.cs` | `markup_extensions/relative_source_extension.rs` | present | 1/1 | 7/7 |  |
 | `ResolveByNameExtension.cs` | `markup_extensions/resolve_by_name_extension.rs` | present | 1/1 | 3/3 |  |
-| `StaticResourceExtension.cs` | `markup_extensions/static_resource_extension.rs` | present | 1/1 | 4/5 (1 waived) |  |
+| `StaticResourceExtension.cs` | `markup_extensions/static_resource_extension.rs` | present | 1/1 | 5/5 |  |
 
-### `MarkupExtensions/CompiledBindings` - files 2/2, types 4/5 (1 waived), members 13/26 (13 waived)
+### `MarkupExtensions/CompiledBindings` - files 2/2, types 4/5 (1 waived), members 14/26 (12 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `PropertyInfoAccessorFactory.cs` | `markup_extensions/compiled_bindings/property_info_accessor_factory.rs` | present | 3/4 (1 waived) | 11/24 (13 waived) |  |
+| `PropertyInfoAccessorFactory.cs` | `markup_extensions/compiled_bindings/property_info_accessor_factory.rs` | present | 3/4 (1 waived) | 12/24 (12 waived) |  |
 | `TaskStreamPlugin.cs` | `markup_extensions/compiled_bindings/task_stream_plugin.rs` | present | 1/1 | 2/2 |  |
 
 ### `Parsers` - files 1/1, types 0/1 (1 waived), members 0/2 (2 waived)
@@ -112,13 +112,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `AssemblyInfo.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 
-### `Styling` - files 3/3, types 3/3, members 21/24 (3 waived)
+### `Styling` - files 3/3, types 3/3, members 24/24
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `MergeResourceInclude.cs` | `styling/merge_resource_include.rs` | present | 1/1 | 1/2 (1 waived) |  |
-| `ResourceInclude.cs` | `styling/resource_include.rs` | present | 1/1 | 10/11 (1 waived) |  |
-| `StyleInclude.cs` | `styling/style_include.rs` | present | 1/1 | 10/11 (1 waived) |  |
+| `MergeResourceInclude.cs` | `styling/merge_resource_include.rs` | present | 1/1 | 2/2 |  |
+| `ResourceInclude.cs` | `styling/resource_include.rs` | present | 1/1 | 11/11 |  |
+| `StyleInclude.cs` | `styling/style_include.rs` | present | 1/1 | 11/11 |  |
 
 ### `Templates` - files 8/8, types 8/8, members 25/25
 

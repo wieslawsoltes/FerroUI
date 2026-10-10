@@ -12,7 +12,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 1 - controls / P0 |
 | Files | 538/538 (100.0%), 1 not applicable |
 | Types | 621/628 (7 waived) (100.0%) |
-| Members | 6214/6405 (189 waived) (100.0%) |
+| Members | 6255/6405 (148 waived) (100.0%) |
 | Contracts (interfaces) | 83/83 |
 | Property registrations | 938/938 |
 | Routed events | 67/67 |
@@ -43,7 +43,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Controls.ApplicationLifetimes.ISingleViewApplicationLifetime` | public | `ApplicationLifetimes/ISingleViewApplicationLifetime.cs` | 1/1 | present |
 | `Avalonia.Controls.Chrome.IWindowDrawnDecorationsTemplate` | public | `Chrome/IWindowDrawnDecorationsTemplate.cs` | 1/1 | present |
 | `Avalonia.Controls.Diagnostics.IPopupHostProvider` | internal | `Diagnostics/IPopupHostProvider.cs` | 2/2 | present |
-| `Avalonia.Controls.Documents.IInlineHost` | internal | `Documents/IInlineHost.cs` | 1/2 (1 waived) | present |
+| `Avalonia.Controls.Documents.IInlineHost` | internal | `Documents/IInlineHost.cs` | 2/2 | present |
 | `Avalonia.Controls.ICommandBarElement` | public | `CommandBar/ICommandBarElement.cs` | 2/2 | present |
 | `Avalonia.Controls.IContentControl` | internal | `IContentControl.cs` | 4/4 | present |
 | `Avalonia.Controls.IGlobalDataTemplates` | public | `IGlobalDataTemplates.cs` | 0/0 | present |
@@ -109,7 +109,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 147/147, types 175/178 (3 waived), members 2212/2293 (81 waived)
+### `(project root)` - files 147/147, types 175/178 (3 waived), members 2231/2293 (62 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -123,7 +123,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Canvas.cs` | `canvas.rs` | present | 1/1 | 17/17 |  |
 | `Carousel.cs` | `carousel.rs` | present | 1/1 | 17/17 |  |
 | `CheckBox.cs` | `check_box.rs` | present | 1/1 | 1/1 |  |
-| `ColumnDefinition.cs` | `column_definition.rs` | present | 1/1 | 12/14 (2 waived) |  |
+| `ColumnDefinition.cs` | `column_definition.rs` | present | 1/1 | 14/14 |  |
 | `ColumnDefinitions.cs` | `column_definitions.rs` | present | 1/1 | 4/4 |  |
 | `ComboBox.cs` | `combo_box.rs` | present | 1/1 | 41/41 |  |
 | `ComboBoxItem.cs` | `combo_box_item.rs` | present | 1/1 | 2/2 |  |
@@ -131,7 +131,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ContainerIndexChangedEventArgs.cs` | `container_index_changed_event_args.rs` | present | 1/1 | 4/4 |  |
 | `ContainerPreparedEventArgs.cs` | `container_prepared_event_args.rs` | present | 1/1 | 3/3 |  |
 | `ContentControl.cs` | `content_control.rs` | present | 1/1 | 16/16 |  |
-| `ContextMenu.cs` | `context_menu.rs` | present | 1/1 | 31/32 (1 waived) |  |
+| `ContextMenu.cs` | `context_menu.rs` | present | 1/1 | 32/32 |  |
 | `Control.cs` | `control.rs` | present | 1/1 | 39/39 |  |
 | `ControlExtensions.cs` | `control_extensions.rs` | present | 1/1 | 5/5 | renamed: an extension class: its methods are inherent methods of the type they extend (`impl Control`) |
 | `Controls.cs` | `controls.rs` | present | 1/1 | 2/3 (1 waived) |  |
@@ -174,9 +174,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ListBox.cs` | `list_box.rs` | present | 1/1 | 13/16 (3 waived) |  |
 | `ListBoxItem.cs` | `list_box_item.rs` | present | 1/1 | 8/8 |  |
 | `LoggingExtensions.cs` | `logging_extensions.rs` | present | 1/1 | 3/3 | renamed: an extension class: its methods are inherent methods of the type they extend (`impl AppBuilder`) |
-| `MaskedTextBox.cs` | `masked_text_box.rs` | present | 1/1 | 28/29 (1 waived) |  |
-| `Menu.cs` | `menu.rs` | present | 1/1 | 7/8 (1 waived) |  |
-| `MenuBase.cs` | `menu_base.rs` | present | 1/1 | 18/23 (5 waived) |  |
+| `MaskedTextBox.cs` | `masked_text_box.rs` | present | 1/1 | 29/29 |  |
+| `Menu.cs` | `menu.rs` | present | 1/1 | 8/8 |  |
+| `MenuBase.cs` | `menu_base.rs` | present | 1/1 | 19/23 (4 waived) |  |
 | `MenuItem.cs` | `menu_item.rs` | present | 1/1 | 58/65 (7 waived) |  |
 | `MenuItemAccessKeyHandler.cs` | `menu_item_access_key_handler.rs` | present | 1/1 | 2/2 |  |
 | `MenuItemToggleType.cs` | `menu_item_toggle_type.rs` | present | 1/1 | 3/3 |  |
@@ -186,7 +186,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `NativeMenu.cs` | `native_menu.rs` | present | 1/1 | 11/14 (3 waived) |  |
 | `NativeMenuBar.cs` | `native_menu_bar.rs` | present | 1/1 | 5/5 |  |
 | `NativeMenuBarPresenter.cs` | `native_menu_bar_presenter.rs` | present | 1/1 | 3/3 |  |
-| `NativeMenuItem.cs` | `native_menu_item.rs` | present | 1/1 | 28/29 (1 waived) |  |
+| `NativeMenuItem.cs` | `native_menu_item.rs` | present | 1/1 | 29/29 |  |
 | `NativeMenuItemBase.cs` | `native_menu_item_base.rs` | present | 1/1 | 3/3 |  |
 | `NativeMenuItemSeparator.cs` | `native_menu_item_separator.rs` | present | 1/1 | 1/1 |  |
 | `Panel.cs` | `panel.rs` | present | 1/1 | 12/14 (2 waived) |  |
@@ -203,19 +203,19 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `RepeatButton.cs` | `repeat_button.rs` | present | 1/1 | 9/9 |  |
 | `RequestBringIntoViewEventArgs.cs` | `request_bring_into_view_event_args.rs` | present | 1/1 | 2/2 |  |
 | `ResolveByNameAttribute.cs` | `markup_types/classes.rs` | present | 0/1 (1 waived) | 0/0 | replaced: an attribute read by the markup compiler: a property states it in the `property_attributes` of its markup metadata (`metadata::attributes::RESOLVE_BY_NAME`) |
-| `RowDefinition.cs` | `row_definition.rs` | present | 1/1 | 12/14 (2 waived) |  |
+| `RowDefinition.cs` | `row_definition.rs` | present | 1/1 | 14/14 |  |
 | `RowDefinitions.cs` | `row_definitions.rs` | present | 1/1 | 4/4 |  |
 | `Screens.cs` | `screens.rs` | present | 1/1 | 11/11 |  |
-| `ScrollChangedEventArgs.cs` | `scroll_changed_event_args.rs` | present | 1/1 | 4/5 (1 waived) |  |
+| `ScrollChangedEventArgs.cs` | `scroll_changed_event_args.rs` | present | 1/1 | 5/5 |  |
 | `ScrollViewer.cs` | `scroll_viewer.rs` | present | 1/1 | 89/89 |  |
 | `SelectableTextBlock.cs` | `selectable_text_block.rs` | present | 1/1 | 27/27 |  |
 | `SelectionChangedEventArgs.cs` | `selection_changed_event_args.rs` | present | 1/1 | 3/3 |  |
 | `SelectionMode.cs` | `selection_mode.rs` | present | 1/1 | 4/4 |  |
 | `Separator.cs` | `separator.rs` | present | 1/1 | 0/0 |  |
 | `ShutdownMode.cs` | `shutdown_mode.rs` | present | 1/1 | 3/3 |  |
-| `SizeChangedEventArgs.cs` | `size_changed_event_args.rs` | present | 1/1 | 6/7 (1 waived) |  |
+| `SizeChangedEventArgs.cs` | `size_changed_event_args.rs` | present | 1/1 | 7/7 |  |
 | `Slider.cs` | `slider.rs` | present | 2/2 | 26/26 |  |
-| `Spinner.cs` | `spinner.rs` | present | 4/4 | 15/18 (3 waived) |  |
+| `Spinner.cs` | `spinner.rs` | present | 4/4 | 18/18 |  |
 | `StackPanel.cs` | `stack_panel.rs` | present | 1/1 | 20/20 |  |
 | `SystemFontAppBuilderExtension.cs` | `system_font_app_builder_extension.rs` | present | 1/1 | 1/1 | renamed: an extension class: its methods are inherent methods of the type they extend (`impl AppBuilder`) |
 | `TabControl.cs` | `tab_control.rs` | present | 1/1 | 33/33 |  |
@@ -228,14 +228,14 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TextBlock.cs` | `text_block.rs` | present | 3/3 | 80/82 (2 waived) |  |
 | `TextBox.cs` | `text_box.rs` | present | 1/1 | 124/127 (3 waived) |  |
 | `TextBoxTextInputMethodClient.cs` | `text_box_text_input_method_client.rs` | present | 1/1 | 11/11 |  |
-| `TextChangedEventArgs.cs` | `text_changed_event_args.rs` | present | 1/1 | 1/2 (1 waived) |  |
-| `TextChangingEventArgs.cs` | `text_changing_event_args.rs` | present | 1/1 | 1/2 (1 waived) |  |
+| `TextChangedEventArgs.cs` | `text_changed_event_args.rs` | present | 1/1 | 2/2 |  |
+| `TextChangingEventArgs.cs` | `text_changing_event_args.rs` | present | 1/1 | 2/2 |  |
 | `ThemeVariantScope.cs` | `theme_variant_scope.rs` | present | 1/1 | 3/3 |  |
 | `TickBar.cs` | `tick_bar.rs` | present | 2/2 | 24/24 |  |
 | `ToggleSwitch.cs` | `toggle_switch.rs` | present | 1/1 | 16/16 |  |
 | `ToolTip.cs` | `tool_tip.rs` | present | 1/1 | 47/47 |  |
 | `ToolTipService.cs` | `tool_tip_service.rs` | present | 1/1 | 3/3 |  |
-| `TopLevel.cs` | `top_level.rs` | present | 1/1 | 69/70 (1 waived) |  |
+| `TopLevel.cs` | `top_level.rs` | present | 1/1 | 70/70 |  |
 | `TopLevelHost.Decorations.cs` | `top_level_host_decorations.rs` | present | 1/1 | 3/3 |  |
 | `TopLevelHost.Peers.cs` | `top_level_host_peers.rs` | present | 1/1 | 2/2 |  |
 | `TopLevelHost.cs` | `top_level_host.rs` | present | 1/1 | 6/6 |  |
@@ -250,8 +250,8 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `VirtualizingCarouselPanel.cs` | `virtualizing_carousel_panel.rs` | present | 1/1 | 29/29 |  |
 | `VirtualizingPanel.cs` | `virtualizing_panel.rs` | present | 1/1 | 19/19 |  |
 | `VirtualizingStackPanel.cs` | `virtualizing_stack_panel.rs` | present | 1/1 | 32/32 |  |
-| `Window.cs` | `window.rs` | present | 4/4 | 80/81 (1 waived) |  |
-| `WindowBase.cs` | `window_base.rs` | present | 1/1 | 32/33 (1 waived) |  |
+| `Window.cs` | `window.rs` | present | 4/4 | 81/81 |  |
+| `WindowBase.cs` | `window_base.rs` | present | 1/1 | 33/33 |  |
 | `WindowClosingEventArgs.cs` | `window_closing_event_args.rs` | present | 2/2 | 8/8 |  |
 | `WindowEdge.cs` | `window_edge.rs` | present | 1/1 | 8/8 |  |
 | `WindowIcon.cs` | `window_icon.rs` | present | 1/1 | 5/5 |  |
@@ -475,34 +475,34 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IPopupHostProvider.cs` | `diagnostics/i_popup_host_provider.rs` | present | 1/1 | 2/2 |  |
 | `ToolTipDiagnostics.cs` | `diagnostics/tool_tip_diagnostics.rs` | present | 1/1 | 1/1 |  |
 
-### `Documents` - files 12/12, types 12/12, members 98/101 (3 waived)
+### `Documents` - files 12/12, types 12/12, members 101/101
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `Bold.cs` | `documents/bold.rs` | present | 1/1 | 2/2 |  |
-| `IInlineHost.cs` | `documents/i_inline_host.rs` | present | 1/1 | 1/2 (1 waived) |  |
+| `IInlineHost.cs` | `documents/i_inline_host.rs` | present | 1/1 | 2/2 |  |
 | `Inline.cs` | `documents/inline.rs` | present | 1/1 | 11/11 |  |
 | `InlineCollection.cs` | `documents/inline_collection.rs` | present | 1/1 | 9/9 |  |
 | `InlineRun.cs` | `documents/inline_run.rs` | present | 1/1 | 6/6 |  |
-| `InlineUIContainer.cs` | `documents/inline_ui_container.rs` | present | 1/1 | 8/9 (1 waived) |  |
+| `InlineUIContainer.cs` | `documents/inline_ui_container.rs` | present | 1/1 | 9/9 |  |
 | `Italic.cs` | `documents/italic.rs` | present | 1/1 | 2/2 |  |
 | `LineBreak.cs` | `documents/line_break.rs` | present | 1/1 | 3/3 |  |
-| `Run.cs` | `documents/run.rs` | present | 1/1 | 6/7 (1 waived) |  |
+| `Run.cs` | `documents/run.rs` | present | 1/1 | 7/7 |  |
 | `Span.cs` | `documents/span.rs` | present | 1/1 | 11/11 |  |
 | `TextElement.cs` | `documents/text_element.rs` | present | 1/1 | 37/37 |  |
 | `Underline.cs` | `documents/underline.rs` | present | 1/1 | 2/2 |  |
 
-### `Embedding` - files 1/1, types 1/1, members 8/11 (3 waived)
+### `Embedding` - files 1/1, types 1/1, members 9/11 (2 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `EmbeddableControlRoot.cs` | `embedding/embeddable_control_root.rs` | present | 1/1 | 8/11 (3 waived) |  |
+| `EmbeddableControlRoot.cs` | `embedding/embeddable_control_root.rs` | present | 1/1 | 9/11 (2 waived) |  |
 
-### `Embedding/Offscreen` - files 2/2, types 2/2, members 33/34 (1 waived)
+### `Embedding/Offscreen` - files 2/2, types 2/2, members 34/34
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `OffscreenTopLevel.cs` | `embedding/offscreen/offscreen_top_level.rs` | present | 1/1 | 4/5 (1 waived) |  |
+| `OffscreenTopLevel.cs` | `embedding/offscreen/offscreen_top_level.rs` | present | 1/1 | 5/5 |  |
 | `OffscreenTopLevelImpl.cs` | `embedding/offscreen/offscreen_top_level_impl.rs` | present | 1/1 | 29/29 |  |
 
 ### `FlexPanel` - files 9/9, types 9/9, members 81/81
@@ -519,7 +519,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `FlexPanel.cs` | `flex_panel/flex_panel.rs` | present | 1/1 | 18/18 |  |
 | `FlexWrap.cs` | `flex_panel/flex_wrap.rs` | present | 1/1 | 3/3 |  |
 
-### `Flyouts` - files 7/7, types 7/7, members 80/83 (3 waived)
+### `Flyouts` - files 7/7, types 7/7, members 81/83 (2 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -528,7 +528,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `FlyoutPresenter.cs` | `flyouts/flyout_presenter.rs` | present | 1/1 | 1/1 |  |
 | `FlyoutShowMode.cs` | `flyouts/flyout_show_mode.rs` | present | 1/1 | 3/3 |  |
 | `MenuFlyout.cs` | `flyouts/menu_flyout.rs` | present | 1/1 | 14/14 |  |
-| `MenuFlyoutPresenter.cs` | `flyouts/menu_flyout_presenter.rs` | present | 1/1 | 4/5 (1 waived) |  |
+| `MenuFlyoutPresenter.cs` | `flyouts/menu_flyout_presenter.rs` | present | 1/1 | 5/5 |  |
 | `PopupFlyoutBase.cs` | `flyouts/popup_flyout_base.rs` | present | 1/1 | 35/37 (2 waived) |  |
 
 ### `Generators` - files 1/1, types 1/1, members 7/7
@@ -544,28 +544,28 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PressedMixin.cs` | `mixins/pressed_mixin.rs` | present | 1/1 | 1/1 |  |
 | `SelectableMixin.cs` | `mixins/selectable_mixin.rs` | present | 1/1 | 1/1 |  |
 
-### `Notifications` - files 9/9, types 9/9, members 65/67 (2 waived)
+### `Notifications` - files 9/9, types 9/9, members 67/67
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `IManagedNotificationManager.cs` | `notifications/i_managed_notification_manager.rs` | present | 1/1 | 2/2 |  |
 | `INotification.cs` | `notifications/i_notification.rs` | present | 1/1 | 6/6 |  |
 | `INotificationManager.cs` | `notifications/i_notification_manager.rs` | present | 1/1 | 3/3 |  |
-| `Notification.cs` | `notifications/notification.rs` | present | 1/1 | 9/10 (1 waived) |  |
+| `Notification.cs` | `notifications/notification.rs` | present | 1/1 | 10/10 |  |
 | `NotificationCard.cs` | `notifications/notification_card.rs` | present | 1/1 | 15/15 |  |
 | `NotificationPosition.cs` | `notifications/notification_position.rs` | present | 1/1 | 6/6 |  |
 | `NotificationType.cs` | `notifications/notification_type.rs` | present | 1/1 | 4/4 |  |
 | `ReversibleStackPanel.cs` | `notifications/reversible_stack_panel.rs` | present | 1/1 | 4/4 |  |
-| `WindowNotificationManager.cs` | `notifications/window_notification_manager.rs` | present | 1/1 | 16/17 (1 waived) |  |
+| `WindowNotificationManager.cs` | `notifications/window_notification_manager.rs` | present | 1/1 | 17/17 |  |
 
-### `NumericUpDown` - files 2/2, types 2/2, members 73/74 (1 waived)
+### `NumericUpDown` - files 2/2, types 2/2, members 74/74
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `NumericUpDown.cs` | `numeric_up_down/numeric_up_down.rs` | present | 1/1 | 70/71 (1 waived) |  |
+| `NumericUpDown.cs` | `numeric_up_down/numeric_up_down.rs` | present | 1/1 | 71/71 |  |
 | `NumericUpDownValueChangedEventArgs.cs` | `numeric_up_down/numeric_up_down_value_changed_event_args.rs` | present | 1/1 | 3/3 |  |
 
-### `Page` - files 29/29, types 29/29, members 390/394 (4 waived)
+### `Page` - files 29/29, types 29/29, members 394/394
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -582,10 +582,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ModalPoppedEventArgs.cs` | `page/modal_popped_event_args.rs` | present | 1/1 | 2/2 |  |
 | `ModalPushedEventArgs.cs` | `page/modal_pushed_event_args.rs` | present | 1/1 | 2/2 |  |
 | `MultiPage.cs` | `page/multi_page.rs` | present | 1/1 | 13/13 |  |
-| `NavigatedFromEventArgs.cs` | `page/navigated_from_event_args.rs` | present | 1/1 | 4/5 (1 waived) |  |
-| `NavigatedToEventArgs.cs` | `page/navigated_to_event_args.rs` | present | 1/1 | 4/5 (1 waived) |  |
-| `NavigatingFromEventArgs.cs` | `page/navigating_from_event_args.rs` | present | 1/1 | 5/6 (1 waived) |  |
-| `NavigationEventArgs.cs` | `page/navigation_event_args.rs` | present | 1/1 | 4/5 (1 waived) |  |
+| `NavigatedFromEventArgs.cs` | `page/navigated_from_event_args.rs` | present | 1/1 | 5/5 |  |
+| `NavigatedToEventArgs.cs` | `page/navigated_to_event_args.rs` | present | 1/1 | 5/5 |  |
+| `NavigatingFromEventArgs.cs` | `page/navigating_from_event_args.rs` | present | 1/1 | 6/6 |  |
+| `NavigationEventArgs.cs` | `page/navigation_event_args.rs` | present | 1/1 | 5/5 |  |
 | `NavigationPage.cs` | `page/navigation_page.rs` | present | 1/1 | 99/99 |  |
 | `NavigationType.cs` | `page/navigation_type.rs` | present | 1/1 | 8/8 |  |
 | `Page.cs` | `page/page.rs` | present | 1/1 | 34/34 |  |
@@ -607,12 +607,12 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PipsPagerSelectedIndexChangedEventArgs.cs` | `pips_pager/pips_pager_selected_index_changed_event_args.rs` | present | 1/1 | 3/3 |  |
 | `PipsPagerTemplateSettings.cs` | `pips_pager/pips_pager_template_settings.rs` | present | 1/1 | 3/3 |  |
 
-### `Platform` - files 31/31, types 53/53, members 302/313 (11 waived)
+### `Platform` - files 31/31, types 53/53, members 304/313 (9 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `DefaultMenuInteractionHandler.cs` | `platform/default_menu_interaction_handler.rs` | present | 1/1 | 32/33 (1 waived) |  |
-| `IInputPane.cs` | `platform/i_input_pane.rs` | present | 4/4 | 15/16 (1 waived) |  |
+| `DefaultMenuInteractionHandler.cs` | `platform/default_menu_interaction_handler.rs` | present | 1/1 | 33/33 |  |
+| `IInputPane.cs` | `platform/i_input_pane.rs` | present | 4/4 | 16/16 |  |
 | `IInsetsManager.cs` | `platform/i_insets_manager.rs` | present | 4/4 | 17/17 |  |
 | `IMenuInteractionHandler.cs` | `platform/i_menu_interaction_handler.rs` | present | 1/1 | 2/2 |  |
 | `INativeApplicationCommands.cs` | `platform/i_native_application_commands.rs` | present | 1/1 | 4/4 |  |
@@ -675,7 +675,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TableViewLayoutHelper.cs` | `presenters/table_view_layout_helper.rs` | present | 1/1 | 5/5 |  |
 | `TextPresenter.cs` | `presenters/text_presenter.rs` | present | 1/1 | 70/71 (1 waived) |  |
 
-### `Primitives` - files 38/38, types 39/39, members 520/534 (14 waived)
+### `Primitives` - files 38/38, types 39/39, members 522/534 (12 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -695,7 +695,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Popup.cs` | `primitives/popup.rs` | present | 1/1 | 62/63 (1 waived) |  |
 | `PopupOverlayLayer.cs` | `primitives/popup_overlay_layer.rs` | present | 1/1 | 5/5 |  |
 | `PopupRoot.cs` | `primitives/popup_root.rs` | present | 1/1 | 21/22 (1 waived) |  |
-| `RangeBase.cs` | `primitives/range_base.rs` | present | 1/1 | 15/16 (1 waived) |  |
+| `RangeBase.cs` | `primitives/range_base.rs` | present | 1/1 | 16/16 |  |
 | `RangeBaseValueChangedEventArgs.cs` | `primitives/range_base_value_changed_event_args.rs` | present | 1/1 | 4/4 |  |
 | `ScrollBar.cs` | `primitives/scroll_bar.rs` | present | 2/2 | 42/42 |  |
 | `ScrollBarVisibility.cs` | `primitives/scroll_bar_visibility.rs` | present | 1/1 | 4/4 |  |
@@ -714,7 +714,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TextSelectorLayer.cs` | `primitives/text_selector_layer.rs` | present | 1/1 | 7/7 |  |
 | `Thumb.cs` | `primitives/thumb.rs` | present | 1/1 | 16/16 |  |
 | `ToggleButton.cs` | `primitives/toggle_button.rs` | present | 1/1 | 12/13 (1 waived) |  |
-| `Track.cs` | `primitives/track.rs` | present | 1/1 | 28/29 (1 waived) |  |
+| `Track.cs` | `primitives/track.rs` | present | 1/1 | 29/29 |  |
 | `UniformGrid.cs` | `primitives/uniform_grid.rs` | present | 1/1 | 13/13 |  |
 | `VisualLayerManager.cs` | `primitives/visual_layer_manager.rs` | present | 1/1 | 14/14 |  |
 
@@ -735,19 +735,19 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `AssemblyInfo.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 
-### `PullToRefresh` - files 9/9, types 9/9, members 84/86 (2 waived)
+### `PullToRefresh` - files 9/9, types 9/9, members 86/86
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `RefreshCompletionDeferral.cs` | `pull_to_refresh/refresh_completion_deferral.rs` | present | 1/1 | 3/3 |  |
 | `RefreshContainer.cs` | `pull_to_refresh/refresh_container.rs` | present | 1/1 | 15/15 |  |
 | `RefreshInfoProvider.cs` | `pull_to_refresh/refresh_info_provider.rs` | present | 1/1 | 23/23 |  |
-| `RefreshRequestedEventArgs.cs` | `pull_to_refresh/refresh_requested_event_args.rs` | present | 1/1 | 4/5 (1 waived) |  |
+| `RefreshRequestedEventArgs.cs` | `pull_to_refresh/refresh_requested_event_args.rs` | present | 1/1 | 5/5 |  |
 | `RefreshVisualizer.cs` | `pull_to_refresh/refresh_visualizer.rs` | present | 1/1 | 14/14 |  |
 | `RefreshVisualizerOrientation.cs` | `pull_to_refresh/refresh_visualizer_orientation.rs` | present | 1/1 | 4/4 |  |
 | `RefreshVisualizerState.cs` | `pull_to_refresh/refresh_visualizer_state.rs` | present | 1/1 | 5/5 |  |
 | `ScrollViewerIRefreshInfoProviderAdapter.cs` | `pull_to_refresh/scroll_viewer_i_refresh_info_provider_adapter.rs` | present | 1/1 | 8/8 |  |
-| `ScrollablePullGestureRecognizer.cs` | `pull_to_refresh/scrollable_pull_gesture_recognizer.rs` | present | 1/1 | 8/9 (1 waived) |  |
+| `ScrollablePullGestureRecognizer.cs` | `pull_to_refresh/scrollable_pull_gesture_recognizer.rs` | present | 1/1 | 9/9 |  |
 
 ### `Remote` - files 2/2, types 3/3, members 9/9
 
@@ -771,7 +771,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Selection` - files 10/10, types 16/17 (1 waived), members 150/176 (26 waived)
+### `Selection` - files 10/10, types 16/17 (1 waived), members 151/176 (25 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -781,7 +781,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ReadOnlySelectionListBase.cs` | `selection/read_only_selection_list_base.rs` | present | 1/1 | 2/19 (17 waived) |  |
 | `SelectedIndexes.cs` | `selection/selected_indexes.rs` | present | 1/1 | 6/6 |  |
 | `SelectedItems.cs` | `selection/selected_items.rs` | present | 2/2 | 10/10 |  |
-| `SelectionModel.cs` | `selection/selection_model.rs` | present | 2/3 (1 waived) | 49/53 (4 waived) |  |
+| `SelectionModel.cs` | `selection/selection_model.rs` | present | 2/3 (1 waived) | 50/53 (3 waived) |  |
 | `SelectionModelIndexesChangedEventArgs.cs` | `selection/selection_model_indexes_changed_event_args.rs` | present | 1/1 | 3/3 |  |
 | `SelectionModelSelectionChangedEventArgs.cs` | `selection/selection_model_selection_changed_event_args.rs` | present | 2/2 | 8/13 (5 waived) |  |
 | `SelectionNodeBase.cs` | `selection/selection_node_base.rs` | present | 2/2 | 18/18 |  |
@@ -841,12 +841,12 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ITypedDataTemplate.cs` | `templates/i_typed_data_template.rs` | present | 1/1 | 1/1 |  |
 | `TemplateExtensions.cs` | `templates/template_extensions.rs` | present | 1/1 | 2/2 | renamed: an extension class: its methods are inherent methods of the type they extend (`impl TemplatedControl`) |
 
-### `Utils` - files 15/15, types 16/17 (1 waived), members 85/93 (8 waived)
+### `Utils` - files 15/15, types 16/17 (1 waived), members 87/93 (6 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AncestorFinder.cs` | `utils/ancestor_finder.rs` | present | 1/1 | 2/2 |  |
-| `BindingEvaluator.cs` | `utils/binding_evaluator.rs` | present | 1/1 | 6/7 (1 waived) |  |
+| `BindingEvaluator.cs` | `utils/binding_evaluator.rs` | present | 1/1 | 7/7 |  |
 | `BorderRenderHelper.cs` | `utils/border_render_helper.rs` | present | 1/1 | 1/1 |  |
 | `ClipboardHelper.cs` | `utils/clipboard_helper.rs` | present | 1/1 | 1/1 |  |
 | `CollectionChangedEventManager.cs` | `utils/collection_changed_event_manager.rs` | present | 2/2 | 5/6 (1 waived) |  |
@@ -855,7 +855,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ISelectionAdapter.cs` | `utils/i_selection_adapter.rs` | present | 1/1 | 6/6 |  |
 | `PrimarySelectionHelper.cs` | `utils/primary_selection_helper.rs` | present | 1/1 | 1/1 |  |
 | `RealizedStackElements.cs` | `utils/realized_stack_elements.rs` | present | 1/1 | 19/19 |  |
-| `SelectingItemsControlSelectionAdapter.cs` | `utils/selecting_items_control_selection_adapter.rs` | present | 1/1 | 12/13 (1 waived) |  |
+| `SelectingItemsControlSelectionAdapter.cs` | `utils/selecting_items_control_selection_adapter.rs` | present | 1/1 | 13/13 |  |
 | `StringUtils.cs` | `utils/string_utils.rs` | present | 1/1 | 5/5 |  |
 | `TimeUtils.cs` | `utils/time_utils.rs` | present | 1/1 | 2/2 |  |
 | `UndoRedoHelper.cs` | `utils/undo_redo_helper.rs` | present | 2/2 | 18/18 |  |

@@ -2,14 +2,18 @@
 
 Generates the port tracking documents:
 
-- `docs/porting/TRACKING.md` - master document (totals, per-project table, project structure)
+- `docs/porting/TRACKING.md` - master document (the two headline numbers, totals, per-project table, project structure)
+- `docs/porting/REMAINING.md` - what is left to port, in one place: every upstream project with its scope and what is
+  present, missing and waived, the upstream test projects, the upstream samples, and the missing files, types and
+  members by name
 - `docs/porting/tracking/<Project>.md` - per project: contracts, files by directory, missing types and members
 - `docs/porting/data/port-status.json` - the same totals, machine readable
 
 ```sh
 scripts/port-status/run.sh            # upstream checkout at ../Avalonia, or UPSTREAM=/path/to/Avalonia
 scripts/port-status/run.sh --force    # re-run the upstream extractor
-scripts/port-status/run.sh --check    # exit 1 when the generated documents are out of date
+scripts/port-status/run.sh --check    # exit 1 when the generated documents are out of date; runs no extraction
+TRACKED_COMMIT=<sha> scripts/port-status/run.sh   # move the tracking to another upstream commit
 python3 scripts/port-status/port_status.py --explain Avalonia.Base Point.cs   # how each member was matched
 ```
 
@@ -32,21 +36,35 @@ and the ones that are not ported for a stated reason, with a section per upstrea
    `scripts/api-extract/projects.json` and writes `docs/porting/data/upstream-api.json`: project -> file -> type -> member,
    public, protected and internal (private members are only counted). If the JSON grows beyond 15 MB the extractor
    writes one file per project to `docs/porting/data/upstream/` and an index; the scanner reads both layouts.
-   `run.sh` re-runs it when the JSON is missing, the upstream `HEAD` differs from the recorded commit, or the extractor
-   or its project list changed.
+   `run.sh` re-runs it when the JSON is missing, when the extractor or its project list changed, or when
+   `TRACKED_COMMIT` names a commit other than the recorded one. The extractor reads the tracked commit, not the `HEAD`
+   of the checkout, which is usually ahead: `run.sh` exports the tree of that commit, and of each submodule at the
+   commit the tree names, with `git archive` into a temporary directory (below `PORT_STATUS_TMP`, else `TMPDIR`), runs
+   the extractor on it with `--commit`, and removes it. Nothing is checked out. Files of the checkout that upstream
+   ignores (build outputs) are therefore no part of the extraction. `API_EXTRACT_ARTIFACTS` names a directory for the
+   build output of the extractor; `PYTHON` names the interpreter (3.11 or later).
 2. `port_status.py` maps every upstream file to its Rust path (docs/porting/PORTING-GUIDE.md), scans the Rust files
    with `rustscan.py` (comments and literals blanked, brace structure walked, items found with regular expressions)
-   and matches types and members by name. The Rust tree is only read.
+   and matches types and members by name. The Rust tree is only read. `REMAINING.md` also reads the totals at the top
+   of the reports of `test_gaps.py` (`docs/porting/data/test-gaps-*.txt`) and `docs/porting/data/samples.toml`; it does
+   not run `test_gaps.py`, so run that first when tests were ported.
 
 ## Files you edit
 
 - `docs/porting/data/path-overrides.toml` - merged / renamed / replaced / not-applicable files, Rust-only files.
 - `docs/porting/data/member-waivers.toml` - `[[waive]]` (not ported, with a reason) and `[[alias]]` (ported under a
-  name the default rule cannot derive).
+  name the default rule cannot derive). Prefer an alias to a waiver whenever the member exists under another name: a
+  waiver holds whether or not the item it names exists, an alias is checked at every run. An alias names a method, a
+  constructor (`member = ".ctor"`), a property, a field, an event or an indexer, and the Rust items that stand for it
+  (`rust = ["with_parent"]`): functions, fields or constants of the type, or of its file when the type is ported as a
+  module. `docs/porting/waiver-audit.md` is the audit of the waivers of 2026-10-10 and says what a sound reason is.
+- `docs/porting/data/samples.toml` - the upstream samples and the directory each is ported to.
 - `scripts/api-extract/projects.json` - project list, level of detail, target crate, phase and priority.
   The scope, phase, priority and crate of a project are read from this file at every run, so moving a project into
   scope needs no new extraction; its level of detail is what the extraction holds. A project in scope that was
-  extracted with `types` detail has its files and types looked for, and its members counted as totals.
+  extracted with `types` detail has its files and types looked for, and its members counted as totals. The list
+  `expanded` gives the planning data of one project that a `dir/*` entry expands to, where it differs from its
+  siblings (the scanner reads it, the extractor does not).
 
 ## Matching rules
 
@@ -56,6 +74,7 @@ and the ones that are not ported for a stated reason, with a section per upstrea
 | type `Foo` | `struct` / `enum` / `union` / `trait` / `type` / `ferro_class!` named `Foo` (`Avalonia` -> `Ferro`, `Avn` -> `Frn`) in the mapped file, else anywhere in the crate; the items of a macro called with parentheses count like the items of one called with braces (`define_class!( pub struct Foo; impl Foo { .. } );`); nested `Outer.Inner` -> `Inner` in the mapped file or `OuterInner`; a static class also counts when its members exist as free items of the mapped file |
 | property / field `Foo` | fn `foo` or `get_foo` (+ `set_foo` when the setter is not private), struct field `foo`, const / variant `FOO` |
 | `FooProperty`, `FooEvent` | `foo_property()`, `foo_event()` (covers `ferro_property!`) |
+| any member `AvaloniaFoo` | the name with the framework renamed as well (`ferro_foo`, `FERRO_FOO`): rule 2 of the porting guide |
 | method `DoIt` | fn `do_it`; n-th overload: n-th of `do_it`, aliases, public `do_it_*` (names that belong to another upstream member are excluded); parameterless `GetFoo()` -> `foo()`; abstract / virtual members also match a fn of any trait declared in the same file |
 | `ToString`, `Equals`, `GetHashCode`, `CompareTo`, `Parse` / `TryParse`, `Clone`, `Dispose`, `GetEnumerator` | `Display`, `PartialEq`, `Hash`, `PartialOrd`, `FromStr`, `Clone`, `Drop`, `IntoIterator` (derive or impl), or the method by name |
 | constructors | `new` / `construct` (one constructor), `new_*`, `from_*`, `create`, `Default`, `From` impls, counted |

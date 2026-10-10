@@ -1,5 +1,28 @@
 {
  "upstreamCommit": "17350180c33b063f0e98abbfd19aa3cae63f5d56",
+ "inScope": {
+  "files": [
+   2475,
+   2569,
+   0
+  ],
+  "types": [
+   3348,
+   3888,
+   311
+  ],
+  "members": [
+   27019,
+   31738,
+   2858
+  ]
+ },
+ "allProjects": {
+  "membersPresent": 27019,
+  "members": 37391,
+  "membersNotApplicable": 1132,
+  "membersOutOfScope": 4521
+ },
  "projects": [
   {
    "name": "XamlX",
@@ -18,9 +41,9 @@
     5
    ],
    "members": [
-    713,
+    722,
     878,
-    165
+    156
    ],
    "interfaces": [
     47,
@@ -36,12 +59,13 @@
    ],
    "notApplicableFiles": 26,
    "matchKinds": {
-    "alias fn": 3,
+    "alias fn": 13,
+    "alias free fn": 1,
     "const": 67,
     "field": 159,
     "fn": 433,
     "free fn": 6,
-    "overload fn": 16,
+    "overload fn": 14,
     "trait": 3,
     "trait fn": 9,
     "variant": 17
@@ -271,7 +295,7 @@
     0,
     0
    ],
-   "notApplicableFiles": 1,
+   "notApplicableFiles": 0,
    "matchKinds": {},
    "presentFiles": {
     "inc/avalonia-native-guids.h": [
@@ -468,7 +492,7 @@
    "path": "src/Android/Avalonia.Android",
    "rust": "src/Android/FerroUI.Android",
    "scope": "in",
-   "detail": "types",
+   "detail": "full",
    "files": [
     23,
     58,
@@ -480,7 +504,7 @@
     0
    ],
    "members": [
-    0,
+    153,
     447,
     0
    ],
@@ -497,7 +521,13 @@
     0
    ],
    "notApplicableFiles": 0,
-   "matchKinds": {},
+   "matchKinds": {
+    "field": 1,
+    "fn": 142,
+    "free item": 1,
+    "overload fn": 6,
+    "variant": 3
+   },
    "presentFiles": {
     "AndroidDispatcherImpl.cs": [
      "android_dispatcher_impl.rs"
@@ -590,14 +620,14 @@
     0
    ],
    "types": [
-    1523,
+    1524,
     1659,
-    136
+    135
    ],
    "members": [
-    10281,
+    10398,
     11433,
-    1152
+    1035
    ],
    "interfaces": [
     247,
@@ -613,7 +643,9 @@
    ],
    "notApplicableFiles": 51,
    "matchKinds": {
-    "alias fn": 50,
+    "alias field": 3,
+    "alias fn": 162,
+    "alias free fn": 5,
     "const": 381,
     "derive": 62,
     "field": 638,
@@ -621,8 +653,8 @@
     "free fn": 15,
     "free item": 16,
     "getter fn": 4,
-    "overload fn": 314,
-    "trait": 362,
+    "overload fn": 313,
+    "trait": 360,
     "trait fn": 75,
     "variant": 1793
    },
@@ -4615,9 +4647,9 @@
     7
    ],
    "members": [
-    6214,
+    6255,
     6405,
-    189
+    148
    ],
    "interfaces": [
     83,
@@ -4633,14 +4665,14 @@
    ],
    "notApplicableFiles": 1,
    "matchKinds": {
-    "alias fn": 4,
+    "alias fn": 48,
     "const": 33,
     "derive": 2,
     "field": 29,
     "fn": 5598,
     "free item": 4,
     "overload fn": 82,
-    "trait": 37,
+    "trait": 34,
     "variant": 425
    },
    "presentFiles": {
@@ -6532,9 +6564,9 @@
     0
    ],
    "members": [
-    170,
+    173,
     176,
-    3
+    1
    ],
    "interfaces": [
     0,
@@ -6550,6 +6582,8 @@
    ],
    "notApplicableFiles": 0,
    "matchKinds": {
+    "alias fn": 2,
+    "alias free item": 1,
     "field": 2,
     "fn": 161,
     "free item": 2,
@@ -6787,7 +6821,7 @@
    "path": "src/Avalonia.FreeDesktop",
    "rust": "src/FerroUI.FreeDesktop",
    "scope": "in",
-   "detail": "types",
+   "detail": "full",
    "files": [
     18,
     18,
@@ -6799,7 +6833,7 @@
     0
    ],
    "members": [
-    0,
+    175,
     216,
     0
    ],
@@ -6816,7 +6850,14 @@
     0
    ],
    "notApplicableFiles": 0,
-   "matchKinds": {},
+   "matchKinds": {
+    "field": 6,
+    "fn": 104,
+    "free fn": 1,
+    "overload fn": 1,
+    "trait fn": 8,
+    "variant": 55
+   },
    "presentFiles": {
     "DBusCallQueue.cs": [
      "dbus_call_queue.rs"
@@ -7026,18 +7067,18 @@
    "detail": "full",
    "files": [
     48,
-    48,
+    49,
     0
    ],
    "types": [
-    65,
-    76,
-    11
+    67,
+    85,
+    10
    ],
    "members": [
-    455,
-    531,
-    76
+    473,
+    601,
+    59
    ],
    "interfaces": [
     1,
@@ -7051,11 +7092,13 @@
     0,
     0
    ],
-   "notApplicableFiles": 1,
+   "notApplicableFiles": 0,
    "matchKinds": {
-    "alias fn": 6,
+    "alias field": 2,
+    "alias fn": 11,
+    "alias free fn": 10,
     "field": 18,
-    "fn": 406,
+    "fn": 407,
     "free fn": 6,
     "overload fn": 10,
     "trait": 1,
@@ -7227,9 +7270,9 @@
     2
    ],
    "members": [
-    601,
+    603,
     639,
-    38
+    30
    ],
    "interfaces": [
     18,
@@ -7245,7 +7288,7 @@
    ],
    "notApplicableFiles": 0,
    "matchKinds": {
-    "alias fn": 1,
+    "alias fn": 3,
     "field": 24,
     "fn": 270,
     "free fn": 92,
@@ -7398,7 +7441,7 @@
     1
    ],
    "members": [
-    196,
+    198,
     202,
     3
    ],
@@ -7416,11 +7459,11 @@
    ],
    "notApplicableFiles": 0,
    "matchKinds": {
-    "alias fn": 5,
+    "alias fn": 8,
     "const": 1,
     "field": 52,
     "fn": 95,
-    "trait": 10,
+    "trait": 9,
     "variant": 33
    },
    "presentFiles": {
@@ -7669,21 +7712,21 @@
    "path": "src/Avalonia.X11",
    "rust": "src/FerroUI.X11",
    "scope": "in",
-   "detail": "types",
+   "detail": "full",
    "files": [
     73,
     88,
     0
    ],
    "types": [
-    145,
+    144,
     291,
     107
    ],
    "members": [
-    0,
+    3402,
     4897,
-    0
+    1076
    ],
    "interfaces": [
     8,
@@ -7698,7 +7741,18 @@
     0
    ],
    "notApplicableFiles": 0,
-   "matchKinds": {},
+   "matchKinds": {
+    "alias field": 1,
+    "const": 2,
+    "field": 247,
+    "fn": 405,
+    "free fn": 102,
+    "free item": 12,
+    "overload fn": 5,
+    "trait": 3,
+    "trait fn": 4,
+    "variant": 2621
+   },
    "presentFiles": {
     "ActivityTrackingHelper.cs": [
      "activity_tracking_helper.rs"
@@ -7944,9 +7998,9 @@
     2
    ],
    "members": [
-    333,
+    340,
     428,
-    95
+    88
    ],
    "interfaces": [
     0,
@@ -7962,7 +8016,9 @@
    ],
    "notApplicableFiles": 2,
    "matchKinds": {
-    "alias fn": 1,
+    "alias field": 2,
+    "alias fn": 5,
+    "alias free fn": 1,
     "const": 1,
     "field": 8,
     "fn": 236,
@@ -8308,21 +8364,21 @@
    "name": "Avalonia.Headless.Vnc",
    "path": "src/Headless/Avalonia.Headless.Vnc",
    "rust": "src/Headless/FerroUI.Headless.Vnc",
-   "scope": "in",
+   "scope": "out",
    "detail": "full",
    "files": [
     0,
-    0,
+    3,
     0
    ],
    "types": [
     0,
-    0,
+    3,
     0
    ],
    "members": [
     0,
-    0,
+    11,
     0
    ],
    "interfaces": [
@@ -8337,7 +8393,7 @@
     0,
     0
    ],
-   "notApplicableFiles": 3,
+   "notApplicableFiles": 0,
    "matchKinds": {},
    "presentFiles": {},
    "rustOnly": []
@@ -8501,9 +8557,9 @@
     2
    ],
    "members": [
-    199,
+    208,
     239,
-    40
+    31
    ],
    "interfaces": [
     9,
@@ -8519,6 +8575,7 @@
    ],
    "notApplicableFiles": 2,
    "matchKinds": {
+    "alias fn": 9,
     "field": 26,
     "fn": 157,
     "free fn": 1,
@@ -8695,9 +8752,9 @@
     6
    ],
    "members": [
-    400,
+    422,
     505,
-    105
+    83
    ],
    "interfaces": [
     5,
@@ -8713,6 +8770,9 @@
    ],
    "notApplicableFiles": 1,
    "matchKinds": {
+    "alias const": 1,
+    "alias field": 10,
+    "alias fn": 11,
     "const": 24,
     "field": 147,
     "fn": 209,
@@ -8966,18 +9026,18 @@
    "detail": "full",
    "files": [
     51,
-    51,
+    54,
     0
    ],
    "types": [
     62,
-    62,
+    66,
     0
    ],
    "members": [
-    386,
-    420,
-    33
+    398,
+    451,
+    21
    ],
    "interfaces": [
     10,
@@ -8991,9 +9051,10 @@
     0,
     0
    ],
-   "notApplicableFiles": 3,
+   "notApplicableFiles": 0,
    "matchKinds": {
-    "alias fn": 3,
+    "alias fn": 5,
+    "alias free fn": 10,
     "field": 29,
     "fn": 305,
     "free fn": 35,
@@ -9175,7 +9236,7 @@
    "path": "src/Windows/Avalonia.Win32",
    "rust": "src/Windows/FerroUI.Win32",
    "scope": "in",
-   "detail": "types",
+   "detail": "full",
    "files": [
     59,
     95,
@@ -9187,7 +9248,7 @@
     0
    ],
    "members": [
-    0,
+    1687,
     2605,
     0
    ],
@@ -9204,7 +9265,18 @@
     0
    ],
    "notApplicableFiles": 0,
-   "matchKinds": {},
+   "matchKinds": {
+    "alias fn": 1,
+    "const": 15,
+    "derive": 2,
+    "field": 262,
+    "fn": 341,
+    "free fn": 128,
+    "free item": 30,
+    "overload fn": 9,
+    "trait": 10,
+    "variant": 889
+   },
    "presentFiles": {
     "AngleOptions.cs": [
      "angle_options.rs"
@@ -9508,7 +9580,7 @@
    "path": "src/iOS/Avalonia.iOS",
    "rust": "src/iOS/FerroUI.iOS",
    "scope": "in",
-   "detail": "types",
+   "detail": "full",
    "files": [
     36,
     40,
@@ -9520,9 +9592,9 @@
     1
    ],
    "members": [
-    0,
+    237,
     331,
-    0
+    17
    ],
    "interfaces": [
     3,
@@ -9537,7 +9609,16 @@
     0
    ],
    "notApplicableFiles": 1,
-   "matchKinds": {},
+   "matchKinds": {
+    "const": 1,
+    "field": 5,
+    "fn": 212,
+    "free fn": 5,
+    "free item": 5,
+    "overload fn": 5,
+    "trait fn": 2,
+    "variant": 2
+   },
    "presentFiles": {
     "ActivatableLifetime.cs": [
      "activatable_lifetime.rs"
@@ -9692,35 +9773,5 @@
   }
  ],
  "unusedPathOverrides": [],
- "unusedWaivers": [
-  {
-   "project": "Avalonia.Remote.Protocol",
-   "type": "Metsys.Bson.TypeHelper",
-   "member": "*LambdaExpression*",
-   "reason": "`FindProperty(LambdaExpression)`: the name of a property from an expression tree; see `ExpressionHelper`"
-  },
-  {
-   "project": "Avalonia.Remote.Protocol",
-   "type": "Metsys.Bson.ScopedCode<T>",
-   "reason": "the class with a typed scope is the one struct `ScopedCode`: its scope is a `Value`, which holds an object of any class"
-  },
-  {
-   "project": "Avalonia.Remote.Protocol",
-   "type": "Metsys.Bson.ObjectId",
-   "member": "*operator*",
-   "reason": "`==` and `!=` are `PartialEq` of `ObjectId` (by the text of the value, as upstream's `Equals`); the implicit conversions are `From<&ObjectId> for Option<String>` and `TryFrom<&str> for ObjectId`"
-  },
-  {
-   "project": "Avalonia.Remote.Protocol",
-   "type": "Metsys.Bson.ObjectId",
-   "member": "Equals",
-   "reason": "`PartialEq` of `ObjectId`"
-  },
-  {
-   "project": "Avalonia.Remote.Protocol",
-   "type": "Avalonia.Remote.Protocol.BsonStreamTransportConnection",
-   "member": "Dispose",
-   "reason": "`dispose` of the `IFerroRemoteTransportConnection` implementation of the connection (`bson_stream_transport.rs`)"
-  }
- ]
+ "unusedWaivers": []
 }

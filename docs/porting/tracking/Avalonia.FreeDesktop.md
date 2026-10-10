@@ -12,49 +12,119 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 5 - desktop (Linux) / P1 |
 | Files | 18/18 (100.0%) |
 | Types | 26/26 (100.0%) |
-| Members | 0/216 (0.0%) |
+| Members | 175/216 (81.0%) |
+| Contracts (interfaces) | 3/3 |
+| Property registrations | 0/0 |
+| Routed events | 0/0 |
 
-This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
+## Contracts
+
+Every interface of the project. Each becomes a `pub trait` with the same name (the `I` prefix is kept).
+
+| Interface | Access | Upstream file | Members | Status |
+|---|---|---|---|---|
+| `Avalonia.FreeDesktop.IPortalParentLease` | internal | `IPortalParentLease.cs` | 1/1 | present |
+| `Avalonia.FreeDesktop.IX11InputMethodControl` | internal | `IX11InputMethod.cs` | 6/6 | present |
+| `Avalonia.FreeDesktop.IX11InputMethodFactory` | internal | `IX11InputMethod.cs` | 1/1 | present |
 
 ## Files
 
-### `(project root)` - files 11/11, types 15/15, members 0/76
+### `(project root)` - files 11/11, types 15/15, members 54/76
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `DBusCallQueue.cs` | `dbus_call_queue.rs` | present | 1/1 | - | 5 |  |
-| `DBusHelper.cs` | `dbus_helper.rs` | present | 1/1 | - | 2 |  |
-| `DBusMenuExporter.cs` | `dbus_menu_exporter.rs` | present | 1/1 | - | 3 |  |
-| `DBusPlatformSettings.cs` | `dbus_platform_settings.rs` | present | 1/1 | - | 2 |  |
-| `DBusSystemDialog.cs` | `dbus_system_dialog.rs` | present | 1/1 | - | 7 |  |
-| `DBusTrayIconImpl.cs` | `dbus_tray_icon_impl.rs` | present | 2/2 | - | 37 |  |
-| `IPortalParentLease.cs` | `i_portal_parent_lease.rs` | present | 2/2 | - | 4 |  |
-| `IX11InputMethod.cs` | `ix11_input_method.rs` | present | 3/3 | - | 11 |  |
-| `LinuxMountedVolumeInfoListener.cs` | `linux_mounted_volume_info_listener.rs` | present | 1/1 | - | 3 |  |
-| `LinuxMountedVolumeInfoProvider.cs` | `linux_mounted_volume_info_provider.rs` | present | 1/1 | - | 1 |  |
-| `NativeMethods.cs` | `native_methods.rs` | present | 1/1 | - | 1 |  |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `DBusCallQueue.cs` | `dbus_call_queue.rs` | present | 1/1 | 5/5 |  |
+| `DBusHelper.cs` | `dbus_helper.rs` | present | 1/1 | 2/2 |  |
+| `DBusMenuExporter.cs` | `dbus_menu_exporter.rs` | present | 1/1 | 3/3 |  |
+| `DBusPlatformSettings.cs` | `dbus_platform_settings.rs` | present | 1/1 | 2/2 |  |
+| `DBusSystemDialog.cs` | `dbus_system_dialog.rs` | present | 1/1 | 7/7 |  |
+| `DBusTrayIconImpl.cs` | `dbus_tray_icon_impl.rs` | partial | 2/2 | 16/37 |  |
+| `IPortalParentLease.cs` | `i_portal_parent_lease.rs` | present | 2/2 | 4/4 |  |
+| `IX11InputMethod.cs` | `ix11_input_method.rs` | present | 3/3 | 11/11 |  |
+| `LinuxMountedVolumeInfoListener.cs` | `linux_mounted_volume_info_listener.rs` | partial | 1/1 | 2/3 |  |
+| `LinuxMountedVolumeInfoProvider.cs` | `linux_mounted_volume_info_provider.rs` | present | 1/1 | 1/1 |  |
+| `NativeMethods.cs` | `native_methods.rs` | present | 1/1 | 1/1 |  |
 
-### `DBusIme` - files 2/2, types 3/3, members 0/33
+<details><summary><code>DBusTrayIconImpl.cs</code> - 21 missing</summary>
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `DBusTextInputMethodBase.cs` | `dbus_ime/dbus_text_input_method_base.rs` | present | 2/2 | - | 32 |  |
-| `X11DBusImeHelper.cs` | `dbus_ime/x11_dbus_ime_helper.rs` | present | 1/1 | - | 1 |  |
+- `StatusNotifierItemDbusObj` (class): 21 missing
+  - `string IStatusNotifierItemProperties.Category { get; }` *(explicit)*
+  - `string IStatusNotifierItemProperties.Id { get; }` *(explicit)*
+  - `string IStatusNotifierItemProperties.Title { get; }` *(explicit)*
+  - `string IStatusNotifierItemProperties.Status { get; }` *(explicit)*
+  - `int IStatusNotifierItemProperties.WindowId { get; }` *(explicit)*
+  - `string IStatusNotifierItemProperties.IconThemePath { get; }` *(explicit)*
+  - `bool IStatusNotifierItemProperties.ItemIsMenu { get; }` *(explicit)*
+  - `string IStatusNotifierItemProperties.IconName { get; }` *(explicit)*
+  - `(int, int, byte[])[] IStatusNotifierItemProperties.IconPixmap { get; }` *(explicit)*
+  - `string IStatusNotifierItemProperties.OverlayIconName { get; }` *(explicit)*
+  - `(int, int, byte[])[] IStatusNotifierItemProperties.OverlayIconPixmap { get; }` *(explicit)*
+  - `string IStatusNotifierItemProperties.AttentionIconName { get; }` *(explicit)*
+  - `(int, int, byte[])[] IStatusNotifierItemProperties.AttentionIconPixmap { get; }` *(explicit)*
+  - `string IStatusNotifierItemProperties.AttentionMovieName { get; }` *(explicit)*
+  - `(string, (int, int, byte[])[], string, string) IStatusNotifierItemProperties.ToolTip { get; }` *(explicit)*
+  - `ValueTask IStatusNotifierItemHandler.HandleGetPropertyAsync(IStatusNotifierItemHandler.GetPropertyContext c...` *(explicit)*
+  - `ValueTask IStatusNotifierItemHandler.HandleGetAllPropertiesAsync(IStatusNotifierItemHandler.GetAllPropertie...` *(explicit)*
+  - `ValueTask IStatusNotifierItemHandler.ContextMenuAsync(int x, int y)` *(explicit)*
+  - `ValueTask IStatusNotifierItemHandler.ActivateAsync(int x, int y)` *(explicit)*
+  - `ValueTask IStatusNotifierItemHandler.SecondaryActivateAsync(int x, int y)` *(explicit)*
+  - `ValueTask IStatusNotifierItemHandler.ScrollAsync(int delta, string orientation)` *(explicit)*
 
-### `DBusIme/Fcitx` - files 3/3, types 5/5, members 0/70
+</details>
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `FcitxEnums.cs` | `dbus_ime/fcitx/fcitx_enums.rs` | present | 3/3 | - | 47 |  |
-| `FcitxICWrapper.cs` | `dbus_ime/fcitx/fcitx_ic_wrapper.rs` | present | 1/1 | - | 12 |  |
-| `FcitxX11TextInputMethod.cs` | `dbus_ime/fcitx/fcitx_x11_text_input_method.rs` | present | 1/1 | - | 11 |  |
+<details><summary><code>LinuxMountedVolumeInfoListener.cs</code> - 1 missing</summary>
 
-### `DBusIme/IBus` - files 2/2, types 3/3, members 0/37
+- `LinuxMountedVolumeInfoListener` (class): 1 missing
+  - `virtual void Dispose(bool disposing)` *(protected; 1 of 2 overloads found)*
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `IBusEnums.cs` | `dbus_ime/ibus/ibus_enums.rs` | present | 2/2 | - | 27 |  |
-| `IBusX11TextInputMethod.cs` | `dbus_ime/ibus/ibus_x11_text_input_method.rs` | present | 1/1 | - | 10 |  |
+</details>
+
+### `DBusIme` - files 2/2, types 3/3, members 33/33
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `DBusTextInputMethodBase.cs` | `dbus_ime/dbus_text_input_method_base.rs` | present | 2/2 | 32/32 |  |
+| `X11DBusImeHelper.cs` | `dbus_ime/x11_dbus_ime_helper.rs` | present | 1/1 | 1/1 |  |
+
+### `DBusIme/Fcitx` - files 3/3, types 5/5, members 51/70
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `FcitxEnums.cs` | `dbus_ime/fcitx/fcitx_enums.rs` | partial | 3/3 | 28/47 |  |
+| `FcitxICWrapper.cs` | `dbus_ime/fcitx/fcitx_ic_wrapper.rs` | present | 1/1 | 12/12 |  |
+| `FcitxX11TextInputMethod.cs` | `dbus_ime/fcitx/fcitx_x11_text_input_method.rs` | present | 1/1 | 11/11 |  |
+
+<details><summary><code>FcitxEnums.cs</code> - 19 missing</summary>
+
+- `FcitxKeyState` (enum): 19 missing
+  - `FcitxKeyState_None = 0`
+  - `FcitxKeyState_Shift = 1 << 0`
+  - `FcitxKeyState_CapsLock = 1 << 1`
+  - `FcitxKeyState_Ctrl = 1 << 2`
+  - `FcitxKeyState_Alt = 1 << 3`
+  - `FcitxKeyState_Alt_Shift = FcitxKeyState_Alt \| FcitxKeyState_Shift`
+  - `FcitxKeyState_Ctrl_Shift = FcitxKeyState_Ctrl \| FcitxKeyState_Shift`
+  - `FcitxKeyState_Ctrl_Alt = FcitxKeyState_Ctrl \| FcitxKeyState_Alt`
+  - `FcitxKeyState_Ctrl_Alt_Shift = FcitxKeyState_Ctrl \| FcitxKeyState_Alt \| FcitxKeyState_Shift`
+  - `FcitxKeyState_NumLock = 1 << 4`
+  - `FcitxKeyState_Super = 1 << 6`
+  - `FcitxKeyState_ScrollLock = 1 << 7`
+  - `FcitxKeyState_MousePressed = 1 << 8`
+  - `FcitxKeyState_HandledMask = 1 << 24`
+  - `FcitxKeyState_IgnoredMask = 1 << 25`
+  - `FcitxKeyState_Super2 = 1 << 26`
+  - `FcitxKeyState_Hyper = 1 << 27`
+  - `FcitxKeyState_Meta = 1 << 28`
+  - `FcitxKeyState_UsedMask = 0x5c001fff`
+
+</details>
+
+### `DBusIme/IBus` - files 2/2, types 3/3, members 37/37
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `IBusEnums.cs` | `dbus_ime/ibus/ibus_enums.rs` | present | 2/2 | 27/27 |  |
+| `IBusX11TextInputMethod.cs` | `dbus_ime/ibus/ibus_x11_text_input_method.rs` | present | 1/1 | 10/10 |  |
 
 ## Rust-only files
 

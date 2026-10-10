@@ -8,6 +8,12 @@
 //       --upstream /path/to/Avalonia --config scripts/api-extract/projects.json \
 //       --out docs/porting/data
 //
+// The commit recorded in the output is the HEAD of the upstream directory, or
+// the value of --commit when the directory is a plain export of a commit,
+// which is how scripts/port-status/run.sh reads the tracked commit without
+// touching the checkout. --xamlx-commit names the commit of the external/XamlX
+// submodule of such an export.
+//
 // Output: <out>/upstream-api.json (index, and the whole data set when it is
 // smaller than --split-threshold-mb), otherwise one file per project in
 // <out>/upstream/<project>.json referenced from the index.
@@ -36,7 +42,7 @@ internal static class Program
 
     private static int Main(string[] args)
     {
-        string? upstream = null, config = null, outDir = null;
+        string? upstream = null, config = null, outDir = null, commitArg = null, xamlxCommitArg = null;
         double splitMb = 15;
         for (var i = 0; i < args.Length; i++)
         {
@@ -45,6 +51,8 @@ internal static class Program
                 case "--upstream": upstream = args[++i]; break;
                 case "--config": config = args[++i]; break;
                 case "--out": outDir = args[++i]; break;
+                case "--commit": commitArg = args[++i]; break;
+                case "--xamlx-commit": xamlxCommitArg = args[++i]; break;
                 case "--split-threshold-mb": splitMb = double.Parse(args[++i]); break;
                 default:
                     Console.Error.WriteLine($"unknown argument {args[i]}");
@@ -54,7 +62,7 @@ internal static class Program
 
         if (upstream is null || config is null || outDir is null)
         {
-            Console.Error.WriteLine("usage: api-extract --upstream <dir> --config <projects.json> --out <dir> [--split-threshold-mb 15]");
+            Console.Error.WriteLine("usage: api-extract --upstream <dir> --config <projects.json> --out <dir> [--commit <sha>] [--xamlx-commit <sha>] [--split-threshold-mb 15]");
             return 2;
         }
 
@@ -156,10 +164,10 @@ internal static class Program
 
         projects.Sort((a, b) => string.CompareOrdinal(a["path"]!.GetValue<string>(), b["path"]!.GetValue<string>()));
 
-        var commit = GitHead(upstream);
+        var commit = commitArg ?? GitHead(upstream);
         var submoduleCommits = new JsonObject();
         if (Directory.Exists(Path.Combine(upstream, "external", "XamlX")))
-            submoduleCommits["external/XamlX"] = GitHead(Path.Combine(upstream, "external", "XamlX"));
+            submoduleCommits["external/XamlX"] = xamlxCommitArg ?? GitHead(Path.Combine(upstream, "external", "XamlX"));
 
         Directory.CreateDirectory(outDir);
         var serialized = projects.Select(p => (p, text: p.ToJsonString(s_json))).ToList();

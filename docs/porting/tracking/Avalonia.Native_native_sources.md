@@ -10,7 +10,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `native/FerroUI.Native` (exists) |
 | Crate | (Objective-C++ sources built by ferroui-native) |
 | Phase / priority | 1 - desktop (macOS) / P0 |
-| Files | 62/62 (100.0%), 1 not applicable |
+| Files | 62/62 (100.0%) |
 
 Non-C# sources, tracked as a plain file list (names mapped with the rename rules of `scripts/sync-native.sh`).
 
@@ -21,7 +21,6 @@ Non-C# sources, tracked as a plain file list (names mapped with the rename rules
 | Upstream file | FerroUI file | Status | Notes |
 |---|---|---|---|
 | `avalonia-native-guids.h` | `inc/ferro-native-guids.h` | present |  |
-| `avalonia-native.h` | `-` | n/a | not-applicable: generated header: produced at build time from frn.idl by microcom-codegen (scripts/sync-native.sh) |
 | `com.h` | `inc/com.h` | present |  |
 | `comimpl.h` | `inc/comimpl.h` | present |  |
 | `noarc.h` | `inc/noarc.h` | present |  |

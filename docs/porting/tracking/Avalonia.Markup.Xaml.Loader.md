@@ -12,7 +12,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 2 - xaml + themes / P1 |
 | Files | 66/66 (100.0%), 1 not applicable |
 | Types | 120/126 (6 waived) (100.0%) |
-| Members | 400/505 (105 waived) (100.0%) |
+| Members | 422/505 (83 waived) (100.0%) |
 | Contracts (interfaces) | 5/6 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -26,8 +26,8 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.GroupTransformers.IXamlAstGroupTransformer` | internal | `CompilerExtensions/GroupTransformers/IXamlAstGroupTransformer.cs` | 1/1 | present |
 | `Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.IXamlDocumentResource` | internal | `CompilerExtensions/IXamlDocumentResource.cs` | 7/7 | present |
 | `Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.IXamlIlAvaloniaClassPropertyNode` | internal | `CompilerExtensions/XamlIlAvaloniaPropertyHelper.cs` | 0/0 | waived |
-| `Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.IXamlIlAvaloniaProperty` | internal | `CompilerExtensions/XamlIlAvaloniaPropertyHelper.cs` | 0/1 (1 waived) | present |
-| `Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.IXamlIlAvaloniaPropertyNode` | internal | `CompilerExtensions/XamlIlAvaloniaPropertyHelper.cs` | 0/1 (1 waived) | present |
+| `Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.IXamlIlAvaloniaProperty` | internal | `CompilerExtensions/XamlIlAvaloniaPropertyHelper.cs` | 1/1 | present |
+| `Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.IXamlIlAvaloniaPropertyNode` | internal | `CompilerExtensions/XamlIlAvaloniaPropertyHelper.cs` | 1/1 | present |
 | `Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.IXamlIlBindingPathNode` | internal | `CompilerExtensions/XamlIlBindingPathHelper.cs` | 1/1 | present |
 
 ## Files
@@ -40,11 +40,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `AvaloniaXamlIlRuntimeCompiler.cs` | `ferro_xaml_il_runtime_compiler.rs` | present | 1/1 | 2/4 (2 waived) |  |
 | `CompilerDynamicDependencies.cs` | - | n/a | - | - | not-applicable: trimming annotation (`DynamicallyAccessedMembers`) for the reflection the IL loader does: no reflection, nothing to annotate |
 
-### `CompilerExtensions` - files 15/15, types 22/23 (1 waived), members 81/107 (26 waived)
+### `CompilerExtensions` - files 15/15, types 22/23 (1 waived), members 92/107 (15 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaXamlDiagnosticCodes.cs` | `compiler_extensions/ferro_xaml_diagnostic_codes.rs` | present | 1/1 | 21/23 (2 waived) |  |
+| `AvaloniaXamlDiagnosticCodes.cs` | `compiler_extensions/ferro_xaml_diagnostic_codes.rs` | present | 1/1 | 23/23 |  |
 | `AvaloniaXamlIlCompiler.cs` | `compiler_extensions/ferro_xaml_il_compiler.rs` | present | 1/1 | 10/13 (3 waived) |  |
 | `AvaloniaXamlIlCompilerConfiguration.cs` | `compiler_extensions/ferro_xaml_il_compiler_configuration.rs` | present | 1/1 | 1/4 (3 waived) |  |
 | `AvaloniaXamlIlLanguage.cs` | `compiler_extensions/ferro_xaml_il_language.rs` | present | 1/1 | 3/3 |  |
@@ -54,10 +54,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `XamlDocumentResource.cs` | `compiler_extensions/xaml_document_resource.rs` | present | 1/1 | 10/10 |  |
 | `XamlDocumentTypeBuilderProvider.cs` | `compiler_extensions/xaml_document_resource.rs` | present | 1/1 | 2/5 (3 waived) | replaced: the IL type and method builders of a document are the trait `IXamlDocumentTypeBuilderProvider` of `xaml_document_resource.rs`: handles to the build and populate methods of a document, which each back end implements (`RuntimeDocumentTypeBuilderProvider` of the run-time loader). docs/porting/xaml.md 6.2: replaced by an output module per document |
 | `XamlDocumentUsage.cs` | `compiler_extensions/xaml_document_usage.rs` | present | 1/1 | 3/3 |  |
-| `XamlIlAvaloniaPropertyHelper.cs` | `compiler_extensions/xaml_il_ferro_property_helper.rs` | present | 7/8 (1 waived) | 11/25 (14 waived) |  |
+| `XamlIlAvaloniaPropertyHelper.cs` | `compiler_extensions/xaml_il_ferro_property_helper.rs` | present | 7/8 (1 waived) | 19/25 (6 waived) |  |
 | `XamlIlBindingPathHelper.cs` | `compiler_extensions/xaml_il_binding_path_helper.rs` | present | 2/2 | 2/2 |  |
 | `XamlIlClrPropertyInfoHelper.cs` | `compiler_extensions/xaml_il_clr_property_info_helper.rs` | present | 1/1 | 3/3 |  |
-| `XamlIlPropertyInfoAccessorFactoryEmitter.cs` | `compiler_extensions/xaml_il_property_info_accessor_factory_emitter.rs` | present | 1/1 | 3/4 (1 waived) |  |
+| `XamlIlPropertyInfoAccessorFactoryEmitter.cs` | `compiler_extensions/xaml_il_property_info_accessor_factory_emitter.rs` | present | 1/1 | 4/4 |  |
 | `XamlIlTrampolineBuilder.cs` | `compiler_extensions/xaml_il_trampoline_builder.rs` | present | 1/1 | 3/3 |  |
 
 ### `CompilerExtensions/AstNodes` - files 5/5, types 5/5, members 10/15 (5 waived)
@@ -78,7 +78,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `XamlIncludeGroupTransformer.cs` | `compiler_extensions/group_transformers/xaml_include_group_transformer.rs` | present | 1/1 | 2/2 |  |
 | `XamlMergeResourceGroupTransformer.cs` | `compiler_extensions/group_transformers/xaml_merge_resource_group_transformer.rs` | present | 1/1 | 2/2 |  |
 
-### `CompilerExtensions/Transformers` - files 40/40, types 86/91 (5 waived), members 286/358 (72 waived)
+### `CompilerExtensions/Transformers` - files 40/40, types 86/91 (5 waived), members 297/358 (61 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -117,7 +117,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `AvaloniaXamlIlTransformRoutedEvent.cs` | `compiler_extensions/transformers/ferro_xaml_il_transform_routed_event.rs` | present | 1/1 | 1/1 |  |
 | `AvaloniaXamlIlTransformSyntheticCompiledBindingMembers.cs` | `compiler_extensions/transformers/ferro_xaml_il_transform_synthetic_compiled_binding_members.rs` | present | 3/3 | 5/5 |  |
 | `AvaloniaXamlIlTransitionsTypeMetadataTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_transitions_type_metadata_transformer.rs` | present | 1/1 | 1/1 |  |
-| `AvaloniaXamlIlWellKnownTypes.cs` | `compiler_extensions/transformers/ferro_xaml_il_well_known_types.rs` | present | 3/3 | 129/143 (14 waived) |  |
+| `AvaloniaXamlIlWellKnownTypes.cs` | `compiler_extensions/transformers/ferro_xaml_il_well_known_types.rs` | present | 3/3 | 140/143 (3 waived) |  |
 | `IgnoredDirectivesTransformer.cs` | `compiler_extensions/transformers/ignored_directives_transformer.rs` | present | 1/1 | 1/1 |  |
 | `XDataTypeTransformer.cs` | `compiler_extensions/transformers/x_data_type_transformer.rs` | present | 1/1 | 1/1 |  |
 | `XNameTransformer.cs` | `compiler_extensions/transformers/x_name_transformer.rs` | present | 1/1 | 1/1 |  |
