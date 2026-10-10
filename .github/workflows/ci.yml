@@ -193,6 +193,14 @@ jobs:
         env:
           FERROUI_SMOKE_EXIT_MS: 2000
         run: cargo run --locked -p ferroui-desktop --example hello_window
+      # Upstream's integration tests of the backend (tests/FerroUI.IntegrationTests.Win32): windows
+      # of the window class on the desktop of the runner, in every state, with every kind of
+      # decorations, their client area and bounds compared with the screen. One binary without
+      # the test harness; it prints every test with its result.
+      - name: Integration tests of windows on the desktop
+        if: ${{ steps.skia.outputs.raster == 'true' }}
+        timeout-minutes: 30
+        run: cargo test --locked -p ferroui-integration-tests-win32 --test integration
 
   # The same backend on Windows for ARM64 (the owner's test machine is one): whether ANGLE builds
   # for the target and runs there. Informative as a whole until its first green run.
