@@ -5,7 +5,7 @@
 
 FerroUI is a cross-platform UI framework for Rust: a retained-mode control library with a styled property system, data binding, XAML markup, control themes and a composition-based renderer. It is a port of the Avalonia UI framework to idiomatic, safe Rust that keeps the original architecture, contracts and behaviour, so that applications, themes and markup written against that model carry over with their structure intact.
 
-> **Status: early development.** The framework builds and runs on macOS, paints themed controls and passes a large ported test suite, but the public API is not stable, several subsystems are incomplete and nothing has been published to crates.io. See [Project status](#project-status).
+> **Status: preview.** The framework builds and runs on macOS, Windows, Linux (X11), iOS, Android and in the browser, paints themed controls and passes a large ported test suite. The public API is not stable and several subsystems are incomplete; macOS and the browser are the most complete platforms, the others are newer and less tested. See [Project status](#project-status).
 
 ![Fluent theme rendered by FerroUI](docs/porting/images/themed_window_fluent.png)
 
@@ -14,9 +14,9 @@ FerroUI is a cross-platform UI framework for Rust: a retained-mode control libra
 - **Complete object model.** Styled and direct properties with value priorities, inheritance, coercion and change notification; logical and visual trees; routed events; layout; input, focus and gestures.
 - **Styling and theming.** Selectors, styles, control themes, resources, theme variants and transitions. The Fluent and Simple themes are included.
 - **Data binding.** Compiled and reflection-style binding paths, converters, multi-bindings, data validation and templates.
-- **XAML.** A port of the XamlX compiler front end together with the framework's transformers and markup extensions. Documents are loaded at run time today; ahead-of-time compilation to Rust is designed and in progress.
+- **XAML.** A port of the XamlX compiler front end together with the framework's transformers and markup extensions. Documents are compiled to Rust source by the build script of a crate, or loaded at run time.
 - **Composition renderer.** A compositor with a render loop, dirty-region tracking and server-side visuals, drawing through a backend-neutral drawing context.
-- **Swappable backends.** Rendering and windowing sit behind contracts. The current backends are Skia (Graphite on Metal, Ganesh, raster) for rendering, HarfBuzz for text shaping and a native macOS windowing backend.
+- **Swappable backends.** Rendering and windowing sit behind contracts. The backends are Skia (Graphite on Metal, Ganesh on OpenGL, ANGLE and WebGL, raster) for rendering, with an experimental Vello backend, HarfBuzz for text shaping, and platform backends for macOS, Windows, Linux (X11), iOS, Android and the browser.
 - **Safe Rust.** The controls, markup, XAML and theme crates contain no `unsafe` code. It is confined to a small part of the object model core and to the rendering, text shaping, platform and interop backends.
 
 ## Project status
@@ -28,20 +28,27 @@ FerroUI is a cross-platform UI framework for Rust: a retained-mode control libra
 | Media, text layout, fonts | Ported |
 | Compositor and render loop | Working; composition animations and custom visuals outstanding |
 | Skia and HarfBuzz backends | Working |
-| macOS platform | Windows, input, clipboard, drag and drop, menus, tray icon; storage dialogs and accessibility outstanding |
+| macOS platform | Windows, input, clipboard, drag and drop, menus, tray icon; storage dialogs and parts of accessibility outstanding |
 | Controls | Most of the control set, including items controls, text input, menus, pickers, calendar, pages and automation peers |
-| XAML | Run-time loader with the upstream test suites; ahead-of-time compiler outstanding |
+| XAML | Compilation of markup to Rust source at build time (used by the themes and the samples), and the run-time loader with the upstream test suites |
 | Themes | Fluent and Simple load for every ported control |
-| Windows and Linux platforms | Not started |
-| Browser (WebAssembly) | In progress |
-| Vello render backend | In progress: geometries, shapes, brushes, pens, clips, layers, bitmaps and text (typefaces, the fonts of the system, glyph runs) on the CPU renderer, measured against the Skia backend; effects and the GPU modes are next (`docs/porting/vello-backend.md`) |
+| Windows platform | Windows, input, clipboard and drag and drop over OLE, file dialogs, tray icon, native control host, extended client area; rendering in software, through ANGLE and through DirectComposition. Input methods (IME), UI Automation, WGL and the blur effects of composition outstanding |
+| Linux platform (X11) | Windows, input, input methods (XIM, IBus, Fcitx), clipboard, drag and drop, the desktop portals, GTK file dialogs, menus and tray icon over D-Bus, session management, native control host, accessibility over AT-SPI; rendering in software, through GLX and EGL. Wayland, the Linux framebuffer and Vulkan outstanding |
+| iOS platform | A view over Metal, touch, keyboard and text input, clipboard, storage, native control host, accessibility. Verified in the simulator only |
+| Android platform | A view over a surface with EGL or software rendering, touch, keyboard and text input, lifecycle, clipboard, storage, native control host, accessibility. Verified on the emulator only; the native library is built with a nightly toolchain for now (`docs/porting/android-platform.md`, section 5.1) |
+| Browser (WebAssembly) | Working; in progress |
+| Vello render backend | Experimental: CPU, hybrid and GPU modes, measured against the Skia backend, which is the default and the reference; the open work is listed in `docs/porting/vello-backend.md`, section 13 |
 
-Roughly 70 percent of the upstream API surface that is in scope has a counterpart. The per-subsystem state is tracked in [docs/porting/CRITICAL-PATH.md](docs/porting/CRITICAL-PATH.md) and the per-member state in [docs/porting/TRACKING.md](docs/porting/TRACKING.md).
+About 95 percent of the members of the upstream projects that are in scope have a counterpart, and about three quarters of the members of every upstream project (the projects that are not ported yet, such as Wayland and Vulkan, count in the second number). The per-subsystem state is tracked in [docs/porting/CRITICAL-PATH.md](docs/porting/CRITICAL-PATH.md) and the per-member state in [docs/porting/TRACKING.md](docs/porting/TRACKING.md).
 
 ## Requirements
 
 - Rust 1.89 or later
-- macOS 11 or later with the Xcode command line tools (the only supported platform at present)
+- One of the platforms:
+  - macOS 11 or later with the Xcode command line tools
+  - Windows (x64 or ARM64; verified on Windows 11 and on the Windows Server runners of the continuous integration) with the MSVC build tools; rendering through ANGLE needs `libclang`
+  - Linux with X11 and the development packages of fontconfig
+  - iOS (Xcode), Android (the SDK and NDK, and a nightly toolchain for the native library) and the browser (Emscripten): see the platform documents under `docs/porting`
 - Python 3 for the maintenance scripts (not needed to build)
 
 The first build compiles or downloads Skia and can take a while.
