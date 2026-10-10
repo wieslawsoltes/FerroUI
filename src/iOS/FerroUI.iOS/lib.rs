@@ -18,6 +18,7 @@
 //! of the crate run on the development machine.
 
 pub mod activatable_lifetime;
+pub mod automation_peer_wrapper;
 pub mod clipboard;
 pub mod combined_span3;
 pub mod completion;
