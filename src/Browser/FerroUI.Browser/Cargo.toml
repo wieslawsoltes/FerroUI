@@ -22,7 +22,7 @@ wasm-bindgen.workspace = true
 ferroui-vello = { workspace = true, optional = true, features = ["hybrid-webgl"] }
 
 # The Vello render backend beside Skia, chosen at start with `BrowserPlatformOptions::renderer`
-# (docs/porting/vello-backend.md, section 11). Off by default: it adds the renderers of the Vello
+# (docs/porting/vello-backend.md, section 12). Off by default: it adds the renderers of the Vello
 # project to the module.
 [features]
 default = []

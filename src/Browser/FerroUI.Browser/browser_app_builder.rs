@@ -241,7 +241,7 @@ fn use_vello_renderer(_builder: &AppBuilder) -> AppBuilder {
     panic!(
         "BrowserPlatformOptions::renderer asks for the Vello backend, and the module was built without the feature \
          `vello` of ferroui-browser (scripts/build-browser.sh <application> --features vello; \
-         docs/porting/vello-backend.md, section 11)"
+         docs/porting/vello-backend.md, section 12)"
     );
 }
 

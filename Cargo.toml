@@ -108,7 +108,7 @@ gif = { version = "=0.14.2", default-features = false, features = ["std"] }
 # their platforms. No crate but the Vello backend names these, and only behind its features.
 # `vello_gpu` has two renderers: over `wgpu` (the feature `hybrid` of the backend adds its `wgpu`
 # feature) and over a WebGL2 context through `web-sys` (the feature `hybrid-webgl` adds its `webgl`
-# feature: the browser, docs/porting/vello-backend.md, section 11).
+# feature: the browser, docs/porting/vello-backend.md, section 12).
 vello_gpu = { version = "=0.3.0", default-features = false, features = ["std", "text"] }
 vello = { version = "=0.11.0", default-features = false, features = ["wgpu"] }
 wgpu = { version = "=30.0.1", default-features = false, features = ["std", "wgsl", "metal"] }
@@ -185,7 +185,7 @@ opt-level = 3
 # crate; no other module links them): flattening, strips, the fine rasterization of the CPU mode,
 # glyph outlines and the conversions of the backend are inner loops over every pixel or every curve
 # of a frame. At "z" a frame of the TableView page of the catalog took 330 ms in the CPU mode and
-# 27 ms in the hybrid mode (docs/porting/vello-backend.md, section 11.5).
+# 27 ms in the hybrid mode (docs/porting/vello-backend.md, section 12.5).
 [profile.browser.package.ferroui-vello]
 opt-level = 3
 

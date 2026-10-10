@@ -23,7 +23,7 @@
 //
 // A second argument is a parameter of the query string that every page of the checks is opened with.
 // `Renderer=Vello` runs the same checks with the Vello render backend, against a site whose module
-// has it (docs/porting/vello-backend.md, section 11):
+// has it (docs/porting/vello-backend.md, section 12):
 //
 //   scripts/build-browser.sh themed_view --features vello
 //   node scripts/browser/tests/themed_view.test.mjs target/browser-vello/themed_view Renderer=Vello
