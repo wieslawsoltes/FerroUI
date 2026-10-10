@@ -75,12 +75,15 @@ impl NativeLibrary {
 /// of them or fails with the name of the first that is missing.
 ///
 /// Each entry names the library (an argument of `load`) the function is
-/// in, as the `DllImport` attribute of the reference does.
+/// in, as the `DllImport` attribute of the reference does, and the
+/// exported name when the field is named otherwise (`as "Name"`).
 macro_rules! native_functions {
+    (@symbol $f:ident) => { stringify!($f) };
+    (@symbol $f:ident $symbol:literal) => { $symbol };
     (
         $(#[$meta:meta])*
         $vis:vis struct $name:ident ($($lib:ident),+ $(,)?) {
-            $( $(#[$fmeta:meta])* $flib:ident :: $f:ident : $ty:ty ; )*
+            $( $(#[$fmeta:meta])* $flib:ident :: $f:ident $(as $symbol:literal)? : $ty:ty ; )*
         }
     ) => {
         $(#[$meta])*
@@ -101,7 +104,9 @@ macro_rules! native_functions {
                         // whose C declaration is the type of the field; a function pointer
                         // has the size and the validity of a non-null address.
                         $f: unsafe {
-                            std::mem::transmute::<*const std::ffi::c_void, $ty>($flib.symbol(stringify!($f))?)
+                            std::mem::transmute::<*const std::ffi::c_void, $ty>(
+                                $flib.symbol($crate::interop::native_library::native_functions!(@symbol $f $($symbol)?))?,
+                            )
                         },
                     )*
                 })

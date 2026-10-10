@@ -14,8 +14,8 @@
 //! session management and logs that; the reference fails to start
 //! (DEVIATIONS.md).
 
-use crate::ice_lib::{ice_lib, IceLibApi, ICE_PROCESS_MESSAGES_IO_ERROR};
-use crate::sm_lib::{sm_lib, SmDialogValue, SmLibApi, SmcCallbacks};
+use crate::ice_lib::{ice_lib, ICELib, IceProcessMessagesStatus};
+use crate::sm_lib::{sm_lib, SmDialogValue, SMLib, SmcCallbacks};
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
@@ -57,8 +57,8 @@ pub(crate) trait ISmConnectionCalls: Send + Sync {
 }
 
 struct LibraryCalls {
-    sm: &'static SmLibApi,
-    ice: &'static IceLibApi,
+    sm: &'static SMLib,
+    ice: &'static ICELib,
 }
 
 impl ISmConnectionCalls for LibraryCalls {
@@ -66,14 +66,14 @@ impl ISmConnectionCalls for LibraryCalls {
         // SAFETY: the connection is one `SmcOpenConnection` returned and that was not closed:
         // the callers take it from the callback of the library or from the field that is
         // cleared before the connection is closed.
-        unsafe { (self.sm.SmcSaveYourselfDone)(smc_conn as *mut c_void, success as c_int) }
+        unsafe { (self.sm.smc_save_yourself_done)(smc_conn as *mut c_void, success as c_int) }
     }
 
     fn interact_request(&self, smc_conn: usize, client_data: usize) {
         // SAFETY: as above; the handler is a function of this module, which lives as long as
         // the process.
         unsafe {
-            (self.sm.SmcInteractRequest)(
+            (self.sm.smc_interact_request)(
                 smc_conn as *mut c_void,
                 SmDialogValue::SmDialogError as c_int,
                 static_interact_handler,
@@ -84,7 +84,7 @@ impl ISmConnectionCalls for LibraryCalls {
 
     fn interact_done(&self, smc_conn: usize, cancel_shutdown: bool) {
         // SAFETY: as `save_yourself_done`.
-        unsafe { (self.sm.SmcInteractDone)(smc_conn as *mut c_void, cancel_shutdown as c_int) }
+        unsafe { (self.sm.smc_interact_done)(smc_conn as *mut c_void, cancel_shutdown as c_int) }
     }
 
     fn close_connection(&self, smc_conn: usize, reason: &str) {
@@ -92,7 +92,7 @@ impl ISmConnectionCalls for LibraryCalls {
         let mut reasons = [reason.as_ptr().cast_mut()];
         // SAFETY: the connection was taken out of its field by the caller, so it is closed
         // once; the reasons are one terminated string that lives for the call.
-        unsafe { (self.sm.SmcCloseConnection)(smc_conn as *mut c_void, 1, reasons.as_mut_ptr()) };
+        unsafe { (self.sm.smc_close_connection)(smc_conn as *mut c_void, 1, reasons.as_mut_ptr()) };
     }
 
     fn process_messages(&self, ice_conn: usize) -> bool {
@@ -101,8 +101,8 @@ impl ISmConnectionCalls for LibraryCalls {
         // this one thread; no reply is waited for (a null wait), and the flag is a valid
         // place for an integer.
         let status =
-            unsafe { (self.ice.IceProcessMessages)(ice_conn as *mut c_void, std::ptr::null_mut(), &mut reply_ready) };
-        status != ICE_PROCESS_MESSAGES_IO_ERROR
+            unsafe { (self.ice.ice_process_messages)(ice_conn as *mut c_void, std::ptr::null_mut(), &mut reply_ready) };
+        status != IceProcessMessagesStatus::IceProcessMessagesIoError as c_int
     }
 }
 
@@ -218,7 +218,7 @@ unsafe extern "C" fn ice_watch_handler(
 
     if let Ok(ice) = ice_lib() {
         // SAFETY: removes the watch this module added, with the arguments it was added with.
-        unsafe { (ice.IceRemoveConnectionWatch)(ice_watch_handler, std::ptr::null_mut()) };
+        unsafe { (ice.ice_remove_connection_watch)(ice_watch_handler, std::ptr::null_mut()) };
     }
 }
 
@@ -379,9 +379,9 @@ impl X11PlatformLifetimeEvents {
     }
 
     /// The constructor of the reference after its first line.
-    fn connect(&self, sm: &'static SmLibApi, ice: &'static IceLibApi) {
+    fn connect(&self, sm: &'static SMLib, ice: &'static ICELib) {
         // SAFETY: the watch is a function of this module, which lives as long as the process.
-        if unsafe { (ice.IceAddConnectionWatch)(ice_watch_handler, std::ptr::null_mut()) } == 0 {
+        if unsafe { (ice.ice_add_connection_watch)(ice_watch_handler, std::ptr::null_mut()) } == 0 {
             warn("SMLib was unable to add an ICE connection watcher.");
             return;
         }
@@ -404,7 +404,7 @@ impl X11PlatformLifetimeEvents {
         // identifier the library allocates is kept for the life of the process, as in the
         // reference.
         let smc_conn = unsafe {
-            (sm.SmcOpenConnection)(
+            (sm.smc_open_connection)(
                 std::ptr::null(),
                 std::ptr::null_mut(),
                 1,
@@ -442,10 +442,10 @@ impl X11PlatformLifetimeEvents {
 
         // SAFETY: the handlers are functions of this module; the connection is open.
         let ice_conn = unsafe {
-            let _ = (sm.SmcSetErrorHandler)(Some(static_error_handler));
-            let _ = (ice.IceSetErrorHandler)(Some(static_error_handler));
-            let _ = (ice.IceSetIOErrorHandler)(Some(static_ice_io_error_handler));
-            (sm.SmcGetIceConnection)(smc_conn as *mut c_void) as usize
+            let _ = (sm.smc_set_error_handler)(Some(static_error_handler));
+            let _ = (ice.ice_set_error_handler)(Some(static_error_handler));
+            let _ = (ice.ice_set_io_error_handler)(Some(static_ice_io_error_handler));
+            (sm.smc_get_ice_connection)(smc_conn as *mut c_void) as usize
         };
 
         self.shared.current_smc_conn.store(smc_conn, Ordering::SeqCst);

@@ -2,23 +2,23 @@
  "upstreamCommit": "17350180c33b063f0e98abbfd19aa3cae63f5d56",
  "inScope": {
   "files": [
-   2475,
+   2487,
    2569,
    0
   ],
   "types": [
-   3348,
+   3379,
    3888,
    311
   ],
   "members": [
-   27019,
+   27142,
    31738,
    2858
   ]
  },
  "allProjects": {
-  "membersPresent": 27019,
+  "membersPresent": 27142,
   "members": 37391,
   "membersNotApplicable": 1132,
   "membersOutOfScope": 4521
@@ -7714,17 +7714,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    73,
+    85,
     88,
     0
    ],
    "types": [
-    144,
+    175,
     291,
     107
    ],
    "members": [
-    3402,
+    3525,
     4897,
     1076
    ],
@@ -7744,18 +7744,24 @@
    "matchKinds": {
     "alias field": 1,
     "const": 2,
-    "field": 247,
-    "fn": 405,
-    "free fn": 102,
-    "free item": 12,
-    "overload fn": 5,
+    "field": 254,
+    "fn": 492,
+    "free fn": 103,
+    "free item": 16,
+    "overload fn": 7,
     "trait": 3,
     "trait fn": 4,
-    "variant": 2621
+    "variant": 2643
    },
    "presentFiles": {
     "ActivityTrackingHelper.cs": [
      "activity_tracking_helper.rs"
+    ],
+    "Dispatching/GLibDispatcherImpl.cs": [
+     "dispatching/g_lib_dispatcher_impl.rs"
+    ],
+    "Dispatching/GlibDispatcherImplBase.cs": [
+     "dispatching/glib_dispatcher_impl_base.rs"
     ],
     "Dispatching/IX11PlatformDispatcher.cs": [
      "dispatching/i_x11_platform_dispatcher.rs"
@@ -7784,11 +7790,29 @@
     "Glx/GlxPlatformFeature.cs": [
      "glx/glx_platform_feature.rs"
     ],
+    "ICELib.cs": [
+     "ice_lib.rs"
+    ],
+    "Interop/Glib.cs": [
+     "interop/glib.rs"
+    ],
+    "Interop/GtkInteropHelper.cs": [
+     "interop/gtk_interop_helper.rs"
+    ],
     "Keysyms.cs": [
      "keysyms.rs"
     ],
     "LibC.cs": [
      "lib_c.rs"
+    ],
+    "NativeDialogs/Gtk.cs": [
+     "native_dialogs/gtk.rs"
+    ],
+    "NativeDialogs/GtkNativeFileDialogs.cs": [
+     "native_dialogs/gtk_native_file_dialogs.rs"
+    ],
+    "SMLib.cs": [
+     "sm_lib.rs"
     ],
     "Screens/X11Screen.Providers.cs": [
      "screens/x11_screen_providers.rs"
@@ -7916,8 +7940,14 @@
     "X11KeyTransform.cs": [
      "x11_key_transform.rs"
     ],
+    "X11NativeControlHost.cs": [
+     "x11_native_control_host.rs"
+    ],
     "X11Platform.cs": [
      "x11_platform.rs"
+    ],
+    "X11PlatformLifetimeEvents.cs": [
+     "x11_platform_lifetime_events.rs"
     ],
     "X11Structs.cs": [
      "x11_structs.rs"
@@ -7942,6 +7972,12 @@
     ],
     "X11WindowModes/WindowMode.cs": [
      "x11_window_modes/window_mode.rs"
+    ],
+    "X11WindowModes/XEmbedClientWindowMode.cs": [
+     "x11_window_modes/x_embed_client_window_mode.rs"
+    ],
+    "XEmbedPlug.cs": [
+     "x_embed_plug.rs"
     ],
     "XEmbedTrayIconImpl.cs": [
      "x_embed_tray_icon_impl.rs"
@@ -7975,6 +8011,7 @@
     ]
    },
    "rustOnly": [
+    "interop/native_library.rs",
     "pixel_buffer.rs",
     "raw_event_grouping.rs",
     "selections/drag_drop/x11_drag_source/tests.rs",

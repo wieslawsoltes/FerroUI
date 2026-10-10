@@ -8,8 +8,8 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. The s
 
 | | Present | Total | Missing | Waived | Not applicable | Out of scope | Share |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Members of the projects in scope | 27019 | 31738 | 1861 | 2858 | - | - | 93.6% of total less waived |
-| Members of every upstream source project of the extraction | 27019 | 37391 | 1861 | 2858 | 1132 | 4521 | 72.3% of total |
+| Members of the projects in scope | 27142 | 31738 | 1738 | 2858 | - | - | 94.0% of total less waived |
+| Members of every upstream source project of the extraction | 27142 | 37391 | 1738 | 2858 | 1132 | 4521 | 72.6% of total |
 
 The first row is the headline of the tracking: it leaves out the waived members and everything out of scope. The second row leaves out nothing: every member of every C# project the extraction reads, whether or not the port will ever have it. A member is *present* when an item of the mapped name exists; names are matched, not behaviour.
 
@@ -37,7 +37,7 @@ Files, types and members as present / missing / waived. *n/a* counts the files m
 | [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | in | 14 / 0 / 0 | 54 / 0 / 1 | 198 / 1 / 3 | 0 (0) | 98.0% |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | in | 5 / 0 / 0 | 6 / 0 / 0 | 68 / 0 / 5 | 1 (0) | 93.2% |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | in | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 | 1 (0) | 100.0% |
-| [Avalonia.X11](tracking/Avalonia.X11.md) | in | 73 / 15 / 0 | 144 / 40 / 107 | 3402 / 419 / 1076 | 0 (0) | 69.5% |
+| [Avalonia.X11](tracking/Avalonia.X11.md) | in | 85 / 3 / 0 | 175 / 9 / 107 | 3525 / 296 / 1076 | 0 (0) | 72.0% |
 | [Avalonia.Browser](tracking/Avalonia.Browser.md) | in | 50 / 0 / 0 | 60 / 0 / 2 | 340 / 0 / 88 | 2 (13) | 77.1% |
 | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | in | 3 / 0 / 0 | 3 / 0 / 0 | 5 / 0 / 3 | 0 (0) | 62.5% |
 | [Avalonia.Headless](tracking/Avalonia.Headless.md) | in | 11 / 0 / 0 | 22 / 0 / 2 | 238 / 0 / 13 | 0 (0) | 94.8% |
@@ -251,11 +251,11 @@ Files without a Rust file, types without a Rust type, and members without a Rust
 
 ### [Avalonia.X11](tracking/Avalonia.X11.md)
 
-15 files, 40 types and 419 members missing (258 members of the missing types, 161 members of types that exist).
+3 files, 9 types and 296 members missing (118 members of the missing types, 178 members of types that exist).
 
-- **Files (15):** `Dispatching/GLibDispatcherImpl.cs`, `Dispatching/GlibDispatcherImplBase.cs`, `ICELib.cs`, `Interop/Glib.cs`, `Interop/GtkInteropHelper.cs`, `NativeDialogs/Gtk.cs`, `NativeDialogs/GtkNativeFileDialogs.cs`, `SMLib.cs`, `Vulkan/VulkanNativeInterop.cs`, `Vulkan/VulkanSupport.cs`, `X11AtSpiAccessibility.cs`, `X11NativeControlHost.cs`, `X11PlatformLifetimeEvents.cs`, `X11WindowModes/XEmbedClientWindowMode.cs`, `XEmbedPlug.cs`
-- **Types (40):** `GSList`, `Glib`, `Glib.GDestroyNotify`, `Glib.GIOCondition`, `Glib.GSourceFunc`, `Glib.GUnixFDSourceFunc`, `GlibDispatcherImpl`, `GlibDispatcherImplBase`, `GlxConsts`, `Gtk`, `Gtk.signal_dialog_response`, `Gtk.signal_generic`, `GtkFileChooserAction`, `GtkInteropHelper`, `GtkResponseType`, `GtkSystemDialog`, `ICELib`, `ICELib.IceErrorHandler`, `ICELib.IceIOErrorHandler`, `ICELib.IceProcessMessagesStatus`, `SMLib`, `SMLib.IceWatchProc`, `SMLib.SmDialogValue`, `SMLib.SmcCallbacks`, `SMLib.SmcDieProc`, `SMLib.SmcErrorHandler`, `SMLib.SmcInteractProc`, `SMLib.SmcSaveCompleteProc`, `SMLib.SmcSaveYourselfProc`, `SMLib.SmcShutdownCancelledProc`, `VkXlibSurfaceCreateInfoKHR`, `VulkanSupport`, `VulkanSupport.VulkanSurfaceFactory`, `X11AtSpiAccessibility`, `X11NativeControlHost`, `X11PlatformLifetimeEvents`, `X11VulkanInterface`, `X11Window.XEmbedClientWindowMode`, `XEmbedPlug`, `XLib.GrabResult`
-- **Members of types that exist (161), by type:** `XLib` 130, `X11Window.X11WindowMode` 7, `AvaloniaX11Platform` 4, `GlxInterface` 3, `CursorImpl` 2, `DragDropDataProvider` 2, `DragDropDataTransfer` 2, `XLib.XGeometry` 2, `DataFormatHelper` 1, `GlxDisplay` 1, `SelectionDataProvider` 1, `X11EglHelper` 1, `X11FramebufferSurface` 1, `X11Window` 1, `X11Window.DefaultTopLevelWindowMode` 1, `X11Window.InputProxyWindowMode` 1, `X11Window.SurfacePlatformHandle` 1
+- **Files (3):** `Vulkan/VulkanNativeInterop.cs`, `Vulkan/VulkanSupport.cs`, `X11AtSpiAccessibility.cs`
+- **Types (9):** `GlxConsts`, `Gtk.signal_dialog_response`, `Gtk.signal_generic`, `VkXlibSurfaceCreateInfoKHR`, `VulkanSupport`, `VulkanSupport.VulkanSurfaceFactory`, `X11AtSpiAccessibility`, `X11VulkanInterface`, `XLib.GrabResult`
+- **Members of types that exist (178), by type:** `XLib` 130, `SMLib` 7, `X11Window.X11WindowMode` 7, `Glib` 5, `ICELib` 5, `AvaloniaX11Platform` 4, `GlxInterface` 3, `CursorImpl` 2, `DragDropDataProvider` 2, `DragDropDataTransfer` 2, `XLib.XGeometry` 2, `DataFormatHelper` 1, `GlxDisplay` 1, `SelectionDataProvider` 1, `X11EglHelper` 1, `X11FramebufferSurface` 1, `X11Window` 1, `X11Window.DefaultTopLevelWindowMode` 1, `X11Window.InputProxyWindowMode` 1, `X11Window.SurfacePlatformHandle` 1
 
 ### [Avalonia.Skia](tracking/Avalonia.Skia.md)
 

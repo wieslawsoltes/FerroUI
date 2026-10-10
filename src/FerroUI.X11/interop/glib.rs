@@ -248,12 +248,12 @@ pub struct GMainLoop {
 }
 
 impl GMainLoop {
-    pub fn run(&self) {
+    pub fn g_main_loop_run(&self) {
         // SAFETY: the loop is alive while this object is.
         unsafe { (self.glib.api.g_main_loop_run)(self.main_loop as *mut c_void) }
     }
 
-    pub fn quit(&self) {
+    pub fn g_main_loop_quit(&self) {
         // SAFETY: the loop is alive while this object is; the function is safe to call from
         // any thread.
         unsafe { (self.glib.api.g_main_loop_quit)(self.main_loop as *mut c_void) }
@@ -574,7 +574,7 @@ pub(crate) mod tests {
             30,
             Box::new(move || {
                 o.lock().unwrap().push("timeout");
-                l.quit();
+                l.g_main_loop_quit();
             }),
         );
         // A timeout that is removed never runs, and its state is freed.
@@ -590,7 +590,7 @@ pub(crate) mod tests {
         assert!(glib.g_source_remove(tag));
         assert_eq!(dropped.load(Ordering::SeqCst), 1);
 
-        main_loop.run();
+        main_loop.g_main_loop_run();
         assert_eq!(*order.lock().unwrap(), ["high", "high", "idle", "timeout"]);
     }
 
@@ -612,7 +612,7 @@ pub(crate) mod tests {
             GIOCondition::G_IO_IN,
             Box::new(move |fd, condition| {
                 *s.lock().unwrap() = Some((fd, condition));
-                l.quit();
+                l.g_main_loop_quit();
                 false
             }),
         );
@@ -621,7 +621,7 @@ pub(crate) mod tests {
         assert_eq!(glib.g_source_get_can_recurse(tag), Some(true));
         // SAFETY: writes one byte of a local value to the pipe of this test.
         assert_eq!(unsafe { libc::write(fds[1], [1u8].as_ptr().cast(), 1) }, 1);
-        main_loop.run();
+        main_loop.g_main_loop_run();
         assert_eq!(*seen.lock().unwrap(), Some((fds[0], GIOCondition::G_IO_IN)));
         // The callback returned false: the source is gone.
         assert_eq!(glib.g_source_get_can_recurse(tag), None);
@@ -642,8 +642,8 @@ pub(crate) mod tests {
         let ok = glib.run_on_glib_thread(|| 6 * 7);
         let failed = glib.run_on_glib_thread(|| -> i32 { panic!("no answer") });
         let l = main_loop.clone();
-        glib.g_timeout_add_once(20, Box::new(move || l.quit()));
-        main_loop.run();
+        glib.g_timeout_add_once(20, Box::new(move || l.g_main_loop_quit()));
+        main_loop.g_main_loop_run();
 
         let block = |task: GlibTask<i32>| {
             let waker = Waker::noop();

@@ -47,6 +47,11 @@ pub enum GtkResponseType {
     None = -1,
 }
 
+/// `signal_generic`: the handler of a signal without arguments.
+pub type SignalGeneric = crate::interop::glib::SignalGeneric;
+/// `signal_dialog_response`: the handler of the response of a dialog.
+pub type SignalDialogResponse = crate::interop::glib::SignalDialogResponse;
+
 const GDK_NAME: &CStr = c"libgdk-3.so.0";
 const GTK_NAME: &CStr = c"libgtk-3.so.0";
 
