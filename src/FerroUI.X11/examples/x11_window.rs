@@ -1939,6 +1939,13 @@ mod app {
                 let tray_clicks = tray_clicks.clone();
                 tray_icon.clicked(move |_| tray_clicks.set(tray_clicks.get() + 1))
             };
+            // A tray icon has its platform implementation while it is one of the icons of the application.
+            let tray_icons = ferroui_controls::TrayIcons::new();
+            tray_icons.add(tray_icon.clone());
+            match Application::current() {
+                Some(application) => TrayIcon::set_icons(&application, Some(tray_icons)),
+                None => report.check("application", false, "there is no application to give the tray icon to".to_string()),
+            }
             tray_icon.set_tool_tip_text(Some("FerroUI tray".to_string()));
             let tray_menu = NativeMenu::new();
             tray_menu.add(NativeMenuItem::with_header("Show"));
