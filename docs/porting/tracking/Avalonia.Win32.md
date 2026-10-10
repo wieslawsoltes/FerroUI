@@ -10,10 +10,10 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Windows/FerroUI.Win32` (exists) |
 | Crate | `ferroui-win32` |
 | Phase / priority | 1 - desktop (Windows) / P0 |
-| Files | 59/95 (62.1%) |
-| Types | 162/276 (58.7%) |
-| Members | 1687/2605 (64.8%) |
-| Contracts (interfaces) | 1/7 |
+| Files | 70/95 (73.7%) |
+| Types | 182/276 (65.9%) |
+| Members | 1763/2605 (67.7%) |
+| Contracts (interfaces) | 7/7 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
@@ -23,17 +23,17 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 | Interface | Access | Upstream file | Members | Status |
 |---|---|---|---|---|
-| `Avalonia.Win32.DirectX.IDirect3D11TexturePlatformSurface` | public | `DirectX/IDirect3D11TexturePlatformSurface.cs` | 0/1 | missing |
-| `Avalonia.Win32.DirectX.IDirect3D11TexturePlatformSurface2` | public | `DirectX/IDirect3D11TexturePlatformSurface.cs` | 0/1 | missing |
-| `Avalonia.Win32.DirectX.IDirect3D11TextureRenderTarget` | public | `DirectX/IDirect3D11TexturePlatformSurface.cs` | 0/1 | missing |
-| `Avalonia.Win32.DirectX.IDirect3D11TextureRenderTarget2` | public | `DirectX/IDirect3D11TexturePlatformSurface.cs` | 0/1 | missing |
-| `Avalonia.Win32.DirectX.IDirect3D11TextureRenderTargetRenderSession` | public | `DirectX/IDirect3D11TexturePlatformSurface.cs` | 0/4 | missing |
+| `Avalonia.Win32.DirectX.IDirect3D11TexturePlatformSurface` | public | `DirectX/IDirect3D11TexturePlatformSurface.cs` | 1/1 | present |
+| `Avalonia.Win32.DirectX.IDirect3D11TexturePlatformSurface2` | public | `DirectX/IDirect3D11TexturePlatformSurface.cs` | 1/1 | present |
+| `Avalonia.Win32.DirectX.IDirect3D11TextureRenderTarget` | public | `DirectX/IDirect3D11TexturePlatformSurface.cs` | 1/1 | present |
+| `Avalonia.Win32.DirectX.IDirect3D11TextureRenderTarget2` | public | `DirectX/IDirect3D11TexturePlatformSurface.cs` | 1/1 | present |
+| `Avalonia.Win32.DirectX.IDirect3D11TextureRenderTargetRenderSession` | public | `DirectX/IDirect3D11TexturePlatformSurface.cs` | 4/4 | present |
 | `Avalonia.Win32.ICompositionEffectsSurface` | internal | `IBlurHost.cs` | 1/1 | present |
-| `Avalonia.Win32.IWindowsSurfaceFactory` | internal | `IWindowsSurfaceFactory.cs` | 0/2 | missing |
+| `Avalonia.Win32.IWindowsSurfaceFactory` | internal | `IWindowsSurfaceFactory.cs` | 2/2 | present |
 
 ## Files
 
-### `(project root)` - files 40/43, types 49/52, members 301/358
+### `(project root)` - files 41/43, types 50/52, members 303/358
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -46,7 +46,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `EmbeddedWindowImpl.cs` | `embedded_window_impl.rs` | partial | 1/1 | 1/2 |  |
 | `FramebufferManager.cs` | `framebuffer_manager.rs` | present | 1/1 | 4/4 |  |
 | `IBlurHost.cs` | `i_blur_host.rs` | present | 2/2 | 6/6 |  |
-| `IWindowsSurfaceFactory.cs` | `i_windows_surface_factory.rs` | missing | 0/1 | 0/2 |  |
+| `IWindowsSurfaceFactory.cs` | `i_windows_surface_factory.rs` | present | 1/1 | 2/2 |  |
 | `IconImpl.cs` | `icon_impl.rs` | present | 1/1 | 6/6 |  |
 | `NonPumpingWaitHelperImpl.cs` | `non_pumping_wait_helper_impl.rs` | missing | 0/1 | 0/2 |  |
 | `OffscreenParentWindow.cs` | `offscreen_parent_window.rs` | present | 1/1 | 1/1 |  |
@@ -178,24 +178,33 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `DComposition` - files 0/6, types 1/8, members 2/34
+### `DComposition` - files 6/6, types 8/8, members 31/34
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `DirectCompositedWindow.cs` | `d_composition/direct_composited_window.rs` | missing | 0/1 | 0/5 |  |
-| `DirectCompositedWindowSurface.cs` | `d_composition/direct_composited_window_surface.rs` | missing | 0/2 | 0/10 |  |
-| `DirectCompositionConnection.cs` | `d_composition/direct_composition_connection.rs` | missing | 0/1 | 0/7 |  |
-| `DirectCompositionShared.cs` | `d_composition/direct_composition_shared.rs` | missing | 0/1 | 0/4 |  |
-| `NativeMethods.cs` | `d_composition/native_methods.rs` | missing | 0/1 | 0/1 |  |
-| `NativeStructs.cs` | `d_composition/native_structs.rs` | missing (types found elsewhere) | 1/2 | 2/7 | types found in `direct_x/direct_x_structs.rs` (add to path-overrides.toml) |
+| `DirectCompositedWindow.cs` | `d_composition/direct_composited_window.rs` | present | 1/1 | 5/5 |  |
+| `DirectCompositedWindowSurface.cs` | `d_composition/direct_composited_window_surface.rs` | present | 2/2 | 10/10 |  |
+| `DirectCompositionConnection.cs` | `d_composition/direct_composition_connection.rs` | partial | 1/1 | 5/7 |  |
+| `DirectCompositionShared.cs` | `d_composition/direct_composition_shared.rs` | partial | 1/1 | 3/4 |  |
+| `NativeMethods.cs` | `d_composition/native_methods.rs` | present | 1/1 | 1/1 |  |
+| `NativeStructs.cs` | `d_composition/native_structs.rs` | present | 2/2 | 7/7 |  |
 
-<details><summary><code>NativeStructs.cs</code> - 6 missing</summary>
+<details><summary><code>DirectCompositionConnection.cs</code> - 2 missing</summary>
 
-- `DCOMPOSITION_FRAME_STATISTICS` (struct, internal): **type missing** (5 members)
+- `DirectCompositionConnection` (class): 2 missing
+  - `bool RequiresNoRedirectionBitmap { get; }`
+  - `IPlatformRenderSurface CreateSurface(EglGlPlatformSurface.IEglWindowGlPlatformSurfaceInfo info)`
 
 </details>
 
-### `DirectX` - files 3/7, types 20/42, members 105/242
+<details><summary><code>DirectCompositionShared.cs</code> - 1 missing</summary>
+
+- `DirectCompositionShared` (class): 1 missing
+  - `void Dispose()`
+
+</details>
+
+### `DirectX` - files 4/7, types 25/42, members 113/242
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -205,7 +214,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `DxgiConnection.cs` | `direct_x/dxgi_connection.rs` | missing | 0/1 | 0/7 |  |
 | `DxgiRenderTarget.cs` | `direct_x/dxgi_render_target.rs` | missing | 0/1 | 0/5 |  |
 | `DxgiSwapchainWindow.cs` | `direct_x/dxgi_swapchain_window.rs` | missing | 0/1 | 0/2 |  |
-| `IDirect3D11TexturePlatformSurface.cs` | `direct_x/i_direct3d11_texture_platform_surface.rs` | missing | 0/5 | 0/8 |  |
+| `IDirect3D11TexturePlatformSurface.cs` | `direct_x/i_direct3_d11_texture_platform_surface.rs` | present | 5/5 | 8/8 |  |
 
 <details><summary><code>DirectXEnums.cs</code> - 126 missing</summary>
 
@@ -492,14 +501,14 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `WglPlatformOpenGlInterface.cs` | `open_gl/wgl_platform_open_gl_interface.rs` | missing | 0/1 | 0/6 |  |
 | `WglRestoreContext.cs` | `open_gl/wgl_restore_context.rs` | missing | 0/1 | 0/2 |  |
 
-### `OpenGl/Angle` - files 5/9, types 5/12, members 22/63
+### `OpenGl/Angle` - files 8/9, types 9/12, members 49/63
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AngleD3DTextureFeature.cs` | `open_gl/angle/angle_d3d_texture_feature.rs` | missing | 0/1 | 0/2 |  |
+| `AngleD3DTextureFeature.cs` | `open_gl/angle/angle_d3d_texture_feature.rs` | present | 1/1 | 2/2 |  |
 | `AngleEglInterface.cs` | `open_gl/angle/angle_egl_interface.rs` | present | 1/1 | 3/3 |  |
-| `AngleExternalD3D11Texture2D.cs` | `open_gl/angle/angle_external_d3d11_texture2d.rs` | missing | 0/2 | 0/11 |  |
-| `AngleExternalObjectsFeature.cs` | `open_gl/angle/angle_external_objects_feature.rs` | missing | 0/1 | 0/14 |  |
+| `AngleExternalD3D11Texture2D.cs` | `open_gl/angle/angle_external_d3d11_texture2_d.rs` | present | 2/2 | 11/11 |  |
+| `AngleExternalObjectsFeature.cs` | `open_gl/angle/angle_external_objects_feature.rs` | present | 1/1 | 14/14 |  |
 | `AngleWin32EglDisplay.cs` | `open_gl/angle/angle_win32_egl_display.rs` | partial | 1/1 | 7/8 |  |
 | `AngleWin32PlatformGraphicsFactory.cs` | `open_gl/angle/angle_win32_platform_graphics_factory.rs` | present | 1/1 | 1/1 |  |
 | `D3D11AngleWin32PlatformGraphics.cs` | `open_gl/angle/d3d11_angle_win32_platform_graphics.rs` | present | 1/1 | 6/6 |  |
@@ -520,25 +529,20 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `VulkanNativeInterop.cs` | `vulkan/vulkan_native_interop.rs` | missing | 0/2 | 0/8 |  |
 | `VulkanSupport.cs` | `vulkan/vulkan_support.rs` | missing | 0/2 | 0/3 |  |
 
-### `WinRT` - files 5/5, types 7/10, members 73/84
+### `WinRT` - files 5/5, types 10/10, members 83/84
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `NativeWinRTMethods.cs` | `win_rt/native_win_rt_methods.rs` | partial | 3/6 | 12/23 |  |
+| `NativeWinRTMethods.cs` | `win_rt/native_win_rt_methods.rs` | partial | 6/6 | 22/23 |  |
 | `WinRTApiInformation.cs` | `win_rt/win_rt_api_information.rs` | present | 1/1 | 10/10 |  |
 | `WinRTColor.cs` | `win_rt/win_rt_color.rs` | present | 1/1 | 6/6 |  |
 | `WinRTInspectable.cs` | `win_rt/win_rt_inspectable.rs` | present | 1/1 | 3/3 |  |
 | `WinRTPropertyValue.cs` | `win_rt/win_rt_property_value.rs` | present | 1/1 | 42/42 |  |
 
-<details><summary><code>NativeWinRTMethods.cs</code> - 14 missing</summary>
+<details><summary><code>NativeWinRTMethods.cs</code> - 1 missing</summary>
 
-- `NativeWinRTMethods` (class): 3 missing
+- `NativeWinRTMethods` (class): 1 missing
   - `static IntPtr WindowsCreateString(string sourceString)` *(internal; 1 of 2 overloads found)*
-  - `static IActivationFactory GetWindowsUICompositionActivationFactory(string className)` *(internal)*
-  - `static IntPtr CreateDispatcherQueueController(DispatcherQueueOptions options)` *(internal)*
-- `NativeWinRTMethods.DISPATCHERQUEUE_THREAD_APARTMENTTYPE` (enum, internal): **type missing** (3 members)
-- `NativeWinRTMethods.DISPATCHERQUEUE_THREAD_TYPE` (enum, internal): **type missing** (2 members)
-- `NativeWinRTMethods.DispatcherQueueOptions` (struct, internal): **type missing** (3 members)
 
 </details>
 
@@ -560,7 +564,8 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
+| `sync_root.rs` | The monitor a composition mode shares between its threads (the `SyncRoot` object of the reference, whose lock the runtime provides) and a COM pointer shared between threads (docs/porting/win32-platform.md, section 6.4) | `SharedCom`, `State`, `SyncRoot`, `SyncRootGuard` |
 | `win_rt/numerics.rs` | The vector, quaternion and matrix values the interfaces of `winrt.idl` pass, by their layout: upstream maps the names to the types of the numerics library of its runtime | `Matrix4x4`, `Quaternion`, `Vector2`, `Vector3` |
 | `wnd_proc_guard.rs` | Keeps a panic from unwinding out of a window procedure through the frames of the system: caught, kept, and raised again by the message loop (docs/porting/win32-platform.md, section 5) |  |
 
-Tests, examples and build scripts (not scanned): `build.rs`, `examples/win32_window.rs`, `ole_tests.rs`, `win_rt/win_rt_tests.rs`.
+Tests, examples and build scripts (not scanned): `build.rs`, `d_composition/d_composition_tests.rs`, `examples/win32_window.rs`, `ole_tests.rs`, `win_rt/win_rt_tests.rs`.

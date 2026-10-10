@@ -2121,6 +2121,10 @@ rust = "window_impl_custom_caption_proc.rs"
 reason = "a part of the window class with a file of its own, which stage 2 builds: without this entry the rule for partial classes would count it as present in `window_impl.rs`"
 
 [[rust_only]]
+path = "src/Windows/FerroUI.Win32/sync_root.rs"
+reason = "The monitor a composition mode shares between its threads (the `SyncRoot` object of the reference, whose lock the runtime provides) and a COM pointer shared between threads (docs/porting/win32-platform.md, section 6.4)"
+
+[[rust_only]]
 path = "src/Windows/FerroUI.Win32/wnd_proc_guard.rs"
 reason = "Keeps a panic from unwinding out of a window procedure through the frames of the system: caught, kept, and raised again by the message loop (docs/porting/win32-platform.md, section 5)"
 
