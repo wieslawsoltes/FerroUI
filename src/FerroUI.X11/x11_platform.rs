@@ -24,12 +24,12 @@ use ferroui_base::input::platform::{
     PlatformClipboardManager, PlatformHotkeyConfiguration,
 };
 use ferroui_base::input::{IKeyboardDevice, KeyModifiers, KeyboardDevice};
-use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::platform::{DefaultPlatformSettings, ICursorFactory, IPlatformGraphics, IPlatformSettings};
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::rendering::{IRenderLoop, IRenderTimer, RenderLoop, SleepLoopRenderTimer, UiThreadRenderTimer};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{FerroLocator, LocatorExtensions};
+use ferroui_freedesktop::dbus_ime::X11DBusImeHelper;
 use ferroui_controls::platform::{
     IPlatformIconLoader, IScreenImpl, ITopLevelImpl, ITrayIconImpl, IWindowImpl, IWindowingPlatform,
 };
@@ -42,7 +42,7 @@ use std::sync::Arc;
 
 /// The environment variable that chooses the input method module of an
 /// application of this framework, before the ones of the other toolkits.
-pub const IM_MODULE_VARIABLE: &str = "FERROUI_IM_MODULE";
+pub const IM_MODULE_VARIABLE: &str = ferroui_freedesktop::dbus_ime::IM_MODULE_VARIABLE;
 /// The environment variable that turns the session management off (`0`).
 pub const USE_SESSION_MANAGEMENT_VARIABLE: &str = "FERROUI_X11_USE_SESSION_MANAGEMENT";
 
@@ -205,32 +205,22 @@ impl FerroX11Platform {
         let options = Rc::new(options);
         let _ = self.options.set(options.clone());
 
-        let use_xim = false;
+        let mut use_xim = false;
         if Self::enable_ime(
             &options,
             std::env::var(IM_MODULE_VARIABLE).ok().as_deref(),
             std::env::var("LANG").ok().as_deref(),
         ) {
             // Attempt to configure DBus-based input method and check if we can fall back to XIM
-            //
-            // Stage 2 of docs/porting/x11-platform.md: the input methods
-            // over D-Bus (`X11DBusImeHelper.DetectAndRegister`) and the
-            // input method of the server (`XimInputMethod`) are not built,
-            // so keys produce text through the keyboard mapping alone.
-            let xim_configured = Self::should_use_xim(
-                std::env::var(IM_MODULE_VARIABLE).ok().as_deref(),
-                std::env::var("GTK_IM_MODULE").ok().as_deref(),
-                std::env::var("QT_IM_MODULE").ok().as_deref(),
-                std::env::var("XMODIFIERS").ok().as_deref(),
-            );
-            if xim_configured {
-                if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::X11_PLATFORM) {
-                    logger.log(
-                        None,
-                        "An input method of the X server is configured, and input methods are not available yet on \
-                         this platform: text is produced by the keyboard layout only.",
-                    );
-                }
+            if !X11DBusImeHelper::detect_and_register()
+                && Self::should_use_xim(
+                    std::env::var(IM_MODULE_VARIABLE).ok().as_deref(),
+                    std::env::var("GTK_IM_MODULE").ok().as_deref(),
+                    std::env::var("QT_IM_MODULE").ok().as_deref(),
+                    std::env::var("XMODIFIERS").ok().as_deref(),
+                )
+            {
+                use_xim = true;
             }
         }
 

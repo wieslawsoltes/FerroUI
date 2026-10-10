@@ -56,6 +56,16 @@
 //!   once small and once larger than a property may be, so that it is
 //!   transferred incrementally (`INCR`) in each direction. The other
 //!   client is `xclip`, which has to be installed.
+//! - **ime** (with `--ime=ibus` or `--ime=xim`): a text box gets the
+//!   focus and the server synthesizes keys. With `ibus` the input method
+//!   is the one over D-Bus, and this example is also the service it talks
+//!   to (a double of the portal of IBus on the session bus, so the run
+//!   needs one: `dbus-run-session`): the key "a" is consumed and another
+//!   text is committed for it, the key "b" passes. With `xim` it is the
+//!   input method of the server, the one Xlib has built in
+//!   (`XMODIFIERS=@im=local`): a key produces its text through the input
+//!   context, and a compose sequence produces one character (the caller
+//!   gives a key the compose symbol: `xmodmap -e "keycode 135 = Multi_key"`).
 //!
 //! It then asks the window to close the way a window manager does (a
 //! `WM_DELETE_WINDOW` message), which has to end the application.
@@ -162,6 +172,7 @@ mod app {
     }
 
     pub fn run() -> ExitCode {
+        prepare_ime();
         let smoke = std::env::args().any(|arg| arg == "--smoke");
         let args: Vec<String> = std::env::args()
             .skip(1)
@@ -170,6 +181,7 @@ mod app {
                     && !arg.starts_with("--skip=")
                     && !arg.starts_with("--expect-screens=")
                     && !arg.starts_with("--mode=")
+                    && !arg.starts_with("--ime=")
                     && arg != "--expect-fallback"
                     && arg != "--shm"
             })
@@ -213,6 +225,164 @@ mod app {
         }
     }
 
+    /// A service that answers as the portal of IBus does, on the session
+    /// bus of the environment (a private one: `dbus-run-session`). Not
+    /// part of the platform: the smoke mode uses it to stand in for an
+    /// input method daemon, so that what the input method does with a key
+    /// is known.
+    mod ibus_double {
+        use std::sync::{Arc, Mutex, OnceLock};
+        use zbus::zvariant::{ObjectPath, OwnedObjectPath, Structure, Value};
+
+        pub const NAME: &str = "org.freedesktop.portal.IBus";
+        const CONTEXT_PATH: &str = "/org/freedesktop/IBus/InputContext_1";
+        const CONTEXT_INTERFACE: &str = "org.freedesktop.IBus.InputContext";
+        /// The key symbol the double consumes, and the text it commits for it.
+        pub const CONSUMED_KEY: u32 = 0x61;
+        pub const COMMITTED_TEXT: &str = "\u{3042}";
+        /// The bit of the state of a key event that says "release".
+        const RELEASE_MASK: u32 = 1 << 30;
+
+        type Log = Arc<Mutex<Vec<String>>>;
+
+        struct Portal {
+            log: Log,
+        }
+
+        #[zbus::interface(name = "org.freedesktop.IBus.Portal")]
+        impl Portal {
+            fn create_input_context(&self, client_name: &str) -> OwnedObjectPath {
+                self.log.lock().unwrap().push(format!("CreateInputContext({client_name})"));
+                ObjectPath::try_from(CONTEXT_PATH).unwrap().into()
+            }
+        }
+
+        struct Context {
+            log: Log,
+        }
+
+        #[zbus::interface(name = "org.freedesktop.IBus.InputContext")]
+        impl Context {
+            async fn process_key_event(
+                &self,
+                keyval: u32,
+                keycode: u32,
+                state: u32,
+                #[zbus(connection)] connection: &zbus::Connection,
+            ) -> bool {
+                self.log.lock().unwrap().push(format!("ProcessKeyEvent({keyval:#x}, {keycode}, {state:#x})"));
+                if keyval != CONSUMED_KEY {
+                    return false;
+                }
+                if state & RELEASE_MASK == 0 {
+                    // An IBusText: (sa{sv}sv), the text is its third member.
+                    let attachments: std::collections::HashMap<String, Value<'static>> = Default::default();
+                    let text = Value::Structure(Structure::from((
+                        "IBusText".to_string(),
+                        attachments,
+                        COMMITTED_TEXT.to_string(),
+                        Value::from(0u32),
+                    )));
+                    let _ = connection
+                        .emit_signal(Option::<&str>::None, CONTEXT_PATH, CONTEXT_INTERFACE, "CommitText", &(text,))
+                        .await;
+                }
+                true
+            }
+
+            fn set_cursor_location(&self, x: i32, y: i32, w: i32, h: i32) {
+                self.log.lock().unwrap().push(format!("SetCursorLocation({x}, {y}, {w}, {h})"));
+            }
+
+            fn focus_in(&self) {
+                self.log.lock().unwrap().push("FocusIn".to_string());
+            }
+
+            fn focus_out(&self) {
+                self.log.lock().unwrap().push("FocusOut".to_string());
+            }
+
+            fn reset(&self) {
+                self.log.lock().unwrap().push("Reset".to_string());
+            }
+
+            fn set_capabilities(&self, caps: u32) {
+                self.log.lock().unwrap().push(format!("SetCapabilities({caps})"));
+            }
+        }
+
+        struct Service {
+            log: Log,
+        }
+
+        #[zbus::interface(name = "org.freedesktop.IBus.Service")]
+        impl Service {
+            fn destroy(&self) {
+                self.log.lock().unwrap().push("Destroy".to_string());
+            }
+        }
+
+        struct Double {
+            _connection: zbus::blocking::Connection,
+            log: Log,
+        }
+
+        static DOUBLE: OnceLock<Result<Double, String>> = OnceLock::new();
+
+        /// Puts the service on the session bus. An error says why it could not.
+        pub fn start() -> Result<(), String> {
+            DOUBLE
+                .get_or_init(|| {
+                    let log: Log = Arc::default();
+                    let connection = zbus::blocking::connection::Builder::session()
+                        .and_then(|builder| builder.serve_at("/org/freedesktop/IBus", Portal { log: log.clone() }))
+                        .and_then(|builder| builder.serve_at(CONTEXT_PATH, Context { log: log.clone() }))
+                        .and_then(|builder| builder.serve_at(CONTEXT_PATH, Service { log: log.clone() }))
+                        .and_then(|builder| builder.name(NAME))
+                        .and_then(|builder| builder.build())
+                        .map_err(|error| error.to_string())?;
+                    Ok(Double { _connection: connection, log })
+                })
+                .as_ref()
+                .map(|_| ())
+                .map_err(Clone::clone)
+        }
+
+        /// The calls the service got so far.
+        pub fn calls() -> Vec<String> {
+            match DOUBLE.get() {
+                Some(Ok(double)) => double.log.lock().unwrap().clone(),
+                _ => Vec::new(),
+            }
+        }
+    }
+
+    /// The input method `--ime=` asks for: `ibus` (over D-Bus, against the
+    /// double of this example) or `xim` (the input method of the server).
+    fn ime() -> Option<String> {
+        std::env::args().find_map(|arg| arg.strip_prefix("--ime=").map(str::to_string))
+    }
+
+    /// Sets the environment of the input method that is asked for, before
+    /// the platform reads it, and starts the double of IBus.
+    fn prepare_ime() {
+        match ime().as_deref() {
+            Some("ibus") => {
+                std::env::set_var("FERROUI_IM_MODULE", "ibus");
+                if let Err(error) = ibus_double::start() {
+                    println!("The double of the input method service did not start: {error}");
+                }
+            }
+            Some("xim") => {
+                std::env::set_var("FERROUI_IM_MODULE", "xim");
+                // The input method Xlib has built in: compose sequences, no server needed.
+                if std::env::var_os("XMODIFIERS").is_none() {
+                    std::env::set_var("XMODIFIERS", "@im=local");
+                }
+            }
+            _ => {}
+        }
+    }
 
     /// Input the server synthesizes (the XTEST extension, `libXtst`). Not
     /// part of the platform, which never fakes input: the smoke mode uses
@@ -290,8 +460,13 @@ mod app {
             IRawInputEventArgs, RawKeyEventArgs, RawKeyEventType, RawMouseWheelEventArgs, RawPointerEventArgs,
             RawPointerEventType, RawTextInputEventArgs,
         };
+        use ferroui_base::input::text_input::ITextInputMethodImpl;
         use ferroui_base::input::Key;
-        use ferroui_base::{Point, Vector};
+        use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
+        use ferroui_base::{Point, Thickness, Vector};
+        use ferroui_controls::TextBox;
+        use ferroui_freedesktop::IX11InputMethodFactory;
+        use std::any::TypeId;
         use ferroui_controls::primitives::popup_positioning::{PopupAnchor, PopupGravity};
         use ferroui_controls::primitives::Popup;
         use ferroui_controls::PlacementMode;
@@ -501,6 +676,10 @@ mod app {
                 if options.runs("clipboard") {
                     report.phase("clipboard");
                     clipboard_checks(&report, &window).await;
+                }
+                if let Some(kind) = ime() {
+                    report.phase("ime");
+                    ime_checks(&report, &platform, &window, &content, &kind).await;
                 }
             }
 
@@ -1318,6 +1497,279 @@ mod app {
             } else {
                 format!("{} bytes", text.len())
             }
+        }
+
+        /// Presses and releases the key that produces `key_sym`; false
+        /// when no key of the keyboard mapping does.
+        async fn tap(display: xlib::XDisplay, key_sym: u64) -> bool {
+            let key_code = xtest::key_code(display, key_sym);
+            if key_code == 0 {
+                return false;
+            }
+            xtest::key(display, key_code, true);
+            delay(Duration::from_millis(50)).await;
+            xtest::key(display, key_code, false);
+            delay(Duration::from_millis(50)).await;
+            true
+        }
+
+        /// Text input through an input method: a text box gets the focus,
+        /// the server synthesizes keys, and the text has to arrive the way
+        /// the input method decides.
+        ///
+        /// With `ibus` the input method is the one over D-Bus, against the
+        /// double of this example: it consumes the key "a" and commits
+        /// another text for it, and lets every other key pass. With `xim`
+        /// it is the input method of the server (the one Xlib has built
+        /// in): keys produce their text through the input context, and a
+        /// compose sequence produces one character.
+        async fn ime_checks(
+            report: &Report,
+            platform: &Rc<FerroX11Platform>,
+            window: &Ref<Window>,
+            content: &Ref<Border>,
+            kind: &str,
+        ) {
+            let info = platform.info();
+            let display = info.display();
+            if !xtest::available(display) {
+                report.check("XTEST", false, "libXtst is missing or the server has no XTEST extension".to_string());
+                return;
+            }
+            let (Some(xid), Some(window_impl)) = (xid_of(window), window.platform_impl()) else {
+                report.check("handle", false, "the window has no platform implementation".to_string());
+                return;
+            };
+
+            let has_factory = FerroLocator::current().get_service::<dyn IX11InputMethodFactory>().is_some();
+            let has_feature = window_impl.try_get_feature(TypeId::of::<dyn ITextInputMethodImpl>()).is_some();
+            match kind {
+                "ibus" => {
+                    report.check(
+                        "input method over D-Bus",
+                        has_factory,
+                        format!(
+                            "the platform registered {} input method factory for {}=ibus",
+                            if has_factory { "an" } else { "no" },
+                            ferroui_x11::x11_platform::IM_MODULE_VARIABLE
+                        ),
+                    );
+                    let created = wait_for(STEP_TIMEOUT, || {
+                        ibus_double::calls().iter().any(|call| call.starts_with("CreateInputContext("))
+                    })
+                    .await;
+                    report.check(
+                        "input context",
+                        created,
+                        format!("the service was called with {:?}", ibus_double::calls()),
+                    );
+                }
+                _ => {
+                    report.check(
+                        "input method of the server",
+                        info.has_xim() && !has_factory,
+                        format!(
+                            "XOpenIM for XMODIFIERS={:?} gave {} input method; a factory over D-Bus is {}",
+                            std::env::var("XMODIFIERS").unwrap_or_default(),
+                            if info.has_xim() { "an" } else { "no" },
+                            if has_factory { "registered" } else { "not registered" }
+                        ),
+                    );
+                }
+            }
+            report.check(
+                "input method of the window",
+                has_feature,
+                format!("the window has {} text input method", if has_feature { "a" } else { "no" }),
+            );
+
+            // A text box in the corner of the window, with the focus, in an active window.
+            let text_box = TextBox::new();
+            text_box.set_width(240.0);
+            text_box.set_height(32.0);
+            text_box.set_horizontal_alignment(HorizontalAlignment::Left);
+            text_box.set_vertical_alignment(VerticalAlignment::Top);
+            text_box.set_margin(Thickness::uniform(8.0));
+            content.set_child(&text_box);
+            delay(Duration::from_millis(300)).await;
+            // Key events go to the window with the focus or, without a window manager, to the one
+            // under the pointer.
+            if let Some((origin_x, origin_y, _)) = xlib::x_translate_coordinates(display, xid, info.root_window(), 0, 0) {
+                xtest::motion(display, origin_x + 300, origin_y + 200);
+            }
+            window.activate();
+            let focused = text_box.focus();
+            let active = wait_for(STEP_TIMEOUT, || window.is_active()).await;
+            report.check(
+                "focus",
+                focused && active,
+                format!("the text box took the focus: {focused}; the window is active: {active}"),
+            );
+
+            // The callback of the contract, with a recorder in front of the one of the framework.
+            let log: Rc<RefCell<Vec<Recorded>>> = Rc::new(RefCell::new(Vec::new()));
+            let framework_input = window_impl.input();
+            {
+                let log = log.clone();
+                let framework_input = framework_input.clone();
+                window_impl.set_input(Some(Rc::new(move |args: Rc<dyn IRawInputEventArgs>| {
+                    if let Some(recorded) = record(&args) {
+                        log.borrow_mut().push(recorded);
+                    }
+                    if let Some(framework_input) = &framework_input {
+                        framework_input(args);
+                    }
+                })));
+            }
+            let seen = |wanted: &dyn Fn(&Recorded) -> bool| log.borrow().iter().any(|recorded| wanted(recorded));
+            let tail = || {
+                let log = log.borrow();
+                format!("{:?}", &log[log.len().saturating_sub(8)..])
+            };
+            let text_is = |expected: &str| text_box.text().as_deref() == Some(expected);
+
+            if kind == "ibus" {
+                let focus_in = wait_for(STEP_TIMEOUT, || ibus_double::calls().iter().any(|call| call == "FocusIn")).await;
+                report.check(
+                    "focus of the input context",
+                    focus_in,
+                    format!("the service was called with {:?}", ibus_double::calls()),
+                );
+
+                // The key the input method consumes: the application gets the committed text and
+                // not the key.
+                let committed = ibus_double::COMMITTED_TEXT;
+                let tapped = tap(display, u64::from(ibus_double::CONSUMED_KEY)).await;
+                let text = wait_for(STEP_TIMEOUT, || seen(&|recorded| *recorded == Recorded::Text(committed.to_string()))).await;
+                delay(Duration::from_millis(300)).await;
+                let key_passed = seen(&|recorded| matches!(recorded, Recorded::Key(_, Key::A, _)));
+                report.check(
+                    "committed text",
+                    tapped && text && !key_passed,
+                    format!(
+                        "expected the text {committed:?} and no key event for the consumed key (seen: {key_passed}); \
+                         last input {}",
+                        tail()
+                    ),
+                );
+                let in_text_box = wait_for(STEP_TIMEOUT, || text_is(committed)).await;
+                report.check(
+                    "committed text in the text box",
+                    in_text_box,
+                    format!("the text box has {:?}, expected {committed:?}", text_box.text()),
+                );
+
+                // A key the input method lets pass: the key and its text, after the text before.
+                log.borrow_mut().clear();
+                let tapped = tap(display, 0x62).await;
+                let key_down = wait_for(STEP_TIMEOUT, || {
+                    seen(&|recorded| matches!(recorded, Recorded::Key(RawKeyEventType::KeyDown, Key::B, _)))
+                })
+                .await;
+                let key_up = wait_for(STEP_TIMEOUT, || {
+                    seen(&|recorded| matches!(recorded, Recorded::Key(RawKeyEventType::KeyUp, Key::B, _)))
+                })
+                .await;
+                let expected = format!("{committed}b");
+                let in_text_box = wait_for(STEP_TIMEOUT, || text_is(&expected)).await;
+                report.check(
+                    "a key the input method passes on",
+                    tapped && key_down && key_up && in_text_box,
+                    format!(
+                        "down {key_down}, up {key_up}; the text box has {:?}, expected {expected:?}; last input {}",
+                        text_box.text(),
+                        tail()
+                    ),
+                );
+
+                // The input method was offered both keys, each press before its release.
+                let offered: Vec<String> =
+                    ibus_double::calls().into_iter().filter(|call| call.starts_with("ProcessKeyEvent(")).collect();
+                let key_code_a = xtest::key_code(display, 0x61);
+                let key_code_b = xtest::key_code(display, 0x62);
+                let expected_calls = vec![
+                    format!("ProcessKeyEvent(0x61, {key_code_a}, 0x0)"),
+                    format!("ProcessKeyEvent(0x61, {key_code_a}, 0x40000000)"),
+                    format!("ProcessKeyEvent(0x62, {key_code_b}, 0x0)"),
+                    format!("ProcessKeyEvent(0x62, {key_code_b}, 0x40000000)"),
+                ];
+                report.check(
+                    "keys offered to the input method",
+                    offered == expected_calls,
+                    format!("{offered:?}, expected {expected_calls:?}"),
+                );
+
+                // The cursor of the text box is reported in pixels of the screen: a place inside the
+                // window as the server has it.
+                let origin = xlib::x_translate_coordinates(display, xid, info.root_window(), 0, 0);
+                let attributes = xlib::x_get_window_attributes(display, xid);
+                let location = ibus_double::calls().iter().rev().find_map(|call| {
+                    let numbers = call.strip_prefix("SetCursorLocation(")?.strip_suffix(')')?;
+                    let numbers: Vec<i32> = numbers.split(", ").filter_map(|number| number.parse().ok()).collect();
+                    (numbers.len() == 4).then(|| (numbers[0], numbers[1], numbers[2], numbers[3]))
+                });
+                let inside = match (location, origin, &attributes) {
+                    (Some((x, y, _, height)), Some((origin_x, origin_y, _)), Some(attributes)) => {
+                        x >= origin_x
+                            && y >= origin_y
+                            && x <= origin_x + attributes.width
+                            && y + height <= origin_y + attributes.height
+                            && height > 0
+                    }
+                    _ => false,
+                };
+                report.check(
+                    "cursor location",
+                    inside,
+                    format!(
+                        "the last location reported is {location:?}; the window is at {:?} of the root",
+                        origin.map(|(x, y, _)| (x, y))
+                    ),
+                );
+            } else {
+                // A key produces its text through the input context.
+                let tapped = tap(display, 0x61).await;
+                let text = wait_for(STEP_TIMEOUT, || seen(&|recorded| *recorded == Recorded::Text("a".to_string()))).await;
+                let in_text_box = wait_for(STEP_TIMEOUT, || text_is("a")).await;
+                report.check(
+                    "text through the input context",
+                    tapped && text && in_text_box,
+                    format!("the text box has {:?}, expected \"a\"; last input {}", text_box.text(), tail()),
+                );
+
+                // A compose sequence (the compose key, an apostrophe, "e") is one character. The
+                // input method filters the keys of the sequence, so only the input method of the
+                // server gives this text. The caller gives a key the compose symbol
+                // (`xmodmap -e "keycode 135 = Multi_key"`).
+                log.borrow_mut().clear();
+                let composed = "\u{e9}";
+                if xtest::key_code(display, 0xff20) == 0 {
+                    report.check(
+                        "compose sequence",
+                        false,
+                        "no key of the keyboard mapping is the compose key (Multi_key)".to_string(),
+                    );
+                } else {
+                    let tapped = tap(display, 0xff20).await && tap(display, 0x27).await && tap(display, 0x65).await;
+                    let text =
+                        wait_for(STEP_TIMEOUT, || seen(&|recorded| *recorded == Recorded::Text(composed.to_string()))).await;
+                    let expected = format!("a{composed}");
+                    let in_text_box = wait_for(STEP_TIMEOUT, || text_is(&expected)).await;
+                    report.check(
+                        "compose sequence",
+                        tapped && text && in_text_box,
+                        format!(
+                            "the text box has {:?}, expected {expected:?} (locale {:?}); last input {}",
+                            text_box.text(),
+                            std::env::var("LANG").unwrap_or_default(),
+                            tail()
+                        ),
+                    );
+                }
+            }
+
+            window_impl.set_input(framework_input);
+            content.set_child(None::<Ref<Control>>);
         }
 
         /// The clipboard between this client and another one, in both

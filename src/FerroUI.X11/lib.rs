@@ -22,7 +22,7 @@ pub mod activity_tracking_helper;
 #[cfg(unix)]
 pub mod dispatching;
 #[cfg(unix)]
-pub mod event;
+pub use ferroui_freedesktop::event;
 #[cfg(unix)]
 pub mod glx;
 #[cfg(unix)]
@@ -71,6 +71,8 @@ pub mod x11_structs;
 pub mod x11_window;
 #[cfg(unix)]
 pub(crate) mod x11_window_ime;
+#[cfg(unix)]
+pub(crate) mod x11_window_xim;
 #[cfg(unix)]
 pub mod x11_window_info;
 #[cfg(unix)]

@@ -1,0 +1,34 @@
+[package]
+name = "ferroui-freedesktop"
+description = "The FreeDesktop services of FerroUI for Linux desktops: D-Bus input methods, portals, menus and tray icons"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+bitflags.workspace = true
+
+# D-Bus (docs/porting/x11-platform.md, section 3). The services of a FreeDesktop session exist on
+# Unix systems only; the crate has only its event type elsewhere.
+[target.'cfg(unix)'.dependencies]
+zbus.workspace = true
+futures-util.workspace = true
+
+# The tests talk to doubles of the input method services over a socket pair, without a bus.
+[target.'cfg(unix)'.dev-dependencies]
+zbus = { workspace = true, features = ["p2p"] }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "platforms"

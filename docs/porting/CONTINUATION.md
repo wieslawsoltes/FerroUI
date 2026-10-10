@@ -105,6 +105,19 @@ Next: 2c, input methods. It starts the crate `ferroui-freedesktop` (what `docs/r
 
 Not verified anywhere: a GPU with a hardware driver, input from a real device, a compositing manager under plain X11.
 
+## The Linux platform, stage 2c: input methods (2026-10-10)
+
+Branch `x11-platform-3` (on top of `x11-platform-2`). `x11-platform.md`, sections 3, 9 and 13, has the detail; in short:
+
+- **The crate `ferroui-freedesktop`** (`src/FerroUI.FreeDesktop`, published, group platforms) with `zbus` 5.19.0: the connection (`DBusHelper`), the call queue (`DBusCallQueue`), the input method interface of a window (`IX11InputMethodControl`, `IX11InputMethodFactory`), the base of the input methods over D-Bus and the two of them (IBus through its portal; Fcitx 4 and 5), and the detection from the environment (`X11DBusImeHelper`). Calls and signals are tasks of the UI dispatcher; only the connect blocks.
+- **In the X11 crate**: the input method of a window and its key queue (`x11_window_ime.rs`), the input method of the server (`x11_window_xim.rs`), `use_xim` decided as upstream.
+- **Tests**: 27 in the FreeDesktop crate (the input methods against doubles of the services over a socket pair; the same on a session bus with `FERROUI_FREEDESKTOP_TEST_BUS=session` under `dbus-run-session`), 184 in the X11 crate. The smoke mode has `--ime=ibus` (the example is the service) and `--ime=xim` (a compose sequence through the input method Xlib has built in); the CI job runs both.
+- Tracking: `Avalonia.FreeDesktop` is in scope (10 of 18 files, 16 of 26 types); `Avalonia.X11` 61 of 88 files.
+
+Entry points for what follows. 2d, drag and drop: `selections/` has the selection protocol the drop target and the drag source read and write with (`SelectionDataProvider`, `SelectionReadSession`); the event hook of the dispatcher (`X11EventDispatcher`) is where `X11DragSource` listens during a drag; the XDND client messages arrive in `X11Window::on_event`. 2e: the rest of the FreeDesktop crate. The scanner expects the files of upstream's `DBus*.cs` under the names `d_bus_menu_exporter.rs`, `d_bus_platform_settings.rs`, `d_bus_system_dialog.rs`, `d_bus_tray_icon_impl.rs` unless `path-overrides.toml` says otherwise (the two files of stage 2c are found as `dbus_call_queue.rs` and `dbus_helper.rs`). A proxy for another interface is a trait beside its user, like `dbus_ime/ibus/dbus.rs`; a service the port exports (`com.canonical.dbusmenu`, `org.kde.StatusNotifierItem`) is an `#[interface]` block, as the doubles in `dbus_ime/tests.rs` show.
+
+Not verified anywhere: a real `ibus-daemon` or Fcitx (the doubles answer as the interface descriptions say; what a real engine sends for a pre-edit with attributes was not seen), an XIM server other than the one Xlib has built in.
+
 ## In flight on 2026-10-09
 
 Nothing runs in the cloud. In flight locally, each on its own branch, written by a sub-agent without a compiler and validated in the main checkout:
