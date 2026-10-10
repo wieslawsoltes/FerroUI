@@ -6712,12 +6712,12 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    10,
+    15,
     18,
     0
    ],
    "types": [
-    16,
+    22,
     26,
     0
    ],
@@ -6727,7 +6727,7 @@
     0
    ],
    "interfaces": [
-    2,
+    3,
     3
    ],
    "propertyRegistrations": [
@@ -6768,8 +6768,23 @@
     "DBusIme/X11DBusImeHelper.cs": [
      "dbus_ime/x11_dbus_ime_helper.rs"
     ],
+    "DBusPlatformSettings.cs": [
+     "dbus_platform_settings.rs"
+    ],
+    "IPortalParentLease.cs": [
+     "i_portal_parent_lease.rs"
+    ],
     "IX11InputMethod.cs": [
      "ix11_input_method.rs"
+    ],
+    "LinuxMountedVolumeInfoListener.cs": [
+     "linux_mounted_volume_info_listener.rs"
+    ],
+    "LinuxMountedVolumeInfoProvider.cs": [
+     "linux_mounted_volume_info_provider.rs"
+    ],
+    "NativeMethods.cs": [
+     "native_methods.rs"
     ]
    },
    "rustOnly": [

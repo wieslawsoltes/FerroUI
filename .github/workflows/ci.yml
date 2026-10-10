@@ -519,11 +519,11 @@ jobs:
       # the real ones).
       - name: Tests of the FreeDesktop crate (no bus needed)
         run: cargo test --locked -p ferroui-freedesktop --no-fail-fast
-      - name: The input methods against services on a session bus
+      - name: The D-Bus services against doubles on a session bus
         if: ${{ !cancelled() }}
         run: |
           FERROUI_FREEDESKTOP_TEST_BUS=session dbus-run-session -- \
-            cargo test --locked -p ferroui-freedesktop --no-fail-fast -- --test-threads=1 dbus_ime
+            cargo test --locked -p ferroui-freedesktop --no-fail-fast -- --test-threads=1 dbus
       - name: The desktop entry point selects X11 on Linux
         if: ${{ !cancelled() }}
         run: cargo test --locked -p ferroui-desktop --lib

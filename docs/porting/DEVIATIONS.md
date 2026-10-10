@@ -477,12 +477,22 @@ Drag and drop (stage 2d; `src/FerroUI.X11/selections/drag_drop/`):
 | An invalid drag source throws `ArgumentOutOfRangeException`. | A panic with the message. | Representation | As the other drag sources of the port. | x11-platform stage 2d |
 | The formats of `XdndEnter` are collected in a `HashSet`. | In a list, each once, in the order the source gave them. | Behaviour | A defined order of the formats of a data transfer. | x11-platform stage 2d |
 
+FreeDesktop services (stage 2e; `src/FerroUI.FreeDesktop/`):
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `DBusPlatformSettings` derives from `DefaultPlatformSettings`. | It holds the default settings and answers the other members of the contract with them. | Representation | No inheritance. | x11-platform stage 2e |
+| `DBusPlatformSettings`: a value of `color-scheme` that is not a number, or of `accent-color` that is not three numbers, fails in the signal handler or in the task of the first read; the accent colour of a portal before version 2 (the deprecated `Read`, which wraps the value in a second variant) is not unwrapped, and so never read. | A colour scheme that is not a number is passed over; an accent colour that is not three numbers is no accent colour; the nested variant is unwrapped for both settings. | Behaviour | Failures in handlers nobody observes; the missing unwrapping is a defect of upstream. | x11-platform stage 2e |
+| `LinuxMountedVolumeInfoListener` parses with regular expressions and LINQ, and fails in its timer when `/proc/partitions` or `/proc/mounts` cannot be read or a line has too few fields. | The same parsing as functions over text, without a regular expression library; a file that cannot be read is an empty one, a line with too few fields is passed over. An escape that is not a valid octal number of three digits is left as it is, where upstream fails. | Behaviour | The crate also compiles and tests on systems without these files; no new dependency for three patterns. | x11-platform stage 2e |
+| `NativeMethods.ReadLink` calls `readlink` with a buffer of 4097 bytes. | `std::fs::read_link`. | Representation | The same system call. | x11-platform stage 2e |
+| `IPortalParentLease : IAsyncDisposable`. | `dispose_async` is a member that returns a future. | Representation | | x11-platform stage 2e |
+
 Not built yet (each fails, logs or answers "not available" as stated, and is tracked as missing in `tracking/Avalonia.X11.md`):
 
 | Upstream | Port | Kind | Stage |
 |---|---|---|---|
 | The rendering mode Vulkan (`VulkanSupport`, `VulkanNativeInterop`). | Passed over like a mode that failed to initialize. | Missing | 2a, after the Vulkan GPU of the Skia backend |
-| `DBusPlatformSettings`, `DBusTrayIconImpl` (and `XEmbedTrayIconImpl`), `DBusMenuExporter`, `DBusSystemDialog`, `GtkSystemDialog`, `LinuxMountedVolumeInfoProvider`, `GlibDispatcherImpl`. | The default platform settings; no tray icon; no native menu exporter; the managed storage provider alone; no mounted volume provider; `use_g_lib_main_loop` fails with a message. | Missing | 2e |
+| `DBusTrayIconImpl` (and `XEmbedTrayIconImpl`), `DBusMenuExporter`, `DBusSystemDialog`, `GtkSystemDialog`, `GlibDispatcherImpl`. | No tray icon; no native menu exporter; the managed file dialogs; the option `use_g_lib_main_loop` fails with a message. | Missing | 2e |
 | `X11PlatformLifetimeEvents`, `X11NativeControlHost`, `XEmbedPlug` and `XEmbedClientWindowMode`. | Not registered; the features are not offered. | Missing | 2f |
 | `X11AtSpiAccessibility` (`TrackWindow`, `UntrackWindow`, the server calls in `Show` and `Cleanup`). | `track_window` and `untrack_window` do nothing. | Missing | 3 |
 

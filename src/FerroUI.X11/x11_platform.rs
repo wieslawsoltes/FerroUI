@@ -26,12 +26,14 @@ use ferroui_base::input::platform::{
     PlatformClipboardManager, PlatformHotkeyConfiguration,
 };
 use ferroui_base::input::{IKeyboardDevice, KeyModifiers, KeyboardDevice};
-use ferroui_base::platform::{DefaultPlatformSettings, ICursorFactory, IPlatformGraphics, IPlatformSettings};
+use ferroui_base::platform::{ICursorFactory, IPlatformGraphics, IPlatformSettings};
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::rendering::{IRenderLoop, IRenderTimer, RenderLoop, SleepLoopRenderTimer, UiThreadRenderTimer};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{FerroLocator, LocatorExtensions};
+use ferroui_controls::platform::IMountedVolumeInfoProvider;
 use ferroui_freedesktop::dbus_ime::X11DBusImeHelper;
+use ferroui_freedesktop::{DBusPlatformSettings, LinuxMountedVolumeInfoProvider};
 use ferroui_controls::platform::{
     IPlatformIconLoader, IScreenImpl, ITopLevelImpl, ITrayIconImpl, IWindowImpl, IWindowingPlatform,
 };
@@ -308,7 +310,8 @@ impl FerroX11Platform {
         // desktop portal (`DBusPlatformSettings`, the colour scheme and
         // the accent colour) are a service of the FreeDesktop crate; until
         // it is built the defaults of the framework answer.
-        let platform_settings: Rc<dyn IPlatformSettings> = Rc::new(DefaultPlatformSettings::new());
+        let platform_settings: Rc<dyn IPlatformSettings> = DBusPlatformSettings::new();
+        let mounted_volumes: Rc<dyn IMountedVolumeInfoProvider> = Rc::new(LinuxMountedVolumeInfoProvider::new());
         let icon_loader: Rc<dyn IPlatformIconLoader> = Rc::new(X11IconLoader);
         locator
             .bind::<Arc<dyn IRenderLoop>>()
@@ -330,7 +333,9 @@ impl FerroX11Platform {
             .bind::<dyn IPlatformIconLoader>()
             .to_constant(icon_loader)
             .bind::<dyn IPlatformDragSource>()
-            .to_constant(drag_source);
+            .to_constant(drag_source)
+            .bind::<dyn IMountedVolumeInfoProvider>()
+            .to_constant(mounted_volumes);
         // Not bound yet, each with the stage of docs/porting/x11-platform.md
         // that builds it: the
         // mounted volumes (`LinuxMountedVolumeInfoProvider`, with the
