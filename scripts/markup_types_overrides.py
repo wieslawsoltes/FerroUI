@@ -350,6 +350,16 @@ CONTROLS = {
             "DependencyResolver: Option<Rc<dyn IFerroDependencyResolver>> { set: Popup::set_dependency_resolver }",
         ],
     },
+    'WindowBase': {
+        # The public methods of the managed original without parameters, in the order of their
+        # declaration: a binding path that ends in one is a command
+        # (`{Binding $parent[Window].Hide}`).
+        'methods': [
+            "fn Activate() => |window: &Ref<WindowBase>| window.activate()",
+            "fn Hide() => |window: &Ref<WindowBase>| window.hide()",
+            "fn Show() => |window: &Ref<WindowBase>| window.show()",
+        ],
+    },
     'TextBox': {
         'properties': [
             """SelectedText: String {

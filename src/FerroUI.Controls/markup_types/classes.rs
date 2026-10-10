@@ -896,6 +896,11 @@ ferro_class_info!(Window {
 ferro_class_info!(WindowBase {
     markup: {
         namespace: "FerroUI.Controls",
+        methods: [
+            fn Activate() => |window: &Ref<WindowBase>| window.activate(),
+            fn Hide() => |window: &Ref<WindowBase>| window.hide(),
+            fn Show() => |window: &Ref<WindowBase>| window.show(),
+        ],
         events: [
             Activated(Option<BoxedValue>, EventArgs) => |this: &Ref<WindowBase>, handler: MarkupDelegate| {
                 let sender = this.downgrade();
