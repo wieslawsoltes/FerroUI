@@ -1,9 +1,9 @@
 //! EGL through the window system integration of the driver (the port of
 //! `WaylandEglWsiPlatformGraphics.cs`).
 
-use super::wayland_framebuffer::log_render_error;
 use crate::server::interop::wayland_connection::WaylandConnection;
 use crate::server::wayland_platform_graphics::IWaylandGraphics;
+use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::platform::IPlatformGraphicsContext;
 use ferroui_base::reactive::IDisposable;
 use ferroui_opengl::egl::{EglDisplay, EglDisplayCreationOptions, EglDisplayOptions, EglInterface};
@@ -100,7 +100,9 @@ impl WaylandEglWsiPlatformGraphics {
         match created {
             Ok(display) => Some(Rc::new(Self { display })),
             Err(error) => {
-                log_render_error("Unable to initialize Wayland WSI EGL rendering: {0}", &error);
+                if let Some(logger) = Logger::try_get(LogEventLevel::Error, "OpenGL") {
+                    logger.log_with_values(None, "Unable to initialize Wayland WSI EGL rendering: {0}", &[&error]);
+                }
                 None
             }
         }
