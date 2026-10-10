@@ -32,6 +32,23 @@ Merged, by area (pull requests 89 to 112). The sections below have the state of 
 - **Performance.** Design 09: the native recycling benchmark, allocation counting and the counters behind the feature `perf-counters` (#108). Designs 04 and 03: four changes of the port's machinery, behaviour unchanged (#111).
 - **Tracking.** The mapping data reviewed and the pages regenerated (branch `tracking-and-continuation`), then the entries that need no code written and the pages regenerated again (branch `tracking-false-negatives`); see "What the tracking pages show (2026-10-09)".
 
+## Windows platform backend, stage 1 (2026-10-10)
+
+Branch `win32-platform`, not pushed. The design, the file table and the stages are in `win32-platform.md`; `CRITICAL-PATH.md` row 26 has the state.
+
+- **What exists.** The crate `ferroui-win32` (`src/Windows/FerroUI.Win32`): the platform and its options, the dispatcher over the message loop, windows (with popups and embedded windows as kinds of one implementation), screens, cursors, the software framebuffer surface, clipboard text, mouse and keyboard input, `use_win32`; the Windows branch of `use_platform_detect`; the example `win32_window` with a `--smoke` run; the `windows` job of the CI workflow. Tracking: the project is in scope, 23 of 95 files and 80 of 276 types.
+- **How it was verified.** It was written on macOS and has never run. `cargo check -p ferroui-win32 --target x86_64-pc-windows-msvc --all-targets` is green; `cargo test -p ferroui-win32` runs 49 tests of its logic on any host; `cargo check --workspace` on the host is green.
+- **The first thing to do: read the first run of the `windows` job.** It is the first execution of the backend. The smoke run prints a line for every check (`[ ok ]`, `[FAIL]`, `[info]`) with what it saw, and lists the failures at its end.
+  - A failure to build or link in the first step: an import the system does not export under that name or from that library (`interop/unmanaged_methods.rs`, the `rtl_get_version` declaration first of all, which is the one import the backend declares itself).
+  - A panic or a hang before the first `[ ok ]`: platform initialisation (the message window, DPI awareness, the dispatcher).
+  - `client size after resize and show` or `frames` failing with sizes of 0: the runner has no interactive desktop, against what is expected of GitHub's hosted Windows runners; the job then needs another way to show a window, and the rest of the checks say little.
+  - `maximize`, `restore`: the state machine of `window_impl.rs` (`show_window`, `update_window_properties`, the `WM_SIZE` arm of `window_impl_app_wnd_proc.rs`).
+  - `key down`, `text input`, `mouse move`, `mouse wheel`: the message arms and `input/key_interop.rs`.
+  - `clipboard text`: `clipboard_impl.rs`; `work posted from another thread`: the signal of `win32_dispatcher_impl.rs`.
+  - The step "Skia binaries published for Windows" prints which prebuilt feature sets exist; record them in `win32-platform.md`, section 6.2, in place of the **[CI]** mark.
+  - The two steps after it are informative (`continue-on-error`): the first compile of the Skia backend, HarfBuzz and the whole stack with MSVC, and `hello_window` through the compositor and the render thread. Expect findings there that are not about this backend.
+- **Stage 2, in order** (`win32-platform.md`, section 11): 2.0 make the informative steps green, remove their markers, port upstream's `StandardWindowTests` and `BeginMoveDragTests` to run in the job, and run the member extraction for the project (`scripts/port-status/run.sh --force`, with the .NET SDK: the project list already asks for full detail, and the tracking page then counts members); 2a COM and the Windows Runtime (MicroCom vtables as `extern "system"`, `win32.idl`, `winrt.idl`, the platform settings); 2b GPU rendering (ANGLE on Direct3D 11, WGL; the Ganesh GPU of the Skia backend on Windows); 2c composition (DirectComposition, Windows.UI.Composition with acrylic and mica, the DXGI swap chain); 2d the OLE data objects, the clipboard through them, drag and drop; 2e icons, the taskbar, tray icons, the storage provider and file dialogs, the native control host, the menu exporter (Windows has no native menu bar: the managed menu is the menu); 2f touch and pen (`WM_POINTER`), input methods, the input pane, the custom caption and the extended client area. After stage 2: the automation project (`Avalonia.Win32.Automation`, 40 files, out of scope today), Vulkan after the Vulkan project, and embedding (`Avalonia.Win32.Interoperability` hosts in WPF and Windows Forms and has no counterpart; an embeddable window exists since stage 1).
+
 ## In flight on 2026-10-09
 
 Nothing runs in the cloud. In flight locally, each on its own branch, written by a sub-agent without a compiler and validated in the main checkout:
@@ -273,6 +290,7 @@ Also: the layout clock is in milliseconds (`DEVIATIONS.md`, Layout). Found while
 
 ## Decisions waiting for the owner
 
+- **Windows: where the ANGLE libraries come from (2026-10-10).** Upstream's default rendering mode on Windows is OpenGL ES through ANGLE on Direct3D 11, and it ships its own build of ANGLE. The port takes crates from crates.io only. `win32-platform.md`, section 6.2, lists the candidates (a crate that carries ANGLE binaries, building ANGLE in CI and publishing it with the port, or WGL and the software mode alone until Vulkan). Needed before stage 2b. The same section records that Graphite has no Direct3D backend in the Skia bindings, so "Graphite on Windows" means Vulkan.
 - **Bindings from expression trees.** `CompiledBinding.Create<TIn, TOut>(Expression)` and `BindingExpressionVisitor` (36 tests) have no counterpart in the port. `xaml.md` 3.6.1 compares three options: no counterpart (recommended; the builder chain stands for the expression tree), a `binding_path!` macro, or a run-time expression model. The note maps each of the 36 tests to its counterpart: 27 have one in `CompiledBindingPathBuilder`.
 - **CI speed-up.** The earlier proposal for a faster CI run is still open.
 - **Stale branches.** Branches of merged pull requests can be deleted by hand.
