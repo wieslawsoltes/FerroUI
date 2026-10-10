@@ -70,6 +70,34 @@ Next, in the order of `ios-platform.md`, section 14:
 
 Tracking: `Avalonia.iOS` is in scope at file and type granularity: 23 of 40 files, 27 of 57 types (1 waived). The scanner does not see a class declared inside `define_class!`, so four built classes count as missing (`FerroAppDelegate`, `FerroSceneDelegate`, `FerroView`, `DefaultFerroViewController`: 31 of 57 with them); `path-overrides.toml` has the type names, and the scanner was not changed because the tracking data is being audited on another branch. The 331 members are totals only. `DEVIATIONS.md` has the section of the backend (it was added to the second of the two copies of the platform sections that file has on main).
 
+## The Android platform, stages 1 and 1b (2026-10-10)
+
+Design, decisions, file table, what was measured and the stages: `android-platform.md`. Row 29 of `CRITICAL-PATH.md`.
+
+**What exists.** The crate `ferroui-android` (`src/Android/FerroUI.Android`) with its Java layer (`java/org/ferroui/android`), the smoke application (`examples/android_smoke.rs`), the catalog host (`samples/ControlCatalog.Android`), and four scripts under `scripts/android/`: `env.sh` (the pinned NDK, build tools, platform and nightly toolchain), `apk.sh smoke|catalog` (the package, without Gradle), `emu-smoke.sh` and `emu-catalog.sh` (the emulator runs; `emu-common.sh` is their shared part). Both emulator scripts passed on 2026-10-10 on the device `ferroui_api36` (`android-platform.md`, section 10.1).
+
+**How to work on it.**
+
+- Host: `cargo test -p ferroui-android` (the logic: 53 tests) and `cargo check -p ferroui-android --target aarch64-linux-android` after `. scripts/android/env.sh` with `ANDROID_HOME` set (the build scripts of the dependencies compile C and C++ with the NDK).
+- A device run needs the package: `scripts/android/apk.sh smoke`, then `scripts/android/emu-smoke.sh` (it starts and stops the emulator itself; `--keep` and `FERROUI_EMU_REUSE=1` run several packages in one boot). On the development machine the emulator may only run while no virtual machine does: the runs are serialised by whoever coordinates the work.
+- A crash on the device: the scripts leave `logcat-*.txt` and `crash-*.txt`; the frames of the library in a tombstone are named from the symbol table of the library that was not stripped (`<target directory>/aarch64-linux-android/debug/...`), with `llvm-nm -n` of the NDK.
+- A new call into the framework of the system goes through `interop/java.rs` (by name and signature, checked before the call); a new override of a framework class is a method of the Java class that forwards to a native method registered in `interop/natives.rs`. Logic stays in the Rust file of the upstream class, behind a trait where the tests should reach it (`IInsetsWindow`, `IDisplaySource`, `IMotionEventsTopLevel`).
+
+**Waiting for the owner: the toolchain.** An application for Android cannot be built with stable Rust as things are (`android-platform.md`, section 5.1, with three alternatives and their cost). Until the decision the scripts build with `nightly-2026-07-01`, `-Zbuild-std` and `-Zhas-thread-local=yes`, confined to `scripts/android/apk.sh` and the CI job.
+
+**Stage 2, in order** (each with what its emulator run proves, `android-platform.md` section 11):
+
+1. **2a, keyboard**: `Platform/Specific/Helpers/AndroidKeyboardEventsHelper.cs` and `AndroidKeyInterop.cs` (the key table), `Platform/Input/AndroidKeyboardDevice.cs`; `dispatchKeyEvent` of the Java view forwards a copy of the key event as the motion events are copied; `TopLevelImpl::text_input`. The platform then registers `AndroidKeyboardDevice` instead of the keyboard device of the framework.
+2. **2b, the input method**: `Platform/Input/AndroidInputMethod.cs`, `AvaloniaInputConnection.cs` (a Java class deriving from `BaseInputConnection` that forwards every call; `onCreateInputConnection` of the Java view returns it), `TextEditBuffer.cs`, `EditCommand.cs`, `IInitEditorInfo.cs`; the insets animation callback of `AndroidInsetsManager` (the animated state change of the input pane) and its path below API 30. The edit buffer and the commands are logic: their tests run on the host.
+3. **2c, lifecycle**: the surface lost and created again (pause and resume: the EGL surface information keeps the last window alive, and the render target has to take the new one), a second start of the activity in one process, `onNewIntent` and `HandleIntent` (protocol and file activation, with the storage items of 2e), configuration changes (rotation, night mode: an activity of the platform has no local night mode, `android-platform.md` 3.3), the back button (`BackPressedCallback.cs`, `IAndroidNavigationService.cs`, `AndroidSystemNavigationManager.cs`: `OnBackInvokedDispatcher` on API 33 and `onBackPressed` below).
+4. **2d, services**: `ClipboardImpl.cs` with the two clip data wrappers and `AndroidDataFormatHelper.cs`; `AndroidPlatformSettings.cs` (theme, accent, contrast from the configuration and the resources of the system); `AndroidLauncher.cs`; `AndroidPlatformFeedback.cs`.
+5. **2e, storage**: `Platform/Storage/AndroidStorageProvider.cs` and `AndroidStorageItem.cs` (the storage access framework through `DocumentsContract`, without the AndroidX document file), `IActivityResultHandler.cs`, `PlatformSupport.cs` (permissions): the Java activity forwards `onActivityResult` and `onRequestPermissionsResult`.
+6. **2f, the native control host**: `AndroidNativeControlHostImpl.cs`, and `EmbedSample.Android.cs` of the catalog host.
+
+Then stage 3 (accessibility: `AvaloniaAccessHelper.cs` and the nine node info providers, over `AccessibilityNodeProvider`), and Vulkan with the Vulkan project.
+
+**Not verified anywhere yet**: the CI job (it had not run); the build for `x86_64-linux-android` (whether a Skia binary is published for it); API levels other than 36 (the paths below API 30 of `PlatformHelper` are written and never ran); `--gpu host` of the emulator; a real device. The member extraction for the project is not made (`upstream-api.json` has its files and types; members are a total).
+
 ## The Linux platform, stage 1 (2026-10-10)
 
 Branch `x11-platform` (not pushed): the crate `ferroui-x11` with stage 1 of `x11-platform.md`, the design document, the tracking of `Avalonia.X11` moved into scope, the Linux branch of `use_platform_detect`, and the CI job `x11`. `CRITICAL-PATH.md`, row 26, has the summary; `DEVIATIONS.md`, "X11 platform", the differences and what is not built.

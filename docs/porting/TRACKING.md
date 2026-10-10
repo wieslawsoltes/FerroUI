@@ -52,7 +52,7 @@ Percentages are `present / (total - waived)`. Member matching is by name with re
 | Routed events | 108 | 108 | - | 100.0% |
 | Other files (native sources, XAML, TypeScript, fonts) | 243 | 268 | - | 90.7% |
 
-148 upstream files are not applicable and not counted. Out of the current scope (platform backends, below): 301 files, 573 types, 5173 members.
+148 upstream files are not applicable and not counted. Out of the current scope (platform backends, below): 243 files, 485 types, 4726 members.
 
 ## Projects
 
@@ -62,6 +62,7 @@ The % column is member coverage (file coverage for plain file lists).
 |---|---|---|---|---:|---:|---:|---:|---|---|
 | [XamlX](tracking/XamlX.md) | `external/XamlX/src/XamlX` | `external/XamlX/src/XamlX` | `xamlx` | 62/62 | 172/177 (5 waived) | 713/878 (165 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Native (native sources)](tracking/Avalonia.Native_native_sources.md) | `native/Avalonia.Native` | `native/FerroUI.Native` | (Objective-C++ sources built by ferroui-native) | 62/62 | - | - | 100.0% | 1 - desktop (macOS) | P0 |
+| [Avalonia.Android](tracking/Avalonia.Android.md) | `src/Android/Avalonia.Android` | `src/Android/FerroUI.Android` | `ferroui-android` | 23/58 | 32/88 | 0/447 | 0.0% | 6 - mobile (Android) | P1 |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/Avalonia.Base` | `src/FerroUI.Base` | `ferroui-base` | 1248/1248 | 1523/1659 (136 waived) | 10281/11433 (1152 waived) | 100.0% | 0 - core | P0 |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/Avalonia.Build.Tasks` | `src/FerroUI.Build.Tasks` | `ferroui-build` | 6/6 | 6/7 (1 waived) | 7/35 (28 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/Avalonia.Controls` | `src/FerroUI.Controls` | `ferroui-controls` | 538/538 | 621/628 (7 waived) | 6214/6405 (189 waived) | 100.0% | 1 - controls | P0 |
@@ -109,7 +110,6 @@ Tracked at file and type granularity so that the size of the remaining work is k
 
 | Project | Upstream path | FerroUI path | Crate | Files | Types | Members | % | Phase | Priority |
 |---|---|---|---|---:|---:|---:|---:|---|---|
-| [Avalonia.Android](tracking/Avalonia.Android.md) | `src/Android/Avalonia.Android` | `src/Android/FerroUI.Android` | `ferroui-android` | 0/58 | 0/88 | 0/447 | 0.0% | not started / out of current scope | - |
 | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/Avalonia.FreeDesktop` | `src/FerroUI.FreeDesktop` | `ferroui-freedesktop` | 0/18 | 0/26 | 0/216 | 0.0% | not started / out of current scope | - |
 | [Avalonia.FreeDesktop.AtSpi](tracking/Avalonia.FreeDesktop.AtSpi.md) | `src/Avalonia.FreeDesktop.AtSpi` | `src/FerroUI.FreeDesktop.AtSpi` | `ferroui-freedesktop-atspi` | 0/27 | 0/27 | 0/434 | 0.0% | not started / out of current scope | - |
 | [Avalonia.Vulkan](tracking/Avalonia.Vulkan.md) | `src/Avalonia.Vulkan` | `src/FerroUI.Vulkan` | `ferroui-vulkan` | 0/30 | 0/151 | 0/2034 | 0.0% | not started / out of current scope | - |
@@ -129,7 +129,7 @@ Libraries.
 
 | Upstream project | C# files | FerroUI path | State | Tracking |
 |---|---:|---|---|---|
-| `src/Android/Avalonia.Android` | 58 | `src/Android/FerroUI.Android` | not created | [Avalonia.Android](tracking/Avalonia.Android.md) (out of scope) |
+| `src/Android/Avalonia.Android` | 58 | `src/Android/FerroUI.Android` | workspace member | [Avalonia.Android](tracking/Avalonia.Android.md) |
 | `src/Avalonia.Base` | 1304 | `src/FerroUI.Base` | workspace member | [Avalonia.Base](tracking/Avalonia.Base.md) |
 | `src/Avalonia.Build.Tasks` | 10 | `src/FerroUI.Build.Tasks` | workspace member | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) |
 | `src/Avalonia.Controls` | 539 | `src/FerroUI.Controls` | workspace member | [Avalonia.Controls](tracking/Avalonia.Controls.md) |
@@ -227,7 +227,7 @@ Sample applications. Same directory names; binary crates.
 | `samples/AppWithoutLifetime` | 4 | `samples/AppWithoutLifetime` | workspace member | not tracked |
 | `samples/BindingDemo` | 11 | `samples/BindingDemo` | workspace member | not tracked |
 | `samples/ControlCatalog` | 284 | `samples/ControlCatalog` | workspace member | not tracked |
-| `samples/ControlCatalog.Android` | 3 | `samples/ControlCatalog.Android` | not created | not tracked |
+| `samples/ControlCatalog.Android` | 3 | `samples/ControlCatalog.Android` | workspace member | not tracked |
 | `samples/ControlCatalog.Browser` | 2 | `samples/ControlCatalog.Browser` | workspace member | not tracked |
 | `samples/ControlCatalog.Desktop` | 7 | `samples/ControlCatalog.Desktop` | workspace member | not tracked |
 | `samples/ControlCatalog.MacCatalyst` | 0 | `samples/ControlCatalog.MacCatalyst` | not created | not tracked |
@@ -302,6 +302,7 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `samples/AppWithoutLifetime` | `samples/AppWithoutLifetime` (not tracked) |
 | `samples/BindingDemo` | `samples/BindingDemo` (not tracked) |
 | `samples/ControlCatalog` | `samples/ControlCatalog` (not tracked) |
+| `samples/ControlCatalog.Android` | `samples/ControlCatalog.Android` (not tracked) |
 | `samples/ControlCatalog.Browser` | `samples/ControlCatalog.Browser` (not tracked) |
 | `samples/ControlCatalog.Desktop` | `samples/ControlCatalog.Desktop` (not tracked) |
 | `samples/ControlCatalog.iOS` | `samples/ControlCatalog.iOS` (not tracked) |
@@ -315,6 +316,7 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `samples/Sandbox` | `samples/Sandbox` (not tracked) |
 | `samples/TextTestApp` | `samples/TextTestApp` (not tracked) |
 | `samples/VirtualizationDemo` | `samples/VirtualizationDemo` (not tracked) |
+| `src/Android/FerroUI.Android` | `src/Android/Avalonia.Android` |
 | `src/Browser/FerroUI.Browser` | `src/Browser/Avalonia.Browser` |
 | `src/FerroUI.Base` | `src/Avalonia.Base` |
 | `src/FerroUI.Build.Scan` | none (FerroUI only) |
@@ -355,11 +357,17 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-340 Rust source files have no upstream counterpart (9 without a recorded reason). They are listed at the end of each project page.
+346 Rust source files have no upstream counterpart (15 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
 | [XamlX](tracking/XamlX.md) | `external/XamlX/src/XamlX/extensions/query_interface.rs` | dynamic interface queries on AST nodes: replaces C# `is`/`as` casts to backend-generic interfaces |
+| [Avalonia.Android](tracking/Avalonia.Android.md) | `src/Android/FerroUI.Android/android_egl.rs` | **unmapped** |
+| [Avalonia.Android](tracking/Avalonia.Android.md) | `src/Android/FerroUI.Android/interop/java.rs` | **unmapped** |
+| [Avalonia.Android](tracking/Avalonia.Android.md) | `src/Android/FerroUI.Android/interop/natives.rs` | **unmapped** |
+| [Avalonia.Android](tracking/Avalonia.Android.md) | `src/Android/FerroUI.Android/interop/ndk.rs` | **unmapped** |
+| [Avalonia.Android](tracking/Avalonia.Android.md) | `src/Android/FerroUI.Android/interop/signature.rs` | **unmapped** |
+| [Avalonia.Android](tracking/Avalonia.Android.md) | `src/Android/FerroUI.Android/log.rs` | **unmapped** |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/animation/animation_task.rs` | the completion of an animation run, the `Task` upstream returns: completed from within a clock tick or a cancellation, so it needs no executor |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/animation/cancellation.rs` | cancellation callbacks for state of the UI thread: a cancellation token runs its callbacks on the cancelling thread, so they must be `Send`, and what an animation does on cancellation is not |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/animation/time_span.rs` | counterpart of .NET `System.TimeSpan` (signed 100-nanosecond ticks), the time type of the animation system |
