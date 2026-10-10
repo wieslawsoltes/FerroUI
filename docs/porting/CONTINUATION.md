@@ -70,6 +70,19 @@ Next, in the order of `x11-platform.md`, section 14: 2a GPU rendering (decide th
 
 Tracking: `Avalonia.X11` is in scope at file and type granularity (48 of 88 files, 121 of 291 types with 108 waived as structures of the bindings); its members (4897) are not extracted, because the extraction of that project holds types only. Running the upstream extractor with `"detail": "full"` for the project gives member tracking; the scanner needed two small changes for a project in scope without members (`port_status.py`: the planning data of `projects.json` is overlaid on the extraction, and types are looked for in such a project).
 
+## The Linux platform, stage 2 up to 2b (2026-10-10)
+
+Branch `x11-platform-2` (draft pull request 164). `x11-platform.md` has the detail; in short:
+
+- **Stage 1's unverified items are closed.** The smoke mode of `examples/x11_window.rs` now has phases for synthetic input (XTEST, expected at the input callback of the window), a popup (asked of the server; kept by a press inside, dismissed by a press outside), a resize, the screens (two monitors with `xrandr --setmonitor`) and the clipboard with another client (`xclip`, both directions, also in parts). They pass in the virtual machine and in the CI job. One defect was found and fixed: an incremental transfer announced with an empty property (what `xclip` sends) was not read.
+- **2a, built but for Vulkan**: GLX (`glx/`) and EGL (`x11_egl_helper.rs`) with Skia's Ganesh on OpenGL (the feature `gl` of `skia-safe` for Linux; binaries are published for x86-64 and ARM64). Both rendered correctly the first time they ran, on `llvmpipe`. Vulkan waits for the Vulkan project of the port and the Vulkan GPU of the Skia backend.
+- **2b, built**: the shared memory framebuffer (`x_shm/`, `x11_deferred_display_dispatcher.rs`, `lib_c.rs`).
+- Tracking: 60 of 88 files, 133 of 291 types (107 waived).
+
+Next: 2c, input methods. It starts the crate `ferroui-freedesktop` (what `docs/release.md` section 1.4 asks of a published crate) with `zbus`: before adding it, check its current version and that its futures complete on the UI dispatcher as section 3 of the design says (a call awaited through `Dispatcher::invoke_async_task_local`, a signal stream as a task). In the X11 crate: the queue of key events an input method filters (`FilterIme` in `X11Window.Ime.cs`, of which the keyboard part is built), `X11Window.Xim.cs`, `XimInputMethod`, and `use_xim` of `X11Info`, which is false today. The job needs an input method to talk to: `ibus-daemon` under `dbus-run-session` for the D-Bus side; for XIM, an `XMODIFIERS=@im=` server (ibus provides one).
+
+Not verified anywhere: a GPU with a hardware driver, input from a real device, a compositing manager under plain X11.
+
 ## In flight on 2026-10-09
 
 Nothing runs in the cloud. In flight locally, each on its own branch, written by a sub-agent without a compiler and validated in the main checkout:
