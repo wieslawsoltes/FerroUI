@@ -1,0 +1,41 @@
+[package]
+name = "ferroui-x11"
+description = "The X11 windowing platform of FerroUI for Linux"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-dialogs.workspace = true
+ferroui-opengl.workspace = true
+bitflags.workspace = true
+
+# What the example draws and shapes text with. Optional, behind the feature the example requires,
+# so that the crate and its tests build without the native libraries of the renderer and the text
+# shaper (which is how the crate is checked for the Linux target from another system).
+ferroui-harfbuzz = { workspace = true, optional = true }
+ferroui-skia = { workspace = true, optional = true }
+ferroui-themes-simple = { workspace = true, optional = true }
+
+# Xlib and its extension libraries are opened at run time (nothing is linked), and the C library
+# gives the event loop its descriptors: both exist on Unix systems only.
+[target.'cfg(unix)'.dependencies]
+x11-dl.workspace = true
+libc.workspace = true
+
+[features]
+# Builds `examples/x11_window.rs`: a window with the Skia renderer in software, the HarfBuzz text
+# shaper and the Simple theme, and its smoke mode.
+example = ["dep:ferroui-harfbuzz", "dep:ferroui-skia", "dep:ferroui-themes-simple"]
+
+[[example]]
+name = "x11_window"
+path = "examples/x11_window.rs"
+required-features = ["example"]
