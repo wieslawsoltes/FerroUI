@@ -6,9 +6,11 @@ use crate::gl_consts::{
 };
 use crate::surfaces::{IGlPlatformSurface, IGlPlatformSurfaceRenderingSession};
 use crate::{GlInterface, IGlContext, OpenGlException};
-use ferroui_base::platform::{IPlatformGraphicsContext, PlatformRenderTargetState, RenderTargetSceneInfo};
+use ferroui_base::platform::{
+    IPlatformGraphicsContext, PlatformRenderTargetState, RenderTargetError, RenderTargetSceneInfo,
+};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::PixelSize;
+use ferroui_base::{PixelSize, RenderTargetCorruptedException};
 use std::cell::Cell;
 use std::ffi::c_void;
 use std::rc::Rc;
@@ -192,6 +194,19 @@ pub trait EglPlatformImageSurfaceRenderTarget {
         }
 
         self.begin_draw_core(scene_info)
+    }
+
+    /// `BeginDraw(sceneInfo)` with the exception of a lost context as an error: what
+    /// `IGlPlatformSurfaceRenderTarget::try_begin_draw` of a render target forwards to.
+    fn try_begin_draw(
+        &self,
+        scene_info: &RenderTargetSceneInfo,
+    ) -> Result<Rc<dyn IGlPlatformSurfaceRenderingSession>, RenderTargetError> {
+        if IPlatformGraphicsContext::is_lost(&**self.base().context()) {
+            return Err(RenderTargetCorruptedException::new().into());
+        }
+
+        Ok(self.begin_draw_core(scene_info))
     }
 
     /// The state of the render target: corrupted when [`is_corrupted`](Self::is_corrupted),

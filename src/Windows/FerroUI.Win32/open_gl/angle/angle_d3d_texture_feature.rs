@@ -8,7 +8,9 @@ use crate::direct_x::{
     IDirect3D11TextureRenderTargetRenderSession, DXGI_ERROR,
 };
 use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
-use ferroui_base::platform::{IPlatformGraphicsContext, PlatformRenderTargetState, RenderTargetSceneInfo};
+use ferroui_base::platform::{
+    IPlatformGraphicsContext, PlatformRenderTargetState, RenderTargetError, RenderTargetSceneInfo,
+};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::RenderTargetCorruptedException;
 use ferroui_microcom::HResult;
@@ -129,11 +131,29 @@ impl EglPlatformSurfaceRenderTarget for RenderTargetWrapper {
     }
 
     /// # Panics
-    /// Panics when the frame cannot be begun (the exceptions of the
-    /// reference): the render target of the surface is corrupted (a lost
-    /// device is reported to the context first), the texture cannot be
-    /// wrapped, or the context cannot be made current with it.
+    /// Panics when the frame cannot be begun, as
+    /// [`try_begin_draw_core`](Self::try_begin_draw_core), and when the
+    /// render target of the surface is corrupted: the renderer calls the
+    /// other member, which returns that as an error.
     fn begin_draw_core(&self, scene_info: &RenderTargetSceneInfo) -> Rc<dyn IGlPlatformSurfaceRenderingSession> {
+        match self.try_begin_draw_core(scene_info) {
+            Ok(session) => session,
+            Err(error) => panic!("{error}"),
+        }
+    }
+
+    /// The corrupted render target of the surface is an error the
+    /// compositor takes, as it catches the exception of the reference (a
+    /// lost device is reported to the context first).
+    ///
+    /// # Panics
+    /// Panics when the texture cannot be wrapped or the context cannot be
+    /// made current with it (exceptions of the reference that its
+    /// compositor does not catch).
+    fn try_begin_draw_core(
+        &self,
+        scene_info: &RenderTargetSceneInfo,
+    ) -> Result<Rc<dyn IGlPlatformSurfaceRenderingSession>, RenderTargetError> {
         // TODO: use expectedPixelSize
         let context = self.base.context();
         let context_lock = IPlatformGraphicsContext::ensure_current(&**context);
@@ -145,7 +165,7 @@ impl EglPlatformSurfaceRenderTarget for RenderTargetWrapper {
                     context.notify_context_lost();
                 }
                 release(&context_lock, None, None);
-                panic!("{error}");
+                return Err(error.into());
             }
         };
 
@@ -169,7 +189,7 @@ impl EglPlatformSurfaceRenderTarget for RenderTargetWrapper {
             Rc::new(move || release(&context_lock, Some(&session), Some(&surface)))
         };
         match self.base.begin_draw(&surface, size, session.scaling(), Some(on_finish), true, None, false) {
-            Ok(rv) => rv,
+            Ok(rv) => Ok(rv),
             Err(error) => {
                 release(&context_lock, Some(&session), Some(&surface));
                 panic!("{error}");
@@ -199,6 +219,13 @@ impl IPlatformRenderSurfaceRenderTarget for RenderTargetWrapper {
 impl IGlPlatformSurfaceRenderTarget for RenderTargetWrapper {
     fn begin_draw(&self, scene_info: &RenderTargetSceneInfo) -> Rc<dyn IGlPlatformSurfaceRenderingSession> {
         EglPlatformSurfaceRenderTarget::begin_draw(self, scene_info)
+    }
+
+    fn try_begin_draw(
+        &self,
+        scene_info: &RenderTargetSceneInfo,
+    ) -> Result<Rc<dyn IGlPlatformSurfaceRenderingSession>, RenderTargetError> {
+        EglPlatformSurfaceRenderTarget::try_begin_draw(self, scene_info)
     }
 
     fn dispose(&self) {

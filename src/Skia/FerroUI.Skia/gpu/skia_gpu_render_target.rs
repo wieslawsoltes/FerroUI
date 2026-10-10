@@ -3,7 +3,7 @@ use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl};
 use crate::skia_platform::SkiaPlatform;
 use ferroui_base::platform::{
     IDrawingContextImpl, IRenderTarget, PlatformRenderTargetState, RenderTargetDrawingContextProperties,
-    RenderTargetProperties, RenderTargetSceneInfo,
+    RenderTargetError, RenderTargetProperties, RenderTargetSceneInfo,
 };
 use std::rc::Rc;
 
@@ -30,7 +30,17 @@ impl IRenderTarget for SkiaGpuRenderTarget {
         &self,
         scene_info: &RenderTargetSceneInfo,
     ) -> (Box<dyn IDrawingContextImpl>, RenderTargetDrawingContextProperties) {
-        let session = self.render_target.begin_rendering_session(scene_info);
+        match self.try_create_drawing_context(scene_info) {
+            Ok(created) => created,
+            Err(error) => panic!("{error}"),
+        }
+    }
+
+    fn try_create_drawing_context(
+        &self,
+        scene_info: &RenderTargetSceneInfo,
+    ) -> Result<(Box<dyn IDrawingContextImpl>, RenderTargetDrawingContextProperties), RenderTargetError> {
+        let session = self.render_target.try_begin_rendering_session(scene_info)?;
 
         let nfo = CreateInfo {
             gr_context: Some(session.gr_context()),
@@ -44,7 +54,7 @@ impl IRenderTarget for SkiaGpuRenderTarget {
 
         let context = DrawingContextImpl::new(nfo, vec![Box::new(move || session.dispose())]);
 
-        (Box::new(context), RenderTargetDrawingContextProperties::default())
+        Ok((Box::new(context), RenderTargetDrawingContextProperties::default()))
     }
 
     fn platform_render_target_state(&self) -> PlatformRenderTargetState {

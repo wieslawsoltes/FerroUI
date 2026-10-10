@@ -1,7 +1,51 @@
 use super::IDrawingContextImpl;
 use crate::rendering::composition::CompositionTransparencyLevel;
-use crate::{PixelSize, Size};
+use crate::{PixelSize, RenderTargetCorruptedException, RenderTargetNotReadyException, Size};
 use std::any::Any;
+use std::error::Error;
+use std::fmt;
+
+/// Why a frame could not be begun on a render target: the two exceptions
+/// the compositor of the reference catches around the creation of a
+/// drawing context. Neither is a fault: a target that is not ready is
+/// asked again later, and a corrupted one is released and created anew.
+#[derive(Clone, Debug)]
+pub enum RenderTargetError {
+    /// The target cannot be drawn to yet.
+    NotReady(RenderTargetNotReadyException),
+    /// The target can no longer be drawn to.
+    Corrupted(RenderTargetCorruptedException),
+}
+
+impl fmt::Display for RenderTargetError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            RenderTargetError::NotReady(error) => error.fmt(f),
+            RenderTargetError::Corrupted(error) => error.fmt(f),
+        }
+    }
+}
+
+impl Error for RenderTargetError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            RenderTargetError::NotReady(error) => Some(error),
+            RenderTargetError::Corrupted(error) => Some(error),
+        }
+    }
+}
+
+impl From<RenderTargetNotReadyException> for RenderTargetError {
+    fn from(error: RenderTargetNotReadyException) -> Self {
+        RenderTargetError::NotReady(error)
+    }
+}
+
+impl From<RenderTargetCorruptedException> for RenderTargetError {
+    fn from(error: RenderTargetCorruptedException) -> Self {
+        RenderTargetError::Corrupted(error)
+    }
+}
 
 /// The readiness of a platform render target.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -76,6 +120,19 @@ pub trait IRenderTarget {
         &self,
         scene_info: &RenderTargetSceneInfo,
     ) -> (Box<dyn IDrawingContextImpl>, RenderTargetDrawingContextProperties);
+
+    /// Creates a drawing context for a rendering session, or says that the
+    /// target is not ready or is corrupted: what the reference reports by
+    /// throwing `RenderTargetNotReadyException` or
+    /// `RenderTargetCorruptedException` out of `CreateDrawingContext`. The
+    /// compositor calls this member. A target that cannot report either
+    /// keeps the default.
+    fn try_create_drawing_context(
+        &self,
+        scene_info: &RenderTargetSceneInfo,
+    ) -> Result<(Box<dyn IDrawingContextImpl>, RenderTargetDrawingContextProperties), RenderTargetError> {
+        Ok(self.create_drawing_context(scene_info))
+    }
 
     /// The readiness of the underlying platform target.
     fn platform_render_target_state(&self) -> PlatformRenderTargetState {
