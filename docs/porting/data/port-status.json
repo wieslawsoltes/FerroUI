@@ -2,26 +2,26 @@
  "upstreamCommit": "17350180c33b063f0e98abbfd19aa3cae63f5d56",
  "inScope": {
   "files": [
-   2560,
-   2596,
+   2618,
+   2677,
    0
   ],
   "types": [
-   3467,
-   3915,
+   3547,
+   4038,
    311
   ],
   "members": [
-   27859,
-   32172,
+   28277,
+   32988,
    2868
   ]
  },
  "allProjects": {
-  "membersPresent": 27859,
+  "membersPresent": 28277,
   "members": 37391,
   "membersNotApplicable": 1132,
-  "membersOutOfScope": 4087
+  "membersOutOfScope": 3271
  },
  "projects": [
   {
@@ -7876,25 +7876,25 @@
    "name": "Avalonia.Wayland",
    "path": "src/Avalonia.Wayland",
    "rust": "src/FerroUI.Wayland",
-   "scope": "out",
-   "detail": "types",
+   "scope": "in",
+   "detail": "full",
    "files": [
-    0,
+    58,
     81,
     0
    ],
    "types": [
-    0,
+    80,
     123,
     0
    ],
    "members": [
-    0,
+    418,
     816,
     0
    ],
    "interfaces": [
-    0,
+    12,
     14
    ],
    "propertyRegistrations": [
@@ -7906,8 +7906,191 @@
     0
    ],
    "notApplicableFiles": 0,
-   "matchKinds": {},
-   "presentFiles": {},
+   "matchKinds": {
+    "field": 67,
+    "fn": 323,
+    "free fn": 1,
+    "free item": 1,
+    "trait": 7,
+    "trait fn": 3,
+    "variant": 16
+   },
+   "presentFiles": {
+    "AvaloniaWaylandException.cs": [
+     "ferro_wayland_exception.rs"
+    ],
+    "AvaloniaWaylandPlatformExtensions.cs": [
+     "ferro_wayland_platform_extensions.rs"
+    ],
+    "PopupImpl.Sink.cs": [
+     "popup_impl_sink.rs"
+    ],
+    "PopupImpl.cs": [
+     "popup_impl.rs"
+    ],
+    "Screens/IWaylandOutputsSink.cs": [
+     "screens/i_wayland_outputs_sink.rs"
+    ],
+    "Screens/SnapshotScreensImpl.cs": [
+     "screens/snapshot_screens_impl.rs"
+    ],
+    "Screens/WaylandOutputSnapshot.cs": [
+     "screens/wayland_output_snapshot.rs"
+    ],
+    "Server/Interop/UnsafeNativeMethods.cs": [
+     "server/interop/unsafe_native_methods.rs"
+    ],
+    "Server/Interop/WakeupFd.cs": [
+     "server/interop/wakeup_fd.rs"
+    ],
+    "Server/Interop/WaylandConnection.cs": [
+     "server/interop/wayland_connection.rs"
+    ],
+    "Server/Persistent/DecorationMode.cs": [
+     "server/persistent/decoration_mode.rs"
+    ],
+    "Server/Persistent/IPersistentObject.cs": [
+     "server/persistent/i_persistent_object.rs"
+    ],
+    "Server/Persistent/IWSurface.cs": [
+     "server/persistent/i_w_surface.rs"
+    ],
+    "Server/Persistent/IWSurfaceEventSink.cs": [
+     "server/persistent/i_w_surface_event_sink.rs"
+    ],
+    "Server/Persistent/IWXdgTopLevel.cs": [
+     "server/persistent/i_w_xdg_top_level.rs"
+    ],
+    "Server/Persistent/IWaylandCursor.cs": [
+     "server/persistent/i_wayland_cursor.rs"
+    ],
+    "Server/Persistent/WSurface.cs": [
+     "server/persistent/w_surface.rs"
+    ],
+    "Server/Persistent/WaylandBitmapCursor.cs": [
+     "server/persistent/wayland_bitmap_cursor.rs"
+    ],
+    "Server/Persistent/WaylandCursor.cs": [
+     "server/persistent/wayland_cursor.rs"
+    ],
+    "Server/Persistent/WaylandInputEventCookie.cs": [
+     "server/persistent/wayland_input_event_cookie.rs"
+    ],
+    "Server/Persistent/XdgConfigureBatch.cs": [
+     "server/persistent/xdg_configure_batch.rs"
+    ],
+    "Server/Persistent/XdgPopupConfigureBatch.cs": [
+     "server/persistent/xdg_popup_configure_batch.rs"
+    ],
+    "Server/Persistent/XdgPopupPositionerParams.cs": [
+     "server/persistent/xdg_popup_positioner_params.rs"
+    ],
+    "Server/ServerSignaler.cs": [
+     "server/server_signaler.rs"
+    ],
+    "Server/Transient/Rendering/IWaylandFramebufferSurface.cs": [
+     "server/transient/rendering/i_wayland_framebuffer_surface.rs"
+    ],
+    "Server/Transient/Rendering/WaylandEglWsiPlatformGraphics.cs": [
+     "server/transient/rendering/wayland_egl_wsi_platform_graphics.rs"
+    ],
+    "Server/Transient/Rendering/WaylandEglWsiSurface.cs": [
+     "server/transient/rendering/wayland_egl_wsi_surface.rs"
+    ],
+    "Server/Transient/Rendering/WaylandFramebuffer.cs": [
+     "server/transient/rendering/wayland_framebuffer.rs"
+    ],
+    "Server/Transient/WaylandCursorManager.cs": [
+     "server/transient/wayland_cursor_manager.rs"
+    ],
+    "Server/Transient/WaylandGlobals.cs": [
+     "server/transient/wayland_globals.rs"
+    ],
+    "Server/Transient/WaylandInputDispatcher.Keyboard.cs": [
+     "server/transient/wayland_input_dispatcher_keyboard.rs"
+    ],
+    "Server/Transient/WaylandInputDispatcher.cs": [
+     "server/transient/wayland_input_dispatcher.rs"
+    ],
+    "Server/Transient/WaylandOutputsTracker.cs": [
+     "server/transient/wayland_outputs_tracker.rs"
+    ],
+    "Server/WaylandDispatchPriority.cs": [
+     "server/wayland_dispatch_priority.rs"
+    ],
+    "Server/WaylandMarshallers.cs": [
+     "server/wayland_marshallers.rs"
+    ],
+    "Server/WaylandPlatformGraphics.cs": [
+     "server/wayland_platform_graphics.rs"
+    ],
+    "Server/WaylandWorker.RenderTimer.cs": [
+     "server/wayland_worker_render_timer.rs"
+    ],
+    "Server/WaylandWorker.cs": [
+     "server/wayland_worker.rs"
+    ],
+    "Server/WaylandWorkerClient.cs": [
+     "server/wayland_worker_client.rs"
+    ],
+    "WaylandConversionExtensions.cs": [
+     "wayland_conversion_extensions.rs"
+    ],
+    "WaylandCursorFactory.cs": [
+     "wayland_cursor_factory.rs"
+    ],
+    "WaylandGlibDispatcher.cs": [
+     "wayland_glib_dispatcher.rs"
+    ],
+    "WaylandPlatform.cs": [
+     "wayland_platform.rs"
+    ],
+    "WaylandPlatformOptions.cs": [
+     "wayland_platform_options.rs"
+    ],
+    "WaylandSurfaceCreateResult.cs": [
+     "wayland_surface_create_result.rs"
+    ],
+    "WaylandTopLevelFactory.cs": [
+     "wayland_top_level_factory.rs"
+    ],
+    "WindowImpl.Sink.cs": [
+     "window_impl_sink.rs"
+    ],
+    "WindowImpl.TextInput.cs": [
+     "window_impl.rs"
+    ],
+    "WindowImpl.cs": [
+     "window_impl.rs"
+    ],
+    "WindowImplBase.DragDrop.cs": [
+     "window_impl_base.rs"
+    ],
+    "WindowImplBase.Keyboard.cs": [
+     "window_impl_base_keyboard.rs"
+    ],
+    "WindowImplBase.Pointer.cs": [
+     "window_impl_base_pointer.rs"
+    ],
+    "WindowImplBase.cs": [
+     "window_impl_base.rs"
+    ],
+    "XkbCommonKeymap.cs": [
+     "xkb_common_keymap.rs"
+    ],
+    "XkbComposeState.cs": [
+     "xkb_compose_state.rs"
+    ],
+    "XkbComposeTable.cs": [
+     "xkb_compose_table.rs"
+    ],
+    "XkbContext.cs": [
+     "xkb_context.rs"
+    ],
+    "XkbKeyTransform.cs": [
+     "xkb_key_transform.rs"
+    ]
+   },
    "rustOnly": []
   },
   {

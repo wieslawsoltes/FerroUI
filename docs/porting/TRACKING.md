@@ -10,8 +10,8 @@ The master status of the port: every upstream project, file, type and member (pu
 
 Two numbers, because one hides what the other shows.
 
-1. **Of what is in scope: 95.1%.** The 32 upstream projects that are in scope have 32172 members (public, protected and internal) in files that apply to the port. 27859 have a counterpart, 1445 are missing and 2868 are waived: declared not ported, each with a reason ([waiver-audit.md](waiver-audit.md)). The percentage is `present / (total - waived)`. It says nothing about projects that are out of scope, and it counts a waived member as if it did not exist.
-2. **Of everything upstream has: 74.5%.** Every C# source project of the extraction, in scope or not, has 37391 members; the port has a counterpart for 27859. The total includes the 2868 waived members, the 1132 members of files marked not applicable and the 4087 members of projects that are out of scope or not started. The rest of that distance is what [REMAINING.md](REMAINING.md) lists; part of it is never ported by design (the waived and not applicable members), so this number does not reach 100.
+1. **Of what is in scope: 93.9%.** The 33 upstream projects that are in scope have 32988 members (public, protected and internal) in files that apply to the port. 28277 have a counterpart, 1843 are missing and 2868 are waived: declared not ported, each with a reason ([waiver-audit.md](waiver-audit.md)). The percentage is `present / (total - waived)`. It says nothing about projects that are out of scope, and it counts a waived member as if it did not exist.
+2. **Of everything upstream has: 75.6%.** Every C# source project of the extraction, in scope or not, has 37391 members; the port has a counterpart for 28277. The total includes the 2868 waived members, the 1132 members of files marked not applicable and the 3271 members of projects that are out of scope or not started. The rest of that distance is what [REMAINING.md](REMAINING.md) lists; part of it is never ported by design (the waived and not applicable members), so this number does not reach 100.
 
 Both numbers match names, not behaviour (Legend, below). Projects the extraction does not read (analyzers, generators of upstream's own build, the D-Bus library) are listed in REMAINING.md with their size in files.
 
@@ -55,15 +55,15 @@ Percentages are `present / (total - waived)`. Member matching is by name with re
 
 | | Ported | Total | Waived | % |
 |---|---:|---:|---:|---:|
-| C# files | 2560 | 2596 | 0 | 98.6% |
-| Types | 3467 | 3915 | 311 | 96.2% |
-| Members | 27859 | 32172 | 2868 | 95.1% |
-| Contracts (interfaces) | 461 | 486 | - | 94.9% |
+| C# files | 2618 | 2677 | 0 | 97.8% |
+| Types | 3547 | 4038 | 311 | 95.2% |
+| Members | 28277 | 32988 | 2868 | 93.9% |
+| Contracts (interfaces) | 473 | 500 | - | 94.6% |
 | Property registrations | 1218 | 1233 | - | 98.8% |
 | Routed events | 108 | 108 | - | 100.0% |
 | Other files (native sources, XAML, TypeScript, fonts) | 243 | 265 | - | 91.7% |
 
-142 upstream files are not applicable and not counted. Out of the current scope (below): 201 files, 435 types, 4087 members.
+142 upstream files are not applicable and not counted. Out of the current scope (below): 120 files, 312 types, 3271 members.
 
 ## Projects
 
@@ -91,6 +91,7 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | `src/Avalonia.Remote.Protocol` | `src/FerroUI.Remote.Protocol` | `ferroui-remote-protocol` | 14/14 | 54/55 (1 waived) | 198/202 (3 waived) | 99.5% | 4 - tooling | P3 |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/Avalonia.Themes.Fluent` | `src/FerroUI.Themes.Fluent` | `ferroui-themes-fluent` | 5/5 | 6/6 | 68/73 (5 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/Avalonia.Themes.Simple` | `src/FerroUI.Themes.Simple` | `ferroui-themes-simple` | 1/1 | 1/1 | 1/1 | 100.0% | 2 - xaml + themes | P2 |
+| [Avalonia.Wayland](tracking/Avalonia.Wayland.md) | `src/Avalonia.Wayland` | `src/FerroUI.Wayland` | `ferroui-wayland` | 58/81 | 80/123 | 418/816 | 51.2% | 5 - desktop (Linux) | P1 |
 | [Avalonia.X11](tracking/Avalonia.X11.md) | `src/Avalonia.X11` | `src/FerroUI.X11` | `ferroui-x11` | 86/88 | 176/291 (107 waived) | 3531/4897 (1076 waived) | 92.4% | 5 - desktop (Linux) | P1 |
 | [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/Avalonia.Browser` | `src/Browser/FerroUI.Browser` | `ferroui-browser` | 50/50 | 60/62 (2 waived) | 340/428 (88 waived) | 100.0% | 3 - browser | P2 |
 | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | `src/HarfBuzz/Avalonia.HarfBuzz` | `src/HarfBuzz/FerroUI.HarfBuzz` | `ferroui-harfbuzz` | 3/3 | 3/3 | 5/8 (3 waived) | 100.0% | 1 - rendering | P0 |
@@ -123,7 +124,6 @@ Tracked so that the size of the remaining work is known: files, types and member
 | Project | Upstream path | FerroUI path | Crate | Files | Types | Members | % | Phase | Priority |
 |---|---|---|---|---:|---:|---:|---:|---|---|
 | [Avalonia.Vulkan](tracking/Avalonia.Vulkan.md) | `src/Avalonia.Vulkan` | `src/FerroUI.Vulkan` | `ferroui-vulkan` | 0/30 | 0/151 | 0/2034 | 0.0% | not started / out of current scope | - |
-| [Avalonia.Wayland](tracking/Avalonia.Wayland.md) | `src/Avalonia.Wayland` | `src/FerroUI.Wayland` | `ferroui-wayland` | 0/81 | 0/123 | 0/816 | 0.0% | not started / out of current scope | - |
 | [Avalonia.Headless.Vnc](tracking/Avalonia.Headless.Vnc.md) | `src/Headless/Avalonia.Headless.Vnc` | `src/Headless/FerroUI.Headless.Vnc` | `ferroui-headless-vnc` | 0/3 | 0/3 | 0/11 | 0.0% | not started / out of current scope | - |
 | [Avalonia.LinuxFramebuffer](tracking/Avalonia.LinuxFramebuffer.md) | `src/Linux/Avalonia.LinuxFramebuffer` | `src/Linux/FerroUI.LinuxFramebuffer` | `ferroui-linuxframebuffer` | 0/30 | 0/76 | 0/529 | 0.0% | not started / out of current scope | - |
 | [Avalonia.Win32.Automation](tracking/Avalonia.Win32.Automation.md) | `src/Windows/Avalonia.Win32.Automation` | `src/Windows/FerroUI.Win32.Automation` | `ferroui-win32-automation` | 0/40 | 0/64 | 0/598 | 0.0% | not started / out of current scope | - |
@@ -159,7 +159,7 @@ Libraries.
 | `src/Avalonia.Themes.Fluent` | 6 | `src/FerroUI.Themes.Fluent` | workspace member | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) |
 | `src/Avalonia.Themes.Simple` | 2 | `src/FerroUI.Themes.Simple` | workspace member | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) |
 | `src/Avalonia.Vulkan` | 30 | `src/FerroUI.Vulkan` | workspace member | [Avalonia.Vulkan](tracking/Avalonia.Vulkan.md) (out of scope) |
-| `src/Avalonia.Wayland` | 81 | `src/FerroUI.Wayland` | workspace member | [Avalonia.Wayland](tracking/Avalonia.Wayland.md) (out of scope) |
+| `src/Avalonia.Wayland` | 81 | `src/FerroUI.Wayland` | workspace member | [Avalonia.Wayland](tracking/Avalonia.Wayland.md) |
 | `src/Avalonia.X11` | 88 | `src/FerroUI.X11` | workspace member | [Avalonia.X11](tracking/Avalonia.X11.md) |
 | `src/Browser/Avalonia.Browser` | 52 | `src/Browser/FerroUI.Browser` | workspace member | [Avalonia.Browser](tracking/Avalonia.Browser.md) |
 | `src/HarfBuzz/Avalonia.HarfBuzz` | 3 | `src/HarfBuzz/FerroUI.HarfBuzz` | workspace member | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) |

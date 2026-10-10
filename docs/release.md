@@ -137,7 +137,7 @@ The owner decided on 2026-10-10 to reserve, with the first preview, the names of
 | Crate | Directory | For |
 |---|---|---|
 | `ferroui` | `src/FerroUI` | the facade crate of section 2.1 |
-| `ferroui-wayland` | `src/FerroUI.Wayland` | the Wayland platform (upstream `Avalonia.Wayland`; in progress) |
+| `ferroui-wayland` | `src/FerroUI.Wayland` | the Wayland platform (upstream `Avalonia.Wayland`; the port is on the branch `wayland-platform`, pull request 183, and replaces the placeholder in the preview after the first) |
 | `ferroui-vulkan` | `src/FerroUI.Vulkan` | the Vulkan platform contracts (upstream `Avalonia.Vulkan`) |
 | `ferroui-linuxframebuffer` | `src/Linux/FerroUI.LinuxFramebuffer` | the Linux framebuffer platform (upstream `Avalonia.LinuxFramebuffer`) |
 | `ferroui-winui` | `src/Windows/FerroUI.WinUI` | the WinUI integration (upstream `Avalonia.WinUI`) |
