@@ -37,8 +37,9 @@ cc.workspace = true
 # The GPU back end of Skia is chosen per target, because the published Skia
 # binaries carry one of them: Graphite on Metal for Apple platforms, Ganesh on
 # WebGL for the browser, Ganesh on OpenGL ES (ANGLE) for Windows, Ganesh on
-# OpenGL (GLX or EGL) for Linux. Raster is always present. `build.rs` mirrors
-# the tables with Ganesh on OpenGL as the `ferro_skia_ganesh_gl` configuration.
+# OpenGL (GLX or EGL) for Linux, Ganesh on OpenGL ES (EGL) for Android. Raster
+# is always present. `build.rs` mirrors the tables with Ganesh on OpenGL as the
+# `ferro_skia_ganesh_gl` configuration.
 [target.'cfg(target_vendor = "apple")'.dependencies]
 skia-safe = { workspace = true, features = ["graphite", "metal"] }
 
@@ -57,6 +58,12 @@ skia-safe = { workspace = true, features = ["gl"] }
 # entry points of the context the platform created. A binary of Skia with this feature set is
 # published for x86-64 and for ARM64 (the job `x11` of CI asks).
 [target.'cfg(target_os = "linux")'.dependencies]
+skia-safe = { workspace = true, features = ["gl"] }
+
+# Android: the rendering mode the Android backend offers first is OpenGL ES through the EGL of the
+# system (docs/porting/android-platform.md, section 6). A binary of Skia with this feature set is
+# published for the target.
+[target.'cfg(target_os = "android")'.dependencies]
 skia-safe = { workspace = true, features = ["gl"] }
 
 # The group of the crate in the table of the README (docs/release.md).

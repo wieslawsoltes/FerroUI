@@ -30,6 +30,9 @@ fn main() {
     if env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("linux") {
         println!("cargo:rustc-cfg=ferro_skia_ganesh_gl");
     }
+    if env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("android") {
+        println!("cargo:rustc-cfg=ferro_skia_ganesh_gl");
+    }
 
     if env::var("CARGO_CFG_TARGET_VENDOR").as_deref() != Ok("apple") {
         return;
