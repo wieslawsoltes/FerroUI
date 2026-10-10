@@ -3,20 +3,27 @@ package org.ferroui.android;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
+import android.os.LocaleList;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
+
+import java.util.Locale;
 
 /**
  * Calls into the framework of the system that return several values, or that differ between the
@@ -430,6 +437,86 @@ final class PlatformHelper {
         if (manager != null && listener instanceof DisplayManager.DisplayListener) {
             manager.unregisterDisplayListener((DisplayManager.DisplayListener) listener);
         }
+    }
+
+    // ---- platform settings ---------------------------------------------------------------------
+
+    /**
+     * What the platform settings read of a context for the colour values: whether the night mode
+     * of the configuration is "yes", whether the high contrast text is on, the number of accent
+     * colours that follow (three of the system from API 31, one of the theme below, or none), and
+     * the colours.
+     */
+    static int[] getColorValues(Context context) {
+        int[] result = new int[6];
+        Resources resources = context.getResources();
+        Configuration configuration = resources != null ? resources.getConfiguration() : null;
+        int uiMode = configuration != null
+                ? configuration.uiMode & Configuration.UI_MODE_NIGHT_MASK
+                : Configuration.UI_MODE_NIGHT_NO;
+        result[0] = uiMode == Configuration.UI_MODE_NIGHT_YES ? 1 : 0;
+
+        try {
+            result[1] = Settings.Secure.getInt(context.getContentResolver(), "high_text_contrast_enabled", 0) == 1
+                    ? 1 : 0;
+        } catch (RuntimeException e) {
+            result[1] = 0;
+        }
+
+        if (Build.VERSION.SDK_INT >= 31) {
+            if (resources != null) {
+                // See https://developer.android.com/reference/android/R.color
+                result[2] = 3;
+                result[3] = resources.getColor(android.R.color.system_accent1_500, context.getTheme());
+                result[4] = resources.getColor(android.R.color.system_accent2_500, context.getTheme());
+                result[5] = resources.getColor(android.R.color.system_accent3_500, context.getTheme());
+            }
+        } else {
+            // See https://developer.android.com/reference/android/R.attr
+            Resources.Theme theme = context.getTheme();
+            TypedArray array = theme != null
+                    ? theme.obtainStyledAttributes(new int[] { android.R.attr.colorAccent })
+                    : null;
+            if (array != null) {
+                try {
+                    result[2] = 1;
+                    result[3] = array.getColor(0, 0);
+                } finally {
+                    array.recycle();
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * What the platform settings read of the view configuration: the long press timeout, the multi
+     * press timeout (API 31) or a negative number, whether the context has a view configuration,
+     * its scaled double tap slop and scaled touch slop, and the density of the display metrics.
+     */
+    static float[] getInputConfigValues(Context context) {
+        float[] result = new float[6];
+        result[0] = ViewConfiguration.getLongPressTimeout();
+        result[1] = Build.VERSION.SDK_INT >= 31 ? ViewConfiguration.getMultiPressTimeout() : -1;
+        ViewConfiguration config = ViewConfiguration.get(context);
+        if (config != null) {
+            result[2] = 1;
+            result[3] = config.getScaledDoubleTapSlop();
+            result[4] = config.getScaledTouchSlop();
+        }
+        Resources resources = context.getResources();
+        DisplayMetrics metrics = resources != null ? resources.getDisplayMetrics() : null;
+        result[5] = metrics != null ? metrics.density : 1;
+        return result;
+    }
+
+    /** The language tag of the first locale of the configuration of the context, or null. */
+    static String getPreferredApplicationLanguage(Context context) {
+        Resources resources = context.getResources();
+        Configuration configuration = resources != null ? resources.getConfiguration() : null;
+        LocaleList locales = configuration != null ? configuration.getLocales() : null;
+        Locale locale = locales != null && !locales.isEmpty() ? locales.get(0) : null;
+        return locale != null ? locale.toLanguageTag() : null;
     }
 
     private static native void nativeApplyWindowInsets(long handle, boolean hasInsets, boolean imeVisible, int imeBottom);

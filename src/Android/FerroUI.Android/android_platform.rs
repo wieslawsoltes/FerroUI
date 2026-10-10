@@ -88,8 +88,11 @@ mod imp {
     use crate::platform::AndroidActivatableLifetime;
     use crate::stubs::{PlatformIconLoaderStub, WindowingPlatformStub};
     use ferroui_base::input::platform::{KeyGestureFormatInfo, PlatformHotkeyConfiguration};
-    use ferroui_base::input::{IKeyboardDevice, KeyboardDevice};
-    use ferroui_base::platform::{DefaultPlatformSettings, ICursorFactory, IPlatformGraphics, IPlatformSettings};
+    use crate::ferro_android_application::FerroAndroidApplication;
+    use crate::platform::android_platform_settings::ApplicationSettingsContext;
+    use crate::platform::{AndroidKeyboardDevice, AndroidPlatformSettings};
+    use ferroui_base::input::IKeyboardDevice;
+    use ferroui_base::platform::{ICursorFactory, IPlatformGraphics, IPlatformSettings};
     use ferroui_base::rendering::composition::Compositor;
     use ferroui_base::rendering::{IRenderLoop, IRenderTimer, RenderLoop};
     use ferroui_base::threading::Dispatcher;
@@ -161,12 +164,11 @@ mod imp {
             TIMER.with(|slot| *slot.borrow_mut() = Some(timer.clone()));
 
             let windowing_platform: Rc<dyn IWindowingPlatform> = Rc::new(WindowingPlatformStub);
-            // Stage 2 of docs/porting/android-platform.md: the keyboard device of the
-            // platform (`AndroidKeyboardDevice`) and its settings (`AndroidPlatformSettings`)
-            // are not built; the keyboard device and the default settings of the framework
-            // answer until then.
-            let keyboard_device: Rc<dyn IKeyboardDevice> = KeyboardDevice::new();
-            let platform_settings: Rc<dyn IPlatformSettings> = Rc::new(DefaultPlatformSettings::new());
+            let keyboard_device: Rc<dyn IKeyboardDevice> = AndroidKeyboardDevice::new();
+            let platform_settings: Rc<dyn IPlatformSettings> = AndroidPlatformSettings::new(
+                FerroAndroidApplication::try_context()
+                    .map(|context| Box::new(ApplicationSettingsContext::new(context)) as Box<_>),
+            );
             let render_timer: Arc<dyn IRenderTimer> = timer;
             let render_loop: Arc<dyn IRenderLoop> = RenderLoop::from_timer(render_timer);
             let activatable_lifetime = AndroidActivatableLifetime::new();

@@ -44,6 +44,11 @@ impl FerroAndroidApplication {
         }
     }
 
+    /// The application context; `None` before the application was created.
+    pub fn try_context() -> Option<JavaObject> {
+        APPLICATION.get().cloned()
+    }
+
     /// The lifetime of the application; `None` before it was created.
     pub fn lifetime() -> Option<Rc<ApplicationLifetime>> {
         LIFETIME.with(|lifetime| lifetime.borrow().clone())
