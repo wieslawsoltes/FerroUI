@@ -1,0 +1,53 @@
+//! The port of `AtSpiState.cs`.
+// The states of the specification; the mapping uses some of them.
+#![allow(dead_code)]
+
+/// A state of an accessible object: the number of its bit in a state set.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[repr(u32)]
+pub(crate) enum AtSpiState {
+    Invalid = 0,
+    Active = 1,
+    Armed = 2,
+    Busy = 3,
+    Checked = 4,
+    Collapsed = 5,
+    Defunct = 6,
+    Editable = 7,
+    Enabled = 8,
+    Expandable = 9,
+    Expanded = 10,
+    Focusable = 11,
+    Focused = 12,
+    HasToolTip = 13,
+    Horizontal = 14,
+    Iconified = 15,
+    Modal = 16,
+    MultiLine = 17,
+    MultiSelectable = 18,
+    Opaque = 19,
+    Pressed = 20,
+    Resizable = 21,
+    Selectable = 22,
+    Selected = 23,
+    Sensitive = 24,
+    Showing = 25,
+    SingleLine = 26,
+    Stale = 27,
+    Transient = 28,
+    Vertical = 29,
+    Visible = 30,
+    ManagesDescendants = 31,
+    Indeterminate = 32,
+    Required = 33,
+    Truncated = 34,
+    Animated = 35,
+    InvalidEntry = 36,
+    SupportsAutoCompletion = 37,
+    SelectableText = 38,
+    IsDefault = 39,
+    Visited = 40,
+    Checkable = 41,
+    HasPopup = 42,
+    ReadOnly = 43,
+}

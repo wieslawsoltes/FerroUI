@@ -28,6 +28,9 @@ futures-util.workspace = true
 # The tests talk to doubles of the input method services over a socket pair, without a bus.
 [target.'cfg(unix)'.dev-dependencies]
 zbus = { workspace = true, features = ["p2p"] }
+# The tests of accessibility build windows with controls over the mock platform of the controls crate.
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
