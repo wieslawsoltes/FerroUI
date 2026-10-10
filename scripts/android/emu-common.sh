@@ -8,6 +8,7 @@
 #   ANDROID_AVD_HOME   where the virtual devices are (the emulator's own default when not set)
 #   FERROUI_AVD        the virtual device (default ferroui_api36)
 #   FERROUI_EMU_PORT   the console port of the emulator (default 5584: the serial is emulator-5584)
+#   FERROUI_EMU_REUSE  1: use the device when it is already running (left by --keep) and leave it running
 
 FERROUI_AVD="${FERROUI_AVD:-ferroui_api36}"
 FERROUI_EMU_PORT="${FERROUI_EMU_PORT:-5584}"
@@ -47,6 +48,11 @@ emu_start() {
         return 1
     fi
     "$ADB" start-server >/dev/null 2>&1 || true
+    if "$ADB" devices | grep -q "^$FERROUI_SERIAL" && [ "${FERROUI_EMU_REUSE:-0}" = 1 ]; then
+        # A device another script left running with --keep: used as it is, and left running.
+        echo "== using the running device $FERROUI_SERIAL"
+        return 0
+    fi
     if "$ADB" devices | grep -q "^$FERROUI_SERIAL"; then
         echo "a device $FERROUI_SERIAL is already running; stop it first ($ADB -s $FERROUI_SERIAL emu kill)" >&2
         return 1
