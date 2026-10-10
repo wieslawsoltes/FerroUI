@@ -536,7 +536,19 @@ impl<T: PropertyValue> IItemsList for FerroList<T> {
 
     fn index_of(&self, item: &Option<BoxedValue>) -> i32 {
         let snapshot = self.snapshot();
-        snapshot.iter().position(|i| item_equals_typed(item, i)).map_or(-1, |i| i as i32)
+        if let Some(index) = snapshot.iter().position(|i| item_equals_typed(item, i)) {
+            return index as i32;
+        }
+        // The item in another form than the list holds it in: a shared object of a list of
+        // handles (`Rc<T>`) is delivered by a binding as the object itself. Upstream's
+        // `IList.IndexOf(object)` finds the reference whatever the static type of the list.
+        let is_typed = item.as_ref().is_some_and(|boxed| (**boxed).downcast_ref::<T>().is_some());
+        if !is_typed {
+            if let Some(typed) = ferroui_base::metadata::from_markup_value::<T>(item) {
+                return snapshot.iter().position(|i| *i == typed).map_or(-1, |i| i as i32);
+            }
+        }
+        -1
     }
 
     fn is_notifying(&self) -> bool {
@@ -828,6 +840,30 @@ mod reference_equals_tests {
 
         assert!(!reference_equals(&Some(Control::boxed(first.clone())), &Some(Control::boxed(second))));
         assert!(!reference_equals(&Some(Control::boxed(first)), &boxed("able".to_string())));
+    }
+}
+
+#[cfg(test)]
+mod reference_item_tests {
+    // Not from upstream: an item of a list of handles is found in the form a binding
+    // delivers it in (found by the IntegrationTestApp sample, I008).
+    use super::*;
+
+    #[derive(PartialEq)]
+    struct Model(i32);
+
+    #[test]
+    fn a_shared_object_is_found_in_a_list_of_its_handles() {
+        ValueTypes::register_reference::<Model>();
+        let (first, second) = (Rc::new(Model(1)), Rc::new(Model(2)));
+        let list: FerroList<Rc<Model>> = FerroList::new();
+        list.add(first.clone());
+        list.add(second.clone());
+        // The form the list boxes its items in.
+        assert_eq!(1, IItemsList::index_of(&list, &IItemsList::get_at(&list, 1)));
+        // The object itself, as a binding of a property of the handle type delivers it.
+        assert_eq!(1, IItemsList::index_of(&list, &Some(second as BoxedValue)));
+        assert_eq!(-1, IItemsList::index_of(&list, &Some(Rc::new(7i32) as BoxedValue)));
     }
 }
 
