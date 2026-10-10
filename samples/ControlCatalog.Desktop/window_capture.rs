@@ -42,6 +42,7 @@ extern "system" {
     fn GetDC(hwnd: isize) -> isize;
     fn ReleaseDC(hwnd: isize, dc: isize) -> i32;
     fn PrintWindow(hwnd: isize, dc: isize, flags: u32) -> i32;
+    fn ClientToScreen(hwnd: isize, point: *mut [i32; 2]) -> i32;
 }
 
 #[link(name = "gdi32", kind = "raw-dylib")]
@@ -59,6 +60,22 @@ extern "system" {
     fn DeleteObject(object: isize) -> i32;
     fn DeleteDC(dc: isize) -> i32;
     fn GdiFlush() -> i32;
+    fn BitBlt(dc: isize, x: i32, y: i32, width: i32, height: i32, source: isize, source_x: i32, source_y: i32, rop: u32) -> i32;
+}
+
+/// `SRCCOPY | CAPTUREBLT`: a copy that includes the windows the desktop
+/// window manager composes over the screen.
+const SRCCOPY_CAPTUREBLT: u32 = 0x00CC_0020 | 0x4000_0000;
+
+/// Where the pixels of a capture come from.
+#[derive(Clone, Copy, PartialEq)]
+enum Source {
+    /// The window prints itself (`PrintWindow`).
+    Window,
+    /// The screen under the client area of the window: what the desktop
+    /// window manager composed there, with whatever is behind or over the
+    /// window.
+    Screen,
 }
 
 /// `PW_CLIENTONLY`: the client area, without the frame.
@@ -78,6 +95,20 @@ pub struct Capture {
 
 /// Captures the client area of the window, or says what failed.
 pub fn capture_client_area(hwnd: isize) -> Result<Capture, String> {
+    capture(hwnd, Source::Window)
+}
+
+/// Captures the rectangle of the screen the client area of the window
+/// covers, as the desktop window manager composed it: the window with its
+/// backdrop (what is behind a transparent window, blurred or tinted by a
+/// backdrop effect). Unlike [`capture_client_area`] this reads the screen,
+/// so it is only for a run on a machine whose screen holds nothing but
+/// the run (a runner of the CI): the backdrop run asks for it.
+pub fn capture_client_area_from_screen(hwnd: isize) -> Result<Capture, String> {
+    capture(hwnd, Source::Screen)
+}
+
+fn capture(hwnd: isize, source: Source) -> Result<Capture, String> {
     let mut rect = Rect::default();
     // SAFETY: a rectangle of this frame the system writes to; a handle
     // that is not a window makes the call fail.
@@ -120,7 +151,20 @@ pub fn capture_client_area(hwnd: isize) -> Result<Capture, String> {
             Err("the bitmap of the capture could not be created".to_string())
         } else {
             let previous = SelectObject(memory_dc, bitmap);
-            let printed = PrintWindow(hwnd, memory_dc, PW_CLIENTONLY | PW_RENDERFULLCONTENT) != 0;
+            let printed = match source {
+                Source::Window => PrintWindow(hwnd, memory_dc, PW_CLIENTONLY | PW_RENDERFULLCONTENT) != 0,
+                Source::Screen => {
+                    let mut origin = [0, 0];
+                    let screen_dc = GetDC(0);
+                    let copied = screen_dc != 0
+                        && ClientToScreen(hwnd, &mut origin) != 0
+                        && BitBlt(memory_dc, 0, 0, width, height, screen_dc, origin[0], origin[1], SRCCOPY_CAPTUREBLT) != 0;
+                    if screen_dc != 0 {
+                        ReleaseDC(0, screen_dc);
+                    }
+                    copied
+                }
+            };
             GdiFlush();
             let mut pixels = std::slice::from_raw_parts(bits as *const u8, (width * height * 4) as usize).to_vec();
             SelectObject(memory_dc, previous);
@@ -131,7 +175,7 @@ pub fn capture_client_area(hwnd: isize) -> Result<Capture, String> {
                 }
                 Ok(Capture { pixels, width, height })
             } else {
-                Err("PrintWindow failed".to_string())
+                Err(if source == Source::Window { "PrintWindow failed" } else { "the screen could not be copied" }.to_string())
             }
         };
         if bitmap != 0 {

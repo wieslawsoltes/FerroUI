@@ -212,11 +212,10 @@ jobs:
           done
       # The same run presented through a DXGI swap chain of the window (the low-latency mode, the
       # rest of stage 2c): a flip-model swap chain that allows tearing, on the device of ANGLE.
-      # Informative until its first green run: whether the software device of a runner creates
-      # such a swap chain is what the run says.
-      - name: Smoke run through ANGLE, presented through a DXGI swap chain (informative)
+      # Required since its first green run (38078715201): the software device of the runners
+      # creates such a swap chain.
+      - name: Smoke run through ANGLE, presented through a DXGI swap chain
         if: ${{ !cancelled() }}
-        continue-on-error: true
         timeout-minutes: 5
         run: cargo run --locked -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition dxgi --teardown-trace
       - name: Skia binaries published for Windows (informative)
@@ -275,7 +274,7 @@ jobs:
             FERROUI_SMOKE_RENDERING=$mode cargo test --locked -p ferroui-integration-tests-win32 --test integration -- presented_frame_tests || result=1
           done
           # Through ANGLE with each composition mode that presents through a surface of its own.
-          for composition in dcomp winui; do
+          for composition in dcomp winui dxgi; do
             FERROUI_SMOKE_RENDERING=angle FERROUI_SMOKE_COMPOSITION=$composition \
               cargo test --locked -p ferroui-integration-tests-win32 --test integration -- presented_frame_tests || result=1
           done
@@ -327,6 +326,21 @@ jobs:
               ./target/debug/control-catalog-desktop.exe || { echo "::error::the catalog ended with an error (Windows.UI.Composition, $level)"; result=1; }
             echo "::endgroup::"
             ls -l "target/screenshots/winui-$level" || result=1
+          done
+          # Whether a backdrop effect shows on the screen of the runner: a second window with a
+          # transparent background over the window of the catalog, and the screen under it (the
+          # desktop of the runner, which holds nothing but this run) captured with the level
+          # transparent and with the level asked for. The pictures are kept; the line
+          # "Backdrop check" says how much changed. Informative: a session without a compositor
+          # that draws the effects shows none.
+          for level in acrylic mica; do
+            echo "::group::The backdrop of the transparency level $level through Windows.UI.Composition"
+            FERROUI_SMOKE_RENDERING=angle FERROUI_SMOKE_COMPOSITION=winui FERROUI_SMOKE_TRANSPARENCY=$level \
+              FERROUI_SMOKE_BACKDROP=target/screenshots/backdrop-$level \
+              ./target/debug/control-catalog-desktop.exe > "backdrop-$level.log" 2>&1 || echo "::warning::the backdrop run ended with an error ($level)"
+            cat "backdrop-$level.log"
+            echo "::endgroup::"
+            echo "::notice::$(grep 'Backdrop check' "backdrop-$level.log" || echo "Backdrop check ($level): the run printed no result")"
           done
           # Once more with the client area of the window extended into its frame (stage 2f of the
           # backend): the title bar and the caption buttons are drawn by the framework, and the
@@ -441,11 +455,10 @@ jobs:
           done
       # The same run presented through a DXGI swap chain of the window (the low-latency mode, the
       # rest of stage 2c): a flip-model swap chain that allows tearing, on the device of ANGLE.
-      # Informative until its first green run: whether the software device of a runner creates
-      # such a swap chain is what the run says.
-      - name: Smoke run through ANGLE, presented through a DXGI swap chain (informative)
+      # Required since its first green run (38078715201): the software device of the runners
+      # creates such a swap chain.
+      - name: Smoke run through ANGLE, presented through a DXGI swap chain
         if: ${{ !cancelled() }}
-        continue-on-error: true
         timeout-minutes: 5
         run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition dxgi --teardown-trace
       - name: Skia binaries published for Windows on ARM64

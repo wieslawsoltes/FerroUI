@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Windows/FerroUI.Win32` (exists) |
 | Crate | `ferroui-win32` |
 | Phase / priority | 1 - desktop (Windows) / P0 |
-| Files | 70/95 (73.7%) |
-| Types | 182/276 (65.9%) |
-| Members | 1763/2605 (67.7%) |
+| Files | 82/95 (86.3%) |
+| Types | 204/276 (73.9%) |
+| Members | 1932/2605 (74.2%) |
 | Contracts (interfaces) | 7/7 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -33,7 +33,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 41/43, types 50/52, members 303/358
+### `(project root)` - files 42/43, types 51/52, members 331/358
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -61,7 +61,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PopupImpl.cs` | `popup_impl.rs` | partial | 1/1 | 1/10 |  |
 | `ScreenImpl.cs` | `screen_impl.rs` | present | 1/1 | 10/10 |  |
 | `SimpleWindow.cs` | `simple_window.rs` | partial | 1/1 | 3/4 |  |
-| `SwapChainTopLevelImpl.cs` | `swap_chain_top_level_impl.rs` | missing | 0/1 | 0/28 |  |
+| `SwapChainTopLevelImpl.cs` | `swap_chain_top_level_impl.rs` | present | 1/1 | 28/28 |  |
 | `TrayIconImpl.cs` | `tray_icon_impl.rs` | present | 1/1 | 11/11 |  |
 | `Win32DispatcherImpl.cs` | `win32_dispatcher_impl.rs` | present | 1/1 | 14/14 |  |
 | `Win32GlManager.cs` | `win32_gl_manager.rs` | present | 1/1 | 1/1 |  |
@@ -204,16 +204,16 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `DirectX` - files 4/7, types 25/42, members 113/242
+### `DirectX` - files 7/7, types 28/42, members 126/242
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `DirectXEnums.cs` | `direct_x/direct_x_enums.rs` | partial | 1/15 | 1/113 |  |
 | `DirectXStructs.cs` | `direct_x/direct_x_structs.rs` | partial | 18/18 | 102/104 |  |
-| `DirectXUnmanagedMethods.cs` | `direct_x/direct_x_unmanaged_methods.rs` | partial | 1/1 | 2/3 |  |
-| `DxgiConnection.cs` | `direct_x/dxgi_connection.rs` | missing | 0/1 | 0/7 |  |
-| `DxgiRenderTarget.cs` | `direct_x/dxgi_render_target.rs` | missing | 0/1 | 0/5 |  |
-| `DxgiSwapchainWindow.cs` | `direct_x/dxgi_swapchain_window.rs` | missing | 0/1 | 0/2 |  |
+| `DirectXUnmanagedMethods.cs` | `direct_x/direct_x_unmanaged_methods.rs` | present | 1/1 | 3/3 |  |
+| `DxgiConnection.cs` | `direct_x/dxgi_connection.rs` | partial | 1/1 | 5/7 |  |
+| `DxgiRenderTarget.cs` | `direct_x/dxgi_render_target.rs` | present | 1/1 | 5/5 |  |
+| `DxgiSwapchainWindow.cs` | `direct_x/dxgi_swapchain_window.rs` | present | 1/1 | 2/2 |  |
 | `IDirect3D11TexturePlatformSurface.cs` | `direct_x/i_direct3_d11_texture_platform_surface.rs` | present | 5/5 | 8/8 |  |
 
 <details><summary><code>DirectXEnums.cs</code> - 126 missing</summary>
@@ -243,10 +243,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>DirectXUnmanagedMethods.cs</code> - 1 missing</summary>
+<details><summary><code>DxgiConnection.cs</code> - 2 missing</summary>
 
-- `DirectXUnmanagedMethods` (class): 1 missing
-  - `static void CreateDXGIFactory(ref Guid riid, out void* ppFactory)` *(internal)*
+- `DxgiConnection` (class): 2 missing
+  - `bool RequiresNoRedirectionBitmap { get; }`
+  - `IPlatformRenderSurface CreateSurface(EglGlPlatformSurface.IEglWindowGlPlatformSurfaceInfo info)`
 
 </details>
 
@@ -261,17 +262,17 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `WindowsKeyboardDevice.cs` | `input/windows_keyboard_device.rs` | present | 1/1 | 2/2 |  |
 | `WindowsMouseDevice.cs` | `input/windows_mouse_device.rs` | present | 2/2 | 4/4 |  |
 
-### `Interop` - files 3/3, types 76/119, members 1173/1564
+### `Interop` - files 3/3, types 76/119, members 1174/1564
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `TaskBarList.cs` | `interop/task_bar_list.rs` | present | 1/1 | 2/2 |  |
-| `UnmanagedMethods.cs` | `interop/unmanaged_methods.rs` | partial | 73/115 | 1155/1542 |  |
+| `UnmanagedMethods.cs` | `interop/unmanaged_methods.rs` | partial | 73/115 | 1156/1542 |  |
 | `Win32Icon.cs` | `interop/win32_icon.rs` | partial | 2/3 | 16/20 |  |
 
-<details><summary><code>UnmanagedMethods.cs</code> - 429 missing</summary>
+<details><summary><code>UnmanagedMethods.cs</code> - 428 missing</summary>
 
-- `UnmanagedMethods` (class) (ported as module-level items): 113 missing
+- `UnmanagedMethods` (class) (ported as module-level items): 112 missing
   - `static int EnableMouseInPointer(bool enable)`
   - `static bool GetPointerCursorId(uint pointerId, out uint cursorId)`
   - `static IntPtr GetDC(IntPtr hWnd)`
@@ -340,7 +341,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
   - `static IntPtr CopyMemory(IntPtr dest, IntPtr src, UIntPtr count)`
   - `static int DragQueryFile(IntPtr hDrop, int iFile, StringBuilder? lpszFile, int cch)`
   - `static int DwmGetWindowAttribute(IntPtr hwnd, int dwAttribute, out RECT pvAttribute, int cbAttribute)`
-  - `static void DwmFlush()`
   - `static bool SetLayeredWindowAttributes(IntPtr hwnd, uint crKey, byte bAlpha, LayeredWindowFlags dwFlags)`
   - `const int WAIT_FAILED`
   - `static int WaitForMultipleObjectsEx(int nCount, IntPtr[] pHandles, bool bWaitAll, int dwMilliseconds, bool ...` *(internal)*
@@ -501,7 +501,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `WglPlatformOpenGlInterface.cs` | `open_gl/wgl_platform_open_gl_interface.rs` | missing | 0/1 | 0/6 |  |
 | `WglRestoreContext.cs` | `open_gl/wgl_restore_context.rs` | missing | 0/1 | 0/2 |  |
 
-### `OpenGl/Angle` - files 8/9, types 9/12, members 49/63
+### `OpenGl/Angle` - files 9/9, types 12/12, members 61/63
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -513,12 +513,19 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `AngleWin32PlatformGraphicsFactory.cs` | `open_gl/angle/angle_win32_platform_graphics_factory.rs` | present | 1/1 | 1/1 |  |
 | `D3D11AngleWin32PlatformGraphics.cs` | `open_gl/angle/d3d11_angle_win32_platform_graphics.rs` | present | 1/1 | 6/6 |  |
 | `D3D9AngleWin32PlatformGraphics.cs` | `open_gl/angle/d3d9_angle_win32_platform_graphics.rs` | present | 1/1 | 5/5 |  |
-| `SwapChainGlSurface.cs` | `open_gl/angle/swap_chain_gl_surface.rs` | missing | 0/3 | 0/13 |  |
+| `SwapChainGlSurface.cs` | `open_gl/angle/swap_chain_gl_surface.rs` | partial | 3/3 | 12/13 |  |
 
 <details><summary><code>AngleWin32EglDisplay.cs</code> - 1 missing</summary>
 
 - `AngleWin32EglDisplay` (class): 1 missing
   - `override bool DisplayLockIsSharedWithContexts { get; }` *(protected)*
+
+</details>
+
+<details><summary><code>SwapChainGlSurface.cs</code> - 1 missing</summary>
+
+- `SwapChainGlRenderTarget` (class): 1 missing
+  - `SwapChainGlRenderTarget(EglContext context, IDXGISwapChain1 swapChain, Func<PixelSize> getSizeFunc, Func<do...`
 
 </details>
 
@@ -546,17 +553,43 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `WinRT/Composition` - files 0/7, types 0/15, members 0/121
+### `WinRT/Composition` - files 7/7, types 15/15, members 115/121
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `D2DEffects.cs` | `win_rt/composition/d2d_effects.rs` | missing | 0/1 | 0/42 |  |
-| `WinUIEffectBase.cs` | `win_rt/composition/win_ui_effect_base.rs` | missing | 0/8 | 0/38 |  |
-| `WinUiCompositedWindow.cs` | `win_rt/composition/win_ui_composited_window.rs` | missing | 0/1 | 0/7 |  |
-| `WinUiCompositedWindowSurface.cs` | `win_rt/composition/win_ui_composited_window_surface.rs` | missing | 0/2 | 0/10 |  |
-| `WinUiCompositionShared.cs` | `win_rt/composition/win_ui_composition_shared.rs` | missing | 0/1 | 0/12 |  |
-| `WinUiCompositionUtils.cs` | `win_rt/composition/win_ui_composition_utils.rs` | missing | 0/1 | 0/5 |  |
-| `WinUiCompositorConnection.cs` | `win_rt/composition/win_ui_compositor_connection.rs` | missing | 0/1 | 0/7 |  |
+| `D2DEffects.cs` | `win_rt/composition/d2d_effects.rs` | present | 1/1 | 42/42 |  |
+| `WinUIEffectBase.cs` | `win_rt/composition/win_ui_effect_base.rs` | partial | 8/8 | 35/38 |  |
+| `WinUiCompositedWindow.cs` | `win_rt/composition/win_ui_composited_window.rs` | present | 1/1 | 7/7 |  |
+| `WinUiCompositedWindowSurface.cs` | `win_rt/composition/win_ui_composited_window_surface.rs` | present | 2/2 | 10/10 |  |
+| `WinUiCompositionShared.cs` | `win_rt/composition/win_ui_composition_shared.rs` | partial | 1/1 | 11/12 |  |
+| `WinUiCompositionUtils.cs` | `win_rt/composition/win_ui_composition_utils.rs` | present | 1/1 | 5/5 |  |
+| `WinUiCompositorConnection.cs` | `win_rt/composition/win_ui_compositor_connection.rs` | partial | 1/1 | 5/7 |  |
+
+<details><summary><code>WinUIEffectBase.cs</code> - 3 missing</summary>
+
+- `WinUIEffectBase` (class): 1 missing
+  - `override void Destroyed()` *(protected)*
+- `WinUIGaussianBlurEffect` (class): 1 missing
+  - `WinUIGaussianBlurEffect(IGraphicsEffectSource source)`
+- `SaturationEffect` (class): 1 missing
+  - `SaturationEffect(IGraphicsEffectSource source)`
+
+</details>
+
+<details><summary><code>WinUiCompositionShared.cs</code> - 1 missing</summary>
+
+- `WinUiCompositionShared` (class): 1 missing
+  - `void Dispose()`
+
+</details>
+
+<details><summary><code>WinUiCompositorConnection.cs</code> - 2 missing</summary>
+
+- `WinUiCompositorConnection` (class): 2 missing
+  - `bool RequiresNoRedirectionBitmap { get; }`
+  - `IPlatformRenderSurface CreateSurface(EglGlPlatformSurface.IEglWindowGlPlatformSurfaceInfo info)`
+
+</details>
 
 ## Rust-only files
 
@@ -568,4 +601,4 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `win_rt/numerics.rs` | The vector, quaternion and matrix values the interfaces of `winrt.idl` pass, by their layout: upstream maps the names to the types of the numerics library of its runtime | `Matrix4x4`, `Quaternion`, `Vector2`, `Vector3` |
 | `wnd_proc_guard.rs` | Keeps a panic from unwinding out of a window procedure through the frames of the system: caught, kept, and raised again by the message loop (docs/porting/win32-platform.md, section 5) |  |
 
-Tests, examples and build scripts (not scanned): `build.rs`, `d_composition/d_composition_tests.rs`, `examples/win32_window.rs`, `ole_tests.rs`, `win_rt/win_rt_tests.rs`.
+Tests, examples and build scripts (not scanned): `build.rs`, `d_composition/d_composition_tests.rs`, `examples/win32_window.rs`, `ole_tests.rs`, `win_rt/composition/win_ui_composition_tests.rs`, `win_rt/win_rt_tests.rs`.

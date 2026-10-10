@@ -29,7 +29,15 @@
 //! what of a window lies outside the desktop, so the run first moves and
 //! shrinks the window until all of it is on its screen. On Windows
 //! `FERROUI_SMOKE_RENDERING=software` or `angle` asks for that rendering
-//! mode alone.
+//! mode alone, `FERROUI_SMOKE_COMPOSITION` for a composition mode, and
+//! `FERROUI_SMOKE_TRANSPARENCY=mica|acrylic|blur|transparent` makes the
+//! window ask for that transparency level. With
+//! `FERROUI_SMOKE_BACKDROP=<directory>` and a transparency level the run
+//! is the backdrop run instead (`backdrop_run`): a second window with a
+//! transparent background over the main window, and the screen under it
+//! captured with the level `transparent` and with the level asked for.
+//! That run reads the screen under its own window: it is for a machine
+//! whose screen holds nothing but the run.
 //!
 //! Not ported, because the platforms and options they name do not exist
 //! yet: the command line switches `--wait-for-attach`, `--fbdev`, `--vnc`,
@@ -319,13 +327,8 @@ fn apply_smoke_transparency(window: &Window) {
     use ferroui_base::media::{Colors, IBrush};
     use ferroui_controls::{WindowTransparencyLevel, WindowTransparencyLevelCollection};
 
-    let level = match std::env::var("FERROUI_SMOKE_TRANSPARENCY").ok().as_deref() {
-        None | Some("") => return,
-        Some("mica") => WindowTransparencyLevel::mica(),
-        Some("acrylic") => WindowTransparencyLevel::acrylic_blur(),
-        Some("blur") => WindowTransparencyLevel::blur(),
-        Some("transparent") => WindowTransparencyLevel::transparent(),
-        Some(other) => panic!("FERROUI_SMOKE_TRANSPARENCY: unknown level {other:?} (mica, acrylic, blur, transparent)"),
+    let Some(level) = smoke_transparency_level() else {
+        return;
     };
     window.set_transparency_level_hint(WindowTransparencyLevelCollection::new(vec![level.clone()]));
     let actual = window.actual_transparency_level();
@@ -334,6 +337,188 @@ fn apply_smoke_transparency(window: &Window) {
         let brush: std::rc::Rc<dyn IBrush> = std::rc::Rc::new(ImmutableSolidColorBrush::with_opacity(Colors::GRAY, 0.2));
         window.set_background(Some(brush));
     }
+}
+
+/// The transparency level `FERROUI_SMOKE_TRANSPARENCY` names; `None` when
+/// the variable is not set.
+fn smoke_transparency_level() -> Option<ferroui_controls::WindowTransparencyLevel> {
+    use ferroui_controls::WindowTransparencyLevel;
+
+    match std::env::var("FERROUI_SMOKE_TRANSPARENCY").ok().as_deref() {
+        None | Some("") => None,
+        Some("mica") => Some(WindowTransparencyLevel::mica()),
+        Some("acrylic") => Some(WindowTransparencyLevel::acrylic_blur()),
+        Some("blur") => Some(WindowTransparencyLevel::blur()),
+        Some("transparent") => Some(WindowTransparencyLevel::transparent()),
+        Some(other) => panic!("FERROUI_SMOKE_TRANSPARENCY: unknown level {other:?} (mica, acrylic, blur, transparent)"),
+    }
+}
+
+/// The share of the pixels of two captures of one size that differ by more
+/// than a few steps in a channel, in percent.
+#[cfg_attr(not(windows), allow(dead_code))]
+fn changed_percent(first: &[u8], second: &[u8]) -> f64 {
+    let pixels = first.len().min(second.len()) / 4;
+    if pixels == 0 {
+        return 0.0;
+    }
+    let changed = first
+        .chunks_exact(4)
+        .zip(second.chunks_exact(4))
+        .filter(|(a, b)| (0..3).any(|channel| (i32::from(a[channel]) - i32::from(b[channel])).abs() > 8))
+        .count();
+    changed as f64 * 100.0 / pixels as f64
+}
+
+/// The backdrop run asked for with `FERROUI_SMOKE_BACKDROP=<directory>` and
+/// `FERROUI_SMOKE_TRANSPARENCY=<level>`: whether the backdrop effect of a
+/// transparency level shows on the screen.
+///
+/// A second window with a transparent background and one line of text is
+/// shown over the main window of the catalog (whose page is what lies
+/// behind it), topmost. It first asks for the level `transparent`, and
+/// the rectangle of the screen under its client area is captured: the
+/// page behind shows through as it is. Then it asks for the level of the
+/// run and the rectangle is captured again: with a backdrop effect what
+/// is behind the window is blurred (acrylic) or replaced by the tinted
+/// wallpaper (mica), so the two captures differ. Both captures and the
+/// window as it prints itself are written as pictures, and the run says
+/// how much of the rectangle changed. It reads the screen, under the
+/// rectangle of its own window only: it is for a machine whose screen
+/// holds nothing but the run.
+#[cfg(windows)]
+fn backdrop_run(directory: PathBuf) {
+    use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+    use ferroui_base::media::{Colors, IBrush};
+    use ferroui_base::PixelPoint;
+    use ferroui_controls::{Control, TextBlock, WindowTransparencyLevel, WindowTransparencyLevelCollection};
+    use std::rc::Rc;
+
+    fn save(path: &Path, capture: &window_capture::Capture) {
+        let size = PixelSize::new(capture.width, capture.height);
+        let bitmap = Bitmap::from_pixels(
+            PixelFormat::BGRA8888,
+            AlphaFormat::Opaque,
+            &capture.pixels,
+            size,
+            Vector::new(96.0, 96.0),
+            size.width * 4,
+        );
+        match bitmap.save_to_file(&path.to_string_lossy(), &png()) {
+            Ok(()) => println!(
+                "Backdrop: {} ({} by {}, {} colour(s) among its samples)",
+                path.display(),
+                size.width,
+                size.height,
+                window_capture::sampled_colors(capture)
+            ),
+            Err(error) => println!("Backdrop: {} could not be written: {error}", path.display()),
+        }
+        bitmap.dispose();
+    }
+
+    fn finish() {
+        println!("Backdrop: closing the main window");
+        if let Some(main_window) = main_window() {
+            main_window.close();
+        }
+    }
+
+    if let Err(error) = std::fs::create_dir_all(&directory) {
+        println!("Backdrop: the directory {} could not be created: {error}", directory.display());
+        return;
+    }
+    let Some(level) = smoke_transparency_level() else {
+        println!("Backdrop: FERROUI_SMOKE_TRANSPARENCY names no level");
+        return;
+    };
+    let name = std::env::var("FERROUI_SMOKE_TRANSPARENCY").unwrap_or_default();
+    let step = Duration::from_millis(environment_milliseconds("FERROUI_SMOKE_PAGES").unwrap_or(2500));
+    println!("Backdrop run for the level {level:?} to {}, {step:?} a step", directory.display());
+
+    let _timer = DispatcherTimer::run_once(
+        move || {
+            // The steps are closures a timer may call again: each hands
+            // copies of what the next one needs on.
+            let (directory, name) = (directory.clone(), name.clone());
+            let Some(main_window) = main_window() else {
+                println!("Backdrop: there is no main window");
+                return;
+            };
+            fit_window_to_screen(&main_window);
+
+            let probe = Window::new();
+            probe.set_title(Some("Backdrop".to_string()));
+            probe.set_width(420.0);
+            probe.set_height(260.0);
+            probe.set_topmost(true);
+            let transparent: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::new(Colors::TRANSPARENT));
+            probe.set_background(Some(transparent));
+            let text = TextBlock::new();
+            text.set_text(Some("A window with a transparent background"));
+            probe.set_content(Some(Control::boxed(text)));
+            probe.set_transparency_level_hint(WindowTransparencyLevelCollection::new(vec![WindowTransparencyLevel::transparent()]));
+            probe.show();
+            probe.set_position(PixelPoint::new(160, 140));
+            println!("Backdrop: the window is shown with the level {:?}", probe.actual_transparency_level());
+
+            let _timer = DispatcherTimer::run_once(
+                move || {
+                    let Some(handle) = probe.try_get_platform_handle() else {
+                        println!("Backdrop: the window has no platform handle");
+                        return finish();
+                    };
+                    let hwnd = handle.handle();
+                    let before = window_capture::capture_client_area_from_screen(hwnd);
+                    match &before {
+                        Ok(capture) => save(&directory.join("backdrop-transparent-screen.png"), capture),
+                        Err(error) => println!("Backdrop: the screen under the window could not be captured: {error}"),
+                    }
+
+                    probe.set_transparency_level_hint(WindowTransparencyLevelCollection::new(vec![level]));
+                    let actual = probe.actual_transparency_level();
+                    println!("Backdrop: transparency level asked for: {level:?}; the window has: {actual:?}");
+                    let (directory, name, probe) = (directory.clone(), name.clone(), probe.clone());
+
+                    let _timer = DispatcherTimer::run_once(
+                        move || {
+                            let after = window_capture::capture_client_area_from_screen(hwnd);
+                            match &after {
+                                Ok(capture) => save(&directory.join(format!("backdrop-{name}-screen.png")), capture),
+                                Err(error) => println!("Backdrop: the screen under the window could not be captured: {error}"),
+                            }
+                            match window_capture::capture_client_area(hwnd) {
+                                Ok(capture) => save(&directory.join(format!("backdrop-{name}-window.png")), &capture),
+                                Err(error) => println!("Backdrop: the window could not be captured: {error}"),
+                            }
+                            if let (Ok(before), Ok(after)) = (&before, &after) {
+                                let changed = changed_percent(&before.pixels, &after.pixels);
+                                let shows = actual == level && changed >= 20.0;
+                                println!(
+                                    "Backdrop check: {} {changed:.1} % of the screen under the window changed between the level transparent and the level {name} (the window has {actual:?}){}",
+                                    if shows { "[ ok ]" } else { "[info]" },
+                                    if shows { ": the backdrop effect shows" } else { ": no backdrop effect shows on this screen" }
+                                );
+                            }
+                            probe.close();
+                            finish();
+                        },
+                        step,
+                        DispatcherPriority::NORMAL,
+                    );
+                },
+                step,
+                DispatcherPriority::NORMAL,
+            );
+        },
+        step,
+        DispatcherPriority::NORMAL,
+    );
+}
+
+#[cfg(not(windows))]
+fn backdrop_run(_directory: PathBuf) {
+    println!("Backdrop: the host has no capture of the screen on this system");
 }
 
 /// The screenshot run asked for with `FERROUI_SMOKE_SCREENSHOTS`.
@@ -389,7 +574,9 @@ fn screenshot_run(directory: PathBuf) {
 /// The smoke run asked for with `FERROUI_SMOKE_EXIT_MS`,
 /// `FERROUI_SMOKE_PAGES` and `FERROUI_SMOKE_SCREENSHOTS`.
 fn smoke_run() {
-    if let Some(directory) = std::env::var_os("FERROUI_SMOKE_SCREENSHOTS").filter(|directory| !directory.is_empty()) {
+    if let Some(directory) = std::env::var_os("FERROUI_SMOKE_BACKDROP").filter(|directory| !directory.is_empty()) {
+        backdrop_run(PathBuf::from(directory));
+    } else if let Some(directory) = std::env::var_os("FERROUI_SMOKE_SCREENSHOTS").filter(|directory| !directory.is_empty()) {
         screenshot_run(PathBuf::from(directory));
     } else if let Some(ms) = environment_milliseconds("FERROUI_SMOKE_PAGES") {
         control_catalog::show_every_page(Duration::from_millis(ms));

@@ -420,7 +420,7 @@ if ($Desktop) {
                 if ($code -ne 0) { $failed.Add("presented frames ($mode)") }
                 Tail $name 20 'FAILED|^test |^test result|panicked|^    '
             }
-            foreach ($composition in @('dcomp', 'winui')) {
+            foreach ($composition in @('dcomp', 'winui', 'dxgi')) {
                 $name = "integration-presented-angle-$composition"
                 $commandLine = "set FERROUI_SMOKE_RENDERING=angle&& set FERROUI_SMOKE_COMPOSITION=$composition&& `"$($binary.FullName)`" presented_frame_tests"
                 $code = if ($InteractiveUser) { Run-Interactive $name $commandLine 300 } else { Run $name $commandLine }
