@@ -254,6 +254,17 @@ pub fn compute_positioner_geometry(
     PositionerGeometry { size: (width, height), anchor_rect: (anchor_x, anchor_y, anchor_w, anchor_h), offset }
 }
 
+/// Where a popup was asked to be and where the compositor put it, for a test or a diagnosis
+/// (not in the reference): the numbers of the last positioner, the window geometry of the
+/// parent they were computed against, and the last sealed configure (its position is
+/// relative to the window geometry of the parent).
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct PopupPlacement {
+    pub positioner: Option<PositionerGeometry>,
+    pub parent_geometry: Option<(i32, i32, i32, i32)>,
+    pub configure: Option<crate::server::persistent::xdg_popup_configure_batch::XdgPopupConfigureBatch>,
+}
+
 /// The first version of `xdg_wm_base` with `xdg_popup.reposition`.
 pub const XDG_POPUP_REPOSITION_SINCE: u32 = 3;
 
@@ -1190,6 +1201,7 @@ mod imp {
         /// The popup was created again in place of a reposition (a compositor whose
         /// `xdg_wm_base` is older than version 3): its next configure asks for a frame.
         recreated: bool,
+        placement: PopupPlacement,
     }
 
     impl WXdgPopup {
@@ -1203,6 +1215,7 @@ mod imp {
                 positioner: None,
                 next_reposition_token: 1,
                 recreated: false,
+                placement: PopupPlacement::default(),
             }
         }
 
@@ -1217,6 +1230,11 @@ mod imp {
         /// The number of the parent surface: a top-level or another popup.
         pub fn parent(&self) -> WSurfaceId {
             self.parent
+        }
+
+        /// Where the popup was asked to be and where the compositor put it.
+        pub fn placement(&self) -> PopupPlacement {
+            self.placement
         }
 
         /// Whether the popup has its role object on the compositor.
@@ -1277,7 +1295,9 @@ mod imp {
             // with a fresh configure + repositioned(token) sequence; the
             // pending batch is reset so the next OnPopupConfigure carries the
             // post-reposition geometry.
-            let p = Self::build_positioner(&positioner, parent, globals);
+            let (p, geometry) = Self::build_positioner(&positioner, parent, globals);
+            self.placement.positioner = Some(geometry);
+            self.placement.parent_geometry = parent.and_then(|parent| parent.last_window_geometry);
             self.pending_batch = XdgPopupConfigureBatch::default();
             xdg_popup.reposition(&p, self.next_reposition_token);
             self.next_reposition_token += 1;
@@ -1343,7 +1363,9 @@ mod imp {
                 _ => return PopupAttach::ParentNotMapped,
             };
 
-            let positioner = Self::build_positioner(pos, Some(parent), globals);
+            let (positioner, geometry) = Self::build_positioner(pos, Some(parent), globals);
+            self.placement.positioner = Some(geometry);
+            self.placement.parent_geometry = parent.last_window_geometry;
             self.pending_batch = XdgPopupConfigureBatch::default();
             self.xdg_popup =
                 Some(xdg_surface.get_popup(Some(parent_xdg_surface), &positioner, globals.queue_handle(), self.shell.surface.id));
@@ -1361,7 +1383,11 @@ mod imp {
         /// the parent's most recent `set_window_geometry` as the
         /// authoritative source) and clamps it into the parent's window-geometry
         /// rectangle as required by the xdg_positioner spec.
-        fn build_positioner(p: &XdgPopupPositionerParams, parent: Option<&PopupParent>, globals: &WaylandGlobals) -> XdgPositioner {
+        fn build_positioner(
+            p: &XdgPopupPositionerParams,
+            parent: Option<&PopupParent>,
+            globals: &WaylandGlobals,
+        ) -> (XdgPositioner, PositionerGeometry) {
             let positioner = globals.xdg_wm_base.create_positioner(globals.queue_handle(), ());
 
             let geometry = compute_positioner_geometry(
@@ -1382,7 +1408,7 @@ mod imp {
                 positioner.set_offset(x, y);
             }
 
-            positioner
+            (positioner, geometry)
         }
 
         /// `xdg_surface.configure`: the batch is complete.
@@ -1390,6 +1416,7 @@ mod imp {
             let mut batch = std::mem::take(&mut self.pending_batch);
             batch.serial = serial;
             batch.recreated = std::mem::take(&mut self.recreated);
+            self.placement.configure = Some(batch);
 
             self.popup_event_sink.on_popup_configure(batch);
 

@@ -1523,6 +1523,40 @@ mod app {
                     window.client_size()
                 ),
             );
+            // A popup of the decorated window: its anchor is given in the coordinates of the
+            // buffer, and the compositor places it against the window geometry, which starts
+            // after the shadow.
+            if let (Some(marker), Some(geometry)) = (MARKER.with(|cell| cell.borrow().clone()), window_geometry(client)) {
+                let window_visual = window.clone().upcast::<ferroui_base::Visual>();
+                let origin = marker.translate_point(Point::new(0.0, 0.0), &window_visual).unwrap_or_default();
+                let child = Border::new();
+                child.set_background(Some(brush(POPUP_FILL)));
+                child.set_width(POPUP_SIZE.0);
+                child.set_height(POPUP_SIZE.1);
+                let popup = Popup::new();
+                popup.set_child(&child);
+                popup.set_placement_target(&marker);
+                popup.set_placement(PlacementMode::BottomEdgeAlignedLeft);
+                popup.set_is_open(true);
+                let expected = (
+                    origin.x.round() as i32 - geometry.0,
+                    (origin.y + MARKER_SIZE).round() as i32 - geometry.1,
+                    POPUP_SIZE.0 as i32,
+                    POPUP_SIZE.1 as i32,
+                );
+                let placed = wait_for(STEP_TIMEOUT, || popup_configures(client) == vec![expected]).await;
+                let configured = popup_configures(client);
+                report.check(
+                    "popup of the decorated window",
+                    placed,
+                    format!(
+                        "the marker is at {origin:?} of the buffer and the window geometry starts at ({}, {}): the compositor configured the popup at {configured:?}; expected {expected:?}",
+                        geometry.0, geometry.1
+                    ),
+                );
+                popup.set_is_open(false);
+                delay(Duration::from_millis(300)).await;
+            }
             let alive = probe.alive() && sway::view(TITLE).is_some();
             report.check("after the decorations", alive, "the connection and the window are still there".to_string());
         }
@@ -1553,6 +1587,23 @@ mod app {
                 })
                 .recv_timeout(STEP_TIMEOUT)
                 .ok()
+        }
+
+        /// Where the compositor configured the popups of the worker: position (relative to the
+        /// window geometry of the parent) and size, in the order the popups were made.
+        fn popup_configures(client: &Rc<WaylandWorkerClient>) -> Vec<(i32, i32, i32, i32)> {
+            client
+                .invoke_oob(|worker| {
+                    let mut popups: Vec<_> = worker.state.popups.iter().collect();
+                    popups.sort_by_key(|(id, _)| **id);
+                    popups
+                        .into_iter()
+                        .filter_map(|(_, popup)| popup.placement().configure)
+                        .map(|configure| (configure.x, configure.y, configure.width, configure.height))
+                        .collect::<Vec<_>>()
+                })
+                .recv_timeout(STEP_TIMEOUT)
+                .unwrap_or_default()
         }
 
         /// A popup of the framework over `xdg_popup`: placed by the compositor from the
@@ -1610,6 +1661,15 @@ mod app {
                     counts.shell_version
                 ),
             );
+            // The place the compositor reported, relative to the window: under the marker, the
+            // left edges aligned.
+            let expected = (left as i32, top as i32, POPUP_SIZE.0 as i32, POPUP_SIZE.1 as i32);
+            let configured = popup_configures(client);
+            report.check(
+                "popup configure",
+                configured == vec![expected],
+                format!("the compositor configured the popup at {configured:?} (x, y, width, height); expected {expected:?}"),
+            );
             match &picture {
                 Ok(picture) => {
                     let inside = picture.pixel(centre.0, centre.1);
@@ -1659,6 +1719,13 @@ mod app {
                     // The place the popup left shows the window again.
                     let picture = picture_with(probe, vacated, FILL).await;
                     let counts = popup_counts(client).unwrap_or_default();
+                    let expected = (left as i32 + SHIFT as i32, top as i32, POPUP_SIZE.0 as i32, POPUP_SIZE.1 as i32);
+                    let configured = popup_configures(client);
+                    report.check(
+                        "moved popup configure",
+                        configured == vec![expected],
+                        format!("the compositor configured the moved popup at {configured:?}; expected {expected:?}"),
+                    );
                     let (new, old) = match &picture {
                         Ok(picture) => (picture.pixel(moved_in.0, moved_in.1), picture.pixel(vacated.0, vacated.1)),
                         Err(_) => (None, None),
@@ -1681,6 +1748,14 @@ mod app {
             let picture = picture_with(probe, nested_centre, NESTED_FILL).await;
             let counts = popup_counts(client).unwrap_or_default();
             let pixel = picture.as_ref().ok().and_then(|picture| picture.pixel(nested_centre.0, nested_centre.1));
+            // The nested popup is placed against its parent popup: at its right edge, centred.
+            let expected = (POPUP_SIZE.0 as i32, ((POPUP_SIZE.1 - NESTED_SIZE.1) / 2.0) as i32, NESTED_SIZE.0 as i32, NESTED_SIZE.1 as i32);
+            let configured = popup_configures(client);
+            report.check(
+                "nested popup configure",
+                configured.last() == Some(&expected) && configured.len() == 2,
+                format!("the compositor configured the popups at {configured:?}; expected the second at {expected:?} of the first"),
+            );
             report.check(
                 "nested popup",
                 close_to(pixel, NESTED_FILL) && counts.attached == 2 && counts.mapped == 2 && counts.nested == 1,

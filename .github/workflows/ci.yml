@@ -910,6 +910,34 @@ jobs:
         run: |
           scripts/wayland/sway-run.sh --size 1200x720 --scale 1.5 -- \
             timeout 300 target/debug/examples/wayland_window --smoke --mode=egl --expect-scale=1.5 --skip=resize
+      # The ControlCatalog on the Wayland backend with a combo box and a menu open: the catalog
+      # says where the compositor put each popup, and the step fails when that is not at the
+      # control the popup belongs to. The pictures the compositor took are an artifact.
+      - name: Build the ControlCatalog
+        if: ${{ !cancelled() }}
+        run: |
+          sudo apt-get install -y --no-install-recommends grim
+          cargo build --locked -p control-catalog-desktop
+      - name: The popups of the ControlCatalog are at their controls
+        if: ${{ !cancelled() }}
+        run: |
+          result=0
+          for popup in combobox menu; do
+            case "$popup" in combobox) page=ComboBox ;; menu) page=Menu ;; esac
+            for scale in 1 1.5 2; do
+              FERROUI_SMOKE_SCREENSHOT_PAGES="$page" CATALOG_POPUP="$popup" \
+                scripts/wayland/sway-run.sh --size 1920x1200 --scale "$scale" -- \
+                sh scripts/wayland/catalog-pictures.sh target/debug/control-catalog-desktop "catalog-pictures/scale-$scale" software 4000 || result=1
+            done
+          done
+          exit $result
+      - name: Upload the pictures of the catalog
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: wayland-catalog-pictures
+          path: catalog-pictures
+          if-no-files-found: ignore
       # Without a compositor the backend does not start, and says why.
       - name: Without a compositor the probe fails with a message
         if: ${{ !cancelled() }}

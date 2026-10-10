@@ -74,7 +74,15 @@ done
 
 pictures="$(ls "$out" | grep -c "^$prefix-[0-9][0-9]-.*\.png$")"
 echo "catalog-pictures.sh: $pictures pictures of the compositor in $out ($mode)"
-grep -E "^ControlCatalog: |panicked|Screenshots written|Screenshots: opening" "$log" | head -n 20
+grep -E "^ControlCatalog: |panicked|Screenshots written|Screenshots: opening|^Popup placement:" "$log" | head -n 20
+if [ -n "${CATALOG_POPUP:-}" ]; then
+    # The catalog says where the compositor put the popup it opened, and whether that is at
+    # the control the popup belongs to.
+    if ! grep -q "^Popup placement: \[ok\]" "$log" || grep -q "^Popup placement: \[FAILED\]" "$log"; then
+        echo "catalog-pictures.sh: the popup is not at its control" >&2
+        exit 1
+    fi
+fi
 if ! grep -q "ControlCatalog: the Wayland backend" "$log"; then
     echo "catalog-pictures.sh: the catalog did not select the Wayland backend" >&2
     exit 1

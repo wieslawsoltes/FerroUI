@@ -383,9 +383,14 @@ fn open_popups_of_pages(interval: Duration) {
         _ => return,
     };
     let seen: std::cell::RefCell<Option<Vec<Ref<Visual>>>> = std::cell::RefCell::new(None);
+    let opened: std::cell::RefCell<Option<Ref<Visual>>> = std::cell::RefCell::new(None);
     let timer = DispatcherTimer::run(
         move || {
             let Some(window) = main_window() else { return true };
+            // One look after a popup was opened: where the platform put it.
+            if let Some(control) = opened.borrow_mut().take() {
+                report_popup_placement(&window, &control);
+            }
             let candidates: Vec<Ref<Visual>> = window
                 .clone()
                 .upcast::<Visual>()
@@ -409,6 +414,7 @@ fn open_popups_of_pages(interval: Duration) {
                     println!("Screenshots: opening a menu item");
                     menu_item.open();
                 }
+                *opened.borrow_mut() = Some(first);
             }
             true
         },
@@ -418,6 +424,72 @@ fn open_popups_of_pages(interval: Duration) {
     // The timer lives as long as the run.
     std::mem::forget(timer);
 }
+
+/// Says where the popup of a control that was just opened is, on a platform that can tell: on
+/// the Wayland backend the compositor places a popup, and the line compares the place it
+/// reported (relative to the window geometry of the window) with the control the popup
+/// belongs to. A popup that is not below its control, at its left edge or centred under it,
+/// is a line with `[FAILED]`.
+#[cfg(target_os = "linux")]
+fn report_popup_placement(window: &Ref<Window>, control: &Ref<Visual>) {
+    use ferroui_base::{FerroLocator, LocatorExtensions, Point};
+    use ferroui_wayland::server::wayland_worker_client::WaylandWorkerClient;
+    let Some(client) = FerroLocator::current().get_service::<WaylandWorkerClient>() else {
+        return;
+    };
+    let window_visual = window.clone().upcast::<Visual>();
+    let Some(origin) = control.translate_point(Point::new(0.0, 0.0), &window_visual) else {
+        println!("Popup placement: [FAILED] the control is not in the window");
+        return;
+    };
+    let size = control.bounds().size();
+    let placements = client
+        .invoke_oob(|worker| {
+            let state = &worker.state;
+            // The popups whose parent is a window: a popup of a popup is placed against its parent.
+            state
+                .popups
+                .values()
+                .filter(|popup| state.top_levels.contains_key(&popup.parent()))
+                .map(|popup| popup.placement())
+                .collect::<Vec<_>>()
+        })
+        .recv_timeout(Duration::from_secs(5))
+        .unwrap_or_default();
+    if placements.is_empty() {
+        println!("Popup placement: [FAILED] the worker has no popup of the window; the control is at {origin:?} with {size:?}");
+        return;
+    }
+    for placement in placements {
+        let (left, top) = placement.parent_geometry.map_or((0, 0), |(left, top, _, _)| (left, top));
+        let verdict = match placement.configure {
+            Some(configure) => {
+                let x = f64::from(configure.x + left);
+                let y = f64::from(configure.y + top);
+                let width = f64::from(configure.width);
+                let below = (y - (origin.y + size.height)).abs() <= 12.0;
+                let centred = (x + width / 2.0 - (origin.x + size.width / 2.0)).abs() <= 12.0;
+                let left_aligned = (x - origin.x).abs() <= 12.0;
+                below && (centred || left_aligned)
+            }
+            None => false,
+        };
+        println!(
+            "Popup placement: [{}] the control is at ({}, {}) with {} by {} in the window; the positioner was {:?} against the window geometry {:?}; the compositor configured {:?}",
+            if verdict { "ok" } else { "FAILED" },
+            origin.x,
+            origin.y,
+            size.width,
+            size.height,
+            placement.positioner,
+            placement.parent_geometry,
+            placement.configure
+        );
+    }
+}
+
+#[cfg(not(target_os = "linux"))]
+fn report_popup_placement(_window: &Ref<Window>, _control: &Ref<Visual>) {}
 
 /// The screenshot run asked for with `FERROUI_SMOKE_SCREENSHOTS`.
 fn screenshot_run(directory: PathBuf) {
