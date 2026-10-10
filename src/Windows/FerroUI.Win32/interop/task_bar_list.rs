@@ -172,7 +172,25 @@ mod tests {
     fn the_shell_creates_the_task_bar_list_and_takes_the_calls() {
         let result = crate::interop::unmanaged_methods::ole_initialize();
         assert!(result == 0 || result == 1, "OleInitialize: {result:#010x}");
-        assert!(TaskBarList::is_available(), "the task bar list of the shell could not be created");
+        if !TaskBarList::is_available() {
+            // Session 0, where services run (and the tools of a virtual
+            // machine host start their commands), has no shell: the object
+            // is not created there, and the calls below do nothing, as for
+            // an application of the backend. Anywhere else it has to be.
+            #[link(name = "kernel32", kind = "raw-dylib")]
+            extern "system" {
+                fn GetCurrentProcessId() -> u32;
+                fn ProcessIdToSessionId(process_id: u32, session_id: *mut u32) -> i32;
+            }
+            let mut session = u32::MAX;
+            // SAFETY: a number of this frame the system writes to.
+            let known = unsafe { ProcessIdToSessionId(GetCurrentProcessId(), &mut session) } != 0;
+            assert!(known && session == 0, "the task bar list of the shell could not be created (session {session})");
+            println!("session 0: the shell creates no task bar list here");
+            TaskBarList::mark_fullscreen(0, false);
+            TaskBarList::set_overlay_icon(0, 0, None);
+            return;
+        }
         TaskBarList::mark_fullscreen(0, false);
         TaskBarList::set_overlay_icon(0, 0, None);
         TaskBarList::set_overlay_icon(0, 0, Some("none"));
