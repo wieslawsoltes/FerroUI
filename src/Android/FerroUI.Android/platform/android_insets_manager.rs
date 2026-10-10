@@ -7,6 +7,7 @@
 //! (docs/porting/android-platform.md, section 3.3) and the tests with a
 //! fake; the logic of the manager is the same on both.
 
+use ferroui_base::animation::easings::IEasing;
 use ferroui_base::media::{Color, Colors};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::{Rect, Size, Thickness};
@@ -16,6 +17,7 @@ use ferroui_controls::platform::{
 };
 use std::cell::Cell;
 use std::rc::{Rc, Weak};
+use std::time::Duration;
 
 /// The insets of the root window, in pixels.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -106,6 +108,7 @@ pub struct AndroidInsetsManager {
     previous_rect: Cell<Rect>,
     previous_ime_inset: Cell<Option<i32>>,
     display_edge_to_edge_preference: Cell<bool>,
+    uses_legacy_layouts: bool,
     is_display_edge_to_edge_forced: bool,
     safe_area_changed: InsetsManagerBase,
     state_changed: InputPaneBase,
@@ -121,9 +124,10 @@ impl AndroidInsetsManager {
     /// report applied insets to
     /// [`on_apply_window_insets`](Self::on_apply_window_insets).
     ///
-    /// Below API 30 the reference also follows the global layout of the
-    /// decor view to learn the state of the input pane; that path is
-    /// stage 2 of docs/porting/android-platform.md, with the input method.
+    /// Below API 30 the window also reports the global layout of its decor
+    /// view ([`on_global_layout`](Self::on_global_layout)), from API 30 the
+    /// start of an animation of its insets
+    /// ([`on_insets_animation_start`](Self::on_insets_animation_start)).
     pub(crate) fn new(
         window: Box<dyn IInsetsWindow>,
         top_level: Weak<dyn IInsetsTopLevel>,
@@ -131,6 +135,7 @@ impl AndroidInsetsManager {
         // Better detection for target sdk and running api level. Apps can change their target sdk and bypass
         // the fixed target sdk level.
         let is_display_edge_to_edge_forced = window.is_display_edge_to_edge_forced();
+        let uses_legacy_layouts = window.sdk_int() < R;
 
         let this = Rc::new(AndroidInsetsManager {
             window,
@@ -144,6 +149,7 @@ impl AndroidInsetsManager {
             previous_rect: Cell::new(Rect::default()),
             previous_ime_inset: Cell::new(None),
             display_edge_to_edge_preference: Cell::new(false),
+            uses_legacy_layouts,
             is_display_edge_to_edge_forced,
             safe_area_changed: InsetsManagerBase::new(),
             state_changed: InputPaneBase::new(),
@@ -166,7 +172,7 @@ impl AndroidInsetsManager {
 
         if old_state != value && self.window.sdk_int() <= Q {
             let current_rect = self.occluded_rect();
-            self.notify_state_changed(value, Some(self.previous_rect.get()), current_rect);
+            self.notify_state_changed(value, Some(self.previous_rect.get()), current_rect, Duration::ZERO, None);
             self.previous_rect.set(current_rect);
         }
     }
@@ -208,7 +214,13 @@ impl AndroidInsetsManager {
                 self.previous_ime_inset.set(ime_inset);
             }
             if ime_inset.unwrap_or(0) != self.previous_ime_inset.get().unwrap_or(0) {
-                self.notify_state_changed(self.state.get(), Some(self.previous_rect.get()), self.occluded_rect());
+                self.notify_state_changed(
+                    self.state.get(),
+                    Some(self.previous_rect.get()),
+                    self.occluded_rect(),
+                    Duration::ZERO,
+                    None,
+                );
             }
             self.previous_ime_inset.set(ime_inset);
         }
@@ -222,8 +234,72 @@ impl AndroidInsetsManager {
         self.safe_area_changed.on_safe_area_changed(SafeAreaChangedArgs::new(safe_area_padding));
     }
 
-    fn notify_state_changed(&self, new_state: InputPaneState, start_rect: Option<Rect>, end_rect: Rect) {
-        self.state_changed.on_state_changed(InputPaneStateEventArgs::new(new_state, start_rect, end_rect));
+    fn notify_state_changed(
+        &self,
+        new_state: InputPaneState,
+        start_rect: Option<Rect>,
+        end_rect: Rect,
+        animation_duration: Duration,
+        easing: Option<Rc<dyn IEasing>>,
+    ) {
+        self.state_changed.on_state_changed(InputPaneStateEventArgs::with_animation(
+            new_state,
+            start_rect,
+            end_rect,
+            animation_duration,
+            easing,
+        ));
+    }
+
+    /// The layout of the view tree of the decor view changed (reported
+    /// below API 30).
+    pub(crate) fn on_global_layout(&self) {
+        self.notify_safe_area_changed(self.safe_area_padding());
+
+        if self.uses_legacy_layouts {
+            let insets = self.window.root_insets();
+            self.set_state(if insets.is_some_and(|insets| insets.ime_visible) {
+                InputPaneState::Open
+            } else {
+                InputPaneState::Closed
+            });
+        }
+    }
+
+    /// An animation of the insets of the input method starts
+    /// (`WindowInsetsAnimation.Callback.onStart`, for an animation whose
+    /// type mask has the input method): the bottom of the lower and of the
+    /// upper bound of the animation in pixels, its duration and its
+    /// interpolator.
+    pub(crate) fn on_insets_animation_start(
+        &self,
+        lower_bound_bottom: i32,
+        upper_bound_bottom: i32,
+        duration_millis: i64,
+        easing: Option<Rc<dyn IEasing>>,
+    ) {
+        if let Some(insets) = self.window.root_insets() {
+            let navbar_inset = insets.navigation_bars_bottom;
+            let client_size = self.client_size();
+            let bottom = self.safe_area_padding().bottom;
+            let rect_of = |bound_bottom: i32| {
+                let height = f64::from((((bound_bottom - navbar_inset) as f64 / self.render_scaling()) as f32).max(0.0));
+                Rect::new(0.0, client_size.height - bottom - height, client_size.width, height)
+            };
+            let upper_rect = rect_of(lower_bound_bottom);
+            let lower_rect = rect_of(upper_bound_bottom);
+
+            let duration = Duration::from_millis(u64::try_from(duration_millis).unwrap_or(0));
+
+            let is_opening = self.state.get() == InputPaneState::Open;
+            self.notify_state_changed(
+                self.state.get(),
+                Some(if is_opening { upper_rect } else { lower_rect }),
+                if is_opening { lower_rect } else { upper_rect },
+                duration,
+                easing,
+            );
+        }
     }
 
     /// The theme of the system bars.
@@ -369,7 +445,7 @@ impl IInputPane for AndroidInsetsManager {
 }
 
 #[cfg(target_os = "android")]
-pub(crate) use imp::ActivityInsetsWindow;
+pub(crate) use imp::{ActivityInsetsWindow, AnimationEasing};
 
 #[cfg(target_os = "android")]
 mod imp {
@@ -379,7 +455,36 @@ mod imp {
         JavaValue,
     };
     use crate::interop::natives::{sdk_int, PLATFORM_HELPER};
+    use ferroui_base::animation::easings::{IEasing, SharedEasing};
     use ferroui_base::media::Color;
+    use std::sync::Arc;
+
+    /// The interpolator of an animation of the system as an easing
+    /// (`AnimationEasing` of the reference).
+    pub(crate) struct AnimationEasing {
+        interpolator: JavaObject,
+    }
+
+    impl AnimationEasing {
+        pub fn new(interpolator: JavaObject) -> Self {
+            Self { interpolator }
+        }
+    }
+
+    impl IEasing for AnimationEasing {
+        fn ease(&self, progress: f64) -> f64 {
+            f64::from(crate::interop::java::call_float(
+                &self.interpolator,
+                "getInterpolation",
+                "(F)F",
+                &[JavaValue::Float(progress as f32)],
+            ))
+        }
+
+        fn to_shared(&self) -> Arc<SharedEasing> {
+            Arc::new(AnimationEasing { interpolator: self.interpolator.clone() })
+        }
+    }
 
     /// The window of an activity, asked through the Java layer.
     pub(crate) struct ActivityInsetsWindow {
@@ -745,5 +850,171 @@ mod tests {
         manager.set_is_system_bar_visible(Some(false));
         manager.set_is_system_bar_visible(None);
         assert_eq!(*state.calls.borrow(), ["visible false", "visible true"]);
+    }
+}
+
+#[cfg(test)]
+mod input_pane_tests {
+    // Not from the reference, which has no tests of the manager.
+    use super::*;
+    use std::cell::RefCell;
+
+    struct Window {
+        sdk_int: i32,
+        insets: Rc<Cell<Option<RootInsets>>>,
+    }
+
+    impl IInsetsWindow for Window {
+        fn sdk_int(&self) -> i32 {
+            self.sdk_int
+        }
+
+        fn has_window(&self) -> bool {
+            true
+        }
+
+        fn root_insets(&self) -> Option<RootInsets> {
+            self.insets.get()
+        }
+
+        fn is_display_edge_to_edge_forced(&self) -> bool {
+            true
+        }
+
+        fn set_layout_in_display_cutout_mode(&self, _short_edges: bool) {}
+        fn set_decor_fits_system_windows(&self, _decor_fits_system_windows: bool) {}
+        fn add_translucent_bars(&self) {}
+        fn set_system_bar_color(&self, _color: Color) {}
+        fn set_navigation_bar_contrast_enforced(&self, _enforced: bool) {}
+
+        fn appearance_light_status_bars(&self) -> bool {
+            true
+        }
+
+        fn set_appearance_light_bars(&self, _light: bool) {}
+        fn set_system_bars_visible(&self, _visible: bool) {}
+    }
+
+    struct TopLevel;
+
+    impl IInsetsTopLevel for TopLevel {
+        fn top_level_render_scaling(&self) -> f64 {
+            2.0
+        }
+
+        fn top_level_client_size(&self) -> Size {
+            Size::new(540.0, 1200.0)
+        }
+    }
+
+    type Seen = Rc<RefCell<Vec<(InputPaneState, Option<Rect>, Rect, Duration, bool)>>>;
+
+    fn manager(sdk_int: i32) -> (Rc<AndroidInsetsManager>, Rc<Cell<Option<RootInsets>>>, Seen, Rc<dyn IInsetsTopLevel>) {
+        let insets = Rc::new(Cell::new(Some(bars(0, false))));
+        let top_level: Rc<dyn IInsetsTopLevel> = Rc::new(TopLevel);
+        let manager =
+            AndroidInsetsManager::new(Box::new(Window { sdk_int, insets: insets.clone() }), Rc::downgrade(&top_level));
+        let seen: Seen = Rc::new(RefCell::new(Vec::new()));
+        std::mem::forget(manager.state_changed(Rc::new({
+            let seen = seen.clone();
+            move |e: &InputPaneStateEventArgs| {
+                seen.borrow_mut().push((
+                    e.new_state(),
+                    e.start_rect(),
+                    e.end_rect(),
+                    e.animation_duration(),
+                    e.easing().is_some(),
+                ));
+            }
+        })));
+        (manager, insets, seen, top_level)
+    }
+
+    /// Bars of 100 px at the top and 48 px at the bottom, and the input method.
+    fn bars(ime_bottom: i32, ime_visible: bool) -> RootInsets {
+        RootInsets {
+            left: 0,
+            top: 100,
+            right: 0,
+            bottom: 48,
+            navigation_bars_bottom: 48,
+            ime_bottom,
+            ime_visible,
+            system_bars_visible: true,
+        }
+    }
+
+    #[test]
+    fn from_api_30_the_animation_of_the_insets_reports_the_input_pane() {
+        let _scope = ferroui_base::threading::Dispatcher::unit_test_scope();
+        let (manager, insets, seen, _top_level) = manager(36);
+
+        // The insets with the input method are applied first: the state opens, silently.
+        insets.set(Some(bars(848, true)));
+        manager.on_apply_window_insets(true, true, 848);
+        assert_eq!(manager.state(), InputPaneState::Open);
+        assert!(seen.borrow().is_empty());
+
+        // Then the animation starts: from no input method to 848 px, in 285 ms.
+        manager.on_insets_animation_start(0, 848, 285, None);
+        // The client is 1200 high and its safe area 24 at the bottom; the pane is
+        // (848 - 48) / 2 = 400 high.
+        assert_eq!(
+            *seen.borrow(),
+            vec![(
+                InputPaneState::Open,
+                Some(Rect::new(0.0, 1176.0, 540.0, 0.0)),
+                Rect::new(0.0, 776.0, 540.0, 400.0),
+                Duration::from_millis(285),
+                false
+            )]
+        );
+        assert_eq!(manager.occluded_rect(), Rect::new(0.0, 776.0, 540.0, 400.0));
+
+        // Closing runs the other way.
+        seen.borrow_mut().clear();
+        insets.set(Some(bars(0, false)));
+        manager.on_apply_window_insets(true, false, 0);
+        manager.on_insets_animation_start(0, 848, 200, None);
+        assert_eq!(
+            *seen.borrow(),
+            vec![(
+                InputPaneState::Closed,
+                Some(Rect::new(0.0, 776.0, 540.0, 400.0)),
+                Rect::new(0.0, 1176.0, 540.0, 0.0),
+                Duration::from_millis(200),
+                false
+            )]
+        );
+    }
+
+    #[test]
+    fn below_api_30_the_global_layout_reports_the_input_pane_at_once() {
+        let _scope = ferroui_base::threading::Dispatcher::unit_test_scope();
+        let (manager, insets, seen, _top_level) = manager(29);
+
+        manager.on_global_layout();
+        assert!(seen.borrow().is_empty());
+
+        insets.set(Some(bars(848, true)));
+        manager.on_global_layout();
+        assert_eq!(manager.state(), InputPaneState::Open);
+        assert_eq!(seen.borrow().len(), 1);
+        let (state, _, end, duration, easing) = seen.borrow()[0];
+        assert_eq!((state, end, duration, easing), (InputPaneState::Open, Rect::new(0.0, 776.0, 540.0, 400.0), Duration::ZERO, false));
+
+        // The same layout again changes nothing.
+        manager.on_global_layout();
+        assert_eq!(seen.borrow().len(), 1);
+    }
+
+    #[test]
+    fn from_api_30_the_global_layout_does_not_touch_the_state() {
+        let _scope = ferroui_base::threading::Dispatcher::unit_test_scope();
+        let (manager, insets, seen, _top_level) = manager(36);
+        insets.set(Some(bars(848, true)));
+        manager.on_global_layout();
+        assert_eq!(manager.state(), InputPaneState::Closed);
+        assert!(seen.borrow().is_empty());
     }
 }

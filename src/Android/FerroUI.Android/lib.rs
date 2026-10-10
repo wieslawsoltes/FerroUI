@@ -27,6 +27,7 @@ mod android_runtime_platform;
 mod application_lifetime;
 mod cursor_factory;
 mod i_ferro_activity;
+mod i_init_editor_info;
 mod platform_icon_loader;
 mod stubs;
 
