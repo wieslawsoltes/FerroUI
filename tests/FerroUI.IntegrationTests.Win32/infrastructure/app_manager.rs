@@ -16,7 +16,30 @@ fn use_platform(builder: AppBuilder) -> AppBuilder {
     use ferroui_skia::SkiaApplicationExtensions;
     use ferroui_win32::Win32ApplicationExtensions;
 
-    builder.use_win32().use_skia().use_harfbuzz()
+    rendering_options(builder).use_win32().use_skia().use_harfbuzz()
+}
+
+/// Upstream's tests run with the default options. For the tests of what a
+/// window presents the run can be given one rendering mode without a
+/// fallback: `FERROUI_SMOKE_RENDERING=software` or `angle`, the variable
+/// the smoke runs of the examples read.
+#[cfg(windows)]
+fn rendering_options(builder: AppBuilder) -> AppBuilder {
+    use ferroui_win32::{Win32CompositionMode, Win32PlatformOptions, Win32RenderingMode};
+    use std::rc::Rc;
+
+    let mut options = Win32PlatformOptions::default();
+    match std::env::var("FERROUI_SMOKE_RENDERING").ok().as_deref() {
+        Some("software") => options.rendering_mode = vec![Win32RenderingMode::Software],
+        Some("angle") => {
+            options.rendering_mode = vec![Win32RenderingMode::AngleEgl];
+            options.composition_mode = vec![Win32CompositionMode::RedirectionSurface];
+        }
+        Some(other) => panic!("FERROUI_SMOKE_RENDERING: unknown mode {other:?} (software, angle)"),
+        None => return builder,
+    }
+    println!("rendering modes of the run: {:?}", options.rendering_mode);
+    builder.with(Rc::new(options))
 }
 
 #[cfg(not(windows))]

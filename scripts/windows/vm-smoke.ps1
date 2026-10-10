@@ -55,7 +55,10 @@
   binary of Skia for the target is needed, or Skia is built from source, which takes an hour):
   with the default options, with each rendering mode alone, and with ANGLE on the UI thread.
   Then build and run upstream's integration tests of windows (tests\FerroUI.IntegrationTests.Win32:
-  windows of the window class on the desktop, in every state and with every kind of decorations).
+  windows of the window class on the desktop, in every state and with every kind of decorations),
+  the test of what a window presents once more with each rendering mode alone, and the picture run
+  of the catalog (control-catalog-desktop with FERROUI_SMOKE_SCREENSHOTS) in both rendering modes;
+  the pictures are copied to vm-smoke-screenshots beside the report.
 
 .PARAMETER HelloRepeat
   How many times the run of hello_window with the default options is made (to look for a failure
@@ -332,6 +335,45 @@ if ($Desktop) {
             $code = if ($InteractiveUser) { Run-Interactive 'integration' $commandLine 900 } else { Run 'integration' $commandLine }
             if ($code -ne 0) { $failed.Add('integration tests') }
             Tail 'integration' 80 'FAILED|^test result|^running|panicked|^failures|^    '
+            # What a window presents reaches the edges of its client area, with each rendering
+            # mode alone (the run above had the default options).
+            foreach ($mode in @('software', 'angle')) {
+                $name = "integration-presented-$mode"
+                $commandLine = "set FERROUI_SMOKE_RENDERING=$mode&& `"$($binary.FullName)`" presented_frame_tests"
+                $code = if ($InteractiveUser) { Run-Interactive $name $commandLine 300 } else { Run $name $commandLine }
+                if ($code -ne 0) { $failed.Add("presented frames ($mode)") }
+                Tail $name 20 'FAILED|^test |^test result|panicked|^    '
+            }
+        }
+    }
+
+    # The catalog: its desktop host shows the home page and a handful of others and writes two
+    # pictures of each (the frame of the framework, and the client area of the window as the
+    # system composed it), once with software rendering and once through ANGLE. The pictures
+    # are copied beside the report.
+    Say ""
+    Say "-- pictures of the catalog"
+    if ((Run 'catalog-build' "cargo build --locked $jobsArgument -p control-catalog-desktop") -ne 0) {
+        $failed.Add('catalog build')
+        Tail 'catalog-build' 40
+    } else {
+        $catalog = Join-Path $TargetDir 'debug\control-catalog-desktop.exe'
+        $pictures = Join-Path $TargetDir 'vm-smoke-screenshots'
+        foreach ($mode in @('software', 'angle')) {
+            $name = "catalog-$mode"
+            $directory = Join-Path $pictures $mode
+            New-Item -ItemType Directory -Force -Path $directory | Out-Null
+            Get-ChildItem $directory -Filter '*.png' -ErrorAction SilentlyContinue | Remove-Item -Force
+            $commandLine = "set FERROUI_SMOKE_PAGES=2500&& set FERROUI_SMOKE_EXIT_MS=120000&& set FERROUI_SMOKE_RENDERING=$mode&& set FERROUI_SMOKE_SCREENSHOTS=$directory&& `"$catalog`""
+            $code = if ($InteractiveUser) { Run-Interactive $name $commandLine 600 } else { Run $name $commandLine }
+            if ($code -ne 0) { $failed.Add("catalog ($mode)") }
+            $count = @(Get-ChildItem $directory -Filter '*.png' -ErrorAction SilentlyContinue).Count
+            Say "    $count picture(s) in $directory"
+            if ($count -eq 0) { $failed.Add("catalog pictures ($mode)") }
+            Tail $name 40 'content reaches|colour\(s\)|panicked|error|moved'
+            $copy = Join-Path (Join-Path (Split-Path -Parent $Report) 'vm-smoke-screenshots') $mode
+            New-Item -ItemType Directory -Force -Path $copy | Out-Null
+            Copy-Item (Join-Path $directory '*.png') $copy -Force -ErrorAction SilentlyContinue
         }
     }
 }

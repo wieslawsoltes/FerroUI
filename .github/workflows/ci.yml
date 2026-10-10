@@ -201,6 +201,18 @@ jobs:
         if: ${{ steps.skia.outputs.raster == 'true' }}
         timeout-minutes: 30
         run: cargo test --locked -p ferroui-integration-tests-win32 --test integration
+      # What a window presents has to reach the last column and row of its client area, after it
+      # was shown and after a resize: the test of that (presented_frame_tests.rs, which ran with
+      # the default options in the step above) once more with each rendering mode alone.
+      - name: Presented frames reach the edges of the window (software rendering and ANGLE)
+        if: ${{ steps.skia.outputs.raster == 'true' }}
+        timeout-minutes: 15
+        run: |
+          result=0
+          for mode in software angle; do
+            FERROUI_SMOKE_RENDERING=$mode cargo test --locked -p ferroui-integration-tests-win32 --test integration -- presented_frame_tests || result=1
+          done
+          exit $result
       # The catalog on Windows, for a person to look at: its desktop host shows the home page and
       # a handful of others and writes two pictures of each, the frame the framework draws
       # through its own render target and the client area of its window as the system composed

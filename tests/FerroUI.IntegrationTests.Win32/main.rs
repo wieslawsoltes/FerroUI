@@ -21,6 +21,7 @@
 mod begin_move_drag_tests;
 mod infrastructure;
 mod ole_data_tests;
+mod presented_frame_tests;
 mod standard_window_tests;
 mod unmanaged_methods;
 mod window_extensions;
@@ -65,6 +66,7 @@ fn main() -> ExitCode {
     let mut cases = Vec::new();
     begin_move_drag_tests::tests(&mut cases);
     ole_data_tests::tests(&mut cases);
+    presented_frame_tests::tests(&mut cases);
     standard_window_tests::tests(&mut cases);
 
     let selected: Vec<&TestCase> = cases
