@@ -792,6 +792,14 @@ impl<T: ObjectType> Ref<T> {
         std::ptr::addr_eq(Rc::as_ptr(&self.ptr), Rc::as_ptr(&other.ptr))
     }
 
+    /// The number of handles to the object, the number of weak handles to it and its address:
+    /// what a leak test says of an object that survived its scenario. For tests only.
+    #[cfg(feature = "testing")]
+    #[doc(hidden)]
+    pub fn reference_counts(&self) -> (usize, usize, usize) {
+        (Rc::strong_count(&self.ptr), Rc::weak_count(&self.ptr), Rc::as_ptr(&self.ptr) as *const () as usize)
+    }
+
     #[inline]
     pub(crate) fn from_rc(ptr: Rc<dyn Any>) -> Self {
         Ref { ptr, _marker: PhantomData }

@@ -36,6 +36,7 @@ members = [
     "tests/FerroUI.RenderBackends.Comparison",
     "tests/FerroUI.RenderTests",
     "tests/FerroUI.Benchmarks",
+    "tests/FerroUI.LeakTests",
     "samples/MiniMvvm",
     "samples/ControlCatalog",
     "samples/ControlCatalog.Desktop",
