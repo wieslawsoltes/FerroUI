@@ -8,8 +8,8 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. The s
 
 | | Present | Total | Missing | Waived | Not applicable | Out of scope | Share |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Members of the projects in scope | 27430 | 31738 | 1451 | 2857 | - | - | 95.0% of total less waived |
-| Members of every upstream source project of the extraction | 27430 | 37391 | 1451 | 2857 | 1132 | 4521 | 73.4% of total |
+| Members of the projects in scope | 27859 | 32172 | 1445 | 2868 | - | - | 95.1% of total less waived |
+| Members of every upstream source project of the extraction | 27859 | 37391 | 1445 | 2868 | 1132 | 4087 | 74.5% of total |
 
 The first row is the headline of the tracking: it leaves out the waived members and everything out of scope. The second row leaves out nothing: every member of every C# project the extraction reads, whether or not the port will ever have it. A member is *present* when an item of the mapped name exists; names are matched, not behaviour.
 
@@ -30,6 +30,7 @@ Files, types and members as present / missing / waived. *n/a* counts the files m
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | in | 17 / 0 / 0 | 18 / 0 / 0 | 94 / 0 / 0 | 0 (0) | 100.0% |
 | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) | in | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 | 1 (0) | 100.0% |
 | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | in | 18 / 0 / 0 | 26 / 0 / 0 | 175 / 41 / 0 | 0 (0) | 81.0% |
+| [Avalonia.FreeDesktop.AtSpi](tracking/Avalonia.FreeDesktop.AtSpi.md) | in | 27 / 0 / 0 | 27 / 0 / 0 | 423 / 0 / 11 | 0 (0) | 97.5% |
 | [Avalonia.Metal](tracking/Avalonia.Metal.md) | in | 2 / 0 / 0 | 7 / 0 / 0 | 21 / 0 / 0 | 0 (0) | 100.0% |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | in | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 5 | 0 (0) | 16.7% |
 | [Avalonia.Native](tracking/Avalonia.Native.md) | in | 48 / 1 / 0 | 67 / 8 / 10 | 473 / 69 / 59 | 0 (0) | 78.7% |
@@ -37,7 +38,7 @@ Files, types and members as present / missing / waived. *n/a* counts the files m
 | [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | in | 14 / 0 / 0 | 54 / 0 / 1 | 198 / 1 / 3 | 0 (0) | 98.0% |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | in | 5 / 0 / 0 | 6 / 0 / 0 | 68 / 0 / 5 | 1 (0) | 93.2% |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | in | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 | 1 (0) | 100.0% |
-| [Avalonia.X11](tracking/Avalonia.X11.md) | in | 85 / 3 / 0 | 175 / 9 / 107 | 3525 / 296 / 1076 | 0 (0) | 72.0% |
+| [Avalonia.X11](tracking/Avalonia.X11.md) | in | 86 / 2 / 0 | 176 / 8 / 107 | 3531 / 290 / 1076 | 0 (0) | 72.1% |
 | [Avalonia.Browser](tracking/Avalonia.Browser.md) | in | 50 / 0 / 0 | 60 / 0 / 2 | 340 / 0 / 88 | 2 (13) | 77.1% |
 | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | in | 3 / 0 / 0 | 3 / 0 / 0 | 5 / 0 / 3 | 0 (0) | 62.5% |
 | [Avalonia.Headless](tracking/Avalonia.Headless.md) | in | 11 / 0 / 0 | 22 / 0 / 2 | 238 / 0 / 13 | 0 (0) | 94.8% |
@@ -50,14 +51,13 @@ Files, types and members as present / missing / waived. *n/a* counts the files m
 | [Avalonia.Win32](tracking/Avalonia.Win32.md) | in | 70 / 25 / 0 | 182 / 94 / 0 | 1763 / 842 / 0 | 0 (0) | 67.7% |
 | [Avalonia.iOS](tracking/Avalonia.iOS.md) | in | 37 / 3 / 0 | 51 / 5 / 1 | 254 / 60 / 17 | 1 (0) | 76.7% |
 | [Avalonia.Generators](tracking/Avalonia.Generators.md) | in: every file not applicable | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 / 0 | 31 (264) | 0.0% |
-| [Avalonia.FreeDesktop.AtSpi](tracking/Avalonia.FreeDesktop.AtSpi.md) | out (not started) | 27 files | 27 types | 434 members | 0 (0) | 0.0% |
-| [Avalonia.Vulkan](tracking/Avalonia.Vulkan.md) | out (not started) | 30 files | 151 types | 2034 members | 0 (0) | 0.0% |
-| [Avalonia.Wayland](tracking/Avalonia.Wayland.md) | out (not started) | 81 files | 123 types | 816 members | 0 (0) | 0.0% |
-| [Avalonia.Headless.Vnc](tracking/Avalonia.Headless.Vnc.md) | out (not started) | 3 files | 3 types | 11 members | 0 (0) | 0.0% |
-| [Avalonia.LinuxFramebuffer](tracking/Avalonia.LinuxFramebuffer.md) | out (not started) | 30 files | 76 types | 529 members | 0 (0) | 0.0% |
+| [Avalonia.Vulkan](tracking/Avalonia.Vulkan.md) | out (started) | 30 files | 151 types | 2034 members | 0 (0) | 0.0% |
+| [Avalonia.Wayland](tracking/Avalonia.Wayland.md) | out (started) | 81 files | 123 types | 816 members | 0 (0) | 0.0% |
+| [Avalonia.Headless.Vnc](tracking/Avalonia.Headless.Vnc.md) | out (started) | 3 files | 3 types | 11 members | 0 (0) | 0.0% |
+| [Avalonia.LinuxFramebuffer](tracking/Avalonia.LinuxFramebuffer.md) | out (started) | 30 files | 76 types | 529 members | 0 (0) | 0.0% |
 | [Avalonia.Win32.Automation](tracking/Avalonia.Win32.Automation.md) | out (not started) | 40 files | 64 types | 598 members | 1 (0) | 0.0% |
 | [Avalonia.Win32.Interoperability](tracking/Avalonia.Win32.Interoperability.md) | out (not started) | 2 files | 2 types | 11 members | 0 (0) | 0.0% |
-| [Avalonia.WinUI](tracking/Avalonia.WinUI.md) | out (not started) | 15 files | 16 types | 88 members | 0 (0) | 0.0% |
+| [Avalonia.WinUI](tracking/Avalonia.WinUI.md) | out (started) | 15 files | 16 types | 88 members | 0 (0) | 0.0% |
 
 Files that are not C#:
 
@@ -251,11 +251,11 @@ Files without a Rust file, types without a Rust type, and members without a Rust
 
 ### [Avalonia.X11](tracking/Avalonia.X11.md)
 
-3 files, 9 types and 296 members missing (118 members of the missing types, 178 members of types that exist).
+2 files, 8 types and 290 members missing (113 members of the missing types, 177 members of types that exist).
 
-- **Files (3):** `Vulkan/VulkanNativeInterop.cs`, `Vulkan/VulkanSupport.cs`, `X11AtSpiAccessibility.cs`
-- **Types (9):** `GlxConsts`, `Gtk.signal_dialog_response`, `Gtk.signal_generic`, `VkXlibSurfaceCreateInfoKHR`, `VulkanSupport`, `VulkanSupport.VulkanSurfaceFactory`, `X11AtSpiAccessibility`, `X11VulkanInterface`, `XLib.GrabResult`
-- **Members of types that exist (178), by type:** `XLib` 130, `SMLib` 7, `X11Window.X11WindowMode` 7, `Glib` 5, `ICELib` 5, `AvaloniaX11Platform` 4, `GlxInterface` 3, `CursorImpl` 2, `DragDropDataProvider` 2, `DragDropDataTransfer` 2, `XLib.XGeometry` 2, `DataFormatHelper` 1, `GlxDisplay` 1, `SelectionDataProvider` 1, `X11EglHelper` 1, `X11FramebufferSurface` 1, `X11Window` 1, `X11Window.DefaultTopLevelWindowMode` 1, `X11Window.InputProxyWindowMode` 1, `X11Window.SurfacePlatformHandle` 1
+- **Files (2):** `Vulkan/VulkanNativeInterop.cs`, `Vulkan/VulkanSupport.cs`
+- **Types (8):** `GlxConsts`, `Gtk.signal_dialog_response`, `Gtk.signal_generic`, `VkXlibSurfaceCreateInfoKHR`, `VulkanSupport`, `VulkanSupport.VulkanSurfaceFactory`, `X11VulkanInterface`, `XLib.GrabResult`
+- **Members of types that exist (177), by type:** `XLib` 130, `SMLib` 7, `X11Window.X11WindowMode` 7, `Glib` 5, `ICELib` 5, `AvaloniaX11Platform` 3, `GlxInterface` 3, `CursorImpl` 2, `DragDropDataProvider` 2, `DragDropDataTransfer` 2, `XLib.XGeometry` 2, `DataFormatHelper` 1, `GlxDisplay` 1, `SelectionDataProvider` 1, `X11EglHelper` 1, `X11FramebufferSurface` 1, `X11Window` 1, `X11Window.DefaultTopLevelWindowMode` 1, `X11Window.InputProxyWindowMode` 1, `X11Window.SurfacePlatformHandle` 1
 
 ### [Avalonia.Skia](tracking/Avalonia.Skia.md)
 

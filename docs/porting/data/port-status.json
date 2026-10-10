@@ -2,26 +2,26 @@
  "upstreamCommit": "17350180c33b063f0e98abbfd19aa3cae63f5d56",
  "inScope": {
   "files": [
-   2532,
-   2569,
+   2560,
+   2596,
    0
   ],
   "types": [
-   3439,
-   3888,
+   3467,
+   3915,
    311
   ],
   "members": [
-   27430,
-   31738,
-   2857
+   27859,
+   32172,
+   2868
   ]
  },
  "allProjects": {
-  "membersPresent": 27430,
+  "membersPresent": 27859,
   "members": 37391,
   "membersNotApplicable": 1132,
-  "membersOutOfScope": 4521
+  "membersOutOfScope": 4087
  },
  "projects": [
   {
@@ -7033,23 +7033,23 @@
   {
    "name": "Avalonia.FreeDesktop.AtSpi",
    "path": "src/Avalonia.FreeDesktop.AtSpi",
-   "rust": "src/FerroUI.FreeDesktop.AtSpi",
-   "scope": "out",
-   "detail": "types",
+   "rust": "src/FerroUI.FreeDesktop/at_spi",
+   "scope": "in",
+   "detail": "full",
    "files": [
-    0,
+    27,
     27,
     0
    ],
    "types": [
-    0,
+    27,
     27,
     0
    ],
    "members": [
-    0,
+    423,
     434,
-    0
+    11
    ],
    "interfaces": [
     0,
@@ -7064,9 +7064,107 @@
     0
    ],
    "notApplicableFiles": 0,
-   "matchKinds": {},
-   "presentFiles": {},
-   "rustOnly": []
+   "matchKinds": {
+    "alias fn": 5,
+    "field": 7,
+    "fn": 207,
+    "free fn": 3,
+    "free item": 36,
+    "variant": 165
+   },
+   "presentFiles": {
+    "ApplicationAccessibleHandler.cs": [
+     "application_accessible_handler.rs"
+    ],
+    "ApplicationAtSpiNode.cs": [
+     "application_at_spi_node.rs"
+    ],
+    "ApplicationNodeApplicationHandler.cs": [
+     "application_node_application_handler.rs"
+    ],
+    "AtSpiAccessibilityWatcher.cs": [
+     "at_spi_accessibility_watcher.rs"
+    ],
+    "AtSpiCacheHandler.cs": [
+     "at_spi_cache_handler.rs"
+    ],
+    "AtSpiConstants.cs": [
+     "at_spi_constants.rs"
+    ],
+    "AtSpiCoordType.cs": [
+     "at_spi_coord_type.rs"
+    ],
+    "AtSpiNode.RoleMapping.cs": [
+     "at_spi_node_role_mapping.rs"
+    ],
+    "AtSpiNode.StateMapping.cs": [
+     "at_spi_node_state_mapping.rs"
+    ],
+    "AtSpiNode.cs": [
+     "at_spi_node.rs"
+    ],
+    "AtSpiRegistryEventTracker.cs": [
+     "at_spi_registry_event_tracker.rs"
+    ],
+    "AtSpiRole.cs": [
+     "at_spi_role.rs"
+    ],
+    "AtSpiServer.cs": [
+     "at_spi_server.rs"
+    ],
+    "AtSpiState.cs": [
+     "at_spi_state.rs"
+    ],
+    "Handlers/AtSpiAccessibleHandler.cs": [
+     "handlers/at_spi_accessible_handler.rs"
+    ],
+    "Handlers/AtSpiActionHandler.cs": [
+     "handlers/at_spi_action_handler.rs"
+    ],
+    "Handlers/AtSpiCollectionHandler.cs": [
+     "handlers/at_spi_collection_handler.rs"
+    ],
+    "Handlers/AtSpiComponentHandler.cs": [
+     "handlers/at_spi_component_handler.rs"
+    ],
+    "Handlers/AtSpiCoordinateHelper.cs": [
+     "handlers/at_spi_coordinate_helper.rs"
+    ],
+    "Handlers/AtSpiEditableTextHandler.cs": [
+     "handlers/at_spi_editable_text_handler.rs"
+    ],
+    "Handlers/AtSpiEventObjectHandler.cs": [
+     "handlers/at_spi_event_object_handler.rs"
+    ],
+    "Handlers/AtSpiEventWindowHandler.cs": [
+     "handlers/at_spi_event_window_handler.rs"
+    ],
+    "Handlers/AtSpiImageHandler.cs": [
+     "handlers/at_spi_image_handler.rs"
+    ],
+    "Handlers/AtSpiSelectionHandler.cs": [
+     "handlers/at_spi_selection_handler.rs"
+    ],
+    "Handlers/AtSpiTextHandler.cs": [
+     "handlers/at_spi_text_handler.rs"
+    ],
+    "Handlers/AtSpiValueHandler.cs": [
+     "handlers/at_spi_value_handler.rs"
+    ],
+    "RootAtSpiNode.cs": [
+     "root_at_spi_node.rs"
+    ]
+   },
+   "rustOnly": [
+    "dbus/built_in_introspection_handler.rs",
+    "dbus/built_in_properties_handler.rs",
+    "dbus/connection.rs",
+    "dbus/descriptions.rs",
+    "dbus/interface.rs",
+    "dbus/proxies.rs",
+    "dbus/types.rs",
+    "tests.rs"
+   ]
   },
   {
    "name": "Avalonia.Metal",
@@ -7819,17 +7917,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    85,
+    86,
     88,
     0
    ],
    "types": [
-    175,
+    176,
     291,
     107
    ],
    "members": [
-    3525,
+    3531,
     4897,
     1076
    ],
@@ -7850,7 +7948,7 @@
     "alias field": 1,
     "const": 2,
     "field": 254,
-    "fn": 492,
+    "fn": 498,
     "free fn": 103,
     "free item": 16,
     "overload fn": 7,
@@ -8005,6 +8103,9 @@
     ],
     "X11ActiveWindowTracker.cs": [
      "x11_active_window_tracker.rs"
+    ],
+    "X11AtSpiAccessibility.cs": [
+     "x11_at_spi_accessibility.rs"
     ],
     "X11Atoms.cs": [
      "x11_atoms.rs"

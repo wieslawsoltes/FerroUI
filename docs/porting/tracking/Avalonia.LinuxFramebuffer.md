@@ -7,7 +7,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Linux/Avalonia.LinuxFramebuffer` |
-| FerroUI | `src/Linux/FerroUI.LinuxFramebuffer` (not created yet) |
+| FerroUI | `src/Linux/FerroUI.LinuxFramebuffer` (exists) |
 | Crate | `ferroui-linuxframebuffer` |
 | Phase / priority | not started / out of current scope / - |
 | Files | 0/30 (0.0%) |
