@@ -662,6 +662,23 @@ ferro_markup_type!(class DrawingCollection {
     methods: [fn Add(Ref<Drawing>) => |drawings: &DrawingCollection, item: Ref<Drawing>| drawings.add(item)],
 });
 
+// The font manager: markup names the current one (`{x:Static FontManager.Current}`) and binds
+// to the fonts of the system.
+ferro_markup_type!(class crate::media::FontManager as "FontManager" {
+    namespace: "FerroUI.Media",
+    handles: [Rc<crate::media::FontManager>, Option<Rc<crate::media::FontManager>>],
+    this: Rc<crate::media::FontManager>,
+    properties: [
+        DefaultFontFamily: crate::media::FontFamily {
+            get: |font_manager: &Rc<crate::media::FontManager>| font_manager.default_font_family().clone()
+        },
+        SystemFonts: Rc<dyn crate::media::fonts::IFontCollection> {
+            get: |font_manager: &Rc<crate::media::FontManager>| font_manager.system_fonts()
+        },
+    ],
+    static_properties: [Current: Rc<crate::media::FontManager> { get: crate::media::FontManager::current }],
+});
+
 // FerroUI.Media.Transformation
 
 // A list of transform operations: the text content of an element is its text form.
@@ -974,6 +991,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <Transforms as MarkupTyped>::MARKUP,
     <DrawingCollection as MarkupTyped>::MARKUP,
     <TransformOperations as MarkupTyped>::MARKUP,
+    <crate::media::FontManager as MarkupTyped>::MARKUP,
     <MediaCollection<f64> as MarkupTyped>::MARKUP,
     <FerroList<Rc<dyn IAnimationSetter>> as MarkupTyped>::MARKUP,
     <FerroList<Rc<dyn IResourceProvider>> as MarkupTyped>::MARKUP,
@@ -1079,6 +1097,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<FerroList<Ref<crate::media::TextDecoration>>>();
     // A list of transform operations is a transform.
     ValueTypes::register_nullable::<Rc<TransformOperations>>();
+    ValueTypes::register_nullable::<Rc<crate::media::FontManager>>();
     ValueTypes::register_cast::<Rc<TransformOperations>, Rc<dyn crate::media::ITransform>>(|operations| operations.clone());
     // A converter is a converter contract.
     ValueTypes::register_nullable::<Rc<DefaultValueConverter>>();

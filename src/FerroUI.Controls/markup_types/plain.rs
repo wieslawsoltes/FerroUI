@@ -459,6 +459,13 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<crate::ItemsSource>();
     ValueTypes::register_nullable::<crate::primitives::SelectedItemsList>();
     crate::ItemsSource::register_binding_conversion::<crate::ItemsSource>();
+    // A font collection is a read-only list of font families (`IReadOnlyList<FontFamily>` in
+    // the managed original), which a binding delivers to an items source
+    // (`{Binding SystemFonts, Source={x:Static FontManager.Current}}`): the items are the
+    // font families of the collection.
+    crate::ItemsSource::register_binding_conversion_with::<Rc<dyn ferroui_base::media::fonts::IFontCollection>>(|fonts| {
+        crate::ItemsSource::from_values(fonts.font_families())
+    });
     // A list of untyped items is an enumerable (a list of the runtime library the run-time
     // loader creates for markup, `List<T>` or `ArrayList`): the handle shares the list.
     ValueTypes::register_cast::<Rc<FerroList<Option<BoxedValue>>>, crate::ItemsSource>(|list| {

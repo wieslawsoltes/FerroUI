@@ -29,6 +29,15 @@ pub struct FontManager {
     default_font_family: OnceCell<FontFamily>,
 }
 
+/// Font managers compare by reference, so that a handle can be an untyped
+/// value (the value of the static member markup names).
+impl PartialEq for FontManager {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::eq(self, other)
+    }
+}
+
 impl FontManager {
     pub const FONT_COLLECTION_SCHEME: &'static str = "fonts";
     pub const SYSTEM_FONT_SCHEME: &'static str = "systemfont";

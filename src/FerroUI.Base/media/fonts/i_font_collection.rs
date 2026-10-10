@@ -99,3 +99,12 @@ pub trait IFontCollection: 'static {
     /// Lets callers recover the concrete collection type.
     fn as_any(&self) -> &dyn Any;
 }
+
+/// Font collections compare by reference, so that a handle can be an untyped
+/// value (what a binding to the fonts of the font manager delivers).
+impl PartialEq for dyn IFontCollection {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::addr_eq(self, other)
+    }
+}
