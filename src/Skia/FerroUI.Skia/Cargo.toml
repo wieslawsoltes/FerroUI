@@ -36,12 +36,19 @@ cc.workspace = true
 
 # The GPU back end of Skia is chosen per target, because the published Skia
 # binaries carry one of them: Graphite on Metal for Apple platforms, Ganesh on
-# WebGL for the browser. Raster is always present. `build.rs` mirrors the
-# second table as the `ferro_skia_ganesh_gl` configuration.
+# WebGL for the browser, Ganesh on OpenGL ES (ANGLE) for Windows. Raster is
+# always present. `build.rs` mirrors the second and the third table as the
+# `ferro_skia_ganesh_gl` configuration.
 [target.'cfg(target_vendor = "apple")'.dependencies]
 skia-safe = { workspace = true, features = ["graphite", "metal"] }
 
 [target.'cfg(target_os = "emscripten")'.dependencies]
+skia-safe = { workspace = true, features = ["gl"] }
+
+# Windows: the bindings have no Direct3D back end of Graphite, and the rendering mode the Windows
+# backend offers first is OpenGL ES through ANGLE (docs/porting/win32-platform.md, section 6.2).
+# A binary of Skia with this feature set is published for the target (the Windows job of CI asks).
+[target.'cfg(windows)'.dependencies]
 skia-safe = { workspace = true, features = ["gl"] }
 
 # The group of the crate in the table of the README (docs/release.md).

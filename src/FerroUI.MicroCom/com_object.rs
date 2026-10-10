@@ -80,7 +80,7 @@ impl<I: Interface, T> UnknownThunks<I, T> {
         release: Self::release,
     };
 
-    unsafe extern "C" fn query_interface(
+    unsafe extern "system" fn query_interface(
         this: *mut c_void,
         riid: *const Guid,
         ppv: *mut *mut c_void,
@@ -98,12 +98,12 @@ impl<I: Interface, T> UnknownThunks<I, T> {
         }
     }
 
-    unsafe extern "C" fn add_ref(this: *mut c_void) -> u32 {
+    unsafe extern "system" fn add_ref(this: *mut c_void) -> u32 {
         let obj = &*(this as *const ComObject<T>);
         obj.refs.fetch_add(1, Ordering::Relaxed) + 1
     }
 
-    unsafe extern "C" fn release(this: *mut c_void) -> u32 {
+    unsafe extern "system" fn release(this: *mut c_void) -> u32 {
         let obj = this as *mut ComObject<T>;
         let left = (*obj).refs.fetch_sub(1, Ordering::Release) - 1;
         if left == 0 {

@@ -7,8 +7,10 @@
 //!   native side may hand over flag combinations or values added later);
 //! * struct `S` -> `#[repr(C)] struct S` with snake_case fields;
 //! * interface `IFoo`:
-//!   * `IFooVtbl` — `#[repr(C)]` table of `unsafe extern "C" fn` slots,
-//!     starting with the base interface's table;
+//!   * `IFooVtbl` — `#[repr(C)]` table of `unsafe extern "system" fn` slots,
+//!     starting with the base interface's table (the calling convention of
+//!     COM: `stdcall` on 32-bit x86 Windows, the C convention everywhere
+//!     else);
 //!   * `IFoo` — `#[repr(C)]` struct holding the vtable pointer; a
 //!     `*mut IFoo` is the native interface pointer, `&IFoo` derefs to the
 //!     base interface and carries the snake_case proxy methods;
@@ -31,7 +33,18 @@
 //! | `bool`                                | `bool` (C++ `bool` in the header)  |
 //!
 //! (1) only for a trailing parameter named `ret`, `retOut`, `ppv` or
-//! `result`; every other pointer parameter is passed through unchanged.
+//! `result`, or marked `[out]` or `[retval]`; every other pointer parameter
+//! is passed through unchanged.
+//!
+//! Types the IDL does not declare:
+//!
+//! * `@rust-map NAME type` names the Rust type of `NAME` (the counterpart
+//!   of the `@clr-map` lines of the IDL files of the C# generator):
+//!   `@rust-map HWND isize`, `@rust-map REFIID *const Guid`;
+//! * `@rust-types-from path` imports everything `path` has into the
+//!   generated code, where every other unknown name is looked up (the
+//!   structures and enumerations a file declares beside its IDL):
+//!   `@rust-types-from super`.
 
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
@@ -115,6 +128,10 @@ fn primitive(name: &str) -> Option<&'static str> {
 struct Ctx<'a> {
     interfaces: HashSet<&'a str>,
     known: HashSet<&'a str>,
+    /// `@rust-map NAME type`.
+    maps: HashMap<&'a str, &'a str>,
+    /// `@rust-types-from path`.
+    types_from: Option<&'a str>,
 }
 
 impl Ctx<'_> {
@@ -123,9 +140,14 @@ impl Ctx<'_> {
     }
 
     fn base_type(&self, name: &str) -> Result<String, String> {
-        if let Some(p) = primitive(name) {
+        if let Some(mapped) = self.maps.get(name) {
+            Ok(mapped.to_string())
+        } else if let Some(p) = primitive(name) {
             Ok(p.to_string())
         } else if self.known.contains(name) {
+            Ok(name.to_string())
+        } else if self.types_from.is_some() {
+            // Found through the import of everything the path has (see `generate`).
             Ok(name.to_string())
         } else {
             Err(format!("unknown type '{name}'"))
@@ -220,7 +242,9 @@ fn analyze<'a>(ctx: &Ctx, m: &'a Method) -> Result<MethodInfo<'a>, String> {
 
         if is_last
             && matches!(ret, RetKind::HResult)
-            && OUT_PARAM_NAMES.contains(&p.name.as_str())
+            && (OUT_PARAM_NAMES.contains(&p.name.as_str())
+                || has_attr(&p.attributes, "out")
+                || has_attr(&p.attributes, "retval"))
             && ty.pointers >= 1
             && !ty.reference
             && !is_const
@@ -248,7 +272,8 @@ fn analyze<'a>(ctx: &Ctx, m: &'a Method) -> Result<MethodInfo<'a>, String> {
         } else if ty.pointers == 1 && ty.name == "char" {
             (ParamKind::CStr { is_const }, "Option<&::core::ffi::CStr>".to_string())
         } else {
-            (ParamKind::Plain { raw_pointer: ty.pointers > 0 }, raw_ty.clone())
+            // A name that is mapped to a pointer type is a raw pointer too.
+            (ParamKind::Plain { raw_pointer: ty.pointers > 0 || raw_ty.starts_with('*') }, raw_ty.clone())
         };
         params.push(ParamInfo { name, raw_ty, hi_ty, kind });
     }
@@ -327,7 +352,14 @@ pub fn generate(idl: &Idl, options: &RustOptions) -> Result<String, String> {
     let mut known = interfaces.clone();
     known.extend(idl.enums.iter().map(|e| e.name.as_str()));
     known.extend(idl.structs.iter().map(|s| s.name.as_str()));
-    let ctx = Ctx { interfaces, known };
+    let mut maps = HashMap::new();
+    for map in idl.directive_values("rust-map") {
+        let (name, ty) = map
+            .split_once(char::is_whitespace)
+            .ok_or_else(|| format!("@rust-map {map}: expected a name and a type"))?;
+        maps.insert(name, ty.trim());
+    }
+    let ctx = Ctx { interfaces, known, maps, types_from: idl.directive("rust-types-from") };
 
     let mut out = String::new();
     let w = &mut out;
@@ -339,6 +371,10 @@ pub fn generate(idl: &Idl, options: &RustOptions) -> Result<String, String> {
         "#[allow(unused_imports)]\nuse {rt}::{{make_com, ComObject, ComPtr, Guid, HResult, IUnknown, IUnknownImpl, IUnknownVtbl, ImplementedBy, Interface, RawHResult, S_OK}};\n"
     )
     .unwrap();
+
+    if let Some(path) = ctx.types_from {
+        writeln!(w, "#[allow(unused_imports)]\nuse {path}::*;\n").unwrap();
+    }
 
     for e in &idl.enums {
         gen_enum(w, e)?;
@@ -418,7 +454,20 @@ fn gen_interface(w: &mut String, ctx: &Ctx, i: &Interface) -> Result<(), String>
     let uuid = parse_uuid(i.uuid().ok_or("missing uuid")?)?;
     let mut seen = HashSet::new();
     let mut methods = Vec::new();
-    for m in &i.methods {
+    // A property has two methods of one name: the one that sets it (`[propput]`) is `SetName`,
+    // as in the bindings of the reference generator; the one that reads it keeps the name.
+    let renamed: Vec<Method> = i
+        .methods
+        .iter()
+        .map(|m| {
+            let mut m = m.clone();
+            if has_attr(&m.attributes, "propput") {
+                m.name = format!("Set{}", m.name);
+            }
+            m
+        })
+        .collect();
+    for m in &renamed {
         if !seen.insert(m.name.as_str()) {
             return Err(format!("overloaded method '{}' is not supported", m.name));
         }
@@ -431,7 +480,7 @@ fn gen_interface(w: &mut String, ctx: &Ctx, i: &Interface) -> Result<(), String>
     for m in &methods {
         writeln!(
             w,
-            "    pub {}: unsafe extern \"C\" fn(this: *mut ::core::ffi::c_void{}){},",
+            "    pub {}: unsafe extern \"system\" fn(this: *mut ::core::ffi::c_void{}){},",
             m.method.name,
             m.raw_params(),
             m.raw_ret
@@ -535,7 +584,7 @@ fn gen_interface(w: &mut String, ctx: &Ctx, i: &Interface) -> Result<(), String>
     for m in &methods {
         writeln!(
             w,
-            "\n    pub unsafe extern \"C\" fn {}<T: {name}Impl>(__this: *mut ::core::ffi::c_void{}){} {{",
+            "\n    pub unsafe extern \"system\" fn {}<T: {name}Impl>(__this: *mut ::core::ffi::c_void{}){} {{",
             m.method.name,
             m.raw_params(),
             m.raw_ret
@@ -623,6 +672,62 @@ mod tests {
     }
 
     #[test]
+    fn mapped_types_and_out_parameters() {
+        let idl = crate::parse(
+            r#"
+            @rust-map HWND isize
+            @rust-map UINT u32
+            @rust-map REFIID *const Guid
+            @rust-types-from super
+            [uuid(00000000-0000-0000-0000-000000000002)]
+            interface IB : IUnknown {
+                HRESULT GetParent([in] REFIID riid, [out, retval] void** ppParent);
+                HRESULT GetDesc([out] DESC* pDesc);
+                HRESULT GetHwnd([out] HWND* pHwnd);
+                HRESULT GetOutput([out] IB** ppOutput);
+                HRESULT Resize([in] UINT Width, [in] DESC* pDesc);
+                INT32 Enum([in] UINT index, [out] void** ppAdapter);
+            }"#,
+        )
+        .unwrap();
+        let rs = generate(&idl, &RustOptions::default()).unwrap();
+        assert!(rs.contains("pub unsafe fn get_parent(&self, riid: *const Guid) -> Result<*mut ::core::ffi::c_void, HResult>"));
+        assert!(rs.contains("pub fn get_desc(&self) -> Result<DESC, HResult>"));
+        assert!(rs.contains("pub fn get_hwnd(&self) -> Result<isize, HResult>"));
+        assert!(rs.contains("pub fn get_output(&self) -> Result<Option<ComPtr<IB>>, HResult>"));
+        assert!(rs.contains("pub unsafe fn resize(&self, width: u32, p_desc: *mut DESC) -> Result<(), HResult>"));
+        // Not an HRESULT: the out parameter stays a parameter.
+        assert!(rs.contains("pub unsafe fn enum_(&self, index: u32, pp_adapter: *mut *mut ::core::ffi::c_void) -> INT32"));
+        assert!(rs.contains("use super::*;"));
+        assert!(rs.contains("pub GetHwnd: unsafe extern \"system\" fn(this: *mut ::core::ffi::c_void, p_hwnd: *mut isize) -> RawHResult,"));
+    }
+
+    #[test]
+    fn the_two_methods_of_a_property() {
+        let idl = crate::parse(
+            r#"
+            [uuid(00000000-0000-0000-0000-000000000004)]
+            interface ID : IUnknown {
+                [propget] HRESULT Opacity([out] [retval] float* value);
+                [propput] HRESULT Opacity([in] float value);
+            }"#,
+        )
+        .unwrap();
+        let rs = generate(&idl, &RustOptions::default()).unwrap();
+        assert!(rs.contains("pub fn opacity(&self) -> Result<f32, HResult>"));
+        assert!(rs.contains("pub fn set_opacity(&self, value: f32) -> Result<(), HResult>"));
+    }
+
+    #[test]
+    fn an_unknown_type_without_a_place_to_look_is_an_error() {
+        let idl = crate::parse(
+            "[uuid(00000000-0000-0000-0000-000000000003)] interface IC : IUnknown { HRESULT Get(DESC* pDesc); }",
+        )
+        .unwrap();
+        assert_eq!(Err("IC: Get: unknown type 'DESC'".to_string()), generate(&idl, &RustOptions::default()));
+    }
+
+    #[test]
     fn signatures() {
         let idl = crate::parse(
             r#"
@@ -646,7 +751,7 @@ mod tests {
             "pub fn key(&self, type_: i32, text: Option<&::core::ffi::CStr>, s: &S, other: Option<&IA>) -> bool"
         ));
         assert!(rs.contains(
-            "pub Key: unsafe extern \"C\" fn(this: *mut ::core::ffi::c_void, type_: i32, text: *const ::core::ffi::c_char, s: *const S, other: *mut IA) -> bool,"
+            "pub Key: unsafe extern \"system\" fn(this: *mut ::core::ffi::c_void, type_: i32, text: *const ::core::ffi::c_char, s: *const S, other: *mut IA) -> bool,"
         ));
     }
 }

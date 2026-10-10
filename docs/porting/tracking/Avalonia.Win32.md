@@ -7,158 +7,168 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Windows/Avalonia.Win32` |
-| FerroUI | `src/Windows/FerroUI.Win32` (not created yet) |
+| FerroUI | `src/Windows/FerroUI.Win32` (exists) |
 | Crate | `ferroui-win32` |
-| Phase / priority | not started / out of current scope / - |
-| Files | 0/95 (0.0%) |
-| Types | 0/276 (0.0%) |
+| Phase / priority | 1 - desktop (Windows) / P0 |
+| Files | 33/95 (34.7%) |
+| Types | 111/276 (40.2%) |
 | Members | 0/2605 (0.0%) |
 
-This backend is outside the current porting scope. It is tracked at file and type granularity only; member counts are totals.
+This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
 
 ## Files
 
-### `(project root)` - files 0/43, types 0/52, members 0/358
+### `(project root)` - files 21/43, types 29/52, members 0/358
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `AngleOptions.cs` | `AngleOptions`, `AngleOptions.PlatformApi` | 4 | not started |
-| `ClipboardFormatRegistry.cs` | `ClipboardFormatRegistry` | 9 | not started |
-| `ClipboardImpl.cs` | `ClipboardImpl` | 5 | not started |
-| `CursorFactory.cs` | `CursorFactory`, `CursorImpl` | 9 | not started |
-| `DataTransferToOleDataObjectWrapper.cs` | `DataTransferToOleDataObjectWrapper` | 15 | not started |
-| `DragSource.cs` | `DragSource` | 1 | not started |
-| `EmbeddedWindowImpl.cs` | `EmbeddedWindowImpl` | 2 | not started |
-| `FramebufferManager.cs` | `FramebufferManager` | 4 | not started |
-| `IBlurHost.cs` | `BlurEffect`, `ICompositionEffectsSurface` | 6 | not started |
-| `IWindowsSurfaceFactory.cs` | `IWindowsSurfaceFactory` | 2 | not started |
-| `IconImpl.cs` | `IconImpl` | 6 | not started |
-| `NonPumpingWaitHelperImpl.cs` | `NonPumpingWaitHelperImpl` | 2 | not started |
-| `OffscreenParentWindow.cs` | `OffscreenParentWindow` | 1 | not started |
-| `OleContext.cs` | `OleContext` | 3 | not started |
-| `OleDataObjectHelper.cs` | `OleDataObjectHelper` | 6 | not started |
-| `OleDataObjectToDataTransferItemWrapper.cs` | `OleDataObjectToDataTransferItemWrapper` | 3 | not started |
-| `OleDataObjectToDataTransferWrapper.cs` | `OleDataObjectToDataTransferWrapper` | 4 | not started |
-| `OleDragSource.cs` | `OleDragSource` | 2 | not started |
-| `OleDropTarget.cs` | `OleDropTarget` | 9 | not started |
-| `OleVirtualFileData.cs` | `OleVirtualFileData`, `OleVirtualFileData.Descriptor` | 7 | not started |
-| `PlatformConstants.cs` | `PlatformConstants` | 7 | not started |
-| `PopupImpl.cs` | `PopupImpl` | 10 | not started |
-| `ScreenImpl.cs` | `ScreenImpl` | 10 | not started |
-| `SimpleWindow.cs` | `SimpleWindow` | 4 | not started |
-| `SwapChainTopLevelImpl.cs` | `SwapChainTopLevelImpl` | 28 | not started |
-| `TrayIconImpl.cs` | `TrayIconImpl` | 11 | not started |
-| `Win32DispatcherImpl.cs` | `Win32DispatcherImpl` | 14 | not started |
-| `Win32GlManager.cs` | `Win32GlManager` | 1 | not started |
-| `Win32NativeControlHost.cs` | `Win32NativeControlHost` | 6 | not started |
-| `Win32NativeToManagedMenuExporter.cs` | `Win32NativeToManagedMenuExporter` | 2 | not started |
-| `Win32Platform.cs` | `Win32ApplicationExtensions`, `Win32Platform` | 23 | not started |
-| `Win32PlatformOptions.cs` | `Win32RenderingMode`, `Win32DpiAwareness`, `Win32CompositionMode`, `Win32PlatformOptions` | 20 | not started |
-| `Win32PlatformSettings.cs` | `Win32PlatformSettings` | 7 | not started |
-| `Win32StorageProvider.cs` | `Win32StorageProvider` | 7 | not started |
-| `Win32TopLevelSceneInfo.cs` | `Win32TopLevelSceneInfo` | 2 | not started |
-| `Win32TypeExtensions.cs` | `Win32TypeExtensions` | 2 | not started |
-| `WinScreen.cs` | `WinScreen` | 3 | not started |
-| `WindowImpl.AppWndProc.cs` | `WindowImpl` | 3 | not started |
-| `WindowImpl.CustomCaptionProc.cs` | `WindowImpl` | 1 | not started |
-| `WindowImpl.WndProc.cs` | `WindowImpl` | 3 | not started |
-| `WindowImpl.cs` | `WindowImpl`, `WindowImpl.WindowProperties` | 90 | not started |
-| `WindowsMountedVolumeInfoListener.cs` | `WindowsMountedVolumeInfoListener` | 3 | not started |
-| `WindowsMountedVolumeInfoProvider.cs` | `WindowsMountedVolumeInfoProvider` | 1 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `AngleOptions.cs` | `angle_options.rs` | present | 2/2 | - | 4 |  |
+| `ClipboardFormatRegistry.cs` | `clipboard_format_registry.rs` | missing | 0/1 | `ClipboardFormatRegistry` | 9 |  |
+| `ClipboardImpl.cs` | `clipboard_impl.rs` | present | 1/1 | - | 5 |  |
+| `CursorFactory.cs` | `cursor_factory.rs` | present | 2/2 | - | 9 |  |
+| `DataTransferToOleDataObjectWrapper.cs` | `data_transfer_to_ole_data_object_wrapper.rs` | missing | 0/1 | `DataTransferToOleDataObjectWrapper` | 15 |  |
+| `DragSource.cs` | `drag_source.rs` | missing | 0/1 | `DragSource` | 1 |  |
+| `EmbeddedWindowImpl.cs` | `embedded_window_impl.rs` | present | 1/1 | - | 2 |  |
+| `FramebufferManager.cs` | `framebuffer_manager.rs` | present | 1/1 | - | 4 |  |
+| `IBlurHost.cs` | `i_blur_host.rs` | missing | 0/2 | `BlurEffect`, `ICompositionEffectsSurface` | 6 |  |
+| `IWindowsSurfaceFactory.cs` | `i_windows_surface_factory.rs` | missing | 0/1 | `IWindowsSurfaceFactory` | 2 |  |
+| `IconImpl.cs` | `icon_impl.rs` | missing | 0/1 | `IconImpl` | 6 |  |
+| `NonPumpingWaitHelperImpl.cs` | `non_pumping_wait_helper_impl.rs` | missing | 0/1 | `NonPumpingWaitHelperImpl` | 2 |  |
+| `OffscreenParentWindow.cs` | `offscreen_parent_window.rs` | present | 1/1 | - | 1 |  |
+| `OleContext.cs` | `ole_context.rs` | missing | 0/1 | `OleContext` | 3 |  |
+| `OleDataObjectHelper.cs` | `ole_data_object_helper.rs` | missing | 0/1 | `OleDataObjectHelper` | 6 |  |
+| `OleDataObjectToDataTransferItemWrapper.cs` | `ole_data_object_to_data_transfer_item_wrapper.rs` | missing | 0/1 | `OleDataObjectToDataTransferItemWrapper` | 3 |  |
+| `OleDataObjectToDataTransferWrapper.cs` | `ole_data_object_to_data_transfer_wrapper.rs` | missing | 0/1 | `OleDataObjectToDataTransferWrapper` | 4 |  |
+| `OleDragSource.cs` | `ole_drag_source.rs` | missing | 0/1 | `OleDragSource` | 2 |  |
+| `OleDropTarget.cs` | `ole_drop_target.rs` | missing | 0/1 | `OleDropTarget` | 9 |  |
+| `OleVirtualFileData.cs` | `ole_virtual_file_data.rs` | missing | 0/2 | `OleVirtualFileData`, `OleVirtualFileData.Descriptor` | 7 |  |
+| `PlatformConstants.cs` | `platform_constants.rs` | present | 1/1 | - | 7 |  |
+| `PopupImpl.cs` | `popup_impl.rs` | present | 1/1 | - | 10 |  |
+| `ScreenImpl.cs` | `screen_impl.rs` | present | 1/1 | - | 10 |  |
+| `SimpleWindow.cs` | `simple_window.rs` | present | 1/1 | - | 4 |  |
+| `SwapChainTopLevelImpl.cs` | `swap_chain_top_level_impl.rs` | missing | 0/1 | `SwapChainTopLevelImpl` | 28 |  |
+| `TrayIconImpl.cs` | `tray_icon_impl.rs` | missing | 0/1 | `TrayIconImpl` | 11 |  |
+| `Win32DispatcherImpl.cs` | `win32_dispatcher_impl.rs` | present | 1/1 | - | 14 |  |
+| `Win32GlManager.cs` | `win32_gl_manager.rs` | present | 1/1 | - | 1 |  |
+| `Win32NativeControlHost.cs` | `win32_native_control_host.rs` | missing | 0/1 | `Win32NativeControlHost` | 6 |  |
+| `Win32NativeToManagedMenuExporter.cs` | `win32_native_to_managed_menu_exporter.rs` | missing | 0/1 | `Win32NativeToManagedMenuExporter` | 2 |  |
+| `Win32Platform.cs` | `win32_platform.rs` | present | 2/2 | - | 23 |  |
+| `Win32PlatformOptions.cs` | `win32_platform_options.rs` | present | 4/4 | - | 20 |  |
+| `Win32PlatformSettings.cs` | `win32_platform_settings.rs` | present | 1/1 | - | 7 |  |
+| `Win32StorageProvider.cs` | `win32_storage_provider.rs` | missing | 0/1 | `Win32StorageProvider` | 7 |  |
+| `Win32TopLevelSceneInfo.cs` | `win32_top_level_scene_info.rs` | present | 1/1 | - | 2 |  |
+| `Win32TypeExtensions.cs` | `win32_type_extensions.rs` | present | 1/1 | - | 2 |  |
+| `WinScreen.cs` | `win_screen.rs` | present | 1/1 | - | 3 |  |
+| `WindowImpl.AppWndProc.cs` | `window_impl_app_wnd_proc.rs` | present | 1/1 | - | 3 |  |
+| `WindowImpl.CustomCaptionProc.cs` | `window_impl_custom_caption_proc.rs` | missing | 1/1 | - | 1 | types found in `window_impl.rs` (add to path-overrides.toml) |
+| `WindowImpl.WndProc.cs` | `window_impl.rs` | present | 1/1 | - | 3 | partial merged into main file |
+| `WindowImpl.cs` | `window_impl.rs` | present | 2/2 | - | 90 |  |
+| `WindowsMountedVolumeInfoListener.cs` | `windows_mounted_volume_info_listener.rs` | missing | 0/1 | `WindowsMountedVolumeInfoListener` | 3 |  |
+| `WindowsMountedVolumeInfoProvider.cs` | `windows_mounted_volume_info_provider.rs` | missing | 0/1 | `WindowsMountedVolumeInfoProvider` | 1 |  |
 
-### `DComposition` - files 0/6, types 0/8, members 0/34
+### `DComposition` - files 0/6, types 1/8, members 0/34
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `DirectCompositedWindow.cs` | `DirectCompositedWindow` | 5 | not started |
-| `DirectCompositedWindowSurface.cs` | `DirectCompositedWindowSurface`, `DirectCompositedWindowRenderTarget` | 10 | not started |
-| `DirectCompositionConnection.cs` | `DirectCompositionConnection` | 7 | not started |
-| `DirectCompositionShared.cs` | `DirectCompositionShared` | 4 | not started |
-| `NativeMethods.cs` | `NativeMethods` | 1 | not started |
-| `NativeStructs.cs` | `DXGI_RATIONAL`, `DCOMPOSITION_FRAME_STATISTICS` | 7 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `DirectCompositedWindow.cs` | `d_composition/direct_composited_window.rs` | missing | 0/1 | `DirectCompositedWindow` | 5 |  |
+| `DirectCompositedWindowSurface.cs` | `d_composition/direct_composited_window_surface.rs` | missing | 0/2 | `DirectCompositedWindowSurface`, `DirectCompositedWindowRenderTarget` | 10 |  |
+| `DirectCompositionConnection.cs` | `d_composition/direct_composition_connection.rs` | missing | 0/1 | `DirectCompositionConnection` | 7 |  |
+| `DirectCompositionShared.cs` | `d_composition/direct_composition_shared.rs` | missing | 0/1 | `DirectCompositionShared` | 4 |  |
+| `NativeMethods.cs` | `d_composition/native_methods.rs` | missing | 0/1 | `NativeMethods` | 1 |  |
+| `NativeStructs.cs` | `d_composition/native_structs.rs` | missing | 1/2 | `DCOMPOSITION_FRAME_STATISTICS` | 7 | types found in `direct_x/direct_x_structs.rs` (add to path-overrides.toml) |
 
-### `DirectX` - files 0/7, types 0/42, members 0/242
+### `DirectX` - files 3/7, types 20/42, members 0/242
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `DirectXEnums.cs` | `D3D_FEATURE_LEVEL`, `D3D11_RESOURCE_DIMENSION`, `D3D11_USAGE`, `D3D11_RESOURCE_MISC_FLAG`, `D3D11_BIND_FLAG`, `DXGI_SWAP_EFFECT`, `DXGI_SWAP_CHAIN_FLAG`, `DXGI_SCALING`, `DXGI_RESIDENCY`, `DXGI_MODE_ROTATION`, `DXGI_ALPHA_MODE`, `D3D_DRIVER_TYPE`, `DXGI_ERROR`, `DXGI_MWA`, `DxgiErrorExtensions` | 113 | not started |
-| `DirectXStructs.cs` | `HANDLE`, `DXGI_ADAPTER_DESC`, `DXGI_ADAPTER_DESC1`, `DXGI_FRAME_STATISTICS`, `DXGI_GAMMA_CONTROL_CAPABILITIES`, `DXGI_MAPPED_RECT`, `DXGI_MODE_DESC`, `DXGI_OUTPUT_DESC`, `DXGI_PRESENT_PARAMETERS`, `DXGI_RATIONAL`, `DXGI_RGB`, `DXGI_RGBA`, `DXGI_SAMPLE_DESC`, `DXGI_SURFACE_DESC`, `DXGI_SWAP_CHAIN_DESC`, `DXGI_SWAP_CHAIN_DESC1`, `DXGI_SWAP_CHAIN_FULLSCREEN_DESC`, `D3D11_TEXTURE2D_DESC` | 104 | not started |
-| `DirectXUnmanagedMethods.cs` | `DirectXUnmanagedMethods` | 3 | not started |
-| `DxgiConnection.cs` | `DxgiConnection` | 7 | not started |
-| `DxgiRenderTarget.cs` | `DxgiRenderTarget` | 5 | not started |
-| `DxgiSwapchainWindow.cs` | `DxgiSwapchainWindow` | 2 | not started |
-| `IDirect3D11TexturePlatformSurface.cs` | `IDirect3D11TexturePlatformSurface`, `IDirect3D11TexturePlatformSurface2`, `IDirect3D11TextureRenderTarget`, `IDirect3D11TextureRenderTarget2`, `IDirect3D11TextureRenderTargetRenderSession` | 8 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `DirectXEnums.cs` | `direct_x/direct_x_enums.rs` | partial | 1/15 | `D3D_FEATURE_LEVEL`, `D3D11_RESOURCE_DIMENSION`, `D3D11_USAGE`, `D3D11_RESOURCE_MISC_FLAG`, `D3D11_BIND_FLAG`, `DXGI_SWAP_EFFECT`, `DXGI_SWAP_CHAIN_FLAG`, `DXGI_SCALING`, `DXGI_RESIDENCY`, `DXGI_MODE_ROTATION`, `DXGI_ALPHA_MODE`, `D3D_DRIVER_TYPE`, `DXGI_ERROR`, `DXGI_MWA` | 113 |  |
+| `DirectXStructs.cs` | `direct_x/direct_x_structs.rs` | present | 18/18 | - | 104 |  |
+| `DirectXUnmanagedMethods.cs` | `direct_x/direct_x_unmanaged_methods.rs` | present | 1/1 | - | 3 |  |
+| `DxgiConnection.cs` | `direct_x/dxgi_connection.rs` | missing | 0/1 | `DxgiConnection` | 7 |  |
+| `DxgiRenderTarget.cs` | `direct_x/dxgi_render_target.rs` | missing | 0/1 | `DxgiRenderTarget` | 5 |  |
+| `DxgiSwapchainWindow.cs` | `direct_x/dxgi_swapchain_window.rs` | missing | 0/1 | `DxgiSwapchainWindow` | 2 |  |
+| `IDirect3D11TexturePlatformSurface.cs` | `direct_x/i_direct3d11_texture_platform_surface.rs` | missing | 0/5 | `IDirect3D11TexturePlatformSurface`, `IDirect3D11TexturePlatformSurface2`, `IDirect3D11TextureRenderTarget`, `IDirect3D11TextureRenderTarget2`, `IDirect3D11TextureRenderTargetRenderSession` | 8 |  |
 
-### `Input` - files 0/6, types 0/7, members 0/38
+### `Input` - files 3/6, types 4/7, members 0/38
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `Imm32CaretManager.cs` | `Imm32CaretManager` | 3 | not started |
-| `Imm32InputMethod.cs` | `Imm32InputMethod` | 22 | not started |
-| `KeyInterop.cs` | `KeyInterop` | 5 | not started |
-| `WindowsInputPane.cs` | `WindowsInputPane` | 2 | not started |
-| `WindowsKeyboardDevice.cs` | `WindowsKeyboardDevice` | 2 | not started |
-| `WindowsMouseDevice.cs` | `WindowsMouseDevice`, `WindowsMouseDevice.WindowsMousePointer` | 4 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `Imm32CaretManager.cs` | `input/imm32_caret_manager.rs` | missing | 0/1 | `Imm32CaretManager` | 3 |  |
+| `Imm32InputMethod.cs` | `input/imm32_input_method.rs` | missing | 0/1 | `Imm32InputMethod` | 22 |  |
+| `KeyInterop.cs` | `input/key_interop.rs` | present | 1/1 | - | 5 |  |
+| `WindowsInputPane.cs` | `input/windows_input_pane.rs` | missing | 0/1 | `WindowsInputPane` | 2 |  |
+| `WindowsKeyboardDevice.cs` | `input/windows_keyboard_device.rs` | present | 1/1 | - | 2 |  |
+| `WindowsMouseDevice.cs` | `input/windows_mouse_device.rs` | present | 2/2 | - | 4 |  |
 
-### `Interop` - files 0/3, types 0/119, members 0/1564
+### `Interop` - files 1/3, types 52/119, members 0/1564
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `TaskBarList.cs` | `TaskBarList` | 2 | not started |
-| `UnmanagedMethods.cs` | `UnmanagedMethods`, `UnmanagedMethods.TimerProc`, `UnmanagedMethods.TimeCallback`, `UnmanagedMethods.WaitOrTimerCallback`, `UnmanagedMethods.WndProc`, `UnmanagedMethods.Cursor`, `UnmanagedMethods.MouseActivate`, `UnmanagedMethods.SetWindowPosFlags`, `UnmanagedMethods.WindowPosZOrder`, `UnmanagedMethods.SizeCommand`, `UnmanagedMethods.ShowWindowCommand`, `UnmanagedMethods.SystemMetric`, `UnmanagedMethods.ModifierKeys`, `UnmanagedMethods.VirtualKeyStates`, `UnmanagedMethods.WindowActivate`, `UnmanagedMethods.HitTestValues`, `UnmanagedMethods.WindowStyles`, `UnmanagedMethods.ClassStyles`, `UnmanagedMethods.PointerDeviceChangeFlags`, `UnmanagedMethods.PointerInputType`, `UnmanagedMethods.WindowsMessage`, `UnmanagedMethods.SystemParametersInfo`, `UnmanagedMethods.DwmWindowAttribute`, `UnmanagedMethods.DwmWindowCornerPreference`, `UnmanagedMethods.DwmNCRenderingPolicy`, `UnmanagedMethods.MapVirtualKeyMapTypes`, `UnmanagedMethods.BitmapCompressionMode`, `UnmanagedMethods.BitmapColorSpace`, `UnmanagedMethods.BitmapIntent`, `UnmanagedMethods.DIBColorTable`, `UnmanagedMethods.WindowLongParam`, `UnmanagedMethods.MenuCharParam`, `UnmanagedMethods.SysCommands`, `UnmanagedMethods.TrackPopupMenuFlags`, `UnmanagedMethods.PointerFlags`, `UnmanagedMethods.PointerButtonChangeType`, `UnmanagedMethods.PenFlags`, `UnmanagedMethods.PenMask`, `UnmanagedMethods.TouchFlags`, `UnmanagedMethods.TouchMask`, `UnmanagedMethods.POINTER_TOUCH_INFO`, `UnmanagedMethods.POINTER_PEN_INFO`, `UnmanagedMethods.POINTER_INFO`, `UnmanagedMethods.RGBQUAD`, `UnmanagedMethods.BITMAP`, `UnmanagedMethods.BITMAPINFOHEADER`, `UnmanagedMethods.BITMAPV5HEADER`, `UnmanagedMethods.CIEXYZTRIPLE`, `UnmanagedMethods.CIEXYZ`, `UnmanagedMethods.MINMAXINFO`, `UnmanagedMethods.MOUSEMOVEPOINT`, `UnmanagedMethods.EnumWindowsProc`, `UnmanagedMethods.GetAncestorFlags`, `UnmanagedMethods.ClassLongIndex`, `UnmanagedMethods.MessageFilterFlag`, `UnmanagedMethods.LayeredWindowFlags`, `UnmanagedMethods.DWM_BB`, `UnmanagedMethods.DWM_BLURBEHIND`, `UnmanagedMethods.RTL_OSVERSIONINFOEX`, `UnmanagedMethods.QueueStatusFlags`, `UnmanagedMethods.MsgWaitForMultipleObjectsFlags`, `UnmanagedMethods.GCS`, `UnmanagedMethods.CANDIDATEFORM`, `UnmanagedMethods.COMPOSITIONFORM`, `UnmanagedMethods.LOGFONT`, `UnmanagedMethods.WindowCompositionAttributeData`, `UnmanagedMethods.WindowCompositionAttribute`, `UnmanagedMethods.AccentState`, `UnmanagedMethods.AccentFlags`, `UnmanagedMethods.AccentPolicy`, `UnmanagedMethods.MARGINS`, `UnmanagedMethods.MONITOR`, `UnmanagedMethods.MONITORINFOEX`, `UnmanagedMethods.DEVICECAP`, `UnmanagedMethods.PROCESS_DPI_AWARENESS`, `UnmanagedMethods.MONITOR_DPI_TYPE`, `UnmanagedMethods.ClipboardFormat`, `UnmanagedMethods.MSG`, `UnmanagedMethods.PAINTSTRUCT`, `UnmanagedMethods.POINT`, `UnmanagedMethods.SIZE`, `UnmanagedMethods.SIZE_F`, `UnmanagedMethods.RECT`, `UnmanagedMethods.WINDOWPOS`, `UnmanagedMethods.NCCALCSIZE_PARAMS`, `UnmanagedMethods.TRACKMOUSEEVENT`, `UnmanagedMethods.WindowPlacementFlags`, `UnmanagedMethods.WINDOWPLACEMENT`, `UnmanagedMethods.WNDCLASSEX`, `UnmanagedMethods.TOUCHINPUT`, `UnmanagedMethods.ICONINFO`, `UnmanagedMethods.TouchInputFlags`, `UnmanagedMethods.OpenFileNameFlags`, `UnmanagedMethods.HRESULT`, `UnmanagedMethods.Icons`, `UnmanagedMethods.ShellIds`, `UnmanagedMethods.COMDLG_FILTERSPEC`, `UnmanagedMethods.MarkFullscreenWindow`, `UnmanagedMethods.SetOverlayIcon`, `UnmanagedMethods.HrInit`, `UnmanagedMethods.ITaskBarList3VTable`, `UnmanagedMethods.APPBARDATA`, `UnmanagedMethods.DROPFILES`, `UnmanagedMethods.STGMEDIUM`, `UnmanagedMethods.FORMATETC`, `UnmanagedMethods.FILEDESCRIPTORW`, `UnmanagedMethods.STATSTG`, `UnmanagedMethods.GlobalAllocFlags`, `PixelFormatDescriptorFlags`, `PixelFormatDescriptor`, `NIM`, `AppBarMessage`, `NIF`, `NIIF`, `NOTIFYICONDATA` | 1542 | not started |
-| `Win32Icon.cs` | `Win32Icon`, `Win32Icon.ICONDIR`, `Win32Icon.ICONDIRENTRY` | 20 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `TaskBarList.cs` | `interop/task_bar_list.rs` | missing | 0/1 | `TaskBarList` | 2 |  |
+| `UnmanagedMethods.cs` | `interop/unmanaged_methods.rs` | partial | 52/115 | `UnmanagedMethods.TimerProc`, `UnmanagedMethods.TimeCallback`, `UnmanagedMethods.WaitOrTimerCallback`, `UnmanagedMethods.PointerDeviceChangeFlags`, `UnmanagedMethods.BitmapCompressionMode`, `UnmanagedMethods.BitmapColorSpace`, `UnmanagedMethods.BitmapIntent`, `UnmanagedMethods.DIBColorTable`, `UnmanagedMethods.TrackPopupMenuFlags`, `UnmanagedMethods.PenMask`, `UnmanagedMethods.TouchFlags`, `UnmanagedMethods.POINTER_TOUCH_INFO`, `UnmanagedMethods.POINTER_PEN_INFO`, `UnmanagedMethods.POINTER_INFO`, `UnmanagedMethods.RGBQUAD`, `UnmanagedMethods.BITMAP`, `UnmanagedMethods.BITMAPV5HEADER`, `UnmanagedMethods.CIEXYZTRIPLE`, `UnmanagedMethods.CIEXYZ`, `UnmanagedMethods.EnumWindowsProc`, `UnmanagedMethods.GetAncestorFlags`, `UnmanagedMethods.MessageFilterFlag`, `UnmanagedMethods.LayeredWindowFlags`, `UnmanagedMethods.DWM_BLURBEHIND`, `UnmanagedMethods.RTL_OSVERSIONINFOEX`, `UnmanagedMethods.GCS`, `UnmanagedMethods.CANDIDATEFORM`, `UnmanagedMethods.COMPOSITIONFORM`, `UnmanagedMethods.LOGFONT`, `UnmanagedMethods.WindowCompositionAttributeData`, `UnmanagedMethods.WindowCompositionAttribute`, `UnmanagedMethods.AccentState`, `UnmanagedMethods.AccentFlags`, `UnmanagedMethods.AccentPolicy`, `UnmanagedMethods.MSG`, `UnmanagedMethods.PAINTSTRUCT`, `UnmanagedMethods.SIZE`, `UnmanagedMethods.SIZE_F`, `UnmanagedMethods.NCCALCSIZE_PARAMS`, `UnmanagedMethods.TRACKMOUSEEVENT`, `UnmanagedMethods.WNDCLASSEX`, `UnmanagedMethods.TOUCHINPUT`, `UnmanagedMethods.ICONINFO`, `UnmanagedMethods.OpenFileNameFlags`, `UnmanagedMethods.HRESULT`, `UnmanagedMethods.COMDLG_FILTERSPEC`, `UnmanagedMethods.MarkFullscreenWindow`, `UnmanagedMethods.SetOverlayIcon`, `UnmanagedMethods.HrInit`, `UnmanagedMethods.ITaskBarList3VTable`, `UnmanagedMethods.APPBARDATA`, `UnmanagedMethods.DROPFILES`, `UnmanagedMethods.STGMEDIUM`, `UnmanagedMethods.FORMATETC`, `UnmanagedMethods.FILEDESCRIPTORW`, `UnmanagedMethods.STATSTG`, `PixelFormatDescriptorFlags`, `PixelFormatDescriptor`, `NIM`, `AppBarMessage`, `NIF`, `NIIF`, `NOTIFYICONDATA` | 1542 |  |
+| `Win32Icon.cs` | `interop/win32_icon.rs` | missing | 0/3 | `Win32Icon`, `Win32Icon.ICONDIR`, `Win32Icon.ICONDIRENTRY` | 20 |  |
 
 ### `OpenGl` - files 0/7, types 0/7, members 0/90
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `WglConsts.cs` | `WglConsts` | 56 | not started |
-| `WglContext.cs` | `WglContext` | 17 | not started |
-| `WglDisplay.cs` | `WglDisplay` | 2 | not started |
-| `WglGdiResourceManager.cs` | `WglGdiResourceManager` | 5 | not started |
-| `WglGlPlatformSurface.cs` | `WglGlPlatformSurface` | 2 | not started |
-| `WglPlatformOpenGlInterface.cs` | `WglPlatformOpenGlInterface` | 6 | not started |
-| `WglRestoreContext.cs` | `WglRestoreContext` | 2 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `WglConsts.cs` | `open_gl/wgl_consts.rs` | missing | 0/1 | `WglConsts` | 56 |  |
+| `WglContext.cs` | `open_gl/wgl_context.rs` | missing | 0/1 | `WglContext` | 17 |  |
+| `WglDisplay.cs` | `open_gl/wgl_display.rs` | missing | 0/1 | `WglDisplay` | 2 |  |
+| `WglGdiResourceManager.cs` | `open_gl/wgl_gdi_resource_manager.rs` | missing | 0/1 | `WglGdiResourceManager` | 5 |  |
+| `WglGlPlatformSurface.cs` | `open_gl/wgl_gl_platform_surface.rs` | missing | 0/1 | `WglGlPlatformSurface` | 2 |  |
+| `WglPlatformOpenGlInterface.cs` | `open_gl/wgl_platform_open_gl_interface.rs` | missing | 0/1 | `WglPlatformOpenGlInterface` | 6 |  |
+| `WglRestoreContext.cs` | `open_gl/wgl_restore_context.rs` | missing | 0/1 | `WglRestoreContext` | 2 |  |
 
-### `OpenGl/Angle` - files 0/9, types 0/12, members 0/63
+### `OpenGl/Angle` - files 5/9, types 5/12, members 0/63
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `AngleD3DTextureFeature.cs` | `AngleD3DTextureFeature` | 2 | not started |
-| `AngleEglInterface.cs` | `Win32AngleEglInterface` | 3 | not started |
-| `AngleExternalD3D11Texture2D.cs` | `AngleExternalMemoryD3D11Texture2D`, `AngleExternalMemoryD3D11ExportedTexture2D` | 11 | not started |
-| `AngleExternalObjectsFeature.cs` | `AngleExternalObjectsFeature` | 14 | not started |
-| `AngleWin32EglDisplay.cs` | `AngleWin32EglDisplay` | 8 | not started |
-| `AngleWin32PlatformGraphicsFactory.cs` | `AngleWin32PlatformGraphicsFactory` | 1 | not started |
-| `D3D11AngleWin32PlatformGraphics.cs` | `D3D11AngleWin32PlatformGraphics` | 6 | not started |
-| `D3D9AngleWin32PlatformGraphics.cs` | `D3D9AngleWin32PlatformGraphics` | 5 | not started |
-| `SwapChainGlSurface.cs` | `SwapChainGlSurface`, `SwapChainGlSurface.DXGI_MATRIX_3X2_F`, `SwapChainGlRenderTarget` | 13 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `AngleD3DTextureFeature.cs` | `open_gl/angle/angle_d3d_texture_feature.rs` | missing | 0/1 | `AngleD3DTextureFeature` | 2 |  |
+| `AngleEglInterface.cs` | `open_gl/angle/angle_egl_interface.rs` | present | 1/1 | - | 3 |  |
+| `AngleExternalD3D11Texture2D.cs` | `open_gl/angle/angle_external_d3d11_texture2d.rs` | missing | 0/2 | `AngleExternalMemoryD3D11Texture2D`, `AngleExternalMemoryD3D11ExportedTexture2D` | 11 |  |
+| `AngleExternalObjectsFeature.cs` | `open_gl/angle/angle_external_objects_feature.rs` | missing | 0/1 | `AngleExternalObjectsFeature` | 14 |  |
+| `AngleWin32EglDisplay.cs` | `open_gl/angle/angle_win32_egl_display.rs` | present | 1/1 | - | 8 |  |
+| `AngleWin32PlatformGraphicsFactory.cs` | `open_gl/angle/angle_win32_platform_graphics_factory.rs` | present | 1/1 | - | 1 |  |
+| `D3D11AngleWin32PlatformGraphics.cs` | `open_gl/angle/d3d11_angle_win32_platform_graphics.rs` | present | 1/1 | - | 6 |  |
+| `D3D9AngleWin32PlatformGraphics.cs` | `open_gl/angle/d3d9_angle_win32_platform_graphics.rs` | present | 1/1 | - | 5 |  |
+| `SwapChainGlSurface.cs` | `open_gl/angle/swap_chain_gl_surface.rs` | missing | 0/3 | `SwapChainGlSurface`, `SwapChainGlSurface.DXGI_MATRIX_3X2_F`, `SwapChainGlRenderTarget` | 13 |  |
 
 ### `Vulkan` - files 0/2, types 0/4, members 0/11
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `VulkanNativeInterop.cs` | `Win32VulkanInterface`, `VkWin32SurfaceCreateInfoKHR` | 8 | not started |
-| `VulkanSupport.cs` | `VulkanSupport`, `VulkanSupport.VulkanSurfaceFactory` | 3 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `VulkanNativeInterop.cs` | `vulkan/vulkan_native_interop.rs` | missing | 0/2 | `Win32VulkanInterface`, `VkWin32SurfaceCreateInfoKHR` | 8 |  |
+| `VulkanSupport.cs` | `vulkan/vulkan_support.rs` | missing | 0/2 | `VulkanSupport`, `VulkanSupport.VulkanSurfaceFactory` | 3 |  |
 
 ### `WinRT` - files 0/5, types 0/10, members 0/84
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `NativeWinRTMethods.cs` | `NativeWinRTMethods`, `NativeWinRTMethods.DISPATCHERQUEUE_THREAD_APARTMENTTYPE`, `NativeWinRTMethods.DISPATCHERQUEUE_THREAD_TYPE`, `NativeWinRTMethods.DispatcherQueueOptions`, `NativeWinRTMethods.RO_INIT_TYPE`, `HStringInterop` | 23 | not started |
-| `WinRTApiInformation.cs` | `WinRTApiInformation` | 10 | not started |
-| `WinRTColor.cs` | `WinRTColor` | 6 | not started |
-| `WinRTInspectable.cs` | `WinRTInspectable` | 3 | not started |
-| `WinRTPropertyValue.cs` | `WinRTPropertyValue` | 42 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `NativeWinRTMethods.cs` | `win_rt/native_win_rt_methods.rs` | missing | 0/6 | `NativeWinRTMethods`, `NativeWinRTMethods.DISPATCHERQUEUE_THREAD_APARTMENTTYPE`, `NativeWinRTMethods.DISPATCHERQUEUE_THREAD_TYPE`, `NativeWinRTMethods.DispatcherQueueOptions`, `NativeWinRTMethods.RO_INIT_TYPE`, `HStringInterop` | 23 |  |
+| `WinRTApiInformation.cs` | `win_rt/win_rt_api_information.rs` | missing | 0/1 | `WinRTApiInformation` | 10 |  |
+| `WinRTColor.cs` | `win_rt/win_rt_color.rs` | missing | 0/1 | `WinRTColor` | 6 |  |
+| `WinRTInspectable.cs` | `win_rt/win_rt_inspectable.rs` | missing | 0/1 | `WinRTInspectable` | 3 |  |
+| `WinRTPropertyValue.cs` | `win_rt/win_rt_property_value.rs` | missing | 0/1 | `WinRTPropertyValue` | 42 |  |
 
 ### `WinRT/Composition` - files 0/7, types 0/15, members 0/121
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `D2DEffects.cs` | `D2DEffects` | 42 | not started |
-| `WinUIEffectBase.cs` | `WinUIEffectBase`, `BorderEffect`, `BlendEffect`, `CompositeStepEffect`, `OpacityEffect`, `ColorSourceEffect`, `WinUIGaussianBlurEffect`, `SaturationEffect` | 38 | not started |
-| `WinUiCompositedWindow.cs` | `WinUiCompositedWindow` | 7 | not started |
-| `WinUiCompositedWindowSurface.cs` | `WinUiCompositedWindowSurface`, `WinUiCompositedWindowRenderTarget` | 10 | not started |
-| `WinUiCompositionShared.cs` | `WinUiCompositionShared` | 12 | not started |
-| `WinUiCompositionUtils.cs` | `WinUiCompositionUtils` | 5 | not started |
-| `WinUiCompositorConnection.cs` | `WinUiCompositorConnection` | 7 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `D2DEffects.cs` | `win_rt/composition/d2d_effects.rs` | missing | 0/1 | `D2DEffects` | 42 |  |
+| `WinUIEffectBase.cs` | `win_rt/composition/win_ui_effect_base.rs` | missing | 0/8 | `WinUIEffectBase`, `BorderEffect`, `BlendEffect`, `CompositeStepEffect`, `OpacityEffect`, `ColorSourceEffect`, `WinUIGaussianBlurEffect`, `SaturationEffect` | 38 |  |
+| `WinUiCompositedWindow.cs` | `win_rt/composition/win_ui_composited_window.rs` | missing | 0/1 | `WinUiCompositedWindow` | 7 |  |
+| `WinUiCompositedWindowSurface.cs` | `win_rt/composition/win_ui_composited_window_surface.rs` | missing | 0/2 | `WinUiCompositedWindowSurface`, `WinUiCompositedWindowRenderTarget` | 10 |  |
+| `WinUiCompositionShared.cs` | `win_rt/composition/win_ui_composition_shared.rs` | missing | 0/1 | `WinUiCompositionShared` | 12 |  |
+| `WinUiCompositionUtils.cs` | `win_rt/composition/win_ui_composition_utils.rs` | missing | 0/1 | `WinUiCompositionUtils` | 5 |  |
+| `WinUiCompositorConnection.cs` | `win_rt/composition/win_ui_compositor_connection.rs` | missing | 0/1 | `WinUiCompositorConnection` | 7 |  |
+
+## Rust-only files
+
+Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
+
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `wnd_proc_guard.rs` | Keeps a panic from unwinding out of a window procedure through the frames of the system: caught, kept, and raised again by the message loop (docs/porting/win32-platform.md, section 5) |  |
+
+Tests, examples and build scripts (not scanned): `build.rs`, `examples/win32_window.rs`.

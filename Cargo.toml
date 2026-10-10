@@ -11,6 +11,7 @@ members = [
     "src/FerroUI.Build.Tasks",
     "src/FerroUI.MicroCom",
     "src/FerroUI.Native",
+    "src/Windows/FerroUI.Win32",
     "src/FerroUI.Desktop",
     "src/FerroUI.X11",
     "src/Browser/FerroUI.Browser",
@@ -71,6 +72,7 @@ xamlx = { version = "=0.1.0-preview.1", path = "external/XamlX/src/XamlX" }
 ferroui-microcom = { version = "=0.1.0-preview.1", path = "src/FerroUI.MicroCom" }
 microcom-codegen = { version = "=0.1.0-preview.1", path = "src/tools/MicroCom.CodeGenerator" }
 ferroui-native = { version = "=0.1.0-preview.1", path = "src/FerroUI.Native" }
+ferroui-win32 = { version = "=0.1.0-preview.1", path = "src/Windows/FerroUI.Win32" }
 ferroui-desktop = { version = "=0.1.0-preview.1", path = "src/FerroUI.Desktop" }
 ferroui-x11 = { version = "=0.1.0-preview.1", path = "src/FerroUI.X11" }
 ferroui-browser = { version = "=0.1.0-preview.1", path = "src/Browser/FerroUI.Browser" }
@@ -87,6 +89,12 @@ ferroui-skia = { version = "=0.1.0-preview.1", path = "src/Skia/FerroUI.Skia" }
 ferroui-vello = { version = "=0.1.0-preview.1", path = "src/Vello/FerroUI.Vello" }
 ferroui-harfbuzz = { version = "=0.1.0-preview.1", path = "src/HarfBuzz/FerroUI.HarfBuzz" }
 bitflags = "2"
+# The bindings of the Windows API for the Windows platform backend (docs/porting/win32-platform.md,
+# section 2). Without features here: the backend names the API namespaces it calls.
+windows-sys = { version = "0.61.2" }
+# ANGLE for the Windows platform backend (docs/porting/win32-platform.md, section 6.2): compiled
+# from source by its build script, only with the feature `angle` of ferroui-win32.
+mozangle = { version = "=0.7.1" }
 # The X11 platform (docs/porting/x11-platform.md, section 2): Xlib and its extension libraries, loaded
 # at run time, and the C library for the event loop (epoll, the wake-up pipe) and shared memory.
 x11-dl = "2.21"

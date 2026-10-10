@@ -1,0 +1,171 @@
+// The COM interfaces of DirectComposition the Windows backend uses, for the MicroCom generator
+// (src/tools/MicroCom.CodeGenerator). The interfaces are the ones of the reference; the lines
+// below name the Rust type of every type name the file does not declare (the reference maps
+// the same names to types of its runtime), and where the structures and enumerations that
+// are declared in Rust beside this file are found.
+@rust-types-from super
+@rust-map IntPtr isize
+@rust-map Guid Guid
+@rust-map ulong u64
+@rust-map FLOAT f32
+@rust-map HSTRING isize
+@rust-map Vector2 crate::win_rt::numerics::Vector2
+@rust-map Vector3 crate::win_rt::numerics::Vector3
+@rust-map Quaternion crate::win_rt::numerics::Quaternion
+@rust-map Matrix4x4 crate::win_rt::numerics::Matrix4x4
+@rust-map RECT crate::interop::unmanaged_methods::RECT
+@rust-map SIZE crate::interop::unmanaged_methods::SIZE
+@rust-map POINT crate::interop::unmanaged_methods::POINT
+@rust-map DXGI_FORMAT crate::direct_x::DXGI_FORMAT
+@rust-map DXGI_ALPHA_MODE crate::direct_x::DXGI_ALPHA_MODE
+@rust-map HWND isize
+@rust-map HANDLE isize
+@rust-map BOOL i32
+@rust-map DWORD i32
+@rust-map SIZE_T isize
+@rust-map boolean i32
+@rust-map BYTE u8
+@rust-map INT16 i16
+@rust-map INT32 i32
+@rust-map INT64 i64
+@rust-map UINT u32
+@rust-map UINT16 u16
+@rust-map ULONG u32
+@rust-map UINT32 u32
+@rust-map UINT64 u64
+@rust-map DOUBLE f64
+@rust-map GUID Guid
+@rust-map REFGUID *const Guid
+@rust-map REFIID *const Guid
+@rust-map WCHAR u16
+@rust-map HMODULE *mut ::core::ffi::c_void
+@rust-map DXGI_USAGE u32
+@rust-map LARGE_INTEGER u64
+@rust-map INT i32
+@rust-map DXGI_SHARED_RESOURCE *mut ::core::ffi::c_void
+@rust-map LUID u64
+@rust-map LPSTR *mut u16
+@rust-map LPWSTR *mut u16
+@rust-map LPCWSTR *mut u16
+
+[uuid(c37ea93a-e7aa-450d-b16f-9746cb0407f3)]
+interface IDCompositionDevice : IUnknown
+{
+    HRESULT Commit();
+    HRESULT WaitForCommitCompletion();
+    HRESULT GetFrameStatistics(DCOMPOSITION_FRAME_STATISTICS* statistics);
+    HRESULT CreateTargetForHwnd(IntPtr hwnd, bool topmost, [out] IDCompositionVisual** target);
+    HRESULT CreateVisual([out] IDCompositionVisual** visual);
+    HRESULT CreateSurface(UINT width, UINT height, DXGI_FORMAT pixelFormat, DXGI_ALPHA_MODE alphaMode, [out] IDCompositionSurface** surface);
+    HRESULT CreateVirtualSurface(UINT initialWidth, UINT initialHeight, DXGI_FORMAT pixelFormat, DXGI_ALPHA_MODE alphaMode, [out] IDCompositionVirtualSurface** virtualSurface);
+    HRESULT CreateSurfaceFromHandle(IntPtr handle, [out] IUnknown** surface);
+    HRESULT CreateSurfaceFromHwnd(IntPtr hwnd, [out] IUnknown** surface);
+    HRESULT CreateTranslateTransform([out] void** translateTransform);
+    HRESULT CreateScaleTransform([out] void** scaleTransform);
+    HRESULT CreateRotateTransform([out] void** rotateTransform);
+    HRESULT CreateSkewTransform([out] void** skewTransform);
+    HRESULT CreateMatrixTransform([out] void** matrixTransform);
+    HRESULT CreateTransformGroup(void* transforms, int elements, [out] void** transformGroup);
+    HRESULT CreateTranslateTransform3D([out] void** translateTransform3D);
+    HRESULT CreateScaleTransform3D([out] void** scaleTransform3D);
+    HRESULT CreateRotateTransform3D([out] void** rotateTransform3D);
+    HRESULT CreateMatrixTransform3D([out] void** matrixTransform3D);
+    HRESULT CreateTransform3DGroup(void* transforms3D, int elements, [out] void** transform3DGroup);
+    HRESULT CreateEffectGroup([out] void** effectGroup);
+    HRESULT CreateRectangleClip([out] void** clip);
+    HRESULT CreateAnimation([out] void** animation);
+    HRESULT CheckDeviceState([out] BOOL* pfValid);
+}
+
+// IDCompositionDevice2 DOES NOT inherit IDCompositionDevice, it's a completely different interface in DComp as it doesn't have desktop only APIs. 
+[uuid(75F6468D-1B8E-447C-9BC6-75FEA80B5B25)]
+interface IDCompositionDevice2 : IUnknown
+{
+    HRESULT Commit();
+    HRESULT WaitForCommitCompletion();
+    HRESULT GetFrameStatistics(DCOMPOSITION_FRAME_STATISTICS* statistics);
+    HRESULT CreateVisual([out] IDCompositionVisual** visual);
+    HRESULT CreateSurfaceFactory(IUnknown* renderingDevice, [out] IDCompositionSurfaceFactory** surfaceFactory);
+    HRESULT CreateSurface(UINT width, UINT height, DXGI_FORMAT pixelFormat, DXGI_ALPHA_MODE alphaMode, [out] IDCompositionSurface** surface);
+    HRESULT CreateVirtualSurface(UINT initialWidth, UINT initialHeight, DXGI_FORMAT pixelFormat, DXGI_ALPHA_MODE alphaMode, [out] IDCompositionVirtualSurface** virtualSurface);
+    HRESULT CreateTranslateTransform([out] void** translateTransform);
+    HRESULT CreateScaleTransform([out] void** scaleTransform);
+    HRESULT CreateRotateTransform([out] void** rotateTransform);
+    HRESULT CreateSkewTransform([out] void** skewTransform);
+    HRESULT CreateMatrixTransform([out] void** matrixTransform);
+    HRESULT CreateTransformGroup(void* transforms, int elements, [out] void** transformGroup);
+    HRESULT CreateTranslateTransform3D([out] void** translateTransform3D);
+    HRESULT CreateScaleTransform3D([out] void** scaleTransform3D);
+    HRESULT CreateRotateTransform3D([out] void** rotateTransform3D);
+    HRESULT CreateMatrixTransform3D([out] void** matrixTransform3D);
+    HRESULT CreateTransform3DGroup(void* transforms3D, int elements, [out] void** transform3DGroup);
+    HRESULT CreateEffectGroup([out] void** effectGroup);
+    HRESULT CreateRectangleClip([out] void** clip);
+    HRESULT CreateAnimation([out] void** animation);
+}
+
+[uuid(0987cb06-f916-48bf-8d35-ce7641781bd9)]
+interface IDCompositionDevice3 : IDCompositionDevice2
+{
+    HRESULT CreateGaussianBlurEffect([out] void** gaussianBlurEffect);
+}
+
+[uuid(5f4633fe-1e08-4cb8-8c75-ce24333f5602)]
+interface IDCompositionDesktopDevice : IDCompositionDevice2
+{
+    HRESULT CreateTargetForHwnd(IntPtr hwnd, bool topmost, [out] IDCompositionVisual** target);
+    HRESULT CreateSurfaceFromHandle(IntPtr handle, [out] IUnknown** surface);
+    HRESULT CreateSurfaceFromHwnd(IntPtr hwnd, [out] IUnknown** surface);
+}
+
+[uuid(4d93059d-097b-4651-9a60-f0f25116e2f3)]
+interface IDCompositionVisual : IUnknown
+{
+    HRESULT SetOffsetX_IDCompositionAnimation(void* animation);
+    HRESULT SetOffsetX(float offsetX);
+    HRESULT SetOffsetY_IDCompositionAnimation(void* animation);
+    HRESULT SetOffsetY(float offsetY);
+    HRESULT SetTransform_IDCompositionTransform(void* transform);
+    HRESULT SetTransform(/* D2D_MATRIX_3X2_F */ void* matrix);
+    HRESULT SetTransformParent(IDCompositionVisual* visual);
+    HRESULT SetEffect(void* effect);
+    HRESULT SetBitmapInterpolationMode(/* DCOMPOSITION_BITMAP_INTERPOLATION_MODE */ int interpolationMode);
+    HRESULT SetBorderMode(/* DCOMPOSITION_BORDER_MODE */ int borderMode);
+    HRESULT SetClip_IDCompositionClip(void* clip);
+    HRESULT SetClip(/* D2D_RECT_F */ void* rect);
+    HRESULT SetContent(IUnknown* content);
+    HRESULT AddVisual(IDCompositionVisual* visual, BOOL insertAbove, IDCompositionVisual* referenceVisual);
+    HRESULT RemoveVisual(IDCompositionVisual* visual);
+    HRESULT RemoveAllVisuals();
+    HRESULT SetCompositeMode(/* DCOMPOSITION_COMPOSITE_MODE */ int compositeMode);
+}
+
+[uuid(eacdd04c-117e-4e17-88f4-d1b12b0e3d89)]
+interface IDCompositionTarget : IUnknown
+{
+    HRESULT SetRoot(IDCompositionVisual* visual);
+}
+
+[uuid(e334bc12-3937-4e02-85eb-fcf4eb30d2c8)]
+interface IDCompositionSurfaceFactory : IUnknown
+{
+    HRESULT CreateSurface(UINT width, UINT height, DXGI_FORMAT pixelFormat, DXGI_ALPHA_MODE alphaMode, [out] IDCompositionSurface** surface);
+    HRESULT CreateVirtualSurface(UINT initialWidth, UINT initialHeight, DXGI_FORMAT pixelFormat, DXGI_ALPHA_MODE alphaMode, [out] IDCompositionVirtualSurface** virtualSurface);
+}
+
+[uuid(bb8a4953-2c99-4f5a-96f5-4819027fa3ac)]
+interface IDCompositionSurface : IUnknown
+{
+    HRESULT BeginDraw(RECT* updateRect,  GUID* iid, [out] void** updateObject, [out] POINT* updateOffset);
+    HRESULT EndDraw();
+    HRESULT SuspendDraw();
+    HRESULT ResumeDraw();
+    HRESULT Scroll(RECT* scrollRect, RECT* clipRect, int offsetX, int offsetY);
+}
+
+[uuid(ae471c51-5f53-4a24-8d3e-d0c39c30b3f0)]
+interface IDCompositionVirtualSurface : IDCompositionSurface
+{
+    HRESULT Resize(UINT width, UINT height);
+    HRESULT Trim(/* RECT* */ void* rectangles, INT count);
+}

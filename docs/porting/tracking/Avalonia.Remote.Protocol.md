@@ -70,6 +70,8 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `assembly.rs` | The table of the exported types of an assembly with their identifier attributes: what `DefaultMessageTypeResolver` reads by reflection upstream (`Assembly.ExportedTypes`) | `Assembly`, `ExportedType` |
 | `error.rs` | The exceptions the upstream library throws or lets through, as one error value that the exception event of a connection hands to its handlers | `Error` |
 | `guid.rs` | `System.Guid` of the runtime library: the text forms and the byte layout (`ToByteArray`) the header of a message carries | `Guid` |
+| `input/key.rs` | **unmapped** | `Key`, `ParseKeyError` |
+| `input/physical_key.rs` | **unmapped** | `ParsePhysicalKeyError`, `PhysicalKey` |
 | `task.rs` | `Task` and `TaskCompletionSource` of the runtime library, as far as `Send` of a connection uses them: the library has no asynchronous runtime (DEVIATIONS.md, Remote protocol) | `Task`, `TaskCompletionSource`, `TaskState` |
 
 Tests, examples and build scripts (not scanned): `metsys_bson_tests.rs`, `tests/remote_protocol_tests.rs`.

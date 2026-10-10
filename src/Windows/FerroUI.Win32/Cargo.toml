@@ -1,0 +1,85 @@
+[package]
+name = "ferroui-win32"
+description = "The Windows platform backend: windows, the message loop, input, screens and the software surface over the Win32 API"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+# The build script generates the bindings of the COM interfaces from the interface definition
+# files of the crate (`build.rs`).
+build = "build.rs"
+
+[lib]
+path = "lib.rs"
+
+[features]
+# ANGLE is built in by default: the rendering mode the options ask for first is `AngleEgl`, as in
+# the reference. `default-features = false` gives the backend with software rendering alone.
+default = ["angle"]
+# OpenGL ES through ANGLE on Direct3D 11, the rendering mode `AngleEgl`
+# (docs/porting/win32-platform.md, section 6.2). ANGLE is the crate `mozangle`, which compiles it
+# from C++ source and links it into the application: building with this feature needs the MSVC
+# C++ tools and libclang (LLVM) where the application is built (a Windows target only; on other
+# targets the feature adds nothing). Without it the mode fails to initialise with a message that
+# says so, and the backend goes on to the next mode of the options: software rendering.
+angle = ["dep:mozangle"]
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+# The EGL the ANGLE rendering mode drives, and the OpenGL contracts of the surfaces of a window.
+ferroui-opengl.workspace = true
+# The COM runtime of the bindings the build script generates.
+ferroui-microcom.workspace = true
+bitflags.workspace = true
+
+# The bindings of the Windows API (docs/porting/win32-platform.md, section 2): declarations only,
+# linked through `windows-link` without import libraries, so the crate is checked for a Windows
+# target on any host. One feature per API namespace the backend calls.
+[target.'cfg(windows)'.dependencies]
+windows-sys = { workspace = true, features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Dwm",
+    "Win32_Graphics_Gdi",
+    "Win32_System_DataExchange",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Memory",
+    "Win32_System_SystemInformation",
+    "Win32_System_Threading",
+    "Win32_UI_Controls",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_Input_Pointer",
+    "Win32_UI_Input_Touch",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+# ANGLE (BSD-3-Clause): Mozilla's fork as the Servo project packages it. Its `egl` feature builds
+# the EGL and OpenGL ES implementation on Direct3D 11 as static libraries.
+[target.'cfg(windows)'.dependencies.mozangle]
+workspace = true
+features = ["egl"]
+optional = true
+
+[build-dependencies]
+# The port's MicroCom generator: the standard library alone.
+microcom-codegen.workspace = true
+
+[dev-dependencies]
+# The example of a window draws through the render interface of the Vello backend in its CPU
+# mode: a renderer without C or C++ sources, so the example is checked for a Windows target on
+# any host like the crate itself (the Skia backend is not: its bindings are built with a C++
+# toolchain of the target).
+ferroui-vello.workspace = true
+
+[[example]]
+name = "win32_window"
+path = "examples/win32_window.rs"
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "platforms"

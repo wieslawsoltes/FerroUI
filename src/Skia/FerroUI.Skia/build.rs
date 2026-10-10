@@ -24,6 +24,9 @@ fn main() {
         println!("cargo:rustc-cfg=ferro_skia_ganesh_gl");
         build_emscripten_sjlj();
     }
+    if env::var("CARGO_CFG_WINDOWS").is_ok() {
+        println!("cargo:rustc-cfg=ferro_skia_ganesh_gl");
+    }
 
     if env::var("CARGO_CFG_TARGET_VENDOR").as_deref() != Ok("apple") {
         return;

@@ -40,7 +40,10 @@
 
     { "path": "src/Avalonia.X11", "detail": "types", "crate": "ferroui-x11", "phase": "5 - desktop (Linux)", "priority": "P1" },
 
-    { "path": "src/Windows/*", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
+    { "path": "src/Windows/Avalonia.Win32", "detail": "full", "crate": "ferroui-win32", "phase": "1 - desktop (Windows)", "priority": "P0" },
+    { "path": "src/Windows/Avalonia.Win32.Automation", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
+    { "path": "src/Windows/Avalonia.Win32.Interoperability", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
+    { "path": "src/Windows/Avalonia.WinUI", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
     { "path": "src/Avalonia.FreeDesktop", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
     { "path": "src/Avalonia.FreeDesktop.AtSpi", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
     { "path": "src/Avalonia.Wayland", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
