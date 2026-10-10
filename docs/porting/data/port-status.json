@@ -470,12 +470,12 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    0,
+    23,
     58,
     0
    ],
    "types": [
-    0,
+    32,
     88,
     0
    ],
@@ -485,7 +485,7 @@
     0
    ],
    "interfaces": [
-    0,
+    1,
     7
    ],
    "propertyRegistrations": [
@@ -498,8 +498,85 @@
    ],
    "notApplicableFiles": 0,
    "matchKinds": {},
-   "presentFiles": {},
-   "rustOnly": []
+   "presentFiles": {
+    "AndroidDispatcherImpl.cs": [
+     "android_dispatcher_impl.rs"
+    ],
+    "AndroidPlatform.cs": [
+     "android_platform.rs"
+    ],
+    "AndroidRuntimePlatform.cs": [
+     "android_runtime_platform.rs"
+    ],
+    "AndroidViewControlHandle.cs": [
+     "android_view_control_handle.rs"
+    ],
+    "ApplicationLifetime.cs": [
+     "application_lifetime.rs"
+    ],
+    "AvaloniaActivity.cs": [
+     "ferro_activity.rs"
+    ],
+    "AvaloniaAndroidApplication.cs": [
+     "ferro_android_application.rs"
+    ],
+    "AvaloniaMainActivity.cs": [
+     "ferro_main_activity.rs"
+    ],
+    "AvaloniaView.Input.cs": [
+     "ferro_view_input.rs"
+    ],
+    "AvaloniaView.cs": [
+     "ferro_view.rs"
+    ],
+    "ChoreographerTimer.cs": [
+     "choreographer_timer.rs"
+    ],
+    "CursorFactory.cs": [
+     "cursor_factory.rs"
+    ],
+    "IAvaloniaActivity.cs": [
+     "i_ferro_activity.rs"
+    ],
+    "Platform/AndroidActivatableLifetime.cs": [
+     "platform/android_activatable_lifetime.rs"
+    ],
+    "Platform/AndroidInsetsManager.cs": [
+     "platform/android_insets_manager.rs"
+    ],
+    "Platform/AndroidScreens.cs": [
+     "platform/android_screens.rs"
+    ],
+    "Platform/SkiaPlatform/AndroidFramebuffer.cs": [
+     "platform/skia_platform/android_framebuffer.rs"
+    ],
+    "Platform/SkiaPlatform/FramebufferManager.cs": [
+     "platform/skia_platform/framebuffer_manager.rs"
+    ],
+    "Platform/SkiaPlatform/InvalidationAwareSurfaceView.cs": [
+     "platform/skia_platform/invalidation_aware_surface_view.rs"
+    ],
+    "Platform/SkiaPlatform/TopLevelImpl.cs": [
+     "platform/skia_platform/top_level_impl.rs"
+    ],
+    "Platform/Specific/Helpers/AndroidMotionEventsHelper.cs": [
+     "platform/specific/helpers/android_motion_events_helper.rs"
+    ],
+    "PlatformIconLoader.cs": [
+     "platform_icon_loader.rs"
+    ],
+    "Stubs.cs": [
+     "stubs.rs"
+    ]
+   },
+   "rustOnly": [
+    "android_egl.rs",
+    "interop/java.rs",
+    "interop/natives.rs",
+    "interop/ndk.rs",
+    "interop/signature.rs",
+    "log.rs"
+   ]
   },
   {
    "name": "Avalonia.Base",
