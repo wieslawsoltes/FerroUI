@@ -1,0 +1,20 @@
+[package]
+name = "sample-support"
+description = "What the small FerroUI samples share: the table of the classes with a document, the load of a class from its compiled markup and the smoke options of the desktop hosts"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-markup-xaml = { workspace = true }

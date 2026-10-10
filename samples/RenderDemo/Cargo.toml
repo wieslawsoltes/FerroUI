@@ -1,0 +1,54 @@
+[package]
+name = "render-demo"
+description = "The RenderDemo sample of FerroUI: pages of custom drawing, animations, transitions, composition and text"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+build = "build.rs"
+
+# Unit tests live next to the code (`tests/` modules of the library), not as integration test
+# targets.
+autotests = false
+autobenches = false
+autoexamples = false
+autobins = false
+
+[lib]
+path = "lib.rs"
+
+# The desktop entry point: `Main` of `App.xaml.cs` of the upstream sample.
+[[bin]]
+name = "render-demo"
+path = "program.rs"
+
+[dependencies]
+# The compiled markup of the crate calls the typed functions of the declared members.
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+ferroui-markup = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+ferroui-themes-fluent = { workspace = true }
+# The Skia lease of `Pages/custom_skia_page.rs` (custom drawing on the canvas of the backend).
+ferroui-skia = { workspace = true }
+skia-safe = { workspace = true }
+# The entry point.
+ferroui-desktop = { workspace = true }
+mini-mvvm = { path = "../MiniMvvm" }
+# The hamburger menu of the main window and its resources.
+control-samples = { path = "../SampleControls" }
+sample-support = { path = "../SampleSupport" }
+
+[build-dependencies]
+sample-build = { path = "../SampleBuild" }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+sample-testing = { path = "../SampleTesting" }
+# The resources of the hamburger menu as an asset too: `App.xaml` loaded with the run-time loader
+# includes them, and the loader leaves such an include to run time only for a document the asset
+# loader has.
+control-samples = { path = "../SampleControls", features = ["document-assets"] }

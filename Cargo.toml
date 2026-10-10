@@ -40,6 +40,11 @@ members = [
     "samples/ControlCatalog.Desktop",
     "samples/ControlCatalog.iOS",
     "samples/ControlCatalog.Browser",
+    "samples/SampleBuild",
+    "samples/SampleSupport",
+    "samples/SampleTesting",
+    "samples/SampleControls",
+    "samples/RenderDemo",
 ]
 
 [workspace.package]

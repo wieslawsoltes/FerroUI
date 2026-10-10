@@ -1,0 +1,28 @@
+[package]
+name = "sample-testing"
+description = "The test harness of the small FerroUI samples: the test services, a headless shell that renders frames through the compositor with Skia, the comparison of compiled markup with the run-time loader and the binding report guard"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-markup-xaml = { workspace = true }
+# The run-time loader of the tests: every document is loaded with it too, and each class populated by
+# its compiled markup is compared with the class the loader populates.
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+# The render interface, font manager and text shaper of the tests: the pages draw and lay out text,
+# which the mock services of the framework tests do not.
+ferroui-skia = { workspace = true }
+ferroui-harfbuzz = { workspace = true }
+sample-support = { path = "../SampleSupport" }
