@@ -717,6 +717,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f4beca3cb2444e3304ac30843cc091f44ed58932353cd492ce740067bfce6b12"
 
 [[package]]
+name = "ferroui"
+version = "0.1.0-preview.1"
+
+[[package]]
 name = "ferroui-android"
 version = "0.1.0-preview.1"
 dependencies = [
@@ -890,6 +894,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-headless-vnc"
+version = "0.1.0-preview.1"
+
+[[package]]
 name = "ferroui-integration-tests-win32"
 version = "0.1.0-preview.1"
 dependencies = [
@@ -931,6 +939,10 @@ dependencies = [
  "ferroui-markup-xaml",
  "ferroui-themes-simple",
 ]
+
+[[package]]
+name = "ferroui-linuxframebuffer"
+version = "0.1.0-preview.1"
 
 [[package]]
 name = "ferroui-markup"
@@ -1119,6 +1131,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-vulkan"
+version = "0.1.0-preview.1"
+
+[[package]]
+name = "ferroui-wayland"
+version = "0.1.0-preview.1"
+
+[[package]]
 name = "ferroui-win32"
 version = "0.1.0-preview.1"
 dependencies = [
@@ -1132,6 +1152,10 @@ dependencies = [
  "mozangle",
  "windows-sys",
 ]
+
+[[package]]
+name = "ferroui-winui"
+version = "0.1.0-preview.1"
 
 [[package]]
 name = "ferroui-x11"
