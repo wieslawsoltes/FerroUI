@@ -177,7 +177,16 @@ Runs in the simulator (2026-10-10, "iPhone 17 Pro", iOS 26.4, a debug build; the
 
 Seen in the trace of run 2, and open: the first frame took about a second and a half (begun at the first attempt, presented by the fourth; the display link, whose handler was drawing, did not tick meanwhile: 19 ticks before, 38 after). A first frame compiles the pipelines of Graphite, in a debug build, in the simulator; it was not measured further, and a release build on a device is where it should be. After the frames the render loop detaches from the timer (`render loop attached: false`), as it does on every platform when nothing changes.
 
-The screenshots of both runs failed: the simulator service may not write into the build directory on the external volume. The script now writes them to `~/Library/Caches/ferroui-ios-smoke/`; that has not been run yet.
+The screenshots of both runs failed: the simulator service may not write into the build directory on the external volume. The scripts write them to `~/Library/Caches/ferroui-ios-smoke/` since.
+
+| Run | Result |
+|---|---|
+| 3 | The smoke mode again, **SMOKE PASSED**, with its screenshots (`images/ios_view.png`: the view fills the screen under the status bar and the sensor housing, the text, the square, the circle and the marker where layout puts them). |
+| 3, the catalog | `scripts/ios/sim-catalog.sh "iPhone 17 Pro"`: the ControlCatalog (`samples/ControlCatalog.iOS`, the crate `control-catalog-ios`) started at its first attempt with the Fluent theme from compiled markup, found its 75 pages, and showed Home, Buttons, TextBox and ListBox, five seconds each, with a screenshot of each (`images/ios_catalog_home.png`, `images/ios_catalog_buttons.png`): **CATALOG SHOWN**. Read from the pictures: the page host with its navigation bar under the status bar, the embedded images and icons, text in the system font and in the monospaced font of the markup samples, check boxes, buttons, rounded borders, a scroll bar. The activatable lifetime reported the activation of the application (`App activated: Background`). |
+
+![The example in the simulator](images/ios_view.png) ![The catalog's home page in the simulator](images/ios_catalog_home.png) ![The Buttons page](images/ios_catalog_buttons.png)
+
+`scripts/ios/sim-catalog.sh <device> [--pages a,b,c] [--page-ms n] [--keep]` is the script for pictures of the catalog: the host has the smoke run of the desktop host (`FERROUI_SMOKE_PAGES=<ms>`, and `FERROUI_SMOKE_PAGE_NAMES=<headers>` to name pages; `FERROUI_SMOKE_EXIT_MS`), prints `Selecting <header>` for each page, and the script takes a screenshot of the simulator a second before the next page.
 
 4. **CI** (the job `ios` of `.github/workflows/ci.yml`, macOS runner): adds the two Rust targets, checks that the Skia features of the target are the Graphite and Metal set, builds the crate and the example for the simulator, checks the crate for the device target, runs the host tests, and bundles the example (`bundle.sh`, with the ad hoc signature verified). It does not run the simulator: a boot of a simulator on a hosted runner takes minutes and fails intermittently **[R]**, and the runner image decides which runtimes exist. The script is written so that a later step can call it (`sim-smoke.sh "<device>"`, exit code 0 on success) once a run has been shown to be reliable; expected cost two to five minutes on top of the build **[R]**.
 
@@ -229,7 +238,7 @@ One row per upstream file. "built" files are on the branch; "part" means the fil
 | `Storage/IOSStorageItem.cs` | 348 | `storage/ios_storage_item.rs` | 2 | open | security-scoped URLs, bookmarks |
 | `Storage/IOSStorageProvider.cs` | 436 | `storage/ios_storage_provider.rs` | 2 | open | the document pickers |
 
-Stage 1 has 23 of the 40 files, 17 complete and 6 in part. `samples/ControlCatalog.iOS` (`Main.cs`, `AppDelegate.cs`, `EmbedSample.iOS.cs`, `Info.plist`, the launch screen) becomes the crate `control-catalog-ios` in stage 2: a `main` that calls `run_application_with`, the embed sample over the native control host, and a bundle made by `bundle.sh`.
+Stage 1 has 23 of the 40 files, 17 complete and 6 in part. `samples/ControlCatalog.iOS` is the crate `control-catalog-ios` (built in stage 1b): `main.rs` is `Main.cs` and `AppDelegate.cs` (a `main` that calls `run_application_with`, and the delegate trait for the builder), the property list is written by `bundle.sh`; `EmbedSample.iOS.cs` waits for the native control host (stage 2d), and the launch screen is the empty `UILaunchScreen` of the bundle.
 
 ## 14. Stages
 
@@ -239,6 +248,7 @@ Stage 1 has 23 of the 40 files, 17 complete and 6 in part. `samples/ControlCatal
 | 2a | Keys (`presses*`, the key table), the scroll wheel, platform settings (colour scheme, accent, language) with trait changes, the launcher, feedback | A hardware keyboard event through `simctl` is not available either; the settings can be checked against the simulator's appearance setting (`simctl ui appearance dark`), which the script can switch |
 | 2b | Text input: `TextInputResponder`, the keyboard traits, the input pane | The keyboard appears for a focused text box (the input pane reports its frame); text entry itself needs a person or UI automation |
 | 2c | Clipboard (`UIPasteboard`), the storage provider with the document pickers and storage items, activations by URL and user activity (`simctl openurl`) | The clipboard round trip (`simctl pbcopy`/`pbpaste` against the application); a URL activation; the pickers need a person |
-| 2d | The native control host and the catalog's iOS host (`control-catalog-ios`) | The catalog starts and selects its pages in the simulator, as the desktop host does in its smoke mode |
+| 1b (built) | The catalog's iOS host (`control-catalog-ios`) and `scripts/ios/sim-catalog.sh` | The catalog starts, selects pages and is photographed (section 12) |
+| 2d | The native control host, and the embed sample of the catalog over it | The embed page of the catalog shows a native button |
 | 3 | Accessibility (`AutomationPeerWrapper`, the container methods of the view) | The accessibility tree as the simulator's inspector shows it; by hand |
 | 4 | OpenGL ES over EAGL, as a build of its own (section 7); a device build with signing | The smoke mode in the OpenGL mode |
