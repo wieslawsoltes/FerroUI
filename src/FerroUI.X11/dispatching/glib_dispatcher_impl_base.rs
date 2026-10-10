@@ -384,12 +384,14 @@ impl IDispatcherImplWithExplicitBackgroundProcessing for GlibDispatcherImplBase 
     }
 
     fn request_background_processing(&self) {
-        // The reference raises the event without a handler for what it throws; here a panic
-        // goes where the panics of the other callbacks go.
+        // The reference raises the event without a handler for what it throws and without
+        // flushing afterwards; here a panic goes where the panics of the other callbacks go,
+        // and the backend is flushed as after them (DEVIATIONS.md).
         self.glib.g_idle_add_once(self.callback(|this| {
             if let Err(e) = catch_unwind(AssertUnwindSafe(|| this.ready_for_background_processing.raise())) {
                 this.handle_exception(e);
             }
+            this.flush();
         }));
     }
 }

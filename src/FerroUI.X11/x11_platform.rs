@@ -1,6 +1,8 @@
 //! The X11 windowing platform (the port of `X11Platform.cs`): opens the
 //! connections, registers the platform services and creates the windows.
 
+use crate::x11_platform_lifetime_events::X11PlatformLifetimeEvents;
+use ferroui_controls::platform::IPlatformLifetimeEventsImpl;
 use crate::dispatching::{GlibDispatcherImpl, IX11PlatformDispatcher, X11PlatformThreading};
 use crate::glx::GlxPlatformGraphics;
 use crate::raw_event_grouping::ManualRawEventGrouperDispatchQueue;
@@ -311,6 +313,8 @@ impl FerroX11Platform {
         let platform_settings: Rc<dyn IPlatformSettings> = DBusPlatformSettings::new();
         let mounted_volumes: Rc<dyn IMountedVolumeInfoProvider> = Rc::new(LinuxMountedVolumeInfoProvider::new());
         let icon_loader: Rc<dyn IPlatformIconLoader> = Rc::new(X11IconLoader);
+        let lifetime_events: Rc<dyn IPlatformLifetimeEventsImpl> =
+            X11PlatformLifetimeEvents::new(options.enable_session_management);
         locator
             .bind::<Arc<dyn IRenderLoop>>()
             .to_constant(Rc::new(render_loop))
@@ -333,12 +337,9 @@ impl FerroX11Platform {
             .bind::<dyn IPlatformDragSource>()
             .to_constant(drag_source)
             .bind::<dyn IMountedVolumeInfoProvider>()
-            .to_constant(mounted_volumes);
-        // Not bound yet, each with the stage of docs/porting/x11-platform.md
-        // that builds it: the
-        // mounted volumes (`LinuxMountedVolumeInfoProvider`, with the
-        // FreeDesktop crate) and the lifetime events of the session
-        // manager (`X11PlatformLifetimeEvents`, stage 2).
+            .to_constant(mounted_volumes)
+            .bind::<dyn IPlatformLifetimeEventsImpl>()
+            .to_constant(lifetime_events);
 
         let x11_screens = X11Screens::new(self);
         let _ = self.x11_screens.set(x11_screens.clone());

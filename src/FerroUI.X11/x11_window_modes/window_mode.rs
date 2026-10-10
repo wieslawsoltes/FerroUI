@@ -18,6 +18,12 @@ pub trait X11WindowMode {
         false
     }
 
+    /// The mode as the mode of an embedded window, when it is one (the
+    /// cast of the reference).
+    fn x_embed(&self) -> Option<&super::XEmbedClientWindowMode> {
+        None
+    }
+
     /// Sees an event of the window first; whether it handled it.
     fn on_event(&self, _window: &X11Window, _ev: &mut XEvent) -> bool {
         false

@@ -26,6 +26,8 @@ pub use ferroui_freedesktop::event;
 #[cfg(unix)]
 pub mod glx;
 #[cfg(unix)]
+pub mod ice_lib;
+#[cfg(unix)]
 pub mod interop;
 #[cfg(unix)]
 pub mod lib_c;
@@ -39,6 +41,8 @@ pub mod raw_event_grouping;
 pub mod screens;
 #[cfg(unix)]
 pub mod selections;
+#[cfg(unix)]
+pub mod sm_lib;
 #[cfg(unix)]
 pub mod transparency_helper;
 #[cfg(unix)]
@@ -68,7 +72,11 @@ pub mod x11_icon_loader;
 #[cfg(unix)]
 pub mod x11_info;
 #[cfg(unix)]
+pub mod x11_native_control_host;
+#[cfg(unix)]
 pub mod x11_platform;
+#[cfg(unix)]
+pub mod x11_platform_lifetime_events;
 #[cfg(unix)]
 pub mod x11_structs;
 #[cfg(unix)]
@@ -81,6 +89,8 @@ pub(crate) mod x11_window_xim;
 pub mod x11_window_info;
 #[cfg(unix)]
 pub mod x11_window_modes;
+#[cfg(unix)]
+pub mod x_embed_plug;
 #[cfg(unix)]
 pub mod x_embed_tray_icon_impl;
 #[cfg(unix)]
@@ -96,6 +106,8 @@ pub mod xi_structs;
 #[cfg(unix)]
 pub mod xlib;
 
+#[cfg(unix)]
+pub use x_embed_plug::XEmbedPlug;
 #[cfg(unix)]
 pub use x11_platform::{
     initialize_x11_platform, FerroX11Platform, FerroX11PlatformExtensions, X11PlatformOptions, X11RenderingMode,

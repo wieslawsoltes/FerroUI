@@ -57,6 +57,8 @@ use ferroui_controls::{
     WindowResizeReason, WindowState, WindowTransparencyLevel,
 };
 use crate::native_dialogs::GtkSystemDialog;
+use crate::x11_native_control_host::X11NativeControlHost;
+use ferroui_controls::platform::INativeControlHostImpl;
 use ferroui_dialogs::ManagedStorageProvider;
 use ferroui_freedesktop::dbus_system_dialog::ParentLeaseProvider;
 use ferroui_controls::platform::ITopLevelNativeMenuExporter;
@@ -419,6 +421,7 @@ pub struct X11Window {
     touch: Rc<TouchDevice>,
     pub(crate) keyboard: Rc<dyn IKeyboardDevice>,
     storage_provider: RefCell<Option<Rc<dyn IStorageProvider>>>,
+    native_control_host: RefCell<Option<Rc<X11NativeControlHost>>>,
     native_menu_exporter: RefCell<Option<Rc<DBusMenuExporterImpl>>>,
     position: Cell<Option<PixelPoint>>,
     real_size: Cell<PixelSize>,
@@ -649,6 +652,7 @@ impl X11Window {
             touch: TouchDevice::new(),
             keyboard: platform.keyboard_device(),
             storage_provider: RefCell::new(None),
+            native_control_host: RefCell::new(None),
             native_menu_exporter: RefCell::new(None),
             position: Cell::new(None),
             real_size: Cell::new(PixelSize::new(default_width, default_height)),
@@ -866,8 +870,7 @@ impl X11Window {
                 *window.native_menu_exporter.borrow_mut() = Some(exporter);
             }
         }
-        // Stage 2f of docs/porting/x11-platform.md, here in the order of
-        // the reference: the native control host (`X11NativeControlHost`).
+        *window.native_control_host.borrow_mut() = Some(X11NativeControlHost::new(platform, weak.clone()));
         window.initialize_ime();
 
         let mut data = vec![x11.atoms().WM_DELETE_WINDOW, x11.atoms()._NET_WM_SYNC_REQUEST];
@@ -1013,6 +1016,41 @@ impl X11Window {
         self.real_size.set(value);
         self.shared.real_width.store(value.width, Ordering::SeqCst);
         self.shared.real_height.store(value.height, Ordering::SeqCst);
+    }
+
+    /// The mode of the window.
+    pub(crate) fn mode(&self) -> &dyn X11WindowMode {
+        &*self.mode
+    }
+
+    /// The scaling a mode or a popup gave the window in place of the one
+    /// of its screen.
+    pub(crate) fn scaling_override(&self) -> Option<f64> {
+        self.scaling_override.get()
+    }
+
+    pub(crate) fn set_scaling_override(&self, value: Option<f64>) {
+        self.scaling_override.set(value);
+    }
+
+    /// Raises the callback of the contract for a lost focus.
+    pub(crate) fn raise_lost_focus(&self) {
+        if let Some(lost_focus) = get(&self.lost_focus) {
+            lost_focus();
+        }
+    }
+
+    /// The size an embedder gives the window while it is resized by the
+    /// user (the body of `ProcessInteractiveResize` of the mode of an
+    /// embedded window): taken at once, reported and painted.
+    pub(crate) fn interactive_resize(&self, size: PixelSize) {
+        self.set_real_size(size);
+        if let Some(resized) = get(&self.resized) {
+            resized(self.client_size_value(), WindowResizeReason::User);
+        }
+        if let Some(paint) = get(&self.paint) {
+            paint(Rect::from_size(self.client_size_value()));
+        }
     }
 
     pub(crate) fn input_root_or_none(&self) -> Option<Rc<dyn IInputRoot>> {
@@ -1925,9 +1963,6 @@ pub(crate) fn encode_ascii(text: &str) -> Vec<u8> {
 
 impl IOptionalFeatureProvider for X11Window {
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
-        // Not available yet, a feature the reference answers here: the
-        // native control host (stage 2f of docs/porting/x11-platform.md).
-
         if feature_type == TypeId::of::<dyn ITopLevelNativeMenuExporter>() {
             let exporter: Rc<dyn ITopLevelNativeMenuExporter> = self.native_menu_exporter.borrow().clone()?;
             return Some(Rc::new(exporter));
@@ -1938,6 +1973,10 @@ impl IOptionalFeatureProvider for X11Window {
             return Some(Rc::new(ime));
         }
 
+        if feature_type == TypeId::of::<dyn INativeControlHostImpl>() {
+            let native_control_host: Rc<dyn INativeControlHostImpl> = self.native_control_host.borrow().clone()?;
+            return Some(Rc::new(native_control_host));
+        }
         if feature_type == TypeId::of::<dyn IStorageProvider>() {
             let storage_provider = self.storage_provider.borrow().clone()?;
             return Some(Rc::new(storage_provider));

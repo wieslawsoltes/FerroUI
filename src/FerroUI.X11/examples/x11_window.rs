@@ -220,6 +220,7 @@ mod app {
                     && arg != "--dnd"
                     && arg != "--menu"
                     && arg != "--glib"
+                    && arg != "--embed"
                     && arg != "--gtk-dialog"
                     && arg != "--expect-fallback"
                     && arg != "--shm"
@@ -1024,6 +1025,10 @@ mod app {
                 if std::env::args().any(|arg| arg == "--menu") {
                     report.phase("menu");
                     menu_checks(&report, &window).await;
+                }
+                if std::env::args().any(|arg| arg == "--embed") {
+                    report.phase("embed");
+                    embed_checks(&report, &platform, &window).await;
                 }
                 if std::env::args().any(|arg| arg == "--glib") {
                     report.phase("glib");
@@ -2086,6 +2091,221 @@ mod app {
                 None => report.check("the dialog that opens answers", false, "no answer within ten seconds".to_string()),
             }
             let _ = std::fs::remove_dir_all(&folder);
+        }
+
+        /// The parent of a window, as the server has it.
+        fn parent_of(platform: &Rc<FerroX11Platform>, window: xlib::XID) -> Option<xlib::XID> {
+            xlib::x_query_tree(platform.info().display(), window).map(|(_, parent, _)| parent)
+        }
+
+        /// Stage 2f: the native control host of the window (a window of
+        /// "another toolkit", made here with Xlib, held in the window),
+        /// an XEmbed plug in a socket window of this example, and the
+        /// lifetime events of the session manager.
+        async fn embed_checks(report: &Report, platform: &Rc<FerroX11Platform>, window: &Ref<Window>) {
+            use ferroui_base::{PixelSize, Rect, Size};
+            use ferroui_controls::platform::{
+                INativeControlHostImpl, IPlatformHandle, IPlatformLifetimeEventsImpl, PlatformHandle,
+            };
+            use ferroui_x11::XEmbedPlug;
+
+            let info = platform.info();
+            let display = info.display();
+            let root = info.root_window();
+            let (Some(xid), Some(window_impl)) = (xid_of(window), window.platform_impl()) else {
+                report.check("handle", false, "the window has no platform implementation".to_string());
+                return;
+            };
+            let scaling = window.render_scaling();
+            let attributes = |id: xlib::XID| {
+                xlib::x_sync(display, false);
+                xlib::x_get_window_attributes(display, id)
+            };
+
+            // The native control host.
+            let host = window_impl
+                .try_get_feature(TypeId::of::<dyn INativeControlHostImpl>())
+                .and_then(|feature| feature.downcast::<Rc<dyn INativeControlHostImpl>>().ok());
+            report.check("native control host", host.is_some(), format!("the window offers one: {}", host.is_some()));
+            if let Some(host) = host {
+                // A window of another toolkit: a child of the root with a colour of its own.
+                let native = xlib::x_create_simple_window(display, root, 0, 0, 40, 30, 0, 0, 0x00cc_3300);
+                let handle: Rc<dyn IPlatformHandle> = Rc::new(PlatformHandle::new(native as isize, Some("XID")));
+                let foreign: Rc<dyn IPlatformHandle> = Rc::new(PlatformHandle::new(native as isize, Some("HWND")));
+                report.check(
+                    "the host takes windows of the X server only",
+                    host.is_compatible_with(&*handle) && !host.is_compatible_with(&*foreign),
+                    "a handle described as XID is compatible, one described as HWND is not".to_string(),
+                );
+                let attachment = host.create_new_attachment(handle);
+                let holder = parent_of(platform, native);
+                let holder_parent = holder.and_then(|holder| parent_of(platform, holder));
+                report.check(
+                    "the native window is in a holder window of the window",
+                    holder.is_some_and(|holder| holder != root) && holder_parent == Some(xid),
+                    format!("parent {holder:x?}, its parent {holder_parent:x?}; the window is {xid:#x}"),
+                );
+                let Some(holder) = holder else {
+                    return;
+                };
+                let hidden = attributes(holder).map(|a| a.map_state);
+                report.check("the holder is not shown before it has bounds", hidden == Some(0), format!("map state {hidden:?}"));
+
+                let bounds = Rect::new(60.0, 50.0, 200.0, 120.0);
+                attachment.show_in_bounds(bounds);
+                let expected = (
+                    (bounds.x * scaling) as i32,
+                    (bounds.y * scaling) as i32,
+                    (bounds.width * scaling) as i32,
+                    (bounds.height * scaling) as i32,
+                );
+                let on_server = attributes(holder).map(|a| (a.x, a.y, a.width, a.height, a.map_state));
+                let child = attributes(native).map(|a| (a.x, a.y, a.width, a.height, a.map_state));
+                report.check(
+                    "shown in bounds: the holder is at the bounds, viewable",
+                    on_server == Some((expected.0, expected.1, expected.2, expected.3, 2)),
+                    format!("the holder on the server: {on_server:?}; expected {expected:?}, viewable (2)"),
+                );
+                report.check(
+                    "shown in bounds: the native window fills the holder",
+                    child == Some((0, 0, expected.2, expected.3, 2)),
+                    format!("the native window on the server: {child:?}"),
+                );
+                delay(Duration::from_millis(300)).await;
+                let pixel = xlib::x_get_pixel(display, native, 5, 5).map(|pixel| pixel as u64 & 0xff_ffff);
+                report.check(
+                    "the native window draws itself",
+                    pixel == Some(0xcc3300),
+                    format!("the pixel at (5, 5) of the native window: {pixel:x?}"),
+                );
+
+                attachment.hide_with_size(Size::new(90.0, 70.0));
+                let on_server = attributes(holder).map(|a| a.map_state);
+                let child = attributes(native).map(|a| (a.width, a.height));
+                report.check(
+                    "hidden with a size: the holder is unmapped and the native window has the size",
+                    on_server == Some(0) && child == Some(((90.0 * scaling) as i32, (70.0 * scaling) as i32)),
+                    format!("the holder's map state {on_server:?}, the native window {child:?}"),
+                );
+
+                attachment.show_in_bounds(bounds);
+                attachment.dispose();
+                let parent = parent_of(platform, native);
+                let holder_gone = attributes(holder).is_none();
+                report.check(
+                    "disposed: the native window is kept, outside the window, and the holder is destroyed",
+                    parent == Some(platform.orphaned_window()) && holder_gone,
+                    format!(
+                        "the parent of the native window is {parent:x?} (the window of orphans is {:#x}); holder gone: {holder_gone}",
+                        platform.orphaned_window()
+                    ),
+                );
+                xlib::x_destroy_window(display, native);
+            }
+
+            // An XEmbed plug in a socket: a window of this example that plays the embedder.
+            const PLUG_FILL: (u8, u8, u8) = (0x11, 0xaa, 0x55);
+            let socket = xlib::x_create_simple_window(display, root, 700, 40, 300, 200, 0, 0, 0x0020_2020);
+            xlib::x_map_window(display, socket);
+            let plug = XEmbedPlug::create_in(socket);
+            let plug_xid = plug.handle();
+            let fill = Border::new();
+            fill.set_background(Some(Rc::new(ImmutableSolidColorBrush::new(Color::from_rgb(
+                PLUG_FILL.0,
+                PLUG_FILL.1,
+                PLUG_FILL.2,
+            )))));
+            plug.set_content(Some(Control::boxed(fill)));
+            plug.set_background_color(Color::from_rgb(0x20, 0x20, 0x20));
+
+            let atoms = info.atoms();
+            let embed_info =
+                xlib::x_get_window_property_as_int_ptr_array(display, plug_xid, atoms._XEMBED_INFO, atoms._XEMBED_INFO);
+            report.check(
+                "the plug announces XEmbed and asks to be mapped",
+                embed_info.as_deref() == Some(&[0, 1]),
+                format!("_XEMBED_INFO of {plug_xid:#x}: {embed_info:?} (version 0, XEMBED_MAPPED)"),
+            );
+            let parent = parent_of(platform, plug_xid);
+            report.check(
+                "the plug is a child of the socket",
+                parent == Some(socket),
+                format!("the parent of the plug is {parent:x?}; the socket is {socket:#x}"),
+            );
+            report.check("the plug has a scale factor of 1", plug.scale_factor() == 1.0, format!("{}", plug.scale_factor()));
+
+            // What an embedder does: it sizes and maps the plug and tells it that it is embedded,
+            // that the embedder's window is active and that the plug has the focus.
+            let size = (300, 200);
+            xlib::x_move_resize_window(display, plug_xid, 0, 0, size.0 as u32, size.1 as u32);
+            xlib::x_map_window(display, plug_xid);
+            let send = |message: i64, data1: i64| {
+                let mut xev = xlib::new_event();
+                {
+                    let client_message = xlib::client_message_event_mut(&mut xev);
+                    client_message.type_ = XEventName::ClientMessage as i32;
+                    client_message.send_event = 1;
+                    client_message.window = plug_xid;
+                    client_message.message_type = atoms._XEMBED;
+                    client_message.format = 32;
+                    client_message.data.set_long(0, 0);
+                    client_message.data.set_long(1, message as _);
+                    client_message.data.set_long(2, 0);
+                    client_message.data.set_long(3, data1 as _);
+                    client_message.data.set_long(4, 0);
+                }
+                xlib::x_send_event(display, plug_xid, false, EventMask::NO_EVENT_MASK.bits() as _, &mut xev);
+                xlib::x_flush(display);
+            };
+            send(0, socket as i64); // XEMBED_EMBEDDED_NOTIFY
+            send(1, 0); // XEMBED_WINDOW_ACTIVATE
+            send(4, 0); // XEMBED_FOCUS_IN
+            delay(Duration::from_millis(300)).await;
+            plug.process_interactive_resize(PixelSize::new(size.0, size.1));
+
+            let filled = |at: (i32, i32)| {
+                xlib::x_sync(display, false);
+                xlib::x_get_pixel(display, plug_xid, at.0, at.1).map(|pixel| pixel as u64 & 0xff_ffff) == Some(rgb(PLUG_FILL))
+            };
+            let drawn = wait_for(STEP_TIMEOUT, || filled((size.0 / 2, size.1 / 2)) && filled((size.0 - 5, size.1 - 5))).await;
+            let viewable = attributes(plug_xid).map(|a| (a.width, a.height, a.map_state));
+            report.check(
+                "the plug is drawn in the socket",
+                drawn && viewable == Some((size.0, size.1, 2)),
+                format!(
+                    "the content's colour at the centre and near the corner of the plug: {drawn}; the plug on the server: {viewable:?}"
+                ),
+            );
+
+            // The embedder resizes: it tells the plug the size it will have.
+            let size = (220, 140);
+            xlib::x_resize_window(display, socket, size.0 as u32, size.1 as u32);
+            xlib::x_resize_window(display, plug_xid, size.0 as u32, size.1 as u32);
+            plug.process_interactive_resize(PixelSize::new(size.0, size.1));
+            let drawn = wait_for(STEP_TIMEOUT, || filled((size.0 - 5, size.1 - 5))).await;
+            report.check(
+                "after a resize by the embedder the plug is drawn at the new size",
+                drawn,
+                format!("the content's colour near the new corner ({}, {}): {drawn}", size.0 - 5, size.1 - 5),
+            );
+
+            plug.dispose();
+            let gone = wait_for(STEP_TIMEOUT, || attributes(plug_xid).is_none()).await;
+            report.check("disposed: the window of the plug is destroyed", gone, format!("gone from the server: {gone}"));
+            xlib::x_destroy_window(display, socket);
+            xlib::x_flush(display);
+
+            // The lifetime events: registered, with or without a session manager.
+            let lifetime_events = FerroLocator::current().get_service::<dyn IPlatformLifetimeEventsImpl>();
+            report.check(
+                "the lifetime events of the platform are registered",
+                lifetime_events.is_some(),
+                format!(
+                    "registered: {}; SESSION_MANAGER is {:?}",
+                    lifetime_events.is_some(),
+                    std::env::var("SESSION_MANAGER").ok()
+                ),
+            );
         }
 
         async fn menu_checks(report: &Report, window: &Ref<Window>) {

@@ -4,7 +4,9 @@
 pub mod default_window_mode;
 pub mod input_proxy_window_mode;
 pub mod window_mode;
+pub mod x_embed_client_window_mode;
 
 pub use default_window_mode::DefaultTopLevelWindowMode;
 pub use input_proxy_window_mode::InputProxyWindowMode;
 pub use window_mode::X11WindowMode;
+pub use x_embed_client_window_mode::XEmbedClientWindowMode;
