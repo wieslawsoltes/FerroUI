@@ -168,7 +168,16 @@ What the smoke mode proves, each a line `[ ok ]` or `[FAIL]`:
 
 What it cannot prove: touch input (no synthetic touches from inside an application; `simctl` has no touch command); rotation and a change of the safe area; the background and foreground transitions; the launch screen. The screenshot the script takes shows what the simulator composited, for a person to look at; it is not compared.
 
-Runs in the simulator: see the row of the platform in `CRITICAL-PATH.md` for the state; the orchestrator of the port runs the script, because the simulator may only run while no virtual machine does.
+Runs in the simulator (2026-10-10, "iPhone 17 Pro", iOS 26.4, a debug build; the orchestrator of the port runs the script, because the simulator may only run while no virtual machine does) **[S]**:
+
+| Run | Result |
+|---|---|
+| 1 | The application started at the first attempt, without a crash: platform, view (402x874 points), size, scale 3, one screen of 1206x2622 pixels at 3, safe area (top 62, bottom 34, equal to the layout guide and to the insets of the view) passed. One frame was presented and no more, and no frame was read back: the example asked for a redraw by invalidating a panel that draws nothing, so nothing changed after the first frame. A fault of the example. |
+| 2 | **SMOKE PASSED** at the fourth attempt (two seconds after the start of the checks): all ten checks. The example now changes the colour of a marker at every attempt. The frame read back is 1206x2622, `BGRA8Unorm`; the fill, the square and the circle have exactly the colours that were drawn ((51, 102, 153), (204, 51, 51), (51, 170, 85)); 11249 pixels of the text band are not the fill. |
+
+Seen in the trace of run 2, and open: the first frame took about a second and a half (begun at the first attempt, presented by the fourth; the display link, whose handler was drawing, did not tick meanwhile: 19 ticks before, 38 after). A first frame compiles the pipelines of Graphite, in a debug build, in the simulator; it was not measured further, and a release build on a device is where it should be. After the frames the render loop detaches from the timer (`render loop attached: false`), as it does on every platform when nothing changes.
+
+The screenshots of both runs failed: the simulator service may not write into the build directory on the external volume. The script now writes them to `~/Library/Caches/ferroui-ios-smoke/`; that has not been run yet.
 
 4. **CI** (the job `ios` of `.github/workflows/ci.yml`, macOS runner): adds the two Rust targets, checks that the Skia features of the target are the Graphite and Metal set, builds the crate and the example for the simulator, checks the crate for the device target, runs the host tests, and bundles the example (`bundle.sh`, with the ad hoc signature verified). It does not run the simulator: a boot of a simulator on a hosted runner takes minutes and fails intermittently **[R]**, and the runner image decides which runtimes exist. The script is written so that a later step can call it (`sim-smoke.sh "<device>"`, exit code 0 on success) once a run has been shown to be reliable; expected cost two to five minutes on top of the build **[R]**.
 
