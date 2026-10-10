@@ -134,8 +134,31 @@ impl TestConnections {
         ping_path: &str,
         serve: impl FnOnce(ServiceBuilder) -> zbus::Result<ServiceBuilder> + Send + 'static,
     ) -> TestConnections {
+        Self::new_with(ping_path, true, serve)
+    }
+
+    /// As [`new`](Self::new); with `client_object_server` false the
+    /// connection of the code under test has no object server, as the
+    /// connection to the accessibility bus has none: what answers its
+    /// method calls is the code under test.
+    pub(crate) fn new_with(
+        ping_path: &str,
+        client_object_server: bool,
+        serve: impl FnOnce(ServiceBuilder) -> zbus::Result<ServiceBuilder> + Send + 'static,
+    ) -> TestConnections {
+        let with_object_server = move |builder: ServiceBuilder| {
+            if client_object_server {
+                DBusHelper::with_object_server(builder)
+            } else {
+                Ok(builder)
+            }
+        };
         let (client, service, owners) = if on_session_bus() {
-            let client = DBusHelper::try_create_new_connection(None).expect("a session bus");
+            let client = with_object_server(zbus::blocking::connection::Builder::session().unwrap())
+                .unwrap()
+                .build()
+                .expect("a session bus")
+                .into_inner();
             let service = serve(zbus::blocking::connection::Builder::session().unwrap()).unwrap().build().unwrap();
             (client, service, None)
         } else {
@@ -156,10 +179,8 @@ impl TestConnections {
                     serve(builder).unwrap().build().unwrap()
                 })
             };
-            let client = DBusHelper::with_object_server(
-                zbus::blocking::connection::Builder::async_io_unix_stream(client_end).p2p(),
-            )
-            .unwrap()
+            let client = with_object_server(zbus::blocking::connection::Builder::async_io_unix_stream(client_end).p2p())
+                .unwrap()
             .build()
             .unwrap()
             .into_inner();
