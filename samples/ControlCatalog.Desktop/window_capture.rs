@@ -145,6 +145,26 @@ pub fn capture_client_area(hwnd: isize) -> Result<Capture, String> {
     }
 }
 
+/// How far the content of the capture reaches: one more than the last
+/// column and the last row that have a pixel that is not white. A capture
+/// of a window that lies partly outside the desktop is white there (the
+/// system does not draw what is off the screen), and so is a surface that
+/// is smaller than the client area: the reach then stops short of the
+/// size of the capture.
+pub fn content_extent(capture: &Capture) -> (i32, i32) {
+    let (mut right, mut bottom) = (0, 0);
+    for y in 0..capture.height {
+        for x in 0..capture.width {
+            let at = ((y * capture.width + x) * 4) as usize;
+            if capture.pixels[at..at + 3] != [0xff, 0xff, 0xff] {
+                right = right.max(x + 1);
+                bottom = bottom.max(y + 1);
+            }
+        }
+    }
+    (right, bottom)
+}
+
 /// The number of different colours among a grid of samples of the pixels:
 /// 1 for a picture of one colour, which is what a capture that shows
 /// nothing looks like.
