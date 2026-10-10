@@ -628,7 +628,7 @@ jobs:
             libx11-6 libxi6 libxrandr2 libxcursor1 libxfixes3 libxext6 libxtst6 \
             libgl1 libglx-mesa0 libegl1 libegl-mesa0 libgl1-mesa-dri mesa-utils \
             libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config \
-            libglib2.0-0 libgtk-3-0
+            libglib2.0-0 libgtk-3-0 at-spi2-core libglib2.0-bin
       - name: Skia features of the target
         run: |
           # Ganesh on OpenGL, for the rendering modes GLX and EGL of the platform, and nothing
@@ -800,6 +800,24 @@ jobs:
         run: |
           xvfb-run -a --server-args="-screen 0 1280x1024x24" \
             timeout 300 target/debug/examples/x11_window --smoke --embed --skip=input,popup,resize,screens,clipboard
+      # Accessibility over AT-SPI (docs/porting/atspi.md). The example is org.a11y.Bus and the
+      # registry on a private session bus; the application finds the accessibility bus, registers
+      # its root with the registry, and a client on a second connection walks the tree of the window
+      # (root, window, a button, a text box, a check box: roles, names, states, extents), invokes
+      # the button, reads the text, moves the focus, toggles the check box and gets the event.
+      - name: Accessibility, the tree of a window over D-Bus (a double of the registry)
+        if: ${{ !cancelled() }}
+        run: |
+          dbus-run-session -- xvfb-run -a --server-args="-screen 0 1280x1024x24" \
+            timeout 300 target/debug/examples/x11_window --smoke --a11y --skip=input,popup,resize,screens,clipboard
+      # The same against the services of at-spi2-core: org.a11y.Bus starts the accessibility bus
+      # (at-spi-bus-launcher), the application embeds its root in the registry of that bus
+      # (at-spi2-registryd), and the client finds it among the children of the registry.
+      - name: Accessibility with the registry of at-spi2-core
+        if: ${{ !cancelled() }}
+        run: |
+          xvfb-run -a --server-args="-screen 0 1280x1024x24" dbus-run-session -- \
+            timeout 300 target/debug/examples/x11_window --smoke --a11y=real --skip=input,popup,resize,screens,clipboard
       # The desktop host of the ControlCatalog with its native control demo for Linux (a window of
       # the X server for mplayer, a file chooser of GTK): compiled, not run.
       - name: The ControlCatalog host with the native control demo compiles
