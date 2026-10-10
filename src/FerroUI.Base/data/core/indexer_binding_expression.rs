@@ -1,4 +1,6 @@
-use super::{impl_untyped_binding_expression, Publish, UntypedBindingExpression, UntypedBindingExpressionBase};
+use super::{
+    impl_untyped_binding_expression, Publish, UntypedBindingExpression, UntypedBindingExpressionBase, ValueType, ValueTypes,
+};
 use crate::data::{BindingMode, BindingPriority};
 use crate::reactive::IDisposable;
 use crate::{BoxedValue, FerroObject, FerroProperty, WeakRef};
@@ -49,9 +51,39 @@ impl IndexerBindingExpression {
     fn publish_source_value(&self) {
         if let Some(source) = self.source.upgrade() {
             let value = source.get_value_untyped(self.source_property);
+            let value = match self.target_property {
+                Some(target_property) => cast_to_property(value, target_property),
+                None => value,
+            };
             self.base.publish_value(Publish::Value(Some(value)), None, false);
         }
     }
+}
+
+/// The value of a property as the value of another property receives it.
+///
+/// Upstream publishes `_source.GetValue(_sourceProperty)`, an `object`: what
+/// reaches the other property is the value itself, whatever the declared
+/// type of the property it was read from, and the property takes it if the
+/// value is of its type (the cast `value is T` of the untyped route). The
+/// untyped value of a property of the port has the declared type of the
+/// property (`Option<BoxedValue>` for a property of type `object`,
+/// `Option<T>` for a nullable one), so the value is taken out of that type
+/// and cast to the type of the receiving property: the text a content
+/// property holds is the text of a text property bound to it. A value that
+/// is not of the receiving type is passed on as it is, and is the invalid
+/// value it is upstream.
+fn cast_to_property(value: BoxedValue, property: &'static FerroProperty) -> BoxedValue {
+    let target = ValueType::new(property.property_type(), property.property_type_name());
+    if ValueType::of_value(&*value).id() == target.id() {
+        return value;
+    }
+
+    let converted = match ValueTypes::normalize(value.clone()) {
+        Some(inner) => ValueTypes::try_cast(&inner, target),
+        None => ValueTypes::null_value(target),
+    };
+    converted.unwrap_or(value)
 }
 
 impl UntypedBindingExpression for IndexerBindingExpression {
