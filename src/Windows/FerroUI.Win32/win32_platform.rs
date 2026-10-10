@@ -60,30 +60,15 @@ thread_local! {
 /// compositor is dropped under the locks it shares with the thread that
 /// renders (the render loop, the server compositor); a render thread that
 /// was ended inside one of them never leaves it, and the process then
-/// waits for ever (`docs/porting/win32-platform.md`, section 11.2). The
-/// reference releases nothing when the process ends.
+/// waits for ever (`docs/porting/win32-platform.md`, section 11.2: with the
+/// compositor dropped, runs of the smoke example through DirectComposition
+/// did not end on both runners; kept, ten of ten end on each). The reference
+/// releases nothing when the process ends.
 struct KeptForTheProcess<T>(std::mem::ManuallyDrop<T>);
 
 impl<T> KeptForTheProcess<T> {
     fn new(value: T) -> KeptForTheProcess<T> {
         KeptForTheProcess(std::mem::ManuallyDrop::new(value))
-    }
-}
-
-impl<T> Drop for KeptForTheProcess<T> {
-    fn drop(&mut self) {
-        // Diagnosis of the finding, to be removed with the trace of
-        // releases: with the variable set the value is dropped after all.
-        if ferroui_microcom::release_trace() {
-            if std::env::var_os("FERROUI_WIN32_TEARDOWN_DROP").is_some() {
-                eprintln!("teardown: the drop of the compositor of the platform begins");
-                // SAFETY: the value is not used again: this is its drop.
-                unsafe { std::mem::ManuallyDrop::drop(&mut self.0) };
-                eprintln!("teardown: the drop of the compositor of the platform returned");
-            } else {
-                eprintln!("teardown: the compositor of the platform is kept");
-            }
-        }
     }
 }
 

@@ -9,7 +9,23 @@ fn the_system_creates_a_composition_device() {
     // Without a rendering device, as a device that only composes.
     let device = NativeMethods::d_composition_create_device2::<IDCompositionDesktopDevice>(None);
     println!("DCompositionCreateDevice2: {:?}", device.as_ref().map(|_| "created"));
-    let device = device.expect("a composition device");
+    let Ok(device) = device else {
+        // Session 0, where services run (and the tools of a virtual machine
+        // host start their commands), has no compositor: the device is not
+        // created there (the first run of this test in the virtual machine).
+        // Anywhere else it has to be.
+        #[link(name = "kernel32", kind = "raw-dylib")]
+        extern "system" {
+            fn GetCurrentProcessId() -> u32;
+            fn ProcessIdToSessionId(process_id: u32, session_id: *mut u32) -> i32;
+        }
+        let mut session = u32::MAX;
+        // SAFETY: a number of this frame the system writes to.
+        let known = unsafe { ProcessIdToSessionId(GetCurrentProcessId(), &mut session) } != 0;
+        assert!(known && session == 0, "a composition device could not be created (session {session})");
+        println!("session 0: the system creates no composition device here");
+        return;
+    };
 
     // The desktop device is a device of the second version.
     let device2 = device.cast::<IDCompositionDevice2>().expect("IDCompositionDevice2");

@@ -39,28 +39,15 @@ fn main() {
 #[cfg(windows)]
 fn main() -> std::process::ExitCode {
     // `--teardown-trace`: what the end of the process does is written to the standard error
-    // stream (finding 1 of docs/porting/win32-platform.md, section 11.2: a run through
-    // DirectComposition printed that it passed and then did not end on one runner).
+    // stream. The values of the main thread are destroyed while the process ends, after the
+    // system has ended every other thread: a destructor that waits for one of them never
+    // returns (docs/porting/win32-platform.md, section 11.2: runs through DirectComposition
+    // printed that they passed and then did not end). The trace tells how far the end got.
     let trace = std::env::args().any(|argument| argument == "--teardown-trace");
     if trace {
         teardown::at_start();
     }
-    // `--on-thread`: the run is made by a thread of its own, which ends (and whose values are
-    // destroyed) while every other thread of the process is alive.
-    let code = if std::env::args().any(|argument| argument == "--on-thread") {
-        std::thread::Builder::new()
-            .name("smoke run".to_owned())
-            .spawn(|| {
-                let code = windows::run();
-                println!("the thread of the run returns");
-                code
-            })
-            .expect("the thread of the run")
-            .join()
-            .unwrap_or(std::process::ExitCode::from(101))
-    } else {
-        windows::run()
-    };
+    let code = windows::run();
     // The last line the program prints itself: what follows is the end of the process (the
     // values of the thread, the libraries).
     println!("main returns");
@@ -71,8 +58,9 @@ fn main() -> std::process::ExitCode {
 }
 
 /// Diagnostics of the end of the process: the threads that are alive when `main` returns,
-/// a line per second while they still run, and a line when the handlers of the C runtime
-/// and the destructors of the values of the main thread run.
+/// a line per second while they still run (none once the system has ended them), and a line
+/// when the handlers of the C runtime and the destructors of the values of the main thread
+/// run.
 #[cfg(windows)]
 mod teardown {
     use std::ffi::c_void;
@@ -212,7 +200,6 @@ mod teardown {
             eprintln!("teardown:   {thread}");
         }
         LAST.with(|_| {});
-        ferroui_microcom::set_release_trace(true);
         let _ = std::thread::Builder::new().name("teardown watchdog".to_owned()).spawn(|| {
             for second in 1..=20 {
                 std::thread::sleep(std::time::Duration::from_secs(1));
@@ -369,6 +356,8 @@ mod windows {
         /// The frame that was read back last: its size, the pixels that
         /// are not blank, a checksum.
         last_frame: Cell<Option<(PixelSize, usize, u64)>>,
+        /// Where in its texture the last frame was read back from.
+        read_offset: Cell<(i32, i32)>,
     }
 
     type Scissor = unsafe extern "system" fn(x: i32, y: i32, width: i32, height: i32);
@@ -438,7 +427,13 @@ mod windows {
                     }
                 }
             };
-            Some(GlPainter { context, render_target, mismatches: RefCell::new(Vec::new()), last_frame: Cell::new(None) })
+            Some(GlPainter {
+                context,
+                render_target,
+                mismatches: RefCell::new(Vec::new()),
+                last_frame: Cell::new(None),
+                read_offset: Cell::new((0, 0)),
+            })
         }
 
         /// Draws a frame of rectangles (the number of the frame moves one of
@@ -502,16 +497,44 @@ mod windows {
             let error = gl.get_error();
             let mut painted = 0usize;
             let mut checksum = 0xcbf2_9ce4_8422_2325_u64;
-            for pixel in pixels.chunks_exact(4) {
+            let (mut blank_in_column, mut blank_in_row) = (vec![0i32; width as usize], vec![0i32; height as usize]);
+            for (index, pixel) in pixels.chunks_exact(4).enumerate() {
                 if pixel != [0, 0, 0, 0] {
                     painted += 1;
+                } else {
+                    blank_in_column[index % width as usize] += 1;
+                    blank_in_row[index / width as usize] += 1;
                 }
                 for &byte in pixel {
                     checksum = (checksum ^ u64::from(byte)).wrapping_mul(0x0000_0100_0000_01b3);
                 }
             }
+            // In a composition mode the frame is a rectangle of a texture of the system, at
+            // an offset the system chooses for every frame (the atlas of a virtual surface of
+            // DirectComposition). ANGLE applies that offset to what is drawn (the viewport,
+            // the scissor rectangle, a clear, the target of a blit) and not to glReadPixels,
+            // which reads the texture from its origin: the frame is then read back moved by
+            // the offset, with blank columns and rows before it and its last columns and rows
+            // out of reach (the first run at scaling 2, in the virtual machine, read one blank
+            // column and one blank row from the fifth frame on, while the window the system
+            // composed had every pixel). The offset is what is blank at the start; the pixels
+            // it hides count as painted, and the places that are compared move with it.
+            let leading = |blank: &[i32], full: i32| blank.iter().take_while(|&&count| count == full).count() as i32;
+            let (offset_x, offset_y) =
+                if flipped { (leading(&blank_in_column, height), leading(&blank_in_row, width)) } else { (0, 0) };
+            if (offset_x, offset_y) != self.read_offset.get() {
+                self.read_offset.set((offset_x, offset_y));
+                println!(
+                    "[info] frame {frame}: the frame is read back at the offset ({offset_x}, {offset_y}) of its texture (glReadPixels of ANGLE reads the texture, not the rectangle of the frame)"
+                );
+            }
+            if offset_x < width && offset_y < height {
+                painted += (width as usize * height as usize)
+                    - ((width - offset_x) as usize * (height - offset_y) as usize);
+            }
             // The pixel at a point of the window, in the rows of OpenGL.
             let pixel_at = |x: i32, y: i32| -> [u8; 4] {
+                let (x, y) = ((x + offset_x).min(width - 1), (y + offset_y).min(height - 1));
                 let row = if flipped { y } else { height - 1 - y };
                 let index = (row as usize * width as usize + x as usize) * 4;
                 [pixels[index], pixels[index + 1], pixels[index + 2], pixels[index + 3]]
