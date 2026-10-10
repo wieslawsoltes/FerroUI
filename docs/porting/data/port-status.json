@@ -8958,12 +8958,12 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    39,
+    41,
     95,
     0
    ],
    "types": [
-    124,
+    127,
     276,
     0
    ],
@@ -9011,6 +9011,9 @@
     "FramebufferManager.cs": [
      "framebuffer_manager.rs"
     ],
+    "IconImpl.cs": [
+     "icon_impl.rs"
+    ],
     "Input/KeyInterop.cs": [
      "input/key_interop.rs"
     ],
@@ -9022,6 +9025,9 @@
     ],
     "Interop/UnmanagedMethods.cs": [
      "interop/unmanaged_methods.rs"
+    ],
+    "Interop/Win32Icon.cs": [
+     "interop/win32_icon.rs"
     ],
     "OffscreenParentWindow.cs": [
      "offscreen_parent_window.rs"

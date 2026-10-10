@@ -220,6 +220,8 @@ mod imp {
     use super::*;
     use crate::cursor_factory::CursorImpl;
     use crate::framebuffer_manager::FramebufferManager;
+    use crate::icon_impl::IconImpl;
+    use crate::interop::win32_icon::Win32Icon;
     use crate::input::WindowsMouseDevice;
     use crate::interop::unmanaged_methods::*;
     use crate::offscreen_parent_window::OffscreenParentWindow;
@@ -400,6 +402,9 @@ mod imp {
         topmost: Cell<bool>,
         scaling: Cell<f64>,
         dpi: Cell<u32>,
+        icon_impl: RefCell<Option<Rc<IconImpl>>>,
+        /// The icons of the system made for the window, by kind and DPI.
+        icon_cache: RefCell<HashMap<(i32, u32), Win32Icon>>,
         show_window_state: Cell<WindowState>,
         last_window_state: Cell<WindowState>,
         min_size: Cell<Size>,
@@ -504,6 +509,8 @@ mod imp {
                 topmost: Cell::new(false),
                 scaling: Cell::new(1.0),
                 dpi: Cell::new(96),
+                icon_impl: RefCell::new(None),
+                icon_cache: RefCell::new(HashMap::new()),
                 show_window_state: Cell::new(WindowState::Normal),
                 last_window_state: Cell::new(WindowState::Normal),
                 min_size: Cell::new(Size::default()),
@@ -1028,6 +1035,87 @@ mod imp {
                 self.hwnd.set(0);
                 wnd_proc_guard::resume_pending();
             }
+
+            self.clear_icon_cache();
+        }
+
+        fn set_icon_impl(&self, icon: Option<Rc<dyn IWindowIconImpl>>) {
+            let icon = icon.map(|icon| match IconImpl::from_window_icon(&icon) {
+                Ok(icon) => icon,
+                Err(error) => panic!("The icon of the window could not be read: {error}"),
+            });
+            let same = match (&*self.icon_impl.borrow(), &icon) {
+                (None, None) => true,
+                (Some(current), Some(icon)) => Rc::ptr_eq(current, icon),
+                _ => false,
+            };
+            if same {
+                return;
+            }
+
+            *self.icon_impl.borrow_mut() = icon;
+            self.clear_icon_cache();
+            self.refresh_icon();
+        }
+
+        fn clear_icon_cache(&self) {
+            let icons = std::mem::take(&mut *self.icon_cache.borrow_mut());
+            for icon in icons.values() {
+                icon.dispose();
+            }
+        }
+
+        /// Whether the window has an icon.
+        pub(crate) fn has_icon(&self) -> bool {
+            self.icon_impl.borrow().is_some()
+        }
+
+        /// The handle of the icon of the window of a kind (`Icons`) for a
+        /// DPI; 0 for a window without an icon.
+        ///
+        /// # Panics
+        /// Panics for a kind of icon the system does not have, and when
+        /// the icon cannot be made.
+        pub(crate) fn load_icon(&self, type_: i32, dpi: u32) -> isize {
+            let Some(icon_impl) = self.icon_impl.borrow().clone() else {
+                return 0;
+            };
+
+            let type_ = if type_ == Icons::ICON_SMALL2 { Icons::ICON_SMALL } else { type_ };
+
+            let icon_key = (type_, dpi);
+            if let Some(icon) = self.icon_cache.borrow().get(&icon_key) {
+                return icon.handle();
+            }
+            let scale = f64::from(dpi) / 96.0;
+            let icon = match type_ {
+                Icons::ICON_SMALL => icon_impl.load_small_icon(scale),
+                Icons::ICON_BIG => icon_impl.load_big_icon(scale),
+                _ => panic!("the kind of icon {type_} is not implemented"),
+            };
+            let icon = match icon {
+                Ok(icon) => icon,
+                Err(error) => panic!("The icon of the window could not be made: {error}"),
+            };
+            let handle = icon.handle();
+            self.icon_cache.borrow_mut().insert(icon_key, icon);
+            handle
+        }
+
+        pub(crate) fn refresh_icon(&self) {
+            let hwnd = self.hwnd.get();
+            let dpi = self.dpi.get();
+            send_message(hwnd, WindowsMessage::WM_SETICON, Icons::ICON_SMALL as usize, self.load_icon(Icons::ICON_SMALL, dpi));
+            send_message(hwnd, WindowsMessage::WM_SETICON, Icons::ICON_BIG as usize, self.load_icon(Icons::ICON_BIG, dpi));
+
+            // The reference sets no overlay icon on the taskbar button here,
+            // which prompts the taskbar to redraw the icon: the taskbar list
+            // is stage 2e.
+        }
+
+        /// The DPI of the window.
+        pub(crate) fn dpi(&self) -> u32 {
+            self.dpi.get()
         }
 
         /// The window is gone (`WM_DESTROY`): its handle is forgotten and
@@ -2092,9 +2180,7 @@ mod imp {
         /// `Win32Icon`) are stage 2, and no icon of this backend can exist
         /// before it.
         fn set_icon(&self, icon: Option<Rc<dyn IWindowIconImpl>>) {
-            if icon.is_some() {
-                crate::not_built("WindowImpl::set_icon (the icon of a window)", 2);
-            }
+            self.set_icon_impl(icon);
         }
 
         fn show_taskbar_icon(&self, value: bool) {
