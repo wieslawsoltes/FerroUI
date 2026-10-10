@@ -4,9 +4,9 @@
 //! Touch, generic pointer, hover and key events, and the input connection
 //! of the input method. What the input method gives the view to make the
 //! connection with (`IInitEditorInfo` of the reference) is kept by the
-//! top-level of the view, which exists before this object does. Stage 3 of
-//! docs/porting/android-platform.md: the hover and key events of the
-//! accessibility helper.
+//! top-level of the view, which exists before this object does. The access
+//! helper of the view is told of hover events, of the keys nothing handled
+//! and of the focus of the view.
 
 use crate::ferro_view::FerroView;
 use crate::i_init_editor_info::EditorInfo;
@@ -47,10 +47,18 @@ impl FerroView {
         let mut call_base = true;
         let res = self.top_level_impl().keyboard_helper().dispatch_key_event(e, &mut call_base);
         if res == Some(false) {
-            // The reference lets the accessibility helper of the view decide here whether
-            // the base class is called; without the helper (stage 3 of
-            // docs/porting/android-platform.md) its expression is false.
-            call_base = false;
+            // A key nothing handled goes to the access helper, and to the base class when
+            // the helper does not take it. The helper is told whether the event has no
+            // modifiers; of the modifiers the event is copied with control and shift.
+            let handled = e.is_some_and(|e| {
+                self.access_helper().dispatch_key_event(
+                    e.action,
+                    e.key_code,
+                    !e.is_ctrl_pressed && !e.is_shift_pressed,
+                    e.repeat_count,
+                )
+            });
+            call_base = !handled && call_base;
         }
 
         let result = match res {
@@ -59,6 +67,17 @@ impl FerroView {
             Some(true) => RESULT_TRUE,
         };
         result | if call_base { CALL_BASE } else { 0 }
+    }
+
+    /// A hover event of the view, for the access helper: whether the base
+    /// class dispatches the event too.
+    pub(crate) fn dispatch_access_hover_event(&self, action: i32, x: f32, y: f32) -> bool {
+        self.access_helper().dispatch_hover_event(action, x, y)
+    }
+
+    /// `onFocusChanged` of the view.
+    pub(crate) fn on_focus_changed(&self, gain_focus: bool) {
+        self.access_helper().on_focus_changed(gain_focus);
     }
 
     /// `onCreateInputConnection` of the view: fills `out_attrs` (an

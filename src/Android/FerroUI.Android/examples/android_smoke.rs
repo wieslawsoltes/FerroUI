@@ -34,7 +34,10 @@ ferroui_android::android_application!(app::build);
 
 #[cfg(target_os = "android")]
 mod app {
-    use ferroui_android::interop::java::{call_int, call_object, string_of};
+    use ferroui_android::interop::java::{
+        call_boolean, call_float, call_int, call_object, call_void, new_object, string_of, JavaClass, JavaLocal,
+        JavaRef, JavaValue,
+    };
     use ferroui_android::log::{self, LogPriority};
     use ferroui_android::{
         AndroidApplicationExtensions, AndroidPlatform, AndroidPlatformOptions, AndroidRenderingMode,
@@ -69,10 +72,12 @@ mod app {
     use ferroui_base::interactivity::RoutedEventArgs;
     use ferroui_controls::application_lifetimes::{ActivatedEventArgs, ActivationKind, IActivatableLifetime};
     use ferroui_controls::platform::{InputPaneState, InputPaneStateEventArgs};
+    use ferroui_controls::automation::AutomationProperties;
+    use ferroui_controls::primitives::RangeBase;
     use ferroui_controls::shapes::Ellipse;
     use ferroui_controls::{
-        AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Border, Control, ControlImpl, NewApplication,
-        Panel, StackPanel, TextBlock, TopLevel,
+        AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Border, Button, CheckBox, Control, ControlImpl,
+        NewApplication, Panel, Slider, StackPanel, TextBlock, TextBox, TopLevel,
     };
     use ferroui_skia::ISkiaApiLeaseFeature;
     use std::any::TypeId;
@@ -478,6 +483,12 @@ mod app {
         ellipse: Ref<Ellipse>,
         readback: Arc<Mutex<Readback>>,
         pointers: Rc<Pointers>,
+        /// The controls of the accessibility checks, and the clicks of the button.
+        button: Ref<Button>,
+        check_box: Ref<CheckBox>,
+        slider: Ref<Slider>,
+        text_box: Ref<TextBox>,
+        clicks: Rc<Cell<u32>>,
     }
 
     fn create_main_view() -> Ref<Control> {
@@ -498,10 +509,45 @@ mod app {
         ellipse.set_fill(brush(ELLIPSE));
         ellipse.set_horizontal_alignment(HorizontalAlignment::Center);
 
+        // The controls of the accessibility checks. The application has no theme, so a
+        // control has no template and draws nothing: each is given its size, and what the
+        // accessibility tree says of it comes from its automation peer.
+        let sized = |control: &Control, name: &str| {
+            control.set_width(200.0);
+            control.set_height(40.0);
+            control.set_horizontal_alignment(HorizontalAlignment::Center);
+            AutomationProperties::set_name(control, Some(name));
+        };
+        let button = Button::new();
+        sized(&button, "Press");
+        let clicks = Rc::new(Cell::new(0u32));
+        button.click({
+            let clicks = clicks.clone();
+            move |_, _| clicks.set(clicks.get() + 1)
+        });
+        let check_box = CheckBox::new();
+        sized(&check_box, "Agree");
+        let slider = Slider::new();
+        sized(&slider, "Volume");
+        {
+            let range: &RangeBase = &slider;
+            range.set_minimum(0.0);
+            range.set_maximum(10.0);
+            range.set_range_value(4.0);
+        }
+        let text_box = TextBox::new();
+        sized(&text_box, "Name");
+        text_box.set_text(Some("NameText"));
+        AutomationProperties::set_help_text(&text_box, Some("Your name"));
+
         let stack = StackPanel::new();
         stack.children().add(stripe);
         stack.children().add(text.clone());
         stack.children().add(ellipse.clone());
+        stack.children().add(button.clone());
+        stack.children().add(check_box.clone());
+        stack.children().add(slider.clone());
+        stack.children().add(text_box.clone());
 
         let background = Border::new();
         background.set_background(brush(FILL));
@@ -571,7 +617,22 @@ mod app {
             }
         });
 
-        smoke::start(Rc::new(MainView { editor, other, client, root: root.clone(), probe, text, ellipse, readback, pointers }));
+        smoke::start(Rc::new(MainView {
+            editor,
+            other,
+            client,
+            root: root.clone(),
+            probe,
+            text,
+            ellipse,
+            readback,
+            pointers,
+            button,
+            check_box,
+            slider,
+            text_box,
+            clicks,
+        }));
 
         root.upcast()
     }
@@ -592,6 +653,7 @@ mod app {
             InputMethod,
             InputPaneClosed,
             NativeControl,
+            Accessibility,
             Settings,
             Background,
             Foreground,
@@ -620,6 +682,9 @@ mod app {
             scaling: Cell<f64>,
             /// A step of a stage that is taken once.
             aimed: Cell<bool>,
+            /// How far the accessibility stage is: 0 reads the nodes and performs the
+            /// actions, 1 looks at what the actions did.
+            accessibility_step: Cell<u32>,
             keys: Rc<Keys>,
             /// The colour values the platform settings raised as changed.
             color_changes: Rc<RefCell<Vec<PlatformColorValues>>>,
@@ -697,6 +762,7 @@ mod app {
                 tap: Cell::new((0, 0, Point::default())),
                 scaling: Cell::new(1.0),
                 aimed: Cell::new(false),
+                accessibility_step: Cell::new(0),
                 keys: Rc::new(Keys::default()),
                 color_changes: Rc::new(RefCell::new(Vec::new())),
                 first_theme: Cell::new(PlatformThemeVariant::Light),
@@ -752,6 +818,7 @@ mod app {
                 Stage::InputMethod => input_method(state),
                 Stage::InputPaneClosed => input_pane_closed(state),
                 Stage::NativeControl => native_control(state),
+                Stage::Accessibility => accessibility(state),
                 Stage::Settings => settings(state),
                 Stage::Background => background(state),
                 Stage::Foreground => foreground(state),
@@ -1354,7 +1421,7 @@ mod app {
                 return;
             }
             let Some((child, attachment)) = state.native_control.borrow_mut().take() else {
-                begin_settings(state);
+                enter(state, Stage::Accessibility);
                 return;
             };
             let view = child.as_any().downcast_ref::<AndroidViewControlHandle>().and_then(AndroidViewControlHandle::view);
@@ -1384,8 +1451,266 @@ mod app {
                 None => check("native control host", false, "the default child is not a view"),
             }
             child.destroy();
+            enter(state, Stage::Accessibility);
+        }
+
+        // ---- accessibility ----------------------------------------------------------------
+
+        const NODE_INFO: &str = "Landroid/view/accessibility/AccessibilityNodeInfo;";
+        const ACTION_CLICK: i32 = 16;
+        const ACTION_SCROLL_FORWARD: i32 = 4096;
+        const ACTION_SET_TEXT: i32 = 2097152;
+
+        /// A node of the accessibility tree as the node provider of the view gives it.
+        struct Node {
+            class_name: String,
+            text: String,
+            content_description: String,
+            /// The bounds on the screen, written as the window dump of the system writes them.
+            bounds: String,
+            actions: i32,
+            clickable: bool,
+            checkable: bool,
+            checked: bool,
+            editable: bool,
+            visible: bool,
+            /// Minimum, maximum and current value of the range, if the node has one.
+            range: Option<(f32, f32, f32)>,
+        }
+
+        fn text_of(node: &JavaLocal, getter: &str) -> String {
+            call_object(node, getter, "()Ljava/lang/CharSequence;", &[])
+                .and_then(|text| call_object(&text, "toString", "()Ljava/lang/String;", &[]))
+                .map(|text| string_of(&text))
+                .unwrap_or_default()
+        }
+
+        fn node_of(provider: &JavaLocal, virtual_view_id: i32) -> Option<Node> {
+            let node = call_object(
+                provider,
+                "createAccessibilityNodeInfo",
+                &format!("(I){NODE_INFO}"),
+                &[JavaValue::Int(virtual_view_id)],
+            )?;
+            let rect = new_object(&JavaClass::find("android/graphics/Rect"), "()V", &[]);
+            let rect_ref: &dyn JavaRef = &rect;
+            call_void(&node, "getBoundsInScreen", "(Landroid/graphics/Rect;)V", &[JavaValue::Object(Some(rect_ref))]);
+            let bounds = call_object(&rect, "toShortString", "()Ljava/lang/String;", &[])
+                .map(|text| string_of(&text))
+                .unwrap_or_default();
+            let range = call_object(
+                &node,
+                "getRangeInfo",
+                "()Landroid/view/accessibility/AccessibilityNodeInfo$RangeInfo;",
+                &[],
+            )
+            .map(|range| {
+                (
+                    call_float(&range, "getMin", "()F", &[]),
+                    call_float(&range, "getMax", "()F", &[]),
+                    call_float(&range, "getCurrent", "()F", &[]),
+                )
+            });
+            let flag = |name: &str| call_boolean(&node, name, "()Z", &[]);
+            Some(Node {
+                class_name: text_of(&node, "getClassName"),
+                text: text_of(&node, "getText"),
+                content_description: text_of(&node, "getContentDescription"),
+                bounds,
+                actions: call_int(&node, "getActions", "()I", &[]),
+                clickable: flag("isClickable"),
+                checkable: flag("isCheckable"),
+                checked: flag("isChecked"),
+                editable: flag("isEditable"),
+                visible: flag("isVisibleToUser"),
+                range,
+            })
+        }
+
+        /// The bounds the access helper gives the node of a control: the corners of its
+        /// bounds in the top-level, in pixels.
+        fn expected_bounds(state: &State, control: &Visual) -> String {
+            let scaling = state.scaling.get();
+            let size = control.bounds().size();
+            let root: &Visual = &state.view.root;
+            let top_left = control.translate_point(Point::new(0.0, 0.0), root).unwrap_or_default();
+            let (left, top) = ((top_left.x * scaling) as i32, (top_left.y * scaling) as i32);
+            let (right, bottom) =
+                (((top_left.x + size.width) * scaling) as i32, ((top_left.y + size.height) * scaling) as i32);
+            format!("[{left},{top}][{right},{bottom}]")
+        }
+
+        fn perform(provider: &JavaLocal, virtual_view_id: i32, action: i32, arguments: Option<&JavaLocal>) -> bool {
+            call_boolean(
+                provider,
+                "performAction",
+                "(IILandroid/os/Bundle;)Z",
+                &[
+                    JavaValue::Int(virtual_view_id),
+                    JavaValue::Int(action),
+                    JavaValue::Object(arguments.map(|arguments| arguments as &dyn JavaRef)),
+                ],
+            )
+        }
+
+        /// What an application can read of its own accessibility tree: the node provider of
+        /// the view, the nodes of four controls and their actions; and what the script reads
+        /// from outside, the window dump of the system.
+        fn accessibility(state: &Rc<State>) {
+            let view = FerroActivity::current_main_activity().and_then(|activity| activity.view());
+            let provider = view.as_ref().and_then(|view| {
+                call_object(
+                    view.java_object(),
+                    "getAccessibilityNodeProvider",
+                    "()Landroid/view/accessibility/AccessibilityNodeProvider;",
+                    &[],
+                )
+            });
+            let (Some(view), Some(provider)) = (view, provider) else {
+                check("accessibility provider", false, "the view has no accessibility node provider");
+                begin_settings(state);
+                return;
+            };
+            let main = &state.view;
+            let ids = [
+                view.accessibility_virtual_view_id(&main.button),
+                view.accessibility_virtual_view_id(&main.check_box),
+                view.accessibility_virtual_view_id(&main.slider),
+                view.accessibility_virtual_view_id(&main.text_box),
+            ];
+
+            if state.accessibility_step.get() == 0 {
+                // The node of the host view: the view itself, with virtual views as children.
+                let host =
+                    call_object(&provider, "createAccessibilityNodeInfo", &format!("(I){NODE_INFO}"), &[JavaValue::Int(-1)]);
+                let children = host.as_ref().map_or(0, |host| call_int(host, "getChildCount", "()I", &[]));
+                check(
+                    "accessibility provider",
+                    children > 0,
+                    format!(
+                        "the view has a node provider; the node of the view has {children} virtual child(ren); the \
+                         virtual views of the button, the check box, the slider and the text box are {ids:?}"
+                    ),
+                );
+
+                let controls: [(&str, &Visual, &str); 4] = [
+                    ("accessibility button", &main.button, "Button"),
+                    ("accessibility check box", &main.check_box, "CheckBox"),
+                    ("accessibility slider", &main.slider, "Slider"),
+                    ("accessibility text box", &main.text_box, "TextBox"),
+                ];
+                let mut dump = Vec::new();
+                for (index, (name, control, class_name)) in controls.iter().enumerate() {
+                    let expected = expected_bounds(state, control);
+                    let Some(node) = node_of(&provider, ids[index]) else {
+                        check(name, false, "the provider has no node of the virtual view");
+                        continue;
+                    };
+                    let (specific, said) = match index {
+                        0 => (
+                            node.text == "Press" && node.clickable && node.actions & ACTION_CLICK != 0 && !node.checkable,
+                            format!("clickable: {}", node.clickable),
+                        ),
+                        1 => (
+                            node.text == "Agree"
+                                && node.checkable
+                                && !node.checked
+                                && node.clickable
+                                && node.actions & ACTION_CLICK != 0,
+                            format!("checkable: {}, checked: {}", node.checkable, node.checked),
+                        ),
+                        2 => (
+                            node.text == "Volume" && node.range == Some((0.0, 10.0, 4.0)),
+                            format!("range (minimum, maximum, current): {:?}", node.range),
+                        ),
+                        _ => (
+                            node.text == "NameText"
+                                && node.content_description == "Your name"
+                                && node.editable
+                                && node.actions & ACTION_SET_TEXT != 0,
+                            format!("editable: {}", node.editable),
+                        ),
+                    };
+                    check(
+                        name,
+                        node.class_name == *class_name && node.bounds == expected && node.visible && specific,
+                        format!(
+                            "class \"{}\", text \"{}\", content description \"{}\", bounds in screen {} (the control: \
+                             {expected}), visible to the user: {}, actions {:#x}, {said}",
+                            node.class_name, node.text, node.content_description, node.bounds, node.visible, node.actions
+                        ),
+                    );
+                    dump.push(expected);
+                }
+
+                // The actions. The reference gives a range no action of its own: the slider
+                // refuses, and its node follows the value the application sets.
+                let clicked = perform(&provider, ids[0], ACTION_CLICK, None);
+                let toggled = perform(&provider, ids[1], ACTION_CLICK, None);
+                let ranged = perform(&provider, ids[2], ACTION_SCROLL_FORWARD, None);
+                let arguments = new_object(&JavaClass::find("android/os/Bundle"), "()V", &[]);
+                call_void(
+                    &arguments,
+                    "putCharSequence",
+                    "(Ljava/lang/String;Ljava/lang/CharSequence;)V",
+                    &[JavaValue::String("ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE"), JavaValue::String("!")],
+                );
+                let text_set = perform(&provider, ids[3], ACTION_SET_TEXT, Some(&arguments));
+                let range: &RangeBase = &main.slider;
+                range.set_range_value(7.0);
+                check(
+                    "accessibility actions",
+                    clicked && toggled && !ranged && text_set,
+                    format!(
+                        "performAction: a click on the button {clicked}, a click on the check box {toggled}, a scroll \
+                         forward on the slider (the reference has no range action) {ranged}, set text on the text box \
+                         {text_set}"
+                    ),
+                );
+
+                // The script asks the system for the window dump and looks for the four
+                // nodes in it, each by its text with its bounds.
+                if dump.len() == 4 {
+                    note(format!(
+                        "SCRIPT a11y-dump Press:{} Agree:{} Volume:{} NameText!:{}",
+                        dump[0], dump[1], dump[2], dump[3]
+                    ));
+                }
+                state.accessibility_step.set(1);
+                enter(state, Stage::Accessibility);
+                return;
+            }
+
+            // The dump takes the script a few seconds.
+            if elapsed(state) < Duration::from_secs(12) {
+                return;
+            }
+            let check_box = node_of(&provider, ids[1]);
+            let slider = node_of(&provider, ids[2]);
+            let text_box = node_of(&provider, ids[3]);
+            let checked = check_box.as_ref().is_some_and(|node| node.checked);
+            let current = slider.as_ref().and_then(|node| node.range).map(|range| range.2);
+            let text = text_box.map(|node| node.text).unwrap_or_default();
+            check(
+                "accessibility effects",
+                main.clicks.get() == 1
+                    && main.check_box.is_checked() == Some(true)
+                    && checked
+                    && main.text_box.text().as_deref() == Some("NameText!")
+                    && text == "NameText!"
+                    && current == Some(7.0),
+                format!(
+                    "the click raised {} click(s) of the button; the check box is checked: {:?}, and its node says \
+                     {checked}; the text box has {:?} and its node \"{text}\"; the slider was set to 7 and its node \
+                     has {current:?}",
+                    main.clicks.get(),
+                    main.check_box.is_checked(),
+                    main.text_box.text()
+                ),
+            );
             begin_settings(state);
         }
+
 
         /// The settings of the platform, and the night mode the script switches.
         fn begin_settings(state: &Rc<State>) {

@@ -18,6 +18,7 @@
 // calls it there.
 #![cfg_attr(not(target_os = "android"), allow(dead_code))]
 
+pub mod automation;
 pub mod interop;
 pub mod log;
 pub mod platform;
@@ -26,6 +27,8 @@ mod android_platform;
 mod android_runtime_platform;
 mod application_lifetime;
 mod cursor_factory;
+mod explore_by_touch_helper;
+mod ferro_access_helper;
 mod i_activity_result_handler;
 mod i_android_navigation_service;
 mod i_ferro_activity;

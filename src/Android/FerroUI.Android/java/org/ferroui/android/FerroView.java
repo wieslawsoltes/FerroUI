@@ -3,6 +3,7 @@ package org.ferroui.android;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Build;
 import android.view.InputDevice;
 import android.view.KeyEvent;
@@ -102,8 +103,18 @@ public class FerroView extends FrameLayout implements ViewTreeObserver.OnGlobalL
             return false;
         }
         int answer = forwardMotionEvent(e);
-        // The accessibility helper decides whether the base class is called: without it, never.
-        return (answer & RESULT_MASK) == RESULT_TRUE;
+        boolean callBase = (answer & CALL_BASE) != 0;
+        // The access helper tells assistive technology which virtual view is under the finger.
+        callBase = FerroAccessHelper.nativeDispatchHoverEvent(nativeHandle, e.getAction(), e.getX(), e.getY())
+                && callBase;
+        boolean baseResult = callBase && super.dispatchHoverEvent(e);
+        return (answer & RESULT_MASK) == RESULT_NONE ? baseResult : (answer & RESULT_MASK) == RESULT_TRUE;
+    }
+
+    @Override
+    protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
+        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
+        FerroAccessHelper.nativeFocusChanged(nativeHandle, gainFocus);
     }
 
     @Override

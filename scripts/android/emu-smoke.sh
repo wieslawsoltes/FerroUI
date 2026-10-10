@@ -95,7 +95,41 @@ adb_shell settings put secure show_ime_with_hard_keyboard 1 >/dev/null 2>&1 || t
 #   rotate 0..3           the rotation of the display, in quarter turns
 #   view URI              an intent with the URI for the activity that runs
 #   back                  the back button
-# Everything but a picture is left out with --no-input.
+#   a11y-dump TEXT:BOUNDS...  the window hierarchy as the accessibility of the system reports it
+#                         (uiautomator dump, kept as <out>/window-<mode>.xml): each TEXT has to be
+#                         the text of a node with the bounds BOUNDS ("[left,top][right,bottom]")
+# Everything but a picture and the dump is left out with --no-input.
+
+# The accessibility tree from outside of the application: the virtual views of the automation
+# peers are nodes of the window dump, with their text and their bounds on the screen. A node that
+# is missing fails the run.
+a11y_failed=0
+a11y_dump() {
+    local mode="$1" xml expected text bounds
+    shift
+    xml="$out/window-$mode.xml"
+    rm -f "$xml"
+    ADB_TIMEOUT=60 adb_shell uiautomator dump /sdcard/ferroui-window.xml > "$out/uiautomator-$mode.txt" 2>&1 || true
+    ADB_TIMEOUT=30 adb_do exec-out cat /sdcard/ferroui-window.xml > "$xml" 2>/dev/null || true
+    adb_shell rm -f /sdcard/ferroui-window.xml >/dev/null 2>&1 || true
+    if [ ! -s "$xml" ]; then
+        echo "   [FAIL] uiautomator: the system wrote no window dump: $(tr -d '\r' < "$out/uiautomator-$mode.txt" | head -n 3)"
+        a11y_failed=1
+        return 0
+    fi
+    echo "   uiautomator: $(tr '>' '\n' < "$xml" | grep -c '<node') node(s) in $xml"
+    for expected in "$@"; do
+        text="${expected%%:*}"
+        bounds="${expected#*:}"
+        if tr '>' '\n' < "$xml" | grep -F "text=\"$text\"" | grep -qF "bounds=\"$bounds\""; then
+            echo "   [ ok ] uiautomator: a node with the text \"$text\" and the bounds $bounds"
+        else
+            echo "   [FAIL] uiautomator: no node with the text \"$text\" and the bounds $bounds; the nodes with that text:"
+            tr '>' '\n' < "$xml" | grep -F "text=\"$text\"" | sed 's/^/      /'
+            a11y_failed=1
+        fi
+    done
+}
 night_changed=0
 rotated=0
 # How the launcher starts the activity: an intent that equals this one brings its task back.
@@ -106,6 +140,10 @@ smoke_request() {
     if [ "$command" = picture ]; then
         emu_screencap "$out/$1-$mode.png" || true
         [ "$1" = smoke ] && pictured=1
+        return 0
+    fi
+    if [ "$command" = a11y-dump ]; then
+        a11y_dump "$mode" "$@"
         return 0
     fi
     [ "$input" = 1 ] || return 0
@@ -194,7 +232,11 @@ EOF
     emu_read_file "$application_id" smoke-report.txt > "$out/smoke-report-$mode.txt"
 
     printf '%s\n' "$lines" | grep -v '^--------- beginning of' | sed 's/^/   /'
-    if [ "$done_" = 1 ] && grep -q '^RESULT: PASS$' "$out/smoke-report-$mode.txt"; then
+    if [ "$a11y_failed" = 1 ]; then
+        failed=1
+        a11y_failed=0
+        echo "== $mode: FAIL: the window dump of the system (window-$mode.xml) lacks a node of the accessibility checks"
+    elif [ "$done_" = 1 ] && grep -q '^RESULT: PASS$' "$out/smoke-report-$mode.txt"; then
         echo "== $mode: PASS (report: $out/smoke-report-$mode.txt)"
     else
         failed=1
