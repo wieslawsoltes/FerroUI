@@ -8,6 +8,10 @@
 
 #![allow(non_camel_case_types)]
 
+mod direct_composited_window;
+mod direct_composited_window_surface;
+mod direct_composition_connection;
+mod direct_composition_shared;
 #[cfg(windows)]
 mod native_methods;
 mod native_structs;
@@ -26,6 +30,10 @@ mod dcomp {
 }
 
 pub use dcomp::*;
+pub(crate) use direct_composited_window::DirectCompositedWindow;
+pub(crate) use direct_composited_window_surface::DirectCompositedWindowSurface;
+pub(crate) use direct_composition_connection::DirectCompositionConnection;
+pub(crate) use direct_composition_shared::DirectCompositionShared;
 #[cfg(windows)]
 pub use native_methods::NativeMethods;
 pub use native_structs::*;

@@ -25,7 +25,7 @@ fn use_platform(builder: AppBuilder) -> AppBuilder {
 /// the smoke runs of the examples read.
 #[cfg(windows)]
 fn rendering_options(builder: AppBuilder) -> AppBuilder {
-    use ferroui_win32::{Win32CompositionMode, Win32PlatformOptions, Win32RenderingMode};
+    use ferroui_win32::{Win32PlatformOptions, Win32RenderingMode};
     use std::rc::Rc;
 
     let mut options = Win32PlatformOptions::default();
@@ -33,13 +33,27 @@ fn rendering_options(builder: AppBuilder) -> AppBuilder {
         Some("software") => options.rendering_mode = vec![Win32RenderingMode::Software],
         Some("angle") => {
             options.rendering_mode = vec![Win32RenderingMode::AngleEgl];
-            options.composition_mode = vec![Win32CompositionMode::RedirectionSurface];
+            options.composition_mode = vec![smoke_composition_mode()];
         }
         Some(other) => panic!("FERROUI_SMOKE_RENDERING: unknown mode {other:?} (software, angle)"),
         None => return builder,
     }
-    println!("rendering modes of the run: {:?}", options.rendering_mode);
+    println!("rendering modes of the run: {:?}; composition modes: {:?}", options.rendering_mode, options.composition_mode);
     builder.with(Rc::new(options))
+}
+
+/// The composition mode of a smoke run through ANGLE, without a fallback:
+/// `FERROUI_SMOKE_COMPOSITION=redirection|dcomp`; the redirection surface
+/// of the window when the variable is not set.
+#[cfg(windows)]
+fn smoke_composition_mode() -> ferroui_win32::Win32CompositionMode {
+    use ferroui_win32::Win32CompositionMode;
+
+    match std::env::var("FERROUI_SMOKE_COMPOSITION").ok().as_deref() {
+        None | Some("redirection") => Win32CompositionMode::RedirectionSurface,
+        Some("dcomp") => Win32CompositionMode::DirectComposition,
+        Some(other) => panic!("FERROUI_SMOKE_COMPOSITION: unknown mode {other:?} (redirection, dcomp)"),
+    }
 }
 
 #[cfg(not(windows))]

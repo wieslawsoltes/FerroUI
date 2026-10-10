@@ -702,6 +702,7 @@ mod imp {
                     self.release_drop_target();
 
                     self.framebuffer().dispose();
+                    self.dispose_gl_surface();
 
                     //Window doesn't exist anymore
                     self.on_destroyed();

@@ -193,10 +193,6 @@ mod windows {
                 return None;
             };
             let surfaces: Vec<Arc<dyn IPlatformRenderSurface>> = window.surfaces();
-            let Some(gl_surface) = surfaces.iter().find_map(|surface| try_get_gl_surface(&**surface)) else {
-                report.check("OpenGL surface", false, "the window has no OpenGL surface among its surfaces");
-                return None;
-            };
             let context = graphics.create_context();
             let features: &dyn ferroui_base::platform::IOptionalFeatureProvider = &*context;
             let Some(gl_context) = features.try_get::<dyn IGlContext>() else {
@@ -220,7 +216,39 @@ mod windows {
                 ),
             );
             current.dispose();
-            let render_target = gl_surface.create_gl_render_target(&gl_context);
+            // The OpenGL surface of the window (the redirection surface),
+            // or, in a composition mode, the surface the context renders
+            // to through its render target factory, as a renderer does.
+            let render_target = match surfaces.iter().find_map(|surface| try_get_gl_surface(&**surface)) {
+                Some(gl_surface) => gl_surface.create_gl_render_target(&gl_context),
+                None => {
+                    let factory = features.try_get::<dyn ferroui_opengl::IGlPlatformSurfaceRenderTargetFactory>();
+                    let surface = factory
+                        .as_ref()
+                        .and_then(|factory| surfaces.iter().find(|surface| factory.can_render_to_surface(&gl_context, surface)));
+                    match (&factory, surface) {
+                        (Some(factory), Some(surface)) => {
+                            report.check(
+                                "composition surface",
+                                true,
+                                "the context renders to a surface of the window through its render target factory",
+                            );
+                            factory.create_render_target(&gl_context, surface)
+                        }
+                        _ => {
+                            report.check(
+                                "OpenGL surface",
+                                false,
+                                format!(
+                                    "the window has no OpenGL surface among its surfaces, and the context has {} it can render to one of them with",
+                                    if factory.is_some() { "a render target factory but no surface" } else { "no render target factory" }
+                                ),
+                            );
+                            return None;
+                        }
+                    }
+                }
+            };
             Some(GlPainter { context, render_target, mismatches: RefCell::new(Vec::new()), last_frame: Cell::new(None) })
         }
 
@@ -243,11 +271,14 @@ mod windows {
             let scissor = unsafe { std::mem::transmute::<*const std::ffi::c_void, Scissor>(scissor) };
 
             // A rectangle from the top-left corner, as the window sees it:
-            // the rows of OpenGL count from the bottom.
+            // the rows of OpenGL count from the bottom, unless the session
+            // says that its surface is flipped (a texture of Direct3D in a
+            // composition mode), where they count from the top.
+            let flipped = session.is_y_flipped();
             let fill = |x: i32, y: i32, w: i32, h: i32, color: [u8; 3]| {
                 // SAFETY: plain values; the context of the session is
                 // current.
-                unsafe { scissor(x, height - y - h, w, h) };
+                unsafe { scissor(x, if flipped { y } else { height - y - h }, w, h) };
                 gl.clear_color(f32::from(color[0]) / 255.0, f32::from(color[1]) / 255.0, f32::from(color[2]) / 255.0, 1.0);
                 gl.clear(GL_COLOR_BUFFER_BIT);
             };
@@ -292,7 +323,8 @@ mod windows {
             }
             // The pixel at a point of the window, in the rows of OpenGL.
             let pixel_at = |x: i32, y: i32| -> [u8; 4] {
-                let index = ((height - 1 - y) as usize * width as usize + x as usize) * 4;
+                let row = if flipped { y } else { height - 1 - y };
+                let index = (row as usize * width as usize + x as usize) * 4;
                 [pixels[index], pixels[index + 1], pixels[index + 2], pixels[index + 3]]
             };
             let near = |pixel: [u8; 4], color: [u8; 3]| {
@@ -1403,11 +1435,30 @@ mod windows {
         };
         println!("Rendering mode: {rendering_mode:?}");
 
+        // `--composition redirection|dcomp`: the one composition mode of
+        // the run (with ANGLE), without a fallback. The default is the
+        // redirection surface of the window.
+        let composition = arguments
+            .iter()
+            .position(|argument| argument == "--composition")
+            .and_then(|index| arguments.get(index + 1))
+            .map_or("redirection", String::as_str);
+        let composition_mode = match composition {
+            "redirection" => Win32CompositionMode::RedirectionSurface,
+            "dcomp" => Win32CompositionMode::DirectComposition,
+            other => {
+                eprintln!("win32_window: unknown composition mode '{other}' (redirection, dcomp)");
+                return ExitCode::from(2);
+            }
+        };
+        if rendering_mode == Win32RenderingMode::AngleEgl {
+            println!("Composition mode: {composition_mode:?}");
+        }
+        let composed = rendering_mode == Win32RenderingMode::AngleEgl && composition_mode != Win32CompositionMode::RedirectionSurface;
+
         let options = Win32PlatformOptions {
             rendering_mode: vec![rendering_mode],
-            // The window is presented through its redirection surface: the
-            // composition modes are a later stage.
-            composition_mode: vec![Win32CompositionMode::RedirectionSurface],
+            composition_mode: vec![composition_mode],
             ..Win32PlatformOptions::default()
         };
         Win32Platform::initialize(options);
@@ -1483,17 +1534,39 @@ mod windows {
             );
             let surfaces = window.surfaces();
             let gl_surfaces = surfaces.iter().filter(|surface| try_get_gl_surface(&***surface).is_some()).count();
-            let expected_gl_surfaces = usize::from(rendering_mode == Win32RenderingMode::AngleEgl);
+            // With ANGLE a window has a third surface: its OpenGL surface,
+            // or in a composition mode the surface of that mode, which is
+            // not an OpenGL surface itself.
+            let expected_gl_surfaces = usize::from(rendering_mode == Win32RenderingMode::AngleEgl && !composed);
+            let expected_surfaces = 2 + usize::from(rendering_mode == Win32RenderingMode::AngleEgl);
             report.check(
                 "surfaces",
-                surfaces.len() == 2 + expected_gl_surfaces
+                surfaces.len() == expected_surfaces
                     && gl_surfaces == expected_gl_surfaces
                     && surfaces.iter().any(|surface| surface.as_framebuffer_surface().is_some()),
                 format!(
-                    "{} surface(s): the window handle, {gl_surfaces} OpenGL surface(s) and the framebuffer",
-                    surfaces.len()
+                    "{} surface(s): the window handle, {gl_surfaces} OpenGL surface(s){} and the framebuffer",
+                    surfaces.len(),
+                    if composed { ", the surface of the composition mode" } else { "" }
                 ),
             );
+            if composed {
+                // A window of a composition mode has no redirection bitmap.
+                const GWL_EXSTYLE: i32 = -20;
+                const WS_EX_NOREDIRECTIONBITMAP: isize = 0x0020_0000;
+                #[link(name = "user32")]
+                extern "system" {
+                    fn GetWindowLongPtrW(hwnd: isize, index: i32) -> isize;
+                }
+                // SAFETY: a window handle of this thread and an index of
+                // the system.
+                let ex_style = unsafe { GetWindowLongPtrW(hwnd, GWL_EXSTYLE) };
+                report.check(
+                    "no redirection bitmap",
+                    ex_style & WS_EX_NOREDIRECTIONBITMAP != 0,
+                    format!("the extended styles of the window are {ex_style:#x}"),
+                );
+            }
         }
 
         window.set_input_root(Rc::new(InputRoot {
