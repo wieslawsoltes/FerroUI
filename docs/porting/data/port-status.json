@@ -6709,15 +6709,15 @@
    "name": "Avalonia.FreeDesktop",
    "path": "src/Avalonia.FreeDesktop",
    "rust": "src/FerroUI.FreeDesktop",
-   "scope": "out",
+   "scope": "in",
    "detail": "types",
    "files": [
-    0,
+    10,
     18,
     0
    ],
    "types": [
-    0,
+    16,
     26,
     0
    ],
@@ -6727,7 +6727,7 @@
     0
    ],
    "interfaces": [
-    0,
+    2,
     3
    ],
    "propertyRegistrations": [
@@ -6740,8 +6740,46 @@
    ],
    "notApplicableFiles": 0,
    "matchKinds": {},
-   "presentFiles": {},
-   "rustOnly": []
+   "presentFiles": {
+    "DBusCallQueue.cs": [
+     "dbus_call_queue.rs"
+    ],
+    "DBusHelper.cs": [
+     "dbus_helper.rs"
+    ],
+    "DBusIme/DBusTextInputMethodBase.cs": [
+     "dbus_ime/dbus_text_input_method_base.rs"
+    ],
+    "DBusIme/Fcitx/FcitxEnums.cs": [
+     "dbus_ime/fcitx/fcitx_enums.rs"
+    ],
+    "DBusIme/Fcitx/FcitxICWrapper.cs": [
+     "dbus_ime/fcitx/fcitx_ic_wrapper.rs"
+    ],
+    "DBusIme/Fcitx/FcitxX11TextInputMethod.cs": [
+     "dbus_ime/fcitx/fcitx_x11_text_input_method.rs"
+    ],
+    "DBusIme/IBus/IBusEnums.cs": [
+     "dbus_ime/ibus/ibus_enums.rs"
+    ],
+    "DBusIme/IBus/IBusX11TextInputMethod.cs": [
+     "dbus_ime/ibus/ibus_x11_text_input_method.rs"
+    ],
+    "DBusIme/X11DBusImeHelper.cs": [
+     "dbus_ime/x11_dbus_ime_helper.rs"
+    ],
+    "IX11InputMethod.cs": [
+     "ix11_input_method.rs"
+    ]
+   },
+   "rustOnly": [
+    "dbus_ime/fcitx/dbus.rs",
+    "dbus_ime/ibus/dbus.rs",
+    "dbus_ime/tests.rs",
+    "event.rs",
+    "signal_watch.rs",
+    "test_support.rs"
+   ]
   },
   {
    "name": "Avalonia.FreeDesktop.AtSpi",
@@ -7528,7 +7566,7 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    60,
+    61,
     88,
     0
    ],
@@ -7695,6 +7733,9 @@
     "X11Window.Ime.cs": [
      "x11_window_ime.rs"
     ],
+    "X11Window.Xim.cs": [
+     "x11_window_xim.rs"
+    ],
     "X11Window.cs": [
      "x11_window.rs"
     ],
@@ -7739,7 +7780,6 @@
     ]
    },
    "rustOnly": [
-    "event.rs",
     "pixel_buffer.rs",
     "raw_event_grouping.rs"
    ]

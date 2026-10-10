@@ -10,7 +10,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.X11` (exists) |
 | Crate | `ferroui-x11` |
 | Phase / priority | 5 - desktop (Linux) / P1 |
-| Files | 60/88 (68.2%) |
+| Files | 61/88 (69.3%) |
 | Types | 133/291 (107 waived) (72.3%) |
 | Members | 0/4897 (0.0%) |
 
@@ -18,7 +18,7 @@ This backend is being ported. It is tracked at file and type granularity: the me
 
 ## Files
 
-### `(project root)` - files 29/37, types 91/216 (106 waived), members 0/4427
+### `(project root)` - files 30/37, types 91/216 (106 waived), members 0/4427
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
@@ -48,7 +48,7 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `X11PlatformLifetimeEvents.cs` | `x11_platform_lifetime_events.rs` | missing | 0/1 | `X11PlatformLifetimeEvents` | 3 |  |
 | `X11Structs.cs` | `x11_structs.rs` | present | 37/123 (86 waived) | - | 1353 | replaced: the event, request and hint structures are those of the Xlib bindings (`x11-dl`, used through `xlib.rs`), which declare them with the layout of the C headers; the enumerations and the Motif hints are ported (docs/porting/x11-platform.md, section 2) |
 | `X11Window.Ime.cs` | `x11_window_ime.rs` | present | 1/1 | - | 0 | renamed: the keyboard part is ported (the input context, the key of a key event, its text); the input method part (`InitializeIme`, `FilterIme`, `ProcessNextImeEvent`, the forwarded keys) is stage 2 of docs/porting/x11-platform.md |
-| `X11Window.Xim.cs` | `x11_window_xim.rs` | missing | 1/1 | - | 0 | types found in `x11_window.rs` (add to path-overrides.toml) |
+| `X11Window.Xim.cs` | `x11_window_xim.rs` | present | 1/1 | - | 0 | renamed: not ported yet: the input method of the server (`XimInputMethod`) is stage 2 of docs/porting/x11-platform.md |
 | `X11Window.cs` | `x11_window.rs` | present | 2/2 | - | 86 |  |
 | `X11WindowInfo.cs` | `x11_window_info.rs` | present | 1/1 | - | 3 |  |
 | `XEmbedPlug.cs` | `x_embed_plug.rs` | missing | 0/1 | `XEmbedPlug` | 8 |  |
@@ -172,7 +172,6 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
-| `event.rs` | The multicast events of the backend's own classes (a C# `event Action` of the original): a list of handlers with tokens to remove them | `Event` |
 | `pixel_buffer.rs` | A framebuffer over pixels the crate owns, for what the original makes with the `LockedFramebuffer` constructor over memory of its own (cursor and icon pixels) | `PixelBuffer` |
 | `raw_event_grouping.rs` | The port of `src/Shared/RawEventGrouping.cs`, a source file the original compiles into every backend that queues its input (it belongs to no project of the tracking) | `AutomaticRawEventGrouperDispatchQueue`, `GrouperState`, `IRawEventGrouperDispatchQueue`, `ManualRawEventGrouperDispatchQueue`, `MergedPoints`, `RawEvent`, `RawEventGrouper`, `RawEventHandler` |
 

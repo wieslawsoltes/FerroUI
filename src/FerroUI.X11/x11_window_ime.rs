@@ -1,10 +1,10 @@
-//! The keyboard input of a window (the port of the keyboard part of
-//! `X11Window.Ime.cs`): the input context, the key of a key event and the
-//! text it produces.
+//! The keyboard input of a window (the port of `X11Window.Ime.cs`): the
+//! input context, the key of a key event and the text it produces, the
+//! input method of the window and the queue of key events an enabled
+//! input method is offered before the application gets them.
 //!
-//! The rest of that file, and `X11Window.Xim.cs`, are the input methods of
-//! a window (the queue of key events an input method filters, the input
-//! method of the server): stage 2 of docs/porting/x11-platform.md.
+//! The input method of the server is in `x11_window_xim.rs`; the input
+//! methods over D-Bus are in the crate `ferroui-freedesktop`.
 
 use crate::keysyms::X11Key;
 use crate::x11_enum_extensions::X11EnumExtensions;
@@ -12,14 +12,21 @@ use crate::x11_enums::XModifierMask;
 use crate::x11_key_transform::X11KeyTransform;
 use crate::x11_structs::{XEventName, XIMProperties};
 use crate::x11_window::X11Window;
+use crate::x11_window_xim::XimInputMethod;
 use crate::xlib::{self, XDisplay, XEvent, XKeyEvent, XLookupStatus};
-use ferroui_base::input::raw::{IRawInputEventArgs, RawInputEventArgs, RawKeyEventArgs, RawKeyEventType};
+use ferroui_base::input::raw::{
+    IRawInputEventArgs, RawInputEventArgs, RawKeyEventArgs, RawKeyEventType, RawTextInputEventArgs,
+};
+use ferroui_base::input::text_input::ITextInputMethodImpl;
 use ferroui_base::input::{
     IInputDevice, IInputRoot, Key, KeyDeviceType, KeySymbolHelper, PhysicalKey, RawInputModifiers,
 };
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
 use std::ops::Deref;
+use ferroui_base::threading::Dispatcher;
+use ferroui_base::{FerroLocator, LocatorExtensions};
+use ferroui_freedesktop::{IX11InputMethodControl, IX11InputMethodFactory, X11InputMethodForwardedKey};
 use std::rc::Rc;
 
 const IME_BUFFER_SIZE: usize = 64 * 1024;
@@ -246,7 +253,6 @@ impl X11Window {
         let (x11_key, key, symbol) = self.lookup_key(xlib::key_event_mut(ev), physical_key);
         let modifiers = XModifierMask::from_bits_retain(key_event.state as i32).to_raw_input_modifiers();
         let timestamp = key_event.time as u64;
-        let _ = x11_key;
 
         let args: Rc<dyn IRawInputEventArgs> = if xlib::event_type(ev) == XEventName::KeyPress as i32 {
             let text = self.translate_event_to_string(ev, symbol.clone());
@@ -275,7 +281,7 @@ impl X11Window {
             ))
         };
 
-        self.schedule_key_input(args, ev);
+        self.schedule_key_input(args, ev, x11_key.0, key_event.keycode as i32);
     }
 
     fn lookup_key(&self, key_event: &mut XKeyEvent, physical_key: PhysicalKey) -> KeyLookup {
@@ -322,16 +328,217 @@ impl X11Window {
         filter_key_text(text)
     }
 
-    fn schedule_key_input(&self, args: Rc<dyn IRawInputEventArgs>, xev: &XEvent) {
+    fn schedule_key_input(&self, args: Rc<dyn IRawInputEventArgs>, xev: &XEvent, keyval: i32, keycode: i32) {
         // As the reference, which reads the time through the layout of a
         // button event: a key event has it at the same place.
         self.x11.set_last_activity_timestamp(xlib::button_event(xev).time);
 
-        // Stage 2: with an input method that is enabled the event goes to
-        // its queue first (`FilterIme`).
+        let enabled = self.ime_control.borrow().as_ref().is_some_and(|ime_control| ime_control.is_enabled());
+        if enabled && self.filter_ime(args.clone(), keyval, keycode) {
+            return;
+        }
 
         self.schedule_input(args);
     }
+
+    /// Makes the input method of the window (`InitializeIme`): the one
+    /// over D-Bus the platform registered a factory for, else the one of
+    /// the server when the platform opened it.
+    pub(crate) fn initialize_ime(&self) {
+        let factory = FerroLocator::current().get_service::<dyn IX11InputMethodFactory>();
+        let mut ime: Option<(Rc<dyn ITextInputMethodImpl>, Rc<dyn IX11InputMethodControl>)> =
+            factory.map(|factory| factory.create_client(self.xid() as usize));
+
+        if ime.is_none() && self.x11.has_xim() {
+            let xim = XimInputMethod::new(self.this.clone());
+            ime = Some((xim.clone(), xim));
+        }
+
+        if let Some((ime, ime_control)) = ime {
+            {
+                let weak = self.this.clone();
+                ime_control.commit().subscribe(move |s| {
+                    if let Some(window) = weak.upgrade() {
+                        let Some(input_root) = window.input_root_or_none() else {
+                            return;
+                        };
+                        window.schedule_input(Rc::new(RawTextInputEventArgs::new(
+                            window.keyboard.clone(),
+                            window.x11.last_activity_timestamp() as u64,
+                            input_root,
+                            s,
+                        )));
+                    }
+                });
+            }
+            {
+                let weak = self.this.clone();
+                ime_control.forward_key().subscribe(move |forwarded_key| {
+                    if let Some(window) = weak.upgrade() {
+                        window.on_ime_control_forward_key(forwarded_key);
+                    }
+                });
+            }
+            *self.ime.borrow_mut() = Some(ime);
+            *self.ime_control.borrow_mut() = Some(ime_control);
+        }
+    }
+
+    fn on_ime_control_forward_key(&self, forwarded_key: X11InputMethodForwardedKey) {
+        let Some(input_root) = self.input_root_or_none() else {
+            return;
+        };
+        let x11_key = X11Key(forwarded_key.key_val);
+        let key_symbol = if self.x11.has_xkb() {
+            get_key_symbol_xkb(self.x11.display(), x11_key)
+        } else {
+            get_key_symbol_x_core(x11_key)
+        };
+        let timestamp = self.x11.last_activity_timestamp() as u64;
+
+        self.schedule_input(forwarded_key_args(
+            forwarded_key,
+            key_symbol,
+            self.keyboard.clone(),
+            timestamp,
+            input_root,
+        ));
+    }
+
+    /// Queues a key event for the input method (`FilterIme`); false when
+    /// the window has none.
+    fn filter_ime(&self, args: Rc<dyn IRawInputEventArgs>, keyval: i32, keycode: i32) -> bool {
+        if self.ime.borrow().is_none() {
+            return false;
+        }
+        self.ime_queue.borrow_mut().push_back(QueuedImeKey { args, keyval, keycode });
+        if !self.processing_ime.get() {
+            self.process_next_ime_event();
+        }
+        true
+    }
+
+    /// Offers the queued key events to the input method, one after the
+    /// other, and passes on those it does not consume
+    /// (`ProcessNextImeEvent`, an `async void` of the reference: a task of
+    /// the UI dispatcher here).
+    fn process_next_ime_event(&self) {
+        if self.processing_ime.get() {
+            return;
+        }
+        let Some(window) = self.this.clone().upgrade() else {
+            return;
+        };
+        self.processing_ime.set(true);
+
+        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+            // The `finally` of the reference.
+            struct ResetProcessing(Rc<X11Window>);
+            impl Drop for ResetProcessing {
+                fn drop(&mut self) {
+                    self.0.processing_ime.set(false);
+                }
+            }
+            let guard = ResetProcessing(window);
+            let window = &guard.0;
+
+            loop {
+                let Some(ev) = window.ime_queue.borrow_mut().pop_front() else {
+                    break;
+                };
+                let ime_control = window.ime_control.borrow().clone();
+                if let Some(ime_control) = ime_control {
+                    let handled_by_ime = ime_control.handle_event_async(ev.args.clone(), ev.keyval, ev.keycode).await;
+                    if handled_by_ime && !passes_although_handled(&ev.args) {
+                        continue;
+                    }
+                }
+
+                window.schedule_input(ev.args);
+            }
+        }));
+    }
+}
+
+/// A key event that waits for the input method (an element of
+/// `_imeQueue`; the X event the reference keeps with it is never read).
+pub(crate) struct QueuedImeKey {
+    pub(crate) args: Rc<dyn IRawInputEventArgs>,
+    pub(crate) keyval: i32,
+    pub(crate) keycode: i32,
+}
+
+/// Whether a key event goes on to the application although the input
+/// method consumed it.
+pub(crate) fn passes_although_handled(args: &Rc<dyn IRawInputEventArgs>) -> bool {
+    let Some(key) = args.downcast_ref::<RawKeyEventArgs>() else {
+        return false;
+    };
+
+    // We let filtered modifier-key KeyUp events through
+    // since some apps rely on the order of events to track individual (left/right)
+    // modifier keys states rather than relying on general key modifiers
+    key.type_() == RawKeyEventType::KeyUp
+        && matches!(
+            key.key(),
+            Key::LeftCtrl
+                | Key::RightCtrl
+                | Key::LeftAlt
+                | Key::RightAlt
+                | Key::LeftShift
+                | Key::RightShift
+                | Key::LWin
+                | Key::RWin
+        )
+}
+
+/// The raw input of a key an input method forwards
+/// (`OnImeControlForwardKey`): a key event without a physical key, with
+/// the symbol as its text when the input method says the key has text.
+pub(crate) fn forwarded_key_args(
+    forwarded_key: X11InputMethodForwardedKey,
+    key_symbol: Option<String>,
+    keyboard: Rc<dyn IInputDevice>,
+    timestamp: u64,
+    input_root: Rc<dyn IInputRoot>,
+) -> Rc<dyn IRawInputEventArgs> {
+    let x11_key = X11Key(forwarded_key.key_val);
+    let key = X11KeyTransform::key_from_x11_key(x11_key);
+    let modifiers = RawInputModifiers::from_bits_retain(forwarded_key.modifiers.bits());
+
+    if forwarded_key.with_text {
+        Rc::new(RawKeyEventArgsWithText::new(
+            keyboard,
+            timestamp,
+            input_root,
+            forwarded_key.type_,
+            key,
+            modifiers,
+            PhysicalKey::None,
+            key_symbol.clone(),
+            key_symbol,
+        ))
+    } else {
+        Rc::new(RawKeyEventArgs::new(
+            keyboard,
+            timestamp,
+            input_root,
+            forwarded_key.type_,
+            key,
+            modifiers,
+            PhysicalKey::None,
+            key_symbol,
+            KeyDeviceType::Keyboard,
+        ))
+    }
+}
+
+fn get_key_symbol_x_core(x11_key: X11Key) -> Option<String> {
+    let bytes = xlib::x_keysym_to_string(x11_key.0 as u32 as _)?;
+    if bytes.is_empty() {
+        return None;
+    }
+    Some(String::from_utf8_lossy(&bytes).into_owned())
 }
 
 #[cfg(test)]
@@ -427,4 +634,125 @@ mod tests {
         assert_eq!(xlib::xkb_set_group_for_core_state(5, 7), 3 << 13 | 5);
     }
 
+    struct TestDevice;
+
+    impl IInputDevice for TestDevice {
+        fn process_raw_event(&self, _ev: &dyn IRawInputEventArgs) {}
+
+        fn as_any(&self) -> &dyn Any {
+            self
+        }
+    }
+
+    struct TestRoot;
+
+    impl IInputRoot for TestRoot {
+        fn focus_manager(&self) -> Option<Rc<ferroui_base::input::FocusManager>> {
+            None
+        }
+
+        fn pointer_over_element(&self) -> Option<ferroui_base::Ref<ferroui_base::input::InputElement>> {
+            None
+        }
+
+        fn set_pointer_over_element(&self, _value: Option<ferroui_base::Ref<ferroui_base::input::InputElement>>) {}
+
+        fn cursor_element(&self) -> Option<ferroui_base::Ref<ferroui_base::input::InputElement>> {
+            None
+        }
+
+        fn set_cursor_element(&self, _value: Option<ferroui_base::Ref<ferroui_base::input::InputElement>>) {}
+
+        fn root_element(&self) -> ferroui_base::Ref<ferroui_base::input::InputElement> {
+            unreachable!("key events do not ask for the root element")
+        }
+
+        fn focus_root(&self) -> ferroui_base::Ref<ferroui_base::input::InputElement> {
+            unreachable!("key events do not ask for the focus root")
+        }
+
+        fn pointer_over_invalidated(&self) {}
+    }
+
+    fn key_args(type_: RawKeyEventType, key: Key) -> Rc<dyn IRawInputEventArgs> {
+        Rc::new(RawKeyEventArgs::new(
+            Rc::new(TestDevice),
+            1,
+            Rc::new(TestRoot),
+            type_,
+            key,
+            RawInputModifiers::empty(),
+            PhysicalKey::None,
+            None,
+            KeyDeviceType::Keyboard,
+        ))
+    }
+
+    #[test]
+    fn the_release_of_a_modifier_key_passes_although_the_input_method_consumed_it() {
+        for key in [
+            Key::LeftCtrl,
+            Key::RightCtrl,
+            Key::LeftAlt,
+            Key::RightAlt,
+            Key::LeftShift,
+            Key::RightShift,
+            Key::LWin,
+            Key::RWin,
+        ] {
+            assert!(passes_although_handled(&key_args(RawKeyEventType::KeyUp, key)), "{key:?}");
+            // Its press does not.
+            assert!(!passes_although_handled(&key_args(RawKeyEventType::KeyDown, key)), "{key:?}");
+        }
+        assert!(!passes_although_handled(&key_args(RawKeyEventType::KeyUp, Key::A)));
+        assert!(!passes_although_handled(&key_args(RawKeyEventType::KeyDown, Key::A)));
+        // A press with text is a key event like the others.
+        let with_text: Rc<dyn IRawInputEventArgs> = Rc::new(RawKeyEventArgsWithText::new(
+            Rc::new(TestDevice),
+            1,
+            Rc::new(TestRoot),
+            RawKeyEventType::KeyUp,
+            Key::LeftShift,
+            RawInputModifiers::empty(),
+            PhysicalKey::None,
+            None,
+            None,
+        ));
+        assert!(passes_although_handled(&with_text));
+    }
+
+    #[test]
+    fn a_forwarded_key_is_a_key_event_without_a_physical_key() {
+        use ferroui_base::input::KeyModifiers;
+
+        // The return key, released, with modifiers: no text.
+        let forwarded = X11InputMethodForwardedKey {
+            key_val: 0xff0d,
+            modifiers: KeyModifiers::CONTROL | KeyModifiers::SHIFT,
+            type_: RawKeyEventType::KeyUp,
+            with_text: false,
+        };
+        let args = forwarded_key_args(forwarded, None, Rc::new(TestDevice), 77, Rc::new(TestRoot));
+        let key = args.downcast_ref::<RawKeyEventArgs>().unwrap();
+        assert_eq!(key.key(), Key::Enter);
+        assert_eq!(key.type_(), RawKeyEventType::KeyUp);
+        assert_eq!(key.modifiers(), RawInputModifiers::CONTROL | RawInputModifiers::SHIFT);
+        assert_eq!(key.physical_key(), PhysicalKey::None);
+        assert_eq!(args.timestamp(), 77);
+        assert_eq!(text_of(&args), None);
+
+        // A press with text: the symbol of the key is its text.
+        let forwarded = X11InputMethodForwardedKey {
+            key_val: 0x61,
+            modifiers: KeyModifiers::empty(),
+            type_: RawKeyEventType::KeyDown,
+            with_text: true,
+        };
+        let args =
+            forwarded_key_args(forwarded, Some("a".to_string()), Rc::new(TestDevice), 78, Rc::new(TestRoot));
+        let key = args.downcast_ref::<RawKeyEventArgs>().unwrap();
+        assert_eq!(key.key(), Key::A);
+        assert_eq!(key.key_symbol().as_deref(), Some("a"));
+        assert_eq!(text_of(&args).as_deref(), Some("a"));
+    }
 }
