@@ -23,6 +23,12 @@ pub mod wayland_platform_options;
 pub mod xkb_key_transform;
 
 #[cfg(target_os = "linux")]
+pub mod popup_impl;
+#[cfg(target_os = "linux")]
+mod popup_impl_sink;
+#[cfg(target_os = "linux")]
+pub mod wayland_conversion_extensions;
+#[cfg(target_os = "linux")]
 pub mod wayland_cursor_factory;
 #[cfg(target_os = "linux")]
 pub mod wayland_glib_dispatcher;

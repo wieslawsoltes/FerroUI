@@ -6,13 +6,14 @@
 //! so the client creates it, with the render loop and the platform graphics
 //! of the worker, and gives the worker the handle of its server side.
 //!
-//! `CreatePopupHandle` belongs to stage 2 of
-//! `docs/porting/wayland-platform.md`.
+//! The result of `CreatePopupHandle` has no first configure to wait for: the
+//! reference completes that task at once with an empty batch, the port leaves
+//! the member out of the result of a popup.
 
-use super::persistent::i_w_surface_event_sink::WXdgTopLevelEventSinkProxy;
-use super::persistent::i_w_xdg_top_level::WXdgTopLevelProxy;
+use super::persistent::i_w_surface_event_sink::{WXdgPopupEventSinkProxy, WXdgTopLevelEventSinkProxy};
+use super::persistent::i_w_xdg_top_level::{WXdgPopupProxy, WXdgShellSurfaceProxy, WXdgTopLevelProxy};
 use super::persistent::i_wayland_cursor::WaylandCursorProxy;
-use super::persistent::w_surface::{WSurfaceId, WXdgTopLevel};
+use super::persistent::w_surface::{WSurfaceId, WXdgPopup, WXdgTopLevel};
 use super::persistent::wayland_bitmap_cursor::WaylandBitmapCursor;
 use super::persistent::wayland_cursor::{WaylandCursorId, WaylandStandardCursor};
 use super::transient::rendering::i_wayland_framebuffer_surface::WaylandRenderSurfaceTarget;
@@ -185,7 +186,32 @@ impl WaylandWorkerClient {
         WaylandSurfaceCreateResult {
             proxy: WXdgTopLevelProxy::new(id, self.marshaller.clone()),
             render_surfaces,
-            basic_init_completed,
+            basic_init_completed: Some(basic_init_completed),
         }
+    }
+
+    /// Creates a new xdg_popup surface as a child of `parent`. The
+    /// popup is not actually mapped on the compositor until
+    /// the UI side calls `IWXdgPopup::update_positioner` at least
+    /// once and a buffer is attached.
+    pub fn create_popup_handle(
+        &self,
+        sink: WXdgPopupEventSinkProxy,
+        parent: &WXdgShellSurfaceProxy,
+    ) -> WaylandSurfaceCreateResult<WXdgPopupProxy> {
+        let id = WSurfaceId::new();
+        let parent = parent.id();
+        let worker_handle = self.worker.clone();
+        self.post_oob(move |worker| worker.register_popup(WXdgPopup::new(id, worker_handle, sink, parent)));
+
+        let render_surfaces: Vec<Arc<dyn IPlatformRenderSurface>> = vec![
+            Arc::new(WaylandEglWsiSurface::new(id)),
+            Arc::new(WaylandFramebuffer::new(WaylandRenderSurfaceTarget::Surface(id))),
+        ];
+
+        // Popups don't currently surface a "basic init" task to the UI
+        // side: the UI driver waits on the first OnPopupConfigure delivered
+        // through the event sink instead.
+        WaylandSurfaceCreateResult { proxy: WXdgPopupProxy::new(id, self.marshaller.clone()), render_surfaces, basic_init_completed: None }
     }
 }

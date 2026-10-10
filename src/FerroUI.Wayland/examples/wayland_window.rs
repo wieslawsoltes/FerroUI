@@ -34,7 +34,7 @@
 //!   backend.
 //! - `--expect-scale=N`: the scale of the output, which the window has to
 //!   take.
-//! - `--skip=a,b`: phases to leave out (`screens`, `frames`, `input`,
+//! - `--skip=a,b`: phases to leave out (`screens`, `frames`, `input`, `popup`,
 //!   `cursor`, `resize`, `state`, `title`).
 //!
 //! Touch is not checked: wlroots has no protocol that synthesizes it.
@@ -78,6 +78,17 @@ mod app {
     const MARKER_ORIGIN: (f64, f64) = (100.0, 60.0);
     const MARKER_SIZE: f64 = 40.0;
     const MARKER_FILL: (u8, u8, u8) = (0xcc, 0x33, 0x00);
+
+    /// The colours of the popups the smoke mode opens: one under the marker, one beside it.
+    const POPUP_FILL: (u8, u8, u8) = (0xee, 0xcc, 0x22);
+    const POPUP_SIZE: (f64, f64) = (160.0, 90.0);
+    const NESTED_FILL: (u8, u8, u8) = (0x22, 0xaa, 0x55);
+    const NESTED_SIZE: (f64, f64) = (80.0, 40.0);
+
+    thread_local! {
+        /// The marker of the main window: what the popup of the smoke mode is placed at.
+        static MARKER: RefCell<Option<Ref<Border>>> = const { RefCell::new(None) };
+    }
 
     /// Whether every check of the smoke mode passed.
     static SMOKE_PASSED: AtomicBool = AtomicBool::new(false);
@@ -132,6 +143,7 @@ mod app {
         let border = Border::new();
         border.set_background(Some(brush(FILL)));
         border.set_child(&marker);
+        MARKER.with(|cell| *cell.borrow_mut() = Some(marker.clone()));
 
         let window = Window::new();
         window.set_title(Some(TITLE.to_string()));
@@ -747,7 +759,9 @@ mod app {
         use ferroui_base::rendering::IRenderLoop;
         use ferroui_base::{PixelPoint, PixelSize, Point, Size, Vector};
         use ferroui_controls::platform::{IScreenImpl, IWindowingPlatform};
-        use ferroui_controls::WindowState;
+        use ferroui_controls::primitives::Popup;
+        use ferroui_controls::{PlacementMode, WindowState};
+        use wayland_client::Proxy;
         use ferroui_wayland::screens::SnapshotScreensImpl;
         use ferroui_wayland::server::wayland_worker_client::WaylandWorkerClient;
         use std::future::Future;
@@ -916,6 +930,10 @@ mod app {
                 if options.runs("cursor") {
                     report.phase("cursor");
                     cursor_checks(&report, probe, &window, client.as_ref()).await;
+                }
+                if options.runs("popup") {
+                    report.phase("popup");
+                    popup_checks(&report, probe, &window, client.as_ref()).await;
                 }
                 if options.runs("resize") {
                     report.phase("resize");
@@ -1303,6 +1321,197 @@ mod app {
             }
 
             window_impl.set_input(framework_input);
+        }
+
+        /// What the worker has of popups: how many are registered, how many have their role
+        /// object, how many are mapped, how many have a popup as their parent, and the version
+        /// of the shell.
+        #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+        struct PopupCounts {
+            registered: usize,
+            attached: usize,
+            mapped: usize,
+            nested: usize,
+            shell_version: u32,
+        }
+
+        fn popup_counts(client: &Rc<WaylandWorkerClient>) -> Option<PopupCounts> {
+            client
+                .invoke_oob(|worker| {
+                    let state = &worker.state;
+                    PopupCounts {
+                        registered: state.popups.len(),
+                        attached: state.popups.values().filter(|popup| popup.is_attached()).count(),
+                        mapped: state.popups.values().filter(|popup| popup.shell().is_mapped()).count(),
+                        nested: state.popups.values().filter(|popup| state.popups.contains_key(&popup.parent())).count(),
+                        shell_version: state.globals.as_ref().map_or(0, |globals| globals.xdg_wm_base.version()),
+                    }
+                })
+                .recv_timeout(STEP_TIMEOUT)
+                .ok()
+        }
+
+        /// A popup of the framework over `xdg_popup`: placed by the compositor from the
+        /// positioner, moved, given a popup of its own, and dismissed by a press beside it.
+        async fn popup_checks(report: &Report, probe: &mut Probe, window: &Ref<Window>, client: Option<&Rc<WaylandWorkerClient>>) {
+            let (Some(client), Some(marker)) = (client, MARKER.with(|cell| cell.borrow().clone())) else {
+                report.check("popup", false, "the worker client or the marker of the window is missing".to_string());
+                return;
+            };
+            if !probe.has_screencopy() || !probe.has_pointer() {
+                report.check("popup", false, "the compositor has no screen copy or no virtual pointer".to_string());
+                return;
+            }
+            let scaling = window.render_scaling();
+            let client_size = window.client_size();
+            let extent = (client_size.width as u32, client_size.height as u32);
+            let at = |x: f64, y: f64| ((x * scaling) as u32, (y * scaling) as u32);
+            // The pointer away from where the popups will be.
+            let _ = probe.pointer_move(20, 20, extent);
+
+            let nested_child = Border::new();
+            nested_child.set_background(Some(brush(NESTED_FILL)));
+            nested_child.set_width(NESTED_SIZE.0);
+            nested_child.set_height(NESTED_SIZE.1);
+            let nested = Popup::new();
+            nested.set_child(&nested_child);
+            nested.set_placement(PlacementMode::Right);
+
+            let popup_child = Border::new();
+            popup_child.set_background(Some(brush(POPUP_FILL)));
+            popup_child.set_width(POPUP_SIZE.0);
+            popup_child.set_height(POPUP_SIZE.1);
+            nested.set_placement_target(&popup_child);
+            let popup = Popup::new();
+            popup.set_child(&popup_child);
+            popup.set_placement_target(&marker);
+            // The left edge of the popup at the left edge of the marker, below it.
+            popup.set_placement(PlacementMode::BottomEdgeAlignedLeft);
+            popup.set_is_light_dismiss_enabled(true);
+
+            let before = popup_counts(client).unwrap_or_default();
+            popup.set_is_open(true);
+
+            // Where the compositor has to put it: under the marker.
+            let left = MARKER_ORIGIN.0;
+            let top = MARKER_ORIGIN.1 + MARKER_SIZE;
+            let centre = at(left + POPUP_SIZE.0 / 2.0, top + POPUP_SIZE.1 / 2.0);
+            let picture = picture_with(probe, centre, POPUP_FILL).await;
+            let counts = popup_counts(client).unwrap_or_default();
+            report.check(
+                "popup created",
+                !popup.is_using_overlay_layer() && before.registered == 0 && counts.registered == 1 && counts.attached == 1 && counts.mapped == 1,
+                format!(
+                    "the popup of the framework is a surface of the worker with its xdg_popup, mapped: {counts:?} (xdg_wm_base version {})",
+                    counts.shell_version
+                ),
+            );
+            match &picture {
+                Ok(picture) => {
+                    let inside = picture.pixel(centre.0, centre.1);
+                    let right = at(left + POPUP_SIZE.0 + 8.0, top + POPUP_SIZE.1 / 2.0);
+                    let below = at(left + POPUP_SIZE.0 / 2.0, top + POPUP_SIZE.1 + 8.0);
+                    let first = at(left + 3.0, top + 3.0);
+                    let last = at(left + POPUP_SIZE.0 - 3.0, top + POPUP_SIZE.1 - 3.0);
+                    let marker_pixel = at(MARKER_ORIGIN.0 + MARKER_SIZE / 2.0, MARKER_ORIGIN.1 + MARKER_SIZE / 2.0);
+                    report.check(
+                        "popup placed",
+                        close_to(inside, POPUP_FILL)
+                            && close_to(picture.pixel(first.0, first.1), POPUP_FILL)
+                            && close_to(picture.pixel(last.0, last.1), POPUP_FILL)
+                            && close_to(picture.pixel(right.0, right.1), FILL)
+                            && close_to(picture.pixel(below.0, below.1), FILL)
+                            && close_to(picture.pixel(marker_pixel.0, marker_pixel.1), MARKER_FILL),
+                        format!(
+                            "the composed output has the popup below the marker, its left edge at the marker's: centre {centre:?} is {inside:?}, its corners {:?} and {:?}, beside it {:?} and {:?}",
+                            picture.pixel(first.0, first.1),
+                            picture.pixel(last.0, last.1),
+                            picture.pixel(right.0, right.1),
+                            picture.pixel(below.0, below.1)
+                        ),
+                    );
+                }
+                Err(error) => report.check("popup placed", false, error.clone()),
+            }
+
+            // The pointer over the popup: its events arrive at the popup, not at the window.
+            let over = (left + POPUP_SIZE.0 / 2.0, top + POPUP_SIZE.1 / 2.0);
+            let sent = probe.pointer_move(over.0 as u32, over.1 as u32, extent);
+            let entered = wait_for(STEP_TIMEOUT, || popup_child.is_pointer_over()).await;
+            report.check(
+                "popup input",
+                sent.is_ok() && entered && !marker.is_pointer_over(),
+                format!("the pointer at {over:?} of the output is over the content of the popup: {sent:?}"),
+            );
+            let _ = probe.pointer_move(20, 20, extent);
+
+            // Moved: a reposition from version 3 of the shell, the popup created again before it.
+            const SHIFT: f64 = 60.0;
+            popup.set_horizontal_offset(SHIFT);
+            let moved_in = at(left + POPUP_SIZE.0 + SHIFT - 10.0, top + POPUP_SIZE.1 / 2.0);
+            let vacated = at(left + SHIFT / 2.0, top + POPUP_SIZE.1 / 2.0);
+            match picture_with(probe, moved_in, POPUP_FILL).await {
+                Ok(_) => {
+                    // The place the popup left shows the window again.
+                    let picture = picture_with(probe, vacated, FILL).await;
+                    let counts = popup_counts(client).unwrap_or_default();
+                    let (new, old) = match &picture {
+                        Ok(picture) => (picture.pixel(moved_in.0, moved_in.1), picture.pixel(vacated.0, vacated.1)),
+                        Err(_) => (None, None),
+                    };
+                    report.check(
+                        "popup moved",
+                        close_to(new, POPUP_FILL) && close_to(old, FILL) && counts.attached == 1 && counts.mapped == 1,
+                        format!(
+                            "an offset of {SHIFT} moves the popup ({}): {moved_in:?} is {new:?}, {vacated:?} is {old:?}; {counts:?}",
+                            if counts.shell_version >= 3 { "xdg_popup.reposition" } else { "created again: the shell is older than version 3" }
+                        ),
+                    );
+                }
+                Err(error) => report.check("popup moved", false, error),
+            }
+
+            // A popup of the popup: its parent on the compositor is the popup.
+            nested.set_is_open(true);
+            let nested_centre = at(left + SHIFT + POPUP_SIZE.0 + NESTED_SIZE.0 / 2.0, top + POPUP_SIZE.1 / 2.0);
+            let picture = picture_with(probe, nested_centre, NESTED_FILL).await;
+            let counts = popup_counts(client).unwrap_or_default();
+            let pixel = picture.as_ref().ok().and_then(|picture| picture.pixel(nested_centre.0, nested_centre.1));
+            report.check(
+                "nested popup",
+                close_to(pixel, NESTED_FILL) && counts.attached == 2 && counts.mapped == 2 && counts.nested == 1,
+                format!("a popup to the right of the popup, whose parent is the popup: {nested_centre:?} is {pixel:?}; {counts:?}"),
+            );
+            nested.set_is_open(false);
+            let closed = wait_for(STEP_TIMEOUT, || popup_counts(client).is_some_and(|counts| counts.registered == 1)).await;
+            let picture = picture_with(probe, nested_centre, FILL).await;
+            let pixel = picture.as_ref().ok().and_then(|picture| picture.pixel(nested_centre.0, nested_centre.1));
+            report.check(
+                "nested popup closed",
+                closed && close_to(pixel, FILL) && popup.is_open(),
+                format!("the popup of the popup is gone and its parent stays: {nested_centre:?} is {pixel:?}"),
+            );
+
+            // A press on the window beside the popup dismisses it.
+            let beside = (left + POPUP_SIZE.0 + SHIFT + 150.0, top + POPUP_SIZE.1 + 120.0);
+            let sent = probe
+                .pointer_move(beside.0 as u32, beside.1 as u32, extent)
+                .and_then(|()| probe.pointer_button(true))
+                .and_then(|()| probe.pointer_button(false));
+            let dismissed = wait_for(STEP_TIMEOUT, || !popup.is_open()).await;
+            let gone = wait_for(STEP_TIMEOUT, || popup_counts(client).is_some_and(|counts| counts.registered == 0)).await;
+            let picture = picture_with(probe, moved_in, FILL).await;
+            let pixel = picture.as_ref().ok().and_then(|picture| picture.pixel(moved_in.0, moved_in.1));
+            report.check(
+                "popup dismissed",
+                sent.is_ok() && dismissed && gone && close_to(pixel, FILL),
+                format!("a press at {beside:?} closes the popup and its surface is destroyed: {sent:?}; {moved_in:?} is {pixel:?}"),
+            );
+            let alive = probe.alive() && sway::view(TITLE).is_some();
+            report.check("after the popups", alive, "the connection and the window are still there".to_string());
+            if popup.is_open() {
+                popup.set_is_open(false);
+            }
         }
 
         /// A themed cursor and a bitmap cursor: the worker makes both and the compositor takes

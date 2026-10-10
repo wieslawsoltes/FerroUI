@@ -48,9 +48,9 @@ impl WindowImplSink {
         *sink.surface_proxy.borrow_mut() = Some(surface_proxy.clone());
         parent.set_surface(surface_proxy.clone(), handle.render_surfaces);
 
-        let initial_batch = match handle.basic_init_completed.recv() {
-            Ok(batch) => batch,
-            Err(_) => FerroWaylandException::new("The Wayland worker did not configure the window: it is gone").throw(),
+        let initial_batch = match handle.basic_init_completed.map(|completed| completed.recv()) {
+            Some(Ok(batch)) => batch,
+            _ => FerroWaylandException::new("The Wayland worker did not configure the window: it is gone").throw(),
         };
         *sink.initial_batch.borrow_mut() = Some(initial_batch.clone());
         parent.apply_configure_batch(&initial_batch);

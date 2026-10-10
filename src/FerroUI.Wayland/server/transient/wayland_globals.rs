@@ -272,6 +272,9 @@ impl Dispatch<WlRegistry, ()> for WaylandWorkerState {
                         for top_level in state.top_levels.values_mut() {
                             top_level.shell_mut().surface_mut().forget_output(name);
                         }
+                        for popup in state.popups.values_mut() {
+                            popup.shell_mut().surface_mut().forget_output(name);
+                        }
                     }
                 }
             }

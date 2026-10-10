@@ -19,5 +19,6 @@ use std::sync::Arc;
 pub struct WaylandSurfaceCreateResult<T> {
     pub proxy: T,
     pub render_surfaces: Vec<Arc<dyn IPlatformRenderSurface>>,
-    pub basic_init_completed: Receiver<Arc<XdgConfigureBatch>>,
+    /// The first configure of a top-level; a popup has none to wait for.
+    pub basic_init_completed: Option<Receiver<Arc<XdgConfigureBatch>>>,
 }

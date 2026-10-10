@@ -103,10 +103,8 @@ impl KeyboardHandler {
 
                 // Process compose sequences on key press only, and only when the
                 // focused surface has an active text input client (e.g. a TextBox)
-                let has_text_input_client = cx
-                    .top_levels
-                    .get(&focused_surface)
-                    .is_some_and(|top_level| top_level.shell().surface().has_text_input_client());
+                let has_text_input_client =
+                    cx.shell(focused_surface).is_some_and(|shell| shell.surface().has_text_input_client());
                 if let (true, true, Some(keymap), Some(compose_state)) =
                     (pressed, has_text_input_client, &self.keymap, &self.compose_state)
                 {

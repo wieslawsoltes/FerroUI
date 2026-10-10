@@ -1,15 +1,17 @@
 //! The events of a surface as the UI thread receives them (the port of
 //! `IWSurfaceEventSink.cs`), and the proxies the worker holds
-//! (`WSurfaceEventSinkProxy`, `WXdgTopLevelEventSinkProxy`, which the
-//! reference generates): every call is posted to the UI thread at the default
-//! priority, with its arguments as values.
+//! (`WSurfaceEventSinkProxy`, `WXdgTopLevelEventSinkProxy`,
+//! `WXdgPopupEventSinkProxy`, which the reference generates): every call is
+//! posted to the UI thread at the default priority, with its arguments as
+//! values.
 //!
 //! The members of drag and drop (`OnDragEnter`, `OnDragMotion`, `OnDragLeave`,
-//! `OnDrop`) and the sink of a popup belong to stage 2 of
+//! `OnDrop`) belong to a later part of stage 2 of
 //! `docs/porting/wayland-platform.md`.
 
 use super::decoration_mode::DecorationMode;
 use super::xdg_configure_batch::XdgConfigureBatch;
+use super::xdg_popup_configure_batch::XdgPopupConfigureBatch;
 use crate::screens::wayland_output_snapshot::WaylandOutputId;
 use crate::server::wayland_marshallers::UiThreadRef;
 use ferroui_base::input::raw::RawPointerEventType;
@@ -67,6 +69,19 @@ pub trait IWXdgTopLevelEventSink: IWSurfaceEventSink {
     fn on_configure(&self, batch: Arc<XdgConfigureBatch>);
     fn on_close(&self);
     fn on_decoration_mode_changed(&self, mode: DecorationMode);
+}
+
+/// UI-thread sink for worker→UI events specific to `xdg_popup` surfaces.
+/// Marshalled across the worker→UI boundary by `WXdgPopupEventSinkProxy`:
+/// calls are posted to the UI dispatcher.
+pub trait IWXdgPopupEventSink: IWSurfaceEventSink {
+    /// Compositor delivered a new popup configure (x, y, width, height),
+    /// sealed by the wrapping xdg_surface.configure(serial).
+    fn on_popup_configure(&self, batch: XdgPopupConfigureBatch);
+
+    /// Compositor dismissed the popup (xdg_popup.popup_done). The popup
+    /// must be torn down; after this no further events arrive.
+    fn on_popup_done(&self);
 }
 
 /// The sink of a surface as the worker holds it.
@@ -210,5 +225,37 @@ impl WXdgTopLevelEventSinkProxy {
 
     pub fn on_decoration_mode_changed(&self, mode: DecorationMode) {
         self.target.post(move |sink| sink.on_decoration_mode_changed(mode));
+    }
+}
+
+/// The sink of a popup as the worker holds it.
+#[derive(Clone)]
+pub struct WXdgPopupEventSinkProxy {
+    target: UiThreadRef<dyn IWXdgPopupEventSink>,
+    surface: WSurfaceEventSinkProxy,
+}
+
+impl WXdgPopupEventSinkProxy {
+    /// A proxy of `target`, an object of the calling thread, whose dispatcher `dispatcher` is.
+    pub fn new<T: IWXdgPopupEventSink + 'static>(target: Rc<T>, dispatcher: Arc<Dispatcher>) -> Self {
+        let surface: Rc<dyn IWSurfaceEventSink> = target.clone();
+        let popup: Rc<dyn IWXdgPopupEventSink> = target;
+        Self {
+            target: UiThreadRef::new(popup, dispatcher.clone()),
+            surface: WSurfaceEventSinkProxy::new(surface, dispatcher),
+        }
+    }
+
+    /// The proxy as the sink of the events every surface has (the base interface).
+    pub fn as_surface_sink(&self) -> &WSurfaceEventSinkProxy {
+        &self.surface
+    }
+
+    pub fn on_popup_configure(&self, batch: XdgPopupConfigureBatch) {
+        self.target.post(move |sink| sink.on_popup_configure(batch));
+    }
+
+    pub fn on_popup_done(&self) {
+        self.target.post(|sink| sink.on_popup_done());
     }
 }

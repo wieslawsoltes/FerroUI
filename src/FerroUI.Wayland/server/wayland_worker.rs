@@ -18,7 +18,10 @@
 use super::interop::wakeup_fd::WakeupFd;
 use super::interop::wayland_connection::{DispatchResult, WaylandConnection};
 use super::persistent::i_persistent_object::{ConnectionContext, IPersistentWaylandObject};
-use super::persistent::w_surface::{WSurfaceId, WXdgTopLevel};
+use super::persistent::w_surface::{
+    shell_surface_of, shell_surface_of_mut, PopupAttach, PopupParent, WSurfaceId, WXdgPopup, WXdgShellSurface, WXdgTopLevel,
+};
+use super::persistent::xdg_popup_positioner_params::XdgPopupPositionerParams;
 use super::persistent::wayland_bitmap_cursor::WaylandBitmapCursor;
 use super::persistent::wayland_cursor::{WaylandCursor, WaylandCursorId, WaylandCursors};
 use super::transient::rendering::i_wayland_framebuffer_surface::{IWaylandFramebufferSurface, WaylandRenderSurfaceTarget};
@@ -31,6 +34,7 @@ use crate::screens::i_wayland_outputs_sink::WaylandOutputsSinkProxy;
 use crate::ferro_wayland_exception::FerroWaylandException;
 use crate::wayland_platform_options::WaylandWorkerOptions;
 use ferroui_base::logging::{LogEventLevel, Logger};
+use ferroui_base::platform::RenderTargetSceneInfo;
 use ferroui_base::rendering::composition::server::LockedServerCompositor;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet, VecDeque};
@@ -215,6 +219,7 @@ impl WaylandWorker {
                     globals: None,
                     registry_bootstrap: None,
                     top_levels: HashMap::new(),
+                    popups: HashMap::new(),
                     cursors: HashMap::new(),
                     connected_objects: HashSet::new(),
                 };
@@ -367,6 +372,9 @@ pub struct WaylandWorkerState {
     pub(crate) registry_bootstrap: Option<RegistryBootstrap>,
     /// The top-levels of the worker: persistent objects.
     pub top_levels: HashMap<WSurfaceId, WXdgTopLevel>,
+    /// The popups of the worker: persistent objects. A popup names its parent, a top-level
+    /// or another popup, by number.
+    pub popups: HashMap<WSurfaceId, WXdgPopup>,
     /// The cursors of the worker; the bitmap ones are persistent objects.
     pub cursors: WaylandCursors,
     connected_objects: HashSet<PersistentKey>,
@@ -379,16 +387,89 @@ impl WaylandWorkerState {
         &mut self,
         target: WaylandRenderSurfaceTarget,
     ) -> Option<(&WaylandGlobals, &mut dyn IWaylandFramebufferSurface)> {
-        let WaylandWorkerState { globals, top_levels, cursors, .. } = self;
+        let WaylandWorkerState { globals, top_levels, popups, cursors, .. } = self;
         let globals = globals.as_ref()?;
         let surface: &mut dyn IWaylandFramebufferSurface = match target {
-            WaylandRenderSurfaceTarget::Surface(id) => top_levels.get_mut(&id)?,
+            WaylandRenderSurfaceTarget::Surface(id) => match top_levels.get_mut(&id) {
+                Some(top_level) => top_level,
+                None => popups.get_mut(&id)?,
+            },
             WaylandRenderSurfaceTarget::Cursor(id) => match cursors.get_mut(&id)? {
                 WaylandCursor::Bitmap(cursor) => cursor,
                 WaylandCursor::Standard(_) => return None,
             },
         };
         Some((globals, surface))
+    }
+
+    /// The shell surface of a top-level or of a popup.
+    pub fn shell(&self, id: WSurfaceId) -> Option<&WXdgShellSurface> {
+        shell_surface_of(&self.top_levels, &self.popups, id)
+    }
+
+    /// The shell surface of a top-level or of a popup.
+    pub fn shell_mut(&mut self, id: WSurfaceId) -> Option<&mut WXdgShellSurface> {
+        shell_surface_of_mut(&mut self.top_levels, &mut self.popups, id)
+    }
+
+    /// Stages the per-frame state of the object a render surface draws for, before its
+    /// buffer is attached, and attaches the popups that waited for the surface to be mapped
+    /// (the loop over the pending child popups in `OnBeforeNewBufferAttached` of the
+    /// reference, which reaches the children through the parent object).
+    pub fn on_before_new_buffer_attached(&mut self, target: WaylandRenderSurfaceTarget, scene_info: &RenderTargetSceneInfo) {
+        match self.framebuffer_surface(target) {
+            Some((globals, surface)) => surface.on_before_new_buffer_attached(globals, scene_info),
+            None => return,
+        }
+        if let WaylandRenderSurfaceTarget::Surface(id) = target {
+            let children = self.shell_mut(id).map(WXdgShellSurface::take_children_to_attach).unwrap_or_default();
+            for child in children {
+                self.try_attach_popup_to_parent(child);
+            }
+        }
+    }
+
+    /// What a popup reads of its parent, when both exist.
+    fn popup_parent(&self, popup: WSurfaceId) -> Option<(WSurfaceId, Option<PopupParent>)> {
+        let parent_id = self.popups.get(&popup)?.parent();
+        Some((parent_id, self.shell(parent_id).map(PopupParent::of)))
+    }
+
+    fn finish_popup_attach(&mut self, popup: WSurfaceId, parent: WSurfaceId, attach: PopupAttach) {
+        if attach == PopupAttach::ParentNotMapped {
+            if let Some(parent) = self.shell_mut(parent) {
+                parent.unregister_pending_child_popup(popup);
+                parent.register_pending_child_popup(popup);
+            }
+        }
+    }
+
+    /// Creates the role object of a popup if its parent is mapped, and has the parent
+    /// remember the popup if it is not (`TryAttachToParent`).
+    pub fn try_attach_popup_to_parent(&mut self, popup: WSurfaceId) {
+        let Some((parent_id, parent)) = self.popup_parent(popup) else {
+            return;
+        };
+        let WaylandWorkerState { globals, popups, .. } = self;
+        let Some(popup_surface) = popups.get_mut(&popup) else {
+            return;
+        };
+        let attach = popup_surface.try_attach_to_parent(parent.as_ref(), globals.as_ref());
+        self.finish_popup_attach(popup, parent_id, attach);
+    }
+
+    /// Gives a popup new positioner parameters (`UpdatePositioner`).
+    pub fn update_popup_positioner(&mut self, popup: WSurfaceId, positioner: XdgPopupPositionerParams) {
+        let Some((parent_id, parent)) = self.popup_parent(popup) else {
+            return;
+        };
+        let has_attached_children = self.popups.values().any(|child| child.parent() == popup && child.is_attached());
+        let WaylandWorkerState { globals, popups, .. } = self;
+        let Some(popup_surface) = popups.get_mut(&popup) else {
+            return;
+        };
+        let attach = popup_surface.update_positioner(positioner, parent.as_ref(), globals.as_ref(), has_attached_children);
+        self.finish_popup_attach(popup, parent_id, attach);
     }
 
     /// Refreshes the cursor of the pointers that are over a surface.
@@ -398,6 +479,7 @@ impl WaylandWorkerState {
         };
         let cx = InputContext {
             top_levels: &self.top_levels,
+            popups: &self.popups,
             cursors: &self.cursors,
             cursor_manager: &globals.cursor_manager,
             connection_id: globals.connection_id,
@@ -421,23 +503,29 @@ impl WaylandWorkerThread {
     }
 
     fn connect_persistent_object(&mut self, key: PersistentKey) {
+        let mut connected_popup = None;
         let enforce_roundtrip = {
             let WaylandWorkerThread { connection, state } = self;
             let Some(connection) = connection else {
                 return;
             };
-            let WaylandWorkerState { globals, top_levels, cursors, connected_objects, .. } = state;
+            let WaylandWorkerState { globals, top_levels, popups, cursors, connected_objects, .. } = state;
             let Some(globals) = globals.as_ref() else {
                 return;
             };
             let cx = ConnectionContext { connection_id: connection.id(), queue_handle: connection.queue_handle(), globals };
             let enforce_roundtrip = match key {
-                PersistentKey::Surface(id) => match top_levels.get_mut(&id) {
-                    Some(top_level) => {
+                PersistentKey::Surface(id) => match (top_levels.get_mut(&id), popups.get_mut(&id)) {
+                    (Some(top_level), _) => {
                         top_level.on_connected(&cx);
                         top_level.enforce_buffer_creation_roundtrip()
                     }
-                    None => return,
+                    (None, Some(popup)) => {
+                        popup.on_connected(&cx);
+                        connected_popup = Some(id);
+                        popup.enforce_buffer_creation_roundtrip()
+                    }
+                    (None, None) => return,
                 },
                 PersistentKey::Cursor(id) => match cursors.get_mut(&id) {
                     Some(WaylandCursor::Bitmap(cursor)) => {
@@ -450,6 +538,10 @@ impl WaylandWorkerThread {
             connected_objects.insert(key);
             enforce_roundtrip
         };
+        // `OnConnected` of a popup ends with the attempt to attach it to its parent.
+        if let Some(popup) = connected_popup {
+            self.state.try_attach_popup_to_parent(popup);
+        }
         if enforce_roundtrip {
             self.roundtrip();
         }
@@ -457,6 +549,11 @@ impl WaylandWorkerThread {
 
     fn persistent_keys(&self) -> Vec<PersistentKey> {
         let mut keys: Vec<PersistentKey> = self.state.top_levels.keys().map(|id| PersistentKey::Surface(*id)).collect();
+        // Popups after the top-levels and in the order they were made, so that a parent
+        // comes before its children.
+        let mut popups: Vec<WSurfaceId> = self.state.popups.keys().copied().collect();
+        popups.sort();
+        keys.extend(popups.into_iter().map(PersistentKey::Surface));
         keys.extend(self.state.cursors.iter().filter_map(|(id, cursor)| match cursor {
             WaylandCursor::Bitmap(_) => Some(PersistentKey::Cursor(*id)),
             WaylandCursor::Standard(_) => None,
@@ -475,6 +572,14 @@ impl WaylandWorkerThread {
             PersistentKey::Surface(id) => {
                 if let Some(top_level) = self.state.top_levels.get_mut(&id) {
                     top_level.on_disconnected();
+                } else if let Some(popup) = self.state.popups.get_mut(&id) {
+                    let parent = popup.parent();
+                    popup.on_disconnected();
+                    // Unregister from the parent's pending list in case we were
+                    // deferred and the connection went down before we got attached.
+                    if let Some(parent) = self.state.shell_mut(parent) {
+                        parent.unregister_pending_child_popup(id);
+                    }
                 }
             }
             PersistentKey::Cursor(id) => {
@@ -513,13 +618,28 @@ impl WaylandWorkerThread {
         }
     }
 
-    /// Destroys a top-level and unregisters it from the worker (`Disconnect` of a surface).
-    pub fn unregister_top_level(&mut self, id: WSurfaceId) {
+    /// Registers a popup (`RegisterPersistentObject`), like a top-level.
+    pub fn register_popup(&mut self, popup: WXdgPopup) {
+        let id = popup.shell().surface().id();
+        self.state.popups.insert(id, popup);
+        if self.is_connected() {
+            self.connect_persistent_object(PersistentKey::Surface(id));
+        }
+    }
+
+    /// Destroys a top-level or a popup and unregisters it from the worker (`Disconnect` of
+    /// a surface).
+    pub fn unregister_surface(&mut self, id: WSurfaceId) {
         let key = PersistentKey::Surface(id);
         if self.state.connected_objects.remove(&key) {
             self.disconnect_persistent_object(key);
         }
         self.state.top_levels.remove(&id);
+        if let Some(popup) = self.state.popups.remove(&id) {
+            if let Some(parent) = self.state.shell_mut(popup.parent()) {
+                parent.unregister_pending_child_popup(id);
+            }
+        }
     }
 
     /// Registers a themed cursor: a name for a cursor of the theme of whatever connection.

@@ -28,6 +28,10 @@
 //! handful of others) are shown one after the other, `FERROUI_SMOKE_PAGES`
 //! milliseconds each (1500 by default), and each is drawn into a bitmap
 //! through the render target of the framework (`NN-<header>.png`). On
+//! a screenshot run `FERROUI_SMOKE_OPEN_POPUP=combobox` (or `menu`) opens
+//! the first combo box (or the first menu item) of each page that is shown,
+//! so that a picture taken from outside (the compositor's, on Wayland) has a
+//! popup in it; the frame the framework draws of the window does not. On
 //! Windows the client area of the window is captured as well, as the
 //! system composed it (`NN-<header>-window.png`); only the window of the
 //! application is captured, never the desktop. The system does not draw
@@ -64,7 +68,7 @@ use ferroui_base::media::imaging::{Bitmap, BitmapEncoderOptions, PngBitmapEncode
 use ferroui_base::platform::{AlphaFormat, PixelFormat};
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::{PixelPoint, PixelRect, PixelSize, Ref, Size, Vector, Visual};
-use ferroui_controls::{AppBuilder, Application, Window};
+use ferroui_controls::{AppBuilder, Application, ComboBox, MenuItem, Window};
 use ferroui_desktop::AppBuilderDesktopExtensions;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
@@ -106,9 +110,9 @@ pub fn build_ferro_app() -> AppBuilder {
 /// platform detection takes over.
 ///
 /// The original calls `UseWaylandWithFallback()` always. Here it is asked for, because the
-/// Wayland backend has no popups yet (stage 2 of `docs/porting/wayland-platform.md`): a
-/// catalog that moved to Wayland by itself on a Wayland session would fail at its first
-/// popup.
+/// Wayland backend has no clipboard, no drag and drop and no input method yet (the later
+/// parts of stage 2 of `docs/porting/wayland-platform.md`): a catalog that moved to Wayland by
+/// itself on a Wayland session would lose what it has there through the X11 backend.
 #[cfg(target_os = "linux")]
 fn use_wayland_of_the_environment(builder: AppBuilder) -> AppBuilder {
     use ferroui_wayland::{FerroWaylandPlatformExtensions, WaylandPlatformOptions};
@@ -365,6 +369,53 @@ fn client_size_that_fits(
     Some(Size::new(width.floor(), height.floor()))
 }
 
+/// With `FERROUI_SMOKE_OPEN_POPUP` in a screenshot run: looks at the window four times a
+/// page and opens the first combo box (`combobox`, or `1`) or the first menu item (`menu`)
+/// that was not there at the look before, which is the first of the page that was just
+/// shown. The first look only remembers what the window has by itself.
+fn open_popups_of_pages(interval: Duration) {
+    let menu = match std::env::var("FERROUI_SMOKE_OPEN_POPUP").ok().as_deref() {
+        Some("menu") => true,
+        Some("combobox") | Some("1") => false,
+        _ => return,
+    };
+    let seen: std::cell::RefCell<Option<Vec<Ref<Visual>>>> = std::cell::RefCell::new(None);
+    let timer = DispatcherTimer::run(
+        move || {
+            let Some(window) = main_window() else { return true };
+            let candidates: Vec<Ref<Visual>> = window
+                .clone()
+                .upcast::<Visual>()
+                .get_visual_descendants()
+                .filter(|visual| if menu { visual.cast::<MenuItem>().is_some() } else { visual.cast::<ComboBox>().is_some() })
+                .collect();
+            let mut seen = seen.borrow_mut();
+            let first_look = seen.is_none();
+            let known = seen.get_or_insert_with(Vec::new);
+            let new: Vec<Ref<Visual>> =
+                candidates.into_iter().filter(|visual| !known.iter().any(|seen| seen.ptr_eq(visual))).collect();
+            known.extend(new.iter().cloned());
+            if first_look {
+                return true;
+            }
+            if let Some(first) = new.into_iter().find(|visual| visual.is_effectively_visible()) {
+                if let Some(combo_box) = first.cast::<ComboBox>() {
+                    println!("Screenshots: opening the drop-down of a combo box");
+                    combo_box.set_is_drop_down_open(true);
+                } else if let Some(menu_item) = first.cast::<MenuItem>() {
+                    println!("Screenshots: opening a menu item");
+                    menu_item.open();
+                }
+            }
+            true
+        },
+        interval / 4,
+        DispatcherPriority::BACKGROUND,
+    );
+    // The timer lives as long as the run.
+    std::mem::forget(timer);
+}
+
 /// The screenshot run asked for with `FERROUI_SMOKE_SCREENSHOTS`.
 fn screenshot_run(directory: PathBuf) {
     if let Err(error) = std::fs::create_dir_all(&directory) {
@@ -376,6 +427,7 @@ fn screenshot_run(directory: PathBuf) {
         pages.split(',').map(str::trim).filter(|header| !header.is_empty()).map(str::to_string).collect();
     let interval = Duration::from_millis(environment_milliseconds("FERROUI_SMOKE_PAGES").unwrap_or(1500));
     println!("Screenshots of {headers:?} to {}, {interval:?} a page", directory.display());
+    open_popups_of_pages(interval);
     // Before the first page is shown: the window is made to fit its screen.
     // The timer stops itself after its only tick.
     let _timer = DispatcherTimer::run_once(

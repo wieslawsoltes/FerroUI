@@ -2,15 +2,15 @@
 //! the state the framework asks for, and the requests to the top-level of the
 //! worker.
 //!
-//! Not built yet (`docs/porting/wayland-platform.md`, stage 2): popups
-//! (`create_popup` fails with a message), the text input method, and the
-//! file chooser portal of the storage provider with its parent handle from
-//! `xdg-foreign` (the managed dialogs answer alone).
+//! Not built yet (`docs/porting/wayland-platform.md`, stage 2): the text
+//! input method, and the file chooser portal of the storage provider with its
+//! parent handle from `xdg-foreign` (the managed dialogs answer alone).
 
 use crate::server::persistent::decoration_mode::DecorationMode;
 use crate::server::persistent::i_w_surface::IWSurface;
 use crate::server::persistent::i_w_surface_event_sink::PlatformInputEventCookie;
-use crate::server::persistent::i_w_xdg_top_level::{IWXdgShellSurface, IWXdgTopLevel, WXdgTopLevelProxy};
+use crate::popup_impl::{IPopupParent, PopupImpl};
+use crate::server::persistent::i_w_xdg_top_level::{IWXdgShellSurface, IWXdgTopLevel, WXdgShellSurfaceProxy, WXdgTopLevelProxy};
 use crate::server::persistent::xdg_configure_batch::{XdgConfigureBatch, XdgToplevelStates};
 use crate::server::wayland_dispatch_priority::WaylandDispatchPriority;
 use crate::server::wayland_worker_client::WaylandWorkerClient;
@@ -345,6 +345,20 @@ impl WindowImpl {
     }
 }
 
+impl IPopupParent for WindowImpl {
+    fn window_base(&self) -> &WindowBaseImpl {
+        &self.base
+    }
+
+    fn parent_max_auto_size_hint(&self) -> Size {
+        self.max_auto_size_hint.get()
+    }
+
+    fn shell_surface_proxy(&self) -> Option<WXdgShellSurfaceProxy> {
+        self.surface_proxy.borrow().as_ref().map(|proxy| proxy.as_shell_surface().clone())
+    }
+}
+
 impl ISinkOwner for WindowImpl {
     fn base(&self) -> &WindowBaseImpl {
         &self.base
@@ -546,13 +560,9 @@ impl ITopLevelImpl for WindowImpl {
         set(&self.base.lost_focus, value);
     }
 
-    /// # Panics
-    /// Always: popups over `xdg_popup` are stage 2 of `docs/porting/wayland-platform.md`.
     fn create_popup(&self) -> Option<Rc<dyn IPopupImpl>> {
-        panic!(
-            "The Wayland backend has no popups yet: xdg_popup and its positioner are stage 2 of \
-             docs/porting/wayland-platform.md"
-        )
+        let parent: Rc<dyn IPopupParent> = self.this.upgrade()?;
+        Some(PopupImpl::new(parent))
     }
 
     fn set_transparency_level_hint(&self, _transparency_levels: &[WindowTransparencyLevel]) {}

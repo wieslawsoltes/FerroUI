@@ -182,7 +182,7 @@ pub use imp::*;
 mod imp {
     use super::*;
     use crate::server::persistent::i_w_surface_event_sink::{PlatformInputEventCookie, WSurfaceEventSinkProxy};
-    use crate::server::persistent::w_surface::{WSurfaceId, WXdgTopLevel, WlSurfaceData};
+    use crate::server::persistent::w_surface::{shell_surface_of, WSurfaceId, WXdgPopup, WXdgShellSurface, WXdgTopLevel, WlSurfaceData};
     use crate::server::persistent::wayland_cursor::{resolve_cursor, WaylandCursorId, WaylandCursors};
     use crate::server::persistent::wayland_input_event_cookie::WaylandInputEventCookie;
     use crate::server::transient::wayland_cursor_manager::WaylandCursorManager;
@@ -210,18 +210,24 @@ mod imp {
     /// What the handlers of a seat need of the rest of the worker while they hand out events.
     pub(crate) struct InputContext<'a> {
         pub top_levels: &'a HashMap<WSurfaceId, WXdgTopLevel>,
+        pub popups: &'a HashMap<WSurfaceId, WXdgPopup>,
         pub cursors: &'a WaylandCursors,
         pub cursor_manager: &'a WaylandCursorManager,
         pub connection_id: u64,
     }
 
     impl InputContext<'_> {
+        /// The shell surface of a top-level or of a popup.
+        pub fn shell(&self, surface: WSurfaceId) -> Option<&WXdgShellSurface> {
+            shell_surface_of(self.top_levels, self.popups, surface)
+        }
+
         pub fn sink_of(&self, surface: WSurfaceId) -> Option<WSurfaceEventSinkProxy> {
-            self.top_levels.get(&surface).map(|top_level| top_level.shell().event_sink().clone())
+            self.shell(surface).map(|shell| shell.event_sink().clone())
         }
 
         fn cursor_of(&self, surface: WSurfaceId) -> Option<WaylandCursorId> {
-            self.top_levels.get(&surface).and_then(|top_level| top_level.shell().surface().current_cursor())
+            self.shell(surface).and_then(|shell| shell.surface().current_cursor())
         }
     }
 
@@ -646,9 +652,9 @@ mod imp {
         seat_name: u32,
         f: impl FnOnce(&mut Seat, &InputContext<'_>) -> R,
     ) -> Option<R> {
-        let WaylandWorkerState { globals, top_levels, cursors, .. } = state;
+        let WaylandWorkerState { globals, top_levels, popups, cursors, .. } = state;
         let WaylandGlobals { input_dispatcher, cursor_manager, connection_id, .. } = globals.as_mut()?;
-        let cx = InputContext { top_levels, cursors, cursor_manager, connection_id: *connection_id };
+        let cx = InputContext { top_levels, popups, cursors, cursor_manager, connection_id: *connection_id };
         let seat = input_dispatcher.seat_mut(seat_name)?;
         Some(f(seat, &cx))
     }

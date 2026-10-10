@@ -10,9 +10,9 @@
 //! belong to stage 2 of `docs/porting/wayland-platform.md`.
 
 use super::i_wayland_cursor::WaylandCursorProxy;
-use super::w_surface::WSurfaceId;
+use super::w_surface::{shell_surface_of_mut, WSurfaceId};
 use crate::server::wayland_dispatch_priority::WaylandDispatchPriority;
-use crate::server::wayland_worker::{WaylandWorkerThread, WorkerMarshaller};
+use crate::server::wayland_worker::{WaylandWorkerState, WaylandWorkerThread, WorkerMarshaller};
 
 /// Worker-side surface commands posted from UI thread.
 pub trait IWSurface {
@@ -62,14 +62,14 @@ impl WSurfaceProxy {
 
 impl IWSurface for WSurfaceProxy {
     fn disconnect(&self) {
-        self.post(|worker, id| worker.unregister_top_level(id));
+        self.post(|worker, id| worker.unregister_surface(id));
     }
 
     fn set_cursor(&self, cursor: Option<&WaylandCursorProxy>) {
         let cursor = cursor.map(WaylandCursorProxy::id);
         self.post(move |worker, id| {
-            if let Some(top_level) = worker.state.top_levels.get_mut(&id) {
-                top_level.shell_mut().surface_mut().set_cursor(cursor);
+            if let Some(shell) = worker.state.shell_mut(id) {
+                shell.surface_mut().set_cursor(cursor);
             }
             worker.state.notify_cursor_changed(id);
         });
@@ -77,10 +77,10 @@ impl IWSurface for WSurfaceProxy {
 
     fn set_hit_test_visible(&self, value: bool) {
         self.post(move |worker, id| {
-            let globals = worker.state.globals.as_ref();
-            if let Some(top_level) = worker.state.top_levels.get_mut(&id) {
-                let can_commit_out_of_band = top_level.shell().can_commit_out_of_band();
-                top_level.shell_mut().surface_mut().set_hit_test_visible(value, globals, can_commit_out_of_band);
+            let WaylandWorkerState { globals, top_levels, popups, .. } = &mut worker.state;
+            if let Some(shell) = shell_surface_of_mut(top_levels, popups, id) {
+                let can_commit_out_of_band = shell.can_commit_out_of_band();
+                shell.surface_mut().set_hit_test_visible(value, globals.as_ref(), can_commit_out_of_band);
             }
         });
     }

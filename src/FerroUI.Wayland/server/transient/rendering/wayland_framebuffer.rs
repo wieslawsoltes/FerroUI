@@ -221,14 +221,30 @@ pub(crate) fn present_frame(
     stride: i32,
     scene_info: &RenderTargetSceneInfo,
 ) {
-    let enforce_roundtrip = {
+    let buffer = {
         let Some((globals, surface)) = worker.state.framebuffer_surface(target) else {
             return;
         };
         if !surface.state().is_ready {
             return;
         }
-        attach_frame(globals, surface, fd, size, stride, scene_info);
+        create_frame_buffer(globals, fd, size, stride)
+    };
+
+    // Stage per-frame state (frame callback +
+    // ack_configure + geometry + viewport/scale +
+    // min/max) into the next commit BEFORE binding the
+    // buffer, then commit explicitly after attach +
+    // damage. Through the state of the worker: a surface that is mapped by this frame
+    // attaches the popups that waited for it.
+    worker.state.on_before_new_buffer_attached(target, scene_info);
+
+    let enforce_roundtrip = {
+        let Some((_, surface)) = worker.state.framebuffer_surface(target) else {
+            buffer.destroy();
+            return;
+        };
+        commit_frame_buffer(surface, buffer, size);
         surface.enforce_buffer_creation_roundtrip()
     };
 
@@ -240,8 +256,18 @@ pub(crate) fn present_frame(
     }
 }
 
-/// The requests of a frame: the pool and the buffer over the memory file, the per-frame state
-/// of the surface, attach, damage, commit.
+/// The pool and the buffer over the memory file of a frame.
+fn create_frame_buffer(globals: &WaylandGlobals, fd: BorrowedFd<'_>, size: PixelSize, stride: i32) -> WlBuffer {
+    let queue_handle = globals.queue_handle();
+    let pool = globals.wl_shm.create_pool(fd, stride * size.height, queue_handle, ());
+    let buffer = pool.create_buffer(0, size.width, size.height, stride, wl_shm::Format::Argb8888, queue_handle, ());
+    // The pool is destroyed at once: the buffer keeps the memory alive on the compositor.
+    pool.destroy();
+    buffer
+}
+
+/// The requests of a frame for an object that has no popups (a cursor): the pool and the
+/// buffer over the memory file, the per-frame state of the surface, attach, damage, commit.
 pub(crate) fn attach_frame(
     globals: &WaylandGlobals,
     surface: &mut dyn IWaylandFramebufferSurface,
@@ -250,11 +276,7 @@ pub(crate) fn attach_frame(
     stride: i32,
     scene_info: &RenderTargetSceneInfo,
 ) {
-    let queue_handle = globals.queue_handle();
-    let pool = globals.wl_shm.create_pool(fd, stride * size.height, queue_handle, ());
-    let buffer = pool.create_buffer(0, size.width, size.height, stride, wl_shm::Format::Argb8888, queue_handle, ());
-    // The pool is destroyed at once: the buffer keeps the memory alive on the compositor.
-    pool.destroy();
+    let buffer = create_frame_buffer(globals, fd, size, stride);
 
     // Stage per-frame state (frame callback +
     // ack_configure + geometry + viewport/scale +
@@ -262,6 +284,11 @@ pub(crate) fn attach_frame(
     // buffer, then commit explicitly after attach +
     // damage.
     surface.on_before_new_buffer_attached(globals, scene_info);
+    commit_frame_buffer(surface, buffer, size);
+}
+
+/// Attach, damage, commit.
+fn commit_frame_buffer(surface: &mut dyn IWaylandFramebufferSurface, buffer: WlBuffer, size: PixelSize) {
     let Some(wl_surface) = surface.wl_surface() else {
         buffer.destroy();
         return;

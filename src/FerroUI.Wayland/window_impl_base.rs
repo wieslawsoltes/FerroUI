@@ -119,6 +119,17 @@ impl WindowBaseImpl {
         self.render_scaling.get()
     }
 
+    /// Sets the scaling without telling anyone (the setter of `RenderScaling`, which a
+    /// popup uses to start with the scaling of its parent).
+    pub(crate) fn set_render_scaling(&self, value: f64) {
+        self.render_scaling.set(value);
+    }
+
+    /// The keyboard device as its type: a popup is made with the device of its parent.
+    pub(crate) fn keyboard_device(&self) -> Rc<KeyboardDevice> {
+        self.keyboard.clone()
+    }
+
     pub(crate) fn is_enabled(&self) -> bool {
         self.is_enabled.get()
     }

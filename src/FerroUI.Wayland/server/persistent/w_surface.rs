@@ -10,11 +10,17 @@
 //! listener classes are the `Dispatch` implementations at the end of this
 //! file: the user data of an object is the number of its surface.
 //!
-//! `WXdgPopup`, the fractional scale object and the viewport of a surface,
-//! the members of text input and the export of a top-level belong to stage 2
+//! A popup (`WXdgPopup`) holds its shell surface likewise and names its parent
+//! by number, because the parent is another entry of the worker's maps: what
+//! the reference reads of the parent object is handed in as [`imp::PopupParent`],
+//! and what it calls on the parent (`RegisterPendingChildPopup`) is done by
+//! the worker's state (`WaylandWorkerState::try_attach_popup_to_parent`).
+//!
+//! The fractional scale object and the viewport of a surface, the members of
+//! text input and the export of a top-level belong to later parts of stage 2
 //! of `docs/porting/wayland-platform.md`.
 
-use ferroui_base::{PixelSize, Size, Thickness};
+use ferroui_base::{PixelSize, Point, Rect, Size, Thickness};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 /// The number of a surface of the worker: what the UI thread holds of it.
@@ -86,7 +92,7 @@ pub fn compute_window_geometry(
 ) -> Option<(i32, i32, i32, i32)> {
     let (surface_width, surface_height) =
         if has_fractional_scaling && logical_size.width > 0.0 && logical_size.height > 0.0 {
-            ((logical_size.width.round() as i32).max(1), (logical_size.height.round() as i32).max(1))
+            ((logical_size.width.round_ties_even() as i32).max(1), (logical_size.height.round_ties_even() as i32).max(1))
         } else {
             let int_scale = buffer_scale(scaling);
             ((buffer_pixel_size.width + int_scale - 1) / int_scale, (buffer_pixel_size.height + int_scale - 1) / int_scale)
@@ -154,6 +160,89 @@ pub fn calculate_max_size(bounds: Option<PixelSize>, output_logical_sizes: impl 
     max_size.unwrap_or_else(|| Size::new(800.0, 600.0))
 }
 
+/// What an `xdg_positioner` is given for a popup: the size, the anchor rectangle (x, y, width,
+/// height in the window geometry of the parent) and the offset, when there is one.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct PositionerGeometry {
+    pub size: (i32, i32),
+    pub anchor_rect: (i32, i32, i32, i32),
+    pub offset: Option<(i32, i32)>,
+}
+
+/// The numbers of the positioner of a popup (the computation of `BuildPositioner`).
+///
+/// `anchor_rect` is given in the parent's *buffer-relative* logical frame (true top-left,
+/// includes shadow). Wayland's xdg_positioner wants coords in the parent's *window-geometry*
+/// frame (excludes shadow): `parent_geometry`, the parent's most recent window geometry
+/// (left, top, width, height), is the single source of truth for the shift.
+pub fn compute_positioner_geometry(
+    size: Size,
+    deflate: Thickness,
+    anchor_rect: Rect,
+    offset: Point,
+    parent_geometry: Option<(i32, i32, i32, i32)>,
+) -> PositionerGeometry {
+    // Size corresponds to the popup's window geometry (see the
+    // xdg_positioner.set_size contract), which excludes the child margin.
+    // The protocol requires positive integers.
+    let geometry_size = size.deflate(deflate);
+    let width = (geometry_size.width.ceil() as i32).max(1);
+    let height = (geometry_size.height.ceil() as i32).max(1);
+
+    // If the parent hasn't reported geometry yet, that's a contract
+    // violation (we shouldn't be building a positioner before the
+    // parent is mapped) — fall back to assuming origin (0,0) and skip
+    // clamping rather than crashing.
+    let (origin_x, origin_y) = parent_geometry.map_or((0, 0), |(left, top, _, _)| (left, top));
+
+    let mut anchor_x = anchor_rect.x.round_ties_even() as i32 - origin_x;
+    let mut anchor_y = anchor_rect.y.round_ties_even() as i32 - origin_y;
+    let mut anchor_w = (anchor_rect.width.round_ties_even() as i32).max(0);
+    let mut anchor_h = (anchor_rect.height.round_ties_even() as i32).max(0);
+
+    // Clamp into the parent's window geometry. The protocol forbids the
+    // anchor rect from extending outside the parent's geometry; rather
+    // than failing the call (which would protocol-error the connection)
+    // we clip it. UI-side may produce slightly off-edge anchor rects
+    // when, e.g., a context menu opens near the corner of a window.
+    //
+    // The clamp must produce a strictly positive (>= 1×1) rectangle:
+    // xdg_positioner accepts a zero-sized anchor rect via set_anchor_rect,
+    // but the spec considers such a positioner *incomplete* and the
+    // subsequent get_popup/reposition raises xdg_wm_base.invalid_positioner
+    // — a fatal error that disconnects every window. So we
+    // shift the floor back by one when the clamp would collapse to zero.
+    match parent_geometry {
+        Some((_, _, g_width, g_height)) if g_width > 0 && g_height > 0 => {
+            let max_x0 = (g_width - 1).max(0);
+            let max_y0 = (g_height - 1).max(0);
+            let x0 = anchor_x.clamp(0, max_x0);
+            let y0 = anchor_y.clamp(0, max_y0);
+            let x1 = anchor_x.saturating_add(anchor_w.max(1)).clamp(x0 + 1, g_width);
+            let y1 = anchor_y.saturating_add(anchor_h.max(1)).clamp(y0 + 1, g_height);
+            anchor_x = x0;
+            anchor_y = y0;
+            anchor_w = x1 - x0;
+            anchor_h = y1 - y0;
+        }
+        _ => {
+            // No parent geometry to clamp against — still ensure the
+            // anchor rect is at least 1×1 to keep the positioner valid.
+            anchor_w = anchor_w.max(1);
+            anchor_h = anchor_h.max(1);
+        }
+    }
+
+    // Offset is post-resolution (popup-relative); no parent/shadow shift.
+    let offset = (offset.x != 0.0 || offset.y != 0.0)
+        .then(|| (offset.x.round_ties_even() as i32, offset.y.round_ties_even() as i32));
+
+    PositionerGeometry { size: (width, height), anchor_rect: (anchor_x, anchor_y, anchor_w, anchor_h), offset }
+}
+
+/// The first version of `xdg_wm_base` with `xdg_popup.reposition`.
+pub const XDG_POPUP_REPOSITION_SINCE: u32 = 3;
+
 #[cfg(target_os = "linux")]
 pub use imp::*;
 
@@ -164,8 +253,10 @@ mod imp {
     use crate::server::persistent::decoration_mode::DecorationMode;
     use crate::server::persistent::i_persistent_object::{ConnectionContext, IPersistentWaylandObject};
     use crate::server::persistent::i_w_surface_event_sink::{
-        PlatformInputEventCookie, WSurfaceEventSinkProxy, WXdgTopLevelEventSinkProxy,
+        PlatformInputEventCookie, WSurfaceEventSinkProxy, WXdgPopupEventSinkProxy, WXdgTopLevelEventSinkProxy,
     };
+    use crate::server::persistent::xdg_popup_configure_batch::XdgPopupConfigureBatch;
+    use crate::server::persistent::xdg_popup_positioner_params::XdgPopupPositionerParams;
     use crate::server::persistent::wayland_cursor::WaylandCursorId;
     use crate::server::persistent::wayland_input_event_cookie::WaylandInputEventCookie;
     use crate::server::persistent::xdg_configure_batch::XdgConfigureBatch;
@@ -186,6 +277,11 @@ mod imp {
     use wayland_protocols::xdg::decoration::zv1::client::zxdg_toplevel_decoration_v1::{
         self, ZxdgToplevelDecorationV1,
     };
+    use ferroui_base::logging::{LogEventLevel, Logger};
+    use std::collections::HashMap;
+    use wayland_client::Proxy;
+    use wayland_protocols::xdg::shell::client::xdg_popup::{self, XdgPopup};
+    use wayland_protocols::xdg::shell::client::xdg_positioner::XdgPositioner;
     use wayland_protocols::xdg::shell::client::xdg_surface::{self, XdgSurface};
     use wayland_protocols::xdg::shell::client::xdg_toplevel::{self, ResizeEdge, XdgToplevel};
 
@@ -194,7 +290,7 @@ mod imp {
     /// the tag.
     #[derive(Clone, Copy, Debug, PartialEq, Eq)]
     pub enum WlSurfaceData {
-        /// The surface of a shell surface (a top-level, later a popup).
+        /// The surface of a shell surface (a top-level or a popup).
         Shell(WSurfaceId),
         /// A surface without events of its own: a cursor.
         Cursor,
@@ -401,8 +497,18 @@ mod imp {
             self.frame_callback = Some(wl_surface.frame(globals.queue_handle(), self.id));
         }
 
-        fn on_frame_done(&mut self) {
+        fn on_frame_done(&mut self, callback: &WlCallback) {
             self.worker.wakeup_render_loop();
+            // A popup that was created again has dropped the callback of its last frame: the
+            // answer to that one must not clear the callback of a newer frame.
+            if self.frame_callback.as_ref().is_some_and(|pending| pending == callback) {
+                self.frame_callback = None;
+            }
+        }
+
+        /// Forgets the frame callback of a surface that is unmapped, which the compositor
+        /// answers late or never.
+        fn forget_frame_callback(&mut self) {
             self.frame_callback = None;
         }
 
@@ -461,6 +567,16 @@ mod imp {
         // following the most recent OnConnected — i.e. the surface is now
         // *mapped* in xdg-shell terms.
         mapped: bool,
+        /// Children popups whose parents weren't yet mapped when the popup
+        /// went through OnConnected (or when the child itself reconnected
+        /// before the parent finished mapping). Drained when this surface
+        /// transitions to mapped (in `on_before_new_buffer_attached`).
+        /// Cleared on disconnect — every child's OnDisconnected runs
+        /// independently, so on reconnect they will re-register if still pending.
+        pending_child_popups: Vec<WSurfaceId>,
+        /// The children the transition to mapped drained, until the worker's state attaches
+        /// them (the loop of `OnBeforeNewBufferAttached` in the reference).
+        children_to_attach: Vec<WSurfaceId>,
         /// The UI-thread event sink associated with this surface.
         event_sink: WSurfaceEventSinkProxy,
         shadow_extents: Option<Thickness>,
@@ -479,6 +595,8 @@ mod imp {
                 pending_ack_serial: None,
                 initial_configure_acknowledged: false,
                 mapped: false,
+                pending_child_popups: Vec::new(),
+                children_to_attach: Vec::new(),
                 event_sink,
                 shadow_extents: None,
                 last_window_geometry: None,
@@ -508,6 +626,21 @@ mod imp {
         // or on the first buffer attach.
         pub fn can_commit_out_of_band(&self) -> bool {
             self.mapped
+        }
+
+        pub fn register_pending_child_popup(&mut self, popup: WSurfaceId) {
+            self.pending_child_popups.push(popup);
+        }
+
+        pub fn unregister_pending_child_popup(&mut self, popup: WSurfaceId) {
+            if let Some(index) = self.pending_child_popups.iter().position(|pending| *pending == popup) {
+                self.pending_child_popups.remove(index);
+            }
+        }
+
+        /// The popups that waited for this surface to be mapped and may attach now.
+        pub fn take_children_to_attach(&mut self) -> Vec<WSurfaceId> {
+            std::mem::take(&mut self.children_to_attach)
         }
 
         pub fn event_sink(&self) -> &WSurfaceEventSinkProxy {
@@ -567,6 +700,8 @@ mod imp {
             self.pending_ack_serial = None;
             self.initial_configure_acknowledged = false;
             self.mapped = false;
+            self.pending_child_popups.clear();
+            self.children_to_attach.clear();
             self.last_window_geometry = None;
             self.event_sink.on_surface_outputs_changed(Vec::new());
             self.surface.on_disconnected();
@@ -596,8 +731,13 @@ mod imp {
             self.surface.on_before_new_buffer_attached(globals, scene_info);
 
             // First buffer attach + configure-ack since the most recent
-            // (re-)connect → we are now mapped.
-            self.mapped = true;
+            // (re-)connect → we are now mapped. Drain any popups that were
+            // queued while we were unmapped; they can now safely call
+            // xdg_surface.get_popup against us.
+            if !self.mapped {
+                self.mapped = true;
+                self.children_to_attach.append(&mut self.pending_child_popups);
+            }
         }
 
         /// Computes and emits the surface's window geometry (the rectangle
@@ -845,10 +985,6 @@ mod imp {
             }
         }
 
-        /// Handles what an event of the `wl_surface` changed.
-        fn apply_change(&self, change: SurfaceChange, globals: Option<&WaylandGlobals>) {
-            self.shell.apply_change(change, globals);
-        }
     }
 
     impl IPersistentWaylandObject for WXdgTopLevel {
@@ -933,6 +1069,371 @@ mod imp {
         }
     }
 
+    /// The shell surface of a top-level or of a popup, by its number.
+    pub fn shell_surface_of<'a>(
+        top_levels: &'a HashMap<WSurfaceId, WXdgTopLevel>,
+        popups: &'a HashMap<WSurfaceId, WXdgPopup>,
+        id: WSurfaceId,
+    ) -> Option<&'a WXdgShellSurface> {
+        match top_levels.get(&id) {
+            Some(top_level) => Some(&top_level.shell),
+            None => popups.get(&id).map(|popup| &popup.shell),
+        }
+    }
+
+    /// The shell surface of a top-level or of a popup, by its number.
+    pub fn shell_surface_of_mut<'a>(
+        top_levels: &'a mut HashMap<WSurfaceId, WXdgTopLevel>,
+        popups: &'a mut HashMap<WSurfaceId, WXdgPopup>,
+        id: WSurfaceId,
+    ) -> Option<&'a mut WXdgShellSurface> {
+        match top_levels.get_mut(&id) {
+            Some(top_level) => Some(&mut top_level.shell),
+            None => popups.get_mut(&id).map(|popup| &mut popup.shell),
+        }
+    }
+
+    /// What a popup reads of its parent surface (`_parent.IsMapped`, `_parent.XdgSurface`,
+    /// `_parent.LastWindowGeometry` of the reference).
+    #[derive(Clone, Debug)]
+    pub struct PopupParent {
+        pub is_mapped: bool,
+        pub xdg_surface: Option<XdgSurface>,
+        pub last_window_geometry: Option<(i32, i32, i32, i32)>,
+    }
+
+    impl PopupParent {
+        pub fn of(shell: &WXdgShellSurface) -> Self {
+            Self {
+                is_mapped: shell.mapped,
+                xdg_surface: shell.xdg_surface.clone(),
+                last_window_geometry: shell.last_window_geometry,
+            }
+        }
+    }
+
+    /// What became of an attempt to attach a popup to its parent.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+    pub enum PopupAttach {
+        /// Nothing to do, or the popup is attached.
+        Done,
+        /// Parent not yet mapped — it has to register the popup and call back
+        /// when its first buffer commits.
+        ParentNotMapped,
+    }
+
+    /// Worker-side xdg_popup surface. The UI thread keeps a
+    /// `WXdgPopupProxy` handle and feeds positioner parameters via
+    /// `update_positioner`; the worker rebuilds the protocol-level
+    /// `xdg_positioner` and calls `xdg_surface.get_popup` on every
+    /// (re-)connect (so the popup survives compositor reconnects). Popup
+    /// configure events are accumulated in `pending_batch` and
+    /// flushed to `IWXdgPopupEventSink::on_popup_configure` when the
+    /// wrapping `xdg_surface.configure(serial)` seals the batch.
+    pub struct WXdgPopup {
+        shell: WXdgShellSurface,
+        popup_event_sink: WXdgPopupEventSinkProxy,
+        parent: WSurfaceId,
+        xdg_popup: Option<XdgPopup>,
+        pending_batch: XdgPopupConfigureBatch,
+        positioner: Option<XdgPopupPositionerParams>,
+        // 0 is reserved (means "no token"); start at 1 and bump on every reposition.
+        next_reposition_token: u32,
+        /// The popup was created again in place of a reposition (a compositor whose
+        /// `xdg_wm_base` is older than version 3): its next configure asks for a frame.
+        recreated: bool,
+    }
+
+    impl WXdgPopup {
+        pub fn new(id: WSurfaceId, worker: Arc<WaylandWorker>, event_sink: WXdgPopupEventSinkProxy, parent: WSurfaceId) -> Self {
+            Self {
+                shell: WXdgShellSurface::new(id, worker, event_sink.as_surface_sink().clone()),
+                popup_event_sink: event_sink,
+                parent,
+                xdg_popup: None,
+                pending_batch: XdgPopupConfigureBatch::default(),
+                positioner: None,
+                next_reposition_token: 1,
+                recreated: false,
+            }
+        }
+
+        pub fn shell(&self) -> &WXdgShellSurface {
+            &self.shell
+        }
+
+        pub fn shell_mut(&mut self) -> &mut WXdgShellSurface {
+            &mut self.shell
+        }
+
+        /// The number of the parent surface: a top-level or another popup.
+        pub fn parent(&self) -> WSurfaceId {
+            self.parent
+        }
+
+        /// Whether the popup has its role object on the compositor.
+        pub fn is_attached(&self) -> bool {
+            self.xdg_popup.is_some()
+        }
+
+        /// Takes new positioner parameters. `has_attached_children` says whether a popup
+        /// whose parent this one is has its role object: such a popup cannot be created
+        /// again (the topmost popup has to be destroyed first).
+        pub fn update_positioner(
+            &mut self,
+            positioner: XdgPopupPositionerParams,
+            parent: Option<&PopupParent>,
+            globals: Option<&WaylandGlobals>,
+            has_attached_children: bool,
+        ) -> PopupAttach {
+            let previous = self.positioner.replace(positioner);
+
+            // The popup child's margin (Deflate) must be carved out of the surface's window geometry
+            // so the compositor positions and constrains against the child content.
+            if positioner.deflate != Thickness::default() {
+                self.shell.set_shadow_extents(positioner.deflate);
+            }
+
+            let Some(previous) = previous else {
+                // First positioner — attempt to attach now (may still defer
+                // if the parent isn't mapped or we're not yet connected;
+                // OnConnected / parent's drain will retry).
+                return self.try_attach_to_parent(parent, globals);
+            };
+
+            let (Some(xdg_popup), Some(globals)) = (&self.xdg_popup, globals) else {
+                return PopupAttach::Done;
+            };
+
+            if globals.xdg_wm_base.version() < XDG_POPUP_REPOSITION_SINCE {
+                // `xdg_popup.reposition` does not exist before version 3 of the shell. The
+                // popup is given its new place the way toolkits did before the request
+                // existed: its role objects are destroyed and created again from the new
+                // positioner. Parameters that did not change leave the popup alone.
+                if previous == positioner {
+                    return PopupAttach::Done;
+                }
+                if has_attached_children {
+                    if let Some(logger) = Logger::try_get(LogEventLevel::Warning, "Wayland") {
+                        logger.log(
+                            None,
+                            "A popup with an open child popup cannot be repositioned on xdg_wm_base before version 3",
+                        );
+                    }
+                    return PopupAttach::Done;
+                }
+                return self.recreate(parent, globals);
+            }
+
+            // Already mapped — issue a reposition. The compositor will reply
+            // with a fresh configure + repositioned(token) sequence; the
+            // pending batch is reset so the next OnPopupConfigure carries the
+            // post-reposition geometry.
+            let p = Self::build_positioner(&positioner, parent, globals);
+            self.pending_batch = XdgPopupConfigureBatch::default();
+            xdg_popup.reposition(&p, self.next_reposition_token);
+            self.next_reposition_token += 1;
+            p.destroy();
+            PopupAttach::Done
+        }
+
+        /// The equivalent of a reposition on a compositor without the request: the popup is
+        /// unmapped, its `xdg_popup` and `xdg_surface` are destroyed, and both are created
+        /// again on the same `wl_surface` with a positioner of the new parameters. The
+        /// surface is then as it is after a connect: it waits for a configure, and its next
+        /// buffer maps it.
+        fn recreate(&mut self, parent: Option<&PopupParent>, globals: &WaylandGlobals) -> PopupAttach {
+            let Some(wl_surface) = self.shell.surface.wl_surface.clone() else {
+                return PopupAttach::Done;
+            };
+            if let Some(xdg_popup) = self.xdg_popup.take() {
+                xdg_popup.destroy();
+            }
+            if let Some(xdg_surface) = self.shell.xdg_surface.take() {
+                xdg_surface.destroy();
+            }
+            // An `xdg_surface` cannot be made for a surface that has a buffer.
+            wl_surface.attach(None, 0, 0);
+            wl_surface.commit();
+
+            self.shell.pending_ack_serial = None;
+            self.shell.initial_configure_acknowledged = false;
+            self.shell.mapped = false;
+            self.shell.last_window_geometry = None;
+            self.shell.surface.forget_frame_callback();
+            self.shell.xdg_surface =
+                Some(globals.xdg_wm_base.get_xdg_surface(&wl_surface, globals.queue_handle(), self.shell.surface.id));
+            self.recreated = true;
+
+            self.try_attach_to_parent(parent, Some(globals))
+        }
+
+        /// Called either from our own `on_connected`, or from the
+        /// parent's `on_before_new_buffer_attached` when
+        /// finalising pending child popups whose creation was deferred because
+        /// the parent wasn't mapped yet. xdg_surface.get_popup against an
+        /// unmapped parent is a protocol error, so we wait for the parent's
+        /// first frame.
+        pub fn try_attach_to_parent(&mut self, parent: Option<&PopupParent>, globals: Option<&WaylandGlobals>) -> PopupAttach {
+            if self.xdg_popup.is_some() {
+                return PopupAttach::Done; // already attached
+            }
+            let (Some(xdg_surface), Some(globals)) = (&self.shell.xdg_surface, globals) else {
+                return PopupAttach::Done; // we're not connected
+            };
+            let Some(pos) = &self.positioner else {
+                return PopupAttach::Done; // UI hasn't supplied positioner yet
+            };
+            let Some(parent) = parent else {
+                // The parent surface is gone: the popup has nothing to attach to.
+                return PopupAttach::Done;
+            };
+            let parent_xdg_surface = match &parent.xdg_surface {
+                Some(parent_xdg_surface) if parent.is_mapped => parent_xdg_surface,
+                // Parent not yet mapped — register; parent will call us back
+                // when its first buffer commits.
+                _ => return PopupAttach::ParentNotMapped,
+            };
+
+            let positioner = Self::build_positioner(pos, Some(parent), globals);
+            self.pending_batch = XdgPopupConfigureBatch::default();
+            self.xdg_popup =
+                Some(xdg_surface.get_popup(Some(parent_xdg_surface), &positioner, globals.queue_handle(), self.shell.surface.id));
+            positioner.destroy();
+            if let Some(wl_surface) = self.shell.surface.wl_surface() {
+                wl_surface.commit();
+            }
+            PopupAttach::Done
+        }
+
+        /// Translates the cached `XdgPopupPositionerParams` into a
+        /// fresh `xdg_positioner` protocol object. The caller owns the
+        /// returned object and must destroy it after use.
+        /// Performs the buffer→geometry origin shift on the anchor rect (using
+        /// the parent's most recent `set_window_geometry` as the
+        /// authoritative source) and clamps it into the parent's window-geometry
+        /// rectangle as required by the xdg_positioner spec.
+        fn build_positioner(p: &XdgPopupPositionerParams, parent: Option<&PopupParent>, globals: &WaylandGlobals) -> XdgPositioner {
+            let positioner = globals.xdg_wm_base.create_positioner(globals.queue_handle(), ());
+
+            let geometry = compute_positioner_geometry(
+                p.size,
+                p.deflate,
+                p.anchor_rect,
+                p.offset,
+                parent.and_then(|parent| parent.last_window_geometry),
+            );
+            positioner.set_size(geometry.size.0, geometry.size.1);
+            let (anchor_x, anchor_y, anchor_w, anchor_h) = geometry.anchor_rect;
+            positioner.set_anchor_rect(anchor_x, anchor_y, anchor_w, anchor_h);
+            positioner.set_anchor(p.anchor);
+            positioner.set_gravity(p.gravity);
+            positioner.set_constraint_adjustment(p.constraint_adjustment);
+
+            if let Some((x, y)) = geometry.offset {
+                positioner.set_offset(x, y);
+            }
+
+            positioner
+        }
+
+        /// `xdg_surface.configure`: the batch is complete.
+        fn on_configure_batch_complete(&mut self, serial: u32) {
+            let mut batch = std::mem::take(&mut self.pending_batch);
+            batch.serial = serial;
+            batch.recreated = std::mem::take(&mut self.recreated);
+
+            self.popup_event_sink.on_popup_configure(batch);
+
+            self.shell.surface.worker.wakeup_render_loop();
+        }
+
+        /// Tells the popup that the connection is lost, or that the popup is destroyed. The
+        /// caller unregisters it from the pending list of its parent
+        /// (`_parent.UnregisterPendingChildPopup`), which is another object of the worker.
+        pub fn on_disconnected(&mut self) {
+            self.shell.event_sink.on_keyboard_leave();
+            if let Some(xdg_popup) = self.xdg_popup.take() {
+                xdg_popup.destroy();
+            }
+            self.pending_batch = XdgPopupConfigureBatch::default();
+            self.recreated = false;
+            self.shell.on_disconnected();
+        }
+
+        /// Always create wl_surface + xdg_surface (so any pending children of
+        /// _ours_ can attach), even if our own popup creation is deferred
+        /// because the parent isn't ready yet. The caller then tries to attach the popup
+        /// to its parent.
+        pub fn on_connected(&mut self, cx: &ConnectionContext<'_>) {
+            self.shell.on_connected(cx);
+        }
+    }
+
+    impl IWaylandFramebufferSurface for WXdgPopup {
+        fn wl_surface(&self) -> Option<&WlSurface> {
+            self.shell.surface.wl_surface()
+        }
+
+        fn state(&self) -> PlatformRenderTargetState {
+            self.shell.state()
+        }
+
+        fn register_render_target(&mut self, render_target: Weak<dyn IWaylandSurfaceRenderTarget>) {
+            self.shell.surface.register_render_target(render_target);
+        }
+
+        fn unregister_render_target(&mut self, render_target: &Rc<dyn IWaylandSurfaceRenderTarget>) {
+            self.shell.surface.unregister_render_target(render_target);
+        }
+
+        fn on_before_new_buffer_attached(&mut self, globals: &WaylandGlobals, scene_info: &RenderTargetSceneInfo) {
+            self.shell.on_before_new_buffer_attached(globals, scene_info);
+        }
+
+        fn enforce_buffer_creation_roundtrip(&self) -> bool {
+            false
+        }
+    }
+
+    impl Dispatch<XdgPopup, WSurfaceId> for WaylandWorkerState {
+        fn event(
+            state: &mut Self,
+            proxy: &XdgPopup,
+            event: xdg_popup::Event,
+            data: &WSurfaceId,
+            _conn: &Connection,
+            _qhandle: &QueueHandle<Self>,
+        ) {
+            let Some(popup) = state.popups.get_mut(data) else {
+                return;
+            };
+            // The events of the role object a popup had before it was created again.
+            if popup.xdg_popup.as_ref() != Some(proxy) {
+                return;
+            }
+            match event {
+                xdg_popup::Event::Configure { x, y, width, height } => {
+                    popup.pending_batch.x = x;
+                    popup.pending_batch.y = y;
+                    popup.pending_batch.width = width;
+                    popup.pending_batch.height = height;
+                }
+                xdg_popup::Event::PopupDone => popup.popup_event_sink.on_popup_done(),
+                // Repositioned(token) acks a previous Reposition request. We don't
+                // currently surface the token to the UI side (the UI doesn't track
+                // outstanding reposition requests — the geometry already arrives
+                // via the matching configure event).
+                _ => {}
+            }
+        }
+    }
+
+    impl Dispatch<XdgPositioner, ()> for WaylandWorkerState {
+        fn event(_: &mut Self, _: &XdgPositioner, _: <XdgPositioner as Proxy>::Event, _: &(), _: &Connection, _: &QueueHandle<Self>) {
+        }
+    }
+
     // The listeners of the reference.
 
     impl Dispatch<WlSurface, WlSurfaceData> for WaylandWorkerState {
@@ -947,25 +1448,24 @@ mod imp {
             let WlSurfaceData::Shell(id) = data else {
                 return;
             };
-            let globals = state.globals.as_ref();
-            let Some(top_level) = state.top_levels.get_mut(id) else {
+            let WaylandWorkerState { globals, top_levels, popups, .. } = state;
+            let globals = globals.as_ref();
+            let Some(shell) = shell_surface_of_mut(top_levels, popups, *id) else {
                 return;
             };
             let change = match event {
-                wl_surface::Event::PreferredBufferScale { factor } => {
-                    top_level.shell.surface.on_preferred_buffer_scale(factor, globals)
-                }
+                wl_surface::Event::PreferredBufferScale { factor } => shell.surface.on_preferred_buffer_scale(factor, globals),
                 wl_surface::Event::Enter { output } => {
                     let name = globals.and_then(|globals| globals.outputs.find_by_proxy(&output)).map(|output| output.name);
-                    top_level.shell.surface.on_enter(name, globals)
+                    shell.surface.on_enter(name, globals)
                 }
                 wl_surface::Event::Leave { output } => {
                     let name = globals.and_then(|globals| globals.outputs.find_by_proxy(&output)).map(|output| output.name);
-                    top_level.shell.surface.on_leave(name, globals)
+                    shell.surface.on_leave(name, globals)
                 }
                 _ => return,
             };
-            top_level.apply_change(change, globals);
+            shell.apply_change(change, globals);
         }
     }
 
@@ -973,15 +1473,15 @@ mod imp {
     impl Dispatch<WlCallback, WSurfaceId> for WaylandWorkerState {
         fn event(
             state: &mut Self,
-            _proxy: &WlCallback,
+            proxy: &WlCallback,
             event: wl_callback::Event,
             data: &WSurfaceId,
             _conn: &Connection,
             _qhandle: &QueueHandle<Self>,
         ) {
             if let wl_callback::Event::Done { .. } = event {
-                match state.top_levels.get_mut(data) {
-                    Some(top_level) => top_level.shell.surface.on_frame_done(),
+                match shell_surface_of_mut(&mut state.top_levels, &mut state.popups, *data) {
+                    Some(shell) => shell.surface.on_frame_done(proxy),
                     // The surface is gone; the loop is woken as the listener of the reference does.
                     None => state.worker.wakeup_render_loop(),
                 }
@@ -997,7 +1497,7 @@ mod imp {
     impl Dispatch<XdgSurface, WSurfaceId> for WaylandWorkerState {
         fn event(
             state: &mut Self,
-            _proxy: &XdgSurface,
+            proxy: &XdgSurface,
             event: xdg_surface::Event,
             data: &WSurfaceId,
             _conn: &Connection,
@@ -1007,6 +1507,12 @@ mod imp {
                 let globals = state.globals.as_ref();
                 if let Some(top_level) = state.top_levels.get_mut(data) {
                     top_level.on_configure_batch_complete(serial, globals);
+                } else if let Some(popup) = state.popups.get_mut(data) {
+                    // A configure of the `xdg_surface` a popup had before it was created
+                    // again is of an object that is gone.
+                    if popup.shell.xdg_surface.as_ref() == Some(proxy) {
+                        popup.on_configure_batch_complete(serial);
+                    }
                 }
             }
         }
@@ -1129,5 +1635,72 @@ mod tests {
             Size::new(1280.0, 1080.0)
         );
         assert_eq!(calculate_max_size(None, []), Size::new(800.0, 600.0));
+    }
+
+    #[test]
+    fn the_positioner_of_a_popup_is_in_the_window_geometry_of_its_parent() {
+        // A parent without shadow: the anchor rectangle goes through.
+        let geometry = compute_positioner_geometry(
+            Size::new(200.0, 120.5),
+            Thickness::default(),
+            Rect::new(40.0, 30.0, 100.0, 24.0),
+            Point::new(0.0, 0.0),
+            Some((0, 0, 800, 600)),
+        );
+        assert_eq!(geometry, PositionerGeometry { size: (200, 121), anchor_rect: (40, 30, 100, 24), offset: None });
+
+        // A parent with a shadow of 10 and 12: the origin moves; the margin of the child is not
+        // part of the size; the offset is rounded.
+        let geometry = compute_positioner_geometry(
+            Size::new(220.0, 140.0),
+            Thickness::new(10.0, 10.0, 10.0, 10.0),
+            Rect::new(50.0, 42.0, 100.0, 24.0),
+            Point::new(2.4, -3.6),
+            Some((10, 12, 780, 576)),
+        );
+        assert_eq!(geometry, PositionerGeometry { size: (200, 120), anchor_rect: (40, 30, 100, 24), offset: Some((2, -4)) });
+    }
+
+    #[test]
+    fn the_anchor_rectangle_is_clamped_into_the_parent_and_never_empty() {
+        let parent = Some((0, 0, 800, 600));
+        let none = Thickness::default();
+        let size = Size::new(100.0, 100.0);
+        let zero = Point::new(0.0, 0.0);
+        // Over the right and bottom edge.
+        assert_eq!(
+            compute_positioner_geometry(size, none, Rect::new(780.0, 590.0, 100.0, 24.0), zero, parent).anchor_rect,
+            (780, 590, 20, 10)
+        );
+        // Outside altogether: the last pixel of the parent.
+        assert_eq!(
+            compute_positioner_geometry(size, none, Rect::new(900.0, 700.0, 10.0, 10.0), zero, parent).anchor_rect,
+            (799, 599, 1, 1)
+        );
+        // Before the origin.
+        assert_eq!(
+            compute_positioner_geometry(size, none, Rect::new(-20.0, -5.0, 10.0, 10.0), zero, parent).anchor_rect,
+            (0, 0, 1, 5)
+        );
+        // An empty rectangle (a point, as a context menu gives) is one pixel.
+        assert_eq!(
+            compute_positioner_geometry(size, none, Rect::new(300.0, 200.0, 0.0, 0.0), zero, parent).anchor_rect,
+            (300, 200, 1, 1)
+        );
+        // Without a geometry of the parent nothing is clamped, and the rectangle is not empty.
+        assert_eq!(
+            compute_positioner_geometry(size, none, Rect::new(900.0, -7.0, 0.0, 12.0), zero, None).anchor_rect,
+            (900, -7, 1, 12)
+        );
+        // A size that the margin of the child eats leaves a size of one.
+        assert_eq!(
+            compute_positioner_geometry(Size::new(10.0, 10.0), Thickness::new(8.0, 8.0, 8.0, 8.0), Rect::default(), zero, parent).size,
+            (1, 1)
+        );
+        // Halves round to the even number, as the reference rounds.
+        assert_eq!(
+            compute_positioner_geometry(size, none, Rect::new(2.5, 3.5, 4.5, 5.5), zero, parent).anchor_rect,
+            (2, 4, 4, 6)
+        );
     }
 }

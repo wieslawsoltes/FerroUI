@@ -1,14 +1,15 @@
 //! The commands of a shell surface and of a top-level (the port of
 //! `IWXdgTopLevel.cs`) and the proxies the UI thread holds
-//! (`WXdgShellSurfaceProxy`, `WXdgTopLevelProxy`, which the reference
-//! generates).
+//! (`WXdgShellSurfaceProxy`, `WXdgTopLevelProxy`, `WXdgPopupProxy`, which the
+//! reference generates).
 //!
-//! `IWXdgPopup` with its proxy and `ExportToplevel` belong to stage 2 of
+//! `ExportToplevel` belongs to a later part of stage 2 of
 //! `docs/porting/wayland-platform.md`.
 
 use super::i_w_surface::WSurfaceProxy;
 use super::i_w_surface_event_sink::PlatformInputEventCookie;
 use super::w_surface::WSurfaceId;
+use super::xdg_popup_positioner_params::XdgPopupPositionerParams;
 use crate::server::wayland_dispatch_priority::WaylandDispatchPriority;
 use crate::server::wayland_worker::WorkerMarshaller;
 use ferroui_base::{Size, Thickness};
@@ -72,16 +73,16 @@ impl Deref for WXdgShellSurfaceProxy {
 impl IWXdgShellSurface for WXdgShellSurfaceProxy {
     fn set_shadow_extents(&self, extents: Thickness) {
         self.post(move |worker, id| {
-            if let Some(top_level) = worker.state.top_levels.get_mut(&id) {
-                top_level.shell_mut().set_shadow_extents(extents);
+            if let Some(shell) = worker.state.shell_mut(id) {
+                shell.set_shadow_extents(extents);
             }
         });
     }
 
     fn set_pending_ack_serial(&self, serial: u32) {
         self.post(move |worker, id| {
-            if let Some(top_level) = worker.state.top_levels.get_mut(&id) {
-                top_level.shell_mut().set_pending_ack_serial(serial);
+            if let Some(shell) = worker.state.shell_mut(id) {
+                shell.set_pending_ack_serial(serial);
             }
         });
     }
@@ -220,5 +221,56 @@ impl IWXdgTopLevel for WXdgTopLevelProxy {
                 top_level.destroy_decoration();
             }
         });
+    }
+}
+
+/// Worker-side xdg_popup commands posted from the UI thread. The worker
+/// caches the most recent positioner parameters and rebuilds
+/// the protocol-level `xdg_positioner` from these on every connect.
+pub trait IWXdgPopup: IWXdgShellSurface {
+    /// Updates the cached positioner parameters used to (re-)create the
+    /// xdg_popup on connect. Called from the UI thread before the popup is
+    /// shown for the first time, and when reposition is invoked.
+    fn update_positioner(&self, positioner: XdgPopupPositionerParams);
+}
+
+/// A popup of the worker as the UI thread holds it.
+#[derive(Clone)]
+pub struct WXdgPopupProxy {
+    shell: WXdgShellSurfaceProxy,
+}
+
+impl WXdgPopupProxy {
+    pub fn new(id: WSurfaceId, marshaller: WorkerMarshaller) -> Self {
+        Self { shell: WXdgShellSurfaceProxy::new(id, marshaller) }
+    }
+
+    /// The proxy as the proxy of its shell surface (the base interface).
+    pub fn as_shell_surface(&self) -> &WXdgShellSurfaceProxy {
+        &self.shell
+    }
+}
+
+impl Deref for WXdgPopupProxy {
+    type Target = WXdgShellSurfaceProxy;
+
+    fn deref(&self) -> &WXdgShellSurfaceProxy {
+        &self.shell
+    }
+}
+
+impl IWXdgShellSurface for WXdgPopupProxy {
+    fn set_shadow_extents(&self, extents: Thickness) {
+        self.shell.set_shadow_extents(extents);
+    }
+
+    fn set_pending_ack_serial(&self, serial: u32) {
+        self.shell.set_pending_ack_serial(serial);
+    }
+}
+
+impl IWXdgPopup for WXdgPopupProxy {
+    fn update_positioner(&self, positioner: XdgPopupPositionerParams) {
+        self.post(move |worker, id| worker.state.update_popup_positioner(id, positioner));
     }
 }

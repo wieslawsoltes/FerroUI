@@ -215,9 +215,9 @@ impl EglPlatformSurfaceRenderTarget for RenderTarget {
         let before_swap: Rc<dyn Fn()> = Rc::new(move || {
             display.egl_interface().swap_interval(display.handle(), 0);
             with_worker_thread(|worker| {
-                if let Some((globals, surface)) = worker.state.framebuffer_surface(WaylandRenderSurfaceTarget::Surface(surface)) {
-                    surface.on_before_new_buffer_attached(globals, &before_swap_scene_info);
-                }
+                worker
+                    .state
+                    .on_before_new_buffer_attached(WaylandRenderSurfaceTarget::Surface(surface), &before_swap_scene_info);
             });
         });
 
