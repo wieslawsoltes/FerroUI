@@ -34,11 +34,19 @@ ferroui_android::android_application!(app::build);
 
 #[cfg(target_os = "android")]
 mod app {
-    use ferroui_android::interop::java::{call_object, string_of};
+    use ferroui_android::interop::java::{call_int, call_object, string_of};
     use ferroui_android::log::{self, LogPriority};
     use ferroui_android::{
-        AndroidApplicationExtensions, AndroidPlatform, AndroidPlatformOptions, AndroidRenderingMode, FerroActivity,
-        FerroAndroidApplication,
+        AndroidApplicationExtensions, AndroidPlatform, AndroidPlatformOptions, AndroidRenderingMode,
+        AndroidViewControlHandle, FerroActivity, FerroAndroidApplication,
+    };
+    use ferroui_base::input::platform::ClipboardExtensions;
+    use ferroui_base::platform::storage::WellKnownFolder;
+    use ferroui_base::reactive::IDisposable;
+    use ferroui_base::utilities::Uri;
+    use ferroui_controls::platform::{
+        FeedbackAction, FeedbackType, INativeControlHostControlTopLevelAttachment,
+        INativeControlHostDestroyableControlHandle, INativeControlHostImpl, IPlatformFeedback, IPlatformHandle,
     };
     use ferroui_base::input::text_input::{
         TextInputMethodClient, TextInputMethodClientEvents, TextInputMethodClientRequestedEventArgs, TextSelection,
@@ -583,6 +591,7 @@ mod app {
             InputPane,
             InputMethod,
             InputPaneClosed,
+            NativeControl,
             Settings,
             Background,
             Foreground,
@@ -622,9 +631,30 @@ mod app {
             /// The changes of the state of the input pane.
             pane_changes: Rc<RefCell<Vec<(InputPaneState, Rect, Duration, bool)>>>,
             lifecycle: Rc<Lifecycle>,
+            /// The native control of the native control host check, and its attachment.
+            native_control: RefCell<Option<NativeControl>>,
             /// Whether a back request is handled, and how many arrived.
             handle_back: Rc<Cell<bool>>,
             back_requests: Rc<Cell<u32>>,
+        }
+
+        type NativeControl =
+            (Rc<dyn INativeControlHostDestroyableControlHandle>, Rc<dyn INativeControlHostControlTopLevelAttachment>);
+
+        /// The value of a future that is complete when it is first asked.
+        fn now<T>(future: impl std::future::Future<Output = T>) -> Option<T> {
+            let future = std::pin::pin!(future);
+            match future.poll(&mut std::task::Context::from_waker(std::task::Waker::noop())) {
+                std::task::Poll::Ready(value) => Some(value),
+                std::task::Poll::Pending => None,
+            }
+        }
+
+        /// A feature of the platform implementation of the top-level.
+        fn feature<T: ?Sized + 'static>(state: &State) -> Option<Rc<T>> {
+            let platform_impl = top_level(state)?.platform_impl()?;
+            let feature = platform_impl.try_get_feature(TypeId::of::<T>())?;
+            feature.downcast_ref::<Rc<T>>().cloned()
         }
 
         /// What the activatable lifetime of the application raised.
@@ -673,6 +703,7 @@ mod app {
                 settings_step: Cell::new(0),
                 pane_changes: Rc::new(RefCell::new(Vec::new())),
                 lifecycle: Rc::new(Lifecycle::default()),
+                native_control: RefCell::new(None),
                 handle_back: Rc::new(Cell::new(true)),
                 back_requests: Rc::new(Cell::new(0)),
             });
@@ -720,6 +751,7 @@ mod app {
                 Stage::InputPane => input_pane(state),
                 Stage::InputMethod => input_method(state),
                 Stage::InputPaneClosed => input_pane_closed(state),
+                Stage::NativeControl => native_control(state),
                 Stage::Settings => settings(state),
                 Stage::Background => background(state),
                 Stage::Foreground => foreground(state),
@@ -1225,6 +1257,133 @@ mod app {
                     state.pane_changes.borrow()
                 ),
             );
+            services(state);
+        }
+
+        /// The services of the top-level that answer at once: the clipboard, the
+        /// feedback, the launcher, the storage provider; then the native control host.
+        fn services(state: &Rc<State>) {
+            match top_level(state).and_then(|top_level| top_level.clipboard()) {
+                Some(clipboard) => {
+                    let text = "FerroUI \u{17c}\u{f3}\u{142}w \u{1f600}";
+                    let set = now(clipboard.set_text_async(Some(text)));
+                    let got = now(clipboard.try_get_text_async());
+                    check(
+                        "clipboard",
+                        matches!(set, Some(Ok(()))) && matches!(&got, Some(Ok(Some(got))) if got == text),
+                        format!("text set on the clipboard of the system ({set:?}) reads back as {got:?}"),
+                    );
+                    let cleared = now(clipboard.clear_async());
+                    let after = now(clipboard.try_get_text_async());
+                    check(
+                        "clipboard cleared",
+                        matches!(cleared, Some(Ok(()))) && matches!(&after, Some(Ok(None))),
+                        format!("cleared ({cleared:?}) the clipboard has the text {after:?}"),
+                    );
+                }
+                None => check("clipboard", false, "the top-level has no clipboard"),
+            }
+
+            match feature::<dyn IPlatformFeedback>(state) {
+                Some(feedback) => {
+                    let hold = feedback.perform(FeedbackAction::hold(), FeedbackType::Haptic);
+                    let hold_sound = feedback.perform(FeedbackAction::hold(), FeedbackType::Sound);
+                    let click = feedback.perform(FeedbackAction::click(), FeedbackType::Sound);
+                    check(
+                        "platform feedback",
+                        hold && !hold_sound && click,
+                        format!(
+                            "a haptic hold was performed: {hold}; a hold as a sound: {hold_sound}; a click sound: {click}"
+                        ),
+                    );
+                }
+                None => check("platform feedback", false, "the top-level has no platform feedback"),
+            }
+
+            match top_level(state) {
+                Some(top_level) => {
+                    let uri = Uri::absolute("ferroui-smoke-nobody://nothing").expect("a URI");
+                    let launched = now(top_level.launcher().launch_uri_async(&uri));
+                    check(
+                        "launcher",
+                        launched == Some(false),
+                        format!("a URI no application of the device handles was launched: {launched:?}"),
+                    );
+
+                    let provider = top_level.storage_provider();
+                    let documents = now(provider.try_get_well_known_folder_async(WellKnownFolder::Documents));
+                    let folder = documents.as_ref().and_then(|folder| folder.as_ref().map(|folder| folder.path().original_string().to_string()));
+                    check(
+                        "storage provider",
+                        provider.can_open() && provider.can_save() && provider.can_pick_folder() && folder.is_some(),
+                        format!(
+                            "the provider can open: {}, save: {}, pick a folder: {}; the documents folder is {folder:?}",
+                            provider.can_open(),
+                            provider.can_save(),
+                            provider.can_pick_folder()
+                        ),
+                    );
+                }
+                None => check("launcher", false, "there is no top-level"),
+            }
+
+            // The native control host: a default child, attached and shown in a rectangle.
+            let host = feature::<dyn INativeControlHostImpl>(state);
+            let parent = top_level(state).and_then(|top_level| top_level.platform_impl()).and_then(|i| i.handle());
+            match (host, parent) {
+                (Some(host), Some(parent)) => {
+                    let child = host.create_default_child(parent);
+                    let handle: Rc<dyn IPlatformHandle> = child.clone();
+                    let compatible = host.is_compatible_with(&*handle);
+                    let attachment = host.create_new_attachment(handle);
+                    attachment.show_in_bounds(Rect::new(20.0, 30.0, 100.0, 50.0));
+                    note(format!("A native control was attached (its handle is compatible with the host: {compatible})"));
+                    *state.native_control.borrow_mut() = Some((child, attachment));
+                    enter(state, Stage::NativeControl);
+                }
+                _ => {
+                    check("native control host", false, "the top-level has no native control host");
+                    begin_settings(state);
+                }
+            }
+        }
+
+        fn native_control(state: &Rc<State>) {
+            // A layout pass of the system places the view.
+            if elapsed(state) < Duration::from_millis(1500) {
+                return;
+            }
+            let Some((child, attachment)) = state.native_control.borrow_mut().take() else {
+                begin_settings(state);
+                return;
+            };
+            let view = child.as_any().downcast_ref::<AndroidViewControlHandle>().and_then(AndroidViewControlHandle::view);
+            match view {
+                Some(view) => {
+                    let int = |name: &str| call_int(&view, name, "()I", &[]);
+                    let has_parent = || call_object(&view, "getParent", "()Landroid/view/ViewParent;", &[]).is_some();
+                    let scaling = state.scaling.get();
+                    let expected =
+                        ((20.0 * scaling) as i32, (30.0 * scaling) as i32, (100.0 * scaling) as i32, (50.0 * scaling) as i32);
+                    let placed = (int("getLeft"), int("getTop"), int("getWidth"), int("getHeight"));
+                    let shown = has_parent() && int("getVisibility") == 0;
+                    attachment.hide_with_size(ferroui_base::Size::new(100.0, 50.0));
+                    let hidden = int("getVisibility") == 8;
+                    attachment.dispose();
+                    let removed = !has_parent();
+                    check(
+                        "native control host",
+                        shown && placed == expected && hidden && removed,
+                        format!(
+                            "a view of the system shown in (20, 30, 100, 50) is a visible child of the view: {shown}, \
+                             placed at (left, top, width, height) {placed:?} px, expected {expected:?}; hidden it is \
+                             gone: {hidden}; disposed it left the view: {removed}"
+                        ),
+                    );
+                }
+                None => check("native control host", false, "the default child is not a view"),
+            }
+            child.destroy();
             begin_settings(state);
         }
 

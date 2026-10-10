@@ -49,6 +49,7 @@ pub(crate) const FERRO_VIEW: &str = "org/ferroui/android/FerroView";
 pub(crate) const FERRO_SURFACE_VIEW: &str = "org/ferroui/android/FerroSurfaceView";
 pub(crate) const MAIN_LOOPER_BRIDGE: &str = "org/ferroui/android/MainLooperBridge";
 pub(crate) const FERRO_INPUT_CONNECTION: &str = "org/ferroui/android/FerroInputConnection";
+pub(crate) const NATIVE_CLICK_LISTENER: &str = "org/ferroui/android/NativeClickListener";
 pub(crate) const PLATFORM_HELPER: &str = "org/ferroui/android/PlatformHelper";
 pub(crate) const CONFIGURATION_CHANGED_RECEIVER: &str = "org/ferroui/android/ConfigurationChangedReceiver";
 
@@ -115,6 +116,8 @@ pub unsafe fn on_load(vm: *mut c_void, build: fn() -> AppBuilder) -> i32 {
             FERRO_SURFACE_VIEW,
             MAIN_LOOPER_BRIDGE,
             FERRO_INPUT_CONNECTION,
+            NATIVE_CLICK_LISTENER,
+            crate::platform::storage::android_storage_item::STORAGE_HELPER,
             PLATFORM_HELPER,
             CONFIGURATION_CHANGED_RECEIVER,
         ]);
@@ -337,6 +340,12 @@ fn register_all() {
                     connection_send_key_event as unsafe extern "system" fn(_, _, _, _) -> _
                 ),
             ],
+        );
+    }
+    unsafe {
+        register_natives(
+            &JavaClass::find(NATIVE_CLICK_LISTENER),
+            &[native!(c"nativeOnClick", c"(J)V", click_listener_on_click as unsafe extern "system" fn(_, _, _))],
         );
     }
     unsafe {
@@ -869,6 +878,12 @@ unsafe extern "system" fn connection_send_key_event(
         let event = unsafe { JavaObject::from_raw(event) };
         connection.send_key_event(event.map(|event| KeyEventToDispatch::System(Rc::new(event)))) as JBoolean
     })
+}
+
+// ---- NativeClickListener ------------------------------------------------------------------
+
+unsafe extern "system" fn click_listener_on_click(_env: *mut JNIEnv, _class: jobject, handle: jlong) {
+    guard((), || super::listeners::on_click(handle));
 }
 
 // ---- ConfigurationChangedReceiver ---------------------------------------------------------
