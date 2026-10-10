@@ -11,7 +11,7 @@ use std::rc::Rc;
 use zbus::Connection;
 
 /// The variable of this framework that names the input method module
-/// (`AVALONIA_IM_MODULE` of the reference, renamed: docs/porting/DEVIATIONS.md).
+/// (the module variable of the reference, renamed: docs/porting/DEVIATIONS.md).
 pub const IM_MODULE_VARIABLE: &str = "FERROUI_IM_MODULE";
 
 /// The input methods this crate has (`KnownMethods`, as its keys with the
