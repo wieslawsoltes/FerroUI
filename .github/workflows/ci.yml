@@ -835,6 +835,77 @@ jobs:
             xrandr --listmonitors
             timeout 300 target/debug/examples/x11_window --smoke --expect-screens=2 --skip=clipboard'
 
+  # The Wayland platform (docs/porting/wayland-platform.md, section 11): the tests of the crate, and
+  # a window on a compositor. The compositor is sway on the headless backend of wlroots with its
+  # software renderer (scripts/wayland/sway-run.sh). The example asks the compositor what it knows
+  # of the window and of the outputs (its IPC), and is its own test client on a second connection:
+  # it reads the composed output (screen copy) and synthesizes pointer and keyboard input (the
+  # virtual pointer and virtual keyboard protocols). Rendered through wl_shm buffers and through
+  # EGL (Mesa's software rasterizer), on an output of scale 1 and of scale 2. Not covered: a
+  # desktop compositor (Mutter, KWin), a hardware GPU, touch, a compositor restart.
+  wayland:
+    name: Build and test (Linux, Wayland under headless sway)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: wayland
+      # libwayland-client, libwayland-egl, libEGL and libxkbcommon are opened at run time (nothing
+      # links them); Skia links FreeType and Fontconfig, and needs a font to answer for the default
+      # family. xkb-data has the keymap the virtual keyboard of the example gives the compositor.
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            sway libwayland-client0 libwayland-egl1 libxkbcommon0 xkb-data \
+            libegl1 libegl-mesa0 libgl1 libgles2 libgl1-mesa-dri \
+            libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config
+          sway --version
+      - name: Tests of the Wayland crate (no compositor needed)
+        run: cargo test --locked -p ferroui-wayland --no-fail-fast
+      - name: Build the window example
+        if: ${{ !cancelled() }}
+        run: cargo build --locked -p ferroui-wayland --features example --example wayland_window
+      - name: A window on a compositor, rendered through wl_shm buffers
+        run: |
+          scripts/wayland/sway-run.sh -- \
+            timeout 300 target/debug/examples/wayland_window --smoke
+      - name: The same rendered through EGL
+        if: ${{ !cancelled() }}
+        env:
+          LIBGL_ALWAYS_SOFTWARE: 1
+        run: |
+          scripts/wayland/sway-run.sh -- \
+            timeout 300 target/debug/examples/wayland_window --smoke --mode=egl
+      - name: On an output of scale 2, through wl_shm buffers
+        if: ${{ !cancelled() }}
+        run: |
+          scripts/wayland/sway-run.sh --scale 2 -- \
+            timeout 300 target/debug/examples/wayland_window --smoke --expect-scale=2
+      - name: On an output of scale 2, through EGL
+        if: ${{ !cancelled() }}
+        env:
+          LIBGL_ALWAYS_SOFTWARE: 1
+        run: |
+          scripts/wayland/sway-run.sh --scale 2 -- \
+            timeout 300 target/debug/examples/wayland_window --smoke --mode=egl --expect-scale=2
+      # Without a compositor the backend does not start, and says why.
+      - name: Without a compositor the probe fails with a message
+        if: ${{ !cancelled() }}
+        run: |
+          set +e
+          out="$(env -u WAYLAND_DISPLAY -u WAYLAND_SOCKET XDG_RUNTIME_DIR=/nonexistent timeout 60 target/debug/examples/wayland_window 2>&1)"
+          status=$?
+          echo "$out"
+          test $status -ne 0
+          echo "$out" | grep -q "Unable to connect to Wayland display"
+
 
   # The Android platform (docs/porting/android-platform.md, section 12): the tests of what is logic,
   # and the package of the smoke application built without Gradle. Nothing runs on a device here:
