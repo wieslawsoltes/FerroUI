@@ -21,7 +21,7 @@ impl TransformedGeometryImpl {
         let matrix = to_sk_matrix(transform);
 
         let stroke_path = source.stroke_path().map(|path| path.make_transform(&matrix));
-        let bounds = stroke_path.as_ref().map(|path| to_rect(path.compute_tight_bounds())).unwrap_or_default();
+        let bounds = stroke_path.as_ref().map(|path| to_rect(crate::skia_sharp_extensions::tight_bounds(path))).unwrap_or_default();
 
         let fill = match source.fill() {
             FillPath::SameAsStroke if stroke_path.is_some() => FillPath::SameAsStroke,

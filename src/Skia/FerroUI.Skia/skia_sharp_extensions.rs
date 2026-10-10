@@ -329,3 +329,34 @@ pub fn font_style_to_slant(style: ferroui_base::media::FontStyle) -> sk::font_st
         FontStyle::Oblique => sk::font_style::Slant::Oblique,
     }
 }
+
+/// Upstream's `SKPath.TightBounds`.
+///
+/// A path that has only lines has the bounds of all its points as its tight
+/// bounds (`SkPath::computeTightBounds`: "if we're only lines, then our
+/// (quick) bounds is also tight"), and in the Skia upstream links those are
+/// the bounds of every point of the path, the points of its moves included,
+/// also of a move no segment follows. The Skia this backend links leaves
+/// the trailing moves of a path out of its bounds, so the bounds of such a
+/// path are computed here; upstream's render tests have paths that end in
+/// moves to give a shape its extent (`M 10,190 L 190,10 M0,0M200,200`).
+pub fn tight_bounds(path: &sk::Path) -> sk::Rect {
+    if path.count_verbs() != 0 && path.segment_masks() == sk::PathSegmentMask::LINE {
+        let points = path.points();
+        if let Some(first) = points.first() {
+            let (mut left, mut top, mut right, mut bottom) = (first.x, first.y, first.x, first.y);
+            let mut finite = true;
+            for point in points {
+                finite &= point.x.is_finite() && point.y.is_finite();
+                left = left.min(point.x);
+                top = top.min(point.y);
+                right = right.max(point.x);
+                bottom = bottom.max(point.y);
+            }
+            // The bounds of a path with a point that is not finite are empty.
+            return if finite { sk::Rect::new(left, top, right, bottom) } else { sk::Rect::new_empty() };
+        }
+    }
+
+    path.compute_tight_bounds()
+}

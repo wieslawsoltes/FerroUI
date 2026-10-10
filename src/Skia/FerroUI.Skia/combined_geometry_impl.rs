@@ -19,10 +19,10 @@ pub struct CombinedGeometryImpl {
 impl CombinedGeometryImpl {
     /// Creates a geometry from an already combined stroke and fill.
     pub fn new(stroke: Option<Path>, fill: FillPath) -> Arc<Self> {
-        let mut bounds = stroke.as_ref().map(Path::compute_tight_bounds).unwrap_or_default();
+        let mut bounds = stroke.as_ref().map(crate::skia_sharp_extensions::tight_bounds).unwrap_or_default();
 
         if let FillPath::Separate(fill) = &fill {
-            let fill_bounds = fill.compute_tight_bounds();
+            let fill_bounds = crate::skia_sharp_extensions::tight_bounds(&fill);
             bounds = skia_safe::Rect::new(
                 bounds.left.min(fill_bounds.left),
                 bounds.top.min(fill_bounds.top),

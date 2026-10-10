@@ -56,7 +56,36 @@ impl VelloPath {
 
     /// The tight bounds of the path: of its curves, not of their control
     /// points. A path without a segment has empty bounds at the origin.
+    ///
+    /// A path that has only lines has the bounds of all its points, the
+    /// points of its moves included, also of a move no segment follows: as
+    /// the tight bounds of the Skia backend (its `tight_bounds`), which are
+    /// upstream's. Upstream's render tests have paths that end in moves to
+    /// give a shape its extent (`M 10,190 L 190,10 M0,0M200,200`).
     pub fn tight_bounds(&self) -> Rect {
+        let mut has_line = false;
+        let mut only_lines = true;
+        for element in self.elements.elements() {
+            match element {
+                kurbo::PathEl::LineTo(_) => has_line = true,
+                kurbo::PathEl::MoveTo(_) | kurbo::PathEl::ClosePath => {}
+                kurbo::PathEl::QuadTo(..) | kurbo::PathEl::CurveTo(..) => only_lines = false,
+            }
+        }
+
+        if has_line && only_lines {
+            let mut bounds: Option<kurbo::Rect> = None;
+            for element in self.elements.elements() {
+                if let kurbo::PathEl::MoveTo(point) | kurbo::PathEl::LineTo(point) = element {
+                    let at = kurbo::Rect::from_points(*point, *point);
+                    bounds = Some(bounds.map_or(at, |bounds| bounds.union(at)));
+                }
+            }
+            if let Some(bounds) = bounds {
+                return to_rect(bounds);
+            }
+        }
+
         to_rect(self.elements.bounding_box())
     }
 

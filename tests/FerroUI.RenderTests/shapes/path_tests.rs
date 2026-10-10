@@ -20,7 +20,6 @@ fn base() -> TestBase {
 }
 
 #[test]
-#[ignore = "the line is drawn shifted right and down: the bounds of a path of lines leave out its trailing move, where the Skia of upstream counts it, so the shape is measured smaller and centered (measured error 0.065861, immediate and composited)"]
 fn line_absolute() {
     let t = base();
     let target = Decorator::new();
@@ -39,7 +38,6 @@ fn line_absolute() {
 }
 
 #[test]
-#[ignore = "the line is drawn shifted right and down: the bounds of a path of lines leave out its trailing move, where the Skia of upstream counts it, so the shape is measured smaller and centered (measured error 0.066803, immediate and composited)"]
 fn line_relative() {
     let t = base();
     let target = Decorator::new();
@@ -58,7 +56,6 @@ fn line_relative() {
 }
 
 #[test]
-#[ignore = "the line is drawn shifted right and down: the bounds of a path of lines leave out its trailing move, where the Skia of upstream counts it, so the shape is measured smaller and centered (measured error 0.047527, immediate and composited)"]
 fn horizontal_line_absolute() {
     let t = base();
     let target = Decorator::new();
@@ -77,7 +74,6 @@ fn horizontal_line_absolute() {
 }
 
 #[test]
-#[ignore = "the line is drawn shifted right and down: the bounds of a path of lines leave out its trailing move, where the Skia of upstream counts it, so the shape is measured smaller and centered (measured error 0.047527, immediate and composited)"]
 fn horizontal_line_relative() {
     let t = base();
     let target = Decorator::new();
@@ -96,7 +92,6 @@ fn horizontal_line_relative() {
 }
 
 #[test]
-#[ignore = "the line is drawn shifted right and down: the bounds of a path of lines leave out its trailing move, where the Skia of upstream counts it, so the shape is measured smaller and centered (measured error 0.047527, immediate and composited)"]
 fn vertical_line_absolute() {
     let t = base();
     let target = Decorator::new();
@@ -115,7 +110,6 @@ fn vertical_line_absolute() {
 }
 
 #[test]
-#[ignore = "the line is drawn shifted right and down: the bounds of a path of lines leave out its trailing move, where the Skia of upstream counts it, so the shape is measured smaller and centered (measured error 0.049149, immediate and composited)"]
 fn vertical_line_relative() {
     let t = base();
     let target = Decorator::new();
