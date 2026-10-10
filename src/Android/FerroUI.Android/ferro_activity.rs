@@ -4,22 +4,23 @@
 //! (`FerroActivity`), which forwards its lifecycle; this is the object
 //! behind it, from `onCreate` to `onDestroy`.
 //!
-//! Stage 2 of docs/porting/android-platform.md: the back button
-//! (`OnBackPressed`, `OnBackInvoked`, `BackRequested`, the back pressed
-//! callback), the results of activities and of permission requests, and
-//! the intents (`OnNewIntent`, `HandleIntent`: protocol and file
-//! activation). The Java activity does not forward them yet.
+//! Stage 2d of docs/porting/android-platform.md: the activation with a
+//! file (an intent whose data is a file or a content URI), with the storage
+//! items.
 
+use crate::back_pressed_callback::BackPressedCallback;
 use crate::ferro_main_activity::FerroMainActivity;
 use crate::ferro_view::FerroView;
+use crate::i_activity_result_handler::{ActivityResultHandler, IActivityResultHandler, RequestPermissionsResultHandler};
+use crate::i_android_navigation_service::{AndroidBackRequestedEventArgs, IActivityNavigationService};
 use crate::i_ferro_activity::IFerroActivity;
-use crate::interop::java::{call_boolean, call_object, call_void, string_of, JavaObject, JavaValue};
-use crate::interop::natives::next_handle;
+use crate::interop::java::{call_boolean, call_object, call_void, string_of, JavaObject, JavaRef, JavaValue};
+use crate::interop::natives::{next_handle, sdk_int};
 use crate::platform::AndroidActivatableLifetime;
 use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_base::utilities::HandlerList;
+use ferroui_base::utilities::{HandlerList, Uri, UriKind};
 use ferroui_base::{BoxedValue, FerroLocator, LocatorExtensions};
-use ferroui_controls::application_lifetimes::{ActivatedEventArgs, ActivationKind};
+use ferroui_controls::application_lifetimes::{ActivatedEventArgs, ActivationKind, ProtocolActivatedEventArgs};
 use ferroui_controls::{Application, Control};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -43,6 +44,11 @@ pub struct FerroActivity {
     content: RefCell<Option<BoxedValue>>,
     content_view_set: Cell<bool>,
     view: RefCell<Option<Rc<FerroView>>>,
+    current_back_pressed_callback: RefCell<Option<BackPressedCallback>>,
+    should_navigate_back: Cell<bool>,
+    activity_result: RefCell<Option<ActivityResultHandler>>,
+    request_permissions_result: RefCell<Option<RequestPermissionsResultHandler>>,
+    back_requested: Rc<HandlerList<dyn Fn(&AndroidBackRequestedEventArgs)>>,
 }
 
 /// Whether two contents are the same object (`_content != value`).
@@ -89,6 +95,97 @@ impl FerroActivity {
         Self::from_handle(handle)
     }
 
+    /// The activity whose activity of the system is `java`.
+    pub(crate) fn from_java(java: &dyn JavaRef) -> Option<Rc<FerroActivity>> {
+        ACTIVITIES.with(|activities| {
+            activities.borrow().values().find(|activity| activity.java.is_same_object(java)).cloned()
+        })
+    }
+
+    /// Gets whether to call the default back handler after our back handler is called.
+    pub(crate) fn should_navigate_back(&self) -> bool {
+        self.should_navigate_back.replace(false)
+    }
+
+    /// `onBackPressed` of the activity below API 33. The answer is whether
+    /// the request was handled; the base class is called when it was not.
+    pub(crate) fn on_back_pressed(&self) -> bool {
+        let event_args = AndroidBackRequestedEventArgs::new();
+
+        self.raise_back_requested(&event_args);
+
+        event_args.handled()
+    }
+
+    /// The back callback of the activity (API 33): the answer is whether
+    /// the default action of the system follows.
+    pub(crate) fn handle_on_back_pressed(self: &Rc<Self>) -> bool {
+        // A callback is registered between `onStart` and `onStop`; a system that calls
+        // `onBackPressed` instead finds it here as well.
+        let callback = self.current_back_pressed_callback.borrow().as_ref().map(|_| BackPressedCallback::new(self));
+        match callback {
+            Some(callback) => callback.handle_on_back_pressed(),
+            None => true,
+        }
+    }
+
+    pub fn on_back_invoked(&self) {
+        let event_args = AndroidBackRequestedEventArgs::new();
+
+        self.raise_back_requested(&event_args);
+
+        self.should_navigate_back.set(!event_args.handled());
+    }
+
+    fn raise_back_requested(&self, event_args: &AndroidBackRequestedEventArgs) {
+        for (_, handler) in self.back_requested.snapshot().iter() {
+            handler(event_args);
+        }
+    }
+
+    /// `onNewIntent` of the activity, and the intent it was created with:
+    /// `android_uri` is the data of the intent (an `android.net.Uri`).
+    pub(crate) fn handle_intent(&self, android_uri: Option<JavaObject>) {
+        let Some(android_uri) = android_uri else {
+            return;
+        };
+        if !call_boolean(&android_uri, "isAbsolute", "()Z", &[]) {
+            return;
+        }
+        let Some(text) = call_object(&android_uri, "toString", "()Ljava/lang/String;", &[]) else {
+            return;
+        };
+        let Some(uri) = Uri::try_create(&string_of(&text), UriKind::Absolute) else {
+            return;
+        };
+
+        if uri.scheme() == "file" || uri.scheme() == "content" {
+            // Stage 2d of docs/porting/android-platform.md: `AndroidStorageItem.CreateItem`
+            // and the file activation.
+            panic!(
+                "The activation with a file ({}) needs the storage items of the Android backend, which are not \
+                 built: stage 2d of docs/porting/android-platform.md.",
+                uri.original_string()
+            );
+        } else {
+            raise(&self.on_activated, ProtocolActivatedEventArgs::new(uri).into());
+        }
+    }
+
+    pub(crate) fn on_activity_result(&self, request_code: i32, result_code: i32, data: Option<JavaObject>) {
+        let activity_result = self.activity_result.borrow().clone();
+        if let Some(activity_result) = activity_result {
+            activity_result(request_code, result_code, data.as_ref());
+        }
+    }
+
+    pub(crate) fn on_request_permissions_result(&self, request_code: i32, permissions: &[String], grant_results: &[i32]) {
+        let request_permissions_result = self.request_permissions_result.borrow().clone();
+        if let Some(request_permissions_result) = request_permissions_result {
+            request_permissions_result(request_code, permissions, grant_results);
+        }
+    }
+
     /// The activity of the system.
     pub fn java_object(&self) -> &JavaObject {
         &self.java
@@ -122,6 +219,11 @@ impl FerroActivity {
             content: RefCell::new(None),
             content_view_set: Cell::new(false),
             view: RefCell::new(None),
+            current_back_pressed_callback: RefCell::new(None),
+            should_navigate_back: Cell::new(false),
+            activity_result: RefCell::new(None),
+            request_permissions_result: RefCell::new(None),
+            back_requested: Rc::new(HandlerList::new()),
         });
         ACTIVITIES.with(|activities| activities.borrow_mut().insert(handle, this.clone()));
 
@@ -137,19 +239,28 @@ impl FerroActivity {
             activatable_lifetime.set_current_intend_activity(Some(activity));
         }
 
-        // Stage 2: `HandleIntent(Intent)`.
+        // `HandleIntent(Intent)` follows: the Java activity calls it with the data of its
+        // intent.
     }
 
     pub(crate) fn on_stop(&self) {
         raise(&self.on_deactivated, ActivatedEventArgs::new(ActivationKind::Background));
 
-        // Stage 2: the back pressed callback is removed here.
+        if sdk_int() >= 33 {
+            let removed = self.current_back_pressed_callback.borrow_mut().take();
+            if removed.is_some() {
+                call_void(&self.java, "removeBackCallback", "()V", &[]);
+            }
+        }
     }
 
-    pub(crate) fn on_start(&self) {
+    pub(crate) fn on_start(self: &Rc<Self>) {
         raise(&self.on_activated, ActivatedEventArgs::new(ActivationKind::Background));
 
-        // Stage 2: the back pressed callback is added here.
+        if sdk_int() >= 33 {
+            *self.current_back_pressed_callback.borrow_mut() = Some(BackPressedCallback::new(self));
+            call_void(&self.java, "addBackCallback", "()V", &[]);
+        }
     }
 
     pub(crate) fn on_resume(self: &Rc<Self>) {
@@ -236,6 +347,34 @@ impl FerroActivity {
             &[JavaValue::String(name)],
         )?;
         Some(string_of(&value))
+    }
+}
+
+impl IActivityResultHandler for FerroActivity {
+    fn activity_result(&self) -> Option<ActivityResultHandler> {
+        self.activity_result.borrow().clone()
+    }
+
+    fn set_activity_result(&self, value: Option<ActivityResultHandler>) {
+        *self.activity_result.borrow_mut() = value;
+    }
+
+    fn request_permissions_result(&self) -> Option<RequestPermissionsResultHandler> {
+        self.request_permissions_result.borrow().clone()
+    }
+
+    fn set_request_permissions_result(&self, value: Option<RequestPermissionsResultHandler>) {
+        *self.request_permissions_result.borrow_mut() = value;
+    }
+}
+
+impl IActivityNavigationService for FerroActivity {
+    fn back_requested(&self, handler: Rc<dyn Fn(&AndroidBackRequestedEventArgs)>) -> Rc<dyn IDisposable> {
+        let token = self.back_requested.add(handler);
+        let back_requested = self.back_requested.clone();
+        Disposable::create(move || {
+            back_requested.remove(token);
+        })
     }
 }
 

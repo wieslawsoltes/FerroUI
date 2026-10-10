@@ -58,6 +58,8 @@ mod app {
         ferro_class, ferro_impl_classes, instantiate, FerroLocator, FerroObjectImpl, LocatorExtensions, Point, Rect,
         Ref, StyledElementImpl, Thickness, Visual, VisualImpl,
     };
+    use ferroui_base::interactivity::RoutedEventArgs;
+    use ferroui_controls::application_lifetimes::{ActivatedEventArgs, ActivationKind, IActivatableLifetime};
     use ferroui_controls::platform::{InputPaneState, InputPaneStateEventArgs};
     use ferroui_controls::shapes::Ellipse;
     use ferroui_controls::{
@@ -582,6 +584,14 @@ mod app {
             InputMethod,
             InputPaneClosed,
             Settings,
+            Background,
+            Foreground,
+            Rotated,
+            RotatedBack,
+            Protocol,
+            BackHandled,
+            BackNotHandled,
+            BackResumed,
             Finish,
             WaitForDestroy,
             Done,
@@ -599,6 +609,8 @@ mod app {
             /// it is.
             tap: Cell<(i32, i32, Point)>,
             scaling: Cell<f64>,
+            /// A step of a stage that is taken once.
+            aimed: Cell<bool>,
             keys: Rc<Keys>,
             /// The colour values the platform settings raised as changed.
             color_changes: Rc<RefCell<Vec<PlatformColorValues>>>,
@@ -609,6 +621,18 @@ mod app {
             settings_step: Cell<u32>,
             /// The changes of the state of the input pane.
             pane_changes: Rc<RefCell<Vec<(InputPaneState, Rect, Duration, bool)>>>,
+            lifecycle: Rc<Lifecycle>,
+            /// Whether a back request is handled, and how many arrived.
+            handle_back: Rc<Cell<bool>>,
+            back_requests: Rc<Cell<u32>>,
+        }
+
+        /// What the activatable lifetime of the application raised.
+        #[derive(Default)]
+        struct Lifecycle {
+            activated: RefCell<Vec<ActivationKind>>,
+            deactivated: RefCell<Vec<ActivationKind>>,
+            protocols: RefCell<Vec<String>>,
         }
 
         /// The key and text events the top-level raised.
@@ -619,7 +643,20 @@ mod app {
             text: RefCell<String>,
         }
 
+        thread_local! {
+            /// How many times the main view was made: once per start of the activity.
+            static STARTS: Cell<u32> = const { Cell::new(0) };
+        }
+
+        fn second_start() -> bool {
+            STARTS.with(Cell::get) >= 2
+        }
+
         pub fn start(view: Rc<MainView>) {
+            STARTS.with(|starts| starts.set(starts.get() + 1));
+            if second_start() {
+                note("The activity was started again in the process: the checks of the surface and of the frames follow.");
+            }
             let state = Rc::new(State {
                 view,
                 stage: Cell::new(Stage::WaitForSurface),
@@ -629,11 +666,15 @@ mod app {
                 posted_on_main: Arc::new(AtomicBool::new(false)),
                 tap: Cell::new((0, 0, Point::default())),
                 scaling: Cell::new(1.0),
+                aimed: Cell::new(false),
                 keys: Rc::new(Keys::default()),
                 color_changes: Rc::new(RefCell::new(Vec::new())),
                 first_theme: Cell::new(PlatformThemeVariant::Light),
                 settings_step: Cell::new(0),
                 pane_changes: Rc::new(RefCell::new(Vec::new())),
+                lifecycle: Rc::new(Lifecycle::default()),
+                handle_back: Rc::new(Cell::new(true)),
+                back_requests: Rc::new(Cell::new(0)),
             });
 
             let timer = DispatcherTimer::new();
@@ -680,6 +721,14 @@ mod app {
                 Stage::InputMethod => input_method(state),
                 Stage::InputPaneClosed => input_pane_closed(state),
                 Stage::Settings => settings(state),
+                Stage::Background => background(state),
+                Stage::Foreground => foreground(state),
+                Stage::Rotated => rotated(state),
+                Stage::RotatedBack => rotated_back(state),
+                Stage::Protocol => protocol(state),
+                Stage::BackHandled => back_handled(state),
+                Stage::BackNotHandled => back_not_handled(state),
+                Stage::BackResumed => back_resumed(state),
                 Stage::Finish => finish(state),
                 Stage::WaitForDestroy => wait_for_destroy(state),
                 Stage::Done => {}
@@ -805,6 +854,31 @@ mod app {
                 }
             });
 
+            // The back requests of the top-level, and the activations of the application.
+            top_level.add_handler(TopLevel::back_requested_event(), {
+                let (handle_back, back_requests) = (state.handle_back.clone(), state.back_requests.clone());
+                move |_: &Interactive, e: &RoutedEventArgs| {
+                    back_requests.set(back_requests.get() + 1);
+                    e.set_handled(handle_back.get());
+                }
+            });
+            if let Some(lifetime) = FerroLocator::current().get_service::<dyn IActivatableLifetime>() {
+                // The subscriptions live as long as the application.
+                std::mem::forget(lifetime.activated(Rc::new({
+                    let lifecycle = state.lifecycle.clone();
+                    move |e: &ActivatedEventArgs| {
+                        lifecycle.activated.borrow_mut().push(e.kind());
+                        if let Some(protocol) = e.as_protocol_activated() {
+                            lifecycle.protocols.borrow_mut().push(protocol.uri().original_string().to_string());
+                        }
+                    }
+                })));
+                std::mem::forget(lifetime.deactivated(Rc::new({
+                    let lifecycle = state.lifecycle.clone();
+                    move |e: &ActivatedEventArgs| lifecycle.deactivated.borrow_mut().push(e.kind())
+                })));
+            }
+
             // The dispatcher: a timer, and a job from another thread.
             let fired = state.timer_fired.clone();
             let _ = DispatcherTimer::run_once(
@@ -840,6 +914,13 @@ mod app {
                 "a job posted from a thread the virtual machine did not start ran on the main thread",
             );
 
+            aim_readback(state);
+            enter(state, Stage::Frames);
+        }
+
+        /// Tells the render thread what to read back, for the layout as it is now, and
+        /// forgets the frames read so far.
+        fn aim_readback(state: &Rc<State>) {
             // What the render thread is asked to read back: the middle of the stripe, the
             // centre of the ellipse, a point of the background below both, and the rectangle
             // of the text.
@@ -859,6 +940,8 @@ mod app {
             let text_at = to_pixel(text_origin);
             {
                 let mut readback = view.readback.lock().unwrap_or_else(PoisonError::into_inner);
+                readback.frames = 0;
+                readback.colors.clear();
                 readback.points = vec![
                     ("stripe", stripe.0, stripe.1),
                     ("ellipse", ellipse.0, ellipse.1),
@@ -872,7 +955,19 @@ mod app {
                 ));
             }
             state.tap.set((ellipse.0, ellipse.1, ellipse_center));
-            enter(state, Stage::Frames);
+        }
+
+        /// The frames read back since the readback was aimed, the size of the surface
+        /// they were read from, and whether the three points have the colours drawn.
+        fn frames_read(state: &Rc<State>) -> (u32, (i32, i32), bool) {
+            // Something changes every tick, so that frames keep coming.
+            state.view.probe.invalidate_visual();
+
+            let readback = state.view.readback.lock().unwrap_or_else(PoisonError::into_inner);
+            let colors = [("stripe", STRIPE), ("ellipse", ELLIPSE), ("background", FILL)].iter().all(|(name, expected)| {
+                readback.colors.iter().any(|(read_name, read)| read_name == name && near(*read, *expected))
+            });
+            (readback.frames, readback.surface, colors)
         }
 
         fn frames(state: &Rc<State>) {
@@ -932,6 +1027,11 @@ mod app {
                 ),
             );
             drop(readback);
+
+            if second_start() {
+                enter(state, Stage::Finish);
+                return;
+            }
 
             // The script reads the lines that begin with SCRIPT and does what each says, in
             // order: here a picture of the screen, a tap at the pixel and a swipe from it.
@@ -1008,7 +1108,9 @@ mod app {
             );
             check(
                 "key without text",
-                down.last() == Some(&(Key::Enter, Some("\r".to_string()))),
+                // A key the shell injects has no scan code, so no physical key, and the line feed
+                // it produces is not a key symbol: the enter key of a keyboard has "\r".
+                down.last() == Some(&(Key::Enter, None)) && !text.contains(['\r', '\n']),
                 format!("the enter key went down as {:?} and raised no text", down.last()),
             );
             drop((down, up, text));
@@ -1202,8 +1304,217 @@ mod app {
                     arrived && current == Some(wanted),
                     format!("the system went back to {wanted:?}: the last change was to {last:?}, the settings answer {current:?}"),
                 );
-                enter(state, Stage::Finish);
+
+                // The lifecycle: the home button sends the application to the background.
+                state.lifecycle.deactivated.borrow_mut().clear();
+                note("SCRIPT home");
+                enter(state, Stage::Background);
             }
+        }
+
+        fn background(state: &Rc<State>) {
+            let deactivated = state.lifecycle.deactivated.borrow().contains(&ActivationKind::Background);
+            if !deactivated && elapsed(state) < Duration::from_secs(30) {
+                return;
+            }
+            check(
+                "background",
+                deactivated,
+                format!(
+                    "after the home button the application was deactivated: {:?}",
+                    state.lifecycle.deactivated.borrow()
+                ),
+            );
+            // The surface of a stopped activity is destroyed; the frames that are read back
+            // after the activity is back are drawn to a new one.
+            state.lifecycle.activated.borrow_mut().clear();
+            aim_readback(state);
+            note("SCRIPT resume");
+            enter(state, Stage::Foreground);
+        }
+
+        fn foreground(state: &Rc<State>) {
+            let activated = state.lifecycle.activated.borrow().contains(&ActivationKind::Background);
+            let (frames, surface, colors) = frames_read(state);
+            if !(activated && frames >= 3 && colors) && elapsed(state) < Duration::from_secs(40) {
+                return;
+            }
+            check(
+                "foreground",
+                activated && frames >= 3 && colors,
+                format!(
+                    "back in the foreground the application was activated ({:?}) and {frames} frame(s) were drawn \
+                     to the new surface of {}x{} px, with the colours drawn: {colors}",
+                    state.lifecycle.activated.borrow(),
+                    surface.0,
+                    surface.1
+                ),
+            );
+
+            // Rotation: the surface changes its size and the layout follows.
+            note("SCRIPT rotate 1");
+            enter(state, Stage::Rotated);
+        }
+
+        /// The client size of the top-level and the orientation of its screen.
+        fn orientation(state: &Rc<State>) -> (ferroui_base::Size, String) {
+            let top_level = top_level(state);
+            let size = top_level.as_ref().map(|top_level| top_level.client_size()).unwrap_or_default();
+            let orientation = top_level
+                .as_ref()
+                .and_then(|top_level| top_level.screens())
+                .and_then(|screens| top_level.as_ref().and_then(|top_level| screens.screen_from_top_level(top_level)))
+                .map(|screen| format!("{:?}", screen.current_orientation()))
+                .unwrap_or_default();
+            (size, orientation)
+        }
+
+        fn rotated(state: &Rc<State>) {
+            let (size, orientation) = orientation(state);
+            let landscape = size.width > size.height;
+            // The readback is aimed once the layout has the new size.
+            let root = state.view.root.bounds();
+            if landscape && root.width > root.height && !state.aimed.replace(true) {
+                aim_readback(state);
+            }
+            let (frames, surface, colors) = frames_read(state);
+            let drawn = state.aimed.get() && frames >= 3 && colors && surface.0 > surface.1;
+            if !(landscape && drawn) && elapsed(state) < Duration::from_secs(40) {
+                return;
+            }
+            check(
+                "rotation",
+                landscape && drawn && orientation.contains("Landscape"),
+                format!(
+                    "rotated by a quarter the client size is {}x{}, the screen is {orientation}, and {frames} \
+                     frame(s) were drawn to a surface of {}x{} px with the colours drawn: {colors}",
+                    size.width, size.height, surface.0, surface.1
+                ),
+            );
+            state.aimed.set(false);
+            note("SCRIPT rotate 0");
+            enter(state, Stage::RotatedBack);
+        }
+
+        fn rotated_back(state: &Rc<State>) {
+            let (size, orientation) = orientation(state);
+            let portrait = size.height > size.width;
+            let root = state.view.root.bounds();
+            if portrait && root.height > root.width && !state.aimed.replace(true) {
+                aim_readback(state);
+            }
+            let (frames, surface, colors) = frames_read(state);
+            let drawn = state.aimed.get() && frames >= 3 && colors && surface.1 > surface.0;
+            if !(portrait && drawn) && elapsed(state) < Duration::from_secs(40) {
+                return;
+            }
+            check(
+                "rotation back",
+                portrait && drawn && orientation.contains("Portrait"),
+                format!(
+                    "rotated back the client size is {}x{}, the screen is {orientation}, and {frames} frame(s) \
+                     were drawn to a surface of {}x{} px with the colours drawn: {colors}",
+                    size.width, size.height, surface.0, surface.1
+                ),
+            );
+
+            // An intent with a URI for the activity that runs: a protocol activation.
+            note("SCRIPT view ferroui-smoke://hello/world?answer=42");
+            enter(state, Stage::Protocol);
+        }
+
+        fn protocol(state: &Rc<State>) {
+            let arrived = !state.lifecycle.protocols.borrow().is_empty();
+            if !arrived && elapsed(state) < Duration::from_secs(30) {
+                return;
+            }
+            check(
+                "protocol activation",
+                state.lifecycle.protocols.borrow().first().map(String::as_str)
+                    == Some("ferroui-smoke://hello/world?answer=42"),
+                format!(
+                    "a new intent with a URI activated the application with {:?} (activations: {:?})",
+                    state.lifecycle.protocols.borrow(),
+                    state.lifecycle.activated.borrow()
+                ),
+            );
+
+            // The back button, handled by the application.
+            state.handle_back.set(true);
+            state.back_requests.set(0);
+            state.lifecycle.deactivated.borrow_mut().clear();
+            note("SCRIPT back");
+            enter(state, Stage::BackHandled);
+        }
+
+        fn back_handled(state: &Rc<State>) {
+            let requested = state.back_requests.get() > 0;
+            // After the request, a moment in which a default action of the system would show.
+            if !requested && elapsed(state) < Duration::from_secs(30) {
+                return;
+            }
+            if requested && !state.aimed.replace(true) {
+                state.since.set(Instant::now());
+                return;
+            }
+            if requested && elapsed(state) < Duration::from_secs(3) {
+                return;
+            }
+            state.aimed.set(false);
+            let stayed =
+                state.lifecycle.deactivated.borrow().is_empty() && FerroActivity::current_main_activity().is_some();
+            check(
+                "back handled",
+                requested && stayed,
+                format!(
+                    "the back button raised {} back request(s) of the top-level, which were handled; the activity \
+                     stayed in the foreground: {stayed}",
+                    state.back_requests.get()
+                ),
+            );
+
+            // The back button, not handled: the system does its default (the task of a main
+            // activity goes to the background).
+            state.handle_back.set(false);
+            state.back_requests.set(0);
+            note("SCRIPT back");
+            enter(state, Stage::BackNotHandled);
+        }
+
+        fn back_not_handled(state: &Rc<State>) {
+            let requested = state.back_requests.get() > 0;
+            let left = !state.lifecycle.deactivated.borrow().is_empty()
+                || FerroActivity::current_main_activity().is_none();
+            if !(requested && left) && elapsed(state) < Duration::from_secs(30) {
+                return;
+            }
+            check(
+                "back not handled",
+                requested && left,
+                format!(
+                    "the back button raised {} back request(s), which nobody handled; the default action of the \
+                     system followed (deactivated: {:?}, main activity alive: {})",
+                    state.back_requests.get(),
+                    state.lifecycle.deactivated.borrow(),
+                    FerroActivity::current_main_activity().is_some()
+                ),
+            );
+            state.lifecycle.activated.borrow_mut().clear();
+            aim_readback(state);
+            note("SCRIPT resume");
+            enter(state, Stage::BackResumed);
+        }
+
+        fn back_resumed(state: &Rc<State>) {
+            let activity = FerroActivity::current_main_activity().is_some();
+            let (frames, _, colors) = frames_read(state);
+            if !(activity && frames >= 3 && colors) && elapsed(state) < Duration::from_secs(40) {
+                return;
+            }
+            note(format!(
+                "Back in the foreground after the back button: main activity {activity}, {frames} frame(s), colours {colors}"
+            ));
+            enter(state, Stage::Finish);
         }
 
         fn finish(state: &Rc<State>) {
@@ -1235,6 +1546,13 @@ mod app {
                     top_level(state).is_none()
                 ),
             );
+            if !second_start() && OPTIONS.with(Cell::get).input {
+                // The process lives on: the script starts the activity again, and the main
+                // view that is made then runs the checks of a second start and the report.
+                note("SCRIPT resume");
+                enter(state, Stage::Done);
+                return;
+            }
             finish_report();
             enter(state, Stage::Done);
         }
