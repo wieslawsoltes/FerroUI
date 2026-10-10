@@ -69,6 +69,7 @@ Package `org.ferroui.android`, sources in `src/Android/FerroUI.Android/java/org/
 | `MainLooperBridge` | `MessageQueue.IdleHandler` | the `Handler`, the three `Runnable`s and the `IdleHandler` of `AndroidDispatcherImpl` | the signal, the timer and the idle callback of the main looper |
 | `FerroInputConnection` | `android.view.inputmethod.InputConnection` | `AvaloniaInputConnection` | every call of the input method of the system that upstream answers with more than a constant (section 7.1) |
 | `ConfigurationChangedReceiver` | `android.content.BroadcastReceiver` | `AndroidPlatformSettings.ConfigurationChangedReceiver` | `onReceive` of `ACTION_CONFIGURATION_CHANGED` |
+| `FerroAccessHelper` | `View.AccessibilityDelegate`, with an `AccessibilityNodeProvider` | `AvaloniaAccessHelper`, and what it inherits from `ExploreByTouchHelper` of AndroidX | the node of a virtual view, its actions, the focused virtual view; the hover events and the focus changes of the view (section 7.3) |
 | `NativeClickListener` | `View.OnClickListener` | (the event binding of the managed runtime) | `onClick`, for a view an application written in Rust creates (`interop::listeners`) |
 | `StorageHelper` | (static) | the calls of `AndroidStorageItem` and `AndroidStorageProvider` that upstream wraps in `try`/`catch`, and the queries `DocumentFile` makes | the columns of a document, the children of a tree, create, delete and move of a document, the persistable permissions, the descriptors of the streams; an exception is caught in Java and its text kept for the native side |
 | `PlatformHelper` | (static) | calls upstream makes inline on framework objects that return more than one value, or that set fields | the insets of a window, the displays, the system features, the insets listener and the insets animation callback of the decor view, the colour and input values of the platform settings, the fields of an `EditorInfo`, an `ExtractedText`, the layout parameters of a native control |
@@ -91,7 +92,7 @@ A `MotionEvent` is a Java object with some forty getters, valid only during the 
 | `OnBackPressedDispatcher`, `OnBackPressedCallback` | `OnBackInvokedDispatcher` with an `OnBackInvokedCallback` of default priority (API 33), `onBackPressed` below | upstream's callback disables itself and asks the dispatcher again to reach the default action; the port calls the default action of the activity (`super.onBackPressed()`), which on API 36 finishes a main activity **[E]** |
 | `ViewCompat`, `WindowCompat`, `WindowInsetsCompat`, `WindowInsetsControllerCompat`, `WindowInsetsAnimationCompat` | `WindowInsets`, `WindowInsetsController`, `WindowInsetsAnimation` of the platform (API 30); below API 30 the deprecated calls the compatibility classes make themselves | below API 30 the input method counts as visible when the system window inset at the bottom exceeds the stable one, and its state follows the global layout of the decor view (written, never run: the emulator is API 36) |
 | `WindowMetricsCalculator` (AndroidX Window) | `WindowManager.getMaximumWindowMetrics` (API 30), which is what the calculator calls there | none on API 30 and later |
-| `ExploreByTouchHelper` | `AccessibilityNodeProvider` | stage 3 |
+| `ExploreByTouchHelper` (AndroidX custom view) | `View.AccessibilityDelegate` with an `AccessibilityNodeProvider` of the platform; the state and the rules of the library class in `explore_by_touch_helper.rs` | moving the keyboard focus between virtual views with the direction keys and the tab key is not built (section 7.3) |
 | `DocumentFile` | `DocumentsContract` | stage 2d |
 | `ContextCompat.RegisterReceiver(..., ReceiverNotExported)` | `Context.registerReceiver` with `RECEIVER_NOT_EXPORTED` (API 33), without a flag below | none: the broadcast of a configuration change is one only the system sends |
 
@@ -196,6 +197,30 @@ Positions are UTF-16 code units on both sides (the text of the framework is a `S
 - **Native control host** (`AndroidNativeControlHostImpl`): a native control is a view of the system added to the Java view of the framework (a frame layout) over the surface, placed with frame layout parameters in pixels (the bounds times the scaling), hidden with visibility "gone". The default child is a frame layout. The catalog's embed page (`samples/ControlCatalog.Android/embed_sample_android.rs`) shows a button of the system that counts its clicks (its click listener is `interop::listeners::set_on_click_listener`, the stand-in for the event of the managed binding) and a web view.
 - **File activation**: an intent whose data is a file or content URI raises the activation with the storage item of the URI.
 
+### 7.3 Accessibility (stage 3)
+
+Upstream: `AvaloniaAccessHelper` derives from `ExploreByTouchHelper` of the AndroidX library `androidx.customview` and is set as the accessibility delegate of the view (`ViewCompat.SetAccessibilityDelegate`). The library class turns four answers of a subclass (the virtual view at a point, the visible virtual views, what the node of a virtual view has, an action of a virtual view) into an accessibility node provider: a tree of virtual views under one real view, for a view that draws its own content. Upstream's subclass answers them from the automation peers: every peer it meets gets a number (its virtual view) from a counter, and a set of node info providers, one per provider contract the peer has (`Automation/`, nine files), each of which adds to the node and performs actions.
+
+**The decision without AndroidX.** The backend uses the classes of the platform only (section 3.3), so there is no `ExploreByTouchHelper` to derive from. What the port has in its place:
+
+| Part of the library class | Where it is in the port | Why there |
+|---|---|---|
+| The accessibility delegate that returns a node provider; the provider's `createAccessibilityNodeInfo`, `performAction`, `findFocus` | `FerroAccessHelper.java`: a `View.AccessibilityDelegate` whose `getAccessibilityNodeProvider` returns an `AccessibilityNodeProvider` of the platform (both exist since API 16) | They are overrides of framework classes, which only Java can be. Each forwards to a native method. |
+| The node of the host view: the view's own node with the virtual views of the children of the root peer as children | Java (`createNodeForHost`), the children added by the native side | `onInitializeAccessibilityNodeInfo` of the view is a call into the view system. A view group with a node provider adds no real children to its node, so the surface view and native controls do not mix with the virtual views. |
+| What the library adds to the node of a virtual view after the subclass populated it: package name, source, parent; the bounds in the parent from the bounds on the screen; the bounds clipped to the visible rectangle of the host; "visible to the user" when the window and every ancestor are visible | Java (`createNodeForChild`, `isVisibleToUser`) | Calls on the host view. Without "visible to the user" assistive technology and the window dump of the system pass a node over. |
+| The defaults of a node (enabled, focusable, the class name `android.view.View`), the rules it enforces (a text or a content description, bounds, no accessibility focus action from the subclass), the accessibility focus (one virtual view, with its two actions, its events and a redraw of the host), the keyboard focus of a virtual view (needs the focus of the host; its two actions and its event), the virtual view under the finger (hover enter and exit events, only while touch exploration is on), the content change events, the click of the keyboard-focused virtual view with enter or the centre of the direction pad | `explore_by_touch_helper.rs` (`ExploreByTouchHelper`, with the contracts `IAccessibilityHost` for the calls into the system and `IExploreByTouchCallbacks` for the four answers) | It is state and rules, not calls: in Rust the host tests run it with a host that records what was sent. |
+| Sending an event of a virtual view: the event made from the node (text, content description, scrollable, password, enabled, checked, class name, source, package), sent through the parent of the host (`requestSendAccessibilityEvent`) | Java (`sendEventForVirtualView`, `sendContentChanged`), asked for by the native side | Calls into the view system. |
+| Moving the keyboard focus between virtual views with the direction keys and the tab key (`FocusStrategy`), and into them when the host gains the focus from a direction | **Not built** | The keyboard focus of the framework moves between its own elements, and a key the framework handled never reaches the helper; what is lost is directional navigation by the system between nodes when the framework did not handle the key. Recorded as missing. |
+
+The rest is upstream's, file by file:
+
+- **`FerroAccessHelper`** (`ferro_access_helper.rs`): the three maps (virtual view to peer, peer to virtual view, peer to its node info providers) and the counter; `get_or_create_node_info_providers_from_peer`, which follows `ChildrenChanged` (a subtree change) and `PropertyChanged` of the peer (name: text; help text: content description; bounding rectangle or class name: undefined) and removes the registration when the control of the peer leaves the visual tree (never for the root peer, the virtual view 0); the virtual view at a point (the peer at the point from the embedded root provider of the root peer; its parent instead when the parent is not one of the 25 container types; the focused peer when there is none at the point; never an interop peer, never the root); the visible virtual views (the children of the root peer); an action (every node info provider of the virtual view is asked, a refusal is "not performed"); the node (children, labelled by, class name, unique id and resource name from the automation id, enabled, screen reader focusable and focusable, the bounds between the two corners of the bounding rectangle on the screen, the providers, then the name as the text and the help text as the content description where no provider set one).
+- **The node info providers** (`automation/`): invoke (click; clickable), toggle (click; clickable, checkable, the checked state with "partial" for indeterminate), range value (the range of the node as floats: minimum, maximum, current; **no action**: upstream's provider performs none, so a slider cannot be changed through its node), scroll (forward and backward by a small increment, vertical first; scrollable), selection item (select; selected), expand and collapse (the two actions), value (set text, which appends the text of the action to the value as upstream does; the text of the node is the value, editable unless read-only, the selection at the end, a polite live region; a change of the value is sent as a text change).
+- **A node is plain data** (`automation/node_info.rs`, in place of the compatibility wrapper of a node the providers fill upstream). `write_node_info` writes it to the `AccessibilityNodeInfo` of the system in one place, with the members of the platform: `setUniqueId` from API 33, `setScreenReaderFocusable` from API 28, the three-state `setChecked(int)` from API 36 and the boolean one below.
+- **The view** (`ferro_view.rs`, `ferro_view_input.rs`, `FerroView.java`): creates the helper over the peer of its top-level and sets the Java helper as its accessibility delegate; `dispatchHoverEvent` asks the helper whether the base class dispatches the event; `onFocusChanged` tells the helper; a key event the keyboard helper answered with "not handled" goes to the helper, and to the base class when the helper did not take it.
+
+Host tests (13): the container types, the bounds, the virtual views of the children of the root in their order and a number never given twice, the node of a button (class, text, content description, ids, bounds, actions; a click raises the click; refused when disabled; the node of an unknown virtual view), a check box (checkable, the three checked states, a click toggles), a text box (the value as the text, the selection in UTF-16 units, set text, the text change event), a slider (the range, no action), an expander, the children of a node and the subtree event (and nothing sent while accessibility is off), the accessibility focus (one at a time, its events, not without touch exploration), the keyboard focus (needs the host's focus; enter clicks; cleared when the focus of the host changes), a hover outside of every peer.
+
 ## 8. File table
 
 One row per upstream file. "Java" names the class of the Java layer that belongs to the file.
@@ -207,12 +232,12 @@ One row per upstream file. "Java" names the class of the Java layer that belongs
 | `AndroidRuntimePlatform.cs` | 53 | `android_runtime_platform.rs` | `PlatformHelper` | 1 | |
 | `AndroidViewControlHandle.cs` | 26 | `android_view_control_handle.rs` | | 1 | |
 | `ApplicationLifetime.cs` | 28 | `application_lifetime.rs` | | 1 | |
-| `AvaloniaAccessHelper.cs` | 339 | `ferro_access_helper.rs` | (a node provider) | 3 | accessibility |
+| `AvaloniaAccessHelper.cs` | 339 | `ferro_access_helper.rs` | `FerroAccessHelper` | 3 | section 7.3; with `explore_by_touch_helper.rs` for its base class |
 | `AvaloniaActivity.cs` | 259 | `ferro_activity.rs` | `FerroActivity` | 1, 2c, 2d | |
 | `AvaloniaAndroidApplication.cs` | 45 | `ferro_android_application.rs` | `FerroApplication` | 1 | with `android_application!` |
 | `AvaloniaMainActivity.cs` | 47 | `ferro_main_activity.rs` | `FerroMainActivity` | 1 | the main activity is a kind of the activity |
 | `AvaloniaView.cs` | 155 | `ferro_view.rs` | `FerroView` | 1 | |
-| `AvaloniaView.Input.cs` | 72 | `ferro_view_input.rs` | `FerroView` | 1, 2a, 2b | stage 3: hover, focus and key events to the access helper |
+| `AvaloniaView.Input.cs` | 72 | `ferro_view_input.rs` | `FerroView` | 1, 2a, 2b, 3 | with the hover, focus and key events of the access helper |
 | `BackPressedCallback.cs` | 23 | `back_pressed_callback.rs` | (in `FerroActivity`) | 2c | |
 | `ChoreographerTimer.cs` | 126 | `choreographer_timer.rs` | | 1 | |
 | `CursorFactory.cs` | 21 | `cursor_factory.rs` | | 1 | |
@@ -222,7 +247,7 @@ One row per upstream file. "Java" names the class of the Java layer that belongs
 | `IInitEditorInfo.cs` | 11 | `i_init_editor_info.rs` | | 2b | with the `EditorInfo` of values |
 | `PlatformIconLoader.cs` | 47 | `platform_icon_loader.rs` | | 1 | |
 | `Stubs.cs` | 60 | `stubs.rs` | | 1 | |
-| `Automation/*.cs` (9 files) | 359 | `automation/*.rs` | | 3 | the node info providers |
+| `Automation/*.cs` (9 files) | 359 | `automation/*.rs` (the same nine names in snake case) | | 3 | the node info providers; `automation/node_info.rs` is the node they fill |
 | `Platform/AndroidActivatableLifetime.cs` | 75 | `platform/android_activatable_lifetime.rs` | | 1 | |
 | `Platform/AndroidDataFormatHelper.cs` | 43 | `platform/android_data_format_helper.rs` | | 2d | |
 | `Platform/AndroidInsetsManager.cs` | 380 | `platform/android_insets_manager.rs` | `PlatformHelper` | 1, 2b | |
@@ -253,7 +278,7 @@ One row per upstream file. "Java" names the class of the Java layer that belongs
 | `Platform/Vulkan/VulkanNativeInterop.cs` | 25 | `platform/vulkan/vulkan_native_interop.rs` | | later | with the Vulkan project |
 | `Platform/Vulkan/VulkanSupport.cs` | 71 | `platform/vulkan/vulkan_support.rs` | | later | |
 
-Files of the port without an upstream file: `interop/java.rs` (JNI, section 2.1), `interop/ndk.rs` (the NDK, section 2.2), `interop/natives.rs` (the table of native methods and the guard of section 2.3), `android_egl.rs` (the EGL library of the system and the platform graphics of section 6), `log.rs` (the log of the system, where the standard streams of a process go nowhere), `interop/listeners.rs` (a click listener whose handler is a closure, for the native controls of an application).
+Files of the port without an upstream file: `interop/java.rs` (JNI, section 2.1), `interop/ndk.rs` (the NDK, section 2.2), `interop/natives.rs` (the table of native methods and the guard of section 2.3), `android_egl.rs` (the EGL library of the system and the platform graphics of section 6), `log.rs` (the log of the system, where the standard streams of a process go nowhere), `interop/listeners.rs` (a click listener whose handler is a closure, for the native controls of an application), `explore_by_touch_helper.rs` (what the access helper inherits from a library class upstream, section 7.3), `automation/node_info.rs` (the values of an accessibility node).
 
 ## 9. Packaging without Gradle
 
@@ -297,11 +322,14 @@ The smoke example (`examples/android_smoke.rs`, an APK) asks the system and not 
 | text set on the clipboard reads back, with characters outside the basic plane; cleared, the clipboard has no text (2d) | `ClipboardImpl`, the clip data wrappers |
 | the feedback performs a haptic hold and a click sound, and no hold as a sound; a URI nobody handles is not launched; the storage provider can open, save and pick folders and has a documents folder (2d) | the features of the top-level, `tryStartActivity`, the well-known folders |
 | a default child of the native control host, attached and shown in a rectangle, is a visible child view at those pixels; hidden it is gone; disposed it has no parent (2d) | `AndroidNativeControlHostImpl` |
+| the view has an accessibility node provider and the node of the view has virtual children; the nodes of a button, a check box, a slider and a text box, asked from the provider by their virtual view: class name, text, content description, bounds on the screen equal to the control's, visible to the user, and per control clickable with the click action, checkable and not checked, the range 0 to 10 at 4, editable with the set text action (3) | the access helper, the node info providers, `write_node_info`, the Java delegate |
+| `performAction` of the provider: a click on the button and on the check box, set text on the text box are performed, a scroll forward on the slider is not (upstream has no range action); afterwards one click was raised, the check box is checked and its node says so, the text box has the text and its node too, and the node of the slider has the value the application set (3) | the actions, and nodes that follow their peers |
+| the script takes the window dump of the system (`uiautomator dump`) and finds four nodes by their text, each with the bounds the application printed (3) | the tree as the accessibility service of the system reads it from outside of the process: the host node, the virtual children, their text, bounds and visibility |
 | the activity finishes itself and the top-level is disposed | the lifecycle of stage 1 |
 
 The script runs the example twice: with the default options (EGL) and with `Software` (a properties file in the files directory of the application, because the platform is initialised before an activity and its intent exist). The application asks the script for what only the outside can do with lines `SCRIPT <command> <arguments>` in its log (a picture, a tap, a swipe, key codes, text, the night mode, home, start, rotate, an intent with a URI, back); the script does each once, in order (`emu-smoke.sh` lists them). The touch position is a pixel of the view, which is a pixel of the screen while the window is displayed edge to edge (always on API 35 and later).
 
-**What an emulator run cannot show:** a real GPU driver (the emulator's OpenGL ES is SwiftShader or a translation to the host), more than one finger (the shell injects one pointer), a stylus or a mouse, a hardware keyboard (the keys the shell injects have no scan code, so the scan code table and the key symbols of control keys are host tests only), other input methods than the one of the image (composition as an Asian input method does it: the editing commands are host tests), a remote control or a gamepad, multi-window, other API levels than 36 (everything below API 33 of the back button and below API 30 of the insets is written and never ran), other densities than the device's, 16 KB page devices, and performance.
+**What an emulator run cannot show:** TalkBack, or any other assistive technology, reading and driving the tree (the runs read nodes through the provider in the process and through the window dump of the system; nobody listens to the events, moves an accessibility focus or explores by touch), a real GPU driver (the emulator's OpenGL ES is SwiftShader or a translation to the host), more than one finger (the shell injects one pointer), a stylus or a mouse, a hardware keyboard (the keys the shell injects have no scan code, so the scan code table and the key symbols of control keys are host tests only), other input methods than the one of the image (composition as an Asian input method does it: the editing commands are host tests), a remote control or a gamepad, multi-window, other API levels than 36 (everything below API 33 of the back button and below API 30 of the insets is written and never ran), other densities than the device's, 16 KB page devices, and performance.
 
 ### 10.1 Measured on the emulator (2026-10-10) **[E]**
 
@@ -356,6 +384,39 @@ The view is 1080 px wide: before the layout both native views were exactly one v
 
 **Not proven by a run:** the pickers (they need a person, or automation of the picker of the system), and with them bookmarks, document trees, the streams of a picked file and the permission request; the file activation; the launcher with a URI that is handled (it leaves the application); a click on the native button; clipboard formats other than text.
 
+### 10.4 Stage 3 on the emulator (2026-10-10) **[E]**
+
+`emu-smoke.sh` and `emu-catalog.sh` on the device of 10.1, with a button, a check box, a slider and a text box added to the smoke application (it has no theme, so they are given a size and draw nothing; what the accessibility tree says of them comes from their automation peers).
+
+**From inside the application, both modes the same.** The view has an accessibility node provider, and the node of the view has one virtual child (the content presenter of the top-level). The four controls have the virtual views 1 to 4. Their nodes, asked from the provider:
+
+| Control | Class | Text | Bounds on the screen | Actions | Specific |
+|---|---|---|---|---|---|
+| Button | `Button` | "Press" | [278,738][803,843] | 0x51: click, accessibility focus, focus | clickable |
+| Check box | `CheckBox` | "Agree" | [278,843][803,948] | 0x51 | clickable, checkable, not checked |
+| Slider | `Slider` | "Volume" | [278,948][803,1053] | 0x41: accessibility focus, focus | the range 0 to 10 at 4 |
+| Text box | `TextBox` | "NameText" (its value), content description "Your name" (its help text) | [278,1053][803,1158] | 0x200041: set text, accessibility focus, focus | editable |
+
+Each has the bounds of its control (200 by 40 logical pixels at 2.625: 525 by 105 px) and is visible to the user. `performAction`: the click on the button and on the check box and set text on the text box are performed, the scroll forward on the slider is not (no range action upstream). Afterwards: one click of the button was raised; the check box is checked and its node says so; the text box has "NameText!" and its node too; the slider, set to 7 by the application, has a node whose range is at 7.
+
+**From outside: `adb shell uiautomator dump`.** The window dump has 20 nodes: four of the window of the activity (the decor view and its layouts, down to the view of the framework), and under them the virtual views in the order and nesting of the peers: `ContentPresenter`, `Panel`, `Border`, `StackPanel`, then the stripe, the line of text ("FerroUI on Android" at [234,294][846,381]), the ellipse, `Button` "Press" (clickable), `CheckBox` "Agree" (checkable, **checked**: the dump was taken after the click), `Slider` "Volume", `TextBox` "NameText!", the two editors of the input method checks and the probe. The script finds the four nodes by their text with the bounds the application printed. The class of a node is the class name of the peer (`Button`, not `android.widget.Button`), as upstream sets it: assistive technology that picks a role from the class name of the platform finds none.
+
+**The catalog passes with eight pages**, and confirms the fix of 10.3: `Native views of Native Embed after the transition: 3 child(ren) of a view 1080 px wide: FerroSurfaceView at (0, 0) 1080x2400 visible; Button at (52, 566) 976x811 visible; WebView at (52, 1475) 976x810 visible`. Both native views are at x = 52 (they were at 1132 before the fix of the controls crate).
+
+One run of the smoke application failed a check of stage 1 in the EGL mode, the first after the boot ("touch moved and released: 1 pressed"): the system dropped the first tap the script injected (`InputDispatcher: Dropping untrusted touch event`, under the snapshot of the transition that starts the activity), so the swipe was the only gesture that arrived. The software mode of the same run passed whole. The lines of the system log:
+
+```
+W InputDispatcher: Untrusted touch due to occlusion by /1000
+D InputDispatcher: Stack of obscuring windows during untrusted touch (539.0, 580.0):
+D InputDispatcher:     * package=/1000, id=111, mode=BLOCK_UNTRUSTED, ... window={transition snapshot: Display{#0 state=ON size=1080x2400 ROTATION_0}#111}, inputConfig={NO_INPUT_CHANNEL}
+W InputDispatcher: Dropping untrusted touch event due to /1000
+I InputDispatcher: Dropping event because no targets were found: MotionEvent(... action=DOWN ... pointers=[0: (539.0, 580.0)])
+```
+
+The script injected the tap when the application asked for it, two seconds after the activity started on a device that had just booted, while the snapshot of the start transition was still over the window. `emu-smoke.sh` is robust against it since: the first tap of a mode waits until the window of the activity has the input focus (`dumpsys window`, `mCurrentFocus`), and after every tap and swipe the script counts the "Dropping untrusted touch event" lines of the log and injects the touch again when there is a new one, with a line `script: the system dropped the tap ... injected again`. A second run after a new boot, with the script as it is now, passed every check in both modes (`SMOKE PASSED`: the tap and the swipe arrived as 2 pressed, 24 or 25 moved and 2 released events); the system dropped nothing in it, so the repeated injection itself has not been seen at work.
+
+**Not proven by a run:** TalkBack (no accessibility service was enabled: the accessibility events the helper sends had no listener, nobody moved an accessibility focus, and no hover event of touch exploration was delivered); the hover path and the focus actions are host tests only; selection items, scroll viewers and expanders through the node provider on a device (host tests); API levels below 36 (the boolean checked state, and no unique id below API 33).
+
 ## 11. Stages
 
 | Stage | Content | What its emulator run proves |
@@ -366,7 +427,7 @@ The view is 1080 px wide: before the layout both native views were exactly one v
 | **2b** (built and run, 2026-10-10) | the input method: `AndroidInputMethod`, the input connection (`AvaloniaInputConnection`), `TextEditBuffer`, `EditCommand`, `IInitEditorInfo`, the insets animation of the input pane | the soft keyboard of the emulator opens for an editor, its keys arrive as text, it closes; the editing commands and the connection in host tests |
 | **2c** (built and run, 2026-10-10) | lifecycle: the surface lost and created again, `onNewIntent` and protocol activation, activity and permission results, rotation, the back button (`BackPressedCallback`, `IActivityNavigationService`, `AndroidSystemNavigationManagerImpl`) | the script sends the application to the background and back, rotates, sends an intent, presses back, starts the activity a second time |
 | **2d** (built and run, 2026-10-10; with what this table had as 2e and 2f) | services: the clipboard, the launcher, the platform feedback; the storage provider and items; the native control host and the embed sample of the catalog | the checks of 10.3; the pickers themselves need a person |
-| 3 | accessibility: the access helper and the node info providers | the node tree read with `uiautomator dump` |
+| **3** (built and run, 2026-10-10) | accessibility: the access helper, the node info providers, the delegate and node provider of the platform in place of the AndroidX helper | the nodes of four controls read from the provider and from `uiautomator dump`, their actions (10.4); not TalkBack |
 | later | Vulkan, with the Vulkan project of the port | |
 
 ## 12. CI

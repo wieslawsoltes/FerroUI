@@ -64,6 +64,29 @@ Branches `win32-platform-2` (on top of `win32-platform`, pull request 156; merge
 - **Runs in the virtual machine**: stages 2a to the first part of 2e ran there on 2026-10-10 (`win32-platform.md`, section 10.5: the smoke runs, `hello_window`, the 52 integration tests and the presented frames pass at scaling 2; the one failure was a test that asked session 0 for the task bar list, corrected since). The rest of 2e has not run there, and the result of the picture run of the catalog is to be read from the report (`/Volumes/1TB-macOS/ferroui-vm-windows/vm-smoke-report.txt`). `scripts/windows/vm-smoke.ps1 -Desktop` covers the tests of the crate, the smoke run in both rendering modes, `hello_window` in four variants, the integration tests, the test of presented frames with each rendering mode alone, and the picture run of the catalog in both modes (pictures copied beside the report).
 - **When the branch is rebased onto main** after the release-preparation change: give `ferroui-win32` what `docs/release.md` section 1.4 asks of a published crate (the inherited metadata keys, `[package.metadata.release] group`, the two symlinks `LICENSE` and `NOTICE-PROJECT.md`); the job `packaging` checks it.
 
+## Accessibility on iOS and Android: stage 3 of both mobile backends (2026-10-10)
+
+Branch `mobile-accessibility`. Both backends expose the automation peers of the controls crate to the accessibility of the system; nothing was added to the controls crate (every peer and provider member the bridges read was there).
+
+- **iOS** (`ios-platform.md`, section 10c): `automation_peer_wrapper.rs` (`AutomationPeerWrapper.cs`) and the accessibility container of the view (`AvaloniaView.Automation.cs`). 37 of the 40 files; open are the three files of `Eagl/` (stage 4). 102 host tests. The simulator run passed every check (section 12, run 9).
+- **Android** (`android-platform.md`, section 7.3): `ferro_access_helper.rs` and the nine files of `automation/`, with the Java class `FerroAccessHelper` and `explore_by_touch_helper.rs` in place of the AndroidX helper upstream derives from. 56 of the 58 files; open is Vulkan. 156 host tests. The emulator runs are in section 10.4.
+
+What a run proved, and what none did:
+
+- Proven: the tree as an application reads it of itself (iOS: the container protocol from the view down, labels, values, traits, frames, activation, increment; Android: the node provider of the view, class names, text, content descriptions, bounds, actions, `performAction`), and on Android the tree as the system reads it from outside (`uiautomator dump`, compared by `emu-smoke.sh`).
+- **Not proven: VoiceOver and TalkBack.** No assistive technology was run against either backend. On Android no accessibility service listened to the events, no accessibility focus was moved and no touch exploration hover arrived (those paths are host tests). The first thing to do by hand on each platform is to turn the screen reader on and walk the catalog.
+
+Known, and kept as upstream has it (each is a decision for the owner, not a defect of the port):
+
+1. iOS: the element of a slider does not have the adjustable trait, because upstream sets the traits anew after it set that trait (`ios-platform.md`, section 10c). One line to change.
+2. Android: a range has no action (upstream's range value provider performs none), so a slider cannot be changed through its node; and the class name of a node is the class name of the peer (`Button`), not a class of the platform, so a screen reader that derives the role from the class name announces none.
+3. Android: set text appends to the value (upstream: `provider.SetValue(provider.Value + text)`).
+4. Both: every peer is a node, the panels and presenters between the controls included (48 objects under the iOS view of the example for 8 elements; 16 virtual views in the Android example).
+
+Not built: moving the keyboard focus between virtual views with the direction keys on Android (the focus strategy of the AndroidX helper; `DEVIATIONS.md`, Android platform).
+
+`emu-smoke.sh` waits for the input focus of the activity before its first tap and injects a touch again when the system dropped it: the first run after a boot lost its first tap under the start transition (`android-platform.md`, section 10.4).
+
 ## The iOS platform, stage 2 (2026-10-10)
 
 Branch `ios-platform-2`, on top of `ios-platform` (stage 1, pull request 166). Stage 2 of `ios-platform.md` is built in four parts, each with its section there (9, 10, 10a, 10b), its checks in the smoke mode of the example (section 12) and its rows in `DEVIATIONS.md`, "iOS platform":
