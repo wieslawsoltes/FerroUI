@@ -2,23 +2,23 @@
  "upstreamCommit": "17350180c33b063f0e98abbfd19aa3cae63f5d56",
  "inScope": {
   "files": [
-   2579,
+   2582,
    2596,
    0
   ],
   "types": [
-   3497,
+   3503,
    3915,
    311
   ],
   "members": [
-   28103,
+   28176,
    32172,
    2868
   ]
  },
  "allProjects": {
-  "membersPresent": 28103,
+  "membersPresent": 28176,
   "members": 37391,
   "membersNotApplicable": 1132,
   "membersOutOfScope": 4087
@@ -9481,17 +9481,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    89,
+    92,
     95,
     0
    ],
    "types": [
-    212,
+    218,
     276,
     0
    ],
    "members": [
-    2007,
+    2080,
     2605,
     0
    ],
@@ -9512,13 +9512,13 @@
     "alias fn": 1,
     "const": 61,
     "derive": 2,
-    "field": 302,
-    "fn": 548,
-    "free fn": 143,
-    "free item": 31,
+    "field": 309,
+    "fn": 572,
+    "free fn": 157,
+    "free item": 45,
     "overload fn": 10,
-    "trait": 12,
-    "variant": 897
+    "trait": 14,
+    "variant": 909
    },
    "presentFiles": {
     "AngleOptions.cs": [
@@ -9593,8 +9593,17 @@
     "IconImpl.cs": [
      "icon_impl.rs"
     ],
+    "Input/Imm32CaretManager.cs": [
+     "input/imm32_caret_manager.rs"
+    ],
+    "Input/Imm32InputMethod.cs": [
+     "input/imm32_input_method.rs"
+    ],
     "Input/KeyInterop.cs": [
      "input/key_interop.rs"
+    ],
+    "Input/WindowsInputPane.cs": [
+     "input/windows_input_pane.rs"
     ],
     "Input/WindowsKeyboardDevice.cs": [
      "input/windows_keyboard_device.rs"

@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Windows/FerroUI.Win32` (exists) |
 | Crate | `ferroui-win32` |
 | Phase / priority | 1 - desktop (Windows) / P0 |
-| Files | 89/95 (93.7%) |
-| Types | 212/276 (76.8%) |
-| Members | 2007/2605 (77.0%) |
+| Files | 92/95 (96.8%) |
+| Types | 218/276 (79.0%) |
+| Members | 2080/2605 (79.8%) |
 | Contracts (interfaces) | 7/7 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -244,28 +244,35 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Input` - files 3/6, types 4/7, members 11/38
+### `Input` - files 6/6, types 7/7, members 37/38
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Imm32CaretManager.cs` | `input/imm32_caret_manager.rs` | missing | 0/1 | 0/3 |  |
-| `Imm32InputMethod.cs` | `input/imm32_input_method.rs` | missing | 0/1 | 0/22 |  |
+| `Imm32CaretManager.cs` | `input/imm32_caret_manager.rs` | present | 1/1 | 3/3 |  |
+| `Imm32InputMethod.cs` | `input/imm32_input_method.rs` | partial | 1/1 | 21/22 |  |
 | `KeyInterop.cs` | `input/key_interop.rs` | present | 1/1 | 5/5 |  |
-| `WindowsInputPane.cs` | `input/windows_input_pane.rs` | missing | 0/1 | 0/2 |  |
+| `WindowsInputPane.cs` | `input/windows_input_pane.rs` | present | 1/1 | 2/2 |  |
 | `WindowsKeyboardDevice.cs` | `input/windows_keyboard_device.rs` | present | 1/1 | 2/2 |  |
 | `WindowsMouseDevice.cs` | `input/windows_mouse_device.rs` | present | 2/2 | 4/4 |  |
 
-### `Interop` - files 3/3, types 78/119, members 1216/1564
+<details><summary><code>Imm32InputMethod.cs</code> - 1 missing</summary>
+
+- `Imm32InputMethod` (class): 1 missing
+  - `string? Composition { get; internal set; }` *(getter `composition` found, setter `set_composition` missing)*
+
+</details>
+
+### `Interop` - files 3/3, types 81/119, members 1263/1564
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `TaskBarList.cs` | `interop/task_bar_list.rs` | present | 1/1 | 2/2 |  |
-| `UnmanagedMethods.cs` | `interop/unmanaged_methods.rs` | partial | 75/115 | 1198/1542 |  |
+| `UnmanagedMethods.cs` | `interop/unmanaged_methods.rs` | partial | 78/115 | 1245/1542 |  |
 | `Win32Icon.cs` | `interop/win32_icon.rs` | partial | 2/3 | 16/20 |  |
 
-<details><summary><code>UnmanagedMethods.cs</code> - 384 missing</summary>
+<details><summary><code>UnmanagedMethods.cs</code> - 334 missing</summary>
 
-- `UnmanagedMethods` (class) (ported as module-level items): 98 missing
+- `UnmanagedMethods` (class) (ported as module-level items): 70 missing
   - `static int EnableMouseInPointer(bool enable)`
   - `static bool GetPointerCursorId(uint pointerId, out uint cursorId)`
   - `static int SetDIBitsToDevice(IntPtr hdc, int XDest, int YDest, uint dwWidth, uint dwHeight, int XSrc, int Y...`
@@ -323,45 +330,17 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
   - `static bool SetLayeredWindowAttributes(IntPtr hwnd, uint crKey, byte bAlpha, LayeredWindowFlags dwFlags)`
   - `const int WAIT_FAILED`
   - `static int WaitForMultipleObjectsEx(int nCount, IntPtr[] pHandles, bool bWaitAll, int dwMilliseconds, bool ...` *(internal)*
-  - `static IntPtr ImmGetContext(IntPtr hWnd)`
-  - `static IntPtr ImmAssociateContext(IntPtr hWnd, IntPtr hIMC)`
-  - `static IntPtr ImmCreateContext()`
-  - `static bool ImmReleaseContext(IntPtr hWnd, IntPtr hIMC)`
   - `static bool ImmSetOpenStatus(IntPtr hIMC, bool flag)`
   - `static bool ImmSetActiveContext(IntPtr hIMC, bool flag)`
   - `static bool ImmSetStatusWindowPos(IntPtr hIMC, ref POINT lpptPos)`
   - `static bool ImmIsIME(IntPtr HKL)`
-  - `static bool ImmSetCandidateWindow(IntPtr hIMC, ref CANDIDATEFORM lpCandidate)`
-  - `static bool ImmSetCompositionWindow(IntPtr hIMC, ref COMPOSITIONFORM lpComp)`
-  - `static bool ImmSetCompositionFont(IntPtr hIMC, ref LOGFONT lf)`
-  - `static int ImmGetCompositionString(IntPtr hIMC, GCS dwIndex, [Out, Optional] IntPtr lpBuf, uint dwBufLen)`
-  - `static string? ImmGetCompositionString(IntPtr hIMC, GCS dwIndex)`
-  - `static bool ImmNotifyIME(IntPtr hIMC, int dwAction, int dwIndex, int dwValue)`
-  - `static bool CreateCaret(IntPtr hwnd, IntPtr hBitmap, int nWidth, int nHeight)`
-  - `static bool SetCaretPos(int X, int Y)`
-  - `static bool DestroyCaret()`
+  - `static string? ImmGetCompositionString(IntPtr hIMC, GCS dwIndex)` *(1 of 2 overloads found)*
   - `static int LCIDToLocaleName(uint Locale, StringBuilder lpName, int cchName, int dwFlags)`
   - `static uint MAKELCID(uint lgid, uint srtid)`
-  - `static ushort PRIMARYLANGID(uint lgid)`
-  - `static uint LGID(IntPtr HKL)`
-  - `const int SORT_DEFAULT`
-  - `const int LANG_ZH`
-  - `const int LANG_JA`
-  - `const int LANG_KO`
-  - `const int CFS_FORCE_POSITION`
-  - `const int CFS_CANDIDATEPOS`
-  - `const int CFS_EXCLUDE`
-  - `const int CFS_POINT`
-  - `const int CFS_RECT`
   - `const long ISC_SHOWUICANDIDATEWINDOW`
   - `const long ISC_SHOWUIGUIDELINE`
   - `const long ISC_SHOWUIALLCANDIDATEWINDOW`
   - `const long ISC_SHOWUIALL`
-  - `const int NI_COMPOSITIONSTR`
-  - `const int CPS_COMPLETE`
-  - `const int CPS_CONVERT`
-  - `const int CPS_REVERT`
-  - `const int CPS_CANCEL`
   - `const uint TME_QUERY`
   - `const uint TME_CANCEL`
 - `UnmanagedMethods.TimerProc` (delegate, public): **type missing** (0 members)
@@ -415,9 +394,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 - `UnmanagedMethods.LayeredWindowFlags` (enum, public): **type missing** (2 members)
 - `UnmanagedMethods.DWM_BLURBEHIND` (struct, public): **type missing** (4 members)
 - `UnmanagedMethods.RTL_OSVERSIONINFOEX` (struct, internal): **type missing** (6 members)
-- `UnmanagedMethods.GCS` (enum, public): **type missing** (12 members)
-- `UnmanagedMethods.CANDIDATEFORM` (struct, internal): **type missing** (4 members)
-- `UnmanagedMethods.COMPOSITIONFORM` (struct, internal): **type missing** (3 members)
 - `UnmanagedMethods.LOGFONT` (struct, public): **type missing** (14 members)
 - `UnmanagedMethods.WindowCompositionAttributeData` (struct, internal): **type missing** (3 members)
 - `UnmanagedMethods.WindowCompositionAttribute` (enum, internal): **type missing** (1 members)

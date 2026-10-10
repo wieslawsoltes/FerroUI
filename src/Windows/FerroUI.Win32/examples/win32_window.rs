@@ -254,7 +254,13 @@ mod windows {
     use ferroui_opengl::IGlContext;
     use ferroui_controls::{WindowResizeReason, WindowState};
     use ferroui_vello::{VelloOptions, VelloPlatform, VelloRenderingMode};
-    use ferroui_win32::interop::unmanaged_methods::{post_message, WindowsMessage};
+    use ferroui_base::input::text_input::{
+        ITextInputMethodImpl, TextInputMethodClient, TextInputMethodClientEvents, TextSelection,
+    };
+    use ferroui_win32::interop::unmanaged_methods::{
+        get_active_window, get_caret_pos, imm_get_candidate_window, imm_get_context, imm_notify_ime, imm_release_context,
+        imm_set_composition_string, post_message, send_message, WindowsMessage,
+    };
     use ferroui_win32::{Win32CompositionMode, Win32Platform, Win32PlatformOptions, Win32RenderingMode};
     use std::cell::{Cell, RefCell};
     use std::future::Future;
@@ -614,6 +620,188 @@ mod windows {
         wake_waits: Cell<u32>,
         report: Report,
         verbose_input: bool,
+        /// The text input client of the text input checks of a smoke run.
+        text_client: RefCell<Option<Rc<SmokeTextClient>>>,
+        /// How often the window said it lost the focus.
+        lost_focus: Cell<u32>,
+        /// Where the caret of the system has to be once the input method
+        /// was given the rectangle of the text cursor, in pixels; `None`
+        /// when the window was not the active one.
+        caret_expected: Cell<Option<(i32, i32)>>,
+    }
+
+    /// A text input client that records the preedit text an input method
+    /// gives it.
+    struct SmokeTextClient {
+        events: TextInputMethodClientEvents,
+        preedit: RefCell<Vec<(Option<String>, Option<i32>)>>,
+    }
+
+    impl TextInputMethodClient for SmokeTextClient {
+        fn events(&self) -> &TextInputMethodClientEvents {
+            &self.events
+        }
+
+        fn text_view_visual(&self) -> Ref<ferroui_base::Visual> {
+            unreachable!("the input method of the system does not ask for the visual")
+        }
+
+        fn supports_preedit(&self) -> bool {
+            true
+        }
+
+        fn supports_surrounding_text(&self) -> bool {
+            false
+        }
+
+        fn surrounding_text(&self) -> String {
+            String::new()
+        }
+
+        fn cursor_rectangle(&self) -> Rect {
+            Rect::new(60.0, 40.0, 1.0, 16.0)
+        }
+
+        fn selection(&self) -> TextSelection {
+            TextSelection::new(0, 0)
+        }
+
+        fn set_selection(&self, _value: TextSelection) {}
+
+        fn set_preedit_text_with_cursor(&self, preedit_text: Option<&str>, cursor_pos: Option<i32>) {
+            self.preedit.borrow_mut().push((preedit_text.map(str::to_owned), cursor_pos));
+        }
+    }
+
+    /// The checks of the input method: what can be checked without a person
+    /// typing through an input method editor. The window procedure is sent
+    /// the messages an input method sends, and the system is asked what the
+    /// backend told it.
+    fn text_input_checks(state: &Rc<State>, hwnd: isize) {
+        let report = &state.report;
+        let window = &state.window;
+        let features: &dyn ferroui_base::platform::IOptionalFeatureProvider = &**window;
+        let input_method = features.try_get::<dyn ITextInputMethodImpl>();
+        report.check("input method feature", input_method.is_some(), "the window has the text input method of the system as a feature");
+        let (Some(input_method), Some(client)) = (input_method, state.text_client.borrow().clone()) else {
+            return;
+        };
+
+        // The client enabled the input context of the window.
+        let himc = imm_get_context(hwnd);
+        report.check("input context", himc != 0, format!("ImmGetContext of the window: {himc:#x}"));
+
+        // The rectangle of the text cursor went to the caret of the system
+        // (its lower right corner) and to the candidate window.
+        match state.caret_expected.get() {
+            Some(expected) => {
+                let caret = get_caret_pos();
+                report.check(
+                    "caret of the system",
+                    caret == Some(expected),
+                    format!("at {caret:?}; the text cursor ends at {expected:?} (pixels of the client area)"),
+                );
+                let candidate = imm_get_candidate_window(himc, 0);
+                report.info(
+                    "candidate window",
+                    match candidate {
+                        Some(form) => format!(
+                            "style {:#x}, position ({}, {}), kept clear of ({}, {})-({}, {})",
+                            form.dwStyle,
+                            form.ptCurrentPos.x,
+                            form.ptCurrentPos.y,
+                            form.rcArea.left,
+                            form.rcArea.top,
+                            form.rcArea.right,
+                            form.rcArea.bottom
+                        ),
+                        None => "the input context reports no candidate form".to_string(),
+                    },
+                );
+            }
+            None => report.info("caret of the system", "the window was not the active one: the input method is not given the text cursor"),
+        }
+
+        // A composition as the messages of an input method: its start
+        // clears the preedit text of the client.
+        client.preedit.borrow_mut().clear();
+        send_message(hwnd, WindowsMessage::WM_IME_STARTCOMPOSITION, 0, 0);
+        let at_start = client.preedit.borrow().clone();
+        report.check("composition start", at_start == vec![(None, None)], format!("the client was given {at_start:?}"));
+
+        // While it composes a character message is not text.
+        *state.seen.text.borrow_mut() = None;
+        send_message(hwnd, WindowsMessage::WM_CHAR, 0x78, 0);
+        let text = state.seen.text.borrow().clone();
+        report.check("character while composing", text.is_none(), format!("text input seen: {text:?}"));
+
+        // A change of the composition string reaches the client, with the
+        // string the input context has (none without an input method
+        // editor).
+        client.preedit.borrow_mut().clear();
+        send_message(hwnd, WindowsMessage::WM_IME_COMPOSITION, 0, 0x0008 /* GCS_COMPSTR */);
+        let changed = client.preedit.borrow().clone();
+        report.check("composition change", changed.len() == 1, format!("the client was given {changed:?}"));
+        // A message without flags empties the preedit text.
+        client.preedit.borrow_mut().clear();
+        send_message(hwnd, WindowsMessage::WM_IME_COMPOSITION, 0, 0);
+        let emptied = client.preedit.borrow().clone();
+        report.check(
+            "composition emptied",
+            emptied == vec![(Some(String::new()), None)],
+            format!("the client was given {emptied:?}"),
+        );
+
+        // Losing the focus while composing is told when the composition
+        // ends.
+        let lost_before = state.lost_focus.get();
+        send_message(hwnd, WindowsMessage::WM_KILLFOCUS, 0, 0);
+        let lost_while_composing = state.lost_focus.get() - lost_before;
+        client.preedit.borrow_mut().clear();
+        send_message(hwnd, WindowsMessage::WM_IME_ENDCOMPOSITION, 0, 0);
+        let lost_after = state.lost_focus.get() - lost_before;
+        let at_end = client.preedit.borrow().clone();
+        report.check(
+            "composition end",
+            lost_while_composing == 0 && lost_after == 1 && at_end == vec![(None, None)],
+            format!(
+                "focus lost while composing: {lost_while_composing}, after the end: {lost_after}; the client was given {at_end:?}"
+            ),
+        );
+
+        // Afterwards a character message is text again.
+        send_message(hwnd, WindowsMessage::WM_CHAR, 0x79, 0);
+        let text = state.seen.text.borrow().clone();
+        report.check("character after composing", text.as_deref() == Some("y"), format!("text input seen: {text:?}"));
+
+        // With an input method editor in the session the system takes a
+        // composition string and sends the messages itself.
+        client.preedit.borrow_mut().clear();
+        *state.seen.text.borrow_mut() = None;
+        let taken = imm_set_composition_string(himc, "\u{306b}\u{307b}\u{3093}");
+        if taken {
+            let preedit = client.preedit.borrow().clone();
+            report.check(
+                "composition string through the system",
+                preedit.iter().any(|(text, _)| text.as_deref() == Some("\u{306b}\u{307b}\u{3093}")),
+                format!("ImmSetCompositionString was taken; the client was given {preedit:?}"),
+            );
+            // The composition is completed: its text is committed.
+            imm_notify_ime(himc, 21 /* NI_COMPOSITIONSTR */, 1 /* CPS_COMPLETE */, 0);
+            let text = state.seen.text.borrow().clone();
+            report.info("composition completed", format!("text input seen: {text:?}; the client was given {:?}", client.preedit.borrow()));
+        } else {
+            report.info(
+                "composition string through the system",
+                "ImmSetCompositionString was refused: the keyboard layout of the session has no input method editor",
+            );
+        }
+        imm_release_context(hwnd, himc);
+
+        // Without a client the input context is taken from the window
+        // (when the dispatcher runs what this posts).
+        input_method.set_client(None);
+        *state.text_client.borrow_mut() = None;
     }
 
     /// What the timer does after a step of a smoke run.
@@ -1114,6 +1302,23 @@ mod windows {
                     (120usize) << 16,
                     make_l_param(screen_point.x, screen_point.y),
                 );
+
+                // Text input: the window gives the input method of the
+                // system as a feature. It is given a client and the
+                // rectangle of the text cursor; both act when the
+                // dispatcher runs what they post, before the next step.
+                let features: &dyn ferroui_base::platform::IOptionalFeatureProvider = &**window;
+                if let Some(input_method) = features.try_get::<dyn ITextInputMethodImpl>() {
+                    let client = Rc::new(SmokeTextClient { events: TextInputMethodClientEvents::new(), preedit: RefCell::new(Vec::new()) });
+                    input_method.set_client(Some(client.clone()));
+                    *state.text_client.borrow_mut() = Some(client.clone());
+                    if get_active_window() == hwnd {
+                        let rect = client.cursor_rectangle();
+                        input_method.set_cursor_rect(rect);
+                        let bottom_right = rect.bottom_right();
+                        state.caret_expected.set(Some(((bottom_right.x * scaling) as i32, (bottom_right.y * scaling) as i32)));
+                    }
+                }
                 Step::Next
             }
             3 => {
@@ -1136,6 +1341,9 @@ mod windows {
                 report.check("left button down", near(seen.left_down.get()), format!("{:?}", seen.left_down.get()));
                 report.check("left button up", seen.left_up.get(), format!("seen: {}", seen.left_up.get()));
                 report.check("mouse wheel", seen.wheel.get() == Some(1.0), format!("{:?} notch(es)", seen.wheel.get()));
+
+                println!("-- text input (the input method of the system)");
+                text_input_checks(state, hwnd);
 
                 println!("-- clipboard");
                 // The clipboard goes through OLE: the data transfer is a
@@ -1827,6 +2035,9 @@ mod windows {
             wake_waits: Cell::new(0),
             report: early_report,
             verbose_input: true,
+            text_client: RefCell::new(None),
+            lost_focus: Cell::new(0),
+            caret_expected: Cell::new(None),
         });
         if gl_failed {
             eprintln!("win32_window: the rendering mode has no painter; see the failed check above");
@@ -1914,6 +2125,13 @@ mod windows {
         window.set_scaling_changed(Some(Rc::new(|scaling| println!("ScalingChanged: {scaling}"))));
         window.set_position_changed(Some(Rc::new(|position: PixelPoint| {
             println!("PositionChanged: ({}, {})", position.x, position.y)
+        })));
+        let weak = Rc::downgrade(&state);
+        window.set_lost_focus(Some(Rc::new(move || {
+            println!("LostFocus");
+            if let Some(state) = weak.upgrade() {
+                state.lost_focus.set(state.lost_focus.get() + 1);
+            }
         })));
         window.set_activated(Some(Rc::new(|| println!("Activated"))));
         window.set_deactivated(Some(Rc::new(|| println!("Deactivated"))));

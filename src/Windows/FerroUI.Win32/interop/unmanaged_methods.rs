@@ -1367,6 +1367,76 @@ impl MONITOR {
     pub const MONITOR_DEFAULTTONEAREST: u32 = 0x00000002;
 }
 
+/// `GCS` of the interop declarations: what a `WM_IME_COMPOSITION` message
+/// says has changed, and what `ImmGetCompositionString` is asked for.
+pub struct GCS;
+
+#[allow(missing_docs)]
+impl GCS {
+    pub const GCS_COMPREADSTR: u32 = 0x0001;
+    pub const GCS_COMPREADATTR: u32 = 0x0002;
+    pub const GCS_COMPREADCLAUSE: u32 = 0x0004;
+    pub const GCS_COMPSTR: u32 = 0x0008;
+    pub const GCS_COMPATTR: u32 = 0x0010;
+    pub const GCS_COMPCLAUSE: u32 = 0x0020;
+    pub const GCS_CURSORPOS: u32 = 0x0080;
+    pub const GCS_DELTASTART: u32 = 0x0100;
+    pub const GCS_RESULTREADSTR: u32 = 0x0200;
+    pub const GCS_RESULTREADCLAUSE: u32 = 0x0400;
+    pub const GCS_RESULTSTR: u32 = 0x0800;
+    pub const GCS_RESULTCLAUSE: u32 = 0x1000;
+}
+
+pub const SORT_DEFAULT: i32 = 0;
+pub const LANG_ZH: i32 = 0x0004;
+pub const LANG_JA: i32 = 0x0011;
+pub const LANG_KO: i32 = 0x0012;
+
+pub const CFS_FORCE_POSITION: i32 = 0x0020;
+pub const CFS_CANDIDATEPOS: i32 = 0x0040;
+pub const CFS_EXCLUDE: i32 = 0x0080;
+pub const CFS_POINT: i32 = 0x0002;
+pub const CFS_RECT: i32 = 0x0001;
+
+pub const NI_COMPOSITIONSTR: i32 = 21;
+pub const CPS_COMPLETE: i32 = 1;
+pub const CPS_CONVERT: i32 = 2;
+pub const CPS_REVERT: i32 = 3;
+pub const CPS_CANCEL: i32 = 4;
+
+/// `PRIMARYLANGID`: the primary language of a language identifier.
+pub fn primary_lang_id(lgid: u32) -> u16 {
+    (lgid & 0x3ff) as u16
+}
+
+/// `LGID`: the language identifier of a keyboard layout handle.
+pub fn lgid(hkl: isize) -> u32 {
+    (hkl as usize & 0xffff) as u32
+}
+
+/// `CANDIDATEFORM` of the interop declarations: where the candidate window
+/// of an input method goes.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[allow(missing_docs, non_snake_case)]
+pub struct CANDIDATEFORM {
+    pub dwIndex: i32,
+    pub dwStyle: i32,
+    pub ptCurrentPos: POINT,
+    pub rcArea: RECT,
+}
+
+/// `COMPOSITIONFORM` of the interop declarations: where the composition
+/// window of an input method goes.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[allow(missing_docs, non_snake_case)]
+pub struct COMPOSITIONFORM {
+    pub dwStyle: i32,
+    pub ptCurrentPos: POINT,
+    pub rcArea: RECT,
+}
+
 /// `PixelFormatDescriptorFlags` of the interop declarations.
 pub struct PixelFormatDescriptorFlags;
 
@@ -1986,6 +2056,7 @@ mod native {
     use windows_sys::Win32::Graphics::Dwm as dwm;
     use windows_sys::Win32::Graphics::Gdi as gdi;
     use windows_sys::Win32::Graphics::OpenGL as gl;
+    use windows_sys::Win32::UI::Input::Ime as ime;
     use windows_sys::Win32::Storage::FileSystem as fs;
     use windows_sys::Win32::System::DataExchange as dx;
     use windows_sys::Win32::System::Com as com;
@@ -2182,6 +2253,150 @@ mod native {
             Some(entry) => entry as *const c_void,
             None => std::ptr::null(),
         }
+    }
+
+    fn himc(context: isize) -> ime::HIMC {
+        context as ime::HIMC
+    }
+
+    /// `ImmGetContext`: the input context of a window; 0 if it has none.
+    /// It is given back with [`imm_release_context`].
+    pub fn imm_get_context(hwnd: isize) -> isize {
+        // SAFETY: a handle; a stale one makes the call fail.
+        unsafe { ime::ImmGetContext(h(hwnd)) as isize }
+    }
+
+    /// `ImmCreateContext`: a new input context; 0 if the call fails.
+    pub fn imm_create_context() -> isize {
+        // SAFETY: no arguments.
+        unsafe { ime::ImmCreateContext() as isize }
+    }
+
+    /// `ImmAssociateContext`: gives a window an input context (0 for
+    /// none) and returns the one it had.
+    pub fn imm_associate_context(hwnd: isize, context: isize) -> isize {
+        // SAFETY: handles.
+        unsafe { ime::ImmAssociateContext(h(hwnd), himc(context)) as isize }
+    }
+
+    /// `ImmReleaseContext`.
+    pub fn imm_release_context(hwnd: isize, context: isize) -> bool {
+        // SAFETY: handles.
+        unsafe { ime::ImmReleaseContext(h(hwnd), himc(context)) != 0 }
+    }
+
+    /// `ImmNotifyIME`.
+    pub fn imm_notify_ime(context: isize, action: i32, index: i32, value: i32) -> bool {
+        // SAFETY: a handle and numbers.
+        unsafe { ime::ImmNotifyIME(himc(context), action as u32, index as u32, value as u32) != 0 }
+    }
+
+    /// `ImmSetCandidateWindow`.
+    pub fn imm_set_candidate_window(context: isize, candidate: &super::CANDIDATEFORM) -> bool {
+        // SAFETY: the structure has the layout of the system (two numbers,
+        // a point, a rectangle) and is read during the call.
+        unsafe { ime::ImmSetCandidateWindow(himc(context), (candidate as *const super::CANDIDATEFORM).cast()) != 0 }
+    }
+
+    /// `ImmGetCandidateWindow`: where the candidate window of an index was
+    /// last put; `None` when the context has no such form.
+    pub fn imm_get_candidate_window(context: isize, index: u32) -> Option<super::CANDIDATEFORM> {
+        let mut form = super::CANDIDATEFORM::default();
+        // SAFETY: the structure has the layout of the system and is
+        // written during the call.
+        let ok = unsafe {
+            ime::ImmGetCandidateWindow(himc(context), index, (&mut form as *mut super::CANDIDATEFORM).cast()) != 0
+        };
+        ok.then_some(form)
+    }
+
+    /// `ImmSetCompositionWindow`.
+    pub fn imm_set_composition_window(context: isize, form: &super::COMPOSITIONFORM) -> bool {
+        // SAFETY: the structure has the layout of the system (a number, a
+        // point, a rectangle) and is read during the call.
+        unsafe { ime::ImmSetCompositionWindow(himc(context), (form as *const super::COMPOSITIONFORM).cast()) != 0 }
+    }
+
+    /// `ImmSetCompositionFont` with a font of a height and a quality, the
+    /// rest of the description zero.
+    pub fn imm_set_composition_font(context: isize, height: i32, quality: u8) -> bool {
+        // SAFETY: zeroed plain data is a valid description of a font.
+        let mut font: gdi::LOGFONTW = unsafe { std::mem::zeroed() };
+        font.lfHeight = height;
+        font.lfQuality = quality as _;
+        // SAFETY: the description is read during the call.
+        unsafe { ime::ImmSetCompositionFontW(himc(context), &font) != 0 }
+    }
+
+    /// `ImmGetCompositionString` for a value that is a number (the cursor
+    /// position): the answer of the call, negative for an error.
+    pub fn imm_get_composition_value(context: isize, index: u32) -> i32 {
+        // SAFETY: no buffer: the call answers a number or a length.
+        unsafe { ime::ImmGetCompositionStringW(himc(context), index, std::ptr::null_mut(), 0) }
+    }
+
+    /// `ImmGetCompositionString` for a string of the composition: `None`
+    /// when the context has none (or the string is empty, as the helper of
+    /// the reference answers).
+    pub fn imm_get_composition_string(context: isize, index: u32) -> Option<String> {
+        let buffer_length = imm_get_composition_value(context, index);
+        if buffer_length <= 0 {
+            return None;
+        }
+        // The length is in bytes; the buffer is of UTF-16 code units.
+        let mut buffer = vec![0u16; (buffer_length as usize).div_ceil(2)];
+        // SAFETY: the system writes at most `buffer_length` bytes into a
+        // buffer of at least that size.
+        let result = unsafe {
+            ime::ImmGetCompositionStringW(himc(context), index, buffer.as_mut_ptr().cast(), buffer_length as u32)
+        };
+        (result >= 0).then(|| String::from_utf16_lossy(&buffer[..(result as usize / 2).min(buffer.len())]))
+    }
+
+    /// `ImmSetCompositionString` with `SCS_SETSTR`: asks the input method
+    /// of the context to take `text` as its composition string. False when
+    /// the context has no input method that does.
+    pub fn imm_set_composition_string(context: isize, text: &str) -> bool {
+        let text: Vec<u16> = text.encode_utf16().collect();
+        // SAFETY: the buffer and its length in bytes; no reading string.
+        unsafe {
+            ime::ImmSetCompositionStringW(
+                himc(context),
+                ime::SCS_SETSTR,
+                text.as_ptr().cast(),
+                (text.len() * 2) as u32,
+                std::ptr::null(),
+                0,
+            ) != 0
+        }
+    }
+
+    /// `CreateCaret` without a bitmap: a caret of the window of a width
+    /// and a height.
+    pub fn create_caret(hwnd: isize, width: i32, height: i32) -> bool {
+        // SAFETY: a handle and numbers.
+        unsafe { wm::CreateCaret(h(hwnd), std::ptr::null_mut(), width, height) != 0 }
+    }
+
+    /// `SetCaretPos`.
+    pub fn set_caret_pos(x: i32, y: i32) -> bool {
+        // SAFETY: numbers.
+        unsafe { wm::SetCaretPos(x, y) != 0 }
+    }
+
+    /// `GetCaretPos`: where the caret of the thread is, in the client
+    /// coordinates of its window.
+    pub fn get_caret_pos() -> Option<(i32, i32)> {
+        let mut point = wf::POINT { x: 0, y: 0 };
+        // SAFETY: a valid out structure.
+        let ok = unsafe { wm::GetCaretPos(&mut point) != 0 };
+        ok.then_some((point.x, point.y))
+    }
+
+    /// `DestroyCaret`.
+    pub fn destroy_caret() -> bool {
+        // SAFETY: no arguments.
+        unsafe { wm::DestroyCaret() != 0 }
     }
 
     /// The version of the system as `RtlGetVersion` reports it: major,
