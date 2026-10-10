@@ -202,7 +202,7 @@ pub(crate) fn get_render_bounds(geometry: &dyn GeometryImpl, pen: Option<&dyn IP
     let mut bounds = cache.render_bounds();
 
     if let FillPath::Separate(fill_path) = geometry.fill() {
-        bounds = bounds.union(to_rect(fill_path.compute_tight_bounds()));
+        bounds = bounds.union(to_rect(crate::skia_sharp_extensions::tight_bounds(&fill_path)));
     }
 
     bounds
@@ -319,8 +319,8 @@ impl PathCache {
         }
 
         let bounds = match (&self.path, &self.cached_for) {
-            (Some(path), _) => to_rect(path.compute_tight_bounds()),
-            (None, Some((_, cached_for))) => to_rect(cached_for.compute_tight_bounds()),
+            (Some(path), _) => to_rect(crate::skia_sharp_extensions::tight_bounds(&path)),
+            (None, Some((_, cached_for))) => to_rect(crate::skia_sharp_extensions::tight_bounds(&cached_for)),
             (None, None) => Rect::default(),
         };
         self.render_bounds = Some(bounds);

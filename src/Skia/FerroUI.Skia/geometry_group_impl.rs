@@ -53,7 +53,7 @@ impl GeometryGroupImpl {
             FillPath::SameAsStroke
         };
 
-        let bounds = to_rect(stroke_path.compute_tight_bounds());
+        let bounds = to_rect(crate::skia_sharp_extensions::tight_bounds(&stroke_path));
 
         register(Self { base: GeometryImplBase::new(), bounds, stroke_path: Shared::new(stroke_path), fill: Shared::new(fill) })
     }

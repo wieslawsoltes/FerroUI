@@ -24,7 +24,7 @@ impl StreamGeometryImpl {
     /// Creates a geometry from a stroke path and a fill. `bounds` defaults to
     /// the tight bounds of the stroke path.
     pub fn from_paths(stroke: Path, fill: FillPath, bounds: Option<Rect>) -> Arc<Self> {
-        let bounds = bounds.unwrap_or_else(|| to_rect(stroke.compute_tight_bounds()));
+        let bounds = bounds.unwrap_or_else(|| to_rect(crate::skia_sharp_extensions::tight_bounds(&stroke)));
 
         register(Self {
             state: Arc::new(StreamGeometryState {
@@ -179,7 +179,7 @@ impl StreamContext {
             FillBuilder::Separate(fill) => FillPath::Separate(fill.snapshot()),
         };
 
-        self.geometry_impl.bounds.set(to_rect(stroke.compute_tight_bounds()));
+        self.geometry_impl.bounds.set(to_rect(crate::skia_sharp_extensions::tight_bounds(&stroke)));
         self.geometry_impl.stroke_path.set(stroke);
         self.geometry_impl.fill.set(fill);
         self.geometry_impl.base.invalidate_caches();
