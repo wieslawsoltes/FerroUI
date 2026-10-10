@@ -40,6 +40,9 @@ mod app {
         AndroidApplicationExtensions, AndroidPlatform, AndroidPlatformOptions, AndroidRenderingMode, FerroActivity,
         FerroAndroidApplication,
     };
+    use ferroui_base::input::text_input::{
+        TextInputMethodClient, TextInputMethodClientEvents, TextInputMethodClientRequestedEventArgs, TextSelection,
+    };
     use ferroui_base::input::{
         InputElement, InputElementImpl, Key, KeyEventArgs, PointerEventArgs, PointerPressedEventArgs,
         PointerReleasedEventArgs, PointerType, TextInputEventArgs,
@@ -53,8 +56,9 @@ mod app {
     use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
     use ferroui_base::{
         ferro_class, ferro_impl_classes, instantiate, FerroLocator, FerroObjectImpl, LocatorExtensions, Point, Rect,
-        Ref, StyledElementImpl, Thickness, VisualImpl,
+        Ref, StyledElementImpl, Thickness, Visual, VisualImpl,
     };
+    use ferroui_controls::platform::{InputPaneState, InputPaneStateEventArgs};
     use ferroui_controls::shapes::Ellipse;
     use ferroui_controls::{
         AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Border, Control, ControlImpl, NewApplication,
@@ -366,7 +370,98 @@ mod app {
         released: RefCell<Vec<Point>>,
     }
 
+    /// The client of the input method of the smoke run: a text and a
+    /// selection in UTF-16 code units, edited as a text box edits its own
+    /// by the text input and the delete keys the editor of the view gets.
+    struct EditorClient {
+        events: TextInputMethodClientEvents,
+        visual: Ref<Visual>,
+        text: RefCell<Vec<u16>>,
+        selection: Cell<TextSelection>,
+        /// The text inputs the editor got while it was the client.
+        inputs: Cell<u32>,
+    }
+
+    impl EditorClient {
+        fn text(&self) -> String {
+            String::from_utf16_lossy(&self.text.borrow())
+        }
+
+        fn ordered(&self) -> (usize, usize) {
+            let selection = self.selection.get();
+            let length = self.text.borrow().len() as i32;
+            let start = selection.start.min(selection.end).clamp(0, length);
+            let end = selection.start.max(selection.end).clamp(0, length);
+            (start as usize, end as usize)
+        }
+
+        fn replace(&self, start: usize, end: usize, with: &str) {
+            let units: Vec<u16> = with.encode_utf16().collect();
+            let caret = (start + units.len()) as i32;
+            self.text.borrow_mut().splice(start..end, units);
+            self.selection.set(TextSelection::new(caret, caret));
+            self.raise_surrounding_text_changed();
+            self.raise_selection_changed();
+        }
+
+        fn input(&self, text: &str) {
+            self.inputs.set(self.inputs.get() + 1);
+            let (start, end) = self.ordered();
+            self.replace(start, end, text);
+        }
+
+        fn delete(&self, forward: bool) {
+            let (start, end) = self.ordered();
+            let length = self.text.borrow().len();
+            if end > start {
+                self.replace(start, end, "");
+            } else if forward && start < length {
+                self.replace(start, start + 1, "");
+            } else if !forward && start > 0 {
+                self.replace(start - 1, start, "");
+            }
+        }
+    }
+
+    impl TextInputMethodClient for EditorClient {
+        fn events(&self) -> &TextInputMethodClientEvents {
+            &self.events
+        }
+
+        fn text_view_visual(&self) -> Ref<Visual> {
+            self.visual.clone()
+        }
+
+        fn supports_preedit(&self) -> bool {
+            false
+        }
+
+        fn supports_surrounding_text(&self) -> bool {
+            true
+        }
+
+        fn surrounding_text(&self) -> String {
+            self.text()
+        }
+
+        fn cursor_rectangle(&self) -> Rect {
+            Rect::default()
+        }
+
+        fn selection(&self) -> TextSelection {
+            self.selection.get()
+        }
+
+        fn set_selection(&self, value: TextSelection) {
+            self.selection.set(value);
+        }
+    }
+
     struct MainView {
+        editor: Ref<Border>,
+        /// Something else that takes the focus, and has no text to edit.
+        other: Ref<Border>,
+        client: Rc<EditorClient>,
         root: Ref<Panel>,
         probe: Ref<Probe>,
         text: Ref<TextBlock>,
@@ -405,8 +500,47 @@ mod app {
         let readback = Arc::new(Mutex::new(Readback::default()));
         let probe = Probe::new(readback.clone());
 
+        // The editor of the input method checks, and something else to move the focus to:
+        // two elements of one pixel that draw nothing.
+        let focusable = || {
+            let border = Border::new();
+            border.set_width(1.0);
+            border.set_height(1.0);
+            border.set_focusable(true);
+            border
+        };
+        let (editor, other) = (focusable(), focusable());
+        let client = Rc::new(EditorClient {
+            events: TextInputMethodClientEvents::new(),
+            visual: editor.clone().upcast(),
+            text: RefCell::new(Vec::new()),
+            selection: Cell::new(TextSelection::default()),
+            inputs: Cell::new(0),
+        });
+        editor.add_handler(InputElement::text_input_method_client_requested_event(), {
+            let client = client.clone();
+            move |_: &Interactive, e: &TextInputMethodClientRequestedEventArgs| {
+                let client: Rc<dyn TextInputMethodClient> = client.clone();
+                e.set_client(Some(client));
+            }
+        });
+        editor.add_handler(InputElement::text_input_event(), {
+            let client = client.clone();
+            move |_: &Interactive, e: &TextInputEventArgs| client.input(e.text.as_deref().unwrap_or_default())
+        });
+        editor.add_handler(InputElement::key_down_event(), {
+            let client = client.clone();
+            move |_: &Interactive, e: &KeyEventArgs| match e.key {
+                Key::Delete => client.delete(true),
+                Key::Back => client.delete(false),
+                _ => {}
+            }
+        });
+
         let root = Panel::new();
         root.children().add(background);
+        root.children().add(editor.clone());
+        root.children().add(other.clone());
         root.children().add(probe.clone());
 
         let pointers = Rc::new(Pointers::default());
@@ -427,7 +561,7 @@ mod app {
             }
         });
 
-        smoke::start(Rc::new(MainView { root: root.clone(), probe, text, ellipse, readback, pointers }));
+        smoke::start(Rc::new(MainView { editor, other, client, root: root.clone(), probe, text, ellipse, readback, pointers }));
 
         root.upcast()
     }
@@ -444,6 +578,9 @@ mod app {
             Frames,
             Input,
             Keys,
+            InputPane,
+            InputMethod,
+            InputPaneClosed,
             Settings,
             Finish,
             WaitForDestroy,
@@ -470,6 +607,8 @@ mod app {
             /// first one again.
             first_theme: Cell<PlatformThemeVariant>,
             settings_step: Cell<u32>,
+            /// The changes of the state of the input pane.
+            pane_changes: Rc<RefCell<Vec<(InputPaneState, Rect, Duration, bool)>>>,
         }
 
         /// The key and text events the top-level raised.
@@ -494,6 +633,7 @@ mod app {
                 color_changes: Rc::new(RefCell::new(Vec::new())),
                 first_theme: Cell::new(PlatformThemeVariant::Light),
                 settings_step: Cell::new(0),
+                pane_changes: Rc::new(RefCell::new(Vec::new())),
             });
 
             let timer = DispatcherTimer::new();
@@ -536,6 +676,9 @@ mod app {
                 Stage::Frames => frames(state),
                 Stage::Input => input(state),
                 Stage::Keys => keys(state),
+                Stage::InputPane => input_pane(state),
+                Stage::InputMethod => input_method(state),
+                Stage::InputPaneClosed => input_pane_closed(state),
                 Stage::Settings => settings(state),
                 Stage::Finish => finish(state),
                 Stage::WaitForDestroy => wait_for_destroy(state),
@@ -839,7 +982,7 @@ mod app {
         fn keys(state: &Rc<State>) {
             let keys = &state.keys;
             let complete = keys.up.borrow().contains(&Key::Enter);
-            if !complete && elapsed(state) < Duration::from_secs(25) {
+            if !complete && elapsed(state) < Duration::from_secs(40) {
                 return;
             }
 
@@ -870,7 +1013,121 @@ mod app {
             );
             drop((down, up, text));
 
-            // The settings of the platform, and the night mode the script switches.
+            // The input method: the editor takes the focus, which makes it the client of the
+            // input method and asks for the soft keyboard.
+            match top_level(state).and_then(|top_level| top_level.input_pane()) {
+                Some(input_pane) => {
+                    let changes = state.pane_changes.clone();
+                    // The subscription lives as long as the application.
+                    std::mem::forget(input_pane.state_changed(Rc::new(move |e: &InputPaneStateEventArgs| {
+                        changes.borrow_mut().push((
+                            e.new_state(),
+                            e.end_rect(),
+                            e.animation_duration(),
+                            e.easing().is_some(),
+                        ));
+                    })));
+                    let focused = state.view.editor.focus();
+                    note(format!("The editor took the focus: {focused}"));
+                    enter(state, Stage::InputPane);
+                }
+                None => {
+                    check("input pane", false, "the top-level has no input pane");
+                    begin_settings(state);
+                }
+            }
+        }
+
+        fn input_pane(state: &Rc<State>) {
+            let Some(input_pane) = top_level(state).and_then(|top_level| top_level.input_pane()) else {
+                return;
+            };
+            let rect = input_pane.occluded_rect();
+            let open = input_pane.state() == InputPaneState::Open && rect.height > 0.0;
+            // The animation of the insets reports the change; it starts after the state.
+            let animated = state.pane_changes.borrow().iter().any(|(new_state, ..)| *new_state == InputPaneState::Open);
+            if !(open && animated) && elapsed(state) < Duration::from_secs(40) {
+                return;
+            }
+            check(
+                "input pane",
+                open && animated,
+                format!(
+                    "with the editor focused the input pane is {:?} and covers {rect:?}; changes reported (state, \
+                     end, duration, easing): {:?}",
+                    input_pane.state(),
+                    state.pane_changes.borrow()
+                ),
+            );
+            if !open {
+                state.view.other.focus();
+                begin_settings(state);
+                return;
+            }
+
+            // Two taps on letters of the soft keyboard: in its second and third row of keys
+            // (the pane has a strip of suggestions, three rows of letters and a bottom row).
+            let scaling = state.scaling.get();
+            let at = |x: f64, y: f64| {
+                format!(
+                    "SCRIPT tap {} {}",
+                    ((rect.x + rect.width * x) * scaling).round(),
+                    ((rect.y + rect.height * y) * scaling).round()
+                )
+            };
+            note("SCRIPT picture ime");
+            note(at(0.45, 0.42));
+            note(at(0.65, 0.58));
+            enter(state, Stage::InputMethod);
+        }
+
+        fn input_method(state: &Rc<State>) {
+            let client = &state.view.client;
+            let text = client.text();
+            let complete = text.encode_utf16().count() >= 2;
+            if !complete && elapsed(state) < Duration::from_secs(30) {
+                return;
+            }
+            check(
+                "input method",
+                complete,
+                format!(
+                    "two keys of the soft keyboard made the text of the editor {text:?}, selection {:?}, through {} \
+                     text input(s) of the input connection",
+                    client.selection(),
+                    client.inputs.get()
+                ),
+            );
+
+            // Another element takes the focus: no client, and the soft keyboard goes.
+            state.pane_changes.borrow_mut().clear();
+            state.view.other.focus();
+            enter(state, Stage::InputPaneClosed);
+        }
+
+        fn input_pane_closed(state: &Rc<State>) {
+            let Some(input_pane) = top_level(state).and_then(|top_level| top_level.input_pane()) else {
+                return;
+            };
+            let closed = input_pane.state() == InputPaneState::Closed && input_pane.occluded_rect().height == 0.0;
+            if !closed && elapsed(state) < Duration::from_secs(30) {
+                return;
+            }
+            check(
+                "input pane closed",
+                closed,
+                format!(
+                    "without a client the input pane is {:?} and covers {:?}; changes reported: {:?}",
+                    input_pane.state(),
+                    input_pane.occluded_rect(),
+                    state.pane_changes.borrow()
+                ),
+            );
+            begin_settings(state);
+        }
+
+        /// The settings of the platform, and the night mode the script switches.
+        fn begin_settings(state: &Rc<State>) {
             match FerroLocator::current().get_service::<dyn IPlatformSettings>() {
                 Some(settings) => {
                     let colors = settings.get_color_values();
@@ -918,7 +1175,8 @@ mod app {
             let wanted = if state.settings_step.get() == 0 { other } else { first };
             let last = state.color_changes.borrow().last().map(PlatformColorValues::theme_variant);
             let arrived = last == Some(wanted);
-            if !arrived && elapsed(state) < Duration::from_secs(25) {
+            // The broadcast of a configuration change is slow on a device that has just booted.
+            if !arrived && elapsed(state) < Duration::from_secs(60) {
                 return;
             }
 

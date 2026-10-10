@@ -59,7 +59,7 @@ impl FerroView {
     pub(crate) fn native_create(java: JavaObject, context: JavaObject) -> i64 {
         // `ViewImpl` of the reference: a top-level that raises the lost focus of the
         // top-level when its view loses the focus.
-        let view = TopLevelImpl::new(&context, false);
+        let view = TopLevelImpl::new(&java, &context, false);
         view.set_focus_change(Some(Rc::new({
             let view = Rc::downgrade(&view);
             move |has_focus: bool| {

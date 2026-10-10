@@ -20,9 +20,14 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowInsets;
+import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
+import android.view.animation.Interpolator;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.ExtractedText;
 
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -114,6 +119,34 @@ final class PlatformHelper {
                     handle, described != null, described != null && described[6] != 0, described != null ? described[5] : 0);
             return applied;
         });
+
+        if (Build.VERSION.SDK_INT < 30) {
+            // The state of the input method is only known from the layout there.
+            window.getDecorView().getViewTreeObserver().addOnGlobalLayoutListener(
+                    () -> nativeInsetsGlobalLayout(handle));
+        } else {
+            window.getDecorView().setWindowInsetsAnimationCallback(
+                    new WindowInsetsAnimation.Callback(WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP) {
+                        @Override
+                        public WindowInsetsAnimation.Bounds onStart(
+                                WindowInsetsAnimation animation, WindowInsetsAnimation.Bounds bounds) {
+                            if ((animation.getTypeMask() & WindowInsets.Type.ime()) != 0) {
+                                nativeInsetsAnimationStart(
+                                        handle,
+                                        bounds.getLowerBound().bottom,
+                                        bounds.getUpperBound().bottom,
+                                        animation.getDurationMillis(),
+                                        animation.getInterpolator());
+                            }
+                            return bounds;
+                        }
+
+                        @Override
+                        public WindowInsets onProgress(WindowInsets insets, List<WindowInsetsAnimation> runningAnimations) {
+                            return insets;
+                        }
+                    });
+        }
     }
 
     /** Whether the system displays every application that targets it edge to edge. */
@@ -439,6 +472,49 @@ final class PlatformHelper {
         }
     }
 
+    // ---- input method --------------------------------------------------------------------------
+
+    /**
+     * Sets what the native input method made of the options of the text input: the input type and
+     * the options of the editor, the capitalization mode when it is not zero, and the hint locales
+     * (language tags) when there are any.
+     */
+    static void setEditorInfo(
+            EditorInfo outAttrs, int inputType, int imeOptions, int initialCapsMode, String[] hintLocales) {
+        outAttrs.inputType = inputType;
+        outAttrs.imeOptions = imeOptions;
+        if (initialCapsMode != 0) {
+            outAttrs.initialCapsMode = initialCapsMode;
+        }
+        if (hintLocales != null && hintLocales.length > 0) {
+            Locale[] locales = new Locale[hintLocales.length];
+            for (int index = 0; index < hintLocales.length; index++) {
+                locales[index] = Locale.forLanguageTag(hintLocales[index]);
+            }
+            outAttrs.hintLocales = new LocaleList(locales);
+        }
+    }
+
+    /** The extracted text of the system with the values the native edit buffer gives. */
+    static ExtractedText newExtractedText(
+            String text,
+            int flags,
+            int partialStartOffset,
+            int partialEndOffset,
+            int selectionStart,
+            int selectionEnd,
+            int startOffset) {
+        ExtractedText extracted = new ExtractedText();
+        extracted.flags = flags;
+        extracted.partialStartOffset = partialStartOffset;
+        extracted.partialEndOffset = partialEndOffset;
+        extracted.selectionStart = selectionStart;
+        extracted.selectionEnd = selectionEnd;
+        extracted.startOffset = startOffset;
+        extracted.text = text;
+        return extracted;
+    }
+
     // ---- platform settings ---------------------------------------------------------------------
 
     /**
@@ -518,6 +594,11 @@ final class PlatformHelper {
         Locale locale = locales != null && !locales.isEmpty() ? locales.get(0) : null;
         return locale != null ? locale.toLanguageTag() : null;
     }
+
+    private static native void nativeInsetsAnimationStart(
+            long handle, int lowerBoundBottom, int upperBoundBottom, long durationMillis, Interpolator interpolator);
+
+    private static native void nativeInsetsGlobalLayout(long handle);
 
     private static native void nativeApplyWindowInsets(long handle, boolean hasInsets, boolean imeVisible, int imeBottom);
 

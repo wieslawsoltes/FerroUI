@@ -79,6 +79,8 @@ trap cleanup EXIT
 
 emu_start "$gpu" "$out/emulator.log" || exit 1
 emu_install "$apk" "$application_id" || exit 1
+# An emulator has a hardware keyboard, and the system shows no soft keyboard beside one unless told.
+adb_shell settings put secure show_ime_with_hard_keyboard 1 >/dev/null 2>&1 || true
 
 # What the application asks for with a line "SCRIPT <command> <arguments>":
 #   picture NAME          a picture of the screen, <out>/NAME-<mode>.png
@@ -131,7 +133,7 @@ input=$input"
     pictured=0
     done_=0
     waited=0
-    limit="${FERROUI_SMOKE_TIMEOUT:-120}"
+    limit="${FERROUI_SMOKE_TIMEOUT:-360}"
     lines=""
     while [ "$waited" -lt "$limit" ]; do
         lines="$(ADB_TIMEOUT=20 adb_do logcat -d -v raw -s ferroui-smoke:V 2>/dev/null | tr -d '\r' || true)"
