@@ -10,15 +10,15 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.FreeDesktop` (exists) |
 | Crate | `ferroui-freedesktop` |
 | Phase / priority | 5 - desktop (Linux) / P1 |
-| Files | 15/18 (83.3%) |
-| Types | 22/26 (84.6%) |
+| Files | 16/18 (88.9%) |
+| Types | 23/26 (88.5%) |
 | Members | 0/216 (0.0%) |
 
 This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
 
 ## Files
 
-### `(project root)` - files 8/11, types 11/15, members 0/76
+### `(project root)` - files 9/11, types 12/15, members 0/76
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
@@ -26,7 +26,7 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `DBusHelper.cs` | `dbus_helper.rs` | present | 1/1 | - | 2 |  |
 | `DBusMenuExporter.cs` | `d_bus_menu_exporter.rs` | missing | 0/1 | `DBusMenuExporter` | 3 |  |
 | `DBusPlatformSettings.cs` | `dbus_platform_settings.rs` | present | 1/1 | - | 2 |  |
-| `DBusSystemDialog.cs` | `d_bus_system_dialog.rs` | missing | 0/1 | `DBusSystemDialog` | 7 |  |
+| `DBusSystemDialog.cs` | `dbus_system_dialog.rs` | present | 1/1 | - | 7 |  |
 | `DBusTrayIconImpl.cs` | `d_bus_tray_icon_impl.rs` | missing | 0/2 | `DBusTrayIconImpl`, `StatusNotifierItemDbusObj` | 37 |  |
 | `IPortalParentLease.cs` | `i_portal_parent_lease.rs` | present | 2/2 | - | 4 |  |
 | `IX11InputMethod.cs` | `ix11_input_method.rs` | present | 3/3 | - | 11 |  |
@@ -65,6 +65,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `dbus_ime/fcitx/dbus.rs` | **unmapped** | `InputContext`, `InputContext1`, `InputMethod`, `InputMethod1` |
 | `dbus_ime/ibus/dbus.rs` | **unmapped** | `InputContext`, `Portal`, `Service` |
 | `dbus_ime/tests.rs` | the unit tests of the module | `Fcitx4Context`, `Fcitx4Method`, `Fcitx5Context`, `Fcitx5Method`, `IBusContext`, `IBusPortal`, `IBusService`, `Recorded`, `TestBus`, `TestClient`, `TestDevice`, `TestRoot` |
+| `dbus_system_dialog/tests.rs` | the unit tests of the module | `Answer`, `Fixture`, `Portal` |
 | `event.rs` | **unmapped** | `Event` |
 | `signal_watch.rs` | **unmapped** | `CancellationFlag`, `CancellationState`, `Cancelled`, `Subscription` |
 | `test_support.rs` | **unmapped** | `FakeBus`, `Log`, `ServiceBuilder`, `TestConnections` |

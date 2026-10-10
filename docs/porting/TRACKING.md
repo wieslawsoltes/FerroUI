@@ -70,7 +70,7 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Desktop](tracking/Avalonia.Desktop.md) | `src/Avalonia.Desktop` | `src/FerroUI.Desktop` | `ferroui-desktop` | 1/1 | 1/1 | 1/1 | 100.0% | 1 - desktop (macOS) | P0 |
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/Avalonia.Dialogs` | `src/FerroUI.Dialogs` | `ferroui-dialogs` | 17/17 | 18/18 | 94/94 | 100.0% | 3 - extras | P3 |
 | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) | `src/Avalonia.Fonts.Inter` | `src/FerroUI.Fonts.Inter` | `ferroui-fonts-inter` | 2/2 | 2/2 | 2/2 | 100.0% | 3 - browser | P2 |
-| [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/Avalonia.FreeDesktop` | `src/FerroUI.FreeDesktop` | `ferroui-freedesktop` | 15/18 | 22/26 | 0/216 | 0.0% | 5 - desktop (Linux) | P1 |
+| [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/Avalonia.FreeDesktop` | `src/FerroUI.FreeDesktop` | `ferroui-freedesktop` | 16/18 | 23/26 | 0/216 | 0.0% | 5 - desktop (Linux) | P1 |
 | [Avalonia.Metal](tracking/Avalonia.Metal.md) | `src/Avalonia.Metal` | `src/FerroUI.Metal` | `ferroui-metal` | 2/2 | 7/7 | 21/21 | 100.0% | 1 - desktop (macOS) | P1 |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/Avalonia.MicroCom` | `src/FerroUI.MicroCom` | `ferroui-microcom` | 1/1 | 1/1 | 0/6 (6 waived) | - | 0 - core | P0 |
 | [Avalonia.Native](tracking/Avalonia.Native.md) | `src/Avalonia.Native` | `src/FerroUI.Native` | `ferroui-native` | 48/48 | 65/76 (11 waived) | 455/531 (76 waived) | 100.0% | 1 - desktop (macOS) | P0 |
@@ -356,7 +356,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-347 Rust source files have no upstream counterpart (14 without a recorded reason). They are listed at the end of each project page.
+348 Rust source files have no upstream counterpart (14 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
@@ -609,6 +609,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/dbus_ime/fcitx/dbus.rs` | **unmapped** |
 | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/dbus_ime/ibus/dbus.rs` | **unmapped** |
 | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/dbus_ime/tests.rs` | the unit tests of the module |
+| [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/dbus_system_dialog/tests.rs` | the unit tests of the module |
 | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/event.rs` | **unmapped** |
 | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/signal_watch.rs` | **unmapped** |
 | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | `src/FerroUI.FreeDesktop/test_support.rs` | **unmapped** |

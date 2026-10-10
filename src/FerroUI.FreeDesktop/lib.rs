@@ -26,6 +26,8 @@ pub mod dbus_ime;
 #[cfg(unix)]
 pub mod dbus_platform_settings;
 #[cfg(unix)]
+pub mod dbus_system_dialog;
+#[cfg(unix)]
 pub mod i_portal_parent_lease;
 #[cfg(unix)]
 pub mod ix11_input_method;
@@ -44,6 +46,8 @@ pub use dbus_call_queue::{DBusCallError, DBusCallQueue, DBusResult};
 pub use dbus_helper::DBusHelper;
 #[cfg(unix)]
 pub use dbus_platform_settings::DBusPlatformSettings;
+#[cfg(unix)]
+pub use dbus_system_dialog::DBusSystemDialog;
 #[cfg(unix)]
 pub use i_portal_parent_lease::{IPortalParentLease, TrivialPortalParentLease};
 #[cfg(unix)]
