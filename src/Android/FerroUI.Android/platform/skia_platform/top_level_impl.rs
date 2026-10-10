@@ -11,7 +11,10 @@ use crate::interop::java::{call_static_int, call_static_long, call_static_void, 
 use crate::interop::natives::{next_handle, sdk_int, FERRO_ACTIVITY, PLATFORM_HELPER};
 use crate::interop::ndk::NativeWindow;
 use crate::platform::android_insets_manager::{ActivityInsetsWindow, IInsetsTopLevel};
+use crate::i_init_editor_info::InitEditorInfo;
+use crate::platform::input::android_input_method::{AndroidInputMethod, IInputMethodHost, ViewInputMethodHost};
 use crate::platform::input::android_keyboard_device::AndroidKeyboardDevice;
+use crate::platform::input::text_edit_buffer::IInputConnectionTopLevel;
 use crate::platform::specific::helpers::android_keyboard_events_helper::{
     AndroidKeyboardEventsHelper, IKeyboardEventsTopLevel,
 };
@@ -20,7 +23,8 @@ use crate::platform::specific::helpers::android_motion_events_helper::{
 };
 use crate::platform::{AndroidInsetsManager, AndroidScreens};
 use ferroui_base::input::raw::{IRawInputEventArgs, RawTextInputEventArgs};
-use ferroui_base::input::{IInputDevice, IInputRoot};
+use ferroui_base::input::text_input::ITextInputMethodImpl;
+use ferroui_base::input::{IInputDevice, IInputRoot, NavigationDirection};
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider, PlatformThemeVariant};
 use ferroui_base::reactive::IDisposable;
@@ -118,6 +122,8 @@ pub struct TopLevelImpl {
     id: i64,
     context: JavaObject,
     keyboard_helper: AndroidKeyboardEventsHelper,
+    text_input_method: Rc<AndroidInputMethod>,
+    text_input_host: Rc<ViewInputMethodHost>,
     pointer_helper: AndroidMotionEventsHelper,
     insets_manager: Option<Rc<AndroidInsetsManager>>,
     screens: Rc<AndroidScreens>,
@@ -141,17 +147,23 @@ pub struct TopLevelImpl {
 }
 
 impl TopLevelImpl {
-    /// Creates the top-level of a view in `context`, with its surface view.
-    pub(crate) fn new(context: &JavaObject, place_on_top: bool) -> Rc<TopLevelImpl> {
+    /// Creates the top-level of the Java view `ferro_view` in `context`,
+    /// with its surface view.
+    pub(crate) fn new(ferro_view: &JavaObject, context: &JavaObject, place_on_top: bool) -> Rc<TopLevelImpl> {
         let id = next_handle();
         let view = InvalidationAwareSurfaceView::new(context, id, place_on_top);
         let shared = view.shared().clone();
 
         // Stage 2 of docs/porting/android-platform.md, each with the files that build it:
-        // the input method, the clipboard, the platform feedback, the storage provider, the
-        // launcher, the native control host and the system navigation manager.
+        // the clipboard, the platform feedback, the storage provider, the launcher, the
+        // native control host and the system navigation manager.
         // `try_get_feature` answers that the top-level does not have them.
         let is_activity = is_instance_of(context, "android/app/Activity");
+        let text_input_host = Rc::new(ViewInputMethodHost::new(ferro_view.clone(), context));
+        let text_input_method = {
+            let host: Rc<dyn IInputMethodHost> = text_input_host.clone();
+            AndroidInputMethod::new(host, sdk_int())
+        };
 
         let this = Rc::new_cyclic(|this: &Weak<TopLevelImpl>| {
             let keyboard_top_level: Weak<dyn IKeyboardEventsTopLevel> = this.clone();
@@ -181,6 +193,8 @@ impl TopLevelImpl {
                 id,
                 context: context.clone(),
                 keyboard_helper: AndroidKeyboardEventsHelper::new(keyboard_top_level, sdk_int()),
+                text_input_method,
+                text_input_host,
                 pointer_helper: AndroidMotionEventsHelper::new(motion_top_level),
                 insets_manager,
                 screens: AndroidScreens::new(context),
@@ -244,6 +258,12 @@ impl TopLevelImpl {
 
     pub(crate) fn insets_manager(&self) -> Option<&Rc<AndroidInsetsManager>> {
         self.insets_manager.as_ref()
+    }
+
+    /// What the input method said the next input connection of the view is
+    /// made with (the field of the view class of the reference).
+    pub(crate) fn editor_info_init(&self) -> Option<InitEditorInfo> {
+        self.text_input_host.editor_info_init()
     }
 
     pub(crate) fn keyboard_helper(&self) -> &AndroidKeyboardEventsHelper {
@@ -432,6 +452,31 @@ impl IKeyboardEventsTopLevel for TopLevelImpl {
     }
 }
 
+impl IInputConnectionTopLevel for TopLevelImpl {
+    fn text_input(&self, text: &str) {
+        TopLevelImpl::text_input(self, text);
+    }
+
+    fn try_move_focus_next(&self) {
+        if let Some(focus_manager) = self.input_root().and_then(|input_root| input_root.focus_manager()) {
+            focus_manager.try_move_focus(NavigationDirection::Next, None);
+        }
+    }
+
+    fn uptime_millis(&self) -> i64 {
+        call_static_long(&JavaClass::find("android/os/SystemClock"), "uptimeMillis", "()J", &[])
+    }
+
+    fn get_caps_mode(&self, text: &str, off: i32, req_modes: i32) -> i32 {
+        call_static_int(
+            &JavaClass::find("android/text/TextUtils"),
+            "getCapsMode",
+            "(Ljava/lang/CharSequence;II)I",
+            &[JavaValue::String(text), JavaValue::Int(off), JavaValue::Int(req_modes)],
+        )
+    }
+}
+
 impl IInsetsTopLevel for TopLevelImpl {
     fn top_level_render_scaling(&self) -> f64 {
         self.render_scaling()
@@ -455,6 +500,11 @@ impl IDisposable for TopLevelImpl {
 
 impl IOptionalFeatureProvider for TopLevelImpl {
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        if feature_type == TypeId::of::<dyn ITextInputMethodImpl>() {
+            let text_input_method: Rc<dyn ITextInputMethodImpl> = self.text_input_method.clone();
+            return Some(Rc::new(text_input_method));
+        }
+
         if feature_type == TypeId::of::<dyn IInsetsManager>() {
             let insets_manager: Rc<dyn IInsetsManager> = self.insets_manager.clone()?;
             return Some(Rc::new(insets_manager));

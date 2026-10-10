@@ -9,6 +9,8 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.widget.FrameLayout;
 
 /**
@@ -131,6 +133,11 @@ public class FerroView extends FrameLayout implements ViewTreeObserver.OnGlobalL
     }
 
     @Override
+    public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+        return nativeCreateInputConnection(nativeHandle, outAttrs);
+    }
+
+    @Override
     public boolean dispatchKeyEvent(KeyEvent e) {
         if (e == null) {
             return super.dispatchKeyEvent(e);
@@ -214,6 +221,8 @@ public class FerroView extends FrameLayout implements ViewTreeObserver.OnGlobalL
     private static native void nativeVisibilityChanged(long handle, boolean isVisible);
 
     private static native void nativeConfigurationChanged(long handle, boolean hasConfiguration, boolean night);
+
+    private static native InputConnection nativeCreateInputConnection(long handle, EditorInfo outAttrs);
 
     private static native int nativeKeyEvent(
             long handle,

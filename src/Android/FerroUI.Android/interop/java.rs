@@ -242,6 +242,39 @@ impl Drop for JavaLocal {
     }
 }
 
+impl JavaLocal {
+    /// Gives the reference up, to be returned from the native method that
+    /// is running: the virtual machine releases it when the method returns.
+    pub(crate) fn into_raw(self) -> jobject {
+        let raw = self.raw;
+        std::mem::forget(self);
+        raw
+    }
+}
+
+/// A new `java.lang.String`.
+pub fn new_string(text: &str) -> JavaLocal {
+    new_string_local(env(), text)
+}
+
+/// A new `String[]` with the given elements.
+pub fn new_string_array(elements: &[String]) -> JavaLocal {
+    let env = env();
+    let class = JavaClass::find("java/lang/String");
+    // SAFETY: the class is a valid class reference and the length is not negative.
+    let array = unsafe {
+        JavaLocal::from_raw(jni!(env, NewObjectArray, elements.len() as jsize, class.class.raw, ptr::null_mut()))
+    };
+    check_exception(env, &|| "the creation of an array of strings".to_string());
+    let array = array.unwrap_or_else(|| panic!("The Java virtual machine is out of memory (NewObjectArray)."));
+    for (index, element) in elements.iter().enumerate() {
+        let string = new_string_local(env, element);
+        // SAFETY: the array has an element at the index, and the value is a string.
+        unsafe { jni!(env, SetObjectArrayElement, array.raw, index as jsize, string.raw) };
+    }
+    array
+}
+
 /// A Java class.
 #[derive(Clone)]
 pub struct JavaClass {
