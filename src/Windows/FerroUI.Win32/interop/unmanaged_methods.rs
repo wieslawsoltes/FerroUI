@@ -1351,6 +1351,116 @@ bitflags::bitflags! {
     }
 }
 
+/// A size in device pixels. The reference names its two numbers `X` and
+/// `Y`.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct SIZE {
+    #[allow(missing_docs)]
+    pub x: i32,
+    #[allow(missing_docs)]
+    pub y: i32,
+}
+
+/// A size as two single-precision numbers.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct SIZE_F {
+    #[allow(missing_docs)]
+    pub x: f32,
+    #[allow(missing_docs)]
+    pub y: f32,
+}
+
+/// The result codes the reference names (`HRESULT` of the interop
+/// declarations).
+pub struct HRESULT;
+
+#[allow(missing_docs)]
+impl HRESULT {
+    pub const S_FALSE: u32 = 0x0001;
+    pub const S_OK: u32 = 0x0000;
+    pub const E_INVALIDARG: u32 = 0x8007_0057;
+    pub const E_OUTOFMEMORY: u32 = 0x8007_000E;
+    pub const E_NOTIMPL: u32 = 0x8000_4001;
+    pub const E_UNEXPECTED: u32 = 0x8000_FFFF;
+    pub const E_CANCELLED: u32 = 0x8007_04C7;
+}
+
+#[allow(missing_docs)]
+pub const STG_E_MEDIUMFULL: u32 = 0x8003_0070;
+#[allow(missing_docs)]
+pub const DV_E_TYMED: u32 = 0x8004_0069;
+#[allow(missing_docs)]
+pub const DV_E_DVASPECT: u32 = 0x8004_006B;
+#[allow(missing_docs)]
+pub const DV_E_FORMATETC: u32 = 0x8004_0064;
+#[allow(missing_docs)]
+pub const OLE_E_ADVISENOTSUPPORTED: u32 = 0x8004_0003;
+#[allow(missing_docs)]
+pub const COR_E_OBJECTDISPOSED: u32 = 0x8013_1622;
+#[allow(missing_docs)]
+pub const STATFLAG_NONAME: i32 = 1;
+
+bitflags::bitflags! {
+    /// `TYMED`: the kinds of storage medium of a data transfer. The
+    /// reference takes the type from the COM types of its runtime.
+    #[repr(transparent)]
+    #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+    pub struct TYMED: i32 {
+        const TYMED_NULL = 0;
+        const TYMED_HGLOBAL = 1;
+        const TYMED_FILE = 2;
+        const TYMED_ISTREAM = 4;
+        const TYMED_ISTORAGE = 8;
+        const TYMED_GDI = 16;
+        const TYMED_MFPICT = 32;
+        const TYMED_ENHMF = 64;
+    }
+}
+
+bitflags::bitflags! {
+    /// `DVASPECT`: the aspect of the data of a data transfer. The reference
+    /// takes the type from the COM types of its runtime.
+    #[repr(transparent)]
+    #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+    pub struct DVASPECT: i32 {
+        const DVASPECT_CONTENT = 1;
+        const DVASPECT_THUMBNAIL = 2;
+        const DVASPECT_ICON = 4;
+        const DVASPECT_DOCPRINT = 8;
+    }
+}
+
+/// `STGMEDIUM`: a storage medium of a data transfer: its kind, the handle
+/// or the pointer of that kind, and the object that releases it.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct STGMEDIUM {
+    #[allow(missing_docs)]
+    pub tymed: TYMED,
+    #[allow(missing_docs)]
+    pub unionmember: isize,
+    #[allow(missing_docs)]
+    pub p_unk_for_release: isize,
+}
+
+/// `FORMATETC`: a format of a data transfer.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct FORMATETC {
+    #[allow(missing_docs)]
+    pub cf_format: u16,
+    #[allow(missing_docs)]
+    pub ptd: isize,
+    #[allow(missing_docs)]
+    pub dw_aspect: DVASPECT,
+    #[allow(missing_docs)]
+    pub lindex: i32,
+    #[allow(missing_docs)]
+    pub tymed: TYMED,
+}
+
 
 /// Encodes a string as the null-terminated UTF-16 string the system takes.
 pub fn to_wide(value: &str) -> Vec<u16> {
@@ -1377,7 +1487,9 @@ mod native {
     use windows_sys::Win32::Graphics::Dwm as dwm;
     use windows_sys::Win32::Graphics::Gdi as gdi;
     use windows_sys::Win32::System::DataExchange as dx;
+    use windows_sys::Win32::System::Com as com;
     use windows_sys::Win32::System::LibraryLoader as ll;
+    use windows_sys::Win32::System::Ole as ole;
     use windows_sys::Win32::System::Memory as mem;
     use windows_sys::Win32::System::SystemInformation as si;
     use windows_sys::Win32::UI::Controls as ctl;
@@ -2324,6 +2436,69 @@ mod native {
             }
             true
         }
+    }
+
+    // ----------------------------------------------------------------
+    // COM and OLE
+    // ----------------------------------------------------------------
+
+    /// `OleInitialize`: initialises OLE on the calling thread, which makes
+    /// it a single-threaded apartment. Returns the result code.
+    pub fn ole_initialize() -> u32 {
+        // SAFETY: the reserved argument is null; the call has no other
+        // precondition.
+        unsafe { ole::OleInitialize(std::ptr::null()) as u32 }
+    }
+
+    /// `RegisterDragDrop`: registers a drop target for a window. Returns
+    /// the result code.
+    ///
+    /// # Safety
+    /// `target` must point at a live COM object that implements
+    /// `IDropTarget`; the system takes a reference of its own.
+    pub unsafe fn register_drag_drop(hwnd: isize, target: *mut c_void) -> u32 {
+        // SAFETY: the contract of this function.
+        unsafe { ole::RegisterDragDrop(h(hwnd), target) as u32 }
+    }
+
+    /// `RevokeDragDrop`: removes the drop target of a window. Returns the
+    /// result code.
+    pub fn revoke_drag_drop(hwnd: isize) -> u32 {
+        // SAFETY: a window handle; a window without a target makes the
+        // call fail.
+        unsafe { ole::RevokeDragDrop(h(hwnd)) as u32 }
+    }
+
+    /// The kind of COM apartment of the calling thread (`APTTYPE`), or
+    /// `None` when COM is not initialised on it.
+    pub fn co_get_apartment_type() -> Option<i32> {
+        let mut apartment_type = 0;
+        let mut qualifier = 0;
+        // SAFETY: two numbers of this frame the system writes to.
+        let result = unsafe { com::CoGetApartmentType(&mut apartment_type, &mut qualifier) };
+        (result >= 0).then_some(apartment_type)
+    }
+
+    /// `APTTYPE_STA`: a single-threaded apartment.
+    pub const APTTYPE_STA: i32 = com::APTTYPE_STA;
+    /// `APTTYPE_MAINSTA`: the main single-threaded apartment.
+    pub const APTTYPE_MAINSTA: i32 = com::APTTYPE_MAINSTA;
+
+    /// `CoTaskMemAlloc`: memory of the COM allocator, which the receiver of
+    /// an out parameter frees. Null when there is none.
+    pub fn co_task_mem_alloc(size: usize) -> *mut c_void {
+        // SAFETY: allocates; the caller owns the block.
+        unsafe { com::CoTaskMemAlloc(size) }
+    }
+
+    /// `CoTaskMemFree`.
+    ///
+    /// # Safety
+    /// `block` must be null or a block of the COM allocator that is not
+    /// used again.
+    pub unsafe fn co_task_mem_free(block: *mut c_void) {
+        // SAFETY: the contract of this function.
+        unsafe { com::CoTaskMemFree(block) }
     }
 
     // ----------------------------------------------------------------

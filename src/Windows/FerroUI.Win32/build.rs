@@ -13,7 +13,11 @@ use std::{env, fs};
 
 /// The files that are compiled: the path in the crate and the name of the
 /// generated file.
-const COMPILED: &[(&str, &str)] = &[("direct_x/directx.idl", "directx.rs")];
+const COMPILED: &[(&str, &str)] = &[
+    ("direct_x/directx.idl", "directx.rs"),
+    ("win_rt/winrt.idl", "winrt.rs"),
+    ("win32_com/win32.idl", "win32.rs"),
+];
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
