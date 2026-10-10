@@ -101,6 +101,15 @@ jobs:
           -p ferroui-browser -p control-catalog-browser
       - name: Check the examples of the browser crate
         run: cargo check --locked --target wasm32-unknown-emscripten -p ferroui-browser --examples
+      # The Vello backend in the browser is behind a feature that no site built here turns on: without
+      # this its sink for WebGL is compiled by nothing, and a change of the scene interface breaks it
+      # unseen (docs/porting/vello-backend.md, section 12).
+      - name: Check the browser crate and the catalog host with the Vello backend
+        run: >
+          cargo check --locked --target wasm32-unknown-emscripten
+          -p ferroui-browser --features vello --examples
+          && cargo check --locked --target wasm32-unknown-emscripten
+          -p control-catalog-browser --features vello
       - name: Build the themed view site
         run: scripts/build-browser.sh themed_view
       - name: Behaviour tests in headless Chrome

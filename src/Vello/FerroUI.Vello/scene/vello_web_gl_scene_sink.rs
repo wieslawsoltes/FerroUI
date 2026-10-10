@@ -93,7 +93,16 @@ impl IVelloSceneSink for VelloWebGlSceneSink {
     fn capabilities(&self) -> VelloSceneCapabilities {
         // The drawing buffer of a canvas is not read back: what ends in
         // memory is drawn by the CPU mode.
-        VelloSceneCapabilities { blend_layers: true, aliased_edges: true, image_paints: true, read_back: false }
+        VelloSceneCapabilities {
+            blend_layers: true,
+            aliased_edges: true,
+            aliased_rectangles: true,
+            image_paints: true,
+            read_back: false,
+            // The frame is drawn whole and directly: nothing stays on the context between frames.
+            device_textures: false,
+            retained_targets: false,
+        }
     }
 
     fn width(&self) -> u16 {
