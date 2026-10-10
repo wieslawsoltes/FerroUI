@@ -2,6 +2,7 @@
 //! framework (the port of `X11Window.cs`). The keyboard part of the class
 //! is in `x11_window_ime.rs`, the modes in `x11_window_modes/`.
 
+use crate::x11_at_spi_accessibility::X11AtSpiAccessibility;
 use crate::activity_tracking_helper::WindowActivationTrackingHelper;
 use crate::raw_event_grouping::{IRawEventGrouperDispatchQueue, RawEventGrouper};
 use crate::selections::drag_drop::x11_drop_target::{XdndTargetAtoms, XlibXdndTargetConnection};
@@ -1620,6 +1621,11 @@ impl X11Window {
 
         // Remove from AT-SPI tree before closing
         self.platform.untrack_window(self);
+        if let Some(at_spi_server) = self.platform.at_spi_server() {
+            if let Some(at_spi_peer) = X11AtSpiAccessibility::existing_window_peer(self) {
+                at_spi_server.remove_window(&at_spi_peer);
+            }
+        }
 
         // If we're closing the active window, speculatively hand activation back to its owner so an
         // awaited ShowDialog() sees the owner as active immediately, instead of waiting for the
@@ -2186,6 +2192,11 @@ impl IWindowBaseImpl for X11Window {
         self.mode.show(self, activate, is_dialog);
 
         self.platform.track_window(self);
+        if let Some(server) = self.platform.at_spi_server() {
+            if let Some(root_peer) = X11AtSpiAccessibility::try_get_window_peer(self) {
+                server.add_window(&root_peer);
+            }
+        }
     }
 
     fn hide(&self) {

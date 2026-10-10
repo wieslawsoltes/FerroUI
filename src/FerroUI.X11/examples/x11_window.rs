@@ -61,6 +61,14 @@
 //!   session bus, and asks the application what a desktop shell asks: the
 //!   layout of the menu of the window, a click of one of its items, the
 //!   properties, the menu and the activation of a tray icon.
+//! - **a11y** (with `--a11y` or `--a11y=real`): the window gets a button, a
+//!   text box and a check box, and a client on a second connection to the
+//!   accessibility bus finds the application through the registry, walks
+//!   the tree of the window (roles, names, states), invokes the button,
+//!   reads the text box and toggles the check box. With `--a11y` the
+//!   example is also `org.a11y.Bus` and the registry on the session bus
+//!   (a private one: `dbus-run-session`); with `--a11y=real` those are the
+//!   services of `at-spi2-core`.
 //! - **ime** (with `--ime=ibus` or `--ime=xim`): a text box gets the
 //!   focus and the server synthesizes keys. With `ibus` the input method
 //!   is the one over D-Bus, and this example is also the service it talks
@@ -207,6 +215,7 @@ mod app {
     pub fn run() -> ExitCode {
         prepare_ime();
         prepare_menu();
+        prepare_a11y();
         let smoke = std::env::args().any(|arg| arg == "--smoke");
         let args: Vec<String> = std::env::args()
             .skip(1)
@@ -219,6 +228,8 @@ mod app {
                     && !arg.starts_with("--dnd-target=")
                     && arg != "--dnd"
                     && arg != "--menu"
+                    && arg != "--a11y"
+                    && !arg.starts_with("--a11y=")
                     && arg != "--glib"
                     && arg != "--embed"
                     && arg != "--gtk-dialog"
@@ -592,6 +603,263 @@ mod app {
             let dbus = zbus::blocking::fdo::DBusProxy::new(connection).map_err(|error| error.to_string())?;
             let name = zbus::names::BusName::try_from(name).map_err(|error| error.to_string())?;
             dbus.name_has_owner(name).map_err(|error| error.to_string())
+        }
+    }
+
+    /// The other side of accessibility on the session bus of the
+    /// environment (a private one: `dbus-run-session`). Not part of the
+    /// platform. With `--a11y` the example is a double of the services
+    /// of `at-spi2-core`: `org.a11y.Bus`, which answers with the address
+    /// of the session bus itself as the accessibility bus, and the
+    /// registry (`org.a11y.atspi.Registry`), which takes the embedding of
+    /// the application and says that the events of objects are listened
+    /// to. With `--a11y=real` the services are the real ones. In both the
+    /// example then is a client on a second connection that walks the
+    /// tree of the application, as an assistive technology does.
+    mod a11y {
+        use std::collections::HashMap;
+        use std::sync::{Arc, Mutex, OnceLock};
+        use zbus::zvariant::{OwnedObjectPath, OwnedValue};
+
+        pub const ROOT_PATH: &str = "/org/a11y/atspi/accessible/root";
+        pub const REGISTRY_NAME: &str = "org.a11y.atspi.Registry";
+        pub const ACCESSIBLE: &str = "org.a11y.atspi.Accessible";
+        pub const ACTION: &str = "org.a11y.atspi.Action";
+        pub const COMPONENT: &str = "org.a11y.atspi.Component";
+        pub const TEXT: &str = "org.a11y.atspi.Text";
+        const PROPERTIES: &str = "org.freedesktop.DBus.Properties";
+
+        type Reference = (String, OwnedObjectPath);
+
+        #[derive(Default)]
+        struct State {
+            /// How often the address of the accessibility bus was asked for.
+            address_requests: u32,
+            /// The roots that were embedded: the name of the connection and the path.
+            embedded: Vec<(String, String)>,
+            /// The event signals the registry connection received.
+            events: Vec<String>,
+        }
+
+        type Shared = Arc<Mutex<State>>;
+
+        struct Bus {
+            state: Shared,
+        }
+
+        #[zbus::interface(name = "org.a11y.Bus")]
+        impl Bus {
+            fn get_address(&self) -> String {
+                self.state.lock().unwrap().address_requests += 1;
+                std::env::var("DBUS_SESSION_BUS_ADDRESS").unwrap_or_default()
+            }
+        }
+
+        struct Socket {
+            state: Shared,
+        }
+
+        #[zbus::interface(name = "org.a11y.atspi.Socket")]
+        impl Socket {
+            fn embed(&self, plug: Reference, #[zbus(header)] header: zbus::message::Header<'_>) -> Reference {
+                let sender = header.sender().map(|sender| sender.to_string()).unwrap_or_default();
+                self.state.lock().unwrap().embedded.push((sender, plug.1.to_string()));
+                (plug.0, OwnedObjectPath::try_from(ROOT_PATH).unwrap())
+            }
+        }
+
+        /// The root of the registry lists the applications that were embedded.
+        struct RegistryRoot {
+            state: Shared,
+        }
+
+        #[zbus::interface(name = "org.a11y.atspi.Accessible")]
+        impl RegistryRoot {
+            fn get_children(&self) -> Vec<Reference> {
+                let state = self.state.lock().unwrap();
+                state
+                    .embedded
+                    .iter()
+                    .filter_map(|(name, path)| Some((name.clone(), OwnedObjectPath::try_from(path.as_str()).ok()?)))
+                    .collect()
+            }
+        }
+
+        struct Registry;
+
+        #[zbus::interface(name = "org.a11y.atspi.Registry")]
+        impl Registry {
+            fn get_registered_events(&self, #[zbus(header)] header: zbus::message::Header<'_>) -> Vec<(String, String)> {
+                let own = header.destination().map(|name| name.to_string()).unwrap_or_default();
+                vec![(own, "object:".to_string())]
+            }
+        }
+
+        struct Double {
+            state: Shared,
+        }
+
+        static DOUBLE: OnceLock<Result<Double, String>> = OnceLock::new();
+
+        /// `--a11y` or `--a11y=real`.
+        pub fn kind() -> Option<String> {
+            std::env::args().find_map(|arg| match arg.as_str() {
+                "--a11y" => Some("double".to_string()),
+                other => other.strip_prefix("--a11y=").map(str::to_string),
+            })
+        }
+
+        pub fn start() -> Result<(), String> {
+            DOUBLE
+                .get_or_init(|| {
+                    let state: Shared = Arc::default();
+                    let connection = zbus::blocking::connection::Builder::session()
+                        .and_then(|builder| builder.serve_at("/org/a11y/bus", Bus { state: state.clone() }))
+                        .and_then(|builder| builder.serve_at(ROOT_PATH, Socket { state: state.clone() }))
+                        .and_then(|builder| builder.serve_at(ROOT_PATH, RegistryRoot { state: state.clone() }))
+                        .and_then(|builder| builder.serve_at("/org/a11y/atspi/registry", Registry))
+                        .and_then(|builder| builder.name("org.a11y.Bus"))
+                        .and_then(|builder| builder.name(REGISTRY_NAME))
+                        .and_then(|builder| builder.build())
+                        .map_err(|error| error.to_string())?;
+
+                    // The events of objects, as a listener of the registry gets them.
+                    let events = state.clone();
+                    std::thread::spawn(move || {
+                        let rule = "type='signal',interface='org.a11y.atspi.Event.Object'";
+                        let Ok(iterator) = zbus::blocking::MessageIterator::for_match_rule(rule, &connection, Some(256))
+                        else {
+                            return;
+                        };
+                        for message in iterator.flatten() {
+                            let header = message.header();
+                            let Ok((detail, detail1, _, _, _)) = message
+                                .body()
+                                .deserialize::<(String, i32, i32, OwnedValue, HashMap<String, OwnedValue>)>()
+                            else {
+                                continue;
+                            };
+                            let member = header.member().map(|member| member.to_string()).unwrap_or_default();
+                            let path = header.path().map(|path| path.to_string()).unwrap_or_default();
+                            events.lock().unwrap().events.push(format!("{path} {member} {detail} {detail1}"));
+                        }
+                    });
+                    Ok(Double { state })
+                })
+                .as_ref()
+                .map(|_| ())
+                .map_err(Clone::clone)
+        }
+
+        fn double() -> Option<&'static Double> {
+            DOUBLE.get().and_then(|double| double.as_ref().ok())
+        }
+
+        pub fn address_requests() -> u32 {
+            double().map(|double| double.state.lock().unwrap().address_requests).unwrap_or(0)
+        }
+
+        pub fn embedded() -> Vec<(String, String)> {
+            double().map(|double| double.state.lock().unwrap().embedded.clone()).unwrap_or_default()
+        }
+
+        pub fn events() -> Vec<String> {
+            double().map(|double| double.state.lock().unwrap().events.clone()).unwrap_or_default()
+        }
+
+        /// A client of the accessibility bus.
+        pub struct Client {
+            connection: zbus::blocking::Connection,
+            /// The connection of the application on the accessibility bus.
+            pub application: String,
+        }
+
+        impl Client {
+            /// Asks the session bus for the accessibility bus, connects
+            /// to it, and finds the application of this toolkit among
+            /// the children of the root of the registry.
+            pub fn connect() -> Result<Client, String> {
+                let text = |error: zbus::Error| error.to_string();
+                let session = zbus::blocking::Connection::session().map_err(text)?;
+                let address: String = session
+                    .call_method(Some("org.a11y.Bus"), "/org/a11y/bus", Some("org.a11y.Bus"), "GetAddress", &())
+                    .map_err(text)?
+                    .body()
+                    .deserialize()
+                    .map_err(text)?;
+                let connection = zbus::blocking::connection::Builder::address(address.as_str())
+                    .and_then(|builder| builder.build())
+                    .map_err(|error| format!("the accessibility bus at {address}: {error}"))?;
+                let mut client = Client { connection, application: REGISTRY_NAME.to_string() };
+                let applications = client.children(ROOT_PATH)?;
+                for (name, path) in &applications {
+                    client.application = name.clone();
+                    let toolkit = client.property(path, "org.a11y.atspi.Application", "ToolkitName");
+                    if path == ROOT_PATH && toolkit.as_deref() == Ok("FerroUI") {
+                        return Ok(client);
+                    }
+                }
+                Err(format!("the registry lists no application of the toolkit among {applications:?}"))
+            }
+
+            pub fn call<B, T>(&self, path: &str, interface: &str, member: &str, body: &B) -> Result<T, String>
+            where
+                B: zbus::export::serde::ser::Serialize + zbus::zvariant::DynamicType,
+                T: for<'a> zbus::export::serde::Deserialize<'a> + zbus::zvariant::Type,
+            {
+                let reply = self
+                    .connection
+                    .call_method(Some(self.application.as_str()), path, Some(interface), member, body)
+                    .map_err(|error| format!("{member} of {path}: {error}"))?;
+                reply.body().deserialize::<T>().map_err(|error| format!("the reply of {member} of {path}: {error}"))
+            }
+
+            pub fn property(&self, path: &str, interface: &str, name: &str) -> Result<String, String> {
+                let value: OwnedValue = self.call(path, PROPERTIES, "Get", &(interface, name))?;
+                Ok(super::desktop_double::show(&value))
+            }
+
+            pub fn children(&self, path: &str) -> Result<Vec<(String, String)>, String> {
+                let children: Vec<Reference> = self.call(path, ACCESSIBLE, "GetChildren", &())?;
+                Ok(children.into_iter().map(|(name, path)| (name, path.to_string())).collect())
+            }
+
+            pub fn role_name(&self, path: &str) -> Result<String, String> {
+                self.call(path, ACCESSIBLE, "GetRoleName", &())
+            }
+
+            pub fn name(&self, path: &str) -> String {
+                self.property(path, ACCESSIBLE, "Name").unwrap_or_else(|error| error)
+            }
+
+            /// Whether the object has the state with the number `state`.
+            pub fn has_state(&self, path: &str, state: u32) -> bool {
+                let words: Vec<u32> = self.call(path, ACCESSIBLE, "GetState", &()).unwrap_or_default();
+                words.get((state / 32) as usize).is_some_and(|word| word & (1 << (state % 32)) != 0)
+            }
+
+            /// The tree below `path`, one line per object: the depth,
+            /// the role, the name and the path.
+            pub fn dump(&self, path: &str, depth: usize, lines: &mut Vec<(usize, String, String, String)>) {
+                if depth > 40 || lines.len() > 5000 {
+                    return;
+                }
+                let role = self.role_name(path).unwrap_or_else(|error| error);
+                lines.push((depth, role, self.name(path), path.to_string()));
+                for (_, child) in self.children(path).unwrap_or_default() {
+                    self.dump(&child, depth + 1, lines);
+                }
+            }
+        }
+    }
+
+    /// Starts the double of the accessibility services before the
+    /// platform asks for the accessibility bus, when `--a11y` asks for it.
+    fn prepare_a11y() {
+        if a11y::kind().as_deref() == Some("double") {
+            if let Err(error) = a11y::start() {
+                println!("The double of the accessibility services did not start: {error}");
+            }
         }
     }
 
@@ -1025,6 +1293,10 @@ mod app {
                 if std::env::args().any(|arg| arg == "--menu") {
                     report.phase("menu");
                     menu_checks(&report, &window).await;
+                }
+                if let Some(kind) = a11y::kind() {
+                    report.phase("a11y");
+                    a11y_checks(&report, &window, &content, &kind).await;
                 }
                 if std::env::args().any(|arg| arg == "--embed") {
                     report.phase("embed");
@@ -2306,6 +2578,269 @@ mod app {
                     std::env::var("SESSION_MANAGER").ok()
                 ),
             );
+        }
+
+        /// What the client of the accessibility bus found, gathered on a
+        /// thread of its own while the UI thread answers it.
+        #[derive(Clone, Default)]
+        struct A11yWalk {
+            error: Option<String>,
+            application: String,
+            root: String,
+            window: String,
+            tree: Vec<(usize, String, String, String)>,
+            button: String,
+            button_states: Vec<bool>,
+            button_action: String,
+            button_clicked: bool,
+            entry: String,
+            entry_text: String,
+            entry_count: String,
+            entry_editable: bool,
+            entry_focused: bool,
+            check_box: String,
+            check_box_before: (bool, bool),
+            check_box_after: bool,
+            window_extents: (i32, i32, i32, i32),
+            button_extents: (i32, i32, i32, i32),
+            check_box_path: String,
+        }
+
+        fn a11y_walk() -> A11yWalk {
+            // The numbers of the states (the AT-SPI specification).
+            const CHECKED: u32 = 4;
+            const EDITABLE: u32 = 7;
+            const ENABLED: u32 = 8;
+            const FOCUSABLE: u32 = 11;
+            const FOCUSED: u32 = 12;
+            const SHOWING: u32 = 25;
+            const VISIBLE: u32 = 30;
+            const CHECKABLE: u32 = 41;
+            let mut walk = A11yWalk::default();
+            let client = match a11y::Client::connect() {
+                Ok(client) => client,
+                Err(error) => {
+                    walk.error = Some(error);
+                    return walk;
+                }
+            };
+            walk.application = client.application.clone();
+            let root_role = client.role_name(a11y::ROOT_PATH).unwrap_or_else(|error| error);
+            let toolkit = client
+                .property(a11y::ROOT_PATH, "org.a11y.atspi.Application", "ToolkitName")
+                .unwrap_or_else(|error| error);
+            let windows = client.children(a11y::ROOT_PATH).unwrap_or_default();
+            walk.root = format!("{root_role}, toolkit {toolkit}, {} child(ren)", windows.len());
+            let Some((_, window)) = windows.first().cloned() else {
+                walk.error = Some("the root of the application has no child".to_string());
+                return walk;
+            };
+            walk.window =
+                format!("{} \"{}\"", client.role_name(&window).unwrap_or_else(|error| error), client.name(&window));
+            client.dump(&window, 0, &mut walk.tree);
+            let find = |role: &str| {
+                walk.tree
+                    .iter()
+                    .find(|(_, found, _, _)| found == role)
+                    .map(|(_, _, _, path)| path.clone())
+                    .unwrap_or_default()
+            };
+            let (button, entry, check_box) = (find("push button"), find("entry"), find("check box"));
+
+            walk.button = client.name(&button);
+            walk.button_states =
+                [ENABLED, FOCUSABLE, VISIBLE, SHOWING].iter().map(|state| client.has_state(&button, *state)).collect();
+            walk.button_action =
+                client.call::<_, String>(&button, a11y::ACTION, "GetName", &0i32).unwrap_or_else(|error| error);
+            walk.button_clicked = client.call::<_, bool>(&button, a11y::ACTION, "DoAction", &0i32).unwrap_or(false);
+            walk.window_extents = client.call(&window, a11y::COMPONENT, "GetExtents", &0u32).unwrap_or_default();
+            walk.button_extents = client.call(&button, a11y::COMPONENT, "GetExtents", &0u32).unwrap_or_default();
+
+            walk.entry = client.role_name(&entry).unwrap_or_else(|error| error);
+            walk.entry_text =
+                client.call::<_, String>(&entry, a11y::TEXT, "GetText", &(0i32, -1i32)).unwrap_or_else(|error| error);
+            walk.entry_count = client.property(&entry, a11y::TEXT, "CharacterCount").unwrap_or_else(|error| error);
+            walk.entry_editable = client.has_state(&entry, EDITABLE);
+            let _ = client.call::<_, bool>(&entry, a11y::COMPONENT, "GrabFocus", &());
+            walk.entry_focused = client.has_state(&entry, FOCUSED);
+
+            walk.check_box = client.name(&check_box);
+            walk.check_box_before = (client.has_state(&check_box, CHECKABLE), client.has_state(&check_box, CHECKED));
+            let _ = client.call::<_, bool>(&check_box, a11y::ACTION, "DoAction", &0i32);
+            walk.check_box_after = client.has_state(&check_box, CHECKED);
+            walk.check_box_path = check_box;
+            walk
+        }
+
+        /// The accessibility phase: the window gets a button, a text box
+        /// and a check box; a client on a second connection to the
+        /// accessibility bus finds the application through the registry,
+        /// walks the tree of the window, invokes the button, reads the
+        /// text box and toggles the check box.
+        async fn a11y_checks(report: &Report, window: &Ref<Window>, content: &Ref<Border>, kind: &str) {
+            use ferroui_controls::{Button, CheckBox, StackPanel, TextBox};
+            use std::sync::{Arc, Mutex};
+
+            let button = Button::new();
+            button.set_content(Some(Rc::new("Save".to_string())));
+            let clicks = Rc::new(Cell::new(0u32));
+            let counter = clicks.clone();
+            button.click(move |_, _| counter.set(counter.get() + 1));
+            let text_box = TextBox::new();
+            text_box.set_text(Some("Hello world"));
+            let check_box = CheckBox::new();
+            check_box.set_content(Some(Rc::new("Agree".to_string())));
+            let panel = StackPanel::new();
+            panel.children().add(&button);
+            panel.children().add(&text_box);
+            panel.children().add(&check_box);
+            content.set_child(&panel);
+            delay(Duration::from_millis(300)).await;
+
+            if kind == "double" {
+                wait_for(STEP_TIMEOUT, || !a11y::embedded().is_empty()).await;
+                let (requests, embedded) = (a11y::address_requests(), a11y::embedded());
+                report.check(
+                    "accessibility bus",
+                    requests > 0,
+                    format!("org.a11y.Bus was asked for the address of the accessibility bus {requests} time(s)"),
+                );
+                report.check(
+                    "embedded",
+                    embedded.len() == 1 && embedded[0].1 == a11y::ROOT_PATH,
+                    format!("the registry was asked to embed {embedded:?}"),
+                );
+            }
+
+            // The client talks from a thread of its own; this thread answers it.
+            let answer: Arc<Mutex<Option<A11yWalk>>> = Arc::default();
+            let slot = answer.clone();
+            std::thread::spawn(move || {
+                // The real registry is told about the application a moment after it started.
+                let mut walk = a11y_walk();
+                for _ in 0..20 {
+                    if walk.error.is_none() {
+                        break;
+                    }
+                    std::thread::sleep(Duration::from_millis(250));
+                    walk = a11y_walk();
+                }
+                *slot.lock().unwrap() = Some(walk);
+            });
+            wait_for(Duration::from_secs(30), || answer.lock().unwrap().is_some()).await;
+            let Some(walk) = answer.lock().unwrap().clone() else {
+                report.check("client", false, "the client of the accessibility bus did not finish".to_string());
+                return;
+            };
+            if let Some(error) = &walk.error {
+                report.check("client", false, error.clone());
+                return;
+            }
+
+            println!("  The tree of the window, as the client read it from {}:", walk.application);
+            for (depth, role, name, path) in &walk.tree {
+                println!("    {}{role} \"{name}\" {path}", "  ".repeat(*depth));
+            }
+            report.check(
+                "registered",
+                walk.application.starts_with(':'),
+                format!("the registry lists the application as {}", walk.application),
+            );
+            report.check("root", walk.root == "application, toolkit FerroUI, 1 child(ren)", walk.root.clone());
+            report.check("window", walk.window == format!("frame \"{TITLE}\""), walk.window.clone());
+            report.check(
+                "paths",
+                !walk.tree.is_empty() && walk.tree.iter().all(|(_, _, _, path)| path.starts_with("/org/ferroui/a11y/")),
+                format!("{} objects below the window, all at /org/ferroui/a11y/<n>", walk.tree.len()),
+            );
+            report.check(
+                "button",
+                walk.button == "Save" && walk.button_states.iter().all(|state| *state),
+                format!(
+                    "a push button named \"{}\"; enabled, focusable, visible, showing: {:?}",
+                    walk.button, walk.button_states
+                ),
+            );
+            wait_for(STEP_TIMEOUT, || clicks.get() > 0).await;
+            report.check(
+                "button action",
+                walk.button_action == "click" && walk.button_clicked && clicks.get() == 1,
+                format!(
+                    "action 0 is \"{}\"; DoAction answered {}; the button was clicked {} time(s)",
+                    walk.button_action,
+                    walk.button_clicked,
+                    clicks.get()
+                ),
+            );
+            let (window_extents, button_extents) = (walk.window_extents, walk.button_extents);
+            let inside = button_extents.2 > 0
+                && button_extents.3 > 0
+                && button_extents.0 >= window_extents.0
+                && button_extents.1 >= window_extents.1
+                && button_extents.0 + button_extents.2 <= window_extents.0 + window_extents.2
+                && button_extents.1 + button_extents.3 <= window_extents.1 + window_extents.3;
+            let origin = window
+                .platform_impl()
+                .map(|window_impl| window_impl.point_to_screen(ferroui_base::Point::new(0.0, 0.0)));
+            report.check(
+                "extents",
+                inside && origin.is_some_and(|origin| (origin.x, origin.y) == (window_extents.0, window_extents.1)),
+                format!(
+                    "the button at {button_extents:?} on the screen, the window at {window_extents:?}; the window is at {:?} for the platform",
+                    origin.map(|origin| (origin.x, origin.y))
+                ),
+            );
+            report.check(
+                "text box",
+                walk.entry == "entry"
+                    && walk.entry_editable
+                    && walk.entry_text == "Hello world"
+                    && walk.entry_count == "11",
+                format!(
+                    "an {} with the text \"{}\" of {} characters; editable: {}",
+                    walk.entry, walk.entry_text, walk.entry_count, walk.entry_editable
+                ),
+            );
+            report.check(
+                "focus",
+                walk.entry_focused && text_box.is_focused(),
+                format!(
+                    "after GrabFocus the text box has the state focused: {}; the framework says it is focused: {}",
+                    walk.entry_focused,
+                    text_box.is_focused()
+                ),
+            );
+            report.check(
+                "check box",
+                walk.check_box == "Agree" && walk.check_box_before == (true, false),
+                format!(
+                    "a check box named \"{}\"; checkable and checked before: {:?}",
+                    walk.check_box, walk.check_box_before
+                ),
+            );
+            report.check(
+                "check box toggled",
+                walk.check_box_after && check_box.is_checked() == Some(true),
+                format!(
+                    "after its action the state checked: {}; the framework: {:?}",
+                    walk.check_box_after,
+                    check_box.is_checked()
+                ),
+            );
+            if kind == "double" {
+                let expected = format!("{} StateChanged checked 1", walk.check_box_path);
+                wait_for(STEP_TIMEOUT, || a11y::events().contains(&expected)).await;
+                let events = a11y::events();
+                report.check(
+                    "events",
+                    events.contains(&expected),
+                    format!(
+                        "the listener of the registry got {} event(s), among them \"{expected}\": {}",
+                        events.len(),
+                        events.contains(&expected)
+                    ),
+                );
+            }
         }
 
         async fn menu_checks(report: &Report, window: &Ref<Window>) {
