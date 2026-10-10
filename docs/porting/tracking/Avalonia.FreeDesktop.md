@@ -64,7 +64,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 |---|---|---|
 | `dbus_ime/fcitx/dbus.rs` | **unmapped** | `InputContext`, `InputContext1`, `InputMethod`, `InputMethod1` |
 | `dbus_ime/ibus/dbus.rs` | **unmapped** | `InputContext`, `Portal`, `Service` |
-| `dbus_ime/tests.rs` | the unit tests of the module | `FakeBus`, `Fcitx4Context`, `Fcitx4Method`, `Fcitx5Context`, `Fcitx5Method`, `IBusContext`, `IBusPortal`, `IBusService`, `Log`, `Recorded`, `TestBus`, `TestClient`, ... (14 total) |
+| `dbus_ime/tests.rs` | the unit tests of the module | `Fcitx4Context`, `Fcitx4Method`, `Fcitx5Context`, `Fcitx5Method`, `IBusContext`, `IBusPortal`, `IBusService`, `Recorded`, `TestBus`, `TestClient`, `TestDevice`, `TestRoot` |
 | `event.rs` | **unmapped** | `Event` |
 | `signal_watch.rs` | **unmapped** | `CancellationFlag`, `CancellationState`, `Cancelled`, `Subscription` |
-| `test_support.rs` | **unmapped** |  |
+| `test_support.rs` | **unmapped** | `FakeBus`, `Log`, `ServiceBuilder`, `TestConnections` |
