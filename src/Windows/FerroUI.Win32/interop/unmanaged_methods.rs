@@ -189,6 +189,112 @@ pub struct MOUSEMOVEPOINT {
     pub dw_extra_info: isize,
 }
 
+/// What the system knows of a pointer (`GetPointerInfo`): the members of
+/// the structure of the system that the backend reads.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct POINTER_INFO {
+    /// A [`PointerInputType`].
+    pub pointer_type: u32,
+    #[allow(missing_docs)]
+    pub pointer_id: u32,
+    #[allow(missing_docs)]
+    pub pointer_flags: u32,
+    #[allow(missing_docs)]
+    pub source_device: isize,
+    #[allow(missing_docs)]
+    pub pt_pixel_location_x: i32,
+    #[allow(missing_docs)]
+    pub pt_pixel_location_y: i32,
+    #[allow(missing_docs)]
+    pub pt_himetric_location_raw_x: i32,
+    #[allow(missing_docs)]
+    pub pt_himetric_location_raw_y: i32,
+    #[allow(missing_docs)]
+    pub dw_time: u32,
+    #[allow(missing_docs)]
+    pub history_count: u32,
+    /// A [`PointerButtonChangeType`].
+    pub button_change_type: u32,
+}
+
+/// What the system knows of a touch contact (`GetPointerTouchInfo`).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct POINTER_TOUCH_INFO {
+    #[allow(missing_docs)]
+    pub pointer_info: POINTER_INFO,
+    /// A set of [`TouchMask`].
+    pub touch_mask: u32,
+    #[allow(missing_docs)]
+    pub rc_contact_left: i32,
+    #[allow(missing_docs)]
+    pub rc_contact_top: i32,
+    #[allow(missing_docs)]
+    pub rc_contact_right: i32,
+    #[allow(missing_docs)]
+    pub rc_contact_bottom: i32,
+    #[allow(missing_docs)]
+    pub pressure: u32,
+}
+
+/// What the system knows of a pen (`GetPointerPenInfo`).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct POINTER_PEN_INFO {
+    #[allow(missing_docs)]
+    pub pointer_info: POINTER_INFO,
+    /// A set of [`PenFlags`].
+    pub pen_flags: u32,
+    #[allow(missing_docs)]
+    pub pressure: u32,
+    #[allow(missing_docs)]
+    pub rotation: u32,
+    #[allow(missing_docs)]
+    pub tilt_x: i32,
+    #[allow(missing_docs)]
+    pub tilt_y: i32,
+}
+
+/// One contact of a `WM_TOUCH` message (`GetTouchInputInfo`): the members
+/// the backend reads. Positions and sizes are hundredths of a pixel.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct TOUCHINPUT {
+    #[allow(missing_docs)]
+    pub x: i32,
+    #[allow(missing_docs)]
+    pub y: i32,
+    #[allow(missing_docs)]
+    pub id: u32,
+    /// A set of [`TouchInputFlags`].
+    pub flags: u32,
+    #[allow(missing_docs)]
+    pub mask: u32,
+    #[allow(missing_docs)]
+    pub time: u32,
+    #[allow(missing_docs)]
+    pub cx_contact: u32,
+    #[allow(missing_docs)]
+    pub cy_contact: u32,
+}
+
+/// The flags of `EnableMenuItem`.
+pub const MF_BYCOMMAND: u32 = 0x0000_0000;
+#[allow(missing_docs)]
+pub const MF_ENABLED: u32 = 0x0000_0000;
+#[allow(missing_docs)]
+pub const MF_GRAYED: u32 = 0x0000_0001;
+#[allow(missing_docs)]
+pub const MF_DISABLED: u32 = 0x0000_0002;
+
+bitflags::bitflags! {
+    /// `TrackPopupMenuFlags` of the interop declarations.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+    pub struct TrackPopupMenuFlags: u32 {
+        const TPM_LEFTBUTTON = 0x0000;
+        const TPM_RIGHTBUTTON = 0x0002;
+        const TPM_NONOTIFY = 0x0080;
+        const TPM_RETURNCMD = 0x0100;
+    }
+}
+
 /// The header of a device independent bitmap.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -2818,6 +2924,249 @@ mod native {
         };
         // SAFETY: a complete structure that lives through the call.
         unsafe { kbm::TrackMouseEvent(&mut event) != 0 }
+    }
+
+    /// `TrackMouseEvent` with the given flags (`TME_LEAVE`, with
+    /// `TME_NONCLIENT` for the frame of the window).
+    pub fn track_mouse_event(hwnd: isize, flags: u32) -> bool {
+        let mut event = kbm::TRACKMOUSEEVENT {
+            cbSize: std::mem::size_of::<kbm::TRACKMOUSEEVENT>() as u32,
+            dwFlags: flags,
+            hwndTrack: h(hwnd),
+            dwHoverTime: 0,
+        };
+        // SAFETY: a complete structure that lives through the call.
+        unsafe { kbm::TrackMouseEvent(&mut event) != 0 }
+    }
+
+    /// `GetMouseMovePointsEx` with `GMMP_USE_DISPLAY_POINTS`: up to
+    /// `count` points of the history of the mouse that end at `point`,
+    /// newest first; empty if the point is not in the history.
+    pub fn get_mouse_move_points_ex(point: MOUSEMOVEPOINT, count: usize) -> Vec<MOUSEMOVEPOINT> {
+        let native = kbm::MOUSEMOVEPOINT { x: point.x, y: point.y, time: point.time as u32, dwExtraInfo: 0 };
+        let mut buffer = vec![kbm::MOUSEMOVEPOINT { x: 0, y: 0, time: 0, dwExtraInfo: 0 }; count];
+        // SAFETY: the buffer has `count` elements, which is what the call
+        // is told, and the point lives through the call.
+        let written = unsafe {
+            kbm::GetMouseMovePointsEx(
+                std::mem::size_of::<kbm::MOUSEMOVEPOINT>() as u32,
+                &native,
+                buffer.as_mut_ptr(),
+                count as i32,
+                1,
+            )
+        };
+        if written <= 0 {
+            return Vec::new();
+        }
+        buffer
+            .iter()
+            .take(written as usize)
+            .map(|p| MOUSEMOVEPOINT { x: p.x, y: p.y, time: p.time as i32, dw_extra_info: p.dwExtraInfo as isize })
+            .collect()
+    }
+
+    // ----------------------------------------------------------------
+    // Pointer and touch input
+    // ----------------------------------------------------------------
+
+    fn to_pointer_info(info: &ptr_input::POINTER_INFO) -> POINTER_INFO {
+        POINTER_INFO {
+            pointer_type: info.pointerType as u32,
+            pointer_id: info.pointerId,
+            pointer_flags: info.pointerFlags,
+            source_device: info.sourceDevice as isize,
+            pt_pixel_location_x: info.ptPixelLocation.x,
+            pt_pixel_location_y: info.ptPixelLocation.y,
+            pt_himetric_location_raw_x: info.ptHimetricLocationRaw.x,
+            pt_himetric_location_raw_y: info.ptHimetricLocationRaw.y,
+            dw_time: info.dwTime,
+            history_count: info.historyCount,
+            button_change_type: info.ButtonChangeType as u32,
+        }
+    }
+
+    fn to_pointer_touch_info(info: &ptr_input::POINTER_TOUCH_INFO) -> POINTER_TOUCH_INFO {
+        POINTER_TOUCH_INFO {
+            pointer_info: to_pointer_info(&info.pointerInfo),
+            touch_mask: info.touchMask,
+            rc_contact_left: info.rcContact.left,
+            rc_contact_top: info.rcContact.top,
+            rc_contact_right: info.rcContact.right,
+            rc_contact_bottom: info.rcContact.bottom,
+            pressure: info.pressure,
+        }
+    }
+
+    fn to_pointer_pen_info(info: &ptr_input::POINTER_PEN_INFO) -> POINTER_PEN_INFO {
+        POINTER_PEN_INFO {
+            pointer_info: to_pointer_info(&info.pointerInfo),
+            pen_flags: info.penFlags,
+            pressure: info.pressure,
+            rotation: info.rotation,
+            tilt_x: info.tiltX,
+            tilt_y: info.tiltY,
+        }
+    }
+
+    /// The kind of a pointer, a [`PointerInputType`]; `PT_NONE` if the
+    /// system does not know the pointer.
+    pub fn get_pointer_type(pointer_id: u32) -> u32 {
+        let mut pointer_type = 0;
+        // SAFETY: a valid out value.
+        unsafe { ptr_input::GetPointerType(pointer_id, &mut pointer_type) };
+        pointer_type as u32
+    }
+
+    /// `GetPointerInfo`; the zeroed structure if the call fails, which is
+    /// what the reference reads then.
+    pub fn get_pointer_info(pointer_id: u32) -> POINTER_INFO {
+        // SAFETY: zeroed plain data the call fills.
+        let mut info: ptr_input::POINTER_INFO = unsafe { std::mem::zeroed() };
+        // SAFETY: a valid out structure.
+        unsafe { ptr_input::GetPointerInfo(pointer_id, &mut info) };
+        to_pointer_info(&info)
+    }
+
+    /// `GetPointerTouchInfo`; the zeroed structure if the call fails.
+    pub fn get_pointer_touch_info(pointer_id: u32) -> POINTER_TOUCH_INFO {
+        // SAFETY: zeroed plain data the call fills.
+        let mut info: ptr_input::POINTER_TOUCH_INFO = unsafe { std::mem::zeroed() };
+        // SAFETY: a valid out structure.
+        unsafe { ptr_input::GetPointerTouchInfo(pointer_id, &mut info) };
+        to_pointer_touch_info(&info)
+    }
+
+    /// `GetPointerPenInfo`; the zeroed structure if the call fails.
+    pub fn get_pointer_pen_info(pointer_id: u32) -> POINTER_PEN_INFO {
+        // SAFETY: zeroed plain data the call fills.
+        let mut info: ptr_input::POINTER_PEN_INFO = unsafe { std::mem::zeroed() };
+        // SAFETY: a valid out structure.
+        unsafe { ptr_input::GetPointerPenInfo(pointer_id, &mut info) };
+        to_pointer_pen_info(&info)
+    }
+
+    /// `GetPointerInfoHistory`: up to `count` entries of the history of a
+    /// pointer, newest first; `None` if the call fails.
+    pub fn get_pointer_info_history(pointer_id: u32, count: u32) -> Option<Vec<POINTER_INFO>> {
+        // SAFETY: zeroed plain data the call fills.
+        let mut buffer: Vec<ptr_input::POINTER_INFO> = vec![unsafe { std::mem::zeroed() }; count as usize];
+        let mut entries = count;
+        // SAFETY: the buffer has `entries` elements.
+        let ok = unsafe { ptr_input::GetPointerInfoHistory(pointer_id, &mut entries, buffer.as_mut_ptr()) } != 0;
+        ok.then(|| buffer.iter().take(entries.min(count) as usize).map(to_pointer_info).collect())
+    }
+
+    /// `GetPointerTouchInfoHistory`, as [`get_pointer_info_history`].
+    pub fn get_pointer_touch_info_history(pointer_id: u32, count: u32) -> Option<Vec<POINTER_TOUCH_INFO>> {
+        // SAFETY: zeroed plain data the call fills.
+        let mut buffer: Vec<ptr_input::POINTER_TOUCH_INFO> = vec![unsafe { std::mem::zeroed() }; count as usize];
+        let mut entries = count;
+        // SAFETY: the buffer has `entries` elements.
+        let ok = unsafe { ptr_input::GetPointerTouchInfoHistory(pointer_id, &mut entries, buffer.as_mut_ptr()) } != 0;
+        ok.then(|| buffer.iter().take(entries.min(count) as usize).map(to_pointer_touch_info).collect())
+    }
+
+    /// `GetPointerPenInfoHistory`, as [`get_pointer_info_history`].
+    pub fn get_pointer_pen_info_history(pointer_id: u32, count: u32) -> Option<Vec<POINTER_PEN_INFO>> {
+        // SAFETY: zeroed plain data the call fills.
+        let mut buffer: Vec<ptr_input::POINTER_PEN_INFO> = vec![unsafe { std::mem::zeroed() }; count as usize];
+        let mut entries = count;
+        // SAFETY: the buffer has `entries` elements.
+        let ok = unsafe { ptr_input::GetPointerPenInfoHistory(pointer_id, &mut entries, buffer.as_mut_ptr()) } != 0;
+        ok.then(|| buffer.iter().take(entries.min(count) as usize).map(to_pointer_pen_info).collect())
+    }
+
+    /// Whether this system exports `GetPointerDeviceRects` (Wine and
+    /// Proton do not).
+    pub fn has_get_pointer_device_rects() -> bool {
+        get_proc_address(load_library("user32.dll"), c"GetPointerDeviceRects").is_some()
+    }
+
+    /// `GetPointerDeviceRects`: the rectangle of a pointer device in its
+    /// own units and the rectangle of the display it is mapped to; `None`
+    /// if the system does not have the function or the call fails.
+    pub fn get_pointer_device_rects(device: isize) -> Option<(RECT, RECT)> {
+        let function = get_proc_address(load_library("user32.dll"), c"GetPointerDeviceRects")?;
+        // SAFETY: the export has this signature (Windows 8 and later).
+        let function: unsafe extern "system" fn(*mut c_void, *mut wf::RECT, *mut wf::RECT) -> i32 =
+            unsafe { std::mem::transmute(function) };
+        let mut device_rect = wf::RECT { left: 0, top: 0, right: 0, bottom: 0 };
+        let mut display_rect = wf::RECT { left: 0, top: 0, right: 0, bottom: 0 };
+        // SAFETY: both out rectangles are valid for the call.
+        let ok = unsafe { function(h(device), &mut device_rect, &mut display_rect) } != 0;
+        ok.then(|| (to_rect(device_rect), to_rect(display_rect)))
+    }
+
+    /// `GetTouchInputInfo`: the contacts of a `WM_TOUCH` message, whose
+    /// parameters are the count and the handle; `None` if the call fails.
+    pub fn get_touch_input_info(touch_input: isize, count: u32) -> Option<Vec<TOUCHINPUT>> {
+        // SAFETY: zeroed plain data the call fills.
+        let mut buffer: Vec<touch::TOUCHINPUT> = vec![unsafe { std::mem::zeroed() }; count as usize];
+        // SAFETY: the buffer has `count` elements of the size passed.
+        let ok = unsafe {
+            touch::GetTouchInputInfo(
+                h(touch_input),
+                count,
+                buffer.as_mut_ptr(),
+                std::mem::size_of::<touch::TOUCHINPUT>() as i32,
+            )
+        } != 0;
+        ok.then(|| {
+            buffer
+                .iter()
+                .map(|t| TOUCHINPUT {
+                    x: t.x,
+                    y: t.y,
+                    id: t.dwID,
+                    flags: t.dwFlags,
+                    mask: t.dwMask,
+                    time: t.dwTime,
+                    cx_contact: t.cxContact,
+                    cy_contact: t.cyContact,
+                })
+                .collect()
+        })
+    }
+
+    #[allow(missing_docs)]
+    pub fn close_touch_input_handle(touch_input: isize) -> bool {
+        // SAFETY: plain values.
+        unsafe { touch::CloseTouchInputHandle(h(touch_input)) != 0 }
+    }
+
+    // ----------------------------------------------------------------
+    // The frame of a window and its system menu
+    // ----------------------------------------------------------------
+
+    /// `DwmDefWindowProc`: the answer of the desktop window manager to a
+    /// message of the frame (the hit test of the caption buttons it
+    /// draws), or `None` if it did not handle the message.
+    pub fn dwm_def_window_proc(hwnd: isize, msg: u32, w_param: usize, l_param: isize) -> Option<isize> {
+        let mut result = 0isize;
+        // SAFETY: plain values and a valid out value.
+        let handled = unsafe { dwm::DwmDefWindowProc(h(hwnd), msg, w_param, l_param, &mut result) } != 0;
+        handled.then_some(result)
+    }
+
+    /// `TrackPopupMenu`: shows a menu at a point of the screen and runs
+    /// its loop; with `TPM_RETURNCMD` the result is the chosen command.
+    pub fn track_popup_menu(menu: isize, flags: TrackPopupMenuFlags, x: i32, y: i32, hwnd: isize) -> i32 {
+        // SAFETY: plain values; the reserved rectangle is null. The window
+        // procedure is called during the call, on this thread.
+        unsafe { wm::TrackPopupMenu(h(menu), flags.bits(), x, y, 0, h(hwnd), std::ptr::null()) }
+    }
+
+    #[allow(missing_docs)]
+    pub fn enable_menu_item(menu: isize, id: u32, flags: u32) -> i32 {
+        // SAFETY: plain values.
+        unsafe { wm::EnableMenuItem(h(menu), id, flags) }
+    }
+
+    #[allow(missing_docs)]
+    pub fn set_menu_default_item(menu: isize, item: u32, by_position: u32) -> bool {
+        // SAFETY: plain values.
+        unsafe { wm::SetMenuDefaultItem(h(menu), item, by_position) != 0 }
     }
 
     /// Sends all mouse input to a window of the calling thread.

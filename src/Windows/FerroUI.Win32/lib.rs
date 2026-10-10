@@ -30,6 +30,7 @@ mod angle_options;
 mod clipboard_format_registry;
 mod cursor_factory;
 mod framebuffer_manager;
+mod i_blur_host;
 mod icon_impl;
 mod ole_data_object_helper;
 mod ole_drag_source;
@@ -50,6 +51,7 @@ mod win32_top_level_scene_info;
 mod win32_type_extensions;
 mod window_impl;
 mod window_impl_app_wnd_proc;
+mod window_impl_custom_caption_proc;
 
 #[cfg(windows)]
 mod clipboard_impl;
