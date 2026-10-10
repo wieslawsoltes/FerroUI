@@ -53,7 +53,7 @@ and the ones that are not ported for a stated reason, with a section per upstrea
 | Upstream | Rust evidence |
 |---|---|
 | file `Dir/Foo.cs` | `dir/foo.rs`; `` Foo`1.cs `` -> `foo.rs`; `Foo.Part.cs` -> `foo_part.rs` or `foo.rs`; `IFoo.cs` -> `i_foo.rs`, or `foo.rs` if it declares `IFoo`. Names are compared ignoring case and underscores |
-| type `Foo` | `struct` / `enum` / `union` / `trait` / `type` / `ferro_class!` named `Foo` (`Avalonia` -> `Ferro`, `Avn` -> `Frn`) in the mapped file, else anywhere in the crate; nested `Outer.Inner` -> `Inner` in the mapped file or `OuterInner`; a static class also counts when its members exist as free items of the mapped file |
+| type `Foo` | `struct` / `enum` / `union` / `trait` / `type` / `ferro_class!` named `Foo` (`Avalonia` -> `Ferro`, `Avn` -> `Frn`) in the mapped file, else anywhere in the crate; the items of a macro called with parentheses count like the items of one called with braces (`define_class!( pub struct Foo; impl Foo { .. } );`); nested `Outer.Inner` -> `Inner` in the mapped file or `OuterInner`; a static class also counts when its members exist as free items of the mapped file |
 | property / field `Foo` | fn `foo` or `get_foo` (+ `set_foo` when the setter is not private), struct field `foo`, const / variant `FOO` |
 | `FooProperty`, `FooEvent` | `foo_property()`, `foo_event()` (covers `ferro_property!`) |
 | method `DoIt` | fn `do_it`; n-th overload: n-th of `do_it`, aliases, public `do_it_*` (names that belong to another upstream member are excluded); parameterless `GetFoo()` -> `foo()`; abstract / virtual members also match a fn of any trait declared in the same file |

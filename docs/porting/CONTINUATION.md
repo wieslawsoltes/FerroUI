@@ -68,7 +68,7 @@ Next, in the order of `ios-platform.md`, section 14:
 4. **2d**: `NativeControlHostImpl.cs` (the handle is there), then `EmbedSample.iOS.cs` in the catalog's host (`samples/ControlCatalog.iOS`, which exists).
 5. Stage 3 (accessibility) and stage 4 (EAGL as a build of its own, a signed device build) are described in the design document.
 
-Tracking: `Avalonia.iOS` is in scope at file and type granularity: 23 of 40 files, 27 of 57 types (1 waived). The scanner does not see a class declared inside `define_class!`, so four built classes count as missing (`FerroAppDelegate`, `FerroSceneDelegate`, `FerroView`, `DefaultFerroViewController`: 31 of 57 with them); `path-overrides.toml` has the type names, and the scanner was not changed because the tracking data is being audited on another branch. The 331 members are totals only. `DEVIATIONS.md` has the section of the backend (it was added to the second of the two copies of the platform sections that file has on main).
+Tracking: `Avalonia.iOS` is in scope at file and type granularity; the numbers are in `TRACKING.md`. The scanner reads the items of a macro called with parentheses since stage 2 (`scripts/port-status/rustscan.py`), so the classes declared inside `define_class!` count (35 of 57 types at the end of stage 1, no other project changed); `path-overrides.toml` has the type names. The 331 members are totals only. `DEVIATIONS.md` has the section of the backend, and the sections that file had twice on main (the X11 platform word for word, Diagnostics and Bindings each as two sections with different rows) are one each, with every row kept.
 
 ## The Linux platform, stage 1 (2026-10-10)
 

@@ -11,24 +11,24 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Crate | `ferroui-ios` |
 | Phase / priority | 6 - mobile (iOS) / P2 |
 | Files | 23/40 (57.5%), 1 not applicable |
-| Types | 27/57 (1 waived) (48.2%) |
+| Types | 35/57 (1 waived) (62.5%) |
 | Members | 0/331 (0.0%) |
 
 This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
 
 ## Files
 
-### `(project root)` - files 18/26, types 22/39 (1 waived), members 0/211
+### `(project root)` - files 18/26, types 30/39 (1 waived), members 0/211
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
 | `ActivatableLifetime.cs` | `activatable_lifetime.rs` | present | 1/1 | - | 1 |  |
 | `AutomationPeerWrapper.cs` | `automation_peer_wrapper.rs` | missing | 0/1 | `AutomationPeerWrapper` | 15 |  |
-| `AvaloniaAppDelegate.cs` | `ferro_app_delegate.rs` | partial | 1/3 | `IAvaloniaAppInternalDelegate`, `AvaloniaAppDelegate<TApp>` | 16 | renamed: the generic delegate class an application derives from is one class of the Objective-C runtime (`FerroAppDelegate`) and the trait `FerroApplicationDelegate` for the two overridable members; `IAvaloniaAppInternalDelegate` (URLs and user activities) is stage 2 of docs/porting/ios-platform.md |
-| `AvaloniaSceneDelegate.cs` | `ferro_scene_delegate.rs` | partial | 0/1 | `AvaloniaSceneDelegate` | 5 | renamed: the window of a scene with the view in it is ported; the activations a scene is connected with or receives are stage 2 |
-| `AvaloniaView.Automation.cs` | `ferro_view.rs` | partial | 0/1 | `AvaloniaView` | 4 | partial merged into main file |
-| `AvaloniaView.Text.cs` | `ferro_view.rs` | partial | 0/1 | `AvaloniaView` | 6 | partial merged into main file |
-| `AvaloniaView.cs` | `ferro_view.rs` | partial | 1/2 | `AvaloniaView` | 50 | renamed: the view, its layer, its layout, touches and its top-level are ported; key presses, the settings that follow the traits and the features that are services of their own are stage 2 |
+| `AvaloniaAppDelegate.cs` | `ferro_app_delegate.rs` | partial | 2/3 | `IAvaloniaAppInternalDelegate` | 16 | renamed: the generic delegate class an application derives from is one class of the Objective-C runtime (`FerroAppDelegate`) and the trait `FerroApplicationDelegate` for the two overridable members; `IAvaloniaAppInternalDelegate` (URLs and user activities) is stage 2 of docs/porting/ios-platform.md |
+| `AvaloniaSceneDelegate.cs` | `ferro_scene_delegate.rs` | present | 1/1 | - | 5 | renamed: the window of a scene with the view in it is ported; the activations a scene is connected with or receives are stage 2 |
+| `AvaloniaView.Automation.cs` | `ferro_view.rs` | present | 1/1 | - | 4 | partial merged into main file |
+| `AvaloniaView.Text.cs` | `ferro_view.rs` | present | 1/1 | - | 6 | partial merged into main file |
+| `AvaloniaView.cs` | `ferro_view.rs` | present | 2/2 | - | 50 | renamed: the view, its layer, its layout, touches and its top-level are ported; key presses, the settings that follow the traits and the features that are services of their own are stage 2 |
 | `CombinedSpan3.cs` | `combined_span3.rs` | missing | 0/1 | `CombinedSpan3<T>` | 6 |  |
 | `DispatcherImpl.cs` | `dispatcher_impl.rs` | present | 1/1 | - | 9 |  |
 | `DisplayLinkTimer.cs` | `display_link_timer.rs` | present | 1/1 | - | 4 |  |
@@ -43,10 +43,10 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `PlatformSettings.cs` | `platform_settings.rs` | missing | 0/1 | `PlatformSettings` | 4 |  |
 | `SingleViewLifetime.cs` | `single_view_lifetime.rs` | present | 1/1 | - | 3 |  |
 | `Stubs.cs` | `stubs.rs` | present | 4/4 | - | 12 |  |
-| `TextInputResponder.Properties.cs` | `text_input_responder_properties.rs` | missing | 0/1 | `AvaloniaView` | 0 |  |
-| `TextInputResponder.cs` | `text_input_responder.rs` | missing | 0/1 | `AvaloniaView` | 0 |  |
+| `TextInputResponder.Properties.cs` | `text_input_responder_properties.rs` | missing | 1/1 | - | 0 | types found in `ferro_view.rs` (add to path-overrides.toml) |
+| `TextInputResponder.cs` | `text_input_responder.rs` | missing | 1/1 | - | 0 | types found in `ferro_view.rs` (add to path-overrides.toml) |
 | `UIKitInputPane.cs` | `ui_kit_input_pane.rs` | missing | 0/1 | `UIKitInputPane` | 2 |  |
-| `ViewController.cs` | `view_controller.rs` | partial | 1/2 | `DefaultAvaloniaViewController` | 11 | renamed: the view controller class forwards to `ViewControllerState`, which is what the view holds of it and what the tests drive |
+| `ViewController.cs` | `view_controller.rs` | present | 2/2 | - | 11 | renamed: the view controller class forwards to `ViewControllerState`, which is what the view holds of it and what the tests drive |
 | `iOSScreens.cs` | `ios_screens.rs` | present | 2/2 | - | 9 | renamed: the names follow the naming of Rust |
 
 ### `Clipboard` - files 0/4, types 0/4, members 0/18

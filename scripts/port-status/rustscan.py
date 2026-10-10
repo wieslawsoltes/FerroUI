@@ -383,6 +383,18 @@ def scan_rust(path: str, src: str) -> RustFile:
             owner = ctx[1]
             hm = _ITEM_HEAD.match(header)
             mm = _MACRO_HEAD.match(header)
+            if mm and not hm and header[mm.end() - 1:mm.end()] == "(" and ";" in header[mm.end():]:
+                # A macro called with parentheses whose content is items, the first block of
+                # which opens here (`define_class!( pub struct Name; impl Name { .. } .. );`):
+                # the declarations before the block are recorded, and the block is the item
+                # its own header says. The items after it are read in the enclosing context.
+                parts = header[mm.end():].split(";")
+                inner = _ITEM_HEAD.match(parts[-1].strip())
+                if inner:
+                    for part in parts[:-1]:
+                        record_decl(part, "macro", owner, ctx[4])
+                    header = parts[-1].strip()
+                    hm, mm = inner, None
             if hm and not (mm and not hm):
                 kw, rest = hm.group(1), hm.group(2)
                 if kw == "impl":
