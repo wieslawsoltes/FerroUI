@@ -1499,6 +1499,13 @@ mod app {
                     FerroActivity::current_main_activity().is_some()
                 ),
             );
+            if FerroActivity::current_main_activity().is_none() {
+                // The default action finished the activity: the script starts it again, and
+                // the main view that is made then runs the checks of a second start.
+                note("SCRIPT resume");
+                enter(state, Stage::Done);
+                return;
+            }
             state.lifecycle.activated.borrow_mut().clear();
             aim_readback(state);
             note("SCRIPT resume");
