@@ -16,9 +16,8 @@
 //! and what it calls on the parent (`RegisterPendingChildPopup`) is done by
 //! the worker's state (`WaylandWorkerState::try_attach_popup_to_parent`).
 //!
-//! The fractional scale object and the viewport of a surface, the members of
-//! text input and the export of a top-level belong to later parts of stage 2
-//! of `docs/porting/wayland-platform.md`.
+//! The members of text input and the export of a top-level belong to later
+//! parts of stage 2 of `docs/porting/wayland-platform.md`.
 
 use ferroui_base::{PixelSize, Point, Rect, Size, Thickness};
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -68,6 +67,21 @@ pub fn compute_scale(
 /// Whether a computed scale differs from the current one.
 pub fn scale_differs(new_scale: f64, current_scale: f64) -> bool {
     (new_scale - current_scale).abs() > SCALE_EPSILON
+}
+
+/// The scale `wp_fractional_scale_v1.preferred_scale` announces, which comes in 120ths.
+///
+/// Per protocol: scale is preferred_scale * 120. Reject 0 (would be a compositor
+/// bug — value must be > 0 per the protocol) but otherwise accept whatever the
+/// compositor sent us, including sub-1.0 values.
+pub fn preferred_fractional_scale(scale: u32) -> Option<f64> {
+    (scale != 0).then(|| f64::from(scale) / 120.0)
+}
+
+/// The destination of the viewport of a surface with fractional scaling: its logical size,
+/// at least one by one.
+pub fn viewport_destination(logical_size: Size) -> (i32, i32) {
+    ((logical_size.width.round_ties_even() as i32).max(1), (logical_size.height.round_ties_even() as i32).max(1))
 }
 
 /// The integer scale of the buffers of a surface without fractional scaling.
@@ -280,6 +294,8 @@ mod imp {
     use ferroui_base::logging::{LogEventLevel, Logger};
     use std::collections::HashMap;
     use wayland_client::Proxy;
+    use wayland_protocols::wp::fractional_scale::v1::client::wp_fractional_scale_v1::{self, WpFractionalScaleV1};
+    use wayland_protocols::wp::viewporter::client::wp_viewport::WpViewport;
     use wayland_protocols::xdg::shell::client::xdg_popup::{self, XdgPopup};
     use wayland_protocols::xdg::shell::client::xdg_positioner::XdgPositioner;
     use wayland_protocols::xdg::shell::client::xdg_surface::{self, XdgSurface};
@@ -312,6 +328,8 @@ mod imp {
         worker: Arc<WaylandWorker>,
         connection_id: Option<u64>,
         wl_surface: Option<WlSurface>,
+        fractional_scale: Option<WpFractionalScaleV1>,
+        viewport: Option<WpViewport>,
         last_preferred_buffer_scale: Option<i32>,
         preferred_fractional_scale: Option<f64>,
         /// The outputs the surface is on, in the order it entered them: the registry names.
@@ -333,6 +351,8 @@ mod imp {
                 worker,
                 connection_id: None,
                 wl_surface: None,
+                fractional_scale: None,
+                viewport: None,
                 last_preferred_buffer_scale: None,
                 preferred_fractional_scale: None,
                 outputs: Vec::new(),
@@ -357,9 +377,9 @@ mod imp {
         }
 
         /// Fractional scaling needs the fractional scale object and the viewport of the
-        /// surface: stage 2. Until then a surface has neither.
+        /// surface.
         pub fn has_fractional_scaling(&self) -> bool {
-            false
+            self.fractional_scale.is_some() && self.viewport.is_some()
         }
 
         /// Whether this surface currently has an active text input client, which gates
@@ -433,7 +453,13 @@ mod imp {
 
         pub fn on_connected(&mut self, cx: &ConnectionContext<'_>) {
             self.connection_id = Some(cx.connection_id);
-            self.wl_surface = Some(cx.globals.wl_compositor.create_surface(cx.queue_handle, WlSurfaceData::Shell(self.id)));
+            let wl_surface = cx.globals.wl_compositor.create_surface(cx.queue_handle, WlSurfaceData::Shell(self.id));
+
+            if let (Some(manager), Some(viewporter)) = (&cx.globals.fractional_scale_manager, &cx.globals.viewporter) {
+                self.fractional_scale = Some(manager.get_fractional_scale(&wl_surface, cx.queue_handle, self.id));
+                self.viewport = Some(viewporter.get_viewport(&wl_surface, cx.queue_handle, ()));
+            }
+            self.wl_surface = Some(wl_surface);
 
             // Re-apply the cached input region on (re)connect. It's double-buffered
             // state, promoted by the next commit — which happens before the surface
@@ -493,7 +519,13 @@ mod imp {
             let Some(wl_surface) = &self.wl_surface else {
                 return;
             };
-            wl_surface.set_buffer_scale(buffer_scale(scene_info.scaling));
+            match &self.viewport {
+                Some(viewport) if self.fractional_scale.is_some() => {
+                    let (width, height) = viewport_destination(scene_info.logical_size);
+                    viewport.set_destination(width, height);
+                }
+                _ => wl_surface.set_buffer_scale(buffer_scale(scene_info.scaling)),
+            }
             self.frame_callback = Some(wl_surface.frame(globals.queue_handle(), self.id));
         }
 
@@ -510,6 +542,14 @@ mod imp {
         /// answers late or never.
         fn forget_frame_callback(&mut self) {
             self.frame_callback = None;
+        }
+
+        fn on_preferred_fractional_scale(&mut self, scale: u32, globals: Option<&WaylandGlobals>) -> SurfaceChange {
+            let Some(scale) = preferred_fractional_scale(scale) else {
+                return SurfaceChange::default();
+            };
+            self.preferred_fractional_scale = Some(scale);
+            SurfaceChange { scale: self.recompute_scale(globals), outputs: false }
         }
 
         fn on_preferred_buffer_scale(&mut self, factor: i32, globals: Option<&WaylandGlobals>) -> SurfaceChange {
@@ -549,6 +589,14 @@ mod imp {
                 if let Some(render_target) = render_target.upgrade() {
                     render_target.dispose_from_surface();
                 }
+            }
+            // Per fractional-scale-v1 / viewporter protocol: child objects must be destroyed
+            // before their parent wl_surface to avoid protocol errors.
+            if let Some(viewport) = self.viewport.take() {
+                viewport.destroy();
+            }
+            if let Some(fractional_scale) = self.fractional_scale.take() {
+                fractional_scale.destroy();
             }
             if let Some(wl_surface) = self.wl_surface.take() {
                 wl_surface.destroy();
@@ -1429,6 +1477,30 @@ mod imp {
         }
     }
 
+    impl Dispatch<WpFractionalScaleV1, WSurfaceId> for WaylandWorkerState {
+        fn event(
+            state: &mut Self,
+            _proxy: &WpFractionalScaleV1,
+            event: wp_fractional_scale_v1::Event,
+            data: &WSurfaceId,
+            _conn: &Connection,
+            _qhandle: &QueueHandle<Self>,
+        ) {
+            if let wp_fractional_scale_v1::Event::PreferredScale { scale } = event {
+                let WaylandWorkerState { globals, top_levels, popups, .. } = state;
+                let globals = globals.as_ref();
+                if let Some(shell) = shell_surface_of_mut(top_levels, popups, *data) {
+                    let change = shell.surface.on_preferred_fractional_scale(scale, globals);
+                    shell.apply_change(change, globals);
+                }
+            }
+        }
+    }
+
+    impl Dispatch<WpViewport, ()> for WaylandWorkerState {
+        fn event(_: &mut Self, _: &WpViewport, _: <WpViewport as Proxy>::Event, _: &(), _: &Connection, _: &QueueHandle<Self>) {}
+    }
+
     impl Dispatch<XdgPositioner, ()> for WaylandWorkerState {
         fn event(_: &mut Self, _: &XdgPositioner, _: <XdgPositioner as Proxy>::Event, _: &(), _: &Connection, _: &QueueHandle<Self>) {
         }
@@ -1584,6 +1656,16 @@ mod tests {
         assert_eq!(buffer_scale(1.0), 1);
         assert_eq!(buffer_scale(1.25), 2);
         assert_eq!(buffer_scale(0.5), 1);
+        // The preferred scale of the fractional scale protocol comes in 120ths; zero is none.
+        assert_eq!(preferred_fractional_scale(120), Some(1.0));
+        assert_eq!(preferred_fractional_scale(150), Some(1.25));
+        assert_eq!(preferred_fractional_scale(180), Some(1.5));
+        assert_eq!(preferred_fractional_scale(90), Some(0.75));
+        assert_eq!(preferred_fractional_scale(0), None);
+        // The viewport of such a surface has its logical size.
+        assert_eq!(viewport_destination(Size::new(853.0, 480.0)), (853, 480));
+        assert_eq!(viewport_destination(Size::new(853.4, 479.6)), (853, 480));
+        assert_eq!(viewport_destination(Size::new(0.0, 0.2)), (1, 1));
     }
 
     #[test]

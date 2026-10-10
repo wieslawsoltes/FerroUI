@@ -5,9 +5,9 @@
 //! (`RegistryBootstrap`), the globals are made from the record, and the
 //! registry listener writes to the globals from then on.
 //!
-//! The globals of stage 2 of `docs/porting/wayland-platform.md` (the data
-//! device manager, fractional scale and viewporter, text input, the exporter
-//! of `xdg-foreign`) and of stage 3 (`linux-dmabuf`) are not bound yet.
+//! The globals of the later parts of stage 2 of `docs/porting/wayland-platform.md`
+//! (the data device manager, text input, the exporter of `xdg-foreign`) and of
+//! stage 3 (`linux-dmabuf`) are not bound yet.
 
 use super::rendering::wayland_egl_wsi_platform_graphics::WaylandEglWsiPlatformGraphics;
 use super::wayland_cursor_manager::WaylandCursorManager;
@@ -24,6 +24,8 @@ use wayland_client::protocol::wl_compositor::WlCompositor;
 use wayland_client::protocol::wl_registry::{self, WlRegistry};
 use wayland_client::protocol::wl_shm::{self, WlShm};
 use wayland_client::{Connection, Dispatch, Proxy, QueueHandle, WEnum};
+use wayland_protocols::wp::fractional_scale::v1::client::wp_fractional_scale_manager_v1::WpFractionalScaleManagerV1;
+use wayland_protocols::wp::viewporter::client::wp_viewporter::WpViewporter;
 use wayland_protocols::xdg::decoration::zv1::client::zxdg_decoration_manager_v1::ZxdgDecorationManagerV1;
 use wayland_protocols::xdg::shell::client::xdg_wm_base::{self, XdgWmBase};
 use wayland_protocols::xdg::xdg_output::zv1::client::zxdg_output_manager_v1::ZxdgOutputManagerV1;
@@ -54,6 +56,8 @@ pub struct WaylandGlobals {
     pub xdg_wm_base: XdgWmBase,
     pub xdg_output_manager: Option<ZxdgOutputManagerV1>,
     pub xdg_decoration_manager: Option<ZxdgDecorationManagerV1>,
+    pub fractional_scale_manager: Option<WpFractionalScaleManagerV1>,
+    pub viewporter: Option<WpViewporter>,
     pub input_dispatcher: WaylandInputDispatcher,
     pub cursor_manager: WaylandCursorManager,
     /// The application identifier of the top-levels (an addition, see the options).
@@ -105,6 +109,10 @@ impl WaylandGlobals {
             Self::bind(&registry, &known_globals, 1, 1, &queue_handle)?
         };
 
+        let fractional_scale_manager: Option<WpFractionalScaleManagerV1> =
+            Self::bind(&registry, &known_globals, 1, 1, &queue_handle)?;
+        let viewporter: Option<WpViewporter> = Self::bind(&registry, &known_globals, 1, 1, &queue_handle)?;
+
         let mut globals = WaylandGlobals {
             queue_handle: queue_handle.clone(),
             connection_id: connection.id(),
@@ -117,6 +125,8 @@ impl WaylandGlobals {
             xdg_wm_base,
             xdg_output_manager: xdg_output_manager.clone(),
             xdg_decoration_manager,
+            fractional_scale_manager,
+            viewporter,
             input_dispatcher: WaylandInputDispatcher::new(),
             cursor_manager,
             app_id: state.options.app_id.clone(),
@@ -161,6 +171,11 @@ impl WaylandGlobals {
 
         // TODO: sanity checks
         Ok(())
+    }
+
+    /// Fractional scaling needs both the manager of the fractional scale and the viewporter.
+    pub fn has_fractional_scaling(&self) -> bool {
+        self.fractional_scale_manager.is_some() && self.viewporter.is_some()
     }
 
     /// The handle objects of this connection are created with.
@@ -303,6 +318,22 @@ impl Dispatch<XdgWmBase, ()> for WaylandWorkerState {
             proxy.pong(serial);
         }
     }
+}
+
+impl Dispatch<WpFractionalScaleManagerV1, ()> for WaylandWorkerState {
+    fn event(
+        _: &mut Self,
+        _: &WpFractionalScaleManagerV1,
+        _: <WpFractionalScaleManagerV1 as Proxy>::Event,
+        _: &(),
+        _: &Connection,
+        _: &QueueHandle<Self>,
+    ) {
+    }
+}
+
+impl Dispatch<WpViewporter, ()> for WaylandWorkerState {
+    fn event(_: &mut Self, _: &WpViewporter, _: <WpViewporter as Proxy>::Event, _: &(), _: &Connection, _: &QueueHandle<Self>) {}
 }
 
 impl Dispatch<ZxdgDecorationManagerV1, ()> for WaylandWorkerState {

@@ -895,6 +895,21 @@ jobs:
         run: |
           scripts/wayland/sway-run.sh --scale 2 -- \
             timeout 300 target/debug/examples/wayland_window --smoke --mode=egl --expect-scale=2
+      # Fractional scaling: the compositor announces the scale through wp_fractional_scale_v1 and
+      # the buffer is mapped to the logical size through wp_viewport. The mode of the output is one
+      # that 1.5 divides; the resize phase, whose mode it does not divide, is left out.
+      - name: On an output of scale 1.5, through wl_shm buffers
+        if: ${{ !cancelled() }}
+        run: |
+          scripts/wayland/sway-run.sh --size 1200x720 --scale 1.5 -- \
+            timeout 300 target/debug/examples/wayland_window --smoke --expect-scale=1.5 --skip=resize
+      - name: On an output of scale 1.5, through EGL
+        if: ${{ !cancelled() }}
+        env:
+          LIBGL_ALWAYS_SOFTWARE: 1
+        run: |
+          scripts/wayland/sway-run.sh --size 1200x720 --scale 1.5 -- \
+            timeout 300 target/debug/examples/wayland_window --smoke --mode=egl --expect-scale=1.5 --skip=resize
       # Without a compositor the backend does not start, and says why.
       - name: Without a compositor the probe fails with a message
         if: ${{ !cancelled() }}
