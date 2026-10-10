@@ -26,7 +26,11 @@ pub use ferroui_freedesktop::event;
 #[cfg(unix)]
 pub mod glx;
 #[cfg(unix)]
+pub mod interop;
+#[cfg(unix)]
 pub mod lib_c;
+#[cfg(unix)]
+pub mod native_dialogs;
 #[cfg(unix)]
 pub(crate) mod pixel_buffer;
 #[cfg(unix)]

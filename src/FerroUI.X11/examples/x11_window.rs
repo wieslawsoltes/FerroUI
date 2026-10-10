@@ -219,6 +219,8 @@ mod app {
                     && !arg.starts_with("--dnd-target=")
                     && arg != "--dnd"
                     && arg != "--menu"
+                    && arg != "--glib"
+                    && arg != "--gtk-dialog"
                     && arg != "--expect-fallback"
                     && arg != "--shm"
             })
@@ -233,6 +235,15 @@ mod app {
 
         if std::env::args().any(|arg| arg == "--shm") {
             options.use_x_shm_framebuffer = Some(true);
+        }
+        // The dispatcher over the main loop of GLib in place of the one of the platform.
+        if std::env::args().any(|arg| arg == "--glib") {
+            options.use_g_lib_main_loop = true;
+        }
+        // The file dialogs of GTK: the portal is turned off, so that the storage provider of
+        // the window goes on to them.
+        if std::env::args().any(|arg| arg == "--gtk-dialog") {
+            options.use_d_bus_file_picker = false;
         }
 
         let mut builder = AppBuilder::configure::<App>();
@@ -1013,6 +1024,14 @@ mod app {
                 if std::env::args().any(|arg| arg == "--menu") {
                     report.phase("menu");
                     menu_checks(&report, &window).await;
+                }
+                if std::env::args().any(|arg| arg == "--glib") {
+                    report.phase("glib");
+                    glib_checks(&report, &platform).await;
+                }
+                if std::env::args().any(|arg| arg == "--gtk-dialog") {
+                    report.phase("gtk dialog");
+                    gtk_dialog_checks(&report, &platform, &window).await;
                 }
             }
 
@@ -1867,6 +1886,208 @@ mod app {
         /// application menus and the watcher of status notifier items,
         /// and asks the application for layouts and properties and sends
         /// it the events a shell sends.
+        /// The dispatcher over the main loop of GLib: every phase before
+        /// this one ran on it. Here: it is the dispatcher of the platform,
+        /// a source an application adds to the default main context runs
+        /// while the framework waits, and a job posted from another thread
+        /// runs on the UI thread.
+        async fn glib_checks(report: &Report, platform: &Rc<FerroX11Platform>) {
+            use ferroui_x11::interop::glib::Glib;
+
+            let dispatcher_impl = platform.dispatcher_impl();
+            let explicit = dispatcher_impl.as_explicit_background_processing().is_some();
+            let pending = dispatcher_impl.as_pending_input().is_some_and(|pending| pending.can_query_pending_input());
+            report.check(
+                "the dispatcher of GLib",
+                explicit && !pending,
+                format!("explicit background processing: {explicit}; can query pending input: {pending}"),
+            );
+            let glib = match Glib::try_get() {
+                Ok(glib) => glib,
+                Err(error) => {
+                    report.check("GLib", false, error.to_string());
+                    return;
+                }
+            };
+
+            // A source of the application, as a library on the main thread would add one.
+            let ran_on = std::sync::Arc::new(std::sync::Mutex::new(None));
+            let slot = ran_on.clone();
+            glib.g_timeout_add_once(10, Box::new(move || *slot.lock().unwrap() = Some(std::thread::current().id())));
+            wait_for(STEP_TIMEOUT, || ran_on.lock().unwrap().is_some()).await;
+            let ran = *ran_on.lock().unwrap();
+            report.check(
+                "a source of the application runs in the loop of the framework",
+                ran == Some(std::thread::current().id()),
+                format!("a timeout source ran on {ran:?}; the UI thread is {:?}", std::thread::current().id()),
+            );
+
+            // A job from another thread: the signal is an idle source of the main context.
+            let dispatcher = Dispatcher::ui_thread();
+            let ui_thread = std::thread::current().id();
+            let done = std::sync::Arc::new(AtomicBool::new(false));
+            let flag = done.clone();
+            let poster = std::thread::spawn(move || {
+                dispatcher.post(
+                    move || flag.store(std::thread::current().id() == ui_thread, Ordering::SeqCst),
+                    DispatcherPriority::NORMAL,
+                );
+            });
+            let _ = poster.join();
+            let arrived = wait_for(STEP_TIMEOUT, || done.load(Ordering::SeqCst)).await;
+            report.check(
+                "a job posted from another thread runs on the UI thread",
+                arrived,
+                format!("the job ran on the UI thread: {arrived}"),
+            );
+        }
+
+        /// The window of another client with that title, among the
+        /// windows the window manager manages.
+        fn client_window_titled(platform: &Rc<FerroX11Platform>, title: &str) -> Option<xlib::XID> {
+            let info = platform.info();
+            let display = info.display();
+            let atoms = info.atoms();
+            xlib::x_sync(display, false);
+            let clients =
+                xlib::x_get_window_property_as_int_ptr_array(display, info.root_window(), atoms._NET_CLIENT_LIST, atoms.WINDOW)?;
+            clients.into_iter().map(|client| client as xlib::XID).find(|client| {
+                let name = xlib::x_get_window_property(display, *client, atoms._NET_WM_NAME, 0, 1024, false, atoms.UTF8_STRING);
+                String::from_utf8_lossy(&name.data) == title
+            })
+        }
+
+        /// The file dialogs of GTK, driven as a user would: a dialog that
+        /// saves is answered with the Return key, one that opens is closed
+        /// with the Escape key. Needs a window manager (a dialog gets the
+        /// keys only when it has the focus) and no file chooser portal.
+        async fn gtk_dialog_checks(report: &Report, platform: &Rc<FerroX11Platform>, window: &Ref<Window>) {
+            use ferroui_base::platform::storage::file_io::{BclStorageFolder, FileSystemInfo};
+            use ferroui_base::platform::storage::{
+                FilePickerFileType, FilePickerOpenOptions, FilePickerSaveOptions, IStorageFolder, IStorageItem,
+            };
+
+            let info = platform.info();
+            let display = info.display();
+            let atoms = info.atoms();
+            let Some(xid) = xid_of(window) else {
+                report.check("handle", false, "the window has no platform handle".to_string());
+                return;
+            };
+            if !xtest::available(display) {
+                report.check("XTEST", false, "libXtst is missing or the server has no XTEST extension".to_string());
+                return;
+            }
+            let provider = window.storage_provider();
+            let folder = std::env::temp_dir().join(format!("ferroui-gtk-dialog-{}", std::process::id()));
+            let _ = std::fs::create_dir_all(&folder);
+            let folder_path = folder.to_string_lossy().into_owned();
+            let start: Rc<dyn IStorageFolder> = BclStorageFolder::new(FileSystemInfo::directory(&folder_path));
+            let press = |key_sym: u64| {
+                let key_code = xtest::key_code(display, key_sym);
+                xtest::key(display, key_code, true);
+                xtest::key(display, key_code, false);
+            };
+
+            // A dialog that saves, with a name and a file type whose extension the name lacks.
+            const SAVE_TITLE: &str = "FerroUI saves a file";
+            let text = FilePickerFileType::new(Some("Text"));
+            text.set_patterns(Some(vec!["*.txt".to_string()]));
+            let all = FilePickerFileType::new(Some("All"));
+            all.set_patterns(Some(vec!["*".to_string()]));
+            let mut options = FilePickerSaveOptions::new();
+            options.set_title(Some(SAVE_TITLE.to_string()));
+            options.set_suggested_start_location(Some(start.clone()));
+            options.set_suggested_file_name(Some("ferro-note".to_string()));
+            options.set_file_type_choices(Some(vec![all.clone(), text.clone()]));
+            options.set_suggested_file_type(Some(text.clone()));
+            let saved = Rc::new(RefCell::new(None));
+            let _save_task = {
+                let (provider, saved) = (provider.clone(), saved.clone());
+                Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                    let result = provider.save_file_picker_with_result_async(options).await;
+                    *saved.borrow_mut() = Some(result);
+                })
+            };
+            let shown = wait_for(Duration::from_secs(20), || client_window_titled(platform, SAVE_TITLE).is_some()).await;
+            let dialog = client_window_titled(platform, SAVE_TITLE);
+            report.check(
+                "the dialog of GTK is on the server",
+                shown && saved.borrow().is_none(),
+                format!("a window titled {SAVE_TITLE:?}: {dialog:?}; the picker answered already: {}", saved.borrow().is_some()),
+            );
+            if let Some(dialog) = dialog {
+                let transient = xlib::x_get_window_property_as_int_ptr(display, dialog, atoms.WM_TRANSIENT_FOR, atoms.WINDOW);
+                report.check(
+                    "the dialog is transient for the window",
+                    transient == Some(xid as _),
+                    format!("WM_TRANSIENT_FOR of {dialog:#x} is {transient:x?}; the window is {xid:#x}"),
+                );
+                // The dialog is realized before it is presented: wait for the focus to be in it.
+                delay(Duration::from_millis(1500)).await;
+                press(0xff0d);
+            }
+            wait_for(Duration::from_secs(10), || saved.borrow().is_some()).await;
+            let expected = format!("{folder_path}/ferro-note.txt");
+            let answer = saved.borrow_mut().take();
+            match answer {
+                Some(Ok(result)) => {
+                    let path = result.file.as_ref().and_then(|file| {
+                        let item: &dyn IStorageItem = &**file;
+                        item.try_get_local_path()
+                    });
+                    report.check(
+                        "the Return key saves under the name, with the extension of the chosen type",
+                        path.as_deref() == Some(expected.as_str()),
+                        format!("the picker answered {path:?}; expected {expected:?}"),
+                    );
+                    let chosen = result.selected_file_type.as_ref();
+                    report.check(
+                        "the chosen file type is the object of the options",
+                        chosen.is_some_and(|chosen| Rc::ptr_eq(chosen, &text)),
+                        format!("the chosen type: {:?}", chosen.map(|chosen| chosen.name().to_string())),
+                    );
+                }
+                Some(Err(error)) => report.check("the dialog that saves answers", false, error.to_string()),
+                None => report.check("the dialog that saves answers", false, "no answer within ten seconds".to_string()),
+            }
+            let gone = wait_for(STEP_TIMEOUT, || client_window_titled(platform, SAVE_TITLE).is_none()).await;
+            report.check("the dialog is hidden after its answer", gone, format!("no window titled {SAVE_TITLE:?}: {gone}"));
+
+            // A dialog that opens, closed without a choice.
+            const OPEN_TITLE: &str = "FerroUI opens a file";
+            let mut options = FilePickerOpenOptions::new();
+            options.set_title(Some(OPEN_TITLE.to_string()));
+            options.set_suggested_start_location(Some(start));
+            options.set_allow_multiple(true);
+            let opened = Rc::new(RefCell::new(None));
+            let _open_task = {
+                let (provider, opened) = (provider.clone(), opened.clone());
+                Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                    let result = provider.open_file_picker_async(options).await;
+                    *opened.borrow_mut() = Some(result);
+                })
+            };
+            let shown = wait_for(Duration::from_secs(20), || client_window_titled(platform, OPEN_TITLE).is_some()).await;
+            report.check("the second dialog is on the server", shown, format!("a window titled {OPEN_TITLE:?}: {shown}"));
+            if shown {
+                delay(Duration::from_millis(1500)).await;
+                press(0xff1b);
+            }
+            wait_for(Duration::from_secs(10), || opened.borrow().is_some()).await;
+            let answer = opened.borrow_mut().take();
+            match answer {
+                Some(Ok(files)) => report.check(
+                    "the Escape key closes the dialog without a choice",
+                    files.is_empty(),
+                    format!("the picker answered with {} files", files.len()),
+                ),
+                Some(Err(error)) => report.check("the dialog that opens answers", false, error.to_string()),
+                None => report.check("the dialog that opens answers", false, "no answer within ten seconds".to_string()),
+            }
+            let _ = std::fs::remove_dir_all(&folder);
+        }
+
         async fn menu_checks(report: &Report, window: &Ref<Window>) {
             use ferroui_controls::platform::ITopLevelNativeMenuExporter;
             use ferroui_controls::{NativeMenu, NativeMenuItem, TrayIcon};
