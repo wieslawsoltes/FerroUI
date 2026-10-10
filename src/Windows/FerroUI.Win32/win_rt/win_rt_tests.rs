@@ -186,22 +186,46 @@ fn a_thread_gets_a_dispatcher_queue_and_a_compositor() {
         println!("DispatcherQueue: {:?}", queue.as_ref().map(|_| "the queue of the thread"));
         assert!(queue.is_ok());
 
-        let factory = NativeWinRTMethods::get_windows_ui_composition_activation_factory(
-            "Windows.UI.Composition.Compositor",
-        );
-        println!("the activation factory of the compositor: {:?}", factory.as_ref().map(|_| "created"));
-        let factory = factory.expect("the activation factory of the composition library");
-        let instance = factory.activate_instance();
-        println!("ActivateInstance: {instance:?}");
-        let instance = instance.expect("a compositor");
-        assert_ne!(instance, 0);
-        // SAFETY: the instance is an object the activation returned, whose
-        // reference this test owns.
-        let unknown =
-            unsafe { ferroui_microcom::ComPtr::<ferroui_microcom::IUnknown>::from_raw(instance as *mut _) }.unwrap();
-        let compositor = unknown.cast::<ICompositor>();
-        println!("ICompositor: {:?}", compositor.as_ref().map(|_| "the compositor"));
-        assert!(compositor.is_ok());
+        // The activation factory of the composition library. The reference
+        // declares the import and never calls it; the hosted runners of
+        // the CI (a server system) answered at their first run that the
+        // library, or its export, does not exist there. That is said, not
+        // failed: nothing of the backend depends on it.
+        match NativeWinRTMethods::get_windows_ui_composition_activation_factory("Windows.UI.Composition.Compositor") {
+            Ok(factory) => {
+                let instance = factory.activate_instance();
+                println!("the activation factory of the composition library: ActivateInstance: {instance:?}");
+                let instance = instance.expect("a compositor");
+                assert_ne!(instance, 0);
+                // SAFETY: the instance is an object the activation
+                // returned, whose reference this test owns.
+                let unknown =
+                    unsafe { ferroui_microcom::ComPtr::<ferroui_microcom::IUnknown>::from_raw(instance as *mut _) }.unwrap();
+                assert!(unknown.cast::<ICompositor>().is_ok());
+            }
+            Err(error) if error.0 == ferroui_microcom::HResult::NOTIMPL.0 => println!(
+                "skipped: this system has no Windows.UI.Composition.dll with DllGetActivationFactory ({error}); \
+                 the reference declares the import and does not call it"
+            ),
+            Err(error) => panic!("the activation factory of the composition library: {error}"),
+        }
+
+        // The compositor as the composition mode creates it: activated by
+        // its class name on a thread with a dispatcher queue. A session
+        // that cannot create one says so; the mode is then passed over.
+        match NativeWinRTMethods::create_instance::<ICompositor>("Windows.UI.Composition.Compositor") {
+            Ok(compositor) => {
+                let compositor5 = compositor.cast::<super::ICompositor5>();
+                let interop = compositor.cast::<super::ICompositorDesktopInterop>();
+                println!(
+                    "Windows.UI.Composition.Compositor: activated; ICompositor5 {:?}, ICompositorDesktopInterop {:?}",
+                    compositor5.as_ref().map(|_| "yes"),
+                    interop.as_ref().map(|_| "yes")
+                );
+                assert!(interop.is_ok());
+            }
+            Err(error) => println!("skipped: this session does not activate Windows.UI.Composition.Compositor: {error}"),
+        }
     })
     .join()
     .unwrap();
