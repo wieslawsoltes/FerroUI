@@ -2144,3 +2144,53 @@ reason = "How a handler on the reader thread of a connection reaches an object o
 [[rust_only]]
 path = "src/FerroUI.DesignerSupport/remote/test_connection.rs"
 reason = "A connection for the tests of the crate, which records what is sent and raises what a test tells it to"
+
+# ---------------------------------------------------------------- Avalonia.X11
+# The project is tracked at file and type granularity until its members are extracted (TRACKING.md).
+
+[[map]]
+project = "Avalonia.X11"
+upstream = ["X11Structs.cs"]
+kind = "replaced"
+rust = "x11_structs.rs"
+reason = "the event, request and hint structures are those of the Xlib bindings (`x11-dl`, used through `xlib.rs`), which declare them with the layout of the C headers; the enumerations and the Motif hints are ported (docs/porting/x11-platform.md, section 2)"
+
+[[map]]
+project = "Avalonia.X11"
+upstream = ["XIStructs.cs"]
+kind = "replaced"
+rust = "xi_structs.rs"
+reason = "the structures of the X Input extension are those of the Xlib bindings and the copies `xlib.rs` makes of them (`XIDeviceEventData`, `XIClassInfo`, ...); the enumerations are ported"
+
+[[map]]
+project = "Avalonia.X11"
+upstream = ["XLib.Helpers.cs"]
+kind = "merged"
+rust = "xlib.rs"
+reason = "the helpers of the partial class are functions of the same module as the calls"
+
+[[map]]
+project = "Avalonia.X11"
+upstream = ["X11Window.Ime.cs"]
+kind = "renamed"
+rust = "x11_window_ime.rs"
+reason = "the keyboard part is ported (the input context, the key of a key event, its text); the input method part (`InitializeIme`, `FilterIme`, `ProcessNextImeEvent`, the forwarded keys) is stage 2 of docs/porting/x11-platform.md"
+
+[[map]]
+project = "Avalonia.X11"
+upstream = ["X11Window.Xim.cs"]
+kind = "renamed"
+rust = "x11_window_xim.rs"
+reason = "not ported yet: the input method of the server (`XimInputMethod`) is stage 2 of docs/porting/x11-platform.md"
+
+[[rust_only]]
+path = "src/FerroUI.X11/raw_event_grouping.rs"
+reason = "The port of `src/Shared/RawEventGrouping.cs`, a source file the original compiles into every backend that queues its input (it belongs to no project of the tracking)"
+
+[[rust_only]]
+path = "src/FerroUI.X11/event.rs"
+reason = "The multicast events of the backend's own classes (a C# `event Action` of the original): a list of handlers with tokens to remove them"
+
+[[rust_only]]
+path = "src/FerroUI.X11/pixel_buffer.rs"
+reason = "A framebuffer over pixels the crate owns, for what the original makes with the `LockedFramebuffer` constructor over memory of its own (cursor and icon pixels)"

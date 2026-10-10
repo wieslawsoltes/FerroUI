@@ -44,6 +44,9 @@ and the ones that are not ported for a stated reason, with a section per upstrea
 - `docs/porting/data/member-waivers.toml` - `[[waive]]` (not ported, with a reason) and `[[alias]]` (ported under a
   name the default rule cannot derive).
 - `scripts/api-extract/projects.json` - project list, level of detail, target crate, phase and priority.
+  The scope, phase, priority and crate of a project are read from this file at every run, so moving a project into
+  scope needs no new extraction; its level of detail is what the extraction holds. A project in scope that was
+  extracted with `types` detail has its files and types looked for, and its members counted as totals.
 
 ## Matching rules
 

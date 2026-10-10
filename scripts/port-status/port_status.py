@@ -95,6 +95,33 @@ def load_upstream(data_dir: str) -> dict:
     return index
 
 
+def apply_project_list(index: dict, repo: str) -> None:
+    """Overlays the planning data of scripts/api-extract/projects.json (scope, phase, priority, crate) on the
+    projects of the extraction, so that moving a project into scope or changing its phase needs no new extraction.
+    The detail of a project is not overlaid: it says what the extraction holds."""
+    path = os.path.join(repo, "scripts", "api-extract", "projects.json")
+    if not os.path.exists(path):
+        return
+    with open(path, encoding="utf-8") as f:
+        listed = {p["path"]: p for p in json.load(f).get("projects", [])}
+    for project in index["projects"]:
+        entry = listed.get(project["path"])
+        if entry is None:
+            # a project of a `dir/*` entry
+            parent = project["path"].rsplit("/", 1)[0] + "/*"
+            entry = listed.get(parent)
+            if entry is None:
+                continue
+            fields = ("scope", "phase", "priority")
+        else:
+            fields = ("scope", "phase", "priority", "crate")
+        for key in fields:
+            if key in entry:
+                project[key] = entry[key]
+            elif key == "scope":
+                project.pop("scope", None)
+
+
 def load_toml(path: str) -> dict:
     if not os.path.exists(path):
         return {}
@@ -644,7 +671,9 @@ def scan_project(project: dict, repo: str, overrides: Overrides, waivers: Waiver
         mapped_rust.update(fr["rust"])
 
         for ut in types:
-            tr = scan_type(ut, name, crate, fr, members_mode, waivers, detail, result["how"])
+            # A project in scope whose extraction holds no members has its types looked for all the same.
+            type_detail = "types-scan" if detail == "types" and result["scope"] == "in" else detail
+            tr = scan_type(ut, name, crate, fr, members_mode, waivers, type_detail, result["how"])
             fr["types"].append(tr)
         if fr["status"] == "missing":
             # types found elsewhere in the crate: suggest an override
@@ -740,7 +769,7 @@ def scan_type(ut: dict, project: str, crate: RustCrate, fr: dict, members_mode: 
         tr["status"] = "n/a"
         tr["members"] = [{"m": m, "status": "n/a", "how": ""} for m in members]
         return tr
-    if detail != "full":
+    if detail not in ("full", "types-scan"):
         return tr
 
     in_files = [rel for rel in fr["rust"] if rel in crate.files]
@@ -776,6 +805,11 @@ def scan_type(ut: dict, project: str, crate: RustCrate, fr: dict, members_mode: 
     results = match_members(ut, view, waivers.aliases(project, ut["fullName"])) if members else []
     if not found_name and tr["static"] and in_files and any(st == "present" for _, st, _ in results):
         # static class ported as free functions / constants of the module
+        found_name = names[0]
+        tr["asModule"] = True
+    if not found_name and detail == "types-scan" and tr["static"] and in_files:
+        # Without the members of the type there is nothing to look for in the module: a static class
+        # counts as ported with its file.
         found_name = names[0]
         tr["asModule"] = True
     if not found_name and ut["kind"] == "delegate" and in_files:
@@ -936,7 +970,10 @@ def render_project(pr: dict, counts: dict, commit: str) -> str:
         w(f"| Property registrations | {ratio(counts['properties'])} |")
         w(f"| Routed events | {ratio(counts['events'])} |")
     w("")
-    if detail == "types":
+    if detail == "types" and pr["scope"] == "in":
+        w("This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.")
+        w("")
+    elif detail == "types":
         w("This backend is outside the current porting scope. It is tracked at file and type granularity only; member counts are totals.")
         w("")
     if detail == "files":
@@ -992,6 +1029,21 @@ def render_project(pr: dict, counts: dict, commit: str) -> str:
             w("|---|---|---|---|")
             for fr in files:
                 w(f"| `{fr['path'].rsplit('/', 1)[-1]}` | `{fr['expected']}` | {fr['status']} | {esc(fr['note'])} |")
+            w("")
+            continue
+        if detail == "types" and pr["scope"] == "in":
+            # In scope without extracted members: the file and each of its types, found or not.
+            w("| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |")
+            w("|---|---|---|---|---|---:|---|")
+            for fr in files:
+                fc = file_counts(fr, detail)
+                rust = ", ".join(f"`{x}`" for x in fr["rust"]) if fr["rust"] else (f"`{fr['expected']}`" if fr["status"] != "n/a" else "-")
+                status = fr["status"]
+                if status == "present" and fc["types"][0] + fc["types"][2] != fc["types"][1]:
+                    status = "partial"
+                missing = ", ".join(code(tr["name"]) for tr in fr["types"] if tr["status"] == "missing") or "-"
+                types_cell = f"{fc['types'][0]}/{fc['types'][1]}" + (f" ({fc['types'][2]} waived)" if fc["types"][2] else "")
+                w(f"| `{fr['path'].rsplit('/', 1)[-1]}` | {rust} | {status} | {types_cell} | {missing} | {fc['members'][1]} | {esc(fr['note'])} |")
             w("")
             continue
         if detail == "types":
@@ -1383,6 +1435,7 @@ def main() -> int:
     repo = os.path.abspath(args.repo)
     data_dir = os.path.join(repo, "docs", "porting", "data")
     index = load_upstream(data_dir)
+    apply_project_list(index, repo)
     overrides = Overrides(load_toml(os.path.join(data_dir, "path-overrides.toml")))
     waivers = Waivers(load_toml(os.path.join(data_dir, "member-waivers.toml")))
 
