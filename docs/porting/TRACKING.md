@@ -10,8 +10,8 @@ The master status of the port: every upstream project, file, type and member (pu
 
 Two numbers, because one hides what the other shows.
 
-1. **Of what is in scope: 93.6%.** The 31 upstream projects that are in scope have 31738 members (public, protected and internal) in files that apply to the port. 27019 have a counterpart, 1861 are missing and 2858 are waived: declared not ported, each with a reason ([waiver-audit.md](waiver-audit.md)). The percentage is `present / (total - waived)`. It says nothing about projects that are out of scope, and it counts a waived member as if it did not exist.
-2. **Of everything upstream has: 72.3%.** Every C# source project of the extraction, in scope or not, has 37391 members; the port has a counterpart for 27019. The total includes the 2858 waived members, the 1132 members of files marked not applicable and the 4521 members of projects that are out of scope or not started. The rest of that distance is what [REMAINING.md](REMAINING.md) lists; part of it is never ported by design (the waived and not applicable members), so this number does not reach 100.
+1. **Of what is in scope: 94.1%.** The 31 upstream projects that are in scope have 31738 members (public, protected and internal) in files that apply to the port. 27177 have a counterpart, 1703 are missing and 2858 are waived: declared not ported, each with a reason ([waiver-audit.md](waiver-audit.md)). The percentage is `present / (total - waived)`. It says nothing about projects that are out of scope, and it counts a waived member as if it did not exist.
+2. **Of everything upstream has: 72.7%.** Every C# source project of the extraction, in scope or not, has 37391 members; the port has a counterpart for 27177. The total includes the 2858 waived members, the 1132 members of files marked not applicable and the 4521 members of projects that are out of scope or not started. The rest of that distance is what [REMAINING.md](REMAINING.md) lists; part of it is never ported by design (the waived and not applicable members), so this number does not reach 100.
 
 Both numbers match names, not behaviour (Legend, below). Projects the extraction does not read (analyzers, generators of upstream's own build, the D-Bus library) are listed in REMAINING.md with their size in files.
 
@@ -55,10 +55,10 @@ Percentages are `present / (total - waived)`. Member matching is by name with re
 
 | | Ported | Total | Waived | % |
 |---|---:|---:|---:|---:|
-| C# files | 2475 | 2569 | 0 | 96.3% |
-| Types | 3348 | 3888 | 311 | 93.6% |
-| Members | 27019 | 31738 | 2858 | 93.6% |
-| Contracts (interfaces) | 450 | 486 | - | 92.6% |
+| C# files | 2498 | 2569 | 0 | 97.2% |
+| Types | 3377 | 3888 | 311 | 94.4% |
+| Members | 27177 | 31738 | 2858 | 94.1% |
+| Contracts (interfaces) | 454 | 486 | - | 93.4% |
 | Property registrations | 1218 | 1233 | - | 98.8% |
 | Routed events | 108 | 108 | - | 100.0% |
 | Other files (native sources, XAML, TypeScript, fonts) | 243 | 265 | - | 91.7% |
@@ -73,7 +73,7 @@ The % column is member coverage (file coverage for plain file lists).
 |---|---|---|---|---:|---:|---:|---:|---|---|
 | [XamlX](tracking/XamlX.md) | `external/XamlX/src/XamlX` | `external/XamlX/src/XamlX` | `xamlx` | 62/62 | 172/177 (5 waived) | 722/878 (156 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Native (native sources)](tracking/Avalonia.Native_native_sources.md) | `native/Avalonia.Native` | `native/FerroUI.Native` | (Objective-C++ sources built by ferroui-native) | 62/62 | - | - | 100.0% | 1 - desktop (macOS) | P0 |
-| [Avalonia.Android](tracking/Avalonia.Android.md) | `src/Android/Avalonia.Android` | `src/Android/FerroUI.Android` | `ferroui-android` | 23/58 | 32/88 | 153/447 | 34.2% | 6 - mobile (Android) | P1 |
+| [Avalonia.Android](tracking/Avalonia.Android.md) | `src/Android/Avalonia.Android` | `src/Android/FerroUI.Android` | `ferroui-android` | 46/58 | 61/88 | 311/447 | 69.6% | 6 - mobile (Android) | P1 |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/Avalonia.Base` | `src/FerroUI.Base` | `ferroui-base` | 1248/1248 | 1524/1659 (135 waived) | 10398/11433 (1035 waived) | 100.0% | 0 - core | P0 |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/Avalonia.Build.Tasks` | `src/FerroUI.Build.Tasks` | `ferroui-build` | 6/6 | 6/7 (1 waived) | 7/35 (28 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/Avalonia.Controls` | `src/FerroUI.Controls` | `ferroui-controls` | 538/538 | 621/628 (7 waived) | 6255/6405 (148 waived) | 100.0% | 1 - controls | P0 |
@@ -370,13 +370,14 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-359 Rust source files have no upstream counterpart (19 without a recorded reason). They are listed at the end of each project page.
+360 Rust source files have no upstream counterpart (20 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
 | [XamlX](tracking/XamlX.md) | `external/XamlX/src/XamlX/extensions/query_interface.rs` | dynamic interface queries on AST nodes: replaces C# `is`/`as` casts to backend-generic interfaces |
 | [Avalonia.Android](tracking/Avalonia.Android.md) | `src/Android/FerroUI.Android/android_egl.rs` | **unmapped** |
 | [Avalonia.Android](tracking/Avalonia.Android.md) | `src/Android/FerroUI.Android/interop/java.rs` | **unmapped** |
+| [Avalonia.Android](tracking/Avalonia.Android.md) | `src/Android/FerroUI.Android/interop/listeners.rs` | **unmapped** |
 | [Avalonia.Android](tracking/Avalonia.Android.md) | `src/Android/FerroUI.Android/interop/natives.rs` | **unmapped** |
 | [Avalonia.Android](tracking/Avalonia.Android.md) | `src/Android/FerroUI.Android/interop/ndk.rs` | **unmapped** |
 | [Avalonia.Android](tracking/Avalonia.Android.md) | `src/Android/FerroUI.Android/interop/signature.rs` | **unmapped** |

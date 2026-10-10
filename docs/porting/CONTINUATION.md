@@ -111,6 +111,16 @@ Next, in the order of `ios-platform.md`, section 14:
 
 Tracking: `Avalonia.iOS` is in scope at file and type granularity; the numbers are in `TRACKING.md`. The scanner reads the items of a macro called with parentheses since stage 2 (`scripts/port-status/rustscan.py`), so the classes declared inside `define_class!` count (35 of 57 types at the end of stage 1, no other project changed); `path-overrides.toml` has the type names. The 331 members are totals only. `DEVIATIONS.md` has the section of the backend, and the sections that file had twice on main (the X11 platform word for word, Diagnostics and Bindings each as two sections with different rows) are one each, with every row kept.
 
+## The Android platform, stage 2d (2026-10-10)
+
+Built and run on the emulator (`android-platform.md`, sections 7.2 and 10.3): the clipboard, the storage provider with its files and folders (`StorageHelper.java` beside it), the launcher, the platform feedback, the native control host with the embed sample of the catalog, the file activation. 143 host tests. Stage 2 of the file table is complete; what is left of the backend is stage 3 (accessibility: `AvaloniaAccessHelper.cs` and the nine node info providers, over `AccessibilityNodeProvider`) and Vulkan with the Vulkan project.
+
+- **Not proven by a run**: the pickers (they need a person, or UI automation of the picker of the system), bookmarks and everything of a document tree (it starts from a picked folder), the permission request, the launcher with a URI that is handled (it leaves the application), a click on the native button of the embed page beyond what the picture shows, clipboard formats other than text.
+- The storage code was written against the sources and compiled; of its members only the capabilities and the well-known folders ran. The first use with a picked document is where to look first.
+- **Open, shared with iOS**: a native control keeps its place when the page it is on moves by a render transform (`android-platform.md` 10.3, with the numbers; `ios-platform.md` section 12). The catalog host lays the main view out once more per page of its smoke run so that the pictures are true; the control itself (`NativeControlHost`) is as upstream.
+- `StorageHelper` keeps the text of the last exception per call (`takeLastError`); a failure of a storage member is in the log under the area `AndroidPlatform`.
+- Tracking counts `EditCommand.cs` as 1 of 9 types (its classes are the variants of an enum) and the constant members of the input connection as missing (they are answered in Java).
+
 ## The Android platform, stages 2a to 2c (2026-10-10)
 
 Built and run on the emulator after stage 1 (`android-platform.md`, sections 7, 7.1 and 10.2): the keyboard and the platform settings (2a), the input method with its connection, edit buffer and commands and the animated input pane (2b), the lifecycle: intents, results, the back button, and the surface lost and created again, rotation and a second start verified (2c). 113 host tests. What to know when working on it:
