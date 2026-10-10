@@ -406,3 +406,57 @@ jobs:
         run: node scripts/browser/tests/site_loader.test.mjs target/browser-both/control-catalog-browser
       - name: Sizes of the site with both modules
         run: node scripts/browser/module-sizes.mjs target/browser-both/control-catalog-browser >> "$GITHUB_STEP_SUMMARY"
+
+  # The Linux desktop platform on a real X server (docs/porting/x11-platform.md, section 13). The
+  # crate is developed on a Mac, where it is compiled for Linux and its tests run without a server;
+  # this job is where it meets one: the crate is built and tested on Linux, and the smoke mode of its
+  # example opens a window under Xvfb and asks the server what it sees (the window mapped, its size,
+  # title, class, process and protocols, and pixels read back from the window with XGetImage), then
+  # has the window closed by a WM_DELETE_WINDOW message; once on a bare Xvfb and once under a
+  # window manager. No compositing manager and no input devices: those are not covered here.
+  x11:
+    name: Build and test (Linux, X11 under Xvfb)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: x11
+      # The X libraries are opened at run time (nothing links them); Skia links FreeType and
+      # Fontconfig, and needs a font to answer for the default family.
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            xvfb xauth x11-utils openbox \
+            libx11-6 libxi6 libxrandr2 libxcursor1 libxfixes3 libxext6 \
+            libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config
+      - name: Skia features of the target
+        run: |
+          # A Linux build renders in software until the GPU modes of the platform are ported: a GPU
+          # feature here would ask for a Skia binary that may not be published, and the build would
+          # fall back to compiling Skia from source.
+          features="$(cargo tree --locked -p ferroui-skia -e features,normal --target x86_64-unknown-linux-gnu | grep -oE 'skia-bindings feature "(gl|ganesh|graphite|metal|vulkan|d3d)"' | sort -u | tr '\n' ' ')"
+          echo "GPU features: '$features'"
+          test -z "$features"
+      - name: Tests of the X11 crate (no server needed)
+        run: cargo test --locked -p ferroui-x11 --no-fail-fast
+      - name: The desktop entry point selects X11 on Linux
+        run: cargo test --locked -p ferroui-desktop --lib
+      - name: Build the window example
+        run: cargo build --locked -p ferroui-x11 --features example --example x11_window
+      - name: A window on a real X server (Xvfb)
+        run: |
+          xvfb-run -a --server-args="-screen 0 1280x1024x24" \
+            timeout 300 target/debug/examples/x11_window --smoke
+      # A window manager clamps the window to a screen narrower than it: the server and the
+      # framework have to agree on the size the window got.
+      - name: The same under a window manager (openbox)
+        run: |
+          xvfb-run -a --server-args="-screen 0 600x500x24" \
+            sh -c 'openbox & sleep 2; timeout 300 target/debug/examples/x11_window --smoke'

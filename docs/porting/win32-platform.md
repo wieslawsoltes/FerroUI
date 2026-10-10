@@ -469,7 +469,7 @@ Windows has no native menu bar to export a menu to, so the native menu of a wind
 | | Before | After stage 1 | After stage 2b for ANGLE (2026-10-10) |
 |---|---:|---:|---:|
 | Files | 0/95 | 23/95 (24.2 %) | 33/95 (34.7 %) |
-| Types | 0/276 | 80/276 (29.0 %) | 109/276 (39.5 %) |
+| Types | 0/276 | 80/276 (29.0 %) | 111/276 (40.2 %) |
 | Members | 0/2605 | not measured: 2605 in total, names not extracted | not measured |
 
 A file counts when it exists; a file that is built in part counts as a file and its missing members will count as missing once members are extracted. The type count is dominated by the interop file (119 types, most of them enumerations and structures of calls later stages make; 50 present).

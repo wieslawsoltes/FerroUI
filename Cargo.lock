@@ -523,6 +523,7 @@ dependencies = [
  "ferroui-native",
  "ferroui-skia",
  "ferroui-win32",
+ "ferroui-x11",
 ]
 
 [[package]]
@@ -751,6 +752,22 @@ dependencies = [
  "microcom-codegen",
  "mozangle",
  "windows-sys",
+]
+
+[[package]]
+name = "ferroui-x11"
+version = "0.1.0-preview.1"
+dependencies = [
+ "bitflags",
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-dialogs",
+ "ferroui-harfbuzz",
+ "ferroui-opengl",
+ "ferroui-skia",
+ "ferroui-themes-simple",
+ "libc",
+ "x11-dl",
 ]
 
 [[package]]
@@ -2814,6 +2831,17 @@ name = "winnow"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "23b97319f7b8343df12cc98938e5c3eb436064524c8d2b4e30a1d3a36eecdf81"
+
+[[package]]
+name = "x11-dl"
+version = "2.21.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "38735924fedd5314a6e548792904ed8c6de6636285cb9fec04d5b1db85c1516f"
+dependencies = [
+ "libc",
+ "once_cell",
+ "pkg-config",
+]
 
 [[package]]
 name = "xaml-include-fixture-application"

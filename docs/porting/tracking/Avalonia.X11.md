@@ -7,161 +7,173 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Avalonia.X11` |
-| FerroUI | `src/FerroUI.X11` (not created yet) |
+| FerroUI | `src/FerroUI.X11` (exists) |
 | Crate | `ferroui-x11` |
-| Phase / priority | not started / out of current scope / - |
-| Files | 0/88 (0.0%) |
-| Types | 0/291 (0.0%) |
+| Phase / priority | 5 - desktop (Linux) / P1 |
+| Files | 48/88 (54.5%) |
+| Types | 121/291 (108 waived) (66.1%) |
 | Members | 0/4897 (0.0%) |
 
-This backend is outside the current porting scope. It is tracked at file and type granularity only; member counts are totals.
+This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
 
 ## Files
 
-### `(project root)` - files 0/37, types 0/216, members 0/4427
+### `(project root)` - files 26/37, types 87/216 (107 waived), members 0/4427
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `ActivityTrackingHelper.cs` | `WindowActivationTrackingHelper` | 7 | not started |
-| `ICELib.cs` | `ICELib`, `ICELib.IceProcessMessagesStatus`, `ICELib.IceErrorHandler`, `ICELib.IceIOErrorHandler` | 6 | not started |
-| `Keysyms.cs` | `X11Key` | 2099 | not started |
-| `LibC.cs` | `LibC` | 7 | not started |
-| `SMLib.cs` | `SMLib`, `SMLib.SmDialogValue`, `SMLib.SmcCallbacks`, `SMLib.IceWatchProc`, `SMLib.SmcDieProc`, `SMLib.SmcInteractProc`, `SMLib.SmcSaveCompleteProc`, `SMLib.SmcSaveYourselfProc`, `SMLib.SmcShutdownCancelledProc`, `SMLib.SmcErrorHandler` | 12 | not started |
-| `TransparencyHelper.cs` | `TransparencyHelper` | 5 | not started |
-| `X11ActiveWindowTracker.cs` | `X11ActiveWindowTracker` | 3 | not started |
-| `X11AtSpiAccessibility.cs` | `X11AtSpiAccessibility` | 5 | not started |
-| `X11Atoms.cs` | `X11Atoms` | 166 | not started |
-| `X11CursorFactory.cs` | `X11CursorFactory`, `CursorImpl` | 9 | not started |
-| `X11DeferredDisplayDispatcher.cs` | `X11DeferredDisplayDispatcher` | 4 | not started |
-| `X11EglHelper.cs` | `X11EglHelper` | 3 | not started |
-| `X11EnumExtensions.cs` | `X11EnumExtensions` | 1 | not started |
-| `X11Enums.cs` | `Status`, `XEventMask`, `XModifierMask`, `XCreateWindowFlags`, `ShapeKind` | 78 | not started |
-| `X11Exception.cs` | `X11Exception` | 1 | not started |
-| `X11FocusProxy.cs` | `X11FocusProxy` | 3 | not started |
-| `X11FramebufferSurface.cs` | `X11FramebufferSurface` | 3 | not started |
-| `X11Globals.cs` | `X11Globals`, `X11Globals.WindowActivationTrackingMode` | 15 | not started |
-| `X11IconLoader.cs` | `X11IconLoader`, `X11IconData` | 6 | not started |
-| `X11Info.cs` | `X11Info` | 25 | not started |
-| `X11KeyTransform.cs` | `X11KeyTransform` | 2 | not started |
-| `X11NativeControlHost.cs` | `X11NativeControlHost` | 6 | not started |
-| `X11Platform.cs` | `AvaloniaX11Platform`, `X11RenderingMode`, `X11PlatformOptions`, `AvaloniaX11PlatformExtensions` | 54 | not started |
-| `X11PlatformLifetimeEvents.cs` | `X11PlatformLifetimeEvents` | 3 | not started |
-| `X11Structs.cs` | `XAnyEvent`, `XKeyEvent`, `XButtonEvent`, `XMotionEvent`, `XCrossingEvent`, `XFocusChangeEvent`, `XKeymapEvent`, `XExposeEvent`, `XGraphicsExposeEvent`, `XNoExposeEvent`, `XVisibilityEvent`, `XCreateWindowEvent`, `XDestroyWindowEvent`, `XUnmapEvent`, `XMapEvent`, `XMapRequestEvent`, `XReparentEvent`, `XConfigureEvent`, `XGravityEvent`, `XResizeRequestEvent`, `XConfigureRequestEvent`, `XCirculateEvent`, `XCirculateRequestEvent`, `XPropertyEvent`, `XSelectionClearEvent`, `XSelectionRequestEvent`, `XSelectionEvent`, `XColormapEvent`, `XClientMessageEvent`, `XMappingEvent`, `XErrorEvent`, `XEventPad`, `XGenericEventCookie`, `XEvent`, `XSetWindowAttributes`, `XWindowAttributes`, `XTextProperty`, `XWindowClass`, `XEventName`, `SetWindowValuemask`, `SendEventValues`, `CreateWindowArgs`, `Gravity`, `XKeySym`, `EventMask`, `RandrEventMask`, `RandrEvent`, `RandrRotate`, `GrabMode`, `XStandardColormap`, `XColor`, `Atom`, `XScreen`, `ChangeWindowFlags`, `StackMode`, `XWindowChanges`, `ColorFlags`, `NotifyMode`, `NotifyDetail`, `MotifWmHints`, `MotifFlags`, `MotifFunctions`, `MotifDecorations`, `MotifInputMode`, `KeyMasks`, `MouseKeyMasks`, `XModifierKeymap`, `PropertyMode`, `XKeyBoardState`, `XKeyBoardState.AutoRepeats`, `GCFunction`, `GCJoinStyle`, `GCLineStyle`, `GCCapStyle`, `GCFillStyle`, `GCFillRule`, `GCArcMode`, `GCSubwindowMode`, `XGCValues`, `GXFunction`, `NetWindowManagerState`, `RevertTo`, `MapState`, `CursorFontShape`, `SystrayRequest`, `NetWmStateRequest`, `NetWmMoveResize`, `XSizeHintsFlags`, `XSizeHints`, `XWMHintsFlags`, `XInitialState`, `XWMHints`, `XIconSize`, `XErrorHandler`, `XRequest`, `XIMProperties`, `WindowType`, `XEmbedMessage`, `XcursorImage`, `XcursorImages`, `XIMStyles`, `XPoint`, `XRectangle`, `XIMCallback`, `XImage`, `XVisualInfo`, `XIMFeedback`, `XIMFeedbackStruct`, `XIMText`, `XIMPreeditDrawCallbackStruct`, `XIMCaretDirection`, `XIMCaretStyle`, `XIMPreeditCaretCallbackStruct`, `XIMProc`, `XNames`, `XRRMonitorInfo`, `XShmSegmentInfo`, `XShmCompletionEvent`, `XRRScreenResources`, `RRModeFlags`, `XRRModeInfo`, `XRROutputInfo`, `XRRCrtcInfo` | 1353 | not started |
-| `X11Window.Ime.cs` | `X11Window` | 0 | not started |
-| `X11Window.Xim.cs` | `X11Window` | 0 | not started |
-| `X11Window.cs` | `X11Window`, `X11Window.SurfacePlatformHandle` | 86 | not started |
-| `X11WindowInfo.cs` | `X11WindowInfo` | 3 | not started |
-| `XEmbedPlug.cs` | `XEmbedPlug` | 8 | not started |
-| `XEmbedTrayIconImpl.cs` | `XEmbedTrayIconImpl` | 6 | not started |
-| `XError.cs` | `XError` | 3 | not started |
-| `XI2Manager.cs` | `XI2Manager`, `XI2Manager.ParsedDeviceEvent`, `IXI2Client` | 21 | not started |
-| `XIStructs.cs` | `XIAddMasterInfo`, `XIRemoveMasterInfo`, `XIAttachSlaveInfo`, `XIDetachSlaveInfo`, `XIAnyHierarchyChangeInfo`, `XIModifierState`, `XIButtonState`, `XIValuatorState`, `XIEventMask`, `XIAnyClassInfo`, `XIButtonClassInfo`, `XIKeyClassInfo`, `XIValuatorClassInfo`, `XIScrollClassInfo`, `XiScrollType`, `XITouchClassInfo`, `XIDeviceInfo`, `XiDeviceType`, `XiPredefinedDeviceId`, `XiDeviceClass`, `XIDeviceChangedEvent`, `XIDeviceEvent`, `XIEnterLeaveEvent`, `XiDeviceEventFlags`, `XiDeviceChangeReason`, `XIEvent`, `XiEventType`, `XiEnterLeaveDetail` | 185 | not started |
-| `XLib.Helpers.cs` | `XLib` | 3 | not started |
-| `XLib.cs` | `XLib`, `XLib.XLookupStatus`, `XLib.XGeometry`, `XLib.XClassHint`, `XLib.XSyncValue`, `XLib.GrabResult` | 233 | not started |
-| `XResources.cs` | `XResources` | 3 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `ActivityTrackingHelper.cs` | `activity_tracking_helper.rs` | present | 1/1 | - | 7 |  |
+| `ICELib.cs` | `ice_lib.rs` | missing | 0/4 | `ICELib`, `ICELib.IceProcessMessagesStatus`, `ICELib.IceErrorHandler`, `ICELib.IceIOErrorHandler` | 6 |  |
+| `Keysyms.cs` | `keysyms.rs` | present | 1/1 | - | 2099 |  |
+| `LibC.cs` | `lib_c.rs` | missing | 0/1 | `LibC` | 7 |  |
+| `SMLib.cs` | `sm_lib.rs` | missing | 0/10 | `SMLib`, `SMLib.SmDialogValue`, `SMLib.SmcCallbacks`, `SMLib.IceWatchProc`, `SMLib.SmcDieProc`, `SMLib.SmcInteractProc`, `SMLib.SmcSaveCompleteProc`, `SMLib.SmcSaveYourselfProc`, `SMLib.SmcShutdownCancelledProc`, `SMLib.SmcErrorHandler` | 12 |  |
+| `TransparencyHelper.cs` | `transparency_helper.rs` | present | 1/1 | - | 5 |  |
+| `X11ActiveWindowTracker.cs` | `x11_active_window_tracker.rs` | present | 1/1 | - | 3 |  |
+| `X11AtSpiAccessibility.cs` | `x11_at_spi_accessibility.rs` | missing | 0/1 | `X11AtSpiAccessibility` | 5 |  |
+| `X11Atoms.cs` | `x11_atoms.rs` | present | 1/1 | - | 166 |  |
+| `X11CursorFactory.cs` | `x11_cursor_factory.rs` | present | 2/2 | - | 9 |  |
+| `X11DeferredDisplayDispatcher.cs` | `x11_deferred_display_dispatcher.rs` | missing | 0/1 | `X11DeferredDisplayDispatcher` | 4 |  |
+| `X11EglHelper.cs` | `x11_egl_helper.rs` | missing | 0/1 | `X11EglHelper` | 3 |  |
+| `X11EnumExtensions.cs` | `x11_enum_extensions.rs` | present | 1/1 | - | 1 |  |
+| `X11Enums.cs` | `x11_enums.rs` | present | 5/5 | - | 78 |  |
+| `X11Exception.cs` | `x11_exception.rs` | present | 1/1 | - | 1 |  |
+| `X11FocusProxy.cs` | `x11_focus_proxy.rs` | present | 1/1 | - | 3 |  |
+| `X11FramebufferSurface.cs` | `x11_framebuffer_surface.rs` | present | 1/1 | - | 3 |  |
+| `X11Globals.cs` | `x11_globals.rs` | present | 2/2 | - | 15 |  |
+| `X11IconLoader.cs` | `x11_icon_loader.rs` | present | 2/2 | - | 6 |  |
+| `X11Info.cs` | `x11_info.rs` | present | 1/1 | - | 25 |  |
+| `X11KeyTransform.cs` | `x11_key_transform.rs` | present | 1/1 | - | 2 |  |
+| `X11NativeControlHost.cs` | `x11_native_control_host.rs` | missing | 0/1 | `X11NativeControlHost` | 6 |  |
+| `X11Platform.cs` | `x11_platform.rs` | present | 4/4 | - | 54 |  |
+| `X11PlatformLifetimeEvents.cs` | `x11_platform_lifetime_events.rs` | missing | 0/1 | `X11PlatformLifetimeEvents` | 3 |  |
+| `X11Structs.cs` | `x11_structs.rs` | present | 36/123 (87 waived) | - | 1353 | replaced: the event, request and hint structures are those of the Xlib bindings (`x11-dl`, used through `xlib.rs`), which declare them with the layout of the C headers; the enumerations and the Motif hints are ported (docs/porting/x11-platform.md, section 2) |
+| `X11Window.Ime.cs` | `x11_window_ime.rs` | present | 1/1 | - | 0 | renamed: the keyboard part is ported (the input context, the key of a key event, its text); the input method part (`InitializeIme`, `FilterIme`, `ProcessNextImeEvent`, the forwarded keys) is stage 2 of docs/porting/x11-platform.md |
+| `X11Window.Xim.cs` | `x11_window_xim.rs` | missing | 1/1 | - | 0 | types found in `x11_window.rs` (add to path-overrides.toml) |
+| `X11Window.cs` | `x11_window.rs` | present | 2/2 | - | 86 |  |
+| `X11WindowInfo.cs` | `x11_window_info.rs` | present | 1/1 | - | 3 |  |
+| `XEmbedPlug.cs` | `x_embed_plug.rs` | missing | 0/1 | `XEmbedPlug` | 8 |  |
+| `XEmbedTrayIconImpl.cs` | `x_embed_tray_icon_impl.rs` | missing | 0/1 | `XEmbedTrayIconImpl` | 6 |  |
+| `XError.cs` | `x_error.rs` | present | 1/1 | - | 3 |  |
+| `XI2Manager.cs` | `xi2_manager.rs` | present | 3/3 | - | 21 |  |
+| `XIStructs.cs` | `xi_structs.rs` | present | 11/28 (17 waived) | - | 185 | replaced: the structures of the X Input extension are those of the Xlib bindings and the copies `xlib.rs` makes of them (`XIDeviceEventData`, `XIClassInfo`, ...); the enumerations are ported |
+| `XLib.Helpers.cs` | `xlib.rs` | present | 1/1 | - | 3 | merged: the helpers of the partial class are functions of the same module as the calls |
+| `XLib.cs` | `xlib.rs` | present | 3/6 (3 waived) | - | 233 |  |
+| `XResources.cs` | `x_resources.rs` | present | 1/1 | - | 3 |  |
 
-### `Dispatching` - files 0/5, types 0/7, members 0/39
+### `Dispatching` - files 3/5, types 5/7, members 0/39
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `GLibDispatcherImpl.cs` | `GlibDispatcherImpl` | 4 | not started |
-| `GlibDispatcherImplBase.cs` | `GlibDispatcherImplBase` | 16 | not started |
-| `IX11PlatformDispatcher.cs` | `IX11PlatformDispatcher` | 1 | not started |
-| `X11EventDispatcher.cs` | `X11EventDispatcher`, `X11EventDispatcher.EventHandler`, `X11EventDispatcher.IEventHook` | 7 | not started |
-| `X11PlatformThreading.cs` | `X11PlatformThreading` | 11 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `GLibDispatcherImpl.cs` | `dispatching/g_lib_dispatcher_impl.rs` | missing | 0/1 | `GlibDispatcherImpl` | 4 |  |
+| `GlibDispatcherImplBase.cs` | `dispatching/glib_dispatcher_impl_base.rs` | missing | 0/1 | `GlibDispatcherImplBase` | 16 |  |
+| `IX11PlatformDispatcher.cs` | `dispatching/i_x11_platform_dispatcher.rs` | present | 1/1 | - | 1 |  |
+| `X11EventDispatcher.cs` | `dispatching/x11_event_dispatcher.rs` | present | 3/3 | - | 7 |  |
+| `X11PlatformThreading.cs` | `dispatching/x11_platform_threading.rs` | present | 1/1 | - | 11 |  |
 
 ### `Glx` - files 0/6, types 0/6, members 0/157
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `Glx.cs` | `GlxInterface` | 24 | not started |
-| `GlxConsts.cs` | `GlxConsts` | 96 | not started |
-| `GlxContext.cs` | `GlxContext` | 18 | not started |
-| `GlxDisplay.cs` | `GlxDisplay` | 9 | not started |
-| `GlxGlPlatformSurface.cs` | `GlxGlPlatformSurface` | 2 | not started |
-| `GlxPlatformFeature.cs` | `GlxPlatformGraphics` | 8 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `Glx.cs` | `glx/glx.rs` | missing | 0/1 | `GlxInterface` | 24 |  |
+| `GlxConsts.cs` | `glx/glx_consts.rs` | missing | 0/1 | `GlxConsts` | 96 |  |
+| `GlxContext.cs` | `glx/glx_context.rs` | missing | 0/1 | `GlxContext` | 18 |  |
+| `GlxDisplay.cs` | `glx/glx_display.rs` | missing | 0/1 | `GlxDisplay` | 9 |  |
+| `GlxGlPlatformSurface.cs` | `glx/glx_gl_platform_surface.rs` | missing | 0/1 | `GlxGlPlatformSurface` | 2 |  |
+| `GlxPlatformFeature.cs` | `glx/glx_platform_feature.rs` | missing | 0/1 | `GlxPlatformGraphics` | 8 |  |
 
 ### `Interop` - files 0/2, types 0/7, members 0/29
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `Glib.cs` | `Glib`, `Glib.GSourceFunc`, `Glib.GDestroyNotify`, `Glib.GIOCondition`, `Glib.GUnixFDSourceFunc`, `GSList` | 28 | not started |
-| `GtkInteropHelper.cs` | `GtkInteropHelper` | 1 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `Glib.cs` | `interop/glib.rs` | missing | 0/6 | `Glib`, `Glib.GSourceFunc`, `Glib.GDestroyNotify`, `Glib.GIOCondition`, `Glib.GUnixFDSourceFunc`, `GSList` | 28 |  |
+| `GtkInteropHelper.cs` | `interop/gtk_interop_helper.rs` | missing | 0/1 | `GtkInteropHelper` | 1 |  |
 
 ### `NativeDialogs` - files 0/2, types 0/6, members 0/48
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `Gtk.cs` | `GtkFileChooserAction`, `GtkResponseType`, `Gtk`, `Gtk.signal_generic`, `Gtk.signal_dialog_response` | 41 | not started |
-| `GtkNativeFileDialogs.cs` | `GtkSystemDialog` | 7 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `Gtk.cs` | `native_dialogs/gtk.rs` | missing | 0/5 | `GtkFileChooserAction`, `GtkResponseType`, `Gtk`, `Gtk.signal_generic`, `Gtk.signal_dialog_response` | 41 |  |
+| `GtkNativeFileDialogs.cs` | `native_dialogs/gtk_native_file_dialogs.rs` | missing | 0/1 | `GtkSystemDialog` | 7 |  |
 
-### `Screens` - files 0/3, types 0/9, members 0/27
+### `Screens` - files 3/3, types 8/9 (1 waived), members 0/27
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `X11Screen.Providers.cs` | `X11Screens`, `X11Screens.X11Screen`, `X11Screens.FallBackScreen`, `X11Screens.IX11RawScreenInfoProvider`, `X11Screens.IX11RawScreenInfoProviderWithRefreshRate`, `X11Screens.MonitorInfo` | 20 | not started |
-| `X11Screens.Scaling.cs` | `X11Screens`, `X11Screens.IScalingProvider` | 1 | not started |
-| `X11Screens.cs` | `X11Screens` | 6 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `X11Screen.Providers.cs` | `screens/x11_screen_providers.rs` | present | 5/6 (1 waived) | - | 20 |  |
+| `X11Screens.Scaling.cs` | `screens/x11_screens_scaling.rs` | present | 2/2 | - | 1 |  |
+| `X11Screens.cs` | `screens/x11_screens.rs` | present | 1/1 | - | 6 |  |
 
-### `Selections` - files 0/7, types 0/8, members 0/39
+### `Selections` - files 7/7, types 8/8, members 0/39
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `DataFormatHelper.cs` | `DataFormatHelper` | 11 | not started |
-| `IXEventWaiter.cs` | `IXEventWaiter` | 1 | not started |
-| `SelectionDataProvider.cs` | `SelectionDataProvider` | 9 | not started |
-| `SelectionDataReader.cs` | `SelectionDataReader<TItem>` | 7 | not started |
-| `SelectionHelper.cs` | `SelectionHelper` | 1 | not started |
-| `SelectionReadSession.cs` | `SelectionReadSession`, `SelectionReadSession.GetDataResult` | 8 | not started |
-| `UriListHelper.cs` | `UriListHelper` | 2 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `DataFormatHelper.cs` | `selections/data_format_helper.rs` | present | 1/1 | - | 11 |  |
+| `IXEventWaiter.cs` | `selections/i_x_event_waiter.rs` | present | 1/1 | - | 1 |  |
+| `SelectionDataProvider.cs` | `selections/selection_data_provider.rs` | present | 1/1 | - | 9 |  |
+| `SelectionDataReader.cs` | `selections/selection_data_reader.rs` | present | 1/1 | - | 7 |  |
+| `SelectionHelper.cs` | `selections/selection_helper.rs` | present | 1/1 | - | 1 |  |
+| `SelectionReadSession.cs` | `selections/selection_read_session.rs` | present | 2/2 | - | 8 |  |
+| `UriListHelper.cs` | `selections/uri_list_helper.rs` | present | 1/1 | - | 2 |  |
 
-### `Selections/Clipboard` - files 0/6, types 0/6, members 0/23
+### `Selections/Clipboard` - files 6/6, types 6/6, members 0/23
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `ClipboardDataReader.cs` | `ClipboardDataReader` | 5 | not started |
-| `ClipboardDataTransfer.cs` | `ClipboardDataTransfer` | 4 | not started |
-| `ClipboardDataTransferItem.cs` | `ClipboardDataTransferItem` | 3 | not started |
-| `ClipboardReadSessionFactory.cs` | `ClipboardReadSessionFactory` | 1 | not started |
-| `EventStreamWindow.cs` | `EventStreamWindow` | 4 | not started |
-| `X11ClipboardImpl.cs` | `X11ClipboardImpl` | 6 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `ClipboardDataReader.cs` | `selections/clipboard/clipboard_data_reader.rs` | present | 1/1 | - | 5 |  |
+| `ClipboardDataTransfer.cs` | `selections/clipboard/clipboard_data_transfer.rs` | present | 1/1 | - | 4 |  |
+| `ClipboardDataTransferItem.cs` | `selections/clipboard/clipboard_data_transfer_item.rs` | present | 1/1 | - | 3 |  |
+| `ClipboardReadSessionFactory.cs` | `selections/clipboard/clipboard_read_session_factory.rs` | present | 1/1 | - | 1 |  |
+| `EventStreamWindow.cs` | `selections/clipboard/event_stream_window.rs` | present | 1/1 | - | 4 |  |
+| `X11ClipboardImpl.cs` | `selections/clipboard/x11_clipboard_impl.rs` | present | 1/1 | - | 6 |  |
 
 ### `Selections/DragDrop` - files 0/11, types 0/11, members 0/48
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `DragDropDataProvider.cs` | `DragDropDataProvider` | 6 | not started |
-| `DragDropDataReader.cs` | `DragDropDataReader` | 6 | not started |
-| `DragDropDataTransfer.cs` | `DragDropDataTransfer` | 11 | not started |
-| `DragDropDataTransferItem.cs` | `DragDropDataTransferItem` | 3 | not started |
-| `DragDropTimeoutManager.cs` | `DragDropTimeoutManager` | 4 | not started |
-| `IXdndWindow.cs` | `IXdndWindow` | 3 | not started |
-| `SynchronousXEventWaiter.cs` | `SynchronousXEventWaiter` | 4 | not started |
-| `X11DragSource.cs` | `X11DragSource` | 2 | not started |
-| `X11DropTarget.cs` | `X11DropTarget` | 5 | not started |
-| `XdndActionHelper.cs` | `XdndActionHelper` | 2 | not started |
-| `XdndConstants.cs` | `XdndConstants` | 2 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `DragDropDataProvider.cs` | `selections/drag_drop/drag_drop_data_provider.rs` | missing | 0/1 | `DragDropDataProvider` | 6 |  |
+| `DragDropDataReader.cs` | `selections/drag_drop/drag_drop_data_reader.rs` | missing | 0/1 | `DragDropDataReader` | 6 |  |
+| `DragDropDataTransfer.cs` | `selections/drag_drop/drag_drop_data_transfer.rs` | missing | 0/1 | `DragDropDataTransfer` | 11 |  |
+| `DragDropDataTransferItem.cs` | `selections/drag_drop/drag_drop_data_transfer_item.rs` | missing | 0/1 | `DragDropDataTransferItem` | 3 |  |
+| `DragDropTimeoutManager.cs` | `selections/drag_drop/drag_drop_timeout_manager.rs` | missing | 0/1 | `DragDropTimeoutManager` | 4 |  |
+| `IXdndWindow.cs` | `selections/drag_drop/i_xdnd_window.rs` | missing | 0/1 | `IXdndWindow` | 3 |  |
+| `SynchronousXEventWaiter.cs` | `selections/drag_drop/synchronous_x_event_waiter.rs` | missing | 0/1 | `SynchronousXEventWaiter` | 4 |  |
+| `X11DragSource.cs` | `selections/drag_drop/x11_drag_source.rs` | missing | 0/1 | `X11DragSource` | 2 |  |
+| `X11DropTarget.cs` | `selections/drag_drop/x11_drop_target.rs` | missing | 0/1 | `X11DropTarget` | 5 |  |
+| `XdndActionHelper.cs` | `selections/drag_drop/xdnd_action_helper.rs` | missing | 0/1 | `XdndActionHelper` | 2 |  |
+| `XdndConstants.cs` | `selections/drag_drop/xdnd_constants.rs` | missing | 0/1 | `XdndConstants` | 2 |  |
 
 ### `Vulkan` - files 0/2, types 0/4, members 0/12
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `VulkanNativeInterop.cs` | `X11VulkanInterface`, `VkXlibSurfaceCreateInfoKHR` | 8 | not started |
-| `VulkanSupport.cs` | `VulkanSupport`, `VulkanSupport.VulkanSurfaceFactory` | 4 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `VulkanNativeInterop.cs` | `vulkan/vulkan_native_interop.rs` | missing | 0/2 | `X11VulkanInterface`, `VkXlibSurfaceCreateInfoKHR` | 8 |  |
+| `VulkanSupport.cs` | `vulkan/vulkan_support.rs` | missing | 0/2 | `VulkanSupport`, `VulkanSupport.VulkanSurfaceFactory` | 4 |  |
 
-### `X11WindowModes` - files 0/4, types 0/8, members 0/36
+### `X11WindowModes` - files 3/4, types 7/8, members 0/36
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `DefaultWindowMode.cs` | `X11Window`, `X11Window.DefaultTopLevelWindowMode` | 6 | not started |
-| `InputProxyWindowMode.cs` | `X11Window`, `X11Window.InputProxyWindowMode` | 5 | not started |
-| `WindowMode.cs` | `X11Window`, `X11Window.X11WindowMode` | 17 | not started |
-| `XEmbedClientWindowMode.cs` | `X11Window`, `X11Window.XEmbedClientWindowMode` | 8 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `DefaultWindowMode.cs` | `x11_window_modes/default_window_mode.rs` | present | 2/2 | - | 6 |  |
+| `InputProxyWindowMode.cs` | `x11_window_modes/input_proxy_window_mode.rs` | present | 2/2 | - | 5 |  |
+| `WindowMode.cs` | `x11_window_modes/window_mode.rs` | present | 2/2 | - | 17 |  |
+| `XEmbedClientWindowMode.cs` | `x11_window_modes/x_embed_client_window_mode.rs` | missing | 1/2 | `X11Window.XEmbedClientWindowMode` | 8 | types found in `x11_window.rs` (add to path-overrides.toml) |
 
 ### `XShm` - files 0/3, types 0/3, members 0/12
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `X11ShmFramebufferRenderTarget.cs` | `X11ShmFramebufferRenderTarget` | 3 | not started |
-| `X11ShmFramebufferSurface.cs` | `X11ShmFramebufferSurface` | 2 | not started |
-| `X11ShmImage.cs` | `X11ShmImage` | 7 | not started |
+| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
+|---|---|---|---|---|---:|---|
+| `X11ShmFramebufferRenderTarget.cs` | `x_shm/x11_shm_framebuffer_render_target.rs` | missing | 0/1 | `X11ShmFramebufferRenderTarget` | 3 |  |
+| `X11ShmFramebufferSurface.cs` | `x_shm/x11_shm_framebuffer_surface.rs` | missing | 0/1 | `X11ShmFramebufferSurface` | 2 |  |
+| `X11ShmImage.cs` | `x_shm/x11_shm_image.rs` | missing | 0/1 | `X11ShmImage` | 7 |  |
+
+## Rust-only files
+
+Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
+
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `event.rs` | The multicast events of the backend's own classes (a C# `event Action` of the original): a list of handlers with tokens to remove them | `Event` |
+| `pixel_buffer.rs` | A framebuffer over pixels the crate owns, for what the original makes with the `LockedFramebuffer` constructor over memory of its own (cursor and icon pixels) | `PixelBuffer` |
+| `raw_event_grouping.rs` | The port of `src/Shared/RawEventGrouping.cs`, a source file the original compiles into every backend that queues its input (it belongs to no project of the tracking) | `AutomaticRawEventGrouperDispatchQueue`, `GrouperState`, `IRawEventGrouperDispatchQueue`, `ManualRawEventGrouperDispatchQueue`, `MergedPoints`, `RawEvent`, `RawEventGrouper`, `RawEventHandler` |
+
+Tests, examples and build scripts (not scanned): `examples/x11_window.rs`.

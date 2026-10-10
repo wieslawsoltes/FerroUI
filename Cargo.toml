@@ -13,6 +13,7 @@ members = [
     "src/FerroUI.Native",
     "src/Windows/FerroUI.Win32",
     "src/FerroUI.Desktop",
+    "src/FerroUI.X11",
     "src/Browser/FerroUI.Browser",
     "src/Headless/FerroUI.Headless",
     "src/FerroUI.Fonts.Inter",
@@ -72,6 +73,7 @@ microcom-codegen = { version = "=0.1.0-preview.1", path = "src/tools/MicroCom.Co
 ferroui-native = { version = "=0.1.0-preview.1", path = "src/FerroUI.Native" }
 ferroui-win32 = { version = "=0.1.0-preview.1", path = "src/Windows/FerroUI.Win32" }
 ferroui-desktop = { version = "=0.1.0-preview.1", path = "src/FerroUI.Desktop" }
+ferroui-x11 = { version = "=0.1.0-preview.1", path = "src/FerroUI.X11" }
 ferroui-browser = { version = "=0.1.0-preview.1", path = "src/Browser/FerroUI.Browser" }
 ferroui-headless = { version = "=0.1.0-preview.1", path = "src/Headless/FerroUI.Headless" }
 ferroui-fonts-inter = { version = "=0.1.0-preview.1", path = "src/FerroUI.Fonts.Inter" }
@@ -92,6 +94,10 @@ windows-sys = { version = "0.61.2" }
 # ANGLE for the Windows platform backend (docs/porting/win32-platform.md, section 6.2): compiled
 # from source by its build script, only with the feature `angle` of ferroui-win32.
 mozangle = { version = "=0.7.1" }
+# The X11 platform (docs/porting/x11-platform.md, section 2): Xlib and its extension libraries, loaded
+# at run time, and the C library for the event loop (epoll, the wake-up pipe) and shared memory.
+x11-dl = "2.21"
+libc = "0.2"
 paste = "1"
 cc = "1"
 skia-safe = { version = "0.153" }

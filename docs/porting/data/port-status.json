@@ -7525,17 +7525,17 @@
    "name": "Avalonia.X11",
    "path": "src/Avalonia.X11",
    "rust": "src/FerroUI.X11",
-   "scope": "out",
+   "scope": "in",
    "detail": "types",
    "files": [
-    0,
+    48,
     88,
     0
    ],
    "types": [
-    0,
+    121,
     291,
-    0
+    108
    ],
    "members": [
     0,
@@ -7543,7 +7543,7 @@
     0
    ],
    "interfaces": [
-    0,
+    7,
     8
    ],
    "propertyRegistrations": [
@@ -7556,8 +7556,157 @@
    ],
    "notApplicableFiles": 0,
    "matchKinds": {},
-   "presentFiles": {},
-   "rustOnly": []
+   "presentFiles": {
+    "ActivityTrackingHelper.cs": [
+     "activity_tracking_helper.rs"
+    ],
+    "Dispatching/IX11PlatformDispatcher.cs": [
+     "dispatching/i_x11_platform_dispatcher.rs"
+    ],
+    "Dispatching/X11EventDispatcher.cs": [
+     "dispatching/x11_event_dispatcher.rs"
+    ],
+    "Dispatching/X11PlatformThreading.cs": [
+     "dispatching/x11_platform_threading.rs"
+    ],
+    "Keysyms.cs": [
+     "keysyms.rs"
+    ],
+    "Screens/X11Screen.Providers.cs": [
+     "screens/x11_screen_providers.rs"
+    ],
+    "Screens/X11Screens.Scaling.cs": [
+     "screens/x11_screens_scaling.rs"
+    ],
+    "Screens/X11Screens.cs": [
+     "screens/x11_screens.rs"
+    ],
+    "Selections/Clipboard/ClipboardDataReader.cs": [
+     "selections/clipboard/clipboard_data_reader.rs"
+    ],
+    "Selections/Clipboard/ClipboardDataTransfer.cs": [
+     "selections/clipboard/clipboard_data_transfer.rs"
+    ],
+    "Selections/Clipboard/ClipboardDataTransferItem.cs": [
+     "selections/clipboard/clipboard_data_transfer_item.rs"
+    ],
+    "Selections/Clipboard/ClipboardReadSessionFactory.cs": [
+     "selections/clipboard/clipboard_read_session_factory.rs"
+    ],
+    "Selections/Clipboard/EventStreamWindow.cs": [
+     "selections/clipboard/event_stream_window.rs"
+    ],
+    "Selections/Clipboard/X11ClipboardImpl.cs": [
+     "selections/clipboard/x11_clipboard_impl.rs"
+    ],
+    "Selections/DataFormatHelper.cs": [
+     "selections/data_format_helper.rs"
+    ],
+    "Selections/IXEventWaiter.cs": [
+     "selections/i_x_event_waiter.rs"
+    ],
+    "Selections/SelectionDataProvider.cs": [
+     "selections/selection_data_provider.rs"
+    ],
+    "Selections/SelectionDataReader.cs": [
+     "selections/selection_data_reader.rs"
+    ],
+    "Selections/SelectionHelper.cs": [
+     "selections/selection_helper.rs"
+    ],
+    "Selections/SelectionReadSession.cs": [
+     "selections/selection_read_session.rs"
+    ],
+    "Selections/UriListHelper.cs": [
+     "selections/uri_list_helper.rs"
+    ],
+    "TransparencyHelper.cs": [
+     "transparency_helper.rs"
+    ],
+    "X11ActiveWindowTracker.cs": [
+     "x11_active_window_tracker.rs"
+    ],
+    "X11Atoms.cs": [
+     "x11_atoms.rs"
+    ],
+    "X11CursorFactory.cs": [
+     "x11_cursor_factory.rs"
+    ],
+    "X11EnumExtensions.cs": [
+     "x11_enum_extensions.rs"
+    ],
+    "X11Enums.cs": [
+     "x11_enums.rs"
+    ],
+    "X11Exception.cs": [
+     "x11_exception.rs"
+    ],
+    "X11FocusProxy.cs": [
+     "x11_focus_proxy.rs"
+    ],
+    "X11FramebufferSurface.cs": [
+     "x11_framebuffer_surface.rs"
+    ],
+    "X11Globals.cs": [
+     "x11_globals.rs"
+    ],
+    "X11IconLoader.cs": [
+     "x11_icon_loader.rs"
+    ],
+    "X11Info.cs": [
+     "x11_info.rs"
+    ],
+    "X11KeyTransform.cs": [
+     "x11_key_transform.rs"
+    ],
+    "X11Platform.cs": [
+     "x11_platform.rs"
+    ],
+    "X11Structs.cs": [
+     "x11_structs.rs"
+    ],
+    "X11Window.Ime.cs": [
+     "x11_window_ime.rs"
+    ],
+    "X11Window.cs": [
+     "x11_window.rs"
+    ],
+    "X11WindowInfo.cs": [
+     "x11_window_info.rs"
+    ],
+    "X11WindowModes/DefaultWindowMode.cs": [
+     "x11_window_modes/default_window_mode.rs"
+    ],
+    "X11WindowModes/InputProxyWindowMode.cs": [
+     "x11_window_modes/input_proxy_window_mode.rs"
+    ],
+    "X11WindowModes/WindowMode.cs": [
+     "x11_window_modes/window_mode.rs"
+    ],
+    "XError.cs": [
+     "x_error.rs"
+    ],
+    "XI2Manager.cs": [
+     "xi2_manager.rs"
+    ],
+    "XIStructs.cs": [
+     "xi_structs.rs"
+    ],
+    "XLib.Helpers.cs": [
+     "xlib.rs"
+    ],
+    "XLib.cs": [
+     "xlib.rs"
+    ],
+    "XResources.cs": [
+     "x_resources.rs"
+    ]
+   },
+   "rustOnly": [
+    "event.rs",
+    "pixel_buffer.rs",
+    "raw_event_grouping.rs"
+   ]
   },
   {
    "name": "Avalonia.Browser",
@@ -8814,7 +8963,7 @@
     0
    ],
    "types": [
-    109,
+    111,
     276,
     0
    ],
