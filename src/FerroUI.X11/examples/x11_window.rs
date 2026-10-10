@@ -1954,10 +1954,14 @@ mod app {
             wait_for(STEP_TIMEOUT, || !desktop_double::registered_items().is_empty()).await;
             let items = desktop_double::registered_items();
             let expected_name = format!("org.kde.StatusNotifierItem-{}-0", std::process::id());
+            // The watcher may be told about the item more than once, as with the reference: a tray
+            // icon is hidden while its properties are set and then shown, and the show and the
+            // first answer about the owner of the watcher's name each register the item once the
+            // name is owned. What has to hold: every registration names the one item.
             report.check(
                 "tray registered",
-                items.len() == 1 && items[0].0 == expected_name,
-                format!("the watcher was told about {items:?}, expected the item {expected_name}"),
+                !items.is_empty() && items.iter().all(|(item, _)| *item == expected_name),
+                format!("the watcher was told about {items:?}, expected the item {expected_name} and no other"),
             );
             let Some((name, _)) = items.first().cloned() else {
                 tray_icon.dispose();
@@ -2053,13 +2057,14 @@ mod app {
             }
             report.check("tray hidden", hidden == Some(Ok(false)), format!("the name of a hidden item is owned: {hidden:?}"));
 
+            let before = desktop_double::registered_items().len();
             tray_icon.set_is_visible(true);
-            wait_for(STEP_TIMEOUT, || desktop_double::registered_items().len() >= 2).await;
+            wait_for(STEP_TIMEOUT, || desktop_double::registered_items().len() > before).await;
             let items = desktop_double::registered_items();
             report.check(
                 "tray shown again",
-                items.len() == 2 && items[1].0 == name,
-                format!("the watcher was told about the item again, under its name: {items:?}"),
+                items.len() == before + 1 && items.iter().all(|(item, _)| *item == name),
+                format!("the watcher was told about the item once more ({before} time(s) before), under its name: {items:?}"),
             );
 
             tray_icon.dispose();
