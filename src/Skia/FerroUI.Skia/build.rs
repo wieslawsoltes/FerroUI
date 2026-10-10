@@ -32,8 +32,14 @@ fn main() {
         return;
     }
 
+    // The runtime of the iOS simulator is a library of its own: the one of
+    // the devices has no slice for it, and the linker refuses the archive.
+    let simulator = env::var("CARGO_CFG_TARGET_ABI").as_deref() == Ok("sim")
+        || env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("sim")
+        || env::var("TARGET").is_ok_and(|target| target == "x86_64-apple-ios");
     let runtime = match env::var("CARGO_CFG_TARGET_OS").as_deref() {
         Ok("macos") => "clang_rt.osx",
+        Ok("ios") if simulator => "clang_rt.iossim",
         Ok("ios") => "clang_rt.ios",
         _ => return,
     };
@@ -49,7 +55,16 @@ fn main() {
     // Without a directory clang did not find the library and echoed the name.
     if let Some(directory) = path.parent().filter(|directory| directory.is_dir() && path.is_file()) {
         println!("cargo:rustc-link-search=native={}", directory.display());
-        println!("cargo:rustc-link-lib=static={runtime}");
+        // The runtime is a universal archive. The compiler takes the slice
+        // of the target out of one when it puts a static library into the
+        // library of this crate, for macOS only; for iOS the archive is
+        // left to the linker of the final link, which reads universal
+        // archives itself.
+        if runtime == "clang_rt.osx" {
+            println!("cargo:rustc-link-lib=static={runtime}");
+        } else {
+            println!("cargo:rustc-link-lib=static:-bundle={runtime}");
+        }
     }
 }
 

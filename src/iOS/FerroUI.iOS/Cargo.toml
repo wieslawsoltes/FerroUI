@@ -1,0 +1,132 @@
+[package]
+name = "ferroui-ios"
+description = "The iOS platform of FerroUI: a UIKit view, touch input and Metal graphics"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+# The Metal contracts the platform implements.
+ferroui-metal.workspace = true
+# The platform selects its renderer and its text shaper, as the original does (`use_ios`).
+ferroui-harfbuzz.workspace = true
+ferroui-skia.workspace = true
+bitflags.workspace = true
+
+# What the example shows its content with. Optional, behind the feature the example requires.
+ferroui-themes-simple = { workspace = true, optional = true }
+
+# The run loop of the main thread and the main dispatch queue (Core Foundation and libdispatch,
+# declared in `interop.rs`) exist on every Apple system, which is what lets the dispatcher be
+# tested on the development machine; `pthread_main_np` comes from the C library.
+[target.'cfg(target_vendor = "apple")'.dependencies]
+libc.workspace = true
+
+# UIKit, Core Animation and Metal (docs/porting/ios-platform.md, section 2): the versions the
+# lock file already had for the `wgpu` renderer of the Vello backend, with UIKit added.
+[target.'cfg(target_os = "ios")'.dependencies]
+objc2 = { version = "=0.6.5" }
+block2 = { version = "=0.6.2" }
+objc2-foundation = { version = "=0.3.2", default-features = false, features = [
+    "std",
+    "block2",
+    "objc2-core-foundation",
+    "NSArray",
+    "NSDictionary",
+    "NSEnumerator",
+    "NSGeometry",
+    "NSNotification",
+    "NSObjCRuntime",
+    "NSObject",
+    "NSOperation",
+    "NSRunLoop",
+    "NSSet",
+    "NSString",
+    "NSThread",
+] }
+objc2-core-foundation = { version = "=0.3.2", default-features = false, features = ["std", "CFCGTypes"] }
+objc2-quartz-core = { version = "=0.3.2", default-features = false, features = [
+    "std",
+    "objc2-core-foundation",
+    "objc2-metal",
+    "CADisplayLink",
+    "CALayer",
+    "CAMetalLayer",
+] }
+objc2-metal = { version = "=0.3.2", default-features = false, features = [
+    "std",
+    "MTLBlitCommandEncoder",
+    "MTLCommandBuffer",
+    "MTLCommandEncoder",
+    "MTLCommandQueue",
+    "MTLDevice",
+    "MTLDrawable",
+    "MTLPixelFormat",
+    "MTLResource",
+    "MTLTexture",
+    "MTLTypes",
+] }
+objc2-ui-kit = { version = "=0.3.2", default-features = false, features = [
+    "std",
+    "block2",
+    "objc2-core-foundation",
+    "objc2-quartz-core",
+    "UIApplication",
+    "UICommand",
+    "UIDevice",
+    "UIEvent",
+    "UIGeometry",
+    "UIGraphics",
+    "UIGraphicsImageRenderer",
+    "UIGraphicsRenderer",
+    "UIImage",
+    "UILayoutGuide",
+    "UIOrientation",
+    "UIResponder",
+    "UIScene",
+    "UISceneConfiguration",
+    "UISceneDefinitions",
+    "UISceneOptions",
+    "UISceneSession",
+    "UIScreen",
+    "UITouch",
+    "UIView",
+    "UIViewController",
+    "UIWindow",
+    "UIWindowScene",
+] }
+
+[features]
+# Builds `examples/ios_view.rs`: a view with the Simple theme and the smoke mode.
+example = ["dep:ferroui-themes-simple"]
+
+[[example]]
+name = "ios_view"
+path = "examples/ios_view.rs"
+required-features = ["example"]
+
+# Runs the run loop of the main thread, which only the main thread can.
+[[test]]
+name = "dispatcher_main_loop"
+path = "tests/dispatcher_main_loop.rs"
+harness = false
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "platforms"
+
+# The crate has its content on iOS only, so its documentation is the one of that target.
+[package.metadata.docs.rs]
+default-target = "aarch64-apple-ios"
+targets = ["aarch64-apple-ios", "aarch64-apple-ios-sim"]
