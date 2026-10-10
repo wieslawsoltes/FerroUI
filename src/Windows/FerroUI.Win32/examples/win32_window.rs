@@ -20,7 +20,9 @@
 //! The renderer is the Vello backend in its CPU mode: it has no C or C++
 //! sources, so the example is checked for a Windows target on any host. The
 //! window is drawn through the framebuffer surface with
-//! `--rendering software` (the default).
+//! `--rendering software` (the default). `--rendering wgl` asks for the
+//! OpenGL of the system and, where the system has no driver for it, checks
+//! that the mode is passed over and the window renders in software.
 //!
 //! With `--rendering angle` (the crate built with its feature `angle`) the
 //! platform graphics are ANGLE on Direct3D 11, and the frames are drawn
@@ -1692,8 +1694,9 @@ mod windows {
         let rendering_mode = match rendering {
             "software" => Win32RenderingMode::Software,
             "angle" => Win32RenderingMode::AngleEgl,
+            "wgl" => Win32RenderingMode::Wgl,
             other => {
-                eprintln!("win32_window: unknown rendering mode '{other}' (software, angle)");
+                eprintln!("win32_window: unknown rendering mode '{other}' (software, angle, wgl)");
                 return ExitCode::from(2);
             }
         };
@@ -1727,11 +1730,33 @@ mod windows {
             && matches!(composition_mode, Win32CompositionMode::DirectComposition | Win32CompositionMode::WinUIComposition);
 
         let options = Win32PlatformOptions {
-            rendering_mode: vec![rendering_mode],
+            // The OpenGL of the system is the one mode with a fallback: a
+            // system without a driver that has the extensions of WGL (the
+            // generic implementation of the system is OpenGL 1.1) has to
+            // pass the mode over and render in software, and that is what
+            // the run then checks.
+            rendering_mode: if rendering_mode == Win32RenderingMode::Wgl {
+                vec![Win32RenderingMode::Wgl, Win32RenderingMode::Software]
+            } else {
+                vec![rendering_mode]
+            },
             composition_mode: vec![composition_mode],
             ..Win32PlatformOptions::default()
         };
         Win32Platform::initialize(options);
+        let wgl_active = rendering_mode == Win32RenderingMode::Wgl
+            && FerroLocator::current().get_service::<Arc<dyn IPlatformGraphics>>().is_some();
+        if rendering_mode == Win32RenderingMode::Wgl {
+            if wgl_active {
+                println!("WGL: active: the system created a context of one of the profiles of the options");
+            } else {
+                println!(
+                    "WGL: not available: the system created no context of OpenGL 4.0 or 3.2; the mode was passed over and the run renders in software (the fallback is what this run checks)"
+                );
+            }
+        }
+        // The modes that draw with a context of OpenGL through the surface of the window.
+        let gl_mode = rendering_mode == Win32RenderingMode::AngleEgl || wgl_active;
         VelloPlatform::initialize_with_options(VelloOptions::with_rendering_mode(VelloRenderingMode::Cpu));
 
         // The compositor of the Windows Runtime commits what was changed when its thread asks it
@@ -1781,13 +1806,13 @@ mod windows {
         let windowing_platform = locator.get_required_service::<dyn IWindowingPlatform>();
         let window = windowing_platform.create_window();
         let early_report = Report::default();
-        let gl = if rendering_mode == Win32RenderingMode::AngleEgl {
+        let gl = if gl_mode {
             println!("-- platform graphics");
             GlPainter::new(&window, &early_report)
         } else {
             None
         };
-        let gl_failed = rendering_mode == Win32RenderingMode::AngleEgl && gl.is_none();
+        let gl_failed = gl_mode && gl.is_none();
         let state = Rc::new(State {
             window: window.clone(),
             gl,
@@ -1804,7 +1829,7 @@ mod windows {
             verbose_input: true,
         });
         if gl_failed {
-            eprintln!("win32_window: the rendering mode ANGLE has no painter; see the failed check above");
+            eprintln!("win32_window: the rendering mode has no painter; see the failed check above");
             return ExitCode::FAILURE;
         }
         let report = &state.report;
@@ -1829,8 +1854,8 @@ mod windows {
             // With ANGLE a window has a third surface: its OpenGL surface,
             // or in a composition mode the surface of that mode, which is
             // not an OpenGL surface itself.
-            let expected_gl_surfaces = usize::from(rendering_mode == Win32RenderingMode::AngleEgl && !composed);
-            let expected_surfaces = 2 + usize::from(rendering_mode == Win32RenderingMode::AngleEgl);
+            let expected_gl_surfaces = usize::from(gl_mode && !composed);
+            let expected_surfaces = 2 + usize::from(gl_mode);
             report.check(
                 "surfaces",
                 surfaces.len() == expected_surfaces

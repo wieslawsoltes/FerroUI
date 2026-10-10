@@ -365,7 +365,7 @@ mod fatal_exceptions {
 }
 
 /// The options of a smoke run on Windows, from the environment:
-/// `FERROUI_SMOKE_RENDERING=software|angle` asks for that rendering mode
+/// `FERROUI_SMOKE_RENDERING=software|angle|wgl` asks for that rendering mode
 /// alone (no fallback, so a mode that does not work fails the run), and
 /// `FERROUI_SMOKE_RENDER_ON_UI_THREAD=1` renders on the UI thread.
 #[cfg(windows)]
@@ -384,7 +384,10 @@ fn smoke_platform_options(builder: AppBuilder) -> AppBuilder {
             options.rendering_mode = vec![Win32RenderingMode::AngleEgl];
             options.composition_mode = vec![smoke_composition_mode()];
         }
-        Some(other) => println!("FERROUI_SMOKE_RENDERING: unknown mode {other:?} (software, angle); the default order is used"),
+        // The OpenGL of the system, with software rendering behind it: a system without a
+        // driver for it (the generic implementation is OpenGL 1.1) passes the mode over.
+        Some("wgl") => options.rendering_mode = vec![Win32RenderingMode::Wgl, Win32RenderingMode::Software],
+        Some(other) => println!("FERROUI_SMOKE_RENDERING: unknown mode {other:?} (software, angle, wgl); the default order is used"),
         None => {}
     }
     println!(

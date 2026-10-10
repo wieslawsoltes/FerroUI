@@ -1367,6 +1367,50 @@ impl MONITOR {
     pub const MONITOR_DEFAULTTONEAREST: u32 = 0x00000002;
 }
 
+/// `PixelFormatDescriptorFlags` of the interop declarations.
+pub struct PixelFormatDescriptorFlags;
+
+#[allow(missing_docs)]
+impl PixelFormatDescriptorFlags {
+    pub const PFD_DOUBLEBUFFER: u32 = 0x00000001;
+    pub const PFD_DRAW_TO_WINDOW: u32 = 0x00000004;
+    pub const PFD_SUPPORT_OPENGL: u32 = 0x00000020;
+}
+
+/// `PixelFormatDescriptor` of the interop declarations: the layout of the
+/// `PIXELFORMATDESCRIPTOR` of the system (40 bytes).
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[allow(missing_docs)]
+pub struct PixelFormatDescriptor {
+    pub size: u16,
+    pub version: u16,
+    pub flags: u32,
+    pub pixel_type: u8,
+    pub color_bits: u8,
+    pub red_bits: u8,
+    pub red_shift: u8,
+    pub green_bits: u8,
+    pub green_shift: u8,
+    pub blue_bits: u8,
+    pub blue_shift: u8,
+    pub alpha_bits: u8,
+    pub alpha_shift: u8,
+    pub accum_bits: u8,
+    pub accum_red_bits: u8,
+    pub accum_green_bits: u8,
+    pub accum_blue_bits: u8,
+    pub accum_alpha_bits: u8,
+    pub depth_bits: u8,
+    pub stencil_bits: u8,
+    pub aux_buffers: u8,
+    pub layer_type: u8,
+    pub reserved: u8,
+    pub layer_mask: u32,
+    pub visible_mask: u32,
+    pub damage_mask: u32,
+}
+
 /// `DEVICECAP` of the interop declarations: the values the system uses, as constants.
 pub struct DEVICECAP;
 
@@ -1941,6 +1985,7 @@ mod native {
     use windows_sys::Win32::Foundation as wf;
     use windows_sys::Win32::Graphics::Dwm as dwm;
     use windows_sys::Win32::Graphics::Gdi as gdi;
+    use windows_sys::Win32::Graphics::OpenGL as gl;
     use windows_sys::Win32::Storage::FileSystem as fs;
     use windows_sys::Win32::System::DataExchange as dx;
     use windows_sys::Win32::System::Com as com;
@@ -2013,6 +2058,130 @@ mod native {
         // SAFETY: the module handle came from the loader and the name is a
         // null-terminated string.
         unsafe { ll::GetProcAddress(h(module), name.as_ptr().cast()) }
+    }
+
+    /// The device context of the client area of a window; 0 if the call
+    /// fails. It is released with [`release_dc`], by the thread that got it.
+    pub fn get_dc(hwnd: isize) -> isize {
+        // SAFETY: a stale handle makes the call fail.
+        unsafe { gdi::GetDC(h(hwnd)) as isize }
+    }
+
+    /// Releases a device context of [`get_dc`].
+    pub fn release_dc(hwnd: isize, dc: isize) -> bool {
+        // SAFETY: handles; stale ones make the call fail.
+        unsafe { gdi::ReleaseDC(h(hwnd), h(dc)) != 0 }
+    }
+
+    /// `GetDeviceCaps`: 0 for a device context that is not valid.
+    pub fn get_device_caps(dc: isize, index: i32) -> i32 {
+        // SAFETY: a handle and a number.
+        unsafe { gdi::GetDeviceCaps(h(dc), index) }
+    }
+
+    /// Posts a message to the queue of a thread. Fails while the thread has
+    /// no message queue.
+    pub fn post_thread_message(thread_id: u32, msg: u32, w_param: usize, l_param: isize) -> bool {
+        // SAFETY: plain numbers.
+        unsafe { wm::PostThreadMessageW(thread_id, msg, w_param, l_param) != 0 }
+    }
+
+    /// Takes a message off the queue of the calling thread, if there is
+    /// one (`PeekMessage` with `PM_REMOVE`). The first call creates the
+    /// queue.
+    pub fn peek_message() -> Option<Msg> {
+        // SAFETY: zeroed plain data, filled by the call.
+        let mut msg: wm::MSG = unsafe { std::mem::zeroed() };
+        // SAFETY: a valid out structure; no window or range filter.
+        let found = unsafe { wm::PeekMessageW(&mut msg, std::ptr::null_mut(), 0, 0, wm::PM_REMOVE) != 0 };
+        found.then_some(Msg(msg))
+    }
+
+    /// An overlapped window of a class, never shown: what the device
+    /// context of an OpenGL context belongs to.
+    pub fn create_offscreen_gl_window(atom: u16) -> isize {
+        create_window_ex(0, atom, super::WindowStyles::WS_OVERLAPPEDWINDOW.bits(), 0, 0, 640, 480, 0)
+    }
+
+    fn pfd(descriptor: &super::PixelFormatDescriptor) -> *const gl::PIXELFORMATDESCRIPTOR {
+        // The two structures have the same layout (`repr(C)`, the fields of
+        // the header in their order; the size is tested).
+        (descriptor as *const super::PixelFormatDescriptor).cast()
+    }
+
+    /// `ChoosePixelFormat`: the index of the pixel format of the device
+    /// context that fits the descriptor best; 0 if there is none.
+    pub fn choose_pixel_format(dc: isize, descriptor: &super::PixelFormatDescriptor) -> i32 {
+        // SAFETY: the descriptor is read during the call.
+        unsafe { gl::ChoosePixelFormat(h(dc), pfd(descriptor)) }
+    }
+
+    /// `SetPixelFormat`.
+    pub fn set_pixel_format(dc: isize, format: i32, descriptor: &super::PixelFormatDescriptor) -> bool {
+        // SAFETY: the descriptor is read during the call.
+        unsafe { gl::SetPixelFormat(h(dc), format, pfd(descriptor)) != 0 }
+    }
+
+    /// `DescribePixelFormat`: the descriptor of a pixel format of the
+    /// device context; `None` if the call fails.
+    pub fn describe_pixel_format(dc: isize, format: i32) -> Option<super::PixelFormatDescriptor> {
+        let mut descriptor = super::PixelFormatDescriptor::default();
+        let size = std::mem::size_of::<super::PixelFormatDescriptor>() as u32;
+        // SAFETY: the system writes at most `size` bytes, the size of the
+        // structure, whose layout is the one of the system.
+        let result = unsafe {
+            gl::DescribePixelFormat(h(dc), format, size, (&mut descriptor as *mut super::PixelFormatDescriptor).cast())
+        };
+        (result != 0).then_some(descriptor)
+    }
+
+    /// `SwapBuffers`.
+    pub fn swap_buffers(dc: isize) -> bool {
+        // SAFETY: a handle.
+        unsafe { gl::SwapBuffers(h(dc)) != 0 }
+    }
+
+    /// `wglCreateContext`: 0 if no context can be created for the pixel
+    /// format of the device context.
+    pub fn wgl_create_context(dc: isize) -> isize {
+        // SAFETY: a handle.
+        unsafe { gl::wglCreateContext(h(dc)) as isize }
+    }
+
+    /// `wglDeleteContext`.
+    pub fn wgl_delete_context(context: isize) -> bool {
+        // SAFETY: a handle; a stale one makes the call fail.
+        unsafe { gl::wglDeleteContext(h(context)) != 0 }
+    }
+
+    /// `wglMakeCurrent`: makes a context current on the calling thread with
+    /// a device context; two zeros release the current context.
+    pub fn wgl_make_current(dc: isize, context: isize) -> bool {
+        // SAFETY: handles.
+        unsafe { gl::wglMakeCurrent(h(dc), h(context)) != 0 }
+    }
+
+    /// The context that is current on the calling thread; 0 if none is.
+    pub fn wgl_get_current_context() -> isize {
+        // SAFETY: no arguments.
+        unsafe { gl::wglGetCurrentContext() as isize }
+    }
+
+    /// The device context of the current context; 0 if none is current.
+    pub fn wgl_get_current_dc() -> isize {
+        // SAFETY: no arguments.
+        unsafe { gl::wglGetCurrentDC() as isize }
+    }
+
+    /// `wglGetProcAddress`: the address of an entry point of the driver of
+    /// the current context that the system library does not export; null
+    /// if it has none, or if no context is current.
+    pub fn wgl_get_proc_address(name: &std::ffi::CStr) -> *const c_void {
+        // SAFETY: a null-terminated string that lives through the call.
+        match unsafe { gl::wglGetProcAddress(name.as_ptr().cast()) } {
+            Some(entry) => entry as *const c_void,
+            None => std::ptr::null(),
+        }
     }
 
     /// The version of the system as `RtlGetVersion` reports it: major,

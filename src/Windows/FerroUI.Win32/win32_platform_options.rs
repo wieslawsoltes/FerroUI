@@ -1,6 +1,7 @@
 //! The options of the Windows backend.
 
 use ferroui_base::platform::{IPlatformGraphics, PlatformGraphicsDeviceAdapterDescription};
+use ferroui_opengl::{GlProfileType, GlVersion};
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -95,6 +96,11 @@ pub struct Win32PlatformOptions {
     /// to begin with. This setting is false by default.
     pub should_render_on_ui_thread: bool,
 
+    /// Windows OpenGL profiles used when
+    /// [`rendering_mode`](Self::rendering_mode) is set to
+    /// [`Win32RenderingMode::Wgl`]. This setting is 4.0 and 3.2 by default.
+    pub wgl_profiles: Vec<GlVersion>,
+
     /// Provides a way to use a custom-implemented graphics context such as
     /// a custom ISkiaGpu. When this property is set,
     /// [`rendering_mode`](Self::rendering_mode) is ignored and
@@ -122,6 +128,7 @@ impl Default for Win32PlatformOptions {
             ],
             win_ui_composition_backdrop_corner_radius: None,
             should_render_on_ui_thread: false,
+            wgl_profiles: vec![GlVersion::new(GlProfileType::OpenGL, 4, 0), GlVersion::new(GlProfileType::OpenGL, 3, 2)],
             custom_platform_graphics: None,
             dpi_awareness: Win32DpiAwareness::PerMonitorDpiAware,
             graphics_adapter_selection_callback: None,
@@ -156,6 +163,10 @@ mod tests {
         );
         assert_eq!(options.win_ui_composition_backdrop_corner_radius, None);
         assert!(!options.should_render_on_ui_thread);
+        assert_eq!(
+            options.wgl_profiles,
+            [GlVersion::new(GlProfileType::OpenGL, 4, 0), GlVersion::new(GlProfileType::OpenGL, 3, 2)]
+        );
         assert!(options.custom_platform_graphics.is_none());
         assert_eq!(options.dpi_awareness, Win32DpiAwareness::PerMonitorDpiAware);
         assert!(options.graphics_adapter_selection_callback.is_none());

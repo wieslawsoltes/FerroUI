@@ -225,6 +225,7 @@ mod imp {
     use crate::input::WindowsMouseDevice;
     use crate::interop::unmanaged_methods::*;
     use crate::offscreen_parent_window::OffscreenParentWindow;
+    use crate::open_gl::WglGlPlatformSurface;
     use crate::platform_constants::{PlatformConstants, Version};
     use crate::screen_impl::ScreenImpl;
     use crate::win32_gl_manager::{Win32GlManager, Win32PlatformGraphicsKind};
@@ -602,9 +603,7 @@ mod imp {
             // The surface of the platform graphics: the one of the surface
             // factory (a composition mode), or the one that fits the
             // platform graphics; the reference tests their type, the
-            // graphics manager remembers what it registered. The surface
-            // of the OpenGL of the system (WGL) is a later step of stage
-            // 2b.
+            // graphics manager remembers what it registered.
             if gl_platform.is_some() {
                 if let Some(handle) = this.handle.borrow().clone() {
                     if let Some(surface_factory) = &surface_factory {
@@ -614,6 +613,9 @@ mod imp {
                         *this.gl_surface_dispose.borrow_mut() = dispose;
                     } else if Win32GlManager::platform_graphics_kind() == Some(Win32PlatformGraphicsKind::AngleD3D11) {
                         let gl_surface: Arc<dyn IPlatformRenderSurface> = EglGlPlatformSurface::new(handle);
+                        *this.gl_surface.borrow_mut() = Some(gl_surface);
+                    } else if Win32GlManager::platform_graphics_kind() == Some(Win32PlatformGraphicsKind::Wgl) {
+                        let gl_surface: Arc<dyn IPlatformRenderSurface> = WglGlPlatformSurface::new(handle);
                         *this.gl_surface.borrow_mut() = Some(gl_surface);
                     }
                 }

@@ -134,6 +134,14 @@ jobs:
       - name: Smoke run of a window (software rendering)
         timeout-minutes: 5
         run: cargo run --locked -p ferroui-win32 --no-default-features --example win32_window -- --smoke
+      # The rendering mode Wgl, the OpenGL of the system. The hosted runners have no driver for it
+      # (the generic implementation of the system is OpenGL 1.1, without the extensions contexts
+      # are created through), so there the run checks that the mode is passed over and the window
+      # renders in software; with a driver it draws and reads back every frame through a context
+      # of WGL. The run prints which of the two it was ("WGL: active" or "WGL: not available").
+      - name: Smoke run with the OpenGL of the system (WGL), or its fallback
+        timeout-minutes: 5
+        run: cargo run --locked -p ferroui-win32 --no-default-features --example win32_window -- --smoke --rendering wgl
       # A feature set of Skia without a published binary makes the Skia bindings build Skia from
       # source (an hour, with LLVM). This asks the release of the bindings which sets exist for
       # the target: the raster set the desktop entry point needs today, which gates the steps
@@ -270,7 +278,7 @@ jobs:
         timeout-minutes: 15
         run: |
           result=0
-          for mode in software angle; do
+          for mode in software angle wgl; do
             FERROUI_SMOKE_RENDERING=$mode cargo test --locked -p ferroui-integration-tests-win32 --test integration -- presented_frame_tests || result=1
           done
           # Through ANGLE with each composition mode that presents through a surface of its own.
@@ -392,6 +400,9 @@ jobs:
       - name: Smoke run of a window (software rendering)
         timeout-minutes: 5
         run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --no-default-features --example win32_window -- --smoke
+      - name: Smoke run with the OpenGL of the system (WGL), or its fallback
+        timeout-minutes: 5
+        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --no-default-features --example win32_window -- --smoke --rendering wgl
       - name: Build with ANGLE (the time of the mozangle build)
         if: ${{ !cancelled() }}
         timeout-minutes: 90

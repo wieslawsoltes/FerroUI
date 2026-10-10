@@ -35,7 +35,10 @@ fn rendering_options(builder: AppBuilder) -> AppBuilder {
             options.rendering_mode = vec![Win32RenderingMode::AngleEgl];
             options.composition_mode = vec![smoke_composition_mode()];
         }
-        Some(other) => panic!("FERROUI_SMOKE_RENDERING: unknown mode {other:?} (software, angle)"),
+        // The OpenGL of the system, with software rendering behind it: a system without a
+        // driver for it (the generic implementation is OpenGL 1.1) passes the mode over.
+        Some("wgl") => options.rendering_mode = vec![Win32RenderingMode::Wgl, Win32RenderingMode::Software],
+        Some(other) => panic!("FERROUI_SMOKE_RENDERING: unknown mode {other:?} (software, angle, wgl)"),
         None => return builder,
     }
     println!("rendering modes of the run: {:?}; composition modes: {:?}", options.rendering_mode, options.composition_mode);

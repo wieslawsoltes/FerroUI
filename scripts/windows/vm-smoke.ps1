@@ -305,6 +305,9 @@ if (-not $SkipTests -and -not $failed.Contains('build')) {
 if ($Modes.Count -eq 0) {
     $Modes = @('software')
     if ($angle) { $Modes += 'angle' }
+    # The OpenGL of the system, or software rendering where the system has no driver for it:
+    # the run prints which ("WGL: active" or "WGL: not available").
+    $Modes += 'wgl'
 }
 $example = Join-Path $TargetDir 'debug\examples\win32_window.exe'
 
@@ -380,6 +383,7 @@ if ($Desktop) {
             @('default', ''),
             @('software', 'set FERROUI_SMOKE_RENDERING=software&& '),
             @('angle', 'set FERROUI_SMOKE_RENDERING=angle&& '),
+            @('wgl', 'set FERROUI_SMOKE_RENDERING=wgl&& '),
             @('angle-ui-thread', 'set FERROUI_SMOKE_RENDERING=angle&& set FERROUI_SMOKE_RENDER_ON_UI_THREAD=1&& ')
         )
         for ($i = 2; $i -le $HelloRepeat; $i++) { $variants += ,@("default-$i", '') }
@@ -413,7 +417,7 @@ if ($Desktop) {
             Tail 'integration' 80 'FAILED|^test result|^running|panicked|^failures|^    '
             # What a window presents reaches the edges of its client area, with each rendering
             # mode alone (the run above had the default options).
-            foreach ($mode in @('software', 'angle')) {
+            foreach ($mode in @('software', 'angle', 'wgl')) {
                 $name = "integration-presented-$mode"
                 $commandLine = "set FERROUI_SMOKE_RENDERING=$mode&& `"$($binary.FullName)`" presented_frame_tests"
                 $code = if ($InteractiveUser) { Run-Interactive $name $commandLine 300 } else { Run $name $commandLine }

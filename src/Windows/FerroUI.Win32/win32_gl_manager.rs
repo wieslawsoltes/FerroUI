@@ -3,6 +3,7 @@
 
 use crate::angle_options::AngleOptions;
 use crate::open_gl::angle::{AnglePlatformGraphics, AngleWin32PlatformGraphicsFactory, D3D11AngleWin32PlatformGraphics};
+use crate::open_gl::WglPlatformOpenGlInterface;
 use crate::win32_platform_options::{Win32CompositionMode, Win32PlatformOptions, Win32RenderingMode};
 use ferroui_base::platform::IPlatformGraphics;
 use ferroui_base::{FerroLocator, LocatorExtensions};
@@ -20,6 +21,16 @@ pub(crate) enum Win32PlatformGraphicsKind {
     /// ANGLE on Direct3D 11: a window is rendered through an EGL window
     /// surface.
     AngleD3D11,
+    /// The OpenGL of the system: a window is rendered through its device
+    /// context, with a context of WGL.
+    Wgl,
+}
+
+/// The platform graphics the loop over the rendering modes chose.
+#[derive(Debug)]
+pub(crate) enum Win32PlatformGraphics {
+    Angle(D3D11AngleWin32PlatformGraphics),
+    Wgl(WglPlatformOpenGlInterface),
 }
 
 thread_local! {
@@ -44,19 +55,46 @@ impl Win32GlManager {
         let gl = Self::initialize_core(
             opts,
             &mut || AngleWin32PlatformGraphicsFactory::try_create(Some(&angle_options), selection_callback.clone()),
+            &mut Self::try_create_wgl,
             &mut Self::try_create_and_register_composition,
         )?;
 
-        KIND.with(|kind| kind.set(Some(Win32PlatformGraphicsKind::AngleD3D11)));
-        let open_gl_factory: Rc<dyn IPlatformGraphicsOpenGlContextFactory> = Rc::new(gl.clone());
-        let gl: Arc<dyn IPlatformGraphics> = Arc::new(gl);
-        FerroLocator::current_mutable()
-            .bind::<Arc<dyn IPlatformGraphics>>()
-            .to_constant(Rc::new(gl.clone()))
-            .bind::<dyn IPlatformGraphicsOpenGlContextFactory>()
-            .to_constant(open_gl_factory);
+        match gl {
+            Win32PlatformGraphics::Angle(gl) => {
+                KIND.with(|kind| kind.set(Some(Win32PlatformGraphicsKind::AngleD3D11)));
+                let open_gl_factory: Rc<dyn IPlatformGraphicsOpenGlContextFactory> = Rc::new(gl.clone());
+                let gl: Arc<dyn IPlatformGraphics> = Arc::new(gl);
+                FerroLocator::current_mutable()
+                    .bind::<Arc<dyn IPlatformGraphics>>()
+                    .to_constant(Rc::new(gl.clone()))
+                    .bind::<dyn IPlatformGraphicsOpenGlContextFactory>()
+                    .to_constant(open_gl_factory);
+                Some(gl)
+            }
+            // As in the reference, the graphics of WGL are no factory of
+            // OpenGL contexts for the application.
+            #[cfg(windows)]
+            Win32PlatformGraphics::Wgl(gl) => {
+                KIND.with(|kind| kind.set(Some(Win32PlatformGraphicsKind::Wgl)));
+                let gl: Arc<dyn IPlatformGraphics> = Arc::new(gl);
+                FerroLocator::current_mutable().bind::<Arc<dyn IPlatformGraphics>>().to_constant(Rc::new(gl.clone()));
+                Some(gl)
+            }
+            #[cfg(not(windows))]
+            Win32PlatformGraphics::Wgl(_) => None,
+        }
+    }
 
-        Some(gl)
+    /// The platform graphics of WGL, when the system creates a context of
+    /// one of the profiles of the options.
+    #[cfg(windows)]
+    fn try_create_wgl() -> Option<WglPlatformOpenGlInterface> {
+        WglPlatformOpenGlInterface::try_create()
+    }
+
+    #[cfg(not(windows))]
+    fn try_create_wgl() -> Option<WglPlatformOpenGlInterface> {
+        None
     }
 
     /// What the registered platform graphics are; `None` without platform
@@ -97,14 +135,17 @@ impl Win32GlManager {
     /// platform graphics of ANGLE; `try_register_composition` registers a
     /// composition mode other than the redirection surface.
     ///
-    /// The modes that are not built yet are passed over like a mode that
-    /// fails to initialize: the OpenGL of the system (WGL, a later step of
-    /// stage 2b) and Vulkan (after the Vulkan project of the port).
+    /// `try_create_wgl` creates the platform graphics of the OpenGL of the
+    /// system.
+    ///
+    /// Vulkan is not built yet (after the Vulkan project of the port) and
+    /// is passed over like a mode that fails to initialize.
     pub(crate) fn initialize_core(
         opts: &Win32PlatformOptions,
         try_create_angle: &mut dyn FnMut() -> Option<AnglePlatformGraphics>,
+        try_create_wgl: &mut dyn FnMut() -> Option<WglPlatformOpenGlInterface>,
         try_register_composition: &mut dyn FnMut(Win32CompositionMode) -> bool,
-    ) -> Option<D3D11AngleWin32PlatformGraphics> {
+    ) -> Option<Win32PlatformGraphics> {
         if opts.rendering_mode.is_empty() {
             panic!("Win32PlatformOptions.rendering_mode must not be empty or null");
         }
@@ -115,7 +156,7 @@ impl Win32GlManager {
                 Win32RenderingMode::AngleEgl => match try_create_angle() {
                     Some(AnglePlatformGraphics::D3D11(egl)) => {
                         Self::try_register_composition(opts, try_register_composition);
-                        return Some(egl);
+                        return Some(Win32PlatformGraphics::Angle(egl));
                     }
                     // As in the reference, the graphics of Direct3D 9 are
                     // not taken; they are released here, where the
@@ -123,7 +164,12 @@ impl Win32GlManager {
                     Some(AnglePlatformGraphics::D3D9(d3d9)) => d3d9.dispose(),
                     None => {}
                 },
-                Win32RenderingMode::Wgl | Win32RenderingMode::Vulkan => {}
+                Win32RenderingMode::Wgl => {
+                    if let Some(wgl) = try_create_wgl() {
+                        return Some(Win32PlatformGraphics::Wgl(wgl));
+                    }
+                }
+                Win32RenderingMode::Vulkan => {}
             }
         }
 
@@ -164,9 +210,27 @@ impl Win32GlManager {
 mod tests {
     // Not from upstream: the reference has no tests of the manager.
     use super::*;
+    use ferroui_opengl::{GlProfileType, GlVersion};
 
     fn options(rendering_mode: Vec<Win32RenderingMode>) -> Win32PlatformOptions {
         Win32PlatformOptions { rendering_mode, ..Default::default() }
+    }
+
+    /// The loop on a system whose OpenGL creates no context.
+    fn angle_only(
+        opts: &Win32PlatformOptions,
+        try_create_angle: &mut dyn FnMut() -> Option<AnglePlatformGraphics>,
+        try_register_composition: &mut dyn FnMut(Win32CompositionMode) -> bool,
+    ) -> Option<D3D11AngleWin32PlatformGraphics> {
+        match Win32GlManager::initialize_core(opts, try_create_angle, &mut || None, try_register_composition) {
+            Some(Win32PlatformGraphics::Angle(gl)) => Some(gl),
+            Some(Win32PlatformGraphics::Wgl(_)) => panic!("no graphics of WGL were offered"),
+            None => None,
+        }
+    }
+
+    fn wgl() -> Option<WglPlatformOpenGlInterface> {
+        Some(WglPlatformOpenGlInterface::new(GlVersion::new(GlProfileType::OpenGL, 4, 0)))
     }
 
     fn d3d11() -> Option<AnglePlatformGraphics> {
@@ -177,7 +241,7 @@ mod tests {
     fn the_default_order_takes_angle_when_it_initializes() {
         let mut asked = 0;
         let mut composition = Vec::new();
-        let gl = Win32GlManager::initialize_core(
+        let gl = angle_only(
             &Win32PlatformOptions::default(),
             &mut || {
                 asked += 1;
@@ -199,7 +263,7 @@ mod tests {
     #[test]
     fn the_default_order_falls_back_to_software_when_angle_does_not_initialize() {
         let mut asked = 0;
-        let gl = Win32GlManager::initialize_core(
+        let gl = angle_only(
             &Win32PlatformOptions::default(),
             &mut || {
                 asked += 1;
@@ -215,7 +279,7 @@ mod tests {
     #[test]
     fn software_first_never_asks_for_angle() {
         let mut asked = 0;
-        let gl = Win32GlManager::initialize_core(
+        let gl = angle_only(
             &options(vec![Win32RenderingMode::Software, Win32RenderingMode::AngleEgl]),
             &mut || {
                 asked += 1;
@@ -231,7 +295,7 @@ mod tests {
     #[test]
     #[should_panic(expected = "has a value of \"AngleEgl, Wgl, Vulkan\", but no options were applied.")]
     fn a_list_in_which_nothing_initializes_is_an_error() {
-        Win32GlManager::initialize_core(
+        angle_only(
             &options(vec![Win32RenderingMode::AngleEgl, Win32RenderingMode::Wgl, Win32RenderingMode::Vulkan]),
             &mut || None,
             &mut |_| false,
@@ -241,7 +305,7 @@ mod tests {
     #[test]
     #[should_panic(expected = "rendering_mode must not be empty or null")]
     fn an_empty_list_is_an_error() {
-        Win32GlManager::initialize_core(&options(Vec::new()), &mut || None, &mut |_| false);
+        angle_only(&options(Vec::new()), &mut || None, &mut |_| false);
     }
 
     #[test]
@@ -252,7 +316,7 @@ mod tests {
             ..Default::default()
         };
 
-        Win32GlManager::initialize_core(&opts, &mut d3d11, &mut |_| false);
+        angle_only(&opts, &mut d3d11, &mut |_| false);
     }
 
     #[test]
@@ -267,7 +331,7 @@ mod tests {
         };
         let mut asked = Vec::new();
 
-        let gl = Win32GlManager::initialize_core(&opts, &mut d3d11, &mut |mode| {
+        let gl = angle_only(&opts, &mut d3d11, &mut |mode| {
             asked.push(mode);
             mode == Win32CompositionMode::DirectComposition
         });
@@ -283,7 +347,7 @@ mod tests {
             ..Default::default()
         };
 
-        let gl = Win32GlManager::initialize_core(&opts, &mut d3d11, &mut |_| panic!("nothing is registered"));
+        let gl = angle_only(&opts, &mut d3d11, &mut |_| panic!("nothing is registered"));
 
         assert!(gl.is_some());
     }
@@ -293,6 +357,71 @@ mod tests {
     fn angle_with_an_empty_list_of_composition_modes_is_an_error() {
         let opts = Win32PlatformOptions { composition_mode: Vec::new(), ..Default::default() };
 
-        Win32GlManager::initialize_core(&opts, &mut d3d11, &mut |_| false);
+        angle_only(&opts, &mut d3d11, &mut |_| false);
+    }
+
+    #[test]
+    fn wgl_is_taken_when_the_system_creates_a_context_and_registers_no_composition_mode() {
+        let mut asked = 0;
+        let gl = Win32GlManager::initialize_core(
+            &options(vec![Win32RenderingMode::Wgl, Win32RenderingMode::Software]),
+            &mut || panic!("ANGLE is not in the list"),
+            &mut || {
+                asked += 1;
+                wgl()
+            },
+            &mut |_| panic!("no composition without ANGLE"),
+        );
+
+        match gl {
+            Some(Win32PlatformGraphics::Wgl(gl)) => {
+                assert_eq!(GlVersion::new(GlProfileType::OpenGL, 4, 0), gl.primary_version());
+            }
+            other => panic!("the graphics of WGL, not {other:?}"),
+        }
+        assert_eq!(1, asked);
+    }
+
+    #[test]
+    fn wgl_that_does_not_initialize_is_passed_over() {
+        let mut asked = 0;
+        let gl = Win32GlManager::initialize_core(
+            &options(vec![Win32RenderingMode::Wgl, Win32RenderingMode::Software]),
+            &mut || panic!("ANGLE is not in the list"),
+            &mut || {
+                asked += 1;
+                None
+            },
+            &mut |_| panic!("no composition without ANGLE"),
+        );
+
+        assert!(gl.is_none());
+        assert_eq!(1, asked);
+    }
+
+    #[test]
+    fn angle_before_wgl_is_asked_first_and_wgl_only_when_it_fails() {
+        let order = std::cell::RefCell::new(Vec::new());
+        let gl = Win32GlManager::initialize_core(
+            &options(vec![Win32RenderingMode::AngleEgl, Win32RenderingMode::Wgl]),
+            &mut || {
+                order.borrow_mut().push("angle");
+                None
+            },
+            &mut || {
+                order.borrow_mut().push("wgl");
+                wgl()
+            },
+            &mut |_| false,
+        );
+
+        assert!(matches!(gl, Some(Win32PlatformGraphics::Wgl(_))));
+        assert_eq!(vec!["angle", "wgl"], *order.borrow());
+    }
+
+    #[test]
+    #[should_panic(expected = "has a value of \"Wgl\", but no options were applied.")]
+    fn wgl_alone_on_a_system_without_a_driver_is_an_error() {
+        Win32GlManager::initialize_core(&options(vec![Win32RenderingMode::Wgl]), &mut || None, &mut || None, &mut |_| false);
     }
 }
