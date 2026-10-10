@@ -81,18 +81,18 @@ jobs:
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
       - name: Test
-        run: cargo test --workspace --locked --no-fail-fast --lib --tests --exclude ferroui-render-backends-comparison
-      # The comparison of the Vello backend with the Skia backend, apart from the other tests: on
+        run: cargo test --workspace --locked --no-fail-fast --lib --tests --exclude ferroui-render-backends-comparison --exclude ferroui-vello
+      # The tests of the Vello backend and its comparison with the Skia backend, apart from the other tests: on
       # the runner one scene of a GPU mode now and then comes out wholly different or differs
       # between two draws (docs/porting/vello-backend.md, section 13). A failure is tried again,
       # twice at most; a scene that fails three times in a row fails the job.
-      - name: Test (the render backends compared)
+      - name: Test (the Vello backend and the render backends compared)
         run: |
           for attempt in 1 2 3; do
-            if cargo test --locked -p ferroui-render-backends-comparison --no-fail-fast --lib --tests; then
+            if cargo test --locked -p ferroui-vello -p ferroui-render-backends-comparison --no-fail-fast --lib --tests; then
               exit 0
             fi
-            echo "::warning::the comparison of the render backends failed in attempt $attempt"
+            echo "::warning::the tests of the Vello backend or the comparison of the render backends failed in attempt $attempt"
           done
           exit 1
 
