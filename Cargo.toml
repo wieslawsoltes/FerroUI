@@ -19,6 +19,12 @@ members = [
     "src/Android/FerroUI.Android",
     "src/Browser/FerroUI.Browser",
     "src/Headless/FerroUI.Headless",
+    "src/Headless/FerroUI.Headless.Vnc",
+    "src/FerroUI",
+    "src/FerroUI.Wayland",
+    "src/FerroUI.Vulkan",
+    "src/Linux/FerroUI.LinuxFramebuffer",
+    "src/Windows/FerroUI.WinUI",
     "src/FerroUI.Fonts.Inter",
     "src/FerroUI.Dialogs",
     "src/FerroUI.Themes.Simple",
@@ -99,6 +105,13 @@ ferroui-freedesktop = { version = "=0.1.0-preview.1", path = "src/FerroUI.FreeDe
 ferroui-android = { version = "=0.1.0-preview.1", path = "src/Android/FerroUI.Android" }
 ferroui-browser = { version = "=0.1.0-preview.1", path = "src/Browser/FerroUI.Browser" }
 ferroui-headless = { version = "=0.1.0-preview.1", path = "src/Headless/FerroUI.Headless" }
+# Reserved names: empty placeholders until the ports exist (docs/release.md, section 2.2).
+ferroui = { version = "=0.1.0-preview.1", path = "src/FerroUI" }
+ferroui-headless-vnc = { version = "=0.1.0-preview.1", path = "src/Headless/FerroUI.Headless.Vnc" }
+ferroui-wayland = { version = "=0.1.0-preview.1", path = "src/FerroUI.Wayland" }
+ferroui-vulkan = { version = "=0.1.0-preview.1", path = "src/FerroUI.Vulkan" }
+ferroui-linuxframebuffer = { version = "=0.1.0-preview.1", path = "src/Linux/FerroUI.LinuxFramebuffer" }
+ferroui-winui = { version = "=0.1.0-preview.1", path = "src/Windows/FerroUI.WinUI" }
 ferroui-fonts-inter = { version = "=0.1.0-preview.1", path = "src/FerroUI.Fonts.Inter" }
 ferroui-dialogs = { version = "=0.1.0-preview.1", path = "src/FerroUI.Dialogs" }
 ferroui-themes-simple = { version = "=0.1.0-preview.1", path = "src/FerroUI.Themes.Simple" }

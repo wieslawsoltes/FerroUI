@@ -1,0 +1,19 @@
+[package]
+name = "ferroui-headless-vnc"
+description = "Reserved name: the VNC server of the headless platform of FerroUI, which is not ported yet. This version is an empty placeholder"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "platforms"
