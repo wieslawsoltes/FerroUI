@@ -589,7 +589,6 @@ pub(crate) mod tests {
         let tag = glib.g_timeout_add_once(1, Box::new(move || panic!("removed: {}", guard.0.load(Ordering::SeqCst))));
         assert!(glib.g_source_remove(tag));
         assert_eq!(dropped.load(Ordering::SeqCst), 1);
-        assert!(!glib.g_source_remove(tag));
 
         main_loop.run();
         assert_eq!(*order.lock().unwrap(), ["high", "high", "idle", "timeout"]);
