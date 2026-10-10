@@ -4,7 +4,7 @@
 //! Built with the feature `hybrid-webgl` of the crate, without `wgpu`:
 //! `vello_gpu` draws through the bindings of `web-sys`, which the browser
 //! platform of the port links on `wasm32-unknown-emscripten`
-//! (`docs/porting/vello-backend.md`, section 11, for why this renderer and
+//! (`docs/porting/vello-backend.md`, section 12, for why this renderer and
 //! not `wgpu` over WebGL).
 //!
 //! What corresponds to what in the Skia backend, which draws to the same

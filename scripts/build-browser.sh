@@ -20,7 +20,7 @@
 #
 # --features <list> turns on features of the package that is built (cargo's --features): `vello`
 # adds the Vello render backend to the module beside Skia (the feature of the browser crate for its
-# examples, of control-catalog-browser for the catalog; docs/porting/vello-backend.md, section 11),
+# examples, of control-catalog-browser for the catalog; docs/porting/vello-backend.md, section 12),
 # which a page then chooses with `?Renderer=Vello`. The site of such a module is written next to the
 # site without the features: target/browser-<list>/<application> (browser-threads-<list> with
 # --threads, browser-both-<list> with --both; a comma of the list becomes a hyphen).
