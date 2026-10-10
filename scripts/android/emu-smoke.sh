@@ -1,8 +1,8 @@
 #!/bin/bash
 # Runs the smoke application of the Android platform on the emulator
 # (docs/porting/android-platform.md, section 10): starts the virtual device ferroui_api36 without a
-# window, installs the package, runs the application once per rendering mode, injects the touch
-# input it asks for, prints its check lines, pulls its report, takes a picture of the screen,
+# window, installs the package, runs the application once per rendering mode, does on the device
+# what it asks for (touch input, keys, the night mode), prints its check lines, pulls its report, takes a picture of the screen,
 # uninstalls and shuts the emulator down. Exits 0 only when every run passed.
 #
 #   scripts/android/emu-smoke.sh [options]
@@ -15,7 +15,8 @@
 #   --build           build the package first (scripts/android/apk.sh smoke)
 #   --gpu MODE        the GPU mode of the emulator: swiftshader_indirect (default) or host
 #   --modes "A B"     the rendering modes to run, of egl and software (default: both)
-#   --no-input        do not inject touch input (the application then skips its touch checks)
+#   --no-input        do nothing the application asks for but pictures (it then skips the checks
+#                     that need the script: touch, keys, the night mode)
 #
 # The emulator may only run while no virtual machine does on the development machine: this script is
 # run by whoever serialises that.
@@ -79,6 +80,35 @@ trap cleanup EXIT
 emu_start "$gpu" "$out/emulator.log" || exit 1
 emu_install "$apk" "$application_id" || exit 1
 
+# What the application asks for with a line "SCRIPT <command> <arguments>":
+#   picture NAME          a picture of the screen, <out>/NAME-<mode>.png
+#   tap X Y               a tap at a pixel of the screen
+#   swipe X1 Y1 X2 Y2 MS  a swipe
+#   keyevent CODE...      key codes, each pressed and released
+#   text TEXT             text, as the keys of a virtual keyboard
+#   night yes|no          the night mode of the system
+# Everything but a picture is left out with --no-input.
+night_changed=0
+smoke_request() {
+    local mode="$1" command="$2"
+    shift 2
+    if [ "$command" = picture ]; then
+        emu_screencap "$out/$1-$mode.png" || true
+        [ "$1" = smoke ] && pictured=1
+        return 0
+    fi
+    [ "$input" = 1 ] || return 0
+    echo "   script: $command $*"
+    case "$command" in
+        tap) adb_shell input tap "$1" "$2" >/dev/null 2>&1 || true; sleep 1 ;;
+        swipe) adb_shell input swipe "$1" "$2" "$3" "$4" "$5" >/dev/null 2>&1 || true ;;
+        keyevent) adb_shell input keyevent "$@" >/dev/null 2>&1 || true ;;
+        text) adb_shell input text "$1" >/dev/null 2>&1 || true ;;
+        night) night_changed=1; adb_shell cmd uimode night "$1" >/dev/null 2>&1 || true ;;
+        *) echo "   script: unknown request '$command'" ;;
+    esac
+}
+
 failed=0
 for mode in $modes; do
     echo
@@ -95,8 +125,9 @@ input=$input"
         continue
     fi
 
-    # The lines of the application, until it has written its report.
-    injected=0
+    # The lines of the application, until it has written its report. A line "SCRIPT <command>
+    # <arguments>" asks for something to be done on the device; each is done once, in order.
+    executed=0
     pictured=0
     done_=0
     waited=0
@@ -104,21 +135,17 @@ input=$input"
     lines=""
     while [ "$waited" -lt "$limit" ]; do
         lines="$(ADB_TIMEOUT=20 adb_do logcat -d -v raw -s ferroui-smoke:V 2>/dev/null | tr -d '\r' || true)"
-        target="$(printf '%s\n' "$lines" | sed -n 's/^INPUT-TARGET \([0-9]*\) \([0-9]*\)$/\1 \2/p' | tail -n 1)"
-        if [ -n "$target" ] && [ "$pictured" = 0 ]; then
-            # The frames were read back: this is what is on the screen.
-            emu_screencap "$out/smoke-$mode.png" || true
-            pictured=1
-        fi
-        if [ -n "$target" ] && [ "$injected" = 0 ] && [ "$input" = 1 ]; then
-            x="${target% *}"
-            y="${target#* }"
-            echo "   injecting a tap at $x,$y and a swipe from it"
-            adb_shell input tap "$x" "$y" >/dev/null 2>&1 || true
-            sleep 1
-            adb_shell input swipe "$x" "$y" "$x" "$((y + 300))" 400 >/dev/null 2>&1 || true
-            injected=1
-        fi
+        requests="$(printf '%s\n' "$lines" | sed -n 's/^SCRIPT //p')"
+        count=0
+        while IFS= read -r request; do
+            [ -n "$request" ] || continue
+            count=$((count + 1))
+            [ "$count" -gt "$executed" ] || continue
+            executed=$count
+            smoke_request "$mode" $request
+        done <<EOF
+$requests
+EOF
         if printf '%s\n' "$lines" | grep -q '^REPORT WRITTEN$'; then
             done_=1
             break
@@ -133,6 +160,11 @@ input=$input"
 
     if [ "$pictured" = 0 ]; then
         emu_screencap "$out/smoke-$mode.png" || true
+    fi
+    if [ "$night_changed" = 1 ]; then
+        # A run that ended early may have left the night mode on.
+        adb_shell cmd uimode night no >/dev/null 2>&1 || true
+        night_changed=0
     fi
     ADB_TIMEOUT=30 adb_do logcat -d -v threadtime > "$out/logcat-$mode.txt" 2>/dev/null || true
     ADB_TIMEOUT=30 adb_do logcat -d -b crash -v threadtime > "$out/crash-$mode.txt" 2>/dev/null || true

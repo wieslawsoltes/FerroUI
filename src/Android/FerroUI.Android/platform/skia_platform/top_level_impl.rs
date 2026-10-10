@@ -7,16 +7,20 @@ use super::invalidation_aware_surface_view::{
 };
 use crate::android_platform::AndroidPlatform;
 use crate::android_view_control_handle::AndroidViewControlHandle;
-use crate::interop::java::{call_static_int, call_static_void, is_instance_of, JavaClass, JavaObject, JavaValue};
+use crate::interop::java::{call_static_int, call_static_long, call_static_void, is_instance_of, JavaClass, JavaObject, JavaValue};
 use crate::interop::natives::{next_handle, sdk_int, FERRO_ACTIVITY, PLATFORM_HELPER};
 use crate::interop::ndk::NativeWindow;
 use crate::platform::android_insets_manager::{ActivityInsetsWindow, IInsetsTopLevel};
+use crate::platform::input::android_keyboard_device::AndroidKeyboardDevice;
+use crate::platform::specific::helpers::android_keyboard_events_helper::{
+    AndroidKeyboardEventsHelper, IKeyboardEventsTopLevel,
+};
 use crate::platform::specific::helpers::android_motion_events_helper::{
     AndroidMotionEventsHelper, IMotionEventsTopLevel,
 };
 use crate::platform::{AndroidInsetsManager, AndroidScreens};
-use ferroui_base::input::raw::IRawInputEventArgs;
-use ferroui_base::input::IInputRoot;
+use ferroui_base::input::raw::{IRawInputEventArgs, RawTextInputEventArgs};
+use ferroui_base::input::{IInputDevice, IInputRoot};
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider, PlatformThemeVariant};
 use ferroui_base::reactive::IDisposable;
@@ -113,6 +117,7 @@ impl IPlatformRenderSurface for EglWindowSurface {
 pub struct TopLevelImpl {
     id: i64,
     context: JavaObject,
+    keyboard_helper: AndroidKeyboardEventsHelper,
     pointer_helper: AndroidMotionEventsHelper,
     insets_manager: Option<Rc<AndroidInsetsManager>>,
     screens: Rc<AndroidScreens>,
@@ -143,12 +148,13 @@ impl TopLevelImpl {
         let shared = view.shared().clone();
 
         // Stage 2 of docs/porting/android-platform.md, each with the files that build it:
-        // the input method, the keyboard helper, the clipboard, the platform feedback, the
-        // storage provider, the launcher, the native control host and the system navigation
-        // manager. `try_get_feature` answers that the top-level does not have them.
+        // the input method, the clipboard, the platform feedback, the storage provider, the
+        // launcher, the native control host and the system navigation manager.
+        // `try_get_feature` answers that the top-level does not have them.
         let is_activity = is_instance_of(context, "android/app/Activity");
 
         let this = Rc::new_cyclic(|this: &Weak<TopLevelImpl>| {
+            let keyboard_top_level: Weak<dyn IKeyboardEventsTopLevel> = this.clone();
             let motion_top_level: Weak<dyn IMotionEventsTopLevel> = this.clone();
             let insets_manager = is_activity.then(|| {
                 let insets_top_level: Weak<dyn IInsetsTopLevel> = this.clone();
@@ -174,6 +180,7 @@ impl TopLevelImpl {
             TopLevelImpl {
                 id,
                 context: context.clone(),
+                keyboard_helper: AndroidKeyboardEventsHelper::new(keyboard_top_level, sdk_int()),
                 pointer_helper: AndroidMotionEventsHelper::new(motion_top_level),
                 insets_manager,
                 screens: AndroidScreens::new(context),
@@ -237,6 +244,10 @@ impl TopLevelImpl {
 
     pub(crate) fn insets_manager(&self) -> Option<&Rc<AndroidInsetsManager>> {
         self.insets_manager.as_ref()
+    }
+
+    pub(crate) fn keyboard_helper(&self) -> &AndroidKeyboardEventsHelper {
+        &self.keyboard_helper
     }
 
     pub(crate) fn pointer_helper(&self) -> &AndroidMotionEventsHelper {
@@ -361,6 +372,23 @@ impl TopLevelImpl {
         );
     }
 
+    /// Text the input method commits: a raw text input event at the time of
+    /// the uptime clock.
+    pub(crate) fn text_input(&self, text: &str) {
+        let input = self.input.borrow().clone();
+        if let Some(input) = input {
+            let (Some(device), Some(input_root)) = (AndroidKeyboardDevice::instance(), self.input_root()) else {
+                panic!("Text was input before the top-level had an input root, or without the keyboard device.");
+            };
+            let device: Rc<dyn IInputDevice> = device;
+            let uptime_millis =
+                call_static_long(&JavaClass::find("android/os/SystemClock"), "uptimeMillis", "()J", &[]);
+            let args = RawTextInputEventArgs::new(device, uptime_millis as u64, input_root, text);
+
+            input(Rc::new(args));
+        }
+    }
+
     /// The id of the display the surface view is on.
     pub(crate) fn display_id(&self) -> Option<i32> {
         let view = self.view()?;
@@ -388,6 +416,19 @@ impl IMotionEventsTopLevel for TopLevelImpl {
 
     fn motion_render_scaling(&self) -> f64 {
         self.render_scaling()
+    }
+}
+
+impl IKeyboardEventsTopLevel for TopLevelImpl {
+    fn key_input_root(&self) -> Option<Rc<dyn IInputRoot>> {
+        self.input_root()
+    }
+
+    fn dispatch_key_input(&self, args: Rc<dyn IRawInputEventArgs>) {
+        let input = self.input.borrow().clone();
+        if let Some(input) = input {
+            input(args);
+        }
     }
 }
 

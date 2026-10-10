@@ -13,8 +13,8 @@
 //! stops as one with an uncaught exception does.
 
 use super::java::{
-    call_static_int, read_float_array, read_int_array, register_natives, throw_runtime_exception, JavaClass,
-    JavaObject, NativeMethod,
+    call_static_int, read_float_array, read_int_array, read_string, register_natives, throw_runtime_exception,
+    JavaClass, JavaObject, NativeMethod,
 };
 use super::panic_message;
 use crate::android_dispatcher_impl::AndroidDispatcherImpl;
@@ -23,7 +23,9 @@ use crate::ferro_android_application::FerroAndroidApplication;
 use crate::ferro_view::FerroView;
 use crate::log::{self, LogPriority};
 use crate::platform::skia_platform::{SurfaceProperties, TopLevelImpl};
+use crate::platform::specific::helpers::android_keyboard_events_helper::{KeyEventData, KeyEventDevice};
 use crate::platform::specific::helpers::android_motion_events_helper::MotionEventData;
+use crate::platform::AndroidPlatformSettings;
 use crate::platform::AndroidScreens;
 use ferroui_base::PixelSize;
 use ferroui_controls::AppBuilder;
@@ -40,6 +42,7 @@ pub(crate) const FERRO_VIEW: &str = "org/ferroui/android/FerroView";
 pub(crate) const FERRO_SURFACE_VIEW: &str = "org/ferroui/android/FerroSurfaceView";
 pub(crate) const MAIN_LOOPER_BRIDGE: &str = "org/ferroui/android/MainLooperBridge";
 pub(crate) const PLATFORM_HELPER: &str = "org/ferroui/android/PlatformHelper";
+pub(crate) const CONFIGURATION_CHANGED_RECEIVER: &str = "org/ferroui/android/ConfigurationChangedReceiver";
 
 /// A `boolean` argument of a native method: one byte, zero for false.
 type JBoolean = u8;
@@ -104,6 +107,7 @@ pub unsafe fn on_load(vm: *mut c_void, build: fn() -> AppBuilder) -> i32 {
             FERRO_SURFACE_VIEW,
             MAIN_LOOPER_BRIDGE,
             PLATFORM_HELPER,
+            CONFIGURATION_CHANGED_RECEIVER,
         ]);
         register_all();
     });
@@ -182,6 +186,11 @@ fn register_all() {
                     view_configuration_changed as unsafe extern "system" fn(_, _, _, _, _)
                 ),
                 native!(
+                    c"nativeKeyEvent",
+                    c"(JJIIIIIZZLjava/lang/String;ZII)I",
+                    view_key_event as unsafe extern "system" fn(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _) -> _
+                ),
+                native!(
                     c"nativeMotionEvent",
                     c"(JJIIIIII[I[FFF)I",
                     view_motion_event as unsafe extern "system" fn(_, _, _, _, _, _, _, _, _, _, _, _, _, _) -> _
@@ -220,6 +229,12 @@ fn register_all() {
                     surface_focus_changed as unsafe extern "system" fn(_, _, _, _)
                 ),
             ],
+        );
+    }
+    unsafe {
+        register_natives(
+            &JavaClass::find(CONFIGURATION_CHANGED_RECEIVER),
+            &[native!(c"nativeOnReceive", c"()V", configuration_changed_on_receive as unsafe extern "system" fn(_, _))],
         );
     }
     unsafe {
@@ -415,6 +430,54 @@ unsafe extern "system" fn view_motion_event(
         );
         view.dispatch_motion_event(event.as_ref())
     })
+}
+
+#[allow(clippy::too_many_arguments)]
+unsafe extern "system" fn view_key_event(
+    _env: *mut JNIEnv,
+    _class: jobject,
+    handle: jlong,
+    event_time: jlong,
+    action: jint,
+    key_code: jint,
+    scan_code: jint,
+    unicode_char: jint,
+    repeat_count: jint,
+    is_ctrl_pressed: JBoolean,
+    is_shift_pressed: JBoolean,
+    characters: jobject,
+    has_device: JBoolean,
+    device_sources: jint,
+    device_keyboard_type: jint,
+) -> jint {
+    guard(0, || {
+        // SAFETY: `characters` is the `String` of the signature, or null.
+        let characters = unsafe { read_string(characters) };
+        let Some(view) = FerroView::from_handle(handle) else {
+            // No view: no result, and the base class dispatches the event.
+            return 4;
+        };
+        let event = KeyEventData {
+            event_time,
+            action,
+            key_code,
+            scan_code,
+            unicode_char,
+            repeat_count,
+            is_ctrl_pressed: is_ctrl_pressed != 0,
+            is_shift_pressed: is_shift_pressed != 0,
+            characters,
+            device: (has_device != 0)
+                .then_some(KeyEventDevice { sources: device_sources, keyboard_type: device_keyboard_type }),
+        };
+        view.dispatch_key_event(Some(&event))
+    })
+}
+
+// ---- ConfigurationChangedReceiver ---------------------------------------------------------
+
+unsafe extern "system" fn configuration_changed_on_receive(_env: *mut JNIEnv, _class: jobject) {
+    guard((), AndroidPlatformSettings::on_receive);
 }
 
 // ---- FerroSurfaceView ---------------------------------------------------------------------

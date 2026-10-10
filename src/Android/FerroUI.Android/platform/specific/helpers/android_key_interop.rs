@@ -1,0 +1,271 @@
+//! Scan codes of the system to physical keys of the framework.
+//!
+//! The scan code is the number `KeyEvent.getScanCode()` returns: the evdev code of the key, which says where
+//! the key is on the keyboard whatever the layout makes of it.
+
+use ferroui_base::input::PhysicalKey;
+
+/// The scan codes of the system as physical keys.
+pub struct AndroidKeyInterop;
+
+impl AndroidKeyInterop {
+    /// The physical key of an evdev scan code, [`PhysicalKey::None`] for a scan code the table does not have.
+    ///
+    /// The reference looks only the scan codes from 1 to 255 up in its table, whose keys are bytes; every
+    /// scan code of the table below is in that range, so the match alone does the same.
+    pub fn physical_key_from_scan_code(scan_code: i32) -> PhysicalKey {
+        // evdev scan code to physical key map.
+        // https://github.com/chromium/chromium/blob/main/ui/events/keycodes/dom/dom_code_data.inc
+        // This list has the same order as the PhysicalKey enum.
+        match scan_code {
+            // Writing System Keys
+            0x29 => PhysicalKey::Backquote,
+            0x2B => PhysicalKey::Backslash,
+            0x1A => PhysicalKey::BracketLeft,
+            0x1B => PhysicalKey::BracketRight,
+            0x33 => PhysicalKey::Comma,
+            0x0B => PhysicalKey::Digit0,
+            0x02 => PhysicalKey::Digit1,
+            0x03 => PhysicalKey::Digit2,
+            0x04 => PhysicalKey::Digit3,
+            0x05 => PhysicalKey::Digit4,
+            0x06 => PhysicalKey::Digit5,
+            0x07 => PhysicalKey::Digit6,
+            0x08 => PhysicalKey::Digit7,
+            0x09 => PhysicalKey::Digit8,
+            0x0A => PhysicalKey::Digit9,
+            0x0D => PhysicalKey::Equal,
+            0x56 => PhysicalKey::IntlBackslash,
+            0x59 => PhysicalKey::IntlRo,
+            0x7C => PhysicalKey::IntlYen,
+            0x1E => PhysicalKey::A,
+            0x30 => PhysicalKey::B,
+            0x2E => PhysicalKey::C,
+            0x20 => PhysicalKey::D,
+            0x12 => PhysicalKey::E,
+            0x21 => PhysicalKey::F,
+            0x22 => PhysicalKey::G,
+            0x23 => PhysicalKey::H,
+            0x17 => PhysicalKey::I,
+            0x24 => PhysicalKey::J,
+            0x25 => PhysicalKey::K,
+            0x26 => PhysicalKey::L,
+            0x32 => PhysicalKey::M,
+            0x31 => PhysicalKey::N,
+            0x18 => PhysicalKey::O,
+            0x19 => PhysicalKey::P,
+            0x10 => PhysicalKey::Q,
+            0x13 => PhysicalKey::R,
+            0x1F => PhysicalKey::S,
+            0x14 => PhysicalKey::T,
+            0x16 => PhysicalKey::U,
+            0x2F => PhysicalKey::V,
+            0x11 => PhysicalKey::W,
+            0x2D => PhysicalKey::X,
+            0x15 => PhysicalKey::Y,
+            0x2C => PhysicalKey::Z,
+            0x0C => PhysicalKey::Minus,
+            0x34 => PhysicalKey::Period,
+            0x28 => PhysicalKey::Quote,
+            0x27 => PhysicalKey::Semicolon,
+            0x35 => PhysicalKey::Slash,
+
+            // Functional Keys
+            0x38 => PhysicalKey::AltLeft,
+            0x64 => PhysicalKey::AltRight,
+            0x0E => PhysicalKey::Backspace,
+            0x3A => PhysicalKey::CapsLock,
+            0x7F => PhysicalKey::ContextMenu,
+            0x1D => PhysicalKey::ControlLeft,
+            0x61 => PhysicalKey::ControlRight,
+            0x1C => PhysicalKey::Enter,
+            0x7D => PhysicalKey::MetaLeft,
+            0x7E => PhysicalKey::MetaRight,
+            0x2A => PhysicalKey::ShiftLeft,
+            0x36 => PhysicalKey::ShiftRight,
+            0x39 => PhysicalKey::Space,
+            0x0F => PhysicalKey::Tab,
+            0x5C => PhysicalKey::Convert,
+            0x5D => PhysicalKey::KanaMode,
+            0x7A => PhysicalKey::Lang1,
+            0x7B => PhysicalKey::Lang2,
+            0x5A => PhysicalKey::Lang3,
+            0x5B => PhysicalKey::Lang4,
+            0x55 => PhysicalKey::Lang5,
+            0x5E => PhysicalKey::NonConvert,
+
+            // Control Pad Section
+            0x6F => PhysicalKey::Delete,
+            0x6B => PhysicalKey::End,
+            0x8A => PhysicalKey::Help,
+            0x66 => PhysicalKey::Home,
+            0x6E => PhysicalKey::Insert,
+            0x6D => PhysicalKey::PageDown,
+            0x68 => PhysicalKey::PageUp,
+
+            // Arrow Pad Section
+            0x6C => PhysicalKey::ArrowDown,
+            0x69 => PhysicalKey::ArrowLeft,
+            0x6A => PhysicalKey::ArrowRight,
+            0x67 => PhysicalKey::ArrowUp,
+
+            // Numpad Section
+            0x45 => PhysicalKey::NumLock,
+            0x52 => PhysicalKey::NumPad0,
+            0x4F => PhysicalKey::NumPad1,
+            0x50 => PhysicalKey::NumPad2,
+            0x51 => PhysicalKey::NumPad3,
+            0x4B => PhysicalKey::NumPad4,
+            0x4C => PhysicalKey::NumPad5,
+            0x4D => PhysicalKey::NumPad6,
+            0x47 => PhysicalKey::NumPad7,
+            0x48 => PhysicalKey::NumPad8,
+            0x49 => PhysicalKey::NumPad9,
+            0x4E => PhysicalKey::NumPadAdd,
+            //      => PhysicalKey::NumPadClear,
+            0x79 => PhysicalKey::NumPadComma,
+            0x53 => PhysicalKey::NumPadDecimal,
+            0x62 => PhysicalKey::NumPadDivide,
+            0x60 => PhysicalKey::NumPadEnter,
+            0x75 => PhysicalKey::NumPadEqual,
+            0x37 => PhysicalKey::NumPadMultiply,
+            0xB3 => PhysicalKey::NumPadParenLeft,
+            0xB4 => PhysicalKey::NumPadParenRight,
+            0x4A => PhysicalKey::NumPadSubtract,
+
+            // Function Section
+            0x01 => PhysicalKey::Escape,
+            0x3B => PhysicalKey::F1,
+            0x3C => PhysicalKey::F2,
+            0x3D => PhysicalKey::F3,
+            0x3E => PhysicalKey::F4,
+            0x3F => PhysicalKey::F5,
+            0x40 => PhysicalKey::F6,
+            0x41 => PhysicalKey::F7,
+            0x42 => PhysicalKey::F8,
+            0x43 => PhysicalKey::F9,
+            0x44 => PhysicalKey::F10,
+            0x57 => PhysicalKey::F11,
+            0x58 => PhysicalKey::F12,
+            0xB7 => PhysicalKey::F13,
+            0xB8 => PhysicalKey::F14,
+            0xB9 => PhysicalKey::F15,
+            0xBA => PhysicalKey::F16,
+            0xBB => PhysicalKey::F17,
+            0xBC => PhysicalKey::F18,
+            0xBD => PhysicalKey::F19,
+            0xBE => PhysicalKey::F20,
+            0xBF => PhysicalKey::F21,
+            0xC0 => PhysicalKey::F22,
+            0xC1 => PhysicalKey::F23,
+            0xC2 => PhysicalKey::F24,
+            0x63 => PhysicalKey::PrintScreen,
+            0x46 => PhysicalKey::ScrollLock,
+            0x77 => PhysicalKey::Pause,
+
+            // Media Keys
+            0x9E => PhysicalKey::BrowserBack,
+            0x9C => PhysicalKey::BrowserFavorites,
+            0x9F => PhysicalKey::BrowserForward,
+            0xAC => PhysicalKey::BrowserHome,
+            0xAD => PhysicalKey::BrowserRefresh,
+            0xD9 => PhysicalKey::BrowserSearch,
+            0x80 => PhysicalKey::BrowserStop,
+            0xA1 => PhysicalKey::Eject,
+            0x90 => PhysicalKey::LaunchApp1,
+            0x8C => PhysicalKey::LaunchApp2,
+            0x9B => PhysicalKey::LaunchMail,
+            0xA4 => PhysicalKey::MediaPlayPause,
+            0xAB => PhysicalKey::MediaSelect,
+            0xA6 => PhysicalKey::MediaStop,
+            0xA3 => PhysicalKey::MediaTrackNext,
+            0xA5 => PhysicalKey::MediaTrackPrevious,
+            0x74 => PhysicalKey::Power,
+            0x8E => PhysicalKey::Sleep,
+            0x72 => PhysicalKey::AudioVolumeDown,
+            0x71 => PhysicalKey::AudioVolumeMute,
+            0x73 => PhysicalKey::AudioVolumeUp,
+            0x8F => PhysicalKey::WakeUp,
+
+            // Legacy Keys
+            0x81 => PhysicalKey::Again,
+            0x85 => PhysicalKey::Copy,
+            0x89 => PhysicalKey::Cut,
+            0x88 => PhysicalKey::Find,
+            0x86 => PhysicalKey::Open,
+            0x87 => PhysicalKey::Paste,
+            //      => PhysicalKey::Props,
+            0x84 => PhysicalKey::Select,
+            0x83 => PhysicalKey::Undo,
+
+            _ => PhysicalKey::None,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_top_letter_row() {
+        let row = [
+            PhysicalKey::Q,
+            PhysicalKey::W,
+            PhysicalKey::E,
+            PhysicalKey::R,
+            PhysicalKey::T,
+            PhysicalKey::Y,
+            PhysicalKey::U,
+            PhysicalKey::I,
+            PhysicalKey::O,
+            PhysicalKey::P,
+        ];
+        // KEY_Q is 16 and the row follows it from left to right.
+        for (index, key) in row.iter().enumerate() {
+            assert_eq!(AndroidKeyInterop::physical_key_from_scan_code(0x10 + index as i32), *key);
+        }
+    }
+
+    #[test]
+    fn the_digit_row() {
+        let digits = [
+            PhysicalKey::Digit1,
+            PhysicalKey::Digit2,
+            PhysicalKey::Digit3,
+            PhysicalKey::Digit4,
+            PhysicalKey::Digit5,
+            PhysicalKey::Digit6,
+            PhysicalKey::Digit7,
+            PhysicalKey::Digit8,
+            PhysicalKey::Digit9,
+            PhysicalKey::Digit0,
+        ];
+        // KEY_1 is 2 and the zero is the last key of the row.
+        for (index, key) in digits.iter().enumerate() {
+            assert_eq!(AndroidKeyInterop::physical_key_from_scan_code(0x02 + index as i32), *key);
+        }
+    }
+
+    #[test]
+    fn named_keys() {
+        assert_eq!(AndroidKeyInterop::physical_key_from_scan_code(0x1C), PhysicalKey::Enter);
+        assert_eq!(AndroidKeyInterop::physical_key_from_scan_code(0x60), PhysicalKey::NumPadEnter);
+        assert_eq!(AndroidKeyInterop::physical_key_from_scan_code(0x01), PhysicalKey::Escape);
+        assert_eq!(AndroidKeyInterop::physical_key_from_scan_code(0x0E), PhysicalKey::Backspace);
+        assert_eq!(AndroidKeyInterop::physical_key_from_scan_code(0x39), PhysicalKey::Space);
+        assert_eq!(AndroidKeyInterop::physical_key_from_scan_code(0x67), PhysicalKey::ArrowUp);
+        assert_eq!(AndroidKeyInterop::physical_key_from_scan_code(0xC2), PhysicalKey::F24);
+        assert_eq!(AndroidKeyInterop::physical_key_from_scan_code(0xD9), PhysicalKey::BrowserSearch);
+    }
+
+    #[test]
+    fn an_unknown_scan_code_is_no_key() {
+        assert_eq!(AndroidKeyInterop::physical_key_from_scan_code(0), PhysicalKey::None);
+        assert_eq!(AndroidKeyInterop::physical_key_from_scan_code(-1), PhysicalKey::None);
+        assert_eq!(AndroidKeyInterop::physical_key_from_scan_code(0xFF), PhysicalKey::None);
+        assert_eq!(AndroidKeyInterop::physical_key_from_scan_code(256), PhysicalKey::None);
+        // A scan code above a byte whose low byte is the one of the Escape key.
+        assert_eq!(AndroidKeyInterop::physical_key_from_scan_code(0x101), PhysicalKey::None);
+    }
+}

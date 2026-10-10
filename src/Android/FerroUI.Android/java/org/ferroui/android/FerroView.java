@@ -3,6 +3,9 @@ package org.ferroui.android;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.os.Build;
+import android.view.InputDevice;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -127,6 +130,36 @@ public class FerroView extends FrameLayout implements ViewTreeObserver.OnGlobalL
         return (answer & RESULT_MASK) == RESULT_NONE ? baseResult : (answer & RESULT_MASK) == RESULT_TRUE;
     }
 
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent e) {
+        if (e == null) {
+            return super.dispatchKeyEvent(e);
+        }
+        InputDevice device = e.getDevice();
+        int answer = nativeKeyEvent(
+                nativeHandle,
+                e.getEventTime(),
+                e.getAction(),
+                e.getKeyCode(),
+                e.getScanCode(),
+                e.getUnicodeChar(),
+                e.getRepeatCount(),
+                e.isCtrlPressed(),
+                e.isShiftPressed(),
+                characters(e),
+                device != null,
+                device != null ? device.getSources() : 0,
+                device != null ? device.getKeyboardType() : 0);
+        boolean baseResult = (answer & CALL_BASE) != 0 && super.dispatchKeyEvent(e);
+        return (answer & RESULT_MASK) == RESULT_NONE ? baseResult : (answer & RESULT_MASK) == RESULT_TRUE;
+    }
+
+    /** The characters of an event of several characters, which the system gives below API 29. */
+    @SuppressWarnings("deprecation")
+    private static String characters(KeyEvent e) {
+        return Build.VERSION.SDK_INT < 29 ? e.getCharacters() : null;
+    }
+
     /**
      * Copies what the native side reads of a motion event: the event is only valid during the call.
      * Per pointer: id and tool type, and x, y, pressure and orientation; for a move, the same four
@@ -181,6 +214,21 @@ public class FerroView extends FrameLayout implements ViewTreeObserver.OnGlobalL
     private static native void nativeVisibilityChanged(long handle, boolean isVisible);
 
     private static native void nativeConfigurationChanged(long handle, boolean hasConfiguration, boolean night);
+
+    private static native int nativeKeyEvent(
+            long handle,
+            long eventTime,
+            int action,
+            int keyCode,
+            int scanCode,
+            int unicodeChar,
+            int repeatCount,
+            boolean isCtrlPressed,
+            boolean isShiftPressed,
+            String characters,
+            boolean hasDevice,
+            int deviceSources,
+            int deviceKeyboardType);
 
     private static native int nativeMotionEvent(
             long handle,

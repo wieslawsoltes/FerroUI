@@ -20,7 +20,12 @@
 //!
 //! The file `smoke.properties` of the files directory, when the script has
 //! written it, selects what is run: `mode=software` renders through the
-//! native window instead of EGL, `input=0` leaves the touch checks out.
+//! native window instead of EGL, `input=0` leaves out the checks that need
+//! the script to act (touch, keys, the night mode).
+//!
+//! A line `SCRIPT <command> <arguments>` asks the script that runs the
+//! application to do something on the device (`scripts/android/emu-smoke.sh`
+//! lists the commands).
 //!
 //! On another system than Android the library is empty.
 
@@ -36,17 +41,19 @@ mod app {
         FerroAndroidApplication,
     };
     use ferroui_base::input::{
-        InputElement, InputElementImpl, PointerEventArgs, PointerPressedEventArgs, PointerReleasedEventArgs,
+        InputElement, InputElementImpl, Key, KeyEventArgs, PointerEventArgs, PointerPressedEventArgs,
+        PointerReleasedEventArgs, PointerType, TextInputEventArgs,
     };
     use ferroui_base::interactivity::{Interactive, InteractiveImpl};
     use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl};
     use ferroui_base::media::immutable::ImmutableSolidColorBrush;
     use ferroui_base::media::{Color, DrawingContext, IBrush, ImmediateDrawingContext};
+    use ferroui_base::platform::{IPlatformSettings, PlatformColorValues, PlatformThemeVariant};
     use ferroui_base::rendering::scene_graph::ICustomDrawOperation;
     use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
     use ferroui_base::{
-        ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, Point, Rect, Ref, StyledElementImpl, Thickness,
-        VisualImpl,
+        ferro_class, ferro_impl_classes, instantiate, FerroLocator, FerroObjectImpl, LocatorExtensions, Point, Rect,
+        Ref, StyledElementImpl, Thickness, VisualImpl,
     };
     use ferroui_controls::shapes::Ellipse;
     use ferroui_controls::{
@@ -436,6 +443,8 @@ mod app {
             Dispatcher,
             Frames,
             Input,
+            Keys,
+            Settings,
             Finish,
             WaitForDestroy,
             Done,
@@ -453,6 +462,22 @@ mod app {
             /// it is.
             tap: Cell<(i32, i32, Point)>,
             scaling: Cell<f64>,
+            keys: Rc<Keys>,
+            /// The colour values the platform settings raised as changed.
+            color_changes: Rc<RefCell<Vec<PlatformColorValues>>>,
+            /// The theme of the system when the settings stage began, and how
+            /// far the stage is: 0 asked for the other theme, 1 asked for the
+            /// first one again.
+            first_theme: Cell<PlatformThemeVariant>,
+            settings_step: Cell<u32>,
+        }
+
+        /// The key and text events the top-level raised.
+        #[derive(Default)]
+        struct Keys {
+            down: RefCell<Vec<(Key, Option<String>)>>,
+            up: RefCell<Vec<Key>>,
+            text: RefCell<String>,
         }
 
         pub fn start(view: Rc<MainView>) {
@@ -465,6 +490,10 @@ mod app {
                 posted_on_main: Arc::new(AtomicBool::new(false)),
                 tap: Cell::new((0, 0, Point::default())),
                 scaling: Cell::new(1.0),
+                keys: Rc::new(Keys::default()),
+                color_changes: Rc::new(RefCell::new(Vec::new())),
+                first_theme: Cell::new(PlatformThemeVariant::Light),
+                settings_step: Cell::new(0),
             });
 
             let timer = DispatcherTimer::new();
@@ -506,6 +535,8 @@ mod app {
                 Stage::Dispatcher => dispatcher(state),
                 Stage::Frames => frames(state),
                 Stage::Input => input(state),
+                Stage::Keys => keys(state),
+                Stage::Settings => settings(state),
                 Stage::Finish => finish(state),
                 Stage::WaitForDestroy => wait_for_destroy(state),
                 Stage::Done => {}
@@ -614,6 +645,22 @@ mod app {
                 }
                 None => check("insets", false, "the top-level has no insets manager"),
             }
+
+            // The key and text events of the top-level, for the keys the script injects.
+            top_level.add_handler(InputElement::key_down_event(), {
+                let keys = state.keys.clone();
+                move |_: &Interactive, e: &KeyEventArgs| keys.down.borrow_mut().push((e.key, e.key_symbol.clone()))
+            });
+            top_level.add_handler(InputElement::key_up_event(), {
+                let keys = state.keys.clone();
+                move |_: &Interactive, e: &KeyEventArgs| keys.up.borrow_mut().push(e.key)
+            });
+            top_level.add_handler(InputElement::text_input_event(), {
+                let keys = state.keys.clone();
+                move |_: &Interactive, e: &TextInputEventArgs| {
+                    keys.text.borrow_mut().push_str(e.text.as_deref().unwrap_or_default());
+                }
+            });
 
             // The dispatcher: a timer, and a job from another thread.
             let fired = state.timer_fired.clone();
@@ -743,10 +790,13 @@ mod app {
             );
             drop(readback);
 
+            // The script reads the lines that begin with SCRIPT and does what each says, in
+            // order: here a picture of the screen, a tap at the pixel and a swipe from it.
+            note("SCRIPT picture smoke");
             if OPTIONS.with(Cell::get).input {
                 let (x, y, _) = state.tap.get();
-                // The script reads this line and injects a tap at the pixel and a swipe from it.
-                note(format!("INPUT-TARGET {x} {y}"));
+                note(format!("SCRIPT tap {x} {y}"));
+                note(format!("SCRIPT swipe {x} {y} {x} {} 400", y + 300));
                 enter(state, Stage::Input);
             } else {
                 enter(state, Stage::Finish);
@@ -777,7 +827,125 @@ mod app {
                 complete,
                 format!("{pressed} pressed, {moved} moved and {released} released event(s) for a tap and a swipe"),
             );
-            enter(state, Stage::Finish);
+
+            // The key A, the text "ferro" (which the shell injects as the keys of a virtual
+            // keyboard) and the enter key.
+            note("SCRIPT keyevent 29");
+            note("SCRIPT text ferro");
+            note("SCRIPT keyevent 66");
+            enter(state, Stage::Keys);
+        }
+
+        fn keys(state: &Rc<State>) {
+            let keys = &state.keys;
+            let complete = keys.up.borrow().contains(&Key::Enter);
+            if !complete && elapsed(state) < Duration::from_secs(25) {
+                return;
+            }
+
+            let down = keys.down.borrow();
+            let up = keys.up.borrow();
+            let text = keys.text.borrow();
+            check(
+                "key down and up",
+                down.first() == Some(&(Key::A, Some("a".to_string()))) && up.first() == Some(&Key::A),
+                format!(
+                    "the key A arrived as key down {:?} and key up {:?}; {} key down and {} key up event(s) in all",
+                    down.first(),
+                    up.first(),
+                    down.len(),
+                    up.len()
+                ),
+            );
+            let down_keys: Vec<Key> = down.iter().map(|(key, _)| *key).collect();
+            check(
+                "key text",
+                *text == "aferro" && down_keys == [Key::A, Key::F, Key::E, Key::R, Key::R, Key::O, Key::Enter],
+                format!("the text input of the keys is {:?}; the keys that went down: {down_keys:?}", *text),
+            );
+            check(
+                "key without text",
+                down.last() == Some(&(Key::Enter, Some("\r".to_string()))),
+                format!("the enter key went down as {:?} and raised no text", down.last()),
+            );
+            drop((down, up, text));
+
+            // The settings of the platform, and the night mode the script switches.
+            match FerroLocator::current().get_service::<dyn IPlatformSettings>() {
+                Some(settings) => {
+                    let colors = settings.get_color_values();
+                    let (tap, double_tap) =
+                        (settings.get_tap_size(PointerType::Touch), settings.get_double_tap_size(PointerType::Touch));
+                    check(
+                        "platform settings",
+                        colors.accent_color1().a == 0xff
+                            && tap.width > 0.0
+                            && double_tap.width > tap.width
+                            && !settings.preferred_application_language().is_empty(),
+                        format!(
+                            "theme {:?}, contrast {:?}, accents {:?} {:?} {:?}; tap size {tap:?}, double tap size \
+                             {double_tap:?} within {:?}, hold after {:?}; language {:?}",
+                            colors.theme_variant(),
+                            colors.contrast_preference(),
+                            colors.accent_color1(),
+                            colors.accent_color2(),
+                            colors.accent_color3(),
+                            settings.get_double_tap_time(PointerType::Touch),
+                            settings.hold_wait_duration(),
+                            settings.preferred_application_language()
+                        ),
+                    );
+                    let changes = state.color_changes.clone();
+                    // The subscription lives as long as the application.
+                    std::mem::forget(settings.color_values_changed(Rc::new(move |values: &PlatformColorValues| {
+                        changes.borrow_mut().push(*values);
+                    })));
+                    state.first_theme.set(colors.theme_variant());
+                    note(format!("SCRIPT night {}", if colors.theme_variant() == PlatformThemeVariant::Dark { "no" } else { "yes" }));
+                    enter(state, Stage::Settings);
+                }
+                None => {
+                    check("platform settings", false, "no platform settings are registered");
+                    enter(state, Stage::Finish);
+                }
+            }
+        }
+
+        fn settings(state: &Rc<State>) {
+            let first = state.first_theme.get();
+            let other =
+                if first == PlatformThemeVariant::Dark { PlatformThemeVariant::Light } else { PlatformThemeVariant::Dark };
+            let wanted = if state.settings_step.get() == 0 { other } else { first };
+            let last = state.color_changes.borrow().last().map(PlatformColorValues::theme_variant);
+            let arrived = last == Some(wanted);
+            if !arrived && elapsed(state) < Duration::from_secs(25) {
+                return;
+            }
+
+            let current = FerroLocator::current()
+                .get_service::<dyn IPlatformSettings>()
+                .map(|settings| settings.get_color_values().theme_variant());
+            if state.settings_step.get() == 0 {
+                check(
+                    "night mode",
+                    arrived && current == Some(wanted),
+                    format!(
+                        "the system went from {first:?} to {wanted:?}: the settings raised {} change(s), the last to \
+                         {last:?}, and now answer {current:?}",
+                        state.color_changes.borrow().len()
+                    ),
+                );
+                note(format!("SCRIPT night {}", if first == PlatformThemeVariant::Dark { "yes" } else { "no" }));
+                state.settings_step.set(1);
+                enter(state, Stage::Settings);
+            } else {
+                check(
+                    "night mode back",
+                    arrived && current == Some(wanted),
+                    format!("the system went back to {wanted:?}: the last change was to {last:?}, the settings answer {current:?}"),
+                );
+                enter(state, Stage::Finish);
+            }
         }
 
         fn finish(state: &Rc<State>) {
