@@ -1,13 +1,21 @@
 [package]
 name = "ferroui-microcom"
+description = "The COM-style interop runtime of FerroUI, which its native platform backend is built on"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords = ["com", "interop", "ffi", "gui"]
+categories = ["gui", "development-tools::ffi"]
 
 [lib]
 path = "lib.rs"
 
 [dependencies]
 
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "platforms"

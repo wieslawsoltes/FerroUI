@@ -6,6 +6,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords = ["gui", "xaml", "build", "codegen"]
+categories = ["gui", "development-tools::build-utils"]
 autotests = false
 autobenches = false
 autoexamples = false
@@ -36,3 +40,7 @@ xamlx = { workspace = true }
 # 9.5.13): the crate the framework crates scan themselves with. Its modules are exported from this
 # crate under the names they had here.
 ferroui-build-scan = { workspace = true }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "markup"

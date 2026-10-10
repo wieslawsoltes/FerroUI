@@ -408,3 +408,24 @@ fn a_server_that_is_disposed_accepts_no_more_clients() {
     client.dispose();
     server.dispose();
 }
+
+/// Not from upstream: the two key enumerations are compiled into this library from copies of the
+/// files of the base library (`input/key.rs`, `input/physical_key.rs`; see `lib.rs`), and the copies
+/// are the originals, byte for byte. A change of a key is made in the base library and copied here.
+#[test]
+fn the_key_enumerations_are_the_files_of_the_base_library() {
+    let library = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    for file in ["key.rs", "physical_key.rs"] {
+        let copy = library.join("input").join(file);
+        let original = library.with_file_name("FerroUI.Base").join("input").join(file);
+        let read = |path: &std::path::Path| {
+            std::fs::read_to_string(path).unwrap_or_else(|error| panic!("cannot read {}: {error}", path.display()))
+        };
+        assert!(
+            read(&copy) == read(&original),
+            "{} differs from {}: copy the file of the base library over it",
+            copy.display(),
+            original.display()
+        );
+    }
+}

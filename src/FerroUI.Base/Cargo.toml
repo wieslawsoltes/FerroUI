@@ -1,15 +1,22 @@
 [package]
 name = "ferroui-base"
+description = "The base library of FerroUI: the property system, layout, input, styling, media, text, animation, data binding and the compositor"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 # The build script exports the type model of the crate (`build.rs`); Cargo hands the path of the file
 # to the build scripts of the crates that depend on this one (`DEP_FERROUI_BASE_XAML_XAMLMETA`;
 # docs/porting/xaml.md, 9.5.13 and 9.6.3).
 build = "build.rs"
 links = "ferroui_base_xaml"
+# The fonts of the tests stay out of the package: nothing but the tests reads them.
+exclude = ["test_assets/"]
 
 # Unit tests live in `tests/` as a module tree of the library (`mod tests;`),
 # not as integration test targets.
@@ -52,3 +59,7 @@ time.workspace = true
 # The source scanner and the export of the type model: the standard library and `syn`, nothing of the
 # framework.
 ferroui-build-scan = { workspace = true }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "core"

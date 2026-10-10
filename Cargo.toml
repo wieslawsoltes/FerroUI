@@ -38,41 +38,51 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.0-preview.1"
 edition = "2021"
 rust-version = "1.89"
 license = "MIT"
 repository = "https://github.com/wieslawsoltes/FerroUI"
+homepage = "https://github.com/wieslawsoltes/FerroUI"
+# What every published crate states beside its own description (docs/release.md, "Metadata"). The
+# readme is the one of the repository: Cargo copies it into each package.
+readme = "README.md"
+keywords = ["gui", "ui", "xaml", "framework", "cross-platform"]
+categories = ["gui"]
 
+# The crates of the workspace are pinned to one another at the exact version of the workspace, so
+# that the crates of a release are only ever resolved together (docs/release.md, "Version scheme").
+# `scripts/release/set-version.sh <version>` writes the version above and these keys.
 [workspace.dependencies]
-ferroui-base = { path = "src/FerroUI.Base" }
-ferroui-controls = { path = "src/FerroUI.Controls" }
-ferroui-controls-color-picker = { path = "src/FerroUI.Controls.ColorPicker" }
-ferroui-markup = { path = "src/Markup/FerroUI.Markup" }
-ferroui-markup-xaml = { path = "src/Markup/FerroUI.Markup.Xaml" }
+ferroui-base = { version = "=0.1.0-preview.1", path = "src/FerroUI.Base" }
+ferroui-controls = { version = "=0.1.0-preview.1", path = "src/FerroUI.Controls" }
+ferroui-controls-color-picker = { version = "=0.1.0-preview.1", path = "src/FerroUI.Controls.ColorPicker" }
+ferroui-markup = { version = "=0.1.0-preview.1", path = "src/Markup/FerroUI.Markup" }
+ferroui-markup-xaml = { version = "=0.1.0-preview.1", path = "src/Markup/FerroUI.Markup.Xaml" }
 # Without the default features: the default is the run-time back end, which links the XAML runtime library
 # and the controls, and the build tool (`ferroui-build`) takes the compiler alone. Every crate that loads
 # markup at run time states the `runtime` feature.
-ferroui-markup-xaml-loader = { path = "src/Markup/FerroUI.Markup.Xaml.Loader", default-features = false }
-ferroui-build-scan = { path = "src/FerroUI.Build.Scan" }
-ferroui-build = { path = "src/FerroUI.Build.Tasks" }
-xamlx = { path = "external/XamlX/src/XamlX" }
-ferroui-microcom = { path = "src/FerroUI.MicroCom" }
-ferroui-native = { path = "src/FerroUI.Native" }
-ferroui-desktop = { path = "src/FerroUI.Desktop" }
-ferroui-browser = { path = "src/Browser/FerroUI.Browser" }
-ferroui-headless = { path = "src/Headless/FerroUI.Headless" }
-ferroui-fonts-inter = { path = "src/FerroUI.Fonts.Inter" }
-ferroui-dialogs = { path = "src/FerroUI.Dialogs" }
-ferroui-themes-simple = { path = "src/FerroUI.Themes.Simple" }
-ferroui-themes-fluent = { path = "src/FerroUI.Themes.Fluent" }
-ferroui-opengl = { path = "src/FerroUI.OpenGL" }
-ferroui-metal = { path = "src/FerroUI.Metal" }
-ferroui-remote-protocol = { path = "src/FerroUI.Remote.Protocol" }
-ferroui-designer-support = { path = "src/FerroUI.DesignerSupport" }
-ferroui-skia = { path = "src/Skia/FerroUI.Skia" }
-ferroui-vello = { path = "src/Vello/FerroUI.Vello" }
-ferroui-harfbuzz = { path = "src/HarfBuzz/FerroUI.HarfBuzz" }
+ferroui-markup-xaml-loader = { version = "=0.1.0-preview.1", path = "src/Markup/FerroUI.Markup.Xaml.Loader", default-features = false }
+ferroui-build-scan = { version = "=0.1.0-preview.1", path = "src/FerroUI.Build.Scan" }
+ferroui-build = { version = "=0.1.0-preview.1", path = "src/FerroUI.Build.Tasks" }
+xamlx = { version = "=0.1.0-preview.1", path = "external/XamlX/src/XamlX" }
+ferroui-microcom = { version = "=0.1.0-preview.1", path = "src/FerroUI.MicroCom" }
+microcom-codegen = { version = "=0.1.0-preview.1", path = "src/tools/MicroCom.CodeGenerator" }
+ferroui-native = { version = "=0.1.0-preview.1", path = "src/FerroUI.Native" }
+ferroui-desktop = { version = "=0.1.0-preview.1", path = "src/FerroUI.Desktop" }
+ferroui-browser = { version = "=0.1.0-preview.1", path = "src/Browser/FerroUI.Browser" }
+ferroui-headless = { version = "=0.1.0-preview.1", path = "src/Headless/FerroUI.Headless" }
+ferroui-fonts-inter = { version = "=0.1.0-preview.1", path = "src/FerroUI.Fonts.Inter" }
+ferroui-dialogs = { version = "=0.1.0-preview.1", path = "src/FerroUI.Dialogs" }
+ferroui-themes-simple = { version = "=0.1.0-preview.1", path = "src/FerroUI.Themes.Simple" }
+ferroui-themes-fluent = { version = "=0.1.0-preview.1", path = "src/FerroUI.Themes.Fluent" }
+ferroui-opengl = { version = "=0.1.0-preview.1", path = "src/FerroUI.OpenGL" }
+ferroui-metal = { version = "=0.1.0-preview.1", path = "src/FerroUI.Metal" }
+ferroui-remote-protocol = { version = "=0.1.0-preview.1", path = "src/FerroUI.Remote.Protocol" }
+ferroui-designer-support = { version = "=0.1.0-preview.1", path = "src/FerroUI.DesignerSupport" }
+ferroui-skia = { version = "=0.1.0-preview.1", path = "src/Skia/FerroUI.Skia" }
+ferroui-vello = { version = "=0.1.0-preview.1", path = "src/Vello/FerroUI.Vello" }
+ferroui-harfbuzz = { version = "=0.1.0-preview.1", path = "src/HarfBuzz/FerroUI.HarfBuzz" }
 bitflags = "2"
 paste = "1"
 cc = "1"

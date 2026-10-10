@@ -6,6 +6,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 build = "build.rs"
 # The build script compiles the theme documents of the crate and exports its type model with them;
 # Cargo hands the path of the file to the build scripts of the crates that depend on this one
@@ -55,3 +59,7 @@ ferroui-controls = { workspace = true, features = ["testing"] }
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
 ferroui-themes-fluent = { workspace = true }
 ferroui-themes-simple = { workspace = true }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"
