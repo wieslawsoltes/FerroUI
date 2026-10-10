@@ -234,7 +234,8 @@ mod imp {
     use crate::wnd_proc_guard;
     use ferroui_base::input::platform::IClipboard;
     use ferroui_base::input::raw::IRawInputEventArgs;
-    use ferroui_base::input::{IInputRoot, PointerPressedEventArgs};
+    use crate::i_blur_host::{BlurEffect, ICompositionEffectsSurface};
+    use ferroui_base::input::{IInputRoot, PenDevice, PointerPressedEventArgs, TouchDevice};
     use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
     use ferroui_base::platform::surfaces::IPlatformRenderSurface;
     use ferroui_opengl::egl::{EglGlPlatformSurface, IEglWindowGlPlatformSurfaceInfo};
@@ -375,6 +376,11 @@ mod imp {
 
     type Callback<F> = RefCell<Option<Rc<F>>>;
 
+    /// `WinUiCompositionShared.MinHostBackdropVersion` of the reference:
+    /// the first version of the system with the host backdrop brush
+    /// attribute of a window.
+    const MIN_HOST_BACKDROP_VERSION: Version = Version { major: 10, minor: 0, build: 22000 };
+
     /// Window implementation for the Win32 platform.
     pub struct WindowImpl {
         this: Weak<WindowImpl>,
@@ -402,6 +408,14 @@ mod imp {
         drop_target: RefCell<Option<ferroui_microcom::ComPtr<crate::win32_com::IDropTarget>>>,
         window_properties: Cell<WindowProperties>,
         tracking_mouse: Cell<bool>,
+        tracking_non_client_mouse: Cell<bool>,
+        /// The point of the last mouse move, as the history of the mouse
+        /// of the system names it.
+        last_wm_mouse_point: Cell<MOUSEMOVEPOINT>,
+        touch_device: Rc<TouchDevice>,
+        pen_device: Rc<PenDevice>,
+        /// Whether the system has the pointer messages (Windows 8 and later).
+        wm_pointer_enabled: bool,
         topmost: Cell<bool>,
         scaling: Cell<f64>,
         dpi: Cell<u32>,
@@ -422,6 +436,11 @@ mod imp {
         ignore_wm_char: Cell<bool>,
         /// The first half of a character of two `WM_CHAR` messages.
         pending_high_surrogate: Cell<Option<u16>>,
+        /// The surface of the window when it is one of a composition mode
+        /// that has the blur effects (`_glSurface as
+        /// ICompositionEffectsSurface` in the reference). No surface of
+        /// the backend is one before the composition modes of stage 2c.
+        composition_effects_surface: RefCell<Option<Arc<dyn ICompositionEffectsSurface>>>,
         transparency_level: Cell<WindowTransparencyLevel>,
         default_transparency_level: WindowTransparencyLevel,
         corner_preference: Cell<WindowCornerPreference>,
@@ -512,6 +531,11 @@ mod imp {
                 drop_target: RefCell::new(None),
                 window_properties: Cell::new(window_properties),
                 tracking_mouse: Cell::new(false),
+                tracking_non_client_mouse: Cell::new(false),
+                last_wm_mouse_point: Cell::new(MOUSEMOVEPOINT::default()),
+                touch_device: TouchDevice::new(),
+                pen_device: PenDevice::new(false),
+                wm_pointer_enabled: Win32Platform::windows_version() >= PlatformConstants::WINDOWS8,
                 topmost: Cell::new(false),
                 scaling: Cell::new(1.0),
                 dpi: Cell::new(96),
@@ -530,6 +554,7 @@ mod imp {
                 hidden_window_is_parent: Cell::new(false),
                 ignore_wm_char: Cell::new(false),
                 pending_high_surrogate: Cell::new(None),
+                composition_effects_surface: RefCell::new(None),
                 transparency_level: Cell::new(default_transparency_level),
                 default_transparency_level,
                 corner_preference: Cell::new(WindowCornerPreference::default()),
@@ -737,7 +762,45 @@ mod imp {
         }
 
         pub(crate) fn is_mouse_in_pointer_enabled(&self) -> bool {
-            Win32Platform::windows_version() >= PlatformConstants::WINDOWS8 && is_mouse_in_pointer_enabled()
+            self.wm_pointer_enabled && is_mouse_in_pointer_enabled()
+        }
+
+        pub(crate) fn wm_pointer_enabled(&self) -> bool {
+            self.wm_pointer_enabled
+        }
+
+        pub(crate) fn touch_device(&self) -> &Rc<TouchDevice> {
+            &self.touch_device
+        }
+
+        pub(crate) fn pen_device(&self) -> &Rc<PenDevice> {
+            &self.pen_device
+        }
+
+        pub(crate) fn tracking_non_client_mouse(&self) -> bool {
+            self.tracking_non_client_mouse.get()
+        }
+
+        pub(crate) fn set_tracking_non_client_mouse(&self, value: bool) {
+            self.tracking_non_client_mouse.set(value);
+        }
+
+        /// Sets the point of the last mouse move and returns the one before.
+        pub(crate) fn replace_last_wm_mouse_point(&self, value: MOUSEMOVEPOINT) -> MOUSEMOVEPOINT {
+            self.last_wm_mouse_point.replace(value)
+        }
+
+        pub(crate) fn extend_title_bar_hint(&self) -> f64 {
+            self.extend_title_bar_hint.get()
+        }
+
+        pub(crate) fn extended_margins_value(&self) -> Thickness {
+            self.extended_margins.get()
+        }
+
+        /// The input root of the window, once it has one.
+        pub(crate) fn try_owner(&self) -> Option<Rc<dyn IInputRoot>> {
+            self.owner.borrow().clone()
         }
 
         pub(crate) fn should_take_focus_on_click(&self) -> bool {
@@ -861,7 +924,7 @@ mod imp {
             Size::new(f64::from(rc_window.width()), f64::from(rc_window.height())) / self.scaling.get()
         }
 
-        fn window_state_impl(&self) -> WindowState {
+        pub(crate) fn window_state_impl(&self) -> WindowState {
             if !is_window_visible(self.hwnd.get()) {
                 return self.show_window_state.get();
             }
@@ -875,7 +938,7 @@ mod imp {
             window_state_from_show_command(placement.show_cmd)
         }
 
-        fn set_window_state_impl(&self, value: WindowState) {
+        pub(crate) fn set_window_state_impl(&self, value: WindowState) {
             if is_window_visible(self.hwnd.get()) && self.last_window_state.get() != value {
                 // If the window is minimized, it shouldn't be activated
                 self.show_window(value, value != WindowState::Minimized);
@@ -906,9 +969,20 @@ mod imp {
                 return !self.use_redirection_bitmap || Win32Platform::windows_version() >= PlatformConstants::WINDOWS8;
             }
 
-            // Blur, acrylic blur and mica are effects of a composition
-            // surface, which the composition modes of stage 2 bring: no
-            // surface of this stage supports them.
+            let surface = self.composition_effects_surface.borrow();
+
+            if level == WindowTransparencyLevel::blur() {
+                return surface.as_ref().is_some_and(|surface| surface.is_blur_supported(BlurEffect::GaussianBlur));
+            }
+
+            if level == WindowTransparencyLevel::acrylic_blur() {
+                return surface.as_ref().is_some_and(|surface| surface.is_blur_supported(BlurEffect::Acrylic));
+            }
+
+            if level == WindowTransparencyLevel::mica() {
+                return surface.as_ref().is_some_and(|surface| surface.is_blur_supported(BlurEffect::MicaDark));
+            }
+
             false
         }
 
@@ -917,7 +991,39 @@ mod imp {
         // Here we only adjust the DWM window attributes that have to be set from the UI thread.
 
         fn set_transparency_transparent(&self) -> bool {
+            if self.composition_effects_surface.borrow().is_some() {
+                return true;
+            }
+
             self.set_legacy_transparency(true)
+        }
+
+        fn set_transparency_acrylic_blur(&self) -> bool {
+            self.set_use_host_backdrop_brush(true);
+            self.set_legacy_transparency(false);
+            true
+        }
+
+        fn set_transparency_mica(&self) -> bool {
+            self.set_use_host_backdrop_brush(false);
+            self.set_legacy_transparency(false);
+            true
+        }
+
+        fn set_use_host_backdrop_brush(&self, use_host_backdrop_brush: bool) -> bool {
+            if Win32Platform::windows_version() < MIN_HOST_BACKDROP_VERSION {
+                return false;
+            }
+
+            // AcrylicBlur requires window to set DWMWA_USE_HOSTBACKDROPBRUSH flag on Win11+.
+            // It's not necessary on older versions and it's not necessary with Mica brush.
+
+            let result = dwm_set_window_attribute(
+                self.hwnd.get(),
+                DwmWindowAttribute::DWMWA_USE_HOSTBACKDROPBRUSH,
+                i32::from(use_host_backdrop_brush),
+            );
+            result == 0
         }
 
         fn set_legacy_transparency(&self, enabled: bool) -> bool {
@@ -1161,6 +1267,7 @@ mod imp {
         }
 
         pub(crate) fn on_destroyed(&self) {
+            self.touch_device.dispose();
             let hwnd = self.hwnd.replace(0);
             if let Some(handle) = self.handle.borrow().as_ref() {
                 handle.hwnd.store(0, Ordering::Release);
@@ -1300,11 +1407,10 @@ mod imp {
             self.wnd_proc(hwnd, msg, w_param, l_param)
         }
 
-        /// The window procedure: a popup answers a few messages itself,
-        /// and the procedure of the application handles the rest. (With an
-        /// extended client area the reference first asks the procedure of
-        /// the custom caption; the client area is not extended before
-        /// stage 2 builds that procedure.)
+        /// The window procedure: a popup answers a few messages itself;
+        /// with an extended client area the procedure of the custom
+        /// caption is asked first; the procedure of the application
+        /// handles the rest.
         fn wnd_proc(&self, hwnd: isize, msg: u32, w_param: usize, l_param: isize) -> isize {
             if let WindowKind::Popup(popup) = &self.kind {
                 if let Some(result) = popup.wnd_proc(msg) {
@@ -1312,7 +1418,18 @@ mod imp {
                 }
             }
 
-            self.app_wnd_proc(hwnd, msg, w_param, l_param)
+            let mut l_ret = 0;
+            let mut call_dwp = true;
+
+            if self.is_client_area_extended.get() {
+                l_ret = self.custom_caption_proc(hwnd, msg, w_param, l_param, &mut call_dwp);
+            }
+
+            if call_dwp {
+                l_ret = self.app_wnd_proc(hwnd, msg, w_param, l_param);
+            }
+
+            l_ret
         }
 
         /// Ported from https://github.com/chromium/chromium/blob/master/ui/views/win/fullscreen_handler.cc
@@ -2042,7 +2159,15 @@ mod imp {
                 if level == self.transparency_level.get() {
                     return;
                 }
-                if level == WindowTransparencyLevel::transparent() && !self.set_transparency_transparent() {
+                if level == WindowTransparencyLevel::transparent() {
+                    if !self.set_transparency_transparent() {
+                        continue;
+                    }
+                } else if level == WindowTransparencyLevel::acrylic_blur() {
+                    if !self.set_transparency_acrylic_blur() {
+                        continue;
+                    }
+                } else if level == WindowTransparencyLevel::mica() && !self.set_transparency_mica() {
                     continue;
                 }
 
@@ -2080,6 +2205,9 @@ mod imp {
                     DwmWindowAttribute::DWMWA_USE_IMMERSIVE_DARK_MODE,
                     i32::from(current == PlatformThemeVariant::Dark),
                 );
+                if self.transparency_level.get() == WindowTransparencyLevel::mica() {
+                    self.set_transparency_mica();
+                }
             }
         }
 
@@ -2338,22 +2466,8 @@ mod imp {
             self.max_size.set(max_size);
         }
 
-        /// The client area is not extended into the decorations before
-        /// stage 2: extending it needs the window procedure of the custom
-        /// caption (the hit tests of the caption buttons and of the resize
-        /// borders), which is built there. The hint is recorded as not
-        /// honoured: the window reports that its client area is not
-        /// extended, and the callback is told so.
         fn set_extend_client_area_to_decorations_hint(&self, extend_into_client_area_hint: bool) {
-            if extend_into_client_area_hint {
-                if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::WIN32_PLATFORM) {
-                    logger.log(
-                        None,
-                        "The client area is not extended into the decorations: stage 2 of the Windows platform backend.",
-                    );
-                }
-            }
-            self.is_client_area_extended.set(false);
+            self.is_client_area_extended.set(extend_into_client_area_hint);
 
             self.extend_client_area();
         }

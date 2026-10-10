@@ -372,18 +372,24 @@ if ($Desktop) {
     } else {
         $catalog = Join-Path $TargetDir 'debug\control-catalog-desktop.exe'
         $pictures = Join-Path $TargetDir 'vm-smoke-screenshots'
-        foreach ($mode in @('software', 'angle')) {
+        # The third run is of a window whose client area extends into its frame (the title bar
+        # and the caption buttons drawn by the framework), through ANGLE, with the page of the
+        # window customizations among its pages.
+        foreach ($mode in @('software', 'angle', 'extended')) {
             $name = "catalog-$mode"
             $directory = Join-Path $pictures $mode
             New-Item -ItemType Directory -Force -Path $directory | Out-Null
             Get-ChildItem $directory -Filter '*.png' -ErrorAction SilentlyContinue | Remove-Item -Force
             $commandLine = "set FERROUI_SMOKE_PAGES=2500&& set FERROUI_SMOKE_EXIT_MS=120000&& set FERROUI_SMOKE_RENDERING=$mode&& set FERROUI_SMOKE_SCREENSHOTS=$directory&& `"$catalog`""
+            if ($mode -eq 'extended') {
+                $commandLine = "set FERROUI_SMOKE_PAGES=2500&& set FERROUI_SMOKE_EXIT_MS=120000&& set FERROUI_SMOKE_RENDERING=angle&& set FERROUI_SMOKE_EXTEND_CLIENT_AREA=1&& set FERROUI_SMOKE_SCREENSHOT_PAGES=Home,Window Customizations,Buttons&& set FERROUI_SMOKE_SCREENSHOTS=$directory&& `"$catalog`""
+            }
             $code = if ($InteractiveUser) { Run-Interactive $name $commandLine 600 } else { Run $name $commandLine }
             if ($code -ne 0) { $failed.Add("catalog ($mode)") }
             $count = @(Get-ChildItem $directory -Filter '*.png' -ErrorAction SilentlyContinue).Count
             Say "    $count picture(s) in $directory"
             if ($count -eq 0) { $failed.Add("catalog pictures ($mode)") }
-            Tail $name 40 'content reaches|colour\(s\)|panicked|error|moved'
+            Tail $name 40 'content reaches|colour\(s\)|panicked|error|moved|extended'
             $copy = Join-Path (Join-Path (Split-Path -Parent $Report) 'vm-smoke-screenshots') $mode
             New-Item -ItemType Directory -Force -Path $copy | Out-Null
             Copy-Item (Join-Path $directory '*.png') $copy -Force -ErrorAction SilentlyContinue

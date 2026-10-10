@@ -9088,12 +9088,12 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    57,
+    59,
     95,
     0
    ],
    "types": [
-    155,
+    162,
     276,
     0
    ],
@@ -9103,7 +9103,7 @@
     0
    ],
    "interfaces": [
-    0,
+    1,
     7
    ],
    "propertyRegistrations": [
@@ -9149,6 +9149,9 @@
     ],
     "FramebufferManager.cs": [
      "framebuffer_manager.rs"
+    ],
+    "IBlurHost.cs": [
+     "i_blur_host.rs"
     ],
     "IconImpl.cs": [
      "icon_impl.rs"
@@ -9275,6 +9278,9 @@
     ],
     "WindowImpl.AppWndProc.cs": [
      "window_impl_app_wnd_proc.rs"
+    ],
+    "WindowImpl.CustomCaptionProc.cs": [
+     "window_impl_custom_caption_proc.rs"
     ],
     "WindowImpl.WndProc.cs": [
      "window_impl.rs"
