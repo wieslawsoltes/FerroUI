@@ -1753,6 +1753,32 @@ mod app {
                 Err(error) => report.check("popup moved", false, error),
             }
 
+            // Moved again and again at intervals of nothing to a few frames, so that some of
+            // the moves are asked for while the answer to the configure of the move before is
+            // on its way. On a shell before version 3 the popup then has another xdg_surface by
+            // the time the serial of that configure arrives at the worker, which must not
+            // acknowledge it there (the catalog ended with "wrong configure serial" on a popup
+            // that was laid out twice while it opened).
+            const MOVES: u32 = 24;
+            for step in 1..=MOVES {
+                popup.set_horizontal_offset(SHIFT + f64::from(step % 5) * 4.0 - 8.0);
+                delay(Duration::from_millis(u64::from(step % 8) * 4)).await;
+            }
+            popup.set_horizontal_offset(SHIFT);
+            let expected = (left as i32 + SHIFT as i32, top as i32, POPUP_SIZE.0 as i32, POPUP_SIZE.1 as i32);
+            let settled = wait_for(STEP_TIMEOUT, || popup_configures(client) == vec![expected]).await;
+            let picture = picture_with(probe, moved_in, POPUP_FILL).await;
+            let pixel = picture.as_ref().ok().and_then(|picture| picture.pixel(moved_in.0, moved_in.1));
+            let counts = popup_counts(client).unwrap_or_default();
+            report.check(
+                "popup moved in a hurry",
+                settled && close_to(pixel, POPUP_FILL) && counts.mapped == 1 && probe.alive() && sway::view(TITLE).is_some(),
+                format!(
+                    "{MOVES} moves at intervals of 0 to 28 milliseconds: the popup ends at {:?} (expected {expected:?}), mapped ({counts:?}), {moved_in:?} is {pixel:?}, and the connection is still there",
+                    popup_configures(client)
+                ),
+            );
+
             // A popup of the popup: its parent on the compositor is the popup.
             nested.set_is_open(true);
             let nested_centre = at(left + SHIFT + POPUP_SIZE.0 + NESTED_SIZE.0 / 2.0, top + POPUP_SIZE.1 / 2.0);

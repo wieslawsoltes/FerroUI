@@ -624,6 +624,11 @@ mod imp {
         surface: WSurface,
         xdg_surface: Option<XdgSurface>,
         pending_ack_serial: Option<u32>,
+        /// The serials of the configure events of the current `xdg_surface` that are not
+        /// acknowledged yet (not in the reference): the UI thread answers a configure with
+        /// its serial some time later, and a popup that was created again in between has
+        /// another `xdg_surface`, for which that serial is a protocol error.
+        configure_serials: Vec<u32>,
         initial_configure_acknowledged: bool,
         // True once we've attached a buffer + acked the initial configure
         // following the most recent OnConnected — i.e. the surface is now
@@ -655,6 +660,7 @@ mod imp {
                 surface: WSurface::new(id, worker),
                 xdg_surface: None,
                 pending_ack_serial: None,
+                configure_serials: Vec::new(),
                 initial_configure_acknowledged: false,
                 mapped: false,
                 pending_child_popups: Vec::new(),
@@ -745,9 +751,19 @@ mod imp {
             }
         }
 
+        /// Remembers the serial of a configure event of the current `xdg_surface`.
+        fn note_configure_serial(&mut self, serial: u32) {
+            const KEPT: usize = 32;
+            if self.configure_serials.len() >= KEPT {
+                self.configure_serials.remove(0);
+            }
+            self.configure_serials.push(serial);
+        }
+
         pub fn on_connected(&mut self, cx: &ConnectionContext<'_>) {
             self.surface.on_connected(cx);
             self.pending_ack_serial = None;
+            self.configure_serials.clear();
             self.initial_configure_acknowledged = false;
             self.mapped = false;
 
@@ -760,6 +776,7 @@ mod imp {
                 xdg_surface.destroy();
             }
             self.pending_ack_serial = None;
+            self.configure_serials.clear();
             self.initial_configure_acknowledged = false;
             self.mapped = false;
             self.pending_child_popups.clear();
@@ -770,7 +787,16 @@ mod imp {
         }
 
         /// Called from UI thread (via Post) to set the serial that should be acked on next commit.
+        ///
+        /// A serial that is not one of the current `xdg_surface` is dropped: it answers a
+        /// configure of an object that is gone (a popup that was created again, a connection
+        /// that was lost), and acknowledging it would be a protocol error.
         pub fn set_pending_ack_serial(&mut self, serial: u32) {
+            let Some(index) = self.configure_serials.iter().position(|known| *known == serial) else {
+                return;
+            };
+            // The serials before it are answered with it.
+            self.configure_serials.drain(..=index);
             self.initial_configure_acknowledged = true;
             self.pending_ack_serial = Some(serial);
         }
@@ -1330,6 +1356,7 @@ mod imp {
             wl_surface.commit();
 
             self.shell.pending_ack_serial = None;
+            self.shell.configure_serials.clear();
             self.shell.initial_configure_acknowledged = false;
             self.shell.mapped = false;
             self.shell.last_window_geometry = None;
@@ -1610,11 +1637,13 @@ mod imp {
             if let xdg_surface::Event::Configure { serial } = event {
                 let globals = state.globals.as_ref();
                 if let Some(top_level) = state.top_levels.get_mut(data) {
+                    top_level.shell.note_configure_serial(serial);
                     top_level.on_configure_batch_complete(serial, globals);
                 } else if let Some(popup) = state.popups.get_mut(data) {
                     // A configure of the `xdg_surface` a popup had before it was created
                     // again is of an object that is gone.
                     if popup.shell.xdg_surface.as_ref() == Some(proxy) {
+                        popup.shell.note_configure_serial(serial);
                         popup.on_configure_batch_complete(serial);
                     }
                 }
