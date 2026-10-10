@@ -68,6 +68,80 @@ jobs:
       - name: Test
         run: cargo test --workspace --locked --no-fail-fast --lib --tests
 
+  # The Windows platform backend (docs/porting/win32-platform.md, section 10.3). This job is the
+  # only place the backend runs: it is written and checked for the Windows target on other
+  # systems. Like the macOS job it does not run for a push to main.
+  # - The first three steps are the backend itself and fail the job: it links, its tests pass on
+  #   the real target, and the smoke run of a window passes every check it prints (frames through
+  #   the software surface, a resize, maximize and restore, posted key and mouse input, clipboard
+  #   text, a wake-up of the message loop from another thread, close). Read the log of the smoke
+  #   run: it prints what it saw for every check.
+  # - The steps after them are the first time anything of the port is compiled with MSVC and the
+  #   first time the whole stack runs on Windows. They are informative (continue-on-error) until
+  #   their first green run, after which the marker is to be removed.
+  windows:
+    name: Build, test and smoke run (Windows platform backend)
+    if: github.event_name != 'push'
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: Build the backend and its example
+        run: cargo build --locked -p ferroui-win32 --examples
+      - name: Tests of the backend
+        run: cargo test --locked -p ferroui-win32 --no-fail-fast
+      - name: Smoke run of a window
+        timeout-minutes: 5
+        run: cargo run --locked -p ferroui-win32 --example win32_window -- --smoke
+      # A feature set of Skia without a published binary makes the Skia bindings build Skia from
+      # source (an hour, with LLVM). This asks the release of the bindings which sets exist for
+      # the target: the raster set the desktop entry point needs today, which gates the steps
+      # below, and the GPU sets stage 2 chooses from (win32-platform.md, section 6.2).
+      - name: Skia binaries published for Windows (informative)
+        id: skia
+        continue-on-error: true
+        run: |
+          echo "raster=false" >> "$GITHUB_OUTPUT"
+          cargo fetch --locked --target x86_64-pc-windows-msvc
+          info="$(ls "${CARGO_HOME:-$HOME/.cargo}"/registry/src/*/skia-bindings-*/.cargo_vcs_info.json | head -n 1)"
+          version="$(basename "$(dirname "$info")" | sed 's/^skia-bindings-//')"
+          hash="$(grep -o '"sha1": *"[0-9a-f]*"' "$info" | grep -o '[0-9a-f]\{40\}' | cut -c1-20)"
+          echo "skia-bindings $version, commit $hash"
+          published() {
+            curl -sfL -r 0-0 -o /dev/null \
+              "https://github.com/rust-skia/skia-binaries/releases/download/$version/skia-binaries-$hash-x86_64-pc-windows-msvc-$1.tar.gz"
+          }
+          if published jpegd-jpege-pdf; then
+            echo "published:     jpegd-jpege-pdf (raster)"
+            echo "raster=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::no Skia binary for the raster feature set on Windows: the desktop steps are skipped"
+          fi
+          for key in ganesh-gl-jpegd-jpege-pdf d3d-ganesh-jpegd-jpege-pdf graphite-jpegd-jpege-pdf-vulkan \
+                     ganesh-gl-graphite-jpegd-jpege-pdf-vulkan d3d-ganesh-gl-graphite-jpegd-jpege-pdf-vulkan; do
+            if published "$key"; then echo "published:     $key"; else echo "not published: $key"; fi
+          done
+      - name: Build and test the desktop entry point (informative until its first green run)
+        if: steps.skia.outputs.raster == 'true'
+        continue-on-error: true
+        timeout-minutes: 60
+        run: cargo test --locked -p ferroui-desktop --lib
+      - name: hello_window for two seconds (informative until its first green run)
+        if: steps.skia.outputs.raster == 'true'
+        continue-on-error: true
+        timeout-minutes: 30
+        env:
+          FERROUI_SMOKE_EXIT_MS: 2000
+        run: cargo run --locked -p ferroui-desktop --example hello_window
+
   browser:
     name: Check (browser, wasm32-unknown-emscripten)
     runs-on: ubuntu-latest
