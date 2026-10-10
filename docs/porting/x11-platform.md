@@ -2,7 +2,7 @@
 
 The design of the Linux desktop backend of FerroUI, the decisions it rests on, the file table of the port and its stages. Upstream: `src/Avalonia.X11` (88 files, 291 types, 4897 members) with `src/Avalonia.FreeDesktop` (18 files, 26 types, 216 members) at the tracked commit (`TRACKING.md`). `Avalonia.FreeDesktop.AtSpi` (27 files, accessibility), `Avalonia.Wayland` (81 files) and `Avalonia.LinuxFramebuffer` (30 files) are later stages, named at the end.
 
-Marks, as in `browser-platform.md`: **[V]** verified from sources (the upstream files, the sources of a crate in the cargo registry, `cargo info`), **[M]** measured here (a build or a test run on this machine), **[R]** recalled and not verified here, **[CI]** to be shown by the CI job on a real X server. The development machine is a Mac: nothing in this document was run against an X server before the first run of that job.
+Marks, as in `browser-platform.md`: **[V]** verified from sources (the upstream files, the sources of a crate in the cargo registry, `cargo info`), **[M]** measured here (a build or a test run on this machine), **[R]** recalled and not verified here, **[CI]** to be shown by the CI job on a real X server. **[VM]** measured in a virtual machine on the development machine (Ubuntu 24.04, ARM64, section 13). The development machine is a Mac; the CI job runs on x86-64 and had not run when this was written.
 
 ## 1. Crates
 
@@ -275,10 +275,26 @@ One row per upstream file. "built" files are on the branch; the stage of an open
 Three levels, because an X application cannot run on the development machine:
 
 1. **Compilation for Linux**: `cargo check -p ferroui-x11 --target x86_64-unknown-linux-gnu --all-targets` **[M]**, and the host: the crate compiles whole on macOS.
-2. **Tests without a server** (`cargo test -p ferroui-x11`, 163 tests **[M]**), of everything that is logic and not a round trip: the key tables; atoms and property decoding; Motif, size and state hints, window state from `_NET_WM_STATE`, allowed actions, frame extents; the translation of X Input events (built as the C structures the library delivers, copied as the dispatcher copies them); scaling from `Xft.dpi`, the environment and physical sizes, EDID, refresh rates, working areas; the resource database; the selection protocol with a mock connection (targets, multiple, incremental transfers in both directions, timeouts), formats and encodings, uri lists; the wake-up pipe and the timer wait of the event loop; the cursor tables; icon data; the options and the input method decisions.
+2. **Tests without a server** (`cargo test -p ferroui-x11`, 163 tests **[M][VM]**), of everything that is logic and not a round trip: the key tables; atoms and property decoding; Motif, size and state hints, window state from `_NET_WM_STATE`, allowed actions, frame extents; the translation of X Input events (built as the C structures the library delivers, copied as the dispatcher copies them); scaling from `Xft.dpi`, the environment and physical sizes, EDID, refresh rates, working areas; the resource database; the selection protocol with a mock connection (targets, multiple, incremental transfers in both directions, timeouts), formats and encodings, uri lists; the wake-up pipe and the timer wait of the event loop; the cursor tables; icon data; the options and the input method decisions.
 3. **A real server in CI** (the job `x11` of `.github/workflows/ci.yml`, Ubuntu, Xvfb): the crate is built for Linux, its tests run on Linux, and `examples/x11_window.rs --smoke` runs under `xvfb-run`. The smoke mode asks the server, not the framework: the window is viewable, has the expected size, `WM_NAME` and `_NET_WM_NAME`, `_NET_WM_PID`, `WM_PROTOCOLS`, `WM_CLASS`, `_NET_WM_WINDOW_TYPE`, and pixels read back with `XGetImage` at three points have the fill colour; it then sends itself `WM_DELETE_WINDOW`, which has to close the window and end the application. Every check prints a line and the exit code is the result.
 
-Not covered by the job: a window manager (Xvfb has none, so the `_NET_WM` paths run against a server that ignores them), a compositing manager, real input devices, more than one screen, high DPI. These are the first additions to make to the job (a window manager such as `openbox` or `metacity`, `xdotool` for input, `xrandr --fb`/`--scale`).
+The job runs the smoke mode twice: on a bare Xvfb, and under a window manager (`openbox`) on a screen narrower than the window, where the window manager clamps the window and the framework has to follow (the size check compares the server with the framework, and with the requested size only without a window manager).
+
+### Measured in the virtual machine (2026-10-10) **[VM]**
+
+Ubuntu 24.04.3 on ARM64 (`aarch64-unknown-linux-gnu`, Rust 1.97.1), the sources and the build directory on a shared folder, one package installed for the build (`libfontconfig1-dev`):
+
+| What | Result |
+|---|---|
+| `cargo test -p ferroui-x11` | 163 passed, as on macOS |
+| `cargo build -p ferroui-x11 --features example --example x11_window` | Builds in under four minutes: `skia-bindings` 0.153.3 has a published binary for `aarch64-unknown-linux-gnu` with the default features (no source build), and the bundled HarfBuzz compiles |
+| The smoke mode under `xvfb-run` (no window manager), 1280x1024x24 | All checks pass at the first attempt: viewable, 640x400, depth 32, `WM_NAME`, `_NET_WM_NAME`, `_NET_WM_PID`, `WM_PROTOCOLS`, `WM_CLASS`, `_NET_WM_WINDOW_TYPE`, three pixels `0xff336699`, closed by `WM_DELETE_WINDOW`, exit code 0 |
+| The same under `openbox` in Xvfb, 1280x1024 and 600x500 | Pass; on the small screen the window is 598x400 on the server and in the framework |
+| The same once on the XWayland display of the desktop session (GNOME, mutter, `Xft.dpi` 192) | Scaling 2 from `Xft.dpi`; the window mapped, titled, drawn and closed. Two checks failed that were wrong in the example, not in the platform: the window manager had clamped the 1280 pixel wide window to the 1148 pixel work area, and the example expected the requested size and read a pixel beyond the window. The example was corrected and the corrected checks run under `openbox` (above); the run on the session display was not repeated |
+| `cargo test -p ferroui-desktop --lib` | `platform_detect_selects_the_linux_subsystems` passes |
+| `hello_window` of `ferroui-desktop` under `xvfb-run` (`use_platform_detect`) | Opens, closes after its timer, exit code 0 |
+
+Nothing had to be changed in the platform for these runs. Only in CI so far: the build for x86-64 (whether `skia-bindings` has a binary for that target with the default features is **[R]**). Verified nowhere yet: input from real devices or synthetic input (`xdotool`), the clipboard between two clients, popups, more than one screen, a compositing manager under plain X11.
 
 ## 14. Stages
 

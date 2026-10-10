@@ -210,8 +210,14 @@ mod app {
             xlib::x_sync(display, false);
 
             let scaling = window.render_scaling();
-            let expected_width = (WIDTH * scaling) as i32;
-            let expected_height = (HEIGHT * scaling) as i32;
+            // What was asked for, and what the framework believes the window has. A window manager may
+            // grant another size than the one asked for (a window larger than the work area is
+            // clamped), so the requested size is only expected without one.
+            let requested = ((WIDTH * scaling) as i32, (HEIGHT * scaling) as i32);
+            let client_size = window.client_size();
+            let believed = ((client_size.width * scaling) as i32, (client_size.height * scaling) as i32);
+            let has_window_manager = platform.globals().net_supported().is_some();
+            let (mut server_width, mut server_height) = requested;
 
             // IsViewable is 2.
             let attributes = xlib::x_get_window_attributes(display, xid);
@@ -223,13 +229,22 @@ mod app {
                         attributes.map_state == 2,
                         format!("map state {} (2 is viewable), window {xid:#x}", attributes.map_state),
                     );
+                    server_width = attributes.width;
+                    server_height = attributes.height;
+                    let on_server = (attributes.width, attributes.height);
                     check(
                         &mut checks,
                         "size",
-                        attributes.width == expected_width && attributes.height == expected_height,
+                        on_server == believed && (has_window_manager || on_server == requested),
                         format!(
-                            "{}x{} on the server, {expected_width}x{expected_height} expected at scaling {scaling}",
-                            attributes.width, attributes.height
+                            "{}x{} on the server, {}x{} in the framework, {}x{} requested at scaling {scaling}, {}",
+                            on_server.0,
+                            on_server.1,
+                            believed.0,
+                            believed.1,
+                            requested.0,
+                            requested.1,
+                            if has_window_manager { "with a window manager" } else { "without a window manager" }
                         ),
                     );
                     check(
@@ -294,9 +309,9 @@ mod app {
             // The pixels the server holds for the window: the centre and a point near each corner.
             let expected = (FILL.0 as u64) << 16 | (FILL.1 as u64) << 8 | FILL.2 as u64;
             let points = [
-                ("centre", expected_width / 2, expected_height / 2),
+                ("centre", server_width / 2, server_height / 2),
                 ("top left", 4, 4),
-                ("bottom right", expected_width - 5, expected_height - 5),
+                ("bottom right", server_width - 5, server_height - 5),
             ];
             for (where_, x, y) in points {
                 let pixel = xlib::x_get_pixel(display, xid, x, y).map(|pixel| pixel as u64);
