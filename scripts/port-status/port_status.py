@@ -6,6 +6,7 @@ Reads the upstream API description produced by scripts/api-extract
 writes:
 
   docs/porting/TRACKING.md              master tracking document
+  docs/porting/REMAINING.md             what is left to port, in one place
   docs/porting/tracking/<Project>.md    one page per upstream project
   docs/porting/data/port-status.json    machine readable summary
 
@@ -103,10 +104,16 @@ def apply_project_list(index: dict, repo: str) -> None:
     if not os.path.exists(path):
         return
     with open(path, encoding="utf-8") as f:
-        listed = {p["path"]: p for p in json.load(f).get("projects", [])}
+        config = json.load(f)
+    listed = {p["path"]: p for p in config.get("projects", [])}
+    # `expanded`: planning data of one project that a `dir/*` entry expands to, where it differs from its siblings
+    expanded = {p["path"]: p for p in config.get("expanded", [])}
     for project in index["projects"]:
         entry = listed.get(project["path"])
-        if entry is None:
+        if entry is None and project["path"] in expanded:
+            entry = expanded[project["path"]]
+            fields = ("scope", "phase", "priority")
+        elif entry is None:
             # a project of a `dir/*` entry
             parent = project["path"].rsplit("/", 1)[0] + "/*"
             entry = listed.get(parent)
@@ -395,6 +402,8 @@ def match_members(utype: dict, view: TypeView, aliases: dict | None = None) -> l
             for f in aliases.get(name, []):
                 if f in t.fns and ("fn", f) not in pool:
                     pool.append(("alias fn", f))
+                elif f not in t.fns and f in view.free_fns and ("free fn", f) not in pool:
+                    pool.append(("alias free fn", f))
             for f in sorted(t.fns):
                 if f.startswith(s + "_") and norm(f) not in reserved and f not in t.private_fns and all(f != p[1] for p in pool):
                     pool.append(("overload fn", f))
@@ -438,6 +447,11 @@ def match_members(utype: dict, view: TypeView, aliases: dict | None = None) -> l
                     continue
                 seen.add(canonical)
                 pool.append(("fn", f))
+            for f in aliases.get(".ctor", []):
+                # a constructor the port names after what it takes (`with_parent`): an alias names the function
+                if f in t.fns and f not in seen:
+                    seen.add(f)
+                    pool.append(("alias fn", f))
             if view.has_trait("Default") and "default" not in seen:
                 pool.append(("trait", "Default"))
             for tname, targs in t.traits:
@@ -481,17 +495,41 @@ def match_members(utype: dict, view: TypeView, aliases: dict | None = None) -> l
                 elif any(norm(a) in view.fn_norm for a in METHOD_ALIASES.get(m["name"], [])):
                     results[i] = ("present", "fn `" + next(view.fn_norm[norm(a)] for a in METHOD_ALIASES[m["name"]] if norm(a) in view.fn_norm) + "`")
                 else:
-                    results[i] = ("missing", "")
+                    results[i] = alias_single(m, view, aliases) or ("missing", "")
             else:
-                results[i] = match_single(m, uname, view)
+                results[i] = match_single(m, uname, view, aliases)
         else:
             i = idxs[0]
-            results[i] = match_single(members[i], uname, view)
+            results[i] = match_single(members[i], uname, view, aliases)
 
     return [(m, *results[i]) for i, m in enumerate(members)]
 
 
-def match_single(m: dict, uname: str, view: TypeView) -> tuple:
+def alias_single(m: dict, view: TypeView, aliases: dict) -> tuple | None:
+    """A member that is not an overload set (a property, a field, an event, an indexer, an explicit interface
+    member, a static constructor) and that the port has under a name an `[[alias]]` gives: present when an item
+    of that name exists on the type or, for a type ported as a module, in its file."""
+    t = view.type
+    for f in aliases.get(m["name"], []):
+        if f in t.fns:
+            return ("present", f"alias fn `{f}`")
+        if f in t.fields:
+            return ("present", f"alias field `{f}`")
+        if f in t.consts or f in t.variants:
+            return ("present", f"alias const `{f}`")
+        if f in view.free_fns or f in view.free_consts:
+            return ("present", f"alias free item `{f}`")
+    return None
+
+
+def match_single(m: dict, uname: str, view: TypeView, aliases: dict | None = None) -> tuple:
+    result = match_single_by_rule(m, uname, view)
+    if result[0] == "missing" and aliases:
+        return alias_single(m, view, aliases) or result
+    return result
+
+
+def match_single_by_rule(m: dict, uname: str, view: TypeView) -> tuple:
     kind = m["kind"]
     t = view.type
     if kind == "operator":  # conversion
@@ -802,7 +840,17 @@ def scan_type(ut: dict, project: str, crate: RustCrate, fr: dict, members_mode: 
             view_files.append(where)
     view = TypeView(crate, [found_name] if found_name else names, view_files)
 
-    results = match_members(ut, view, waivers.aliases(project, ut["fullName"])) if members else []
+    aliases = waivers.aliases(project, ut["fullName"])
+    for m in members:
+        # Rule 2 of the porting guide renames the framework in every identifier, members included:
+        # `AvaloniaPropertyType` is looked for as `ferro_property_type` too.
+        renamed = map_name(m["name"])
+        if renamed != m["name"]:
+            s = snake(renamed)
+            for cand in (s, s.upper()):
+                if cand not in aliases[m["name"]]:
+                    aliases[m["name"]].append(cand)
+    results = match_members(ut, view, aliases) if members else []
     if not found_name and tr["static"] and in_files and any(st == "present" for _, st, _ in results):
         # static class ported as free functions / constants of the module
         found_name = names[0]
@@ -1184,25 +1232,33 @@ def render_tracking(index: dict, projects: list, counts: dict, repo: str, worksp
     w(f"Generated from upstream commit `{commit}`" + (f" ({sub})" if sub else "") + ".")
     w("")
     w("The master status of the port: every upstream project, file, type and member (public, protected and internal), "
-      "and whether its FerroUI counterpart exists. The mapping rules are those of [PORTING-GUIDE.md](PORTING-GUIDE.md).")
+      "and whether its FerroUI counterpart exists. The mapping rules are those of [PORTING-GUIDE.md](PORTING-GUIDE.md). "
+      "What is left to port, in one place: [REMAINING.md](REMAINING.md). The audit of what is declared not ported: [waiver-audit.md](waiver-audit.md).")
     w("")
+    render_headline(L, projects, counts)
     w("## How to regenerate")
     w("")
     w("```sh")
     w("scripts/port-status/run.sh                 # upstream checkout expected at ../Avalonia")
     w("UPSTREAM=/path/to/Avalonia scripts/port-status/run.sh")
     w("scripts/port-status/run.sh --force         # re-run the upstream extractor even if its JSON is fresh")
+    w("scripts/port-status/run.sh --check         # exit 1 when a generated document is out of date; writes nothing")
     w("```")
     w("")
     w("1. `scripts/api-extract` (.NET, Roslyn syntax trees) reads the upstream sources listed in `scripts/api-extract/projects.json` "
-      "and writes `docs/porting/data/upstream-api.json`. It runs only when that file is missing or older than the upstream commit, the project list or the extractor.")
+      "and writes `docs/porting/data/upstream-api.json`. It runs only when that file is missing, when the project list or the extractor changed, "
+      "or when `TRACKED_COMMIT` names another commit. It reads the tracked commit (the one named above), not the `HEAD` of the checkout: "
+      "`run.sh` exports the tree of that commit, and of its submodules at the commits the tree names, into a temporary directory and extracts from there.")
     w("2. `scripts/port-status/port_status.py` (Python, standard library) reads that JSON, scans the Rust tree read-only and writes this file, "
-      "`docs/porting/tracking/*.md` and `docs/porting/data/port-status.json`.")
+      "`REMAINING.md`, `docs/porting/tracking/*.md` and `docs/porting/data/port-status.json`. `REMAINING.md` also reads the totals of the test reports "
+      "(`docs/porting/data/test-gaps-*.txt`, written by `scripts/port-status/test_gaps.py --all`) and the list of samples (`docs/porting/data/samples.toml`).")
     w("")
     w("Inputs you edit by hand:")
     w("")
     w("- `docs/porting/data/path-overrides.toml` - files that do not follow the default path rule (merged, renamed, replaced, not applicable) and Rust-only files.")
-    w("- `docs/porting/data/member-waivers.toml` - types and members that are intentionally not ported, with the reason.")
+    w("- `docs/porting/data/member-waivers.toml` - types and members that are intentionally not ported, with the reason (`[[waive]]`), "
+      "and members the port has under a name the rules cannot derive (`[[alias]]`, checked at every run).")
+    w("- `docs/porting/data/samples.toml` - the upstream samples and where each is ported.")
     w("- `scripts/api-extract/projects.json` - the project list, target crates, phases and priorities.")
     w("")
     w("`scripts/port-status/port_status.py --explain <Project> <File.cs>` prints how every member of one file was matched.")
@@ -1244,7 +1300,7 @@ def render_tracking(index: dict, projects: list, counts: dict, repo: str, worksp
     for p in out_scope:
         add_counts(out_total, counts[p["name"]])
 
-    w("## Totals (projects in scope)")
+    w("## Totals (projects in scope with member detail)")
     w("")
     w("| | Ported | Total | Waived | % |")
     w("|---|---:|---:|---:|---:|")
@@ -1257,7 +1313,7 @@ def render_tracking(index: dict, projects: list, counts: dict, repo: str, worksp
     w(f"| Other files (native sources, XAML, TypeScript, fonts) | {other_files[0]} | {other_files[1]} | - | {pct(*other_files)} |")
     w("")
     w(f"{total['na_files']} upstream files are not applicable and not counted. "
-      f"Out of the current scope (platform backends, below): {out_total['files'][1]} files, {out_total['types'][1]} types, {out_total['members'][1]} members.")
+      f"Out of the current scope (below): {out_total['files'][1]} files, {out_total['types'][1]} types, {out_total['members'][1]} members.")
     w("")
 
     def project_rows(ps):
@@ -1268,7 +1324,7 @@ def render_tracking(index: dict, projects: list, counts: dict, repo: str, worksp
             if p["detail"] == "files":
                 yield f"| {link} | `{p['path']}` | `{p['rust']}` | {crate} | {ratio(c['files'])} | - | - | {pct(*c['files'])} | {p['phase']} | {p['priority']} |"
             else:
-                mp = pct(*c["members"]) if p["detail"] == "full" else "0.0%"
+                mp = pct(*c["members"]) if p["detail"] == "full" and p["scope"] == "in" else "0.0%"
                 yield (f"| {link} | `{p['path']}` | `{p['rust']}` | {crate} | {ratio(c['files'])} | {ratio(c['types'])} | {ratio(c['members'])} | {mp} | {p['phase']} | {p['priority']} |")
 
     w("## Projects")
@@ -1298,9 +1354,9 @@ def render_tracking(index: dict, projects: list, counts: dict, repo: str, worksp
           f"(details in [{p['name']}](tracking/{page_name(p['name'])})).")
         w("")
 
-    w("### Platform backends: not started / out of current scope")
+    w("### Not started / out of current scope")
     w("")
-    w("Tracked at file and type granularity so that the size of the remaining work is known.")
+    w("Tracked so that the size of the remaining work is known: files, types and member totals, and the members themselves for the projects extracted with full detail.")
     w("")
     w("| Project | Upstream path | FerroUI path | Crate | Files | Types | Members | % | Phase | Priority |")
     w("|---|---|---|---|---:|---:|---:|---:|---|---|")
@@ -1400,6 +1456,322 @@ def render_tracking(index: dict, projects: list, counts: dict, repo: str, worksp
 
 
 # --------------------------------------------------------------------------
+# The two headline numbers and REMAINING.md
+# --------------------------------------------------------------------------
+
+def na_size(pr: dict) -> list:
+    """[files, types, members] of the files of a project that are marked not applicable."""
+    size = [0, 0, 0]
+    for fr in pr["files"]:
+        if fr["status"] != "n/a":
+            continue
+        size[0] += 1
+        size[1] += len(fr["types"])
+        size[2] += sum(len(tr["members"]) or tr.get("memberCount", 0) for tr in fr["types"])
+    return size
+
+
+def overall_numbers(projects: list, counts: dict) -> dict:
+    """The totals behind the two headline numbers.
+
+    `scope`: the projects in scope whose members were extracted: present / (total - waived).
+    `all`: every C# project of the extraction, in scope or not: present / every member, where every member
+    includes the waived ones, the ones of files marked not applicable and the ones of projects out of scope."""
+    scope = empty_counts()
+    present = 0
+    everything = [0, 0, 0]          # files, types, members
+    na = [0, 0, 0]
+    out = [0, 0, 0]
+    scope_projects = []
+    for pr in projects:
+        if pr["detail"] == "files":
+            continue
+        c = counts[pr["name"]]
+        n = na_size(pr)
+        for i, key in enumerate(("files", "types", "members")):
+            everything[i] += c[key][1] + n[i]
+            na[i] += n[i]
+            if pr["scope"] != "in":
+                out[i] += c[key][1] + n[i]
+        present += c["members"][0]
+        if pr["scope"] == "in" and pr["detail"] == "full":
+            add_counts(scope, c)
+            scope_projects.append(pr["name"])
+    return {"scope": scope, "scopeProjects": scope_projects, "present": present, "all": everything, "na": na, "out": out}
+
+
+def share(present: int, total: int) -> str:
+    return f"{100.0 * present / total:.1f}%" if total else "-"
+
+
+def render_headline(L: list, projects: list, counts: dict) -> None:
+    w = L.append
+    o = overall_numbers(projects, counts)
+    m = o["scope"]["members"]
+    missing = m[1] - m[0] - m[2]
+    w("## Headline")
+    w("")
+    w("Two numbers, because one hides what the other shows.")
+    w("")
+    w(f"1. **Of what is in scope: {pct(*m)}.** The {len(o['scopeProjects'])} upstream projects that are in scope have {m[1]} members "
+      f"(public, protected and internal) in files that apply to the port. {m[0]} have a counterpart, {missing} are missing and {m[2]} are waived: "
+      f"declared not ported, each with a reason ([waiver-audit.md](waiver-audit.md)). The percentage is `present / (total - waived)`. "
+      f"It says nothing about projects that are out of scope, and it counts a waived member as if it did not exist.")
+    w(f"2. **Of everything upstream has: {share(o['present'], o['all'][2])}.** Every C# source project of the extraction, in scope or not, "
+      f"has {o['all'][2]} members; the port has a counterpart for {o['present']}. The total includes the {m[2]} waived members, "
+      f"the {o['na'][2]} members of files marked not applicable and the {o['out'][2]} members of projects that are out of scope or not started. "
+      f"The rest of that distance is what [REMAINING.md](REMAINING.md) lists; part of it is never ported by design (the waived and not applicable members), "
+      f"so this number does not reach 100.")
+    w("")
+    w("Both numbers match names, not behaviour (Legend, below). Projects the extraction does not read (analyzers, generators of upstream's own build, "
+      "the D-Bus library) are listed in REMAINING.md with their size in files.")
+    w("")
+
+
+TEST_PROJECTS = [
+    # short name of docs/porting/data/test-gaps-<short>.txt -> upstream test project (scripts/port-status/test_gaps.py, PROJECTS)
+    ("base", "tests/Avalonia.Base.UnitTests"), ("controls", "tests/Avalonia.Controls.UnitTests"), ("markup", "tests/Avalonia.Markup.UnitTests"),
+    ("markup-xaml", "tests/Avalonia.Markup.Xaml.UnitTests"), ("skia", "tests/Avalonia.Skia.UnitTests"), ("headless", "tests/Avalonia.Headless.UnitTests"),
+    ("themes", "tests/Avalonia.Themes.UnitTests"), ("build-tasks", "tests/Avalonia.Build.Tasks.UnitTest"),
+    ("designer-support", "tests/Avalonia.DesignerSupport.Tests"), ("render", "tests/Avalonia.RenderTests"),
+]
+
+
+def load_test_totals(data_dir: str) -> list:
+    """The totals at the top of each report of test_gaps.py: [(project path, short, totals or None)]."""
+    out = []
+    for short, project in TEST_PROJECTS:
+        path = os.path.join(data_dir, f"test-gaps-{short}.txt")
+        totals = None
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                head = f.read(2000)
+            t = re.search(r"^Tests: (\d+) in (\d+) files", head, re.M)
+            p = re.search(r"^Present: (\d+)", head, re.M)
+            wv = re.search(r"^Waived: (\d+)", head, re.M)
+            ms = re.search(r"^Missing: (\d+) in (\d+) files", head, re.M)
+            c = re.search(r"at ([0-9a-f]{40})", head)
+            if t and p and wv and ms:
+                totals = {"tests": int(t.group(1)), "files": int(t.group(2)), "present": int(p.group(1)), "waived": int(wv.group(1)),
+                          "missing": int(ms.group(1)), "missingFiles": int(ms.group(2)), "commit": c.group(1) if c else ""}
+        out.append((project, short, totals))
+    return out
+
+
+def render_remaining(index: dict, projects: list, counts: dict, repo: str, data_dir: str) -> str:
+    commit = index["upstreamCommit"]
+    L = []
+    w = L.append
+    o = overall_numbers(projects, counts)
+    m = o["scope"]["members"]
+    w("# What is left to port")
+    w("")
+    w("<!-- Generated by scripts/port-status/run.sh (port_status.py). Do not edit: change the code or the data files and regenerate. -->")
+    w("")
+    w(f"Generated from upstream commit `{commit}`. The single place to look for what the port does not have yet. "
+      "It is written from the same data as [TRACKING.md](TRACKING.md) and the pages under `tracking/`, which have the detail of every file; "
+      "nothing here is written by hand. What is declared not ported, and why, is audited in [waiver-audit.md](waiver-audit.md).")
+    w("")
+    w("## The two numbers")
+    w("")
+    w("| | Present | Total | Missing | Waived | Not applicable | Out of scope | Share |")
+    w("|---|---:|---:|---:|---:|---:|---:|---:|")
+    w(f"| Members of the projects in scope | {m[0]} | {m[1]} | {m[1] - m[0] - m[2]} | {m[2]} | - | - | {pct(*m)} of total less waived |")
+    in_all = o["all"][2] - o["na"][2] - o["out"][2]
+    w(f"| Members of every upstream source project of the extraction | {o['present']} | {o['all'][2]} | {in_all - m[0] - m[2]} | {m[2]} | {o['na'][2]} | {o['out'][2]} | "
+      f"{share(o['present'], o['all'][2])} of total |")
+    w("")
+    w("The first row is the headline of the tracking: it leaves out the waived members and everything out of scope. "
+      "The second row leaves out nothing: every member of every C# project the extraction reads, whether or not the port will ever have it. "
+      "A member is *present* when an item of the mapped name exists; names are matched, not behaviour.")
+    w("")
+
+    # ---- per project
+    w("## Upstream source projects")
+    w("")
+    w("Files, types and members as present / missing / waived. *n/a* counts the files marked not applicable (and their members), which the totals of the tracking leave out. "
+      "For a project that is out of scope the three columns give its size.")
+    w("")
+    w("| Project | Scope | Files | Types | Members | n/a files (members) | Member share of all |")
+    w("|---|---|---:|---:|---:|---:|---:|")
+
+    def triple(c):
+        return f"{c[0]} / {c[1] - c[0] - c[2]} / {c[2]}"
+
+    cs_projects = [p for p in sorted(projects, key=lambda p: (p["scope"] != "in", p["path"])) if p["detail"] != "files"]
+    for pr in cs_projects:
+        c = counts[pr["name"]]
+        n = na_size(pr)
+        link = f"[{pr['name']}](tracking/{page_name(pr['name'])})"
+        all_members = c["members"][1] + n[2]
+        if pr["scope"] != "in":
+            started = "started" if pr["rustExists"] else "not started"
+            w(f"| {link} | out ({started}) | {c['files'][1]} files | {c['types'][1]} types | {c['members'][1]} members | "
+              f"{n[0]} ({n[2]}) | {share(c['members'][0], all_members)} |")
+            continue
+        scope = "in"
+        if c["files"][1] == 0:
+            scope = "in: every file not applicable"
+        elif pr["detail"] != "full":
+            scope = "in (members not extracted)"
+        w(f"| {link} | {scope} | {triple(c['files'])} | {triple(c['types'])} | {triple(c['members']) if pr['detail'] == 'full' else '0 / ' + str(c['members'][1]) + ' / 0'} | "
+          f"{n[0]} ({n[2]}) | {share(c['members'][0], all_members)} |")
+    w("")
+    other = [p for p in sorted(projects, key=lambda p: p["path"]) if p["detail"] == "files" or p.get("extra")]
+    if other:
+        w("Files that are not C#:")
+        w("")
+        w("| Project | Kind | Present | Missing |")
+        w("|---|---|---:|---:|")
+        for pr in other:
+            link = f"[{pr['name']}](tracking/{page_name(pr['name'])})"
+            if pr["detail"] == "files":
+                c = counts[pr["name"]]["files"]
+                w(f"| {link} | native sources | {c[0]} | {c[1] - c[0]} |")
+            for label, entries in sorted(pr.get("extra", {}).items()):
+                present = sum(1 for e in entries if e["status"] == "present")
+                w(f"| {link} | {label} | {present} | {len(entries) - present} |")
+        w("")
+    for pr in projects:
+        for idl in pr.get("idl", []):
+            missing_methods = sum(i["methods"] - i["present"] for i in idl["interfaces"])
+            w(f"Native interop contract `{idl['file']}` of {pr['name']}: {sum(1 for i in idl['interfaces'] if i['status'] != 'present')} interfaces and "
+              f"{missing_methods} methods missing of {len(idl['interfaces'])} and {sum(i['methods'] for i in idl['interfaces'])}.")
+            w("")
+
+    tracked = {p["path"] for p in projects}
+    layout = index.get("solutionLayout", {})
+    untracked = [e for top in ("src", "native", "external") for e in layout.get(top, []) if e["path"] not in tracked]
+    if untracked:
+        w("### Upstream projects the extraction does not read")
+        w("")
+        w("Directories of `src`, `native` and `external` that hold a project and are not in `scripts/api-extract/projects.json`: "
+          "their types and members are in neither number above. Size in C# files.")
+        w("")
+        w("| Upstream project | C# files | FerroUI directory |")
+        w("|---|---:|---|")
+        for e in untracked:
+            rust = map_project_dir(e["path"])
+            w(f"| `{e['path']}` | {e['csFiles']} | {'`' + rust + '`' if os.path.isdir(os.path.join(repo, rust)) else 'none'} |")
+        w("")
+
+    # ---- tests
+    w("## Upstream test projects")
+    w("")
+    w("Counted by `scripts/port-status/test_gaps.py --all` (its rules are at its top), read here from the totals of its reports in `docs/porting/data/`. "
+      "A test is present when the port has a test function of its name.")
+    w("")
+    w("| Upstream test project | Tests | Present | Missing | Waived | Report |")
+    w("|---|---:|---:|---:|---:|---|")
+    counted = set()
+    sums = [0, 0, 0, 0]
+    stale_reports = []
+    for project, short, t in load_test_totals(data_dir):
+        counted.add(project)
+        if t is None:
+            w(f"| `{project}` | - | - | - | - | no report: run `test_gaps.py --all` |")
+            continue
+        for i, k in enumerate(("tests", "present", "missing", "waived")):
+            sums[i] += t[k]
+        if t["commit"] and t["commit"] != commit:
+            stale_reports.append(short)
+        w(f"| `{project}` | {t['tests']} | {t['present']} | {t['missing']} | {t['waived']} | `data/test-gaps-{short}.txt` |")
+    w(f"| Total | {sums[0]} | {sums[1]} | {sums[2]} | {sums[3]} | |")
+    w("")
+    if stale_reports:
+        w("Reports written for another upstream commit: " + ", ".join(f"`{s}`" for s in stale_reports) + ".")
+        w("")
+    not_counted = [e for e in layout.get("tests", []) if e["path"] not in counted]
+    if not_counted:
+        w("Test projects that are not counted (no report; `CONTINUATION.md` has the reasons for those that were looked at):")
+        w("")
+        w("| Upstream test project | C# files | FerroUI directory |")
+        w("|---|---:|---|")
+        for e in not_counted:
+            rust = map_project_dir(e["path"])
+            w(f"| `{e['path']}` | {e['csFiles']} | {'`' + rust + '`' if os.path.isdir(os.path.join(repo, rust)) else 'none'} |")
+        w("")
+
+    # ---- samples
+    w("## Upstream samples")
+    w("")
+    w("From `docs/porting/data/samples.toml`; a sample counts as ported when the directory the file names exists.")
+    w("")
+    w("| Upstream sample | C# files | State | FerroUI directory | Note |")
+    w("|---|---:|---|---|---|")
+    listed = {s["upstream"]: s for s in load_toml(os.path.join(data_dir, "samples.toml")).get("sample", [])}
+    ported = 0
+    samples = layout.get("samples", [])
+    for e in samples:
+        s = listed.get(e["path"], {})
+        rust = s.get("rust")
+        if rust and os.path.isdir(os.path.join(repo, rust)):
+            state = "ported"
+            ported += 1
+        elif rust:
+            state = "not ported (the directory named does not exist)"
+        else:
+            state = s.get("state", "not ported")
+        w(f"| `{e['path']}` | {e['csFiles']} | {state} | {'`' + rust + '`' if rust else '-'} | {esc(s.get('note', '' if s else 'not listed in samples.toml'))} |")
+    w("")
+    w(f"{ported} of {len(samples)} samples are ported.")
+    w("")
+
+    # ---- missing lists
+    w("## Missing, by project")
+    w("")
+    w("Files without a Rust file, types without a Rust type, and members without a Rust item, for the projects in scope. "
+      "Names only: the page of each project has the signatures and, for files that exist in part, the members by file.")
+    w("")
+    any_missing = False
+    for pr in cs_projects:
+        if pr["scope"] != "in" or pr["detail"] not in ("full", "types"):
+            continue
+        files = [fr["path"] for fr in pr["files"] if fr["status"] == "missing"]
+        types = []
+        members = defaultdict(list)
+        in_missing_types = 0
+        for fr in pr["files"]:
+            for tr in fr["types"]:
+                if tr["status"] == "missing":
+                    types.append(tr["name"])
+                    in_missing_types += len(tr["members"]) or tr.get("memberCount", 0)
+                elif tr["status"] == "present":
+                    for mr in tr["members"]:
+                        if mr["status"] == "missing":
+                            members[tr["name"]].append(mr["m"]["name"])
+        loose = sum(len(v) for v in members.values())
+        if not files and not types and not loose:
+            continue
+        any_missing = True
+        w(f"### [{pr['name']}](tracking/{page_name(pr['name'])})")
+        w("")
+        w(f"{len(files)} files, {len(types)} types and {in_missing_types + loose} members missing "
+          f"({in_missing_types} members of the missing types, {loose} members of types that exist).")
+        w("")
+        if files:
+            w(f"- **Files ({len(files)}):** " + ", ".join(f"`{f}`" for f in sorted(files)))
+        if types:
+            names = sorted(set(types))
+            shown = names[:120]
+            w(f"- **Types ({len(types)}):** " + ", ".join(code(n) for n in shown) + (f", and {len(names) - len(shown)} more" if len(names) > len(shown) else ""))
+        if loose:
+            if loose <= 60:
+                items = [f"{t}.{n}" for t in sorted(members) for n in members[t]]
+                w(f"- **Members of types that exist ({loose}):** " + ", ".join(code(i) for i in items))
+            else:
+                ranked = sorted(members.items(), key=lambda kv: (-len(kv[1]), kv[0]))
+                shown = ranked[:40]
+                w(f"- **Members of types that exist ({loose}), by type:** " + ", ".join(f"{code(t)} {len(v)}" for t, v in shown)
+                  + (f", and {sum(len(v) for _, v in ranked[40:])} in {len(ranked) - 40} more types" if len(ranked) > 40 else ""))
+        w("")
+    if not any_missing:
+        w("Nothing is missing in the projects in scope.")
+        w("")
+    return "\n".join(L).rstrip() + "\n"
+
+
+# --------------------------------------------------------------------------
 # Main
 # --------------------------------------------------------------------------
 
@@ -1472,9 +1844,14 @@ def main() -> int:
     for pr in projects:
         outputs[os.path.join(repo, "docs", "porting", "tracking", page_name(pr["name"]))] = render_project(pr, counts[pr["name"]], commit)
     outputs[os.path.join(repo, "docs", "porting", "TRACKING.md")] = render_tracking(index, projects, counts, repo, workspace_members(repo))
+    outputs[os.path.join(repo, "docs", "porting", "REMAINING.md")] = render_remaining(index, projects, counts, repo, data_dir)
 
+    numbers = overall_numbers(projects, counts)
     summary = {
         "upstreamCommit": commit,
+        "inScope": {"files": numbers["scope"]["files"], "types": numbers["scope"]["types"], "members": numbers["scope"]["members"]},
+        "allProjects": {"membersPresent": numbers["present"], "members": numbers["all"][2], "membersNotApplicable": numbers["na"][2],
+                        "membersOutOfScope": numbers["out"][2]},
         "projects": [],
         "unusedPathOverrides": [overrides.maps[i].get("upstream") for i in range(len(overrides.maps)) if i not in overrides.used],
         "unusedWaivers": [w for i, w in enumerate(waivers.entries) if not waivers.hits[i]],
@@ -1519,6 +1896,8 @@ def main() -> int:
             add_counts(total, counts[pr["name"]])
     print(f"port-status: files {ratio(total['files'])}, types {ratio(total['types'])}, members {ratio(total['members'])} "
           f"({pct(*total['members'])}); {changed} of {len(outputs)} documents updated")
+    print(f"port-status: of every upstream source project, in scope or not: members {numbers['present']}/{numbers['all'][2]} "
+          f"({share(numbers['present'], numbers['all'][2])})")
     for w_ in summary["unusedPathOverrides"]:
         print("warning: path override matched nothing:", w_, file=sys.stderr)
     return 0

@@ -12,7 +12,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 4 - tooling / P3 |
 | Files | 9/9 (100.0%) |
 | Types | 17/18 (94.4%) |
-| Members | 170/176 (3 waived) (98.3%) |
+| Members | 173/176 (1 waived) (98.9%) |
 | Contracts (interfaces) | 0/1 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -33,7 +33,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `DesignWindowLoader.cs` | `design_window_loader.rs` | present | 1/1 | 2/2 |  |
 
-### `Remote` - files 6/6, types 11/12, members 144/147
+### `Remote` - files 6/6, types 11/12, members 145/147
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -41,7 +41,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `FileWatcherTransport.cs` | `remote/file_watcher_transport.rs` | partial | 1/2 | 7/8 |  |
 | `PreviewerWindowImpl.cs` | `remote/previewer_window_impl.rs` | partial | 1/1 | 39/40 |  |
 | `PreviewerWindowingPlatform.cs` | `remote/previewer_windowing_platform.rs` | present | 1/1 | 7/7 |  |
-| `RemoteDesignerEntryPoint.cs` | `remote/remote_designer_entry_point.rs` | partial | 2/2 | 3/4 |  |
+| `RemoteDesignerEntryPoint.cs` | `remote/remote_designer_entry_point.rs` | present | 2/2 | 4/4 |  |
 | `Stubs.cs` | `remote/stubs.rs` | present | 5/5 | 81/81 |  |
 
 <details><summary><code>FileWatcherTransport.cs</code> - 2 missing</summary>
@@ -57,19 +57,12 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>RemoteDesignerEntryPoint.cs</code> - 1 missing</summary>
-
-- `RemoteDesignerEntryPoint.Methods` (class) (ported as module-level items): 1 missing
-  - `const string AvaloniaRemote`
-
-</details>
-
-### `Remote/HtmlTransport` - files 2/2, types 5/5, members 24/27 (3 waived)
+### `Remote/HtmlTransport` - files 2/2, types 5/5, members 26/27 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `HtmlTransport.cs` | `remote/html_transport/html_transport.rs` | present | 1/1 | 6/6 |  |
-| `SimpleWebSocketHttpServer.cs` | `remote/html_transport/simple_web_socket_http_server.rs` | present | 4/4 | 18/21 (3 waived) |  |
+| `SimpleWebSocketHttpServer.cs` | `remote/html_transport/simple_web_socket_http_server.rs` | present | 4/4 | 20/21 (1 waived) |  |
 
 ## Rust-only files
 

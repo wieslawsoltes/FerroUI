@@ -7,90 +7,95 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/iOS/Avalonia.iOS` |
-| FerroUI | `src/iOS/FerroUI.iOS` (exists) |
+| FerroUI | `src/iOS/FerroUI.iOS` (not created yet) |
 | Crate | `ferroui-ios` |
-| Phase / priority | 6 - mobile (iOS) / P2 |
-| Files | 23/40 (57.5%), 1 not applicable |
-| Types | 27/57 (1 waived) (48.2%) |
+| Phase / priority | not started / out of current scope / - |
+| Files | 0/40 (0.0%), 1 not applicable |
+| Types | 0/57 (0.0%) |
 | Members | 0/331 (0.0%) |
+| Contracts (interfaces) | 0/3 |
+| Property registrations | 0/0 |
+| Routed events | 0/0 |
 
-This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
+## Contracts
+
+Every interface of the project. Each becomes a `pub trait` with the same name (the `I` prefix is kept).
+
+| Interface | Access | Upstream file | Members | Status |
+|---|---|---|---|---|
+| `Avalonia.iOS.IAvaloniaAppDelegate` | public | `AvaloniaAppDelegate.cs` | 0/2 | missing |
+| `Avalonia.iOS.IAvaloniaAppInternalDelegate` | internal | `AvaloniaAppDelegate.cs` | 0/2 | missing |
+| `Avalonia.iOS.IAvaloniaViewController` | public | `ViewController.cs` | 0/4 | missing |
 
 ## Files
 
-### `(project root)` - files 18/26, types 22/39 (1 waived), members 0/211
+### `(project root)` - files 0/26, types 0/39, members 0/211
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `ActivatableLifetime.cs` | `activatable_lifetime.rs` | present | 1/1 | - | 1 |  |
-| `AutomationPeerWrapper.cs` | `automation_peer_wrapper.rs` | missing | 0/1 | `AutomationPeerWrapper` | 15 |  |
-| `AvaloniaAppDelegate.cs` | `ferro_app_delegate.rs` | partial | 1/3 | `IAvaloniaAppInternalDelegate`, `AvaloniaAppDelegate<TApp>` | 16 | renamed: the generic delegate class an application derives from is one class of the Objective-C runtime (`FerroAppDelegate`) and the trait `FerroApplicationDelegate` for the two overridable members; `IAvaloniaAppInternalDelegate` (URLs and user activities) is stage 2 of docs/porting/ios-platform.md |
-| `AvaloniaSceneDelegate.cs` | `ferro_scene_delegate.rs` | partial | 0/1 | `AvaloniaSceneDelegate` | 5 | renamed: the window of a scene with the view in it is ported; the activations a scene is connected with or receives are stage 2 |
-| `AvaloniaView.Automation.cs` | `ferro_view.rs` | partial | 0/1 | `AvaloniaView` | 4 | partial merged into main file |
-| `AvaloniaView.Text.cs` | `ferro_view.rs` | partial | 0/1 | `AvaloniaView` | 6 | partial merged into main file |
-| `AvaloniaView.cs` | `ferro_view.rs` | partial | 1/2 | `AvaloniaView` | 50 | renamed: the view, its layer, its layout, touches and its top-level are ported; key presses, the settings that follow the traits and the features that are services of their own are stage 2 |
-| `CombinedSpan3.cs` | `combined_span3.rs` | missing | 0/1 | `CombinedSpan3<T>` | 6 |  |
-| `DispatcherImpl.cs` | `dispatcher_impl.rs` | present | 1/1 | - | 9 |  |
-| `DisplayLinkTimer.cs` | `display_link_timer.rs` | present | 1/1 | - | 4 |  |
-| `Extensions.cs` | `extensions.rs` | present | 1/1 | - | 3 |  |
-| `IOSLauncher.cs` | `ios_launcher.rs` | missing | 0/1 | `IOSLauncher` | 2 |  |
-| `IOSPlatformFeedback.cs` | `ios_platform_feedback.rs` | missing | 0/1 | `IOSPlatformFeedback` | 2 |  |
-| `InputHandler.cs` | `input_handler.rs` | present | 1/1 | - | 5 |  |
-| `InsetsManager.cs` | `insets_manager.rs` | present | 1/1 | - | 6 |  |
-| `Interop.cs` | `interop.rs` | present | 1/2 (1 waived) | - | 17 | replaced: the static class of platform invokes is a module of `extern` declarations: the same functions of Core Foundation and libdispatch |
-| `NativeControlHostImpl.cs` | `native_control_host_impl.rs` | partial | 1/2 | `NativeControlHostImpl` | 9 |  |
-| `Platform.cs` | `platform.rs` | present | 4/4 | - | 10 | renamed: the names follow the naming of Rust |
-| `PlatformSettings.cs` | `platform_settings.rs` | missing | 0/1 | `PlatformSettings` | 4 |  |
-| `SingleViewLifetime.cs` | `single_view_lifetime.rs` | present | 1/1 | - | 3 |  |
-| `Stubs.cs` | `stubs.rs` | present | 4/4 | - | 12 |  |
-| `TextInputResponder.Properties.cs` | `text_input_responder_properties.rs` | missing | 0/1 | `AvaloniaView` | 0 |  |
-| `TextInputResponder.cs` | `text_input_responder.rs` | missing | 0/1 | `AvaloniaView` | 0 |  |
-| `UIKitInputPane.cs` | `ui_kit_input_pane.rs` | missing | 0/1 | `UIKitInputPane` | 2 |  |
-| `ViewController.cs` | `view_controller.rs` | partial | 1/2 | `DefaultAvaloniaViewController` | 11 | renamed: the view controller class forwards to `ViewControllerState`, which is what the view holds of it and what the tests drive |
-| `iOSScreens.cs` | `ios_screens.rs` | present | 2/2 | - | 9 | renamed: the names follow the naming of Rust |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `ActivatableLifetime.cs` | `activatable_lifetime.rs` | missing | 0/1 | 0/1 |  |
+| `AutomationPeerWrapper.cs` | `automation_peer_wrapper.rs` | missing | 0/1 | 0/15 |  |
+| `AvaloniaAppDelegate.cs` | `ferro_app_delegate.rs` | missing | 0/3 | 0/16 |  |
+| `AvaloniaSceneDelegate.cs` | `ferro_scene_delegate.rs` | missing | 0/1 | 0/5 |  |
+| `AvaloniaView.Automation.cs` | `ferro_view_automation.rs` | missing | 0/1 | 0/4 |  |
+| `AvaloniaView.Text.cs` | `ferro_view_text.rs` | missing | 0/1 | 0/6 |  |
+| `AvaloniaView.cs` | `ferro_view.rs` | missing | 0/2 | 0/50 |  |
+| `CombinedSpan3.cs` | `combined_span3.rs` | missing | 0/1 | 0/6 |  |
+| `DispatcherImpl.cs` | `dispatcher_impl.rs` | missing | 0/1 | 0/9 |  |
+| `DisplayLinkTimer.cs` | `display_link_timer.rs` | missing | 0/1 | 0/4 |  |
+| `Extensions.cs` | `extensions.rs` | missing | 0/1 | 0/3 |  |
+| `IOSLauncher.cs` | `ios_launcher.rs` | missing | 0/1 | 0/2 |  |
+| `IOSPlatformFeedback.cs` | `ios_platform_feedback.rs` | missing | 0/1 | 0/2 |  |
+| `InputHandler.cs` | `input_handler.rs` | missing | 0/1 | 0/5 |  |
+| `InsetsManager.cs` | `insets_manager.rs` | missing | 0/1 | 0/6 |  |
+| `Interop.cs` | `interop.rs` | missing | 0/2 | 0/17 |  |
+| `NativeControlHostImpl.cs` | `native_control_host_impl.rs` | missing | 0/2 | 0/9 |  |
+| `Platform.cs` | `platform.rs` | missing | 0/4 | 0/10 |  |
+| `PlatformSettings.cs` | `platform_settings.rs` | missing | 0/1 | 0/4 |  |
+| `SingleViewLifetime.cs` | `single_view_lifetime.rs` | missing | 0/1 | 0/3 |  |
+| `Stubs.cs` | `stubs.rs` | missing | 0/4 | 0/12 |  |
+| `TextInputResponder.Properties.cs` | `text_input_responder_properties.rs` | missing | 0/1 | 0/0 |  |
+| `TextInputResponder.cs` | `text_input_responder.rs` | missing | 0/1 | 0/0 |  |
+| `UIKitInputPane.cs` | `ui_kit_input_pane.rs` | missing | 0/1 | 0/2 |  |
+| `ViewController.cs` | `view_controller.rs` | missing | 0/2 | 0/11 |  |
+| `iOSScreens.cs` | `i_os_screens.rs` | missing | 0/2 | 0/9 |  |
 
 ### `Clipboard` - files 0/4, types 0/4, members 0/18
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `ClipboardDataFormatHelper.cs` | `clipboard/clipboard_data_format_helper.rs` | missing | 0/1 | `ClipboardDataFormatHelper` | 6 |  |
-| `ClipboardImpl.cs` | `clipboard/clipboard_impl.rs` | missing | 0/1 | `ClipboardImpl` | 5 |  |
-| `PasteboardItemToDataTransferItemWrapper.cs` | `clipboard/pasteboard_item_to_data_transfer_item_wrapper.rs` | missing | 0/1 | `PasteboardItemToDataTransferItemWrapper` | 3 |  |
-| `PasteboardToDataTransferWrapper.cs` | `clipboard/pasteboard_to_data_transfer_wrapper.rs` | missing | 0/1 | `PasteboardToDataTransferWrapper` | 4 |  |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `ClipboardDataFormatHelper.cs` | `clipboard/clipboard_data_format_helper.rs` | missing | 0/1 | 0/6 |  |
+| `ClipboardImpl.cs` | `clipboard/clipboard_impl.rs` | missing | 0/1 | 0/5 |  |
+| `PasteboardItemToDataTransferItemWrapper.cs` | `clipboard/pasteboard_item_to_data_transfer_item_wrapper.rs` | missing | 0/1 | 0/3 |  |
+| `PasteboardToDataTransferWrapper.cs` | `clipboard/pasteboard_to_data_transfer_wrapper.rs` | missing | 0/1 | 0/4 |  |
 
 ### `Eagl` - files 0/3, types 0/5, members 0/36
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `EaglDisplay.cs` | `eagl/eagl_display.rs` | missing | 0/2 | `EaglPlatformGraphics`, `GlContext` | 20 |  |
-| `EaglLayerSurface.cs` | `eagl/eagl_layer_surface.rs` | missing | 0/1 | `EaglLayerSurface` | 2 |  |
-| `LayerFbo.cs` | `eagl/layer_fbo.rs` | missing | 0/2 | `LayerFbo`, `SizeSynchronizedLayerFbo` | 14 |  |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `EaglDisplay.cs` | `eagl/eagl_display.rs` | missing | 0/2 | 0/20 |  |
+| `EaglLayerSurface.cs` | `eagl/eagl_layer_surface.rs` | missing | 0/1 | 0/2 |  |
+| `LayerFbo.cs` | `eagl/layer_fbo.rs` | missing | 0/2 | 0/14 |  |
 
-### `Metal` - files 5/5, types 5/5, members 0/25
+### `Metal` - files 0/5, types 0/5, members 0/25
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `MetalDevice.cs` | `metal/metal_device.rs` | present | 1/1 | - | 9 |  |
-| `MetalDrawingSession.cs` | `metal/metal_drawing_session.rs` | present | 1/1 | - | 6 |  |
-| `MetalPlatformGraphics.cs` | `metal/metal_platform_graphics.rs` | present | 1/1 | - | 4 |  |
-| `MetalPlatformSurface.cs` | `metal/metal_platform_surface.rs` | present | 1/1 | - | 2 |  |
-| `MetalRenderTarget.cs` | `metal/metal_render_target.rs` | present | 1/1 | - | 4 |  |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `MetalDevice.cs` | `metal/metal_device.rs` | missing | 0/1 | 0/9 |  |
+| `MetalDrawingSession.cs` | `metal/metal_drawing_session.rs` | missing | 0/1 | 0/6 |  |
+| `MetalPlatformGraphics.cs` | `metal/metal_platform_graphics.rs` | missing | 0/1 | 0/4 |  |
+| `MetalPlatformSurface.cs` | `metal/metal_platform_surface.rs` | missing | 0/1 | 0/2 |  |
+| `MetalRenderTarget.cs` | `metal/metal_render_target.rs` | missing | 0/1 | 0/4 |  |
 
 ### `Properties` - files 0/0, types 0/0, members 0/0
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `AssemblyInfo.cs` | - | n/a | 0/0 | - | 0 | no non-private types (assembly attributes, global usings or file-local helpers) |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `AssemblyInfo.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 
 ### `Storage` - files 0/2, types 0/4, members 0/41
 
-| Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
-|---|---|---|---|---|---:|---|
-| `IOSStorageItem.cs` | `storage/ios_storage_item.rs` | missing | 0/3 | `IOSStorageItem`, `IOSStorageFile`, `IOSStorageFolder` | 26 |  |
-| `IOSStorageProvider.cs` | `storage/ios_storage_provider.rs` | missing | 0/1 | `IOSStorageProvider` | 15 |  |
-
-## Rust-only files
-
-Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
-
-Tests, examples and build scripts (not scanned): `examples/ios_view.rs`, `tests/dispatcher_main_loop.rs`.
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `IOSStorageItem.cs` | `storage/ios_storage_item.rs` | missing | 0/3 | 0/26 |  |
+| `IOSStorageProvider.cs` | `storage/ios_storage_provider.rs` | missing | 0/1 | 0/15 |  |

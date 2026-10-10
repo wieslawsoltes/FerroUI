@@ -35,55 +35,7 @@ type = "Avalonia.Collections.IAvaloniaList*"
 member = "new *"
 reason = "re-declaration of a member of IAvaloniaReadOnlyList<T>/IList<T>: the Rust trait inherits `count`/`get` from IFerroReadOnlyList and declares `set`"
 
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Utilities.WeakEvents"
-member = "AvaloniaPropertyChanged"
-reason = "ported as `WeakEvents::ferro_property_changed` (rule 2 of the porting guide; the scanner does not rename members)"
-
 # Styling
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Styling.ContainerQuery"
-member = "ContainerQuery(Func<*"
-reason = "ported as `ContainerQuery::with_query_fn` (the scanner counts constructors named `new`)"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Styling.Style"
-member = "Style(Func<*"
-reason = "ported as `Style::with_selector_fn` (the scanner counts constructors named `new`)"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Styling.ControlTheme"
-member = "ControlTheme(Type*"
-reason = "ported as `ControlTheme::with_target_type` and `ControlTheme::for_type::<T>()` (the scanner counts constructors named `new`)"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Styling.ContainerQuery"
-member = "ToString"
-reason = "override of StyleBase.ToString: `to_display_string` in the StyleBaseImpl of the class"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Styling.Style"
-member = "ToString"
-reason = "override of StyleBase.ToString: `to_display_string` in the StyleBaseImpl of the class"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Styling.ControlTheme"
-member = "ToString"
-reason = "override of StyleBase.ToString: `to_display_string` in the StyleBaseImpl of the class"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Styling.NthChildSelector"
-member = "NthChildSelector(Selector? previous, int step, int offset, bool reversed)"
-reason = "ported as `NthChildSelector::with_direction` (the scanner counts constructors named `new`)"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -99,12 +51,6 @@ reason = "returns no state and no error: the default of `IValueEntry::get_data_v
 
 [[waive]]
 project = "Avalonia.Base"
-type = "Avalonia.Styling.Setter"
-member = "*IValueEntry.GetValue*"
-reason = "ported as `get_value_boxed` in the IValueEntry impl of Setter"
-
-[[waive]]
-project = "Avalonia.Base"
 type = "Avalonia.Styling.WidthQuery"
 member = "ToString"
 reason = "ported as `to_string(owner)` in the StyleQueryNode impl; the form without an owner is the Display of the StyleQuery handle"
@@ -114,12 +60,6 @@ project = "Avalonia.Base"
 type = "Avalonia.Styling.HeightQuery"
 member = "ToString"
 reason = "ported as `to_string(owner)` in the StyleQueryNode impl; the form without an owner is the Display of the StyleQuery handle"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Styling.SelectorMatch"
-member = "SelectorMatch(*"
-reason = "both constructors are ported: `SelectorMatch::new(result)` and `SelectorMatch::sometimes(activator)`"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -150,12 +90,6 @@ project = "Avalonia.Base"
 type = "Avalonia.Styling.StyleChildren"
 member = "*Item(int index*"
 reason = "protected overrides of Collection<T> behind Insert, RemoveAt and the indexer setter: their bodies are in `StyleChildren::insert`, `remove_at` and `set`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Styling.Styles"
-member = "Styles(IResourceHost owner)"
-reason = "ported as `Styles::with_owner` (the scanner counts constructors named `new`)"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -279,30 +213,6 @@ reason = "the primary constructor of the record is the struct literal (public fi
 
 [[waive]]
 project = "Avalonia.Base"
-type = "Avalonia.Platform.PixelFormat"
-member = "FormatEnum"
-reason = "ported as the crate-visible field `format`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Platform.RetainedFramebuffer"
-member = "RetainedFramebuffer(*"
-reason = "both constructors are ported: `RetainedFramebuffer::new` and `RetainedFramebuffer::with_row_bytes`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Platform.Internal.IAssemblyDescriptor"
-member = "AvaloniaResources"
-reason = "ported as `ferro_resources` (rule 2 of the porting guide; the scanner does not rename members)"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Platform.Internal.AssemblyDescriptor"
-member = "AvaloniaResources"
-reason = "ported as `ferro_resources` (rule 2 of the porting guide; the scanner does not rename members)"
-
-[[waive]]
-project = "Avalonia.Base"
 type = "Avalonia.Platform.Internal.UnmanagedBlob"
 member = "SuppressFinalizerWarning"
 reason = "silences the debug warning about a blob that the finalizer thread disposes: there is no finalizer thread"
@@ -401,12 +311,6 @@ reason = "one function takes the place of both overloads: the overload with one 
 
 [[waive]]
 project = "Avalonia.Base"
-type = "Avalonia.Utilities.SpanRider"
-member = "SpanRider(*"
-reason = "both constructors are ported: `SpanRider::new(spans, latest_position, cp)` and `SpanRider::at_latest_position(spans, latest_position)` (the scanner counts constructors named `new`)"
-
-[[waive]]
-project = "Avalonia.Base"
 type = "Avalonia.Utilities.SpanHelpers"
 member = "TryParseInt"
 reason = "one function takes the place of both overloads: the overload without a style is `try_parse_int(s, NumberStyles::INTEGER)`"
@@ -459,12 +363,6 @@ reason = "the class is the trait `BindingExpressionBase: IDisposable + IValueEnt
 
 [[waive]]
 project = "Avalonia.Base"
-type = "Avalonia.Data.BindingNotification"
-member = "BindingNotification(Exception error*"
-reason = "ported as `BindingNotification::with_error` and `with_error_and_fallback`"
-
-[[waive]]
-project = "Avalonia.Base"
 type = "Avalonia.Data.BindingErrorTypeExtensions"
 reason = "an extension method: `BindingErrorType::to_binding_value_type`"
 
@@ -497,12 +395,6 @@ project = "Avalonia.Base"
 type = "Avalonia.Data.CompiledBinding"
 member = "Create"
 reason = "takes a LINQ expression tree (`Expression<Func<TIn, TOut>>`); the path is written with `CompiledBindingPathBuilder` and given to `CompiledBinding::new` (DEVIATIONS.md, Bindings)"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Data.*Binding"
-member = "*Binding(*"
-reason = "the parameterless constructor is `empty()` and the constructor with an argument is `new(..)`"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -763,18 +655,6 @@ reason = "the helper is created by `FerroLocator::bind`, which fills its fields;
 [[waive]]
 project = "Avalonia.Base"
 type = "Avalonia.AvaloniaObject"
-member = "*this[[]AvaloniaProperty property]*"
-reason = "ported as `get_value_untyped` and `set_value_untyped` (Rust indexers cannot take a property and return an owned untyped value)"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.AvaloniaObject"
-member = "*this[[]IndexerDescriptor binding]*"
-reason = "ported as `indexer` (the getter) and `bind_indexer` (the setter)"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.AvaloniaObject"
 member = "DebugDisplay"
 reason = "debugger display string: `FerroObject` implements `Debug`; the descriptions the framework puts in error messages are built by `ferroui_controls::utils::debug_display`, the object model has no such virtual"
 
@@ -847,18 +727,6 @@ reason = "ported as `PropertyChangedObservable::add_class_handler` and `ObjectPr
 [[waive]]
 project = "Avalonia.Base"
 type = "Avalonia.AvaloniaProperty"
-member = "AvaloniaProperty(AvaloniaProperty source*"
-reason = "ported as `FerroProperty::for_added_owner`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.AvaloniaProperty*"
-member = "AvaloniaProperty(AvaloniaProperty<TValue> source*"
-reason = "ported as `FerroProperty::for_added_owner`: the typed layer has no state of its own"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.AvaloniaProperty"
 member = "*operator !(*"
 reason = "ported as `FerroProperty::bind` (`!Property` is `Property.bind()`): Rust has one prefix operator, kept for negating a descriptor"
 
@@ -906,12 +774,6 @@ reason = "one constructor: `FerroPropertyChangedEventArgs::new` takes the proper
 
 [[waive]]
 project = "Avalonia.Base"
-type = "Avalonia.AvaloniaPropertyChangedEventArgs"
-member = "SetSender"
-reason = "ported as `with_sender`, which returns the arguments for another sender: the arguments borrow their sender and are not mutated"
-
-[[waive]]
-project = "Avalonia.Base"
 type = "Avalonia.AvaloniaPropertyChangedEventArgs*"
 member = "GetProperty"
 reason = "protected accessor behind `Property`, needed because the typed class returns a typed property: `property()` is the one accessor"
@@ -921,30 +783,6 @@ project = "Avalonia.Base"
 type = "Avalonia.AvaloniaPropertyRegistry"
 member = "GetRegisteredDirectUntyped"
 reason = "internal untyped lookup of a direct property: untyped access to a direct property goes through its `PropertyRoutes`, and the typed lookup is `get_registered_direct_for` / `find_registered_direct`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.CombinedGeometry"
-member = "CombinedGeometry(*"
-reason = "ported as `with_geometries`, `with_mode` and `with_mode_and_transform`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.CornerRadius"
-member = "CornerRadius(*"
-reason = "ported as `uniform`, `top_bottom` and `new`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Thickness"
-member = "Thickness(*"
-reason = "ported as `uniform`, `symmetric` and `new`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.Rotate3DTransform"
-member = "Rotate3DTransform(*"
-reason = "ported as `with_values`"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -967,12 +805,6 @@ reason = "the class handler of `DataContextProperty` is added in the registratio
 [[waive]]
 project = "Avalonia.Base"
 type = "Avalonia.StyledElement"
-member = "TypedLogicalChildren"
-reason = "ported as `logical_children`: one list type serves the typed and the interface view"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.StyledElement"
 member = "InvalidTheme"
 reason = "sentinel theme that marks a failed lookup of the implicit theme: ported as the `Invalid` variant of the private `ImplicitTheme` enum"
 
@@ -981,12 +813,6 @@ project = "Avalonia.Base"
 type = "Avalonia.StyledElement"
 member = "*IAvaloniaListItemValidator<ILogical>.Validate*"
 reason = "rejects a null logical child: a `Ref<StyledElement>` is never null"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Visual"
-member = "TypedVisualChildren"
-reason = "ported as `visual_children`: one list type serves the typed and the interface view"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -1020,12 +846,6 @@ reason = "the observer callbacks are implemented by the private observers of the
 
 [[waive]]
 project = "Avalonia.Base"
-type = "Avalonia.PropertyStore.BindingEntryBase*"
-member = "*IValueEntry.GetValue()*"
-reason = "ported as `try_get_value` (typed) and `get_value_boxed` (untyped) of `IValueEntry`"
-
-[[waive]]
-project = "Avalonia.Base"
 type = "Avalonia.PropertyStore.TypedBindingEntry*"
 member = "ConvertAndValidate"
 reason = "ported as `BindingEntry::validate` (a plain value) and `BindingEntry::convert_and_validate` (a binding value)"
@@ -1035,12 +855,6 @@ project = "Avalonia.Base"
 type = "Avalonia.PropertyStore.SourceUntypedBindingEntry*"
 member = "ConvertAndValidate"
 reason = "the `BindingValue<object?>` overload throws `NotSupportedException` upstream; an untyped value is converted by `StyledProperty::from_untyped` and validated by `BindingEntry::convert_and_validate`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.PropertyStore.*BindingEntry*"
-member = "GetDefaultValue"
-reason = "ported as `BindingEntry::cached_default_value`, which reads `StyledProperty::get_default_value_for`"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -1083,12 +897,6 @@ project = "Avalonia.Base"
 type = "Avalonia.PropertyStore.EffectiveValue*"
 member = "HasCoercion"
 reason = "ported as the presence of the uncommon fields of `EffectiveValue<T>`, which hold the coercion callback (`uncommon.is_some()`)"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.PropertyStore.EffectiveValue*"
-member = "CoerceDefaultValueAndRaise"
-reason = "ported as `ValueStore::coerce_default_value` with `EffectiveValue::set_coerced_default_value_and_raise`"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -1210,18 +1018,6 @@ type = "Avalonia.PropertyStore.ValueStore"
 member = "GetDiagnostic"
 reason = "ported in `diagnostics::FerroObjectDiagnosticExtensions::get_diagnostic`, its one caller"
 
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.PropertyStore.ValueStore"
-member = "*IBindingExpressionSink.OnChanged*"
-reason = "ported as `on_expression_changed`: the store is not a sink object, the binding expression reaches it through its target (`SinkRef`)"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.PropertyStore.ValueStore"
-member = "*IBindingExpressionSink.OnCompleted*"
-reason = "ported as `on_expression_completed`: the store is not a sink object, the binding expression reaches it through its target (`SinkRef`)"
-
 # Threading (triage of 2026-10-08). The dispatcher is ported with one shared, lock-protected state
 # and operations that are handles over a shared core, so several internal members have another
 # home; the constructors exist as `with_*` functions, which the scanner does not count.
@@ -1279,18 +1075,6 @@ project = "Avalonia.Base"
 type = "Avalonia.Threading.DispatcherEventArgs"
 member = "DispatcherEventArgs(*"
 reason = "the base class is the trait `DispatcherEventArgs`; an implementation stores its dispatcher and answers `dispatcher()`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Threading.DispatcherFrame"
-member = "DispatcherFrame(*"
-reason = "ported as `DispatcherFrame::with_exit_when_requested` and `with_dispatcher` (the scanner counts `new`, `new_*` and `from_*` only)"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Threading.DispatcherTimer"
-member = "DispatcherTimer(*"
-reason = "ported as `DispatcherTimer::with_priority`, `with_priority_and_dispatcher`, `with_interval`, `with_callback` and `with_callback_and_dispatcher` (the scanner counts `new`, `new_*` and `from_*` only)"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -1453,18 +1237,6 @@ reason = "`ICompositorSerializable::serialize_changes` is implemented by each co
 [[waive]]
 project = "Avalonia.Base"
 type = "Avalonia.Rendering.Composition.Compositor"
-member = "Loop"
-reason = "ported as `Compositor::render_loop` (`loop` is a keyword)"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Rendering.Composition.Compositor"
-member = "Compositor(*"
-reason = "the three constructors chain to one upstream, which serves every threading mode; here the mode is a constructor: `Compositor::with_scheduler` (every argument; the thread of the compositor renders), `Compositor::with_render_thread` (every argument; the thread that ticks the render loop renders under the compositor lock, and alone when the thread of the compositor never renders) and `Compositor::new` (the render loop of the locator, which picks one of the two by where the loop runs). The overload that only adds the render loop to the public one is either of the two with the defaults"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Rendering.Composition.Compositor"
 member = "*InvokeServerJobAsync<T>*"
 reason = "`Compositor::invoke_server_job_async` is generic over the result, so the `Action` and the `Func<T>` overloads are one function"
 
@@ -1514,12 +1286,6 @@ reason = "ported as `ImplicitAnimationCollection::items`, a snapshot of the pair
 
 [[waive]]
 project = "Avalonia.Base"
-type = "Avalonia.Rendering.Composition*ImplicitAnimationCollection"
-member = "*Contains(KeyValuePair*"
-reason = "explicit `ICollection<KeyValuePair<...>>.Contains`: ported as `ImplicitAnimationCollection::contains_pair`"
-
-[[waive]]
-project = "Avalonia.Base"
 type = "Avalonia.Rendering.Composition*Interpolator"
 member = "Instance"
 reason = "ported as the function `instance()` of every interpolator, generated by the `instance!` macro of `interpolators.rs`, which the scanner does not expand"
@@ -1537,11 +1303,6 @@ project = "Avalonia.Base"
 type = "Avalonia.Rendering.Composition*Payload"
 member = "Opcode"
 reason = "ported as the associated constant `IRenderDataPayload::OPCODE`, implemented for every payload by the `render_data_payload!` macro of `render_data_payloads.rs`, which the scanner does not expand"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Rendering.Composition*ServerResourceHelperExtensions"
-reason = "the four `GetServer` extension overloads are the free functions `brush_get_server`, `pen_get_server`, `transform_get_server` and `geometry_get_server` of `server_resource_helper_extensions.rs` (one name per receiver type, since free functions cannot be overloaded)"
 
 # Rendering/Composition/Expressions
 
@@ -1585,12 +1346,6 @@ project = "Avalonia.Base"
 type = "Avalonia.Rendering.Composition*ExpressionVariant"
 member = "AvaloniaMatrix"
 reason = "field of the explicit-layout struct: the case `ExpressionVariant::FerroMatrix` of the enum (rule 2 of the porting guide; the scanner does not rename members)"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Rendering.Composition*ExpressionVariant"
-member = "Type"
-reason = "field of the explicit-layout struct: ported as `ExpressionVariant::variant_type`, the case of the enum (`type` is a keyword)"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -1838,42 +1593,6 @@ reason = "the interface is implemented by the adapter handle of the class (`Spli
 
 [[waive]]
 project = "Avalonia.Controls"
-type = "*.ColumnDefinition"
-member = "ColumnDefinition(*"
-reason = "the constructor with arguments is `with_value(value, type)` / `with_width(width)`"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.RowDefinition"
-member = "RowDefinition(*"
-reason = "the constructor with arguments is `with_value(value, type)` / `with_height(height)`"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.ContextMenu"
-member = "ContextMenu(IMenuInteractionHandler*"
-reason = "the constructor with arguments is `with_interaction_handler`"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.Menu"
-member = "Menu(IMenuInteractionHandler*"
-reason = "the constructor with arguments is `with_interaction_handler`"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.MenuBase"
-member = "MenuBase(IMenuInteractionHandler*"
-reason = "the constructor with arguments is `construct_with`"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.MenuFlyoutPresenter"
-member = "MenuFlyoutPresenter(IMenuInteractionHandler*"
-reason = "the constructor with arguments is `with_interaction_handler`"
-
-[[waive]]
-project = "Avalonia.Controls"
 type = "*.Controls"
 member = "*IAvaloniaListItemValidator*"
 reason = "the validator rejects a null item; an item is a `Ref<Control>`, which is never null"
@@ -1970,12 +1689,6 @@ reason = "makes a protected member of `SelectingItemsControl` public; in the por
 
 [[waive]]
 project = "Avalonia.Controls"
-type = "*.MaskedTextBox"
-member = "MaskedTextBox(MaskedTextProvider*"
-reason = "the constructor with arguments is `with_provider`"
-
-[[waive]]
-project = "Avalonia.Controls"
 type = "*.MenuBase"
 member = "*IMenu.*"
 reason = "the interface is implemented by the adapter handle of the class (`MenuBaseHandle`), as the porting guide prescribes for a class that implements an interface, not by the class itself"
@@ -2012,12 +1725,6 @@ reason = "the interface is implemented by the adapter handle of the class (`Nati
 
 [[waive]]
 project = "Avalonia.Controls"
-type = "*.NativeMenuItem"
-member = "NativeMenuItem(string header)"
-reason = "the constructor with arguments is `with_header`"
-
-[[waive]]
-project = "Avalonia.Controls"
 type = "*.RadioButton"
 member = "*IRadioButton.*"
 reason = "the interface is implemented by the adapter handle of the class (`RadioButtonHandle`), as the porting guide prescribes for a class that implements an interface, not by the class itself"
@@ -2035,69 +1742,15 @@ reason = "two private helpers of `RelativePanel.cs`: `IsNaN` is `f64::is_nan` an
 
 [[waive]]
 project = "Avalonia.Controls"
-type = "*.ScrollChangedEventArgs"
-member = "ScrollChangedEventArgs(RoutedEvent*"
-reason = "the constructor with arguments is `with_event`"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.SizeChangedEventArgs"
-member = "SizeChangedEventArgs(RoutedEvent*"
-reason = "the three constructors are `with_event`, `with_event_and_source` and `new` (event, source, previous size, new size)"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.SpinEventArgs"
-member = "SpinEventArgs(*"
-reason = "the four constructors are `new`, `with_event`, `with_mouse_wheel` and `with_event_and_mouse_wheel`"
-
-[[waive]]
-project = "Avalonia.Controls"
 type = "*.TextBlock"
 member = "*IInlineHost.*"
 reason = "the interface is implemented by the adapter handle of the class (`TextBlockInlineHost`), as the porting guide prescribes for a class that implements an interface, not by the class itself"
 
 [[waive]]
 project = "Avalonia.Controls"
-type = "*.IInlineHost"
-member = "VisualChildren"
-reason = "present as `with_visual_children`: the list is lent to a closure because the adapter cannot return a borrow of the list of the text block"
-
-[[waive]]
-project = "Avalonia.Controls"
 type = "*.TextBox"
 member = "*IUndoRedoHost.*"
 reason = "the interface is implemented by the adapter handle of the class (`TextBoxUndoRedoHost`), as the porting guide prescribes for a class that implements an interface, not by the class itself"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.TextChangedEventArgs"
-member = "TextChangedEventArgs(RoutedEvent*"
-reason = "the two constructors are `with_event` and `with_event_and_source`"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.TextChangingEventArgs"
-member = "TextChangingEventArgs(RoutedEvent*"
-reason = "the two constructors are `with_event` and `with_event_and_source`"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.TopLevel"
-member = "TopLevel(ITopLevelImpl impl, IAvaloniaDependencyResolver*"
-reason = "an abstract class has `construct` functions only: `construct_with_resolver`"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.WindowBase"
-member = "WindowBase(IWindowBaseImpl impl, IAvaloniaDependencyResolver*"
-reason = "the constructor with a resolver is `construct_with_resolver`"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.Window"
-member = "Window(IWindowImpl impl)"
-reason = "the constructor with arguments is `with_impl`"
 
 [[waive]]
 project = "Avalonia.Controls"
@@ -2143,33 +1796,9 @@ reason = "internal state: the port writes the field directly (or through a dedic
 
 [[waive]]
 project = "Avalonia.Controls"
-type = "*.InlineUIContainer"
-member = "InlineUIContainer(Control child)"
-reason = "the constructor with arguments is `with_child`"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.Run"
-member = "Run(string? text)"
-reason = "the constructor with arguments is `with_text`"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.EmbeddableControlRoot"
-member = "EmbeddableControlRoot()"
-reason = "present: `new()`; the constructor with an implementation is `with_impl` (the scanner counts `new` once)"
-
-[[waive]]
-project = "Avalonia.Controls"
 type = "*.EmbeddableControlRoot"
 member = "St*Rendering"
 reason = "makes an internal member of `TopLevel` public; `TopLevel::start_rendering` / `stop_rendering` are public in the port and reached through `Deref`"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.OffscreenTopLevel"
-member = "Impl"
-reason = "present as `offscreen_impl` (`impl` is a keyword)"
 
 [[waive]]
 project = "Avalonia.Controls"
@@ -2182,60 +1811,6 @@ project = "Avalonia.Controls"
 type = "*.Popup"
 member = "*IPopupHostProvider.*"
 reason = "the interface is implemented by the adapter handle of the class (`PopupHostProvider`), as the porting guide prescribes for a class that implements an interface, not by the class itself"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.Notification"
-member = "Notification()"
-reason = "present: `empty()`; `new(..)` is the constructor with arguments"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.WindowNotificationManager"
-member = "WindowNotificationManager()"
-reason = "present: `new()`; the constructor with a host is `with_host` (the scanner counts `new` once)"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.NumericUpDown"
-member = "Value"
-reason = "the setter is `set_numeric_value`: `set_value` is the property setter of every object"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.RangeBase"
-member = "Value"
-reason = "the setter is `set_range_value`: `set_value` is the property setter of every object"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.Track"
-member = "Value"
-reason = "the setter is `set_range_value`: `set_value` is the property setter of every object"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.BindingEvaluator*"
-member = "Value"
-reason = "the setter is `set_evaluated_value`: `set_value` is the property setter of every object"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.Navigat*EventArgs"
-member = "Navigat*EventArgs(*"
-reason = "the constructor with arguments is `with_parameter`"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.DefaultMenuInteractionHandler"
-member = "DefaultMenuInteractionHandler(bool isContextMenu, IInputManager*"
-reason = "the constructor with arguments is `with_overrides`"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.InputPaneStateEventArgs"
-member = "InputPaneStateEventArgs(*"
-reason = "the two constructors are `new` and `with_animation`"
 
 [[waive]]
 project = "Avalonia.Controls"
@@ -2327,27 +1902,9 @@ reason = "an extension method of the positioner: `<dyn IPopupPositioner>::update
 
 [[waive]]
 project = "Avalonia.Controls"
-type = "*.RefreshRequestedEventArgs"
-member = "RefreshRequestedEventArgs(RefreshCompletionDeferral*"
-reason = "the constructor with arguments is `with_deferral`"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.ScrollablePullGestureRecognizer"
-member = "ScrollablePullGestureRecognizer()"
-reason = "present: `new()`; the constructor with arguments is `with_direction` (the scanner counts `new` once)"
-
-[[waive]]
-project = "Avalonia.Controls"
 type = "*.ReadOnlySelectionListBase*"
 member = "*"
 reason = "the abstract class is the trait `IReadOnlySelectionList<T>` (`count`, `get`, `iter`, `contains`, `index_of`) plus the change notification state `ReadOnlySelectionListBase`; the non-generic `IList` face, which throws for every mutation, has no counterpart"
-
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.SelectionModel*"
-member = "SelectionModel(IEnumerable<T>? source)"
-reason = "the constructor with arguments is `with_source`"
 
 [[waive]]
 project = "Avalonia.Controls"
@@ -2390,12 +1947,6 @@ type = "*.CollectionChangedEventManager"
 member = "Instance"
 reason = "the manager is a thread-local static reached through the associated functions `add_listener` / `remove_listener`"
 
-[[waive]]
-project = "Avalonia.Controls"
-type = "*.SelectingItemsControlSelectionAdapter"
-member = "SelectingItemsControlSelectionAdapter(SelectingItemsControl*"
-reason = "the constructor with arguments is `with_selector`"
-
 # ---------------------------------------------------------------- Avalonia.OpenGL, Avalonia.HarfBuzz, Avalonia.Themes.Fluent
 
 [[waive]]
@@ -2403,12 +1954,6 @@ project = "Avalonia.OpenGL"
 type = "*.Gl*EntryPoint"
 member = "Gl*EntryPoint(*"
 reason = "an attribute class read by the upstream source generator of the entry point tables; here the table macro (`entry_points.rs`) calls the static `get_proc_address` of the unit struct, which takes what the attribute constructor took"
-
-[[waive]]
-project = "Avalonia.OpenGL"
-type = "*.GlVersion"
-member = "GlVersion(GlProfileType type, int major, int minor, bool isCompatibilityProfile)"
-reason = "the constructor with the compatibility profile flag is `GlVersion::with_compatibility_profile`"
 
 [[waive]]
 project = "Avalonia.HarfBuzz"
@@ -2434,25 +1979,7 @@ type = "*.ColorPaletteResourcesCollection"
 member = "*ICollection<*"
 reason = "the explicit `ICollection<KeyValuePair<..>>` face of the dictionary: `Contains(pair)` and `CopyTo` are covered by `contains_key`, `try_get_value` and `to_vec`, and the collection is never read-only"
 
-[[waive]]
-project = "Avalonia.OpenGL"
-type = "*.EglInterface"
-member = "EglInterface(*"
-reason = "the constructors that load the EGL library by name (`NativeLibrary.Load`) are left to the platform backend that has EGL: it resolves `eglGetProcAddress` of its library and calls `EglInterface::new` with the loader, as `GlInterface::new` is called"
-
-[[waive]]
-project = "Avalonia.OpenGL"
-type = "*.ExternalObjectsInterface"
-member = "ExternalObjectsInterface(*"
-reason = "ported as `ExternalObjectsInterface::try_new`, which reports a missing required entry point instead of throwing"
-
 # ---------------------------------------------------------------- Avalonia.Browser
-
-[[waive]]
-project = "Avalonia.Browser"
-type = "*.AvaloniaView"
-member = "AvaloniaView(JSObject host)"
-reason = "the constructor with a host element is `FerroView::with_host`"
 
 [[waive]]
 project = "Avalonia.Browser"
@@ -2463,20 +1990,8 @@ reason = "the script module is imported statically (`raw_module = \"./ferroui.js
 [[waive]]
 project = "Avalonia.Browser"
 type = "*.BrowserPlatformOptions"
-member = "*ServiceWorker*"
-reason = "present as `register_ferro_service_worker` / `ferro_service_worker_scope` (rule 2 of the porting guide; the scanner does not rename members)"
-
-[[waive]]
-project = "Avalonia.Browser"
-type = "*.BrowserPlatformOptions"
 member = "PreferManagedThreadDispatcher"
 reason = "chooses the dispatcher of the managed runtime for a build with threads, where the user interface runs on a thread of that runtime: here the user interface stays on the main thread of the page in every build and only rendering moves to a worker (browser-render-worker.md, owner decision of 2026-10-08), so there is one dispatcher and nothing to prefer; `BrowserPlatformOptions::render_thread` is the option of the port"
-
-[[waive]]
-project = "Avalonia.Browser"
-type = "*.BrowserAppBuilder"
-member = "S*BrowserAppAsync"
-reason = "present as the synchronous `start_browser_app` / `setup_browser_app` of the extension trait of `AppBuilder` in `browser_app_builder.rs`: the module is imported statically, so nothing is awaited"
 
 [[waive]]
 project = "Avalonia.Browser"
@@ -2729,12 +2244,6 @@ reason = "protected state for the derived swapchain: `SwapchainBase` is embedded
 
 [[waive]]
 project = "Avalonia.Base"
-type = "Avalonia.Rendering.SwapchainBase*"
-member = "DisposeAsync"
-reason = "ported as `SwapchainBase::dispose`, which is synchronous because `ISwapchainImage::dispose` of the port is: the contract returns nothing to await. Nothing implements the contract outside the tests of `swapchain_base.rs` (the swapchain of the OpenGL control keeps its own entries and awaits them in `CompositionOpenGlSwapchain::dispose_async`), so no image is released late today. Since the render thread an imported object is released on that thread (`ICompositionGpuImportedObject::dispose_async` returns a task): the first swapchain built on this class has to make `ISwapchainImage::dispose` and this member return that task, as upstream awaits `DisposeAsync` of each image"
-
-[[waive]]
-project = "Avalonia.Base"
 type = "Avalonia.Rendering.ZIndexComparer"
 member = "*Instance"
 reason = "shared instances of the comparer and of its delegate: `ZIndexComparer::compare` and `compare_optional` are associated functions, passed as they are to a sort"
@@ -2755,12 +2264,6 @@ project = "Avalonia.Base"
 type = "Avalonia.Rendering.Composition*CompositionGradientBrush"
 member = "SerializeChangesCore"
 reason = "the gradient brush is a kind of the one `CompositionBrush`, whose `ICompositorSerializable::serialize_changes` writes the gradient stops for a brush of a gradient kind"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Rendering.Composition*ServerCompositionGradientBrush"
-member = "s_IdOfGradientStopsProperty"
-reason = "ported as `ServerCompositionGradientBrush::id_of_gradient_stops_property` (a function instead of a static field with the `s_` prefix)"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -2819,12 +2322,6 @@ reason = "override of the abstract member of `TransitionObservableBase<T>`: the 
 
 [[waive]]
 project = "Avalonia.Base"
-type = "Avalonia.Animation.Clock"
-member = "Clock(IClock parent)*"
-reason = "ported as `Clock::with_parent` (the scanner counts `new`, `new_*` and `from_*` only)"
-
-[[waive]]
-project = "Avalonia.Base"
 type = "Avalonia.Animation.ClockBase"
 member = "Stop"
 reason = "protected virtual called from `Pulse`: `ClockBase` is embedded, not derived from, so `ClockBase::pulse` takes the stop action as its `stop` argument (`Clock` passes its own `stop`)"
@@ -2860,18 +2357,6 @@ reason = "override of the abstract member of `Transition<T>`: `Transition::do_tr
 
 [[waive]]
 project = "Avalonia.Base"
-type = "Avalonia.Animation.KeySpline"
-member = "KeySpline(double*"
-reason = "ported as `KeySpline::with_points` (the scanner counts `new`, `new_*` and `from_*` only)"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Animation.Easings.SplineEasing"
-member = "SplineEasing(*"
-reason = "the three constructors are `SplineEasing::new`, `with_points` and `with_key_spline` (the scanner counts `new`, `new_*` and `from_*` only)"
-
-[[waive]]
-project = "Avalonia.Base"
 type = "Avalonia.Animation.Transition*"
 member = "*static Transition()*"
 reason = "the static constructor adds a class handler that rejects a property of another value type: `on_property_changed` of `TransitionBase` makes the check with `TransitionBaseImpl::value_type` of the class"
@@ -2893,12 +2378,6 @@ project = "Avalonia.Base"
 type = "Avalonia.Animation.Animators.Animator*"
 member = "Property"
 reason = "the property of `AnimatorBase` (`property`, `set_property`), which every animator embeds; the scanner looks for it on the trait `Animator`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Animation.Animators.Animator*"
-member = "Apply"
-reason = "both overloads exist: `Animator::apply` and the crate-internal `apply_with_visual` of `animator.rs` (a free function, since it is generic over the animator)"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -2933,12 +2412,6 @@ reason = "both overloads of `Find` and `Get` exist: the ones on a name scope are
 
 [[waive]]
 project = "Avalonia.Base"
-type = "Avalonia.Controls.Resource*"
-member = "Resource*(IResourceHost owner)*"
-reason = "ported as `ResourceDictionary::with_owner` and `construct_with_owner` of both classes (the scanner counts `new`, `new_*` and `from_*` only)"
-
-[[waive]]
-project = "Avalonia.Base"
 type = "Avalonia.Controls.ResourceDictionary"
 member = "Values"
 reason = "raw view of the inner dictionary, in which a deferred resource is still its factory: here a deferred resource is a case of a private enum, so the values are read with `keys` and `try_get_value`, which materialises them as `TryGetValue` does"
@@ -2957,30 +2430,6 @@ reason = "explicit members of `ICollection<KeyValuePair<object, object?>>` (`IsR
 
 # Avalonia.Native (triage of 2026-10-08). `MetalExternalObjectsFeature` of `Metal.cs` is ported in `metal.rs`
 # (row 9 of the work list of 2026-10-09).
-
-[[waive]]
-project = "Avalonia.Native"
-type = "*AvaloniaNativeMenuExporter"
-member = "AvaloniaNativeMenuExporter(*"
-reason = "the four constructors are `FerroNativeMenuExporter::for_window`, `for_application`, `for_tray_icon` and `for_dock`, named after the menu target they select (the scanner counts `new`, `new_*` and `from_*` only)"
-
-[[waive]]
-project = "Avalonia.Native"
-type = "*AvaloniaNativePlatformExtensions"
-member = "UseAvaloniaNative"
-reason = "ported as `FerroNativePlatformExtensions::use_ferro_native` (rule 2 of the porting guide; the scanner does not rename members)"
-
-[[waive]]
-project = "Avalonia.Native"
-type = "*AvaloniaNativePlatformOptions"
-member = "AvaloniaNativeLibraryPath"
-reason = "ported as the field `ferro_native_library_path` (rule 2 of the porting guide; the scanner does not rename members)"
-
-[[waive]]
-project = "Avalonia.Native"
-type = "*MacOSPlatformOptions"
-member = "DisableAvaloniaAppDelegate"
-reason = "ported as the field `disable_ferro_app_delegate` (rule 2 of the porting guide; the scanner does not rename members)"
 
 [[waive]]
 project = "Avalonia.Native"
@@ -3018,11 +2467,6 @@ reason = "the setters of the framebuffer description and `Height`: the descripti
 
 [[waive]]
 project = "Avalonia.Native"
-type = "*Helpers"
-reason = "the conversion extension methods are the free functions of `helpers.rs` (`to_ferro_point`, `to_frn_point`, `to_frn_rect`, ...), named with the `Ferro`/`Frn` rename, which the scanner does not apply to members"
-
-[[waive]]
-project = "Avalonia.Native"
 type = "*MenuEvents"
 member = "Initialise"
 reason = "sets the parent after the native menu is created: `FrnMenu::create` shares the parent cell (`MenuEvents::parent`) with the events object and fills it once the menu exists"
@@ -3053,12 +2497,6 @@ reason = "sealed override that only calls the base: `PopupImpl::new` and `Window
 project = "Avalonia.Native"
 type = "*AvnScreen"
 reason = "ported as `NativeScreen` of `screen_impl.rs` (the scanner renames the prefix to `Frn`, the port names the type after what it is)"
-
-[[waive]]
-project = "Avalonia.Native"
-type = "*TopLevelImpl"
-member = "MouseDevice"
-reason = "ported as `TopLevelImpl::mouse`"
 
 [[waive]]
 project = "Avalonia.Native"
@@ -3188,36 +2626,6 @@ reason = "ported as `with_inner`"
 
 [[waive]]
 project = "Avalonia.Markup.Xaml"
-type = "Avalonia.Markup.Xaml.MarkupExtensions.CompiledBindingExtension"
-member = "CompiledBindingExtension(*"
-reason = "ported as `with_path`"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml"
-type = "Avalonia.Markup.Xaml.MarkupExtensions.ReflectionBindingExtension"
-member = "ReflectionBindingExtension(*"
-reason = "ported as `with_path`"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml"
-type = "Avalonia.Markup.Xaml.MarkupExtensions.DynamicResourceExtension"
-member = "DynamicResourceExtension(*"
-reason = "ported as `with_resource_key`"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml"
-type = "Avalonia.Markup.Xaml.MarkupExtensions.StaticResourceExtension"
-member = "StaticResourceExtension(*"
-reason = "ported as `with_resource_key`"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml"
-type = "Avalonia.Markup.Xaml.MarkupExtensions.RelativeSourceExtension"
-member = "RelativeSourceExtension(*"
-reason = "ported as `with_mode`"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml"
 type = "Avalonia.Markup.Xaml.MarkupExtensions.OnFormFactorExtension*"
 member = "*"
 reason = "ported on `OnFormFactorExtensionBase<TReturn>`, the shared implementation of the untyped and the typed extension: `new`, `with_default` and `should_provide_option`"
@@ -3227,18 +2635,6 @@ project = "Avalonia.Markup.Xaml"
 type = "Avalonia.Markup.Xaml.MarkupExtensions.OnPlatformExtension*"
 member = "*"
 reason = "ported on `OnPlatformExtensionBase<TReturn>`, the shared implementation of the untyped and the typed extension: `new`, `with_default` and `should_provide_option`"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml"
-type = "Avalonia.Markup.Xaml.Styling.*"
-member = "*(IServiceProvider serviceProvider)"
-reason = "ported as `with_service_provider`"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml"
-type = "Avalonia.Markup.Xaml.MarkupExtensions.CompiledBindings.PropertyInfoAccessorFactory"
-member = "CreateAvaloniaPropertyAccessor"
-reason = "ported as `create_ferro_property_accessor` and `try_create_ferro_property_accessor` (rule 2 of the porting guide; the scanner does not rename members)"
 
 [[waive]]
 project = "Avalonia.Markup.Xaml"
@@ -3314,56 +2710,8 @@ reason = "the settable property of a node is a public `RefCell` / `Cell` field (
 
 [[waive]]
 project = "Avalonia.Markup.Xaml.Loader"
-type = "*AvaloniaXamlDiagnosticCodes"
-member = "AvaloniaIntrinsicsError"
-reason = "ported under the framework name (rule 2 of the porting guide; the scanner does not rename members): `FERRO_INTRINSICS_ERROR`"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml.Loader"
-type = "*AvaloniaXamlDiagnosticCodes"
-member = "XamlXDiagnosticCodeToAvalonia"
-reason = "ported under the framework name (rule 2 of the porting guide; the scanner does not rename members): `xaml_x_diagnostic_code_to_ferro`"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml.Loader"
-type = "*XamlIlAvaloniaPropertyHelper"
-member = "GetAvaloniaPropertyType"
-reason = "ported under the framework name (rule 2 of the porting guide; the scanner does not rename members): `get_ferro_property_type`"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml.Loader"
-type = "*XamlIlAvaloniaProperty*"
-member = "AvaloniaPropertyType"
-reason = "ported under the framework name (rule 2 of the porting guide; the scanner does not rename members): `ferro_property_type`"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml.Loader"
-type = "*XamlIlAvaloniaProperty*"
-member = "AvaloniaProperty"
-reason = "ported under the framework name (rule 2 of the porting guide; the scanner does not rename members): `ferro_property`"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml.Loader"
-type = "*XamlIlAvaloniaClassProperty*"
-member = "AvaloniaPropertyType"
-reason = "ported under the framework name (rule 2 of the porting guide; the scanner does not rename members): `ferro_property_type`"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml.Loader"
 type = "*IXamlIlAvaloniaClassPropertyNode"
 reason = "marker interface: ported as `IXamlIlFerroPropertyNode::is_xaml_il_ferro_class_property_node` (porting guide: C# `is` on an interface becomes a virtual)"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml.Loader"
-type = "*XamlIlAvaloniaPropertyNode"
-member = "XamlIlAvaloniaPropertyNode(*"
-reason = "ported as `new` and `with_property_type`"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml.Loader"
-type = "*AvaloniaXamlIlWellKnownTypes"
-member = "Avalonia*"
-reason = "ported under the framework name (rule 2 of the porting guide; the scanner does not rename members): `ferro_object`, `ferro_object_extensions`, `ferro_property`, `ferro_property_t`, `ferro_attached_property_t`, `ferro_object_set_styled_property_value`, `ferro_object_bind_method`, `ferro_object_set_value_method`, `ferro_list_attribute`, `ferro_list`"
 
 [[waive]]
 project = "Avalonia.Markup.Xaml.Loader"
@@ -3461,30 +2809,6 @@ reason = "created by `XamlError::type_system_exception`"
 
 [[waive]]
 project = "XamlX"
-type = "XamlX.Ast.XamlAstClrProperty"
-member = "XamlAstClrProperty(*"
-reason = "ported as `from_property`, `with_setters` and `with_setter_methods`; the overload without setters is `with_setters` with an empty list"
-
-[[waive]]
-project = "XamlX"
-type = "XamlX.Ast.XamlNoReturnMethodCallNode"
-member = "XamlNoReturnMethodCallNode(*"
-reason = "ported as `with_wrapped_method`, next to `new` for a plain method"
-
-[[waive]]
-project = "XamlX"
-type = "XamlX.Ast.XamlStaticOrTargetedReturnMethodCallNode"
-member = "XamlStaticOrTargetedReturnMethodCallNode(*"
-reason = "ported as `with_wrapped_method`, next to `new` for a plain method"
-
-[[waive]]
-project = "XamlX"
-type = "XamlX.Ast.XamlAstXamlPropertyValueNode"
-member = "XamlAstXamlPropertyValueNode(*"
-reason = "ported as `with_values`, next to `new` for a single value"
-
-[[waive]]
-project = "XamlX"
 type = "XamlX.XamlDiagnostic"
 member = "XamlDiagnostic(*"
 reason = "one constructor taking the optional line and position; the line information overload only reads them from its argument"
@@ -3494,12 +2818,6 @@ project = "XamlX"
 type = "XamlX.Parsers.SystemXamlMarkupExtensionParser.MeScannerParseException"
 member = "MeScannerParseException(*"
 reason = "one constructor taking the message; the scanner argument of the other overload is not used upstream"
-
-[[waive]]
-project = "XamlX"
-type = "XamlX.TypeSystem.AnonymousParameterInfo"
-member = "AnonymousParameterInfo(*"
-reason = "ported as `with_index`, next to `new` for a named parameter"
 
 [[waive]]
 project = "XamlX"
@@ -3540,12 +2858,6 @@ reason = "ported as inherent methods of `AstTransformationContext`: `report_diag
 [[waive]]
 project = "XamlX"
 type = "XamlX.ContextDiagnosticExtensions"
-member = "ToDiagnostic"
-reason = "ported as the free function `exception_to_diagnostic`"
-
-[[waive]]
-project = "XamlX"
-type = "XamlX.ContextDiagnosticExtensions"
 member = "ToException"
 reason = "ported as `XamlDiagnostic::to_exception`"
 
@@ -3581,12 +2893,6 @@ reason = "shim that returns the context itself so that the scanner code taken fr
 
 [[waive]]
 project = "XamlX"
-type = "XamlX.Transform.TransformerConfiguration"
-member = "GetCustomAttribute"
-reason = "ported as `get_custom_attribute_for_type`, `get_custom_attributes_for_type`, `get_custom_attribute_for_property` and `get_custom_attributes_for_property`"
-
-[[waive]]
-project = "XamlX"
 type = "XamlX.TypeSystem.XamlTypeSystemExtensions"
 member = "*"
 reason = "ported as inherent methods of `dyn IXamlType` and `dyn IXamlMethod` in `type_system/type_system.rs` under the same names; the overloads of `GetMethod` / `FindMethod` are `get_method` / `find_method` (a predicate), `*_by_name` and `*_by_signature`; `make_generic_type` and `is` are members of the type trait"
@@ -3612,32 +2918,8 @@ reason = "internal constructor: `CompositionOpenGlSwapchain::begin_draw` builds 
 [[waive]]
 project = "Avalonia.OpenGL"
 type = "Avalonia.OpenGL.Egl.EglDisplay"
-member = "EglDisplay(*"
-reason = "two of the three constructors are ported (`EglDisplay::new`, `EglDisplay::new_with_creation_options`); the one without arguments creates the default display of the EGL library of the system through `new EglInterface()`, which loads the library by name and is not ported: a platform resolves the entry points and names the interface in the options"
-
-[[waive]]
-project = "Avalonia.OpenGL"
-type = "Avalonia.OpenGL.Egl.EglDisplay"
 member = "CreatePBufferFromClientBuffer"
 reason = "one function takes the place of the overloads with an array and with a pointer: `create_pbuffer_from_client_buffer(buffer_type, handle, &[i32])`"
-
-[[waive]]
-project = "Avalonia.OpenGL"
-type = "Avalonia.OpenGL.Egl.EglDisplay"
-member = "DisplayLockIsSharedWithContexts"
-reason = "says whether the contexts of the display share its monitor: the display and its contexts belong to one thread (`Rc<EglDisplay>`, `Rc<EglContext>`) and have no monitor (`lock` and `ensure_locked` return handles that do nothing). Applicable when an EGL platform renders on the render thread while another thread uses a context of the same display: the display then needs the monitor and this member"
-
-[[waive]]
-project = "Avalonia.OpenGL"
-type = "Avalonia.OpenGL.Egl.EglDisplay"
-member = "ContextSharedSyncRoot"
-reason = "the monitor of the display for its contexts: the display and its contexts belong to one thread (`Rc<EglDisplay>`, `Rc<EglContext>`) and have no monitor. Applicable with `DisplayLockIsSharedWithContexts`, when an EGL platform renders on the render thread"
-
-[[waive]]
-project = "Avalonia.OpenGL"
-type = "Avalonia.OpenGL.Egl.EglPlatformGraphics"
-member = "TryCreate"
-reason = "the overload with a display factory is ported; the one without arguments creates the default display through `new EglInterface()`, which loads the EGL library by name and is not ported"
 
 # The EGL surfaces: the abstract classes are a state struct plus a trait of the overridable members.
 
@@ -3678,18 +2960,6 @@ project = "Avalonia.Base"
 type = "Avalonia.Input.AsyncDataTransferExtensions"
 member = "To*ynchronous"
 reason = "ported as methods of `dyn IAsyncDataTransfer` and `dyn IDataTransfer` (`to_synchronous`, `to_asynchronous` in `async_data_transfer_extensions.rs`): they take `Rc<Self>` to return the object itself when it implements both interfaces, which a method of the extension trait cannot do"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Input.Cursor"
-member = "Default"
-reason = "static readonly field holding an object: `Cursor::default_cursor()`, created on first use per thread"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Input.TextInput.TextInputOptions"
-member = "Default"
-reason = "static readonly field: `TextInputOptions::default_options()` (`default` is the method of the `Default` trait)"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -3745,30 +3015,6 @@ reason = "inherent method of the type it extends: `RawPointerEventType::to_updat
 
 [[waive]]
 project = "Avalonia.Base"
-type = "Avalonia.Input.PinchEventArgs"
-member = "PinchEventArgs(*"
-reason = "constructor: `PinchEventArgs::with_angle`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Input.PointerEventArgs"
-member = "PointerEventArgs(*"
-reason = "the public constructor and the internal one with the previous points and the platform cookie are `PointerEventArgs::new` followed by `with_previous_points` and `with_platform_input_event_cookie`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Input.PointerPressedEventArgs"
-member = "PointerPressedEventArgs(*"
-reason = "the public constructor and the internal one with the platform cookie are `PointerPressedEventArgs::new` followed by `with_platform_input_event_cookie`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Input.PointerPointProperties"
-member = "PointerPointProperties(*"
-reason = "constructors: `new`, `with_pen_state`, `with_pen_state_and_contact_rect`, `from_raw_point` and `based_on`; the parameterless one is `Default`"
-
-[[waive]]
-project = "Avalonia.Base"
 type = "Avalonia.Input.PointerOverPreProcessor"
 member = "OnError"
 reason = "empty method of IObserver<T>: the default `on_error` of the `IObserver` trait, which the type does not override"
@@ -3778,12 +3024,6 @@ project = "Avalonia.Base"
 type = "Avalonia.Input.GestureRecognizers.GestureRecognizerCollection"
 member = "*GetEnumerator*"
 reason = "IEnumerable: `GestureRecognizerCollection::to_vec`, a snapshot that can be iterated while recognizers are added or removed"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Input.PullGestureRecognizer"
-member = "PullGestureRecognizer(*"
-reason = "constructors: `PullGestureRecognizer::new` and `PullGestureRecognizer::with_direction`"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -3827,145 +3067,7 @@ type = "Avalonia.Input.Platform.KeyGestureFormatInfo"
 member = "GetFormat"
 reason = "IFormatProvider, which lets a `KeyGestureFormatInfo` be passed where a format provider is expected: `KeyGestureFormatInfo::get_instance` and `KeyGesture::to_string_format` take the format info itself"
 
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Input.Raw.RawPointerEventArgs"
-member = "RawPointerEventArgs(*"
-reason = "constructor: `RawPointerEventArgs::with_point`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Input.Raw.RawTouchEventArgs"
-member = "RawTouchEventArgs(*"
-reason = "constructor: `RawTouchEventArgs::with_point`"
-
 # Avalonia.Base Media (triage of 2026-10-08)
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.DashStyle"
-member = "DashStyle(*"
-reason = "constructor: `DashStyle::with_dashes` (and `with_dash_list`)"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.DrawingBrush"
-member = "DrawingBrush(*"
-reason = "constructor: `DrawingBrush::with_drawing`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.DrawingImage"
-member = "DrawingImage(*"
-reason = "constructor: `DrawingImage::with_drawing`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.EllipseGeometry"
-member = "EllipseGeometry(*"
-reason = "constructor: `EllipseGeometry::with_rect`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.GradientStop"
-member = "GradientStop(*"
-reason = "constructor: `GradientStop::with_color_and_offset`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.ImageBrush"
-member = "ImageBrush(*"
-reason = "constructor: `ImageBrush::with_source`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.LineGeometry"
-member = "LineGeometry(*"
-reason = "constructor: `LineGeometry::with_points`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.MatrixTransform"
-member = "MatrixTransform(*"
-reason = "constructor: `MatrixTransform::with_matrix`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.Pen"
-member = "Pen(*"
-reason = "constructors: `Pen::with_brush` (brush and thickness) and `Pen::with_all` (every argument); the one that takes a color is `Pen::from_uint32`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.PolyBezierSegment"
-member = "PolyBezierSegment(*"
-reason = "constructor: `PolyBezierSegment::with_points`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.PolyLineSegment"
-member = "PolyLineSegment(*"
-reason = "constructor: `PolyLineSegment::with_points`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.PolylineGeometry"
-member = "PolylineGeometry(*"
-reason = "constructors: `PolylineGeometry::with_points` and `PolylineGeometry::with_points_and_fill_rule`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.RectangleGeometry"
-member = "RectangleGeometry(*"
-reason = "constructors: `RectangleGeometry::with_rect` and `RectangleGeometry::with_rect_and_radii`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.RotateTransform"
-member = "RotateTransform(*"
-reason = "constructors: `RotateTransform::with_angle` and `RotateTransform::with_angle_and_center`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.ScaleTransform"
-member = "ScaleTransform(*"
-reason = "constructor: `ScaleTransform::with_scale`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.SkewTransform"
-member = "SkewTransform(*"
-reason = "constructor: `SkewTransform::with_angles`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.SolidColorBrush"
-member = "SolidColorBrush(*"
-reason = "constructors: `SolidColorBrush::with_color` and `SolidColorBrush::with_color_and_opacity` (the color with the default opacity and with a given one); the one that takes a number is `SolidColorBrush::from_uint32`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.TranslateTransform"
-member = "TranslateTransform(*"
-reason = "constructor: `TranslateTransform::with_offset`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.VisualBrush"
-member = "VisualBrush(*"
-reason = "constructor: `VisualBrush::with_visual`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.Geometry"
-member = "Geometry(*"
-reason = "private protected constructors of the abstract class: `Geometry::construct` and `Geometry::construct_with_impl`, which a derived class calls for its base"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.ImmediateDrawingContext"
-member = "ImmediateDrawingContext(*"
-reason = "internal constructors with an `ownsImpl` flag: `ImmediateDrawingContext::new` (owns the implementation), `borrowed` and `borrowed_with_transform` (do not own it)"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -3975,45 +3077,9 @@ reason = "five constructors, four functions (`new`, `from_center_and_angles`, `f
 
 [[waive]]
 project = "Avalonia.Base"
-type = "Avalonia.Media.Imaging.CroppedBitmap"
-member = "CroppedBitmap(*"
-reason = "constructor: `CroppedBitmap::with_source`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.Imaging.RenderTargetBitmap"
-member = "RenderTargetBitmap(*"
-reason = "constructor: `RenderTargetBitmap::with_dpi`"
-
-[[waive]]
-project = "Avalonia.Base"
 type = "Avalonia.Media.Immutable.ImmutableGradientBrush"
 member = "ImmutableGradientBrush(*"
 reason = "three protected constructors of the abstract class, two functions: `ImmutableGradientBrush::new` (both constructors that take the stops; the one without a relative transform passes `None`) and `from_brush`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.Immutable.ImmutableRadialGradientBrush"
-member = "ImmutableRadialGradientBrush(*"
-reason = "constructors: `new`, `with_radius`, `from_stops` and `from_brush`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.Immutable.ImmutableSolidColorBrush"
-member = "ImmutableSolidColorBrush(*"
-reason = "constructors: `new`, `with_opacity`, `with_transforms`, `from_uint32` and `from_brush`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.TextFormatting.GenericTextParagraphProperties"
-member = "GenericTextParagraphProperties(*"
-reason = "constructors: `new`, `with_options`, `with_all` and `from_properties`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Media.TextFormatting.TextCharacters"
-member = "TextCharacters(*"
-reason = "constructors: `TextCharacters::new` (the text as memory) and `TextCharacters::from_str` (a string)"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -4350,12 +3416,6 @@ reason = "ported as `file_system_info_full_name`: the one user of the contract (
 
 [[waive]]
 project = "Avalonia.Base"
-type = "Avalonia.Platform.Surfaces.FuncFramebufferRenderTarget"
-member = "FuncFramebufferRenderTarget(LockFramebufferDelegate*"
-reason = "ported as `FuncFramebufferRenderTarget::with_scene_info`, with the same two parameters (the scanner counts constructors named `new`)"
-
-[[waive]]
-project = "Avalonia.Base"
 type = "Avalonia.Rendering.Composition.CompositionGpuImportedObjectBase"
 member = "Context"
 reason = "`ServerGpuImportedObjectBase::context` in the same file: the context belongs to the half of the object that stays inside the compositor lock (`CompositionGpuImportedObjectBase::server`), which the render thread reads"
@@ -4389,18 +3449,6 @@ project = "Avalonia.Base"
 type = "Avalonia.Rendering.Composition.CompositionImportedGpuSemaphore"
 member = "IsUsable"
 reason = "`ServerImportedGpuSemaphore::is_usable` in the same file, which takes the server compositor whose render interface it compares the context with"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Rendering.Composition.Drawing.RenderDataStream.HitTestVisitor"
-member = "HitTestVisitor(Geometry*"
-reason = "ported as `HitTestVisitor::for_geometry` (the scanner counts constructors named `new`)"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Rendering.Composition.Drawing.RenderDataStream.HitTestVisitor"
-member = "HitTestVisitor(Point*"
-reason = "ported as `HitTestVisitor::for_point` (the scanner counts constructors named `new`)"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -4449,54 +3497,6 @@ reason = "ported as the free function `ltrb_to_sk_rect_i` of `skia_sharp_extensi
 [[waive]]
 project = "Avalonia.Skia"
 type = "Avalonia.Skia.SkiaSharpExtensions"
-member = "ToAvaloniaRect"
-reason = "ported as the free function `to_rect` of `skia_sharp_extensions.rs`: the conversions back to the types of the framework are named after their result"
-
-[[waive]]
-project = "Avalonia.Skia"
-type = "Avalonia.Skia.SkiaSharpExtensions"
-member = "ToAvaloniaPixelRect"
-reason = "ported as the free function `to_pixel_rect` of `skia_sharp_extensions.rs`"
-
-[[waive]]
-project = "Avalonia.Skia"
-type = "Avalonia.Skia.SkiaSharpExtensions"
-member = "ToAvaloniaLtrbPixelRect"
-reason = "ported as the free function `to_ltrb_pixel_rect` of `skia_sharp_extensions.rs`"
-
-[[waive]]
-project = "Avalonia.Skia"
-type = "Avalonia.Skia.SkiaSharpExtensions"
-member = "ToAvaloniaMatrix"
-reason = "the two overloads are the free functions `to_matrix` (from a 3x3 matrix) and `matrix44_to_matrix` (from a 4x4 matrix) of `skia_sharp_extensions.rs`"
-
-[[waive]]
-project = "Avalonia.Skia"
-type = "Avalonia.Skia.SkiaSharpExtensions"
-member = "*ToAvalonia(this SKColorType*"
-reason = "ported as the free function `to_pixel_format_opt` of `skia_sharp_extensions.rs`, next to `to_pixel_format`, which panics where upstream throws"
-
-[[waive]]
-project = "Avalonia.Skia"
-type = "Avalonia.Skia.SkiaSharpExtensions"
-member = "*ToAvalonia(this SKTextAlign*"
-reason = "ported as the free function `to_text_alignment` of `skia_sharp_extensions.rs`"
-
-[[waive]]
-project = "Avalonia.Skia"
-type = "Avalonia.Skia.SkiaSharpExtensions"
-member = "*ToAvalonia(this SKFontStyleSlant*"
-reason = "ported as the free function `slant_to_font_style` of `skia_sharp_extensions.rs`"
-
-[[waive]]
-project = "Avalonia.Skia"
-type = "Avalonia.Skia.SkiaSharpExtensions"
-member = "ToSkia"
-reason = "ported as the free function `font_style_to_slant` of `skia_sharp_extensions.rs`"
-
-[[waive]]
-project = "Avalonia.Skia"
-type = "Avalonia.Skia.SkiaSharpExtensions"
 member = "Clone"
 reason = "a copy of a path that may be null: the path of the binding is `Clone`, and an absent path is an `Option`, whose `clone` is this method"
 
@@ -4520,27 +3520,9 @@ reason = "`GeometryImplBase::invalidate_caches` in the same file: the state of t
 
 [[waive]]
 project = "Avalonia.Skia"
-type = "Avalonia.Skia.ISkiaSharpApiLease"
-member = "SkCanvas"
-reason = "ported as `ISkiaApiLease::with_sk_canvas`, which runs a closure with the canvas: the canvas of the binding is borrowed from its surface and cannot be returned"
-
-[[waive]]
-project = "Avalonia.Skia"
-type = "Avalonia.Skia.ImmutableBitmap"
-member = "ImmutableBitmap(PixelSize size*"
-reason = "ported as `ImmutableBitmap::from_pixels`, which copies from a slice in place of an address. The scanner reports one constructor too few because the constructor that resizes another bitmap is `ImmutableBitmap::resized`, a name it does not count"
-
-[[waive]]
-project = "Avalonia.Skia"
 type = "Avalonia.Skia.SkiaGpuRenderTarget"
 member = "*CreateDrawingContext(IRenderTarget.RenderTargetSceneInfo*"
 reason = "ported as `create_drawing_context` of the `IRenderTarget` implementation. The scanner counts that function for the other overload, `CreateDrawingContext(bool)`, a legacy member that only throws and that the `IRenderTarget` of upstream no longer declares; it is not ported"
-
-[[waive]]
-project = "Avalonia.Skia"
-type = "Avalonia.Skia.Helpers.DrawingContextHelper"
-member = "WrapSkiaCanvas"
-reason = "ported as the free function `wrap_skia_surface` of `helpers/drawing_context_helper.rs`: a canvas of the binding is borrowed from its surface, so the context is created from the surface (`CanvasSource::Surface`)"
 
 [[waive]]
 project = "Avalonia.Skia"
@@ -4573,12 +3555,6 @@ project = "Avalonia.Headless"
 type = "*HeadlessWindowImpl"
 member = "CreateFramebufferRenderTarget"
 reason = "`create_framebuffer_render_target` of the `IFramebufferPlatformSurface` implementation of `HeadlessWindowSurface` (`headless_window_surface.rs`), the surface `HeadlessWindowImpl::surfaces` returns"
-
-[[waive]]
-project = "Avalonia.Browser"
-type = "Avalonia.Browser.Rendering.RenderWorker"
-member = "WorkerThreadId"
-reason = "ported as `RenderWorker::thread_id` (the thread, for the proxying of calls) and `RenderWorker::canvas_thread_id` (the value a canvas is created for) in `rendering/render_worker.rs`; the state is private to the file"
 
 [[waive]]
 project = "Avalonia.Browser"
@@ -5008,38 +3984,9 @@ reason = "walks an expression tree (`x => x.Name`) to the name of a member: a pr
 
 [[waive]]
 project = "Avalonia.Remote.Protocol"
-type = "Metsys.Bson.TypeHelper"
-member = "*LambdaExpression*"
-reason = "`FindProperty(LambdaExpression)`: the name of a property from an expression tree; see `ExpressionHelper`"
-
-[[waive]]
-project = "Avalonia.Remote.Protocol"
-type = "Metsys.Bson.ScopedCode<T>"
-reason = "the class with a typed scope is the one struct `ScopedCode`: its scope is a `Value`, which holds an object of any class"
-
-[[waive]]
-project = "Avalonia.Remote.Protocol"
-type = "Metsys.Bson.ObjectId"
-member = "*operator*"
-reason = "`==` and `!=` are `PartialEq` of `ObjectId` (by the text of the value, as upstream's `Equals`); the implicit conversions are `From<&ObjectId> for Option<String>` and `TryFrom<&str> for ObjectId`"
-
-[[waive]]
-project = "Avalonia.Remote.Protocol"
-type = "Metsys.Bson.ObjectId"
-member = "Equals"
-reason = "`PartialEq` of `ObjectId`"
-
-[[waive]]
-project = "Avalonia.Remote.Protocol"
 type = "Avalonia.Remote.Protocol.TcpTransportBase"
 member = "TcpTransportBase(*"
 reason = "the abstract class is a trait: the resolver its constructor takes is `TcpTransportBase::resolver` of the implementor"
-
-[[waive]]
-project = "Avalonia.Remote.Protocol"
-type = "Avalonia.Remote.Protocol.BsonStreamTransportConnection"
-member = "Dispose"
-reason = "`dispose` of the `IFerroRemoteTransportConnection` implementation of the connection (`bson_stream_transport.rs`)"
 
 [[alias]]
 project = "Avalonia.Remote.Protocol"
@@ -5125,18 +4072,6 @@ reason = "not kept (DEVIATIONS.md, Headless platform): the property is no member
 
 [[waive]]
 project = "Avalonia.DesignerSupport"
-type = "Avalonia.DesignerSupport.Remote.HtmlTransport.SimpleWebSocketHttpServer"
-member = "AcceptAsync"
-reason = "ported as `SimpleWebSocketHttpServer::accept`, which blocks: the server has no asynchronous runtime (DEVIATIONS.md, Designer support)"
-
-[[waive]]
-project = "Avalonia.DesignerSupport"
-type = "Avalonia.DesignerSupport.Remote.HtmlTransport.SimpleWebSocketHttpRequest"
-member = "RespondAsync"
-reason = "ported as `SimpleWebSocketHttpRequest::respond`, which blocks (DEVIATIONS.md, Designer support)"
-
-[[waive]]
-project = "Avalonia.DesignerSupport"
 type = "Avalonia.DesignerSupport.Remote.HtmlTransport.SimpleWebSocket"
 member = "*SendMessage(bool isText, byte[] data, int offset, int length)*"
 reason = "the overload with an offset and a length is `SimpleWebSocket::send_message` with a slice"
@@ -5155,10 +4090,1005 @@ reason = "the structure of the Xlib bindings (`x11_dl::sync::XSyncValue`), re-ex
 
 [[waive]]
 project = "Avalonia.X11"
-type = "Avalonia.X11.XLib.GrabResult"
-reason = "the result of `XGrabPointer`, which the drag source uses (stage 2 of docs/porting/x11-platform.md)"
-
-[[waive]]
-project = "Avalonia.X11"
 type = "Avalonia.X11.Screens.X11Screens.FallBackScreen"
 reason = "`X11Screen::new_fall_back`: a screen of the same type without a scaling provider, whose refresh does nothing"
+
+# ---------------------------------------------------------------- aliases of the waiver audit (2026-10-10)
+# Former waivers whose reason named the Rust item that stands for the member (docs/porting/waiver-audit.md,
+# class b). An alias is checked at every run: the member counts as present only while the item exists.
+
+[[alias]]
+project = "XamlX"
+type = "XamlX.Ast.XamlAstClrProperty"
+member = ".ctor"
+rust = ["with_setters", "with_setter_methods"]
+
+[[alias]]
+project = "XamlX"
+type = "XamlX.Ast.XamlNoReturnMethodCallNode"
+member = ".ctor"
+rust = ["with_wrapped_method"]
+
+[[alias]]
+project = "XamlX"
+type = "XamlX.Ast.XamlStaticOrTargetedReturnMethodCallNode"
+member = ".ctor"
+rust = ["with_wrapped_method"]
+
+[[alias]]
+project = "XamlX"
+type = "XamlX.Ast.XamlAstXamlPropertyValueNode"
+member = ".ctor"
+rust = ["with_values"]
+
+[[alias]]
+project = "XamlX"
+type = "XamlX.TypeSystem.AnonymousParameterInfo"
+member = ".ctor"
+rust = ["with_index"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.AvaloniaProperty"
+member = ".ctor"
+rust = ["for_added_owner"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.AvaloniaProperty"
+member = ".ctor"
+rust = ["for_added_owner"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.CombinedGeometry"
+member = ".ctor"
+rust = ["with_geometries", "with_mode", "with_mode_and_transform"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.CornerRadius"
+member = ".ctor"
+rust = ["uniform", "top_bottom"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.Rotate3DTransform"
+member = ".ctor"
+rust = ["with_values"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Thickness"
+member = ".ctor"
+rust = ["uniform", "symmetric"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Animation.Clock"
+member = ".ctor"
+rust = ["with_parent"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Animation.KeySpline"
+member = ".ctor"
+rust = ["with_points"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Animation.Easings.SplineEasing"
+member = ".ctor"
+rust = ["with_points", "with_key_spline"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Controls.ResourceDictionary"
+member = ".ctor"
+rust = ["with_owner", "construct_with_owner"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Controls.ResourceProvider"
+member = ".ctor"
+rust = ["with_owner", "construct_with_owner"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Data.BindingNotification"
+member = ".ctor"
+rust = ["with_error", "with_error_and_fallback"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Data.CompiledBinding"
+member = ".ctor"
+rust = ["empty"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Data.ReflectionBinding"
+member = ".ctor"
+rust = ["empty"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Data.TemplateBinding"
+member = ".ctor"
+rust = ["empty"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Input.PinchEventArgs"
+member = ".ctor"
+rust = ["with_angle"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Input.PointerEventArgs"
+member = ".ctor"
+rust = ["with_previous_points", "with_platform_input_event_cookie"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Input.PointerPressedEventArgs"
+member = ".ctor"
+rust = ["with_platform_input_event_cookie"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Input.PointerPointProperties"
+member = ".ctor"
+rust = ["with_pen_state", "with_pen_state_and_contact_rect", "based_on"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Input.PullGestureRecognizer"
+member = ".ctor"
+rust = ["with_direction"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Input.Raw.RawPointerEventArgs"
+member = ".ctor"
+rust = ["with_point"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Input.Raw.RawTouchEventArgs"
+member = ".ctor"
+rust = ["with_point"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.DashStyle"
+member = ".ctor"
+rust = ["with_dashes", "with_dash_list"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.DrawingBrush"
+member = ".ctor"
+rust = ["with_drawing"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.DrawingImage"
+member = ".ctor"
+rust = ["with_drawing"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.EllipseGeometry"
+member = ".ctor"
+rust = ["with_rect"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.Geometry"
+member = ".ctor"
+rust = ["construct", "construct_with_impl"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.GradientStop"
+member = ".ctor"
+rust = ["with_color_and_offset"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.ImageBrush"
+member = ".ctor"
+rust = ["with_source"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.ImmediateDrawingContext"
+member = ".ctor"
+rust = ["borrowed", "borrowed_with_transform"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.LineGeometry"
+member = ".ctor"
+rust = ["with_points"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.MatrixTransform"
+member = ".ctor"
+rust = ["with_matrix"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.Pen"
+member = ".ctor"
+rust = ["with_brush", "with_all"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.PolyBezierSegment"
+member = ".ctor"
+rust = ["with_points"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.PolyLineSegment"
+member = ".ctor"
+rust = ["with_points"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.PolylineGeometry"
+member = ".ctor"
+rust = ["with_points", "with_points_and_fill_rule"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.RectangleGeometry"
+member = ".ctor"
+rust = ["with_rect", "with_rect_and_radii"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.RotateTransform"
+member = ".ctor"
+rust = ["with_angle", "with_angle_and_center"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.ScaleTransform"
+member = ".ctor"
+rust = ["with_scale"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.SkewTransform"
+member = ".ctor"
+rust = ["with_angles"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.SolidColorBrush"
+member = ".ctor"
+rust = ["with_color", "with_color_and_opacity"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.TranslateTransform"
+member = ".ctor"
+rust = ["with_offset"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.VisualBrush"
+member = ".ctor"
+rust = ["with_visual"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.Imaging.CroppedBitmap"
+member = ".ctor"
+rust = ["with_source"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.Imaging.RenderTargetBitmap"
+member = ".ctor"
+rust = ["with_dpi"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.Immutable.ImmutableRadialGradientBrush"
+member = ".ctor"
+rust = ["with_radius"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.Immutable.ImmutableSolidColorBrush"
+member = ".ctor"
+rust = ["with_opacity", "with_transforms"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.TextFormatting.GenericTextParagraphProperties"
+member = ".ctor"
+rust = ["with_options", "with_all"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.TextFormatting.TextCharacters"
+member = ".ctor"
+rust = ["from_str"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.LockedFramebuffer"
+member = ".ctor"
+rust = ["with_data"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.RetainedFramebuffer"
+member = ".ctor"
+rust = ["with_row_bytes"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Surfaces.FuncFramebufferRenderTarget"
+member = ".ctor"
+rust = ["with_scene_info"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.Compositor"
+member = ".ctor"
+rust = ["with_scheduler", "with_render_thread"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.Compositor"
+member = "Loop"
+rust = ["render_loop"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.Drawing.RenderDataStream.HitTestVisitor"
+member = ".ctor"
+rust = ["for_geometry", "for_point"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Styling.ContainerQuery"
+member = ".ctor"
+rust = ["with_query_fn"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Styling.ContainerQuery"
+member = "ToString"
+rust = ["to_display_string"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Styling.ControlTheme"
+member = ".ctor"
+rust = ["with_target_type"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Styling.ControlTheme"
+member = "ToString"
+rust = ["to_display_string"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Styling.NthChildSelector"
+member = ".ctor"
+rust = ["with_direction"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Styling.SelectorMatch"
+member = ".ctor"
+rust = ["sometimes"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Styling.Style"
+member = ".ctor"
+rust = ["with_selector_fn"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Styling.Style"
+member = "ToString"
+rust = ["to_display_string"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Styling.Styles"
+member = ".ctor"
+rust = ["with_owner"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Threading.AvaloniaSynchronizationContext"
+member = ".ctor"
+rust = ["with_priority", "with_dispatcher"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Threading.DispatcherFrame"
+member = ".ctor"
+rust = ["with_exit_when_requested", "with_dispatcher"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Threading.DispatcherTimer"
+member = ".ctor"
+rust = ["with_priority", "with_priority_and_dispatcher", "with_interval", "with_callback", "with_callback_and_dispatcher"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Utilities.SpanRider"
+member = ".ctor"
+rust = ["at_latest_position"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Utilities.SpanStringTokenizer"
+member = ".ctor"
+rust = ["with_message", "with_separator"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.ColumnDefinition"
+member = ".ctor"
+rust = ["with_value", "with_width"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.ContextMenu"
+member = ".ctor"
+rust = ["with_interaction_handler"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.MaskedTextBox"
+member = ".ctor"
+rust = ["with_provider"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.Menu"
+member = ".ctor"
+rust = ["with_interaction_handler"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.MenuBase"
+member = ".ctor"
+rust = ["construct_with"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.NativeMenuItem"
+member = ".ctor"
+rust = ["with_header"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.RowDefinition"
+member = ".ctor"
+rust = ["with_value", "with_height"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.ScrollChangedEventArgs"
+member = ".ctor"
+rust = ["with_event"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.SizeChangedEventArgs"
+member = ".ctor"
+rust = ["with_event", "with_event_and_source"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.SpinEventArgs"
+member = ".ctor"
+rust = ["with_event", "with_mouse_wheel", "with_event_and_mouse_wheel"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.TextChangedEventArgs"
+member = ".ctor"
+rust = ["with_event", "with_event_and_source"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.TextChangingEventArgs"
+member = ".ctor"
+rust = ["with_event", "with_event_and_source"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.TopLevel"
+member = ".ctor"
+rust = ["construct", "construct_with_resolver"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.Window"
+member = ".ctor"
+rust = ["with_impl"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.WindowBase"
+member = ".ctor"
+rust = ["construct_with_resolver"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.Documents.InlineUIContainer"
+member = ".ctor"
+rust = ["with_child"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.Documents.Run"
+member = ".ctor"
+rust = ["with_text"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.Embedding.EmbeddableControlRoot"
+member = ".ctor"
+rust = ["with_impl"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.MenuFlyoutPresenter"
+member = ".ctor"
+rust = ["with_interaction_handler"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.Notifications.Notification"
+member = ".ctor"
+rust = ["empty"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.Notifications.WindowNotificationManager"
+member = ".ctor"
+rust = ["with_host"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.NavigatedFromEventArgs"
+member = ".ctor"
+rust = ["with_parameter"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.NavigatedToEventArgs"
+member = ".ctor"
+rust = ["with_parameter"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.NavigatingFromEventArgs"
+member = ".ctor"
+rust = ["with_parameter"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.NavigationEventArgs"
+member = ".ctor"
+rust = ["with_parameter"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.Platform.DefaultMenuInteractionHandler"
+member = ".ctor"
+rust = ["with_overrides"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.Platform.InputPaneStateEventArgs"
+member = ".ctor"
+rust = ["with_animation"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.RefreshRequestedEventArgs"
+member = ".ctor"
+rust = ["with_deferral"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.PullToRefresh.ScrollablePullGestureRecognizer"
+member = ".ctor"
+rust = ["with_direction"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.Selection.SelectionModel"
+member = ".ctor"
+rust = ["with_source"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.Utils.SelectingItemsControlSelectionAdapter"
+member = ".ctor"
+rust = ["with_selector"]
+
+[[alias]]
+project = "Avalonia.Native"
+type = "Avalonia.Native.AvaloniaNativeMenuExporter"
+member = ".ctor"
+rust = ["for_window", "for_application", "for_tray_icon", "for_dock"]
+
+[[alias]]
+project = "Avalonia.OpenGL"
+type = "Avalonia.OpenGL.GlVersion"
+member = ".ctor"
+rust = ["with_compatibility_profile"]
+
+[[alias]]
+project = "Avalonia.OpenGL"
+type = "Avalonia.OpenGL.Features.ExternalObjectsInterface"
+member = ".ctor"
+rust = ["try_new"]
+
+[[alias]]
+project = "Avalonia.Browser"
+type = "Avalonia.Browser.AvaloniaView"
+member = ".ctor"
+rust = ["with_host"]
+
+[[alias]]
+project = "Avalonia.Markup.Xaml"
+type = "Avalonia.Markup.Xaml.MarkupExtensions.CompiledBindingExtension"
+member = ".ctor"
+rust = ["with_path"]
+
+[[alias]]
+project = "Avalonia.Markup.Xaml"
+type = "Avalonia.Markup.Xaml.MarkupExtensions.DynamicResourceExtension"
+member = ".ctor"
+rust = ["with_resource_key"]
+
+[[alias]]
+project = "Avalonia.Markup.Xaml"
+type = "Avalonia.Markup.Xaml.MarkupExtensions.ReflectionBindingExtension"
+member = ".ctor"
+rust = ["with_path"]
+
+[[alias]]
+project = "Avalonia.Markup.Xaml"
+type = "Avalonia.Markup.Xaml.MarkupExtensions.RelativeSourceExtension"
+member = ".ctor"
+rust = ["with_mode"]
+
+[[alias]]
+project = "Avalonia.Markup.Xaml"
+type = "Avalonia.Markup.Xaml.MarkupExtensions.StaticResourceExtension"
+member = ".ctor"
+rust = ["with_resource_key"]
+
+[[alias]]
+project = "Avalonia.Markup.Xaml"
+type = "Avalonia.Markup.Xaml.Styling.MergeResourceInclude"
+member = ".ctor"
+rust = ["with_service_provider"]
+
+[[alias]]
+project = "Avalonia.Markup.Xaml"
+type = "Avalonia.Markup.Xaml.Styling.ResourceInclude"
+member = ".ctor"
+rust = ["with_service_provider"]
+
+[[alias]]
+project = "Avalonia.Markup.Xaml"
+type = "Avalonia.Markup.Xaml.Styling.StyleInclude"
+member = ".ctor"
+rust = ["with_service_provider"]
+
+[[alias]]
+project = "Avalonia.Markup.Xaml.Loader"
+type = "Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.XamlIlAvaloniaPropertyNode"
+member = ".ctor"
+rust = ["with_property_type"]
+
+[[alias]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.ImmutableBitmap"
+member = ".ctor"
+rust = ["resized"]
+
+[[alias]]
+project = "XamlX"
+type = "XamlX.ContextDiagnosticExtensions"
+member = "ToDiagnostic"
+rust = ["exception_to_diagnostic"]
+
+[[alias]]
+project = "XamlX"
+type = "XamlX.Transform.TransformerConfiguration"
+member = "GetCustomAttribute"
+rust = ["get_custom_attribute_for_type", "get_custom_attributes_for_type", "get_custom_attribute_for_property", "get_custom_attributes_for_property"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.AvaloniaPropertyChangedEventArgs"
+member = "SetSender"
+rust = ["with_sender"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.StyledElement"
+member = "TypedLogicalChildren"
+rust = ["logical_children"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Visual"
+member = "TypedVisualChildren"
+rust = ["visual_children"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Animation.Animators.Animator"
+member = "Apply"
+rust = ["apply_with_visual"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Input.Cursor"
+member = "Default"
+rust = ["default_cursor"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Input.TextInput.TextInputOptions"
+member = "Default"
+rust = ["default_options"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.PixelFormat"
+member = "FormatEnum"
+rust = ["format"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.PropertyStore.BindingEntryBase"
+member = "GetValue"
+rust = ["try_get_value", "get_value_boxed"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.PropertyStore.EffectiveValue"
+member = "CoerceDefaultValueAndRaise"
+rust = ["set_coerced_default_value_and_raise"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.PropertyStore.EffectiveValue"
+member = "CoerceDefaultValueAndRaise"
+rust = ["set_coerced_default_value_and_raise"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.PropertyStore.SourceUntypedBindingEntry"
+member = "GetDefaultValue"
+rust = ["cached_default_value"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.PropertyStore.TypedBindingEntry"
+member = "GetDefaultValue"
+rust = ["cached_default_value"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.PropertyStore.ValueStore"
+member = "OnChanged"
+rust = ["on_expression_changed"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.PropertyStore.ValueStore"
+member = "OnCompleted"
+rust = ["on_expression_completed"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.SwapchainBase"
+member = "DisposeAsync"
+rust = ["dispose"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.Animations.ImplicitAnimationCollection"
+member = "Contains"
+rust = ["contains_pair"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.Server.ServerCompositionGradientBrush"
+member = "s_IdOfGradientStopsProperty"
+rust = ["id_of_gradient_stops_property"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.Drawing.ServerResourceHelperExtensions"
+member = "GetServer"
+rust = ["brush_get_server", "pen_get_server", "transform_get_server", "geometry_get_server"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.Expressions.Expression"
+member = "Type"
+rust = ["expression_type"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.Expressions.BinaryExpression"
+member = "Type"
+rust = ["expression_type"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.Expressions.UnaryExpression"
+member = "Type"
+rust = ["expression_type"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.Expressions.ExpressionVariant"
+member = "Type"
+rust = ["variant_type"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Styling.Setter"
+member = "GetValue"
+rust = ["get_value_boxed"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.AvaloniaObject"
+member = "this[]"
+rust = ["get_value_untyped", "set_value_untyped", "indexer", "bind_indexer"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.Embedding.Offscreen.OffscreenTopLevel"
+member = "Impl"
+rust = ["offscreen_impl"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.NumericUpDown"
+member = "Value"
+rust = ["set_numeric_value"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.Primitives.RangeBase"
+member = "Value"
+rust = ["set_range_value"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.Primitives.Track"
+member = "Value"
+rust = ["set_range_value"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.Utils.BindingEvaluator"
+member = "Value"
+rust = ["set_evaluated_value"]
+
+[[alias]]
+project = "Avalonia.Controls"
+type = "Avalonia.Controls.Documents.IInlineHost"
+member = "VisualChildren"
+rust = ["with_visual_children"]
+
+[[alias]]
+project = "Avalonia.DesignerSupport"
+type = "Avalonia.DesignerSupport.Remote.HtmlTransport.SimpleWebSocketHttpServer"
+member = "AcceptAsync"
+rust = ["accept"]
+
+[[alias]]
+project = "Avalonia.DesignerSupport"
+type = "Avalonia.DesignerSupport.Remote.HtmlTransport.SimpleWebSocketHttpRequest"
+member = "RespondAsync"
+rust = ["respond"]
+
+[[alias]]
+project = "Avalonia.Native"
+type = "Avalonia.Native.TopLevelImpl"
+member = "MouseDevice"
+rust = ["mouse"]
+
+[[alias]]
+project = "Avalonia.Browser"
+type = "Avalonia.Browser.BrowserAppBuilder"
+member = "SetupBrowserAppAsync"
+rust = ["setup_browser_app"]
+
+[[alias]]
+project = "Avalonia.Browser"
+type = "Avalonia.Browser.BrowserAppBuilder"
+member = "StartBrowserAppAsync"
+rust = ["start_browser_app"]
+
+[[alias]]
+project = "Avalonia.Browser"
+type = "Avalonia.Browser.Rendering.RenderWorker"
+member = "WorkerThreadId"
+rust = ["thread_id"]
+
+[[alias]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.ISkiaSharpApiLease"
+member = "SkCanvas"
+rust = ["with_sk_canvas"]
+
+[[alias]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "ToAvaloniaRect"
+rust = ["to_rect"]
+
+[[alias]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "ToAvaloniaPixelRect"
+rust = ["to_pixel_rect"]
+
+[[alias]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "ToAvaloniaLtrbPixelRect"
+rust = ["to_ltrb_pixel_rect"]
+
+[[alias]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "ToAvaloniaMatrix"
+rust = ["to_matrix", "matrix44_to_matrix"]
+
+[[alias]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "ToAvalonia"
+rust = ["to_pixel_format_opt", "to_text_alignment", "slant_to_font_style"]
+
+[[alias]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "ToSkia"
+rust = ["font_style_to_slant"]
+
+[[alias]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.Helpers.DrawingContextHelper"
+member = "WrapSkiaCanvas"
+rust = ["wrap_skia_surface"]
+
+[[alias]]
+project = "Avalonia.Native"
+type = "Avalonia.Native.Helpers"
+member = "ToAvnPoint"
+rust = ["pixel_point_to_frn_point"]

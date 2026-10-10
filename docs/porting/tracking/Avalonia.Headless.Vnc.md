@@ -9,20 +9,20 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Upstream | `src/Headless/Avalonia.Headless.Vnc` |
 | FerroUI | `src/Headless/FerroUI.Headless.Vnc` (not created yet) |
 | Crate | `ferroui-headless-vnc` |
-| Phase / priority | 1 - test infrastructure / P1 |
-| Files | 0/0 (-), 3 not applicable |
-| Types | 0/0 (-) |
-| Members | 0/0 (-) |
+| Phase / priority | not started / out of current scope / - |
+| Files | 0/3 (0.0%) |
+| Types | 0/3 (0.0%) |
+| Members | 0/11 (0.0%) |
 | Contracts (interfaces) | 0/0 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
 ## Files
 
-### `(project root)` - files 0/0, types 0/0, members 0/0
+### `(project root)` - files 0/3, types 0/3, members 0/11
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaVncLogger.cs` | - | n/a | - | - | not-applicable: out of scope: a VNC server that shows the frames of a headless application, built on a .NET VNC library; nothing in the port depends on it |
-| `HeadlessVncFramebufferSource.cs` | - | n/a | - | - | not-applicable: out of scope: a VNC server that shows the frames of a headless application, built on a .NET VNC library; nothing in the port depends on it |
-| `HeadlessVncPlatformExtensions.cs` | - | n/a | - | - | not-applicable: out of scope: a VNC server that shows the frames of a headless application, built on a .NET VNC library; nothing in the port depends on it |
+| `AvaloniaVncLogger.cs` | `ferro_vnc_logger.rs` | missing | 0/1 | 0/3 |  |
+| `HeadlessVncFramebufferSource.cs` | `headless_vnc_framebuffer_source.rs` | missing | 0/1 | 0/6 |  |
+| `HeadlessVncPlatformExtensions.cs` | `headless_vnc_platform_extensions.rs` | missing | 0/1 | 0/2 |  |

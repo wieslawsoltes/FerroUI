@@ -1,5 +1,28 @@
 {
  "upstreamCommit": "17350180c33b063f0e98abbfd19aa3cae63f5d56",
+ "inScope": {
+  "files": [
+   2347,
+   2453,
+   0
+  ],
+  "types": [
+   3164,
+   3717,
+   311
+  ],
+  "members": [
+   25928,
+   30744,
+   2850
+  ]
+ },
+ "allProjects": {
+  "membersPresent": 25928,
+  "members": 37391,
+  "membersNotApplicable": 1132,
+  "membersOutOfScope": 5515
+ },
  "projects": [
   {
    "name": "XamlX",
@@ -18,9 +41,9 @@
     5
    ],
    "members": [
-    713,
+    722,
     878,
-    165
+    156
    ],
    "interfaces": [
     47,
@@ -36,12 +59,13 @@
    ],
    "notApplicableFiles": 26,
    "matchKinds": {
-    "alias fn": 3,
+    "alias fn": 13,
+    "alias free fn": 1,
     "const": 67,
     "field": 159,
     "fn": 433,
     "free fn": 6,
-    "overload fn": 16,
+    "overload fn": 14,
     "trait": 3,
     "trait fn": 9,
     "variant": 17
@@ -271,7 +295,7 @@
     0,
     0
    ],
-   "notApplicableFiles": 1,
+   "notApplicableFiles": 0,
    "matchKinds": {},
    "presentFiles": {
     "inc/avalonia-native-guids.h": [
@@ -513,14 +537,14 @@
     0
    ],
    "types": [
-    1523,
+    1524,
     1659,
-    136
+    135
    ],
    "members": [
-    10281,
+    10398,
     11433,
-    1152
+    1035
    ],
    "interfaces": [
     247,
@@ -536,7 +560,9 @@
    ],
    "notApplicableFiles": 51,
    "matchKinds": {
-    "alias fn": 50,
+    "alias field": 3,
+    "alias fn": 162,
+    "alias free fn": 5,
     "const": 381,
     "derive": 64,
     "field": 638,
@@ -544,8 +570,8 @@
     "free fn": 15,
     "free item": 16,
     "getter fn": 4,
-    "overload fn": 314,
-    "trait": 360,
+    "overload fn": 313,
+    "trait": 358,
     "trait fn": 75,
     "variant": 1793
    },
@@ -4538,9 +4564,9 @@
     7
    ],
    "members": [
-    6214,
+    6255,
     6405,
-    189
+    148
    ],
    "interfaces": [
     83,
@@ -4556,14 +4582,14 @@
    ],
    "notApplicableFiles": 1,
    "matchKinds": {
-    "alias fn": 4,
+    "alias fn": 48,
     "const": 33,
     "derive": 2,
     "field": 29,
     "fn": 5598,
     "free item": 4,
     "overload fn": 82,
-    "trait": 37,
+    "trait": 34,
     "variant": 425
    },
    "presentFiles": {
@@ -6455,9 +6481,9 @@
     0
    ],
    "members": [
-    170,
+    173,
     176,
-    3
+    1
    ],
    "interfaces": [
     0,
@@ -6473,6 +6499,8 @@
    ],
    "notApplicableFiles": 0,
    "matchKinds": {
+    "alias fn": 2,
+    "alias free item": 1,
     "field": 2,
     "fn": 161,
     "free item": 2,
@@ -6710,7 +6738,7 @@
    "path": "src/Avalonia.FreeDesktop",
    "rust": "src/FerroUI.FreeDesktop",
    "scope": "out",
-   "detail": "types",
+   "detail": "full",
    "files": [
     0,
     18,
@@ -6883,18 +6911,18 @@
    "detail": "full",
    "files": [
     48,
-    48,
+    49,
     0
    ],
    "types": [
-    65,
-    76,
-    11
+    67,
+    85,
+    10
    ],
    "members": [
-    455,
-    531,
-    76
+    473,
+    601,
+    59
    ],
    "interfaces": [
     1,
@@ -6908,11 +6936,13 @@
     0,
     0
    ],
-   "notApplicableFiles": 1,
+   "notApplicableFiles": 0,
    "matchKinds": {
-    "alias fn": 6,
+    "alias field": 2,
+    "alias fn": 11,
+    "alias free fn": 10,
     "field": 18,
-    "fn": 406,
+    "fn": 407,
     "free fn": 6,
     "overload fn": 10,
     "trait": 1,
@@ -7084,9 +7114,9 @@
     2
    ],
    "members": [
-    601,
+    603,
     639,
-    38
+    30
    ],
    "interfaces": [
     18,
@@ -7102,7 +7132,7 @@
    ],
    "notApplicableFiles": 0,
    "matchKinds": {
-    "alias fn": 1,
+    "alias fn": 3,
     "field": 24,
     "fn": 270,
     "free fn": 92,
@@ -7255,7 +7285,7 @@
     1
    ],
    "members": [
-    196,
+    198,
     202,
     3
    ],
@@ -7273,11 +7303,11 @@
    ],
    "notApplicableFiles": 0,
    "matchKinds": {
-    "alias fn": 5,
+    "alias fn": 8,
     "const": 1,
     "field": 52,
     "fn": 95,
-    "trait": 10,
+    "trait": 9,
     "variant": 33
    },
    "presentFiles": {
@@ -7526,21 +7556,21 @@
    "path": "src/Avalonia.X11",
    "rust": "src/FerroUI.X11",
    "scope": "in",
-   "detail": "types",
+   "detail": "full",
    "files": [
-    60,
+    48,
     88,
     0
    ],
    "types": [
-    133,
+    120,
     291,
-    107
+    108
    ],
    "members": [
-    0,
+    3248,
     4897,
-    0
+    1085
    ],
    "interfaces": [
     7,
@@ -7555,7 +7585,18 @@
     0
    ],
    "notApplicableFiles": 0,
-   "matchKinds": {},
+   "matchKinds": {
+    "alias field": 1,
+    "const": 1,
+    "field": 238,
+    "fn": 290,
+    "free fn": 82,
+    "free item": 7,
+    "overload fn": 3,
+    "trait": 1,
+    "trait fn": 4,
+    "variant": 2621
+   },
    "presentFiles": {
     "ActivityTrackingHelper.cs": [
      "activity_tracking_helper.rs"
@@ -7569,29 +7610,8 @@
     "Dispatching/X11PlatformThreading.cs": [
      "dispatching/x11_platform_threading.rs"
     ],
-    "Glx/Glx.cs": [
-     "glx/glx.rs"
-    ],
-    "Glx/GlxConsts.cs": [
-     "glx/glx_consts.rs"
-    ],
-    "Glx/GlxContext.cs": [
-     "glx/glx_context.rs"
-    ],
-    "Glx/GlxDisplay.cs": [
-     "glx/glx_display.rs"
-    ],
-    "Glx/GlxGlPlatformSurface.cs": [
-     "glx/glx_gl_platform_surface.rs"
-    ],
-    "Glx/GlxPlatformFeature.cs": [
-     "glx/glx_platform_feature.rs"
-    ],
     "Keysyms.cs": [
      "keysyms.rs"
-    ],
-    "LibC.cs": [
-     "lib_c.rs"
     ],
     "Screens/X11Screen.Providers.cs": [
      "screens/x11_screen_providers.rs"
@@ -7652,12 +7672,6 @@
     ],
     "X11CursorFactory.cs": [
      "x11_cursor_factory.rs"
-    ],
-    "X11DeferredDisplayDispatcher.cs": [
-     "x11_deferred_display_dispatcher.rs"
-    ],
-    "X11EglHelper.cs": [
-     "x11_egl_helper.rs"
     ],
     "X11EnumExtensions.cs": [
      "x11_enum_extensions.rs"
@@ -7727,15 +7741,6 @@
     ],
     "XResources.cs": [
      "x_resources.rs"
-    ],
-    "XShm/X11ShmFramebufferRenderTarget.cs": [
-     "x_shm/x11_shm_framebuffer_render_target.rs"
-    ],
-    "XShm/X11ShmFramebufferSurface.cs": [
-     "x_shm/x11_shm_framebuffer_surface.rs"
-    ],
-    "XShm/X11ShmImage.cs": [
-     "x_shm/x11_shm_image.rs"
     ]
    },
    "rustOnly": [
@@ -7761,9 +7766,9 @@
     2
    ],
    "members": [
-    333,
+    340,
     428,
-    95
+    88
    ],
    "interfaces": [
     0,
@@ -7779,7 +7784,9 @@
    ],
    "notApplicableFiles": 2,
    "matchKinds": {
-    "alias fn": 1,
+    "alias field": 2,
+    "alias fn": 5,
+    "alias free fn": 1,
     "const": 1,
     "field": 8,
     "fn": 236,
@@ -8125,21 +8132,21 @@
    "name": "Avalonia.Headless.Vnc",
    "path": "src/Headless/Avalonia.Headless.Vnc",
    "rust": "src/Headless/FerroUI.Headless.Vnc",
-   "scope": "in",
+   "scope": "out",
    "detail": "full",
    "files": [
     0,
-    0,
+    3,
     0
    ],
    "types": [
     0,
-    0,
+    3,
     0
    ],
    "members": [
     0,
-    0,
+    11,
     0
    ],
    "interfaces": [
@@ -8154,7 +8161,7 @@
     0,
     0
    ],
-   "notApplicableFiles": 3,
+   "notApplicableFiles": 0,
    "matchKinds": {},
    "presentFiles": {},
    "rustOnly": []
@@ -8318,9 +8325,9 @@
     2
    ],
    "members": [
-    199,
+    208,
     239,
-    40
+    31
    ],
    "interfaces": [
     9,
@@ -8336,6 +8343,7 @@
    ],
    "notApplicableFiles": 2,
    "matchKinds": {
+    "alias fn": 9,
     "field": 26,
     "fn": 157,
     "free fn": 1,
@@ -8512,9 +8520,9 @@
     6
    ],
    "members": [
-    400,
+    422,
     505,
-    105
+    83
    ],
    "interfaces": [
     5,
@@ -8530,6 +8538,9 @@
    ],
    "notApplicableFiles": 1,
    "matchKinds": {
+    "alias const": 1,
+    "alias field": 10,
+    "alias fn": 11,
     "const": 24,
     "field": 147,
     "fn": 209,
@@ -8783,18 +8794,18 @@
    "detail": "full",
    "files": [
     51,
-    51,
+    54,
     0
    ],
    "types": [
     62,
-    62,
+    66,
     0
    ],
    "members": [
-    386,
-    420,
-    33
+    398,
+    451,
+    21
    ],
    "interfaces": [
     10,
@@ -8808,9 +8819,10 @@
     0,
     0
    ],
-   "notApplicableFiles": 3,
+   "notApplicableFiles": 0,
    "matchKinds": {
-    "alias fn": 3,
+    "alias fn": 5,
+    "alias free fn": 10,
     "field": 29,
     "fn": 305,
     "free fn": 35,
@@ -8992,19 +9004,19 @@
    "path": "src/Windows/Avalonia.Win32",
    "rust": "src/Windows/FerroUI.Win32",
    "scope": "in",
-   "detail": "types",
+   "detail": "full",
    "files": [
     33,
     95,
     0
    ],
    "types": [
-    111,
+    110,
     276,
     0
    ],
    "members": [
-    0,
+    1315,
     2605,
     0
    ],
@@ -9021,7 +9033,17 @@
     0
    ],
    "notApplicableFiles": 0,
-   "matchKinds": {},
+   "matchKinds": {
+    "const": 13,
+    "derive": 2,
+    "field": 158,
+    "fn": 195,
+    "free fn": 72,
+    "free item": 15,
+    "overload fn": 7,
+    "trait": 4,
+    "variant": 849
+   },
    "presentFiles": {
     "AngleOptions.cs": [
      "angle_options.rs"
@@ -9245,17 +9267,17 @@
    "name": "Avalonia.iOS",
    "path": "src/iOS/Avalonia.iOS",
    "rust": "src/iOS/FerroUI.iOS",
-   "scope": "in",
-   "detail": "types",
+   "scope": "out",
+   "detail": "full",
    "files": [
-    23,
+    0,
     40,
     0
    ],
    "types": [
-    27,
+    0,
     57,
-    1
+    0
    ],
    "members": [
     0,
@@ -9263,7 +9285,7 @@
     0
    ],
    "interfaces": [
-    2,
+    0,
     3
    ],
    "propertyRegistrations": [
@@ -9276,77 +9298,7 @@
    ],
    "notApplicableFiles": 1,
    "matchKinds": {},
-   "presentFiles": {
-    "ActivatableLifetime.cs": [
-     "activatable_lifetime.rs"
-    ],
-    "AvaloniaAppDelegate.cs": [
-     "ferro_app_delegate.rs"
-    ],
-    "AvaloniaSceneDelegate.cs": [
-     "ferro_scene_delegate.rs"
-    ],
-    "AvaloniaView.Automation.cs": [
-     "ferro_view.rs"
-    ],
-    "AvaloniaView.Text.cs": [
-     "ferro_view.rs"
-    ],
-    "AvaloniaView.cs": [
-     "ferro_view.rs"
-    ],
-    "DispatcherImpl.cs": [
-     "dispatcher_impl.rs"
-    ],
-    "DisplayLinkTimer.cs": [
-     "display_link_timer.rs"
-    ],
-    "Extensions.cs": [
-     "extensions.rs"
-    ],
-    "InputHandler.cs": [
-     "input_handler.rs"
-    ],
-    "InsetsManager.cs": [
-     "insets_manager.rs"
-    ],
-    "Interop.cs": [
-     "interop.rs"
-    ],
-    "Metal/MetalDevice.cs": [
-     "metal/metal_device.rs"
-    ],
-    "Metal/MetalDrawingSession.cs": [
-     "metal/metal_drawing_session.rs"
-    ],
-    "Metal/MetalPlatformGraphics.cs": [
-     "metal/metal_platform_graphics.rs"
-    ],
-    "Metal/MetalPlatformSurface.cs": [
-     "metal/metal_platform_surface.rs"
-    ],
-    "Metal/MetalRenderTarget.cs": [
-     "metal/metal_render_target.rs"
-    ],
-    "NativeControlHostImpl.cs": [
-     "native_control_host_impl.rs"
-    ],
-    "Platform.cs": [
-     "platform.rs"
-    ],
-    "SingleViewLifetime.cs": [
-     "single_view_lifetime.rs"
-    ],
-    "Stubs.cs": [
-     "stubs.rs"
-    ],
-    "ViewController.cs": [
-     "view_controller.rs"
-    ],
-    "iOSScreens.cs": [
-     "ios_screens.rs"
-    ]
-   },
+   "presentFiles": {},
    "rustOnly": []
   },
   {
@@ -9389,35 +9341,5 @@
   }
  ],
  "unusedPathOverrides": [],
- "unusedWaivers": [
-  {
-   "project": "Avalonia.Remote.Protocol",
-   "type": "Metsys.Bson.TypeHelper",
-   "member": "*LambdaExpression*",
-   "reason": "`FindProperty(LambdaExpression)`: the name of a property from an expression tree; see `ExpressionHelper`"
-  },
-  {
-   "project": "Avalonia.Remote.Protocol",
-   "type": "Metsys.Bson.ScopedCode<T>",
-   "reason": "the class with a typed scope is the one struct `ScopedCode`: its scope is a `Value`, which holds an object of any class"
-  },
-  {
-   "project": "Avalonia.Remote.Protocol",
-   "type": "Metsys.Bson.ObjectId",
-   "member": "*operator*",
-   "reason": "`==` and `!=` are `PartialEq` of `ObjectId` (by the text of the value, as upstream's `Equals`); the implicit conversions are `From<&ObjectId> for Option<String>` and `TryFrom<&str> for ObjectId`"
-  },
-  {
-   "project": "Avalonia.Remote.Protocol",
-   "type": "Metsys.Bson.ObjectId",
-   "member": "Equals",
-   "reason": "`PartialEq` of `ObjectId`"
-  },
-  {
-   "project": "Avalonia.Remote.Protocol",
-   "type": "Avalonia.Remote.Protocol.BsonStreamTransportConnection",
-   "member": "Dispose",
-   "reason": "`dispose` of the `IFerroRemoteTransportConnection` implementation of the connection (`bson_stream_transport.rs`)"
-  }
- ]
+ "unusedWaivers": []
 }

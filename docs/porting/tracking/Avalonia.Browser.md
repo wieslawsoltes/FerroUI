@@ -12,20 +12,20 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 3 - browser / P2 |
 | Files | 50/50 (100.0%), 2 not applicable |
 | Types | 60/62 (2 waived) (100.0%) |
-| Members | 333/428 (95 waived) (100.0%) |
+| Members | 340/428 (88 waived) (100.0%) |
 | Contracts (interfaces) | 0/0 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
 ## Files
 
-### `(project root)` - files 28/28, types 34/35 (1 waived), members 161/177 (16 waived)
+### `(project root)` - files 28/28, types 34/35 (1 waived), members 166/177 (11 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaView.cs` | `ferro_view.rs` | present | 1/1 | 3/4 (1 waived) | renamed: the view type is named after the framework |
+| `AvaloniaView.cs` | `ferro_view.rs` | present | 1/1 | 4/4 | renamed: the view type is named after the framework |
 | `BrowserActivatableLifetime.cs` | `browser_activatable_lifetime.rs` | present | 1/1 | 1/1 |  |
-| `BrowserAppBuilder.cs` | `browser_app_builder.rs` | present | 3/3 | 7/13 (6 waived) |  |
+| `BrowserAppBuilder.cs` | `browser_app_builder.rs` | present | 3/3 | 11/13 (2 waived) |  |
 | `BrowserClipboardDataTransfer.cs` | `browser_clipboard_data_transfer.rs` | present | 1/1 | 4/4 |  |
 | `BrowserClipboardDataTransferItem.cs` | `browser_clipboard_data_transfer_item.rs` | present | 1/1 | 3/4 (1 waived) |  |
 | `BrowserDataFormatHelper.cs` | `browser_data_format_helper.rs` | present | 1/1 | 2/2 |  |
@@ -52,13 +52,13 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | `WinStubs.cs` | `win_stubs.rs` | present | 1/1 | 3/3 |  |
 | `WindowingPlatform.cs` | `windowing_platform.rs` | present | 1/1 | 8/10 (2 waived) |  |
 
-### `Interop` - files 10/10, types 10/11 (1 waived), members 64/123 (59 waived)
+### `Interop` - files 10/10, types 10/11 (1 waived), members 65/123 (58 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AvaloniaModule.cs` | `interop/ferro_module.rs` | present | 1/1 | 4/10 (6 waived) | renamed: the module is named after the framework; it is imported statically, so the asynchronous import and path resolution members have no counterpart |
 | `CanvasHelper.cs` | `interop/canvas_helper.rs` | present | 2/2 | 6/9 (3 waived) | renamed: Rust spelling of the acronym |
-| `DomHelper.cs` | `interop/dom_helper.rs` | present | 1/1 | 7/15 (8 waived) |  |
+| `DomHelper.cs` | `interop/dom_helper.rs` | present | 1/1 | 8/15 (7 waived) |  |
 | `GeneralHelpers.cs` | - | n/a | - | - | not-applicable: reflective access to script objects: replaced by typed property getters in interop/ |
 | `InputHelper.cs` | `interop/input_helper.rs` | present | 1/1 | 19/37 (18 waived) |  |
 | `JsCallbackHelper.cs` | - | n/a | - | - | not-applicable: restores the synchronisation context of the managed runtime in callbacks: no equivalent concept |
@@ -69,7 +69,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | `StreamHelper.cs` | `interop/stream_helper.rs` | present | 1/1 | 6/6 |  |
 | `TimerHelper.cs` | `interop/timer_helper.rs` | present | 1/1 | 2/3 (1 waived) |  |
 
-### `Rendering` - files 8/8, types 9/9, members 45/53 (8 waived)
+### `Rendering` - files 8/8, types 9/9, members 46/53 (7 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -79,7 +79,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | `BrowserSurface.cs` | `rendering/browser_surface.rs` | present | 1/1 | 11/13 (2 waived) |  |
 | `BrowserWebGlRenderTarget.cs` | `rendering/browser_web_gl_render_target.rs` | present | 2/2 | 17/18 (1 waived) |  |
 | `RenderTargetBrowserSurface.cs` | `rendering/render_target_browser_surface.rs` | present | 1/1 | 5/5 |  |
-| `RenderWorker.cs` | `rendering/render_worker.rs` | present | 1/1 | 1/2 (1 waived) |  |
+| `RenderWorker.cs` | `rendering/render_worker.rs` | present | 1/1 | 2/2 |  |
 | `WebRenderTarget.cs` | `rendering/web_render_target.rs` | present | 1/1 | 3/5 (2 waived) | renamed: the file is named after its script-side counterpart upstream; it declares the render target base |
 
 ### `Storage` - files 4/4, types 7/7, members 63/75 (12 waived)
@@ -91,15 +91,12 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | `BrowserStorageProvider.cs` | `storage/browser_storage_provider.rs` | present | 4/4 | 40/40 | renamed: Rust spelling of the acronym |
 | `WriteableStream.cs` | `storage/writeable_stream.rs` | present | 1/1 | 12/17 (5 waived) |  |
 
-## Other files: typescript - 8/33
+## Other files: typescript - 8/30
 
 <details><summary>File list</summary>
 
 | Upstream file | FerroUI file | Status |
 |---|---|---|
-| `staticwebassets/avalonia.js` | `staticwebassets/ferro.js` | missing |
-| `staticwebassets/storage.js` | `staticwebassets/storage.js` | missing |
-| `staticwebassets/sw.js` | `staticwebassets/sw.js` | missing |
 | `webapp/.eslintrc.json` | `webapp/.eslintrc.json` | present |
 | `webapp/build.js` | `webapp/build.js` | present |
 | `webapp/modules/avalonia-sw.ts` | `webapp/modules/ferro-sw.ts` | missing |

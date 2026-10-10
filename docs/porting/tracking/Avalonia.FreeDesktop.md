@@ -13,45 +13,56 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Files | 0/18 (0.0%) |
 | Types | 0/26 (0.0%) |
 | Members | 0/216 (0.0%) |
+| Contracts (interfaces) | 0/3 |
+| Property registrations | 0/0 |
+| Routed events | 0/0 |
 
-This backend is outside the current porting scope. It is tracked at file and type granularity only; member counts are totals.
+## Contracts
+
+Every interface of the project. Each becomes a `pub trait` with the same name (the `I` prefix is kept).
+
+| Interface | Access | Upstream file | Members | Status |
+|---|---|---|---|---|
+| `Avalonia.FreeDesktop.IPortalParentLease` | internal | `IPortalParentLease.cs` | 0/1 | missing |
+| `Avalonia.FreeDesktop.IX11InputMethodControl` | internal | `IX11InputMethod.cs` | 0/6 | missing |
+| `Avalonia.FreeDesktop.IX11InputMethodFactory` | internal | `IX11InputMethod.cs` | 0/1 | missing |
 
 ## Files
 
 ### `(project root)` - files 0/11, types 0/15, members 0/76
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `DBusCallQueue.cs` | `DBusCallQueue` | 5 | not started |
-| `DBusHelper.cs` | `DBusHelper` | 2 | not started |
-| `DBusMenuExporter.cs` | `DBusMenuExporter` | 3 | not started |
-| `DBusPlatformSettings.cs` | `DBusPlatformSettings` | 2 | not started |
-| `DBusSystemDialog.cs` | `DBusSystemDialog` | 7 | not started |
-| `DBusTrayIconImpl.cs` | `DBusTrayIconImpl`, `StatusNotifierItemDbusObj` | 37 | not started |
-| `IPortalParentLease.cs` | `IPortalParentLease`, `TrivialPortalParentLease` | 4 | not started |
-| `IX11InputMethod.cs` | `IX11InputMethodFactory`, `X11InputMethodForwardedKey`, `IX11InputMethodControl` | 11 | not started |
-| `LinuxMountedVolumeInfoListener.cs` | `LinuxMountedVolumeInfoListener` | 3 | not started |
-| `LinuxMountedVolumeInfoProvider.cs` | `LinuxMountedVolumeInfoProvider` | 1 | not started |
-| `NativeMethods.cs` | `NativeMethods` | 1 | not started |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `DBusCallQueue.cs` | `d_bus_call_queue.rs` | missing | 0/1 | 0/5 |  |
+| `DBusHelper.cs` | `d_bus_helper.rs` | missing | 0/1 | 0/2 |  |
+| `DBusMenuExporter.cs` | `d_bus_menu_exporter.rs` | missing | 0/1 | 0/3 |  |
+| `DBusPlatformSettings.cs` | `d_bus_platform_settings.rs` | missing | 0/1 | 0/2 |  |
+| `DBusSystemDialog.cs` | `d_bus_system_dialog.rs` | missing | 0/1 | 0/7 |  |
+| `DBusTrayIconImpl.cs` | `d_bus_tray_icon_impl.rs` | missing | 0/2 | 0/37 |  |
+| `IPortalParentLease.cs` | `i_portal_parent_lease.rs` | missing | 0/2 | 0/4 |  |
+| `IX11InputMethod.cs` | `ix11_input_method.rs` | missing | 0/3 | 0/11 |  |
+| `LinuxMountedVolumeInfoListener.cs` | `linux_mounted_volume_info_listener.rs` | missing | 0/1 | 0/3 |  |
+| `LinuxMountedVolumeInfoProvider.cs` | `linux_mounted_volume_info_provider.rs` | missing | 0/1 | 0/1 |  |
+| `NativeMethods.cs` | `native_methods.rs` | missing | 0/1 | 0/1 |  |
 
 ### `DBusIme` - files 0/2, types 0/3, members 0/33
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `DBusTextInputMethodBase.cs` | `DBusInputMethodFactory<T>`, `DBusTextInputMethodBase` | 32 | not started |
-| `X11DBusImeHelper.cs` | `X11DBusImeHelper` | 1 | not started |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `DBusTextInputMethodBase.cs` | `d_bus_ime/d_bus_text_input_method_base.rs` | missing | 0/2 | 0/32 |  |
+| `X11DBusImeHelper.cs` | `d_bus_ime/x11d_bus_ime_helper.rs` | missing | 0/1 | 0/1 |  |
 
 ### `DBusIme/Fcitx` - files 0/3, types 0/5, members 0/70
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `FcitxEnums.cs` | `FcitxKeyEventType`, `FcitxCapabilityFlags`, `FcitxKeyState` | 47 | not started |
-| `FcitxICWrapper.cs` | `FcitxICWrapper` | 12 | not started |
-| `FcitxX11TextInputMethod.cs` | `FcitxX11TextInputMethod` | 11 | not started |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `FcitxEnums.cs` | `d_bus_ime/fcitx/fcitx_enums.rs` | missing | 0/3 | 0/47 |  |
+| `FcitxICWrapper.cs` | `d_bus_ime/fcitx/fcitx_ic_wrapper.rs` | missing | 0/1 | 0/12 |  |
+| `FcitxX11TextInputMethod.cs` | `d_bus_ime/fcitx/fcitx_x11_text_input_method.rs` | missing | 0/1 | 0/11 |  |
 
 ### `DBusIme/IBus` - files 0/2, types 0/3, members 0/37
 
-| Upstream file | Types | Members | Status |
-|---|---|---|---|
-| `IBusEnums.cs` | `IBusModifierMask`, `IBusCapability` | 27 | not started |
-| `IBusX11TextInputMethod.cs` | `IBusX11TextInputMethod` | 10 | not started |
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `IBusEnums.cs` | `d_bus_ime/i_bus/i_bus_enums.rs` | missing | 0/2 | 0/27 |  |
+| `IBusX11TextInputMethod.cs` | `d_bus_ime/i_bus/i_bus_x11_text_input_method.rs` | missing | 0/1 | 0/10 |  |
