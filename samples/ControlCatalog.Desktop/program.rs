@@ -375,7 +375,10 @@ fn client_size_that_fits(
 /// With `FERROUI_SMOKE_OPEN_POPUP` in a screenshot run: looks at the window four times a
 /// page and opens the first combo box (`combobox`, or `1`) or the first menu item (`menu`)
 /// that was not there at the look before, which is the first of the page that was just
-/// shown. The first look only remembers what the window has by itself.
+/// shown. The first look only remembers what the window has by itself. The control is opened
+/// once it is at the same place at two looks: a page comes in with a transition that slides
+/// its content, and a popup takes its place from where its control is when it opens (the
+/// first pictures had the popups at the edge of the output the page came in from).
 fn open_popups_of_pages(interval: Duration) {
     let menu = match std::env::var("FERROUI_SMOKE_OPEN_POPUP").ok().as_deref() {
         Some("menu") => true,
@@ -384,6 +387,7 @@ fn open_popups_of_pages(interval: Duration) {
     };
     let seen: std::cell::RefCell<Option<Vec<Ref<Visual>>>> = std::cell::RefCell::new(None);
     let opened: std::cell::RefCell<Option<Ref<Visual>>> = std::cell::RefCell::new(None);
+    let candidate: std::cell::RefCell<Option<(Ref<Visual>, Option<ferroui_base::Point>)>> = std::cell::RefCell::new(None);
     let timer = DispatcherTimer::run(
         move || {
             let Some(window) = main_window() else { return true };
@@ -407,6 +411,33 @@ fn open_popups_of_pages(interval: Duration) {
                 return true;
             }
             if let Some(first) = new.into_iter().find(|visual| visual.is_effectively_visible()) {
+                let window_visual = window.clone().upcast::<Visual>();
+                println!(
+                    "Screenshots: a control to open appeared at {:?} of the window",
+                    first.translate_point(ferroui_base::Point::new(0.0, 0.0), &window_visual)
+                );
+                *candidate.borrow_mut() = Some((first, None));
+                return true;
+            }
+            let window_visual = window.clone().upcast::<Visual>();
+            let settled = {
+                let mut candidate = candidate.borrow_mut();
+                match candidate.as_mut() {
+                    Some((control, last)) => {
+                        let now = control.translate_point(ferroui_base::Point::new(0.0, 0.0), &window_visual);
+                        if now.is_some() && now == *last {
+                            println!("Screenshots: the control stays at {now:?} of the window");
+                            true
+                        } else {
+                            *last = now;
+                            false
+                        }
+                    }
+                    None => false,
+                }
+            };
+            let first = if settled { candidate.borrow_mut().take().map(|(control, _)| control) } else { None };
+            if let Some(first) = first {
                 if let Some(combo_box) = first.cast::<ComboBox>() {
                     println!("Screenshots: opening the drop-down of a combo box");
                     combo_box.set_is_drop_down_open(true);
@@ -481,7 +512,7 @@ fn report_popup_placement(window: &Ref<Window>, control: &Ref<Visual>) {
             origin.y,
             size.width,
             size.height,
-            placement.positioner,
+            (placement.positioner, placement.requested_anchor_rect),
             placement.parent_geometry,
             placement.configure
         );

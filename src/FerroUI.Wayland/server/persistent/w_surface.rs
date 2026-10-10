@@ -260,6 +260,9 @@ pub fn compute_positioner_geometry(
 /// relative to the window geometry of the parent).
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct PopupPlacement {
+    /// The anchor rectangle the framework gave (x, y, width, height in the buffer of the
+    /// parent), before it was moved and clamped into the window geometry of the parent.
+    pub requested_anchor_rect: Option<(f64, f64, f64, f64)>,
     pub positioner: Option<PositionerGeometry>,
     pub parent_geometry: Option<(i32, i32, i32, i32)>,
     pub configure: Option<crate::server::persistent::xdg_popup_configure_batch::XdgPopupConfigureBatch>,
@@ -1253,6 +1256,8 @@ mod imp {
             has_attached_children: bool,
         ) -> PopupAttach {
             let previous = self.positioner.replace(positioner);
+            let rect = positioner.anchor_rect;
+            self.placement.requested_anchor_rect = Some((rect.x, rect.y, rect.width, rect.height));
 
             // The popup child's margin (Deflate) must be carved out of the surface's window geometry
             // so the compositor positions and constrains against the child content.

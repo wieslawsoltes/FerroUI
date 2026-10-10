@@ -1527,8 +1527,15 @@ mod app {
             // buffer, and the compositor places it against the window geometry, which starts
             // after the shadow.
             if let (Some(marker), Some(geometry)) = (MARKER.with(|cell| cell.borrow().clone()), window_geometry(client)) {
-                let window_visual = window.clone().upcast::<ferroui_base::Visual>();
-                let origin = marker.translate_point(Point::new(0.0, 0.0), &window_visual).unwrap_or_default();
+                // The root visual is the whole buffer: the shadow, the border and the title bar
+                // lie between it and the content of the window.
+                let root_visual = window.presentation_source().root_visual();
+                let origin = root_visual
+                    .and_then(|root_visual| {
+                        let root_visual: &ferroui_base::Visual = &root_visual;
+                        marker.translate_point(Point::new(0.0, 0.0), root_visual)
+                    })
+                    .unwrap_or_default();
                 let child = Border::new();
                 child.set_background(Some(brush(POPUP_FILL)));
                 child.set_width(POPUP_SIZE.0);
@@ -1544,13 +1551,17 @@ mod app {
                     POPUP_SIZE.0 as i32,
                     POPUP_SIZE.1 as i32,
                 );
-                let placed = wait_for(STEP_TIMEOUT, || popup_configures(client) == vec![expected]).await;
+                // Where the output leaves no room below the marker the compositor flips the popup
+                // to the other side of it.
+                let flipped = (expected.0, origin.y.round() as i32 - geometry.1 - POPUP_SIZE.1 as i32, expected.2, expected.3);
+                let placed =
+                    wait_for(STEP_TIMEOUT, || [vec![expected], vec![flipped]].contains(&popup_configures(client))).await;
                 let configured = popup_configures(client);
                 report.check(
                     "popup of the decorated window",
                     placed,
                     format!(
-                        "the marker is at {origin:?} of the buffer and the window geometry starts at ({}, {}): the compositor configured the popup at {configured:?}; expected {expected:?}",
+                        "the marker is at {origin:?} of the buffer and the window geometry starts at ({}, {}): the compositor configured the popup at {configured:?}; expected {expected:?}, or {flipped:?} above the marker",
                         geometry.0, geometry.1
                     ),
                 );
