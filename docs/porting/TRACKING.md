@@ -90,7 +90,7 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/Avalonia.Markup.Xaml.Loader` | `src/Markup/FerroUI.Markup.Xaml.Loader` | `ferroui-markup-xaml-loader` | 66/66 | 120/126 (6 waived) | 400/505 (105 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/Avalonia.Skia` | `src/Skia/FerroUI.Skia` | `ferroui-skia` | 51/51 | 62/62 | 386/420 (33 waived) | 99.7% | 1 - rendering | P0 |
 | [Avalonia.Win32](tracking/Avalonia.Win32.md) | `src/Windows/Avalonia.Win32` | `src/Windows/FerroUI.Win32` | `ferroui-win32` | 33/95 | 111/276 | 0/2605 | 0.0% | 1 - desktop (Windows) | P0 |
-| [Avalonia.iOS](tracking/Avalonia.iOS.md) | `src/iOS/Avalonia.iOS` | `src/iOS/FerroUI.iOS` | `ferroui-ios` | 23/40 | 27/57 (1 waived) | 0/331 | 0.0% | 6 - mobile (iOS) | P2 |
+| [Avalonia.iOS](tracking/Avalonia.iOS.md) | `src/iOS/Avalonia.iOS` | `src/iOS/FerroUI.iOS` | `ferroui-ios` | 23/40 | 35/57 (1 waived) | 0/331 | 0.0% | 6 - mobile (iOS) | P2 |
 | [Avalonia.Generators](tracking/Avalonia.Generators.md) | `src/tools/Avalonia.Generators` | `src/tools/FerroUI.Generators` | (merged into ferroui-build, see docs/porting/xaml.md) | 0/0 | 0/0 | 0/0 | - | 2 - xaml + themes | P2 |
 
 Non-C# files that belong to these projects:
