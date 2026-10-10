@@ -38,18 +38,22 @@
     { "path": "src/tools/Avalonia.Generators", "detail": "full", "crate": "(merged into ferroui-build, see docs/porting/xaml.md)", "phase": "2 - xaml + themes", "priority": "P2" },
     { "path": "external/XamlX/src/XamlX", "detail": "full", "name": "XamlX", "rust": "external/XamlX/src/XamlX", "crate": "xamlx", "phase": "2 - xaml + themes", "priority": "P1" },
 
-    { "path": "src/Avalonia.X11", "detail": "types", "crate": "ferroui-x11", "phase": "5 - desktop (Linux)", "priority": "P1" },
+    { "path": "src/Avalonia.X11", "detail": "full", "crate": "ferroui-x11", "phase": "5 - desktop (Linux)", "priority": "P1" },
 
     { "path": "src/Windows/Avalonia.Win32", "detail": "full", "crate": "ferroui-win32", "phase": "1 - desktop (Windows)", "priority": "P0" },
     { "path": "src/Windows/Avalonia.Win32.Automation", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
     { "path": "src/Windows/Avalonia.Win32.Interoperability", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
     { "path": "src/Windows/Avalonia.WinUI", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
-    { "path": "src/Avalonia.FreeDesktop", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
+    { "path": "src/Avalonia.FreeDesktop", "detail": "full", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
     { "path": "src/Avalonia.FreeDesktop.AtSpi", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
     { "path": "src/Avalonia.Wayland", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
     { "path": "src/Android/*", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
-    { "path": "src/iOS/*", "detail": "types", "crate": "ferroui-ios", "phase": "6 - mobile (iOS)", "priority": "P2" },
+    { "path": "src/iOS/*", "detail": "full", "crate": "ferroui-ios", "phase": "6 - mobile (iOS)", "priority": "P2" },
     { "path": "src/Linux/*", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
     { "path": "src/Avalonia.Vulkan", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" }
+  ],
+  "//expanded": "Planning data (scope, phase, priority) of one project that a `dir/*` entry above expands to, where it differs from its siblings. Read by scripts/port-status only; the extractor ignores it.",
+  "expanded": [
+    { "path": "src/Headless/Avalonia.Headless.Vnc", "scope": "out", "phase": "not started / out of current scope", "priority": "-" }
   ]
 }
