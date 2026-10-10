@@ -122,11 +122,13 @@ impl EglContext {
         self.context.get()
     }
 
-    /// The shared handle of the context.
+    /// The shared handle of the context: what a platform surface outside this crate makes
+    /// its render target with, after it recovered the context from `IGlContext::as_any` (the
+    /// cast `(EglContext)context` of the original).
     ///
     /// # Panics
     /// Panics when the context is being dropped.
-    pub(crate) fn this(&self) -> Rc<EglContext> {
+    pub fn this(&self) -> Rc<EglContext> {
         self.this.upgrade().expect("the context is alive")
     }
 

@@ -14,6 +14,7 @@ members = [
     "src/Windows/FerroUI.Win32",
     "src/FerroUI.Desktop",
     "src/FerroUI.X11",
+    "src/FerroUI.Wayland",
     "src/iOS/FerroUI.iOS",
     "src/FerroUI.FreeDesktop",
     "src/Android/FerroUI.Android",
@@ -21,7 +22,6 @@ members = [
     "src/Headless/FerroUI.Headless",
     "src/Headless/FerroUI.Headless.Vnc",
     "src/FerroUI",
-    "src/FerroUI.Wayland",
     "src/FerroUI.Vulkan",
     "src/Linux/FerroUI.LinuxFramebuffer",
     "src/Windows/FerroUI.WinUI",
@@ -100,6 +100,7 @@ ferroui-native = { version = "=0.1.0-preview.1", path = "src/FerroUI.Native" }
 ferroui-win32 = { version = "=0.1.0-preview.1", path = "src/Windows/FerroUI.Win32" }
 ferroui-desktop = { version = "=0.1.0-preview.1", path = "src/FerroUI.Desktop" }
 ferroui-x11 = { version = "=0.1.0-preview.1", path = "src/FerroUI.X11" }
+ferroui-wayland = { version = "=0.1.0-preview.1", path = "src/FerroUI.Wayland" }
 ferroui-ios = { version = "=0.1.0-preview.1", path = "src/iOS/FerroUI.iOS" }
 ferroui-freedesktop = { version = "=0.1.0-preview.1", path = "src/FerroUI.FreeDesktop" }
 ferroui-android = { version = "=0.1.0-preview.1", path = "src/Android/FerroUI.Android" }
@@ -108,7 +109,6 @@ ferroui-headless = { version = "=0.1.0-preview.1", path = "src/Headless/FerroUI.
 # Reserved names: empty placeholders until the ports exist (docs/release.md, section 2.2).
 ferroui = { version = "=0.1.0-preview.1", path = "src/FerroUI" }
 ferroui-headless-vnc = { version = "=0.1.0-preview.1", path = "src/Headless/FerroUI.Headless.Vnc" }
-ferroui-wayland = { version = "=0.1.0-preview.1", path = "src/FerroUI.Wayland" }
 ferroui-vulkan = { version = "=0.1.0-preview.1", path = "src/FerroUI.Vulkan" }
 ferroui-linuxframebuffer = { version = "=0.1.0-preview.1", path = "src/Linux/FerroUI.LinuxFramebuffer" }
 ferroui-winui = { version = "=0.1.0-preview.1", path = "src/Windows/FerroUI.WinUI" }
@@ -139,6 +139,20 @@ libc = "0.2"
 # signals and for waiting on one of two futures.
 zbus = { version = "=5.19.0" }
 futures-util = { version = "0.3", default-features = false, features = ["std"] }
+# The Wayland platform (docs/porting/wayland-platform.md, section 2): the protocol bindings over
+# libwayland-client, which is opened at run time (`dlopen`), because EGL needs the display and the
+# surfaces of that library; the cursor themes; `libwayland-egl` and `libxkbcommon`, opened at run
+# time too. Pinned exactly; the licences are in the NOTICE.md of the crate.
+wayland-client = { version = "=0.31.15", features = ["system", "dlopen"] }
+wayland-backend = { version = "=0.3.17", features = ["client_system", "dlopen"] }
+wayland-protocols = { version = "=0.32.13", features = ["client", "staging", "unstable"] }
+wayland-cursor = { version = "=0.31.14" }
+wayland-egl = { version = "=0.32.11" }
+xkbcommon-dl = { version = "=0.4.2" }
+# What the smoke example of the Wayland platform drives a wlroots compositor with: the virtual
+# pointer and screen copy protocols, and the virtual keyboard protocol.
+wayland-protocols-wlr = { version = "=0.3.12", features = ["client"] }
+wayland-protocols-misc = { version = "=0.3.12", features = ["client"] }
 # The Android platform (docs/porting/android-platform.md, section 2.1): the declarations of the Java
 # Native Interface, which one module of the backend wraps in safe functions.
 jni-sys = { version = "=0.4.1" }

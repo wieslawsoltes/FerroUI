@@ -1,6 +1,6 @@
 [package]
 name = "ferroui-wayland"
-description = "Reserved name: the Wayland platform of FerroUI, which is not ported yet. This version is an empty placeholder"
+description = "The Wayland windowing platform of FerroUI for Linux"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -13,6 +13,60 @@ categories.workspace = true
 
 [lib]
 path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-dialogs.workspace = true
+ferroui-freedesktop.workspace = true
+ferroui-opengl.workspace = true
+# The source files the reference compiles into both Linux backends (the grouping of raw input, the
+# icon loader, the dispatcher over the main loop of GLib) live in the X11 crate.
+ferroui-x11.workspace = true
+bitflags.workspace = true
+
+# What the example draws and shapes text with. Optional, behind the feature the example requires,
+# so that the crate and its tests build without the native libraries of the renderer and the text
+# shaper (which is how the crate is checked for the Linux target from another system).
+ferroui-harfbuzz = { workspace = true, optional = true }
+ferroui-skia = { workspace = true, optional = true }
+ferroui-themes-simple = { workspace = true, optional = true }
+wayland-protocols-wlr = { workspace = true, optional = true }
+wayland-protocols-misc = { workspace = true, optional = true }
+
+# The protocol runs over libwayland-client, which is opened at run time together with
+# libwayland-egl and libxkbcommon (nothing is linked); the C library gives the worker its
+# descriptors and the shared memory of a buffer. The reference runs on Linux only, and so does
+# the part of this crate that talks to a compositor.
+[target.'cfg(target_os = "linux")'.dependencies]
+wayland-client.workspace = true
+wayland-backend.workspace = true
+wayland-protocols.workspace = true
+wayland-cursor.workspace = true
+wayland-egl.workspace = true
+xkbcommon-dl.workspace = true
+libc.workspace = true
+
+[features]
+# Builds `examples/wayland_window.rs`: a window with the Skia renderer, the HarfBuzz text shaper and
+# the Simple theme, and its smoke mode, which drives a wlroots compositor through the virtual
+# pointer, virtual keyboard and screen copy protocols.
+example = [
+    "example-check",
+    "dep:ferroui-harfbuzz",
+    "dep:ferroui-skia",
+    "dep:ferroui-themes-simple",
+]
+# The example without the renderer, the text shaper and the theme, whose native libraries cannot be
+# built for Linux on another system: `cargo check -p ferroui-wayland --features example-check
+# --target x86_64-unknown-linux-gnu --example wayland_window` type-checks the example from there.
+# An example built with this feature alone does not run.
+example-check = ["dep:wayland-protocols-wlr", "dep:wayland-protocols-misc"]
+
+[[example]]
+name = "wayland_window"
+path = "examples/wayland_window.rs"
+required-features = ["example-check"]
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

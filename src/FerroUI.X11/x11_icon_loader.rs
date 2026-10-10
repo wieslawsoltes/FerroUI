@@ -115,7 +115,7 @@ impl X11IconData {
     /// the icons this loader made are remembered and found again by
     /// identity. An icon of another origin, which the reference fails to
     /// cast, is converted through its encoded form.
-    pub(crate) fn from_icon_impl(icon: &Rc<dyn IWindowIconImpl>) -> io::Result<Rc<X11IconData>> {
+    pub fn from_icon_impl(icon: &Rc<dyn IWindowIconImpl>) -> io::Result<Rc<X11IconData>> {
         let address = Rc::as_ptr(icon).cast::<()>();
         let known = ICONS.with(|icons| {
             icons.borrow().iter().filter_map(Weak::upgrade).find(|known| Rc::as_ptr(known).cast::<()>() == address)
