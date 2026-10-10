@@ -7,15 +7,30 @@
 //! xvfb-run -a cargo run -p ferroui-x11 --features example --example x11_window -- --smoke
 //! ```
 //!
+//! `--mode=glx` and `--mode=egl` render with OpenGL through GLX or EGL
+//! (with software rendering as the fallback, as an application would list
+//! it); without the option the window is rendered in software. GLX refuses
+//! the software renderer of Mesa (`llvmpipe`) unless
+//! `FERROUI_GLX_IGNORE_RENDERER_BLACKLIST=1` is set; `--expect-fallback`
+//! makes the smoke mode expect exactly that refusal.
+//!
 //! With `--smoke` the example checks itself against the server and exits.
 //! Every check prints a line; the exit code is 0 only when all of them
-//! passed. The phases, in order (`--skip=input,popup,screens,clipboard`
+//! passed. The phases, in order (`--skip=gpu,input,popup,screens,clipboard`
 //! leaves some out):
 //!
 //! - **window**: it asks the server (not the framework) whether the window
 //!   is mapped, how large it is, what its title, class, process and
 //!   protocols are, and reads pixels back from the window to see that the
 //!   frame arrived.
+//! - **gpu** (with `--mode=glx` or `--mode=egl`): the platform has the
+//!   graphics of the mode and did not fall back; the window has a render
+//!   window; a context of the platform graphics clears an offscreen
+//!   framebuffer and reads the colour back with `glReadPixels`; with GLX
+//!   the frame of the window is read back from the buffers of its render
+//!   window with `glReadPixels` as well. (With EGL the frame is checked through the
+//!   server only, by the pixels of the phase before: a window has one EGL
+//!   surface, and it belongs to the compositor.)
 //! - **input**: it has the server synthesize input through the XTEST
 //!   extension (a pointer move, a button, the wheel, a key) and expects it
 //!   at the input callback of the window, which is the contract between
@@ -132,17 +147,38 @@ mod app {
         window
     }
 
+    /// The rendering mode `--mode=` asks for: `software` without the option.
+    fn mode() -> String {
+        std::env::args().find_map(|arg| arg.strip_prefix("--mode=").map(str::to_string)).unwrap_or("software".to_string())
+    }
+
     pub fn run() -> ExitCode {
         let smoke = std::env::args().any(|arg| arg == "--smoke");
         let args: Vec<String> = std::env::args()
             .skip(1)
-            .filter(|arg| arg != "--smoke" && !arg.starts_with("--skip=") && !arg.starts_with("--expect-screens="))
+            .filter(|arg| {
+                arg != "--smoke"
+                    && !arg.starts_with("--skip=")
+                    && !arg.starts_with("--expect-screens=")
+                    && !arg.starts_with("--mode=")
+                    && arg != "--expect-fallback"
+            })
             .collect();
 
         let mut options = X11PlatformOptions::new();
-        options.rendering_mode = vec![X11RenderingMode::Software];
+        options.rendering_mode = match mode().as_str() {
+            "glx" => vec![X11RenderingMode::Glx, X11RenderingMode::Software],
+            "egl" => vec![X11RenderingMode::Egl, X11RenderingMode::Software],
+            _ => vec![X11RenderingMode::Software],
+        };
 
-        let exit_code = AppBuilder::configure::<App>()
+        let mut builder = AppBuilder::configure::<App>();
+        if smoke {
+            // What the framework logs at the level of warnings and above (why a rendering mode
+            // did not initialize, for one), to the error stream.
+            builder = builder.log_to_text_writer(std::io::stderr(), ferroui_base::logging::LogEventLevel::Warning, &[]);
+        }
+        let exit_code = builder
             .with(Rc::new(options))
             .use_harfbuzz()
             .use_x11()
@@ -412,6 +448,22 @@ mod app {
             }
 
             if let Some(platform) = FerroLocator::current().get_service::<FerroX11Platform>() {
+                let mode = mode();
+                println!("Rendering mode asked for: {mode}");
+                if std::env::args().any(|arg| arg == "--expect-fallback") {
+                    // The mode is expected not to initialize (GLX on a renderer of its blacklist):
+                    // the platform has to have gone on to software rendering.
+                    report.phase("fallback");
+                    let fell_back = platform.glx_graphics().is_none() && platform.egl_graphics().is_none();
+                    report.check(
+                        "software rendering took over",
+                        fell_back,
+                        format!("the platform has {} platform graphics", if fell_back { "no" } else { "the" }),
+                    );
+                } else if mode != "software" && options.runs("gpu") {
+                    report.phase("gpu");
+                    gpu_checks(&report, &platform, &window, &mode);
+                }
                 if options.runs("input") {
                     report.phase("input");
                     input_checks(&report, &platform, &window).await;
@@ -573,6 +625,163 @@ mod app {
             }
 
             checks
+        }
+
+        /// Rendering with OpenGL: the platform graphics of the mode, the
+        /// render window, a context of the graphics that draws and reads
+        /// back, and with GLX the frame of the window in its front buffer.
+        fn gpu_checks(report: &Report, platform: &Rc<FerroX11Platform>, window: &Ref<Window>, mode: &str) {
+            use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformGraphics, IPlatformGraphicsContext};
+            use ferroui_opengl::gl_consts::{
+                GL_BACK, GL_COLOR_ATTACHMENT0, GL_COLOR_BUFFER_BIT, GL_FRAMEBUFFER, GL_FRAMEBUFFER_COMPLETE, GL_RENDERBUFFER,
+                GL_RGBA, GL_RGBA8, GL_UNSIGNED_BYTE,
+            };
+            use ferroui_opengl::IGlContext;
+            use ferroui_x11::glx::GlxContext;
+            use ferroui_x11::x11_window::X11Window;
+            const GL_FRONT: i32 = 0x0404;
+
+            let graphics: Option<Arc<dyn IPlatformGraphics>> = match mode {
+                "glx" => platform.glx_graphics().map(|graphics| graphics as Arc<dyn IPlatformGraphics>),
+                "egl" => platform.egl_graphics().map(|graphics| graphics as Arc<dyn IPlatformGraphics>),
+                _ => None,
+            };
+            let Some(graphics) = graphics else {
+                report.check(
+                    "platform graphics",
+                    false,
+                    format!("the platform has no graphics of the mode {mode}: it fell back to software (the log says why)"),
+                );
+                return;
+            };
+            report.check("platform graphics", true, format!("the platform registered the graphics of {mode}"));
+
+            let info = platform.info();
+            let display = info.display();
+            let Some(window_impl) = window.platform_impl() else {
+                report.check("handle", false, "the window has no platform implementation".to_string());
+                return;
+            };
+            let Some(x11_window) = window_impl.as_any().downcast_ref::<X11Window>() else {
+                report.check("handle", false, "the window is not a window of the X11 platform".to_string());
+                return;
+            };
+            let (xid, render_xid) = (x11_window.xid(), x11_window.render_xid());
+            let parent = xlib::x_query_tree(display, render_xid).map(|(_, parent, _)| parent);
+            let window_size = xlib::x_get_geometry(display, xid).map(|geometry| (geometry.width, geometry.height));
+            let render_size = xlib::x_get_geometry(display, render_xid).map(|geometry| (geometry.width, geometry.height));
+            let viewable = xlib::x_get_window_attributes(display, render_xid).map(|attributes| attributes.map_state == 2);
+            report.check(
+                "render window",
+                render_xid != xid && parent == Some(xid) && render_size == window_size && viewable == Some(true),
+                format!(
+                    "{render_xid:#x}, a child of {parent:x?} (the window is {xid:#x}), {render_size:?} in a window of \
+                     {window_size:?}, viewable {viewable:?}"
+                ),
+            );
+
+            // A context of the platform graphics, as the compositor creates one.
+            let context = graphics.create_context();
+            let features: &dyn IOptionalFeatureProvider = &*context;
+            let Some(gl_context) = features.try_get::<dyn IGlContext>() else {
+                report.check("context", false, "the context of the platform graphics is not an OpenGL context".to_string());
+                return;
+            };
+            let gl = gl_context.gl_interface();
+            report.check(
+                "context",
+                gl.version().is_some() && gl.renderer().is_some(),
+                format!(
+                    "{:?} {}.{}; version {:?}, renderer {:?}, vendor {:?}; {} stencil bits, {} samples",
+                    gl_context.version().type_(),
+                    gl_context.version().major(),
+                    gl_context.version().minor(),
+                    gl.version(),
+                    gl.renderer(),
+                    gl.vendor(),
+                    gl_context.stencil_size(),
+                    gl_context.sample_count()
+                ),
+            );
+
+            // Drawing and reading back, away from the window: a framebuffer of four by four pixels
+            // cleared to the fill colour.
+            {
+                let current = gl_context.make_current();
+                let framebuffer = gl.gen_framebuffer();
+                gl.bind_framebuffer(GL_FRAMEBUFFER, framebuffer);
+                let renderbuffer = gl.gen_renderbuffer();
+                gl.bind_renderbuffer(GL_RENDERBUFFER, renderbuffer);
+                gl.renderbuffer_storage(GL_RENDERBUFFER, GL_RGBA8, 4, 4);
+                gl.framebuffer_renderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer);
+                let status = gl.check_framebuffer_status(GL_FRAMEBUFFER);
+                gl.viewport(0, 0, 4, 4);
+                gl.clear_color(FILL.0 as f32 / 255.0, FILL.1 as f32 / 255.0, FILL.2 as f32 / 255.0, 1.0);
+                gl.clear(GL_COLOR_BUFFER_BIT);
+                let mut pixel = [0u8; 4];
+                // SAFETY: one pixel of four bytes is read into a buffer of four bytes.
+                unsafe { gl.read_pixels(1, 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel.as_mut_ptr().cast()) };
+                let error = gl.get_error();
+                gl.bind_framebuffer(GL_FRAMEBUFFER, 0);
+                gl.delete_renderbuffer(renderbuffer);
+                gl.delete_framebuffer(framebuffer);
+                current.dispose();
+                report.check(
+                    "offscreen draw read back (glReadPixels)",
+                    status == GL_FRAMEBUFFER_COMPLETE && pixel == [FILL.0, FILL.1, FILL.2, 255] && error == 0,
+                    format!(
+                        "{pixel:?}, {:?} expected; framebuffer status {status:#x}, error {error:#x}",
+                        [FILL.0, FILL.1, FILL.2, 255]
+                    ),
+                );
+            }
+
+            // The frame of the window, from the buffers of its render window. A second context may
+            // be current on a drawable of GLX; a window has one surface of EGL, which the
+            // compositor holds, so with EGL the frame is checked through the server alone. Which
+            // buffer holds the frame after it was presented is the implementation's choice: both
+            // are read, and one of them has to hold it.
+            if let Some(glx_context) = context.as_any().downcast_ref::<GlxContext>() {
+                const NAME: &str = "frame read back (glReadPixels)";
+                match (glx_context.make_current_with(render_xid), render_size) {
+                    (Ok(current), Some((width, height))) => {
+                        gl.bind_framebuffer(GL_FRAMEBUFFER, 0);
+                        let read = |buffer: i32| {
+                            if gl.is_read_buffer_available() {
+                                gl.read_buffer(buffer);
+                            }
+                            let mut pixel = [0u8; 4];
+                            // SAFETY: one pixel of four bytes is read into a buffer of four bytes.
+                            unsafe {
+                                gl.read_pixels(width / 2, height / 2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel.as_mut_ptr().cast())
+                            };
+                            pixel
+                        };
+                        let front = read(GL_FRONT);
+                        let back = read(GL_BACK);
+                        let error = gl.get_error();
+                        current.dispose();
+                        let expected = [FILL.0, FILL.1, FILL.2];
+                        report.check(
+                            NAME,
+                            (front[..3] == expected || back[..3] == expected) && error == 0,
+                            format!(
+                                "centre ({}, {}): front buffer {front:?}, back buffer {back:?}, {expected:?} expected in \
+                                 the first three of one of them; error {error:#x}",
+                                width / 2,
+                                height / 2
+                            ),
+                        );
+                    }
+                    (Err(error), _) => report.check(NAME, false, error.to_string()),
+                    (Ok(current), None) => {
+                        current.dispose();
+                        report.check(NAME, false, "no geometry".to_string());
+                    }
+                }
+            }
+
+            IPlatformGraphicsContext::dispose(&*context);
         }
 
         fn rgb(colour: (u8, u8, u8)) -> u64 {

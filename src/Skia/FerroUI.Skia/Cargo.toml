@@ -36,9 +36,9 @@ cc.workspace = true
 
 # The GPU back end of Skia is chosen per target, because the published Skia
 # binaries carry one of them: Graphite on Metal for Apple platforms, Ganesh on
-# WebGL for the browser, Ganesh on OpenGL ES (ANGLE) for Windows. Raster is
-# always present. `build.rs` mirrors the second and the third table as the
-# `ferro_skia_ganesh_gl` configuration.
+# WebGL for the browser, Ganesh on OpenGL ES (ANGLE) for Windows, Ganesh on
+# OpenGL (GLX or EGL) for Linux. Raster is always present. `build.rs` mirrors
+# the tables with Ganesh on OpenGL as the `ferro_skia_ganesh_gl` configuration.
 [target.'cfg(target_vendor = "apple")'.dependencies]
 skia-safe = { workspace = true, features = ["graphite", "metal"] }
 
@@ -49,6 +49,14 @@ skia-safe = { workspace = true, features = ["gl"] }
 # backend offers first is OpenGL ES through ANGLE (docs/porting/win32-platform.md, section 6.2).
 # A binary of Skia with this feature set is published for the target (the Windows job of CI asks).
 [target.'cfg(windows)'.dependencies]
+skia-safe = { workspace = true, features = ["gl"] }
+
+# Linux: the rendering modes of the X11 backend are GLX and EGL (docs/porting/x11-platform.md,
+# section 4). Only `gl`: the features `x11`, `egl` and `wayland` of the bindings add the window
+# system libraries Skia would create its own interface with, and the backend gives Skia the
+# entry points of the context the platform created. A binary of Skia with this feature set is
+# published for x86-64 and for ARM64 (the job `x11` of CI asks).
+[target.'cfg(target_os = "linux")'.dependencies]
 skia-safe = { workspace = true, features = ["gl"] }
 
 # The group of the crate in the table of the README (docs/release.md).
