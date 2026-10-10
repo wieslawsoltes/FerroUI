@@ -1021,7 +1021,16 @@ mod windows {
                     println!("Input: pointer {:?} at {:?} modifiers {:?}", e.type_(), e.position(), e.input_modifiers());
                 }
                 match e.type_() {
-                    RawPointerEventType::Move => self.seen.mouse_move.set(Some(e.position())),
+                    // The move the run posted is at (100, 50). The cursor of the session can
+                    // lie over the window and send a move of its own afterwards (run
+                    // 38093722092 saw one at (444, 293)): once the posted move was seen, a
+                    // later one elsewhere does not replace it.
+                    RawPointerEventType::Move => {
+                        let posted = |point: Point| (point.x - 100.0).abs() <= 1.0 && (point.y - 50.0).abs() <= 1.0;
+                        if !self.seen.mouse_move.get().is_some_and(posted) {
+                            self.seen.mouse_move.set(Some(e.position()));
+                        }
+                    }
                     RawPointerEventType::LeftButtonDown => self.seen.left_down.set(Some(e.position())),
                     RawPointerEventType::LeftButtonUp => self.seen.left_up.set(true),
                     _ => {}
