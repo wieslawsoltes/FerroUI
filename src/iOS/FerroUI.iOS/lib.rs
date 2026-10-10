@@ -18,6 +18,7 @@
 //! of the crate run on the development machine.
 
 pub mod activatable_lifetime;
+pub mod clipboard;
 pub mod combined_span3;
 pub mod completion;
 pub mod extensions;
@@ -28,6 +29,7 @@ pub mod ios_platform_feedback;
 pub mod ios_screens;
 pub mod platform;
 pub mod platform_settings;
+pub mod storage;
 pub mod stubs;
 pub mod text_input_responder;
 pub mod ui_kit_input_pane;
