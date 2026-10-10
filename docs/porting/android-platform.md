@@ -62,12 +62,15 @@ Package `org.ferroui.android`, sources in `src/Android/FerroUI.Android/java/org/
 | Java class | Derives from | Upstream class | What it forwards |
 |---|---|---|---|
 | `FerroApplication` | `android.app.Application` | `AvaloniaAndroidApplication<TApp>` | `onCreate` (after loading the library) |
-| `FerroActivity` | `android.app.Activity` | `AvaloniaActivity` | `onCreate`, `onStart`, `onStop`, `onResume`, `onDestroy`; stage 2: `onNewIntent`, `onActivityResult`, `onRequestPermissionsResult`, the back button |
+| `FerroActivity` | `android.app.Activity` | `AvaloniaActivity`, and the `BackPressedCallback` it registers | `onCreate`, `onStart`, `onStop`, `onResume`, `onDestroy`, `onNewIntent` (and the intent the activity was created with), `onActivityResult`, `onRequestPermissionsResult`, `onBackPressed`, and the back callback of the window (API 33) |
 | `FerroMainActivity` | `FerroActivity` | `AvaloniaMainActivity` | states that it is the main activity |
-| `FerroView` | `android.widget.FrameLayout` | `AvaloniaView` (both parts) | `onAttachedToWindow`, `onVisibilityAggregated`, `onVisibilityChanged`, `onConfigurationChanged`, the focus change of the view, the global layout, `dispatchTouchEvent`, `dispatchGenericPointerEvent`, `dispatchHoverEvent`; stage 2: `dispatchKeyEvent`, `onCreateInputConnection` |
+| `FerroView` | `android.widget.FrameLayout` | `AvaloniaView` (both parts) | `onAttachedToWindow`, `onVisibilityAggregated`, `onVisibilityChanged`, `onConfigurationChanged`, the focus change of the view, the global layout, `dispatchTouchEvent`, `dispatchGenericPointerEvent`, `dispatchHoverEvent`, `dispatchKeyEvent`, `onCreateInputConnection` |
 | `FerroSurfaceView` | `android.view.SurfaceView`, `SurfaceHolder.Callback2` | `InvalidationAwareSurfaceView` and `TopLevelImpl.SurfaceViewImpl` | the five callbacks of the surface holder; `dispatchDraw` clears the canvas (upstream's workaround, which is drawing code of the view and stays in Java) |
 | `MainLooperBridge` | `MessageQueue.IdleHandler` | the `Handler`, the three `Runnable`s and the `IdleHandler` of `AndroidDispatcherImpl` | the signal, the timer and the idle callback of the main looper |
-| `PlatformHelper` | (static) | calls upstream makes inline on framework objects that return more than one value | the insets of a window, the displays, the system features, the insets listener of the decor view |
+| `FerroInputConnection` | `android.view.inputmethod.InputConnection` | `AvaloniaInputConnection` | every call of the input method of the system that upstream answers with more than a constant (section 7.1) |
+| `ConfigurationChangedReceiver` | `android.content.BroadcastReceiver` | `AndroidPlatformSettings.ConfigurationChangedReceiver` | `onReceive` of `ACTION_CONFIGURATION_CHANGED` |
+| `NativeClickListener` | `View.OnClickListener` | (the event binding of the managed runtime) | `onClick`, for a view an application written in Rust creates (`interop::listeners`) |
+| `PlatformHelper` | (static) | calls upstream makes inline on framework objects that return more than one value, or that set fields | the insets of a window, the displays, the system features, the insets listener and the insets animation callback of the decor view, the colour and input values of the platform settings, the fields of an `EditorInfo`, an `ExtractedText`, the layout parameters of a native control |
 
 ### 3.1 Objects on both sides
 
@@ -83,12 +86,13 @@ A `MotionEvent` is a Java object with some forty getters, valid only during the 
 
 | Upstream uses | The port uses | Difference |
 |---|---|---|
-| `AppCompatActivity` | `android.app.Activity` | no AppCompat theme and no local night mode: `SetFrameThemeVariant` sets the system bar theme only (the night mode of an activity through `UiModeManager`/configuration override is stage 2) |
-| `OnBackPressedDispatcher`, `OnBackPressedCallback` | `OnBackInvokedDispatcher` (API 33) and `onBackPressed` below | stage 2 |
-| `ViewCompat`, `WindowCompat`, `WindowInsetsCompat`, `WindowInsetsControllerCompat`, `WindowInsetsAnimationCompat` | `WindowInsets`, `WindowInsetsController`, `WindowInsetsAnimation` of the platform (API 30); below API 30 the deprecated calls the compatibility classes make themselves | below API 30 the visibility of the input method is not known (stage 2) |
+| `AppCompatActivity` | `android.app.Activity` | no AppCompat theme and no local night mode: `SetFrameThemeVariant` sets the system bar theme only. An activity of the platform has no night mode of its own (the platform has an application-wide one from API 31, `UiModeManager.setApplicationNightMode`, which upstream's comment rules out for the reason it gives against `DefaultNightMode`: the application would stop following the system). Open. |
+| `OnBackPressedDispatcher`, `OnBackPressedCallback` | `OnBackInvokedDispatcher` with an `OnBackInvokedCallback` of default priority (API 33), `onBackPressed` below | upstream's callback disables itself and asks the dispatcher again to reach the default action; the port calls the default action of the activity (`super.onBackPressed()`), which on API 36 finishes a main activity **[E]** |
+| `ViewCompat`, `WindowCompat`, `WindowInsetsCompat`, `WindowInsetsControllerCompat`, `WindowInsetsAnimationCompat` | `WindowInsets`, `WindowInsetsController`, `WindowInsetsAnimation` of the platform (API 30); below API 30 the deprecated calls the compatibility classes make themselves | below API 30 the input method counts as visible when the system window inset at the bottom exceeds the stable one, and its state follows the global layout of the decor view (written, never run: the emulator is API 36) |
 | `WindowMetricsCalculator` (AndroidX Window) | `WindowManager.getMaximumWindowMetrics` (API 30), which is what the calculator calls there | none on API 30 and later |
 | `ExploreByTouchHelper` | `AccessibilityNodeProvider` | stage 3 |
-| `DocumentFile` | `DocumentsContract` | stage 2 |
+| `DocumentFile` | `DocumentsContract` | stage 2d |
+| `ContextCompat.RegisterReceiver(..., ReceiverNotExported)` | `Context.registerReceiver` with `RECEIVER_NOT_EXPORTED` (API 33), without a flag below | none: the broadcast of a configuration change is one only the system sends |
 
 The API level: the native code is built for API 26 (the level the published Skia binaries are built for, section 5), so `minSdkVersion` is 26; upstream's is 21. The target is API 36.
 
@@ -161,9 +165,26 @@ The recommendation of this document: (a) until the owner decides; (b) if Android
 - **`TopLevelImpl`** (`platform/skia_platform/top_level_impl.rs`): client size and scaling from the surface view (the frame of the surface holder and the density of the display metrics), the callbacks, the surfaces, the features (stage 1: the insets manager and the input pane, the screens; the others arrive with their stage), transparency levels (stage 2 beyond `None`), `SurfaceRedrawNeeded` as a synchronous paint and `SurfaceRedrawNeededAsync` through `Compositor::request_composition_update`.
 - **`FerroView`** (`ferro_view.rs`): rendering starts when the surface exists and the view is visible and stops when either ends (`on_visibility_changed`), which is also how a destroyed surface stops the renderer.
 - **Pointer input** (`AndroidMotionEventsHelper`): touch, pen and mouse devices by tool type; `Move` raises one event per pointer with the history as intermediate points; down and up by action and tool type (a finger: touch begin and end with the pointer id, so several fingers are several pointers); button press and release by the action button; scroll from the two scroll axes; cancel; modifiers from the meta state and the button state; positions divided by the scaling; pressure capped at one.
-- **Keyboard and text** are stage 2: `AndroidKeyboardEventsHelper`, `AndroidKeyInterop`, `AndroidKeyboardDevice`, and the input method (`AndroidInputMethod`, `AvaloniaInputConnection`, `TextEditBuffer`, `EditCommand`). Until then the platform binds the keyboard device of the base library, the view returns no input connection and key events go to the base class.
+- **Keyboard** (`AndroidKeyboardEventsHelper`, stage 2a): `dispatchKeyEvent` of the Java view copies what upstream reads of a `KeyEvent` (time, action, key code, scan code, the character of the key with its meta state, the repeat count, control and shift, the characters of an event of several characters, the sources and the keyboard type of the device), and the helper translates the copy: a raw key event with the key of the key code (`AndroidKeyboardDevice.ConvertKey`, 112 key codes), the physical key of the scan code (`AndroidKeyInterop`, 162 scan codes), the key symbol and the device type, then a raw text event for a key down whose character is 32 or above. The key codes, actions, sources, input types and editor flags written in the sources were compared with `android.jar` of API 36 (`javap -constants`) **[M]**. Two things are upstream's and kept: the modifiers are control and shift only, and the device type test ("any bit in common" with the sources of a joystick or a gamepad) is true for every device with keys, so a key of an alphabetic keyboard has the device type of a gamepad. A key the shell injects has no scan code: no physical key, and for the enter key no key symbol **[E]**.
+- **The view takes keys when it is focusable**, which upstream's input method makes it in its constructor; before stage 2b no key reached the view **[E]**.
+- **Platform settings** (`AndroidPlatformSettings`, stage 2a): the theme (the night mode of the configuration), the contrast (the high contrast text of the secure settings), the accent colours (the three accent palettes of the system at tone 500 from API 31, the accent colour of the theme below), the hold duration and the double tap time of the view configuration, tap sizes from its slops and the density, the language of the first locale. The values are read from the application context through `PlatformHelper` in two calls and when `ConfigurationChangedReceiver` receives a configuration change, 100 ms later, as upstream; what changed is raised. The platform is initialised from `FerroApplication.onCreate`, so the application context exists.
+- **The input method** is section 7.1.
 - **Screens** (`AndroidScreens`): the displays of the display manager, keyed by display id; bounds from the maximum window metrics, the scaling from the density of the configuration, the orientation from the rotation and the natural orientation, as upstream; refreshed on the display listener and on a configuration change.
 - **Insets** (`AndroidInsetsManager`, the insets manager and the input pane of a top-level): the safe area from the insets of the root window (status bars, navigation bars and the display cutout when the window is displayed edge to edge, which is forced when the application targets API 35 on a system of API 35), the preference, the system bar visibility, theme and colour, the occluded rectangle of the input method. Stage 2: the insets animation callback (the animated state change of the input pane), with the input method.
+
+### 7.1 The input method (stage 2b)
+
+| Upstream | Port | What it is |
+|---|---|---|
+| `AndroidInputMethod<TView>`, `IAndroidInputMethod` | `platform/input/android_input_method.rs` | `ITextInputMethodImpl` of the top-level. A client (a text box that has the focus) makes the view take the focus, restarts the input of the input method manager and shows the soft keyboard (`SHOW_IMPLICIT`); no client restarts and hides it (`HIDE_IMPLICIT_ONLY`). Changes of the text and of the selection of the client are reported to the system through the connection (`updateSelection`, `updateExtractedText` when the input method monitors). `SetOptions` gives the view what the next connection is made with: the input type, the action of the enter key and the flags of the editor from the options of the text input. |
+| `IInitEditorInfo`, `AvaloniaView.OnCreateInputConnection` | `i_init_editor_info.rs`, `ferro_view_input.rs` | The view is asked by the system for a connection, calls what the input method gave it, sets the fields of the `EditorInfo` (through `PlatformHelper.setEditorInfo`: JNI by name and signature has no field access here) and returns a new `FerroInputConnection` of the Java layer that holds the number of the Rust object. |
+| `AvaloniaInputConnection` | `platform/input/ferro_input_connection.rs`, `FerroInputConnection.java` | Batches (a level), a queue of commands applied when the outermost batch ends, the monitor mode and token of the extracted text, the editor action (done hides the keyboard, next moves the focus, then enter down and up), the context menu actions, the text around the cursor. The Java class forwards 18 methods; the seven upstream answers with `false` whatever the argument, and the handler (null), are answered in Java. |
+| `TextEditBuffer` | `platform/input/text_edit_buffer.rs` | The text and the selection are the client's (`SurroundingText`, `Selection`); the buffer adds the composing region. A replacement selects the range, dispatches a forward delete key to the view and raises a text input through the top-level, as upstream does: the text box edits itself. |
+| `EditCommand` and its eight classes | `platform/input/edit_command.rs` | An enum with a variant per class. |
+
+Positions are UTF-16 code units on both sides (the text of the framework is a `String`; the buffer counts and cuts in code units). The input method, the view and the top-level are behind three traits (`IAndroidInputMethod`, `IInputMethodHost`, `IInputConnectionTopLevel`), so the whole of the logic runs in host tests against a client that edits a text as a text box does. The connection is called on the main thread (its handler is null), so what upstream guards with interlocked operations and a concurrent queue are plain cells here.
+
+**The input pane.** From API 30 the decor view has a `WindowInsetsAnimation.Callback` (dispatch mode "stop"); `onStart` of an animation whose type mask has the input method reports the state with the rectangles of the lower and the upper bound, the duration and the interpolator as an easing (`AnimationEasing`, which calls `getInterpolation`). Below API 30 the global layout of the decor view sets the state. Measured **[E]**: the keyboard of the emulator opens to 312.4 logical pixels (820 px) over a client of 914.3, in 285 ms.
 
 ## 8. File table
 
@@ -177,52 +198,52 @@ One row per upstream file. "Java" names the class of the Java layer that belongs
 | `AndroidViewControlHandle.cs` | 26 | `android_view_control_handle.rs` | | 1 | |
 | `ApplicationLifetime.cs` | 28 | `application_lifetime.rs` | | 1 | |
 | `AvaloniaAccessHelper.cs` | 339 | `ferro_access_helper.rs` | (a node provider) | 3 | accessibility |
-| `AvaloniaActivity.cs` | 259 | `ferro_activity.rs` | `FerroActivity` | 1 | stage 2: back button, activity results, permissions, intents |
+| `AvaloniaActivity.cs` | 259 | `ferro_activity.rs` | `FerroActivity` | 1, 2c | 2d: the file activation |
 | `AvaloniaAndroidApplication.cs` | 45 | `ferro_android_application.rs` | `FerroApplication` | 1 | with `android_application!` |
 | `AvaloniaMainActivity.cs` | 47 | `ferro_main_activity.rs` | `FerroMainActivity` | 1 | the main activity is a kind of the activity |
 | `AvaloniaView.cs` | 155 | `ferro_view.rs` | `FerroView` | 1 | |
-| `AvaloniaView.Input.cs` | 72 | `ferro_view_input.rs` | `FerroView` | 1 | stage 2: key events, the input connection; stage 3: hover to the access helper |
-| `BackPressedCallback.cs` | 23 | `back_pressed_callback.rs` | (in `FerroActivity`) | 2 | |
+| `AvaloniaView.Input.cs` | 72 | `ferro_view_input.rs` | `FerroView` | 1, 2a, 2b | stage 3: hover, focus and key events to the access helper |
+| `BackPressedCallback.cs` | 23 | `back_pressed_callback.rs` | (in `FerroActivity`) | 2c | |
 | `ChoreographerTimer.cs` | 126 | `choreographer_timer.rs` | | 1 | |
 | `CursorFactory.cs` | 21 | `cursor_factory.rs` | | 1 | |
-| `IActivityResultHandler.cs` | 13 | `i_activity_result_handler.rs` | | 2 | |
-| `IAndroidNavigationService.cs` | 14 | `i_android_navigation_service.rs` | | 2 | |
-| `IAvaloniaActivity.cs` | 11 | `i_ferro_activity.rs` | | 1 | the activation events; the two base contracts are stage 2 |
-| `IInitEditorInfo.cs` | 11 | `i_init_editor_info.rs` | | 2 | |
+| `IActivityResultHandler.cs` | 13 | `i_activity_result_handler.rs` | | 2c | |
+| `IAndroidNavigationService.cs` | 14 | `i_android_navigation_service.rs` | | 2c | |
+| `IAvaloniaActivity.cs` | 11 | `i_ferro_activity.rs` | | 1, 2c | |
+| `IInitEditorInfo.cs` | 11 | `i_init_editor_info.rs` | | 2b | with the `EditorInfo` of values |
 | `PlatformIconLoader.cs` | 47 | `platform_icon_loader.rs` | | 1 | |
 | `Stubs.cs` | 60 | `stubs.rs` | | 1 | |
 | `Automation/*.cs` (9 files) | 359 | `automation/*.rs` | | 3 | the node info providers |
 | `Platform/AndroidActivatableLifetime.cs` | 75 | `platform/android_activatable_lifetime.rs` | | 1 | |
 | `Platform/AndroidDataFormatHelper.cs` | 43 | `platform/android_data_format_helper.rs` | | 2 | |
-| `Platform/AndroidInsetsManager.cs` | 380 | `platform/android_insets_manager.rs` | `PlatformHelper` | 1 | stage 2: the insets animation |
+| `Platform/AndroidInsetsManager.cs` | 380 | `platform/android_insets_manager.rs` | `PlatformHelper` | 1, 2b | |
 | `Platform/AndroidLauncher.cs` | 62 | `platform/android_launcher.rs` | | 2 | |
 | `Platform/AndroidNativeControlHostImpl.cs` | 137 | `platform/android_native_control_host_impl.rs` | | 2 | |
 | `Platform/AndroidPlatformFeedback.cs` | 43 | `platform/android_platform_feedback.rs` | | 2 | |
-| `Platform/AndroidPlatformSettings.cs` | 205 | `platform/android_platform_settings.rs` | | 2 | until then the default settings of the framework |
+| `Platform/AndroidPlatformSettings.cs` | 205 | `platform/android_platform_settings.rs` | `ConfigurationChangedReceiver`, `PlatformHelper` | 2a | |
 | `Platform/AndroidScreens.cs` | 154 | `platform/android_screens.rs` | `PlatformHelper` | 1 | |
-| `Platform/AndroidSystemNavigationManager.cs` | 39 | `platform/android_system_navigation_manager.rs` | | 2 | |
+| `Platform/AndroidSystemNavigationManager.cs` | 39 | `platform/android_system_navigation_manager.rs` | | 2c | |
 | `Platform/ClipDataItemToDataTransferItemWrapper.cs` | 108 | `platform/clip_data_item_to_data_transfer_item_wrapper.rs` | | 2 | |
 | `Platform/ClipDataToDataTransferWrapper.cs` | 58 | `platform/clip_data_to_data_transfer_wrapper.rs` | | 2 | |
 | `Platform/ClipboardImpl.cs` | 149 | `platform/clipboard_impl.rs` | | 2 | |
 | `Platform/PlatformSupport.cs` | 51 | `platform/platform_support.rs` | | 2 | |
-| `Platform/Input/AndroidInputMethod.cs` | 235 | `platform/input/android_input_method.rs` | | 2 | |
-| `Platform/Input/AndroidKeyboardDevice.cs` | 224 | `platform/input/android_keyboard_device.rs` | | 2 | |
-| `Platform/Input/AvaloniaInputConnection.cs` | 341 | `platform/input/ferro_input_connection.rs` | (an input connection) | 2 | |
-| `Platform/Input/EditCommand.cs` | 196 | `platform/input/edit_command.rs` | | 2 | |
-| `Platform/Input/TextEditBuffer.cs` | 141 | `platform/input/text_edit_buffer.rs` | | 2 | |
+| `Platform/Input/AndroidInputMethod.cs` | 235 | `platform/input/android_input_method.rs` | | 2b | |
+| `Platform/Input/AndroidKeyboardDevice.cs` | 224 | `platform/input/android_keyboard_device.rs` | | 2a | |
+| `Platform/Input/AvaloniaInputConnection.cs` | 341 | `platform/input/ferro_input_connection.rs` | `FerroInputConnection` | 2b | |
+| `Platform/Input/EditCommand.cs` | 196 | `platform/input/edit_command.rs` | | 2b | |
+| `Platform/Input/TextEditBuffer.cs` | 141 | `platform/input/text_edit_buffer.rs` | | 2b | |
 | `Platform/SkiaPlatform/AndroidFramebuffer.cs` | 123 | `platform/skia_platform/android_framebuffer.rs` | | 1 | its declarations of the NDK are in `interop/ndk.rs` |
 | `Platform/SkiaPlatform/FramebufferManager.cs` | 22 | `platform/skia_platform/framebuffer_manager.rs` | | 1 | |
 | `Platform/SkiaPlatform/InvalidationAwareSurfaceView.cs` | 113 | `platform/skia_platform/invalidation_aware_surface_view.rs` | `FerroSurfaceView` | 1 | |
-| `Platform/SkiaPlatform/TopLevelImpl.cs` | 415 | `platform/skia_platform/top_level_impl.rs` | `FerroSurfaceView` | 1 | stage 2: the features of stage 2, transparency beyond `None` |
-| `Platform/Specific/Helpers/AndroidKeyInterop.cs` | 198 | `platform/specific/helpers/android_key_interop.rs` | | 2 | |
-| `Platform/Specific/Helpers/AndroidKeyboardEventsHelper.cs` | 180 | `platform/specific/helpers/android_keyboard_events_helper.rs` | | 2 | |
+| `Platform/SkiaPlatform/TopLevelImpl.cs` | 415 | `platform/skia_platform/top_level_impl.rs` | `FerroSurfaceView` | 1, 2a to 2d | the transparency levels beyond `None` are written and never ran |
+| `Platform/Specific/Helpers/AndroidKeyInterop.cs` | 198 | `platform/specific/helpers/android_key_interop.rs` | | 2a | |
+| `Platform/Specific/Helpers/AndroidKeyboardEventsHelper.cs` | 180 | `platform/specific/helpers/android_keyboard_events_helper.rs` | `FerroView` | 2a | |
 | `Platform/Specific/Helpers/AndroidMotionEventsHelper.cs` | 252 | `platform/specific/helpers/android_motion_events_helper.rs` | `FerroView` | 1 | |
 | `Platform/Storage/AndroidStorageItem.cs` | 671 | `platform/storage/android_storage_item.rs` | | 2 | |
 | `Platform/Storage/AndroidStorageProvider.cs` | 344 | `platform/storage/android_storage_provider.rs` | | 2 | |
 | `Platform/Vulkan/VulkanNativeInterop.cs` | 25 | `platform/vulkan/vulkan_native_interop.rs` | | later | with the Vulkan project |
 | `Platform/Vulkan/VulkanSupport.cs` | 71 | `platform/vulkan/vulkan_support.rs` | | later | |
 
-Files of the port without an upstream file: `interop/java.rs` (JNI, section 2.1), `interop/ndk.rs` (the NDK, section 2.2), `interop/natives.rs` (the table of native methods and the guard of section 2.3), `android_egl.rs` (the EGL library of the system and the platform graphics of section 6), `log.rs` (the log of the system, where the standard streams of a process go nowhere).
+Files of the port without an upstream file: `interop/java.rs` (JNI, section 2.1), `interop/ndk.rs` (the NDK, section 2.2), `interop/natives.rs` (the table of native methods and the guard of section 2.3), `android_egl.rs` (the EGL library of the system and the platform graphics of section 6), `log.rs` (the log of the system, where the standard streams of a process go nowhere), `interop/listeners.rs` (a click listener whose handler is a closure, for the native controls of an application).
 
 ## 9. Packaging without Gradle
 
@@ -255,11 +276,19 @@ The smoke example (`examples/android_smoke.rs`, an APK) asks the system and not 
 | a dispatcher timer fires and a job posted from another thread runs on the main thread | the dispatcher, the signal through JNI from a thread the virtual machine did not start |
 | frames are drawn: the render timer ticks on the render thread, and pixels read back at several points have the colours drawn (from the surface with `glReadPixels` in the EGL mode, from the locked buffer in the software mode) | the choreographer, rendering, Skia and text |
 | a touch sequence injected by the script (`input tap`, `input swipe`) arrives as pointer pressed, moved and released at the right logical position | pointer input |
+| keys injected by the script (`input keyevent`, `input text`): the key A as key down with its symbol and key up, the text of six keys, the enter key without text (2a) | `dispatchKeyEvent`, the keyboard helper, the key table |
+| the settings of the platform have accent colours, tap sizes and a language; the night mode the script switches (`cmd uimode night`) arrives as a change of the colour values, both ways (2a) | `AndroidPlatformSettings`, the receiver |
+| an editor of the application takes the focus: the input pane opens with a rectangle and an animated change; two taps of the script on keys of the soft keyboard arrive as text through the input connection; without a client the pane closes (2b) | the input method, the connection, the insets animation |
+| the home button deactivates the application; started again it is activated and frames are drawn to the new surface with the colours drawn (2c) | the surface lost and created again, EGL and software |
+| the display rotated by a quarter turn: the client size, the orientation of the screen, frames at the new size; and back (2c) | configuration changes |
+| an intent with a URI for the running activity is a protocol activation with that URI (2c) | `onNewIntent`, `HandleIntent` |
+| the back button raises the back request of the top-level; handled, the activity stays; not handled, the default action of the system follows (2c) | the back callback, the navigation manager |
+| the activity is started again in the process: surface, screen, insets, dispatcher, frames and pixels again (2c) | a second activity object, a second view and top-level |
 | the activity finishes itself and the top-level is disposed | the lifecycle of stage 1 |
 
-The script runs the example twice: with the default options (EGL) and with `Software` (a properties file in the files directory of the application, because the platform is initialised before an activity and its intent exist). The touch position the script injects is a pixel of the view, which is a pixel of the screen while the window is displayed edge to edge (always on API 35 and later).
+The script runs the example twice: with the default options (EGL) and with `Software` (a properties file in the files directory of the application, because the platform is initialised before an activity and its intent exist). The application asks the script for what only the outside can do with lines `SCRIPT <command> <arguments>` in its log (a picture, a tap, a swipe, key codes, text, the night mode, home, start, rotate, an intent with a URI, back); the script does each once, in order (`emu-smoke.sh` lists them). The touch position is a pixel of the view, which is a pixel of the screen while the window is displayed edge to edge (always on API 35 and later).
 
-**What an emulator run cannot show:** a real GPU driver (the emulator's OpenGL ES is SwiftShader or a translation to the host), more than one finger (the shell injects one pointer), a stylus or a mouse, a hardware keyboard, rotation and multi-window during a frame, other API levels than 36, other densities than the device's, 16 KB page devices, and performance.
+**What an emulator run cannot show:** a real GPU driver (the emulator's OpenGL ES is SwiftShader or a translation to the host), more than one finger (the shell injects one pointer), a stylus or a mouse, a hardware keyboard (the keys the shell injects have no scan code, so the scan code table and the key symbols of control keys are host tests only), other input methods than the one of the image (composition as an Asian input method does it: the editing commands are host tests), a remote control or a gamepad, multi-window, other API levels than 36 (everything below API 33 of the back button and below API 30 of the insets is written and never ran), other densities than the device's, 16 KB page devices, and performance.
 
 ### 10.1 Measured on the emulator (2026-10-10) **[E]**
 
@@ -277,16 +306,32 @@ The catalog (a debug build, 230 MB of library in a package of 62 MB, EGL): five 
 
 Nothing of the platform code had to be changed for these runs: the two changes were to how the library is built, and one to how long the smoke application waits. What the runs did not exercise: more than one activity, a second start of the activity in the same process, rotation and other configuration changes, the surface lost and created again (pause and resume), the transparency levels, system bar colours and visibility set by an application, more than one pointer, a mouse or a pen, `--gpu host`.
 
+### 10.2 Stages 2a to 2c on the emulator (2026-10-10) **[E]**
+
+Three runs of `emu-smoke.sh` on the device of 10.1, both rendering modes each time.
+
+| Run | Result |
+|---|---|
+| 1, stage 2a alone | No key reached the view: a frame layout is not focusable, and upstream makes its view focusable in the constructor of its input method, which is stage 2b. The settings check passed. The night mode check passed in the software run and timed out in the EGL run, the first after the boot: the broadcast of the configuration change was late on a device that had just booted (the wait is 60 s since). |
+| 2, with 2b | Every check but one of the application's own: it expected the enter key to have the key symbol of the physical enter key, which a key without a scan code does not have (the expectation was wrong, not the port). |
+| 3, with 2c | **Both modes pass every check** (`SMOKE PASSED`), and the catalog passes with the TextBox page. |
+
+What run 3 says, the same in both modes: the key A arrives as key down with the symbol "a" and key up, seven keys go down and up, the text of the keys is "aferro", the enter key raises no text. The settings: light, no contrast preference, three accent colours of the system (96, 118, 172; 112, 119, 139; 140, 109, 140), a tap size of 16 and a double tap size of 200.4 logical pixels (slops of 21 and 263 px at 2.625). The night mode arrives as one change to dark and one back. With the editor focused the input pane opens to a rectangle of 411.4 by 312.4 at y 577.9, reported once with a duration of 285 ms and an easing; two taps on the keyboard make the text "gn" through two text inputs; without a client the pane closes, reported the same way. Home deactivates, the start activates, and frames are drawn to the new surface of 1080 by 2400 with the colours drawn (EGL: the render target made a new EGL surface for the new native window; nothing of the platform code had to change for it). Rotated, the client is 914.3 by 411.4, the screen landscape, frames of 2400 by 1080; and back. The URI `ferroui-smoke://hello/world?answer=42` arrives as a protocol activation. The back button raises one back request each time; handled, the activity stays; not handled, the system finishes the activity (API 36), and started again in the same process the new activity passes the checks of the surface, the dispatcher, the frames and the pixels again.
+
+The catalog: the TextBox page is in the list. The first run of the script tapped where no editor is (the page is a list of samples); the script now opens the first sample, taps into its text box and takes the picture when `dumpsys input_method` says the keyboard is shown.
+
+Not exercised by these runs: the transparency levels, system bar colours and visibility set by an application, more than one pointer, a mouse or a pen, `--gpu host`, the paths of other API levels.
+
 ## 11. Stages
 
 | Stage | Content | What its emulator run proves |
 |---|---|---|
 | **1** (built and run, 2026-10-10) | the crate, the Java layer, the bindings; platform initialisation and options; the application, the activity, the view; the top-level over the surface; the dispatcher; the choreographer timer; software and EGL rendering; pointer input; screens; insets; the smoke example; the packaging and emulator scripts | section 10, level 3 |
 | **1b** (built and run, 2026-10-10) | the host of the ControlCatalog (`samples/ControlCatalog.Android`) and its script | the catalog starts with the Fluent theme, shows its pages, and a picture of each of a handful is taken |
-| 2a | keyboard: `AndroidKeyboardEventsHelper`, `AndroidKeyInterop`, `AndroidKeyboardDevice` | key events injected by the script (`input keyevent`, `input text`) arrive as key down, up and text |
-| 2b | the input method: `AndroidInputMethod`, the input connection (`AvaloniaInputConnection`), `TextEditBuffer`, `EditCommand`, the insets animation of the input pane | text composed through the soft keyboard of the emulator; upstream's editing tests of the buffer on the host |
-| 2c | lifecycle: pause and resume, surface loss and re-creation, `onNewIntent` and protocol and file activation, configuration changes (rotation, night mode), the back button (`BackPressedCallback`, `AndroidSystemNavigationManager`) | the script sends the application to the background and back, rotates, presses back |
-| 2d | services: the clipboard, the platform settings, the launcher, the platform feedback | clipboard round trip through the shell; the theme follows `cmd uimode night` |
+| **2a** (built and run, 2026-10-10) | keyboard: `AndroidKeyboardEventsHelper`, `AndroidKeyInterop`, `AndroidKeyboardDevice`; the platform settings (`AndroidPlatformSettings`) | key events injected by the script arrive as key down, up and text; the theme follows `cmd uimode night` |
+| **2b** (built and run, 2026-10-10) | the input method: `AndroidInputMethod`, the input connection (`AvaloniaInputConnection`), `TextEditBuffer`, `EditCommand`, `IInitEditorInfo`, the insets animation of the input pane | the soft keyboard of the emulator opens for an editor, its keys arrive as text, it closes; the editing commands and the connection in host tests |
+| **2c** (built and run, 2026-10-10) | lifecycle: the surface lost and created again, `onNewIntent` and protocol activation, activity and permission results, rotation, the back button (`BackPressedCallback`, `IActivityNavigationService`, `AndroidSystemNavigationManagerImpl`) | the script sends the application to the background and back, rotates, sends an intent, presses back, starts the activity a second time |
+| 2d | services: the clipboard, the launcher, the platform feedback | clipboard round trip in the application |
 | 2e | the storage provider and items (the storage access framework), activity results, permissions | the pickers need a person; bookmarks and items against the media store of the emulator |
 | 2f | the native control host | the embed page of the catalog shows a button and a web view |
 | 3 | accessibility: the access helper and the node info providers | the node tree read with `uiautomator dump` |
