@@ -30,6 +30,10 @@ pub struct NativeControlHost {
     queued_for_destruction: Cell<bool>,
     queued_for_move_resize: Cell<bool>,
     property_changed_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    /// The subscriptions to the changes of the render transforms of the
+    /// host and of its visual ancestors (not upstream: see
+    /// `subscribe_render_transforms`).
+    render_transform_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
     native_control_handle_changed: HandlerList<dyn Fn()>,
 }
 
@@ -70,6 +74,7 @@ impl VisualImpl for NativeControlHost {
 
             visual = current.get_visual_parent();
         }
+        this.subscribe_render_transforms();
 
         this.update_host();
     }
@@ -81,6 +86,7 @@ impl VisualImpl for NativeControlHost {
         for subscription in subscriptions {
             subscription.dispose();
         }
+        this.unsubscribe_render_transforms();
         this.update_host();
     }
 }
@@ -142,6 +148,7 @@ impl NativeControlHost {
             queued_for_destruction: Cell::new(false),
             queued_for_move_resize: Cell::new(false),
             property_changed_subscriptions: RefCell::new(Vec::new()),
+            render_transform_subscriptions: RefCell::new(Vec::new()),
             native_control_handle_changed: HandlerList::new(),
         }
     }
@@ -186,11 +193,62 @@ impl NativeControlHost {
     }
 
     fn property_changed_handler(&self, e: &FerroPropertyChangedEventArgs<'_>) {
-        if e.is_effective_value_change()
-            && (e.property() == Visual::bounds_property().as_property()
-                || e.property() == Visual::is_visible_property().as_property())
+        if !e.is_effective_value_change() {
+            return;
+        }
+        if e.property() == Visual::bounds_property().as_property()
+            || e.property() == Visual::is_visible_property().as_property()
         {
             self.enqueue_for_move_resize();
+        } else if e.property() == Visual::render_transform_property().as_property() {
+            // Deviation (DEVIATIONS.md, Native control host): see
+            // `subscribe_render_transforms`.
+            self.subscribe_render_transforms();
+            self.enqueue_for_move_resize();
+        } else if e.property() == Visual::render_transform_origin_property().as_property() {
+            self.enqueue_for_move_resize();
+        }
+    }
+
+    /// Subscribes to the changes of the render transforms of the host and
+    /// of its visual ancestors, in place of the previous subscriptions.
+    ///
+    /// Deviation (DEVIATIONS.md, Native control host): upstream
+    /// (`NativeControlHost.PropertyChangedHandler`) moves the native control
+    /// only when the bounds or the visibility of the host or of an ancestor
+    /// change. The position of the native control is the position of the
+    /// host in the root, which the render transforms are part of, so a
+    /// host whose first arrange falls into a transition that slides its
+    /// page in stayed where the first frame of the transition had it. The
+    /// host is moved when a render transform of the chain is set, replaced
+    /// or removed, and when a mutable one changes in place (an animation);
+    /// a host under no transform that changes is not looked at.
+    fn subscribe_render_transforms(&self) {
+        self.unsubscribe_render_transforms();
+        let mut subscriptions = Vec::new();
+        let mut visual = Some(self.to_ref().upcast::<Visual>());
+        while let Some(current) = visual {
+            let render_transform = current.render_transform();
+            if let Some(mutable_transform) =
+                render_transform.as_ref().and_then(|render_transform| render_transform.as_mutable_transform())
+            {
+                let weak = self.to_ref().downgrade();
+                subscriptions.push(mutable_transform.changed(Rc::new(move || {
+                    if let Some(this) = weak.upgrade() {
+                        this.enqueue_for_move_resize();
+                    }
+                })));
+            }
+
+            visual = current.get_visual_parent();
+        }
+        *self.render_transform_subscriptions.borrow_mut() = subscriptions;
+    }
+
+    fn unsubscribe_render_transforms(&self) {
+        let subscriptions = std::mem::take(&mut *self.render_transform_subscriptions.borrow_mut());
+        for subscription in subscriptions {
+            subscription.dispose();
         }
     }
 
