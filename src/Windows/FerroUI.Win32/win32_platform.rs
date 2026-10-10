@@ -253,11 +253,11 @@ impl Win32Platform {
             .bind::<dyn IPlatformIconLoader>()
             .to_constant(icon_loader)
             .bind::<dyn IPlatformLifetimeEventsImpl>()
-            .to_constant(lifetime_events);
-        // The helper of the non-pumping wait and the provider of the
-        // mounted volumes are bound here by the reference: the base
-        // library has no contract for the first, and the second arrives
-        // with the storage provider of stage 2.
+            .to_constant(lifetime_events)
+            .bind::<dyn ferroui_controls::platform::IMountedVolumeInfoProvider>()
+            .to_constant(Rc::new(crate::windows_mounted_volume_info_provider::WindowsMountedVolumeInfoProvider));
+        // The helper of the non-pumping wait is bound here by the
+        // reference: the base library has no contract for it.
 
         let platform_graphics: Option<Arc<dyn IPlatformGraphics>> = match &options.custom_platform_graphics {
             Some(custom_platform_graphics) => {

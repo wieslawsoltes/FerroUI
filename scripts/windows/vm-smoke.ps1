@@ -66,6 +66,14 @@
 
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\windows\vm-smoke.ps1 -TargetDir D:\ferroui-target -Jobs 3
+
+.EXAMPLE
+  With the sources on a folder shared from a virtual machine host: start the script through the
+  drive letter the share is mapped to (the letter `net use` shows for the share; it is not the same
+  on every machine or after every start), never through its UNC path, which cmd refuses as a
+  working directory. <S> stands for that letter:
+
+  powershell -NoProfile -ExecutionPolicy Bypass -File <S>:\ferroui-vm-windows\src\scripts\windows\vm-smoke.ps1 -TargetDir C:\ferroui-target -Jobs 3 -InteractiveUser <user> -Desktop -Report <S>:\ferroui-vm-windows\vm-smoke-report.txt
 #>
 param(
     [Parameter(Mandatory = $true)][string]$TargetDir,
@@ -146,6 +154,11 @@ Say ("system: {0} {1}, {2}" -f $os.Caption, $os.Version, $env:PROCESSOR_ARCHITEC
 $session = [System.Diagnostics.Process]::GetCurrentProcess().SessionId
 Say ("this process: user {0}, session {1}, interactive {2}" -f [System.Security.Principal.WindowsIdentity]::GetCurrent().Name, $session, [Environment]::UserInteractive)
 Say "source: $Source"
+if ($Source.StartsWith('\\')) {
+    # The steps run through cmd, which refuses a UNC path as its working directory.
+    Say "MISSING: the source is a UNC path. Start the script through the drive letter the share is mapped to (the letter 'net use' shows for it)."
+    exit 2
+}
 Say "target directory: $TargetDir"
 
 # ---- what the build needs ---------------------------------------------------------------------

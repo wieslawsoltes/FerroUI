@@ -408,6 +408,8 @@ mod imp {
         icon_impl: RefCell<Option<Rc<IconImpl>>>,
         /// The icons of the system made for the window, by kind and DPI.
         icon_cache: RefCell<HashMap<(i32, u32), Win32Icon>>,
+        storage_provider: RefCell<Option<Rc<crate::win32_storage_provider::Win32StorageProvider>>>,
+        native_control_host: RefCell<Option<Rc<crate::win32_native_control_host::Win32NativeControlHost>>>,
         show_window_state: Cell<WindowState>,
         last_window_state: Cell<WindowState>,
         min_size: Cell<Size>,
@@ -515,6 +517,8 @@ mod imp {
                 dpi: Cell::new(96),
                 icon_impl: RefCell::new(None),
                 icon_cache: RefCell::new(HashMap::new()),
+                storage_provider: RefCell::new(None),
+                native_control_host: RefCell::new(None),
                 show_window_state: Cell::new(WindowState::Normal),
                 last_window_state: Cell::new(WindowState::Normal),
                 min_size: Cell::new(Size::default()),
@@ -1841,12 +1845,31 @@ mod imp {
     impl IOptionalFeatureProvider for WindowImpl {
         /// The optional features of a window. The features whose
         /// implementations arrive with later stages (the text input
-        /// method, the native control host, the storage provider, the
-        /// input pane, the launcher) are absent.
+        /// method, the input pane, the launcher) are absent.
         fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
             if feature_type == TypeId::of::<dyn IScreenImpl>() {
                 let screens: Rc<dyn IScreenImpl> = self.screen.clone();
                 return Some(Rc::new(screens));
+            }
+
+            if feature_type == TypeId::of::<dyn ferroui_base::platform::storage::IStorageProvider>() {
+                let storage_provider: Rc<dyn ferroui_base::platform::storage::IStorageProvider> = self
+                    .storage_provider
+                    .borrow_mut()
+                    .get_or_insert_with(|| Rc::new(crate::win32_storage_provider::Win32StorageProvider::new(self.hwnd.get())))
+                    .clone();
+                return Some(Rc::new(storage_provider));
+            }
+
+            if feature_type == TypeId::of::<dyn ferroui_controls::platform::INativeControlHostImpl>() {
+                let native_control_host: Rc<dyn ferroui_controls::platform::INativeControlHostImpl> = self
+                    .native_control_host
+                    .borrow_mut()
+                    .get_or_insert_with(|| {
+                        crate::win32_native_control_host::Win32NativeControlHost::new(self.this.clone(), !self.use_redirection_bitmap)
+                    })
+                    .clone();
+                return Some(Rc::new(native_control_host));
             }
 
             if feature_type == TypeId::of::<dyn IClipboard>() {
