@@ -5092,3 +5092,54 @@ project = "Avalonia.Native"
 type = "Avalonia.Native.Helpers"
 member = "ToAvnPoint"
 rust = ["pixel_point_to_frn_point"]
+
+# ---------------------------------------------------------------- Avalonia.FreeDesktop.AtSpi
+# docs/porting/atspi.md and DEVIATIONS.md, "Accessibility over AT-SPI".
+
+[[alias]]
+project = "Avalonia.FreeDesktop.AtSpi"
+type = "Avalonia.FreeDesktop.AtSpi.AtSpiNode"
+member = ".ctor"
+rust = ["create"]
+
+[[alias]]
+project = "Avalonia.FreeDesktop.AtSpi"
+type = "Avalonia.FreeDesktop.AtSpi.AtSpiNode"
+member = "DisposePathRegistrationAsync"
+rust = ["dispose_path_registration"]
+
+[[alias]]
+project = "Avalonia.FreeDesktop.AtSpi"
+type = "Avalonia.FreeDesktop.AtSpi.AtSpiServer"
+member = "DisposeAsync"
+rust = ["dispose"]
+
+[[alias]]
+project = "Avalonia.FreeDesktop.AtSpi"
+type = "Avalonia.FreeDesktop.AtSpi.AtSpiAccessibilityWatcher"
+member = "DisposeAsync"
+rust = ["dispose"]
+
+[[alias]]
+project = "Avalonia.FreeDesktop.AtSpi"
+type = "Avalonia.FreeDesktop.AtSpi.RootAtSpiNode"
+member = "WindowImpl"
+rust = ["with_window_impl"]
+
+[[waive]]
+project = "Avalonia.FreeDesktop.AtSpi"
+type = "Avalonia.FreeDesktop.AtSpi.AtSpiNode"
+member = "*Handler"
+reason = "the handlers of a node are the fields of `NodeHandlers`, which the node holds; the two that are read from outside have accessors"
+
+[[waive]]
+project = "Avalonia.FreeDesktop.AtSpi"
+type = "Avalonia.FreeDesktop.AtSpi.AtSpiNode"
+member = "PathRegistrationTask"
+reason = "registration is synchronous: the node holds the registration itself (`path_registration`), not a task of it"
+
+[[waive]]
+project = "Avalonia.FreeDesktop.AtSpi"
+type = "Avalonia.FreeDesktop.AtSpi.AtSpiServer"
+member = "SyncContext"
+reason = "the handlers are called by a task of the UI dispatcher; there is no synchronization context to hand to a D-Bus library"

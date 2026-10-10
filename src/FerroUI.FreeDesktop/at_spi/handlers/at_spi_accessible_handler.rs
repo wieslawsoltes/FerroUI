@@ -21,6 +21,42 @@ impl AtSpiAccessibleHandler {
         Self { server, node }
     }
 
+    pub(crate) fn version() -> u32 {
+        ACCESSIBLE_VERSION
+    }
+
+    pub(crate) fn description(node: &AtSpiNode) -> String {
+        node.peer().get_help_text()
+    }
+
+    pub(crate) fn child_count(node: &AtSpiNode) -> i32 {
+        to_i32(node.ensure_children().len())
+    }
+
+    pub(crate) fn locale() -> String {
+        resolve_locale()
+    }
+
+    pub(crate) fn accessible_id(node: &AtSpiNode) -> String {
+        node.peer().get_automation_id().unwrap_or_default()
+    }
+
+    pub(crate) fn help_text(node: &AtSpiNode) -> String {
+        node.peer().get_help_text()
+    }
+
+    pub(crate) fn get_localized_role_name_async(node: &AtSpiNode) -> &'static str {
+        Self::get_role_name_async(node)
+    }
+
+    pub(crate) fn get_state_async(node: &AtSpiNode) -> Vec<u32> {
+        node.compute_states()
+    }
+
+    pub(crate) fn get_application_async(server: &AtSpiServer) -> AtSpiObjectReference {
+        server.get_root_reference()
+    }
+
     pub(crate) fn name(node: &AtSpiNode) -> String {
         AtSpiNode::get_accessible_name(node.peer())
     }
@@ -34,7 +70,7 @@ impl AtSpiAccessibleHandler {
         server.get_reference(node.parent().as_ref())
     }
 
-    pub(crate) fn get_child_at_index(server: &AtSpiServer, node: &AtSpiNode, index: i32) -> AtSpiObjectReference {
+    pub(crate) fn get_child_at_index_async(server: &AtSpiServer, node: &AtSpiNode, index: i32) -> AtSpiObjectReference {
         let children = node.ensure_children();
         match item_at(&children, index) {
             Some(child) => server.get_reference(Some(child)),
@@ -42,11 +78,11 @@ impl AtSpiAccessibleHandler {
         }
     }
 
-    pub(crate) fn get_children(server: &AtSpiServer, node: &AtSpiNode) -> Vec<AtSpiObjectReference> {
+    pub(crate) fn get_children_async(server: &AtSpiServer, node: &AtSpiNode) -> Vec<AtSpiObjectReference> {
         node.ensure_children().iter().map(|child| server.get_reference(Some(child))).collect()
     }
 
-    pub(crate) fn get_index_in_parent(node: &Rc<AtSpiNode>) -> i32 {
+    pub(crate) fn get_index_in_parent_async(node: &Rc<AtSpiNode>) -> i32 {
         // Window nodes are children of the ApplicationAtSpiNode, but their
         // internal Parent field is null (they are attached with parent: null).
         // Mirror the Parent property's special case so that backward path
@@ -59,7 +95,7 @@ impl AtSpiAccessibleHandler {
         parent.ensure_children().iter().position(|sibling| Rc::ptr_eq(sibling, node)).map_or(-1, to_i32)
     }
 
-    pub(crate) fn get_relation_set(server: &AtSpiServer, node: &AtSpiNode) -> Vec<AtSpiRelationEntry> {
+    pub(crate) fn get_relation_set_async(server: &AtSpiServer, node: &AtSpiNode) -> Vec<AtSpiRelationEntry> {
         let mut relations = Vec::new();
 
         if let Some(labeled_by) = node.peer().get_labeled_by() {
@@ -72,16 +108,16 @@ impl AtSpiAccessibleHandler {
         relations
     }
 
-    pub(crate) fn get_role(node: &AtSpiNode) -> u32 {
+    pub(crate) fn get_role_async(node: &AtSpiNode) -> u32 {
         AtSpiNode::to_at_spi_role(node.peer().get_automation_control_type(), Some(node.peer())) as u32
     }
 
-    pub(crate) fn get_role_name(node: &AtSpiNode) -> &'static str {
+    pub(crate) fn get_role_name_async(node: &AtSpiNode) -> &'static str {
         let role = AtSpiNode::to_at_spi_role(node.peer().get_automation_control_type(), Some(node.peer()));
         AtSpiNode::to_at_spi_role_name(role)
     }
 
-    pub(crate) fn get_attributes(node: &AtSpiNode) -> AtSpiAttributeSet {
+    pub(crate) fn get_attributes_async(node: &AtSpiNode) -> AtSpiAttributeSet {
         let peer = node.peer();
         let mut attrs = AtSpiAttributeSet::new();
         attrs.insert("toolkit".to_string(), TOOLKIT_NAME.to_string());
@@ -106,7 +142,7 @@ impl AtSpiAccessibleHandler {
         attrs
     }
 
-    pub(crate) fn get_interfaces(node: &AtSpiNode) -> Vec<String> {
+    pub(crate) fn get_interfaces_async(node: &AtSpiNode) -> Vec<String> {
         // The set is ordered: the interfaces sorted by their ordinal names.
         node.get_supported_interfaces().into_iter().map(str::to_string).collect()
     }
@@ -120,19 +156,20 @@ impl DBusInterface for AtSpiAccessibleHandler {
     fn call(&self, member: &str, body: &zbus::message::Body) -> CallResult {
         let (server, node) = (server_of(&self.server)?, node_of(&self.node)?);
         match member {
-            "GetChildAtIndex" => reply((Self::get_child_at_index(&server, &node, args::<i32>(body)?).to_wire(),)),
-            "GetChildren" => reply((Self::get_children(&server, &node)
+            "GetChildAtIndex" => reply((Self::get_child_at_index_async(&server, &node, args::<i32>(body)?).to_wire(),)),
+            "GetChildren" => reply((Self::get_children_async(&server, &node)
                 .iter()
                 .map(AtSpiObjectReference::to_wire)
                 .collect::<Vec<_>>(),)),
-            "GetIndexInParent" => reply((Self::get_index_in_parent(&node),)),
-            "GetRelationSet" => reply((Self::get_relation_set(&server, &node),)),
-            "GetRole" => reply((Self::get_role(&node),)),
-            "GetRoleName" | "GetLocalizedRoleName" => reply((Self::get_role_name(&node),)),
-            "GetState" => reply((node.compute_states(),)),
-            "GetAttributes" => reply((Self::get_attributes(&node),)),
-            "GetApplication" => reply((server.get_root_reference().to_wire(),)),
-            "GetInterfaces" => reply((Self::get_interfaces(&node),)),
+            "GetIndexInParent" => reply((Self::get_index_in_parent_async(&node),)),
+            "GetRelationSet" => reply((Self::get_relation_set_async(&server, &node),)),
+            "GetRole" => reply((Self::get_role_async(&node),)),
+            "GetRoleName" => reply((Self::get_role_name_async(&node),)),
+            "GetLocalizedRoleName" => reply((Self::get_localized_role_name_async(&node),)),
+            "GetState" => reply((Self::get_state_async(&node),)),
+            "GetAttributes" => reply((Self::get_attributes_async(&node),)),
+            "GetApplication" => reply((Self::get_application_async(&server).to_wire(),)),
+            "GetInterfaces" => reply((Self::get_interfaces_async(&node),)),
             _ => Err(DBusError::unknown_method()),
         }
     }
@@ -140,13 +177,14 @@ impl DBusInterface for AtSpiAccessibleHandler {
     fn get_property(&self, name: &str) -> Option<Value<'static>> {
         let (server, node) = (self.server.upgrade()?, self.node.upgrade()?);
         Some(match name {
-            "version" => Value::from(ACCESSIBLE_VERSION),
+            "version" => Value::from(Self::version()),
             "Name" => Value::from(Self::name(&node)),
-            "Description" | "HelpText" => Value::from(node.peer().get_help_text()),
+            "Description" => Value::from(Self::description(&node)),
             "Parent" => Self::parent(&server, &node).to_dbus_struct(),
-            "ChildCount" => Value::from(to_i32(node.ensure_children().len())),
-            "Locale" => Value::from(resolve_locale()),
-            "AccessibleId" => Value::from(node.peer().get_automation_id().unwrap_or_default()),
+            "ChildCount" => Value::from(Self::child_count(&node)),
+            "Locale" => Value::from(Self::locale()),
+            "AccessibleId" => Value::from(Self::accessible_id(&node)),
+            "HelpText" => Value::from(Self::help_text(&node)),
             _ => return None,
         })
     }

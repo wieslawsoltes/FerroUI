@@ -25,38 +25,77 @@ impl AtSpiComponentHandler {
         Self { server, node }
     }
 
-    fn contains(node: &AtSpiNode, x: i32, y: i32, coord_type: u32) -> bool {
+    fn version() -> u32 {
+        COMPONENT_VERSION
+    }
+
+    fn get_position_async(node: &AtSpiNode, coord_type: u32) -> (i32, i32) {
+        let extents = Self::get_extents_async(node, coord_type);
+        (extents.0, extents.1)
+    }
+
+    fn get_mdiz_order_async() -> i16 {
+        -1
+    }
+
+    fn grab_focus_async(node: &AtSpiNode) -> bool {
+        node.peer().set_focus();
+        true
+    }
+
+    fn get_alpha_async() -> f64 {
+        1.0
+    }
+
+    fn set_extents_async(node: &AtSpiNode, x: i32, y: i32, _width: i32, _height: i32, coord_type: u32) -> bool {
+        // Only support moving (not resizing) for now
+        Self::set_position_async(node, x, y, coord_type)
+    }
+
+    fn set_size_async(_width: i32, _height: i32) -> bool {
+        false
+    }
+
+    fn scroll_to_async(_scroll_type: u32) -> bool {
+        false
+    }
+
+    fn scroll_to_point_async(_coord_type: u32, _x: i32, _y: i32) -> bool {
+        false
+    }
+
+    fn contains_async(node: &AtSpiNode, x: i32, y: i32, coord_type: u32) -> bool {
         let rect = AtSpiCoordinateHelper::get_screen_extents(node);
         let point = Self::translate_to_screen(node, x, y, coord_type);
         rect.contains_exclusive(Point::new(f64::from(point.0), f64::from(point.1)))
     }
 
-    fn get_accessible_at_point(
+    fn get_accessible_at_point_async(
         server: &AtSpiServer,
         node: &Rc<AtSpiNode>,
         x: i32,
         y: i32,
         coord_type: u32,
     ) -> AtSpiObjectReference {
-        if Self::contains(node, x, y, coord_type) {
+        if Self::contains_async(node, x, y, coord_type) {
             server.get_reference(Some(node))
         } else {
             server.get_null_reference()
         }
     }
 
-    pub(crate) fn get_extents(node: &AtSpiNode, coord_type: u32) -> AtSpiRect {
+    pub(crate) fn get_extents_async(node: &AtSpiNode, coord_type: u32) -> AtSpiRect {
         let rect = AtSpiCoordinateHelper::get_screen_extents(node);
         let translated = AtSpiCoordinateHelper::translate_rect(node, rect, coord_type);
         (translated.x as i32, translated.y as i32, translated.width as i32, translated.height as i32)
     }
 
-    fn get_size(node: &AtSpiNode) -> (i32, i32) {
+    fn get_size_async(node: &AtSpiNode) -> (i32, i32) {
         let rect = AtSpiCoordinateHelper::get_screen_extents(node);
         (rect.width as i32, rect.height as i32)
     }
 
-    fn get_layer(node: &AtSpiNode) -> u32 {
+    fn get_layer_async(node: &AtSpiNode) -> u32 {
         if node.peer().get_automation_control_type() == AutomationControlType::Window {
             WINDOW_LAYER
         } else {
@@ -64,7 +103,7 @@ impl AtSpiComponentHandler {
         }
     }
 
-    fn set_position(node: &AtSpiNode, x: i32, y: i32, coord_type: u32) -> bool {
+    fn set_position_async(node: &AtSpiNode, x: i32, y: i32, coord_type: u32) -> bool {
         let Some(platform_impl) =
             node.peer().get_provider::<dyn IRootProvider>().and_then(|provider| provider.platform_impl())
         else {
@@ -102,51 +141,41 @@ impl DBusInterface for AtSpiComponentHandler {
         match member {
             "Contains" => {
                 let (x, y, coord_type) = args::<(i32, i32, u32)>(body)?;
-                reply((Self::contains(&node, x, y, coord_type),))
+                reply((Self::contains_async(&node, x, y, coord_type),))
             }
             "GetAccessibleAtPoint" => {
                 let (x, y, coord_type) = args::<(i32, i32, u32)>(body)?;
-                reply((Self::get_accessible_at_point(&server, &node, x, y, coord_type).to_wire(),))
+                reply((Self::get_accessible_at_point_async(&server, &node, x, y, coord_type).to_wire(),))
             }
-            "GetExtents" => reply((Self::get_extents(&node, args::<u32>(body)?),)),
-            "GetPosition" => {
-                let extents = Self::get_extents(&node, args::<u32>(body)?);
-                reply((extents.0, extents.1))
-            }
-            "GetSize" => reply(Self::get_size(&node)),
-            "GetLayer" => reply((Self::get_layer(&node),)),
-            "GetMDIZOrder" => reply((-1i16,)),
-            "GrabFocus" => {
-                node.peer().set_focus();
-                reply((true,))
-            }
-            "GetAlpha" => reply((1.0f64,)),
+            "GetExtents" => reply((Self::get_extents_async(&node, args::<u32>(body)?),)),
+            "GetPosition" => reply(Self::get_position_async(&node, args::<u32>(body)?)),
+            "GetSize" => reply(Self::get_size_async(&node)),
+            "GetLayer" => reply((Self::get_layer_async(&node),)),
+            "GetMDIZOrder" => reply((Self::get_mdiz_order_async(),)),
+            "GrabFocus" => reply((Self::grab_focus_async(&node),)),
+            "GetAlpha" => reply((Self::get_alpha_async(),)),
             "SetExtents" => {
-                // Only support moving (not resizing) for now
-                let (x, y, _width, _height, coord_type) = args::<(i32, i32, i32, i32, u32)>(body)?;
-                reply((Self::set_position(&node, x, y, coord_type),))
+                let (x, y, width, height, coord_type) = args::<(i32, i32, i32, i32, u32)>(body)?;
+                reply((Self::set_extents_async(&node, x, y, width, height, coord_type),))
             }
             "SetPosition" => {
                 let (x, y, coord_type) = args::<(i32, i32, u32)>(body)?;
-                reply((Self::set_position(&node, x, y, coord_type),))
+                reply((Self::set_position_async(&node, x, y, coord_type),))
             }
             "SetSize" => {
-                args::<(i32, i32)>(body)?;
-                reply((false,))
+                let (width, height) = args::<(i32, i32)>(body)?;
+                reply((Self::set_size_async(width, height),))
             }
-            "ScrollTo" => {
-                args::<u32>(body)?;
-                reply((false,))
-            }
+            "ScrollTo" => reply((Self::scroll_to_async(args::<u32>(body)?),)),
             "ScrollToPoint" => {
-                args::<(u32, i32, i32)>(body)?;
-                reply((false,))
+                let (coord_type, x, y) = args::<(u32, i32, i32)>(body)?;
+                reply((Self::scroll_to_point_async(coord_type, x, y),))
             }
             _ => Err(DBusError::unknown_method()),
         }
     }
 
     fn get_property(&self, name: &str) -> Option<Value<'static>> {
-        (name == "version").then(|| Value::from(COMPONENT_VERSION))
+        (name == "version").then(|| Value::from(Self::version()))
     }
 }

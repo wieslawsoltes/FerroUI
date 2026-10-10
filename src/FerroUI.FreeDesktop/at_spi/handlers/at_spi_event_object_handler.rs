@@ -27,6 +27,10 @@ impl AtSpiEventObjectHandler {
         Self { server, path }
     }
 
+    pub(crate) fn version(&self) -> u32 {
+        EVENT_OBJECT_VERSION
+    }
+
     pub(crate) fn emit_children_changed_signal(&self, operation: &str, index_in_parent: i32, child: Value<'_>) {
         self.emit_signal("ChildrenChanged", event_body(operation, index_in_parent, 0, child));
     }
@@ -64,6 +68,6 @@ impl DBusInterface for AtSpiEventObjectHandler {
     }
 
     fn get_property(&self, name: &str) -> Option<Value<'static>> {
-        (name == "version").then(|| Value::from(EVENT_OBJECT_VERSION))
+        (name == "version").then(|| Value::from(self.version()))
     }
 }

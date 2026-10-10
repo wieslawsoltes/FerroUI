@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.X11` (exists) |
 | Crate | `ferroui-x11` |
 | Phase / priority | 5 - desktop (Linux) / P1 |
-| Files | 85/88 (96.6%) |
-| Types | 175/291 (107 waived) (95.1%) |
-| Members | 3525/4897 (1076 waived) (92.3%) |
+| Files | 86/88 (97.7%) |
+| Types | 176/291 (107 waived) (95.7%) |
+| Members | 3531/4897 (1076 waived) (92.4%) |
 | Contracts (interfaces) | 8/8 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -34,7 +34,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 36/37, types 108/216 (106 waived), members 3189/4427 (1074 waived)
+### `(project root)` - files 37/37, types 109/216 (106 waived), members 3195/4427 (1074 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -45,7 +45,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `SMLib.cs` | `sm_lib.rs` | partial | 10/10 | 5/12 |  |
 | `TransparencyHelper.cs` | `transparency_helper.rs` | present | 1/1 | 5/5 |  |
 | `X11ActiveWindowTracker.cs` | `x11_active_window_tracker.rs` | present | 1/1 | 3/3 |  |
-| `X11AtSpiAccessibility.cs` | `x11_at_spi_accessibility.rs` | missing | 0/1 | 0/5 |  |
+| `X11AtSpiAccessibility.cs` | `x11_at_spi_accessibility.rs` | present | 1/1 | 5/5 |  |
 | `X11Atoms.cs` | `x11_atoms.rs` | present | 1/1 | 166/166 |  |
 | `X11CursorFactory.cs` | `x11_cursor_factory.rs` | partial | 2/2 | 7/9 |  |
 | `X11DeferredDisplayDispatcher.cs` | `x11_deferred_display_dispatcher.rs` | present | 1/1 | 4/4 |  |
@@ -60,7 +60,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `X11Info.cs` | `x11_info.rs` | present | 1/1 | 25/25 |  |
 | `X11KeyTransform.cs` | `x11_key_transform.rs` | present | 1/1 | 2/2 |  |
 | `X11NativeControlHost.cs` | `x11_native_control_host.rs` | present | 1/1 | 6/6 |  |
-| `X11Platform.cs` | `x11_platform.rs` | partial | 4/4 | 50/54 |  |
+| `X11Platform.cs` | `x11_platform.rs` | partial | 4/4 | 51/54 |  |
 | `X11PlatformLifetimeEvents.cs` | `x11_platform_lifetime_events.rs` | present | 1/1 | 3/3 |  |
 | `X11Structs.cs` | `x11_structs.rs` | present | 36/123 (87 waived) | 396/1353 (957 waived) | replaced: the event, request and hint structures are those of the Xlib bindings (`x11-dl`, used through `xlib.rs`), which declare them with the layout of the C headers; the enumerations and the Motif hints are ported (docs/porting/x11-platform.md, section 2) |
 | `X11Window.Ime.cs` | `x11_window_ime.rs` | present | 1/1 | 0/0 | renamed: the keyboard part is ported (the input context, the key of a key event, its text); the input method part (`InitializeIme`, `FilterIme`, `ProcessNextImeEvent`, the forwarded keys) is stage 2 of docs/porting/x11-platform.md |
@@ -122,10 +122,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>X11Platform.cs</code> - 4 missing</summary>
+<details><summary><code>X11Platform.cs</code> - 3 missing</summary>
 
-- `AvaloniaX11Platform` (class): 4 missing
-  - `AtSpiServer? AtSpiServer { get; }` *(internal)*
+- `AvaloniaX11Platform` (class): 3 missing
   - `IntPtr DeferredDisplay { get; set; }` *(getter `deferred_display` found, setter `set_deferred_display` missing)*
   - `IntPtr Display { get; set; }` *(getter `display` found, setter `set_display` missing)*
   - `X11DeferredDisplayDispatcher DeferredDisplayDispatcher { get; }` *(internal)*

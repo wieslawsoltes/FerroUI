@@ -23,6 +23,30 @@ impl AtSpiValueHandler {
         self.node.upgrade()?.peer().get_provider::<dyn IRangeValueProvider>()
     }
 
+    fn version(&self) -> u32 {
+        VALUE_VERSION
+    }
+
+    fn minimum_value(&self) -> f64 {
+        self.provider().map_or(0.0, |p| p.minimum())
+    }
+
+    fn maximum_value(&self) -> f64 {
+        self.provider().map_or(0.0, |p| p.maximum())
+    }
+
+    fn minimum_increment(&self) -> f64 {
+        self.provider().map_or(0.0, |p| p.small_change())
+    }
+
+    fn text(&self) -> String {
+        String::new()
+    }
+
+    fn current_value(&self) -> f64 {
+        self.provider().map_or(0.0, |p| p.value())
+    }
+
     fn set_current_value(&self, value: f64) {
         let Some(p) = self.provider() else { return };
         let clamped = clamp_value(p.minimum(), p.maximum(), value);
@@ -42,15 +66,13 @@ impl DBusInterface for AtSpiValueHandler {
     }
 
     fn get_property(&self, name: &str) -> Option<Value<'static>> {
-        let provider = self.provider();
-        let number = |read: fn(&dyn IRangeValueProvider) -> f64| Value::from(provider.as_deref().map_or(0.0, read));
         Some(match name {
-            "version" => Value::from(VALUE_VERSION),
-            "MinimumValue" => number(|p| p.minimum()),
-            "MaximumValue" => number(|p| p.maximum()),
-            "MinimumIncrement" => number(|p| p.small_change()),
-            "CurrentValue" => number(|p| p.value()),
-            "Text" => Value::from(String::new()),
+            "version" => Value::from(self.version()),
+            "MinimumValue" => Value::from(self.minimum_value()),
+            "MaximumValue" => Value::from(self.maximum_value()),
+            "MinimumIncrement" => Value::from(self.minimum_increment()),
+            "CurrentValue" => Value::from(self.current_value()),
+            "Text" => Value::from(self.text()),
             _ => return None,
         })
     }

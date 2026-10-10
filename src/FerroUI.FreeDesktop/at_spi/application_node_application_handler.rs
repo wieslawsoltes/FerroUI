@@ -32,6 +32,16 @@ impl ApplicationNodeApplicationHandler {
 
 }
 
+impl ApplicationNodeApplicationHandler {
+    fn get_locale_async(&self, _lctype: u32) -> String {
+        resolve_locale()
+    }
+
+    fn get_application_bus_address_async(&self) -> String {
+        String::new()
+    }
+}
+
 impl DBusInterface for ApplicationNodeApplicationHandler {
     fn description(&self) -> &'static InterfaceDescription {
         &APPLICATION
@@ -39,11 +49,8 @@ impl DBusInterface for ApplicationNodeApplicationHandler {
 
     fn call(&self, member: &str, body: &zbus::message::Body) -> CallResult {
         match member {
-            "GetLocale" => {
-                let _lctype = args::<u32>(body)?;
-                reply((resolve_locale(),))
-            }
-            "GetApplicationBusAddress" => reply((String::new(),)),
+            "GetLocale" => reply((self.get_locale_async(args::<u32>(body)?),)),
+            "GetApplicationBusAddress" => reply((self.get_application_bus_address_async(),)),
             _ => Err(DBusError::unknown_method()),
         }
     }

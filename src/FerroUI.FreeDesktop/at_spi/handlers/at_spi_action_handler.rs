@@ -53,14 +53,38 @@ impl AtSpiActionHandler {
         Self { node, actions }
     }
 
-    fn get_actions(&self) -> Vec<AtSpiAction> {
+    fn version(&self) -> u32 {
+        ACTION_VERSION
+    }
+
+    fn n_actions(&self) -> i32 {
+        to_i32(self.actions.len())
+    }
+
+    fn get_description_async(&self, index: i32) -> String {
+        item_at(&self.actions, index).map(|entry| entry.description.to_string()).unwrap_or_default()
+    }
+
+    fn get_name_async(&self, index: i32) -> String {
+        item_at(&self.actions, index).map(|entry| entry.action_name.to_string()).unwrap_or_default()
+    }
+
+    fn get_localized_name_async(&self, index: i32) -> String {
+        item_at(&self.actions, index).map(|entry| entry.localized_name.to_string()).unwrap_or_default()
+    }
+
+    fn get_key_binding_async(&self, index: i32) -> String {
+        item_at(&self.actions, index).map(|entry| entry.key_binding.clone()).unwrap_or_default()
+    }
+
+    fn get_actions_async(&self) -> Vec<AtSpiAction> {
         self.actions
             .iter()
             .map(|entry| (entry.localized_name.to_string(), entry.description.to_string(), entry.key_binding.clone()))
             .collect()
     }
 
-    fn do_action(&self, index: i32) -> Result<bool, DBusError> {
+    fn do_action_async(&self, index: i32) -> Result<bool, DBusError> {
         let Some(action) = item_at(&self.actions, index) else { return Ok(false) };
         self.execute_action(action.action_name)?;
         Ok(true)
@@ -164,25 +188,21 @@ impl DBusInterface for AtSpiActionHandler {
     }
 
     fn call(&self, member: &str, body: &zbus::message::Body) -> CallResult {
-        let text = |read: fn(&ActionEntry) -> String| -> CallResult {
-            let index = args::<i32>(body)?;
-            reply((item_at(&self.actions, index).map(read).unwrap_or_default(),))
-        };
         match member {
-            "GetDescription" => text(|entry| entry.description.to_string()),
-            "GetName" => text(|entry| entry.action_name.to_string()),
-            "GetLocalizedName" => text(|entry| entry.localized_name.to_string()),
-            "GetKeyBinding" => text(|entry| entry.key_binding.clone()),
-            "GetActions" => reply((self.get_actions(),)),
-            "DoAction" => reply((self.do_action(args::<i32>(body)?)?,)),
+            "GetDescription" => reply((self.get_description_async(args::<i32>(body)?),)),
+            "GetName" => reply((self.get_name_async(args::<i32>(body)?),)),
+            "GetLocalizedName" => reply((self.get_localized_name_async(args::<i32>(body)?),)),
+            "GetKeyBinding" => reply((self.get_key_binding_async(args::<i32>(body)?),)),
+            "GetActions" => reply((self.get_actions_async(),)),
+            "DoAction" => reply((self.do_action_async(args::<i32>(body)?)?,)),
             _ => Err(DBusError::unknown_method()),
         }
     }
 
     fn get_property(&self, name: &str) -> Option<Value<'static>> {
         Some(match name {
-            "version" => Value::from(ACTION_VERSION),
-            "NActions" => Value::from(to_i32(self.actions.len())),
+            "version" => Value::from(self.version()),
+            "NActions" => Value::from(self.n_actions()),
             _ => return None,
         })
     }
