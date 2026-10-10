@@ -54,6 +54,8 @@
   Also build ferroui-desktop and run its example hello_window for two seconds (Skia: a published
   binary of Skia for the target is needed, or Skia is built from source, which takes an hour):
   with the default options, with each rendering mode alone, and with ANGLE on the UI thread.
+  Then build and run upstream's integration tests of windows (tests\FerroUI.IntegrationTests.Win32:
+  windows of the window class on the desktop, in every state and with every kind of decorations).
 
 .PARAMETER HelloRepeat
   How many times the run of hello_window with the default options is made (to look for a failure
@@ -239,7 +241,7 @@ $example = Join-Path $TargetDir 'debug\examples\win32_window.exe'
 
 # Starts a command line in the session of a logged-on user and waits for it: a scheduled task
 # that is created, run once and deleted.
-function Run-Interactive([string]$name, [string]$commandLine) {
+function Run-Interactive([string]$name, [string]$commandLine, [int]$timeout = 180) {
     # The files of the task are on the disk of the machine: a drive that is mapped for the
     # account of this process (a folder shared from a virtual machine host) need not exist in the
     # session of the user. The log is copied to the log directory afterwards.
@@ -260,7 +262,7 @@ function Run-Interactive([string]$name, [string]$commandLine) {
     if ($LASTEXITCODE -ne 0) { Say "${name}: the scheduled task could not be created for user $InteractiveUser"; return 1 }
     cmd /c "schtasks /run /tn $task > nul 2>&1" | Out-Null
     $waited = 0
-    while (-not (Test-Path $done) -and $waited -lt 180) { Start-Sleep -Seconds 1; $waited++ }
+    while (-not (Test-Path $done) -and $waited -lt $timeout) { Start-Sleep -Seconds 1; $waited++ }
     cmd /c "schtasks /delete /f /tn $task > nul 2>&1" | Out-Null
     if (Test-Path $log) { Copy-Item $log (Join-Path $logs "$name.log") -Force }
     if (-not (Test-Path $done)) { Say "${name}: no result after $waited s (is $InteractiveUser logged on?)"; return 1 }
@@ -309,6 +311,27 @@ if ($Desktop) {
             if ($code -ne 0) { $failed.Add("hello_window ($($variant[0]))") }
             # A repetition that passed is one line of the report.
             if ($code -ne 0 -or $variant[0] -notmatch '^default-') { Tail $name 30 '^(?!WARN: driver_utils)' }
+        }
+    }
+
+    # Upstream's integration tests of windows: one binary without the test harness, which
+    # prints every test with its result. It needs a desktop, like the smoke runs.
+    Say ""
+    Say "-- integration tests of windows"
+    if ((Run 'integration-build' "cargo test --locked $jobsArgument -p ferroui-integration-tests-win32 --test integration --no-run") -ne 0) {
+        $failed.Add('integration tests build')
+        Tail 'integration-build' 40
+    } else {
+        $binary = Get-ChildItem (Join-Path $TargetDir 'debug\deps') -Filter 'integration-*.exe' |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        if (-not $binary) {
+            Say "the test binary was not found under $TargetDir\debug\deps"
+            $failed.Add('integration tests (no binary)')
+        } else {
+            $commandLine = "`"$($binary.FullName)`""
+            $code = if ($InteractiveUser) { Run-Interactive 'integration' $commandLine 900 } else { Run 'integration' $commandLine }
+            if ($code -ne 0) { $failed.Add('integration tests') }
+            Tail 'integration' 80 'FAILED|^test result|^running|panicked|^failures|^    '
         }
     }
 }
