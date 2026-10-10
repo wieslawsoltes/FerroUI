@@ -327,6 +327,10 @@ The same machine (Mesa 25.2.8, `llvmpipe`; `xclip` 0.13 and `mesa-utils` install
 | `--mode=glx`, `FERROUI_GLX_IGNORE_RENDERER_BLACKLIST=1` | 37 of 37: the platform graphics of GLX; a render window, child of the window; an OpenGL 4.0 core context (Mesa reports 4.5, `llvmpipe (LLVM 20.1.2, 128 bits)`, 8 stencil bits); the offscreen draw read back as (51, 102, 153, 255); the frame read back with `glReadPixels` from the back buffer of the render window (the front buffer reads (0, 0, 0, 0)); the pixels of the window and of the popup on the server (`XGetImage`) as in software |
 | `--mode=egl` | 36 of 36: the platform graphics of EGL, the render window, the same context and offscreen read back, the pixels of the window and of the popup on the server |
 
+With the resize phase and the shared memory framebuffer of stage 2b (commit `987ae01b`), every variant again, in the virtual machine and in the CI job (run 38046204940, x86-64): software 33 of 33, `--shm` 35 of 35 (the server has MIT-SHM, the first of the three surfaces of the window is the shared memory one, and the window shows the fill colour up to its corner after the resize to 520 by 320, which takes images of the new size), GLX 38 of 38, EGL 37 of 37, GLX refused 14 of 14, under `openbox` 33 of 33, two monitors 28 of 28 **[VM]**; the job passed with the same steps **[CI]**. Stage 2b needed no change after its first run.
+
+The ControlCatalog (`control-catalog-desktop`, `use_platform_detect`) was run in the virtual machine under Xvfb at 1280 by 800 with `FERROUI_SMOKE_PAGES`: all 75 pages are selected and drawn, once in software (GLX refuses `llvmpipe` and the default mode list goes on to software) and once through GLX (with the override), and the window closes on its timer. Pictures of the virtual display were taken per page (`import -window root`); the host and the platform needed no change **[VM]**.
+
 What these runs found, and what was changed:
 
 | Finding | Change |
