@@ -48,8 +48,11 @@ ferroui-controls = { workspace = true, features = ["testing"] }
 # documents at run time.
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
 # The example starts a desktop application with a theme (the role of a sample application,
-# which references the desktop package and the themes; no library references another).
-ferroui-desktop = { workspace = true }
+# which references the desktop package and the themes; no library references another). By path
+# and without a version, so that Cargo leaves it out of the package: the desktop package depends
+# on the platform backends, and one of them has this theme as an optional dependency of its
+# example, which with a version here is a cycle among the published crates (docs/release.md, 1.3).
+ferroui-desktop = { path = "../FerroUI.Desktop" }
 ferroui-themes-fluent = { workspace = true }
 
 [[example]]
