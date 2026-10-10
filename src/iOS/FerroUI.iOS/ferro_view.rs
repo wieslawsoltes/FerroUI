@@ -2,11 +2,10 @@
 //! framework and can be embedded into the view tree of an application.
 //!
 //! Later stages of `docs/porting/ios-platform.md` add what the reference's
-//! view has beyond this file: the text input method (stage 2b:
-//! `ITextInputMethodImpl`, the first responder rules), the features of a
-//! top-level that are services of their own (stage 2b: the input pane;
-//! stage 2c: the storage provider and the clipboard; stage 2d: the native
-//! control host), and accessibility (stage 3). The swipe gestures of a
+//! view has beyond this file: the features of a top-level that are
+//! services of their own (stage 2c: the storage provider and the
+//! clipboard; stage 2d: the native control host), and accessibility
+//! (stage 3). The swipe gestures of a
 //! remote, which the reference adds on tvOS, are not ported.
 
 use crate::input_handler::InputHandler;
@@ -16,9 +15,12 @@ use crate::ios_platform_feedback::IosPlatformFeedback;
 use crate::metal::{FrameCapture, MetalPlatformSurface, SurfaceShared};
 use crate::native_control_host_impl::UIViewControlHandle;
 use crate::platform::Platform;
+use crate::text_input_responder::{current_ferro_responder, set_current_ferro_responder, TextInputResponder};
+use crate::ui_kit_input_pane::UIKitInputPane;
 use crate::view_controller::{IFerroViewController, StatusBarStyle};
 use ferroui_base::data::BindingPriority;
 use ferroui_base::input::raw::IRawInputEventArgs;
+use ferroui_base::input::text_input::{ITextInputMethodImpl, TextInputMethodClient, TextInputOptions};
 use ferroui_base::input::IInputRoot;
 use ferroui_base::platform::storage::ILauncher;
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
@@ -28,7 +30,7 @@ use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, PixelSize, Point, Rect, Ref, Size};
 use ferroui_controls::embedding::EmbeddableControlRoot;
 use ferroui_controls::platform::{
-    IInsetsManager, IPlatformFeedback, IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, PlatformThemeVariant,
+    IInputPane, IInsetsManager, IPlatformFeedback, IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, PlatformThemeVariant,
 };
 use ferroui_controls::primitives::TemplatedControl;
 use ferroui_controls::{
@@ -36,11 +38,11 @@ use ferroui_controls::{
 };
 use objc2::rc::{Retained, Weak};
 use objc2::runtime::AnyClass;
-use objc2::{define_class, msg_send, sel, ClassType, DefinedClass, MainThreadMarker, MainThreadOnly};
+use objc2::{define_class, msg_send, sel, ClassType, DefinedClass, MainThreadMarker, MainThreadOnly, Message};
 use objc2_foundation::{NSObjectProtocol, NSSet};
 use objc2_quartz_core::{CADisplayLink, CAMetalLayer};
 use objc2_ui_kit::{
-    UIEvent, UIPanGestureRecognizer, UIPress, UIPressesEvent, UIScreen, UIScrollTypeMask, UITouch,
+    UIEvent, UIPanGestureRecognizer, UIPress, UIPressesEvent, UIResponder, UIScreen, UIScrollTypeMask, UITouch,
     UITraitCollection, UIView,
 };
 use std::any::{Any, TypeId};
@@ -65,6 +67,9 @@ pub struct FerroViewIvars {
     input_root: RefCell<Option<Rc<dyn IInputRoot>>>,
     latest_scaling: Cell<f64>,
     disposed_value: Cell<bool>,
+    client: RefCell<Option<Rc<dyn TextInputMethodClient>>>,
+    cursor_rect: Cell<Rect>,
+    options: RefCell<Option<TextInputOptions>>,
 }
 
 define_class!(
@@ -93,6 +98,27 @@ define_class!(
         #[unsafe(method(canResignFirstResponder))]
         fn can_resign_first_responder(&self) -> bool {
             true
+        }
+
+        #[unsafe(method(becomeFirstResponder))]
+        fn become_first_responder(&self) -> bool {
+            // SAFETY: the method of the superclass this one overrides.
+            let res: bool = unsafe { msg_send![super(self), becomeFirstResponder] };
+            if res {
+                let this: Retained<UIView> = Retained::into_super(Message::retain(self));
+                set_current_ferro_responder(Some(Retained::into_super(this)));
+            }
+            res
+        }
+
+        #[unsafe(method(resignFirstResponder))]
+        fn resign_first_responder(&self) -> bool {
+            // SAFETY: the method of the superclass this one overrides.
+            let res: bool = unsafe { msg_send![super(self), resignFirstResponder] };
+            if res && self.is_current_ferro_responder() {
+                set_current_ferro_responder(None);
+            }
+            res
         }
 
         #[unsafe(method(touchesBegan:withEvent:))]
@@ -304,6 +330,73 @@ impl FerroView {
         }
     }
 
+    fn is_current_ferro_responder(&self) -> bool {
+        current_ferro_responder().is_some_and(|current| {
+            std::ptr::eq(Retained::as_ptr(&current).cast::<FerroView>(), self as *const FerroView)
+        })
+    }
+
+    /// The text input responder that is the first responder, when it is
+    /// one of this view.
+    fn driving_responder(&self) -> Option<Retained<TextInputResponder>> {
+        let responder = current_ferro_responder()?.downcast::<TextInputResponder>().ok()?;
+        responder.is_of_view(self).then_some(responder)
+    }
+
+    /// Whether a text input responder of this view is the first
+    /// responder: whether the keyboard writes into a client of this view.
+    pub fn is_driving_text(&self) -> bool {
+        self.driving_responder().is_some()
+    }
+
+    /// The responder UIKit sends the text of the keyboard to, while a
+    /// client of this view has the text input: an object that implements
+    /// `UITextInput`. An addition of the port, for an application that
+    /// tests itself.
+    pub fn text_input_responder(&self) -> Option<Retained<UIResponder>> {
+        self.driving_responder().map(Retained::into_super)
+    }
+
+    /// The marked text of the text input responder of this view. An
+    /// addition of the port, for an application that tests itself.
+    pub fn marked_text(&self) -> Option<String> {
+        self.driving_responder().and_then(|responder| responder.marked_text())
+    }
+
+    /// The rectangle of the caret the text input method was given.
+    pub(crate) fn cursor_rect(&self) -> Rect {
+        self.ivars().cursor_rect.get()
+    }
+
+    /// The text input options the text input method was given.
+    pub(crate) fn text_input_options(&self) -> Option<TextInputOptions> {
+        self.ivars().options.borrow().clone()
+    }
+
+    /// Passes a raw input event to the top-level.
+    pub(crate) fn invoke_input(&self, args: Rc<dyn IRawInputEventArgs>) {
+        if let Some(input) = self.state().top_level_impl.input() {
+            input(args);
+        }
+    }
+
+    fn set_client(&self, client: Option<Rc<dyn TextInputMethodClient>>) {
+        *self.ivars().client.borrow_mut() = client.clone();
+        if client.is_none() && self.is_driving_text() {
+            self.becomeFirstResponder();
+        }
+
+        if let Some(client) = client {
+            TextInputResponder::new(self, client).becomeFirstResponder();
+        }
+    }
+
+    fn reset_text_input(&self) {
+        if self.is_driving_text() {
+            self.becomeFirstResponder();
+        }
+    }
+
     fn handle_presses(&self, presses: &NSSet<UIPress>, evt: Option<&UIPressesEvent>) -> bool {
         match self.ivars().state.get() {
             Some(state) => state.input.handle_presses(presses, evt),
@@ -385,11 +478,47 @@ impl FerroView {
     }
 }
 
+/// The text input method of a view. The reference's view is the text
+/// input method itself; a view of the port is an object of the
+/// Objective-C runtime, and the contract is implemented by this object,
+/// which forwards to its view.
+struct ViewTextInputMethod {
+    view: Weak<FerroView>,
+}
+
+impl ITextInputMethodImpl for ViewTextInputMethod {
+    fn set_client(&self, client: Option<Rc<dyn TextInputMethodClient>>) {
+        if let Some(view) = self.view.load() {
+            view.set_client(client);
+        }
+    }
+
+    fn set_cursor_rect(&self, rect: Rect) {
+        if let Some(view) = self.view.load() {
+            view.ivars().cursor_rect.set(rect);
+        }
+    }
+
+    fn set_options(&self, options: &TextInputOptions) {
+        if let Some(view) = self.view.load() {
+            *view.ivars().options.borrow_mut() = Some(options.clone());
+        }
+    }
+
+    fn reset(&self) {
+        if let Some(view) = self.view.load() {
+            view.reset_text_input();
+        }
+    }
+}
+
 /// The top-level implementation of a view.
 pub struct TopLevelImpl {
     view: Weak<FerroView>,
     pub(crate) insets_manager: Rc<InsetsManager>,
     feedback: Rc<dyn IPlatformFeedback>,
+    text_input_method: Rc<dyn ITextInputMethodImpl>,
+    input_pane: Rc<dyn IInputPane>,
     pub(crate) shared: Arc<SurfaceShared>,
     top_level: RefCell<Option<ferroui_base::WeakRef<EmbeddableControlRoot>>>,
     padding_insets: Rc<RefCell<Option<Rc<dyn IDisposable>>>>,
@@ -414,6 +543,8 @@ impl TopLevelImpl {
             view: Weak::from_retained(view),
             insets_manager: insets_manager.clone(),
             feedback: Rc::new(IosPlatformFeedback::new(Weak::from_retained(view))),
+            text_input_method: Rc::new(ViewTextInputMethod { view: Weak::from_retained(view) }),
+            input_pane: UIKitInputPane::instance(),
             shared: SurfaceShared::new(),
             top_level: RefCell::new(None),
             padding_insets: Rc::new(RefCell::new(None)),
@@ -482,6 +613,14 @@ impl IDisposable for TopLevelImpl {
 
 impl IOptionalFeatureProvider for TopLevelImpl {
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        if feature_type == TypeId::of::<dyn ITextInputMethodImpl>() {
+            return Some(Rc::new(self.text_input_method.clone()));
+        }
+
+        if feature_type == TypeId::of::<dyn IInputPane>() {
+            return Some(Rc::new(self.input_pane.clone()));
+        }
+
         if feature_type == TypeId::of::<dyn IInsetsManager>() {
             let insets_manager: Rc<dyn IInsetsManager> = self.insets_manager.clone();
             return Some(Rc::new(insets_manager));

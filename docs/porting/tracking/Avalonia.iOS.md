@@ -10,15 +10,15 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/iOS/FerroUI.iOS` (exists) |
 | Crate | `ferroui-ios` |
 | Phase / priority | 6 - mobile (iOS) / P2 |
-| Files | 26/40 (65.0%), 1 not applicable |
-| Types | 38/57 (1 waived) (67.9%) |
+| Files | 30/40 (75.0%), 1 not applicable |
+| Types | 40/57 (1 waived) (71.4%) |
 | Members | 0/331 (0.0%) |
 
 This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
 
 ## Files
 
-### `(project root)` - files 21/26, types 33/39 (1 waived), members 0/211
+### `(project root)` - files 25/26, types 35/39 (1 waived), members 0/211
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
@@ -29,7 +29,7 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `AvaloniaView.Automation.cs` | `ferro_view.rs` | present | 1/1 | - | 4 | partial merged into main file |
 | `AvaloniaView.Text.cs` | `ferro_view.rs` | present | 1/1 | - | 6 | partial merged into main file |
 | `AvaloniaView.cs` | `ferro_view.rs` | present | 2/2 | - | 50 | renamed: the view, its layer, its layout, touches and its top-level are ported; key presses, the settings that follow the traits and the features that are services of their own are stage 2 |
-| `CombinedSpan3.cs` | `combined_span3.rs` | missing | 0/1 | `CombinedSpan3<T>` | 6 |  |
+| `CombinedSpan3.cs` | `combined_span3.rs` | present | 1/1 | - | 6 |  |
 | `DispatcherImpl.cs` | `dispatcher_impl.rs` | present | 1/1 | - | 9 |  |
 | `DisplayLinkTimer.cs` | `display_link_timer.rs` | present | 1/1 | - | 4 |  |
 | `Extensions.cs` | `extensions.rs` | present | 1/1 | - | 3 |  |
@@ -43,9 +43,9 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `PlatformSettings.cs` | `platform_settings.rs` | present | 1/1 | - | 4 |  |
 | `SingleViewLifetime.cs` | `single_view_lifetime.rs` | present | 1/1 | - | 3 |  |
 | `Stubs.cs` | `stubs.rs` | present | 4/4 | - | 12 |  |
-| `TextInputResponder.Properties.cs` | `text_input_responder_properties.rs` | missing | 1/1 | - | 0 | types found in `ferro_view.rs` (add to path-overrides.toml) |
-| `TextInputResponder.cs` | `text_input_responder.rs` | missing | 1/1 | - | 0 | types found in `ferro_view.rs` (add to path-overrides.toml) |
-| `UIKitInputPane.cs` | `ui_kit_input_pane.rs` | missing | 0/1 | `UIKitInputPane` | 2 |  |
+| `TextInputResponder.Properties.cs` | `text_input_responder.rs` | present | 1/1 | - | 0 | merged: the two parts of the partial class are one file; the responder and its position and range classes are classes of the Objective-C runtime declared with `define_class!` (`TextInputResponder`, `FerroTextPosition`, `FerroEmptyTextPosition`, `FerroTextRange`) |
+| `TextInputResponder.cs` | `text_input_responder.rs` | present | 1/1 | - | 0 | merged: the two parts of the partial class are one file; the responder and its position and range classes are classes of the Objective-C runtime declared with `define_class!` (`TextInputResponder`, `FerroTextPosition`, `FerroEmptyTextPosition`, `FerroTextRange`) |
+| `UIKitInputPane.cs` | `ui_kit_input_pane.rs` | present | 1/1 | - | 2 | renamed: the file name splits the acronym as the naming of Rust does |
 | `ViewController.cs` | `view_controller.rs` | present | 2/2 | - | 11 | renamed: the view controller class forwards to `ViewControllerState`, which is what the view holds of it and what the tests drive |
 | `iOSScreens.cs` | `ios_screens.rs` | present | 2/2 | - | 9 | renamed: the names follow the naming of Rust |
 

@@ -2290,3 +2290,17 @@ reason = "the name follows the naming of Rust"
 path = "src/iOS/FerroUI.iOS/completion.rs"
 reason = "A value set once on the main thread and the future that waits for it: what stands for the tasks the original completes from the completion handlers of UIKit"
 
+[[map]]
+project = "Avalonia.iOS"
+upstream = ["TextInputResponder.cs", "TextInputResponder.Properties.cs"]
+kind = "merged"
+rust = "text_input_responder.rs"
+reason = "the two parts of the partial class are one file; the responder and its position and range classes are classes of the Objective-C runtime declared with `define_class!` (`TextInputResponder`, `FerroTextPosition`, `FerroEmptyTextPosition`, `FerroTextRange`)"
+
+[[map]]
+project = "Avalonia.iOS"
+upstream = ["UIKitInputPane.cs"]
+kind = "renamed"
+rust = "ui_kit_input_pane.rs"
+reason = "the file name splits the acronym as the naming of Rust does"
+

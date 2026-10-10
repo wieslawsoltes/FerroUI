@@ -4,7 +4,8 @@
 //! application delegate with the single-view lifetime, the dispatcher on
 //! the run loop of the main thread, the render timer on a display link,
 //! Metal graphics over the layer of the view, touch, key and scroll input,
-//! the settings of the system, the safe area and the screens. `docs/porting/ios-platform.md` has the design, the file
+//! text input from the keyboard of the system, the settings of the
+//! system, the safe area and the screens. `docs/porting/ios-platform.md` has the design, the file
 //! table and the stages.
 //!
 //! The platform calls UIKit, Core Animation and Metal through the `objc2`
@@ -17,6 +18,7 @@
 //! of the crate run on the development machine.
 
 pub mod activatable_lifetime;
+pub mod combined_span3;
 pub mod completion;
 pub mod extensions;
 pub mod ferro_app_delegate;
@@ -27,6 +29,8 @@ pub mod ios_screens;
 pub mod platform;
 pub mod platform_settings;
 pub mod stubs;
+pub mod text_input_responder;
+pub mod ui_kit_input_pane;
 pub mod view_controller;
 
 #[cfg(target_vendor = "apple")]

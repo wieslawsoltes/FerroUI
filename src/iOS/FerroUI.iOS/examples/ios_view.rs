@@ -22,7 +22,13 @@
 //! the platform against the traits and the locale UIKit reports, a change
 //! of the traits (the window is given the other user interface style, and
 //! the settings have to raise their change), the scroll gesture of the
-//! view, the launcher and the feedback of the top-level.
+//! view, the launcher and the feedback of the top-level; then text input:
+//! a text box is focused, which has to make a text input responder of the
+//! view the first responder, and the example then talks to that responder
+//! as the keyboard of the system would (`insertText:`, `textInRange:`,
+//! marked text, `deleteBackward`, the traits of the keyboard) and compares
+//! with the text of the text box; the input pane is checked with a
+//! keyboard notification the example posts itself.
 //!
 //! What the smoke mode cannot check: input. An application cannot
 //! synthesize a touch, a key press or a scroll event for itself without
@@ -48,7 +54,7 @@ mod app {
     use ferroui_base::{ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, Ref, Thickness};
     use ferroui_controls::shapes::Ellipse;
     use ferroui_controls::{
-        Application, ApplicationImpl, ApplicationImplExt, Border, Control, NewApplication, Panel, TextBlock,
+        Application, ApplicationImpl, ApplicationImplExt, Border, Control, NewApplication, Panel, TextBlock, TextBox,
     };
     use ferroui_themes_simple::SimpleTheme;
     use std::rc::Rc;
@@ -70,6 +76,9 @@ mod app {
     /// The two colours and the side of the marker in the bottom right corner.
     pub const MARKER: [(u8, u8, u8); 2] = [(0xFF, 0xCC, 0x00), (0x00, 0xCC, 0xFF)];
     pub const MARKER_SIDE: f64 = 16.0;
+    /// The distance of the text box from the top edge and its width.
+    pub const TEXT_BOX_TOP: f64 = 230.0;
+    pub const TEXT_BOX_WIDTH: f64 = 220.0;
 
     /// Gives the marker the colour of the given step.
     pub fn set_marker(marker: &Ref<Border>, step: u32) {
@@ -102,11 +111,11 @@ mod app {
             if let Some(single_view) =
                 lifetime.as_ref().and_then(|lifetime| lifetime.as_single_view_application_lifetime())
             {
-                let (main_view, marker) = create_main_view();
+                let (main_view, marker, text_box) = create_main_view();
                 single_view.set_main_view(Some(main_view));
 
                 if std::env::args().any(|arg| arg == "--smoke") {
-                    super::smoke::start(marker);
+                    super::smoke::start(marker, text_box);
                 }
             }
 
@@ -120,7 +129,7 @@ mod app {
 
     /// The main view, and the marker in its corner: a small square the
     /// smoke mode changes the colour of, so that frames are drawn.
-    fn create_main_view() -> (Ref<Control>, Ref<Border>) {
+    fn create_main_view() -> (Ref<Control>, Ref<Border>, Ref<TextBox>) {
         let background = Border::new();
         background.set_background(brush(FILL));
 
@@ -158,9 +167,18 @@ mod app {
         marker.set_horizontal_alignment(HorizontalAlignment::Right);
         marker.set_vertical_alignment(VerticalAlignment::Bottom);
 
+        // A text box for the checks of text input, away from the pixels
+        // the checks of the frame read.
+        let text_box = TextBox::new();
+        text_box.set_width(TEXT_BOX_WIDTH);
+        text_box.set_horizontal_alignment(HorizontalAlignment::Center);
+        text_box.set_vertical_alignment(VerticalAlignment::Top);
+        text_box.set_margin(Thickness::new(0.0, TEXT_BOX_TOP, 0.0, 0.0));
+
         panel.children().add(text);
+        panel.children().add(text_box.clone());
         panel.children().add(marker.clone());
-        (panel.upcast(), marker)
+        (panel.upcast(), marker, text_box)
     }
 }
 
@@ -170,7 +188,7 @@ mod smoke {
     use super::app::{CIRCLE, CIRCLE_BOTTOM, CIRCLE_DIAMETER, FILL, SQUARE, TEXT_SIZE, TEXT_TOP};
     use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
     use ferroui_base::{Rect, Ref, Size, Thickness};
-    use ferroui_controls::{Application, Border, TopLevel};
+    use ferroui_controls::{Application, Border, TextBox, TopLevel};
     use ferroui_ios::metal::FrameCapture;
     use ferroui_ios::single_view_lifetime::SingleViewLifetime;
     use ferroui_ios::view_controller::safe_area_padding_of;
@@ -203,11 +221,11 @@ mod smoke {
 
     /// Starts the checks: they are tried until all of them pass or the
     /// attempts are used up, and then the process exits.
-    pub fn start(marker: Ref<Border>) {
+    pub fn start(marker: Ref<Border>, text_box: Ref<TextBox>) {
         let attempt = Rc::new(Cell::new(0u32));
         let capture: Arc<Mutex<Option<FrameCapture>>> = Arc::new(Mutex::new(None));
         let capture_requested = Rc::new(Cell::new(false));
-        let stage2 = super::stage2::State::new();
+        let stage2 = super::stage2::State::new(text_box);
 
         let _timer = DispatcherTimer::run(
             move || {
@@ -491,10 +509,23 @@ mod stage2 {
     use ferroui_base::reactive::IDisposable;
     use ferroui_base::utilities::Uri;
     use ferroui_base::{FerroLocator, LocatorExtensions};
-    use ferroui_controls::platform::{FeedbackAction, FeedbackType, IPlatformFeedback};
+    use ferroui_base::input::text_input::{TextInputContentType, TextInputOptions};
+    use ferroui_base::input::{KeyModifiers, NavigationMethod};
+    use ferroui_base::{Rect, Ref};
+    use ferroui_controls::platform::{FeedbackAction, FeedbackType, IPlatformFeedback, InputPaneState};
+    use ferroui_controls::TextBox;
     use ferroui_ios::FerroView;
-    use objc2_foundation::NSLocale;
-    use objc2_ui_kit::{UIPanGestureRecognizer, UIScrollTypeMask, UITraitEnvironment, UIUserInterfaceStyle};
+    use objc2::rc::Retained;
+    use objc2::runtime::AnyObject;
+    use objc2::{msg_send, MainThreadMarker};
+    use objc2_core_foundation::{CGPoint, CGRect, CGSize};
+    use objc2_foundation::{NSDictionary, NSLocale, NSNotificationCenter, NSNumber, NSRange, NSString, NSValue};
+    use objc2_ui_kit::{
+        NSValueUIGeometryExtensions, UIKeyboardAnimationCurveUserInfoKey, UIKeyboardAnimationDurationUserInfoKey,
+        UIKeyboardFrameBeginUserInfoKey, UIKeyboardFrameEndUserInfoKey, UIKeyboardType, UIKeyboardWillHideNotification,
+        UIKeyboardWillShowNotification, UIPanGestureRecognizer, UIResponder, UIReturnKeyType, UIScrollTypeMask,
+        UITextPosition, UITextRange, UITraitEnvironment, UIUserInterfaceStyle,
+    };
     use std::cell::{Cell, RefCell};
     use std::future::Future;
     use std::pin::Pin;
@@ -503,6 +534,9 @@ mod stage2 {
     use std::task::{Context, Poll, Wake, Waker};
 
     type Checks = Vec<(&'static str, bool, String)>;
+
+    /// The steps of the checks of text input.
+    const TEXT_STEPS: u32 = 4;
 
     struct NoopWaker;
 
@@ -541,11 +575,23 @@ mod stage2 {
         initial_dark: Cell<bool>,
         color_events: Rc<RefCell<Vec<PlatformColorValues>>>,
         subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+        /// Text input: the text box, the step of its checks and what the
+        /// steps that are over found.
+        text_box: Ref<TextBox>,
+        text_step: Cell<u32>,
+        text_checks: RefCell<Checks>,
+        /// The state the input pane reported before the example posted a
+        /// notification of its own: what the keyboard of the system did.
+        system_keyboard: RefCell<String>,
     }
 
     impl State {
-        pub fn new() -> Rc<Self> {
+        pub fn new(text_box: Ref<TextBox>) -> Rc<Self> {
             Rc::new(Self {
+                text_box,
+                text_step: Cell::new(0),
+                text_checks: RefCell::new(Checks::new()),
+                system_keyboard: RefCell::new(String::new()),
                 once: RefCell::new(None),
                 initial_dark: Cell::new(false),
                 color_events: Rc::new(RefCell::new(Vec::new())),
@@ -583,6 +629,12 @@ mod stage2 {
 
             let expected = variant_of(!self.initial_dark.get());
             let events = self.color_events.borrow();
+            self.run_text_input(view);
+            checks.extend(self.text_checks.borrow().iter().cloned());
+            if self.text_step.get() < TEXT_STEPS {
+                checks.push(("text input", false, format!("step {} of {TEXT_STEPS}", self.text_step.get())));
+            }
+
             checks.push((
                 "trait change",
                 is_dark(view) != self.initial_dark.get()
@@ -597,6 +649,245 @@ mod stage2 {
             ));
 
             checks
+        }
+
+        /// The checks of text input, a step per attempt: the focus, the
+        /// keyboard and the first responder change between the steps.
+        fn run_text_input(&self, view: &FerroView) {
+            let top_level = view.top_level();
+            let mut checks = Checks::new();
+            match self.text_step.get() {
+                0 => {
+                    // The options of the text box, then the focus: the
+                    // input method manager gives the view its client.
+                    TextInputOptions::set_content_type(&self.text_box, TextInputContentType::Email);
+                    let focused = self.text_box.focus();
+                    checks.push(("text focus", focused, format!("the text box took the focus: {focused}")));
+                }
+                1 => {
+                    let responder = view.text_input_responder();
+                    let first = responder.as_ref().is_some_and(|responder| responder.isFirstResponder());
+                    checks.push((
+                        "text responder",
+                        view.is_driving_text() && first,
+                        format!(
+                            "a text input responder of the view exists: {}, and is the first responder: {first}",
+                            responder.is_some()
+                        ),
+                    ));
+                    if let Some(responder) = responder {
+                        self.talk_to_responder(&responder, view, &mut checks);
+                    }
+                    *self.system_keyboard.borrow_mut() = match top_level.input_pane() {
+                        Some(pane) => format!("{:?}, occluding {:?}", pane.state(), pane.occluded_rect()),
+                        None => "no input pane".to_string(),
+                    };
+                }
+                2 => {
+                    self.check_input_pane(view, &mut checks);
+                    // The focus leaves the text box: the view takes the
+                    // first responder back.
+                    top_level.focus_manager().focus(None, NavigationMethod::Unspecified, KeyModifiers::NONE);
+                }
+                3 => {
+                    checks.push((
+                        "text end",
+                        !view.is_driving_text() && view.isFirstResponder(),
+                        format!(
+                            "without a client the view drives no text: {}, and is the first responder: {}",
+                            !view.is_driving_text(),
+                            view.isFirstResponder()
+                        ),
+                    ));
+                }
+                _ => return,
+            }
+            self.text_checks.borrow_mut().extend(checks);
+            self.text_step.set(self.text_step.get() + 1);
+        }
+
+        /// What the keyboard of the system does with the responder, done
+        /// by the example: the methods of `UIKeyInput`, `UITextInput` and
+        /// `UITextInputTraits`.
+        fn talk_to_responder(&self, responder: &UIResponder, view: &FerroView, checks: &mut Checks) {
+            let text = || self.text_box.text().unwrap_or_default();
+            // SAFETY (for every message of this function): the responder
+            // implements `UITextInput`, `UIKeyInput` and
+            // `UITextInputTraits`, whose methods these are, with the
+            // argument and return types the protocols declare.
+            let insert = |value: &str| {
+                let _: () = unsafe { msg_send![responder, insertText: &*NSString::from_str(value)] };
+            };
+            let document = || -> (Retained<UITextPosition>, Retained<UITextPosition>) {
+                unsafe { (msg_send![responder, beginningOfDocument], msg_send![responder, endOfDocument]) }
+            };
+            let offset = |from: &UITextPosition, to: &UITextPosition| -> isize {
+                unsafe { msg_send![responder, offsetFromPosition: from, toPosition: to] }
+            };
+            let text_between = |from: &UITextPosition, to: &UITextPosition| -> Option<String> {
+                let range: Option<Retained<UITextRange>> =
+                    unsafe { msg_send![responder, textRangeFromPosition: from, toPosition: to] };
+                let text: Option<Retained<NSString>> = unsafe { msg_send![responder, textInRange: &*range?] };
+                text.map(|text| text.to_string())
+            };
+
+            // Traits, from the options of the text box.
+            let keyboard: UIKeyboardType = unsafe { msg_send![responder, keyboardType] };
+            let return_key: UIReturnKeyType = unsafe { msg_send![responder, returnKeyType] };
+            let secure: bool = unsafe { msg_send![responder, isSecureTextEntry] };
+            checks.push((
+                "keyboard traits",
+                keyboard == UIKeyboardType::EmailAddress && return_key == UIReturnKeyType::Done && !secure,
+                format!(
+                    "for an e-mail text box of one line: keyboard type {}, return key {}, secure {secure}",
+                    keyboard.0, return_key.0
+                ),
+            ));
+
+            // Insertion.
+            insert("abc");
+            let after_insert = text();
+            let (begin, end) = document();
+            let length = offset(&begin, &end);
+            let read = text_between(&begin, &end);
+            let selection: Option<Retained<UITextRange>> = unsafe { msg_send![responder, selectedTextRange] };
+            let caret = selection.as_ref().map(|selection| (offset(&begin, &selection.start()), selection.isEmpty()));
+            checks.push((
+                "insert text",
+                after_insert == "abc" && length == 3 && read.as_deref() == Some("abc") && caret == Some((3, true)),
+                format!(
+                    "after insertText \"abc\" the text box has {after_insert:?}; the document is {length} long, \
+                     textInRange of it {read:?}, the selection (offset, empty) {caret:?}"
+                ),
+            ));
+
+            // Positions.
+            let middle: Option<Retained<UITextPosition>> =
+                unsafe { msg_send![responder, positionFromPosition: &*begin, offset: 1isize] };
+            let beyond: Option<Retained<UITextPosition>> =
+                unsafe { msg_send![responder, positionFromPosition: &*begin, offset: 4isize] };
+            let tail = middle.as_ref().and_then(|middle| text_between(middle, &end));
+            checks.push((
+                "positions",
+                tail.as_deref() == Some("bc") && beyond.is_none(),
+                format!("from offset 1 to the end: {tail:?}; a position after the end exists: {}", beyond.is_some()),
+            ));
+
+            // Marked text: shown by the client as its pre-edit text, then
+            // committed.
+            let marked = NSString::from_str("xy");
+            let _: () = unsafe { msg_send![responder, setMarkedText: &*marked, selectedRange: NSRange::new(2, 0)] };
+            let marked_range: Option<Retained<UITextRange>> = unsafe { msg_send![responder, markedTextRange] };
+            let marked_at = marked_range.as_ref().map(|range| (offset(&begin, &range.start()), offset(&begin, &range.end())));
+            let marked_text = view.marked_text();
+            let _: () = unsafe { msg_send![responder, unmarkText] };
+            let after_commit = text();
+            let unmarked: Option<Retained<UITextRange>> = unsafe { msg_send![responder, markedTextRange] };
+            checks.push((
+                "marked text",
+                marked_text.as_deref() == Some("xy")
+                    && marked_at == Some((3, 5))
+                    && after_commit == "abcxy"
+                    && unmarked.is_none(),
+                format!(
+                    "marked {marked_text:?} at {marked_at:?}; after unmarkText the text box has {after_commit:?} \
+                     and a marked range exists: {}",
+                    unmarked.is_some()
+                ),
+            ));
+
+            // Deletion, and a replacement of a range.
+            let _: () = unsafe { msg_send![responder, deleteBackward] };
+            let after_delete = text();
+            let (begin, _) = document();
+            let first: Option<Retained<UITextPosition>> =
+                unsafe { msg_send![responder, positionFromPosition: &*begin, offset: 1isize] };
+            let range: Option<Retained<UITextRange>> = first
+                .as_ref()
+                .and_then(|first| unsafe { msg_send![responder, textRangeFromPosition: &*begin, toPosition: &**first] });
+            if let Some(range) = &range {
+                let _: () = unsafe { msg_send![responder, replaceRange: &**range, withText: &*NSString::from_str("Z")] };
+            }
+            let after_replace = text();
+            checks.push((
+                "delete and replace",
+                after_delete == "abcx" && after_replace == "Zbcx",
+                format!("after deleteBackward {after_delete:?}; after replacing the first character {after_replace:?}"),
+            ));
+        }
+
+        /// The input pane, with a notification of the keyboard the
+        /// example posts: the frames, the state and the event.
+        fn check_input_pane(&self, view: &FerroView, checks: &mut Checks) {
+            let Some(pane) = view.top_level().input_pane() else {
+                checks.push(("input pane", false, "the top-level has no input pane".to_string()));
+                return;
+            };
+            let Some(_mtm) = MainThreadMarker::new() else {
+                return;
+            };
+            let events = Rc::new(RefCell::new(Vec::new()));
+            let log = events.clone();
+            let subscription = pane.state_changed(Rc::new(move |e| {
+                log.borrow_mut().push((e.new_state(), e.start_rect(), e.end_rect(), e.animation_duration().as_millis()));
+            }));
+
+            let bounds = view.bounds();
+            let (width, height) = (bounds.size.width, bounds.size.height);
+            let hidden = CGRect::new(CGPoint::new(0.0, height), CGSize::new(width, 300.0));
+            let shown = CGRect::new(CGPoint::new(0.0, height - 300.0), CGSize::new(width, 300.0));
+            let post = |show: bool| {
+                let (from, to) = if show { (hidden, shown) } else { (shown, hidden) };
+                // SAFETY: the names and the keys are constants of UIKit;
+                // the values are of the types the keys of a keyboard
+                // notification have (two rectangles, a duration in
+                // seconds, a curve).
+                unsafe {
+                    let begin: Retained<AnyObject> = NSValue::valueWithCGRect(from).into();
+                    let end: Retained<AnyObject> = NSValue::valueWithCGRect(to).into();
+                    let duration: Retained<AnyObject> = NSNumber::new_f64(0.25).into();
+                    let curve: Retained<AnyObject> = NSNumber::new_isize(7).into();
+                    let user_info = NSDictionary::<NSString, AnyObject>::from_slices(
+                        &[
+                            UIKeyboardFrameBeginUserInfoKey,
+                            UIKeyboardFrameEndUserInfoKey,
+                            UIKeyboardAnimationDurationUserInfoKey,
+                            UIKeyboardAnimationCurveUserInfoKey,
+                        ],
+                        &[&*begin, &*end, &*duration, &*curve],
+                    );
+                    let user_info: &NSDictionary = &*(Retained::as_ptr(&user_info).cast());
+                    let name = if show { UIKeyboardWillShowNotification } else { UIKeyboardWillHideNotification };
+                    NSNotificationCenter::defaultCenter().postNotificationName_object_userInfo(name, None, Some(user_info));
+                }
+            };
+
+            post(true);
+            let open = (pane.state(), pane.occluded_rect());
+            post(false);
+            let closed = (pane.state(), pane.occluded_rect());
+            subscription.dispose();
+
+            let shown_rect = Rect::new(0.0, height - 300.0, width, 300.0);
+            let hidden_rect = Rect::new(0.0, height, width, 300.0);
+            let events = events.borrow();
+            checks.push((
+                "input pane",
+                open == (InputPaneState::Open, shown_rect)
+                    && closed == (InputPaneState::Closed, hidden_rect)
+                    && *events
+                        == vec![
+                            (InputPaneState::Open, Some(hidden_rect), shown_rect, 250),
+                            (InputPaneState::Closed, Some(shown_rect), hidden_rect, 250),
+                        ],
+                format!(
+                    "a posted keyboard notification opened the pane over {:?} and the next closed it, {} event(s); \
+                     before that, with the text box focused, the keyboard of the system had left it {}",
+                    open.1,
+                    events.len(),
+                    self.system_keyboard.borrow()
+                ),
+            ));
         }
 
         fn run_once(&self, view: &FerroView, settings: &Rc<dyn IPlatformSettings>) -> Checks {
