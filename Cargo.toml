@@ -12,6 +12,7 @@ members = [
     "src/FerroUI.MicroCom",
     "src/FerroUI.Native",
     "src/FerroUI.Desktop",
+    "src/FerroUI.X11",
     "src/Browser/FerroUI.Browser",
     "src/Headless/FerroUI.Headless",
     "src/FerroUI.Fonts.Inter",
@@ -70,6 +71,7 @@ ferroui-microcom = { version = "=0.1.0-preview.1", path = "src/FerroUI.MicroCom"
 microcom-codegen = { version = "=0.1.0-preview.1", path = "src/tools/MicroCom.CodeGenerator" }
 ferroui-native = { version = "=0.1.0-preview.1", path = "src/FerroUI.Native" }
 ferroui-desktop = { version = "=0.1.0-preview.1", path = "src/FerroUI.Desktop" }
+ferroui-x11 = { version = "=0.1.0-preview.1", path = "src/FerroUI.X11" }
 ferroui-browser = { version = "=0.1.0-preview.1", path = "src/Browser/FerroUI.Browser" }
 ferroui-headless = { version = "=0.1.0-preview.1", path = "src/Headless/FerroUI.Headless" }
 ferroui-fonts-inter = { version = "=0.1.0-preview.1", path = "src/FerroUI.Fonts.Inter" }
@@ -84,6 +86,10 @@ ferroui-skia = { version = "=0.1.0-preview.1", path = "src/Skia/FerroUI.Skia" }
 ferroui-vello = { version = "=0.1.0-preview.1", path = "src/Vello/FerroUI.Vello" }
 ferroui-harfbuzz = { version = "=0.1.0-preview.1", path = "src/HarfBuzz/FerroUI.HarfBuzz" }
 bitflags = "2"
+# The X11 platform (docs/porting/x11-platform.md, section 2): Xlib and its extension libraries, loaded
+# at run time, and the C library for the event loop (epoll, the wake-up pipe) and shared memory.
+x11-dl = "2.21"
+libc = "0.2"
 paste = "1"
 cc = "1"
 skia-safe = { version = "0.153" }

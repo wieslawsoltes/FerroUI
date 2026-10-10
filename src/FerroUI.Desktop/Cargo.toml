@@ -23,6 +23,9 @@ ferroui-harfbuzz.workspace = true
 [target.'cfg(target_os = "macos")'.dependencies]
 ferroui-native.workspace = true
 
+[target.'cfg(target_os = "linux")'.dependencies]
+ferroui-x11.workspace = true
+
 [dev-dependencies]
 # The example opens a window before the compositing renderer exists and
 # says so; see examples/hello_window.rs.
