@@ -10,8 +10,8 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.X11` (exists) |
 | Crate | `ferroui-x11` |
 | Phase / priority | 5 - desktop (Linux) / P1 |
-| Files | 61/88 (69.3%) |
-| Types | 133/291 (107 waived) (72.3%) |
+| Files | 72/88 (81.8%) |
+| Types | 144/291 (107 waived) (78.3%) |
 | Members | 0/4897 (0.0%) |
 
 This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
@@ -126,21 +126,21 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `EventStreamWindow.cs` | `selections/clipboard/event_stream_window.rs` | present | 1/1 | - | 4 |  |
 | `X11ClipboardImpl.cs` | `selections/clipboard/x11_clipboard_impl.rs` | present | 1/1 | - | 6 |  |
 
-### `Selections/DragDrop` - files 0/11, types 0/11, members 0/48
+### `Selections/DragDrop` - files 11/11, types 11/11, members 0/48
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
-| `DragDropDataProvider.cs` | `selections/drag_drop/drag_drop_data_provider.rs` | missing | 0/1 | `DragDropDataProvider` | 6 |  |
-| `DragDropDataReader.cs` | `selections/drag_drop/drag_drop_data_reader.rs` | missing | 0/1 | `DragDropDataReader` | 6 |  |
-| `DragDropDataTransfer.cs` | `selections/drag_drop/drag_drop_data_transfer.rs` | missing | 0/1 | `DragDropDataTransfer` | 11 |  |
-| `DragDropDataTransferItem.cs` | `selections/drag_drop/drag_drop_data_transfer_item.rs` | missing | 0/1 | `DragDropDataTransferItem` | 3 |  |
-| `DragDropTimeoutManager.cs` | `selections/drag_drop/drag_drop_timeout_manager.rs` | missing | 0/1 | `DragDropTimeoutManager` | 4 |  |
-| `IXdndWindow.cs` | `selections/drag_drop/i_xdnd_window.rs` | missing | 0/1 | `IXdndWindow` | 3 |  |
-| `SynchronousXEventWaiter.cs` | `selections/drag_drop/synchronous_x_event_waiter.rs` | missing | 0/1 | `SynchronousXEventWaiter` | 4 |  |
-| `X11DragSource.cs` | `selections/drag_drop/x11_drag_source.rs` | missing | 0/1 | `X11DragSource` | 2 |  |
-| `X11DropTarget.cs` | `selections/drag_drop/x11_drop_target.rs` | missing | 0/1 | `X11DropTarget` | 5 |  |
-| `XdndActionHelper.cs` | `selections/drag_drop/xdnd_action_helper.rs` | missing | 0/1 | `XdndActionHelper` | 2 |  |
-| `XdndConstants.cs` | `selections/drag_drop/xdnd_constants.rs` | missing | 0/1 | `XdndConstants` | 2 |  |
+| `DragDropDataProvider.cs` | `selections/drag_drop/drag_drop_data_provider.rs` | present | 1/1 | - | 6 |  |
+| `DragDropDataReader.cs` | `selections/drag_drop/drag_drop_data_reader.rs` | present | 1/1 | - | 6 |  |
+| `DragDropDataTransfer.cs` | `selections/drag_drop/drag_drop_data_transfer.rs` | present | 1/1 | - | 11 |  |
+| `DragDropDataTransferItem.cs` | `selections/drag_drop/drag_drop_data_transfer_item.rs` | present | 1/1 | - | 3 |  |
+| `DragDropTimeoutManager.cs` | `selections/drag_drop/drag_drop_timeout_manager.rs` | present | 1/1 | - | 4 |  |
+| `IXdndWindow.cs` | `selections/drag_drop/i_xdnd_window.rs` | present | 1/1 | - | 3 |  |
+| `SynchronousXEventWaiter.cs` | `selections/drag_drop/synchronous_x_event_waiter.rs` | present | 1/1 | - | 4 |  |
+| `X11DragSource.cs` | `selections/drag_drop/x11_drag_source.rs` | present | 1/1 | - | 2 |  |
+| `X11DropTarget.cs` | `selections/drag_drop/x11_drop_target.rs` | present | 1/1 | - | 5 |  |
+| `XdndActionHelper.cs` | `selections/drag_drop/xdnd_action_helper.rs` | present | 1/1 | - | 2 |  |
+| `XdndConstants.cs` | `selections/drag_drop/xdnd_constants.rs` | present | 1/1 | - | 2 |  |
 
 ### `Vulkan` - files 0/2, types 0/4, members 0/12
 
@@ -174,5 +174,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 |---|---|---|
 | `pixel_buffer.rs` | A framebuffer over pixels the crate owns, for what the original makes with the `LockedFramebuffer` constructor over memory of its own (cursor and icon pixels) | `PixelBuffer` |
 | `raw_event_grouping.rs` | The port of `src/Shared/RawEventGrouping.cs`, a source file the original compiles into every backend that queues its input (it belongs to no project of the tracking) | `AutomaticRawEventGrouperDispatchQueue`, `GrouperState`, `IRawEventGrouperDispatchQueue`, `ManualRawEventGrouperDispatchQueue`, `MergedPoints`, `RawEvent`, `RawEventGrouper`, `RawEventHandler` |
+| `selections/drag_drop/x11_drag_source/tests.rs` | the unit tests of the module | `Call`, `FakeHost` |
+| `selections/drag_drop/x11_drop_target/tests.rs` | the unit tests of the module | `FakeConnection`, `FakeItems`, `FakeWindow`, `Fixture`, `RecordingDevice`, `Seen`, `TestRoot` |
 
 Tests, examples and build scripts (not scanned): `examples/x11_window.rs`.

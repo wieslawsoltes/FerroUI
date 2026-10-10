@@ -471,12 +471,24 @@ Input methods (stage 2c; the crate `ferroui-freedesktop`, `src/FerroUI.FreeDeskt
 | The queue of key events of a window keeps the X event with each (`xev`). | Not kept. | Representation | It is never read. | x11-platform stage 2c |
 | `AVALONIA_IM_MODULE`. | `FERROUI_IM_MODULE` (`IM_MODULE_VARIABLE` of the FreeDesktop crate, re-exported by the X11 crate). | Behaviour | As the other renamed variables. | x11-platform stage 2c |
 
+Drag and drop (stage 2d; `src/FerroUI.X11/selections/drag_drop/`):
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `X11DragSource.Handler` calls Xlib, the platform, the data provider, the cursor factory and the timeout manager directly. | The handler has the protocol and calls a host (`IDragSourceHost`); `XlibDragSourceHost` is the host on the connection of the platform. A target of the application is a flag of the target (`in_process`) and its window is found again by its identifier. | Representation | The protocol runs in the tests against a host that is not a server. | x11-platform stage 2d |
+| `X11DropTarget` calls Xlib directly. | Through `IXdndTargetConnection` (`XlibXdndTargetConnection` on the platform); the reader of the data of a drag is what the connection makes (`IDragDropItemsSource`). | Representation | As above. | x11-platform stage 2d |
+| `DragDropDataTransfer` derives from `PlatformDataTransfer`. | It holds one (`data_transfer()`), which is what the drag events carry. | Representation | No inheritance. | x11-platform stage 2d |
+| `DragDropTimeoutManager` uses a timer of the thread pool; its callback completes the drag from that thread. | A timer of the UI dispatcher: the timeout runs on the UI thread. | Behaviour | Everything else of a drag runs on the UI thread, and its state is not shared between threads here. A UI thread that is blocked for the whole timeout sees it late, where upstream completes the task while the thread is blocked. | x11-platform stage 2d |
+| `SynchronousXEventWaiter` puts the events it took and did not want back with `XPutBackEvent` first to last, which leaves them on the queue in reverse order. | Last to first: the queue has them in the order they arrived in. | Behaviour | A defect of upstream: `XPutBackEvent` pushes onto the head of the queue. A press and its release, or two configure events, taken during a read would be handled in the wrong order. | x11-platform stage 2d |
+| `X11DragSource` casts the registered `ICursorFactory` to `X11CursorFactory`. | The platform keeps its cursor factory as its own type (`FerroX11Platform::cursor_factory`). | Representation | The contract has no way to ask for the concrete type. | x11-platform stage 2d |
+| An invalid drag source throws `ArgumentOutOfRangeException`. | A panic with the message. | Representation | As the other drag sources of the port. | x11-platform stage 2d |
+| The formats of `XdndEnter` are collected in a `HashSet`. | In a list, each once, in the order the source gave them. | Behaviour | A defined order of the formats of a data transfer. | x11-platform stage 2d |
+
 Not built yet (each fails, logs or answers "not available" as stated, and is tracked as missing in `tracking/Avalonia.X11.md`):
 
 | Upstream | Port | Kind | Stage |
 |---|---|---|---|
 | The rendering mode Vulkan (`VulkanSupport`, `VulkanNativeInterop`). | Passed over like a mode that failed to initialize. | Missing | 2a, after the Vulkan GPU of the Skia backend |
-| `X11DragSource`, `X11DropTarget`, the XDND client messages. | No drag source is registered; the messages are ignored. | Missing | 2d |
 | `DBusPlatformSettings`, `DBusTrayIconImpl` (and `XEmbedTrayIconImpl`), `DBusMenuExporter`, `DBusSystemDialog`, `GtkSystemDialog`, `LinuxMountedVolumeInfoProvider`, `GlibDispatcherImpl`. | The default platform settings; no tray icon; no native menu exporter; the managed storage provider alone; no mounted volume provider; `use_g_lib_main_loop` fails with a message. | Missing | 2e |
 | `X11PlatformLifetimeEvents`, `X11NativeControlHost`, `XEmbedPlug` and `XEmbedClientWindowMode`. | Not registered; the features are not offered. | Missing | 2f |
 | `X11AtSpiAccessibility` (`TrackWindow`, `UntrackWindow`, the server calls in `Show` and `Cleanup`). | `track_window` and `untrack_window` do nothing. | Missing | 3 |

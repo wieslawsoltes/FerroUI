@@ -4,6 +4,9 @@
 
 use crate::activity_tracking_helper::WindowActivationTrackingHelper;
 use crate::raw_event_grouping::{IRawEventGrouperDispatchQueue, RawEventGrouper};
+use crate::selections::drag_drop::x11_drop_target::{XdndTargetAtoms, XlibXdndTargetConnection};
+use crate::selections::drag_drop::xdnd_action_helper::XdndActions;
+use crate::selections::drag_drop::{IXdndWindow, X11DropTarget};
 use crate::transparency_helper::TransparencyHelper;
 use crate::x11_cursor_factory::CursorImpl;
 use crate::x11_enum_extensions::X11EnumExtensions;
@@ -25,7 +28,7 @@ use crate::xi2_manager::IXI2Client;
 use crate::xlib::{self, Atom, PropertyMode, XConfigureEvent, XDisplay, XEvent, XSyncValue, XIC, XID};
 use ferroui_base::input::platform::{IClipboard, IPlatformClipboardManagerImpl};
 use ferroui_base::input::raw::{
-    IRawInputEventArgs, RawDragEvent, RawMouseWheelEventArgs, RawPointerEventArgs, RawPointerEventType,
+    IDragDropDevice, IRawInputEventArgs, RawDragEvent, RawMouseWheelEventArgs, RawPointerEventArgs, RawPointerEventType,
     RawTextInputEventArgs,
 };
 use ferroui_base::input::{
@@ -415,6 +418,8 @@ pub struct X11Window {
     cleaning_up: Cell<bool>,
     handle: Cell<XID>,
     pub(crate) xic: Cell<XIC>,
+    drag_drop_device: RefCell<Option<Rc<dyn IDragDropDevice>>>,
+    drop_target: RefCell<Option<Rc<X11DropTarget>>>,
     pub(crate) ime: RefCell<Option<Rc<dyn ITextInputMethodImpl>>>,
     pub(crate) ime_control: RefCell<Option<Rc<dyn IX11InputMethodControl>>>,
     pub(crate) processing_ime: Cell<bool>,
@@ -642,6 +647,8 @@ impl X11Window {
             cleaning_up: Cell::new(false),
             handle: Cell::new(handle),
             xic: Cell::new(std::ptr::null_mut()),
+            drag_drop_device: RefCell::new(None),
+            drop_target: RefCell::new(None),
             ime: RefCell::new(None),
             ime_control: RefCell::new(None),
             processing_ime: Cell::new(false),
@@ -894,8 +901,22 @@ impl X11Window {
         })]));
         *window.storage_provider.borrow_mut() = Some(storage_provider);
 
-        // Stage 2: the drop target of the window (`X11DropTarget`), when
-        // the drag and drop device is registered.
+        if let Some(drag_drop_device) = FerroLocator::current().get_service::<dyn IDragDropDevice>() {
+            *window.drag_drop_device.borrow_mut() = Some(drag_drop_device.clone());
+            let xdnd_window: Weak<dyn IXdndWindow> = weak.clone();
+            let atoms = x11.atoms();
+            *window.drop_target.borrow_mut() = Some(Rc::new(X11DropTarget::new(
+                drag_drop_device,
+                xdnd_window,
+                handle,
+                XlibXdndTargetConnection::new(x11.clone()),
+                XdndTargetAtoms {
+                    status: atoms.XdndStatus,
+                    finished: atoms.XdndFinished,
+                    actions: XdndActions::new(atoms),
+                },
+            )));
+        }
 
         window.screens_subscription.set(platform.x11_screens().changed_event.subscribe({
             let weak = weak.clone();
@@ -1222,10 +1243,17 @@ impl X11Window {
                     self.x_sync_state.set(XSyncState::WaitConfigure);
                 }
             }
-            // Stage 2 of docs/porting/x11-platform.md: the messages of the
-            // drag and drop protocol (`XdndEnter`, `XdndPosition`,
-            // `XdndLeave`, `XdndDrop`) go to the drop target of the
-            // window, which is not built.
+            else if let Some(drop_target) = self.drop_target.borrow().clone() {
+                if message_type == atoms.XdndEnter {
+                    drop_target.on_xdnd_enter(&message);
+                } else if message_type == atoms.XdndPosition {
+                    drop_target.on_xdnd_position(&message);
+                } else if message_type == atoms.XdndLeave {
+                    drop_target.on_xdnd_leave(&message);
+                } else if message_type == atoms.XdndDrop {
+                    drop_target.on_xdnd_drop(&message);
+                }
+            }
         } else if event_type == XEventName::KeyPress as i32 || event_type == XEventName::KeyRelease as i32 {
             if self.activate_transient_child_if_needed() {
                 return;
@@ -1396,6 +1424,12 @@ impl X11Window {
                 activation_tracker.on_net_wm_state_changed(&state_atoms);
             }
         }
+    }
+
+    /// The drag and drop device the window raises drag events with
+    /// (`DragDropDevice`): the registered one, when the window was made.
+    pub fn drag_drop_device(&self) -> Option<Rc<dyn IDragDropDevice>> {
+        self.drag_drop_device.borrow().clone()
     }
 
     /// Tells the input method of the window where the window is
@@ -2505,6 +2539,20 @@ impl IXI2Client for X11Window {
 
     fn touch_device(&self) -> Rc<dyn IInputDevice> {
         self.touch.clone()
+    }
+}
+
+impl IXdndWindow for X11Window {
+    fn handle(&self) -> XID {
+        self.handle.get()
+    }
+
+    fn input_root(&self) -> Option<Rc<dyn IInputRoot>> {
+        self.input_root_or_none()
+    }
+
+    fn point_to_client(&self, point: PixelPoint) -> Point {
+        self.mode.point_to_client(self, point)
     }
 }
 

@@ -1,8 +1,9 @@
-//! The selections of the X server: the clipboard and, later, the drag and
-//! drop transfers (the port of the `Selections` directory).
+//! The selections of the X server: the clipboard and the drag and drop
+//! transfers (the port of the `Selections` directory).
 
 pub mod clipboard;
 pub mod data_format_helper;
+pub mod drag_drop;
 pub mod i_x_event_waiter;
 pub mod selection_data_provider;
 pub mod selection_data_reader;
