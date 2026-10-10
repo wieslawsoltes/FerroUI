@@ -2199,6 +2199,18 @@ reason = "A subscription to a D-Bus signal as a disposable handle, and a cancell
 path = "src/FerroUI.FreeDesktop/ui_thread_object.rs"
 reason = "How an object exported on a connection answers from the object of the UI thread it stands for: the D-Bus library of the original calls a handler on the synchronization context of the thread that made the connection"
 
+[[rust_only]]
+path = "src/FerroUI.FreeDesktop/at_spi/dbus/*.rs"
+reason = "What accessibility needs of the D-Bus library the original compiles into its AT-SPI project (external/Avalonia.DBus) and of the code its generator makes from DBusXml: the object table and dispatch of a connection, the built-in properties and introspection handlers, the handler shape, the types, descriptions and proxies of the interfaces (atspi.md, section 5)"
+
+[[rust_only]]
+path = "src/FerroUI.FreeDesktop/at_spi/tests.rs"
+reason = "The server against a peer with a double of the registry; the original has no tests of this project"
+
+[[rust_only]]
+path = "src/FerroUI.FreeDesktop/at_spi/mod.rs"
+reason = "The module declarations"
+
 # ---------------------------------------------------------------- Avalonia.iOS
 # The project is tracked at file and type granularity (TRACKING.md); docs/porting/ios-platform.md has the file table
 # and the stage of every file. The classes of the Objective-C runtime are declared with a macro of the bindings

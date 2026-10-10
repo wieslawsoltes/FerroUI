@@ -306,6 +306,8 @@ One row per upstream file. "built" files are on the branch; the stage of an open
 | `DBusIme/IBus/IBusX11TextInputMethod.cs` | 185 | `dbus_ime/ibus/ibus_x11_text_input_method.rs` | 2c | built |  |
 | `DBusIme/X11DBusImeHelper.cs` | 65 | `dbus_ime/x11_dbus_ime_helper.rs` | 2c | built |  |
 
+The 27 files of `Avalonia.FreeDesktop.AtSpi` (`src/FerroUI.FreeDesktop/at_spi/`, all built) have their table in `atspi.md`, section 8.
+
 `RawEventGrouping.cs` of `src/Shared` is `raw_event_grouping.rs` (built). Files of the port without an upstream file: in the X11 crate `pixel_buffer.rs` (a framebuffer over pixels the crate owns) and `interop/native_library.rs` (a library opened at run time and its functions by name: what upstream's runtime does for a platform invoke); in the FreeDesktop crate `event.rs` (the multicast events of the backends' own classes; it moved there from the X11 crate, which re-exports it), `signal_watch.rs` (a subscription to a signal as a disposable handle, and a cancellation flag: facilities of upstream's D-Bus library and runtime), `ui_thread_object.rs` (how an exported object answers from the UI thread) and the proxy traits `dbus_ime/ibus/dbus.rs` and `dbus_ime/fcitx/dbus.rs` (the code upstream generates from `DBusXml/`).
 
 ## 13. Verification
