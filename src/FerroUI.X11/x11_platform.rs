@@ -1,7 +1,7 @@
 //! The X11 windowing platform (the port of `X11Platform.cs`): opens the
 //! connections, registers the platform services and creates the windows.
 
-use crate::dispatching::{IX11PlatformDispatcher, X11PlatformThreading};
+use crate::dispatching::{GlibDispatcherImpl, IX11PlatformDispatcher, X11PlatformThreading};
 use crate::glx::GlxPlatformGraphics;
 use crate::raw_event_grouping::ManualRawEventGrouperDispatchQueue;
 use crate::screens::X11Screens;
@@ -68,7 +68,7 @@ pub struct FerroX11Platform {
     active_window_tracker: OnceCell<Rc<X11ActiveWindowTracker>>,
     resources: OnceCell<Rc<XResources>>,
     event_grouper_dispatch_queue: Rc<ManualRawEventGrouperDispatchQueue>,
-    dispatcher_impl: OnceCell<Rc<X11PlatformThreading>>,
+    dispatcher_impl: OnceCell<Rc<dyn IX11PlatformDispatcher>>,
     deferred_display: Cell<Option<XDisplay>>,
     display: Cell<Option<XDisplay>>,
     glx_graphics: OnceCell<Arc<GlxPlatformGraphics>>,
@@ -287,16 +287,11 @@ impl FerroX11Platform {
         let locator = FerroLocator::current_mutable();
         let windowing_platform: Rc<dyn IWindowingPlatform> = self.clone();
         locator.bind_to_self(self.clone()).bind::<dyn IWindowingPlatform>().to_constant(windowing_platform);
-        // Stage 2 of docs/porting/x11-platform.md: the dispatcher over the
-        // main loop of GLib (`GlibDispatcherImpl`), which the option asks
-        // for, is not built.
-        if options.use_g_lib_main_loop {
-            panic!(
-                "X11PlatformOptions::use_g_lib_main_loop: the dispatcher over the GLib main loop is not built yet \
-                 (stage 2 of docs/porting/x11-platform.md)"
-            );
-        }
-        let dispatcher_impl = X11PlatformThreading::new(self);
+        let dispatcher_impl: Rc<dyn IX11PlatformDispatcher> = if options.use_g_lib_main_loop {
+            GlibDispatcherImpl::new(self)
+        } else {
+            X11PlatformThreading::new(self)
+        };
         let _ = self.dispatcher_impl.set(dispatcher_impl.clone());
         Dispatcher::initialize_ui_thread_dispatcher(dispatcher_impl);
 
