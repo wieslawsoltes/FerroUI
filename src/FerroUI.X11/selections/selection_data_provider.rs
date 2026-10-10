@@ -218,7 +218,7 @@ impl Wake for FrameWaker {
 /// an application puts on the clipboard have their values at hand, so the
 /// future is ready; one that is not is waited for in a nested frame of the
 /// dispatcher, as the synchronous wrappers of the base library do.
-fn get_result<T>(mut future: LocalBoxFuture<T>) -> T {
+pub(crate) fn get_result<T>(mut future: LocalBoxFuture<T>) -> T {
     if let Poll::Ready(value) = future.as_mut().poll(&mut Context::from_waker(Waker::noop())) {
         return value;
     }

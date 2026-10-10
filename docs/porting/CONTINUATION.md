@@ -118,6 +118,12 @@ Entry points for what follows. 2d, drag and drop: `selections/` has the selectio
 
 Not verified anywhere: a real `ibus-daemon` or Fcitx (the doubles answer as the interface descriptions say; what a real engine sends for a pre-edit with attributes was not seen), an XIM server other than the one Xlib has built in.
 
+## The Linux platform, stage 2d: drag and drop (2026-10-10)
+
+Branch `x11-platform-3`. `x11-platform.md`, section 10, has the detail; in short: `selections/drag_drop/` is the port of upstream's eleven files. The drop target of a window (`X11DropTarget`) and the drag source of the platform (`X11DragSource`, bound as `IPlatformDragSource`; its handler is the event hook of the dispatcher during a drag) speak XDND 5; windows of the application get their drag events without the protocol. 34 tests drive both sides with doubles. The smoke mode has `--dnd`: a drag inside the window, and a drag to a second process of the example (`--dnd-target=X,Y`), with XTEST; the CI job runs it. Tracking: `Avalonia.X11` 72 of 88 files.
+
+Not verified anywhere: another toolkit as the source or the target of a drag (GTK and Qt applications; a file manager dragging files, which exercises `text/uri-list` and `XdndTypeList`), a window manager that proxies drops (`XdndProxy` on the root or on frames), a drag started by touch.
+
 ## In flight on 2026-10-09
 
 Nothing runs in the cloud. In flight locally, each on its own branch, written by a sub-agent without a compiler and validated in the main checkout:

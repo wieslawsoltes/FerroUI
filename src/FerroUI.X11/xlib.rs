@@ -1395,6 +1395,33 @@ pub fn xutf8_lookup_string(xic: XIC, event: &mut XKeyEvent, buffer: &mut [u8]) -
     ((length.max(0) as usize).min(buffer.len()), status)
 }
 
+/// `XLookupKeysym`: the key symbol of a key event in a column of the
+/// keyboard mapping, without modifiers applied.
+pub fn x_lookup_keysym(key_event: &XKeyEvent, index: c_int) -> c_ulong {
+    let mut key_event = *key_event;
+    // SAFETY: the event is a valid key event that Xlib reads; its display
+    // is the connection it came from.
+    unsafe { (x().XLookupKeysym)(&mut key_event, index) }
+}
+
+/// `XChangeActivePointerGrab`: the event mask and the cursor of the
+/// pointer grab this client holds, if it holds one.
+pub fn x_change_active_pointer_grab(display: XDisplay, event_mask: c_uint, cursor: XID, time: Time) -> c_int {
+    // SAFETY: the connection is open; the other arguments are plain values.
+    unsafe { (x().XChangeActivePointerGrab)(display.raw(), event_mask, cursor, time) }
+}
+
+/// `XPutBackEvent`: pushes an event onto the head of the event queue of
+/// the connection. For a generic event Xlib keeps a copy of the data the
+/// event carries, so that the event can be taken and read again.
+pub fn x_put_back_event(display: XDisplay, event: &mut XEvent) {
+    // SAFETY: the connection is open and `event` is a valid event, which
+    // Xlib copies.
+    unsafe {
+        (x().XPutBackEvent)(display.raw(), event);
+    }
+}
+
 /// `XKeysymToString`: the name of a key symbol.
 pub fn x_keysym_to_string(key_sym: c_ulong) -> Option<Vec<u8>> {
     // SAFETY: the result is null or a static NUL-terminated string of

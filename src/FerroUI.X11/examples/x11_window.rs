@@ -66,6 +66,16 @@
 //!   (`XMODIFIERS=@im=local`): a key produces its text through the input
 //!   context, and a compose sequence produces one character (the caller
 //!   gives a key the compose symbol: `xmodmap -e "keycode 135 = Multi_key"`).
+//! - **dnd** (with `--dnd`): a square in the window starts a drag of a
+//!   text when it is pressed; the server synthesizes the press, the
+//!   movement and the release. First the drag ends over the window
+//!   itself, which gets its drag events without the protocol. Then this
+//!   example is started a second time (`--dnd-target=X,Y`: a small window
+//!   that accepts text and prints what is dropped), and the drag ends over
+//!   the window of that process: the source side here and the target side
+//!   there speak XDND through the server, and the text crosses as a
+//!   selection. The other process has to print the text, and the drag has
+//!   to end with the action the target finished with.
 //!
 //! It then asks the window to close the way a window manager does (a
 //! `WM_DELETE_WINDOW` message), which has to end the application.
@@ -159,6 +169,21 @@ mod app {
         window.opened(|| println!("Window opened"));
         window.closed(|| println!("Window closed"));
 
+        if let Some((x, y)) = dnd::target_position() {
+            // The process that only takes drops: a small window at the place it is told, whose
+            // content accepts text and prints what is dropped.
+            window.set_width(dnd::TARGET_SIZE.0);
+            window.set_height(dnd::TARGET_SIZE.1);
+            window.set_position(ferroui_base::PixelPoint::new(x, y));
+            dnd::accept_text(&border, &Rc::default());
+            let opened = window.clone();
+            window.opened(move || {
+                if let Some(handle) = opened.try_get_platform_handle() {
+                    println!("DND TARGET READY {}", handle.handle());
+                }
+            });
+        }
+
         if std::env::args().any(|arg| arg == "--smoke") {
             smoke::start(&window, &border);
         }
@@ -182,6 +207,8 @@ mod app {
                     && !arg.starts_with("--expect-screens=")
                     && !arg.starts_with("--mode=")
                     && !arg.starts_with("--ime=")
+                    && !arg.starts_with("--dnd-target=")
+                    && arg != "--dnd"
                     && arg != "--expect-fallback"
                     && arg != "--shm"
             })
@@ -383,6 +410,95 @@ mod app {
             _ => {}
         }
     }
+    /// What the drag and drop phase of the smoke mode puts into the
+    /// windows: a square that starts a drag of a text when it is pressed,
+    /// and a window content that accepts text.
+    mod dnd {
+        use super::*;
+        use ferroui_base::input::{
+            DataFormat, DataTransfer, DataTransferExtensions, DataTransferItem, DragDrop, DragDropEffects, IDataTransfer,
+            InputElement,
+        };
+        use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
+        use ferroui_base::Thickness;
+
+        pub const DRAGGED_TEXT: &str = "FerroUI drag: za\u{17c}\u{f3}\u{142}\u{107}";
+        /// Where the square that starts a drag is, in the window, and how large.
+        pub const SOURCE_ORIGIN: (f64, f64) = (20.0, 20.0);
+        pub const SOURCE_SIZE: f64 = 80.0;
+        /// The size of the window of the second process.
+        pub const TARGET_SIZE: (f64, f64) = (300.0, 200.0);
+
+        /// The position `--dnd-target=X,Y` gives the window of a process
+        /// that only takes drops.
+        pub fn target_position() -> Option<(i32, i32)> {
+            let value = std::env::args().find_map(|arg| arg.strip_prefix("--dnd-target=").map(str::to_string))?;
+            let (x, y) = value.split_once(',')?;
+            Some((x.parse().ok()?, y.parse().ok()?))
+        }
+
+        /// What the drag events of a drop zone were, as lines.
+        pub type DropLog = Rc<RefCell<Vec<String>>>;
+
+        /// Makes `zone` accept text: a drag over it is answered with
+        /// "copy", and a drop is recorded (and printed, for the process
+        /// that started the drag to read).
+        pub fn accept_text(zone: &Ref<Border>, log: &DropLog) {
+            DragDrop::set_allow_drop(zone, true);
+            {
+                let log = log.clone();
+                DragDrop::add_drag_enter_handler(zone, move |_, _| {
+                    log.borrow_mut().push("enter".to_string());
+                });
+            }
+            DragDrop::add_drag_over_handler(zone, move |_, e| {
+                let has_text = e.data_transfer().contains(&DataFormat::text());
+                e.set_drag_effects(if has_text { e.drag_effects() & DragDropEffects::COPY } else { DragDropEffects::NONE });
+            });
+            let log = log.clone();
+            DragDrop::add_drop_handler(zone, move |_, e| {
+                e.set_drag_effects(e.drag_effects() & DragDropEffects::COPY);
+                let text = e.data_transfer().try_get_text();
+                let line = format!("DND DROP: effects={:?} text={:?}", e.drag_effects(), text);
+                println!("{line}");
+                log.borrow_mut().push(line);
+            });
+        }
+
+        /// A square in the corner of `content` that starts a drag of
+        /// [`DRAGGED_TEXT`] when it is pressed. The result of every drag
+        /// that ended is pushed to `results`.
+        pub fn add_source(content: &Ref<Border>, results: &Rc<RefCell<Vec<DragDropEffects>>>) -> Ref<Border> {
+            let source = Border::new();
+            source.set_background(Some(Rc::new(ImmutableSolidColorBrush::new(Color::from_rgb(0xee, 0xaa, 0x00)))));
+            source.set_width(SOURCE_SIZE);
+            source.set_height(SOURCE_SIZE);
+            source.set_horizontal_alignment(HorizontalAlignment::Left);
+            source.set_vertical_alignment(VerticalAlignment::Top);
+            source.set_margin(Thickness::new(SOURCE_ORIGIN.0, SOURCE_ORIGIN.1, 0.0, 0.0));
+
+            let results = results.clone();
+            source.add_handler(InputElement::pointer_pressed_event(), move |_, e| {
+                let e = e.clone();
+                let results = results.clone();
+                drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                    let data = DataTransfer::new();
+                    data.add(DataTransferItem::create(&DataFormat::text(), Some(DRAGGED_TEXT.to_string())));
+                    let data_transfer: Rc<dyn IDataTransfer> = data;
+                    let result = DragDrop::do_drag_drop_async(
+                        &e,
+                        data_transfer,
+                        DragDropEffects::COPY | DragDropEffects::MOVE,
+                    )
+                    .await;
+                    results.borrow_mut().push(result);
+                }));
+            });
+
+            content.set_child(&source);
+            source
+        }
+    }
 
     /// Input the server synthesizes (the XTEST extension, `libXtst`). Not
     /// part of the platform, which never fakes input: the smoke mode uses
@@ -461,7 +577,7 @@ mod app {
             RawPointerEventType, RawTextInputEventArgs,
         };
         use ferroui_base::input::text_input::ITextInputMethodImpl;
-        use ferroui_base::input::Key;
+        use ferroui_base::input::{DragDropEffects, Key};
         use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
         use ferroui_base::{Point, Thickness, Vector};
         use ferroui_controls::TextBox;
@@ -680,6 +796,10 @@ mod app {
                 if let Some(kind) = ime() {
                     report.phase("ime");
                     ime_checks(&report, &platform, &window, &content, &kind).await;
+                }
+                if std::env::args().any(|arg| arg == "--dnd") {
+                    report.phase("dnd");
+                    dnd_checks(&report, &platform, &window, &content).await;
                 }
             }
 
@@ -1769,6 +1889,189 @@ mod app {
             }
 
             window_impl.set_input(framework_input);
+            content.set_child(None::<Ref<Control>>);
+        }
+
+        /// Moves the pointer from one point of the screen to another in
+        /// steps, as a hand does: a drag target is found, entered and
+        /// asked on the way.
+        async fn glide(display: xlib::XDisplay, from: (i32, i32), to: (i32, i32)) {
+            const STEPS: i32 = 8;
+            for step in 1..=STEPS {
+                let x = from.0 + (to.0 - from.0) * step / STEPS;
+                let y = from.1 + (to.1 - from.1) * step / STEPS;
+                xtest::motion(display, x, y);
+                delay(Duration::from_millis(60)).await;
+            }
+        }
+
+        /// Drag and drop, both sides of the XDND protocol.
+        ///
+        /// First inside the window: a drag from the square to the window
+        /// content, which a window of the same application gets without
+        /// the protocol. Then to a second process (this example started
+        /// with `--dnd-target`), which is another client of the server:
+        /// the source side of this process and the target side of the
+        /// other talk through the server, and the data crosses as a
+        /// selection.
+        async fn dnd_checks(report: &Report, platform: &Rc<FerroX11Platform>, window: &Ref<Window>, content: &Ref<Border>) {
+            let info = platform.info();
+            let display = info.display();
+            if !xtest::available(display) {
+                report.check("XTEST", false, "libXtst is missing or the server has no XTEST extension".to_string());
+                return;
+            }
+            let Some(xid) = xid_of(window) else {
+                report.check("handle", false, "the window has no platform handle".to_string());
+                return;
+            };
+            let Some((origin_x, origin_y, _)) = xlib::x_translate_coordinates(display, xid, info.root_window(), 0, 0) else {
+                report.check("origin", false, "XTranslateCoordinates failed".to_string());
+                return;
+            };
+            let scaling = window.render_scaling();
+            let scaled = |value: f64| (value * scaling) as i32;
+
+            let aware = xlib::x_get_window_property_as_int_ptr(display, xid, info.atoms().XdndAware, info.atoms().ATOM);
+            report.check(
+                "XdndAware",
+                aware == Some(5),
+                format!("the window announces the version {aware:?} of the protocol, expected 5"),
+            );
+
+            let drops: dnd::DropLog = Rc::default();
+            let results: Rc<RefCell<Vec<DragDropEffects>>> = Rc::default();
+            dnd::accept_text(content, &drops);
+            let _source = dnd::add_source(content, &results);
+            delay(Duration::from_millis(300)).await;
+
+            let source_point = (
+                origin_x + scaled(dnd::SOURCE_ORIGIN.0 + dnd::SOURCE_SIZE / 2.0),
+                origin_y + scaled(dnd::SOURCE_ORIGIN.1 + dnd::SOURCE_SIZE / 2.0),
+            );
+
+            // Inside the window.
+            let inside = (origin_x + scaled(360.0), origin_y + scaled(260.0));
+            xtest::motion(display, source_point.0 - 5, source_point.1 - 5);
+            delay(Duration::from_millis(100)).await;
+            xtest::motion(display, source_point.0, source_point.1);
+            delay(Duration::from_millis(100)).await;
+            xtest::button(display, 1, true);
+            delay(Duration::from_millis(200)).await;
+            glide(display, source_point, inside).await;
+            delay(Duration::from_millis(200)).await;
+            xtest::button(display, 1, false);
+            let ended = wait_for(STEP_TIMEOUT, || !results.borrow().is_empty()).await;
+            let expected_drop = format!("DND DROP: effects={:?} text={:?}", DragDropEffects::COPY, Some(dnd::DRAGGED_TEXT));
+            report.check(
+                "drag inside the window",
+                ended && results.borrow().first() == Some(&DragDropEffects::COPY) && drops.borrow().contains(&expected_drop),
+                format!(
+                    "the drag ended with {:?}, expected [COPY]; the window content saw {:?}",
+                    results.borrow(),
+                    drops.borrow()
+                ),
+            );
+            let hook_removed = platform.dispatcher_impl().event_dispatcher().event_hook().is_none();
+            let owner = xlib::x_get_selection_owner(display, info.atoms().XdndSelection);
+            report.check(
+                "the drag is cleaned up",
+                hook_removed && owner != xid,
+                format!("the event hook is {}; the owner of XdndSelection is {owner:#x}", if hook_removed { "removed" } else { "still installed" }),
+            );
+
+            // To another process.
+            results.borrow_mut().clear();
+            drops.borrow_mut().clear();
+            let target_position = (origin_x + scaled(WIDTH) + 20, origin_y);
+            let child = std::env::current_exe().and_then(|exe| {
+                Command::new(exe)
+                    .arg(format!("--dnd-target={},{}", target_position.0, target_position.1))
+                    .stdout(Stdio::piped())
+                    .stderr(Stdio::inherit())
+                    .spawn()
+            });
+            let mut child = match child {
+                Ok(child) => child,
+                Err(error) => {
+                    report.check("second process", false, format!("it could not be started: {error}"));
+                    return;
+                }
+            };
+            let lines: Arc<Mutex<Vec<String>>> = Arc::default();
+            if let Some(stdout) = child.stdout.take() {
+                let lines = lines.clone();
+                std::thread::spawn(move || {
+                    use std::io::BufRead;
+                    for line in std::io::BufReader::new(stdout).lines().map_while(Result::ok) {
+                        lines.lock().unwrap().push(line);
+                    }
+                });
+            }
+            let target_xid = || {
+                lines.lock().unwrap().iter().find_map(|line| {
+                    line.strip_prefix("DND TARGET READY ").and_then(|xid| xid.trim().parse::<u64>().ok())
+                })
+            };
+            let ready = wait_for(Duration::from_secs(20), || {
+                target_xid().is_some_and(|xid| {
+                    xlib::x_get_window_attributes(display, xid as xlib::XID).is_some_and(|attributes| attributes.map_state == 2)
+                })
+            })
+            .await;
+            let target = target_xid().unwrap_or(0) as xlib::XID;
+            let target_origin =
+                if ready { xlib::x_translate_coordinates(display, target, info.root_window(), 0, 0) } else { None };
+            let target_aware = xlib::x_get_window_property_as_int_ptr(display, target, info.atoms().XdndAware, info.atoms().ATOM);
+            report.check(
+                "second process",
+                ready && target_origin.is_some() && target_aware == Some(5) && platform.get_window(target).is_none(),
+                format!(
+                    "its window {target:#x} is {}, at {:?} of the root, announces the version {target_aware:?}, and is \
+                     {} window of this process",
+                    if ready { "viewable" } else { "not viewable" },
+                    target_origin.map(|(x, y, _)| (x, y)),
+                    if platform.get_window(target).is_some() { "a" } else { "no" }
+                ),
+            );
+
+            if let Some((target_x, target_y, _)) = target_origin {
+                delay(Duration::from_millis(500)).await;
+                let over_target =
+                    (target_x + scaled(dnd::TARGET_SIZE.0 / 2.0), target_y + scaled(dnd::TARGET_SIZE.1 / 2.0));
+                xtest::motion(display, source_point.0 - 5, source_point.1 - 5);
+                delay(Duration::from_millis(100)).await;
+                xtest::motion(display, source_point.0, source_point.1);
+                delay(Duration::from_millis(100)).await;
+                xtest::button(display, 1, true);
+                delay(Duration::from_millis(200)).await;
+                glide(display, source_point, over_target).await;
+                // The target answers the last position before the button goes up.
+                delay(Duration::from_millis(500)).await;
+                xtest::button(display, 1, false);
+
+                let ended = wait_for(Duration::from_secs(10), || !results.borrow().is_empty()).await;
+                let dropped = wait_for(STEP_TIMEOUT, || lines.lock().unwrap().iter().any(|line| *line == expected_drop)).await;
+                report.check(
+                    "drop in the other process",
+                    dropped,
+                    format!("the other process printed {:?}; expected the line {expected_drop:?}", lines.lock().unwrap()),
+                );
+                report.check(
+                    "result of the drag",
+                    ended && *results.borrow() == [DragDropEffects::COPY],
+                    format!("the drag ended with {:?}, expected [COPY] (the action the target finished with)", results.borrow()),
+                );
+                // The window of this process was left on the way and got no drop.
+                report.check(
+                    "no drop in the source window",
+                    drops.borrow().iter().all(|line| !line.starts_with("DND DROP")),
+                    format!("the window content saw {:?}", drops.borrow()),
+                );
+            }
+
+            let _ = child.kill();
+            let _ = child.wait();
             content.set_child(None::<Ref<Control>>);
         }
 

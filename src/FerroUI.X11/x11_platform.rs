@@ -7,7 +7,9 @@ use crate::raw_event_grouping::ManualRawEventGrouperDispatchQueue;
 use crate::screens::X11Screens;
 use crate::selections::clipboard::X11ClipboardImpl;
 use crate::x11_active_window_tracker::X11ActiveWindowTracker;
+use crate::selections::drag_drop::X11DragSource;
 use crate::x11_cursor_factory::X11CursorFactory;
+use ferroui_base::input::platform::IPlatformDragSource;
 use crate::x11_egl_helper::X11EglPlatformGraphics;
 use crate::x11_exception::X11Exception;
 use crate::x11_globals::X11Globals;
@@ -66,6 +68,7 @@ pub struct FerroX11Platform {
     display: Cell<Option<XDisplay>>,
     glx_graphics: OnceCell<Arc<GlxPlatformGraphics>>,
     egl_graphics: OnceCell<Arc<X11EglPlatformGraphics>>,
+    cursor_factory: OnceCell<Rc<X11CursorFactory>>,
 }
 
 fn initialized<T>(cell: &OnceCell<T>) -> &T {
@@ -95,6 +98,7 @@ impl FerroX11Platform {
             display: Cell::new(None),
             glx_graphics: OnceCell::new(),
             egl_graphics: OnceCell::new(),
+            cursor_factory: OnceCell::new(),
         })
     }
 
@@ -185,6 +189,13 @@ impl FerroX11Platform {
 
     /// The platform graphics of GLX, when they are the ones the platform
     /// registered (`glfeature as GlxPlatformGraphics` of the reference).
+    /// The cursor factory of the platform, as its own type (the cast of
+    /// the registered service in the reference): the drag source takes
+    /// the cursors of a drag from it.
+    pub fn cursor_factory(&self) -> Option<Rc<X11CursorFactory>> {
+        self.cursor_factory.get().cloned()
+    }
+
     pub fn glx_graphics(&self) -> Option<Arc<GlxPlatformGraphics>> {
         self.glx_graphics.get().cloned()
     }
@@ -286,7 +297,10 @@ impl FerroX11Platform {
 
         let render_loop: Arc<dyn IRenderLoop> = RenderLoop::from_timer(timer);
         let weak = self.this.clone();
-        let cursor_factory: Rc<dyn ICursorFactory> = Rc::new(X11CursorFactory::new(display));
+        let x11_cursor_factory = Rc::new(X11CursorFactory::new(display));
+        let _ = self.cursor_factory.set(x11_cursor_factory.clone());
+        let cursor_factory: Rc<dyn ICursorFactory> = x11_cursor_factory;
+        let drag_source: Rc<dyn IPlatformDragSource> = Rc::new(X11DragSource::new(self));
         let clipboard_impl: Rc<dyn IClipboardImpl> = clipboard_impl;
         let clipboard: Rc<dyn IClipboard> = clipboard;
         let clipboard_manager: Rc<dyn IPlatformClipboardManagerImpl> = clipboard_manager;
@@ -314,9 +328,11 @@ impl FerroX11Platform {
             .bind::<dyn IPlatformSettings>()
             .to_constant(platform_settings)
             .bind::<dyn IPlatformIconLoader>()
-            .to_constant(icon_loader);
+            .to_constant(icon_loader)
+            .bind::<dyn IPlatformDragSource>()
+            .to_constant(drag_source);
         // Not bound yet, each with the stage of docs/porting/x11-platform.md
-        // that builds it: the drag source (`X11DragSource`, stage 2), the
+        // that builds it: the
         // mounted volumes (`LinuxMountedVolumeInfoProvider`, with the
         // FreeDesktop crate) and the lifetime events of the session
         // manager (`X11PlatformLifetimeEvents`, stage 2).

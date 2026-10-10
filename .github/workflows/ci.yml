@@ -593,6 +593,15 @@ jobs:
             set -e
             xmodmap -e "keycode 135 = Multi_key"
             timeout 300 target/debug/examples/x11_window --smoke --ime=xim --skip=popup,resize,screens,clipboard'
+      # Drag and drop: the server synthesizes a press on a square that starts a drag, the movement
+      # and the release; first over the window itself, then over the window of a second process
+      # (the same example, as a drop target), so that the source side of one process and the target
+      # side of the other speak XDND through the server and the text crosses as a selection.
+      - name: Drag and drop inside a window and to another process (XDND)
+        if: ${{ !cancelled() }}
+        run: |
+          xvfb-run -a --server-args="-screen 0 1280x1024x24" \
+            timeout 300 target/debug/examples/x11_window --smoke --dnd --skip=popup,resize,screens,clipboard
       - name: The same with two monitors (xrandr --setmonitor)
         if: ${{ !cancelled() }}
         run: |

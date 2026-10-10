@@ -7566,12 +7566,12 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    61,
+    72,
     88,
     0
    ],
    "types": [
-    133,
+    144,
     291,
     107
    ],
@@ -7581,7 +7581,7 @@
     0
    ],
    "interfaces": [
-    7,
+    8,
     8
    ],
    "propertyRegistrations": [
@@ -7660,6 +7660,39 @@
     ],
     "Selections/DataFormatHelper.cs": [
      "selections/data_format_helper.rs"
+    ],
+    "Selections/DragDrop/DragDropDataProvider.cs": [
+     "selections/drag_drop/drag_drop_data_provider.rs"
+    ],
+    "Selections/DragDrop/DragDropDataReader.cs": [
+     "selections/drag_drop/drag_drop_data_reader.rs"
+    ],
+    "Selections/DragDrop/DragDropDataTransfer.cs": [
+     "selections/drag_drop/drag_drop_data_transfer.rs"
+    ],
+    "Selections/DragDrop/DragDropDataTransferItem.cs": [
+     "selections/drag_drop/drag_drop_data_transfer_item.rs"
+    ],
+    "Selections/DragDrop/DragDropTimeoutManager.cs": [
+     "selections/drag_drop/drag_drop_timeout_manager.rs"
+    ],
+    "Selections/DragDrop/IXdndWindow.cs": [
+     "selections/drag_drop/i_xdnd_window.rs"
+    ],
+    "Selections/DragDrop/SynchronousXEventWaiter.cs": [
+     "selections/drag_drop/synchronous_x_event_waiter.rs"
+    ],
+    "Selections/DragDrop/X11DragSource.cs": [
+     "selections/drag_drop/x11_drag_source.rs"
+    ],
+    "Selections/DragDrop/X11DropTarget.cs": [
+     "selections/drag_drop/x11_drop_target.rs"
+    ],
+    "Selections/DragDrop/XdndActionHelper.cs": [
+     "selections/drag_drop/xdnd_action_helper.rs"
+    ],
+    "Selections/DragDrop/XdndConstants.cs": [
+     "selections/drag_drop/xdnd_constants.rs"
     ],
     "Selections/IXEventWaiter.cs": [
      "selections/i_x_event_waiter.rs"
@@ -7781,7 +7814,9 @@
    },
    "rustOnly": [
     "pixel_buffer.rs",
-    "raw_event_grouping.rs"
+    "raw_event_grouping.rs",
+    "selections/drag_drop/x11_drag_source/tests.rs",
+    "selections/drag_drop/x11_drop_target/tests.rs"
    ]
   },
   {
