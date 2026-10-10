@@ -452,9 +452,12 @@ jobs:
   # crate is developed on a Mac, where it is compiled for Linux and its tests run without a server;
   # this job is where it meets one: the crate is built and tested on Linux, and the smoke mode of its
   # example opens a window under Xvfb and asks the server what it sees (the window mapped, its size,
-  # title, class, process and protocols, and pixels read back from the window with XGetImage), then
-  # has the window closed by a WM_DELETE_WINDOW message; once on a bare Xvfb and once under a
-  # window manager. No compositing manager and no input devices: those are not covered here.
+  # title, class, process and protocols, and pixels read back from the window with XGetImage), has
+  # the server synthesize input (XTEST: pointer, button, wheel, a key with its text), opens and
+  # dismisses a popup, compares the screens with the root window, exchanges the clipboard with
+  # another client (xclip) in both directions, also in parts (INCR), and then has the window closed
+  # by a WM_DELETE_WINDOW message; on a bare Xvfb, under a window manager, and with two monitors
+  # (xrandr --setmonitor). No compositing manager: that is not covered here.
   x11:
     name: Build and test (Linux, X11 under Xvfb)
     runs-on: ubuntu-latest
@@ -474,8 +477,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            xvfb xauth x11-utils openbox \
-            libx11-6 libxi6 libxrandr2 libxcursor1 libxfixes3 libxext6 \
+            xvfb xauth x11-utils x11-xserver-utils xclip openbox \
+            libx11-6 libxi6 libxrandr2 libxcursor1 libxfixes3 libxext6 libxtst6 \
             libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config
       - name: Skia features of the target
         run: |
@@ -498,6 +501,21 @@ jobs:
       # A window manager clamps the window to a screen narrower than it: the server and the
       # framework have to agree on the size the window got.
       - name: The same under a window manager (openbox)
+        if: ${{ !cancelled() }}
         run: |
           xvfb-run -a --server-args="-screen 0 600x500x24" \
             sh -c 'openbox & sleep 2; timeout 300 target/debug/examples/x11_window --smoke'
+      # Two monitors of the RandR extension, side by side: the first takes the output of the
+      # server (which removes the monitor the server derives from it), the second has none.
+      - name: The same with two monitors (xrandr --setmonitor)
+        if: ${{ !cancelled() }}
+        run: |
+          xvfb-run -a --server-args="-screen 0 1280x1024x24" sh -c '
+            set -e
+            xrandr --listmonitors
+            output="$(xrandr --listmonitors | awk "NR==2 { print \$NF }")"
+            xrandr --setmonitor FERRO-A 640/169x1024/271+0+0 "$output"
+            xrandr --setmonitor FERRO-B 640/169x1024/271+640+0 none
+            xrandr --listmonitors
+            timeout 300 target/debug/examples/x11_window --smoke --expect-screens=2 --skip=clipboard'
+
