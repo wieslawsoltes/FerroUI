@@ -47,7 +47,7 @@
     { "path": "src/Avalonia.FreeDesktop", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
     { "path": "src/Avalonia.FreeDesktop.AtSpi", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
     { "path": "src/Avalonia.Wayland", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
-    { "path": "src/Android/*", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
+    { "path": "src/Android/Avalonia.Android", "detail": "types", "crate": "ferroui-android", "phase": "6 - mobile (Android)", "priority": "P1" },
     { "path": "src/iOS/*", "detail": "types", "crate": "ferroui-ios", "phase": "6 - mobile (iOS)", "priority": "P2" },
     { "path": "src/Linux/*", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" },
     { "path": "src/Avalonia.Vulkan", "detail": "types", "scope": "out", "phase": "not started / out of current scope", "priority": "-" }
