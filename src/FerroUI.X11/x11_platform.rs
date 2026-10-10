@@ -33,7 +33,10 @@ use ferroui_base::threading::Dispatcher;
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::platform::IMountedVolumeInfoProvider;
 use ferroui_freedesktop::dbus_ime::X11DBusImeHelper;
-use ferroui_freedesktop::{DBusPlatformSettings, LinuxMountedVolumeInfoProvider};
+use crate::x11_icon_loader::X11IconData;
+use crate::x_embed_tray_icon_impl::XEmbedTrayIconImpl;
+use ferroui_controls::platform::IWindowIconImpl;
+use ferroui_freedesktop::{DBusPlatformSettings, DBusTrayIconImpl, LinuxMountedVolumeInfoProvider};
 use ferroui_controls::platform::{
     IPlatformIconLoader, IScreenImpl, ITopLevelImpl, ITrayIconImpl, IWindowImpl, IWindowingPlatform,
 };
@@ -480,6 +483,18 @@ impl FerroX11Platform {
     }
 }
 
+/// The data of an icon of this platform as the tray icon takes it
+/// (`X11IconConverter`): the width, the height and the pixels; empty for
+/// no icon and for an icon the platform cannot read.
+fn x11_icon_converter(icon: Option<&Rc<dyn IWindowIconImpl>>) -> Vec<u32> {
+    let Some(x11icon) = icon.and_then(|icon| X11IconData::from_icon_impl(icon).ok()) else {
+        return Vec::new();
+    };
+
+    // An item of the property is a C long that holds 32 bits.
+    x11icon.data().iter().map(|x| *x as u32).collect()
+}
+
 impl IWindowingPlatform for FerroX11Platform {
     fn create_window(&self) -> Rc<dyn IWindowImpl> {
         let this = self.this.upgrade().expect("the platform is alive");
@@ -495,12 +510,15 @@ impl IWindowingPlatform for FerroX11Platform {
     }
 
     fn create_tray_icon(&self) -> Option<Rc<dyn ITrayIconImpl>> {
-        // Stage 2 of docs/porting/x11-platform.md: the tray icon over
-        // D-Bus (`DBusTrayIconImpl`) is a service of the FreeDesktop
-        // crate, and the reference's fallback (`XEmbedTrayIconImpl`) only
-        // logs that it is not implemented. Without either, the platform
-        // has no tray icon, which the contract expresses.
-        None
+        let dbus_tray_icon = DBusTrayIconImpl::new();
+
+        if !dbus_tray_icon.is_active() {
+            return Some(Rc::new(XEmbedTrayIconImpl::new()));
+        }
+
+        dbus_tray_icon.set_icon_converter_delegate(Some(Rc::new(x11_icon_converter)));
+
+        Some(dbus_tray_icon)
     }
 
     fn get_windows_z_order(&self, windows: &[Rc<dyn IWindowImpl>], z_order: &mut [i64]) {

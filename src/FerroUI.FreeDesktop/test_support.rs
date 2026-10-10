@@ -156,8 +156,13 @@ impl TestConnections {
                     serve(builder).unwrap().build().unwrap()
                 })
             };
-            let client =
-                zbus::blocking::connection::Builder::async_io_unix_stream(client_end).p2p().build().unwrap().into_inner();
+            let client = DBusHelper::with_object_server(
+                zbus::blocking::connection::Builder::async_io_unix_stream(client_end).p2p(),
+            )
+            .unwrap()
+            .build()
+            .unwrap()
+            .into_inner();
             let service = service.join().unwrap();
             (client, service, Some(owners))
         };
@@ -228,6 +233,63 @@ impl TestConnections {
             pump_until(|| *done.borrow());
             Dispatcher::ui_thread().run_jobs(None);
         }
+    }
+}
+
+/// Calls a method of an object the code under test exports on the client
+/// connection, as a peer would: from the connection of the doubles, on
+/// another thread, while this thread runs the dispatcher (the exported
+/// objects answer from the UI thread).
+pub(crate) fn peer_call<B>(
+    connections: &TestConnections,
+    path: &str,
+    interface: &str,
+    method: &str,
+    body: B,
+) -> zbus::Result<zbus::Message>
+where
+    B: zbus::export::serde::ser::Serialize + zbus::zvariant::DynamicType + Send + 'static,
+{
+    let service = connections.service.clone();
+    let destination = connections.client.unique_name().map(|name| name.to_string());
+    let (path, interface, method) = (path.to_string(), interface.to_string(), method.to_string());
+    let worker = std::thread::spawn(move || {
+        service.call_method(destination.as_deref(), path.as_str(), Some(interface.as_str()), method.as_str(), &body)
+    });
+    pump_until(|| worker.is_finished());
+    worker.join().unwrap()
+}
+
+/// A property of such an object, shown as text (see [`show`]); `None`
+/// when the object does not answer.
+pub(crate) fn peer_property(connections: &TestConnections, path: &str, interface: &str, name: &str) -> Option<String> {
+    let body = (interface.to_string(), name.to_string());
+    let reply = peer_call(connections, path, "org.freedesktop.DBus.Properties", "Get", body).ok()?;
+    let value: zbus::zvariant::OwnedValue = reply.body().deserialize().ok()?;
+    Some(show(&value))
+}
+
+/// A value as text: variants unwrapped, the entries of a dictionary
+/// sorted by key.
+pub(crate) fn show(value: &zbus::zvariant::Value<'_>) -> String {
+    use zbus::zvariant::Value;
+    match value {
+        Value::Value(inner) => show(inner),
+        Value::Str(text) => text.to_string(),
+        Value::ObjectPath(path) => path.to_string(),
+        Value::Bool(flag) => flag.to_string(),
+        Value::U8(number) => number.to_string(),
+        Value::I32(number) => number.to_string(),
+        Value::U32(number) => number.to_string(),
+        Value::Array(items) => format!("[{}]", items.iter().map(show).collect::<Vec<_>>().join(",")),
+        Value::Structure(fields) => format!("({})", fields.fields().iter().map(show).collect::<Vec<_>>().join(",")),
+        Value::Dict(entries) => {
+            let mut entries: Vec<String> =
+                entries.iter().map(|(key, value)| format!("{}={}", show(key), show(value))).collect();
+            entries.sort();
+            format!("{{{}}}", entries.join(","))
+        }
+        other => format!("{other:?}"),
     }
 }
 

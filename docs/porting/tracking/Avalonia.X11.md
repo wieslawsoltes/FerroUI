@@ -10,15 +10,15 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.X11` (exists) |
 | Crate | `ferroui-x11` |
 | Phase / priority | 5 - desktop (Linux) / P1 |
-| Files | 72/88 (81.8%) |
-| Types | 144/291 (107 waived) (78.3%) |
+| Files | 73/88 (83.0%) |
+| Types | 145/291 (107 waived) (78.8%) |
 | Members | 0/4897 (0.0%) |
 
 This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
 
 ## Files
 
-### `(project root)` - files 30/37, types 91/216 (106 waived), members 0/4427
+### `(project root)` - files 31/37, types 92/216 (106 waived), members 0/4427
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
@@ -52,7 +52,7 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `X11Window.cs` | `x11_window.rs` | present | 2/2 | - | 86 |  |
 | `X11WindowInfo.cs` | `x11_window_info.rs` | present | 1/1 | - | 3 |  |
 | `XEmbedPlug.cs` | `x_embed_plug.rs` | missing | 0/1 | `XEmbedPlug` | 8 |  |
-| `XEmbedTrayIconImpl.cs` | `x_embed_tray_icon_impl.rs` | missing | 0/1 | `XEmbedTrayIconImpl` | 6 |  |
+| `XEmbedTrayIconImpl.cs` | `x_embed_tray_icon_impl.rs` | present | 1/1 | - | 6 |  |
 | `XError.cs` | `x_error.rs` | present | 1/1 | - | 3 |  |
 | `XI2Manager.cs` | `xi2_manager.rs` | present | 3/3 | - | 21 |  |
 | `XIStructs.cs` | `xi_structs.rs` | present | 11/28 (17 waived) | - | 185 | replaced: the structures of the X Input extension are those of the Xlib bindings and the copies `xlib.rs` makes of them (`XIDeviceEventData`, `XIClassInfo`, ...); the enumerations are ported |

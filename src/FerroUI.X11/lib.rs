@@ -78,6 +78,8 @@ pub mod x11_window_info;
 #[cfg(unix)]
 pub mod x11_window_modes;
 #[cfg(unix)]
+pub mod x_embed_tray_icon_impl;
+#[cfg(unix)]
 pub mod x_error;
 #[cfg(unix)]
 pub mod x_resources;
