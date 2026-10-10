@@ -589,3 +589,57 @@ jobs:
             xrandr --listmonitors
             timeout 300 target/debug/examples/x11_window --smoke --expect-screens=2 --skip=clipboard'
 
+
+  # The Android platform (docs/porting/android-platform.md, section 12): the tests of what is logic,
+  # and the package of the smoke application built without Gradle. Nothing runs on a device here:
+  # the emulator runs are made on the development machine (scripts/android/emu-smoke.sh).
+  android:
+    name: Build and package (Android, arm64)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: android
+      - name: Tests of the Android crate (the logic, on the host)
+        run: cargo test --locked -p ferroui-android --no-fail-fast
+      # The image has an Android SDK; what it has of it is printed, and the versions the scripts pin
+      # (scripts/android/env.sh) are installed when they are missing.
+      - name: The Android SDK of the image, and the pinned packages
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls "$ANDROID_HOME" "$ANDROID_HOME/ndk" "$ANDROID_HOME/build-tools" "$ANDROID_HOME/platforms" || true
+          java -version
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" \
+            "ndk;28.2.13676358" "build-tools;36.0.0" "platforms;android-36" > /dev/null
+          ls "$ANDROID_HOME/ndk"
+      # The native library is built together with the standard library, for thread-local storage
+      # that does not take a key of the C library per variable (android-platform.md, section 5.1).
+      - name: The toolchain that builds the standard library
+        run: |
+          . scripts/android/env.sh
+          rustup toolchain install "$FERROUI_ANDROID_RUST_TOOLCHAIN" --profile minimal --component rust-src
+      - name: Skia features of the target
+        run: |
+          # Ganesh on OpenGL, for which a Skia binary is published for the target. The scripts do not
+          # set ANDROID_NDK, so a fall-back to building Skia from source stops at once.
+          features="$(cargo tree --locked -p ferroui-skia -e features,normal --target aarch64-linux-android | grep -oE 'skia-bindings feature "(gl|ganesh|graphite|metal|vulkan|d3d)"' | sort -u | tr '\n' ' ')"
+          echo "GPU features: '$features'"
+          test "$features" = 'skia-bindings feature "ganesh" skia-bindings feature "gl" '
+      - name: The package of the smoke application
+        run: |
+          scripts/android/apk.sh smoke | tee apk.out
+          apk="$(sed -n 's/^APK: //p' apk.out)"
+          . scripts/android/env.sh
+          "$FERROUI_ANDROID_BUILD_TOOLS/aapt2" dump badging "$apk" | head -n 12
+          unzip -l "$apk"
+      - name: The ControlCatalog host compiles for the target
+        run: |
+          . scripts/android/env.sh
+          rustup target add aarch64-linux-android
+          cargo check --locked -p control-catalog-android --target aarch64-linux-android
