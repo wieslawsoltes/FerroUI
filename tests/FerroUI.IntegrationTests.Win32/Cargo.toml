@@ -1,0 +1,32 @@
+[package]
+name = "ferroui-integration-tests-win32"
+description = "Test crate: upstream's integration tests of the Windows platform backend, which open windows on a live desktop"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+# One test binary without the test harness: every test opens windows and
+# pumps the message loop of the thread that initialised the platform, so
+# the tests run one after the other on the main thread, as upstream's
+# executor runs them on its UI thread. On a system that is not Windows the
+# binary compiles (the tests are written against the window class) and
+# reports that it has nothing to run.
+[[test]]
+name = "integration"
+path = "main.rs"
+harness = false
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-themes-fluent.workspace = true
+
+# What upstream's tests set the application up with: the Windows backend,
+# Skia and HarfBuzz.
+[target.'cfg(windows)'.dependencies]
+ferroui-win32.workspace = true
+ferroui-skia.workspace = true
+ferroui-harfbuzz.workspace = true

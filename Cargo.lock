@@ -864,6 +864,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-integration-tests-win32"
+version = "0.1.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-harfbuzz",
+ "ferroui-skia",
+ "ferroui-themes-fluent",
+ "ferroui-win32",
+]
+
+[[package]]
 name = "ferroui-ios"
 version = "0.1.0-preview.1"
 dependencies = [
