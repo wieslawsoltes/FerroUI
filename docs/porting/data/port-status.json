@@ -467,7 +467,7 @@
    "name": "Avalonia.Android",
    "path": "src/Android/Avalonia.Android",
    "rust": "src/Android/FerroUI.Android",
-   "scope": "out",
+   "scope": "in",
    "detail": "types",
    "files": [
     0,
