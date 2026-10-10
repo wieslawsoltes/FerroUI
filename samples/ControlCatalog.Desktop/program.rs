@@ -25,7 +25,9 @@
 //! through the render target of the framework (`NN-<header>.png`). On
 //! Windows the client area of the window is captured as well, as the
 //! system composed it (`NN-<header>-window.png`); only the window of the
-//! application is captured, never the desktop. On Windows
+//! application is captured, never the desktop. The system does not draw
+//! what of a window lies outside the desktop, so the run first moves and
+//! shrinks the window until all of it is on its screen. On Windows
 //! `FERROUI_SMOKE_RENDERING=software` or `angle` asks for that rendering
 //! mode alone.
 //!
@@ -160,22 +162,24 @@ fn save_frame(window: &Ref<Window>, path: &Path) -> std::io::Result<PixelSize> {
 
 /// The client area of the window as the system composed it: the pixels
 /// (four bytes each, blue first, opaque), their size, and the number of
-/// different colours among a grid of samples. `None` on a system where
-/// the host has no capture.
+/// what the capture holds, in words (the number of different colours among
+/// a grid of samples, and how far its content reaches). `None` on a system
+/// where the host has no capture.
 #[cfg(windows)]
-fn capture_window(window: &Ref<Window>) -> Option<Result<(Vec<u8>, PixelSize, usize), String>> {
+fn capture_window(window: &Ref<Window>) -> Option<Result<(Vec<u8>, PixelSize, String), String>> {
     let Some(handle) = window.try_get_platform_handle() else {
         return Some(Err("the window has no platform handle".to_string()));
     };
     Some(window_capture::capture_client_area(handle.handle()).map(|capture| {
         let colors = window_capture::sampled_colors(&capture);
+        let (right, bottom) = window_capture::content_extent(&capture);
         let size = PixelSize::new(capture.width, capture.height);
-        (capture.pixels, size, colors)
+        (capture.pixels, size, format!("{colors} colour(s) among its samples, content reaches {right} by {bottom}"))
     }))
 }
 
 #[cfg(not(windows))]
-fn capture_window(_window: &Ref<Window>) -> Option<Result<(Vec<u8>, PixelSize, usize), String>> {
+fn capture_window(_window: &Ref<Window>) -> Option<Result<(Vec<u8>, PixelSize, String), String>> {
     None
 }
 
@@ -201,7 +205,7 @@ fn save_screenshots(directory: &Path, index: usize, header: &str) {
     match capture_window(&window) {
         None => {}
         Some(Err(error)) => println!("Screenshot of {header}: the window could not be captured: {error}"),
-        Some(Ok((pixels, size, colors))) => {
+        Some(Ok((pixels, size, content))) => {
             let path = directory.join(screenshot_name(index, header, "-window"));
             let bitmap = Bitmap::from_pixels(
                 PixelFormat::BGRA8888,
@@ -215,7 +219,7 @@ fn save_screenshots(directory: &Path, index: usize, header: &str) {
             bitmap.dispose();
             match result {
                 Ok(()) => println!(
-                    "Screenshot of {header}: {} ({} by {}, the window as the system composed it; {colors} colour(s) among its samples)",
+                    "Screenshot of {header}: {} ({} by {}, the window as the system composed it; {content})",
                     path.display(),
                     size.width,
                     size.height
@@ -226,6 +230,47 @@ fn save_screenshots(directory: &Path, index: usize, header: &str) {
             }
         }
     }
+}
+
+/// Moves and shrinks the window so that all of it is on its screen. The
+/// system does not draw the part of a window that lies outside the
+/// desktop, so a capture of a window that is larger than the screen, or
+/// placed over its edge, is blank there (the window of the catalog asks
+/// for 1100 by 800, more than a small desktop has).
+fn fit_window_to_screen(window: &Ref<Window>) {
+    let Some(screen) = window.screens().screen_from_window(window) else {
+        println!("Screenshots: the window is on no screen");
+        return;
+    };
+    let area = screen.working_area();
+    let scaling = window.render_scaling();
+    let client = window.client_size();
+    let frame = window.frame_size().unwrap_or(client);
+    let position = window.position();
+    let (frame_width, frame_height) = ((frame.width * scaling).ceil() as i32, (frame.height * scaling).ceil() as i32);
+    println!(
+        "Screenshots: the window is at {}, {} with a frame of {frame_width} by {frame_height} pixels (client {} by {} at scaling {scaling}); the working area of its screen is {area:?}",
+        position.x, position.y, client.width, client.height
+    );
+    let fits = position.x >= area.x
+        && position.y >= area.y
+        && position.x + frame_width <= area.right()
+        && position.y + frame_height <= area.bottom();
+    if fits {
+        return;
+    }
+    let width = client.width.min(f64::from(area.width) / scaling - (frame.width - client.width));
+    let height = client.height.min(f64::from(area.height) / scaling - (frame.height - client.height));
+    window.set_width(width.floor());
+    window.set_height(height.floor());
+    window.set_position(area.position());
+    println!(
+        "Screenshots: the window did not fit its screen: moved to {}, {} with a client area of {} by {}",
+        area.x,
+        area.y,
+        width.floor(),
+        height.floor()
+    );
 }
 
 /// The screenshot run asked for with `FERROUI_SMOKE_SCREENSHOTS`.
@@ -239,6 +284,16 @@ fn screenshot_run(directory: PathBuf) {
         pages.split(',').map(str::trim).filter(|header| !header.is_empty()).map(str::to_string).collect();
     let interval = Duration::from_millis(environment_milliseconds("FERROUI_SMOKE_PAGES").unwrap_or(1500));
     println!("Screenshots of {headers:?} to {}, {interval:?} a page", directory.display());
+    // Before the first page is shown: the window is made to fit its screen.
+    // The timer stops itself after its only tick.
+    let _timer = DispatcherTimer::run_once(
+        || match main_window() {
+            Some(window) => fit_window_to_screen(&window),
+            None => println!("Screenshots: there is no main window to fit to its screen"),
+        },
+        interval / 2,
+        DispatcherPriority::NORMAL,
+    );
     control_catalog::show_pages(
         headers,
         interval,
