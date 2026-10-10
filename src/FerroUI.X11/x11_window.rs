@@ -58,7 +58,11 @@ use ferroui_controls::{
 };
 use ferroui_dialogs::ManagedStorageProvider;
 use ferroui_freedesktop::dbus_system_dialog::ParentLeaseProvider;
-use ferroui_freedesktop::{DBusSystemDialog, IPortalParentLease, IX11InputMethodControl, TrivialPortalParentLease};
+use ferroui_controls::platform::ITopLevelNativeMenuExporter;
+use ferroui_freedesktop::{
+    DBusHelper, DBusMenuExporterImpl, DBusSystemDialog, IPortalParentLease, IX11InputMethodControl,
+    TrivialPortalParentLease,
+};
 use ferroui_opengl::egl::{EglGlPlatformSurface, IEglWindowGlPlatformSurfaceInfo};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
@@ -414,6 +418,7 @@ pub struct X11Window {
     touch: Rc<TouchDevice>,
     pub(crate) keyboard: Rc<dyn IKeyboardDevice>,
     storage_provider: RefCell<Option<Rc<dyn IStorageProvider>>>,
+    native_menu_exporter: RefCell<Option<Rc<DBusMenuExporterImpl>>>,
     position: Cell<Option<PixelPoint>>,
     real_size: Cell<PixelSize>,
     cleaning_up: Cell<bool>,
@@ -643,6 +648,7 @@ impl X11Window {
             touch: TouchDevice::new(),
             keyboard: platform.keyboard_device(),
             storage_provider: RefCell::new(None),
+            native_menu_exporter: RefCell::new(None),
             position: Cell::new(None),
             real_size: Cell::new(PixelSize::new(default_width, default_height)),
             cleaning_up: Cell::new(false),
@@ -853,10 +859,14 @@ impl X11Window {
             let positioner: Rc<dyn IPopupPositioner> = Rc::new(ManagedPopupPositioner::new(Rc::new(helper)));
             *window.popup_positioner.borrow_mut() = Some(positioner);
         }
-        // Stages 2e and 2f of docs/porting/x11-platform.md, in the order
-        // of the reference: the exporter of the native menu over D-Bus
-        // (`DBusMenuExporter`, with `X11PlatformOptions::use_d_bus_menu`)
-        // and the native control host (`X11NativeControlHost`).
+        if window.platform.options().use_d_bus_menu {
+            if let Some(conn) = DBusHelper::default_connection() {
+                let exporter = DBusMenuExporterImpl::new_top_level(conn, window.handle.get() as usize);
+                *window.native_menu_exporter.borrow_mut() = Some(exporter);
+            }
+        }
+        // Stage 2f of docs/porting/x11-platform.md, here in the order of
+        // the reference: the native control host (`X11NativeControlHost`).
         window.initialize_ime();
 
         let mut data = vec![x11.atoms().WM_DELETE_WINDOW, x11.atoms()._NET_WM_SYNC_REQUEST];
@@ -1598,6 +1608,10 @@ impl X11Window {
             }
         }
 
+        if let Some(native_menu_exporter) = &*self.native_menu_exporter.borrow() {
+            native_menu_exporter.dispose();
+        }
+
         let grouper = self.raw_event_grouper.borrow_mut().take();
         if let Some(grouper) = grouper {
             grouper.dispose();
@@ -1909,9 +1923,13 @@ pub(crate) fn encode_ascii(text: &str) -> Vec<u8> {
 
 impl IOptionalFeatureProvider for X11Window {
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
-        // Not available yet, each a feature the reference answers here:
-        // the exporter of the native menu and the native control host
-        // (stages 2e and 2f of docs/porting/x11-platform.md).
+        // Not available yet, a feature the reference answers here: the
+        // native control host (stage 2f of docs/porting/x11-platform.md).
+
+        if feature_type == TypeId::of::<dyn ITopLevelNativeMenuExporter>() {
+            let exporter: Rc<dyn ITopLevelNativeMenuExporter> = self.native_menu_exporter.borrow().clone()?;
+            return Some(Rc::new(exporter));
+        }
 
         if feature_type == TypeId::of::<dyn ITextInputMethodImpl>() {
             let ime = self.ime.borrow().clone()?;

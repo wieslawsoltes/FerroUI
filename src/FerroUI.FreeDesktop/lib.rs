@@ -3,8 +3,7 @@
 //! The services of a FreeDesktop session that the Linux platforms of
 //! FerroUI share: the input methods that are reached over D-Bus (IBus,
 //! Fcitx), the platform settings of the settings portal, the mounted
-//! volumes, and, in later stages, the file chooser portal, the menu
-//! exporter and the tray icon. `docs/porting/x11-platform.md` has the design (section 3 for
+//! volumes, the file chooser portal, the menu exporter and the tray icon. `docs/porting/x11-platform.md` has the design (section 3 for
 //! D-Bus) and the stages.
 //!
 //! D-Bus is spoken through `zbus`. A connection reads its socket on a
@@ -24,9 +23,13 @@ pub mod dbus_helper;
 #[cfg(unix)]
 pub mod dbus_ime;
 #[cfg(unix)]
+pub mod dbus_menu_exporter;
+#[cfg(unix)]
 pub mod dbus_platform_settings;
 #[cfg(unix)]
 pub mod dbus_system_dialog;
+#[cfg(unix)]
+pub mod dbus_tray_icon_impl;
 #[cfg(unix)]
 pub mod i_portal_parent_lease;
 #[cfg(unix)]
@@ -39,13 +42,19 @@ pub mod linux_mounted_volume_info_provider;
 pub mod native_methods;
 #[cfg(unix)]
 pub mod signal_watch;
+#[cfg(unix)]
+pub mod ui_thread_object;
 
 #[cfg(unix)]
 pub use dbus_call_queue::{DBusCallError, DBusCallQueue, DBusResult};
 #[cfg(unix)]
 pub use dbus_helper::DBusHelper;
 #[cfg(unix)]
+pub use dbus_menu_exporter::{DBusMenuExporter, DBusMenuExporterImpl};
+#[cfg(unix)]
 pub use dbus_platform_settings::DBusPlatformSettings;
+#[cfg(unix)]
+pub use dbus_tray_icon_impl::DBusTrayIconImpl;
 #[cfg(unix)]
 pub use dbus_system_dialog::DBusSystemDialog;
 #[cfg(unix)]

@@ -6712,12 +6712,12 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    16,
+    18,
     18,
     0
    ],
    "types": [
-    23,
+    26,
     26,
     0
    ],
@@ -6768,11 +6768,17 @@
     "DBusIme/X11DBusImeHelper.cs": [
      "dbus_ime/x11_dbus_ime_helper.rs"
     ],
+    "DBusMenuExporter.cs": [
+     "dbus_menu_exporter.rs"
+    ],
     "DBusPlatformSettings.cs": [
      "dbus_platform_settings.rs"
     ],
     "DBusSystemDialog.cs": [
      "dbus_system_dialog.rs"
+    ],
+    "DBusTrayIconImpl.cs": [
+     "dbus_tray_icon_impl.rs"
     ],
     "IPortalParentLease.cs": [
      "i_portal_parent_lease.rs"
@@ -6794,10 +6800,13 @@
     "dbus_ime/fcitx/dbus.rs",
     "dbus_ime/ibus/dbus.rs",
     "dbus_ime/tests.rs",
+    "dbus_menu_exporter/tests.rs",
     "dbus_system_dialog/tests.rs",
+    "dbus_tray_icon_impl/tests.rs",
     "event.rs",
     "signal_watch.rs",
-    "test_support.rs"
+    "test_support.rs",
+    "ui_thread_object.rs"
    ]
   },
   {
@@ -7585,12 +7594,12 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    72,
+    73,
     88,
     0
    ],
    "types": [
-    144,
+    145,
     291,
     107
    ],
@@ -7802,6 +7811,9 @@
     ],
     "X11WindowModes/WindowMode.cs": [
      "x11_window_modes/window_mode.rs"
+    ],
+    "XEmbedTrayIconImpl.cs": [
+     "x_embed_tray_icon_impl.rs"
     ],
     "XError.cs": [
      "x_error.rs"

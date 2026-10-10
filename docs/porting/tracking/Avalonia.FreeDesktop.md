@@ -10,24 +10,24 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.FreeDesktop` (exists) |
 | Crate | `ferroui-freedesktop` |
 | Phase / priority | 5 - desktop (Linux) / P1 |
-| Files | 16/18 (88.9%) |
-| Types | 23/26 (88.5%) |
+| Files | 18/18 (100.0%) |
+| Types | 26/26 (100.0%) |
 | Members | 0/216 (0.0%) |
 
 This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
 
 ## Files
 
-### `(project root)` - files 9/11, types 12/15, members 0/76
+### `(project root)` - files 11/11, types 15/15, members 0/76
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
 | `DBusCallQueue.cs` | `dbus_call_queue.rs` | present | 1/1 | - | 5 |  |
 | `DBusHelper.cs` | `dbus_helper.rs` | present | 1/1 | - | 2 |  |
-| `DBusMenuExporter.cs` | `d_bus_menu_exporter.rs` | missing | 0/1 | `DBusMenuExporter` | 3 |  |
+| `DBusMenuExporter.cs` | `dbus_menu_exporter.rs` | present | 1/1 | - | 3 |  |
 | `DBusPlatformSettings.cs` | `dbus_platform_settings.rs` | present | 1/1 | - | 2 |  |
 | `DBusSystemDialog.cs` | `dbus_system_dialog.rs` | present | 1/1 | - | 7 |  |
-| `DBusTrayIconImpl.cs` | `d_bus_tray_icon_impl.rs` | missing | 0/2 | `DBusTrayIconImpl`, `StatusNotifierItemDbusObj` | 37 |  |
+| `DBusTrayIconImpl.cs` | `dbus_tray_icon_impl.rs` | present | 2/2 | - | 37 |  |
 | `IPortalParentLease.cs` | `i_portal_parent_lease.rs` | present | 2/2 | - | 4 |  |
 | `IX11InputMethod.cs` | `ix11_input_method.rs` | present | 3/3 | - | 11 |  |
 | `LinuxMountedVolumeInfoListener.cs` | `linux_mounted_volume_info_listener.rs` | present | 1/1 | - | 3 |  |
@@ -65,7 +65,10 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `dbus_ime/fcitx/dbus.rs` | **unmapped** | `InputContext`, `InputContext1`, `InputMethod`, `InputMethod1` |
 | `dbus_ime/ibus/dbus.rs` | **unmapped** | `InputContext`, `Portal`, `Service` |
 | `dbus_ime/tests.rs` | the unit tests of the module | `Fcitx4Context`, `Fcitx4Method`, `Fcitx5Context`, `Fcitx5Method`, `IBusContext`, `IBusPortal`, `IBusService`, `Recorded`, `TestBus`, `TestClient`, `TestDevice`, `TestRoot` |
+| `dbus_menu_exporter/tests.rs` | the unit tests of the module | `Fixture`, `RegistrarDouble` |
 | `dbus_system_dialog/tests.rs` | the unit tests of the module | `Answer`, `Fixture`, `Portal` |
+| `dbus_tray_icon_impl/tests.rs` | the unit tests of the module | `Fixture`, `TestIcon`, `WatcherDouble` |
 | `event.rs` | **unmapped** | `Event` |
-| `signal_watch.rs` | **unmapped** | `CancellationFlag`, `CancellationState`, `Cancelled`, `Subscription` |
+| `signal_watch.rs` | A subscription to a D-Bus signal as a disposable handle, and a cancellation flag: facilities of the D-Bus library and of the runtime of the original (`Watch...Async`, `CancellationTokenSource`) | `CancellationFlag`, `CancellationState`, `Cancelled`, `Subscription` |
 | `test_support.rs` | **unmapped** | `FakeBus`, `Log`, `ServiceBuilder`, `TestConnections` |
+| `ui_thread_object.rs` | How an object exported on a connection answers from the object of the UI thread it stands for: the D-Bus library of the original calls a handler on the synchronization context of the thread that made the connection | `Sender`, `Slot`, `UiThreadCall`, `UiThreadHandle` |

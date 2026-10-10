@@ -56,6 +56,11 @@
 //!   once small and once larger than a property may be, so that it is
 //!   transferred incrementally (`INCR`) in each direction. The other
 //!   client is `xclip`, which has to be installed.
+//! - **menu** (with `--menu`): the example is also the registrar of
+//!   application menus and the watcher of status notifier items on the
+//!   session bus, and asks the application what a desktop shell asks: the
+//!   layout of the menu of the window, a click of one of its items, the
+//!   properties, the menu and the activation of a tray icon.
 //! - **ime** (with `--ime=ibus` or `--ime=xim`): a text box gets the
 //!   focus and the server synthesizes keys. With `ibus` the input method
 //!   is the one over D-Bus, and this example is also the service it talks
@@ -201,6 +206,7 @@ mod app {
 
     pub fn run() -> ExitCode {
         prepare_ime();
+        prepare_menu();
         let smoke = std::env::args().any(|arg| arg == "--smoke");
         let args: Vec<String> = std::env::args()
             .skip(1)
@@ -212,6 +218,7 @@ mod app {
                     && !arg.starts_with("--ime=")
                     && !arg.starts_with("--dnd-target=")
                     && arg != "--dnd"
+                    && arg != "--menu"
                     && arg != "--expect-fallback"
                     && arg != "--shm"
             })
@@ -383,6 +390,205 @@ mod app {
             match DOUBLE.get() {
                 Some(Ok(double)) => double.log.lock().unwrap().clone(),
                 _ => Vec::new(),
+            }
+        }
+    }
+
+    /// A service that answers as the registrar of application menus and as
+    /// the watcher of status notifier items do, on the session bus of the
+    /// environment (a private one: `dbus-run-session`), and that asks the
+    /// application what a menu host and a tray host ask. Not part of the
+    /// platform: the smoke mode uses it to stand in for a desktop shell.
+    mod desktop_double {
+        use std::collections::HashMap;
+        use std::sync::{Arc, Mutex, OnceLock};
+        use zbus::zvariant::{OwnedObjectPath, OwnedValue, Value};
+
+        pub const REGISTRAR_NAME: &str = "com.canonical.AppMenu.Registrar";
+        pub const WATCHER_NAME: &str = "org.kde.StatusNotifierWatcher";
+        pub const MENU_INTERFACE: &str = "com.canonical.dbusmenu";
+        pub const ITEM_INTERFACE: &str = "org.kde.StatusNotifierItem";
+        pub const ITEM_PATH: &str = "/StatusNotifierItem";
+
+        #[derive(Default)]
+        struct State {
+            /// Window, the unique name of who registered it, the path of its menu.
+            windows: Vec<(u32, String, String)>,
+            /// The service names of the items, with the unique name of who registered each.
+            items: Vec<(String, String)>,
+        }
+
+        type Shared = Arc<Mutex<State>>;
+
+        fn sender(header: &zbus::message::Header<'_>) -> String {
+            header.sender().map(|sender| sender.to_string()).unwrap_or_default()
+        }
+
+        struct Registrar {
+            state: Shared,
+        }
+
+        #[zbus::interface(name = "com.canonical.AppMenu.Registrar")]
+        impl Registrar {
+            fn register_window(
+                &self,
+                window_id: u32,
+                menu_object_path: OwnedObjectPath,
+                #[zbus(header)] header: zbus::message::Header<'_>,
+            ) {
+                self.state.lock().unwrap().windows.push((window_id, sender(&header), menu_object_path.to_string()));
+            }
+
+            fn unregister_window(&self, window_id: u32) {
+                self.state.lock().unwrap().windows.retain(|(id, _, _)| *id != window_id);
+            }
+        }
+
+        struct Watcher {
+            state: Shared,
+        }
+
+        #[zbus::interface(name = "org.kde.StatusNotifierWatcher")]
+        impl Watcher {
+            fn register_status_notifier_item(&self, service: &str, #[zbus(header)] header: zbus::message::Header<'_>) {
+                self.state.lock().unwrap().items.push((service.to_string(), sender(&header)));
+            }
+        }
+
+        struct Double {
+            connection: zbus::blocking::Connection,
+            state: Shared,
+        }
+
+        static DOUBLE: OnceLock<Result<Double, String>> = OnceLock::new();
+
+        /// Starts the service; an error when the session bus cannot be
+        /// reached or a name is taken.
+        pub fn start() -> Result<(), String> {
+            DOUBLE
+                .get_or_init(|| {
+                    let state: Shared = Arc::default();
+                    let connection = zbus::blocking::connection::Builder::session()
+                        .and_then(|builder| {
+                            builder.serve_at("/com/canonical/AppMenu/Registrar", Registrar { state: state.clone() })
+                        })
+                        .and_then(|builder| builder.serve_at("/StatusNotifierWatcher", Watcher { state: state.clone() }))
+                        .and_then(|builder| builder.name(REGISTRAR_NAME))
+                        .and_then(|builder| builder.name(WATCHER_NAME))
+                        .and_then(|builder| builder.build())
+                        .map_err(|error| error.to_string())?;
+                    Ok(Double { connection, state })
+                })
+                .as_ref()
+                .map(|_| ())
+                .map_err(Clone::clone)
+        }
+
+        fn double() -> Option<&'static Double> {
+            DOUBLE.get().and_then(|double| double.as_ref().ok())
+        }
+
+        /// Who registered the menu of `window`, and at which path.
+        pub fn registered_window(window: u32) -> Option<(String, String)> {
+            let state = double()?.state.lock().unwrap();
+            state.windows.iter().find(|(id, _, _)| *id == window).map(|(_, sender, path)| (sender.clone(), path.clone()))
+        }
+
+        /// The items the watcher was told about, in order.
+        pub fn registered_items() -> Vec<(String, String)> {
+            double().map(|double| double.state.lock().unwrap().items.clone()).unwrap_or_default()
+        }
+
+        /// The answer of a call the double makes, once it arrived.
+        pub type Answer<T> = Arc<Mutex<Option<T>>>;
+
+        /// Makes a call from the connection of the double, on a thread of
+        /// its own: the application answers from its UI thread, which has
+        /// to go on running meanwhile.
+        pub fn ask<T: Send + 'static>(
+            call: impl FnOnce(&zbus::blocking::Connection) -> T + Send + 'static,
+        ) -> Answer<T> {
+            let answer: Answer<T> = Arc::default();
+            if let Some(double) = double() {
+                let (connection, answer) = (double.connection.clone(), answer.clone());
+                std::thread::spawn(move || {
+                    let value = call(&connection);
+                    *answer.lock().unwrap() = Some(value);
+                });
+            }
+            answer
+        }
+
+        /// A value as text: variants unwrapped, a dictionary sorted by key.
+        pub fn show(value: &Value<'_>) -> String {
+            match value {
+                Value::Value(inner) => show(inner),
+                Value::Str(text) => text.to_string(),
+                Value::ObjectPath(path) => path.to_string(),
+                Value::Bool(flag) => flag.to_string(),
+                Value::U8(number) => number.to_string(),
+                Value::I32(number) => number.to_string(),
+                Value::U32(number) => number.to_string(),
+                Value::Array(items) => format!("[{}]", items.iter().map(show).collect::<Vec<_>>().join(",")),
+                Value::Structure(fields) => {
+                    format!("({})", fields.fields().iter().map(show).collect::<Vec<_>>().join(","))
+                }
+                Value::Dict(entries) => {
+                    let mut entries: Vec<String> =
+                        entries.iter().map(|(key, value)| format!("{}={}", show(key), show(value))).collect();
+                    entries.sort();
+                    format!("{{{}}}", entries.join(","))
+                }
+                other => format!("{other:?}"),
+            }
+        }
+
+        /// `GetLayout` of the whole menu at `path` of `destination`, as text.
+        pub fn layout(connection: &zbus::blocking::Connection, destination: &str, path: &str) -> Result<String, String> {
+            let body = (0i32, -1i32, Vec::<String>::new());
+            let reply = connection
+                .call_method(Some(destination), path, Some(MENU_INTERFACE), "GetLayout", &body)
+                .map_err(|error| error.to_string())?;
+            let (_, (id, properties, children)): (u32, (i32, HashMap<String, OwnedValue>, Vec<OwnedValue>)) =
+                reply.body().deserialize().map_err(|error| error.to_string())?;
+            let mut entries: Vec<String> = properties.iter().map(|(key, value)| format!("{key}={}", show(value))).collect();
+            entries.sort();
+            let children: Vec<String> = children.iter().map(|child| show(child)).collect();
+            Ok(format!("({id},{{{}}},[{}])", entries.join(","), children.join(",")))
+        }
+
+        /// The event "clicked" for the item `id` of that menu.
+        pub fn click(connection: &zbus::blocking::Connection, destination: &str, path: &str, id: i32) -> Result<(), String> {
+            let body = (id, "clicked", Value::I32(0), 0u32);
+            connection
+                .call_method(Some(destination), path, Some(MENU_INTERFACE), "Event", &body)
+                .map(|_| ())
+                .map_err(|error| error.to_string())
+        }
+
+        /// A property of the item of `destination`, as text.
+        pub fn item_property(connection: &zbus::blocking::Connection, destination: &str, name: &str) -> Result<String, String> {
+            let reply = connection
+                .call_method(Some(destination), ITEM_PATH, Some("org.freedesktop.DBus.Properties"), "Get", &(ITEM_INTERFACE, name))
+                .map_err(|error| error.to_string())?;
+            let value: OwnedValue = reply.body().deserialize().map_err(|error| error.to_string())?;
+            Ok(show(&value))
+        }
+
+        /// Whether somebody owns `name` on the bus.
+        pub fn has_owner(connection: &zbus::blocking::Connection, name: &str) -> Result<bool, String> {
+            let dbus = zbus::blocking::fdo::DBusProxy::new(connection).map_err(|error| error.to_string())?;
+            let name = zbus::names::BusName::try_from(name).map_err(|error| error.to_string())?;
+            dbus.name_has_owner(name).map_err(|error| error.to_string())
+        }
+    }
+
+    /// Starts the double of the desktop shell before the platform connects
+    /// to the session bus, when `--menu` asks for the menu and tray phase.
+    fn prepare_menu() {
+        if std::env::args().any(|arg| arg == "--menu") {
+            if let Err(error) = desktop_double::start() {
+                println!("The double of the desktop shell did not start: {error}");
             }
         }
     }
@@ -803,6 +1009,10 @@ mod app {
                 if std::env::args().any(|arg| arg == "--dnd") {
                     report.phase("dnd");
                     dnd_checks(&report, &platform, &window, &content).await;
+                }
+                if std::env::args().any(|arg| arg == "--menu") {
+                    report.phase("menu");
+                    menu_checks(&report, &window).await;
                 }
             }
 
@@ -1634,6 +1844,218 @@ mod app {
             xtest::key(display, key_code, false);
             delay(Duration::from_millis(50)).await;
             true
+        }
+
+        /// Waits for the answer of a call of the double of the desktop shell.
+        async fn answer_of<T: Clone>(answer: desktop_double::Answer<T>) -> Option<T> {
+            wait_for(STEP_TIMEOUT, || answer.lock().unwrap().is_some()).await;
+            let value = answer.lock().unwrap().clone();
+            value
+        }
+
+        /// The identifier of the item with `label` in a layout that was
+        /// asked for with all properties, as [`desktop_double::layout`]
+        /// shows it: `(id,{..label=..`.
+        fn item_id(layout: &str, label: &str) -> Option<i32> {
+            let at = layout.find(&format!("label={label}"))?;
+            let open = layout[..at].rfind('(')?;
+            layout[open + 1..at].split(',').next()?.parse().ok()
+        }
+
+        /// The menu of the window and a tray icon, as a desktop shell sees
+        /// them: the double of this example is the registrar of
+        /// application menus and the watcher of status notifier items,
+        /// and asks the application for layouts and properties and sends
+        /// it the events a shell sends.
+        async fn menu_checks(report: &Report, window: &Ref<Window>) {
+            use ferroui_controls::platform::ITopLevelNativeMenuExporter;
+            use ferroui_controls::{NativeMenu, NativeMenuItem, TrayIcon};
+
+            let (Some(xid), Some(window_impl)) = (xid_of(window), window.platform_impl()) else {
+                report.check("handle", false, "the window has no platform implementation".to_string());
+                return;
+            };
+            let has_exporter = window_impl.try_get_feature(TypeId::of::<dyn ITopLevelNativeMenuExporter>()).is_some();
+            report.check("menu exporter", has_exporter, format!("the window offers a native menu exporter: {has_exporter}"));
+
+            wait_for(STEP_TIMEOUT, || desktop_double::registered_window(xid as u32).is_some()).await;
+            let registration = desktop_double::registered_window(xid as u32);
+            report.check(
+                "menu registered",
+                registration.as_ref().is_some_and(|(_, path)| path.starts_with("/org/ferroui/dbusmenu/")),
+                format!("the registrar was told about window {xid:#x}: {registration:?}"),
+            );
+            let Some((owner, path)) = registration else {
+                return;
+            };
+
+            let clicks = Rc::new(Cell::new(0));
+            let menu = NativeMenu::new();
+            let file = NativeMenuItem::with_header("File");
+            let file_menu = NativeMenu::new();
+            let quit = NativeMenuItem::with_header("Quit");
+            let _click = {
+                let clicks = clicks.clone();
+                quit.click(move |_| clicks.set(clicks.get() + 1))
+            };
+            file_menu.add(quit.clone());
+            file.set_menu(Some(file_menu));
+            menu.add(file);
+            NativeMenu::set_menu(window, Some(menu));
+
+            let layout = {
+                let (owner, path) = (owner.clone(), path.clone());
+                answer_of(desktop_double::ask(move |connection| desktop_double::layout(connection, &owner, &path))).await
+            };
+            let layout = layout.unwrap_or(Err("no answer".to_string()));
+            let expected = "(0,{},[(1,{children-display=submenu,label=File,visible=true},[(2,{label=Quit,visible=true},[])])])";
+            report.check(
+                "menu layout",
+                layout.as_deref() == Ok(expected),
+                format!("the layout a host is given: {layout:?}"),
+            );
+            let exported = NativeMenu::get_is_native_menu_exported(window);
+            report.check("menu exported", exported, format!("the window says its menu is exported: {exported}"));
+
+            let quit_id = layout.as_deref().ok().and_then(|layout| item_id(layout, "Quit"));
+            if let Some(id) = quit_id {
+                let (owner, path) = (owner.clone(), path.clone());
+                let sent =
+                    answer_of(desktop_double::ask(move |connection| desktop_double::click(connection, &owner, &path, id))).await;
+                wait_for(STEP_TIMEOUT, || clicks.get() > 0).await;
+                report.check(
+                    "menu click",
+                    clicks.get() == 1,
+                    format!("the event of the host ({sent:?}) raised the click of the item {} time(s)", clicks.get()),
+                );
+            } else {
+                report.check("menu click", false, "the layout has no item to click".to_string());
+            }
+
+            // The tray icon.
+            let tray_clicks = Rc::new(Cell::new(0));
+            let tray_icon = TrayIcon::new();
+            let _tray_click = {
+                let tray_clicks = tray_clicks.clone();
+                tray_icon.clicked(move |_| tray_clicks.set(tray_clicks.get() + 1))
+            };
+            tray_icon.set_tool_tip_text(Some("FerroUI tray".to_string()));
+            let tray_menu = NativeMenu::new();
+            tray_menu.add(NativeMenuItem::with_header("Show"));
+            tray_icon.set_menu(Some(tray_menu));
+
+            wait_for(STEP_TIMEOUT, || !desktop_double::registered_items().is_empty()).await;
+            let items = desktop_double::registered_items();
+            let expected_name = format!("org.kde.StatusNotifierItem-{}-0", std::process::id());
+            report.check(
+                "tray registered",
+                items.len() == 1 && items[0].0 == expected_name,
+                format!("the watcher was told about {items:?}, expected the item {expected_name}"),
+            );
+            let Some((name, _)) = items.first().cloned() else {
+                tray_icon.dispose();
+                return;
+            };
+
+            let owned = {
+                let name = name.clone();
+                answer_of(desktop_double::ask(move |connection| desktop_double::has_owner(connection, &name))).await
+            };
+            report.check("tray name", owned == Some(Ok(true)), format!("the bus says the name of the item is owned: {owned:?}"));
+
+            // The title is set right after the registration: asked until it is there.
+            let mut title = None;
+            for _ in 0..20 {
+                let name = name.clone();
+                title = answer_of(desktop_double::ask(move |connection| desktop_double::item_property(connection, &name, "Title")))
+                    .await;
+                if title == Some(Ok("FerroUI tray".to_string())) {
+                    break;
+                }
+                delay(Duration::from_millis(100)).await;
+            }
+            report.check(
+                "tray title",
+                title == Some(Ok("FerroUI tray".to_string())),
+                format!("the title of the item, read by a host: {title:?}"),
+            );
+            let properties = {
+                let name = name.clone();
+                answer_of(desktop_double::ask(move |connection| {
+                    ["Status", "Category", "Id", "Menu", "ItemIsMenu"]
+                        .map(|property| desktop_double::item_property(connection, &name, property).unwrap_or_else(|error| error))
+                }))
+                .await
+            };
+            let menu_path = properties.as_ref().map(|properties| properties[3].clone()).unwrap_or_default();
+            report.check(
+                "tray properties",
+                properties.as_ref().is_some_and(|properties| {
+                    properties[0] == "Active"
+                        && properties[1] == "ApplicationStatus"
+                        && properties[2] == "FerroUI tray"
+                        && properties[3].starts_with("/org/ferroui/dbusmenu/")
+                        && properties[4] == "false"
+                }),
+                format!("status, category, id, menu and whether the item is a menu: {properties:?}"),
+            );
+
+            let tray_layout = {
+                let (name, menu_path) = (name.clone(), menu_path.clone());
+                answer_of(desktop_double::ask(move |connection| desktop_double::layout(connection, &name, &menu_path))).await
+            };
+            report.check(
+                "tray menu",
+                tray_layout == Some(Ok("(0,{},[(1,{label=Show,visible=true},[])])".to_string())),
+                format!("the layout of the menu of the item: {tray_layout:?}"),
+            );
+
+            let activated = {
+                let name = name.clone();
+                answer_of(desktop_double::ask(move |connection| {
+                    connection
+                        .call_method(
+                            Some(name.as_str()),
+                            desktop_double::ITEM_PATH,
+                            Some(desktop_double::ITEM_INTERFACE),
+                            "Activate",
+                            &(0i32, 0i32),
+                        )
+                        .map(|_| ())
+                        .map_err(|error| error.to_string())
+                }))
+                .await
+            };
+            wait_for(STEP_TIMEOUT, || tray_clicks.get() > 0).await;
+            report.check(
+                "tray click",
+                tray_clicks.get() == 1,
+                format!("the activation by the host ({activated:?}) raised the click of the tray icon {} time(s)", tray_clicks.get()),
+            );
+
+            // A hidden icon gives its name back, and its object is gone.
+            tray_icon.set_is_visible(false);
+            let mut hidden = None;
+            for _ in 0..20 {
+                let name = name.clone();
+                hidden = answer_of(desktop_double::ask(move |connection| desktop_double::has_owner(connection, &name))).await;
+                if hidden == Some(Ok(false)) {
+                    break;
+                }
+                delay(Duration::from_millis(100)).await;
+            }
+            report.check("tray hidden", hidden == Some(Ok(false)), format!("the name of a hidden item is owned: {hidden:?}"));
+
+            tray_icon.set_is_visible(true);
+            wait_for(STEP_TIMEOUT, || desktop_double::registered_items().len() >= 2).await;
+            let items = desktop_double::registered_items();
+            report.check(
+                "tray shown again",
+                items.len() == 2 && items[1].0 == name,
+                format!("the watcher was told about the item again, under its name: {items:?}"),
+            );
+
+            tray_icon.dispose();
         }
 
         /// Text input through an input method: a text box gets the focus,
