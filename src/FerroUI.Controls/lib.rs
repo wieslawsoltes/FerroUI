@@ -620,7 +620,9 @@ pub use platform::X11Properties;
 pub use platform::Win32Properties;
 pub use url_opened_event_args::UrlOpenedEventArgs;
 #[cfg(test)]
-mod storage_misc_tests;
+mod native_control_host_tests;
+#[cfg(test)]
+pub(crate) mod storage_misc_tests;
 
 // --- flexpanel ---
 pub mod flex_panel;

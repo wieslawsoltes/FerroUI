@@ -376,10 +376,10 @@ impl INativeControlHostDestroyableControlHandle for TestHandle {
 }
 
 #[derive(Default)]
-struct TestAttachment {
+pub(crate) struct TestAttachment {
     attached_to: RefCell<Option<Rc<dyn INativeControlHostImpl>>>,
-    shown: RefCell<Vec<Rect>>,
-    hidden: RefCell<Vec<Size>>,
+    pub(crate) shown: RefCell<Vec<Rect>>,
+    pub(crate) hidden: RefCell<Vec<Size>>,
     disposed: Cell<bool>,
     /// Whether the attachment refuses to move to another host.
     incompatible: Cell<bool>,
@@ -414,16 +414,16 @@ impl INativeControlHostControlTopLevelAttachment for TestAttachment {
     }
 }
 
-struct TestNativeControlHostImpl {
+pub(crate) struct TestNativeControlHostImpl {
     this: std::rc::Weak<TestNativeControlHostImpl>,
     handles: RefCell<Vec<Rc<TestHandle>>>,
-    attachments: RefCell<Vec<Rc<TestAttachment>>>,
+    pub(crate) attachments: RefCell<Vec<Rc<TestAttachment>>>,
     /// Whether the host refuses the handles of existing native controls.
     incompatible_with_handles: Cell<bool>,
 }
 
 impl TestNativeControlHostImpl {
-    fn new() -> Rc<Self> {
+    pub(crate) fn new() -> Rc<Self> {
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
             handles: RefCell::new(Vec::new()),
