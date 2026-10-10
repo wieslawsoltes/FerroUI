@@ -1,6 +1,6 @@
 [package]
 name = "ferroui-freedesktop"
-description = "The FreeDesktop services of FerroUI for Linux desktops: D-Bus input methods, portals, menus and tray icons"
+description = "The FreeDesktop services of FerroUI for Linux desktops: D-Bus input methods, portals, menus, tray icons and accessibility over AT-SPI"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
