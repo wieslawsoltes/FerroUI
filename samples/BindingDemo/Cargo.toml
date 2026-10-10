@@ -1,0 +1,45 @@
+[package]
+name = "binding-demo"
+description = "The BindingDemo sample of FerroUI: bindings of every kind (modes, collections, negation, element names, resources, streams, validation, commands, generic types in markup)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+build = "build.rs"
+
+# Unit tests live next to the code (`tests/` modules of the library), not as integration test
+# targets.
+autotests = false
+autobenches = false
+autoexamples = false
+autobins = false
+
+[lib]
+path = "lib.rs"
+
+# The desktop entry point: `Main` of `App.xaml.cs` of the upstream sample.
+[[bin]]
+name = "binding-demo"
+path = "program.rs"
+
+[dependencies]
+# The compiled markup of the crate calls the typed functions of the declared members.
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+ferroui-markup = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+ferroui-themes-fluent = { workspace = true }
+# The entry point.
+ferroui-desktop = { workspace = true }
+mini-mvvm = { path = "../MiniMvvm" }
+sample-support = { path = "../SampleSupport" }
+
+[build-dependencies]
+sample-build = { path = "../SampleBuild" }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+sample-testing = { path = "../SampleTesting" }

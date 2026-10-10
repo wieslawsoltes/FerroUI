@@ -64,13 +64,14 @@ pub struct SampleBuild {
     assembly_name: String,
     default_compile_bindings: bool,
     not_compared: Vec<(String, String)>,
+    refused: Vec<(String, String)>,
 }
 
 impl SampleBuild {
     /// The build of the sample whose assembly is `assembly_name` (`ASSEMBLY.name` of its
     /// `register_types.rs`: the authority of the URIs of its documents and assets).
     pub fn new(assembly_name: &str) -> Self {
-        Self { assembly_name: assembly_name.to_string(), default_compile_bindings: true, not_compared: Vec::new() }
+        Self { assembly_name: assembly_name.to_string(), default_compile_bindings: true, not_compared: Vec::new(), refused: Vec::new() }
     }
 
     /// Whether the bindings of a document are compiled when the document does not say
@@ -88,6 +89,16 @@ impl SampleBuild {
         self
     }
 
+    /// A document (its path below the directory of the sample) the compiler refuses, with the
+    /// reason of its first error, which names the gap of the framework (`GAPS.md` of the
+    /// sample): the build does not compile it, it stays an asset of the assembly, and its
+    /// generated tests are ignored with the reason. The build compiles every other document
+    /// and fails if one of them is refused.
+    pub fn refused(mut self, document: &str, reason: &str) -> Self {
+        self.refused.push((document.to_string(), reason.to_string()));
+        self
+    }
+
     /// Compiles the documents and writes the tables and the tests.
     pub fn run(self) {
         let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
@@ -102,7 +113,7 @@ impl SampleBuild {
             .filter(|(asset_path, _)| asset_path.ends_with(".xaml"))
             .map(|(asset_path, path)| (asset_path.clone(), read(path)))
             .collect();
-        for (name, _) in &self.not_compared {
+        for (name, _) in self.not_compared.iter().chain(&self.refused) {
             assert!(
                 documents.iter().any(|(document, _)| document.strip_prefix('/') == Some(name.as_str())),
                 "the build script names {name}, which is not a document of the crate"
@@ -123,7 +134,10 @@ impl SampleBuild {
         text.push_str(&document_assets);
         text.push_str("];\n");
 
-        let excluded = read_excluded(&root, &assets);
+        let mut excluded = read_excluded(&root, &assets);
+        for (name, reason) in &self.refused {
+            excluded.push(Excluded { path: format!("/{name}"), page_only: false, reason: reason.clone() });
+        }
         text.push_str("#[allow(dead_code)]\npub(crate) static EXCLUDED: &[(&str, bool, &str)] = &[\n");
         for entry in &excluded {
             writeln!(text, "    ({:?}, {}, {:?}),", entry.path, entry.page_only, entry.reason).expect("write");
@@ -175,7 +189,9 @@ impl SampleBuild {
     /// Compiles the documents `(rooted asset path, text)`, each as a group of its own: the
     /// build fails with the one diagnostic of a refused document.
     fn compile_documents(&self, out_dir: &Path, documents: &[(String, String)]) -> CompiledMarkup {
-        let named: Vec<(&str, &str)> = documents.iter().map(|(path, text)| (path.trim_start_matches('/'), text.as_str())).collect();
+        let every: Vec<(&str, &str)> = documents.iter().map(|(path, text)| (path.trim_start_matches('/'), text.as_str())).collect();
+        let named: Vec<(&str, &str)> =
+            every.iter().copied().filter(|(name, _)| !self.refused.iter().any(|(refused, _)| refused == name)).collect();
         let mut build = Build::from_env().type_system(TypeSystem::Model).default_compile_bindings(self.default_compile_bindings);
         for (name, text) in &named {
             // A document that includes another one of the sample is given every document, of

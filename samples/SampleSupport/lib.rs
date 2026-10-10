@@ -132,6 +132,9 @@ pub fn describe(error: &XamlLoadException) -> String {
 /// xaml_class!(BrushesPage, "/Pages/BrushesPage.xaml");
 /// // A class without a parameterless constructor names how the table creates it:
 /// xaml_class!(TestItemView, "/TestItemView.xaml", create: TestItemView::with(..));
+/// // A class whose constructor prepares the instance for its document (a resource the
+/// // document refers to) names the instance a load of the document on its own populates:
+/// xaml_class!(MainWindow, "/MainWindow.xaml", create: MainWindow::new(), uninitialized: MainWindow::before_document());
 /// ```
 #[macro_export]
 macro_rules! xaml_class {
@@ -139,6 +142,9 @@ macro_rules! xaml_class {
         $crate::xaml_class!($class, $path, create: <$class>::new());
     };
     ($class:ident, $path:literal, create: $create:expr) => {
+        $crate::xaml_class!($class, $path, create: $create, uninitialized: ::ferroui_base::instantiate(<$class>::construct()));
+    };
+    ($class:ident, $path:literal, create: $create:expr, uninitialized: $uninitialized:expr) => {
         impl $class {
             /// The rooted asset path of the document of the class.
             pub const DOCUMENT_PATH: &'static str = $path;
@@ -148,9 +154,7 @@ macro_rules! xaml_class {
                 document: $path,
                 type_info: || <$class>::TYPE,
                 create: || ::std::rc::Rc::new($create) as ::ferroui_base::BoxedValue,
-                create_uninitialized: || {
-                    ::std::rc::Rc::new(::ferroui_base::instantiate(<$class>::construct())) as ::ferroui_base::BoxedValue
-                },
+                create_uninitialized: || ::std::rc::Rc::new($uninitialized) as ::ferroui_base::BoxedValue,
             };
 
             /// `InitializeComponent()`: populates the instance from the document of the

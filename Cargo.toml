@@ -45,6 +45,8 @@ members = [
     "samples/SampleTesting",
     "samples/SampleControls",
     "samples/RenderDemo",
+    "samples/BindingDemo",
+    "samples/VirtualizationDemo",
 ]
 
 [workspace.package]
