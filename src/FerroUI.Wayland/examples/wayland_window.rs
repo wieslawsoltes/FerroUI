@@ -1347,17 +1347,22 @@ mod app {
             sway::view(TITLE).and_then(|view| sway::rect(&view, "rect"))
         }
 
-        /// A press at a point of the output, a drag by an offset in steps, and a release.
-        fn drag(probe: &mut Probe, from: (i32, i32), by: (i32, i32), extent: (u32, u32)) -> Result<(), String> {
+        /// A press at a point of the output, a drag by an offset in steps, and a release. The
+        /// dispatcher runs between the steps: the press has to reach the window, and the
+        /// request of the window the compositor, while the button is still down.
+        async fn drag(probe: &mut Probe, from: (i32, i32), by: (i32, i32), extent: (u32, u32)) -> Result<(), String> {
             let clamp = |value: i32, limit: u32| value.clamp(0, limit as i32 - 1) as u32;
             probe.pointer_move(clamp(from.0, extent.0), clamp(from.1, extent.1), extent)?;
+            delay(Duration::from_millis(200)).await;
             probe.pointer_button(true)?;
+            delay(Duration::from_millis(400)).await;
             for step in 1..=8 {
                 let x = from.0 + by.0 * step / 8;
                 let y = from.1 + by.1 * step / 8;
                 probe.pointer_move(clamp(x, extent.0), clamp(y, extent.1), extent)?;
-                std::thread::sleep(Duration::from_millis(30));
+                delay(Duration::from_millis(50)).await;
             }
+            delay(Duration::from_millis(200)).await;
             probe.pointer_button(false)
         }
 
@@ -1430,29 +1435,35 @@ mod app {
                 title_bar.is_some_and(|height| (8.0..=80.0).contains(&height)) && !close_to(top_pixel, FILL),
                 format!("the content moved down by {title_bar:?} in the composed output, and the top of the window is {top_pixel:?}"),
             );
-            report.check(
-                "window geometry",
-                match (geometry, view) {
-                    (Some((left, top, width, height)), Some((_, _, view_width, view_height))) => {
-                        left >= 0 && top >= 0 && (width, height) == (view_width, view_height)
-                    }
-                    _ => false,
-                },
-                format!("the window geometry sent with the frame is {geometry:?} (left, top, width, height); the view of the compositor is {view:?}"),
-            );
+            println!("  tiled: the window geometry is {geometry:?} (left, top, width, height), the view of the compositor {view:?}");
             let (Some(title_bar), Some(_)) = (title_bar, geometry) else {
                 return;
             };
 
-            // A floating window, which the compositor lets the pointer move and resize.
-            let floated = sway::message(&["floating", "enable"]).is_some();
-            delay(Duration::from_millis(800)).await;
+            // A floating window of a size and at a place that leave room on the output, which
+            // the compositor lets the pointer move and resize. Its window geometry is the view
+            // of the compositor: the shadow lies outside it.
+            let floated = sway::message(&["floating", "enable"]).is_some()
+                && sway::message(&["resize", "set", "width", "400", "px", "height", "240", "px"]).is_some()
+                && sway::message(&["move", "position", "40", "30"]).is_some();
+            let settled = wait_for(STEP_TIMEOUT, || {
+                matches!((view_rect(), window_geometry(client)), (Some(view), Some(geometry)) if view.2 == 400 && (geometry.2, geometry.3) == (view.2, view.3))
+            })
+            .await;
+            delay(Duration::from_millis(300)).await;
             let (Some(view), Some(geometry), Some(((output_width, output_height), _, _))) =
                 (view_rect(), window_geometry(client), output_geometry())
             else {
                 report.check("floating", false, format!("the compositor did not float the window (asked: {floated})"));
                 return;
             };
+            report.check(
+                "window geometry",
+                floated && settled && geometry.0 > 0 && geometry.1 > 0 && (geometry.2, geometry.3) == (view.2, view.3),
+                format!(
+                    "floating, the window geometry sent with the frame is {geometry:?} (left, top, width, height): the shadow is outside it, and its size is the view of the compositor, {view:?}"
+                ),
+            );
             let extent = (output_width as u32, output_height as u32);
             // A point of the client area in the coordinates of the output.
             let to_output = |x: f64, y: f64| (view.0 + x as i32 - geometry.0, view.1 + y as i32 - geometry.1);
@@ -1461,14 +1472,14 @@ mod app {
             let title_point = (f64::from(geometry.0) + f64::from(geometry.2) / 2.0, f64::from(geometry.1) + title_bar / 2.0);
             let role = input_root.hit_test_chrome_element(Point::new(title_point.0, title_point.1));
             let from = to_output(title_point.0, title_point.1);
-            let sent = drag(probe, from, (90, 60), extent);
-            let moved = wait_for(STEP_TIMEOUT, || view_rect().is_some_and(|now| (now.0 - view.0).abs() >= 40 || (now.1 - view.1).abs() >= 25)).await;
+            let sent = drag(probe, from, (40, 20), extent).await;
+            let moved = wait_for(STEP_TIMEOUT, || view_rect().is_some_and(|now| now.0 - view.0 >= 25 && now.1 - view.1 >= 10)).await;
             let after_move = view_rect();
             report.check(
                 "interactive move",
                 role == Some(WindowDecorationsElementRole::TitleBar) && sent.is_ok() && moved,
                 format!(
-                    "a drag of the drawn title bar (role {role:?}) from {from:?} by (90, 60): the view went from {view:?} to {after_move:?}: {sent:?}"
+                    "a drag of the drawn title bar (role {role:?}) from {from:?} by (40, 20): the view went from {view:?} to {after_move:?}: {sent:?}"
                 ),
             );
 
@@ -1493,10 +1504,10 @@ mod app {
             };
             let from = to_output(grip.0, grip.1);
             let size_before = window.client_size();
-            let sent = drag(probe, from, (70, 50), extent);
+            let sent = drag(probe, from, (-60, -40), extent).await;
             let resized = wait_for(STEP_TIMEOUT, || {
-                view_rect().is_some_and(|now| now.2 - view.2 >= 30 && now.3 - view.3 >= 20)
-                    && window.client_size().width - size_before.width >= 30.0
+                view_rect().is_some_and(|now| view.2 - now.2 >= 30 && view.3 - now.3 >= 20)
+                    && size_before.width - window.client_size().width >= 30.0
             })
             .await;
             let after_resize = view_rect();
@@ -1504,7 +1515,7 @@ mod app {
                 "interactive resize",
                 sent.is_ok() && resized,
                 format!(
-                    "a drag of the drawn grip at {grip:?} of the client area ({from:?} of the output) by (70, 50): the view went from {view:?} to {after_resize:?}, the client size from {size_before:?} to {:?}: {sent:?}",
+                    "a drag of the drawn grip at {grip:?} of the client area ({from:?} of the output) by (-60, -40): the view went from {view:?} to {after_resize:?}, the client size from {size_before:?} to {:?}: {sent:?}",
                     window.client_size()
                 ),
             );
