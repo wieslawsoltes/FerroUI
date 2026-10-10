@@ -37,7 +37,7 @@ use ferroui_base::input::{
 };
 use ferroui_base::input::text_input::ITextInputMethodImpl;
 use ferroui_base::platform::storage::file_io::BclLauncher;
-use ferroui_base::platform::storage::{FallbackStorageProvider, ILauncher, IStorageProvider};
+use ferroui_base::platform::storage::{FallbackStorageProvider, ILauncher, IStorageProvider, StorageProviderFactory};
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider, IPlatformGraphics, PlatformThemeVariant};
 use ferroui_base::reactive::IDisposable;
@@ -57,7 +57,8 @@ use ferroui_controls::{
     WindowResizeReason, WindowState, WindowTransparencyLevel,
 };
 use ferroui_dialogs::ManagedStorageProvider;
-use ferroui_freedesktop::IX11InputMethodControl;
+use ferroui_freedesktop::dbus_system_dialog::ParentLeaseProvider;
+use ferroui_freedesktop::{DBusSystemDialog, IPortalParentLease, IX11InputMethodControl, TrivialPortalParentLease};
 use ferroui_opengl::egl::{EglGlPlatformSurface, IEglWindowGlPlatformSurfaceInfo};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
@@ -885,11 +886,22 @@ impl X11Window {
         }
 
         // The storage providers of the reference, in its order: the file
-        // chooser of the desktop portal over D-Bus and the GTK dialogs
-        // (both stage 2 of docs/porting/x11-platform.md), then the managed
-        // dialogs, which is the one provider there is until then.
+        // chooser of the desktop portal over D-Bus, the GTK dialogs
+        // (stage 2e of docs/porting/x11-platform.md, not built) and the
+        // managed dialogs.
         let storage_window = weak.clone();
-        let storage_provider: Rc<dyn IStorageProvider> = Rc::new(FallbackStorageProvider::new(vec![Rc::new(move || {
+        let use_d_bus_file_picker = platform.options().use_d_bus_file_picker;
+        let portal_provider: StorageProviderFactory = Rc::new(move || {
+            if !use_d_bus_file_picker {
+                return Box::pin(std::future::ready(None));
+            }
+            let parent_lease_provider: ParentLeaseProvider = Rc::new(move || {
+                let lease: Rc<dyn IPortalParentLease> = Rc::new(TrivialPortalParentLease::new(format!("x11:{handle:X}")));
+                Box::pin(std::future::ready(Some(lease)))
+            });
+            Box::pin(DBusSystemDialog::try_create_async(Some(parent_lease_provider)))
+        });
+        let storage_provider: Rc<dyn IStorageProvider> = Rc::new(FallbackStorageProvider::new(vec![portal_provider, Rc::new(move || {
             // TODO: This will be incompatible with "root element is not a TopLevel" scenarios,
             // HACK: this relies on focus root being TopLevel which currently is true
             let provider: Option<Rc<dyn IStorageProvider>> = storage_window

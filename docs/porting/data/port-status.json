@@ -6712,12 +6712,12 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    15,
+    16,
     18,
     0
    ],
    "types": [
-    22,
+    23,
     26,
     0
    ],
@@ -6771,6 +6771,9 @@
     "DBusPlatformSettings.cs": [
      "dbus_platform_settings.rs"
     ],
+    "DBusSystemDialog.cs": [
+     "dbus_system_dialog.rs"
+    ],
     "IPortalParentLease.cs": [
      "i_portal_parent_lease.rs"
     ],
@@ -6791,6 +6794,7 @@
     "dbus_ime/fcitx/dbus.rs",
     "dbus_ime/ibus/dbus.rs",
     "dbus_ime/tests.rs",
+    "dbus_system_dialog/tests.rs",
     "event.rs",
     "signal_watch.rs",
     "test_support.rs"
