@@ -1,0 +1,26 @@
+[package]
+name = "control-catalog-android"
+description = "The Android entry point of the ControlCatalog sample of FerroUI"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+autobenches = false
+autoexamples = false
+
+# A shared library: the application class of the Java layer of the Android backend loads it.
+# `scripts/android/apk.sh catalog` builds it for the Android target and packages it; on another
+# system the library is empty.
+[lib]
+name = "control_catalog_android"
+path = "application.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-android = { workspace = true }
+control-catalog = { path = "../ControlCatalog" }

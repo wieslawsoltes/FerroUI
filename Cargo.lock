@@ -434,6 +434,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "control-catalog-android"
+version = "0.1.0-preview.1"
+dependencies = [
+ "control-catalog",
+ "ferroui-android",
+ "ferroui-base",
+ "ferroui-controls",
+]
+
+[[package]]
 name = "control-catalog-browser"
 version = "0.1.0-preview.1"
 dependencies = [
