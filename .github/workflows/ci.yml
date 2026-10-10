@@ -156,7 +156,7 @@ jobs:
       # what was drawn. The probe adds what ANGLE reports of itself on Direct3D 11 and 9.
       - name: Smoke run through ANGLE with the ANGLE probe
         timeout-minutes: 5
-        run: cargo run --locked -p ferroui-win32 --example win32_window -- --smoke --rendering angle --angle-probe
+        run: cargo run --locked -p ferroui-win32 --example win32_window -- --smoke --rendering angle --angle-probe --teardown-trace
       # The same run presented through DirectComposition (stage 2c): the window has no redirection
       # bitmap, the context of ANGLE renders into the texture of a composition surface, and the
       # client area the system composed is read back as in the other runs.
@@ -167,7 +167,14 @@ jobs:
         if: ${{ !cancelled() }}
         continue-on-error: true
         timeout-minutes: 3
-        run: cargo run --locked -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition dcomp
+        run: cargo run --locked -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition dcomp --teardown-trace
+      # The same with the run on a thread of its own, which ends while the other threads live
+      # (diagnosis of the finding above).
+      - name: Smoke run through DirectComposition on a thread of its own (diagnosis)
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        timeout-minutes: 3
+        run: cargo run --locked -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition dcomp --teardown-trace --on-thread
       - name: Skia binaries published for Windows (informative)
         id: skia
         if: ${{ !cancelled() }}
@@ -328,7 +335,7 @@ jobs:
       - name: Smoke run through ANGLE, presented through DirectComposition
         if: ${{ !cancelled() }}
         timeout-minutes: 5
-        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition dcomp
+        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition dcomp --teardown-trace
       - name: Skia binaries published for Windows on ARM64
         if: ${{ !cancelled() }}
         run: |
