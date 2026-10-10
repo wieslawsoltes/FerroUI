@@ -55,38 +55,28 @@ impl VelloPath {
     }
 
     /// The tight bounds of the path: of its curves, not of their control
-    /// points. A path without a segment has empty bounds at the origin.
+    /// points, and of the points of its moves. A path without an element
+    /// has empty bounds at the origin.
     ///
-    /// A path that has only lines has the bounds of all its points, the
-    /// points of its moves included, also of a move no segment follows: as
-    /// the tight bounds of the Skia backend (its `tight_bounds`), which are
-    /// upstream's. Upstream's render tests have paths that end in moves to
-    /// give a shape its extent (`M 10,190 L 190,10 M0,0M200,200`).
+    /// The point of a move counts whether or not a segment follows it, as
+    /// in the tight bounds of the Skia backend (`SkPath::computeTightBounds`
+    /// and its `tight_bounds` for a path of lines), which are upstream's.
+    /// Upstream's render tests have paths that end in moves to give a shape
+    /// its extent (`M 10,190 L 190,10 M0,0M200,200`).
     pub fn tight_bounds(&self) -> Rect {
-        let mut has_line = false;
-        let mut only_lines = true;
+        let mut bounds: Option<kurbo::Rect> = None;
+        let mut add = |rect: kurbo::Rect| bounds = Some(bounds.map_or(rect, |bounds| bounds.union(rect)));
+
         for element in self.elements.elements() {
-            match element {
-                kurbo::PathEl::LineTo(_) => has_line = true,
-                kurbo::PathEl::MoveTo(_) | kurbo::PathEl::ClosePath => {}
-                kurbo::PathEl::QuadTo(..) | kurbo::PathEl::CurveTo(..) => only_lines = false,
+            if let kurbo::PathEl::MoveTo(point) = element {
+                add(kurbo::Rect::from_points(*point, *point));
             }
         }
-
-        if has_line && only_lines {
-            let mut bounds: Option<kurbo::Rect> = None;
-            for element in self.elements.elements() {
-                if let kurbo::PathEl::MoveTo(point) | kurbo::PathEl::LineTo(point) = element {
-                    let at = kurbo::Rect::from_points(*point, *point);
-                    bounds = Some(bounds.map_or(at, |bounds| bounds.union(at)));
-                }
-            }
-            if let Some(bounds) = bounds {
-                return to_rect(bounds);
-            }
+        for segment in self.elements.segments() {
+            add(kurbo::Shape::bounding_box(&segment));
         }
 
-        to_rect(self.elements.bounding_box())
+        bounds.map(to_rect).unwrap_or_default()
     }
 
     /// Whether `other` is this very path: the same elements, not equal ones.
