@@ -45,7 +45,6 @@ mod host {
     use ferroui_base::logging::LogEventLevel;
     use ferroui_base::metadata::from_markup_value;
     use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
-    use ferroui_base::Thickness;
     use ferroui_controls::{AppBuilder, Application, PageNavigationHost};
     use ferroui_ios::{FerroApplicationDelegate, IFerroAppDelegate, IosApplicationExtensions};
     use std::cell::Cell;
@@ -148,19 +147,6 @@ mod host {
         format!("{} [{}]", subviews.len(), subviews.join("; "))
     }
 
-    /// Changes the bounds of the main view by a point and back at the
-    /// next change, so that what depends on the bounds of its ancestors
-    /// is placed again.
-    fn nudge_layout() {
-        let lifetime = Application::current().and_then(|application| application.application_lifetime());
-        let main_view =
-            lifetime.as_ref().and_then(|lifetime| lifetime.as_single_view_application_lifetime()).and_then(|l| l.main_view());
-        if let Some(main_view) = main_view {
-            let nudged = main_view.margin().bottom != 0.0;
-            main_view.set_margin(Thickness::new(0.0, 0.0, 0.0, if nudged { 0.0 } else { 1.0 }));
-        }
-    }
-
     /// The smoke run asked for with `FERROUI_SMOKE_PAGES`,
     /// `FERROUI_SMOKE_PAGE_NAMES` and `FERROUI_SMOKE_EXIT_MS`.
     fn smoke_run() {
@@ -186,28 +172,14 @@ mod host {
                         println!("Selecting {}", item.header());
                         view_model.navigate_to_item(item);
                         next.set(index + 1);
-                        // A native control host places its control when
-                        // its bounds or those of an ancestor change, not
-                        // when a render transform does: a page that
-                        // slides in keeps its native controls where the
-                        // page was when it was laid out, until the next
-                        // such change (as in the reference). So that the
-                        // pictures of the smoke run show the page as a
-                        // person sees it after any change of layout, the
-                        // main view is laid out once more when the
-                        // transition is over.
+                        // Where the native views of the page are once the
+                        // transition that slides the page in is over: a
+                        // native control host follows the render
+                        // transforms above it, so they are at their places
+                        // in the page without another layout.
                         let header = item.header();
-                        let _relayout = DispatcherTimer::run_once(
-                            move || {
-                                println!("Native views of {header} before a layout: {}", native_views());
-                                nudge_layout();
-                                let header = header.clone();
-                                let _report = DispatcherTimer::run_once(
-                                    move || println!("Native views of {header} after a layout: {}", native_views()),
-                                    Duration::from_millis(500),
-                                    DispatcherPriority::NORMAL,
-                                );
-                            },
+                        let _report = DispatcherTimer::run_once(
+                            move || println!("Native views of {header} after the transition: {}", native_views()),
                             Duration::from_millis(ms / 2),
                             DispatcherPriority::NORMAL,
                         );
