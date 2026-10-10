@@ -35,7 +35,6 @@ mod windows {
     use ferroui_base::logging::LogArea;
     use ferroui_base::media::imaging::Bitmap;
     use ferroui_base::platform::{AlphaFormat, PixelFormat};
-    use ferroui_base::reactive::IDisposable;
     use ferroui_base::{FerroLocator, LocatorExtensions, PixelRect, PixelSize, Vector};
     use ferroui_controls::Window;
     use std::future::Future;

@@ -52,6 +52,17 @@ pub fn when_loaded(window: &Window) {
     assert!(!timed_out.get(), "the window was not loaded within {LOAD_TIMEOUT:?}");
 }
 
+/// Runs the message loop for a time.
+pub fn wait_for(time: Duration) {
+    let frame = DispatcherFrame::new();
+    let timer = {
+        let frame = frame.clone();
+        DispatcherTimer::run_once(move || frame.set_continue(false), time, DispatcherPriority::NORMAL)
+    };
+    Dispatcher::ui_thread().push_frame(&frame);
+    timer.dispose();
+}
+
 pub fn get_screen_at_index(window: &Window, index: usize) -> Rc<Screen> {
     window.screens().all()[index].clone()
 }

@@ -544,6 +544,190 @@ mod windows {
         }
     }
 
+    /// The client area of the window as the system holds it after a frame
+    /// was presented: the window prints itself into a bitmap, with what the
+    /// desktop window manager composed of it, so a frame presented through
+    /// the swap chain of ANGLE is there as well as one copied with GDI.
+    /// Nothing but the window of the example is captured.
+    mod presented {
+        use std::ffi::c_void;
+
+        #[repr(C)]
+        #[derive(Default)]
+        struct Rect {
+            left: i32,
+            top: i32,
+            right: i32,
+            bottom: i32,
+        }
+
+        /// `BITMAPINFOHEADER`, which is all of a `BITMAPINFO` for 32 bits
+        /// a pixel without compression.
+        #[repr(C)]
+        struct BitmapInfoHeader {
+            size: u32,
+            width: i32,
+            height: i32,
+            planes: u16,
+            bit_count: u16,
+            compression: u32,
+            size_image: u32,
+            x_pels_per_meter: i32,
+            y_pels_per_meter: i32,
+            clr_used: u32,
+            clr_important: u32,
+        }
+
+        #[link(name = "user32", kind = "raw-dylib")]
+        extern "system" {
+            fn GetClientRect(hwnd: isize, rect: *mut Rect) -> i32;
+            fn GetDC(hwnd: isize) -> isize;
+            fn ReleaseDC(hwnd: isize, dc: isize) -> i32;
+            fn PrintWindow(hwnd: isize, dc: isize, flags: u32) -> i32;
+        }
+
+        #[link(name = "gdi32", kind = "raw-dylib")]
+        extern "system" {
+            fn CreateCompatibleDC(dc: isize) -> isize;
+            fn CreateDIBSection(
+                dc: isize,
+                info: *const BitmapInfoHeader,
+                usage: u32,
+                bits: *mut *mut c_void,
+                section: isize,
+                offset: u32,
+            ) -> isize;
+            fn SelectObject(dc: isize, object: isize) -> isize;
+            fn DeleteObject(object: isize) -> i32;
+            fn DeleteDC(dc: isize) -> i32;
+            fn GdiFlush() -> i32;
+        }
+
+        /// `PW_CLIENTONLY | PW_RENDERFULLCONTENT`: the client area, with
+        /// what the desktop window manager holds of the window.
+        const FLAGS: u32 = 1 | 2;
+
+        /// The pixels of the client area: four bytes a pixel, blue first,
+        /// rows from the top.
+        pub struct Capture {
+            pub pixels: Vec<u8>,
+            pub width: i32,
+            pub height: i32,
+        }
+
+        impl Capture {
+            /// Red, green and blue of the pixel of a column and a row.
+            pub fn at(&self, x: i32, y: i32) -> [u8; 3] {
+                let index = (y as usize * self.width as usize + x as usize) * 4;
+                [self.pixels[index + 2], self.pixels[index + 1], self.pixels[index]]
+            }
+        }
+
+        pub fn capture(hwnd: isize) -> Result<Capture, String> {
+            let mut rect = Rect::default();
+            // SAFETY: a rectangle of this frame the system writes to; a
+            // handle that is not a window makes the call fail.
+            if unsafe { GetClientRect(hwnd, &mut rect) } == 0 {
+                return Err("GetClientRect failed".to_string());
+            }
+            let (width, height) = (rect.right - rect.left, rect.bottom - rect.top);
+            if width < 1 || height < 1 {
+                return Err(format!("the client area is empty ({width} by {height})"));
+            }
+            let header = BitmapInfoHeader {
+                size: std::mem::size_of::<BitmapInfoHeader>() as u32,
+                width,
+                // A negative height: the rows run from the top.
+                height: -height,
+                planes: 1,
+                bit_count: 32,
+                compression: 0,
+                size_image: 0,
+                x_pels_per_meter: 0,
+                y_pels_per_meter: 0,
+                clr_used: 0,
+                clr_important: 0,
+            };
+            // SAFETY: every object created here is released before the
+            // function returns. The section is `width * height * 4` bytes
+            // the system owns until the bitmap is deleted; they are copied
+            // out, after the drawing of the system was flushed, while the
+            // bitmap lives.
+            unsafe {
+                let window_dc = GetDC(hwnd);
+                if window_dc == 0 {
+                    return Err("GetDC failed".to_string());
+                }
+                let memory_dc = CreateCompatibleDC(window_dc);
+                let mut bits: *mut c_void = std::ptr::null_mut();
+                let bitmap = if memory_dc == 0 { 0 } else { CreateDIBSection(memory_dc, &header, 0, &mut bits, 0, 0) };
+                let result = if memory_dc == 0 || bitmap == 0 || bits.is_null() {
+                    Err("the bitmap of the capture could not be created".to_string())
+                } else {
+                    let previous = SelectObject(memory_dc, bitmap);
+                    let printed = PrintWindow(hwnd, memory_dc, FLAGS) != 0;
+                    GdiFlush();
+                    let pixels = std::slice::from_raw_parts(bits as *const u8, (width * height * 4) as usize).to_vec();
+                    SelectObject(memory_dc, previous);
+                    if printed {
+                        Ok(Capture { pixels, width, height })
+                    } else {
+                        Err("PrintWindow failed".to_string())
+                    }
+                };
+                if bitmap != 0 {
+                    DeleteObject(bitmap);
+                }
+                if memory_dc != 0 {
+                    DeleteDC(memory_dc);
+                }
+                ReleaseDC(hwnd, window_dc);
+                result
+            }
+        }
+    }
+
+    /// Checks that what was presented reaches the last column and the last
+    /// row of the client area: the capture has the size of the client
+    /// area, no pixel of its last column and of its last row is blank
+    /// (white, which is what the system shows where nothing was presented,
+    /// or black), and its last pixel has the colour both painters end
+    /// with. The desktop window manager may compose a frame a moment after
+    /// it was presented, so a capture that fails is taken again.
+    fn check_presented(state: &State, hwnd: isize, name: &str) {
+        const LAST: [u8; 3] = [0xf5, 0x9e, 0x0b];
+        let expected = PixelSize::from_size(state.window.client_size(), state.window.render_scaling());
+        let mut detail = String::new();
+        for attempt in 0..6 {
+            if attempt > 0 {
+                std::thread::sleep(Duration::from_millis(100));
+            }
+            match presented::capture(hwnd) {
+                Err(error) => detail = error,
+                Ok(capture) => {
+                    let (width, height) = (capture.width, capture.height);
+                    let blank = |pixel: [u8; 3]| pixel.iter().all(|&c| c >= 250) || pixel.iter().all(|&c| c <= 5);
+                    let blank_in_column = (0..height).filter(|&y| blank(capture.at(width - 1, y))).count();
+                    let blank_in_row = (0..width).filter(|&x| blank(capture.at(x, height - 1))).count();
+                    let last = capture.at(width - 1, height - 1);
+                    let last_ok = (0..3).all(|i| (i32::from(last[i]) - i32::from(LAST[i])).abs() <= 12);
+                    let size_ok = width == expected.width && height == expected.height;
+                    detail = format!(
+                        "the window prints {width} by {height} pixels (client area {} by {}); {blank_in_column} blank pixel(s) in the last column, {blank_in_row} in the last row; the last pixel is {last:?} (drawn {LAST:?}), the first {:?}",
+                        expected.width,
+                        expected.height,
+                        capture.at(0, 0)
+                    );
+                    if size_ok && blank_in_column == 0 && blank_in_row == 0 && last_ok {
+                        state.report.check(name, true, detail);
+                        return;
+                    }
+                }
+            }
+        }
+        state.report.check(name, false, detail);
+    }
+
     /// Polls a future once: the clipboard completes at once unless another
     /// process holds it open.
     fn poll_once<T>(mut future: Pin<Box<dyn Future<Output = T>>>) -> Option<T> {
@@ -1195,6 +1379,7 @@ mod windows {
                     }
                     if drawn.get() < SMOKE_FRAMES {
                         if drawn.get() == SMOKE_FRAMES / 2 {
+                            check_presented(&state, hwnd, "presented pixels reach the last column and row after showing");
                             window.resize(Size::new(800.0, 520.0), WindowResizeReason::Application);
                         }
                         let before = state.frames.get();
@@ -1246,6 +1431,8 @@ mod windows {
                                 resizes.iter().any(|size| (size.width - 800.0).abs() <= 1.0 && (size.height - 520.0).abs() <= 1.0),
                                 format!("sizes reported: {:?}", *resizes),
                             );
+                            drop(resizes);
+                            check_presented(&state, hwnd, "presented pixels reach the last column and row after the resize");
                         }
                         return true;
                     }
