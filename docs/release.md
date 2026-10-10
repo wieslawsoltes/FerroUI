@@ -63,6 +63,11 @@ Each states `publish = false`.
 | `control-catalog-desktop` | `samples/ControlCatalog.Desktop` | Desktop entry point of the sample |
 | `control-catalog-browser` | `samples/ControlCatalog.Browser` | Browser entry point of the sample |
 | `mini-mvvm` | `samples/MiniMvvm` | View-model library of the samples |
+| `render-demo`, `binding-demo`, `virtualization-demo`, `text-test-app`, `sandbox`, `app-without-lifetime`, `integration-test-app` | `samples/RenderDemo`, `samples/BindingDemo`, `samples/VirtualizationDemo`, `samples/TextTestApp`, `samples/Sandbox`, `samples/AppWithoutLifetime`, `samples/IntegrationTestApp` | Sample applications, each with its desktop entry point |
+| `control-samples` | `samples/SampleControls` | Shared controls of the samples |
+| `sample-build`, `sample-support`, `sample-testing` | `samples/SampleBuild`, `samples/SampleSupport`, `samples/SampleTesting` | Build script, markup tables and test harness of the small samples |
+| `ferroui-leak-tests` | `tests/FerroUI.LeakTests` | Leak tests |
+| `ferroui-benchmarks` | `tests/FerroUI.Benchmarks` | Benchmarks |
 | `ferroui-markup-xaml-tests` | `tests/FerroUI.Markup.Xaml.UnitTests` | Test crate |
 | `xaml-include-fixture-theme` | `tests/XamlIncludeFixture/Theme` | Test fixture |
 | `xaml-include-fixture-application` | `tests/XamlIncludeFixture/Application` | Test fixture |
