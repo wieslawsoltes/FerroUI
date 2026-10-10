@@ -256,8 +256,8 @@ jobs:
   # this job is where it meets one: the crate is built and tested on Linux, and the smoke mode of its
   # example opens a window under Xvfb and asks the server what it sees (the window mapped, its size,
   # title, class, process and protocols, and pixels read back from the window with XGetImage), then
-  # has the window closed by a WM_DELETE_WINDOW message. Xvfb has no window manager and no
-  # compositing manager: what those add is not covered here.
+  # has the window closed by a WM_DELETE_WINDOW message; once on a bare Xvfb and once under a
+  # window manager. No compositing manager and no input devices: those are not covered here.
   x11:
     name: Build and test (Linux, X11 under Xvfb)
     runs-on: ubuntu-latest
@@ -277,7 +277,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            xvfb xauth x11-utils \
+            xvfb xauth x11-utils openbox \
             libx11-6 libxi6 libxrandr2 libxcursor1 libxfixes3 libxext6 \
             libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config
       - name: Skia features of the target
@@ -298,3 +298,9 @@ jobs:
         run: |
           xvfb-run -a --server-args="-screen 0 1280x1024x24" \
             timeout 300 target/debug/examples/x11_window --smoke
+      # A window manager clamps the window to a screen narrower than it: the server and the
+      # framework have to agree on the size the window got.
+      - name: The same under a window manager (openbox)
+        run: |
+          xvfb-run -a --server-args="-screen 0 600x500x24" \
+            sh -c 'openbox & sleep 2; timeout 300 target/debug/examples/x11_window --smoke'
