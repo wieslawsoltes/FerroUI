@@ -7528,14 +7528,14 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    48,
+    60,
     88,
     0
    ],
    "types": [
-    121,
+    133,
     291,
-    108
+    107
    ],
    "members": [
     0,
@@ -7569,8 +7569,29 @@
     "Dispatching/X11PlatformThreading.cs": [
      "dispatching/x11_platform_threading.rs"
     ],
+    "Glx/Glx.cs": [
+     "glx/glx.rs"
+    ],
+    "Glx/GlxConsts.cs": [
+     "glx/glx_consts.rs"
+    ],
+    "Glx/GlxContext.cs": [
+     "glx/glx_context.rs"
+    ],
+    "Glx/GlxDisplay.cs": [
+     "glx/glx_display.rs"
+    ],
+    "Glx/GlxGlPlatformSurface.cs": [
+     "glx/glx_gl_platform_surface.rs"
+    ],
+    "Glx/GlxPlatformFeature.cs": [
+     "glx/glx_platform_feature.rs"
+    ],
     "Keysyms.cs": [
      "keysyms.rs"
+    ],
+    "LibC.cs": [
+     "lib_c.rs"
     ],
     "Screens/X11Screen.Providers.cs": [
      "screens/x11_screen_providers.rs"
@@ -7631,6 +7652,12 @@
     ],
     "X11CursorFactory.cs": [
      "x11_cursor_factory.rs"
+    ],
+    "X11DeferredDisplayDispatcher.cs": [
+     "x11_deferred_display_dispatcher.rs"
+    ],
+    "X11EglHelper.cs": [
+     "x11_egl_helper.rs"
     ],
     "X11EnumExtensions.cs": [
      "x11_enum_extensions.rs"
@@ -7700,6 +7727,15 @@
     ],
     "XResources.cs": [
      "x_resources.rs"
+    ],
+    "XShm/X11ShmFramebufferRenderTarget.cs": [
+     "x_shm/x11_shm_framebuffer_render_target.rs"
+    ],
+    "XShm/X11ShmFramebufferSurface.cs": [
+     "x_shm/x11_shm_framebuffer_surface.rs"
+    ],
+    "XShm/X11ShmImage.cs": [
+     "x_shm/x11_shm_image.rs"
     ]
    },
    "rustOnly": [

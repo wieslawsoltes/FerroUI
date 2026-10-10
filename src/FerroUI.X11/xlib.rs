@@ -2027,6 +2027,171 @@ pub fn x_sync_destroy_counter(display: XDisplay, counter: XID) {
     }
 }
 
+/// A visual of a connection as a value that may be handed to the thread
+/// that renders (`IntPtr visual` of the reference); null is the visual of
+/// the parent (`CopyFromParent`).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct VisualPointer(*mut Visual);
+
+// SAFETY: a visual belongs to its connection, which is never closed; it is
+// never dereferenced here, only handed back to Xlib, which reads it under
+// the lock of the connection.
+unsafe impl Send for VisualPointer {}
+// SAFETY: see `Send`.
+unsafe impl Sync for VisualPointer {}
+
+impl VisualPointer {
+    pub fn new(visual: *mut Visual) -> Self {
+        Self(visual)
+    }
+}
+
+fn shm() -> &'static x11_dl::xshm::Xext {
+    libraries().xshm.as_ref().expect("the shared memory extension is only used when its library was loaded")
+}
+
+/// `XShmGetEventBase`: zero without the library of the extension.
+pub fn x_shm_get_event_base(display: XDisplay) -> c_int {
+    let Some(shm) = libraries().xshm.as_ref() else {
+        return 0;
+    };
+    // SAFETY: plain call.
+    unsafe { (shm.XShmGetEventBase)(display.raw()) }
+}
+
+/// `XShmCreateImage` for a `ZPixmap` without data: null when the image
+/// cannot be created.
+///
+/// # Safety
+/// `shminfo` must point at a segment information that stays where it is
+/// for as long as the image lives: the image keeps the pointer.
+///
+/// # Panics
+/// Panics when the library of the extension was not loaded.
+pub unsafe fn x_shm_create_image(
+    display: XDisplay,
+    visual: VisualPointer,
+    depth: c_uint,
+    shminfo: *mut x11_dl::xshm::XShmSegmentInfo,
+    width: c_uint,
+    height: c_uint,
+) -> *mut XImage {
+    // SAFETY: the caller's contract for `shminfo`; the visual is null or one of the connection.
+    unsafe { (shm().XShmCreateImage)(display.raw(), visual.0, depth, xl::ZPixmap, ptr::null_mut(), shminfo, width, height) }
+}
+
+/// `XShmAttach`.
+///
+/// # Safety
+/// `shminfo` must point at a segment information whose segment is attached
+/// to this process.
+pub unsafe fn x_shm_attach(display: XDisplay, shminfo: *mut x11_dl::xshm::XShmSegmentInfo) -> bool {
+    // SAFETY: the caller's contract.
+    unsafe { (shm().XShmAttach)(display.raw(), shminfo) != 0 }
+}
+
+/// `XShmDetach`.
+///
+/// # Safety
+/// `shminfo` must point at a segment information that was attached with
+/// [`x_shm_attach`].
+pub unsafe fn x_shm_detach(display: XDisplay, shminfo: *mut x11_dl::xshm::XShmSegmentInfo) -> bool {
+    // SAFETY: the caller's contract.
+    unsafe { (shm().XShmDetach)(display.raw(), shminfo) != 0 }
+}
+
+/// `XShmPutImage`: whether the request was accepted.
+///
+/// # Safety
+/// `image` must be a live image of [`x_shm_create_image`] whose data is
+/// its attached segment.
+#[allow(clippy::too_many_arguments)]
+pub unsafe fn x_shm_put_image(
+    display: XDisplay,
+    drawable: XID,
+    gc: GC,
+    image: *mut XImage,
+    src_x: c_int,
+    src_y: c_int,
+    dst_x: c_int,
+    dst_y: c_int,
+    src_width: c_uint,
+    src_height: c_uint,
+    send_event: bool,
+) -> bool {
+    // SAFETY: the caller's contract for the image; the graphics context is one of the connection.
+    unsafe {
+        (shm().XShmPutImage)(
+            display.raw(),
+            drawable,
+            gc,
+            image,
+            src_x,
+            src_y,
+            dst_x,
+            dst_y,
+            src_width,
+            src_height,
+            c_int::from(send_event),
+        ) != 0
+    }
+}
+
+/// `XDestroyImage`: frees the structure, and its data when the pointer is
+/// not null.
+///
+/// # Safety
+/// `image` must be a live image Xlib allocated, used here for the last
+/// time; its data must be null or memory `free` may release.
+pub unsafe fn x_destroy_image(image: *mut XImage) {
+    // SAFETY: the caller's contract.
+    unsafe {
+        (x().XDestroyImage)(image);
+    }
+}
+
+/// `XCreateGC` without values.
+pub fn x_create_gc(display: XDisplay, drawable: XID) -> GC {
+    // SAFETY: with a zero mask the values are not read.
+    unsafe { (x().XCreateGC)(display.raw(), drawable, 0, ptr::null_mut()) }
+}
+
+/// `XFreeGC`.
+pub fn x_free_gc(display: XDisplay, gc: GC) {
+    // SAFETY: the graphics context is one `x_create_gc` returned for this connection, freed once
+    // by its creator.
+    unsafe {
+        (x().XFreeGC)(display.raw(), gc);
+    }
+}
+
+/// The completion event of the shared memory extension (`XShmCompletionEvent`
+/// of the extension's header; the declaration of the bindings has two
+/// members of other sizes, which moves the segment).
+#[repr(C)]
+#[derive(Clone, Copy)]
+struct XShmCompletionEvent {
+    type_: c_int,
+    serial: c_ulong,
+    send_event: c_int,
+    display: *mut xl::Display,
+    drawable: XID,
+    major_code: c_int,
+    minor_code: c_int,
+    shmseg: c_ulong,
+    offset: c_ulong,
+}
+
+const _: () = assert!(std::mem::size_of::<XShmCompletionEvent>() <= std::mem::size_of::<XEvent>());
+
+/// The segment of a completion event of the shared memory extension. The
+/// caller has checked the type of the event.
+pub fn shm_completion_event_shmseg(event: &XEvent) -> c_ulong {
+    // SAFETY: an event is a union of plain data that is larger than the completion event
+    // (asserted above), and every bit pattern is valid for its members.
+    unsafe { (*(event as *const XEvent).cast::<XShmCompletionEvent>()).shmseg }
+}
+
 /// Whether the server has the shared memory extension
 /// (`XShmQueryExtension` and `XShmQueryVersion`).
 pub fn x_shm_query(display: XDisplay) -> bool {

@@ -10,30 +10,30 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.X11` (exists) |
 | Crate | `ferroui-x11` |
 | Phase / priority | 5 - desktop (Linux) / P1 |
-| Files | 48/88 (54.5%) |
-| Types | 121/291 (108 waived) (66.1%) |
+| Files | 60/88 (68.2%) |
+| Types | 133/291 (107 waived) (72.3%) |
 | Members | 0/4897 (0.0%) |
 
 This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.
 
 ## Files
 
-### `(project root)` - files 26/37, types 87/216 (107 waived), members 0/4427
+### `(project root)` - files 29/37, types 91/216 (106 waived), members 0/4427
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
 | `ActivityTrackingHelper.cs` | `activity_tracking_helper.rs` | present | 1/1 | - | 7 |  |
 | `ICELib.cs` | `ice_lib.rs` | missing | 0/4 | `ICELib`, `ICELib.IceProcessMessagesStatus`, `ICELib.IceErrorHandler`, `ICELib.IceIOErrorHandler` | 6 |  |
 | `Keysyms.cs` | `keysyms.rs` | present | 1/1 | - | 2099 |  |
-| `LibC.cs` | `lib_c.rs` | missing | 0/1 | `LibC` | 7 |  |
+| `LibC.cs` | `lib_c.rs` | present | 1/1 | - | 7 |  |
 | `SMLib.cs` | `sm_lib.rs` | missing | 0/10 | `SMLib`, `SMLib.SmDialogValue`, `SMLib.SmcCallbacks`, `SMLib.IceWatchProc`, `SMLib.SmcDieProc`, `SMLib.SmcInteractProc`, `SMLib.SmcSaveCompleteProc`, `SMLib.SmcSaveYourselfProc`, `SMLib.SmcShutdownCancelledProc`, `SMLib.SmcErrorHandler` | 12 |  |
 | `TransparencyHelper.cs` | `transparency_helper.rs` | present | 1/1 | - | 5 |  |
 | `X11ActiveWindowTracker.cs` | `x11_active_window_tracker.rs` | present | 1/1 | - | 3 |  |
 | `X11AtSpiAccessibility.cs` | `x11_at_spi_accessibility.rs` | missing | 0/1 | `X11AtSpiAccessibility` | 5 |  |
 | `X11Atoms.cs` | `x11_atoms.rs` | present | 1/1 | - | 166 |  |
 | `X11CursorFactory.cs` | `x11_cursor_factory.rs` | present | 2/2 | - | 9 |  |
-| `X11DeferredDisplayDispatcher.cs` | `x11_deferred_display_dispatcher.rs` | missing | 0/1 | `X11DeferredDisplayDispatcher` | 4 |  |
-| `X11EglHelper.cs` | `x11_egl_helper.rs` | missing | 0/1 | `X11EglHelper` | 3 |  |
+| `X11DeferredDisplayDispatcher.cs` | `x11_deferred_display_dispatcher.rs` | present | 1/1 | - | 4 |  |
+| `X11EglHelper.cs` | `x11_egl_helper.rs` | present | 1/1 | - | 3 |  |
 | `X11EnumExtensions.cs` | `x11_enum_extensions.rs` | present | 1/1 | - | 1 |  |
 | `X11Enums.cs` | `x11_enums.rs` | present | 5/5 | - | 78 |  |
 | `X11Exception.cs` | `x11_exception.rs` | present | 1/1 | - | 1 |  |
@@ -46,7 +46,7 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `X11NativeControlHost.cs` | `x11_native_control_host.rs` | missing | 0/1 | `X11NativeControlHost` | 6 |  |
 | `X11Platform.cs` | `x11_platform.rs` | present | 4/4 | - | 54 |  |
 | `X11PlatformLifetimeEvents.cs` | `x11_platform_lifetime_events.rs` | missing | 0/1 | `X11PlatformLifetimeEvents` | 3 |  |
-| `X11Structs.cs` | `x11_structs.rs` | present | 36/123 (87 waived) | - | 1353 | replaced: the event, request and hint structures are those of the Xlib bindings (`x11-dl`, used through `xlib.rs`), which declare them with the layout of the C headers; the enumerations and the Motif hints are ported (docs/porting/x11-platform.md, section 2) |
+| `X11Structs.cs` | `x11_structs.rs` | present | 37/123 (86 waived) | - | 1353 | replaced: the event, request and hint structures are those of the Xlib bindings (`x11-dl`, used through `xlib.rs`), which declare them with the layout of the C headers; the enumerations and the Motif hints are ported (docs/porting/x11-platform.md, section 2) |
 | `X11Window.Ime.cs` | `x11_window_ime.rs` | present | 1/1 | - | 0 | renamed: the keyboard part is ported (the input context, the key of a key event, its text); the input method part (`InitializeIme`, `FilterIme`, `ProcessNextImeEvent`, the forwarded keys) is stage 2 of docs/porting/x11-platform.md |
 | `X11Window.Xim.cs` | `x11_window_xim.rs` | missing | 1/1 | - | 0 | types found in `x11_window.rs` (add to path-overrides.toml) |
 | `X11Window.cs` | `x11_window.rs` | present | 2/2 | - | 86 |  |
@@ -70,16 +70,16 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `X11EventDispatcher.cs` | `dispatching/x11_event_dispatcher.rs` | present | 3/3 | - | 7 |  |
 | `X11PlatformThreading.cs` | `dispatching/x11_platform_threading.rs` | present | 1/1 | - | 11 |  |
 
-### `Glx` - files 0/6, types 0/6, members 0/157
+### `Glx` - files 6/6, types 5/6, members 0/157
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
-| `Glx.cs` | `glx/glx.rs` | missing | 0/1 | `GlxInterface` | 24 |  |
-| `GlxConsts.cs` | `glx/glx_consts.rs` | missing | 0/1 | `GlxConsts` | 96 |  |
-| `GlxContext.cs` | `glx/glx_context.rs` | missing | 0/1 | `GlxContext` | 18 |  |
-| `GlxDisplay.cs` | `glx/glx_display.rs` | missing | 0/1 | `GlxDisplay` | 9 |  |
-| `GlxGlPlatformSurface.cs` | `glx/glx_gl_platform_surface.rs` | missing | 0/1 | `GlxGlPlatformSurface` | 2 |  |
-| `GlxPlatformFeature.cs` | `glx/glx_platform_feature.rs` | missing | 0/1 | `GlxPlatformGraphics` | 8 |  |
+| `Glx.cs` | `glx/glx.rs` | present | 1/1 | - | 24 |  |
+| `GlxConsts.cs` | `glx/glx_consts.rs` | partial | 0/1 | `GlxConsts` | 96 |  |
+| `GlxContext.cs` | `glx/glx_context.rs` | present | 1/1 | - | 18 |  |
+| `GlxDisplay.cs` | `glx/glx_display.rs` | present | 1/1 | - | 9 |  |
+| `GlxGlPlatformSurface.cs` | `glx/glx_gl_platform_surface.rs` | present | 1/1 | - | 2 |  |
+| `GlxPlatformFeature.cs` | `glx/glx_platform_feature.rs` | present | 1/1 | - | 8 |  |
 
 ### `Interop` - files 0/2, types 0/7, members 0/29
 
@@ -158,13 +158,13 @@ This backend is being ported. It is tracked at file and type granularity: the me
 | `WindowMode.cs` | `x11_window_modes/window_mode.rs` | present | 2/2 | - | 17 |  |
 | `XEmbedClientWindowMode.cs` | `x11_window_modes/x_embed_client_window_mode.rs` | missing | 1/2 | `X11Window.XEmbedClientWindowMode` | 8 | types found in `x11_window.rs` (add to path-overrides.toml) |
 
-### `XShm` - files 0/3, types 0/3, members 0/12
+### `XShm` - files 3/3, types 3/3, members 0/12
 
 | Upstream file | Rust file | Status | Types | Missing types | Members (total) | Notes |
 |---|---|---|---|---|---:|---|
-| `X11ShmFramebufferRenderTarget.cs` | `x_shm/x11_shm_framebuffer_render_target.rs` | missing | 0/1 | `X11ShmFramebufferRenderTarget` | 3 |  |
-| `X11ShmFramebufferSurface.cs` | `x_shm/x11_shm_framebuffer_surface.rs` | missing | 0/1 | `X11ShmFramebufferSurface` | 2 |  |
-| `X11ShmImage.cs` | `x_shm/x11_shm_image.rs` | missing | 0/1 | `X11ShmImage` | 7 |  |
+| `X11ShmFramebufferRenderTarget.cs` | `x_shm/x11_shm_framebuffer_render_target.rs` | present | 1/1 | - | 3 |  |
+| `X11ShmFramebufferSurface.cs` | `x_shm/x11_shm_framebuffer_surface.rs` | present | 1/1 | - | 2 |  |
+| `X11ShmImage.cs` | `x_shm/x11_shm_image.rs` | present | 1/1 | - | 7 |  |
 
 ## Rust-only files
 

@@ -26,6 +26,8 @@ pub mod event;
 #[cfg(unix)]
 pub mod glx;
 #[cfg(unix)]
+pub mod lib_c;
+#[cfg(unix)]
 pub(crate) mod pixel_buffer;
 #[cfg(unix)]
 pub mod raw_event_grouping;
@@ -41,6 +43,8 @@ pub mod x11_active_window_tracker;
 pub mod x11_atoms;
 #[cfg(unix)]
 pub mod x11_cursor_factory;
+#[cfg(unix)]
+pub mod x11_deferred_display_dispatcher;
 #[cfg(unix)]
 pub mod x11_egl_helper;
 #[cfg(unix)]
@@ -75,6 +79,8 @@ pub mod x11_window_modes;
 pub mod x_error;
 #[cfg(unix)]
 pub mod x_resources;
+#[cfg(unix)]
+pub mod x_shm;
 #[cfg(unix)]
 pub mod xi2_manager;
 #[cfg(unix)]

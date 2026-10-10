@@ -77,7 +77,7 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | `src/Avalonia.Remote.Protocol` | `src/FerroUI.Remote.Protocol` | `ferroui-remote-protocol` | 14/14 | 54/55 (1 waived) | 196/202 (3 waived) | 98.5% | 4 - tooling | P3 |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/Avalonia.Themes.Fluent` | `src/FerroUI.Themes.Fluent` | `ferroui-themes-fluent` | 5/5 | 6/6 | 68/73 (5 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/Avalonia.Themes.Simple` | `src/FerroUI.Themes.Simple` | `ferroui-themes-simple` | 1/1 | 1/1 | 1/1 | 100.0% | 2 - xaml + themes | P2 |
-| [Avalonia.X11](tracking/Avalonia.X11.md) | `src/Avalonia.X11` | `src/FerroUI.X11` | `ferroui-x11` | 48/88 | 121/291 (108 waived) | 0/4897 | 0.0% | 5 - desktop (Linux) | P1 |
+| [Avalonia.X11](tracking/Avalonia.X11.md) | `src/Avalonia.X11` | `src/FerroUI.X11` | `ferroui-x11` | 60/88 | 133/291 (107 waived) | 0/4897 | 0.0% | 5 - desktop (Linux) | P1 |
 | [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/Avalonia.Browser` | `src/Browser/FerroUI.Browser` | `ferroui-browser` | 50/50 | 60/62 (2 waived) | 333/428 (95 waived) | 100.0% | 3 - browser | P2 |
 | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | `src/HarfBuzz/Avalonia.HarfBuzz` | `src/HarfBuzz/FerroUI.HarfBuzz` | `ferroui-harfbuzz` | 3/3 | 3/3 | 5/8 (3 waived) | 100.0% | 1 - rendering | P0 |
 | [Avalonia.Headless](tracking/Avalonia.Headless.md) | `src/Headless/Avalonia.Headless` | `src/Headless/FerroUI.Headless` | `ferroui-headless` | 11/11 | 22/24 (2 waived) | 238/251 (13 waived) | 100.0% | 1 - test infrastructure | P1 |
@@ -332,6 +332,7 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `src/tools/MicroCom.CodeGenerator` | none (FerroUI only) |
 | `tests/FerroUI.Markup.Xaml.UnitTests` | `tests/Avalonia.Markup.Xaml.UnitTests` (not tracked) |
 | `tests/FerroUI.RenderBackends.Comparison` | none (FerroUI only) |
+| `tests/FerroUI.RenderTests` | none (FerroUI only) |
 | `tests/XamlIncludeFixture/Application` | none (FerroUI only) |
 | `tests/XamlIncludeFixture/Theme` | none (FerroUI only) |
 
