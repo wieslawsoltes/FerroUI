@@ -1,0 +1,30 @@
+[package]
+name = "ferroui-render-tests"
+description = "Test crate: upstream's render tests, which render scenes offscreen and compare them with expected images"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+path = "lib.rs"
+
+# The tests run against the Skia backend. With the feature `vello` the same
+# tests run against the Vello backend in its CPU mode and are compared with
+# the same expected images (docs/porting/render-tests.md).
+[features]
+default = []
+vello = ["dep:ferroui-vello"]
+
+[dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-skia.workspace = true
+ferroui-vello = { workspace = true, optional = true }
+ferroui-harfbuzz.workspace = true
+ferroui-themes-simple.workspace = true
+# The images are decoded for the comparison by a decoder that is not the
+# one of the render backend, as upstream compares with a library of its own.
+png.workspace = true
