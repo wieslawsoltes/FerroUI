@@ -19,6 +19,7 @@
 //! compiles and runs nothing.
 
 mod begin_move_drag_tests;
+mod extend_client_area_window_tests;
 mod infrastructure;
 mod ole_data_tests;
 mod presented_frame_tests;
@@ -65,6 +66,7 @@ fn main() -> ExitCode {
 
     let mut cases = Vec::new();
     begin_move_drag_tests::tests(&mut cases);
+    extend_client_area_window_tests::tests(&mut cases);
     ole_data_tests::tests(&mut cases);
     presented_frame_tests::tests(&mut cases);
     standard_window_tests::tests(&mut cases);

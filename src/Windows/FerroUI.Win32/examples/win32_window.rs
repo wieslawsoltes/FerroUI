@@ -1118,6 +1118,126 @@ mod windows {
                     }
                 }
 
+                println!("-- extended client area");
+                // The client area extended into the frame: the window
+                // reports it with a margin for the title bar, the caption
+                // becomes client area, and the hit test of the frame is
+                // the one of the custom caption procedure (the top resize
+                // border, the title bar below it, the left border, the
+                // client area in the middle). Taken back, the frame is the
+                // one of the system again.
+                {
+                    use ferroui_win32::interop::unmanaged_methods::{
+                        get_client_rect, get_window_rect, send_message, HitTestValues, WindowsMessage,
+                    };
+
+                    let changes = Rc::new(RefCell::new(Vec::new()));
+                    window.set_extend_client_area_to_decorations_changed(Some(Rc::new({
+                        let changes = changes.clone();
+                        move |extended| changes.borrow_mut().push(extended)
+                    })));
+                    let hit = |x: i32, y: i32| send_message(hwnd, WindowsMessage::WM_NCHITTEST, 0, make_l_param(x, y)) as i32;
+                    let height = |rect: ferroui_win32::interop::unmanaged_methods::RECT| rect.bottom - rect.top;
+                    let scaling = window.render_scaling();
+                    let client_before = get_client_rect(hwnd);
+
+                    window.set_extend_client_area_to_decorations_hint(true);
+
+                    let extended = window.is_client_area_extended_to_decorations();
+                    let margins = window.extended_margins();
+                    let bounds = get_window_rect(hwnd);
+                    let client = get_client_rect(hwnd);
+                    // The width of the resize border at a side.
+                    let frame = ((bounds.right - bounds.left) - (client.right - client.left)) / 2;
+                    let center_x = (bounds.left + bounds.right) / 2;
+                    let center_y = (bounds.top + bounds.bottom) / 2;
+                    let top_edge = hit(center_x, bounds.top + 1);
+                    let title = hit(center_x, bounds.top + frame + 4);
+                    let left_edge = hit(bounds.left + 1, center_y);
+                    let middle = hit(center_x, center_y);
+                    report.check(
+                        "extended client area",
+                        extended
+                            && margins.top > 0.0
+                            && height(client) > height(client_before)
+                            && height(client) == height(bounds) - frame,
+                        format!(
+                            "extended: {extended}; margins {margins:?} at scaling {scaling}; the client area is {} pixels high (before: {}), the window {} with a border of {frame}",
+                            height(client),
+                            height(client_before),
+                            height(bounds)
+                        ),
+                    );
+                    report.check(
+                        "hit test of the extended frame",
+                        top_edge == HitTestValues::HTTOP
+                            && title == HitTestValues::HTCAPTION
+                            && left_edge == HitTestValues::HTLEFT
+                            && middle == HitTestValues::HTCLIENT,
+                        format!(
+                            "top edge {top_edge} (HTTOP is 12), title bar {title} (HTCAPTION is 2), left edge {left_edge} (HTLEFT is 10), middle {middle} (HTCLIENT is 1)"
+                        ),
+                    );
+
+                    window.set_extend_client_area_to_decorations_hint(false);
+
+                    let client_after = get_client_rect(hwnd);
+                    let title_after = hit(center_x, bounds.top + frame + 4);
+                    let changes = changes.borrow().clone();
+                    report.check(
+                        "extended client area taken back",
+                        !window.is_client_area_extended_to_decorations()
+                            && window.extended_margins().top == 0.0
+                            && height(client_after) == height(client_before)
+                            && title_after == HitTestValues::HTCAPTION
+                            && changes.first() == Some(&true)
+                            && changes.last() == Some(&false),
+                        format!(
+                            "the client area is {} pixels high again (before: {}); the caption answers {title_after}; the window reported {changes:?}",
+                            height(client_after),
+                            height(client_before)
+                        ),
+                    );
+                    window.set_extend_client_area_to_decorations_changed(None);
+                }
+
+                println!("-- transparency levels and the theme of the frame");
+                // The levels of a composition surface (blur, acrylic blur,
+                // mica) are not taken by a window that presents through its
+                // redirection bitmap: of a list that names them the window
+                // takes the transparent level, which the desktop window
+                // manager gives such a window, or keeps none. A list of
+                // "none" alone is none.
+                {
+                    use ferroui_base::platform::PlatformThemeVariant;
+                    use ferroui_controls::WindowTransparencyLevel;
+
+                    window.set_transparency_level_hint(&[
+                        WindowTransparencyLevel::mica(),
+                        WindowTransparencyLevel::acrylic_blur(),
+                        WindowTransparencyLevel::blur(),
+                        WindowTransparencyLevel::transparent(),
+                    ]);
+                    let taken = window.transparency_level();
+                    window.set_transparency_level_hint(&[WindowTransparencyLevel::none()]);
+                    let none = window.transparency_level();
+                    report.check(
+                        "transparency levels",
+                        (taken == WindowTransparencyLevel::transparent() || taken == WindowTransparencyLevel::none())
+                            && none == WindowTransparencyLevel::none(),
+                        format!("of mica, acrylic blur, blur and transparent the window took {taken:?}; of none, {none:?}"),
+                    );
+
+                    // The frame in the dark and in the light theme, and
+                    // back to the theme of the system: the attribute of the
+                    // desktop window manager is set (Windows 11); nothing
+                    // reads the frame back.
+                    window.set_frame_theme_variant(Some(PlatformThemeVariant::Dark));
+                    window.set_frame_theme_variant(Some(PlatformThemeVariant::Light));
+                    window.set_frame_theme_variant(None);
+                    report.info("theme of the frame", "set to dark, to light and to the theme of the system");
+                }
+
                 println!("-- dispatcher");
                 // Work posted from another thread has to wake the message
                 // loop: the signal of the dispatcher.

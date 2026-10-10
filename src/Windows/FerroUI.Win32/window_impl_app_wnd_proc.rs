@@ -6,7 +6,8 @@
 //! procedure itself is the second part.
 
 use crate::interop::unmanaged_methods::{
-    ModifierKeys, SizeCommand, WindowStyles, WindowsMessage, MINMAXINFO, RECT,
+    ModifierKeys, PenFlags, PointerButtonChangeType, PointerFlags, PointerInputType, SizeCommand, TouchInputFlags,
+    WindowStyles, WindowsMessage, MINMAXINFO, MOUSEMOVEPOINT, POINTER_INFO, RECT,
 };
 use ferroui_base::input::raw::RawPointerEventType;
 use ferroui_base::input::RawInputModifiers;
@@ -284,6 +285,161 @@ pub(crate) fn extended_client_area_border_thickness(
     border_thickness
 }
 
+/// The most entries of the history of a pointer that are read for one
+/// message.
+pub(crate) const MAX_POINTER_HISTORY_SIZE: u32 = 512;
+
+/// The most points of the history of the mouse that are read for one move.
+pub(crate) const MOUSE_HISTORY_SIZE: usize = 64;
+
+/// The modifiers of a pointer message: the keyboard modifiers and the
+/// buttons the flags of the pointer say are down.
+pub(crate) fn get_pointer_input_modifiers(flags: u32, keyboard_modifiers: RawInputModifiers) -> RawInputModifiers {
+    let flags = PointerFlags::from_bits_retain(flags);
+    let mut modifiers = keyboard_modifiers;
+
+    if flags.contains(PointerFlags::POINTER_FLAG_FIRSTBUTTON) {
+        modifiers |= RawInputModifiers::LEFT_MOUSE_BUTTON;
+    }
+
+    if flags.contains(PointerFlags::POINTER_FLAG_SECONDBUTTON) {
+        modifiers |= RawInputModifiers::RIGHT_MOUSE_BUTTON;
+    }
+
+    if flags.contains(PointerFlags::POINTER_FLAG_THIRDBUTTON) {
+        modifiers |= RawInputModifiers::MIDDLE_MOUSE_BUTTON;
+    }
+
+    if flags.contains(PointerFlags::POINTER_FLAG_FOURTHBUTTON) {
+        modifiers |= RawInputModifiers::X_BUTTON_1_MOUSE_BUTTON;
+    }
+
+    if flags.contains(PointerFlags::POINTER_FLAG_FIFTHBUTTON) {
+        modifiers |= RawInputModifiers::X_BUTTON_2_MOUSE_BUTTON;
+    }
+
+    modifiers
+}
+
+/// The modifiers the flags of a pen stand for.
+pub(crate) fn get_pen_modifiers(pen_flags: u32) -> RawInputModifiers {
+    let flags = PenFlags::from_bits_retain(pen_flags);
+    let mut modifiers = RawInputModifiers::NONE;
+
+    if flags.contains(PenFlags::PEN_FLAGS_BARREL) {
+        modifiers |= RawInputModifiers::PEN_BARREL_BUTTON;
+    }
+    if flags.contains(PenFlags::PEN_FLAGS_ERASER) {
+        modifiers |= RawInputModifiers::PEN_ERASER;
+    }
+    if flags.contains(PenFlags::PEN_FLAGS_INVERTED) {
+        modifiers |= RawInputModifiers::PEN_INVERTED;
+    }
+
+    modifiers
+}
+
+/// The raw event of a change of the buttons of a pointer.
+pub(crate) fn to_event_type(button_change_type: u32, is_touch: bool) -> RawPointerEventType {
+    match button_change_type {
+        PointerButtonChangeType::POINTER_CHANGE_FIRSTBUTTON_DOWN if is_touch => RawPointerEventType::TouchBegin,
+        PointerButtonChangeType::POINTER_CHANGE_FIRSTBUTTON_DOWN => RawPointerEventType::LeftButtonDown,
+        PointerButtonChangeType::POINTER_CHANGE_SECONDBUTTON_DOWN => RawPointerEventType::RightButtonDown,
+        PointerButtonChangeType::POINTER_CHANGE_THIRDBUTTON_DOWN => RawPointerEventType::MiddleButtonDown,
+        PointerButtonChangeType::POINTER_CHANGE_FOURTHBUTTON_DOWN => RawPointerEventType::XButton1Down,
+        PointerButtonChangeType::POINTER_CHANGE_FIFTHBUTTON_DOWN => RawPointerEventType::XButton2Down,
+
+        PointerButtonChangeType::POINTER_CHANGE_FIRSTBUTTON_UP if is_touch => RawPointerEventType::TouchEnd,
+        PointerButtonChangeType::POINTER_CHANGE_FIRSTBUTTON_UP => RawPointerEventType::LeftButtonUp,
+        PointerButtonChangeType::POINTER_CHANGE_SECONDBUTTON_UP => RawPointerEventType::RightButtonUp,
+        PointerButtonChangeType::POINTER_CHANGE_THIRDBUTTON_UP => RawPointerEventType::MiddleButtonUp,
+        PointerButtonChangeType::POINTER_CHANGE_FOURTHBUTTON_UP => RawPointerEventType::XButton1Up,
+        PointerButtonChangeType::POINTER_CHANGE_FIFTHBUTTON_UP => RawPointerEventType::XButton2Up,
+        _ if is_touch => RawPointerEventType::TouchUpdate,
+        _ => RawPointerEventType::Move,
+    }
+}
+
+/// The raw event of a pointer message.
+pub(crate) fn get_event_type(message: u32, info: &POINTER_INFO) -> RawPointerEventType {
+    let is_touch = info.pointer_type == PointerInputType::PT_TOUCH;
+    if PointerFlags::from_bits_retain(info.pointer_flags).contains(PointerFlags::POINTER_FLAG_CANCELED) {
+        return if is_touch { RawPointerEventType::TouchCancel } else { RawPointerEventType::CancelCapture };
+    }
+
+    let event_type = to_event_type(info.button_change_type, is_touch);
+    if event_type == RawPointerEventType::LeftButtonDown && message == WindowsMessage::WM_NCPOINTERDOWN {
+        return RawPointerEventType::NonClientLeftButtonDown;
+    }
+
+    event_type
+}
+
+/// The raw event of one contact of a `WM_TOUCH` message.
+pub(crate) fn touch_input_event_type(flags: u32) -> RawPointerEventType {
+    let flags = TouchInputFlags::from_bits_retain(flags);
+    if flags.contains(TouchInputFlags::TOUCHEVENTF_UP) {
+        RawPointerEventType::TouchEnd
+    } else if flags.contains(TouchInputFlags::TOUCHEVENTF_DOWN) {
+        RawPointerEventType::TouchBegin
+    } else {
+        RawPointerEventType::TouchUpdate
+    }
+}
+
+/// The location of a pointer on the screen with the precision of its
+/// device: the raw location in the units of the device, mapped from the
+/// rectangle of the device to the rectangle of its display.
+pub(crate) fn himetric_location(info: &POINTER_INFO, pointer_device_rect: RECT, display_rect: RECT) -> Point {
+    let display_width = f64::from(display_rect.right - display_rect.left);
+    let display_height = f64::from(display_rect.bottom - display_rect.top);
+    let device_width = f64::from(pointer_device_rect.right - pointer_device_rect.left);
+    let device_height = f64::from(pointer_device_rect.bottom - pointer_device_rect.top);
+
+    Point::new(
+        f64::from(info.pt_himetric_location_raw_x) * display_width / device_width + f64::from(display_rect.left),
+        f64::from(info.pt_himetric_location_raw_y) * display_height / device_height + f64::from(display_rect.top),
+    )
+}
+
+/// The point of a mouse move as the history of the mouse of the system
+/// names it: screen coordinates cut to 16 bits, and the time of the message.
+pub(crate) fn mouse_move_point(screen_x: i32, screen_y: i32, timestamp: u64) -> MOUSEMOVEPOINT {
+    MOUSEMOVEPOINT { x: screen_x & 0xFFFF, y: screen_y & 0xFFFF, time: timestamp as i32, dw_extra_info: 0 }
+}
+
+/// The points of the history of the mouse that lie between two moves, in
+/// screen pixels, oldest first.
+pub(crate) fn intermediate_mouse_points(
+    history: &[MOUSEMOVEPOINT],
+    move_point: MOUSEMOVEPOINT,
+    prev_move_point: MOUSEMOVEPOINT,
+) -> Vec<PixelPoint> {
+    // The history can be missing if the point wasn't found or there is such a delay that
+    // the original points were erased from the buffer.
+    if history.len() <= 1 {
+        return Vec::new();
+    }
+
+    let mut sorted_points: Vec<(i32, PixelPoint)> = Vec::with_capacity(history.len());
+
+    for mp in history {
+        let x = if mp.x > 32767 { mp.x - 65536 } else { mp.x };
+        let y = if mp.y > 32767 { mp.y - 65536 } else { mp.y };
+
+        if mp.time <= prev_move_point.time || mp.time >= move_point.time {
+            continue;
+        }
+
+        sorted_points.push((mp.time, PixelPoint::new(x, y)));
+    }
+
+    // sorting is required to ensure points are in order from oldest to newest
+    sorted_points.sort_by_key(|(time, _)| *time);
+
+    sorted_points.into_iter().map(|(_, point)| point).collect()
+}
+
 #[cfg(windows)]
 mod imp {
     use super::*;
@@ -294,9 +450,10 @@ mod imp {
     use crate::window_impl::WindowImpl;
     use ferroui_base::input::raw::{
         IRawInputEventArgs, RawKeyEventArgs, RawKeyEventType, RawMouseWheelEventArgs, RawPointerEventArgs,
-        RawTextInputEventArgs,
+        RawPointerPoint, RawTextInputEventArgs, RawTouchEventArgs,
     };
-    use ferroui_base::input::{IInputDevice, Key, KeyDeviceType, PhysicalKey};
+    use ferroui_base::input::{IInputDevice, IntermediatePoints, Key, KeyDeviceType, PhysicalKey};
+    use std::cell::LazyCell;
     use ferroui_base::threading::{Dispatcher, DispatcherPriority};
     use ferroui_base::Vector;
     use ferroui_controls::platform::{IScreenImpl, ScreensBaseImplExt};
@@ -308,6 +465,136 @@ mod imp {
     enum RawEvent {
         Key(Rc<RawKeyEventArgs>),
         Other(Rc<dyn IRawInputEventArgs>),
+    }
+
+    /// The device of a pointer message.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+    pub(crate) enum PointerDeviceKind {
+        Mouse,
+        Touch,
+        Pen,
+    }
+
+    /// What the system says of the pointer of a message
+    /// (`GetDevicePointerInfo` of the reference, whose out parameters
+    /// these are).
+    pub(crate) struct DevicePointerInfo {
+        pub device: PointerDeviceKind,
+        pub info: POINTER_INFO,
+        pub point: RawPointerPoint,
+        pub modifiers: RawInputModifiers,
+        pub timestamp: u64,
+    }
+
+    /// A raw pointer point at a position, with the defaults of the rest.
+    fn raw_point(position: Point) -> RawPointerPoint {
+        let mut point = RawPointerPoint::new();
+        point.position = position;
+        point
+    }
+
+    /// A screen pixel point as a point of the client area of a window.
+    fn point_to_client(hwnd: isize, scaling: f64, point: PixelPoint) -> Point {
+        let p = screen_to_client(hwnd, POINT { x: point.x, y: point.y });
+        Point::new(f64::from(p.x), f64::from(p.y)) / scaling
+    }
+
+    /// A screen point as a point of the client area of a window, with the
+    /// precision it has.
+    fn point_to_client_precise(hwnd: isize, scaling: f64, point: Point) -> Point {
+        let p = client_to_screen(hwnd, POINT { x: 0, y: 0 });
+        Point::new(point.x - f64::from(p.x), point.y - f64::from(p.y)) / scaling
+    }
+
+    /// Get the location of the pointer in screen coordinates with HIMETRIC sub-pixel precision
+    /// when supported, falling back to the integer pixel location on platforms that do not
+    /// implement `GetPointerDeviceRects` (e.g. Wine/Proton).
+    fn get_himetric_location(info: &POINTER_INFO) -> Point {
+        thread_local! {
+            static IS_GET_POINTER_DEVICE_RECTS_AVAILABLE: bool = has_get_pointer_device_rects();
+        }
+
+        let pixel_location = Point::new(f64::from(info.pt_pixel_location_x), f64::from(info.pt_pixel_location_y));
+        if !IS_GET_POINTER_DEVICE_RECTS_AVAILABLE.with(|available| *available) {
+            return pixel_location;
+        }
+
+        match get_pointer_device_rects(info.source_device) {
+            Some((pointer_device_rect, display_rect)) => himetric_location(info, pointer_device_rect, display_rect),
+            // Deviation (DEVIATIONS.md, Windows platform backend): a call
+            // that fails leaves rectangles of zeros in the reference and
+            // a location that is not a number.
+            None => pixel_location,
+        }
+    }
+
+    fn mouse_raw_pointer_point(hwnd: isize, scaling: f64, pointer_info: &POINTER_INFO) -> RawPointerPoint {
+        let point = point_to_client(
+            hwnd,
+            scaling,
+            PixelPoint::new(pointer_info.pt_pixel_location_x, pointer_info.pt_pixel_location_y),
+        );
+        raw_point(point)
+    }
+
+    fn touch_raw_pointer_point(hwnd: isize, scaling: f64, info: &POINTER_TOUCH_INFO) -> RawPointerPoint {
+        let himetric_location = get_himetric_location(&info.pointer_info);
+        let point = point_to_client_precise(hwnd, scaling, himetric_location);
+
+        let mut pointer_point = raw_point(point);
+        // POINTER_PEN_INFO.pressure is normalized to a range between 0 and 1024, with 512 as a default.
+        // But in our API we use range from 0.0 to 1.0.
+        pointer_point.pressure = info.pressure as f32 / 1024.0;
+
+        // See https://learn.microsoft.com/en-us/windows/win32/inputmsg/touch-mask-constants
+        // > TOUCH_MASK_CONTACTAREA: rcContact of the POINTER_TOUCH_INFO structure is valid.
+        if (info.touch_mask & TouchMask::TOUCH_MASK_CONTACTAREA.bits()) != 0 {
+            // See https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-pointer_touch_info
+            // > The predicted screen coordinates of the contact area, in pixels. By default, if the device does not report a contact area, this field defaults to a 0-by-0 rectangle centered around the pointer location.
+            let left_top_position =
+                point_to_client(hwnd, scaling, PixelPoint::new(info.rc_contact_left, info.rc_contact_top));
+            let bottom_right_position =
+                point_to_client(hwnd, scaling, PixelPoint::new(info.rc_contact_right, info.rc_contact_bottom));
+
+            // Why not use ptPixelLocationX and ptPixelLocationY to as leftTopPosition?
+            // Because ptPixelLocationX and ptPixelLocationY will be the center of the contact area.
+            pointer_point.set_contact_rect(Rect::from_points(left_top_position, bottom_right_position));
+        }
+
+        pointer_point
+    }
+
+    fn pen_raw_pointer_point(hwnd: isize, scaling: f64, info: &POINTER_PEN_INFO) -> RawPointerPoint {
+        let himetric_location = get_himetric_location(&info.pointer_info);
+        let point = point_to_client_precise(hwnd, scaling, himetric_location);
+        let mut pointer_point = raw_point(point);
+        // POINTER_PEN_INFO.pressure is normalized to a range between 0 and 1024, with 512 as a default.
+        // But in our API we use range from 0.0 to 1.0.
+        pointer_point.pressure = info.pressure as f32 / 1024.0;
+        pointer_point.twist = info.rotation as f32;
+        pointer_point.x_tilt = info.tilt_x as f32;
+        pointer_point.y_tilt = info.tilt_y as f32;
+        pointer_point
+    }
+
+    /// The points the mouse went through between two moves.
+    fn create_intermediate_points(
+        hwnd: isize,
+        scaling: f64,
+        move_point: MOUSEMOVEPOINT,
+        prev_move_point: MOUSEMOVEPOINT,
+    ) -> Vec<RawPointerPoint> {
+        // To understand some of this code, please check MS docs:
+        // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmousemovepointsex#remarks
+
+        // empty "time" as otherwise WinAPI will always fail
+        let move_point_copy = MOUSEMOVEPOINT { time: 0, ..move_point };
+        let history = get_mouse_move_points_ex(move_point_copy, MOUSE_HISTORY_SIZE);
+
+        intermediate_mouse_points(&history, move_point, prev_move_point)
+            .into_iter()
+            .map(|point| raw_point(point_to_client(hwnd, scaling, point)))
+            .collect()
     }
 
     impl RawEvent {
@@ -552,10 +839,27 @@ mod imp {
 
                         let point = self.dip_from_l_param(l_param);
 
-                        // The points between this move and the previous one
-                        // (the history of the mouse of the system) are
-                        // attached lazily by the reference: stage 2.
-                        e = Some(self.pointer_event(timestamp, RawPointerEventType::Move, point, w_param));
+                        // Prepare points for the IntermediatePoints call.
+                        let p = client_to_screen(
+                            self.hwnd(),
+                            POINT { x: (point.x * self.scaling()) as i32, y: (point.y * self.scaling()) as i32 },
+                        );
+                        let curr_point = mouse_move_point(p.x, p.y, timestamp);
+                        let prev_point = self.replace_last_wm_mouse_point(curr_point);
+
+                        let args = RawPointerEventArgs::new(
+                            self.mouse_input_device(),
+                            timestamp,
+                            self.owner(),
+                            RawPointerEventType::Move,
+                            point,
+                            get_mouse_modifiers(w_param, WindowsKeyboardDevice::modifiers()),
+                        );
+                        let (hwnd, scaling) = (self.hwnd(), self.scaling());
+                        let points: Box<dyn FnOnce() -> Option<Vec<RawPointerPoint>>> =
+                            Box::new(move || Some(create_intermediate_points(hwnd, scaling, curr_point, prev_point)));
+                        args.set_intermediate_points(Some(Rc::new(LazyCell::new(points))));
+                        e = Some(RawEvent::Other(Rc::new(args)));
                     }
                 }
 
@@ -621,10 +925,134 @@ mod imp {
                     }
                 }
 
-                // WM_TOUCH and the pointer messages (WM_POINTERDOWN, ...,
-                // WM_POINTERWHEEL): touch and pen input are stage 2. The
-                // messages are left to the system, which turns them into
-                // the mouse messages this procedure ignores as emulated.
+                WindowsMessage::WM_TOUCH => {
+                    if let (false, Some(input)) = (self.wm_pointer_enabled(), self.input_callback()) {
+                        let touch_input_count = to_int32(w_param as isize);
+
+                        if let Some(touch_inputs) = get_touch_input_info(l_param, touch_input_count.max(0) as u32) {
+                            for touch_input in touch_inputs {
+                                let position = self
+                                    .point_to_client_impl(PixelPoint::new(touch_input.x / 100, touch_input.y / 100));
+                                let mut raw_pointer_point = raw_point(position);
+
+                                // Try to get the touch width and height.
+                                // See https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-touchinput
+                                // > The width of the touch contact area in hundredths of a pixel in physical screen coordinates. This value is only valid if the dwMask member has the TOUCHEVENTFMASK_CONTACTAREA flag set.
+                                const TOUCHEVENTFMASK_CONTACTAREA: u32 = 0x0004; // Known as TOUCHINPUTMASKF_CONTACTAREA in the docs.
+                                if (touch_input.mask & TOUCHEVENTFMASK_CONTACTAREA) != 0 {
+                                    let center_x = f64::from(touch_input.x) / 100.0;
+                                    let center_y = f64::from(touch_input.y) / 100.0;
+
+                                    // The center X add the half width is the right X
+                                    let right_x = center_x + f64::from(touch_input.cx_contact) / 100.0 / 2.0;
+                                    // The center Y add the half height is the bottom Y
+                                    let bottom_y = center_y + f64::from(touch_input.cy_contact) / 100.0 / 2.0;
+
+                                    let bottom_right_position =
+                                        self.point_to_client_impl(PixelPoint::new(right_x as i32, bottom_y as i32));
+
+                                    let center_position = position;
+                                    let half_width = bottom_right_position.x - center_position.x;
+                                    let half_height = bottom_right_position.y - center_position.y;
+                                    let left_top_position =
+                                        Point::new(center_position.x - half_width, center_position.y - half_height);
+
+                                    raw_pointer_point
+                                        .set_contact_rect(Rect::from_points(left_top_position, bottom_right_position));
+                                }
+
+                                let device: Rc<dyn IInputDevice> = self.touch_device().clone();
+                                input(Rc::new(RawTouchEventArgs::with_point(
+                                    device,
+                                    u64::from(touch_input.time),
+                                    self.owner(),
+                                    touch_input_event_type(touch_input.flags),
+                                    raw_pointer_point,
+                                    WindowsKeyboardDevice::modifiers(),
+                                    i64::from(touch_input.id),
+                                )));
+                            }
+
+                            close_touch_input_handle(l_param);
+                            return 0;
+                        }
+                    }
+                }
+
+                WindowsMessage::WM_NCPOINTERDOWN
+                | WindowsMessage::WM_NCPOINTERUP
+                | WindowsMessage::WM_POINTERDOWN
+                | WindowsMessage::WM_POINTERUP
+                | WindowsMessage::WM_POINTERUPDATE => {
+                    if self.wm_pointer_enabled() {
+                        let pointer = self.get_device_pointer_info(w_param, timestamp);
+                        let event_type = get_event_type(message, &pointer.info);
+
+                        e = Some(RawEvent::Other(self.create_pointer_args_with_intermediate_points(
+                            &pointer,
+                            event_type,
+                            self.create_lazy_intermediate_points(&pointer.info),
+                        )));
+                    }
+                }
+
+                WindowsMessage::WM_POINTERLEAVE => {
+                    if self.wm_pointer_enabled() {
+                        let pointer = self.get_device_pointer_info(w_param, timestamp);
+                        let event_type = if pointer.device == PointerDeviceKind::Touch {
+                            RawPointerEventType::TouchCancel
+                        } else {
+                            RawPointerEventType::LeaveWindow
+                        };
+                        e = Some(RawEvent::Other(self.create_pointer_args(&pointer, event_type)));
+                    }
+                }
+
+                WindowsMessage::WM_POINTERCAPTURECHANGED => {
+                    if self.wm_pointer_enabled() {
+                        let pointer = self.get_device_pointer_info(w_param, timestamp);
+                        let event_type = if pointer.device == PointerDeviceKind::Touch {
+                            RawPointerEventType::TouchCancel
+                        } else {
+                            RawPointerEventType::CancelCapture
+                        };
+                        e = Some(RawEvent::Other(self.create_pointer_args(&pointer, event_type)));
+                    }
+                }
+
+                WindowsMessage::WM_POINTERWHEEL | WindowsMessage::WM_POINTERHWHEEL => {
+                    if self.wm_pointer_enabled() {
+                        let pointer = self.get_device_pointer_info(w_param, timestamp);
+
+                        let val = wheel_delta_from_w_param(w_param);
+                        let delta = if message == WindowsMessage::WM_POINTERWHEEL {
+                            Vector::new(0.0, val)
+                        } else {
+                            Vector::new(val, 0.0)
+                        };
+                        let args = RawMouseWheelEventArgs::new(
+                            self.pointer_input_device(pointer.device),
+                            pointer.timestamp,
+                            self.owner(),
+                            pointer.point.position,
+                            delta,
+                            pointer.modifiers,
+                        );
+                        args.set_raw_pointer_id(i64::from(pointer.info.pointer_id));
+                        e = Some(RawEvent::Other(Rc::new(args)));
+                    }
+                }
+
+                // WM_POINTERACTIVATE occurs when a pointer activates an inactive window; we should
+                // handle this and return PA_ACTIVATE or PA_NOACTIVATE.
+                // WM_POINTERDEVICECHANGE notifies about changes in the settings of a monitor that has
+                // a digitizer attached to it.
+                // WM_NCPOINTERUPDATE: NC stands for non-client area - window header and window border;
+                // all we need is pointer down and up, so this is skipped for now.
+                // WM_POINTERENTER is not handled as WM_MOUSEENTER is not; with a pen there can be a
+                // pointer leave or enter inside the window when the pen is lifted above the display.
+                // DM_POINTERHITTEST (direct manipulation), WM_TOUCHHITTESTING (the most probable
+                // touch target) and WM_PARENTNOTIFY (dialog scenarios) are not handled either.
                 WindowsMessage::WM_NCPAINT => {
                     if !self.has_full_decorations() {
                         return 0;
@@ -877,6 +1305,129 @@ mod imp {
 
         fn dip_from_l_param(&self, l_param: isize) -> Point {
             dip_from_l_param(l_param, self.scaling())
+        }
+
+        fn pointer_input_device(&self, device: PointerDeviceKind) -> Rc<dyn IInputDevice> {
+            match device {
+                PointerDeviceKind::Mouse => self.mouse_input_device(),
+                PointerDeviceKind::Touch => self.touch_device().clone(),
+                PointerDeviceKind::Pen => self.pen_device().clone(),
+            }
+        }
+
+        fn create_lazy_intermediate_points(&self, info: &POINTER_INFO) -> Option<IntermediatePoints> {
+            let history_count = info.history_count.min(MAX_POINTER_HISTORY_SIZE);
+            if history_count <= 1 {
+                return None;
+            }
+
+            let (pointer_type, pointer_id) = (info.pointer_type, info.pointer_id);
+            let (hwnd, scaling) = (self.hwnd(), self.scaling());
+            let points: Box<dyn FnOnce() -> Option<Vec<RawPointerPoint>>> = Box::new(move || {
+                let mut list = Vec::with_capacity(history_count as usize);
+
+                // Pointers in history are ordered from newest to oldest, so we need to reverse iteration.
+                // Also we skip the newest pointer, because original event arguments already contains it.
+
+                if pointer_type == PointerInputType::PT_TOUCH {
+                    if let Some(history) = get_pointer_touch_info_history(pointer_id, history_count) {
+                        list.extend(history.iter().skip(1).rev().map(|info| touch_raw_pointer_point(hwnd, scaling, info)));
+                    }
+                } else if pointer_type == PointerInputType::PT_PEN {
+                    if let Some(history) = get_pointer_pen_info_history(pointer_id, history_count) {
+                        list.extend(history.iter().skip(1).rev().map(|info| pen_raw_pointer_point(hwnd, scaling, info)));
+                    }
+                } else {
+                    // Currently Windows does not return history info for mouse input, but we handle it just for case.
+                    if let Some(history) = get_pointer_info_history(pointer_id, history_count) {
+                        list.extend(history.iter().skip(1).rev().map(|info| mouse_raw_pointer_point(hwnd, scaling, info)));
+                    }
+                }
+                Some(list)
+            });
+
+            Some(Rc::new(LazyCell::new(points)))
+        }
+
+        pub(crate) fn create_pointer_args(
+            &self,
+            pointer: &DevicePointerInfo,
+            event_type: RawPointerEventType,
+        ) -> Rc<dyn IRawInputEventArgs> {
+            self.create_pointer_args_with_intermediate_points(pointer, event_type, None)
+        }
+
+        fn create_pointer_args_with_intermediate_points(
+            &self,
+            pointer: &DevicePointerInfo,
+            event_type: RawPointerEventType,
+            intermediate_points: Option<IntermediatePoints>,
+        ) -> Rc<dyn IRawInputEventArgs> {
+            let device = self.pointer_input_device(pointer.device);
+            let raw_pointer_id = i64::from(pointer.info.pointer_id);
+
+            if pointer.device == PointerDeviceKind::Touch {
+                let args = RawTouchEventArgs::with_point(
+                    device,
+                    pointer.timestamp,
+                    self.owner(),
+                    event_type,
+                    pointer.point,
+                    pointer.modifiers,
+                    raw_pointer_id,
+                );
+                args.set_intermediate_points(intermediate_points);
+                Rc::new(args)
+            } else {
+                let args = RawPointerEventArgs::with_point(
+                    device,
+                    pointer.timestamp,
+                    self.owner(),
+                    event_type,
+                    pointer.point,
+                    pointer.modifiers,
+                );
+                args.set_raw_pointer_id(raw_pointer_id);
+                args.set_intermediate_points(intermediate_points);
+                Rc::new(args)
+            }
+        }
+
+        /// The device, the state, the point and the modifiers of the
+        /// pointer of a message; the time of the pointer replaces
+        /// `timestamp` when the system has one.
+        pub(crate) fn get_device_pointer_info(&self, w_param: usize, timestamp: u64) -> DevicePointerInfo {
+            let pointer_id = (to_int32(w_param as isize) & 0xFFFF) as u32;
+            let type_ = get_pointer_type(pointer_id);
+            let (hwnd, scaling) = (self.hwnd(), self.scaling());
+
+            let mut modifiers = RawInputModifiers::NONE;
+
+            let (device, info, point) = match type_ {
+                PointerInputType::PT_PEN => {
+                    let pen_info = get_pointer_pen_info(pointer_id);
+                    modifiers |= get_pen_modifiers(pen_info.pen_flags);
+                    (PointerDeviceKind::Pen, pen_info.pointer_info, pen_raw_pointer_point(hwnd, scaling, &pen_info))
+                }
+                PointerInputType::PT_TOUCH => {
+                    let touch_info = get_pointer_touch_info(pointer_id);
+                    (
+                        PointerDeviceKind::Touch,
+                        touch_info.pointer_info,
+                        touch_raw_pointer_point(hwnd, scaling, &touch_info),
+                    )
+                }
+                _ => {
+                    let info = get_pointer_info(pointer_id);
+                    (PointerDeviceKind::Mouse, info, mouse_raw_pointer_point(hwnd, scaling, &info))
+                }
+            };
+
+            let timestamp = if info.dw_time != 0 { u64::from(info.dw_time) } else { timestamp };
+
+            modifiers |= get_pointer_input_modifiers(info.pointer_flags, WindowsKeyboardDevice::modifiers());
+
+            DevicePointerInfo { device, info, point, modifiers, timestamp }
         }
 
         fn mouse_input_device(&self) -> Rc<dyn IInputDevice> {
@@ -1187,5 +1738,115 @@ mod tests {
         let border_only = WindowStyles::WS_BORDER | WindowStyles::WS_THICKFRAME;
         let border = extended_client_area_border_thickness(border_only, false, &adjust);
         assert_eq!(border, RECT { left: -8, top: -1, right: 8, bottom: 8 });
+    }
+
+    fn pointer(pointer_type: u32, flags: PointerFlags, change: u32) -> POINTER_INFO {
+        POINTER_INFO { pointer_type, pointer_flags: flags.bits(), button_change_type: change, ..POINTER_INFO::default() }
+    }
+
+    #[test]
+    fn the_event_of_a_change_of_the_buttons_of_a_pointer() {
+        use PointerButtonChangeType as C;
+        use RawPointerEventType as E;
+        let cases = [
+            (C::POINTER_CHANGE_FIRSTBUTTON_DOWN, E::LeftButtonDown, E::TouchBegin),
+            (C::POINTER_CHANGE_FIRSTBUTTON_UP, E::LeftButtonUp, E::TouchEnd),
+            (C::POINTER_CHANGE_SECONDBUTTON_DOWN, E::RightButtonDown, E::RightButtonDown),
+            (C::POINTER_CHANGE_SECONDBUTTON_UP, E::RightButtonUp, E::RightButtonUp),
+            (C::POINTER_CHANGE_THIRDBUTTON_DOWN, E::MiddleButtonDown, E::MiddleButtonDown),
+            (C::POINTER_CHANGE_THIRDBUTTON_UP, E::MiddleButtonUp, E::MiddleButtonUp),
+            (C::POINTER_CHANGE_FOURTHBUTTON_DOWN, E::XButton1Down, E::XButton1Down),
+            (C::POINTER_CHANGE_FOURTHBUTTON_UP, E::XButton1Up, E::XButton1Up),
+            (C::POINTER_CHANGE_FIFTHBUTTON_DOWN, E::XButton2Down, E::XButton2Down),
+            (C::POINTER_CHANGE_FIFTHBUTTON_UP, E::XButton2Up, E::XButton2Up),
+            (C::POINTER_CHANGE_NONE, E::Move, E::TouchUpdate),
+        ];
+        for (change, not_touch, touch) in cases {
+            assert_eq!(to_event_type(change, false), not_touch);
+            assert_eq!(to_event_type(change, true), touch);
+        }
+    }
+
+    #[test]
+    fn the_event_of_a_pointer_message() {
+        use PointerButtonChangeType as C;
+        let down = pointer(PointerInputType::PT_MOUSE, PointerFlags::POINTER_FLAG_DOWN, C::POINTER_CHANGE_FIRSTBUTTON_DOWN);
+        assert_eq!(get_event_type(WindowsMessage::WM_POINTERDOWN, &down), RawPointerEventType::LeftButtonDown);
+        assert_eq!(get_event_type(WindowsMessage::WM_NCPOINTERDOWN, &down), RawPointerEventType::NonClientLeftButtonDown);
+
+        // A touch in the frame is a touch.
+        let touch = pointer(PointerInputType::PT_TOUCH, PointerFlags::POINTER_FLAG_DOWN, C::POINTER_CHANGE_FIRSTBUTTON_DOWN);
+        assert_eq!(get_event_type(WindowsMessage::WM_NCPOINTERDOWN, &touch), RawPointerEventType::TouchBegin);
+
+        // A cancelled pointer, whatever its buttons say.
+        let cancelled = pointer(PointerInputType::PT_PEN, PointerFlags::POINTER_FLAG_CANCELED, C::POINTER_CHANGE_FIRSTBUTTON_UP);
+        assert_eq!(get_event_type(WindowsMessage::WM_POINTERUP, &cancelled), RawPointerEventType::CancelCapture);
+        let cancelled = pointer(PointerInputType::PT_TOUCH, PointerFlags::POINTER_FLAG_CANCELED, C::POINTER_CHANGE_NONE);
+        assert_eq!(get_event_type(WindowsMessage::WM_POINTERUPDATE, &cancelled), RawPointerEventType::TouchCancel);
+    }
+
+    #[test]
+    fn the_modifiers_of_a_pointer_and_of_a_pen() {
+        let flags = PointerFlags::POINTER_FLAG_FIRSTBUTTON | PointerFlags::POINTER_FLAG_FIFTHBUTTON | PointerFlags::POINTER_FLAG_INCONTACT;
+        assert_eq!(
+            get_pointer_input_modifiers(flags.bits(), RawInputModifiers::SHIFT),
+            RawInputModifiers::SHIFT | RawInputModifiers::LEFT_MOUSE_BUTTON | RawInputModifiers::X_BUTTON_2_MOUSE_BUTTON
+        );
+        let flags = PointerFlags::POINTER_FLAG_SECONDBUTTON | PointerFlags::POINTER_FLAG_THIRDBUTTON | PointerFlags::POINTER_FLAG_FOURTHBUTTON;
+        assert_eq!(
+            get_pointer_input_modifiers(flags.bits(), RawInputModifiers::NONE),
+            RawInputModifiers::RIGHT_MOUSE_BUTTON | RawInputModifiers::MIDDLE_MOUSE_BUTTON | RawInputModifiers::X_BUTTON_1_MOUSE_BUTTON
+        );
+        assert_eq!(get_pointer_input_modifiers(0, RawInputModifiers::NONE), RawInputModifiers::NONE);
+
+        assert_eq!(get_pen_modifiers(0), RawInputModifiers::NONE);
+        assert_eq!(
+            get_pen_modifiers((PenFlags::PEN_FLAGS_BARREL | PenFlags::PEN_FLAGS_INVERTED).bits()),
+            RawInputModifiers::PEN_BARREL_BUTTON | RawInputModifiers::PEN_INVERTED
+        );
+        assert_eq!(get_pen_modifiers(PenFlags::PEN_FLAGS_ERASER.bits()), RawInputModifiers::PEN_ERASER);
+    }
+
+    #[test]
+    fn the_event_of_a_contact_of_a_touch_message() {
+        use TouchInputFlags as F;
+        assert_eq!(touch_input_event_type(F::TOUCHEVENTF_DOWN.bits()), RawPointerEventType::TouchBegin);
+        assert_eq!(touch_input_event_type(F::TOUCHEVENTF_MOVE.bits()), RawPointerEventType::TouchUpdate);
+        assert_eq!(touch_input_event_type((F::TOUCHEVENTF_UP | F::TOUCHEVENTF_PRIMARY).bits()), RawPointerEventType::TouchEnd);
+        // Up wins over down, as in the reference.
+        assert_eq!(touch_input_event_type((F::TOUCHEVENTF_UP | F::TOUCHEVENTF_DOWN).bits()), RawPointerEventType::TouchEnd);
+    }
+
+    #[test]
+    fn the_location_of_a_pointer_in_the_units_of_its_device() {
+        // A digitizer of 20000 by 10000 units mapped to a display of 2000
+        // by 1000 pixels whose left edge is at 1920.
+        let device = RECT { left: 0, top: 0, right: 20000, bottom: 10000 };
+        let display = RECT { left: 1920, top: 0, right: 3920, bottom: 1000 };
+        let info = POINTER_INFO { pt_himetric_location_raw_x: 10005, pt_himetric_location_raw_y: 2503, ..POINTER_INFO::default() };
+        let location = himetric_location(&info, device, display);
+        assert!((location.x - 2920.5).abs() < 1e-9);
+        assert!((location.y - 250.3).abs() < 1e-9);
+    }
+
+    #[test]
+    fn the_point_of_a_mouse_move_for_the_history_of_the_system() {
+        assert_eq!(mouse_move_point(100, 200, 5000), MOUSEMOVEPOINT { x: 100, y: 200, time: 5000, dw_extra_info: 0 });
+        // A negative coordinate (a monitor left of the primary) is cut to 16 bits.
+        assert_eq!(mouse_move_point(-10, 20, 1).x, 65526);
+    }
+
+    #[test]
+    fn the_points_between_two_mouse_moves() {
+        let at = |x, y, time| MOUSEMOVEPOINT { x, y, time, dw_extra_info: 0 };
+        // Newest first, as the system returns them; the first is the move
+        // itself, the last two are the previous move and one before it.
+        let history = [at(50, 50, 400), at(40, 40, 300), at(65526, 30, 250), at(20, 20, 200), at(10, 10, 100)];
+        let points = intermediate_mouse_points(&history, at(50, 50, 400), at(20, 20, 200));
+        assert_eq!(points, vec![PixelPoint::new(-10, 30), PixelPoint::new(40, 40)]);
+
+        // The point was not found, or it is the only one.
+        assert!(intermediate_mouse_points(&[], at(50, 50, 400), at(20, 20, 200)).is_empty());
+        assert!(intermediate_mouse_points(&history[..1], at(50, 50, 400), at(20, 20, 200)).is_empty());
     }
 }

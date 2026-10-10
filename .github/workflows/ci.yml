@@ -236,6 +236,16 @@ jobs:
             echo "::endgroup::"
             ls -l "target/screenshots/$mode" || result=1
           done
+          # Once more with the client area of the window extended into its frame (stage 2f of the
+          # backend): the title bar and the caption buttons are drawn by the framework, and the
+          # page of the window customizations is among the pages.
+          echo "::group::The catalog with an extended client area"
+          FERROUI_SMOKE_RENDERING=angle FERROUI_SMOKE_EXTEND_CLIENT_AREA=1 \
+            FERROUI_SMOKE_SCREENSHOT_PAGES="Home,Window Customizations,Buttons" \
+            FERROUI_SMOKE_SCREENSHOTS=target/screenshots/extended \
+            ./target/debug/control-catalog-desktop.exe || { echo "::error::the catalog ended with an error (extended client area)"; result=1; }
+          echo "::endgroup::"
+          ls -l target/screenshots/extended || result=1
           exit $result
       - name: Keep the pictures of the catalog
         if: ${{ always() && steps.skia.outputs.raster == 'true' }}
