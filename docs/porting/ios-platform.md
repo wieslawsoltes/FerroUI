@@ -142,9 +142,18 @@ Stage 2a adds the rest of the handler:
 
 Both are plain functions and a small state (`translate_press`, `key_event_type`, `MomentumScrolling`) with the UIKit part around them; 13 tests on the host. What no test can do is deliver a press or a scroll event (section 12). Text input is section 10.
 
-## 10. Text input (stage 2)
+## 10. Text input (stage 2b, built)
 
-Upstream: the view is the `ITextInputMethodImpl`; when a client is set it creates a `TextInputResponder` (a `UIResponder` implementing `UITextInput` and `UIKeyInput`, 683 lines in two files) and makes it first responder, which brings up the keyboard; the responder answers UIKit's questions (text in a range, selection, marked text, caret and selection rectangles, positions and ranges as its own `UITextPosition`/`UITextRange` subclasses) from the `TextInputMethodClient`, and applies insertions, deletions and marked text to it; the keyboard's traits (type, return key, autocorrection, secure entry) come from `TextInputOptions`; `UIKitInputPane` reports the keyboard's frame and animation from the keyboard notifications. In Rust that is three more classes declared with `define_class!` and the `UITextInput` protocol of the bindings. The contracts exist in the base crate and are used by the browser and macOS backends.
+Upstream: the view is the `ITextInputMethodImpl`; when a client is set it creates a `TextInputResponder` (a `UIResponder` implementing `UITextInput` and `UIKeyInput`, 683 lines in two files) and makes it first responder, which brings up the keyboard; the responder answers UIKit's questions (text in a range, selection, marked text, caret and selection rectangles, positions and ranges as its own `UITextPosition`/`UITextRange` subclasses) from the `TextInputMethodClient`, and applies insertions, deletions and marked text to it; the keyboard's traits (type, return key, autocorrection, secure entry) come from `TextInputOptions`; `UIKitInputPane` reports the keyboard's frame and animation from the keyboard notifications. In Rust that is four more classes declared with `define_class!` (`FerroTextInputResponder`, `FerroTextPosition`, `FerroEmptyTextPosition`, `FerroTextRange`) and the `UITextInput`, `UIKeyInput` and `UITextInputTraits` protocols of the bindings. The contracts exist in the base crate and are used by the browser and macOS backends.
+
+What was built, as upstream:
+
+- **The view and the first responder.** The top-level's `ITextInputMethodImpl` forwards to the view (a view is not an `Rc`; DEVIATIONS.md). `set_client` with a client creates a responder for it and makes it the first responder; without one, and on `reset`, the view takes the first responder back if a responder of its own had it ("is driving text"). The responder that is the first responder (the view or a text input responder) is kept in a thread-local, as upstream's static property.
+- **The responder.** Its next responder is the view, so key presses of a hardware keyboard still reach the view. `insertText:` is a text input event, except a new line: a key press of Enter, then by the return key the focus moves on (Next) or the keyboard is dismissed (Done, Go, Send, Search). `deleteBackward` is a key press of Backspace. `replaceRange:withText:` sets the selection of the client and sends the text. Marked text is the pre-edit text of the client (`set_preedit_text`); `unmarkText` commits it as text input. The document is the surrounding text of the client plus the marked text; positions and ranges are indices in UTF-16 code units, the unit of UIKit and of the client's selection. `caretRectForPosition:` is the cursor rectangle of the client, `firstRectForRange:` the rectangle the text input method was given, `closestPositionToPoint:` a hit test of the text layout of the presenter. While the client reports a change of its surrounding text, the responder tells the input delegate (text and selection will change, did change) and ignores what UIKit sets as the selection in response. Writing direction, selection rectangles and the position in a range are upstream's to-dos, ported as they are.
+- **The traits.** Keyboard type from the content type (alpha, digits, PIN, number, e-mail, URL, name, social, search), the return key from the options (or Done for one line), secure entry for passwords, PINs and sensitive content, autocorrection and spell checking unless suggestions are off; the input mode from the locale hints.
+- **The input pane.** `UIKitInputPane`, one per application: the keyboard's will-show and will-hide notifications set the state and the occluded rectangle (the end frame, in the coordinates of the screen) and raise the change with the start frame, the duration and an easing. Upstream reads the animation curve of the notification as animation options and tests the curve options as flags, of which "ease in out" has no bits: every curve gives the sine ease in out (kept, with a test that says so).
+
+The arithmetic (ranges, positions, the text of a range with and without marked text, the traits from the options) is plain functions with 13 tests on the host; `combined_span3.rs` has 3, the input pane 3.
 
 ## 11. Insets and the safe area
 
@@ -180,8 +189,17 @@ The checks of stage 2 (the module `stage2` of the example), in the same report:
 | scroll gesture | 2a | The view has one pan gesture recognizer, for no touches and both kinds of scroll events. |
 | launcher | 2a | The top-level has a launcher; a URI of a scheme no application has is answered with `false` at once. |
 | feedback | 2a | The top-level has its feedback: the sound of a click is performed, holding has no sound, the tap of holding is performed (the haptic engine of a simulator does nothing with it). |
+| text focus | 2b | A text box of the example takes the focus (its content type was set to e-mail first). |
+| text responder | 2b | At the next attempt the view "is driving text": a text input responder of the view exists and UIKit says it is the first responder. Proves the input method manager, the feature of the top-level, `set_client` and `becomeFirstResponder`. |
+| keyboard traits | 2b | Asked as UIKit asks: the keyboard type is the e-mail one, the return key Done (one line), the entry not secure. |
+| insert text | 2b | `insertText:` "abc": the text box has "abc"; the document is 3 long (`offsetFromPosition:toPosition:` of its ends), `textInRange:` of it is "abc", the selected range is empty at 3. |
+| positions | 2b | `positionFromPosition:offset:`: the text from offset 1 to the end is "bc"; there is no position after the end. |
+| marked text | 2b | `setMarkedText:selectedRange:` "xy": the marked text is held, `markedTextRange` is 3 to 5; after `unmarkText` the text box has "abcxy" and there is no marked range. |
+| delete and replace | 2b | `deleteBackward`: "abcx"; `replaceRange:withText:` of the first character with "Z": "Zbcx". |
+| input pane | 2b | The example posts a keyboard will-show notification with two frames, a duration and a curve, then a will-hide one: the pane is open over the end frame, then closed, with two events that carry the frames and 250 ms. The detail also prints what the keyboard of the system itself had reported while the text box was focused, which depends on the simulator (no software keyboard appears while a hardware keyboard is connected to it). |
+| text end | 2b | The focus is cleared: the view drives no text and is the first responder again. |
 
-What it cannot prove: touch input, key presses and scroll events (no synthetic input from inside an application; `simctl` has no touch or key command), so that the handlers are reached at all is shown only by hand; that a launched URI opens (it would leave the application); that the sound is heard; rotation and a change of the safe area; the background and foreground transitions; the launch screen. The screenshot the script takes shows what the simulator composited, for a person to look at; it is not compared.
+What it cannot prove: touch input, key presses and scroll events (no synthetic input from inside an application; `simctl` has no touch or key command), so that the handlers are reached at all is shown only by hand; that the keyboard of the system and its input methods (autocorrection, dictation, a marked-text input method such as Pinyin) drive the responder the way the example does, and what the keyboard looks like for the traits; that a launched URI opens (it would leave the application); that the sound is heard; rotation and a change of the safe area; the background and foreground transitions; the launch screen. The screenshot the script takes shows what the simulator composited, for a person to look at; it is not compared.
 
 Runs in the simulator (2026-10-10, "iPhone 17 Pro", iOS 26.4, a debug build; the orchestrator of the port runs the script, because the simulator may only run while no virtual machine does) **[S]**:
 
@@ -199,6 +217,9 @@ The screenshots of both runs failed: the simulator service may not write into th
 | 3 | The smoke mode again, **SMOKE PASSED**, with its screenshots (`images/ios_view.png`: the view fills the screen under the status bar and the sensor housing, the text, the square, the circle and the marker where layout puts them). |
 | 3, the catalog | `scripts/ios/sim-catalog.sh "iPhone 17 Pro"`: the ControlCatalog (`samples/ControlCatalog.iOS`, the crate `control-catalog-ios`) started at its first attempt with the Fluent theme from compiled markup, found its 75 pages, and showed Home, Buttons, TextBox and ListBox, five seconds each, with a screenshot of each (`images/ios_catalog_home.png`, `images/ios_catalog_buttons.png`): **CATALOG SHOWN**. Read from the pictures: the page host with its navigation bar under the status bar, the embedded images and icons, text in the system font and in the monospaced font of the markup samples, check boxes, buttons, rounded borders, a scroll bar. The activatable lifetime reported the activation of the application (`App activated: Background`). |
 
+| 4 (stage 2a) | **SMOKE PASSED** at the second attempt: the ten checks of stage 1 and settings (Light, no contrast preference, the language "en-PL" as the first preferred language; the accent stayed the default of the framework: the preferred tint of the system is its blue, which has no red, and upstream passes over a tint with a component of zero), scroll gesture, launcher, feedback, trait change (the view became Dark, the settings raised one change and answered Dark). |
+| 5 (stage 2b) | **SMOKE PASSED** at the fourth attempt, without a crash at the first time UIKit talked to the responder: text focus, text responder (the first responder), keyboard traits (type 7, return key 9, not secure), insert text, positions, marked text, delete and replace ("abcx", then "Zbcx"), input pane (open over the posted frame, closed, two events), text end. The keyboard of the system itself had reported a pane of height 0 at the bottom of the screen while the text box was focused: the simulator had a hardware keyboard connected, so no software keyboard was shown. |
+
 ![The example in the simulator](images/ios_view.png) ![The catalog's home page in the simulator](images/ios_catalog_home.png) ![The Buttons page](images/ios_catalog_buttons.png)
 
 `scripts/ios/sim-catalog.sh <device> [--pages a,b,c] [--page-ms n] [--keep]` is the script for pictures of the catalog: the host has the smoke run of the desktop host (`FERROUI_SMOKE_PAGES=<ms>`, and `FERROUI_SMOKE_PAGE_NAMES=<headers>` to name pages; `FERROUI_SMOKE_EXIT_MS`), prints `Selecting <header>` for each page, and the script takes a screenshot of the simulator a second before the next page.
@@ -215,10 +236,10 @@ One row per upstream file. "built" files are on the branch; "part" means the fil
 | `AutomationPeerWrapper.cs` | 486 | `automation_peer_wrapper.rs` | 3 | open | accessibility elements over automation peers |
 | `AvaloniaAppDelegate.cs` | 142 | `ferro_app_delegate.rs` | 1 | part | the delegate, the builder, scenes, background and foreground; URLs and user activities (`IAvaloniaAppInternalDelegate`) are stage 2 |
 | `AvaloniaSceneDelegate.cs` | 88 | `ferro_scene_delegate.rs` | 1 | part | the window of a scene; the activations a scene carries are stage 2 |
-| `AvaloniaView.cs` | 444 | `ferro_view.rs` | 1, 2a | part | the view, layer, layout, touches, presses, the scroll gesture, trait and tint changes, the top-level with the insets manager, the screens, the launcher and the feedback; the text input method and the input pane are 2b, the clipboard and the storage provider 2c, the native control host 2d; the tvOS gestures are not ported |
-| `AvaloniaView.Text.cs` | 52 | `ferro_view.rs` | 2 | open | the text input method of the view |
+| `AvaloniaView.cs` | 444 | `ferro_view.rs` | 1, 2a, 2b | part | the view, layer, layout, touches, presses, the scroll gesture, trait and tint changes, the top-level with the insets manager, the screens, the launcher, the feedback, the text input method and the input pane; the clipboard and the storage provider are 2c, the native control host 2d; the tvOS gestures are not ported |
+| `AvaloniaView.Text.cs` | 52 | `ferro_view.rs` | 2b | built | the text input method of the view |
 | `AvaloniaView.Automation.cs` | 24 | `ferro_view.rs` | 3 | open | the accessibility container |
-| `CombinedSpan3.cs` | 40 | `combined_span3.rs` | 2 | open | a helper of the text input responder |
+| `CombinedSpan3.cs` | 40 | `combined_span3.rs` | 2b | built | a helper of the text input responder |
 | `DispatcherImpl.cs` | 133 | `dispatcher_impl.rs` | 1 | built | |
 | `DisplayLinkTimer.cs` | 45 | `display_link_timer.rs` | 1 | built | |
 | `Extensions.cs` | 23 | `extensions.rs` | 1, 2a | built | |
@@ -232,9 +253,9 @@ One row per upstream file. "built" files are on the branch; "part" means the fil
 | `PlatformSettings.cs` | 95 | `platform_settings.rs` | 2a | built | colour scheme, contrast, tint, language |
 | `SingleViewLifetime.cs` | 40 | `single_view_lifetime.rs` | 1 | built | |
 | `Stubs.cs` | 73 | `stubs.rs` | 1 | built | |
-| `TextInputResponder.cs` | 587 | `text_input_responder.rs` | 2 | open | `UITextInput` |
-| `TextInputResponder.Properties.cs` | 96 | `text_input_responder.rs` | 2 | open | the keyboard traits |
-| `UIKitInputPane.cs` | 58 | `ui_kit_input_pane.rs` | 2 | open | |
+| `TextInputResponder.cs` | 587 | `text_input_responder.rs` | 2b | built | `UITextInput`, `UIKeyInput` |
+| `TextInputResponder.Properties.cs` | 96 | `text_input_responder.rs` | 2b | built | the keyboard traits |
+| `UIKitInputPane.cs` | 58 | `ui_kit_input_pane.rs` | 2b | built | |
 | `ViewController.cs` | 82 | `view_controller.rs` | 1 | built | |
 | `iOSScreens.cs` | 75 | `ios_screens.rs` | 1 | built | |
 | `Clipboard/ClipboardDataFormatHelper.cs` | 61 | `clipboard/clipboard_data_format_helper.rs` | 2 | open | |
@@ -261,7 +282,7 @@ Stage 1 has 23 of the 40 files, 17 complete and 6 in part. `samples/ControlCatal
 |---|---|---|
 | 1 (built) | The crate, the platform and its options, the application delegate, scenes, the single-view lifetime, the view and its top-level, the dispatcher, the display link timer, Metal with the Skia GPU, touches, the safe area and the insets manager, the screens, the example with its smoke mode, the bundle and simulator scripts, the CI job | Section 12 |
 | 2a (built) | Keys (`presses*`, the key table), the scroll wheel, platform settings (colour scheme, accent, language) with trait changes, the launcher, feedback | The settings against the traits and the locale; a change of the traits (the example gives its window the other style); the scroll gesture is attached; the launcher refuses an unknown scheme; the feedback. Not: a key press or a scroll event, which an application cannot make for itself (section 12) |
-| 2b | Text input: `TextInputResponder`, the keyboard traits, the input pane | The keyboard appears for a focused text box (the input pane reports its frame); text entry itself needs a person or UI automation |
+| 2b (built) | Text input: `TextInputResponder`, the keyboard traits, the input pane | A focused text box makes a text input responder the first responder; the example then sends that responder the messages the keyboard sends (insertion, marked text, deletion, replacement, the questions about the document) and compares with the text box; the input pane with a keyboard notification the example posts. Not: typing on the keyboard of the system, which needs a person or UI automation |
 | 2c | Clipboard (`UIPasteboard`), the storage provider with the document pickers and storage items, activations by URL and user activity (`simctl openurl`) | The clipboard round trip (`simctl pbcopy`/`pbpaste` against the application); a URL activation; the pickers need a person |
 | 1b (built) | The catalog's iOS host (`control-catalog-ios`) and `scripts/ios/sim-catalog.sh` | The catalog starts, selects pages and is photographed (section 12) |
 | 2d | The native control host, and the embed sample of the catalog over it | The embed page of the catalog shows a native button |

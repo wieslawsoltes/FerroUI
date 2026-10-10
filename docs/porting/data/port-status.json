@@ -9342,12 +9342,12 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    26,
+    30,
     40,
     0
    ],
    "types": [
-    38,
+    40,
     57,
     1
    ],
@@ -9388,6 +9388,9 @@
     ],
     "AvaloniaView.cs": [
      "ferro_view.rs"
+    ],
+    "CombinedSpan3.cs": [
+     "combined_span3.rs"
     ],
     "DispatcherImpl.cs": [
      "dispatcher_impl.rs"
@@ -9442,6 +9445,15 @@
     ],
     "Stubs.cs": [
      "stubs.rs"
+    ],
+    "TextInputResponder.Properties.cs": [
+     "text_input_responder.rs"
+    ],
+    "TextInputResponder.cs": [
+     "text_input_responder.rs"
+    ],
+    "UIKitInputPane.cs": [
+     "ui_kit_input_pane.rs"
     ],
     "ViewController.cs": [
      "view_controller.rs"
