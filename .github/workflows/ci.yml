@@ -580,21 +580,27 @@ jobs:
       # Text through an input method over D-Bus: the example is also the service (a double of the
       # portal of IBus on a private session bus) that consumes the key "a" and commits another text
       # for it. A real daemon is not used: which engine it starts, and when, is not deterministic.
+      # Under a window manager: an input method is told about focus when its window is active,
+      # and without a window manager no window ever is.
       - name: Text through an input method over D-Bus (a double of the IBus portal)
         if: ${{ !cancelled() }}
         run: |
-          dbus-run-session -- xvfb-run -a --server-args="-screen 0 1280x1024x24" \
-            timeout 300 target/debug/examples/x11_window --smoke --ime=ibus --skip=popup,resize,screens,clipboard
+          dbus-run-session -- xvfb-run -a --server-args="-screen 0 1280x1024x24" sh -c '
+            openbox & sleep 2
+            timeout 300 target/debug/examples/x11_window --smoke --ime=ibus --skip=popup,resize,screens,clipboard'
       # Text through the input method of the server: the one Xlib has built in (@im=local), with a
-      # compose sequence, which only an input method produces. A key gets the compose symbol; the
-      # server must not reset when xmodmap disconnects, or the mapping would be gone.
+      # compose sequence, which only an input method produces. A key gets the compose symbol (the
+      # scroll lock key: the framework has no action for it, where the menu key would open the
+      # context menu of the text box); the server must not reset when xmodmap disconnects, or the
+      # mapping would be gone.
       - name: Text through the input method of the server (XIM, a compose sequence)
         if: ${{ !cancelled() }}
         run: |
           sudo locale-gen en_US.UTF-8
           LANG=en_US.UTF-8 xvfb-run -a --server-args="-screen 0 1280x1024x24 -noreset" sh -c '
             set -e
-            xmodmap -e "keycode 135 = Multi_key"
+            xmodmap -e "keycode 78 = Multi_key"
+            openbox & sleep 2
             timeout 300 target/debug/examples/x11_window --smoke --ime=xim --skip=popup,resize,screens,clipboard'
       # Drag and drop: the server synthesizes a press on a square that starts a drag, the movement
       # and the release; first over the window itself, then over the window of a second process

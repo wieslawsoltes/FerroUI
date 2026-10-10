@@ -65,7 +65,10 @@
 //!   input method of the server, the one Xlib has built in
 //!   (`XMODIFIERS=@im=local`): a key produces its text through the input
 //!   context, and a compose sequence produces one character (the caller
-//!   gives a key the compose symbol: `xmodmap -e "keycode 135 = Multi_key"`).
+//!   gives a key the compose symbol: `xmodmap -e "keycode 78 = Multi_key"`,
+//!   the scroll lock key, for which the framework has no action). Both
+//!   need a window manager: an input method is told about focus when its
+//!   window is active, and without a window manager no window ever is.
 //! - **dnd** (with `--dnd`): a square in the window starts a drag of a
 //!   text when it is pressed; the server synthesizes the press, the
 //!   movement and the release. First the drag ends over the window
@@ -1860,7 +1863,8 @@ mod app {
                 // A compose sequence (the compose key, an apostrophe, "e") is one character. The
                 // input method filters the keys of the sequence, so only the input method of the
                 // server gives this text. The caller gives a key the compose symbol
-                // (`xmodmap -e "keycode 135 = Multi_key"`).
+                // (`xmodmap -e "keycode 78 = Multi_key"`: the scroll lock key. Not the menu key,
+                // which opens the context menu of the text box and takes the focus with it).
                 log.borrow_mut().clear();
                 let composed = "\u{e9}";
                 if xtest::key_code(display, 0xff20) == 0 {
