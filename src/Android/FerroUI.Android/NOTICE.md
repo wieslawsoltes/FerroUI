@@ -26,6 +26,19 @@ device. The declarations of the NDK functions the backend calls
 (`interop/ndk.rs`) are written from the documentation of the NDK, as the
 upstream project declares them in its own source.
 
+## AndroidX (Jetpack)
+
+The upstream project builds its accessibility helper on the class
+`ExploreByTouchHelper` of the AndroidX library `androidx.customview`
+(Copyright The Android Open Source Project, Apache License 2.0). The port does
+not use the AndroidX libraries; `explore_by_touch_helper.rs` and the Java class
+`FerroAccessHelper` are written anew over the platform classes and follow the
+behaviour of that class as its documentation and its source describe it (the
+rules of the accessibility and keyboard focus of a virtual view, the hover
+events, the node of a virtual view and its accessibility events, with a few of
+its comments). The licence is at
+<https://www.apache.org/licenses/LICENSE-2.0>.
+
 ## Dependencies
 
 | Crate | Version | Licence | Used for |

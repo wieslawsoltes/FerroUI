@@ -20,6 +20,9 @@ use super::panic_message;
 use crate::android_dispatcher_impl::AndroidDispatcherImpl;
 use crate::ferro_activity::FerroActivity;
 use crate::ferro_android_application::FerroAndroidApplication;
+use crate::automation::NodeActionArguments;
+use crate::explore_by_touch_helper::{IExploreByTouchCallbacks, INVALID_ID};
+use crate::ferro_access_helper::{populate_host_node, write_node_info};
 use crate::ferro_view::FerroView;
 use crate::log::{self, LogPriority};
 use crate::platform::skia_platform::{SurfaceProperties, TopLevelImpl};
@@ -46,6 +49,7 @@ use std::sync::OnceLock;
 pub(crate) const FERRO_APPLICATION: &str = "org/ferroui/android/FerroApplication";
 pub(crate) const FERRO_ACTIVITY: &str = "org/ferroui/android/FerroActivity";
 pub(crate) const FERRO_VIEW: &str = "org/ferroui/android/FerroView";
+pub(crate) const FERRO_ACCESS_HELPER: &str = "org/ferroui/android/FerroAccessHelper";
 pub(crate) const FERRO_SURFACE_VIEW: &str = "org/ferroui/android/FerroSurfaceView";
 pub(crate) const MAIN_LOOPER_BRIDGE: &str = "org/ferroui/android/MainLooperBridge";
 pub(crate) const FERRO_INPUT_CONNECTION: &str = "org/ferroui/android/FerroInputConnection";
@@ -113,6 +117,7 @@ pub unsafe fn on_load(vm: *mut c_void, build: fn() -> AppBuilder) -> i32 {
             FERRO_APPLICATION,
             FERRO_ACTIVITY,
             FERRO_VIEW,
+            FERRO_ACCESS_HELPER,
             FERRO_SURFACE_VIEW,
             MAIN_LOOPER_BRIDGE,
             FERRO_INPUT_CONNECTION,
@@ -236,6 +241,43 @@ fn register_all() {
                     c"nativeMotionEvent",
                     c"(JJIIIIII[I[FFF)I",
                     view_motion_event as unsafe extern "system" fn(_, _, _, _, _, _, _, _, _, _, _, _, _, _) -> _
+                ),
+            ],
+        );
+    }
+    unsafe {
+        register_natives(
+            &JavaClass::find(FERRO_ACCESS_HELPER),
+            &[
+                native!(
+                    c"nativePopulateHost",
+                    c"(JLandroid/view/accessibility/AccessibilityNodeInfo;Landroid/view/View;)V",
+                    access_populate_host as unsafe extern "system" fn(_, _, _, _, _)
+                ),
+                native!(
+                    c"nativePopulateNode",
+                    c"(JILandroid/view/accessibility/AccessibilityNodeInfo;Landroid/view/View;)V",
+                    access_populate_node as unsafe extern "system" fn(_, _, _, _, _, _)
+                ),
+                native!(
+                    c"nativePerformAction",
+                    c"(JIIZLjava/lang/String;)Z",
+                    access_perform_action as unsafe extern "system" fn(_, _, _, _, _, _, _) -> _
+                ),
+                native!(
+                    c"nativeFindFocus",
+                    c"(JI)I",
+                    access_find_focus as unsafe extern "system" fn(_, _, _, _) -> _
+                ),
+                native!(
+                    c"nativeDispatchHoverEvent",
+                    c"(JIFF)Z",
+                    access_dispatch_hover_event as unsafe extern "system" fn(_, _, _, _, _, _) -> _
+                ),
+                native!(
+                    c"nativeFocusChanged",
+                    c"(JZ)V",
+                    access_focus_changed as unsafe extern "system" fn(_, _, _, _)
                 ),
             ],
         );
@@ -680,6 +722,94 @@ unsafe extern "system" fn view_create_input_connection(
         };
         view.on_create_input_connection(&out_attrs).map_or(ptr::null_mut(), |connection| connection.into_raw())
     })
+}
+
+// ---- FerroAccessHelper ----------------------------------------------------------------------
+
+unsafe extern "system" fn access_populate_host(
+    _env: *mut JNIEnv,
+    _class: jobject,
+    handle: jlong,
+    info: jobject,
+    host: jobject,
+) {
+    guard((), || {
+        // SAFETY: the two references are the arguments of the method, references or null.
+        let (info, host) = unsafe { (JavaObject::from_raw(info), JavaObject::from_raw(host)) };
+        let (Some(view), Some(info), Some(host)) = (FerroView::from_handle(handle), info, host) else {
+            return;
+        };
+        let children = view.access_helper().get_visible_virtual_views();
+        populate_host_node(&children, &info, &host);
+    });
+}
+
+unsafe extern "system" fn access_populate_node(
+    _env: *mut JNIEnv,
+    _class: jobject,
+    handle: jlong,
+    virtual_view_id: jint,
+    info: jobject,
+    host: jobject,
+) {
+    guard((), || {
+        // SAFETY: the two references are the arguments of the method, references or null.
+        let (info, host) = unsafe { (JavaObject::from_raw(info), JavaObject::from_raw(host)) };
+        let (Some(view), Some(info), Some(host)) = (FerroView::from_handle(handle), info, host) else {
+            return;
+        };
+        let node = view.access_helper().create_node_for_virtual_view(virtual_view_id);
+        write_node_info(&node, &info, &host);
+    });
+}
+
+unsafe extern "system" fn access_perform_action(
+    _env: *mut JNIEnv,
+    _class: jobject,
+    handle: jlong,
+    virtual_view_id: jint,
+    action: jint,
+    has_arguments: JBoolean,
+    set_text: jobject,
+) -> JBoolean {
+    guard(0, || {
+        // SAFETY: `set_text` is the `String` of the signature, or null.
+        let set_text = unsafe { read_string(set_text) };
+        let Some(view) = FerroView::from_handle(handle) else {
+            return 0;
+        };
+        let arguments = (has_arguments != 0).then(|| NodeActionArguments { set_text_char_sequence: set_text });
+        view.access_helper().perform_action(virtual_view_id, action, arguments.as_ref()) as JBoolean
+    })
+}
+
+unsafe extern "system" fn access_find_focus(_env: *mut JNIEnv, _class: jobject, handle: jlong, focus_type: jint) -> jint {
+    guard(INVALID_ID, || match FerroView::from_handle(handle) {
+        Some(view) => view.access_helper().find_focus(focus_type),
+        None => INVALID_ID,
+    })
+}
+
+unsafe extern "system" fn access_dispatch_hover_event(
+    _env: *mut JNIEnv,
+    _class: jobject,
+    handle: jlong,
+    action: jint,
+    x: jfloat,
+    y: jfloat,
+) -> JBoolean {
+    guard(0, || match FerroView::from_handle(handle) {
+        Some(view) => view.dispatch_access_hover_event(action, x, y) as JBoolean,
+        None => 0,
+    })
+}
+
+unsafe extern "system" fn access_focus_changed(_env: *mut JNIEnv, _class: jobject, handle: jlong, gain_focus: JBoolean) {
+    guard((), || {
+        if let Some(view) = FerroView::from_handle(handle) {
+            view.on_focus_changed(gain_focus != 0);
+        }
+    });
 }
 
 // ---- FerroInputConnection -----------------------------------------------------------------

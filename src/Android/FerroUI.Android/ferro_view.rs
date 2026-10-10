@@ -4,11 +4,14 @@
 //! frame layout), which forwards what the system tells a view; this is the
 //! object behind it.
 
+use crate::ferro_access_helper::{FerroAccessHelper, JavaAccessibilityHost, TopLevelAccessView};
 use crate::interop::java::{call_int, call_long, call_void, new_object, JavaClass, JavaObject, JavaValue};
-use crate::interop::natives::{next_handle, FERRO_VIEW};
+use crate::interop::natives::{next_handle, FERRO_ACCESS_HELPER, FERRO_VIEW};
 use crate::platform::skia_platform::TopLevelImpl;
 use ferroui_base::{BoxedValue, Ref};
+use ferroui_controls::automation::peers::ControlAutomationPeer;
 use ferroui_controls::embedding::EmbeddableControlRoot;
+use ferroui_controls::Control;
 use ferroui_controls::platform::ITopLevelImpl;
 use ferroui_controls::TopLevel;
 use std::cell::{Cell, RefCell};
@@ -27,6 +30,7 @@ pub struct FerroView {
     java: JavaObject,
     root: RefCell<Option<Ref<EmbeddableControlRoot>>>,
     view: Rc<TopLevelImpl>,
+    access_helper: Rc<FerroAccessHelper>,
 
     is_rendering: Cell<bool>,
     surface_created: Cell<bool>,
@@ -84,11 +88,33 @@ impl FerroView {
         // of the Java view, once this function has returned the number of the object.
 
         let handle = next_handle();
+
+        // The access helper of the view, over the automation peer of the top-level, and its
+        // Java side as the accessibility delegate of the Java view.
+        let java_access_helper = new_object(
+            &JavaClass::find(FERRO_ACCESS_HELPER),
+            "(Lorg/ferroui/android/FerroView;J)V",
+            &[JavaValue::Object(Some(&java)), JavaValue::Long(handle)],
+        )
+        .to_global();
+        let access_helper = FerroAccessHelper::new(
+            Rc::new(TopLevelAccessView::new(Rc::downgrade(&view))),
+            Rc::new(JavaAccessibilityHost::new(java_access_helper.clone())),
+            ControlAutomationPeer::create_peer_for_element(&root),
+        );
+        call_void(
+            &java,
+            "setAccessibilityDelegate",
+            "(Landroid/view/View$AccessibilityDelegate;)V",
+            &[JavaValue::Object(Some(&java_access_helper))],
+        );
+
         let this = Rc::new(FerroView {
             handle,
             java,
             root: RefCell::new(Some(root)),
             view,
+            access_helper,
             is_rendering: Cell::new(false),
             surface_created: Cell::new(false),
         });
@@ -109,8 +135,6 @@ impl FerroView {
                 }
             }));
         }
-
-        // Stage 3 of docs/porting/android-platform.md: the accessibility helper of the view.
 
         VIEWS.with(|views| views.borrow_mut().insert(handle, this));
         handle
@@ -142,6 +166,20 @@ impl FerroView {
 
     pub(crate) fn top_level_impl(&self) -> &Rc<TopLevelImpl> {
         &self.view
+    }
+
+    pub(crate) fn access_helper(&self) -> &Rc<FerroAccessHelper> {
+        &self.access_helper
+    }
+
+    /// The number of the virtual view that stands for a control in the
+    /// accessibility tree of the view: what the node provider of the Java
+    /// view (`View.getAccessibilityNodeProvider`) is asked for the node of
+    /// the control with. An addition of the port, for an application that
+    /// tests itself.
+    pub fn accessibility_virtual_view_id(&self, control: &Control) -> i32 {
+        self.access_helper
+            .get_or_create_node_info_providers_from_peer(&ControlAutomationPeer::create_peer_for_element(control))
     }
 
     /// The top-level of the view; `None` once the view is disposed.
