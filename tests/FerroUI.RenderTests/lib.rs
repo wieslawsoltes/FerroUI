@@ -18,4 +18,24 @@ pub mod test_render_helper;
 pub mod test_render_root;
 
 #[cfg(test)]
+mod bug_repros;
+#[cfg(test)]
+mod composition;
+#[cfg(test)]
+mod controls;
+#[cfg(test)]
+mod cross_test_base;
+#[cfg(test)]
+mod cross_tests;
+#[cfg(test)]
+mod cross_ui;
+#[cfg(test)]
+mod geometry_clipping_tests;
+#[cfg(test)]
+mod media;
+#[cfg(test)]
+mod opacity_mask_tests;
+#[cfg(test)]
 mod shapes;
+#[cfg(test)]
+mod svg_path_tests;
