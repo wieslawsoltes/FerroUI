@@ -15,7 +15,8 @@
 #   --no-cargo          package the library that is already built
 #
 # Environment: ANDROID_HOME (the SDK); CARGO_TARGET_DIR is honoured; see scripts/android/env.sh for
-# the pinned versions of the NDK, the build tools and the platform.
+# the pinned versions of the NDK, the build tools and the platform, and for the nightly Rust
+# toolchain (with the component rust-src) the native library is built with.
 #
 # The last line printed is "APK: <path>".
 set -euo pipefail
@@ -106,8 +107,21 @@ mkdir -p "$work/classes" "$work/stage/lib/$abi"
 
 # 1. The native library.
 if [ "$run_cargo" = 1 ]; then
-    echo "== cargo build ${cargo_args[*]} --target $target (${profile})"
-    (cd "$repo" && cargo build "${cargo_args[@]}" --target "$target" ${profile_args[@]+"${profile_args[@]}"})
+    echo "== cargo +$FERROUI_ANDROID_RUST_TOOLCHAIN build -Zbuild-std ${cargo_args[*]} --target $target (${profile})"
+    # The standard library is built with the application, with thread-local storage through the
+    # emulated TLS of the compiler runtime (docs/porting/android-platform.md, section 5.1): the
+    # standard library of the Android targets as it is distributed keeps every thread-local variable
+    # under a key of the C library, and the system has 128 of those for a process.
+    target_env="$(printf '%s' "$target" | tr 'a-z-' 'A-Z_')"
+    compiler_var="CARGO_TARGET_${target_env}_LINKER"
+    builtins="$("${!compiler_var}" --print-libgcc-file-name)"
+    if [ ! -f "$builtins" ]; then
+        echo "the compiler runtime of the NDK was not found: $builtins" >&2
+        exit 1
+    fi
+    export "CARGO_TARGET_${target_env}_RUSTFLAGS=-Zhas-thread-local=yes -Zpre-link-args=$builtins"
+    (cd "$repo" && cargo "+$FERROUI_ANDROID_RUST_TOOLCHAIN" build -Zbuild-std=std,panic_unwind \
+        "${cargo_args[@]}" --target "$target" ${profile_args[@]+"${profile_args[@]}"})
 fi
 built="$cargo_target_dir/$target/$profile_dir/${library_dir:+$library_dir/}lib$library.so"
 if [ ! -f "$built" ]; then
