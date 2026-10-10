@@ -15,6 +15,7 @@ use std::{env, fs};
 /// generated file.
 const COMPILED: &[(&str, &str)] = &[
     ("direct_x/directx.idl", "directx.rs"),
+    ("d_composition/dcomp.idl", "dcomp.rs"),
     ("win_rt/winrt.idl", "winrt.rs"),
     ("win32_com/win32.idl", "win32.rs"),
 ];
