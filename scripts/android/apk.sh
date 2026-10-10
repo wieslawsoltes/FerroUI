@@ -60,6 +60,7 @@ case "$abi" in
 esac
 
 # What is built and how the package names it.
+permissions=""
 case "$app" in
     smoke)
         cargo_args=(-p ferroui-android --example android_smoke)
@@ -74,6 +75,8 @@ case "$app" in
         library_dir=""
         application_id="org.ferroui.controlcatalog"
         label="ControlCatalog"
+        # The web view of the embed page loads a page of the network.
+        permissions='    <uses-permission android:name="android.permission.INTERNET" />'
         ;;
 esac
 min_sdk="$FERROUI_ANDROID_API"
@@ -169,6 +172,7 @@ cat > "$work/AndroidManifest.xml" <<EOF
     android:versionCode="1"
     android:versionName="1.0">
     <uses-sdk android:minSdkVersion="$min_sdk" android:targetSdkVersion="$target_sdk" />
+$permissions
     <application
         android:name="org.ferroui.android.FerroApplication"
         android:label="$label"

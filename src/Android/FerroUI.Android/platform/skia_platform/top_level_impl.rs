@@ -23,7 +23,15 @@ use crate::platform::specific::helpers::android_motion_events_helper::{
 };
 use crate::ferro_activity::FerroActivity;
 use crate::i_android_navigation_service::IActivityNavigationService;
-use crate::platform::{AndroidInsetsManager, AndroidScreens, AndroidSystemNavigationManagerImpl};
+use crate::platform::android_launcher::AndroidLauncher;
+use crate::platform::android_platform_feedback::{AndroidPlatformFeedback, ViewFeedback};
+use crate::platform::clipboard_impl::ClipboardImpl;
+use crate::platform::storage::android_storage_provider::AndroidStorageProvider;
+use ferroui_base::input::platform::{Clipboard, IClipboard};
+use ferroui_base::platform::storage::{ILauncher, IStorageProvider};
+use crate::platform::{
+    AndroidInsetsManager, AndroidNativeControlHostImpl, AndroidScreens, AndroidSystemNavigationManagerImpl,
+};
 use ferroui_base::input::raw::{IRawInputEventArgs, RawTextInputEventArgs};
 use ferroui_base::input::text_input::ITextInputMethodImpl;
 use ferroui_base::input::{IInputDevice, IInputRoot, NavigationDirection};
@@ -35,7 +43,8 @@ use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::{PixelPoint, PixelSize, Point, Rect, Size};
 use ferroui_controls::platform::{
-    IInputPane, IInsetsManager, IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, SystemBarTheme,
+    IInputPane, IInsetsManager, INativeControlHostImpl, IPlatformFeedback, IPlatformHandle, IPopupImpl, IScreenImpl,
+    ITopLevelImpl, SystemBarTheme,
 };
 use ferroui_controls::{AcrylicPlatformCompensationLevels, WindowResizeReason, WindowTransparencyLevel};
 use ferroui_opengl::egl::{
@@ -129,6 +138,11 @@ pub struct TopLevelImpl {
     text_input_method: Rc<AndroidInputMethod>,
     text_input_host: Rc<ViewInputMethodHost>,
     system_navigation_manager: Rc<AndroidSystemNavigationManagerImpl>,
+    native_control_host: Rc<AndroidNativeControlHostImpl>,
+    feedback: Rc<AndroidPlatformFeedback>,
+    clipboard: Rc<Clipboard>,
+    storage_provider: Option<Rc<dyn IStorageProvider>>,
+    launcher: Option<Rc<AndroidLauncher>>,
     pointer_helper: AndroidMotionEventsHelper,
     insets_manager: Option<Rc<AndroidInsetsManager>>,
     screens: Rc<AndroidScreens>,
@@ -159,10 +173,6 @@ impl TopLevelImpl {
         let view = InvalidationAwareSurfaceView::new(context, id, place_on_top);
         let shared = view.shared().clone();
 
-        // Stage 2 of docs/porting/android-platform.md, each with the files that build it:
-        // the clipboard, the platform feedback, the storage provider, the launcher and the
-        // native control host.
-        // `try_get_feature` answers that the top-level does not have them.
         let is_activity = is_instance_of(context, "android/app/Activity");
         // `context as IActivityNavigationService`: the activity of this backend the context is.
         let navigation_service = FerroActivity::from_java(context)
@@ -174,7 +184,17 @@ impl TopLevelImpl {
             AndroidInputMethod::new(host, sdk_int())
         };
 
+        let feedback = Rc::new(AndroidPlatformFeedback::new(Box::new(ViewFeedback::new(ferro_view.clone()))));
+        let clipboard = Clipboard::new(ClipboardImpl::new(context));
+        let storage_provider: Option<Rc<dyn IStorageProvider>> =
+            is_activity.then(|| AndroidStorageProvider::new(context.clone()) as Rc<dyn IStorageProvider>);
+        let launcher = is_activity.then(|| Rc::new(AndroidLauncher::new(context.clone())));
+
         let this = Rc::new_cyclic(|this: &Weak<TopLevelImpl>| {
+            let native_control_host = AndroidNativeControlHostImpl::new(ferro_view.clone(), context.clone(), {
+                let this = this.clone();
+                Box::new(move || this.upgrade().map_or(1.0, |this| ITopLevelImpl::render_scaling(&*this)))
+            });
             let keyboard_top_level: Weak<dyn IKeyboardEventsTopLevel> = this.clone();
             let motion_top_level: Weak<dyn IMotionEventsTopLevel> = this.clone();
             let insets_manager = is_activity.then(|| {
@@ -205,6 +225,11 @@ impl TopLevelImpl {
                 text_input_method,
                 text_input_host,
                 system_navigation_manager,
+                native_control_host,
+                feedback,
+                clipboard,
+                storage_provider,
+                launcher,
                 pointer_helper: AndroidMotionEventsHelper::new(motion_top_level),
                 insets_manager,
                 screens: AndroidScreens::new(context),
@@ -519,6 +544,30 @@ impl IOptionalFeatureProvider for TopLevelImpl {
         if feature_type == TypeId::of::<dyn ISystemNavigationManagerImpl>() {
             let system_navigation_manager: Rc<dyn ISystemNavigationManagerImpl> = self.system_navigation_manager.clone();
             return Some(Rc::new(system_navigation_manager));
+        }
+
+        if feature_type == TypeId::of::<dyn IStorageProvider>() {
+            return Some(Rc::new(self.storage_provider.clone()?));
+        }
+
+        if feature_type == TypeId::of::<dyn IClipboard>() {
+            let clipboard: Rc<dyn IClipboard> = self.clipboard.clone();
+            return Some(Rc::new(clipboard));
+        }
+
+        if feature_type == TypeId::of::<dyn ILauncher>() {
+            let launcher: Rc<dyn ILauncher> = self.launcher.clone()?;
+            return Some(Rc::new(launcher));
+        }
+
+        if feature_type == TypeId::of::<dyn INativeControlHostImpl>() {
+            let native_control_host: Rc<dyn INativeControlHostImpl> = self.native_control_host.clone();
+            return Some(Rc::new(native_control_host));
+        }
+
+        if feature_type == TypeId::of::<dyn IPlatformFeedback>() {
+            let feedback: Rc<dyn IPlatformFeedback> = self.feedback.clone();
+            return Some(Rc::new(feedback));
         }
 
         if feature_type == TypeId::of::<dyn IInsetsManager>() {
