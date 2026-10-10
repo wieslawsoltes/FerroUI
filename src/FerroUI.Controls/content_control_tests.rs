@@ -346,3 +346,32 @@ fn default_template_creates_the_presenter_bound_to_the_control() {
     presenter.update_child();
     assert_eq!(presenter.child().unwrap(), child);
 }
+
+/// Not from upstream's unit tests; the scene is the button template of
+/// upstream's render test of the pips pager (`Controls/PipsPagerTests.cs`:
+/// `[!TextBlock.TextProperty] = b[!ContentControl.ContentProperty]`). The
+/// indexer binding of a property of type `object` to a property of another
+/// type gives the property the value itself when it is of that type.
+#[test]
+fn indexer_binding_of_content_gives_text_its_string() {
+    let _scope = test_scope();
+    let target = ContentControl::new();
+    let text = crate::TextBlock::new();
+
+    target.set_content(boxed_str("<"));
+    text.bind_indexer(
+        &crate::TextBlock::text_property().as_property().bind(),
+        &target.indexer(&ContentControl::content_property().as_property().bind()),
+    );
+    assert_eq!(Some("<".to_string()), text.text());
+
+    target.set_content(boxed_str(">"));
+    assert_eq!(Some(">".to_string()), text.text());
+
+    // A value that is not text is not the text.
+    target.set_content(Some(Rc::new(5i32) as BoxedValue));
+    assert_eq!(None, text.text());
+
+    target.set_content(None);
+    assert_eq!(None, text.text());
+}
