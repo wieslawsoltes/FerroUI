@@ -509,6 +509,32 @@ fn dbus_a_listener_that_was_registered_before_the_start_is_heard() {
     fixture.server.dispose();
 }
 
+#[test]
+fn dbus_children_that_arrive_after_a_client_asked_are_found() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let fixture = Fixture::new(&[]);
+
+    // A window that is shown and asked for its children before it has content.
+    // The window is added and walked before it is shown, when it has no template yet.
+    let window = Window::new();
+    fixture.add_window(&window);
+    let path = fixture.children(ROOT_PATH)[0].clone();
+    let before = fixture.children(&path);
+    assert_eq!(fixture.find(&path, "push button"), None);
+    window.show();
+    assert_eq!(fixture.find(&path, "push button"), None);
+
+    let button = Button::new();
+    button.set_content(Some(Rc::new("Late".to_string())));
+    window.set_content(Some(Control::boxed(&button)));
+    window.layout_manager().execute_initial_layout_pass();
+
+    let found = fixture.find(&path, "push button");
+    assert!(found.is_some(), "the children before: {before:?}, after: {:?}", fixture.children(&path));
+    assert_eq!(fixture.property(&found.unwrap(), IFACE_ACCESSIBLE, "Name"), "Late");
+    fixture.server.dispose();
+}
+
 impl Fixture {
     /// Adds a window after the application was embedded: no second embed.
     fn add_window_again(&self, window: &Ref<Window>) -> Ref<AutomationPeer> {
