@@ -1,0 +1,19 @@
+[package]
+name = "sample-build"
+description = "The build script of the small FerroUI samples: compiles the markup documents of a sample, embeds its assets and generates its per-document tests"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+# The compiler of the markup documents, against the type models: it links no crate for its types.
+ferroui-build = { workspace = true }

@@ -1,0 +1,37 @@
+[package]
+name = "control-samples"
+description = "The shared controls of the FerroUI samples (the assembly ControlSamples): the hamburger menu and its control theme"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+build = "build.rs"
+# The build script compiles the theme document of the crate and exports its type model with it; Cargo
+# hands the path of the file to the build scripts of the crates that depend on this one
+# (`DEP_CONTROL_SAMPLES_XAML_XAMLMETA`; docs/porting/xaml.md, 9.5.13 and 9.6.3): a sample whose
+# documents name the hamburger menu and include its resources.
+links = "control_samples_xaml"
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+# The theme document is also embedded as an asset of the assembly, next to its compiled markup. For the
+# tests of a sample, which load the documents of the sample with the run-time loader too: the run-time
+# loader leaves an include of a document of another assembly to run time only for a document the asset
+# loader has (docs/porting/xaml.md, 9.5.20 and decision 22); the include then loads the compiled markup.
+document-assets = []
+
+[dependencies]
+# The compiled markup of the crate calls the typed functions of the declared members.
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+
+[build-dependencies]
+ferroui-build = { workspace = true }

@@ -277,6 +277,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "control-samples"
+version = "0.1.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+]
+
+[[package]]
 name = "convert_case"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1832,6 +1842,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
 
 [[package]]
+name = "render-demo"
+version = "0.1.0-preview.1"
+dependencies = [
+ "control-samples",
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-markup",
+ "ferroui-markup-xaml",
+ "ferroui-skia",
+ "ferroui-themes-fluent",
+ "mini-mvvm",
+ "sample-build",
+ "sample-support",
+ "sample-testing",
+ "skia-safe",
+]
+
+[[package]]
 name = "renderdoc-sys"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1909,6 +1938,35 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "93fc1dc3aaa9bfed95e02e6eadabb4baf7e3078b0bd1b4d7b6b0b68378900502"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "sample-build"
+version = "0.1.0-preview.1"
+dependencies = [
+ "ferroui-build",
+]
+
+[[package]]
+name = "sample-support"
+version = "0.1.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+]
+
+[[package]]
+name = "sample-testing"
+version = "0.1.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-harfbuzz",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-skia",
+ "sample-support",
 ]
 
 [[package]]
