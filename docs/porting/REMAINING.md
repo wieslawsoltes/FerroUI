@@ -8,8 +8,8 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. The s
 
 | | Present | Total | Missing | Waived | Not applicable | Out of scope | Share |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Members of the projects in scope | 27376 | 31738 | 1504 | 2858 | - | - | 94.8% of total less waived |
-| Members of every upstream source project of the extraction | 27376 | 37391 | 1504 | 2858 | 1132 | 4521 | 73.2% of total |
+| Members of the projects in scope | 27377 | 31738 | 1504 | 2857 | - | - | 94.8% of total less waived |
+| Members of every upstream source project of the extraction | 27377 | 37391 | 1504 | 2857 | 1132 | 4521 | 73.2% of total |
 
 The first row is the headline of the tracking: it leaves out the waived members and everything out of scope. The second row leaves out nothing: every member of every C# project the extraction reads, whether or not the port will ever have it. A member is *present* when an item of the mapped name exists; names are matched, not behaviour.
 
@@ -31,7 +31,7 @@ Files, types and members as present / missing / waived. *n/a* counts the files m
 | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) | in | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 | 1 (0) | 100.0% |
 | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) | in | 18 / 0 / 0 | 26 / 0 / 0 | 175 / 41 / 0 | 0 (0) | 81.0% |
 | [Avalonia.Metal](tracking/Avalonia.Metal.md) | in | 2 / 0 / 0 | 7 / 0 / 0 | 21 / 0 / 0 | 0 (0) | 100.0% |
-| [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | in | 1 / 0 / 0 | 1 / 0 / 0 | 0 / 0 / 6 | 0 (0) | 0.0% |
+| [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | in | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 5 | 0 (0) | 16.7% |
 | [Avalonia.Native](tracking/Avalonia.Native.md) | in | 48 / 1 / 0 | 67 / 8 / 10 | 473 / 69 / 59 | 0 (0) | 78.7% |
 | [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | in | 39 / 0 / 0 | 61 / 0 / 2 | 603 / 6 / 30 | 0 (0) | 94.4% |
 | [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | in | 14 / 0 / 0 | 54 / 0 / 1 | 198 / 1 / 3 | 0 (0) | 98.0% |

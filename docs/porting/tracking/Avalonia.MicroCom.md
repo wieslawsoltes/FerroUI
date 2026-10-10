@@ -12,18 +12,18 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 0 - core / P0 |
 | Files | 1/1 (100.0%) |
 | Types | 1/1 (100.0%) |
-| Members | 0/6 (6 waived) (-) |
+| Members | 1/6 (5 waived) (100.0%) |
 | Contracts (interfaces) | 0/0 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
 ## Files
 
-### `(project root)` - files 1/1, types 1/1, members 0/6 (6 waived)
+### `(project root)` - files 1/1, types 1/1, members 1/6 (5 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `CallbackBase.cs` | `com_object.rs` | present | 1/1 | 0/6 (6 waived) | replaced: ComObject&lt;T&gt; (reference-counted COM callable wrapper) takes the place of the managed/native dual-reference callback base class |
+| `CallbackBase.cs` | `com_object.rs` | present | 1/1 | 1/6 (5 waived) | replaced: ComObject&lt;T&gt; (reference-counted COM callable wrapper) takes the place of the managed/native dual-reference callback base class |
 
 ## Rust-only files
 
