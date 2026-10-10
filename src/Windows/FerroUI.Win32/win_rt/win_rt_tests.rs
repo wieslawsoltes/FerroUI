@@ -161,3 +161,48 @@ fn a_property_value_answers_through_its_interface() {
     assert!(number.type_().unwrap() == PropertyType::UInt32);
     assert_eq!(number.get_u_int32().unwrap(), 7);
 }
+
+/// The dispatcher queue of a thread and the compositor of the composition
+/// library: what the composition mode of the Windows Runtime starts from.
+/// On a thread of its own, which the test gives a queue.
+#[test]
+fn a_thread_gets_a_dispatcher_queue_and_a_compositor() {
+    use super::native_win_rt_methods::{
+        DispatcherQueueOptions, DISPATCHERQUEUE_THREAD_APARTMENTTYPE, DISPATCHERQUEUE_THREAD_TYPE,
+    };
+    use super::{ICompositor, IDispatcherQueueController};
+
+    std::thread::spawn(|| {
+        let options = DispatcherQueueOptions {
+            dw_size: std::mem::size_of::<DispatcherQueueOptions>() as i32,
+            thread_type: DISPATCHERQUEUE_THREAD_TYPE::DQTYPE_THREAD_CURRENT,
+            apartment_type: DISPATCHERQUEUE_THREAD_APARTMENTTYPE::DQTAT_COM_NONE,
+        };
+        assert_eq!(options.dw_size, 12);
+        let controller = NativeWinRTMethods::create_dispatcher_queue_controller(options);
+        println!("CreateDispatcherQueueController: {:?}", controller.as_ref().map(|_| "created"));
+        let controller: ferroui_microcom::ComPtr<IDispatcherQueueController> = controller.expect("a controller");
+        let queue = controller.dispatcher_queue();
+        println!("DispatcherQueue: {:?}", queue.as_ref().map(|_| "the queue of the thread"));
+        assert!(queue.is_ok());
+
+        let factory = NativeWinRTMethods::get_windows_ui_composition_activation_factory(
+            "Windows.UI.Composition.Compositor",
+        );
+        println!("the activation factory of the compositor: {:?}", factory.as_ref().map(|_| "created"));
+        let factory = factory.expect("the activation factory of the composition library");
+        let instance = factory.activate_instance();
+        println!("ActivateInstance: {instance:?}");
+        let instance = instance.expect("a compositor");
+        assert_ne!(instance, 0);
+        // SAFETY: the instance is an object the activation returned, whose
+        // reference this test owns.
+        let unknown =
+            unsafe { ferroui_microcom::ComPtr::<ferroui_microcom::IUnknown>::from_raw(instance as *mut _) }.unwrap();
+        let compositor = unknown.cast::<ICompositor>();
+        println!("ICompositor: {:?}", compositor.as_ref().map(|_| "the compositor"));
+        assert!(compositor.is_ok());
+    })
+    .join()
+    .unwrap();
+}
