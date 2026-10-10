@@ -39,7 +39,7 @@
   The rendering modes of the smoke runs. Default: software, and angle when ANGLE is built.
 
 .PARAMETER NoAngle
-  Build without the feature `angle` (no ANGLE, no LLVM needed).
+  Build without the default feature `angle` only (no ANGLE, no LLVM needed).
 
 .PARAMETER Jobs
   The number of parallel jobs of cargo. Default: the choice of cargo.
@@ -195,23 +195,22 @@ $env:CARGO_PROFILE_TEST_DEBUG = '0'
 $env:CARGO_INCREMENTAL = '0'
 $env:RUST_BACKTRACE = '1'
 $jobsArgument = if ($Jobs -gt 0) { "-j$Jobs" } else { '' }
-$features = if ($angle) { '--features angle' } else { '' }
 Set-Location $Source
 
 # ---- build ------------------------------------------------------------------------------------
 Say ""
 Say "-- build"
 if (-not $SkipBuild) {
-    if ((Run 'build' "cargo build --locked $jobsArgument -p ferroui-win32 --examples") -ne 0) {
+    # First without the default feature `angle`: the backend with software rendering alone.
+    if ((Run 'build' "cargo build --locked $jobsArgument -p ferroui-win32 --no-default-features --examples") -ne 0) {
         $failed.Add('build')
         Tail 'build' 40
     }
     if ($angle) {
-        if ((Run 'build-angle' "cargo build --locked $jobsArgument -p ferroui-win32 --features angle --examples") -ne 0) {
+        if ((Run 'build-angle' "cargo build --locked $jobsArgument -p ferroui-win32 --examples") -ne 0) {
             $failed.Add('build with ANGLE')
             Tail 'build-angle' 60
             $angle = $false
-            $features = ''
         }
     }
 }
@@ -220,7 +219,8 @@ if (-not $SkipBuild) {
 Say ""
 Say "-- tests"
 if (-not $SkipTests -and -not $failed.Contains('build')) {
-    if ((Run 'test' "cargo test --locked $jobsArgument -p ferroui-win32 --no-fail-fast") -ne 0) { $failed.Add('tests') }
+    $testFeatures = if ($angle) { '' } else { '--no-default-features' }
+    if ((Run 'test' "cargo test --locked $jobsArgument -p ferroui-win32 $testFeatures --no-fail-fast") -ne 0) { $failed.Add('tests') }
     Tail 'test' 6 'test result|FAILED|panicked'
 }
 

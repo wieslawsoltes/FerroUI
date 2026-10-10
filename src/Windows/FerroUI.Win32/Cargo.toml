@@ -14,11 +14,15 @@ build = "build.rs"
 path = "lib.rs"
 
 [features]
+# ANGLE is built in by default: the rendering mode the options ask for first is `AngleEgl`, as in
+# the reference. `default-features = false` gives the backend with software rendering alone.
+default = ["angle"]
 # OpenGL ES through ANGLE on Direct3D 11, the rendering mode `AngleEgl`
 # (docs/porting/win32-platform.md, section 6.2). ANGLE is the crate `mozangle`, which compiles it
 # from C++ source and links it into the application: building with this feature needs the MSVC
-# C++ tools and libclang (LLVM) where the application is built. Without it the mode fails to
-# initialise with a message that says so, and the backend goes on to the next mode of the options.
+# C++ tools and libclang (LLVM) where the application is built (a Windows target only; on other
+# targets the feature adds nothing). Without it the mode fails to initialise with a message that
+# says so, and the backend goes on to the next mode of the options: software rendering.
 angle = ["dep:mozangle"]
 
 [dependencies]

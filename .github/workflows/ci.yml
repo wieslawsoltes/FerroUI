@@ -94,37 +94,40 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
-      - name: Build the backend and its example
-        run: cargo build --locked -p ferroui-win32 --examples
+      # Without the default feature `angle`: the backend with software rendering alone, which is
+      # what builds where there is no libclang.
+      - name: Build the backend and its example (without ANGLE)
+        run: cargo build --locked -p ferroui-win32 --no-default-features --examples
       - name: Tests of the backend
-        run: cargo test --locked -p ferroui-win32 --no-fail-fast
-      - name: Smoke run of a window
+        run: cargo test --locked -p ferroui-win32 --no-default-features --no-fail-fast
+      - name: Smoke run of a window (software rendering)
         timeout-minutes: 5
-        run: cargo run --locked -p ferroui-win32 --example win32_window -- --smoke
+        run: cargo run --locked -p ferroui-win32 --no-default-features --example win32_window -- --smoke
       # A feature set of Skia without a published binary makes the Skia bindings build Skia from
       # source (an hour, with LLVM). This asks the release of the bindings which sets exist for
       # the target: the raster set the desktop entry point needs today, which gates the steps
       # below, and the GPU sets stage 2 chooses from (win32-platform.md, section 6.2).
       # ANGLE for the rendering mode AngleEgl is the crate mozangle, compiled from C++ source by
-      # its build script (bindgen needs libclang, which the image has). Informative: how long it
-      # takes on the runner, and what that ANGLE does there (win32-platform.md, section 6.2): the
-      # probe of the example creates the displays of Direct3D 11 and Direct3D 9, a context and a
-      # window surface, clears a frame and reads a pixel of it back.
-      - name: Build with ANGLE (informative; the time of the mozangle build)
-        if: ${{ !cancelled() }}
-        continue-on-error: true
+      # its build script (bindgen needs libclang, which the image has): the default feature
+      # `angle` of the crate. The step says how long the build takes on the runner
+      # (win32-platform.md, section 6.2: 528 s on windows-latest, 363 s on windows-11-arm).
+      - name: Build with ANGLE (the default features; the time of the mozangle build)
         timeout-minutes: 60
         run: |
           clang --version || true
           echo "LIBCLANG_PATH=${LIBCLANG_PATH:-unset}"
           start=$(date +%s)
-          cargo build --locked -p ferroui-win32 --features angle --examples
+          cargo build --locked -p ferroui-win32 --examples
           echo "::notice::ferroui-win32 with the feature angle built in $(( $(date +%s) - start )) s on $RUNNER_ARCH"
-      - name: Smoke run with the ANGLE probe (informative)
+      # The GPU path: the platform graphics of ANGLE on a Direct3D 11 device the backend creates
+      # (the WARP device of the runner), an EGL window surface on the window, frames drawn with
+      # OpenGL ES; every frame is read back with glReadPixels before the swap and compared with
+      # what was drawn. The probe adds what ANGLE reports of itself on Direct3D 11 and 9.
+      - name: Smoke run through ANGLE with the ANGLE probe (informative until its first green run)
         if: ${{ !cancelled() }}
         continue-on-error: true
         timeout-minutes: 5
-        run: cargo run --locked -p ferroui-win32 --features angle --example win32_window -- --smoke --angle-probe
+        run: cargo run --locked -p ferroui-win32 --example win32_window -- --smoke --rendering angle --angle-probe
       - name: Skia binaries published for Windows (informative)
         id: skia
         if: ${{ !cancelled() }}
@@ -140,11 +143,12 @@ jobs:
             curl -sfL -r 0-0 -o /dev/null \
               "https://github.com/rust-skia/skia-binaries/releases/download/$version/skia-binaries-$hash-x86_64-pc-windows-msvc-$1.tar.gz"
           }
-          if published jpegd-jpege-pdf; then
-            echo "published:     jpegd-jpege-pdf (raster)"
+          if published jpegd-jpege-pdf; then echo "published:     jpegd-jpege-pdf (raster)"; else echo "not published: jpegd-jpege-pdf (raster)"; fi
+          # The feature set of the Skia backend on Windows: Ganesh on OpenGL, for ANGLE.
+          if published ganesh-gl-jpegd-jpege-pdf; then
             echo "raster=true" >> "$GITHUB_OUTPUT"
           else
-            echo "::warning::no Skia binary for the raster feature set on Windows: the desktop steps are skipped"
+            echo "::warning::no Skia binary for the feature set of the Skia backend on Windows (ganesh, gl): the desktop steps are skipped"
           fi
           for key in ganesh-gl-jpegd-jpege-pdf d3d-ganesh-jpegd-jpege-pdf graphite-jpegd-jpege-pdf-vulkan \
                      ganesh-gl-graphite-jpegd-jpege-pdf-vulkan d3d-ganesh-gl-graphite-jpegd-jpege-pdf-vulkan; do
@@ -187,24 +191,39 @@ jobs:
           rustc -vV
           clang --version || true
           echo "LIBCLANG_PATH=${LIBCLANG_PATH:-unset}"
-      - name: Build the backend and its example
-        run: cargo build --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --examples
+      - name: Build the backend and its example (without ANGLE)
+        run: cargo build --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --no-default-features --examples
       - name: Tests of the backend
-        run: cargo test --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --no-fail-fast
-      - name: Smoke run of a window
+        run: cargo test --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --no-default-features --no-fail-fast
+      - name: Smoke run of a window (software rendering)
         timeout-minutes: 5
-        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke
+        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --no-default-features --example win32_window -- --smoke
       - name: Build with ANGLE (the time of the mozangle build)
         if: ${{ !cancelled() }}
         timeout-minutes: 90
         run: |
           start=$(date +%s)
-          cargo build --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --features angle --examples
+          cargo build --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --examples
           echo "::notice::ferroui-win32 with the feature angle built in $(( $(date +%s) - start )) s on $RUNNER_ARCH"
-      - name: Smoke run with the ANGLE probe
+      - name: Smoke run through ANGLE with the ANGLE probe
         if: ${{ !cancelled() }}
         timeout-minutes: 5
-        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --features angle --example win32_window -- --smoke --angle-probe
+        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke --rendering angle --angle-probe
+      - name: Skia binaries published for Windows on ARM64
+        if: ${{ !cancelled() }}
+        run: |
+          cargo fetch --locked --target aarch64-pc-windows-msvc
+          info="$(ls "${CARGO_HOME:-$HOME/.cargo}"/registry/src/*/skia-bindings-*/.cargo_vcs_info.json | head -n 1)"
+          version="$(basename "$(dirname "$info")" | sed 's/^skia-bindings-//')"
+          hash="$(grep -o '"sha1": *"[0-9a-f]*"' "$info" | grep -o '[0-9a-f]\{40\}' | cut -c1-20)"
+          echo "skia-bindings $version, commit $hash"
+          for key in jpegd-jpege-pdf ganesh-gl-jpegd-jpege-pdf; do
+            if curl -sfL -r 0-0 -o /dev/null "https://github.com/rust-skia/skia-binaries/releases/download/$version/skia-binaries-$hash-aarch64-pc-windows-msvc-$key.tar.gz"; then
+              echo "::notice::Skia binary published for aarch64-pc-windows-msvc: $key"
+            else
+              echo "::warning::no Skia binary for aarch64-pc-windows-msvc with the features $key"
+            fi
+          done
 
   browser:
     name: Check (browser, wasm32-unknown-emscripten)

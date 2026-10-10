@@ -8807,12 +8807,12 @@
    "scope": "in",
    "detail": "types",
    "files": [
-    23,
+    33,
     95,
     0
    ],
    "types": [
-    80,
+    109,
     276,
     0
    ],
@@ -8836,11 +8836,23 @@
    "notApplicableFiles": 0,
    "matchKinds": {},
    "presentFiles": {
+    "AngleOptions.cs": [
+     "angle_options.rs"
+    ],
     "ClipboardImpl.cs": [
      "clipboard_impl.rs"
     ],
     "CursorFactory.cs": [
      "cursor_factory.rs"
+    ],
+    "DirectX/DirectXEnums.cs": [
+     "direct_x/direct_x_enums.rs"
+    ],
+    "DirectX/DirectXStructs.cs": [
+     "direct_x/direct_x_structs.rs"
+    ],
+    "DirectX/DirectXUnmanagedMethods.cs": [
+     "direct_x/direct_x_unmanaged_methods.rs"
     ],
     "EmbeddedWindowImpl.cs": [
      "embedded_window_impl.rs"
@@ -8863,6 +8875,21 @@
     "OffscreenParentWindow.cs": [
      "offscreen_parent_window.rs"
     ],
+    "OpenGl/Angle/AngleEglInterface.cs": [
+     "open_gl/angle/angle_egl_interface.rs"
+    ],
+    "OpenGl/Angle/AngleWin32EglDisplay.cs": [
+     "open_gl/angle/angle_win32_egl_display.rs"
+    ],
+    "OpenGl/Angle/AngleWin32PlatformGraphicsFactory.cs": [
+     "open_gl/angle/angle_win32_platform_graphics_factory.rs"
+    ],
+    "OpenGl/Angle/D3D11AngleWin32PlatformGraphics.cs": [
+     "open_gl/angle/d3d11_angle_win32_platform_graphics.rs"
+    ],
+    "OpenGl/Angle/D3D9AngleWin32PlatformGraphics.cs": [
+     "open_gl/angle/d3d9_angle_win32_platform_graphics.rs"
+    ],
     "PlatformConstants.cs": [
      "platform_constants.rs"
     ],
@@ -8877,6 +8904,9 @@
     ],
     "Win32DispatcherImpl.cs": [
      "win32_dispatcher_impl.rs"
+    ],
+    "Win32GlManager.cs": [
+     "win32_gl_manager.rs"
     ],
     "Win32Platform.cs": [
      "win32_platform.rs"

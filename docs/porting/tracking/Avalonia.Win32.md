@@ -10,19 +10,19 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Windows/FerroUI.Win32` (exists) |
 | Crate | `ferroui-win32` |
 | Phase / priority | 1 - desktop (Windows) / P0 |
-| Files | 23/95 (24.2%) |
-| Types | 80/276 (29.0%) |
+| Files | 33/95 (34.7%) |
+| Types | 109/276 (39.5%) |
 | Members | 0/2605 (0.0%) |
 
 This backend is in scope. Its upstream extraction holds files, types and member counts but no member names yet, so files and types are matched and the member counts are totals: run `scripts/port-status/run.sh --force` (needs the .NET SDK; `scripts/api-extract/projects.json` already asks for full detail) to track its members.
 
 ## Files
 
-### `(project root)` - files 19/43, types 26/52, members 0/358
+### `(project root)` - files 21/43, types 29/52, members 0/358
 
 | Upstream file | Types | Members | Status |
 |---|---|---|---|
-| `AngleOptions.cs` | `AngleOptions`, `AngleOptions.PlatformApi` | 4 | missing |
+| `AngleOptions.cs` | `AngleOptions`, `AngleOptions.PlatformApi` | 4 | `angle_options.rs`: types 2/2 |
 | `ClipboardFormatRegistry.cs` | `ClipboardFormatRegistry` | 9 | missing |
 | `ClipboardImpl.cs` | `ClipboardImpl` | 5 | `clipboard_impl.rs`: types 1/1 |
 | `CursorFactory.cs` | `CursorFactory`, `CursorImpl` | 9 | `cursor_factory.rs`: types 2/2 |
@@ -49,7 +49,7 @@ This backend is in scope. Its upstream extraction holds files, types and member 
 | `SwapChainTopLevelImpl.cs` | `SwapChainTopLevelImpl` | 28 | missing |
 | `TrayIconImpl.cs` | `TrayIconImpl` | 11 | missing |
 | `Win32DispatcherImpl.cs` | `Win32DispatcherImpl` | 14 | `win32_dispatcher_impl.rs`: types 1/1 |
-| `Win32GlManager.cs` | `Win32GlManager` | 1 | missing |
+| `Win32GlManager.cs` | `Win32GlManager` | 1 | `win32_gl_manager.rs`: types 1/1 |
 | `Win32NativeControlHost.cs` | `Win32NativeControlHost` | 6 | missing |
 | `Win32NativeToManagedMenuExporter.cs` | `Win32NativeToManagedMenuExporter` | 2 | missing |
 | `Win32Platform.cs` | `Win32ApplicationExtensions`, `Win32Platform` | 23 | `win32_platform.rs`: types 2/2 |
@@ -66,7 +66,7 @@ This backend is in scope. Its upstream extraction holds files, types and member 
 | `WindowsMountedVolumeInfoListener.cs` | `WindowsMountedVolumeInfoListener` | 3 | missing |
 | `WindowsMountedVolumeInfoProvider.cs` | `WindowsMountedVolumeInfoProvider` | 1 | missing |
 
-### `DComposition` - files 0/6, types 0/8, members 0/34
+### `DComposition` - files 0/6, types 1/8, members 0/34
 
 | Upstream file | Types | Members | Status |
 |---|---|---|---|
@@ -75,15 +75,15 @@ This backend is in scope. Its upstream extraction holds files, types and member 
 | `DirectCompositionConnection.cs` | `DirectCompositionConnection` | 7 | missing |
 | `DirectCompositionShared.cs` | `DirectCompositionShared` | 4 | missing |
 | `NativeMethods.cs` | `NativeMethods` | 1 | missing |
-| `NativeStructs.cs` | `DXGI_RATIONAL`, `DCOMPOSITION_FRAME_STATISTICS` | 7 | missing |
+| `NativeStructs.cs` | `DXGI_RATIONAL`, `DCOMPOSITION_FRAME_STATISTICS` | 7 | missing (types 1/2 elsewhere in the crate) |
 
-### `DirectX` - files 0/7, types 0/42, members 0/242
+### `DirectX` - files 3/7, types 20/42, members 0/242
 
 | Upstream file | Types | Members | Status |
 |---|---|---|---|
-| `DirectXEnums.cs` | `D3D_FEATURE_LEVEL`, `D3D11_RESOURCE_DIMENSION`, `D3D11_USAGE`, `D3D11_RESOURCE_MISC_FLAG`, `D3D11_BIND_FLAG`, `DXGI_SWAP_EFFECT`, `DXGI_SWAP_CHAIN_FLAG`, `DXGI_SCALING`, `DXGI_RESIDENCY`, `DXGI_MODE_ROTATION`, `DXGI_ALPHA_MODE`, `D3D_DRIVER_TYPE`, `DXGI_ERROR`, `DXGI_MWA`, `DxgiErrorExtensions` | 113 | missing |
-| `DirectXStructs.cs` | `HANDLE`, `DXGI_ADAPTER_DESC`, `DXGI_ADAPTER_DESC1`, `DXGI_FRAME_STATISTICS`, `DXGI_GAMMA_CONTROL_CAPABILITIES`, `DXGI_MAPPED_RECT`, `DXGI_MODE_DESC`, `DXGI_OUTPUT_DESC`, `DXGI_PRESENT_PARAMETERS`, `DXGI_RATIONAL`, `DXGI_RGB`, `DXGI_RGBA`, `DXGI_SAMPLE_DESC`, `DXGI_SURFACE_DESC`, `DXGI_SWAP_CHAIN_DESC`, `DXGI_SWAP_CHAIN_DESC1`, `DXGI_SWAP_CHAIN_FULLSCREEN_DESC`, `D3D11_TEXTURE2D_DESC` | 104 | missing |
-| `DirectXUnmanagedMethods.cs` | `DirectXUnmanagedMethods` | 3 | missing |
+| `DirectXEnums.cs` | `D3D_FEATURE_LEVEL`, `D3D11_RESOURCE_DIMENSION`, `D3D11_USAGE`, `D3D11_RESOURCE_MISC_FLAG`, `D3D11_BIND_FLAG`, `DXGI_SWAP_EFFECT`, `DXGI_SWAP_CHAIN_FLAG`, `DXGI_SCALING`, `DXGI_RESIDENCY`, `DXGI_MODE_ROTATION`, `DXGI_ALPHA_MODE`, `D3D_DRIVER_TYPE`, `DXGI_ERROR`, `DXGI_MWA`, `DxgiErrorExtensions` | 113 | `direct_x/direct_x_enums.rs`: types 1/15 |
+| `DirectXStructs.cs` | `HANDLE`, `DXGI_ADAPTER_DESC`, `DXGI_ADAPTER_DESC1`, `DXGI_FRAME_STATISTICS`, `DXGI_GAMMA_CONTROL_CAPABILITIES`, `DXGI_MAPPED_RECT`, `DXGI_MODE_DESC`, `DXGI_OUTPUT_DESC`, `DXGI_PRESENT_PARAMETERS`, `DXGI_RATIONAL`, `DXGI_RGB`, `DXGI_RGBA`, `DXGI_SAMPLE_DESC`, `DXGI_SURFACE_DESC`, `DXGI_SWAP_CHAIN_DESC`, `DXGI_SWAP_CHAIN_DESC1`, `DXGI_SWAP_CHAIN_FULLSCREEN_DESC`, `D3D11_TEXTURE2D_DESC` | 104 | `direct_x/direct_x_structs.rs`: types 18/18 |
+| `DirectXUnmanagedMethods.cs` | `DirectXUnmanagedMethods` | 3 | `direct_x/direct_x_unmanaged_methods.rs`: types 1/1 |
 | `DxgiConnection.cs` | `DxgiConnection` | 7 | missing |
 | `DxgiRenderTarget.cs` | `DxgiRenderTarget` | 5 | missing |
 | `DxgiSwapchainWindow.cs` | `DxgiSwapchainWindow` | 2 | missing |
@@ -120,18 +120,18 @@ This backend is in scope. Its upstream extraction holds files, types and member 
 | `WglPlatformOpenGlInterface.cs` | `WglPlatformOpenGlInterface` | 6 | missing |
 | `WglRestoreContext.cs` | `WglRestoreContext` | 2 | missing |
 
-### `OpenGl/Angle` - files 0/9, types 0/12, members 0/63
+### `OpenGl/Angle` - files 5/9, types 5/12, members 0/63
 
 | Upstream file | Types | Members | Status |
 |---|---|---|---|
 | `AngleD3DTextureFeature.cs` | `AngleD3DTextureFeature` | 2 | missing |
-| `AngleEglInterface.cs` | `Win32AngleEglInterface` | 3 | missing |
+| `AngleEglInterface.cs` | `Win32AngleEglInterface` | 3 | `open_gl/angle/angle_egl_interface.rs`: types 1/1 |
 | `AngleExternalD3D11Texture2D.cs` | `AngleExternalMemoryD3D11Texture2D`, `AngleExternalMemoryD3D11ExportedTexture2D` | 11 | missing |
 | `AngleExternalObjectsFeature.cs` | `AngleExternalObjectsFeature` | 14 | missing |
-| `AngleWin32EglDisplay.cs` | `AngleWin32EglDisplay` | 8 | missing |
-| `AngleWin32PlatformGraphicsFactory.cs` | `AngleWin32PlatformGraphicsFactory` | 1 | missing |
-| `D3D11AngleWin32PlatformGraphics.cs` | `D3D11AngleWin32PlatformGraphics` | 6 | missing |
-| `D3D9AngleWin32PlatformGraphics.cs` | `D3D9AngleWin32PlatformGraphics` | 5 | missing |
+| `AngleWin32EglDisplay.cs` | `AngleWin32EglDisplay` | 8 | `open_gl/angle/angle_win32_egl_display.rs`: types 1/1 |
+| `AngleWin32PlatformGraphicsFactory.cs` | `AngleWin32PlatformGraphicsFactory` | 1 | `open_gl/angle/angle_win32_platform_graphics_factory.rs`: types 1/1 |
+| `D3D11AngleWin32PlatformGraphics.cs` | `D3D11AngleWin32PlatformGraphics` | 6 | `open_gl/angle/d3d11_angle_win32_platform_graphics.rs`: types 1/1 |
+| `D3D9AngleWin32PlatformGraphics.cs` | `D3D9AngleWin32PlatformGraphics` | 5 | `open_gl/angle/d3d9_angle_win32_platform_graphics.rs`: types 1/1 |
 | `SwapChainGlSurface.cs` | `SwapChainGlSurface`, `SwapChainGlSurface.DXGI_MATRIX_3X2_F`, `SwapChainGlRenderTarget` | 13 | missing |
 
 ### `Vulkan` - files 0/2, types 0/4, members 0/11
@@ -171,4 +171,4 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 |---|---|---|
 | `wnd_proc_guard.rs` | Keeps a panic from unwinding out of a window procedure through the frames of the system: caught, kept, and raised again by the message loop (docs/porting/win32-platform.md, section 5) |  |
 
-Tests, examples and build scripts (not scanned): `examples/win32_window.rs`.
+Tests, examples and build scripts (not scanned): `build.rs`, `examples/win32_window.rs`.

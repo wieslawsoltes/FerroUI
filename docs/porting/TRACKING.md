@@ -87,7 +87,7 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/Avalonia.Markup.Xaml` | `src/Markup/FerroUI.Markup.Xaml` | `ferroui-markup-xaml` | 46/46 | 61/63 (2 waived) | 199/239 (40 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/Avalonia.Markup.Xaml.Loader` | `src/Markup/FerroUI.Markup.Xaml.Loader` | `ferroui-markup-xaml-loader` | 66/66 | 120/126 (6 waived) | 400/505 (105 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/Avalonia.Skia` | `src/Skia/FerroUI.Skia` | `ferroui-skia` | 51/51 | 62/62 | 386/420 (33 waived) | 99.7% | 1 - rendering | P0 |
-| [Avalonia.Win32](tracking/Avalonia.Win32.md) | `src/Windows/Avalonia.Win32` | `src/Windows/FerroUI.Win32` | `ferroui-win32` | 23/95 | 80/276 | 0/2605 | types 29.0% | 1 - desktop (Windows) | P0 |
+| [Avalonia.Win32](tracking/Avalonia.Win32.md) | `src/Windows/Avalonia.Win32` | `src/Windows/FerroUI.Win32` | `ferroui-win32` | 33/95 | 109/276 | 0/2605 | types 39.5% | 1 - desktop (Windows) | P0 |
 | [Avalonia.Generators](tracking/Avalonia.Generators.md) | `src/tools/Avalonia.Generators` | `src/tools/FerroUI.Generators` | (merged into ferroui-build, see docs/porting/xaml.md) | 0/0 | 0/0 | 0/0 | - | 2 - xaml + themes | P2 |
 
 Non-C# files that belong to these projects:
