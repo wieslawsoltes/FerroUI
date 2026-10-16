@@ -5,7 +5,7 @@
 
 FerroUI is a cross-platform UI framework for Rust: a retained-mode control library with a styled property system, data binding, XAML markup, control themes and a composition-based renderer. It is a port of the Avalonia UI framework to Rust that keeps the original architecture, contracts and behaviour, so that applications, themes and markup written against that model carry over with their structure intact.
 
-> **Status: preview.** `0.1.0-preview.2` is published on crates.io ([CHANGELOG.md](CHANGELOG.md)). Every upstream file and member in scope is ported or waived with a recorded reason. The framework runs on macOS, Windows, Linux (X11, Wayland and the framebuffer), iOS, Android and in the browser. It was verified in continuous integration, in virtual machines, in the iOS simulator and on the Android emulator, not on a range of real devices; the public API is not stable. See [Project status](#project-status).
+> **Status: preview.** `0.1.0-preview.3` is published on crates.io ([CHANGELOG.md](CHANGELOG.md)). Every upstream file and member in scope is ported or waived with a recorded reason. The framework runs on macOS, Windows, Linux (X11, Wayland and the framebuffer), iOS, Android and in the browser. It was verified in continuous integration, in virtual machines, in the iOS simulator and on the Android emulator, not on a range of real devices; the public API is not stable. See [Project status](#project-status).
 
 ![Fluent theme rendered by FerroUI](docs/porting/images/themed_window_fluent.png)
 
@@ -75,10 +75,10 @@ FerroUI is a set of crates that are released together at one version. A desktop 
 
 ```toml
 [dependencies]
-ferroui-base = "=0.1.0-preview.2"
-ferroui-controls = "=0.1.0-preview.2"
-ferroui-desktop = "=0.1.0-preview.2"
-ferroui-themes-fluent = "=0.1.0-preview.2"
+ferroui-base = "=0.1.0-preview.3"
+ferroui-controls = "=0.1.0-preview.3"
+ferroui-desktop = "=0.1.0-preview.3"
+ferroui-themes-fluent = "=0.1.0-preview.3"
 ```
 
 An application can also name one dependency instead: the facade crate `ferroui`. It re-exports the common crates under short names (`ferroui::base`, `ferroui::controls`, ...) with a prelude of the types of a minimal application; its default features are the desktop platforms and the Fluent theme, and further features add the Simple theme, XAML loading at run time, the colour picker, the dialogs, the browser platform, the Vello backend, the headless platform and the graphics contracts ([docs/release.md](docs/release.md), section 2.1). In the repository it is used already: `cargo run -p ferroui --example hello`.

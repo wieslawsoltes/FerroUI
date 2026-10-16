@@ -4,7 +4,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
-## [0.1.0-preview.3] - Unreleased
+## [0.1.0-preview.3] - 2026-10-16
 
 The third preview. It completes the port of upstream's samples and tests: every applicable sample, every applicable unit test and the integration tests are ported, and the defects they found are fixed.
 
@@ -116,6 +116,6 @@ The preview makes the framework available as crates so that it can be tried outs
 - **Tests of the published crates.** The packages hold the sources of the tests but not the test fonts and images of the Skia backend; the test suites are run from the repository.
 
 [Unreleased]: https://github.com/wieslawsoltes/FerroUI/compare/v0.1.0-preview.3...main
-[0.1.0-preview.3]: https://github.com/wieslawsoltes/FerroUI/compare/v0.1.0-preview.2...v0.1.0-preview.3
+[0.1.0-preview.3]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.1.0-preview.3
 [0.1.0-preview.2]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.1.0-preview.2
 [0.1.0-preview.1]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.1.0-preview.1
