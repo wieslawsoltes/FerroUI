@@ -13,8 +13,8 @@ pub mod sortable_rows_base;
 pub use anonymous_sortable_rows::AnonymousSortableRows;
 pub use columns::{
     default_comparer, CheckBoxColumn, ColumnBase, ColumnKind, ColumnList, ColumnOptions, ColumnRef, Comparison,
-    HierarchicalExpanderColumn, IColumn, IColumnOf, IExpanderColumn, IValueColumn, ListSortDirection, TemplateColumn,
-    TextColumn, ValueColumn, ValueComparer,
+    HierarchicalExpanderColumn, IColumn, IColumnOf, IExpanderColumn, IUntypedExpanderColumn, IUntypedValueColumn, IValueColumn, ListSortDirection, TemplateColumn,
+    TextColumn, UntypedSubscription, ValueColumn, ValueComparer,
 };
 pub use hierarchical_row::HierarchicalRow;
 pub use hierarchical_rows::{as_hierarchical_row, HierarchicalRows};

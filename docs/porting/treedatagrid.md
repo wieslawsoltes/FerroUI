@@ -39,6 +39,13 @@ The names follow the rules of the repository: no upstream framework name in code
 7. **Threading.** As the framework: single-threaded types (`Rc`, `RefCell`), changes from another thread are posted to the UI thread by the application.
 8. **Re-entrancy.** Events are raised after the state they describe is committed and borrows are released, from snapshots of the handler lists, as the framework's collections do.
 
+### 3.1 The control layer
+
+- **Untyped presentation.** The reference's control talks to a `TreeDataGridPresentation` (columns as `IColumns`, rows as `ITreeDataGridRows` that realize cells, selection, sorting, moving rows), created for a typed source through a visitor (`TreeDataGridPresentation<TModel>`). A source given to the control in markup or by a binding arrives as an untyped value, and Rust has no generic dispatch over a trait object, so the port's presentation is untyped: models are boxed values, the values of neutral columns are read through the erased access of the core (`IValueColumn` and the untyped column contract), and the source is reached through `ITreeDataGridSource`. The typed sources stay the API of applications.
+- **View columns.** The columns of the control crate (`TextColumn<M, V>`, `CheckBoxColumn<M>`, `TemplateColumn<M>`, `HierarchicalExpanderColumn<M>`, the reflection, filtered and object expander columns) are the reference's classic columns: they create their cells and take part in the column layout (`IUpdateColumnLayout`), and they are also core columns (`IColumnOf<M>`), so a core source holds them as it holds neutral columns. A view column answers the core's `IColumn::view` with its handle; the presentation uses the handle when there is one and presents a neutral column through the presentation options otherwise (`CellColumnFactory`).
+- **Bindings of cells.** The vendored typed-binding engine of the reference (`Experimental/`) is replaced by accessors (`Accessor<M, V>` of the core): a cell reads its value with the getter, writes it with the setter, and follows the model's `PropertyChanged` for the member name and the path observer for a nested path.
+- **Framework idioms.** Controls are `ferro_class!` classes with `ferro_properties!`, as in `ferroui-controls` and `ferroui-controls-color-picker`; the themes are compiled markup of the crate (`build.rs`, as the colour picker's).
+
 ## 4. Stages
 
 | Stage | Content | Gate |

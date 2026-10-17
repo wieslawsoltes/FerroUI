@@ -40,6 +40,60 @@ pub trait IColumn: INotifyPropertyChanged + Any {
     fn as_any(&self) -> &dyn Any;
     /// The model type of the column (`is IColumn<TModel>`).
     fn model_type(&self) -> std::any::TypeId;
+
+    /// The view of a column that presents itself (a column of the control crate, which creates its
+    /// cells), as a handle the control downcasts; `None` for a neutral column, which the control
+    /// presents through its presentation options.
+    fn view(&self) -> Option<Rc<dyn Any>> {
+        None
+    }
+
+    /// The erased access to the value of a value column, for a presentation that holds models as
+    /// untyped values.
+    fn untyped_value(&self) -> Option<&dyn IUntypedValueColumn> {
+        None
+    }
+
+    /// The erased access to an expander column.
+    fn untyped_expander(&self) -> Option<&dyn IUntypedExpanderColumn> {
+        None
+    }
+}
+
+/// A subscription of [`IUntypedValueColumn::observe`]: dropping it ends it.
+pub type UntypedSubscription = Box<dyn Any>;
+
+/// The value of a [`ValueColumn`] read and written through untyped models.
+pub trait IUntypedValueColumn {
+    /// The value of `model` (`None` when the model is not of the column's model type).
+    fn get_value(&self, model: &BoxedValue) -> Option<BoxedValue>;
+    /// Writes a value; false when the column is read only or a type does not match.
+    fn set_value(&self, model: &BoxedValue, value: Option<&BoxedValue>) -> bool;
+    fn can_set(&self) -> bool;
+    /// The member the value is read from.
+    fn property_name(&self) -> Option<&'static str>;
+    /// Observes the objects below the model on the value's path; `None` when the value reads only
+    /// members of the model.
+    fn observe(&self, model: &BoxedValue, changed: Rc<dyn Fn()>) -> Option<UntypedSubscription>;
+    /// Whether the column is a template column.
+    fn is_template(&self) -> bool;
+    /// Whether a check box column has three states.
+    fn is_three_state(&self) -> bool;
+    /// The column's options as untyped values: (can user resize, can user sort, min width, max width).
+    fn layout_options(&self) -> (Option<bool>, Option<bool>, GridLength, Option<GridLength>);
+}
+
+/// An expander column read through untyped models.
+pub trait IUntypedExpanderColumn {
+    /// The column the expander shows.
+    fn inner(&self) -> Rc<dyn IColumn>;
+    fn has_children(&self, model: &BoxedValue) -> bool;
+    fn get_model_is_expanded(&self, model: &BoxedValue) -> Option<bool>;
+}
+
+fn typed_model<M: 'static>(model: &BoxedValue) -> Option<Rc<M>> {
+    let any: Rc<dyn Any> = model.clone();
+    any.downcast::<M>().ok()
 }
 
 /// What a column of models of `M` is, the dispatch of the reference's `IColumnVisitor`
@@ -502,7 +556,99 @@ pub struct ValueColumn<M: 'static, V: 'static> {
     weak_self: std::rc::Weak<Self>,
 }
 
-impl_column_base!(ValueColumn<M, V> where M: 'static, V: 'static);
+impl<M: TreeModel, V: Clone + PartialEq + 'static> INotifyPropertyChanged for ValueColumn<M, V> {
+    fn property_changed(&self) -> &Event<str> {
+        self.base.property_changed()
+    }
+}
+
+impl<M: TreeModel, V: Clone + PartialEq + 'static> IColumn for ValueColumn<M, V> {
+    fn id(&self) -> String {
+        self.base.id()
+    }
+    fn header(&self) -> Option<BoxedValue> {
+        self.base.header()
+    }
+    fn width(&self) -> GridLength {
+        self.base.width()
+    }
+    fn set_width(&self, value: GridLength) {
+        self.base.set_width(value)
+    }
+    fn is_visible(&self) -> bool {
+        self.base.is_visible()
+    }
+    fn set_is_visible(&self, value: bool) {
+        self.base.set_is_visible(value)
+    }
+    fn presentation_key(&self) -> Option<String> {
+        self.base.presentation_key()
+    }
+    fn set_presentation_key(&self, value: Option<String>) {
+        self.base.set_presentation_key(value)
+    }
+    fn sort_direction(&self) -> Option<ListSortDirection> {
+        self.base.sort_direction()
+    }
+    fn set_sort_direction(&self, value: Option<ListSortDirection>) {
+        self.base.set_sort_direction(value)
+    }
+    fn tag(&self) -> Option<BoxedValue> {
+        self.base.tag()
+    }
+    fn set_tag(&self, value: Option<BoxedValue>) {
+        self.base.set_tag(value)
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+    fn model_type(&self) -> std::any::TypeId {
+        std::any::TypeId::of::<M>()
+    }
+    fn untyped_value(&self) -> Option<&dyn IUntypedValueColumn> {
+        Some(self)
+    }
+}
+
+impl<M: TreeModel, V: Clone + PartialEq + 'static> IUntypedValueColumn for ValueColumn<M, V> {
+    fn get_value(&self, model: &BoxedValue) -> Option<BoxedValue> {
+        typed_model::<M>(model).and_then(|m| (self.boxer)(&self.get_value(&m)))
+    }
+
+    fn set_value(&self, model: &BoxedValue, value: Option<&BoxedValue>) -> bool {
+        match typed_model::<M>(model) {
+            Some(m) => IValueColumn::set_boxed_value(self, &m, value),
+            None => false,
+        }
+    }
+
+    fn can_set(&self) -> bool {
+        self.accessor.setter().is_some()
+    }
+
+    fn property_name(&self) -> Option<&'static str> {
+        self.accessor.property_name()
+    }
+
+    fn observe(&self, model: &BoxedValue, changed: Rc<dyn Fn()>) -> Option<UntypedSubscription> {
+        let model = typed_model::<M>(model)?;
+        let observer = PropertyPathObserver::create(&self.accessor)?;
+        Some(Box::new(observer.subscribe(&model, changed)) as UntypedSubscription)
+    }
+
+    fn is_template(&self) -> bool {
+        self.is_template.get()
+    }
+
+    fn is_three_state(&self) -> bool {
+        !self.is_boolean.get()
+    }
+
+    fn layout_options(&self) -> (Option<bool>, Option<bool>, GridLength, Option<GridLength>) {
+        let options = self.base.options();
+        (options.can_user_resize_column, options.can_user_sort_column, options.min_width, options.max_width)
+    }
+}
 
 impl<M: TreeModel, V: Clone + PartialEq + PartialOrd + 'static> ValueColumn<M, V> {
     /// A column of the value `accessor` reads (`ValueColumn(header, getter, setter, ...)`); the
@@ -877,6 +1023,23 @@ impl<M: TreeModel> IColumn for HierarchicalExpanderColumn<M> {
     }
     fn model_type(&self) -> std::any::TypeId {
         std::any::TypeId::of::<M>()
+    }
+    fn untyped_expander(&self) -> Option<&dyn IUntypedExpanderColumn> {
+        Some(self)
+    }
+}
+
+impl<M: TreeModel> IUntypedExpanderColumn for HierarchicalExpanderColumn<M> {
+    fn inner(&self) -> Rc<dyn IColumn> {
+        self.inner.clone() as Rc<dyn IColumn>
+    }
+
+    fn has_children(&self, model: &BoxedValue) -> bool {
+        typed_model::<M>(model).is_some_and(|m| IExpanderColumn::has_children(self, &m))
+    }
+
+    fn get_model_is_expanded(&self, model: &BoxedValue) -> Option<bool> {
+        typed_model::<M>(model).and_then(|m| IExpanderColumn::get_model_is_expanded(self, &m))
     }
 }
 
