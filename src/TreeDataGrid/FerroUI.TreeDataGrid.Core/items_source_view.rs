@@ -4,7 +4,7 @@
 //! Adapted, as the reference, from the WinUI project (<https://github.com/microsoft/microsoft-ui-xaml>),
 //! MIT License, Copyright (c) Microsoft Corporation.
 
-use crate::model_collection::{ModelCollection, Models, ModelsChangedArgs};
+use crate::model_collection::{Models, ModelsChangedArgs};
 use crate::utils::{CollectionChangedEventManager, ICollectionChangedListener};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};

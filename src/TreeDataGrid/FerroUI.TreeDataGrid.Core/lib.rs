@@ -13,7 +13,7 @@ pub mod models;
 pub mod selection;
 pub mod utils;
 
-pub use accessor::{Accessor, TreeModel};
+pub use accessor::{Accessor, PathSubscription, PropertyPathObserver, TreeModel};
 pub use cell_index::CellIndex;
 pub use grid_length::{GridLength, GridUnitType};
 pub use index_path::IndexPath;
