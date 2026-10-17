@@ -63,9 +63,9 @@ The names follow the rules of the repository: no upstream framework name in code
 
 | Stage | State |
 |---|---|
-| T1 | not started |
-| T2 | not started |
-| T3 | not started |
+| T1 | done |
+| T2 | done |
+| T3 | done: the 192 tests of `TreeDataGrid.Core.Tests` pass (`cargo test -p ferroui-treedatagrid-core`, with 6 tests of the port's own) |
 | T4 | not started |
 | T5 | not started |
 | T6 | not started |
