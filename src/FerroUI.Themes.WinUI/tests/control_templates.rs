@@ -638,3 +638,34 @@ fn every_themed_control_has_a_test() {
         assert!(themed.contains(name), "{name} has a test but no control theme");
     }
 }
+
+/// A path icon of the framework's applications (the navigation of the ControlCatalog: a 16 by 16
+/// icon of a geometry of 24 units in a button) is scaled into its box (PI-2), not drawn unscaled
+/// and cut as the icons of the templates of PI-3.
+#[test]
+fn a_path_icon_in_a_button_is_scaled_into_its_box() {
+    use ferroui_base::media::StreamGeometry;
+    use ferroui_base::Visual;
+    use ferroui_controls::shapes::Path;
+    use ferroui_controls::{Button, PathIcon};
+
+    let _app = start_themed_application();
+    let icon = PathIcon::new();
+    icon.set_data(StreamGeometry::parse("M2,2H22V22H2Z").expect("a geometry"));
+    let layoutable: &Layoutable = &icon;
+    layoutable.set_width(16.0);
+    layoutable.set_height(16.0);
+    let button = Button::new();
+    button.set_content(Some(Control::boxed(&icon)));
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&button)));
+    window.show();
+    window.update_layout();
+
+    let visual: &Visual = &icon;
+    let names: Vec<String> = visual.get_self_and_visual_descendants().map(|d| d.get_type().name().to_string()).collect();
+    assert!(visual.get_visual_descendants().any(|d| d.cast::<ferroui_controls::Viewbox>().is_some()), "the icon has the template of PI-2: {names:?}");
+    let path = visual.get_visual_descendants().find_map(|d| d.cast::<Path>()).unwrap_or_else(|| panic!("the path of the icon: {names:?}"));
+    assert_eq!(ferroui_base::media::Stretch::Uniform, path.stretch(), "the geometry is scaled");
+    window.close();
+}

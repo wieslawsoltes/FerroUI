@@ -90869,7 +90869,7 @@
    "winui": "SelectorBar: DefaultSelectorBarStyle (SelectorBar.xaml, SelectorBar_themeresources.xaml).",
    "status": "ported",
    "deviations": 3,
-   "date": "2026-10-16"
+   "date": "2026-10-17"
   },
   {
    "document": "TabStripItem.xaml",
@@ -90880,7 +90880,7 @@
    "winui": "SelectorBarItem: DefaultSelectorBarItemStyle, SelectorBarItemPill (SelectorBar.xaml, SelectorBar_themeresources.xaml).",
    "status": "ported",
    "deviations": 8,
-   "date": "2026-10-16"
+   "date": "2026-10-17"
   },
   {
    "document": "TabbedPage.xaml",

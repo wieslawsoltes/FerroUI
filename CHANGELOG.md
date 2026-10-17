@@ -4,6 +4,10 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
+### Fixed
+
+- **Path icons of the WinUI 3 theme are scaled into their boxes again**: a style meant for the icons of menu items (`MenuItem > ^` in the control theme of `PathIcon`) matched every path icon, because the nesting selector stands for the whole selector of the theme and what precedes it is dropped (as upstream). Every path icon got the unscaled template, so the icons of the ControlCatalog (its navigation, the cards of its home page, the logo) were drawn at the size of their geometry and cut. The style is now `MenuItem > PathIcon`, a style of the theme.
+
 ## [0.1.0] - 2026-10-17
 
 The first release that is not a preview. It is the fourth preview with the work that followed it: the port at upstream 66b7273b9a, the WinUI 3 theme placing text on the baseline of native WinUI 3, and touch scrolling that coasts after a flick, in the browser on a phone too. The crates of 0.1.0 depend on one another at exactly that version, as the previews did; within 0.1 a later release keeps the public API, and the work towards 0.2.0 is published as previews of it (`0.2.0-preview.N`).

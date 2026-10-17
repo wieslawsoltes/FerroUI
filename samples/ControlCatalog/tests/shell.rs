@@ -881,3 +881,20 @@ fn every_class_with_a_document_populates_itself() {
     assert_eq!(crate::register_types::classes().count(), declared, "the sources that declare the document of a class");
     assert_eq!(Vec::<String>::new(), missing, "classes that never populate themselves from their document");
 }
+
+/// The icons of the drawer (16 by 16 path icons of geometries of 24 units) are scaled into their
+/// boxes by the theme of path icons, with the WinUI theme the catalog starts with as with the others.
+#[test]
+fn the_icons_of_the_drawer_are_scaled_into_their_boxes() {
+    use ferroui_controls::shapes::Path;
+    use ferroui_controls::PathIcon;
+
+    let shell = Shell::start(1400.0, 900.0);
+    let icons = descendants::<PathIcon>(&shell.main_view);
+    assert!(!icons.is_empty(), "the drawer has path icons");
+    for icon in icons.iter().filter(|icon| icon.is_effectively_visible()) {
+        let types: Vec<String> = icon.get_self_and_visual_descendants().map(|d| d.get_type().name().to_string()).collect();
+        let path = descendants::<Path>(icon).into_iter().next().unwrap_or_else(|| panic!("the path of an icon: {types:?}"));
+        assert_eq!(ferroui_base::media::Stretch::Uniform, path.stretch(), "the geometry of an icon is scaled: {types:?}");
+    }
+}

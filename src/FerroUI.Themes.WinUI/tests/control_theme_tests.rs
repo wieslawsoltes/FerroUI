@@ -43,6 +43,12 @@ fn default_control_themes(theme: &Ref<crate::WinUITheme>) -> Vec<(ResourceKey, R
     control_themes(theme).into_iter().filter(|(key, _)| matches!(key, ResourceKey::Type(_))).collect()
 }
 
+/// The global styles the theme has on purpose: the icon of a menu item is a logical child of the
+/// item, which neither a style of the item's template nor a nested style of a control theme can
+/// name (the nesting selector drops what precedes it), so the theme scales it as WinUI's with a
+/// style of its own (DEVIATIONS.md, PI-3). It targets a type, which keeps it cheap to match.
+const GLOBAL_STYLES: [&str; 1] = ["MenuItem > PathIcon"];
+
 #[test]
 fn should_not_contain_any_global_styles() {
     // For performance reasons, we want all styles to be enclosed in ControlThemes,
@@ -51,7 +57,12 @@ fn should_not_contain_any_global_styles() {
     let theme = create_attached_theme();
     let all_styles = enumerate_styles(&theme.as_style());
 
-    assert!(all_styles.iter().all(|style| style.parent().is_some()));
+    let global: Vec<String> = all_styles
+        .iter()
+        .filter(|style| style.parent().is_none())
+        .map(|style| style.downcast_ref::<ferroui_base::styling::Style>().and_then(|s| s.selector()).map(|s| s.to_string()).unwrap_or_default())
+        .collect();
+    assert_eq!(GLOBAL_STYLES.to_vec(), global, "the global styles of the theme");
 }
 
 /// The templated controls of the controls and the dialogs assemblies, by their style keys, as

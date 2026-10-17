@@ -127,8 +127,8 @@
                        IsVisible="False">
                 <!-- A path icon is unscaled there, as WinUI's, so that the Viewbox scales its
                      geometry as WinUI's does: the icon is a logical child of the item, which a
-                     style of this presenter does not reach, so the theme of PathIcon does it for
-                     the path icons of menu items (Controls/PathIcon.xaml, PI-3). -->
+                     style of this presenter does not reach, so a style of the theme does it for
+                     the path icons of menu items (MenuItem > PathIcon, Controls/WinUIControls.xaml, PI-3). -->
                 <ContentPresenter x:Name="IconContent"
                                   Content="{TemplateBinding Icon}"
                                   Foreground="{TemplateBinding Foreground}" />

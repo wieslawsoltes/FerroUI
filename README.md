@@ -7,12 +7,18 @@ FerroUI is a cross-platform UI framework for Rust: a retained-mode control libra
 
 > **Status: 0.1.0.** `0.1.0`, the first release that is not a preview, is published on crates.io ([CHANGELOG.md](CHANGELOG.md)). Every upstream file and member in scope is ported or waived with a recorded reason. The framework runs on macOS, Windows, Linux (X11, Wayland and the framebuffer), iOS, Android and in the browser. It was verified in continuous integration, in virtual machines, in the iOS simulator and on the Android emulator, not on a range of real devices. Within 0.1 the public API is kept; 0.2.0 may change it. See [Project status](#project-status).
 
-![Fluent theme rendered by FerroUI](docs/porting/images/themed_window_fluent.png)
+![The ControlCatalog with the WinUI 3 theme on Windows 11, in a window with the Mica backdrop](docs/porting/images/control_catalog_winui_windows.png)
+
+The ControlCatalog sample with the WinUI 3 theme (`ferroui-themes-winui`), its default theme, on Windows 11 with the Mica backdrop. Text is shaped with HarfBuzz and drawn by Skia with the platform's text rendering settings: the contrast and gamma of ClearType on Windows, greyscale antialiasing on a high-density display, and colour emoji (`docs/porting/text-rendering.md`).
+
+| Text on Windows | The same catalog on macOS |
+|---|---|
+| ![The TextBlock page of the ControlCatalog on Windows: trimming, wrapping, alignment, decorations, inlines and colour emoji](docs/porting/images/control_catalog_winui_text_windows.png) | ![The home page of the ControlCatalog with the WinUI 3 theme on macOS](docs/porting/images/control_catalog_winui_macos.png) |
 
 ## Highlights
 
 - **Complete object model.** Styled and direct properties with value priorities, inheritance, coercion and change notification; logical and visual trees; routed events; layout; input, focus and gestures.
-- **Styling and theming.** Selectors, styles, control themes, resources, theme variants and transitions. The Fluent and Simple themes are included.
+- **Styling and theming.** Selectors, styles, control themes, resources, theme variants and transitions. The Fluent, Simple and WinUI 3 themes are included.
 - **Data binding.** Compiled and reflection-style binding paths, converters, multi-bindings, data validation and templates.
 - **XAML.** A port of the XamlX compiler front end with the framework's transformers and markup extensions. Documents are compiled to Rust source by the build script of a crate, or loaded at run time.
 - **Composition renderer.** A compositor with a render loop on its own thread, dirty-region tracking, server-side visuals and composition animations, drawing through a backend-neutral drawing context.

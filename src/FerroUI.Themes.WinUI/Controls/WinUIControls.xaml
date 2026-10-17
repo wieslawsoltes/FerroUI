@@ -103,4 +103,14 @@
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>
+
+  <!-- The icon of a menu item (MenuItem.Icon, a logical child of the item): unscaled, in the
+       IconRoot Viewbox of 16 of the template of MenuFlyoutItem (DEVIATIONS.md, PI-3). A style of
+       the theme rather than of the control theme of PathIcon, whose nested styles cannot name a
+       parent (the selector MenuItem > ^ there matched every path icon). -->
+  <Style Selector="MenuItem > PathIcon">
+    <Setter Property="Width" Value="NaN" />
+    <Setter Property="Height" Value="NaN" />
+    <Setter Property="Template" Value="{StaticResource PathIconUnscaledTemplate}" />
+  </Style>
 </Styles>
