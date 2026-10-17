@@ -58,8 +58,16 @@ pub trait IColumnOf<M: 'static>: IColumn {
     fn kind(&self) -> ColumnKind<'_, M>;
 
     /// The column as an expander column (`as IExpanderColumn<TModel>`).
-    fn as_expander_column(&self) -> Option<&dyn IExpanderColumn<M>> {
+    fn as_expander_column(&self) -> Option<&dyn IExpanderColumn<M>>
+    where
+        M: TreeModel,
+    {
         None
+    }
+
+    /// Whether the column is an expander column (`is IExpanderColumn<TModel>`).
+    fn as_expander_column_any(&self) -> bool {
+        false
     }
 }
 
@@ -127,6 +135,10 @@ fn same_column<M: 'static>(a: &ColumnRef<M>, b: &ColumnRef<M>) -> bool {
 /// `ColumnList<TModel>`: the columns of a source, each instance at most once.
 pub struct ColumnList<M: 'static> {
     list: NotifyingListBase<ColumnRef<M>>,
+    // The columns of a hierarchical source (`HierarchicalColumnList`): one expander column, which
+    // can be neither removed nor replaced.
+    hierarchical: bool,
+    applying_reset: Cell<bool>,
 }
 
 impl<M: 'static> Default for ColumnList<M> {
@@ -137,7 +149,21 @@ impl<M: 'static> Default for ColumnList<M> {
 
 impl<M: 'static> ColumnList<M> {
     pub fn new() -> Self {
-        Self { list: NotifyingListBase::new() }
+        Self { list: NotifyingListBase::new(), hierarchical: false, applying_reset: Cell::new(false) }
+    }
+
+    /// The columns of a hierarchical source (`HierarchicalColumnList`): at most one expander
+    /// column, which can be neither removed nor replaced once it is added.
+    pub fn new_hierarchical() -> Self {
+        Self { list: NotifyingListBase::new(), hierarchical: true, applying_reset: Cell::new(false) }
+    }
+
+    fn is_expander(column: &ColumnRef<M>) -> bool {
+        column.as_expander_column_any()
+    }
+
+    fn expander_count(&self) -> usize {
+        self.list.with_items(|items| items.iter().filter(|c| Self::is_expander(c)).count())
     }
 
     /// The notifying list (its `CollectionChanged` and `PropertyChanged`).
@@ -183,6 +209,9 @@ impl<M: 'static> ColumnList<M> {
         if self.contains_reference(&column) {
             panic!("{NOT_UNIQUE}");
         }
+        if self.hierarchical && !self.applying_reset.get() && Self::is_expander(&column) && self.expander_count() > 0 {
+            panic!("Only one expander column is allowed.");
+        }
         self.list.insert(index, column);
     }
 
@@ -191,6 +220,9 @@ impl<M: 'static> ColumnList<M> {
     /// # Panics
     /// When the column is elsewhere in the list.
     pub fn set(&self, index: usize, column: ColumnRef<M>) {
+        if self.hierarchical && !self.applying_reset.get() && (Self::is_expander(&self.get(index)) || Self::is_expander(&column)) {
+            panic!("The expander column cannot be replaced.");
+        }
         for i in 0..self.count() {
             if i != index && same_column(&self.get(i), &column) {
                 panic!("{NOT_UNIQUE}");
@@ -200,6 +232,9 @@ impl<M: 'static> ColumnList<M> {
     }
 
     pub fn remove_at(&self, index: usize) {
+        if self.hierarchical && !self.applying_reset.get() && Self::is_expander(&self.get(index)) {
+            panic!("The expander column cannot be removed.");
+        }
         self.list.remove_at(index);
     }
 
@@ -215,10 +250,20 @@ impl<M: 'static> ColumnList<M> {
     }
 
     pub fn clear(&self) {
+        if self.hierarchical && !self.applying_reset.get() && self.expander_count() > 0 {
+            panic!("The expander column cannot be removed.");
+        }
         self.list.clear();
     }
 
     pub fn remove_range(&self, index: usize, count: usize) {
+        if self.hierarchical {
+            for i in 0..count {
+                if Self::is_expander(&self.get(index + i)) {
+                    panic!("The expander column cannot be removed.");
+                }
+            }
+        }
         self.list.remove_range(index, count);
     }
 
@@ -229,6 +274,9 @@ impl<M: 'static> ColumnList<M> {
     pub fn insert_range(&self, index: usize, action: impl FnOnce(&mut dyn FnMut(ColumnRef<M>))) {
         let mut proposed = Vec::new();
         action(&mut |column| proposed.push(column));
+        if self.hierarchical && self.expander_count() + proposed.iter().filter(|c| Self::is_expander(c)).count() > 1 {
+            panic!("Only one expander column is allowed.");
+        }
         self.validate_unique(&proposed, true);
         self.list.insert_range(index, |add| {
             for column in proposed {
@@ -242,15 +290,28 @@ impl<M: 'static> ColumnList<M> {
     /// # Panics
     /// When a column appears twice.
     pub fn reset(&self, action: impl FnOnce(&mut Vec<ColumnRef<M>>)) {
+        let current_expander = self.list.with_items(|items| items.iter().find(|c| Self::is_expander(c)).cloned());
         let mut proposed = self.to_vec();
         action(&mut proposed);
+        if self.hierarchical {
+            let proposed_expanders: Vec<&ColumnRef<M>> = proposed.iter().filter(|c| Self::is_expander(c)).collect();
+            if proposed_expanders.len() > 1
+                || current_expander
+                    .as_ref()
+                    .is_some_and(|current| proposed_expanders.first().is_none_or(|p| !same_column(current, p)))
+            {
+                panic!("A reset cannot remove or replace the expander column.");
+            }
+        }
         self.validate_unique(&proposed, false);
+        self.applying_reset.set(true);
         self.list.reset(|columns| {
             columns.clear();
             for column in proposed {
                 columns.add(column);
             }
         });
+        self.applying_reset.set(false);
     }
 
     /// Sets the width of the column at `column_index`.
@@ -824,6 +885,10 @@ impl<M: TreeModel> IColumnOf<M> for HierarchicalExpanderColumn<M> {
 
     fn as_expander_column(&self) -> Option<&dyn IExpanderColumn<M>> {
         Some(self)
+    }
+
+    fn as_expander_column_any(&self) -> bool {
+        true
     }
 }
 
