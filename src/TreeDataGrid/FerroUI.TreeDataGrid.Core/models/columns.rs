@@ -38,6 +38,8 @@ pub trait IColumn: INotifyPropertyChanged + Any {
     fn tag(&self) -> Option<BoxedValue>;
     fn set_tag(&self, value: Option<BoxedValue>);
     fn as_any(&self) -> &dyn Any;
+    /// The model type of the column (`is IColumn<TModel>`).
+    fn model_type(&self) -> std::any::TypeId;
 }
 
 /// What a column of models of `M` is, the dispatch of the reference's `IColumnVisitor`
@@ -459,6 +461,7 @@ macro_rules! impl_column_base {
             fn tag(&self) -> Option<::ferroui_base::BoxedValue> { self.base.tag() }
             fn set_tag(&self, value: Option<::ferroui_base::BoxedValue>) { self.base.set_tag(value) }
             fn as_any(&self) -> &dyn ::std::any::Any { self }
+            fn model_type(&self) -> ::std::any::TypeId { ::std::any::TypeId::of::<M>() }
         }
     };
 }
@@ -871,6 +874,9 @@ impl<M: TreeModel> IColumn for HierarchicalExpanderColumn<M> {
     }
     fn as_any(&self) -> &dyn Any {
         self
+    }
+    fn model_type(&self) -> std::any::TypeId {
+        std::any::TypeId::of::<M>()
     }
 }
 

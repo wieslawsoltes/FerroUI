@@ -31,8 +31,10 @@ mod tree_selection_model_indexes_changed_event_args;
 mod tree_selection_model_selection_changed_event_args;
 mod tree_selection_model_source_reset_event_args;
 mod tree_selection_node;
+mod tree_data_grid_cell_selection_model;
+mod tree_data_grid_row_selection_model;
 
-pub use i_tree_data_grid_selection::ITreeDataGridSelection;
+pub use i_tree_data_grid_selection::{downcast_selection, ITreeDataGridSelection};
 pub use i_tree_selection_model::{
     box_model, downcast_models, erase_models, IReadOnlyList, ITreeSelectionModel, ReadOnlyList, UntypedModels,
 };
@@ -51,3 +53,7 @@ pub use tree_selection_model_selection_changed_event_args::{
 };
 pub use tree_selection_model_source_reset_event_args::TreeSelectionModelSourceResetEventArgs;
 pub use tree_selection_node::TreeSelectionNode;
+pub use tree_data_grid_cell_selection_model::{
+    ColumnSelectionItem, TreeDataGridCellSelectionChangedEventArgs, TreeDataGridCellSelectionModel,
+};
+pub use tree_data_grid_row_selection_model::TreeDataGridRowSelectionModel;

@@ -122,6 +122,11 @@ impl<M: TreeModel> HierarchicalRow<M> {
         self.weak_self.upgrade().expect("a row that is alive")
     }
 
+    /// The shared row.
+    pub fn shared(&self) -> Rc<Self> {
+        self.this()
+    }
+
     fn controller(&self) -> Option<Rc<dyn IExpanderRowController<M>>> {
         self.controller.upgrade()
     }

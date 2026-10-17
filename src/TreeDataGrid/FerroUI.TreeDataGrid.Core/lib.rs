@@ -5,7 +5,10 @@
 
 pub mod accessor;
 mod cell_index;
+mod flat_tree_data_grid_source;
 mod grid_length;
+mod hierarchical_tree_data_grid_source;
+mod i_tree_data_grid_source;
 mod index_path;
 pub mod items_source_view;
 pub mod model_collection;
@@ -15,6 +18,11 @@ pub mod utils;
 
 pub use accessor::{Accessor, PathSubscription, PropertyPathObserver, TreeModel};
 pub use cell_index::CellIndex;
+pub use flat_tree_data_grid_source::FlatTreeDataGridSource;
+pub use hierarchical_tree_data_grid_source::{HierarchicalTreeDataGridSource, RowEventHandler};
+pub use i_tree_data_grid_source::{
+    downcast_source, ITreeDataGridSource, ITreeDataGridSourceOf, RowDropPosition, RowMoveEffects,
+};
 pub use grid_length::{GridLength, GridUnitType};
 pub use index_path::IndexPath;
 pub use items_source_view::TreeDataGridItemsSourceView;
