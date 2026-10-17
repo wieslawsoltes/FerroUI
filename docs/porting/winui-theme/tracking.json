@@ -90296,7 +90296,7 @@
    "winui": "CalendarViewDayItem: {CalendarViewDayItem} (CalendarView_themeresources.xaml).",
    "status": "ported",
    "deviations": 10,
-   "date": "2026-10-17"
+   "date": "2026-10-18"
   },
   {
    "document": "CalendarItem.xaml",
@@ -90618,7 +90618,7 @@
    "winui": "MenuFlyoutItem: DefaultMenuFlyoutItemStyle; MenuFlyoutSubItem: DefaultMenuFlyoutSubItemStyle; ToggleMenuFlyoutItem: DefaultToggleMenuFlyoutItemStyle (MenuFlyout_themeresources.xaml); RadioMenuFlyoutItem: DefaultRadioMenuFlyoutItemStyle (RadioMenuFlyoutItem_themeresources.xaml).",
    "status": "ported",
    "deviations": 16,
-   "date": "2026-10-17"
+   "date": "2026-10-18"
   },
   {
    "document": "MenuScrollViewer.xaml",
@@ -90682,7 +90682,7 @@
    "winui": "No WinUI style (IconElement has no template): the Path that WinUI's PathIcon builds in code (CPathIcon::ApplyTemplate, icon.cpp), unscaled and filled with the Foreground.",
    "status": "ported",
    "deviations": 3,
-   "date": "2026-10-17"
+   "date": "2026-10-18"
   },
   {
    "document": "PipsPager.xaml",
