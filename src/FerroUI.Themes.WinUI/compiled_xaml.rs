@@ -97919,7 +97919,7 @@ fn build_controls_winuicontrols_xaml_deferred_31(
     // Controls/WinUIControls.xaml(54,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::margin_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64)));
     // Controls/WinUIControls.xaml(56,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64)));
+    rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 2.0_f64)));
     // Controls/WinUIControls.xaml(57,6) Content
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/WinUIControls.xaml(57,35) Value
