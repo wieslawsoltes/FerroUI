@@ -30,9 +30,8 @@
     TodayFontWeight (CalendarViewTodayFontWeight) for today, the text margin DayItemMargin
     (CalendarViewDayItemMargin) inside the item; the labels of the first day of a month
     (IsGroupLabelVisible, False by default) are not ported: FerroUI's Calendar has no such labels.
-  - The Padding 0,0,0,4 of the implicit style of CalendarViewDayItem is not set: WinUI draws the
-    text of a day where it is centred in the item below the margin 0,3,0,0 without that padding
-    (measured at 200 %: with it the days were 2 px higher than WinUI's, CDB-10).
+  - The Padding 0,0,0,4 of the implicit style of CalendarViewDayItem: the text of a day is centred in
+    the item less its border and that padding, below the margin 0,3,0,0, as WinUI's chrome arranges it.
   - The focus visual (UseSystemFocusVisuals, FocusVisualMargin -3, CalendarViewFocusVisualPrimaryBrush
     of 2 px and CalendarViewFocusVisualSecondaryBrush of 1 px, a circle in the rounded chrome) is the
     Border FocusVisual of the template, shown in the :dayfocused state: the day buttons of FerroUI's
@@ -53,8 +52,8 @@
     <Setter Property="MinWidth" Value="40" />
     <Setter Property="MinHeight" Value="40" />
     <Setter Property="Margin" Value="1" />
-    <!-- Not the Padding 0,0,0,4 of the implicit style of CalendarViewDayItem (CDB-10). -->
-    <Setter Property="Padding" Value="0" />
+    <!-- The Padding 0,0,0,4 of the implicit style of CalendarViewDayItem. -->
+    <Setter Property="Padding" Value="0,0,0,4" />
     <Setter Property="Foreground" Value="{DynamicResource CalendarViewCalendarItemForeground}" />
     <Setter Property="Background" Value="{DynamicResource CalendarViewCalendarItemBackground}" />
     <Setter Property="BorderBrush" Value="{DynamicResource CalendarViewCalendarItemBorderBrush}" />
