@@ -4,6 +4,7 @@ members = [
     "src/FerroUI.Base",
     "src/FerroUI.Controls",
     "src/FerroUI.Controls.ColorPicker",
+    "src/TreeDataGrid/FerroUI.TreeDataGrid.Core",
     "src/Markup/FerroUI.Markup",
     "src/Markup/FerroUI.Markup.Xaml",
     "src/Markup/FerroUI.Markup.Xaml.Loader",
@@ -99,6 +100,7 @@ categories = ["gui"]
 ferroui-base = { version = "=0.2.0-preview.1", path = "src/FerroUI.Base" }
 ferroui-controls = { version = "=0.2.0-preview.1", path = "src/FerroUI.Controls" }
 ferroui-controls-color-picker = { version = "=0.2.0-preview.1", path = "src/FerroUI.Controls.ColorPicker" }
+ferroui-treedatagrid-core = { version = "=0.2.0-preview.1", path = "src/TreeDataGrid/FerroUI.TreeDataGrid.Core" }
 ferroui-markup = { version = "=0.2.0-preview.1", path = "src/Markup/FerroUI.Markup" }
 ferroui-markup-xaml = { version = "=0.2.0-preview.1", path = "src/Markup/FerroUI.Markup.Xaml" }
 # Without the default features: the default is the run-time back end, which links the XAML runtime library
