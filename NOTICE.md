@@ -59,6 +59,12 @@ Avalonia itself incorporates code from other projects (for example WPF-derived l
 - License: MIT, Copyright (c) Microsoft Corporation
 - Used for: the WinUI theme `src/FerroUI.Themes.WinUI`, whose resource and control theme documents are ported from the theme of WinUI 3 (`generic.xaml` and the theme resources of the controls library; see `src/FerroUI.Themes.WinUI/NOTICE.md`, which holds the license text, and `docs/porting/winui-theme.md`).
 
+## Reactive Extensions for .NET (Rx.NET)
+
+- Project: <https://github.com/dotnet/reactive> (`Rx.NET/Source`, commit `89e05b8`)
+- License: MIT, Copyright (c) .NET Foundation and Contributors
+- Used for: `src/FerroUI.Reactive` (a port of System.Reactive), `src/FerroUI.Reactive.Testing` (a port of Microsoft.Reactive.Testing) and their unit tests in `tests/FerroUI.Reactive.Tests`, ported from `Tests.System.Reactive` (`docs/porting/reactive.md`).
+
 ## RemoteViewing
 
 - Project: <https://github.com/quamotion/remoteviewing> (package `Quamotion.RemoteViewing` 1.1.211)

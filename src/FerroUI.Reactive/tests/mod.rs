@@ -3,3 +3,4 @@
 //! `Tests.System.Reactive/Tests/Internal`.
 
 mod priority_queue_test;
+mod fast_immediate_observer_test;

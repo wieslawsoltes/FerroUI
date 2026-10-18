@@ -23,6 +23,10 @@ impl VirtualTimeClock for HistoricalTime {
     fn to_relative(duration: Duration) -> Duration {
         duration
     }
+
+    fn subtract(absolute: SystemTime, duration: Duration) -> SystemTime {
+        absolute.checked_sub(duration).unwrap_or(SystemTime::UNIX_EPOCH)
+    }
 }
 
 /// A virtual-time scheduler over historical time (`HistoricalScheduler`), for replaying recorded

@@ -1,4 +1,10 @@
+mod anonymous_test;
 mod concurrency;
+mod connectable_observable_test;
 mod disposables;
 mod internal;
 mod linq;
+mod notification_test;
+mod observer_test;
+mod time_tests;
+mod unit_test;

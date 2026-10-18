@@ -17,3 +17,4 @@ path = "lib.rs"
 [dependencies]
 ferroui-reactive = { workspace = true }
 ferroui-reactive-testing = { workspace = true }
+ferroui-system = { workspace = true }

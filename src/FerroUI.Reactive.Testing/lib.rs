@@ -49,6 +49,10 @@ impl VirtualTimeClock for TestTime {
         duration_to_ticks(duration)
     }
 
+    fn subtract(absolute: i64, duration: Duration) -> i64 {
+        absolute - duration_to_ticks(duration)
+    }
+
     /// Work scheduled for now or earlier runs one tick later (`TestScheduler.ScheduleAbsolute`).
     fn adjust_due_time(due_time: i64, clock: i64) -> i64 {
         if due_time <= clock {

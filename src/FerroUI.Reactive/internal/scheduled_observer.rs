@@ -63,12 +63,11 @@ impl<T: 'static> ScheduledObserver<T> {
         match self.state.get() {
             RunState::Stopped => {
                 self.state.set(RunState::Running);
-                let this = self.this.clone();
-                let run = self.scheduler.schedule_recursive(move |recurse| {
-                    if let Some(this) = this.upgrade() {
-                        this.run(recurse);
-                    }
-                });
+                // The delivery keeps the observer alive, as the closure of upstream does: an
+                // observer of a sequence that has ended may be held by nothing else. Disposing the
+                // observer cancels the delivery, which drops the closure.
+                let this = self.this.upgrade().expect("the observer is alive while it is made active");
+                let run = self.scheduler.schedule_recursive(move |recurse| this.run(recurse));
                 self.disposable.set_disposable(Some(run));
             }
             RunState::Running => self.state.set(RunState::Pending),

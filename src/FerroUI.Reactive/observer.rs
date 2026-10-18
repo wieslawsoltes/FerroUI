@@ -108,6 +108,15 @@ pub trait ObserverExt<T> {
     /// where upstream throws `InvalidOperationException`, on a notification after a terminal one
     /// and on a notification while another is being handled.
     fn checked(&self) -> Rc<dyn IObserver<T>>;
+
+    /// The observer itself (`Synchronize`): the notifications of one thread are serialized
+    /// already, and a notification that re-enters the observer from inside another runs at once,
+    /// as it does with the re-entrant lock of upstream.
+    fn synchronize(&self) -> Rc<dyn IObserver<T>>;
+
+    /// An observer that delivers the notifications to this one on `scheduler`, in order
+    /// (`NotifyOn(IScheduler)`).
+    fn notify_on(&self, scheduler: Rc<dyn crate::concurrency::IScheduler>) -> Rc<dyn IObserver<T>>;
 }
 
 impl<T: 'static> ObserverExt<T> for Rc<dyn IObserver<T>> {
@@ -123,6 +132,40 @@ impl<T: 'static> ObserverExt<T> for Rc<dyn IObserver<T>> {
 
     fn checked(&self) -> Rc<dyn IObserver<T>> {
         Rc::new(CheckedObserver { observer: self.clone(), state: Cell::new(CheckedState::Idle) })
+    }
+
+    fn synchronize(&self) -> Rc<dyn IObserver<T>> {
+        self.clone()
+    }
+
+    fn notify_on(&self, scheduler: Rc<dyn crate::concurrency::IScheduler>) -> Rc<dyn IObserver<T>> {
+        Rc::new(NotifyOnObserver { inner: crate::internal::ScheduledObserver::new(scheduler, self.clone()) })
+    }
+}
+
+/// The observer of `NotifyOn` (`ObserveOnObserver<T>` as an observer): each notification is
+/// queued and the queue is delivered on the scheduler.
+struct NotifyOnObserver<T: 'static> {
+    inner: Rc<crate::internal::ScheduledObserver<T>>,
+}
+
+impl<T: 'static> IObserver<T> for NotifyOnObserver<T> {
+    fn on_next(&self, value: T) {
+        use crate::internal::IScheduledObserver;
+        self.inner.on_next(value);
+        self.inner.ensure_active();
+    }
+
+    fn on_error(&self, error: ObservableError) {
+        use crate::internal::IScheduledObserver;
+        self.inner.on_error(error);
+        self.inner.ensure_active();
+    }
+
+    fn on_completed(&self) {
+        use crate::internal::IScheduledObserver;
+        self.inner.on_completed();
+        self.inner.ensure_active();
     }
 }
 
@@ -140,11 +183,13 @@ struct CheckedObserver<T> {
 }
 
 impl<T> CheckedObserver<T> {
+    /// Moves from idle to busy; any other state is left as it is and panics (`CheckAccess`, which
+    /// only moves from `Idle`).
     fn check_access(&self) {
-        match self.state.replace(CheckedState::Busy) {
+        match self.state.get() {
             CheckedState::Busy => panic!("This observer is currently busy with a notification."),
             CheckedState::Done => panic!("This observer has already terminated."),
-            CheckedState::Idle => {}
+            CheckedState::Idle => self.state.set(CheckedState::Busy),
         }
     }
 }

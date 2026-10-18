@@ -26,6 +26,12 @@ pub trait VirtualTimeClock: 'static {
     /// A duration as a relative time (`ToRelative`).
     fn to_relative(duration: Duration) -> Self::Relative;
 
+    /// `absolute` moved back by `duration`: what upstream's `Add` does with the negative relative
+    /// time of a due time in the past. The default keeps `absolute` (the past is due now).
+    fn subtract(absolute: Self::Absolute, _duration: Duration) -> Self::Absolute {
+        absolute
+    }
+
     /// The due time an absolute schedule uses for `due_time` when the clock is at `clock`
     /// (`ScheduleAbsolute`): `due_time` itself. The test scheduler moves work due now or earlier to
     /// one tick later.
@@ -189,8 +195,12 @@ impl<C: VirtualTimeClock> IScheduler for VirtualTimeScheduler<C> {
     }
 
     fn schedule_at(&self, due_time: SystemTime, action: ScheduledAction) -> Rc<dyn IDisposable> {
-        let relative = due_time.duration_since(self.now()).unwrap_or(Duration::ZERO);
-        self.schedule_relative(C::to_relative(relative), action)
+        match due_time.duration_since(self.now()) {
+            Ok(relative) => self.schedule_relative(C::to_relative(relative), action),
+            // A due time in the past keeps its place before the work due now
+            // (`ScheduleRelative(ToRelative(dueTime - Now))` with a negative time).
+            Err(past) => self.schedule_absolute(C::subtract(self.clock.get(), past.duration()), action),
+        }
     }
 
     fn as_stopwatch_provider(&self) -> Option<&dyn IStopwatchProvider> {

@@ -38,3 +38,11 @@ impl<T> Timestamped<T> {
         Self { value, timestamp }
     }
 }
+
+impl<T: fmt::Display> fmt::Display for Timestamped<T> {
+    /// `value@timestamp` (`ToString`), the time as the duration since the epoch of the system time.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let since_epoch = self.timestamp.duration_since(SystemTime::UNIX_EPOCH).unwrap_or_default();
+        write!(f, "{}@{:?}", self.value, since_epoch)
+    }
+}
