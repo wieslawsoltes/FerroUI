@@ -30,5 +30,5 @@ fn every_document_with_a_class_is_compiled() {
         assert!(SAMPLE.find_class(path).is_some(), "{path} has no class");
         compiled += 1;
     }
-    assert_eq!(compiled, 4, "the documents with a class");
+    assert_eq!(compiled, 12, "the documents with a class");
 }

@@ -27,7 +27,7 @@ path = "program.rs"
 [features]
 default = ["online"]
 # The article list of the Wikipedia page loads from the network.
-online = []
+online = ["dep:ureq"]
 
 [dependencies]
 # The compiled markup of the crate calls the typed functions of the declared members.
@@ -40,9 +40,16 @@ ferroui-treedatagrid-core = { workspace = true }
 ferroui-controls-treedatagrid = { workspace = true }
 # The entry point.
 ferroui-desktop = { workspace = true }
+# The articles of the Wikipedia page (the reference uses System.Text.Json).
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
 # The view models (the reference uses ReactiveUI).
 mini-mvvm = { path = "../MiniMvvm" }
 sample-support = { path = "../SampleSupport" }
+
+# The HTTP client of the Wikipedia page, with the feature `online` (the reference uses HttpClient).
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+ureq = { version = "2.12.1", optional = true }
 
 [build-dependencies]
 sample-build = { path = "../SampleBuild" }

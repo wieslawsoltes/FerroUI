@@ -1,4 +1,4 @@
-//! `UpdateRealizedCount` of `MainWindow.axaml.cs`: the text of the element of class
+//! `UpdateRealizedCount` of `MainWindow.xaml.cs`: the text of the element of class
 //! `realized-count` of a page counts the rows of the first TreeDataGrid of the page.
 
 use ferroui_base::Ref;

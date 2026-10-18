@@ -1,4 +1,4 @@
-//! Port of `App.axaml.cs`: the class of the document `App.xaml`.
+//! Port of `App.xaml.cs`: the class of the document `App.xaml`.
 
 use crate::main_window::MainWindow;
 use crate::markup::xaml_class;

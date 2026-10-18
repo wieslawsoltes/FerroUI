@@ -9,8 +9,34 @@
              x:CompileBindings="True"
              x:DataType="vm:MainWindowViewModel">
   <TabControl Name="tabs">
+    <TabItem Header="Template Column Reuse">
+      <views:TemplateColumnBugPage DataContext="{Binding TemplateColumnBug}"/>
+    </TabItem>
+    <TabItem Header="People (v12 XAML)">
+      <views:PeopleXamlPage DataContext="{Binding PeopleXaml}"/>
+    </TabItem>
     <TabItem Header="Countries" IsSelected="True">
       <views:CountriesPage DataContext="{Binding Countries}"/>
+    </TabItem>
+    <TabItem Header="Find Displayed Row">
+      <views:FindDisplayedRowIndexPage DataContext="{Binding FindDisplayedRowIndex}"/>
+    </TabItem>
+    <TabItem Header="BringIntoView (Non-uniform rows)">
+      <views:BringIntoViewNonUniformRowsPage DataContext="{Binding BringIntoViewNonUniformRows}"/>
+    </TabItem>
+    <TabItem Header="Files">
+      <views:FilesPage DataContext="{Binding Files}"/>
+    </TabItem>
+    <TabItem Header="Wikipedia">
+      <views:WikipediaPage DataContext="{Binding Wikipedia}"/>
+    </TabItem>
+    <TabItem Header="Drag/Drop">
+      <views:DragDropPage DataContext="{Binding DragDrop}"/>
+    </TabItem>
+    <TabItem Header="Core">
+      <!-- The view model of the core demo is the local data context of its page, as the
+           reference's core demo window sets it (MainView sets it from code). -->
+      <views:CoreDemoPage Name="corePage"/>
     </TabItem>
   </TabControl>
 </UserControl>

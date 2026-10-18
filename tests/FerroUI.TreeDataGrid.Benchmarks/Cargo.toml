@@ -1,0 +1,30 @@
+[package]
+name = "ferroui-treedatagrid-benchmarks"
+description = "The benchmarks of FerroUI's TreeDataGrid: column geometry and layout, element and cell recycling, sources and presentations, first layout and virtualized scrolling, measured with the harness of ferroui-benchmarks"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+# The counting allocator of the harness (ferroui-benchmarks, harness.rs): the table of a run has
+# what an operation allocated. Off by default: counting costs time.
+count-allocations = ["ferroui-benchmarks/count-allocations"]
+
+[dependencies]
+# The harness: the registry, the runner, the smoke helpers and the allocation counts.
+ferroui-benchmarks = { path = "../FerroUI.Benchmarks" }
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+# Linked as the framework's benchmarks link it; the scenarios of the reference load no theme, so
+# no benchmark applies it.
+ferroui-treedatagrid-core = { workspace = true }
+ferroui-controls-treedatagrid = { workspace = true }

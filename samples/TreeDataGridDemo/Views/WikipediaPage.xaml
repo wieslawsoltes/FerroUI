@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:m="using:TreeDataGridDemo.Models"
+             xmlns:vm="using:TreeDataGridDemo.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="TreeDataGridDemo.Views.WikipediaPage"
+             x:DataType="vm:WikipediaPageViewModel">
+  <DockPanel>
+    <TextBlock Text="{Binding LoadError}"
+               Margin="4"
+               TextWrapping="Wrap"
+               DockPanel.Dock="Top"/>
+    <TextBlock Classes="realized-count" DockPanel.Dock="Bottom"/>
+    <TreeDataGrid Name="wikipedia" Source="{Binding Source}">
+      <TreeDataGrid.Resources>
+        <DataTemplate x:Key="WikipediaImageCell" DataType="m:OnThisDayArticle">
+          <Image Source="{Binding Image}"/>
+        </DataTemplate>
+      </TreeDataGrid.Resources>
+    </TreeDataGrid>
+  </DockPanel>
+</UserControl>

@@ -1,0 +1,17 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:TreeDataGridDemo.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="TreeDataGridDemo.Views.DragDropPage"
+             x:DataType="vm:DragDropPageViewModel">
+  <DockPanel>
+    <TextBlock Classes="realized-count" DockPanel.Dock="Bottom"/>
+    <TreeDataGrid Name="dragDrop"
+                  Source="{Binding Source}"
+                  AutoDragDropRows="True"
+                  RowDragStarted="DragDrop_RowDragStarted"
+                  RowDragOver="DragDrop_RowDragOver"/>
+  </DockPanel>
+</UserControl>

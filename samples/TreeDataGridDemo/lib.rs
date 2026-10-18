@@ -14,6 +14,7 @@
 extern crate self as treedatagrid_demo;
 
 mod app;
+mod internal_tree_data_grid_source_extensions;
 mod main_window;
 pub mod markup;
 mod register_types;

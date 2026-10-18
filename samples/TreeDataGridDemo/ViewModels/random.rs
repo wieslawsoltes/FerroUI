@@ -1,9 +1,7 @@
 //! The pseudo-random number generator of the runtime library (`System.Random`) as the view
 //! models of the demo use it (not a port of a file of the demo): the subtractive
-//! generator of the runtime library, with a seed that differs per instance.
+//! generator of the runtime library with a seed.
 
-use std::collections::hash_map::RandomState;
-use std::hash::{BuildHasher, Hasher};
 
 /// `System.Random`.
 pub(crate) struct Random {
@@ -13,13 +11,6 @@ pub(crate) struct Random {
 }
 
 impl Random {
-    /// `new Random()`: a generator with a seed that differs per instance.
-    pub(crate) fn new() -> Self {
-        // The hasher of the standard library is keyed with random data per instance.
-        let seed = RandomState::new().build_hasher().finish();
-        Self::with_seed((seed ^ (seed >> 32)) as u32 as i32)
-    }
-
     /// `new Random(Seed)`.
     pub(crate) fn with_seed(seed: i32) -> Self {
         let mut seed_array = [0i32; 56];
@@ -130,9 +121,10 @@ mod tests {
 
     #[test]
     fn the_numbers_stay_in_their_range() {
-        let mut random = Random::new();
+        let mut random = Random::with_seed(7);
         for _ in 0..1000 {
             assert!((0..10).contains(&random.next_max(10)));
+            assert!((1..6).contains(&random.next_range(1, 6)));
         }
         assert_eq!(0, random.next_max(0));
     }

@@ -1,4 +1,4 @@
-//! Port of `MainWindow.axaml.cs`: the class of the document `MainWindow.xaml`. The window shows
+//! Port of `MainWindow.xaml.cs`: the class of the document `MainWindow.xaml`. The window shows
 //! the tabs of the pages (`views::MainView`, which the ControlCatalog shows too); the handlers of
 //! the pages moved to the views of the pages.
 

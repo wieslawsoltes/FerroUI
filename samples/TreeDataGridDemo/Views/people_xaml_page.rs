@@ -1,6 +1,6 @@
-//! The people page: the tab "People (v12 XAML)" of `MainWindow.axaml` of the reference demo, a
-//! grid of an `ItemsSource` whose columns are declared in markup, with the handler of its
-//! selection changes (`People_SelectionChanged` of `MainWindow.axaml.cs`), as a view of its own
+//! The people page: the tab "People (v12 XAML)" of the main window of the reference demo, a grid
+//! of an `ItemsSource` whose columns are declared in markup, with the handler of its selection
+//! changes (`People_SelectionChanged` of the main window's code-behind), as a view of its own
 //! that the main window and the ControlCatalog both show.
 
 use crate::markup::{user_control_class, xaml_class};
@@ -9,7 +9,7 @@ use ferroui_base::metadata::from_markup_value;
 use ferroui_base::{ferro_class_info, instantiate, BoxedValue, Ref};
 use ferroui_controls::{TextBlock, UserControl};
 use ferroui_controls_treedatagrid::{TreeDataGrid, TreeDataGridSelectionChangedEventArgs};
-use ferroui_treedatagrid_core::selection::{IReadOnlyList, ITreeSelectionModel};
+use ferroui_treedatagrid_core::selection::ITreeSelectionModel;
 use std::any::Any;
 use std::rc::Rc;
 

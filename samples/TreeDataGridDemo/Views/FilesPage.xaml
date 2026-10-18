@@ -1,0 +1,74 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:m="using:TreeDataGridDemo.Models"
+             xmlns:vm="using:TreeDataGridDemo.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="TreeDataGridDemo.Views.FilesPage"
+             x:DataType="vm:FilesPageViewModel">
+  <DockPanel>
+    <DockPanel DockPanel.Dock="Top" Margin="0 4">
+      <ComboBox ItemsSource="{Binding Drives}"
+                SelectedItem="{Binding SelectedDrive}"
+                DockPanel.Dock="Left"/>
+      <CheckBox IsChecked="{Binding CellSelection}"
+                Margin="4 0 0 0"
+                DockPanel.Dock="Right">
+        Cell Selection
+      </CheckBox>
+      <CheckBox IsChecked="{Binding FlatList}"
+                Margin="4 0 0 0"
+                DockPanel.Dock="Right">
+        Flat
+      </CheckBox>
+      <TextBox Text="{Binding SelectedPath, Mode=OneWay}"
+               Margin="4 0 0 0"
+               VerticalContentAlignment="Center"
+               KeyDown="SelectedPath_KeyDown"/>
+    </DockPanel>
+    <TextBlock Classes="realized-count" DockPanel.Dock="Bottom"/>
+    <TreeDataGrid Name="fileViewer" Source="{Binding Source}">
+      <TreeDataGrid.Resources>
+
+        <!-- Template for Name column cells -->
+        <DataTemplate x:Key="FileNameCell" DataType="m:FileTreeNodeModel">
+          <StackPanel Orientation="Horizontal">
+            <Image Margin="0 0 4 0"
+                   VerticalAlignment="Center">
+              <Image.Source>
+                <MultiBinding Converter="{x:Static vm:FilesPageViewModel.FileIconConverter}">
+                  <Binding Path="IsDirectory"/>
+                  <Binding Path="IsExpanded"/>
+                </MultiBinding>
+              </Image.Source>
+            </Image>
+            <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+          </StackPanel>
+        </DataTemplate>
+
+        <!-- Edit template for Name column cells -->
+        <DataTemplate x:Key="FileNameEditCell" DataType="m:FileTreeNodeModel">
+          <StackPanel Orientation="Horizontal">
+            <Image Margin="0 0 4 0"
+                   VerticalAlignment="Center">
+              <Image.Source>
+                <MultiBinding Converter="{x:Static vm:FilesPageViewModel.FileIconConverter}">
+                  <Binding Path="IsDirectory"/>
+                  <Binding Path="IsExpanded"/>
+                </MultiBinding>
+              </Image.Source>
+            </Image>
+            <TextBox Text="{Binding Name}" VerticalAlignment="Center"/>
+          </StackPanel>
+        </DataTemplate>
+
+      </TreeDataGrid.Resources>
+      <TreeDataGrid.Styles>
+        <Style Selector="TreeDataGrid TreeDataGridRow:nth-child(2n)">
+          <Setter Property="Background"  Value="#20808080"/>
+        </Style>
+      </TreeDataGrid.Styles>
+    </TreeDataGrid>
+  </DockPanel>
+</UserControl>

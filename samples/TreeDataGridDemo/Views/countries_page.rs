@@ -1,5 +1,5 @@
-//! The countries page: the tab "Countries" of `MainWindow.axaml` of the reference demo, with the
-//! handlers of its buttons from `MainWindow.axaml.cs`, as a view of its own that the main window
+//! The countries page: the tab "Countries" of `MainWindow.xaml` of the reference demo, with the
+//! handlers of its buttons from `MainWindow.xaml.cs`, as a view of its own that the main window
 //! and the ControlCatalog both show.
 
 use crate::markup::{user_control_class, xaml_class};

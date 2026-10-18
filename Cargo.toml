@@ -47,6 +47,7 @@ members = [
     "tests/FerroUI.RenderBackends.Comparison",
     "tests/FerroUI.RenderTests",
     "tests/FerroUI.Benchmarks",
+    "tests/FerroUI.TreeDataGrid.Benchmarks",
     "tests/FerroUI.LeakTests",
     "tests/FerroUI.IntegrationTests.Appium",
     "tests/FerroUI.IntegrationTests.Win32",

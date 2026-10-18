@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:m="using:TreeDataGridDemo.Models"
+             xmlns:vm="using:TreeDataGridDemo.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="TreeDataGridDemo.Views.BringIntoViewNonUniformRowsPage"
+             x:DataType="vm:CountriesPageViewModel">
+  <Grid RowDefinitions="30*,70*">
+    <!-- The items are the items of the source of the view model (`Source.Items` in the
+         reference), which the code-behind gives the list: the source handle the view model
+         exposes has no members markup can bind to. -->
+    <ListBox Name="bringIntoViewNonUniformRowsList"
+             SelectionChanged="BringIntoViewNonUniformRows_SelectionChanged"/>
+    <DockPanel Grid.Row="1">
+      <CheckBox Name="bringIntoViewNonUniformRowsVisible"
+                IsChecked="True"
+                DockPanel.Dock="Top">
+        Show TreeDataGrid
+      </CheckBox>
+      <TextBlock Classes="realized-count" DockPanel.Dock="Bottom"/>
+      <TreeDataGrid Name="bringIntoViewNonUniformRowsGrid"
+                    Source="{Binding Source}"
+                    IsVisible="{Binding #bringIntoViewNonUniformRowsVisible.IsChecked}">
+        <TreeDataGrid.Resources>
+          <DataTemplate x:Key="RegionCell" DataType="m:Country">
+            <TextBlock Text="{Binding Region}"/>
+          </DataTemplate>
+          <DataTemplate x:Key="RegionEditCell" DataType="m:Country">
+            <ComboBox ItemsSource="{x:Static m:Countries.Regions}"
+                      SelectedItem="{Binding Region}"/>
+          </DataTemplate>
+        </TreeDataGrid.Resources>
+        <TreeDataGrid.Styles>
+          <Style Selector="TreeDataGrid TreeDataGridRow:nth-last-child(2n)">
+            <Setter Property="Background" Value="#20808080"/>
+          </Style>
+        </TreeDataGrid.Styles>
+      </TreeDataGrid>
+    </DockPanel>
+  </Grid>
+</UserControl>
