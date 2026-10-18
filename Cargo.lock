@@ -437,6 +437,7 @@ dependencies = [
  "ferroui-build",
  "ferroui-controls",
  "ferroui-controls-color-picker",
+ "ferroui-controls-treedatagrid",
  "ferroui-dialogs",
  "ferroui-harfbuzz",
  "ferroui-markup",
@@ -450,6 +451,7 @@ dependencies = [
  "ferroui-vello",
  "mini-mvvm",
  "skia-safe",
+ "treedatagrid-demo",
  "unicode-normalization",
 ]
 

@@ -24,6 +24,11 @@ path = "lib.rs"
 name = "treedatagrid-demo"
 path = "program.rs"
 
+[features]
+default = ["online"]
+# The article list of the Wikipedia page loads from the network.
+online = []
+
 [dependencies]
 # The compiled markup of the crate calls the typed functions of the declared members.
 ferroui-base = { workspace = true, features = ["markup-functions"] }

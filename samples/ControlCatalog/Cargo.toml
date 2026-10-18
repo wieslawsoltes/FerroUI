@@ -42,7 +42,11 @@ count-allocations = ["ferroui-base/tagged-weak-references"]
 # are populated by the run-time XAML loader, as the sample was before its markup was compiled. For
 # working on the documents and the classes of the sample, where a build without the compiled markup is
 # several times shorter (docs/porting/xaml.md, 9.5.22, has the measures).
-runtime-markup = ["dep:ferroui-markup-xaml-loader", "ferroui-controls-color-picker/document-assets"]
+runtime-markup = [
+    "dep:ferroui-markup-xaml-loader",
+    "ferroui-controls-color-picker/document-assets",
+    "ferroui-controls-treedatagrid/document-assets",
+]
 
 [dependencies]
 # The compiled markup of the crate calls the typed functions of the declared members.
@@ -50,6 +54,11 @@ ferroui-base = { workspace = true, features = ["markup-functions"] }
 ferroui-controls = { workspace = true }
 # The colour picker library (the colour picker page and the styles of App.xaml).
 ferroui-controls-color-picker = { workspace = true }
+# The TreeDataGrid (the styles of App.xaml) and the pages of its demo, which the page TreeDataGrid
+# shows (not in the original). The demo without its feature `online`: the catalog makes no
+# network requests, and the article list of the demo shows that it cannot load.
+ferroui-controls-treedatagrid = { workspace = true }
+treedatagrid-demo = { path = "../TreeDataGridDemo", default-features = false }
 # The about dialog.
 ferroui-dialogs = { workspace = true }
 ferroui-markup = { workspace = true }
@@ -90,6 +99,7 @@ ferroui-vello = { workspace = true, features = ["hybrid", "gpu"] }
 # The styles of the colour picker as assets too: `App.xaml` loaded with the run-time loader includes
 # them, and the loader leaves such an include to run time only for a document the asset loader has.
 ferroui-controls-color-picker = { workspace = true, features = ["document-assets"] }
+ferroui-controls-treedatagrid = { workspace = true, features = ["document-assets"] }
 # The run-time loader of the tests: every document is loaded with it too, and each class populated by
 # its compiled markup is compared with the class the loader populates (`tests/compiled_markup.rs`);
 # the reproductions of the gaps load markup text.

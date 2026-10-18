@@ -34,6 +34,8 @@ pub struct App {
     winui_theme: RefCell<Option<Ref<WinUITheme>>>,
     color_picker_fluent: RefCell<Option<Rc<dyn IStyle>>>,
     color_picker_simple: RefCell<Option<Rc<dyn IStyle>>>,
+    tree_data_grid_fluent: RefCell<Option<Rc<dyn IStyle>>>,
+    tree_data_grid_generic: RefCell<Option<Rc<dyn IStyle>>>,
     dock_menu_item_count: Cell<i32>,
     prev_theme: Cell<CatalogTheme>,
 }
@@ -75,6 +77,8 @@ impl ApplicationImpl for App {
         *this.winui_theme.borrow_mut() = from_markup_value::<Ref<WinUITheme>>(&this.resource("WinUITheme"));
         *this.color_picker_fluent.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("ColorPickerFluent"));
         *this.color_picker_simple.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("ColorPickerSimple"));
+        *this.tree_data_grid_fluent.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("TreeDataGridFluent"));
+        *this.tree_data_grid_generic.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("TreeDataGridGeneric"));
 
         // The port starts the catalog in its WinUI theme (not in the original, which starts in the
         // Fluent theme); the settings page and `FERROUI_CATALOG_THEME` select the others.
@@ -115,6 +119,8 @@ impl App {
             winui_theme: RefCell::new(None),
             color_picker_fluent: RefCell::new(None),
             color_picker_simple: RefCell::new(None),
+            tree_data_grid_fluent: RefCell::new(None),
+            tree_data_grid_generic: RefCell::new(None),
             dock_menu_item_count: Cell::new(0),
             prev_theme: Cell::new(CatalogTheme::WinUI),
         }
@@ -242,7 +248,16 @@ impl App {
             app.theme_styles_container.add(Style::new());
             app.theme_styles_container.add(Style::new());
             app.theme_styles_container.add(Style::new());
+            // Not in the original: the styles of the TreeDataGrid of the port (the page of the
+            // TreeDataGrid demo).
+            app.theme_styles_container.add(Style::new());
         }
+
+        // The TreeDataGrid has Fluent styles, whose brushes come from resources the Fluent and the
+        // WinUI themes define, and the generic styles they build on, which the Simple theme takes.
+        let tree_data_grid_fluent = || app.tree_data_grid_fluent.borrow().clone().expect("the TreeDataGrid Fluent styles of App.xaml");
+        let tree_data_grid_generic =
+            || app.tree_data_grid_generic.borrow().clone().expect("the TreeDataGrid generic styles of App.xaml");
 
         if theme == CatalogTheme::Fluent {
             let fluent_theme = app.fluent_theme.borrow().clone().expect("the Fluent theme of App.xaml");
@@ -250,12 +265,14 @@ impl App {
             let color_picker_fluent = app.color_picker_fluent.borrow().clone().expect("the colour picker Fluent styles of App.xaml");
             app.theme_styles_container.set(1, color_picker_fluent);
             app.theme_styles_container.set(2, Style::new());
+            app.theme_styles_container.set(3, tree_data_grid_fluent());
         } else if theme == CatalogTheme::Simple {
             let simple_theme = app.simple_theme.borrow().clone().expect("the Simple theme of App.xaml");
             app.theme_styles_container.set(0, simple_theme.as_style());
             let color_picker_simple = app.color_picker_simple.borrow().clone().expect("the colour picker Simple styles of App.xaml");
             app.theme_styles_container.set(1, color_picker_simple);
             app.theme_styles_container.set(2, Style::new());
+            app.theme_styles_container.set(3, tree_data_grid_generic());
         } else if theme == CatalogTheme::WinUI {
             // Not in the original: the WinUI theme of the port (docs/porting/winui-theme.md), which
             // themes every control, with the Fluent styles of the colour picker (the colour picker
@@ -267,6 +284,7 @@ impl App {
             let color_picker_fluent = app.color_picker_fluent.borrow().clone().expect("the colour picker Fluent styles of App.xaml");
             app.theme_styles_container.set(1, color_picker_fluent);
             app.theme_styles_container.set(2, Style::new());
+            app.theme_styles_container.set(3, tree_data_grid_fluent());
         }
 
         if should_reopen_window {

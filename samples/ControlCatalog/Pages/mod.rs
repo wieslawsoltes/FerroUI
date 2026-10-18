@@ -69,6 +69,8 @@ mod theme_page;
 mod toggle_switch_page;
 mod tool_tip_page;
 mod transitioning_content_control_page;
+// Not in the original: the pages of the TreeDataGrid demo.
+mod tree_data_grid_page;
 mod tree_view_page;
 mod viewbox_page;
 mod window_customizations_page;
@@ -222,6 +224,7 @@ pub use theme_page::ThemePage;
 pub use toggle_switch_page::ToggleSwitchPage;
 pub use tool_tip_page::ToolTipPage;
 pub use transitioning_content_control_page::TransitioningContentControlPage;
+pub use tree_data_grid_page::TreeDataGridPage;
 pub use tree_view_page::TreeViewPage;
 pub use viewbox_page::ViewboxPage;
 pub use window_customizations_page::WindowCustomizationsPage;
@@ -333,6 +336,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     ToggleSwitchPage::TYPE,
     ToolTipPage::TYPE,
     TransitioningContentControlPage::TYPE,
+    TreeDataGridPage::TYPE,
     TreeViewPage::TYPE,
     ViewboxPage::TYPE,
     WindowCustomizationsPage::TYPE,
@@ -412,6 +416,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &ToggleSwitchPage::XAML_CLASS,
     &ToolTipPage::XAML_CLASS,
     &TransitioningContentControlPage::XAML_CLASS,
+    &TreeDataGridPage::XAML_CLASS,
     &TreeViewPage::XAML_CLASS,
     &ViewboxPage::XAML_CLASS,
     &WindowCustomizationsPage::XAML_CLASS,

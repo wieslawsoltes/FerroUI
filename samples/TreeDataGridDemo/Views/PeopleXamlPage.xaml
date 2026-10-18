@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:m="using:TreeDataGridDemo.Models"
+             xmlns:vm="using:TreeDataGridDemo.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="TreeDataGridDemo.Views.PeopleXamlPage"
+             x:CompileBindings="True"
+             x:DataType="vm:PeopleXamlPageViewModel">
+  <DockPanel>
+    <TextBlock Name="peopleSelectionText"
+               Classes="realized-count"
+               DockPanel.Dock="Bottom"
+               Text="Selection: none"/>
+    <TreeDataGrid Name="peopleXamlGrid"
+                  ItemsSource="{Binding People}"
+                  SelectionMode="Row,Multiple"
+                  SelectionChanged="People_SelectionChanged">
+      <TreeDataGrid.Styles>
+        <Style Selector="TreeDataGrid TreeDataGridRow:nth-child(2n)">
+          <Setter Property="Background" Value="#20808080"/>
+        </Style>
+      </TreeDataGrid.Styles>
+      <TreeDataGridRowHeaderColumn Width="48"/>
+      <TreeDataGridHierarchicalExpanderColumn Header="Name"
+                                             Width="2*"
+                                             ChildrenBinding="{CompiledBinding Children, DataType={x:Type m:Person}}"
+                                             HasChildrenBinding="{CompiledBinding HasChildren, DataType={x:Type m:Person}}"
+                                             IsExpandedBinding="{CompiledBinding IsExpanded, DataType={x:Type m:Person}}">
+        <TreeDataGridTextColumn Binding="{CompiledBinding Name, DataType={x:Type m:Person}}"/>
+      </TreeDataGridHierarchicalExpanderColumn>
+      <TreeDataGridTextColumn Header="Title"
+                              Width="2*"
+                              Binding="{CompiledBinding Title, DataType={x:Type m:Person}}"/>
+      <TreeDataGridTemplateColumn Header="Age"
+                                  Width="90"
+                                  TextSearchBinding="{CompiledBinding Title, DataType={x:Type m:Person}}">
+        <TreeDataGridTemplateColumn.CellTemplate>
+          <DataTemplate x:DataType="m:Person">
+            <Border Background="#204088C5"
+                    CornerRadius="12"
+                    Padding="8 2"
+                    HorizontalAlignment="Left">
+              <TextBlock Text="{Binding Age}" FontWeight="SemiBold"/>
+            </Border>
+          </DataTemplate>
+        </TreeDataGridTemplateColumn.CellTemplate>
+      </TreeDataGridTemplateColumn>
+      <TreeDataGridCheckBoxColumn Header="Active"
+                                  Width="90"
+                                  Binding="{CompiledBinding IsActive, DataType={x:Type m:Person}}"/>
+    </TreeDataGrid>
+  </DockPanel>
+</UserControl>

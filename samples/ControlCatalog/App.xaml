@@ -36,6 +36,8 @@
       <WinUITheme x:Key="WinUITheme" />
       <StyleInclude x:Key="ColorPickerFluent" Source="ferres://FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
       <StyleInclude x:Key="ColorPickerSimple" Source="ferres://FerroUI.Controls.ColorPicker/Themes/Simple/Simple.xaml" />
+      <StyleInclude x:Key="TreeDataGridFluent" Source="ferres://FerroUI.Controls.TreeDataGrid/Themes/Fluent.xaml" />
+      <StyleInclude x:Key="TreeDataGridGeneric" Source="ferres://FerroUI.Controls.TreeDataGrid/Themes/Generic.xaml" />
     </ResourceDictionary>
   </Application.Resources>
   <Application.Styles>
