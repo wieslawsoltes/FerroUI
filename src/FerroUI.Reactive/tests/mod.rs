@@ -1,2 +1,5 @@
-//! The unit tests of the crate, as a module tree of the library: one module per test file of
-//! upstream (`Tests.System.Reactive`), under its name in Rust case.
+//! The unit tests of the internals of the crate (the tests of its public API are in the crate
+//! `ferroui-reactive-tests`, `tests/FerroUI.Reactive.Tests`), ported from Rx.NET's
+//! `Tests.System.Reactive/Tests/Internal`.
+
+mod priority_queue_test;
