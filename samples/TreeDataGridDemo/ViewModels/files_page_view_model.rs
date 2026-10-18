@@ -31,7 +31,7 @@ use std::cell::{Cell, OnceCell, RefCell};
 use std::path::{Component, Path};
 use std::rc::{Rc, Weak};
 
-thread_local! {
+ferroui_base::ferro_thread_local! {
     // `s_iconConverter`: created on first use, on the UI thread.
     static ICON_CONVERTER: OnceCell<Rc<IconConverter>> = const { OnceCell::new() };
 }

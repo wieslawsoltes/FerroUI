@@ -22,7 +22,7 @@ struct Entry<M: 'static> {
     listeners: Vec<Weak<dyn ICollectionChangedListener<M>>>,
 }
 
-thread_local! {
+ferroui_base::ferro_thread_local! {
     static ENTRIES: RefCell<FxHashMap<(usize, TypeId), Box<dyn Any>>> = RefCell::new(FxHashMap::default());
 }
 

@@ -40,7 +40,7 @@ use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
 use std::rc::Rc;
 
-thread_local! {
+ferroui_base::ferro_thread_local! {
     // The icons of the name cells of the files page (`Assets/folder.png`, `Assets/file.png`),
     // loaded on first use, on the UI thread.
     static FILE_ICONS: RefCell<Option<(Rc<dyn IImage>, Rc<dyn IImage>)>> = const { RefCell::new(None) };

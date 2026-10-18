@@ -14,7 +14,7 @@ use mini_mvvm::ViewModelBase;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
-thread_local! {
+ferroui_base::ferro_thread_local! {
     // `private static Random _random = new Random(0)`.
     static RANDOM: RefCell<Random> = RefCell::new(Random::with_seed(0));
     // `Bogus.Randomizer.Seed = new System.Random(0)` (the application class of the reference).
