@@ -1,6 +1,6 @@
 //! ferroui-controls-treedatagrid
 //!
-//! The TreeDataGrid control, ported from the `Avalonia.Controls.TreeDataGrid` project of
+//! The TreeDataGrid control, ported from the control project of
 //! TreeDataGrid (<https://github.com/wieslawsoltes/TreeDataGrid>): hierarchical and tabular data
 //! in one virtualizing view, with column layout, sorting, row and cell selection, editing, drag and
 //! drop and automation. The data layer is `ferroui-treedatagrid-core` (sources, columns, rows and

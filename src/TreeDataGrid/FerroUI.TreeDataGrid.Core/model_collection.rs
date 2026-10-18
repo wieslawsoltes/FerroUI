@@ -71,7 +71,7 @@ pub fn collection_identity<M: 'static>(collection: &Models<M>) -> usize {
     Rc::as_ptr(collection) as *const () as usize
 }
 
-// A notifying list: the reference's `ObservableCollection<T>` and `AvaloniaList<T>`.
+// A notifying list: the reference's `ObservableCollection<T>` and the notifying list of the framework.
 impl<M: PartialEq + 'static> ModelCollection<M> for FerroList<Rc<M>> {
     fn count(&self) -> usize {
         FerroList::count(self)
