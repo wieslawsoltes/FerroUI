@@ -12,14 +12,12 @@
 use crate::tests::support::*;
 
 use crate::models::{
-    CellRef, CheckBoxCell, CheckBoxColumn, ColumnRef, ICell, IColumn, IColumns, ITextCell, ITreeDataGridRows,
-    IViewColumn, TemplateCell, TemplateColumn, TextColumn, TextColumnOptions,
+    CellRef, CheckBoxCell, CheckBoxColumn, ColumnRef, IViewColumn, TemplateCell, TemplateColumn, TextColumn, TextColumnOptions,
 };
 use crate::primitives::{
     TreeDataGridCell, TreeDataGridCheckBoxCell, TreeDataGridColumnHeader, TreeDataGridRow, TreeDataGridTemplateCell,
     TreeDataGridTextCell,
 };
-use crate::selection::ITreeDataGridSelectionInteraction;
 use crate::{TreeDataGrid, TreeDataGridCellEventArgs, TreeDataGridRowDragStartedEventArgs};
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::core::{Maybe, Value};
@@ -41,7 +39,7 @@ use ferroui_markup_xaml::markup_extensions::DynamicResourceExtension;
 use ferroui_treedatagrid_core::model_collection::Models;
 use ferroui_treedatagrid_core::models::{ColumnRef as CoreColumnRef, ListSortDirection};
 use ferroui_treedatagrid_core::selection::ITreeSelectionModel;
-use ferroui_treedatagrid_core::{Accessor, FlatTreeDataGridSource, ITreeDataGridSource, IndexPath};
+use ferroui_treedatagrid_core::{Accessor, FlatTreeDataGridSource, IndexPath};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -290,7 +288,7 @@ fn create_target_with(options: Options) -> Target {
     let root = test_window(Some(target.clone().upcast::<Control>()), None);
     root.styles().add(tree_data_grid_row_style());
     root.styles().add(Style::with_setters(
-        Selectors::of_type::<TreeDataGridCell>(),
+        Selectors::is::<TreeDataGridCell>(),
         [Setter::new(Layoutable::height_property(), 10.0)],
     ));
 

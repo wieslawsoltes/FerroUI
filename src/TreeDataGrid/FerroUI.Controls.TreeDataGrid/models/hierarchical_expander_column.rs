@@ -14,8 +14,8 @@ use ferroui_base::BoxedValue;
 use ferroui_controls::GridLength;
 use ferroui_treedatagrid_core::accessor::TreeModel;
 use ferroui_treedatagrid_core::models::{
-    self as core_models, as_hierarchical_row, ColumnKind, Comparison, IColumnOf, IExpander, IExpanderColumn,
-    IExpanderRow, IRowOf, ListSortDirection, NotifyingBase, RowRef,
+    self as core_models, as_hierarchical_row, ColumnKind, Comparison, IColumnOf, IExpanderColumn,
+    IExpanderRow, ListSortDirection, NotifyingBase, RowRef,
 };
 use ferroui_treedatagrid_core::{Accessor, Models, PropertyPathObserver};
 use std::any::{Any, TypeId};

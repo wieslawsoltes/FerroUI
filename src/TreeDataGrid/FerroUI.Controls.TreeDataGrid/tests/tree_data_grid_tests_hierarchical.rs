@@ -8,9 +8,8 @@
 //! grid as its `Source`.
 
 use crate::models::{
-    CellRef, HierarchicalExpanderColumn, ICell, IColumns, IViewColumn, TemplateCell, TemplateColumn, TextColumn,
+    CellRef, HierarchicalExpanderColumn, IViewColumn, TemplateCell, TemplateColumn, TextColumn,
 };
-use crate::presentation::TreeDataGridPresentation;
 use crate::primitives::{
     TemplateCellDataContext, TreeDataGridCell, TreeDataGridExpanderCell, TreeDataGridRow, TreeDataGridRowsPresenter,
     TreeDataGridTemplateCell,
@@ -27,8 +26,7 @@ use ferroui_controls::primitives::TemplatedControl;
 use ferroui_controls::templates::{FuncDataTemplate, IDataTemplate};
 use ferroui_controls::{Border, Control, ScrollViewer, Window};
 use ferroui_treedatagrid_core::index_path;
-use ferroui_treedatagrid_core::models::{ColumnRef as CoreColumnRef, IExpander, IRow, IRows, ListSortDirection};
-use ferroui_treedatagrid_core::selection::ITreeSelectionModel;
+use ferroui_treedatagrid_core::models::{ColumnRef as CoreColumnRef, ListSortDirection};
 use ferroui_treedatagrid_core::{Accessor, HierarchicalTreeDataGridSource, ITreeDataGridSource, IndexPath, Models};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;

@@ -10,7 +10,7 @@
 //! [`as_column_viewport_estimator`].
 
 use super::{as_natural_width_measure_cache, TreeDataGridPresenterBase};
-use crate::models::{ColumnListBase, IColumnViewportEstimator, IColumns};
+use crate::models::{IColumnViewportEstimator, IColumns};
 use ferroui_base::layout::Orientation;
 use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{Rect, Ref, Size};
@@ -203,5 +203,5 @@ impl TreeDataGridColumnarPresenterBase {
 /// The columns as a viewport estimator (`Columns is IColumnViewportEstimator`): the column list of
 /// the crate.
 pub fn as_column_viewport_estimator(columns: &dyn IColumns) -> Option<&dyn IColumnViewportEstimator> {
-    columns.as_any().downcast_ref::<ColumnListBase>().map(|columns| columns as &dyn IColumnViewportEstimator)
+    columns.as_viewport_estimator()
 }

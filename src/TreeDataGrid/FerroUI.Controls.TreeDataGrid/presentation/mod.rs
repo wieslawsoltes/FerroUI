@@ -31,7 +31,7 @@ mod tree_data_grid_rows;
 pub use cell_binding::{check_box_conversion, untyped_conversion, CellValueConversion, CoreCellBinding};
 pub use cell_column::{CoreCheckBoxColumn, CoreTextColumn};
 pub use cell_column_base::CellColumnBase;
-pub(crate) use cell_column_base::{are_close, is_zero};
+pub(crate) use cell_column_base::is_zero;
 pub use cell_column_factory::CellColumnFactory;
 pub use cell_column_options::CellColumnOptions;
 pub use cell_model_pool::CellModelPool;

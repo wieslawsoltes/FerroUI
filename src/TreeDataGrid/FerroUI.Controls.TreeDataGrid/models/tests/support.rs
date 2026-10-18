@@ -1,20 +1,13 @@
-//! The helpers of the model tests: the reference's `LayoutTestColumn.cs` and `LayoutTestCell.cs`,
-//! the models of the tests, a stand-in of `BehaviorSubject<BindingValue<T>>` and a deterministic
-//! random number generator (the reference's `System.Random` with a seed).
+//! The helpers of the model tests: the models of the tests, a stand-in of
+//! `BehaviorSubject<BindingValue<T>>` and a deterministic random number generator (the
+//! reference's `System.Random` with a seed).
 
-use crate::models::column_base::impl_view_column_base;
-use crate::models::{
-    CellRef, ColumnBase, ColumnOptions, ICellBinding, ICellColumn, IColumnOptions, TextCell, TextColumn,
-};
+use crate::models::{ICellBinding, TextColumn};
 use ferroui_base::utilities::HandlerList;
-use ferroui_base::BoxedValue;
 use ferroui_controls::{GridLength, GridUnitType};
-use ferroui_treedatagrid_core::accessor::TreeModel;
-use ferroui_treedatagrid_core::models::{ColumnKind, Comparison, IColumnOf, IValueColumn, ListSortDirection, RowRef};
 use ferroui_treedatagrid_core::Accessor;
-use std::any::Any;
 use std::cell::{Cell, RefCell};
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
 
 /// The model of the column tests: a name and a country.
 #[derive(Default)]
@@ -65,76 +58,6 @@ pub(crate) fn pixels(value: f64) -> GridLength {
 /// A length in stars.
 pub(crate) fn stars(value: f64) -> GridLength {
     GridLength::new(value, GridUnitType::Star)
-}
-
-/// `LayoutTestCell`: a read-only text cell of a constant text.
-pub(crate) fn layout_test_cell(value: String) -> CellRef {
-    TextCell::from_value(Some(value))
-}
-
-/// `LayoutTestColumn<TModel>`: a column of the layout tests whose cells show the header and the
-/// row's index, with a minimum width of 0 by default.
-pub(crate) struct LayoutTestColumn<M: TreeModel> {
-    weak_self: Weak<Self>,
-    base: ColumnBase<M>,
-}
-
-impl<M: TreeModel> LayoutTestColumn<M> {
-    pub fn new(header: &str, width: Option<GridLength>, options: Option<Rc<ColumnOptions<M>>>) -> Rc<Self> {
-        let options: Rc<dyn IColumnOptions<M>> = options.unwrap_or_else(|| {
-            let options = ColumnOptions::default();
-            options.set_min_width(GridLength::new(0.0, GridUnitType::Pixel));
-            Rc::new(options)
-        });
-        let header = Some(Rc::new(header.to_string()) as BoxedValue);
-        Rc::new_cyclic(|weak_self| Self { weak_self: weak_self.clone(), base: ColumnBase::new(header, width, options) })
-    }
-}
-
-impl_view_column_base!(impl[M: TreeModel] LayoutTestColumn<M>, model M);
-
-impl<M: TreeModel> ICellColumn for LayoutTestColumn<M> {
-    fn create_cell(&self, row: &RowRef) -> CellRef {
-        let indexable = row.as_model_indexable().expect("a row of an indexed source");
-        let header = self.base.header().as_ref().and_then(|h| h.downcast_ref::<String>().cloned()).unwrap_or_default();
-        layout_test_cell(format!("{header} Row {}", indexable.model_index()))
-    }
-}
-
-impl<M: TreeModel> IColumnOf<M> for LayoutTestColumn<M> {
-    fn get_comparison(&self, _direction: ListSortDirection) -> Option<Comparison<M>> {
-        panic!("The method or operation is not implemented.");
-    }
-
-    fn kind(&self) -> ColumnKind<'_, M> {
-        ColumnKind::Value(self)
-    }
-}
-
-impl<M: TreeModel> IValueColumn<M> for LayoutTestColumn<M> {
-    fn get_boxed_value(&self, _model: &Rc<M>) -> Option<BoxedValue> {
-        None
-    }
-
-    fn set_boxed_value(&self, _model: &Rc<M>, _value: Option<&BoxedValue>) -> bool {
-        false
-    }
-
-    fn can_set(&self) -> bool {
-        false
-    }
-
-    fn property_name(&self) -> Option<&'static str> {
-        None
-    }
-
-    fn value_type_name(&self) -> &'static str {
-        std::any::type_name::<String>()
-    }
-
-    fn as_value_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// `BehaviorSubject<BindingValue<T>>`: a binding that holds a value, pushes it to each new

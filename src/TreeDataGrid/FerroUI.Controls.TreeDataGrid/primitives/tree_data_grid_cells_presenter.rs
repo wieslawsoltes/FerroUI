@@ -223,20 +223,20 @@ impl TreeDataGridPresenterHooks for TreeDataGridCellsPresenter {
 
     fn unrealize_element(&self, element: &Ref<Control>) {
         let cell = element.cast::<TreeDataGridCell>().expect("an element of the cells presenter is a cell");
-        let model = cell.model().expect("a realized cell has a model");
+        // A cell whose rebind failed has no model: there is nothing to pool or dispose.
+        let model = cell.model();
         let column_index = cell.column_index();
         let row_index = cell.row_index();
         let column = cell.recycling_column();
         cell.unrealize();
 
-        let rows = self.rows();
-        let recycled = match (&rows, &column) {
-            (Some(rows), Some(column)) if self.row_index.get() >= 0 => rows.try_recycle_cell(column, &model),
-            _ => false,
-        };
+        if let (Some(rows), Some(model)) = (self.rows(), model) {
+            let recycled = match &column {
+                Some(column) if self.row_index.get() >= 0 => rows.try_recycle_cell(column, &model),
+                _ => false,
+            };
 
-        if !recycled {
-            if let Some(rows) = &rows {
+            if !recycled {
                 rows.unrealize_cell(&model, column_index, row_index);
             }
         }
@@ -592,7 +592,7 @@ impl TreeDataGridCellsPresenter {
             let column_index = first_index + i as i32;
             let old_column_index = cell.column_index();
             let old_row_index = cell.row_index();
-            let mut model = cell.model().expect("a realized cell has a model");
+            let model = cell.model();
             let column = items.get(column_index as usize);
 
             let rebind = RebindScope { cell: &cell, realized: Cell::new(false) };
@@ -602,12 +602,18 @@ impl TreeDataGridCellsPresenter {
             self.raise_child_index_changed(element.as_ref().expect("a cell"), cell.row_index());
 
             let selection = self.get_selection();
-            if Self::try_reuse_cell(&*rows, &column, &model, row_index) {
-                cell.realize(&factory, selection.as_deref(), &model, column_index, row_index);
-            } else {
-                rows.unrealize_cell(&model, old_column_index, old_row_index);
-                model = rows.realize_cell(&column, column_index, row_index);
-                cell.realize(&factory, selection.as_deref(), &model, column_index, row_index);
+            // A cell whose earlier rebind failed has no model to reuse or dispose.
+            match model {
+                Some(model) if Self::try_reuse_cell(&*rows, &column, &model, row_index) => {
+                    cell.realize(&factory, selection.as_deref(), &model, column_index, row_index);
+                }
+                model => {
+                    if let Some(model) = &model {
+                        rows.unrealize_cell(model, old_column_index, old_row_index);
+                    }
+                    let model = rows.realize_cell(&column, column_index, row_index);
+                    cell.realize(&factory, selection.as_deref(), &model, column_index, row_index);
+                }
             }
 
             rebind.realized.set(true);

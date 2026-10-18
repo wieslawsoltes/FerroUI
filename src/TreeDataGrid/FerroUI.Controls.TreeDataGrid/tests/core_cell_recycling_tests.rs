@@ -7,7 +7,7 @@ use super::support::{
     observable, presentation_of, run_jobs, source_ref, start_app, test_window, tree_data_grid_row_style,
     tree_data_grid_template, TestNotifier,
 };
-use crate::models::{CellRef, CheckBoxCell, ICell, IColumns, ITextCell, ITreeDataGridRows};
+use crate::models::{CellRef, CheckBoxCell};
 use crate::presentation::{CellModelPool, TreeDataGridPresentation, TreeDataGridSourcePresentation};
 use crate::primitives::{TreeDataGridCell, TreeDataGridRow};
 use crate::TreeDataGrid;
@@ -15,7 +15,7 @@ use ferroui_base::data::model::{Event, INotifyPropertyChanged, Model};
 use ferroui_base::layout::Layoutable;
 use ferroui_base::styling::{Selectors, Setter, Style};
 use ferroui_base::{ferro_model, BoxedValue, Size, Vector};
-use ferroui_treedatagrid_core::models::{self as core_models, ColumnRef as CoreColumnRef, IColumn as CoreColumn};
+use ferroui_treedatagrid_core::models::{self as core_models, ColumnRef as CoreColumnRef};
 use ferroui_treedatagrid_core::{Accessor, FlatTreeDataGridSource, GridLength as CoreGridLength, ITreeDataGridSource, Models};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};

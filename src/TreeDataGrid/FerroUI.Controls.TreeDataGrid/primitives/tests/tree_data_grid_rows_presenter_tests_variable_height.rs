@@ -1,7 +1,6 @@
 //! `TreeDataGridRowsPresenterTests_VariableHeight.cs`.
 //!
-//! The random heights of the reference come from `new Random(0)`; the port's fixed sequence is
-//! another, and the tests depend only on the heights being varied, between 10 and 99.
+//! The random heights are the reference's: those of `new Random(0)`, between 10 and 99.
 
 use super::support::{
     has_logical_child, has_visual_child, layout, model_of, rows_of, run_jobs, same_model, scroll_viewer, start_app,

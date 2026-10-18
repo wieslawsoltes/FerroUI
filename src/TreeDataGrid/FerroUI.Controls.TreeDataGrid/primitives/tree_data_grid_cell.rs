@@ -4,7 +4,7 @@
 //! The edits are those of the cell model (`IEditableObject`, [`ICell::as_editable`]).
 
 use super::{INaturalWidthMeasureCache, ITreeDataGridCell, TreeDataGridElementFactory, TreeDataGridRow};
-use crate::models::{BeginEditGestures, CellRef, ColumnRef, ICell};
+use crate::models::{BeginEditGestures, CellRef, ColumnRef};
 use crate::selection::ITreeDataGridSelectionInteraction;
 use crate::TreeDataGrid;
 use ferroui_base::input::{

@@ -7,13 +7,12 @@ use super::support::{
     source_ref, start_app, test_element_factory, test_window, tree_data_grid_row_style, tree_data_grid_template,
     LayoutTestCell, LayoutTestCellControl,
 };
-use crate::models::{CellRef, ColumnRef, ICellColumn, IColumn, IColumns, IUpdateColumnLayout};
+use crate::models::{CellRef, ColumnRef, ICellColumn, IColumn, IUpdateColumnLayout};
 use crate::presentation::{
     CellColumnBase, CellColumnOptions, ITreeDataGridPresentationOptions, TreeDataGridPresentation,
     TreeDataGridPresentationOptions, TreeDataGridSourcePresentation,
 };
 use crate::primitives::TreeDataGridCell;
-use crate::selection::ITreeDataGridSelectionInteraction;
 use crate::{TreeDataGrid, TreeDataGridSelectionMode};
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::model::{Event, INotifyPropertyChanged};

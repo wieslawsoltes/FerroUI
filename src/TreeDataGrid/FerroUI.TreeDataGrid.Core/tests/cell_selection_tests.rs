@@ -3,7 +3,7 @@
 use super::support::{array, header, single};
 use crate::accessor::Accessor;
 use crate::model_collection::{observable, Models};
-use crate::models::{ColumnRef, HierarchicalExpanderColumn, IColumn, ListSortDirection, TextColumn};
+use crate::models::{ColumnRef, HierarchicalExpanderColumn, ListSortDirection, TextColumn};
 use crate::selection::{ITreeDataGridSelection, TreeDataGridCellSelectionChangedEventArgs, TreeDataGridCellSelectionModel};
 use crate::{
     index_path, CellIndex, FlatTreeDataGridSource, HierarchicalTreeDataGridSource, ITreeDataGridSource, ITreeDataGridSourceOf,

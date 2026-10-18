@@ -838,6 +838,10 @@ impl IColumns for ColumnListBase {
         Some(self)
     }
 
+    fn as_viewport_estimator(&self) -> Option<&dyn IColumnViewportEstimator> {
+        Some(self)
+    }
+
     fn as_any(&self) -> &dyn Any {
         self
     }

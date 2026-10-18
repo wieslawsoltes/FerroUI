@@ -13,7 +13,7 @@ use super::support::{
 };
 use crate::automation::peers::{TreeDataGridAutomationPeer, TreeDataGridRowAutomationPeer};
 use crate::models::{
-    CellRef, CheckBoxCell, ColumnRef, ICell, ICellColumn, IColumn, IColumns, ITreeDataGridRows, IUpdateColumnLayout,
+    CellRef, CheckBoxCell, ColumnRef, ICellColumn, IColumn, IUpdateColumnLayout,
     TemplateColumn,
 };
 use crate::presentation::{
@@ -21,7 +21,6 @@ use crate::presentation::{
     TreeDataGridPresentation, TreeDataGridPresentationOptions, TreeDataGridSourcePresentation,
 };
 use crate::primitives::TreeDataGridCell;
-use crate::selection::ITreeDataGridSelectionInteraction;
 use crate::{TreeDataGrid, TreeDataGridRowDropPosition, TreeDataGridSelectionMode};
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::model::{Event, INotifyPropertyChanged, Model};
@@ -32,7 +31,7 @@ use ferroui_base::{ferro_model, BoxedValue, Vector};
 use ferroui_controls::templates::{FuncDataTemplate, IDataTemplate};
 use ferroui_controls::{Control, GridLength, TextBlock};
 use ferroui_treedatagrid_core::models::{
-    self as core_models, ColumnList, ColumnRef as CoreColumnRef, IColumn as CoreColumn, IExpander, IRows,
+    self as core_models, ColumnList, ColumnRef as CoreColumnRef, IColumn as CoreColumn, IRows,
     ListSortDirection, RowRef, RowsChangedArgs, ValueColumn,
 };
 use ferroui_treedatagrid_core::selection::{IReadOnlyList, ITreeDataGridSelection, UntypedModels};

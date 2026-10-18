@@ -17,7 +17,6 @@ use ferroui_base::data::{
     CompiledBindingPath, CompiledBindingPathElementKind, MultiBinding, ReflectionBinding,
 };
 use ferroui_markup_xaml::markup_extensions::{CompiledBindingExtension, ReflectionBindingExtension};
-use ferroui_base::reactive::IDisposable;
 use ferroui_base::{BoxedValue, Ref};
 use std::cell::Cell;
 use std::rc::Rc;

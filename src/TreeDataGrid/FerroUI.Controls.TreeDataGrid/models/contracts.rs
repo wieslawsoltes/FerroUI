@@ -211,6 +211,11 @@ pub trait IColumns {
     fn as_layout_batch(&self) -> Option<&dyn IColumnLayoutBatch> {
         None
     }
+    /// The viewport estimation of the columns, if they estimate the widths of the columns not
+    /// realized (`IColumnViewportEstimator`).
+    fn as_viewport_estimator(&self) -> Option<&dyn super::IColumnViewportEstimator> {
+        None
+    }
     fn as_any(&self) -> &dyn Any;
 }
 

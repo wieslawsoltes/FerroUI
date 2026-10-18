@@ -12,11 +12,10 @@
 
 use super::support::{model_of, observable, run_jobs, start_app, tree_data_grid_row_style, tree_data_grid_with_template, visual_children_of};
 use crate::models::{
-    CheckBoxCell, CheckBoxColumn, ICell, ICellColumn, IColumns, IExpanderCellPresentation, ITextCell, ITreeDataGridRows,
+    CheckBoxCell, CheckBoxColumn, IColumns, IExpanderCellPresentation, ITreeDataGridRows,
     TextColumn,
 };
 use crate::primitives::{TreeDataGridCell, TreeDataGridRow};
-use crate::selection::IUntypedCellSelection;
 use crate::{
     HierarchicalTreeDataGridSourceExtensions, TreeDataGrid, TreeDataGridCheckBoxColumn, TreeDataGridColumn,
     TreeDataGridHierarchicalExpanderColumn, TreeDataGridSelectionChangedEventArgs, TreeDataGridSelectionMode,
@@ -36,7 +35,7 @@ use ferroui_treedatagrid_core::models::{
     AnonymousRow, ColumnList, ColumnRef as CoreColumnRef, IColumn as CoreColumn, IRows, ListSortDirection, RowRef,
     TextColumn as NeutralTextColumn, ValueColumn,
 };
-use ferroui_treedatagrid_core::selection::{ITreeDataGridSelection, ITreeSelectionModel, UntypedModels};
+use ferroui_treedatagrid_core::selection::{ITreeDataGridSelection, UntypedModels};
 use ferroui_treedatagrid_core::{
     Accessor, CellIndex, FlatTreeDataGridSource, HierarchicalTreeDataGridSource, ITreeDataGridSource,
     ITreeDataGridSourceOf, IndexPath, Models, RowDropPosition, RowMoveEffects,

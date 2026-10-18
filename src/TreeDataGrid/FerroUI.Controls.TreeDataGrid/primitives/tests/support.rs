@@ -740,19 +740,78 @@ pub fn realized_rows(elements: &[Option<Ref<Control>>]) -> Vec<Ref<TreeDataGridR
     elements.iter().flatten().map(|element| element.cast::<TreeDataGridRow>().expect("a row")).collect()
 }
 
-/// A pseudo-random sequence, the stand-in of the reference's `new Random(0)`: the tests only need a
-/// fixed sequence of numbers in a range.
-pub struct TestRandom(u64);
+/// The sequence of the reference's `new Random(seed)`: the subtractive generator that a seeded
+/// `System.Random` keeps for compatibility, so the tests see the reference's numbers.
+pub struct TestRandom {
+    seeds: [i32; 56],
+    next: usize,
+    next_p: usize,
+}
 
 impl TestRandom {
-    pub fn new(seed: u64) -> Self {
-        Self(seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407))
+    const MBIG: i32 = i32::MAX;
+    const MSEED: i32 = 161_803_398;
+
+    pub fn new(seed: i32) -> Self {
+        let mut seeds = [0i32; 56];
+        let subtraction = if seed == i32::MIN { i32::MAX } else { seed.abs() };
+        let mut mj = Self::MSEED - subtraction;
+        seeds[55] = mj;
+        let mut mk = 1i32;
+        let mut ii = 0usize;
+        for _ in 1..55 {
+            ii += 21;
+            if ii >= 55 {
+                ii -= 55;
+            }
+            seeds[ii] = mk;
+            mk = mj - mk;
+            if mk < 0 {
+                mk += Self::MBIG;
+            }
+            mj = seeds[ii];
+        }
+        for _ in 1..5 {
+            for i in 1..56 {
+                let mut n = i + 30;
+                if n >= 55 {
+                    n -= 55;
+                }
+                seeds[i] = seeds[i].wrapping_sub(seeds[1 + n]);
+                if seeds[i] < 0 {
+                    seeds[i] += Self::MBIG;
+                }
+            }
+        }
+        Self { seeds, next: 0, next_p: 21 }
     }
 
-    /// A number in `0..max`.
+    fn internal_sample(&mut self) -> i32 {
+        let mut next = self.next + 1;
+        if next >= 56 {
+            next = 1;
+        }
+        let mut next_p = self.next_p + 1;
+        if next_p >= 56 {
+            next_p = 1;
+        }
+        let mut value = self.seeds[next] - self.seeds[next_p];
+        if value == Self::MBIG {
+            value -= 1;
+        }
+        if value < 0 {
+            value += Self::MBIG;
+        }
+        self.seeds[next] = value;
+        self.next = next;
+        self.next_p = next_p;
+        value
+    }
+
+    /// A number in `0..max` (`Next(maxValue)`).
     pub fn next(&mut self, max: u32) -> u32 {
-        self.0 = self.0.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
-        ((self.0 >> 33) % u64::from(max)) as u32
+        let sample = f64::from(self.internal_sample()) * (1.0 / f64::from(Self::MBIG));
+        (sample * f64::from(max)) as u32
     }
 }
 

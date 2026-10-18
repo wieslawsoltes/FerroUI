@@ -12,22 +12,6 @@ use ferroui_base::platform::register_assets;
 
 include!(concat!(env!("OUT_DIR"), "/assets.rs"));
 
-/// The content of the embedded asset with the rooted asset path `path`.
-#[cfg(test)]
-pub(crate) fn asset(path: &str) -> Option<&'static [u8]> {
-    ASSETS.iter().find(|(asset_path, _)| *asset_path == path).map(|(_, content)| *content)
-}
-
-/// The theme documents as the compiler takes them: the path below the root URI of the
-/// assembly and the text.
-#[cfg(test)]
-pub(crate) fn documents() -> Vec<(&'static str, &'static str)> {
-    ASSETS
-        .iter()
-        .map(|(path, content)| (path.trim_start_matches('/'), std::str::from_utf8(content).expect("a theme document is text")))
-        .collect()
-}
-
 /// Registers the embedded assets with the asset loader under the name of
 /// the assembly of the crate.
 pub(crate) fn register() {

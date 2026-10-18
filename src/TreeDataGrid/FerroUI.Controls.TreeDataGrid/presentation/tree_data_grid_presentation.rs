@@ -22,7 +22,7 @@ use ferroui_controls::GridLength;
 use ferroui_treedatagrid_core::accessor::TreeModel;
 use ferroui_treedatagrid_core::models::{IColumn as CoreColumn, ListSortDirection, NotifyingBase};
 use ferroui_treedatagrid_core::selection::{
-    IReadOnlyList, ITreeDataGridSelection, ITreeSelectionModel, TreeSelectionModelSelectionChangedEventArgs,
+    ITreeDataGridSelection, ITreeSelectionModel, TreeSelectionModelSelectionChangedEventArgs,
 };
 use ferroui_treedatagrid_core::{CellIndex, ITreeDataGridSource, ITreeDataGridSourceOf, IndexPath, RowMoveEffects};
 use std::any::Any;
@@ -981,6 +981,10 @@ impl IColumns for PresentationColumns {
     }
 
     fn as_layout_batch(&self) -> Option<&dyn IColumnLayoutBatch> {
+        Some(&*self.list)
+    }
+
+    fn as_viewport_estimator(&self) -> Option<&dyn crate::models::IColumnViewportEstimator> {
         Some(&*self.list)
     }
 

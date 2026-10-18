@@ -10,7 +10,7 @@
 
 use super::support::{assert_panics, presentation_of, start_app, ListDebug, TestNotifier};
 use crate::models::{
-    CellRef, ColumnRef, HierarchicalExpanderColumn, ICellColumn, IColumn, IColumns, ITreeDataGridRows, IUpdateColumnLayout,
+    CellRef, ColumnRef, HierarchicalExpanderColumn, ICellColumn, IColumn, ITreeDataGridRows, IUpdateColumnLayout,
     IViewColumn, ShowExpanderObservable, TextColumn,
 };
 use crate::presentation::{
@@ -23,7 +23,7 @@ use ferroui_base::{ferro_model, BoxedValue};
 use ferroui_controls::GridLength;
 use ferroui_treedatagrid_core::models::{
     self as core_models, ColumnKind, ColumnRef as CoreColumnRef, Comparison, IColumn as CoreColumn, IColumnOf,
-    IExpander, IUntypedValueColumn, ListSortDirection, RowRef, ValueColumn,
+    IUntypedValueColumn, ListSortDirection, RowRef, ValueColumn,
 };
 use ferroui_treedatagrid_core::{
     Accessor, FlatTreeDataGridSource, GridLength as CoreGridLength, HierarchicalTreeDataGridSource, ITreeDataGridSource,
