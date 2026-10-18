@@ -822,6 +822,19 @@ impl FerroObject {
         })
     }
 
+    /// Subscribes `handler` to property changes on this object and returns
+    /// the token that [`remove_property_changed_handler`](Self::remove_property_changed_handler)
+    /// takes: [`property_changed`](Self::property_changed) for a subscriber
+    /// that keeps the object and the token itself, so that no handle is made.
+    pub fn add_property_changed_handler(&self, handler: Rc<dyn Fn(&FerroPropertyChangedEventArgs<'_>)>) -> u64 {
+        self.property_changed.add(handler)
+    }
+
+    /// Ends a subscription of [`add_property_changed_handler`](Self::add_property_changed_handler).
+    pub fn remove_property_changed_handler(&self, token: u64) -> bool {
+        self.property_changed.remove(token)
+    }
+
     /// The number of subscribers to property changes on this object (a
     /// diagnostics member, used by tests to verify that subscriptions are
     /// released).

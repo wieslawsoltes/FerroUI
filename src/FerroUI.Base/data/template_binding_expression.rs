@@ -6,10 +6,9 @@ use crate::data::core::{
 };
 use crate::data::{BindingMode, BindingOperations, BindingPriority};
 use crate::logging::LogEventLevel;
-use crate::reactive::IDisposable;
 use crate::utilities::CultureInfo;
-use crate::{BoxedValue, FerroObject, FerroProperty, Ref, StyledElement};
-use std::cell::{Cell, RefCell};
+use crate::{BoxedValue, FerroObject, FerroPropertyChangedEventArgs, FerroProperty, Ref, StyledElement, WeakRef};
+use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::{Rc, Weak};
 
 /// A binding expression that reads a property of the templated parent of
@@ -23,8 +22,26 @@ pub struct TemplateBindingExpression {
     mode: BindingMode,
     property: Option<&'static FerroProperty>,
     has_published_value: Cell<bool>,
-    target_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    parent_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    target_subscription: RefCell<Option<Subscription>>,
+    parent_subscription: RefCell<Option<Subscription>>,
+    /// The handlers of the property changes of the target and of the templated parent, made
+    /// once and added again at every subscription.
+    target_handler: OnceCell<Rc<dyn Fn(&FerroPropertyChangedEventArgs<'_>)>>,
+    parent_handler: OnceCell<Rc<dyn Fn(&FerroPropertyChangedEventArgs<'_>)>>,
+}
+
+/// A subscription to the property changes of an object.
+struct Subscription {
+    object: WeakRef<FerroObject>,
+    token: u64,
+}
+
+impl Subscription {
+    fn dispose(self) {
+        if let Some(object) = self.object.upgrade() {
+            object.remove_property_changed_handler(self.token);
+        }
+    }
 }
 
 impl TemplateBindingExpression {
@@ -47,6 +64,8 @@ impl TemplateBindingExpression {
             has_published_value: Cell::new(false),
             target_subscription: RefCell::new(None),
             parent_subscription: RefCell::new(None),
+            target_handler: OnceCell::new(),
+            parent_handler: OnceCell::new(),
         })
     }
 
@@ -124,16 +143,19 @@ impl TemplateBindingExpression {
     fn on_templated_parent_changed(&self) {
         self.unsubscribe_parent();
         if let Some(templated_parent) = self.try_get_templated_parent() {
-            let weak = self.this.clone();
-            let id = self.property.map(FerroProperty::id);
-            let subscription = templated_parent.property_changed(move |e| {
-                if Some(e.property().id()) == id {
-                    if let Some(this) = weak.upgrade() {
-                        this.publish();
+            let handler = self.parent_handler.get_or_init(|| {
+                let weak = self.this.clone();
+                let id = self.property.map(FerroProperty::id);
+                Rc::new(move |e: &FerroPropertyChangedEventArgs<'_>| {
+                    if Some(e.property().id()) == id {
+                        if let Some(this) = weak.upgrade() {
+                            this.publish();
+                        }
                     }
-                }
+                })
             });
-            self.parent_subscription.replace(Some(subscription));
+            let token = templated_parent.add_property_changed_handler(handler.clone());
+            self.parent_subscription.replace(Some(Subscription { object: templated_parent.downgrade(), token }));
         }
         self.publish();
     }
@@ -164,13 +186,16 @@ impl UntypedBindingExpression for TemplateBindingExpression {
         self.has_published_value.set(false);
         self.on_templated_parent_changed();
         if let Some(target) = self.base.try_get_target() {
-            let weak = self.this.clone();
-            let subscription = target.property_changed(move |e| {
-                if let Some(this) = weak.upgrade() {
-                    this.on_target_property_changed(e.property().id());
-                }
+            let handler = self.target_handler.get_or_init(|| {
+                let weak = self.this.clone();
+                Rc::new(move |e: &FerroPropertyChangedEventArgs<'_>| {
+                    if let Some(this) = weak.upgrade() {
+                        this.on_target_property_changed(e.property().id());
+                    }
+                })
             });
-            self.target_subscription.replace(Some(subscription));
+            let token = target.add_property_changed_handler(handler.clone());
+            self.target_subscription.replace(Some(Subscription { object: target.downgrade(), token }));
         }
     }
 
