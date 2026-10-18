@@ -131,6 +131,7 @@ Two names are not under the `ferroui-` prefix. The owner decided on 2026-10-10 t
   | `winui-theme` | `ferroui-themes-winui` | `themes_winui` | no |
   | `xaml` | `ferroui-markup-xaml` and the run-time loader (`ferroui-markup-xaml-loader` with its feature `runtime`) | `markup_xaml`, `markup_xaml_loader` | no |
   | `color-picker`, `dialogs` | `ferroui-controls-color-picker`, `ferroui-dialogs` | `controls_color_picker`, `dialogs` | no |
+  | `treedatagrid` | `ferroui-controls-treedatagrid` and `ferroui-treedatagrid-core` (added for 0.2) | `controls_treedatagrid`, `treedatagrid_core` | no |
   | `browser` | `ferroui-browser`, with Skia and HarfBuzz | `browser`, `skia`, `harfbuzz` | no |
   | `vello`, `vello-hybrid`, `vello-gpu` | `ferroui-vello`; the second and third turn on its features `hybrid` and `gpu` | `vello` | no |
   | `headless` | `ferroui-headless` | `headless` | no |

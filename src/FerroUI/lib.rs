@@ -28,6 +28,7 @@
 //! | `themes_winui` | `ferroui-themes-winui` | `winui-theme` | no |
 //! | `markup_xaml`, `markup_xaml_loader` | `ferroui-markup-xaml`, `ferroui-markup-xaml-loader` (run-time loading) | `xaml` | no |
 //! | `controls_color_picker` | `ferroui-controls-color-picker` | `color-picker` | no |
+//! | `controls_treedatagrid`, `treedatagrid_core` | `ferroui-controls-treedatagrid`, `ferroui-treedatagrid-core` | `treedatagrid` | no |
 //! | `dialogs` | `ferroui-dialogs` | `dialogs` | no |
 //! | `browser`, `skia`, `harfbuzz` | `ferroui-browser` | `browser` | no |
 //! | `vello` | `ferroui-vello`; its GPU modes with `vello-hybrid` and `vello-gpu` | `vello` | no |
@@ -149,6 +150,10 @@ pub use ferroui_markup_xaml_loader as markup_xaml_loader;
 
 #[cfg(feature = "color-picker")]
 pub use ferroui_controls_color_picker as controls_color_picker;
+#[cfg(feature = "treedatagrid")]
+pub use ferroui_controls_treedatagrid as controls_treedatagrid;
+#[cfg(feature = "treedatagrid")]
+pub use ferroui_treedatagrid_core as treedatagrid_core;
 #[cfg(feature = "dialogs")]
 pub use ferroui_dialogs as dialogs;
 

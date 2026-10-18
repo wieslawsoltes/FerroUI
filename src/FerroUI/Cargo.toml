@@ -30,6 +30,7 @@ winui-theme = ["dep:ferroui-themes-winui"]
 xaml = ["dep:ferroui-markup-xaml", "dep:ferroui-markup-xaml-loader"]
 # The libraries of controls beside the control set.
 color-picker = ["dep:ferroui-controls-color-picker"]
+treedatagrid = ["dep:ferroui-controls-treedatagrid", "dep:ferroui-treedatagrid-core"]
 dialogs = ["dep:ferroui-dialogs"]
 # The browser platform (wasm32-unknown-emscripten), with Skia and HarfBuzz as on the desktop.
 browser = ["dep:ferroui-browser", "dep:ferroui-skia", "dep:ferroui-harfbuzz"]
@@ -57,6 +58,8 @@ ferroui-themes-winui = { workspace = true, optional = true }
 ferroui-markup-xaml = { workspace = true, optional = true }
 ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["runtime"] }
 ferroui-controls-color-picker = { workspace = true, optional = true }
+ferroui-controls-treedatagrid = { workspace = true, optional = true }
+ferroui-treedatagrid-core = { workspace = true, optional = true }
 ferroui-dialogs = { workspace = true, optional = true }
 ferroui-browser = { workspace = true, optional = true }
 ferroui-vello = { workspace = true, optional = true }
@@ -83,7 +86,7 @@ required-features = ["desktop", "fluent"]
 # docs.rs documents the default features with the libraries that need no more than the host
 # (docs/release.md, section 7).
 [package.metadata.docs.rs]
-features = ["simple", "winui-theme", "xaml", "color-picker", "dialogs", "headless", "opengl", "metal", "vulkan"]
+features = ["simple", "winui-theme", "xaml", "color-picker", "treedatagrid", "dialogs", "headless", "opengl", "metal", "vulkan"]
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

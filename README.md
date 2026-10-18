@@ -89,7 +89,7 @@ ferroui-themes-fluent = "=0.1.0"
 
 The WinUI 3 theme is the crate `ferroui-themes-winui` (`WinUITheme`), used in place of `ferroui-themes-fluent` or beside it; the facade crate has it as the feature `winui-theme`.
 
-An application can also name one dependency instead: the facade crate `ferroui`. It re-exports the common crates under short names (`ferroui::base`, `ferroui::controls`, ...) with a prelude of the types of a minimal application; its default features are the desktop platforms and the Fluent theme, and further features add the Simple theme, XAML loading at run time, the colour picker, the dialogs, the browser platform, the WinUI 3 theme, the Vello backend, the headless platform and the graphics contracts ([docs/release.md](docs/release.md), section 2.1). In the repository it is used already: `cargo run -p ferroui --example hello`.
+An application can also name one dependency instead: the facade crate `ferroui`. It re-exports the common crates under short names (`ferroui::base`, `ferroui::controls`, ...) with a prelude of the types of a minimal application; its default features are the desktop platforms and the Fluent theme, and further features add the Simple theme, XAML loading at run time, the colour picker, the TreeDataGrid, the dialogs, the browser platform, the WinUI 3 theme, the Vello backend, the headless platform and the graphics contracts ([docs/release.md](docs/release.md), section 2.1). In the repository it is used already: `cargo run -p ferroui --example hello`.
 
 The crates of a release depend on one another at exactly its version, so name the same version for every FerroUI crate, as above. `0.1.0` follows four previews (`0.1.0-preview.1` to `0.1.0-preview.4`), pre-releases in the sense of semantic versioning, which Cargo selects only when they are named. The work towards the next minor version is published as previews of it (`0.2.0-preview.1`, ...), which may change any part of the public API. The release process is described in [docs/release.md](docs/release.md) and the changes of each release in [CHANGELOG.md](CHANGELOG.md).
 
@@ -197,6 +197,9 @@ cargo run -p ferroui-themes-simple --example themed_window
 
 # The ControlCatalog sample application
 cargo run -p control-catalog-desktop
+
+# The TreeDataGrid demo (its pages are also the page TreeDataGrid of the ControlCatalog)
+cargo run -p treedatagrid-demo
 
 # The gallery of the WinUI theme (its capture mode and its comparison with WinUI 3 on Windows:
 # docs/porting/winui-theme-gallery.md)
