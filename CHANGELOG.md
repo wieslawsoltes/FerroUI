@@ -4,6 +4,12 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
+### Added
+
+- **TreeDataGrid**: the port of TreeDataGrid (<https://github.com/wieslawsoltes/TreeDataGrid>) as two new crates. `ferroui-treedatagrid-core` is the framework-neutral data layer: flat and hierarchical sources, value, text, check box, template and hierarchical expander columns, sorting, expansion, filtering, row and cell selection. `ferroui-controls-treedatagrid` is the control: a virtualizing view of rows and columns with star and auto column layout, resizing and sorting from the headers, row and cell selection, editing, row drag and drop, automation peers, the Generic and Fluent themes, and declarative columns in markup (`<TreeDataGrid ItemsSource=".."><TreeDataGridTextColumn Binding=".." /></TreeDataGrid>`). The tests of the reference are ported (the 198 tests of the core and the 497 of the control pass), and `docs/porting/treedatagrid.md` describes the port.
+- **The TreeDataGrid demo** (`samples/TreeDataGridDemo`, `cargo run -p treedatagrid-demo`): every page of the reference demo (countries with filtering and editing, a file tree, people declared in markup, drag and drop, the articles of the day from Wikipedia, finding a displayed row, rows of different heights, template column reuse) and the core demo. The ControlCatalog shows the same pages in its new page TreeDataGrid of the section Collections & Data.
+- **The TreeDataGrid benchmarks** (`tests/FerroUI.TreeDataGrid.Benchmarks`): the benchmark suite of the reference on the harness of the workspace.
+
 ### Fixed
 
 - **Path icons of the WinUI 3 theme are scaled into their boxes again**: a style meant for the icons of menu items (`MenuItem > ^` in the control theme of `PathIcon`) matched every path icon, because the nesting selector stands for the whole selector of the theme and what precedes it is dropped (as upstream). Every path icon got the unscaled template, so the icons of the ControlCatalog (its navigation, the cards of its home page, the logo) were drawn at the size of their geometry and cut. The style is now `MenuItem > PathIcon`, a style of the theme.

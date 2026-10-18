@@ -69,8 +69,8 @@ The names follow the rules of the repository: no upstream framework name in code
 | T4 | done |
 | T5 | done |
 | T6 | done: the 497 tests of the control crate pass (`cargo test -p ferroui-controls-treedatagrid`): the reference's control tests and the port's own |
-| T7 | in progress: `samples/TreeDataGridDemo` (one crate: the library of models, view models and views, and the binary `treedatagrid-demo`) |
-| T8 | not started |
+| T7 | done: `samples/TreeDataGridDemo` (one crate: the library of models, view models and one view per page, and the binary `treedatagrid-demo`), every page of the reference demo and the core demo as the page "Core"; its 53 tests pass (the reference's demo tests, the generated document tests and a test that shows and draws every page); the ControlCatalog page TreeDataGrid shows the view of the tabs of the demo. The deviations are in `DEVIATIONS.md`, section TreeDataGrid |
+| T8 | in progress: `tests/FerroUI.TreeDataGrid.Benchmarks` ports every benchmark class of the reference |
 
 ## 6. Performance
 
