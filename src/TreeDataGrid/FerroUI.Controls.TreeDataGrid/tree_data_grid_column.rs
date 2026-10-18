@@ -205,6 +205,13 @@ impl PartialEq for dyn TreeDataGridColumn {
 
 macro_rules! deref_to_base {
     ($ty:ty) => {
+        // A column is an object with identity.
+        impl PartialEq for $ty {
+            fn eq(&self, other: &Self) -> bool {
+                std::ptr::eq(self, other)
+            }
+        }
+
         impl Deref for $ty {
             type Target = TreeDataGridColumnBase;
 

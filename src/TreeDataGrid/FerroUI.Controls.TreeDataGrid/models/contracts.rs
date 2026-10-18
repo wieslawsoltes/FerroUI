@@ -32,6 +32,25 @@ impl BeginEditGestures {
     pub fn has_flag(self, flag: BeginEditGestures) -> bool {
         self.0 & flag.0 == flag.0
     }
+
+    /// The gestures parsed from their markup form: flag names separated by commas (`"F2, Tap"`),
+    /// or a number.
+    pub fn parse(text: &str) -> Option<BeginEditGestures> {
+        let mut value = 0u32;
+        for part in text.split(',') {
+            let part = part.trim();
+            value |= match part {
+                p if p.eq_ignore_ascii_case("None") => Self::NONE.0,
+                p if p.eq_ignore_ascii_case("F2") => Self::F2.0,
+                p if p.eq_ignore_ascii_case("Tap") => Self::TAP.0,
+                p if p.eq_ignore_ascii_case("DoubleTap") => Self::DOUBLE_TAP.0,
+                p if p.eq_ignore_ascii_case("WhenSelected") => Self::WHEN_SELECTED.0,
+                p if p.eq_ignore_ascii_case("Default") => Self::DEFAULT.0,
+                p => p.parse::<u32>().ok()?,
+            };
+        }
+        Some(BeginEditGestures(value))
+    }
 }
 
 impl Default for BeginEditGestures {

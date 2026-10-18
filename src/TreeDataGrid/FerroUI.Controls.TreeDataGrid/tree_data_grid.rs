@@ -123,7 +123,36 @@ ferro_class! {
         fn create_default_element_factory(this) -> Rc<TreeDataGridElementFactory>;
     }
 }
-ferroui_base::ferro_class_info!(TreeDataGrid { new: TreeDataGrid::new });
+ferroui_base::ferro_class_info!(TreeDataGrid {
+    new: TreeDataGrid::new,
+    markup: {
+        namespace: "FerroUI.Controls",
+        // The declarative columns are the content of the grid (`[Content] ColumnDefinitions`).
+        content: ColumnDefinitions,
+        properties: [
+            ColumnDefinitions: crate::TreeDataGridColumns {
+                get: |this: &Ref<TreeDataGrid>| this.column_definitions().clone()
+            },
+        ],
+        fields: [
+            RowDragStartedEvent: RoutedEvent<crate::TreeDataGridRowDragStartedEventArgs> => || *TreeDataGrid::row_drag_started_event(),
+            RowDragOverEvent: RoutedEvent<crate::TreeDataGridRowDragEventArgs> => || *TreeDataGrid::row_drag_over_event(),
+            RowDropEvent: RoutedEvent<crate::TreeDataGridRowDragEventArgs> => || *TreeDataGrid::row_drop_event(),
+        ],
+        events: [
+            SelectionChanged(Option<ferroui_base::BoxedValue>, crate::TreeDataGridSelectionChangedEventArgs) =>
+                |this: &Ref<TreeDataGrid>, handler: ferroui_base::metadata::MarkupDelegate| {
+                    let sender = this.downgrade();
+                    this.selection_changed(move |e: &crate::TreeDataGridSelectionChangedEventArgs| {
+                        handler.invoke(&[
+                            ferroui_base::metadata::into_markup_value(sender.upgrade()),
+                            ferroui_base::metadata::into_markup_value(e.clone()),
+                        ]);
+                    })
+                },
+        ],
+    },
+});
 ferro_impl_classes!(TreeDataGrid: StyledElementImpl, LayoutableImpl, InteractiveImpl);
 
 ferro_properties! { impl TreeDataGrid {

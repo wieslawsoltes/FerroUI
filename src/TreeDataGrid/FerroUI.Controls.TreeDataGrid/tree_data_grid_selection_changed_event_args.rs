@@ -22,6 +22,16 @@ pub struct TreeDataGridSelectionChangedEventArgs {
     selected_cell_indexes: Rc<[CellIndex]>,
 }
 
+impl PartialEq for TreeDataGridSelectionChangedEventArgs {
+    /// Arguments are equal when they share their lists (the identity of event arguments).
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.selected_indexes, &other.selected_indexes)
+            && Rc::ptr_eq(&self.deselected_indexes, &other.deselected_indexes)
+            && Rc::ptr_eq(&self.selected_cell_indexes, &other.selected_cell_indexes)
+            && Rc::ptr_eq(&self.deselected_cell_indexes, &other.deselected_cell_indexes)
+    }
+}
+
 impl TreeDataGridSelectionChangedEventArgs {
     /// The arguments; a list that is `None` is empty.
     pub fn new(

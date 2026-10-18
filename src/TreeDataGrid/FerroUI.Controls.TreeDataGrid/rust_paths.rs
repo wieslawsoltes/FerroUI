@@ -24,8 +24,20 @@ ferroui_base::ferro_rust_paths! {
     ],
     types: [
         crate::converters::IndentConverter,
+        crate::models::BeginEditGestures,
+        crate::TreeDataGridCheckBoxColumn,
+        crate::TreeDataGridColumns,
+        crate::TreeDataGridHierarchicalExpanderColumn,
+        crate::TreeDataGridRowDragEventArgs,
+        crate::TreeDataGridRowDragStartedEventArgs,
+        crate::TreeDataGridRowHeaderColumn,
+        crate::TreeDataGridSelectionChangedEventArgs,
+        crate::TreeDataGridSelectionMode,
+        crate::TreeDataGridTemplateColumn,
+        crate::TreeDataGridTextColumn,
     ],
     contracts: [
+        crate::TreeDataGridColumn,
     ],
     generics: [
     ],
