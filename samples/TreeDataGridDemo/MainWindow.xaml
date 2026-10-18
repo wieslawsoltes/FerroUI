@@ -1,0 +1,17 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:TreeDataGridDemo.ViewModels"
+        xmlns:views="using:TreeDataGridDemo.Views"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="TreeDataGridDemo.MainWindow"
+        x:CompileBindings="True"
+        x:DataType="vm:MainWindowViewModel"
+        Title="TreeDataGridDemo">
+  <TabControl Name="tabs">
+    <TabItem Header="Countries" IsSelected="True">
+      <views:CountriesPage DataContext="{Binding Countries}"/>
+    </TabItem>
+  </TabControl>
+</Window>

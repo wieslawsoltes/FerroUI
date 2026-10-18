@@ -1,6 +1,7 @@
 //! The type table of this crate: its namespaces, its classes, what it states about itself for
 //! markup, its embedded assets and its compiled markup.
 
+use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{MarkupAssembly, XmlnsDefinition, FERRO_XML_NAMESPACE};
 use ferroui_base::{StaticType, TypeInfo};
 
@@ -71,8 +72,15 @@ pub fn register_types() {
         crate::rust_paths::register_rust_paths();
         MarkupAssembly::register(&ASSEMBLY);
         crate::markup_types::register();
+        ValueTypes::register_global(register_value_types);
         #[cfg(any(test, feature = "document-assets"))]
         crate::assets::register();
         crate::compiled_markup::register();
     });
+}
+
+/// What the untyped value conversions must know about the types of this crate: a source handle
+/// a view model exposes binds to the nullable `Source` of the control.
+fn register_value_types() {
+    ValueTypes::register_nullable::<crate::TreeDataGridSourceRef>();
 }

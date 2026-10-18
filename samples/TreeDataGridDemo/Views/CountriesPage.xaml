@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:m="using:TreeDataGridDemo.Models"
+             xmlns:vm="using:TreeDataGridDemo.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="TreeDataGridDemo.Views.CountriesPage"
+             x:DataType="vm:CountriesPageViewModel">
+  <DockPanel>
+    <TextBlock Classes="realized-count" DockPanel.Dock="Bottom"/>
+    <StackPanel DockPanel.Dock="Right" Spacing="4" Margin="4 0 0 0">
+      <CheckBox IsChecked="{Binding CellSelection}">Cell Selection</CheckBox>
+      <Label Target="countryFilterTextBox">_Filter</Label>
+      <TextBox Name="countryFilterTextBox"
+               PlaceholderText="Filter by country or region"
+               Text="{Binding FilterText}"/>
+      <Button Click="RefreshCountryFilterClick">Refresh Filter</Button>
+      <Button Click="ClearCountrySortClick">Clear Sort</Button>
+      <Label Target="countryTextBox">_Country</Label>
+      <TextBox Name="countryTextBox">Sealand</TextBox>
+      <Label Target="regionTextBox">_Region</Label>
+      <TextBox Name="regionTextBox">WESTERN EUROPE</TextBox>
+      <Label Target="populationTextBox">_Population</Label>
+      <TextBox Name="populationTextBox">2</TextBox>
+      <Label Target="areaTextBox">_Area</Label>
+      <TextBox Name="areaTextBox">0.004</TextBox>
+      <Label Target="gdpTextBox">_GDP</Label>
+      <TextBox Name="gdpTextBox">600000</TextBox>
+      <Button Click="AddCountryClick">Add</Button>
+      <Button Command="{Binding RemoveSelected}">Remove</Button>
+    </StackPanel>
+    <TreeDataGrid Name="countries"
+                  Source="{Binding Source}"
+                  AutoDragDropRows="True">
+      <TreeDataGrid.Resources>
+        <!-- Template for Region column cells -->
+        <DataTemplate x:Key="RegionCell" DataType="m:Country">
+          <TextBlock Text="{Binding Region}"/>
+        </DataTemplate>
+        <DataTemplate x:Key="RegionEditCell" DataType="m:Country">
+          <ComboBox ItemsSource="{x:Static m:Countries.Regions}"
+                    SelectedItem="{Binding Region}"/>
+        </DataTemplate>
+      </TreeDataGrid.Resources>
+      <TreeDataGrid.Styles>
+        <Style Selector="TreeDataGrid TreeDataGridRow:nth-last-child(2n)">
+          <Setter Property="Background" Value="#20808080"/>
+        </Style>
+        <Style Selector="TreeDataGrid :is(TreeDataGridCell):nth-last-child(1)">
+          <Setter Property="TextBlock.FontWeight" Value="Bold"/>
+        </Style>
+        <Style Selector="TreeDataGrid TreeDataGridColumnHeader:nth-last-child(1)">
+          <Setter Property="TextBlock.FontWeight" Value="Bold"/>
+        </Style>
+      </TreeDataGrid.Styles>
+    </TreeDataGrid>
+  </DockPanel>
+</UserControl>

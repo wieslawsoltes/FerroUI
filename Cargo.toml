@@ -63,6 +63,7 @@ members = [
     "samples/RenderDemo",
     "samples/BindingDemo",
     "samples/VirtualizationDemo",
+    "samples/TreeDataGridDemo",
     "samples/TextTestApp",
     "samples/Sandbox",
     "samples/AppWithoutLifetime",
