@@ -10,6 +10,13 @@
 
 mod creation;
 mod observable_ext;
+pub(crate) mod merge;
+pub(crate) mod concat;
+pub(crate) mod amb;
+pub(crate) mod switch;
+pub(crate) mod with_latest_from;
+pub(crate) mod buffer;
+pub(crate) mod window;
 pub(crate) mod delay;
 pub(crate) mod delay_subscription;
 pub(crate) mod time_interval_op;
@@ -82,6 +89,7 @@ pub use cast::{AnyObject, InvalidCastException};
 pub use creation::Observable;
 pub use dematerialize::NotificationValue;
 pub use element_at::ArgumentOutOfRangeError;
+pub use merge::ObservableSource;
 pub use timeout::TimeoutException;
 pub use to_lookup::{Grouping, Lookup};
 pub use observable_ext::ObservableExt;

@@ -70,6 +70,13 @@ pub trait ObservableExt<T: 'static> {
     super::observe_on::observe_on_methods!();
     super::subscribe_on::subscribe_on_methods!();
     super::synchronize::synchronize_methods!();
+    super::merge::merge_methods!();
+    super::concat::concat_methods!();
+    super::amb::amb_methods!();
+    super::switch::switch_methods!();
+    super::with_latest_from::with_latest_from_methods!();
+    super::buffer::buffer_methods!();
+    super::window::window_methods!();
 }
 
 impl<T: 'static> ObservableExt<T> for Rc<dyn IObservable<T>> {
