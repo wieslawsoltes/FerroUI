@@ -1,96 +1,14 @@
 //! `RetryWhen` (`Linq/Observable/RetryWhen.cs`), with the parts it shares with `RepeatWhen`: the
 //! serialized observer of the signals (`RedoSerializedObserver<X>`), the slot of the subscription
-//! to the source, and the half serializer of the notifications (`Internal/HalfSerializer.cs`).
+//! to the source.
 
 use crate::disposables::{Disposable, SingleAssignmentDisposable, SingleAssignmentDisposableValue};
-use crate::internal::Sink;
+use crate::internal::{HalfSerializedSink, HalfSerializer, Sink};
 use crate::subjects::Subject;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
 use std::rc::{Rc, Weak};
-
-/// The forwarding of a sink, which the half serializer calls (`ISink<TTarget>`).
-pub(crate) trait ForwardSink<T> {
-    fn forward_on_next(&self, value: T);
-    fn forward_on_error(&self, error: ObservableError);
-    fn forward_on_completed(&self);
-}
-
-/// The terminal state of a half serializer (`ref Exception? error`): `Terminated` is
-/// `ExceptionHelper.Terminated`.
-enum HalfTerminal {
-    None,
-    Error(ObservableError),
-    Terminated,
-}
-
-/// Serializes the values of one producer with the terminal notifications of others
-/// (`HalfSerializer`, with its `wip` and `error` fields): a terminal notification that arrives
-/// while a value is being forwarded is forwarded after it.
-pub(crate) struct HalfSerializer {
-    wip: Cell<usize>,
-    error: RefCell<HalfTerminal>,
-}
-
-impl HalfSerializer {
-    pub(crate) fn new() -> Self {
-        Self { wip: Cell::new(0), error: RefCell::new(HalfTerminal::None) }
-    }
-
-    /// `HalfSerializer.ForwardOnNext`.
-    pub(crate) fn forward_on_next<T>(&self, sink: &impl ForwardSink<T>, item: T) {
-        if self.wip.get() == 0 {
-            self.wip.set(1);
-            sink.forward_on_next(item);
-            let wip = self.wip.get() - 1;
-            self.wip.set(wip);
-            if wip != 0 {
-                let error = std::mem::replace(&mut *self.error.borrow_mut(), HalfTerminal::Terminated);
-                match error {
-                    HalfTerminal::Error(error) => sink.forward_on_error(error),
-                    _ => sink.forward_on_completed(),
-                }
-            }
-        }
-        // Upstream traces a warning for a value that arrives while another one is forwarded.
-    }
-
-    /// `HalfSerializer.ForwardOnError`.
-    pub(crate) fn forward_on_error<T>(&self, sink: &impl ForwardSink<T>, error: ObservableError) {
-        if !self.try_set_terminal(HalfTerminal::Error(error.clone())) {
-            return;
-        }
-        let wip = self.wip.get() + 1;
-        self.wip.set(wip);
-        if wip == 1 {
-            *self.error.borrow_mut() = HalfTerminal::Terminated;
-            sink.forward_on_error(error);
-        }
-    }
-
-    /// `HalfSerializer.ForwardOnCompleted`.
-    pub(crate) fn forward_on_completed<T>(&self, sink: &impl ForwardSink<T>) {
-        if !self.try_set_terminal(HalfTerminal::Terminated) {
-            return;
-        }
-        let wip = self.wip.get() + 1;
-        self.wip.set(wip);
-        if wip == 1 {
-            sink.forward_on_completed();
-        }
-    }
-
-    /// `ExceptionHelper.TrySetException`: sets the terminal state unless one is set.
-    fn try_set_terminal(&self, terminal: HalfTerminal) -> bool {
-        let mut error = self.error.borrow_mut();
-        if !matches!(*error, HalfTerminal::None) {
-            return false;
-        }
-        *error = terminal;
-        true
-    }
-}
 
 /// The terminal state of a [`RedoSerializedObserver`] (`_terminalException`): `Completed` is
 /// `ExceptionHelper.Terminated` and `Signaled` is `SignaledIndicator`.
@@ -327,11 +245,11 @@ impl<T: 'static> MainObserver<T> {
     }
 
     fn handler_error(&self, error: ObservableError) {
-        self.half_serializer.forward_on_error(self, error);
+        self.half_serializer.on_error(self, error);
     }
 
     fn handler_complete(&self) {
-        self.half_serializer.forward_on_completed(self);
+        self.half_serializer.on_completed(self);
     }
 
     /// Subscribes to the source again, through a trampoline (`HandlerNext`).
@@ -361,7 +279,7 @@ impl<T: 'static> MainObserver<T> {
     }
 }
 
-impl<T: 'static> ForwardSink<T> for MainObserver<T> {
+impl<T: 'static> HalfSerializedSink<T> for MainObserver<T> {
     fn forward_on_next(&self, value: T) {
         self.sink.forward_on_next(value);
     }
@@ -381,7 +299,7 @@ impl<T: 'static> ForwardSink<T> for MainObserver<T> {
 
 impl<T: 'static> IObserver<T> for MainObserver<T> {
     fn on_next(&self, value: T) {
-        self.half_serializer.forward_on_next(self, value);
+        self.half_serializer.on_next(self, value);
     }
 
     fn on_error(&self, error: ObservableError) {
@@ -391,7 +309,7 @@ impl<T: 'static> IObserver<T> for MainObserver<T> {
     }
 
     fn on_completed(&self) {
-        self.half_serializer.forward_on_completed(self);
+        self.half_serializer.on_completed(self);
     }
 }
 

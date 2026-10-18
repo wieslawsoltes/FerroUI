@@ -1,94 +1,16 @@
 //! `TakeUntil` (`Linq/Observable/TakeUntil.cs`, `Linq/Observable/TakeUntilPredicate.cs`,
-//! `Linq/Observable/TakeUntilCancellationToken.cs`), and the half serializer of the operators whose
-//! terminal notifications may come from a second source (`Internal/HalfSerializer.cs`).
+//! `Linq/Observable/TakeUntilCancellationToken.cs`).
 
 use crate::concurrency::{IScheduler, SchedulerExt};
 use crate::disposables::SingleAssignmentDisposableValue;
-use crate::internal::{impl_sink_dispose, subscribe_sink, unary, OperatorSink, Sink};
+use crate::internal::{impl_sink_dispose, subscribe_sink, unary, HalfSerializedSink, HalfSerializer, OperatorSink, Sink};
 use ferroui_system::threading::{CancellationToken, CancellationTokenRegistration};
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::SystemTime;
-
-/// The forwarding of a sink whose notifications go through a [`HalfSerializer`]
-/// (`ISink<TTarget>`): each terminal notification disposes the sink.
-pub(crate) trait SerializedSink {
-    /// The type of the values.
-    type Item;
-
-    fn forward_next(&self, value: Self::Item);
-    fn forward_error(&self, error: ObservableError);
-    fn forward_completed(&self);
-}
-
-/// The terminal state of a [`HalfSerializer`] (the `error` field of upstream: the error, or
-/// `ExceptionHelper.Terminated`).
-enum Terminal {
-    Error(ObservableError),
-    Terminated,
-}
-
-/// Serializes a sink's values with the terminal notifications that a second source may signal
-/// (`HalfSerializer`): a terminal notification that arrives while a value is being forwarded is
-/// forwarded once that value has been, and nothing is forwarded after a terminal notification.
-pub(crate) struct HalfSerializer {
-    wip: Cell<u32>,
-    error: RefCell<Option<Terminal>>,
-}
-
-impl HalfSerializer {
-    pub(crate) const fn new() -> Self {
-        Self { wip: Cell::new(0), error: RefCell::new(None) }
-    }
-
-    /// `HalfSerializer.ForwardOnNext`.
-    pub(crate) fn on_next<S: SerializedSink + ?Sized>(&self, sink: &S, value: S::Item) {
-        if self.wip.get() != 0 {
-            return;
-        }
-        self.wip.set(1);
-        sink.forward_next(value);
-        let wip = self.wip.get() - 1;
-        self.wip.set(wip);
-        if wip != 0 {
-            let terminal = self.error.replace(Some(Terminal::Terminated));
-            match terminal {
-                Some(Terminal::Error(error)) => sink.forward_error(error),
-                _ => sink.forward_completed(),
-            }
-        }
-    }
-
-    /// `HalfSerializer.ForwardOnError`.
-    pub(crate) fn on_error<S: SerializedSink + ?Sized>(&self, sink: &S, error: ObservableError) {
-        if self.error.borrow().is_some() {
-            return;
-        }
-        *self.error.borrow_mut() = Some(Terminal::Error(error.clone()));
-        let wip = self.wip.get() + 1;
-        self.wip.set(wip);
-        if wip == 1 {
-            *self.error.borrow_mut() = Some(Terminal::Terminated);
-            sink.forward_error(error);
-        }
-    }
-
-    /// `HalfSerializer.ForwardOnCompleted`.
-    pub(crate) fn on_completed<S: SerializedSink + ?Sized>(&self, sink: &S) {
-        if self.error.borrow().is_some() {
-            return;
-        }
-        *self.error.borrow_mut() = Some(Terminal::Terminated);
-        let wip = self.wip.get() + 1;
-        self.wip.set(wip);
-        if wip == 1 {
-            sink.forward_completed();
-        }
-    }
-}
 
 // ---------------------------------------------------------------------------------------------
 // TakeUntil(IObservable<TOther>)
@@ -110,20 +32,18 @@ impl<T: 'static> TakeUntilSink<T> {
     }
 }
 
-impl<T: 'static> SerializedSink for TakeUntilSink<T> {
-    type Item = T;
-
-    fn forward_next(&self, value: T) {
+impl<T: 'static> HalfSerializedSink<T> for TakeUntilSink<T> {
+    fn forward_on_next(&self, value: T) {
         self.sink.forward_on_next(value);
     }
 
-    fn forward_error(&self, error: ObservableError) {
+    fn forward_on_error(&self, error: ObservableError) {
         let observer = self.sink.observer();
         observer.on_error(error);
         self.dispose();
     }
 
-    fn forward_completed(&self) {
+    fn forward_on_completed(&self) {
         let observer = self.sink.observer();
         observer.on_completed();
         self.dispose();
@@ -210,20 +130,18 @@ struct TakeUntilTimeSink<T> {
     serializer: HalfSerializer,
 }
 
-impl<T: 'static> SerializedSink for TakeUntilTimeSink<T> {
-    type Item = T;
-
-    fn forward_next(&self, value: T) {
+impl<T: 'static> HalfSerializedSink<T> for TakeUntilTimeSink<T> {
+    fn forward_on_next(&self, value: T) {
         self.sink.forward_on_next(value);
     }
 
-    fn forward_error(&self, error: ObservableError) {
+    fn forward_on_error(&self, error: ObservableError) {
         let observer = self.sink.observer();
         observer.on_error(error);
         self.dispose();
     }
 
-    fn forward_completed(&self) {
+    fn forward_on_completed(&self) {
         let observer = self.sink.observer();
         observer.on_completed();
         self.dispose();
@@ -385,20 +303,18 @@ struct TakeUntilTokenSink<T> {
     serializer: HalfSerializer,
 }
 
-impl<T: 'static> SerializedSink for TakeUntilTokenSink<T> {
-    type Item = T;
-
-    fn forward_next(&self, value: T) {
+impl<T: 'static> HalfSerializedSink<T> for TakeUntilTokenSink<T> {
+    fn forward_on_next(&self, value: T) {
         self.sink.forward_on_next(value);
     }
 
-    fn forward_error(&self, error: ObservableError) {
+    fn forward_on_error(&self, error: ObservableError) {
         let observer = self.sink.observer();
         observer.on_error(error);
         self.dispose();
     }
 
-    fn forward_completed(&self) {
+    fn forward_on_completed(&self) {
         let observer = self.sink.observer();
         observer.on_completed();
         self.dispose();

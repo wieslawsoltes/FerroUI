@@ -1,11 +1,13 @@
 //! The internal machinery of the operators (`System.Reactive` `Internal/`).
 
+mod half_serializer;
 mod priority_queue;
 mod sink;
 
 mod operator;
 mod scheduled_observer;
 
+pub(crate) use half_serializer::{HalfSerializedSink, HalfSerializer};
 pub(crate) use operator::{impl_sink_dispose, unary, OperatorSink};
 pub(crate) use priority_queue::PriorityQueue;
 pub(crate) use scheduled_observer::{FastImmediateObserver, IScheduledObserver, ScheduledObserver};

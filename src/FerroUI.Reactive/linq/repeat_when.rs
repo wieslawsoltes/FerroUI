@@ -1,8 +1,8 @@
 //! `RepeatWhen` (`Linq/Observable/RepeatWhen.cs`).
 
 use crate::disposables::{Disposable, SingleAssignmentDisposable, SingleAssignmentDisposableValue};
-use crate::internal::Sink;
-use crate::linq::retry_when::{ForwardSink, HalfSerializer, RedoSerializedObserver, RedoUpstream};
+use crate::internal::{HalfSerializedSink, HalfSerializer, Sink};
+use crate::linq::retry_when::{RedoSerializedObserver, RedoUpstream};
 use crate::subjects::Subject;
 use crate::Unit;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
@@ -68,11 +68,11 @@ impl<T: 'static> MainObserver<T> {
     }
 
     fn handler_error(&self, error: ObservableError) {
-        self.half_serializer.forward_on_error(self, error);
+        self.half_serializer.on_error(self, error);
     }
 
     fn handler_complete(&self) {
-        self.half_serializer.forward_on_completed(self);
+        self.half_serializer.on_completed(self);
     }
 
     /// Subscribes to the source again, through a trampoline (`HandlerNext`).
@@ -102,7 +102,7 @@ impl<T: 'static> MainObserver<T> {
     }
 }
 
-impl<T: 'static> ForwardSink<T> for MainObserver<T> {
+impl<T: 'static> HalfSerializedSink<T> for MainObserver<T> {
     fn forward_on_next(&self, value: T) {
         self.sink.forward_on_next(value);
     }
@@ -122,11 +122,11 @@ impl<T: 'static> ForwardSink<T> for MainObserver<T> {
 
 impl<T: 'static> IObserver<T> for MainObserver<T> {
     fn on_next(&self, value: T) {
-        self.half_serializer.forward_on_next(self, value);
+        self.half_serializer.on_next(self, value);
     }
 
     fn on_error(&self, error: ObservableError) {
-        self.half_serializer.forward_on_error(self, error);
+        self.half_serializer.on_error(self, error);
     }
 
     fn on_completed(&self) {

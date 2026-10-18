@@ -2,8 +2,7 @@
 
 use crate::concurrency::{IScheduler, SchedulerExt};
 use crate::disposables::SingleAssignmentDisposableValue;
-use crate::internal::{subscribe_sink, Sink};
-use crate::linq::take_until::{HalfSerializer, SerializedSink};
+use crate::internal::{subscribe_sink, HalfSerializedSink, HalfSerializer, Sink};
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::Cell;
 use std::rc::Rc;
@@ -31,20 +30,18 @@ impl<T: 'static> SkipUntilSink<T> {
     }
 }
 
-impl<T: 'static> SerializedSink for SkipUntilSink<T> {
-    type Item = T;
-
-    fn forward_next(&self, value: T) {
+impl<T: 'static> HalfSerializedSink<T> for SkipUntilSink<T> {
+    fn forward_on_next(&self, value: T) {
         self.sink.forward_on_next(value);
     }
 
-    fn forward_error(&self, error: ObservableError) {
+    fn forward_on_error(&self, error: ObservableError) {
         let observer = self.sink.observer();
         observer.on_error(error);
         self.dispose();
     }
 
-    fn forward_completed(&self) {
+    fn forward_on_completed(&self) {
         let observer = self.sink.observer();
         observer.on_completed();
         self.dispose();
