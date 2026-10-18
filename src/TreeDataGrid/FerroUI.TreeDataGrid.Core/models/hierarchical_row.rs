@@ -176,6 +176,11 @@ impl<M: TreeModel> HierarchicalRow<M> {
         self.model_index_path.borrow().clone()
     }
 
+    /// Whether the model index path of the row is `path` (without cloning the path).
+    pub(crate) fn has_model_index_path(&self, path: &IndexPath) -> bool {
+        *self.model_index_path.borrow() == *path
+    }
+
     pub fn indent(&self) -> i32 {
         self.model_index_path.borrow().count() as i32 - 1
     }

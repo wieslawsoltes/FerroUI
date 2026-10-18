@@ -522,17 +522,9 @@ impl ColumnListBase {
 
         let ends = self.column_ends.borrow();
 
-        // Upper bound skips zero-width columns and preserves exclusive right edges.
-        let mut low = 0usize;
-        let mut high = ends.len();
-        while low < high {
-            let middle = low + ((high - low) / 2);
-            if ends[middle] <= x {
-                low = middle + 1;
-            } else {
-                high = middle;
-            }
-        }
+        // Upper bound skips zero-width columns and preserves exclusive right edges (the reference's
+        // binary search, as the standard library's partition point).
+        let low = ends.partition_point(|&end| end <= x);
 
         if x >= 0.0 && low < ends.len() && x < ends[low] {
             return (low as i32, if low == 0 { 0.0 } else { ends[low - 1] });
@@ -541,11 +533,16 @@ impl ColumnListBase {
         (-1, -1.0)
     }
 
+    #[inline]
     fn ensure_geometry(&self) {
-        if !self.geometry_dirty.get() {
-            return;
+        if self.geometry_dirty.get() {
+            self.rebuild_geometry();
         }
+    }
 
+    /// Computes the right edges of the columns of the known prefix and the estimated column width.
+    #[cold]
+    fn rebuild_geometry(&self) {
         let columns = self.to_vec();
         let mut column_ends = Vec::with_capacity(columns.len());
         let mut end = 0.0;

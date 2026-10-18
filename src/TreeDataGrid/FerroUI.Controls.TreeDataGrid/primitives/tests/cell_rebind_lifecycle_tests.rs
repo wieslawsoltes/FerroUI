@@ -14,6 +14,7 @@ use crate::models::{
     BeginEditGestures, CellRef, ColumnRef, ICell, IColumns, IEditableObject, ITextCell, ITreeDataGridRows, TextCell,
 };
 use crate::primitives::{
+    type_recycle_key, RecycleKey,
     TreeDataGridCellImpl, TreeDataGridCellImplExt, TreeDataGridCellsPresenter, TreeDataGridElementFactory,
     TreeDataGridElementFactoryImpl,
 };
@@ -113,8 +114,8 @@ impl TreeDataGridElementFactoryImpl for HookFactory {
         HookCell::new(self.recorder.clone()).upcast()
     }
 
-    fn get_data_recycle_key(&self, _factory: &TreeDataGridElementFactory, _data: &dyn Any) -> String {
-        HookCell::TYPE.full_name()
+    fn get_data_recycle_key(&self, _factory: &TreeDataGridElementFactory, _data: &dyn Any) -> RecycleKey {
+        type_recycle_key(HookCell::TYPE)
     }
 }
 

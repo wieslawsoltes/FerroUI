@@ -9,7 +9,7 @@
 use ferroui_base::AnyValue;
 use std::any::TypeId;
 use std::cell::RefCell;
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 
 /// An object that commits or discards the changes of an edit (`IEditableObject`).
 pub trait IEditableObject {
@@ -24,7 +24,7 @@ pub trait IEditableObject {
 type AsEditable = fn(&dyn AnyValue) -> Option<&dyn IEditableObject>;
 
 ferroui_base::ferro_thread_local! {
-    static EDITABLE_MODELS: RefCell<HashMap<TypeId, AsEditable>> = RefCell::new(HashMap::new());
+    static EDITABLE_MODELS: RefCell<FxHashMap<TypeId, AsEditable>> = RefCell::new(FxHashMap::default());
 }
 
 fn as_editable_of<T: IEditableObject + 'static>(value: &dyn AnyValue) -> Option<&dyn IEditableObject> {

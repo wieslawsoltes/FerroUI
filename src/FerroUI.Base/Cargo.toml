@@ -50,6 +50,8 @@ perf-counters = []
 tagged-weak-references = []
 
 [dependencies]
+# The hasher of identity-keyed maps on hot paths (the layout queues).
+rustc-hash = { workspace = true }
 bitflags.workspace = true
 paste.workspace = true
 rust_decimal.workspace = true

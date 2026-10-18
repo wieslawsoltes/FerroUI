@@ -35,7 +35,9 @@ pub use tree_data_grid_check_box_cell::TreeDataGridCheckBoxCell;
 pub use tree_data_grid_column_header::TreeDataGridColumnHeader;
 pub use tree_data_grid_column_headers_presenter::TreeDataGridColumnHeadersPresenter;
 pub use tree_data_grid_columnar_presenter_base::{as_column_viewport_estimator, TreeDataGridColumnarPresenterBase};
-pub use tree_data_grid_element_factory::{TreeDataGridElementFactory, TreeDataGridElementFactoryImpl};
+pub use tree_data_grid_element_factory::{
+    type_recycle_key, RecycleKey, TreeDataGridElementFactory, TreeDataGridElementFactoryImpl,
+};
 pub use tree_data_grid_expander_cell::TreeDataGridExpanderCell;
 pub use tree_data_grid_presenter_base::{PresenterItemsChange, TreeDataGridPresenterBase, TreeDataGridPresenterHooks};
 pub use tree_data_grid_row::{TreeDataGridRow, TreeDataGridRowImpl, TreeDataGridRowImplExt, TreeDataGridRowVTable};

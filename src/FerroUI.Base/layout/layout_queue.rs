@@ -2,7 +2,8 @@ use crate::logging::{LogArea, LogEventLevel, Logger};
 use super::Layoutable;
 use crate::Ref;
 use std::any::Any;
-use std::collections::{HashMap, VecDeque};
+use rustc_hash::FxHashMap;
+use std::collections::VecDeque;
 use std::fmt;
 use std::hash::Hash;
 
@@ -47,12 +48,12 @@ struct Info {
 /// and updated between two clears, never removed one by one).
 struct LoopQueueInfo<T> {
     entries: Vec<(T, Info)>,
-    index: HashMap<T, usize>,
+    index: FxHashMap<T, usize>,
 }
 
 impl<T: Clone + Eq + Hash> LoopQueueInfo<T> {
     fn new() -> Self {
-        Self { entries: Vec::new(), index: HashMap::new() }
+        Self { entries: Vec::new(), index: FxHashMap::default() }
     }
 
     fn try_get_value(&self, item: &T) -> Option<Info> {

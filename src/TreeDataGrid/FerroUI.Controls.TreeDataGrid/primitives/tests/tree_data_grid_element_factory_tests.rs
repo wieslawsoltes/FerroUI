@@ -1,7 +1,7 @@
 //! `TreeDataGridElementFactoryTests.cs`.
 
 use super::support::start_app;
-use crate::primitives::{TreeDataGridElementFactory, TreeDataGridElementFactoryImpl};
+use crate::primitives::{RecycleKey, TreeDataGridElementFactory, TreeDataGridElementFactoryImpl};
 use ferroui_base::{BoxedValue, Ref};
 use ferroui_controls::{Border, Control, StackPanel};
 use std::any::Any;
@@ -19,12 +19,12 @@ impl TreeDataGridElementFactoryImpl for CountingElementFactory {
         Border::new().upcast()
     }
 
-    fn get_data_recycle_key(&self, _factory: &TreeDataGridElementFactory, _data: &dyn Any) -> String {
-        "element".to_string()
+    fn get_data_recycle_key(&self, _factory: &TreeDataGridElementFactory, _data: &dyn Any) -> RecycleKey {
+        "element".into()
     }
 
-    fn get_element_recycle_key(&self, _factory: &TreeDataGridElementFactory, _element: &Control) -> String {
-        "element".to_string()
+    fn get_element_recycle_key(&self, _factory: &TreeDataGridElementFactory, _element: &Control) -> RecycleKey {
+        "element".into()
     }
 }
 
@@ -38,12 +38,12 @@ fn counting_factory() -> (Rc<TreeDataGridElementFactory>, Rc<Cell<i32>>) {
 struct KeyedElementFactory;
 
 impl TreeDataGridElementFactoryImpl for KeyedElementFactory {
-    fn get_data_recycle_key(&self, _factory: &TreeDataGridElementFactory, data: &dyn Any) -> String {
-        data.downcast_ref::<String>().cloned().expect("a string")
+    fn get_data_recycle_key(&self, _factory: &TreeDataGridElementFactory, data: &dyn Any) -> RecycleKey {
+        data.downcast_ref::<String>().cloned().map(RecycleKey::from).expect("a string")
     }
 
-    fn get_element_recycle_key(&self, _factory: &TreeDataGridElementFactory, element: &Control) -> String {
-        element.tag().and_then(|tag| tag.downcast_ref::<String>().cloned()).expect("a string tag")
+    fn get_element_recycle_key(&self, _factory: &TreeDataGridElementFactory, element: &Control) -> RecycleKey {
+        element.tag().and_then(|tag| tag.downcast_ref::<String>().cloned()).map(RecycleKey::from).expect("a string tag")
     }
 }
 

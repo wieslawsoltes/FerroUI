@@ -31,6 +31,9 @@ pub struct Visual {
     presentation_source: RefCell<Option<Rc<dyn IPresentationSource>>>,
     visual_parent: RefCell<Option<WeakRef<Visual>>>,
     has_mirror_transform: Cell<bool>,
+    // Deviation (DEVIATIONS.md, Visual tree): whether `RenderTransform` has a value, kept by its
+    // change handler, so that the transforms of the visual tree skip the property read.
+    has_render_transform: Cell<bool>,
     is_effectively_visible: Cell<bool>,
     has_non_uniform_z_index_children: Cell<bool>,
     visual_children: OnceCell<FerroList<Ref<Visual>>>,
@@ -598,6 +601,7 @@ impl Visual {
             presentation_source: RefCell::new(None),
             visual_parent: RefCell::new(None),
             has_mirror_transform: Cell::new(false),
+            has_render_transform: Cell::new(false),
             is_effectively_visible: Cell::new(true),
             has_non_uniform_z_index_children: Cell::new(false),
             visual_children: OnceCell::new(),
@@ -761,6 +765,13 @@ impl Visual {
     /// Whether the control is mirrored relative to its parent because of its
     /// flow direction.
     #[inline]
+    /// Whether `RenderTransform` has a value (not upstream: the transforms of the visual tree
+    /// skip the property read when it has none).
+    #[inline]
+    pub(crate) fn has_render_transform(&self) -> bool {
+        self.has_render_transform.get()
+    }
+
     pub fn has_mirror_transform(&self) -> bool {
         self.has_mirror_transform.get()
     }
@@ -995,9 +1006,10 @@ impl Visual {
     /// notification moves from the old value to the new one.
     fn render_transform_changed(e: &FerroPropertyChangedEventArgs<'_>) {
         let Some(sender) = e.sender().downcast_ref::<Visual>() else { return };
+        let (_, new_value) = e.get_old_and_new_value::<Option<Rc<dyn ITransform>>>();
+        sender.has_render_transform.set(new_value.is_some());
 
         if sender.visual_root().is_some() {
-            let (_, new_value) = e.get_old_and_new_value::<Option<Rc<dyn ITransform>>>();
 
             // The old transform's subscription is the one held.
             let subscription = new_value.as_ref().and_then(|new_value| {

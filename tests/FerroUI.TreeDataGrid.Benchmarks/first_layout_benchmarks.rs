@@ -42,7 +42,7 @@ use ferroui_controls_treedatagrid::models::{
 };
 use ferroui_controls_treedatagrid::primitives::{
     TreeDataGridCellImpl, TreeDataGridCellsPresenter, TreeDataGridColumnHeader, TreeDataGridColumnHeadersPresenter,
-    TreeDataGridElementFactory, TreeDataGridElementFactoryImpl, TreeDataGridRow, TreeDataGridRowsPresenter,
+    RecycleKey, TreeDataGridElementFactory, TreeDataGridElementFactoryImpl, TreeDataGridRow, TreeDataGridRowsPresenter,
     TreeDataGridTextCell,
 };
 use ferroui_controls_treedatagrid::{TreeDataGrid, TreeDataGridSourceRef};
@@ -355,21 +355,21 @@ impl TreeDataGridElementFactoryImpl for SyntheticElementFactory {
         }
     }
 
-    fn get_data_recycle_key(&self, factory: &TreeDataGridElementFactory, data: &dyn Any) -> String {
+    fn get_data_recycle_key(&self, factory: &TreeDataGridElementFactory, data: &dyn Any) -> RecycleKey {
         if data.is::<CellRef>() {
-            SYNTHETIC_CELL.to_string()
+            SYNTHETIC_CELL.into()
         } else if data.is::<ColumnRef>() {
-            SYNTHETIC_HEADER.to_string()
+            SYNTHETIC_HEADER.into()
         } else {
             factory.default_data_recycle_key(data)
         }
     }
 
-    fn get_element_recycle_key(&self, factory: &TreeDataGridElementFactory, element: &Control) -> String {
+    fn get_element_recycle_key(&self, factory: &TreeDataGridElementFactory, element: &Control) -> RecycleKey {
         if element.downcast_ref::<SyntheticTextCell>().is_some() {
-            SYNTHETIC_CELL.to_string()
+            SYNTHETIC_CELL.into()
         } else if element.downcast_ref::<SyntheticColumnHeader>().is_some() {
-            SYNTHETIC_HEADER.to_string()
+            SYNTHETIC_HEADER.into()
         } else {
             factory.default_element_recycle_key(element)
         }

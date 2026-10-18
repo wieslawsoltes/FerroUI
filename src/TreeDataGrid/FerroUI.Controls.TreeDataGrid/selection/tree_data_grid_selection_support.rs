@@ -24,7 +24,7 @@ use ferroui_treedatagrid_core::{
 };
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 use std::marker::PhantomData;
 use std::rc::Rc;
 
@@ -240,11 +240,11 @@ impl<M: TreeModel> ITreeDataGridModelSupport for ModelSupport<M> {
 #[derive(Default)]
 struct Registry {
     // By the type of a source.
-    sources: HashMap<TypeId, Rc<dyn ITreeDataGridSourceSupport>>,
+    sources: FxHashMap<TypeId, Rc<dyn ITreeDataGridSourceSupport>>,
     // By the type of a selection or of a row.
-    models: HashMap<TypeId, Rc<dyn ITreeDataGridModelSupport>>,
+    models: FxHashMap<TypeId, Rc<dyn ITreeDataGridModelSupport>>,
     // The model types registered.
-    model_types: HashMap<TypeId, ()>,
+    model_types: FxHashMap<TypeId, ()>,
 }
 
 ferroui_base::ferro_thread_local! {

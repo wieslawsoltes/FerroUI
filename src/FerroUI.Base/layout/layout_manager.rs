@@ -341,7 +341,9 @@ impl LayoutManager {
         // Translate the viewport into this control's coordinate space.
         *viewport = viewport.translate((-control.bounds().position()).into());
 
-        if !is_target {
+        // The flag skips the property read for the visuals without a render transform (the
+        // transforms of the visual tree do the same, DEVIATIONS.md, Visual tree).
+        if !is_target && control.has_render_transform() {
             if let Some(transform) = control.render_transform() {
                 match transform.value().try_invert() {
                     Some(inverted_matrix) => {

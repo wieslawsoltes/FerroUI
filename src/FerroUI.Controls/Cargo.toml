@@ -20,6 +20,8 @@ links = "ferroui_controls_xaml"
 path = "lib.rs"
 
 [dependencies]
+# The hasher of identity-keyed maps on hot paths (the anchor candidates of a scroll presenter).
+rustc-hash = { workspace = true }
 ferroui-base.workspace = true
 # The messages and the connections of remote rendering (`remote`).
 ferroui-remote-protocol.workspace = true

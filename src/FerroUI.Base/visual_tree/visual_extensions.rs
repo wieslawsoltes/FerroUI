@@ -21,6 +21,9 @@ use std::rc::Rc;
 /// tester get the render transform from.
 #[inline]
 fn render_transform(visual: &Visual) -> Option<Matrix> {
+    if !visual.has_render_transform() {
+        return None;
+    }
     visual.render_transform().map(|transform| {
         let origin = visual.render_transform_origin().to_pixels(visual.bounds().size());
         let offset = Matrix::create_translation(origin.x, origin.y);
@@ -512,6 +515,15 @@ impl Visual {
     /// the coordinates of the specified `to` visual, or `None` if the
     /// visuals don't share a common ancestor.
     pub fn transform_to_visual(&self, to: &Visual) -> Option<Matrix> {
+        // Deviation (DEVIATIONS.md, Visual tree): when `to` is this visual or one of its ancestors
+        // (a descendant translated into the coordinates of a container: hit testing, bringing into
+        // view, scroll anchoring) the transform is the offset from `to`, found in one walk up
+        // from this visual; upstream finds the common ancestor first, which walks both visuals up
+        // to the root. The result is the same.
+        if let Some(offset) = Self::try_get_offset_from_ancestor(to, self) {
+            return Some(offset);
+        }
+
         let common = self.find_common_visual_ancestor(to)?;
         let this_offset = Self::get_offset_from(&common, self);
         let that_offset = Self::get_offset_from(&common, to);
@@ -534,6 +546,20 @@ impl Visual {
             (Some(source), Some(root)) => (source, root),
             _ => panic!("Visual does not belong to a visual tree."),
         }
+    }
+
+    /// The transform from `ancestor` to `visual` when `ancestor` is `visual` or one of its
+    /// ancestors, else `None`.
+    fn try_get_offset_from_ancestor(ancestor: &Visual, visual: &Visual) -> Option<Matrix> {
+        let mut result = Matrix::IDENTITY;
+        let mut v = visual.to_ref();
+
+        while !std::ptr::eq::<Visual>(&*v, ancestor) {
+            result *= local_transform(&v);
+            v = v.visual_parent()?;
+        }
+
+        Some(result)
     }
 
     /// Gets a transform from an ancestor to a descendent.

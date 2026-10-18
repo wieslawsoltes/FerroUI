@@ -850,6 +850,7 @@ dependencies = [
  "libc",
  "paste",
  "rust_decimal",
+ "rustc-hash 2.1.3",
  "time",
 ]
 
@@ -911,6 +912,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-remote-protocol",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -937,6 +939,7 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-themes-fluent",
  "ferroui-treedatagrid-core",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -1301,6 +1304,7 @@ version = "0.2.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]

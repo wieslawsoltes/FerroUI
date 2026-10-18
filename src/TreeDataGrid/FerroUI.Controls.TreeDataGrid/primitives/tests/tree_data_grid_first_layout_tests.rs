@@ -7,6 +7,7 @@
 use super::support::{run_jobs, scroll_viewer_template, start_app, test_window};
 use crate::models::{CellRef, ColumnRef, IColumns, TextColumn, TextColumnOptions};
 use crate::primitives::{
+    RecycleKey,
     TreeDataGridCellImpl, TreeDataGridCellsPresenter, TreeDataGridCellsPresenterImpl,
     TreeDataGridCellsPresenterImplExt, TreeDataGridColumnHeader, TreeDataGridColumnHeadersPresenter,
     TreeDataGridElementFactory, TreeDataGridElementFactoryImpl, TreeDataGridRow, TreeDataGridRowImpl,
@@ -452,25 +453,25 @@ impl TreeDataGridElementFactoryImpl for CountingElementFactory {
         }
     }
 
-    fn get_data_recycle_key(&self, factory: &TreeDataGridElementFactory, data: &dyn Any) -> String {
+    fn get_data_recycle_key(&self, factory: &TreeDataGridElementFactory, data: &dyn Any) -> RecycleKey {
         if data.is::<CellRef>() {
-            "counting-cell".to_string()
+            "counting-cell".into()
         } else if data.is::<ColumnRef>() {
-            "counting-header".to_string()
+            "counting-header".into()
         } else if data.is::<RowRef>() {
-            "counting-row".to_string()
+            "counting-row".into()
         } else {
             factory.default_data_recycle_key(data)
         }
     }
 
-    fn get_element_recycle_key(&self, factory: &TreeDataGridElementFactory, element: &Control) -> String {
+    fn get_element_recycle_key(&self, factory: &TreeDataGridElementFactory, element: &Control) -> RecycleKey {
         if element.downcast_ref::<CountingTextCell>().is_some() {
-            "counting-cell".to_string()
+            "counting-cell".into()
         } else if element.downcast_ref::<CountingColumnHeader>().is_some() {
-            "counting-header".to_string()
+            "counting-header".into()
         } else if element.downcast_ref::<CountingRow>().is_some() {
-            "counting-row".to_string()
+            "counting-row".into()
         } else {
             factory.default_element_recycle_key(element)
         }

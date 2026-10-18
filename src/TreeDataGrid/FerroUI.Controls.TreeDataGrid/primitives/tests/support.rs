@@ -14,6 +14,7 @@ use crate::models::{
 };
 use crate::presentation::TreeDataGridRows;
 use crate::primitives::{
+    type_recycle_key, RecycleKey,
     TreeDataGridCellImpl, TreeDataGridCellsPresenter, TreeDataGridColumnHeadersPresenter, TreeDataGridElementFactory,
     TreeDataGridElementFactoryImpl, TreeDataGridExpanderCell, TreeDataGridRow, TreeDataGridRowsPresenter,
     TreeDataGridTemplateCell, TreeDataGridTextCell,
@@ -438,9 +439,9 @@ impl TreeDataGridElementFactoryImpl for TestElementFactory {
         }
     }
 
-    fn get_data_recycle_key(&self, factory: &TreeDataGridElementFactory, data: &dyn Any) -> String {
+    fn get_data_recycle_key(&self, factory: &TreeDataGridElementFactory, data: &dyn Any) -> RecycleKey {
         if is_layout_test_cell(data) {
-            LayoutTestCellControl::TYPE.full_name()
+            type_recycle_key(LayoutTestCellControl::TYPE)
         } else {
             factory.default_data_recycle_key(data)
         }

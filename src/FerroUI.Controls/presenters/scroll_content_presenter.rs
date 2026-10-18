@@ -27,6 +27,7 @@ use ferroui_base::{
 };
 use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
+use rustc_hash::FxHashMap;
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -42,7 +43,7 @@ pub struct ScrollContentPresenter {
     viewport: Cell<Size>,
     active_logical_gesture_scrolls: RefCell<Option<HashMap<i32, Vector>>>,
     scroll_gesture_snap_points: RefCell<Option<HashMap<i32, Vector>>>,
-    anchor_candidates: RefCell<Option<Vec<Ref<Control>>>>,
+    anchor_candidates: RefCell<Option<AnchorCandidates>>,
     anchor_element: RefCell<Option<Ref<Control>>>,
     anchor_element_bounds: Cell<Rect>,
     is_anchor_element_dirty: Cell<bool>,
@@ -303,19 +304,13 @@ impl IScrollAnchorProvider for ScrollContentPresenter {
             panic!("An anchor control must be a visual descendent of the ScrollContentPresenter.");
         }
 
-        {
-            let mut candidates = self.anchor_candidates.borrow_mut();
-            let candidates = candidates.get_or_insert_with(Vec::new);
-            if !candidates.contains(element) {
-                candidates.push(element.clone());
-            }
-        }
+        self.anchor_candidates.borrow_mut().get_or_insert_with(AnchorCandidates::default).add(element);
         self.is_anchor_element_dirty.set(true);
     }
 
     fn unregister_anchor_candidate(&self, element: &Ref<Control>) {
         if let Some(candidates) = self.anchor_candidates.borrow_mut().as_mut() {
-            candidates.retain(|candidate| candidate != element);
+            candidates.remove(element);
         }
         self.is_anchor_element_dirty.set(true);
 
@@ -1198,7 +1193,7 @@ impl ScrollContentPresenter {
         if !self.is_anchor_element_dirty.get() {
             return;
         }
-        let Some(candidates) = self.anchor_candidates.borrow().clone() else {
+        let Some(candidates) = self.anchor_candidates.borrow().as_ref().map(|candidates| candidates.items.clone()) else {
             return;
         };
 
@@ -1506,4 +1501,33 @@ impl ScrollContentPresenter {
 /// a member of an intermediate class.
 fn fo(object: &ferroui_base::FerroObject) -> &ferroui_base::FerroObject {
     object
+}
+
+/// The anchor candidates of a presenter (upstream's `HashSet<Control>`): the controls, and the
+/// position of each in the list by its address, so that adding and removing one does not search
+/// the list.
+#[derive(Default)]
+struct AnchorCandidates {
+    items: Vec<Ref<Control>>,
+    positions: FxHashMap<*const Control, usize>,
+}
+
+impl AnchorCandidates {
+    fn add(&mut self, element: &Ref<Control>) {
+        let key: *const Control = &**element;
+        if !self.positions.contains_key(&key) {
+            self.positions.insert(key, self.items.len());
+            self.items.push(element.clone());
+        }
+    }
+
+    fn remove(&mut self, element: &Ref<Control>) {
+        let key: *const Control = &**element;
+        let Some(position) = self.positions.remove(&key) else { return };
+        self.items.swap_remove(position);
+        if let Some(moved) = self.items.get(position) {
+            let moved: *const Control = &**moved;
+            self.positions.insert(moved, position);
+        }
+    }
 }

@@ -232,26 +232,28 @@ impl<M: TreeModel> HierarchicalRows<M> {
             return Some(-1);
         }
         let rows = self.flattened_rows.borrow();
-        (from_row_index..rows.len()).find(|&i| *model_index == rows[i].model_index_path()).map(|i| i as i32)
+        (from_row_index..rows.len()).find(|&i| rows[i].has_model_index_path(model_index)).map(|i| i as i32)
     }
 
     fn initialize_rows(&self) {
-        let mut i = 0;
+        let mut rows = Vec::new();
         for row in self.roots().to_vec() {
-            i += self.add_rows_and_descendants(i, &row);
+            Self::collect_rows_and_descendants(row, &mut rows);
         }
+        self.flattened_rows.borrow_mut().splice(0..0, rows);
     }
 
-    fn add_rows_and_descendants(&self, index: usize, row: &Rc<HierarchicalRow<M>>) -> usize {
-        let mut i = index;
-        self.flattened_rows.borrow_mut().insert(i, row.clone());
-        i += 1;
-        if let Some(children) = row.children() {
+    /// The rows `AddRowsAndDescendants` inserts for `row`: the row and the rows of its expanded
+    /// descendants, depth first. The reference inserts them into the flattened list one by one; the
+    /// port collects them and inserts them at once (`add`), which moves the rows after them once.
+    fn collect_rows_and_descendants(row: Rc<HierarchicalRow<M>>, rows: &mut Vec<Rc<HierarchicalRow<M>>>) {
+        let children = row.children();
+        rows.push(row);
+        if let Some(children) = children {
             for child in children {
-                i += self.add_rows_and_descendants(i, &child);
+                Self::collect_rows_and_descendants(child, rows);
             }
         }
-        i - index
     }
 
     fn expand_collapse_recursive_core(rows: &[Rc<HierarchicalRow<M>>], predicate: &dyn Fn(&Rc<M>) -> bool) {
@@ -280,18 +282,23 @@ impl<M: TreeModel> HierarchicalRows<M> {
         });
     }
 
-    fn add(&self, mut index: usize, items: &[Rc<HierarchicalRow<M>>]) {
-        let start = index;
+    fn add(&self, index: usize, items: &[Rc<HierarchicalRow<M>>]) {
+        let mut rows = Vec::new();
         for row in items {
-            index += self.add_rows_and_descendants(index, row);
+            Self::collect_rows_and_descendants(row.clone(), &mut rows);
         }
-        if index > start {
-            let added: Vec<RowRef> = self.flattened_rows.borrow()[start..index].iter().map(|r| r.clone() as RowRef).collect();
+        if rows.is_empty() {
+            return;
+        }
+        let added: Vec<RowRef> =
+            if self.changed.has_handlers() { rows.iter().map(|r| r.clone() as RowRef).collect() } else { Vec::new() };
+        self.flattened_rows.borrow_mut().splice(index..index, rows);
+        if self.changed.has_handlers() {
             self.changed.raise(&RowsChangedArgs {
                 action: NotifyCollectionChangedAction::Add,
                 new_items: &added,
                 old_items: &[],
-                new_starting_index: start as i32,
+                new_starting_index: index as i32,
                 old_starting_index: -1,
             });
         }
@@ -332,9 +339,9 @@ impl<M: TreeModel> HierarchicalRows<M> {
         if row_index == -1 {
             return rows.len();
         }
-        let depth = rows[row_index as usize].model_index_path().count();
+        let depth = rows[row_index as usize].indent();
         let mut i = row_index as usize + 1;
-        while i < rows.len() && rows[i].model_index_path().count() > depth {
+        while i < rows.len() && rows[i].indent() > depth {
             i += 1;
         }
         i - (row_index as usize + 1)

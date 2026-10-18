@@ -26,6 +26,8 @@ autoexamples = false
 path = "lib.rs"
 
 [dependencies]
+# The hasher of the per-collection listener lists.
+rustc-hash = { workspace = true }
 # The base library only: values, model types, notifying collections and events. The core does
 # not depend on the controls, as the reference's core does not reference the UI framework.
 ferroui-base = { workspace = true }

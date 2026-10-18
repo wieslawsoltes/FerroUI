@@ -110,14 +110,23 @@ impl<T: Clone + PartialEq + 'static> TextCell<T> {
             return self.edit_text.borrow().clone();
         }
         let value = self.value.borrow().clone();
-        let boxed = value.as_ref().and_then(box_cell_value);
         match &self.options {
             Some(options) => {
                 let format = options.string_format();
+                if format == "{0}" {
+                    let text = match &value {
+                        Some(value) => invariant_text(value as &dyn Any),
+                        None => Some(String::new()),
+                    };
+                    if text.is_some() {
+                        return text;
+                    }
+                }
+                let boxed = value.as_ref().and_then(box_cell_value);
                 let culture = options.culture();
                 Some(format_text(&format, boxed, &culture))
             }
-            None => cell_value_text(boxed.as_ref()),
+            None => cell_value_text(value.as_ref().and_then(box_cell_value).as_ref()),
         }
     }
 
@@ -159,6 +168,56 @@ impl<T: Clone + PartialEq + 'static> TextCell<T> {
     pub fn this(&self) -> Option<Rc<Self>> {
         self.weak_self.upgrade()
     }
+}
+
+/// The text of the default format of a column (`{0}`) for a value whose text is the same in every
+/// culture: a string is its own text, a number without a sign has no symbol of a culture, and a
+/// missing value has no text (as `string.Format` writes null). `None` for any other value, which
+/// the composite formatter formats. A cell reads its text at every realization, and this is its
+/// common case: the value is not boxed and the format is not parsed.
+fn invariant_text(value: &dyn Any) -> Option<String> {
+    // The cells of untyped models hold their values boxed.
+    if let Some(boxed) = value.downcast_ref::<BoxedValue>() {
+        return invariant_text(boxed.as_any());
+    }
+    if let Some(boxed) = value.downcast_ref::<Option<BoxedValue>>() {
+        return match boxed {
+            Some(boxed) => invariant_text(boxed.as_any()),
+            None => Some(String::new()),
+        };
+    }
+    if let Some(text) = value.downcast_ref::<String>() {
+        return Some(text.clone());
+    }
+    if let Some(text) = value.downcast_ref::<Option<String>>() {
+        return Some(text.clone().unwrap_or_default());
+    }
+    macro_rules! unsigned {
+        ($($ty:ty),*) => {
+            $(if let Some(v) = value.downcast_ref::<$ty>() {
+                return Some(v.to_string());
+            }
+            if let Some(v) = value.downcast_ref::<Option<$ty>>() {
+                return Some(v.map(|v| v.to_string()).unwrap_or_default());
+            })*
+        };
+    }
+    macro_rules! signed {
+        ($($ty:ty),*) => {
+            $(if let Some(v) = value.downcast_ref::<$ty>() {
+                return (*v >= 0).then(|| v.to_string());
+            }
+            if let Some(v) = value.downcast_ref::<Option<$ty>>() {
+                return match v {
+                    None => Some(String::new()),
+                    Some(v) => (*v >= 0).then(|| v.to_string()),
+                };
+            })*
+        };
+    }
+    unsigned!(u8, u16, u32, u64, usize);
+    signed!(i8, i16, i32, i64, isize);
+    None
 }
 
 /// `string.Format(culture, format, value)`.

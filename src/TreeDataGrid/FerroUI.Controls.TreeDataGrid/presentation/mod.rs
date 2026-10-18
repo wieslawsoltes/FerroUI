@@ -46,7 +46,7 @@ pub use tree_data_grid_rows::{as_reusable_cell_rows, IReusableCellRows, TreeData
 use crate::models::ColumnRef;
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 use std::rc::Rc;
 
 impl PartialEq for dyn TreeDataGridPresentation {
@@ -64,7 +64,7 @@ pub trait IDisposableColumn {
 type ColumnDisposer = Rc<dyn Fn(&dyn Any)>;
 
 ferroui_base::ferro_thread_local! {
-    static COLUMN_DISPOSERS: RefCell<HashMap<TypeId, ColumnDisposer>> = RefCell::new(HashMap::new());
+    static COLUMN_DISPOSERS: RefCell<FxHashMap<TypeId, ColumnDisposer>> = RefCell::new(FxHashMap::default());
 }
 
 /// Registers the view column type `T` as one that a presentation disposes when it drops a column of

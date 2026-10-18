@@ -9,7 +9,7 @@ use ferroui_base::Ref;
 use ferroui_benchmarks::harness::Registry;
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{Border, Control, StackPanel};
-use ferroui_controls_treedatagrid::primitives::{TreeDataGridElementFactory, TreeDataGridElementFactoryImpl};
+use ferroui_controls_treedatagrid::primitives::{RecycleKey, TreeDataGridElementFactory, TreeDataGridElementFactoryImpl};
 use std::any::Any;
 use std::rc::Rc;
 
@@ -23,12 +23,12 @@ impl TreeDataGridElementFactoryImpl for BenchmarkElementFactory {
         Border::new().upcast()
     }
 
-    fn get_data_recycle_key(&self, _factory: &TreeDataGridElementFactory, _data: &dyn Any) -> String {
-        "element".to_string()
+    fn get_data_recycle_key(&self, _factory: &TreeDataGridElementFactory, _data: &dyn Any) -> RecycleKey {
+        "element".into()
     }
 
-    fn get_element_recycle_key(&self, _factory: &TreeDataGridElementFactory, _element: &Control) -> String {
-        "element".to_string()
+    fn get_element_recycle_key(&self, _factory: &TreeDataGridElementFactory, _element: &Control) -> RecycleKey {
+        "element".into()
     }
 }
 

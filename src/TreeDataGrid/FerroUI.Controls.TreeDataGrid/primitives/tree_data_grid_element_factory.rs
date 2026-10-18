@@ -13,13 +13,40 @@ use super::{
     TreeDataGridExpanderCell, TreeDataGridRow, TreeDataGridRowsPresenter, TreeDataGridTemplateCell, TreeDataGridTextCell,
 };
 use crate::models::{CellRef, CheckBoxCell, ColumnRef, TemplateCell};
-use ferroui_base::{Ref, StyledElement};
+use ferroui_base::{Ref, StyledElement, TypeInfo};
 use ferroui_controls::{Control, Panel};
 use ferroui_treedatagrid_core::models::RowRef;
 use std::any::Any;
+use std::borrow::Cow;
 use std::cell::RefCell;
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 use std::rc::Rc;
+
+/// A recycle key (the reference's `string`): an element is reused for data whose key is the key of
+/// the element. The keys of the factory's own elements are the interned full names of their types
+/// ([`type_recycle_key`]), as the reference's are the interned names of .NET types; a factory may
+/// return any text.
+pub type RecycleKey = Cow<'static, str>;
+
+ferroui_base::ferro_thread_local! {
+    static TYPE_RECYCLE_KEYS: RefCell<FxHashMap<usize, &'static str>> = RefCell::new(FxHashMap::default());
+}
+
+/// The recycle key of the elements of a type: the full name of the type (`Type.FullName`),
+/// computed once per type and thread and kept for the life of the process, as the reference's type
+/// names are.
+pub fn type_recycle_key(type_info: &'static TypeInfo) -> RecycleKey {
+    let key = type_info as *const TypeInfo as usize;
+    let name = TYPE_RECYCLE_KEYS.with(|keys| {
+        if let Some(name) = keys.borrow().get(&key) {
+            return *name;
+        }
+        let name: &'static str = Box::leak(type_info.full_name().into_boxed_str());
+        keys.borrow_mut().insert(key, name);
+        name
+    });
+    Cow::Borrowed(name)
+}
 
 /// The overridable members of [`TreeDataGridElementFactory`] (the reference's protected virtual
 /// members). Every member defaults to the factory's own behaviour.
@@ -30,12 +57,12 @@ pub trait TreeDataGridElementFactoryImpl {
     }
 
     /// The recycle key of the element that shows `data` (`GetDataRecycleKey`).
-    fn get_data_recycle_key(&self, factory: &TreeDataGridElementFactory, data: &dyn Any) -> String {
+    fn get_data_recycle_key(&self, factory: &TreeDataGridElementFactory, data: &dyn Any) -> RecycleKey {
         factory.default_data_recycle_key(data)
     }
 
     /// The recycle key of `element` (`GetElementRecycleKey`).
-    fn get_element_recycle_key(&self, factory: &TreeDataGridElementFactory, element: &Control) -> String {
+    fn get_element_recycle_key(&self, factory: &TreeDataGridElementFactory, element: &Control) -> RecycleKey {
         factory.default_element_recycle_key(element)
     }
 }
@@ -45,11 +72,11 @@ impl<T: TreeDataGridElementFactoryImpl + ?Sized> TreeDataGridElementFactoryImpl 
         (**self).create_element(factory, data)
     }
 
-    fn get_data_recycle_key(&self, factory: &TreeDataGridElementFactory, data: &dyn Any) -> String {
+    fn get_data_recycle_key(&self, factory: &TreeDataGridElementFactory, data: &dyn Any) -> RecycleKey {
         (**self).get_data_recycle_key(factory, data)
     }
 
-    fn get_element_recycle_key(&self, factory: &TreeDataGridElementFactory, element: &Control) -> String {
+    fn get_element_recycle_key(&self, factory: &TreeDataGridElementFactory, element: &Control) -> RecycleKey {
         (**self).get_element_recycle_key(factory, element)
     }
 }
@@ -62,7 +89,7 @@ impl TreeDataGridElementFactoryImpl for DefaultBehavior {}
 /// Creates the elements of the presenters and keeps the recycled ones, by recycle key and by the
 /// parent they were recycled from.
 pub struct TreeDataGridElementFactory {
-    recycle_pools: RefCell<HashMap<String, RecyclePool>>,
+    recycle_pools: RefCell<FxHashMap<RecycleKey, RecyclePool>>,
     behavior: Box<dyn TreeDataGridElementFactoryImpl>,
 }
 
@@ -82,7 +109,7 @@ impl Default for TreeDataGridElementFactory {
 
 impl TreeDataGridElementFactory {
     fn construct(behavior: Box<dyn TreeDataGridElementFactoryImpl>) -> Self {
-        Self { recycle_pools: RefCell::new(HashMap::new()), behavior }
+        Self { recycle_pools: RefCell::new(FxHashMap::default()), behavior }
     }
 
     /// A factory with the default behaviour.
@@ -146,12 +173,12 @@ impl TreeDataGridElementFactory {
     }
 
     /// The recycle key of the element that shows `data` (`GetDataRecycleKey`).
-    pub fn get_data_recycle_key(&self, data: &dyn Any) -> String {
+    pub fn get_data_recycle_key(&self, data: &dyn Any) -> RecycleKey {
         self.behavior.get_data_recycle_key(self, data)
     }
 
     /// The recycle key of `element` (`GetElementRecycleKey`).
-    pub fn get_element_recycle_key(&self, element: &Control) -> String {
+    pub fn get_element_recycle_key(&self, element: &Control) -> RecycleKey {
         self.behavior.get_element_recycle_key(self, element)
     }
 
@@ -184,34 +211,34 @@ impl TreeDataGridElementFactory {
 
     /// The factory's own `GetDataRecycleKey`: the full name of the type of the element
     /// [`default_create_element`](Self::default_create_element) creates for `data`.
-    pub fn default_data_recycle_key(&self, data: &dyn Any) -> String {
+    pub fn default_data_recycle_key(&self, data: &dyn Any) -> RecycleKey {
         if let Some(cell) = data.downcast_ref::<CellRef>() {
             if cell.as_any().is::<CheckBoxCell>() {
-                return TreeDataGridCheckBoxCell::TYPE.full_name();
+                return type_recycle_key(TreeDataGridCheckBoxCell::TYPE);
             }
             if cell.as_any().is::<TemplateCell>() {
-                return TreeDataGridTemplateCell::TYPE.full_name();
+                return type_recycle_key(TreeDataGridTemplateCell::TYPE);
             }
             if cell.as_expander_cell().is_some() {
-                return TreeDataGridExpanderCell::TYPE.full_name();
+                return type_recycle_key(TreeDataGridExpanderCell::TYPE);
             }
-            return TreeDataGridTextCell::TYPE.full_name();
+            return type_recycle_key(TreeDataGridTextCell::TYPE);
         }
 
         if data.is::<ColumnRef>() {
-            return TreeDataGridColumnHeader::TYPE.full_name();
+            return type_recycle_key(TreeDataGridColumnHeader::TYPE);
         }
 
         if data.is::<RowRef>() {
-            return TreeDataGridRow::TYPE.full_name();
+            return type_recycle_key(TreeDataGridRow::TYPE);
         }
 
         panic!("Specified method is not supported.");
     }
 
     /// The factory's own `GetElementRecycleKey`: the full name of the element's type.
-    pub fn default_element_recycle_key(&self, element: &Control) -> String {
-        element.get_type().full_name()
+    pub fn default_element_recycle_key(&self, element: &Control) -> RecycleKey {
+        type_recycle_key(element.get_type())
     }
 
     fn is_parent_layouting(parent: &Control) -> bool {
@@ -256,7 +283,7 @@ struct ParentBucket {
 struct RecyclePool {
     entries: Vec<Option<Entry>>,
     free: Vec<usize>,
-    by_parent: HashMap<Ref<StyledElement>, ParentBucket>,
+    by_parent: FxHashMap<Ref<StyledElement>, ParentBucket>,
     fallback_first: Option<usize>,
     fallback_last: Option<usize>,
 }

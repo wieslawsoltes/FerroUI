@@ -6,7 +6,7 @@
 use crate::model_collection::{collection_identity, Models, ModelsChangedArgs};
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 use std::rc::{Rc, Weak};
 
 /// A listener of [`CollectionChangedEventManager`].
@@ -23,7 +23,7 @@ struct Entry<M: 'static> {
 }
 
 thread_local! {
-    static ENTRIES: RefCell<HashMap<(usize, TypeId), Box<dyn Any>>> = RefCell::new(HashMap::new());
+    static ENTRIES: RefCell<FxHashMap<(usize, TypeId), Box<dyn Any>>> = RefCell::new(FxHashMap::default());
 }
 
 /// The listeners of the collections of the thread.
