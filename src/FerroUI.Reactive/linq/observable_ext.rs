@@ -37,6 +37,29 @@ pub trait ObservableExt<T: 'static> {
     super::take_last_buffer::take_last_buffer_methods!();
     super::take_while::take_while_methods!();
     super::take_until::take_until_methods!();
+    super::aggregate::aggregate_methods!();
+    super::all::all_methods!();
+    super::any::any_methods!();
+    super::contains::contains_methods!();
+    super::count::count_methods!();
+    super::first_async::first_async_methods!();
+    super::is_empty::is_empty_methods!();
+    super::last_async::last_async_methods!();
+    super::sequence_equal::sequence_equal_methods!();
+    super::single_async::single_async_methods!();
+    super::to_array::to_array_methods!();
+    super::to_dictionary::to_dictionary_methods!();
+    super::to_list::to_list_methods!();
+    super::to_lookup::to_lookup_methods!();
+    super::distinct::distinct_methods!();
+    super::distinct_until_changed::distinct_until_changed_methods!();
+    super::element_at::element_at_methods!();
+    super::catch::catch_methods!();
+    super::on_error_resume_next::on_error_resume_next_methods!();
+    super::retry::retry_methods!();
+    super::repeat_source::repeat_source_methods!();
+    super::retry_when::retry_when_methods!();
+    super::repeat_when::repeat_when_methods!();
 }
 
 impl<T: 'static> ObservableExt<T> for Rc<dyn IObservable<T>> {
