@@ -250,6 +250,33 @@ pixels per page in the light and dark variant, before and after the third calibr
 At a scaling of 2 the edges of glyphs are a smaller share of the picture, so the floor of text is
 about 1 %.
 
+The same comparison on 2026-10-18 (`03828103`), after the text calibration of
+`text-rendering.md` and the scaled path icons, and with the calendar's day items at the padding of
+CDB-10 (the text of the days had been 2 px below WinUI's: datetime 1.30 / 1.31 before):
+
+| Page | Light / dark |
+|---|---|
+| buttons | 0.53 / 0.38 |
+| toggles | 0.53 / 0.45 |
+| text | 0.86 / 0.72 |
+| numbers | 0.54 / 0.44 |
+| combobox | 0.56 / 0.51 |
+| lists | 0.54 / 0.45 |
+| range | 0.60 / 0.50 |
+| datetime | 0.93 / 0.87 |
+| menus | 0.87 / 0.77 |
+| flyouts | 0.82 / 0.65 |
+| tabs | 0.54 / 0.51 |
+| containers | 0.62 / 0.46 |
+| navigation | 0.66 / 0.48 |
+| table | 9.17 / 9.20 |
+| dialogs | 0.15 / 0.11 |
+
+What remains is mostly the edges of glyphs, the stand-in of the table, and the menus: a menu item
+of WinUI is 29 px high where FerroUI's is 28, because WinUI lays out the clipped text of a menu item
+(`MenuFlyoutItemTextTrimming` Clip) in another text mode than a plain text block, whose line height
+the framework does not reproduce.
+
 ## 6. Files
 
 | File | What |
