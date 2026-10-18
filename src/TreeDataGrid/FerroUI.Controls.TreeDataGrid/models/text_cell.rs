@@ -84,21 +84,16 @@ impl<T: Clone + PartialEq + 'static> TextCell<T> {
 
     /// Sets the value; a cell that is not read only and not editing writes it to its binding.
     pub fn set_value(&self, value: Option<T>) {
-        let changed = {
-            let mut current = self.value.borrow_mut();
-            if *current != value {
-                *current = value.clone();
-                true
-            } else {
-                false
-            }
-        };
-        if changed {
-            self.notifying.raise_property_changed("Value");
-            if !self.is_read_only && !self.is_editing.get() {
-                if let (Some(binding), Some(value)) = (&self.binding, value) {
-                    binding.on_next(value);
-                }
+        if *self.value.borrow() == value {
+            return;
+        }
+        // Only a cell that writes its changes back keeps a copy of the value for its binding.
+        let written_back = if self.is_read_only { None } else { value.clone() };
+        *self.value.borrow_mut() = value;
+        self.notifying.raise_property_changed("Value");
+        if !self.is_editing.get() {
+            if let (Some(binding), Some(value)) = (&self.binding, written_back) {
+                binding.on_next(value);
             }
         }
     }
@@ -109,24 +104,26 @@ impl<T: Clone + PartialEq + 'static> TextCell<T> {
         if self.is_editing.get() {
             return self.edit_text.borrow().clone();
         }
-        let value = self.value.borrow().clone();
+        let boxed = {
+            let value = self.value.borrow();
+            if self.options.as_ref().is_some_and(|options| options.has_default_string_format()) {
+                let text = match &*value {
+                    Some(value) => invariant_text(value as &dyn Any),
+                    None => Some(String::new()),
+                };
+                if text.is_some() {
+                    return text;
+                }
+            }
+            value.as_ref().and_then(box_cell_value)
+        };
         match &self.options {
             Some(options) => {
                 let format = options.string_format();
-                if format == "{0}" {
-                    let text = match &value {
-                        Some(value) => invariant_text(value as &dyn Any),
-                        None => Some(String::new()),
-                    };
-                    if text.is_some() {
-                        return text;
-                    }
-                }
-                let boxed = value.as_ref().and_then(box_cell_value);
                 let culture = options.culture();
                 Some(format_text(&format, boxed, &culture))
             }
-            None => cell_value_text(value.as_ref().and_then(box_cell_value).as_ref()),
+            None => cell_value_text(boxed.as_ref()),
         }
     }
 

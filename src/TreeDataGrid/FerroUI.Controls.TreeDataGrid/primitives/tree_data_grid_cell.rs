@@ -23,7 +23,7 @@ use ferroui_controls::automation::peers::AutomationPeer;
 use ferroui_controls::metadata::PseudoClassesAttribute;
 use ferroui_controls::primitives::{TemplatedControl, TemplatedControlImpl};
 use ferroui_controls::ControlImpl;
-use std::cell::{Cell, RefCell};
+use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
 
 const INVALID_POINT: Point = Point::new(f64::NAN, f64::NAN);
@@ -43,6 +43,9 @@ pub struct TreeDataGridCell {
     natural_desired_size: Cell<Option<Size>>,
     /// The model whose property changes the cell follows, and the token of the handler.
     model_subscription: RefCell<Option<(CellRef, u64)>>,
+    /// The handler the cell subscribes to the property changes of its models with, made once and
+    /// added again at every subscription.
+    model_changed_handler: OnceCell<Rc<dyn Fn(&str)>>,
 }
 
 ferro_class! {
@@ -341,6 +344,7 @@ impl TreeDataGridCell {
             recycling_column: RefCell::new(None),
             natural_desired_size: Cell::new(None),
             model_subscription: RefCell::new(None),
+            model_changed_handler: OnceCell::new(),
         }
     }
 
@@ -434,12 +438,15 @@ impl TreeDataGridCell {
         let Some(model) = self.model() else { return };
         let Some(notifier) = model.as_notify_property_changed() else { return };
 
-        let weak = self.to_ref().downgrade();
-        let token = notifier.property_changed().add(Rc::new(move |property_name: &str| {
-            if let Some(this) = weak.upgrade() {
-                this.on_model_property_changed(property_name);
-            }
-        }));
+        let handler = self.model_changed_handler.get_or_init(|| {
+            let weak = self.to_ref().downgrade();
+            Rc::new(move |property_name: &str| {
+                if let Some(this) = weak.upgrade() {
+                    this.on_model_property_changed(property_name);
+                }
+            })
+        });
+        let token = notifier.property_changed().add(handler.clone());
         let previous = self.model_subscription.borrow_mut().replace((model.clone(), token));
         if let Some((previous_model, previous_token)) = previous {
             if let Some(notifier) = previous_model.as_notify_property_changed() {

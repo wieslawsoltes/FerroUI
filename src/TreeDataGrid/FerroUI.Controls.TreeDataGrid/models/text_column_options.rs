@@ -124,6 +124,10 @@ impl<M: 'static> ITextCellOptions for TextColumnOptions<M> {
         TextColumnOptions::string_format(self)
     }
 
+    fn has_default_string_format(&self) -> bool {
+        *self.string_format.borrow() == "{0}"
+    }
+
     fn text_trimming(&self) -> Rc<dyn TextTrimming> {
         TextColumnOptions::text_trimming(self)
     }

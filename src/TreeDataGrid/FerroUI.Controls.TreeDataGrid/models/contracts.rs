@@ -75,6 +75,10 @@ pub trait ICellOptions {
 /// The options of a text cell (`ITextCellOptions`).
 pub trait ITextCellOptions: ICellOptions {
     fn string_format(&self) -> String;
+    /// Whether the string format is the default `{0}`, which formats a value as its own text.
+    fn has_default_string_format(&self) -> bool {
+        self.string_format() == "{0}"
+    }
     fn text_trimming(&self) -> Rc<dyn TextTrimming>;
     fn text_wrapping(&self) -> TextWrapping;
     fn text_alignment(&self) -> TextAlignment;
