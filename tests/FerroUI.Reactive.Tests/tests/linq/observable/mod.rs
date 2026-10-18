@@ -30,6 +30,8 @@ mod finally_test;
 mod first_async_test;
 mod first_or_default_async_test;
 mod generate_test;
+mod group_by_test;
+mod group_by_until_test;
 mod ignore_elements_test;
 mod interval_test;
 mod is_empty_test;

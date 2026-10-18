@@ -10,6 +10,9 @@
 
 mod creation;
 mod observable_ext;
+pub(crate) mod grouped_observable;
+pub(crate) mod group_by;
+pub(crate) mod group_by_until;
 pub(crate) mod zip;
 pub(crate) mod numeric;
 pub(crate) mod sum;
@@ -98,6 +101,7 @@ pub use cast::{AnyObject, InvalidCastException};
 pub use creation::Observable;
 pub use dematerialize::NotificationValue;
 pub use element_at::ArgumentOutOfRangeError;
+pub use grouped_observable::IGroupedObservable;
 pub use merge::ObservableSource;
 pub use numeric::{Averageable, Extremum, Summable};
 pub use timeout::TimeoutException;
