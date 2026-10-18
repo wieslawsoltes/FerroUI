@@ -1,0 +1,16 @@
+//! `Automation/Peers/`: the automation peers of the grid, its rows, cells, column headers and the
+//! presenter of the column headers.
+
+mod tree_data_grid_automation_peer;
+mod tree_data_grid_cell_automation_peer;
+mod tree_data_grid_check_box_cell_automation_peer;
+mod tree_data_grid_column_header_automation_peer;
+mod tree_data_grid_column_headers_presenter_automation_peer;
+mod tree_data_grid_row_automation_peer;
+
+pub use tree_data_grid_automation_peer::TreeDataGridAutomationPeer;
+pub use tree_data_grid_cell_automation_peer::TreeDataGridCellAutomationPeer;
+pub use tree_data_grid_check_box_cell_automation_peer::TreeDataGridCheckBoxCellAutomationPeer;
+pub use tree_data_grid_column_header_automation_peer::TreeDataGridColumnHeaderAutomationPeer;
+pub use tree_data_grid_column_headers_presenter_automation_peer::TreeDataGridColumnHeadersPresenterAutomationPeer;
+pub use tree_data_grid_row_automation_peer::TreeDataGridRowAutomationPeer;

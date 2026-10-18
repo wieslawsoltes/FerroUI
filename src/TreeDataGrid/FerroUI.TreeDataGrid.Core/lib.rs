@@ -11,6 +11,8 @@ mod hierarchical_tree_data_grid_source;
 mod i_tree_data_grid_source;
 mod index_path;
 pub mod items_source_view;
+mod markup_types;
+pub use markup_types::register_types;
 pub mod model_collection;
 pub mod models;
 pub mod selection;

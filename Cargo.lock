@@ -908,6 +908,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-controls-treedatagrid"
+version = "0.2.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-themes-fluent",
+ "ferroui-treedatagrid-core",
+]
+
+[[package]]
 name = "ferroui-designer-support"
 version = "0.2.0-preview.1"
 dependencies = [
@@ -1257,6 +1270,7 @@ name = "ferroui-treedatagrid-core"
 version = "0.2.0-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build-scan",
 ]
 
 [[package]]

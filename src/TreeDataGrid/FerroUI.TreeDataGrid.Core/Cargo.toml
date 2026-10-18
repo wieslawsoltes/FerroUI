@@ -10,6 +10,11 @@ homepage.workspace = true
 readme.workspace = true
 keywords.workspace = true
 categories.workspace = true
+build = "build.rs"
+# The build script exports the type model of the crate (its enumerations, for markup); Cargo hands
+# the path of the file to the build scripts of the crates that depend on this one (the control,
+# whose themes name the sort directions).
+links = "ferroui_treedatagrid_core_xaml"
 
 # Unit tests live next to the code (`tests/` modules of the library), not as
 # integration test targets.
@@ -24,6 +29,9 @@ path = "lib.rs"
 # The base library only: values, model types, notifying collections and events. The core does
 # not depend on the controls, as the reference's core does not reference the UI framework.
 ferroui-base = { workspace = true }
+
+[build-dependencies]
+ferroui-build-scan = { workspace = true }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
