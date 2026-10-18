@@ -70,8 +70,96 @@ The names follow the rules of the repository: no upstream framework name in code
 | T5 | done |
 | T6 | done: the 497 tests of the control crate pass (`cargo test -p ferroui-controls-treedatagrid`): the reference's control tests and the port's own |
 | T7 | done: `samples/TreeDataGridDemo` (one crate: the library of models, view models and one view per page, and the binary `treedatagrid-demo`), every page of the reference demo and the core demo as the page "Core"; its 53 tests pass (the reference's demo tests, the generated document tests and a test that shows and draws every page); the ControlCatalog page TreeDataGrid shows the view of the tabs of the demo. The deviations are in `DEVIATIONS.md`, section TreeDataGrid |
-| T8 | in progress: `tests/FerroUI.TreeDataGrid.Benchmarks` ports every benchmark class of the reference |
+| T8 | done: `tests/FerroUI.TreeDataGrid.Benchmarks` ports every benchmark class of the reference; the comparison is in section 6 |
 
 ## 6. Performance
 
-To be filled by T8: the reference's suites (`./benchmarks/run-benchmarks.sh`, .NET on this machine) against the port's benches, workload by workload.
+The reference's suite (`benchmarks/run-benchmarks.sh`: BenchmarkDotNet, 5 warm-up and 10 measured iterations a benchmark, the operations of an invocation normalised) and the port's (`tests/FerroUI.TreeDataGrid.Benchmarks`: the harness of the workspace, 3 warm-up and 15 measured iterations, the same normalisation) were run one after the other on one machine with nothing else running: an Apple M3 Pro, macOS 26.6; the reference at its commit 3ca47316 on .NET 10.0.201 (the suite targets .NET 8 and runs on the installed .NET 10 with `DOTNET_ROLL_FORWARD=Major`); the port in a release build with rustc 1.90.0. The times are the mean time of one operation.
+
+```sh
+# The reference, in a clone outside this repository.
+dotnet benchmarks/Avalonia.Controls.TreeDataGrid.Benchmarks/bin/Release/net8.0/Avalonia.Controls.TreeDataGrid.Benchmarks.dll --filter '*' --exporters json
+# The port.
+cargo test --release -p ferroui-treedatagrid-benchmarks --lib run_benchmarks -- --ignored --nocapture --test-threads=1
+```
+
+The first run of the port was faster in 37 of the 71 benchmarks, with a geometric mean of the ratio of 0.91: scrolling was 1.5 to 1.9 times slower, reusing an element 2.5 times, finding a column 1.8 times. The profiles showed the costs in the framework and in the port's own code rather than in the algorithms, which follow the reference: the scroll presenter translating every anchor candidate to itself walked both visuals up to the root (`transform_to_visual`, now one walk for an ancestor) and read the render transform of every visual it passed through the value store (now only for the visuals that have one); maps keyed by identities hashed with SipHash (the layout queues, the scroll anchors, the pools of the element factory, the collection change listeners: now the Fx hasher); the recycle keys were type names built on every lookup (now interned); the text of a cell went through the composite formatter for the default format `{0}`; a column lookup called an outlined geometry check. The deviations this needed are in `DEVIATIONS.md` (sections Visual tree and TreeDataGrid).
+
+After these changes the port is as fast or faster in 58 of the 71 benchmarks, with a geometric mean of the ratio port / reference of 0.68. Of the 13 others, 12 are within 14 % of the reference (scrolls that realize rows and cells, bursts of changes of the items, reusing an element from a pool of 100): what remains there is spread over allocation and the property system of the framework. Expanding and collapsing a thousand rows takes 1.8 to 1.9 times as long (14.5 against 7.7 microseconds): the rows of an expansion are counted references, copied into the flattened rows and into the arguments of the change the handlers receive, where the reference copies plain references; a contract of the change that does not copy the rows would remove it.
+
+| Benchmark | Parameters | Reference (.NET) | Port | Port / reference |
+|---|---|---|---|---|
+| ColumnGeometryBenchmarks.locate_viewport | ColumnCount=1000 | 13.7 ns | 10.0 ns | 0.73 |
+| ColumnGeometryBenchmarks.locate_viewport | ColumnCount=20 | 6.7 ns | 6.0 ns | 0.88 |
+| ColumnGeometryBenchmarks.locate_viewport | ColumnCount=200 | 10.7 ns | 7.8 ns | 0.73 |
+| ColumnLayoutBenchmarks.commit_unchanged_widths | ColumnCount=1000 | 11.6 ns | 3.3 ns | 0.29 |
+| ColumnLayoutBenchmarks.commit_unchanged_widths | ColumnCount=20 | 11.2 ns | 3.3 ns | 0.30 |
+| ColumnLayoutBenchmarks.commit_unchanged_widths | ColumnCount=200 | 14.1 ns | 3.3 ns | 0.23 |
+| ColumnWidthBatchBenchmarks.batched_width_commit | Layout=Auto, RowCount=20 | 16.14 us | 2.73 us | 0.17 |
+| ColumnWidthBatchBenchmarks.batched_width_commit | Layout=Auto, RowCount=40 | 16.99 us | 3.41 us | 0.20 |
+| ColumnWidthBatchBenchmarks.batched_width_commit | Layout=Mixed, RowCount=20 | 16.87 us | 3.03 us | 0.18 |
+| ColumnWidthBatchBenchmarks.batched_width_commit | Layout=Mixed, RowCount=40 | 17.11 us | 4.05 us | 0.24 |
+| ColumnWidthBatchBenchmarks.incremental_width_commits | Layout=Auto, RowCount=20 | 18.05 us | 4.73 us | 0.26 |
+| ColumnWidthBatchBenchmarks.incremental_width_commits | Layout=Auto, RowCount=40 | 20.09 us | 7.31 us | 0.36 |
+| ColumnWidthBatchBenchmarks.incremental_width_commits | Layout=Mixed, RowCount=20 | 18.59 us | 5.56 us | 0.30 |
+| ColumnWidthBatchBenchmarks.incremental_width_commits | Layout=Mixed, RowCount=40 | 21.42 us | 9.13 us | 0.43 |
+| ElementFactoryBenchmarks.same_parent_reuse | PoolSize=10 | 59.1 ns | 60.6 ns | 1.03 |
+| ElementFactoryBenchmarks.same_parent_reuse | PoolSize=100 | 70.9 ns | 79.2 ns | 1.12 |
+| ElementFactoryBenchmarks.same_parent_reuse | PoolSize=1000 | 90.7 ns | 90.6 ns | 1.00 |
+| FirstLayoutBenchmarks.legacy_natural_width_probe | Layout=Auto, CacheLength=0 | 1.74 ms | 755.51 us | 0.44 |
+| FirstLayoutBenchmarks.legacy_natural_width_probe | Layout=Auto, CacheLength=0.5 | 1.67 ms | 1.36 ms | 0.81 |
+| FirstLayoutBenchmarks.legacy_natural_width_probe | Layout=Fixed, CacheLength=0 | 1.80 ms | 1.04 ms | 0.58 |
+| FirstLayoutBenchmarks.legacy_natural_width_probe | Layout=Fixed, CacheLength=0.5 | 1.66 ms | 1.34 ms | 0.81 |
+| FirstLayoutBenchmarks.legacy_natural_width_probe | Layout=Mixed, CacheLength=0 | 919.56 us | 802.30 us | 0.87 |
+| FirstLayoutBenchmarks.legacy_natural_width_probe | Layout=Mixed, CacheLength=0.5 | 1.68 ms | 1.41 ms | 0.84 |
+| FirstLayoutBenchmarks.legacy_natural_width_probe | Layout=Star, CacheLength=0 | 1.81 ms | 773.44 us | 0.43 |
+| FirstLayoutBenchmarks.legacy_natural_width_probe | Layout=Star, CacheLength=0.5 | 1.66 ms | 1.36 ms | 0.82 |
+| FirstLayoutBenchmarks.resolved_width_constraint | Layout=Auto, CacheLength=0 | 1.02 ms | 779.72 us | 0.77 |
+| FirstLayoutBenchmarks.resolved_width_constraint | Layout=Auto, CacheLength=0.5 | 1.68 ms | 1.35 ms | 0.81 |
+| FirstLayoutBenchmarks.resolved_width_constraint | Layout=Fixed, CacheLength=0 | 1.09 ms | 729.30 us | 0.67 |
+| FirstLayoutBenchmarks.resolved_width_constraint | Layout=Fixed, CacheLength=0.5 | 1.62 ms | 1.27 ms | 0.79 |
+| FirstLayoutBenchmarks.resolved_width_constraint | Layout=Mixed, CacheLength=0 | 901.76 us | 775.56 us | 0.86 |
+| FirstLayoutBenchmarks.resolved_width_constraint | Layout=Mixed, CacheLength=0.5 | 1.71 ms | 1.41 ms | 0.83 |
+| FirstLayoutBenchmarks.resolved_width_constraint | Layout=Star, CacheLength=0 | 1.05 ms | 763.82 us | 0.73 |
+| FirstLayoutBenchmarks.resolved_width_constraint | Layout=Star, CacheLength=0.5 | 1.64 ms | 1.31 ms | 0.80 |
+| NeutralSourceBenchmarks.create_source_and_presentation | NeutralSource=false | 5.74 us | 2.62 us | 0.46 |
+| NeutralSourceBenchmarks.create_source_and_presentation | NeutralSource=true | 5.71 us | 2.75 us | 0.48 |
+| NeutralSourceBenchmarks.expand_collapse_thousand_rows | NeutralSource=false | 7.65 us | 14.59 us | 1.91 |
+| NeutralSourceBenchmarks.expand_collapse_thousand_rows | NeutralSource=true | 8.01 us | 14.42 us | 1.80 |
+| NeutralSourceBenchmarks.sort_thousand_rows | NeutralSource=false | 710.78 us | 75.42 us | 0.11 |
+| NeutralSourceBenchmarks.sort_thousand_rows | NeutralSource=true | 73.00 us | 73.44 us | 1.01 |
+| TemplateCellRecyclingBenchmarks.alternating_template_providers |  | 2.35 us | 1.45 us | 0.62 |
+| TemplateCellRecyclingBenchmarks.same_template_provider |  | 2.33 us | 1.40 us | 0.60 |
+| VirtualizationBenchmarks.collection_insert_remove_burst | NeutralSource=false | 51.13 us | 57.21 us | 1.12 |
+| VirtualizationBenchmarks.collection_insert_remove_burst | NeutralSource=true | 54.31 us | 53.93 us | 0.99 |
+| VirtualizationBenchmarks.collection_move_burst | NeutralSource=false | 20.99 us | 23.83 us | 1.14 |
+| VirtualizationBenchmarks.collection_move_burst | NeutralSource=true | 23.96 us | 23.87 us | 1.00 |
+| VirtualizationBenchmarks.create_and_layout_grid | NeutralSource=false | 1.97 ms | 1.06 ms | 0.54 |
+| VirtualizationBenchmarks.create_and_layout_grid | NeutralSource=true | 2.08 ms | 1.09 ms | 0.52 |
+| VirtualizationBenchmarks.detach_reattach | NeutralSource=false | 888.92 us | 514.66 us | 0.58 |
+| VirtualizationBenchmarks.detach_reattach | NeutralSource=true | 885.75 us | 519.40 us | 0.59 |
+| VirtualizationBenchmarks.forced_stationary_vertical_layouts | NeutralSource=false | 4.79 us | 4.00 us | 0.83 |
+| VirtualizationBenchmarks.forced_stationary_vertical_layouts | NeutralSource=true | 4.68 us | 3.88 us | 0.83 |
+| VirtualizationBenchmarks.horizontal_column_scrolls | NeutralSource=false | 176.28 us | 172.49 us | 0.98 |
+| VirtualizationBenchmarks.horizontal_column_scrolls | NeutralSource=true | 157.28 us | 176.29 us | 1.12 |
+| VirtualizationBenchmarks.horizontal_far_column_scrolls | NeutralSource=false | 162.19 us | 161.84 us | 1.00 |
+| VirtualizationBenchmarks.horizontal_far_column_scrolls | NeutralSource=true | 142.61 us | 160.37 us | 1.12 |
+| VirtualizationBenchmarks.horizontal_small_scrolls | NeutralSource=false | 20.20 us | 18.10 us | 0.90 |
+| VirtualizationBenchmarks.horizontal_small_scrolls | NeutralSource=true | 20.06 us | 17.77 us | 0.89 |
+| VirtualizationBenchmarks.horizontal_unbatched_small_scrolls | NeutralSource=false | 40.43 us | 43.44 us | 1.07 |
+| VirtualizationBenchmarks.horizontal_unbatched_small_scrolls | NeutralSource=true | 40.44 us | 44.42 us | 1.10 |
+| VirtualizationBenchmarks.vertical_buffered_jitter_scrolls | NeutralSource=false | 24.98 us | 24.57 us | 0.98 |
+| VirtualizationBenchmarks.vertical_buffered_jitter_scrolls | NeutralSource=true | 24.78 us | 23.61 us | 0.95 |
+| VirtualizationBenchmarks.vertical_buffered_small_scrolls | NeutralSource=false | 23.25 us | 21.01 us | 0.90 |
+| VirtualizationBenchmarks.vertical_buffered_small_scrolls | NeutralSource=true | 23.29 us | 21.26 us | 0.91 |
+| VirtualizationBenchmarks.vertical_jitter_scrolls | NeutralSource=false | 101.20 us | 113.27 us | 1.12 |
+| VirtualizationBenchmarks.vertical_jitter_scrolls | NeutralSource=true | 103.42 us | 117.95 us | 1.14 |
+| VirtualizationBenchmarks.vertical_row_scrolls | NeutralSource=false | 34.68 us | 32.89 us | 0.95 |
+| VirtualizationBenchmarks.vertical_row_scrolls | NeutralSource=true | 34.57 us | 33.56 us | 0.97 |
+| VirtualizationBenchmarks.vertical_small_scrolls | NeutralSource=false | 19.75 us | 17.82 us | 0.90 |
+| VirtualizationBenchmarks.vertical_small_scrolls | NeutralSource=true | 19.89 us | 18.47 us | 0.93 |
+| VirtualizationBenchmarks.vertical_unbatched_small_scrolls | NeutralSource=false | 24.97 us | 22.68 us | 0.91 |
+| VirtualizationBenchmarks.vertical_unbatched_small_scrolls | NeutralSource=true | 24.58 us | 21.91 us | 0.89 |
+
+71 benchmarks compared; the port is as fast or faster in 58; geometric mean of port / reference: 0.68.
+
