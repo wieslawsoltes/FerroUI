@@ -10,6 +10,13 @@
 
 mod creation;
 mod observable_ext;
+pub(crate) mod numeric;
+pub(crate) mod sum;
+pub(crate) mod average;
+pub(crate) mod min;
+pub(crate) mod max;
+pub(crate) mod min_by;
+pub(crate) mod max_by;
 pub(crate) mod combine_latest;
 pub(crate) mod merge;
 pub(crate) mod concat;
@@ -91,6 +98,7 @@ pub use creation::Observable;
 pub use dematerialize::NotificationValue;
 pub use element_at::ArgumentOutOfRangeError;
 pub use merge::ObservableSource;
+pub use numeric::{Averageable, Extremum, Summable};
 pub use timeout::TimeoutException;
 pub use to_lookup::{Grouping, Lookup};
 pub use observable_ext::ObservableExt;
