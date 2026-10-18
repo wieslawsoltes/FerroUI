@@ -2,6 +2,7 @@ mod anonymous_test;
 mod concurrency;
 mod connectable_observable_test;
 mod disposables;
+mod event_pattern_source_base_test;
 mod internal;
 mod linq;
 mod notification_test;
