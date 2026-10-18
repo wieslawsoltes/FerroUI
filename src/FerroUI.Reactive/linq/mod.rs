@@ -10,6 +10,11 @@
 
 mod creation;
 mod observable_ext;
+pub(crate) mod multicast;
+pub(crate) mod publish;
+pub(crate) mod replay;
+pub(crate) mod ref_count;
+pub(crate) mod auto_connect;
 pub(crate) mod grouped_observable;
 pub(crate) mod group_by;
 pub(crate) mod group_by_until;
@@ -103,6 +108,7 @@ pub use dematerialize::NotificationValue;
 pub use element_at::ArgumentOutOfRangeError;
 pub use grouped_observable::IGroupedObservable;
 pub use merge::ObservableSource;
+pub use multicast::ConnectableObservableExt;
 pub use numeric::{Averageable, Extremum, Summable};
 pub use timeout::TimeoutException;
 pub use to_lookup::{Grouping, Lookup};

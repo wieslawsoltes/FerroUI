@@ -36,6 +36,9 @@ impl<S: ISubject<A, B> + 'static, A, B> ISubjectHandle<A, B> for S {
 impl<TSource: 'static, TResult: 'static> ConnectableObservable<TSource, TResult> {
     /// Shares `source` through `subject`.
     pub fn new(source: Rc<dyn IObservable<TSource>>, subject: Rc<dyn ISubjectHandle<TSource, TResult>>) -> Rc<Self> {
+        // The source is subscribed through `AsObservable`, as upstream does: its sink ends the
+        // subscription to the source when the source ends.
+        let source = crate::ObservableExt::as_observable(&source);
         Rc::new(Self { source, subject, connection: Rc::new(RefCell::new(None)) })
     }
 }

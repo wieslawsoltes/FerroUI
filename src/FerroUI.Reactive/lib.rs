@@ -32,7 +32,7 @@ pub mod subjects;
 mod time_interval;
 
 pub use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
-pub use linq::{Observable, ObservableExt};
+pub use linq::{ConnectableObservableExt, Observable, ObservableExt};
 pub use notification::{Notification, NotificationKind};
 pub use observer::{AnonymousObserver, Observer, ObserverExt};
 pub use time_interval::{TimeInterval, Timestamped};
