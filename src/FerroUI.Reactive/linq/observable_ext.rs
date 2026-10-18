@@ -16,6 +16,27 @@ pub trait ObservableExt<T: 'static> {
     super::subscribe::subscribe_methods!();
     super::select::select_methods!();
     super::where_::where_methods!();
+    super::as_observable::as_observable_methods!();
+    super::cast::cast_methods!();
+    super::of_type::of_type_methods!();
+    super::do_::do_methods!();
+    super::finally::finally_methods!();
+    super::ignore_elements::ignore_elements_methods!();
+    super::materialize::materialize_methods!();
+    super::dematerialize::dematerialize_methods!();
+    super::scan::scan_methods!();
+    super::start_with::start_with_methods!();
+    super::append_prepend::append_prepend_methods!();
+    super::default_if_empty::default_if_empty_methods!();
+    super::skip::skip_methods!();
+    super::skip_last::skip_last_methods!();
+    super::skip_while::skip_while_methods!();
+    super::skip_until::skip_until_methods!();
+    super::take::take_methods!();
+    super::take_last::take_last_methods!();
+    super::take_last_buffer::take_last_buffer_methods!();
+    super::take_while::take_while_methods!();
+    super::take_until::take_until_methods!();
 }
 
 impl<T: 'static> ObservableExt<T> for Rc<dyn IObservable<T>> {

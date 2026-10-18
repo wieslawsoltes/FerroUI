@@ -9,10 +9,33 @@
 //! invokes).
 
 mod creation;
+pub(crate) mod append_prepend;
+pub(crate) mod as_observable;
+pub(crate) mod cast;
+pub(crate) mod default_if_empty;
+pub(crate) mod dematerialize;
+pub(crate) mod do_;
+pub(crate) mod finally;
+pub(crate) mod ignore_elements;
+pub(crate) mod materialize;
+pub(crate) mod of_type;
+pub(crate) mod scan;
+pub(crate) mod skip;
+pub(crate) mod skip_last;
+pub(crate) mod skip_until;
+pub(crate) mod skip_while;
+pub(crate) mod start_with;
+pub(crate) mod take;
+pub(crate) mod take_last;
+pub(crate) mod take_last_buffer;
+pub(crate) mod take_until;
+pub(crate) mod take_while;
 mod observable_ext;
 pub(crate) mod select;
 pub(crate) mod subscribe;
 pub(crate) mod where_;
 
+pub use cast::{AnyObject, InvalidCastException};
 pub use creation::Observable;
+pub use dematerialize::NotificationValue;
 pub use observable_ext::ObservableExt;
