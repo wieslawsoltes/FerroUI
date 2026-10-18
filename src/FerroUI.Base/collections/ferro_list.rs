@@ -231,11 +231,10 @@ impl<T: Clone> Default for FerroList<T> {
 impl<T: Clone> FerroList<T> {
     /// Creates an empty list.
     pub fn new() -> Self {
-        let ids = Rc::new(Cell::new(1));
         Self(Rc::new(FerroListData {
             items: RefCell::new(Rc::new(Vec::new())),
-            collection_changed: HandlerList::with_shared_ids(ids.clone()),
-            untyped_collection_changed: Event::with_shared_ids(ids),
+            collection_changed: HandlerList::with_ordered_ids(),
+            untyped_collection_changed: Event::with_ordered_ids(),
             property_changed: Event::new(),
             validator: RefCell::new(None),
             reset_behavior: Cell::new(ResetBehavior::Reset),

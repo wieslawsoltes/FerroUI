@@ -3,7 +3,7 @@ use super::{CollectionChangedHandler, NotifyCollectionChangedAction, NotifyColle
 use crate::data::core::INDEXER_NAME;
 use crate::data::model::{CollectionChange, Event, INotifyCollectionChanged, INotifyPropertyChanged};
 use crate::utilities::{HandlerList, WeakEventSender};
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::Hash;
@@ -151,11 +151,10 @@ impl<K: Eq + Hash + Clone + Display, V: Clone> FerroDictionary<K, V> {
 
     /// Creates an empty dictionary with room for `capacity` entries.
     pub fn with_capacity(capacity: usize) -> Self {
-        let ids = Rc::new(Cell::new(1));
         Self(Rc::new(FerroDictionaryData {
             inner: RefCell::new(Inner::with_capacity(capacity)),
-            collection_changed: HandlerList::with_shared_ids(ids.clone()),
-            untyped_collection_changed: Event::with_shared_ids(ids),
+            collection_changed: HandlerList::with_ordered_ids(),
+            untyped_collection_changed: Event::with_ordered_ids(),
             property_changed: Event::new(),
         }))
     }

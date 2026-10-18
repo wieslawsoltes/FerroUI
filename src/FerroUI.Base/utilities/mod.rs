@@ -12,7 +12,7 @@ mod synchronous_completion_async_result;
 
 pub use boolean_boxes::BooleanBoxes;
 pub use byte_size_helper::ByteSizeHelper;
-pub use handler_list::HandlerList;
+pub use handler_list::{HandlerList, HandlerSnapshot};
 pub use i_weak_event_subscriber::{
     IWeakEventSubscriber, TargetWeakEventSubscriber, WeakEventSubscriber, WeakEventSubscriberHandler,
 };

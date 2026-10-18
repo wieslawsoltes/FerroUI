@@ -1,4 +1,4 @@
-use crate::utilities::HandlerList;
+use crate::utilities::{HandlerList, HandlerSnapshot};
 use std::rc::Rc;
 
 /// A multicast event of a model object: the equivalent of a managed `event`
@@ -27,9 +27,15 @@ impl<A: ?Sized> Event<A> {
         Self { handlers: HandlerList::with_shared_ids(ids) }
     }
 
+    /// An event whose handler tokens come from the counter of the process
+    /// (see [`HandlerList::with_ordered_ids`]).
+    pub fn with_ordered_ids() -> Self {
+        Self { handlers: HandlerList::with_ordered_ids() }
+    }
+
     /// The current handlers with their tokens; later changes do not affect
     /// it.
-    pub fn snapshot(&self) -> Rc<Vec<(u64, Rc<dyn Fn(&A)>)>> {
+    pub fn snapshot(&self) -> HandlerSnapshot<dyn Fn(&A)> {
         self.handlers.snapshot()
     }
 
