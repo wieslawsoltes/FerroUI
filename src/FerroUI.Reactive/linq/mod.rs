@@ -10,6 +10,16 @@
 
 mod creation;
 mod observable_ext;
+pub(crate) mod delay;
+pub(crate) mod delay_subscription;
+pub(crate) mod time_interval_op;
+pub(crate) mod timestamp;
+pub(crate) mod throttle;
+pub(crate) mod sample;
+pub(crate) mod timeout;
+pub(crate) mod observe_on;
+pub(crate) mod subscribe_on;
+pub(crate) mod synchronize;
 pub(crate) mod defer;
 pub(crate) mod range;
 pub(crate) mod repeat;
@@ -72,5 +82,6 @@ pub use cast::{AnyObject, InvalidCastException};
 pub use creation::Observable;
 pub use dematerialize::NotificationValue;
 pub use element_at::ArgumentOutOfRangeError;
+pub use timeout::TimeoutException;
 pub use to_lookup::{Grouping, Lookup};
 pub use observable_ext::ObservableExt;

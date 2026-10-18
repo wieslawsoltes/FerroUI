@@ -60,6 +60,16 @@ pub trait ObservableExt<T: 'static> {
     super::repeat_source::repeat_source_methods!();
     super::retry_when::retry_when_methods!();
     super::repeat_when::repeat_when_methods!();
+    super::delay::delay_methods!();
+    super::delay_subscription::delay_subscription_methods!();
+    super::time_interval_op::time_interval_methods!();
+    super::timestamp::timestamp_methods!();
+    super::throttle::throttle_methods!();
+    super::sample::sample_methods!();
+    super::timeout::timeout_methods!();
+    super::observe_on::observe_on_methods!();
+    super::subscribe_on::subscribe_on_methods!();
+    super::synchronize::synchronize_methods!();
 }
 
 impl<T: 'static> ObservableExt<T> for Rc<dyn IObservable<T>> {
