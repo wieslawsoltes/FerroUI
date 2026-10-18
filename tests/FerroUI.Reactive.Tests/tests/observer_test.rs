@@ -2,8 +2,11 @@
 //! Adapted: an error delivered to an observer without a function for errors panics where upstream
 //! rethrows the exception, so the tests check for the panic (`assert_throws`) and not for the
 //! identity of the exception; `InvalidOperationException` of `Checked` is a panic too. The mutable
-//! locals that the observer lambdas capture are shared cells.
+//! locals that the observer lambdas capture are shared cells. The overloads of
+//! `Observer.Synchronize` are the methods `synchronize`, `synchronize_with_gate` (the gate is any
+//! `Rc<dyn Any>`), `synchronize_prevent_reentrancy` and `synchronize_with_lock` of `ObserverExt`.
 
+use ferroui_reactive::concurrency::AsyncLock;
 use ferroui_reactive::{IObserver, Notification, NotificationKind, ObservableError, Observer, ObserverExt};
 use ferroui_reactive_testing::{assert_throws, new_error};
 use std::cell::{Cell, RefCell};
@@ -473,24 +476,166 @@ fn observer_checked_reentrant_completed() {
     assert_eq!(n.get(), 1);
 }
 
+/// The observer of the re-entrancy tests of `Synchronize`: the value 1 sends 2 to the
+/// synchronized observer in `s` (with `inOne` set while it does), and the value 2 sets `res` to
+/// `record(inOne)`.
+fn reentrant_observer(s: &ObserverSlot, res: &Rc<Cell<bool>>, record: fn(bool) -> bool) -> Rc<dyn IObserver<i32>> {
+    let in_one = Rc::new(Cell::new(false));
+    let (s, res) = (s.clone(), res.clone());
+    Observer::create(move |x: i32| {
+        if x == 1 {
+            in_one.set(true);
+            let synchronized = s.borrow().clone().expect("the synchronized observer");
+            synchronized.on_next(2);
+            in_one.set(false);
+        } else if x == 2 {
+            res.set(record(in_one.get()));
+        }
+    })
+}
+
+#[test]
+fn observer_synchronize_monitor_reentrant1() {
+    let res = Rc::new(Cell::new(false));
+
+    let s: ObserverSlot = Rc::new(RefCell::new(None));
+
+    let o = reentrant_observer(&s, &res, |in_one| in_one);
+
+    let synchronized = o.synchronize();
+    *s.borrow_mut() = Some(synchronized.clone());
+
+    synchronized.on_next(1);
+
+    assert!(res.get());
+}
+
+#[test]
+fn observer_synchronize_monitor_reentrant2() {
+    let res = Rc::new(Cell::new(false));
+
+    let s: ObserverSlot = Rc::new(RefCell::new(None));
+
+    let o = reentrant_observer(&s, &res, |in_one| in_one);
+
+    let synchronized = o.synchronize_with_gate(Rc::new(()));
+    *s.borrow_mut() = Some(synchronized.clone());
+
+    synchronized.on_next(1);
+
+    assert!(res.get());
+}
+
+#[test]
+fn observer_synchronize_monitor_reentrant3() {
+    let res = Rc::new(Cell::new(false));
+
+    let s: ObserverSlot = Rc::new(RefCell::new(None));
+
+    let o = reentrant_observer(&s, &res, |in_one| in_one);
+
+    let synchronized = o.synchronize_prevent_reentrancy(false);
+    *s.borrow_mut() = Some(synchronized.clone());
+
+    synchronized.on_next(1);
+
+    assert!(res.get());
+}
+
+#[test]
+fn observer_synchronize_async_lock_non_reentrant1() {
+    let res = Rc::new(Cell::new(false));
+
+    let s: ObserverSlot = Rc::new(RefCell::new(None));
+
+    let o = reentrant_observer(&s, &res, |in_one| !in_one);
+
+    let synchronized = o.synchronize_with_lock(Rc::new(AsyncLock::new()));
+    *s.borrow_mut() = Some(synchronized.clone());
+
+    synchronized.on_next(1);
+
+    assert!(res.get());
+}
+
+#[test]
+fn observer_synchronize_async_lock_non_reentrant2() {
+    let res = Rc::new(Cell::new(false));
+
+    let s: ObserverSlot = Rc::new(RefCell::new(None));
+
+    let o = reentrant_observer(&s, &res, |in_one| !in_one);
+
+    let synchronized = o.synchronize_prevent_reentrancy(true);
+    *s.borrow_mut() = Some(synchronized.clone());
+
+    synchronized.on_next(1);
+
+    assert!(res.get());
+}
+
+#[test]
+fn observer_synchronize_async_lock() {
+    {
+        let res = Rc::new(Cell::new(false));
+
+        let o = {
+            let res = res.clone();
+            Observer::create_all(move |x: i32| res.set(x == 1), |_| panic!("unexpected OnError"), || panic!("unexpected OnCompleted"))
+        };
+
+        let s = o.synchronize_prevent_reentrancy(true);
+
+        s.on_next(1);
+
+        assert!(res.get());
+    }
+
+    {
+        let res: Rc<RefCell<Option<ObservableError>>> = Rc::new(RefCell::new(None));
+
+        let err = new_error("err");
+
+        let o = {
+            let res = res.clone();
+            Observer::create_all(|_: i32| panic!("unexpected OnNext"), move |ex| *res.borrow_mut() = Some(ex), || panic!("unexpected OnCompleted"))
+        };
+
+        let s = o.synchronize_prevent_reentrancy(true);
+
+        s.on_error(err.clone());
+
+        assert!(same_error(&err, res.borrow().as_ref().expect("the error is received")));
+    }
+
+    {
+        let res = Rc::new(Cell::new(false));
+
+        let o = {
+            let res = res.clone();
+            Observer::create_all(|_: i32| panic!("unexpected OnNext"), |_| panic!("unexpected OnError"), move || res.set(true))
+        };
+
+        let s = o.synchronize_prevent_reentrancy(true);
+
+        s.on_completed();
+
+        assert!(res.get());
+    }
+}
+
 // Not ported: ToObserver_ArgumentChecking - argument validation
 // Not ported: ToNotifier_ArgumentChecking - argument validation
 // Not ported: Create_ArgumentChecking - argument validation
 // Not ported: AsObserver_ArgumentChecking - argument validation
 // Not ported: Observer_Checked_ArgumentChecking - argument validation
 // Not ported: Observer_Synchronize_ArgumentChecking - argument validation
-// Not ported: Observer_Synchronize_Monitor_Reentrant1 - Observer.Synchronize(IObserver<T>) is not in the crate
-// Not ported: Observer_Synchronize_Monitor_Reentrant2 - Observer.Synchronize(IObserver<T>, object) is not in the crate
-// Not ported: Observer_Synchronize_Monitor_Reentrant3 - Observer.Synchronize(IObserver<T>, bool) is not in the crate
-// Not ported: Observer_Synchronize_AsyncLock_NonReentrant1 - Observer.Synchronize(IObserver<T>, AsyncLock) is not in the crate
-// Not ported: Observer_Synchronize_AsyncLock_NonReentrant2 - Observer.Synchronize(IObserver<T>, bool) is not in the crate
-// Not ported: Observer_Synchronize_AsyncLock - Observer.Synchronize(IObserver<T>, bool) is not in the crate
-// Not ported: Observer_Synchronize_OnCompleted - real threads (Scheduler.Default, CountdownEvent); Observer.Synchronize is not in the crate
-// Not ported: Observer_Synchronize_OnError - real threads (Scheduler.Default, CountdownEvent); Observer.Synchronize is not in the crate
+// Not ported: Observer_Synchronize_OnCompleted - real threads (Scheduler.Default, CountdownEvent)
+// Not ported: Observer_Synchronize_OnError - real threads (Scheduler.Default, CountdownEvent)
 // Not ported: NotifyOn_Null - argument validation
-// Not ported: NotifyOn_Scheduler_OnCompleted - real threads (ThreadPoolScheduler, Thread, ManualResetEvent); Observer.NotifyOn is not in the crate
-// Not ported: NotifyOn_Scheduler_OnError - real threads (ThreadPoolScheduler, Thread, ManualResetEvent); Observer.NotifyOn is not in the crate
-// Not ported: NotifyOn_SyncCtx - real threads (SynchronizationContext posting to Task.Run, ManualResetEvent); Observer.NotifyOn is not in the crate
+// Not ported: NotifyOn_Scheduler_OnCompleted - real threads (ThreadPoolScheduler, Thread, ManualResetEvent)
+// Not ported: NotifyOn_Scheduler_OnError - real threads (ThreadPoolScheduler, Thread, ManualResetEvent)
+// Not ported: NotifyOn_SyncCtx - real threads (SynchronizationContext posting to Task.Run, ManualResetEvent)
 // Not ported: Observer_ToProgress_ArgumentChecking - argument validation
 // Not ported: Observer_ToProgress - Observer.ToProgress and IProgress<T> are not in the crate
 // Not ported: Observer_ToProgress_Scheduler - Observer.ToProgress(IObserver<T>, IScheduler) and IProgress<T> are not in the crate

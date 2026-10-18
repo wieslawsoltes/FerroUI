@@ -198,6 +198,16 @@ impl<T: 'static> AutoDetachObserver<T> {
     pub(crate) fn set_resource(&self, resource: Rc<dyn IDisposable>) {
         self.resource.set_disposable(Some(resource));
     }
+
+    /// Delivers an error of the subscription unless the observer has stopped (`Fail`): false
+    /// when it has, and the caller rethrows the error.
+    pub(crate) fn fail(&self, error: ObservableError) -> bool {
+        if self.is_stopped.get() {
+            return false;
+        }
+        self.on_error(error);
+        true
+    }
 }
 
 impl<T: 'static> IObserver<T> for AutoDetachObserver<T> {
@@ -249,6 +259,31 @@ pub(crate) fn subscribe_auto_detach<T: 'static>(
     } else {
         let resource = subscribe_core(auto_detach.clone());
         auto_detach.set_resource(resource);
+    }
+    auto_detach
+}
+
+/// [`subscribe_auto_detach`] with a subscription that may fail (`ObservableBase<T>.Subscribe`
+/// with the `catch` of `SubscribeCore`): the error goes to the observer
+/// ([`AutoDetachObserver::fail`]), and is rethrown as a panic when the observer has stopped.
+pub(crate) fn try_subscribe_auto_detach<T: 'static>(
+    observer: Rc<dyn IObserver<T>>,
+    subscribe_core: impl FnOnce(Rc<dyn IObserver<T>>) -> Result<Rc<dyn IDisposable>, ObservableError> + 'static,
+) -> Rc<dyn IDisposable> {
+    let auto_detach = AutoDetachObserver::new(observer);
+    let run = move |target: Rc<AutoDetachObserver<T>>| match subscribe_core(target.clone()) {
+        Ok(resource) => target.set_resource(resource),
+        Err(error) => {
+            if !target.fail(error.clone()) {
+                panic!("{error}");
+            }
+        }
+    };
+    if CurrentThreadScheduler::is_schedule_required() {
+        let target = auto_detach.clone();
+        CurrentThreadScheduler::instance().schedule_action(move || run(target));
+    } else {
+        run(auto_detach.clone());
     }
     auto_detach
 }

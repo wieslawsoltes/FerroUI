@@ -4,7 +4,21 @@ use crate::concurrency::{IScheduler, SchedulerExt};
 use crate::linq::Observable;
 use ferroui_system::{IObservable, IObserver, ObservableError};
 use std::fmt;
+use std::hash::{Hash, Hasher};
 use std::rc::Rc;
+
+/// An observer whose handlers return a result (`IObserver<TValue, TResult>`), which
+/// [`Notification::accept_observer_with_result`] returns.
+pub trait IObserverWithResult<T, R> {
+    /// Handles a value (`OnNext`).
+    fn on_next(&self, value: T) -> R;
+
+    /// Handles an error (`OnError`).
+    fn on_error(&self, error: ObservableError) -> R;
+
+    /// Handles the end of the sequence (`OnCompleted`).
+    fn on_completed(&self) -> R;
+}
 
 /// The kind of a notification (`NotificationKind`).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -69,6 +83,16 @@ impl<T> Notification<T> {
         }
     }
 
+    /// Delivers the notification to an observer whose handlers return a result, and returns it
+    /// (`Accept<TResult>(IObserver<T, TResult>)`).
+    pub fn accept_observer_with_result<R>(self, observer: &dyn IObserverWithResult<T, R>) -> R {
+        match self {
+            Self::OnNext(value) => observer.on_next(value),
+            Self::OnError(error) => observer.on_error(error),
+            Self::OnCompleted => observer.on_completed(),
+        }
+    }
+
     /// Calls the function for the kind of the notification (`Accept(Func<T, TResult>, ...)`).
     pub fn accept_fns<R>(
         self,
@@ -114,6 +138,23 @@ impl<T: PartialEq> PartialEq for Notification<T> {
             (Self::OnError(a), Self::OnError(b)) => Rc::ptr_eq(a, b),
             (Self::OnCompleted, Self::OnCompleted) => true,
             _ => false,
+        }
+    }
+}
+
+/// The hash of a notification (`GetHashCode`), consistent with its equality: a value hashes as the
+/// value; an error by its identity (the address of the error, which is what its equality
+/// compares); the end of the sequence as the name of the type of the values combined with a
+/// constant, as upstream's `typeof(T).FullName.GetHashCode() ^ 8510`.
+impl<T: Hash> Hash for Notification<T> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        match self {
+            Self::OnNext(value) => value.hash(state),
+            Self::OnError(error) => (Rc::as_ptr(error) as *const () as usize).hash(state),
+            Self::OnCompleted => {
+                std::any::type_name::<T>().hash(state);
+                8510u32.hash(state);
+            }
         }
     }
 }

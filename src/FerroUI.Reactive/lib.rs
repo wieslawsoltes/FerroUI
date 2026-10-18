@@ -14,7 +14,7 @@
 //! - [`subjects`]: `System.Reactive.Subjects`.
 //! - [`linq`]: `System.Reactive.Linq` (the operators: [`Observable`] and [`ObservableExt`]).
 //! - The root: `Notification<T>`, `Unit`, `TimeInterval<T>`, `Timestamped<T>`, the observers
-//!   (`Observer`, `AnonymousObserver<T>`).
+//!   (`Observer`, `AnonymousObserver<T>`, `ObserverBase<T>`), `ObservableBase<T>`.
 //!
 //! Everything is single-threaded and reference counted, as the object model of FerroUI is: a
 //! sequence and its subscriptions live on the thread that created them, and the schedulers of the
@@ -27,14 +27,18 @@ pub mod disposables;
 pub(crate) mod internal;
 pub mod linq;
 mod notification;
+mod observable_base;
 mod observer;
+mod observer_base;
 pub mod subjects;
 mod time_interval;
 
 pub use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 pub use linq::{ConnectableObservableExt, Observable, ObservableExt};
-pub use notification::{Notification, NotificationKind};
+pub use notification::{IObserverWithResult, Notification, NotificationKind};
+pub use observable_base::{ObservableBase, ObservableCore};
 pub use observer::{AnonymousObserver, Observer, ObserverExt};
+pub use observer_base::{ObserverBase, ObserverCore};
 pub use time_interval::{TimeInterval, Timestamped};
 
 /// The type of a notification without a value (`System.Reactive.Unit`): Rust's unit type.

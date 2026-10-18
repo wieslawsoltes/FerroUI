@@ -1,6 +1,10 @@
-//! `AnonymousObserver<T>` and `Observer` (`AnonymousObserver.cs`, `Observer.Extensions.cs`).
+//! `AnonymousObserver<T>` and `Observer` (`AnonymousObserver.cs`, `Observer.Extensions.cs`), and
+//! the observers of `Synchronize` (`Internal/SynchronizedObserver.cs`,
+//! `Internal/AsyncLockObserver.cs`).
 
+use crate::concurrency::AsyncLock;
 use crate::notification::Notification;
+use crate::observer_base::{ObserverBase, ObserverCore};
 use ferroui_system::{IObserver, ObservableError};
 use std::cell::Cell;
 use std::rc::Rc;
@@ -109,10 +113,31 @@ pub trait ObserverExt<T> {
     /// and on a notification while another is being handled.
     fn checked(&self) -> Rc<dyn IObserver<T>>;
 
-    /// The observer itself (`Synchronize`): the notifications of one thread are serialized
-    /// already, and a notification that re-enters the observer from inside another runs at once,
-    /// as it does with the re-entrant lock of upstream.
+    /// An observer whose notifications reach this one under a lock of its own
+    /// (`Synchronize(IObserver<T>)`, a `SynchronizedObserver<T>`): it ignores everything after a
+    /// terminal notification. On one thread the notifications are serialized already, and the lock
+    /// of upstream (a monitor) is re-entrant: a notification that re-enters the observer from
+    /// inside another reaches this one at once.
     fn synchronize(&self) -> Rc<dyn IObserver<T>>;
+
+    /// An observer whose notifications reach this one one at a time
+    /// (`Synchronize(IObserver<T>, bool preventReentrancy)`): with `prevent_reentrancy`, through an
+    /// [`AsyncLock`] of its own, so that a notification that re-enters the observer from inside
+    /// another is queued and reaches this one when that one has returned (`AsyncLockObserver<T>`);
+    /// without, as [`synchronize`](Self::synchronize).
+    fn synchronize_prevent_reentrancy(&self, prevent_reentrancy: bool) -> Rc<dyn IObserver<T>>;
+
+    /// An observer whose notifications reach this one under the lock `gate`
+    /// (`Synchronize(IObserver<T>, object gate)`), which observers may share; as
+    /// [`synchronize`](Self::synchronize), the lock is re-entrant and has nothing to serialize on
+    /// one thread. The observer keeps the gate.
+    fn synchronize_with_gate(&self, gate: Rc<dyn std::any::Any>) -> Rc<dyn IObserver<T>>;
+
+    /// An observer whose notifications reach this one through `async_lock`
+    /// (`Synchronize(IObserver<T>, AsyncLock)`, an `AsyncLockObserver<T>`), which observers may
+    /// share: a notification that arrives while an action of the lock runs (a re-entrant one) is
+    /// queued and reaches this one after it.
+    fn synchronize_with_lock(&self, async_lock: Rc<AsyncLock>) -> Rc<dyn IObserver<T>>;
 
     /// An observer that delivers the notifications to this one on `scheduler`, in order
     /// (`NotifyOn(IScheduler)`).
@@ -135,11 +160,77 @@ impl<T: 'static> ObserverExt<T> for Rc<dyn IObserver<T>> {
     }
 
     fn synchronize(&self) -> Rc<dyn IObserver<T>> {
-        self.clone()
+        synchronized(self.clone(), Rc::new(()))
+    }
+
+    fn synchronize_prevent_reentrancy(&self, prevent_reentrancy: bool) -> Rc<dyn IObserver<T>> {
+        if prevent_reentrancy {
+            return Rc::new(ObserverBase::new(AsyncLockCore { observer: self.clone(), gate: Rc::new(AsyncLock::new()) }));
+        }
+        synchronized(self.clone(), Rc::new(()))
+    }
+
+    fn synchronize_with_gate(&self, gate: Rc<dyn std::any::Any>) -> Rc<dyn IObserver<T>> {
+        synchronized(self.clone(), gate)
+    }
+
+    fn synchronize_with_lock(&self, async_lock: Rc<AsyncLock>) -> Rc<dyn IObserver<T>> {
+        Rc::new(ObserverBase::new(AsyncLockCore { observer: self.clone(), gate: async_lock }))
     }
 
     fn notify_on(&self, scheduler: Rc<dyn crate::concurrency::IScheduler>) -> Rc<dyn IObserver<T>> {
         Rc::new(NotifyOnObserver { inner: crate::internal::ScheduledObserver::new(scheduler, self.clone()) })
+    }
+}
+
+/// `SynchronizedObserver<T>` on `observer` with the lock `gate`.
+fn synchronized<T: 'static>(observer: Rc<dyn IObserver<T>>, gate: Rc<dyn std::any::Any>) -> Rc<dyn IObserver<T>> {
+    Rc::new(ObserverBase::new(SynchronizedCore { observer, _gate: gate }))
+}
+
+/// The core of `SynchronizedObserver<T>` (an `ObserverBase<T>`): each notification reaches the
+/// observer inside `lock (gate)`. A monitor is re-entrant and the notifications of one thread
+/// cannot overlap, so the notification reaches it at once; the gate is kept, as upstream keeps it.
+struct SynchronizedCore<T> {
+    observer: Rc<dyn IObserver<T>>,
+    _gate: Rc<dyn std::any::Any>,
+}
+
+impl<T> ObserverCore<T> for SynchronizedCore<T> {
+    fn on_next_core(&self, value: T) {
+        self.observer.on_next(value);
+    }
+
+    fn on_error_core(&self, error: ObservableError) {
+        self.observer.on_error(error);
+    }
+
+    fn on_completed_core(&self) {
+        self.observer.on_completed();
+    }
+}
+
+/// The core of `AsyncLockObserver<T>` (an `ObserverBase<T>`): each notification reaches the
+/// observer through `gate.Wait`, so that one that arrives while another runs is queued after it.
+struct AsyncLockCore<T> {
+    observer: Rc<dyn IObserver<T>>,
+    gate: Rc<AsyncLock>,
+}
+
+impl<T: 'static> ObserverCore<T> for AsyncLockCore<T> {
+    fn on_next_core(&self, value: T) {
+        let observer = self.observer.clone();
+        self.gate.wait(move || observer.on_next(value));
+    }
+
+    fn on_error_core(&self, error: ObservableError) {
+        let observer = self.observer.clone();
+        self.gate.wait(move || observer.on_error(error));
+    }
+
+    fn on_completed_core(&self) {
+        let observer = self.observer.clone();
+        self.gate.wait(move || observer.on_completed());
     }
 }
 

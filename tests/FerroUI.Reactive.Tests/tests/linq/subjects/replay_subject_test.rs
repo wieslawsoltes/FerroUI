@@ -1817,9 +1817,9 @@ fn replay_subject_reentrant() {
 
 // Not ported: Subscribe_ArgumentChecking - argument validation
 // Not ported: OnError_ArgumentChecking - argument validation
-// Not ported: FastImmediateObserver_Simple1 - FastImmediateObserver is internal to the crate (pub(crate) module internal); belongs in the crate's own tests
-// Not ported: FastImmediateObserver_Simple2 - FastImmediateObserver is internal to the crate (pub(crate) module internal); belongs in the crate's own tests
-// Not ported: FastImmediateObserver_Simple3 - FastImmediateObserver is internal to the crate (pub(crate) module internal); belongs in the crate's own tests
-// Not ported: FastImmediateObserver_Fault - FastImmediateObserver is internal to the crate (pub(crate) module internal); belongs in the crate's own tests
+// Ported as unit tests of src/FerroUI.Reactive/tests/fast_immediate_observer_test.rs: FastImmediateObserver_Simple1
+// Ported as unit tests of src/FerroUI.Reactive/tests/fast_immediate_observer_test.rs: FastImmediateObserver_Simple2
+// Ported as unit tests of src/FerroUI.Reactive/tests/fast_immediate_observer_test.rs: FastImmediateObserver_Simple3
+// Ported as unit tests of src/FerroUI.Reactive/tests/fast_immediate_observer_test.rs: FastImmediateObserver_Fault
 // Not ported: FastImmediateObserver_Ownership1 - real threads
 // Not ported: FastImmediateObserver_Ownership2 - real threads

@@ -21,6 +21,7 @@ pub(crate) mod group_join;
 pub(crate) mod push_to_pull_adapter;
 pub(crate) mod collect;
 pub(crate) mod most_recent;
+pub(crate) mod create_iterator;
 pub(crate) mod if_;
 pub(crate) mod case;
 pub(crate) mod for_;

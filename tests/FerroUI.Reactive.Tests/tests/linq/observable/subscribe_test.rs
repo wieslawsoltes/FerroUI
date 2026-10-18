@@ -8,10 +8,13 @@
 //! `Subscribe` overloads of `ObservableExtensions` are the `subscribe_*` methods of `ObservableExt`
 //! (`subscribe_ignore`, `subscribe_next`, `subscribe_next_completed`); an unhandled error panics,
 //! checked with `assert_throws` (which cannot check that the panic carries the error of the
-//! sequence, as `ReactiveAssert.Throws(ex, ...)` does).
+//! sequence, as `ReactiveAssert.Throws(ex, ...)` does); the overloads with a `CancellationToken`
+//! are the `*_with_token` methods (`subscribe_with_token`, `subscribe_ignore_with_token`,
+//! `subscribe_next_with_token`, ...), and `CancellationToken.None` is `CancellationToken::none()`.
 
 use ferroui_reactive::concurrency::Scheduler;
-use ferroui_reactive::{IDisposable, IObservable, Observable, ObservableError, ObservableExt};
+use ferroui_reactive::{IDisposable, IObservable, Observable, ObservableError, ObservableExt, Observer};
+use ferroui_system::threading::{CancellationToken, CancellationTokenSource};
 use ferroui_reactive_testing::{assert_messages, assert_subscriptions, assert_throws, new_error, ReactiveTest as RT, Subscription, TestScheduler};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -281,15 +284,230 @@ fn subscribe_on_next_on_completed_empty() {
     assert!(finished.get());
 }
 
+#[test]
+fn subscribe_ct_none() {
+    let scheduler = TestScheduler::new();
+
+    let xs = scheduler.create_hot_observable(vec![RT::on_next(210, 1), RT::on_next(220, 2), RT::on_next(230, 3), RT::on_completed(240)]);
+
+    let obs = scheduler.create_observer::<i32>();
+
+    {
+        let (source, observer) = (xs.as_observable(), obs.clone());
+        scheduler.schedule_absolute_action(200, move || source.subscribe_with_token(observer, CancellationToken::none()));
+    }
+
+    scheduler.run();
+
+    assert_messages!(obs.messages(), RT::on_next(210, 1), RT::on_next(220, 2), RT::on_next(230, 3), RT::on_completed(240));
+
+    // No auto-dispose when using a hot observable.
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe_from(200));
+}
+
+#[test]
+fn subscribe_ct_cancel_before_begin() {
+    let scheduler = TestScheduler::new();
+
+    let xs = scheduler.create_hot_observable(vec![RT::on_next(210, 1), RT::on_next(220, 2), RT::on_next(230, 3), RT::on_completed(240)]);
+
+    let cts = CancellationTokenSource::new();
+
+    let obs = scheduler.create_observer::<i32>();
+
+    {
+        let (source, observer, token) = (xs.as_observable(), obs.clone(), cts.token());
+        scheduler.schedule_absolute_action(200, move || source.subscribe_with_token(observer, token));
+    }
+    {
+        let cts = cts.clone();
+        scheduler.schedule_absolute_action(150, move || cts.cancel());
+    }
+
+    scheduler.run();
+
+    assert_messages!(obs.messages());
+
+    assert_subscriptions!(xs.subscriptions());
+}
+
+#[test]
+fn subscribe_ct_cancel_middle() {
+    let scheduler = TestScheduler::new();
+
+    let xs = scheduler.create_hot_observable(vec![RT::on_next(210, 1), RT::on_next(220, 2), RT::on_next(230, 3), RT::on_completed(240)]);
+
+    let cts = CancellationTokenSource::new();
+
+    let obs = scheduler.create_observer::<i32>();
+
+    {
+        let (source, observer, token) = (xs.as_observable(), obs.clone(), cts.token());
+        scheduler.schedule_absolute_action(200, move || source.subscribe_with_token(observer, token));
+    }
+    {
+        let cts = cts.clone();
+        scheduler.schedule_absolute_action(225, move || cts.cancel());
+    }
+
+    scheduler.run();
+
+    assert_messages!(obs.messages(), RT::on_next(210, 1), RT::on_next(220, 2));
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 225));
+}
+
+#[test]
+fn subscribe_ct_cancel_after_end() {
+    let scheduler = TestScheduler::new();
+
+    let ex = new_error("ex");
+
+    let xs = scheduler.create_hot_observable(vec![RT::on_next(210, 1), RT::on_next(220, 2), RT::on_next(230, 3), RT::on_error(240, ex.clone())]);
+
+    let cts = CancellationTokenSource::new();
+
+    let obs = scheduler.create_observer::<i32>();
+
+    {
+        let (source, observer, token) = (xs.as_observable(), obs.clone(), cts.token());
+        scheduler.schedule_absolute_action(200, move || source.subscribe_with_token(observer, token));
+    }
+    {
+        let cts = cts.clone();
+        scheduler.schedule_absolute_action(250, move || cts.cancel());
+    }
+
+    scheduler.run();
+
+    assert_messages!(obs.messages(), RT::on_next(210, 1), RT::on_next(220, 2), RT::on_next(230, 3), RT::on_error(240, ex));
+
+    // No auto-dispose when using a hot observable.
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe_from(200));
+}
+
+#[test]
+fn subscribe_ct_never_cancel() {
+    let scheduler = TestScheduler::new();
+
+    let xs = scheduler.create_hot_observable(vec![RT::on_next(210, 1), RT::on_next(220, 2), RT::on_next(230, 3), RT::on_completed(240)]);
+
+    let cts = CancellationTokenSource::new();
+
+    let obs = scheduler.create_observer::<i32>();
+
+    {
+        let (source, observer, token) = (xs.as_observable(), obs.clone(), cts.token());
+        scheduler.schedule_absolute_action(200, move || source.subscribe_with_token(observer, token));
+    }
+
+    scheduler.run();
+
+    assert_messages!(obs.messages(), RT::on_next(210, 1), RT::on_next(220, 2), RT::on_next(230, 3), RT::on_completed(240));
+
+    // No auto-dispose when using a hot observable.
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe_from(200));
+}
+
+#[test]
+fn subscribe_ct_overloads_already_cancelled() {
+    let xs: Rc<dyn IObservable<i32>> = Observable::defer(|| -> Rc<dyn IObservable<i32>> {
+        panic!("the factory of the deferred sequence ran");
+    });
+
+    let cts = CancellationTokenSource::new();
+    cts.cancel();
+
+    xs.subscribe_ignore_with_token(cts.token());
+    xs.subscribe_next_with_token(|_| {}, cts.token());
+    xs.subscribe_next_error_with_token(|_| {}, |_| {}, cts.token());
+    xs.subscribe_next_completed_with_token(|_| {}, || {}, cts.token());
+    xs.subscribe_all_with_token(|_| {}, |_| {}, || {}, cts.token());
+    xs.subscribe_with_token(Observer::create_all(|_: i32| {}, |_| {}, || {}), cts.token());
+}
+
+#[test]
+fn subscribe_ct_overloads_none() {
+    let i = Rc::new(Cell::new(0));
+    let n = Rc::new(Cell::new(0));
+    let e = Rc::new(Cell::new(0));
+    let c = Rc::new(Cell::new(0));
+
+    let xs: Rc<dyn IObservable<i32>> = {
+        let i = i.clone();
+        Observable::defer(move || {
+            i.set(i.get() + 1);
+            Observable::return_on(42, Scheduler::immediate())
+        })
+    };
+
+    let incr = |counter: &Rc<Cell<i32>>| {
+        let counter = counter.clone();
+        move || counter.set(counter.get() + 1)
+    };
+
+    xs.subscribe_ignore_with_token(CancellationToken::none());
+    {
+        let on_next = incr(&n);
+        xs.subscribe_next_with_token(move |_| on_next(), CancellationToken::none());
+    }
+    {
+        let (on_next, on_error) = (incr(&n), incr(&e));
+        xs.subscribe_next_error_with_token(move |_| on_next(), move |_| on_error(), CancellationToken::none());
+    }
+    {
+        let (on_next, on_completed) = (incr(&n), incr(&c));
+        xs.subscribe_next_completed_with_token(move |_| on_next(), on_completed, CancellationToken::none());
+    }
+    {
+        let (on_next, on_error, on_completed) = (incr(&n), incr(&e), incr(&c));
+        xs.subscribe_all_with_token(move |_| on_next(), move |_| on_error(), on_completed, CancellationToken::none());
+    }
+    {
+        let (on_next, on_error, on_completed) = (incr(&n), incr(&e), incr(&c));
+        xs.subscribe_with_token(Observer::create_all(move |_: i32| on_next(), move |_| on_error(), on_completed), CancellationToken::none());
+    }
+
+    assert_eq!(6, i.get());
+    assert_eq!(5, n.get());
+    assert_eq!(0, e.get());
+    assert_eq!(3, c.get());
+}
+
+#[test]
+fn subscribe_ct_cancel_during_callback() {
+    let scheduler = TestScheduler::new();
+
+    let xs = scheduler.create_hot_observable(vec![RT::on_next(210, 1), RT::on_next(220, 2), RT::on_next(230, 3), RT::on_completed(240)]);
+
+    let cts = CancellationTokenSource::new();
+
+    let n = Rc::new(Cell::new(0));
+
+    {
+        let (source, token, cts, n) = (xs.as_observable(), cts.token(), cts.clone(), n.clone());
+        scheduler.schedule_absolute_action(200, move || {
+            source.subscribe_next_with_token(
+                move |x| {
+                    n.set(n.get() + 1);
+
+                    if x == 2 {
+                        cts.cancel();
+                    }
+                },
+                token,
+            );
+        });
+    }
+
+    scheduler.run();
+
+    assert_eq!(2, n.get());
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 220));
+}
+
 // Not ported: SubscribeToEnumerable_ArgumentChecking - argument validation (null arguments, an enumerable whose GetEnumerator returns null)
 // Not ported: SubscribeToEnumerable_DefaultScheduler - real threads (Semaphore, DefaultScheduler.Instance)
 // Not ported: Subscribe_ArgumentChecking - argument validation
-// Not ported: Subscribe_CT_ArgumentChecking - needs the Subscribe overloads with a CancellationToken (not in ObservableExt)
-// Not ported: Subscribe_CT_None - needs the Subscribe overloads with a CancellationToken (not in ObservableExt)
-// Not ported: Subscribe_CT_CancelBeforeBegin - needs the Subscribe overloads with a CancellationToken (not in ObservableExt)
-// Not ported: Subscribe_CT_CancelMiddle - needs the Subscribe overloads with a CancellationToken (not in ObservableExt)
-// Not ported: Subscribe_CT_CancelAfterEnd - needs the Subscribe overloads with a CancellationToken (not in ObservableExt)
-// Not ported: Subscribe_CT_NeverCancel - needs the Subscribe overloads with a CancellationToken (not in ObservableExt)
-// Not ported: Subscribe_CT_Overloads_AlreadyCancelled - needs the Subscribe overloads with a CancellationToken (not in ObservableExt)
-// Not ported: Subscribe_CT_Overloads_None - needs the Subscribe overloads with a CancellationToken (not in ObservableExt)
-// Not ported: Subscribe_CT_CancelDuringCallback - needs the Subscribe overloads with a CancellationToken (not in ObservableExt)
+// Not ported: Subscribe_CT_ArgumentChecking - argument validation

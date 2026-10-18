@@ -9,10 +9,16 @@
 //! `as_stopwatch_provider` of `IScheduler`, and the services of `MyDumbScheduler2` are optional
 //! fields where upstream has a dictionary keyed by type; the checks of `Scheduler.AsLongRunning`
 //! are left out of `DetectServices_*` (`ISchedulerLongRunning` does not exist).
+//! `DisableOptimizations1` runs on the task pool upstream and waits for an event after each
+//! scheduling, and runs here on the test scheduler, running it after each scheduling; its due time
+//! of `DateTimeOffset.Now.AddMilliseconds(10)` is ten milliseconds after the scheduler's `now`.
+//! `Scheduler.DisableOptimizations(params Type[])` is `disable_optimizations_of`, with the services
+//! named by `SchedulerOptimization`.
 
 use ferroui_reactive::concurrency::{
     IScheduler, ISchedulerPeriodic, IStopwatch, IStopwatchProvider, ScheduledAction, Scheduler, SchedulerExt,
 };
+use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::IDisposable;
 use ferroui_reactive_testing::{duration_to_ticks, ticks_to_duration, TestScheduler};
 use std::cell::{Cell, RefCell};
@@ -237,6 +243,74 @@ fn scheduler_periodic2() {
     assert_eq!(11 * period, scheduler.clock());
 }
 
+#[test]
+fn disable_optimizations1() {
+    let scheduler = TestScheduler::new();
+    let s = scheduler.scheduler();
+    assert!(s.as_stopwatch_provider().is_some());
+
+    let t = s.disable_optimizations();
+
+    let d = t.now().duration_since(s.now()).unwrap_or(Duration::ZERO);
+    assert!(d < Duration::from_secs(1));
+
+    let e1 = Rc::new(Cell::new(false));
+    {
+        let e1 = e1.clone();
+        t.schedule(Box::new(move |_| {
+            e1.set(true);
+            Disposable::empty()
+        }));
+    }
+    scheduler.run();
+    assert!(e1.get());
+
+    let e2 = Rc::new(Cell::new(false));
+    {
+        let e2 = e2.clone();
+        t.schedule_after(
+            Duration::from_millis(1),
+            Box::new(move |_| {
+                e2.set(true);
+                Disposable::empty()
+            }),
+        );
+    }
+    scheduler.run();
+    assert!(e2.get());
+
+    let e3 = Rc::new(Cell::new(false));
+    {
+        let e3 = e3.clone();
+        t.schedule_at(
+            t.now() + Duration::from_millis(10),
+            Box::new(move |_| {
+                e3.set(true);
+                Disposable::empty()
+            }),
+        );
+    }
+    scheduler.run();
+    assert!(e3.get());
+}
+
+#[test]
+fn disable_optimizations_unknown_service() {
+    let s: Rc<dyn IScheduler> = MyScheduler::new();
+    assert!(s.as_periodic().is_none());
+    assert!(s.as_stopwatch_provider().is_none());
+
+    let d = s.disable_optimizations();
+    // `GetService(typeof(bool))`: a service that is not hidden is asked of the scheduler wrapped,
+    // which offers none. The services of the port are the ones `DisableOptimizations` hides, so
+    // the lookup of a service that is not hidden is that of a wrapper hiding none.
+    assert!(d.as_periodic().is_none());
+    assert!(d.as_stopwatch_provider().is_none());
+    let none_hidden = s.disable_optimizations_of(&[]);
+    assert!(none_hidden.as_periodic().is_none());
+    assert!(none_hidden.as_stopwatch_provider().is_none());
+}
+
 /// A scheduler with no services, whose members are not called (`MyDumbScheduler1`).
 struct MyDumbScheduler1;
 
@@ -354,10 +428,8 @@ fn detect_services_found() {
 // Not ported: Scheduler_LongRunning2 - real threads (TaskPoolScheduler); ISchedulerLongRunning (ScheduleLongRunning) does not exist
 // Not ported: Scheduler_Periodic_HostLifecycleManagement - real threads (ThreadPoolScheduler, AppDomain, host lifecycle notifications of the platform enlightenment provider)
 // Not ported: DisableOptimizations_ArgumentChecking - argument validation
-// Not ported: DisableOptimizations1 - real threads (TaskPoolScheduler); Scheduler.DisableOptimizations does not exist
-// Not ported: DisableOptimizations2 - real threads (TaskPoolScheduler); Scheduler.DisableOptimizations and ISchedulerLongRunning do not exist
-// Not ported: DisableOptimizations3 - real threads (TaskPoolScheduler); Scheduler.DisableOptimizations and ISchedulerLongRunning do not exist
-// Not ported: DisableOptimizations_UnknownService - Scheduler.DisableOptimizations and the lookup of a service by type (IServiceProvider.GetService) do not exist
+// Not ported: DisableOptimizations2 - real threads (TaskPoolScheduler); ISchedulerLongRunning does not exist (the only service it checks)
+// Not ported: DisableOptimizations3 - real threads (TaskPoolScheduler); ISchedulerLongRunning does not exist (the service it hides, keeping ISchedulerPeriodic)
 // Not ported: Catch_ArgumentChecking - argument validation
 // Not ported: Catch_Builtin_Swallow_Shallow - real threads (Default scheduler, ManualResetEvent); Scheduler.Catch does not exist
 // Not ported: Catch_Builtin_Swallow_Recursive - real threads (Default scheduler, ManualResetEvent); Scheduler.Catch does not exist

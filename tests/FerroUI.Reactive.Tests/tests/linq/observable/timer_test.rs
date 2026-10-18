@@ -9,7 +9,7 @@
 //! here that runs its work on a `TestScheduler` (passing itself to the work, as the subclass is
 //! passed upstream) and adds the periodic scheduling that records its `TimerRun`s.
 
-use ferroui_reactive::concurrency::{IScheduler, ISchedulerPeriodic, IStopwatchProvider, ScheduledAction, SchedulerExt};
+use ferroui_reactive::concurrency::{IScheduler, ISchedulerPeriodic, IStopwatchProvider, ScheduledAction, SchedulerExt, SchedulerOptimization};
 use ferroui_reactive::disposables::{CompositeDisposable, Disposable};
 use ferroui_reactive::{IDisposable, IObservable, Observable, ObservableExt};
 use ferroui_reactive_testing::{assert_messages, assert_throws, ticks_to_duration, ticks_to_time, ReactiveTest as RT, TestScheduler};
@@ -459,7 +459,50 @@ impl ISchedulerPeriodic for PeriodicTestScheduler {
 // Not ported: OneShotTimer_TimeSpan_TimeSpan_DefaultScheduler - real threads (the default scheduler); blocking operator ToEnumerable (waived: one thread)
 // Not ported: OneShotTimer_DateTimeOffset_TimeSpan_DefaultScheduler - real threads (the default scheduler); blocking operator ToEnumerable (waived: one thread)
 // Not ported: RepeatingTimer_TimeSpan_Zero_DefaultScheduler - real threads (ManualResetEvent, the default scheduler)
-// Not ported: RepeatingTimer_NoStopwatch_Slippage1 - needs DisableOptimizations of a scheduler (not in the port; its periodic emulation without a stopwatch measures with the clock of the scheduler, not with upstream's best-effort recursive form)
-// Not ported: RepeatingTimer_NoStopwatch_Slippage2 - needs DisableOptimizations of a scheduler (not in the port; as RepeatingTimer_NoStopwatch_Slippage1)
+#[test]
+fn repeating_timer_no_stopwatch_slippage1() {
+    let scheduler = TestScheduler::new();
+
+    let (times, result) = run_slippage(
+        &scheduler,
+        |s| Observable::timer_periodic_on(Duration::ZERO, ticks_to_duration(100), s.disable_optimizations_of(&[SchedulerOptimization::StopwatchProvider])),
+        slippage_on_next,
+    );
+    assert!(result.is_ok());
+
+    assert_eq!(
+        vec![
+            201, // 1 off because of initial scheduling jump (InvokeStart)
+            301, 401, 523, // 3 off because of 401 + 120 + 2 scheduling ticks (one due to yield in SchedulePeriodic emulation code)
+            645, // 5 off because of 523 + 120 + 2 scheduling ticks (one due to yield in SchedulePeriodic emulation code)
+            743, // \
+            843, //  +--> 43 off because this situation (no stopwatch or periodic scheduling interface) only gets best effort treatment (see SchedulePeriodic emulation code)
+            943, // /
+        ],
+        *times.borrow()
+    );
+}
+
+#[test]
+fn repeating_timer_no_stopwatch_slippage2() {
+    let scheduler = TestScheduler::new();
+
+    let (times, result) = run_slippage(
+        &scheduler,
+        |s| Observable::timer_periodic_on(ticks_to_duration(100), ticks_to_duration(100), s.disable_optimizations_of(&[SchedulerOptimization::StopwatchProvider])),
+        slippage_on_next,
+    );
+    assert!(result.is_ok());
+
+    assert_eq!(
+        vec![
+            300, 400, 500, 622, // 2 off because of 500 + 120 + 2 scheduling ticks (one due to yield in SchedulePeriodic emulation code)
+            744, // 4 off because of 622 + 120 + 2 scheduling ticks (one due to yield in SchedulePeriodic emulation code)
+            842, // |
+            942, // +--> 42 off because this situation (no stopwatch or periodic scheduling interface) only gets best effort treatment (see SchedulePeriodic emulation code)
+        ],
+        *times.borrow()
+    );
+}
 // Not ported: RepeatingTimer_Start_CatchUp - real threads (Thread.Sleep, ManualResetEvent, the default scheduler)
 // Not ported: RepeatingTimer_Start_CatchUp_Throws - real threads (ThreadPoolScheduler, the Catch of a scheduler)

@@ -187,10 +187,17 @@ impl CompositeDisposable {
     }
 
     /// Copies the disposables into `array` from `index` (`CopyTo`). Panics, where upstream throws
-    /// `ArgumentOutOfRangeException`, when they do not fit.
+    /// `ArgumentOutOfRangeException`, when `index` is not in the array or the disposables do not
+    /// fit; a disposed group copies nothing.
     pub fn copy_to(&self, array: &mut [Option<Rc<dyn IDisposable>>], index: usize) {
+        if index >= array.len() {
+            panic!("Specified argument was out of the range of valid values. (Parameter 'arrayIndex')");
+        }
+        if self.disposed.get() {
+            return;
+        }
         let disposables = self.to_vec();
-        if index > array.len() || array.len() - index < disposables.len() {
+        if array.len() - index < disposables.len() {
             panic!("Specified argument was out of the range of valid values. (Parameter 'arrayIndex')");
         }
         for (slot, disposable) in array[index..].iter_mut().zip(disposables) {

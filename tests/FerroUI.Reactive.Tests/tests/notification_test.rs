@@ -2,15 +2,27 @@
 //! Adapted: `ToString` is the `Debug` format of `Notification<T>` (`OnNext(42)`, `OnError(message)`,
 //! `OnCompleted()`); `Value` of an error or the end is `None` where upstream throws; comparisons
 //! with `null` and with values of other types (`Equals(null)`, `Equals("")`, `n == null`) have no
-//! form in Rust and are left out of the equality tests.
+//! form in Rust and are left out of the equality tests; `GetHashCode` is the `Hash` of
+//! `Notification<T>` through the hasher of the standard library; `IObserver<T, TResult>` is
+//! `IObserverWithResult<T, R>` and `Accept(IObserver<T, TResult>)` is
+//! `accept_observer_with_result`, and the strings of the observer's handlers are `&'static str`.
 
-use ferroui_reactive::{IObserver, Notification, NotificationKind, ObservableError, ObservableExt};
+use ferroui_reactive::{IObserver, IObserverWithResult, Notification, NotificationKind, ObservableError, ObservableExt};
 use ferroui_reactive_testing::{assert_messages, new_error, ReactiveTest as RT, TestScheduler};
 use std::cell::{Cell, RefCell};
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 use std::rc::Rc;
 
 fn same_error(a: &ObservableError, b: &ObservableError) -> bool {
     std::ptr::addr_eq(Rc::as_ptr(a), Rc::as_ptr(b))
+}
+
+/// The hash of a notification (`GetHashCode`).
+fn hash_code<T: Hash>(notification: &Notification<T>) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    notification.hash(&mut hasher);
+    hasher.finish()
 }
 
 // ToObservable
@@ -112,6 +124,15 @@ fn on_next_equality() {
 }
 
 #[test]
+fn on_next_get_hash_code() {
+    let n1 = Notification::OnNext(42);
+    let n2 = Notification::OnNext(42);
+
+    assert_ne!(0, hash_code(&n1));
+    assert_eq!(hash_code(&n1), hash_code(&n2));
+}
+
+#[test]
 fn on_next_to_string() {
     let n1 = Notification::OnNext(42);
     assert!(format!("{n1:?}").contains("OnNext"));
@@ -143,6 +164,18 @@ fn on_next_accept_observer() {
     n1.accept(&con);
 
     assert_eq!(con.value.get(), 42);
+}
+
+#[test]
+fn on_next_accept_observer_with_result() {
+    let n1 = Notification::OnNext(42);
+    let res = n1.accept_observer_with_result(&AcceptObserver::new(
+        |_| "OK",
+        |_| -> &'static str { panic!("unexpected OnError") },
+        || -> &'static str { panic!("unexpected OnCompleted") },
+    ));
+
+    assert_eq!(res, "OK");
 }
 
 #[test]
@@ -202,6 +235,17 @@ fn on_error_equality() {
 }
 
 #[test]
+fn on_error_get_hash_code() {
+    let ex = new_error("ex");
+
+    let n1 = Notification::<i32>::OnError(ex.clone());
+    let n2 = Notification::<i32>::OnError(ex.clone());
+
+    assert_ne!(0, hash_code(&n1));
+    assert_eq!(hash_code(&n1), hash_code(&n2));
+}
+
+#[test]
 fn on_error_to_string() {
     let ex = new_error("ex");
 
@@ -239,6 +283,24 @@ fn on_error_accept_observer() {
     n1.accept(&obs);
 
     assert!(same_error(&ex, obs.error.borrow().as_ref().unwrap()));
+}
+
+#[test]
+fn on_error_accept_observer_with_result() {
+    let ex = new_error("ex");
+
+    let n1 = Notification::<i32>::OnError(ex.clone());
+    let expected = ex.clone();
+    let res = n1.accept_observer_with_result(&AcceptObserver::new(
+        |_| -> &'static str { panic!("unexpected OnNext") },
+        move |e| {
+            assert!(same_error(&expected, &e));
+            "OK"
+        },
+        || -> &'static str { panic!("unexpected OnCompleted") },
+    ));
+
+    assert_eq!(res, "OK");
 }
 
 #[test]
@@ -297,6 +359,15 @@ fn on_completed_equality() {
 }
 
 #[test]
+fn on_completed_get_hash_code() {
+    let n1 = Notification::<i32>::OnCompleted;
+    let n2 = Notification::<i32>::OnCompleted;
+
+    assert_ne!(0, hash_code(&n1));
+    assert_eq!(hash_code(&n1), hash_code(&n2));
+}
+
+#[test]
 fn on_completed_to_string() {
     let n1 = Notification::<i32>::OnCompleted;
     assert!(format!("{n1:?}").contains("OnCompleted"));
@@ -331,6 +402,18 @@ fn on_completed_accept_observer() {
 }
 
 #[test]
+fn on_completed_accept_observer_with_result() {
+    let n1 = Notification::<i32>::OnCompleted;
+    let res = n1.accept_observer_with_result(&AcceptObserver::new(
+        |_| -> &'static str { panic!("unexpected OnNext") },
+        |_| -> &'static str { panic!("unexpected OnError") },
+        || "OK",
+    ));
+
+    assert_eq!(res, "OK");
+}
+
+#[test]
 fn on_completed_accept_action() {
     let mut obs = false;
 
@@ -348,17 +431,42 @@ fn on_completed_accept_action_with_result() {
     assert_eq!(res, "OK");
 }
 
+/// An observer whose handlers return a string (`AcceptObserver`, an `IObserver<int, string>`).
+struct AcceptObserver {
+    on_next: Box<dyn Fn(i32) -> &'static str>,
+    on_error: Box<dyn Fn(ObservableError) -> &'static str>,
+    on_completed: Box<dyn Fn() -> &'static str>,
+}
+
+impl AcceptObserver {
+    fn new(
+        on_next: impl Fn(i32) -> &'static str + 'static,
+        on_error: impl Fn(ObservableError) -> &'static str + 'static,
+        on_completed: impl Fn() -> &'static str + 'static,
+    ) -> Self {
+        Self { on_next: Box::new(on_next), on_error: Box::new(on_error), on_completed: Box::new(on_completed) }
+    }
+}
+
+impl IObserverWithResult<i32, &'static str> for AcceptObserver {
+    fn on_next(&self, value: i32) -> &'static str {
+        (self.on_next)(value)
+    }
+
+    fn on_error(&self, error: ObservableError) -> &'static str {
+        (self.on_error)(error)
+    }
+
+    fn on_completed(&self) -> &'static str {
+        (self.on_completed)()
+    }
+}
+
 // Not ported: ToObservable_ArgumentChecking - argument validation
-// Not ported: OnNext_GetHashCode - Notification does not implement Hash
-// Not ported: OnNext_AcceptObserverWithResult - IObserver<T, TResult> and Notification.Accept(IObserver<T, TResult>) are not in the crate
 // Not ported: OnNext_AcceptObserverWithResult_Null - argument validation
 // Not ported: OnNext_Accept_ArgumentChecking - argument validation
 // Not ported: OnError_CtorNull - argument validation
 // Not ported: OnError_Accept_ArgumentChecking - argument validation
-// Not ported: OnError_GetHashCode - Notification does not implement Hash
-// Not ported: OnError_AcceptObserverWithResult - IObserver<T, TResult> and Notification.Accept(IObserver<T, TResult>) are not in the crate
 // Not ported: OnError_AcceptObserverWithResult_Null - argument validation
 // Not ported: OnCompleted_Accept_ArgumentChecking - argument validation
-// Not ported: OnCompleted_GetHashCode - Notification does not implement Hash
-// Not ported: OnCompleted_AcceptObserverWithResult - IObserver<T, TResult> and Notification.Accept(IObserver<T, TResult>) are not in the crate
 // Not ported: OnCompleted_AcceptObserverWithResult_Null - argument validation

@@ -1,6 +1,7 @@
 //! `IScheduler`, the services a scheduler may offer (`ISchedulerPeriodic`, `IStopwatchProvider`,
 //! `IStopwatch`) and the extension methods of `Scheduler` (`Scheduler.cs`, `Scheduler.Simple.cs`,
-//! `Scheduler.Recursive.cs`, `Scheduler.Services.cs`, `Scheduler.Services.Emulation.cs`).
+//! `Scheduler.Recursive.cs`, `Scheduler.Services.cs`, `Scheduler.Services.Emulation.cs`); the
+//! wrapper of `DisableOptimizations` is in `disable_optimizations_scheduler.rs`.
 
 use crate::disposables::{CompositeDisposable, Disposable, SingleAssignmentDisposable};
 use ferroui_system::IDisposable;
@@ -130,6 +131,17 @@ pub trait SchedulerExt {
     /// Starts a stopwatch (`StartStopwatch`): the scheduler's own if it has one, else one that
     /// measures with the scheduler's clock.
     fn start_stopwatch(&self) -> Box<dyn IStopwatch>;
+
+    /// The scheduler without the services it offers (`DisableOptimizations(IScheduler)`): it
+    /// schedules on this one, answers none of the services of
+    /// [`SchedulerOptimization::ALL`](super::SchedulerOptimization::ALL), and
+    /// hands the work it runs a scheduler without them too, so that operators use the emulated
+    /// forms (periodic scheduling through recursive scheduling, a stopwatch on the clock).
+    fn disable_optimizations(&self) -> Rc<dyn IScheduler>;
+
+    /// The scheduler without the services `optimizations` (`DisableOptimizations(IScheduler,
+    /// params Type[])`): the other services are those of this one.
+    fn disable_optimizations_of(&self, optimizations: &[super::SchedulerOptimization]) -> Rc<dyn IScheduler>;
 }
 
 impl SchedulerExt for Rc<dyn IScheduler> {
@@ -210,7 +222,10 @@ impl SchedulerExt for Rc<dyn IScheduler> {
         if let Some(periodic) = self.as_periodic() {
             return periodic.schedule_periodic(period, Box::new(action));
         }
-        schedule_periodic_emulated(self, period, Box::new(action))
+        if self.as_stopwatch_provider().is_some() {
+            return schedule_periodic_emulated(self, period, Box::new(action));
+        }
+        schedule_periodic_recursive(self, period, Box::new(action))
     }
 
     fn start_stopwatch(&self) -> Box<dyn IStopwatch> {
@@ -218,6 +233,14 @@ impl SchedulerExt for Rc<dyn IScheduler> {
             return provider.start_stopwatch();
         }
         Box::new(EmulatedStopwatch { scheduler: self.clone(), start: self.now() })
+    }
+
+    fn disable_optimizations(&self) -> Rc<dyn IScheduler> {
+        super::disable_optimizations_scheduler::DisableOptimizationsScheduler::create(self.clone(), &super::SchedulerOptimization::ALL)
+    }
+
+    fn disable_optimizations_of(&self, optimizations: &[super::SchedulerOptimization]) -> Rc<dyn IScheduler> {
+        super::disable_optimizations_scheduler::DisableOptimizationsScheduler::create(self.clone(), optimizations)
     }
 }
 
@@ -327,6 +350,63 @@ fn schedule_periodic_emulated(scheduler: &Rc<dyn IScheduler>, period: Duration, 
         let elapsed = state.stopwatch.elapsed();
         recurse(due.saturating_sub(elapsed));
     })
+}
+
+/// The commands of [`schedule_periodic_recursive`] (`TICK`, `DispatchStart`, `DispatchEnd`).
+#[derive(Clone, Copy)]
+enum PeriodicCommand {
+    Tick,
+    DispatchStart,
+    DispatchEnd,
+}
+
+/// Periodic scheduling on a scheduler without a stopwatch (`SchedulePeriodicRecursive<TState>`):
+/// the ticks keep the period, each scheduling the next before the action runs; a tick that comes
+/// while the action is pending is counted, and the end of the action dispatches it at once.
+fn schedule_periodic_recursive(scheduler: &Rc<dyn IScheduler>, period: Duration, action: Box<dyn FnMut()>) -> Rc<dyn IDisposable> {
+    let action = RefCell::new(action);
+    let pending_tick_count = Cell::new(0usize);
+    let cancel = SingleAssignmentDisposable::new();
+    let on_panic = cancel.clone();
+    cancel.set_disposable(Some(scheduler.schedule_recursive_after_with(PeriodicCommand::Tick, period, move |command, recurse| {
+        let mut command = command;
+        loop {
+            match command {
+                PeriodicCommand::Tick => {
+                    recurse(PeriodicCommand::Tick, period);
+                    pending_tick_count.set(pending_tick_count.get() + 1);
+                    if pending_tick_count.get() == 1 {
+                        command = PeriodicCommand::DispatchStart;
+                        continue;
+                    }
+                }
+                PeriodicCommand::DispatchStart => {
+                    // A panic of the action ends the schedule (`_cancel.Dispose()` before the rethrow).
+                    let guard = DisposeOnPanic(&*on_panic);
+                    (action.borrow_mut())();
+                    std::mem::forget(guard);
+                    recurse(PeriodicCommand::DispatchEnd, Duration::ZERO);
+                }
+                PeriodicCommand::DispatchEnd => {
+                    pending_tick_count.set(pending_tick_count.get() - 1);
+                    if pending_tick_count.get() > 0 {
+                        recurse(PeriodicCommand::DispatchStart, Duration::ZERO);
+                    }
+                }
+            }
+            break;
+        }
+    })));
+    cancel
+}
+
+/// Disposes the schedule when it is dropped by a panic.
+struct DisposeOnPanic<'a>(&'a SingleAssignmentDisposable);
+
+impl Drop for DisposeOnPanic<'_> {
+    fn drop(&mut self) {
+        self.0.dispose();
+    }
 }
 
 struct PeriodicState {

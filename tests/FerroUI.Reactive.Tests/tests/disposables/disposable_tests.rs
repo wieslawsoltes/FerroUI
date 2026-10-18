@@ -1,6 +1,8 @@
 //! Ported from `Tests.System.Reactive/Tests/Disposables/DisposableTests.cs` of Rx.NET.
 //! Adapted: captured flags are `Rc<Cell<bool>>`; `Assert.Same` compares `Rc` addresses; the
-//! enumeration of a `CompositeDisposable` (`ToArray`, `GetEnumerator`) is `to_vec`; the `ICancelable`
+//! enumeration of a `CompositeDisposable` (`ToArray`, `GetEnumerator`) is `to_vec`; the array of
+//! `CopyTo` is a slice of `Option<Rc<dyn IDisposable>>` (`None` for `null`), and `CopyTo` panics
+//! where upstream throws `ArgumentOutOfRangeException`; the `ICancelable`
 //! side of `Disposable.Create` is checked on `AnonymousDisposable::new`, since `Disposable::create`
 //! returns a plain `Rc<dyn IDisposable>`; null-argument lines inside ported tests are dropped.
 
@@ -143,6 +145,28 @@ fn composite_disposable_contains() {
     assert_eq!(2, g.count());
     assert!(g.contains(&d1));
     assert!(g.contains(&d2));
+}
+
+#[test]
+fn composite_disposable_is_read_only() {
+    assert!(!CompositeDisposable::new().is_read_only());
+}
+
+#[test]
+fn composite_disposable_copy_to_beyond_end() {
+    assert_throws(|| CompositeDisposable::new().copy_to(&mut [None, None], 2));
+}
+
+#[test]
+fn composite_disposable_copy_to() {
+    let d1 = Disposable::create(|| {});
+    let d2 = Disposable::create(|| {});
+    let g = CompositeDisposable::from_disposables(vec![d1.clone(), d2.clone()]);
+
+    let mut d: [Option<Rc<dyn IDisposable>>; 3] = [None, None, None];
+    g.copy_to(&mut d, 1);
+    assert!(same(d[1].as_ref().expect("the first disposable is copied"), &d1));
+    assert!(same(d[2].as_ref().expect("the second disposable is copied"), &d2));
 }
 
 #[test]
@@ -353,8 +377,24 @@ fn composite_disposable_disposed_is_no_op() {
 
     assert!(!composite.contains(&as_dyn(&d)));
 
-    // `CopyTo` of a disposed group copies nothing; the port enumerates with `to_vec`.
-    assert!(composite.to_vec().is_empty());
+    let mut array: [Option<Rc<dyn IDisposable>>; 1] = [None];
+
+    composite.copy_to(&mut array, 0);
+
+    assert!(array[0].is_none());
+}
+
+#[test]
+fn composite_disposable_copy_to_index_out_of_range() {
+    let d1 = BooleanDisposable::new();
+    let d2 = BooleanDisposable::new();
+
+    let composite = CompositeDisposable::from_disposables([as_dyn(&d1), as_dyn(&d2)]);
+
+    let mut array: [Option<Rc<dyn IDisposable>>; 2] = [None, None];
+
+    // Upstream throws `ArgumentOutOfRangeException`; the port panics.
+    assert_throws(|| composite.copy_to(&mut array, 1));
 }
 
 #[test]
@@ -659,17 +699,13 @@ fn stable_composite_disposable_nary2() {
 
 // Not ported: AnonymousDisposable_CreateNull - argument validation
 // Not ported: CompositeDisposable_ArgumentChecking - argument validation (null arrays; a negative capacity cannot be a usize)
-// Not ported: CompositeDisposable_IsReadOnly - the port's CompositeDisposable is not a collection type (no ICollection<IDisposable>.IsReadOnly)
 // Not ported: CompositeDisposable_CopyTo_Null - argument validation
 // Not ported: CompositeDisposable_CopyTo_Negative - argument validation (a negative index cannot be a usize)
-// Not ported: CompositeDisposable_CopyTo_BeyondEnd - CompositeDisposable has no CopyTo in the port (to_vec instead)
-// Not ported: CompositeDisposable_CopyTo - CompositeDisposable has no CopyTo in the port (to_vec instead)
 // Not ported: CompositeDisposable_GetEnumeratorNonGeneric - Rust has no non-generic enumeration (same as CompositeDisposable_GetEnumerator)
 // Not ported: CompositeDisposable_AddNull_via_params_ctor - argument validation
 // Not ported: CompositeDisposable_AddNull_via_IEnum_ctor - argument validation
 // Not ported: CompositeDisposable_AddNull - argument validation
 // Not ported: CompositeDisposable_RemoveNull - argument validation
-// Not ported: CompositeDisposable_CopyTo_Index_Out_Of_Range - CompositeDisposable has no CopyTo in the port (to_vec instead)
 // Not ported: CompositeDisposable_GetEnumerator_Reset - IEnumerator.Reset has no counterpart on Rust iterators
 // Not ported: CancellationDisposable_Ctor_Null - argument validation
 // Not ported: ContextDisposable_CreateNullContext - argument validation; ContextDisposable (SynchronizationContext) is not in the port

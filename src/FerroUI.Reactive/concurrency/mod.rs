@@ -8,6 +8,7 @@
 
 mod async_lock;
 mod current_thread_scheduler;
+mod disable_optimizations_scheduler;
 mod historical_scheduler;
 mod immediate_scheduler;
 mod local_scheduler;
@@ -18,6 +19,7 @@ mod virtual_time_scheduler;
 
 pub use async_lock::AsyncLock;
 pub use current_thread_scheduler::CurrentThreadScheduler;
+pub use disable_optimizations_scheduler::SchedulerOptimization;
 pub use historical_scheduler::{HistoricalScheduler, HistoricalTime};
 pub use immediate_scheduler::ImmediateScheduler;
 pub use scheduled_item::ScheduledItem;
