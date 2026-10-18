@@ -78,6 +78,7 @@ pub trait ObservableExt<T: 'static> {
     super::buffer::buffer_methods!();
     super::window::window_methods!();
     super::combine_latest::combine_latest_methods!();
+    super::zip::zip_methods!();
     super::sum::sum_methods!();
     super::average::average_methods!();
     super::min::min_methods!();

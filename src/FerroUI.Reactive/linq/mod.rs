@@ -10,6 +10,7 @@
 
 mod creation;
 mod observable_ext;
+pub(crate) mod zip;
 pub(crate) mod numeric;
 pub(crate) mod sum;
 pub(crate) mod average;

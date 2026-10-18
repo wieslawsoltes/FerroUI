@@ -91,3 +91,5 @@ mod using_test;
 mod where_test;
 mod window_test;
 mod with_latest_from_test;
+mod zip_arity_test;
+mod zip_test;
