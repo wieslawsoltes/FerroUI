@@ -5,7 +5,7 @@
 //! update are shared `Cell`s.
 
 use ferroui_reactive::disposables::SerialDisposable;
-use ferroui_reactive::{IDisposable, IObservable, IObserver, Observable, ObservableExt};
+use ferroui_reactive::{IDisposable, IObserver, Observable, ObservableExt};
 use ferroui_reactive_testing::{assert_messages, assert_subscriptions, assert_throws, new_error, ReactiveTest as RT, TestScheduler};
 use std::cell::Cell;
 use std::rc::Rc;

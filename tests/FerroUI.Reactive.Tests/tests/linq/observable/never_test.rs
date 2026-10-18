@@ -1,6 +1,6 @@
 //! Ported from `Tests.System.Reactive/Tests/Linq/Observable/NeverTest.cs` of Rx.NET.
 
-use ferroui_reactive::{IObservable, Observable};
+use ferroui_reactive::{Observable};
 use ferroui_reactive_testing::{assert_messages, TestScheduler};
 
 #[test]

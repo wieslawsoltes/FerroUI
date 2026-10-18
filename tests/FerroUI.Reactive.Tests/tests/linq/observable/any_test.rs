@@ -78,7 +78,7 @@ fn any_throw() {
 
 #[test]
 fn any_never() {
-    let ex = new_error("ex");
+    let _ex = new_error("ex");
 
     let scheduler = TestScheduler::new();
 

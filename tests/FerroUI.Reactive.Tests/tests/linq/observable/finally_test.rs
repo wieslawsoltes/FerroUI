@@ -1,7 +1,7 @@
 //! Ported from `Tests.System.Reactive/Tests/Linq/Observable/FinallyTest.cs` of Rx.NET.
 //! Adapted: the flags, counters and strings the actions update are shared `Cell`s and `RefCell`s.
 
-use ferroui_reactive::{IDisposable, Observable, ObservableExt, Unit};
+use ferroui_reactive::{Observable, ObservableExt, Unit};
 use ferroui_reactive_testing::{assert_messages, assert_subscriptions, new_error, ReactiveTest as RT, TestScheduler};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;

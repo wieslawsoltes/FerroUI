@@ -4,7 +4,6 @@
 //! `TimeSpan` selector are `generate_after_on`, those with a `DateTimeOffset` selector
 //! `generate_at_on`.
 
-use ferroui_reactive::concurrency::IScheduler;
 use ferroui_reactive::Observable;
 use ferroui_reactive_testing::{assert_messages, new_error, ticks_to_duration, ReactiveTest as RT, TestScheduler};
 

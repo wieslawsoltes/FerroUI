@@ -172,7 +172,7 @@ fn contains_throw() {
 
 #[test]
 fn contains_never() {
-    let ex = new_error("ex");
+    let _ex = new_error("ex");
 
     let scheduler = TestScheduler::new();
 
@@ -214,7 +214,7 @@ fn contains_comparer_throws() {
 
 #[test]
 fn contains_comparer_contains_value() {
-    let ex = new_error("ex");
+    let _ex = new_error("ex");
 
     let scheduler = TestScheduler::new();
 
@@ -242,7 +242,7 @@ fn contains_comparer_contains_value() {
 
 #[test]
 fn contains_comparer_does_not_contain_value() {
-    let ex = new_error("ex");
+    let _ex = new_error("ex");
 
     let scheduler = TestScheduler::new();
 

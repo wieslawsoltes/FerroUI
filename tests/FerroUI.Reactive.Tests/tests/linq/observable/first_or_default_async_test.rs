@@ -105,7 +105,7 @@ fn first_or_default_async_error() {
 fn first_or_default_async_predicate() {
     let scheduler = TestScheduler::new();
 
-    let ex = new_error("ex");
+    let _ex = new_error("ex");
 
     let xs = scheduler.create_hot_observable(vec![
         RT::on_next(150, 1),
@@ -134,7 +134,7 @@ fn first_or_default_async_predicate() {
 fn first_or_default_async_predicate_none() {
     let scheduler = TestScheduler::new();
 
-    let ex = new_error("ex");
+    let _ex = new_error("ex");
 
     let xs = scheduler.create_hot_observable(vec![
         RT::on_next(150, 1),

@@ -76,7 +76,7 @@ fn is_empty_throw() {
 
 #[test]
 fn is_empty_never() {
-    let ex = new_error("ex");
+    let _ex = new_error("ex");
 
     let scheduler = TestScheduler::new();
 

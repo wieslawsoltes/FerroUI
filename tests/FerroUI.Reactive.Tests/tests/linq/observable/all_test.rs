@@ -179,7 +179,7 @@ fn all_throw() {
 
 #[test]
 fn all_never() {
-    let ex = new_error("ex");
+    let _ex = new_error("ex");
 
     let scheduler = TestScheduler::new();
 

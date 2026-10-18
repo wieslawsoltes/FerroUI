@@ -111,7 +111,7 @@ fn single_or_default_async_error() {
 fn single_or_default_async_predicate() {
     let scheduler = TestScheduler::new();
 
-    let ex = new_error("ex");
+    let _ex = new_error("ex");
 
     let xs = scheduler.create_hot_observable(vec![
         RT::on_next(150, 1),
@@ -139,7 +139,7 @@ fn single_or_default_async_predicate() {
 fn single_or_default_async_predicate_empty() {
     let scheduler = TestScheduler::new();
 
-    let ex = new_error("ex");
+    let _ex = new_error("ex");
 
     let xs = scheduler.create_hot_observable(vec![
         RT::on_next(150, 1),
@@ -164,7 +164,7 @@ fn single_or_default_async_predicate_empty() {
 fn single_or_default_async_predicate_one() {
     let scheduler = TestScheduler::new();
 
-    let ex = new_error("ex");
+    let _ex = new_error("ex");
 
     let xs = scheduler.create_hot_observable(vec![
         RT::on_next(150, 1),
@@ -193,7 +193,7 @@ fn single_or_default_async_predicate_one() {
 fn single_or_default_async_predicate_none() {
     let scheduler = TestScheduler::new();
 
-    let ex = new_error("ex");
+    let _ex = new_error("ex");
 
     let xs = scheduler.create_hot_observable(vec![
         RT::on_next(150, 1),

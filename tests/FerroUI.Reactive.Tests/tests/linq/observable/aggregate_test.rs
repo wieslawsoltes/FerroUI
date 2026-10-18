@@ -85,7 +85,7 @@ fn aggregate_with_seed_throw() {
 
 #[test]
 fn aggregate_with_seed_never() {
-    let ex = new_error("ex");
+    let _ex = new_error("ex");
 
     let scheduler = TestScheduler::new();
 
@@ -105,7 +105,7 @@ fn aggregate_with_seed_never() {
 
 #[test]
 fn aggregate_with_seed_range() {
-    let ex = new_error("ex");
+    let _ex = new_error("ex");
 
     let scheduler = TestScheduler::new();
 
@@ -236,7 +236,7 @@ fn aggregate_with_seed_and_result_throw() {
 
 #[test]
 fn aggregate_with_seed_and_result_never() {
-    let ex = new_error("ex");
+    let _ex = new_error("ex");
 
     let scheduler = TestScheduler::new();
 
@@ -256,7 +256,7 @@ fn aggregate_with_seed_and_result_never() {
 
 #[test]
 fn aggregate_with_seed_and_result_range() {
-    let ex = new_error("ex");
+    let _ex = new_error("ex");
 
     let scheduler = TestScheduler::new();
 

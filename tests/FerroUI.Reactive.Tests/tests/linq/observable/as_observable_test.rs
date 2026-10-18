@@ -3,7 +3,7 @@
 //! sets is a shared `Cell`. The test observables are coerced to the handle `Rc<dyn IObservable<T>>`
 //! first (their own `as_observable` gives that handle, not the operator).
 
-use ferroui_reactive::{IDisposable, IObservable, IObserver, Observable, ObservableExt};
+use ferroui_reactive::{IObservable, IObserver, Observable, ObservableExt};
 use ferroui_reactive_testing::{assert_messages, assert_subscriptions, new_error, ReactiveTest as RT, TestScheduler};
 use std::cell::Cell;
 use std::rc::Rc;

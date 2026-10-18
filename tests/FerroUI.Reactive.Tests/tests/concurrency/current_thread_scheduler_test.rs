@@ -5,8 +5,7 @@
 //! delays the trampoline waits for (1 s and 0.2 s upstream) are 10 ms, which keeps the tests
 //! deterministic (the scheduler blocks the thread for the delay) and short.
 
-use ferroui_reactive::concurrency::{CurrentThreadScheduler, IScheduler, Scheduler, SchedulerExt};
-use ferroui_reactive::IDisposable;
+use ferroui_reactive::concurrency::{CurrentThreadScheduler, Scheduler, SchedulerExt};
 use std::cell::Cell;
 use std::panic::{catch_unwind, panic_any, AssertUnwindSafe};
 use std::rc::Rc;

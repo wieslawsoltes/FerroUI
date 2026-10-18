@@ -4,7 +4,7 @@
 //! the scheduled closure captures; the delays the scheduler blocks for (0.2 s and 100 ms upstream)
 //! are 10 ms, which keeps the tests deterministic and short.
 
-use ferroui_reactive::concurrency::{IScheduler, Scheduler, SchedulerExt};
+use ferroui_reactive::concurrency::{Scheduler, SchedulerExt};
 use ferroui_reactive::disposables::Disposable;
 use std::cell::Cell;
 use std::panic::{catch_unwind, panic_any, AssertUnwindSafe};
