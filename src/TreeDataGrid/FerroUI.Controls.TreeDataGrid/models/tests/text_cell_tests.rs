@@ -11,7 +11,7 @@ use std::rc::Rc;
 fn record<T: Clone + 'static>(binding: &Rc<BehaviorSubject<T>>) -> Rc<RefCell<Vec<T>>> {
     let result = Rc::new(RefCell::new(Vec::new()));
     let sink = result.clone();
-    binding.subscribe(Rc::new(move |value: &T| sink.borrow_mut().push(value.clone())));
+    binding.subscribe(Rc::new(move |value: T| sink.borrow_mut().push(value)));
     result
 }
 

@@ -42,9 +42,9 @@ impl CheckBoxCell {
             is_three_state,
         });
         let weak = Rc::downgrade(&this);
-        let token = binding.subscribe(Rc::new(move |value: &Option<bool>| {
+        let token = binding.subscribe(Rc::new(move |value: Option<bool>| {
             if let Some(this) = weak.upgrade() {
-                this.set_value(*value);
+                this.set_value(value);
             }
         }));
         this.subscription.set(Some(token));

@@ -64,9 +64,9 @@ impl<M: TreeModel> ShowExpanderObservable<M> {
                 let binding = AccessorBinding::new(selector.clone(), Some(model));
                 // The binding pushes its current value synchronously: store it before.
                 let weak = self.weak_self.clone();
-                let token = binding.subscribe(Rc::new(move |value: &bool| {
+                let token = binding.subscribe(Rc::new(move |value: bool| {
                     if let Some(this) = weak.upgrade() {
-                        this.publish_next(*value);
+                        this.publish_next(value);
                     }
                 }));
                 self.state.borrow_mut().subscription = Some((binding, token));

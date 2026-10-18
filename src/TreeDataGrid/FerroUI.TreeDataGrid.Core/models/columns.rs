@@ -547,7 +547,8 @@ pub struct ValueColumn<M: 'static, V: 'static> {
     base: ColumnBase<M>,
     accessor: Accessor<M, V>,
     comparer: Option<ValueComparer<V>>,
-    boxer: Rc<dyn Fn(&V) -> Option<BoxedValue>>,
+    // Boxes a value it takes, without copying it.
+    boxer: Rc<dyn Fn(V) -> Option<BoxedValue>>,
     unboxer: Rc<dyn Fn(Option<&BoxedValue>) -> Option<V>>,
     // A template column: its own comparison (the options only), its value the model.
     is_template: Cell<bool>,
@@ -612,7 +613,7 @@ impl<M: TreeModel, V: Clone + PartialEq + 'static> IColumn for ValueColumn<M, V>
 
 impl<M: TreeModel, V: Clone + PartialEq + 'static> IUntypedValueColumn for ValueColumn<M, V> {
     fn get_value(&self, model: &BoxedValue) -> Option<BoxedValue> {
-        typed_model::<M>(model).and_then(|m| (self.boxer)(&self.get_value(&m)))
+        typed_model::<M>(model).and_then(|m| (self.boxer)(self.get_value(&m)))
     }
 
     fn set_value(&self, model: &BoxedValue, value: Option<&BoxedValue>) -> bool {
@@ -698,7 +699,7 @@ impl<M: TreeModel, V: Clone + PartialEq + 'static> ValueColumn<M, V> {
             base: ColumnBase::new(header, width, options, id),
             accessor,
             comparer,
-            boxer: Rc::new(|v: &V| Some(Rc::new(v.clone()) as BoxedValue)),
+            boxer: Rc::new(|v: V| Some(Rc::new(v) as BoxedValue)),
             unboxer: Rc::new(|b: Option<&BoxedValue>| b.and_then(|b| b.downcast_ref::<V>().cloned())),
             is_template: Cell::new(false),
             is_boolean: Cell::new(false),
@@ -807,7 +808,7 @@ fn template_comparison<M: 'static>(options: &ColumnOptions<M>, direction: ListSo
 
 impl<M: TreeModel, V: Clone + PartialEq + 'static> IValueColumn<M> for ValueColumn<M, V> {
     fn get_boxed_value(&self, model: &Rc<M>) -> Option<BoxedValue> {
-        (self.boxer)(&self.get_value(model))
+        (self.boxer)(self.get_value(model))
     }
 
     fn set_boxed_value(&self, model: &Rc<M>, value: Option<&BoxedValue>) -> bool {

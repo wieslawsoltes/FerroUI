@@ -1,4 +1,5 @@
 use std::cell::{Cell, RefCell};
+use smallvec::SmallVec;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
 
@@ -8,13 +9,17 @@ use std::sync::atomic::{AtomicU64, Ordering};
 pub struct HandlerList<F: ?Sized> {
     /// `None` until the first handler is added: most lists of an object never get one, and an
     /// empty list then costs no allocation.
-    handlers: RefCell<Option<Rc<Vec<(u64, Rc<F>)>>>>,
+    handlers: RefCell<Option<Rc<Handlers<F>>>>,
     next_id: HandlerIds,
 }
 
+/// The handlers of a list: most lists hold one or two, which are stored with the list's shared
+/// allocation.
+type Handlers<F> = SmallVec<[(u64, Rc<F>); 2]>;
+
 /// The handlers of a [`HandlerList`] at the time of [`HandlerList::snapshot`]: later
 /// modifications of the list do not affect it.
-pub struct HandlerSnapshot<F: ?Sized>(Option<Rc<Vec<(u64, Rc<F>)>>>);
+pub struct HandlerSnapshot<F: ?Sized>(Option<Rc<Handlers<F>>>);
 
 impl<F: ?Sized> Clone for HandlerSnapshot<F> {
     fn clone(&self) -> Self {
@@ -100,7 +105,7 @@ impl<F: ?Sized> HandlerList<F> {
     pub fn add(&self, handler: Rc<F>) -> u64 {
         let id = self.next_id.next();
         let mut handlers = self.handlers.borrow_mut();
-        let handlers = handlers.get_or_insert_with(|| Rc::new(Vec::new()));
+        let handlers = handlers.get_or_insert_with(|| Rc::new(SmallVec::new()));
         Rc::make_mut_or_clone(handlers).push((id, handler));
         id
     }
@@ -131,10 +136,10 @@ trait MakeMutOrClone<T> {
     fn make_mut_or_clone(this: &mut Self) -> &mut T;
 }
 
-impl<F: ?Sized> MakeMutOrClone<Vec<(u64, Rc<F>)>> for Rc<Vec<(u64, Rc<F>)>> {
-    fn make_mut_or_clone(this: &mut Self) -> &mut Vec<(u64, Rc<F>)> {
+impl<F: ?Sized> MakeMutOrClone<Handlers<F>> for Rc<Handlers<F>> {
+    fn make_mut_or_clone(this: &mut Self) -> &mut Handlers<F> {
         if Rc::get_mut(this).is_none() {
-            let copy: Vec<(u64, Rc<F>)> = this.iter().map(|(id, f)| (*id, f.clone())).collect();
+            let copy: Handlers<F> = this.iter().map(|(id, f)| (*id, f.clone())).collect();
             *this = Rc::new(copy);
         }
         Rc::get_mut(this).expect("uniquely owned after copy")

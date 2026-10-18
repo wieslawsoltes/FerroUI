@@ -301,6 +301,9 @@ pub struct TreeDataGridPresenterBase {
     last_measure_viewport: Cell<Rect>,
     items_subscription: Cell<Option<u64>>,
     measure_elements: RefCell<Option<Rc<RealizedStackElements>>>,
+    /// The list the final measure pass copies the measured elements into, kept for the next
+    /// measure (empty between measures).
+    measured_scratch: RefCell<Vec<Option<Ref<Control>>>>,
     realized_elements: RefCell<Option<Rc<RealizedStackElements>>>,
     /// The ancestor that implements the scroll anchor provider contract.
     scroll_anchor_provider: RefCell<Option<WeakRef<Visual>>>,
@@ -337,6 +340,7 @@ impl TreeDataGridPresenterBase {
             last_measure_viewport: Cell::new(INVALID_VIEWPORT),
             items_subscription: Cell::new(None),
             measure_elements: RefCell::new(None),
+            measured_scratch: RefCell::new(Vec::new()),
             realized_elements: RefCell::new(None),
             scroll_anchor_provider: RefCell::new(None),
             last_estimated_element_size_u: Cell::new(25.0),
@@ -734,7 +738,8 @@ impl TreeDataGridPresenterBase {
         self.realize_elements(hooks, item_count as i32, available_size, &mut viewport, &realized_elements, &measure_elements);
 
         // Run the final measure pass if necessary.
-        let measured = measure_elements.elements_snapshot();
+        let mut measured = std::mem::take(&mut *self.measured_scratch.borrow_mut());
+        measured.extend(measure_elements.elements().iter().cloned());
         if hooks.needs_final_measure_pass(measure_elements.first_index(), &measured) {
             let first_index = measure_elements.first_index();
 
@@ -761,6 +766,9 @@ impl TreeDataGridPresenterBase {
                 }
             }
         }
+
+        measured.clear();
+        *self.measured_scratch.borrow_mut() = measured;
 
         // Now swap the measure elements and realized elements collection.
         *self.measure_elements.borrow_mut() = Some(realized_elements.clone());

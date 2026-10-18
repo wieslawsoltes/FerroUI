@@ -72,7 +72,7 @@ pub struct CoreCellBinding<V: Clone + 'static> {
     column: Rc<dyn CoreColumn>,
     conversion: CellValueConversion<V>,
     root: RefCell<Option<BoxedValue>>,
-    observers: HandlerList<dyn Fn(&V)>,
+    observers: HandlerList<dyn Fn(V)>,
     listening: RefCell<Option<Listening>>,
     publish_count: Cell<u32>,
 }
@@ -126,8 +126,13 @@ impl<V: Clone + 'static> CoreCellBinding<V> {
             return;
         };
         self.publish_count.set(self.publish_count.get().wrapping_add(1));
-        for (_, observer) in self.observers.snapshot().iter() {
-            observer(&value);
+        // Every observer but the last gets a copy; the last takes the value.
+        let observers = self.observers.snapshot();
+        if let Some(((_, last), others)) = observers.split_last() {
+            for (_, observer) in others {
+                observer(value.clone());
+            }
+            last(value);
         }
     }
 
@@ -200,14 +205,14 @@ impl<V: Clone + 'static> CoreCellBinding<V> {
 }
 
 impl<V: Clone + 'static> ICellBinding<V> for CoreCellBinding<V> {
-    fn subscribe(&self, observer: Rc<dyn Fn(&V)>) -> u64 {
+    fn subscribe(&self, observer: Rc<dyn Fn(V)>) -> u64 {
         let first = self.observers.is_empty();
         let token = self.observers.add(observer.clone());
         if first {
             self.start_listening();
         }
         if let Some(value) = self.value() {
-            observer(&value);
+            observer(value);
         }
         token
     }

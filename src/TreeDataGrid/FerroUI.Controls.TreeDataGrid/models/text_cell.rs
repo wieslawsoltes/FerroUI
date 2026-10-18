@@ -63,9 +63,9 @@ impl<T: Clone + PartialEq + 'static> TextCell<T> {
             is_read_only,
         });
         let weak = Rc::downgrade(&this);
-        let token = binding.subscribe(Rc::new(move |value: &T| {
+        let token = binding.subscribe(Rc::new(move |value: T| {
             if let Some(this) = weak.upgrade() {
-                this.set_value(Some(value.clone()));
+                this.set_value(Some(value));
             }
         }));
         this.subscription.set(Some(token));

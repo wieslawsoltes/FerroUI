@@ -762,6 +762,11 @@ impl ValueStore {
     fn add_effective_value(&self, owner: &FerroObject, property: &FerroProperty, value: EffectiveValueRef) {
         {
             let mut values = self.effective_values.borrow_mut();
+            if values.capacity() == 0 {
+                // A control holds several values once styled: room for them in one allocation
+                // instead of growing through four.
+                values.reserve_exact(8);
+            }
             let index = values.partition_point(|(id, _)| *id < property.id());
             debug_assert!(values.get(index).is_none_or(|(id, _)| *id != property.id()));
             values.insert(index, (property.id(), value));

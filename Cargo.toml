@@ -150,6 +150,7 @@ ferroui-harfbuzz = { version = "=0.2.0", path = "src/HarfBuzz/FerroUI.HarfBuzz" 
 bitflags = "2"
 # A fast hasher for maps keyed by identities and short keys (the TreeDataGrid's recycle pools).
 rustc-hash = "2.1"
+smallvec = "1.16"
 # The bindings of the Windows API for the Windows platform backend (docs/porting/win32-platform.md,
 # section 2). Without features here: the backend names the API namespaces it calls.
 windows-sys = { version = "0.61.2" }

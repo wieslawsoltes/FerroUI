@@ -164,9 +164,9 @@ impl TestTarget {
     /// `target.Bind(TestTarget.TextProperty, expression)`.
     fn bind(self: &Rc<Self>, expression: Rc<dyn ICellBinding<Option<String>>>) {
         let weak: Weak<Self> = Rc::downgrade(self);
-        let token = expression.subscribe(Rc::new(move |value: &Option<String>| {
+        let token = expression.subscribe(Rc::new(move |value: Option<String>| {
             if let Some(this) = weak.upgrade() {
-                *this.text.borrow_mut() = value.clone();
+                *this.text.borrow_mut() = value;
             }
         }));
         *self.subscription.borrow_mut() = Some((expression, token));
@@ -216,9 +216,9 @@ impl TestExpandableTarget {
         source_node: &Rc<TestExpandableNode>,
     ) {
         let weak: Weak<Self> = Rc::downgrade(self);
-        let token = expression.subscribe(Rc::new(move |value: &bool| {
+        let token = expression.subscribe(Rc::new(move |value: bool| {
             if let Some(this) = weak.upgrade() {
-                this.is_expanded.set(*value);
+                this.is_expanded.set(value);
             }
         }));
         *self.subscription.borrow_mut() = Some((expression.clone(), token));

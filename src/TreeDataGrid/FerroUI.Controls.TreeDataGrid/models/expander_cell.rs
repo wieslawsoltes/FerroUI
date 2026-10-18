@@ -56,9 +56,9 @@ impl<M: TreeModel> ExpanderCell<M> {
 
         if let Some(is_expanded) = is_expanded {
             let weak = Rc::downgrade(&this);
-            let token = is_expanded.subscribe(Rc::new(move |value: &bool| {
+            let token = is_expanded.subscribe(Rc::new(move |value: bool| {
                 if let Some(this) = weak.upgrade() {
-                    this.set_is_expanded(*value);
+                    this.set_is_expanded(value);
                 }
             }));
             *this.is_expanded.borrow_mut() = Some((is_expanded, token));

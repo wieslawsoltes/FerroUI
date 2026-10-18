@@ -20,8 +20,9 @@ use std::rc::{Rc, Weak};
 /// that the cell writes back to.
 pub trait ICellBinding<T: 'static> {
     /// Subscribes `observer`: it receives the current value now, if there is one, and every later
-    /// value (`Subscribe`). Returns the token of [`unsubscribe`](Self::unsubscribe).
-    fn subscribe(&self, observer: Rc<dyn Fn(&T)>) -> u64;
+    /// value (`Subscribe`). Returns the token of [`unsubscribe`](Self::unsubscribe). An observer
+    /// receives a value of its own, which it keeps without copying it.
+    fn subscribe(&self, observer: Rc<dyn Fn(T)>) -> u64;
     /// Ends a subscription (the `IDisposable` that `Subscribe` returns).
     fn unsubscribe(&self, token: u64);
     /// Writes a value to the source (`OnNext`).
@@ -69,7 +70,7 @@ pub struct AccessorBinding<M: TreeModel, V: Clone + 'static> {
     accessor: Accessor<M, V>,
     observer: Option<Rc<PropertyPathObserver<M>>>,
     root: RefCell<Option<Rc<M>>>,
-    observers: HandlerList<dyn Fn(&V)>,
+    observers: HandlerList<dyn Fn(V)>,
     listening: RefCell<Option<Listening<M>>>,
     publish_count: Cell<u32>,
 }
@@ -131,8 +132,13 @@ impl<M: TreeModel, V: Clone + 'static> AccessorBinding<M, V> {
             return;
         };
         self.publish_count.set(self.publish_count.get().wrapping_add(1));
-        for (_, observer) in self.observers.snapshot().iter() {
-            observer(&value);
+        // Every observer but the last gets a copy; the last takes the value.
+        let observers = self.observers.snapshot();
+        if let Some(((_, last), others)) = observers.split_last() {
+            for (_, observer) in others {
+                observer(value.clone());
+            }
+            last(value);
         }
     }
 
@@ -191,7 +197,7 @@ impl<M: TreeModel, V: Clone + 'static> AccessorBinding<M, V> {
 }
 
 impl<M: TreeModel, V: Clone + 'static> ICellBinding<V> for AccessorBinding<M, V> {
-    fn subscribe(&self, observer: Rc<dyn Fn(&V)>) -> u64 {
+    fn subscribe(&self, observer: Rc<dyn Fn(V)>) -> u64 {
         let first = self.observers.is_empty();
         let token = self.observers.add(observer.clone());
         if first {
@@ -199,7 +205,7 @@ impl<M: TreeModel, V: Clone + 'static> ICellBinding<V> for AccessorBinding<M, V>
             self.start_listening();
         }
         if let Some(value) = self.value() {
-            observer(&value);
+            observer(value);
         }
         token
     }

@@ -38,6 +38,10 @@ pub struct LayoutManager {
     to_arrange: RefCell<LayoutQueue<Ref<Layoutable>>>,
     to_arrange_after_measure: RefCell<Vec<Ref<Layoutable>>>,
     effective_viewport_changed_listeners: RefCell<Vec<Rc<EffectiveViewportChangedListener>>>,
+    /// Not upstream: the copy of the listeners and the viewports of their ancestors that
+    /// [`raise_effective_viewport_changed`](Self::raise_effective_viewport_changed) works on, kept
+    /// for the next layout pass (empty between passes).
+    effective_viewport_scratch: RefCell<(Vec<Rc<EffectiveViewportChangedListener>>, FxHashMap<usize, Rect>)>,
     bring_into_view_requests: RefCell<Option<Vec<Rc<dyn BringIntoViewRequest>>>>,
     disposed: Cell<bool>,
     queued: Cell<bool>,
@@ -58,6 +62,7 @@ impl LayoutManager {
             to_arrange: RefCell::new(LayoutQueue::new(|v| !v.is_arrange_valid())),
             to_arrange_after_measure: RefCell::new(Vec::new()),
             effective_viewport_changed_listeners: RefCell::new(Vec::new()),
+            effective_viewport_scratch: RefCell::new((Vec::new(), FxHashMap::default())),
             bring_into_view_requests: RefCell::new(None),
             disposed: Cell::new(false),
             queued: Cell::new(false),
@@ -304,11 +309,11 @@ impl LayoutManager {
         // The viewports of the ancestors the listeners share are computed once in the pass while
         // nothing they are computed from changes (a handler of the event may change it, so the
         // version of the geometry is checked before each listener).
-        let mut ancestors: FxHashMap<usize, Rect> = FxHashMap::default();
+        let (mut listeners, mut ancestors) = std::mem::take(&mut *self.effective_viewport_scratch.borrow_mut());
         let mut version = crate::visual::geometry_version();
 
-        let listeners: Vec<_> = self.effective_viewport_changed_listeners.borrow().clone();
-        for l in listeners {
+        listeners.extend(self.effective_viewport_changed_listeners.borrow().iter().cloned());
+        for l in &listeners {
             if !l.listener.is_attached_to_visual_tree() {
                 continue;
             }
@@ -323,6 +328,9 @@ impl LayoutManager {
                 l.viewport.set(Some(viewport));
             }
         }
+        listeners.clear();
+        ancestors.clear();
+        *self.effective_viewport_scratch.borrow_mut() = (listeners, ancestors);
 
         start_count != self.to_measure.borrow().count() + self.to_arrange.borrow().count()
     }

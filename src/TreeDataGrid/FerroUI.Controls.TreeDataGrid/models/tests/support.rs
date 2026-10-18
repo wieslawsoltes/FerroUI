@@ -64,7 +64,7 @@ pub(crate) fn stars(value: f64) -> GridLength {
 /// subscriber and pushes every value written to it to all subscribers.
 pub(crate) struct BehaviorSubject<T: Clone + 'static> {
     value: RefCell<T>,
-    observers: HandlerList<dyn Fn(&T)>,
+    observers: HandlerList<dyn Fn(T)>,
 }
 
 impl<T: Clone + 'static> BehaviorSubject<T> {
@@ -74,10 +74,10 @@ impl<T: Clone + 'static> BehaviorSubject<T> {
 }
 
 impl<T: Clone + 'static> ICellBinding<T> for BehaviorSubject<T> {
-    fn subscribe(&self, observer: Rc<dyn Fn(&T)>) -> u64 {
+    fn subscribe(&self, observer: Rc<dyn Fn(T)>) -> u64 {
         let token = self.observers.add(observer.clone());
         let value = self.value.borrow().clone();
-        observer(&value);
+        observer(value);
         token
     }
 
@@ -88,7 +88,7 @@ impl<T: Clone + 'static> ICellBinding<T> for BehaviorSubject<T> {
     fn on_next(&self, value: T) {
         *self.value.borrow_mut() = value.clone();
         for (_, observer) in self.observers.snapshot().iter() {
-            observer(&value);
+            observer(value.clone());
         }
     }
 
