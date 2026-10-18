@@ -678,3 +678,34 @@ fn stable_composite_disposable_nary2() {
 // Not ported: RefCountDisposable_Ctor_Null - argument validation
 // Not ported: ScheduledDisposable_Null - argument validation
 // Not ported: StableCompositeDisposable_ArgumentChecking - argument validation
+
+/// Many members are removed in linear time overall (dotnet/reactive issue 2005): above the
+/// threshold of a linear search, a removal finds its member through an index; the members keep the
+/// order they were added in.
+#[test]
+fn composite_disposable_large_number_of_items_add_remove() {
+    use std::cell::Cell;
+    let disposed = Rc::new(Cell::new(0usize));
+    let group = CompositeDisposable::new();
+    let items: Vec<Rc<dyn IDisposable>> = (0..5000)
+        .map(|_| {
+            let disposed = disposed.clone();
+            Disposable::create(move || disposed.set(disposed.get() + 1))
+        })
+        .collect();
+    for item in &items {
+        group.add(item.clone());
+    }
+    assert_eq!(5000, group.count());
+    for item in items.iter().step_by(2) {
+        assert!(group.remove(item));
+    }
+    assert_eq!(2500, group.count());
+    assert_eq!(2500, disposed.get());
+    assert!(group.contains(&items[1]));
+    assert!(!group.contains(&items[0]));
+    let remaining = group.to_vec();
+    assert!(remaining.iter().zip(items.iter().skip(1).step_by(2)).all(|(a, b)| std::ptr::addr_eq(Rc::as_ptr(a), Rc::as_ptr(b))));
+    group.dispose();
+    assert_eq!(5000, disposed.get());
+}
