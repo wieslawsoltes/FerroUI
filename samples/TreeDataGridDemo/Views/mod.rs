@@ -6,16 +6,18 @@ use ferroui_base::metadata::MarkupType;
 use ferroui_base::TypeInfo;
 
 mod countries_page;
+mod main_view;
 mod realized_count;
 
 pub use countries_page::CountriesPage;
+pub use main_view::MainView;
 pub use realized_count::update_realized_count;
 
 /// The classes of this namespace (`X::TYPE`).
-pub(crate) const TYPES: &[&TypeInfo] = &[CountriesPage::TYPE];
+pub(crate) const TYPES: &[&TypeInfo] = &[CountriesPage::TYPE, MainView::TYPE];
 
 /// The classes of this namespace that have a document (`&X::XAML_CLASS`).
-pub(crate) const CLASSES: &[&XamlClass] = &[&CountriesPage::XAML_CLASS];
+pub(crate) const CLASSES: &[&XamlClass] = &[&CountriesPage::XAML_CLASS, &MainView::XAML_CLASS];
 
 /// The types of this namespace declared with `ferro_markup_type!` / `ferro_markup_enum!`
 /// (`<X as MarkupTyped>::MARKUP`).

@@ -21,7 +21,7 @@ The port of TreeDataGrid (<https://github.com/wieslawsoltes/TreeDataGrid>, MIT, 
 |---|---|---|
 | `TreeDataGrid.Core` | `ferroui-treedatagrid-core` | `src/TreeDataGrid/FerroUI.TreeDataGrid.Core` |
 | `Avalonia.Controls.TreeDataGrid` (and `TreeDataGrid.Avalonia`) | `ferroui-controls-treedatagrid` | `src/TreeDataGrid/FerroUI.Controls.TreeDataGrid` |
-| `TreeDataGridDemo` and `TreeDataGridCoreDemo` | `treedatagrid-demo` (library: models, view models, pages) and `treedatagrid-demo-desktop` (the application) | `samples/TreeDataGridDemo`, `samples/TreeDataGridDemo.Desktop` |
+| `TreeDataGridDemo` and `TreeDataGridCoreDemo` | `treedatagrid-demo`: the library (models, view models, one view per page) and the binary of the application, as the other samples of the workspace | `samples/TreeDataGridDemo` |
 | ControlCatalog pages | pages of the section "Collections & Data" that host the pages of `treedatagrid-demo` | `samples/ControlCatalog/Pages/TreeDataGrid*` |
 | Unit tests | `tests/` modules of the two crates and of the demo | next to the code, as in every crate of the workspace |
 | Benchmarks | `benches` of `ferroui-controls-treedatagrid` (a harness of the workspace's kind: headless application, many operations per sample, per-operation results) | `src/TreeDataGrid/FerroUI.Controls.TreeDataGrid/benches` |
@@ -66,10 +66,10 @@ The names follow the rules of the repository: no upstream framework name in code
 | T1 | done |
 | T2 | done |
 | T3 | done: the 192 tests of `TreeDataGrid.Core.Tests` pass (`cargo test -p ferroui-treedatagrid-core`, with 6 tests of the port's own) |
-| T4 | not started |
-| T5 | not started |
-| T6 | not started |
-| T7 | not started |
+| T4 | done |
+| T5 | done |
+| T6 | done: the 497 tests of the control crate pass (`cargo test -p ferroui-controls-treedatagrid`): the reference's control tests and the port's own |
+| T7 | in progress: `samples/TreeDataGridDemo` (one crate: the library of models, view models and views, and the binary `treedatagrid-demo`) |
 | T8 | not started |
 
 ## 6. Performance
