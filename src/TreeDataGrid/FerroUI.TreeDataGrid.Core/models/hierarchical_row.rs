@@ -122,7 +122,7 @@ impl<M: TreeModel> HierarchicalRow<M> {
         this
     }
 
-    fn this(&self) -> Rc<Self> {
+    pub(crate) fn this(&self) -> Rc<Self> {
         self.weak_self.upgrade().expect("a row that is alive")
     }
 
