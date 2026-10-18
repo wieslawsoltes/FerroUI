@@ -1207,6 +1207,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-reactive"
+version = "0.3.0-preview.1"
+dependencies = [
+ "ferroui-system",
+]
+
+[[package]]
+name = "ferroui-reactive-testing"
+version = "0.3.0-preview.1"
+dependencies = [
+ "ferroui-reactive",
+]
+
+[[package]]
+name = "ferroui-reactive-tests"
+version = "0.3.0-preview.1"
+dependencies = [
+ "ferroui-reactive",
+ "ferroui-reactive-testing",
+]
+
+[[package]]
 name = "ferroui-remote-protocol"
 version = "0.3.0-preview.1"
 

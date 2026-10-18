@@ -2,6 +2,8 @@
 resolver = "2"
 members = [
     "src/FerroUI.System",
+    "src/FerroUI.Reactive",
+    "src/FerroUI.Reactive.Testing",
     "src/FerroUI.Base",
     "src/FerroUI.Controls",
     "src/FerroUI.Controls.ColorPicker",
@@ -43,6 +45,7 @@ members = [
     "src/tools/MicroCom.CodeGenerator",
     "external/XamlX/src/XamlX",
     "tests/FerroUI.Markup.Xaml.UnitTests",
+    "tests/FerroUI.Reactive.Tests",
     "tests/XamlIncludeFixture/Theme",
     "tests/XamlIncludeFixture/Application",
     "tests/FerroUI.RenderBackends.Comparison",
@@ -102,6 +105,8 @@ categories = ["gui"]
 # `scripts/release/set-version.sh <version>` writes the version above and these keys.
 [workspace.dependencies]
 ferroui-system = { version = "=0.3.0-preview.1", path = "src/FerroUI.System" }
+ferroui-reactive = { version = "=0.3.0-preview.1", path = "src/FerroUI.Reactive" }
+ferroui-reactive-testing = { version = "=0.3.0-preview.1", path = "src/FerroUI.Reactive.Testing" }
 ferroui-base = { version = "=0.3.0-preview.1", path = "src/FerroUI.Base" }
 ferroui-controls = { version = "=0.3.0-preview.1", path = "src/FerroUI.Controls" }
 ferroui-controls-color-picker = { version = "=0.3.0-preview.1", path = "src/FerroUI.Controls.ColorPicker" }

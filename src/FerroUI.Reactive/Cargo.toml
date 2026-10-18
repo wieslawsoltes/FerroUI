@@ -1,0 +1,26 @@
+[package]
+name = "ferroui-reactive"
+description = "A port of Rx.NET (System.Reactive) for FerroUI: observable sequences, their operators, schedulers, disposables and subjects, independent of the user interface"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+# Unit tests live in `tests/` as a module tree of the library (`mod tests;`), not as integration test
+# targets.
+autotests = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-system = { workspace = true }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "core"

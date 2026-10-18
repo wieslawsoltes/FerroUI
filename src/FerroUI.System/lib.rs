@@ -5,7 +5,8 @@
 //! cancellation of work. Nothing here depends on the user interface; the base
 //! library of FerroUI re-exports every item at the path it had there.
 //!
-//! The modules follow the namespaces of .NET where an item ports one of its types:
+//! The modules follow the namespaces of .NET where an item ports one of its types; the items of the
+//! namespace `System` are at the root (`IDisposable`, `IObservable<T>`, `IObserver<T>`).
 //!
 //! - [`component_model`]: `System.ComponentModel` (`INotifyPropertyChanged`).
 //! - [`collections::specialized`]: `System.Collections.Specialized` (`INotifyCollectionChanged` and
@@ -19,7 +20,12 @@ pub mod collections;
 pub mod component_model;
 pub mod events;
 pub mod ferro_thread_local;
+mod i_disposable;
+mod i_observable;
 pub mod threading;
+
+pub use i_disposable::IDisposable;
+pub use i_observable::{IObservable, IObserver, ObservableError};
 
 #[cfg(test)]
 mod tests;
