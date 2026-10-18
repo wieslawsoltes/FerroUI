@@ -470,5 +470,5 @@ fn throttle_duration_inner_done_throttle_behavior() {
 }
 
 // Not ported: Throttle_ArgumentChecking - argument validation (and a negative TimeSpan, which a Duration cannot be)
-// Not ported: Throttle_DefaultScheduler - needs operator ToEnumerable (the blocking operators, phase 3, later)
+// Not ported: Throttle_DefaultScheduler - blocking operator ToEnumerable (waived: one thread)
 // Not ported: Throttle_Duration_ArgumentChecking - argument validation

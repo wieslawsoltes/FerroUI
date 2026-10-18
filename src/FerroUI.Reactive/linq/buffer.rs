@@ -1,6 +1,7 @@
 //! `Buffer` (`Linq/Observable/Buffer.cs`): buffers by count, by count and skip, by time, by time and
-//! shift, by time or count, by a closing selector and by boundaries. A buffer is a `Vec<T>` (upstream's
-//! `IList<TSource>`).
+//! shift, by time or count, by a closing selector and by boundaries; and the buffers by openings and
+//! closings of `Linq/QueryLanguage.Multiple.cs`, the lists of the windows by openings. A buffer is a
+//! `Vec<T>` (upstream's `IList<TSource>`).
 
 use crate::concurrency::{AsyncLock, IScheduler, SchedulerExt};
 use crate::disposables::{SerialDisposableValue, SingleAssignmentDisposable, SingleAssignmentDisposableValue};
@@ -725,6 +726,21 @@ impl<T: 'static> IObservable<Vec<T>> for BufferObservable<T> {
     }
 }
 
+/// `Buffer` by openings and closings (`QueryLanguage.Buffer<TSource, TBufferOpening, TBufferClosing>`,
+/// `Linq/QueryLanguage.Multiple.cs`): upstream has no operator of its own for it, but
+/// `source.Window(bufferOpenings, bufferClosingSelector).SelectMany(ToList)`, the list of each window
+/// by openings and closings.
+pub(crate) fn buffer_openings<T: Clone + 'static, O: 'static, C: 'static>(
+    source: Rc<dyn IObservable<T>>,
+    buffer_openings: Rc<dyn IObservable<O>>,
+    buffer_closing_selector: impl Fn(&O) -> Result<Rc<dyn IObservable<C>>, ObservableError> + 'static,
+) -> Rc<dyn IObservable<Vec<T>>> {
+    crate::linq::select_many::select_many(
+        crate::linq::window::window_openings(source, buffer_openings, buffer_closing_selector),
+        |window: Rc<dyn IObservable<T>>, _| Ok(crate::linq::to_list::to_list(window)),
+    )
+}
+
 /// The methods of `Buffer` (provided methods of [`ObservableExt`](super::ObservableExt)).
 macro_rules! buffer_methods {
     () => {
@@ -821,6 +837,35 @@ macro_rules! buffer_methods {
         /// (`Buffer<TSource, TBufferBoundary>(IObservable<TSource>, IObservable<TBufferBoundary>)`).
         fn buffer_boundaries<B: 'static>(&self, boundaries: std::rc::Rc<dyn ferroui_system::IObservable<B>>) -> std::rc::Rc<dyn ferroui_system::IObservable<Vec<T>>> {
             crate::linq::buffer::buffer_boundaries(self.observable(), boundaries)
+        }
+
+        /// Buffers that each value of `buffer_openings` starts, each ending when the sequence
+        /// `buffer_closing_selector` returns for its opening produces or ends
+        /// (`Buffer<TSource, TBufferOpening, TBufferClosing>(IObservable<TSource>,
+        /// IObservable<TBufferOpening>, Func<TBufferOpening, IObservable<TBufferClosing>>)`).
+        fn buffer_openings<O: 'static, C: 'static>(
+            &self,
+            buffer_openings: std::rc::Rc<dyn ferroui_system::IObservable<O>>,
+            buffer_closing_selector: impl Fn(&O) -> std::rc::Rc<dyn ferroui_system::IObservable<C>> + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<Vec<T>>>
+        where
+            T: Clone,
+        {
+            crate::linq::buffer::buffer_openings(self.observable(), buffer_openings, move |opening: &O| Ok(buffer_closing_selector(opening)))
+        }
+
+        /// [`buffer_openings`](Self::buffer_openings) with a closing selector that may fail; a failure
+        /// ends the sequence with its error (`Buffer` by openings with a closing selector that
+        /// throws).
+        fn try_buffer_openings<O: 'static, C: 'static>(
+            &self,
+            buffer_openings: std::rc::Rc<dyn ferroui_system::IObservable<O>>,
+            buffer_closing_selector: impl Fn(&O) -> Result<std::rc::Rc<dyn ferroui_system::IObservable<C>>, ferroui_system::ObservableError> + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<Vec<T>>>
+        where
+            T: Clone,
+        {
+            crate::linq::buffer::buffer_openings(self.observable(), buffer_openings, buffer_closing_selector)
         }
     };
 }

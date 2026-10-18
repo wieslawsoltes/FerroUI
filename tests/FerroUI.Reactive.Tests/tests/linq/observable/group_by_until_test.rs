@@ -13,7 +13,9 @@
 
 use ferroui_reactive::linq::IGroupedObservable;
 use ferroui_reactive::{IDisposable, IObservable, IObserver, Notification, Observable, ObservableError, ObservableExt};
-use ferroui_reactive_testing::{assert_messages, assert_subscriptions, new_error, HotObservable, MockObserver, ReactiveTest as RT, Recorded, TestScheduler};
+use ferroui_reactive_testing::{
+    assert_messages, assert_subscriptions, new_error, ticks_to_duration, HotObservable, MockObserver, ReactiveTest as RT, Recorded, TestScheduler,
+};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -1286,6 +1288,114 @@ fn duration_selector_throws(capacity: Option<usize>) {
     assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 210));
 }
 
+/// The source of the `NullKeys_Simple` tests.
+fn null_keys_source(scheduler: &TestScheduler) -> Rc<HotObservable<String>> {
+    scheduler.create_hot_observable(vec![
+        RT::on_next(220, s("bar")),
+        RT::on_next(240, s("foo")),
+        RT::on_next(310, s("qux")),
+        RT::on_next(470, s("baz")),
+        RT::on_completed(500),
+    ])
+}
+
+/// `.SelectMany(g => g, (g, x) => (g.Key ?? "(null)") + x)`.
+fn null_keys_flatten(groups: Rc<dyn IObservable<Rc<dyn IGroupedObservable<Option<String>, String>>>>) -> Rc<dyn IObservable<String>> {
+    groups.select_many_with(
+        |g: Rc<dyn IGroupedObservable<Option<String>, String>>| g.observable(),
+        |g: Rc<dyn IGroupedObservable<Option<String>, String>>, x: String| g.key().clone().unwrap_or_else(|| s("(null)")) + &x,
+    )
+}
+
+/// `x => x[0] == 'b' ? null : x.ToUpper()`.
+fn null_key(x: &String) -> Option<String> {
+    if x.starts_with('b') {
+        None
+    } else {
+        Some(x.to_uppercase())
+    }
+}
+
+fn null_keys_simple_never(capacity: Option<usize>) {
+    let scheduler = TestScheduler::new();
+
+    let xs = null_keys_source(&scheduler);
+
+    let source = xs.as_observable();
+    let res = scheduler.start(move || null_keys_flatten(group_by_until_key(source, capacity, null_key, |_| Observable::never::<()>())));
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(220, s("(null)bar")),
+        RT::on_next(240, s("FOOfoo")),
+        RT::on_next(310, s("QUXqux")),
+        RT::on_next(470, s("(null)baz")),
+        RT::on_completed(500),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 500));
+}
+
+fn null_keys_simple_expire1(capacity: Option<usize>) {
+    let scheduler = TestScheduler::new();
+
+    let xs = null_keys_source(&scheduler);
+
+    let n = Rc::new(Cell::new(0));
+    let (source, sch, n_) = (xs.as_observable(), scheduler.scheduler(), n.clone());
+    let res = scheduler.start(move || {
+        null_keys_flatten(group_by_until_key(source, capacity, null_key, move |g| {
+            if g.key().is_none() {
+                increment(&n_);
+            }
+            Observable::timer_on(ticks_to_duration(50), sch.clone())
+        }))
+    });
+
+    assert_eq!(2, n.get());
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(220, s("(null)bar")),
+        RT::on_next(240, s("FOOfoo")),
+        RT::on_next(310, s("QUXqux")),
+        RT::on_next(470, s("(null)baz")),
+        RT::on_completed(500),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 500));
+}
+
+fn null_keys_simple_expire2(capacity: Option<usize>) {
+    let scheduler = TestScheduler::new();
+
+    let xs = null_keys_source(&scheduler);
+
+    let n = Rc::new(Cell::new(0));
+    let (source, sch, n_) = (xs.as_observable(), scheduler.scheduler(), n.clone());
+    let res = scheduler.start(move || {
+        null_keys_flatten(group_by_until_key(source, capacity, null_key, move |g| {
+            if g.key().is_none() {
+                increment(&n_);
+            }
+            Observable::timer_on(ticks_to_duration(50), sch.clone()).ignore_elements()
+        }))
+    });
+
+    assert_eq!(2, n.get());
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(220, s("(null)bar")),
+        RT::on_next(240, s("FOOfoo")),
+        RT::on_next(310, s("QUXqux")),
+        RT::on_next(470, s("(null)baz")),
+        RT::on_completed(500),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 500));
+}
+
 fn null_keys_error(capacity: Option<usize>) {
     let scheduler = TestScheduler::new();
 
@@ -1450,6 +1560,21 @@ fn group_by_until_duration_selector_throws() {
 }
 
 #[test]
+fn group_by_until_null_keys_simple_never() {
+    null_keys_simple_never(None);
+}
+
+#[test]
+fn group_by_until_null_keys_simple_expire1() {
+    null_keys_simple_expire1(None);
+}
+
+#[test]
+fn group_by_until_null_keys_simple_expire2() {
+    null_keys_simple_expire2(None);
+}
+
+#[test]
 fn group_by_until_null_keys_error() {
     null_keys_error(None);
 }
@@ -1575,15 +1700,24 @@ fn group_by_until_capacity_duration_selector_throws() {
 }
 
 #[test]
+fn group_by_until_capacity_null_keys_simple_never() {
+    null_keys_simple_never(Some(GROUP_BY_UNTIL_CAPACITY));
+}
+
+#[test]
+fn group_by_until_capacity_null_keys_simple_expire1() {
+    null_keys_simple_expire1(Some(GROUP_BY_UNTIL_CAPACITY));
+}
+
+#[test]
+fn group_by_until_capacity_null_keys_simple_expire2() {
+    null_keys_simple_expire2(Some(GROUP_BY_UNTIL_CAPACITY));
+}
+
+#[test]
 fn group_by_until_capacity_null_keys_error() {
     null_keys_error(Some(GROUP_BY_UNTIL_CAPACITY));
 }
 
 // Not ported: GroupByUntil_ArgumentChecking - argument validation
-// Not ported: GroupByUntil_NullKeys_Simple_Never - needs operator SelectMany (phase 3, later)
-// Not ported: GroupByUntil_NullKeys_Simple_Expire1 - needs operator SelectMany (phase 3, later)
-// Not ported: GroupByUntil_NullKeys_Simple_Expire2 - needs operator SelectMany (phase 3, later)
 // Not ported: GroupByUntil_Capacity_ArgumentChecking - argument validation (and a negative capacity, which `usize` rules out)
-// Not ported: GroupByUntil_Capacity_NullKeys_Simple_Never - needs operator SelectMany (phase 3, later)
-// Not ported: GroupByUntil_Capacity_NullKeys_Simple_Expire1 - needs operator SelectMany (phase 3, later)
-// Not ported: GroupByUntil_Capacity_NullKeys_Simple_Expire2 - needs operator SelectMany (phase 3, later)

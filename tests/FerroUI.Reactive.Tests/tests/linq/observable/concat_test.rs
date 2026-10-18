@@ -5,8 +5,10 @@
 //! `MockEnumerable<T>` of the test library is a local enumerable that records the times its
 //! enumerators live (an enumerator is disposed when it is dropped).
 
-use ferroui_reactive::{IObservable, Observable, ObservableExt};
-use ferroui_reactive_testing::{assert_messages, assert_subscriptions, new_error, ReactiveTest as RT, Subscription, TestScheduler};
+use ferroui_reactive::{IObservable, Observable, ObservableError, ObservableExt};
+use ferroui_reactive_testing::{
+    assert_messages, assert_recorded_eq, assert_subscriptions, new_error, Expected, ReactiveTest as RT, Recorded, Subscription, TestScheduler,
+};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -512,11 +514,105 @@ fn concat_enumerable_dispose() {
     assert_subscriptions!(xss.subscriptions(), RT::subscribe(200, 300));
 }
 
+#[test]
+fn concat_optimization_defer_eval_timing() {
+    let scheduler = TestScheduler::new();
+
+    let o1 = scheduler.create_hot_observable(vec![RT::on_next(150, 1), RT::on_next(210, 2), RT::on_next(220, 3), RT::on_completed(230)]);
+
+    let o2 = scheduler.create_cold_observable(vec![RT::on_next(10, 4), RT::on_next(20, 5), RT::on_next(30, 6), RT::on_completed(40)]);
+
+    let invoked = Rc::new(Cell::new(0i64));
+
+    let xs = o1.as_observable();
+    let ys = {
+        let (invoked, sc, o2) = (invoked.clone(), scheduler.clone(), o2.clone());
+        Observable::defer(move || {
+            invoked.set(sc.clock());
+            o2.as_observable()
+        })
+    };
+
+    let res = scheduler.start(move || xs.concat(ys));
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(210, 2),
+        RT::on_next(220, 3),
+        RT::on_next(240, 4),
+        RT::on_next(250, 5),
+        RT::on_next(260, 6),
+        RT::on_completed(270),
+    );
+
+    assert_subscriptions!(o1.subscriptions(), RT::subscribe(200, 230));
+
+    assert_subscriptions!(o2.subscriptions(), RT::subscribe(230, 270));
+
+    assert_eq!(230, invoked.get());
+}
+
+#[test]
+fn concat_optimization_defer_exception_propagation() {
+    let scheduler = TestScheduler::new();
+
+    let o1 = scheduler.create_hot_observable(vec![RT::on_next(150, 1), RT::on_next(210, 2), RT::on_completed(220)]);
+
+    let ex = new_error("ex");
+    let invoked = Rc::new(Cell::new(0i64));
+
+    let xs = o1.as_observable();
+    let ys = {
+        let (invoked, sc, ex) = (invoked.clone(), scheduler.clone(), ex.clone());
+        Observable::try_defer(move || -> Result<Rc<dyn IObservable<i32>>, ObservableError> {
+            invoked.set(sc.clock());
+            Err(ex.clone())
+        })
+    };
+
+    let res = scheduler.start(move || xs.concat(ys));
+
+    assert_messages!(res.messages(), RT::on_next(210, 2), RT::on_error(220, ex));
+
+    assert_subscriptions!(o1.subscriptions(), RT::subscribe(200, 220));
+
+    assert_eq!(220, invoked.get());
+}
+
+#[test]
+fn concat_tail_recursive1() {
+    let create = 0;
+    let start = 200;
+    let end = 1000;
+
+    let scheduler = TestScheduler::new();
+
+    let o = scheduler
+        .create_cold_observable(vec![RT::on_next(10, 1), RT::on_next(20, 2), RT::on_next(30, 3), RT::on_completed(40)])
+        .as_observable();
+
+    fn f(o: Rc<dyn IObservable<i32>>) -> Rc<dyn IObservable<i32>> {
+        Observable::defer(move || o.concat(f(o.clone())))
+    }
+    let res = scheduler.start_with(move || f(o), create, start, end);
+
+    let mut expected: Vec<Recorded<Expected<i32>>> = Vec::new();
+
+    let mut t = start;
+    while t <= end {
+        let n = (t - start) / 10;
+        if n % 4 != 0 {
+            expected.push(RT::on_next(t, (n % 4) as i32).into());
+        }
+
+        t += 10;
+    }
+
+    assert_recorded_eq(&res.messages(), &expected);
+}
+
 // Not ported: Concat_ArgumentChecking - argument validation
 // Not ported: Concat_IEofIO_GetEnumeratorThrows - an enumerable whose GetEnumerator throws: a Rust iterator cannot fail to be created
 // Not ported: Concat_EnumerableThrows - an enumerable that throws while it is enumerated: a Rust iterator cannot fail
-// Not ported: Concat_Optimization_DeferEvalTiming - needs operator Defer (phase 3, later)
-// Not ported: Concat_Optimization_DeferExceptionPropagation - needs operator Defer (phase 3, later)
-// Not ported: Concat_TailRecursive1 - needs operator Defer (phase 3, later)
-// Not ported: Concat_TailRecursive2 - real threads (ThreadPoolScheduler, stack traces); needs operators Defer, Take, ForEach (phase 3, later)
+// Not ported: Concat_TailRecursive2 - real threads (ThreadPoolScheduler, stack traces); blocking operator ForEach (waived: one thread)
 // Not ported: Concat_Task - needs async/await (phase 4)

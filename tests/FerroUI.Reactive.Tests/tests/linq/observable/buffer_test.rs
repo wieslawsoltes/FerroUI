@@ -2,8 +2,9 @@
 //! Adapted: a buffer is a `Vec<i32>`, compared whole where upstream compares it with
 //! `SequenceEqual`; the overloads are `buffer` (count), `buffer_with_skip` (count and skip),
 //! `buffer_time_on` (time), `buffer_time_shift_on` (time and shift), `buffer_time_count_on` (time or
-//! count), `buffer_closing` and `try_buffer_closing` (closing selector), `buffer_boundaries`;
-//! `PeriodicTestScheduler` and `TimerRun` of `TimerTest.cs` are local types.
+//! count), `buffer_closing` and `try_buffer_closing` (closing selector), `buffer_boundaries`,
+//! `buffer_openings` (openings and a closing selector); `PeriodicTestScheduler` and `TimerRun` of
+//! `TimerTest.cs` are local types.
 
 use ferroui_reactive::concurrency::{IScheduler, ISchedulerPeriodic, IStopwatchProvider, ScheduledAction, SchedulerExt};
 use ferroui_reactive::disposables::{CompositeDisposable, Disposable};
@@ -154,6 +155,34 @@ fn time_or_count_source(scheduler: &TestScheduler, end: ferroui_reactive_testing
 }
 
 #[test]
+fn buffer_closings_basic() {
+    let scheduler = TestScheduler::new();
+
+    let xs = closings_source(&scheduler, RT::on_completed(590));
+
+    let window = Rc::new(Cell::new(1i64));
+
+    let (source, sched) = (xs.as_observable(), scheduler.scheduler());
+    let res = scheduler.start(move || {
+        source.buffer_closing(move || {
+            let w = window.get();
+            window.set(w + 1);
+            Observable::timer_on(ticks_to_duration(w * 100), sched.clone())
+        })
+    });
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(300, vec![3, 4]),
+        RT::on_next(500, vec![5, 6, 7, 8, 9]),
+        RT::on_next(590, vec![10]),
+        RT::on_completed(590),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 590));
+}
+
+#[test]
 fn buffer_closings_inner_subscriptions() {
     let scheduler = TestScheduler::new();
 
@@ -198,6 +227,88 @@ fn buffer_closings_inner_subscriptions() {
 }
 
 #[test]
+fn buffer_closings_empty() {
+    let scheduler = TestScheduler::new();
+
+    let xs = closings_source(&scheduler, RT::on_completed(590));
+
+    let window = Rc::new(Cell::new(1i64));
+
+    let (source, sched) = (xs.as_observable(), scheduler.scheduler());
+    let res = scheduler.start(move || {
+        source.buffer_closing(move || {
+            let w = window.get();
+            window.set(w + 1);
+            Observable::empty::<i32>().delay_on(ticks_to_duration(w * 100), sched.clone())
+        })
+    });
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(300, vec![3, 4]),
+        RT::on_next(500, vec![5, 6, 7, 8, 9]),
+        RT::on_next(590, vec![10]),
+        RT::on_completed(590),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 590));
+}
+
+#[test]
+fn buffer_closings_dispose() {
+    let scheduler = TestScheduler::new();
+
+    let xs = closings_source(&scheduler, RT::on_completed(590));
+
+    let window = Rc::new(Cell::new(1i64));
+
+    let (source, sched) = (xs.as_observable(), scheduler.scheduler());
+    let res = scheduler.start_disposed(
+        move || {
+            source.buffer_closing(move || {
+                let w = window.get();
+                window.set(w + 1);
+                Observable::timer_on(ticks_to_duration(w * 100), sched.clone())
+            })
+        },
+        400,
+    );
+
+    assert_messages!(res.messages(), RT::on_next(300, vec![3, 4]));
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 400));
+}
+
+#[test]
+fn buffer_closings_error() {
+    let scheduler = TestScheduler::new();
+
+    let ex = new_error("ex");
+
+    let xs = closings_source(&scheduler, RT::on_error(590, ex.clone()));
+
+    let window = Rc::new(Cell::new(1i64));
+
+    let (source, sched) = (xs.as_observable(), scheduler.scheduler());
+    let res = scheduler.start(move || {
+        source.buffer_closing(move || {
+            let w = window.get();
+            window.set(w + 1);
+            Observable::timer_on(ticks_to_duration(w * 100), sched.clone())
+        })
+    });
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(300, vec![3, 4]),
+        RT::on_next(500, vec![5, 6, 7, 8, 9]),
+        RT::on_error(590, ex.clone()),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 590));
+}
+
+#[test]
 fn buffer_closings_throw() {
     let scheduler = TestScheduler::new();
 
@@ -227,6 +338,31 @@ fn buffer_closings_window_close_error() {
     assert_messages!(res.messages(), RT::on_error::<Vec<i32>>(201, ex.clone()));
 
     assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 201));
+}
+
+#[test]
+fn buffer_opening_closings_basic() {
+    let scheduler = TestScheduler::new();
+
+    let xs = closings_source(&scheduler, RT::on_completed(590));
+
+    let ys = scheduler.create_hot_observable(vec![RT::on_next(255, 50), RT::on_next(330, 100), RT::on_next(350, 50), RT::on_next(400, 90), RT::on_completed(900)]);
+
+    let (source, openings, sched) = (xs.as_observable(), ys.as_observable(), scheduler.scheduler());
+    let res = scheduler.start(move || source.buffer_openings(openings, move |x: &i32| Observable::timer_on(ticks_to_duration(i64::from(*x)), sched.clone())));
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(305, vec![4]),
+        RT::on_next(400, vec![]),
+        RT::on_next(430, vec![6, 7, 8]),
+        RT::on_next(490, vec![7, 8, 9]),
+        RT::on_completed(900),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 590));
+
+    assert_subscriptions!(ys.subscriptions(), RT::subscribe(200, 900));
 }
 
 #[test]
@@ -728,16 +864,11 @@ fn buffer_with_time_tick_while_on_completed() {
 }
 
 // Not ported: Buffer_ArgumentChecking - argument validation
-// Not ported: Buffer_Closings_Basic - needs operator Timer (phase 3, later)
-// Not ported: Buffer_Closings_Empty - needs operator Delay (phase 3, later)
-// Not ported: Buffer_Closings_Dispose - needs operator Timer (phase 3, later)
-// Not ported: Buffer_Closings_Error - needs operator Timer (phase 3, later)
-// Not ported: Buffer_OpeningClosings_Basic - needs operators Timer, GroupJoin (Window by openings), SelectMany, ToList (phase 3, later)
 // Not ported: Buffer_Single_ArgumentChecking - argument validation
 // Not ported: BufferWithCount_ArgumentChecking - argument validation
-// Not ported: BufferWithCount_Default - needs operators Range, Skip, First (phase 3, later)
+// Not ported: BufferWithCount_Default - blocking operator First (waived: one thread)
 // Not ported: Buffer_Time_ArgumentChecking - argument validation
 // Not ported: BufferWithTime_ArgumentChecking - argument validation
-// Not ported: BufferWithTime_Default - needs operators Range, First (phase 3, later)
+// Not ported: BufferWithTime_Default - blocking operator First (waived: one thread)
 // Not ported: BufferWithTimeOrCount_ArgumentChecking - argument validation
-// Not ported: BufferWithTimeOrCount_Default - needs operators Range, Skip, First (phase 3, later); real threads (DefaultScheduler)
+// Not ported: BufferWithTimeOrCount_Default - real threads (DefaultScheduler); blocking operator First (waived: one thread)

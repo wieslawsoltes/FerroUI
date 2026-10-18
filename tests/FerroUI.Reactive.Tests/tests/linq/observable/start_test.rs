@@ -32,8 +32,8 @@ fn start_func2() {
 }
 
 // Not ported: Start_ArgumentChecking - argument validation
-// Not ported: Start_Action - real threads (the default scheduler) and needs operator ToEnumerable (phase 3, later)
-// Not ported: Start_ActionError - real threads (the default scheduler) and needs operators Materialize and ToEnumerable (phase 3, later)
+// Not ported: Start_Action - real threads (the default scheduler); blocking operator ToEnumerable (waived: one thread)
+// Not ported: Start_ActionError - real threads (the default scheduler); blocking operator ToEnumerable (waived: one thread)
 // Not ported: Start_ActionErrorAfterUnsubscribeDoesNotThrow - real threads (Barrier)
-// Not ported: Start_Func - real threads (the default scheduler) and needs operator ToEnumerable (phase 3, later)
-// Not ported: Start_FuncError - real threads (the default scheduler) and needs operators Materialize and ToEnumerable (phase 3, later)
+// Not ported: Start_Func - real threads (the default scheduler); blocking operator ToEnumerable (waived: one thread)
+// Not ported: Start_FuncError - real threads (the default scheduler); blocking operator ToEnumerable (waived: one thread)

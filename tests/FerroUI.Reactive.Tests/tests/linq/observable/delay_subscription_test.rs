@@ -68,5 +68,5 @@ fn delay_subscription_date_time_offset_error() {
 }
 
 // Not ported: DelaySubscription_ArgumentChecking - argument validation (and a negative TimeSpan, which a Duration cannot be)
-// Not ported: DelaySubscription_TimeSpan_Default - needs operator ForEach (the blocking operators, phase 3, later)
-// Not ported: DelaySubscription_DateTimeOffset_Default - needs operator ForEach (the blocking operators, phase 3, later)
+// Not ported: DelaySubscription_TimeSpan_Default - blocking operator ForEach (waived: one thread)
+// Not ported: DelaySubscription_DateTimeOffset_Default - blocking operator ForEach (waived: one thread)

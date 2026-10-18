@@ -412,6 +412,48 @@ fn multicast_cold_dispose() {
 }
 
 #[test]
+fn multicast_cold_zip() {
+    let scheduler = TestScheduler::new();
+
+    let xs = scheduler.create_hot_observable(vec![
+        RT::on_next(40, 0),
+        RT::on_next(90, 1),
+        RT::on_next(150, 2),
+        RT::on_next(210, 3),
+        RT::on_next(240, 4),
+        RT::on_next(270, 5),
+        RT::on_next(330, 6),
+        RT::on_next(340, 7),
+        RT::on_completed(390),
+    ]);
+
+    let res = scheduler.start({
+        let xs = xs.clone();
+        move || {
+            xs.as_observable().multicast_with(
+                || {
+                    let subject: Rc<dyn ISubjectHandle<i32, i32>> = Subject::new();
+                    subject
+                },
+                |ys| ys.zip(ys.clone(), |a, b| a + b),
+            )
+        }
+    });
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(210, 6),
+        RT::on_next(240, 8),
+        RT::on_next(270, 10),
+        RT::on_next(330, 12),
+        RT::on_next(340, 14),
+        RT::on_completed(390),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 390));
+}
+
+#[test]
 fn multicast_subject_selector_throws() {
     let ex = new_error("ex");
 
@@ -461,4 +503,3 @@ fn multicast_selector_throws() {
 }
 
 // Not ported: Multicast_ArgumentChecking - argument validation
-// Not ported: Multicast_Cold_Zip - needs operator Zip (phase 3, later)

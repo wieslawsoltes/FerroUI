@@ -67,5 +67,5 @@ fn interval_time_span_observer_throws() {
 }
 
 // Not ported: Interval_TimeSpan_ArgumentChecking - argument validation (a null scheduler, a null observer, a negative period: a `Duration` cannot be negative)
-// Not ported: Interval_TimeSpan_Zero_DefaultScheduler - real threads (ManualResetEvent, the default scheduler) and needs operator TakeWhile (phase 3, later)
-// Not ported: Interval_TimeSpan_DefaultScheduler - real threads (the default scheduler) and needs operators ToEnumerable and Take (phase 3, later)
+// Not ported: Interval_TimeSpan_Zero_DefaultScheduler - real threads (ManualResetEvent, the default scheduler)
+// Not ported: Interval_TimeSpan_DefaultScheduler - real threads (the default scheduler); blocking operator ToEnumerable (waived: one thread)

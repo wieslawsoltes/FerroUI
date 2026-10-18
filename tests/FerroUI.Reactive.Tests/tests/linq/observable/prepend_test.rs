@@ -56,6 +56,22 @@ fn prepend_many() {
 }
 
 #[test]
+fn prepend_many_take() {
+    let scheduler = TestScheduler::new();
+
+    let xs = scheduler.create_hot_observable(vec![RT::on_next(150, 1), RT::on_next(220, 2), RT::on_completed(250)]);
+
+    let res = scheduler.start(move || xs.as_observable().prepend(3).prepend(4).prepend(5).take(2));
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(200, 5),
+        RT::on_next(200, 4),
+        RT::on_completed(200),
+    );
+}
+
+#[test]
 fn prepend_many_scheduler() {
     let scheduler = TestScheduler::new();
 
@@ -74,6 +90,21 @@ fn prepend_many_scheduler() {
     );
 }
 
+#[test]
+fn prepend_many_take_scheduler() {
+    let scheduler = TestScheduler::new();
+
+    let xs = scheduler.create_hot_observable(vec![RT::on_next(150, 1), RT::on_next(220, 2), RT::on_completed(250)]);
+
+    let s = scheduler.scheduler();
+    let res = scheduler.start(move || xs.as_observable().prepend_on(3, s.clone()).prepend_on(4, s.clone()).prepend_on(5, s).take(2));
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(201, 5),
+        RT::on_next(202, 4),
+        RT::on_completed(202),
+    );
+}
+
 // Not ported: Prepend_ArgumentChecking - argument validation
-// Not ported: Prepend_Many_Take - needs operator Take (phase 3, later)
-// Not ported: Prepend_Many_Take_Scheduler - needs operator Take (phase 3, later)

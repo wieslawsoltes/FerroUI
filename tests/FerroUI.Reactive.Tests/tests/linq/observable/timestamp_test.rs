@@ -80,4 +80,4 @@ fn timestamp_never() {
 }
 
 // Not ported: Timestamp_ArgumentChecking - argument validation
-// Not ported: Timestamp_DefaultScheduler - needs operator First (the blocking operators, phase 3, later)
+// Not ported: Timestamp_DefaultScheduler - blocking operator First (waived: one thread)

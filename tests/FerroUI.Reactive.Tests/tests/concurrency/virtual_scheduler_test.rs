@@ -110,4 +110,4 @@ fn virtual_schedule_action_due() {
 
 // Not ported: Virtual_ArgumentChecking - argument validation
 // Not ported: Historical_ArgumentChecking - argument validation
-// Not ported: Virtual_ThreadSafety - real threads (Task.Run racing AdvanceBy); also needs operator Timeout (phase 3)
+// Not ported: Virtual_ThreadSafety - real threads (Task.Run racing AdvanceBy)

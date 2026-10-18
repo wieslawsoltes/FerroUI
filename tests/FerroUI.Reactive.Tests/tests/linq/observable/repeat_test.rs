@@ -90,20 +90,20 @@ fn repeat_value() {
 // Not ported: Repeat_Value_Count_Default - real threads (compares with the sequence on DefaultScheduler.Instance, through the blocking ToEnumerable of AssertEqual)
 // Not ported: Repeat_Value_ArgumentChecking - argument validation
 // Not ported: Repeat_Value_Default_ArgumentChecking - argument validation
-// Not ported: Repeat_Value_Default - real threads (DefaultScheduler.Instance, the blocking ToEnumerable of AssertEqual) and needs operator Take (phase 3, later)
+// Not ported: Repeat_Value_Default - real threads (DefaultScheduler.Instance); blocking operator ToEnumerable (of AssertEqual) (waived: one thread)
 // Not ported: Repeat_Count_LongRunning1 - real threads (TestLongRunningScheduler; the port has no ISchedulerLongRunning)
 // Not ported: Repeat_Count_LongRunning2 - real threads (TestLongRunningScheduler; the port has no ISchedulerLongRunning)
 // Not ported: Repeat_Inf_LongRunning - real threads (TestLongRunningScheduler; the port has no ISchedulerLongRunning)
-// Not ported: Repeat_Observable_ArgumentChecking - needs operator Repeat of a source (phase 3, later)
-// Not ported: Repeat_Observable_Basic - needs operator Repeat of a source (phase 3, later)
-// Not ported: Repeat_Observable_Infinite - needs operator Repeat of a source (phase 3, later)
-// Not ported: Repeat_Observable_Error - needs operator Repeat of a source (phase 3, later)
-// Not ported: Repeat_Observable_Throws - needs operator Repeat of a source (phase 3, later)
-// Not ported: Repeat_Observable_Default_ArgumentChecking - needs operator Repeat of a source (phase 3, later)
-// Not ported: Repeat_Observable_RepeatCount_ArgumentChecking - needs operator Repeat of a source (phase 3, later)
-// Not ported: Repeat_Observable_RepeatCount_Basic - needs operator Repeat of a source (phase 3, later)
-// Not ported: Repeat_Observable_RepeatCount_Dispose - needs operator Repeat of a source (phase 3, later)
-// Not ported: Repeat_Observable_RepeatCount_Infinite - needs operator Repeat of a source (phase 3, later)
-// Not ported: Repeat_Observable_RepeatCount_Error - needs operator Repeat of a source (phase 3, later)
-// Not ported: Repeat_Observable_RepeatCount_Throws - needs operator Repeat of a source (phase 3, later)
-// Not ported: Repeat_Observable_RepeatCount_Default_ArgumentChecking - needs operator Repeat of a source (phase 3, later)
+// Not ported: Repeat_Observable_ArgumentChecking - a form of a source, ported in `repeat_source_test.rs`
+// Not ported: Repeat_Observable_Basic - a form of a source, ported in `repeat_source_test.rs`
+// Not ported: Repeat_Observable_Infinite - a form of a source, ported in `repeat_source_test.rs`
+// Not ported: Repeat_Observable_Error - a form of a source, ported in `repeat_source_test.rs`
+// Not ported: Repeat_Observable_Throws - a form of a source, ported in `repeat_source_test.rs`
+// Not ported: Repeat_Observable_Default_ArgumentChecking - a form of a source, ported in `repeat_source_test.rs`
+// Not ported: Repeat_Observable_RepeatCount_ArgumentChecking - a form of a source, ported in `repeat_source_test.rs`
+// Not ported: Repeat_Observable_RepeatCount_Basic - a form of a source, ported in `repeat_source_test.rs`
+// Not ported: Repeat_Observable_RepeatCount_Dispose - a form of a source, ported in `repeat_source_test.rs`
+// Not ported: Repeat_Observable_RepeatCount_Infinite - a form of a source, ported in `repeat_source_test.rs`
+// Not ported: Repeat_Observable_RepeatCount_Error - a form of a source, ported in `repeat_source_test.rs`
+// Not ported: Repeat_Observable_RepeatCount_Throws - a form of a source, ported in `repeat_source_test.rs`
+// Not ported: Repeat_Observable_RepeatCount_Default_ArgumentChecking - a form of a source, ported in `repeat_source_test.rs`

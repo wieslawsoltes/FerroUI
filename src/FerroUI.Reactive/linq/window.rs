@@ -1,8 +1,9 @@
 //! `Window` (`Linq/Observable/Window.cs`, with the window observable of `Linq/Observable/AddRef.cs`):
 //! windows by count, by count and skip, by time, by time and shift, by time or count, by a closing
-//! selector and by boundaries. A window is a sequence (`Rc<dyn IObservable<T>>`) made of a subject;
-//! the subscription to the source lasts while the outer subscription or a subscription to a window
-//! does (a `RefCountDisposable`).
+//! selector and by boundaries; and the windows by openings and closings of
+//! `Linq/QueryLanguage.Multiple.cs`, a `GroupJoin`. A window is a sequence
+//! (`Rc<dyn IObservable<T>>`) made of a subject; the subscription to the source lasts while the
+//! outer subscription or a subscription to a window does (a `RefCountDisposable`).
 
 use crate::concurrency::{AsyncLock, IScheduler, SchedulerExt};
 use crate::disposables::{CompositeDisposable, RefCountDisposable, SerialDisposable, SingleAssignmentDisposable, SingleAssignmentDisposableValue};
@@ -752,6 +753,25 @@ pub(crate) fn window_boundaries<T: Clone + 'static, B: 'static>(
     })
 }
 
+/// `Window` by openings and closings (`QueryLanguage.Window<TSource, TWindowOpening, TWindowClosing>`,
+/// `Linq/QueryLanguage.Multiple.cs`): upstream has no operator of its own for it, but
+/// `windowOpenings.GroupJoin(source, windowClosingSelector, _ => Observable.Empty<Unit>(), (_, window)
+/// => window)`: each opening starts a window of the values of the source until the sequence the
+/// closing selector returns for it produces or ends.
+pub(crate) fn window_openings<T: Clone + 'static, O: 'static, C: 'static>(
+    source: Rc<dyn IObservable<T>>,
+    window_openings: Rc<dyn IObservable<O>>,
+    window_closing_selector: impl Fn(&O) -> Result<Rc<dyn IObservable<C>>, ObservableError> + 'static,
+) -> Rc<dyn IObservable<WindowHandle<T>>> {
+    crate::linq::group_join::group_join(
+        window_openings,
+        source,
+        window_closing_selector,
+        |_: &T| Ok(crate::linq::Observable::empty::<()>()),
+        |_: O, window: WindowHandle<T>| Ok(window),
+    )
+}
+
 /// The methods of `Window` (provided methods of [`ObservableExt`](super::ObservableExt)).
 macro_rules! window_methods {
     () => {
@@ -883,6 +903,35 @@ macro_rules! window_methods {
             T: Clone,
         {
             crate::linq::window::window_boundaries(self.observable(), boundaries)
+        }
+
+        /// Windows that each value of `window_openings` starts, each ending when the sequence
+        /// `window_closing_selector` returns for its opening produces or ends
+        /// (`Window<TSource, TWindowOpening, TWindowClosing>(IObservable<TSource>,
+        /// IObservable<TWindowOpening>, Func<TWindowOpening, IObservable<TWindowClosing>>)`).
+        fn window_openings<O: 'static, C: 'static>(
+            &self,
+            window_openings: std::rc::Rc<dyn ferroui_system::IObservable<O>>,
+            window_closing_selector: impl Fn(&O) -> std::rc::Rc<dyn ferroui_system::IObservable<C>> + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<std::rc::Rc<dyn ferroui_system::IObservable<T>>>>
+        where
+            T: Clone,
+        {
+            crate::linq::window::window_openings(self.observable(), window_openings, move |opening: &O| Ok(window_closing_selector(opening)))
+        }
+
+        /// [`window_openings`](Self::window_openings) with a closing selector that may fail; a failure
+        /// ends the windows and the sequence with its error (`Window` by openings with a closing
+        /// selector that throws).
+        fn try_window_openings<O: 'static, C: 'static>(
+            &self,
+            window_openings: std::rc::Rc<dyn ferroui_system::IObservable<O>>,
+            window_closing_selector: impl Fn(&O) -> Result<std::rc::Rc<dyn ferroui_system::IObservable<C>>, ferroui_system::ObservableError> + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<std::rc::Rc<dyn ferroui_system::IObservable<T>>>>
+        where
+            T: Clone,
+        {
+            crate::linq::window::window_openings(self.observable(), window_openings, window_closing_selector)
         }
     };
 }

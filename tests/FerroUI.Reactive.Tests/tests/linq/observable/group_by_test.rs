@@ -1170,6 +1170,37 @@ fn inner_escape_dispose(capacity: Option<usize>) {
     assert_messages!(res.messages());
 }
 
+fn null_keys_simple(capacity: Option<usize>) {
+    let scheduler = TestScheduler::new();
+
+    let xs = scheduler.create_hot_observable(vec![
+        RT::on_next(220, s("bar")),
+        RT::on_next(240, s("foo")),
+        RT::on_next(310, s("qux")),
+        RT::on_next(470, s("baz")),
+        RT::on_completed(500),
+    ]);
+
+    let source = xs.as_observable();
+    let res = scheduler.start(move || {
+        group_by_key(source, capacity, |x: &String| if x.starts_with('b') { None } else { Some(x.to_uppercase()) }).select_many_with(
+            |g: Rc<dyn IGroupedObservable<Option<String>, String>>| g.observable(),
+            |g: Rc<dyn IGroupedObservable<Option<String>, String>>, x: String| g.key().clone().unwrap_or_else(|| s("(null)")) + &x,
+        )
+    });
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(220, s("(null)bar")),
+        RT::on_next(240, s("FOOfoo")),
+        RT::on_next(310, s("QUXqux")),
+        RT::on_next(470, s("(null)baz")),
+        RT::on_completed(500),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 500));
+}
+
 fn null_keys_error(capacity: Option<usize>) {
     let scheduler = TestScheduler::new();
 
@@ -1319,6 +1350,11 @@ fn group_by_inner_escape_dispose() {
 }
 
 #[test]
+fn group_by_null_keys_simple() {
+    null_keys_simple(None);
+}
+
+#[test]
 fn group_by_null_keys_error() {
     null_keys_error(None);
 }
@@ -1434,6 +1470,11 @@ fn group_by_capacity_inner_escape_dispose() {
 }
 
 #[test]
+fn group_by_capacity_null_keys_simple() {
+    null_keys_simple(Some(GROUP_BY_CAPACITY));
+}
+
+#[test]
 fn group_by_capacity_null_keys_error() {
     null_keys_error(Some(GROUP_BY_CAPACITY));
 }
@@ -1485,9 +1526,7 @@ fn group_by_completion_of_many_groups() {
 // Not ported: GroupBy_KeyEle_ArgumentChecking - argument validation
 // Not ported: GroupBy_KeyComparer_ArgumentChecking - argument validation
 // Not ported: GroupBy_Key_ArgumentChecking - argument validation
-// Not ported: GroupBy_NullKeys_Simple - needs operator SelectMany (phase 3, later)
 // Not ported: GroupBy_Capacity_ArgumentChecking - argument validation (and a negative capacity, which `usize` rules out)
 // Not ported: GroupBy_Capacity_KeyEle_ArgumentChecking - argument validation (and a negative capacity, which `usize` rules out)
 // Not ported: GroupBy_Capacity_KeyComparer_ArgumentChecking - argument validation (and a negative capacity, which `usize` rules out)
 // Not ported: GroupBy_Capacity_Key_ArgumentChecking - argument validation (and a negative capacity, which `usize` rules out)
-// Not ported: GroupBy_Capacity_NullKeys_Simple - needs operator SelectMany (phase 3, later)

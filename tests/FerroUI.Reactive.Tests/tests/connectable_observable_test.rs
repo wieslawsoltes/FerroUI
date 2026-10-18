@@ -296,4 +296,4 @@ fn connectable_observable_multiple_non_overlapped_connections() {
     assert_subscriptions!(xs.subscriptions(), RT::subscribe(225, 241), RT::subscribe(249, 255), RT::subscribe(275, 295));
 }
 
-// Not ported: ConnectableObservable_ArgumentChecking - argument validation (and needs operator Publish (phase 3))
+// Not ported: ConnectableObservable_ArgumentChecking - argument validation

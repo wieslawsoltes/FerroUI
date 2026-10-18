@@ -1369,8 +1369,8 @@ fn delay_selector_immediate() {
 // Not ported: Delay_TimeSpan_Real_Error2_Stopwatch - real threads (ThreadPoolScheduler, Task.Run)
 // Not ported: Delay_TimeSpan_Real_Error3 - real threads (ThreadPoolScheduler, Task.Run)
 // Not ported: Delay_TimeSpan_Real_Error3_Stopwatch - real threads (ThreadPoolScheduler, Task.Run)
-// Not ported: Delay_TimeSpan_DefaultScheduler - needs operator ToEnumerable (the blocking operators, phase 3, later)
-// Not ported: Delay_DateTimeOffset_DefaultScheduler - needs operator ToEnumerable (the blocking operators, phase 3, later)
+// Not ported: Delay_TimeSpan_DefaultScheduler - blocking operator ToEnumerable (waived: one thread)
+// Not ported: Delay_DateTimeOffset_DefaultScheduler - blocking operator ToEnumerable (waived: one thread)
 // Not ported: Delay_Duration_ArgumentChecking - argument validation
 // Not ported: Delay_LongRunning_CancelEarly - real threads (ISchedulerLongRunning, which the port does not have)
 // Not ported: Delay_LongRunning_CancelLate - real threads (ISchedulerLongRunning, which the port does not have)

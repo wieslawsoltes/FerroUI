@@ -196,7 +196,48 @@ fn publish_last_multiple_connections() {
     connection3.dispose();
 }
 
+#[test]
+fn publish_last_lambda_zip_complete() {
+    let scheduler = TestScheduler::new();
+
+    let xs = scheduler.create_hot_observable(source_messages(RT::on_completed(600)));
+
+    let source = xs.as_observable();
+    let res = scheduler.start(move || source.publish_last_with(|ys| ys.zip(ys.clone(), |x, y| x + y)));
+
+    assert_messages!(res.messages(), RT::on_next(600, 40), RT::on_completed(600));
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 600));
+}
+
+#[test]
+fn publish_last_lambda_zip_error() {
+    let scheduler = TestScheduler::new();
+
+    let ex = new_error("ex");
+
+    let xs = scheduler.create_hot_observable(source_messages(RT::on_error(600, ex.clone())));
+
+    let source = xs.as_observable();
+    let res = scheduler.start(move || source.publish_last_with(|ys| ys.zip(ys.clone(), |x, y| x + y)));
+
+    assert_messages!(res.messages(), RT::on_error(600, ex.clone()));
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 600));
+}
+
+#[test]
+fn publish_last_lambda_zip_dispose() {
+    let scheduler = TestScheduler::new();
+
+    let xs = scheduler.create_hot_observable(source_messages(RT::on_completed(600)));
+
+    let source = xs.as_observable();
+    let res = scheduler.start_disposed(move || source.publish_last_with(|ys| ys.zip(ys.clone(), |x, y| x + y)), 470);
+
+    assert_messages!(res.messages());
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 470));
+}
+
 // Not ported: PublishLast_ArgumentChecking - argument validation
-// Not ported: PublishLastLambda_Zip_Complete - needs operator Zip (phase 3, later)
-// Not ported: PublishLastLambda_Zip_Error - needs operator Zip (phase 3, later)
-// Not ported: PublishLastLambda_Zip_Dispose - needs operator Zip (phase 3, later)

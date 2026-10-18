@@ -188,4 +188,4 @@ fn time_interval_with_stopwatch_never() {
 }
 
 // Not ported: TimeInterval_ArgumentChecking - argument validation
-// Not ported: TimeInterval_DefaultScheduler - needs operator First (the blocking operators, phase 3, later)
+// Not ported: TimeInterval_DefaultScheduler - blocking operator First (waived: one thread)

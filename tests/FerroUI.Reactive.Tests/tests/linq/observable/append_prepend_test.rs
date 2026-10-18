@@ -258,5 +258,5 @@ fn append_prepend_mixed_schedulers() {
     );
 }
 
-// Not ported: AppendPrepend_SchedulerRecursive - real threads (EventLoopScheduler, ThreadPoolScheduler); also needs operators Range, DelaySubscription, Timeout, ToList and First (phase 3, later)
-// Not ported: AppendPrepend_SchedulerLongRunning - real threads (NewThreadScheduler, ThreadPoolScheduler, ISchedulerLongRunning); also needs operators Range, DelaySubscription, Timeout, ToList and First (phase 3, later)
+// Not ported: AppendPrepend_SchedulerRecursive - real threads (EventLoopScheduler, ThreadPoolScheduler); blocking operator First (waived: one thread)
+// Not ported: AppendPrepend_SchedulerLongRunning - real threads (NewThreadScheduler, ThreadPoolScheduler, ISchedulerLongRunning); blocking operator First (waived: one thread)

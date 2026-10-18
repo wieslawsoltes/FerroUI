@@ -672,8 +672,8 @@ fn timeout_duration_simple_source_throws() {
 }
 
 // Not ported: Timeout_ArgumentChecking - argument validation (and a negative TimeSpan, which a Duration cannot be)
-// Not ported: Timeout_TimeSpan_DefaultScheduler - needs operator ToEnumerable (the blocking operators, phase 3, later)
-// Not ported: Timeout_TimeSpan_Observable_DefaultScheduler - needs operator ToEnumerable (the blocking operators, phase 3, later)
-// Not ported: Timeout_DateTimeOffset_DefaultScheduler - needs operator ToEnumerable (the blocking operators, phase 3, later)
-// Not ported: Timeout_DateTimeOffset_Observable_DefaultScheduler - needs operator ToEnumerable (the blocking operators, phase 3, later)
+// Not ported: Timeout_TimeSpan_DefaultScheduler - blocking operator ToEnumerable (waived: one thread)
+// Not ported: Timeout_TimeSpan_Observable_DefaultScheduler - blocking operator ToEnumerable (waived: one thread)
+// Not ported: Timeout_DateTimeOffset_DefaultScheduler - blocking operator ToEnumerable (waived: one thread)
+// Not ported: Timeout_DateTimeOffset_Observable_DefaultScheduler - blocking operator ToEnumerable (waived: one thread)
 // Not ported: Timeout_Duration_ArgumentChecking - argument validation

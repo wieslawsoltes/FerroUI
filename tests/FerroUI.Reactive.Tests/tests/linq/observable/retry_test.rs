@@ -232,4 +232,4 @@ fn retry_observable_retry_count_throws() {
 // Not ported: Retry_Observable_Default_ArgumentChecking - argument validation
 // Not ported: Retry_Observable_RetryCount_ArgumentChecking - argument validation (the count is a `usize`, never negative)
 // Not ported: Retry_Observable_RetryCount_Default_ArgumentChecking - argument validation (the count is a `usize`, never negative)
-// Not ported: Retry_Observable_RetryCount_Default - needs operators Range and the AssertEqual of two sequences (phase 3, later)
+// Not ported: Retry_Observable_RetryCount_Default - blocking operator ToEnumerable (of the AssertEqual of two sequences) (waived: one thread)

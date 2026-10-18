@@ -100,6 +100,38 @@ fn notifications(source: &Rc<dyn IObservable<i32>>) -> Vec<Notification<i32>> {
 }
 
 #[test]
+fn publish_cold_zip() {
+    let scheduler = TestScheduler::new();
+
+    let xs = scheduler.create_hot_observable(vec![
+        RT::on_next(40, 0),
+        RT::on_next(90, 1),
+        RT::on_next(150, 2),
+        RT::on_next(210, 3),
+        RT::on_next(240, 4),
+        RT::on_next(270, 5),
+        RT::on_next(330, 6),
+        RT::on_next(340, 7),
+        RT::on_completed(390),
+    ]);
+
+    let source = xs.as_observable();
+    let res = scheduler.start(move || source.publish_with(|ys| ys.zip(ys.clone(), |a, b| a + b)));
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(210, 6),
+        RT::on_next(240, 8),
+        RT::on_next(270, 10),
+        RT::on_next(330, 12),
+        RT::on_next(340, 14),
+        RT::on_completed(390),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 390));
+}
+
+#[test]
 fn publish_basic() {
     let scheduler = TestScheduler::new();
 
@@ -225,6 +257,89 @@ fn publish_multiple_connections() {
     assert!(!std::ptr::addr_eq(Rc::as_ptr(&connection1), Rc::as_ptr(&connection3)));
 
     connection3.dispose();
+}
+
+#[test]
+fn publish_lambda_zip_complete() {
+    let scheduler = TestScheduler::new();
+
+    let xs = scheduler.create_hot_observable(source_messages(RT::on_completed(600)));
+
+    let source = xs.as_observable();
+    let res = scheduler.start(move || source.publish_with(|ys| ys.zip(ys.skip(1), |prev, cur| cur + prev)));
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(280, 7),
+        RT::on_next(290, 5),
+        RT::on_next(340, 9),
+        RT::on_next(360, 13),
+        RT::on_next(370, 11),
+        RT::on_next(390, 13),
+        RT::on_next(410, 20),
+        RT::on_next(430, 15),
+        RT::on_next(450, 11),
+        RT::on_next(520, 20),
+        RT::on_next(560, 31),
+        RT::on_completed(600),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 600));
+}
+
+#[test]
+fn publish_lambda_zip_error() {
+    let scheduler = TestScheduler::new();
+
+    let ex = new_error("ex");
+
+    let xs = scheduler.create_hot_observable(source_messages(RT::on_error(600, ex.clone())));
+
+    let source = xs.as_observable();
+    let res = scheduler.start(move || source.publish_with(|ys| ys.zip(ys.skip(1), |prev, cur| cur + prev)));
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(280, 7),
+        RT::on_next(290, 5),
+        RT::on_next(340, 9),
+        RT::on_next(360, 13),
+        RT::on_next(370, 11),
+        RT::on_next(390, 13),
+        RT::on_next(410, 20),
+        RT::on_next(430, 15),
+        RT::on_next(450, 11),
+        RT::on_next(520, 20),
+        RT::on_next(560, 31),
+        RT::on_error(600, ex.clone()),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 600));
+}
+
+#[test]
+fn publish_lambda_zip_dispose() {
+    let scheduler = TestScheduler::new();
+
+    let xs = scheduler.create_hot_observable(source_messages(RT::on_completed(600)));
+
+    let source = xs.as_observable();
+    let res = scheduler.start_disposed(move || source.publish_with(|ys| ys.zip(ys.skip(1), |prev, cur| cur + prev)), 470);
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(280, 7),
+        RT::on_next(290, 5),
+        RT::on_next(340, 9),
+        RT::on_next(360, 13),
+        RT::on_next(370, 11),
+        RT::on_next(390, 13),
+        RT::on_next(410, 20),
+        RT::on_next(430, 15),
+        RT::on_next(450, 11),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 470));
 }
 
 #[test]
@@ -372,12 +487,91 @@ fn publish_with_initial_value_multiple_connections() {
     connection3.dispose();
 }
 
-// Not ported: Publish_Cold_Zip - needs operator Zip (phase 3, later)
+#[test]
+fn publish_with_initial_value_lambda_zip_complete() {
+    let scheduler = TestScheduler::new();
+
+    let xs = scheduler.create_hot_observable(source_messages(RT::on_completed(600)));
+
+    let source = xs.as_observable();
+    let res = scheduler.start(move || source.publish_with_initial_with(|ys| ys.zip(ys.skip(1), |prev, cur| cur + prev), 1979));
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(220, 1982),
+        RT::on_next(280, 7),
+        RT::on_next(290, 5),
+        RT::on_next(340, 9),
+        RT::on_next(360, 13),
+        RT::on_next(370, 11),
+        RT::on_next(390, 13),
+        RT::on_next(410, 20),
+        RT::on_next(430, 15),
+        RT::on_next(450, 11),
+        RT::on_next(520, 20),
+        RT::on_next(560, 31),
+        RT::on_completed(600),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 600));
+}
+
+#[test]
+fn publish_with_initial_value_lambda_zip_error() {
+    let scheduler = TestScheduler::new();
+
+    let ex = new_error("ex");
+
+    let xs = scheduler.create_hot_observable(source_messages(RT::on_error(600, ex.clone())));
+
+    let source = xs.as_observable();
+    let res = scheduler.start(move || source.publish_with_initial_with(|ys| ys.zip(ys.skip(1), |prev, cur| cur + prev), 1979));
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(220, 1982),
+        RT::on_next(280, 7),
+        RT::on_next(290, 5),
+        RT::on_next(340, 9),
+        RT::on_next(360, 13),
+        RT::on_next(370, 11),
+        RT::on_next(390, 13),
+        RT::on_next(410, 20),
+        RT::on_next(430, 15),
+        RT::on_next(450, 11),
+        RT::on_next(520, 20),
+        RT::on_next(560, 31),
+        RT::on_error(600, ex.clone()),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 600));
+}
+
+#[test]
+fn publish_with_initial_value_lambda_zip_dispose() {
+    let scheduler = TestScheduler::new();
+
+    let xs = scheduler.create_hot_observable(source_messages(RT::on_completed(600)));
+
+    let source = xs.as_observable();
+    let res = scheduler.start_disposed(move || source.publish_with_initial_with(|ys| ys.zip(ys.skip(1), |prev, cur| cur + prev), 1979), 470);
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(220, 1982),
+        RT::on_next(280, 7),
+        RT::on_next(290, 5),
+        RT::on_next(340, 9),
+        RT::on_next(360, 13),
+        RT::on_next(370, 11),
+        RT::on_next(390, 13),
+        RT::on_next(410, 20),
+        RT::on_next(430, 15),
+        RT::on_next(450, 11),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 470));
+}
+
 // Not ported: Publish_ArgumentChecking - argument validation
-// Not ported: PublishLambda_Zip_Complete - needs operator Zip (phase 3, later)
-// Not ported: PublishLambda_Zip_Error - needs operator Zip (phase 3, later)
-// Not ported: PublishLambda_Zip_Dispose - needs operator Zip (phase 3, later)
 // Not ported: PublishWithInitialValue_ArgumentChecking - argument validation
-// Not ported: PublishWithInitialValueLambda_Zip_Complete - needs operator Zip (phase 3, later)
-// Not ported: PublishWithInitialValueLambda_Zip_Error - needs operator Zip (phase 3, later)
-// Not ported: PublishWithInitialValueLambda_Zip_Dispose - needs operator Zip (phase 3, later)

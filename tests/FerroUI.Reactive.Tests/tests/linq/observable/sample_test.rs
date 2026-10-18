@@ -538,5 +538,5 @@ fn sample_sampler_sampler_throws() {
 }
 
 // Not ported: Sample_ArgumentChecking - argument validation (and a negative TimeSpan, which a Duration cannot be)
-// Not ported: Sample_DefaultScheduler_Periodic - needs operator ToEnumerable (the blocking operators, phase 3, later)
-// Not ported: Sample_DefaultScheduler_PeriodicDisabled - needs operator ToEnumerable (the blocking operators, phase 3, later)
+// Not ported: Sample_DefaultScheduler_Periodic - blocking operator ToEnumerable (waived: one thread)
+// Not ported: Sample_DefaultScheduler_PeriodicDisabled - blocking operator ToEnumerable (waived: one thread)

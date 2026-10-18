@@ -1045,14 +1045,14 @@ fn merge_concat_inner_error() {
 }
 
 // Not ported: Merge_ArgumentChecking - argument validation
-// Not ported: Merge_DefaultScheduler - needs operators ToList, Single (phase 3, later)
-// Not ported: Merge_Binary_DefaultScheduler - needs operator ToEnumerable (phase 3, later)
-// Not ported: Merge_Params_DefaultScheduler - needs operator ToEnumerable (phase 3, later)
-// Not ported: Merge_IEnumerableOfIObservable_DefaultScheduler - needs operator ToEnumerable (phase 3, later)
+// Not ported: Merge_DefaultScheduler - blocking operator Single (waived: one thread)
+// Not ported: Merge_Binary_DefaultScheduler - blocking operator ToEnumerable (waived: one thread)
+// Not ported: Merge_Params_DefaultScheduler - blocking operator ToEnumerable (waived: one thread)
+// Not ported: Merge_IEnumerableOfIObservable_DefaultScheduler - blocking operator ToEnumerable (waived: one thread)
 // Not ported: MergeConcat_ArgumentChecking - argument validation
-// Not ported: MergeConcat_Enumerable_Scheduler - needs operators Range, SequenceEqual, First (phase 3, later)
-// Not ported: MergeConcat_Enumerable - needs operators Range, SequenceEqual, First (phase 3, later); real threads (DefaultScheduler)
-// Not ported: MergeConcat_Default - needs operators Range, SequenceEqual, First (phase 3, later)
+// Not ported: MergeConcat_Enumerable_Scheduler - blocking operator First (waived: one thread)
+// Not ported: MergeConcat_Enumerable - real threads (DefaultScheduler); blocking operator First (waived: one thread)
+// Not ported: MergeConcat_Default - blocking operator First (waived: one thread)
 // Not ported: Merge_Task - needs async/await (phase 4)
 // Not ported: Merge_TaskWithCompletionSource_RanToCompletion_Async - needs async/await (phase 4)
 // Not ported: Merge_TaskWithCompletionSource_RanToCompletion_Sync - needs async/await (phase 4)

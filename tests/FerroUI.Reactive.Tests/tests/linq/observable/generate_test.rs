@@ -327,5 +327,5 @@ fn generate_date_time_offset_dispose() {
 // Not ported: Generate_DateTimeOffset_ArgumentChecking - argument validation
 // Not ported: Generate_DateTimeOffset_DefaultScheduler_ArgumentChecking - argument validation
 // Not ported: Generate_DateTimeOffset_DefaultScheduler - real threads (compares with the sequence on DefaultScheduler.Instance, through the blocking ToEnumerable of AssertEqual)
-// Not ported: Generate_TimeSpan_DisposeLater - real threads (Thread.Sleep on the default scheduler) and needs operators WithLatestFrom and Concat (phase 3, later)
-// Not ported: Generate_DateTimeOffset_DisposeLater - real threads (Thread.Sleep on the default scheduler) and needs operators WithLatestFrom and Concat (phase 3, later)
+// Not ported: Generate_TimeSpan_DisposeLater - real threads (Thread.Sleep on the default scheduler)
+// Not ported: Generate_DateTimeOffset_DisposeLater - real threads (Thread.Sleep on the default scheduler)

@@ -2,7 +2,8 @@
 //! Adapted: a window is a `Rc<dyn IObservable<i32>>`; the overloads are `window` (count),
 //! `window_with_skip` (count and skip), `window_time_on` (time), `window_time_shift_on` (time and
 //! shift), `window_time_count_on` (time or count), `window_closing` and `try_window_closing` (closing
-//! selector), `window_boundaries`; `.Select((w, i) => ...).Merge()` is `select_with_index` and
+//! selector), `window_boundaries`, `window_openings` and `try_window_openings` (openings and a closing
+//! selector); `.Select((w, i) => ...).Merge()` is `select_with_index` and
 //! `merge_inner`; the variables that scheduled actions assign are shared slots; `PeriodicTestScheduler`
 //! and `TimerRun` of `TimerTest.cs` are local types.
 
@@ -186,6 +187,39 @@ fn time_or_count_source(scheduler: &TestScheduler, end: Recorded<Notification<i3
 }
 
 #[test]
+fn window_closings_basic() {
+    let scheduler = TestScheduler::new();
+
+    let xs = closings_source(&scheduler, RT::on_completed(590));
+
+    let window = Rc::new(Cell::new(1i64));
+
+    let (source, sched) = (xs.as_observable(), scheduler.scheduler());
+    let res = scheduler.start(move || {
+        labeled(source.window_closing(move || {
+            let w = window.get();
+            window.set(w + 1);
+            Observable::timer_on(ticks_to_duration(w * 100), sched.clone())
+        }))
+    });
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(250, s("0 3")),
+        RT::on_next(260, s("0 4")),
+        RT::on_next(310, s("1 5")),
+        RT::on_next(340, s("1 6")),
+        RT::on_next(410, s("1 7")),
+        RT::on_next(420, s("1 8")),
+        RT::on_next(470, s("1 9")),
+        RT::on_next(550, s("2 10")),
+        RT::on_completed(590),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 590));
+}
+
+#[test]
 fn window_closings_inner_subscriptions() {
     let scheduler = TestScheduler::new();
 
@@ -234,6 +268,105 @@ fn window_closings_inner_subscriptions() {
 }
 
 #[test]
+fn window_closings_empty() {
+    let scheduler = TestScheduler::new();
+
+    let xs = closings_source(&scheduler, RT::on_completed(590));
+
+    let window = Rc::new(Cell::new(1i64));
+
+    let (source, sched) = (xs.as_observable(), scheduler.scheduler());
+    let res = scheduler.start(move || {
+        labeled(source.window_closing(move || {
+            let w = window.get();
+            window.set(w + 1);
+            Observable::empty::<i32>().delay_on(ticks_to_duration(w * 100), sched.clone())
+        }))
+    });
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(250, s("0 3")),
+        RT::on_next(260, s("0 4")),
+        RT::on_next(310, s("1 5")),
+        RT::on_next(340, s("1 6")),
+        RT::on_next(410, s("1 7")),
+        RT::on_next(420, s("1 8")),
+        RT::on_next(470, s("1 9")),
+        RT::on_next(550, s("2 10")),
+        RT::on_completed(590),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 590));
+}
+
+#[test]
+fn window_closings_dispose() {
+    let scheduler = TestScheduler::new();
+
+    let xs = closings_source(&scheduler, RT::on_completed(590));
+
+    let window = Rc::new(Cell::new(1i64));
+
+    let (source, sched) = (xs.as_observable(), scheduler.scheduler());
+    let res = scheduler.start_disposed(
+        move || {
+            labeled(source.window_closing(move || {
+                let w = window.get();
+                window.set(w + 1);
+                Observable::timer_on(ticks_to_duration(w * 100), sched.clone())
+            }))
+        },
+        400,
+    );
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(250, s("0 3")),
+        RT::on_next(260, s("0 4")),
+        RT::on_next(310, s("1 5")),
+        RT::on_next(340, s("1 6")),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 400));
+}
+
+#[test]
+fn window_closings_error() {
+    let scheduler = TestScheduler::new();
+
+    let ex = new_error("ex");
+
+    let xs = closings_source(&scheduler, RT::on_error(590, ex.clone()));
+
+    let window = Rc::new(Cell::new(1i64));
+
+    let (source, sched) = (xs.as_observable(), scheduler.scheduler());
+    let res = scheduler.start(move || {
+        labeled(source.window_closing(move || {
+            let w = window.get();
+            window.set(w + 1);
+            Observable::timer_on(ticks_to_duration(w * 100), sched.clone())
+        }))
+    });
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(250, s("0 3")),
+        RT::on_next(260, s("0 4")),
+        RT::on_next(310, s("1 5")),
+        RT::on_next(340, s("1 6")),
+        RT::on_next(410, s("1 7")),
+        RT::on_next(420, s("1 8")),
+        RT::on_next(470, s("1 9")),
+        RT::on_next(550, s("2 10")),
+        RT::on_error(590, ex.clone()),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 590));
+}
+
+#[test]
 fn window_closings_throw() {
     let scheduler = TestScheduler::new();
 
@@ -263,6 +396,177 @@ fn window_closings_window_close_error() {
     assert_messages!(res.messages(), RT::on_error::<String>(201, ex.clone()));
 
     assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 201));
+}
+
+#[test]
+fn window_closings_default() {
+    let scheduler = TestScheduler::new();
+
+    let xs = closings_source(&scheduler, RT::on_completed(590));
+
+    let window = Rc::new(Cell::new(1i64));
+
+    let (source, sched) = (xs.as_observable(), scheduler.scheduler());
+    let res = scheduler.start(move || {
+        labeled(source.window_closing(move || {
+            let w = window.get();
+            window.set(w + 1);
+            Observable::timer_on(ticks_to_duration(w * 100), sched.clone())
+        }))
+    });
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(250, s("0 3")),
+        RT::on_next(260, s("0 4")),
+        RT::on_next(310, s("1 5")),
+        RT::on_next(340, s("1 6")),
+        RT::on_next(410, s("1 7")),
+        RT::on_next(420, s("1 8")),
+        RT::on_next(470, s("1 9")),
+        RT::on_next(550, s("2 10")),
+        RT::on_completed(590),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 590));
+}
+
+/// The openings of the `Window_OpeningClosings_*` and `Buffer_OpeningClosings_*` tests.
+fn openings_source(scheduler: &TestScheduler, end: Recorded<Notification<i32>>) -> Rc<HotObservable<i32>> {
+    scheduler.create_hot_observable(vec![RT::on_next(255, 50), RT::on_next(330, 100), RT::on_next(350, 50), RT::on_next(400, 90), end])
+}
+
+/// `xs.Window(ys, x => Observable.Timer(TimeSpan.FromTicks(x), scheduler))`, labeled.
+fn timer_windows(scheduler: &TestScheduler, xs: &Rc<HotObservable<i32>>, ys: &Rc<HotObservable<i32>>) -> impl FnOnce() -> Rc<dyn IObservable<String>> + 'static {
+    let (source, openings, sched) = (xs.as_observable(), ys.as_observable(), scheduler.scheduler());
+    move || labeled(source.window_openings(openings, move |x: &i32| Observable::timer_on(ticks_to_duration(i64::from(*x)), sched.clone())))
+}
+
+#[test]
+fn window_opening_closings_basic() {
+    let scheduler = TestScheduler::new();
+
+    let xs = closings_source(&scheduler, RT::on_completed(590));
+
+    let ys = openings_source(&scheduler, RT::on_completed(900));
+
+    let res = scheduler.start(timer_windows(&scheduler, &xs, &ys));
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(260, s("0 4")),
+        RT::on_next(340, s("1 6")),
+        RT::on_next(410, s("1 7")),
+        RT::on_next(410, s("3 7")),
+        RT::on_next(420, s("1 8")),
+        RT::on_next(420, s("3 8")),
+        RT::on_next(470, s("3 9")),
+        RT::on_completed(900),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 590));
+
+    assert_subscriptions!(ys.subscriptions(), RT::subscribe(200, 900));
+}
+
+#[test]
+fn window_opening_closings_throw() {
+    let scheduler = TestScheduler::new();
+
+    let xs = closings_source(&scheduler, RT::on_completed(590));
+
+    let ys = openings_source(&scheduler, RT::on_completed(900));
+
+    let ex = new_error("ex");
+
+    let (source, openings, error) = (xs.as_observable(), ys.as_observable(), ex.clone());
+    let res = scheduler.start(move || {
+        labeled(source.try_window_openings(openings, move |_x: &i32| -> Result<Rc<dyn IObservable<i32>>, ObservableError> { Err(error.clone()) }))
+    });
+
+    assert_messages!(res.messages(), RT::on_error::<String>(255, ex.clone()));
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 255));
+
+    assert_subscriptions!(ys.subscriptions(), RT::subscribe(200, 255));
+}
+
+#[test]
+fn window_opening_closings_dispose() {
+    let scheduler = TestScheduler::new();
+
+    let xs = closings_source(&scheduler, RT::on_completed(590));
+
+    let ys = openings_source(&scheduler, RT::on_completed(900));
+
+    let res = scheduler.start_disposed(timer_windows(&scheduler, &xs, &ys), 415);
+
+    assert_messages!(res.messages(), RT::on_next(260, s("0 4")), RT::on_next(340, s("1 6")), RT::on_next(410, s("1 7")), RT::on_next(410, s("3 7")));
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 415));
+
+    assert_subscriptions!(ys.subscriptions(), RT::subscribe(200, 415));
+}
+
+#[test]
+fn window_opening_closings_data_error() {
+    let scheduler = TestScheduler::new();
+
+    let ex = new_error("ex");
+
+    let xs = scheduler.create_hot_observable(vec![
+        RT::on_next(90, 1),
+        RT::on_next(180, 2),
+        RT::on_next(250, 3),
+        RT::on_next(260, 4),
+        RT::on_next(310, 5),
+        RT::on_next(340, 6),
+        RT::on_next(410, 7),
+        RT::on_error(415, ex.clone()),
+    ]);
+
+    let ys = openings_source(&scheduler, RT::on_completed(900));
+
+    let res = scheduler.start(timer_windows(&scheduler, &xs, &ys));
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(260, s("0 4")),
+        RT::on_next(340, s("1 6")),
+        RT::on_next(410, s("1 7")),
+        RT::on_next(410, s("3 7")),
+        RT::on_error(415, ex.clone()),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 415));
+
+    assert_subscriptions!(ys.subscriptions(), RT::subscribe(200, 415));
+}
+
+#[test]
+fn window_opening_closings_window_error() {
+    let scheduler = TestScheduler::new();
+
+    let ex = new_error("ex");
+
+    let xs = closings_source(&scheduler, RT::on_completed(590));
+
+    let ys = openings_source(&scheduler, RT::on_error(415, ex.clone()));
+
+    let res = scheduler.start(timer_windows(&scheduler, &xs, &ys));
+
+    assert_messages!(
+        res.messages(),
+        RT::on_next(260, s("0 4")),
+        RT::on_next(340, s("1 6")),
+        RT::on_next(410, s("1 7")),
+        RT::on_next(410, s("3 7")),
+        RT::on_error(415, ex.clone()),
+    );
+
+    assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 415));
+
+    assert_subscriptions!(ys.subscriptions(), RT::subscribe(200, 415));
 }
 
 #[test]
@@ -959,19 +1263,9 @@ fn window_with_time_or_count_disposed() {
 }
 
 // Not ported: Window_ArgumentChecking - argument validation
-// Not ported: Window_Closings_Basic - needs operator Timer (phase 3, later)
-// Not ported: Window_Closings_Empty - needs operator Delay (phase 3, later)
-// Not ported: Window_Closings_Dispose - needs operator Timer (phase 3, later)
-// Not ported: Window_Closings_Error - needs operator Timer (phase 3, later)
-// Not ported: Window_Closings_Default - needs operator Timer (phase 3, later)
-// Not ported: Window_OpeningClosings_Basic - needs operators GroupJoin (Window by openings), Timer (phase 3, later)
-// Not ported: Window_OpeningClosings_Throw - needs operator GroupJoin (Window by openings) (phase 3, later)
-// Not ported: Window_OpeningClosings_Dispose - needs operators GroupJoin (Window by openings), Timer (phase 3, later)
-// Not ported: Window_OpeningClosings_Data_Error - needs operators GroupJoin (Window by openings), Timer (phase 3, later)
-// Not ported: Window_OpeningClosings_Window_Error - needs operators GroupJoin (Window by openings), Timer (phase 3, later)
 // Not ported: WindowWithCount_ArgumentChecking - argument validation
-// Not ported: WindowWithCount_Default - needs operators Range, Skip, First, SequenceEqual (phase 3, later)
+// Not ported: WindowWithCount_Default - blocking operator First (waived: one thread)
 // Not ported: WindowWithTime_ArgumentChecking - argument validation
-// Not ported: WindowWithTime_Default - needs operators Range, SelectMany, ToList, First (phase 3, later)
+// Not ported: WindowWithTime_Default - blocking operator First (waived: one thread)
 // Not ported: WindowWithTimeOrCount_ArgumentChecking - argument validation
-// Not ported: WindowWithTimeOrCount_Default - needs operators Range, Skip, First, SequenceEqual (phase 3, later)
+// Not ported: WindowWithTimeOrCount_Default - blocking operator First (waived: one thread)

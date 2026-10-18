@@ -346,5 +346,5 @@ fn amb_many_enumerable_on_completed() {
 }
 
 // Not ported: Amb_ArgumentChecking - argument validation
-// Not ported: Amb_Many_Enumerable_Many_Sources - needs operators ToList, First (phase 3, later)
-// Not ported: Amb_Many_Enumerable_Many_Sources_NoStackOverflow - needs operators ToList, First (phase 3, later)
+// Not ported: Amb_Many_Enumerable_Many_Sources - blocking operator First (waived: one thread)
+// Not ported: Amb_Many_Enumerable_Many_Sources_NoStackOverflow - blocking operator First (waived: one thread)
