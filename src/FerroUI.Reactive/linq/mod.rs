@@ -10,6 +10,15 @@
 
 mod creation;
 mod observable_ext;
+pub(crate) mod defer;
+pub(crate) mod range;
+pub(crate) mod repeat;
+pub(crate) mod generate;
+pub(crate) mod using;
+pub(crate) mod start;
+pub(crate) mod to_observable;
+pub(crate) mod timer;
+pub(crate) mod interval;
 pub(crate) mod distinct;
 pub(crate) mod distinct_until_changed;
 pub(crate) mod element_at;
