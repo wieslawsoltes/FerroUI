@@ -8,6 +8,8 @@ mod as_observable_test;
 mod buffer_test;
 mod cast_test;
 mod catch_test;
+mod combine_latest_arity_test;
+mod combine_latest_test;
 mod concat_test;
 mod contains_test;
 mod count_test;

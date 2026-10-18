@@ -10,6 +10,7 @@
 
 mod creation;
 mod observable_ext;
+pub(crate) mod combine_latest;
 pub(crate) mod merge;
 pub(crate) mod concat;
 pub(crate) mod amb;

@@ -77,6 +77,7 @@ pub trait ObservableExt<T: 'static> {
     super::with_latest_from::with_latest_from_methods!();
     super::buffer::buffer_methods!();
     super::window::window_methods!();
+    super::combine_latest::combine_latest_methods!();
 }
 
 impl<T: 'static> ObservableExt<T> for Rc<dyn IObservable<T>> {
