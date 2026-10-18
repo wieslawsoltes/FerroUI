@@ -201,7 +201,7 @@ The upstream checklist of the surface is `System.Reactive.MakeRefAssemblies/.Pub
 **Out of scope.** The parts with no meaning in this model are recorded as waived in that checklist:
 - IQbservable and the expression-tree query providers (about 28,000 lines);
 - `FromEventPattern` by event name (reflection);
-- the blocking operators, which would deadlock the only thread: `Wait`, `First`, `Last`, `Single`, `ForEach`, `Latest`, `MostRecent`, `Next`, `ToEnumerable`;
+- the blocking operators, which would deadlock the only thread: `Wait`, `First`, `Last`, `Single`, `ForEach`, `GetEnumerator`, `Latest`, `Next`, `ToEnumerable` (the pull adapters that never wait, `Collect`, `Chunkify` and `MostRecent`, are ported);
 - Remoting.
 
 The `*Async` forms of the terminal operators port as futures.

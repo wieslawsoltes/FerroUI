@@ -87,6 +87,8 @@ pub trait ObservableExt<T: 'static> {
     super::select_many::select_many_methods!();
     super::join::join_methods!();
     super::group_join::group_join_methods!();
+    super::collect::collect_methods!();
+    super::most_recent::most_recent_methods!();
     super::sum::sum_methods!();
     super::average::average_methods!();
     super::min::min_methods!();
