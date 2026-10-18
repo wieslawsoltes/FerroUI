@@ -102,9 +102,17 @@ impl<M: TreeModel> AnonymousSortableRows<M> {
     }
 
     fn create_sorted_indexes(&self) -> Vec<i32> {
-        let count = self.items.borrow().count();
-        let mut compare = self.compare_items_by_index();
-        stable_sort::sorted_map(count, &mut compare)
+        // The models are read once for the sort, which compares each many times: the comparisons
+        // borrow them rather than reading them from the items for every comparison.
+        let items = self.items.borrow().clone();
+        let models: Vec<Rc<M>> = (0..items.count()).map(|i| items.get_at(i)).collect();
+        let comparer = self.comparer.borrow().clone().expect("a comparer");
+        let mut compare = |&index1: &i32, &index2: &i32| match comparer(&models[index1 as usize], &models[index2 as usize]) {
+            // The order of the models keeps the sort stable.
+            Ordering::Equal => index1.cmp(&index2),
+            order => order,
+        };
+        stable_sort::sorted_map(models.len(), &mut compare)
     }
 
     fn rows_of(index: i32, models: &[Rc<M>]) -> Vec<RowRef> {
