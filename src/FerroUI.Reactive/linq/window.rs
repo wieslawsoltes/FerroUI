@@ -72,7 +72,7 @@ impl<T: 'static> IObservable<T> for WindowObservable<T> {
     }
 }
 
-fn window_observable<T: Clone + 'static>(subject: &Rc<Subject<T>>, ref_count: &Rc<RefCountDisposable>) -> WindowHandle<T> {
+pub(crate) fn window_observable<T: Clone + 'static>(subject: &Rc<Subject<T>>, ref_count: &Rc<RefCountDisposable>) -> WindowHandle<T> {
     Rc::new(WindowObservable { source: subject.as_observable(), ref_count: ref_count.clone() })
 }
 

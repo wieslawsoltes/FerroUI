@@ -84,6 +84,9 @@ pub trait ObservableExt<T: 'static> {
     super::multicast::multicast_methods!();
     super::publish::publish_methods!();
     super::replay::replay_methods!();
+    super::select_many::select_many_methods!();
+    super::join::join_methods!();
+    super::group_join::group_join_methods!();
     super::sum::sum_methods!();
     super::average::average_methods!();
     super::min::min_methods!();
