@@ -3,12 +3,15 @@
 //! the tests on the default scheduler wait for nothing (`Return` notifies on the immediate scheduler,
 //! so the subscription has ended when `subscribe` returns, where upstream waits on an event);
 //! `MockEnumerable<T>` of the test library is a local enumerable that records the times its
-//! enumerators live (an enumerator is disposed when it is dropped).
+//! enumerators live (an enumerator is disposed when it is dropped). `Concat` of a sequence of tasks
+//! is `concat_inner` (a `Task` is an `ObservableSource`); `Task.Factory.StartNew` is `tasks::run`
+//! and the blocking `Single()` is `block_on` of `single_async().to_task()`.
 
 use ferroui_reactive::{IObservable, Observable, ObservableError, ObservableExt};
 use ferroui_reactive_testing::{
     assert_messages, assert_recorded_eq, assert_subscriptions, new_error, Expected, ReactiveTest as RT, Recorded, Subscription, TestScheduler,
 };
+use ferroui_system::threading::tasks::{block_on, run};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -611,8 +614,16 @@ fn concat_tail_recursive1() {
     assert_recorded_eq(&res.messages(), &expected);
 }
 
+#[test]
+fn concat_task() {
+    let tss = Observable::to_observable(vec![run(|| Ok(1)), run(|| Ok(2)), run(|| Ok(3))]).concat_inner::<i32>();
+
+    let res = block_on(tss.to_array().single_async().to_task()).unwrap();
+
+    assert_eq!(vec![1, 2, 3], res);
+}
+
 // Not ported: Concat_ArgumentChecking - argument validation
 // Not ported: Concat_IEofIO_GetEnumeratorThrows - an enumerable whose GetEnumerator throws: a Rust iterator cannot fail to be created
 // Not ported: Concat_EnumerableThrows - an enumerable that throws while it is enumerated: a Rust iterator cannot fail
 // Not ported: Concat_TailRecursive2 - real threads (ThreadPoolScheduler, stack traces); blocking operator ForEach (waived: one thread)
-// Not ported: Concat_Task - needs async/await (phase 4)

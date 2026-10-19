@@ -8,13 +8,24 @@
 //! `SelectManyWithIndex_X`) share their scenarios: each scenario is a function run by both tests,
 //! with the form chosen by `indexed`. The anonymous values are tuples; the inner sequences of a
 //! sequence of sequences are `Rc<dyn IObservable<i32>>` handles of the test observables.
+//! The forms on tasks are `select_many_async` (`_with_index`, `_with_token`, `_with` for a result
+//! selector, `try_` for selectors that throw). `Task.Factory.StartNew` is `tasks::run`, whose
+//! token argument the port does not have; `ToEnumerable()` is `block_on` of
+//! `to_array().to_task()`. A task that throws `ex` fails with `ex` once its work has run, so that
+//! the error is the same value; `ManualResetEvent`s that only wait for the end are the flags of
+//! the subscription (the continuations of the tasks run when the tasks end, on the test thread);
+//! `token.Register` is `register_local`.
 
 use ferroui_reactive::concurrency::IScheduler;
-use ferroui_reactive::{IObservable, Notification, Observable, ObservableError, ObservableExt};
+use ferroui_reactive::subjects::Subject;
+use ferroui_reactive::{IDisposable, IObservable, IObserver, Notification, Observable, ObservableError, ObservableExt};
 use ferroui_reactive_testing::{
     assert_messages, assert_subscriptions, new_error, ticks_to_duration, ColdObservable, HotObservable, ReactiveTest as RT, Recorded, TestScheduler,
 };
-use std::cell::Cell;
+use ferroui_system::threading::tasks::{block_on, run, Task, TaskCanceledError, TaskCompletionSource};
+use ferroui_system::threading::CancellationToken;
+use std::cell::{Cell, RefCell};
+use std::future::Future;
 use std::rc::Rc;
 
 type Inner = Rc<dyn IObservable<i32>>;
@@ -1896,6 +1907,1180 @@ fn select_many_with_index_triple_on_error_throw() {
 fn select_many_with_index_triple_on_completed_throw() {
     select_many_triple_on_completed_throw_case(true);
 }
+// The forms on tasks.
+
+/// `SelectMany(selector)` to tasks, or `SelectMany((x, _) => selector(x))` when `indexed`.
+fn many_async<U: Clone + 'static, Fut: Future<Output = Result<U, ObservableError>> + 'static>(
+    xs: Rc<dyn IObservable<i32>>,
+    indexed: bool,
+    selector: impl Fn(i32) -> Fut + 'static,
+) -> Rc<dyn IObservable<U>> {
+    if indexed {
+        xs.select_many_async_with_index(move |x, _| selector(x))
+    } else {
+        xs.select_many_async(selector)
+    }
+}
+
+/// [`many_async`] with a selector that may fail.
+fn try_many_async<U: Clone + 'static, Fut: Future<Output = Result<U, ObservableError>> + 'static>(
+    xs: Rc<dyn IObservable<i32>>,
+    indexed: bool,
+    selector: impl Fn(i32) -> Result<Fut, ObservableError> + 'static,
+) -> Rc<dyn IObservable<U>> {
+    if indexed {
+        xs.try_select_many_async_with_index(move |x, _| selector(x))
+    } else {
+        xs.try_select_many_async(selector)
+    }
+}
+
+/// `SelectMany((x, token) => selector(x, token))` to tasks, or
+/// `SelectMany((x, _, token) => selector(x, token))` when `indexed`.
+fn many_async_token<U: Clone + 'static, Fut: Future<Output = Result<U, ObservableError>> + 'static>(
+    xs: Rc<dyn IObservable<i32>>,
+    indexed: bool,
+    selector: impl Fn(i32, CancellationToken) -> Fut + 'static,
+) -> Rc<dyn IObservable<U>> {
+    if indexed {
+        xs.select_many_async_with_index_with_token(move |x, _, token| selector(x, token))
+    } else {
+        xs.select_many_async_with_token(selector)
+    }
+}
+
+/// [`many_async_token`] with a selector that may fail.
+fn try_many_async_token<U: Clone + 'static, Fut: Future<Output = Result<U, ObservableError>> + 'static>(
+    xs: Rc<dyn IObservable<i32>>,
+    indexed: bool,
+    selector: impl Fn(i32, CancellationToken) -> Result<Fut, ObservableError> + 'static,
+) -> Rc<dyn IObservable<U>> {
+    if indexed {
+        xs.try_select_many_async_with_index_with_token(move |x, _, token| selector(x, token))
+    } else {
+        xs.try_select_many_async_with_token(selector)
+    }
+}
+
+/// `SelectMany(taskSelector, resultSelector)`, or
+/// `SelectMany((x, _) => taskSelector(x), (x, _, y) => resultSelector(x, y))` when `indexed`.
+fn many_async_with<C: Clone + 'static, Fut: Future<Output = Result<C, ObservableError>> + 'static>(
+    xs: Rc<dyn IObservable<i32>>,
+    indexed: bool,
+    task_selector: impl Fn(i32) -> Fut + 'static,
+    result_selector: impl Fn(i32, C) -> i32 + 'static,
+) -> Rc<dyn IObservable<i32>> {
+    if indexed {
+        xs.select_many_async_with_index_with(move |x, _| task_selector(x), move |x, _, y| result_selector(x, y))
+    } else {
+        xs.select_many_async_with(task_selector, result_selector)
+    }
+}
+
+/// [`many_async_with`] with selectors that may fail.
+fn try_many_async_with<C: Clone + 'static, Fut: Future<Output = Result<C, ObservableError>> + 'static>(
+    xs: Rc<dyn IObservable<i32>>,
+    indexed: bool,
+    task_selector: impl Fn(i32) -> Result<Fut, ObservableError> + 'static,
+    result_selector: impl Fn(i32, C) -> Result<i32, ObservableError> + 'static,
+) -> Rc<dyn IObservable<i32>> {
+    if indexed {
+        xs.try_select_many_async_with_index_with(move |x, _| task_selector(x), move |x, _, y| result_selector(x, y))
+    } else {
+        xs.try_select_many_async_with(task_selector, result_selector)
+    }
+}
+
+/// `SelectMany((x, token) => taskSelector(x, token), resultSelector)`, or
+/// `SelectMany((x, _, token) => taskSelector(x, token), (x, _, y) => resultSelector(x, y))` when
+/// `indexed`.
+fn many_async_token_with<C: Clone + 'static, Fut: Future<Output = Result<C, ObservableError>> + 'static>(
+    xs: Rc<dyn IObservable<i32>>,
+    indexed: bool,
+    task_selector: impl Fn(i32, CancellationToken) -> Fut + 'static,
+    result_selector: impl Fn(i32, C) -> i32 + 'static,
+) -> Rc<dyn IObservable<i32>> {
+    if indexed {
+        xs.select_many_async_with_index_with_token_with(move |x, _, token| task_selector(x, token), move |x, _, y| result_selector(x, y))
+    } else {
+        xs.select_many_async_with_token_with(task_selector, result_selector)
+    }
+}
+
+/// [`many_async_token_with`] with selectors that may fail.
+fn try_many_async_token_with<C: Clone + 'static, Fut: Future<Output = Result<C, ObservableError>> + 'static>(
+    xs: Rc<dyn IObservable<i32>>,
+    indexed: bool,
+    task_selector: impl Fn(i32, CancellationToken) -> Result<Fut, ObservableError> + 'static,
+    result_selector: impl Fn(i32, C) -> Result<i32, ObservableError> + 'static,
+) -> Rc<dyn IObservable<i32>> {
+    if indexed {
+        xs.try_select_many_async_with_index_with_token_with(move |x, _, token| task_selector(x, token), move |x, _, y| result_selector(x, y))
+    } else {
+        xs.try_select_many_async_with_token_with(task_selector, result_selector)
+    }
+}
+
+/// `n` completion sources (`new TaskCompletionSource<int>[n]`).
+fn completion_sources(n: usize) -> Vec<TaskCompletionSource<i32>> {
+    (0..n).map(|_| TaskCompletionSource::new()).collect()
+}
+
+/// A selector of the task of a completion source (`x => tcss[x].Task`).
+fn task_of(tcss: &[TaskCompletionSource<i32>]) -> impl Fn(i32) -> Task<i32> + 'static {
+    let tcss = tcss.to_vec();
+    move |x| tcss[x as usize].task()
+}
+
+/// What a subscription received: the values (`lst`), the error (`err`) and whether it ended
+/// (`done`, set by an error too where upstream's test sets it on both).
+#[derive(Default)]
+struct Received {
+    values: RefCell<Vec<i32>>,
+    error: RefCell<Option<ObservableError>>,
+    completed: Cell<bool>,
+}
+
+impl Received {
+    fn sorted(&self) -> Vec<i32> {
+        let mut values = self.values.borrow().clone();
+        values.sort();
+        values
+    }
+
+    fn error(&self) -> Option<ObservableError> {
+        self.error.borrow().clone()
+    }
+}
+
+/// `res.Subscribe(lst.Add, ex_ => err = ex_, () => done = true)`.
+fn receive(res: &Rc<dyn IObservable<i32>>) -> (Rc<Received>, Rc<dyn IDisposable>) {
+    let received = Rc::new(Received::default());
+    let (on_next, on_error, on_completed) = (received.clone(), received.clone(), received.clone());
+    let subscription = res.subscribe_all(
+        move |x| on_next.values.borrow_mut().push(x),
+        move |ex| *on_error.error.borrow_mut() = Some(ex),
+        move || on_completed.completed.set(true),
+    );
+    (received, subscription)
+}
+
+fn same_error(a: &ObservableError, b: &ObservableError) -> bool {
+    std::ptr::addr_eq(Rc::as_ptr(a), Rc::as_ptr(b))
+}
+
+/// `err is TaskCanceledException tcException && tcException.Task == task`.
+fn is_cancellation_of(error: &ObservableError, task: &Task<i32>) -> bool {
+    error.downcast_ref::<TaskCanceledError>().is_some_and(|canceled| canceled.task_id == Some(task.id()))
+}
+
+/// The values of a sequence whose tasks run on worker threads (`ToEnumerable()`), or its error.
+fn to_enumerable<T: Clone + 'static>(res: Rc<dyn IObservable<T>>) -> Result<Vec<T>, ObservableError> {
+    block_on(res.to_array().to_task())
+}
+
+fn select_many_task1_case(indexed: bool) {
+    let res = many_async(Observable::range(0, 10), indexed, |x| run(move || Ok(x + 1)));
+    let mut res = to_enumerable(res).unwrap();
+    res.sort();
+    assert_eq!((0..10).map(|x| x + 1).collect::<Vec<i32>>(), res);
+}
+
+fn select_many_task2_case(indexed: bool) {
+    let res = many_async_token(Observable::range(0, 10), indexed, |x, _ct| run(move || Ok(x + 1)));
+    let mut res = to_enumerable(res).unwrap();
+    res.sort();
+    assert_eq!((0..10).map(|x| x + 1).collect::<Vec<i32>>(), res);
+}
+
+fn select_many_task_task_throws_case(indexed: bool) {
+    let ex = new_error("ex");
+
+    let e = ex.clone();
+    let res = many_async(Observable::range(0, 10), indexed, move |x| {
+        let ex = e.clone();
+        async move {
+            let value = run(move || Ok(x + 1)).await;
+            if x > 5 {
+                Err(ex)
+            } else {
+                value
+            }
+        }
+    });
+
+    let error = to_enumerable(res).unwrap_err();
+    assert!(same_error(&ex, &error));
+}
+
+fn select_many_task_selector_throws_case(indexed: bool) {
+    let ex = new_error("ex");
+
+    let e = ex.clone();
+    let res = try_many_async(Observable::range(0, 10), indexed, move |x| if x > 5 { Err(e.clone()) } else { Ok(run(move || Ok(x + 1))) });
+
+    let error = to_enumerable(res).unwrap_err();
+    assert!(same_error(&ex, &error));
+}
+
+fn select_many_task_result_selector1_case(indexed: bool) {
+    let res = many_async_with(Observable::range(0, 10), indexed, |x| run(move || Ok(x + 1)), |x, y| x + y);
+    let mut res = to_enumerable(res).unwrap();
+    res.sort();
+    assert_eq!((0..10).map(|x| 2 * x + 1).collect::<Vec<i32>>(), res);
+}
+
+fn select_many_task_result_selector2_case(indexed: bool) {
+    let res = many_async_token_with(Observable::range(0, 10), indexed, |x, _ct| run(move || Ok(x + 1)), |x, y| x + y);
+    let mut res = to_enumerable(res).unwrap();
+    res.sort();
+    assert_eq!((0..10).map(|x| 2 * x + 1).collect::<Vec<i32>>(), res);
+}
+
+fn select_many_task_result_selector_throws_case(indexed: bool) {
+    let ex = new_error("ex");
+
+    let e = ex.clone();
+    let res = try_many_async_with(
+        Observable::range(0, 10),
+        indexed,
+        |x| Ok(run(move || Ok(x + 1))),
+        move |x, y| if x > 5 { Err(e.clone()) } else { Ok(x + y) },
+    );
+
+    let error = to_enumerable(res).unwrap_err();
+    assert!(same_error(&ex, &error));
+}
+
+fn simple_ran_to_completion_async_case(indexed: bool) {
+    let tcss = completion_sources(2);
+
+    let res = many_async(Observable::range(0, 2), indexed, task_of(&tcss));
+
+    let (received, _) = receive(&res);
+
+    tcss[0].set_result(42);
+    tcss[1].set_result(43);
+
+    assert!(received.completed.get());
+
+    assert_eq!(vec![42, 43], received.sorted());
+}
+
+fn simple_ran_to_completion_sync_case(indexed: bool) {
+    let tcss = completion_sources(2);
+
+    tcss[0].set_result(42);
+    tcss[1].set_result(43);
+
+    let res = many_async(Observable::range(0, 2), indexed, task_of(&tcss));
+
+    let (received, _) = receive(&res);
+
+    assert!(received.completed.get());
+
+    assert_eq!(vec![42, 43], received.sorted());
+}
+
+fn simple_faulted_async_case(indexed: bool) {
+    let tcss = completion_sources(3);
+
+    let res = many_async(Observable::range(0, 3), indexed, task_of(&tcss));
+
+    let (received, _) = receive(&res);
+
+    let ex = new_error("ex");
+    tcss[1].set_exception(ex.clone());
+
+    assert!(received.error().is_some() || received.completed.get());
+
+    assert!(received.values.borrow().is_empty());
+    assert!(same_error(&ex, &received.error().unwrap()));
+}
+
+fn simple_faulted_sync_case(indexed: bool) {
+    let tcss = completion_sources(3);
+
+    let ex = new_error("ex");
+    tcss[1].set_exception(ex.clone());
+
+    let res = many_async(Observable::range(0, 3), indexed, task_of(&tcss));
+
+    let (received, _) = receive(&res);
+
+    assert!(received.error().is_some() || received.completed.get());
+
+    assert!(received.values.borrow().is_empty());
+    assert!(same_error(&ex, &received.error().unwrap()));
+}
+
+fn simple_canceled_async_case(indexed: bool) {
+    let tcss = completion_sources(3);
+
+    let res = many_async(Observable::range(0, 3), indexed, task_of(&tcss));
+
+    let (received, _) = receive(&res);
+
+    tcss[1].set_canceled();
+
+    assert!(received.error().is_some() || received.completed.get());
+
+    assert!(received.values.borrow().is_empty());
+    assert!(is_cancellation_of(&received.error().unwrap(), &tcss[1].task()));
+}
+
+fn simple_canceled_sync_case(indexed: bool) {
+    let tcss = completion_sources(3);
+
+    tcss[1].set_canceled();
+
+    let res = many_async(Observable::range(0, 3), indexed, task_of(&tcss));
+
+    let (received, _) = receive(&res);
+
+    assert!(received.error().is_some() || received.completed.get());
+
+    assert!(received.values.borrow().is_empty());
+    assert!(is_cancellation_of(&received.error().unwrap(), &tcss[1].task()));
+}
+
+fn simple_inner_complete_before_outer_case(indexed: bool) {
+    let xs = Subject::new();
+
+    let tcss = completion_sources(3);
+
+    let res = many_async(xs.as_observable(), indexed, task_of(&tcss));
+
+    let (received, _) = receive(&res);
+
+    tcss[1].set_result(42);
+
+    xs.on_next(0);
+    xs.on_next(1);
+    xs.on_next(2);
+
+    tcss[0].set_result(43);
+    tcss[2].set_result(44);
+
+    xs.on_completed();
+
+    assert!(received.completed.get());
+
+    assert_eq!(vec![42, 43, 44], received.sorted());
+}
+
+fn simple_outer_complete_before_inner_case(indexed: bool) {
+    let xs = Subject::new();
+
+    let tcss = completion_sources(3);
+
+    let res = many_async(xs.as_observable(), indexed, task_of(&tcss));
+
+    let (received, _) = receive(&res);
+
+    tcss[1].set_result(42);
+
+    xs.on_next(0);
+    xs.on_next(1);
+    xs.on_next(2);
+    xs.on_completed();
+
+    tcss[0].set_result(43);
+    tcss[2].set_result(44);
+
+    assert!(received.completed.get());
+
+    assert_eq!(vec![42, 43, 44], received.sorted());
+}
+
+/// A selector that registers `on_cancel(tcs)` with the token and returns the task of `tcs`
+/// (`(x, token) => { var tcs = tcss[x]; token.Register(...); return tcs.Task; }`); `throw_at`
+/// is the value for which the selector throws `ex`.
+fn registering_selector(
+    tcss: &[TaskCompletionSource<i32>],
+    throw_at: Option<(i32, ObservableError)>,
+    on_cancel: impl Fn(&TaskCompletionSource<i32>) + 'static,
+) -> impl Fn(i32, CancellationToken) -> Result<Task<i32>, ObservableError> + 'static {
+    let tcss = tcss.to_vec();
+    let on_cancel = Rc::new(on_cancel);
+    move |x, token| {
+        if let Some((at, ex)) = &throw_at {
+            if x == *at {
+                return Err(ex.clone());
+            }
+        }
+
+        let tcs = tcss[x as usize].clone();
+
+        let canceled = tcs.clone();
+        let on_cancel = on_cancel.clone();
+        let _ = token.register_local(move || on_cancel(&canceled));
+
+        Ok(tcs.task())
+    }
+}
+
+/// [`registering_selector`] as a selector that does not fail (the form of upstream's tests whose
+/// selector does not throw).
+fn plain(selector: impl Fn(i32, CancellationToken) -> Result<Task<i32>, ObservableError> + 'static) -> impl Fn(i32, CancellationToken) -> Task<i32> + 'static {
+    move |x, token| selector(x, token).expect("the selector does not fail")
+}
+
+/// The `token.Register(() => { n++; m += tcs.TrySetCanceled() ? 1 : 0; })` of the tests of the
+/// cancellation.
+fn counting_cancellation(n: &Rc<Cell<i32>>, m: &Rc<Cell<i32>>) -> impl Fn(&TaskCompletionSource<i32>) + 'static {
+    let (n, m) = (n.clone(), m.clone());
+    move |tcs| {
+        n.set(n.get() + 1);
+        m.set(m.get() + if tcs.try_set_canceled() { 1 } else { 0 });
+    }
+}
+
+fn simple_cancellation_never_invoked_case(indexed: bool) {
+    let xs = Subject::new();
+
+    let tcss = completion_sources(3);
+
+    // `tcs.SetCanceled()` of upstream runs when the subscription is disposed after the end, and
+    // throws on the completed task in a continuation of the thread pool, which swallows it; the
+    // continuations here run on the thread that ends the task, so the callback uses
+    // `try_set_canceled`.
+    let res = many_async_token(
+        xs.as_observable(),
+        indexed,
+        plain(registering_selector(&tcss, None, |tcs| {
+            tcs.try_set_canceled();
+        })),
+    );
+
+    let (received, _d) = receive(&res);
+
+    tcss[1].set_result(42);
+
+    xs.on_next(0);
+    xs.on_next(1);
+    xs.on_next(2);
+    xs.on_completed();
+
+    tcss[0].set_result(43);
+    tcss[2].set_result(44);
+
+    assert!(received.completed.get());
+
+    assert_eq!(vec![42, 43, 44], received.sorted());
+}
+
+fn simple_cancellation_invoked_case(indexed: bool) {
+    let xs = Subject::new();
+
+    let tcss = completion_sources(3);
+
+    let n = Rc::new(Cell::new(0));
+    let m = Rc::new(Cell::new(0));
+
+    let res = many_async_token(xs.as_observable(), indexed, plain(registering_selector(&tcss, None, counting_cancellation(&n, &m))));
+
+    let (received, d) = receive(&res);
+
+    tcss[1].set_result(42);
+
+    xs.on_next(0);
+    xs.on_next(1);
+
+    d.dispose();
+
+    xs.on_next(2);
+    xs.on_completed();
+
+    assert!(!tcss[0].try_set_result(43));
+    tcss[2].set_result(44); // never observed because xs.OnNext(2) happened after dispose
+
+    assert_eq!(vec![42], *received.values.borrow());
+    assert!(!received.completed.get());
+    assert_eq!(2, n.get());
+    assert_eq!(1, m.get()); // tcss[1] was already finished
+}
+
+fn simple_cancellation_after_outer_error_case(indexed: bool) {
+    let xs = Subject::new();
+
+    let tcss = completion_sources(3);
+
+    let n = Rc::new(Cell::new(0));
+    let m = Rc::new(Cell::new(0));
+
+    let res = many_async_token(xs.as_observable(), indexed, plain(registering_selector(&tcss, None, counting_cancellation(&n, &m))));
+
+    let (received, _) = receive(&res);
+
+    tcss[1].set_result(42);
+
+    xs.on_next(0);
+    xs.on_next(1);
+
+    let ex = new_error("ex");
+    xs.on_error(ex.clone());
+
+    assert!(!tcss[0].try_set_result(43));
+    tcss[2].set_result(44); // no-op
+
+    assert_eq!(vec![42], *received.values.borrow());
+    assert!(same_error(&ex, &received.error().unwrap()));
+    assert!(!received.completed.get());
+    assert_eq!(2, n.get());
+    assert_eq!(1, m.get()); // tcss[1] was already finished
+}
+
+fn simple_cancellation_after_selector_throws_case(indexed: bool) {
+    let xs = Subject::new();
+
+    let tcss = completion_sources(4);
+
+    let n = Rc::new(Cell::new(0));
+    let m = Rc::new(Cell::new(0));
+
+    let ex = new_error("ex");
+
+    let res = try_many_async_token(xs.as_observable(), indexed, registering_selector(&tcss, Some((2, ex.clone())), counting_cancellation(&n, &m)));
+
+    let (received, _) = receive(&res);
+
+    tcss[1].set_result(43);
+
+    xs.on_next(0);
+    xs.on_next(1);
+
+    tcss[0].set_result(42);
+
+    xs.on_next(2); // causes error
+    xs.on_completed();
+
+    assert!(received.error().is_some() || received.completed.get());
+
+    assert!(!received.completed.get());
+    assert!(same_error(&ex, &received.error().unwrap()));
+    assert_eq!(2, n.get());
+    assert_eq!(0, m.get());
+}
+
+fn with_result_selector_ran_to_completion_async_case(indexed: bool) {
+    let tcss = completion_sources(2);
+
+    let res = many_async_with(Observable::range(0, 2), indexed, task_of(&tcss), |x, y| x + y);
+
+    let (received, _) = receive(&res);
+
+    tcss[0].set_result(42);
+    tcss[1].set_result(43);
+
+    assert!(received.completed.get());
+
+    assert_eq!(vec![42, 43 + 1], received.sorted());
+}
+
+fn with_result_selector_ran_to_completion_sync_case(indexed: bool) {
+    let tcss = completion_sources(2);
+
+    tcss[0].set_result(42);
+    tcss[1].set_result(43);
+
+    let res = many_async_with(Observable::range(0, 2), indexed, task_of(&tcss), |x, y| x + y);
+
+    let (received, _) = receive(&res);
+
+    assert!(received.completed.get());
+
+    assert_eq!(vec![42, 43 + 1], received.sorted());
+}
+
+fn with_result_selector_faulted_async_case(indexed: bool) {
+    let tcss = completion_sources(3);
+
+    let res = many_async_with(Observable::range(0, 3), indexed, task_of(&tcss), |x, y| x + y);
+
+    let (received, _) = receive(&res);
+
+    let ex = new_error("ex");
+    tcss[1].set_exception(ex.clone());
+
+    assert!(received.error().is_some() || received.completed.get());
+
+    assert!(received.values.borrow().is_empty());
+    assert!(same_error(&ex, &received.error().unwrap()));
+}
+
+fn with_result_selector_faulted_sync_case(indexed: bool) {
+    let tcss = completion_sources(3);
+
+    let ex = new_error("ex");
+    tcss[1].set_exception(ex.clone());
+
+    let res = many_async_with(Observable::range(0, 3), indexed, task_of(&tcss), |x, y| x + y);
+
+    let (received, _) = receive(&res);
+
+    assert!(received.error().is_some() || received.completed.get());
+
+    assert!(received.values.borrow().is_empty());
+    assert!(same_error(&ex, &received.error().unwrap()));
+}
+
+fn with_result_selector_canceled_async_case(indexed: bool) {
+    let tcss = completion_sources(3);
+
+    let res = many_async_with(Observable::range(0, 3), indexed, task_of(&tcss), |x, y| x + y);
+
+    let (received, _) = receive(&res);
+
+    tcss[1].set_canceled();
+
+    assert!(received.error().is_some() || received.completed.get());
+
+    assert!(received.values.borrow().is_empty());
+    assert!(is_cancellation_of(&received.error().unwrap(), &tcss[1].task()));
+}
+
+fn with_result_selector_canceled_sync_case(indexed: bool) {
+    let tcss = completion_sources(3);
+
+    tcss[1].set_canceled();
+
+    let res = many_async_with(Observable::range(0, 3), indexed, task_of(&tcss), |x, y| x + y);
+
+    let (received, _) = receive(&res);
+
+    assert!(received.error().is_some() || received.completed.get());
+
+    assert!(received.values.borrow().is_empty());
+    assert!(is_cancellation_of(&received.error().unwrap(), &tcss[1].task()));
+}
+
+fn with_result_selector_inner_complete_before_outer_case(indexed: bool) {
+    let xs = Subject::new();
+
+    let tcss = completion_sources(3);
+
+    let res = many_async_with(xs.as_observable(), indexed, task_of(&tcss), |x, y| x + y);
+
+    let (received, _) = receive(&res);
+
+    tcss[1].set_result(42);
+
+    xs.on_next(0);
+    xs.on_next(1);
+    xs.on_next(2);
+
+    tcss[0].set_result(43);
+    tcss[2].set_result(44);
+
+    xs.on_completed();
+
+    assert!(received.completed.get());
+
+    let mut expected = vec![42 + 1, 43, 44 + 2];
+    expected.sort();
+    assert_eq!(expected, received.sorted());
+}
+
+fn with_result_selector_outer_complete_before_inner_case(indexed: bool) {
+    let xs = Subject::new();
+
+    let tcss = completion_sources(3);
+
+    let res = many_async_with(xs.as_observable(), indexed, task_of(&tcss), |x, y| x + y);
+
+    let (received, _) = receive(&res);
+
+    tcss[1].set_result(42);
+
+    xs.on_next(0);
+    xs.on_next(1);
+    xs.on_next(2);
+    xs.on_completed();
+
+    tcss[0].set_result(43);
+    tcss[2].set_result(44);
+
+    assert!(received.completed.get());
+
+    let mut expected = vec![42 + 1, 43, 44 + 2];
+    expected.sort();
+    assert_eq!(expected, received.sorted());
+}
+
+fn with_result_selector_cancellation_never_invoked_case(indexed: bool) {
+    let xs = Subject::new();
+
+    let tcss = completion_sources(3);
+
+    // `try_set_canceled` for upstream's `SetCanceled`: see `simple_cancellation_never_invoked_case`.
+    let res = many_async_token_with(
+        xs.as_observable(),
+        indexed,
+        plain(registering_selector(&tcss, None, |tcs| {
+            tcs.try_set_canceled();
+        })),
+        |x, y| x + y,
+    );
+
+    let (received, _d) = receive(&res);
+
+    tcss[1].set_result(42);
+
+    xs.on_next(0);
+    xs.on_next(1);
+    xs.on_next(2);
+    xs.on_completed();
+
+    tcss[0].set_result(43);
+    tcss[2].set_result(44);
+
+    assert!(received.completed.get());
+
+    let mut expected = vec![42 + 1, 43, 44 + 2];
+    expected.sort();
+    assert_eq!(expected, received.sorted());
+}
+
+fn with_result_selector_cancellation_invoked_case(indexed: bool) {
+    let xs = Subject::new();
+
+    let tcss = completion_sources(3);
+
+    let n = Rc::new(Cell::new(0));
+    let m = Rc::new(Cell::new(0));
+
+    let res = many_async_token_with(xs.as_observable(), indexed, plain(registering_selector(&tcss, None, counting_cancellation(&n, &m))), |x, y| x + y);
+
+    let (received, d) = receive(&res);
+
+    tcss[1].set_result(42);
+
+    xs.on_next(0);
+    xs.on_next(1);
+
+    d.dispose();
+
+    xs.on_next(2);
+    xs.on_completed();
+
+    assert!(!tcss[0].try_set_result(43));
+    tcss[2].set_result(44); // never observed because xs.OnNext(2) happened after dispose
+
+    assert_eq!(vec![42 + 1], *received.values.borrow());
+    assert!(!received.completed.get());
+    assert_eq!(2, n.get());
+    assert_eq!(1, m.get()); // tcss[1] was already finished
+}
+
+fn with_result_selector_cancellation_after_outer_error_case(indexed: bool) {
+    let xs = Subject::new();
+
+    let tcss = completion_sources(3);
+
+    let n = Rc::new(Cell::new(0));
+    let m = Rc::new(Cell::new(0));
+
+    let res = many_async_token_with(xs.as_observable(), indexed, plain(registering_selector(&tcss, None, counting_cancellation(&n, &m))), |x, y| x + y);
+
+    let (received, _) = receive(&res);
+
+    tcss[1].set_result(42);
+
+    xs.on_next(0);
+    xs.on_next(1);
+
+    let ex = new_error("ex");
+    xs.on_error(ex.clone());
+
+    assert!(!tcss[0].try_set_result(43));
+    tcss[2].set_result(44); // no-op
+
+    assert_eq!(vec![42 + 1], *received.values.borrow());
+    assert!(same_error(&ex, &received.error().unwrap()));
+    assert!(!received.completed.get());
+    assert_eq!(2, n.get());
+    assert_eq!(1, m.get()); // tcss[1] was already finished
+}
+
+fn with_result_selector_cancellation_after_selector_throws_case(indexed: bool) {
+    let xs = Subject::new();
+
+    let tcss = completion_sources(4);
+
+    let n = Rc::new(Cell::new(0));
+    let m = Rc::new(Cell::new(0));
+
+    let ex = new_error("ex");
+
+    let res = try_many_async_token_with(
+        xs.as_observable(),
+        indexed,
+        registering_selector(&tcss, Some((2, ex.clone())), counting_cancellation(&n, &m)),
+        |x, y| Ok(x + y),
+    );
+
+    let (received, _) = receive(&res);
+
+    tcss[1].set_result(43);
+
+    xs.on_next(0);
+    xs.on_next(1);
+
+    tcss[0].set_result(42);
+
+    xs.on_next(2); // causes error
+    xs.on_completed();
+
+    assert!(received.error().is_some() || received.completed.get());
+
+    assert!(!received.completed.get());
+    assert!(same_error(&ex, &received.error().unwrap()));
+    assert_eq!(2, n.get());
+    assert_eq!(0, m.get());
+}
+
+#[test]
+fn select_many_task1() {
+    select_many_task1_case(false);
+}
+
+#[test]
+fn select_many_task2() {
+    select_many_task2_case(false);
+}
+
+#[test]
+fn select_many_task_task_throws() {
+    select_many_task_task_throws_case(false);
+}
+
+#[test]
+fn select_many_task_selector_throws() {
+    select_many_task_selector_throws_case(false);
+}
+
+#[test]
+fn select_many_task_result_selector1() {
+    select_many_task_result_selector1_case(false);
+}
+
+#[test]
+fn select_many_task_result_selector2() {
+    select_many_task_result_selector2_case(false);
+}
+
+#[test]
+fn select_many_task_result_selector_throws() {
+    select_many_task_result_selector_throws_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_simple_ran_to_completion_async() {
+    simple_ran_to_completion_async_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_simple_ran_to_completion_sync() {
+    simple_ran_to_completion_sync_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_simple_faulted_async() {
+    simple_faulted_async_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_simple_faulted_sync() {
+    simple_faulted_sync_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_simple_canceled_async() {
+    simple_canceled_async_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_simple_canceled_sync() {
+    simple_canceled_sync_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_simple_inner_complete_before_outer() {
+    simple_inner_complete_before_outer_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_simple_outer_complete_before_inner() {
+    simple_outer_complete_before_inner_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_simple_cancellation_never_invoked() {
+    simple_cancellation_never_invoked_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_simple_cancellation_invoked() {
+    simple_cancellation_invoked_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_simple_cancellation_after_outer_error() {
+    simple_cancellation_after_outer_error_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_simple_cancellation_after_selector_throws() {
+    simple_cancellation_after_selector_throws_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_with_result_selector_ran_to_completion_async() {
+    with_result_selector_ran_to_completion_async_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_with_result_selector_ran_to_completion_sync() {
+    with_result_selector_ran_to_completion_sync_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_with_result_selector_faulted_async() {
+    with_result_selector_faulted_async_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_with_result_selector_faulted_sync() {
+    with_result_selector_faulted_sync_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_with_result_selector_canceled_async() {
+    with_result_selector_canceled_async_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_with_result_selector_canceled_sync() {
+    with_result_selector_canceled_sync_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_with_result_selector_inner_complete_before_outer() {
+    with_result_selector_inner_complete_before_outer_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_with_result_selector_outer_complete_before_inner() {
+    with_result_selector_outer_complete_before_inner_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_with_result_selector_cancellation_never_invoked() {
+    with_result_selector_cancellation_never_invoked_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_with_result_selector_cancellation_invoked() {
+    with_result_selector_cancellation_invoked_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_with_result_selector_cancellation_after_outer_error() {
+    with_result_selector_cancellation_after_outer_error_case(false);
+}
+
+#[test]
+fn select_many_task_with_completion_source_with_result_selector_cancellation_after_selector_throws() {
+    with_result_selector_cancellation_after_selector_throws_case(false);
+}
+
+#[test]
+fn select_many_with_index_task_index() {
+    let res = Observable::range(0, 10).select_many_async_with_index(|x, i| run(move || Ok((x, i))));
+    let mut res = to_enumerable(res).unwrap();
+    res.sort_by_key(|v| v.1);
+    assert_eq!((0..10).map(|x| (x, x as usize)).collect::<Vec<(i32, usize)>>(), res);
+}
+
+#[test]
+fn select_many_with_index_task_cancellation_index() {
+    let res = Observable::range(0, 10).select_many_async_with_index_with_token(|x, i, _ctx| run(move || Ok((x, i))));
+    let mut res = to_enumerable(res).unwrap();
+    res.sort_by_key(|v| v.1);
+    assert_eq!((0..10).map(|x| (x, x as usize)).collect::<Vec<(i32, usize)>>(), res);
+}
+
+#[test]
+fn select_many_with_index_task_result_selector_index() {
+    let res = Observable::range(0, 10).select_many_async_with_index_with(|x, i| run(move || Ok((x, i))), |_, _, r| r);
+    let mut res = to_enumerable(res).unwrap();
+    res.sort_by_key(|v| v.1);
+    assert_eq!((0..10).map(|x| (x, x as usize)).collect::<Vec<(i32, usize)>>(), res);
+}
+
+#[test]
+fn select_many_with_index_task_result_selector_cancellation_index() {
+    let res = Observable::range(0, 10).select_many_async_with_index_with_token_with(|x, i, _ctx| run(move || Ok((x, i))), |_, _, r| r);
+    let mut res = to_enumerable(res).unwrap();
+    res.sort_by_key(|v| v.1);
+    assert_eq!((0..10).map(|x| (x, x as usize)).collect::<Vec<(i32, usize)>>(), res);
+}
+
+#[test]
+fn select_many_with_index_task1() {
+    select_many_task1_case(true);
+}
+
+#[test]
+fn select_many_with_index_task2() {
+    select_many_task2_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_task_throws() {
+    select_many_task_task_throws_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_selector_throws() {
+    select_many_task_selector_throws_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_result_selector1() {
+    select_many_task_result_selector1_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_result_selector2() {
+    select_many_task_result_selector2_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_result_selector_throws() {
+    select_many_task_result_selector_throws_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_simple_ran_to_completion_async() {
+    simple_ran_to_completion_async_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_simple_ran_to_completion_sync() {
+    simple_ran_to_completion_sync_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_simple_faulted_async() {
+    simple_faulted_async_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_simple_faulted_sync() {
+    simple_faulted_sync_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_simple_canceled_async() {
+    simple_canceled_async_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_simple_canceled_sync() {
+    simple_canceled_sync_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_simple_inner_complete_before_outer() {
+    simple_inner_complete_before_outer_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_simple_outer_complete_before_inner() {
+    simple_outer_complete_before_inner_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_simple_cancellation_never_invoked() {
+    simple_cancellation_never_invoked_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_simple_cancellation_invoked() {
+    simple_cancellation_invoked_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_simple_cancellation_after_outer_error() {
+    simple_cancellation_after_outer_error_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_simple_cancellation_after_selector_throws() {
+    simple_cancellation_after_selector_throws_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_with_result_selector_ran_to_completion_async() {
+    with_result_selector_ran_to_completion_async_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_with_result_selector_ran_to_completion_sync() {
+    with_result_selector_ran_to_completion_sync_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_with_result_selector_faulted_async() {
+    with_result_selector_faulted_async_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_with_result_selector_faulted_sync() {
+    with_result_selector_faulted_sync_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_with_result_selector_canceled_async() {
+    with_result_selector_canceled_async_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_with_result_selector_canceled_sync() {
+    with_result_selector_canceled_sync_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_with_result_selector_inner_complete_before_outer() {
+    with_result_selector_inner_complete_before_outer_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_with_result_selector_outer_complete_before_inner() {
+    with_result_selector_outer_complete_before_inner_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_with_result_selector_cancellation_never_invoked() {
+    with_result_selector_cancellation_never_invoked_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_with_result_selector_cancellation_invoked() {
+    with_result_selector_cancellation_invoked_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_with_result_selector_cancellation_after_outer_error() {
+    with_result_selector_cancellation_after_outer_error_case(true);
+}
+
+#[test]
+fn select_many_with_index_task_with_completion_source_with_result_selector_cancellation_after_selector_throws() {
+    with_result_selector_cancellation_after_selector_throws_case(true);
+}
 
 // Not ported: SelectMany_Then_ArgumentChecking - argument validation
 // Not ported: SelectMany_ArgumentChecking - argument validation
@@ -1904,71 +3089,5 @@ fn select_many_with_index_triple_on_completed_throw() {
 // Not ported: SelectManyWithIndex_QueryOperator_ArgumentChecking - argument validation
 // Not ported: SelectMany_Triple_ArgumentChecking - argument validation
 // Not ported: SelectManyWithIndex_Triple_ArgumentChecking - argument validation
-// Not ported: SelectMany_Task_ArgumentChecking - needs async/await (phase 4)
-// Not ported: SelectMany_Task1 - needs async/await (phase 4)
-// Not ported: SelectMany_Task2 - needs async/await (phase 4)
-// Not ported: SelectMany_Task_TaskThrows - needs async/await (phase 4)
-// Not ported: SelectMany_Task_SelectorThrows - needs async/await (phase 4)
-// Not ported: SelectMany_Task_ResultSelector1 - needs async/await (phase 4)
-// Not ported: SelectMany_Task_ResultSelector2 - needs async/await (phase 4)
-// Not ported: SelectMany_Task_ResultSelectorThrows - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_Simple_RanToCompletion_Async - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_Simple_RanToCompletion_Sync - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_Simple_Faulted_Async - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_Simple_Faulted_Sync - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_Simple_Canceled_Async - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_Simple_Canceled_Sync - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_Simple_InnerCompleteBeforeOuter - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_Simple_OuterCompleteBeforeInner - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_Simple_Cancellation_NeverInvoked - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_Simple_Cancellation_Invoked - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_Simple_Cancellation_AfterOuterError - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_Simple_Cancellation_AfterSelectorThrows - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_WithResultSelector_RanToCompletion_Async - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_WithResultSelector_RanToCompletion_Sync - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_WithResultSelector_Faulted_Async - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_WithResultSelector_Faulted_Sync - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_WithResultSelector_Canceled_Async - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_WithResultSelector_Canceled_Sync - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_WithResultSelector_InnerCompleteBeforeOuter - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_WithResultSelector_OuterCompleteBeforeInner - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_WithResultSelector_Cancellation_NeverInvoked - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_WithResultSelector_Cancellation_Invoked - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_WithResultSelector_Cancellation_AfterOuterError - needs async/await (phase 4)
-// Not ported: SelectMany_TaskWithCompletionSource_WithResultSelector_Cancellation_AfterSelectorThrows - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_Task_ArgumentChecking - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_Task_Index - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_Task_Cancellation_Index - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_Task_ResultSelector_Index - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_Task_ResultSelector_Cancellation_Index - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_Task1 - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_Task2 - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_Task_TaskThrows - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_Task_SelectorThrows - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_Task_ResultSelector1 - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_Task_ResultSelector2 - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_Task_ResultSelectorThrows - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_Simple_RanToCompletion_Async - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_Simple_RanToCompletion_Sync - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_Simple_Faulted_Async - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_Simple_Faulted_Sync - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_Simple_Canceled_Async - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_Simple_Canceled_Sync - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_Simple_InnerCompleteBeforeOuter - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_Simple_OuterCompleteBeforeInner - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_Simple_Cancellation_NeverInvoked - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_Simple_Cancellation_Invoked - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_Simple_Cancellation_AfterOuterError - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_Simple_Cancellation_AfterSelectorThrows - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_WithResultSelector_RanToCompletion_Async - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_WithResultSelector_RanToCompletion_Sync - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_WithResultSelector_Faulted_Async - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_WithResultSelector_Faulted_Sync - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_WithResultSelector_Canceled_Async - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_WithResultSelector_Canceled_Sync - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_WithResultSelector_InnerCompleteBeforeOuter - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_WithResultSelector_OuterCompleteBeforeInner - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_WithResultSelector_Cancellation_NeverInvoked - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_WithResultSelector_Cancellation_Invoked - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_WithResultSelector_Cancellation_AfterOuterError - needs async/await (phase 4)
-// Not ported: SelectManyWithIndex_TaskWithCompletionSource_WithResultSelector_Cancellation_AfterSelectorThrows - needs async/await (phase 4)
+// Not ported: SelectMany_Task_ArgumentChecking - argument validation
+// Not ported: SelectManyWithIndex_Task_ArgumentChecking - argument validation

@@ -3,10 +3,16 @@
 //! `Observable::merge_all_on`, `Observable.Merge(xs, ys, scheduler)` is `merge_on`, `Merge()` and
 //! `Merge(int)` on a sequence of sequences are `merge_inner` and `merge_inner_max`; the inner
 //! sequences of a sequence of sequences are `Rc<dyn IObservable<i32>>` handles of the test
-//! observables.
+//! observables. `Merge` of a sequence of tasks is `merge_inner` (a `Task` is an `ObservableSource`);
+//! `Task.Factory.StartNew` is `tasks::run` and the blocking `Single()` is `block_on` of
+//! `single_async().to_task()`; the `ManualResetEvent`s that only wait for the end are the flags of
+//! the subscription (the continuations of the tasks run when the tasks end, on the test thread).
 
-use ferroui_reactive::{IObservable, Notification, Observable, ObservableExt};
+use ferroui_reactive::subjects::Subject;
+use ferroui_reactive::{IObservable, IObserver, Notification, Observable, ObservableError, ObservableExt};
 use ferroui_reactive_testing::{assert_messages, assert_subscriptions, new_error, ReactiveTest as RT, Recorded, TestScheduler};
+use ferroui_system::threading::tasks::{block_on, run, Task, TaskCanceledError, TaskCompletionSource};
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 type Inner = Rc<dyn IObservable<i32>>;
@@ -1043,6 +1049,241 @@ fn merge_concat_inner_error() {
 
     assert_subscriptions!(ys4.subscriptions(), RT::subscribe(460, 490));
 }
+/// `n` completion sources (`new TaskCompletionSource<int>[n]`).
+fn completion_sources(n: usize) -> Vec<TaskCompletionSource<i32>> {
+    (0..n).map(|_| TaskCompletionSource::new()).collect()
+}
+
+/// `xs.Select(x => tcss[x].Task)`.
+fn tasks_of(xs: Rc<dyn IObservable<i32>>, tcss: &[TaskCompletionSource<i32>]) -> Rc<dyn IObservable<Task<i32>>> {
+    let tcss = tcss.to_vec();
+    xs.select(move |x| tcss[x as usize].task())
+}
+
+/// What a subscription received: the values (`lst`), the error (`err`) and whether it completed
+/// (`done`).
+#[derive(Default)]
+struct Received {
+    values: RefCell<Vec<i32>>,
+    error: RefCell<Option<ObservableError>>,
+    completed: Cell<bool>,
+}
+
+impl Received {
+    fn sorted(&self) -> Vec<i32> {
+        let mut values = self.values.borrow().clone();
+        values.sort();
+        values
+    }
+
+    fn error(&self) -> Option<ObservableError> {
+        self.error.borrow().clone()
+    }
+}
+
+/// `res.Subscribe(lst.Add, ex_ => err = ex_, () => done = true)`.
+fn receive(res: &Rc<dyn IObservable<i32>>) -> Rc<Received> {
+    let received = Rc::new(Received::default());
+    let (on_next, on_error, on_completed) = (received.clone(), received.clone(), received.clone());
+    res.subscribe_all(
+        move |x| on_next.values.borrow_mut().push(x),
+        move |ex| *on_error.error.borrow_mut() = Some(ex),
+        move || on_completed.completed.set(true),
+    );
+    received
+}
+
+fn same_error(a: &ObservableError, b: &ObservableError) -> bool {
+    std::ptr::addr_eq(Rc::as_ptr(a), Rc::as_ptr(b))
+}
+
+#[test]
+fn merge_task() {
+    let tss = Observable::to_observable(vec![run(|| Ok(1)), run(|| Ok(2)), run(|| Ok(3))]).merge_inner::<i32>();
+
+    let mut res = block_on(tss.to_array().single_async().to_task()).unwrap();
+
+    res.sort();
+    assert_eq!(vec![1, 2, 3], res);
+}
+
+#[test]
+fn merge_task_with_completion_source_ran_to_completion_async() {
+    let tcss = completion_sources(2);
+
+    let res = tasks_of(Observable::range(0, 2), &tcss).merge_inner::<i32>();
+
+    let received = receive(&res);
+
+    tcss[0].set_result(42);
+    tcss[1].set_result(43);
+
+    assert!(received.completed.get());
+
+    assert_eq!(vec![42, 43], received.sorted());
+}
+
+#[test]
+fn merge_task_with_completion_source_ran_to_completion_sync() {
+    let tcss = completion_sources(2);
+
+    tcss[0].set_result(42);
+    tcss[1].set_result(43);
+
+    let res = tasks_of(Observable::range(0, 2), &tcss).merge_inner::<i32>();
+
+    let received = receive(&res);
+
+    assert!(received.completed.get());
+
+    assert_eq!(vec![42, 43], received.sorted());
+}
+
+#[test]
+fn merge_task_with_completion_source_faulted_async() {
+    let tcss = completion_sources(3);
+
+    let res = tasks_of(Observable::range(0, 3), &tcss).merge_inner::<i32>();
+
+    let received = receive(&res);
+
+    let ex = new_error("ex");
+    tcss[1].set_exception(ex.clone());
+
+    assert!(received.error().is_some() || received.completed.get());
+
+    assert!(received.values.borrow().is_empty());
+    assert!(same_error(&ex, &received.error().unwrap()));
+}
+
+#[test]
+fn merge_task_with_completion_source_faulted_sync() {
+    let tcss = completion_sources(3);
+
+    let ex = new_error("ex");
+    tcss[1].set_exception(ex.clone());
+
+    let res = tasks_of(Observable::range(0, 3), &tcss).merge_inner::<i32>();
+
+    let received = receive(&res);
+
+    assert!(received.error().is_some() || received.completed.get());
+
+    assert!(received.values.borrow().is_empty());
+    assert!(same_error(&ex, &received.error().unwrap()));
+}
+
+#[test]
+fn merge_task_with_completion_source_canceled_async() {
+    let tcss = completion_sources(3);
+
+    let res = tasks_of(Observable::range(0, 3), &tcss).merge_inner::<i32>();
+
+    let received = receive(&res);
+
+    tcss[1].set_canceled();
+
+    assert!(received.error().is_some() || received.completed.get());
+
+    assert!(received.values.borrow().is_empty());
+    let error = received.error().unwrap();
+    assert!(error.downcast_ref::<TaskCanceledError>().is_some_and(|canceled| canceled.task_id == Some(tcss[1].task().id())));
+}
+
+#[test]
+fn merge_task_with_completion_source_canceled_sync() {
+    let tcss = completion_sources(3);
+
+    tcss[1].set_canceled();
+
+    let res = tasks_of(Observable::range(0, 3), &tcss).merge_inner::<i32>();
+
+    let received = receive(&res);
+
+    assert!(received.error().is_some() || received.completed.get());
+
+    assert!(received.values.borrow().is_empty());
+    let error = received.error().unwrap();
+    assert!(error.downcast_ref::<TaskCanceledError>().is_some_and(|canceled| canceled.task_id == Some(tcss[1].task().id())));
+}
+
+#[test]
+fn merge_task_with_completion_source_inner_complete_before_outer() {
+    let xs = Subject::new();
+
+    let tcss = completion_sources(3);
+
+    let res = tasks_of(xs.as_observable(), &tcss).merge_inner::<i32>();
+
+    let received = receive(&res);
+
+    tcss[1].set_result(42);
+
+    xs.on_next(0);
+    xs.on_next(1);
+    xs.on_next(2);
+
+    tcss[0].set_result(43);
+    tcss[2].set_result(44);
+
+    xs.on_completed();
+
+    assert!(received.completed.get());
+
+    assert_eq!(vec![42, 43, 44], received.sorted());
+}
+
+#[test]
+fn merge_task_with_completion_source_outer_complete_before_inner() {
+    let xs = Subject::new();
+
+    let tcss = completion_sources(3);
+
+    let res = tasks_of(xs.as_observable(), &tcss).merge_inner::<i32>();
+
+    let received = receive(&res);
+
+    tcss[1].set_result(42);
+
+    xs.on_next(0);
+    xs.on_next(1);
+    xs.on_next(2);
+    xs.on_completed();
+
+    tcss[0].set_result(43);
+    tcss[2].set_result(44);
+
+    assert!(received.completed.get());
+
+    assert_eq!(vec![42, 43, 44], received.sorted());
+}
+
+#[test]
+fn merge_task_on_error() {
+    let xs = Subject::new();
+
+    let tcss = completion_sources(3);
+
+    let res = tasks_of(xs.as_observable(), &tcss).merge_inner::<i32>();
+
+    let received = receive(&res);
+
+    tcss[1].set_result(42);
+
+    xs.on_next(0);
+    xs.on_next(1);
+    xs.on_next(2);
+
+    tcss[0].set_result(43);
+    tcss[2].set_result(44);
+
+    let ex = new_error("ex");
+    xs.on_error(ex.clone());
+
+    assert!(received.error().is_some() || received.completed.get());
+
+    assert!(same_error(&ex, &received.error().unwrap()));
+}
 
 // Not ported: Merge_ArgumentChecking - argument validation
 // Not ported: Merge_DefaultScheduler - blocking operator Single (waived: one thread)
@@ -1053,13 +1294,3 @@ fn merge_concat_inner_error() {
 // Not ported: MergeConcat_Enumerable_Scheduler - blocking operator First (waived: one thread)
 // Not ported: MergeConcat_Enumerable - real threads (DefaultScheduler); blocking operator First (waived: one thread)
 // Not ported: MergeConcat_Default - blocking operator First (waived: one thread)
-// Not ported: Merge_Task - needs async/await (phase 4)
-// Not ported: Merge_TaskWithCompletionSource_RanToCompletion_Async - needs async/await (phase 4)
-// Not ported: Merge_TaskWithCompletionSource_RanToCompletion_Sync - needs async/await (phase 4)
-// Not ported: Merge_TaskWithCompletionSource_Faulted_Async - needs async/await (phase 4)
-// Not ported: Merge_TaskWithCompletionSource_Faulted_Sync - needs async/await (phase 4)
-// Not ported: Merge_TaskWithCompletionSource_Canceled_Async - needs async/await (phase 4)
-// Not ported: Merge_TaskWithCompletionSource_Canceled_Sync - needs async/await (phase 4)
-// Not ported: Merge_TaskWithCompletionSource_InnerCompleteBeforeOuter - needs async/await (phase 4)
-// Not ported: Merge_TaskWithCompletionSource_OuterCompleteBeforeInner - needs async/await (phase 4)
-// Not ported: Merge_Task_OnError - needs async/await (phase 4)

@@ -1,9 +1,12 @@
 //! Ported from `Tests.System.Reactive/Tests/Linq/Observable/SwitchTest.cs` of Rx.NET.
 //! Adapted: the inner sequences of the sequence of sequences are `Rc<dyn IObservable<i32>>` handles
-//! of the test observables.
+//! of the test observables. `Switch` of a sequence of tasks is `switch` (a `Task` is an
+//! `ObservableSource`); `Task.Factory.StartNew` is `tasks::run` and the blocking `Single()` is
+//! `block_on` of `single_async().to_task()`.
 
-use ferroui_reactive::{IObservable, ObservableExt};
+use ferroui_reactive::{IObservable, Observable, ObservableExt};
 use ferroui_reactive_testing::{assert_messages, assert_subscriptions, new_error, ReactiveTest as RT, TestScheduler};
+use ferroui_system::threading::tasks::{block_on, run};
 use std::rc::Rc;
 
 type Inner = Rc<dyn IObservable<i32>>;
@@ -238,5 +241,13 @@ fn switch_inner_completes() {
     assert_subscriptions!(ys1.subscriptions(), RT::subscribe(300, 530));
 }
 
+#[test]
+fn switch_task() {
+    let tss = Observable::to_observable(vec![run(|| Ok(1)), run(|| Ok(2)), run(|| Ok(3))]).switch::<i32>();
+
+    let res = block_on(tss.to_array().single_async().to_task()).unwrap();
+
+    assert!(res.iter().zip(res.iter().skip(1)).map(|(l, r)| r > l).all(|b| b));
+}
+
 // Not ported: Switch_ArgumentChecking - argument validation
-// Not ported: Switch_Task - needs async/await (phase 4)

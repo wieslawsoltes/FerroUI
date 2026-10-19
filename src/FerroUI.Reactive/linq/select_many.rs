@@ -6,13 +6,19 @@
 //! subscribed to as it arrives, its values are forwarded (through the result selector, which keeps
 //! the source value and both indexes), and the result ends when the source and every projected
 //! sequence have ended. The forms that project to iterators share another sink, which iterates
-//! each projection to its end while it handles the source value. The forms on tasks are not
-//! ported (phase 4).
+//! each projection to its end while it handles the source value. The forms that project to tasks
+//! (`TaskSelector._` and `TaskSelectorIndexed._` of both classes) share a third sink: a selector
+//! returns a future, which runs as a task ([`future_as_task`]), and the result of each task is
+//! notified when the task ends (docs/porting/reactive.md, section 5.8).
 
 use crate::disposables::{CompositeDisposable, SingleAssignmentDisposableValue};
 use crate::internal::{unary, OperatorSink, Sink};
+use ferroui_system::threading::tasks::Task;
+use ferroui_system::threading::{CancellationToken, CancellationTokenSource};
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
+use std::collections::HashMap;
+use std::future::Future;
 use std::rc::{Rc, Weak};
 
 /// The projection of the values of one projected sequence to results, with the index of each value
@@ -343,6 +349,186 @@ where
     )
 }
 
+/// A future as the task that runs it: a [`Task`] is used as it is, as upstream uses the task a
+/// function returns (so that the continuations, and the task named by a cancellation, are those of
+/// that task); another future runs as a task of the current thread (`Task::spawn_local`).
+pub(crate) fn future_as_task<T: 'static, Fut: Future<Output = Result<T, ObservableError>> + 'static>(future: Fut) -> Task<T> {
+    let mut slot = Some(future);
+    if let Some(task) = (&mut slot as &mut dyn std::any::Any).downcast_mut::<Option<Task<T>>>() {
+        if let Some(task) = task.take() {
+            return task;
+        }
+    }
+    Task::spawn_local(slot.take().expect("the future is in its slot"))
+}
+
+/// The projection of the result of a task to a result of the sequence (the result selector bound to
+/// the source value and its index, or the identity).
+pub(crate) type TaskProject<C, R> = Box<dyn FnOnce(C) -> Result<R, ObservableError>>;
+
+type TaskSelector<T, C, R> = Rc<dyn Fn(T, usize, CancellationToken) -> Result<(Task<C>, TaskProject<C, R>), ObservableError>>;
+
+/// The sink of the forms on tasks (`SelectMany<TSource, TResult>.TaskSelector._` and
+/// `TaskSelectorIndexed._`, `SelectMany<TSource, TCollection, TResult>.TaskSelector._` and
+/// `TaskSelectorIndexed._`): `count` is one for the source and one for each task that has not ended;
+/// the token given to the selector is cancelled when the sink is disposed, and the continuations
+/// on the tasks that have not ended are removed then (upstream registers them with that token).
+struct SelectManyTaskSink<T, C, R> {
+    this: Weak<SelectManyTaskSink<T, C, R>>,
+    sink: Sink<R>,
+    cancel: CancellationTokenSource,
+    selector: TaskSelector<T, C, R>,
+    count: Cell<usize>,
+    index: Cell<usize>,
+    /// What removes each continuation that has not run, by the number of its task.
+    pending: RefCell<HashMap<usize, Box<dyn FnOnce()>>>,
+}
+
+impl<T: 'static, C: Clone + 'static, R: 'static> SelectManyTaskSink<T, C, R> {
+    /// `OnCompletedTask`.
+    fn on_completed_task(&self, task: &Task<C>, project: TaskProject<C, R>) {
+        match task.result() {
+            Ok(value) => match project(value) {
+                Ok(result) => {
+                    self.sink.forward_on_next(result);
+                    self.on_completed();
+                }
+                Err(error) => self.sink.forward_on_error(error),
+            },
+            // A canceled task is a `TaskCanceledError` naming it, unless the sink cancelled it.
+            Err(error) => {
+                if !(task.is_canceled() && self.cancel.is_cancellation_requested()) {
+                    self.sink.forward_on_error(error);
+                }
+            }
+        }
+    }
+}
+
+impl<T: 'static, C: Clone + 'static, R: 'static> OperatorSink<T, R> for SelectManyTaskSink<T, C, R> {
+    fn sink(&self) -> &Sink<R> {
+        &self.sink
+    }
+}
+
+impl<T: 'static, C: Clone + 'static, R: 'static> IObserver<T> for SelectManyTaskSink<T, C, R> {
+    fn on_next(&self, value: T) {
+        let index = self.index.get();
+        self.index.set(index.wrapping_add(1));
+        self.count.set(self.count.get() + 1);
+        let (task, project) = match (self.selector)(value, index, self.cancel.token()) {
+            Ok(selected) => selected,
+            Err(error) => {
+                self.sink.forward_on_error(error);
+                return;
+            }
+        };
+        if task.is_completed() {
+            self.on_completed_task(&task, project);
+        } else {
+            // The continuation keeps the sink, as upstream's keeps `this`: the source may have
+            // ended and released it while the task runs.
+            let this = self.this.upgrade().expect("the sink is alive while it receives notifications");
+            let continuation = task.continue_with(move |task| {
+                this.pending.borrow_mut().remove(&index);
+                if !this.cancel.is_cancellation_requested() {
+                    this.on_completed_task(task, project);
+                }
+            });
+            if let Some(id) = continuation {
+                let task = task.clone();
+                self.pending.borrow_mut().insert(index, Box::new(move || {
+                    task.remove_continuation(id);
+                }));
+            }
+        }
+    }
+
+    fn on_error(&self, error: ObservableError) {
+        self.sink.forward_on_error(error);
+    }
+
+    fn on_completed(&self) {
+        let count = self.count.get() - 1;
+        self.count.set(count);
+        if count == 0 {
+            self.sink.forward_on_completed();
+        }
+    }
+}
+
+impl<T, C, R: 'static> IDisposable for SelectManyTaskSink<T, C, R> {
+    /// Cancels the token of the selector, then disposes the sink (`Dispose(bool)`).
+    fn dispose(&self) {
+        if !self.sink.is_disposed() {
+            self.cancel.cancel();
+            let pending = std::mem::take(&mut *self.pending.borrow_mut());
+            for (_, remove) in pending {
+                remove();
+            }
+        }
+        self.sink.dispose();
+    }
+}
+
+fn select_many_task_observable<T: 'static, C: Clone + 'static, R: 'static>(
+    source: Rc<dyn IObservable<T>>,
+    selector: TaskSelector<T, C, R>,
+) -> Rc<dyn IObservable<R>> {
+    unary(source, move |observer| {
+        let selector = selector.clone();
+        Rc::new_cyclic(|this| SelectManyTaskSink {
+            this: this.clone(),
+            sink: Sink::new(observer),
+            cancel: CancellationTokenSource::new(),
+            selector,
+            count: Cell::new(1),
+            index: Cell::new(0),
+            pending: RefCell::new(HashMap::new()),
+        })
+    })
+}
+
+/// `SelectMany` to tasks: `selector` projects each source value, with its index and the token
+/// that disposing the subscription cancels, to a future, which runs as a task; the result of each
+/// task is notified when the task ends.
+pub(crate) fn select_many_task<T: 'static, U: Clone + 'static, Fut>(
+    source: Rc<dyn IObservable<T>>,
+    selector: impl Fn(T, usize, CancellationToken) -> Result<Fut, ObservableError> + 'static,
+) -> Rc<dyn IObservable<U>>
+where
+    Fut: Future<Output = Result<U, ObservableError>> + 'static,
+{
+    let selector: TaskSelector<T, U, U> =
+        Rc::new(move |value: T, index: usize, token: CancellationToken| -> Result<(Task<U>, TaskProject<U, U>), ObservableError> {
+            let task = future_as_task(selector(value, index, token)?);
+            let project: TaskProject<U, U> = Box::new(|value| Ok(value));
+            Ok((task, project))
+        });
+    select_many_task_observable(source, selector)
+}
+
+/// `SelectMany` to tasks with a result selector of the source value, its index and the result of
+/// its task.
+pub(crate) fn select_many_task_with<T: Clone + 'static, C: Clone + 'static, R: 'static, Fut>(
+    source: Rc<dyn IObservable<T>>,
+    task_selector: impl Fn(T, usize, CancellationToken) -> Result<Fut, ObservableError> + 'static,
+    result_selector: impl Fn(T, usize, C) -> Result<R, ObservableError> + 'static,
+) -> Rc<dyn IObservable<R>>
+where
+    Fut: Future<Output = Result<C, ObservableError>> + 'static,
+{
+    let result_selector = Rc::new(result_selector);
+    let selector: TaskSelector<T, C, R> =
+        Rc::new(move |value: T, index: usize, token: CancellationToken| -> Result<(Task<C>, TaskProject<C, R>), ObservableError> {
+            let task = future_as_task(task_selector(value.clone(), index, token)?);
+            let result_selector = result_selector.clone();
+            let project: TaskProject<C, R> = Box::new(move |result| result_selector(value, index, result));
+            Ok((task, project))
+        });
+    select_many_task_observable(source, selector)
+}
+
 /// The methods of `SelectMany` (provided methods of [`ObservableExt`](super::ObservableExt)).
 macro_rules! select_many_methods {
     () => {
@@ -644,6 +830,233 @@ macro_rules! select_many_methods {
             I::IntoIter: 'static,
         {
             crate::linq::select_many::select_many_iter_with(self.observable(), collection_selector, result_selector)
+        }
+
+        /// Projects each value to a future, runs it as a task (a `Task` is used as it is), and
+        /// notifies the result of each task when it ends; the sequence ends when the source and
+        /// every task have ended. A task that fails ends the sequence with its error, a canceled
+        /// one with a `TaskCanceledError` naming it (`SelectMany(Func<TSource, Task<TResult>>)`).
+        fn select_many_async<U: Clone + 'static, Fut: std::future::Future<Output = Result<U, ferroui_system::ObservableError>> + 'static>(
+            &self,
+            selector: impl Fn(T) -> Fut + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<U>> {
+            crate::linq::select_many::select_many_task(self.observable(), move |value, _, _| Ok(selector(value)))
+        }
+
+        /// [`select_many_async`](Self::select_many_async) with the index of each value
+        /// (`SelectMany(Func<TSource, int, Task<TResult>>)`).
+        fn select_many_async_with_index<U: Clone + 'static, Fut: std::future::Future<Output = Result<U, ferroui_system::ObservableError>> + 'static>(
+            &self,
+            selector: impl Fn(T, usize) -> Fut + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<U>> {
+            crate::linq::select_many::select_many_task(self.observable(), move |value, index, _| Ok(selector(value, index)))
+        }
+
+        /// [`select_many_async`](Self::select_many_async) with a token that disposing the
+        /// subscription cancels (`SelectMany(Func<TSource, CancellationToken, Task<TResult>>)`).
+        fn select_many_async_with_token<U: Clone + 'static, Fut: std::future::Future<Output = Result<U, ferroui_system::ObservableError>> + 'static>(
+            &self,
+            selector: impl Fn(T, ferroui_system::threading::CancellationToken) -> Fut + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<U>> {
+            crate::linq::select_many::select_many_task(self.observable(), move |value, _, token| Ok(selector(value, token)))
+        }
+
+        /// [`select_many_async`](Self::select_many_async) with the index of each value and a token
+        /// that disposing the subscription cancels (`SelectMany(Func<TSource, int,
+        /// CancellationToken, Task<TResult>>)`).
+        fn select_many_async_with_index_with_token<U: Clone + 'static, Fut: std::future::Future<Output = Result<U, ferroui_system::ObservableError>> + 'static>(
+            &self,
+            selector: impl Fn(T, usize, ferroui_system::threading::CancellationToken) -> Fut + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<U>> {
+            crate::linq::select_many::select_many_task(self.observable(), move |value, index, token| Ok(selector(value, index, token)))
+        }
+
+        /// [`select_many_async`](Self::select_many_async) with a selector that may fail; a failure
+        /// ends the sequence with its error (`SelectMany(Func<TSource, Task<TResult>>)` with a
+        /// selector that throws).
+        fn try_select_many_async<U: Clone + 'static, Fut: std::future::Future<Output = Result<U, ferroui_system::ObservableError>> + 'static>(
+            &self,
+            selector: impl Fn(T) -> Result<Fut, ferroui_system::ObservableError> + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<U>> {
+            crate::linq::select_many::select_many_task(self.observable(), move |value, _, _| selector(value))
+        }
+
+        /// [`select_many_async_with_index`](Self::select_many_async_with_index) with a selector
+        /// that may fail; a failure ends the sequence with its error (`SelectMany(Func<TSource,
+        /// int, Task<TResult>>)` with a selector that throws).
+        fn try_select_many_async_with_index<U: Clone + 'static, Fut: std::future::Future<Output = Result<U, ferroui_system::ObservableError>> + 'static>(
+            &self,
+            selector: impl Fn(T, usize) -> Result<Fut, ferroui_system::ObservableError> + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<U>> {
+            crate::linq::select_many::select_many_task(self.observable(), move |value, index, _| selector(value, index))
+        }
+
+        /// [`select_many_async_with_token`](Self::select_many_async_with_token) with a selector
+        /// that may fail; a failure ends the sequence with its error (`SelectMany(Func<TSource,
+        /// CancellationToken, Task<TResult>>)` with a selector that throws).
+        fn try_select_many_async_with_token<U: Clone + 'static, Fut: std::future::Future<Output = Result<U, ferroui_system::ObservableError>> + 'static>(
+            &self,
+            selector: impl Fn(T, ferroui_system::threading::CancellationToken) -> Result<Fut, ferroui_system::ObservableError> + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<U>> {
+            crate::linq::select_many::select_many_task(self.observable(), move |value, _, token| selector(value, token))
+        }
+
+        /// [`select_many_async_with_index_with_token`](Self::select_many_async_with_index_with_token)
+        /// with a selector that may fail; a failure ends the sequence with its error
+        /// (`SelectMany(Func<TSource, int, CancellationToken, Task<TResult>>)` with a selector that
+        /// throws).
+        fn try_select_many_async_with_index_with_token<U: Clone + 'static, Fut: std::future::Future<Output = Result<U, ferroui_system::ObservableError>> + 'static>(
+            &self,
+            selector: impl Fn(T, usize, ferroui_system::threading::CancellationToken) -> Result<Fut, ferroui_system::ObservableError> + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<U>> {
+            crate::linq::select_many::select_many_task(self.observable(), move |value, index, token| selector(value, index, token))
+        }
+
+        /// Projects each value to a future, runs it as a task, and notifies the result of the
+        /// result selector of the value and the result of its task when the task ends
+        /// (`SelectMany(Func<TSource, Task<TTaskResult>>, Func<TSource, TTaskResult, TResult>)`).
+        fn select_many_async_with<C: Clone + 'static, R: 'static, Fut: std::future::Future<Output = Result<C, ferroui_system::ObservableError>> + 'static>(
+            &self,
+            task_selector: impl Fn(T) -> Fut + 'static,
+            result_selector: impl Fn(T, C) -> R + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<R>>
+        where
+            T: Clone,
+        {
+            crate::linq::select_many::select_many_task_with(
+                self.observable(),
+                move |value, _, _| Ok(task_selector(value)),
+                move |value, _, result| Ok(result_selector(value, result)),
+            )
+        }
+
+        /// [`select_many_async_with`](Self::select_many_async_with) with the index of each value
+        /// (`SelectMany(Func<TSource, int, Task<TTaskResult>>, Func<TSource, int, TTaskResult,
+        /// TResult>)`).
+        fn select_many_async_with_index_with<C: Clone + 'static, R: 'static, Fut: std::future::Future<Output = Result<C, ferroui_system::ObservableError>> + 'static>(
+            &self,
+            task_selector: impl Fn(T, usize) -> Fut + 'static,
+            result_selector: impl Fn(T, usize, C) -> R + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<R>>
+        where
+            T: Clone,
+        {
+            crate::linq::select_many::select_many_task_with(
+                self.observable(),
+                move |value, index, _| Ok(task_selector(value, index)),
+                move |value, index, result| Ok(result_selector(value, index, result)),
+            )
+        }
+
+        /// [`select_many_async_with`](Self::select_many_async_with) with a token that disposing the
+        /// subscription cancels (`SelectMany(Func<TSource, CancellationToken, Task<TTaskResult>>,
+        /// Func<TSource, TTaskResult, TResult>)`).
+        fn select_many_async_with_token_with<C: Clone + 'static, R: 'static, Fut: std::future::Future<Output = Result<C, ferroui_system::ObservableError>> + 'static>(
+            &self,
+            task_selector: impl Fn(T, ferroui_system::threading::CancellationToken) -> Fut + 'static,
+            result_selector: impl Fn(T, C) -> R + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<R>>
+        where
+            T: Clone,
+        {
+            crate::linq::select_many::select_many_task_with(
+                self.observable(),
+                move |value, _, token| Ok(task_selector(value, token)),
+                move |value, _, result| Ok(result_selector(value, result)),
+            )
+        }
+
+        /// [`select_many_async_with`](Self::select_many_async_with) with the index of each value
+        /// and a token that disposing the subscription cancels (`SelectMany(Func<TSource, int,
+        /// CancellationToken, Task<TTaskResult>>, Func<TSource, int, TTaskResult, TResult>)`).
+        fn select_many_async_with_index_with_token_with<C: Clone + 'static, R: 'static, Fut: std::future::Future<Output = Result<C, ferroui_system::ObservableError>> + 'static>(
+            &self,
+            task_selector: impl Fn(T, usize, ferroui_system::threading::CancellationToken) -> Fut + 'static,
+            result_selector: impl Fn(T, usize, C) -> R + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<R>>
+        where
+            T: Clone,
+        {
+            crate::linq::select_many::select_many_task_with(
+                self.observable(),
+                move |value, index, token| Ok(task_selector(value, index, token)),
+                move |value, index, result| Ok(result_selector(value, index, result)),
+            )
+        }
+
+        /// [`select_many_async_with`](Self::select_many_async_with) with selectors that may fail; a
+        /// failure ends the sequence with its error (`SelectMany(Func<TSource, Task<TTaskResult>>,
+        /// Func<TSource, TTaskResult, TResult>)` with selectors that throw).
+        fn try_select_many_async_with<C: Clone + 'static, R: 'static, Fut: std::future::Future<Output = Result<C, ferroui_system::ObservableError>> + 'static>(
+            &self,
+            task_selector: impl Fn(T) -> Result<Fut, ferroui_system::ObservableError> + 'static,
+            result_selector: impl Fn(T, C) -> Result<R, ferroui_system::ObservableError> + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<R>>
+        where
+            T: Clone,
+        {
+            crate::linq::select_many::select_many_task_with(
+                self.observable(),
+                move |value, _, _| task_selector(value),
+                move |value, _, result| result_selector(value, result),
+            )
+        }
+
+        /// [`select_many_async_with_index_with`](Self::select_many_async_with_index_with) with
+        /// selectors that may fail; a failure ends the sequence with its error
+        /// (`SelectMany(Func<TSource, int, Task<TTaskResult>>, Func<TSource, int, TTaskResult,
+        /// TResult>)` with selectors that throw).
+        fn try_select_many_async_with_index_with<C: Clone + 'static, R: 'static, Fut: std::future::Future<Output = Result<C, ferroui_system::ObservableError>> + 'static>(
+            &self,
+            task_selector: impl Fn(T, usize) -> Result<Fut, ferroui_system::ObservableError> + 'static,
+            result_selector: impl Fn(T, usize, C) -> Result<R, ferroui_system::ObservableError> + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<R>>
+        where
+            T: Clone,
+        {
+            crate::linq::select_many::select_many_task_with(
+                self.observable(),
+                move |value, index, _| task_selector(value, index),
+                move |value, index, result| result_selector(value, index, result),
+            )
+        }
+
+        /// [`select_many_async_with_token_with`](Self::select_many_async_with_token_with) with
+        /// selectors that may fail; a failure ends the sequence with its error
+        /// (`SelectMany(Func<TSource, CancellationToken, Task<TTaskResult>>, Func<TSource,
+        /// TTaskResult, TResult>)` with selectors that throw).
+        fn try_select_many_async_with_token_with<C: Clone + 'static, R: 'static, Fut: std::future::Future<Output = Result<C, ferroui_system::ObservableError>> + 'static>(
+            &self,
+            task_selector: impl Fn(T, ferroui_system::threading::CancellationToken) -> Result<Fut, ferroui_system::ObservableError> + 'static,
+            result_selector: impl Fn(T, C) -> Result<R, ferroui_system::ObservableError> + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<R>>
+        where
+            T: Clone,
+        {
+            crate::linq::select_many::select_many_task_with(
+                self.observable(),
+                move |value, _, token| task_selector(value, token),
+                move |value, _, result| result_selector(value, result),
+            )
+        }
+
+        /// [`select_many_async_with_index_with_token_with`](Self::select_many_async_with_index_with_token_with)
+        /// with selectors that may fail; a failure ends the sequence with its error
+        /// (`SelectMany(Func<TSource, int, CancellationToken, Task<TTaskResult>>, Func<TSource,
+        /// int, TTaskResult, TResult>)` with selectors that throw).
+        fn try_select_many_async_with_index_with_token_with<C: Clone + 'static, R: 'static, Fut: std::future::Future<Output = Result<C, ferroui_system::ObservableError>> + 'static>(
+            &self,
+            task_selector: impl Fn(T, usize, ferroui_system::threading::CancellationToken) -> Result<Fut, ferroui_system::ObservableError> + 'static,
+            result_selector: impl Fn(T, usize, C) -> Result<R, ferroui_system::ObservableError> + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<R>>
+        where
+            T: Clone,
+        {
+            crate::linq::select_many::select_many_task_with(
+                self.observable(),
+                move |value, index, token| task_selector(value, index, token),
+                move |value, index, result| result_selector(value, index, result),
+            )
         }
     };
 }
