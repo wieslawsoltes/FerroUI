@@ -1,0 +1,28 @@
+//! `AutoRefreshOnObservable` (`List/ObservableListEx.AutoRefreshOnObservable.cs`).
+
+macro_rules! auto_refresh_on_observable_methods {
+    () => {
+        /// The changes, with a refresh of an item whenever the sequence `reevaluator` makes for it
+        /// produces a value, so that the operators downstream evaluate it again
+        /// (`AutoRefreshOnObservable(Func<TObject, IObservable<TAny>>)`).
+        fn auto_refresh_on_observable<A: 'static>(
+            &self,
+            reevaluator: impl Fn(&T) -> std::rc::Rc<dyn ferroui_system::IObservable<A>> + 'static,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<crate::list::ChangeSet<T>>> {
+            self.auto_refresh_on_observable_with(reevaluator, None, None)
+        }
+
+        /// [`auto_refresh_on_observable`](Self::auto_refresh_on_observable) that gathers the
+        /// refreshes of each `change_set_buffer` into one change set, on `scheduler`
+        /// (`AutoRefreshOnObservable(Func<TObject, IObservable<TAny>>, TimeSpan? changeSetBuffer, IScheduler? scheduler)`).
+        fn auto_refresh_on_observable_with<A: 'static>(
+            &self,
+            reevaluator: impl Fn(&T) -> std::rc::Rc<dyn ferroui_system::IObservable<A>> + 'static,
+            change_set_buffer: Option<std::time::Duration>,
+            scheduler: Option<std::rc::Rc<dyn ferroui_reactive::concurrency::IScheduler>>,
+        ) -> std::rc::Rc<dyn ferroui_system::IObservable<crate::list::ChangeSet<T>>> {
+            crate::list::internal::auto_refresh(self.change_sets(), std::rc::Rc::new(reevaluator), change_set_buffer, scheduler)
+        }
+    };
+}
+pub(crate) use auto_refresh_on_observable_methods;

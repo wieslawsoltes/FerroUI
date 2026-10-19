@@ -72,10 +72,6 @@ impl<T: Clone + PartialEq> ChangeAwareList<T> {
         Self { inner: Vec::new(), changes: Vec::new(), hooks: Some(hooks) }
     }
 
-    pub(crate) fn hooks(&self) -> Option<&dyn ChangeAwareListHooks<T>> {
-        self.hooks.as_deref()
-    }
-
     /// The number of items (`Count`).
     pub fn count(&self) -> usize {
         self.inner.len()
@@ -206,11 +202,6 @@ impl<T: Clone + PartialEq> ChangeAwareList<T> {
         assert!(index <= self.inner.len(), "index cannot be greater than the size of the collection");
         let item = self.inner[index].clone();
         self.remove_item(index, item);
-    }
-
-    /// Forgets the changes (`ClearChanges`).
-    pub(crate) fn clear_changes(&mut self) {
-        self.changes.clear();
     }
 
     /// Inserts with the batching of consecutive insertions into a range (`InsertItem`).

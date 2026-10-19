@@ -5,3 +5,5 @@ mod binding;
 mod cache;
 mod kernel;
 mod list;
+mod auto_refresh_filter;
+mod observable_collection_ex_fixture;

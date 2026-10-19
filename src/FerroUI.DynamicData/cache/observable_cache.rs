@@ -255,20 +255,27 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> Inner<T, K> {
                 subject.on_next(true);
             }
         }
-        // An edit that panics still brings the level down (`finally`); what else the `finally`
-        // does runs on the normal path below, in upstream's order.
-        struct Unwind<'a> {
-            level: &'a Cell<usize>,
+        // An edit that panics still runs upstream's `finally`: the level comes down and, at the
+        // outermost edit, the edit is no longer in progress (no changes are enqueued: none were
+        // captured). The normal path below runs the same steps in upstream's order.
+        struct Unwind<'a, T: Clone + 'static, K: Eq + Hash + Clone + 'static> {
+            inner: &'a Inner<T, K>,
             armed: bool,
         }
-        impl Drop for Unwind<'_> {
+        impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> Drop for Unwind<'_, T, K> {
             fn drop(&mut self) {
                 if self.armed {
-                    self.level.set(self.level.get() - 1);
+                    let level = self.inner.edit_level.get() - 1;
+                    self.inner.edit_level.set(level);
+                    if level == 0 {
+                        if let Some(subject) = self.inner.edit_in_progress_subject() {
+                            subject.on_next(false);
+                        }
+                    }
                 }
             }
         }
-        let mut unwind = Unwind { level: &self.edit_level, armed: true };
+        let mut unwind = Unwind { inner: self, armed: true };
         let changes = if level == 1 {
             let preview_handler = self.preview_handler();
             Some(self.reader_writer.write(update, preview_handler.as_ref().map(|h| h as &dyn Fn(&ChangeSet<T, K>)), self.changes.has_observers()))

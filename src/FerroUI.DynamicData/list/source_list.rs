@@ -147,16 +147,24 @@ impl<T: Clone + PartialEq + 'static> Inner<T> {
                 subject.on_next(true);
             }
         }
-        // The inner `finally`: the level comes down however the edit ends.
-        struct Level<'a>(&'a Cell<usize>, bool);
-        impl Drop for Level<'_> {
+        // An edit that panics still runs upstream's two `finally` blocks: the level comes down
+        // and, at the outermost edit, the edit is no longer in progress. The normal path below
+        // runs the same steps.
+        struct Level<'a, T: Clone + PartialEq + 'static>(&'a Inner<T>, bool);
+        impl<T: Clone + PartialEq + 'static> Drop for Level<'_, T> {
             fn drop(&mut self) {
                 if self.1 {
-                    self.0.set(self.0.get() - 1);
+                    let level = self.0.edit_level.get() - 1;
+                    self.0.edit_level.set(level);
+                    if level == 0 {
+                        if let Some(subject) = self.0.edit_in_progress_subject() {
+                            subject.on_next(false);
+                        }
+                    }
                 }
             }
         }
-        let mut guard = Level(&self.edit_level, true);
+        let mut guard = Level(self, true);
         let changes = if level == 1 {
             if self.changes_preview.has_observers() {
                 let this = self.this.clone();

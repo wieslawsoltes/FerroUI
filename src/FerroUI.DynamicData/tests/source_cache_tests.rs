@@ -97,3 +97,20 @@ fn filter_follows_refreshes_and_updates() {
     cache.edit(|u| u.add_or_update((1, false)));
     assert_eq!(*log.borrow(), vec![vec![(ChangeReason::Add, 1)], vec![(ChangeReason::Add, 2)], vec![(ChangeReason::Remove, 1)]]);
 }
+
+#[test]
+fn a_panicking_edit_ends_the_edit_for_deferred_connections() {
+    let cache = SourceCache::new(|x: &i32| *x);
+    // A connection during an edit makes the subject of edits in progress exist.
+    let c = cache.clone();
+    let slot = Rc::new(RefCell::new(None));
+    let s = slot.clone();
+    cache.edit(move |_| *s.borrow_mut() = Some(record(&c.connect())));
+    let c = cache.clone();
+    let failed = std::panic::catch_unwind(std::panic::AssertUnwindSafe(move || c.edit(|_| panic!("Test"))));
+    assert!(failed.is_err());
+    // A later connection is made at once, not deferred for ever.
+    cache.edit(|u| u.add_or_update(1));
+    let (log, _subscription) = record(&cache.connect());
+    assert_eq!(*log.borrow(), vec![vec![(ChangeReason::Add, 1)]]);
+}

@@ -22,3 +22,12 @@ pub use cache::{
 
 #[cfg(test)]
 mod tests;
+mod as_disposable;
+pub use as_disposable::*;
+mod dynamic_data_options;
+pub use dynamic_data_options::*;
+mod enumerable_ex;
+pub use enumerable_ex::*;
+pub mod kernel;
+mod observable_items_ex;
+pub use observable_items_ex::*;

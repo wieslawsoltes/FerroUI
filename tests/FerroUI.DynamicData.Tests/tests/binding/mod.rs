@@ -1,2 +1,23 @@
 //! `DynamicData.Tests/Binding`: the tests of the binding operators and of the objects that notify
 //! their changes.
+mod deeply_nested_notify_property_changed_fixture;
+mod i_observable_list_bind_cache_fixture;
+mod i_observable_list_bind_cache_sorted_fixture;
+mod i_observable_list_bind_list_fixture;
+mod notify_property_changed_ex_fixture;
+mod observable_collection_bind_cache_fixture;
+mod observable_collection_bind_cache_sorted_fixture;
+mod observable_collection_bind_list_fixture;
+mod observable_collection_extended_to_change_set_fixture;
+mod observable_collection_to_change_set_fixture;
+mod read_only_observable_collection_to_change_set_fixture;
+mod readonly_collection_bind_cache_fixture;
+mod when_property_changed_fixture;
+mod when_property_changed_fixture_integration_tests;
+mod when_property_changed_fixture_integration_tests_deep_chain;
+mod when_property_changed_fixture_integration_tests_shallow;
+mod when_property_changed_fixture_unit_tests;
+mod when_property_changed_fixture_unit_tests_conversions;
+mod when_property_changed_fixture_unit_tests_deep_chain;
+mod when_property_changed_fixture_unit_tests_shallow;
+mod when_property_changed_fixture_unit_tests_subscription;

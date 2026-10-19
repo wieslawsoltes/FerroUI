@@ -41,7 +41,4 @@ impl<T> ItemChange<T> {
         self.previous_index
     }
 
-    pub(crate) fn set_current_index(&mut self, index: Option<usize>) {
-        self.current_index = index;
-    }
 }

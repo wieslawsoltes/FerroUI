@@ -1,4 +1,4 @@
-use crate::list::{ChangeSet, IList, IObservableList, ListChangeReason, SourceList};
+use crate::list::{ChangeSet, IObservableList, ListChangeReason, SourceList};
 use ferroui_reactive::ObservableExt;
 use std::cell::RefCell;
 use std::rc::Rc;
