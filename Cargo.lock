@@ -922,6 +922,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-remote-protocol",
+ "ferroui-system",
  "rustc-hash 2.1.3",
 ]
 

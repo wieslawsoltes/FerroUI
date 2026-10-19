@@ -23,6 +23,9 @@ path = "lib.rs"
 # The hasher of identity-keyed maps on hot paths (the anchor candidates of a scroll presenter).
 rustc-hash = { workspace = true }
 ferroui-base.workspace = true
+# The `ObservableCollection` of the base class library subset, which an items control reads
+# (`items_source.rs`).
+ferroui-system = { workspace = true }
 # The messages and the connections of remote rendering (`remote`).
 ferroui-remote-protocol.workspace = true
 bitflags.workspace = true

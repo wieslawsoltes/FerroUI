@@ -402,7 +402,7 @@ A fixed predicate is `filter(|item| ...)`; `sort` and `sort_by` sort without bin
 let remove_feature = ReactiveCommand::create_param(move |key: i32| removed_from.remove_key(key));
 ```
 
-`auto_refresh` takes a property path, as `AutoRefresh(x => x.IsFavourite)` takes an expression, and re-evaluates the filter and the sort when that property of an item changes. The items controls of FerroUI read an `IItemsList`; the example hands them the bound collection through a small adapter (`samples/ReactiveUIExample/Views/observable_collection_items.rs`).
+`auto_refresh` takes a property path, as `AutoRefresh(x => x.IsFavourite)` takes an expression, and re-evaluates the filter and the sort when that property of an item changes. An `ObservableCollection` of `ferroui-system` is an items source of the controls, as an `ObservableCollection<T>` is in .NET: the example sets `ItemsSource::new(Rc::new(items.collection().clone()))` on its list, and the list follows the changes `sort_and_bind` makes.
 
 ## 9. Threading
 

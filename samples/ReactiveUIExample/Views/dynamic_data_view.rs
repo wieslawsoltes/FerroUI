@@ -6,11 +6,10 @@
 //! with `OneWayBind`, and the command that adds a feature with `BindCommand`, inside its activation.
 
 use super::bindable_view::{element_control, element_property, owned_element_property, BindableView};
-use super::observable_collection_items::ObservableCollectionItems;
 use crate::markup::{reactive_user_control_class, xaml_class};
 use crate::view_models::{DynamicDataViewModel, FeatureItemViewModel};
 use ferroui_base::{ferro_class_info, instantiate, Ref};
-use ferroui_controls::{Button, ItemsControl, ListBox, TextBox};
+use ferroui_controls::{Button, ItemsControl, ItemsSource, ListBox, TextBox};
 use ferroui_dynamic_data::binding::ObservableCollectionExtended;
 use ferroui_reactive::disposables::CompositeDisposable;
 use ferroui_reactiveui::{settable_prop, BindCommandMixins, IViewForOf, PropertyBindingMixins, ViewForMixins};
@@ -128,7 +127,7 @@ impl DynamicDataView {
                 none,
                 prop!(DynamicDataViewModel => items),
                 owned_element_property("FeatureList", &list, ferro_prop!(ItemsControl => items_source), |items, value| items.set_items_source(value)),
-                |items: ObservableCollectionExtended<Rc<FeatureItemViewModel>>| Some(ObservableCollectionItems::items_source(items)),
+                |items: ObservableCollectionExtended<Rc<FeatureItemViewModel>>| Some(ItemsSource::new(Rc::new(items.collection().clone()))),
             )
             .map(|binding| binding as Rc<dyn IDisposable>));
 

@@ -617,6 +617,55 @@ impl<T: PropertyValue> IItemsList for BindableList<T> {
     }
 }
 
+/// The `ObservableCollection<T>` of `ferroui-system` as the items of an items control, as an
+/// `ObservableCollection<T>` is an `IList` with `INotifyCollectionChanged` that an items control
+/// of .NET reads directly: the collections that the reactive libraries fill (DynamicData's
+/// `ObservableCollectionExtended::collection()`, ReactiveUI's routing stack) are items sources.
+impl<T: PropertyValue> IItemsList for ferroui_system::collections::object_model::ObservableCollection<T> {
+    fn count(&self) -> usize {
+        ferroui_system::collections::object_model::ObservableCollection::count(self)
+    }
+
+    fn get_at(&self, index: usize) -> Option<BoxedValue> {
+        box_item(&self.get(index))
+    }
+
+    fn index_of(&self, item: &Option<BoxedValue>) -> i32 {
+        (0..ferroui_system::collections::object_model::ObservableCollection::count(self))
+            .position(|index| item_equals_typed(item, &self.get(index)))
+            .map_or(-1, |index| index as i32)
+    }
+
+    fn is_notifying(&self) -> bool {
+        true
+    }
+
+    fn add_collection_changed(&self, handler: Rc<ItemsChangedHandler>) -> Option<u64> {
+        Some(ferroui_system::collections::object_model::ObservableCollection::add_collection_changed(
+            self,
+            Rc::new(move |e: &ferroui_system::collections::specialized::NotifyCollectionChangedEventArgs<'_, T>| {
+                let new_items = TypedItems(e.new_items);
+                let old_items = TypedItems(e.old_items);
+                handler(&ItemsChangedEventArgs {
+                    action: e.action,
+                    new_items: ItemsView::from_typed(&new_items),
+                    old_items: ItemsView::from_typed(&old_items),
+                    new_starting_index: e.new_starting_index,
+                    old_starting_index: e.old_starting_index,
+                });
+            }),
+        ))
+    }
+
+    fn remove_collection_changed(&self, token: u64) {
+        let _ = ferroui_system::collections::object_model::ObservableCollection::remove_collection_changed(self, token);
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
 /// A shared handle to an untyped items list: the value of an items source
 /// property.
 ///

@@ -1,7 +1,6 @@
 //! The views of the example (namespace `ReactiveUIExample.Views`): one class per reference view,
 //! each with its document, the view of the DynamicData page (an addition of the port), and what the
-//! port adds for the bindings of the views ([`BindableView`]) and for the list of the DynamicData
-//! page ([`ObservableCollectionItems`]).
+//! port adds for the bindings of the views ([`BindableView`]).
 
 use crate::markup::XamlClass;
 use ferroui_base::metadata::MarkupType;
@@ -15,7 +14,6 @@ mod main_view;
 mod main_window;
 mod memory_metric_card_view;
 mod metrics_view;
-mod observable_collection_items;
 mod overview_view;
 mod performance_metric_card_view;
 
@@ -27,7 +25,6 @@ pub use main_view::MainView;
 pub use main_window::MainWindow;
 pub use memory_metric_card_view::MemoryMetricCardView;
 pub use metrics_view::MetricsView;
-pub use observable_collection_items::ObservableCollectionItems;
 pub use overview_view::OverviewView;
 pub use performance_metric_card_view::PerformanceMetricCardView;
 
