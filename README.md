@@ -314,6 +314,14 @@ Views can be written in XAML. FerroUI uses its own XML namespace:
 </Window>
 ```
 
+### MVVM with ReactiveUI
+
+FerroUI has ports of System.Reactive, DynamicData, Splat and ReactiveUI, one crate each, and an integration of ReactiveUI with the controls (`ferroui-reactiveui-controls`) that is set up with `use_reactive_ui` on the application builder. Only the integration depends on the user interface, so view models can be tested without a window. The guide [docs/mvvm.md](docs/mvvm.md) covers view models, property paths, commands, views, routing, reactive collections, threading and testing, with the two samples, `samples/ReactiveDemo` and `samples/ReactiveUIExample`.
+
+| ReactiveDemo | The DynamicData page of the ReactiveUI example |
+|---|---|
+| ![ReactiveDemo, the getting-started sample of ReactiveUI, with the WinUI 3 theme on macOS](docs/porting/images/reactive_demo_winui_macos.png) | ![The DynamicData page of the ReactiveUI example: a searchable list of features with favourites sorted first](docs/porting/images/reactiveui_example_dynamicdata_winui_macos.png) |
+
 ## Repository layout
 
 The layout follows the upstream project so that files can be compared side by side; the crate of each directory is in the table of crates above.
@@ -335,6 +343,7 @@ The layout follows the upstream project so that files can be compared side by si
 - [Tracking](docs/porting/TRACKING.md) and [what is left](docs/porting/REMAINING.md): generated per-file, per-type and per-member status.
 - [Deviations](docs/porting/DEVIATIONS.md): every place where the port differs from upstream, and why.
 - [XAML design](docs/porting/xaml.md): the markup pipeline, the run-time loader and the compiler of markup to Rust.
+- [MVVM on FerroUI](docs/mvvm.md): ReactiveUI, DynamicData and System.Reactive on FerroUI, with the samples ReactiveDemo and ReactiveUIExample.
 - Platforms: [Windows](docs/porting/win32-platform.md), [WinUI](docs/porting/winui.md), [Linux on X11](docs/porting/x11-platform.md) with [AT-SPI](docs/porting/atspi.md), [Wayland](docs/porting/wayland-platform.md), [Linux framebuffer](docs/porting/linux-framebuffer-platform.md), [OpenGL on macOS and iOS](docs/porting/apple-opengl.md), [iOS](docs/porting/ios-platform.md), [Android](docs/porting/android-platform.md), [browser](docs/porting/browser-platform.md) with its [render worker](docs/porting/browser-render-worker.md), [headless VNC](docs/porting/headless-vnc.md), [Vulkan](docs/porting/vulkan.md).
 - Rendering: [render thread](docs/porting/render-thread.md), [Vello backend](docs/porting/vello-backend.md), [render tests](docs/porting/render-tests.md).
 - [Releasing](docs/release.md): the published crates, the version scheme and the release workflow; [changelog](CHANGELOG.md).

@@ -14,7 +14,7 @@ use std::rc::Rc;
 /// so that `vm.when_any_value(prop!(VM => name))` works.
 ///
 /// The paths are one argument: one [`PropertyPath`](ferroui_system::component_model::PropertyPath)
-/// or a tuple of 2 to 12 ([`WhenAnyPaths`]). The observation holds the object weakly.
+/// or a tuple of 2 to 16 ([`WhenAnyPaths`]). The observation holds the object weakly.
 pub trait ReactiveUIBindingExtensions<T: 'static> {
     /// The object observed.
     #[doc(hidden)]
