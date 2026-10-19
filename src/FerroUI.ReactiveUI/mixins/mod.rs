@@ -14,6 +14,6 @@ pub use switch_subscribe_mixins::{SwitchSource, SwitchSubscribeMixins};
 pub(crate) mod auto_persist_helper_mixins;
 pub(crate) mod auto_persist_helper_mixins_metadata;
 pub(crate) mod auto_persist_helper_mixins_persistence;
-pub use auto_persist_helper_mixins::{AutoPersistCollectionMixins, AutoPersistHelperMixins, DataContract};
+pub use auto_persist_helper_mixins::{AutoPersistChangeSetMixins, AutoPersistCollectionMixins, AutoPersistHelperMixins, DataContract};
 pub use auto_persist_helper_mixins_metadata::AutoPersistMetadataMixins;
 pub use auto_persist_helper_mixins_persistence::{AutoPersistCollectionMetadataMixins, AutoPersistMetadata, MetadataProvider, PersistFunction};

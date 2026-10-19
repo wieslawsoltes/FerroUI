@@ -2,9 +2,9 @@
 //! for the objects and collections whose type declares its persisted properties, and
 //! `ActOnEveryObject`.
 
-use super::auto_persist_helper_mixins_persistence::{act_on_every_object, start_auto_persist, track_per_item_persistence, AutoPersistMetadata, PersistFunction, DEFAULT_AUTO_PERSIST_INTERVAL};
-use crate::IReactiveObject;
-use ferroui_reactive::Observable;
+use super::auto_persist_helper_mixins_persistence::{act_on_every_object, apply_change, start_auto_persist, track_per_item_persistence, AutoPersistMetadata, PersistFunction, DEFAULT_AUTO_PERSIST_INTERVAL};
+use crate::{IReactiveObject, ReactiveChangeSet};
+use ferroui_reactive::{Observable, Observer};
 use ferroui_system::collections::object_model::ObservableCollection;
 use ferroui_system::{IDisposable, IObservable};
 use std::rc::Rc;
@@ -123,6 +123,59 @@ impl<T: IReactiveObject> AutoPersistHelperMixins<T> for Rc<T> {
     }
 }
 
+/// `ActOnEveryObject` of a stream of change sets (the extension members of
+/// `IObservable<IReactiveChangeSet<TItem>>` in `AutoPersistHelperMixins`).
+///
+/// ```
+/// use ferroui_reactive::subjects::Subject;
+/// use ferroui_reactiveui::{reactive_object, AutoPersistChangeSetMixins, ReactiveChange, ReactiveChangeReason, ReactiveChangeSet, ReactiveObject};
+/// use ferroui_system::IObserver;
+/// use std::cell::Cell;
+/// use std::rc::Rc;
+///
+/// #[derive(Default)]
+/// pub struct Item {
+///     reactive: ReactiveObject,
+/// }
+/// reactive_object!(Item);
+///
+/// let change_sets = Subject::<ReactiveChangeSet<Rc<Item>>>::new();
+/// let adds = Rc::new(Cell::new(0));
+/// let added = adds.clone();
+/// let subscription = change_sets.as_observable().act_on_every_object(move |_| added.set(added.get() + 1), |_| {});
+///
+/// let item = Rc::new(Item::default());
+/// change_sets.on_next(ReactiveChangeSet::new(vec![ReactiveChange::new(ReactiveChangeReason::Add, item, None, 0, -1)]));
+/// assert_eq!(adds.get(), 1);
+/// subscription.dispose();
+/// ```
+// Deviation (DEVIATIONS.md, ReactiveUI): the stream carries `ReactiveChangeSet<Rc<TItem>>`, the type
+// the change sets of the port flow as, where upstream's carries the interface
+// `IReactiveChangeSet<TItem>`; the method is on a trait of its own (Rust has no overloading by the
+// receiver of an extension).
+pub trait AutoPersistChangeSetMixins<T: IReactiveObject> {
+    /// Calls `on_add` for each item added and `on_remove` for each item removed by the change sets
+    /// of the stream: a replacement removes the replaced item and adds the new one, a refresh
+    /// removes the item and adds it again, and a move does nothing. The errors and the end of the
+    /// stream are ignored. Disposing the result stops watching (`ActOnEveryObject(Action<TItem>,
+    /// Action<TItem>)`).
+    fn act_on_every_object(&self, on_add: impl Fn(Rc<T>) + 'static, on_remove: impl Fn(Rc<T>) + 'static) -> Rc<dyn IDisposable>;
+}
+
+impl<T: IReactiveObject> AutoPersistChangeSetMixins<T> for Rc<dyn IObservable<ReactiveChangeSet<Rc<T>>>> {
+    fn act_on_every_object(&self, on_add: impl Fn(Rc<T>) + 'static, on_remove: impl Fn(Rc<T>) + 'static) -> Rc<dyn IDisposable> {
+        self.subscribe(Observer::create_all(
+            move |change_set: ReactiveChangeSet<Rc<T>>| {
+                for change in &change_set {
+                    apply_change(change, &on_add, &on_remove);
+                }
+            },
+            |_| {},
+            || {},
+        ))
+    }
+}
+
 /// AutoPersist for each item of a collection, and `ActOnEveryObject` (the extension members of
 /// `ObservableCollection<TItem>` in `AutoPersistHelperMixins`): an item is saved while it is in
 /// the collection, and no longer after it was removed.
@@ -137,9 +190,9 @@ impl<T: IReactiveObject> AutoPersistHelperMixins<T> for Rc<T> {
 /// The overloads with explicit metadata are those of
 /// [`AutoPersistCollectionMetadataMixins`](crate::AutoPersistCollectionMetadataMixins).
 // Deviation (DEVIATIONS.md, ReactiveUI): the overloads of `ReadOnlyObservableCollection<TItem>`
-// are not ported (`ferroui-system` has no such collection), and `ActOnEveryObject` of an
-// `IObservable<IReactiveChangeSet<TItem>>` is not ported in this module (it needs the change sets
-// of `ChangeSets/`); `ActOnEveryObject` of a collection follows its typed change notification.
+// are not ported (`ferroui-system` has no such collection); `ActOnEveryObject` of a collection
+// follows its typed change notification. `ActOnEveryObject` of an
+// `IObservable<IReactiveChangeSet<TItem>>` is [`AutoPersistChangeSetMixins`].
 pub trait AutoPersistCollectionMixins<T: IReactiveObject> {
     /// Persists each item with the default interval (`AutoPersistCollection(Func)`).
     fn auto_persist_collection(&self, do_persist: impl Fn(Rc<T>) -> Rc<dyn IObservable<()>> + 'static) -> Rc<dyn IDisposable>

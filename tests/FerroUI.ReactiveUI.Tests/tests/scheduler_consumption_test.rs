@@ -70,7 +70,21 @@ impl ExampleViewModel {
     }
 }
 
-// Not ported: ReactivePropertyFactoryMethodsWork - needs ReactiveProperty (reactive properties, a later wave)
+#[test]
+fn reactive_property_factory_methods_work() {
+    const EXPECTED_VALUE: i32 = 42;
+
+    // These factory methods use RxSchedulers internally. Upstream's `Create` factories are the
+    // constructors `new`, `with_value` and `with_options`; its nullable `string` is an
+    // `Option<String>`.
+    let prop1 = ReactiveProperty::<Option<String>>::new();
+    let prop2 = ReactiveProperty::<Option<String>>::with_value(Some("initial".to_owned()));
+    let prop3 = ReactiveProperty::<i32>::with_options(EXPECTED_VALUE, false, true);
+
+    assert_eq!(prop1.value(), None);
+    assert_eq!(prop2.value().as_deref(), Some("initial"));
+    assert_eq!(prop3.value(), EXPECTED_VALUE);
+}
 
 #[test]
 fn repository_can_use_schedulers_without_attributes() {

@@ -164,3 +164,7 @@ pub use recording_synchronization_context::RecordingSynchronizationContext;
 pub use stub_view_thread_invoker::StubViewThreadInvoker;
 pub use stub_binding_type_converter::StubBindingTypeConverter;
 pub use stub_fallback_converter::StubFallbackConverter;
+mod click_command_binder;
+mod dispatch_stub_control;
+pub use click_command_binder::ClickCommandBinder;
+pub use dispatch_stub_control::DispatchStubControl;

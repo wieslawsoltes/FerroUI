@@ -1,8 +1,9 @@
 //! `DispatchStubView` (`TestModels/DispatchStubView.cs`).
 //!
-//! The controls of the command bindings (`Control`, `Surface`) are left out: the tests that use
-//! them belong to the command binding.
+//! `Surface`, the control no registered command binder reaches, is left out: only the tests of
+//! `RuntimeCommandBindingFallback` (not ported, `Fallback/`) use it.
 
+use super::DispatchStubControl;
 use ferroui_reactiveui::{IActivatableView, IViewFor};
 use ferroui_system::component_model::INotifyPropertyChanged;
 use ferroui_system::events::Event;
@@ -13,6 +14,7 @@ use std::rc::Rc;
 /// A view that names no type of view model, whose `Caption` raises `PropertyChanged` on every
 /// write (`DispatchStubView`). Its view model does not notify.
 pub struct DispatchStubView {
+    control: Rc<DispatchStubControl>,
     caption: RefCell<String>,
     view_model: RefCell<Option<Rc<dyn Any>>>,
     property_changed: Event<str>,
@@ -22,7 +24,7 @@ pub struct DispatchStubView {
 impl DispatchStubView {
     /// The view with the caption `"a"`.
     pub fn new() -> Rc<Self> {
-        Rc::new(Self { caption: RefCell::new("a".to_string()), view_model: RefCell::new(None), property_changed: Event::new() })
+        Rc::new(Self { control: Rc::new(DispatchStubControl::new()), caption: RefCell::new("a".to_string()), view_model: RefCell::new(None), property_changed: Event::new() })
     }
 
     /// The view with `caption`.
@@ -30,6 +32,11 @@ impl DispatchStubView {
         let view = Self::new();
         *view.caption.borrow_mut() = caption.to_string();
         view
+    }
+
+    /// The control a command binding names (`Control`).
+    pub fn control(&self) -> Rc<DispatchStubControl> {
+        self.control.clone()
     }
 
     pub fn caption(&self) -> String {

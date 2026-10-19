@@ -3,7 +3,7 @@
 //! metadata, and the driver that saves an object.
 
 use super::auto_persist_helper_mixins::DataContract;
-use crate::{IReactiveNotifyPropertyChanged, IReactiveObject, ReactivePropertyChangedEventArgs, RxSchedulers};
+use crate::{IReactiveNotifyPropertyChanged, IReactiveObject, ReactiveChange, ReactiveChangeReason, ReactivePropertyChangedEventArgs, RxSchedulers};
 use ferroui_reactive::concurrency::IScheduler;
 use ferroui_reactive::disposables::{Disposable, ICancelable, SerialDisposable, SingleAssignmentDisposable};
 use ferroui_reactive::Observer;
@@ -282,6 +282,29 @@ pub(crate) fn act_on_every_object<T: Clone + PartialEq + 'static>(
             on_remove(item);
         }
     })
+}
+
+/// Calls `on_add` and `on_remove` for one change of a change set (`ApplyChange`): an addition adds
+/// the item, a removal removes it, a replacement removes the replaced item (when there is one) and
+/// adds the new one, and a refresh removes the item and adds it again.
+pub(crate) fn apply_change<T: Clone>(change: &ReactiveChange<T>, on_add: &dyn Fn(T), on_remove: &dyn Fn(T)) {
+    match change.reason() {
+        ReactiveChangeReason::Add => on_add(change.current().clone()),
+        ReactiveChangeReason::Remove => on_remove(change.current().clone()),
+        ReactiveChangeReason::Replace => {
+            if let Some(previous) = change.previous() {
+                on_remove(previous.clone());
+            }
+            on_add(change.current().clone());
+        }
+        ReactiveChangeReason::Refresh => {
+            on_remove(change.current().clone());
+            on_add(change.current().clone());
+        }
+        // Any other change reason is intentionally ignored: AutoPersistCollection only tracks
+        // item add/remove/replace/refresh for per-item persistence wiring.
+        ReactiveChangeReason::Move => {}
+    }
 }
 
 /// Starts tracking each item of the collection once, and stops tracking it when it is removed

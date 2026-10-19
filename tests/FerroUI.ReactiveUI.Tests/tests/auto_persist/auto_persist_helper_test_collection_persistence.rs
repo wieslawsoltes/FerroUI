@@ -7,8 +7,8 @@ use ferroui_reactive::subjects::Subject;
 use ferroui_reactive::Observable;
 use ferroui_reactiveui::*;
 use ferroui_system::collections::object_model::ObservableCollection;
-use ferroui_system::IObserver;
-use std::cell::Cell;
+use ferroui_system::{IDisposable, IObserver};
+use std::cell::{Cell, RefCell};
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
 use std::time::Duration;
@@ -230,7 +230,59 @@ fn auto_persist_manual_signal_no_interval_saves_correctly() {
 }
 
 // Not ported: AutoPersist_DerivedRuntimeType_UsesRuntimeMetadata - reflection (the metadata of the runtime type of a derived class)
-// Not ported: ActOnEveryObject_RefreshChange_CallsRemoveThenAdd - needs ReactiveChangeSet (ChangeSets, wave 2)
-// Not ported: ActOnEveryObject_ReplaceChangeWithPrevious_CallsRemoveAndAdd - needs ReactiveChangeSet (ChangeSets, wave 2)
+
+/// The items `on_add` and `on_remove` received, and the subscription of `ActOnEveryObject` to
+/// `change_sets`.
+fn act_on_every_change_set(
+    change_sets: &Rc<Subject<ReactiveChangeSet<Rc<TestFixture>>>>,
+) -> (Rc<RefCell<Vec<Rc<TestFixture>>>>, Rc<RefCell<Vec<Rc<TestFixture>>>>, Rc<dyn IDisposable>) {
+    let adds = Rc::new(RefCell::new(Vec::new()));
+    let removes = Rc::new(RefCell::new(Vec::new()));
+    let added = adds.clone();
+    let removed = removes.clone();
+    let subscription = change_sets
+        .as_observable()
+        .act_on_every_object(move |item| added.borrow_mut().push(item), move |item| removed.borrow_mut().push(item));
+    (adds, removes, subscription)
+}
+
+/// Whether `items` holds `item` (`Contains`, by reference).
+fn contains(items: &RefCell<Vec<Rc<TestFixture>>>, item: &Rc<TestFixture>) -> bool {
+    items.borrow().iter().any(|candidate| Rc::ptr_eq(candidate, item))
+}
+
+#[test]
+fn act_on_every_object_refresh_change_calls_remove_then_add() {
+    let item = TestFixture::new();
+    let change_sets = Subject::<ReactiveChangeSet<Rc<TestFixture>>>::new();
+    let (adds, removes, subscription) = act_on_every_change_set(&change_sets);
+
+    change_sets.on_next(ReactiveChangeSet::new(vec![ReactiveChange::new(ReactiveChangeReason::Refresh, item.clone(), None, 0, -1)]));
+
+    assert!(contains(&removes, &item));
+    assert!(contains(&adds, &item));
+    subscription.dispose();
+}
+
+#[test]
+fn act_on_every_object_replace_change_with_previous_calls_remove_and_add() {
+    let previous = TestFixture::new();
+    let current = TestFixture::new();
+    let change_sets = Subject::<ReactiveChangeSet<Rc<TestFixture>>>::new();
+    let (adds, removes, subscription) = act_on_every_change_set(&change_sets);
+
+    change_sets.on_next(ReactiveChangeSet::new(vec![ReactiveChange::new(
+        ReactiveChangeReason::Replace,
+        current.clone(),
+        Some(previous.clone()),
+        0,
+        -1,
+    )]));
+
+    assert!(contains(&removes, &previous));
+    assert!(contains(&adds, &current));
+    subscription.dispose();
+}
+
 // Not ported: AutoPersistCollection_ReplaceUntrackedPrevious_DisposeAndRemoveSkips - needs a typed change notification of collections other than ObservableCollection in ferroui-system (a replace of an item never added)
 // Not ported: AutoPersistCollection_GenericReflectionManualSignalNoInterval_SavesCorrectly - needs a typed change notification of collections other than ObservableCollection in ferroui-system
