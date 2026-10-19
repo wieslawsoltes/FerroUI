@@ -12,4 +12,9 @@ fn binding_direction_enum_values_are_constant() {
     assert_eq!(BindingDirection::AsyncOneWay as i32, ASYNC_ONE_WAY_VALUE);
 }
 
-// Not ported: TriggerUpdate_EnumValues_AreConstant - needs TriggerUpdate (bindings, a later wave)
+#[test]
+fn trigger_update_enum_values_are_constant() {
+    // Assert
+    assert_eq!(TriggerUpdate::ViewToViewModel as i32, 0);
+    assert_eq!(TriggerUpdate::ViewModelToView as i32, 1);
+}
