@@ -1,7 +1,7 @@
 //! Port of `AppViewModel.cs`.
 
-use crate::nuget_details_view_model::{LauncherSource, NugetDetailsViewModel};
-use crate::nuget_search::{default_search_service, INuGetSearchService};
+use crate::crate_details_view_model::{CrateDetailsViewModel, LauncherSource};
+use crate::crate_search::{default_search_service, ICrateSearchService};
 use ferroui_reactive::ObservableExt;
 use ferroui_reactiveui::{
     reactive_object, reactive_properties, ObservableAsPropertyHelper, ReactiveObject, ReactiveUIBindingExtensions, RxSchedulers,
@@ -14,9 +14,9 @@ use std::future::Future;
 use std::rc::Rc;
 use std::time::Duration;
 
-/// The results of a search (`IEnumerable<NugetDetailsViewModel>`): `None` before the first search,
-/// as the reference's property is `null` then.
-pub type SearchResults = Option<Rc<Vec<Rc<NugetDetailsViewModel>>>>;
+/// The results of a search (`IEnumerable<NugetDetailsViewModel>` of the reference, for crates):
+/// `None` before the first search, as the reference's property is `null` then.
+pub type SearchResults = Option<Rc<Vec<Rc<CrateDetailsViewModel>>>>;
 
 reactive_properties! {
     /// AppViewModel is where we will describe the interaction of our application. We can describe
@@ -65,7 +65,7 @@ impl AppViewModel {
     ///
     /// Deviation (DEVIATIONS.md, samples): the reference searches in the view model itself and has
     /// no parameter; the service and the launcher are parameters, so that the tests give their own.
-    pub fn with_services(search_service: Rc<dyn INuGetSearchService>, launcher: LauncherSource) -> Rc<Self> {
+    pub fn with_services(search_service: Rc<dyn ICrateSearchService>, launcher: LauncherSource) -> Rc<Self> {
         let view_model = Rc::new(Self {
             reactive: ReactiveObject::new(),
             search_term: RefCell::new(None),
@@ -111,13 +111,13 @@ impl AppViewModel {
             .distinct_until_changed()
             .where_(|term: &Option<String>| term.as_deref().is_some_and(|term| !term.is_empty()))
             .select_many_async_with_token(move |term: Option<String>, token: CancellationToken| {
-                search_nuget_packages(&search_service, &launcher, term.unwrap_or_default(), token)
+                search_crates(&search_service, &launcher, term.unwrap_or_default(), token)
             })
             .observe_on(RxSchedulers::main_thread_scheduler())
             .to_property(&view_model, prop!(AppViewModel => search_results));
 
         // We subscribe to the "ThrownExceptions" property of our OAPH, where ReactiveUI marshals any
-        // exceptions that are thrown in SearchNuGetPackages method. See the "Error Handling"
+        // exceptions that are thrown in the search_crates function. See the "Error Handling"
         // section for more information about this.
         let _ = search_results.thrown_exceptions().subscribe_next(|_error: ObservableError| { /* Handle errors here */ });
         let _ = view_model.search_results.set(search_results);
@@ -133,7 +133,7 @@ impl AppViewModel {
         view_model
     }
 
-    /// `SearchResults`: the view models of the packages of the latest search.
+    /// `SearchResults`: the view models of the crates of the latest search.
     pub fn search_results(&self) -> SearchResults {
         self.search_results.get().and_then(|helper| helper.value())
     }
@@ -144,15 +144,16 @@ impl AppViewModel {
     }
 }
 
-/// Here we search NuGet packages with the search service of the sample (`SearchNuGetPackages`).
-/// Ideally, we should extract such code into a separate service, say, INuGetSearchService, but
-/// let's try to avoid overcomplicating things at this time.
+/// Here we search crates with the search service of the sample (`SearchNuGetPackages` of the
+/// reference, which searches NuGet packages). Ideally, we should extract such code into a separate
+/// service, say, ICrateSearchService, but let's try to avoid overcomplicating things at this time.
 ///
-/// Deviation (DEVIATIONS.md, samples): the search itself is the service ([`INuGetSearchService`]),
-/// which the reference suggests; the view models of the packages are made on the thread of the
-/// view model when the search ends, as they are not `Send`.
-fn search_nuget_packages(
-    search_service: &Rc<dyn INuGetSearchService>,
+/// Deviation (DEVIATIONS.md, samples): the search itself is the service ([`ICrateSearchService`]),
+/// which the reference suggests; the view models of the crates are made on the thread of the view
+/// model when the search ends, as they are not `Send`. The reference searches NuGet; the port
+/// searches crates.io, because FerroUI is a Rust framework.
+fn search_crates(
+    search_service: &Rc<dyn ICrateSearchService>,
     launcher: &LauncherSource,
     term: String,
     token: CancellationToken,
@@ -161,8 +162,8 @@ fn search_nuget_packages(
     let launcher = launcher.clone();
     async move {
         let metadata = metadata.await?;
-        let results: Vec<Rc<NugetDetailsViewModel>> =
-            metadata.into_iter().map(|package| NugetDetailsViewModel::new(package, launcher.clone())).collect();
+        let results: Vec<Rc<CrateDetailsViewModel>> =
+            metadata.into_iter().map(|krate| CrateDetailsViewModel::new(krate, launcher.clone())).collect();
         Ok::<SearchResults, ObservableError>(Some(Rc::new(results)))
     }
 }

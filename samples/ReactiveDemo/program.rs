@@ -7,7 +7,8 @@
 //! FERROUI_SMOKE_EXIT_MS=3000 cargo run -p reactive-demo
 //! ```
 //!
-//! Without the default feature `online` the search runs over an in-memory catalogue of packages.
+//! With the default feature `online` the search queries crates.io; without it the search runs
+//! over an in-memory catalogue of crates.
 //! With `FERROUI_SMOKE_EXIT_MS=<n>` the main window is closed after `n` milliseconds, which ends
 //! the main loop; the process exits with the exit code the lifetime returns.
 

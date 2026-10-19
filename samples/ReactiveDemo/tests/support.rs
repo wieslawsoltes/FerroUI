@@ -1,7 +1,7 @@
 //! Shared helpers of the tests: the application scope with ReactiveUI built, the bodies of the
 //! generated per-document tests, a search service and a launcher that record what they are asked.
 
-use crate::nuget_search::{CatalogueSearchService, INuGetSearchService, PackageSearchMetadata};
+use crate::crate_search::{CatalogueSearchService, CrateSearchMetadata, ICrateSearchService};
 use crate::{register_types, App, LauncherSource, SAMPLE};
 use ferroui_base::input::LocalBoxFuture;
 use ferroui_base::platform::storage::{ILauncher, IStorageItem};
@@ -70,8 +70,8 @@ impl RecordingSearchService {
     }
 }
 
-impl INuGetSearchService for RecordingSearchService {
-    fn search(&self, term: &str, token: CancellationToken) -> Task<Vec<PackageSearchMetadata>> {
+impl ICrateSearchService for RecordingSearchService {
+    fn search(&self, term: &str, token: CancellationToken) -> Task<Vec<CrateSearchMetadata>> {
         self.terms.borrow_mut().push(term.to_owned());
         CatalogueSearchService::new().search(term, token)
     }
@@ -111,7 +111,7 @@ impl ILauncher for RecordingLauncher {
     }
 }
 
-/// A package of the catalogue by its identifier.
-pub fn catalogue_package(id: &str) -> PackageSearchMetadata {
-    CatalogueSearchService::packages().into_iter().find(|package| package.id == id).unwrap_or_else(|| panic!("{id} is in the catalogue"))
+/// A crate of the catalogue by its name.
+pub fn catalogue_crate(name: &str) -> CrateSearchMetadata {
+    CatalogueSearchService::crates().into_iter().find(|krate| krate.name == name).unwrap_or_else(|| panic!("{name} is in the catalogue"))
 }

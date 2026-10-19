@@ -2,8 +2,8 @@
 //! with ReactiveUI built as the entry point builds it: the bindings its code-behind makes when it
 //! is activated, and the view the items of its list are shown with.
 
-use super::support::{catalogue_package, run_jobs, start_application, RecordingLauncher};
-use crate::{MainWindow, NugetDetailsView, NugetDetailsViewModel};
+use super::support::{catalogue_crate, run_jobs, start_application, RecordingLauncher};
+use crate::{CrateDetailsView, CrateDetailsViewModel, MainWindow};
 use ferroui_base::input::{InputElement, TextInputEventArgs};
 use ferroui_reactiveui::{IViewFor, IViewLocator, ViewLocator};
 use ferroui_reactiveui_controls::view_control;
@@ -36,9 +36,9 @@ fn typing_into_the_search_box_updates_the_view_model() {
     assert_eq!(view_model.search_term().as_deref(), Some("rx"));
 
     // ... and from the view model.
-    view_model.set_search_term(Some("splat".to_owned()));
+    view_model.set_search_term(Some("serde".to_owned()));
     run_jobs();
-    assert_eq!(text_box.text().as_deref(), Some("splat"));
+    assert_eq!(text_box.text().as_deref(), Some("serde"));
 
     window.close();
 }
@@ -59,10 +59,10 @@ fn the_list_is_hidden_until_there_are_results() {
 }
 
 #[test]
-fn the_view_of_a_package_is_located_for_its_view_model() {
+fn the_view_of_a_crate_is_located_for_its_view_model() {
     let _app = start_application();
     let launcher = RecordingLauncher::new();
-    let view_model: Rc<dyn Any> = NugetDetailsViewModel::new(catalogue_package("DynamicData"), RecordingLauncher::source(&launcher));
+    let view_model: Rc<dyn Any> = CrateDetailsViewModel::new(catalogue_crate("ferroui-dynamic-data"), RecordingLauncher::source(&launcher));
 
     // What the view host of an item of the list does with its view model: the views that
     // `ViewRegistrar` registers are in the service locator, which the hosts also ask.
@@ -70,7 +70,7 @@ fn the_view_of_a_package_is_located_for_its_view_model() {
     view.set_view_model(Some(view_model.clone()));
 
     let control = view_control(&*view).expect("the view is a control");
-    let details = control.cast::<NugetDetailsView>().expect("the view is a NugetDetailsView");
+    let details = control.cast::<CrateDetailsView>().expect("the view is a CrateDetailsView");
     let shown = details.view_model().expect("the control has the view model");
     assert!(std::ptr::addr_eq(Rc::as_ptr(&shown), Rc::as_ptr(&view_model)));
 }

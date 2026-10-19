@@ -30,6 +30,6 @@ fn every_document_with_a_class_is_compiled() {
         assert!(SAMPLE.find_class(path).is_some(), "{path} has no class");
         compiled += 1;
     }
-    // App.xaml, MainWindow.xaml and NugetDetailsView.xaml.
+    // App.xaml, MainWindow.xaml and CrateDetailsView.xaml.
     assert_eq!(compiled, 3, "the documents with a class");
 }

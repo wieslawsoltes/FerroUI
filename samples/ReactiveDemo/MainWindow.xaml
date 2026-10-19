@@ -4,7 +4,7 @@
                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                          xmlns:rxui="http://reactiveui.net"
                          x:Class="ReactiveDemo.MainWindow"
-                         Title="NuGet Browser" Height="450" Width="800"
+                         Title="Crate Browser" Height="450" Width="800"
                          mc:Ignorable="d">
   <!-- Deviation (DEVIATIONS.md, samples): the reference's root is the generic
        ReactiveWindow<AppViewModel> (x:TypeArguments="reactivedemo:AppViewModel"). A class of

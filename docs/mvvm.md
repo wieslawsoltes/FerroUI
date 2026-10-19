@@ -224,10 +224,10 @@ let _ = view_model.open_page().execute_default().subscribe_next(|_| {});
   let _ = view_model.add_feature_command.set(ReactiveCommandAdapter::command_of(Rc::new(add_feature.clone())));
   ```
 
-- **From code.** `bind_command` (`BindCommandMixins`) binds a command of the view model to a control of the view, inside the view's activation. From `samples/ReactiveDemo/nuget_details_view.rs`:
+- **From code.** `bind_command` (`BindCommandMixins`) binds a command of the view model to a control of the view, inside the view's activation. From `samples/ReactiveDemo/crate_details_view.rs`:
 
   ```rust
-  disposable_registration.add(view.bind_command(prop!(NugetDetailsViewModel => open_page), prop!(NugetDetailsViewFor => open_button), None));
+  disposable_registration.add(view.bind_command(prop!(CrateDetailsViewModel => open_page), prop!(CrateDetailsViewFor => open_button), None));
   ```
 
 ## 6. Views
@@ -304,7 +304,7 @@ A binding holds its target weakly; once the target is dropped, it is no longer w
 
 ```rust
 pub fn view_assembly() -> ViewAssembly {
-    ViewAssembly::new("ReactiveDemo").view::<NugetDetailsViewModel, NugetDetailsViewFor>(None, || NugetDetailsView::new().view())
+    ViewAssembly::new("ReactiveDemo").view::<CrateDetailsViewModel, CrateDetailsViewFor>(None, || CrateDetailsView::new().view())
 }
 
 pub fn register_views() {
@@ -420,16 +420,16 @@ let search_results = view_model
     .distinct_until_changed()
     .where_(|term: &Option<String>| term.as_deref().is_some_and(|term| !term.is_empty()))
     .select_many_async_with_token(move |term: Option<String>, token: CancellationToken| {
-        search_nuget_packages(&search_service, &launcher, term.unwrap_or_default(), token)
+        search_crates(&search_service, &launcher, term.unwrap_or_default(), token)
     })
     .observe_on(RxSchedulers::main_thread_scheduler())
     .to_property(&view_model, prop!(AppViewModel => search_results));
 ```
 
-**Work on other threads.** Background work goes through tasks (`ferroui_system::threading::tasks`). `tasks::run` runs a `Send` closure on a worker thread and gives a `Task<T>` that completes on the calling thread; `Task::spawn_local` runs a future on the current thread. A `Task<T>` is a future, so an asynchronous operator or command awaits it. ReactiveDemo's search service sends its HTTP request from a worker thread (`samples/ReactiveDemo/nuget_search.rs`):
+**Work on other threads.** Background work goes through tasks (`ferroui_system::threading::tasks`). `tasks::run` runs a `Send` closure on a worker thread and gives a `Task<T>` that completes on the calling thread; `Task::spawn_local` runs a future on the current thread. A `Task<T>` is a future, so an asynchronous operator or command awaits it. ReactiveDemo's search service sends its HTTP request to crates.io from a worker thread (`samples/ReactiveDemo/crate_search.rs`):
 
 ```rust
-fn search(&self, term: &str, token: CancellationToken) -> Task<Vec<PackageSearchMetadata>> {
+fn search(&self, term: &str, token: CancellationToken) -> Task<Vec<CrateSearchMetadata>> {
     if token.is_cancellation_requested() {
         return Task::from_canceled();
     }
@@ -470,12 +470,12 @@ fn the_search_waits_until_the_term_has_not_changed_for_800_ms() {
         let search = RecordingSearchService::new();
         let view_model = AppViewModel::with_services(search.clone(), RecordingLauncher::source(&RecordingLauncher::new()));
 
-        view_model.set_search_term(Some("reactiveui".to_owned()));
+        view_model.set_search_term(Some("tokio".to_owned()));
         scheduler.advance_by_ms(799.0);
         assert!(search.terms().is_empty(), "no search before 800 ms without a change");
 
         scheduler.advance_by_ms(1.0);
-        assert_eq!(search.terms(), ["reactiveui"], "one search, of the last term");
+        assert_eq!(search.terms(), ["tokio"], "one search, of the last term");
     });
 }
 ```
@@ -505,13 +505,13 @@ The main deviations, each recorded with its reason in [DEVIATIONS.md](porting/DE
 
 ### ReactiveDemo
 
-`samples/ReactiveDemo` is a port, file for file, of `ReactiveDemo`, the getting-started sample of the ReactiveUI documentation: a NuGet package browser. It shows a view model with a notifying property and two output properties, the throttled and deduplicated search with `when_any_value` and `to_property`, a `ReactiveCommand` that opens the page of a package, views in markup bound in code inside `when_activated`, and view location for the items of a list without an item template.
+`samples/ReactiveDemo` is a port, file for file, of `ReactiveDemo`, the getting-started sample of the ReactiveUI documentation, as a crates.io browser where the reference browses NuGet packages. It shows a view model with a notifying property and two output properties, the throttled and deduplicated search with `when_any_value` and `to_property`, a `ReactiveCommand` that opens the page of a crate, views in markup bound in code inside `when_activated`, and view location for the items of a list without an item template.
 
-![ReactiveDemo with the WinUI 3 theme on macOS: the results of a search for reactiveui](porting/images/reactive_demo_winui_macos.png)
+![ReactiveDemo, the crate browser, with the WinUI 3 theme on macOS: the results of a search for serde](porting/images/reactive_demo_winui_macos.png)
 
 ```sh
 cargo run -p reactive-demo
-# Search an in-memory catalogue instead of nuget.org
+# Search an in-memory catalogue instead of crates.io
 cargo run -p reactive-demo --no-default-features
 cargo test -p reactive-demo
 ```

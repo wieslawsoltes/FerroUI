@@ -1,6 +1,6 @@
 [package]
 name = "reactive-demo"
-description = "The getting-started sample of ReactiveUI on FerroUI: a NuGet package browser with a throttled search, output properties, a command and views located for their view models"
+description = "The getting-started sample of ReactiveUI on FerroUI: a crates.io browser with a throttled search, output properties, a command and views located for their view models"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -26,8 +26,8 @@ path = "program.rs"
 
 [features]
 default = ["online"]
-# The search calls the search service of NuGet, and the icons of the packages are downloaded.
-# Without it the search runs over an in-memory catalogue of packages.
+# The search calls the API of crates.io. Without it the search runs over an in-memory catalogue of
+# crates.
 online = ["dep:ureq", "dep:serde", "dep:serde_json"]
 
 [dependencies]
@@ -45,13 +45,13 @@ ferroui-reactive = { workspace = true }
 ferroui-splat = { workspace = true }
 ferroui-reactiveui = { workspace = true }
 ferroui-reactiveui-controls = { workspace = true }
-# The response of the search service of NuGet, with the feature `online` (the reference uses
-# NuGet.Protocol).
+# The response of the search of crates.io, with the feature `online` (the reference searches NuGet
+# with NuGet.Protocol).
 serde = { version = "1.0.229", features = ["derive"], optional = true }
 serde_json = { version = "1.0.151", optional = true }
 sample-support = { path = "../SampleSupport" }
 
-# The HTTP client of the search and of the icons, with the feature `online`.
+# The HTTP client of the search, with the feature `online`.
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 ureq = { version = "2.12.1", optional = true }
 

@@ -209,8 +209,8 @@ cargo run -p control-catalog-desktop
 # The TreeDataGrid demo (its pages are also the page TreeDataGrid of the ControlCatalog)
 cargo run -p treedatagrid-demo
 
-# ReactiveDemo, the getting-started sample of ReactiveUI: a NuGet package browser on the WinUI 3
-# theme (add --no-default-features to search an in-memory catalogue instead of nuget.org)
+# ReactiveDemo, the getting-started sample of ReactiveUI: a crates.io browser on the WinUI 3
+# theme (add --no-default-features to search an in-memory catalogue instead of crates.io)
 cargo run -p reactive-demo
 
 # The example of the ReactiveUI integration, with a DynamicData page, on the WinUI 3 theme
@@ -320,7 +320,7 @@ FerroUI has ports of System.Reactive, DynamicData, Splat and ReactiveUI, one cra
 
 | ReactiveDemo | The DynamicData page of the ReactiveUI example |
 |---|---|
-| ![ReactiveDemo, the getting-started sample of ReactiveUI, with the WinUI 3 theme on macOS](docs/porting/images/reactive_demo_winui_macos.png) | ![The DynamicData page of the ReactiveUI example: a searchable list of features with favourites sorted first](docs/porting/images/reactiveui_example_dynamicdata_winui_macos.png) |
+| ![ReactiveDemo, the getting-started sample of ReactiveUI as a crate browser, with the WinUI 3 theme on macOS](docs/porting/images/reactive_demo_winui_macos.png) | ![The DynamicData page of the ReactiveUI example: a searchable list of features with favourites sorted first](docs/porting/images/reactiveui_example_dynamicdata_winui_macos.png) |
 
 ## Repository layout
 

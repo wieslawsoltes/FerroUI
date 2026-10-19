@@ -1,7 +1,7 @@
 //! The class of a document as the view ReactiveUI binds: [`CodeBehindView`].
 //!
-//! Not an upstream file. Upstream's `MainWindow` and `NugetDetailsView` derive from
-//! `ReactiveWindow<TViewModel>` and `ReactiveUserControl<TViewModel>`, so each is its own
+//! Not an upstream file. Upstream's `MainWindow` and `NugetDetailsView` (`CrateDetailsView` here)
+//! derive from `ReactiveWindow<TViewModel>` and `ReactiveUserControl<TViewModel>`, so each is its own
 //! `IViewFor<TViewModel>`: its code-behind calls `this.WhenActivated(..)`, `this.Bind(..)`,
 //! `this.OneWayBind(..)` and `this.BindCommand(..)`, and the expressions of the view start at the
 //! class (`view => view.searchTextBox.Text`).

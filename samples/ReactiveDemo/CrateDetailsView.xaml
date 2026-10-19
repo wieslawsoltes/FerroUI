@@ -1,28 +1,35 @@
 <rxui:ReactiveUserControlBase xmlns="https://github.com/ferroui"
                               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                               xmlns:rxui="http://reactiveui.net"
-                              x:Class="ReactiveDemo.NugetDetailsView">
+                              x:Class="ReactiveDemo.CrateDetailsView">
   <!-- Deviation (DEVIATIONS.md, samples): the reference's root is the generic
        ReactiveUserControl<NugetDetailsViewModel> (x:TypeArguments); the root is the class markup
        creates, ReactiveUserControlBase, and the code behind types the control with
-       ReactiveUserControl::<NugetDetailsViewModel>::from_control (nuget_details_view.rs). -->
+       ReactiveUserControl::<CrateDetailsViewModel>::from_control (crate_details_view.rs). -->
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="Auto" />
       <ColumnDefinition Width="*" />
     </Grid.ColumnDefinitions>
-    <Image x:Name="iconImage" Margin="6" Width="64" Height="64"
-           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <!-- Deviation (DEVIATIONS.md, samples): the reference shows the icon of the package in an
+         Image. crates.io has no icons: the badge is a rounded square with the first letter of the
+         name of the crate. -->
+    <Border Margin="6" Width="48" Height="48" CornerRadius="8" Background="#B7410E"
+            HorizontalAlignment="Center" VerticalAlignment="Center">
+      <TextBlock x:Name="badgeTextBlock" FontSize="22" FontWeight="SemiBold" Foreground="White"
+                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    </Border>
     <!-- Deviation (DEVIATIONS.md, samples): the reference ends its text block with an inline
          Hyperlink. FerroUI has no inline hyperlink; the link is a HyperlinkButton below the
          text, a command source as the Hyperlink is. -->
     <StackPanel Grid.Column="1" Margin="6" VerticalAlignment="Center">
       <TextBlock TextWrapping="WrapWithOverflow">
-        <Run FontSize="14" FontWeight="SemiBold" x:Name="titleRun"/>
+        <Run FontSize="14" FontWeight="SemiBold" x:Name="titleRun"/><Run FontSize="12" x:Name="versionRun"/>
         <LineBreak />
         <Run FontSize="12" x:Name="descriptionRun"/>
       </TextBlock>
-      <HyperlinkButton x:Name="openButton" Content="Open" Padding="0" />
+      <TextBlock x:Name="downloadsTextBlock" FontSize="12" Opacity="0.7" Margin="0,2,0,0"/>
+      <HyperlinkButton x:Name="openButton" Content="Open on crates.io" Padding="0" />
     </StackPanel>
   </Grid>
 </rxui:ReactiveUserControlBase>

@@ -3,8 +3,8 @@
 //! - `app_view_model_tests`: the search of the view model on the in-memory catalogue, in the
 //!   virtual time of a test scheduler (the throttle, the distinct terms, the empty term, the
 //!   results and `IsAvailable`).
-//! - `nuget_details_view_model_tests`: the properties of a package and the command that opens its
-//!   page.
+//! - `crate_details_view_model_tests`: the properties of a crate, the command that opens its page
+//!   and the formatting of the number of downloads.
 //! - `main_window_tests`: the window built in the unit-test application, with the bindings of its
 //!   code-behind and the view located for the items of its list.
 //! - `documents` holds the generated per-document tests (`sample-build`): `document_<name>` loads
@@ -15,8 +15,8 @@
 
 mod app_view_model_tests;
 mod compiled_markup;
+mod crate_details_view_model_tests;
 mod main_window_tests;
-mod nuget_details_view_model_tests;
 mod support;
 
 mod documents {

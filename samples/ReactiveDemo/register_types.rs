@@ -2,7 +2,7 @@
 //! markup, its embedded assets and the loader table of its compiled markup.
 
 use crate::markup::XamlClass;
-use crate::{App, MainWindow, NugetDetailsView};
+use crate::{App, CrateDetailsView, MainWindow};
 use ferroui_base::metadata::MarkupAssembly;
 use ferroui_base::TypeInfo;
 
@@ -20,10 +20,10 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
 };
 
 /// The classes of the namespace `ReactiveDemo` (`X::TYPE`).
-const ROOT_TYPES: &[&TypeInfo] = &[App::TYPE, MainWindow::TYPE, NugetDetailsView::TYPE];
+const ROOT_TYPES: &[&TypeInfo] = &[App::TYPE, MainWindow::TYPE, CrateDetailsView::TYPE];
 
 /// The classes of the namespace that have a document (`&X::XAML_CLASS`).
-pub(crate) const ROOT_CLASSES: &[&XamlClass] = &[&App::XAML_CLASS, &MainWindow::XAML_CLASS, &NugetDetailsView::XAML_CLASS];
+pub(crate) const ROOT_CLASSES: &[&XamlClass] = &[&App::XAML_CLASS, &MainWindow::XAML_CLASS, &CrateDetailsView::XAML_CLASS];
 
 /// Registers the namespace, the types, the assembly, the embedded assets and the compiled
 /// markup of this crate (and of the crates it is built on). Cheap and idempotent.

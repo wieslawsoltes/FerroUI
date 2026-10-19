@@ -2,7 +2,7 @@
 //! sample for their view models.
 
 use crate::markup::xaml_class;
-use crate::{MainWindow, NugetDetailsView, NugetDetailsViewFor, NugetDetailsViewModel};
+use crate::{CrateDetailsView, CrateDetailsViewFor, CrateDetailsViewModel, MainWindow};
 use ferroui_base::{ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Ref};
 use ferroui_controls::{Application, ApplicationImpl, ApplicationImplExt, NewApplication};
 use ferroui_reactiveui_controls::{ViewAssembly, ViewRegistrar};
@@ -65,7 +65,7 @@ impl App {
 /// `ViewRegistrar` of the integration takes it. `MainWindow` is not located: the reference does
 /// not resolve it either (it is the startup window).
 pub fn view_assembly() -> ViewAssembly {
-    ViewAssembly::new("ReactiveDemo").view::<NugetDetailsViewModel, NugetDetailsViewFor>(None, || NugetDetailsView::new().view())
+    ViewAssembly::new("ReactiveDemo").view::<CrateDetailsViewModel, CrateDetailsViewFor>(None, || CrateDetailsView::new().view())
 }
 
 /// Registers the views of the sample with the service locator

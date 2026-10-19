@@ -332,12 +332,13 @@ Each phase is one or more pull requests that build, pass the existing tests and 
 
 ## 7. Samples
 
-**Status.** Both samples are ported (pull request 257), with the DynamicData page, and both use the WinUI 3 theme (`ferroui-themes-winui`). ReactiveDemo is in `samples/ReactiveDemo` (`cargo run -p reactive-demo`, 27 tests); the feature `online` is its default, and `--no-default-features` searches the in-memory catalogue. The integration's example is in `samples/ReactiveUIExample` (`cargo run -p reactiveui-example`, 75 tests). Their differences from the references are in `DEVIATIONS.md`, section "Samples". The plan follows.
+**Status.** Both samples are ported (pull request 257), with the DynamicData page, and both use the WinUI 3 theme (`ferroui-themes-winui`). ReactiveDemo is in `samples/ReactiveDemo` (`cargo run -p reactive-demo`, 28 tests), a crates.io browser; the feature `online` is its default, and `--no-default-features` searches the in-memory catalogue of crates. The integration's example is in `samples/ReactiveUIExample` (`cargo run -p reactiveui-example`, 75 tests). Their differences from the references are in `DEVIATIONS.md`, section "Samples". The plan follows.
 
 1. **ReactiveDemo** (`samples/ReactiveDemo`), the canonical getting-started application.
-   - **Port.** It is ported file for file: `AppViewModel`, `NugetDetailsViewModel`, `MainWindow`, `NugetDetailsView`, the `App`. The views are in FerroUI markup, with the bindings done in code as upstream (`Bind`, `OneWayBind`, `BindCommand` inside `WhenActivated`).
-   - **Search backend.** The upstream sample calls NuGet's search API through NuGet.Protocol. The port calls the same HTTP endpoint (`/v3/query`) behind the feature `online`, as the TreeDataGrid demo does for its online page. By default it uses an in-memory catalogue, as the ReactiveUI documentation's version does, so that it runs and is tested offline.
-   - **Opening a project.** The "open in browser" command uses the platform's launcher.
+   - **Port.** It is ported file for file: `AppViewModel`, `NugetDetailsViewModel` (`CrateDetailsViewModel`), `MainWindow`, `NugetDetailsView` (`CrateDetailsView`), the `App`. The views are in FerroUI markup, with the bindings done in code as upstream (`Bind`, `OneWayBind`, `BindCommand` inside `WhenActivated`).
+   - **Search backend.** The upstream sample calls NuGet's search API through NuGet.Protocol. The port searches crates.io instead, because FerroUI is a Rust framework. Behind the feature `online` (the default) it calls the crates.io API (`/api/v1/crates`, with a descriptive `User-Agent`) from a worker thread, as the TreeDataGrid demo does for its online page. Without the feature, and in the tests, it uses an in-memory catalogue of about thirty well-known crates and the crates of FerroUI, so that it runs and is tested offline.
+   - **Details of a result.** A result shows the name, version, description and downloads of a crate. crates.io has no icons, so a badge with the first letter of the name takes the place of the icon of the package.
+   - **Opening a crate.** The "open in browser" command opens the page of the crate on crates.io with the platform's launcher.
 2. **The integration's example** (`samples/ReactiveUIExample`), a port of the example of the ReactiveUI integration for the reference UI framework (35 files, about 1,765 lines, with 33 headless tests). It exercises what ReactiveDemo does not:
    - `RoutedViewHost` and `ViewModelViewHost` with view contracts;
    - interactions;
