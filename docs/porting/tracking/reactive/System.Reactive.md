@@ -10,9 +10,9 @@ Generated from Rx.NET commit `89e05b8730107983c3f77af54a52974ae12d37f4`. Back to
 | FerroUI | `src/FerroUI.Reactive` (exists) |
 | Crate | `ferroui-reactive` |
 | Phase / priority | 2-4 - Rx / P1 |
-| Files | 227/303 (27 waived) (82.2%), 35 not applicable |
-| Types | 100/172 (50 waived) (82.0%) |
-| Members | 812/1936 (790 waived) (70.9%) |
+| Files | 233/303 (27 waived) (84.4%), 35 not applicable |
+| Types | 105/172 (50 waived) (86.1%) |
+| Members | 956/1936 (790 waived) (83.4%) |
 | Contracts (interfaces) | 11/26 |
 
 Counted: the public API, public and protected types and members (with explicit interface implementations). Internal types (upstream's operator classes and their sinks, the internal helpers) are implementation; they count only through their files, which are ported one to one. Overloads are found by name: every overload of a method counts as present once the Rust function of its name in snake case exists, or that name with a suffix (`_on` for a scheduler argument, `_with`, `_with_index`, ...) or the `try_` prefix. The methods a `*_methods!` macro writes into a trait or an `impl` count as methods of that trait or type. An upstream file without a Rust file at its own path is present in the Rust files whose module documentation (the leading `//!` lines) cites it, such as `Linq/Observable/Select.cs`. A missing file whose types are all waived counts as a waived file. A generic type is also found under its name with its number of type parameters (`Pattern<T1, T2>` as `Pattern2`).
@@ -52,7 +52,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 18/22 (1 waived), types 19/24 (1 waived), members 100/138 (1 waived)
+### `(project root)` - files 18/22 (1 waived), types 19/24 (1 waived), members 102/138 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -76,7 +76,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Observable.Extensions.cs` | `linq/subscribe.rs`, `linq/observable_ext.rs` | present | 1/1 | 12/12 | merged: the Subscribe overloads of ObservableExtensions are methods of `ObservableExt` (`subscribe_methods!`) |
 | `ObservableBase.cs` | `observable_base.rs` | present | 1/1 | 2/2 |  |
 | `ObservableQuery.cs` | - | n/a | - | - | not-applicable: IQbservable and the expression-tree query providers (reactive.md, section 5): the expression-tree implementation of IQbservable and the services of its providers |
-| `Observer.Extensions.cs` | `observer.rs` | partial | 1/1 | 15/17 | partial merged into main file |
+| `Observer.Extensions.cs` | `observer.rs` | present | 1/1 | 17/17 | partial merged into main file |
 | `ObserverBase.cs` | `observer_base.rs` | present | 1/1 | 9/9 |  |
 | `TaskObservable.cs` | `task_observable.rs` | missing | 0/2 | 0/3 |  |
 | `TimeInterval.cs` | `time_interval.rs` | partial | 1/1 | 9/10 |  |
@@ -149,14 +149,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>Observer.Extensions.cs</code> - 2 missing</summary>
-
-- `Observer` (class): 2 missing
-  - `static IProgress<T> ToProgress<T>(this IObserver<T> observer)`
-  - `static IProgress<T> ToProgress<T>(this IObserver<T> observer, IScheduler scheduler)`
-
-</details>
-
 <details><summary><code>TimeInterval.cs</code> - 1 missing</summary>
 
 - `TimeInterval<T>` (struct): 1 missing
@@ -186,7 +178,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Concurrency` - files 26/42 (5 waived), types 19/37 (5 waived), members 44/195 (32 waived)
+### `Concurrency` - files 28/42 (5 waived), types 22/37 (5 waived), members 71/195 (32 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -211,7 +203,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `LocalScheduler.cs` | `concurrency/local_scheduler.rs` | partial | 0/1 | 0/7 |  |
 | `NewThreadScheduler.cs` | `concurrency/new_thread_scheduler.rs` | missing | 0/1 (1 waived) | 0/7 (7 waived) |  |
 | `ScheduledItem.cs` | `concurrency/scheduled_item.rs` | partial | 2/2 | 7/19 |  |
-| `Scheduler.Async.cs` | `concurrency/scheduler.rs` | partial | 1/1 | 0/18 | partial merged into main file |
+| `Scheduler.Async.cs` | `concurrency/scheduler_async.rs` | present | 1/1 | 18/18 |  |
 | `Scheduler.Recursive.cs` | `concurrency/scheduler.rs` | present | 1/1 | 6/6 | partial merged into main file |
 | `Scheduler.Services.Emulation.cs` | `concurrency/scheduler.rs` | present | 1/1 | 4/4 | partial merged into main file |
 | `Scheduler.Services.cs` | `concurrency/scheduler.rs` | partial | 1/1 | 0/3 (1 waived) | partial merged into main file |
@@ -219,13 +211,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Scheduler.Wrappers.cs` | `concurrency/scheduler.rs` | partial | 1/1 | 2/3 | partial merged into main file |
 | `Scheduler.cs` | `concurrency/scheduler.rs` | partial | 1/1 | 3/8 (3 waived) |  |
 | `SchedulerDefaults.cs` | `concurrency/scheduler_defaults.rs` | present | 0/0 | 0/0 |  |
-| `SchedulerOperation.cs` | `concurrency/scheduler_operation.rs` | missing | 0/2 | 0/5 |  |
+| `SchedulerOperation.cs` | `concurrency/scheduler_async.rs` | present | 2/2 | 5/5 | cited by the module documentation |
 | `SchedulerQueue.cs` | `concurrency/scheduler_queue.rs` | missing | 0/1 | 0/7 |  |
 | `SchedulerWrapper.cs` | `concurrency/disable_optimizations_scheduler.rs` | present | 0/0 | 0/0 | cited by the module documentation |
 | `Synchronization.ObserveOn.cs` | `linq/observe_on.rs` | present | 0/0 | 0/0 | cited by the module documentation |
 | `Synchronization.Synchronize.cs` | `linq/synchronize.rs` | present | 0/0 | 0/0 | cited by the module documentation |
 | `Synchronization.cs` | `linq/subscribe_on.rs` | partial | 1/1 | 2/6 | cited by the module documentation |
-| `SynchronizationContextScheduler.cs` | `concurrency/synchronization_context_scheduler.rs` | missing | 0/1 | 0/4 |  |
+| `SynchronizationContextScheduler.cs` | `concurrency/synchronization_context_scheduler.rs` | present | 1/1 | 4/4 |  |
 | `TaskHelpers.cs` | `concurrency/task_helpers.rs` | missing | 0/0 | 0/0 |  |
 | `TaskObservationOptions.cs` | `concurrency/task_observation_options.rs` | missing | 0/1 | 0/3 |  |
 | `TaskPoolScheduler.cs` | `concurrency/task_pool_scheduler.rs` | missing | 0/1 | 0/7 |  |
@@ -281,30 +273,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 - `ScheduledItem<TAbsolute, TValue>` (class): 2 missing
   - `ScheduledItem(IScheduler scheduler, TValue state, Func<IScheduler, TValue, IDisposable> action, TAbsolute d...` *(1 of 2 constructors found)*
   - `override IDisposable InvokeCore()` *(protected)*
-
-</details>
-
-<details><summary><code>Scheduler.Async.cs</code> - 18 missing</summary>
-
-- `Scheduler` (class): 18 missing
-  - `static SchedulerOperation Yield(this IScheduler scheduler)`
-  - `static SchedulerOperation Yield(this IScheduler scheduler, CancellationToken cancellationToken)`
-  - `static SchedulerOperation Sleep(this IScheduler scheduler, TimeSpan dueTime)`
-  - `static SchedulerOperation Sleep(this IScheduler scheduler, TimeSpan dueTime, CancellationToken cancellation...`
-  - `static SchedulerOperation Sleep(this IScheduler scheduler, DateTimeOffset dueTime)`
-  - `static SchedulerOperation Sleep(this IScheduler scheduler, DateTimeOffset dueTime, CancellationToken cancel...`
-  - `static IDisposable ScheduleAsync<TState>(this IScheduler scheduler, TState state, Func<IScheduler, TState, ...`
-  - `static IDisposable ScheduleAsync<TState>(this IScheduler scheduler, TState state, Func<IScheduler, TState, ...`
-  - `static IDisposable ScheduleAsync(this IScheduler scheduler, Func<IScheduler, CancellationToken, Task> action)`
-  - `static IDisposable ScheduleAsync(this IScheduler scheduler, Func<IScheduler, CancellationToken, Task<IDispo...`
-  - `static IDisposable ScheduleAsync<TState>(this IScheduler scheduler, TState state, TimeSpan dueTime, Func<IS...`
-  - `static IDisposable ScheduleAsync<TState>(this IScheduler scheduler, TState state, TimeSpan dueTime, Func<IS...`
-  - `static IDisposable ScheduleAsync(this IScheduler scheduler, TimeSpan dueTime, Func<IScheduler, Cancellation...`
-  - `static IDisposable ScheduleAsync(this IScheduler scheduler, TimeSpan dueTime, Func<IScheduler, Cancellation...`
-  - `static IDisposable ScheduleAsync<TState>(this IScheduler scheduler, TState state, DateTimeOffset dueTime, F...`
-  - `static IDisposable ScheduleAsync<TState>(this IScheduler scheduler, TState state, DateTimeOffset dueTime, F...`
-  - `static IDisposable ScheduleAsync(this IScheduler scheduler, DateTimeOffset dueTime, Func<IScheduler, Cancel...`
-  - `static IDisposable ScheduleAsync(this IScheduler scheduler, DateTimeOffset dueTime, Func<IScheduler, Cancel...`
 
 </details>
 
@@ -366,7 +334,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `NullableAttributes.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 
-### `Disposables` - files 14/17, types 13/14, members 55/65
+### `Disposables` - files 15/17, types 14/14, members 59/65
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -374,7 +342,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `BooleanDisposable.cs` | `disposables/boolean_disposable.rs` | present | 1/1 | 3/3 |  |
 | `CancellationDisposable.cs` | `disposables/cancellation_disposable.rs` | present | 1/1 | 5/5 |  |
 | `CompositeDisposable.cs` | `disposables/composite_disposable.rs` | partial | 1/1 | 13/15 |  |
-| `ContextDisposable.cs` | `disposables/context_disposable.rs` | missing | 0/1 | 0/4 |  |
+| `ContextDisposable.cs` | `disposables/context_disposable.rs` | present | 1/1 | 4/4 |  |
 | `Disposable.Utils.cs` | `disposables/disposable.rs` | present | 1/1 | 0/0 | partial merged into main file |
 | `Disposable.cs` | `disposables/disposable.rs` | present | 1/1 | 3/3 |  |
 | `ICancelable.cs` | `disposables/disposable.rs` | present | 1/1 | 1/1 | cited by the module documentation |
@@ -412,7 +380,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `DisposableExtensions.cs` | `disposables/fluent/disposable_extensions.rs` | missing | 0/1 | 0/1 |  |
 
-### `Internal` - files 14/37 (6 waived), types 0/14 (14 waived), members 0/22 (22 waived)
+### `Internal` - files 15/37 (6 waived), types 0/14 (14 waived), members 0/22 (22 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -453,7 +421,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Sink.cs` | `internal/sink.rs` | present | 0/0 | 0/0 |  |
 | `StopwatchImpl.cs` | `internal/stopwatch_impl.rs` | missing | 0/0 | 0/0 |  |
 | `Stubs.cs` | `internal/stubs.rs` | missing | 0/0 | 0/0 |  |
-| `SynchronizationContextExtensions.cs` | `internal/synchronization_context_extensions.rs` | missing | 0/0 | 0/0 |  |
+| `SynchronizationContextExtensions.cs` | `concurrency/synchronization_context_scheduler.rs` | present | 0/0 | 0/0 | cited by the module documentation |
 | `SynchronizedObserver.cs` | `observer.rs` | present | 0/0 | 0/0 | cited by the module documentation |
 | `SystemClock.Default.cs` | `internal/system_clock_default.rs` | missing | 0/2 (2 waived) | 0/3 (3 waived) |  |
 | `SystemClock.cs` | `internal/system_clock.rs` | missing | 0/4 (4 waived) | 0/9 (9 waived) |  |
@@ -479,7 +447,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Linq` - files 33/54 (10 waived), types 23/34 (11 waived), members 536/1368 (699 waived)
+### `Linq` - files 34/54 (10 waived), types 23/34 (11 waived), members 638/1368 (699 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -493,15 +461,15 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IQueryLanguageEx.cs` | `linq/i_query_language_ex.rs` | missing | 0/0 | 0/0 |  |
 | `LocalQueryMethodImplementationTypeAttribute.cs` | `linq/local_query_method_implementation_type_attribute.rs` | missing | 0/1 (1 waived) | 0/2 (2 waived) |  |
 | `Observable.Aggregates.cs` | `linq/creation.rs`, `linq/observable_ext.rs` | present | 1/1 | 133/133 | merged: the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module |
-| `Observable.Async.cs` | `linq/creation.rs`, `linq/observable_ext.rs` | partial | 1/1 | 4/126 | merged: the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module |
-| `Observable.Awaiter.cs` | `linq/creation.rs`, `linq/observable_ext.rs` | partial | 1/1 | 0/4 | merged: the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module |
+| `Observable.Async.cs` | `linq/creation.rs`, `linq/observable_ext.rs` | partial | 1/1 | 96/126 | merged: the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module |
+| `Observable.Awaiter.cs` | `linq/creation.rs`, `linq/observable_ext.rs` | present | 1/1 | 4/4 | merged: the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module |
 | `Observable.Binding.cs` | `linq/creation.rs`, `linq/observable_ext.rs` | present | 1/1 | 31/31 | merged: the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module |
 | `Observable.Blocking.cs` | `linq/creation.rs`, `linq/observable_ext.rs` | present | 1/1 | 4/22 (18 waived) | merged: the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module |
 | `Observable.Concurrency.cs` | `linq/creation.rs`, `linq/observable_ext.rs` | present | 1/1 | 6/6 | merged: the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module |
 | `Observable.Conversions.cs` | `linq/creation.rs`, `linq/observable_ext.rs` | present | 1/1 | 7/8 (1 waived) | merged: the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module |
-| `Observable.Creation.cs` | `linq/creation.rs`, `linq/observable_ext.rs` | partial | 1/1 | 33/35 | merged: the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module |
+| `Observable.Creation.cs` | `linq/creation.rs`, `linq/observable_ext.rs` | present | 1/1 | 35/35 | merged: the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module |
 | `Observable.Events.cs` | `linq/creation.rs`, `linq/observable_ext.rs` | present | 1/1 | 18/30 (12 waived) | merged: the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module |
-| `Observable.Imperative.cs` | `linq/creation.rs`, `linq/observable_ext.rs` | partial | 1/1 | 9/13 | merged: the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module |
+| `Observable.Imperative.cs` | `linq/creation.rs`, `linq/observable_ext.rs` | present | 1/1 | 13/13 | merged: the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module |
 | `Observable.Joins.cs` | `linq/creation.rs`, `linq/observable_ext.rs` | present | 1/1 | 4/4 | merged: the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module |
 | `Observable.Multiple.CombineLatest.cs` | `linq/creation.rs`, `linq/observable_ext.rs` | present | 2/2 | 29/29 | merged: the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module |
 | `Observable.Multiple.Zip.cs` | `linq/creation.rs`, `linq/observable_ext.rs` | present | 2/2 | 29/29 | merged: the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module |
@@ -519,15 +487,15 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `QbservableEx.cs` | `linq/qbservable_ex.rs` | missing | 0/1 (1 waived) | 0/0 |  |
 | `QueryDebugger.cs` | `linq/query_debugger.rs` | missing | 0/1 (1 waived) | 0/1 (1 waived) |  |
 | `QueryLanguage.Aggregates.cs` | `linq/query_language_aggregates.rs` | missing | 0/0 | 0/0 |  |
-| `QueryLanguage.Async.cs` | `linq/start.rs` | present | 0/0 | 0/0 | cited by the module documentation |
-| `QueryLanguage.Awaiter.cs` | `linq/query_language_awaiter.rs` | missing | 0/0 | 0/0 |  |
+| `QueryLanguage.Async.cs` | `linq/start.rs`, `linq/task_observable.rs`, `linq/to_async.rs` | present | 0/0 | 0/0 | cited by the module documentation |
+| `QueryLanguage.Awaiter.cs` | `linq/run_async.rs` | present | 0/0 | 0/0 | cited by the module documentation |
 | `QueryLanguage.Binding.cs` | `linq/publish.rs`, `linq/replay.rs` | present | 0/0 | 0/0 | cited by the module documentation |
 | `QueryLanguage.Blocking.cs` | `linq/collect.rs` | present | 0/0 | 0/0 | cited by the module documentation |
 | `QueryLanguage.Concurrency.cs` | `linq/query_language_concurrency.rs` | missing | 0/0 | 0/0 |  |
 | `QueryLanguage.Conversions.cs` | `linq/to_event.rs`, `linq/to_observable.rs` | present | 0/0 | 0/0 | cited by the module documentation |
-| `QueryLanguage.Creation.cs` | `linq/creation.rs` | present | 0/0 | 0/0 | cited by the module documentation |
+| `QueryLanguage.Creation.cs` | `linq/create_async.rs`, `linq/creation.rs`, `linq/defer_async.rs`, `linq/using_async.rs` | present | 0/0 | 0/0 | cited by the module documentation |
 | `QueryLanguage.Events.cs` | `linq/from_event.rs`, `linq/from_event_pattern.rs` | present | 0/0 | 0/0 | cited by the module documentation |
-| `QueryLanguage.Imperative.cs` | `linq/case.rs`, `linq/do_while.rs`, `linq/for_.rs`, `linq/if_.rs`, `linq/while_.rs` | present | 0/0 | 0/0 | cited by the module documentation |
+| `QueryLanguage.Imperative.cs` | `linq/case.rs`, `linq/do_while.rs`, `linq/for_.rs`, `linq/for_each_async.rs`, `linq/if_.rs`, `linq/while_.rs` | present | 0/0 | 0/0 | cited by the module documentation |
 | `QueryLanguage.Joins.cs` | `linq/joins.rs` | present | 0/0 | 0/0 | cited by the module documentation |
 | `QueryLanguage.Multiple.CombineLatest.cs` | `linq/query_language_multiple_combine_latest.rs` | missing | 0/0 | 0/0 |  |
 | `QueryLanguage.Multiple.Zip.cs` | `linq/query_language_multiple_zip.rs` | missing | 0/0 | 0/0 |  |
@@ -538,9 +506,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `QueryLanguageEx.cs` | `linq/create_iterator.rs`, `linq/expand.rs`, `linq/fork_join.rs`, `linq/let_.rs`, `linq/many_select.rs`, `linq/to_list_observable.rs` | present | 0/0 | 0/0 | cited by the module documentation |
 | `QueryLanguage_.cs` | `linq/query_language.rs` | missing | 0/0 | 0/0 |  |
 
-<details><summary><code>Observable.Async.cs</code> - 122 missing</summary>
+<details><summary><code>Observable.Async.cs</code> - 30 missing</summary>
 
-- `Observable` (class): 122 missing
+- `Observable` (class): 30 missing
   - `static Func<IObservable<TResult>> FromAsyncPattern<TResult>(Func<AsyncCallback, object?, IAsyncResult> begi...`
   - `static Func<TArg1, IObservable<TResult>> FromAsyncPattern<TArg1, TResult>(Func<TArg1, AsyncCallback, object...`
   - `static Func<TArg1, TArg2, IObservable<TResult>> FromAsyncPattern<TArg1, TArg2, TResult>(Func<TArg1, TArg2, ...`
@@ -571,126 +539,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
   - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, IObserva...`
   - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
   - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
-  - `static IObservable<TResult> StartAsync<TResult>(Func<Task<TResult>> functionAsync)`
-  - `static IObservable<TResult> StartAsync<TResult>(Func<Task<TResult>> functionAsync, IScheduler scheduler)`
-  - `static IObservable<TResult> StartAsync<TResult>(Func<Task<TResult>> functionAsync, TaskObservationOptions o...`
-  - `static IObservable<TResult> StartAsync<TResult>(Func<CancellationToken, Task<TResult>> functionAsync)`
-  - `static IObservable<TResult> StartAsync<TResult>(Func<CancellationToken, Task<TResult>> functionAsync, ISche...`
-  - `static IObservable<TResult> StartAsync<TResult>(Func<CancellationToken, Task<TResult>> functionAsync, TaskO...`
-  - `static IObservable<Unit> StartAsync(Func<Task> actionAsync)`
-  - `static IObservable<Unit> StartAsync(Func<Task> actionAsync, IScheduler scheduler)`
-  - `static IObservable<Unit> StartAsync(Func<Task> actionAsync, TaskObservationOptions options)`
-  - `static IObservable<Unit> StartAsync(Func<CancellationToken, Task> actionAsync)`
-  - `static IObservable<Unit> StartAsync(Func<CancellationToken, Task> actionAsync, IScheduler scheduler)`
-  - `static IObservable<Unit> StartAsync(Func<CancellationToken, Task> actionAsync, TaskObservationOptions options)`
-  - `static IObservable<TResult> FromAsync<TResult>(Func<Task<TResult>> functionAsync)`
-  - `static IObservable<TResult> FromAsync<TResult>(Func<Task<TResult>> functionAsync, IScheduler scheduler)`
-  - `static IObservable<TResult> FromAsync<TResult>(Func<Task<TResult>> functionAsync, TaskObservationOptions op...`
-  - `static IObservable<TResult> FromAsync<TResult>(Func<CancellationToken, Task<TResult>> functionAsync)`
-  - `static IObservable<TResult> FromAsync<TResult>(Func<CancellationToken, Task<TResult>> functionAsync, ISched...`
-  - `static IObservable<TResult> FromAsync<TResult>(Func<CancellationToken, Task<TResult>> functionAsync, TaskOb...`
-  - `static IObservable<Unit> FromAsync(Func<Task> actionAsync)`
-  - `static IObservable<Unit> FromAsync(Func<Task> actionAsync, IScheduler scheduler)`
-  - `static IObservable<Unit> FromAsync(Func<Task> actionAsync, TaskObservationOptions options)`
-  - `static IObservable<Unit> FromAsync(Func<CancellationToken, Task> actionAsync)`
-  - `static IObservable<Unit> FromAsync(Func<CancellationToken, Task> actionAsync, IScheduler scheduler)`
-  - `static IObservable<Unit> FromAsync(Func<CancellationToken, Task> actionAsync, TaskObservationOptions options)`
-  - `static Func<IObservable<TResult>> ToAsync<TResult>(this Func<TResult> function)`
-  - `static Func<IObservable<TResult>> ToAsync<TResult>(this Func<TResult> function, IScheduler scheduler)`
-  - `static Func<TArg1, IObservable<TResult>> ToAsync<TArg1, TResult>(this Func<TArg1, TResult> function)`
-  - `static Func<TArg1, IObservable<TResult>> ToAsync<TArg1, TResult>(this Func<TArg1, TResult> function, ISched...`
-  - `static Func<TArg1, TArg2, IObservable<TResult>> ToAsync<TArg1, TArg2, TResult>(this Func<TArg1, TArg2, TRes...`
-  - `static Func<TArg1, TArg2, IObservable<TResult>> ToAsync<TArg1, TArg2, TResult>(this Func<TArg1, TArg2, TRes...`
-  - `static Func<TArg1, TArg2, TArg3, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TResult>(this Func<TArg...`
-  - `static Func<TArg1, TArg2, TArg3, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TResult>(this Func<TArg...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TArg4, TResult>(...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TArg4, TResult>(...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TArg4, TA...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TArg4, TA...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TA...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TA...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, IObservable<TResult>> ToAsync<TArg1, TArg2, TA...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, IObservable<TResult>> ToAsync<TArg1, TArg2, TA...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, IObservable<TResult>> ToAsync<TArg1, TA...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, IObservable<TResult>> ToAsync<TArg1, TA...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, IObservable<TResult>> ToAsync<TA...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, IObservable<TResult>> ToAsync<TA...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, IObservable<TResult>> To...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, IObservable<TResult>> To...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, IObservable<TRes...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, IObservable<TRes...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, IObserva...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, IObserva...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
-  - `static Func<IObservable<Unit>> ToAsync(this Action action)`
-  - `static Func<IObservable<Unit>> ToAsync(this Action action, IScheduler scheduler)`
-  - `static Func<TArg1, IObservable<Unit>> ToAsync<TArg1>(this Action<TArg1> action)`
-  - `static Func<TArg1, IObservable<Unit>> ToAsync<TArg1>(this Action<TArg1> action, IScheduler scheduler)`
-  - `static Func<TArg1, TArg2, IObservable<Unit>> ToAsync<TArg1, TArg2>(this Action<TArg1, TArg2> action)`
-  - `static Func<TArg1, TArg2, IObservable<Unit>> ToAsync<TArg1, TArg2>(this Action<TArg1, TArg2> action, ISched...`
-  - `static Func<TArg1, TArg2, TArg3, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3>(this Action<TArg1, TArg2, ...`
-  - `static Func<TArg1, TArg2, TArg3, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3>(this Action<TArg1, TArg2, ...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4>(this Action<...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4>(this Action<...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, IObservable<Unit>> ToAsync<TArg1, TArg2...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, IObservable<Unit>> ToAsync<TArg1, TArg2...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, IObservable<Unit>> ToAsync<TArg1...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, IObservable<Unit>> ToAsync<TArg1...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, IObservable<Unit>> ToAsy...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, IObservable<Unit>> ToAsy...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, IObservable<Unit...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, IObservable<Unit...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, IObserva...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, IObserva...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
-  - `static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, ...`
-
-</details>
-
-<details><summary><code>Observable.Awaiter.cs</code> - 4 missing</summary>
-
-- `Observable` (class): 4 missing
-  - `static AsyncSubject<TSource> GetAwaiter<TSource>(this IObservable<TSource> source)`
-  - `static AsyncSubject<TSource> GetAwaiter<TSource>(this IConnectableObservable<TSource> source)`
-  - `static AsyncSubject<TSource> RunAsync<TSource>(this IObservable<TSource> source, CancellationToken cancella...`
-  - `static AsyncSubject<TSource> RunAsync<TSource>(this IConnectableObservable<TSource> source, CancellationTok...`
-
-</details>
-
-<details><summary><code>Observable.Creation.cs</code> - 2 missing</summary>
-
-- `Observable` (class): 2 missing
-  - `static IObservable<TResult> DeferAsync<TResult>(Func<CancellationToken, Task<IObservable<TResult>>> observa...`
-  - `static IObservable<TResult> DeferAsync<TResult>(Func<CancellationToken, Task<IObservable<TResult>>> observa...`
-
-</details>
-
-<details><summary><code>Observable.Imperative.cs</code> - 4 missing</summary>
-
-- `Observable` (class): 4 missing
-  - `static Task ForEachAsync<TSource>(this IObservable<TSource> source, Action<TSource> onNext)`
-  - `static Task ForEachAsync<TSource>(this IObservable<TSource> source, Action<TSource> onNext, CancellationTok...`
-  - `static Task ForEachAsync<TSource>(this IObservable<TSource> source, Action<TSource, int> onNext)`
-  - `static Task ForEachAsync<TSource>(this IObservable<TSource> source, Action<TSource, int> onNext, Cancellati...`
 
 </details>
 
@@ -889,11 +737,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `TaskObservableMethodBuilder.cs` | `runtime/compiler_services/task_observable_method_builder.rs` | missing | 0/1 | 0/8 |  |
 
-### `Subjects` - files 10/10, types 9/9, members 47/59
+### `Subjects` - files 10/10, types 9/9, members 48/59
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AsyncSubject.cs` | `subjects/async_subject.rs` | partial | 1/1 | 11/12 |  |
+| `AsyncSubject.cs` | `subjects/async_subject.rs` | present | 1/1 | 12/12 |  |
 | `BehaviorSubject.cs` | `subjects/behavior_subject.rs` | present | 1/1 | 10/10 |  |
 | `ConnectableObservable.cs` | `subjects/connectable_observable.rs` | present | 0/0 | 0/0 |  |
 | `IConnectableObservable.cs` | `subjects/connectable_observable.rs` | present | 1/1 | 1/1 | interface merged into implementation file |
@@ -903,13 +751,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Subject.Extensions.cs` | `subjects/subject.rs` | partial | 1/1 | 0/6 | partial merged into main file |
 | `Subject.cs` | `subjects/subject.rs` | present | 1/1 | 8/8 |  |
 | `SubjectBase.cs` | `subjects/subject.rs` | partial | 1/1 | 2/7 | cited by the module documentation |
-
-<details><summary><code>AsyncSubject.cs</code> - 1 missing</summary>
-
-- `AsyncSubject<T>` (class): 1 missing
-  - `AsyncSubject<T> GetAwaiter()`
-
-</details>
 
 <details><summary><code>Subject.Extensions.cs</code> - 6 missing</summary>
 
@@ -934,12 +775,24 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Threading/Tasks` - files 0/1, types 0/1, members 0/14
+### `Threading/Tasks` - files 1/1, types 1/1, members 8/14
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `NamespaceDoc.cs` | - | n/a | - | - | not-applicable: documentation of the namespaces and assembly attributes |
-| `TaskObservableExtensions.cs` | `threading/tasks/task_observable_extensions.rs` | missing | 0/1 | 0/14 |  |
+| `TaskObservableExtensions.cs` | `linq/task_observable.rs` | partial | 1/1 | 8/14 | cited by the module documentation |
+
+<details><summary><code>TaskObservableExtensions.cs</code> - 6 missing</summary>
+
+- `TaskObservableExtensions` (class) (ported as module-level items): 6 missing
+  - `static IObservable<Unit> ToObservable(this Task task)`
+  - `static IObservable<Unit> ToObservable(this Task task, IScheduler scheduler)`
+  - `static IObservable<Unit> ToObservable(this Task task, TaskObservationOptions options)`
+  - `static IObservable<TResult> ToObservable<TResult>(this Task<TResult> task)`
+  - `static IObservable<TResult> ToObservable<TResult>(this Task<TResult> task, IScheduler scheduler)`
+  - `static IObservable<TResult> ToObservable<TResult>(this Task<TResult> task, TaskObservationOptions options)`
+
+</details>
 
 ## Rust-only files
 
@@ -948,6 +801,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | Rust file | Reason | Types defined |
 |---|---|---|
 | `internal/operator.rs` | the shared shape of the operators with one source (`OperatorSink`, `unary`), which upstream writes out in each Producer | `OperatorSink`, `UnaryOperator` |
+| `internal/token_registration.rs` | **unmapped** | `TokenRegistration` |
 | `linq/numeric.rs` | the numeric traits that make Sum, Average, Min and Max one generic method each (reactive.md, section 5.3) | `Averageable`, `Extremum`, `Summable` |
 
 Tests, examples and build scripts (not scanned): `tests/fast_immediate_observer_test.rs`, `tests/mod.rs`, `tests/priority_queue_test.rs`.

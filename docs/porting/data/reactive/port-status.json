@@ -2,23 +2,23 @@
  "upstreamCommit": "89e05b8730107983c3f77af54a52974ae12d37f4",
  "inScope": {
   "files": [
-   237,
+   243,
    313,
    27
   ],
   "types": [
-   104,
+   109,
    179,
    50
   ],
   "members": [
-   848,
+   992,
    1999,
    790
   ]
  },
  "allProjects": {
-  "membersPresent": 848,
+  "membersPresent": 992,
   "members": 2006,
   "membersNotApplicable": 7,
   "membersOutOfScope": 0
@@ -107,17 +107,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    227,
+    233,
     303,
     27
    ],
    "types": [
-    100,
+    105,
     172,
     50
    ],
    "members": [
-    812,
+    956,
     1936,
     790
    ],
@@ -137,9 +137,9 @@
    "matchKinds": {
     "derive": 6,
     "field": 6,
-    "fn": 343,
-    "free fn": 2,
-    "overload fn": 432,
+    "fn": 366,
+    "free fn": 10,
+    "overload fn": 545,
     "trait": 16,
     "trait fn": 4,
     "variant": 3
@@ -188,7 +188,7 @@
      "concurrency/scheduled_item.rs"
     ],
     "Concurrency/Scheduler.Async.cs": [
-     "concurrency/scheduler.rs"
+     "concurrency/scheduler_async.rs"
     ],
     "Concurrency/Scheduler.Recursive.cs": [
      "concurrency/scheduler.rs"
@@ -211,6 +211,9 @@
     "Concurrency/SchedulerDefaults.cs": [
      "concurrency/scheduler_defaults.rs"
     ],
+    "Concurrency/SchedulerOperation.cs": [
+     "concurrency/scheduler_async.rs"
+    ],
     "Concurrency/SchedulerWrapper.cs": [
      "concurrency/disable_optimizations_scheduler.rs"
     ],
@@ -222,6 +225,9 @@
     ],
     "Concurrency/Synchronization.cs": [
      "linq/subscribe_on.rs"
+    ],
+    "Concurrency/SynchronizationContextScheduler.cs": [
+     "concurrency/synchronization_context_scheduler.rs"
     ],
     "Concurrency/VirtualTimeScheduler.Extensions.cs": [
      "concurrency/virtual_time_scheduler.rs"
@@ -240,6 +246,9 @@
     ],
     "Disposables/CompositeDisposable.cs": [
      "disposables/composite_disposable.rs"
+    ],
+    "Disposables/ContextDisposable.cs": [
+     "disposables/context_disposable.rs"
     ],
     "Disposables/Disposable.Utils.cs": [
      "disposables/disposable.rs"
@@ -328,6 +337,9 @@
     ],
     "Internal/Sink.cs": [
      "internal/sink.rs"
+    ],
+    "Internal/SynchronizationContextExtensions.cs": [
+     "concurrency/synchronization_context_scheduler.rs"
     ],
     "Internal/SynchronizedObserver.cs": [
      "observer.rs"
@@ -755,7 +767,12 @@
      "linq/observable_ext.rs"
     ],
     "Linq/QueryLanguage.Async.cs": [
-     "linq/start.rs"
+     "linq/start.rs",
+     "linq/task_observable.rs",
+     "linq/to_async.rs"
+    ],
+    "Linq/QueryLanguage.Awaiter.cs": [
+     "linq/run_async.rs"
     ],
     "Linq/QueryLanguage.Binding.cs": [
      "linq/publish.rs",
@@ -769,7 +786,10 @@
      "linq/to_observable.rs"
     ],
     "Linq/QueryLanguage.Creation.cs": [
-     "linq/creation.rs"
+     "linq/create_async.rs",
+     "linq/creation.rs",
+     "linq/defer_async.rs",
+     "linq/using_async.rs"
     ],
     "Linq/QueryLanguage.Events.cs": [
      "linq/from_event.rs",
@@ -779,6 +799,7 @@
      "linq/case.rs",
      "linq/do_while.rs",
      "linq/for_.rs",
+     "linq/for_each_async.rs",
      "linq/if_.rs",
      "linq/while_.rs"
     ],
@@ -854,6 +875,9 @@
     "Subjects/SubjectBase.cs": [
      "subjects/subject.rs"
     ],
+    "Threading/Tasks/TaskObservableExtensions.cs": [
+     "linq/task_observable.rs"
+    ],
     "TimeInterval.cs": [
      "time_interval.rs"
     ],
@@ -866,6 +890,7 @@
    },
    "rustOnly": [
     "internal/operator.rs",
+    "internal/token_registration.rs",
     "linq/numeric.rs"
    ]
   }

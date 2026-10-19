@@ -12,9 +12,9 @@ Present / missing / waived; the percentage is `present / (total - waived)`.
 
 | | Present | Missing | Waived | Total | % |
 |---|---:|---:|---:|---:|---:|
-| Files | 237 | 49 | 27 | 313 | 82.9% |
-| Types | 104 | 25 | 50 | 179 | 80.6% |
-| Members | 848 | 361 | 790 | 1999 | 70.1% |
+| Files | 243 | 43 | 27 | 313 | 85.0% |
+| Types | 109 | 20 | 50 | 179 | 84.5% |
+| Members | 992 | 217 | 790 | 1999 | 82.1% |
 
 38 upstream files are not applicable and not counted (listed with the reason on the pages).
 
@@ -23,7 +23,7 @@ Present / missing / waived; the percentage is `present / (total - waived)`.
 | Project | Upstream path | FerroUI path | Crate | Files | Types | Members | % |
 |---|---|---|---|---:|---:|---:|---:|
 | [Microsoft.Reactive.Testing](Microsoft.Reactive.Testing.md) | `Rx.NET/Source/src/Microsoft.Reactive.Testing` | `src/FerroUI.Reactive.Testing` | `ferroui-reactive-testing` | 10/10 | 4/7 | 36/63 | 57.1% |
-| [System.Reactive](System.Reactive.md) | `Rx.NET/Source/src/System.Reactive` | `src/FerroUI.Reactive` | `ferroui-reactive` | 227/303 (27 waived) | 100/172 (50 waived) | 812/1936 (790 waived) | 70.9% |
+| [System.Reactive](System.Reactive.md) | `Rx.NET/Source/src/System.Reactive` | `src/FerroUI.Reactive` | `ferroui-reactive` | 233/303 (27 waived) | 105/172 (50 waived) | 956/1936 (790 waived) | 83.4% |
 
 ## Tests
 
@@ -31,7 +31,7 @@ From the reports of `scripts/port-status/test_gaps.py --reference reactive --all
 
 | Upstream test project | Tests | Ported | Stated not ported: waived | Stated not ported: deferred | Waived by file | Missing | Report |
 |---|---:|---:|---:|---:|---:|---:|---|
-| `Rx.NET/Source/tests/Tests.System.Reactive` | 3911 | 2473 | 529 | 97 | 383 | 429 | `test-gaps-system-reactive.txt` |
+| `Rx.NET/Source/tests/Tests.System.Reactive` | 3911 | 2766 | 594 | 0 | 383 | 168 | `test-gaps-system-reactive.txt` |
 
 ## Waived
 
