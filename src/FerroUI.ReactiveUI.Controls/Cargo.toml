@@ -10,6 +10,12 @@ homepage.workspace = true
 readme.workspace = true
 keywords.workspace = true
 categories.workspace = true
+build = "build.rs"
+# The build script exports the type model of the crate (its controls, for markup); Cargo hands the
+# path of the file to the build scripts of the crates that depend on this one (docs/porting/xaml.md,
+# 9.5.13 and 9.6.3): an application whose views derive from `ReactiveUserControlBase` or
+# `ReactiveWindowBase` in markup names them.
+links = "ferroui_reactiveui_controls_xaml"
 
 # Unit tests live next to the code (the `tests/` module of the library), not as integration test
 # targets.
@@ -27,6 +33,9 @@ ferroui-system = { workspace = true }
 ferroui-reactive = { workspace = true }
 ferroui-splat = { workspace = true }
 ferroui-reactiveui = { workspace = true }
+
+[build-dependencies]
+ferroui-build-scan = { workspace = true }
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }

@@ -1262,6 +1262,7 @@ name = "ferroui-reactiveui-controls"
 version = "0.3.0-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-reactive",
  "ferroui-reactiveui",
