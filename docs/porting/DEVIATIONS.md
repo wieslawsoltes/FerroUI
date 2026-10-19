@@ -1085,6 +1085,21 @@ The port of Rx.NET's System.Reactive and Microsoft.Reactive.Testing (`docs/porti
 | `Collect`, `Chunkify` and `MostRecent` give an `IEnumerable<T>` whose `MoveNext` throws an error of the source or of a collector, again at each later call. | They give a `PullEnumerable<T>`: `get_enumerator` subscribes (an error of the first collector is its `Err`), and the enumerator is an iterator of `Result<T, ObservableError>` that ends after its first `Err`; dropping it disposes it. | Representation | A Rust iterator reports a failure as an item, and a fused one is safe in a `for` loop. | #249 |
 | Recorded notifications of a test compare with predicates through subclasses of `Notification<T>` (`ReactiveTest.OnNext(long, Func<T, bool>)`). | Expected notifications are `Expected<T>`: a notification, or a predicate on a value or an error; `assert_messages!` takes either. | Test | `Notification<T>` is an enum of the public API. | #248 |
 
+### Splat (`src/FerroUI.Splat/`, `tests/FerroUI.Splat.Tests/`)
+
+The port of Splat (`docs/porting/reactive.md`, phase 6). The reference is that project.
+
+| Reference | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| The locator (`AppLocator`, `InternalLocator`), the containers of `GlobalGenericFirstDependencyResolver` (`Container<T>`), the mode detector and the state of the builder (`HasBeenBuilt`, `UsingBuilder`) are static state of the process; the override of `WithResolver` flows with the asynchronous context (`AsyncLocal`). | They are state of the thread (`ferro_thread_local!`); the override is that of the thread. | Representation | The resolvers hand out `Rc` services, which belong to their thread (reactive.md, section 5.1). | Phase 6 |
+| Services are registered and resolved by `Type` (`GetService(Type)`, `Register(Func<object>, Type)`, `RegisterConstant(object, Type)`, `NullServiceType`) or by generic methods; `FuncDependencyResolver` is built on the `Type` forms. | Only the generic forms (`get_service::<S>`, `register::<S>`, ...), keyed by the `TypeId` of the service type, which may be a trait object; the `Type` forms, `NullServiceType` and `FuncDependencyResolver` are not ported, nor `Register<TService, TImplementation>()`. A registration counts once, where upstream mirrors a generic one in its `Type` registry and counts it twice. | Missing | Without reflection a `Type` names no constructor; a generic `Rc<I>` does not coerce to `Rc<dyn S>` in a generic method, so the factory forms take the coerced service. | Phase 6 |
+| A constant that is `IDisposable` is disposed with the resolver. | `register_constant_disposable` and `register_lazy_singleton_disposable` are the forms whose values are disposed. | Representation | There is no run-time test for a trait. | Phase 6 |
+| The typed overloads of the loggers (`Debug<TArgument>(..)` and the rest, about 5,000 generated lines) format their arguments when the level is enabled. | Generic methods that take a closure or `format_args!`, called only when the level is enabled. | Representation | Rust formats lazily with closures. | Phase 6 |
+| An exception of a logged action, of a feature usage tracking action or of a releasing function is caught or propagated; `MemoizingMRUCache.InvalidateAll` throws an `AggregateException`. | A panic, caught with `catch_unwind` where upstream catches; `invalidate_all_with(true)` returns an `AggregateReleaseError`. | Representation | | Phase 6 |
+| `ModeDetector` also scans the loaded assemblies for test frameworks, and reads the `AppContext` switch and the main module of a `dotnet` host. | Those checks are left out; the environment variables are read. | Missing | No reflection over assemblies; the others are .NET's. | Phase 6 |
+| `Guid` of .NET. | A version 4 identifier of the crate, made from the random keys of the standard library's hasher. | Representation | The standard library has no `Guid`. | Phase 6 |
+| `MemoizingMRUCache` takes a lock. | Single-threaded, with lookups linear in the size of the cache. | Representation | | Phase 6 |
+
 ## Corrected divergences
 
 Places where the port did work that upstream does not do, or did it differently, and a later change made it match upstream again. They are kept here so a regression can be recognised. Extra allocations and copies on hot paths belong here too: `PORTING-GUIDE.md` rules out allocations on hot paths that upstream avoids.

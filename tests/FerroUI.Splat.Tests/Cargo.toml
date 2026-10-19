@@ -1,0 +1,19 @@
+[package]
+name = "ferroui-splat-tests"
+description = "The unit tests of ferroui-splat, ported from Splat's Splat.Tests, Splat.Logging.Tests and Splat.Builder.Tests"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-splat = { workspace = true }
+ferroui-system = { workspace = true }

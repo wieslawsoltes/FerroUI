@@ -1277,6 +1277,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-splat"
+version = "0.3.0-preview.1"
+dependencies = [
+ "ferroui-system",
+]
+
+[[package]]
+name = "ferroui-splat-tests"
+version = "0.3.0-preview.1"
+dependencies = [
+ "ferroui-splat",
+ "ferroui-system",
+]
+
+[[package]]
 name = "ferroui-system"
 version = "0.3.0-preview.1"
 dependencies = [

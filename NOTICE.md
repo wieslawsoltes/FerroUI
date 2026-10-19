@@ -65,6 +65,12 @@ Avalonia itself incorporates code from other projects (for example WPF-derived l
 - License: MIT, Copyright (c) .NET Foundation and Contributors
 - Used for: `src/FerroUI.Reactive` (a port of System.Reactive), `src/FerroUI.Reactive.Testing` (a port of Microsoft.Reactive.Testing) and their unit tests in `tests/FerroUI.Reactive.Tests`, ported from `Tests.System.Reactive` (`docs/porting/reactive.md`).
 
+## Splat
+
+- Project: <https://github.com/reactiveui/splat> (commit `39466de`)
+- License: MIT, Copyright (c) ReactiveUI 2018 - 2025
+- Used for: `src/FerroUI.Splat` (a port of Splat.Core, Splat.Logging, Splat.Builder, and the mode detection and feature usage tracking of Splat) and its unit tests in `tests/FerroUI.Splat.Tests`, ported from Splat.Tests, Splat.Logging.Tests and Splat.Builder.Tests (`docs/porting/reactive.md`).
+
 ## RemoteViewing
 
 - Project: <https://github.com/quamotion/remoteviewing> (package `Quamotion.RemoteViewing` 1.1.211)

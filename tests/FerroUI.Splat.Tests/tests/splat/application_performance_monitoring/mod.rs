@@ -1,0 +1,7 @@
+//! Ported from `Splat.Tests/ApplicationPerformanceMonitoring` of Splat.
+
+mod base_feature_usage_tracking_tests;
+mod base_view_tracking_tests;
+mod default_feature_usage_tracking_session_coverage_tests;
+mod enable_feature_usage_tracking_extensions_coverage_tests;
+mod func_feature_usage_tracking_manager_coverage_tests;
