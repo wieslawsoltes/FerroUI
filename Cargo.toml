@@ -5,6 +5,7 @@ members = [
     "src/FerroUI.Reactive",
     "src/FerroUI.Reactive.Testing",
     "src/FerroUI.Splat",
+    "src/FerroUI.DynamicData",
     "src/FerroUI.Base",
     "src/FerroUI.Controls",
     "src/FerroUI.Controls.ColorPicker",
@@ -110,6 +111,7 @@ ferroui-system = { version = "=0.3.0-preview.1", path = "src/FerroUI.System" }
 ferroui-reactive = { version = "=0.3.0-preview.1", path = "src/FerroUI.Reactive" }
 ferroui-reactive-testing = { version = "=0.3.0-preview.1", path = "src/FerroUI.Reactive.Testing" }
 ferroui-splat = { version = "=0.3.0-preview.1", path = "src/FerroUI.Splat" }
+ferroui-dynamic-data = { version = "=0.3.0-preview.1", path = "src/FerroUI.DynamicData" }
 ferroui-base = { version = "=0.3.0-preview.1", path = "src/FerroUI.Base" }
 ferroui-controls = { version = "=0.3.0-preview.1", path = "src/FerroUI.Controls" }
 ferroui-controls-color-picker = { version = "=0.3.0-preview.1", path = "src/FerroUI.Controls.ColorPicker" }
