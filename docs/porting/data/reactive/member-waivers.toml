@@ -1,0 +1,156 @@
+# Types and members of Rx.NET that are intentionally not ported, and name aliases. The format is that of
+# docs/porting/data/member-waivers.toml; read by `scripts/port-status/port_status.py --reference reactive`.
+# The waivers are those of docs/porting/reactive.md, section 5 ("Out of scope"). The asynchronous forms (Task,
+# async/await: phase 4) are not waived: until they are ported they are missing.
+#
+# A waiver applies to an item the scanner did not find. Overloads are found by name for this reference
+# (references.toml, `overloads = "name"`), so a waiver that names a method overload (by name or by a glob on its
+# signature) waives it even when another overload of the name exists.
+#
+# The files of the platforms the net8.0 target does not compile (Windows Forms, WPF, WinRT) and the internal files of
+# the waived parts are in path-overrides.toml.
+
+# ---------------------------------------------------------------- IQbservable, Qbservable, expression-tree providers
+
+[[waive]]
+type = "System.Reactive.Linq.Qbservable*"
+reason = "IQbservable and the expression-tree query providers (reactive.md, section 5)"
+
+[[waive]]
+type = "System.Reactive.Linq.IQbservable*"
+reason = "IQbservable and the expression-tree query providers (reactive.md, section 5)"
+
+[[waive]]
+type = "System.Reactive.Joins.Queryable*"
+reason = "IQbservable and the expression-tree query providers (reactive.md, section 5): the join patterns over expressions"
+
+[[waive]]
+type = "System.Reactive.Linq.LocalQueryMethodImplementationTypeAttribute"
+reason = "IQbservable and the expression-tree query providers (reactive.md, section 5): the attribute that maps a Qbservable method to its local implementation"
+
+[[waive]]
+type = "System.Reactive.Linq.QueryDebugger"
+reason = "IQbservable and the expression-tree query providers (reactive.md, section 5): the debugging services of the query providers"
+
+# ---------------------------------------------------------------- FromEventPattern by event name
+
+[[waive]]
+type = "System.Reactive.Linq.Observable"
+member = "*string eventName*"
+reason = "FromEventPattern by event name: the event is found by reflection (reactive.md, section 5)"
+
+# ---------------------------------------------------------------- the blocking operators
+
+[[waive]]
+type = "System.Reactive.Linq.Observable"
+member = "Wait"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+type = "System.Reactive.Linq.Observable"
+member = "First"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+type = "System.Reactive.Linq.Observable"
+member = "FirstOrDefault"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5); the default form of First"
+
+[[waive]]
+type = "System.Reactive.Linq.Observable"
+member = "Last"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+type = "System.Reactive.Linq.Observable"
+member = "LastOrDefault"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5); the default form of Last"
+
+[[waive]]
+type = "System.Reactive.Linq.Observable"
+member = "Single"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+type = "System.Reactive.Linq.Observable"
+member = "SingleOrDefault"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5); the default form of Single"
+
+[[waive]]
+type = "System.Reactive.Linq.Observable"
+member = "ForEach"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5); ForEachAsync is not waived"
+
+[[waive]]
+type = "System.Reactive.Linq.Observable"
+member = "GetEnumerator"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+type = "System.Reactive.Linq.Observable"
+member = "Latest"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+type = "System.Reactive.Linq.Observable"
+member = "Next"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+type = "System.Reactive.Linq.Observable"
+member = "ToEnumerable"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+# ---------------------------------------------------------------- Remoting
+
+[[waive]]
+type = "System.Reactive.Linq.RemotingObservable"
+reason = "Remoting (.NET Framework remoting; reactive.md, section 5)"
+
+# ---------------------------------------------------------------- the thread-based schedulers
+
+[[waive]]
+type = "System.Reactive.Concurrency.EventLoopScheduler"
+reason = "thread-based scheduler: observables are single-threaded (reactive.md, sections 5 and 5.1)"
+
+[[waive]]
+type = "System.Reactive.Concurrency.NewThreadScheduler"
+reason = "thread-based scheduler: observables are single-threaded (reactive.md, sections 5 and 5.1)"
+
+[[waive]]
+type = "System.Reactive.Concurrency.ThreadPoolScheduler"
+reason = "thread-based scheduler: observables are single-threaded (reactive.md, sections 5 and 5.1)"
+
+[[waive]]
+type = "System.Reactive.Concurrency.ISchedulerLongRunning"
+reason = "thread-based scheduler: long-running work on a dedicated thread (reactive.md, sections 5 and 5.1)"
+
+[[waive]]
+type = "System.Reactive.Concurrency.IConcurrencyAbstractionLayer"
+reason = "thread-based scheduler: the threads, timers and sleeps of the platform (reactive.md, sections 5 and 5.1)"
+
+[[waive]]
+type = "System.Reactive.Concurrency.Scheduler"
+member = "*LongRunning*"
+reason = "thread-based scheduler: ISchedulerLongRunning (reactive.md, sections 5 and 5.1)"
+
+[[waive]]
+type = "System.Reactive.Concurrency.Scheduler"
+member = "ThreadPool"
+reason = "thread-based scheduler: the obsolete accessor of ThreadPoolScheduler (reactive.md, sections 5 and 5.1)"
+
+[[waive]]
+type = "System.Reactive.Concurrency.Scheduler"
+member = "NewThread"
+reason = "thread-based scheduler: the obsolete accessor of NewThreadScheduler (reactive.md, sections 5 and 5.1)"
+
+[[waive]]
+type = "System.Reactive.Concurrency.Scheduler"
+member = "TaskPool"
+reason = "thread-based scheduler: the obsolete accessor of TaskPoolScheduler (reactive.md, sections 5 and 5.1)"
+
+# ---------------------------------------------------------------- the PlatformServices enlightenment machinery
+
+[[waive]]
+type = "System.Reactive.PlatformServices.*"
+reason = "the PlatformServices enlightenment machinery: the services a platform plugs in at run time (reactive.md, section 5)"

@@ -1,0 +1,145 @@
+# The upstream tests of Rx.NET that the port has under another name (`[[alias]]`) or does not port for a stated
+# reason (`[[waive]]`). The format is that of docs/porting/data/test-aliases.toml; read by
+# `scripts/port-status/test_gaps.py --reference reactive`.
+#
+# Most reasons are written next to the tests, in the Rust test files (`// Not ported: <Name> - <reason>`), which
+# test_gaps.py reads as stated reasons. This file holds the test files of the API that member-waivers.toml waives
+# (docs/porting/reactive.md, section 5), whose Rust test files the port does not write.
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Linq/QbservableTest.cs"
+test = "*"
+reason = "IQbservable and the expression-tree query providers (reactive.md, section 5)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Linq/QbservableExTest.cs"
+test = "*"
+reason = "IQbservable and the expression-tree query providers (reactive.md, section 5)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Linq/ObservableRemotingTest.cs"
+test = "*"
+reason = "Remoting (reactive.md, section 5)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Linq/Observable/FirstTest.cs"
+test = "*"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Linq/Observable/FirstOrDefaultTest.cs"
+test = "*"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Linq/Observable/LastTest.cs"
+test = "*"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Linq/Observable/LastOrDefaultTest.cs"
+test = "*"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Linq/Observable/SingleTest.cs"
+test = "*"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Linq/Observable/SingleOrDefaultTest.cs"
+test = "*"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Linq/Observable/ForEachTest.cs"
+test = "*"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Linq/Observable/GetEnumeratorTest.cs"
+test = "*"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Linq/Observable/LatestTest.cs"
+test = "*"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Linq/Observable/NextTest.cs"
+test = "*"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Linq/Observable/ToEnumerableTest.cs"
+test = "*"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Linq/Observable/WaitTest.cs"
+test = "*"
+reason = "blocking operator: it would deadlock the only thread (reactive.md, section 5)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Concurrency/EventLoopSchedulerTest.cs"
+test = "*"
+reason = "thread-based scheduler: observables are single-threaded (reactive.md, sections 5 and 5.1)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Concurrency/NewThreadSchedulerTest.cs"
+test = "*"
+reason = "thread-based scheduler: observables are single-threaded (reactive.md, sections 5 and 5.1)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Concurrency/TaskPoolSchedulerTest.cs"
+test = "*"
+reason = "thread-based scheduler: observables are single-threaded (reactive.md, sections 5 and 5.1)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Concurrency/ThreadPoolSchedulerTest.cs"
+test = "*"
+reason = "thread-based scheduler: observables are single-threaded (reactive.md, sections 5 and 5.1)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/DefaultConcurrencyAbstractionLayerTest.cs"
+test = "*"
+reason = "thread-based scheduler: observables are single-threaded (reactive.md, sections 5 and 5.1)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/SystemClockTest.cs"
+test = "*"
+reason = "the PlatformServices enlightenment machinery (reactive.md, section 5): SystemClock and its monitors"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Concurrency/ControlSchedulerTest.cs"
+test = "*"
+reason = "compiled only for the Windows targets: the Windows Forms and WPF schedulers (path-overrides.toml, Platforms)"
+
+[[waive]]
+project = "Tests.System.Reactive"
+file = "Tests/Concurrency/DispatcherSchedulerTest.cs"
+test = "*"
+reason = "compiled only for the Windows targets: the Windows Forms and WPF schedulers (path-overrides.toml, Platforms)"

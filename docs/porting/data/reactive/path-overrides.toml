@@ -1,0 +1,151 @@
+# Exceptions to the default upstream-file -> Rust-file rule for the Rx.NET reference. The format is that of
+# docs/porting/data/path-overrides.toml, with one more table, `[[dir]]`; read by
+# `scripts/port-status/port_status.py --reference reactive`.
+#
+# Default rule (no entry needed):
+#   Rx.NET/Source/src/System.Reactive/Subjects/BehaviorSubject.cs -> src/FerroUI.Reactive/subjects/behavior_subject.rs
+#   an upstream file the module documentation of a Rust file cites (`//! ... (`Internal/Sink.cs`)`) -> that file
+#   (references.toml, `doc_citations`)
+#
+# [[dir]]
+#   project  = upstream project name; omit to match in every project
+#   upstream = an upstream directory below the project
+#   rust     = the Rust directory of its files, below the crate ("" for the crate root)
+
+# ---------------------------------------------------------------- System.Reactive
+
+[[dir]]
+project = "System.Reactive"
+upstream = "Linq/Observable"
+rust = "linq"
+
+[[map]]
+project = "System.Reactive"
+upstream = ["Linq/Observable.Aggregates.cs", "Linq/Observable.Async.cs", "Linq/Observable.Awaiter.cs", "Linq/Observable.Binding.cs",
+            "Linq/Observable.Blocking.cs", "Linq/Observable.Concurrency.cs", "Linq/Observable.Conversions.cs", "Linq/Observable.Creation.cs",
+            "Linq/Observable.Events.cs", "Linq/Observable.Imperative.cs", "Linq/Observable.Joins.cs", "Linq/Observable.Multiple.CombineLatest.cs",
+            "Linq/Observable.Multiple.Zip.cs", "Linq/Observable.Multiple.cs", "Linq/Observable.Single.cs",
+            "Linq/Observable.StandardSequenceOperators.cs", "Linq/Observable.Time.cs", "Linq/Observable_.cs", "Linq/ObservableEx.cs"]
+kind = "merged"
+rust = ["linq/creation.rs", "linq/observable_ext.rs"]
+types = { Observable = ["Observable", "ObservableExt", "ConnectableObservableExt"], ObservableEx = ["Observable", "ObservableExt", "ConnectableObservableExt"] }
+reason = "the partial static class Observable (and the experimental ObservableEx): its static methods are associated functions of `Observable`, its extension methods are methods of `ObservableExt` (and of `ConnectableObservableExt` for the connectable sequences), written by the `*_methods!` macro of each operator module"
+
+[[map]]
+project = "System.Reactive"
+upstream = ["Observable.Extensions.cs"]
+kind = "merged"
+rust = ["linq/subscribe.rs", "linq/observable_ext.rs"]
+types = { ObservableExtensions = ["ObservableExt"] }
+reason = "the Subscribe overloads of ObservableExtensions are methods of `ObservableExt` (`subscribe_methods!`)"
+
+[[map]]
+project = "System.Reactive"
+upstream = ["AnonymousObservable.cs"]
+kind = "merged"
+rust = "linq/creation.rs"
+reason = "AnonymousObservable<T> is the sequence of `Observable::create`"
+
+[[map]]
+project = "System.Reactive"
+upstream = ["Unit.cs"]
+kind = "merged"
+rust = "lib.rs"
+reason = "Unit is Rust's unit type, `pub type Unit = ()`"
+
+[[map]]
+project = "System.Reactive"
+upstream = ["Concurrency/ISchedulerPeriodic.cs", "Concurrency/IStopwatch.cs", "Concurrency/IStopwatchProvider.cs"]
+kind = "merged"
+rust = "concurrency/scheduler.rs"
+reason = "the scheduler services are declared next to IScheduler"
+
+[[map]]
+project = "System.Reactive"
+upstream = ["Disposables/SingleAssignmentDisposableValue.cs"]
+kind = "merged"
+rust = "disposables/single_assignment_disposable.rs"
+reason = "the value form lives next to SingleAssignmentDisposable"
+
+[[map]]
+project = "System.Reactive"
+upstream = ["Subjects/ISubject.Multi.cs"]
+kind = "merged"
+rust = "subjects/subject.rs"
+reason = "ISubject<TSource, TResult> is declared next to ISubject<T>"
+
+[[map]]
+project = "System.Reactive"
+upstream = ["Linq/Observable/FirstLastBlocking.cs", "Linq/Observable/ForEach.cs", "Linq/Observable/GetEnumerator.cs",
+            "Linq/Observable/Latest.cs", "Linq/Observable/Next.cs"]
+kind = "not-applicable"
+reason = "the implementation of the blocking operators, which would deadlock the only thread (reactive.md, section 5; waived in member-waivers.toml)"
+
+[[map]]
+project = "System.Reactive"
+upstream = ["Internal/ReflectionUtils.cs"]
+kind = "not-applicable"
+reason = "FromEventPattern by event name: the reflection that finds the event (reactive.md, section 5)"
+
+[[map]]
+project = "System.Reactive"
+upstream = ["NamespaceDocs.cs", "Threading/Tasks/NamespaceDoc.cs", "Properties/*"]
+kind = "not-applicable"
+reason = "documentation of the namespaces and assembly attributes"
+
+[[map]]
+project = "System.Reactive"
+upstream = ["ExperimentalAttribute.cs"]
+kind = "not-applicable"
+reason = "the attribute that marks the experimental API; the port documents it instead"
+
+[[map]]
+project = "System.Reactive"
+upstream = ["Platforms/Desktop/Concurrency/*", "Platforms/Desktop/Internal/*", "Platforms/Desktop/Linq/ControlObservable.cs",
+            "Platforms/Desktop/Linq/DispatcherObservable.cs", "Platforms/WinRT/*", "Platforms/Windows/*"]
+kind = "not-applicable"
+reason = "compiled only for the Windows and .NET Framework targets: the Windows Forms, WPF and WinRT schedulers, events and asynchronous operations, which Rx 7 keeps out of its reference assemblies; the scheduler of the FerroUI dispatcher is ferroui-reactiveui-controls (reactive.md, section 5.1)"
+
+[[map]]
+project = "System.Reactive"
+upstream = ["ObservableQuery.cs", "Internal/QueryServices.cs"]
+kind = "not-applicable"
+reason = "IQbservable and the expression-tree query providers (reactive.md, section 5): the expression-tree implementation of IQbservable and the services of its providers"
+
+[[map]]
+project = "System.Reactive"
+upstream = ["Internal/ExceptionServices.Default.cs", "Internal/ExceptionServicesImpl.cs", "Internal/HostLifecycleNotifications.Windows.cs"]
+kind = "not-applicable"
+reason = "the PlatformServices enlightenment machinery: the services a platform plugs in at run time (reactive.md, section 5); the files with public types of it are waived in member-waivers.toml"
+
+[[map]]
+project = "System.Reactive"
+upstream = ["Concurrency/ConcurrencyAbstractionLayerImpl.cs"]
+kind = "not-applicable"
+reason = "thread-based scheduling: IConcurrencyAbstractionLayer, the threads, timers and sleeps of the platform (reactive.md, sections 5 and 5.1)"
+
+# ---------------------------------------------------------------- Microsoft.Reactive.Testing
+
+[[map]]
+project = "Microsoft.Reactive.Testing"
+upstream = ["ColdObservable.cs", "HotObservable.cs", "ITestObservable.cs", "ITestObserver.cs", "MockObserver.cs", "ReactiveAssert.cs",
+            "ReactiveTest.cs", "Recorded.cs", "Subscription.cs", "TestScheduler.cs"]
+kind = "merged"
+rust = "lib.rs"
+reason = "the crate is one module"
+
+[[map]]
+project = "Microsoft.Reactive.Testing"
+upstream = ["NamespaceDoc.cs", "Properties/*", "GlobalSuppressions.cs"]
+kind = "not-applicable"
+reason = "documentation of the namespace, code-analysis suppressions and assembly attributes"
+
+# ---------------------------------------------------------------- Rust-only files
+
+[[rust_only]]
+path = "src/FerroUI.Reactive/internal/operator.rs"
+reason = "the shared shape of the operators with one source (`OperatorSink`, `unary`), which upstream writes out in each Producer"
+
+[[rust_only]]
+path = "src/FerroUI.Reactive/linq/numeric.rs"
+reason = "the numeric traits that make Sum, Average, Min and Max one generic method each (reactive.md, section 5.3)"

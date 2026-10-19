@@ -1,0 +1,75 @@
+# The upstream references the port tracks. Each has its own name, checkout, tracked commit, project list and data
+# files; scripts/port-status/run.sh, port_status.py and test_gaps.py read this file (through references.py).
+# See scripts/port-status/README.md.
+#
+# [[reference]]
+#   name          the name given to `--reference` (run.sh, port_status.py, test_gaps.py)
+#   title         how the documents name the reference
+#   plan          the document of the plan of its port, relative to the repository (linked from the index)
+#   default       true for the reference the scripts use when no `--reference` is given (exactly one)
+#   checkout      the upstream checkout, relative to the repository or absolute; only read
+#   checkout_env  the environment variable that overrides `checkout`
+#   projects      the project list of scripts/api-extract, relative to the repository
+#   data          the data directory: upstream-api.json (the extraction, whose `upstreamCommit` is the tracked commit),
+#                 port-status.json, path-overrides.toml, member-waivers.toml, test-aliases.toml, test-gaps-*.txt
+#   tracking      the directory of the per-project pages
+#   documents     "framework": docs/porting/TRACKING.md, REMAINING.md and TESTS.md besides the pages (the reference of
+#                 the port itself); "library": the pages and an index, `<tracking>/TRACKING.md`
+#
+# Matching options (all off for the framework reference; the rules are in the README):
+#   api              "all" (public, protected and internal types and members) or "public" (public and protected
+#                    types and members, with the members of explicit interface implementations; the files of
+#                    internal types still count as files)
+#   overloads        "count" (the n-th overload needs an n-th Rust function) or "name" (every overload is found
+#                    when the Rust function of the name, or of the name with a suffix, exists)
+#   method_macros    true: the functions that a `macro_rules!` of the crate writes into a trait or an `impl` at
+#                    the place it is invoked (`select_methods!();` in `trait ObservableExt`) count as items there
+#   doc_citations    true: an upstream file without a Rust file at its path (or a `[[map]]`) is present in the Rust
+#                    files whose module documentation (the leading `//!` lines) names it in backticks
+#                    (`//! `Select` (`Linq/Observable/Select.cs`).`)
+#   waived_files     true: a file that is missing and whose types are all waived counts as a waived file
+#   arity_names      true: a generic type is also looked for under its name with its number of type parameters
+#                    (`Pattern<T1, T2>` as `Pattern2`), the form of the types a macro writes per arity
+#
+# Tests (test_gaps.py):
+#   test_projects    [[short name, test project below the checkout], ...]; default: the table PROJECTS of test_gaps.py
+#   test_roots       the directories of the port searched for Rust tests; default ["src", "tests"]
+#   test_attributes  extra attribute names that mark a C# test method (MSTest's `TestMethod`)
+#   stated_reasons   true: a line `// Not ported: <Name> - <reason>` in the Rust test file of an upstream test file
+#                    states why that test is not ported; such a test counts as deferred when the reason names a
+#                    later phase, else as waived, not as missing
+#   test_files       how an upstream test file names its Rust file: "snake" (`Tests/Linq/Observable/SelectTest.cs`
+#                    -> `tests/linq/observable/select_test.rs`, below the first test root)
+
+[[reference]]
+name = "avalonia"
+title = "the UI framework"
+default = true
+checkout = "../Avalonia"
+checkout_env = "UPSTREAM"
+projects = "scripts/api-extract/projects.json"
+data = "docs/porting/data"
+tracking = "docs/porting/tracking"
+documents = "framework"
+
+[[reference]]
+name = "reactive"
+title = "Rx.NET"
+plan = "docs/porting/reactive.md"
+checkout = "/Volumes/1TB-macOS/reactive-ref/reactive"
+checkout_env = "RX_UPSTREAM"
+projects = "scripts/api-extract/projects-reactive.json"
+data = "docs/porting/data/reactive"
+tracking = "docs/porting/tracking/reactive"
+documents = "library"
+api = "public"
+overloads = "name"
+method_macros = true
+doc_citations = true
+waived_files = true
+arity_names = true
+test_projects = [["system-reactive", "Rx.NET/Source/tests/Tests.System.Reactive"]]
+test_roots = ["tests/FerroUI.Reactive.Tests", "src/FerroUI.Reactive", "src/FerroUI.Reactive.Testing"]
+test_attributes = ["TestMethod", "DataTestMethod"]
+stated_reasons = true
+test_files = "snake"

@@ -1,0 +1,14 @@
+{
+  "//": "Project list of the Rx.NET reference (scripts/port-status/references.toml, `reactive`), shared by scripts/api-extract and scripts/port-status. The keys are those of projects.json.",
+  "//path": "Upstream directory relative to the Rx.NET checkout (dotnet/reactive).",
+  "//preprocessorSymbols": "The net8.0 target of System.Reactive (Directory.build.targets: HAS_TRIMMABILITY_ATTRIBUTES), plus HAS_REMOTING so that the Remoting API (Platforms/Desktop, compiled for net472) is extracted and waived with its reason instead of disappearing.",
+  "preprocessorSymbols": ["NET", "NET6_0_OR_GREATER", "NET7_0_OR_GREATER", "NET8_0_OR_GREATER", "NETCOREAPP", "NETCOREAPP3_0_OR_GREATER", "NETCOREAPP3_1_OR_GREATER", "NET5_0_OR_GREATER", "HAS_TRIMMABILITY_ATTRIBUTES", "HAS_REMOTING"],
+  "excludeDirs": ["bin", "obj", "node_modules", ".vs", "Generated", "generated"],
+  "//excludeFiles": "Unlike projects.json, `*.Generated.cs` is read: Joins/Pattern.Generated.cs and QueryablePattern.Generated.cs are T4 outputs committed upstream, part of the public API.",
+  "excludeFiles": ["*.g.cs", "*.g.i.cs", "*.Designer.cs", "*.designer.cs", "*.AssemblyAttributes.cs"],
+  "projects": [
+    { "path": "Rx.NET/Source/src/System.Reactive", "detail": "full", "name": "System.Reactive", "rust": "src/FerroUI.Reactive", "crate": "ferroui-reactive", "phase": "2-4 - Rx", "priority": "P1" },
+    { "path": "Rx.NET/Source/src/Microsoft.Reactive.Testing", "detail": "full", "name": "Microsoft.Reactive.Testing", "rust": "src/FerroUI.Reactive.Testing", "crate": "ferroui-reactive-testing", "phase": "2 - Rx core", "priority": "P1" }
+  ],
+  "expanded": []
+}

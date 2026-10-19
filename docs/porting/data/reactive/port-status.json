@@ -1,0 +1,875 @@
+{
+ "upstreamCommit": "89e05b8730107983c3f77af54a52974ae12d37f4",
+ "inScope": {
+  "files": [
+   237,
+   313,
+   27
+  ],
+  "types": [
+   104,
+   179,
+   50
+  ],
+  "members": [
+   848,
+   1999,
+   790
+  ]
+ },
+ "allProjects": {
+  "membersPresent": 848,
+  "members": 2006,
+  "membersNotApplicable": 7,
+  "membersOutOfScope": 0
+ },
+ "projects": [
+  {
+   "name": "Microsoft.Reactive.Testing",
+   "path": "Rx.NET/Source/src/Microsoft.Reactive.Testing",
+   "rust": "src/FerroUI.Reactive.Testing",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    10,
+    10,
+    0
+   ],
+   "types": [
+    4,
+    7,
+    0
+   ],
+   "members": [
+    36,
+    63,
+    0
+   ],
+   "interfaces": [
+    0,
+    2
+   ],
+   "propertyRegistrations": [
+    0,
+    0
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 3,
+   "matchKinds": {
+    "const": 4,
+    "derive": 4,
+    "field": 4,
+    "fn": 11,
+    "overload fn": 8,
+    "trait": 5
+   },
+   "presentFiles": {
+    "ColdObservable.cs": [
+     "lib.rs"
+    ],
+    "HotObservable.cs": [
+     "lib.rs"
+    ],
+    "ITestObservable.cs": [
+     "lib.rs"
+    ],
+    "ITestObserver.cs": [
+     "lib.rs"
+    ],
+    "MockObserver.cs": [
+     "lib.rs"
+    ],
+    "ReactiveAssert.cs": [
+     "lib.rs"
+    ],
+    "ReactiveTest.cs": [
+     "lib.rs"
+    ],
+    "Recorded.cs": [
+     "lib.rs"
+    ],
+    "Subscription.cs": [
+     "lib.rs"
+    ],
+    "TestScheduler.cs": [
+     "lib.rs"
+    ]
+   },
+   "rustOnly": []
+  },
+  {
+   "name": "System.Reactive",
+   "path": "Rx.NET/Source/src/System.Reactive",
+   "rust": "src/FerroUI.Reactive",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    227,
+    303,
+    27
+   ],
+   "types": [
+    100,
+    172,
+    50
+   ],
+   "members": [
+    812,
+    1936,
+    790
+   ],
+   "interfaces": [
+    11,
+    26
+   ],
+   "propertyRegistrations": [
+    0,
+    0
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 35,
+   "matchKinds": {
+    "derive": 6,
+    "field": 6,
+    "fn": 343,
+    "free fn": 2,
+    "overload fn": 432,
+    "trait": 16,
+    "trait fn": 4,
+    "variant": 3
+   },
+   "presentFiles": {
+    "AnonymousObservable.cs": [
+     "linq/creation.rs"
+    ],
+    "AnonymousObserver.cs": [
+     "observer.rs"
+    ],
+    "Concurrency/AsyncLock.cs": [
+     "concurrency/async_lock.rs"
+    ],
+    "Concurrency/CurrentThreadScheduler.cs": [
+     "concurrency/current_thread_scheduler.rs"
+    ],
+    "Concurrency/DisableOptimizationsScheduler.cs": [
+     "concurrency/disable_optimizations_scheduler.rs"
+    ],
+    "Concurrency/HistoricalScheduler.cs": [
+     "concurrency/historical_scheduler.rs"
+    ],
+    "Concurrency/IScheduler.cs": [
+     "concurrency/scheduler.rs"
+    ],
+    "Concurrency/ISchedulerPeriodic.cs": [
+     "concurrency/scheduler.rs"
+    ],
+    "Concurrency/IStopwatch.cs": [
+     "concurrency/scheduler.rs"
+    ],
+    "Concurrency/IStopwatchProvider.cs": [
+     "concurrency/scheduler.rs"
+    ],
+    "Concurrency/ImmediateScheduler.cs": [
+     "concurrency/immediate_scheduler.rs"
+    ],
+    "Concurrency/LocalScheduler.TimerQueue.cs": [
+     "concurrency/local_scheduler.rs"
+    ],
+    "Concurrency/LocalScheduler.cs": [
+     "concurrency/local_scheduler.rs"
+    ],
+    "Concurrency/ScheduledItem.cs": [
+     "concurrency/scheduled_item.rs"
+    ],
+    "Concurrency/Scheduler.Async.cs": [
+     "concurrency/scheduler.rs"
+    ],
+    "Concurrency/Scheduler.Recursive.cs": [
+     "concurrency/scheduler.rs"
+    ],
+    "Concurrency/Scheduler.Services.Emulation.cs": [
+     "concurrency/scheduler.rs"
+    ],
+    "Concurrency/Scheduler.Services.cs": [
+     "concurrency/scheduler.rs"
+    ],
+    "Concurrency/Scheduler.Simple.cs": [
+     "concurrency/scheduler.rs"
+    ],
+    "Concurrency/Scheduler.Wrappers.cs": [
+     "concurrency/scheduler.rs"
+    ],
+    "Concurrency/Scheduler.cs": [
+     "concurrency/scheduler.rs"
+    ],
+    "Concurrency/SchedulerDefaults.cs": [
+     "concurrency/scheduler_defaults.rs"
+    ],
+    "Concurrency/SchedulerWrapper.cs": [
+     "concurrency/disable_optimizations_scheduler.rs"
+    ],
+    "Concurrency/Synchronization.ObserveOn.cs": [
+     "linq/observe_on.rs"
+    ],
+    "Concurrency/Synchronization.Synchronize.cs": [
+     "linq/synchronize.rs"
+    ],
+    "Concurrency/Synchronization.cs": [
+     "linq/subscribe_on.rs"
+    ],
+    "Concurrency/VirtualTimeScheduler.Extensions.cs": [
+     "concurrency/virtual_time_scheduler.rs"
+    ],
+    "Concurrency/VirtualTimeScheduler.cs": [
+     "concurrency/virtual_time_scheduler.rs"
+    ],
+    "Disposables/AnonymousDisposable.cs": [
+     "disposables/disposable.rs"
+    ],
+    "Disposables/BooleanDisposable.cs": [
+     "disposables/boolean_disposable.rs"
+    ],
+    "Disposables/CancellationDisposable.cs": [
+     "disposables/cancellation_disposable.rs"
+    ],
+    "Disposables/CompositeDisposable.cs": [
+     "disposables/composite_disposable.rs"
+    ],
+    "Disposables/Disposable.Utils.cs": [
+     "disposables/disposable.rs"
+    ],
+    "Disposables/Disposable.cs": [
+     "disposables/disposable.rs"
+    ],
+    "Disposables/ICancelable.cs": [
+     "disposables/disposable.rs"
+    ],
+    "Disposables/MultipleAssignmentDisposable.cs": [
+     "disposables/multiple_assignment_disposable.rs"
+    ],
+    "Disposables/RefCountDisposable.cs": [
+     "disposables/ref_count_disposable.rs"
+    ],
+    "Disposables/ScheduledDisposable.cs": [
+     "disposables/scheduled_disposable.rs"
+    ],
+    "Disposables/SerialDisposable.cs": [
+     "disposables/serial_disposable.rs"
+    ],
+    "Disposables/SingleAssignmentDisposable.cs": [
+     "disposables/single_assignment_disposable.rs"
+    ],
+    "Disposables/SingleAssignmentDisposableValue.cs": [
+     "disposables/single_assignment_disposable.rs"
+    ],
+    "Disposables/StableCompositeDisposable.cs": [
+     "disposables/stable_composite_disposable.rs"
+    ],
+    "EventPattern.cs": [
+     "linq/event_pattern.rs"
+    ],
+    "EventPatternSource.cs": [
+     "linq/event_pattern.rs"
+    ],
+    "EventPatternSourceBase.cs": [
+     "linq/event_pattern.rs"
+    ],
+    "EventSource.cs": [
+     "linq/to_event.rs"
+    ],
+    "IEventPattern.cs": [
+     "linq/event_pattern.rs"
+    ],
+    "IEventPatternSource.cs": [
+     "linq/event_pattern.rs"
+    ],
+    "IEventSource.cs": [
+     "linq/event_pattern.rs"
+    ],
+    "Internal/AsyncLockObserver.cs": [
+     "observer.rs"
+    ],
+    "Internal/AutoDetachObserver.cs": [
+     "internal/sink.rs"
+    ],
+    "Internal/ConcatSink.cs": [
+     "linq/catch.rs",
+     "linq/concat.rs"
+    ],
+    "Internal/Grouping.cs": [
+     "linq/group_by.rs"
+    ],
+    "Internal/HalfSerializer.cs": [
+     "internal/half_serializer.rs"
+    ],
+    "Internal/Map.cs": [
+     "linq/group_by.rs"
+    ],
+    "Internal/NopObserver.cs": [
+     "internal/sink.rs"
+    ],
+    "Internal/PriorityQueue.cs": [
+     "internal/priority_queue.rs"
+    ],
+    "Internal/Producer.cs": [
+     "internal/sink.rs"
+    ],
+    "Internal/SafeObserver.cs": [
+     "internal/sink.rs"
+    ],
+    "Internal/ScheduledObserver.cs": [
+     "internal/scheduled_observer.rs"
+    ],
+    "Internal/Sink.cs": [
+     "internal/sink.rs"
+    ],
+    "Internal/SynchronizedObserver.cs": [
+     "observer.rs"
+    ],
+    "Internal/TailRecursiveSink.cs": [
+     "linq/catch.rs",
+     "linq/concat.rs"
+    ],
+    "Joins/ActivePlan.cs": [
+     "linq/joins.rs"
+    ],
+    "Joins/JoinObserver.cs": [
+     "linq/joins.rs"
+    ],
+    "Joins/Pattern.Generated.cs": [
+     "linq/joins.rs"
+    ],
+    "Joins/Pattern.cs": [
+     "linq/joins.rs"
+    ],
+    "Joins/Plan.cs": [
+     "linq/joins.rs"
+    ],
+    "Linq/GroupedObservable.cs": [
+     "linq/grouped_observable.rs"
+    ],
+    "Linq/IGroupedObservable.cs": [
+     "linq/grouped_observable.rs"
+    ],
+    "Linq/Observable.Aggregates.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable.Async.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable.Awaiter.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable.Binding.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable.Blocking.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable.Concurrency.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable.Conversions.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable.Creation.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable.Events.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable.Imperative.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable.Joins.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable.Multiple.CombineLatest.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable.Multiple.Zip.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable.Multiple.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable.Single.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable.StandardSequenceOperators.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable.Time.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable/AddRef.cs": [
+     "linq/window.rs"
+    ],
+    "Linq/Observable/Aggregate.cs": [
+     "linq/aggregate.rs"
+    ],
+    "Linq/Observable/All.cs": [
+     "linq/all.rs"
+    ],
+    "Linq/Observable/Amb.cs": [
+     "linq/amb.rs"
+    ],
+    "Linq/Observable/AmbMany.cs": [
+     "linq/amb.rs"
+    ],
+    "Linq/Observable/Any.cs": [
+     "linq/any.rs"
+    ],
+    "Linq/Observable/AppendPrepend.cs": [
+     "linq/append_prepend.rs"
+    ],
+    "Linq/Observable/AsObservable.cs": [
+     "linq/as_observable.rs"
+    ],
+    "Linq/Observable/AutoConnect.cs": [
+     "linq/auto_connect.rs"
+    ],
+    "Linq/Observable/Average.cs": [
+     "linq/average.rs"
+    ],
+    "Linq/Observable/Buffer.cs": [
+     "linq/buffer.rs"
+    ],
+    "Linq/Observable/Case.cs": [
+     "linq/case.rs"
+    ],
+    "Linq/Observable/Cast.cs": [
+     "linq/cast.rs"
+    ],
+    "Linq/Observable/Catch.cs": [
+     "linq/catch.rs"
+    ],
+    "Linq/Observable/Collect.cs": [
+     "linq/collect.rs"
+    ],
+    "Linq/Observable/CombineLatest.NAry.cs": [
+     "linq/combine_latest.rs"
+    ],
+    "Linq/Observable/CombineLatest.cs": [
+     "linq/combine_latest.rs"
+    ],
+    "Linq/Observable/Concat.cs": [
+     "linq/concat.rs"
+    ],
+    "Linq/Observable/ConcatMany.cs": [
+     "linq/concat.rs"
+    ],
+    "Linq/Observable/Contains.cs": [
+     "linq/contains.rs"
+    ],
+    "Linq/Observable/Count.cs": [
+     "linq/count.rs"
+    ],
+    "Linq/Observable/DefaultIfEmpty.cs": [
+     "linq/default_if_empty.rs"
+    ],
+    "Linq/Observable/Defer.cs": [
+     "linq/defer.rs"
+    ],
+    "Linq/Observable/Delay.cs": [
+     "linq/delay.rs"
+    ],
+    "Linq/Observable/DelaySubscription.cs": [
+     "linq/delay_subscription.rs"
+    ],
+    "Linq/Observable/Dematerialize.cs": [
+     "linq/dematerialize.rs"
+    ],
+    "Linq/Observable/Distinct.cs": [
+     "linq/distinct.rs"
+    ],
+    "Linq/Observable/DistinctUntilChanged.cs": [
+     "linq/distinct_until_changed.rs"
+    ],
+    "Linq/Observable/Do.cs": [
+     "linq/do_.rs"
+    ],
+    "Linq/Observable/DoWhile.cs": [
+     "linq/do_while.rs"
+    ],
+    "Linq/Observable/ElementAt.cs": [
+     "linq/element_at.rs"
+    ],
+    "Linq/Observable/ElementAtOrDefault.cs": [
+     "linq/element_at.rs"
+    ],
+    "Linq/Observable/Empty.cs": [
+     "linq/creation.rs"
+    ],
+    "Linq/Observable/Finally.cs": [
+     "linq/finally.rs"
+    ],
+    "Linq/Observable/FirstAsync.cs": [
+     "linq/first_async.rs"
+    ],
+    "Linq/Observable/FirstOrDefaultAsync.cs": [
+     "linq/first_async.rs"
+    ],
+    "Linq/Observable/For.cs": [
+     "linq/for_.rs"
+    ],
+    "Linq/Observable/FromEvent.cs": [
+     "linq/from_event.rs"
+    ],
+    "Linq/Observable/FromEventPattern.cs": [
+     "linq/from_event_pattern.rs"
+    ],
+    "Linq/Observable/Generate.cs": [
+     "linq/generate.rs"
+    ],
+    "Linq/Observable/GroupBy.cs": [
+     "linq/group_by.rs"
+    ],
+    "Linq/Observable/GroupByUntil.cs": [
+     "linq/group_by_until.rs"
+    ],
+    "Linq/Observable/GroupJoin.cs": [
+     "linq/group_join.rs"
+    ],
+    "Linq/Observable/If.cs": [
+     "linq/if_.rs"
+    ],
+    "Linq/Observable/IgnoreElements.cs": [
+     "linq/ignore_elements.rs"
+    ],
+    "Linq/Observable/IsEmpty.cs": [
+     "linq/is_empty.rs"
+    ],
+    "Linq/Observable/Join.cs": [
+     "linq/join.rs"
+    ],
+    "Linq/Observable/LastAsync.cs": [
+     "linq/last_async.rs"
+    ],
+    "Linq/Observable/LastOrDefaultAsync.cs": [
+     "linq/last_async.rs"
+    ],
+    "Linq/Observable/LongCount.cs": [
+     "linq/count.rs"
+    ],
+    "Linq/Observable/Materialize.cs": [
+     "linq/materialize.rs"
+    ],
+    "Linq/Observable/Max.cs": [
+     "linq/max.rs"
+    ],
+    "Linq/Observable/MaxBy.cs": [
+     "linq/max_by.rs"
+    ],
+    "Linq/Observable/Merge.cs": [
+     "linq/merge.rs"
+    ],
+    "Linq/Observable/Min.cs": [
+     "linq/min.rs"
+    ],
+    "Linq/Observable/MinBy.cs": [
+     "linq/min_by.rs"
+    ],
+    "Linq/Observable/MostRecent.cs": [
+     "linq/most_recent.rs"
+    ],
+    "Linq/Observable/Multicast.cs": [
+     "linq/multicast.rs"
+    ],
+    "Linq/Observable/Never.cs": [
+     "linq/creation.rs"
+    ],
+    "Linq/Observable/OfType.cs": [
+     "linq/of_type.rs"
+    ],
+    "Linq/Observable/OnErrorResumeNext.cs": [
+     "linq/on_error_resume_next.rs"
+    ],
+    "Linq/Observable/PushToPullAdapter.cs": [
+     "linq/push_to_pull_adapter.rs"
+    ],
+    "Linq/Observable/Range.cs": [
+     "linq/range.rs"
+    ],
+    "Linq/Observable/RefCount.cs": [
+     "linq/ref_count.rs"
+    ],
+    "Linq/Observable/Repeat.cs": [
+     "linq/repeat.rs"
+    ],
+    "Linq/Observable/RepeatWhen.cs": [
+     "linq/repeat_when.rs"
+    ],
+    "Linq/Observable/RetryWhen.cs": [
+     "linq/retry_when.rs"
+    ],
+    "Linq/Observable/Return.cs": [
+     "linq/creation.rs"
+    ],
+    "Linq/Observable/Sample.cs": [
+     "linq/sample.rs"
+    ],
+    "Linq/Observable/Scan.cs": [
+     "linq/scan.rs"
+    ],
+    "Linq/Observable/Select.cs": [
+     "linq/select.rs"
+    ],
+    "Linq/Observable/SelectMany.cs": [
+     "linq/select_many.rs"
+    ],
+    "Linq/Observable/SequenceEqual.cs": [
+     "linq/sequence_equal.rs"
+    ],
+    "Linq/Observable/SingleAsync.cs": [
+     "linq/single_async.rs"
+    ],
+    "Linq/Observable/SingleOrDefaultAsync.cs": [
+     "linq/single_async.rs"
+    ],
+    "Linq/Observable/Skip.cs": [
+     "linq/skip.rs"
+    ],
+    "Linq/Observable/SkipLast.cs": [
+     "linq/skip_last.rs"
+    ],
+    "Linq/Observable/SkipUntil.cs": [
+     "linq/skip_until.rs"
+    ],
+    "Linq/Observable/SkipWhile.cs": [
+     "linq/skip_while.rs"
+    ],
+    "Linq/Observable/Sum.cs": [
+     "linq/sum.rs"
+    ],
+    "Linq/Observable/Switch.cs": [
+     "linq/switch.rs"
+    ],
+    "Linq/Observable/Synchronize.cs": [
+     "linq/synchronize.rs"
+    ],
+    "Linq/Observable/Take.cs": [
+     "linq/take.rs"
+    ],
+    "Linq/Observable/TakeLast.cs": [
+     "linq/take_last.rs"
+    ],
+    "Linq/Observable/TakeLastBuffer.cs": [
+     "linq/take_last_buffer.rs"
+    ],
+    "Linq/Observable/TakeUntil.cs": [
+     "linq/take_until.rs"
+    ],
+    "Linq/Observable/TakeUntilCancellationToken.cs": [
+     "linq/take_until.rs"
+    ],
+    "Linq/Observable/TakeUntilPredicate.cs": [
+     "linq/take_until.rs"
+    ],
+    "Linq/Observable/TakeWhile.cs": [
+     "linq/take_while.rs"
+    ],
+    "Linq/Observable/Throttle.cs": [
+     "linq/throttle.rs"
+    ],
+    "Linq/Observable/Throw.cs": [
+     "linq/creation.rs"
+    ],
+    "Linq/Observable/TimeInterval.cs": [
+     "linq/time_interval_op.rs"
+    ],
+    "Linq/Observable/Timeout.cs": [
+     "linq/timeout.rs"
+    ],
+    "Linq/Observable/Timer.cs": [
+     "linq/timer.rs"
+    ],
+    "Linq/Observable/Timestamp.cs": [
+     "linq/timestamp.rs"
+    ],
+    "Linq/Observable/ToArray.cs": [
+     "linq/to_array.rs"
+    ],
+    "Linq/Observable/ToDictionary.cs": [
+     "linq/to_dictionary.rs"
+    ],
+    "Linq/Observable/ToList.cs": [
+     "linq/to_list.rs"
+    ],
+    "Linq/Observable/ToLookup.cs": [
+     "linq/to_lookup.rs"
+    ],
+    "Linq/Observable/ToObservable.cs": [
+     "linq/to_observable.rs"
+    ],
+    "Linq/Observable/Using.cs": [
+     "linq/using.rs"
+    ],
+    "Linq/Observable/Where.cs": [
+     "linq/where_.rs"
+    ],
+    "Linq/Observable/While.cs": [
+     "linq/while_.rs"
+    ],
+    "Linq/Observable/Window.cs": [
+     "linq/window.rs"
+    ],
+    "Linq/Observable/WithLatestFrom.cs": [
+     "linq/with_latest_from.rs"
+    ],
+    "Linq/Observable/Zip.NAry.cs": [
+     "linq/zip.rs"
+    ],
+    "Linq/Observable/Zip.cs": [
+     "linq/zip.rs"
+    ],
+    "Linq/ObservableEx.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/Observable_.cs": [
+     "linq/creation.rs",
+     "linq/observable_ext.rs"
+    ],
+    "Linq/QueryLanguage.Async.cs": [
+     "linq/start.rs"
+    ],
+    "Linq/QueryLanguage.Binding.cs": [
+     "linq/publish.rs",
+     "linq/replay.rs"
+    ],
+    "Linq/QueryLanguage.Blocking.cs": [
+     "linq/collect.rs"
+    ],
+    "Linq/QueryLanguage.Conversions.cs": [
+     "linq/to_event.rs",
+     "linq/to_observable.rs"
+    ],
+    "Linq/QueryLanguage.Creation.cs": [
+     "linq/creation.rs"
+    ],
+    "Linq/QueryLanguage.Events.cs": [
+     "linq/from_event.rs",
+     "linq/from_event_pattern.rs"
+    ],
+    "Linq/QueryLanguage.Imperative.cs": [
+     "linq/case.rs",
+     "linq/do_while.rs",
+     "linq/for_.rs",
+     "linq/if_.rs",
+     "linq/while_.rs"
+    ],
+    "Linq/QueryLanguage.Joins.cs": [
+     "linq/joins.rs"
+    ],
+    "Linq/QueryLanguage.Multiple.cs": [
+     "linq/buffer.rs",
+     "linq/window.rs"
+    ],
+    "Linq/QueryLanguage.Single.cs": [
+     "linq/repeat_source.rs",
+     "linq/retry.rs",
+     "linq/start_with.rs"
+    ],
+    "Linq/QueryLanguage.Time.cs": [
+     "linq/interval.rs"
+    ],
+    "Linq/QueryLanguageEx.cs": [
+     "linq/create_iterator.rs",
+     "linq/expand.rs",
+     "linq/fork_join.rs",
+     "linq/let_.rs",
+     "linq/many_select.rs",
+     "linq/to_list_observable.rs"
+    ],
+    "ListObservable.cs": [
+     "linq/to_list_observable.rs"
+    ],
+    "Notification.cs": [
+     "notification.rs"
+    ],
+    "Observable.Extensions.cs": [
+     "linq/subscribe.rs",
+     "linq/observable_ext.rs"
+    ],
+    "ObservableBase.cs": [
+     "observable_base.rs"
+    ],
+    "Observer.Extensions.cs": [
+     "observer.rs"
+    ],
+    "ObserverBase.cs": [
+     "observer_base.rs"
+    ],
+    "Subjects/AsyncSubject.cs": [
+     "subjects/async_subject.rs"
+    ],
+    "Subjects/BehaviorSubject.cs": [
+     "subjects/behavior_subject.rs"
+    ],
+    "Subjects/ConnectableObservable.cs": [
+     "subjects/connectable_observable.rs"
+    ],
+    "Subjects/IConnectableObservable.cs": [
+     "subjects/connectable_observable.rs"
+    ],
+    "Subjects/ISubject.Multi.cs": [
+     "subjects/subject.rs"
+    ],
+    "Subjects/ISubject.cs": [
+     "subjects/subject.rs"
+    ],
+    "Subjects/ReplaySubject.cs": [
+     "subjects/replay_subject.rs"
+    ],
+    "Subjects/Subject.Extensions.cs": [
+     "subjects/subject.rs"
+    ],
+    "Subjects/Subject.cs": [
+     "subjects/subject.rs"
+    ],
+    "Subjects/SubjectBase.cs": [
+     "subjects/subject.rs"
+    ],
+    "TimeInterval.cs": [
+     "time_interval.rs"
+    ],
+    "Timestamped.cs": [
+     "time_interval.rs"
+    ],
+    "Unit.cs": [
+     "lib.rs"
+    ]
+   },
+   "rustOnly": [
+    "internal/operator.rs",
+    "linq/numeric.rs"
+   ]
+  }
+ ],
+ "unusedPathOverrides": [],
+ "unusedWaivers": []
+}

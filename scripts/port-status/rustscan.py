@@ -8,7 +8,8 @@ structure and records, per file:
 * functions grouped by the type they belong to (`impl X`, `impl T for X`,
   `trait X`, `ferro_class!` virtuals), including `ferro_property!` definitions;
 * trait implementations (`impl Add<Vector> for Point`);
-* free functions, consts and statics.
+* free functions, consts and statics;
+* the macros invoked as items (`name!(..);`), with the type whose body invokes them.
 
 Bodies of functions, `macro_rules!` and `#[cfg(test)] mod tests` are skipped.
 """
@@ -146,6 +147,7 @@ class RustFile:
     free_fns: set = field(default_factory=set)
     free_consts: set = field(default_factory=set)
     trait_impls: list = field(default_factory=list)  # (trait, args, self type text)
+    macro_calls: list = field(default_factory=list)  # (macro name, owner type or None, context kind, public, arguments)
     pub_items: int = 0
     lines: int = 0
 
@@ -169,6 +171,7 @@ _MACRO = re.compile(r"^(?:[\w:$]+::)?(\w+)!\s*(\w+)?\s*\(?\s*$", re.S)
 _MACRO_HEAD = re.compile(r"^(?:[\w:$]+::)?(\w+)!\s*\(?", re.S)
 _CLASS_SIMPLE = re.compile(r"\bferro_class!\s*\(\s*([A-Za-z_]\w*)\s*:\s*([A-Za-z_][\w:]*)")
 _CLASS_HEAD = re.compile(r"^\s*([A-Za-z_]\w*)\s*:\s*([A-Za-z_][\w:]*)\s*(?:,\s*virtuals\s+([A-Za-z_]\w*))?")
+_MACRO_CALL = re.compile(r"^(?:[A-Za-z_$][\w$]*\s*::\s*)*([A-Za-z_]\w*)\s*!\s*[(\[]")
 _UNIT_STRUCT = re.compile(r"^" + _VIS + r"struct\s+([A-Za-z_]\w*)")
 _TRANSPARENT = ("root", "mod", "macro")
 _ITEM_CTX = ("root", "mod", "macro", "impl", "trait", "class_body")
@@ -295,6 +298,11 @@ def scan_rust(path: str, src: str) -> RustFile:
             return
         if ctx_kind not in _ITEM_CTX:
             return
+        mc = _MACRO_CALL.match(seg)
+        if mc and mc.group(1) != "macro_rules":
+            # recorded only; port_status.py expands the item-writing macros of a crate when a reference asks
+            close = seg.rfind(")") if seg[mc.end() - 1] == "(" else seg.rfind("]")
+            rf.macro_calls.append((mc.group(1), owner, ctx_kind, public, seg[mc.end():close if close > mc.end() else len(seg)]))
         m = _CLASS_SIMPLE.search(seg)
         if m:
             t = rf.type(m.group(1))

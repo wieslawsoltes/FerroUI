@@ -9,6 +9,7 @@ upstream test is ported with the code it tests, under upstream's name in snake c
     python3 scripts/port-status/test_gaps.py ../Avalonia --all
     python3 scripts/port-status/test_gaps.py ../Avalonia tests/Avalonia.Controls.UnitTests
     python3 scripts/port-status/test_gaps.py ../Avalonia Avalonia.Base.UnitTests --output docs/porting/data/test-gaps-base.txt
+    python3 scripts/port-status/test_gaps.py --reference reactive --all     # another reference of references.toml
 
 Arguments
 
@@ -31,6 +32,21 @@ Options
     --all                 every project of the table PROJECTS below: writes
                           docs/porting/data/test-gaps-<short name>.txt for each and prints the table of totals
                           in Markdown.
+    --reference <name>    a reference of scripts/port-status/references.toml other than the framework: its checkout
+                          (when <upstream checkout> is not given), its tracked commit (the `upstreamCommit` of its
+                          upstream-api.json), its test projects (`test_projects`, for --all), its data directory
+                          (the alias file and the outputs), the directories of its Rust tests (`test_roots`), the
+                          attributes of its test methods (`test_attributes`) and its stated reasons (below).
+
+Stated reasons (a reference with `stated_reasons = true`)
+
+    A line `// Not ported: <Name> - <reason>` (or `// Not ported (in part): <Name>, <Name> - <reason>`) of the Rust
+    test file of an upstream test file states why that upstream test is not ported. The Rust test file of
+    `Tests/Linq/Observable/SelectTest.cs` is `tests/linq/observable/select_test.rs` below the first test root (every
+    component in snake case); a Rust file that no upstream file maps to that way is taken for the one upstream file
+    with its name. A test that is not present by name and has a stated reason is not missing: it is *deferred* when
+    the reason names a later phase (`phase`, `later`), else *waived*. The report lists the stated reasons, and those
+    that name no upstream test of their file (which do not change the exit status).
 
 What is counted
 
@@ -117,6 +133,8 @@ from collections import defaultdict
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DATA = os.path.join(REPO, "docs", "porting", "data")
 DEFAULT_ALIASES = os.path.join(DATA, "test-aliases.toml")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import references  # noqa: E402
 
 # The upstream test projects that are counted by `--all`: the project, and the short name of its output
 # (docs/porting/data/test-gaps-<short name>.txt). The test projects that are not counted, with the reasons, are
@@ -229,7 +247,17 @@ def blank_csharp(text: str) -> str:
     return "".join(out)
 
 
-TEST_ATTRIBUTE = re.compile(r"\[\s*(?:[A-Za-z_][\w.]*\.)?\w*(?:Fact|Theory|Test|TestCase|Benchmark)(?:Attribute)?\s*[\](,]")
+TEST_ATTRIBUTE_NAMES = ["Fact", "Theory", "Test", "TestCase", "Benchmark"]
+
+
+def test_attribute(extra: list[str] | None = None) -> re.Pattern:
+    """The attribute of a test method: a name that ends in one of TEST_ATTRIBUTE_NAMES, or in one of `extra`
+    (`TestMethod` for MSTest)."""
+    names = "|".join(TEST_ATTRIBUTE_NAMES + list(extra or []))
+    return re.compile(r"\[\s*(?:[A-Za-z_][\w.]*\.)?\w*(?:" + names + r")(?:Attribute)?\s*[\](,]")
+
+
+TEST_ATTRIBUTE = test_attribute()
 # The declaration that follows the attributes: modifiers, a return type, the name, `(` or `<`.
 METHOD = re.compile(
     r"(?:\b(?:public|internal|private|protected|static|async|virtual|override|sealed|unsafe|new)\s+)*"
@@ -256,7 +284,7 @@ def skip_attribute(text: str, i: int) -> int:
 CLASS = re.compile(r"\b(?:class|struct|record)\s+([A-Za-z_]\w*)")
 
 
-def upstream_tests(text: str) -> list[tuple[str, str]]:
+def upstream_tests(text: str, attribute: re.Pattern = TEST_ATTRIBUTE) -> list[tuple[str, str]]:
     """The test methods of one C# file as (class, method), in order, each pair once. The class is the one
     declared last before the method."""
     text = blank_csharp(text)
@@ -265,7 +293,7 @@ def upstream_tests(text: str) -> list[tuple[str, str]]:
     seen = set()
     position = 0
     while True:
-        m = TEST_ATTRIBUTE.search(text, position)
+        m = attribute.search(text, position)
         if not m:
             break
         i = skip_attribute(text, m.start())
@@ -325,8 +353,15 @@ def read_project(upstream: str, project: str, rev: str | None) -> dict[str, str]
     return files
 
 
-def tracked_commit() -> str:
-    """The upstream commit the port follows, as docs/porting/TRACKING.md names it."""
+def tracked_commit(ref: dict | None = None) -> str:
+    """The upstream commit the port follows, as docs/porting/TRACKING.md names it; for another reference, the
+    `upstreamCommit` of its upstream-api.json."""
+    if ref is not None and ref["documents"] != "framework":
+        with open(os.path.join(ref["data"], "upstream-api.json"), encoding="utf-8") as handle:
+            match = re.search(r'"upstreamCommit": "([0-9a-f]{40})"', handle.read(4000))
+        if not match:
+            sys.exit(f"{ref['data']}/upstream-api.json does not name the upstream commit")
+        return match.group(1)
     with open(os.path.join(REPO, "docs", "porting", "TRACKING.md"), encoding="utf-8") as handle:
         match = re.search(r"upstream commit `([0-9a-f]{40})`", handle.read())
     if not match:
@@ -546,11 +581,84 @@ def describe(rule: dict) -> str:
     return f"{rule['file']}: {tests}"
 
 
-def count(upstream: str, project: str, rev: str | None, port: dict, alias_path: str) -> dict:
-    """Counts one project; returns the totals and the text of the report."""
+NOT_PORTED = re.compile(r"^[ \t]*//[ \t]*Not ported(?:[ \t]*\(in part\))?:[ \t]*(.+?)[ \t]+-[ \t]+(.+?)[ \t]*$", re.M)
+DEFERRED = re.compile(r"\b(?:phase|later)\b", re.I)
+
+
+def snake(name: str) -> str:
+    """PascalCase -> snake_case, as port_status.py writes the paths of the port (`SelectTest` -> `select_test`)."""
+    out = []
+    for i, c in enumerate(name):
+        if c.isupper() and i > 0:
+            p = name[i - 1]
+            nx = name[i + 1] if i + 1 < len(name) else ""
+            if p.islower() or (p.isdigit() and nx.islower()) or (p.isupper() and nx.islower()):
+                out.append("_")
+        out.append(c.lower() if c.isalnum() or c == "_" else "_")
+    return re.sub(r"__+", "_", "".join(out)).strip("_")
+
+
+def rust_test_file(upstream_path: str) -> str:
+    """`Tests/Linq/Observable/SelectTest.cs` -> `tests/linq/observable/select_test.rs`."""
+    parts = upstream_path.split("/")
+    return "/".join([snake(c) for c in parts[:-1]] + [snake(parts[-1].rsplit(".", 1)[0]) + ".rs"])
+
+
+def stated_reasons(root: str, upstream: dict[str, set[str]]) -> tuple[dict, list[str]]:
+    """The lines `// Not ported: <Name> - <reason>` of the Rust test files below `root`: upstream path ->
+    {test name: reason}, and the lines that name no upstream file. `upstream`: upstream path -> its test names. A
+    line of a Rust file that no upstream file maps to (a test file the port splits off, such as
+    `repeat_source_test.rs`) is taken for the one upstream file that has a test of the name."""
+    upstream_paths = sorted(upstream)
+    by_test: dict[str, list[str]] = defaultdict(list)
+    for p in upstream_paths:
+        for test in upstream[p]:
+            by_test[test].append(p)
+    by_rust = {rust_test_file(p): p for p in upstream_paths}
+    by_stem: dict[str, list[str]] = defaultdict(list)
+    for rust, p in by_rust.items():
+        by_stem[rust.rsplit("/", 1)[-1]].append(p)
+    out: dict[str, dict[str, str]] = defaultdict(dict)
+    orphans: list[str] = []
+    for directory, directories, names in os.walk(root):
+        directories[:] = sorted(d for d in directories if d not in ("target", ".git"))
+        for name in sorted(names):
+            if not name.endswith(".rs"):
+                continue
+            path = os.path.join(directory, name)
+            rel = os.path.relpath(path, root).replace(os.sep, "/")
+            with open(path, encoding="utf-8", errors="replace") as handle:
+                text = handle.read()
+            matches = NOT_PORTED.findall(text)
+            if not matches:
+                continue
+            upstream_path = by_rust.get(rel)
+            if upstream_path is None and len(by_stem.get(name, [])) == 1:
+                upstream_path = by_stem[name][0]
+            for tests, reason in matches:
+                for test in (t.strip() for t in tests.split(",")):
+                    target = upstream_path
+                    if target is None and len(by_test.get(test, [])) == 1:
+                        target = by_test[test][0]
+                    if target is None:
+                        orphans.append(f"{os.path.relpath(path, REPO)}: {test}: no upstream test file maps to the file")
+                    else:
+                        out[target].setdefault(test, reason)
+    return out, orphans
+
+
+def count(upstream: str, project: str, rev: str | None, port: dict, alias_path: str,
+          attribute: re.Pattern = TEST_ATTRIBUTE, stated_root: str | None = None) -> dict:
+    """Counts one project; returns the totals and the text of the report. `stated_root`: the directory of the Rust
+    test files whose `// Not ported:` lines are read (a reference with `stated_reasons`)."""
     project_name = project.rsplit("/", 1)[1]
     sources = read_project(upstream, project, rev)
     aliases, waivers = load_rules(alias_path, project_name)
+    parsed = {path: upstream_tests(sources[path], attribute) for path in sorted(sources)}
+    upstream_names = {path: {method for _, method in pairs} for path, pairs in parsed.items()}
+    stated, stated_stale = stated_reasons(stated_root, upstream_names) if stated_root else ({}, [])
+    stated_waived: list[tuple[str, str, str]] = []
+    deferred: list[tuple[str, str, str]] = []
 
     total = 0
     files_with_tests = 0
@@ -562,7 +670,7 @@ def count(upstream: str, project: str, rev: str | None, port: dict, alias_path: 
 
     occurrence: dict[str, int] = defaultdict(int)
     for path in sorted(sources):
-        pairs = upstream_tests(sources[path])
+        pairs = parsed[path]
         if not pairs:
             continue
         files_with_tests += 1
@@ -592,6 +700,10 @@ def count(upstream: str, project: str, rev: str | None, port: dict, alias_path: 
                 waiver["used"] = True
                 waived.append((path, name, waiver["reason"]))
                 continue
+            reason = stated.get(path, {}).get(method)
+            if reason is not None:
+                (deferred if DEFERRED.search(reason) else stated_waived).append((path, name, reason))
+                continue
             missing.setdefault(path, []).append(name)
 
     for rule in aliases:
@@ -601,6 +713,11 @@ def count(upstream: str, project: str, rev: str | None, port: dict, alias_path: 
         if not rule["used"]:
             stale.append(f"waiver {describe(rule)}: no upstream test of that name is missing")
 
+    for path in sorted(stated):
+        for test in stated[path]:
+            if test not in upstream_names.get(path, ()):
+                stated_stale.append(f"{path}: {test}: no upstream test of that name in the file")
+
     missing_count = sum(len(names) for names in missing.values())
     lines = []
     lines.append(f"Test gaps: {project_name}")
@@ -608,8 +725,15 @@ def count(upstream: str, project: str, rev: str | None, port: dict, alias_path: 
     lines.append("Generated by scripts/port-status/test_gaps.py; the rules of the match are at its top.")
     lines.append("")
     lines.append(f"Tests: {total} in {files_with_tests} files")
-    lines.append(f"Present: {total - missing_count - len(waived)} ({len(aliased)} of them through an alias)")
-    lines.append(f"Waived: {len(waived)}")
+    if stated_root:
+        lines.append(f"Present: {total - missing_count - len(waived) - len(stated_waived) - len(deferred)} "
+                     f"({len(aliased)} of them through an alias)")
+        lines.append(f"Waived: {len(waived) + len(stated_waived)} ({len(stated_waived)} of them stated in the Rust test files)")
+        lines.append(f"Deferred: {len(deferred)}")
+        lines.append(f"Stated not ported: {len(stated_waived) + len(deferred)}")
+    else:
+        lines.append(f"Present: {total - missing_count - len(waived)} ({len(aliased)} of them through an alias)")
+        lines.append(f"Waived: {len(waived)}")
     lines.append(f"Missing: {missing_count} in {len(missing)} files")
 
     if missing:
@@ -634,6 +758,24 @@ def count(upstream: str, project: str, rev: str | None, port: dict, alias_path: 
                     lines.append(f"  reason: {reason}")
                     last = reason
                 lines.append(f"    {name}")
+    for title, entries in (("Stated not ported, deferred to a later phase", deferred),
+                           ("Stated not ported, waived (the reason is in the Rust test file)", stated_waived)):
+        if not entries:
+            continue
+        lines.append("")
+        lines.append(title)
+        by_file = defaultdict(list)
+        for path, name, reason in entries:
+            by_file[path].append((name, reason))
+        for path in sorted(by_file):
+            lines.append("")
+            lines.append(f"{len(by_file[path])}/{counts[path]}  {path}")
+            for name, reason in by_file[path]:
+                lines.append(f"    {name} - {reason}")
+    if stated_stale:
+        lines.append("")
+        lines.append("Stated reasons that name no upstream test (not counted)")
+        lines.extend(f"    {line}" for line in stated_stale)
     if aliased:
         lines.append("")
         lines.append("Aliases (upstream test -> function of the port)")
@@ -654,7 +796,8 @@ def count(upstream: str, project: str, rev: str | None, port: dict, alias_path: 
         "tests": total,
         "missing": missing_count,
         "files": len(missing),
-        "waived": len(waived),
+        "waived": len(waived) + len(stated_waived),
+        "deferred": len(deferred),
         "aliased": len(aliased),
         "stale": len(stale),
         "report": "\n".join(lines) + "\n",
@@ -663,8 +806,9 @@ def count(upstream: str, project: str, rev: str | None, port: dict, alias_path: 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("upstream")
+    parser.add_argument("upstream", nargs="?")
     parser.add_argument("project", nargs="?")
+    parser.add_argument("--reference")
     parser.add_argument("--rev", "--commit", default="tracked")
     parser.add_argument("--rust", "--root", action="append")
     parser.add_argument("--aliases", default=DEFAULT_ALIASES)
@@ -673,20 +817,52 @@ def main() -> int:
     parser.add_argument("--all", action="store_true")
     arguments = parser.parse_args()
 
+    ref = references.load(REPO, arguments.reference) if arguments.reference else None
+    framework = ref is None or ref["documents"] == "framework"
+    if arguments.upstream is None:
+        if ref is None:
+            parser.error("give the upstream checkout")
+        arguments.upstream = ref["checkout"]
     if arguments.all == (arguments.project is not None):
         parser.error("give a test project, or --all")
-    rev = {"tracked": tracked_commit(), "worktree": None}.get(arguments.rev, arguments.rev)
-    roots = [root if os.path.isabs(root) else os.path.join(REPO, root) for root in arguments.rust or ["src", "tests"]]
+    rev = {"tracked": tracked_commit(ref), "worktree": None}.get(arguments.rev, arguments.rev)
+    default_roots = ref["test_roots"] if ref is not None else ["src", "tests"]
+    roots = [root if os.path.isabs(root) else os.path.join(REPO, root) for root in arguments.rust or default_roots]
     port = rust_tests(roots)
+    data = DATA if framework else ref["data"]
+    if arguments.aliases == DEFAULT_ALIASES and not framework:
+        arguments.aliases = os.path.join(data, "test-aliases.toml")
+    attribute = test_attribute(ref["test_attributes"]) if ref is not None and ref["test_attributes"] else TEST_ATTRIBUTE
+    stated_root = roots[0] if ref is not None and ref["stated_reasons"] else None
+    projects = [(path, short) for short, path in ref["test_projects"]] if ref is not None and ref["test_projects"] else PROJECTS
+
+    def run(project: str) -> dict:
+        return count(arguments.upstream, project, rev, port, arguments.aliases, attribute, stated_root)
+
+    if arguments.all and stated_root:
+        print("| Upstream project | Tests | Missing | Files with missing tests | Waived | Deferred | Aliased | Output |")
+        print("|---|---|---|---|---|---|---|---|")
+        stale = 0
+        for project, short in projects:
+            result = run(project)
+            output = f"test-gaps-{short}.txt"
+            with open(os.path.join(data, output), "w", encoding="utf-8") as handle:
+                handle.write(result["report"])
+            stale += result["stale"]
+            print(f"| `{result['project']}` | {result['tests']:,} | {result['missing']} | {result['files']} "
+                  f"| {result['waived']} | {result['deferred']} | {result['aliased']} | `{output}` |")
+        if stale:
+            print(f"\n{stale} stale entries of the alias file: see the ends of the outputs", file=sys.stderr)
+        return 1 if stale else 0
 
     if arguments.all:
         print("| Upstream project | Tests | Missing | Files with missing tests | Waived | Aliased | Output |")
         print("|---|---|---|---|---|---|---|")
         stale = 0
-        for project, short in PROJECTS:
-            result = count(arguments.upstream, project, rev, port, arguments.aliases)
+        for project, short in projects:
+            result = run(project)
             output = f"test-gaps-{short}.txt"
-            with open(os.path.join(DATA, output), "w", encoding="utf-8") as handle:
+            with open(os.path.join(data, output), "w", encoding="utf-8") as handle:
                 handle.write(result["report"])
             stale += result["stale"]
             print(f"| `{result['project']}` | {result['tests']:,} | {result['missing']} | {result['files']} "
@@ -698,7 +874,7 @@ def main() -> int:
     project = arguments.project.strip("/")
     if "/" not in project:
         project = "tests/" + project
-    result = count(arguments.upstream, project, rev, port, arguments.aliases)
+    result = run(project)
     totals = "\t".join(str(result[k]) for k in ("project", "tests", "missing", "files", "waived", "aliased"))
     if arguments.summary:
         print(totals)

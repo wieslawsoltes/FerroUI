@@ -320,6 +320,7 @@ Each phase is one or more pull requests that build, pass the existing tests and 
 ## 8. Tracking, rules and checks
 
 - **Tracking pages.** The port-status tooling (`scripts/port-status/`) gets one source per reference: the Rx.NET sources, DynamicData, ReactiveUI with the `REACTIVE_SHIM` sources, ReactiveUI.Binding, the Primitives extras, and the integration. It also gets pages under `docs/porting/tracking/`, with file, type and member counts as for the upstream port. The public API checklists are the upstream files `PublicAPI.Shipped.txt` (Rx), `ApiApprovalTests.DynamicDataTests.DotNet9_0.verified.txt` (DynamicData), and the integration's `PublicAPI.txt`.
+  - **Rx.NET, tracked.** The pages are in `docs/porting/tracking/reactive/`: the index `TRACKING.md` (totals, tests, waivers by reason) and one page per project, `System.Reactive.md` and `Microsoft.Reactive.Testing.md`. The data (the extraction, the path overrides, the waivers of section 5, the test waivers and the test report) is in `docs/porting/data/reactive/`. `scripts/port-status/run.sh --reference reactive` regenerates them, after `python3 scripts/port-status/test_gaps.py --reference reactive --all` when tests were ported (`scripts/port-status/README.md`).
 - **Deviations.** Every difference goes to `docs/porting/DEVIATIONS.md`, in new sections per crate.
 - **Rules.** The rules of the upstream port apply:
   - no stubs;

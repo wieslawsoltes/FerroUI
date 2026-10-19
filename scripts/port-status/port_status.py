@@ -10,6 +10,11 @@ writes:
   docs/porting/tracking/<Project>.md    one page per upstream project
   docs/porting/data/port-status.json    machine readable summary
 
+That is the framework reference, the default. `--reference <name>` reads another reference of
+scripts/port-status/references.toml from its own data directory and writes its pages and an
+index (`<tracking>/TRACKING.md`) to its tracking directory, and its port-status.json to its data
+directory.
+
 Python 3.11+ (tomllib), standard library only. See scripts/port-status/README.md.
 """
 
@@ -25,7 +30,16 @@ import tomllib
 from collections import Counter, defaultdict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from rustscan import RustFile, RustType, scan_rust  # noqa: E402
+import references  # noqa: E402
+from rustscan import RustFile, RustType, blank_comments_and_literals, scan_rust  # noqa: E402
+
+# The matching options of the reference being scanned (scripts/port-status/references.toml); the defaults are the
+# rules of the framework reference. Set by main().
+OPTS = {"api": "all", "overloads": "count", "method_macros": False, "doc_citations": False, "waived_files": False,
+        "arity_names": False}
+# The wording of the project pages that names the reference and its files; the defaults are those of the framework.
+PAGE = {"inputs": "docs/porting/data/path-overrides.toml or member-waivers.toml", "commit": "upstream commit",
+        "back": "../TRACKING.md", "overrides": "docs/porting/data/path-overrides.toml", "rules": "", "framework_rows": True}
 
 # --------------------------------------------------------------------------
 # Name mapping (docs/porting/PORTING-GUIDE.md)
@@ -96,11 +110,12 @@ def load_upstream(data_dir: str) -> dict:
     return index
 
 
-def apply_project_list(index: dict, repo: str) -> None:
+def apply_project_list(index: dict, repo: str, path: str | None = None) -> None:
     """Overlays the planning data of scripts/api-extract/projects.json (scope, phase, priority, crate) on the
     projects of the extraction, so that moving a project into scope or changing its phase needs no new extraction.
-    The detail of a project is not overlaid: it says what the extraction holds."""
-    path = os.path.join(repo, "scripts", "api-extract", "projects.json")
+    The detail of a project is not overlaid: it says what the extraction holds. `path` is the project list of
+    the reference (projects.json for the framework)."""
+    path = path or os.path.join(repo, "scripts", "api-extract", "projects.json")
     if not os.path.exists(path):
         return
     with open(path, encoding="utf-8") as f:
@@ -129,6 +144,36 @@ def apply_project_list(index: dict, repo: str) -> None:
                 project.pop("scope", None)
 
 
+PUBLIC_ACCESS = ("public", "protected", "protected internal", "explicit")
+
+
+def keep_public_api(index: dict) -> None:
+    """`api = "public"`: drops the internal types (with the types nested in them) and the internal members of the
+    public types. A file whose types are all internal keeps the count of them (`internalTypes`), so that it still
+    counts as a file to port."""
+
+    def public_types(types: list) -> tuple[list, int]:
+        kept, dropped = [], 0
+        for t in types:
+            if t.get("accessibility") not in PUBLIC_ACCESS:
+                dropped += 1
+                continue
+            if "members" in t:
+                t["members"] = [m for m in t["members"] if m.get("accessibility") in PUBLIC_ACCESS]
+            if t.get("nestedTypes"):
+                t["nestedTypes"], n = public_types(t["nestedTypes"])
+                dropped += n
+            kept.append(t)
+        return kept, dropped
+
+    for project in index["projects"]:
+        for f in project.get("files", []):
+            if "types" in f:
+                f["types"], dropped = public_types(f["types"])
+                if dropped:
+                    f["internalTypes"] = dropped
+
+
 def load_toml(path: str) -> dict:
     if not os.path.exists(path):
         return {}
@@ -142,7 +187,20 @@ class Overrides:
     def __init__(self, data: dict):
         self.maps = data.get("map", [])
         self.rust_only = data.get("rust_only", [])
+        self.dirs = data.get("dir", [])
         self.used = set()
+
+    def rust_dir(self, project: str, upstream_rel: str):
+        """`[[dir]]`: the Rust directory of an upstream directory whose path does not follow the default rule
+        (`Linq/Observable` -> `linq`), as (upstream directory, Rust directory), the longest match; or None."""
+        best = None
+        for entry in self.dirs:
+            if entry.get("project") not in (None, project):
+                continue
+            up = entry["upstream"].strip("/")
+            if upstream_rel.startswith(up + "/") and (best is None or len(up) > len(best[0])):
+                best = (up, entry["rust"].strip("/"))
+        return best
 
     def find(self, project: str, upstream_rel: str):
         for idx, entry in enumerate(self.maps):
@@ -219,11 +277,13 @@ class RustCrate:
         self.defined: dict[str, list[str]] = defaultdict(list)
         self.mentions: dict[str, list[str]] = defaultdict(list)
         self.all_paths: set[str] = set()
+        self.citations: dict[str, list[str]] = {}       # crate-relative path -> upstream files its module doc cites
         abs_root = os.path.join(repo, root)
         self.exists = os.path.isdir(abs_root)
         if not self.exists:
             return
         nested = {os.path.join(repo, n) for n in nested_roots}
+        sources: dict[str, str] = {}
         for dirpath, dirnames, filenames in os.walk(abs_root):
             dirnames[:] = sorted(d for d in dirnames if d != "target" and not d.startswith(".") and os.path.join(dirpath, d) not in nested)
             for fn in sorted(filenames):
@@ -244,16 +304,198 @@ class RustCrate:
                     continue
                 rf = scan_rust(rel, src)
                 self.files[rel] = rf
-                key = (tuple(norm(c) for c in comps[:-1]), norm(fn[:-3]))
-                self.by_key[key].append(rel)
-                for name, t in rf.types.items():
-                    self.mentions[name].append(rel)
-                    if t.defined:
-                        self.defined[name].append(rel)
+                if OPTS["method_macros"]:
+                    sources[rel] = src
+                if OPTS["doc_citations"]:
+                    self.citations[rel] = doc_citations(src)
+        if OPTS["method_macros"]:
+            expand_method_macros(self.files, sources)
+        for rel, rf in self.files.items():
+            comps = rel.split("/")
+            key = (tuple(norm(c) for c in comps[:-1]), norm(comps[-1][:-3]))
+            self.by_key[key].append(rel)
+            for name, t in rf.types.items():
+                self.mentions[name].append(rel)
+                if t.defined:
+                    self.defined[name].append(rel)
 
     def lookup(self, dir_comps: tuple, stem: str):
         hits = self.by_key.get((tuple(norm(c) for c in dir_comps), norm(stem)))
         return hits[0] if hits else None
+
+
+_CITED_FILE = re.compile(r"`([A-Za-z0-9_][A-Za-z0-9_./`]*\.cs)`")
+
+
+def doc_citations(src: str) -> list[str]:
+    """The upstream files (`Linq/Observable/Select.cs`) that the module documentation (the leading `//!` lines)
+    of a Rust file names in backticks."""
+    head = []
+    for line in src.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("//!"):
+            head.append(stripped[3:])
+        elif stripped or head:
+            break
+    return list(dict.fromkeys(_CITED_FILE.findall(" ".join(head))))
+
+
+def resolve_citations(crate: "RustCrate", upstream_paths: list[str]) -> dict:
+    """`doc_citations`: upstream file -> the Rust files whose module documentation cites it. A citation is read
+    as a path below the project, else below the upstream directory of the Rust file's directory, else as the one
+    upstream file of that name."""
+    paths = set(upstream_paths)
+    by_base = defaultdict(list)
+    by_dir = defaultdict(set)
+    for p in upstream_paths:
+        by_base[p.rsplit("/", 1)[-1]].append(p)
+        d = p.rsplit("/", 1)[0] if "/" in p else ""
+        by_dir[tuple(norm(snake(map_name(c))) for c in d.split("/")) if d else ()].add(d)
+    out = defaultdict(list)
+    for rel, cites in sorted(crate.citations.items()):
+        rust_dir = tuple(norm(c) for c in rel.split("/")[:-1])
+        for c in cites:
+            hit = None
+            if c in paths:
+                hit = c
+            else:
+                for d in sorted(by_dir.get(rust_dir, ())):
+                    if (d + "/" + c if d else c) in paths:
+                        hit = d + "/" + c if d else c
+                        break
+                if hit is None and len(by_base.get(c.rsplit("/", 1)[-1], [])) == 1:
+                    hit = by_base[c.rsplit("/", 1)[-1]][0]
+            if hit and rel not in out[hit]:
+                out[hit].append(rel)
+    return out
+
+
+_MACRO_RULES = re.compile(r"\bmacro_rules\s*!\s*([A-Za-z_]\w*)\s*[{(\[]")
+_MACRO_BODY_OWNER = "MacroBody__"
+
+
+def _balanced_end(text: str, i: int) -> int:
+    """`i` is at an opening bracket; returns the index after the bracket that closes it."""
+    depth = 0
+    for j in range(i, len(text)):
+        if text[j] in "{([":
+            depth += 1
+        elif text[j] in "})]":
+            depth -= 1
+            if depth == 0:
+                return j + 1
+    return len(text)
+
+
+def macro_definitions(src: str) -> dict:
+    """The `macro_rules!` of a file: name -> [(arm pattern, arm body)], in the blanked text."""
+    text = blank_comments_and_literals(src)
+    out = {}
+    for m in _MACRO_RULES.finditer(text):
+        end = _balanced_end(text, m.end() - 1)
+        body = text[m.end():end - 1]
+        arms = []
+        i = 0
+        while True:
+            while i < len(body) and (body[i].isspace() or body[i] == ";"):
+                i += 1
+            if i >= len(body) or body[i] not in "{([":
+                break
+            pat_end = _balanced_end(body, i)
+            arrow = body.find("=>", pat_end)
+            if arrow < 0:
+                break
+            j = arrow + 2
+            while j < len(body) and body[j].isspace():
+                j += 1
+            if j >= len(body) or body[j] not in "{([":
+                break
+            arm_end = _balanced_end(body, j)
+            arms.append((body[i + 1:pat_end - 1], body[j + 1:arm_end - 1]))
+            i = arm_end
+        if arms:
+            out.setdefault(m.group(1), []).extend(arms)
+    return out
+
+
+_MACRO_TOKEN = re.compile(r"\$\(|\$[A-Za-z_]\w*:\w+|=>|::|[A-Za-z_]\w*|\d+|\S")
+
+
+def _bind_macro_args(pattern: str, args: str) -> dict:
+    """Binds the leading metavariables of a macro arm to the tokens of an invocation, as far as the two agree
+    token by token (a repetition `$( .. )` ends the walk): `($pattern:ident, $plan:ident, ..)` with
+    `(Pattern2, Plan2, ..)` gives {"pattern": "Pattern2", "plan": "Plan2", ..}."""
+    pt = _MACRO_TOKEN.findall(pattern)
+    at = _MACRO_TOKEN.findall(args)
+    bound = {}
+    for p_tok, a_tok in zip(pt, at):
+        if p_tok == "$(":
+            break
+        if p_tok.startswith("$"):
+            name, _, frag = p_tok[1:].partition(":")
+            if frag not in ("ident", "ty", "tt", "literal", "path", "expr", "lifetime"):
+                break
+            bound[name] = a_tok
+        elif p_tok != a_tok:
+            break
+    return bound
+
+
+def expand_method_macros(files: dict, sources: dict) -> None:
+    """`method_macros`: the items that a `macro_rules!` of the crate writes count where the macro is invoked.
+    Invoked in a trait or an `impl` (`super::select::select_methods!();` in `trait ObservableExt`), the functions
+    of its arms are functions of that trait or type. Invoked at module level (`join_arity!(Pattern2, Plan2, ..);`),
+    the leading metavariables of its first arm are bound to the arguments and the items of the arm (structs,
+    traits, `impl` blocks) are items of the file. Macros that invoke other macros are followed."""
+    defs = {}
+    for rel in sorted(sources):
+        for name, arms in macro_definitions(sources[rel]).items():
+            defs.setdefault(name, []).extend(arms)
+
+    def arm_items(name: str, seen: set) -> tuple[set, set]:
+        """The functions (and the private ones) that the arms of a macro write into the body of a trait or impl."""
+        if name in seen or name not in defs:
+            return set(), set()
+        seen.add(name)
+        fns, private = set(), set()
+        for _, body in defs[name]:
+            rf = scan_rust("", "impl " + _MACRO_BODY_OWNER + " {" + body + "}")
+            t = rf.types.get(_MACRO_BODY_OWNER)
+            if t is not None:
+                fns |= t.fns
+                private |= t.private_fns
+            for call in rf.macro_calls:
+                f2, p2 = arm_items(call[0], seen)
+                fns |= f2
+                private |= p2
+        return fns, private
+
+    for rel, rf in files.items():
+        for name, owner, ctx_kind, public, args in list(rf.macro_calls):
+            if name not in defs:
+                continue
+            if owner is None and ctx_kind in ("root", "mod"):
+                pattern, body = defs[name][0]
+                for var, value in _bind_macro_args(pattern, args).items():
+                    body = re.sub(r"\$" + re.escape(var) + r"\b", value, body)
+                sub = scan_rust(rel, body)
+                for tname, t in sub.types.items():
+                    rf.type(tname).merge(t)
+                rf.free_fns |= sub.free_fns
+                rf.free_consts |= sub.free_consts
+                rf.trait_impls += sub.trait_impls
+                continue
+            fns, private = arm_items(name, set())
+            if not fns:
+                continue
+            if owner is None:
+                rf.free_fns |= fns
+                continue
+            t = rf.type(owner)
+            new_private = {f for f in private if f in fns and f not in t.fns}
+            t.fns |= fns
+            if not public:
+                t.private_fns |= new_private
 
 
 class TypeView:
@@ -407,6 +649,11 @@ def match_members(utype: dict, view: TypeView, aliases: dict | None = None) -> l
             for f in sorted(t.fns):
                 if f.startswith(s + "_") and norm(f) not in reserved and f not in t.private_fns and all(f != p[1] for p in pool):
                     pool.append(("overload fn", f))
+            if OPTS["overloads"] == "name":
+                # the fallible form of a selector (`try_select`, docs/porting/reactive.md, section 5.2)
+                f = view.fn_norm.get(norm("try_" + s))
+                if f and norm(f) not in reserved and f not in t.private_fns and all(f != p[1] for p in pool):
+                    pool.append(("overload fn", f))
             traits = TRAIT_METHODS.get(name)
             if traits and view.has_trait(*traits):
                 # the trait stands for every overload, except for ToString where it is the parameterless one
@@ -428,6 +675,13 @@ def match_members(utype: dict, view: TypeView, aliases: dict | None = None) -> l
                     pool.append(("getter fn", view.fn_norm[bare]))
             if not pool and norm(s) in view.field_norm:
                 pool.append(("field", view.field_norm[norm(s)]))
+            if pool and OPTS["overloads"] == "name":
+                # overloads by name: every overload is found once a function of the name (or of the name with a
+                # suffix) exists; the overloads past the functions found name the last one
+                for n, i in enumerate(idxs):
+                    p = pool[min(n, len(pool) - 1)]
+                    results[i] = ("present", f"{p[0]} `{p[1]}`")
+                continue
             for n, i in enumerate(idxs):
                 if n < len(pool):
                     results[i] = ("present", f"{pool[n][0]} `{pool[n][1]}`")
@@ -439,6 +693,9 @@ def match_members(utype: dict, view: TypeView, aliases: dict | None = None) -> l
             ordered = [f for f in ("new", "construct") if f in t.fns]
             ordered += sorted(f for f in t.fns if f.startswith("new_"))
             ordered += sorted(f for f in t.fns if f in ("create", "default") or (f.startswith("from_") and f != "from_str"))
+            if OPTS["overloads"] == "name":
+                # the constructors a Rust type names after what they take (`with_buffer_size`, `with_scheduler`)
+                ordered += sorted(f for f in t.fns if f.startswith("with_"))
             for f in ordered:
                 if norm(f) in reserved or (f in t.private_fns and f not in ("new", "construct")):
                     continue
@@ -614,10 +871,15 @@ def flatten_types(types: list, out=None) -> list:
     return out
 
 
-def rust_candidates(rel: str) -> list:
-    """Candidate (dir components, stem, note) for an upstream file, in order of preference."""
+def rust_candidates(rel: str, rust_dir: tuple | None = None) -> list:
+    """Candidate (dir components, stem, note) for an upstream file, in order of preference. `rust_dir` is a
+    `[[dir]]` of path-overrides.toml that applies to the file: (upstream directory, Rust directory)."""
     comps = rel.split("/")
     dirs = tuple(snake(map_name(c)) for c in comps[:-1])
+    if rust_dir is not None:
+        up, rust = rust_dir
+        rest = rel[len(up) + 1:].split("/")[:-1]
+        dirs = tuple(c for c in rust.split("/") if c) + tuple(snake(map_name(c)) for c in rest)
     stem = comps[-1].rsplit(".", 1)[0]
     note = ""
     if "`" in stem:
@@ -648,6 +910,7 @@ def scan_project(project: dict, repo: str, overrides: Overrides, waivers: Waiver
         "rustExists": crate.exists, "files": [], "extra": {}, "idl": [], "how": Counter(),
     }
     mapped_rust: set[str] = set()
+    cited = resolve_citations(crate, [f["path"] for f in project.get("files", [])]) if OPTS["doc_citations"] else {}
 
     if detail == "files":
         for f in project["files"]:
@@ -674,7 +937,7 @@ def scan_project(project: dict, repo: str, overrides: Overrides, waivers: Waiver
         rel = f["path"]
         fr = {"path": rel, "types": [], "note": "", "rust": [], "lines": f.get("lines", 0)}
         types = flatten_types(f.get("types", []))
-        cands = rust_candidates(rel)
+        cands = rust_candidates(rel, overrides.rust_dir(name, rel))
         fr["expected"] = "/".join(cands[0][0] + (cands[0][1] + ".rs",))
         ov = overrides.find(name, rel)
         members_mode = "scan"
@@ -702,8 +965,12 @@ def scan_project(project: dict, repo: str, overrides: Overrides, waivers: Waiver
                     fr["rust"] = [hit]
                     fr["note"] = note
                     break
+            if not fr["rust"] and rel in cited:
+                # `doc_citations`: the Rust files whose module documentation names the upstream file
+                fr["rust"] = list(cited[rel])
+                fr["note"] = "cited by the module documentation"
             fr["status"] = "present" if fr["rust"] else "missing"
-            if not types and fr["status"] == "missing":
+            if not types and not f.get("internalTypes") and fr["status"] == "missing":
                 fr["status"] = "n/a"
                 fr["note"] = "no non-private types (assembly attributes, global usings or file-local helpers)"
         mapped_rust.update(fr["rust"])
@@ -790,8 +1057,17 @@ def scan_type(ut: dict, project: str, crate: RustCrate, fr: dict, members_mode: 
     uname = ut["name"]
     names = [map_name(uname)]
     renamed = fr.get("typeMap", {}).get(uname)
+    # A list names the Rust type first, then further Rust types whose members count for the upstream type
+    # (`Observable = ["Observable", "ConnectableObservableExt"]`: a static class whose extension methods the port
+    # splits over several traits).
+    extra_names = []
+    if isinstance(renamed, list):
+        renamed, extra_names = renamed[0], list(renamed[1:])
     if renamed:
         names.insert(0, renamed)
+    if OPTS["arity_names"] and ut.get("typeParameters"):
+        # `arity_names`: a generic type of which upstream has one per arity (`Pattern<T1, T2>`) is also `Pattern2`
+        names.append(map_name(uname) + str(len(ut["typeParameters"])))
     outer = ut.get("outer")
     if outer:
         outer_flat = "".join(re.sub(r"<.*?>", "", p) for p in outer.split("."))
@@ -838,7 +1114,11 @@ def scan_type(ut: dict, project: str, crate: RustCrate, fr: dict, members_mode: 
                     view_files.append(rel)
         elif where and where not in view_files:
             view_files.append(where)
-    view = TypeView(crate, [found_name] if found_name else names, view_files)
+    for extra in extra_names:
+        for rel in crate.defined.get(extra, []) + crate.mentions.get(extra, []):
+            if rel not in view_files:
+                view_files.append(rel)
+    view = TypeView(crate, ([found_name] if found_name else names) + extra_names, view_files)
 
     aliases = waivers.aliases(project, ut["fullName"])
     for m in members:
@@ -876,7 +1156,15 @@ def scan_type(ut: dict, project: str, crate: RustCrate, fr: dict, members_mode: 
     for m, status, note in results:
         if not found_name:
             status, note = "missing", ""
-        if status == "present":
+        if status == "present" and OPTS["overloads"] == "name" and m["kind"] == "method":
+            # By name, an overload is found when any of its set is; a waiver that names this overload (a member
+            # glob or a signature glob) says that it is not ported all the same.
+            reason = waivers.find(project, ut["fullName"], m)
+            if reason is not None:
+                status, note = "waived", reason
+        if status == "waived":
+            pass
+        elif status == "present":
             how[note.split(" `")[0]] += 1
         else:
             reason = waivers.find(project, ut["fullName"], m)
@@ -914,6 +1202,9 @@ def file_counts(fr: dict, detail: str) -> dict:
     c["files"][1] = 1
     if fr["status"] == "present":
         c["files"][0] = 1
+    elif OPTS["waived_files"] and fr["types"] and all(tr["status"] == "waived" for tr in fr["types"]):
+        # `waived_files`: a file that is not ported because each of its types is waived
+        c["files"][2] = 1
     for tr in fr["types"]:
         c["types"][1] += 1
         if tr["status"] == "present":
@@ -999,9 +1290,9 @@ def render_project(pr: dict, counts: dict, commit: str) -> str:
     w = L.append
     w(f"# {pr['name']}")
     w("")
-    w("<!-- Generated by scripts/port-status/run.sh. Do not edit: change the code, docs/porting/data/path-overrides.toml or member-waivers.toml and regenerate. -->")
+    w(f"<!-- Generated by scripts/port-status/run.sh. Do not edit: change the code, {PAGE['inputs']} and regenerate. -->")
     w("")
-    w(f"Generated from upstream commit `{commit}`. Back to [TRACKING.md](../TRACKING.md).")
+    w(f"Generated from {PAGE['commit']} `{commit}`. Back to [TRACKING.md]({PAGE['back']}).")
     w("")
     w("| | |")
     w("|---|---|")
@@ -1015,9 +1306,13 @@ def render_project(pr: dict, counts: dict, commit: str) -> str:
         w(f"| Members | {ratio(counts['members'])} ({pct(*counts['members'])}) |")
     if detail == "full":
         w(f"| Contracts (interfaces) | {ratio(counts['interfaces'])} |")
-        w(f"| Property registrations | {ratio(counts['properties'])} |")
-        w(f"| Routed events | {ratio(counts['events'])} |")
+        if PAGE["framework_rows"]:
+            w(f"| Property registrations | {ratio(counts['properties'])} |")
+            w(f"| Routed events | {ratio(counts['events'])} |")
     w("")
+    if PAGE["rules"]:
+        w(PAGE["rules"])
+        w("")
     if detail == "types" and pr["scope"] == "in":
         w("This backend is being ported. It is tracked at file and type granularity: the members of its types have not been extracted from upstream yet, so member counts are totals and the member column stays at zero.")
         w("")
@@ -1205,7 +1500,7 @@ def render_project(pr: dict, counts: dict, commit: str) -> str:
     if pr.get("rustOnly") or pr.get("rustAux"):
         w("## Rust-only files")
         w("")
-        w("Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).")
+        w(f"Rust sources of this crate that no upstream file maps to. Give each a reason in `{PAGE['overrides']}` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).")
         w("")
         if pr.get("rustOnly"):
             w("| Rust file | Reason | Types defined |")
@@ -1220,7 +1515,9 @@ def render_project(pr: dict, counts: dict, commit: str) -> str:
     return "\n".join(L).rstrip() + "\n"
 
 
-def render_tracking(index: dict, projects: list, counts: dict, repo: str, workspace_members: list) -> str:
+def render_tracking(index: dict, projects: list, counts: dict, repo: str, workspace_members: list, other_refs: dict | None = None) -> str:
+    """`other_refs`: workspace member -> what it ports of another reference (`other_reference_crates`)."""
+    other_refs = other_refs or {}
     commit = index["upstreamCommit"]
     L = []
     w = L.append
@@ -1434,7 +1731,7 @@ def render_tracking(index: dict, projects: list, counts: dict, repo: str, worksp
 
     # Rust-only crates
     upstream_rust_dirs = {p["rust"] for p in projects} | {map_project_dir(e["path"]) for entries in layout.values() for e in entries}
-    rust_only_crates = sorted(m for m in workspace_members if m not in upstream_rust_dirs)
+    rust_only_crates = sorted(m for m in workspace_members if m not in upstream_rust_dirs and m not in other_refs)
     w("### Cargo workspace members")
     w("")
     w("| Workspace member | Upstream project |")
@@ -1446,6 +1743,8 @@ def render_tracking(index: dict, projects: list, counts: dict, repo: str, worksp
             w(f"| `{m}` | `{by_rust[m]['path']}` |")
         elif m in layout_by_rust:
             w(f"| `{m}` | `{layout_by_rust[m]}` (not tracked) |")
+        elif m in other_refs:
+            w(f"| `{m}` | {other_refs[m]} |")
         else:
             w(f"| `{m}` | none (FerroUI only) |")
     w("")
@@ -1790,6 +2089,184 @@ def render_remaining(index: dict, projects: list, counts: dict, repo: str, data_
 # Main
 # --------------------------------------------------------------------------
 
+def library_rules() -> str:
+    """What the pages of a library reference count, from its matching options."""
+    parts = []
+    if OPTS["api"] == "public":
+        parts.append("Counted: the public API, public and protected types and members (with explicit interface implementations). "
+                     "Internal types (upstream's operator classes and their sinks, the internal helpers) are implementation; "
+                     "they count only through their files, which are ported one to one.")
+    if OPTS["overloads"] == "name":
+        parts.append("Overloads are found by name: every overload of a method counts as present once the Rust function of its "
+                     "name in snake case exists, or that name with a suffix (`_on` for a scheduler argument, `_with`, "
+                     "`_with_index`, ...) or the `try_` prefix.")
+    if OPTS["method_macros"]:
+        parts.append("The methods a `*_methods!` macro writes into a trait or an `impl` count as methods of that trait or type.")
+    if OPTS["doc_citations"]:
+        parts.append("An upstream file without a Rust file at its own path is present in the Rust files whose module documentation "
+                     "(the leading `//!` lines) cites it, such as `Linq/Observable/Select.cs`.")
+    if OPTS["waived_files"]:
+        parts.append("A missing file whose types are all waived counts as a waived file.")
+    if OPTS["arity_names"]:
+        parts.append("A generic type is also found under its name with its number of type parameters (`Pattern<T1, T2>` as `Pattern2`).")
+    return " ".join(parts)
+
+
+def library_test_totals(ref: dict) -> list:
+    """The totals at the top of the reports of test_gaps.py for the test projects of a library reference:
+    [(project path, short, totals or None)]."""
+    out = []
+    for short, project in ref["test_projects"] or []:
+        path = os.path.join(ref["data"], f"test-gaps-{short}.txt")
+        totals = None
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                head = f.read(3000)
+            found = {}
+            for key in ("Tests", "Present", "Waived", "Deferred", "Missing"):
+                m = re.search(rf"^{key}: (\d+)", head, re.M)
+                found[key.lower()] = int(m.group(1)) if m else 0
+            m = re.search(r"^Present: \d+ \((\d+) of them through an alias\)", head, re.M)
+            found["aliased"] = int(m.group(1)) if m else 0
+            m = re.search(r"^Waived: \d+ \((\d+) of them stated", head, re.M)
+            found["statedWaived"] = int(m.group(1)) if m else 0
+            totals = found
+        out.append((project, short, totals))
+    return out
+
+
+def render_library_index(ref: dict, index: dict, projects: list, counts: dict, waivers: Waivers, repo: str) -> str:
+    """`<tracking>/TRACKING.md` of a library reference: the totals, the projects, the tests and the waivers."""
+    commit = index["upstreamCommit"]
+    title = ref["title"]
+    rel_data = os.path.relpath(ref["data"], repo).replace(os.sep, "/")
+    rel_tracking = os.path.relpath(ref["tracking"], repo).replace(os.sep, "/")
+    to_docs = os.path.relpath(os.path.join(repo, "docs", "porting"), ref["tracking"]).replace(os.sep, "/")
+    L = []
+    w = L.append
+    w(f"# {title} port tracking")
+    w("")
+    w(f"<!-- Generated by scripts/port-status/run.sh. Do not edit: change the code, {rel_data}/path-overrides.toml or member-waivers.toml and regenerate. -->")
+    w("")
+    plan = ""
+    if ref["plan"]:
+        plan_rel = os.path.relpath(os.path.join(repo, ref["plan"]), ref["tracking"]).replace(os.sep, "/")
+        plan = f" The plan of this port: [{os.path.basename(ref['plan'])}]({plan_rel}); the"
+    w(f"Generated from {title} commit `{commit}` (reference `{ref['name']}` of `scripts/port-status/references.toml`).{plan or ' The'} "
+      f"tracking of the framework itself: [TRACKING.md]({to_docs}/TRACKING.md).")
+    w("")
+    w(library_rules())
+    w("")
+
+    total = empty_counts()
+    for pr in projects:
+        add_counts(total, counts[pr["name"]])
+
+    def row(label, c):
+        present, all_, waived = c
+        return f"| {label} | {present} | {all_ - present - waived} | {waived} | {all_} | {pct(present, all_, waived)} |"
+
+    w("## Totals")
+    w("")
+    w("Present / missing / waived; the percentage is `present / (total - waived)`.")
+    w("")
+    w("| | Present | Missing | Waived | Total | % |")
+    w("|---|---:|---:|---:|---:|---:|")
+    w(row("Files", total["files"]))
+    w(row("Types", total["types"]))
+    w(row("Members", total["members"]))
+    w("")
+    w(f"{total['na_files']} upstream files are not applicable and not counted (listed with the reason on the pages).")
+    w("")
+
+    w("## Projects")
+    w("")
+    w("| Project | Upstream path | FerroUI path | Crate | Files | Types | Members | % |")
+    w("|---|---|---|---|---:|---:|---:|---:|")
+    for pr in sorted(projects, key=lambda p: p["path"]):
+        c = counts[pr["name"]]
+        w(f"| [{pr['name']}]({page_name(pr['name'])}) | `{pr['path']}` | `{pr['rust']}` | {code(pr['crate'])} | {ratio(c['files'])} | "
+          f"{ratio(c['types'])} | {ratio(c['members'])} | {pct(*c['members'])} |")
+    w("")
+
+    tests = library_test_totals(ref)
+    if tests:
+        w("## Tests")
+        w("")
+        w(f"From the reports of `scripts/port-status/test_gaps.py --reference {ref['name']} --all` (`{rel_data}/test-gaps-*.txt`), "
+          "which match the upstream test methods with the Rust tests by name. *Stated not ported* are the tests a line "
+          "`// Not ported: <Name> - <reason>` of the Rust test file gives a reason for: *deferred* when the reason names a later "
+          f"phase, *waived* otherwise. *Waived by file* are the tests of the waived API, in `{rel_data}/test-aliases.toml`.")
+        w("")
+        w("| Upstream test project | Tests | Ported | Stated not ported: waived | Stated not ported: deferred | Waived by file | Missing | Report |")
+        w("|---|---:|---:|---:|---:|---:|---:|---|")
+        for project, short, t in tests:
+            if t is None:
+                w(f"| `{project}` | - | - | - | - | - | - | not written yet |")
+                continue
+            w(f"| `{project}` | {t['tests']} | {t['present']} | {t['statedWaived']} | {t['deferred']} | {t['waived'] - t['statedWaived']} | "
+              f"{t['missing']} | `test-gaps-{short}.txt` |")
+        w("")
+
+    by_reason = Counter()
+    for pr in projects:
+        for fr in pr["files"]:
+            for tr in fr["types"]:
+                if tr["status"] == "waived":
+                    by_reason[tr.get("reason", "")] += 1
+                for mr in tr["members"]:
+                    if mr["status"] == "waived":
+                        by_reason[mr["how"]] += 1
+    if by_reason:
+        w("## Waived")
+        w("")
+        w(f"Types and members waived with a reason (`{rel_data}/member-waivers.toml`, and the files `{rel_data}/path-overrides.toml` "
+          "replaces): the count of types and members per reason.")
+        w("")
+        w("| Types and members | Reason |")
+        w("|---:|---|")
+        for reason, n in sorted(by_reason.items(), key=lambda x: (-x[1], x[0])):
+            w(f"| {n} | {esc(reason)} |")
+        w("")
+
+    w("## How to regenerate")
+    w("")
+    w("```sh")
+    w(f"scripts/port-status/run.sh --reference {ref['name']}            # the checkout at {ref['checkout_config']}, or ${ref['checkout_env']}")
+    w(f"scripts/port-status/run.sh --reference {ref['name']} --check    # exit 1 when a document is out of date; writes nothing")
+    w(f"python3 scripts/port-status/test_gaps.py --reference {ref['name']} --all   # the test reports, before run.sh")
+    w(f"python3 scripts/port-status/port_status.py --reference {ref['name']} --explain <Project> <File.cs>")
+    w("```")
+    w("")
+    w(f"Inputs: the project list `{os.path.relpath(ref['projects'], repo)}`, the extraction `{rel_data}/upstream-api.json`, "
+      f"`{rel_data}/path-overrides.toml`, `{rel_data}/member-waivers.toml` and `{rel_data}/test-aliases.toml`. "
+      f"Outputs: this directory (`{rel_tracking}/`) and `{rel_data}/port-status.json`.")
+    return "\n".join(L).rstrip() + "\n"
+
+
+def other_reference_crates(repo: str, current: dict) -> dict:
+    """Workspace directory -> the project of another reference it ports (its library crates and the crates of its
+    tests), for the table of workspace members of TRACKING.md."""
+    out = {}
+    docs = os.path.join(repo, "docs", "porting")
+    for ref in references.all_references(repo):
+        if ref["name"] == current["name"] or not os.path.exists(ref["projects"]):
+            continue
+        with open(ref["projects"], encoding="utf-8") as f:
+            listed = json.load(f).get("projects", [])
+        link_dir = os.path.relpath(ref["tracking"], docs).replace(os.sep, "/")
+        for p in listed:
+            if p.get("rust"):
+                name = p.get("name") or p["path"].rsplit("/", 1)[-1]
+                out[p["rust"]] = f"`{p['path']}` ({ref['title']}: [{name}]({link_dir}/{page_name(name)}))"
+        tests = [t[1] for t in (ref["test_projects"] or [])]
+        for root in ref["test_roots"]:
+            rel = os.path.relpath(root, repo).replace(os.sep, "/")
+            if rel.startswith("tests/") and rel not in out and tests:
+                out[rel] = ", ".join(f"`{t}`" for t in tests) + f" ({ref['title']}: tests, [TRACKING.md]({link_dir}/TRACKING.md))"
+    return out
+
+
 def workspace_members(repo: str) -> list:
     path = os.path.join(repo, "Cargo.toml")
     if not os.path.exists(path):
@@ -1818,11 +2295,22 @@ def main() -> int:
     ap.add_argument("--repo", default=repo_default)
     ap.add_argument("--explain", nargs=2, metavar=("PROJECT", "FILE"), help="print the member matching of one upstream file and exit")
     ap.add_argument("--check", action="store_true", help="exit 1 if the generated documents are out of date (writes nothing)")
+    ap.add_argument("--reference", help="a reference of scripts/port-status/references.toml (default: the framework)")
     args = ap.parse_args()
     repo = os.path.abspath(args.repo)
-    data_dir = os.path.join(repo, "docs", "porting", "data")
+    ref = references.load(repo, args.reference)
+    framework = ref["documents"] == "framework"
+    OPTS.update({k: ref[k] for k in OPTS})
+    data_dir = ref["data"]
+    tracking_dir = ref["tracking"]
+    if not framework:
+        rel_data = os.path.relpath(data_dir, repo).replace(os.sep, "/")
+        PAGE.update(inputs=f"{rel_data}/path-overrides.toml or member-waivers.toml", commit=f"{ref['title']} commit",
+                    back="TRACKING.md", overrides=f"{rel_data}/path-overrides.toml", rules=library_rules(), framework_rows=False)
     index = load_upstream(data_dir)
-    apply_project_list(index, repo)
+    apply_project_list(index, repo, ref["projects"])
+    if OPTS["api"] == "public":
+        keep_public_api(index)
     overrides = Overrides(load_toml(os.path.join(data_dir, "path-overrides.toml")))
     waivers = Waivers(load_toml(os.path.join(data_dir, "member-waivers.toml")))
 
@@ -1857,9 +2345,13 @@ def main() -> int:
     commit = index["upstreamCommit"]
     outputs = {}
     for pr in projects:
-        outputs[os.path.join(repo, "docs", "porting", "tracking", page_name(pr["name"]))] = render_project(pr, counts[pr["name"]], commit)
-    outputs[os.path.join(repo, "docs", "porting", "TRACKING.md")] = render_tracking(index, projects, counts, repo, workspace_members(repo))
-    outputs[os.path.join(repo, "docs", "porting", "REMAINING.md")] = render_remaining(index, projects, counts, repo, data_dir)
+        outputs[os.path.join(tracking_dir, page_name(pr["name"]))] = render_project(pr, counts[pr["name"]], commit)
+    if framework:
+        outputs[os.path.join(repo, "docs", "porting", "TRACKING.md")] = render_tracking(
+            index, projects, counts, repo, workspace_members(repo), other_reference_crates(repo, ref))
+        outputs[os.path.join(repo, "docs", "porting", "REMAINING.md")] = render_remaining(index, projects, counts, repo, data_dir)
+    else:
+        outputs[os.path.join(tracking_dir, "TRACKING.md")] = render_library_index(ref, index, projects, counts, waivers, repo)
 
     numbers = overall_numbers(projects, counts)
     summary = {
@@ -1897,7 +2389,6 @@ def main() -> int:
         return 1 if stale else 0
 
     # remove pages of projects that no longer exist
-    tracking_dir = os.path.join(repo, "docs", "porting", "tracking")
     if os.path.isdir(tracking_dir):
         for fn in os.listdir(tracking_dir):
             p = os.path.join(tracking_dir, fn)
@@ -1909,6 +2400,14 @@ def main() -> int:
     for pr in projects:
         if pr["scope"] == "in" and pr["detail"] == "full":
             add_counts(total, counts[pr["name"]])
+    if not framework:
+        print(f"port-status ({ref['name']}): files {ratio(total['files'])}, types {ratio(total['types'])}, members {ratio(total['members'])} "
+              f"({pct(*total['members'])}); {changed} of {len(outputs)} documents updated")
+        for w_ in summary["unusedPathOverrides"]:
+            print("warning: path override matched nothing:", w_, file=sys.stderr)
+        for w_ in summary["unusedWaivers"]:
+            print("warning: waiver matched nothing:", w_, file=sys.stderr)
+        return 0
     print(f"port-status: files {ratio(total['files'])}, types {ratio(total['types'])}, members {ratio(total['members'])} "
           f"({pct(*total['members'])}); {changed} of {len(outputs)} documents updated")
     print(f"port-status: of every upstream source project, in scope or not: members {numbers['present']}/{numbers['all'][2]} "

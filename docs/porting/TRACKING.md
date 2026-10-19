@@ -356,6 +356,8 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `src/FerroUI.MicroCom` | `src/Avalonia.MicroCom` |
 | `src/FerroUI.Native` | `src/Avalonia.Native` |
 | `src/FerroUI.OpenGL` | `src/Avalonia.OpenGL` |
+| `src/FerroUI.Reactive` | `Rx.NET/Source/src/System.Reactive` (Rx.NET: [System.Reactive](tracking/reactive/System.Reactive.md)) |
+| `src/FerroUI.Reactive.Testing` | `Rx.NET/Source/src/Microsoft.Reactive.Testing` (Rx.NET: [Microsoft.Reactive.Testing](tracking/reactive/Microsoft.Reactive.Testing.md)) |
 | `src/FerroUI.Remote.Protocol` | `src/Avalonia.Remote.Protocol` |
 | `src/FerroUI.System` | none (FerroUI only) |
 | `src/FerroUI.Themes.Fluent` | `src/Avalonia.Themes.Fluent` |
@@ -385,6 +387,7 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `tests/FerroUI.IntegrationTests.Win32` | `tests/Avalonia.IntegrationTests.Win32` (not tracked) |
 | `tests/FerroUI.LeakTests` | `tests/Avalonia.LeakTests` (not tracked) |
 | `tests/FerroUI.Markup.Xaml.UnitTests` | `tests/Avalonia.Markup.Xaml.UnitTests` (not tracked) |
+| `tests/FerroUI.Reactive.Tests` | `Rx.NET/Source/tests/Tests.System.Reactive` (Rx.NET: tests, [TRACKING.md](tracking/reactive/TRACKING.md)) |
 | `tests/FerroUI.RenderBackends.Comparison` | none (FerroUI only) |
 | `tests/FerroUI.RenderTests` | none (FerroUI only) |
 | `tests/FerroUI.TreeDataGrid.Benchmarks` | none (FerroUI only) |

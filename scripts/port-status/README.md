@@ -1,6 +1,20 @@
 # port-status
 
-Generates the port tracking documents:
+Generates the port tracking documents. The port tracks more than one upstream reference; each is listed in
+`scripts/port-status/references.toml` with its own name, checkout, tracked commit (the `upstreamCommit` of its
+extraction), project list and data files:
+
+| Reference | Checkout | Project list | Data | Pages |
+|---|---|---|---|---|
+| `avalonia` (default) | `../Avalonia`, or `$UPSTREAM` | `scripts/api-extract/projects.json` | `docs/porting/data/` | `docs/porting/TRACKING.md`, `REMAINING.md`, `TESTS.md`, `docs/porting/tracking/` |
+| `reactive` (Rx.NET) | `/Volumes/1TB-macOS/reactive-ref/reactive`, or `$RX_UPSTREAM` | `scripts/api-extract/projects-reactive.json` | `docs/porting/data/reactive/` | `docs/porting/tracking/reactive/` |
+
+The framework reference (`documents = "framework"`) writes the documents below. Another reference
+(`documents = "library"`) writes a page per project and an index, `<tracking>/TRACKING.md` (totals, projects, tests,
+waivers by reason), to its tracking directory, and its `port-status.json` to its data directory; section "Library
+references" below has its rules.
+
+The documents of the framework reference:
 
 - `docs/porting/TRACKING.md` - master document (the two headline numbers, totals, per-project table, project structure)
 - `docs/porting/REMAINING.md` - what is left to port, in one place: every upstream project with its scope and what is
@@ -10,11 +24,13 @@ Generates the port tracking documents:
 - `docs/porting/data/port-status.json` - the same totals, machine readable
 
 ```sh
-scripts/port-status/run.sh            # upstream checkout at ../Avalonia, or UPSTREAM=/path/to/Avalonia
+scripts/port-status/run.sh            # every reference; the framework's checkout at ../Avalonia, or UPSTREAM=/path/to/Avalonia
+scripts/port-status/run.sh --reference avalonia   # one reference (`reactive` for Rx.NET)
 scripts/port-status/run.sh --force    # re-run the upstream extractor
-scripts/port-status/run.sh --check    # exit 1 when the generated documents are out of date; runs no extraction
-TRACKED_COMMIT=<sha> scripts/port-status/run.sh   # move the tracking to another upstream commit
+scripts/port-status/run.sh --check    # exit 1 when the generated documents of any reference are out of date; runs no extraction
+TRACKED_COMMIT=<sha> scripts/port-status/run.sh   # move the tracking of the default reference (or of --reference) to another commit
 python3 scripts/port-status/port_status.py --explain Avalonia.Base Point.cs   # how each member was matched
+python3 scripts/port-status/port_status.py --reference reactive --explain System.Reactive Notification.cs
 ```
 
 Requirements: Python 3.11+ (standard library only); the .NET SDK only when the upstream JSON has to be regenerated.
@@ -25,6 +41,7 @@ script of its own, which reads the upstream test projects at the tracked commit 
 ```sh
 python3 scripts/port-status/test_gaps.py ../Avalonia --all                           # every project: docs/porting/data/test-gaps-*.txt and the table
 python3 scripts/port-status/test_gaps.py ../Avalonia tests/Avalonia.Base.UnitTests   # the report of one project
+python3 scripts/port-status/test_gaps.py --reference reactive --all                  # Rx.NET: docs/porting/data/reactive/test-gaps-system-reactive.txt
 ```
 
 Its rules are at its top; `docs/porting/data/test-aliases.toml` holds the tests the port has under another name
@@ -47,6 +64,42 @@ UPSTREAM=../Avalonia python3 scripts/port-status/tests_audit.py --extract     # 
 python3 scripts/port-status/tests_audit.py --explain Avalonia.Base.UnitTests 'Styling/*'   # what matched each test
 ```
 
+## Library references
+
+A reference with `documents = "library"` (Rx.NET) is extracted and scanned by the same code, with the options of its
+entry in `references.toml`:
+
+- `api = "public"`: the types and members counted are the public API (public and protected, with explicit interface
+  implementations). Internal types (upstream's operator classes and their sinks, the internal helpers) count only
+  through their files: a file whose types are all internal is a file to port, not a file without types.
+- `overloads = "name"`: every overload of a method is present once the Rust function of its name in snake case
+  exists, or that name with a suffix (`_on` for a scheduler argument, `_with`, `_with_index`, ...) or the `try_`
+  prefix; constructors also match `with_*`. A waiver that names an overload (by name or by a glob on its signature)
+  waives it even then.
+- `method_macros = true`: the functions a `macro_rules!` of the crate writes count where the macro is invoked: in a
+  trait or an `impl` (`super::select::select_methods!();` in `trait ObservableExt`), as its functions; at module level
+  (`join_arity!(Pattern2, Plan2, ..);`), as the items of its first arm with the leading metavariables bound to the
+  arguments.
+- `doc_citations = true`: an upstream file without a Rust file at its own path, or a `[[map]]`, is present in the Rust
+  files whose module documentation (the leading `//!` lines) names it in backticks (`` `Linq/Observable/Select.cs` ``,
+  or a path below the directory of the Rust file, or the one upstream file of that name).
+- `waived_files = true`: a missing file whose types are all waived counts as a waived file.
+- `arity_names = true`: a generic type is also looked for under its name with its number of type parameters
+  (`Pattern<T1, T2>` as `Pattern2`).
+
+Its `path-overrides.toml` has one more table, `[[dir]]` (`upstream = "Linq/Observable"`, `rust = "linq"`): the Rust
+directory of an upstream directory. Its `member-waivers.toml` holds the waivers of `docs/porting/reactive.md`,
+section 5. For its tests (`test_gaps.py --reference reactive`), `test_projects`, `test_roots` and `test_attributes`
+(MSTest's `TestMethod`) name what is read, and with `stated_reasons = true` a line `// Not ported: <Name> - <reason>`
+of the Rust test file of an upstream test file (`Tests/Linq/Observable/SelectTest.cs` ->
+`tests/FerroUI.Reactive.Tests/tests/linq/observable/select_test.rs`) states why that test is not ported: it counts as
+deferred when the reason names a later phase, else as waived. The test files of the waived API are waived in its
+`test-aliases.toml`. `run.sh` does not run `test_gaps.py`; run it before `run.sh` when tests were ported, since the
+index reads the totals of its report.
+
+To add a reference: an entry in `references.toml`, a project list for `scripts/api-extract` (the format of
+`projects.json`, with `rust` and `crate` set), and its data directory; `run.sh --reference <name>` extracts it.
+
 ## Pipeline
 
 1. `scripts/api-extract` (C#, Roslyn syntax trees, no compilation) reads the upstream projects listed in
@@ -67,6 +120,9 @@ python3 scripts/port-status/tests_audit.py --explain Avalonia.Base.UnitTests 'St
    not run `test_gaps.py`, so run that first when tests were ported.
 
 ## Files you edit
+
+The files of the framework reference; another reference has the same files in its own data directory
+(`docs/porting/data/reactive/` for Rx.NET) and its project list beside `projects.json`.
 
 - `docs/porting/data/path-overrides.toml` - merged / renamed / replaced / not-applicable files, Rust-only files.
 - `docs/porting/data/member-waivers.toml` - `[[waive]]` (not ported, with a reason) and `[[alias]]` (ported under a
