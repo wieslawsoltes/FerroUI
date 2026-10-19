@@ -1,3 +1,4 @@
 //! The unit tests of the crate, as a module tree of the library.
 
 mod ferro_thread_local_tests;
+mod task_tests;

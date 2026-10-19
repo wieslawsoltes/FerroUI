@@ -272,6 +272,29 @@ Each time type maps to a Rust or `ferroui-system` type:
 
 Tracking pages per reference are generated like those of the upstream port (section 8).
 
+### 5.8 Tasks and futures (phase 4)
+
+Rx's asynchronous surface is written against `Task<T>`: `FromAsync`, `StartAsync`, `ToObservable(Task)`, `ToTask`, `RunAsync`, `GetAwaiter`, `ForEachAsync`, the `Task` forms of `SelectMany`, `Create`, `Defer`, `Using`, `Merge`, `Concat` and `Switch`, and `ScheduleAsync`, `Sleep` and `Yield` of the schedulers. Its tests drive them through `TaskCompletionSource` (238 uses in the upstream tests), whose `SetResult` runs the continuations on the spot. A Rust future, by contrast, is a value that one owner polls until it ends. The port therefore keeps a task type of its own, and futures are how code produces and awaits tasks.
+
+**`Task<T>` and `TaskCompletionSource<T>` in `ferroui-system`** (`threading::tasks`). They have the same shape as the .NET types, with these differences:
+- A task is a shared handle (`Rc`, cloned freely) to one outcome. The status is `Created`, `Running`, `RanToCompletion`, `Faulted` or `Canceled`; the result is a `T: Clone`, an error is an `Rc<dyn Error>`, and a cancellation is `TaskCanceledError`.
+- `continue_with` registers a continuation that runs synchronously when the task completes (`TaskContinuationOptions.ExecuteSynchronously`), or at once on a completed task.
+- A task is a `Future` (output `Result<T, TaskError>`), so `async` code awaits it.
+- `TaskCompletionSource` has `set_result`, `set_exception`, `set_canceled` and their `try_` forms.
+
+Tasks are single-threaded, like the observables.
+
+**Running a future: `Task::spawn_local`.** It runs a future on the current thread and gives its task. The future is polled at once. A wake on the same thread polls it again at once, or right after the poll that is running. A wake from another thread is posted to the thread of the task through the **thread poster** of that thread, a seam of `ferroui-system` (`threading::set_thread_poster`). The dispatcher registers itself as the poster of its thread (phase 8). Without a poster, a wake from another thread is queued, and `run_pending_wakes()` runs the queue. A console program or a test calls it; `Task::block_on` does too, for a thread with nothing else to run. This keeps the executor out of the reactive crate. The UI already has one (`DispatcherTask`), and the seam lets it carry the tasks of `ferroui-system` without a second event loop.
+
+**The Rx forms.** Each upstream overload that takes `Func<Task<T>>` or `Func<CancellationToken, Task<T>>` takes a closure returning a future. The future is spawned as a task (`Task::spawn_local`), and the token of the `CancellationToken` forms is cancelled when the subscription is disposed, as upstream does. A form that takes a `Task<T>` itself (`ToObservable`, `Merge`, `Concat`, `Switch` of tasks) takes a `Task<T>`. `ToTask`, `RunAsync`/`GetAwaiter` and `ForEachAsync` give a `Task<T>`, which code awaits. `ScheduleAsync`, `Sleep` and `Yield` give tasks completed by the scheduler.
+
+**Left out:**
+- `FromAsyncPattern`, the `Begin`/`End` pattern (`IAsyncResult`) superseded by tasks;
+- the task-like method builder (`TaskObservableMethodBuilder`), which needs the C# compiler's support for custom async types;
+- the tests that start real threads (`Task.Factory.StartNew`, `ManualResetEvent`), as section 5.1 says.
+
+**`TaskPoolScheduler`** cannot be an `IScheduler`: the actions of a scheduler are not `Send`. Its role, background work whose result comes back to the subscriber, is `Task::run(work)`. It runs a `Send` closure on a worker thread and completes its task on the calling thread, through the thread poster. `Observable::start_on_task_pool` and the `TaskpoolScheduler` of ReactiveUI build on it, and this is recorded as a deviation.
+
 ## 6. Phases
 
 Each phase is one or more pull requests that build, pass the existing tests and the ported ones, and are merged when CI is green. Sub-agents write and commit; the builds and the validation run one branch at a time in the main checkout, as the other ports do. The sizes are the upstream sizes the phase ports.

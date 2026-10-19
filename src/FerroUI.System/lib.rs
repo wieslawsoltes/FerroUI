@@ -11,7 +11,8 @@
 //! - [`component_model`]: `System.ComponentModel` (`INotifyPropertyChanged`).
 //! - [`collections::specialized`]: `System.Collections.Specialized` (`INotifyCollectionChanged` and
 //!   the arguments of a change).
-//! - [`threading`]: `System.Threading` (`CancellationToken` and its source).
+//! - [`threading`]: `System.Threading` (`CancellationToken` and its source) and
+//!   `System.Threading.Tasks` (`Task<T>`, `TaskCompletionSource<T>`, futures run on their thread).
 //! - [`events`]: the multicast events and the lists of handlers that FerroUI's events are built on.
 //! - [`ferro_thread_local!`]: thread-local variables, `std::thread_local!` on every target with
 //!   thread-local statics and one table per thread on Android ([`mod@ferro_thread_local`]).
