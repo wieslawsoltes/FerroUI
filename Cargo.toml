@@ -49,6 +49,7 @@ members = [
     "tests/FerroUI.Markup.Xaml.UnitTests",
     "tests/FerroUI.Reactive.Tests",
     "tests/FerroUI.Splat.Tests",
+    "tests/FerroUI.DynamicData.Tests",
     "tests/XamlIncludeFixture/Theme",
     "tests/XamlIncludeFixture/Application",
     "tests/FerroUI.RenderBackends.Comparison",

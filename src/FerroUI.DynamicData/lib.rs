@@ -9,6 +9,7 @@
 //! - [`cache`]: the keyed side (`Change<T, K>`, `ChangeSet<T, K>`, `ChangeAwareCache`, `SourceCache`, ...).
 //! - [`list`]: the side of positions (`list::Change<T>`, `list::ChangeSet<T>`, `ChangeAwareList`, ...).
 
+pub mod binding;
 pub mod cache;
 pub mod diagnostics;
 pub(crate) mod internal;

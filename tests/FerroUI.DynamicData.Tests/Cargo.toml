@@ -1,0 +1,21 @@
+[package]
+name = "ferroui-dynamic-data-tests"
+description = "The unit tests of ferroui-dynamic-data, ported from DynamicData's DynamicData.Tests"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-dynamic-data = { workspace = true }
+ferroui-reactive = { workspace = true }
+ferroui-reactive-testing = { workspace = true }
+ferroui-system = { workspace = true }
