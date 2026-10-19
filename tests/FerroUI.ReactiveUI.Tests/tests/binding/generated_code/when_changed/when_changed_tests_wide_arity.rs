@@ -1,5 +1,6 @@
 //! `WhenChangedTests` (`ReactiveUI.Binding.GeneratedCode.Tests/WhenChanged/WhenChangedTests.WideArity.cs`).
 
+use crate::mocks::collect_items;
 use crate::tests::binding::generated_code::test_models::scenarios::when_changed_extended_scenarios;
 use crate::tests::binding::generated_code::test_models::BigViewModel;
 use ferroui_reactive::ObservableExt;
@@ -71,8 +72,40 @@ fn twelve_properties_emits_initial_values() {
     assert!(emits_on_subscribe(&when_changed_extended_scenarios::twelve_properties(&vm)));
 }
 
-// Not ported: ThirteenProperties_EmitsInitialValues - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: FourteenProperties_EmitsInitialValues - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: FifteenProperties_EmitsInitialValues - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: SixteenProperties_EmitsInitialValues - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: WithSelector_SixteenProperties - needs arity 13 to 16 (the tuple traits stop at 12)
+#[test]
+fn thirteen_properties_emits_initial_values() {
+    let vm = BigViewModel::create_populated();
+
+    assert!(emits_on_subscribe(&when_changed_extended_scenarios::thirteen_properties(&vm)));
+}
+
+#[test]
+fn fourteen_properties_emits_initial_values() {
+    let vm = BigViewModel::create_populated();
+
+    assert!(emits_on_subscribe(&when_changed_extended_scenarios::fourteen_properties(&vm)));
+}
+
+#[test]
+fn fifteen_properties_emits_initial_values() {
+    let vm = BigViewModel::create_populated();
+
+    assert!(emits_on_subscribe(&when_changed_extended_scenarios::fifteen_properties(&vm)));
+}
+
+#[test]
+fn sixteen_properties_emits_initial_values() {
+    let vm = BigViewModel::create_populated();
+
+    assert!(emits_on_subscribe(&when_changed_extended_scenarios::sixteen_properties(&vm)));
+}
+
+#[test]
+fn with_selector_sixteen_properties() {
+    let vm = BigViewModel::create_populated();
+
+    let values = collect_items(&when_changed_extended_scenarios::with_selector_sixteen_properties(&vm));
+
+    assert!(!values.borrow().is_empty());
+    assert!(!values.borrow()[0].is_empty());
+}

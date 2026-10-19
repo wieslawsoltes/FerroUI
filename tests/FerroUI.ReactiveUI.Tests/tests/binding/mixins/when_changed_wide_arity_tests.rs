@@ -1,7 +1,7 @@
 //! `WhenChangedWideArityTests` (`ReactiveUI.Binding.Tests/Mixins/WhenChangedWideArityTests.cs`).
 //!
 //! Upstream calls the run-time overloads of every arity, 1 to 16 expressions. The port passes the
-//! paths as one argument, one path or a tuple of 2 to 12, so the arities 13 to 16 are not ported.
+//! paths as one argument, one path or a tuple of 2 to 16.
 
 use crate::mocks::collect_items;
 use crate::tests::binding::test_models::WideArityFixture;
@@ -96,10 +96,26 @@ observation_test!(
     BOTH_ENDS,
     |fixture| fixture.when_changed(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12)).select(|v| format!("{}{}", v.0, v.11))
 );
-// Not ported: WhenChanged_OnThirteenProperties_ReportsTheObservedValues - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: WhenChanged_OnFourteenProperties_ReportsTheObservedValues - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: WhenChanged_OnFifteenProperties_ReportsTheObservedValues - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: WhenChanged_OnSixteenProperties_ReportsTheObservedValues - needs arity 13 to 16 (the tuple traits stop at 12)
+observation_test!(
+    when_changed_on_thirteen_properties_reports_the_observed_values,
+    BOTH_ENDS,
+    |fixture| fixture.when_changed(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13)).select(|v| format!("{}{}", v.0, v.12))
+);
+observation_test!(
+    when_changed_on_fourteen_properties_reports_the_observed_values,
+    BOTH_ENDS,
+    |fixture| fixture.when_changed(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13, value14)).select(|v| format!("{}{}", v.0, v.13))
+);
+observation_test!(
+    when_changed_on_fifteen_properties_reports_the_observed_values,
+    BOTH_ENDS,
+    |fixture| fixture.when_changed(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13, value14, value15)).select(|v| format!("{}{}", v.0, v.14))
+);
+observation_test!(
+    when_changed_on_sixteen_properties_reports_the_observed_values,
+    BOTH_ENDS,
+    |fixture| fixture.when_changed(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13, value14, value15, value16)).select(|v| format!("{}{}", v.0, v.15))
+);
 observation_test!(
     when_changed_projecting_two_properties_reports_the_selector_result,
     BOTH_ENDS,
@@ -155,7 +171,23 @@ observation_test!(
     BOTH_ENDS,
     |fixture| fixture.when_changed_select(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12), |v| format!("{}{}", v.0, v.11))
 );
-// Not ported: WhenChanged_ProjectingThirteenProperties_ReportsTheSelectorResult - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: WhenChanged_ProjectingFourteenProperties_ReportsTheSelectorResult - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: WhenChanged_ProjectingFifteenProperties_ReportsTheSelectorResult - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: WhenChanged_ProjectingSixteenProperties_ReportsTheSelectorResult - needs arity 13 to 16 (the tuple traits stop at 12)
+observation_test!(
+    when_changed_projecting_thirteen_properties_reports_the_selector_result,
+    BOTH_ENDS,
+    |fixture| fixture.when_changed_select(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13), |v| format!("{}{}", v.0, v.12))
+);
+observation_test!(
+    when_changed_projecting_fourteen_properties_reports_the_selector_result,
+    BOTH_ENDS,
+    |fixture| fixture.when_changed_select(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13, value14), |v| format!("{}{}", v.0, v.13))
+);
+observation_test!(
+    when_changed_projecting_fifteen_properties_reports_the_selector_result,
+    BOTH_ENDS,
+    |fixture| fixture.when_changed_select(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13, value14, value15), |v| format!("{}{}", v.0, v.14))
+);
+observation_test!(
+    when_changed_projecting_sixteen_properties_reports_the_selector_result,
+    BOTH_ENDS,
+    |fixture| fixture.when_changed_select(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13, value14, value15, value16), |v| format!("{}{}", v.0, v.15))
+);

@@ -15,3 +15,4 @@ pub mod interfaces;
 pub mod mixins;
 pub mod observable_for_property;
 pub mod observables;
+pub mod view;

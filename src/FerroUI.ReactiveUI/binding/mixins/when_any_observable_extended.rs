@@ -8,9 +8,9 @@ use ferroui_system::component_model::PropertyPath;
 use ferroui_system::IObservable;
 use std::rc::Rc;
 
-/// The paths of one `WhenAnyObservable` with a selector: a tuple of 2 to 12 paths to properties
+/// The paths of one `WhenAnyObservable` with a selector: a tuple of 2 to 16 paths to properties
 /// that hold observables, whose latest values combine.
-// Deviation (DEVIATIONS.md, ReactiveUI): the arity is a tuple of paths, from 2 to 12, where
+// Deviation (DEVIATIONS.md, ReactiveUI): the arity is a tuple of paths, from 2 to 16, where
 // upstream has overloads of 2 to 16 expressions.
 pub trait WhenAnyObservableCombinePaths<T: 'static>: 'static {
     /// The tuple of the latest values of the observables.

@@ -123,10 +123,89 @@ pub fn twelve_properties(vm: &Rc<BigViewModel>) -> Rc<dyn IObservable<(String, i
     ))
 }
 
-// Not ported: ThirteenProperties, FourteenProperties, FifteenProperties, SixteenProperties - needs
-// arity 13 to 16 (the tuple traits stop at 12).
-// Not ported: WithSelector_FiveProperties to WithSelector_FifteenProperties - no test uses them.
-// Not ported: WithSelector_SixteenProperties - needs arity 13 to 16 (the tuple traits stop at 12).
+/// `WhenChanging` of `Prop1` to `Prop13`, as a tuple (`ThirteenProperties`).
+pub fn thirteen_properties(vm: &Rc<BigViewModel>) -> Rc<dyn IObservable<(String, i32, f64, bool, String, i32, f64, bool, String, i32, f64, bool, String)>> {
+    vm.when_changing((
+        prop!(BigViewModel => prop1),
+        prop!(BigViewModel => prop2),
+        prop!(BigViewModel => prop3),
+        prop!(BigViewModel => prop4),
+        prop!(BigViewModel => prop5),
+        prop!(BigViewModel => prop6),
+        prop!(BigViewModel => prop7),
+        prop!(BigViewModel => prop8),
+        prop!(BigViewModel => prop9),
+        prop!(BigViewModel => prop10),
+        prop!(BigViewModel => prop11),
+        prop!(BigViewModel => prop12),
+        prop!(BigViewModel => prop13),
+    ))
+}
+
+/// `WhenChanging` of `Prop1` to `Prop14`, as a tuple (`FourteenProperties`).
+pub fn fourteen_properties(vm: &Rc<BigViewModel>) -> Rc<dyn IObservable<(String, i32, f64, bool, String, i32, f64, bool, String, i32, f64, bool, String, i32)>> {
+    vm.when_changing((
+        prop!(BigViewModel => prop1),
+        prop!(BigViewModel => prop2),
+        prop!(BigViewModel => prop3),
+        prop!(BigViewModel => prop4),
+        prop!(BigViewModel => prop5),
+        prop!(BigViewModel => prop6),
+        prop!(BigViewModel => prop7),
+        prop!(BigViewModel => prop8),
+        prop!(BigViewModel => prop9),
+        prop!(BigViewModel => prop10),
+        prop!(BigViewModel => prop11),
+        prop!(BigViewModel => prop12),
+        prop!(BigViewModel => prop13),
+        prop!(BigViewModel => prop14),
+    ))
+}
+
+/// `WhenChanging` of `Prop1` to `Prop15`, as a tuple (`FifteenProperties`).
+pub fn fifteen_properties(vm: &Rc<BigViewModel>) -> Rc<dyn IObservable<(String, i32, f64, bool, String, i32, f64, bool, String, i32, f64, bool, String, i32, f64)>> {
+    vm.when_changing((
+        prop!(BigViewModel => prop1),
+        prop!(BigViewModel => prop2),
+        prop!(BigViewModel => prop3),
+        prop!(BigViewModel => prop4),
+        prop!(BigViewModel => prop5),
+        prop!(BigViewModel => prop6),
+        prop!(BigViewModel => prop7),
+        prop!(BigViewModel => prop8),
+        prop!(BigViewModel => prop9),
+        prop!(BigViewModel => prop10),
+        prop!(BigViewModel => prop11),
+        prop!(BigViewModel => prop12),
+        prop!(BigViewModel => prop13),
+        prop!(BigViewModel => prop14),
+        prop!(BigViewModel => prop15),
+    ))
+}
+
+/// `WhenChanging` of `Prop1` to `Prop16`, as a tuple (`SixteenProperties`).
+pub fn sixteen_properties(vm: &Rc<BigViewModel>) -> Rc<dyn IObservable<(String, i32, f64, bool, String, i32, f64, bool, String, i32, f64, bool, String, i32, f64, bool)>> {
+    vm.when_changing((
+        prop!(BigViewModel => prop1),
+        prop!(BigViewModel => prop2),
+        prop!(BigViewModel => prop3),
+        prop!(BigViewModel => prop4),
+        prop!(BigViewModel => prop5),
+        prop!(BigViewModel => prop6),
+        prop!(BigViewModel => prop7),
+        prop!(BigViewModel => prop8),
+        prop!(BigViewModel => prop9),
+        prop!(BigViewModel => prop10),
+        prop!(BigViewModel => prop11),
+        prop!(BigViewModel => prop12),
+        prop!(BigViewModel => prop13),
+        prop!(BigViewModel => prop14),
+        prop!(BigViewModel => prop15),
+        prop!(BigViewModel => prop16),
+    ))
+}
+
+// Not ported: WithSelector_FiveProperties to WithSelector_SixteenProperties - no test uses them.
 
 /// `WhenChanging` of `Address.City` (`DeepChain_AddressCity`).
 pub fn deep_chain_address_city(vm: &Rc<BigViewModel>) -> Rc<dyn IObservable<String>> {

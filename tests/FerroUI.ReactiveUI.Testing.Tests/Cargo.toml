@@ -1,0 +1,23 @@
+[package]
+name = "ferroui-reactiveui-testing-tests"
+description = "The unit tests of ferroui-reactiveui-testing, ported from ReactiveUI's ReactiveUI.Testing.Tests"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-reactiveui-testing = { workspace = true }
+ferroui-reactiveui = { workspace = true }
+ferroui-reactive = { workspace = true }
+ferroui-reactive-testing = { workspace = true }
+ferroui-splat = { workspace = true }
+ferroui-system = { workspace = true }

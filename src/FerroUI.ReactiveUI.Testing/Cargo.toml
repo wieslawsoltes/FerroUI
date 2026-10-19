@@ -1,0 +1,30 @@
+[package]
+name = "ferroui-reactiveui-testing"
+description = "A port of ReactiveUI.Testing for ferroui-reactiveui: running code with test schedulers, the builders of test data and the helpers of tests of view models"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+# The unit tests live in their own crate (tests/FerroUI.ReactiveUI.Testing.Tests), not as
+# integration test targets.
+autotests = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-reactiveui = { workspace = true }
+ferroui-reactive = { workspace = true }
+ferroui-reactive-testing = { workspace = true }
+ferroui-splat = { workspace = true }
+ferroui-system = { workspace = true }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "core"

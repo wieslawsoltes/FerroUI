@@ -10,3 +10,5 @@
 
 pub(crate) mod broadcaster;
 pub(crate) mod start_signal;
+mod i_thread_affine_sequencer;
+pub use i_thread_affine_sequencer::IThreadAffineSequencer;

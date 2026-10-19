@@ -1,10 +1,8 @@
-//! `ReactiveUI.Binding/Observables`: the sequences that observe one property, and the combination
-//! of the latest values of several.
+//! `ReactiveUI.Binding/Observables`: the sequences that observe one property, the combination of
+//! the latest values of several, and the sequences of the bindings (`AppliedChangeObservable`,
+//! `InitialBindingSignal`, `ViewThreadObservable`, `EventObservable`).
 //!
-//! `PropertyValues<T1, ..., Tn>` are Rust tuples `(T1, ..., Tn)`. Not ported yet:
-//! `AppliedChangeObservable`, `InitialBindingSignal`, `ViewThreadObservable` and `NotificationKind`
-//! (the bindings, a later wave) and `EventObservable` (an event found by reflection; a platform
-//! observer uses [`CallbackPropertyObservable`]).
+//! `PropertyValues<T1, ..., Tn>` are Rust tuples `(T1, ..., Tn)`.
 
 mod callback_property_observable;
 mod combine_latest_observable;
@@ -27,3 +25,13 @@ pub use property_changing_observable::PropertyChangingObservable;
 pub(crate) use property_observable::{CurrentValueDelivery, DisposeOnPanic};
 pub use property_observable::PropertyObservable;
 pub use unchanging_property_observable::UnchangingPropertyObservable;
+mod applied_change_observable;
+mod event_observable;
+mod initial_binding_signal;
+mod notification_kind;
+mod view_thread_observable;
+pub use applied_change_observable::AppliedChangeObservable;
+pub use event_observable::EventObservable;
+pub use initial_binding_signal::InitialBindingSignal;
+pub use notification_kind::NotificationKind;
+pub use view_thread_observable::ViewThreadObservable;

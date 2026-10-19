@@ -73,10 +73,33 @@ fn twelve_properties_emits_initial_values() {
     assert!(emits_on_subscribe(&when_changing_extended_scenarios::twelve_properties(&vm)));
 }
 
-// Not ported: ThirteenProperties_EmitsInitialValues - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: FourteenProperties_EmitsInitialValues - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: FifteenProperties_EmitsInitialValues - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: SixteenProperties_EmitsInitialValues - needs arity 13 to 16 (the tuple traits stop at 12)
+#[test]
+fn thirteen_properties_emits_initial_values() {
+    let vm = BigViewModel::create_populated();
+
+    assert!(emits_on_subscribe(&when_changing_extended_scenarios::thirteen_properties(&vm)));
+}
+
+#[test]
+fn fourteen_properties_emits_initial_values() {
+    let vm = BigViewModel::create_populated();
+
+    assert!(emits_on_subscribe(&when_changing_extended_scenarios::fourteen_properties(&vm)));
+}
+
+#[test]
+fn fifteen_properties_emits_initial_values() {
+    let vm = BigViewModel::create_populated();
+
+    assert!(emits_on_subscribe(&when_changing_extended_scenarios::fifteen_properties(&vm)));
+}
+
+#[test]
+fn sixteen_properties_emits_initial_values() {
+    let vm = BigViewModel::create_populated();
+
+    assert!(emits_on_subscribe(&when_changing_extended_scenarios::sixteen_properties(&vm)));
+}
 
 #[test]
 fn deep_chain_address_city() {

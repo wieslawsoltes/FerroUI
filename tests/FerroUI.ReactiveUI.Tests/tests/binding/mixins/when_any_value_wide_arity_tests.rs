@@ -1,7 +1,7 @@
 //! `WhenAnyValueWideArityTests` (`ReactiveUI.Binding.Tests/Mixins/WhenAnyValueWideArityTests.cs`).
 //!
 //! Upstream calls the run-time overloads of every arity, 1 to 16 expressions. The port passes the
-//! paths as one argument, one path or a tuple of 2 to 12, so the arities 13 to 16 are not ported.
+//! paths as one argument, one path or a tuple of 2 to 16.
 
 use crate::mocks::collect_items;
 use crate::tests::binding::test_models::WideArityFixture;
@@ -96,10 +96,26 @@ observation_test!(
     BOTH_ENDS,
     |fixture| fixture.when_any_value(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12)).select(|v| format!("{}{}", v.0, v.11))
 );
-// Not ported: WhenAnyValue_OnThirteenProperties_ReportsTheObservedValues - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: WhenAnyValue_OnFourteenProperties_ReportsTheObservedValues - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: WhenAnyValue_OnFifteenProperties_ReportsTheObservedValues - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: WhenAnyValue_OnSixteenProperties_ReportsTheObservedValues - needs arity 13 to 16 (the tuple traits stop at 12)
+observation_test!(
+    when_any_value_on_thirteen_properties_reports_the_observed_values,
+    BOTH_ENDS,
+    |fixture| fixture.when_any_value(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13)).select(|v| format!("{}{}", v.0, v.12))
+);
+observation_test!(
+    when_any_value_on_fourteen_properties_reports_the_observed_values,
+    BOTH_ENDS,
+    |fixture| fixture.when_any_value(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13, value14)).select(|v| format!("{}{}", v.0, v.13))
+);
+observation_test!(
+    when_any_value_on_fifteen_properties_reports_the_observed_values,
+    BOTH_ENDS,
+    |fixture| fixture.when_any_value(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13, value14, value15)).select(|v| format!("{}{}", v.0, v.14))
+);
+observation_test!(
+    when_any_value_on_sixteen_properties_reports_the_observed_values,
+    BOTH_ENDS,
+    |fixture| fixture.when_any_value(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13, value14, value15, value16)).select(|v| format!("{}{}", v.0, v.15))
+);
 observation_test!(
     when_any_value_projecting_one_property_reports_the_selector_result,
     INITIAL_VALUE,
@@ -160,7 +176,23 @@ observation_test!(
     BOTH_ENDS,
     |fixture| fixture.when_any_value_select(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12), |v| format!("{}{}", v.0, v.11))
 );
-// Not ported: WhenAnyValue_ProjectingThirteenProperties_ReportsTheSelectorResult - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: WhenAnyValue_ProjectingFourteenProperties_ReportsTheSelectorResult - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: WhenAnyValue_ProjectingFifteenProperties_ReportsTheSelectorResult - needs arity 13 to 16 (the tuple traits stop at 12)
-// Not ported: WhenAnyValue_ProjectingSixteenProperties_ReportsTheSelectorResult - needs arity 13 to 16 (the tuple traits stop at 12)
+observation_test!(
+    when_any_value_projecting_thirteen_properties_reports_the_selector_result,
+    BOTH_ENDS,
+    |fixture| fixture.when_any_value_select(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13), |v| format!("{}{}", v.0, v.12))
+);
+observation_test!(
+    when_any_value_projecting_fourteen_properties_reports_the_selector_result,
+    BOTH_ENDS,
+    |fixture| fixture.when_any_value_select(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13, value14), |v| format!("{}{}", v.0, v.13))
+);
+observation_test!(
+    when_any_value_projecting_fifteen_properties_reports_the_selector_result,
+    BOTH_ENDS,
+    |fixture| fixture.when_any_value_select(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13, value14, value15), |v| format!("{}{}", v.0, v.14))
+);
+observation_test!(
+    when_any_value_projecting_sixteen_properties_reports_the_selector_result,
+    BOTH_ENDS,
+    |fixture| fixture.when_any_value_select(paths!(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13, value14, value15, value16), |v| format!("{}{}", v.0, v.15))
+);

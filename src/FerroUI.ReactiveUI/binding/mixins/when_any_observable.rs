@@ -8,8 +8,8 @@ use ferroui_system::IObservable;
 use std::rc::Rc;
 
 /// The paths of one `WhenAnyObservable` of an object of type `T`: one path to a property that
-/// holds an observable, or a tuple of 2 to 12 of them whose observables produce one type.
-// Deviation (DEVIATIONS.md, ReactiveUI): the arity is a tuple of paths, from 1 to 12, where
+/// holds an observable, or a tuple of 2 to 16 of them whose observables produce one type.
+// Deviation (DEVIATIONS.md, ReactiveUI): the arity is a tuple of paths, from 1 to 16, where
 // upstream has overloads of 1 to 16 expressions.
 pub trait WhenAnyObservablePaths<T: 'static>: 'static {
     /// The type of the values of the observables.

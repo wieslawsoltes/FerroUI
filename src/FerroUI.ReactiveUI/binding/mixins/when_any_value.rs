@@ -10,13 +10,13 @@ use ferroui_system::IObservable;
 use std::rc::Rc;
 
 /// The property paths of one observation of an object of type `T`: one [`PropertyPath`], or a
-/// tuple of 2 to 12 of them.
+/// tuple of 2 to 16 of them.
 ///
 /// Upstream overloads `WhenAnyValue`, `WhenAny`, `WhenChanged` and `WhenChanging` by the number of
 /// expressions (1 to 16); here the paths are one argument, and this trait gives the type of their
 /// values (`V`, or the tuple `(V1, ..., Vn)` for upstream's `PropertyValues<T1, ..., Tn>`) and of
 /// their changes.
-// Deviation (DEVIATIONS.md, ReactiveUI): the arity is a tuple of paths, from 1 to 12, where
+// Deviation (DEVIATIONS.md, ReactiveUI): the arity is a tuple of paths, from 1 to 16, where
 // upstream has overloads of 1 to 16 expressions.
 pub trait WhenAnyPaths<T: 'static>: 'static {
     /// The values of the paths: `V` for one path, `(V1, ..., Vn)` for a tuple.
