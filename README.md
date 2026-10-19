@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/wieslawsoltes/FerroUI/actions/workflows/ci.yml/badge.svg)](https://github.com/wieslawsoltes/FerroUI/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Community chat](https://img.shields.io/badge/chat-Telegram-26A5E4?logo=telegram&logoColor=white)](https://t.me/+yQ69t8M7xgwyOGZk)
 
 FerroUI is a cross-platform UI framework for Rust: a retained-mode control library with a styled property system, data binding, XAML markup, control themes and a composition-based renderer. It is a port of the Avalonia UI framework to Rust that keeps the original architecture, contracts and behaviour, so that applications, themes and markup written against that model carry over with their structure intact.
 
