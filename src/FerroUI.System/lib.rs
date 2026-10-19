@@ -10,6 +10,8 @@
 //! `IProgress<T>`).
 //!
 //! - [`component_model`]: `System.ComponentModel` (`INotifyPropertyChanged`).
+//! - [`collections::generic`]: `System.Collections.Generic` (`Dictionary` with the order of
+//!   enumeration of .NET).
 //! - [`collections::specialized`]: `System.Collections.Specialized` (`INotifyCollectionChanged` and
 //!   the arguments of a change).
 //! - [`threading`]: `System.Threading` (`CancellationToken` and its source) and
