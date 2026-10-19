@@ -47,6 +47,7 @@ pub use ferro_view_thread_invoker::FerroViewThreadInvoker;
 pub use reactive_command_adapter::{boxed_parameter, parameter_as_any, ReactiveCommandAdapter, ReactiveCommandParameter};
 
 mod app_builder_extensions;
+mod bindable_view;
 mod auto_data_template_binding_hook;
 mod auto_suspend_helper;
 mod navigation_target;
@@ -70,6 +71,7 @@ mod view_registrar;
 
 pub use app_builder_extensions::{AppBuilderExtensions, ReactiveUIBuilderFerroExtensions};
 pub use auto_data_template_binding_hook::AutoDataTemplateBindingHook;
+pub use bindable_view::{element_control, element_property, owned_element_property, BindableView};
 pub use auto_suspend_helper::AutoSuspendHelper;
 pub use navigation_target::NavigationTarget;
 pub use reactive_user_control::ReactiveUserControl;

@@ -81,7 +81,15 @@ impl ViewHostNavigation {
         view_locator: Option<Rc<dyn IViewLocator>>,
     ) -> Option<Rc<dyn IViewFor>> {
         let locator = view_locator.unwrap_or_else(ViewLocator::current);
-        let Some(view_instance) = locator.resolve_view(Some(view_model.clone()), contract) else {
+        // Deviation (DEVIATIONS.md, ReactiveUI controls): when the generated or mapped views have
+        // none, the view is asked of the service locator (`resolve_view_unsafe`). Upstream's source
+        // generator writes the dispatch of every view of the application, and its `ViewRegistrar`
+        // registers the same views with the service locator; here the views that `ViewRegistrar`
+        // registers are found through the service locator.
+        let resolved = locator
+            .resolve_view(Some(view_model.clone()), contract)
+            .or_else(|| locator.resolve_view_unsafe(Some(view_model.clone()), contract));
+        let Some(view_instance) = resolved else {
             Self::log_missing_view(host, &view_model, contract);
             return None;
         };
