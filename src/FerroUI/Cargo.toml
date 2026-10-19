@@ -32,6 +32,11 @@ xaml = ["dep:ferroui-markup-xaml", "dep:ferroui-markup-xaml-loader"]
 color-picker = ["dep:ferroui-controls-color-picker"]
 treedatagrid = ["dep:ferroui-controls-treedatagrid", "dep:ferroui-treedatagrid-core"]
 dialogs = ["dep:ferroui-dialogs"]
+# The reactive foundation (docs/mvvm.md): Rx, DynamicData, and ReactiveUI with its integration
+# with the controls and Splat.
+reactive = ["dep:ferroui-system", "dep:ferroui-reactive"]
+dynamic-data = ["reactive", "dep:ferroui-dynamic-data"]
+reactiveui = ["reactive", "dep:ferroui-splat", "dep:ferroui-reactiveui", "dep:ferroui-reactiveui-controls"]
 # The browser platform (wasm32-unknown-emscripten), with Skia and HarfBuzz as on the desktop.
 browser = ["dep:ferroui-browser", "dep:ferroui-skia", "dep:ferroui-harfbuzz"]
 # The Vello render backend: its CPU mode, and its two GPU modes.
@@ -61,6 +66,12 @@ ferroui-controls-color-picker = { workspace = true, optional = true }
 ferroui-controls-treedatagrid = { workspace = true, optional = true }
 ferroui-treedatagrid-core = { workspace = true, optional = true }
 ferroui-dialogs = { workspace = true, optional = true }
+ferroui-system = { workspace = true, optional = true }
+ferroui-reactive = { workspace = true, optional = true }
+ferroui-dynamic-data = { workspace = true, optional = true }
+ferroui-splat = { workspace = true, optional = true }
+ferroui-reactiveui = { workspace = true, optional = true }
+ferroui-reactiveui-controls = { workspace = true, optional = true }
 ferroui-browser = { workspace = true, optional = true }
 ferroui-vello = { workspace = true, optional = true }
 ferroui-headless = { workspace = true, optional = true }
@@ -86,7 +97,7 @@ required-features = ["desktop", "fluent"]
 # docs.rs documents the default features with the libraries that need no more than the host
 # (docs/release.md, section 7).
 [package.metadata.docs.rs]
-features = ["simple", "winui-theme", "xaml", "color-picker", "treedatagrid", "dialogs", "headless", "opengl", "metal", "vulkan"]
+features = ["simple", "winui-theme", "xaml", "color-picker", "treedatagrid", "dialogs", "reactive", "dynamic-data", "reactiveui", "headless", "opengl", "metal", "vulkan"]
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

@@ -30,6 +30,9 @@
 //! | `controls_color_picker` | `ferroui-controls-color-picker` | `color-picker` | no |
 //! | `controls_treedatagrid`, `treedatagrid_core` | `ferroui-controls-treedatagrid`, `ferroui-treedatagrid-core` | `treedatagrid` | no |
 //! | `dialogs` | `ferroui-dialogs` | `dialogs` | no |
+//! | `system`, `reactive` | `ferroui-system`, `ferroui-reactive` (Rx) | `reactive` | no |
+//! | `dynamic_data` | `ferroui-dynamic-data` (DynamicData) | `dynamic-data` | no |
+//! | `splat`, `reactiveui`, `reactiveui_controls` | `ferroui-splat`, `ferroui-reactiveui`, `ferroui-reactiveui-controls` (ReactiveUI and its integration) | `reactiveui` | no |
 //! | `browser`, `skia`, `harfbuzz` | `ferroui-browser` | `browser` | no |
 //! | `vello` | `ferroui-vello`; its GPU modes with `vello-hybrid` and `vello-gpu` | `vello` | no |
 //! | `headless` | `ferroui-headless` | `headless` | no |
@@ -156,6 +159,19 @@ pub use ferroui_controls_treedatagrid as controls_treedatagrid;
 pub use ferroui_treedatagrid_core as treedatagrid_core;
 #[cfg(feature = "dialogs")]
 pub use ferroui_dialogs as dialogs;
+
+#[cfg(feature = "reactive")]
+pub use ferroui_system as system;
+#[cfg(feature = "reactive")]
+pub use ferroui_reactive as reactive;
+#[cfg(feature = "dynamic-data")]
+pub use ferroui_dynamic_data as dynamic_data;
+#[cfg(feature = "reactiveui")]
+pub use ferroui_splat as splat;
+#[cfg(feature = "reactiveui")]
+pub use ferroui_reactiveui as reactiveui;
+#[cfg(feature = "reactiveui")]
+pub use ferroui_reactiveui_controls as reactiveui_controls;
 
 #[cfg(feature = "browser")]
 pub use ferroui_browser as browser;
