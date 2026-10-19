@@ -1000,6 +1000,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-dynamic-data"
+version = "0.3.0-preview.1"
+dependencies = [
+ "ferroui-reactive",
+ "ferroui-system",
+]
+
+[[package]]
+name = "ferroui-dynamic-data-tests"
+version = "0.3.0-preview.1"
+dependencies = [
+ "ferroui-dynamic-data",
+ "ferroui-reactive",
+ "ferroui-reactive-testing",
+ "ferroui-system",
+]
+
+[[package]]
 name = "ferroui-fonts-inter"
 version = "0.3.0-preview.1"
 dependencies = [
