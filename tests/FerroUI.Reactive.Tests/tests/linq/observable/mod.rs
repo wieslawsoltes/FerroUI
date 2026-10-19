@@ -38,6 +38,7 @@ mod first_async_test;
 mod first_or_default_async_test;
 mod for_test;
 mod fork_join_test;
+mod from_async_test;
 mod from_event_pattern_test;
 mod from_event_test;
 mod generate_test;

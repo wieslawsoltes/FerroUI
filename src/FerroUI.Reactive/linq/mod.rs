@@ -22,6 +22,7 @@ pub(crate) mod push_to_pull_adapter;
 pub(crate) mod collect;
 pub(crate) mod most_recent;
 pub(crate) mod create_iterator;
+pub(crate) mod task_observable;
 pub(crate) mod if_;
 pub(crate) mod case;
 pub(crate) mod for_;
@@ -134,6 +135,7 @@ pub use joins::{Pattern1, Pattern10, Pattern11, Pattern12, Pattern13, Pattern14,
 pub use merge::ObservableSource;
 pub use multicast::ConnectableObservableExt;
 pub use push_to_pull_adapter::{PullEnumerable, PullEnumerator};
+pub use task_observable::TaskObservableExt;
 pub use numeric::{Averageable, Extremum, Summable};
 pub use timeout::TimeoutException;
 pub use to_list_observable::ListObservable;
