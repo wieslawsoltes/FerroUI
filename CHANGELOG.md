@@ -4,6 +4,16 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-19
+
+The third release. It is `0.3.0-preview.1` as a stable release: the reactive foundation for applications written in the MVVM pattern, with nothing changed since the preview. It contains:
+- ports of Rx.NET, DynamicData, Splat and ReactiveUI, with ReactiveUI.Binding and ReactiveUI.Testing;
+- their integration with the controls;
+- the samples ReactiveDemo (a crate browser) and ReactiveUIExample (with a DynamicData page);
+- the guide [docs/mvvm.md](docs/mvvm.md).
+
+The additions and the known limitations are those of `0.3.0-preview.1` below. Within 0.3 the public API is kept; 0.4.0 may change it.
+
 ## [0.3.0-preview.1] - 2026-10-19
 
 The first preview of 0.3. It adds the reactive foundation for applications written in the MVVM pattern:
@@ -229,7 +239,8 @@ The preview makes the framework available as crates so that it can be tried outs
 - **Documentation.** The API documentation is the documentation comments carried over by the port; there are no guides beyond the README and the documents under `docs/`. Not every crate is expected to build on docs.rs (see `docs/release.md`).
 - **Tests of the published crates.** The packages hold the sources of the tests but not the test fonts and images of the Skia backend; the test suites are run from the repository.
 
-[Unreleased]: https://github.com/wieslawsoltes/FerroUI/compare/v0.3.0-preview.1...main
+[Unreleased]: https://github.com/wieslawsoltes/FerroUI/compare/v0.3.0...main
+[0.3.0]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.3.0
 [0.3.0-preview.1]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.3.0-preview.1
 [0.2.0]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.2.0
 [0.1.0]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.1.0
