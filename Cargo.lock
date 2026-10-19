@@ -1248,6 +1248,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-reactiveui"
+version = "0.3.0-preview.1"
+dependencies = [
+ "ferroui-reactive",
+ "ferroui-splat",
+ "ferroui-system",
+ "paste",
+]
+
+[[package]]
+name = "ferroui-reactiveui-tests"
+version = "0.3.0-preview.1"
+dependencies = [
+ "ferroui-reactive",
+ "ferroui-reactive-testing",
+ "ferroui-reactiveui",
+ "ferroui-splat",
+ "ferroui-system",
+]
+
+[[package]]
 name = "ferroui-remote-protocol"
 version = "0.3.0-preview.1"
 

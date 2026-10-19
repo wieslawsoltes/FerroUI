@@ -1,0 +1,31 @@
+[package]
+name = "ferroui-reactiveui"
+description = "A port of ReactiveUI (System.Reactive flavour) and the run time of ReactiveUI.Binding: reactive objects, commands, property observation and bindings for MVVM"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+# The unit tests live in their own crate (tests/FerroUI.ReactiveUI.Tests), not as integration test
+# targets.
+autotests = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-system = { workspace = true }
+ferroui-reactive = { workspace = true }
+ferroui-splat = { workspace = true }
+# The names of the accessors that `reactive_properties!` writes (`set_<field>`, the PascalCase
+# property name).
+paste = { workspace = true }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "core"

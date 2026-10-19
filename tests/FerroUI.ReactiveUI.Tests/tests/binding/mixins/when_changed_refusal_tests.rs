@@ -1,0 +1,37 @@
+//! `WhenChangedRefusalTests` (`ReactiveUI.Binding.Tests/Mixins/WhenChangedRefusalTests.cs`).
+//!
+//! Upstream checks that the overload a source generator displaces refuses the call when no
+//! generated code claimed it. A property path carries its own getter, so every call is served and
+//! there is no refusal to test.
+
+// Not ported: WhenChanged_Arity2WithSelector_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity3WithSelector_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity4WithSelector_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity5WithSelector_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity6WithSelector_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity7WithSelector_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity8WithSelector_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity9WithSelector_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity10WithSelector_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity11WithSelector_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity12WithSelector_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity13WithSelector_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity14WithSelector_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity15WithSelector_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity16WithSelector_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity1_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity2_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity3_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity4_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity5_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity6_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity7_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity8_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity9_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity10_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity11_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity12_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity13_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity14_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity15_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)
+// Not ported: WhenChanged_Arity16_NamesTheUnsafeTwin - expression trees (the stub that refuses a call without generated code has no counterpart: a property path always carries its getter)

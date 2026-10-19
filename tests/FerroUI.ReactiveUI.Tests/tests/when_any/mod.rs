@@ -1,0 +1,31 @@
+//! `ReactiveUI.Tests/WhenAny`: the observation of the properties of reactive objects.
+
+mod binding_observation_integration_tests;
+mod reactive_object_observation_integration_tests;
+mod reactive_object_observation_integration_tests_when_any_value;
+mod when_any_mixin_tests_arity1;
+mod when_any_mixin_tests_arity10;
+mod when_any_mixin_tests_arity11;
+mod when_any_mixin_tests_arity12;
+mod when_any_mixin_tests_arity2;
+mod when_any_mixin_tests_arity3;
+mod when_any_mixin_tests_arity4;
+mod when_any_mixin_tests_arity5;
+mod when_any_mixin_tests_arity6;
+mod when_any_mixin_tests_arity7;
+mod when_any_mixin_tests_arity8;
+mod when_any_mixin_tests_arity9;
+mod when_any_observable_mixin_tests_arity1;
+mod when_any_observable_mixin_tests_arity10;
+mod when_any_observable_mixin_tests_arity11;
+mod when_any_observable_mixin_tests_arity12;
+mod when_any_observable_mixin_tests_arity2;
+mod when_any_observable_mixin_tests_arity3;
+mod when_any_observable_mixin_tests_arity4;
+mod when_any_observable_mixin_tests_arity5;
+mod when_any_observable_mixin_tests_arity6;
+mod when_any_observable_mixin_tests_arity7;
+mod when_any_observable_mixin_tests_arity8;
+mod when_any_observable_mixin_tests_arity9;
+mod when_any_observable_tests;
+mod when_any_value_subscribe_race_tests;
