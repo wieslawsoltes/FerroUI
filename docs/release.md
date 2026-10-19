@@ -1,6 +1,6 @@
 # Releasing FerroUI
 
-How the crates of the workspace are published to crates.io: which crates, in which order, at which version, what each package holds, how the release workflow runs and what has to be true before it is run. Four previews (`0.1.0-preview.1` to `0.1.0-preview.4`), the first release that is not a preview, `0.1.0` (tag `v0.1.0`, 38 crates), and `0.2.0` (tag `v0.2.0`, 40 crates: the two crates of the TreeDataGrid joined) are published; the workspace carries the next version. Section 12 records the decisions the owner made before the first release.
+How the crates of the workspace are published to crates.io: which crates, in which order, at which version, what each package holds, how the release workflow runs and what has to be true before it is run. Four previews (`0.1.0-preview.1` to `0.1.0-preview.4`), the first release that is not a preview, `0.1.0` (tag `v0.1.0`, 38 crates), `0.2.0` (tag `v0.2.0`, 40 crates: the two crates of the TreeDataGrid joined), and the preview `0.3.0-preview.1` (tag `v0.3.0-preview.1`, 48 crates: the eight crates of the reactive foundation joined) are published; the workspace carries the next version. Section 12 records the decisions the owner made before the first release.
 
 Publishing cannot be taken back. A version of a crate can be yanked (Cargo then no longer selects it for new builds) but never removed or replaced, and the name of a crate belongs to the account that published it first. Everything below is arranged so that a release is rehearsed completely before anything is uploaded.
 

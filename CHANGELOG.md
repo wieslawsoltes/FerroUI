@@ -4,6 +4,15 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
+## [0.3.0-preview.1] - 2026-10-19
+
+The first preview of 0.3. It adds the reactive foundation for applications written in the MVVM pattern:
+- ports of Rx.NET (System.Reactive and Microsoft.Reactive.Testing), DynamicData, Splat and ReactiveUI (with the run time of ReactiveUI.Binding and ReactiveUI.Testing);
+- their integration with the controls;
+- two samples and a guide ([docs/mvvm.md](docs/mvvm.md)).
+
+None of the new libraries depends on the user interface except the integration. Eight crates join: `ferroui-system`, `ferroui-reactive`, `ferroui-reactive-testing`, `ferroui-dynamic-data`, `ferroui-splat`, `ferroui-reactiveui`, `ferroui-reactiveui-testing` and `ferroui-reactiveui-controls`. As a preview, it may change any part of the public API.
+
 ### Added
 
 - **`ferroui-splat`**: a port of Splat (phase 6 of `docs/porting/reactive.md`): the service locator (`AppLocator`) with the modern and generic-first dependency resolvers, logging (`IEnableLogger`, `IFullLogger`, the log managers and wrapping loggers, `LogHost`), mode detection, feature usage tracking and the application builder (`AppBuilder`, `IModule`), with 864 ported tests.
@@ -26,6 +35,14 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
   - `samples/ReactiveUIExample` (`cargo run -p reactiveui-example`): the port of the example application of the ReactiveUI integration (routing, view model view hosts, live metrics, a command lab with interactions, `AutoSuspendHelper`), with a DynamicData page that the reference does not have; 75 tests.
 - **Items sources from the reactive libraries**: the `ObservableCollection` of `ferroui-system` is an items source of the controls, as in .NET, so a collection that DynamicData's `sort_and_bind` or `bind` fills (`ObservableCollectionExtended::collection()`) is shown by a `ListBox` or an `ItemsControl` directly.
 - **Port tracking for several references**: the port-status tooling tracks Rx.NET beside the framework (`docs/porting/tracking/reactive/`).
+
+### Known limitations
+
+- **One thread.** The observables, view models and subscriptions are single-threaded, as FerroUI's object model is. Work on another thread goes through `ferroui_system::threading::tasks::run` and comes back to the thread that started it; there is no thread-pool scheduler.
+- **No reflection or expression trees.** Property paths (`prop!`) stand for the expressions of .NET. The `*Unsafe` overloads, `WhenAnyDynamic`, assembly scanning and the type-based APIs of Splat are not ported. The adapters of Splat and ReactiveUI to other dependency-injection containers are not ported either; a port of Microsoft.Extensions.DependencyInjection is tracked separately.
+- **Types that wait for a later preview.** The binding converters of `DateTime`, `DateTimeOffset`, `DateOnly`, `TimeOnly`, `Uri` and `Decimal`, and the Rx and DynamicData tests that use `Decimal`, wait until those types move from `ferroui-base` to `ferroui-system`.
+- Every difference from the reference libraries is recorded in `docs/porting/DEVIATIONS.md`, sections Reactive, DynamicData, Splat, ReactiveUI, ReactiveUI controls and Samples.
+- The limitations of 0.2.0 below still apply.
 
 ## [0.2.0] - 2026-10-18
 
@@ -212,7 +229,8 @@ The preview makes the framework available as crates so that it can be tried outs
 - **Documentation.** The API documentation is the documentation comments carried over by the port; there are no guides beyond the README and the documents under `docs/`. Not every crate is expected to build on docs.rs (see `docs/release.md`).
 - **Tests of the published crates.** The packages hold the sources of the tests but not the test fonts and images of the Skia backend; the test suites are run from the repository.
 
-[Unreleased]: https://github.com/wieslawsoltes/FerroUI/compare/v0.2.0...main
+[Unreleased]: https://github.com/wieslawsoltes/FerroUI/compare/v0.3.0-preview.1...main
+[0.3.0-preview.1]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.3.0-preview.1
 [0.2.0]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.2.0
 [0.1.0]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.1.0
 [0.1.0-preview.4]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.1.0-preview.4
