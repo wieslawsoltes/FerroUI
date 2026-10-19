@@ -20,7 +20,9 @@
 //! `OperationCanceledException` is a `TaskCanceledError` result of `get_result`; the test token
 //! `TestContext.CancellationToken` is a token that is never cancelled. `SchedulerAsync_Sleep_Cancel`
 //! sleeps on the default scheduler upstream and waits for an event, and sleeps here on the test
-//! scheduler, which the cancellation does not need to run.
+//! scheduler, which the cancellation does not need to run. `ConfigureAwait(true)` of a
+//! `SchedulerOperation` is `configure_await(true)`, and the context `MySyncCtx` counts the work it
+//! is posted, which `SchedulerAsync_ScheduleAsync_SyncCtx` checks in addition.
 
 use ferroui_reactive::concurrency::{
     IScheduler, ISchedulerPeriodic, IStopwatch, IStopwatchProvider, ScheduledAction, Scheduler, SchedulerExt,
@@ -29,9 +31,14 @@ use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::{IDisposable, IObserver, ObservableError};
 use ferroui_reactive_testing::{assert_messages, assert_throws, duration_to_ticks, ticks_to_duration, ticks_to_time, ReactiveTest as RT, TestScheduler};
 use ferroui_system::threading::tasks::{TaskCanceledError, TaskCompletionSource};
-use ferroui_system::threading::{CancellationToken, CancellationTokenSource};
+use ferroui_system::threading::{
+    current_synchronization_context, set_synchronization_context, CancellationToken, CancellationTokenSource,
+    SynchronizationContext,
+};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 
 /// A scheduler that runs work at once, checking the due time of delayed work and counting it
@@ -686,6 +693,92 @@ fn scheduler_async_sleep_cancel() {
     assert!(e.get(), "the continuation ran");
 }
 
+#[test]
+fn scheduler_async_schedule_async_sync_ctx() {
+    // `try`/`finally`: the previous context is restored when the test ends, also when it fails.
+    let _restore = RestoreContext(current_synchronization_context());
+
+    let ctx = Arc::new(MySyncCtx::default());
+    set_synchronization_context(Some(ctx.clone()));
+
+    let s = TestScheduler::new();
+
+    let o = s.create_observer::<i32>();
+
+    let (o1, c) = (o.clone(), ctx.clone());
+    s.scheduler().schedule_async(move |scheduler, ct| async move {
+        assert!(is_current(&c));
+
+        o1.on_next(42);
+
+        scheduler.yield_with_token(ct.clone()).configure_await(true).await?;
+
+        assert!(is_current(&c));
+
+        o1.on_next(43);
+
+        scheduler.sleep_with_token(ticks_to_duration(10), ct.clone()).configure_await(true).await?;
+
+        assert!(is_current(&c));
+
+        o1.on_next(44);
+
+        scheduler.sleep_at_with_token(ticks_to_time(250), ct).configure_await(true).await?;
+
+        assert!(is_current(&c));
+
+        o1.on_next(45);
+        Ok::<(), ObservableError>(())
+    });
+
+    s.run();
+
+    assert_messages!(o.messages(), RT::on_next(1, 42), RT::on_next(2, 43), RT::on_next(12, 44), RT::on_next(250, 45));
+
+    // Added: each of the three continuations was posted to the context.
+    assert_eq!(ctx.posts.load(Ordering::SeqCst), 3);
+}
+
+/// `MySyncCtx`: runs the work it is posted at once, counting the posts.
+#[derive(Default)]
+struct MySyncCtx {
+    posts: AtomicUsize,
+}
+
+impl SynchronizationContext for MySyncCtx {
+    fn post(&self, work: Box<dyn FnOnce() + Send>) {
+        self.posts.fetch_add(1, Ordering::SeqCst);
+        work();
+    }
+
+    fn send(&self, work: Box<dyn FnOnce() + Send>) {
+        work();
+    }
+
+    fn post_local(&self, work: Box<dyn FnOnce()>) {
+        self.posts.fetch_add(1, Ordering::SeqCst);
+        work();
+    }
+
+    fn send_local(&self, work: Box<dyn FnOnce()>) {
+        work();
+    }
+}
+
+/// Makes a context current again when it is dropped.
+struct RestoreContext(Option<Arc<dyn SynchronizationContext>>);
+
+impl Drop for RestoreContext {
+    fn drop(&mut self) {
+        set_synchronization_context(self.0.take());
+    }
+}
+
+/// Whether `ctx` is the current context of the thread (`Assert.Same(ctx, SynchronizationContext.Current)`).
+fn is_current(ctx: &Arc<MySyncCtx>) -> bool {
+    current_synchronization_context().is_some_and(|current| std::ptr::addr_eq(Arc::as_ptr(&current), Arc::as_ptr(ctx)))
+}
+
 // Not ported: Scheduler_ArgumentChecks - argument validation
 // Not ported: Schedulers_ArgumentChecks - argument validation
 // Not ported: Scheduler_Builtins - real threads (Default, ThreadPool, NewThread and TaskPool schedulers, ManualResetEvent)
@@ -713,4 +806,3 @@ fn scheduler_async_sleep_cancel() {
 // Not ported: SchedulerAsync_Yield_ArgumentChecking - argument validation
 // Not ported: SchedulerAsync_Sleep_ArgumentChecking - argument validation
 // Not ported: SchedulerAsync_ScheduleAsync_ArgumentChecking - argument validation
-// Not ported: SchedulerAsync_ScheduleAsync_SyncCtx - SynchronizationContext and SchedulerOperation.ConfigureAwait(true): the port has no synchronization context, and the continuation always runs on the scheduler

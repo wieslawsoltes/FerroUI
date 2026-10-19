@@ -3,13 +3,15 @@
 //! `awaiter.OnCompleted(continuation)` is `task.continue_with(continuation)` and
 //! `awaiter.GetResult()` is `task.result()`; the `InvalidOperationException` of a sequence without
 //! a value is `SequenceError::NoElements`. `SynchronizationContext.SetSynchronizationContext(null)`
-//! has no counterpart: the continuations of a task run where it ends. The variables that
-//! scheduled actions assign are shared cells.
+//! is `set_synchronization_context(None)`: without a context, the task of the awaiter ends, running
+//! its continuations, where the subject ends. The variables that scheduled actions assign are
+//! shared cells.
 
 use ferroui_reactive::disposables::StableCompositeDisposable;
 use ferroui_reactive::linq::SequenceError;
 use ferroui_reactive::{ConnectableObservableExt, IDisposable, IObserver, Observable, ObservableError, ObservableExt};
 use ferroui_reactive_testing::{assert_subscriptions, new_error, ReactiveTest as RT, TestScheduler};
+use ferroui_system::threading::set_synchronization_context;
 use ferroui_system::threading::tasks::Task;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -32,6 +34,8 @@ fn same(a: &ObservableError, b: &ObservableError) -> bool {
 
 #[test]
 fn await_() {
+    set_synchronization_context(None);
+
     let scheduler = TestScheduler::new();
 
     let xs = scheduler.create_hot_observable(vec![
@@ -73,6 +77,8 @@ fn await_() {
 
 #[test]
 fn await_connectable() {
+    set_synchronization_context(None);
+
     let scheduler = TestScheduler::new();
 
     let s = Rc::new(Cell::new(0));
@@ -122,6 +128,8 @@ fn await_connectable() {
 
 #[test]
 fn await_error() {
+    set_synchronization_context(None);
+
     let scheduler = TestScheduler::new();
 
     let ex = new_error("ex");
@@ -163,6 +171,8 @@ fn await_error() {
 
 #[test]
 fn await_never() {
+    set_synchronization_context(None);
+
     let scheduler = TestScheduler::new();
 
     let xs = scheduler.create_hot_observable(vec![
@@ -204,6 +214,8 @@ fn await_never() {
 
 #[test]
 fn await_empty() {
+    set_synchronization_context(None);
+
     let scheduler = TestScheduler::new();
 
     let xs = scheduler.create_hot_observable(vec![RT::on_completed::<i32>(300)]);

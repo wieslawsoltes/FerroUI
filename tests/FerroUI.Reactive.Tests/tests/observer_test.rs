@@ -7,14 +7,18 @@
 //! `Rc<dyn Any>`), `synchronize_prevent_reentrancy` and `synchronize_with_lock` of `ObserverExt`.
 //! `Observer.ToProgress` is `to_progress` and `to_progress_on` of `ObserverExt`, and
 //! `Observer.ToObserver(IProgress<T>)` is `to_observer` of `ProgressExt`; the list the observers add
-//! to is a shared `RefCell`.
+//! to is a shared `RefCell`. `NotifyOn(SynchronizationContext)` is `notify_on_context`; the context
+//! `MySyncCtx` of `NotifyOn_SyncCtx`, which posts to the task pool upstream, posts its `Send` work
+//! to a new thread.
 
 use ferroui_reactive::concurrency::AsyncLock;
 use ferroui_reactive::{IObserver, Notification, NotificationKind, ObservableError, Observer, ObserverExt, ProgressExt};
 use ferroui_reactive_testing::{assert_messages, assert_throws, new_error, ReactiveTest as RT, TestScheduler};
+use ferroui_system::threading::SynchronizationContext;
 use ferroui_system::IProgress;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::sync::Arc;
 
 fn same_error(a: &ObservableError, b: &ObservableError) -> bool {
     std::ptr::addr_eq(Rc::as_ptr(a), Rc::as_ptr(b))
@@ -629,6 +633,50 @@ fn observer_synchronize_async_lock() {
 }
 
 #[test]
+fn notify_on_sync_ctx() {
+    let lst = Rc::new(RefCell::new(Vec::new()));
+    let don = Rc::new(Cell::new(false));
+    let obs = {
+        let (lst, don) = (lst.clone(), don.clone());
+        Observer::create_all(move |x: i32| lst.borrow_mut().push(x), |_| panic!("unexpected OnError"), move || don.set(true))
+    };
+    let ctx = Arc::new(MySyncCtx);
+    let _res = obs.notify_on_context(ctx);
+
+    // As upstream, the notifications go to `obs` itself, not to the observer of the context.
+    for i in 0..100 {
+        obs.on_next(i);
+    }
+
+    obs.on_completed();
+
+    assert!(don.get());
+    assert_eq!((0..100).collect::<Vec<_>>(), *lst.borrow());
+}
+
+/// `MySyncCtx`: posts the work it is given to another thread (`Task.Run`). Work that is not `Send`
+/// cannot leave the thread of the context, and runs at once.
+struct MySyncCtx;
+
+impl SynchronizationContext for MySyncCtx {
+    fn post(&self, work: Box<dyn FnOnce() + Send>) {
+        std::thread::spawn(work);
+    }
+
+    fn send(&self, work: Box<dyn FnOnce() + Send>) {
+        work();
+    }
+
+    fn post_local(&self, work: Box<dyn FnOnce()>) {
+        work();
+    }
+
+    fn send_local(&self, work: Box<dyn FnOnce()>) {
+        work();
+    }
+}
+
+#[test]
 fn observer_to_progress() {
     let xs = Rc::new(RefCell::new(Vec::new()));
 
@@ -706,6 +754,5 @@ impl<T> IProgress<T> for MyProgress<T> {
 // Not ported: NotifyOn_Null - argument validation
 // Not ported: NotifyOn_Scheduler_OnCompleted - real threads (ThreadPoolScheduler, Thread, ManualResetEvent)
 // Not ported: NotifyOn_Scheduler_OnError - real threads (ThreadPoolScheduler, Thread, ManualResetEvent)
-// Not ported: NotifyOn_SyncCtx - real threads (SynchronizationContext posting to Task.Run, ManualResetEvent)
 // Not ported: Observer_ToProgress_ArgumentChecking - argument validation
 // Not ported: Progress_ToObserver_ArgumentChecking - argument validation

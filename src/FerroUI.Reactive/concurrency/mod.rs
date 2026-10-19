@@ -16,6 +16,7 @@ mod scheduled_item;
 mod scheduler;
 mod scheduler_async;
 mod scheduler_defaults;
+mod synchronization_context_scheduler;
 mod virtual_time_scheduler;
 
 pub use async_lock::AsyncLock;
@@ -29,4 +30,6 @@ pub use scheduler::{
 };
 pub use scheduler_async::{ScheduleAsyncResult, SchedulerOperation, SchedulerOperationAwaiter};
 pub use scheduler_defaults::SchedulerDefaults;
+pub use synchronization_context_scheduler::SynchronizationContextScheduler;
+pub(crate) use synchronization_context_scheduler::post_with_start_complete;
 pub use virtual_time_scheduler::{VirtualTimeClock, VirtualTimeScheduler};

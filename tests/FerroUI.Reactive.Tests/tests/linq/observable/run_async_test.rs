@@ -2,15 +2,16 @@
 //! Adapted: `RunAsync` gives the task of its `AsyncSubject<T>` (the subject's awaiter), so
 //! `awaiter.OnCompleted(continuation)` is `task.continue_with(continuation)` and
 //! `awaiter.GetResult()` is `task.result()`; the `OperationCanceledException` of a cancellation is
-//! a `TaskCanceledError`. `SynchronizationContext.SetSynchronizationContext(null)` has no
-//! counterpart: the continuations of a task run where it ends. The variables that scheduled
-//! actions assign are shared cells.
+//! a `TaskCanceledError`. `SynchronizationContext.SetSynchronizationContext(null)` is
+//! `set_synchronization_context(None)`: without a context, the task of the awaiter ends, running
+//! its continuations, where the subject ends. The variables that scheduled actions assign are
+//! shared cells.
 
 use ferroui_reactive::disposables::{Disposable, StableCompositeDisposable};
 use ferroui_reactive::{ConnectableObservableExt, IDisposable, IObservable, IObserver, Observable, ObservableExt};
 use ferroui_reactive_testing::{assert_subscriptions, ReactiveTest as RT, TestScheduler};
 use ferroui_system::threading::tasks::{Task, TaskCanceledError};
-use ferroui_system::threading::{CancellationToken, CancellationTokenSource};
+use ferroui_system::threading::{set_synchronization_context, CancellationToken, CancellationTokenSource};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -49,6 +50,8 @@ fn connectable_source(scheduler: &TestScheduler, subscribed: Rc<Cell<Option<i64>
 
 #[test]
 fn run_async_simple() {
+    set_synchronization_context(None);
+
     let scheduler = TestScheduler::new();
 
     let xs = scheduler.create_hot_observable(vec![
@@ -86,6 +89,8 @@ fn run_async_simple() {
 
 #[test]
 fn run_async_cancelled() {
+    set_synchronization_context(None);
+
     let cts = CancellationTokenSource::new();
     cts.cancel();
 
@@ -125,6 +130,8 @@ fn run_async_cancelled() {
 
 #[test]
 fn run_async_cancel() {
+    set_synchronization_context(None);
+
     let cts = CancellationTokenSource::new();
 
     let scheduler = TestScheduler::new();
@@ -167,6 +174,8 @@ fn run_async_cancel() {
 
 #[test]
 fn run_async_connectable() {
+    set_synchronization_context(None);
+
     let scheduler = TestScheduler::new();
 
     let s = Rc::new(Cell::new(None));
@@ -204,6 +213,8 @@ fn run_async_connectable() {
 
 #[test]
 fn run_async_connectable_cancelled() {
+    set_synchronization_context(None);
+
     let cts = CancellationTokenSource::new();
     cts.cancel();
 
@@ -243,6 +254,8 @@ fn run_async_connectable_cancelled() {
 
 #[test]
 fn run_async_connectable_cancel() {
+    set_synchronization_context(None);
+
     let cts = CancellationTokenSource::new();
 
     let scheduler = TestScheduler::new();

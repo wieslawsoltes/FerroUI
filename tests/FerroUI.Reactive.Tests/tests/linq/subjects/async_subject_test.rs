@@ -2,13 +2,19 @@
 //! Adapted: the variables that upstream assigns from scheduled actions are shared slots
 //! (`Rc<RefCell<Option<_>>>`); `ObjectDisposedException` is a panic, checked with `assert_throws`;
 //! `GetResult` of a subject that completed without a value returns `Ok(None)`, where upstream
-//! throws `InvalidOperationException`.
+//! throws `InvalidOperationException`. `GetResult_Context` runs on a thread of its own: the awaiter
+//! is made there with the context current, as on upstream's `Task.Run`, and the subject ends there
+//! with the context cleared, as on the test thread of upstream; the awaiter of the port is a task,
+//! whose `continue_with` is `OnCompleted`.
 
 use ferroui_reactive::subjects::{AsyncSubject, SubjectBase};
 use ferroui_reactive::{IDisposable, IObservable, IObserver, ObservableExt};
 use ferroui_reactive_testing::{assert_messages, assert_throws, new_error, ReactiveTest as RT, TestScheduler};
-use std::cell::RefCell;
+use ferroui_system::threading::{set_synchronization_context, SynchronizationContext};
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 /// A variable that scheduled actions assign and read (`var x = default(X);` captured by lambdas).
 type Slot<T> = Rc<RefCell<Option<T>>>;
@@ -469,6 +475,62 @@ fn get_result_empty() {
 }
 
 #[test]
+fn get_result_context() {
+    let (e, ran) = std::thread::spawn(|| {
+        let x = AsyncSubject::<i32>::new();
+
+        let ctx = Arc::new(MyContext::default());
+
+        // `Task.Run`: the awaiter is made, and given its continuation, where `ctx` is current.
+        set_synchronization_context(Some(ctx.clone()));
+
+        let e = Rc::new(Cell::new(false));
+        let a = x.get_awaiter();
+        let set = e.clone();
+        a.continue_with(move |_| set.set(true));
+
+        // The subject ends where no context is current, as on the test thread of upstream.
+        set_synchronization_context(None);
+
+        x.on_next(42);
+        x.on_completed();
+
+        (e.get(), ctx.ran.load(Ordering::SeqCst))
+    })
+    .join()
+    .unwrap();
+
+    assert!(e);
+    assert!(ran);
+}
+
+/// `MyContext`: runs the work it is posted at once, and records that it ran.
+#[derive(Default)]
+struct MyContext {
+    ran: AtomicBool,
+}
+
+impl SynchronizationContext for MyContext {
+    fn post(&self, work: Box<dyn FnOnce() + Send>) {
+        self.ran.store(true, Ordering::SeqCst);
+        work();
+    }
+
+    fn send(&self, work: Box<dyn FnOnce() + Send>) {
+        work();
+    }
+
+    fn post_local(&self, work: Box<dyn FnOnce()>) {
+        self.ran.store(true, Ordering::SeqCst);
+        work();
+    }
+
+    fn send_local(&self, work: Box<dyn FnOnce()>) {
+        work();
+    }
+}
+
+#[test]
 fn has_observers() {
     let s = AsyncSubject::<i32>::new();
     assert!(!s.has_observers());
@@ -577,4 +639,3 @@ fn has_observers_on_error() {
 // Not ported: Await_Throw - real threads (a thread fails the subject while another blocks in GetResult of its awaiter; the subjects are not Send)
 // Not ported: GetResult_Blocking - real threads (GetResult blocks until another thread completes the subject)
 // Not ported: GetResult_Blocking_Throw - real threads (GetResult blocks until another thread fails the subject)
-// Not ported: GetResult_Context - the awaiter of the port does not post its continuation to a SynchronizationContext (the continuations of a task run where it ends); real threads (Task.Run)

@@ -155,6 +155,27 @@ impl FerroSynchronizationContext {
     }
 }
 
+/// The context as a `System.Threading.SynchronizationContext` of `ferroui-system`, for the code
+/// that is not tied to the user interface (the reactive libraries, the tasks of `ferroui-system`):
+/// each member is the method of the same name above.
+impl ferroui_system::threading::SynchronizationContext for FerroSynchronizationContext {
+    fn post(&self, work: Box<dyn FnOnce() + Send>) {
+        FerroSynchronizationContext::post(self, work);
+    }
+
+    fn send(&self, work: Box<dyn FnOnce() + Send>) {
+        FerroSynchronizationContext::send(self, work);
+    }
+
+    fn post_local(&self, work: Box<dyn FnOnce()>) {
+        FerroSynchronizationContext::post_local(self, work);
+    }
+
+    fn send_local(&self, work: Box<dyn FnOnce()>) {
+        FerroSynchronizationContext::send_local(self, work);
+    }
+}
+
 /// Restores the previous current context; see
 /// [`FerroSynchronizationContext::ensure`].
 ///

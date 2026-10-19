@@ -9,6 +9,7 @@
 mod boolean_disposable;
 mod cancellation_disposable;
 mod composite_disposable;
+mod context_disposable;
 mod disposable;
 mod multiple_assignment_disposable;
 mod ref_count_disposable;
@@ -20,6 +21,7 @@ mod stable_composite_disposable;
 pub use boolean_disposable::BooleanDisposable;
 pub use cancellation_disposable::CancellationDisposable;
 pub use composite_disposable::CompositeDisposable;
+pub use context_disposable::ContextDisposable;
 pub use disposable::{AnonymousDisposable, Disposable, DisposableExt, ICancelable};
 pub use multiple_assignment_disposable::{MultipleAssignmentDisposable, MultipleAssignmentDisposableValue};
 pub use ref_count_disposable::RefCountDisposable;

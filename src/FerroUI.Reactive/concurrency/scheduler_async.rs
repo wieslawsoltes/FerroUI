@@ -8,16 +8,21 @@
 //! Deviation (DEVIATIONS.md, Reactive): the body of `ScheduleAsync` is a closure returning a future
 //! of `Result<(), ObservableError>` (upstream's `Task`) or of `Result<Rc<dyn IDisposable>,
 //! ObservableError>` (`Task<IDisposable>`), which runs as a task of the thread
-//! (`Task::spawn_local`). `SchedulerOperation.ConfigureAwait(true)`, which posts the continuation to
-//! the `SynchronizationContext` of the awaiting code, is left out: the port has no synchronization
-//! context, and the continuation always runs on the scheduler (upstream's default,
-//! `ConfigureAwait(false)`). An awaited operation that the token cancels ends with a
+//! (`Task::spawn_local`). An awaited operation that the token cancels ends with a
 //! `TaskCanceledError` where upstream's `GetResult` throws `OperationCanceledException`.
+//!
+//! `SchedulerOperation.ConfigureAwait(true)` ([`SchedulerOperation::configure_await`]) posts the
+//! continuation, when the scheduler runs it, to the `SynchronizationContext` that is current when
+//! the operation is awaited; the continuation is not `Send`, so it is posted with
+//! [`post_local`](ferroui_system::threading::SynchronizationContext::post_local), to the context of
+//! the thread.
 
 use super::{IScheduler, ScheduledAction, SchedulerExt};
 use crate::disposables::{Disposable, SingleAssignmentDisposableValue};
 use ferroui_system::threading::tasks::{canceled, Task};
-use ferroui_system::threading::{CancellationToken, CancellationTokenSource, LocalCancellationTokenRegistration};
+use ferroui_system::threading::{
+    current_synchronization_context, CancellationToken, CancellationTokenSource, LocalCancellationTokenRegistration,
+};
 use ferroui_system::{IDisposable, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::future::{Future, IntoFuture};
@@ -137,17 +142,25 @@ type ScheduleContinuation = Rc<dyn Fn(Box<dyn FnOnce()>) -> Rc<dyn IDisposable>>
 pub struct SchedulerOperation {
     schedule: ScheduleContinuation,
     token: CancellationToken,
+    post_back_to_original_context: bool,
 }
 
 impl SchedulerOperation {
     pub(crate) fn new(schedule: ScheduleContinuation, token: CancellationToken) -> Self {
-        Self { schedule, token }
+        Self { schedule, token, post_back_to_original_context: false }
+    }
+
+    /// The operation, whose continuation is posted to the synchronization context of the awaiting
+    /// code when `continue_on_captured_context` is true (`ConfigureAwait(bool)`; false by
+    /// default): the context that is current when the continuation is given, if there is one.
+    pub fn configure_await(&self, continue_on_captured_context: bool) -> SchedulerOperation {
+        Self { schedule: self.schedule.clone(), token: self.token.clone(), post_back_to_original_context: continue_on_captured_context }
     }
 
     /// The awaiter of the operation (`GetAwaiter`), which `.await` uses; each awaiter schedules the
     /// continuation once.
     pub fn get_awaiter(&self) -> SchedulerOperationAwaiter {
-        SchedulerOperationAwaiter::new(self.schedule.clone(), self.token.clone())
+        SchedulerOperationAwaiter::new(self.schedule.clone(), self.post_back_to_original_context, self.token.clone())
     }
 }
 
@@ -163,6 +176,7 @@ impl IntoFuture for SchedulerOperation {
 struct AwaiterInner {
     schedule: ScheduleContinuation,
     token: CancellationToken,
+    post_back_to_original_context: bool,
     registration: RefCell<Option<LocalCancellationTokenRegistration>>,
     /// Whether a continuation was given (`_continuation != null`).
     awaited: Cell<bool>,
@@ -216,10 +230,11 @@ pub struct SchedulerOperationAwaiter {
 }
 
 impl SchedulerOperationAwaiter {
-    fn new(schedule: ScheduleContinuation, token: CancellationToken) -> Self {
+    fn new(schedule: ScheduleContinuation, post_back_to_original_context: bool, token: CancellationToken) -> Self {
         let inner = Rc::new(AwaiterInner {
             schedule,
             token: token.clone(),
+            post_back_to_original_context,
             registration: RefCell::new(None),
             awaited: Cell::new(false),
             continuation: RefCell::new(None),
@@ -254,13 +269,22 @@ impl SchedulerOperationAwaiter {
     }
 
     /// Schedules `continuation` on the scheduler of the operation (`OnCompleted`); the cancellation
-    /// of the token runs it at once instead, disposing what was scheduled.
+    /// of the token runs it at once instead, disposing what was scheduled. When the operation was
+    /// configured to continue on the captured context, the continuation is posted to the current
+    /// synchronization context of the thread, if there is one, when it runs.
     ///
     /// # Panics
     /// When the awaiter was given a continuation already (`InvalidOperationException`).
     pub fn on_completed(&self, continuation: impl FnOnce() + 'static) {
         assert!(!self.inner.awaited.replace(true), "The scheduler operation has already been awaited.");
-        *self.inner.continuation.borrow_mut() = Some(Box::new(continuation));
+        let mut continuation: Box<dyn FnOnce()> = Box::new(continuation);
+        if self.inner.post_back_to_original_context {
+            if let Some(context) = current_synchronization_context() {
+                let original = continuation;
+                continuation = Box::new(move || context.post_local(original));
+            }
+        }
+        *self.inner.continuation.borrow_mut() = Some(continuation);
         let target = self.inner.clone();
         let work = (self.inner.schedule)(Box::new(move || target.run_continuation()));
         // The continuation may have run already, from inside the scheduling.

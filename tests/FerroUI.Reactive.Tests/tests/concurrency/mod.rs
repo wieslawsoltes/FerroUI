@@ -4,5 +4,6 @@ mod historical_scheduler_test;
 mod immediate_scheduler_test;
 mod scheduled_item_test;
 mod scheduler_test;
+mod synchronization_context_scheduler_test;
 mod test_scheduler_test;
 mod virtual_scheduler_test;

@@ -4,9 +4,11 @@ use super::subject::{throw_disposed, ObserverList, SubjectBase, SubjectSubscript
 use crate::disposables::Disposable;
 use crate::linq::SequenceError;
 use ferroui_system::threading::tasks::{Task, TaskCompletionSource};
+use ferroui_system::threading::{current_synchronization_context, SynchronizationContext};
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
+use std::sync::Arc;
 
 /// A subject that keeps the last value and hands it, with the end, to every observer once the
 /// sequence has ended (`AsyncSubject<T>`).
@@ -68,17 +70,25 @@ impl<T: Clone + 'static> AsyncSubject<T> {
     /// [`Task::is_completed`], `OnCompleted(Action)` is [`Task::continue_with`] and `GetResult` is
     /// [`Task::result`] once the task has ended.
     ///
-    /// Deviation (DEVIATIONS.md, Reactive): the continuations of the task run synchronously where
-    /// the subject ends; upstream posts the continuation of `OnCompleted` to the
-    /// `SynchronizationContext` it captured. A future that awaits the task is polled again on its
-    /// own thread, as the executor of `ferroui-system` does for every wake.
+    /// The awaiter captures the current `SynchronizationContext` of the thread, as upstream's
+    /// `AwaitObserver` does: when there is one, the end of the subject is posted to it (with
+    /// [`post_local`](SynchronizationContext::post_local)), and the task ends, running its
+    /// continuations, when the context runs that work; without one, the task ends where the subject
+    /// does.
+    ///
+    /// Deviation (DEVIATIONS.md, Reactive): upstream posts only the continuation of `OnCompleted`
+    /// and its `IsCompleted` is true as soon as the subject has ended; the task of the port ends
+    /// when the posted work runs, so its [`is_completed`](Task::is_completed) is false until then.
+    /// The context is captured when the awaiter is made, where upstream captures it when the
+    /// continuation is given (`OnCompleted`).
     ///
     /// # Panics
     /// When the subject is disposed (`ObjectDisposedException`).
     pub fn get_awaiter(&self) -> Task<T> {
         let completion = TaskCompletionSource::new();
         let task = completion.task();
-        self.subscribe(Rc::new(AwaitObserver { subject: self.this.clone(), completion }));
+        let context = current_synchronization_context();
+        self.subscribe(Rc::new(AwaitObserver { subject: self.this.clone(), completion, context }));
         task
     }
 
@@ -92,25 +102,33 @@ impl<T: Clone + 'static> AsyncSubject<T> {
 }
 
 /// The observer of [`AsyncSubject::get_awaiter`] (`AwaitObserver`): the end of the subject ends the
-/// task with the outcome of the subject (`GetResult`).
+/// task with the outcome of the subject (`GetResult`), on the context it captured
+/// (`InvokeOnOriginalContext`).
 struct AwaitObserver<T> {
     subject: Weak<AsyncSubject<T>>,
     completion: TaskCompletionSource<T>,
+    context: Option<Arc<dyn SynchronizationContext>>,
 }
 
 impl<T: Clone + 'static> AwaitObserver<T> {
     fn complete(&self) {
         let Some(subject) = self.subject.upgrade() else { return };
-        match subject.get_result() {
+        let outcome = subject.get_result();
+        let completion = self.completion.clone();
+        let end = move || match outcome {
             Ok(Some(value)) => {
-                self.completion.try_set_result(value);
+                completion.try_set_result(value);
             }
             Ok(None) => {
-                self.completion.try_set_exception(Rc::new(SequenceError::NoElements));
+                completion.try_set_exception(Rc::new(SequenceError::NoElements));
             }
             Err(error) => {
-                self.completion.try_set_exception(error);
+                completion.try_set_exception(error);
             }
+        };
+        match &self.context {
+            Some(context) => context.post_local(Box::new(end)),
+            None => end(),
         }
     }
 }

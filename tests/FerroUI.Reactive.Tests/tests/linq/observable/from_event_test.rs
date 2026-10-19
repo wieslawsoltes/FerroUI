@@ -7,12 +7,20 @@
 //! overloads with a delegate type and no conversion (`FromEvent<Action<int>, int>(add, remove)`),
 //! which upstream makes the delegate of through reflection, are the closure forms of the port. The
 //! sender of an event pattern is a `Sender`, the identity of the object that raises the event.
+//! `FromEvent_SynchronizationContext` runs on a thread of its own with the context set, as
+//! upstream's `RunWithContext` does; the subscription and the disposal, which upstream runs on new
+//! threads that have no context, run on that thread with the context cleared, since the sequence
+//! belongs to the thread that made it. The waits for the handler to be added and removed are checks
+//! of flags, since the context `MyEventSyncCtx` runs the work it is posted at once.
 
 use ferroui_reactive::concurrency::{IScheduler, ScheduledAction, Scheduler};
 use ferroui_reactive::{IDisposable, IObservable, Observable, ObservableExt};
 use ferroui_system::events::Event;
+use ferroui_system::threading::{current_synchronization_context, set_synchronization_context, SynchronizationContext};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 
 /// The identity of the object that raises an event (the sender of upstream, an `object` compared
@@ -331,6 +339,165 @@ fn from_event_implicit_publish() {
 }
 
 #[test]
+fn from_event_synchronization_context() {
+    let flags = run_with_context(MyEventSyncCtx::new(), |ctx| {
+        let src = Rc::new(MyEventSource::default());
+
+        let add_ctx: Rc<RefCell<Option<Arc<dyn SynchronizationContext>>>> = Rc::new(RefCell::new(None));
+        let rem_ctx: Rc<RefCell<Option<Arc<dyn SynchronizationContext>>>> = Rc::new(RefCell::new(None));
+
+        let add_evt = Rc::new(Cell::new(false));
+        let rem_evt = Rc::new(Cell::new(false));
+
+        let (s1, s2, a, r, ae, re) = (src.clone(), src.clone(), add_ctx.clone(), rem_ctx.clone(), add_evt.clone(), rem_evt.clone());
+        let xs = Observable::from_event_pattern(
+            move |h: Rc<dyn Fn(Sender, MyEventArgs)>| {
+                *a.borrow_mut() = current_synchronization_context();
+                let token = s1.bar.add(pattern_handler(h));
+                ae.set(true);
+                token
+            },
+            move |token| {
+                *r.borrow_mut() = current_synchronization_context();
+                s2.bar.remove(token);
+                re.set(true);
+            },
+        );
+
+        assert!(add_ctx.borrow().is_none());
+        assert!(rem_ctx.borrow().is_none());
+
+        let res = Rc::new(RefCell::new(Vec::new()));
+
+        // `new Thread(...)`: no context is current where the sequence is subscribed to.
+        set_synchronization_context(None);
+        let before_subscribe_null = current_synchronization_context().is_none();
+        let rs = res.clone();
+        let d = xs.subscribe_next(move |e| rs.borrow_mut().push(e.event_args.value));
+        let after_subscribe_null = current_synchronization_context().is_none();
+        set_synchronization_context(Some(ctx.clone()));
+
+        assert!(add_evt.get());
+
+        let subscribe_on_ctx = is_context(&add_ctx.borrow(), &ctx);
+
+        src.on_bar(42);
+        let fst_next = *res.borrow() == vec![42];
+
+        src.on_bar(43);
+        let snd_next = *res.borrow() == vec![42, 43];
+
+        // `new Thread(...)`: no context is current where the subscription is disposed.
+        set_synchronization_context(None);
+        let before_dispose_null = current_synchronization_context().is_none();
+        d.dispose();
+        let after_dispose_null = current_synchronization_context().is_none();
+        set_synchronization_context(Some(ctx.clone()));
+
+        assert!(rem_evt.get());
+
+        let dispose_on_ctx = is_context(&rem_ctx.borrow(), &ctx);
+
+        src.on_bar(44);
+        let thd_next = *res.borrow() == vec![42, 43];
+
+        [
+            before_subscribe_null,
+            subscribe_on_ctx,
+            after_subscribe_null,
+            fst_next,
+            snd_next,
+            thd_next,
+            before_dispose_null,
+            dispose_on_ctx,
+            after_dispose_null,
+        ]
+    });
+
+    let [before_subscribe_null, subscribe_on_ctx, after_subscribe_null, fst_next, snd_next, thd_next, before_dispose_null, dispose_on_ctx, after_dispose_null] =
+        flags;
+
+    assert!(before_subscribe_null);
+    assert!(subscribe_on_ctx);
+    assert!(after_subscribe_null);
+
+    assert!(fst_next);
+    assert!(snd_next);
+    assert!(thd_next);
+
+    assert!(before_dispose_null);
+    assert!(dispose_on_ctx);
+    assert!(after_dispose_null);
+}
+
+/// `RunWithContext`: runs `run` on a new thread whose current context is `ctx`, and waits for it.
+fn run_with_context<R: Send + 'static>(ctx: Arc<MyEventSyncCtx>, run: impl FnOnce(Arc<MyEventSyncCtx>) -> R + Send + 'static) -> R {
+    std::thread::spawn(move || {
+        set_synchronization_context(Some(ctx.clone()));
+        let result = run(ctx);
+        set_synchronization_context(None);
+        result
+    })
+    .join()
+    .unwrap()
+}
+
+/// Whether `context` is `ctx` (`ReferenceEquals`).
+fn is_context(context: &Option<Arc<dyn SynchronizationContext>>, ctx: &Arc<MyEventSyncCtx>) -> bool {
+    context.as_ref().is_some_and(|context| std::ptr::addr_eq(Arc::as_ptr(context), Arc::as_ptr(ctx)))
+}
+
+/// `MyEventSyncCtx` (of `FromEventPatternTest.cs`): runs the work it is posted at once, as the
+/// current context of the thread, counting the posts.
+struct MyEventSyncCtx {
+    this: std::sync::Weak<MyEventSyncCtx>,
+    post_count: AtomicUsize,
+}
+
+impl MyEventSyncCtx {
+    fn new() -> Arc<Self> {
+        Arc::new_cyclic(|this| Self { this: this.clone(), post_count: AtomicUsize::new(0) })
+    }
+
+    /// Runs `work` with this context as the current one, then restores the previous one, also
+    /// when the work panics (the `try`/`finally` of `Post`).
+    fn run_as_current(&self, work: impl FnOnce()) {
+        struct Restore(Option<Arc<dyn SynchronizationContext>>);
+        impl Drop for Restore {
+            fn drop(&mut self) {
+                set_synchronization_context(self.0.take());
+            }
+        }
+
+        let old = current_synchronization_context();
+        let this: Arc<dyn SynchronizationContext> = self.this.upgrade().expect("the context is alive while it is posted to");
+        set_synchronization_context(Some(this));
+        let _restore = Restore(old);
+        self.post_count.fetch_add(1, Ordering::SeqCst);
+        work();
+    }
+}
+
+impl SynchronizationContext for MyEventSyncCtx {
+    fn post(&self, work: Box<dyn FnOnce() + Send>) {
+        self.run_as_current(work);
+    }
+
+    /// The `Send` of the base class: the work runs at once.
+    fn send(&self, work: Box<dyn FnOnce() + Send>) {
+        work();
+    }
+
+    fn post_local(&self, work: Box<dyn FnOnce()>) {
+        self.run_as_current(work);
+    }
+
+    fn send_local(&self, work: Box<dyn FnOnce()>) {
+        work();
+    }
+}
+
+#[test]
 fn from_event_scheduler1() {
     run_with_scheduler(|s, add, remove| Observable::from_event_on(move |_h: Rc<dyn Fn(MyEventArgs)>| add(), move |_: ()| remove(), s));
 }
@@ -401,4 +568,3 @@ fn run_with_scheduler<T: 'static>(run: impl FnOnce(Rc<dyn IScheduler>, Rc<dyn Fn
 }
 
 // Not ported: FromEvent_ArgumentChecking - argument validation
-// Not ported: FromEvent_SynchronizationContext - real threads (Thread, ManualResetEvent) and a SynchronizationContext, which the port does not have (phase 4)

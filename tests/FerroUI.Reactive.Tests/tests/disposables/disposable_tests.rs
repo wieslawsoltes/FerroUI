@@ -4,20 +4,25 @@
 //! `CopyTo` is a slice of `Option<Rc<dyn IDisposable>>` (`None` for `null`), and `CopyTo` panics
 //! where upstream throws `ArgumentOutOfRangeException`; the `ICancelable`
 //! side of `Disposable.Create` is checked on `AnonymousDisposable::new`, since `Disposable::create`
-//! returns a plain `Rc<dyn IDisposable>`; null-argument lines inside ported tests are dropped.
+//! returns a plain `Rc<dyn IDisposable>`; null-argument lines inside ported tests are dropped. The
+//! context `MySync` of `ContextDisposable` runs the work it is posted at once, from `post` and
+//! `post_local` alike (the disposal is posted with `post_local`), and records it in an atomic flag,
+//! since a context is shared between threads.
 
 use ferroui_reactive::concurrency::{IScheduler, Scheduler};
 use ferroui_reactive::disposables::{
-    AnonymousDisposable, BooleanDisposable, CancellationDisposable, CompositeDisposable, Disposable, DisposableExt,
-    ICancelable, MultipleAssignmentDisposable, RefCountDisposable, ScheduledDisposable, SerialDisposable,
+    AnonymousDisposable, BooleanDisposable, CancellationDisposable, CompositeDisposable, ContextDisposable, Disposable,
+    DisposableExt, ICancelable, MultipleAssignmentDisposable, RefCountDisposable, ScheduledDisposable, SerialDisposable,
     SingleAssignmentDisposable, StableCompositeDisposable,
 };
 use ferroui_reactive::IDisposable;
 use ferroui_reactive_testing::assert_throws;
-use ferroui_system::threading::CancellationTokenSource;
+use ferroui_system::threading::{CancellationTokenSource, SynchronizationContext};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 /// `Assert.Same` for reference-counted values of any (possibly unsized) type.
 fn same<A: ?Sized, B: ?Sized>(a: &Rc<A>, b: &Rc<B>) -> bool {
@@ -443,6 +448,48 @@ fn cancellation_disposable_token_ctor() {
 }
 
 #[test]
+fn context_disposable() {
+    let disp = Rc::new(Cell::new(false));
+    let m = Arc::new(MySync::default());
+    let d = disp.clone();
+    let c = ContextDisposable::new(m.clone(), Disposable::create(move || d.set(true)));
+    let context: Arc<dyn SynchronizationContext> = m.clone();
+    assert!(std::ptr::addr_eq(Arc::as_ptr(&context), Arc::as_ptr(c.context())));
+    assert!(!m.disposed.load(Ordering::SeqCst));
+    assert!(!disp.get());
+    c.dispose();
+    assert!(c.is_disposed());
+    assert!(m.disposed.load(Ordering::SeqCst));
+    assert!(disp.get());
+}
+
+/// `MySync`: runs the work it is posted at once, then records that it did.
+#[derive(Default)]
+struct MySync {
+    disposed: AtomicBool,
+}
+
+impl SynchronizationContext for MySync {
+    fn post(&self, work: Box<dyn FnOnce() + Send>) {
+        work();
+        self.disposed.store(true, Ordering::SeqCst);
+    }
+
+    fn send(&self, work: Box<dyn FnOnce() + Send>) {
+        work();
+    }
+
+    fn post_local(&self, work: Box<dyn FnOnce()>) {
+        work();
+        self.disposed.store(true, Ordering::SeqCst);
+    }
+
+    fn send_local(&self, work: Box<dyn FnOnce()>) {
+        work();
+    }
+}
+
+#[test]
 fn serial_disposable_ctor_prop() {
     let m = SerialDisposable::new();
     assert!(m.disposable().is_none());
@@ -708,9 +755,8 @@ fn stable_composite_disposable_nary2() {
 // Not ported: CompositeDisposable_RemoveNull - argument validation
 // Not ported: CompositeDisposable_GetEnumerator_Reset - IEnumerator.Reset has no counterpart on Rust iterators
 // Not ported: CancellationDisposable_Ctor_Null - argument validation
-// Not ported: ContextDisposable_CreateNullContext - argument validation; ContextDisposable (SynchronizationContext) is not in the port
-// Not ported: ContextDisposable_CreateNullDisposable - argument validation; ContextDisposable (SynchronizationContext) is not in the port
-// Not ported: ContextDisposable - ContextDisposable and SynchronizationContext are not in the port
+// Not ported: ContextDisposable_CreateNullContext - argument validation
+// Not ported: ContextDisposable_CreateNullDisposable - argument validation
 // Not ported: RefCountDisposable_Ctor_Null - argument validation
 // Not ported: ScheduledDisposable_Null - argument validation
 // Not ported: StableCompositeDisposable_ArgumentChecking - argument validation

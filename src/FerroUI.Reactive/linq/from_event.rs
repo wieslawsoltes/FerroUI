@@ -13,15 +13,17 @@
 //! );
 //! ```
 //!
-//! Deviation (DEVIATIONS.md, Reactive): the overloads without a scheduler run the addition and the
-//! removal of the handler on the scheduler of upstream's `GetSchedulerForCurrentContext` when there
-//! is no `SynchronizationContext`, the immediate one; the port has no synchronization context
-//! (phase 4). The overloads of upstream that make the delegate of the event from the handler
-//! through reflection (`FromEvent<TDelegate, TEventArgs>(Action<TDelegate>, Action<TDelegate>)`)
-//! are not ported: the handler of the port is a closure, which the conversion overloads turn into
-//! the handler type of an event.
+//! The overloads without a scheduler add and remove the handler on the scheduler of upstream's
+//! `GetSchedulerForCurrentContext`, taken when the sequence is made: a
+//! [`SynchronizationContextScheduler`] of the current `SynchronizationContext` of the thread that
+//! runs its work at once when that context is current, else the immediate scheduler.
+//!
+//! The overloads of upstream that make the delegate of the event from the handler through
+//! reflection (`FromEvent<TDelegate, TEventArgs>(Action<TDelegate>, Action<TDelegate>)`) are not
+//! ported: the handler of the port is a closure, which the conversion overloads turn into the
+//! handler type of an event.
 
-use crate::concurrency::{IScheduler, SchedulerDefaults, SchedulerExt};
+use crate::concurrency::{IScheduler, SchedulerDefaults, SchedulerExt, SynchronizationContextScheduler};
 use crate::disposables::{Disposable, SingleAssignmentDisposable};
 use crate::internal::subscribe_basic;
 use crate::linq::Observable;
@@ -48,9 +50,14 @@ pub(crate) fn classic_add_handler<D: 'static, K: 'static>(add: impl Fn(D) -> K +
     })
 }
 
-/// The scheduler of the overloads without one (`GetSchedulerForCurrentContext`).
+/// The scheduler of the overloads without one (`GetSchedulerForCurrentContext`): that of the
+/// current synchronization context of the thread, which does not post when the context is current
+/// (`alwaysPost: false`), else the immediate scheduler (`ConstantTimeOperations`).
 pub(crate) fn scheduler_for_current_context() -> Rc<dyn IScheduler> {
-    SchedulerDefaults::constant_time_operations()
+    match ferroui_system::threading::current_synchronization_context() {
+        Some(context) => SynchronizationContextScheduler::with_always_post(context, false),
+        None => SchedulerDefaults::constant_time_operations(),
+    }
 }
 
 /// The state of an `EventProducer<TDelegate, TArgs>` that its sessions reach.

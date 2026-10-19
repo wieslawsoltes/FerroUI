@@ -1,7 +1,8 @@
 //! `AnonymousObserver<T>` and `Observer` (`AnonymousObserver.cs`, `Observer.Extensions.cs`), the
 //! observers of `Synchronize` (`Internal/SynchronizedObserver.cs`,
-//! `Internal/AsyncLockObserver.cs`), and the conversions between observers and progress objects
-//! (`ToProgress`, `ToObserver(IProgress<T>)`, `AnonymousProgress<T>`).
+//! `Internal/AsyncLockObserver.cs`), the observers of `NotifyOn`, and the conversions between
+//! observers and progress objects (`ToProgress`, `ToObserver(IProgress<T>)`,
+//! `AnonymousProgress<T>`).
 
 use crate::concurrency::AsyncLock;
 use crate::notification::Notification;
@@ -144,6 +145,14 @@ pub trait ObserverExt<T> {
     /// (`NotifyOn(IScheduler)`).
     fn notify_on(&self, scheduler: Rc<dyn crate::concurrency::IScheduler>) -> Rc<dyn IObserver<T>>;
 
+    /// An observer that delivers the notifications to this one through `context`, in order
+    /// (`NotifyOn(SynchronizationContext)`: the observer of `NotifyOn(IScheduler)` on a
+    /// [`SynchronizationContextScheduler`](crate::concurrency::SynchronizationContextScheduler) of
+    /// the context, which posts with
+    /// [`post_local`](ferroui_system::threading::SynchronizationContext::post_local): the observer
+    /// is notified on the thread of the context).
+    fn notify_on_context(&self, context: std::sync::Arc<dyn ferroui_system::threading::SynchronizationContext>) -> Rc<dyn IObserver<T>>;
+
     /// A progress object whose reports are the values of this observer (`ToProgress(IObserver<T>)`).
     fn to_progress(&self) -> Rc<dyn IProgress<T>>;
 
@@ -188,6 +197,11 @@ impl<T: 'static> ObserverExt<T> for Rc<dyn IObserver<T>> {
 
     fn notify_on(&self, scheduler: Rc<dyn crate::concurrency::IScheduler>) -> Rc<dyn IObserver<T>> {
         Rc::new(NotifyOnObserver { inner: crate::internal::ScheduledObserver::new(scheduler, self.clone()) })
+    }
+
+    fn notify_on_context(&self, context: std::sync::Arc<dyn ferroui_system::threading::SynchronizationContext>) -> Rc<dyn IObserver<T>> {
+        let scheduler: Rc<dyn crate::concurrency::IScheduler> = crate::concurrency::SynchronizationContextScheduler::new(context);
+        self.notify_on(scheduler)
     }
 
     fn to_progress(&self) -> Rc<dyn IProgress<T>> {
