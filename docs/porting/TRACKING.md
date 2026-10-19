@@ -322,6 +322,8 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `samples/IntegrationTestApp` | `samples/IntegrationTestApp` (not tracked) |
 | `samples/MiniMvvm` | `samples/MiniMvvm` (not tracked) |
 | `samples/PlatformSanityChecks` | `samples/PlatformSanityChecks` (not tracked) |
+| `samples/ReactiveDemo` | none (FerroUI only) |
+| `samples/ReactiveUIExample` | none (FerroUI only) |
 | `samples/RenderDemo` | `samples/RenderDemo` (not tracked) |
 | `samples/SafeAreaDemo` | `samples/SafeAreaDemo` (not tracked) |
 | `samples/SafeAreaDemo.Android` | `samples/SafeAreaDemo.Android` (not tracked) |
@@ -350,6 +352,7 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `src/FerroUI.DesignerSupport` | `src/Avalonia.DesignerSupport` |
 | `src/FerroUI.Desktop` | `src/Avalonia.Desktop` |
 | `src/FerroUI.Dialogs` | `src/Avalonia.Dialogs` |
+| `src/FerroUI.DynamicData` | none (FerroUI only) |
 | `src/FerroUI.Fonts.Inter` | `src/Avalonia.Fonts.Inter` |
 | `src/FerroUI.FreeDesktop` | `src/Avalonia.FreeDesktop` |
 | `src/FerroUI.Metal` | `src/Avalonia.Metal` |
@@ -358,7 +361,11 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `src/FerroUI.OpenGL` | `src/Avalonia.OpenGL` |
 | `src/FerroUI.Reactive` | `Rx.NET/Source/src/System.Reactive` (Rx.NET: [System.Reactive](tracking/reactive/System.Reactive.md)) |
 | `src/FerroUI.Reactive.Testing` | `Rx.NET/Source/src/Microsoft.Reactive.Testing` (Rx.NET: [Microsoft.Reactive.Testing](tracking/reactive/Microsoft.Reactive.Testing.md)) |
+| `src/FerroUI.ReactiveUI` | none (FerroUI only) |
+| `src/FerroUI.ReactiveUI.Controls` | none (FerroUI only) |
+| `src/FerroUI.ReactiveUI.Testing` | none (FerroUI only) |
 | `src/FerroUI.Remote.Protocol` | `src/Avalonia.Remote.Protocol` |
+| `src/FerroUI.Splat` | none (FerroUI only) |
 | `src/FerroUI.System` | none (FerroUI only) |
 | `src/FerroUI.Themes.Fluent` | `src/Avalonia.Themes.Fluent` |
 | `src/FerroUI.Themes.Simple` | `src/Avalonia.Themes.Simple` |
@@ -383,13 +390,17 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `src/tools/MicroCom.CodeGenerator` | none (FerroUI only) |
 | `tests/FerroUI.Benchmarks` | `tests/Avalonia.Benchmarks` (not tracked) |
 | `tests/FerroUI.DesignerSupport.Tests` | `tests/Avalonia.DesignerSupport.Tests` (not tracked) |
+| `tests/FerroUI.DynamicData.Tests` | none (FerroUI only) |
 | `tests/FerroUI.IntegrationTests.Appium` | `tests/Avalonia.IntegrationTests.Appium` (not tracked) |
 | `tests/FerroUI.IntegrationTests.Win32` | `tests/Avalonia.IntegrationTests.Win32` (not tracked) |
 | `tests/FerroUI.LeakTests` | `tests/Avalonia.LeakTests` (not tracked) |
 | `tests/FerroUI.Markup.Xaml.UnitTests` | `tests/Avalonia.Markup.Xaml.UnitTests` (not tracked) |
 | `tests/FerroUI.Reactive.Tests` | `Rx.NET/Source/tests/Tests.System.Reactive` (Rx.NET: tests, [TRACKING.md](tracking/reactive/TRACKING.md)) |
+| `tests/FerroUI.ReactiveUI.Testing.Tests` | none (FerroUI only) |
+| `tests/FerroUI.ReactiveUI.Tests` | none (FerroUI only) |
 | `tests/FerroUI.RenderBackends.Comparison` | none (FerroUI only) |
 | `tests/FerroUI.RenderTests` | none (FerroUI only) |
+| `tests/FerroUI.Splat.Tests` | none (FerroUI only) |
 | `tests/FerroUI.TreeDataGrid.Benchmarks` | none (FerroUI only) |
 | `tests/XamlIncludeFixture/Application` | none (FerroUI only) |
 | `tests/XamlIncludeFixture/Theme` | none (FerroUI only) |

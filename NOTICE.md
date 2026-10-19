@@ -99,7 +99,13 @@ Avalonia itself incorporates code from other projects (for example WPF-derived l
 
 - Project: <https://github.com/reactiveui/ReactiveUI.Avalonia> (`src/ReactiveUI.Avalonia`, `src/Shared`, commit `26f23b5`), with `ReactiveUI.Binding.Avalonia.Shared` of ReactiveUI.Binding (commit `d1e1b65`) and the scheduler of `ReactiveUI.Primitives.Avalonia.Reactive` (commit `18e8a85`)
 - License: MIT, Copyright (c) 2019-2026 ReactiveUI and Avalonia Teams, and Contributors
-- Used for: `src/FerroUI.ReactiveUI.Controls` (the integration of ReactiveUI with FerroUI) and its unit tests, ported from ReactiveUI.Avalonia.Tests and ReactiveUI.Binding.Avalonia.Tests (`docs/porting/reactive.md`).
+- Used for: `src/FerroUI.ReactiveUI.Controls` (the integration of ReactiveUI with FerroUI) and its unit tests, ported from ReactiveUI.Avalonia.Tests and ReactiveUI.Binding.Avalonia.Tests (`docs/porting/reactive.md`); and `samples/ReactiveUIExample` (the port of its example application, `src/examples`, and its tests).
+
+## ReactiveUI.Samples
+
+- Project: <https://github.com/reactiveui/ReactiveUI.Samples> (`wpf/getting-started/ReactiveDemo`, commit `8e7ca27`)
+- License: MIT, Copyright (c) .NET Foundation and Contributors
+- Used for: `samples/ReactiveDemo` (the port of `ReactiveDemo`, the getting-started sample of the ReactiveUI documentation; see `samples/ReactiveDemo/NOTICE.md`).
 
 ## RemoteViewing
 

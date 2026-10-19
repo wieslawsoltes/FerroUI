@@ -332,6 +332,8 @@ Each phase is one or more pull requests that build, pass the existing tests and 
 
 ## 7. Samples
 
+**Status.** Both samples are ported (pull request 257), with the DynamicData page, and both use the WinUI 3 theme (`ferroui-themes-winui`). ReactiveDemo is in `samples/ReactiveDemo` (`cargo run -p reactive-demo`, 27 tests); the feature `online` is its default, and `--no-default-features` searches the in-memory catalogue. The integration's example is in `samples/ReactiveUIExample` (`cargo run -p reactiveui-example`, 75 tests). Their differences from the references are in `DEVIATIONS.md`, section "Samples". The plan follows.
+
 1. **ReactiveDemo** (`samples/ReactiveDemo`), the canonical getting-started application.
    - **Port.** It is ported file for file: `AppViewModel`, `NugetDetailsViewModel`, `MainWindow`, `NugetDetailsView`, the `App`. The views are in FerroUI markup, with the bindings done in code as upstream (`Bind`, `OneWayBind`, `BindCommand` inside `WhenActivated`).
    - **Search backend.** The upstream sample calls NuGet's search API through NuGet.Protocol. The port calls the same HTTP endpoint (`/v3/query`) behind the feature `online`, as the TreeDataGrid demo does for its online page. By default it uses an in-memory catalogue, as the ReactiveUI documentation's version does, so that it runs and is tested offline.

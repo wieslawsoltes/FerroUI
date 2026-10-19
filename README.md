@@ -209,6 +209,13 @@ cargo run -p control-catalog-desktop
 # The TreeDataGrid demo (its pages are also the page TreeDataGrid of the ControlCatalog)
 cargo run -p treedatagrid-demo
 
+# ReactiveDemo, the getting-started sample of ReactiveUI: a NuGet package browser on the WinUI 3
+# theme (add --no-default-features to search an in-memory catalogue instead of nuget.org)
+cargo run -p reactive-demo
+
+# The example of the ReactiveUI integration, with a DynamicData page, on the WinUI 3 theme
+cargo run -p reactiveui-example
+
 # The gallery of the WinUI theme (its capture mode and its comparison with WinUI 3 on Windows:
 # docs/porting/winui-theme-gallery.md)
 cargo run -p winui-theme-gallery --bin winui-theme-gallery

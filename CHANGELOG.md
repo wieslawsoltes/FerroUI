@@ -21,6 +21,9 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
   - `ReactiveUserControl` and `ReactiveWindow` (their view model follows `DataContext`), `RoutedViewHost` and `ViewModelViewHost`;
   - the automatic item template of `ItemsControl`s, `AutoSuspendHelper`, view registration, and `use_reactive_ui` on the application builder;
   - 166 ported tests.
+- **The ReactiveUI samples**, both on the WinUI 3 theme (`ferroui-themes-winui`):
+  - `samples/ReactiveDemo` (`cargo run -p reactive-demo`): the port of `ReactiveDemo`, the getting-started sample of ReactiveUI (ReactiveUI.Samples), a NuGet package browser with a throttled search, a reactive command and views located for their view models; with `--no-default-features` it searches an in-memory catalogue instead of nuget.org; 27 tests;
+  - `samples/ReactiveUIExample` (`cargo run -p reactiveui-example`): the port of the example application of the ReactiveUI integration (routing, view model view hosts, live metrics, a command lab with interactions, `AutoSuspendHelper`), with a DynamicData page that the reference does not have; 75 tests.
 - **Port tracking for several references**: the port-status tooling tracks Rx.NET beside the framework (`docs/porting/tracking/reactive/`).
 
 ## [0.2.0] - 2026-10-18
