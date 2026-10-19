@@ -95,6 +95,12 @@ Avalonia itself incorporates code from other projects (for example WPF-derived l
 - License: MIT, Copyright (c) 2019-2026 ReactiveUI Association Incorporated
 - Used for: the System.Reactive extras that ReactiveUI calls, in `src/FerroUI.ReactiveUI/primitives` and in the delayed notifications of `src/FerroUI.ReactiveUI/reactive_object`.
 
+## ReactiveUI.Avalonia
+
+- Project: <https://github.com/reactiveui/ReactiveUI.Avalonia> (`src/ReactiveUI.Avalonia`, `src/Shared`, commit `26f23b5`), with `ReactiveUI.Binding.Avalonia.Shared` of ReactiveUI.Binding (commit `d1e1b65`) and the scheduler of `ReactiveUI.Primitives.Avalonia.Reactive` (commit `18e8a85`)
+- License: MIT, Copyright (c) 2019-2026 ReactiveUI and Avalonia Teams, and Contributors
+- Used for: `src/FerroUI.ReactiveUI.Controls` (the integration of ReactiveUI with FerroUI) and its unit tests, ported from ReactiveUI.Avalonia.Tests and ReactiveUI.Binding.Avalonia.Tests (`docs/porting/reactive.md`).
+
 ## RemoteViewing
 
 - Project: <https://github.com/quamotion/remoteviewing> (package `Quamotion.RemoteViewing` 1.1.211)
