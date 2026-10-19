@@ -10,6 +10,7 @@
 //! - [`list`]: the side of positions (`list::Change<T>`, `list::ChangeSet<T>`, `ChangeAwareList`, ...).
 
 pub mod cache;
+pub mod diagnostics;
 pub(crate) mod internal;
 pub mod list;
 

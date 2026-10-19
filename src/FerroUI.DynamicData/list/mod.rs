@@ -12,10 +12,12 @@ mod i_list;
 pub(crate) mod internal;
 mod item_change;
 mod list_change_reason;
+mod observable_list;
 mod observable_list_ex;
 mod ops;
 mod range_change;
 mod source_list;
+pub mod testing;
 
 pub use change::Change;
 pub use change_aware_list::{ChangeAwareList, IExtendedList};
@@ -24,5 +26,6 @@ pub use i_list::{binary_search_by, clear_or_remove_many, clone_changes, clone_ch
 pub use item_change::ItemChange;
 pub use list_change_reason::{ChangeType, ListChangeReason};
 pub use range_change::RangeChange;
+pub use observable_list::ObservableList;
 pub use observable_list_ex::ObservableListEx;
 pub use source_list::{IObservableList, ISourceList, SourceList};

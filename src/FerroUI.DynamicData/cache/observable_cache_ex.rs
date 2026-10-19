@@ -24,6 +24,9 @@ pub trait ObservableCacheEx<T: Clone + 'static, K: Eq + Hash + Clone + 'static> 
     /// `IChangeSet<TObject, TKey>`).
     fn change_sets(&self) -> Rc<dyn IObservable<ChangeSet<T, K>>>;
 
+    super::ops::as_aggregator::as_aggregator_methods!();
+    super::ops::as_observable_cache::as_observable_cache_methods!();
+    super::ops::collect_update_stats::collect_update_stats_methods!();
     super::ops::filter::filter_methods!();
     super::ops::not_empty::not_empty_methods!();
 }

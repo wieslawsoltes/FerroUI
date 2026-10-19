@@ -12,6 +12,7 @@ mod observable_cache;
 mod observable_cache_ex;
 mod ops;
 mod source_cache;
+pub mod testing;
 
 pub use change::Change;
 pub use change_aware_cache::ChangeAwareCache;

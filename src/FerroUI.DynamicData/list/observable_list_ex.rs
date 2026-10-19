@@ -18,6 +18,9 @@ pub trait ObservableListEx<T: Clone + PartialEq + 'static> {
     /// The sequence as plain change sets.
     fn change_sets(&self) -> Rc<dyn IObservable<ChangeSet<T>>>;
 
+    super::ops::as_aggregator::as_aggregator_methods!();
+    super::ops::as_observable_list::as_observable_list_methods!();
+    super::ops::collect_update_stats::collect_update_stats_methods!();
     super::ops::not_empty::not_empty_methods!();
 }
 
