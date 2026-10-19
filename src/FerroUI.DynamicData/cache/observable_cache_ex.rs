@@ -24,6 +24,24 @@ pub trait ObservableCacheEx<T: Clone + 'static, K: Eq + Hash + Clone + 'static> 
     /// `IChangeSet<TObject, TKey>`).
     fn change_sets(&self) -> Rc<dyn IObservable<ChangeSet<T, K>>>;
 
+    super::ops::and::and_methods!();
+    super::ops::async_dispose_many::async_dispose_many_methods!();
+    super::ops::except::except_methods!();
+    super::ops::full_join::full_join_methods!();
+    super::ops::full_join_many::full_join_many_methods!();
+    super::ops::inner_join::inner_join_methods!();
+    super::ops::inner_join_many::inner_join_many_methods!();
+    super::ops::left_join::left_join_methods!();
+    super::ops::left_join_many::left_join_many_methods!();
+    super::ops::or::or_methods!();
+    super::ops::right_join::right_join_methods!();
+    super::ops::right_join_many::right_join_many_methods!();
+    super::ops::transform_async::transform_async_methods!();
+    super::ops::transform_many_async::transform_many_async_methods!();
+    super::ops::transform_many_safe_async::transform_many_safe_async_methods!();
+    super::ops::transform_safe_async::transform_safe_async_methods!();
+    super::ops::xor::xor_methods!();
+
     super::ops::adapt::adapt_methods!();
     super::ops::auto_refresh::auto_refresh_methods!();
     super::ops::auto_refresh_on_observable::auto_refresh_on_observable_methods!();

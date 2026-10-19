@@ -235,3 +235,48 @@ pub use virtualise::*;
 // Names that more than one module defines: the ones the siblings mean.
 pub(crate) use dispose_many::dispose_many;
 pub(crate) use key_value_comparer::Comparer;
+pub(crate) mod async_dispose_many;
+#[allow(unused_imports)]
+pub use async_dispose_many::*;
+pub(crate) mod combine_operator;
+#[allow(unused_imports)]
+pub use combine_operator::*;
+pub(crate) mod combiner;
+#[allow(unused_imports)]
+pub use combiner::*;
+pub(crate) mod dynamic_combiner;
+#[allow(unused_imports)]
+pub use dynamic_combiner::*;
+pub(crate) mod full_join;
+#[allow(unused_imports)]
+pub use full_join::*;
+pub(crate) mod full_join_many;
+#[allow(unused_imports)]
+pub use full_join_many::*;
+pub(crate) mod inner_join;
+#[allow(unused_imports)]
+pub use inner_join::*;
+pub(crate) mod inner_join_many;
+#[allow(unused_imports)]
+pub use inner_join_many::*;
+pub(crate) mod left_join;
+#[allow(unused_imports)]
+pub use left_join::*;
+pub(crate) mod left_join_many;
+#[allow(unused_imports)]
+pub use left_join_many::*;
+pub(crate) mod right_join;
+#[allow(unused_imports)]
+pub use right_join::*;
+pub(crate) mod right_join_many;
+#[allow(unused_imports)]
+pub use right_join_many::*;
+pub(crate) mod switch;
+#[allow(unused_imports)]
+pub use switch::*;
+pub(crate) mod transform_async;
+#[allow(unused_imports)]
+pub use transform_async::*;
+pub(crate) mod transform_many_async;
+#[allow(unused_imports)]
+pub use transform_many_async::*;

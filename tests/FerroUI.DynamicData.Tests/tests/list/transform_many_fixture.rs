@@ -5,7 +5,9 @@ use crate::domain::PersonWithRelations;
 use crate::utilities::{assert_equivalent, SelectManyExtensions};
 use ferroui_dynamic_data::list::testing::ChangeSetAggregator;
 use ferroui_dynamic_data::list::{replace, IObservableList, ObservableListEx, SourceList};
+use ferroui_system::collections::object_model::ObservableCollection;
 use ferroui_system::IDisposable;
+use std::fmt;
 use std::rc::Rc;
 
 struct Fixture {
@@ -115,8 +117,87 @@ fn move_() {
     assert_eq!(fixture.results.messages().len(), 1);
 }
 
-// Not ported: Remove - needs ObservableCollectionEx.ToObservableChangeSet (wave 2): the tours of a
-// provider are an `ObservableCollection<Tour>`.
+/// `Tour`: a name; tours are held in `Rc`, and two tours are equal only when they are the same
+/// one, as upstream's class does not override `Equals`.
+struct Tour {
+    name: String,
+}
+
+impl Tour {
+    fn new(name: &str) -> Rc<Self> {
+        Rc::new(Self { name: name.to_owned() })
+    }
+}
+
+impl PartialEq for Tour {
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::eq(self, other)
+    }
+}
+
+impl fmt::Debug for Tour {
+    /// `ToString`: `Name: {Name}`.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Name: {}", self.name)
+    }
+}
+
+/// `TourProvider`: a name and its tours.
+struct TourProvider {
+    #[allow(dead_code)]
+    name: String,
+    tours: ObservableCollection<Rc<Tour>>,
+}
+
+impl TourProvider {
+    fn new(name: &str, tours: Option<Vec<Rc<Tour>>>) -> Rc<Self> {
+        let provider = Self { name: name.to_owned(), tours: ObservableCollection::new() };
+        if let Some(tours) = tours {
+            // `Tours.AddRange(tours)`: one by one.
+            for tour in tours {
+                provider.tours.add(tour);
+            }
+        }
+        Rc::new(provider)
+    }
+}
+
+impl PartialEq for TourProvider {
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::eq(self, other)
+    }
+}
+
+#[test]
+fn remove() {
+    let tour_providers = SourceList::<Rc<TourProvider>>::new();
+
+    let all_tours = tour_providers.connect().transform_many_observable_collection(|tour_provider: &Rc<TourProvider>| tour_provider.tours.clone()).as_observable_list();
+
+    let tour1_1 = Tour::new("Tour 1.1");
+    let tour2_1 = Tour::new("Tour 2.1");
+    let tour2_2 = Tour::new("Tour 2.2");
+    let tour3_1 = Tour::new("Tour 3.1");
+
+    let tp1 = TourProvider::new("Tour provider 1", Some(vec![tour1_1.clone()]));
+    let tp2 = TourProvider::new("Tour provider 2", Some(vec![tour2_1.clone(), tour2_2.clone()]));
+    let tp3 = TourProvider::new("Tour provider 3", None);
+
+    tour_providers.edit(|list| list.add_range(vec![tp1, tp2.clone(), tp3.clone()]));
+
+    assert_equivalent(&all_tours.items(), &[tour1_1.clone(), tour2_1.clone(), tour2_2.clone()]);
+
+    tp3.tours.add(tour3_1.clone());
+    assert_equivalent(&all_tours.items(), &[tour1_1.clone(), tour2_1.clone(), tour2_2.clone(), tour3_1.clone()]);
+
+    tp2.tours.remove(&tour2_1);
+    assert_equivalent(&all_tours.items(), &[tour1_1.clone(), tour2_2.clone(), tour3_1.clone()]);
+
+    tp2.tours.add(tour2_1.clone());
+    assert_equivalent(&all_tours.items(), &[tour1_1, tour2_1, tour2_2, tour3_1]);
+
+    tour_providers.dispose();
+}
 
 #[test]
 fn remove_parent() {

@@ -2,6 +2,7 @@
 //! (`Cache/Internal/TransformMany.cs`).
 
 use super::transform::transform;
+use crate::binding::ObservableCollectionEx;
 use crate::cache::{Change, ChangeAwareCache, ChangeReason, ChangeSet, ICache, IObservableCache};
 use ferroui_reactive::disposables::{CompositeDisposable, Disposable};
 use ferroui_reactive::{Observable, ObservableExt};
@@ -275,6 +276,27 @@ where
             let cache = many_selector(&item);
             let subsequent_changes = cache.connect();
             if cache.count() > 0 {
+                return subsequent_changes;
+            }
+            Observable::return_(ChangeSet::<D, DK>::empty()).concat(subsequent_changes)
+        })
+    })
+}
+
+/// The child changes of the items of an observable collection of an item of the source (the
+/// constructors of `TransformMany` for `ObservableCollection` and `ReadOnlyObservableCollection`):
+/// the changes of the collection, keyed by `key_selector`, after the first; an empty collection
+/// gives an empty first change set, which is skipped.
+pub(crate) fn observable_collection_child_changes<S: Clone + 'static, D: Clone + PartialEq + 'static, DK: Eq + Hash + Clone + 'static, C: ObservableCollectionEx<D> + 'static>(
+    many_selector: Rc<dyn Fn(&S) -> C>,
+    key_selector: Rc<dyn Fn(&D) -> DK>,
+) -> ChildChanges<S, D, DK> {
+    Rc::new(move |item: &S| {
+        let (many_selector, key_selector, item) = (many_selector.clone(), key_selector.clone(), item.clone());
+        Observable::defer(move || {
+            let key_selector = key_selector.clone();
+            let subsequent_changes = many_selector(&item).to_observable_change_set_with_key(move |child: &D| key_selector(child));
+            if many_selector(&item).notifying_collection().count() > 0 {
                 return subsequent_changes;
             }
             Observable::return_(ChangeSet::<D, DK>::empty()).concat(subsequent_changes)

@@ -2,108 +2,133 @@
 //! the children of parents as one cache, followed as the collections of children change.
 
 use crate::domain::Person;
-use ferroui_dynamic_data::cache::{IConnectableCache, IObservableCache, ObservableCache, ObservableCacheEx, SourceCache};
+use ferroui_dynamic_data::binding::{ObservableCollectionEx, ReadOnlyObservableCollection};
+use ferroui_dynamic_data::cache::{IConnectableCache, IObservableCache, ObservableCache, ObservableCacheEx, SourceCache, SourceCacheEx};
+use ferroui_system::collections::object_model::ObservableCollection;
 use ferroui_system::IDisposable;
 use std::rc::Rc;
 
-// Not ported: FlattenObservableCollection - needs ObservableCollectionEx.ToObservableChangeSet (wave 2)
-// Not ported: FlattenReadOnlyObservableCollection - needs ObservableCollectionEx.ToObservableChangeSet (wave 2)
-// Not ported: ObservableCollectionWithoutInitialData - needs ObservableCollectionEx.ToObservableChangeSet (wave 2)
-// Not ported: ReadOnlyObservableCollectionWithoutInitialData - needs ObservableCollectionEx.ToObservableChangeSet (wave 2)
-
-/// `Parent`, with the form of `ChildrenCache` only.
-///
-/// Deviation (DEVIATIONS.md, DynamicData): upstream keeps the children in an
-/// `ObservableCollection<Person>` and makes `ChildrenCache` of it with
-/// `ToObservableChangeSet(x => x.Name).AsObservableCache()`, which waits for wave 2; the children
-/// are a `SourceCache` here, whose observable cache is `ChildrenCache`. A replacement in the
-/// collection, which the cache sees as the removal of the old child and the addition of the new,
-/// is that edit of the source.
+/// `Parent`: the children in an observable collection, its read-only view, and the observable
+/// cache of the children keyed by name.
 struct Parent {
     id: i32,
-    children: SourceCache<Rc<Person>, String>,
+    children: ObservableCollection<Rc<Person>>,
+    children_readonly: ReadOnlyObservableCollection<Rc<Person>>,
     children_cache: ObservableCache<Rc<Person>, String>,
 }
 
 impl Parent {
+    /// `Parent(int id, IEnumerable<Person> children)`; `Parent(int id)` without children.
     fn new(id: i32, children: Vec<Rc<Person>>) -> Rc<Self> {
-        let source = SourceCache::new(|p: &Rc<Person>| p.name());
-        source.edit(|updater| updater.add_or_update_items(&mut children.into_iter()));
-        let children_cache = source.connect().as_observable_cache();
-        Rc::new(Self { id, children: source, children_cache })
-    }
-
-    fn add_child(&self, child: Rc<Person>) {
-        self.children.edit(|updater| updater.add_or_update(child));
-    }
-
-    fn child_items(&self) -> Vec<Rc<Person>> {
-        self.children.items()
+        let children = ObservableCollection::from_items(children);
+        let children_readonly = ReadOnlyObservableCollection::new(children.clone());
+        let children_cache = children.to_observable_change_set_with_key(|x: &Rc<Person>| x.name()).as_observable_cache();
+        Rc::new(Self { id, children, children_readonly, children_cache })
     }
 }
 
+/// `ObservableCollection.AddRange`: the items one by one.
+fn add_range(collection: &ObservableCollection<Rc<Person>>, items: impl IntoIterator<Item = Rc<Person>>) {
+    for item in items {
+        collection.add(item);
+    }
+}
+
+/// The fifty parents of two children each.
 fn make_parents() -> Vec<Rc<Parent>> {
     let children: Vec<Rc<Person>> = (1..=100).map(|i| Person::new(format!("Name{i}"), i)).collect();
-    (1..=50).map(|i| {
-        let child_index = (i as usize - 1) * 2;
-        Parent::new(i, vec![children[child_index].clone(), children[child_index + 1].clone()])
-    }).collect()
+    let mut child_index = 0;
+    (1..=50)
+        .map(|i| {
+            let parent = Parent::new(i, vec![children[child_index].clone(), children[child_index + 1].clone()]);
+            child_index += 2;
+            parent
+        })
+        .collect()
 }
 
-#[test]
-fn flatten_observable_cache() {
+/// The steps that every `Flatten*` test takes, through the children that `many_selector` selects.
+fn flatten(make_aggregator: impl FnOnce(&SourceCache<Rc<Parent>, i32>) -> ferroui_dynamic_data::cache::testing::ChangeSetAggregator<Rc<Person>, String>) {
     let parents = make_parents();
 
     let source = SourceCache::new(|x: &Rc<Parent>| x.id);
-    let aggregator = source.connect().transform_many_observable_cache(|p: &Rc<Parent>| p.children_cache.clone(), |c: &Rc<Person>| c.name()).as_aggregator();
-    source.edit(|updater| updater.add_or_update_items(&mut parents.iter().cloned()));
+    let aggregator = make_aggregator(&source);
+    source.add_or_update_items(parents.iter().cloned());
 
     assert_eq!(aggregator.data().count(), 100);
 
     // Add a child to an observable collection and check the new item is added.
-    parents[0].add_child(Person::new("NewlyAddded", 100));
+    parents[0].children.add(Person::new("NewlyAddded", 100));
     assert_eq!(aggregator.data().count(), 101);
 
     // Remove the first parent and check its children have gone.
-    source.edit(|updater| updater.remove_key(&1));
+    source.remove_key(1);
     assert_eq!(aggregator.data().count(), 98);
 
     // Check items can be cleared and then added back in.
-    let children_in_zero = parents[1].child_items();
-    parents[1].children.edit(|updater| updater.clear());
+    let children_in_zero = parents[1].children.to_vec();
+    parents[1].children.clear();
     assert_eq!(aggregator.data().count(), 96);
-    parents[1].children.edit(|updater| updater.add_or_update_items(&mut children_in_zero.iter().cloned()));
+    add_range(&parents[1].children, children_in_zero);
     assert_eq!(aggregator.data().count(), 98);
 
     // Replace produces an update.
-    let replaced_child = parents[1].child_items()[0].clone();
-    parents[1].children.edit(|updater| {
-        updater.remove_key(&replaced_child.name());
-        updater.add_or_update(Person::new("Replacement", 100));
-    });
+    let replaced_child = parents[1].children.get(0);
+    parents[1].children.set(0, Person::new("Replacement", 100));
     assert_eq!(aggregator.data().count(), 98);
 
     assert!(aggregator.data().lookup(&replaced_child.key()).is_none());
     assert!(aggregator.data().lookup(&"Replacement".to_owned()).is_some());
 
+    aggregator.dispose();
     source.dispose();
 }
 
 #[test]
-fn observable_cache_without_initial_data() {
+fn flatten_observable_collection() {
+    flatten(|source| source.connect().transform_many_observable_collection(|p: &Rc<Parent>| p.children.clone(), |c: &Rc<Person>| c.name()).as_aggregator());
+}
+
+#[test]
+fn flatten_read_only_observable_collection() {
+    flatten(|source| source.connect().transform_many_observable_collection(|p: &Rc<Parent>| p.children_readonly.clone(), |c: &Rc<Person>| c.name()).as_aggregator());
+}
+
+#[test]
+fn flatten_observable_cache() {
+    flatten(|source| source.connect().transform_many_observable_cache(|p: &Rc<Parent>| p.children_cache.clone(), |c: &Rc<Person>| c.name()).as_aggregator());
+}
+
+/// The steps that every `*WithoutInitialData` test takes.
+fn without_initial_data(make_collection: impl FnOnce(&SourceCache<Rc<Parent>, i32>) -> ObservableCache<Rc<Person>, String>) {
     let parents = SourceCache::new(|d: &Rc<Parent>| d.id);
-    let collection = parents.connect().transform_many_observable_cache(|d: &Rc<Parent>| d.children_cache.clone(), |p: &Rc<Person>| p.name()).as_observable_cache();
+    let collection = make_collection(&parents);
 
     let parent = Parent::new(1, Vec::new());
-    parents.edit(|updater| updater.add_or_update(parent.clone()));
+    parents.add_or_update(parent.clone());
 
     assert_eq!(collection.count(), 0);
 
-    parent.add_child(Person::new("child1", 1));
+    parent.children.add(Person::new("child1", 1));
     assert_eq!(collection.count(), 1);
 
-    parent.add_child(Person::new("child2", 2));
+    parent.children.add(Person::new("child2", 2));
     assert_eq!(collection.count(), 2);
 
     parents.dispose();
+}
+
+#[test]
+fn observable_collection_without_initial_data() {
+    without_initial_data(|parents| parents.connect().transform_many_observable_collection(|d: &Rc<Parent>| d.children.clone(), |p: &Rc<Person>| p.name()).as_observable_cache());
+}
+
+#[test]
+fn read_only_observable_collection_without_initial_data() {
+    without_initial_data(|parents| parents.connect().transform_many_observable_collection(|d: &Rc<Parent>| d.children_readonly.clone(), |p: &Rc<Person>| p.name()).as_observable_cache());
+}
+
+#[test]
+fn observable_cache_without_initial_data() {
+    without_initial_data(|parents| parents.connect().transform_many_observable_cache(|d: &Rc<Parent>| d.children_cache.clone(), |p: &Rc<Person>| p.name()).as_observable_cache());
 }

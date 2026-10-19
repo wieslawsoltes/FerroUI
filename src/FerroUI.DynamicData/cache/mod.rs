@@ -83,3 +83,8 @@ pub use internal::{Group, ImmutableGroup, KeyValueCollection, KeyValueComparer};
 pub use ops::sort::DEFAULT_SORT_RESET_THRESHOLD;
 pub use ops::flatten_buffer_result::{flatten_buffer_result, FlattenBufferResultCacheEx};
 pub use ops::merge_change_sets::{CacheChangeSetSourcesEx, ObservableCacheChangeSetsEx};
+pub use internal::CombineOperator;
+pub use ops::combine::{CacheChangeSetSource, CacheSourceListCombineEx, CacheSourcesCombineEx};
+pub use ops::switch::SwitchCacheEx;
+mod transform_async_options;
+pub use transform_async_options::*;

@@ -4,8 +4,9 @@
 
 use crate::domain::Person;
 use crate::utilities::{assert_equivalent, assert_equivalent_because};
+use ferroui_dynamic_data::aggregation::AggregationListEx;
 use ferroui_dynamic_data::list::testing::ChangeSetAggregator;
-use ferroui_dynamic_data::list::{ChangeSet, IObservableList, ListChangeReason, ObservableListEx, SourceList};
+use ferroui_dynamic_data::list::{ChangeSet, IObservableList, ObservableListEx, SourceList};
 use ferroui_reactive::subjects::BehaviorSubject;
 use ferroui_reactive::ObservableExt;
 use ferroui_system::{IDisposable, IObservable, IObserver};
@@ -79,18 +80,10 @@ impl Drop for Fixture {
     }
 }
 
-/// `Count()` of `DynamicData.Aggregation` (`ForAggregation().Count()`), which no operator of wave 1
-/// provides: the number of items after each change set, by the items each one adds and removes.
+/// `Count()` of `DynamicData.Aggregation` (`ForAggregation().Count()`): the number of items after
+/// each change set.
 fn count<T: Clone + PartialEq + 'static>(source: Rc<dyn IObservable<ChangeSet<T>>>) -> Rc<dyn IObservable<usize>> {
-    source.scan_with(0usize, |count: usize, changes: ChangeSet<T>| {
-        changes.iter().fold(count, |count, change| match change.reason() {
-            ListChangeReason::Add => count + 1,
-            ListChangeReason::AddRange => count + change.range().count(),
-            ListChangeReason::Remove => count - 1,
-            ListChangeReason::RemoveRange | ListChangeReason::Clear => count - change.range().count(),
-            ListChangeReason::Replace | ListChangeReason::Refresh | ListChangeReason::Moved => count,
-        })
-    })
+    source.count_list()
 }
 
 fn people(prefix: &str, count: i32) -> Vec<Rc<Person>> {

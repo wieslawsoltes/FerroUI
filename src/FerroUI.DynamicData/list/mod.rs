@@ -56,3 +56,5 @@ pub use internal::{Group, ImmutableGroup};
 pub use ops::flatten_buffer_result::{flatten_buffer_result, FlattenBufferResultListEx};
 pub use ops::cast::{ObservableObjectListEx};
 pub use ops::merge_change_sets::{ListChangeSetSourcesEx, ObservableListChangeSetsEx};
+pub use ops::combine::{ListChangeSetSource, ListSourceListCombineEx, ListSourcesCombineEx};
+pub use ops::switch::SwitchListEx;

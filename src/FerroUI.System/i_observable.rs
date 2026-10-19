@@ -20,3 +20,10 @@ pub trait IObservable<T> {
     /// Subscribes `observer`; disposing the returned handle unsubscribes it.
     fn subscribe(&self, observer: Rc<dyn IObserver<T>>) -> Rc<dyn IDisposable>;
 }
+
+/// Sequences compare by identity (reference equality), so that they can be the items of a list.
+impl<T> PartialEq for dyn IObservable<T> {
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::addr_eq(self as *const Self, other as *const Self)
+    }
+}

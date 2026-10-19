@@ -2,6 +2,7 @@
 
 use super::remove_index::without_index;
 use super::transformer::transformer;
+use crate::binding::ObservableCollectionEx;
 use crate::list::{clone_changes_with, Change, ChangeAwareList, ChangeSet, IObservableList, ListChangeReason};
 use ferroui_reactive::disposables::{CompositeDisposable, Disposable};
 use ferroui_reactive::{Observable, ObservableExt};
@@ -279,6 +280,25 @@ pub(crate) fn observable_list_child_changes<S: Clone + 'static, D: Clone + Parti
             let list = many_selector(&item);
             let subsequent_changes = list.connect();
             if list.count() > 0 {
+                return subsequent_changes;
+            }
+            Observable::return_(ChangeSet::<D>::empty()).concat(subsequent_changes)
+        })
+    })
+}
+
+/// The child changes of the items of an observable collection of an item of the source (the
+/// constructors of `TransformMany` for `ObservableCollection` and `ReadOnlyObservableCollection`):
+/// the changes of the collection after the first; an empty collection gives an empty first change
+/// set, which is skipped.
+pub(crate) fn observable_collection_child_changes<S: Clone + 'static, D: Clone + PartialEq + 'static, C: ObservableCollectionEx<D> + 'static>(
+    many_selector: Rc<dyn Fn(&S) -> C>,
+) -> ListChildChanges<S, D> {
+    Rc::new(move |item: &S| {
+        let (many_selector, item) = (many_selector.clone(), item.clone());
+        Observable::defer(move || {
+            let subsequent_changes = many_selector(&item).to_observable_change_set();
+            if many_selector(&item).notifying_collection().count() > 0 {
                 return subsequent_changes;
             }
             Observable::return_(ChangeSet::<D>::empty()).concat(subsequent_changes)
