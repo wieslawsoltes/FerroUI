@@ -573,8 +573,8 @@ fn has_observers_on_error() {
 
 // Not ported: Subscribe_ArgumentChecking - argument validation
 // Not ported: OnError_ArgumentChecking - argument validation
-// Not ported: Await_Blocking - needs async/await (phase 4): GetAwaiter, and a real thread that completes the subject
-// Not ported: Await_Throw - needs async/await (phase 4): GetAwaiter, and a real thread that fails the subject
+// Not ported: Await_Blocking - real threads (a thread completes the subject while another blocks in GetResult of its awaiter; the subjects are not Send)
+// Not ported: Await_Throw - real threads (a thread fails the subject while another blocks in GetResult of its awaiter; the subjects are not Send)
 // Not ported: GetResult_Blocking - real threads (GetResult blocks until another thread completes the subject)
 // Not ported: GetResult_Blocking_Throw - real threads (GetResult blocks until another thread fails the subject)
-// Not ported: GetResult_Context - needs async/await (phase 4): GetAwaiter with a SynchronizationContext, Task.Run
+// Not ported: GetResult_Context - the awaiter of the port does not post its continuation to a SynchronizationContext (the continuations of a task run where it ends); real threads (Task.Run)

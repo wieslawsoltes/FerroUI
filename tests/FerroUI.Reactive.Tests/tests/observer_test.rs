@@ -5,10 +5,14 @@
 //! locals that the observer lambdas capture are shared cells. The overloads of
 //! `Observer.Synchronize` are the methods `synchronize`, `synchronize_with_gate` (the gate is any
 //! `Rc<dyn Any>`), `synchronize_prevent_reentrancy` and `synchronize_with_lock` of `ObserverExt`.
+//! `Observer.ToProgress` is `to_progress` and `to_progress_on` of `ObserverExt`, and
+//! `Observer.ToObserver(IProgress<T>)` is `to_observer` of `ProgressExt`; the list the observers add
+//! to is a shared `RefCell`.
 
 use ferroui_reactive::concurrency::AsyncLock;
-use ferroui_reactive::{IObserver, Notification, NotificationKind, ObservableError, Observer, ObserverExt};
-use ferroui_reactive_testing::{assert_throws, new_error};
+use ferroui_reactive::{IObserver, Notification, NotificationKind, ObservableError, Observer, ObserverExt, ProgressExt};
+use ferroui_reactive_testing::{assert_messages, assert_throws, new_error, ReactiveTest as RT, TestScheduler};
+use ferroui_system::IProgress;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -624,6 +628,73 @@ fn observer_synchronize_async_lock() {
     }
 }
 
+#[test]
+fn observer_to_progress() {
+    let xs = Rc::new(RefCell::new(Vec::new()));
+
+    let p = {
+        let xs = xs.clone();
+        Observer::create(move |x: i32| xs.borrow_mut().push(x)).to_progress()
+    };
+
+    p.report(42);
+    p.report(43);
+
+    assert_eq!(vec![42, 43], *xs.borrow());
+}
+
+#[test]
+fn observer_to_progress_scheduler() {
+    let s = TestScheduler::new();
+
+    let o = s.create_observer::<i32>();
+    let observer: Rc<dyn IObserver<i32>> = o.clone();
+    let p = observer.to_progress_on(s.scheduler());
+
+    s.schedule_absolute_action(200, move || {
+        p.report(42);
+        p.report(43);
+    });
+
+    s.run();
+
+    assert_messages!(o.messages(), RT::on_next(201, 42), RT::on_next(202, 43));
+}
+
+#[test]
+fn progress_to_observer() {
+    let xs = Rc::new(RefCell::new(Vec::new()));
+
+    let p: Rc<dyn IProgress<i32>> = {
+        let xs = xs.clone();
+        Rc::new(MyProgress::new(move |x: i32| xs.borrow_mut().push(x)))
+    };
+
+    let o = p.to_observer();
+
+    o.on_next(42);
+    o.on_next(43);
+
+    assert_eq!(vec![42, 43], *xs.borrow());
+}
+
+/// A progress object made of a function (`MyProgress<T>`).
+struct MyProgress<T> {
+    report: Box<dyn Fn(T)>,
+}
+
+impl<T> MyProgress<T> {
+    fn new(report: impl Fn(T) + 'static) -> Self {
+        Self { report: Box::new(report) }
+    }
+}
+
+impl<T> IProgress<T> for MyProgress<T> {
+    fn report(&self, value: T) {
+        (self.report)(value);
+    }
+}
+
 // Not ported: ToObserver_ArgumentChecking - argument validation
 // Not ported: ToNotifier_ArgumentChecking - argument validation
 // Not ported: Create_ArgumentChecking - argument validation
@@ -637,7 +708,4 @@ fn observer_synchronize_async_lock() {
 // Not ported: NotifyOn_Scheduler_OnError - real threads (ThreadPoolScheduler, Thread, ManualResetEvent)
 // Not ported: NotifyOn_SyncCtx - real threads (SynchronizationContext posting to Task.Run, ManualResetEvent)
 // Not ported: Observer_ToProgress_ArgumentChecking - argument validation
-// Not ported: Observer_ToProgress - Observer.ToProgress and IProgress<T> are not in the crate
-// Not ported: Observer_ToProgress_Scheduler - Observer.ToProgress(IObserver<T>, IScheduler) and IProgress<T> are not in the crate
 // Not ported: Progress_ToObserver_ArgumentChecking - argument validation
-// Not ported: Progress_ToObserver - Observer.ToObserver(IProgress<T>) and IProgress<T> are not in the crate

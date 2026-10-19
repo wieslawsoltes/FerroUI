@@ -1,11 +1,16 @@
 //! `IScheduler`, the services a scheduler may offer (`ISchedulerPeriodic`, `IStopwatchProvider`,
 //! `IStopwatch`) and the extension methods of `Scheduler` (`Scheduler.cs`, `Scheduler.Simple.cs`,
-//! `Scheduler.Recursive.cs`, `Scheduler.Services.cs`, `Scheduler.Services.Emulation.cs`); the
-//! wrapper of `DisableOptimizations` is in `disable_optimizations_scheduler.rs`.
+//! `Scheduler.Recursive.cs`, `Scheduler.Services.cs`, `Scheduler.Services.Emulation.cs`,
+//! `Scheduler.Async.cs`); the wrapper of `DisableOptimizations` is in
+//! `disable_optimizations_scheduler.rs`, the machinery of the asynchronous members in
+//! `scheduler_async.rs`.
 
+use super::scheduler_async::{ScheduleAsyncResult, SchedulerOperation};
 use crate::disposables::{CompositeDisposable, Disposable, SingleAssignmentDisposable};
-use ferroui_system::IDisposable;
+use ferroui_system::threading::CancellationToken;
+use ferroui_system::{IDisposable, ObservableError};
 use std::cell::{Cell, RefCell};
+use std::future::Future;
 use std::rc::Rc;
 use std::time::{Duration, SystemTime};
 
@@ -40,6 +45,14 @@ pub trait IScheduler {
 
     /// The stopwatch of the scheduler, if it has its own (`GetService(typeof(IStopwatchProvider))`).
     fn as_stopwatch_provider(&self) -> Option<&dyn IStopwatchProvider> {
+        None
+    }
+
+    /// The cancellation token of the scheduler that [`SchedulerExt::schedule_async`] hands its
+    /// body, which [`SchedulerExt::yield_`] and [`SchedulerExt::sleep`] without a token observe
+    /// (`GetCancellationToken`: `scheduler is CancelableScheduler cs ? cs.Token : None`); none for
+    /// any other scheduler.
+    fn cancellation_token(&self) -> Option<CancellationToken> {
         None
     }
 }
@@ -89,7 +102,7 @@ impl Scheduler {
 }
 
 /// The extension methods of `Scheduler` on a scheduler (`Scheduler.Simple.cs`,
-/// `Scheduler.Recursive.cs`, `Scheduler.Services.cs`).
+/// `Scheduler.Recursive.cs`, `Scheduler.Services.cs`, `Scheduler.Async.cs`).
 pub trait SchedulerExt {
     /// Schedules an action to run as soon as possible (`Schedule(Action)`).
     fn schedule_action(&self, action: impl FnOnce() + 'static) -> Rc<dyn IDisposable>;
@@ -142,6 +155,94 @@ pub trait SchedulerExt {
     /// The scheduler without the services `optimizations` (`DisableOptimizations(IScheduler,
     /// params Type[])`): the other services are those of this one.
     fn disable_optimizations_of(&self, optimizations: &[super::SchedulerOptimization]) -> Rc<dyn IScheduler>;
+
+    /// Runs an asynchronous body on the scheduler, as soon as possible
+    /// (`ScheduleAsync(Func<IScheduler, CancellationToken, Task>)`,
+    /// `ScheduleAsync(Func<IScheduler, CancellationToken, Task<IDisposable>>)`).
+    ///
+    /// The body receives a scheduler and a token. It runs on the scheduler, as a task of the thread,
+    /// until its first await; awaiting [`yield_`](Self::yield_) or [`sleep`](Self::sleep) of the
+    /// scheduler it received resumes it there. Disposing the result cancels the token, which ends a
+    /// pending `yield_` or `sleep` with a `TaskCanceledError`, and disposes the disposable the body
+    /// ended with (its future's output: `()`, or an `Rc<dyn IDisposable>`).
+    fn schedule_async<R: ScheduleAsyncResult, Fut: Future<Output = Result<R, ObservableError>> + 'static>(
+        &self,
+        action: impl FnOnce(Rc<dyn IScheduler>, CancellationToken) -> Fut + 'static,
+    ) -> Rc<dyn IDisposable>;
+
+    /// [`schedule_async`](Self::schedule_async) with a state handed to the body
+    /// (`ScheduleAsync<TState>(TState, Func<IScheduler, TState, CancellationToken, Task>)`, and its
+    /// `Task<IDisposable>` form).
+    fn schedule_async_with<S: 'static, R: ScheduleAsyncResult, Fut: Future<Output = Result<R, ObservableError>> + 'static>(
+        &self,
+        state: S,
+        action: impl FnOnce(Rc<dyn IScheduler>, S, CancellationToken) -> Fut + 'static,
+    ) -> Rc<dyn IDisposable>;
+
+    /// [`schedule_async`](Self::schedule_async) after `due_time`
+    /// (`ScheduleAsync(TimeSpan, Func<IScheduler, CancellationToken, Task>)`, and its
+    /// `Task<IDisposable>` form).
+    fn schedule_async_after<R: ScheduleAsyncResult, Fut: Future<Output = Result<R, ObservableError>> + 'static>(
+        &self,
+        due_time: Duration,
+        action: impl FnOnce(Rc<dyn IScheduler>, CancellationToken) -> Fut + 'static,
+    ) -> Rc<dyn IDisposable>;
+
+    /// [`schedule_async_with`](Self::schedule_async_with) after `due_time`
+    /// (`ScheduleAsync<TState>(TState, TimeSpan, Func<IScheduler, TState, CancellationToken, Task>)`,
+    /// and its `Task<IDisposable>` form).
+    fn schedule_async_after_with<S: 'static, R: ScheduleAsyncResult, Fut: Future<Output = Result<R, ObservableError>> + 'static>(
+        &self,
+        state: S,
+        due_time: Duration,
+        action: impl FnOnce(Rc<dyn IScheduler>, S, CancellationToken) -> Fut + 'static,
+    ) -> Rc<dyn IDisposable>;
+
+    /// [`schedule_async`](Self::schedule_async) at `due_time`
+    /// (`ScheduleAsync(DateTimeOffset, Func<IScheduler, CancellationToken, Task>)`, and its
+    /// `Task<IDisposable>` form).
+    fn schedule_async_at<R: ScheduleAsyncResult, Fut: Future<Output = Result<R, ObservableError>> + 'static>(
+        &self,
+        due_time: SystemTime,
+        action: impl FnOnce(Rc<dyn IScheduler>, CancellationToken) -> Fut + 'static,
+    ) -> Rc<dyn IDisposable>;
+
+    /// [`schedule_async_with`](Self::schedule_async_with) at `due_time`
+    /// (`ScheduleAsync<TState>(TState, DateTimeOffset, Func<IScheduler, TState, CancellationToken, Task>)`,
+    /// and its `Task<IDisposable>` form).
+    fn schedule_async_at_with<S: 'static, R: ScheduleAsyncResult, Fut: Future<Output = Result<R, ObservableError>> + 'static>(
+        &self,
+        state: S,
+        due_time: SystemTime,
+        action: impl FnOnce(Rc<dyn IScheduler>, S, CancellationToken) -> Fut + 'static,
+    ) -> Rc<dyn IDisposable>;
+
+    /// An operation whose await hands the rest of the work to the scheduler, to run after the work
+    /// queued before it (`Yield(IScheduler)`); on the scheduler of a
+    /// [`schedule_async`](Self::schedule_async) body, the token of the body cancels it.
+    fn yield_(&self) -> SchedulerOperation;
+
+    /// [`yield_`](Self::yield_) that the cancellation of `token` ends with a `TaskCanceledError`
+    /// (`Yield(IScheduler, CancellationToken)`).
+    fn yield_with_token(&self, token: CancellationToken) -> SchedulerOperation;
+
+    /// An operation whose await runs the rest of the work on the scheduler after `due_time`
+    /// (`Sleep(IScheduler, TimeSpan)`); on the scheduler of a
+    /// [`schedule_async`](Self::schedule_async) body, the token of the body cancels it.
+    fn sleep(&self, due_time: Duration) -> SchedulerOperation;
+
+    /// [`sleep`](Self::sleep) that the cancellation of `token` ends with a `TaskCanceledError`
+    /// (`Sleep(IScheduler, TimeSpan, CancellationToken)`).
+    fn sleep_with_token(&self, due_time: Duration, token: CancellationToken) -> SchedulerOperation;
+
+    /// An operation whose await runs the rest of the work on the scheduler at `due_time`
+    /// (`Sleep(IScheduler, DateTimeOffset)`); on the scheduler of a
+    /// [`schedule_async`](Self::schedule_async) body, the token of the body cancels it.
+    fn sleep_at(&self, due_time: SystemTime) -> SchedulerOperation;
+
+    /// [`sleep_at`](Self::sleep_at) that the cancellation of `token` ends with a
+    /// `TaskCanceledError` (`Sleep(IScheduler, DateTimeOffset, CancellationToken)`).
+    fn sleep_at_with_token(&self, due_time: SystemTime, token: CancellationToken) -> SchedulerOperation;
 }
 
 impl SchedulerExt for Rc<dyn IScheduler> {
@@ -241,6 +342,91 @@ impl SchedulerExt for Rc<dyn IScheduler> {
 
     fn disable_optimizations_of(&self, optimizations: &[super::SchedulerOptimization]) -> Rc<dyn IScheduler> {
         super::disable_optimizations_scheduler::DisableOptimizationsScheduler::create(self.clone(), optimizations)
+    }
+
+    fn schedule_async<R: ScheduleAsyncResult, Fut: Future<Output = Result<R, ObservableError>> + 'static>(
+        &self,
+        action: impl FnOnce(Rc<dyn IScheduler>, CancellationToken) -> Fut + 'static,
+    ) -> Rc<dyn IDisposable> {
+        self.schedule(Box::new(move |scheduler| super::scheduler_async::invoke_async(scheduler, action)))
+    }
+
+    fn schedule_async_with<S: 'static, R: ScheduleAsyncResult, Fut: Future<Output = Result<R, ObservableError>> + 'static>(
+        &self,
+        state: S,
+        action: impl FnOnce(Rc<dyn IScheduler>, S, CancellationToken) -> Fut + 'static,
+    ) -> Rc<dyn IDisposable> {
+        self.schedule(Box::new(move |scheduler| {
+            super::scheduler_async::invoke_async(scheduler, move |scheduler, token| action(scheduler, state, token))
+        }))
+    }
+
+    fn schedule_async_after<R: ScheduleAsyncResult, Fut: Future<Output = Result<R, ObservableError>> + 'static>(
+        &self,
+        due_time: Duration,
+        action: impl FnOnce(Rc<dyn IScheduler>, CancellationToken) -> Fut + 'static,
+    ) -> Rc<dyn IDisposable> {
+        self.schedule_after(due_time, Box::new(move |scheduler| super::scheduler_async::invoke_async(scheduler, action)))
+    }
+
+    fn schedule_async_after_with<S: 'static, R: ScheduleAsyncResult, Fut: Future<Output = Result<R, ObservableError>> + 'static>(
+        &self,
+        state: S,
+        due_time: Duration,
+        action: impl FnOnce(Rc<dyn IScheduler>, S, CancellationToken) -> Fut + 'static,
+    ) -> Rc<dyn IDisposable> {
+        self.schedule_after(
+            due_time,
+            Box::new(move |scheduler| {
+                super::scheduler_async::invoke_async(scheduler, move |scheduler, token| action(scheduler, state, token))
+            }),
+        )
+    }
+
+    fn schedule_async_at<R: ScheduleAsyncResult, Fut: Future<Output = Result<R, ObservableError>> + 'static>(
+        &self,
+        due_time: SystemTime,
+        action: impl FnOnce(Rc<dyn IScheduler>, CancellationToken) -> Fut + 'static,
+    ) -> Rc<dyn IDisposable> {
+        self.schedule_at(due_time, Box::new(move |scheduler| super::scheduler_async::invoke_async(scheduler, action)))
+    }
+
+    fn schedule_async_at_with<S: 'static, R: ScheduleAsyncResult, Fut: Future<Output = Result<R, ObservableError>> + 'static>(
+        &self,
+        state: S,
+        due_time: SystemTime,
+        action: impl FnOnce(Rc<dyn IScheduler>, S, CancellationToken) -> Fut + 'static,
+    ) -> Rc<dyn IDisposable> {
+        self.schedule_at(
+            due_time,
+            Box::new(move |scheduler| {
+                super::scheduler_async::invoke_async(scheduler, move |scheduler, token| action(scheduler, state, token))
+            }),
+        )
+    }
+
+    fn yield_(&self) -> SchedulerOperation {
+        super::scheduler_async::yield_on(self, super::scheduler_async::get_cancellation_token(self))
+    }
+
+    fn yield_with_token(&self, token: CancellationToken) -> SchedulerOperation {
+        super::scheduler_async::yield_on(self, token)
+    }
+
+    fn sleep(&self, due_time: Duration) -> SchedulerOperation {
+        super::scheduler_async::sleep_on(self, due_time, super::scheduler_async::get_cancellation_token(self))
+    }
+
+    fn sleep_with_token(&self, due_time: Duration, token: CancellationToken) -> SchedulerOperation {
+        super::scheduler_async::sleep_on(self, due_time, token)
+    }
+
+    fn sleep_at(&self, due_time: SystemTime) -> SchedulerOperation {
+        super::scheduler_async::sleep_at_on(self, due_time, super::scheduler_async::get_cancellation_token(self))
+    }
+
+    fn sleep_at_with_token(&self, due_time: SystemTime, token: CancellationToken) -> SchedulerOperation {
+        super::scheduler_async::sleep_at_on(self, due_time, token)
     }
 }
 

@@ -7,5 +7,6 @@ mod internal;
 mod linq;
 mod notification_test;
 mod observer_test;
+mod task_observable_extensions_test;
 mod time_tests;
 mod unit_test;

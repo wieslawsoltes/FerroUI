@@ -1,11 +1,12 @@
-//! `AnonymousObserver<T>` and `Observer` (`AnonymousObserver.cs`, `Observer.Extensions.cs`), and
-//! the observers of `Synchronize` (`Internal/SynchronizedObserver.cs`,
-//! `Internal/AsyncLockObserver.cs`).
+//! `AnonymousObserver<T>` and `Observer` (`AnonymousObserver.cs`, `Observer.Extensions.cs`), the
+//! observers of `Synchronize` (`Internal/SynchronizedObserver.cs`,
+//! `Internal/AsyncLockObserver.cs`), and the conversions between observers and progress objects
+//! (`ToProgress`, `ToObserver(IProgress<T>)`, `AnonymousProgress<T>`).
 
 use crate::concurrency::AsyncLock;
 use crate::notification::Notification;
 use crate::observer_base::{ObserverBase, ObserverCore};
-use ferroui_system::{IObserver, ObservableError};
+use ferroui_system::{IObserver, IProgress, ObservableError};
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -142,6 +143,13 @@ pub trait ObserverExt<T> {
     /// An observer that delivers the notifications to this one on `scheduler`, in order
     /// (`NotifyOn(IScheduler)`).
     fn notify_on(&self, scheduler: Rc<dyn crate::concurrency::IScheduler>) -> Rc<dyn IObserver<T>>;
+
+    /// A progress object whose reports are the values of this observer (`ToProgress(IObserver<T>)`).
+    fn to_progress(&self) -> Rc<dyn IProgress<T>>;
+
+    /// A progress object whose reports reach this observer as values on `scheduler`, in order
+    /// (`ToProgress(IObserver<T>, IScheduler)`, through the observer of `ObserveOn`).
+    fn to_progress_on(&self, scheduler: Rc<dyn crate::concurrency::IScheduler>) -> Rc<dyn IProgress<T>>;
 }
 
 impl<T: 'static> ObserverExt<T> for Rc<dyn IObserver<T>> {
@@ -180,6 +188,41 @@ impl<T: 'static> ObserverExt<T> for Rc<dyn IObserver<T>> {
 
     fn notify_on(&self, scheduler: Rc<dyn crate::concurrency::IScheduler>) -> Rc<dyn IObserver<T>> {
         Rc::new(NotifyOnObserver { inner: crate::internal::ScheduledObserver::new(scheduler, self.clone()) })
+    }
+
+    fn to_progress(&self) -> Rc<dyn IProgress<T>> {
+        let observer = self.clone();
+        Rc::new(AnonymousProgress { progress: Box::new(move |value| observer.on_next(value)) })
+    }
+
+    fn to_progress_on(&self, scheduler: Rc<dyn crate::concurrency::IScheduler>) -> Rc<dyn IProgress<T>> {
+        let observer = self.notify_on(scheduler);
+        Rc::new(AnonymousProgress { progress: Box::new(move |value| observer.on_next(value)) })
+    }
+}
+
+/// A progress object made of a function (`AnonymousProgress<T>` of `Observer.Extensions.cs`).
+struct AnonymousProgress<T> {
+    progress: Box<dyn Fn(T)>,
+}
+
+impl<T> IProgress<T> for AnonymousProgress<T> {
+    fn report(&self, value: T) {
+        (self.progress)(value);
+    }
+}
+
+/// The extension methods of `Observer` on a progress object (`Observer.Extensions.cs`).
+pub trait ProgressExt<T> {
+    /// An observer whose values are reports of this progress object; an error panics, as the
+    /// observer of upstream rethrows it (`ToObserver(IProgress<T>)`).
+    fn to_observer(&self) -> Rc<dyn IObserver<T>>;
+}
+
+impl<T: 'static> ProgressExt<T> for Rc<dyn IProgress<T>> {
+    fn to_observer(&self) -> Rc<dyn IObserver<T>> {
+        let progress = self.clone();
+        Observer::create(move |value| progress.report(value))
     }
 }
 

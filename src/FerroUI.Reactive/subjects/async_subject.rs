@@ -2,6 +2,8 @@
 
 use super::subject::{throw_disposed, ObserverList, SubjectBase, SubjectSubscription};
 use crate::disposables::Disposable;
+use crate::linq::SequenceError;
+use ferroui_system::threading::tasks::{Task, TaskCompletionSource};
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -57,12 +59,71 @@ impl<T: Clone + 'static> AsyncSubject<T> {
         }
     }
 
+    /// The awaiter of the subject (`GetAwaiter`): a task that ends when the subject ends, with its
+    /// last value, with its error (a `TaskCanceledError` cancels it), or with
+    /// [`SequenceError::NoElements`] when it ended without a value (`GetResult`'s
+    /// `InvalidOperationException`). `async` code awaits it.
+    ///
+    /// Upstream's subject is its own awaiter; its members are those of the task: `IsCompleted` is
+    /// [`Task::is_completed`], `OnCompleted(Action)` is [`Task::continue_with`] and `GetResult` is
+    /// [`Task::result`] once the task has ended.
+    ///
+    /// Deviation (DEVIATIONS.md, Reactive): the continuations of the task run synchronously where
+    /// the subject ends; upstream posts the continuation of `OnCompleted` to the
+    /// `SynchronizationContext` it captured. A future that awaits the task is polled again on its
+    /// own thread, as the executor of `ferroui-system` does for every wake.
+    ///
+    /// # Panics
+    /// When the subject is disposed (`ObjectDisposedException`).
+    pub fn get_awaiter(&self) -> Task<T> {
+        let completion = TaskCompletionSource::new();
+        let task = completion.task();
+        self.subscribe(Rc::new(AwaitObserver { subject: self.this.clone(), completion }));
+        task
+    }
+
     pub fn as_observable(self: &Rc<Self>) -> Rc<dyn IObservable<T>> {
         self.clone()
     }
 
     pub fn as_observer(self: &Rc<Self>) -> Rc<dyn IObserver<T>> {
         self.clone()
+    }
+}
+
+/// The observer of [`AsyncSubject::get_awaiter`] (`AwaitObserver`): the end of the subject ends the
+/// task with the outcome of the subject (`GetResult`).
+struct AwaitObserver<T> {
+    subject: Weak<AsyncSubject<T>>,
+    completion: TaskCompletionSource<T>,
+}
+
+impl<T: Clone + 'static> AwaitObserver<T> {
+    fn complete(&self) {
+        let Some(subject) = self.subject.upgrade() else { return };
+        match subject.get_result() {
+            Ok(Some(value)) => {
+                self.completion.try_set_result(value);
+            }
+            Ok(None) => {
+                self.completion.try_set_exception(Rc::new(SequenceError::NoElements));
+            }
+            Err(error) => {
+                self.completion.try_set_exception(error);
+            }
+        }
+    }
+}
+
+impl<T: Clone + 'static> IObserver<T> for AwaitObserver<T> {
+    fn on_next(&self, _value: T) {}
+
+    fn on_error(&self, _error: ObservableError) {
+        self.complete();
+    }
+
+    fn on_completed(&self) {
+        self.complete();
     }
 }
 

@@ -37,7 +37,7 @@ pub use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 pub use linq::{ConnectableObservableExt, Observable, ObservableExt, TaskObservableExt};
 pub use notification::{IObserverWithResult, Notification, NotificationKind};
 pub use observable_base::{ObservableBase, ObservableCore};
-pub use observer::{AnonymousObserver, Observer, ObserverExt};
+pub use observer::{AnonymousObserver, Observer, ObserverExt, ProgressExt};
 pub use observer_base::{ObserverBase, ObserverCore};
 pub use time_interval::{TimeInterval, Timestamped};
 

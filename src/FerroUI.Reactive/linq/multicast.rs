@@ -131,6 +131,7 @@ pub trait ConnectableObservableExt<T: 'static> {
 
     super::ref_count::ref_count_methods!();
     super::auto_connect::auto_connect_methods!();
+    super::run_async::run_async_connectable_methods!();
 }
 
 impl<T: 'static> ConnectableObservableExt<T> for Rc<dyn IConnectableObservable<T>> {

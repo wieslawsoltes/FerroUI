@@ -236,4 +236,4 @@ fn single_async_predicate_throws() {
 }
 
 // Not ported: SingleAsync_ArgumentChecking - argument validation
-// Not ported: MeaningfulStackTrace - needs async/await (phase 4) (awaits the sequence and its task); checks the stack trace of the exception, which an error value does not have
+// Not ported: MeaningfulStackTrace - checks the stack trace of the exception, which an error value does not have

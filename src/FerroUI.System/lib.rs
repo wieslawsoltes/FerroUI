@@ -6,7 +6,8 @@
 //! library of FerroUI re-exports every item at the path it had there.
 //!
 //! The modules follow the namespaces of .NET where an item ports one of its types; the items of the
-//! namespace `System` are at the root (`IDisposable`, `IObservable<T>`, `IObserver<T>`).
+//! namespace `System` are at the root (`IDisposable`, `IObservable<T>`, `IObserver<T>`,
+//! `IProgress<T>`).
 //!
 //! - [`component_model`]: `System.ComponentModel` (`INotifyPropertyChanged`).
 //! - [`collections::specialized`]: `System.Collections.Specialized` (`INotifyCollectionChanged` and
@@ -23,10 +24,12 @@ pub mod events;
 pub mod ferro_thread_local;
 mod i_disposable;
 mod i_observable;
+mod i_progress;
 pub mod threading;
 
 pub use i_disposable::IDisposable;
 pub use i_observable::{IObservable, IObserver, ObservableError};
+pub use i_progress::IProgress;
 
 #[cfg(test)]
 mod tests;

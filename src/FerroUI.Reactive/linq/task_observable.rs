@@ -174,12 +174,11 @@ pub(crate) fn to_task<T: 'static>(source: Rc<dyn IObservable<T>>, token: Cancell
         is_stopped: Cell::new(false),
     });
     if token.can_be_canceled() {
-        let target = Rc::downgrade(&observer);
-        let registration = token.register_local(move || {
-            if let Some(target) = target.upgrade() {
-                target.cancel();
-            }
-        });
+        // The registration holds the observer, as upstream's does: a source that keeps no
+        // reference to its observer (`Never`) still ends the task when the token is canceled. The
+        // end of the sequence disposes the registration.
+        let target = observer.clone();
+        let registration = token.register_local(move || target.cancel());
         *observer.registration.borrow_mut() = Some(registration);
     }
     let subscription = source.subscribe(observer.clone());

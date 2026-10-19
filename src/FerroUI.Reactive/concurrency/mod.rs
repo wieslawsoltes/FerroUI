@@ -14,6 +14,7 @@ mod immediate_scheduler;
 mod local_scheduler;
 mod scheduled_item;
 mod scheduler;
+mod scheduler_async;
 mod scheduler_defaults;
 mod virtual_time_scheduler;
 
@@ -26,5 +27,6 @@ pub use scheduled_item::ScheduledItem;
 pub use scheduler::{
     IScheduler, ISchedulerPeriodic, IStopwatch, IStopwatchProvider, ScheduledAction, Scheduler, SchedulerExt,
 };
+pub use scheduler_async::{ScheduleAsyncResult, SchedulerOperation, SchedulerOperationAwaiter};
 pub use scheduler_defaults::SchedulerDefaults;
 pub use virtual_time_scheduler::{VirtualTimeClock, VirtualTimeScheduler};
