@@ -1,0 +1,75 @@
+[package]
+name = "reactiveui-example"
+description = "The example of the ReactiveUI integration with FerroUI: routing with RoutedViewHost, view contracts with ViewModelViewHost, commands and interactions, live process metrics, suspension with AutoSuspendHelper, and a DynamicData page"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+build = "build.rs"
+
+# Unit tests live next to the code (`tests/` modules of the library), not as integration test
+# targets.
+autotests = false
+autobenches = false
+autoexamples = false
+autobins = false
+
+[lib]
+path = "lib.rs"
+
+# The desktop entry point: `Program.cs` of the desktop head of the reference example.
+[[bin]]
+name = "reactiveui-example"
+path = "program.rs"
+
+[dependencies]
+# The compiled markup of the crate calls the typed functions of the declared members.
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+ferroui-markup = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+ferroui-themes-winui = { workspace = true }
+# `WithInterFont()` of the reference.
+ferroui-fonts-inter = { workspace = true }
+# The entry point.
+ferroui-desktop = { workspace = true }
+# The reactive libraries the example is built on (the reference uses ReactiveUI and its
+# integration; the DynamicData page is an addition of the port).
+ferroui-system = { workspace = true }
+ferroui-reactive = { workspace = true }
+ferroui-splat = { workspace = true }
+ferroui-reactiveui = { workspace = true }
+ferroui-reactiveui-controls = { workspace = true }
+ferroui-dynamic-data = { workspace = true }
+# The saved session (the reference uses System.Text.Json with a generated context).
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+# `Task.Delay` of the asynchronous commands: a delay on a timer of the dispatcher.
+mini-mvvm = { path = "../MiniMvvm" }
+sample-support = { path = "../SampleSupport" }
+
+# The process measurements (the reference uses `System.Diagnostics.Process`): the resource usage of
+# the process on every Unix, its resident memory and threads from `/proc` on Linux and Android and
+# from `proc_pidinfo` on macOS.
+[target.'cfg(any(target_os = "linux", target_os = "android", target_os = "macos"))'.dependencies]
+libc = { workspace = true }
+
+# The process measurements on Windows: the times, the memory counters and the threads of the process.
+[target.'cfg(windows)'.dependencies]
+windows-sys = { workspace = true, features = [
+    "Win32_Foundation",
+    "Win32_System_Threading",
+    "Win32_System_ProcessStatus",
+    "Win32_System_Diagnostics_ToolHelp",
+] }
+
+[build-dependencies]
+sample-build = { path = "../SampleBuild" }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-reactive-testing = { workspace = true }
+sample-testing = { path = "../SampleTesting" }

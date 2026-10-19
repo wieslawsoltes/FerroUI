@@ -1,0 +1,66 @@
+[package]
+name = "reactive-demo"
+description = "The getting-started sample of ReactiveUI on FerroUI: a NuGet package browser with a throttled search, output properties, a command and views located for their view models"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+build = "build.rs"
+
+# Unit tests live next to the code (the `tests/` module of the library), not as integration test
+# targets.
+autotests = false
+autobenches = false
+autoexamples = false
+autobins = false
+
+[lib]
+path = "lib.rs"
+
+# The desktop entry point (`App.xaml` of the reference starts the main window itself).
+[[bin]]
+name = "reactive-demo"
+path = "program.rs"
+
+[features]
+default = ["online"]
+# The search calls the search service of NuGet, and the icons of the packages are downloaded.
+# Without it the search runs over an in-memory catalogue of packages.
+online = ["dep:ureq", "dep:serde", "dep:serde_json"]
+
+[dependencies]
+# The compiled markup of the crate calls the typed functions of the declared members.
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+ferroui-markup = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+ferroui-themes-winui = { workspace = true }
+# The entry point.
+ferroui-desktop = { workspace = true }
+# ReactiveUI and its integration with FerroUI (the reference uses ReactiveUI.WPF).
+ferroui-system = { workspace = true }
+ferroui-reactive = { workspace = true }
+ferroui-splat = { workspace = true }
+ferroui-reactiveui = { workspace = true }
+ferroui-reactiveui-controls = { workspace = true }
+# The response of the search service of NuGet, with the feature `online` (the reference uses
+# NuGet.Protocol).
+serde = { version = "1.0.229", features = ["derive"], optional = true }
+serde_json = { version = "1.0.151", optional = true }
+sample-support = { path = "../SampleSupport" }
+
+# The HTTP client of the search and of the icons, with the feature `online`.
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+ureq = { version = "2.12.1", optional = true }
+
+[build-dependencies]
+sample-build = { path = "../SampleBuild" }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-reactive-testing = { workspace = true }
+ferroui-reactiveui-testing = { workspace = true }
+sample-testing = { path = "../SampleTesting" }

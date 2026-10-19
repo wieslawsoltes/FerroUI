@@ -1,0 +1,15 @@
+<rxui:ReactiveWindowBase xmlns="https://github.com/ferroui"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:rxui="using:ReactiveUI.FerroUI"
+                         xmlns:views="using:ReactiveUIExample.Views"
+                         xmlns:vm="using:ReactiveUIExample.ViewModels"
+                         x:Class="ReactiveUIExample.Views.MainWindow"
+                         x:DataType="vm:MainViewModel"
+                         Width="1180"
+                         Height="760"
+                         MinWidth="940"
+                         MinHeight="620"
+                         Classes="showcase"
+                         Title="ReactiveUI FerroUI Example">
+  <views:MainView x:Name="Main" />
+</rxui:ReactiveWindowBase>

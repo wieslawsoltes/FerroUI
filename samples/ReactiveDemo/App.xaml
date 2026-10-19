@@ -1,0 +1,11 @@
+<Application xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ReactiveDemo.App">
+  <!-- Deviation (DEVIATIONS.md, samples): the reference names its main window with
+       StartupUri="MainWindow.xaml"; the class of this document sets the main window of the
+       desktop lifetime (app.rs). The reference's application has no styles of its own (WPF
+       draws its controls itself); this one takes the WinUI 3 theme. -->
+  <Application.Styles>
+    <WinUITheme/>
+  </Application.Styles>
+</Application>

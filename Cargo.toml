@@ -78,6 +78,8 @@ members = [
     "samples/BindingDemo",
     "samples/VirtualizationDemo",
     "samples/TreeDataGridDemo",
+    "samples/ReactiveDemo",
+    "samples/ReactiveUIExample",
     "samples/TextTestApp",
     "samples/Sandbox",
     "samples/AppWithoutLifetime",

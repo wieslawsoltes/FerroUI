@@ -1,0 +1,38 @@
+<rxui:ReactiveWindowBase xmlns="https://github.com/ferroui"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:rxui="http://reactiveui.net"
+                         x:Class="ReactiveDemo.MainWindow"
+                         Title="NuGet Browser" Height="450" Width="800"
+                         mc:Ignorable="d">
+  <!-- Deviation (DEVIATIONS.md, samples): the reference's root is the generic
+       ReactiveWindow<AppViewModel> (x:TypeArguments="reactivedemo:AppViewModel"). A class of
+       FerroUI is not generic: the root is the class markup creates, ReactiveWindowBase, and the
+       code behind types the window with ReactiveWindow::<AppViewModel>::from_control
+       (main_window.rs). -->
+  <Grid Margin="12">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+    <TextBlock FontSize="16" FontWeight="SemiBold"
+               VerticalAlignment="Center" Text="Search for: "/>
+    <TextBox Grid.Column="1" Margin="6 0 0 0" x:Name="searchTextBox" />
+    <ListBox x:Name="searchResultsListBox" Grid.ColumnSpan="3"
+             Grid.Row="1" Margin="0,6,0,0"
+             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+      <!-- WPF's HorizontalContentAlignment of the list is set on its items here: a list box of
+           FerroUI has no content of its own. -->
+      <ListBox.Styles>
+        <Style Selector="ListBoxItem">
+          <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+      </ListBox.Styles>
+    </ListBox>
+  </Grid>
+</rxui:ReactiveWindowBase>

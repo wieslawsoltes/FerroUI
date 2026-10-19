@@ -1,0 +1,67 @@
+<!-- An addition of the port with no counterpart in the reference: the DynamicData page. -->
+<rxui:ReactiveUserControlBase xmlns="https://github.com/ferroui"
+                              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                              xmlns:rxui="using:ReactiveUI.FerroUI"
+                              xmlns:vm="using:ReactiveUIExample.ViewModels"
+                              x:Class="ReactiveUIExample.Views.DynamicDataView"
+                              x:DataType="vm:DynamicDataViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="40" Spacing="20">
+      <StackPanel Spacing="8">
+        <TextBlock Classes="eyebrow" Text="REACTIVE COLLECTIONS" />
+        <TextBlock Classes="title" Text="{Binding Title}" />
+        <TextBlock Classes="subtitle" Text="{Binding Summary}" />
+      </StackPanel>
+
+      <Border Classes="panel">
+        <StackPanel Spacing="12">
+          <TextBlock FontWeight="SemiBold" Text="Search features" />
+          <TextBox x:Name="SearchTextBox"
+                   PlaceholderText="Filter by name or area" />
+          <TextBlock Classes="subtitle" Text="{Binding Status}" />
+          <ListBox x:Name="FeatureList" MaxHeight="420">
+            <!-- The rows fill the width of the list, so that the toggle and the button of each row
+                 line up at its right edge (the WinUI 3 theme aligns the content of an item left). -->
+            <ListBox.Styles>
+              <Style Selector="ListBoxItem">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+              </Style>
+            </ListBox.Styles>
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:FeatureItemViewModel">
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+                  <StackPanel Spacing="2">
+                    <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
+                    <TextBlock Classes="subtitle" Text="{Binding Area}" />
+                  </StackPanel>
+                  <CheckBox Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Content="Favourite"
+                            IsChecked="{Binding Feature.IsFavourite, Mode=TwoWay}" />
+                  <Button Grid.Column="2"
+                          VerticalAlignment="Center"
+                          Content="Remove"
+                          Command="{Binding Remove}" />
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="panel">
+        <StackPanel Spacing="12">
+          <TextBlock FontWeight="SemiBold" Text="Add a feature" />
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <TextBox x:Name="NewFeatureTextBox"
+                     MinWidth="320"
+                     PlaceholderText="Name of the feature" />
+            <Button x:Name="AddFeatureButton"
+                    Classes="primary"
+                    Content="Add feature" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</rxui:ReactiveUserControlBase>

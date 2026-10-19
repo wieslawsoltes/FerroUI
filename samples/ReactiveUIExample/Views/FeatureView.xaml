@@ -1,0 +1,10 @@
+<rxui:ReactiveUserControlBase xmlns="https://github.com/ferroui"
+                              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                              xmlns:rxui="using:ReactiveUI.FerroUI"
+                              xmlns:vm="using:ReactiveUIExample.ViewModels"
+                              x:Class="ReactiveUIExample.Views.FeatureView"
+                              x:DataType="vm:FeatureViewModel">
+  <Border BorderBrush="#E5E7EB" BorderThickness="0,0,0,1" Padding="0,12">
+    <TextBlock FontSize="15" Foreground="#111827" TextWrapping="Wrap" Text="{Binding Name}" />
+  </Border>
+</rxui:ReactiveUserControlBase>
