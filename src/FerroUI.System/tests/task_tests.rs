@@ -161,7 +161,15 @@ fn a_wake_from_another_thread_goes_through_the_poster() {
     let poster: ThreadPoster = Arc::new(move |work| queue.lock().unwrap().push(work));
     set_thread_poster(Some(poster));
 
-    let task = run(|| Ok("done".to_string()));
+    // The work waits until `run` has polled the task once, so that its end comes as a wake from
+    // the other thread; without the gate, work that ends before that poll completes the task with
+    // no wake at all.
+    let (release, gate) = std::sync::mpsc::channel::<()>();
+    let task = run(move || {
+        let _ = gate.recv();
+        Ok("done".to_string())
+    });
+    release.send(()).unwrap();
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
     loop {
         let work = posted.lock().unwrap().pop();

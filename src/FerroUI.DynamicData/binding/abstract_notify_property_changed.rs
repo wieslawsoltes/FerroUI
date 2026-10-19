@@ -5,38 +5,14 @@ use ferroui_reactive::disposables::Disposable;
 use ferroui_system::component_model::INotifyPropertyChanged;
 use ferroui_system::events::Event;
 use ferroui_system::IDisposable;
-use std::cell::{Cell, RefCell};
+use std::cell::Cell;
 use std::fmt;
 use std::rc::Rc;
 
 /// A backing field that [`AbstractNotifyPropertyChanged::set_and_raise`] reads and assigns: a
-/// `Cell` for a value that is `Copy`, a `RefCell` for the others (`ref T backingField`).
-pub trait BackingField<T> {
-    /// Whether the value of the field equals `value` by `comparer`.
-    fn equals(&self, value: &T, comparer: &dyn Fn(&T, &T) -> bool) -> bool;
-    /// Assigns `value` to the field.
-    fn store(&self, value: T);
-}
-
-impl<T: Copy> BackingField<T> for Cell<T> {
-    fn equals(&self, value: &T, comparer: &dyn Fn(&T, &T) -> bool) -> bool {
-        comparer(&self.get(), value)
-    }
-
-    fn store(&self, value: T) {
-        self.set(value);
-    }
-}
-
-impl<T> BackingField<T> for RefCell<T> {
-    fn equals(&self, value: &T, comparer: &dyn Fn(&T, &T) -> bool) -> bool {
-        comparer(&self.borrow(), value)
-    }
-
-    fn store(&self, value: T) {
-        *self.borrow_mut() = value;
-    }
-}
+/// `Cell` for a value that is `Copy`, a `RefCell` for the others (`ref T backingField`). It is
+/// `ferroui-system`'s, which the reactive objects of `ferroui-reactiveui` share.
+pub use ferroui_system::component_model::BackingField;
 
 struct Inner {
     property_changed: Event<str>,
