@@ -71,6 +71,12 @@ Avalonia itself incorporates code from other projects (for example WPF-derived l
 - License: MIT, Copyright (c) ReactiveUI 2018 - 2025
 - Used for: `src/FerroUI.Splat` (a port of Splat.Core, Splat.Logging, Splat.Builder, and the mode detection and feature usage tracking of Splat) and its unit tests in `tests/FerroUI.Splat.Tests`, ported from Splat.Tests, Splat.Logging.Tests and Splat.Builder.Tests (`docs/porting/reactive.md`).
 
+## DynamicData
+
+- Project: <https://github.com/reactivemarbles/DynamicData> (`src`, commit `65016e5`)
+- License: MIT, Copyright (c) Roland Pheasant 2011-2022
+- Used for: `src/FerroUI.DynamicData` (a port of DynamicData) and its unit tests in `tests/FerroUI.DynamicData.Tests`, ported from `DynamicData.Tests` (`docs/porting/reactive.md`).
+
 ## RemoteViewing
 
 - Project: <https://github.com/quamotion/remoteviewing> (package `Quamotion.RemoteViewing` 1.1.211)
