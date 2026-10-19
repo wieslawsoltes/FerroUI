@@ -77,6 +77,24 @@ Avalonia itself incorporates code from other projects (for example WPF-derived l
 - License: MIT, Copyright (c) Roland Pheasant 2011-2022
 - Used for: `src/FerroUI.DynamicData` (a port of DynamicData) and its unit tests in `tests/FerroUI.DynamicData.Tests`, ported from `DynamicData.Tests` (`docs/porting/reactive.md`).
 
+## ReactiveUI
+
+- Project: <https://github.com/reactiveui/ReactiveUI> (`src/ReactiveUI.Core`, `src/ReactiveUI.Shared`, `src/Shared`, `src/ReactiveUI.Testing`, `src/ReactiveUI.Testing.Reactive`, commit `721f544`)
+- License: MIT, Copyright (c) .NET Foundation and Contributors
+- Used for: `src/FerroUI.ReactiveUI` (a port of ReactiveUI in its System.Reactive flavour), `src/FerroUI.ReactiveUI.Testing` (a port of ReactiveUI.Testing) and their unit tests in `tests/FerroUI.ReactiveUI.Tests` and `tests/FerroUI.ReactiveUI.Testing.Tests`, ported from ReactiveUI.Tests, ReactiveUI.Builder.Tests, ReactiveUI.Splat.Tests and ReactiveUI.Testing.Tests (`docs/porting/reactive.md`).
+
+## ReactiveUI.Binding
+
+- Project: <https://github.com/reactiveui/ReactiveUI.Binding.SourceGenerators> (`src/ReactiveUI.Binding.Shared`, commit `d1e1b65`)
+- License: MIT, Copyright (c) ReactiveUI Association Incorporated 2019 - 2026
+- Used for: the run time of the property observation, output properties, bindings, converters, interactions and view location in `src/FerroUI.ReactiveUI/binding`, and their unit tests in `tests/FerroUI.ReactiveUI.Tests/tests/binding`, ported from ReactiveUI.Binding.Tests and ReactiveUI.Binding.GeneratedCode.Tests (`docs/porting/reactive.md`).
+
+## ReactiveUI.Primitives
+
+- Project: <https://github.com/reactiveui/Primitives> (`src/ReactiveUI.Primitives.Reactive`, `src/Primitives.Platform.Reactive.Shared`, `src/Primitives.Core`, commit `18e8a85`)
+- License: MIT, Copyright (c) 2019-2026 ReactiveUI Association Incorporated
+- Used for: the System.Reactive extras that ReactiveUI calls, in `src/FerroUI.ReactiveUI/primitives` and in the delayed notifications of `src/FerroUI.ReactiveUI/reactive_object`.
+
 ## RemoteViewing
 
 - Project: <https://github.com/quamotion/remoteviewing> (package `Quamotion.RemoteViewing` 1.1.211)

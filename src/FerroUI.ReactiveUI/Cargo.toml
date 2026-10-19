@@ -1,6 +1,6 @@
 [package]
 name = "ferroui-reactiveui"
-description = "A port of ReactiveUI (System.Reactive flavour) and the run time of ReactiveUI.Binding: reactive objects, commands, property observation and bindings for MVVM"
+description = "A port of ReactiveUI for FerroUI, in its System.Reactive flavour with the run time of ReactiveUI.Binding: reactive objects, commands, property observation, bindings, view location, activation and routing for MVVM, independent of the user interface"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
