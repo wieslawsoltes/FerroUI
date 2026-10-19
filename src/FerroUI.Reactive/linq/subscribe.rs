@@ -1,55 +1,9 @@
 //! The subscription overloads of `ObservableExtensions` (`Observable.Extensions.cs`).
 
-use crate::internal::SafeObserver;
-use ferroui_system::threading::{CancellationToken, CancellationTokenRegistration};
-use ferroui_system::{IDisposable, IObservable, IObserver};
-use std::cell::RefCell;
-use std::collections::HashMap;
+use crate::internal::{SafeObserver, TokenRegistration};
+use ferroui_system::threading::CancellationToken;
+use ferroui_system::{IObservable, IObserver};
 use std::rc::Rc;
-use std::sync::atomic::{AtomicU64, Ordering};
-
-ferroui_system::ferro_thread_local! {
-    /// The subscriptions that the registrations of cancellation tokens dispose, by registration:
-    /// the callback a token keeps must be `Send`, the subscriptions are not, so the callback names
-    /// its entry here.
-    static PENDING_SUBSCRIPTIONS: RefCell<HashMap<u64, Rc<dyn IDisposable>>> = RefCell::new(HashMap::new());
-}
-
-/// The numbers of the registrations, unique in the process so that a callback run on another
-/// thread finds no entry of that thread.
-static NEXT_REGISTRATION: AtomicU64 = AtomicU64::new(0);
-
-/// The registration of the disposal of a subscription with a cancellation token
-/// (`CancellationTokenRegistration` as a disposable): disposing it removes the registration.
-struct SubscriptionRegistration {
-    registration: CancellationTokenRegistration,
-    id: u64,
-}
-
-impl SubscriptionRegistration {
-    /// Registers the disposal of `subscription` to run when `token` is canceled on this thread; a
-    /// token canceled already disposes it at once.
-    fn register(token: &CancellationToken, subscription: Rc<dyn IDisposable>) -> Rc<Self> {
-        let id = NEXT_REGISTRATION.fetch_add(1, Ordering::Relaxed);
-        PENDING_SUBSCRIPTIONS.with(|pending| pending.borrow_mut().insert(id, subscription));
-        let registration = token.register(move || {
-            let subscription = PENDING_SUBSCRIPTIONS.try_with(|pending| pending.borrow_mut().remove(&id)).ok().flatten();
-            if let Some(subscription) = subscription {
-                subscription.dispose();
-            }
-        });
-        Rc::new(Self { registration, id })
-    }
-}
-
-impl IDisposable for SubscriptionRegistration {
-    fn dispose(&self) {
-        self.registration.dispose();
-        let id = self.id;
-        let removed = PENDING_SUBSCRIPTIONS.try_with(|pending| pending.borrow_mut().remove(&id)).ok().flatten();
-        drop(removed);
-    }
-}
 
 /// Subscribes `observer` to `source` until `token` is canceled (`Subscribe_` of
 /// `Observable.Extensions.cs`): a token that cannot be canceled subscribes as it is; a token
@@ -61,7 +15,7 @@ pub(crate) fn subscribe_with_token<T: 'static>(source: Rc<dyn IObservable<T>>, o
         if !token.is_cancellation_requested() {
             let consumer = SafeObserver::wrap(observer);
             let subscription = source.subscribe(consumer.clone());
-            consumer.set_resource(SubscriptionRegistration::register(&token, subscription));
+            consumer.set_resource(TokenRegistration::register(&token, move || subscription.dispose()));
         }
     } else {
         source.subscribe(observer);

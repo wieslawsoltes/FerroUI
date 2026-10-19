@@ -3,13 +3,10 @@
 
 use crate::concurrency::{IScheduler, SchedulerExt};
 use crate::disposables::SingleAssignmentDisposableValue;
-use crate::internal::{impl_sink_dispose, subscribe_sink, unary, HalfSerializedSink, HalfSerializer, OperatorSink, Sink};
-use ferroui_system::threading::{CancellationToken, CancellationTokenRegistration};
+use crate::internal::{impl_sink_dispose, subscribe_sink, unary, HalfSerializedSink, HalfSerializer, OperatorSink, Sink, TokenRegistration};
+use ferroui_system::threading::CancellationToken;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
-use std::cell::RefCell;
-use std::collections::HashMap;
 use std::rc::Rc;
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::SystemTime;
 
 // ---------------------------------------------------------------------------------------------
@@ -254,48 +251,6 @@ pub(crate) fn take_until_predicate<T: 'static>(source: Rc<dyn IObservable<T>>, s
 // TakeUntil(CancellationToken)
 // ---------------------------------------------------------------------------------------------
 
-ferroui_system::ferro_thread_local! {
-    /// The completions that the registrations of cancellation tokens run, by registration: the
-    /// callback a token keeps must be `Send`, the sinks are not, so the callback names its entry
-    /// here.
-    static PENDING_CANCELLATIONS: RefCell<HashMap<u64, Rc<dyn Fn()>>> = RefCell::new(HashMap::new());
-}
-
-/// The numbers of the registrations, unique in the process so that a callback run on another
-/// thread finds no entry of that thread.
-static NEXT_REGISTRATION: AtomicU64 = AtomicU64::new(0);
-
-/// The registration of a completion with a cancellation token (`CancellationTokenRegistration` as
-/// a disposable).
-struct TokenRegistration {
-    registration: CancellationTokenRegistration,
-    id: u64,
-}
-
-impl TokenRegistration {
-    /// Registers `callback` to run when `token` is canceled on this thread.
-    fn register(token: &CancellationToken, callback: Rc<dyn Fn()>) -> Rc<Self> {
-        let id = NEXT_REGISTRATION.fetch_add(1, Ordering::Relaxed);
-        PENDING_CANCELLATIONS.with(|pending| pending.borrow_mut().insert(id, callback));
-        let registration = token.register(move || {
-            let callback = PENDING_CANCELLATIONS.try_with(|pending| pending.borrow_mut().remove(&id)).ok().flatten();
-            if let Some(callback) = callback {
-                callback();
-            }
-        });
-        Rc::new(Self { registration, id })
-    }
-}
-
-impl IDisposable for TokenRegistration {
-    fn dispose(&self) {
-        self.registration.dispose();
-        let id = self.id;
-        let removed = PENDING_CANCELLATIONS.try_with(|pending| pending.borrow_mut().remove(&id)).ok().flatten();
-        drop(removed);
-    }
-}
-
 /// The sink of `TakeUntil` with a cancellation token (`TakeUntilCancellationToken<TSource>._`).
 struct TakeUntilTokenSink<T> {
     sink: Sink<T>,
@@ -363,7 +318,7 @@ impl<T: 'static> IObservable<T> for TakeUntilToken<T> {
                     return;
                 }
                 let target = sink.clone();
-                let registration = TokenRegistration::register(&token, Rc::new(move || target.on_completed()));
+                let registration = TokenRegistration::register(&token, move || target.on_completed());
                 sink.registration.set_disposable(Some(registration));
                 sink.sink.set_upstream(source.subscribe(sink.clone()));
             },

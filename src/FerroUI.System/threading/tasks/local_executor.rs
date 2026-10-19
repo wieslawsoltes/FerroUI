@@ -22,16 +22,24 @@ use std::thread::ThreadId;
 /// Runs work on the thread it belongs to, from any thread (`SynchronizationContext.Post`).
 pub type ThreadPoster = Arc<dyn Fn(Box<dyn FnOnce() + Send>) + Send + Sync>;
 
+/// What another thread asks of a thread: to poll a future, or to run a callback that was
+/// registered there.
+#[derive(Clone, Copy)]
+enum Pending {
+    Task(u64),
+    Callback(u64),
+}
+
 /// The wakes that came to a thread from other threads.
-struct Inbox {
-    queue: Mutex<Vec<u64>>,
+pub(crate) struct Inbox {
+    queue: Mutex<Vec<Pending>>,
     arrived: Condvar,
     poster: Mutex<Option<ThreadPoster>>,
 }
 
 impl Inbox {
-    fn push(&self, task_id: u64) {
-        self.queue.lock().unwrap_or_else(PoisonError::into_inner).push(task_id);
+    fn push(&self, pending: Pending) {
+        self.queue.lock().unwrap_or_else(PoisonError::into_inner).push(pending);
         self.arrived.notify_all();
         let poster = self.poster.lock().unwrap_or_else(PoisonError::into_inner).clone();
         if let Some(poster) = poster {
@@ -41,7 +49,7 @@ impl Inbox {
         }
     }
 
-    fn take(&self) -> Vec<u64> {
+    fn take(&self) -> Vec<Pending> {
         std::mem::take(&mut *self.queue.lock().unwrap_or_else(PoisonError::into_inner))
     }
 }
@@ -59,6 +67,65 @@ crate::ferro_thread_local! {
     static TASKS: RefCell<HashMap<u64, Rc<LocalTask>>> = RefCell::new(HashMap::new());
     /// The wakes from other threads.
     static INBOX: Arc<Inbox> = Arc::new(Inbox { queue: Mutex::new(Vec::new()), arrived: Condvar::new(), poster: Mutex::new(None) });
+    /// The callbacks of the thread that another thread may ask to run, by id.
+    static CALLBACKS: RefCell<HashMap<u64, Box<dyn FnOnce()>>> = RefCell::new(HashMap::new());
+}
+
+/// The ids of the callbacks, unique in the process so that a request that reaches the wrong
+/// thread finds nothing.
+static NEXT_CALLBACK: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+
+/// A callback of the current thread that any thread can ask to run ([`LocalCallback::run`]): on
+/// this thread it runs at once, from another it is posted here.
+pub(crate) struct LocalCallback {
+    id: u64,
+    thread: ThreadId,
+    inbox: Arc<Inbox>,
+    /// The callback belongs to its thread.
+    _thread_bound: std::marker::PhantomData<Rc<()>>,
+}
+
+impl LocalCallback {
+    pub(crate) fn register(callback: Box<dyn FnOnce()>) -> Self {
+        let id = NEXT_CALLBACK.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        CALLBACKS.with_borrow_mut(|callbacks| callbacks.insert(id, callback));
+        Self { id, thread: std::thread::current().id(), inbox: INBOX.with(Arc::clone), _thread_bound: std::marker::PhantomData }
+    }
+
+    /// The part that crosses threads.
+    pub(crate) fn handle(&self) -> LocalCallbackHandle {
+        LocalCallbackHandle { id: self.id, thread: self.thread, inbox: self.inbox.clone() }
+    }
+
+    /// Forgets the callback unless it ran; on the thread of the callback only.
+    pub(crate) fn remove(&self) {
+        let removed = CALLBACKS.try_with(|callbacks| callbacks.borrow_mut().remove(&self.id)).ok().flatten();
+        drop(removed);
+    }
+}
+
+/// Asks for a [`LocalCallback`] to run, from any thread.
+pub(crate) struct LocalCallbackHandle {
+    id: u64,
+    thread: ThreadId,
+    inbox: Arc<Inbox>,
+}
+
+impl LocalCallbackHandle {
+    pub(crate) fn run(&self) {
+        if std::thread::current().id() == self.thread {
+            run_callback(self.id);
+        } else {
+            self.inbox.push(Pending::Callback(self.id));
+        }
+    }
+}
+
+fn run_callback(id: u64) {
+    let callback = CALLBACKS.try_with(|callbacks| callbacks.borrow_mut().remove(&id)).ok().flatten();
+    if let Some(callback) = callback {
+        callback();
+    }
 }
 
 /// Wakes a future of a thread.
@@ -77,7 +144,7 @@ impl Wake for TaskWaker {
         if std::thread::current().id() == self.thread {
             poll_task(self.task_id);
         } else {
-            self.inbox.push(self.task_id);
+            self.inbox.push(Pending::Task(self.task_id));
         }
     }
 }
@@ -149,8 +216,9 @@ pub fn set_thread_poster(poster: Option<ThreadPoster>) {
     }
 }
 
-/// Polls the futures of the current thread that other threads woke, until none is left; true
-/// when there was any.
+/// Polls the futures of the current thread that other threads woke, and runs the callbacks they
+/// asked for (a cancellation, [`CancellationToken::register_local`](crate::threading::CancellationToken::register_local)),
+/// until none is left; true when there was any.
 pub fn run_pending_wakes() -> bool {
     let inbox = INBOX.with(Arc::clone);
     let mut ran = false;
@@ -160,8 +228,11 @@ pub fn run_pending_wakes() -> bool {
             return ran;
         }
         ran = true;
-        for id in ids {
-            poll_task(id);
+        for pending in ids {
+            match pending {
+                Pending::Task(id) => poll_task(id),
+                Pending::Callback(id) => run_callback(id),
+            }
         }
     }
 }

@@ -3,4 +3,4 @@
 mod cancellation_token;
 pub mod tasks;
 
-pub use cancellation_token::{CancellationToken, CancellationTokenRegistration, CancellationTokenSource};
+pub use cancellation_token::{CancellationToken, CancellationTokenRegistration, CancellationTokenSource, LocalCancellationTokenRegistration};

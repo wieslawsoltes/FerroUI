@@ -108,6 +108,34 @@ impl CancellationToken {
     }
 }
 
+impl CancellationToken {
+    /// Registers a callback that runs on the current thread when the token is canceled: at once
+    /// when it is canceled on this thread, or already canceled; through the poster of this thread,
+    /// or its queue of [`run_pending_wakes`](crate::threading::tasks::run_pending_wakes), when it is
+    /// canceled on another thread. The callback need not be `Send`.
+    pub fn register_local(&self, callback: impl FnOnce() + 'static) -> LocalCancellationTokenRegistration {
+        let local = super::tasks::local_executor::LocalCallback::register(Box::new(callback));
+        let handle = local.handle();
+        let registration = self.register(move || handle.run());
+        LocalCancellationTokenRegistration { registration, local }
+    }
+}
+
+/// A callback registered with [`CancellationToken::register_local`]; it belongs to the thread
+/// that registered it.
+pub struct LocalCancellationTokenRegistration {
+    registration: CancellationTokenRegistration,
+    local: super::tasks::local_executor::LocalCallback,
+}
+
+impl LocalCancellationTokenRegistration {
+    /// Removes the callback so that it no longer runs on cancellation.
+    pub fn dispose(&self) {
+        self.registration.dispose();
+        self.local.remove();
+    }
+}
+
 /// A callback registered with a [`CancellationToken`].
 pub struct CancellationTokenRegistration {
     inner: Option<Arc<Inner>>,

@@ -194,3 +194,54 @@ fn block_on_waits_for_work_of_other_threads() {
     });
     assert_eq!(value.unwrap(), 42);
 }
+
+#[test]
+fn a_removed_continuation_does_not_run() {
+    let source = TaskCompletionSource::new();
+    let task = source.task();
+    let ran = Rc::new(Cell::new(0));
+    let (a, b) = (ran.clone(), ran.clone());
+    let first = task.continue_with(move |_| a.set(a.get() + 1)).unwrap();
+    task.continue_with(move |_| b.set(b.get() + 10));
+    assert!(task.remove_continuation(first));
+    assert!(!task.remove_continuation(first));
+    source.set_result(());
+    assert_eq!(ran.get(), 10);
+    assert!(Task::from_result(()).continue_with(|_| {}).is_none());
+}
+
+#[test]
+fn register_local_runs_on_the_thread_that_registered() {
+    use crate::threading::CancellationTokenSource;
+
+    // Canceled on this thread: at once.
+    let source = CancellationTokenSource::new();
+    let ran = Rc::new(Cell::new(0));
+    let r = ran.clone();
+    let _registration = source.token().register_local(move || r.set(r.get() + 1));
+    source.cancel();
+    assert_eq!(ran.get(), 1);
+
+    // Canceled already: at once.
+    let r = ran.clone();
+    let _registration = source.token().register_local(move || r.set(r.get() + 1));
+    assert_eq!(ran.get(), 2);
+
+    // Disposed: never.
+    let source = CancellationTokenSource::new();
+    let r = ran.clone();
+    let registration = source.token().register_local(move || r.set(r.get() + 100));
+    registration.dispose();
+    source.cancel();
+    assert_eq!(ran.get(), 2);
+
+    // Canceled on another thread: when this thread runs its pending wakes.
+    let source = CancellationTokenSource::new();
+    let r = ran.clone();
+    let _registration = source.token().register_local(move || r.set(r.get() + 10));
+    let remote = source.clone();
+    std::thread::spawn(move || remote.cancel()).join().unwrap();
+    assert_eq!(ran.get(), 2);
+    assert!(run_pending_wakes());
+    assert_eq!(ran.get(), 12);
+}

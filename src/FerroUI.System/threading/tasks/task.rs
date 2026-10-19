@@ -57,12 +57,18 @@ fn next_task_id() -> u64 {
 
 type Continuation = Box<dyn FnOnce()>;
 
+/// A continuation registered on a task that has not ended ([`Task::continue_with`]), for
+/// [`Task::remove_continuation`].
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct ContinuationId(u64);
+
 struct TaskInner<T> {
     id: u64,
     status: Cell<TaskStatus>,
     result: RefCell<Option<T>>,
     error: RefCell<Option<ObservableError>>,
-    continuations: RefCell<Vec<Continuation>>,
+    continuations: RefCell<Vec<(u64, Continuation)>>,
+    next_continuation: Cell<u64>,
     wakers: RefCell<Vec<Waker>>,
 }
 
@@ -98,6 +104,7 @@ impl<T: 'static> Task<T> {
                 result: RefCell::new(None),
                 error: RefCell::new(None),
                 continuations: RefCell::new(Vec::new()),
+                next_continuation: Cell::new(0),
                 wakers: RefCell::new(Vec::new()),
             }),
         }
@@ -184,14 +191,30 @@ impl<T: 'static> Task<T> {
     }
 
     /// Runs `continuation` when the task ends, synchronously on the thread that ends it, or at once
-    /// when it has ended (`ContinueWith` with `TaskContinuationOptions.ExecuteSynchronously`).
-    pub fn continue_with(&self, continuation: impl FnOnce(&Task<T>) + 'static) {
+    /// when it has ended (`ContinueWith` with `TaskContinuationOptions.ExecuteSynchronously`). The
+    /// id removes a continuation that has not run ([`remove_continuation`](Self::remove_continuation),
+    /// the cancellation token of `ContinueWith`); `None` when it ran at once.
+    pub fn continue_with(&self, continuation: impl FnOnce(&Task<T>) + 'static) -> Option<ContinuationId> {
         let task = self.clone();
         if self.is_completed() {
             continuation(&task);
-            return;
+            return None;
         }
-        self.inner.continuations.borrow_mut().push(Box::new(move || continuation(&task)));
+        let id = self.inner.next_continuation.get();
+        self.inner.next_continuation.set(id + 1);
+        self.inner.continuations.borrow_mut().push((id, Box::new(move || continuation(&task))));
+        Some(ContinuationId(id))
+    }
+
+    /// Removes a continuation that has not run; false when it has run or was removed.
+    pub fn remove_continuation(&self, id: ContinuationId) -> bool {
+        let removed = {
+            let mut continuations = self.inner.continuations.borrow_mut();
+            let position = continuations.iter().position(|(entry, _)| *entry == id.0);
+            position.map(|position| continuations.remove(position))
+        };
+        // Dropped outside of the borrow: what the continuation holds may reach the task.
+        removed.is_some()
     }
 
     /// Ends the task with `outcome` unless it has ended; an error that is a [`TaskCanceledError`]
@@ -228,7 +251,7 @@ impl<T: 'static> Task<T> {
 
     fn finish(&self) {
         let continuations = std::mem::take(&mut *self.inner.continuations.borrow_mut());
-        for continuation in continuations {
+        for (_, continuation) in continuations {
             continuation();
         }
         let wakers = std::mem::take(&mut *self.inner.wakers.borrow_mut());
