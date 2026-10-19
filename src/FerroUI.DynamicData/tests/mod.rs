@@ -3,3 +3,4 @@
 
 mod change_aware_cache_tests;
 mod source_cache_tests;
+mod source_list_tests;

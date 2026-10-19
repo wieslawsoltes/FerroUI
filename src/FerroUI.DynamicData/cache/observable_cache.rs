@@ -227,10 +227,6 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> ObservableCache<T, K> {
 }
 
 impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> Inner<T, K> {
-    fn this(&self) -> Rc<Self> {
-        self.this.upgrade().expect("the cache is alive while it is used")
-    }
-
     fn preview_handler(&self) -> Option<impl Fn(&ChangeSet<T, K>)> {
         if !self.changes_preview.has_observers() {
             return None;

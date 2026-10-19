@@ -6,10 +6,12 @@
 //! single-threaded like the observables it is built on (docs/porting/reactive.md, sections 5.1 and
 //! 5.4).
 //!
-//! - [`cache`]: the keyed side (`Change<T, K>`, `ChangeSet<T, K>`, `ChangeAwareCache`, ...).
+//! - [`cache`]: the keyed side (`Change<T, K>`, `ChangeSet<T, K>`, `ChangeAwareCache`, `SourceCache`, ...).
+//! - [`list`]: the side of positions (`list::Change<T>`, `list::ChangeSet<T>`, `ChangeAwareList`, ...).
 
 pub mod cache;
 pub(crate) mod internal;
+pub mod list;
 
 pub use cache::{
     Change, ChangeAwareCache, ChangeReason, ChangeSet, ICache, ICacheUpdater, IChangeSet, IConnectableCache, IObservableCache, IQuery, ISourceCache, ISourceUpdater,
