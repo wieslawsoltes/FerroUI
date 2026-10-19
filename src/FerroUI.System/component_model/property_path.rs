@@ -255,7 +255,52 @@ impl<M: INotifyPropertyChanged + 'static, V: 'static> PropertyPath<Option<Rc<M>>
     }
 }
 
+impl<M: 'static, V: 'static> PropertyPath<Rc<M>, V> {
+    /// A path of one property of an object that does not raise `PropertyChanged` itself, but whose
+    /// changes an observer chosen at run time may see (an object of a user-interface framework,
+    /// through its own property system).
+    ///
+    /// Its step gives the object (the `Rc` of the source) as its owner, without a change
+    /// notification, so that the observer with the highest affinity for that object observes the
+    /// property. The path itself observes nothing, as [`value`](PropertyPath::value) does.
+    pub fn object_property(name: impl Into<String>, get: impl Fn(&Rc<M>) -> V + 'static) -> Self {
+        Self::owned_property(
+            name,
+            get,
+            |source: &Rc<M>| PropertyOwner { object: Some(source.clone() as Rc<dyn Any>), notify: None },
+            |_: &Rc<M>, _: Rc<dyn Fn()>| on_dispose(|| {}),
+        )
+    }
+}
+
 impl<S: 'static, V: 'static> PropertyPath<S, V> {
+    /// A path of one property whose owner and observation the caller gives: `owner` gives the
+    /// object that owns the property from the source of the step (what an observer chosen at run
+    /// time sees), and `observe` runs its callback when the value may have changed, until the
+    /// result is disposed.
+    ///
+    /// It is how a framework whose objects are not `Rc`s of a type that raises `PropertyChanged`
+    /// (handles of the objects of a user interface) writes the steps of its properties.
+    pub fn owned_property(
+        name: impl Into<String>,
+        get: impl Fn(&S) -> V + 'static,
+        owner: impl Fn(&S) -> PropertyOwner + 'static,
+        observe: impl Fn(&S, Rc<dyn Fn()>) -> Rc<dyn IDisposable> + 'static,
+    ) -> Self {
+        let name: String = name.into();
+        let get: Rc<dyn Fn(&S) -> V> = Rc::new(get);
+        let owner: Rc<dyn Fn(&S) -> PropertyOwner> = Rc::new(owner);
+        let step_get = get.clone();
+        let step_name = name.clone();
+        let owner_name = name.clone();
+        let step = PathStep {
+            name: name.clone(),
+            get: Rc::new(move |source: &dyn Any| Box::new(step_get(step_input::<S>(source, &step_name))) as Box<dyn Any>),
+            owner: Rc::new(move |source: &dyn Any| owner(step_input::<S>(source, &owner_name))),
+        };
+        Self { names: Rc::from(vec![name]), get, observe: Rc::new(observe), steps: Rc::from(vec![step]) }
+    }
+
     /// A path of one value that does not notify its changes (a plain field, or an object that is
     /// not `INotifyPropertyChanged`): it is read again only when an earlier step changes.
     ///
@@ -401,8 +446,18 @@ impl<S: Clone + 'static, M: INotifyPropertyChanged + 'static> PropertyPath<S, Op
 /// Each step is a getter method of an object that raises `PropertyChanged`; its property name is
 /// the getter's in PascalCase (`favorite_color` is `FavoriteColor`), or the one given with
 /// `as "Name"`. The steps after the first are objects held in `Rc`.
+///
+/// `prop!(object Type => getter)` is the path of one property of an object that does not raise
+/// `PropertyChanged` itself ([`PropertyPath::object_property`]): its step gives the object as its
+/// owner, for an observer chosen at run time.
 #[macro_export]
 macro_rules! prop {
+    (object $type_:ty => $first:ident $(as $name:literal)?) => {
+        $crate::component_model::PropertyPath::<::std::rc::Rc<$type_>, _>::object_property(
+            $crate::prop!(@name $first $($name)?),
+            |source: &::std::rc::Rc<$type_>| source.$first(),
+        )
+    };
     ($type_:ty => $first:ident $(as $name:literal)? $(. $rest:ident $(as $rest_name:literal)?)*) => {
         $crate::component_model::PropertyPath::<::std::rc::Rc<$type_>, _>::property(
             $crate::prop!(@name $first $($name)?),

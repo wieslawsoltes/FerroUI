@@ -356,3 +356,11 @@ impl IObserver<NavigationStackSnapshot> for CanNavigateBackSink {
         self.downstream.on_completed();
     }
 }
+
+/// Two routers are equal when they are the same object, as references compare in .NET; a
+/// property of a control can hold a router.
+impl PartialEq for RoutingState {
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::eq(self, other)
+    }
+}

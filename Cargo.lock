@@ -1258,6 +1258,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-reactiveui-controls"
+version = "0.3.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-splat",
+ "ferroui-system",
+]
+
+[[package]]
 name = "ferroui-reactiveui-testing"
 version = "0.3.0-preview.1"
 dependencies = [

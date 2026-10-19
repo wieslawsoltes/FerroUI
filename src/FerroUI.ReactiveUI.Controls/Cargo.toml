@@ -1,0 +1,37 @@
+[package]
+name = "ferroui-reactiveui-controls"
+description = "The integration of ReactiveUI with FerroUI: the scheduler of the dispatcher, property observation and command binding for FerroUI objects, activation, the reactive views and view hosts, the data-template hook, suspension and use_reactive_ui on the application builder"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+# Unit tests live next to the code (the `tests/` module of the library), not as integration test
+# targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-system = { workspace = true }
+ferroui-reactive = { workspace = true }
+ferroui-splat = { workspace = true }
+ferroui-reactiveui = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"
