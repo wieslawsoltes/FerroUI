@@ -5,6 +5,8 @@
 // builds in one browser launch. Labels are recorded from FERRODESIGN_BENCHMARK_LABEL and
 // FERRODESIGN_BASELINE_LABEL. No renderer, document, or camera test command is
 // invoked: JSON imports are validated normally; real middle-button input pans.
+// FERRODESIGN_TRACE_TEXT_PAN=1 adds a separate six-motion Chromium diagnostic
+// after ordinary measurements. Its trace-enabled timings never enter the 36-sample statistics.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
@@ -14,6 +16,7 @@ import { dirname, extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 import { startInputObservation, stopInputObservation } from "./input-observations.mjs";
+import { boundedTextPanOperation, createTextPanBrowserOwner, runTextPanTraceDiagnostic, TEXT_PAN_TRACE_LIMITS } from "./text-pan-trace.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const output = resolve(process.env.FERRODESIGN_REPORT || resolve(root, "text-benchmark-report"));
@@ -25,6 +28,8 @@ const builds = [
 ];
 const viewport = { width: 1600, height: 1100 };
 const warmupCount = 12, measuredCount = 36, seed = 0x4f726269;
+const traceRequested = process.env.FERRODESIGN_TRACE_TEXT_PAN === "1";
+const browserTransport = traceRequested ? "owned-playwright-server-websocket" : "playwright-in-process";
 const motions = [[4, 0], [4, 4], [0, 4], [-4, 4], [-4, 0], [-4, -4], [0, -4], [4, -4], [0, 0]];
 const totalCounters = ["totalFullPrepares", "totalIncrementalPrepares", "totalPreparedNodes", "totalRebuiltVisuals",
     "layerProjectionBuilds", "layerProjectionReuses"];
@@ -105,7 +110,8 @@ async function identifyBuild(build) {
 
 const report = {
     schemaVersion: 2, created: new Date().toISOString(), benchmark: "native-text-pan-v2", viewport, seed,
-    warmupCount, measuredCount, motions, builds: [], results: [],
+    warmupCount, measuredCount, motions, builds: [], results: [], traceDiagnosticRequested: traceRequested,
+    browserTransport,
     method: "Host input dispatch to observed native renderedFrames advance at the expected camera. Record dispatch, frame observation, native presentation and two subsequent animation callbacks separately. Timed polls use the constant-size frame bridge; trusted browser input and long tasks are bounded read-only observations.",
     limitations: [
         "Primary timings still include Playwright dispatch, compact bridge serialization and browser scheduling; they are not isolated renderer timings. Native presentation is the public FerroUI surface counter, not a GPU completion timestamp. Settling includes two subsequent animation callbacks.",
@@ -114,6 +120,8 @@ const report = {
         "Native label visibility/preparation counters are observed. The bridge does not expose actual shaped/drawn glyph totals; exact input character counts describe the workload instead.",
         "The WebGL2 launch requests SwiftShader; the actual renderer string is recorded when available. This is not a hardware-GPU throughput measurement. No speed threshold or FPS assertion is made.",
         "Baseline/current order is sequential and not randomized; machine load and thermal/order effects can affect a paired comparison.",
+        "If enabled, a separately labelled trace cohort follows each mode's ordinary measurements and adds between-run work; compare runs with matching diagnostic configuration.",
+        "Trace-enabled runs use an owned Playwright BrowserServer and WebSocket connection for bounded process termination. Trace-off runs retain chromium.launch(); dispatch observations from different transport/trace configurations are not a transport-identical comparison.",
     ],
 };
 const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".wasm": "application/wasm", ".json": "application/json", ".png": "image/png", ".svg": "image/svg+xml" };
@@ -129,22 +137,30 @@ const server = createServer(async (request, response) => {
         createReadStream(file).on("error", () => response.destroy()).pipe(response);
     } catch { response.writeHead(404).end(); }
 });
-let browser, fixtureDocument, fixtureJson;
+let browser, browserOwner, fixtureDocument, fixtureJson;
 await mkdir(output, { recursive: true });
 try {
     for (const build of builds) report.builds.push(await identifyBuild(build));
     await new Promise((done, reject) => { server.once("error", reject); server.listen(0, "127.0.0.1", done); });
     const base = "http://127.0.0.1:" + server.address().port;
-    browser = await chromium.launch({ headless: true, executablePath: process.env.FERRODESIGN_CHROMIUM || undefined,
-        args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
+    const launchOptions = { headless: true, executablePath: process.env.FERRODESIGN_CHROMIUM || undefined,
+        args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] };
+    if (traceRequested) {
+        const ownedServer = await chromium.launchServer({ ...launchOptions, host: "127.0.0.1" });
+        browserOwner = createTextPanBrowserOwner(ownedServer);
+        browser = await chromium.connect(ownedServer.wsEndpoint(), { timeout: 30000 });
+    } else browser = await chromium.launch(launchOptions);
     report.browser = browser.version();
-    for (const build of builds) for (const mode of ["Software2D", "WebGL2"]) {
-        const result = { build: build.id, label: build.label, requestedMode: mode, status: "running", pageErrors: [], consoleErrors: [], samples: [] };
+    benchmarkRuns: for (const build of builds) for (const mode of ["Software2D", "WebGL2"]) {
+        const result = { build: build.id, label: build.label, requestedMode: mode, status: "running", pageErrors: [], consoleErrors: [], samples: [],
+            browserTransport, traceDiagnosticRequested: traceRequested };
         report.results.push(result);
         const context = await browser.newContext({ viewport, deviceScaleFactor: 1 });
         const page = await context.newPage();
-        page.on("pageerror", error => result.pageErrors.push(error.stack || String(error)));
-        page.on("console", message => { if (message.type() === "error") result.consoleErrors.push(message.text()); });
+        const normalPageError = error => result.pageErrors.push(error.stack || String(error));
+        const normalConsoleError = message => { if (message.type() === "error") result.consoleErrors.push(message.text()); };
+        page.on("pageerror", normalPageError);
+        page.on("console", normalConsoleError);
         try {
             await page.goto(base + "/" + build.id + "/?RenderingMode=" + mode, { waitUntil: "domcontentloaded", timeout: 120000 });
             await page.waitForFunction(() => globalThis.ferroDesignReady || globalThis.ferroDesignErrors?.length,
@@ -313,6 +329,7 @@ try {
             // Keep decisive timing evidence in decoded CI logs as well as the
             // full artifact; downloading an artifact is not always available.
             console.log(JSON.stringify({ benchmark: report.benchmark, label: build.label, mode,
+                browserTransport, traceDiagnosticRequested: traceRequested,
                 metricBridge: result.metricBridge, dispatch: result.dispatchTiming,
                 frameObservation: result.frameObservationTiming, nativePresentation: result.presentationTiming,
                 longTaskSupported: result.inputObservation.longTaskSupported,
@@ -326,13 +343,47 @@ try {
                         task.startTimeMs + task.durationMs >= sample.browserObservation.startedAtMs),
                 })),
             }));
+            if (traceRequested) {
+                // Normal statistics/assertions above are complete before tracing
+                // starts. Keep optional diagnostic failures separately labelled.
+                page.off("pageerror", normalPageError);
+                page.off("console", normalConsoleError);
+                try {
+                    result.traceDiagnostic = await runTextPanTraceDiagnostic({ browser, browserOwner, page, output,
+                        build: build.id, mode, pointer, documentSha256: result.documentSha256,
+                        compactBridge: result.metricBridge.kind === "compact-v1" });
+                } catch (error) {
+                    result.traceDiagnostic = { status: "failed", normalSamplesIncluded: false, error: error.stack || String(error) };
+                    console.error(`${build.label} ${mode}: optional trace diagnostic failed: ${result.traceDiagnostic.error}`);
+                }
+                if (result.traceDiagnostic.status === "failed") process.exitCode = 1;
+                if (result.traceDiagnostic.fatalBrowserClosure || browserOwner.shutdownStarted || !browser.isConnected()) {
+                    report.traceDiagnosticStoppedBrowser = true;
+                    process.exitCode = 1;
+                    break benchmarkRuns;
+                }
+            }
         } catch (error) {
             result.status = "failed"; result.error = error.stack || String(error); process.exitCode = 1;
             console.error(`${build.label} ${mode}: ${result.error}`);
         } finally {
-            await context.close();
-            await writeFile(resolve(output, "report.json"), JSON.stringify(report, null, 2));
+            try {
+                // A fatal trace shutdown has already taken ownership of all
+                // contexts; never await a second close on its stalled transport.
+                if (!browserOwner) await context.close();
+                else if (!browserOwner.shutdownStarted) {
+                    try {
+                        await boundedTextPanOperation(() => context.close(), performance.now() + TEXT_PAN_TRACE_LIMITS.teardownCommandMs, "close trace-enabled benchmark context");
+                    } catch (error) {
+                        result.contextCleanupError = error.stack || String(error);
+                        report.traceDiagnosticStoppedBrowser = true;
+                        process.exitCode = 1;
+                        report.browserShutdown = await browserOwner.close("Trace-enabled context cleanup did not complete");
+                    }
+                }
+            } finally { await writeFile(resolve(output, "report.json"), JSON.stringify(report, null, 2)); }
         }
+        if (report.traceDiagnosticStoppedBrowser) break benchmarkRuns;
     }
     report.comparisons = ["Software2D", "WebGL2"].flatMap(mode => {
         const baseline = report.results.find(result => result.build === "baseline" && result.requestedMode === mode && result.status === "passed");
@@ -347,24 +398,55 @@ try {
             surface: current.environment.surface === baseline.environment.surface
                 && current.environment.device === baseline.environment.device,
             metricBridge: current.metricBridge.kind === baseline.metricBridge.kind,
+            browserTransport: current.browserTransport === baseline.browserTransport,
+            traceConfiguration: current.traceDiagnosticRequested === baseline.traceDiagnosticRequested,
         };
         const mismatches = Object.keys(consistency).filter(key => !consistency[key]);
         return [{ mode, baseline: baseline.timing, current: current.timing, consistency,
             comparable: mismatches.length === 0, mismatches,
-            comparisonNote: mismatches.length ? "Different document/view/surface: raw observations retained, comparative deltas suppressed." : "Same canonical document, camera, canvas bounds and observed surface; sequential-order caveats still apply.",
+            comparisonNote: mismatches.length ? "Different document/view/surface/bridge/transport/trace configuration: raw observations retained, comparative deltas suppressed." : "Same canonical document, camera, canvas bounds, observed surface, metric bridge and transport/trace configuration; sequential-order caveats still apply.",
             medianDeltaMs: mismatches.length ? null : current.timing.medianMs - baseline.timing.medianMs,
             p95DeltaMs: mismatches.length ? null : current.timing.p95Ms - baseline.timing.p95Ms,
             fixtureSha256: report.workload.inputSha256 }];
     });
 } catch (error) { report.error = error.stack || String(error); process.exitCode = 1; console.error(report.error); }
 finally {
-    try { await browser?.close(); }
+    try {
+        if (browserOwner) {
+            report.browserShutdown = await browserOwner.close("Text benchmark finished");
+            if (report.browserShutdown.status !== "closed") process.exitCode = 1;
+            console.log(JSON.stringify({ diagnostic: "native-text-pan-browser-shutdown-v1", browserTransport,
+                ...report.browserShutdown, errors: report.browserShutdown.errors.map(error => error.slice(0, 500)) }));
+        } else await browser?.close();
+    }
     finally {
         if (server.listening) {
             server.closeIdleConnections?.();
-            await new Promise(done => server.close(done));
+            if (browserOwner) {
+                // These are only this benchmark's HTTP connections. Owned
+                // Chromium has stopped (or failed its kill/exit checks), and no
+                // later mode may run; open sockets must not hide the outcome.
+                server.closeAllConnections?.();
+                try {
+                    await boundedTextPanOperation(() => new Promise(done => server.close(done)),
+                        performance.now() + TEXT_PAN_TRACE_LIMITS.teardownCommandMs, "close trace-enabled benchmark HTTP server");
+                } catch (error) { report.serverCleanupError = error.stack || String(error); process.exitCode = 1; }
+            } else await new Promise(done => server.close(done));
         }
         report.finished = new Date().toISOString();
-        await writeFile(resolve(output, "report.json"), JSON.stringify(report, null, 2));
+        try { await writeFile(resolve(output, "report.json"), JSON.stringify(report, null, 2)); }
+        catch (error) {
+            // A storage failure must be explicit, and must not strand the
+            // process after a fatal browser teardown merely to retry a write.
+            report.reportPersistenceError = error.stack || String(error);
+            process.exitCode = 1;
+            console.error(`Final benchmark report could not be persisted: ${report.reportPersistenceError}`);
+        }
+        // No asynchronous work follows this persisted fatal record. Public
+        // BrowserServer.kill()/ChildProcess.kill() have already been attempted;
+        // an unconfirmed exit is reported as failure, never as a stopped trace.
+        // Exit also prevents lingering transport handles from hanging this job.
+        if (browserOwner && (report.traceDiagnosticStoppedBrowser || report.browserShutdown?.status !== "closed" || report.serverCleanupError || report.reportPersistenceError))
+            process.exit(1);
     }
 }

@@ -46,6 +46,49 @@ legacy measurement method, and comparisons across those methods are suppressed.
 The previous 1,366.94 ms WebGL2 p95 remains in the historical evidence; a cache
 change alone does not establish its cause or demonstrate an improvement.
 
+### Optional Chromium trace cohort
+
+`FERRODESIGN_TRACE_TEXT_PAN=1` enables six additional real middle-button motions
+after the ordinary measurements for each surface. The full browser workflow
+enables this diagnostic. Its samples have separate labels and never enter the
+ordinary timing distributions. Tracing is inactive during the ordinary samples;
+the extra work between surfaces still changes the overall run and must not be
+treated as an identical environment for a before/after performance claim.
+
+Trace-enabled runs own Chromium through public Playwright `BrowserServer`
+APIs and connect over WebSocket. The ordinary trace-off path retains
+`chromium.launch()`. Reports record this transport and trace configuration,
+and comparative deltas require matching configurations. Trace-enabled dispatch
+measurements are therefore not transport-identical to the historical runs.
+The owner bounds graceful shutdown, force-kill and direct owned-child fallback
+to three seconds each, observes process exit, and shares one shutdown result
+with the outer finalizer. A fatal or unconfirmed shutdown stops later modes,
+persists the failure report and exits unsuccessfully.
+
+User Timing marks bracket pointer capture/bubble, observed native frame and
+presentation, and two subsequent animation callbacks. The analyzer aligns the
+page clock to Chromium's trace clock using marks bracketed by page timestamps,
+reports alignment uncertainty, and rejects inconsistent clocks. It does not
+subtract host timestamps from page timestamps. Overlapping synchronous slices
+are combined as wall-time unions; asynchronous input/flow records are counted
+separately. Groups can overlap and their durations must not be added.
+
+The cohort, Chromium buffer, retained stream and analyzed event count are
+bounded. Missing marks, buffer loss, truncation, unmatched slice boundaries and
+incomplete input remain explicit in the diagnostic. Raw traces and detailed
+observations stay in the normal browser report directory; the CI log contains
+only a bounded derived summary. Nine pure analysis regressions cover nested
+intervals, clock alignment, incompatible origins, missing/duplicate markers,
+asynchronous input, event limits and log bounds. Four mock-only teardown tests
+cover one-shot ownership, stalled graceful/force cleanup, exact-child fallback
+and failure to confirm exit, for thirteen tests total. They launch no browser
+or subprocess and do not establish actual Chromium trace capture.
+
+This instrumentation can help locate recorded work around the high WebGL2
+input tail. Recorded browser/compositor/GPU activity is not proof of scheduling
+cause, CPU utilization, this page's GPU work, or GPU completion. The exact
+source's CI run must establish whether Chromium captured usable evidence.
+
 ## Inline text-entry diagnosis
 
 The typography scenario still performs one original two-press gesture with an

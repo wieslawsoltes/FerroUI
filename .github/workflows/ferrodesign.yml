@@ -76,11 +76,15 @@ jobs:
           node --check web/main.js
           node --check tests/browser.mjs
           node --check tests/text-render-benchmark.mjs
+          node --check tests/text-pan-trace.mjs
+          node --check tests/text-pan-trace-analysis.mjs
+          node --check tests/text-pan-trace-analysis.test.mjs
           node --check tests/input-observations.mjs
           node --check tests/input-observations.test.mjs
           for file in tests/*-browser.mjs; do node --check "$file"; done
           node --test tests/document-store.test.mjs
           node tests/input-observations.test.mjs 2>&1 | tee native-report/input-observation-tests.log
+          node tests/text-pan-trace-analysis.test.mjs 2>&1 | tee native-report/text-pan-trace-analysis-tests.log
           cargo metadata --locked --no-deps --format-version 1 > native-report/cargo-metadata.json
           cargo test --locked -p ferrodesign-core --jobs 1 2>&1 | tee native-report/core-tests.log
 
@@ -265,6 +269,7 @@ jobs:
         env:
           FERRODESIGN_REPORT: browser-report/text-render-benchmark
           FERRODESIGN_BENCHMARK_LABEL: ${{ github.sha }}
+          FERRODESIGN_TRACE_TEXT_PAN: '1'
         run: |
           set -o pipefail
           node tests/text-render-benchmark.mjs 2>&1 | tee browser-report/text-render-benchmark.log
