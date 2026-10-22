@@ -1689,6 +1689,7 @@ pub fn property_accessors() -> Vec<(&'static ::ferroui_base::FerroProperty, &'st
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::RichTextBlock::text_alignment_property()), "ferroui_controls::RichTextBlock::text_alignment_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::RichTextBlock::text_decorations_property()), "ferroui_controls::RichTextBlock::text_decorations_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::RichTextBlock::text_indent_property()), "ferroui_controls::RichTextBlock::text_indent_property"),
+        (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::RichTextBlock::text_line_bounds_property()), "ferroui_controls::RichTextBlock::text_line_bounds_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::RichTextBlock::text_trimming_property()), "ferroui_controls::RichTextBlock::text_trimming_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::RichTextBlock::text_wrapping_property()), "ferroui_controls::RichTextBlock::text_wrapping_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::RichTextBlockOverflow::content_source_property()), "ferroui_controls::RichTextBlockOverflow::content_source_property"),

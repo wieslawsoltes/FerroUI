@@ -5570,6 +5570,8 @@ pub fn build_rich_text_document_xaml(
     stack_panel_0.begin_init();
     user_control_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&stack_panel_0)));
     context.push_parent(rt::to_value(stack_panel_0.clone()));
+    // rich_text_document.xaml(3,4) TextLineBounds
+    stack_panel_0.set_value(::ferroui_controls::TextBlock::text_line_bounds_property(), ::ferroui_base::media::TextLineBounds::TrimToBaseline);
     // rich_text_document.xaml(4,6) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // rich_text_document.xaml(4,6) RichTextBlock
@@ -5584,6 +5586,8 @@ pub fn build_rich_text_document_xaml(
     rich_text_block_0.set_value(::ferroui_controls::RichTextBlock::language_property(), ::core::clone::Clone::clone(&value_0));
     // rich_text_document.xaml(4,6) TextWrapping
     rich_text_block_0.set_value(::ferroui_controls::RichTextBlock::text_wrapping_property(), ::ferroui_base::media::TextWrapping::Wrap);
+    // rich_text_document.xaml(4,6) TextLineBounds
+    rich_text_block_0.set_value(::ferroui_controls::RichTextBlock::text_line_bounds_property(), ::ferroui_base::media::TextLineBounds::Tight);
     // rich_text_document.xaml(10,10) TextHighlighters
     let text_highlighters_collection_0 = ::ferroui_controls::RichTextBlock::__markup_get_TextHighlighters(&rich_text_block_0);
     // rich_text_document.xaml(10,10) TextHighlighter
@@ -5693,63 +5697,145 @@ pub fn build_rich_text_document_xaml(
     rt::invoked(rich_text_block_0.try_end_init(), 4, 6)?;
     // rich_text_document.xaml(22,6) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
-    // rich_text_document.xaml(22,6) RichEditBox
-    let rich_edit_box_0 = ::ferroui_controls::RichEditBox::new();
-    rich_edit_box_0.begin_init();
-    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&rich_edit_box_0).upcast::<::ferroui_controls::Control>());
-    // rich_text_document.xaml(22,18) Name
-    rich_edit_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("editor")));
-    rt::register_name(name_scope.as_ref(), "editor", ::core::clone::Clone::clone(&rich_edit_box_0).upcast::<::ferroui_base::FerroObject>(), 22, 18)?;
-    // rich_text_document.xaml(22,34) Header
-    rich_edit_box_0.set_value(::ferroui_controls::RichEditBox::header_property(), rt::to_object(::std::string::String::from("Document")));
-    // rich_text_document.xaml(22,52) Description
-    rich_edit_box_0.set_value(::ferroui_controls::RichEditBox::description_property(), rt::to_object(::std::string::String::from("Rich editing")));
-    // rich_text_document.xaml(23,18) PlaceholderText
-    rich_edit_box_0.set_value(::ferroui_controls::RichEditBox::placeholder_text_property(), ::std::string::String::from("Write here"));
-    // rich_text_document.xaml(22,6) Language
-    let value_1 = rt::invoked(::ferroui_base::utilities::CultureInfo::__markup_parse(::std::string::String::from("pl-PL")), 23, 47)?;
-    rich_edit_box_0.set_value(::ferroui_controls::RichEditBox::language_property(), ::core::clone::Clone::clone(&value_1));
-    // rich_text_document.xaml(22,6) AcceptsTab
-    rich_edit_box_0.set_value(::ferroui_controls::RichEditBox::accepts_tab_property(), ::core::clone::Clone::clone(&true));
-    // rich_text_document.xaml(24,8) Blocks
-    let blocks_collection_2 = ::ferroui_controls::RichEditBox::__markup_get_Blocks(&rich_edit_box_0);
-    // rich_text_document.xaml(24,8) Paragraph
+    // rich_text_document.xaml(22,6) RichTextBlock
+    let rich_text_block_1 = ::ferroui_controls::RichTextBlock::new();
+    rich_text_block_1.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&rich_text_block_1).upcast::<::ferroui_controls::Control>());
+    // rich_text_document.xaml(22,20) Name
+    rich_text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("fullLineBounds")));
+    rt::register_name(name_scope.as_ref(), "fullLineBounds", ::core::clone::Clone::clone(&rich_text_block_1).upcast::<::ferroui_base::FerroObject>(), 22, 20)?;
+    // rich_text_document.xaml(22,6) TextLineBounds
+    rich_text_block_1.set_value(::ferroui_controls::RichTextBlock::text_line_bounds_property(), ::ferroui_base::media::TextLineBounds::Full);
+    // rich_text_document.xaml(23,8) Blocks
+    let blocks_collection_2 = ::ferroui_controls::RichTextBlock::__markup_get_Blocks(&rich_text_block_1);
+    // rich_text_document.xaml(23,8) Paragraph
     let paragraph_2 = ::ferroui_controls::documents::Paragraph::new();
     paragraph_2.begin_init();
-    // rich_text_document.xaml(24,19) Inlines
+    // rich_text_document.xaml(23,19) Inlines
     let inlines_collection_7 = ::ferroui_controls::documents::Paragraph::__markup_get_Inlines(&paragraph_2);
-    // rich_text_document.xaml(24,19) Run
+    // rich_text_document.xaml(23,19) Run
     let run_4 = ::ferroui_controls::documents::Run::new();
     run_4.begin_init();
-    // rich_text_document.xaml(24,23) Text
-    run_4.set_value(::ferroui_controls::documents::Run::text_property(), ::core::option::Option::Some(::std::string::String::from("Edit \u{1f600}")));
-    rt::invoked(run_4.try_end_init(), 24, 19)?;
+    // rich_text_document.xaml(23,23) Text
+    run_4.set_value(::ferroui_controls::documents::Run::text_property(), ::core::option::Option::Some(::std::string::String::from("Full line bounds")));
+    rt::invoked(run_4.try_end_init(), 23, 19)?;
     ::ferroui_controls::documents::InlineCollection::__markup_Add_0(&inlines_collection_7, ::core::clone::Clone::clone(&run_4).upcast::<::ferroui_controls::documents::Inline>());
-    rt::invoked(paragraph_2.try_end_init(), 24, 8)?;
+    rt::invoked(paragraph_2.try_end_init(), 23, 8)?;
     ::ferroui_controls::documents::BlockCollection::__markup_Add_0(&blocks_collection_2, ::core::clone::Clone::clone(&paragraph_2).upcast::<::ferroui_controls::documents::Block>());
-    rt::invoked(rich_edit_box_0.try_end_init(), 22, 6)?;
-    // rich_text_document.xaml(26,6) Children
+    rt::invoked(rich_text_block_1.try_end_init(), 22, 6)?;
+    // rich_text_document.xaml(25,6) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
-    // rich_text_document.xaml(26,6) Button
+    // rich_text_document.xaml(25,6) RichTextBlock
+    let rich_text_block_2 = ::ferroui_controls::RichTextBlock::new();
+    rich_text_block_2.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&rich_text_block_2).upcast::<::ferroui_controls::Control>());
+    // rich_text_document.xaml(25,20) Name
+    rich_text_block_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("capLineBounds")));
+    rt::register_name(name_scope.as_ref(), "capLineBounds", ::core::clone::Clone::clone(&rich_text_block_2).upcast::<::ferroui_base::FerroObject>(), 25, 20)?;
+    // rich_text_document.xaml(25,6) TextLineBounds
+    rich_text_block_2.set_value(::ferroui_controls::RichTextBlock::text_line_bounds_property(), ::ferroui_base::media::TextLineBounds::TrimToCapHeight);
+    // rich_text_document.xaml(26,8) Blocks
+    let blocks_collection_3 = ::ferroui_controls::RichTextBlock::__markup_get_Blocks(&rich_text_block_2);
+    // rich_text_document.xaml(26,8) Paragraph
+    let paragraph_3 = ::ferroui_controls::documents::Paragraph::new();
+    paragraph_3.begin_init();
+    // rich_text_document.xaml(26,19) Inlines
+    let inlines_collection_8 = ::ferroui_controls::documents::Paragraph::__markup_get_Inlines(&paragraph_3);
+    // rich_text_document.xaml(26,19) Run
+    let run_5 = ::ferroui_controls::documents::Run::new();
+    run_5.begin_init();
+    // rich_text_document.xaml(26,23) Text
+    run_5.set_value(::ferroui_controls::documents::Run::text_property(), ::core::option::Option::Some(::std::string::String::from("Cap line bounds")));
+    rt::invoked(run_5.try_end_init(), 26, 19)?;
+    ::ferroui_controls::documents::InlineCollection::__markup_Add_0(&inlines_collection_8, ::core::clone::Clone::clone(&run_5).upcast::<::ferroui_controls::documents::Inline>());
+    rt::invoked(paragraph_3.try_end_init(), 26, 8)?;
+    ::ferroui_controls::documents::BlockCollection::__markup_Add_0(&blocks_collection_3, ::core::clone::Clone::clone(&paragraph_3).upcast::<::ferroui_controls::documents::Block>());
+    rt::invoked(rich_text_block_2.try_end_init(), 25, 6)?;
+    // rich_text_document.xaml(28,6) Children
+    let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // rich_text_document.xaml(28,6) RichTextBlock
+    let rich_text_block_3 = ::ferroui_controls::RichTextBlock::new();
+    rich_text_block_3.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&rich_text_block_3).upcast::<::ferroui_controls::Control>());
+    // rich_text_document.xaml(28,20) Name
+    rich_text_block_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("inheritedLineBounds")));
+    rt::register_name(name_scope.as_ref(), "inheritedLineBounds", ::core::clone::Clone::clone(&rich_text_block_3).upcast::<::ferroui_base::FerroObject>(), 28, 20)?;
+    // rich_text_document.xaml(29,8) Blocks
+    let blocks_collection_4 = ::ferroui_controls::RichTextBlock::__markup_get_Blocks(&rich_text_block_3);
+    // rich_text_document.xaml(29,8) Paragraph
+    let paragraph_4 = ::ferroui_controls::documents::Paragraph::new();
+    paragraph_4.begin_init();
+    // rich_text_document.xaml(29,19) Inlines
+    let inlines_collection_9 = ::ferroui_controls::documents::Paragraph::__markup_get_Inlines(&paragraph_4);
+    // rich_text_document.xaml(29,19) Run
+    let run_6 = ::ferroui_controls::documents::Run::new();
+    run_6.begin_init();
+    // rich_text_document.xaml(29,23) Text
+    run_6.set_value(::ferroui_controls::documents::Run::text_property(), ::core::option::Option::Some(::std::string::String::from("Inherited baseline bounds")));
+    rt::invoked(run_6.try_end_init(), 29, 19)?;
+    ::ferroui_controls::documents::InlineCollection::__markup_Add_0(&inlines_collection_9, ::core::clone::Clone::clone(&run_6).upcast::<::ferroui_controls::documents::Inline>());
+    rt::invoked(paragraph_4.try_end_init(), 29, 8)?;
+    ::ferroui_controls::documents::BlockCollection::__markup_Add_0(&blocks_collection_4, ::core::clone::Clone::clone(&paragraph_4).upcast::<::ferroui_controls::documents::Block>());
+    rt::invoked(rich_text_block_3.try_end_init(), 28, 6)?;
+    // rich_text_document.xaml(31,6) Children
+    let children_collection_4 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // rich_text_document.xaml(31,6) RichEditBox
+    let rich_edit_box_0 = ::ferroui_controls::RichEditBox::new();
+    rich_edit_box_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&rich_edit_box_0).upcast::<::ferroui_controls::Control>());
+    // rich_text_document.xaml(31,18) Name
+    rich_edit_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("editor")));
+    rt::register_name(name_scope.as_ref(), "editor", ::core::clone::Clone::clone(&rich_edit_box_0).upcast::<::ferroui_base::FerroObject>(), 31, 18)?;
+    // rich_text_document.xaml(31,34) Header
+    rich_edit_box_0.set_value(::ferroui_controls::RichEditBox::header_property(), rt::to_object(::std::string::String::from("Document")));
+    // rich_text_document.xaml(31,52) Description
+    rich_edit_box_0.set_value(::ferroui_controls::RichEditBox::description_property(), rt::to_object(::std::string::String::from("Rich editing")));
+    // rich_text_document.xaml(32,18) PlaceholderText
+    rich_edit_box_0.set_value(::ferroui_controls::RichEditBox::placeholder_text_property(), ::std::string::String::from("Write here"));
+    // rich_text_document.xaml(31,6) Language
+    let value_1 = rt::invoked(::ferroui_base::utilities::CultureInfo::__markup_parse(::std::string::String::from("pl-PL")), 32, 47)?;
+    rich_edit_box_0.set_value(::ferroui_controls::RichEditBox::language_property(), ::core::clone::Clone::clone(&value_1));
+    // rich_text_document.xaml(31,6) AcceptsTab
+    rich_edit_box_0.set_value(::ferroui_controls::RichEditBox::accepts_tab_property(), ::core::clone::Clone::clone(&true));
+    // rich_text_document.xaml(33,8) Blocks
+    let blocks_collection_5 = ::ferroui_controls::RichEditBox::__markup_get_Blocks(&rich_edit_box_0);
+    // rich_text_document.xaml(33,8) Paragraph
+    let paragraph_5 = ::ferroui_controls::documents::Paragraph::new();
+    paragraph_5.begin_init();
+    // rich_text_document.xaml(33,19) Inlines
+    let inlines_collection_10 = ::ferroui_controls::documents::Paragraph::__markup_get_Inlines(&paragraph_5);
+    // rich_text_document.xaml(33,19) Run
+    let run_7 = ::ferroui_controls::documents::Run::new();
+    run_7.begin_init();
+    // rich_text_document.xaml(33,23) Text
+    run_7.set_value(::ferroui_controls::documents::Run::text_property(), ::core::option::Option::Some(::std::string::String::from("Edit \u{1f600}")));
+    rt::invoked(run_7.try_end_init(), 33, 19)?;
+    ::ferroui_controls::documents::InlineCollection::__markup_Add_0(&inlines_collection_10, ::core::clone::Clone::clone(&run_7).upcast::<::ferroui_controls::documents::Inline>());
+    rt::invoked(paragraph_5.try_end_init(), 33, 8)?;
+    ::ferroui_controls::documents::BlockCollection::__markup_Add_0(&blocks_collection_5, ::core::clone::Clone::clone(&paragraph_5).upcast::<::ferroui_controls::documents::Block>());
+    rt::invoked(rich_edit_box_0.try_end_init(), 31, 6)?;
+    // rich_text_document.xaml(35,6) Children
+    let children_collection_5 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // rich_text_document.xaml(35,6) Button
     let button_0 = ::ferroui_controls::Button::new();
     button_0.begin_init();
-    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_controls::Control>());
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_controls::Control>());
     context.push_parent(rt::to_value(button_0.clone()));
-    // rich_text_document.xaml(26,13) Name
+    // rich_text_document.xaml(35,13) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("bold")));
-    rt::register_name(name_scope.as_ref(), "bold", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 26, 13)?;
-    // rich_text_document.xaml(26,27) Command
+    rt::register_name(name_scope.as_ref(), "bold", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 35, 13)?;
+    // rich_text_document.xaml(35,27) Command
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("#editor.ToggleBold"));
     let provided_0 = rt::provide_value(&context, rt::property_value(::ferroui_controls::Button::command_property()), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), provided_0, 26, 27)?;
-    // rich_text_document.xaml(26,66) IsEnabled
+    rt::bind(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), provided_0, 35, 27)?;
+    // rich_text_document.xaml(35,66) IsEnabled
     let reflection_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("#editor.CanFormat"));
     let provided_1 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::InputElement::is_enabled_property()), &reflection_binding_extension_1, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::InputElement::is_enabled_property(), provided_1, 26, 66)?;
-    // rich_text_document.xaml(26,106) Content
+    rt::bind(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::InputElement::is_enabled_property(), provided_1, 35, 66)?;
+    // rich_text_document.xaml(35,106) Content
     button_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::std::string::String::from("Bold")));
     context.pop_parent();
-    rt::invoked(button_0.try_end_init(), 26, 6)?;
+    rt::invoked(button_0.try_end_init(), 35, 6)?;
     context.pop_parent();
     rt::invoked(stack_panel_0.try_end_init(), 3, 4)?;
     context.pop_parent();

@@ -5921,6 +5921,11 @@ pub trait RichTextBlockProps: ElementBuilder {
         self.prop(<ferroui_controls::RichTextBlock>::line_stacking_strategy_property(), value)
     }
 
+    /// Sets [`RichTextBlock::text_line_bounds_property`](ferroui_controls::RichTextBlock::text_line_bounds_property).
+    fn text_line_bounds<M>(self, value: impl IntoProp<ferroui_base::media::TextLineBounds, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::text_line_bounds_property(), value)
+    }
+
     /// Sets [`RichTextBlock::text_decorations_property`](ferroui_controls::RichTextBlock::text_decorations_property).
     fn text_decorations<M>(self, value: impl IntoProp<Option<ferroui_base::media::TextDecorationCollection>, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::text_decorations_property(), value)

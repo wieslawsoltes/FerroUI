@@ -1,0 +1,48 @@
+{
+  "result": "PASS",
+  "cases": 960,
+  "upstream_pin": "fe244ca6ac4d482712b234a9de3cf771cc6481de",
+  "native_path": "dxaml/xcp/core/text/BlockLayout/ParagraphNode.cpp",
+  "rust_path": "src/FerroUI.Controls/rich_text_layout.rs",
+  "native_function_sha256": "4495f15ab489e017ddb05bf5805b8ae4949fc032ef2a36c06c0bfd012557fb39",
+  "rust_function_sha256": "4dafb402e3be1d8277852fd952df681bd05ef344b57e3ffd0c791cecbfbb1810",
+  "largest_absolute_error": 2.7791000007937328e-06,
+  "tolerance": "relative 1e-6 or absolute 1e-5; native float versus Rust f64",
+  "scope": "actual extracted source functions; no framework or native rendering execution",
+  "inputs": {
+    "strategies": [
+      "MaxHeight",
+      "BlockLineHeight",
+      "BaselineToBaseline"
+    ],
+    "font_baseline": [
+      700,
+      800
+    ],
+    "font_advance": [
+      1000,
+      1100
+    ],
+    "line_height": [
+      0,
+      6,
+      15,
+      26,
+      55
+    ],
+    "natural_height": [
+      11,
+      22,
+      33,
+      44
+    ],
+    "first_line": [
+      false,
+      true
+    ],
+    "last_line": [
+      false,
+      true
+    ]
+  }
+}

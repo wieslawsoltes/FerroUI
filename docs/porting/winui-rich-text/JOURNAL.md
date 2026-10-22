@@ -1090,3 +1090,26 @@ format regression now queries the whole nonempty tail rather than a backward
 insertion boundary. The initial Browser gate passed 271 and failed two; the
 corrected fresh full executable passes 278 with no failures or ignored tests.
 This is the portable adapter gate, not a physical browser/IME session.
+
+## 2026-10-22 — Port rich line stacking and consume shared TextLineBounds
+
+Rich block layout now separates allocated line advance from the natural glyph
+draw origin, following the pinned `ParagraphNode::ApplyLineStackingStrategy`.
+The reproducible comparison compiles the actual C++ and Rust function bodies:
+all 960 cases pass with maximum absolute difference 0.0000027791. Nine control
+regressions pass for wrapped fragments, first/last precedence, overflow fitting,
+empty lines, range geometry and explicit rich-edit spacing.
+
+RichTextBlock owns the existing shared TextLineBounds property. Its captured
+mode reaches paragraph, empty-document and linked-overflow formatting, source
+invalidation and clipping. Ten control regressions pass, and the existing
+rich-document runtime/emitter fixture now covers all four values. The generated
+View builder and XAML references include the new owner. Base paragraph-copy
+coverage also confirms tabs, spacing and bounds survive copying independently;
+the fresh full Base executable passes 4,437 tests.
+
+`LAYOUT.md` records formulas, source provenance and the exact policy boundary of
+this checkpoint. Natural lines still use the shared formatter's half-gap and
+actual fallback-face metrics; native requested-family metrics and per-run object
+bounds are a subsequent implementation. Source formula agreement is not native
+font selection, LineServices or pixel conformance.

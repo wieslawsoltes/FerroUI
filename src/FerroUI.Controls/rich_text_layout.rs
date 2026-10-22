@@ -15,8 +15,8 @@ use ferroui_base::media::text_formatting::{
     TextParagraphProperties, TextRunCache, TextRunProperties, TextTabStops,
 };
 use ferroui_base::media::{
-    BaselineAlignment, CharacterHit, TextAlignment, TextCollapsingCreateInfo, TextTrimming,
-    TextWrapping, Typeface,
+    BaselineAlignment, CharacterHit, TextAlignment, TextCollapsingCreateInfo, TextLineBounds,
+    TextTrimming, TextWrapping, Typeface,
 };
 use ferroui_base::utilities::ValueSpan;
 use ferroui_base::{Point, Rect, Ref, Size, Vector};
@@ -38,6 +38,7 @@ pub(crate) struct RichTextSource {
     pub paragraphs: Vec<RichParagraphSource>,
     pub length: usize,
     pub default_indent: f64,
+    pub text_line_bounds: TextLineBounds,
     pub highlights: Vec<TextHighlightRegion>,
 }
 
@@ -123,6 +124,7 @@ impl RichTextSource {
             paragraphs,
             length: document.text_length(),
             default_indent: view.text_indent(),
+            text_line_bounds: view.text_line_bounds(),
             highlights,
         })
     }
@@ -231,7 +233,9 @@ pub(crate) struct RichTextBreak {
 pub struct RichTextLineMetrics {
     pub start: usize,
     pub length: usize,
+    /// The allocated line space used by layout and caret geometry.
     pub bounds: Rect,
+    /// The baseline after the glyph box has been positioned within the line.
     pub baseline: f64,
 }
 
@@ -239,8 +243,12 @@ pub(crate) struct RichTextLine {
     pub line: Rc<dyn TextLine>,
     pub paragraph_offset: usize,
     pub paragraph_length: usize,
+    /// Glyph origin; line stacking may place it outside the allocated line.
     pub origin: Point,
     pub advance: f64,
+    /// The allocation top, excluding the glyph-box offset.
+    pub(crate) allocation_y: f64,
+    use_line_advance_for_bounds: bool,
     right_margin: f64,
     source_spans: Option<Vec<LineSourceSpan>>,
 }
@@ -262,7 +270,18 @@ impl RichTextLine {
             .min(self.paragraph_offset + self.paragraph_length)
     }
 
-    fn visible_ranges(&self) -> Vec<Range<usize>> {
+    /// Places formatter range bounds in this layout's allocation space.
+    /// Native block bounds fill the line advance; explicit rich-edit spacing
+    /// retains the formatter's natural range height.
+    pub(crate) fn range_bounds(&self, rectangle: Rect) -> Rect {
+        let mut rectangle = rectangle.translate(Vector::new(self.origin.x, self.allocation_y));
+        if self.use_line_advance_for_bounds {
+            rectangle.height = self.advance;
+        }
+        rectangle
+    }
+
+    pub(crate) fn visible_ranges(&self) -> Vec<Range<usize>> {
         match &self.source_spans {
             None => vec![self.start()..self.end()],
             Some(spans) => spans
@@ -294,7 +313,7 @@ impl RichTextLine {
             .unwrap_or(self.line.first_text_source_index().max(0) as usize)
     }
 
-    fn display_position(&self, source: usize) -> usize {
+    pub(crate) fn display_position(&self, source: usize) -> usize {
         let Some(spans) = &self.source_spans else {
             return source;
         };
@@ -382,6 +401,57 @@ pub(crate) struct RichTextLayout {
     pub is_trimmed: bool,
 }
 
+/// The line's allocation and the position of its natural glyph box within it.
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct LineStackingMetrics {
+    advance: f64,
+    offset: f64,
+}
+
+/// Port of ParagraphNode::ApplyLineStackingStrategy at the pinned WinUI source.
+/// The first line starts this page's paragraph fragment; the last line reaches
+/// the paragraph end, rather than merely a page or MaxLines boundary.
+fn apply_line_stacking_strategy(
+    strategy: LineStackingStrategy,
+    font_baseline_ratio: f64,
+    line_height: f64,
+    natural_height: f64,
+    first_line: bool,
+    last_line: bool,
+) -> LineStackingMetrics {
+    // FerroUI represents automatic height with NaN. Preserve its unbounded
+    // height fallback too; neither sentinel is a concrete line height.
+    if !line_height.is_finite() || line_height <= 0.0 {
+        return LineStackingMetrics {
+            advance: natural_height,
+            offset: 0.0,
+        };
+    }
+    match strategy {
+        LineStackingStrategy::MaxHeight => LineStackingMetrics {
+            advance: natural_height.max(line_height),
+            offset: 0.0,
+        },
+        LineStackingStrategy::BlockLineHeight => LineStackingMetrics {
+            advance: line_height,
+            offset: (line_height - natural_height) * font_baseline_ratio,
+        },
+        LineStackingStrategy::BaselineToBaseline => {
+            let mut metrics = LineStackingMetrics {
+                advance: line_height,
+                offset: (line_height - natural_height) * font_baseline_ratio,
+            };
+            if first_line {
+                metrics.advance -= metrics.offset;
+                metrics.offset = 0.0;
+            } else if last_line {
+                metrics.advance -= (line_height - natural_height) * (1.0 - font_baseline_ratio);
+            }
+            metrics
+        }
+    }
+}
+
 impl RichTextLayout {
     pub fn new(
         source: Rc<RichTextSource>,
@@ -444,7 +514,42 @@ impl RichTextLayout {
                 .cast::<Paragraph>()
                 .map(|paragraph| (paragraph.line_spacing_rule(), paragraph.line_spacing()))
                 .unwrap_or((LineSpacingRule::Undefined, 1.0));
-            let mut previous_baseline: Option<f64> = None;
+            // The native block layout uses the regular face of the paragraph's
+            // font family, not the tallest run or the current glyph baseline.
+            let font_baseline_ratio = if spacing_rule == LineSpacingRule::Undefined
+                && strategy != LineStackingStrategy::MaxHeight
+                && line_height.is_finite()
+                && line_height > 0.0
+            {
+                let glyph_typeface =
+                    Typeface::new(paragraph.properties.typeface().font_family().clone())
+                        .glyph_typeface();
+                let metrics = glyph_typeface.metrics();
+                let baseline = -(metrics.ascent as f64);
+                let advance = metrics.descent as f64 + baseline + metrics.line_gap as f64;
+                let cap_height = metrics.cap_height as f64;
+                // The stacking ratio uses the requested paragraph family's
+                // native bounds policy. Natural run metrics remain the shared
+                // formatter's policy, including its existing half line gaps.
+                let (baseline, advance) = match result.source.text_line_bounds {
+                    TextLineBounds::Full => (baseline, advance),
+                    TextLineBounds::TrimToCapHeight => {
+                        (cap_height, advance - baseline + cap_height)
+                    }
+                    TextLineBounds::TrimToBaseline => (baseline, baseline),
+                    TextLineBounds::Tight => (cap_height, cap_height),
+                };
+                if advance > 0.0 {
+                    baseline / advance
+                } else {
+                    0.0
+                }
+            } else {
+                0.0
+            };
+            // A continuation starts a new paragraph fragment. Its first line
+            // gets the same leading-space adjustment as a new paragraph.
+            let mut first_line = true;
 
             loop {
                 let indent = if local == 0 {
@@ -462,35 +567,33 @@ impl RichTextLayout {
                 // Indent is placed outside the formatter so both wrapping and
                 // embedded controls use the same available width and origin.
                 let line_width = (paragraph_width - indent).max(0.0);
-                let properties: Rc<dyn TextParagraphProperties> = Rc::new(
-                    GenericTextParagraphProperties::with_all(
-                        block.flow_direction(),
-                        block.text_alignment(),
-                        local == 0,
-                        false,
-                        paragraph.properties.clone(),
-                        wrapping,
-                        if spacing_rule == LineSpacingRule::Exactly {
-                            spacing
-                        } else if spacing_rule == LineSpacingRule::Undefined
-                            && strategy == LineStackingStrategy::BlockLineHeight
-                        {
-                            line_height
-                        } else {
-                            f64::NAN
-                        },
-                        0.0,
-                        block.letter_spacing(),
-                    )
-                    .with_tabs(
-                        block
-                            .to_ref()
-                            .cast::<Paragraph>()
-                            .map_or_else(TextTabStops::default, |paragraph| paragraph.tab_stops()),
-                        paragraph.default_tab_stop,
-                        indent + if rtl { margin.right } else { margin.left },
-                    ),
+                let properties = GenericTextParagraphProperties::with_all(
+                    block.flow_direction(),
+                    block.text_alignment(),
+                    local == 0,
+                    false,
+                    paragraph.properties.clone(),
+                    wrapping,
+                    if spacing_rule == LineSpacingRule::Exactly {
+                        spacing
+                    } else {
+                        // LineStackingStrategy positions the natural glyph
+                        // box after formatting; it does not resize that box.
+                        f64::NAN
+                    },
+                    0.0,
+                    block.letter_spacing(),
+                )
+                .with_tabs(
+                    block
+                        .to_ref()
+                        .cast::<Paragraph>()
+                        .map_or_else(TextTabStops::default, |paragraph| paragraph.tab_stops()),
+                    paragraph.default_tab_stop,
+                    indent + if rtl { margin.right } else { margin.left },
                 );
+                properties.set_text_line_bounds(result.source.text_line_bounds);
+                let properties: Rc<dyn TextParagraphProperties> = Rc::new(properties);
                 let input_break = previous.as_ref().map(|value| value.fork());
                 let Some(index) = i32::try_from(local).ok() else {
                     result.has_overflow = true;
@@ -508,34 +611,33 @@ impl RichTextLayout {
                 let mut line = formatted.unwrap_or_else(|| {
                     TextFormatterImpl::create_empty_text_line(index, line_width, &properties)
                 });
-                let advance = if spacing_rule != LineSpacingRule::Undefined {
-                    spacing_rule.advance(line.height(), spacing)
+                let line_break = line.text_line_break();
+                let end_of_paragraph = empty_line
+                    || line_break.as_ref().is_some_and(|b| {
+                        b.text_end_of_line()
+                            .is_some_and(|run| run.is::<TextEndOfParagraph>())
+                    });
+                let stacking = if spacing_rule != LineSpacingRule::Undefined {
+                    LineStackingMetrics {
+                        advance: spacing_rule.advance(line.height(), spacing),
+                        offset: 0.0,
+                    }
                 } else {
-                    match strategy {
-                        LineStackingStrategy::BlockLineHeight
-                        | LineStackingStrategy::BaselineToBaseline
-                            if line_height.is_finite() && line_height > 0.0 =>
-                        {
-                            line_height
-                        }
-                        _ if line_height.is_finite() => line.height().max(line_height),
-                        _ => line.height(),
-                    }
-                }
-                .max(f64::MIN_POSITIVE);
-                let mut origin_y = y;
-                if spacing_rule == LineSpacingRule::Undefined
-                    && strategy == LineStackingStrategy::BaselineToBaseline
-                    && line_height.is_finite()
-                {
-                    if let Some(baseline) = previous_baseline {
-                        origin_y = baseline + line_height - line.baseline();
-                    }
-                }
+                    apply_line_stacking_strategy(
+                        strategy,
+                        font_baseline_ratio,
+                        line_height,
+                        line.height(),
+                        first_line,
+                        end_of_paragraph,
+                    )
+                };
+                let advance = stacking.advance.max(f64::MIN_POSITIVE);
+                let origin_y = y + stacking.offset;
                 // A first oversized line is accepted to guarantee forward progress
                 // through columns smaller than a font's metrics. The control clips it.
                 if !result.lines.is_empty()
-                    && ((height.is_finite() && origin_y + advance > height + 1e-8)
+                    && ((height.is_finite() && y + advance > height + 1e-8)
                         || (max_lines > 0 && result.lines.len() >= max_lines))
                 {
                     line.dispose();
@@ -555,12 +657,6 @@ impl RichTextLayout {
                     }
                 }
 
-                let line_break = line.text_line_break();
-                let end_of_paragraph = empty_line
-                    || line_break.as_ref().is_some_and(|b| {
-                        b.text_end_of_line()
-                            .is_some_and(|run| run.is::<TextEndOfParagraph>())
-                    });
                 if block.text_alignment() == TextAlignment::Justify
                     && line_width.is_finite()
                     && !end_of_paragraph
@@ -585,17 +681,19 @@ impl RichTextLayout {
                         + line.width_including_trailing_whitespace()
                         + line_right_margin,
                 );
-                previous_baseline = Some(origin_y + line.baseline());
                 result.lines.push(RichTextLine {
                     line,
                     paragraph_offset: paragraph.offset,
                     paragraph_length: paragraph.length,
                     origin: Point::new(line_origin_x, origin_y),
                     advance,
+                    allocation_y: y,
+                    use_line_advance_for_bounds: spacing_rule == LineSpacingRule::Undefined,
                     right_margin: line_right_margin,
                     source_spans,
                 });
-                y = origin_y + advance;
+                y += advance;
+                first_line = false;
                 local = local.saturating_add(consumed).min(paragraph.length);
                 previous = line_break;
                 previous_is_shared = false;
@@ -665,7 +763,7 @@ impl RichTextLayout {
                 length: entry.end().saturating_sub(entry.start()),
                 bounds: Rect::new(
                     origin.x + entry.origin.x + entry.line.start(),
-                    origin.y + entry.origin.y,
+                    origin.y + entry.allocation_y,
                     entry.line.width_including_trailing_whitespace(),
                     entry.advance,
                 ),
@@ -734,7 +832,7 @@ impl RichTextLayout {
             leading
         };
         let x = entry.line.get_distance_from_character_hit(hit);
-        Rect::new(entry.origin.x + x, entry.origin.y, 1.0, entry.advance)
+        Rect::new(entry.origin.x + x, entry.allocation_y, 1.0, entry.advance)
     }
 
     pub fn selection_rects(&self, start: usize, end: usize) -> Vec<Rect> {
@@ -747,11 +845,7 @@ impl RichTextLayout {
                     let a = entry.display_position(a - entry.paragraph_offset);
                     let b = entry.display_position(b - entry.paragraph_offset);
                     for bounds in entry.line.get_text_bounds(a as i32, (b - a) as i32) {
-                        result.push(
-                            bounds
-                                .rectangle()
-                                .translate(Vector::new(entry.origin.x, entry.origin.y)),
-                        );
+                        result.push(entry.range_bounds(bounds.rectangle()));
                     }
                 }
             }
@@ -815,3 +909,11 @@ impl RichTextLayout {
         result
     }
 }
+
+#[cfg(test)]
+#[path = "rich_text_line_stacking_tests.rs"]
+mod line_stacking_tests;
+
+#[cfg(test)]
+#[path = "rich_text_line_bounds_tests.rs"]
+mod line_bounds_tests;

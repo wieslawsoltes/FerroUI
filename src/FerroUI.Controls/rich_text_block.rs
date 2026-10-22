@@ -23,15 +23,15 @@ use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::media::text_formatting::unicode::GraphemeEnumerator;
 use ferroui_base::media::{
     subscribe_invalidated, Brushes, DrawingContext, FontFamily, FontFeatureCollection, FontStretch,
-    FontStyle, FontWeight, IBrush, TextAlignment, TextDecorationCollection, TextTrimming,
-    TextWrapping,
+    FontStyle, FontWeight, IBrush, TextAlignment, TextDecorationCollection, TextLineBounds,
+    TextTrimming, TextWrapping,
 };
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
-    ferro_class, instantiate, DirectProperty, ElementRef, FerroObjectImpl, FerroObjectImplExt,
+    ferro_class, instantiate, DirectProperty, ElementRef, FerroObject, FerroObjectImpl, FerroObjectImplExt,
     FerroProperty, FerroPropertyChangedEventArgs, IntoRef, Point, Rect, Ref, Size,
-    StyledElementImpl, StyledProperty, StyledPropertyOptions, Thickness, Vector, Visual,
+    StyledElementImpl, StyledProperty, StyledPropertyMetadata, StyledPropertyOptions, Thickness, Vector, Visual,
     VisualImpl, WeakRef,
 };
 use std::cell::{Cell, RefCell};
@@ -123,6 +123,7 @@ ferroui_base::ferro_class_info!(RichTextBlock {
             Blocks: BlockCollection { get: RichTextBlock::blocks },
             TextHighlighters: TextHighlighterCollection { get: RichTextBlock::text_highlighters },
             HorizontalTextAlignment: TextAlignment { get: RichTextBlock::horizontal_text_alignment, set: RichTextBlock::set_horizontal_text_alignment },
+            TextLineBounds: TextLineBounds { get: RichTextBlock::text_line_bounds, set: RichTextBlock::set_text_line_bounds },
         ],
         methods: [
             fn SelectAll() => RichTextBlock::select_all,
@@ -174,6 +175,10 @@ impl FerroObjectImpl for RichTextBlock {
             | "SelectionHighlightColor"
             | "IsTextSelectionEnabled" => {
                 this.invalidate_document_layout();
+            }
+            "TextLineBounds" => {
+                this.invalidate_document_layout();
+                this.refresh_text_line_bounds_clipping();
             }
             "TextWrapping" | "TextTrimming" | "Padding" | "MaxLines" => this.invalidate_layout(),
             "Background" | "CaretBrush" => this.invalidate_visual(),
@@ -683,6 +688,7 @@ ferroui_base::ferro_properties! {
         pub fn line_height_property() -> StyledProperty<f64> { TextBlock::line_height_property().add_owner::<RichTextBlock>() }
         pub fn text_indent_property() -> StyledProperty<f64> { Paragraph::text_indent_property().add_owner::<RichTextBlock>() }
         pub fn line_stacking_strategy_property() -> StyledProperty<LineStackingStrategy> { Block::line_stacking_strategy_property().add_owner::<RichTextBlock>() }
+        pub fn text_line_bounds_property() -> StyledProperty<TextLineBounds> { TextBlock::text_line_bounds_property().add_owner::<RichTextBlock>() }
         pub fn text_decorations_property() -> StyledProperty<Option<TextDecorationCollection>> { TextBlock::text_decorations_property().add_owner::<RichTextBlock>() }
         pub fn text_trimming_property() -> StyledProperty<Rc<dyn TextTrimming>> { TextBlock::text_trimming_property().add_owner::<RichTextBlock>() }
         pub fn text_wrapping_property() -> StyledProperty<TextWrapping> {
@@ -727,7 +733,16 @@ impl RichTextBlock {
 
     fn static_constructor() {
         InputElement::focusable_property().override_default_value::<RichTextBlock>(true);
-        Visual::clip_to_bounds_property().override_default_value::<RichTextBlock>(true);
+        // Trimmed line boxes deliberately exclude some glyph ink, just as the
+        // shared TextBlock formatter does. Overflow uses the document owner's
+        // bounds policy even when it is not in the owner's logical tree.
+        Visual::clip_to_bounds_property().override_metadata::<RichTextBlock>(
+            StyledPropertyMetadata::new(Some(true)).with_coerce(|object: &FerroObject, clip: bool| {
+                clip && object
+                    .downcast_ref::<RichTextBlock>()
+                    .is_none_or(|view| view.effective_text_line_bounds() == TextLineBounds::Full)
+            }),
+        );
         Visual::affects_render::<RichTextBlock>(&[
             Self::background_property().as_property(),
             Self::foreground_property().as_property(),
@@ -1465,6 +1480,26 @@ impl RichTextBlock {
     pub fn set_line_stacking_strategy(&self, value: LineStackingStrategy) {
         self.set_value(Self::line_stacking_strategy_property(), value);
     }
+    /// The shared formatter's bounds policy for every line in this document.
+    /// The value is inherited from the framework's TextBlock attached property.
+    pub fn text_line_bounds(&self) -> TextLineBounds {
+        self.get_value(Self::text_line_bounds_property())
+    }
+    pub fn set_text_line_bounds(&self, value: TextLineBounds) {
+        self.set_value(Self::text_line_bounds_property(), value);
+    }
+    fn effective_text_line_bounds(&self) -> TextLineBounds {
+        self.content_source().map_or_else(
+            || self.text_line_bounds(),
+            |source| source.effective_text_line_bounds(),
+        )
+    }
+    fn refresh_text_line_bounds_clipping(&self) {
+        self.coerce_value(Visual::clip_to_bounds_property().as_property());
+        if let Some(target) = self.overflow_content_target() {
+            target.refresh_text_line_bounds_clipping();
+        }
+    }
     pub fn text_decorations(&self) -> Option<TextDecorationCollection> {
         self.get_value(Self::text_decorations_property())
     }
@@ -1554,6 +1589,7 @@ impl RichTextBlock {
         let old_document = self.document();
         *self.flow_parent.borrow_mut() = parent;
         self.invalidate_layout();
+        self.refresh_text_line_bounds_clipping();
         if let Some(overflow) = self.to_ref().cast::<RichTextBlockOverflow>() {
             overflow.raise_direct_property_changed(
                 RichTextBlockOverflow::content_source_property(),
