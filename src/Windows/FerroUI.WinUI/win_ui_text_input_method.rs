@@ -50,7 +50,7 @@ pub(crate) use imp::WinUITextInputMethod;
 mod imp {
     use super::{clamp, length, requested_units, splice, substring};
     use crate::core_text_input_options::CoreTextInputOptions;
-    use crate::core_text_layout::CoreTextLayoutBounds;
+    use crate::core_text_layout::{CoreTextLayoutBounds, CoreTextTextGeometry};
     use crate::core_text_synchronization::CoreTextSynchronization;
     use crate::ferro_swap_chain_panel::FerroSwapChainPanel;
     use crate::interop::event_handlers::*;

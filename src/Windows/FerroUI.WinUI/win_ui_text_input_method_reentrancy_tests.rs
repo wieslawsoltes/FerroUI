@@ -5,7 +5,10 @@
 mod native_reentrancy_tests {
     use super::*;
     use ferroui_base::input::InputElement;
-    use ferroui_base::input::text_input::TextInputMethodClientEvents;
+    use ferroui_base::input::text_input::{
+        TextInputMethodClientEvents, TextInputMethodError, TextInputMethodRangeGeometry,
+        TextInputMethodTextBounds,
+    };
     use ferroui_base::layout::{ILayoutManager, ILayoutRoot, LayoutManager, Layoutable};
     use ferroui_base::reactive::Disposable;
     use ferroui_base::rendering::{
@@ -25,6 +28,9 @@ mod native_reentrancy_tests {
         owner_callback: Callback,
         visual_callback: Callback,
         revision_callback: Callback,
+        geometry_callback: Callback,
+        geometry_requests: RefCell<Vec<TextSelection>>,
+        geometry_reply: RefCell<Option<Result<TextInputMethodRangeGeometry, TextInputMethodError>>>,
         owner: RefCell<Option<Ref<InputElement>>>,
         visual: RefCell<Option<Ref<Visual>>>,
         revision: Cell<Option<u64>>,
@@ -78,6 +84,15 @@ mod native_reentrancy_tests {
         }
         fn cursor_rectangle(&self) -> FerroRect {
             FerroRect::default()
+        }
+        fn text_range_geometry(
+            &self,
+            range: TextSelection,
+        ) -> Result<TextInputMethodRangeGeometry, TextInputMethodError> {
+            self.geometry_requests.borrow_mut().push(range);
+            let reply = self.geometry_reply.borrow_mut().take();
+            invoke(&self.geometry_callback);
+            reply.unwrap_or(Err(TextInputMethodError::Unsupported))
         }
         fn selection(&self) -> TextSelection {
             TextSelection::default()
@@ -395,5 +410,212 @@ mod native_reentrancy_tests {
         assert_eq!(root.bounds(), FerroRect::new(0.0, 0.0, 250.0, 80.0));
         assert!(method.layout_request_epoch_is_current(&state));
         root.set_presentation_source_for_root_visual(None);
+    }
+
+    struct RangeFixture {
+        root: Ref<InputElement>,
+        method: Rc<WinUITextInputMethod>,
+        client: Rc<ReentrantClient>,
+    }
+
+    impl RangeFixture {
+        fn new() -> Self {
+            let root = InputElement::new();
+            let source = LayoutTestSource::new(&root);
+            root.set_presentation_source_for_root_visual(Some(source.clone()));
+            root.set_bounds(FerroRect::new(0.0, 0.0, 100.0, 40.0));
+            let input_root: Rc<dyn IInputRoot> = source;
+            let method = WinUITextInputMethod::new(
+                Weak::new(),
+                Box::new(|| None),
+                Box::new(move || Some(input_root.clone())),
+                Box::new(|| None),
+            );
+            let client = Rc::new(ReentrantClient::default());
+            client.owner.replace(Some(root.clone()));
+            method.client.replace(Some(client.clone()));
+            Self {
+                root,
+                method,
+                client,
+            }
+        }
+
+        fn capture(&self) -> (LayoutRequestState, LayoutOwner) {
+            let state = self.method.begin_layout_request().unwrap();
+            let owner = self.method.capture_layout_owner(&state).unwrap();
+            (state, owner)
+        }
+
+        fn reply(&self, is_current: impl Fn() -> bool + 'static) {
+            self.client
+                .geometry_reply
+                .replace(Some(TextInputMethodRangeGeometry::new(
+                    TextSelection::new(4, 8),
+                    vec![TextInputMethodTextBounds::new(FerroRect::new(
+                        20.0, 10.0, 30.0, 9.0,
+                    ))],
+                    is_current,
+                )));
+        }
+    }
+
+    impl Drop for RangeFixture {
+        fn drop(&mut self) {
+            self.root.set_presentation_source_for_root_visual(None);
+        }
+    }
+
+    fn requested_layout_range() -> Result<CoreTextRange, HResult> {
+        Ok(CoreTextRange {
+            start_caret_position: 4,
+            end_caret_position: 8,
+        })
+    }
+
+    #[test]
+    fn layout_range_getter_reentry_never_queries_a_superseded_client() {
+        for transition in 0..3 {
+            let f = RangeFixture::new();
+            let (state, owner) = f.capture();
+            let result = f
+                .method
+                .query_layout_text_geometry(&state, &owner, || {
+                    match transition {
+                        0 => f.method.set_client(None),
+                        1 => {
+                            f.method.begin_layout_request().unwrap();
+                        }
+                        _ => f
+                            .method
+                            .set_cursor_rect(FerroRect::new(8.0, 9.0, 1.0, 14.0)),
+                    }
+                    requested_layout_range()
+                })
+                .unwrap();
+            assert!(result.is_none());
+            assert!(f.client.geometry_requests.borrow().is_empty());
+        }
+    }
+
+    #[test]
+    fn layout_range_client_query_cannot_publish_after_owner_or_revision_reentry() {
+        for transition in 0..3 {
+            let f = RangeFixture::new();
+            let (state, owner) = f.capture();
+            f.reply(|| true);
+            let method = Rc::downgrade(&f.method);
+            let client = Rc::downgrade(&f.client);
+            f.client
+                .geometry_callback
+                .replace(Some(Box::new(move || match transition {
+                    0 => method.upgrade().unwrap().set_client(None),
+                    1 => {
+                        method.upgrade().unwrap().begin_layout_request().unwrap();
+                    }
+                    _ => client.upgrade().unwrap().revision.set(Some(2)),
+                })));
+            assert!(
+                f.method
+                    .query_layout_text_geometry(&state, &owner, requested_layout_range)
+                    .unwrap()
+                    .is_none()
+            );
+            assert_eq!(
+                *f.client.geometry_requests.borrow(),
+                [TextSelection::new(4, 8)]
+            );
+        }
+    }
+
+    #[test]
+    fn layout_requested_geometry_keeps_the_requested_range_separate_from_current_caret() {
+        let f = RangeFixture::new();
+        f.method
+            .set_cursor_rect(FerroRect::new(1.0, 2.0, 1.0, 18.0));
+        let (state, owner) = f.capture();
+        f.reply(|| true);
+        let text = f
+            .method
+            .query_layout_text_geometry(&state, &owner, requested_layout_range)
+            .unwrap()
+            .unwrap();
+        let CoreTextTextGeometry::Requested(geometry) = &text else {
+            panic!("exact requested geometry")
+        };
+        assert_eq!(geometry.range(), TextSelection::new(4, 8));
+        assert_eq!(
+            geometry.fragments()[0].rectangle,
+            FerroRect::new(20.0, 10.0, 30.0, 9.0)
+        );
+        assert_ne!(geometry.fragments()[0].rectangle, state.cursor_rect);
+        assert!(
+            f.method
+                .layout_text_geometry_is_current(&state, &owner, &text)
+        );
+    }
+
+    #[test]
+    fn layout_geometry_guard_reentry_is_fenced_before_screen_publication() {
+        for transition in 0..2 {
+            let f = RangeFixture::new();
+            let pending = Rc::new(RefCell::new(None::<Box<dyn FnOnce()>>));
+            let callback = pending.clone();
+            f.reply(move || {
+                let callback = callback.borrow_mut().take();
+                if let Some(callback) = callback {
+                    callback();
+                }
+                true
+            });
+            let (state, owner) = f.capture();
+            let text = f
+                .method
+                .query_layout_text_geometry(&state, &owner, requested_layout_range)
+                .unwrap()
+                .unwrap();
+            let root = f.root.clone();
+            let method = Rc::downgrade(&f.method);
+            pending.replace(Some(Box::new(move || {
+                if transition == 0 {
+                    root.set_bounds(FerroRect::new(0.0, 0.0, 250.0, 80.0));
+                } else {
+                    method.upgrade().unwrap().set_client(None);
+                }
+            })));
+            assert!(
+                !f.method
+                    .layout_text_geometry_is_current(&state, &owner, &text)
+            );
+        }
+    }
+
+    #[test]
+    fn layout_range_reader_failure_and_unavailable_geometry_do_not_fall_back() {
+        let f = RangeFixture::new();
+        let (state, owner) = f.capture();
+        assert_eq!(
+            f.method
+                .query_layout_text_geometry(&state, &owner, || Err(HResult::FAIL))
+                .err(),
+            Some(HResult::FAIL)
+        );
+        assert!(f.client.geometry_requests.borrow().is_empty());
+        f.client
+            .geometry_reply
+            .replace(Some(Err(TextInputMethodError::Unavailable)));
+        assert!(
+            f.method
+                .query_layout_text_geometry(&state, &owner, requested_layout_range)
+                .unwrap()
+                .is_none()
+        );
+        // Unsupported remains the only explicit compatibility case.
+        let legacy = f
+            .method
+            .query_layout_text_geometry(&state, &owner, requested_layout_range)
+            .unwrap()
+            .unwrap();
+        assert!(matches!(legacy, CoreTextTextGeometry::LegacyCaret(_)));
     }
 }

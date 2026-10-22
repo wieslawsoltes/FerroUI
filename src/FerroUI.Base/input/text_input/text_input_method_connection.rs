@@ -8,7 +8,7 @@ use std::cell::Cell;
 use std::fmt;
 use std::rc::{Rc, Weak};
 
-/// Failure of a platform composition operation. A rejected commit retains its
+/// Failure of a platform input operation. A rejected commit retains its
 /// accepted preview so that the platform can retry or explicitly cancel it.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TextInputMethodError {
@@ -27,9 +27,9 @@ impl fmt::Display for TextInputMethodError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(match self {
             Self::Unavailable => "The input owner or input services are unavailable.",
-            Self::Unsupported => "The input client does not support transactional composition.",
+            Self::Unsupported => "The input client does not support this operation.",
             Self::StaleConnection => "The input connection or composition has been superseded.",
-            Self::StateChanged => "The input client's state changed outside this composition.",
+            Self::StateChanged => "The input client's captured state is no longer current.",
             Self::ReadOnly => "The input client is read-only.",
             Self::ReentrantEdit => "An input edit is already being published.",
             Self::Rejected => "The input client rejected the edit.",

@@ -541,3 +541,6 @@ fn rich_input_method_connection_is_weak_and_read_only_handoff_blocks_callbacks()
     assert!(owner.upgrade().is_none());
     assert!(connection.owner().is_none());
 }
+
+#[path = "rich_edit_input_range_geometry_tests.rs"]
+mod input_range_geometry_tests;

@@ -1,14 +1,52 @@
 //! CoreText requires separate text and whole-control rectangles in screen
-//! pixels. Transform each complete root-relative rectangle before applying the
-//! XAML root's rasterization scale and the window's client-to-screen offset.
-use crate::interop::Rect;
-use ferroui_base::Rect as FerroRect;
+//! pixels. Transform requested shaped fragments through the complete visual
+//! chain before taking their bounds, then apply rasterization and screen offset.
+use crate::interop::{Point, Rect};
+use ferroui_base::input::text_input::{
+    TextInputMethodClient, TextInputMethodError, TextInputMethodRangeGeometry,
+    TextInputMethodTextBounds, TextSelection,
+};
+use ferroui_base::{Matrix, Point as FerroPoint, Rect as FerroRect};
 use ferroui_microcom::HResult;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) struct CoreTextLayoutBounds {
     pub text: Rect,
     pub control: Rect,
+}
+
+/// An explicit compatibility boundary. Only clients without a range capability
+/// use the legacy root-relative caret; an unavailable rich range has no reply.
+pub(crate) enum CoreTextTextGeometry {
+    Requested(TextInputMethodRangeGeometry),
+    LegacyCaret(FerroRect),
+}
+
+impl CoreTextTextGeometry {
+    pub(crate) fn query(
+        client: &dyn TextInputMethodClient,
+        range: TextSelection,
+        legacy_caret: FerroRect,
+    ) -> Result<Self, TextInputMethodError> {
+        if range.start < 0 || range.end < range.start {
+            return Err(TextInputMethodError::InvalidRange);
+        }
+        match client.text_range_geometry(range) {
+            Ok(geometry) if geometry.range() == range && geometry.is_current() => {
+                Ok(Self::Requested(geometry))
+            }
+            Ok(_) => Err(TextInputMethodError::StateChanged),
+            Err(TextInputMethodError::Unsupported) => Ok(Self::LegacyCaret(legacy_caret)),
+            Err(error) => Err(error),
+        }
+    }
+
+    pub(crate) fn is_current(&self) -> bool {
+        match self {
+            Self::Requested(geometry) => geometry.is_current(),
+            Self::LegacyCaret(_) => true,
+        }
+    }
 }
 
 fn native_rect(rect: FerroRect) -> Result<Rect, HResult> {
@@ -38,7 +76,87 @@ fn screen_rect(rect: Rect, scale: f64, origin: (i32, i32)) -> Result<Rect, HResu
     ))
 }
 
+fn native_point(point: FerroPoint) -> Result<Point, HResult> {
+    if !point.x.is_finite()
+        || !point.y.is_finite()
+        || !(point.x as f32).is_finite()
+        || !(point.y as f32).is_finite()
+    {
+        return Err(HResult::INVALIDARG);
+    }
+    Ok(Point {
+        x: point.x as f32,
+        y: point.y as f32,
+    })
+}
+
+fn transformed_fragment(
+    fragment: &TextInputMethodTextBounds,
+    owner_to_root: Matrix,
+    transform_point: &mut impl FnMut(Point) -> Result<Point, HResult>,
+) -> Result<FerroRect, HResult> {
+    native_rect(fragment.rectangle)?;
+    let mut minimum = FerroPoint::new(f64::INFINITY, f64::INFINITY);
+    let mut maximum = FerroPoint::new(f64::NEG_INFINITY, f64::NEG_INFINITY);
+    for corner in fragment.corners() {
+        let point = native_point(corner.transform(owner_to_root))?;
+        let point = transform_point(point)?;
+        if !point.x.is_finite() || !point.y.is_finite() {
+            return Err(HResult::INVALIDARG);
+        }
+        minimum.x = minimum.x.min(f64::from(point.x));
+        minimum.y = minimum.y.min(f64::from(point.y));
+        maximum.x = maximum.x.max(f64::from(point.x));
+        maximum.y = maximum.y.max(f64::from(point.y));
+    }
+    Ok(FerroRect::from_points(minimum, maximum))
+}
+
 impl CoreTextLayoutBounds {
+    /// Transforms each shaped fragment through the complete visual chain before
+    /// taking its bounds and union. Disjoint bidi/line boxes and rotations do
+    /// not create an enlarged intermediate owner or root bounding rectangle.
+    pub(crate) fn from_owner_fragments(
+        fragments: &[TextInputMethodTextBounds],
+        control: FerroRect,
+        owner_to_root: Matrix,
+        scale: f64,
+        origin: (i32, i32),
+        mut transform_point: impl FnMut(Point) -> Result<Point, HResult>,
+    ) -> Result<Self, HResult> {
+        if fragments.is_empty() || !scale.is_finite() || scale <= 0.0 {
+            return Err(HResult::INVALIDARG);
+        }
+        let mut text: Option<FerroRect> = None;
+        for fragment in fragments {
+            let bounds = transformed_fragment(fragment, owner_to_root, &mut transform_point)?;
+            text = Some(match text {
+                None => bounds,
+                Some(previous) => {
+                    let left = previous.x.min(bounds.x);
+                    let top = previous.y.min(bounds.y);
+                    FerroRect::new(
+                        left,
+                        top,
+                        previous.right().max(bounds.right()) - left,
+                        previous.bottom().max(bounds.bottom()) - top,
+                    )
+                }
+            });
+        }
+        let control = transformed_fragment(
+            &TextInputMethodTextBounds::new(control),
+            owner_to_root,
+            &mut transform_point,
+        )?;
+        Ok(Self {
+            // No caret minimum is added to exact range geometry. In particular,
+            // paragraph marks keep their measured height and zero advance.
+            text: screen_rect(native_rect(text.unwrap())?, scale, origin)?,
+            control: screen_rect(native_rect(control)?, scale, origin)?,
+        })
+    }
+
     pub(crate) fn from_root_bounds(
         caret: FerroRect,
         control: FerroRect,
@@ -330,3 +448,7 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+#[path = "core_text_range_geometry_tests.rs"]
+mod range_geometry_tests;

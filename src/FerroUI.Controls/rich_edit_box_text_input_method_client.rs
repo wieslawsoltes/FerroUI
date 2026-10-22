@@ -2,7 +2,8 @@ use crate::rich_text::{EditorSelection, RichTextEditor};
 use crate::RichEditBox;
 use ferroui_base::input::text_input::{
     ContextMenuAction, TextInputMethodClient, TextInputMethodClientEvents, TextInputMethodEdit,
-    TextInputMethodEditing, TextInputMethodError, TextInputMethodState, TextSelection,
+    TextInputMethodEditing, TextInputMethodError, TextInputMethodRangeGeometry,
+    TextInputMethodState, TextSelection,
 };
 use ferroui_base::input::InputElement;
 use ferroui_base::{Rect, Ref, Visual, WeakRef};
@@ -108,6 +109,12 @@ impl TextInputMethodClient for RichEditBoxTextInputMethodClient {
     fn cursor_rectangle(&self) -> Rect {
         self.owner()
             .map_or_else(Rect::default, |owner| owner.cursor_rectangle())
+    }
+    fn text_range_geometry(
+        &self,
+        range: TextSelection,
+    ) -> Result<TextInputMethodRangeGeometry, TextInputMethodError> {
+        self.query_text_range_geometry(range)
     }
     fn selection(&self) -> TextSelection {
         self.owner().map_or_else(TextSelection::default, |owner| {
@@ -251,3 +258,6 @@ impl TextInputMethodEditing for RichEditBoxTextInputMethodClient {
 #[cfg(test)]
 #[path = "rich_edit_input_method_tests.rs"]
 mod tests;
+
+#[path = "rich_edit_input_range_geometry.rs"]
+mod range_geometry;

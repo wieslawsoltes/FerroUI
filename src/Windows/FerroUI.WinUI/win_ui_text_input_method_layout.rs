@@ -169,6 +169,42 @@ impl WinUITextInputMethod {
             .is_some_and(|context| std::ptr::eq(&**context, sender))
     }
 
+    fn layout_text_geometry_is_current(
+        &self,
+        state: &LayoutRequestState,
+        owner: &LayoutOwner,
+        text: &CoreTextTextGeometry,
+    ) -> bool {
+        // Run ownership/revision accessors before the geometry guard. The rich
+        // guard ends with cached identity checks; its Base wrapper also rejects
+        // visual changes made while it is validating the captured layout.
+        self.layout_owner_is_current(state, owner)
+            && text.is_current()
+            && self.layout_request_epoch_is_current(state)
+    }
+
+    fn query_layout_text_geometry(
+        &self,
+        state: &LayoutRequestState,
+        owner: &LayoutOwner,
+        read_range: impl FnOnce() -> Result<CoreTextRange, HResult>,
+    ) -> Result<Option<CoreTextTextGeometry>, HResult> {
+        if !self.layout_owner_is_current(state, owner) {
+            return Ok(None);
+        }
+        let range = read_range()?;
+        if !self.layout_owner_is_current(state, owner) {
+            return Ok(None);
+        }
+        let range = TextSelection::new(range.start_caret_position, range.end_caret_position);
+        let Ok(text) = CoreTextTextGeometry::query(&*state.client, range, state.cursor_rect) else {
+            return Ok(None);
+        };
+        Ok(self
+            .layout_text_geometry_is_current(state, owner, &text)
+            .then_some(text))
+    }
+
     fn on_layout_requested(
         &self,
         sender: &ICoreTextEditContext,
@@ -188,17 +224,25 @@ impl WinUITextInputMethod {
             let Some(owner) = self.capture_layout_owner(&state) else {
                 return Ok(());
             };
-            let geometry = self.compute_screen_layout(&state, &owner)?;
+            let Some(text) = self.query_layout_text_geometry(&state, &owner, || request.range())?
+            else {
+                return Ok(());
+            };
+            if request.is_canceled()? != 0
+                || !self.layout_sender_is_current(sender)
+                || !self.layout_text_geometry_is_current(&state, &owner, &text)
+            {
+                return Ok(());
+            }
+            let geometry = self.compute_screen_layout(&state, &owner, &text)?;
             let bounds = request.layout_bounds()?.ok_or(HResult::POINTER)?;
-            // TextBounds still uses the current caret fallback. Honoring an
-            // arbitrary LayoutRequest.Range requires a client range-geometry
-            // contract for the same visible UTF-16 story, including preedit.
-            // These are text/control bounds, never candidate-window bounds.
+            // Requested visible-story text and the complete semantic control
+            // remain separate. These are never candidate-window rectangles.
             geometry.publish(
                 || {
                     request.is_canceled().is_ok_and(|canceled| canceled == 0)
                         && self.layout_sender_is_current(sender)
-                        && self.layout_owner_is_current(&state, &owner)
+                        && self.layout_text_geometry_is_current(&state, &owner, &text)
                 },
                 |rect| bounds.set_text_bounds(rect),
                 |rect| bounds.set_control_bounds(rect),
@@ -223,9 +267,10 @@ impl WinUITextInputMethod {
         &self,
         state: &LayoutRequestState,
         owner: &LayoutOwner,
+        text: &CoreTextTextGeometry,
     ) -> Result<CoreTextLayoutBounds, HResult> {
         let ensure_current = || {
-            if self.layout_owner_is_current(state, owner) {
+            if self.layout_text_geometry_is_current(state, owner, text) {
                 Ok(())
             } else {
                 Err(HResult::ABORT)
@@ -254,17 +299,34 @@ impl WinUITextInputMethod {
         }
         let origin = client_origin_on_screen(hwnd).ok_or(HResult::HANDLE)?;
         ensure_current()?;
-        CoreTextLayoutBounds::from_root_bounds(
-            state.cursor_rect,
-            owner.control_bounds,
-            scale,
-            origin,
-            |rect| {
-                ensure_current()?;
-                let transformed = transform.transform_bounds(rect)?;
-                ensure_current()?;
-                Ok(transformed)
-            },
-        )
+        match text {
+            CoreTextTextGeometry::Requested(geometry) => {
+                CoreTextLayoutBounds::from_owner_fragments(
+                    geometry.fragments(),
+                    FerroRect::from_size(owner.owner_bounds.size()),
+                    owner.owner_to_root,
+                    scale,
+                    origin,
+                    |point| {
+                        ensure_current()?;
+                        let transformed = transform.transform_point(point)?;
+                        ensure_current()?;
+                        Ok(transformed)
+                    },
+                )
+            }
+            CoreTextTextGeometry::LegacyCaret(caret) => CoreTextLayoutBounds::from_root_bounds(
+                *caret,
+                owner.control_bounds,
+                scale,
+                origin,
+                |rect| {
+                    ensure_current()?;
+                    let transformed = transform.transform_bounds(rect)?;
+                    ensure_current()?;
+                    Ok(transformed)
+                },
+            ),
+        }
     }
 }

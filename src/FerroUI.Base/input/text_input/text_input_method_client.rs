@@ -1,4 +1,7 @@
-use super::{TextInputMethodConnection, TextInputMethodEditing};
+use super::{
+    TextInputMethodConnection, TextInputMethodEditing, TextInputMethodError,
+    TextInputMethodRangeGeometry,
+};
 use crate::input::InputElement;
 use crate::reactive::{Disposable, IDisposable};
 use crate::utilities::HandlerList;
@@ -6,7 +9,7 @@ use crate::{Rect, Ref, Visual};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
-/// The start and the end of a selection, in characters.
+/// The start and the end of a selection, in UTF-16 code units.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub struct TextSelection {
     pub start: i32,
@@ -145,6 +148,23 @@ pub trait TextInputMethodClient {
     /// Gets the cursor rectangle relative to the semantic input owner. The
     /// text-view visual is observed for layout changes; it may be a descendant.
     fn cursor_rectangle(&self) -> Rect;
+
+    /// Queries an ordered range of the visible UTF-16 story, including any
+    /// composition preview. The result covers the requested range without
+    /// changing selection, scrolling, composition or history. Read-only range
+    /// endpoints can lie inside a shaped cluster or a surrogate pair: use the
+    /// formatter's cluster bounds and insertion-edge rules for those positions.
+    ///
+    /// `Unsupported` preserves the platform's legacy caret fallback. A client
+    /// that implements this capability returns `Unavailable` for hidden or
+    /// unformatted text, `InvalidRange` for invalid offsets, and `StateChanged`
+    /// for reentrant invalidation; these must never fall back to another caret.
+    fn text_range_geometry(
+        &self,
+        _range: TextSelection,
+    ) -> Result<TextInputMethodRangeGeometry, TextInputMethodError> {
+        Err(TextInputMethodError::Unsupported)
+    }
 
     /// Gets the selection that is currently active.
     fn selection(&self) -> TextSelection;

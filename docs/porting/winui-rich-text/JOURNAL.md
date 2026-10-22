@@ -1113,3 +1113,21 @@ this checkpoint. Natural lines still use the shared formatter's half-gap and
 actual fallback-face metrics; native requested-family metrics and per-run object
 bounds are a subsequent implementation. Source formula agreement is not native
 font selection, LineServices or pixel conformance.
+
+## 2026-10-22 — Connect exact requested-range input geometry
+
+The shared input client now has an optional requested-range geometry capability.
+RichEditBox supplies exact UTF-16 ranges from current shaped fragments, including
+insertion and line-break positions, composition previews and complete linked-page
+coverage. Stale source, layout, owner or connection state rejects the query.
+CoreText transforms every fragment corner to screen coordinates before union;
+only an unsupported client uses the existing caret fallback.
+
+The portable gates pass three Base geometry tests, 13 rich-control tests and
+eight CoreText host tests; full WinUI host passes 50 and Win32 host 329. The
+overflow fixture uses its already attached parent rather than reparenting a
+control whose old child collection still owns it. Five Windows-specific native
+adapter regressions compile/run only in the separate Windows gate after push.
+`INPUT-GEOMETRY.md` documents the capability, ownership checks and limits; this
+framework translation does not claim native WinUI engine geometry or candidate
+window verification.

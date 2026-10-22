@@ -57,6 +57,7 @@ pub struct RichTextBlock {
     font_features_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     source: RefCell<Option<Rc<RichTextSource>>>,
     layout: RefCell<Option<Rc<RichTextLayout>>>,
+    layout_generation: Cell<u64>,
     constraint: Cell<Size>,
     selection_start: Cell<usize>,
     selection_end: Cell<usize>,
@@ -314,7 +315,7 @@ impl LayoutableImpl for RichTextBlock {
     fn measure_override(this: &Self, available_size: Size) -> Size {
         let inner = this.text_layout_constraint(available_size);
         if this.constraint.replace(inner) != inner {
-            this.layout.borrow_mut().take();
+            this.clear_page_layout();
         }
         if this.flow_parent.borrow().is_none() {
             let mut changed = false;
@@ -323,7 +324,7 @@ impl LayoutableImpl for RichTextBlock {
             }
             if changed {
                 this.source.borrow_mut().take();
-                this.layout.borrow_mut().take();
+                this.clear_page_layout();
             }
         }
         this.page_layout().size.inflate(this.text_insets())
@@ -332,7 +333,7 @@ impl LayoutableImpl for RichTextBlock {
     fn arrange_override(this: &Self, final_size: Size) -> Size {
         let inner = this.text_layout_constraint(final_size);
         if this.constraint.replace(inner) != inner {
-            this.layout.borrow_mut().take();
+            this.clear_page_layout();
         }
         let layout = this.page_layout();
         let children = layout.embedded_controls(this.text_origin());
@@ -360,7 +361,7 @@ impl LayoutableImpl for RichTextBlock {
     }
 
     fn on_measure_invalidated(this: &Self) {
-        this.layout.borrow_mut().take();
+        this.clear_page_layout();
         Self::parent_on_measure_invalidated(this);
     }
 }
@@ -760,6 +761,7 @@ impl RichTextBlock {
             font_features_subscription: RefCell::new(None),
             source: RefCell::new(None),
             layout: RefCell::new(None),
+            layout_generation: Cell::new(0),
             constraint: Cell::new(Size::new(f64::INFINITY, f64::INFINITY)),
             selection_start: Cell::new(0),
             selection_end: Cell::new(0),
@@ -1614,17 +1616,34 @@ impl RichTextBlock {
         self.invalidate_layout();
     }
     fn invalidate_layout(&self) {
-        self.layout.borrow_mut().take();
+        self.clear_page_layout();
         self.invalidate_measure();
         self.invalidate_visual();
         if let Some(target) = self.overflow_content_target() {
             target.invalidate_layout();
         }
     }
+    fn clear_page_layout(&self) {
+        self.layout_generation.set(self.layout_generation.get().wrapping_add(1));
+        self.layout.borrow_mut().take();
+    }
+
+    /// Detects invalidation even while an outer formatter call is constructing
+    /// a layout that has not yet been published in the cache.
+    pub(crate) fn page_layout_generation(&self) -> u64 {
+        self.layout_generation.get()
+    }
+
+    /// Observes the current layout identity without formatting or callbacks.
+    pub(crate) fn cached_page_layout(&self) -> Option<Rc<RichTextLayout>> {
+        self.layout.borrow().clone()
+    }
+
     pub(crate) fn page_layout(&self) -> Rc<RichTextLayout> {
         if let Some(layout) = self.layout.borrow().as_ref() {
             return layout.clone();
         }
+        let generation = self.layout_generation.get();
         let parent = self
             .flow_parent
             .borrow()
@@ -1634,12 +1653,14 @@ impl RichTextBlock {
             let layout = parent.page_layout();
             (layout.source.clone(), layout.next.clone())
         } else {
-            let source = self
-                .source
-                .borrow()
-                .clone()
+            // Building runs can call custom text elements. Release the cache
+            // borrow before doing so and preserve any newer reentrant source.
+            let cached_source = self.source.borrow().clone();
+            let source = cached_source
                 .unwrap_or_else(|| RichTextSource::new(&self.document(), self));
-            *self.source.borrow_mut() = Some(source.clone());
+            if self.layout_generation.get() == generation {
+                *self.source.borrow_mut() = Some(source.clone());
+            }
             (source, RichTextBreak::default())
         };
         let constraint = self.constraint.get();
@@ -1652,12 +1673,18 @@ impl RichTextBlock {
             self.overflow_content_target().is_none(),
             &start,
         );
-        let old_overflow = self.reported_overflow.replace(layout.has_overflow);
-        let old_trimmed = self.reported_trimmed.replace(layout.is_trimmed);
         let baseline = layout
             .metrics(self.text_origin())
             .first()
             .map_or(0.0, |line| line.baseline);
+        if self.layout_generation.get() != generation {
+            // A formatter, embedded control or virtual origin may invalidate
+            // this view or publish a newer nested layout. Do not install the
+            // preceding source or report its metrics as the current cache.
+            return layout;
+        }
+        let old_overflow = self.reported_overflow.replace(layout.has_overflow);
+        let old_trimmed = self.reported_trimmed.replace(layout.is_trimmed);
         let old_baseline = self.reported_baseline.replace(baseline);
         // Publish the complete cache before invoking property or routed-event
         // handlers; they may immediately ask for layout or trimming state.
