@@ -1,4 +1,4 @@
-# WinUI binding compiler fixtures
+# Native control and WinUI binding compiler fixtures
 
 These small, original fixtures exercise the opt-in WinUI property-path binding
 contract through the runtime interpreter and through actual Rust emitted by the
@@ -19,7 +19,15 @@ The opt-in migration expands `Icon="Mail"` and `QueryIcon="Find"` into separate
 SymbolIcon objects. Selection, nonselecting footer invocation, ancestor state,
 removal and instance ownership are checked on the constructed native controls.
 
-The test first migrates the original WinUI namespace and x:Bind syntax using
+`native_controls.xaml` uses the ordinary FerroUI presentation namespace directly,
+without a migration policy. It constructs the promoted controls, icon sources and
+template settings, while retaining the established `Page`/`ContentPage` and
+`NumericUpDown` identities alongside `FramePage` and `NumberBox`. The interpreter
+and the emitted Rust must create the same native types and property values. The
+test host supplies the standard mock rendering and font services so path geometry
+and text controls exercise their normal construction paths.
+
+The WinUI-source fixtures first migrate the original namespace and x:Bind syntax using
 `PropertyPathsWithExplicitLifecycle`. The generated file is the output of
 `rust_emitter::generate_file`; rustc compiles that file as part of the integration
 test. Its build functions execute directly, with the same root service provider

@@ -59,11 +59,23 @@ releases its control tree and callback state.
 include button click output and disabled options, original two/three-state and
 select-all check-box handlers, password validation/reveal, text character counts,
 sliders, selection, layout, dates, menus, flyouts,
-scrolling, resources and element-name binding. The opt-in WinUI NumberBox, RadioButtons,
+scrolling, resources and element-name binding. The native NumberBox, RadioButtons,
 FontIcon, SymbolIcon, AutoSuggestBox, InfoBar, InfoBadge, ProgressRing, RatingControl,
-NavigationView and Frame/Page contracts are exercised directly by examples
+NavigationView and Frame/FramePage contracts are exercised directly by examples
 adapted from upstream. They use the framework's property, input, layout, drawing,
 popup and automation infrastructure.
+
+These controls are ordinary `ferroui_controls` exports and use the default FerroUI
+XAML namespace. The reviewed native pages have no compatibility namespace prefix.
+`FramePage` is the explicit destination type for Frame navigation; the existing
+`Page` hierarchy keeps its original asynchronous navigation contract. Frame-specific
+arguments and options use `ferroui_controls::navigation` / `FerroUI.Navigation`.
+The source importer remains explicit so unsupported upstream syntax still produces
+diagnostics.
+
+The [native-control migration guide](../../docs/porting/winui-gallery/NATIVE-CONTROLS.md)
+lists all 16 promoted control mappings, standard builders, helper namespaces and
+examples for updating native application code.
 
 Both AutoSuggestBox examples keep the original event-reason checks, word matching,
 chosen-suggestion precedence and no-results behavior. The detail view uses the
@@ -84,7 +96,7 @@ resource keys and use the explicit Style-to-ControlTheme migration policy.
 `navigation_view_samples.rs` ports all eight original NavigationView compositions:
 adaptive left navigation, top navigation, orientation switching, focus-following tabs,
 data-bound categories, footer items, hierarchy and the API-options form. Distinct
-native Frame/Page factories preserve the original destinations. Category template
+native Frame/FramePage factories preserve the original destinations. Category template
 selection, adaptive triggers and C# handlers are explicit Rust adaptations; source
 quirks and the remaining overflow, selector, transition and platform requirements
 are documented in the example ledger and control contracts.
@@ -145,13 +157,23 @@ preview behavior and actual native event/property interactions. Tests that const
 controls do not claim an interactive desktop run, pixel equality, keyboard traversal,
 screen-reader interoperability or verification on every host.
 
+The **native control promotion** has a new
+[execution record](../../docs/porting/winui-gallery/data/executions/native-controls-005.json):
+**182 native control tests passed across 12 targets**, with **53 source hashes**
+checked before and after execution. All 521 current API evidence entries reference
+this record. The current maps report **315 type candidates, 1,537 member candidates
+and 205 additive types**; the new source matches are `NumberBoxValueChangedEventArgs`
+and its `OldValue`/`NewValue` members. Behavior classifications and page statuses are
+unchanged. Loader, theme and Gallery results below remain tied to their stated
+historical checkpoints.
+
 The **main integration checkpoint `7c679ceb`** incorporates main's TextLineBounds
 work at `0ce4e90c` and regenerates the complete combined WinUI theme reference.
 Local validation passed **295 WinUI theme tests** (two ignored), the explicit
 reference-regeneration test, and **19 focused tests** across Base, Controls, enum
 registration, generated public paths and Skia (one ignored regeneration task).
 The six focused commands checked source equality before and after execution.
-The current maps identify **1,535 member candidates** and **204 additive types**;
+The checkpoint maps identify **1,535 member candidates** and **204 additive types**;
 these lexical counts do not promote a behavior or Gallery page to complete parity.
 The [main integration record](../../docs/porting/winui-gallery/data/navigation-main-integration.json)
 preserves the exact commands and separates this evidence from earlier native and
@@ -197,12 +219,13 @@ with the workspace. All three jobs in the
 passed. Exact commands, versions and hashes are in the
 [integration record](../../docs/porting/winui-gallery/data/integration-validation.json).
 
-The separate
+The current
 [theme resource/style ledger](../../docs/porting/winui-theme/TRACKING.md) records
-6,912 ported, 1,986 waived and 75 pending entries: InfoBadge 27, ProgressRing 8,
-RatingControl 35 and NavigationView styles 5 remain pending in the strict
-source-definition inventory. The native NavigationView metadata templates do not
-count as ports of the five pending source styles.
+6,912 ported, 1,974 waived and 87 pending entries: InfoBadge 27, ProgressRing 8,
+RatingControl 35, NavigationView styles 5 and RadioButtons 12 remain pending in the
+strict source-definition inventory. The twelve RadioButtons entries moved from
+obsolete no-control waivers to pending after native promotion. Native metadata
+templates do not establish ports of the corresponding source definitions.
 
 Integration CI rendered **all 126 pages in light** and **eight pages in dark** with
 real Skia/HarfBuzz. All **134 PNGs** decoded as nonblank, opaque 1280 × 900 frames,
@@ -263,7 +286,9 @@ windowing, notifications, islands, storage, media, WebView, composition, advance
 inking and controls still in separate PRs need their platform/control implementation
 and integration. The catalog entry stays available while those contracts are pending.
 
-WinUI-specific control wrappers must remain opt-in wherever a shared control's default
-values or ownership semantics differ. Shared API names and behaviors are preserved;
-an explicit adaptation (for example `ListView` to `ListBox`) is documented in this
-sample and never counted as full WinUI API parity.
+New control implementations belong to FerroUI's ordinary namespaces. A source
+contract that conflicts with an existing native type receives an explicit mapping,
+such as `Page` to `FramePage`, preserving the original API and behavior. Adaptations
+such as `ListView` to `ListBox` remain documented and do not establish full WinUI API
+parity. Moving a control to the native namespace does not change its recorded
+behavioral, visual or platform acceptance state.

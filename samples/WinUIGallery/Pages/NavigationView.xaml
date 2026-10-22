@@ -1,6 +1,6 @@
 <!-- Adapted from all eight NavigationView ControlExamples at the pinned Gallery revision; see ../NOTICE.md.
      Source handlers, category template dispatch and the adaptive trigger are in navigation_view_samples.rs. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:winui="using:FerroUI.Controls.WinUI" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
   <TextBlock Text="NavigationView with default PaneDisplayMode" FontSize="18" TextWrapping="Wrap" />
   <Grid>
     <Grid.RowDefinitions>
@@ -8,31 +8,31 @@
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
     <TextBlock Margin="0,0,0,12" Text="If you have five or more equally important navigation categories that should prominently appear on larger window widths, consider using a left navigation pane." TextWrapping="Wrap" />
-    <winui:NavigationView x:Name="nvSample5" Grid.Row="1" Height="460" Header="This is Header Text" Focusable="False" PaneDisplayMode="Auto">
-      <winui:NavigationView.MenuItems>
-        <winui:NavigationViewItem Content="Menu Item1" Tag="SamplePage1">
-          <winui:NavigationViewItem.Icon>
-            <winui:SymbolIcon Symbol="Play" />
-          </winui:NavigationViewItem.Icon>
-        </winui:NavigationViewItem>
-        <winui:NavigationViewItem Content="Menu Item2" Tag="SamplePage2">
-          <winui:NavigationViewItem.Icon>
-            <winui:SymbolIcon Symbol="Save" />
-          </winui:NavigationViewItem.Icon>
-        </winui:NavigationViewItem>
-        <winui:NavigationViewItem Content="Menu Item3" Tag="SamplePage3">
-          <winui:NavigationViewItem.Icon>
-            <winui:SymbolIcon Symbol="Refresh" />
-          </winui:NavigationViewItem.Icon>
-        </winui:NavigationViewItem>
-        <winui:NavigationViewItem Content="Menu Item4" Tag="SamplePage4">
-          <winui:NavigationViewItem.Icon>
-            <winui:SymbolIcon Symbol="Download" />
-          </winui:NavigationViewItem.Icon>
-        </winui:NavigationViewItem>
-      </winui:NavigationView.MenuItems>
-      <winui:Frame x:Name="contentFrame5" Margin="0,0,0,0" />
-    </winui:NavigationView>
+    <NavigationView x:Name="nvSample5" Grid.Row="1" Height="460" Header="This is Header Text" Focusable="False" PaneDisplayMode="Auto">
+      <NavigationView.MenuItems>
+        <NavigationViewItem Content="Menu Item1" Tag="SamplePage1">
+          <NavigationViewItem.Icon>
+            <SymbolIcon Symbol="Play" />
+          </NavigationViewItem.Icon>
+        </NavigationViewItem>
+        <NavigationViewItem Content="Menu Item2" Tag="SamplePage2">
+          <NavigationViewItem.Icon>
+            <SymbolIcon Symbol="Save" />
+          </NavigationViewItem.Icon>
+        </NavigationViewItem>
+        <NavigationViewItem Content="Menu Item3" Tag="SamplePage3">
+          <NavigationViewItem.Icon>
+            <SymbolIcon Symbol="Refresh" />
+          </NavigationViewItem.Icon>
+        </NavigationViewItem>
+        <NavigationViewItem Content="Menu Item4" Tag="SamplePage4">
+          <NavigationViewItem.Icon>
+            <SymbolIcon Symbol="Download" />
+          </NavigationViewItem.Icon>
+        </NavigationViewItem>
+      </NavigationView.MenuItems>
+      <Frame x:Name="contentFrame5" Margin="0,0,0,0" />
+    </NavigationView>
   </Grid>
   <TextBlock Text="NavigationView with PaneDisplayMode set to Top" FontSize="18" TextWrapping="Wrap" />
   <Grid>
@@ -41,15 +41,15 @@
       <RowDefinition />
     </Grid.RowDefinitions>
     <TextBlock Margin="0,0,0,12" Text="If you have equally important navigation categories that should be de-emphasized relative to the content of your app, consider using a top navigation pane." TextWrapping="Wrap" />
-    <winui:NavigationView x:Name="nvSample6" Grid.Row="1" Height="460" Header="This is Header Text" Focusable="False" PaneDisplayMode="Top">
-      <winui:NavigationView.MenuItems>
-        <winui:NavigationViewItem Content="Menu Item1" Tag="SamplePage1" />
-        <winui:NavigationViewItem Content="Menu Item2" Tag="SamplePage2" />
-        <winui:NavigationViewItem Content="Menu Item3" Tag="SamplePage3" />
-        <winui:NavigationViewItem Content="Menu Item4" Tag="SamplePage3" />
-      </winui:NavigationView.MenuItems>
-      <winui:Frame x:Name="contentFrame6" />
-    </winui:NavigationView>
+    <NavigationView x:Name="nvSample6" Grid.Row="1" Height="460" Header="This is Header Text" Focusable="False" PaneDisplayMode="Top">
+      <NavigationView.MenuItems>
+        <NavigationViewItem Content="Menu Item1" Tag="SamplePage1" />
+        <NavigationViewItem Content="Menu Item2" Tag="SamplePage2" />
+        <NavigationViewItem Content="Menu Item3" Tag="SamplePage3" />
+        <NavigationViewItem Content="Menu Item4" Tag="SamplePage3" />
+      </NavigationView.MenuItems>
+      <Frame x:Name="contentFrame6" />
+    </NavigationView>
   </Grid>
   <TextBlock Text="NavigationView that switches pane orientation based on window width" FontSize="18" TextWrapping="Wrap" />
   <Grid x:Name="InnerGrid">
@@ -58,17 +58,17 @@
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
     <TextBlock Margin="0,0,0,12" Text="If you have equally important navigation categories and limited app content space, consider using a top navigation pane on larger window widths and a minimal left navigation pane on smaller window widths." TextWrapping="Wrap" />
-    <winui:NavigationView x:Name="nvSample2" Grid.Row="1" Height="460" Focusable="False" PaneDisplayMode="Auto">
-      <winui:NavigationView.MenuItems>
-        <winui:NavigationViewItem Content="Menu Item1" Tag="SamplePage1" />
-        <winui:NavigationViewItem Content="Menu Item2" Tag="SamplePage2" />
-        <winui:NavigationViewItem Content="Menu Item3" Tag="SamplePage3" />
-        <winui:NavigationViewItem Content="Menu Item4" Tag="SamplePage4" />
-      </winui:NavigationView.MenuItems>
-      <winui:NavigationView.Content>
-        <winui:Frame x:Name="contentFrame2" />
-      </winui:NavigationView.Content>
-    </winui:NavigationView>
+    <NavigationView x:Name="nvSample2" Grid.Row="1" Height="460" Focusable="False" PaneDisplayMode="Auto">
+      <NavigationView.MenuItems>
+        <NavigationViewItem Content="Menu Item1" Tag="SamplePage1" />
+        <NavigationViewItem Content="Menu Item2" Tag="SamplePage2" />
+        <NavigationViewItem Content="Menu Item3" Tag="SamplePage3" />
+        <NavigationViewItem Content="Menu Item4" Tag="SamplePage4" />
+      </NavigationView.MenuItems>
+      <NavigationView.Content>
+        <Frame x:Name="contentFrame2" />
+      </NavigationView.Content>
+    </NavigationView>
   </Grid>
   <TextBlock Text="Tying selection and focus - Tabs" FontSize="18" TextWrapping="Wrap" />
   <Grid>
@@ -77,15 +77,15 @@
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
     <TextBlock Margin="0,0,0,12" Text="For the tabs pattern, ensure that you unify selection and focus by setting the SelectionFollowsFocus property to Enabled. If using a Frame to swap out content, then navigating between items shouldn't be recorded into the Frame's navigation stack. Please see the C# in the sample below to understand how to do this." TextWrapping="Wrap" />
-    <winui:NavigationView x:Name="nvSample7" Grid.Row="1" Height="460" IsBackButtonVisible="Collapsed" Focusable="False" PaneDisplayMode="Top" SelectionFollowsFocus="Enabled">
-      <winui:NavigationView.MenuItems>
-        <winui:NavigationViewItem Content="Item1" Tag="SamplePage1" />
-        <winui:NavigationViewItem Content="Item2" Tag="SamplePage2" />
-        <winui:NavigationViewItem Content="Item3" Tag="SamplePage3" />
-        <winui:NavigationViewItem Content="Item4" Tag="SamplePage4" />
-      </winui:NavigationView.MenuItems>
-      <winui:Frame x:Name="contentFrame7" />
-    </winui:NavigationView>
+    <NavigationView x:Name="nvSample7" Grid.Row="1" Height="460" IsBackButtonVisible="Collapsed" Focusable="False" PaneDisplayMode="Top" SelectionFollowsFocus="Enabled">
+      <NavigationView.MenuItems>
+        <NavigationViewItem Content="Item1" Tag="SamplePage1" />
+        <NavigationViewItem Content="Item2" Tag="SamplePage2" />
+        <NavigationViewItem Content="Item3" Tag="SamplePage3" />
+        <NavigationViewItem Content="Item4" Tag="SamplePage4" />
+      </NavigationView.MenuItems>
+      <Frame x:Name="contentFrame7" />
+    </NavigationView>
   </Grid>
   <TextBlock Text="Data binding" FontSize="18" TextWrapping="Wrap" />
   <Grid>
@@ -94,11 +94,11 @@
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
     <TextBlock Margin="0,0,0,12" Text="When data binding, use the MenuItemsSource property to bind to an observable collection of items, and do not set the MenuItems property. In addition, set the MenuItemTemplate property and use a NavigationViewItem as the data template. If you wish to bind to the header content as well, use data template selectors via the MenuItemTemplateSelector property. " TextWrapping="Wrap" />
-    <winui:NavigationView x:Name="nvSample4" Grid.Row="2" Height="460" Focusable="False">
+    <NavigationView x:Name="nvSample4" Grid.Row="2" Height="460" Focusable="False">
       <StackPanel>
-        <winui:Frame x:Name="contentFrame4" Margin="0,0,0,0" />
+        <Frame x:Name="contentFrame4" Margin="0,0,0,0" />
       </StackPanel>
-    </winui:NavigationView>
+    </NavigationView>
   </Grid>
   <TextBlock Text="NavigationView with Footer Menu Items" FontSize="18" TextWrapping="Wrap" />
   <Grid ColumnDefinitions="*,240" ColumnSpacing="24">
@@ -108,49 +108,49 @@
         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
       <TextBlock Margin="0,0,0,12" Text="You can add clickable menu items to the footer of your NavigationView that participate in the same selection model as items in the main menu. In Top PaneDisplayMode, these items will appear aligned to the right of the NavigationView. In Left PaneDisplayMode, these items will appear aligned to the bottom of the NavigationView. " TextWrapping="Wrap" />
-      <winui:NavigationView x:Name="nvSample9" Grid.Row="1" Height="460" Header="This is Header Text" IsSettingsVisible="False" Focusable="False" PaneDisplayMode="Left">
-        <winui:NavigationView.MenuItems>
-          <winui:NavigationViewItem Content="Browse" Tag="SamplePage1">
-            <winui:NavigationViewItem.Icon>
-              <winui:SymbolIcon Symbol="Library" />
-            </winui:NavigationViewItem.Icon>
-          </winui:NavigationViewItem>
-          <winui:NavigationViewItem Content="Track an Order" Tag="SamplePage2">
-            <winui:NavigationViewItem.Icon>
-              <winui:SymbolIcon Symbol="Map" />
-            </winui:NavigationViewItem.Icon>
-          </winui:NavigationViewItem>
-          <winui:NavigationViewItem Content="Order History" Tag="SamplePage3">
-            <winui:NavigationViewItem.Icon>
-              <winui:SymbolIcon Symbol="Tag" />
-            </winui:NavigationViewItem.Icon>
-          </winui:NavigationViewItem>
-        </winui:NavigationView.MenuItems>
-        <winui:NavigationView.FooterMenuItems>
-          <winui:NavigationViewItem Content="Account" Tag="SamplePage4">
-            <winui:NavigationViewItem.Icon>
-              <winui:SymbolIcon Symbol="Contact" />
-            </winui:NavigationViewItem.Icon>
-          </winui:NavigationViewItem>
-          <winui:NavigationViewItem Content="Your Cart" Tag="SamplePage5">
-            <winui:NavigationViewItem.Icon>
-              <winui:SymbolIcon Symbol="Shop" />
-            </winui:NavigationViewItem.Icon>
-          </winui:NavigationViewItem>
-          <winui:NavigationViewItem Content="Help" Tag="SamplePage5">
-            <winui:NavigationViewItem.Icon>
-              <winui:SymbolIcon Symbol="Help" />
-            </winui:NavigationViewItem.Icon>
-          </winui:NavigationViewItem>
-        </winui:NavigationView.FooterMenuItems>
-        <winui:Frame x:Name="contentFrame9" Margin="0,0,0,0" />
-      </winui:NavigationView>
+      <NavigationView x:Name="nvSample9" Grid.Row="1" Height="460" Header="This is Header Text" IsSettingsVisible="False" Focusable="False" PaneDisplayMode="Left">
+        <NavigationView.MenuItems>
+          <NavigationViewItem Content="Browse" Tag="SamplePage1">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Library" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItem Content="Track an Order" Tag="SamplePage2">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Map" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItem Content="Order History" Tag="SamplePage3">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Tag" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+        </NavigationView.MenuItems>
+        <NavigationView.FooterMenuItems>
+          <NavigationViewItem Content="Account" Tag="SamplePage4">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Contact" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItem Content="Your Cart" Tag="SamplePage5">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Shop" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItem Content="Help" Tag="SamplePage5">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Help" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+        </NavigationView.FooterMenuItems>
+        <Frame x:Name="contentFrame9" Margin="0,0,0,0" />
+      </NavigationView>
     </Grid>
     <StackPanel Grid.Column="1">
-      <winui:RadioButtons Header="Pane position:" SelectedIndex="0">
+      <RadioButtons Header="Pane position:" SelectedIndex="0">
         <RadioButton x:Name="nvSample9Left" Content="Left mode" GroupName="footer" />
         <RadioButton x:Name="nvSample9Top" Content="Top mode" GroupName="footer" />
-      </winui:RadioButtons>
+      </RadioButtons>
     </StackPanel>
   </Grid>
   <TextBlock Text="Hierarchical NavigationView" FontSize="18" TextWrapping="Wrap" />
@@ -162,50 +162,50 @@
       </Grid.RowDefinitions>
       <TextBlock Grid.Row="0" Margin="0,0,0,12" TextWrapping="Wrap" />
       <TextBlock Text="NavigationView supports hierarchy in Left, LeftCompact, and Top display modes.&#10;In the example below, the &quot;Account&quot; tab navigates to its own page while &quot;Document options&quot; only opens up its subtree of items. This is done by setting the SelectsOnInvoked property to false on the Document options NavigationView Item.&#10;In both Top and Left modes, clicking the arrows on NavigationViewItems will expand or collapse the subtree. Clicking or tapping elsewhere on the NavigationViewItem will collapse or expand the subtree.&#10;Switch between the three pane display modes on the right." TextWrapping="Wrap" Margin="0,0,0,15" />
-      <winui:NavigationView x:Name="nvSample8" Grid.Row="1" Height="460" Focusable="False" PaneDisplayMode="Left">
-        <winui:NavigationView.MenuItems>
-          <winui:NavigationViewItem Content="Home" Tag="SamplePage1" ToolTip.Tip="Home">
-            <winui:NavigationViewItem.Icon>
-              <winui:SymbolIcon Symbol="Home" />
-            </winui:NavigationViewItem.Icon>
-          </winui:NavigationViewItem>
-          <winui:NavigationViewItem Content="Account" Tag="SamplePage2" ToolTip.Tip="Account">
-            <winui:NavigationViewItem.Icon>
-              <winui:SymbolIcon Symbol="Contact" />
-            </winui:NavigationViewItem.Icon>
-            <winui:NavigationViewItem.MenuItems>
-              <winui:NavigationViewItem Content="Mail" Tag="SamplePage3" ToolTip.Tip="Mail">
-                <winui:NavigationViewItem.Icon>
-                  <winui:SymbolIcon Symbol="Mail" />
-                </winui:NavigationViewItem.Icon>
-              </winui:NavigationViewItem>
-              <winui:NavigationViewItem Content="Calendar" Tag="SamplePage4" ToolTip.Tip="Calendar">
-                <winui:NavigationViewItem.Icon>
-                  <winui:SymbolIcon Symbol="Calendar" />
-                </winui:NavigationViewItem.Icon>
-              </winui:NavigationViewItem>
-            </winui:NavigationViewItem.MenuItems>
-          </winui:NavigationViewItem>
-          <winui:NavigationViewItem Content="Document options" SelectsOnInvoked="False" ToolTip.Tip="Document options">
-            <winui:NavigationViewItem.Icon>
-              <winui:SymbolIcon Symbol="Page2" />
-            </winui:NavigationViewItem.Icon>
-            <winui:NavigationViewItem.MenuItems>
-              <winui:NavigationViewItem Content="Create new" Tag="SamplePage5" ToolTip.Tip="Create new">
-                <winui:NavigationViewItem.Icon>
-                  <winui:SymbolIcon Symbol="NewFolder" />
-                </winui:NavigationViewItem.Icon>
-              </winui:NavigationViewItem>
-              <winui:NavigationViewItem Content="Upload file" Tag="SamplePage6" ToolTip.Tip="Upload file">
-                <winui:NavigationViewItem.Icon>
-                  <winui:SymbolIcon Symbol="OpenLocal" />
-                </winui:NavigationViewItem.Icon>
-              </winui:NavigationViewItem>
-            </winui:NavigationViewItem.MenuItems>
-          </winui:NavigationViewItem>
-        </winui:NavigationView.MenuItems>
-        <winui:Frame x:Name="contentFrame8" />
-      </winui:NavigationView>
+      <NavigationView x:Name="nvSample8" Grid.Row="1" Height="460" Focusable="False" PaneDisplayMode="Left">
+        <NavigationView.MenuItems>
+          <NavigationViewItem Content="Home" Tag="SamplePage1" ToolTip.Tip="Home">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Home" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItem Content="Account" Tag="SamplePage2" ToolTip.Tip="Account">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Contact" />
+            </NavigationViewItem.Icon>
+            <NavigationViewItem.MenuItems>
+              <NavigationViewItem Content="Mail" Tag="SamplePage3" ToolTip.Tip="Mail">
+                <NavigationViewItem.Icon>
+                  <SymbolIcon Symbol="Mail" />
+                </NavigationViewItem.Icon>
+              </NavigationViewItem>
+              <NavigationViewItem Content="Calendar" Tag="SamplePage4" ToolTip.Tip="Calendar">
+                <NavigationViewItem.Icon>
+                  <SymbolIcon Symbol="Calendar" />
+                </NavigationViewItem.Icon>
+              </NavigationViewItem>
+            </NavigationViewItem.MenuItems>
+          </NavigationViewItem>
+          <NavigationViewItem Content="Document options" SelectsOnInvoked="False" ToolTip.Tip="Document options">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Page2" />
+            </NavigationViewItem.Icon>
+            <NavigationViewItem.MenuItems>
+              <NavigationViewItem Content="Create new" Tag="SamplePage5" ToolTip.Tip="Create new">
+                <NavigationViewItem.Icon>
+                  <SymbolIcon Symbol="NewFolder" />
+                </NavigationViewItem.Icon>
+              </NavigationViewItem>
+              <NavigationViewItem Content="Upload file" Tag="SamplePage6" ToolTip.Tip="Upload file">
+                <NavigationViewItem.Icon>
+                  <SymbolIcon Symbol="OpenLocal" />
+                </NavigationViewItem.Icon>
+              </NavigationViewItem>
+            </NavigationViewItem.MenuItems>
+          </NavigationViewItem>
+        </NavigationView.MenuItems>
+        <Frame x:Name="contentFrame8" />
+      </NavigationView>
     </Grid>
     <StackPanel Grid.Column="1">
       <TextBlock Margin="0,12,0,0" Text="PanePosition:" />
@@ -216,51 +216,51 @@
   </Grid>
   <TextBlock Text="API in action" FontSize="18" TextWrapping="Wrap" />
   <Grid ColumnDefinitions="*,240" ColumnSpacing="24">
-    <winui:NavigationView x:Name="nvSample" Height="540" Margin="0,12,0,0" ExpandedModeThresholdWidth="500" Header="{Binding ElementName=headerText, Path=Text, Mode=TwoWay}" Focusable="False" PaneDisplayMode="Left" PaneTitle="{Binding ElementName=paneText, Path=Text, Mode=TwoWay}">
-      <winui:NavigationView.MenuItems>
-        <winui:NavigationViewItem x:Name="SamplePage1Item" Content="Menu Item1" Tag="SamplePage1">
-          <winui:NavigationViewItem.Icon>
-            <winui:SymbolIcon Symbol="Play" />
-          </winui:NavigationViewItem.Icon>
-        </winui:NavigationViewItem>
-        <winui:NavigationViewItemHeader Content="Actions" />
-        <winui:NavigationViewItem x:Name="SamplePage2Item" Content="Menu Item2" SelectsOnInvoked="True" Tag="SamplePage2">
-          <winui:NavigationViewItem.Icon>
-            <winui:SymbolIcon Symbol="Save" />
-          </winui:NavigationViewItem.Icon>
-        </winui:NavigationViewItem>
-        <winui:NavigationViewItem x:Name="SamplePage3Item" Content="Menu Item3" Tag="SamplePage3">
-          <winui:NavigationViewItem.Icon>
-            <winui:SymbolIcon Symbol="Refresh" />
-          </winui:NavigationViewItem.Icon>
-        </winui:NavigationViewItem>
-      </winui:NavigationView.MenuItems>
-      <winui:NavigationView.PaneCustomContent>
+    <NavigationView x:Name="nvSample" Height="540" Margin="0,12,0,0" ExpandedModeThresholdWidth="500" Header="{Binding ElementName=headerText, Path=Text, Mode=TwoWay}" Focusable="False" PaneDisplayMode="Left" PaneTitle="{Binding ElementName=paneText, Path=Text, Mode=TwoWay}">
+      <NavigationView.MenuItems>
+        <NavigationViewItem x:Name="SamplePage1Item" Content="Menu Item1" Tag="SamplePage1">
+          <NavigationViewItem.Icon>
+            <SymbolIcon Symbol="Play" />
+          </NavigationViewItem.Icon>
+        </NavigationViewItem>
+        <NavigationViewItemHeader Content="Actions" />
+        <NavigationViewItem x:Name="SamplePage2Item" Content="Menu Item2" SelectsOnInvoked="True" Tag="SamplePage2">
+          <NavigationViewItem.Icon>
+            <SymbolIcon Symbol="Save" />
+          </NavigationViewItem.Icon>
+        </NavigationViewItem>
+        <NavigationViewItem x:Name="SamplePage3Item" Content="Menu Item3" Tag="SamplePage3">
+          <NavigationViewItem.Icon>
+            <SymbolIcon Symbol="Refresh" />
+          </NavigationViewItem.Icon>
+        </NavigationViewItem>
+      </NavigationView.MenuItems>
+      <NavigationView.PaneCustomContent>
         <HyperlinkButton x:Name="PaneHyperlink" Margin="12,0" Content="More info" IsVisible="false" />
-      </winui:NavigationView.PaneCustomContent>
-      <winui:NavigationView.AutoSuggestBox>
-        <winui:AutoSuggestBox AutomationProperties.Name="Search" x:Name="NavigationSearch">
-          <winui:AutoSuggestBox.QueryIcon>
-            <winui:SymbolIcon Symbol="Find" />
-          </winui:AutoSuggestBox.QueryIcon>
-        </winui:AutoSuggestBox>
-      </winui:NavigationView.AutoSuggestBox>
-      <winui:NavigationView.PaneFooter>
+      </NavigationView.PaneCustomContent>
+      <NavigationView.AutoSuggestBox>
+        <AutoSuggestBox AutomationProperties.Name="Search" x:Name="NavigationSearch">
+          <AutoSuggestBox.QueryIcon>
+            <SymbolIcon Symbol="Find" />
+          </AutoSuggestBox.QueryIcon>
+        </AutoSuggestBox>
+      </NavigationView.AutoSuggestBox>
+      <NavigationView.PaneFooter>
         <StackPanel x:Name="FooterStackPanel" Orientation="Vertical" IsVisible="false">
-          <winui:NavigationViewItem AutomationProperties.Name="download">
-            <winui:NavigationViewItem.Icon>
-              <winui:SymbolIcon Symbol="Download" />
-            </winui:NavigationViewItem.Icon>
-          </winui:NavigationViewItem>
-          <winui:NavigationViewItem AutomationProperties.Name="favorite">
-            <winui:NavigationViewItem.Icon>
-              <winui:SymbolIcon Symbol="Favorite" />
-            </winui:NavigationViewItem.Icon>
-          </winui:NavigationViewItem>
+          <NavigationViewItem AutomationProperties.Name="download">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Download" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItem AutomationProperties.Name="favorite">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Favorite" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
         </StackPanel>
-      </winui:NavigationView.PaneFooter>
-      <winui:Frame x:Name="contentFrame" />
-    </winui:NavigationView>
+      </NavigationView.PaneFooter>
+      <Frame x:Name="contentFrame" />
+    </NavigationView>
     <StackPanel Grid.Column="1">
       <CheckBox x:Name="settingsCheck" Content="Settings item visible" IsChecked="True" />
       <CheckBox x:Name="visibleCheck" Content="Back button visible" IsChecked="True" />

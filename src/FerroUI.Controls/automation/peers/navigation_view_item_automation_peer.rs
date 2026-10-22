@@ -1,7 +1,7 @@
-// Copyright (c) Microsoft Corporation. Licensed under the MIT License. See NOTICE.md.
+// Copyright (c) Microsoft Corporation. Licensed under the MIT License. See ../../NOTICE.md.
 // Adapted from NavigationViewItemAutomationPeer.cpp at WinUI a71c42bd.
 
-use super::{NavigationView, NavigationViewItem, NavigationViewItemBase};
+use crate::{NavigationView, NavigationViewItem, NavigationViewItemBase};
 use crate::automation::peers::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, AutomationPeerImplExt,
     ControlAutomationPeer, ControlAutomationPeerImpl,

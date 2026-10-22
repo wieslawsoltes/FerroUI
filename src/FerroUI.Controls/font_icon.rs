@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. Licensed under the MIT License. See NOTICE.
+// Copyright (c) Microsoft Corporation. Licensed under the MIT License. See NOTICE.md.
 // Adapted from the FontIcon contract and text rendering behavior of WinUI.
 
 use crate::automation::{AccessibilityView, AutomationProperties};
@@ -33,7 +33,7 @@ pub struct FontIcon {
 }
 
 ferro_class!(FontIcon: IconElement);
-ferroui_base::ferro_class_info!(FontIcon { new: FontIcon::new, markup: { namespace: "FerroUI.Controls.WinUI" } });
+ferroui_base::ferro_class_info!(FontIcon { new: FontIcon::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(
     FontIcon: StyledElementImpl, LayoutableImpl, InteractiveImpl, InputElementImpl, ControlImpl
 );

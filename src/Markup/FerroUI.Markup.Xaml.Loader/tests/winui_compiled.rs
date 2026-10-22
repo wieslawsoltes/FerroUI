@@ -7,15 +7,25 @@
 
 use ferroui_base::controls::NameScope;
 use ferroui_base::input::{FocusChangedEventArgs, InputElement, Key, KeyEventArgs};
-use ferroui_base::Ref;
+use ferroui_base::metadata::from_markup_value;
+use ferroui_base::{Ref, TypeInfo};
+use ferroui_controls::navigation::NavigationCacheMode;
+use ferroui_controls::primitives::{
+    InfoBadgeTemplateSettings, InfoBarPanel, InfoBarTemplateSettings, ProgressRingTemplateSettings,
+};
 use ferroui_controls::templates::IDataTemplate;
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
-use ferroui_controls::winui::{
+use ferroui_controls::{
     Frame, NavigationView, NavigationViewBackButtonVisible, NavigationViewItem,
     NavigationViewItemHeader, NavigationViewItemSeparator, NavigationViewPaneDisplayMode, Symbol,
     SymbolIcon,
 };
-use ferroui_controls::{Button, ContentControl, Control, StackPanel, TextBlock, TextBox};
+use ferroui_controls::{
+    AutoSuggestBox, Button, ContentControl, ContentPage, Control, FontIcon, FontIconSource,
+    FramePage, InfoBadge, InfoBar, NumberBox, NumberBoxSpinButtonPlacementMode, NumericUpDown,
+    Page, PathIconSource, ProgressRing, RadioButtons, RatingControl, RatingItemFontInfo,
+    RatingItemImageInfo, RatingItemInfo, StackPanel, SymbolIconSource, TextBlock, TextBox,
+};
 use ferroui_markup_xaml::winui::WinUIBindings;
 use ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers;
 use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
@@ -32,6 +42,7 @@ mod generated;
 const ROOT: &str = include_str!("fixtures/winui_root.xaml");
 const TEMPLATE: &str = include_str!("fixtures/winui_template.xaml");
 const NAVIGATION: &str = include_str!("fixtures/winui_navigation.xaml");
+const NATIVE_CONTROLS: &str = include_str!("fixtures/native_controls.xaml");
 
 fn options() -> WinUIXamlOptions {
     WinUIXamlOptions {
@@ -42,7 +53,11 @@ fn options() -> WinUIXamlOptions {
 
 fn start() -> UnitTestApplicationScope {
     ferroui_markup_xaml::register_types();
-    UnitTestApplication::start(TestServices::mock_threading_interface())
+    // The native fixture realizes geometry-backed icon resources and text controls.
+    // Use the established mock render/font services while retaining default control metadata.
+    let mut services = TestServices::styled_window();
+    services.theme = None;
+    UnitTestApplication::start(services)
 }
 
 fn parts(root: &Control) -> (Ref<TextBlock>, Ref<TextBox>, Ref<TextBlock>) {
@@ -311,6 +326,66 @@ fn compiled_typed_templates_keep_live_bindings_and_recycling_independent() {
     assert_template_behavior(host.content_template().unwrap());
 }
 
+fn assert_native_controls(root: Ref<StackPanel>) {
+    let scope = NameScope::get_name_scope(&root).expect("native document name scope");
+    let existing_page = scope.find_as::<ContentPage>("ExistingPage").unwrap();
+    assert!(Page::TYPE.is_assignable_from(existing_page.get_type()));
+    assert_eq!(from_markup_value::<&'static TypeInfo>(&existing_page.tag()), Some(Page::TYPE));
+    assert!(!Page::TYPE.is_assignable_from(FramePage::TYPE));
+    assert!(std::ptr::eq(TypeInfo::find("FerroUI.Controls", "Page").unwrap(), Page::TYPE));
+    let page = scope.find_as::<FramePage>("NativePage").unwrap();
+    assert_eq!(page.navigation_cache_mode(), NavigationCacheMode::Required);
+    let frame = scope.find_as::<Frame>("NativeFrame").unwrap();
+    assert_eq!(frame.current_source_page_type(), Some(FramePage::TYPE));
+    let number = scope.find_as::<NumberBox>("Number").unwrap();
+    assert_eq!(number.value(), 12.0);
+    assert_eq!(number.spin_button_placement_mode(), NumberBoxSpinButtonPlacementMode::Inline);
+    assert!(scope.find_as::<NumericUpDown>("ExistingNumeric").is_some());
+    assert!(!NumericUpDown::TYPE.is_assignable_from(NumberBox::TYPE));
+    assert_eq!(scope.find_as::<RadioButtons>("Options").unwrap().selected_index(), 1);
+    assert_eq!(scope.find_as::<FontIcon>("Font").unwrap().glyph(), "B");
+    assert_eq!(scope.find_as::<SymbolIcon>("Symbol").unwrap().symbol(), Symbol::Accept);
+    let search = scope.find_as::<AutoSuggestBox>("Search").unwrap();
+    assert_eq!(search.text(), "Find");
+    assert_eq!(search.query_icon().unwrap().cast::<SymbolIcon>().unwrap().symbol(), Symbol::Find);
+    assert!(scope.find_as::<InfoBar>("Bar").unwrap().is_open());
+    let badge = scope.find_as::<InfoBadge>("Badge").unwrap();
+    assert_eq!(badge.value(), 7);
+    assert_eq!(badge.icon_source().unwrap().cast::<FontIconSource>().unwrap().glyph(), "A");
+    let ring = scope.find_as::<ProgressRing>("Ring").unwrap();
+    assert_eq!((ring.maximum(), ring.value()), (200.0, 42.0));
+    let rating = scope.find_as::<RatingControl>("Rating").unwrap();
+    assert_eq!(rating.placeholder_value(), 2.5);
+    assert_eq!(rating.item_info().unwrap().cast::<RatingItemFontInfo>().unwrap().unset_glyph(), "D");
+    assert_eq!(scope.find_as::<InfoBarPanel>("BarPanel").unwrap().children().count(), 1);
+    let navigation = scope.find_as::<NavigationView>("Navigation").unwrap();
+    assert_eq!(navigation.menu_items().count(), 3);
+    assert_eq!(scope.find_as::<NavigationViewItem>("Inbox").unwrap().icon().unwrap().cast::<SymbolIcon>().unwrap().symbol(), Symbol::Mail);
+
+    let resources = root.resources();
+    assert!(from_markup_value::<Ref<SymbolIconSource>>(&resources.get(&"SymbolSource".into())).is_some());
+    assert!(from_markup_value::<Ref<PathIconSource>>(&resources.get(&"PathSource".into())).is_some());
+    assert!(from_markup_value::<Ref<RatingItemInfo>>(&resources.get(&"RatingInfo".into())).is_some());
+    assert!(from_markup_value::<Ref<RatingItemImageInfo>>(&resources.get(&"RatingImages".into())).is_some());
+    assert!(from_markup_value::<Ref<InfoBarTemplateSettings>>(&resources.get(&"BarSettings".into())).is_some());
+    assert!(from_markup_value::<Ref<InfoBadgeTemplateSettings>>(&resources.get(&"BadgeSettings".into())).is_some());
+    assert!(from_markup_value::<Ref<ProgressRingTemplateSettings>>(&resources.get(&"RingSettings".into())).is_some());
+}
+
+#[test]
+fn native_presentation_namespace_constructs_controls_without_import_policy() {
+    let _app = start();
+    assert_native_controls(FerroRuntimeXamlLoader::parse_as(NATIVE_CONTROLS, None).unwrap());
+    assert!(migrate_winui_xaml(NATIVE_CONTROLS, &options()).unwrap().edits.is_empty());
+}
+
+#[test]
+fn compiled_native_presentation_namespace_constructs_the_same_controls() {
+    let _app = start();
+    let provider = XamlIlRuntimeHelpers::create_root_service_provider_v3(None);
+    assert_native_controls(generated::build_native_controls_xaml(Some(provider)).unwrap());
+}
+
 #[test]
 fn generated_winui_binding_fixture_matches_the_current_compiler() {
     assert_eq!(
@@ -322,7 +397,7 @@ fn generated_winui_binding_fixture_matches_the_current_compiler() {
 
 fn emitted_fixture() -> String {
     ferroui_markup_xaml::register_types();
-    let documents: Vec<_> = [
+    let mut documents: Vec<_> = [
         ("root.xaml", ROOT),
         ("template.xaml", TEMPLATE),
         ("navigation.xaml", NAVIGATION),
@@ -336,6 +411,8 @@ fn emitted_fixture() -> String {
         (name, native)
     })
     .collect();
+    // Ordinary native XAML goes straight to the compiler with no migration policy.
+    documents.push(("native_controls.xaml", NATIVE_CONTROLS.to_string()));
     let borrowed: Vec<_> = documents
         .iter()
         .map(|(name, native)| (*name, native.as_str()))

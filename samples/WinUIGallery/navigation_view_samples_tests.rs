@@ -10,13 +10,11 @@ use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::layout::Orientation;
 use ferroui_base::{BoxedValue, Rect, Ref, Size};
 use ferroui_controls::automation::AutomationProperties;
-use ferroui_controls::winui::{
-    Frame, NavigationView, NavigationViewBackButtonVisible, NavigationViewItem,
-    NavigationViewItemHeader, NavigationViewItemSeparator, NavigationViewPaneDisplayMode,
-    NavigationViewSelectionFollowsFocus, Symbol, SymbolIcon,
-};
 use ferroui_controls::{
-    Button, CheckBox, Control, RadioButton, StackPanel, TextBlock, TextBox, ToolTip,
+    Button, CheckBox, Control, Frame, NavigationView, NavigationViewBackButtonVisible,
+    NavigationViewItem, NavigationViewItemHeader, NavigationViewItemSeparator,
+    NavigationViewPaneDisplayMode, NavigationViewSelectionFollowsFocus, RadioButton,
+    StackPanel, Symbol, SymbolIcon, TextBlock, TextBox, ToolTip,
 };
 use std::rc::Rc;
 

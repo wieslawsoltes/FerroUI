@@ -1,12 +1,12 @@
-//! Direct opt-in control examples from the pinned Gallery page code behind.
+//! Direct native control examples from the pinned Gallery page code behind.
 
 use ferroui_base::utilities::{Uri, UriKind};
 use ferroui_base::{BoxedValue, ObjectType, Ref};
 use ferroui_controls::primitives::SelectingItemsControl;
-use ferroui_controls::winui::{
-    AutoSuggestBox, AutoSuggestionBoxTextChangeReason, InfoBar, InfoBarSeverity,
+use ferroui_controls::{
+    AutoSuggestBox, AutoSuggestionBoxTextChangeReason, Button, ComboBox, Control,
+    HyperlinkButton, Image, InfoBar, InfoBarSeverity, ItemsSource, TextBlock,
 };
-use ferroui_controls::{Button, ComboBox, Control, HyperlinkButton, Image, ItemsSource, TextBlock};
 use std::rc::Rc;
 
 pub(crate) fn wire(root: &Ref<Control>) {

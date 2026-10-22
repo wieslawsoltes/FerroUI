@@ -1,5 +1,6 @@
 //! Native WinUI progress state, range, animation lifetime and automation contracts.
 
+use ferroui_controls::automation::peers::{ProgressRingAutomationPeer};
 use ferroui_base::animation::{IClock, PlayState, TimeSpan};
 use ferroui_base::data::BindingPriority;
 use ferroui_base::layout::ILayoutManager;
@@ -13,7 +14,9 @@ use ferroui_controls::primitives::TemplatedControl;
 use ferroui_controls::shapes::Arc;
 use ferroui_controls::templates::FuncControlTemplate;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::winui::{ProgressRing, ProgressRingAutomationPeer};
+use ferroui_controls::{
+    ProgressRing,
+};
 use ferroui_controls::{Border, Control, Grid, ProgressBar, Window};
 use std::cell::Cell;
 use std::rc::Rc;

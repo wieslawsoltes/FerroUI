@@ -1,12 +1,11 @@
 <!-- Adapted from PageTransitionPage.xaml.cs and its sample pages in the pinned Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-            xmlns:winui="using:FerroUI.Controls.WinUI" Spacing="12">
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
   <StackPanel Orientation="Horizontal" Spacing="8">
     <Button x:Name="NavigationNext" Content="Navigate to next page"/>
     <Button x:Name="NavigationBack" Content="Go back" IsEnabled="{Binding CanGoBack, ElementName=ContentFrame, Mode=OneWay}"/>
     <Button x:Name="NavigationForward" Content="Go forward" IsEnabled="{Binding CanGoForward, ElementName=ContentFrame, Mode=OneWay}"/>
   </StackPanel>
   <TextBlock x:Name="NavigationStatus" Text="First page"/>
-  <winui:Frame x:Name="ContentFrame" MinHeight="350"/>
+  <Frame x:Name="ContentFrame" MinHeight="350"/>
   <TextBlock Text="Frame navigation and journal behavior are available. Entrance, drill-in, slide, common and continuum transition effects remain pending." TextWrapping="Wrap"/>
 </StackPanel>

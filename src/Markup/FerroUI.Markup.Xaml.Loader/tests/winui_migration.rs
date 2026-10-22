@@ -3,7 +3,9 @@ use ferroui_markup_xaml_loader::winui::*;
 use roxmltree::{Document, Node};
 
 const XAML_NAMESPACE: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
-const COMPAT_NAMESPACE: &str = "using:FerroUI.Controls.WinUI";
+const CONTROLS_NAMESPACE: &str = "using:FerroUI.Controls";
+const PRIMITIVES_NAMESPACE: &str = "using:FerroUI.Controls.Primitives";
+const NAVIGATION_NAMESPACE: &str = "using:FerroUI.Navigation";
 
 fn source(body: &str) -> String {
     format!("<Grid xmlns='{WINUI_PRESENTATION_NAMESPACE}' xmlns:x='{XAML_NAMESPACE}'>{body}</Grid>")
@@ -43,26 +45,28 @@ fn native_documents_are_identity_and_migration_is_idempotent() {
 }
 
 #[test]
-fn page_and_frame_use_separate_namespace_with_balanced_property_elements() {
+fn source_page_maps_to_native_frame_page_with_balanced_property_elements() {
     let result = migrate("<Page><Page.Content><Frame/></Page.Content></Page>");
     assert!(!result.has_errors());
     let document = Document::parse(&result.xaml).unwrap();
     let elements: Vec<_> = document.descendants().filter(Node::is_element).collect();
     for element in &elements[1..] {
-        assert_eq!(element.tag_name().namespace(), Some(COMPAT_NAMESPACE));
+        assert_eq!(element.tag_name().namespace(), Some(CONTROLS_NAMESPACE));
     }
-    assert_eq!(elements[2].tag_name().name(), "Page.Content");
+    assert_eq!(elements[1].tag_name().name(), "FramePage");
+    assert_eq!(elements[2].tag_name().name(), "FramePage.Content");
+    assert_eq!(elements[3].tag_name().name(), "Frame");
 }
 
 #[test]
-fn behaviorally_distinct_new_controls_use_the_compatibility_namespace() {
+fn implemented_controls_use_the_native_controls_namespace() {
     let result = migrate(
         "<NumberBox Value='12'/><RadioButtons/><FontIcon Glyph='A'/><SymbolIcon Symbol='Accept'/><InfoBar/><FontIconSource/><SymbolIconSource/><PathIconSource/><AutoSuggestBox/>",
     );
     assert!(!result.has_errors());
     let doc = Document::parse(&result.xaml).unwrap();
     for element in doc.descendants().filter(Node::is_element).skip(1) {
-        assert_eq!(element.tag_name().namespace(), Some(COMPAT_NAMESPACE));
+        assert_eq!(element.tag_name().namespace(), Some(CONTROLS_NAMESPACE));
     }
 }
 
@@ -72,9 +76,39 @@ fn feedback_controls_and_item_descriptions_migrate_without_global_type_replaceme
     assert!(!result.has_errors(), "{:?}", result.diagnostics);
     let document = Document::parse(&result.xaml).unwrap();
     for element in document.descendants().filter(Node::is_element).skip(1) {
-        assert_eq!(element.tag_name().namespace(), Some(COMPAT_NAMESPACE));
+        let expected = match element.tag_name().name() {
+            "InfoBadgeTemplateSettings" | "ProgressRingTemplateSettings" => PRIMITIVES_NAMESPACE,
+            _ => CONTROLS_NAMESPACE,
+        };
+        assert_eq!(element.tag_name().namespace(), Some(expected));
     }
     assert_eq!(migrate_winui_xaml(&result.xaml, &WinUIXamlOptions::default()).unwrap().xaml, result.xaml);
+}
+
+#[test]
+fn frame_navigation_and_primitive_type_references_use_their_native_namespaces() {
+    for (source_namespace, name, target_namespace) in [
+        ("using:Microsoft.UI.Xaml.Navigation", "NavigationEventArgs", NAVIGATION_NAMESPACE),
+        ("using:Microsoft.UI.Xaml.Navigation", "NavigatingCancelEventArgs", NAVIGATION_NAMESPACE),
+        ("using:Microsoft.UI.Xaml.Navigation", "NavigationFailedEventArgs", NAVIGATION_NAMESPACE),
+        ("using:Microsoft.UI.Xaml.Navigation", "NavigationMode", NAVIGATION_NAMESPACE),
+        ("using:Microsoft.UI.Xaml.Navigation", "NavigationCacheMode", NAVIGATION_NAMESPACE),
+        ("using:Microsoft.UI.Xaml.Navigation", "FrameNavigationOptions", NAVIGATION_NAMESPACE),
+        ("using:Microsoft.UI.Xaml.Navigation", "PageStackEntry", NAVIGATION_NAMESPACE),
+        ("using:Microsoft.UI.Xaml.Controls.Primitives", "InfoBarPanel", PRIMITIVES_NAMESPACE),
+        ("using:Microsoft.UI.Xaml.Controls.Primitives", "InfoBarTemplateSettings", PRIMITIVES_NAMESPACE),
+        ("using:Microsoft.UI.Xaml.Controls.Primitives", "InfoBadgeTemplateSettings", PRIMITIVES_NAMESPACE),
+        ("using:Microsoft.UI.Xaml.Controls.Primitives", "ProgressRingTemplateSettings", PRIMITIVES_NAMESPACE),
+    ] {
+        let result = migrate(&format!("<Grid xmlns:t='{source_namespace}' Tag='{{x:Type t:{name}}}'/>"));
+        assert!(!result.has_errors(), "{:?}", result.diagnostics);
+        let document = Document::parse(&result.xaml).unwrap();
+        let node = document.root_element().first_element_child().unwrap();
+        let literal = node.attribute("Tag").unwrap().strip_prefix("{x:Type ").unwrap().strip_suffix('}').unwrap();
+        let (prefix, local) = literal.split_once(':').unwrap();
+        assert_eq!(local, name);
+        assert_eq!(node.lookup_namespace_uri(Some(prefix)), Some(target_namespace));
+    }
 }
 
 #[test]
@@ -83,13 +117,18 @@ fn navigation_view_item_collections_and_badges_keep_their_property_element_owner
     assert!(!result.has_errors(), "{:?}", result.diagnostics);
     let document = Document::parse(&result.xaml).unwrap();
     for node in document.descendants().filter(Node::is_element).skip(1) {
-        assert_eq!(node.tag_name().namespace(), Some(COMPAT_NAMESPACE));
+        assert_eq!(node.tag_name().namespace(), Some(CONTROLS_NAMESPACE));
     }
     for member in ["NavigationView.MenuItems", "NavigationView.FooterMenuItems", "NavigationViewItem.MenuItems", "NavigationViewItem.InfoBadge"] {
-        assert!(document.descendants().any(|node| node.has_tag_name((COMPAT_NAMESPACE, member))));
+        assert!(document.descendants().any(|node| node.has_tag_name((CONTROLS_NAMESPACE, member))));
     }
     assert_eq!(migrate_winui_xaml(&result.xaml, &WinUIXamlOptions::default()).unwrap().xaml, result.xaml);
-    for name in ["NavigationViewAutomationPeer", "NavigationViewItemAutomationPeer"] {
+    for name in [
+        "AutoSuggestBoxAutomationPeer", "InfoBarAutomationPeer",
+        "NavigationViewAutomationPeer", "NavigationViewItemAutomationPeer",
+        "NumberBoxAutomationPeer", "ProgressRingAutomationPeer",
+        "RadioButtonsAutomationPeer", "RatingControlAutomationPeer",
+    ] {
         let result = migrate(&format!("<Grid xmlns:a='using:Microsoft.UI.Xaml.Automation.Peers' Tag='{{x:Type a:{name}}}'/>"));
         assert!(!result.has_errors(), "{:?}", result.diagnostics);
         let document = Document::parse(&result.xaml).unwrap();
@@ -97,7 +136,7 @@ fn navigation_view_item_collections_and_badges_keep_their_property_element_owner
         let literal = node.attribute("Tag").unwrap().strip_prefix("{x:Type ").unwrap().strip_suffix('}').unwrap();
         let (prefix, local) = literal.split_once(':').unwrap();
         assert_eq!(local, name);
-        assert_eq!(node.lookup_namespace_uri(Some(prefix)), Some("using:FerroUI.Controls.WinUI.Automation.Peers"));
+        assert_eq!(node.lookup_namespace_uri(Some(prefix)), Some("using:FerroUI.Automation.Peers"));
     }
 
 }
@@ -111,7 +150,7 @@ fn symbol_icon_literals_expand_for_empty_and_content_elements_without_touching_o
     assert!(result.xaml.contains("Content='A &amp; B — café'"));
     assert!(result.xaml.contains("Tag='keep&gt;value'"));
     let document = Document::parse(&result.xaml).unwrap();
-    let icons: Vec<_> = document.descendants().filter(|node| node.has_tag_name((COMPAT_NAMESPACE, "SymbolIcon"))).collect();
+    let icons: Vec<_> = document.descendants().filter(|node| node.has_tag_name((CONTROLS_NAMESPACE, "SymbolIcon"))).collect();
     assert_eq!(icons.iter().map(|node| node.attribute("Symbol").unwrap()).collect::<Vec<_>>(), ["Home", "Mail", "Find"]);
     assert_eq!(icons[0].parent_element().unwrap().tag_name().name(), "NavigationViewItem.Icon");
     assert_eq!(icons[2].parent_element().unwrap().tag_name().name(), "AutoSuggestBox.QueryIcon");
@@ -131,8 +170,8 @@ fn symbolic_icons_respect_explicit_namespace_prefixes_resources_and_custom_type_
     let result = migrate_winui_xaml(&input, &WinUIXamlOptions::default()).unwrap();
     assert!(!result.has_errors(), "{:?}", result.diagnostics);
     let document = Document::parse(&result.xaml).unwrap();
-    assert_eq!(document.root_element().tag_name().namespace(), Some(COMPAT_NAMESPACE));
-    assert!(document.descendants().any(|node| node.has_tag_name((COMPAT_NAMESPACE, "SymbolIcon")) && node.attribute("Symbol") == Some("Play")));
+    assert_eq!(document.root_element().tag_name().namespace(), Some(CONTROLS_NAMESPACE));
+    assert!(document.descendants().any(|node| node.has_tag_name((CONTROLS_NAMESPACE, "SymbolIcon")) && node.attribute("Symbol") == Some("Play")));
 
     let source = source("<NavigationViewItem Icon='{StaticResource SharedIcon}'/><AutoSuggestBox QueryIcon='{Binding SearchIcon}'/>");
     let result = migrate_winui_xaml(&source, &WinUIXamlOptions::default()).unwrap();
@@ -161,7 +200,7 @@ fn symbolic_icons_respect_explicit_namespace_prefixes_resources_and_custom_type_
     assert!(result.xaml.contains("Decoration='Play'"));
     assert!(!result.diagnostics.iter().any(|diagnostic| diagnostic.code == "WXAML2005"));
 
-    let native = "<w:NavigationViewItem xmlns:w='using:FerroUI.Controls.WinUI' Icon='Mail'/>";
+    let native = "<w:NavigationViewItem xmlns:w='using:FerroUI.Controls' Icon='Mail'/>";
     assert!(migrate_winui_xaml(native, &WinUIXamlOptions::default()).unwrap().edits.is_empty());
 }
 
@@ -182,7 +221,7 @@ fn info_badge_style_keys_are_audited_only_when_the_winui_theme_policy_is_selecte
 #[test]
 fn feedback_control_xaml_constructs_live_native_contracts_and_item_info() {
     use ferroui_base::Ref;
-    use ferroui_controls::winui::{FontIconSource, InfoBadge, ProgressRing, RatingControl, RatingItemFontInfo};
+    use ferroui_controls::{FontIconSource, InfoBadge, ProgressRing, RatingControl, RatingItemFontInfo};
     use ferroui_controls::Control;
     use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
     let input = source("<InfoBadge x:Name='Badge' Value='7'><InfoBadge.IconSource><FontIconSource Glyph='A'/></InfoBadge.IconSource></InfoBadge><ProgressRing x:Name='Progress' IsIndeterminate='False' Maximum='200' Value='42'/><RatingControl x:Name='Rating' Caption='Ratings' PlaceholderValue='2.5'><RatingControl.ItemInfo><RatingItemFontInfo Glyph='B' UnsetGlyph='C'/></RatingControl.ItemInfo></RatingControl>");
@@ -214,7 +253,7 @@ fn info_bar_primitives_and_close_button_theme_require_explicit_mappings() {
         .descendants()
         .find(|node| node.tag_name().name() == "InfoBarPanel")
         .unwrap();
-    assert_eq!(panel.tag_name().namespace(), Some(COMPAT_NAMESPACE));
+    assert_eq!(panel.tag_name().namespace(), Some(PRIMITIVES_NAMESPACE));
 }
 
 #[test]
@@ -224,9 +263,9 @@ fn generated_prefix_never_collides_with_a_nested_shadowing_declaration() {
     let document = Document::parse(&result.xaml).unwrap();
     assert!(result
         .xaml
-        .contains("xmlns:fui2=\"using:FerroUI.Controls.WinUI\""));
+        .contains("xmlns:fui2=\"using:FerroUI.Controls\""));
     for element in document.descendants().filter(Node::is_element).skip(1) {
-        assert_eq!(element.tag_name().namespace(), Some(COMPAT_NAMESPACE));
+        assert_eq!(element.tag_name().namespace(), Some(CONTROLS_NAMESPACE));
     }
 }
 
@@ -464,10 +503,10 @@ fn aliases_resolve_type_references_in_templates_directives_and_type_extensions()
         .unwrap();
     let target = template.attribute("TargetType").unwrap();
     let (prefix, local) = target.split_once(':').unwrap();
-    assert_eq!(local, "Page");
+    assert_eq!(local, "FramePage");
     assert_eq!(
         template.lookup_namespace_uri(Some(prefix)),
-        Some(COMPAT_NAMESPACE)
+        Some(CONTROLS_NAMESPACE)
     );
     assert!(result.xaml.contains(":Frame}"));
 }

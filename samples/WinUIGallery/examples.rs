@@ -5,9 +5,9 @@ use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::Color;
 use ferroui_base::{ObjectType, Ref, Thickness};
 use ferroui_controls::primitives::ToggleButton;
-use ferroui_controls::winui::{NumberBox, RadioButtons};
 use ferroui_controls::{
-    Border, Button, ComboBox, Control, Slider, SplitButton, TextBlock, TextBox, ToggleSplitButton,
+    Border, Button, ComboBox, Control, NumberBox, RadioButtons, Slider, SplitButton,
+    TextBlock, TextBox, ToggleSplitButton,
 };
 use ferroui_markup_xaml::XamlLoadException;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
@@ -34,27 +34,27 @@ macro_rules! page {
 pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("CompactSizing", "The source standard/compact page navigation copies all four text/password values and the selected date. The existing native compact dictionary is scoped to each compact page; global theme density remains unchanged. Header and PasswordBox are explicit compositions/adaptations; full WinUI control contracts and input/visual acceptance remain pending."),
     page!("InfoBadge", "All four source compositions use native InfoBadge: NavigationView item badges, severity styles, an embedded button badge and dynamic NumberBox values. Visibility and pane options retain the original handlers. Exact upstream rendering and host accessibility acceptance remain pending."),
-    page!("NavigationView", "All eight source compositions use opt-in native NavigationView, items, hierarchy, footer, settings and Frame navigation. Model templates and C# handlers are explicitly adapted to Rust. Top overflow, selectors, transition effects and platform visual/accessibility acceptance remain pending."),
-    page!("ProgressRing", "Both source examples use the opt-in native ProgressRing, active state, background options and original NumberBox empty-value recovery. Native arc animation is an explicit adaptation; exact Lottie motion, custom animated sources and platform accessibility acceptance remain pending."),
+    page!("NavigationView", "All eight source compositions use native NavigationView, items, hierarchy, footer, settings and Frame navigation. Model templates and C# handlers are explicitly adapted to Rust. Top overflow, selectors, transition effects and platform visual/accessibility acceptance remain pending."),
+    page!("ProgressRing", "Both source examples use the native ProgressRing, active state, background options and original NumberBox empty-value recovery. Native arc animation is an explicit adaptation; exact Lottie motion, custom animated sources and platform accessibility acceptance remain pending."),
     page!("RatingControl", "Both source examples use native RatingControl input, caption changes, clearing/read-only options and half-step placeholder binding. Programmatic updates retain the original caption; user ValueChanged selects Your rating. Exact source animation and host accessibility acceptance remain pending."),
-    page!("InfoBar", "All three original compositions use the opt-in InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending."),
+    page!("InfoBar", "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending."),
     page!("Popup", "The source open/close handlers and offset/light-dismiss options use the native Popup. Placement is explicitly relative to its button; WinUI absolute-placement, acrylic and screen-edge parity remain pending."),
     page!("Clipboard", "Text copy/paste, available formats and clear use the host clipboard service asynchronously. Bitmap/file operations, history/roaming, content-change notifications and original accessibility announcements remain pending."),
     page!("PullToRefresh", "The source RefreshContainer request/deferral behavior inserts NewControl on the UI dispatcher. ListView is explicitly adapted to ListBox; the custom visualizer and full gesture/animation parity remain pending."),
-    page!("PageTransition", "The original alternating sample-page layouts use the opt-in WinUI Frame/Page types, back/forward journals and Rust handlers. Navigation transition effects remain pending."),
+    page!("PageTransition", "The original alternating sample-page layouts use the native Frame/FramePage types, back/forward journals and Rust handlers. Navigation transition effects remain pending."),
     page!("AppBarButton", "The path-icon sample uses the shared CommandBarButton with native click output. Other icon types, accelerators and flyout examples remain pending."),
     page!("AppBarToggleButton", "The three-state path-icon sample uses CommandBarToggleButton; checked, unchecked and indeterminate state remain observable."),
     page!("AppBarSeparator", "The source command groups use CommandBarSeparator; Symbol icons remain pending in this adaptation."),
     page!("CommandBar", "The source primary/secondary commands use the shared CommandBar family, observable open state and an explicit HotKey adaptation. Dynamic symbol conversion and the full option set remain pending."),
     page!("AccessibilityColorContrast", "The original luminance/contrast calculation and pass thresholds run in Rust. Opaque RGB text inputs replace the Gallery's custom inline color pickers; those picker controls remain pending."),
-    page!("AutoSuggestBox", "Both examples use the opt-in AutoSuggestBox: 97 source cat names, user-only token filtering, chosen-item output and control search/query with original title/subtitle and embedded bitmap details. Catalog titles are explicit item values; CurrentCulture matching and full input/accessibility parity remain pending."),
-    page!("NumberBox", "The opt-in WinUI NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending."),
+    page!("AutoSuggestBox", "Both examples use the native AutoSuggestBox: 97 source cat names, user-only token filtering, chosen-item output and control search/query with original title/subtitle and embedded bitmap details. Catalog titles are explicit item values; CurrentCulture matching and full input/accessibility parity remain pending."),
+    page!("NumberBox", "The native NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending."),
     page!("PipsPager", "The existing PipsPager provides page counts, selection and previous/next controls; wrapping remains explicit."),
     page!("TabView", "Native TabControl displays tab content; WinUI add/close/drag contracts remain pending."),
     page!("Pivot", "Native TabControl adapts the basic Pivot sample; Pivot-specific input and animation remain pending."),
     page!("RadialGradientBrush", "The shared RadialGradientBrush renders the source gradient with explicit relative radii."),
     page!("Geometry", "Shared Path geometry renders a triangle and a cubic curve; the upstream geometry editor remains pending."),
-    page!("IconElement", "The original path, font and symbol icon examples use native PathIcon and the opt-in FontIcon/SymbolIcon types. Bitmap/SVG variants and unavailable host icon fonts remain pending."),
+    page!("IconElement", "The original path, font and symbol icon examples use native PathIcon and the native FontIcon/SymbolIcon types. Bitmap/SVG variants and unavailable host icon fonts remain pending."),
     page!("Color", "Native brushes display the color swatches; the full upstream color tools are not claimed."),
     page!("Spacing", "Native element binding changes StackPanel spacing interactively."),
     page!("XamlStyles", "The explicit WinUI style example is adapted to an opt-in ControlTheme; implicit WinUI style semantics are not changed globally."),
@@ -66,7 +66,7 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("ToggleButton", "Native ToggleButton checked state and output; the original handler is ported to Rust."),
     page!("ToggleSwitch", "IsOn maps to IsChecked on the existing ToggleSwitch; Header is composed with a label and an automation name, and states remain observable."),
     page!("CheckBox", "All three source compositions use native CheckBox with original two/three-state output and select-all synchronization. Keyboard, accessibility and exact rendering acceptance remain pending."),
-    page!("RadioButton", "Both original groups use opt-in RadioButtons with the existing native RadioButton, source labels and Rust selection/color handlers. Focus, layout and screen-reader parity still require host verification."),
+    page!("RadioButton", "Both original groups use native RadioButtons with the existing native RadioButton, source labels and Rust selection/color handlers. Focus, layout and screen-reader parity still require host verification."),
     page!("TextBox", "Text, placeholder, read-only and multiline examples use existing TextBox properties; Header is composed explicitly."),
     page!("PasswordBox", "The three source examples and original validation/reveal handlers use TextBox.PasswordChar and RevealPassword with composed Header. A distinct PasswordBox API and full input/accessibility parity remain pending."),
     page!("TextBlock", "Text content, wrapping, typography and inline text use native TextBlock."),

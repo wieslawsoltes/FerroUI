@@ -1,5 +1,23 @@
 //! Automation peers: the objects that expose elements to UI automation.
 
+mod auto_suggest_box_automation_peer;
+mod info_bar_automation_peer;
+mod navigation_view_automation_peer;
+mod navigation_view_item_automation_peer;
+mod number_box_automation_peer;
+mod progress_ring_automation_peer;
+mod radio_buttons_automation_peer;
+mod rating_control_automation_peer;
+
+pub use auto_suggest_box_automation_peer::AutoSuggestBoxAutomationPeer;
+pub use info_bar_automation_peer::InfoBarAutomationPeer;
+pub use navigation_view_automation_peer::NavigationViewAutomationPeer;
+pub use navigation_view_item_automation_peer::NavigationViewItemAutomationPeer;
+pub use number_box_automation_peer::NumberBoxAutomationPeer;
+pub use progress_ring_automation_peer::ProgressRingAutomationPeer;
+pub use radio_buttons_automation_peer::RadioButtonsAutomationPeer;
+pub use rating_control_automation_peer::RatingControlAutomationPeer;
+
 mod auto_complete_box_automation_peer;
 mod automation_peer;
 mod button_automation_peer;

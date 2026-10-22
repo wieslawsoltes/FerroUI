@@ -29,7 +29,7 @@ class SymbolMapTests(unittest.TestCase):
     def test_rust_glyph_drift_is_rejected(self):
         source = """pub enum Symbol { Play = 0xE102,
 }
-ferro_markup_enum!(Symbol { Play }, { namespace: "FerroUI.Controls.WinUI" });
+ferro_markup_enum!(Symbol { Play }, { namespace: "FerroUI.Controls" });
 pub const ALL: &'static [Self] = &[Self::Play];
 Self::Play => '\\u{e102}'
 """

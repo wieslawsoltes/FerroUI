@@ -16,7 +16,7 @@ use ferroui_controls::presenters::ContentPresenter;
 use ferroui_controls::primitives::TemplatedControl;
 use ferroui_controls::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
-use ferroui_controls::winui::{
+use ferroui_controls::{
     InfoBadge, NavigationView, NavigationViewItem, NavigationViewItemBase,
     NavigationViewItemHeader, NavigationViewItemSeparator, NavigationViewPaneDisplayMode, Symbol,
     SymbolIcon,

@@ -1,4 +1,3 @@
-    let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ScrollViewerScrollBarlessTemplate")));
     let provided_14 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::primitives::TemplatedControl::template_property()), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 289, 31)?;
     let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_14);
@@ -39532,3 +39531,4 @@ fn build_controls_winuicontrols_xaml_deferred_449(
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(175,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_450(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,

@@ -40,10 +40,10 @@ pub enum NavigationViewSelectionFollowsFocus {
     Disabled = 0,
     Enabled = 1,
 }
-ferro_markup_enum!(NavigationViewDisplayMode { Minimal, Compact, Expanded }, { namespace: "FerroUI.Controls.WinUI" });
-ferro_markup_enum!(NavigationViewPaneDisplayMode { Auto, Left, Top, LeftCompact, LeftMinimal }, { namespace: "FerroUI.Controls.WinUI" });
-ferro_markup_enum!(NavigationViewBackButtonVisible { Collapsed, Visible, Auto }, { namespace: "FerroUI.Controls.WinUI" });
-ferro_markup_enum!(NavigationViewSelectionFollowsFocus { Disabled, Enabled }, { namespace: "FerroUI.Controls.WinUI" });
+ferro_markup_enum!(NavigationViewDisplayMode { Minimal, Compact, Expanded }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(NavigationViewPaneDisplayMode { Auto, Left, Top, LeftCompact, LeftMinimal }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(NavigationViewBackButtonVisible { Collapsed, Visible, Auto }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(NavigationViewSelectionFollowsFocus { Disabled, Enabled }, { namespace: "FerroUI.Controls" });
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct NavigationViewDisplayModeChangedEventArgs {
@@ -174,18 +174,18 @@ impl NavigationViewItemCollapsedEventArgs {
 }
 
 ferro_markup_type!(class NavigationViewDisplayModeChangedEventArgs {
-    namespace: "FerroUI.Controls.WinUI", handles: [NavigationViewDisplayModeChangedEventArgs],
+    namespace: "FerroUI.Controls", handles: [NavigationViewDisplayModeChangedEventArgs],
     properties: [DisplayMode: NavigationViewDisplayMode { get: |a: &NavigationViewDisplayModeChangedEventArgs| a.display_mode() }],
 });
 ferro_markup_type!(class NavigationViewPaneClosingEventArgs {
-    namespace: "FerroUI.Controls.WinUI", handles: [NavigationViewPaneClosingEventArgs],
+    namespace: "FerroUI.Controls", handles: [NavigationViewPaneClosingEventArgs],
     properties: [Cancel: bool { get: |a: &NavigationViewPaneClosingEventArgs| a.cancel(), set: |a: &NavigationViewPaneClosingEventArgs, v: bool| a.set_cancel(v) }],
 });
 ferro_markup_type!(class NavigationViewBackRequestedEventArgs {
-    namespace: "FerroUI.Controls.WinUI", handles: [NavigationViewBackRequestedEventArgs], properties: [],
+    namespace: "FerroUI.Controls", handles: [NavigationViewBackRequestedEventArgs], properties: [],
 });
 ferro_markup_type!(class NavigationViewSelectionChangedEventArgs {
-    namespace: "FerroUI.Controls.WinUI", handles: [NavigationViewSelectionChangedEventArgs],
+    namespace: "FerroUI.Controls", handles: [NavigationViewSelectionChangedEventArgs],
     properties: [
         SelectedItem: Option<BoxedValue> { get: |a: &NavigationViewSelectionChangedEventArgs| a.selected_item() },
         SelectedItemContainer: Option<Ref<NavigationViewItemBase>> { get: |a: &NavigationViewSelectionChangedEventArgs| a.selected_item_container() },
@@ -193,7 +193,7 @@ ferro_markup_type!(class NavigationViewSelectionChangedEventArgs {
     ],
 });
 ferro_markup_type!(class NavigationViewItemInvokedEventArgs {
-    namespace: "FerroUI.Controls.WinUI", handles: [NavigationViewItemInvokedEventArgs],
+    namespace: "FerroUI.Controls", handles: [NavigationViewItemInvokedEventArgs],
     properties: [
         InvokedItem: Option<BoxedValue> { get: |a: &NavigationViewItemInvokedEventArgs| a.invoked_item() },
         InvokedItemContainer: Option<Ref<NavigationViewItemBase>> { get: |a: &NavigationViewItemInvokedEventArgs| a.invoked_item_container() },
@@ -201,14 +201,14 @@ ferro_markup_type!(class NavigationViewItemInvokedEventArgs {
     ],
 });
 ferro_markup_type!(class NavigationViewItemExpandingEventArgs {
-    namespace: "FerroUI.Controls.WinUI", handles: [NavigationViewItemExpandingEventArgs],
+    namespace: "FerroUI.Controls", handles: [NavigationViewItemExpandingEventArgs],
     properties: [
         ExpandingItem: Option<BoxedValue> { get: |a: &NavigationViewItemExpandingEventArgs| a.expanding_item() },
         ExpandingItemContainer: Ref<NavigationViewItemBase> { get: |a: &NavigationViewItemExpandingEventArgs| a.expanding_item_container() },
     ],
 });
 ferro_markup_type!(class NavigationViewItemCollapsedEventArgs {
-    namespace: "FerroUI.Controls.WinUI", handles: [NavigationViewItemCollapsedEventArgs],
+    namespace: "FerroUI.Controls", handles: [NavigationViewItemCollapsedEventArgs],
     properties: [
         CollapsedItem: Option<BoxedValue> { get: |a: &NavigationViewItemCollapsedEventArgs| a.collapsed_item() },
         CollapsedItemContainer: Ref<NavigationViewItemBase> { get: |a: &NavigationViewItemCollapsedEventArgs| a.collapsed_item_container() },

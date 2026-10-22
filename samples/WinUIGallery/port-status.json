@@ -181,7 +181,7 @@
           "name": "embedded_control_images_resolve_original_uri_paths_and_exact_bytes"
         }
       ],
-      "notes": "Both examples use the opt-in AutoSuggestBox: 97 source cat names, user-only token filtering, chosen-item output and control search/query with original title/subtitle and embedded bitmap details. Catalog titles are explicit item values; CurrentCulture matching and full input/accessibility parity remain pending. Original images retain exact bytes and paths with explicit Windows case aliases; see assets-manifest.json. All acceptance statuses remain partial.",
+      "notes": "Both examples use the native AutoSuggestBox: 97 source cat names, user-only token filtering, chosen-item output and control search/query with original title/subtitle and embedded bitmap details. Catalog titles are explicit item values; CurrentCulture matching and full input/accessibility parity remain pending. Original images retain exact bytes and paths with explicit Windows case aliases; see assets-manifest.json. All acceptance statuses remain partial.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/AutoSuggestBox/BasicAutosuggestBox.txt",
@@ -201,7 +201,7 @@
               "name": "autosuggest_example_filters_only_user_changes_and_reports_selected_cat"
             }
           ],
-          "notes": "The basic source sample uses the opt-in AutoSuggestBox, all 97 source cat names, UserInput-only split-word filtering and SuggestionChosen output. The control-search/bitmap-detail example and host input/accessibility acceptance remain pending."
+          "notes": "The basic source sample uses the native AutoSuggestBox, all 97 source cat names, UserInput-only split-word filtering and SuggestionChosen output. The control-search/bitmap-detail example and host input/accessibility acceptance remain pending."
         },
         {
           "source": "WinUIGallery/Samples/AutoSuggestBox/AutosuggestboxProvidesSearchboxExperience.txt",
@@ -233,7 +233,7 @@
               "name": "embedded_control_images_resolve_original_uri_paths_and_exact_bytes"
             }
           ],
-          "notes": "Both examples use the opt-in AutoSuggestBox: 97 source cat names, user-only token filtering, chosen-item output and control search/query with original title/subtitle and embedded bitmap details. Catalog titles are explicit item values; CurrentCulture matching and full input/accessibility parity remain pending. The catalog metadata provides original title/subtitle/image paths. Images decode through the native platform renderer; mock-only tests assert URI/byte provenance, not pixels."
+          "notes": "Both examples use the native AutoSuggestBox: 97 source cat names, user-only token filtering, chosen-item output and control search/query with original title/subtitle and embedded bitmap details. Catalog titles are explicit item values; CurrentCulture matching and full input/accessibility parity remain pending. The catalog metadata provides original title/subtitle/image paths. Images decode through the native platform renderer; mock-only tests assert URI/byte provenance, not pixels."
         }
       ]
     },
@@ -711,7 +711,7 @@
           "name": "icon_examples_preserve_source_symbol_and_font_glyph"
         }
       ],
-      "notes": "The original path, font and symbol icon examples use native PathIcon and the opt-in FontIcon/SymbolIcon types. Bitmap/SVG variants and unavailable host icon fonts remain pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The original path, font and symbol icon examples use native PathIcon and the native FontIcon/SymbolIcon types. Bitmap/SVG variants and unavailable host icon fonts remain pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/IconElement/IconElementPathiconButton.txt",
@@ -726,7 +726,7 @@
               "name": "icon_examples_preserve_source_symbol_and_font_glyph"
             }
           ],
-          "notes": "The original path, font and symbol icon examples use native PathIcon and the opt-in FontIcon/SymbolIcon types. Bitmap/SVG variants and unavailable host icon fonts remain pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
+          "notes": "The original path, font and symbol icon examples use native PathIcon and the native FontIcon/SymbolIcon types. Bitmap/SVG variants and unavailable host icon fonts remain pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
           "source_sha256": "3d685830ba542269af10f57b79c62e2d968bc8634b168e664412e893990a90c5"
         },
         {
@@ -742,7 +742,7 @@
               "name": "icon_examples_preserve_source_symbol_and_font_glyph"
             }
           ],
-          "notes": "The original path, font and symbol icon examples use native PathIcon and the opt-in FontIcon/SymbolIcon types. Bitmap/SVG variants and unavailable host icon fonts remain pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
+          "notes": "The original path, font and symbol icon examples use native PathIcon and the native FontIcon/SymbolIcon types. Bitmap/SVG variants and unavailable host icon fonts remain pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
           "source_sha256": "ba63288aa473383267134969af16fcd071e34c184037a755298e94bebaea2937"
         },
         {
@@ -758,7 +758,7 @@
               "name": "icon_examples_preserve_source_symbol_and_font_glyph"
             }
           ],
-          "notes": "The original path, font and symbol icon examples use native PathIcon and the opt-in FontIcon/SymbolIcon types. Bitmap/SVG variants and unavailable host icon fonts remain pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
+          "notes": "The original path, font and symbol icon examples use native PathIcon and the native FontIcon/SymbolIcon types. Bitmap/SVG variants and unavailable host icon fonts remain pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
           "source_sha256": "1e756bd5e5bd9a7995f3efec5e646e1c384dcd7497d50c7198ec9994027f2b2a"
         }
       ]
@@ -780,7 +780,7 @@
           "name": "infobar_examples_keep_source_severity_message_action_and_options"
         }
       ],
-      "notes": "All three original compositions use the opt-in InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending. This is bounded application behavior coverage, not complete source/API/render/accessibility acceptance.",
+      "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending. This is bounded application behavior coverage, not complete source/API/render/accessibility acceptance.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/InfoBar/ClosableInfobarOptionsChange.txt",
@@ -796,7 +796,7 @@
               "name": "infobar_examples_keep_source_severity_message_action_and_options"
             }
           ],
-          "notes": "All three original compositions use the opt-in InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending."
+          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending."
         },
         {
           "source": "WinUIGallery/Samples/InfoBar/ClosableInfobarLongShort.txt",
@@ -812,7 +812,7 @@
               "name": "infobar_examples_keep_source_severity_message_action_and_options"
             }
           ],
-          "notes": "All three original compositions use the opt-in InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending."
+          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending."
         },
         {
           "source": "WinUIGallery/Samples/InfoBar/ClosableInfobarOptionsDisplay.txt",
@@ -828,7 +828,7 @@
               "name": "infobar_examples_keep_source_severity_message_action_and_options"
             }
           ],
-          "notes": "All three original compositions use the opt-in InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending."
+          "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending."
         }
       ]
     },
@@ -908,7 +908,7 @@
           "name": "winui_numberbox_example_keeps_expression_nan_and_valuechanged_behavior"
         }
       ],
-      "notes": "The opt-in WinUI NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The native NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/NumberBox/NumberboxSpinButton.txt",
@@ -923,7 +923,7 @@
               "name": "winui_numberbox_example_keeps_expression_nan_and_valuechanged_behavior"
             }
           ],
-          "notes": "The opt-in WinUI NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
+          "notes": "The native NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
           "source_sha256": "59699277ad9e163499f51c2cbbe822e76a458a7be9bed3b63a15d9121a94f236"
         },
         {
@@ -939,7 +939,7 @@
               "name": "winui_numberbox_example_keeps_expression_nan_and_valuechanged_behavior"
             }
           ],
-          "notes": "The opt-in WinUI NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
+          "notes": "The native NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
           "source_sha256": "d5848adadd320cd197313234679a1920aa6def65c28c8a8c73c14d3d5d2896e1"
         }
       ]
@@ -963,7 +963,7 @@
           "name": "page_transition_sample_uses_winui_frame_journal_and_source_page_types"
         }
       ],
-      "notes": "The original alternating sample-page layouts use the opt-in WinUI Frame/Page types, back/forward journals and Rust handlers. Navigation transition effects remain pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The original alternating sample-page layouts use the native Frame/FramePage types, back/forward journals and Rust handlers. Navigation transition effects remain pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/PageTransition/PageTransitions.txt",
@@ -978,7 +978,7 @@
               "name": "page_transition_sample_uses_winui_frame_journal_and_source_page_types"
             }
           ],
-          "notes": "The original alternating sample-page layouts use the opt-in WinUI Frame/Page types, back/forward journals and Rust handlers. Navigation transition effects remain pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
+          "notes": "The original alternating sample-page layouts use the native Frame/FramePage types, back/forward journals and Rust handlers. Navigation transition effects remain pending. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
           "source_sha256": "c174de53636f3fa2943c062c973d273a80a563777221787ea68cfccd2e0187b9"
         }
       ]
@@ -1202,7 +1202,7 @@
           "name": "radio_groups_port_original_selection_and_color_handlers"
         }
       ],
-      "notes": "Both original groups use opt-in RadioButtons with the existing native RadioButton, source labels and Rust selection/color handlers. Focus, layout and screen-reader parity still require host verification. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both original groups use native RadioButtons with the existing native RadioButton, source labels and Rust selection/color handlers. Focus, layout and screen-reader parity still require host verification. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/RadioButton/RadioButtonGroup.txt",
@@ -1217,7 +1217,7 @@
               "name": "radio_groups_port_original_selection_and_color_handlers"
             }
           ],
-          "notes": "Both original groups use opt-in RadioButtons with the existing native RadioButton, source labels and Rust selection/color handlers. Focus, layout and screen-reader parity still require host verification. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
+          "notes": "Both original groups use native RadioButtons with the existing native RadioButton, source labels and Rust selection/color handlers. Focus, layout and screen-reader parity still require host verification. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
           "source_sha256": "458306b1d1ef00cb890c7e221d7a849399cf37343a6308a7100542c1484b8a1c"
         },
         {
@@ -1233,7 +1233,7 @@
               "name": "radio_groups_port_original_selection_and_color_handlers"
             }
           ],
-          "notes": "Both original groups use opt-in RadioButtons with the existing native RadioButton, source labels and Rust selection/color handlers. Focus, layout and screen-reader parity still require host verification. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
+          "notes": "Both original groups use native RadioButtons with the existing native RadioButton, source labels and Rust selection/color handlers. Focus, layout and screen-reader parity still require host verification. Original source substitutions remain in the catalog viewer; chosen native inputs and Rust handlers are explicit adaptations. Rendering/accessibility/platform acceptance is pending.",
           "source_sha256": "5cffd23881ad4c1ce0f68522e2dca2eb0f6c8bf3db7a8bc3e2ce321bafe2de10"
         }
       ]
@@ -1653,7 +1653,7 @@
           "name": "feedback_pages_and_callbacks_release_their_native_controls"
         }
       ],
-      "notes": "Both original examples use the opt-in native ProgressRing, activation and background options, and finite/empty NumberBox handling. The source IsOn option is adapted to the existing native ToggleSwitch.IsChecked. Native arc motion is an explicit adaptation; custom animated visual sources, exact Lottie rendering and complete input/accessibility/visual acceptance remain pending.",
+      "notes": "Both original examples use the native ProgressRing, activation and background options, and finite/empty NumberBox handling. The source IsOn option is adapted to the existing native ToggleSwitch.IsChecked. Native arc motion is an explicit adaptation; custom animated visual sources, exact Lottie rendering and complete input/accessibility/visual acceptance remain pending.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/ProgressRing/IndeterminateProgressRing.txt",
@@ -1669,7 +1669,7 @@
               "name": "progress_ring_page_preserves_both_source_modes_and_active_option"
             }
           ],
-          "notes": "Both original examples use the opt-in native ProgressRing, activation and background options, and finite/empty NumberBox handling. The source IsOn option is adapted to the existing native ToggleSwitch.IsChecked. Native arc motion is an explicit adaptation; custom animated visual sources, exact Lottie rendering and complete input/accessibility/visual acceptance remain pending."
+          "notes": "Both original examples use the native ProgressRing, activation and background options, and finite/empty NumberBox handling. The source IsOn option is adapted to the existing native ToggleSwitch.IsChecked. Native arc motion is an explicit adaptation; custom animated visual sources, exact Lottie rendering and complete input/accessibility/visual acceptance remain pending."
         },
         {
           "source": "WinUIGallery/Samples/ProgressRing/DeterminateProgressRing.txt",
@@ -1685,7 +1685,7 @@
               "name": "progress_ring_page_restores_empty_numeric_input_and_updates_the_native_range"
             }
           ],
-          "notes": "Both original examples use the opt-in native ProgressRing, activation and background options, and finite/empty NumberBox handling. The source IsOn option is adapted to the existing native ToggleSwitch.IsChecked. Native arc motion is an explicit adaptation; custom animated visual sources, exact Lottie rendering and complete input/accessibility/visual acceptance remain pending."
+          "notes": "Both original examples use the native ProgressRing, activation and background options, and finite/empty NumberBox handling. The source IsOn option is adapted to the existing native ToggleSwitch.IsChecked. Native arc motion is an explicit adaptation; custom animated visual sources, exact Lottie rendering and complete input/accessibility/visual acceptance remain pending."
         }
       ]
     },
@@ -1757,9 +1757,9 @@
         "samples/WinUIGallery/examples.rs",
         "samples/WinUIGallery/feedback_samples.rs",
         "samples/WinUIGallery/assets.rs",
-        "src/FerroUI.Themes.WinUI/Controls/WinUIInfoBadge.xaml",
-        "src/FerroUI.Controls/winui/navigation_view.rs",
-        "src/FerroUI.Controls/winui/navigation_view_item.rs"
+        "src/FerroUI.Themes.WinUI/Controls/InfoBadge.xaml",
+        "src/FerroUI.Controls/navigation_view.rs",
+        "src/FerroUI.Controls/navigation_view_item.rs"
       ],
       "tests": [
         {
@@ -1878,7 +1878,7 @@
           "name": "compact_sizing_resources_remain_page_scoped_and_release_with_the_gallery_page"
         }
       ],
-      "notes": "The original standard/compact navigation uses distinct native Page types and Frame factories. All four text/password fields and nullable date values copy between forms. The existing native compact dictionary stays local to the compact page. PasswordBox and Header are explicit native TextBox/composition adaptations; Date maps to SelectedDate. Complete original control contracts and visual/input acceptance remain pending.",
+      "notes": "The original standard/compact navigation uses distinct native FramePage types and Frame factories. All four text/password fields and nullable date values copy between forms. The existing native compact dictionary stays local to the compact page. PasswordBox and Header are explicit native TextBox/composition adaptations; Date maps to SelectedDate. Complete original control contracts and visual/input acceptance remain pending.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/CompactSizing/CompactSizingControls.txt",
@@ -1894,7 +1894,7 @@
               "name": "compact_sizing_copies_every_field_across_distinct_page_types"
             }
           ],
-          "notes": "The original standard/compact navigation uses distinct native Page types and Frame factories. All four text/password fields and nullable date values copy between forms. The existing native compact dictionary stays local to the compact page. PasswordBox and Header are explicit native TextBox/composition adaptations; Date maps to SelectedDate. Complete original control contracts and visual/input acceptance remain pending."
+          "notes": "The original standard/compact navigation uses distinct native FramePage types and Frame factories. All four text/password fields and nullable date values copy between forms. The existing native compact dictionary stays local to the compact page. PasswordBox and Header are explicit native TextBox/composition adaptations; Date maps to SelectedDate. Complete original control contracts and visual/input acceptance remain pending."
         }
       ]
     },
@@ -1910,9 +1910,9 @@
         "samples/WinUIGallery/Pages/NavigationSample5.xaml",
         "samples/WinUIGallery/Pages/NavigationSample6.xaml",
         "samples/WinUIGallery/Pages/NavigationSettings.xaml",
-        "src/FerroUI.Controls/winui/navigation_view.rs",
-        "src/FerroUI.Controls/winui/navigation_view_events.rs",
-        "src/FerroUI.Controls/winui/navigation_view_item.rs"
+        "src/FerroUI.Controls/navigation_view.rs",
+        "src/FerroUI.Controls/navigation_view_events.rs",
+        "src/FerroUI.Controls/navigation_view_item.rs"
       ],
       "tests": [
         {
@@ -1972,7 +1972,7 @@
               "name": "navigation_view_source_selection_loads_distinct_pages_and_settings"
             }
           ],
-          "notes": "Original Auto pane, four exact labels/Symbol icons/tags, initial first selection, distinct native Frame/Page factories, source header updates and Settings navigation. Native visuals/input are exercised by focused tests; acrylic, exact resource templates, transitions and host accessibility remain partial."
+          "notes": "Original Auto pane, four exact labels/Symbol icons/tags, initial first selection, distinct native Frame/FramePage factories, source header updates and Settings navigation. Native visuals/input are exercised by focused tests; acrylic, exact resource templates, transitions and host accessibility remain partial."
         },
         {
           "source": "WinUIGallery/Samples/NavigationView/NavigationviewPanedisplaymodeTop.txt",

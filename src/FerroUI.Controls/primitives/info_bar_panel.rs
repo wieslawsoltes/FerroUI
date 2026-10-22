@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. Licensed under the MIT License. See NOTICE.md.
+// Copyright (c) Microsoft Corporation. Licensed under the MIT License. See ../NOTICE.md.
 // The pinned InfoBarPanel.cpp layout, expressed with native layout and property APIs.
 
 use crate::{Control, ControlImpl, Panel, PanelImpl};
@@ -29,7 +29,7 @@ pub struct InfoBarPanel {
 }
 
 ferro_class!(InfoBarPanel: Panel);
-ferro_class_info!(InfoBarPanel { new: InfoBarPanel::new, markup: { namespace: "FerroUI.Controls.WinUI" } });
+ferro_class_info!(InfoBarPanel { new: InfoBarPanel::new, markup: { namespace: "FerroUI.Controls.Primitives" } });
 ferro_impl_classes!(
     InfoBarPanel: FerroObjectImpl,
     StyledElementImpl,

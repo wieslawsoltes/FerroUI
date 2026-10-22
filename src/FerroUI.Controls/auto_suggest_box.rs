@@ -4,11 +4,9 @@
 //! suggestions; this control deliberately performs no implicit text filtering.
 
 use crate::automation::peers::{
-    AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeer,
-    ControlAutomationPeerImpl,
+    AutoSuggestBoxAutomationPeer, AutomationPeer,
 };
-use crate::automation::provider::{IInvokeProvider, ProviderAdapter};
-use crate::automation::{AutomationProperties, ElementNotEnabledException};
+use crate::automation::AutomationProperties;
 use crate::presenters::ContentPresenter;
 use crate::primitives::{
     HeaderedItemsControl, HeaderedItemsControlImpl, Popup, TemplateAppliedEventArgs,
@@ -50,7 +48,7 @@ pub enum AutoSuggestionBoxTextChangeReason {
     ProgrammaticChange = 1,
     SuggestionChosen = 2,
 }
-ferro_markup_enum!(AutoSuggestionBoxTextChangeReason { UserInput, ProgrammaticChange, SuggestionChosen }, { namespace: "FerroUI.Controls.WinUI" });
+ferro_markup_enum!(AutoSuggestionBoxTextChangeReason { UserInput, ProgrammaticChange, SuggestionChosen }, { namespace: "FerroUI.Controls" });
 
 /// A retained event does not retain the editor. CheckCurrent becomes false as
 /// soon as a newer text change occurs, even before its deferred event is raised.
@@ -95,16 +93,16 @@ pub struct AutoSuggestBoxQuerySubmittedEventArgs {
 }
 
 ferro_markup_type!(class AutoSuggestBoxTextChangedEventArgs {
-    namespace: "FerroUI.Controls.WinUI", handles: [AutoSuggestBoxTextChangedEventArgs],
+    namespace: "FerroUI.Controls", handles: [AutoSuggestBoxTextChangedEventArgs],
     properties: [Reason: AutoSuggestionBoxTextChangeReason { get: AutoSuggestBoxTextChangedEventArgs::reason, set: AutoSuggestBoxTextChangedEventArgs::set_reason }],
     methods: [fn CheckCurrent() -> bool => AutoSuggestBoxTextChangedEventArgs::check_current],
 });
 ferro_markup_type!(class AutoSuggestBoxSuggestionChosenEventArgs {
-    namespace: "FerroUI.Controls.WinUI", handles: [AutoSuggestBoxSuggestionChosenEventArgs],
+    namespace: "FerroUI.Controls", handles: [AutoSuggestBoxSuggestionChosenEventArgs],
     properties: [SelectedItem: BoxedValue { get: |args: &AutoSuggestBoxSuggestionChosenEventArgs| args.selected_item.clone() }],
 });
 ferro_markup_type!(class AutoSuggestBoxQuerySubmittedEventArgs {
-    namespace: "FerroUI.Controls.WinUI", handles: [AutoSuggestBoxQuerySubmittedEventArgs],
+    namespace: "FerroUI.Controls", handles: [AutoSuggestBoxQuerySubmittedEventArgs],
     properties: [
         QueryText: String { get: |args: &AutoSuggestBoxQuerySubmittedEventArgs| args.query_text.clone() },
         ChosenSuggestion: Option<BoxedValue> { get: |args: &AutoSuggestBoxQuerySubmittedEventArgs| args.chosen_suggestion.clone() },
@@ -141,7 +139,7 @@ pub struct AutoSuggestBox {
 ferro_class!(AutoSuggestBox: HeaderedItemsControl);
 ferro_class_info!(AutoSuggestBox {
     new: AutoSuggestBox::new,
-    markup: { namespace: "FerroUI.Controls.WinUI", content: Items, events: [
+    markup: { namespace: "FerroUI.Controls", content: Items, events: [
         TextChanged(Option<BoxedValue>, AutoSuggestBoxTextChangedEventArgs) => |this: &Ref<AutoSuggestBox>, handler: MarkupDelegate| {
             let weak = this.downgrade();
             this.text_changed(move |args| { if let Some(owner) = weak.upgrade() { handler.invoke(&[into_markup_value(Some(owner)), into_markup_value(args.clone())]); } })
@@ -762,43 +760,6 @@ impl Drop for AutoSuggestBox {
         for subscription in self.subscriptions.get_mut().drain(..) {
             subscription.dispose();
         }
-    }
-}
-
-#[repr(C)]
-pub struct AutoSuggestBoxAutomationPeer {
-    base: ControlAutomationPeer,
-}
-ferro_class!(AutoSuggestBoxAutomationPeer: ControlAutomationPeer);
-ferro_class_info!(AutoSuggestBoxAutomationPeer { interfaces: [Rc<dyn IInvokeProvider> => ProviderAdapter::as_invoke_provider] });
-ferro_impl_classes!(AutoSuggestBoxAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
-impl AutomationPeerImpl for AutoSuggestBoxAutomationPeer {
-    fn get_class_name_core(_this: &Self) -> String {
-        "AutoSuggestBox".into()
-    }
-    fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
-        AutomationControlType::Group
-    }
-}
-impl AutoSuggestBoxAutomationPeer {
-    pub fn new(owner: &AutoSuggestBox) -> Ref<Self> {
-        instantiate(Self {
-            base: ControlAutomationPeer::construct(owner),
-        })
-    }
-    pub fn owner(&self) -> Ref<AutoSuggestBox> {
-        ControlAutomationPeer::owner(self)
-            .cast()
-            .expect("AutoSuggestBox owner")
-    }
-}
-impl IInvokeProvider for ProviderAdapter<AutoSuggestBoxAutomationPeer> {
-    fn peer(&self) -> Ref<AutomationPeer> {
-        self.0.clone().upcast()
-    }
-    fn invoke(&self) -> Result<(), ElementNotEnabledException> {
-        self.0.owner().submit_query();
-        Ok(())
     }
 }
 

@@ -15,6 +15,8 @@ python3 scripts/winui-gallery/scan.py --check
 python3 scripts/winui-gallery/event_targets.py --check
 python3 scripts/winui-gallery/symbol_map.py --check
 python3 scripts/winui-gallery/existing_api.py --check
+python3 scripts/generate_view_builders.py --check
+python3 scripts/generate_markup_types.py --target rust-paths --check
 
 # Deliberately fails while API contracts or Gallery pages lack execution evidence.
 python3 scripts/winui-gallery/scan.py --check --require-complete
@@ -51,7 +53,7 @@ All generated outputs live in `docs/porting/winui-gallery/data/`.
 | `api-mappings.json` | Reviewed adaptation candidates, member renames and semantic cautions; hand-maintained input |
 | `symbol-glyphs.tsv` / `symbol-sources.lock.json` | Every pinned Symbol API value and modern rendered glyph, with API-model and native-renderer hashes |
 | `api-evidence.json` | Contract-specific implementation/test anchors and exact-source execution records; hand-maintained input |
-| `api-map.json` | Namespace-scoped Rust candidates and inherited-member presence; behavior remains unverified |
+| `api-map.json` | Namespace-scoped Rust candidates, inherited-member presence and separately evaluated behavioral evidence; candidates alone do not establish behavior |
 | `gallery-xaml-map.json` | XAML member requirements joined through both inheritance trees, with declaring owner and every use site |
 | `xaml-feature-map.json` | Audited syntax adaptations, source/test anchors, explicit rejected features and every use site |
 | `gallery-page-map.json` | Curated sample implementation evidence joined with upstream requirements |
@@ -94,8 +96,10 @@ Private unregistered helper types are excluded.
 The guard rejects a removed or renamed identity, a namespace move, a changed
 declared base, a removed member name, reduced public visibility, removed source
 registration, or an additional declaration origin colliding with an existing
-namespace identity. New types in `FerroUI.Controls.WinUI` and additive members are
-allowed. Pre-existing conditional declaration origins remain recorded for review.
+namespace identity. New native types and additive members are allowed. In particular,
+`FramePage` preserves the existing `Page` identity, and Frame navigation arguments
+use `FerroUI.Navigation` to preserve the existing control-navigation arguments.
+Pre-existing conditional declaration origins remain recorded for review.
 
 This is **source-declaration compatibility only**. It does not prove signatures,
 generic bounds, defaults, public module re-exports, ABI, layout, event behavior,
@@ -180,8 +184,9 @@ remain a separate source-comparison measure and never promote behavior status.
   and unambiguous base-class lookup. It does not prove Rust signatures, XAML
   registration behavior, property defaults, event ordering or visual equality.
 - Alternate control candidates such as `ListView` to `ListBox` retain explicit
-  semantic cautions and cannot be treated as interchangeable aliases. New opt-in
-  implementations such as `NumberBox` map to their own WinUI namespace types.
+  semantic cautions and cannot be treated as interchangeable aliases. New native
+  implementations such as `NumberBox` map directly to `FerroUI.Controls`; genuine
+  name conflicts use reviewed mappings such as source `Page` to `FramePage`.
 - Platform imports remain unresolved adapter requirements until native service
   implementations and platform-specific execution evidence exist.
 

@@ -10,7 +10,7 @@ use ferroui_base::{Point, Ref};
 use ferroui_controls::automation::peers::{AutomationControlType, ControlAutomationPeer};
 use ferroui_controls::automation::provider::{IRangeValueProvider, IValueProvider};
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
-use ferroui_controls::winui::{RatingControl, RatingItemFontInfo, RatingItemImageInfo};
+use ferroui_controls::{RatingControl, RatingItemFontInfo, RatingItemImageInfo};
 use ferroui_controls::{Control, Grid, Image, StackPanel, TextBlock, Window};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;

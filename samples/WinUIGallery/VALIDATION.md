@@ -10,7 +10,7 @@ The current [generated API summary](../../docs/porting/winui-gallery/data/summar
 records 1 verified type, 54 partial types, 202 verified members and 264 partial members.
 The complete `Symbol` enum contributes 197 of those verified members; these counts do
 not certify complete control, page, visual or platform parity.
-The source candidate map separately identifies 314 types and 1,535 members without
+The source candidate map separately identifies 315 types and 1,537 members without
 certifying their signatures, defaults, behavior or WinMD ABI compatibility.
 
 ## Reproducible source inputs
@@ -35,7 +35,7 @@ contains **521 tracked text files, including 355 catalog-page snippets**, with
 supporting and legacy/unreferenced files counted separately from executable examples.
 Source inventory is not evidence that every example executes.
 
-Both generation checks passed again for the current checkpoint; the pinned catalog
+At the prior source-input checkpoint, both generation checks passed; the pinned catalog
 and asset inputs retain the hashes listed above:
 
 ```sh
@@ -48,6 +48,47 @@ PNG files. The images total 525,150 bytes. They are registered under 110 paths:
 the original Windows metadata spells `CheckBox.png` and `AnnotatedScrollbar.png`
 differently from the tracked filenames `Checkbox.png` and `AnnotatedScrollBar.png`.
 Both spellings are explicit aliases; original filenames and image bytes are retained.
+
+## Native control promotion
+
+The reviewed Gallery pages now use ordinary native control identities in the default
+FerroUI XAML namespace. Rust samples import the controls directly from
+`ferroui_controls`. Frame destinations derive `FramePage` and import navigation
+errors from `ferroui_controls::navigation`, preserving the existing `Page` and
+control-navigation argument contracts. The embedded InfoBadge dictionary now comes
+from `FerroUI.Themes.WinUI/Controls/InfoBadge.xaml` and targets the native InfoBadge.
+Original source previews still use the explicit WinUI importer.
+
+All 72 implemented pages remain partial, with 54 pending and no completed or verified
+page. API behavior statuses are also unchanged. The promotion changes source identity
+and usage; it does not demonstrate additional source-example, rendering or platform
+coverage. Original catalog/source/assets and their upstream hashes remain intact.
+
+The promotion's [native-control execution record](../../docs/porting/winui-gallery/data/executions/native-controls-005.json)
+records **182 passing tests across all 12 integration targets**, with no failures or
+ignored tests. Its **53 frozen source hashes** cover the moved implementations,
+extracted peers/settings and updated tests and were checked before and after the
+command. All **521 current API evidence entries** now reference this execution.
+The record identifies the tested source by its hashes; its parent commit identifies
+the base of the changes. This establishes native-control test evidence for the
+promotion. Loader, theme and Gallery executions retain their separately stated scopes.
+
+The current comparison reports **315 type candidates and 1,537 member candidates**.
+The increase consists only of the newly matching native `NumberBoxValueChangedEventArgs`
+type and its `OldValue`/`NewValue` members; their behavior remains unverified. The
+existing-API guard reports **205 additive types** against the unchanged protected
+baseline. No API behavior or Gallery page status advances from these source matches.
+
+The current [theme ledger](../../docs/porting/winui-theme/TRACKING.md) records
+**6,912 ported, 1,974 waived and 87 pending definitions**. Twelve RadioButtons source
+definitions are now pending after obsolete no-control waivers were removed. They
+join InfoBadge's 27, ProgressRing's 8, RatingControl's 35 and five NavigationView
+style definitions. These are source-definition dispositions, separate from runtime
+or visual acceptance.
+
+The revision-specific executions and captures below predate this promotion. They
+retain their original commands, namespaces, paths, counts and hashes as historical
+evidence; they are not relabeled as executions of the promoted source.
 
 ## Main integration checkpoint: TextLineBounds
 
@@ -74,7 +115,7 @@ equality with `7c679ceb` before and after every command; the runner exited 0.
 | Skia cap-height metrics | **1 passed** | The font's cap height agrees with its OS/2 table. |
 | Source gates | **44 scanner tests passed; normal gates passed** | Protected snapshots and API baseline remain unchanged. Strict completeness still returns expected exit 2. |
 
-The updated lexical inventory has **314 type candidates, 1,535 member candidates,
+The checkpoint lexical inventory has **314 type candidates, 1,535 member candidates,
 562 XAML member candidates and 204 additive types**. Existing API preservation still
 accounts for **3,170 types, 28,435 declared member names and 458 registrations**.
 The additional TextBlock.TextLineBounds candidate is not promoted to verified
@@ -195,7 +236,7 @@ generation records 1,509 public target types and 375 direct events; the complete
 Symbol map retains 197 numeric values, glyphs, markup names and iteration entries.
 The protected upstream snapshots, API baseline and symbol source remain unchanged.
 
-The separate theme ledger now contains **6,912 ported, 1,986 waived and 75 pending
+The NavigationView checkpoint's theme ledger contains **6,912 ported, 1,986 waived and 75 pending
 entries**, with zero unresolved references and duplicate keys. The five NavigationView
 styles move from waived to pending because native target controls now exist. They
 join InfoBadge's 27, ProgressRing's 8 and RatingControl's 35 pending entries. A native
@@ -303,7 +344,7 @@ come from CI, as identified below.
 | Compiled/interpreted XAML | **5 passed, 0 failed, 1 ignored**, CI | The ignored task explicitly regenerates a reviewed fixture; emitted and interpreted root/template binding tests pass. |
 | WinUI binding lifecycle | **13 passed, 0 failed**, CI and local | Explicit initialization, source/target changes, template recycling, error scope and subscription lifetime. |
 | Deferred-resource error isolation | **3 passed, 0 failed**, CI | Typed nested error scopes preserve inner errors; unrelated panics resume and ordinary throwing retains its prior behavior. |
-| Native view builders | **`cargo check --locked -p ferroui-view` passed**, CI | Generated typed builders compile against the current native controls. |
+| Native view builders | **`cargo check --locked -p ferroui-view` passed**, CI | Generated typed builders compile against the checkpoint's native controls. |
 | Native Gallery library | **42 passed, 0 failed**, CI | Application interactions and mock-service acceptance described below. |
 | WinUI theme library | **294 passed, 0 failed, 2 ignored**, CI | The explicit ignored tasks regenerate the reference and measure load time. Both compiler-output comparisons and four reference-storage tests pass. |
 | Scanner/comparison regression | **44 passed** | API, glyph, namespace-builder and baseline comparison regressions. |
@@ -365,7 +406,7 @@ behavioral equivalence.
 The separate [theme resource/style ledger](../../docs/porting/winui-theme/TRACKING.md)
 records **6,912 ported, 1,991 waived and 70 pending entries** across scoped resources
 and styles. The 70 pending entries comprise InfoBadge 27, ProgressRing 8 and
-RatingControl 35. The current inventory has zero unresolved references and zero
+RatingControl 35. The checkpoint inventory has zero unresolved references and zero
 duplicate keys. Its declaration accounting uses the theme's own source pin and
 does not itself certify native behavior or visual equivalence; compiled-theme
 execution is reported separately above.

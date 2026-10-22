@@ -1,5 +1,8 @@
-//! Public behavior tests of the opt-in WinUI navigation contract.
+//! Public behavior tests of the native frame navigation contract.
 
+use ferroui_controls::navigation::{
+    FrameNavigationOptions, NavigatingCancelEventArgs, NavigationCacheMode, NavigationError, NavigationEventArgs, NavigationMode, PageStackEntry,
+};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
@@ -8,9 +11,8 @@ use ferroui_base::{
     Ref, StyledElementImpl, VisualImpl,
 };
 use ferroui_controls::primitives::TemplatedControlImpl;
-use ferroui_controls::winui::{
-    Frame, FrameNavigationOptions, NavigatingCancelEventArgs, NavigationCacheMode, NavigationError,
-    NavigationEventArgs, NavigationMode, Page, PageImpl, PageStackEntry,
+use ferroui_controls::{
+    Frame, FramePage, FramePageImpl,
 };
 use ferroui_controls::{Button, ContentControlImpl, ControlImpl};
 use std::cell::{Cell, RefCell};
@@ -31,12 +33,12 @@ fn events() -> Vec<String> {
 macro_rules! page_type {
     ($name:ident) => {
         #[repr(C)]
-        struct $name { base: Page }
-        ferro_class!($name: Page);
+        struct $name { base: FramePage }
+        ferro_class!($name: FramePage);
         ferro_class_info!($name { new: $name::new });
         ferro_impl_classes!($name: FerroObjectImpl, StyledElementImpl, VisualImpl, LayoutableImpl,
             InteractiveImpl, InputElementImpl, ControlImpl, TemplatedControlImpl, ContentControlImpl);
-        impl PageImpl for $name {
+        impl FramePageImpl for $name {
             fn on_navigating_from(_this: &Self, args: &NavigatingCancelEventArgs) {
                 record(concat!(stringify!($name), ".NavigatingFrom"));
                 if CANCEL_PAGE.with(Cell::get) { args.set_cancel(true); }
@@ -48,7 +50,7 @@ macro_rules! page_type {
             }
         }
         impl $name {
-            fn new() -> Ref<Self> { instantiate(Self { base: Page::construct() }) }
+            fn new() -> Ref<Self> { instantiate(Self { base: FramePage::construct() }) }
         }
     };
 }
@@ -75,7 +77,7 @@ fn factory(
             ty,
             Rc::new(move || {
                 count.set(count.get() + 1);
-                let page = ty.create_instance().unwrap().cast::<Page>().unwrap();
+                let page = ty.create_instance().unwrap().cast::<FramePage>().unwrap();
                 page.set_navigation_cache_mode(mode);
                 Ok(page)
             }),
@@ -92,11 +94,11 @@ fn defaults_and_existing_page_type_remain_distinct() {
     assert!(!frame.can_go_forward());
     assert!(frame.source_page_type().is_none());
     assert_eq!(
-        Page::new().navigation_cache_mode(),
+        FramePage::new().navigation_cache_mode(),
         NavigationCacheMode::Disabled
     );
-    assert_ne!(Page::TYPE, ferroui_controls::Page::TYPE);
-    assert_eq!(Page::TYPE.full_name(), "FerroUI.Controls.WinUI.Page");
+    assert_ne!(FramePage::TYPE, ferroui_controls::Page::TYPE);
+    assert_eq!(FramePage::TYPE.full_name(), "FerroUI.Controls.FramePage");
     assert_eq!(
         ferroui_controls::Page::TYPE.full_name(),
         "FerroUI.Controls.Page"
@@ -252,7 +254,7 @@ fn history_handles_are_live_observable_and_mutations_update_properties() {
 #[test]
 fn a_journal_is_a_live_items_source_and_bindings_keep_its_mutation_guards() {
     use ferroui_base::data::core::{ValueType, ValueTypes};
-    use ferroui_controls::{winui::NavigationStack, ItemsSource};
+    use ferroui_controls::{navigation::NavigationStack, ItemsSource};
     let frame = frame();
     let stack = frame.back_stack();
     let source: ItemsSource = stack.clone().into();
@@ -440,7 +442,7 @@ fn failures_preserve_content_history_and_allow_retry() {
         Err(NavigationError::MissingSourcePageType)
     );
     assert!(matches!(
-        frame.register_page_factory(Button::TYPE, Rc::new(|| Ok(Page::new()))),
+        frame.register_page_factory(Button::TYPE, Rc::new(|| Ok(FramePage::new()))),
         Err(NavigationError::NotAPage(_))
     ));
 }

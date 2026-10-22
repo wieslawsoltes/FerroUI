@@ -1,10 +1,8 @@
-// Copyright (c) Microsoft Corporation. Licensed under the MIT License. See NOTICE.
+// Copyright (c) Microsoft Corporation. Licensed under the MIT License. See NOTICE.md.
 // Adapted from RadioButtons and ColumnMajorUniformToLargestGridLayout in WinUI.
 
 use crate::automation::peers::{
-    AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeerImpl,
-    ItemsControlAutomationPeerImpl, SelectingItemsControlAutomationPeer,
-    SelectingItemsControlAutomationPeerImpl,
+    AutomationPeer, RadioButtonsAutomationPeer,
 };
 use crate::automation::AutomationProperties;
 use crate::generators::RecycleKey;
@@ -49,7 +47,7 @@ pub struct RadioButtons {
 ferro_class!(RadioButtons: HeaderedSelectingItemsControl);
 ferroui_base::ferro_class_info!(RadioButtons {
     new: RadioButtons::new,
-    markup: { namespace: "FerroUI.Controls.WinUI", content: Items },
+    markup: { namespace: "FerroUI.Controls", content: Items },
 });
 ferro_impl_classes!(RadioButtons:
     StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl, TemplatedControlImpl,
@@ -284,21 +282,6 @@ impl RadioButtons {
         }
         best.map(|(_, _, control)| control)
     }
-}
-
-/// The native accessibility selection provider of a radio button group.
-#[repr(C)]
-pub struct RadioButtonsAutomationPeer { base: SelectingItemsControlAutomationPeer }
-ferro_class!(RadioButtonsAutomationPeer: SelectingItemsControlAutomationPeer);
-ferroui_base::ferro_class_info!(RadioButtonsAutomationPeer {});
-ferro_impl_classes!(RadioButtonsAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl, ItemsControlAutomationPeerImpl, SelectingItemsControlAutomationPeerImpl);
-impl AutomationPeerImpl for RadioButtonsAutomationPeer {
-    fn get_class_name_core(_this: &Self) -> String { "RadioButtons".to_string() }
-    fn get_automation_control_type_core(_this: &Self) -> AutomationControlType { AutomationControlType::Group }
-}
-impl RadioButtonsAutomationPeer {
-    pub fn construct(owner: &RadioButtons) -> Self { Self { base: SelectingItemsControlAutomationPeer::construct(owner) } }
-    pub fn new(owner: &RadioButtons) -> Ref<Self> { instantiate(Self::construct(owner)) }
 }
 
 #[repr(C)]

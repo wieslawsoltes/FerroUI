@@ -34,7 +34,7 @@ ferro_class! {
         fn get_icon_element_property_core(this, property: &'static FerroProperty) -> Option<&'static FerroProperty>;
     }
 }
-ferro_class_info!(IconSource { markup: { namespace: "FerroUI.Controls.WinUI" } });
+ferro_class_info!(IconSource { markup: { namespace: "FerroUI.Controls" } });
 
 impl FerroObjectImpl for IconSource {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
@@ -120,7 +120,7 @@ pub struct FontIconSource {
     base: IconSource,
 }
 ferro_class!(FontIconSource: IconSource);
-ferro_class_info!(FontIconSource { new: FontIconSource::new, markup: { namespace: "FerroUI.Controls.WinUI" } });
+ferro_class_info!(FontIconSource { new: FontIconSource::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(FontIconSource: FerroObjectImpl);
 
 impl IconSourceImpl for FontIconSource {
@@ -234,7 +234,7 @@ pub struct SymbolIconSource {
     base: IconSource,
 }
 ferro_class!(SymbolIconSource: IconSource);
-ferro_class_info!(SymbolIconSource { new: SymbolIconSource::new, markup: { namespace: "FerroUI.Controls.WinUI" } });
+ferro_class_info!(SymbolIconSource { new: SymbolIconSource::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(SymbolIconSource: FerroObjectImpl);
 impl IconSourceImpl for SymbolIconSource {
     fn create_icon_element_core(this: &Self) -> Ref<IconElement> {
@@ -277,7 +277,7 @@ pub struct PathIconSource {
     base: IconSource,
 }
 ferro_class!(PathIconSource: IconSource);
-ferro_class_info!(PathIconSource { new: PathIconSource::new, markup: { namespace: "FerroUI.Controls.WinUI" } });
+ferro_class_info!(PathIconSource { new: PathIconSource::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(PathIconSource: FerroObjectImpl);
 impl IconSourceImpl for PathIconSource {
     fn create_icon_element_core(this: &Self) -> Ref<IconElement> {

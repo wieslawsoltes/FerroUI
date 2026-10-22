@@ -1,5 +1,6 @@
 //! Event, lifetime, selection and native-part contracts of the suggestion editor.
 
+use ferroui_controls::automation::peers::{AutoSuggestBoxAutomationPeer};
 use ferroui_base::collections::FerroList;
 use ferroui_base::input::{InputElement, Key, KeyEventArgs};
 use ferroui_base::interactivity::RoutedEventArgs;
@@ -10,9 +11,8 @@ use ferroui_controls::automation::provider::ProviderAdapter;
 use ferroui_controls::primitives::{Popup, TemplatedControl};
 use ferroui_controls::templates::FuncControlTemplate;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::winui::{
-    AutoSuggestBox, AutoSuggestBoxAutomationPeer, AutoSuggestionBoxTextChangeReason as Reason,
-    Symbol, SymbolIcon,
+use ferroui_controls::{
+    AutoSuggestBox, AutoSuggestionBoxTextChangeReason as Reason, Symbol, SymbolIcon,
 };
 use ferroui_controls::{
     AutoCompleteBox, Button, Control, ItemsSource, ListBox, TextBlock, TextBox,

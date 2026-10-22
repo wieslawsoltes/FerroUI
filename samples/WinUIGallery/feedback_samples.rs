@@ -6,11 +6,10 @@ use ferroui_base::media::{Brushes, IBrush, SolidColorBrush};
 use ferroui_base::styling::ControlTheme;
 use ferroui_base::{ObjectType, Ref};
 use ferroui_controls::primitives::{SelectingItemsControl, ToggleButton};
-use ferroui_controls::winui::{
-    InfoBadge, NavigationView, NavigationViewPaneDisplayMode, NumberBox, ProgressRing,
-    RatingControl,
+use ferroui_controls::{
+    ComboBox, Control, InfoBadge, NavigationView, NavigationViewPaneDisplayMode, NumberBox,
+    ProgressRing, RatingControl, TextBlock, ToggleSwitch,
 };
-use ferroui_controls::{ComboBox, Control, TextBlock, ToggleSwitch};
 use std::rc::Rc;
 
 pub(crate) fn wire(root: &Ref<Control>) {

@@ -45,6 +45,7 @@ const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_controls::metadata", "FerroUI.Controls.Metadata"),
     ("ferroui_controls::mixins", "FerroUI.Controls.Mixins"),
     ("ferroui_controls::notifications", "FerroUI.Controls.Notifications"),
+    ("ferroui_controls::navigation", "FerroUI.Navigation"),
     ("ferroui_controls::numeric_up_down", "FerroUI.Controls"),
     ("ferroui_controls::calendar", "FerroUI.Controls"),
     ("ferroui_controls::calendar::calendar_blackout_dates_collection", "FerroUI.Controls.Primitives"),
@@ -78,9 +79,6 @@ const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_controls::split_view::split_view_template_settings", "FerroUI.Controls.Primitives"),
     ("ferroui_controls::templates", "FerroUI.Controls.Templates"),
     ("ferroui_controls::utils", "FerroUI.Controls.Utils"),
-    ("ferroui_controls::winui", "FerroUI.Controls.WinUI"),
-    ("ferroui_controls::winui::navigation_view_automation_peer", "FerroUI.Controls.WinUI.Automation.Peers"),
-    ("ferroui_controls::winui::navigation_view_item_automation_peer", "FerroUI.Controls.WinUI.Automation.Peers"),
 ];
 
 /// What this crate states about itself for markup: its assembly name and
@@ -124,48 +122,51 @@ pub fn register_types() {
         crate::rust_paths::register_rust_paths();
         MarkupAssembly::register(&ASSEMBLY);
         crate::markup_types::register();
-        crate::winui::register_markup_types();
+        crate::navigation::register_markup_types();
+        crate::navigation_view_events::register_markup_types();
+        crate::auto_suggest_box::register_markup_types();
+        crate::info_bar::register_markup();
     });
 }
 
 const TYPES: &[&TypeInfo] = types![
-    // Opt-in WinUI contracts. These are not part of the default XML namespace.
-    crate::winui::AutoSuggestBox,
-    crate::winui::AutoSuggestBoxAutomationPeer,
-    crate::winui::Page,
-    crate::winui::Frame,
-    crate::winui::NavigationView,
-    crate::winui::NavigationViewAutomationPeer,
-    crate::winui::NavigationViewItemBase,
-    crate::winui::NavigationViewItem,
-    crate::winui::NavigationViewItemHeader,
-    crate::winui::NavigationViewItemSeparator,
-    crate::winui::NavigationViewItemAutomationPeer,
-    crate::winui::PageStackEntry,
-    crate::winui::NumberBox,
-    crate::winui::NumberBoxAutomationPeer,
-    crate::winui::FontIcon,
-    crate::winui::SymbolIcon,
-    crate::winui::RadioButtons,
-    crate::winui::RadioButtonsAutomationPeer,
-    crate::winui::IconSource,
-    crate::winui::FontIconSource,
-    crate::winui::SymbolIconSource,
-    crate::winui::PathIconSource,
-    crate::winui::InfoBar,
-    crate::winui::InfoBarPanel,
-    crate::winui::InfoBarTemplateSettings,
-    crate::winui::InfoBarAutomationPeer,
-    crate::winui::InfoBadge,
-    crate::winui::InfoBadgeTemplateSettings,
-    crate::winui::ProgressRing,
-    crate::winui::ProgressRingTemplateSettings,
-    crate::winui::ProgressRingAutomationPeer,
-    crate::winui::RatingControl,
-    crate::winui::RatingControlAutomationPeer,
-    crate::winui::RatingItemInfo,
-    crate::winui::RatingItemFontInfo,
-    crate::winui::RatingItemImageInfo,
+    // Native frame navigation and additional controls.
+    crate::AutoSuggestBox,
+    crate::automation::peers::AutoSuggestBoxAutomationPeer,
+    crate::FramePage,
+    crate::Frame,
+    crate::NavigationView,
+    crate::automation::peers::NavigationViewAutomationPeer,
+    crate::NavigationViewItemBase,
+    crate::NavigationViewItem,
+    crate::NavigationViewItemHeader,
+    crate::NavigationViewItemSeparator,
+    crate::automation::peers::NavigationViewItemAutomationPeer,
+    crate::navigation::PageStackEntry,
+    crate::NumberBox,
+    crate::automation::peers::NumberBoxAutomationPeer,
+    crate::FontIcon,
+    crate::SymbolIcon,
+    crate::RadioButtons,
+    crate::automation::peers::RadioButtonsAutomationPeer,
+    crate::IconSource,
+    crate::FontIconSource,
+    crate::SymbolIconSource,
+    crate::PathIconSource,
+    crate::InfoBar,
+    crate::primitives::InfoBarPanel,
+    crate::primitives::InfoBarTemplateSettings,
+    crate::automation::peers::InfoBarAutomationPeer,
+    crate::InfoBadge,
+    crate::primitives::InfoBadgeTemplateSettings,
+    crate::ProgressRing,
+    crate::primitives::ProgressRingTemplateSettings,
+    crate::automation::peers::ProgressRingAutomationPeer,
+    crate::RatingControl,
+    crate::automation::peers::RatingControlAutomationPeer,
+    crate::RatingItemInfo,
+    crate::RatingItemFontInfo,
+    crate::RatingItemImageInfo,
     // FerroUI
     crate::application::Application,
     // FerroUI.Animation

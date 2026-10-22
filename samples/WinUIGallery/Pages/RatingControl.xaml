@@ -1,11 +1,10 @@
 <!-- Ported from both pinned RatingControl examples; see ../NOTICE.md. -->
 <StackPanel xmlns="https://github.com/ferroui"
-            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-            xmlns:winui="using:FerroUI.Controls.WinUI" Spacing="24">
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
   <TextBlock Text="A RatingControl with a caption" FontSize="18" />
   <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
     <StackPanel VerticalAlignment="Top" Spacing="12">
-      <winui:RatingControl x:Name="RatingControl1" HorizontalAlignment="Left"
+      <RatingControl x:Name="RatingControl1" HorizontalAlignment="Left"
                            Caption="312 ratings" AutomationProperties.Name="Simple RatingControl"
                            IsClearEnabled="{Binding #ClearEnabled.IsChecked, Mode=OneWay}"
                            IsReadOnly="{Binding #ReadOnly.IsChecked, Mode=OneWay}" />
@@ -20,7 +19,7 @@
   </Grid>
   <TextBlock Text="A RatingControl with a placeholder" FontSize="18" />
   <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
-    <winui:RatingControl x:Name="RatingControl2" HorizontalAlignment="Left" VerticalAlignment="Top"
+    <RatingControl x:Name="RatingControl2" HorizontalAlignment="Left" VerticalAlignment="Top"
                          AutomationProperties.Name="RatingControl with placeholder"
                          PlaceholderValue="{Binding #PlaceholderSlider.Value, Mode=TwoWay}" />
     <StackPanel Grid.Column="1" Spacing="8">

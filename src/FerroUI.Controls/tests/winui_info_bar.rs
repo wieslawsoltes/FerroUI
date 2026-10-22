@@ -14,7 +14,7 @@ use ferroui_controls::automation::{
 use ferroui_controls::presenters::ContentPresenter;
 use ferroui_controls::templates::{FuncControlTemplate, FuncDataTemplate};
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::winui::{
+use ferroui_controls::{
     FontIcon, FontIconSource, InfoBar, InfoBarCloseReason, InfoBarPanel, InfoBarSeverity,
 };
 use ferroui_controls::{Border, Button, Control, Grid, TextBlock, Viewbox, Window};

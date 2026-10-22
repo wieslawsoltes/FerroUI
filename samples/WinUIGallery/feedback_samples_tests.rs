@@ -5,8 +5,10 @@ use ferroui_base::controls::ResourceKey;
 use ferroui_base::media::{Brushes, Color, IBrush};
 use ferroui_base::styling::ControlTheme;
 use ferroui_base::Ref;
-use ferroui_controls::winui::{FontIconSource, InfoBadge, NumberBox, ProgressRing, RatingControl};
-use ferroui_controls::{CheckBox, ComboBox, Control, Slider, TextBlock, ToggleSwitch};
+use ferroui_controls::{
+    CheckBox, ComboBox, Control, FontIconSource, InfoBadge, NumberBox, ProgressRing,
+    RatingControl, Slider, TextBlock, ToggleSwitch,
+};
 
 fn page(id: &str) -> Ref<Control> {
     examples::create(examples::find(id).unwrap()).unwrap()
@@ -176,7 +178,7 @@ fn info_badge_page_preserves_source_integer_guard_for_dynamic_values() {
 
 #[test]
 fn info_badge_navigation_composition_keeps_original_badge_and_opacity_handler() {
-    use ferroui_controls::winui::{NavigationView, NavigationViewItem};
+    use ferroui_controls::{NavigationView, NavigationViewItem};
     let _application = start();
     let root = page("InfoBadge");
     let nav = root.get_control::<NavigationView>("nvSample1");
@@ -196,7 +198,7 @@ fn info_badge_navigation_composition_keeps_original_badge_and_opacity_handler() 
 
 #[test]
 fn info_badge_navigation_modes_preserve_the_same_notification_and_selection() {
-    use ferroui_controls::winui::{Frame, NavigationView, NavigationViewPaneDisplayMode};
+    use ferroui_controls::{Frame, NavigationView, NavigationViewPaneDisplayMode};
     let _application = start();
     let root = page("InfoBadge");
     let nav = root.get_control::<NavigationView>("nvSample1");
@@ -238,7 +240,7 @@ fn feedback_pages_and_callbacks_release_their_native_controls() {
 fn compact_sizing_copies_every_field_across_distinct_page_types() {
     use ferroui_base::animation::TimeSpan;
     use ferroui_base::utilities::DateTimeOffset;
-    use ferroui_controls::winui::{Frame, RadioButtons};
+    use ferroui_controls::{Frame, RadioButtons};
     use ferroui_controls::{DatePicker, TextBox};
     let _application = start();
     let root = page("CompactSizing");
@@ -300,7 +302,7 @@ fn compact_sizing_copies_every_field_across_distinct_page_types() {
 
 #[test]
 fn compact_sizing_resources_remain_page_scoped_and_release_with_the_gallery_page() {
-    use ferroui_controls::winui::{Frame, RadioButtons};
+    use ferroui_controls::{Frame, RadioButtons};
     use ferroui_controls::Application;
     let _application = start();
     let key = ResourceKey::from("TextControlThemeMinHeight");

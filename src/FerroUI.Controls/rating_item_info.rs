@@ -14,7 +14,7 @@ pub struct RatingItemInfo {
     base: FerroObject,
 }
 ferro_class!(RatingItemInfo: FerroObject);
-ferro_class_info!(RatingItemInfo { new: RatingItemInfo::new, markup: { namespace: "FerroUI.Controls.WinUI" } });
+ferro_class_info!(RatingItemInfo { new: RatingItemInfo::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(RatingItemInfo: FerroObjectImpl);
 
 impl RatingItemInfo {
@@ -34,7 +34,7 @@ pub struct RatingItemFontInfo {
     base: RatingItemInfo,
 }
 ferro_class!(RatingItemFontInfo: RatingItemInfo);
-ferro_class_info!(RatingItemFontInfo { new: RatingItemFontInfo::new, markup: { namespace: "FerroUI.Controls.WinUI" } });
+ferro_class_info!(RatingItemFontInfo { new: RatingItemFontInfo::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(RatingItemFontInfo: FerroObjectImpl);
 
 ferro_properties! { impl RatingItemFontInfo {
@@ -120,7 +120,7 @@ pub struct RatingItemImageInfo {
     base: RatingItemInfo,
 }
 ferro_class!(RatingItemImageInfo: RatingItemInfo);
-ferro_class_info!(RatingItemImageInfo { new: RatingItemImageInfo::new, markup: { namespace: "FerroUI.Controls.WinUI" } });
+ferro_class_info!(RatingItemImageInfo { new: RatingItemImageInfo::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(RatingItemImageInfo: FerroObjectImpl);
 
 ferro_properties! { impl RatingItemImageInfo {

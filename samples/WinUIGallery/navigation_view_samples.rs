@@ -16,17 +16,15 @@ use ferroui_base::{
     Ref, StyledElementImpl, TypeInfo, Visual, VisualImpl,
 };
 use ferroui_controls::automation::AutomationProperties;
+use ferroui_controls::navigation::NavigationError;
 use ferroui_controls::primitives::{TemplatedControlImpl, ToggleButton};
 use ferroui_controls::templates::FuncDataTemplate;
-use ferroui_controls::winui::{
-    AutoSuggestBox, Frame, NavigationError, NavigationView, NavigationViewBackButtonVisible,
-    NavigationViewItem, NavigationViewItemHeader, NavigationViewItemSeparator,
-    NavigationViewPaneDisplayMode, NavigationViewSelectionFollowsFocus, Page, PageImpl, Symbol,
-    SymbolIcon,
-};
 use ferroui_controls::{
-    CheckBox, ContentControlImpl, Control, ControlImpl, RadioButton, StackPanel, TextBlock,
-    ToolTip, TopLevel,
+    AutoSuggestBox, CheckBox, ContentControlImpl, Control, ControlImpl, Frame, FramePage,
+    FramePageImpl, NavigationView, NavigationViewBackButtonVisible, NavigationViewItem,
+    NavigationViewItemHeader, NavigationViewItemSeparator, NavigationViewPaneDisplayMode,
+    NavigationViewSelectionFollowsFocus, RadioButton, StackPanel, Symbol, SymbolIcon,
+    TextBlock, ToolTip, TopLevel,
 };
 use ferroui_markup_xaml::XamlLoadException;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
@@ -36,17 +34,17 @@ use std::rc::Rc;
 macro_rules! sample_page {
     ($name:ident, $source:literal) => {
         #[repr(C)]
-        pub(crate) struct $name { base: Page }
-        ferro_class!($name: Page);
+        pub(crate) struct $name { base: FramePage }
+        ferro_class!($name: FramePage);
         ferro_class_info!($name {});
         ferro_impl_classes!($name: FerroObjectImpl, StyledElementImpl, VisualImpl, LayoutableImpl,
             InteractiveImpl, InputElementImpl, ControlImpl, TemplatedControlImpl, ContentControlImpl,
-            PageImpl);
+            FramePageImpl);
         impl $name {
-            fn create() -> Result<Ref<Page>, NavigationError> {
+            fn create() -> Result<Ref<FramePage>, NavigationError> {
                 let content = FerroRuntimeXamlLoader::parse_as::<Ref<Control>>(include_str!($source), None)
                     .map_err(|error| NavigationError::FactoryFailed(error.to_string()))?;
-                let page = instantiate(Self { base: Page::construct() });
+                let page = instantiate(Self { base: FramePage::construct() });
                 page.set_content(Some(Control::boxed(content)));
                 Ok(page.upcast())
             }
@@ -189,7 +187,7 @@ fn wire_selection(
                     value.downcast_ref::<CategoryEntry>()
                 {
                     nav.set_header(Some(Rc::new(format!(
-                        "Sample Page {}",
+                        "Sample FramePage {}",
                         name.chars().last().unwrap()
                     ))));
                     Some(SamplePage1::TYPE)
@@ -200,7 +198,7 @@ fn wire_selection(
                     let target = page_type(tag)?;
                     if update_header {
                         nav.set_header(Some(Rc::new(format!(
-                            "Sample Page {}",
+                            "Sample FramePage {}",
                             tag.chars().last().unwrap()
                         ))));
                     }

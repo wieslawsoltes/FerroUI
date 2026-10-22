@@ -1,7 +1,7 @@
-// Copyright (c) Microsoft Corporation. Licensed under the MIT License. See NOTICE.md.
+// Copyright (c) Microsoft Corporation. Licensed under the MIT License. See ../../NOTICE.md.
 // Adapted from the pinned ProgressRingAutomationPeer.cpp/.h contracts.
 
-use super::ProgressRing;
+use crate::ProgressRing;
 use crate::automation::peers::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, AutomationPeerImplExt,
     ControlAutomationPeer, ControlAutomationPeerImpl,

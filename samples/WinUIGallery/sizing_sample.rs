@@ -9,10 +9,11 @@ use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Ref,
     StyledElementImpl, VisualImpl,
 };
+use ferroui_controls::navigation::NavigationError;
 use ferroui_controls::primitives::{SelectingItemsControl, TemplatedControlImpl};
-use ferroui_controls::winui::{Frame, NavigationError, Page, PageImpl, RadioButtons};
 use ferroui_controls::{
-    ContentControlImpl, Control, ControlImpl, DatePicker, StackPanel, TextBlock, TextBox,
+    ContentControlImpl, Control, ControlImpl, DatePicker, Frame, FramePage, FramePageImpl,
+    RadioButtons, StackPanel, TextBlock, TextBox,
 };
 use ferroui_markup_xaml::XamlLoadException;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
@@ -21,16 +22,16 @@ use std::rc::Rc;
 macro_rules! sizing_page {
     ($name:ident, $compact:expr) => {
         #[repr(C)]
-        pub(crate) struct $name { base: Page }
-        ferro_class!($name: Page);
+        pub(crate) struct $name { base: FramePage }
+        ferro_class!($name: FramePage);
         ferro_class_info!($name {});
         ferro_impl_classes!($name: FerroObjectImpl, StyledElementImpl, VisualImpl, LayoutableImpl,
-            InteractiveImpl, InputElementImpl, ControlImpl, TemplatedControlImpl, ContentControlImpl, PageImpl);
+            InteractiveImpl, InputElementImpl, ControlImpl, TemplatedControlImpl, ContentControlImpl, FramePageImpl);
         impl $name {
-            fn create() -> Result<Ref<Page>, NavigationError> {
+            fn create() -> Result<Ref<FramePage>, NavigationError> {
                 let form = FerroRuntimeXamlLoader::parse_as::<Ref<StackPanel>>(include_str!("Pages/SizingForm.xaml"), None)
                     .map_err(|error| NavigationError::FactoryFailed(error.to_string()))?;
-                let page = instantiate(Self { base: Page::construct() });
+                let page = instantiate(Self { base: FramePage::construct() });
                 if $compact {
                     // Reuse the actual native dictionary; its values remain scoped to
                     // this page and inherited by this form's themed controls.

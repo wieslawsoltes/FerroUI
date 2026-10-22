@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. Licensed under the MIT License. See NOTICE.md.
 // Adapted from NavigationView.cpp/.idl at microsoft/microsoft-ui-xaml a71c42bd.
 
-use super::navigation_view_automation_peer::NavigationViewAutomationPeer;
+use crate::automation::peers::NavigationViewAutomationPeer;
 use super::navigation_view_events::*;
 use super::{AutoSuggestBox, NavigationViewItem, NavigationViewItemBase, Symbol, SymbolIcon};
 use crate::automation::peers::{AutomationPeer, ControlAutomationPeer};
@@ -174,7 +174,7 @@ pub struct NavigationView {
 ferro_class!(NavigationView: ContentControl);
 ferro_class_info!(NavigationView {
     new: NavigationView::new,
-    markup: { namespace: "FerroUI.Controls.WinUI", content: Content,
+    markup: { namespace: "FerroUI.Controls", content: Content,
         events: [
             SelectionChanged(Option<BoxedValue>, NavigationViewSelectionChangedEventArgs) => |this: &Ref<NavigationView>, handler: MarkupDelegate| {
                 let weak = this.downgrade();

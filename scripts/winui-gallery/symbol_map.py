@@ -90,7 +90,7 @@ def main() -> int:
     if lock["commit"] != commit or lock["snapshot_sha256"] != sha(reference.read_bytes()):
         raise ValueError("Symbol reference pin/hash mismatch")
     entries = [(name, int(value, 16), int(glyph, 16)) for line in reference.read_text().splitlines() if not line.startswith("#") for name, value, glyph in [line.split("\t")]]
-    verify_rust((REPO / "src/FerroUI.Controls/winui/symbol_icon.rs").read_text(), entries)
+    verify_rust((REPO / "src/FerroUI.Controls/symbol_icon.rs").read_text(), entries)
     print(f"Symbol map verified: {len(entries)} public values, rendered glyphs, markup names and iteration entries")
     return 0
 

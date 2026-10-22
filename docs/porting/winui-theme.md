@@ -448,17 +448,17 @@ reason: the Reveal brushes and styles (deprecated; the seven Reveal brushes that
 still name are ported as the plain brushes they are), the controls FerroUI does not have
 (InkToolbar, MediaTransportControls, Pivot, PersonPicture, MapControl,
 TeachingTip, TwoPaneView, SwipeControl, AnnotatedScrollBar, ItemsView/ItemContainer,
-BreadcrumbBar, PagerControl, RadioButtons, ImageIcon, ScrollView, CommandBarFlyout,
+BreadcrumbBar, PagerControl, ImageIcon, ScrollView, CommandBarFlyout,
 RichEditBox, GridView, Hub, SemanticZoom, ListView, ...), the colour picker (styled by
 `ferroui-controls-color-picker`), system backdrops, switches of native chrome
 (`ListViewItemPresenter`, `ThemeShadow`), and the input validation templates that WinUI 3 removed.
 A waiver is the answer "this has no meaning in FerroUI", never "not done yet": what is not done
 stays pending.
 
-The additive `FerroUI.Controls.WinUI.InfoBadge`, `ProgressRing` and `RatingControl` controls have native
+The additive `FerroUI.Controls.InfoBadge`, `ProgressRing`, `RatingControl` and `RadioButtons` controls have native
 implementations, so their former no-control waivers have been removed. The tracking report's
 "Additive WinUI controls" section records their available native behavior and remaining source
-theme gaps. `WinUIInfoBadge.xaml` supplies the named and implicit native control themes;
+theme gaps. `InfoBadge.xaml` supplies the named and implicit native control themes;
 ProgressRing and RatingControl supply native templates in code and resolve application theme
 resource overrides. Key coverage does not claim exact VisualState, Lottie, platform accessibility or
 pixel parity. These additions retain their own control-source pin alongside the older theme
@@ -595,7 +595,7 @@ Every target type of a style of the merged WinUI theme, the FerroUI control its 
 | `FlipViewItem` | `Carousel` | B5 | the items of a Carousel are its content presenters |
 | `FlyoutPresenter` | `FlyoutPresenter` | B3 |  |
 | `HyperlinkButton` | `HyperlinkButton` | F |  |
-| `InfoBadge` | `InfoBadge` | B6 | Additive FerroUI.Controls.WinUI.InfoBadge; native opt-in API and WinUIInfoBadge.xaml ControlThemes. Resource key coverage is separate from exact visual parity. |
+| `InfoBadge` | `InfoBadge` | B6 | Additive FerroUI.Controls.InfoBadge; native control API and InfoBadge.xaml ControlThemes. Resource key coverage is separate from exact visual parity. |
 | `InfoBar` | `NotificationCard` | B6 |  |
 | `ListBox` | `ListBox` | B3 |  |
 | `ListBoxItem` | `ListBoxItem` | B3 |  |
@@ -608,19 +608,20 @@ Every target type of a style of the merged WinUI theme, the FerroUI control its 
 | `MenuFlyoutPresenter` | `MenuFlyoutPresenter` | B3 |  |
 | `MenuFlyoutSeparator` | `Separator` | B1 |  |
 | `MenuFlyoutSubItem` | `MenuItem` | B3 |  |
-| `NavigationView` | `NavigationView` | B5 | Additive FerroUI.Controls.WinUI.NavigationView; replaceable native metadata template and resource lookup. The original implicit style remains pending; DrawerPage keeps its separate existing page contract. |
-| `NavigationViewItem` | `NavigationViewItem` | B5 | Additive FerroUI.Controls.WinUI.NavigationViewItem; native content/icon/badge/hierarchy parts. The original implicit and top settings-item styles remain pending. |
-| `NavigationViewItemHeader` | `NavigationViewItemHeader` | B5 | Additive FerroUI.Controls.WinUI.NavigationViewItemHeader; native nonfocusable heading. The original implicit style remains pending. |
+| `NavigationView` | `NavigationView` | B5 | Additive FerroUI.Controls.NavigationView; replaceable native metadata template and resource lookup. The original implicit style remains pending; DrawerPage keeps its separate existing page contract. |
+| `NavigationViewItem` | `NavigationViewItem` | B5 | Additive FerroUI.Controls.NavigationViewItem; native content/icon/badge/hierarchy parts. The original implicit and top settings-item styles remain pending. |
+| `NavigationViewItemHeader` | `NavigationViewItemHeader` | B5 | Additive FerroUI.Controls.NavigationViewItemHeader; native nonfocusable heading. The original implicit style remains pending. |
 | `NavigationViewItemPresenter` | no FerroUI control | B5 | No public native NavigationViewItemPresenter or its TemplateSettings. The native NavigationViewItem row parts do not implement that source class; its presenter styles remain waived. |
-| `NavigationViewItemSeparator` | `NavigationViewItemSeparator` | B5 | Additive FerroUI.Controls.WinUI.NavigationViewItemSeparator; native nonfocusable line and orientation. The original implicit style remains pending. |
+| `NavigationViewItemSeparator` | `NavigationViewItemSeparator` | B5 | Additive FerroUI.Controls.NavigationViewItemSeparator; native nonfocusable line and orientation. The original implicit style remains pending. |
 | `NumberBox` | `NumericUpDown` | B2 |  |
 | `PasswordBox` | `TextBox` | B3 | FerroUI's TextBox with a PasswordChar; ported as the keyed DefaultPasswordBoxStyle |
 | `PipsPager` | `PipsPager` | B2 |  |
 | `ProgressBar` | `ProgressBar` | B1 |  |
-| `ProgressRing` | `ProgressRing` | B1 | Additive FerroUI.Controls.WinUI.ProgressRing; native Arc template and brush lookup. Source style/resource declarations and exact Lottie/stroke visuals remain pending. |
+| `ProgressRing` | `ProgressRing` | B1 | Additive FerroUI.Controls.ProgressRing; native Arc template and brush lookup. Source style/resource declarations and exact Lottie/stroke visuals remain pending. |
 | `RadioButton` | `RadioButton` | F |  |
+| `RadioButtons` | `RadioButtons` | B3 | Native FerroUI.Controls.RadioButtons; replaceable metadata template and native RadioButton items. Original group/item styles and scoped resource declarations remain pending. |
 | `RadioMenuFlyoutItem` | `MenuItem` | B3 |  |
-| `RatingControl` | `RatingControl` | B2 | Additive FerroUI.Controls.WinUI.RatingControl; native glyph/image template, clipping and resource lookup. Original styles, item DataTemplates and exact source visuals remain pending. |
+| `RatingControl` | `RatingControl` | B2 | Additive FerroUI.Controls.RatingControl; native glyph/image template, clipping and resource lookup. Original styles, item DataTemplates and exact source visuals remain pending. |
 | `Rectangle` | no FerroUI control | B3 | keyed styles of template parts (ComboBoxItemPill, SelectorBarItemPill) |
 | `RefreshContainer` | `RefreshContainer` | B2 |  |
 | `RefreshVisualizer` | `RefreshVisualizer` | B2 |  |
@@ -651,7 +652,7 @@ Every target type of a style of the merged WinUI theme, the FerroUI control its 
 | `TreeView` | `TreeView` | B3 |  |
 | `TreeViewItem` | `TreeViewItem` | B3 |  |
 
-Target types without a FerroUI control (all their styles waived): `AnnotatedScrollBar`, `AppBar`, `AppBarElementContainer`, `BreadcrumbBar`, `BreadcrumbBarItem`, `ColorPicker`, `ColorPickerSlider`, `ColorSpectrum`, `CommandBarFlyoutCommandBar`, `Frame`, `GridView`, `GridViewHeaderItem`, `GridViewItem`, `GroupItem`, `Hub`, `HubSection`, `InkToolbar`, `InkToolbarBallpointPenButton`, `InkToolbarCustomPenButton`, `InkToolbarCustomToggleButton`, `InkToolbarCustomToolButton`, `InkToolbarEraserButton`, `InkToolbarFlyoutItem`, `InkToolbarHighlighterButton`, `InkToolbarPenConfigurationControl`, `InkToolbarPencilButton`, `InkToolbarRulerButton`, `InkToolbarStencilButton`, `ItemContainer`, `ItemsView`, `ListPickerFlyoutPresenter`, `ListView`, `ListViewHeaderItem`, `MapControl`, `MediaPlayerElement`, `MediaTransportControls`, `PagerControl`, `PersonPicture`, `PickerFlyoutPresenter`, `Pivot`, `PivotHeaderItem`, `PivotItem`, `RadioButtons`, `RichEditBox`, `RichTextBlock`, `ScrollView`, `SemanticZoom`, `SwipeControl`, `TeachingTip`, `TwoPaneView`.
+Target types without a FerroUI control (all their styles waived): `AnnotatedScrollBar`, `AppBar`, `AppBarElementContainer`, `BreadcrumbBar`, `BreadcrumbBarItem`, `ColorPicker`, `ColorPickerSlider`, `ColorSpectrum`, `CommandBarFlyoutCommandBar`, `Frame`, `GridView`, `GridViewHeaderItem`, `GridViewItem`, `GroupItem`, `Hub`, `HubSection`, `InkToolbar`, `InkToolbarBallpointPenButton`, `InkToolbarCustomPenButton`, `InkToolbarCustomToggleButton`, `InkToolbarCustomToolButton`, `InkToolbarEraserButton`, `InkToolbarFlyoutItem`, `InkToolbarHighlighterButton`, `InkToolbarPenConfigurationControl`, `InkToolbarPencilButton`, `InkToolbarRulerButton`, `InkToolbarStencilButton`, `ItemContainer`, `ItemsView`, `ListPickerFlyoutPresenter`, `ListView`, `ListViewHeaderItem`, `MapControl`, `MediaPlayerElement`, `MediaTransportControls`, `PagerControl`, `PersonPicture`, `PickerFlyoutPresenter`, `Pivot`, `PivotHeaderItem`, `PivotItem`, `RichEditBox`, `RichTextBlock`, `ScrollView`, `SemanticZoom`, `SwipeControl`, `TeachingTip`, `TwoPaneView`.
 
 <!-- mapping:end -->
 

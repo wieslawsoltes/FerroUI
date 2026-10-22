@@ -7,9 +7,9 @@
 //!   [`PENDING_CONTROLS`]; the pending ones are reported, not failed, and a
 //!   control of the list that has a theme fails the test, so that the list is
 //!   emptied as the batches port the controls.
-//! - Opt-in `FerroUI.Controls.WinUI` controls may supply a real native template
-//!   in property metadata. A control without a dictionary theme must instantiate
-//!   and apply that template; ordinary controls still require their theme.
+//! - An explicit set of native controls supplies default templates in property
+//!   metadata. A control without a dictionary theme must instantiate and apply
+//!   its template; all other controls still require a theme.
 //! - The default control themes of the port are based on the keyed theme of
 //!   the WinUI style (`{x:Type Button}` on `DefaultButtonStyle`), so the
 //!   template of a theme is looked for in its base before the default template
@@ -30,6 +30,28 @@ use ferroui_controls::templates::IControlTemplate;
 use ferroui_controls::{ContentControl, Control, NativeMenuBar, TopLevel, UserControl, Window};
 use ferroui_markup_xaml::markup_extensions::DynamicResourceExtension;
 use std::rc::Rc;
+
+/// These controls supply audited, style-replaceable templates in property metadata.
+/// Keep the list explicit: inheriting ContentControl's fallback must not hide a missing theme.
+pub(super) fn uses_native_default_template(control: &TypeInfo) -> bool {
+    [
+        ferroui_controls::AutoSuggestBox::TYPE,
+        ferroui_controls::FontIcon::TYPE,
+        ferroui_controls::InfoBadge::TYPE,
+        ferroui_controls::InfoBar::TYPE,
+        ferroui_controls::NavigationView::TYPE,
+        ferroui_controls::NavigationViewItem::TYPE,
+        ferroui_controls::NavigationViewItemHeader::TYPE,
+        ferroui_controls::NavigationViewItemSeparator::TYPE,
+        ferroui_controls::NumberBox::TYPE,
+        ferroui_controls::ProgressRing::TYPE,
+        ferroui_controls::RadioButtons::TYPE,
+        ferroui_controls::RatingControl::TYPE,
+        ferroui_controls::SymbolIcon::TYPE,
+    ]
+    .iter()
+    .any(|candidate| std::ptr::eq(*candidate, control))
+}
 
 /// The control themes of the theme that are not defined per theme variant, with their keys.
 fn control_themes(theme: &Ref<crate::WinUITheme>) -> Vec<(ResourceKey, Ref<ControlTheme>)> {
@@ -126,7 +148,7 @@ fn should_define_control_theme_for_built_in_templated_controls() {
     let mut pending = Vec::new();
     for control in &templated_controls {
         let has_theme = themed.iter().any(|themed| std::ptr::eq(*themed, *control));
-        if !has_theme && control.namespace() == "FerroUI.Controls.WinUI" {
+        if !has_theme && uses_native_default_template(control) {
             assert!(
                 TemplatedControl::template_property().get_default_value(control).is_some(),
                 "{} has neither a control theme nor a metadata template",
@@ -134,6 +156,11 @@ fn should_define_control_theme_for_built_in_templated_controls() {
             );
             let instance = control.create_instance().expect("a default constructor");
             let templated = instance.cast::<TemplatedControl>().expect("a templated control");
+            assert!(
+                !templated.has_local_value(TemplatedControl::template_property()),
+                "{} fallback template must remain replaceable through styles",
+                control.full_name()
+            );
             templated.apply_template();
             assert!(
                 templated.visual_children_count() > 0,
@@ -205,7 +232,7 @@ fn resolve_template(style: &Ref<StyleBase>, target_type: &'static TypeInfo) -> O
         }
     }
 
-    if target_type.namespace() == "FerroUI.Controls.WinUI" {
+    if uses_native_default_template(target_type) {
         let default_template = TemplatedControl::template_property().get_default_value(target_type)?;
         return into_markup_value(default_template);
     }

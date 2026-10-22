@@ -1,8 +1,7 @@
 <!-- Ported from all four original InfoBadge examples; see ../NOTICE.md.
-     The original NavigationView composition uses opt-in native controls. -->
+     The original NavigationView composition uses native controls. -->
 <StackPanel xmlns="https://github.com/ferroui"
-            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-            xmlns:winui="using:FerroUI.Controls.WinUI" Spacing="24">
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
   <StackPanel.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
@@ -12,21 +11,21 @@
   </StackPanel.Resources>
   <TextBlock Text="InfoBadge embedded in a NavigationView" FontSize="18" />
   <Grid ColumnDefinitions="*,180" ColumnSpacing="24">
-    <winui:NavigationView x:Name="nvSample1" Height="300" PaneDisplayMode="Left">
-      <winui:NavigationView.MenuItems>
-        <winui:NavigationViewItem Content="Home">
-          <winui:NavigationViewItem.Icon><winui:SymbolIcon Symbol="Home" /></winui:NavigationViewItem.Icon>
-        </winui:NavigationViewItem>
-        <winui:NavigationViewItem Content="Account">
-          <winui:NavigationViewItem.Icon><winui:SymbolIcon Symbol="Contact" /></winui:NavigationViewItem.Icon>
-        </winui:NavigationViewItem>
-        <winui:NavigationViewItem x:Name="InboxPage" Content="Inbox" AutomationProperties.Name="Inbox, 5 notifications">
-          <winui:NavigationViewItem.Icon><winui:SymbolIcon Symbol="Mail" /></winui:NavigationViewItem.Icon>
-          <winui:NavigationViewItem.InfoBadge><winui:InfoBadge x:Name="infoBadge1" Value="5" /></winui:NavigationViewItem.InfoBadge>
-        </winui:NavigationViewItem>
-      </winui:NavigationView.MenuItems>
-      <winui:Frame x:Name="contentFrame" />
-    </winui:NavigationView>
+    <NavigationView x:Name="nvSample1" Height="300" PaneDisplayMode="Left">
+      <NavigationView.MenuItems>
+        <NavigationViewItem Content="Home">
+          <NavigationViewItem.Icon><SymbolIcon Symbol="Home" /></NavigationViewItem.Icon>
+        </NavigationViewItem>
+        <NavigationViewItem Content="Account">
+          <NavigationViewItem.Icon><SymbolIcon Symbol="Contact" /></NavigationViewItem.Icon>
+        </NavigationViewItem>
+        <NavigationViewItem x:Name="InboxPage" Content="Inbox" AutomationProperties.Name="Inbox, 5 notifications">
+          <NavigationViewItem.Icon><SymbolIcon Symbol="Mail" /></NavigationViewItem.Icon>
+          <NavigationViewItem.InfoBadge><InfoBadge x:Name="infoBadge1" Value="5" /></NavigationViewItem.InfoBadge>
+        </NavigationViewItem>
+      </NavigationView.MenuItems>
+      <Frame x:Name="contentFrame" />
+    </NavigationView>
     <StackPanel Grid.Column="1" Spacing="8">
       <TextBlock Text="InfoBadge Opacity" />
       <ToggleSwitch x:Name="ToggleInfoBadgeOpacity" IsChecked="True" AutomationProperties.Name="InfoBadge Opacity" />
@@ -39,13 +38,13 @@
   <TextBlock Text="Different InfoBadge styles" FontSize="18" />
   <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
     <StackPanel Orientation="Horizontal" Spacing="20" HorizontalAlignment="Center">
-      <winui:InfoBadge x:Name="StyleIconBadge" HorizontalAlignment="Right"
+      <InfoBadge x:Name="StyleIconBadge" HorizontalAlignment="Right"
                        Theme="{StaticResource AttentionIconInfoBadgeStyle}"
                        AutomationProperties.Name="Status icon" />
-      <winui:InfoBadge x:Name="StyleValueBadge" Value="10" HorizontalAlignment="Right"
+      <InfoBadge x:Name="StyleValueBadge" Value="10" HorizontalAlignment="Right"
                        Theme="{StaticResource AttentionValueInfoBadgeStyle}"
                        AutomationProperties.Name="10 notifications" />
-      <winui:InfoBadge x:Name="StyleDotBadge" VerticalAlignment="Center"
+      <InfoBadge x:Name="StyleDotBadge" VerticalAlignment="Center"
                        Theme="{StaticResource AttentionDotInfoBadgeStyle}"
                        AutomationProperties.Name="Status indicator" />
     </StackPanel>
@@ -64,21 +63,21 @@
           VerticalContentAlignment="Stretch" ToolTip.Tip="Refresh required"
           AutomationProperties.Name="Refresh required">
     <Grid>
-      <winui:SymbolIcon Symbol="Sync" HorizontalAlignment="Center" />
-      <winui:InfoBadge x:Name="EmbeddedInfoBadge" Background="#C42B1C"
+      <SymbolIcon Symbol="Sync" HorizontalAlignment="Center" />
+      <InfoBadge x:Name="EmbeddedInfoBadge" Background="#C42B1C"
                        HorizontalAlignment="Right" VerticalAlignment="Top"
                        AutomationProperties.Name="Refresh required">
-        <winui:InfoBadge.IconSource>
-          <winui:FontIconSource FontFamily="Segoe Fluent Icons" Glyph="&#xF13C;" />
-        </winui:InfoBadge.IconSource>
-      </winui:InfoBadge>
+        <InfoBadge.IconSource>
+          <FontIconSource FontFamily="Segoe Fluent Icons" Glyph="&#xF13C;" />
+        </InfoBadge.IconSource>
+      </InfoBadge>
     </Grid>
   </Button>
   <TextBlock Text="InfoBadge with a dynamic value" FontSize="18" />
   <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
-    <winui:InfoBadge x:Name="DynamicInfoBadge" Value="1" HorizontalAlignment="Center"
+    <InfoBadge x:Name="DynamicInfoBadge" Value="1" HorizontalAlignment="Center"
                      VerticalAlignment="Center" AutomationProperties.Name="Notification count" />
-    <winui:NumberBox Grid.Column="1" x:Name="ValueNumberBox" Header="InfoBadge Value"
+    <NumberBox Grid.Column="1" x:Name="ValueNumberBox" Header="InfoBadge Value"
                      Minimum="-1" Value="1" SpinButtonPlacementMode="Inline"
                      AutomationProperties.Name="InfoBadge Value" />
   </Grid>

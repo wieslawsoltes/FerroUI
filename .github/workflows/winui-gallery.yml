@@ -7,7 +7,9 @@ on:
       - 'samples/WinUIGallery/**'
       - 'tests/FerroUI.Markup.Xaml.UnitTests/**'
       - 'scripts/winui-gallery/**'
+      - 'scripts/port-status/rustscan.py'
       - 'scripts/generate_view_builders.py'
+      - 'scripts/generate_markup_types.py'
       - 'scripts/rust_paths.py'
       - 'docs/porting/winui-gallery/**'
       - 'Cargo.toml'
@@ -20,9 +22,14 @@ on:
       - 'samples/WinUIGallery/**'
       - 'tests/FerroUI.Markup.Xaml.UnitTests/**'
       - 'scripts/winui-gallery/**'
+      - 'scripts/port-status/rustscan.py'
+      - 'scripts/generate_view_builders.py'
+      - 'scripts/generate_markup_types.py'
+      - 'scripts/rust_paths.py'
       - 'docs/porting/winui-gallery/**'
       - 'Cargo.toml'
       - 'Cargo.lock'
+      - '.github/workflows/winui-gallery.yml'
   workflow_dispatch:
     inputs:
       require_complete:
@@ -54,8 +61,10 @@ jobs:
         run: python3 scripts/winui-gallery/event_targets.py --check
       - name: Complete Symbol enum and glyph map
         run: python3 scripts/winui-gallery/symbol_map.py --check
-      - name: Declarative builders preserve both namespaces
+      - name: Declarative builders expose native controls and preserve existing APIs
         run: python3 scripts/generate_view_builders.py --check
+      - name: Native public Rust path registries are current
+        run: python3 scripts/generate_markup_types.py --target rust-paths --check
       - name: Publish measured state in the run summary
         run: cat docs/porting/winui-gallery/data/REPORT.md >> "$GITHUB_STEP_SUMMARY"
       # A fresh map is not a complete port. This separately named acceptance
@@ -77,7 +86,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
-      - name: Native compatibility control behaviors
+      - name: Native control behaviors derived from WinUI contracts
         run: >-
           cargo test --locked -p ferroui-controls --features testing
           --test winui_navigation --test winui_number_box --test winui_icons
@@ -99,7 +108,7 @@ jobs:
         run: 'cargo test --locked -p ferroui-markup-xaml --lib xaml_error_scope::'
       - name: WinUI theme contracts and exact generated reference
         run: cargo test --locked -p ferroui-themes-winui --lib
-      - name: Existing themes preserve native WinUI template fallback
+      - name: Existing themes preserve native control template fallback
         run: >-
           cargo test --locked -p ferroui-themes-fluent -p ferroui-themes-simple
           --lib tests::control_theme_tests::should_define_control_theme_for_built_in_templated_controls

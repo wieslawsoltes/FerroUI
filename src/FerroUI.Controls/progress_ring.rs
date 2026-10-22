@@ -2,10 +2,10 @@
 // Range, state and legacy template-setting contracts adapted from ProgressRing.cpp at
 // microsoft/microsoft-ui-xaml a71c42bd3e352060e5f5ecf3b5e1a98f8a745809.
 
-use super::ProgressRingAutomationPeer;
-use crate::automation::peers::AutomationPeer;
+use crate::automation::peers::{AutomationPeer, ProgressRingAutomationPeer};
 use crate::automation::{AccessibilityView, AutomationProperties};
 use crate::primitives::{
+    ProgressRingTemplateSettings,
     TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl, TemplatedControlImplExt,
 };
 use crate::shapes::Arc;
@@ -22,85 +22,12 @@ use ferroui_base::reactive::{AnonymousObserver, IDisposable};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate,
-    DirectProperty, FerroLocator, FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
+    DirectProperty, FerroObject, FerroLocator, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, LocatorExtensions, Ref, StyledElementImpl, StyledProperty,
-    Thickness, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
+    Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
-
-/// Legacy WinUI template geometry, updated when the owner's actual width changes.
-#[repr(C)]
-pub struct ProgressRingTemplateSettings {
-    base: FerroObject,
-    ellipse_diameter: Cell<f64>,
-    ellipse_offset: Cell<Thickness>,
-    max_side_length: Cell<f64>,
-}
-ferro_class!(ProgressRingTemplateSettings: FerroObject);
-ferro_class_info!(ProgressRingTemplateSettings {
-    new: ProgressRingTemplateSettings::new,
-    markup: { namespace: "FerroUI.Controls.WinUI" },
-});
-ferro_impl_classes!(ProgressRingTemplateSettings: FerroObjectImpl);
-
-ferro_properties! { impl ProgressRingTemplateSettings {
-    pub fn ellipse_diameter_property() -> DirectProperty<ProgressRingTemplateSettings, f64> {
-        FerroProperty::register_direct::<ProgressRingTemplateSettings, _>("EllipseDiameter", |s| s.ellipse_diameter(), None, 0.0)
-    }
-    pub fn ellipse_offset_property() -> DirectProperty<ProgressRingTemplateSettings, Thickness> {
-        FerroProperty::register_direct::<ProgressRingTemplateSettings, _>("EllipseOffset", |s| s.ellipse_offset(), None, Thickness::default())
-    }
-    pub fn max_side_length_property() -> DirectProperty<ProgressRingTemplateSettings, f64> {
-        FerroProperty::register_direct::<ProgressRingTemplateSettings, _>("MaxSideLength", |s| s.max_side_length(), None, 0.0)
-    }
-} }
-impl ProgressRingTemplateSettings {
-    pub fn new() -> Ref<Self> {
-        instantiate(Self {
-            base: FerroObject::construct(),
-            ellipse_diameter: Cell::new(0.0),
-            ellipse_offset: Cell::new(Thickness::default()),
-            max_side_length: Cell::new(0.0),
-        })
-    }
-    pub fn ellipse_diameter(&self) -> f64 {
-        self.ellipse_diameter.get()
-    }
-    pub fn ellipse_offset(&self) -> Thickness {
-        self.ellipse_offset.get()
-    }
-    pub fn max_side_length(&self) -> f64 {
-        self.max_side_length.get()
-    }
-    fn update(&self, width: f64) {
-        let width = if width.is_finite() {
-            width.max(0.0)
-        } else {
-            0.0
-        };
-        let diameter = if width == 0.0 {
-            0.0
-        } else {
-            width * 0.1 + if width <= 40.0 { 1.0 } else { 0.0 }
-        };
-        self.set_and_raise_cell(
-            Self::ellipse_diameter_property(),
-            &self.ellipse_diameter,
-            diameter,
-        );
-        self.set_and_raise_cell(
-            Self::ellipse_offset_property(),
-            &self.ellipse_offset,
-            Thickness::new(0.0, width * 0.5 - diameter, 0.0, 0.0),
-        );
-        self.set_and_raise_cell(
-            Self::max_side_length_property(),
-            &self.max_side_length,
-            width,
-        );
-    }
-}
 
 #[derive(Clone, Default)]
 struct Parts {
@@ -141,7 +68,7 @@ pub struct ProgressRing {
 ferro_class!(ProgressRing: TemplatedControl);
 ferro_class_info!(ProgressRing {
     new: ProgressRing::new,
-    markup: { namespace: "FerroUI.Controls.WinUI" },
+    markup: { namespace: "FerroUI.Controls" },
 });
 ferro_impl_classes!(ProgressRing: StyledElementImpl, LayoutableImpl, InteractiveImpl, InputElementImpl);
 

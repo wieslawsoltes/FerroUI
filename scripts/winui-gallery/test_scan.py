@@ -174,10 +174,10 @@ class CandidateTests(unittest.TestCase):
                               {"name": "SymbolIcon", "kind": "constructor", "signature": "public SymbolIcon()", "audience": "public-source"},
                               {"name": "SymbolIcon", "kind": "constructor", "signature": "public SymbolIcon(Symbol symbol)", "audience": "public-source"},
                           ]}]}
-        rust = {"FerroUI.Controls.WinUI.SymbolIcon": {"name": "SymbolIcon", "namespace": "FerroUI.Controls.WinUI", "base": None,
+        rust = {"FerroUI.Controls.SymbolIcon": {"name": "SymbolIcon", "namespace": "FerroUI.Controls", "base": None,
                                                      "members": {"new", "with_symbol"}, "sources": [], "registered": True}}
         mappings = {"types": {"Microsoft.UI.Xaml.Controls.SymbolIcon": {
-            "target": "FerroUI.Controls.WinUI.SymbolIcon",
+            "target": "FerroUI.Controls.SymbolIcon",
             "overloads": {"public SymbolIcon(Symbol symbol)": "with_symbol"},
         }}}
         result = scan.compare_api(api, rust, mappings)["types"][0]

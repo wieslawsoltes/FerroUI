@@ -8,7 +8,7 @@ use ferroui_base::media::{Brushes, FlowDirection, FontFamily, FontStyle, FontWei
 use ferroui_base::{Point, Rect, Ref, Size, Visual};
 use ferroui_controls::automation::{AccessibilityView, AutomationProperties};
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::winui::{FontIcon, Symbol, SymbolIcon};
+use ferroui_controls::{FontIcon, Symbol, SymbolIcon};
 use ferroui_controls::{IconElement, TextBlock};
 
 fn fonts() -> TextTestScope {

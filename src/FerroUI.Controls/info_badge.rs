@@ -6,10 +6,11 @@ use crate::automation::{AccessibilityView, AutomationProperties};
 use crate::documents::TextElement;
 use crate::presenters::ContentPresenter;
 use crate::primitives::{
+    InfoBadgeTemplateSettings,
     TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl, TemplatedControlImplExt,
 };
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
-use crate::{Border, Control, ControlImpl, Grid, IconElement, TextBlock, Viewbox};
+use crate::{Border, Control, ControlImpl, Grid, TextBlock, Viewbox};
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::input::{InputElement, InputElementImpl};
@@ -29,48 +30,6 @@ use ferroui_base::{
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
-/// Live values supplied to an InfoBadge template. Each badge owns its own settings.
-#[repr(C)]
-pub struct InfoBadgeTemplateSettings {
-    base: FerroObject,
-}
-ferro_class!(InfoBadgeTemplateSettings: FerroObject);
-ferro_class_info!(InfoBadgeTemplateSettings {
-    new: InfoBadgeTemplateSettings::new,
-    markup: { namespace: "FerroUI.Controls.WinUI" },
-});
-ferro_impl_classes!(InfoBadgeTemplateSettings: FerroObjectImpl);
-ferro_properties! { impl InfoBadgeTemplateSettings {
-    pub fn info_badge_corner_radius_property() -> StyledProperty<CornerRadius> {
-        FerroProperty::register::<InfoBadgeTemplateSettings, _>("InfoBadgeCornerRadius", CornerRadius::default())
-    }
-    pub fn icon_element_property() -> StyledProperty<Option<Ref<IconElement>>> {
-        FerroProperty::register::<InfoBadgeTemplateSettings, _>("IconElement", None)
-    }
-} }
-impl InfoBadgeTemplateSettings {
-    pub fn construct() -> Self {
-        Self {
-            base: FerroObject::construct(),
-        }
-    }
-    pub fn new() -> Ref<Self> {
-        instantiate(Self::construct())
-    }
-    pub fn info_badge_corner_radius(&self) -> CornerRadius {
-        self.get_value(Self::info_badge_corner_radius_property())
-    }
-    pub fn set_info_badge_corner_radius(&self, value: CornerRadius) {
-        self.set_value(Self::info_badge_corner_radius_property(), value);
-    }
-    pub fn icon_element(&self) -> Option<Ref<IconElement>> {
-        self.get_value(Self::icon_element_property())
-    }
-    pub fn set_icon_element(&self, value: Option<Ref<IconElement>>) {
-        self.set_value(Self::icon_element_property(), value);
-    }
-}
-
 #[derive(Clone, Default)]
 struct Parts {
     root: Option<Ref<Border>>,
@@ -86,7 +45,7 @@ struct Parts {
 /// native property validator, including values supplied through bindings/XAML.
 /// Icons use the live reusable source contract; the control has no second
 /// visual tree or drawing backend. The default and named severity themes are
-/// supplied by `FerroUI.Themes.WinUI/Controls/WinUIInfoBadge.xaml`.
+/// supplied by `FerroUI.Themes.WinUI/Controls/InfoBadge.xaml`.
 #[repr(C)]
 pub struct InfoBadge {
     base: TemplatedControl,
@@ -100,7 +59,7 @@ ferro_class!(InfoBadge: TemplatedControl);
 ferro_class_info!(InfoBadge {
     new: InfoBadge::new,
     markup: {
-        namespace: "FerroUI.Controls.WinUI",
+        namespace: "FerroUI.Controls",
         fields: [HighContrastThemeVariant: ThemeVariant => InfoBadge::high_contrast_theme_variant],
     },
 });

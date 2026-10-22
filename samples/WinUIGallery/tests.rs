@@ -341,7 +341,7 @@ fn contrast_inputs_update_ratio_and_report_invalid_values() {
 
 #[test]
 fn winui_numberbox_example_keeps_expression_nan_and_valuechanged_behavior() {
-    use ferroui_controls::winui::NumberBox;
+    use ferroui_controls::NumberBox;
     let _application = start();
     let root = examples::create(examples::find("NumberBox").unwrap()).unwrap();
     let expression = root.get_control::<NumberBox>("Expression");
@@ -363,7 +363,7 @@ fn winui_numberbox_example_keeps_expression_nan_and_valuechanged_behavior() {
 #[test]
 fn page_transition_sample_uses_winui_frame_journal_and_source_page_types() {
     use crate::frame_sample::{FirstSamplePage, SecondSamplePage};
-    use ferroui_controls::winui::Frame;
+    use ferroui_controls::Frame;
     let _application = start();
     let root = examples::create(examples::find("PageTransition").unwrap()).unwrap();
     let frame = root.get_control::<Frame>("ContentFrame");
@@ -423,7 +423,7 @@ fn command_bar_examples_keep_click_and_three_state_handlers() {
 #[test]
 fn radio_groups_port_original_selection_and_color_handlers() {
     use ferroui_base::media::Color;
-    use ferroui_controls::winui::RadioButtons;
+    use ferroui_controls::RadioButtons;
     use ferroui_controls::Border;
     let _application = start();
     let root = examples::create(examples::find("RadioButton").unwrap()).unwrap();
@@ -483,7 +483,7 @@ fn radio_groups_port_original_selection_and_color_handlers() {
 
 #[test]
 fn icon_examples_preserve_source_symbol_and_font_glyph() {
-    use ferroui_controls::winui::{FontIcon, Symbol, SymbolIcon};
+    use ferroui_controls::{FontIcon, Symbol, SymbolIcon};
     let _application = start();
     let root = examples::create(examples::find("IconElement").unwrap()).unwrap();
     assert_eq!(
@@ -690,7 +690,7 @@ fn autosuggest_filter_preserves_all_source_names_and_word_matching() {
 #[test]
 fn autosuggest_example_filters_only_user_changes_and_reports_selected_cat() {
     use ferroui_base::threading::Dispatcher;
-    use ferroui_controls::winui::AutoSuggestBox;
+    use ferroui_controls::AutoSuggestBox;
     use ferroui_controls::{Control, ListBox, Window};
     use std::cell::RefCell;
     use std::rc::Rc;
@@ -756,7 +756,7 @@ fn autosuggest_example_filters_only_user_changes_and_reports_selected_cat() {
 
 #[test]
 fn infobar_examples_keep_source_severity_message_action_and_options() {
-    use ferroui_controls::winui::{InfoBar, InfoBarSeverity};
+    use ferroui_controls::{InfoBar, InfoBarSeverity};
     use ferroui_controls::HyperlinkButton;
     let _application = start();
     let root = examples::create(examples::find("InfoBar").unwrap()).unwrap();
@@ -833,7 +833,7 @@ fn control_search_preserves_title_tokens_prefix_priority_and_unique_metadata() {
 #[test]
 fn control_search_uses_chosen_suggestion_before_free_query_and_preserves_no_result() {
     use ferroui_base::input::{InputElement, Key, KeyEventArgs};
-    use ferroui_controls::winui::AutoSuggestBox;
+    use ferroui_controls::AutoSuggestBox;
     use ferroui_controls::{ItemsSource, ListBox};
     use std::cell::RefCell;
     use std::rc::Rc;

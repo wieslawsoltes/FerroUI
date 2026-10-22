@@ -2,7 +2,7 @@
 
 use ferroui_base::media::{Brushes, FontFamily, FontStyle, FontWeight, Geometry, IBrush};
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::winui::{
+use ferroui_controls::{
     FontIcon, FontIconSource, PathIconSource, Symbol, SymbolIcon, SymbolIconSource,
 };
 use ferroui_controls::{ContentControl, Control, PathIcon};

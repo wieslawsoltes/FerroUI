@@ -784,7 +784,7 @@ The section covers both control themes of the document: ManagedFileChooser and M
 
 | ID | WinUI source | What WinUI does | What the port does | Why |
 |---|---|---|---|---|
-| DRP-1 | (no counterpart) `controls/dev/NavigationView/NavigationView.xaml`, the left pane | An application shows its navigation in the pane of a NavigationView. | The template FerroUI's DrawerPage requires, drawn as NavigationView with its pane at the left: `RootSplitView` (the SplitView port), `PaneContentGrid`, `ContentGrid` and its header row. | DrawerPage keeps its existing page contract; the additive `FerroUI.Controls.WinUI.NavigationView` is a separate control. |
+| DRP-1 | (no counterpart) `controls/dev/NavigationView/NavigationView.xaml`, the left pane | An application shows its navigation in the pane of a NavigationView. | The template FerroUI's DrawerPage requires, drawn as NavigationView with its pane at the left: `RootSplitView` (the SplitView port), `PaneContentGrid`, `ContentGrid` and its header row. | DrawerPage keeps its existing page contract; the additive `FerroUI.Controls.NavigationView` is a separate control. |
 | DRP-2 | The NavigationView styles (`{NavigationView}`, `{NavigationViewItem}`, `{NavigationViewItemHeader}`, `{NavigationViewItemSeparator}`, the `MUX_*` item presenter styles, the overflow and search buttons) | Styles of NavigationView and its items. | The four native control styles and the keyed top settings-item style are now pending. Presenter, overflow and compact search styles retain specific feature waivers (NVW-3/NVW-4). `PaneToggleButtonStyle`, `NavigationViewItemHeaderTextStyle`, `NavigationViewTitleHeaderContentControlTextStyle`, `NavigationBackButtonNormalStyle` and `NavigationBackButtonSmallStyle` remain ported; the left and top pane adaptations in TabItem and TabbedPage are unchanged. | Native control availability removes the old batch-B5 no-control waiver, but the native metadata templates and the existing page adaptations do not declare the original source styles. |
 | DRP-3 | `PaneToggleButtonStyle`: `AnimatedIcon x:Name="Icon"` (`AnimatedGlobalNavigationButtonVisualSource`, fallback E700) | The animated hamburger glyph. | A path of `GlyphGeometryE700`, 16 x 16. | G-9, G-10. |
 | DRP-4 | `PaneToggleButtonStyle` based on `DefaultButtonStyle` (G-15) | The template has no content presenter chrome. | The states set the background and border of `PART_ContentPresenter` transparent. | The states of the base theme would draw the button background on the presenter. |
@@ -1021,20 +1021,20 @@ The section covers both control themes of the document: ManagedFileChooser and M
 | TSW-10 | (not in the style) `VerticalContentAlignment` | The default of a WinUI control is `Center`. | A setter `VerticalContentAlignment="Center"`. | FerroUI's default is `Stretch`. |
 | TSW-11 | `ManipulationMode="System,TranslateX"`, the `CompositeTransform`s of the knobs, the `Thumb x:Name="SwitchThumb"` | The control drags the knob through a thumb. | Left out. | FerroUI's switch handles the drag on `PART_MovingKnobs`. |
 
-## WinUIInfoBadge
+## InfoBadge
 
-This additive control uses `FerroUI.Controls.WinUI.InfoBadge`. Its control implementation and
+This additive control uses `FerroUI.Controls.InfoBadge`. Its control implementation and
 theme adaptation follow `microsoft-ui-xaml` at `a71c42bd3e352060e5f5ecf3b5e1a98f8a745809`;
 the theme key inventory retains its separate reference commit.
 
 | ID | WinUI source | What WinUI does | What the port does | Why |
 |---|---|---|---|---|
-| IBD-1 | `controls/dev/InfoBadge/InfoBadge_themeresources.xaml`: `DefaultInfoBadgeStyle`, the severity styles and the `DisplayKindStates` of its template | Styles target `Microsoft.UI.Xaml.Controls.InfoBadge`; the template selects value, font icon, other icon or dot presentation. | `Controls/WinUIInfoBadge.xaml`, merged by `WinUIControls.xaml`, supplies native `ControlTheme` resources with the source style keys and an implicit theme for the opt-in WinUI InfoBadge type. Migration changes `Style` to `Theme`; the native replaceable template implements display-kind selection. Native NavigationViewItem now hosts the badge, including the Gallery's navigation-badge composition. | The additive native control preserves existing Avalonia-compatible identities. Matching the resource keys is not full custom VisualState, icon-source, source-specific NavigationView badge appearance, platform accessibility or pixel parity. |
+| IBD-1 | `controls/dev/InfoBadge/InfoBadge_themeresources.xaml`: `DefaultInfoBadgeStyle`, the severity styles and the `DisplayKindStates` of its template | Styles target `Microsoft.UI.Xaml.Controls.InfoBadge`; the template selects value, font icon, other icon or dot presentation. | `Controls/InfoBadge.xaml`, merged by `WinUIControls.xaml`, supplies native `ControlTheme` resources with the source style keys and an implicit theme for the native InfoBadge type. Migration changes `Style` to `Theme`; the native replaceable template implements display-kind selection. Native NavigationViewItem now hosts the badge, including the Gallery's navigation-badge composition. | The additive native control preserves existing Avalonia-compatible identities. Matching the resource keys is not full custom VisualState, icon-source, source-specific NavigationView badge appearance, platform accessibility or pixel parity. |
 | IBD-2 | The repeated size, padding and margin resources in the Default, Light and HighContrast dictionaries of `InfoBadge_themeresources.xaml` | Each theme dictionary declares the common metrics as well as its colors and icon height. | The native dictionary keeps the colors and icon height in the three theme dictionaries and declares the common metrics once at dictionary root. The shared values match the repeated source values, but the strict inventory leaves the original variant-scoped declarations pending. | Native resource fallback supplies the common values; the scanner deliberately requires matching theme scope rather than assuming equivalent placement. |
 
-## WinUINavigationView
+## NavigationView
 
-The additive `FerroUI.Controls.WinUI.NavigationView`, `NavigationViewItem`,
+The additive `FerroUI.Controls.NavigationView`, `NavigationViewItem`,
 `NavigationViewItemHeader` and `NavigationViewItemSeparator` follow the control source at
 `a71c42bd3e352060e5f5ecf3b5e1a98f8a745809`. The theme inventory retains its separate
 `7e4b0c2096be402f51cc8f7d203ebf67cff183d0` reference. Their replaceable native metadata
@@ -1049,9 +1049,9 @@ The four implicit styles and the top settings-item style are pending in batch B5
 | NVW-4 | `NavigationViewOverflowButtonStyleWhenPaneOnTop`, `NavigationViewOverflowButtonNoLabelStyleWhenPaneOnTop`, `NavigationViewPaneSearchButtonStyle` | Shows overflow navigation in a top-pane flyout and a compact pane-search button that returns to the AutoSuggestBox. | The native top pane uses horizontal layout without overflow redistribution or OverflowLabelMode, and hosts AutoSuggestBox directly without the source PaneAutoSuggestButton contract. These three style entries retain separate feature waivers. | The missing overflow and compact search behaviors must be implemented before their source style contracts can be claimed. |
 | NVW-5 | NavigationView resource dictionaries, NavigationBackButton resources and compact `NavigationViewItemOnLeftMinHeight` | Declares palette references, dimensions, margins and other resources in their source scopes. | Existing ported resource declarations remain in the ledger. The native controls consume selected brush keys with fallbacks and use their own template geometry. No resource is newly classified as ported by adding native controls. | Source key coverage measures declarations, not whether every native template consumes every source metric or matches WinUI states, acrylic, motion, HighContrast, platform accessibility or pixels. |
 
-## WinUIProgressRing
+## ProgressRing
 
-This additive control uses `FerroUI.Controls.WinUI.ProgressRing`. Its control implementation
+This additive control uses `FerroUI.Controls.ProgressRing`. Its control implementation
 follows `microsoft-ui-xaml` at `a71c42bd3e352060e5f5ecf3b5e1a98f8a745809`; the theme key
 inventory retains its separate reference commit. The original style and resource entries are
 pending, not waived as a missing control.
@@ -1062,9 +1062,9 @@ pending, not waived as a missing control.
 | PRG-2 | `controls/dev/ProgressRing/ProgressRing_themeresources.xaml`: foreground and background brushes in Default, Light and HighContrast; `ProgressRingStrokeThickness` | The source declares six scoped brush resources and a stroke resource of 4. | The native control resolves `ProgressRingForegroundThemeBrush` and `ProgressRingBackgroundThemeBrush` after explicit property values, with native fallbacks. It calculates stroke width from control size and does not consume `ProgressRingStrokeThickness`. The seven source declarations remain pending, including the HighContrast brushes. | Recognizing a resource override is distinct from defining its source dictionary; the native template does not yet implement the original stroke-resource contract. |
 | PRG-3 | The generated Lottie geometry and trim keyframes of the two ProgressRing animated visuals | Native composition geometry and endpoint trim keyframes determine the exact visual shape. | The Arc implementation follows the indeterminate scalar rotation/trim timing and the two-second determinate timeline, with adapted geometry and direct normalized determinate sweep. | Exact Lottie proportions, determinate endpoint trim behavior and pixel parity remain pending. |
 
-## WinUIRatingControl
+## RatingControl
 
-This additive control uses `FerroUI.Controls.WinUI.RatingControl`. Its control implementation
+This additive control uses `FerroUI.Controls.RatingControl`. Its control implementation
 follows `microsoft-ui-xaml` at `a71c42bd3e352060e5f5ecf3b5e1a98f8a745809`; the theme inventory
 retains its separate reference commit. The original implicit style and 34 resource entries
 remain pending. Native control availability no longer justifies a no-control waiver.

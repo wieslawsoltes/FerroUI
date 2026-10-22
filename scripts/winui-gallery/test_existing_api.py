@@ -24,7 +24,7 @@ class ExistingApiTests(unittest.TestCase):
         self.baseline = {self.row["id"]: self.row}
 
     def test_type_or_namespace_rename_is_a_removal_even_when_short_name_matches(self):
-        renamed = declaration("FerroUI.Controls.WinUI.Page")
+        renamed = declaration("FerroUI.Controls.FramePage")
         errors = api.compatibility_errors(self.baseline, {renamed["id"]: renamed})
         self.assertEqual(1, len(errors))
         self.assertIn("Removed or renamed type/namespace: FerroUI.Controls.Page", errors[0])
@@ -42,14 +42,15 @@ class ExistingApiTests(unittest.TestCase):
         self.assertEqual(1, len(api.compatibility_errors(self.baseline, current)))
         self.assertIn("Base changed", api.compatibility_errors(self.baseline, current)[0])
 
-    def test_additive_members_and_separate_winui_namespace_are_allowed(self):
+    def test_additive_frame_page_preserves_the_existing_page_contract(self):
         native = declaration(members=["new", "set_title", "title"])
-        winui = declaration("FerroUI.Controls.WinUI.Page", declaration_paths=["src/Controls/winui/page.rs"])
-        current = {native["id"]: native, winui["id"]: winui}
+        frame_page = declaration("FerroUI.Controls.FramePage", base="UserControl",
+                                 declaration_paths=["src/Controls/frame_page.rs"])
+        current = {native["id"]: native, frame_page["id"]: frame_page}
         self.assertEqual([], api.compatibility_errors(self.baseline, current))
 
     def test_new_namespace_collisions_fail_even_if_merged_members_look_complete(self):
-        collision = declaration(declaration_paths=["src/Controls/page.rs", "src/Controls/winui/page.rs"])
+        collision = declaration(declaration_paths=["src/Controls/page.rs", "src/Controls/frame_page.rs"])
         errors = api.compatibility_errors(self.baseline, {collision["id"]: collision})
         self.assertEqual(1, len(errors))
         self.assertIn("Namespace identity collision", errors[0])
@@ -64,12 +65,12 @@ class ExistingApiTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             crate = root / "src/Controls"
-            (crate / "winui").mkdir(parents=True)
+            (crate / "navigation").mkdir(parents=True)
             (crate / "Cargo.toml").write_text('[package]\nname = "controls"\nversion = "0.1.0"\n')
             (crate / "register_types.rs").write_text('''
 const NAMESPACES: &[(&str, &str)] = &[
     ("controls", "FerroUI.Controls"),
-    ("controls::winui", "FerroUI.Controls.WinUI"),
+    ("controls::navigation", "FerroUI.Navigation"),
 ];
 const TYPES: &[&TypeInfo] = &[Page::TYPE];
 ''')
@@ -80,12 +81,22 @@ impl Page { pub fn new() {} fn private_helper() {} }
 struct Hidden { pub field: i32 }
 pub(crate) struct CrateOnly { pub field: i32 }
 ''')
-            (crate / "winui/page.rs").write_text("pub struct Page {}\nferro_class!(Page: ContentControl);")
+            (crate / "navigation/page.rs").write_text("pub struct Page {}\nferro_class!(Page: ContentControl);")
             result = api.collect_surface(root)
-        self.assertEqual({"FerroUI.Controls.Page", "FerroUI.Controls.WinUI.Page"}, set(result))
+        self.assertEqual({"FerroUI.Controls.Page", "FerroUI.Navigation.Page"}, set(result))
         self.assertEqual(["new", "title"], result["FerroUI.Controls.Page"]["members"])
         self.assertTrue(result["FerroUI.Controls.Page"]["registered"])
-        self.assertNotEqual(result["FerroUI.Controls.Page"]["declaration_paths"], result["FerroUI.Controls.WinUI.Page"]["declaration_paths"])
+        self.assertNotEqual(result["FerroUI.Controls.Page"]["declaration_paths"], result["FerroUI.Navigation.Page"]["declaration_paths"])
+
+    def test_native_navigation_namespaces_do_not_merge_distinct_event_contracts(self):
+        page_args = declaration("FerroUI.Controls.NavigationEventArgs", base=None,
+                                members=["navigation_type", "page", "parameter"])
+        frame_args = declaration("FerroUI.Navigation.NavigationEventArgs", base=None,
+                                 members=["content", "navigation_mode", "parameter", "source_page_type"],
+                                 declaration_paths=["src/Controls/navigation.rs"])
+        current = {page_args["id"]: page_args, frame_args["id"]: frame_args}
+        self.assertEqual([], api.compatibility_errors({page_args["id"]: page_args}, current))
+        self.assertTrue(api.compatibility_errors({page_args["id"]: page_args}, {frame_args["id"]: frame_args}))
 
 
 if __name__ == "__main__":

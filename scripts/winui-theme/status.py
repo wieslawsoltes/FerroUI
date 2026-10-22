@@ -308,7 +308,7 @@ def render_tracking(data):
     if additions:
         lines += ["## Additive WinUI controls", ""]
         lines.append(
-            "These controls use the opt-in `FerroUI.Controls.WinUI` namespace and preserve existing "
+            "These controls use the ordinary `FerroUI.Controls` namespace and preserve existing "
             "Avalonia-compatible control identities. Their native implementation is recorded separately "
             "from the Fluent control-document count and the source resource-key inventory. A matching key "
             "does not establish complete behavioral, platform accessibility or visual parity; resource "

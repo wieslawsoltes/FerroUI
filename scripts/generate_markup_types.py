@@ -41,7 +41,8 @@ Options:
     --check        do not write; exit with status 1 and name the stale files
                    (with a line-count summary of the difference) if a
                    generated file differs from what would be generated
-    --target T     only `enums`, `classes`, `named-values` or `rust-paths` (repeatable)
+    --target T     only `enums`, `classes`, `named-values` or `rust-paths` (repeatable);
+                   `rust-paths` alone uses only local source and needs no upstream checkout
     --report       also print what was left out and why (members that are not
                    ported, events whose arguments cannot be held in an untyped
                    value, plain properties that need a hand-written override)
@@ -1201,12 +1202,13 @@ def main():
     parser.add_argument("--target", action="append", choices=["enums", "classes", "named-values", "rust-paths"])
     args = parser.parse_args()
 
+    targets = args.target or ["enums", "classes", "named-values", "rust-paths"]
+    needs_upstream = any(target != "rust-paths" for target in targets)
     upstream = os.path.join(args.upstream, "src")
-    if not os.path.isdir(os.path.join(upstream, "Avalonia.Base")):
+    if needs_upstream and not os.path.isdir(os.path.join(upstream, "Avalonia.Base")):
         print("no upstream checkout at %s (pass --upstream or set FERROUI_UPSTREAM)" % args.upstream)
         return 2
-    targets = args.target or ["enums", "classes", "named-values", "rust-paths"]
-    sources = Sources(upstream)
+    sources = Sources(upstream) if needs_upstream else None
     overrides = load_overrides()
     report, files = [], {}
     # The base crate declares its typed routed events first; the crates built on it add theirs.

@@ -46,8 +46,8 @@ pub enum NumberBoxValidationMode {
     Disabled = 1,
 }
 
-ferro_markup_enum!(NumberBoxSpinButtonPlacementMode { Hidden, Compact, Inline }, { namespace: "FerroUI.Controls.WinUI" });
-ferro_markup_enum!(NumberBoxValidationMode { InvalidInputOverwritten, Disabled }, { namespace: "FerroUI.Controls.WinUI" });
+ferro_markup_enum!(NumberBoxSpinButtonPlacementMode { Hidden, Compact, Inline }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(NumberBoxValidationMode { InvalidInputOverwritten, Disabled }, { namespace: "FerroUI.Controls" });
 
 /// A formatter must also parse the values it produces, as the native contract requires.
 /// Host applications can supply their existing localization/number-format service here.
@@ -82,7 +82,7 @@ pub struct NumberBoxValueChangedEventArgs {
 }
 
 ferroui_base::ferro_markup_type!(class NumberBoxValueChangedEventArgs {
-    namespace: "FerroUI.Controls.WinUI",
+    namespace: "FerroUI.Controls",
     handles: [NumberBoxValueChangedEventArgs],
     properties: [
         OldValue: f64 { get: |e: &NumberBoxValueChangedEventArgs| e.old_value },
@@ -177,7 +177,7 @@ impl FerroObjectImpl for NumberBox {
 
 impl ControlImpl for NumberBox {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
-        super::number_box_automation_peer::NumberBoxAutomationPeer::new(this).upcast()
+        crate::automation::peers::NumberBoxAutomationPeer::new(this).upcast()
     }
 }
 
@@ -611,7 +611,7 @@ impl NumberBox {
             }
             if let Some(peer) = self
                 .get_automation_peer()
-                .and_then(|peer| peer.cast::<super::NumberBoxAutomationPeer>())
+                .and_then(|peer| peer.cast::<crate::automation::peers::NumberBoxAutomationPeer>())
             {
                 peer.raise_value_changed(old_value, new_value);
             }

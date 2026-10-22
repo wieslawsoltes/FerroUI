@@ -1,10 +1,10 @@
+use ferroui_controls::automation::peers::{NumberBoxAutomationPeer};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_controls::automation::provider::ProviderAdapter;
 use ferroui_controls::templates::FuncControlTemplate;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::winui::{
-    evaluate_number_expression, INumberBoxNumberFormatter, NumberBox, NumberBoxAutomationPeer,
-    NumberBoxSpinButtonPlacementMode, NumberBoxValidationMode,
+use ferroui_controls::{
+    evaluate_number_expression, INumberBoxNumberFormatter, NumberBox, NumberBoxSpinButtonPlacementMode, NumberBoxValidationMode,
 };
 use ferroui_controls::{Button, RepeatButton, TextBox};
 use std::cell::{Cell, RefCell};

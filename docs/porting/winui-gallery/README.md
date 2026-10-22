@@ -1,7 +1,7 @@
 # WinUI API compatibility and Gallery port
 
-This work adds an **opt-in** WinUI API and XAML projection to FerroUI while preserving the
-existing Avalonia-derived API, property defaults, resource precedence and control behavior.
+This work adds native FerroUI controls and an explicit WinUI XAML importer while preserving
+the existing Avalonia-derived API, property defaults, resource precedence and control behavior.
 The acceptance target is the complete pinned Microsoft WinUI Gallery, including its XAML,
 code-behind interactions, navigation, accessibility and platform services. A catalog entry,
 an API with the same name, or a successful parse alone does not establish behavioral parity.
@@ -22,10 +22,11 @@ in every generated inventory so that an upstream update cannot silently change t
 1. **Shared framework services.** Reuse FerroUI's object/property system, collections, layout,
    routed input, text, rendering, styles, resources, bindings, automation, dispatcher and
    platform interfaces. There is one visual tree and one renderer.
-2. **Compatible controls.** Use existing controls directly when their contracts match. Add
-   missing general-purpose members without changing existing defaults. When the WinUI
-   contract conflicts with an existing control, expose an explicit control in
-   `FerroUI.Controls.WinUI` / `ferroui_controls::winui` rather than replacing the original.
+2. **Native controls.** Use existing controls directly when their contracts match. Add
+   missing general-purpose members without changing existing defaults. Implemented additions
+   belong to `FerroUI.Controls` / `ferroui_controls` and the normal presentation namespace.
+   A conflicting contract receives a distinct native identity: source `Page` maps to
+   `FramePage`, and Frame navigation arguments live in `FerroUI.Navigation`.
 3. **Explicit XAML migration.** An opt-in, diagnostic-producing migration step converts
    audited namespace/type/member equivalents. Its output is ordinary FerroUI XAML for the
    existing runtime loader or compiler. Unsupported syntax and semantic differences remain
@@ -44,8 +45,8 @@ in every generated inventory so that an upstream update cannot silently change t
 | --- | --- |
 | Existing markup | The existing FerroUI namespace and loader behavior remain the default. |
 | Existing Rust API | Existing public types, methods and defaults retain their behavior. |
-| Same name, different contract | Use a WinUI-specific projection with explicit semantics. |
-| `Page` / navigation | Preserve existing page/navigation classes; add WinUI navigation separately. |
+| Same name, different contract | Use a distinct native identity with an explicit source mapping. |
+| `Page` / navigation | Preserve existing page/navigation classes; map source `Page` to native `FramePage` and Frame arguments to `FerroUI.Navigation`. |
 | Binding | Preserve source, lifetime and default-mode semantics; `x:Bind` is not a text substitution for `Binding`. |
 | Resources | `ThemeResource` must re-evaluate through the framework resource system; static lookup is not equivalent. |
 | Styles and visual states | Preserve precedence and state ownership; unsupported state transitions remain explicit. |
@@ -59,6 +60,7 @@ in every generated inventory so that an upstream update cannot silently change t
 - [x] Establish the nonbreaking architecture and open a working PR.
 - [x] Generate pinned WinUI source-declaration and Gallery requirement inventories.
 - [x] Implement the opt-in XAML projection and initial conflict-safe controls.
+- [x] Promote implemented additions to normal native control, navigation, primitive and automation namespaces; use them directly in the Gallery.
 - [x] Port the complete exported catalog, native shell and a documented interactive subset.
 - [x] Add deterministic API/usage maps and automated regression/completeness gates.
 - [x] Execute the implemented control, binding, migration and Gallery behavior tests.
@@ -80,6 +82,34 @@ established.** The PR remains draft until the complete requirement map has execu
 and all strict acceptance gates pass. Subsequent commits update this record with measured
 counts, commands, exact results and limitations.
 
+### Native control organization
+
+The [native-control migration guide](NATIVE-CONTROLS.md) lists all 16 concrete
+control mappings, standard builders, helper namespaces and application examples.
+
+The Gallery's reviewed XAML pages use the default FerroUI namespace for NumberBox,
+RadioButtons, FontIcon, SymbolIcon, AutoSuggestBox, InfoBar, InfoBadge, ProgressRing,
+RatingControl, NavigationView and Frame. Rust code imports these controls directly
+from `ferroui_controls`; Frame destination classes derive `FramePage`. Template
+settings and InfoBarPanel follow `FerroUI.Controls.Primitives`, and the eight
+automation peers follow `FerroUI.Automation.Peers`. The source importer maps the
+pinned WinUI identities to these native APIs. There is no separate controls shim.
+
+The [native-promotion execution record](data/executions/native-controls-005.json)
+records **182 passing tests across 12 native integration targets**, with **53 source
+hashes** checked before and after execution. All **521 API evidence entries** now
+reference that record. Behavior classifications and Gallery page statuses remain
+unchanged. Earlier execution records and captures retain their original revisions,
+namespaces and counts; their loader, theme and Gallery results keep their historical
+scope.
+
+The current source map identifies **315 type candidates and 1,537 member candidates**;
+the existing-API guard reports **205 additive types**. The only new matches are
+`NumberBoxValueChangedEventArgs` and its `OldValue`/`NewValue` members, without a
+behavior-status upgrade. The current theme ledger records **6,912 ported, 1,974 waived
+and 87 pending definitions**, including twelve RadioButtons definitions whose obsolete
+no-control waivers were removed.
+
 ### Main integration checkpoint at `7c679ceb`
 
 The tested merge is
@@ -90,7 +120,7 @@ records the merged source, commands, results and CI job status. The NavigationVi
 and earlier integration records below retain their original revisions and counts;
 their passing results are not presented as reruns on this merged tree.
 
-The regenerated inventory reports **1,535 source member candidates**, **204 additive
+The checkpoint maps report **1,535 source member candidates**, **204 additive
 types** and **562 XAML member candidates**. These are source-comparison and mapping
 counts, not newly established behavioral parity.
 
@@ -140,7 +170,7 @@ and 1,534 member candidates**.
 These are lexical declarations connected through explicit namespace/member maps;
 they do not establish signature, default, behavioral or WinMD ABI equivalence.
 
-Execution-backed API evidence currently covers **1 verified type, 54 partial types,
+The checkpoint's execution-backed API evidence covers **1 verified type, 54 partial types,
 202 verified members and 264 partial members**. The verified type is the complete `Symbol`
 enum. Its 197 numeric values account for 197 of the verified members; the remaining five
 are narrowly tested icon members. These figures do not imply that 202 independently
@@ -170,14 +200,14 @@ an explicit native validation exception. CompactSizing retains explicit TextBox/
 adapters for PasswordBox and Header. Installed fonts, exact pixels and Windows accessibility
 acceptance remain separate from the passing native tests.
 
-The separate [theme resource/style ledger](../winui-theme/TRACKING.md) records
+At the NavigationView checkpoint, the separate theme resource/style ledger recorded
 **6,912 ported, 1,986 waived and 75 pending entries**. The pending entries belong to
 InfoBadge (27), ProgressRing (8), RatingControl (35) and NavigationView styles (5).
 The five NavigationView styles move from waived to pending because their native target
 controls now exist; native metadata templates do not establish source-style parity.
 These counts concern scoped
 source definitions, with the theme's own reference revision; resource lookup support
-does not supply a missing source dictionary or establish visual parity. The current
+does not supply a missing source dictionary or establish visual parity. The checkpoint's
 theme suite passes after the reference-fixture storage update, with both compiler
 outputs still compared against the complete reference bytes.
 

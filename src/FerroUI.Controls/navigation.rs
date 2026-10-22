@@ -1,6 +1,9 @@
 //! Navigation contracts derived from the WinUI navigation model and NavigationHistory.cpp.
 
-use super::{Frame, Page};
+mod page_stack_entry;
+pub use page_stack_entry::PageStackEntry;
+
+use crate::{Frame, FramePage};
 use crate::{IItemsList, ItemsChangedHandler, ItemsSource};
 use ferroui_base::collections::{CollectionChangedHandler, FerroList};
 use ferroui_base::data::core::ValueTypes;
@@ -9,8 +12,7 @@ use ferroui_base::data::model::{
 };
 use ferroui_base::metadata::{MarkupType, MarkupTyped};
 use ferroui_base::{
-    ferro_class, ferro_class_info, ferro_impl_classes, ferro_markup_enum, ferro_markup_type,
-    instantiate, BoxedValue, FerroObject, FerroObjectImpl, Ref, TypeInfo, WeakRef,
+    ferro_markup_enum, ferro_markup_type, BoxedValue, Ref, TypeInfo, WeakRef,
 };
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -58,7 +60,7 @@ impl fmt::Display for NavigationError {
             Self::MissingSourcePageType => f.write_str("SourcePageType must identify a page type."),
             Self::NotAPage(name) => write!(
                 f,
-                "'{name}' does not derive from FerroUI.Controls.WinUI.Page."
+                "'{name}' does not derive from FerroUI.Controls.FramePage."
             ),
             Self::MissingConstructor(name) => write!(
                 f,
@@ -157,7 +159,7 @@ impl NavigatingCancelEventArgs {
 #[derive(Clone)]
 pub struct NavigationEventArgs {
     identity: Rc<()>,
-    content: Option<Ref<Page>>,
+    content: Option<Ref<FramePage>>,
     navigation_mode: NavigationMode,
     source_page_type: &'static TypeInfo,
     parameter: Option<BoxedValue>,
@@ -171,7 +173,7 @@ impl PartialEq for NavigationEventArgs {
 
 impl NavigationEventArgs {
     pub(crate) fn new(
-        content: Option<Ref<Page>>,
+        content: Option<Ref<FramePage>>,
         mode: NavigationMode,
         entry: &PageStackEntry,
     ) -> Self {
@@ -183,7 +185,7 @@ impl NavigationEventArgs {
             parameter: entry.parameter(),
         }
     }
-    pub fn content(&self) -> Option<Ref<Page>> {
+    pub fn content(&self) -> Option<Ref<FramePage>> {
         self.content.clone()
     }
     pub fn navigation_mode(&self) -> NavigationMode {
@@ -229,53 +231,6 @@ impl NavigationFailedEventArgs {
     }
     pub fn exception(&self) -> &NavigationError {
         &self.exception
-    }
-}
-
-/// A navigation journal entry. Parameters are retained by identity, as in WinUI.
-#[repr(C)]
-pub struct PageStackEntry {
-    base: FerroObject,
-    source_page_type: &'static TypeInfo,
-    parameter: Option<BoxedValue>,
-    frame: RefCell<Option<WeakRef<Frame>>>,
-}
-
-ferro_class!(PageStackEntry: FerroObject);
-ferro_impl_classes!(PageStackEntry: FerroObjectImpl);
-ferro_class_info!(PageStackEntry {
-    markup: {
-        namespace: "FerroUI.Controls.WinUI",
-        constructors: [
-            (&'static TypeInfo, Option<BoxedValue>) => PageStackEntry::new,
-        ],
-        properties: [
-            SourcePageType: &'static TypeInfo { get: PageStackEntry::source_page_type },
-            Parameter: Option<BoxedValue> { get: PageStackEntry::parameter },
-        ],
-    },
-});
-
-impl PageStackEntry {
-    pub fn new(source_page_type: &'static TypeInfo, parameter: Option<BoxedValue>) -> Ref<Self> {
-        instantiate(Self {
-            base: FerroObject::construct(),
-            source_page_type,
-            parameter,
-            frame: RefCell::new(None),
-        })
-    }
-    pub fn source_page_type(&self) -> &'static TypeInfo {
-        self.source_page_type
-    }
-    pub fn parameter(&self) -> Option<BoxedValue> {
-        self.parameter.clone()
-    }
-    pub(crate) fn frame(&self) -> Option<Ref<Frame>> {
-        self.frame.borrow().as_ref().and_then(WeakRef::upgrade)
-    }
-    pub(crate) fn set_frame(&self, frame: Option<&Ref<Frame>>) {
-        *self.frame.borrow_mut() = frame.map(Ref::downgrade);
     }
 }
 
@@ -472,10 +427,10 @@ impl From<NavigationStack> for ItemsSource {
     }
 }
 
-ferro_markup_enum!(NavigationMode { New, Back, Forward, Refresh }, { namespace: "FerroUI.Controls.WinUI" });
-ferro_markup_enum!(NavigationCacheMode { Disabled, Required, Enabled }, { namespace: "FerroUI.Controls.WinUI" });
+ferro_markup_enum!(NavigationMode { New, Back, Forward, Refresh }, { namespace: "FerroUI.Navigation" });
+ferro_markup_enum!(NavigationCacheMode { Disabled, Required, Enabled }, { namespace: "FerroUI.Navigation" });
 ferro_markup_type!(class FrameNavigationOptions {
-    namespace: "FerroUI.Controls.WinUI",
+    namespace: "FerroUI.Navigation",
     handles: [FrameNavigationOptions, Option<FrameNavigationOptions>],
     constructors: [() => FrameNavigationOptions::new],
     properties: [
@@ -483,7 +438,7 @@ ferro_markup_type!(class FrameNavigationOptions {
     ],
 });
 ferro_markup_type!(class NavigatingCancelEventArgs {
-    namespace: "FerroUI.Controls.WinUI",
+    namespace: "FerroUI.Navigation",
     handles: [NavigatingCancelEventArgs],
     properties: [
         Cancel: bool { get: NavigatingCancelEventArgs::cancel, set: NavigatingCancelEventArgs::set_cancel },
@@ -493,17 +448,17 @@ ferro_markup_type!(class NavigatingCancelEventArgs {
     ],
 });
 ferro_markup_type!(class NavigationEventArgs {
-    namespace: "FerroUI.Controls.WinUI",
+    namespace: "FerroUI.Navigation",
     handles: [NavigationEventArgs],
     properties: [
-        Content: Option<Ref<Page>> { get: NavigationEventArgs::content },
+        Content: Option<Ref<FramePage>> { get: NavigationEventArgs::content },
         NavigationMode: NavigationMode { get: NavigationEventArgs::navigation_mode },
         SourcePageType: &'static TypeInfo { get: NavigationEventArgs::source_page_type },
         Parameter: Option<BoxedValue> { get: NavigationEventArgs::parameter },
     ],
 });
 ferro_markup_type!(class NavigationFailedEventArgs {
-    namespace: "FerroUI.Controls.WinUI",
+    namespace: "FerroUI.Navigation",
     handles: [NavigationFailedEventArgs],
     properties: [
         Handled: bool { get: NavigationFailedEventArgs::handled, set: NavigationFailedEventArgs::set_handled },
@@ -512,7 +467,7 @@ ferro_markup_type!(class NavigationFailedEventArgs {
     ],
 });
 ferro_markup_type!(class NavigationStack {
-    namespace: "FerroUI.Controls.WinUI",
+    namespace: "FerroUI.Navigation",
     handles: [NavigationStack, Option<NavigationStack>],
     properties: [Count: i32 { get: |stack: &NavigationStack| i32::try_from(stack.count()).unwrap_or(i32::MAX) }],
     methods: [
@@ -538,8 +493,8 @@ pub(crate) const TYPES: &[&MarkupType] = &[
 ];
 
 pub(crate) fn register_markup_types() {
-    super::number_box::register_markup();
-    super::symbol_icon::register_symbol_markup_type();
+    crate::number_box::register_markup();
+    crate::symbol_icon::register_symbol_markup_type();
     MarkupType::register_all(TYPES);
     ValueTypes::register_global(register_value_types);
 }

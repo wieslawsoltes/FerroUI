@@ -9,7 +9,7 @@ use ferroui_controls::presenters::ContentPresenter;
 use ferroui_controls::primitives::TemplatedControl;
 use ferroui_controls::templates::FuncControlTemplate;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::winui::{
+use ferroui_controls::{
     FontIcon, FontIconSource, InfoBadge, InfoBadgeTemplateSettings, PathIconSource, Symbol,
     SymbolIcon, SymbolIconSource,
 };

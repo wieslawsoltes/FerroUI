@@ -1,6 +1,6 @@
 //! Range-value automation for the floating-point number editor.
 
-use super::NumberBox;
+use crate::NumberBox;
 use crate::automation::peers::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, AutomationPeerImplExt,
     ControlAutomationPeer, ControlAutomationPeerImpl,

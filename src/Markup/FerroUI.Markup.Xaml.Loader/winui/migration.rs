@@ -14,7 +14,9 @@ use super::{
 
 const XAML_NAMESPACE: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
 const MC_NAMESPACE: &str = "http://schemas.openxmlformats.org/markup-compatibility/2006";
-const COMPAT_NAMESPACE: &str = "using:FerroUI.Controls.WinUI";
+const CONTROLS_NAMESPACE: &str = "using:FerroUI.Controls";
+const PRIMITIVES_NAMESPACE: &str = "using:FerroUI.Controls.Primitives";
+const NAVIGATION_NAMESPACE: &str = "using:FerroUI.Navigation";
 
 /// Migrates an explicit WinUI document without changing the normal XAML loader.
 ///
@@ -176,12 +178,13 @@ impl Migration<'_, '_> {
             "using:Microsoft.UI.Xaml.Controls" => "using:FerroUI.Controls",
             "using:Microsoft.UI.Xaml.Controls.Primitives" => "using:FerroUI.Controls.Primitives",
             "using:Microsoft.UI.Xaml.Controls.Presenters" => "using:FerroUI.Controls.Presenters",
-            "using:Microsoft.UI.Xaml.Navigation" => COMPAT_NAMESPACE,
+            "using:Microsoft.UI.Xaml.Navigation" => NAVIGATION_NAMESPACE,
             "using:Microsoft.UI.Xaml.Shapes" => "using:FerroUI.Controls.Shapes",
             "using:Microsoft.UI.Xaml.Documents" => "using:FerroUI.Controls.Documents",
             "using:Microsoft.UI.Xaml.Media" => "using:FerroUI.Media",
             "using:Microsoft.UI.Xaml.Input" => "using:FerroUI.Input",
             "using:Microsoft.UI.Xaml.Automation" => "using:FerroUI.Automation",
+            "using:Microsoft.UI.Xaml.Automation.Peers" => "using:FerroUI.Automation.Peers",
             _ => return None,
         };
         Some(target.to_string())
@@ -207,11 +210,41 @@ impl Migration<'_, '_> {
                 )
             })
             .or_else(|| {
+                (is_control_namespace(namespace) && name == "Page")
+                    .then(|| (CONTROLS_NAMESPACE.to_string(), "FramePage".to_string()))
+            })
+            .or_else(|| {
+                ((is_control_namespace(namespace)
+                    || namespace == "using:Microsoft.UI.Xaml.Navigation")
+                    && matches!(
+                        name,
+                        "NavigationCacheMode"
+                            | "NavigationMode"
+                            | "NavigatingCancelEventArgs"
+                            | "NavigationEventArgs"
+                            | "NavigationFailedEventArgs"
+                            | "FrameNavigationOptions"
+                            | "PageStackEntry"
+                    ))
+                .then(|| (NAVIGATION_NAMESPACE.to_string(), name.to_string()))
+            })
+            .or_else(|| {
+                ((is_control_namespace(namespace)
+                    || namespace == "using:Microsoft.UI.Xaml.Controls.Primitives")
+                    && matches!(
+                        name,
+                        "InfoBarPanel"
+                            | "InfoBarTemplateSettings"
+                            | "InfoBadgeTemplateSettings"
+                            | "ProgressRingTemplateSettings"
+                    ))
+                .then(|| (PRIMITIVES_NAMESPACE.to_string(), name.to_string()))
+            })
+            .or_else(|| {
                 (is_control_namespace(namespace)
                     && matches!(
                         name,
-                        "Page"
-                            | "Frame"
+                        "Frame"
                             | "NavigationView"
                             | "NavigationViewItemBase"
                             | "NavigationViewItem"
@@ -236,29 +269,18 @@ impl Migration<'_, '_> {
                             | "FontIcon"
                             | "SymbolIcon"
                             | "Symbol"
-                            | "NavigationCacheMode"
-                            | "NavigationMode"
-                            | "NavigatingCancelEventArgs"
-                            | "NavigationEventArgs"
-                            | "NavigationFailedEventArgs"
-                            | "PageStackEntry"
-                            | "FrameNavigationOptions"
                             | "InfoBar"
-                            | "InfoBarPanel"
-                            | "InfoBarTemplateSettings"
                             | "InfoBarSeverity"
                             | "InfoBarCloseReason"
                             | "InfoBarClosingEventArgs"
                             | "InfoBarClosedEventArgs"
                             | "InfoBarOpenedEventArgs"
                             | "InfoBadge"
-                            | "InfoBadgeTemplateSettings"
                             | "RatingControl"
                             | "RatingItemInfo"
                             | "RatingItemFontInfo"
                             | "RatingItemImageInfo"
                             | "ProgressRing"
-                            | "ProgressRingTemplateSettings"
                             | "IconSource"
                             | "FontIconSource"
                             | "SymbolIconSource"
@@ -269,17 +291,22 @@ impl Migration<'_, '_> {
                             | "AutoSuggestBoxSuggestionChosenEventArgs"
                             | "AutoSuggestBoxQuerySubmittedEventArgs"
                     ))
-                .then(|| (COMPAT_NAMESPACE.to_string(), name.to_string()))
+                .then(|| (CONTROLS_NAMESPACE.to_string(), name.to_string()))
             })
             .or_else(|| {
                 (namespace == "using:Microsoft.UI.Xaml.Automation.Peers"
-                    && matches!(name, "NavigationViewAutomationPeer" | "NavigationViewItemAutomationPeer"))
-                    .then(|| ("using:FerroUI.Controls.WinUI.Automation.Peers".to_string(), name.to_string()))
-            })
-            .or_else(|| {
-                (namespace == "using:Microsoft.UI.Xaml.Controls.Primitives"
-                    && name == "InfoBarPanel")
-                    .then(|| (COMPAT_NAMESPACE.to_string(), name.to_string()))
+                    && matches!(
+                        name,
+                        "AutoSuggestBoxAutomationPeer"
+                            | "InfoBarAutomationPeer"
+                            | "NavigationViewAutomationPeer"
+                            | "NavigationViewItemAutomationPeer"
+                            | "NumberBoxAutomationPeer"
+                            | "ProgressRingAutomationPeer"
+                            | "RadioButtonsAutomationPeer"
+                            | "RatingControlAutomationPeer"
+                    ))
+                    .then(|| ("using:FerroUI.Automation.Peers".to_string(), name.to_string()))
             });
         match mapping {
             Some((namespace, name)) => format!("{}:{name}", self.prefix(&namespace)),
@@ -406,7 +433,7 @@ impl Migration<'_, '_> {
         value: &str,
     ) {
         // WinUI's icon shorthand creates a fresh SymbolIcon. Expand only these audited
-        // opt-in members; adding a parser to the shared IconElement would also change
+        // imported members; adding a parser to the shared IconElement would also change
         // existing native-dialect documents. Property elements work with both back ends.
         if self.symbol_icon_attribute(node, namespace, owner, attribute_namespace, local, attribute, value) {
             return;

@@ -140,3 +140,74 @@ A "contributor" is any person that distributes its contribution under this licen
 (D) If you distribute any portion of the software in source code form, you may do so only under this license by including a complete copy of this license with your distribution. If you distribute any portion of the software in compiled or object code form, you may only do so under a license that complies with this license.
 (E) The software is licensed "as-is." You bear the risk of using it. The contributors give no express warranties, guarantees or conditions. You may have additional consumer rights under your local laws which this license cannot change. To the extent permitted under your local laws, the contributors exclude the implied warranties of merchantability, fitness for a particular purpose and non-infringement.
 ```
+
+## WinUI-derived controls
+
+These native controls and their behavior are derived from the Microsoft WinUI sources:
+https://github.com/microsoft/microsoft-ui-xaml
+
+Reference revision: `a71c42bd3e352060e5f5ecf3b5e1a98f8a745809`.
+
+The implementations use FerroUI's existing control, property, template, event and collection
+systems. They do not replace the existing Avalonia-compatible API. Source correspondence:
+
+| FerroUI file | WinUI reference |
+|---|---|
+| `frame_page.rs` | `dxaml/xcp/dxaml/lib/Page_Partial.cpp`; `dxaml/xcp/tools/XCPTypesAutoGen/Modules/Controls/Page.cs` |
+| `frame.rs` | `dxaml/xcp/dxaml/lib/Frame_Partial.cpp`; `NavigationCache.cpp`; `NavigationHistory.cpp`; `dxaml/xcp/tools/XCPTypesAutoGen/XamlOM/Model/Microsoft.UI.Xaml.Controls.cs` |
+| `navigation.rs`, `navigation/page_stack_entry.rs` | `dxaml/xcp/tools/XCPTypesAutoGen/XamlOM/Model/Microsoft.UI.Xaml.Navigation.cs`; `dxaml/xcp/dxaml/lib/PageStackEntry_Partial.cpp`; `NavigationHistory.cpp` |
+| `number_box.rs`, `number_box_expression.rs`, `automation/peers/number_box_automation_peer.rs` | `controls/dev/NumberBox/NumberBox.cpp`, `NumberBoxParser.cpp`, `NumberBox.idl`, `NumberBoxAutomationPeer.cpp` |
+| `radio_buttons.rs`, `automation/peers/radio_buttons_automation_peer.rs` | `controls/dev/RadioButtons/RadioButtons.cpp`, `RadioButtons.idl`, `RadioButtons.xaml`, `RadioButtons_themeresources.xaml`, `ColumnMajorUniformToLargestGridLayout.cpp` |
+| `font_icon.rs`, `symbol_icon.rs` | `dxaml/xcp/tools/XCPTypesAutoGen/XamlOM/Model/Microsoft.UI.Xaml.Controls.cs`; `dxaml/xcp/core/core/elements/icon.cpp` |
+| `auto_suggest_box.rs`, `automation/peers/auto_suggest_box_automation_peer.rs` | `dxaml/xcp/tools/XCPTypesAutoGen/Modules/AutoSuggestBox/AutoSuggestBox.cs`; `dxaml/xcp/dxaml/lib/AutoSuggestBox_Partial.cpp`, `AutoSuggestBoxTextChangedEventArgs_Partial.h`, `AutoSuggestBoxAutomationPeer_Partial.cpp`; `dxaml/xcp/components/DependencyObject/DependencyProperty.cpp` |
+| `info_bar.rs`, `primitives/info_bar_panel.rs`, `primitives/info_bar_template_settings.rs`, `automation/peers/info_bar_automation_peer.rs` | `controls/dev/InfoBar/InfoBar.idl`, `InfoBar.cpp`, `InfoBarPanel.cpp`, `InfoBar.xaml`, `InfoBar_themeresources.xaml` |
+| `icon_source.rs` | `dxaml/xcp/dxaml/lib/IconSource_Partial.cpp`, `FontIconSource_Partial.cpp`, `SymbolIconSource_Partial.cpp`, `PathIconSource_Partial.cpp`, `DependencyProperty.cpp`; light/dark resource fallbacks follow the existing WinUI theme and `Common_themeresources_any.xaml` |
+
+| `info_badge.rs`, `primitives/info_badge_template_settings.rs` | `controls/dev/InfoBadge/InfoBadge.idl`, `InfoBadge.cpp`, `InfoBadge.xaml` |
+| `progress_ring.rs`, `primitives/progress_ring_template_settings.rs`, `automation/peers/progress_ring_automation_peer.rs` | `controls/dev/ProgressRing/ProgressRing.idl`, `ProgressRing.cpp`, `ProgressRingAutomationPeer.cpp` |
+| `rating_control.rs`, `rating_item_info.rs`, `automation/peers/rating_control_automation_peer.rs` | `controls/dev/RatingControl/RatingControl.idl`, `RatingControl.cpp`, `RatingControlAutomationPeer.cpp` |
+| `navigation_view.rs`, `navigation_view_item.rs`, `navigation_view_events.rs`, `automation/peers/navigation_view_automation_peer.rs`, `automation/peers/navigation_view_item_automation_peer.rs` | `controls/dev/NavigationView/NavigationView.idl`, `NavigationView.cpp`, `NavigationViewItem.cpp`, `NavigationViewAutomationPeer.cpp`, `NavigationViewItemAutomationPeer.cpp` |
+
+### API and behavior boundaries
+
+Navigation transitions, frame journal serialization, Windows application bars and Windows
+layout-bounds integration are not implemented and are not exposed as successful placeholders.
+Navigation errors are Rust `Result` values. Registered property-system setters retain the
+framework's throwing convention; application code can call the fallible setters directly.
+The navigation stacks wrap a live framework collection to reject edits during pending
+navigation and prevent an entry from being owned by two frames. Page-to-frame links are weak.
+Frame construction failures are reported through `NavigationFailed` and a Rust error; a handled
+failure returns `false` from `navigate`. Page callbacks are virtual and synchronous.
+
+The cache follows the pinned native implementation: one instance per source type, Required
+entries in a permanent cache, Enabled entries in a transient LRU cache, and default capacity 10.
+Admission requires nonzero capacity even for Required; already cached Required pages survive
+capacity shrinking. Changing a cached page to Disabled removes its type from the cache.
+Changing between Enabled and Required does not move an existing entry between cache buckets.
+Canceled requests return `true` from Navigate because the native operation accepted the request;
+reentrant requests return `false`. Disabling the journal changes content without committing
+source-type or history state. These details have focused regression tests.
+
+### Microsoft license
+
+MIT License
+
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

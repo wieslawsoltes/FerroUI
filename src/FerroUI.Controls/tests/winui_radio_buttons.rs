@@ -8,7 +8,7 @@ use ferroui_controls::automation::peers::{AutomationControlType, ControlAutomati
 use ferroui_controls::primitives::SelectingItemsControl;
 use ferroui_controls::templates::FuncDataTemplate;
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
-use ferroui_controls::winui::RadioButtons;
+use ferroui_controls::RadioButtons;
 use ferroui_controls::{Control, ItemsSource, RadioButton, TextBlock, Window};
 use std::cell::RefCell;
 use std::rc::Rc;

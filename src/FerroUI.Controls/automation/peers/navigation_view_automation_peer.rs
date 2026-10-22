@@ -1,7 +1,7 @@
-// Copyright (c) Microsoft Corporation. Licensed under the MIT License. See NOTICE.md.
+// Copyright (c) Microsoft Corporation. Licensed under the MIT License. See ../../NOTICE.md.
 // Adapted from NavigationViewAutomationPeer at microsoft/microsoft-ui-xaml a71c42bd.
 
-use super::NavigationView;
+use crate::NavigationView;
 use crate::automation::peers::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeer,
     ControlAutomationPeerImpl,
@@ -20,7 +20,7 @@ pub struct NavigationViewAutomationPeer {
 }
 ferro_class!(NavigationViewAutomationPeer: ControlAutomationPeer);
 ferro_class_info!(NavigationViewAutomationPeer {
-    markup: { namespace: "FerroUI.Controls.WinUI.Automation.Peers" },
+    markup: { namespace: "FerroUI.Automation.Peers" },
     interfaces: [Rc<dyn ISelectionProvider> => ProviderAdapter::as_selection_provider]
 });
 ferro_impl_classes!(NavigationViewAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);

@@ -15808,147 +15808,147 @@ pub fn build_controls_winuicontrols_xaml(
     // Controls/WinUIControls.xaml(259,4) Content (resource)
     let deferred_79 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_140, 259, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_79) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 259, 4)?;
-    // Controls/WinUIControls.xaml(18,6) ThemeDictionaries
+    // Controls/WinUIControls.xaml(17,6) ThemeDictionaries
     let theme_dictionaries_collection_0 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
     let value_0 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    // Controls/WinUIControls.xaml(18,6) ResourceDictionary
+    // Controls/WinUIControls.xaml(17,6) ResourceDictionary
     let resource_dictionary_1 = ::ferroui_base::controls::ResourceDictionary::new();
     context.push_parent(rt::to_value(resource_dictionary_1.clone()));
     let resources_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_1.clone());
     if rt::is_instance(&resources_1, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
-        let count_1: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_1.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 18, 6)?);
-        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_1.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 18, 6)?, count_1.wrapping_add(3_i32));
+        let count_1: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_1.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 17, 6)?);
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_1.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 17, 6)?, count_1.wrapping_add(3_i32));
     }
-    // Controls/WinUIControls.xaml(18,6) Key
+    // Controls/WinUIControls.xaml(17,6) Key
     let value_1 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 18, 6)?, rt::cast(::core::clone::Clone::clone(&value_1), 18, 6)?);
+    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 17, 6)?, rt::cast(::core::clone::Clone::clone(&value_1), 17, 6)?);
+    // Controls/WinUIControls.xaml(18,8) Content (resource)
+    let deferred_80 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_141, 18, 8)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_1, rt::to_object(::std::string::String::from("InfoBadgeForeground")), ::core::clone::Clone::clone(&deferred_80) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 18, 8)?;
     // Controls/WinUIControls.xaml(19,8) Content (resource)
-    let deferred_80 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_141, 19, 8)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_1, rt::to_object(::std::string::String::from("InfoBadgeForeground")), ::core::clone::Clone::clone(&deferred_80) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 19, 8)?;
-    // Controls/WinUIControls.xaml(20,8) Content (resource)
-    let deferred_81 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_142, 20, 8)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_1, rt::to_object(::std::string::String::from("InfoBadgeBackground")), ::core::clone::Clone::clone(&deferred_81) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 20, 8)?;
-    // Controls/WinUIControls.xaml(21,45) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 21, 45)?, rt::to_object(::std::string::String::from("InfoBadgeIconHeight")), rt::to_object(8.0_f64)), 21, 45)?;
+    let deferred_81 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_142, 19, 8)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_1, rt::to_object(::std::string::String::from("InfoBadgeBackground")), ::core::clone::Clone::clone(&deferred_81) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 19, 8)?;
+    // Controls/WinUIControls.xaml(20,45) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 20, 45)?, rt::to_object(::std::string::String::from("InfoBadgeIconHeight")), rt::to_object(8.0_f64)), 20, 45)?;
     context.pop_parent();
-    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_0, ::core::clone::Clone::clone(&value_0), rt::cast(resource_dictionary_1.clone(), 18, 6)?), 18, 6)?;
-    // Controls/WinUIControls.xaml(23,6) ThemeDictionaries
+    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_0, ::core::clone::Clone::clone(&value_0), rt::cast(resource_dictionary_1.clone(), 17, 6)?), 17, 6)?;
+    // Controls/WinUIControls.xaml(22,6) ThemeDictionaries
     let theme_dictionaries_collection_1 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
     let value_2 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    // Controls/WinUIControls.xaml(23,6) ResourceDictionary
+    // Controls/WinUIControls.xaml(22,6) ResourceDictionary
     let resource_dictionary_2 = ::ferroui_base::controls::ResourceDictionary::new();
     context.push_parent(rt::to_value(resource_dictionary_2.clone()));
     let resources_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_2.clone());
     if rt::is_instance(&resources_2, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
-        let count_2: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 23, 6)?);
-        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 23, 6)?, count_2.wrapping_add(3_i32));
+        let count_2: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 22, 6)?);
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 22, 6)?, count_2.wrapping_add(3_i32));
     }
-    // Controls/WinUIControls.xaml(23,6) Key
+    // Controls/WinUIControls.xaml(22,6) Key
     let value_3 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 23, 6)?, rt::cast(::core::clone::Clone::clone(&value_3), 23, 6)?);
+    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 22, 6)?, rt::cast(::core::clone::Clone::clone(&value_3), 22, 6)?);
+    // Controls/WinUIControls.xaml(23,8) Content (resource)
+    let deferred_82 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_143, 23, 8)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_2, rt::to_object(::std::string::String::from("InfoBadgeForeground")), ::core::clone::Clone::clone(&deferred_82) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 23, 8)?;
     // Controls/WinUIControls.xaml(24,8) Content (resource)
-    let deferred_82 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_143, 24, 8)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_2, rt::to_object(::std::string::String::from("InfoBadgeForeground")), ::core::clone::Clone::clone(&deferred_82) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 24, 8)?;
-    // Controls/WinUIControls.xaml(25,8) Content (resource)
-    let deferred_83 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_144, 25, 8)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_2, rt::to_object(::std::string::String::from("InfoBadgeBackground")), ::core::clone::Clone::clone(&deferred_83) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 25, 8)?;
-    // Controls/WinUIControls.xaml(26,45) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 26, 45)?, rt::to_object(::std::string::String::from("InfoBadgeIconHeight")), rt::to_object(9.0_f64)), 26, 45)?;
+    let deferred_83 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_144, 24, 8)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_2, rt::to_object(::std::string::String::from("InfoBadgeBackground")), ::core::clone::Clone::clone(&deferred_83) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 24, 8)?;
+    // Controls/WinUIControls.xaml(25,45) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 25, 45)?, rt::to_object(::std::string::String::from("InfoBadgeIconHeight")), rt::to_object(9.0_f64)), 25, 45)?;
     context.pop_parent();
-    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_2), rt::cast(resource_dictionary_2.clone(), 23, 6)?), 23, 6)?;
-    // Controls/WinUIControls.xaml(30,6) ThemeDictionaries
+    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_2), rt::cast(resource_dictionary_2.clone(), 22, 6)?), 22, 6)?;
+    // Controls/WinUIControls.xaml(29,6) ThemeDictionaries
     let theme_dictionaries_collection_2 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
-    let value_4 = ::ferroui_controls::winui::InfoBadge::__markup_field_HighContrastThemeVariant();
-    // Controls/WinUIControls.xaml(30,6) ResourceDictionary
+    let value_4 = ::ferroui_controls::InfoBadge::__markup_field_HighContrastThemeVariant();
+    // Controls/WinUIControls.xaml(29,6) ResourceDictionary
     let resource_dictionary_3 = ::ferroui_base::controls::ResourceDictionary::new();
     context.push_parent(rt::to_value(resource_dictionary_3.clone()));
     let resources_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_3.clone());
     if rt::is_instance(&resources_3, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
-        let count_3: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_3.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 30, 6)?);
-        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_3.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 30, 6)?, count_3.wrapping_add(3_i32));
+        let count_3: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_3.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 29, 6)?);
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_3.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 29, 6)?, count_3.wrapping_add(3_i32));
     }
-    // Controls/WinUIControls.xaml(30,25) Key
-    let value_5 = ::ferroui_controls::winui::InfoBadge::__markup_field_HighContrastThemeVariant();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 30, 25)?, rt::cast(::core::clone::Clone::clone(&value_5), 30, 25)?);
+    // Controls/WinUIControls.xaml(29,25) Key
+    let value_5 = ::ferroui_controls::InfoBadge::__markup_field_HighContrastThemeVariant();
+    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 29, 25)?, rt::cast(::core::clone::Clone::clone(&value_5), 29, 25)?);
+    // Controls/WinUIControls.xaml(30,8) Content (resource)
+    let deferred_84 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_145, 30, 8)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_3, rt::to_object(::std::string::String::from("InfoBadgeForeground")), ::core::clone::Clone::clone(&deferred_84) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 30, 8)?;
     // Controls/WinUIControls.xaml(31,8) Content (resource)
-    let deferred_84 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_145, 31, 8)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_3, rt::to_object(::std::string::String::from("InfoBadgeForeground")), ::core::clone::Clone::clone(&deferred_84) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 31, 8)?;
-    // Controls/WinUIControls.xaml(32,8) Content (resource)
-    let deferred_85 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_146, 32, 8)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_3, rt::to_object(::std::string::String::from("InfoBadgeBackground")), ::core::clone::Clone::clone(&deferred_85) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 32, 8)?;
-    // Controls/WinUIControls.xaml(33,45) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 33, 45)?, rt::to_object(::std::string::String::from("InfoBadgeIconHeight")), rt::to_object(9.0_f64)), 33, 45)?;
+    let deferred_85 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_146, 31, 8)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_3, rt::to_object(::std::string::String::from("InfoBadgeBackground")), ::core::clone::Clone::clone(&deferred_85) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 31, 8)?;
+    // Controls/WinUIControls.xaml(32,45) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 32, 45)?, rt::to_object(::std::string::String::from("InfoBadgeIconHeight")), rt::to_object(9.0_f64)), 32, 45)?;
     context.pop_parent();
-    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_2, ::core::clone::Clone::clone(&value_4), rt::cast(resource_dictionary_3.clone(), 30, 6)?), 30, 6)?;
-    // Controls/WinUIControls.xaml(36,40) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 36, 40)?, rt::to_object(::std::string::String::from("InfoBadgeMinHeight")), rt::to_object(4.0_f64)), 36, 40)?;
-    // Controls/WinUIControls.xaml(37,39) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 37, 39)?, rt::to_object(::std::string::String::from("InfoBadgeMinWidth")), rt::to_object(4.0_f64)), 37, 39)?;
-    // Controls/WinUIControls.xaml(38,40) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 38, 40)?, rt::to_object(::std::string::String::from("InfoBadgeMaxHeight")), rt::to_object(16.0_f64)), 38, 40)?;
-    // Controls/WinUIControls.xaml(39,44) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 39, 44)?, rt::to_object(::std::string::String::from("InfoBadgeValueFontSize")), rt::to_object(11.0_f64)), 39, 44)?;
-    // Controls/WinUIControls.xaml(40,40) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 40, 40)?, rt::to_object(::std::string::String::from("InfoBadgeIconWidth")), rt::to_object(12.0_f64)), 40, 40)?;
-    // Controls/WinUIControls.xaml(41,39) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 41, 39)?, rt::to_object(::std::string::String::from("InfoBadgePadding")), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 41, 39)?;
-    // Controls/WinUIControls.xaml(42,50) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 42, 50)?, rt::to_object(::std::string::String::from("IconInfoBadgeFontIconMargin")), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 0.0_f64, 4.0_f64, 2.0_f64))), 42, 50)?;
-    // Controls/WinUIControls.xaml(43,47) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 43, 47)?, rt::to_object(::std::string::String::from("ValueInfoBadgeTextMargin")), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 0.0_f64, 4.0_f64, 2.0_f64))), 43, 47)?;
-    // Controls/WinUIControls.xaml(44,46) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 44, 46)?, rt::to_object(::std::string::String::from("IconInfoBadgeIconMargin")), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64))), 44, 46)?;
-    // Controls/WinUIControls.xaml(46,4) Content (resource)
-    let deferred_86 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_147, 46, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("DefaultInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_86) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 46, 4)?;
-    // Controls/WinUIControls.xaml(55,4) Content (resource)
-    let deferred_87 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_148, 55, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_87) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 55, 4)?;
-    // Controls/WinUIControls.xaml(57,4) Content (resource)
-    let deferred_88 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_149, 57, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("AttentionDotInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_88) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 57, 4)?;
+    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_2, ::core::clone::Clone::clone(&value_4), rt::cast(resource_dictionary_3.clone(), 29, 6)?), 29, 6)?;
+    // Controls/WinUIControls.xaml(35,40) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 35, 40)?, rt::to_object(::std::string::String::from("InfoBadgeMinHeight")), rt::to_object(4.0_f64)), 35, 40)?;
+    // Controls/WinUIControls.xaml(36,39) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 36, 39)?, rt::to_object(::std::string::String::from("InfoBadgeMinWidth")), rt::to_object(4.0_f64)), 36, 39)?;
+    // Controls/WinUIControls.xaml(37,40) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 37, 40)?, rt::to_object(::std::string::String::from("InfoBadgeMaxHeight")), rt::to_object(16.0_f64)), 37, 40)?;
+    // Controls/WinUIControls.xaml(38,44) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 38, 44)?, rt::to_object(::std::string::String::from("InfoBadgeValueFontSize")), rt::to_object(11.0_f64)), 38, 44)?;
+    // Controls/WinUIControls.xaml(39,40) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 39, 40)?, rt::to_object(::std::string::String::from("InfoBadgeIconWidth")), rt::to_object(12.0_f64)), 39, 40)?;
+    // Controls/WinUIControls.xaml(40,39) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 40, 39)?, rt::to_object(::std::string::String::from("InfoBadgePadding")), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 40, 39)?;
+    // Controls/WinUIControls.xaml(41,50) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 41, 50)?, rt::to_object(::std::string::String::from("IconInfoBadgeFontIconMargin")), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 0.0_f64, 4.0_f64, 2.0_f64))), 41, 50)?;
+    // Controls/WinUIControls.xaml(42,47) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 42, 47)?, rt::to_object(::std::string::String::from("ValueInfoBadgeTextMargin")), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 0.0_f64, 4.0_f64, 2.0_f64))), 42, 47)?;
+    // Controls/WinUIControls.xaml(43,46) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 43, 46)?, rt::to_object(::std::string::String::from("IconInfoBadgeIconMargin")), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64))), 43, 46)?;
+    // Controls/WinUIControls.xaml(45,4) Content (resource)
+    let deferred_86 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_147, 45, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("DefaultInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_86) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 45, 4)?;
+    // Controls/WinUIControls.xaml(54,4) Content (resource)
+    let deferred_87 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_148, 54, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_87) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 54, 4)?;
+    // Controls/WinUIControls.xaml(56,4) Content (resource)
+    let deferred_88 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_149, 56, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("AttentionDotInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_88) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 56, 4)?;
+    // Controls/WinUIControls.xaml(59,4) Content (resource)
+    let deferred_89 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_150, 59, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("AttentionValueInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_89) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 59, 4)?;
     // Controls/WinUIControls.xaml(60,4) Content (resource)
-    let deferred_89 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_150, 60, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("AttentionValueInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_89) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 60, 4)?;
-    // Controls/WinUIControls.xaml(61,4) Content (resource)
-    let deferred_90 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_151, 61, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("AttentionIconInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_90) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 61, 4)?;
-    // Controls/WinUIControls.xaml(67,4) Content (resource)
-    let deferred_91 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_152, 67, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("InformationalDotInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_91) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 67, 4)?;
+    let deferred_90 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_151, 60, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("AttentionIconInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_90) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 60, 4)?;
+    // Controls/WinUIControls.xaml(66,4) Content (resource)
+    let deferred_91 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_152, 66, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("InformationalDotInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_91) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 66, 4)?;
+    // Controls/WinUIControls.xaml(69,4) Content (resource)
+    let deferred_92 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_153, 69, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("InformationalValueInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_92) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 69, 4)?;
     // Controls/WinUIControls.xaml(70,4) Content (resource)
-    let deferred_92 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_153, 70, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("InformationalValueInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_92) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 70, 4)?;
-    // Controls/WinUIControls.xaml(71,4) Content (resource)
-    let deferred_93 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_154, 71, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("InformationalIconInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_93) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 71, 4)?;
-    // Controls/WinUIControls.xaml(77,4) Content (resource)
-    let deferred_94 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_155, 77, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("SuccessDotInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_94) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 77, 4)?;
+    let deferred_93 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_154, 70, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("InformationalIconInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_93) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 70, 4)?;
+    // Controls/WinUIControls.xaml(76,4) Content (resource)
+    let deferred_94 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_155, 76, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("SuccessDotInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_94) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 76, 4)?;
+    // Controls/WinUIControls.xaml(79,4) Content (resource)
+    let deferred_95 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_156, 79, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("SuccessValueInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_95) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 79, 4)?;
     // Controls/WinUIControls.xaml(80,4) Content (resource)
-    let deferred_95 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_156, 80, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("SuccessValueInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_95) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 80, 4)?;
-    // Controls/WinUIControls.xaml(81,4) Content (resource)
-    let deferred_96 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_157, 81, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("SuccessIconInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_96) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 81, 4)?;
-    // Controls/WinUIControls.xaml(86,4) Content (resource)
-    let deferred_97 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_158, 86, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("CautionDotInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_97) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 86, 4)?;
+    let deferred_96 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_157, 80, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("SuccessIconInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_96) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 80, 4)?;
+    // Controls/WinUIControls.xaml(85,4) Content (resource)
+    let deferred_97 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_158, 85, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("CautionDotInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_97) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 85, 4)?;
+    // Controls/WinUIControls.xaml(88,4) Content (resource)
+    let deferred_98 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_159, 88, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("CautionValueInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_98) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 88, 4)?;
     // Controls/WinUIControls.xaml(89,4) Content (resource)
-    let deferred_98 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_159, 89, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("CautionValueInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_98) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 89, 4)?;
-    // Controls/WinUIControls.xaml(90,4) Content (resource)
-    let deferred_99 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_160, 90, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("CautionIconInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_99) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 90, 4)?;
-    // Controls/WinUIControls.xaml(95,4) Content (resource)
-    let deferred_100 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_161, 95, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("CriticalDotInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_100) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 95, 4)?;
+    let deferred_99 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_160, 89, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("CautionIconInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_99) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 89, 4)?;
+    // Controls/WinUIControls.xaml(94,4) Content (resource)
+    let deferred_100 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_161, 94, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("CriticalDotInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_100) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 94, 4)?;
+    // Controls/WinUIControls.xaml(97,4) Content (resource)
+    let deferred_101 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_162, 97, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("CriticalValueInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_101) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 97, 4)?;
     // Controls/WinUIControls.xaml(98,4) Content (resource)
-    let deferred_101 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_162, 98, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("CriticalValueInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_101) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 98, 4)?;
-    // Controls/WinUIControls.xaml(99,4) Content (resource)
-    let deferred_102 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_163, 99, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("CriticalIconInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_102) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 99, 4)?;
+    let deferred_102 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_163, 98, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("CriticalIconInfoBadgeStyle")), ::core::clone::Clone::clone(&deferred_102) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 98, 4)?;
     // Controls/WinUIControls.xaml(36,4) Content (resource)
     let deferred_103 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_164, 36, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("PathIconUnscaledTemplate")), ::core::clone::Clone::clone(&deferred_103) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 36, 4)?;
@@ -35746,165 +35746,165 @@ fn build_controls_winuicontrols_xaml_deferred_140(
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(19,8)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(18,8)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_141(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_0();
-    // Controls/WinUIControls.xaml(19,51) ResourceKey
+    // Controls/WinUIControls.xaml(18,51) ResourceKey
     ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_set_ResourceKey(&static_resource_extension_0, rt::to_object(::std::string::String::from("TextOnAccentFillColorPrimaryBrush")));
-    let provided_0 = rt::invoked(::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&static_resource_extension_0, rt::service_provider(&context)), 19, 8)?;
+    let provided_0 = rt::invoked(::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&static_resource_extension_0, rt::service_provider(&context)), 18, 8)?;
     ::core::result::Result::Ok(rt::to_value(provided_0))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(20,8)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(19,8)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_142(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_0();
-    // Controls/WinUIControls.xaml(20,51) ResourceKey
+    // Controls/WinUIControls.xaml(19,51) ResourceKey
     ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_set_ResourceKey(&static_resource_extension_0, rt::to_object(::std::string::String::from("AccentFillColorDefaultBrush")));
-    let provided_0 = rt::invoked(::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&static_resource_extension_0, rt::service_provider(&context)), 20, 8)?;
+    let provided_0 = rt::invoked(::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&static_resource_extension_0, rt::service_provider(&context)), 19, 8)?;
     ::core::result::Result::Ok(rt::to_value(provided_0))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(24,8)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(23,8)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_143(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_0();
-    // Controls/WinUIControls.xaml(24,51) ResourceKey
+    // Controls/WinUIControls.xaml(23,51) ResourceKey
     ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_set_ResourceKey(&static_resource_extension_0, rt::to_object(::std::string::String::from("TextOnAccentFillColorPrimaryBrush")));
-    let provided_0 = rt::invoked(::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&static_resource_extension_0, rt::service_provider(&context)), 24, 8)?;
+    let provided_0 = rt::invoked(::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&static_resource_extension_0, rt::service_provider(&context)), 23, 8)?;
     ::core::result::Result::Ok(rt::to_value(provided_0))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(25,8)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(24,8)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_144(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_0();
-    // Controls/WinUIControls.xaml(25,51) ResourceKey
+    // Controls/WinUIControls.xaml(24,51) ResourceKey
     ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_set_ResourceKey(&static_resource_extension_0, rt::to_object(::std::string::String::from("AccentFillColorDefaultBrush")));
-    let provided_0 = rt::invoked(::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&static_resource_extension_0, rt::service_provider(&context)), 25, 8)?;
+    let provided_0 = rt::invoked(::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&static_resource_extension_0, rt::service_provider(&context)), 24, 8)?;
     ::core::result::Result::Ok(rt::to_value(provided_0))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(31,8)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(30,8)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_145(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_0();
-    // Controls/WinUIControls.xaml(31,51) ResourceKey
+    // Controls/WinUIControls.xaml(30,51) ResourceKey
     ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_set_ResourceKey(&static_resource_extension_0, rt::to_object(::std::string::String::from("SystemControlHighlightAltChromeWhiteBrush")));
-    let provided_0 = rt::invoked(::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&static_resource_extension_0, rt::service_provider(&context)), 31, 8)?;
+    let provided_0 = rt::invoked(::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&static_resource_extension_0, rt::service_provider(&context)), 30, 8)?;
     ::core::result::Result::Ok(rt::to_value(provided_0))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(32,8)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(31,8)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_146(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_0();
-    // Controls/WinUIControls.xaml(32,51) ResourceKey
+    // Controls/WinUIControls.xaml(31,51) ResourceKey
     ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_set_ResourceKey(&static_resource_extension_0, rt::to_object(::std::string::String::from("SystemControlHighlightAccentBrush")));
-    let provided_0 = rt::invoked(::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&static_resource_extension_0, rt::service_provider(&context)), 32, 8)?;
+    let provided_0 = rt::invoked(::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&static_resource_extension_0, rt::service_provider(&context)), 31, 8)?;
     ::core::result::Result::Ok(rt::to_value(provided_0))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(46,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(45,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_147(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
-    // Controls/WinUIControls.xaml(46,4) ControlTheme
+    // Controls/WinUIControls.xaml(45,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
-    // Controls/WinUIControls.xaml(46,4) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(47,6) Content
+    // Controls/WinUIControls.xaml(45,4) TargetType
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE));
+    // Controls/WinUIControls.xaml(46,6) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::min_height_property()));
-    // Controls/WinUIControls.xaml(47,34) Value
+    // Controls/WinUIControls.xaml(46,34) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("InfoBadgeMinHeight")));
     let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
-    // Controls/WinUIControls.xaml(48,6) Content
+    // Controls/WinUIControls.xaml(47,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::min_width_property()));
-    // Controls/WinUIControls.xaml(48,33) Value
+    // Controls/WinUIControls.xaml(47,33) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("InfoBadgeMinWidth")));
     let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
-    // Controls/WinUIControls.xaml(49,6) Content
+    // Controls/WinUIControls.xaml(48,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::max_height_property()));
-    // Controls/WinUIControls.xaml(49,34) Value
+    // Controls/WinUIControls.xaml(48,34) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("InfoBadgeMaxHeight")));
     let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
-    // Controls/WinUIControls.xaml(50,6) Content
+    // Controls/WinUIControls.xaml(49,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
-    // Controls/WinUIControls.xaml(50,35) Value
+    // Controls/WinUIControls.xaml(49,35) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("InfoBadgeBackground")));
     let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
-    // Controls/WinUIControls.xaml(51,6) Content
+    // Controls/WinUIControls.xaml(50,6) Content
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
-    // Controls/WinUIControls.xaml(51,35) Value
+    // Controls/WinUIControls.xaml(50,35) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("InfoBadgeForeground")));
     let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_4)));
-    // Controls/WinUIControls.xaml(52,6) Content
+    // Controls/WinUIControls.xaml(51,6) Content
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()));
-    // Controls/WinUIControls.xaml(52,32) Value
+    // Controls/WinUIControls.xaml(51,32) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("InfoBadgePadding")));
     let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_5)));
-    // Controls/WinUIControls.xaml(53,6) Content
+    // Controls/WinUIControls.xaml(52,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::input::InputElement::focusable_property()), rt::to_object(::core::clone::Clone::clone(&false)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(55,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(54,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_148(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
-    // Controls/WinUIControls.xaml(55,4) ControlTheme
+    // Controls/WinUIControls.xaml(54,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
-    // Controls/WinUIControls.xaml(55,4) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(55,81) BasedOn
+    // Controls/WinUIControls.xaml(54,4) TargetType
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE));
+    // Controls/WinUIControls.xaml(54,67) BasedOn
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("DefaultInfoBadgeStyle")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 55, 81)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 55, 81)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 55, 81)?);
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 54, 67)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 54, 67)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 54, 67)?);
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(57,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(56,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_149(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
-    // Controls/WinUIControls.xaml(57,4) ControlTheme
+    // Controls/WinUIControls.xaml(56,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
-    // Controls/WinUIControls.xaml(57,4) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(57,82) BasedOn
+    // Controls/WinUIControls.xaml(56,4) TargetType
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE));
+    // Controls/WinUIControls.xaml(56,75) BasedOn
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("DefaultInfoBadgeStyle")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 57, 82)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 57, 82)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 57, 82)?);
-    // Controls/WinUIControls.xaml(58,6) Content
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 56, 75)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 56, 75)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 56, 75)?);
+    // Controls/WinUIControls.xaml(57,6) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
-    // Controls/WinUIControls.xaml(58,35) Value
+    // Controls/WinUIControls.xaml(57,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SystemFillColorAttentionBrush")));
     let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_1)));
@@ -35912,8 +35912,26 @@ fn build_controls_winuicontrols_xaml_deferred_149(
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(60,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(59,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_150(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    // Controls/WinUIControls.xaml(59,4) ControlTheme
+    let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
+    context.push_parent(rt::to_value(control_theme_0.clone()));
+    // Controls/WinUIControls.xaml(59,4) TargetType
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE));
+    // Controls/WinUIControls.xaml(59,77) BasedOn
+    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("AttentionDotInfoBadgeStyle")));
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 59, 77)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 59, 77)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 59, 77)?);
+    context.pop_parent();
+    ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
+}
+
+/// Builds the deferred content at `Controls/WinUIControls.xaml(60,4)` (a template or a deferred resource).
+fn build_controls_winuicontrols_xaml_deferred_151(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
@@ -35921,60 +35939,42 @@ fn build_controls_winuicontrols_xaml_deferred_150(
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(60,4) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(60,84) BasedOn
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE));
+    // Controls/WinUIControls.xaml(60,76) BasedOn
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("AttentionDotInfoBadgeStyle")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 60, 84)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 60, 84)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 60, 84)?);
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/WinUIControls.xaml(61,4)` (a template or a deferred resource).
-fn build_controls_winuicontrols_xaml_deferred_151(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
-    // Controls/WinUIControls.xaml(61,4) ControlTheme
-    let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
-    // Controls/WinUIControls.xaml(61,4) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(61,83) BasedOn
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("AttentionDotInfoBadgeStyle")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 61, 83)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 61, 83)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 61, 83)?);
-    // Controls/WinUIControls.xaml(62,6) Content
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 60, 76)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 60, 76)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 60, 76)?);
+    // Controls/WinUIControls.xaml(61,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 4.0_f64, 0.0_f64, 2.0_f64)));
-    // Controls/WinUIControls.xaml(63,6) Content
-    let setter_1 = rt::new_setter(rt::property(::ferroui_controls::winui::InfoBadge::icon_source_property()));
-    // Controls/WinUIControls.xaml(64,8) Value
-    // Controls/WinUIControls.xaml(64,8) FontIconSource
-    let font_icon_source_0 = ::ferroui_controls::winui::FontIconSource::new();
-    // Controls/WinUIControls.xaml(64,30) Glyph
-    font_icon_source_0.set_value(::ferroui_controls::winui::FontIconSource::glyph_property(), ::std::string::String::from("\u{ea38}"));
+    // Controls/WinUIControls.xaml(62,6) Content
+    let setter_1 = rt::new_setter(rt::property(::ferroui_controls::InfoBadge::icon_source_property()));
+    // Controls/WinUIControls.xaml(63,8) Value
+    // Controls/WinUIControls.xaml(63,8) FontIconSource
+    let font_icon_source_0 = ::ferroui_controls::FontIconSource::new();
+    // Controls/WinUIControls.xaml(63,23) Glyph
+    font_icon_source_0.set_value(::ferroui_controls::FontIconSource::glyph_property(), ::std::string::String::from("\u{ea38}"));
     rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&font_icon_source_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(67,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(66,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_152(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
-    // Controls/WinUIControls.xaml(67,4) ControlTheme
+    // Controls/WinUIControls.xaml(66,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
-    // Controls/WinUIControls.xaml(67,4) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(67,86) BasedOn
+    // Controls/WinUIControls.xaml(66,4) TargetType
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE));
+    // Controls/WinUIControls.xaml(66,79) BasedOn
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("DefaultInfoBadgeStyle")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 67, 86)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 67, 86)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 67, 86)?);
-    // Controls/WinUIControls.xaml(68,6) Content
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 66, 79)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 66, 79)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 66, 79)?);
+    // Controls/WinUIControls.xaml(67,6) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
-    // Controls/WinUIControls.xaml(68,35) Value
+    // Controls/WinUIControls.xaml(67,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SystemFillColorSolidNeutralBrush")));
     let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_1)));
@@ -35982,8 +35982,26 @@ fn build_controls_winuicontrols_xaml_deferred_152(
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(70,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(69,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_153(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    // Controls/WinUIControls.xaml(69,4) ControlTheme
+    let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
+    context.push_parent(rt::to_value(control_theme_0.clone()));
+    // Controls/WinUIControls.xaml(69,4) TargetType
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE));
+    // Controls/WinUIControls.xaml(69,81) BasedOn
+    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("InformationalDotInfoBadgeStyle")));
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 69, 81)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 69, 81)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 69, 81)?);
+    context.pop_parent();
+    ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
+}
+
+/// Builds the deferred content at `Controls/WinUIControls.xaml(70,4)` (a template or a deferred resource).
+fn build_controls_winuicontrols_xaml_deferred_154(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
@@ -35991,60 +36009,42 @@ fn build_controls_winuicontrols_xaml_deferred_153(
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(70,4) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(70,88) BasedOn
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE));
+    // Controls/WinUIControls.xaml(70,80) BasedOn
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("InformationalDotInfoBadgeStyle")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 70, 88)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 70, 88)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 70, 88)?);
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/WinUIControls.xaml(71,4)` (a template or a deferred resource).
-fn build_controls_winuicontrols_xaml_deferred_154(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
-    // Controls/WinUIControls.xaml(71,4) ControlTheme
-    let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
-    // Controls/WinUIControls.xaml(71,4) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(71,87) BasedOn
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("InformationalDotInfoBadgeStyle")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 71, 87)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 71, 87)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 71, 87)?);
-    // Controls/WinUIControls.xaml(72,6) Content
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 70, 80)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 70, 80)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 70, 80)?);
+    // Controls/WinUIControls.xaml(71,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 4.0_f64, 0.0_f64, 2.0_f64)));
-    // Controls/WinUIControls.xaml(73,6) Content
-    let setter_1 = rt::new_setter(rt::property(::ferroui_controls::winui::InfoBadge::icon_source_property()));
-    // Controls/WinUIControls.xaml(74,8) Value
-    // Controls/WinUIControls.xaml(74,8) FontIconSource
-    let font_icon_source_0 = ::ferroui_controls::winui::FontIconSource::new();
-    // Controls/WinUIControls.xaml(74,30) Glyph
-    font_icon_source_0.set_value(::ferroui_controls::winui::FontIconSource::glyph_property(), ::std::string::String::from("\u{f13f}"));
+    // Controls/WinUIControls.xaml(72,6) Content
+    let setter_1 = rt::new_setter(rt::property(::ferroui_controls::InfoBadge::icon_source_property()));
+    // Controls/WinUIControls.xaml(73,8) Value
+    // Controls/WinUIControls.xaml(73,8) FontIconSource
+    let font_icon_source_0 = ::ferroui_controls::FontIconSource::new();
+    // Controls/WinUIControls.xaml(73,23) Glyph
+    font_icon_source_0.set_value(::ferroui_controls::FontIconSource::glyph_property(), ::std::string::String::from("\u{f13f}"));
     rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&font_icon_source_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(77,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(76,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_155(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
-    // Controls/WinUIControls.xaml(77,4) ControlTheme
+    // Controls/WinUIControls.xaml(76,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
-    // Controls/WinUIControls.xaml(77,4) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(77,80) BasedOn
+    // Controls/WinUIControls.xaml(76,4) TargetType
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE));
+    // Controls/WinUIControls.xaml(76,73) BasedOn
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("DefaultInfoBadgeStyle")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 77, 80)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 77, 80)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 77, 80)?);
-    // Controls/WinUIControls.xaml(78,6) Content
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 76, 73)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 76, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 76, 73)?);
+    // Controls/WinUIControls.xaml(77,6) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
-    // Controls/WinUIControls.xaml(78,35) Value
+    // Controls/WinUIControls.xaml(77,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SystemFillColorSuccessBrush")));
     let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_1)));
@@ -36052,8 +36052,26 @@ fn build_controls_winuicontrols_xaml_deferred_155(
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(80,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(79,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_156(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    // Controls/WinUIControls.xaml(79,4) ControlTheme
+    let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
+    context.push_parent(rt::to_value(control_theme_0.clone()));
+    // Controls/WinUIControls.xaml(79,4) TargetType
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE));
+    // Controls/WinUIControls.xaml(79,75) BasedOn
+    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SuccessDotInfoBadgeStyle")));
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 79, 75)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 79, 75)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 79, 75)?);
+    context.pop_parent();
+    ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
+}
+
+/// Builds the deferred content at `Controls/WinUIControls.xaml(80,4)` (a template or a deferred resource).
+fn build_controls_winuicontrols_xaml_deferred_157(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
@@ -36061,58 +36079,40 @@ fn build_controls_winuicontrols_xaml_deferred_156(
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(80,4) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(80,82) BasedOn
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE));
+    // Controls/WinUIControls.xaml(80,74) BasedOn
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SuccessDotInfoBadgeStyle")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 80, 82)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 80, 82)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 80, 82)?);
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/WinUIControls.xaml(81,4)` (a template or a deferred resource).
-fn build_controls_winuicontrols_xaml_deferred_157(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
-    // Controls/WinUIControls.xaml(81,4) ControlTheme
-    let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
-    // Controls/WinUIControls.xaml(81,4) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(81,81) BasedOn
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SuccessDotInfoBadgeStyle")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 81, 81)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 81, 81)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 81, 81)?);
-    // Controls/WinUIControls.xaml(82,6) Content
-    let setter_0 = rt::new_setter(rt::property(::ferroui_controls::winui::InfoBadge::icon_source_property()));
-    // Controls/WinUIControls.xaml(83,8) Value
-    // Controls/WinUIControls.xaml(83,8) SymbolIconSource
-    let symbol_icon_source_0 = ::ferroui_controls::winui::SymbolIconSource::new();
-    // Controls/WinUIControls.xaml(83,8) Symbol
-    symbol_icon_source_0.set_value(::ferroui_controls::winui::SymbolIconSource::symbol_property(), ::ferroui_controls::winui::Symbol::Accept);
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 80, 74)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 80, 74)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 80, 74)?);
+    // Controls/WinUIControls.xaml(81,6) Content
+    let setter_0 = rt::new_setter(rt::property(::ferroui_controls::InfoBadge::icon_source_property()));
+    // Controls/WinUIControls.xaml(82,8) Value
+    // Controls/WinUIControls.xaml(82,8) SymbolIconSource
+    let symbol_icon_source_0 = ::ferroui_controls::SymbolIconSource::new();
+    // Controls/WinUIControls.xaml(82,8) Symbol
+    symbol_icon_source_0.set_value(::ferroui_controls::SymbolIconSource::symbol_property(), ::ferroui_controls::Symbol::Accept);
     rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&symbol_icon_source_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(86,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(85,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_158(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
-    // Controls/WinUIControls.xaml(86,4) ControlTheme
+    // Controls/WinUIControls.xaml(85,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
-    // Controls/WinUIControls.xaml(86,4) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(86,80) BasedOn
+    // Controls/WinUIControls.xaml(85,4) TargetType
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE));
+    // Controls/WinUIControls.xaml(85,73) BasedOn
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("DefaultInfoBadgeStyle")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 86, 80)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 86, 80)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 86, 80)?);
-    // Controls/WinUIControls.xaml(87,6) Content
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 85, 73)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 85, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 85, 73)?);
+    // Controls/WinUIControls.xaml(86,6) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
-    // Controls/WinUIControls.xaml(87,35) Value
+    // Controls/WinUIControls.xaml(86,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SystemFillColorCautionBrush")));
     let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_1)));
@@ -36120,8 +36120,26 @@ fn build_controls_winuicontrols_xaml_deferred_158(
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(89,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(88,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_159(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    // Controls/WinUIControls.xaml(88,4) ControlTheme
+    let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
+    context.push_parent(rt::to_value(control_theme_0.clone()));
+    // Controls/WinUIControls.xaml(88,4) TargetType
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE));
+    // Controls/WinUIControls.xaml(88,75) BasedOn
+    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("CautionDotInfoBadgeStyle")));
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 88, 75)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 88, 75)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 88, 75)?);
+    context.pop_parent();
+    ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
+}
+
+/// Builds the deferred content at `Controls/WinUIControls.xaml(89,4)` (a template or a deferred resource).
+fn build_controls_winuicontrols_xaml_deferred_160(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
@@ -36129,58 +36147,40 @@ fn build_controls_winuicontrols_xaml_deferred_159(
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(89,4) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(89,82) BasedOn
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE));
+    // Controls/WinUIControls.xaml(89,74) BasedOn
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("CautionDotInfoBadgeStyle")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 89, 82)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 89, 82)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 89, 82)?);
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/WinUIControls.xaml(90,4)` (a template or a deferred resource).
-fn build_controls_winuicontrols_xaml_deferred_160(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
-    // Controls/WinUIControls.xaml(90,4) ControlTheme
-    let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
-    // Controls/WinUIControls.xaml(90,4) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(90,81) BasedOn
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("CautionDotInfoBadgeStyle")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 90, 81)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 90, 81)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 90, 81)?);
-    // Controls/WinUIControls.xaml(91,6) Content
-    let setter_0 = rt::new_setter(rt::property(::ferroui_controls::winui::InfoBadge::icon_source_property()));
-    // Controls/WinUIControls.xaml(92,8) Value
-    // Controls/WinUIControls.xaml(92,8) SymbolIconSource
-    let symbol_icon_source_0 = ::ferroui_controls::winui::SymbolIconSource::new();
-    // Controls/WinUIControls.xaml(92,8) Symbol
-    symbol_icon_source_0.set_value(::ferroui_controls::winui::SymbolIconSource::symbol_property(), ::ferroui_controls::winui::Symbol::Important);
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 89, 74)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 89, 74)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 89, 74)?);
+    // Controls/WinUIControls.xaml(90,6) Content
+    let setter_0 = rt::new_setter(rt::property(::ferroui_controls::InfoBadge::icon_source_property()));
+    // Controls/WinUIControls.xaml(91,8) Value
+    // Controls/WinUIControls.xaml(91,8) SymbolIconSource
+    let symbol_icon_source_0 = ::ferroui_controls::SymbolIconSource::new();
+    // Controls/WinUIControls.xaml(91,8) Symbol
+    symbol_icon_source_0.set_value(::ferroui_controls::SymbolIconSource::symbol_property(), ::ferroui_controls::Symbol::Important);
     rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&symbol_icon_source_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(95,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(94,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_161(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
-    // Controls/WinUIControls.xaml(95,4) ControlTheme
+    // Controls/WinUIControls.xaml(94,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
-    // Controls/WinUIControls.xaml(95,4) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(95,81) BasedOn
+    // Controls/WinUIControls.xaml(94,4) TargetType
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE));
+    // Controls/WinUIControls.xaml(94,74) BasedOn
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("DefaultInfoBadgeStyle")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 95, 81)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 95, 81)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 95, 81)?);
-    // Controls/WinUIControls.xaml(96,6) Content
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 94, 74)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 94, 74)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 94, 74)?);
+    // Controls/WinUIControls.xaml(95,6) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
-    // Controls/WinUIControls.xaml(96,35) Value
+    // Controls/WinUIControls.xaml(95,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SystemFillColorCriticalBrush")));
     let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_1)));
@@ -36188,8 +36188,26 @@ fn build_controls_winuicontrols_xaml_deferred_161(
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(98,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(97,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_162(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    // Controls/WinUIControls.xaml(97,4) ControlTheme
+    let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
+    context.push_parent(rt::to_value(control_theme_0.clone()));
+    // Controls/WinUIControls.xaml(97,4) TargetType
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE));
+    // Controls/WinUIControls.xaml(97,76) BasedOn
+    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("CriticalDotInfoBadgeStyle")));
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 97, 76)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 97, 76)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 97, 76)?);
+    context.pop_parent();
+    ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
+}
+
+/// Builds the deferred content at `Controls/WinUIControls.xaml(98,4)` (a template or a deferred resource).
+fn build_controls_winuicontrols_xaml_deferred_163(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
@@ -36197,36 +36215,18 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(98,4) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(98,83) BasedOn
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE));
+    // Controls/WinUIControls.xaml(98,75) BasedOn
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("CriticalDotInfoBadgeStyle")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 98, 83)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 98, 83)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 98, 83)?);
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/WinUIControls.xaml(99,4)` (a template or a deferred resource).
-fn build_controls_winuicontrols_xaml_deferred_163(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
-    // Controls/WinUIControls.xaml(99,4) ControlTheme
-    let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
-    // Controls/WinUIControls.xaml(99,4) TargetType
-    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::winui::InfoBadge as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(99,82) BasedOn
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("CriticalDotInfoBadgeStyle")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 99, 82)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 99, 82)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 99, 82)?);
-    // Controls/WinUIControls.xaml(100,6) Content
-    let setter_0 = rt::new_setter(rt::property(::ferroui_controls::winui::InfoBadge::icon_source_property()));
-    // Controls/WinUIControls.xaml(101,8) Value
-    // Controls/WinUIControls.xaml(101,8) SymbolIconSource
-    let symbol_icon_source_0 = ::ferroui_controls::winui::SymbolIconSource::new();
-    // Controls/WinUIControls.xaml(101,8) Symbol
-    symbol_icon_source_0.set_value(::ferroui_controls::winui::SymbolIconSource::symbol_property(), ::ferroui_controls::winui::Symbol::Cancel);
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 98, 75)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 98, 75)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 98, 75)?);
+    // Controls/WinUIControls.xaml(99,6) Content
+    let setter_0 = rt::new_setter(rt::property(::ferroui_controls::InfoBadge::icon_source_property()));
+    // Controls/WinUIControls.xaml(100,8) Value
+    // Controls/WinUIControls.xaml(100,8) SymbolIconSource
+    let symbol_icon_source_0 = ::ferroui_controls::SymbolIconSource::new();
+    // Controls/WinUIControls.xaml(100,8) Symbol
+    symbol_icon_source_0.set_value(::ferroui_controls::SymbolIconSource::symbol_property(), ::ferroui_controls::Symbol::Cancel);
     rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&symbol_icon_source_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
@@ -41710,3 +41710,4 @@ fn build_controls_winuicontrols_xaml_deferred_213(
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     scroll_viewer_1.set_value_with_priority(::ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Hidden, priority_15);
     // Controls/WinUIControls.xaml(289,31) Template (setter chosen at run time)
+    let priority_16 = ::ferroui_base::data::BindingPriority::Template;

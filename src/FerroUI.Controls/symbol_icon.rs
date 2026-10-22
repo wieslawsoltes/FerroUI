@@ -1,5 +1,5 @@
 // Symbol values and glyph translations follow the pinned Microsoft WinUI source.
-// Copyright (c) Microsoft Corporation. Licensed under the MIT License. See NOTICE.
+// Copyright (c) Microsoft Corporation. Licensed under the MIT License. See NOTICE.md.
 
 use crate::automation::{AccessibilityView, AutomationProperties};
 use crate::primitives::{TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl, TemplatedControlImplExt};
@@ -245,7 +245,7 @@ ferroui_base::ferro_markup_enum!(Symbol {
     NewFolder, CalendarReply, UnSyncFolder, ReportHacked, SyncFolder, BlockContact, SwitchApps, AddFriend,
     TouchPointer, GoToStart, ZeroBars, OneBar, TwoBars, ThreeBars, FourBars, Scan,
     Preview, GlobalNavigationButton, Share, Print, XboxOneConsole,
-}, { namespace: "FerroUI.Controls.WinUI" });
+}, { namespace: "FerroUI.Controls" });
 
 impl Symbol {
     /// Every value defined by the pinned WinUI Symbol contract.
@@ -501,7 +501,7 @@ pub struct SymbolIcon {
 }
 
 ferro_class!(SymbolIcon: IconElement);
-ferroui_base::ferro_class_info!(SymbolIcon { new: SymbolIcon::new, markup: { namespace: "FerroUI.Controls.WinUI" } });
+ferroui_base::ferro_class_info!(SymbolIcon { new: SymbolIcon::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(SymbolIcon: StyledElementImpl, LayoutableImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
 impl FerroObjectImpl for SymbolIcon {

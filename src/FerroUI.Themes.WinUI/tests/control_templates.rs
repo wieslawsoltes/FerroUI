@@ -29,14 +29,14 @@ use ferroui_controls::{Application, Border, Control, Window};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// A class in the controls/dialogs assemblies. Bare names retain their ordinary
-/// namespace meaning; opt-in WinUI controls require their qualified identity.
+/// A class in the controls/dialogs assemblies. A qualified identity resolves
+/// same-name types explicitly; a bare name must identify exactly one type.
 fn control_type(name: &str) -> &'static TypeInfo {
     let qualified = name.rsplit_once('.');
     let mut found = TypeInfo::registered_types().into_iter().filter(|type_| {
         let identity_matches = match qualified {
             Some((namespace, short_name)) => type_.namespace() == namespace && type_.name() == short_name,
-            None => type_.namespace() != "FerroUI.Controls.WinUI" && type_.name() == name,
+            None => type_.name() == name,
         };
         identity_matches
             && (type_.module_path().starts_with("ferroui_controls") || type_.module_path().starts_with("ferroui_dialogs"))
@@ -135,7 +135,7 @@ fn check_control(name: &str) {
     // of its orientation).
     if setter("Template").is_some()
         || name == "ScrollBar"
-        || type_.namespace() == "FerroUI.Controls.WinUI"
+        || super::control_theme_tests::uses_native_default_template(type_)
     {
         let templated = templated.as_ref().unwrap_or_else(|| panic!("{name} has a template but is not templated"));
         assert!(templated.template().is_some(), "{name}: no template");
@@ -207,7 +207,7 @@ macro_rules! control_tests {
 }
 
 control_tests! {
-    info_badge => "FerroUI.Controls.WinUI.InfoBadge";
+    info_badge => "InfoBadge";
     auto_complete_box => "AutoCompleteBox";
     button => "Button";
     calendar => "Calendar";

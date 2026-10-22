@@ -20,7 +20,7 @@ use ferroui_controls::templates::{
     FuncControlTemplate, FuncDataTemplate, FuncTemplateNameScopeExtensions,
 };
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
-use ferroui_controls::winui::{
+use ferroui_controls::{
     AutoSuggestBox, NavigationView, NavigationViewBackButtonVisible, NavigationViewDisplayMode,
     NavigationViewItem, NavigationViewItemBase, NavigationViewItemHeader,
     NavigationViewItemSeparator, NavigationViewPaneDisplayMode,
@@ -831,7 +831,7 @@ fn mode_and_pane_events_expose_exact_values_and_source_enum_numbers() {
         ],
         [0, 1]
     );
-    let args = ferroui_controls::winui::NavigationViewItemInvokedEventArgs::new();
+    let args = ferroui_controls::NavigationViewItemInvokedEventArgs::new();
     assert!(
         args.invoked_item().is_none()
             && args.invoked_item_container().is_none()

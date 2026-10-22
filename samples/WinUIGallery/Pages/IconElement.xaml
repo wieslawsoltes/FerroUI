@@ -1,9 +1,8 @@
 <!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-            xmlns:winui="using:FerroUI.Controls.WinUI" Spacing="12">
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
   <StackPanel Orientation="Horizontal" Spacing="16">
-    <Button Name="AcceptButton"><StackPanel><winui:SymbolIcon x:Name="AcceptIcon" Symbol="Accept"/><TextBlock Text="Accept"/></StackPanel></Button>
-    <Button Name="ExampleButton1"><winui:FontIcon x:Name="FontGlyph" FontFamily="Segoe MDL2 Assets" Glyph="&#xE790;"/></Button>
+    <Button Name="AcceptButton"><StackPanel><SymbolIcon x:Name="AcceptIcon" Symbol="Accept"/><TextBlock Text="Accept"/></StackPanel></Button>
+    <Button Name="ExampleButton1"><FontIcon x:Name="FontGlyph" FontFamily="Segoe MDL2 Assets" Glyph="&#xE790;"/></Button>
     <Button Name="Example1Button"><PathIcon Data="F1 M 16,12 20,2L 20,16 1,16" HorizontalAlignment="Center"/></Button>
   </StackPanel>
   <TextBlock Text="The font examples retain the source font family and glyphs. Their appearance depends on the requested icon font being installed." TextWrapping="Wrap"/>

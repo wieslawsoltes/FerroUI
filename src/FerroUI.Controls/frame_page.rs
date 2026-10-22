@@ -1,6 +1,7 @@
-//! WinUI Page's content and navigation lifecycle. See NOTICE.md for source attribution.
+//! Native frame page content and synchronous navigation lifecycle. See NOTICE.md for source attribution.
 
-use super::{Frame, NavigatingCancelEventArgs, NavigationCacheMode, NavigationEventArgs};
+use crate::navigation::{NavigatingCancelEventArgs, NavigationCacheMode, NavigationEventArgs};
+use crate::Frame;
 use crate::primitives::TemplatedControlImpl;
 use crate::{ContentControlImpl, ControlImpl, UserControl};
 use ferroui_base::data::BindingPriority;
@@ -15,34 +16,36 @@ use ferroui_base::{
 };
 use std::cell::{Cell, RefCell};
 
-/// A WinUI-compatible navigable user control. This is separate from the framework's existing Page.
+/// A navigable user control hosted by a [`Frame`].
+///
+/// The synchronous frame lifecycle is separate from the existing [`crate::Page`] navigation hierarchy.
 #[repr(C)]
-pub struct Page {
+pub struct FramePage {
     base: UserControl,
     frame: RefCell<Option<WeakRef<Frame>>>,
     cache_key: Cell<Option<&'static TypeInfo>>,
 }
 
 ferro_class! {
-    Page: UserControl, virtuals PageImpl: ContentControlImpl {
+    FramePage: UserControl, virtuals FramePageImpl: ContentControlImpl {
         fn on_navigating_from(this, args: &NavigatingCancelEventArgs);
         fn on_navigated_from(this, args: &NavigationEventArgs);
         fn on_navigated_to(this, args: &NavigationEventArgs);
     }
 }
-ferro_class_info!(Page {
-    new: Page::new,
-    markup: { namespace: "FerroUI.Controls.WinUI", content: Content },
+ferro_class_info!(FramePage {
+    new: FramePage::new,
+    markup: { namespace: "FerroUI.Controls", content: Content },
 });
-ferro_impl_classes!(Page: VisualImpl, LayoutableImpl, InteractiveImpl, InputElementImpl, ControlImpl, TemplatedControlImpl, ContentControlImpl);
+ferro_impl_classes!(FramePage: VisualImpl, LayoutableImpl, InteractiveImpl, InputElementImpl, ControlImpl, TemplatedControlImpl, ContentControlImpl);
 
-impl StyledElementImpl for Page {
+impl StyledElementImpl for FramePage {
     fn style_key_override(_this: &Self) -> &'static TypeInfo {
         UserControl::TYPE
     }
 }
 
-impl FerroObjectImpl for Page {
+impl FerroObjectImpl for FramePage {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         if change.property() == Self::navigation_cache_mode_property().as_property()
@@ -55,24 +58,24 @@ impl FerroObjectImpl for Page {
     }
 }
 
-impl PageImpl for Page {
+impl FramePageImpl for FramePage {
     fn on_navigating_from(_this: &Self, _args: &NavigatingCancelEventArgs) {}
     fn on_navigated_from(_this: &Self, _args: &NavigationEventArgs) {}
     fn on_navigated_to(_this: &Self, _args: &NavigationEventArgs) {}
 }
 
 ferro_properties! {
-    impl Page {
+    impl FramePage {
         pub fn navigation_cache_mode_property() -> StyledProperty<NavigationCacheMode> {
-            FerroProperty::register::<Page, _>("NavigationCacheMode", NavigationCacheMode::Disabled)
+            FerroProperty::register::<FramePage, _>("NavigationCacheMode", NavigationCacheMode::Disabled)
         }
-        pub fn frame_property() -> DirectProperty<Page, Option<Ref<Frame>>> {
-            FerroProperty::register_direct::<Page, _>("Frame", Page::frame, None, None)
+        pub fn frame_property() -> DirectProperty<FramePage, Option<Ref<Frame>>> {
+            FerroProperty::register_direct::<FramePage, _>("Frame", FramePage::frame, None, None)
         }
     }
 }
 
-impl Page {
+impl FramePage {
     pub fn construct() -> Self {
         Self {
             base: UserControl::construct(),

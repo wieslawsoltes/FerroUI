@@ -22,6 +22,28 @@ use ferroui_controls::{ContentControl, Control, NativeMenuBar, TopLevel, UserCon
 use ferroui_markup_xaml::markup_extensions::DynamicResourceExtension;
 use std::rc::Rc;
 
+/// These controls supply audited, style-replaceable templates in property metadata.
+/// Keep the list explicit: inheriting ContentControl's fallback must not hide a missing theme.
+pub(super) fn uses_native_default_template(control: &TypeInfo) -> bool {
+    [
+        ferroui_controls::AutoSuggestBox::TYPE,
+        ferroui_controls::FontIcon::TYPE,
+        ferroui_controls::InfoBadge::TYPE,
+        ferroui_controls::InfoBar::TYPE,
+        ferroui_controls::NavigationView::TYPE,
+        ferroui_controls::NavigationViewItem::TYPE,
+        ferroui_controls::NavigationViewItemHeader::TYPE,
+        ferroui_controls::NavigationViewItemSeparator::TYPE,
+        ferroui_controls::NumberBox::TYPE,
+        ferroui_controls::ProgressRing::TYPE,
+        ferroui_controls::RadioButtons::TYPE,
+        ferroui_controls::RatingControl::TYPE,
+        ferroui_controls::SymbolIcon::TYPE,
+    ]
+    .iter()
+    .any(|candidate| std::ptr::eq(*candidate, control))
+}
+
 fn default_control_themes(theme: &Ref<crate::SimpleTheme>) -> Vec<(ResourceKey, Ref<ControlTheme>)> {
     enumerate_resources(&theme.as_style())
         .into_iter()
@@ -100,12 +122,11 @@ fn should_define_control_theme_for_built_in_templated_controls() {
     assert!(templated_controls.len() > 1);
     // Every ordinary templated control has a control theme, except the ones whose document is
     // left out for now (`Controls/excluded.txt`); a control with a theme is not in that list.
-    // Opt-in WinUI controls can instead supply a native template in property metadata. Verify
-    // that fallback builds a visual, so registering these controls does not require changing
-    // the existing theme or silently excuse a control that cannot display anything.
+    // The audited controls below supply native templates in property metadata. Verify that
+    // the fallback builds a visual and can still be replaced by the application theme.
     for control in &templated_controls {
         let themed = default_control_themes.iter().any(|themed| std::ptr::eq(*themed, *control));
-        if !themed && control.namespace() == "FerroUI.Controls.WinUI" {
+        if !themed && uses_native_default_template(control) {
             assert!(
                 TemplatedControl::template_property().get_default_value(control).is_some(),
                 "{} has neither a control theme nor a metadata template",

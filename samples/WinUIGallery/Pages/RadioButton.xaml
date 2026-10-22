@@ -1,17 +1,16 @@
 <!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-            xmlns:winui="using:FerroUI.Controls.WinUI" Spacing="12">
-  <winui:RadioButtons x:Name="Options" Header="Options:">
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <RadioButtons x:Name="Options" Header="Options:">
     <RadioButton x:Name="Option1" AutomationProperties.AutomationId="Option1RadioButton" Content="Option 1"/>
     <RadioButton x:Name="Option2" AutomationProperties.AutomationId="Option2RadioButton" Content="Option 2"/>
     <RadioButton x:Name="Option3" AutomationProperties.AutomationId="Option3RadioButton" Content="Option 3"/>
-  </winui:RadioButtons>
+  </RadioButtons>
   <TextBlock x:Name="Control1Output" Text="Select an option."/>
-  <winui:RadioButtons x:Name="BackgroundRadioButtons" SelectedIndex="2" MaxColumns="3" Header="Background">
+  <RadioButtons x:Name="BackgroundRadioButtons" SelectedIndex="2" MaxColumns="3" Header="Background">
     <x:String>Green</x:String><x:String>Yellow</x:String><x:String>White</x:String>
-  </winui:RadioButtons>
-  <winui:RadioButtons x:Name="BorderRadioButtons" SelectedIndex="1" MaxColumns="3" Header="Border">
+  </RadioButtons>
+  <RadioButtons x:Name="BorderRadioButtons" SelectedIndex="1" MaxColumns="3" Header="Border">
     <x:String>Green</x:String><x:String>Yellow</x:String><x:String>White</x:String>
-  </winui:RadioButtons>
+  </RadioButtons>
   <Border x:Name="ControlOutput" BorderThickness="10" BorderBrush="#FFFFD700" Background="#FFFFFFFF" Height="50" Margin="0,10,0,10"/>
 </StackPanel>

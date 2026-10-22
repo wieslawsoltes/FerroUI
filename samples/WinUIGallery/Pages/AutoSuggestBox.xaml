@@ -1,13 +1,13 @@
 <!-- Adapted from Samples/AutoSuggestBox/BasicAutosuggestBox.txt and its page code behind; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:winui="using:FerroUI.Controls.WinUI" Spacing="12">
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
   <TextBlock Text="A basic autosuggest box" FontSize="18"/>
-  <winui:AutoSuggestBox x:Name="CatSuggestions" Width="300" HorizontalAlignment="Left" AutomationProperties.Name="Basic AutoSuggestBox"/>
+  <AutoSuggestBox x:Name="CatSuggestions" Width="300" HorizontalAlignment="Left" AutomationProperties.Name="Basic AutoSuggestBox"/>
   <TextBlock x:Name="SuggestionOutput" TextWrapping="Wrap"/>
   <TextBlock Text="Try: American, Bobtail, or British Shorthair." TextWrapping="Wrap"/>
   <TextBlock Text="An AutoSuggestBox that provides a SearchBox experience" FontSize="18"/>
-  <winui:AutoSuggestBox x:Name="ControlSuggestions" PlaceholderText="Type a control name" Width="300" HorizontalAlignment="Left" UpdateTextOnSelect="False" AutomationProperties.Name="Control search">
-    <winui:AutoSuggestBox.QueryIcon><winui:SymbolIcon Symbol="Find"/></winui:AutoSuggestBox.QueryIcon>
-  </winui:AutoSuggestBox>
+  <AutoSuggestBox x:Name="ControlSuggestions" PlaceholderText="Type a control name" Width="300" HorizontalAlignment="Left" UpdateTextOnSelect="False" AutomationProperties.Name="Control search">
+    <AutoSuggestBox.QueryIcon><SymbolIcon Symbol="Find"/></AutoSuggestBox.QueryIcon>
+  </AutoSuggestBox>
   <RelativePanel x:Name="ControlDetails" Margin="0,8,0,0" HorizontalAlignment="Left" IsVisible="False">
     <Image x:Name="ControlImage" Height="75"/>
     <TextBlock x:Name="ControlTitle" FontSize="20" FontWeight="SemiBold" Margin="8,0,0,0" RelativePanel.RightOf="ControlImage"/>

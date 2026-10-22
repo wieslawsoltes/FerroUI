@@ -1032,7 +1032,7 @@
         "samples/WinUIGallery/assets_data.rs",
         "samples/WinUIGallery/assets-manifest.json"
       ],
-      "notes": "Both examples use the opt-in AutoSuggestBox: 97 source cat names, user-only token filtering, chosen-item output and control search/query with original title/subtitle and embedded bitmap details. Catalog titles are explicit item values; CurrentCulture matching and full input/accessibility parity remain pending. Original images retain exact bytes and paths with explicit Windows case aliases; see assets-manifest.json. All acceptance statuses remain partial.",
+      "notes": "Both examples use the native AutoSuggestBox: 97 source cat names, user-only token filtering, chosen-item output and control search/query with original title/subtitle and embedded bitmap details. Catalog titles are explicit item values; CurrentCulture matching and full input/accessibility parity remain pending. Original images retain exact bytes and paths with explicit Windows case aliases; see assets-manifest.json. All acceptance statuses remain partial.",
       "requirements": [
         {
           "status": "source-candidate",
@@ -2147,7 +2147,7 @@
         "samples/WinUIGallery/Pages/SizingForm.xaml",
         "src/FerroUI.Themes.WinUI/DensityStyles/Compact.xaml"
       ],
-      "notes": "The original standard/compact navigation uses distinct native Page types and Frame factories. All four text/password fields and nullable date values copy between forms. The existing native compact dictionary stays local to the compact page. PasswordBox and Header are explicit native TextBox/composition adaptations; Date maps to SelectedDate. Complete original control contracts and visual/input acceptance remain pending.",
+      "notes": "The original standard/compact navigation uses distinct native FramePage types and Frame factories. All four text/password fields and nullable date values copy between forms. The existing native compact dictionary stays local to the compact page. PasswordBox and Header are explicit native TextBox/composition adaptations; Date maps to SelectedDate. Complete original control contracts and visual/input acceptance remain pending.",
       "requirements": [
         {
           "status": "source-candidate",
@@ -3135,7 +3135,7 @@
         "samples/WinUIGallery/Pages/IconElement.xaml",
         "samples/WinUIGallery/examples.rs"
       ],
-      "notes": "The original path, font and symbol icon examples use native PathIcon and the opt-in FontIcon/SymbolIcon types. Bitmap/SVG variants and unavailable host icon fonts remain pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The original path, font and symbol icon examples use native PathIcon and the native FontIcon/SymbolIcon types. Bitmap/SVG variants and unavailable host icon fonts remain pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
       "requirements": [
         {
           "status": "missing-source-candidate",
@@ -3436,9 +3436,9 @@
         "samples/WinUIGallery/examples.rs",
         "samples/WinUIGallery/feedback_samples.rs",
         "samples/WinUIGallery/assets.rs",
-        "src/FerroUI.Themes.WinUI/Controls/WinUIInfoBadge.xaml",
-        "src/FerroUI.Controls/winui/navigation_view.rs",
-        "src/FerroUI.Controls/winui/navigation_view_item.rs"
+        "src/FerroUI.Themes.WinUI/Controls/InfoBadge.xaml",
+        "src/FerroUI.Controls/navigation_view.rs",
+        "src/FerroUI.Controls/navigation_view_item.rs"
       ],
       "notes": "All four original examples have native compositions: NavigationViewItem.InfoBadge retains Home/Account/Inbox, count 5, automation name, opacity and pane-mode handlers; severity ControlThemes retain source keys; the Refresh-button composition retains its glyph; NumberBox changes retain the integer-conversion guard. ToggleSwitch and page-property bindings are explicit existing-control/Rust adaptations. Style-to-Theme migration is audited; exact visuals, installed fonts, general XAML behavior and OS accessibility acceptance remain partial.",
       "requirements": [
@@ -3550,7 +3550,7 @@
         "samples/WinUIGallery/examples.rs",
         "samples/WinUIGallery/control_samples.rs"
       ],
-      "notes": "All three original compositions use the opt-in InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending. This is bounded application behavior coverage, not complete source/API/render/accessibility acceptance.",
+      "notes": "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. x:Bind is explicitly adapted to ordinary TwoWay Binding; final layout, icons and live-region acceptance remain pending. This is bounded application behavior coverage, not complete source/API/render/accessibility acceptance.",
       "requirements": [
         {
           "status": "source-candidate",
@@ -4496,9 +4496,9 @@
         "samples/WinUIGallery/Pages/NavigationSample5.xaml",
         "samples/WinUIGallery/Pages/NavigationSample6.xaml",
         "samples/WinUIGallery/Pages/NavigationSettings.xaml",
-        "src/FerroUI.Controls/winui/navigation_view.rs",
-        "src/FerroUI.Controls/winui/navigation_view_events.rs",
-        "src/FerroUI.Controls/winui/navigation_view_item.rs"
+        "src/FerroUI.Controls/navigation_view.rs",
+        "src/FerroUI.Controls/navigation_view_events.rs",
+        "src/FerroUI.Controls/navigation_view_item.rs"
       ],
       "notes": "All eight original compositions now use native NavigationView and the exact source menu data, Frame destinations and option handlers. Category template selection and adaptive triggers are explicitly implemented in Rust; missing general XAML semantics, exact resource/animation/overflow behavior and full platform/visual acceptance remain partial. Actual running source quirks are preserved and separately noted in example entries.",
       "requirements": [
@@ -4677,7 +4677,7 @@
         "samples/WinUIGallery/Pages/NumberBox.xaml",
         "samples/WinUIGallery/examples.rs"
       ],
-      "notes": "The opt-in WinUI NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The native NumberBox preserves spin-button, NaN and expression behavior using the original snippets. Locale-specific upstream number formatting remains pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
       "requirements": [
         {
           "status": "source-candidate",
@@ -4733,7 +4733,7 @@
         "samples/WinUIGallery/Pages/NavigationSample1.xaml",
         "samples/WinUIGallery/Pages/NavigationSample2.xaml"
       ],
-      "notes": "The original alternating sample-page layouts use the opt-in WinUI Frame/Page types, back/forward journals and Rust handlers. Navigation transition effects remain pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The original alternating sample-page layouts use the native Frame/FramePage types, back/forward journals and Rust handlers. Navigation transition effects remain pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
       "requirements": [
         {
           "status": "source-candidate",
@@ -5213,7 +5213,7 @@
         "samples/WinUIGallery/examples.rs",
         "samples/WinUIGallery/feedback_samples.rs"
       ],
-      "notes": "Both original examples use the opt-in native ProgressRing, activation and background options, and finite/empty NumberBox handling. The source IsOn option is adapted to the existing native ToggleSwitch.IsChecked. Native arc motion is an explicit adaptation; custom animated visual sources, exact Lottie rendering and complete input/accessibility/visual acceptance remain pending.",
+      "notes": "Both original examples use the native ProgressRing, activation and background options, and finite/empty NumberBox handling. The source IsOn option is adapted to the existing native ToggleSwitch.IsChecked. Native arc motion is an explicit adaptation; custom animated visual sources, exact Lottie rendering and complete input/accessibility/visual acceptance remain pending.",
       "requirements": [
         {
           "status": "source-candidate",
@@ -5409,7 +5409,7 @@
         "samples/WinUIGallery/Pages/RadioButton.xaml",
         "samples/WinUIGallery/examples.rs"
       ],
-      "notes": "Both original groups use opt-in RadioButtons with the existing native RadioButton, source labels and Rust selection/color handlers. Focus, layout and screen-reader parity still require host verification. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both original groups use native RadioButtons with the existing native RadioButton, source labels and Rust selection/color handlers. Focus, layout and screen-reader parity still require host verification. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
       "requirements": [
         {
           "status": "source-candidate",

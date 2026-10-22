@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. Licensed under the MIT License. See NOTICE.md.
 // Adapted from NavigationView.idl and NavigationViewItem*.cpp at WinUI a71c42bd.
 
-use super::{InfoBadge, NavigationViewItemAutomationPeer};
+use crate::automation::peers::NavigationViewItemAutomationPeer;
+use crate::InfoBadge;
 use crate::automation::peers::AutomationPeer;
 use crate::automation::{AccessibilityView, AutomationProperties};
 use crate::items_source::items_equal;
@@ -49,7 +50,7 @@ pub struct NavigationViewItemBase {
 }
 ferro_class!(NavigationViewItemBase: ContentControl);
 ferro_class_info!(NavigationViewItemBase {
-    markup: { namespace: "FerroUI.Controls.WinUI", content: Content },
+    markup: { namespace: "FerroUI.Controls", content: Content },
 });
 ferro_impl_classes!(NavigationViewItemBase:
     StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl, InputElementImpl,
@@ -198,7 +199,7 @@ pub struct NavigationViewItem {
 ferro_class!(NavigationViewItem: NavigationViewItemBase);
 ferro_class_info!(NavigationViewItem {
     new: NavigationViewItem::new,
-    markup: { namespace: "FerroUI.Controls.WinUI", content: Content },
+    markup: { namespace: "FerroUI.Controls", content: Content },
 });
 ferro_impl_classes!(NavigationViewItem:
     StyledElementImpl, InteractiveImpl, ContentControlImpl
@@ -1116,7 +1117,7 @@ pub struct NavigationViewItemHeader {
     depth: Cell<usize>,
 }
 ferro_class!(NavigationViewItemHeader: NavigationViewItemBase);
-ferro_class_info!(NavigationViewItemHeader { new: NavigationViewItemHeader::new, markup: { namespace: "FerroUI.Controls.WinUI", content: Content } });
+ferro_class_info!(NavigationViewItemHeader { new: NavigationViewItemHeader::new, markup: { namespace: "FerroUI.Controls", content: Content } });
 ferro_impl_classes!(NavigationViewItemHeader: FerroObjectImpl, StyledElementImpl, VisualImpl,
     LayoutableImpl, InteractiveImpl, InputElementImpl, ControlImpl, ContentControlImpl);
 impl TemplatedControlImpl for NavigationViewItemHeader {
@@ -1186,7 +1187,7 @@ pub struct NavigationViewItemSeparator {
     subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
 }
 ferro_class!(NavigationViewItemSeparator: NavigationViewItemBase);
-ferro_class_info!(NavigationViewItemSeparator { new: NavigationViewItemSeparator::new, markup: { namespace: "FerroUI.Controls.WinUI" } });
+ferro_class_info!(NavigationViewItemSeparator { new: NavigationViewItemSeparator::new, markup: { namespace: "FerroUI.Controls" } });
 ferro_impl_classes!(NavigationViewItemSeparator: StyledElementImpl, VisualImpl,
     LayoutableImpl, InteractiveImpl, InputElementImpl, ControlImpl, ContentControlImpl);
 impl FerroObjectImpl for NavigationViewItemSeparator {

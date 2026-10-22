@@ -3,19 +3,19 @@
 
 use super::{IconSource, InfoBarPanel, Symbol, SymbolIcon};
 use crate::automation::peers::{
-    AutomationControlType, AutomationPeer, AutomationPeerImpl, AutomationPeerImplExt,
-    ControlAutomationPeer, ControlAutomationPeerImpl,
+    AutomationPeer, InfoBarAutomationPeer,
 };
 use crate::automation::{
-    AccessibilityView, AutomationElementIdentifiers, AutomationLiveSetting, AutomationProperties,
+    AccessibilityView, AutomationLiveSetting, AutomationProperties,
 };
 use crate::presenters::ContentPresenter;
 use crate::primitives::{
+    InfoBarTemplateSettings,
     TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl, TemplatedControlImplExt,
 };
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
 use crate::{
-    Border, Button, ContentControl, ContentControlImpl, Control, ControlImpl, Grid, IconElement,
+    Border, Button, ContentControl, ContentControlImpl, Control, ControlImpl, Grid,
     TextBlock, ToolTip, Viewbox,
 };
 use ferroui_base::controls::ResourceKey;
@@ -31,8 +31,7 @@ use ferroui_base::styling::{ControlTheme, ThemeVariant};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_markup_enum, ferro_markup_type,
-    ferro_properties, instantiate, BoxedValue, CornerRadius, DirectProperty, FerroObject,
-    FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref,
+    ferro_properties, instantiate, BoxedValue, CornerRadius, DirectProperty, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref,
     StyledElementImpl, StyledProperty, Thickness, VisualImpl, WeakRef,
 };
 use std::cell::{Cell, RefCell};
@@ -56,8 +55,8 @@ pub enum InfoBarCloseReason {
     Programmatic = 1,
 }
 
-ferro_markup_enum!(InfoBarSeverity { Informational, Success, Warning, Error }, { namespace: "FerroUI.Controls.WinUI" });
-ferro_markup_enum!(InfoBarCloseReason { CloseButton, Programmatic }, { namespace: "FerroUI.Controls.WinUI" });
+ferro_markup_enum!(InfoBarSeverity { Informational, Success, Warning, Error }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(InfoBarCloseReason { CloseButton, Programmatic }, { namespace: "FerroUI.Controls" });
 
 /// Cancellation is shared between event-argument clones delivered to markup handlers.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -92,49 +91,19 @@ impl InfoBarClosedEventArgs {
 pub struct InfoBarOpenedEventArgs;
 
 ferro_markup_type!(class InfoBarClosingEventArgs {
-    namespace: "FerroUI.Controls.WinUI", handles: [InfoBarClosingEventArgs],
+    namespace: "FerroUI.Controls", handles: [InfoBarClosingEventArgs],
     properties: [
         Reason: InfoBarCloseReason { get: |args: &InfoBarClosingEventArgs| args.reason() },
         Cancel: bool { get: |args: &InfoBarClosingEventArgs| args.cancel(), set: |args: &InfoBarClosingEventArgs, value: bool| args.set_cancel(value) },
     ],
 });
 ferro_markup_type!(class InfoBarClosedEventArgs {
-    namespace: "FerroUI.Controls.WinUI", handles: [InfoBarClosedEventArgs],
+    namespace: "FerroUI.Controls", handles: [InfoBarClosedEventArgs],
     properties: [Reason: InfoBarCloseReason { get: |args: &InfoBarClosedEventArgs| args.reason() }],
 });
 ferro_markup_type!(class InfoBarOpenedEventArgs {
-    namespace: "FerroUI.Controls.WinUI", handles: [InfoBarOpenedEventArgs], properties: [],
+    namespace: "FerroUI.Controls", handles: [InfoBarOpenedEventArgs], properties: [],
 });
-
-/// The actual icon element used by the current template.
-#[repr(C)]
-pub struct InfoBarTemplateSettings {
-    base: FerroObject,
-}
-ferro_class!(InfoBarTemplateSettings: FerroObject);
-ferro_class_info!(InfoBarTemplateSettings { new: InfoBarTemplateSettings::new, markup: { namespace: "FerroUI.Controls.WinUI" } });
-ferro_impl_classes!(InfoBarTemplateSettings: FerroObjectImpl);
-ferro_properties! { impl InfoBarTemplateSettings {
-    pub fn icon_element_property() -> StyledProperty<Option<Ref<IconElement>>> {
-        FerroProperty::register::<InfoBarTemplateSettings, _>("IconElement", None)
-    }
-} }
-impl InfoBarTemplateSettings {
-    pub fn construct() -> Self {
-        Self {
-            base: FerroObject::construct(),
-        }
-    }
-    pub fn new() -> Ref<Self> {
-        instantiate(Self::construct())
-    }
-    pub fn icon_element(&self) -> Option<Ref<IconElement>> {
-        self.get_value(Self::icon_element_property())
-    }
-    pub fn set_icon_element(&self, value: Option<Ref<IconElement>>) {
-        self.set_value(Self::icon_element_property(), value);
-    }
-}
 
 #[derive(Clone, Default)]
 struct Parts {
@@ -184,7 +153,7 @@ ferro_class!(InfoBar: ContentControl);
 ferro_class_info!(InfoBar {
     new: InfoBar::new,
     markup: {
-        namespace: "FerroUI.Controls.WinUI", content: Content,
+        namespace: "FerroUI.Controls", content: Content,
         events: [
             CloseButtonClick(Option<BoxedValue>, Option<BoxedValue>) => |this: &Ref<InfoBar>, handler: MarkupDelegate| {
                 let weak = this.downgrade();
@@ -991,76 +960,6 @@ impl Drop for InfoBar {
         for subscription in self.subscriptions.get_mut().drain(..) {
             subscription.dispose();
         }
-    }
-}
-
-#[repr(C)]
-pub struct InfoBarAutomationPeer {
-    base: ControlAutomationPeer,
-    last_name: RefCell<String>,
-}
-ferro_class!(InfoBarAutomationPeer: ControlAutomationPeer);
-ferro_class_info!(InfoBarAutomationPeer { markup: { namespace: "FerroUI.Controls.WinUI" } });
-impl FerroObjectImpl for InfoBarAutomationPeer {
-    fn constructed(this: &Self) {
-        Self::parent_constructed(this);
-        *this.last_name.borrow_mut() = this.get_name();
-        let weak = this.to_ref().downgrade();
-        this.owner().property_changed(move |change| {
-            if change.property() == AutomationProperties::name_property().as_property()
-                || change.property() == AutomationProperties::labeled_by_property().as_property()
-                || change.property() == InfoBar::title_property().as_property()
-                || change.property() == InfoBar::message_property().as_property()
-            {
-                if let Some(peer) = weak.upgrade() {
-                    let next = peer.get_name();
-                    let previous = peer.last_name.replace(next.clone());
-                    if previous != next {
-                        peer.raise_property_changed_event(
-                            AutomationElementIdentifiers::name_property(),
-                            Some(Rc::new(previous)),
-                            Some(Rc::new(next)),
-                        );
-                    }
-                }
-            }
-        });
-    }
-}
-impl ControlAutomationPeerImpl for InfoBarAutomationPeer {}
-impl AutomationPeerImpl for InfoBarAutomationPeer {
-    fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
-        AutomationControlType::StatusBar
-    }
-    fn get_class_name_core(_this: &Self) -> String {
-        "InfoBar".into()
-    }
-    fn get_name_core(this: &Self) -> Option<String> {
-        Self::parent_get_name_core(this)
-            .filter(|name| !name.trim().is_empty())
-            .or_else(|| {
-                let owner = this.owner();
-                Some(
-                    [owner.title(), owner.message()]
-                        .into_iter()
-                        .filter(|part| !part.is_empty())
-                        .collect::<Vec<_>>()
-                        .join(" "),
-                )
-            })
-    }
-}
-impl InfoBarAutomationPeer {
-    pub fn new(owner: &InfoBar) -> Ref<Self> {
-        instantiate(Self {
-            base: ControlAutomationPeer::construct(owner),
-            last_name: RefCell::new(String::new()),
-        })
-    }
-    pub fn owner(&self) -> Ref<InfoBar> {
-        ControlAutomationPeer::owner(self)
-            .cast()
-            .expect("InfoBarAutomationPeer owns an InfoBar")
     }
 }
 

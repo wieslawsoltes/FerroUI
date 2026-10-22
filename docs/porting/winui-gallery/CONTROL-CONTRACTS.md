@@ -1,10 +1,13 @@
-# Opt-in control contracts
+# Native control contracts
 
-The controls in this document use `FerroUI.Controls.WinUI` in markup and
-`ferroui_controls::winui` in Rust. They compose the framework's existing property,
-layout, text, selection, input, automation and template systems. They do not
-change the type identities or defaults of the existing controls. A declaration
-or successful construction is not a claim that every WinUI contract is complete.
+The controls in this document use `FerroUI.Controls` in markup and
+`ferroui_controls` in Rust, including the default FerroUI presentation namespace.
+They compose the framework's existing property, layout, text, selection, input,
+automation and template systems. Frame destination pages use `FramePage`, while
+Frame navigation contracts belong to `FerroUI.Navigation`. Template settings and
+InfoBarPanel use `FerroUI.Controls.Primitives`; peers use `FerroUI.Automation.Peers`.
+Existing control identities and defaults remain intact. A declaration or successful
+construction does not establish that every WinUI contract is complete.
 
 The reference commit is
 [`a71c42bd3e352060e5f5ecf3b5e1a98f8a745809`](https://github.com/microsoft/microsoft-ui-xaml/tree/a71c42bd3e352060e5f5ecf3b5e1a98f8a745809).
@@ -143,8 +146,8 @@ visual elements, so two controls never attempt to share the same visual parent.
 
 | Source | Native element | Live source properties |
 |---|---|---|
-| `FontIconSource` | opt-in `FontIcon` | Glyph, FontFamily, FontSize, FontStyle, FontWeight, MirroredWhenRightToLeft, Foreground |
-| `SymbolIconSource` | opt-in `SymbolIcon` | Symbol, Foreground |
+| `FontIconSource` | native `FontIcon` | Glyph, FontFamily, FontSize, FontStyle, FontWeight, MirroredWhenRightToLeft, Foreground |
+| `SymbolIconSource` | native `SymbolIcon` | Symbol, Foreground |
 | `PathIconSource` | existing `PathIcon` | Data, Foreground |
 
 The source keeps weak references to the elements it creates. It neither owns
@@ -239,14 +242,14 @@ The implementation follows the pinned
 [item behavior](https://github.com/microsoft/microsoft-ui-xaml/blob/a71c42bd3e352060e5f5ecf3b5e1a98f8a745809/controls/dev/NavigationView/NavigationViewItem.cpp)
 and [automation declarations](https://github.com/microsoft/microsoft-ui-xaml/blob/a71c42bd3e352060e5f5ecf3b5e1a98f8a745809/controls/dev/NavigationView/NavigationViewItemAutomationPeer.idl).
 Native code is split between
-[navigation_view.rs](../../../src/FerroUI.Controls/winui/navigation_view.rs),
-[navigation_view_item.rs](../../../src/FerroUI.Controls/winui/navigation_view_item.rs)
-and [navigation_view_events.rs](../../../src/FerroUI.Controls/winui/navigation_view_events.rs).
-The [parent peer](../../../src/FerroUI.Controls/winui/navigation_view_automation_peer.rs)
-and [item peer](../../../src/FerroUI.Controls/winui/navigation_view_item_automation_peer.rs)
+[navigation_view.rs](../../../src/FerroUI.Controls/navigation_view.rs),
+[navigation_view_item.rs](../../../src/FerroUI.Controls/navigation_view_item.rs)
+and [navigation_view_events.rs](../../../src/FerroUI.Controls/navigation_view_events.rs).
+The [parent peer](../../../src/FerroUI.Controls/automation/peers/navigation_view_automation_peer.rs)
+and [item peer](../../../src/FerroUI.Controls/automation/peers/navigation_view_item_automation_peer.rs)
 use separate modules and the runtime namespace
-`FerroUI.Controls.WinUI.Automation.Peers`.
-These are opt-in native controls; the existing Avalonia-compatible `SplitView`
+`FerroUI.Automation.Peers`.
+These are ordinary native controls; the existing Avalonia-compatible `SplitView`
 and selection APIs retain their defaults and public contracts.
 
 ### Collections, containers and selection
@@ -416,7 +419,7 @@ the running behavior and records the discrepancy. The category example replaces
 its custom C# `DataTemplateSelector` and category `x:Bind` expressions with
 explicit Rust data-template dispatch. Source search and back controls have no
 query-submission or back-navigation handler; the port retains that scope. The
-seven sample destination types are real native Page subclasses with registered
+seven sample destination types are real native FramePage subclasses with registered
 Frame factories. Callback navigation failures are shown by the page's error
 TextBlock rather than silently discarded.
 
@@ -452,7 +455,7 @@ The contract follows the pinned
 [InfoBadge IDL](https://github.com/microsoft/microsoft-ui-xaml/blob/a71c42bd3e352060e5f5ecf3b5e1a98f8a745809/controls/dev/InfoBadge/InfoBadge.idl),
 [native implementation](https://github.com/microsoft/microsoft-ui-xaml/blob/a71c42bd3e352060e5f5ecf3b5e1a98f8a745809/controls/dev/InfoBadge/InfoBadge.cpp)
 and [theme dictionary](https://github.com/microsoft/microsoft-ui-xaml/blob/a71c42bd3e352060e5f5ecf3b5e1a98f8a745809/controls/dev/InfoBadge/InfoBadge.xaml).
-The [native implementation](../../../src/FerroUI.Controls/winui/info_badge.rs)
+The [native implementation](../../../src/FerroUI.Controls/info_badge.rs)
 derives from `TemplatedControl` and uses native properties, templates and icon
 sources. It does not alter another control's defaults.
 
@@ -479,10 +482,10 @@ displayed. Retemplating releases the old presenter's content and binds the new
 parts. Reentrant property callbacks finish with the current effective state.
 
 The hand-maintained
-[WinUIInfoBadge.xaml](../../../src/FerroUI.Themes.WinUI/Controls/WinUIInfoBadge.xaml)
+[InfoBadge.xaml](../../../src/FerroUI.Themes.WinUI/Controls/InfoBadge.xaml)
 dictionary retains `DefaultInfoBadgeStyle` and Attention, Informational, Success,
 Caution and Critical Dot/Value/Icon style keys. Its implicit theme targets only
-`FerroUI.Controls.WinUI.InfoBadge`. Default, Light and native HighContrast scopes
+`FerroUI.Controls.InfoBadge`. Default, Light and native HighContrast scopes
 provide the source brush aliases; common dimensions and margins are shared
 native resources. The additive native `InfoBadge.HighContrastThemeVariant`
 field (`high_contrast_theme_variant()` in Rust) supplies a typed `x:Static` key
@@ -517,7 +520,7 @@ The source contract is the pinned
 [ProgressRing IDL](https://github.com/microsoft/microsoft-ui-xaml/blob/a71c42bd3e352060e5f5ecf3b5e1a98f8a745809/controls/dev/ProgressRing/ProgressRing.idl),
 [control implementation](https://github.com/microsoft/microsoft-ui-xaml/blob/a71c42bd3e352060e5f5ecf3b5e1a98f8a745809/controls/dev/ProgressRing/ProgressRing.cpp)
 and [automation peer](https://github.com/microsoft/microsoft-ui-xaml/blob/a71c42bd3e352060e5f5ecf3b5e1a98f8a745809/controls/dev/ProgressRing/ProgressRingAutomationPeer.cpp).
-The [native control](../../../src/FerroUI.Controls/winui/progress_ring.rs)
+The [native control](../../../src/FerroUI.Controls/progress_ring.rs)
 derives from `TemplatedControl`; it does not reuse or change `ProgressBar`'s
 different default state.
 
@@ -546,7 +549,7 @@ detachment, retemplating and determinate completion. A changed inherited clock
 replaces the old subscription. Callbacks hold the owner weakly, and a
 synchronously emitting clock cannot leave an obsolete subscription retained.
 
-The [native automation peer](../../../src/FerroUI.Controls/winui/progress_ring_automation_peer.rs)
+The [native automation peer](../../../src/FerroUI.Controls/automation/peers/progress_ring_automation_peer.rs)
 uses the ProgressBar role and exposes RangeValue only while determinate.
 The range provider reports read-only with NaN small/large changes, but its
 setter forwards to Value, as the pinned peer does. Active indeterminate progress
@@ -574,7 +577,7 @@ The contract follows the pinned
 [RatingControl IDL](https://github.com/microsoft/microsoft-ui-xaml/blob/a71c42bd3e352060e5f5ecf3b5e1a98f8a745809/controls/dev/RatingControl/RatingControl.idl),
 [control implementation](https://github.com/microsoft/microsoft-ui-xaml/blob/a71c42bd3e352060e5f5ecf3b5e1a98f8a745809/controls/dev/RatingControl/RatingControl.cpp)
 and [automation peer](https://github.com/microsoft/microsoft-ui-xaml/blob/a71c42bd3e352060e5f5ecf3b5e1a98f8a745809/controls/dev/RatingControl/RatingControlAutomationPeer.cpp).
-The [native control](../../../src/FerroUI.Controls/winui/rating_control.rs)
+The [native control](../../../src/FerroUI.Controls/rating_control.rs)
 derives from `TemplatedControl` and uses native input, text/image rendering,
 property resources and automation.
 
@@ -614,8 +617,8 @@ Windows `IsFocusEngagementEnabled` API or raw controller discovery/mapping.
 
 ### Rating item descriptions and rendering
 
-[RatingItemInfo and its subclasses](../../../src/FerroUI.Controls/winui/rating_item_info.rs)
-are native FerroObject property objects in the same opt-in namespace.
+[RatingItemInfo and its subclasses](../../../src/FerroUI.Controls/rating_item_info.rs)
+are native FerroObject property objects in `FerroUI.Controls`.
 
 | Type | Source properties | Native value type and fallback |
 |---|---|---|
@@ -710,6 +713,15 @@ limits. `data/api-evidence.json` records evidence for exact source signatures;
 evidence must point at an actual successful execution record tied to the
 implementation/test file hashes. Partial evidence keeps its boundaries and
 does not turn a whole type or Gallery page into verified parity.
+
+The current native-promotion execution is
+[`data/executions/native-controls-005.json`](data/executions/native-controls-005.json):
+**182 tests passed across all 12 native integration targets**, with **53 source
+hashes** checked before and after execution. All 521 API evidence entries now
+reference this record. Their behavior classifications remain unchanged; the newly
+matching `NumberBoxValueChangedEventArgs` source type and `OldValue`/`NewValue`
+member candidates do not acquire behavior evidence from a name match. The earlier
+records below retain their original source scope and test counts.
 
 The first recorded native-control execution is
 [`data/executions/native-controls-001.json`](data/executions/native-controls-001.json):

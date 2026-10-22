@@ -15,7 +15,7 @@ pub(crate) fn register() {
             "WinUIGallery",
             &[(
                 "/Styles/InfoBadge.xaml",
-                include_bytes!("../../src/FerroUI.Themes.WinUI/Controls/WinUIInfoBadge.xaml"),
+                include_bytes!("../../src/FerroUI.Themes.WinUI/Controls/InfoBadge.xaml"),
             )],
         );
     });

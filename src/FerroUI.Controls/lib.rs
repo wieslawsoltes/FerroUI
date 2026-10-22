@@ -18,7 +18,68 @@ pub mod remote;
 pub mod shapes;
 pub mod templates;
 pub mod utils;
-pub mod winui;
+pub mod navigation;
+
+mod auto_suggest_box;
+mod font_icon;
+mod frame;
+mod frame_page;
+mod icon_source;
+mod info_badge;
+mod info_bar;
+mod navigation_view;
+mod navigation_view_events;
+mod navigation_view_item;
+mod number_box;
+mod number_box_expression;
+mod progress_ring;
+mod radio_buttons;
+mod rating_control;
+mod rating_item_info;
+mod symbol_icon;
+
+pub use auto_suggest_box::{
+    AutoSuggestBox, AutoSuggestBoxQuerySubmittedEventArgs, AutoSuggestBoxSuggestionChosenEventArgs,
+    AutoSuggestBoxTextChangedEventArgs, AutoSuggestionBoxTextChangeReason,
+};
+pub use font_icon::FontIcon;
+pub use frame::{Frame, PageFactory};
+pub use frame_page::{FramePage, FramePageImpl, FramePageImplExt, FramePageVTable};
+pub use icon_source::{
+    FontIconSource, IconSource, IconSourceImpl, IconSourceImplExt, IconSourceVTable, PathIconSource,
+    SymbolIconSource,
+};
+pub use info_badge::InfoBadge;
+pub use info_bar::{
+    InfoBar, InfoBarClosedEventArgs, InfoBarCloseReason, InfoBarClosingEventArgs,
+    InfoBarOpenedEventArgs, InfoBarSeverity,
+};
+pub use navigation_view::NavigationView;
+pub use navigation_view_events::{
+    NavigationViewBackButtonVisible, NavigationViewBackRequestedEventArgs,
+    NavigationViewDisplayMode, NavigationViewDisplayModeChangedEventArgs,
+    NavigationViewItemCollapsedEventArgs, NavigationViewItemExpandingEventArgs,
+    NavigationViewItemInvokedEventArgs, NavigationViewPaneClosingEventArgs,
+    NavigationViewPaneDisplayMode, NavigationViewSelectionChangedEventArgs,
+    NavigationViewSelectionFollowsFocus,
+};
+pub use navigation_view_item::{
+    NavigationViewItem, NavigationViewItemBase, NavigationViewItemHeader,
+    NavigationViewItemSeparator,
+};
+pub use number_box::{
+    INumberBoxNumberFormatter, InvariantNumberBoxNumberFormatter, NumberBox,
+    NumberBoxSpinButtonPlacementMode, NumberBoxValidationMode, NumberBoxValueChangedEventArgs,
+};
+pub use number_box_expression::{evaluate_number_expression, NumberBoxExpressionError};
+pub use primitives::{
+    InfoBadgeTemplateSettings, InfoBarPanel, InfoBarTemplateSettings, ProgressRingTemplateSettings,
+};
+pub use progress_ring::ProgressRing;
+pub use radio_buttons::RadioButtons;
+pub use rating_control::RatingControl;
+pub use rating_item_info::{RatingItemFontInfo, RatingItemImageInfo, RatingItemInfo};
+pub use symbol_icon::{Symbol, SymbolIcon};
 
 mod acrylic_platform_compensation_levels;
 mod border;

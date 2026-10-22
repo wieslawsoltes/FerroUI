@@ -9,10 +9,19 @@ implementation and registered application metadata; neither an XML rewrite nor a
 source browser executes C#.
 
 FerroUI's existing Avalonia-compatible object model, APIs, markup and default
-behavior remain the foundation. The opt-in API is `ferroui_controls::winui` in
-Rust and `FerroUI.Controls.WinUI` in XAML. It is deliberately absent from the
-default presentation namespace: both the existing `Page` hierarchy and the new
-WinUI `Page` must remain addressable without changing an old document's meaning.
+behavior remain the foundation. The implemented controls are ordinary
+`ferroui_controls` exports with `FerroUI.Controls` identities in the default
+presentation namespace. They use the same native services as existing controls.
+The source importer remains an explicit operation because it must diagnose
+unimplemented WinUI syntax and semantic differences.
+
+Two existing names have different contracts. The Frame destination type is
+`FramePage`, preserving the existing `Page` hierarchy and its asynchronous
+navigation behavior. Frame navigation arguments and options live in
+`ferroui_controls::navigation` / `FerroUI.Navigation`, preserving the existing
+root `NavigationEventArgs`. `PageStackEntry` also belongs to `FerroUI.Navigation`.
+These explicit mappings let the Gallery use native APIs without changing the
+meaning of existing applications.
 
 The source contracts are pinned in [sources.lock.json](data/sources.lock.json).
 The complete declaration and use-site inventory, rather than the examples in
@@ -27,7 +36,7 @@ must not be read as a claim that all of them are implemented.
 | Same API and semantics | Reuse the existing native type and registered member. |
 | Different spelling, same audited meaning | Add a per-document namespace, type or member mapping; retain a source-range edit record. |
 | Additional non-conflicting capability | Add a normal native property, event, method or service with existing conventions. |
-| Conflicting default, value domain or lifetime | Add a type in `Controls.WinUI`; keep the original type and its defaults. |
+| Conflicting default, value domain or lifetime | Add a distinct native control or service with an explicit mapping; keep the original type and its defaults. |
 | Platform-dependent capability | Implement the corresponding platform service and expose the actual result/capability. |
 | Unsupported requirement | Keep its declaration/use site in the parity ledger and produce an actionable error. |
 
@@ -39,14 +48,23 @@ existing template APIs.
 
 The code generator resolves scoped identities before deriving builders and
 property types. Existing `PageProps`, `ContentPage` and their inheritance remain
-unchanged. Opt-in builders have explicit aliases such as `WinUIPage`,
-`WinUINumberBox`, `win_ui_page()` and `win_ui_number_box()`.
+unchanged. New controls use normal native builder names such as `FramePage`,
+`NumberBox`, `frame_page()` and `number_box()`. There is no
+`ferroui_controls::winui` forwarding module or separate control namespace.
+
+| Surface | Native location |
+|---|---|
+| Controls, icon sources and control events/enums | `FerroUI.Controls` / `ferroui_controls` |
+| Frame navigation contracts | `FerroUI.Navigation` / `ferroui_controls::navigation` |
+| `InfoBarPanel` and the three template-settings types | `FerroUI.Controls.Primitives` / `ferroui_controls::primitives` |
+| Automation peers | `FerroUI.Automation.Peers` / `ferroui_controls::automation::peers` |
 
 ## Implemented control foundations
 
-### Page and Frame
+### FramePage and Frame
 
-`Page` derives from native `UserControl` and adds a weak `Frame` link,
+`FramePage` maps the source `Microsoft.UI.Xaml.Controls.Page`. It derives from
+native `UserControl` and adds a weak `Frame` link,
 `NavigationCacheMode` and virtual `OnNavigatingFrom`, `OnNavigatedFrom` and
 `OnNavigatedTo` callbacks. `Frame` is a native content host. A page type can be
 created through its registered constructor or an explicit `PageFactory`; the
@@ -80,7 +98,7 @@ requirements, not successful empty methods.
 
 ### NavigationView and hierarchical menu items
 
-The opt-in `NavigationView` derives from native `ContentControl` and composes
+The native `NavigationView` derives from `ContentControl` and composes
 the existing `SplitView`, panels, presenters, buttons and popup services.
 `NavigationViewItemBase` preserves the common content/selection inheritance;
 `NavigationViewItem`, `NavigationViewItemHeader` and
@@ -118,8 +136,8 @@ current selection. Ancestors reflect a selected descendant through
 `IsChildSelected`. Lazy expansion uses `HasUnrealizedChildren` and real
 `Expanding`/`Collapsed` events. Every item can host a live native `Icon` and
 `InfoBadge`. The two automation peers use the runtime namespace
-`FerroUI.Controls.WinUI.Automation.Peers` and separate source modules; the
-native control namespace and its markup identities stay distinct.
+`FerroUI.Automation.Peers` and separate source modules, following the existing
+native automation organization.
 
 Selecting a model without a realized container schedules its selection
 notification on the native dispatcher. The callback completes only the current
@@ -213,7 +231,7 @@ two parents.
 
 ### AutoSuggestBox
 
-The opt-in `AutoSuggestBox` uses native header/items services, TextBox, ListBox and
+The native `AutoSuggestBox` uses header/items services, TextBox, ListBox and
 Popup parts. Applications supply `Items` or `ItemsSource`; the control does not
 apply an implicit prefix filter. The existing `AutoCompleteBox` retains its own
 filtering and completion contracts.
@@ -240,7 +258,7 @@ explicit API/host obligations, not ignored properties.
 
 ### InfoBar
 
-The opt-in `InfoBar` is a native content control with live severity, title, message,
+The native `InfoBar` is a content control with live severity, title, message,
 action, content and icon-source presentation. Opening and closing have distinct
 events; programmatic closing and a close-button click preserve their separate
 reasons. Closing can be canceled. Commands use native command execution and enabled
@@ -256,7 +274,7 @@ announcements and upstream pixel equivalence need separate host evidence.
 
 ### InfoBadge
 
-The opt-in `InfoBadge` derives from native `TemplatedControl`. `Value` defaults
+The native `InfoBadge` derives from `TemplatedControl`. `Value` defaults
 to -1; a nonnegative value displays the whole integer, otherwise an `IconSource`
 displays an icon, otherwise the control displays a dot. Values below -1 are
 rejected. A source creates a separate native icon for each badge and keeps its
@@ -271,7 +289,7 @@ a local `CornerRadius`, the default radius is half the arranged height; a local
 radius retains priority even while an animation supplies the effective value.
 Styles alone do not opt out of the automatic-radius policy.
 
-`Controls/WinUIInfoBadge.xaml` supplies native `ControlTheme`s with the original
+`Controls/InfoBadge.xaml` supplies native `ControlTheme`s with the original
 default and Attention, Informational, Success, Caution and Critical style keys
 for dot/value/icon usage. An audited migration maps their `Style` use to native
 `Theme`. Light, dark and high-contrast dictionaries use the native resource
@@ -289,7 +307,7 @@ WinUI InfoBadge member.
 
 ### ProgressRing
 
-The opt-in `ProgressRing` preserves `IsActive = true`, `IsIndeterminate = true`,
+The native `ProgressRing` preserves `IsActive = true`, `IsIndeterminate = true`,
 `Minimum = 0`, `Maximum = 100` and `Value = 0` without changing the existing
 `ProgressBar` defaults. Setting either range bound gives that bound precedence,
 then clamps the value. NaN can remain the public value; a nonfinite or collapsed
@@ -315,7 +333,7 @@ requirements.
 
 ### RatingControl and item descriptions
 
-The opt-in `RatingControl` implements the source's distinct numeric domains:
+The native `RatingControl` implements the source's distinct numeric domains:
 `Value = -1` is unset and a nonnegative assignment is coerced into
 `[1, MaxRating]`; `PlaceholderValue` also defaults to -1 but retains fractions
 and zero in `[0, MaxRating]`. `MaxRating` defaults to 5 and is at least 1. Bounds
@@ -348,8 +366,8 @@ native implementation.
 
 ### Native property API and compatibility
 
-These controls and their helper types stay in the opt-in namespace. Their
-metadata overrides apply only to their own types. Existing Avalonia-compatible
+These controls and their helper types belong to the native namespaces listed
+above. Their metadata overrides apply only to their own types. Existing Avalonia-compatible
 types, ordinary binding defaults, property priorities and generic assignment
 APIs remain available. In particular, convenience setters have distinct names
 so they do not hide `FerroObject::set_value(property, value)`:

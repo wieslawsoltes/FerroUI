@@ -1,12 +1,11 @@
 //! Synchronous WinUI frame navigation, journal management and the per-type page cache.
 
-use super::{
+use crate::navigation::{
     FrameNavigationOptions, NavigatingCancelEventArgs, NavigationCacheMode, NavigationError,
-    NavigationEventArgs, NavigationFailedEventArgs, NavigationMode, NavigationStack, Page,
-    PageStackEntry,
+    NavigationEventArgs, NavigationFailedEventArgs, NavigationMode, NavigationStack, PageStackEntry,
 };
 use crate::primitives::TemplatedControlImpl;
-use crate::{ContentControl, ContentControlImpl, Control, ControlImpl};
+use crate::{ContentControl, ContentControlImpl, Control, ControlImpl, FramePage};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::data::BindingPriority;
 use ferroui_base::input::InputElementImpl;
@@ -25,7 +24,7 @@ use std::collections::{HashMap, VecDeque};
 use std::rc::Rc;
 
 /// Application page creation with a recoverable error. Factories are keyed by runtime type.
-pub type PageFactory = dyn Fn() -> Result<Ref<Page>, NavigationError>;
+pub type PageFactory = dyn Fn() -> Result<Ref<FramePage>, NavigationError>;
 
 /// A content host with WinUI navigation semantics. Navigation is synchronous; a callback that
 /// attempts to navigate again is ignored until the current request returns.
@@ -44,8 +43,8 @@ pub struct Frame {
     source_page_type: Cell<Option<&'static TypeInfo>>,
     cache_size: Cell<i32>,
     factories: RefCell<HashMap<&'static TypeInfo, Rc<PageFactory>>>,
-    permanent: RefCell<HashMap<&'static TypeInfo, Ref<Page>>>,
-    transient: RefCell<VecDeque<(&'static TypeInfo, Ref<Page>)>>,
+    permanent: RefCell<HashMap<&'static TypeInfo, Ref<FramePage>>>,
+    transient: RefCell<VecDeque<(&'static TypeInfo, Ref<FramePage>)>>,
     navigating: HandlerList<dyn Fn(&NavigatingCancelEventArgs)>,
     navigated: HandlerList<dyn Fn(&NavigationEventArgs)>,
     navigation_stopped: HandlerList<dyn Fn(&NavigationEventArgs)>,
@@ -56,7 +55,7 @@ ferro_class!(Frame: ContentControl);
 ferro_class_info!(Frame {
     new: Frame::new,
     markup: {
-        namespace: "FerroUI.Controls.WinUI",
+        namespace: "FerroUI.Controls",
         content: Content,
         properties: [
             BackStack: NavigationStack { get: Frame::back_stack },
@@ -201,10 +200,10 @@ impl Frame {
     pub fn set_is_navigation_stack_enabled(&self, value: bool) {
         self.set_value(Self::is_navigation_stack_enabled_property(), value);
     }
-    pub fn current_page(&self) -> Option<Ref<Page>> {
+    pub fn current_page(&self) -> Option<Ref<FramePage>> {
         self.content()
             .and_then(|content| ValueTypes::as_object(&*content))
-            .and_then(|object| object.cast::<Page>())
+            .and_then(|object| object.cast::<FramePage>())
     }
 
     pub fn set_cache_size(&self, value: i32) -> Result<(), NavigationError> {
@@ -242,7 +241,7 @@ impl Frame {
         source_page_type: &'static TypeInfo,
         factory: Rc<PageFactory>,
     ) -> Result<(), NavigationError> {
-        if !Page::TYPE.is_assignable_from(source_page_type) {
+        if !FramePage::TYPE.is_assignable_from(source_page_type) {
             return Err(NavigationError::NotAPage(source_page_type.full_name()));
         }
         let previous = self
@@ -415,8 +414,8 @@ impl Frame {
         self.committing.set(false);
     }
 
-    fn get_page(&self, ty: &'static TypeInfo) -> Result<Ref<Page>, NavigationError> {
-        if !Page::TYPE.is_assignable_from(ty) {
+    fn get_page(&self, ty: &'static TypeInfo) -> Result<Ref<FramePage>, NavigationError> {
+        if !FramePage::TYPE.is_assignable_from(ty) {
             return Err(NavigationError::NotAPage(ty.full_name()));
         }
         if let Some(page) = self.permanent.borrow().get(&ty).cloned() {
@@ -439,7 +438,7 @@ impl Frame {
             None => ty
                 .create_instance()
                 .ok_or_else(|| NavigationError::MissingConstructor(ty.full_name()))?
-                .cast::<Page>()
+                .cast::<FramePage>()
                 .ok_or_else(|| NavigationError::NotAPage(ty.full_name()))?,
         };
         if !ty.is_assignable_from(page.get_type()) {
