@@ -12,13 +12,19 @@ cargo test -p editor-demo --lib --no-default-features
 ```
 
 The toolbar changes the sample language, opens search or replace, displays
-completion at the current prefix, inserts a linked snippet, folds explicit
-regions, and toggles wrapping and the theme. Switching language reloads that
+completion at the current prefix, inserts a linked snippet, reindents source,
+folds explicit regions, and toggles wrapping and the theme. Switching language reloads that
 example. Search supports case matching, whole words, regular expressions,
 capture replacement and replace-all. Completion preserves text-area focus and
 accepts Enter, Tab or double-click. Snippets select each editable field in turn;
 Tab and Shift+Tab navigate, Escape ends synchronization, and linked name fields
 update together in one undo operation.
+
+The C# example installs the C# indentation strategy, so Enter derives the new
+line's indentation from its language context. Reindent formats selected lines,
+or the whole document when no text is selected, in one protected edit and undo
+group. The Rust example uses the default previous-line indentation strategy;
+it does not provide a Rust formatter.
 
 `Ctrl/Cmd+F` opens search, `Ctrl/Cmd+H` opens replacement, `Ctrl+Space` opens the
 sample completion list. The status line reports one-based logical line and
@@ -48,7 +54,15 @@ application-lifetime smoke run is available for build environments:
 ```sh
 FERROUI_SMOKE_EXIT_MS=2000 cargo run -p editor-demo \
   --no-default-features --features headless
+cargo run -p editor-demo --no-default-features --features headless -- --smoke-actions
 ```
+
+The `--smoke-actions` mode opens the search and completion overlays, replaces a
+search result, commits completion through a routed Tab key, edits and navigates
+a linked snippet, folds regions, enables wrapping, changes the theme, and loads
+the C# example. It allows a dispatcher frame between stages and shuts down with
+exit code zero after its checks pass, or one if an action fails. The same mode
+can be used with the desktop backend for a visible integration check.
 
 The default headless renderer records layout and control behavior; it does not
 produce a pixel-accurate editor screenshot. Use the desktop backend for visual

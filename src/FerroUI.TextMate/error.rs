@@ -12,6 +12,7 @@ pub enum Error {
     RegexLimit(String),
     InvalidState,
     InvalidLine(usize),
+    InvalidOffset(usize),
     ResourceCycle(String),
     BackendNotInitialized,
 }
@@ -30,6 +31,7 @@ impl fmt::Display for Error {
             Self::RegexLimit(s) => write!(f, "regular expression work limit: {s}"),
             Self::InvalidState => f.write_str("tokenization state belongs to a different grammar"),
             Self::InvalidLine(line) => write!(f, "line index out of range: {line}"),
+            Self::InvalidOffset(offset) => write!(f, "invalid UTF-16 offset: {offset}"),
             Self::ResourceCycle(s) => write!(f, "resource include cycle: {s}"),
             Self::BackendNotInitialized => {
                 f.write_str("initialize_browser_oniguruma must finish before tokenization")

@@ -7,6 +7,377 @@ fn grammar(source: &str) -> Grammar {
 }
 
 #[test]
+fn registry_lazily_loads_dependencies_injections_and_theme_resources() {
+    use std::{cell::RefCell, collections::BTreeMap, rc::Rc};
+    struct Locator {
+        calls: RefCell<Vec<String>>,
+        grammars: BTreeMap<&'static str, &'static str>,
+    }
+    impl IRegistryOptions for Locator {
+        fn get_grammar(&self, scope: &str) -> Result<Option<RawGrammar>> {
+            self.calls.borrow_mut().push(scope.into());
+            self.grammars
+                .get(scope)
+                .map(|source| RawGrammar::from_json(source))
+                .transpose()
+        }
+        fn get_injections(&self, scope: &str) -> Result<Vec<String>> {
+            Ok(if scope == "source.test" {
+                vec!["source.injection".into()]
+            } else {
+                Vec::new()
+            })
+        }
+        fn get_theme(&self, name: &str) -> Result<Option<String>> {
+            Ok((name == "base.json")
+                .then(|| r##"{"tokenColors":[{"settings":{"foreground":"#abcdef"}}]}"##.into()))
+        }
+        fn get_default_theme(&self) -> Result<Option<String>> {
+            Ok(Some(r##"{"name":"host theme","include":"base.json","tokenColors":[{"scope":"keyword","settings":{"foreground":"#112233"}}]}"##.into()))
+        }
+    }
+    let locator = Rc::new(Locator {
+        calls: RefCell::new(Vec::new()),
+        grammars: BTreeMap::from([
+            (
+                "source.test",
+                r##"{"scopeName":"source.test","patterns":[{"include":"source.dep#word"},{"include":"source.missing"}]}"##,
+            ),
+            (
+                "source.dep",
+                r##"{"scopeName":"source.dep","patterns":[{"include":"source.test"}],"repository":{"word":{"match":"x","name":"constant.dep"}}}"##,
+            ),
+            (
+                "source.injection",
+                r##"{"scopeName":"source.injection","injectionSelector":"L:source","patterns":[{"match":"TODO","name":"comment.todo"}]}"##,
+            ),
+            ("source.other", r##"{"scopeName":"source.other"}"##),
+        ]),
+    });
+    let registry = Registry::with_options(locator.clone()).unwrap();
+    assert_eq!(registry.scope_names().count(), 0);
+    let grammar = registry.load_grammar("source.test").unwrap();
+    let result = grammar.tokenize_line("x TODO", None).unwrap();
+    assert_eq!(result.tokens[0].scopes.last().unwrap(), "constant.dep");
+    assert_eq!(
+        result.tokens.last().unwrap().scopes.last().unwrap(),
+        "comment.todo"
+    );
+    assert_eq!(
+        registry
+            .theme()
+            .match_scopes(&["keyword".into()])
+            .foreground,
+        Color::parse("#112233")
+    );
+    assert_eq!(
+        registry
+            .load_theme("base.json")
+            .unwrap()
+            .match_scopes(&["plain".into()])
+            .foreground,
+        Color::parse("#abcdef")
+    );
+    assert!(registry
+        .dependencies("source.test")
+        .unwrap()
+        .contains(&"source.injection".into()));
+    assert_eq!(
+        registry.diagnostics(),
+        vec![GrammarLoadDiagnostic {
+            scope_name: "source.missing".into(),
+            error: Error::MissingGrammar("source.missing".into())
+        }]
+    );
+    let calls = locator.calls.borrow().len();
+    registry.load_grammar("source.test").unwrap();
+    assert_eq!(locator.calls.borrow().len(), calls);
+    let names_before_load = registry.scope_names();
+    let other = registry.load_grammar("source.other").unwrap();
+    assert_eq!(names_before_load.count(), 3);
+    assert_eq!(
+        other.tokenize_line("TODO", None).unwrap().tokens[0].scopes,
+        vec!["source.other"]
+    );
+    let from_repository =
+        Grammar::from_repository(registry.lookup("source.test").unwrap(), &registry).unwrap();
+    assert_eq!(
+        from_repository
+            .tokenize_line("x TODO", None)
+            .unwrap()
+            .tokens,
+        result.tokens
+    );
+}
+
+#[test]
+fn host_loader_errors_do_not_poison_future_loads() {
+    use std::{cell::Cell, rc::Rc};
+    struct Locator(Cell<bool>);
+    impl IRegistryOptions for Locator {
+        fn get_grammar(&self, scope: &str) -> Result<Option<RawGrammar>> {
+            if !self.0.replace(true) {
+                return Err(Error::MissingResource("not ready".into()));
+            }
+            RawGrammar::from_json(&format!(r#"{{"scopeName":"{scope}"}}"#)).map(Some)
+        }
+    }
+    let registry = Registry::with_options(Rc::new(Locator(Cell::new(false)))).unwrap();
+    assert!(matches!(
+        registry.load_grammar("source.test"),
+        Err(Error::MissingResource(_))
+    ));
+    assert!(registry.load_grammar("source.test").is_ok());
+    assert!(Registry::with_options(Rc::new(DefaultLocator))
+        .unwrap()
+        .load_grammar("source.absent")
+        .is_err());
+}
+
+#[test]
+fn line_text_and_tokenizer_contract_preserve_utf16_boundaries() {
+    let line = LineText::new("a😀b\r\n");
+    assert_eq!(line.len(), 6);
+    assert_eq!(line.slice(1..3).unwrap().as_str(), "😀");
+    assert!(matches!(line.slice(1..2), Err(Error::InvalidOffset(2))));
+    assert_eq!(line.without_line_ending(), "a😀b");
+    let owned = line.clone().into_owned();
+    assert_eq!(owned, line);
+    let grammar =
+        grammar(r#"{"scopeName":"source.test","patterns":[{"match":"b$","name":"keyword"}]}"#);
+    let tokenizer: &dyn ITokenizationSupport = &grammar;
+    assert_eq!(
+        tokenizer
+            .tokenize(line, None, TokenizeOptions::default())
+            .unwrap()
+            .tokens,
+        grammar.tokenize_line("a😀b", None).unwrap().tokens
+    );
+}
+
+#[test]
+fn model_events_publish_completed_ranges_and_dispose_explicitly() {
+    use std::{cell::RefCell, rc::Rc};
+    let grammar = grammar(r#"{"scopeName":"source.test"}"#);
+    let lines = vec!["a\r\n", "😀\n", "last"];
+    let source: &dyn IModelLines = &lines;
+    assert_eq!(source.line_length(1), Some(2));
+    let mut model = TokenizationModel::from_lines(grammar, source).unwrap();
+    assert_eq!(model.line(0), Some("a"));
+    let events = Rc::new(RefCell::new(Vec::new()));
+    let sink = events.clone();
+    let listener: Rc<dyn IModelTokensChangedListener> =
+        Rc::new(move |event: &ModelTokensChangedEvent| sink.borrow_mut().push(event.clone()));
+    let subscription = model.add_model_tokens_changed_listener(listener);
+    let interface: &mut dyn ITMModel = &mut model;
+    let result = interface.force_tokenization(1).unwrap();
+    assert_eq!(result.lines, 0..2);
+    assert!(result.pending);
+    assert_eq!(events.borrow()[0].ranges, vec![0..2]);
+    assert!(events.borrow()[0].pending);
+    assert_eq!(events.borrow()[0].revision, model.revision());
+    model
+        .retokenize_with_options(10, TokenizeOptions::default(), Some(&|| true))
+        .unwrap();
+    assert_eq!(events.borrow().len(), 1);
+    assert!(model.tokens(2).is_none());
+    subscription.dispose();
+    subscription.dispose();
+    model.force_tokenization(2).unwrap();
+    assert_eq!(events.borrow().len(), 1);
+    let sink = events.clone();
+    drop(model.tokens_changed(move |event| sink.borrow_mut().push(event.clone())));
+    model.invalidate_lines(0..1).unwrap();
+    model.retokenize(10).unwrap();
+    assert_eq!(events.borrow().len(), 2);
+    assert_eq!(events.borrow()[1].ranges, vec![0..2]);
+    assert!(!events.borrow()[1].pending);
+}
+
+#[test]
+fn model_events_keep_a_completed_prefix_when_a_later_line_fails() {
+    use std::{cell::RefCell, rc::Rc};
+    let grammar =
+        grammar(r##"{"scopeName":"source.test","patterns":[{"begin":"start","end":"["}]}"##);
+    let mut model = TokenizationModel::new(grammar);
+    model.set_text("plain\nstart\nlater");
+    let ranges = Rc::new(RefCell::new(Vec::new()));
+    let sink = ranges.clone();
+    let _subscription =
+        model.tokens_changed(move |event| sink.borrow_mut().extend(event.ranges.clone()));
+    assert!(model.retokenize(10).is_err());
+    assert_eq!(*ranges.borrow(), vec![0..1]);
+    assert!(model.tokens(0).is_some());
+    assert!(model.tokens(1).is_none());
+    assert_eq!(model.pending_line(), Some(1));
+}
+
+#[test]
+fn language_configuration_preserves_typed_rules_words_and_snippets() {
+    let configuration = LanguageConfiguration::from_json(r##"{
+      "comments":{"lineComment":"//","blockComment":["/*","*/"]},
+      "autoCloseBefore":";:.,=}",
+      "folding":{"offSide":true,"markers":{"start":"^#region","end":"^#endregion"}},
+      "indentationRules":{"increaseIndentPattern":{"pattern":"\\{$","flags":"i"},"decreaseIndentPattern":"^\\}","indentNextLinePattern":"if$"},
+      "onEnterRules":[{"beforeText":"\\{$","afterText":{"pattern":"^\\}"},"previousLineText":"if","action":{"indent":"indentOutdent","appendText":" * ","removeText":1}}],
+      "autoClosingPairs":[["(",")"],{"open":"\"","close":"\"","notIn":["string","comment"]}],
+      "surroundingPairs":[{"open":"/*","close":"*/"}],
+      "wordPattern":{"pattern":"[a-z😀]+","flags":"gi"}
+    }"##).unwrap();
+    assert_eq!(
+        configuration.comments().unwrap().unwrap().block_comment,
+        Some(("/*".into(), "*/".into()))
+    );
+    assert!(!configuration.folding().unwrap().unwrap().is_empty());
+    let indentation = configuration.indentation_rules().unwrap().unwrap();
+    assert!(!indentation.is_empty());
+    assert_eq!(indentation.increase.unwrap().flags, "i");
+    let rule = &configuration.on_enter_rules().unwrap()[0];
+    assert_eq!(rule.action.indent, IndentAction::IndentOutdent);
+    assert_eq!(rule.action.remove_text, Some(1));
+    let pairs = configuration.auto_closing_pairs().unwrap().pairs;
+    assert_eq!(pairs.len(), 2);
+    assert_eq!(pairs[1].not_in, vec!["string", "comment"]);
+    assert_eq!(configuration.surrounding_pairs().unwrap()[0].open, "/*");
+    assert_eq!(
+        configuration.word_at_offset("ABC 😀word +", 7).unwrap(),
+        Some(WordRange {
+            start_index: 4,
+            end_index: 10
+        })
+    );
+    assert!(matches!(
+        configuration.word_at_offset("x", 2),
+        Err(Error::InvalidOffset(2))
+    ));
+    let no_words = LanguageConfiguration::from_json(r#"{"wordPattern":"(?=x)"}"#).unwrap();
+    assert!(no_words.word_at_offset("xxx", 1).unwrap().is_none());
+    let snippets = LanguageSnippets::from_json(r##"{"region":{"prefix":["reg","region"],"body":["#region ${1:name}","$0","#endregion"],"description":"A region","scope":"csharp,cpp"},"line":{"prefix":"x","body":"text"}}"##).unwrap();
+    assert_eq!(snippets.snippets["region"].prefixes, vec!["reg", "region"]);
+    assert_eq!(snippets.snippets["region"].scopes, vec!["csharp", "cpp"]);
+    assert_eq!(snippets.snippets["line"].body, vec!["text"]);
+}
+
+#[cfg(feature = "bundled-grammars")]
+#[test]
+fn bundled_language_settings_decode_through_typed_contracts() {
+    let catalog = BundledCatalog::new().unwrap();
+    for language in catalog.languages() {
+        language.typed_snippets().unwrap();
+        if let Some(configuration) = &language.configuration {
+            configuration
+                .comments()
+                .unwrap_or_else(|e| panic!("{}: {e}", language.id));
+            configuration
+                .folding()
+                .unwrap_or_else(|e| panic!("{}: {e}", language.id));
+            configuration
+                .indentation_rules()
+                .unwrap_or_else(|e| panic!("{}: {e}", language.id));
+            configuration
+                .on_enter_rules()
+                .unwrap_or_else(|e| panic!("{}: {e}", language.id));
+            configuration
+                .auto_closing_pairs()
+                .unwrap_or_else(|e| panic!("{}: {e}", language.id));
+            configuration
+                .surrounding_pairs()
+                .unwrap_or_else(|e| panic!("{}: {e}", language.id));
+            configuration
+                .word_regex()
+                .unwrap_or_else(|e| panic!("{}: {e}", language.id));
+        }
+    }
+}
+
+#[test]
+fn package_metadata_preserves_contributions_and_maps_host_language_ids() {
+    let package = GrammarDefinition::from_json(r##"{
+      "name":"sample","displayName":"Sample","version":"1.2.3","license":"MIT",
+      "engines":{"vscode":"^1.0","node":">=18"},"scripts":{"update-grammar":"generate"},
+      "repository":"https://example.invalid/sample","custom":{"retained":true},
+      "contributes":{"languages":[{"id":"sample","mimetypes":["text/x-sample"],"configuration":"config.json"}],
+        "grammars":[{"language":"sample","scopeName":"source.sample","path":"grammar.json",
+          "embeddedLanguages":{"meta.embedded.js":"javascript","source.unknown":"unknown"},
+          "tokenTypes":{"meta.embedded":"other","comment,comment.line":"comment"},
+          "balancedBracketScopes":["*"],"unbalancedBracketScopes":["string"]}],
+        "snippets":[{"language":"sample","path":"snippets.json"}]}
+    }"##).unwrap();
+    assert_eq!(package.engines.unwrap().vscode.as_deref(), Some("^1.0"));
+    assert_eq!(
+        package.repository.unwrap().url,
+        "https://example.invalid/sample"
+    );
+    assert_eq!(package.other["custom"]["retained"], true);
+    assert_eq!(
+        package.contributes.languages[0].mime_types,
+        vec!["text/x-sample"]
+    );
+    assert_eq!(package.contributes.snippets[0].path, "snippets.json");
+    let configuration = package.contributes.grammars[0]
+        .configuration(|id| match id {
+            "sample" => Some(1),
+            "javascript" => Some(2),
+            _ => None,
+        })
+        .unwrap();
+    assert_eq!(configuration.initial_language, 1);
+    assert_eq!(configuration.embedded_languages.len(), 1);
+    assert_eq!(configuration.embedded_languages["meta.embedded.js"], 2);
+    assert_eq!(configuration.token_types.len(), 3);
+    assert!(configuration.balanced_bracket_selectors[0].matches(&["source.sample"]));
+    assert!(configuration.unbalanced_bracket_selectors[0].matches(&["string.quoted"]));
+}
+
+#[cfg(feature = "bundled-grammars")]
+#[test]
+fn bundled_catalog_is_a_lazy_host_locator_and_exposes_package_metadata() {
+    use std::rc::Rc;
+    let catalog = Rc::new(BundledCatalog::with_default_theme(ThemeName::LightPlus).unwrap());
+    assert_eq!(catalog.packages().count(), 51);
+    assert_eq!(catalog.grammar_contributions().len(), 79);
+    assert_eq!(catalog.language_by_alias("C#").unwrap().id, "csharp");
+    assert_eq!(
+        catalog.language_by_mime_type("text/html").unwrap().id,
+        "html"
+    );
+    let configuration = catalog
+        .grammar_configuration("text.html.derivative", |id| match id {
+            "html" => Some(1),
+            "javascript" => Some(2),
+            _ => None,
+        })
+        .unwrap();
+    assert_eq!(configuration.initial_language, 1);
+    assert_eq!(configuration.embedded_languages["source.js"], 2);
+    assert_eq!(configuration.token_types.len(), 1);
+    assert!(catalog
+        .get_injections("source.ts")
+        .unwrap()
+        .contains(&"documentation.injection.ts".into()));
+    for grammar in catalog.grammar_contributions() {
+        grammar.configuration(|_| Some(1)).unwrap();
+    }
+    let registry = catalog.clone().lazy_registry().unwrap();
+    assert_eq!(registry.scope_names().count(), 0);
+    let grammar = registry.load_grammar("source.json").unwrap();
+    assert!(registry.scope_names().count() < 79);
+    assert!(
+        !grammar
+            .tokenize_line(r#"{"ok":true}"#, None)
+            .unwrap()
+            .stopped_early
+    );
+    assert_eq!(
+        registry.theme().match_scopes(&["source.json".into()]),
+        catalog
+            .theme(ThemeName::LightPlus)
+            .unwrap()
+            .match_scopes(&["source.json".into()])
+    );
+}
+
+#[test]
 fn utf16_tokens_capture_scopes_and_multiline_stack() {
     let grammar = grammar(
         r##"{"scopeName":"source.test","patterns":[{"begin":"/\\*","end":"\\*/","name":"comment.block","beginCaptures":{"0":{"name":"punctuation.begin"}}},{"match":"(foo)(bar)","name":"entity","captures":{"1":{"name":"first"},"2":{"name":"second"}}}]}"##,

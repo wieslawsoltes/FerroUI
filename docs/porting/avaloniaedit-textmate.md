@@ -149,17 +149,22 @@ FerroUI's existing Rust scanner. It does not infer method parity from a name.
 
 Checkpoint evidence is recorded with the commits and updated as tests land:
 
-- The combined checkpoint passes **83 core tests, 28 control tests and two demo tests**. It includes
+- The combined checkpoint passes **185 core tests, 34 control tests and two demo tests**. It includes
   1,600 randomized rope edits, 5,000 appends, dense anchor tests, 2,500 interval
   model edits, 8,000 lazily shifted intervals, 2,500 live-line edits with replay,
-  custom undo and all XSHD resources.
-- Native TextMate and actual compiled Rust/Wasm both match all **74 reference
+  custom undo, C# indentation, protected text transformations, rich text/HTML
+  exports, incremental XSHD convergence and all XSHD resources.
+- The native TextMate library passes **31 tests** and the explicit portable
+  backend passes **30 tests**. Native TextMate and actual compiled Rust/Wasm
+  both match all **74 reference
   lines across 11 language families**, comparing token boundaries, scopes and
   continuation depths. The fixture is generated independently with the pinned
   JavaScript implementation, not with the Rust code being checked.
 - Control tests exercise framework rendering, visible-line cache bounds over a
   100,000-line document, UTF-16/tab hit testing, folding, routed keys, direct Text
-  notifications, runtime XAML, popups, snippets and incremental tokenization.
+  notifications, runtime XAML, popups, snippets, IME visual composition, wrapped
+  visual-row navigation and incremental tokenization. The render notification
+  regression checks that extent updates publish outside the render pass.
 - The incremental installation tests compare 200 batches of queued CR/LF/comment
   edits with fresh highlighting, plus line insertion/deletion, multiline state,
   bounded work, cancellation and theme-change reentrancy.
@@ -202,9 +207,9 @@ change: inspect differences before accepting a new baseline.
 
 The generated map is the authoritative detailed backlog. The substantial open
 areas include the complete visual-line element/transformer/layer/margin
-extension contracts; rectangular selection and virtual-space parity; the full
-C# indentation strategy and command set; overload insight and rich completion
-content; rich-text/HTML/export contracts and XSHD visitor/writer interfaces;
+extension contracts; rectangular selection and virtual-space parity; remaining
+command and modern C# lexical edge cases; overload insight and rich completion
+content; native rich-text control/clipboard integration and XSHD visitor/writer interfaces;
 complete managed service/reader/version overload equivalents; text-range
 accessibility; and the full upstream behavior/test corpus.
 

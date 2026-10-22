@@ -6,18 +6,19 @@
       <TextBlock Text="FerroUI code editor" FontSize="24" FontWeight="SemiBold"/>
       <TextBlock Text="TextMate highlighting · linked snippets · completion · document folding"/>
     </StackPanel>
-    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="6" Margin="0,0,0,12">
+    <WrapPanel Grid.Row="1" Orientation="Horizontal" ItemSpacing="6" LineSpacing="6" Margin="0,0,0,12">
       <Button x:Name="RustLanguage" Content="Rust"/>
       <Button x:Name="CSharpLanguage" Content="C#"/>
       <Button x:Name="Find" Content="Find"/>
       <Button x:Name="Replace" Content="Replace"/>
       <Button x:Name="Complete" Content="Complete"/>
       <Button x:Name="Snippet" Content="Insert snippet"/>
+      <Button x:Name="Reindent" Content="Reindent"/>
       <Button x:Name="Fold" Content="Fold regions"/>
       <Button x:Name="Unfold" Content="Unfold"/>
       <Button x:Name="Wrap" Content="Word wrap"/>
       <Button x:Name="Theme" Content="Light / dark"/>
-    </StackPanel>
+    </WrapPanel>
     <Border Grid.Row="2" BorderThickness="1" BorderBrush="#808080" CornerRadius="4">
       <edit:TextEditor x:Name="Editor" ShowLineNumbers="True" FontSize="15"/>
     </Border>

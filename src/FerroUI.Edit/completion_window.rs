@@ -98,17 +98,20 @@ impl CompletionWindow {
                     }
                 }
             }));
-        let weak = window.downgrade();
-        window
-            .subscriptions
-            .borrow_mut()
-            .push(
-                editor.add_disposable_handler(TextEditor::text_changed_event(), move |_, _| {
+        for event in [
+            TextEditor::text_changed_event(),
+            TextEditor::selection_changed_event(),
+        ] {
+            let weak = window.downgrade();
+            window
+                .subscriptions
+                .borrow_mut()
+                .push(editor.add_disposable_handler(event, move |_, _| {
                     if let Some(window) = weak.upgrade() {
                         window.refresh();
                     }
-                }),
-            );
+                }));
+        }
         let weak = window.downgrade();
         window
             .subscriptions
@@ -473,5 +476,19 @@ mod tests {
         assert!(window.is_closed());
         assert_eq!(editor.text(), "other");
         assert!(CompletionWindow::active_for(&editor).is_none());
+    }
+
+    #[test]
+    fn pointer_or_programmatic_caret_movement_dismisses_completion_immediately() {
+        let _scope = crate::tests::test_scope();
+        let editor = TextEditor::new();
+        editor.set_text("Re rest").unwrap();
+        editor.set_caret_offset(2).unwrap();
+        let window =
+            CompletionWindow::show_for(&editor, 0, 2, vec![CompletionItem::new("Read")]).unwrap();
+        editor.set_caret_offset(7).unwrap();
+        assert!(window.is_closed());
+        assert!(CompletionWindow::active_for(&editor).is_none());
+        assert_eq!(editor.text(), "Re rest");
     }
 }

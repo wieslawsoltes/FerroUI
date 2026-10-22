@@ -55,6 +55,8 @@ pub struct TextArea {
     cache: RefCell<BTreeMap<usize, Rc<VisualLine>>>,
     heights: RefCell<HeightTree>,
     scroll_invalidated: Rc<HandlerList<dyn Fn()>>,
+    rendering: Cell<bool>,
+    scroll_notification_pending: Cell<bool>,
     dragging: Cell<bool>,
     drag_anchor: Cell<usize>,
     caret_visible: Cell<bool>,
@@ -117,6 +119,13 @@ impl VisualImpl for TextArea {
         if size.width <= 0.0 || size.height <= 0.0 {
             return;
         }
+        struct RenderScope<'a>(&'a Cell<bool>, bool);
+        impl Drop for RenderScope<'_> {
+            fn drop(&mut self) {
+                self.0.set(self.1);
+            }
+        }
+        let _render_scope = RenderScope(&this.rendering, this.rendering.replace(true));
         let clip = context.push_clip(Rect::new(0.0, 0.0, size.width, size.height));
         if let Some(background) = editor.background() {
             context.fill_rectangle(
@@ -678,6 +687,8 @@ impl TextArea {
             cache: RefCell::new(BTreeMap::new()),
             heights: RefCell::new(HeightTree::new(1, 20.0)),
             scroll_invalidated: Rc::new(HandlerList::new()),
+            rendering: Cell::new(false),
+            scroll_notification_pending: Cell::new(false),
             dragging: Cell::new(false),
             drag_anchor: Cell::new(0),
             caret_visible: Cell::new(true),
@@ -1265,6 +1276,24 @@ impl ILogicalScrollable for TextArea {
         })
     }
     fn raise_scroll_invalidated(&self) {
+        if self.rendering.get() {
+            // Measured line heights/widths become available during drawing.
+            // Scrollbar visibility can invalidate layout, which the compositor
+            // forbids during the render pass. Publish once after it completes.
+            if !self.scroll_notification_pending.replace(true) {
+                let weak = self.to_ref().downgrade();
+                Dispatcher::ui_thread().post_local(
+                    move || {
+                        if let Some(area) = weak.upgrade() {
+                            area.scroll_notification_pending.set(false);
+                            area.raise_scroll_invalidated();
+                        }
+                    },
+                    DispatcherPriority::NORMAL,
+                );
+            }
+            return;
+        }
         for (_, handler) in self.scroll_invalidated.snapshot().iter() {
             handler();
         }

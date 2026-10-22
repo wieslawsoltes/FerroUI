@@ -23,9 +23,11 @@ Outstanding API and conformance boundaries are listed below.
 | Scope selector matcher and injection priority | `selector.rs`: `ScopeSelector`, `SelectorPriority` | Parsed expressions for ancestry, alternatives, exclusions and priority |
 | Theme readers, theme rules and trie | `theme.rs`: `Theme`, `TokenStyle`, `FontStyle`, `Color` | Deterministic selector cascade with a bounded scope cache rather than the original trie |
 | Encoded attributes and binary tokenization | `metadata.rs`, `encoded_tokens.rs` | Explicit bit fields, color IDs, embedded-language and token-type overrides |
-| Registry and synchronization registry | `registry.rs`: `Registry` | Explicit registration and shared compiled programs; replacing raw input invalidates future loads |
-| Model, line tokens, invalidation and changed ranges | `model.rs`: `TokenizationModel`, `LineTokens`, `TokenizationUpdate` | Caller-scheduled batches and returned ranges replace managed background tasks and listener interfaces |
-| Bundled registry options, language packages and themes | `catalog.rs`: `BundledCatalog`, `Language`, `LanguageConfiguration`, `ThemeName` | Compile-time resources, no runtime filesystem dependency |
+| Registry, host options and synchronization registry | `registry.rs`: `Registry`, `IRegistryOptions`, `IGrammarRepository`, `IThemeProvider`, `DefaultLocator` | Lazy host resource lookup, dependency diagnostics and shared immutable compiled programs |
+| Model, line tokens, invalidation and changed ranges | `model.rs`, `model_contract.rs`, `model_events.rs`: `TokenizationModel`, `ITMModel`, `IModelLines`, `ModelTokensChangedEvent` | Caller-scheduled batches and FerroUI event subscriptions replace managed background tasks |
+| Borrowed input and tokenizer contract | `line_text.rs`: `LineText`, `ITokenizationSupport` | Borrowed/owned UTF-8 input with checked UTF-16 slice coordinates |
+| Bundled registry options, language packages and themes | `catalog.rs`, `package.rs`: `BundledCatalog`, `Language`, `GrammarDefinition`, `GrammarContribution`, `ThemeName` | Typed package metadata, compile-time resources and host-assigned embedded language IDs |
+| Language configuration and snippet data | `language_configuration.rs`: `Comments`, `Folding`, `Indentation`, `EnterRule`, `AutoPair`, `LanguageSnippets` | Typed settings preserve optional expressions, flags, multi-character pairs and snippet bodies |
 | Browser regex engine | `browser.rs`, `browser/adapter.js` | Official `vscode-oniguruma` JavaScript/Wasm through `wasm-bindgen` |
 
 The engine does not depend on a control, dispatcher, filesystem, wall clock, or
@@ -67,6 +69,13 @@ cancellation callback. `stopped_early` means the caller must retry or deliberate
 choose a fallback; its partial stack is not a completed continuation state.
 `TokenizationModel` never publishes an incomplete line as a valid cache entry.
 
+`LineText` accepts borrowed or owned strings, strips one physical line ending
+for the `ITokenizationSupport` adapter, and checks UTF-16 slice boundaries.
+Slices that would split a supplementary character return `InvalidOffset`.
+`IModelLines` exposes borrowed line text and lengths for host documents and
+snapshots; `TokenizationModel::from_lines` takes an owned snapshot of that
+source. Later line edits use `replace_lines` to preserve unaffected caches.
+
 `Grammar::tokenize_line2` emits alternating UTF-16 start positions and packed
 metadata. `GrammarConfiguration` supplies the initial language ID, embedded
 language scope prefixes, token-type selectors, and balanced/unbalanced bracket
@@ -77,6 +86,23 @@ and 8 background bits. An unrepresentable color index returns an error rather
 than truncating.
 
 ## Grammar execution
+
+`Registry::with_options` accepts `Rc<dyn IRegistryOptions>`. The host supplies
+raw grammars, target-specific injection names, theme sources and an optional
+default theme. Synchronous callbacks can read a browser's asynchronously
+preloaded resource map. No host callback runs while a registry map is borrowed.
+Root load failures are returned; unavailable optional dependencies are recorded
+in `GrammarLoadDiagnostic` while their includes remain inactive. Dependency
+discovery traverses rules, repositories, injections and capture subrules.
+Dependency and reentrant-load cycles are guarded. `IGrammarRepository` provides
+already loaded sources to `Grammar::from_repository`.
+
+The bundled catalog implements the same options contract. Eager `registry()`
+loads all grammar sources; `Rc<BundledCatalog>::lazy_registry()` loads only the
+requested dependency closure and the catalog's selected default theme. Both
+honor package `injectTo` declarations. Manually registered grammars can set
+host-specific injection lists with `Registry::set_injections`; without such
+a list, registered injection grammars are considered by their selectors.
 
 The registry compiles raw grammars into an indexed program. Root rules are
 reserved before any grammar is filled so includes can refer to grammars
@@ -156,12 +182,26 @@ language implementations. Extension lookup accepts a leading dot, filename
 lookup prefers an exact name and otherwise the longest extension, and language
 IDs are case-insensitive. `language_by_first_line` executes upstream shebang
 and other first-line detection patterns through the selected regex backend.
-Alias lists, raw language configuration and snippets retain their upstream
-values.
+Alias lists, MIME types, configuration resource paths and snippets retain their
+upstream values. Typed `GrammarDefinition` values preserve package provenance,
+engines, scripts, repository and contribution metadata; unrecognized package
+fields remain available in their `other` maps.
 
-`LanguageConfiguration` exposes common comment, bracket and word-pattern
-settings, with the complete raw JSON available to host services for additional
-settings. Package and grammar resources remain accessible by name. Compiling
+`LanguageConfiguration` exposes comments, brackets, folding markers, indentation
+rules, enter actions, automatic/surrounding pairs and word expressions. Regex
+settings accept string and `{pattern, flags}` forms. Typed snippets preserve
+multiple prefixes, string/array bodies, description and scope lists. The raw
+JSON remains available to host services. `word_at_offset` searches a single
+physical line and returns a UTF-16 word range with bounded zero-width progress;
+it uses the active regex backend and does not claim arbitrary ECMAScript regex
+equivalence. If no word expression is declared, the host retains its normal
+word navigation policy.
+
+`GrammarContribution::configuration` and the catalog's `grammar_configuration`
+translate embedded-language names, token-type overrides and balanced/unbalanced
+bracket scopes to `GrammarConfiguration`. The host provides the numeric language
+IDs; unknown languages retain zero or are omitted from embedded overrides.
+Package and grammar resources remain accessible by name. Compiling
 without `bundled-grammars` omits embedded resources while retaining runtime
 grammar/theme loading from caller-supplied strings.
 
@@ -199,6 +239,27 @@ only the visual lines whose highlights changed. Replacing the grammar
 invalidates all cached states. State values from unrelated grammar instances
 are rejected.
 
+`tokens_changed` and `add_model_tokens_changed_listener` publish completed
+ranges through `ferroui-system::events::Event`. Returned `IDisposable` handles
+remove subscriptions explicitly and idempotently, following FerroUI's existing
+event lifetime contract. Dropping a handle alone leaves the listener attached.
+Events carry zero-based half-open ranges, revision, line count and pending
+status; they do not create a strong reference cycle back to the model. A regex
+failure after some completed lines still publishes those completed ranges and
+leaves the failing line invalid. Cancellation publishes no partial line.
+`force_tokenization` advances through a requested line with the same bounded
+per-line work policy. Model destruction releases owned caches and listeners;
+the host owns worker/dispatcher scheduling and shutdown.
+
+The editor's `TextMateInstallation` applies the same convergence rule to
+persistent document snapshots. It maps batches of edits into the old and new
+line spans, retains the aligned suffix and hides invalid tokens until a valid
+continuation state is restored. Grammar changes reset states, while theme
+changes notify the view without rescanning text. Six integration tests include
+line insertion/removal, multiline-state propagation, CRLF edits, cancellation,
+theme/grammar notifications and 200 deterministic multi-edit batches compared
+with fresh tokenization.
+
 ## Verification and reproduction
 
 `tests/fixtures/upstream-tokens.json` is generated by official
@@ -218,6 +279,22 @@ incremental convergence, theme inheritance/resets, metadata and encoded
 language/token-type overrides. All bundled grammar resources are parsed and
 all 21 themes are loaded. Corpus parity is evidence for those cases, not a
 proof of every grammar and selector edge case.
+
+The matcher regression test translates all 25 cases in the pinned upstream
+`MatcherTests` suite. Seven upstream theme color regressions use their actual
+test theme fixtures. Additional host contract tests exercise lazy dependency
+loading, injection target isolation, explicit listener disposal, model error
+recovery, typed language/package settings and configuration-to-metadata mapping.
+
+The recorded verification checkpoint has the following results:
+
+| Check | Result | What it establishes |
+|---|---|---|
+| Native default `ferroui-textmate` library tests | 31 passed | Core semantics, all bundled metadata/config parsing, host contracts and the 74-line independent corpus |
+| Explicit portable backend library tests | 30 passed | Bounded fallback behavior for supported cases; the full grammar corpus is intentionally excluded |
+| Compiled Rust/Wasm with official browser scanner under Node | 74 corpus lines matched | Token ranges, scope stacks and continuation depth match the independent oracle through actual Wasm/JS execution |
+| Additional compiled Wasm host checks | Passed | Explicit pre-initialization failure, lazy resource loading, incremental event subscriptions/disposal and Unicode word coordinates |
+| FerroUI installation integration tests | 6 passed | Document snapshot invalidation/convergence, theme/grammar notifications and deterministic multi-edit cache comparison |
 
 ```sh
 cargo test -p ferroui-textmate --lib
@@ -248,13 +325,19 @@ rendering or worker-lifecycle test is a separate host integration check.
 
 ## Remaining port and verification boundaries
 
-- The managed `IRegistryOptions` lazy-loading callback interface, model listener
-  interfaces, and task lifecycle are adapted to explicit registration,
-  caller-supplied resolver functions, returned changed ranges, and host
-  scheduling. They are not exposed as one-for-one Rust interface names.
-- Raw package settings are retained, but the catalog does not automatically
-  assign host language IDs or translate every contributed embedded-language
-  setting into `GrammarConfiguration`; the host supplies those IDs.
+- Registry, repository, line, tokenizer and model interfaces have Rust host
+  contracts. Managed stream overloads, mutable internal model-line objects,
+  nullable-grammar lifecycle and background tokenizer threads are not reproduced
+  as identical object APIs. Resource I/O, scheduling and shutdown belong to the
+  host; the engine owns immutable compiled programs and bounded batches.
+- Typed language settings and snippets are available, but applying every
+  language-specific automatic-pair, enter-rule, indentation and snippet policy
+  to editor interactions remains host integration work. Package filename glob
+  declarations are retained; filename detection currently uses exact names and
+  extension suffixes. Numeric language IDs remain a host responsibility.
+- The language-configuration word helper uses the selected Oniguruma-compatible
+  backend. JavaScript-specific regex behavior outside the supported single-line
+  flag interpretation has not been proven equivalent.
 - Theme lookup uses a selector cascade rather than the upstream trie. The
   full upstream theme and selector unit-test suites have not all been
   translated; the source map must not mark trie internals as an exact port.

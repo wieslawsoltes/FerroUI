@@ -14,8 +14,13 @@ mod catalog;
 mod encoded_tokens;
 mod error;
 mod grammar;
+mod language_configuration;
+mod line_text;
 mod metadata;
 mod model;
+mod model_contract;
+mod model_events;
+mod package;
 mod raw;
 mod regex_source;
 mod registry;
@@ -28,8 +33,19 @@ pub use catalog::{BundledCatalog, Language, LanguageConfiguration, ThemeName};
 pub use encoded_tokens::{ColorMap, GrammarConfiguration, TokenizeLineResult2};
 pub use error::{Error, Result};
 pub use grammar::{Grammar, StateStack, Token, TokenizeLineResult, TokenizeOptions};
+pub use language_configuration::{
+    AutoClosingPairs, AutoPair, Comments, EnterAction, EnterRule, Folding, IndentAction,
+    Indentation, LanguageSnippet, LanguageSnippets, Markers, RegexPattern, WordRange,
+};
+pub use line_text::{ITokenizationSupport, LineText};
 pub use metadata::{EncodedTokenAttributes, StandardTokenType};
 pub use model::{LineTokens, TokenizationModel, TokenizationUpdate};
+pub use model_contract::{IModelLines, ITMModel};
+pub use model_events::{IModelTokensChangedListener, ModelTokensChangedEvent};
+pub use package::{
+    Contributes, Engines, GrammarContribution, GrammarDefinition, LanguageContribution, Repository,
+    Scripts, SnippetContribution,
+};
 pub use raw::{read_json, RawGrammar, RawRule};
 pub use regex_source::RegexBackend;
 pub use registry::{

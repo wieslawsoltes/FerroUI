@@ -62,6 +62,7 @@ pub struct PreparedSnippet {
     text: String,
     placeholders: Vec<Placeholder>,
     caret: usize,
+    caret_order: usize,
 }
 impl PreparedSnippet {
     pub fn text(&self) -> &str {
@@ -75,7 +76,13 @@ impl PreparedSnippet {
         if document.get_text(offset, self.text.encode_utf16().count())? != self.text {
             return Err(SnippetError::ExpansionMismatch);
         }
-        SnippetSession::new(document, offset, self.placeholders, self.caret)
+        SnippetSession::new(
+            document,
+            offset,
+            self.placeholders,
+            self.caret,
+            self.caret_order,
+        )
     }
 }
 impl Snippet {
@@ -212,10 +219,12 @@ impl Snippet {
             &mut placeholders,
             &mut caret,
         )?;
+        let (caret, caret_order) = caret.unwrap_or((position, placeholders.len()));
         Ok(PreparedSnippet {
             text,
             placeholders,
-            caret: caret.unwrap_or(position),
+            caret,
+            caret_order,
         })
     }
 }
@@ -237,14 +246,14 @@ fn expand(
     output: &mut String,
     position: &mut usize,
     placeholders: &mut Vec<Placeholder>,
-    caret: &mut Option<usize>,
+    caret: &mut Option<(usize, usize)>,
 ) -> Result<(), SnippetError> {
     for element in elements {
         let text = match element {
             SnippetElement::Text(text) => text.as_str(),
             SnippetElement::Selection => selected,
             SnippetElement::Caret => {
-                *caret = Some(*position);
+                *caret = Some((*position, placeholders.len()));
                 continue;
             }
             SnippetElement::Container(children) => {

@@ -42,6 +42,20 @@ impl HighlightingEngine {
     pub fn definition(&self) -> &Rc<HighlightingDefinition> {
         &self.definition
     }
+    /// Returns the colors of active spans in inside-out order. Uncolored spans
+    /// do not contribute entries, but every frame is validated against this engine.
+    pub fn get_color_stack(
+        &self,
+        state: &HighlightingState,
+    ) -> Result<Vec<HighlightingColor>, HighlightingError> {
+        let mut colors = Vec::new();
+        for frame in state.stack.iter().rev() {
+            if let Some(color) = &self.span(*frame)?.span_color {
+                colors.push(color.clone());
+            }
+        }
+        Ok(colors)
+    }
     pub fn highlight_line(
         &self,
         text: &str,

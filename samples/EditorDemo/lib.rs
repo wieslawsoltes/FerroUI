@@ -1,22 +1,24 @@
 //! A runtime XAML application exercising the editor through its public API.
 
 mod app;
+mod smoke;
 pub use app::App;
 
-use ferroui_base::Ref;
 use ferroui_base::input::{InputElement, Key, KeyEventArgs, KeyModifiers};
 use ferroui_base::interactivity::RoutingStrategies;
-use ferroui_base::media::IBrush;
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+use ferroui_base::media::IBrush;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::styling::ThemeVariant;
+use ferroui_base::Ref;
 use ferroui_controls::{Button, TextBlock, UserControl};
 use ferroui_edit::core::completion::CompletionItem;
 use ferroui_edit::core::document::TextDocument;
+use ferroui_edit::core::editing::CSharpIndentationStrategy;
 use ferroui_edit::core::folding::NewFolding;
 use ferroui_edit::core::snippets::Snippet;
 use ferroui_edit::textmate::{BundledCatalog, Registry, ThemeName};
-use ferroui_edit::{CompletionWindow, TextEditor};
+use ferroui_edit::{CompletionWindow, EditorCommandKind, TextEditor};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -107,6 +109,11 @@ impl EditorDemo {
                 LanguageMode::Rust => RUST_SOURCE,
                 LanguageMode::CSharp => CSHARP_SOURCE,
             }));
+        if language == LanguageMode::CSharp {
+            self.editor.session().set_indentation_strategy(Some(Rc::new(
+                CSharpIndentationStrategy::from_options(&self.editor.options()),
+            )));
+        }
         self.apply_theme()?;
         self.editor.install_folding();
         self.update_foldings()?;
@@ -311,6 +318,15 @@ impl EditorDemo {
         })?;
         self.command("Complete", Self::show_completion)?;
         self.command("Snippet", Self::insert_snippet)?;
+        let reindent = self
+            .view
+            .find_control::<Button>("Reindent")
+            .ok_or("Missing toolbar control Reindent")?;
+        reindent.set_command(Some(
+            self.editor
+                .command(EditorCommandKind::Reindent)
+                .as_command(),
+        ));
         self.command("Theme", Self::toggle_theme)?;
         self.command("Wrap", |demo| {
             demo.editor.set_word_wrap(!demo.editor.word_wrap());

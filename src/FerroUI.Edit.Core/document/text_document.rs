@@ -128,6 +128,9 @@ struct DocumentInner {
     text_length_changed: Event<()>,
     line_count_changed: Event<()>,
     property_changed: Event<String>,
+    notified_can_undo: Cell<bool>,
+    notified_can_redo: Cell<bool>,
+    notified_is_modified: Cell<bool>,
 }
 
 /// Shared UI-thread document with persistent UTF-16 storage, incremental line
@@ -226,6 +229,9 @@ impl TextDocument {
             text_length_changed: Event::default(),
             line_count_changed: Event::default(),
             property_changed: Event::default(),
+            notified_can_undo: Cell::new(false),
+            notified_can_redo: Cell::new(false),
+            notified_is_modified: Cell::new(false),
         }))
     }
 
@@ -327,7 +333,13 @@ impl TextDocument {
         self.0.state.borrow().is_read_only
     }
     pub fn set_is_read_only(&self, value: bool) {
-        self.0.state.borrow_mut().is_read_only = value;
+        let changed = {
+            let mut state = self.0.state.borrow_mut();
+            std::mem::replace(&mut state.is_read_only, value) != value
+        };
+        if changed {
+            self.0.property_changed.raise(&"IsReadOnly".to_owned());
+        }
     }
     pub fn is_in_update(&self) -> bool {
         self.0.state.borrow().update_depth != 0
@@ -358,11 +370,15 @@ impl TextDocument {
         state.history.original_state != Some(state.history.current_state)
     }
     pub fn mark_as_original_file(&self) {
-        let mut state = self.0.state.borrow_mut();
-        state.history.original_state = Some(state.history.current_state);
+        {
+            let mut state = self.0.state.borrow_mut();
+            state.history.original_state = Some(state.history.current_state);
+        }
+        self.notify_history_properties();
     }
     pub fn discard_original_file_marker(&self) {
         self.0.state.borrow_mut().history.original_state = None;
+        self.notify_history_properties();
     }
     pub fn set_undo_size_limit(&self, limit: usize) {
         {
@@ -373,6 +389,7 @@ impl TextDocument {
             }
         }
         self.flush_retired_operations();
+        self.notify_history_properties();
     }
 
     pub fn clear_undo_history(&self) -> Result<(), DocumentError> {
@@ -384,6 +401,7 @@ impl TextDocument {
             state.history.clear_all();
         }
         self.flush_retired_operations();
+        self.notify_history_properties();
         Ok(())
     }
 
@@ -396,7 +414,22 @@ impl TextDocument {
             state.history.clear_redo();
         }
         self.flush_retired_operations();
+        self.notify_history_properties();
         Ok(())
+    }
+
+    fn notify_history_properties(&self) {
+        // Store each observed value before calling client code. A callback may
+        // query or change history, so re-read the next property after it returns.
+        if self.0.notified_can_undo.replace(self.can_undo()) != self.can_undo() {
+            self.0.property_changed.raise(&"CanUndo".to_owned());
+        }
+        if self.0.notified_can_redo.replace(self.can_redo()) != self.can_redo() {
+            self.0.property_changed.raise(&"CanRedo".to_owned());
+        }
+        if self.0.notified_is_modified.replace(self.is_modified()) != self.is_modified() {
+            self.0.property_changed.raise(&"IsModified".to_owned());
+        }
     }
 
     fn flush_retired_operations(&self) {
@@ -570,6 +603,7 @@ impl TextDocument {
         }
         drop(finishing);
         self.flush_retired_operations();
+        self.notify_history_properties();
         self.0.update_finished.raise(&());
         Ok(())
     }
@@ -855,7 +889,7 @@ impl TextDocument {
         struct ResetReplay(TextDocument);
         impl Drop for ResetReplay {
             fn drop(&mut self) {
-                self.0 .0.state.borrow_mut().history.replaying = false;
+                self.0.0.state.borrow_mut().history.replaying = false;
             }
         }
         let _reset = ResetReplay(self.clone());

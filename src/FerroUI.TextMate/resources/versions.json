@@ -36,6 +36,20 @@
     "lines": 74,
     "fixture": "tests/fixtures/upstream-tokens.json"
   },
+  "theme_test_fixtures": {
+    "source_revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+    "license_notices": ["NOTICE.md", "resources/licenses/microsoft--vscode--main.md"],
+    "files": {
+      "tests/fixtures/theme-dark-plus.json": {
+        "source": "src/TextMateSharp.Tests/Resources/dark_plus.json",
+        "sha256": "bbcf443bcd3b5841d18246094ed2d3b05c61661776e4bb810c2c61203d2a61f6"
+      },
+      "tests/fixtures/theme-dark-vs.json": {
+        "source": "src/TextMateSharp.Tests/Resources/dark_vs.json",
+        "sha256": "71b57ea6a7a3829f0336666e5b9093647d847d0432eaa90c7c2fa684acfff195"
+      }
+    }
+  },
   "portable_fallback": {
     "package": "fancy-regex",
     "version": "0.19.2",

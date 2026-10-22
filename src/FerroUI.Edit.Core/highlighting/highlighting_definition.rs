@@ -39,6 +39,11 @@ pub enum HighlightingError {
     InvalidDefinition(String),
     MatchBudget(String),
     InvalidState,
+    Disposed,
+    ReentrantOperation,
+    HighlightingGroupAlreadyOpen,
+    NoHighlightingGroup,
+    HighlightingInterrupted,
 }
 impl fmt::Display for HighlightingError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -50,6 +55,17 @@ impl fmt::Display for HighlightingError {
             Self::MatchBudget(s) => write!(f, "Highlighting budget exceeded: {s}"),
             Self::InvalidState => {
                 f.write_str("Highlighting state belongs to a different definition")
+            }
+            Self::Disposed => f.write_str("The document highlighter has been disposed"),
+            Self::ReentrantOperation => {
+                f.write_str("A highlighting operation is already in progress")
+            }
+            Self::HighlightingGroupAlreadyOpen => {
+                f.write_str("A highlighting group is already open")
+            }
+            Self::NoHighlightingGroup => f.write_str("No highlighting group is open"),
+            Self::HighlightingInterrupted => {
+                f.write_str("The document or highlighting cache changed during highlighting")
             }
         }
     }

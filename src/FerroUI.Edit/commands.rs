@@ -4,7 +4,9 @@ use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{BoxedValue, Ref, WeakRef};
 use ferroui_edit_core::document::{DocumentEdit, DocumentSubscription, TextDocument};
-use ferroui_edit_core::editing::{CaretMovement, EditError, next_caret_position};
+use ferroui_edit_core::editing::{
+    next_caret_position, CaretMovement, EditError, TextTransformation,
+};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -19,6 +21,8 @@ pub enum EditorCommandKind {
     SelectAll,
     Indent,
     Unindent,
+    Reindent,
+    Transform(TextTransformation),
     Find,
     Replace,
 }
@@ -31,7 +35,7 @@ pub struct EditorCommand {
     enabled: Cell<bool>,
     changed: Rc<HandlerList<dyn Fn()>>,
     subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
-    document: RefCell<Option<(TextDocument, DocumentSubscription)>>,
+    document: RefCell<Option<(TextDocument, Vec<DocumentSubscription>)>>,
 }
 impl EditorCommand {
     pub fn new(editor: &Ref<TextEditor>, kind: EditorCommandKind) -> Rc<Self> {
@@ -116,16 +120,27 @@ impl EditorCommand {
             return;
         }
         let previous = self.document.borrow_mut().take();
-        if let Some((_, subscription)) = previous {
-            subscription.dispose();
+        if let Some((_, subscriptions)) = previous {
+            for subscription in subscriptions {
+                subscription.dispose();
+            }
         }
         let weak = Rc::downgrade(self);
-        let subscription = document.update_finished(move || {
+        let update_subscription = document.update_finished(move || {
             if let Some(command) = weak.upgrade() {
                 command.refresh();
             }
         });
-        *self.document.borrow_mut() = Some((document, subscription));
+        let weak = Rc::downgrade(self);
+        let property_subscription = document.property_changed(move |property| {
+            if matches!(property, "IsReadOnly" | "CanUndo" | "CanRedo") {
+                if let Some(command) = weak.upgrade() {
+                    command.refresh();
+                }
+            }
+        });
+        *self.document.borrow_mut() =
+            Some((document, vec![update_subscription, property_subscription]));
     }
     fn replacement_allowed(editor: &TextEditor, insert: bool, delete_next: bool) -> bool {
         let document = editor.document();
@@ -186,6 +201,10 @@ impl ICommand for EditorCommand {
             EditorCommandKind::Indent
             | EditorCommandKind::Unindent
             | EditorCommandKind::Replace => writable,
+            EditorCommandKind::Reindent => {
+                writable && editor.session().indentation_strategy().is_some()
+            }
+            EditorCommandKind::Transform(_) => writable && document.text_length() != 0,
             EditorCommandKind::Find => true,
         }
     }
@@ -227,6 +246,16 @@ impl ICommand for EditorCommand {
                 editor.selection_changed();
                 result
             }
+            EditorCommandKind::Reindent => {
+                let result = editor.session().reindent_selection();
+                editor.selection_changed();
+                result
+            }
+            EditorCommandKind::Transform(transformation) => {
+                let result = editor.session().transform_text(transformation);
+                editor.selection_changed();
+                result
+            }
             EditorCommandKind::Find => {
                 editor.search_panel().show(false);
                 Ok(())
@@ -251,8 +280,10 @@ impl ICommand for EditorCommand {
 }
 impl Drop for EditorCommand {
     fn drop(&mut self) {
-        if let Some((_, subscription)) = self.document.get_mut().take() {
-            subscription.dispose();
+        if let Some((_, subscriptions)) = self.document.get_mut().take() {
+            for subscription in subscriptions {
+                subscription.dispose();
+            }
         }
         for subscription in self.subscriptions.get_mut().drain(..) {
             subscription.dispose();
@@ -310,5 +341,80 @@ mod tests {
         assert!(!delete.can_execute(None));
         drop(editor);
         assert!(!delete.can_execute(None));
+    }
+
+    #[test]
+    fn direct_document_policy_and_history_changes_refresh_bound_commands() {
+        let _scope = crate::tests::test_scope();
+        let editor = TextEditor::new();
+        let document = editor.document();
+        document.insert(0, "a").unwrap();
+        let undo = EditorCommand::new(&editor, EditorCommandKind::Undo);
+        let redo = EditorCommand::new(&editor, EditorCommandKind::Redo);
+        let undo_events = Rc::new(Cell::new(0));
+        let redo_events = Rc::new(Cell::new(0));
+        let count = undo_events.clone();
+        let _undo_subscription =
+            undo.can_execute_changed(Rc::new(move || count.set(count.get() + 1)));
+        let count = redo_events.clone();
+        let _redo_subscription =
+            redo.can_execute_changed(Rc::new(move || count.set(count.get() + 1)));
+
+        document.set_is_read_only(true);
+        assert!(!undo.can_execute(None));
+        assert_eq!(undo_events.get(), 1);
+        document.set_is_read_only(false);
+        assert!(undo.can_execute(None));
+        assert_eq!(undo_events.get(), 2);
+        document.clear_undo_history().unwrap();
+        assert!(!undo.can_execute(None));
+        assert_eq!(undo_events.get(), 3);
+
+        document.insert(1, "b").unwrap();
+        document.undo().unwrap();
+        assert!(redo.can_execute(None));
+        assert_eq!(redo_events.get(), 1);
+        document.undo_stack().clear_redo_stack().unwrap();
+        assert!(!redo.can_execute(None));
+        assert_eq!(redo_events.get(), 2);
+
+        document.insert(1, "c").unwrap();
+        assert!(undo.can_execute(None));
+        let before = undo_events.get();
+        document.set_undo_size_limit(0);
+        assert!(!undo.can_execute(None));
+        assert_eq!(undo_events.get(), before + 1);
+    }
+
+    #[test]
+    fn language_and_transform_commands_use_the_session_and_group_history() {
+        let _scope = crate::tests::test_scope();
+        let editor = TextEditor::new();
+        editor
+            .set_text("class C {\nvoid M() {\nCall();\n}\n}")
+            .unwrap();
+        editor.session().set_indentation_strategy(Some(Rc::new(
+            ferroui_edit_core::editing::CSharpIndentationStrategy::new(),
+        )));
+        editor.document().clear_undo_history().unwrap();
+        let reindent = editor.command(EditorCommandKind::Reindent);
+        assert!(reindent.can_execute(None));
+        reindent.execute(None);
+        assert_eq!(
+            editor.text(),
+            "class C {\n\tvoid M() {\n\t\tCall();\n\t}\n}"
+        );
+        assert_eq!(editor.document().undo_count(), 1);
+        let transform = editor.command(EditorCommandKind::Transform(TextTransformation::Uppercase));
+        transform.execute(None);
+        assert!(editor.text().starts_with("CLASS C"));
+        assert_eq!(editor.document().undo_count(), 2);
+        editor.undo().unwrap();
+        editor.undo().unwrap();
+        assert_eq!(editor.text(), "class C {\nvoid M() {\nCall();\n}\n}");
+        editor.set_is_read_only(true);
+        assert!(!transform.can_execute(None));
+        transform.execute(None);
+        assert_eq!(editor.text(), "class C {\nvoid M() {\nCall();\n}\n}");
     }
 }

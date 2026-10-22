@@ -222,3 +222,82 @@ fn runtime_xaml_builds_editor_properties_and_direct_text() {
     assert_eq!(editor.font_size(), 17.0);
     assert_eq!(editor.text(), "hello 😀");
 }
+
+#[test]
+fn measured_extent_notifies_after_render_and_coalesces_pending_frames() {
+    use ferroui_controls::primitives::ILogicalScrollable;
+    use ferroui_base::input::IScrollable;
+    use ferroui_base::threading::Dispatcher;
+    use std::{cell::Cell, rc::Rc};
+    let _scope = test_scope();
+    let editor = laid_out_editor(&"long text ".repeat(200));
+    Dispatcher::ui_thread().run_jobs(None);
+    let notifications = Rc::new(Cell::new(0));
+    let count = notifications.clone();
+    let area = editor.text_area();
+    let subscription = area.scroll_invalidated(Rc::new(move || count.set(count.get() + 1)));
+    let previous_width = area.extent().width;
+    render_editor(&editor);
+    assert!(area.extent().width > previous_width);
+    assert_eq!(notifications.get(), 0);
+    render_editor(&editor);
+    assert_eq!(notifications.get(), 0);
+    Dispatcher::ui_thread().run_jobs(None);
+    assert_eq!(notifications.get(), 1);
+    subscription.dispose();
+}
+
+#[test]
+fn ime_preedit_projects_selection_without_mutating_document_and_tracks_utf16_cursor() {
+    let _scope = test_scope();
+    let editor = laid_out_editor("a😀suffix");
+    editor.select(1, 2).unwrap();
+    let document = editor.document();
+    document.clear_undo_history().unwrap();
+    let version = document.version();
+    let area = editor.text_area();
+    area.set_preedit(Some("漢😀字"), Some(1));
+    render_editor(&editor);
+    let first = area.cursor_rectangle();
+    area.set_preedit(Some("漢😀字"), Some(3));
+    render_editor(&editor);
+    let second = area.cursor_rectangle();
+    assert!(second.x > first.x);
+    assert_eq!(document.text(), "a😀suffix");
+    assert_eq!(document.version(), version);
+    assert!(!document.can_undo());
+    area.set_preedit(None, None);
+    editor.replace_selection_with_text("漢😀字").unwrap();
+    assert_eq!(document.text(), "a漢😀字suffix");
+    document.undo().unwrap();
+    assert_eq!(document.text(), "a😀suffix");
+}
+
+#[test]
+fn wrapped_vertical_navigation_uses_visual_rows_and_preserves_horizontal_position() {
+    use ferroui_base::input::{InputElement, Key, KeyEventArgs};
+    use ferroui_base::{Rect, Size};
+    let _scope = test_scope();
+    let editor = laid_out_editor(&"abcdefghij ".repeat(20));
+    editor.set_word_wrap(true);
+    let area = editor.text_area();
+    area.measure(Size::new(130.0, 400.0));
+    area.arrange(Rect::new(0.0, 0.0, 130.0, 400.0));
+    editor.set_caret_offset(3).unwrap();
+    render_editor(&editor);
+    let start = area.cursor_rectangle();
+    let mut down = KeyEventArgs::new();
+    down.key = Key::Down;
+    down.set_routed_event(Some(InputElement::key_down_event()));
+    area.raise_event(&down);
+    let after_down = area.cursor_rectangle();
+    assert!(down.handled());
+    assert!(editor.caret_offset() > 3);
+    assert!(after_down.y > start.y);
+    assert!((after_down.x - start.x).abs() < 1.0);
+    let mut up = KeyEventArgs::new();
+    up.key = Key::Up;
+    up.set_routed_event(Some(InputElement::key_down_event()));
+    area.raise_event(&up);
+    assert_eq!(editor.caret_offset(), 3);
+}

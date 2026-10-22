@@ -273,9 +273,11 @@ fn empty_continuation_can_still_continue_the_previous_group() {
 fn read_only_invalid_ranges_and_overlap_do_not_mutate_history() {
     let document = TextDocument::from_text("abcdef");
     assert!(document.replace(2, usize::MAX, "x").is_err());
-    assert!(document
-        .apply_edits(&[DocumentEdit::new(1, 3, "x"), DocumentEdit::new(2, 1, "y")])
-        .is_err());
+    assert!(
+        document
+            .apply_edits(&[DocumentEdit::new(1, 3, "x"), DocumentEdit::new(2, 1, "y")])
+            .is_err()
+    );
     assert_eq!(document.text(), "abcdef");
     assert!(!document.can_undo());
     document.set_is_read_only(true);
@@ -316,7 +318,9 @@ fn event_order_grouped_notifications_and_explicit_dispose() {
     }
     assert_eq!(
         *events.borrow(),
-        ["start", "changing", "changed", "changing", "changed", "text", "finish"]
+        [
+            "start", "changing", "changed", "changing", "changed", "text", "finish"
+        ]
     );
     subscription.dispose();
     events.borrow_mut().clear();
@@ -541,14 +545,16 @@ fn dense_suffix_anchors_follow_lazy_shifts_and_individual_removal() {
 #[test]
 fn overflowing_invalid_mapping_input_returns_error() {
     let document = TextDocument::new();
-    assert!(document
-        .replace_with_mapping(
-            usize::MAX,
-            usize::MAX,
-            "abc",
-            OffsetChangeMappingType::CharacterReplace
-        )
-        .is_err());
+    assert!(
+        document
+            .replace_with_mapping(
+                usize::MAX,
+                usize::MAX,
+                "abc",
+                OffsetChangeMappingType::CharacterReplace
+            )
+            .is_err()
+    );
     assert_eq!(document.text(), "");
 }
 
@@ -575,4 +581,59 @@ fn generic_source_changes_and_document_changes_have_distinct_boundary_affinity()
             .unwrap(),
         4
     );
+}
+
+#[test]
+fn policy_and_committed_history_notifications_allow_reentrant_queries() {
+    let document = TextDocument::new();
+    let observed = Rc::new(RefCell::new(Vec::new()));
+    let events = observed.clone();
+    let read = document.clone();
+    let subscription = document.property_changed(move |name| {
+        if matches!(name, "IsReadOnly" | "CanUndo" | "CanRedo" | "IsModified") {
+            events.borrow_mut().push((
+                name.to_owned(),
+                read.is_read_only(),
+                read.can_undo(),
+                read.can_redo(),
+                read.is_modified(),
+            ));
+        }
+    });
+    document.set_is_read_only(true);
+    document.set_is_read_only(true);
+    document.set_is_read_only(false);
+    assert_eq!(observed.borrow().len(), 2);
+    document.insert(0, "x").unwrap();
+    assert!(
+        observed
+            .borrow()
+            .iter()
+            .any(|(name, _, undo, _, _)| name == "CanUndo" && *undo)
+    );
+    document.undo().unwrap();
+    assert!(
+        observed
+            .borrow()
+            .iter()
+            .any(|(name, _, _, redo, _)| name == "CanRedo" && *redo)
+    );
+    document.undo_stack().clear_redo_stack().unwrap();
+    assert!(
+        observed
+            .borrow()
+            .iter()
+            .any(|(name, _, _, redo, _)| name == "CanRedo" && !*redo)
+    );
+    document.insert(0, "y").unwrap();
+    document.mark_as_original_file();
+    assert!(
+        observed
+            .borrow()
+            .iter()
+            .any(|(name, _, _, _, modified)| name == "IsModified" && !*modified)
+    );
+    document.set_undo_size_limit(0);
+    assert!(!document.can_undo());
+    subscription.dispose();
 }

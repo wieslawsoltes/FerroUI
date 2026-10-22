@@ -1,5 +1,5 @@
 use crate::EditorDemo;
-use ferroui_base::{FerroObjectImpl, Ref, ferro_class, ferro_impl_classes, instantiate};
+use ferroui_base::{ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, Ref};
 use ferroui_controls::{Application, ApplicationImpl, ApplicationImplExt, NewApplication, Window};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -48,6 +48,9 @@ impl ApplicationImpl for App {
             window.set_min_height(480.0);
             window.set_content(Some(Rc::new(demo.view())));
             desktop.set_main_window(Some(window));
+            if std::env::args().any(|argument| argument == "--smoke-actions") {
+                crate::smoke::start(demo.clone());
+            }
             *this.demo.borrow_mut() = Some(demo);
         }
         Self::parent_on_framework_initialization_completed(this);

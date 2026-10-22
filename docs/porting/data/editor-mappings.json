@@ -1402,14 +1402,27 @@
               "rust": "EditorCommand"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/editing/text_transformations.rs",
+          "symbols": [
+            "TextTransformation",
+            "plan_text_transformation"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Editing.EditingCommandHandler",
+              "rust": "plan_text_transformation"
+            }
+          ]
         }
       ],
       "unmapped_types": [
         "AvaloniaEdit.Editing.EditingCommandHandler.DefaultSegmentType"
       ],
-      "notes": "Core editing operations plus native ICommand wrappers for undo, redo, clipboard, selection, indentation and search.",
+      "notes": "Core editing and native ICommand wrappers, language indentation, whitespace/tab/case transformations and selected/current-line deletion.",
       "limitations": [
-        "Not every upstream line-transform/edit command is present."
+        "Casing uses locale-independent Rust Unicode mappings; title case is not implemented in the pinned source; not every upstream input mode is reproduced."
       ]
     },
     {
@@ -1890,9 +1903,9 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Runtime multiline highlighting, line results, lazy invalidation and definition registry.",
+      "notes": "Weak live-line tracking, lazy identity-keyed cache, state convergence, active colors, lifecycle checks and notifications.",
       "limitations": [
-        "HTML/line merging APIs and full suffix-convergence optimization are absent."
+        "Registration builds live-line metadata when needed; state-only updates evaluate full lines, with no benchmark-equivalence claim."
       ]
     },
     {
@@ -1915,9 +1928,9 @@
       "unmapped_types": [
         "AvaloniaEdit.Highlighting.HighlightedLine.HtmlElement"
       ],
-      "notes": "Runtime multiline highlighting, line results, lazy invalidation and definition registry.",
+      "notes": "Validated nested sections, property-aware merging, selected-range rich text/HTML export and preserved parser state.",
       "limitations": [
-        "HTML/line merging APIs and full suffix-convergence optimization are absent."
+        "Flat export spans replace the internal HtmlElement tree; framework brush/font resource adapters remain separate."
       ]
     },
     {
@@ -1938,7 +1951,7 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Runtime multiline highlighting, line results, lazy invalidation and definition registry.",
+      "notes": "Styled UTF-16 section ranges consumed by merging, rich-text export and the highlighter contract.",
       "limitations": [
         "Representative regression coverage; not a complete upstream differential suite."
       ]
@@ -2138,44 +2151,100 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/HtmlClipboard.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Highlighting.HtmlClipboard"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/html_clipboard.rs",
+          "symbols": [
+            "HtmlClipboard"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.HtmlClipboard",
+              "rust": "HtmlClipboard"
+            }
+          ]
+        }
       ],
-      "notes": "This highlighting/rich-text/clipboard contract has no direct implementation; runtime token coloring is tracked separately.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Lossless UTF-16 rich text, format overlays, nested writing and validated HTML/CF_HTML export through typed core services.",
+      "limitations": [
+        "Owned buffers and concrete options replace managed writers and subclass callbacks; framework brush/font/run adapters and operating-system clipboard writes remain separate."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/HtmlOptions.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Highlighting.HtmlOptions"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/html_clipboard.rs",
+          "symbols": [
+            "HtmlOptions"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.HtmlOptions",
+              "rust": "HtmlOptions"
+            }
+          ]
+        }
       ],
-      "notes": "This highlighting/rich-text/clipboard contract has no direct implementation; runtime token coloring is tracked separately.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Lossless UTF-16 rich text, format overlays, nested writing and validated HTML/CF_HTML export through typed core services.",
+      "limitations": [
+        "Owned buffers and concrete options replace managed writers and subclass callbacks; framework brush/font/run adapters and operating-system clipboard writes remain separate."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/HtmlRichTextWriter.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Highlighting.HtmlRichTextWriter"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/html_clipboard.rs",
+          "symbols": [
+            "HtmlRichTextWriter"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.HtmlRichTextWriter",
+              "rust": "HtmlRichTextWriter"
+            }
+          ]
+        }
       ],
-      "notes": "This highlighting/rich-text/clipboard contract has no direct implementation; runtime token coloring is tracked separately.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Lossless UTF-16 rich text, format overlays, nested writing and validated HTML/CF_HTML export through typed core services.",
+      "limitations": [
+        "Owned buffers and concrete options replace managed writers and subclass callbacks; framework brush/font/run adapters and operating-system clipboard writes remain separate."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/IHighlighter.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Highlighting.HighlightingStateChangedEventHandler",
-        "AvaloniaEdit.Highlighting.IHighlighter"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/highlighter.rs",
+          "symbols": [
+            "IHighlighter",
+            "IHighlighter::highlighting_state_changed"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.IHighlighter",
+              "rust": "IHighlighter"
+            },
+            {
+              "upstream": "AvaloniaEdit.Highlighting.HighlightingStateChangedEventHandler",
+              "rust": "IHighlighter::highlighting_state_changed"
+            }
+          ]
+        }
       ],
-      "notes": "This highlighting/rich-text/clipboard contract has no direct implementation; runtime token coloring is tracked separately.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Object-safe highlighter, active colors, grouped lifecycle, explicit disposal and inclusive one-based state-change subscriptions.",
+      "limitations": [
+        "Trait composition replaces protected subclass hooks; callbacks return disposable handles instead of managed event delegates."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/IHighlightingDefinition.cs",
@@ -2235,13 +2304,26 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/RichText.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Highlighting.RichText"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/rich_text.rs",
+          "symbols": [
+            "RichText"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.RichText",
+              "rust": "RichText"
+            }
+          ]
+        }
       ],
-      "notes": "This highlighting/rich-text/clipboard contract has no direct implementation; runtime token coloring is tracked separately.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Lossless UTF-16 rich text, format overlays, nested writing and validated HTML/CF_HTML export through typed core services.",
+      "limitations": [
+        "Owned buffers and concrete options replace managed writers and subclass callbacks; framework brush/font/run adapters and operating-system clipboard writes remain separate."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/RichTextColorizer.cs",
@@ -2255,21 +2337,44 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/RichTextModel.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Highlighting.RichTextModel"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/rich_text.rs",
+          "symbols": [
+            "RichTextModel"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.RichTextModel",
+              "rust": "RichTextModel"
+            }
+          ]
+        }
       ],
-      "notes": "This highlighting/rich-text/clipboard contract has no direct implementation; runtime token coloring is tracked separately.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Lossless UTF-16 rich text, format overlays, nested writing and validated HTML/CF_HTML export through typed core services.",
+      "limitations": [
+        "Owned buffers and concrete options replace managed writers and subclass callbacks; framework brush/font/run adapters and operating-system clipboard writes remain separate."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/RichTextModelWriter.cs",
-      "status": "unmapped",
-      "targets": [],
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/rich_text_writer.rs",
+          "symbols": [
+            "RichTextModelWriter"
+          ],
+          "aliases": []
+        }
+      ],
       "unmapped_types": [],
-      "notes": "No active C# type declaration: managed metadata, attributes, or commented source has no separate Rust counterpart.",
-      "limitations": []
+      "notes": "Owned rich-text buffer writer implements the responsibility described by this entirely commented-out upstream source.",
+      "limitations": [
+        "No active upstream class declaration exists at the pinned revision; the Rust writer is an intentional usable adaptation, not active API parity."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/Xshd/HighlightingLoader.cs",
@@ -2327,9 +2432,9 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Upstream file is commented out; Rust adds a legacy importer for bundled TeX resources.",
+      "notes": "The pinned v1 loader is entirely commented out; a deliberate legacy importer supports the bundled TeX definition.",
       "limitations": [
-        "Not a complete historical v1 mini-language implementation."
+        "Full archived v1 escape-character and @ mini-language behavior is not reproduced; this is not an active upstream runtime loader gap."
       ]
     },
     {
@@ -2484,69 +2589,131 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Indentation/CSharp/CSharpIndentationStrategy.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Indentation.CSharp.CSharpIndentationStrategy"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/editing/indentation/csharp/csharp_indentation_strategy.rs",
+          "symbols": [
+            "CSharpIndentationStrategy"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Indentation.CSharp.CSharpIndentationStrategy",
+              "rust": "CSharpIndentationStrategy"
+            }
+          ]
+        }
       ],
-      "notes": "Full C# indentation/reformatting engine and document-accessor contracts are not implemented.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Pinned block/statement indentation state machine with snapshot context and validated original-coordinate whitespace edit plans.",
+      "limitations": [
+        "Trait composition and fallible edit plans replace direct document writes; raw-string and interpolation-expression parsing are not supplied by the pinned heuristic."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Indentation/CSharp/DocumentAccessor.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Indentation.CSharp.IDocumentAccessor",
-        "AvaloniaEdit.Indentation.CSharp.TextDocumentAccessor"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/editing/indentation/csharp/document_accessor.rs",
+          "symbols": [
+            "IDocumentAccessor",
+            "TextDocumentAccessor"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Indentation.CSharp.IDocumentAccessor",
+              "rust": "IDocumentAccessor"
+            },
+            {
+              "upstream": "AvaloniaEdit.Indentation.CSharp.TextDocumentAccessor",
+              "rust": "TextDocumentAccessor"
+            }
+          ]
+        }
       ],
-      "notes": "Full C# indentation/reformatting engine and document-accessor contracts are not implemented.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Pinned block/statement indentation state machine with snapshot context and validated original-coordinate whitespace edit plans.",
+      "limitations": [
+        "Trait composition and fallible edit plans replace direct document writes; raw-string and interpolation-expression parsing are not supplied by the pinned heuristic."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Indentation/CSharp/IndentationReformatter.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Indentation.CSharp.IndentationReformatter",
-        "AvaloniaEdit.Indentation.CSharp.IndentationReformatter.Block",
-        "AvaloniaEdit.Indentation.CSharp.IndentationSettings"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/editing/indentation/csharp/indentation_reformatter.rs",
+          "symbols": [
+            "IndentationReformatter",
+            "Block",
+            "IndentationSettings"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Indentation.CSharp.IndentationReformatter",
+              "rust": "IndentationReformatter"
+            },
+            {
+              "upstream": "AvaloniaEdit.Indentation.CSharp.IndentationReformatter.Block",
+              "rust": "Block"
+            },
+            {
+              "upstream": "AvaloniaEdit.Indentation.CSharp.IndentationSettings",
+              "rust": "IndentationSettings"
+            }
+          ]
+        }
       ],
-      "notes": "Full C# indentation/reformatting engine and document-accessor contracts are not implemented.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Pinned block/statement indentation state machine with snapshot context and validated original-coordinate whitespace edit plans.",
+      "limitations": [
+        "Trait composition and fallible edit plans replace direct document writes; raw-string and interpolation-expression parsing are not supplied by the pinned heuristic."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Indentation/DefaultIndentationStrategy.cs",
       "status": "adapted",
       "targets": [
         {
-          "path": "src/FerroUI.Edit.Core/editing/editor_session.rs",
+          "path": "src/FerroUI.Edit.Core/editing/indentation/default_indentation_strategy.rs",
           "symbols": [
-            "EditorSession"
+            "DefaultIndentationStrategy"
           ],
           "aliases": [
             {
               "upstream": "AvaloniaEdit.Indentation.DefaultIndentationStrategy",
-              "rust": "EditorSession"
+              "rust": "DefaultIndentationStrategy"
             }
           ]
         }
       ],
       "unmapped_types": [],
-      "notes": "Default indentation/newline behavior is built into the shared editing session.",
-      "limitations": [
-        "No separate IIndentationStrategy plugin or full C# reformatter."
-      ]
+      "notes": "Previous-line indentation copying; range formatting remains an intentional no-op as in the source.",
+      "limitations": []
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Indentation/IIndentationStrategy.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Indentation.IIndentationStrategy"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/editing/indentation/indentation_strategy.rs",
+          "symbols": [
+            "IIndentationStrategy"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Indentation.IIndentationStrategy",
+              "rust": "IIndentationStrategy"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Object-safe language indentation strategy returning validated edit plans.",
+      "limitations": [
+        "Strategy errors and protected-range rejection leave the real document unchanged."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Properties/InternalsVisibleTo.cs",
@@ -3100,14 +3267,38 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Search/SearchCommands.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Search.SearchCommands",
-        "AvaloniaEdit.Search.SearchInputHandler"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/commands.rs",
+          "symbols": [
+            "EditorCommand"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Search.SearchCommands",
+              "rust": "EditorCommand"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.Edit/search_panel.rs",
+          "symbols": [
+            "SearchPanel"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Search.SearchInputHandler",
+              "rust": "SearchPanel"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Find/replace ICommand actions and popup keyboard navigation use existing FerroUI command and input services.",
+      "limitations": [
+        "Managed routed-command attachment classes are consolidated; custom search-strategy injection and localization remain separate."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Search/SearchPanel.cs",
@@ -3749,13 +3940,26 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Utils/RichTextWriter.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Utils.RichTextWriter"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/rich_text_writer.rs",
+          "symbols": [
+            "RichTextWriter"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Utils.RichTextWriter",
+              "rust": "RichTextWriter"
+            }
+          ]
+        }
       ],
-      "notes": "No standalone port of this managed utility API. Rust standard-library or FerroUI services may replace internal uses without providing this public contract.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Object-safe formatted writer trait with balanced spans, indentation and owned UTF-16 buffer implementations.",
+      "limitations": [
+        "The core does not expose managed TextWriter or arbitrary framework brush/font handles."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Utils/Rope.cs",
@@ -4037,6 +4241,53 @@
       "status": "adapted",
       "targets": [
         {
+          "path": "src/FerroUI.TextMate/package.rs",
+          "symbols": [
+            "GrammarDefinition",
+            "Contributes",
+            "Engines",
+            "Scripts",
+            "Repository",
+            "LanguageContribution",
+            "GrammarContribution",
+            "SnippetContribution"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Grammars.GrammarDefinition",
+              "rust": "GrammarDefinition"
+            },
+            {
+              "upstream": "TextMateSharp.Grammars.Contributes",
+              "rust": "Contributes"
+            },
+            {
+              "upstream": "TextMateSharp.Grammars.Engines",
+              "rust": "Engines"
+            },
+            {
+              "upstream": "TextMateSharp.Grammars.Scripts",
+              "rust": "Scripts"
+            },
+            {
+              "upstream": "TextMateSharp.Grammars.Repository",
+              "rust": "Repository"
+            },
+            {
+              "upstream": "TextMateSharp.Grammars.Language",
+              "rust": "LanguageContribution"
+            },
+            {
+              "upstream": "TextMateSharp.Grammars.Grammar",
+              "rust": "GrammarContribution"
+            },
+            {
+              "upstream": "TextMateSharp.Grammars.Snippet",
+              "rust": "SnippetContribution"
+            }
+          ]
+        },
+        {
           "path": "src/FerroUI.TextMate/catalog.rs",
           "symbols": [
             "Language"
@@ -4049,18 +4300,10 @@
           ]
         }
       ],
-      "unmapped_types": [
-        "TextMateSharp.Grammars.Contributes",
-        "TextMateSharp.Grammars.Engines",
-        "TextMateSharp.Grammars.Grammar",
-        "TextMateSharp.Grammars.GrammarDefinition",
-        "TextMateSharp.Grammars.Repository",
-        "TextMateSharp.Grammars.Scripts",
-        "TextMateSharp.Grammars.Snippet"
-      ],
-      "notes": "Bundled language identity, aliases, file matching and scope metadata.",
+      "unmapped_types": [],
+      "notes": "Typed package provenance, engines/scripts/repository and language/grammar/snippet contributions preserve additional JSON fields.",
       "limitations": [
-        "Full package manifest DTO family is not ported."
+        "Package decoding consumes caller-owned strings; contribution types differ from loaded catalog Language values. Numeric language IDs remain host-assigned."
       ]
     },
     {
@@ -4088,24 +4331,73 @@
               "rust": "LanguageConfiguration"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.TextMate/language_configuration.rs",
+          "symbols": [
+            "AutoClosingPairs",
+            "AutoPair",
+            "Comments",
+            "EnterRule",
+            "Folding",
+            "Indentation",
+            "LanguageConfiguration::on_enter_rules",
+            "LanguageSnippet",
+            "LanguageSnippets",
+            "Markers"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Grammars.Comments",
+              "rust": "Comments"
+            },
+            {
+              "upstream": "TextMateSharp.Grammars.Markers",
+              "rust": "Markers"
+            },
+            {
+              "upstream": "TextMateSharp.Grammars.Folding",
+              "rust": "Folding"
+            },
+            {
+              "upstream": "TextMateSharp.Grammars.Indentation",
+              "rust": "Indentation"
+            },
+            {
+              "upstream": "TextMateSharp.Grammars.EnterRule",
+              "rust": "EnterRule"
+            },
+            {
+              "upstream": "TextMateSharp.Grammars.AutoPair",
+              "rust": "AutoPair"
+            },
+            {
+              "upstream": "TextMateSharp.Grammars.AutoClosingPairs",
+              "rust": "AutoClosingPairs"
+            },
+            {
+              "upstream": "TextMateSharp.Grammars.LanguageSnippet",
+              "rust": "LanguageSnippet"
+            },
+            {
+              "upstream": "TextMateSharp.Grammars.LanguageSnippets",
+              "rust": "LanguageSnippets"
+            },
+            {
+              "upstream": "TextMateSharp.Grammars.Region",
+              "rust": "LanguageSnippet"
+            },
+            {
+              "upstream": "TextMateSharp.Grammars.EnterRules",
+              "rust": "LanguageConfiguration::on_enter_rules"
+            }
+          ]
         }
       ],
-      "unmapped_types": [
-        "TextMateSharp.Grammars.AutoClosingPairs",
-        "TextMateSharp.Grammars.AutoPair",
-        "TextMateSharp.Grammars.Comments",
-        "TextMateSharp.Grammars.EnterRule",
-        "TextMateSharp.Grammars.EnterRules",
-        "TextMateSharp.Grammars.Folding",
-        "TextMateSharp.Grammars.Indentation",
-        "TextMateSharp.Grammars.LanguageSnippet",
-        "TextMateSharp.Grammars.LanguageSnippets",
-        "TextMateSharp.Grammars.Markers",
-        "TextMateSharp.Grammars.Region"
-      ],
-      "notes": "Language JSON retained with comment/bracket/word-pattern accessors.",
+      "unmapped_types": [],
+      "notes": "Typed comments/folding/indentation/enter/pair settings and snippets preserve optional regex flags and multi-character values.",
       "limitations": [
-        "Nested typed folding/indentation/on-enter/auto-pair/snippet helper APIs remain JSON fields, not equivalent Rust types."
+        "EnterRules is Vec<EnterRule>; Region shares LanguageSnippet storage. Local filesystem loading is host-owned. Applying all language policies to editor input remains integration work."
       ]
     },
     {
@@ -4134,9 +4426,9 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Bundled grammar/theme/language discovery and registry construction.",
+      "notes": "BundledCatalog implements lazy IRegistryOptions, typed packages/configuration/snippets and extension/filename/alias/MIME/first-line lookup.",
       "limitations": [
-        "Not the complete pluggable IRegistryOptions host callback contract."
+        "Host supplies numeric language IDs and scheduling; arbitrary filename-glob matching remains absent."
       ]
     },
     {
@@ -4424,13 +4716,26 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Grammar/GrammarHelper.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Grammars.GrammarHelper"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/registry.rs",
+          "symbols": [
+            "Grammar::from_repository"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Grammars.GrammarHelper",
+              "rust": "Grammar::from_repository"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Grammar compilation from host repositories and their target-specific injections.",
+      "limitations": [
+        "Helper construction is an associated method on Grammar; compiled programs are immutable."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Grammar/IGrammar.cs",
@@ -4457,13 +4762,26 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Grammar/IGrammarRepository.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Grammars.IGrammarRepository"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/registry.rs",
+          "symbols": [
+            "IGrammarRepository"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Grammars.IGrammarRepository",
+              "rust": "IGrammarRepository"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Host repository/theme contract with typed owned grammar/theme values.",
+      "limitations": [
+        "Synchronous fallible host lookups replace managed object/stream APIs."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Grammar/IToken.cs",
@@ -4540,13 +4858,26 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Grammar/LineText.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Grammars.LineText"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/line_text.rs",
+          "symbols": [
+            "LineText"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Grammars.LineText",
+              "rust": "LineText"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Borrowed/owned line input with physical delimiter handling and checked UTF-16 slices.",
+      "limitations": [
+        "UTF-8 borrowed storage replaces the managed line string wrapper; slices splitting a supplementary scalar return an error."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Grammar/StateStack.cs",
@@ -5759,43 +6090,95 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Model/IModelLines.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Model.IModelLines"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/model_contract.rs",
+          "symbols": [
+            "IModelLines"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Model.IModelLines",
+              "rust": "IModelLines"
+            }
+          ]
+        }
       ],
-      "notes": "This managed token model/decoder/listener API has no direct Rust counterpart; the synchronous TokenizationModel has a separate contract.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Borrowed host line access and caller-scheduled incremental tokenization with disposable change subscriptions.",
+      "limitations": [
+        "Mutable internal ModelLine objects, nullable grammar lifecycle and managed background-thread disposal are not reproduced."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Model/IModelTokensChangedListener.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Model.IModelTokensChangedListener"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/model_events.rs",
+          "symbols": [
+            "IModelTokensChangedListener"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Model.IModelTokensChangedListener",
+              "rust": "IModelTokensChangedListener"
+            }
+          ]
+        }
       ],
-      "notes": "This managed token model/decoder/listener API has no direct Rust counterpart; the synchronous TokenizationModel has a separate contract.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Typed listener callbacks publish completed model ranges through the FerroUI system event service.",
+      "limitations": [
+        "Removal uses an explicit IDisposable subscription instead of listener identity."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Model/ITMModel.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Model.ITMModel"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/model_contract.rs",
+          "symbols": [
+            "ITMModel"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Model.ITMModel",
+              "rust": "ITMModel"
+            }
+          ]
+        }
       ],
-      "notes": "This managed token model/decoder/listener API has no direct Rust counterpart; the synchronous TokenizationModel has a separate contract.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Borrowed host line access and caller-scheduled incremental tokenization with disposable change subscriptions.",
+      "limitations": [
+        "Mutable internal ModelLine objects, nullable grammar lifecycle and managed background-thread disposal are not reproduced."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Model/ITokenizationSupport.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Model.ITokenizationSupport"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/line_text.rs",
+          "symbols": [
+            "ITokenizationSupport"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Model.ITokenizationSupport",
+              "rust": "ITokenizationSupport"
+            }
+          ]
+        }
       ],
-      "notes": "This managed token model/decoder/listener API has no direct Rust counterpart; the synchronous TokenizationModel has a separate contract.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Grammar tokenizer contract over borrowed line input and immutable continuation state.",
+      "limitations": [
+        "Budgets and structured results replace managed stopwatch/time limits."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Model/LineTokens.cs",
@@ -5833,22 +6216,22 @@
       "status": "adapted",
       "targets": [
         {
-          "path": "src/FerroUI.TextMate/model.rs",
+          "path": "src/FerroUI.TextMate/model_events.rs",
           "symbols": [
-            "TokenizationUpdate"
+            "ModelTokensChangedEvent"
           ],
           "aliases": [
             {
               "upstream": "TextMateSharp.Model.ModelTokensChangedEvent",
-              "rust": "TokenizationUpdate"
+              "rust": "ModelTokensChangedEvent"
             }
           ]
         }
       ],
       "unmapped_types": [],
-      "notes": "Returned changed-range report replaces a managed event object.",
+      "notes": "Changed ranges, revision, line count and pending state are published after completed batches.",
       "limitations": [
-        "Host owns scheduling and event publication."
+        "Events use zero-based half-open ranges and do not retain a strong model reference."
       ]
     },
     {
@@ -5876,13 +6259,26 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Model/Range.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Model.Range"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/model_events.rs",
+          "symbols": [
+            "ModelTokensChangedEvent::ranges"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Model.Range",
+              "rust": "ModelTokensChangedEvent::ranges"
+            }
+          ]
+        }
       ],
-      "notes": "This managed token model/decoder/listener API has no direct Rust counterpart; the synchronous TokenizationModel has a separate contract.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Model event ranges use standard Rust Range<usize> values.",
+      "limitations": [
+        "Zero-based half-open ranges replace the mutable managed range wrapper."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Model/TMModel.cs",
@@ -5904,9 +6300,9 @@
       "unmapped_types": [
         "TextMateSharp.Model.TMModel.TokenizerThread"
       ],
-      "notes": "Incremental tokenization with line invalidation, cached states and convergence.",
+      "notes": "Incremental cache/state convergence, host line snapshots, forced or budgeted tokenization and FerroUI event listeners.",
       "limitations": [
-        "Explicit synchronous/budgeted updates replace TokenizerThread and managed listeners."
+        "The caller schedules work and owns worker shutdown; no managed TokenizerThread or nullable grammar lifecycle."
       ]
     },
     {
@@ -5985,14 +6381,31 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Registry/IRegistryOptions.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Registry.DefaultLocator",
-        "TextMateSharp.Registry.IRegistryOptions"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/registry.rs",
+          "symbols": [
+            "IRegistryOptions",
+            "DefaultLocator"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Registry.IRegistryOptions",
+              "rust": "IRegistryOptions"
+            },
+            {
+              "upstream": "TextMateSharp.Registry.DefaultLocator",
+              "rust": "DefaultLocator"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Lazy grammar, injection and theme host lookups with a default locator.",
+      "limitations": [
+        "Host owns resource I/O; source stream and nullable object APIs become typed Rust Result/Option values."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Registry/Registry.cs",
@@ -6012,9 +6425,9 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Grammar registry, includes/injections, compilation and grammar lookup.",
+      "notes": "Lazy host resource loading, transitive dependency/cycle handling, injection isolation, diagnostics, themes and immutable grammar compilation.",
       "limitations": [
-        "No complete IRegistryOptions lazy host callback contract."
+        "Host callbacks are synchronous; resource streams and cross-thread mutable registry synchronization are not copied."
       ]
     },
     {
@@ -6102,13 +6515,26 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Themes/IThemeProvider.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Themes.IThemeProvider"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/registry.rs",
+          "symbols": [
+            "IThemeProvider"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Themes.IThemeProvider",
+              "rust": "IThemeProvider"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Host repository/theme contract with typed owned grammar/theme values.",
+      "limitations": [
+        "Synchronous fallible host lookups replace managed object/stream APIs."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Themes/IThemeSetting.cs",

@@ -1,12 +1,12 @@
 use super::SnippetError;
 use super::snippet::Placeholder;
 use crate::document::{
-    AnchorMovementType, DocumentEdit, DocumentError, DocumentSubscription, SimpleSegment,
-    TextAnchor, TextDocument,
+    AnchorMovementType, DocumentEdit, DocumentError, DocumentSubscription, IUndoableOperation,
+    SimpleSegment, TextAnchor, TextDocument,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeMap;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 pub type SnippetEditValidator = dyn Fn(&[DocumentEdit]) -> Result<(), DocumentError>;
 
@@ -27,19 +27,44 @@ struct SessionInner {
     elements: Vec<ActiveElement>,
     tab_order: Vec<usize>,
     active: Cell<Option<usize>>,
+    owner: Cell<Option<usize>>,
     caret: TextAnchor,
+    caret_order: usize,
     closed: Cell<bool>,
     syncing: Cell<bool>,
     last_text: RefCell<String>,
-    subscription: RefCell<Option<DocumentSubscription>>,
+    subscriptions: RefCell<Vec<DocumentSubscription>>,
     error: RefCell<Option<String>>,
     edit_validator: RefCell<Option<Rc<SnippetEditValidator>>>,
 }
 impl Drop for SessionInner {
     fn drop(&mut self) {
-        if let Some(subscription) = self.subscription.get_mut().take() {
+        for subscription in self.subscriptions.get_mut().drain(..) {
             subscription.dispose();
         }
+    }
+}
+
+struct RestoreOwner {
+    session: Weak<SessionInner>,
+    owner: usize,
+}
+impl RestoreOwner {
+    fn restore(&self) {
+        if let Some(inner) = self.session.upgrade() {
+            let session = SnippetSession { inner };
+            if !session.is_closed() {
+                session.set_owner(self.owner);
+            }
+        }
+    }
+}
+impl IUndoableOperation for RestoreOwner {
+    fn undo(&self) {
+        self.restore();
+    }
+    fn redo(&self) {
+        self.restore();
     }
 }
 
@@ -56,14 +81,13 @@ impl SnippetSession {
         offset: usize,
         placeholders: Vec<Placeholder>,
         caret: usize,
+        caret_order: usize,
     ) -> Result<Self, SnippetError> {
         let mut elements = Vec::new();
         let mut order = BTreeMap::new();
         for placeholder in placeholders {
             let start = document.create_anchor(offset + placeholder.start)?;
             let end = document.create_anchor(offset + placeholder.end)?;
-            start.set_movement_type(AnchorMovementType::BeforeInsertion);
-            end.set_movement_type(AnchorMovementType::AfterInsertion);
             start.set_survive_deletion(true);
             end.set_survive_deletion(true);
             if placeholder.editable {
@@ -80,21 +104,37 @@ impl SnippetSession {
         caret.set_survive_deletion(true);
         let tab_order: Vec<_> = order.into_values().collect();
         let active = (!tab_order.is_empty()).then_some(0);
+        let owner = tab_order.first().copied();
         let inner = Rc::new(SessionInner {
             document: document.clone(),
             elements,
             tab_order,
             active: Cell::new(active),
+            owner: Cell::new(owner),
             caret,
+            caret_order,
             closed: Cell::new(active.is_none()),
             syncing: Cell::new(false),
             last_text: RefCell::new(String::new()),
-            subscription: RefCell::new(None),
+            subscriptions: RefCell::new(Vec::new()),
             error: RefCell::new(None),
             edit_validator: RefCell::new(None),
         });
         let session = Self { inner };
+        session.restore_active_owner();
         session.refresh_last_text();
+        let weak = Rc::downgrade(&session.inner);
+        let changing = document.changing(move |_| {
+            if let Some(inner) = weak.upgrade() {
+                SnippetSession { inner }.record_owner();
+            }
+        });
+        let weak = Rc::downgrade(&session.inner);
+        let changed = document.changed(move |_| {
+            if let Some(inner) = weak.upgrade() {
+                SnippetSession { inner }.record_owner();
+            }
+        });
         let weak = Rc::downgrade(&session.inner);
         let subscription = document.text_changed(move || {
             if let Some(inner) = weak.upgrade() {
@@ -105,7 +145,7 @@ impl SnippetSession {
                 }
             }
         });
-        *session.inner.subscription.borrow_mut() = Some(subscription);
+        *session.inner.subscriptions.borrow_mut() = vec![changing, changed, subscription];
         Ok(session)
     }
     pub fn is_closed(&self) -> bool {
@@ -124,16 +164,10 @@ impl SnippetSession {
         if self.is_closed() {
             return None;
         }
-        self.inner
-            .elements
-            .get(*self.inner.tab_order.get(self.inner.active.get()?)?)?
-            .segment()
+        self.inner.elements.get(self.active_index()?)?.segment()
     }
     pub fn active_placeholder(&self) -> Option<usize> {
-        self.inner
-            .elements
-            .get(*self.inner.tab_order.get(self.inner.active.get()?)?)
-            .map(|e| e.id)
+        self.inner.elements.get(self.active_index()?).map(|e| e.id)
     }
     pub fn caret_offset(&self) -> Option<usize> {
         self.inner.caret.offset().ok()
@@ -150,6 +184,7 @@ impl SnippetSession {
             return None;
         }
         self.inner.active.set(Some(next));
+        self.restore_active_owner();
         self.refresh_last_text();
         self.active_segment()
     }
@@ -165,6 +200,75 @@ impl SnippetSession {
             .replace(segment.offset, segment.length, text)?;
         Ok(())
     }
+    fn active_index(&self) -> Option<usize> {
+        self.inner.tab_order.get(self.inner.active.get()?).copied()
+    }
+    fn restore_active_owner(&self) {
+        if let Some(owner) = self.active_index() {
+            self.set_owner(owner);
+        }
+    }
+    fn set_owner(&self, owner: usize) {
+        self.inner.owner.set(Some(owner));
+        for (index, element) in self.inner.elements.iter().enumerate() {
+            let (start, end) = if index == owner {
+                (
+                    AnchorMovementType::BeforeInsertion,
+                    AnchorMovementType::AfterInsertion,
+                )
+            } else if element.segment().is_some_and(|range| range.length == 0) {
+                // Coincident empty fields retain their order in the expansion.
+                let movement = if index < owner {
+                    AnchorMovementType::BeforeInsertion
+                } else {
+                    AnchorMovementType::AfterInsertion
+                };
+                (movement, movement)
+            } else {
+                (
+                    AnchorMovementType::AfterInsertion,
+                    AnchorMovementType::BeforeInsertion,
+                )
+            };
+            element.start.set_movement_type(start);
+            element.end.set_movement_type(end);
+        }
+        self.inner
+            .caret
+            .set_movement_type(if self.inner.caret_order <= owner {
+                AnchorMovementType::BeforeInsertion
+            } else {
+                AnchorMovementType::AfterInsertion
+            });
+    }
+    fn record_owner(&self) {
+        if self.is_closed() {
+            return;
+        }
+        let Some(owner) = self.inner.owner.get() else {
+            return;
+        };
+        // Recompute after changes as well: deleting a field makes both of its
+        // endpoints obey the same source-order affinity before the next edit.
+        self.set_owner(owner);
+        if self.inner.document.accept_changes() {
+            // Bracketing each edit restores its owner before either undo or
+            // redo, independently of the currently selected tab stop. Weak
+            // references keep history from retaining a finished session.
+            if let Err(error) =
+                self.inner
+                    .document
+                    .undo_stack()
+                    .push_optional(Rc::new(RestoreOwner {
+                        session: Rc::downgrade(&self.inner),
+                        owner,
+                    }))
+            {
+                *self.inner.error.borrow_mut() = Some(error.to_string());
+                self.finish();
+            }
+        }
+    }
     fn refresh_last_text(&self) {
         if let Some(segment) = self.active_segment() {
             if let Ok(text) = self.inner.document.get_text(segment.offset, segment.length) {
@@ -176,6 +280,7 @@ impl SnippetSession {
         if self.is_closed() || self.inner.syncing.get() {
             return Ok(());
         }
+        self.restore_active_owner();
         let Some(segment) = self.active_segment() else {
             self.finish();
             return Ok(());
@@ -193,38 +298,49 @@ impl SnippetSession {
         if !self.inner.document.accept_changes() {
             return Ok(());
         }
-        let active = self.inner.tab_order[self.inner.active.get().unwrap()];
+        let active = self.active_index().ok_or(SnippetError::Closed)?;
         let id = self.inner.elements[active].id;
-        let mut ranges: Vec<_> = self
+        let mut targets: Vec<_> = self
             .inner
             .elements
             .iter()
             .enumerate()
             .filter(|(i, e)| *i != active && e.id == id)
-            .filter_map(|(_, e)| e.segment())
+            .filter_map(|(index, element)| element.segment().map(|range| (index, range)))
             .collect();
-        ranges.sort_by_key(|r| r.offset);
-        if ranges.is_empty() {
+        targets.sort_by_key(|(index, range)| (range.offset, *index));
+        if targets.is_empty() {
             return Ok(());
         }
-        let edits: Vec<_> = ranges
-            .into_iter()
-            .map(|range| DocumentEdit::new(range.offset, range.length, &text))
+        for pair in targets.windows(2) {
+            if pair[0].1.offset + pair[0].1.length > pair[1].1.offset {
+                return Err(DocumentError::OverlappingEdits.into());
+            }
+        }
+        let edits: Vec<_> = targets
+            .iter()
+            .map(|(_, range)| DocumentEdit::new(range.offset, range.length, &text))
             .collect();
         let validator = self.inner.edit_validator.borrow().clone();
         if let Some(validator) = validator {
             validator(&edits)?;
         }
         self.inner.syncing.set(true);
-        struct Reset<'a>(&'a Cell<bool>);
+        struct Reset<'a>(&'a SnippetSession);
         impl Drop for Reset<'_> {
             fn drop(&mut self) {
-                self.0.set(false);
+                self.0.restore_active_owner();
+                self.0.inner.syncing.set(false);
             }
         }
-        let _reset = Reset(&self.inner.syncing);
+        let _reset = Reset(self);
         let _update = self.inner.document.begin_continued_update()?;
-        self.inner.document.apply_edits(&edits)?;
+        for ((owner, _), edit) in targets.iter().zip(&edits).rev() {
+            self.set_owner(*owner);
+            self.inner
+                .document
+                .replace(edit.offset, edit.length, &edit.text)?;
+        }
         Ok(())
     }
 }
@@ -232,7 +348,23 @@ impl SnippetSession {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::snippets::Snippet;
+    use crate::snippets::{Snippet, SnippetElement};
+
+    fn assert_fields(session: &SnippetSession, fields: &[(usize, usize)]) {
+        let actual: Vec<_> = session
+            .inner
+            .elements
+            .iter()
+            .map(|element| {
+                let segment = element.segment().expect("a field must remain ordered");
+                (segment.offset, segment.length)
+            })
+            .collect();
+        assert_eq!(actual, fields);
+        assert!(!session.is_closed());
+        assert_eq!(session.error(), None);
+    }
+
     #[test]
     fn bound_elements_mirror_external_edits_in_one_undo_group() {
         let document = TextDocument::new();
@@ -266,6 +398,208 @@ mod tests {
         assert!(Snippet::parse("${name}").is_err());
         assert!(Snippet::parse("${1:broken").is_err());
     }
+
+    #[test]
+    fn adjacent_empty_mirrors_remain_distinct_through_unicode_edits_and_history() {
+        let document = TextDocument::new();
+        let session = Snippet::parse("$1$1$1$0")
+            .unwrap()
+            .insert(document.clone(), 0, "")
+            .unwrap();
+        document.insert(0, "😀").unwrap();
+        assert_eq!(document.text(), "😀😀😀");
+        assert_fields(&session, &[(0, 2), (2, 2), (4, 2)]);
+        assert_eq!(session.caret_offset(), Some(6));
+        assert_eq!(document.undo_count(), 1);
+
+        document.insert(2, "x").unwrap();
+        assert_eq!(document.text(), "😀x😀x😀x");
+        assert_fields(&session, &[(0, 3), (3, 3), (6, 3)]);
+        assert_eq!(session.caret_offset(), Some(9));
+        assert!(document.undo().unwrap());
+        assert_eq!(document.text(), "😀😀😀");
+        assert_fields(&session, &[(0, 2), (2, 2), (4, 2)]);
+        assert!(document.undo().unwrap());
+        assert_eq!(document.text(), "");
+        assert_fields(&session, &[(0, 0), (0, 0), (0, 0)]);
+        assert!(document.redo().unwrap());
+        assert!(document.redo().unwrap());
+        assert_eq!(document.text(), "😀x😀x😀x");
+        assert_fields(&session, &[(0, 3), (3, 3), (6, 3)]);
+        session.replace_active("z").unwrap();
+        assert_eq!(document.text(), "zzz");
+        assert_fields(&session, &[(0, 1), (1, 1), (2, 1)]);
+    }
+
+    #[test]
+    fn adjacent_placeholders_only_accept_insertions_into_the_active_field() {
+        let document = TextDocument::new();
+        let session = Snippet::parse("${1:a}${2:b}$1$2$0")
+            .unwrap()
+            .insert(document.clone(), 0, "")
+            .unwrap();
+        document.insert(1, "😀").unwrap();
+        assert_eq!(document.text(), "a😀ba😀b");
+        assert_fields(&session, &[(0, 3), (3, 1), (4, 3), (7, 1)]);
+        assert_eq!(session.next_element(false), Some(SimpleSegment::new(3, 1)));
+        document.insert(3, "z").unwrap();
+        assert_eq!(document.text(), "a😀zba😀zb");
+        assert_fields(&session, &[(0, 3), (3, 2), (5, 3), (8, 2)]);
+        assert_eq!(session.next_element(true), Some(SimpleSegment::new(0, 3)));
+        document.insert(0, "!").unwrap();
+        assert_eq!(document.text(), "!a😀zb!a😀zb");
+        assert_fields(&session, &[(0, 4), (4, 2), (6, 4), (10, 2)]);
+        assert_eq!(session.caret_offset(), Some(12));
+    }
+
+    #[test]
+    fn empty_fields_follow_source_order_when_tab_order_differs() {
+        let document = TextDocument::new();
+        let session = Snippet::parse("$3$2$1$2$3$0")
+            .unwrap()
+            .insert(document.clone(), 0, "")
+            .unwrap();
+        assert_eq!(session.active_placeholder(), Some(1));
+        session.replace_active("😀").unwrap();
+        assert_eq!(document.text(), "😀");
+        assert_fields(&session, &[(0, 0), (0, 0), (0, 2), (2, 0), (2, 0)]);
+        assert_eq!(session.next_element(false), Some(SimpleSegment::new(0, 0)));
+        assert_eq!(session.active_placeholder(), Some(2));
+        session.replace_active("b").unwrap();
+        assert_eq!(document.text(), "b😀b");
+        assert_fields(&session, &[(0, 0), (0, 1), (1, 2), (3, 1), (4, 0)]);
+        assert_eq!(session.next_element(false), Some(SimpleSegment::new(0, 0)));
+        assert_eq!(session.active_placeholder(), Some(3));
+        session.replace_active("c").unwrap();
+        assert_eq!(document.text(), "cb😀bc");
+        assert_fields(&session, &[(0, 1), (1, 1), (2, 2), (4, 1), (5, 1)]);
+    }
+
+    #[test]
+    fn collapsed_fields_restore_ownership_when_history_replays_after_navigation() {
+        let document = TextDocument::new();
+        let session = Snippet::parse("${1:A}${2:B}$1$2$0")
+            .unwrap()
+            .insert(document.clone(), 0, "")
+            .unwrap();
+        session.replace_active("").unwrap();
+        assert_eq!(document.text(), "BB");
+        assert_eq!(session.next_element(false), Some(SimpleSegment::new(0, 1)));
+        session.replace_active("").unwrap();
+        assert_eq!(document.text(), "");
+        assert_fields(&session, &[(0, 0), (0, 0), (0, 0), (0, 0)]);
+
+        assert!(document.undo().unwrap());
+        assert_eq!(document.text(), "BB");
+        assert_fields(&session, &[(0, 0), (0, 1), (1, 0), (1, 1)]);
+        assert!(document.undo().unwrap());
+        assert_eq!(document.text(), "ABAB");
+        assert_fields(&session, &[(0, 1), (1, 1), (2, 1), (3, 1)]);
+        assert_eq!(session.active_segment(), Some(SimpleSegment::new(1, 1)));
+        assert!(document.redo().unwrap());
+        assert_eq!(document.text(), "BB");
+        assert_eq!(session.active_segment(), Some(SimpleSegment::new(0, 1)));
+        assert!(document.redo().unwrap());
+        assert_eq!(document.text(), "");
+        session.replace_active("😀").unwrap();
+        assert_eq!(document.text(), "😀😀");
+        assert_fields(&session, &[(0, 0), (0, 2), (2, 0), (2, 2)]);
+        assert_eq!(session.next_element(true), Some(SimpleSegment::new(0, 0)));
+        session.replace_active("x").unwrap();
+        assert_eq!(document.text(), "x😀x😀");
+        assert_fields(&session, &[(0, 1), (1, 2), (3, 1), (4, 2)]);
+    }
+
+    #[test]
+    fn final_caret_retains_its_position_between_coincident_fields() {
+        for (source, expected) in [("$0$1$1", 0), ("$1$0$1", 2), ("$1$1$0", 4), ("$1$1", 4)] {
+            let document = TextDocument::new();
+            let session = Snippet::parse(source)
+                .unwrap()
+                .insert(document.clone(), 0, "")
+                .unwrap();
+            session.replace_active("😀").unwrap();
+            assert_eq!(document.text(), "😀😀", "{source}");
+            assert_eq!(session.caret_offset(), Some(expected), "{source}");
+            assert!(document.undo().unwrap());
+            assert_eq!(session.caret_offset(), Some(0), "{source}");
+            assert!(document.redo().unwrap());
+            assert_eq!(session.caret_offset(), Some(expected), "{source}");
+        }
+    }
+
+    #[test]
+    fn prepared_nested_fields_preserve_boundaries_at_nonzero_offsets() {
+        let document = TextDocument::from_text("[]");
+        let snippet = Snippet {
+            elements: vec![
+                SnippetElement::Bound { id: 1 },
+                SnippetElement::Container(vec![
+                    SnippetElement::Caret,
+                    SnippetElement::Replaceable {
+                        id: 1,
+                        text: String::new(),
+                    },
+                ]),
+            ],
+        };
+        let prepared = snippet.prepare("").unwrap();
+        document.insert(1, prepared.text()).unwrap();
+        let session = prepared.activate(document.clone(), 1).unwrap();
+        assert_eq!(session.active_segment(), Some(SimpleSegment::new(1, 0)));
+        session.replace_active("😀").unwrap();
+        assert_eq!(document.text(), "[😀😀]");
+        assert_fields(&session, &[(1, 2), (3, 2)]);
+        assert_eq!(session.active_segment(), Some(SimpleSegment::new(3, 2)));
+        assert_eq!(session.caret_offset(), Some(3));
+    }
+
+    #[test]
+    fn protected_coincident_mirrors_are_all_checked_before_any_mirror_changes() {
+        let document = TextDocument::new();
+        let session = Snippet::parse("$1$1$1$0")
+            .unwrap()
+            .insert(document.clone(), 0, "")
+            .unwrap();
+        let checked = Rc::new(RefCell::new(Vec::new()));
+        let captured = checked.clone();
+        session.set_edit_validator(Some(Rc::new(move |edits| {
+            *captured.borrow_mut() = edits.to_vec();
+            Err(DocumentError::ReadOnly)
+        })));
+        document.insert(0, "x").unwrap();
+        assert_eq!(
+            *checked.borrow(),
+            [DocumentEdit::new(1, 0, "x"), DocumentEdit::new(1, 0, "x")]
+        );
+        assert_eq!(document.text(), "x");
+        assert!(session.is_closed());
+        assert_eq!(session.error(), Some(DocumentError::ReadOnly.to_string()));
+        assert!(matches!(
+            session.replace_active("y"),
+            Err(SnippetError::Closed)
+        ));
+        assert!(document.undo().unwrap());
+        assert_eq!(document.text(), "");
+    }
+
+    #[test]
+    fn history_and_subscriptions_do_not_retain_dropped_sessions() {
+        let document = TextDocument::new();
+        let session = Snippet::parse("$1$1")
+            .unwrap()
+            .insert(document.clone(), 0, "")
+            .unwrap();
+        session.replace_active("x").unwrap();
+        let weak = Rc::downgrade(&session.inner);
+        drop(session);
+        assert!(weak.upgrade().is_none());
+        assert!(document.undo().unwrap());
+        assert_eq!(document.text(), "");
+        assert!(document.redo().unwrap());
+        assert_eq!(document.text(), "xx");
+    }
+
     #[test]
     fn rejected_mirror_stops_session_without_writing_protected_text() {
         let document = TextDocument::new();

@@ -1,6 +1,9 @@
-use crate::{read_json, regex_source::RegexCache, Error, Registry, Result, Theme};
+use crate::{
+    read_json, regex_source::RegexCache, Error, GrammarConfiguration, GrammarContribution,
+    GrammarDefinition, IRegistryOptions, LanguageSnippets, RawGrammar, Registry, Result, Theme,
+};
 use serde_json::Value;
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, fmt, rc::Rc};
 
 include!(concat!(env!("OUT_DIR"), "/resources.rs"));
 
@@ -43,10 +46,31 @@ pub struct Language {
     pub extensions: Vec<String>,
     pub filenames: Vec<String>,
     pub first_line: Option<String>,
+    pub mime_types: Vec<String>,
+    pub configuration_file: Option<String>,
     pub scope_name: Option<String>,
     pub configuration: Option<LanguageConfiguration>,
     /// Snippet definitions retain prefix, body, description, and scope fields.
     pub snippets: BTreeMap<String, Value>,
+}
+impl Language {
+    pub fn typed_snippets(&self) -> Result<LanguageSnippets> {
+        LanguageSnippets::from_value(&Value::Object(
+            self.snippets
+                .iter()
+                .map(|(key, value)| (key.clone(), value.clone()))
+                .collect(),
+        ))
+    }
+}
+impl fmt::Display for Language {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(alias) = self.aliases.first() {
+            write!(formatter, "{alias} ({})", self.id)
+        } else {
+            formatter.write_str(&self.id)
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -129,12 +153,20 @@ impl ThemeName {
 pub struct BundledCatalog {
     languages: Vec<Language>,
     grammar_paths: Vec<String>,
+    packages: Vec<(String, GrammarDefinition)>,
+    grammar_contributions: Vec<GrammarContribution>,
+    default_theme: ThemeName,
     detection_cache: RegexCache,
 }
 impl BundledCatalog {
     pub fn new() -> Result<Self> {
+        Self::with_default_theme(ThemeName::DarkPlus)
+    }
+    pub fn with_default_theme(default_theme: ThemeName) -> Result<Self> {
         let mut languages = Vec::new();
         let mut grammar_paths = Vec::new();
+        let mut packages = Vec::new();
+        let mut grammar_contributions = Vec::new();
         for (path, source) in RESOURCES {
             if !path.starts_with("grammars/") || !path.ends_with("/package.json") {
                 continue;
@@ -144,6 +176,13 @@ impl BundledCatalog {
                 continue;
             };
             let directory = path.rsplit_once('/').map_or("", |(p, _)| p);
+            let definition = GrammarDefinition::from_json(source)?;
+            for grammar in &definition.contributes.grammars {
+                let mut grammar = grammar.clone();
+                grammar.path = normalize(&format!("{directory}/{}", grammar.path));
+                grammar_contributions.push(grammar);
+            }
+            packages.push((directory.to_owned(), definition));
             let grammars = contributes.get("grammars").and_then(Value::as_array);
             if let Some(grammars) = grammars {
                 for grammar in grammars {
@@ -201,6 +240,11 @@ impl BundledCatalog {
                             .get("firstLine")
                             .and_then(Value::as_str)
                             .map(str::to_owned),
+                        mime_types: strings(entry.get("mimetypes")),
+                        configuration_file: entry
+                            .get("configuration")
+                            .and_then(Value::as_str)
+                            .map(|name| normalize(&format!("{directory}/{name}"))),
                         scope_name,
                         configuration,
                         snippets,
@@ -214,11 +258,53 @@ impl BundledCatalog {
         Ok(Self {
             languages,
             grammar_paths,
+            packages,
+            grammar_contributions,
+            default_theme,
             detection_cache: RegexCache::default(),
         })
     }
     pub fn languages(&self) -> &[Language] {
         &self.languages
+    }
+    pub fn packages(&self) -> impl Iterator<Item = (&str, &GrammarDefinition)> {
+        self.packages
+            .iter()
+            .map(|(directory, package)| (directory.as_str(), package))
+    }
+    pub fn grammar_contributions(&self) -> &[GrammarContribution] {
+        &self.grammar_contributions
+    }
+    pub fn grammar_by_scope(&self, scope: &str) -> Option<&GrammarContribution> {
+        self.grammar_contributions
+            .iter()
+            .find(|grammar| grammar.scope_name == scope)
+    }
+    pub fn grammar_configuration(
+        &self,
+        scope: &str,
+        language_id: impl Fn(&str) -> Option<u8>,
+    ) -> Result<GrammarConfiguration> {
+        self.grammar_by_scope(scope)
+            .ok_or_else(|| Error::MissingGrammar(scope.into()))?
+            .configuration(language_id)
+    }
+    pub fn language_by_alias(&self, alias: &str) -> Option<&Language> {
+        self.languages.iter().find(|language| {
+            language.id.eq_ignore_ascii_case(alias)
+                || language
+                    .aliases
+                    .iter()
+                    .any(|name| name.eq_ignore_ascii_case(alias))
+        })
+    }
+    pub fn language_by_mime_type(&self, mime_type: &str) -> Option<&Language> {
+        self.languages.iter().find(|language| {
+            language
+                .mime_types
+                .iter()
+                .any(|mime| mime.eq_ignore_ascii_case(mime_type))
+        })
     }
     pub fn language_by_id(&self, id: &str) -> Option<&Language> {
         self.languages
@@ -282,7 +368,18 @@ impl BundledCatalog {
         for path in &self.grammar_paths {
             registry.add_grammar_json(Self::resource(path)?)?;
         }
+        for grammar in &self.grammar_contributions {
+            registry.set_injections(
+                grammar.scope_name.clone(),
+                self.get_injections(&grammar.scope_name)?,
+            );
+        }
         Ok(registry)
+    }
+    /// Creates a lazy registry backed by this catalog's resources. The selected
+    /// default theme and declared injectTo dependencies are loaded on demand.
+    pub fn lazy_registry(self: Rc<Self>) -> Result<Registry> {
+        Registry::with_options(self)
     }
     pub fn theme(&self, theme: ThemeName) -> Result<Theme> {
         let source = Self::resource(&format!("themes/{}", theme.resource_name()))?;
@@ -299,6 +396,36 @@ impl BundledCatalog {
     }
     pub fn resource_names() -> impl Iterator<Item = &'static str> {
         RESOURCES.iter().map(|(name, _)| *name)
+    }
+}
+impl IRegistryOptions for BundledCatalog {
+    fn get_grammar(&self, scope_name: &str) -> Result<Option<RawGrammar>> {
+        self.grammar_by_scope(scope_name)
+            .map(|grammar| RawGrammar::from_json(Self::resource(&grammar.path)?))
+            .transpose()
+    }
+    fn get_injections(&self, scope_name: &str) -> Result<Vec<String>> {
+        Ok(self
+            .grammar_contributions
+            .iter()
+            .filter(|grammar| grammar.inject_to.iter().any(|target| target == scope_name))
+            .map(|grammar| grammar.scope_name.clone())
+            .collect())
+    }
+    fn get_theme(&self, name: &str) -> Result<Option<String>> {
+        let path = if name.starts_with("themes/") {
+            name.to_owned()
+        } else {
+            format!("themes/{name}")
+        };
+        match Self::resource(&path) {
+            Ok(source) => Ok(Some(source.into())),
+            Err(Error::MissingResource(_)) => Ok(None),
+            Err(error) => Err(error),
+        }
+    }
+    fn get_default_theme(&self) -> Result<Option<String>> {
+        self.get_theme(self.default_theme.resource_name())
     }
 }
 fn normalize(path: &str) -> String {

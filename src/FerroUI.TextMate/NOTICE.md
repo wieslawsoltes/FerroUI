@@ -17,6 +17,12 @@ locations, and any case where the notice had to be recovered from a different
 revision. Full notices are under `resources/licenses/`. Copyright and license
 headers within the resources are retained.
 
+The two theme regression fixtures under `tests/fixtures/theme-dark-*.json`
+are copied from `src/TextMateSharp.Tests/Resources` at the same pinned revision.
+They derive from Microsoft's default editor themes. The full Microsoft MIT
+notice is retained in `resources/licenses/microsoft--vscode--main.md`; the
+fixture paths and hashes are recorded in `resources/versions.json`.
+
 The browser scanner bundles the unmodified JavaScript and WebAssembly artifacts
 from `vscode-oniguruma` 2.0.1, distributed by Microsoft under the MIT license.
 `browser/vendor/LICENSE.txt` and `browser/vendor/NOTICES.txt` contain the full
