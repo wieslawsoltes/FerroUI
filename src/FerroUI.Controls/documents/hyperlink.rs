@@ -1,13 +1,13 @@
 use super::{Inline, InlineImpl, Span, TextElementImpl};
 use crate::{Control, TopLevel};
 use ferroui_base::input::Key;
-use ferroui_base::metadata::{MarkupDelegate, into_markup_value};
+use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::utilities::{HandlerList, Uri};
 use ferroui_base::{
-    FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref,
-    StyledElementImpl, StyledProperty, ferro_class, instantiate,
+    ferro_class, instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
+    FerroPropertyChangedEventArgs, Ref, StyledElementImpl, StyledProperty,
 };
 use std::cell::Cell;
 use std::rc::Rc;
@@ -49,6 +49,38 @@ ferroui_base::ferro_markup_type!(class HyperlinkClickEventArgs {
     ],
 });
 
+/// Captured event-list identity for a structured hyperlink snapshot. It keeps
+/// the listeners alive without retaining the old parented content tree. Event
+/// lists are runtime behavior, so they do not participate in value equality of
+/// document content or create otherwise empty undo units.
+#[derive(Clone, Default)]
+pub struct HyperlinkBehavior {
+    handlers: Option<(
+        Rc<HandlerList<dyn Fn(&HyperlinkClickEventArgs)>>,
+        Rc<HandlerList<dyn Fn(&HyperlinkClickEventArgs)>>,
+    )>,
+}
+impl HyperlinkBehavior {
+    pub(crate) fn shares_handlers(&self, other: &Self) -> bool {
+        match (&self.handlers, &other.handlers) {
+            (Some((left_click, left_navigation)), Some((right_click, right_navigation))) => {
+                Rc::ptr_eq(left_click, right_click) && Rc::ptr_eq(left_navigation, right_navigation)
+            }
+            _ => false,
+        }
+    }
+}
+impl std::fmt::Debug for HyperlinkBehavior {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str("HyperlinkBehavior")
+    }
+}
+impl PartialEq for HyperlinkBehavior {
+    fn eq(&self, _: &Self) -> bool {
+        true
+    }
+}
+
 /// An interactive span. Its host supplies hit testing/focus and forwards pointer
 /// and keyboard gestures; invocation and URI launch use the framework services.
 #[repr(C)]
@@ -59,6 +91,7 @@ pub struct Hyperlink {
     is_pointer_over: Cell<bool>,
     is_pressed: Cell<bool>,
     is_focused: Cell<bool>,
+    field_id: Cell<Option<u64>>,
 }
 
 ferro_class!(Hyperlink: Span);
@@ -155,11 +188,38 @@ impl Hyperlink {
             is_pointer_over: Cell::new(false),
             is_pressed: Cell::new(false),
             is_focused: Cell::new(false),
+            field_id: Cell::new(None),
         }
     }
 
     pub fn new() -> Ref<Self> {
         instantiate(Self::construct())
+    }
+
+    pub(crate) fn field_id(&self) -> Option<u64> {
+        self.field_id.get()
+    }
+
+    pub(crate) fn set_field_id(&self, value: Option<u64>) {
+        self.field_id.set(value);
+    }
+
+    pub(crate) fn snapshot_behavior(&self) -> HyperlinkBehavior {
+        HyperlinkBehavior {
+            handlers: Some((
+                self.click_handlers.clone(),
+                self.navigation_handlers.clone(),
+            )),
+        }
+    }
+
+    pub(crate) fn with_snapshot_behavior(behavior: &HyperlinkBehavior) -> Ref<Self> {
+        let mut value = Self::construct();
+        if let Some((click, navigation)) = &behavior.handlers {
+            value.click_handlers = click.clone();
+            value.navigation_handlers = navigation.clone();
+        }
+        instantiate(value)
     }
 
     pub(crate) fn with_behavior_from(source: &Self) -> Ref<Self> {

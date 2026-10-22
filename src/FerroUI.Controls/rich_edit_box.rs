@@ -64,6 +64,9 @@ mod format_commands;
 #[path = "rich_edit_context_menu.rs"]
 mod context_menu;
 
+#[path = "rich_edit_fragment_filter.rs"]
+mod fragment_filter;
+
 /// Character casing applied to newly entered text, including clipboard and IME commits.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 #[repr(i32)]
@@ -789,7 +792,14 @@ ferroui_base::ferro_properties! { impl RichEditBox {
     pub fn is_italic_property() -> DirectProperty<RichEditBox, bool> { FerroProperty::register_direct::<RichEditBox, _>("IsItalic", Self::is_italic, None, false) }
     pub fn is_underlined_property() -> DirectProperty<RichEditBox, bool> { FerroProperty::register_direct::<RichEditBox, _>("IsUnderlined", Self::is_underlined, None, false) }
     pub fn text_property() -> DirectProperty<RichEditBox, String> {
-        FerroProperty::register_direct::<RichEditBox, String>("Text", |this| this.text(), Some(|this, value| { this.handle_edit(this.set_text(&value)); }), String::new())
+        FerroProperty::register_direct::<RichEditBox, String>("Text", |this| this.text(), Some(|this, value| {
+            // A TwoWay binding echoes a document change through this setter.
+            // Equal text must not flatten formatting, reset selection, or clear
+            // history while an edit or undo is publishing its new content.
+            if this.text() != value {
+                this.handle_edit(this.set_text(&value));
+            }
+        }), String::new())
     }
 } }
 
@@ -1861,38 +1871,11 @@ impl RichEditBox {
             RichEditCharacterCasing::Upper => text.to_uppercase(),
         }
     }
-    fn filter_fragment(&self, fragment: &DocumentSnapshot) -> DocumentSnapshot {
-        fn filter_inlines(owner: &RichEditBox, inlines: &mut Vec<InlineSnapshot>) {
-            inlines.retain_mut(|inline| {
-                match &mut inline.kind {
-                    InlineSnapshotKind::Run(text) => *text = owner.filter_input(text),
-                    InlineSnapshotKind::LineBreak if !owner.accepts_return() => return false,
-                    _ => {}
-                }
-                if let Some(children) = inline.children_mut() {
-                    filter_inlines(owner, children);
-                }
-                true
-            });
-        }
-        let mut fragment = fragment.clone();
-        for paragraph in &mut fragment.paragraphs {
-            filter_inlines(self, &mut paragraph.inlines);
-        }
-        if !self.accepts_return() && fragment.paragraphs.len() > 1 {
-            let mut paragraphs = fragment.paragraphs.into_iter();
-            let mut first = paragraphs
-                .next()
-                .expect("The fragment has multiple paragraphs.");
-            for paragraph in paragraphs {
-                first.inlines.push(InlineSnapshot {
-                    format: paragraph.format.character,
-                    kind: InlineSnapshotKind::Span(paragraph.inlines),
-                });
-            }
-            fragment.paragraphs = vec![first];
-        }
-        fragment
+    fn filter_fragment(
+        &self,
+        fragment: &DocumentSnapshot,
+    ) -> Result<DocumentSnapshot, crate::documents::DocumentError> {
+        fragment_filter::filter(self, fragment)
     }
     pub fn insert_text(&self, text: &str) -> Result<bool, EditError> {
         let editor = self.editor();
@@ -2347,7 +2330,25 @@ impl RichEditBox {
             {
                 return Err(ClipboardError::from_kind(ClipboardErrorKind::Canceled));
             }
+            // Copying a custom character-format service may execute application
+            // code. Observe accepted editor changes while filtering, then reject
+            // the older paste without rolling back the callback's newer state.
+            let editor = this.editor();
+            let changed = Rc::new(Cell::new(false));
+            let observed = changed.clone();
+            let subscription = editor.changed(move || observed.set(true));
             let fragment = this.filter_fragment(&fragment);
+            subscription.dispose();
+            let fragment = fragment.map_err(|error| ClipboardError::other(error.to_string()))?;
+            if changed.get()
+                || !Rc::ptr_eq(&editor, &this.editor())
+                || this.document() != document
+                || document.mutation_version() != mutation
+                || this.selection() != selection
+                || this.is_read_only()
+            {
+                return Err(ClipboardError::from_kind(ClipboardErrorKind::Canceled));
+            }
             this.replace_selection(&fragment)
                 .map_err(|error| ClipboardError::other(error.to_string()))?;
             Ok(())

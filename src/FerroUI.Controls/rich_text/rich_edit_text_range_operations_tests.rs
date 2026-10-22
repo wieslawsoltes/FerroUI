@@ -320,6 +320,8 @@ fn rich_range_delete_keeps_nested_formatting_and_embedded_control_identity() {
                         ..Default::default()
                     },
                     kind: InlineSnapshotKind::Hyperlink {
+                        field_id: None,
+                        behavior: Default::default(),
                         inlines: vec![InlineSnapshot::run("ab😀cd")],
                         navigate_uri: Some("https://example.test/kept".to_owned()),
                         target_name: None,
@@ -337,6 +339,7 @@ fn rich_range_delete_keeps_nested_formatting_and_embedded_control_identity() {
             ],
             ..Default::default()
         }],
+        ..Default::default()
     };
     let model = RichTextDocument::new();
     model.restore(&snapshot).unwrap();
@@ -849,6 +852,7 @@ fn rich_range_character_replaces_inline_object_with_its_assigned_container_conte
             ],
             ..Default::default()
         }],
+        ..Default::default()
     };
     let view = RichTextBlock::new();
     view.set_font_size(18.0);
@@ -1029,4 +1033,34 @@ fn rich_range_changed_operations_recapture_committed_content_after_preview_cance
     assert!(!document.editor().is_composing());
     document.undo().unwrap();
     assert_eq!(document.text(), "abcd");
+}
+
+#[test]
+fn rich_range_character_external_format_starts_one_current_history_unit() {
+    let _scope = Dispatcher::unit_test_scope();
+    let document = services("seed");
+    document.set_text("abc").unwrap();
+    assert!(document.can_undo());
+    document.selection().set_range(2, 0).unwrap();
+    document.document().paragraphs()[0].set_font_size(18.0);
+    let before = document.document().snapshot();
+    assert!(!document.can_undo());
+
+    assert!(document
+        .get_range(1, 1)
+        .unwrap()
+        .set_character_scalar('😀')
+        .unwrap());
+    assert_eq!(document.text(), "a😀c");
+    assert_eq!(document.selection().selection(), EditorSelection::new(3, 0));
+    let after = document.document().snapshot();
+    assert_eq!(after.paragraphs[0].format.character.font_size, Some(18.0));
+    assert_eq!(after.paragraphs[0].inlines[0].format.font_size, None);
+    assert!(document.can_undo());
+    assert!(document.undo().unwrap());
+    assert_eq!(document.document().snapshot(), before);
+    assert_eq!(document.selection().selection(), EditorSelection::new(2, 0));
+    assert!(!document.can_undo());
+    assert!(document.redo().unwrap());
+    assert_eq!(document.document().snapshot(), after);
 }

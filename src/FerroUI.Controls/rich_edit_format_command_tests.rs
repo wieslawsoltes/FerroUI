@@ -50,6 +50,7 @@ fn mixed_editor() -> ferroui_base::Ref<RichEditBox> {
                     ),
                 ],
             }],
+            ..Default::default()
         })
         .unwrap();
     editor.select(4, 0);

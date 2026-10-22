@@ -4,6 +4,7 @@ mod block;
 mod block_collection;
 mod bold;
 mod character_format;
+mod document_link_field;
 mod document_snapshot;
 mod hyperlink;
 mod i_inline_host;
@@ -19,11 +20,11 @@ mod rich_text_document;
 mod run;
 mod span;
 mod text_element;
-pub(crate) mod text_language;
 mod text_highlight_merge;
 mod text_highlight_range;
 mod text_highlighter;
 mod text_highlighter_collection;
+pub(crate) mod text_language;
 mod text_position;
 mod typography;
 mod typography_format;
@@ -33,10 +34,14 @@ pub use block::{Block, BlockImpl, BlockImplExt, BlockVTable, LineStackingStrateg
 pub use block_collection::BlockCollection;
 pub use bold::Bold;
 pub use character_format::{CharacterFormat, ParagraphFormat};
+pub use document_link_field::DocumentLinkField;
 pub use document_snapshot::{
     DocumentSnapshot, InlineSnapshot, InlineSnapshotKind, ParagraphSnapshot,
 };
-pub use hyperlink::{Hyperlink, HyperlinkClickEventArgs, UnderlineStyle};
+pub use ferroui_base::media::text_formatting::{
+    TabAlignment, TabLeader, TextTabStop, TextTabStops,
+};
+pub use hyperlink::{Hyperlink, HyperlinkBehavior, HyperlinkClickEventArgs, UnderlineStyle};
 pub use i_inline_host::IInlineHost;
 pub use inline::{Inline, InlineImpl, InlineImplExt, InlineVTable};
 pub use inline_collection::InlineCollection;
@@ -46,7 +51,6 @@ pub use italic::Italic;
 pub use line_break::LineBreak;
 pub use line_spacing_rule::LineSpacingRule;
 pub use paragraph::Paragraph;
-pub use ferroui_base::media::text_formatting::{TabAlignment, TabLeader, TextTabStop, TextTabStops};
 pub use rich_text_document::{
     DocumentChangeKind, DocumentChangedEventArgs, DocumentEditBatch, DocumentError,
     DocumentTextChange, RichTextDocument, WeakRichTextDocument,

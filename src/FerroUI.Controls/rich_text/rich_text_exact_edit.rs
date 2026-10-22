@@ -17,12 +17,15 @@ impl RichTextEditor {
         if self.is_composing() {
             return Err(EditError::ReentrantEdit);
         }
-        let before = self.capture();
+        let checkpoint = self.selection_format_checkpoint();
+        let before = Rc::new(self.capture());
         let selection = before.selection;
+        let clean = Rc::new(before.document.clone());
+        self.ensure_selection_format(checkpoint)?;
         let version = self.document.mutation_version();
         self.history.borrow_mut().composition = Some(Composition {
             exact: Some(ExactComposition {
-                document: before.document.clone(),
+                document: clean,
                 range: None,
             }),
             before,
@@ -57,6 +60,7 @@ impl RichTextEditor {
         }
         let _operation = self.enter(true)?;
         self.synchronize();
+        let read_checkpoint = self.selection_format_checkpoint();
         let previous = self.history.borrow().composition.clone();
         if previous.is_some() && (!composing || previous.as_ref().unwrap().exact.is_none()) {
             return Err(rejected());
@@ -64,21 +68,39 @@ impl RichTextEditor {
         let visible = self.capture();
         let before = previous
             .as_ref()
-            .map_or_else(|| visible.clone(), |old| old.before.clone());
+            .map_or_else(|| Rc::new(visible.clone()), |old| old.before.clone());
+        self.ensure_selection_format(read_checkpoint)?;
         let requested_selection =
             EditorSelection::new(edit.selection.start as usize, edit.selection.end as usize);
         let text_changed = self.document.get_text(range.clone())? != edit.text;
         let batch = self.document.begin_edit();
+        let external_generation = self.external_change_generation();
+        let history_generation = self.history_clear_generation.get();
+        let mut format_metadata_failure = false;
         let result = (|| -> Result<(), EditError> {
             if let Some(exact) = previous.as_ref().and_then(|old| old.exact.as_ref()) {
-                self.document.restore(&exact.document)?;
+                self.restore_document_snapshot(&exact.document)?;
             }
             if text_changed {
+                let format = if edit.text.is_empty() {
+                    CharacterFormat::default()
+                } else {
+                    let format_version = self.document.mutation_version();
+                    match self.insertion_character_format(&range) {
+                        Ok(format) => format,
+                        Err(error) => {
+                            format_metadata_failure = self.document.mutation_version()
+                                == format_version
+                                && self.external_change_generation() == external_generation
+                                && self.history_clear_generation.get() == history_generation;
+                            return Err(error);
+                        }
+                    }
+                };
                 self.document.replace_text(range.clone(), &edit.text)?;
                 let end = range.start + edit.text.encode_utf16().count();
                 if end > range.start {
-                    self.document
-                        .apply_format(range.start..end, &self.typing_format())?;
+                    self.document.apply_format(range.start..end, &format)?;
                 }
                 if visible.document.text_length() == 0 || self.document.text_length() == 0 {
                     self.document.apply_paragraph_format(
@@ -121,7 +143,7 @@ impl RichTextEditor {
                     preview_version: self.document.mutation_version(),
                     preview_text,
                     exact: Some(ExactComposition {
-                        document: clean,
+                        document: Rc::new(clean),
                         range: Some(active_range),
                     }),
                 });
@@ -139,7 +161,9 @@ impl RichTextEditor {
         if let Err(error) = result {
             // Application edits made from a routed selection callback own their
             // new state. Never restore a stale snapshot over those edits.
-            if !matches!(error, EditError::ReentrantEdit) {
+            if !matches!(error, EditError::ReentrantEdit) || format_metadata_failure {
+                // An affinity-only read failure owns no new model content. Keep
+                // its newer metadata while restoring the original IME preview.
                 self.restore_composition_state(&visible, previous)?;
             } else {
                 self.clear_history();
@@ -166,7 +190,10 @@ impl RichTextEditor {
             self.publish_changed();
         } else {
             self.checkpoint();
-            self.record(before, EditKind::Programmatic);
+            self.record(
+                Rc::try_unwrap(before).unwrap_or_else(|snapshot| (*snapshot).clone()),
+                EditKind::Programmatic,
+            );
         }
         if self.document.mutation_version() != accepted_version
             || self.document.text() != expected_text
@@ -188,9 +215,11 @@ impl RichTextEditor {
         if composition.preview_version != self.document.mutation_version() {
             return Err(EditError::ReentrantEdit);
         }
-        let changed = composition.before.document != exact.document;
+        let checkpoint = self.selection_format_checkpoint();
+        let changed = composition.before.document != *exact.document;
+        self.ensure_selection_format(checkpoint)?;
         let batch = self.document.begin_edit();
-        self.document.restore(&exact.document)?;
+        self.restore_document_snapshot(&exact.document)?;
         self.history.borrow_mut().composition = None;
         let version = self.document.mutation_version();
         drop(batch);
@@ -203,7 +232,10 @@ impl RichTextEditor {
         self.queue_composition_change(RichTextCompositionChange::Finalized {
             text: composition.preview_text,
         });
-        self.record(composition.before, EditKind::Composition);
+        self.record(
+            Rc::try_unwrap(composition.before).unwrap_or_else(|snapshot| (*snapshot).clone()),
+            EditKind::Composition,
+        );
         if version != self.document.mutation_version() || self.is_composing() {
             self.synchronize();
             return Err(EditError::ReentrantEdit);

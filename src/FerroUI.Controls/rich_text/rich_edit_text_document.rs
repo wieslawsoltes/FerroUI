@@ -39,6 +39,9 @@ pub use selection_options::{SelectionOptions, SelectionType};
 mod range_gravity;
 pub use range_gravity::RangeGravity;
 
+#[path = "rich_edit_text_selection_gravity.rs"]
+mod selection_gravity;
+
 #[path = "rich_edit_text_units.rs"]
 mod units;
 use units::TextUnits;
@@ -816,6 +819,21 @@ impl RichEditTextRange {
     }
 
     pub fn set_snapshot(&self, snapshot: &DocumentSnapshot) -> Result<(), EditError> {
+        self.set_snapshot_core(snapshot, false)
+    }
+
+    fn set_snapshot_preserving_link_fields(
+        &self,
+        snapshot: &DocumentSnapshot,
+    ) -> Result<(), EditError> {
+        self.set_snapshot_core(snapshot, true)
+    }
+
+    fn set_snapshot_core(
+        &self,
+        snapshot: &DocumentSnapshot,
+        preserve_fields: bool,
+    ) -> Result<(), EditError> {
         snapshot.validate()?;
         self.editor.prepare_edit()?;
         if snapshot.paragraphs.is_empty() {
@@ -860,6 +878,8 @@ impl RichEditTextRange {
                     document.paragraphs[index] = paragraph;
                     editor.document().restore(&document)?;
                 }
+            } else if preserve_fields {
+                editor.insert_fragment_preserving_link_fields(snapshot, EditKind::Programmatic)?;
             } else {
                 editor.insert_fragment(snapshot, EditKind::Paste)?;
             }
@@ -1321,13 +1341,14 @@ impl RichEditTextSelection {
     /// Unlike the insertion-format convenience getter, this query reports mixed
     /// formatting across a nonempty selection instead of choosing its first run.
     pub fn character_format_value(&self) -> Result<TextFormatValue<CharacterFormat>, EditError> {
-        if self.selection().is_empty() {
-            Ok(TextFormatValue::Uniform(
-                self.editor.current_character_format()?,
-            ))
+        let checkpoint = self.editor.selection_format_checkpoint();
+        let value = if self.selection().is_empty() {
+            TextFormatValue::Uniform(self.editor.current_character_format()?)
         } else {
-            self.range()?.character_format()
-        }
+            self.range()?.character_format()?
+        };
+        self.editor.ensure_selection_format(checkpoint)?;
+        Ok(value)
     }
     pub fn paragraph_format(&self) -> Result<TextFormatValue<ParagraphFormat>, EditError> {
         self.range()?.paragraph_format()

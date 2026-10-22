@@ -104,6 +104,7 @@ fn semantic_snapshot_containers_keep_defaults_under_inherited_parent_formatting(
                 },
                 inlines: vec![wrapped],
             }],
+            ..Default::default()
         })
         .unwrap();
     let format = document.character_format_at(1).unwrap();
@@ -470,6 +471,7 @@ fn duplicate_embedded_controls_and_foreign_parents_are_rejected_atomically() {
             format: ParagraphFormat::default(),
             inlines: vec![control.clone(), control.clone()],
         }],
+        ..Default::default()
     };
     assert_eq!(
         document.restore(&duplicated),
@@ -481,6 +483,7 @@ fn duplicate_embedded_controls_and_foreign_parents_are_rejected_atomically() {
             format: ParagraphFormat::default(),
             inlines: vec![control],
         }],
+        ..Default::default()
     };
     assert_eq!(
         document.restore(&other),

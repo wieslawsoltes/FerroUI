@@ -626,6 +626,7 @@ fn rich_tom_rich_paste_retains_nested_formatting_and_snapshot_undo() {
                 inlines: vec![InlineSnapshot::run("tail")],
             },
         ],
+        ..Default::default()
     };
     let item = DataTransferItem::new();
     item.set(&RichTextTransfer::document_format(), Some(snapshot.clone()));

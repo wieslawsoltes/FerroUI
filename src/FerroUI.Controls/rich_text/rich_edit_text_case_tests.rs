@@ -45,6 +45,7 @@ fn rich_text_case_contextual_sigma_crosses_formatted_run_boundaries() {
                 InlineSnapshot::run(" ΟΣΑ İ"),
             ],
         }],
+        ..Default::default()
     };
     let model = RichTextDocument::new();
     model.restore(&snapshot).unwrap();
@@ -74,6 +75,8 @@ fn rich_text_case_preserves_nested_links_soft_breaks_paragraph_formats_and_contr
                     InlineSnapshot {
                         format: CharacterFormat::default(),
                         kind: InlineSnapshotKind::Hyperlink {
+                            field_id: None,
+                            behavior: Default::default(),
                             inlines: vec![InlineSnapshot {
                                 format: CharacterFormat::default(),
                                 kind: InlineSnapshotKind::Italic(vec![InlineSnapshot::run("aß")]),
@@ -103,6 +106,7 @@ fn rich_text_case_preserves_nested_links_soft_breaks_paragraph_formats_and_contr
                 inlines: vec![InlineSnapshot::run("é")],
             },
         ],
+        ..Default::default()
     };
     let model = RichTextDocument::new();
     model.restore(&fragment).unwrap();

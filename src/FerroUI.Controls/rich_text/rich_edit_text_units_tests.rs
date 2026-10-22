@@ -154,6 +154,7 @@ fn hard_paragraph_units_distinguish_inline_soft_breaks_and_paragraph_objects() {
                     ..Default::default()
                 },
             ],
+            ..Default::default()
         })
         .unwrap();
     let services = RichEditTextDocument::new(document);
@@ -191,6 +192,7 @@ fn hard_crlf_boundary_can_cross_nested_character_format_runs() {
                 ],
                 ..Default::default()
             }],
+            ..Default::default()
         })
         .unwrap();
     let services = RichEditTextDocument::new(document);

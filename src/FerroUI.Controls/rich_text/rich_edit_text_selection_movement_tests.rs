@@ -749,6 +749,7 @@ fn rich_selection_vertical_keeps_empty_soft_break_lines_and_structural_carets() 
                 },
                 ParagraphSnapshot::default(),
             ],
+            ..Default::default()
         })
         .unwrap();
     measure(&view, 300.0, 500.0);

@@ -51,6 +51,7 @@ fn rich_document() -> RichTextDocument {
                     ),
                 ],
             }],
+            ..Default::default()
         })
         .unwrap();
     document
@@ -196,6 +197,37 @@ fn rich_edit_undo_restores_nested_inline_structure_and_paragraph_format() {
     assert_eq!(editor.selection(), EditorSelection::new(1, 3));
     assert!(editor.redo().unwrap());
     assert_eq!(document.text(), "bXYZd tail");
+}
+
+#[test]
+fn rich_edit_equal_text_property_updates_preserve_format_selection_and_history() {
+    let _scope = Dispatcher::unit_test_scope();
+    let control = RichEditBox::new();
+    control.set_document(rich_document());
+    let before = control.document().snapshot();
+    control.select(1, 3);
+    assert!(control.insert_text("XYZ").unwrap());
+    let after = control.document().snapshot();
+    let revision = control.document().revision();
+    let selection = (control.selection_start(), control.selection_end());
+
+    control.set_direct_value(RichEditBox::text_property(), control.text());
+    assert_eq!(control.document().snapshot(), after);
+    assert_eq!(control.document().revision(), revision);
+    assert_eq!((control.selection_start(), control.selection_end()), selection);
+    assert!(control.can_undo());
+    assert!(control.undo().unwrap());
+    assert_eq!(control.document().snapshot(), before);
+    assert_eq!((control.selection_start(), control.selection_end()), (1, 3));
+
+    let revision = control.document().revision();
+    control.set_direct_value(RichEditBox::text_property(), control.text());
+    assert_eq!(control.document().snapshot(), before);
+    assert_eq!(control.document().revision(), revision);
+    assert!(control.can_redo());
+    assert!(control.redo().unwrap());
+    assert_eq!(control.document().snapshot(), after);
+    assert_eq!((control.selection_start(), control.selection_end()), selection);
 }
 
 #[test]
@@ -957,6 +989,8 @@ fn rich_edit_rtf_unicode_font_names_hyperlink_uris_and_targets_roundtrip() {
     };
     *navigate_uri = Some("https://example.com/日本/😀".to_owned());
     *target_name = Some("詳細".to_owned());
+    document.link_fields[0].target = "https://example.com/日本/😀".to_owned();
+    document.link_fields[0].target_name = Some("詳細".to_owned());
     let rtf = RtfWriter::write(&document).unwrap();
     let decoded = RtfReader::read(rtf.as_bytes()).unwrap();
     let link = decoded.paragraphs[0]
@@ -1441,6 +1475,7 @@ fn rich_edit_rtf_export_rejects_metrics_that_cannot_fit_native_parameters() {
                 inlines: vec![run("text", character)],
                 ..Default::default()
             }],
+            ..Default::default()
         };
         assert!(matches!(
             RtfWriter::write(&snapshot),
@@ -1462,6 +1497,7 @@ fn rich_edit_rtf_export_rejects_metrics_that_cannot_fit_native_parameters() {
                 format,
                 inlines: vec![run("text", CharacterFormat::default())],
             }],
+            ..Default::default()
         };
         assert!(matches!(
             RtfWriter::write(&snapshot),
@@ -2079,6 +2115,7 @@ fn rich_edit_end_stops_before_an_inline_line_break() {
                     run("def", CharacterFormat::default()),
                 ],
             }],
+            ..Default::default()
         })
         .unwrap();
     rich_edit_layout(&_root, Size::new(300.0, 200.0));

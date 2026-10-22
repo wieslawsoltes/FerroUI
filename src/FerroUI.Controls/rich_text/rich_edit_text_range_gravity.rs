@@ -4,6 +4,8 @@
 //! Measured system-MSFTEDIT behavior is recorded in native-msftedit-links-gravity.json.
 //! This mode is independent of TextPointer's insertion tracking policy.
 use super::*;
+use crate::documents::TextElement;
+use ferroui_base::Ref;
 
 /// Character-format affinity at a collapsed range boundary, with the native
 /// Microsoft.UI.Text numeric values. UIBehavior follows the preceding run except
@@ -44,11 +46,39 @@ impl TryFrom<i32> for RangeGravity {
 }
 
 impl RangeGravity {
-    fn canonical(self) -> Self {
+    pub(in crate::rich_text) fn canonical(self) -> Self {
         if self == Self::Outward {
             Self::UIBehavior
         } else {
             self
+        }
+    }
+}
+
+impl RangeGravity {
+    /// Shared formatting source, separate from endpoint tracking and paragraph
+    /// format ownership. Callers fence any application callbacks during lookup.
+    pub(in crate::rich_text) fn caret_element(
+        self,
+        document: &RichTextDocument,
+        offset: usize,
+    ) -> Option<Ref<TextElement>> {
+        match self {
+            Self::Backward if offset > 0 => {
+                // This is an element lookup, not an editable endpoint. A code
+                // unit inside a surrogate still identifies the containing run.
+                document.element_at(offset - 1, TextGravity::Forward)
+            }
+            Self::Forward | Self::Inward if offset == document.text_length() => {
+                // The visible model has no native synthetic terminal EOP. Use
+                // final paragraph defaults without creating a new position.
+                document
+                    .paragraphs()
+                    .last()
+                    .map(|paragraph| paragraph.clone().upcast())
+            }
+            Self::Forward | Self::Inward => document.element_at(offset, TextGravity::Forward),
+            _ => document.element_at(offset, TextGravity::Backward),
         }
     }
 }
@@ -96,7 +126,10 @@ impl RichEditTextRange {
         Ok(())
     }
 
-    pub(super) fn ensure_range_read(&self, (generation, mutation): (u64, u64)) -> Result<(), EditError> {
+    pub(super) fn ensure_range_read(
+        &self,
+        (generation, mutation): (u64, u64),
+    ) -> Result<(), EditError> {
         if self.document().mutation_version() != mutation {
             // A format/brush service can execute application code. Its direct
             // model write is external to an enclosing editor transaction.
@@ -121,29 +154,7 @@ impl RichEditTextRange {
             let data = self.data.borrow();
             (data.gravity, data.typing_format.clone())
         };
-        let document = self.document();
-        let element = match gravity {
-            RangeGravity::Backward if range.start > 0 => {
-                // This is an element lookup, not a text slice or an editable
-                // endpoint. A code unit inside a surrogate still identifies its run.
-                document.element_at(range.start - 1, TextGravity::Forward)
-            }
-            RangeGravity::Forward | RangeGravity::Inward
-                if range.start == document.text_length() =>
-            {
-                // Native forward affinity can sample its synthetic terminal EOP.
-                // The visible model has no such character: use the final
-                // paragraph's effective defaults, without adding a position.
-                document
-                    .paragraphs()
-                    .last()
-                    .map(|paragraph| paragraph.clone().upcast())
-            }
-            RangeGravity::Forward | RangeGravity::Inward => {
-                document.element_at(range.start, TextGravity::Forward)
-            }
-            _ => document.element_at(range.start, TextGravity::Backward),
-        };
+        let element = gravity.caret_element(&self.document(), range.start);
         let format = element
             .map(|element| CharacterFormat::effective(&element))
             .unwrap_or_else(|| self.editor.insertion_defaults().character)

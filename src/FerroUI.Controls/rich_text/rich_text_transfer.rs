@@ -204,6 +204,7 @@ impl RichTextTransfer {
         }
         if format == RichTextPasteFormat::BestAvailable {
             if let Some(snapshot) = data.try_get_value_async(&Self::document_format()).await? {
+                snapshot.validate().map_err(|error| ClipboardError::other(error.to_string()))?;
                 return Ok(Some(RichTextTransferContent::RichText(snapshot)));
             }
         }
@@ -231,3 +232,8 @@ impl RichTextTransfer {
             .map(RichTextTransferContent::PlainText))
     }
 }
+
+
+#[cfg(test)]
+#[path = "rich_text_link_transfer_tests.rs"]
+mod link_field_tests;

@@ -550,6 +550,7 @@ fn character_format_scan_does_not_count_a_missing_embedded_control() {
                     },
                 ],
             }],
+            ..Default::default()
         })
         .unwrap();
     assert_eq!(document.text(), "AB");

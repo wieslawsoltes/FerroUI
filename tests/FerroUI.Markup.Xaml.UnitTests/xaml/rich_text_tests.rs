@@ -226,6 +226,10 @@ fn rich_edit_text_binding_updates_the_document_in_both_directions() {
     assert_eq!(source.text().as_deref(), Some("replacement"));
     assert!(editor.undo().unwrap());
     assert_eq!(source.text().as_deref(), Some("second 😀"));
+    assert!(editor.can_redo());
+    assert!(editor.redo().unwrap());
+    assert_eq!(source.text().as_deref(), Some("replacement"));
+    assert!(editor.can_undo());
     window.close();
 }
 

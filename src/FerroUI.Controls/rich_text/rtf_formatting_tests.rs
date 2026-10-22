@@ -62,6 +62,7 @@ fn rich_rtf_standalone_empty_paragraph_keeps_character_and_paragraph_defaults() 
             format: empty_paragraph_format(),
             inlines: Vec::new(),
         }],
+        ..Default::default()
     };
     let decoded = round_trip(&source);
     assert_eq!(decoded.text(), "");

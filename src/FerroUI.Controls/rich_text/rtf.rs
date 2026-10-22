@@ -1,6 +1,7 @@
 use crate::documents::{
-    CharacterFormat, DocumentSnapshot, InlineSnapshot, InlineSnapshotKind, LineSpacingRule,
-    LineStackingStrategy, ParagraphFormat, ParagraphSnapshot, TabAlignment, TabLeader, TextTabStop,
+    CharacterFormat, DocumentLinkField, DocumentSnapshot, InlineSnapshot, InlineSnapshotKind,
+    LineSpacingRule, LineStackingStrategy, ParagraphFormat, ParagraphSnapshot, TabAlignment,
+    TabLeader, TextTabStop,
 };
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{
@@ -22,6 +23,9 @@ use encoding::{font_code_page, validate_code_page, EncodedText};
 mod styles;
 use styles::{StyleKind, StyleTable};
 
+#[path = "rtf_link_fields.rs"]
+mod link_fields;
+
 #[cfg(test)]
 #[path = "rtf_encoding_tests.rs"]
 mod encoding_tests;
@@ -42,10 +46,12 @@ mod field_tests;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct RtfLimits {
     /// Input bytes and, independently, cumulative materialized hyperlink
-    /// URI/target bytes after projecting fields across paragraph boundaries.
+    /// URI/target bytes in field records and paragraph-owned projections.
     pub max_bytes: usize,
     pub max_depth: usize,
     pub max_tokens: usize,
+    /// Maximum decoded body length in UTF-16 code units, also applied
+    /// independently to each font or field-instruction text destination.
     pub max_text_length: usize,
 }
 
@@ -308,6 +314,7 @@ struct Decoder {
     styles: StyleTable,
     style_work: usize,
     field_metadata_bytes: usize,
+    inside_hyperlink_field: bool,
     document: DocumentSnapshot,
     pending: Vec<u16>,
     pending_format: CharacterFormat,
@@ -363,6 +370,7 @@ impl RtfReader {
             styles: StyleTable::default(),
             style_work: 0,
             field_metadata_bytes: 0,
+            inside_hyperlink_field: false,
             document: DocumentSnapshot {
                 paragraphs: vec![ParagraphSnapshot {
                     format: ParagraphFormat {
@@ -371,6 +379,7 @@ impl RtfReader {
                     },
                     inlines: Vec::new(),
                 }],
+                ..Default::default()
             },
             pending: Vec::new(),
             pending_format: CharacterFormat::default(),
@@ -852,15 +861,17 @@ impl Decoder {
                         }
                         "line" => {
                             self.flush()?;
-                            self.text_length += 1;
-                            if self.text_length > self.limits.max_text_length {
-                                return Err(RtfError::LimitExceeded("text length"));
-                            }
-                            let format = state.character.clone();
-                            self.paragraph().inlines.push(InlineSnapshot {
-                                format,
+                            let inline = InlineSnapshot {
+                                format: state.character.clone(),
                                 kind: InlineSnapshotKind::LineBreak,
-                            });
+                            };
+                            // Structured soft breaks occupy CRLF on Windows
+                            // and LF elsewhere. Field spans and import limits
+                            // use the model's visible UTF-16 representation.
+                            self.text_length = self.text_length.checked_add(inline.text_length())
+                                .filter(|length| *length <= self.limits.max_text_length)
+                                .ok_or(RtfError::LimitExceeded("text length"))?;
+                            self.paragraph().inlines.push(inline);
                         }
                         "tab" => self.character(b'\t' as u16, state)?,
                         "emdash" => self.character(0x2014, state)?,
@@ -1147,15 +1158,32 @@ impl Decoder {
             }
         }
         let target = parse_hyperlink(&instruction)?;
+        if target.is_some() && self.inside_hyperlink_field {
+            return Err(RtfError::UnsupportedFeature("nested hyperlink fields"));
+        }
+        if target.is_some() && result.is_none() {
+            return Err(RtfError::InvalidParameter("hyperlink result"));
+        }
         if let Some(nodes) = result {
             let paragraph_index = self.document.paragraphs.len() - 1;
             let inline_index = self.paragraph().inlines.len();
+            let result_start = self.text_length;
+            let inside_hyperlink_field = self.inside_hyperlink_field;
+            self.inside_hyperlink_field |= target.is_some();
             self.decode(nodes, &mut state.clone())?;
+            self.inside_hyperlink_field = inside_hyperlink_field;
             self.flush()?;
             if let Some(target) = target {
-                // Every paragraph-owned segment stores its own strings. Bound
-                // that expansion before cloning: a long URI and many short
-                // paragraphs must not multiply a bounded input into huge output.
+                if result_start == self.text_length {
+                    return Err(RtfError::UnsupportedFeature("empty hyperlink field result"));
+                }
+                let field_id = self.document.next_link_field_id;
+                let next_id = field_id
+                    .checked_add(1)
+                    .ok_or(RtfError::LimitExceeded("field identity"))?;
+                // The common field record and every paragraph-owned segment
+                // retain target strings. Bound the complete expansion before
+                // cloning; short paragraphs cannot amplify an input without limit.
                 let segments = self.document.paragraphs[paragraph_index..]
                     .iter()
                     .enumerate()
@@ -1167,16 +1195,15 @@ impl Decoder {
                     .uri
                     .len()
                     .checked_add(target.name.as_ref().map_or(0, String::len))
-                    .and_then(|bytes| bytes.checked_mul(segments))
+                    .and_then(|bytes| bytes.checked_mul(segments + 1))
                     .and_then(|bytes| self.field_metadata_bytes.checked_add(bytes))
                     .filter(|bytes| *bytes <= self.limits.max_bytes)
                     .ok_or(RtfError::LimitExceeded("field metadata expansion"))?;
                 self.field_metadata_bytes = metadata_bytes;
-                // An RTF field result may contain paragraph boundaries. The
-                // framework inline tree gives every paragraph its own hyperlink
-                // while retaining the field's URI/target and all result metrics.
-                // Empty paragraphs have no navigable text; do not manufacture an
-                // invisible focus/automation target for their paragraph marks.
+                // One field record includes all result text and structural
+                // separators, including empty paragraph edges. Paragraph-local
+                // Hyperlinks are navigation projections of that same identity.
+                // Empty paragraphs need no invisible focus/automation target.
                 for (index, paragraph) in self.document.paragraphs[paragraph_index..]
                     .iter_mut()
                     .enumerate()
@@ -1192,6 +1219,8 @@ impl Decoder {
                         format: CharacterFormat::default(),
                         kind: InlineSnapshotKind::Hyperlink {
                             inlines,
+                            field_id: Some(field_id),
+                            behavior: Default::default(),
                             navigate_uri: Some(target.uri.clone()),
                             target_name: target.name.clone(),
                             is_enabled: true,
@@ -1202,6 +1231,14 @@ impl Decoder {
                         },
                     });
                 }
+                self.document.link_fields.push(DocumentLinkField {
+                    id: field_id,
+                    range: result_start..self.text_length,
+                    target: target.uri,
+                    target_name: target.name,
+                    has_sentinel: false,
+                });
+                self.document.next_link_field_id = next_id;
             }
         }
         Ok(())
@@ -1369,40 +1406,45 @@ fn parse_hyperlink(instruction: &str) -> Result<Option<HyperlinkTarget>, RtfErro
             let end = quoted
                 .find('"')
                 .ok_or(RtfError::InvalidParameter("hyperlink field"))?;
-            tokens.push(quoted[..end].to_owned());
+            tokens.push((quoted[..end].to_owned(), true));
             rest = quoted[end + 1..].trim_start();
         } else {
             let end = rest.find(char::is_whitespace).unwrap_or(rest.len());
-            tokens.push(rest[..end].to_owned());
+            tokens.push((rest[..end].to_owned(), false));
             rest = rest[end..].trim_start();
         }
     }
-    let mut uri = String::new();
+    let mut uri = None;
     let (mut name, mut bookmark) = (None, None);
     let mut tokens = tokens.into_iter();
-    while let Some(token) = tokens.next() {
+    while let Some((token, quoted)) = tokens.next() {
+        // A quoted target can itself be a UNC path or resemble a switch.
+        // Only unquoted tokens carry field-instruction semantics.
         match token.as_str() {
-            "\\t" => {
+            "\\t" if !quoted => {
                 name = Some(
                     tokens
                         .next()
-                        .ok_or(RtfError::InvalidParameter("hyperlink target"))?,
+                        .ok_or(RtfError::InvalidParameter("hyperlink target"))?
+                        .0,
                 )
             }
-            "\\l" => {
+            "\\l" if !quoted => {
                 bookmark = Some(
                     tokens
                         .next()
-                        .ok_or(RtfError::InvalidParameter("hyperlink bookmark"))?,
+                        .ok_or(RtfError::InvalidParameter("hyperlink bookmark"))?
+                        .0,
                 )
             }
-            value if value.starts_with('\\') => {
+            value if !quoted && value.starts_with('\\') => {
                 return Err(RtfError::UnsupportedFeature("hyperlink field switch"));
             }
-            value if uri.is_empty() => uri = value.to_owned(),
+            value if uri.is_none() => uri = Some(value.to_owned()),
             _ => return Err(RtfError::InvalidParameter("hyperlink field")),
         }
     }
+    let mut uri = uri.unwrap_or_default();
     if let Some(bookmark) = bookmark {
         uri.push('#');
         uri.push_str(&bookmark);
@@ -1459,7 +1501,7 @@ impl RtfWriter {
         };
         for paragraph in &document.paragraphs {
             encoder.collect_format(&paragraph.format.character)?;
-            encoder.collect_inlines(&paragraph.inlines, 0)?;
+            encoder.collect_inlines(&paragraph.inlines, 0, false)?;
         }
         encoder.output.push_str("{\\rtf1\\ansi\\ansicpg1252\\uc1");
         if default_tab_stop.is_none()
@@ -1516,15 +1558,19 @@ impl RtfWriter {
             );
         }
         encoder.output.push('}');
-        for (index, paragraph) in document.paragraphs.iter().enumerate() {
-            if index > 0 {
-                encoder.output.push_str("\\par\n");
+        if document.link_fields.is_empty() {
+            for (index, paragraph) in document.paragraphs.iter().enumerate() {
+                if index > 0 {
+                    encoder.output.push_str("\\par\n");
+                }
+                encoder.output.push_str("\\pard\\plain");
+                encoder.paragraph_format(&paragraph.format)?;
+                encoder.format(&paragraph.format.character)?;
+                encoder.output.push(' ');
+                encoder.inlines(&paragraph.inlines)?;
             }
-            encoder.output.push_str("\\pard\\plain");
-            encoder.paragraph_format(&paragraph.format)?;
-            encoder.format(&paragraph.format.character)?;
-            encoder.output.push(' ');
-            encoder.inlines(&paragraph.inlines)?;
+        } else {
+            encoder.link_field_document(document)?;
         }
         encoder.output.push('}');
         Ok(encoder.output)
@@ -1572,12 +1618,29 @@ impl Encoder {
         &mut self,
         inlines: &[InlineSnapshot],
         depth: usize,
+        inside_hyperlink: bool,
     ) -> Result<(), RtfError> {
         if depth > 128 {
             return Err(RtfError::LimitExceeded("nesting"));
         }
         for inline in inlines {
             self.collect_format(&inline.format)?;
+            let is_hyperlink = matches!(&inline.kind, InlineSnapshotKind::Hyperlink {
+                navigate_uri: Some(_), ..
+            });
+            if let InlineSnapshotKind::Hyperlink { field_id, navigate_uri: Some(target), .. } = &inline.kind {
+                if target.is_empty() || target.contains(['\0', '"']) {
+                    return Err(RtfError::InvalidParameter("hyperlink URI"));
+                }
+                if field_id.is_none() {
+                    if inside_hyperlink {
+                        return Err(RtfError::UnsupportedFeature("nested hyperlink fields"));
+                    }
+                    if inline.text_length() == 0 {
+                        return Err(RtfError::UnsupportedFeature("empty hyperlink field result"));
+                    }
+                }
+            }
             match &inline.kind {
                 InlineSnapshotKind::Span(children)
                 | InlineSnapshotKind::Bold(children)
@@ -1585,7 +1648,7 @@ impl Encoder {
                 | InlineSnapshotKind::Underline(children)
                 | InlineSnapshotKind::Hyperlink {
                     inlines: children, ..
-                } => self.collect_inlines(children, depth + 1)?,
+                } => self.collect_inlines(children, depth + 1, inside_hyperlink || is_hyperlink)?,
                 InlineSnapshotKind::Embedded(_) => {
                     return Err(RtfError::UnsupportedFeature("embedded controls"));
                 }
@@ -1929,7 +1992,8 @@ fn escape(text: &str, output: &mut String) {
                 output.push(unit as u8 as char);
             }
             0x09 => output.push_str("\\tab "),
-            0x0a | 0x2028 => output.push_str("\\line "),
+            // Literal scalars in Runs and instruction strings stay literal.
+            // Only InlineSnapshotKind::LineBreak emits a structural \line.
             0x20..=0x7e => output.push(unit as u8 as char),
             _ => {
                 let _ = write!(output, "\\u{}?", unit as i16);

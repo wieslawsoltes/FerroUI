@@ -1,4 +1,4 @@
-use super::{SelectionOptions, SelectionType};
+use super::{RangeGravity, SelectionOptions, SelectionType};
 use crate::documents::{
     CharacterFormat, DocumentError, DocumentSnapshot, ParagraphFormat, RichTextDocument,
     TextGravity,
@@ -115,7 +115,8 @@ struct UndoUnit {
 
 #[derive(Clone)]
 struct Composition {
-    before: EditorSnapshot,
+    // Deep format reads must never run while History is borrowed.
+    before: Rc<EditorSnapshot>,
     preview_version: u64,
     preview_text: String,
     exact: Option<ExactComposition>,
@@ -124,7 +125,7 @@ struct Composition {
 #[derive(Clone)]
 struct ExactComposition {
     /// Current structured content before temporary IME decorations.
-    document: DocumentSnapshot,
+    document: Rc<DocumentSnapshot>,
     /// A native start has no composed range yet. Its first replacement defines
     /// the extent independently of the committed selection and the 0/0 event
     /// sentinel used while the native composition string is unavailable.
@@ -159,14 +160,17 @@ pub struct RichTextEditor {
     selection: Cell<EditorSelection>,
     selection_options: Cell<SelectionOptions>,
     selection_options_generation: Cell<u64>,
+    selection_gravity: Cell<RangeGravity>,
+    selection_gravity_generation: Cell<u64>,
     navigation_affinity: Cell<Option<NavigationAffinity>>,
     navigation_generation: Cell<u64>,
-    typing_format: RefCell<CharacterFormat>,
-    default_character_format: RefCell<CharacterFormat>,
-    default_paragraph_format: RefCell<ParagraphFormat>,
+    typing_format: RefCell<Rc<CharacterFormat>>,
+    default_character_format: RefCell<Rc<CharacterFormat>>,
+    default_paragraph_format: RefCell<Rc<ParagraphFormat>>,
     selection_projection: RefCell<Option<Rc<dyn Fn(EditorSelection) -> EditorSelection>>>,
     projecting_selection: Cell<bool>,
     history: RefCell<History>,
+    history_clear_generation: Cell<u64>,
     known_revision: Cell<u64>,
     merge_generation: Cell<u64>,
     is_read_only: Cell<bool>,
@@ -206,14 +210,17 @@ impl RichTextEditor {
             selection: Cell::new(EditorSelection::default()),
             selection_options: Cell::new(SelectionOptions::NONE),
             selection_options_generation: Cell::new(0),
+            selection_gravity: Cell::new(RangeGravity::default()),
+            selection_gravity_generation: Cell::new(0),
             navigation_affinity: Cell::new(None),
             navigation_generation: Cell::new(0),
-            typing_format: RefCell::new(CharacterFormat::default()),
-            default_character_format: RefCell::new(CharacterFormat::default()),
-            default_paragraph_format: RefCell::new(ParagraphFormat::default()),
+            typing_format: RefCell::new(Rc::new(CharacterFormat::default())),
+            default_character_format: RefCell::new(Rc::new(CharacterFormat::default())),
+            default_paragraph_format: RefCell::new(Rc::new(ParagraphFormat::default())),
             selection_projection: RefCell::new(None),
             projecting_selection: Cell::new(false),
             history: RefCell::new(History::default()),
+            history_clear_generation: Cell::new(0),
             merge_generation: Cell::new(0),
             is_read_only: Cell::new(false),
             max_length: Cell::new(0),
@@ -385,7 +392,8 @@ impl RichTextEditor {
         Some(result)
     }
     pub fn typing_format(&self) -> CharacterFormat {
-        self.typing_format.borrow().clone()
+        let snapshot = self.typing_format.borrow().clone();
+        (*snapshot).clone()
     }
 
     /// Replaces the temporary typing snapshot used by an independent range
@@ -395,7 +403,8 @@ impl RichTextEditor {
         &self,
         format: &CharacterFormat,
     ) -> Result<(), EditError> {
-        if self.group_depth.get() == 0 || self.in_operation.get() || self.projecting_selection.get() {
+        if self.group_depth.get() == 0 || self.in_operation.get() || self.projecting_selection.get()
+        {
             return Err(EditError::ReentrantEdit);
         }
         format.validate()?;
@@ -409,7 +418,7 @@ impl RichTextEditor {
         if self.navigation_checkpoint() != checkpoint {
             return Err(EditError::ReentrantEdit);
         }
-        let old = self.typing_format.replace(replacement);
+        let old = self.typing_format.replace(Rc::new(replacement));
         drop(old);
         if self.document.mutation_version() != mutation {
             self.observe_external_document_change();
@@ -424,11 +433,13 @@ impl RichTextEditor {
     /// Assigned document defaults. Unassigned fields continue to inherit the host's
     /// FerroUI text properties; callers receive an independent value snapshot.
     pub fn default_character_format(&self) -> CharacterFormat {
-        self.default_character_format.borrow().clone()
+        let snapshot = self.default_character_format.borrow().clone();
+        (*snapshot).clone()
     }
 
     pub fn default_paragraph_format(&self) -> ParagraphFormat {
-        self.default_paragraph_format.borrow().clone()
+        let snapshot = self.default_paragraph_format.borrow().clone();
+        (*snapshot).clone()
     }
 
     /// Updates the defaults for empty content and document replacement without
@@ -440,7 +451,7 @@ impl RichTextEditor {
         self.synchronize();
         let before = self.capture();
         let merged = self.default_character_format().overlay(format).clone();
-        let previous = self.default_character_format.replace(merged);
+        let previous = self.default_character_format.replace(Rc::new(merged));
         if self.document.text_length() == 0 {
             if let Err(error) = self
                 .document
@@ -464,7 +475,7 @@ impl RichTextEditor {
         self.synchronize();
         let before = self.capture();
         let merged = self.default_paragraph_format().overlay(format).clone();
-        let previous = self.default_paragraph_format.replace(merged);
+        let previous = self.default_paragraph_format.replace(Rc::new(merged));
         if self.document.text_length() == 0 {
             if let Err(error) = self
                 .document
@@ -539,23 +550,21 @@ impl RichTextEditor {
     /// Effective formatting at the selection start or insertion point, including the
     /// current collapsed-selection format overrides.
     pub fn current_character_format(&self) -> Result<CharacterFormat, EditError> {
+        let checkpoint = self.selection_format_checkpoint();
         let selection = self.selection();
-        let offset = if selection.is_empty() {
-            selection.active
+        let element = if selection.is_empty() {
+            self.selection_gravity()
+                .caret_element(&self.document, selection.active)
         } else {
-            selection.range().start
+            self.document
+                .element_at(selection.range().start, TextGravity::Forward)
         };
-        let gravity = if selection.is_empty() {
-            TextGravity::Backward
-        } else {
-            TextGravity::Forward
-        };
-        let format = self
-            .document
-            .element_at(offset, gravity)
+        let format = element
             .map(|element| CharacterFormat::effective(&element))
-            .unwrap_or_else(|| self.insertion_defaults().character);
-        Ok(format.overlay(&self.typing_format()))
+            .unwrap_or_else(|| self.insertion_defaults().character)
+            .overlay(&self.typing_format());
+        self.ensure_selection_format(checkpoint)?;
+        Ok(format)
     }
 
     /// Observes completed editing or selection changes. Handlers run after document
@@ -626,8 +635,8 @@ impl RichTextEditor {
             .composition
             .as_ref()
             .filter(|composition| composition.preview_version == self.document.mutation_version())
-            .map(|composition| composition.before.document.clone());
-        committed.map_or_else(|| self.document.text(), |snapshot| snapshot.text())
+            .map(|composition| composition.before.clone());
+        committed.map_or_else(|| self.document.text(), |snapshot| snapshot.document.text())
     }
 
     /// Selection in the committed surrounding text, excluding the uncommitted preview.
@@ -650,14 +659,17 @@ impl RichTextEditor {
         }
         let previous = self.selection.replace(selection);
         if previous != selection {
-            let previous_format = self.typing_format.replace(CharacterFormat::default());
+            let previous_format = self
+                .typing_format
+                .replace(Rc::new(CharacterFormat::default()));
             let navigation_generation = self.navigation_generation();
             // A nested owner request must immediately update the view's proposal.
             // The view suppresses recursive SelectionChanging, while this guard
             // suppresses nested editor publication until the outer request settles.
             self.invoke_selection_projection();
             if self.selection() == previous {
-                *self.typing_format.borrow_mut() = previous_format;
+                let discarded = self.typing_format.replace(previous_format);
+                drop(discarded);
                 return Ok(());
             }
             // A nested navigation may accept the proposed offsets without
@@ -690,6 +702,8 @@ impl RichTextEditor {
             .set(self.merge_generation.get().wrapping_add(1));
     }
     pub fn clear_history(&self) {
+        self.history_clear_generation
+            .set(self.history_clear_generation.get().wrapping_add(1));
         let old = std::mem::take(&mut *self.history.borrow_mut());
         drop(old);
         self.known_revision.set(self.document.revision());
@@ -710,7 +724,10 @@ impl RichTextEditor {
 
     fn discard_external_edit_state(&self) {
         self.clear_history();
-        *self.typing_format.borrow_mut() = CharacterFormat::default();
+        let old_format = self
+            .typing_format
+            .replace(Rc::new(CharacterFormat::default()));
+        drop(old_format);
         self.pending_composition_changes.borrow_mut().clear();
         self.clamp_selection();
     }
@@ -725,7 +742,10 @@ impl RichTextEditor {
         Ok(Operation(&self.in_operation))
     }
 
-    fn synchronize(&self) {
+    /// Discards history for completed model changes before a facade captures
+    /// callback checkpoints. Doing this only after entering its edit group
+    /// would make ordinary synchronization invalidate the facade's own read.
+    pub(super) fn synchronize(&self) {
         let current = self.history_is_current(&self.history.borrow());
         if current {
             // Closing an application-owned model batch publishes a revision without
@@ -771,12 +791,47 @@ impl RichTextEditor {
         }
     }
 
+    fn restore_document_snapshot(&self, snapshot: &DocumentSnapshot) -> Result<(), EditError> {
+        let version = self.document.mutation_version();
+        let history_generation = self.history_clear_generation.get();
+        let result = self.document.restore(snapshot);
+        if result.is_err() && self.document.mutation_version() != version {
+            // The model rejected a stale preflight after an application write.
+            // Its new story owns the failure; callers must not roll it back.
+            self.observe_external_document_change();
+            return Err(EditError::ReentrantEdit);
+        }
+        if self.history_clear_generation.get() != history_generation {
+            // A model-preparation brush may clear history without editing text.
+            // Do not reinstall a removed composition or the popped undo unit.
+            self.clamp_selection();
+            self.known_revision.set(self.document.revision());
+            return Err(EditError::ReentrantEdit);
+        }
+        result.map_err(Into::into)
+    }
+
     fn restore(&self, snapshot: &EditorSnapshot) -> Result<(), EditError> {
-        self.document.restore(&snapshot.document)?;
+        let version = self.document.mutation_version();
+        let history_generation = self.history_clear_generation.get();
+        let typing = Rc::new(snapshot.typing_format.clone());
+        let character = Rc::new(snapshot.default_character_format.clone());
+        let paragraph = Rc::new(snapshot.default_paragraph_format.clone());
+        if self.document.mutation_version() != version {
+            self.observe_external_document_change();
+            return Err(EditError::ReentrantEdit);
+        }
+        if self.history_clear_generation.get() != history_generation {
+            return Err(EditError::ReentrantEdit);
+        }
+        // These are explicit historical formats, not a new affinity query.
+        // A newer Gravity value survives restoration, including group rollback.
+        self.restore_document_snapshot(&snapshot.document)?;
         self.selection.set(snapshot.selection);
-        *self.typing_format.borrow_mut() = snapshot.typing_format.clone();
-        *self.default_character_format.borrow_mut() = snapshot.default_character_format.clone();
-        *self.default_paragraph_format.borrow_mut() = snapshot.default_paragraph_format.clone();
+        let old_typing = self.typing_format.replace(typing);
+        let old_character = self.default_character_format.replace(character);
+        let old_paragraph = self.default_paragraph_format.replace(paragraph);
+        drop((old_typing, old_character, old_paragraph));
         self.known_revision.set(self.document.revision());
         Ok(())
     }
@@ -787,10 +842,14 @@ impl RichTextEditor {
             return;
         }
         let mutation_version = self.document.mutation_version();
+        let history_generation = self.history_clear_generation.get();
         self.project_selection();
         if self.document.mutation_version() != mutation_version {
             self.observe_external_document_change();
             self.publish_changed();
+            return;
+        }
+        if self.history_clear_generation.get() != history_generation {
             return;
         }
         // A group may finish with a visible preview. Only its preceding committed
@@ -802,12 +861,20 @@ impl RichTextEditor {
             .composition
             .as_ref()
             .map(|composition| composition.before.clone());
-        let after = committed.unwrap_or_else(|| self.capture());
-        if before.document == after.document
+        let after = committed.map_or_else(|| self.capture(), |snapshot| (*snapshot).clone());
+        let unchanged = before.document == after.document
             && before.typing_format == after.typing_format
             && before.default_character_format == after.default_character_format
-            && before.default_paragraph_format == after.default_paragraph_format
-        {
+            && before.default_paragraph_format == after.default_paragraph_format;
+        if self.document.mutation_version() != mutation_version {
+            self.observe_external_document_change();
+            self.publish_changed();
+            return;
+        }
+        if self.history_clear_generation.get() != history_generation {
+            return;
+        }
+        if unchanged {
             self.publish_changed();
             return;
         }
@@ -910,13 +977,25 @@ impl RichTextEditor {
         kind: EditKind,
         range: Range<usize>,
     ) -> Result<Option<(EditorSnapshot, String)>, EditError> {
+        let checkpoint = self.selection_format_checkpoint();
+        let limit = self.max_length();
         let text = self.permitted_text(text, range.clone());
         // Rejected input at a length limit must not delete a selected range.
         if text.is_empty() && (!text_is_deletion(kind) || range.is_empty()) {
             return Ok(None);
         }
         let before = self.capture();
+        self.ensure_selection_format(checkpoint)?;
         let length = text.encode_utf16().count();
+        let format = if length > 0 {
+            self.insertion_character_format(&range)?
+        } else {
+            CharacterFormat::default()
+        };
+        self.ensure_selection_format(checkpoint)?;
+        if self.max_length() != limit || self.is_read_only() {
+            return Err(EditError::ReentrantEdit);
+        }
         {
             let _batch = self.document.begin_edit();
             self.document.replace_text(range.clone(), &text)?;
@@ -928,7 +1007,7 @@ impl RichTextEditor {
             }
             if length > 0 {
                 self.document
-                    .apply_format(range.start..range.start + length, &self.typing_format())?;
+                    .apply_format(range.start..range.start + length, &format)?;
             }
             if kind == EditKind::Typing && length > 0 {
                 // Clear accepted typing intent before publication. A later
@@ -962,6 +1041,23 @@ impl RichTextEditor {
         fragment: &DocumentSnapshot,
         kind: EditKind,
     ) -> Result<bool, EditError> {
+        self.insert_fragment_core(fragment, kind, false)
+    }
+
+    pub(super) fn insert_fragment_preserving_link_fields(
+        &self,
+        fragment: &DocumentSnapshot,
+        kind: EditKind,
+    ) -> Result<bool, EditError> {
+        self.insert_fragment_core(fragment, kind, true)
+    }
+
+    fn insert_fragment_core(
+        &self,
+        fragment: &DocumentSnapshot,
+        kind: EditKind,
+        preserve_fields: bool,
+    ) -> Result<bool, EditError> {
         fragment.validate()?;
         self.prepare_edit()?;
         let _operation = self.enter(true)?;
@@ -993,7 +1089,12 @@ impl RichTextEditor {
         let before = self.capture();
         {
             let _batch = self.document.begin_edit();
-            self.document.replace_range(range.clone(), &fragment)?;
+            if preserve_fields {
+                self.document
+                    .replace_range_preserving_link_fields(range.clone(), &fragment)?;
+            } else {
+                self.document.replace_range(range.clone(), &fragment)?;
+            }
             self.selection
                 .set(EditorSelection::caret(range.start + fragment.text_length()));
         }
@@ -1057,13 +1158,38 @@ impl RichTextEditor {
             self.document
                 .apply_format(self.selection().range(), format)?;
             let merged = merge_format(self.typing_format(), format).clone();
-            *self.typing_format.borrow_mut() = merged;
+            let previous = self.typing_format.replace(Rc::new(merged));
+            drop(previous);
         } else {
             self.document
                 .apply_format(self.selection().range(), format)?;
         }
         self.checkpoint();
         self.record(before, EditKind::Formatting);
+        Ok(())
+    }
+
+    /// Installs a prepared field image inside an existing edit group. The
+    /// projected service never substitutes its range for the real selection.
+    pub(super) fn install_field_snapshot(
+        &self,
+        snapshot: &DocumentSnapshot,
+        expected_version: u64,
+    ) -> Result<(), EditError> {
+        let _operation = self.enter(true)?;
+        snapshot.validate()?;
+        if self.document.mutation_version() != expected_version {
+            self.observe_external_document_change();
+            return Err(EditError::ReentrantEdit);
+        }
+        let result = self.document.restore(snapshot);
+        if result.is_err() && self.document.mutation_version() != expected_version {
+            // The model rejected its callback-interrupted preparation. Mark the
+            // independent write so the enclosing edit group cannot roll it back.
+            self.observe_external_document_change();
+            return Err(EditError::ReentrantEdit);
+        }
+        result?;
         Ok(())
     }
 
@@ -1098,6 +1224,7 @@ impl RichTextEditor {
         let before = self.capture();
         let before_limit = self.max_length();
         let before_options = self.selection_options.get();
+        let before_gravity = self.selection_gravity();
         let external_generation = self.external_change_generation();
         let pending_start = self.pending_composition_changes.borrow().len();
         let depth = self.group_depth.get();
@@ -1120,12 +1247,15 @@ impl RichTextEditor {
             // transactions restore that configuration along with the story.
             self.set_max_length(before_limit);
             self.store_selection_options(before_options);
+            self.set_selection_gravity(before_gravity);
             let composition = self.history.borrow_mut().composition.take();
             drop(composition);
             self.pending_composition_changes
                 .borrow_mut()
                 .truncate(pending_start);
-            self.restore(&before)?;
+            if let Err(error) = self.restore(&before) {
+                result = Err(error);
+            }
         }
         let publication_version = self.document.mutation_version();
         drop(batch);
@@ -1160,8 +1290,11 @@ impl RichTextEditor {
         let Some(unit) = unit else {
             return Ok(false);
         };
+        let history_generation = self.history_clear_generation.get();
         if let Err(error) = self.restore(&unit.before) {
-            self.history.borrow_mut().undo.push(unit);
+            if self.history_clear_generation.get() == history_generation {
+                self.history.borrow_mut().undo.push(unit);
+            }
             return Err(error);
         }
         self.history.borrow_mut().redo.push(unit);
@@ -1178,8 +1311,11 @@ impl RichTextEditor {
         let Some(unit) = unit else {
             return Ok(false);
         };
+        let history_generation = self.history_clear_generation.get();
         if let Err(error) = self.restore(&unit.after) {
-            self.history.borrow_mut().redo.push(unit);
+            if self.history_clear_generation.get() == history_generation {
+                self.history.borrow_mut().redo.push(unit);
+            }
             return Err(error);
         }
         self.history.borrow_mut().undo.push(unit);
@@ -1198,11 +1334,16 @@ impl RichTextEditor {
                 .count()
         });
         self.synchronize();
-        let previous = self.history.borrow_mut().composition.take();
+        let read_checkpoint = self.selection_format_checkpoint();
+        let external_generation = self.external_change_generation();
+        let history_generation = self.history_clear_generation.get();
+        let previous = self.history.borrow().composition.clone();
         let visible = self.capture();
-        let before = previous
-            .as_ref()
-            .map_or_else(|| visible.clone(), |composition| composition.before.clone());
+        let before = previous.as_ref().map_or_else(
+            || Rc::new(visible.clone()),
+            |composition| composition.before.clone(),
+        );
+        self.ensure_selection_format(read_checkpoint)?;
         // Keep the committed context available before publishing the model change:
         // platform callbacks can synchronously query surrounding text while it is raised.
         self.history.borrow_mut().composition = Some(Composition {
@@ -1217,6 +1358,11 @@ impl RichTextEditor {
             let range = before.selection.range();
             let text = self.permitted_text(text, range.clone());
             let length = text.encode_utf16().count();
+            let insertion_format = if length > 0 {
+                self.insertion_character_format(&range)?
+            } else {
+                CharacterFormat::default()
+            };
             self.document.replace_text(range.clone(), &text)?;
             if before.document.text_length() == 0 || self.document.text_length() == 0 {
                 self.document.apply_paragraph_format(
@@ -1225,7 +1371,7 @@ impl RichTextEditor {
                 )?;
             }
             if length > 0 {
-                let preedit_format = before.typing_format.overlay(&CharacterFormat {
+                let preedit_format = insertion_format.overlay(&CharacterFormat {
                     text_decorations: Some(Some(TextDecorations::underline())),
                     ..CharacterFormat::default()
                 });
@@ -1240,7 +1386,16 @@ impl RichTextEditor {
         let text = match result {
             Ok(text) => text,
             Err(error) => {
-                self.restore_composition_state(&visible, previous)?;
+                // Metadata-only reentry retains the original preview. A direct
+                // application model write detected during a format read owns its
+                // new story and must not be overwritten by the old snapshot.
+                if self.external_change_generation() == external_generation
+                    && self.history_clear_generation.get() == history_generation
+                {
+                    self.restore_composition_state(&visible, previous)?;
+                } else if self.external_change_generation() != external_generation {
+                    self.discard_external_edit_state();
+                }
                 drop(batch);
                 self.known_revision.set(self.document.revision());
                 return Err(error);
@@ -1276,8 +1431,11 @@ impl RichTextEditor {
         };
         let batch = self.document.begin_edit();
         if self.document.mutation_version() == composition.preview_version {
+            let history_generation = self.history_clear_generation.get();
             if let Err(error) = self.restore(&composition.before) {
-                self.history.borrow_mut().composition = Some(composition);
+                if self.history_clear_generation.get() == history_generation {
+                    self.history.borrow_mut().composition = Some(composition);
+                }
                 return Err(error);
             }
         } else {
@@ -1319,7 +1477,7 @@ impl RichTextEditor {
     ) -> Result<(bool, Option<CompositionCommitResult>), EditError> {
         let _operation = self.enter(true)?;
         self.synchronize();
-        let composition = self.history.borrow_mut().composition.take();
+        let composition = self.history.borrow().composition.clone();
         let Some(composition) = composition else {
             self.checkpoint();
             return self
@@ -1331,7 +1489,13 @@ impl RichTextEditor {
             .exact
             .as_ref()
             .is_some_and(|exact| exact.range.is_none());
+        let read_checkpoint = self.selection_format_checkpoint();
+        let external_generation = self.external_change_generation();
+        let history_generation = self.history_clear_generation.get();
         let visible = self.capture();
+        self.ensure_selection_format(read_checkpoint)?;
+        let previous = self.history.borrow_mut().composition.take();
+        drop(previous);
         let batch = self.document.begin_edit();
         let result = (|| {
             self.restore(&composition.before)?;
@@ -1344,7 +1508,13 @@ impl RichTextEditor {
         let accepted = match result {
             Ok(accepted) => accepted,
             Err(error) => {
-                self.restore_composition_state(&visible, Some(composition))?;
+                if self.external_change_generation() == external_generation
+                    && self.history_clear_generation.get() == history_generation
+                {
+                    self.restore_composition_state(&visible, Some(composition))?;
+                } else if self.external_change_generation() != external_generation {
+                    self.discard_external_edit_state();
+                }
                 drop(batch);
                 self.known_revision.set(self.document.revision());
                 return Err(error);
@@ -1457,3 +1627,6 @@ mod exact_edit;
 
 #[path = "rich_text_editor_selection.rs"]
 mod selection;
+
+#[path = "rich_text_editor_gravity.rs"]
+mod gravity;

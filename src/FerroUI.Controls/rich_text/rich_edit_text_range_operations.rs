@@ -54,6 +54,7 @@ impl RichEditTextRange {
         ensure_character_length(&self.editor, previous, value)?;
 
         self.editor.prepare_edit()?;
+        self.editor.synchronize();
         // Cancelling a preview rebases the live range. Recapture its committed
         // character instead of restoring a stale preview-derived replacement.
         let previous = self.checked_character(single_unit)?;
@@ -61,6 +62,8 @@ impl RichEditTextRange {
             return Ok(false);
         }
         ensure_character_length(&self.editor, previous, value)?;
+        let checkpoint = self.range_read_checkpoint();
+        let editor_checkpoint = self.editor.navigation_checkpoint();
         let range = self.range();
         let replacement = range.start..range.start + previous.len_utf16();
         let selection = self.editor.selection();
@@ -80,23 +83,39 @@ impl RichEditTextRange {
         {
             None
         } else {
-            Some(character_fragment(&document.snapshot(), range.start, value))
+            Some(character_fragment(
+                &document.snapshot(),
+                range.start,
+                value,
+            )?)
         };
+        self.ensure_range_read(checkpoint)?;
+        if self.editor.navigation_checkpoint() != editor_checkpoint {
+            return Err(EditError::ReentrantEdit);
+        }
         let mut buffer = [0; 4];
         let text = value.encode_utf8(&mut buffer);
+        let mut owned_generation = checkpoint.0;
         let result = self.editor.edit_group(|editor| {
+            self.ensure_range_read(checkpoint)?;
+            if editor.navigation_checkpoint() != editor_checkpoint {
+                return Err(EditError::ReentrantEdit);
+            }
             if let Some(fragment) = &fragment {
                 editor
                     .document()
-                    .replace_range(replacement.clone(), fragment)?;
+                    .replace_range_preserving_link_fields(replacement.clone(), fragment)?;
             } else {
                 editor.document().replace_text(replacement.clone(), text)?;
             }
+            let mutation = document.mutation_version();
+            self.ensure_range_generation(checkpoint.0)?;
             let selection = rebase_selection(selection, replacement.clone(), value.len_utf16());
             editor.set_selection(selection)?;
             if selection.is_empty() {
                 editor.replace_range_typing_format(&typing_format)?;
             }
+            self.ensure_range_read((checkpoint.0, mutation))?;
             // The property replaces a character; it does not navigate the range.
             // Its far endpoint continues to encompass the same remaining text.
             let end = if range.is_empty() {
@@ -105,10 +124,17 @@ impl RichEditTextRange {
                 range.end - previous.len_utf16() + value.len_utf16()
             };
             self.set_range(range.start, end)?;
-            self.set_range_typing_format(own_typing_format.clone())?;
+            owned_generation = self.data.borrow().generation;
+            let restore_typing = own_typing_format.clone();
+            self.ensure_range_read((owned_generation, mutation))?;
+            self.set_range_typing_format(restore_typing)?;
+            owned_generation = self.data.borrow().generation;
             Ok(true)
         });
-        if result.is_err() && self.editor.external_change_generation() == external_generation {
+        if result.is_err()
+            && self.editor.external_change_generation() == external_generation
+            && self.data.borrow().generation == owned_generation
+        {
             self.set_range(range.start, range.end)?;
             self.set_range_typing_format(own_typing_format)?;
         }
@@ -258,7 +284,7 @@ fn character_fragment(
     snapshot: &DocumentSnapshot,
     position: usize,
     value: char,
-) -> DocumentSnapshot {
+) -> Result<DocumentSnapshot, EditError> {
     let (index, offset) = snapshot.locate(position);
     let source = &snapshot.paragraphs[index];
     let text = if value == '\n' {
@@ -280,7 +306,68 @@ fn character_fragment(
     // character defaults must stay inherited, rather than being copied to a span
     // around the new character. A newly split paragraph keeps those defaults.
     paragraphs[0].format.character = CharacterFormat::default();
-    DocumentSnapshot { paragraphs }
+    let mut result = DocumentSnapshot {
+        paragraphs,
+        next_link_field_id: snapshot.next_link_field_id,
+        ..Default::default()
+    };
+    fn context_id(inlines: &[InlineSnapshot]) -> Option<u64> {
+        for inline in inlines {
+            if let InlineSnapshotKind::Hyperlink {
+                field_id: Some(id), ..
+            } = &inline.kind
+            {
+                return Some(*id);
+            }
+            if let Some(id) = inline.children().and_then(context_id) {
+                return Some(id);
+            }
+        }
+        None
+    }
+    let carried = result
+        .paragraphs
+        .iter()
+        .find_map(|paragraph| context_id(&paragraph.inlines));
+    let field = snapshot
+        .link_fields
+        .iter()
+        .find(|field| field.range.start <= position && position < field.range.end)
+        .or_else(|| {
+            carried.and_then(|id| snapshot.link_fields.iter().find(|field| field.id == id))
+        });
+    if let Some(field) = field {
+        let mut field = field.clone();
+        field.range = 0..result.text_length();
+        if carried == Some(field.id) {
+            result.link_fields.push(field);
+        } else {
+            // A separator-only field can have no inline in the old paragraph.
+            // Retain its authoritative field when the mark becomes visible text,
+            // without borrowing an adjacent field's behavioral identity.
+            fn clear(inlines: &mut [InlineSnapshot]) {
+                for inline in inlines {
+                    if let InlineSnapshotKind::Hyperlink {
+                        field_id: Some(_),
+                        inlines,
+                        ..
+                    } = &mut inline.kind
+                    {
+                        inline.kind = InlineSnapshotKind::Span(std::mem::take(inlines));
+                    }
+                    if let Some(children) = inline.children_mut() {
+                        clear(children);
+                    }
+                }
+            }
+            for paragraph in &mut result.paragraphs {
+                clear(&mut paragraph.inlines);
+            }
+            result.add_link_field(field)?;
+        }
+    }
+    result.validate()?;
+    Ok(result)
 }
 
 fn character_context(inlines: &[InlineSnapshot], offset: usize, text: &str) -> InlineSnapshot {

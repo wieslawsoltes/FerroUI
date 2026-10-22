@@ -21,6 +21,7 @@ fn empty_rich_fragment() -> DocumentSnapshot {
             },
             inlines: Vec::new(),
         }],
+        ..Default::default()
     }
 }
 

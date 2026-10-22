@@ -1,9 +1,9 @@
 use super::document_snapshot::{normalize_paragraph_breaks, slice_inlines, utf16_to_byte};
 use super::{
-    BlockCollection, Bold, CharacterFormat, DocumentSnapshot, Hyperlink, IInlineHost, Inline,
-    InlineCollection, InlineSnapshot, InlineSnapshotKind, InlineUIContainer, Italic, LineBreak,
-    Paragraph, ParagraphFormat, ParagraphSnapshot, Run, Span, TextElement, TextGravity,
-    TextPointer, TextPosition, Underline,
+    BlockCollection, Bold, CharacterFormat, DocumentLinkField, DocumentSnapshot, Hyperlink,
+    IInlineHost, Inline, InlineCollection, InlineSnapshot, InlineSnapshotKind, InlineUIContainer,
+    Italic, LineBreak, Paragraph, ParagraphFormat, ParagraphSnapshot, Run, Span, TextElement,
+    TextGravity, TextPointer, TextPosition, Underline,
 };
 use crate::Control;
 use ferroui_base::media::text_formatting::unicode::{GraphemeEnumerator, WordBreakEnumerator};
@@ -15,14 +15,16 @@ use std::collections::{HashSet, VecDeque};
 use std::ops::Range;
 use std::rc::{Rc, Weak};
 
-/// Validation failure. Every public ranged mutation validates before touching
-/// the document, so an error leaves both content and revision unchanged.
+/// Validation or reentrancy failure. A rejected operation does not install its
+/// proposed content. Independently accepted callback edits retain their content
+/// and revision when an older operation rejects its stale preparation.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum DocumentError {
     OffsetOutOfRange { offset: usize, length: usize },
     ReversedRange { start: usize, end: usize },
     InvalidUtf16Boundary { offset: usize },
     InvalidFormat(&'static str),
+    InvalidLinkField(&'static str),
     ContentTooDeep,
     DuplicateEmbeddedControl,
     EmbeddedControlAlreadyParented,
@@ -42,7 +44,7 @@ impl std::fmt::Display for DocumentError {
             Self::InvalidUtf16Boundary { offset } => {
                 write!(f, "Text offset {offset} splits a UTF-16 surrogate pair")
             }
-            Self::InvalidFormat(message) => f.write_str(message),
+            Self::InvalidFormat(message) | Self::InvalidLinkField(message) => f.write_str(message),
             Self::ContentTooDeep => f.write_str("Inline nesting exceeds 256 levels"),
             Self::DuplicateEmbeddedControl => {
                 f.write_str("An embedded control cannot occur twice in one document")
@@ -146,6 +148,11 @@ struct RichTextDocumentData {
     dirty: Cell<bool>,
     change_kind: Cell<Option<DocumentChangeKind>>,
     subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    link_fields: RefCell<Vec<DocumentLinkField>>,
+    next_link_field_id: Cell<u64>,
+    link_allocation_floor: Cell<u64>,
+    installed_field_snapshot: Cell<bool>,
+    reconciling_fields: Cell<bool>,
 }
 
 impl Drop for RichTextDocumentData {
@@ -217,6 +224,11 @@ impl RichTextDocument {
             dirty: Cell::new(false),
             change_kind: Cell::new(None),
             subscription: RefCell::new(None),
+            link_fields: RefCell::new(Vec::new()),
+            next_link_field_id: Cell::new(1),
+            link_allocation_floor: Cell::new(1),
+            installed_field_snapshot: Cell::new(false),
+            reconciling_fields: Cell::new(false),
         }));
         let weak = document.downgrade();
         let subscription = document.blocks().invalidated(move || {
@@ -248,6 +260,10 @@ impl RichTextDocument {
     pub(crate) fn mutation_version(&self) -> u64 {
         self.0.mutation_version.get()
     }
+    pub(crate) fn link_allocation_floor(&self) -> u64 {
+        self.0.link_allocation_floor.get()
+    }
+
     pub fn downgrade(&self) -> WeakRichTextDocument {
         WeakRichTextDocument(Rc::downgrade(&self.0))
     }
@@ -334,6 +350,8 @@ impl RichTextDocument {
                     }
                 })
                 .collect(),
+            link_fields: self.0.link_fields.borrow().clone(),
+            next_link_field_id: self.0.next_link_field_id.get(),
         }
     }
 
@@ -369,7 +387,7 @@ impl RichTextDocument {
             return Ok(());
         }
         let normalized = normalize_paragraph_breaks(text);
-        if !normalized.contains('\n') {
+        if !normalized.contains('\n') && self.0.link_fields.borrow().is_empty() {
             if let Some(found) = self.find_splice_run(range.clone()) {
                 let mut value = found.run.text().unwrap_or_default();
                 let start = utf16_to_byte(&value, range.start - found.offset).ok_or(
@@ -425,7 +443,59 @@ impl RichTextDocument {
                 }
             }
         }
-        self.replace_range(range, &replacement)
+        // A plain insertion inherits its existing semantic context. When that
+        // context belongs to a field, preserve the shared identity explicitly.
+        let mut inherited = None;
+        fn find_field(inlines: &[InlineSnapshot]) -> Option<u64> {
+            for inline in inlines {
+                if let InlineSnapshotKind::Hyperlink {
+                    field_id: Some(id), ..
+                } = &inline.kind
+                {
+                    return Some(*id);
+                }
+                if let Some(id) = inline.children().and_then(find_field) {
+                    return Some(id);
+                }
+            }
+            None
+        }
+        for paragraph in &replacement.paragraphs {
+            if let Some(id) = find_field(&paragraph.inlines) {
+                inherited = Some(id);
+                break;
+            }
+        }
+        if replacement.text_length() == 0 {
+            fn clear_empty_projection(inlines: &mut [InlineSnapshot]) {
+                for inline in inlines {
+                    if let InlineSnapshotKind::Hyperlink {
+                        field_id: Some(_),
+                        inlines,
+                        ..
+                    } = &mut inline.kind
+                    {
+                        inline.kind = InlineSnapshotKind::Span(std::mem::take(inlines));
+                    }
+                    if let Some(children) = inline.children_mut() {
+                        clear_empty_projection(children);
+                    }
+                }
+            }
+            for paragraph in &mut replacement.paragraphs {
+                clear_empty_projection(&mut paragraph.inlines);
+            }
+        } else {
+            if let Some(field) =
+                inherited.and_then(|id| snapshot.link_fields.iter().find(|field| field.id == id))
+            {
+                let mut field = field.clone();
+                field.range = 0..replacement.text_length();
+                replacement.link_fields.push(field);
+                replacement.next_link_field_id = snapshot.next_link_field_id;
+            }
+        }
+        self.replace_range_internal(range, &replacement, true)
     }
 
     pub fn replace_range(
@@ -433,13 +503,53 @@ impl RichTextDocument {
         range: Range<usize>,
         fragment: &DocumentSnapshot,
     ) -> Result<(), DocumentError> {
+        self.replace_range_internal(range, fragment, false)
+    }
+
+    /// Internal text transformations retain existing field identity; copied
+    /// rich fragments use replace_range and receive fresh destination IDs.
+    pub(crate) fn replace_range_preserving_link_fields(
+        &self,
+        range: Range<usize>,
+        fragment: &DocumentSnapshot,
+    ) -> Result<(), DocumentError> {
+        let fields = self.0.link_fields.borrow().clone();
+        for field in &fragment.link_fields {
+            if !fields.iter().any(|original| {
+                original.id == field.id
+                    && original.target == field.target
+                    && original.target_name == field.target_name
+                    && original.has_sentinel == field.has_sentinel
+            }) {
+                return Err(DocumentError::InvalidLinkField(
+                    "An inherited fragment must refer to an unchanged destination field.",
+                ));
+            }
+        }
+        self.replace_range_internal(range, fragment, true)
+    }
+
+    fn replace_range_internal(
+        &self,
+        range: Range<usize>,
+        fragment: &DocumentSnapshot,
+        inherited: bool,
+    ) -> Result<(), DocumentError> {
         self.ensure_available()?;
         self.validate_range(range.clone())?;
         fragment.validate()?;
         if range.is_empty() && fragment.text_length() == 0 {
             return Ok(());
         }
-        let mut snapshot = self.snapshot();
+        let before = self.snapshot();
+        let mut next = before.next_link_field_id.max(self.link_allocation_floor());
+        let mut fragment = fragment.clone();
+        if !inherited {
+            fragment.remap_link_field_ids(&mut next)?;
+        } else {
+            next = next.max(fragment.next_link_field_id);
+        }
+        let mut snapshot = before.clone();
         if snapshot.paragraphs.is_empty() {
             snapshot.paragraphs.push(ParagraphSnapshot::default());
         }
@@ -481,6 +591,7 @@ impl RichTextDocument {
         snapshot
             .paragraphs
             .splice(start_index..=end_index, inserted);
+        snapshot.replace_link_fields(&before, range, &fragment, next)?;
         self.install(&snapshot, DocumentChangeKind::Content)
     }
 
@@ -649,9 +760,15 @@ impl RichTextDocument {
         kind: DocumentChangeKind,
     ) -> Result<(), DocumentError> {
         self.ensure_available()?;
+        let version = self.mutation_version();
         snapshot.validate()?;
         let old = self.snapshot();
-        if old == *snapshot {
+        let unchanged = old == *snapshot;
+        // Snapshot capture and custom brush equality can call application code.
+        // A completed nested write owns its state even when our candidate is a
+        // no-op relative to the earlier image.
+        self.ensure_install_read(version)?;
+        if unchanged {
             return Ok(());
         }
         let mut pool = ContentPool::capture(&self.blocks());
@@ -667,6 +784,9 @@ impl RichTextDocument {
             })
             .collect();
         validate_control_parents(snapshot, &current_controls)?;
+        // Reuse preparation captures formatting again. Fence its final read
+        // before clearing the live tree or reserving structural installation.
+        self.ensure_install_read(version)?;
         let _batch = self.begin_edit();
         self.0.installing.set(true);
         self.0.change_kind.set(Some(kind));
@@ -676,9 +796,24 @@ impl RichTextDocument {
             let value = pool.build_paragraph(paragraph);
             self.blocks().add(value);
         }
+        *self.0.link_fields.borrow_mut() = snapshot.link_fields.clone();
+        self.0.next_link_field_id.set(snapshot.next_link_field_id);
+        self.0.link_allocation_floor.set(
+            self.link_allocation_floor()
+                .max(snapshot.next_link_field_id),
+        );
+        self.0.installed_field_snapshot.set(true);
         self.0.installing.set(false);
         self.on_invalidated();
         Ok(())
+    }
+
+    fn ensure_install_read(&self, version: u64) -> Result<(), DocumentError> {
+        if self.mutation_version() == version {
+            Ok(())
+        } else {
+            Err(DocumentError::EditInProgress)
+        }
     }
 
     fn find_splice_run(&self, range: Range<usize>) -> Option<RunLocation> {
@@ -776,12 +911,19 @@ impl RichTextDocument {
     fn observe_text_change(&self) {
         let text = self.0.blocks.text();
         let previous = self.0.observed_text.replace(Rc::from(text.as_str()));
-        if previous.as_ref() != text {
+        let change = (previous.as_ref() != text).then(|| {
             let (range, inserted_length) = changed_range(&previous, &text);
-            let change = DocumentTextChange {
+            DocumentTextChange {
                 range,
                 inserted_length,
-            };
+            }
+        });
+        let installed = self.0.installed_field_snapshot.replace(false);
+        let has_fields = !self.0.link_fields.borrow().is_empty();
+        if !installed && has_fields {
+            self.reconcile_external_fields(change.as_ref());
+        }
+        if let Some(change) = change {
             self.0.text_changes.borrow_mut().push(change.clone());
             // These handlers are private pointer bookkeeping, with no application
             // callbacks. Apply each replacement once before public notifications;
@@ -791,6 +933,104 @@ impl RichTextDocument {
                 handler(&change);
             }
         }
+    }
+
+    fn reconcile_external_fields(&self, change: Option<&DocumentTextChange>) {
+        if self.0.reconciling_fields.replace(true) {
+            return;
+        }
+        let version = self.mutation_version();
+        // Reconciliation needs semantic extents, not frozen brush/font values.
+        // Avoid invoking formatting callbacks recursively while an external
+        // property or text invalidation is already being observed.
+        fn semantic_inline(inline: &Ref<Inline>) -> InlineSnapshot {
+            let kind = if let Some(run) = inline.cast::<Run>() {
+                InlineSnapshotKind::Run(run.text().unwrap_or_default())
+            } else if let Some(link) = inline.cast::<Hyperlink>() {
+                InlineSnapshotKind::Hyperlink {
+                    inlines: link
+                        .inlines()
+                        .snapshot()
+                        .iter()
+                        .map(semantic_inline)
+                        .collect(),
+                    field_id: link.field_id(),
+                    behavior: Default::default(),
+                    navigate_uri: link.navigate_uri(),
+                    target_name: link.target_name(),
+                    is_enabled: true,
+                    is_tab_stop: true,
+                    tab_index: 0,
+                    is_visited: false,
+                    underline_style: super::UnderlineStyle::Single,
+                }
+            } else if let Some(span) = inline.cast::<Span>() {
+                InlineSnapshotKind::Span(
+                    span.inlines()
+                        .snapshot()
+                        .iter()
+                        .map(semantic_inline)
+                        .collect(),
+                )
+            } else if inline.is::<LineBreak>() {
+                InlineSnapshotKind::LineBreak
+            } else if let Some(container) = inline.cast::<InlineUIContainer>() {
+                InlineSnapshotKind::Embedded(container.child())
+            } else {
+                let mut text = String::new();
+                inline.append_text(&mut text);
+                InlineSnapshotKind::Run(text)
+            };
+            InlineSnapshot {
+                format: CharacterFormat::default(),
+                kind,
+            }
+        }
+        let paragraphs = self
+            .blocks()
+            .snapshot()
+            .iter()
+            .map(|block| ParagraphSnapshot {
+                format: ParagraphFormat::default(),
+                inlines: block.cast::<Paragraph>().map_or_else(
+                    || vec![InlineSnapshot::run(block.text())],
+                    |paragraph| {
+                        paragraph
+                            .inlines()
+                            .snapshot()
+                            .iter()
+                            .map(semantic_inline)
+                            .collect()
+                    },
+                ),
+            })
+            .collect();
+        let mut snapshot = DocumentSnapshot {
+            paragraphs,
+            link_fields: self.0.link_fields.borrow().clone(),
+            next_link_field_id: self.0.next_link_field_id.get(),
+        };
+        snapshot.reconcile_external_link_fields(change);
+        if self.mutation_version() == version {
+            let retained: HashSet<_> = snapshot.link_fields.iter().map(|field| field.id).collect();
+            fn clear_retired(inlines: &InlineCollection, retained: &HashSet<u64>) {
+                for inline in inlines.snapshot().iter() {
+                    if let Some(link) = inline.cast::<Hyperlink>() {
+                        if link.field_id().is_some_and(|id| !retained.contains(&id)) {
+                            link.set_field_id(None);
+                        }
+                    }
+                    if let Some(span) = inline.cast::<Span>() {
+                        clear_retired(&span.inlines(), retained);
+                    }
+                }
+            }
+            for paragraph in self.paragraphs() {
+                clear_retired(&paragraph.inlines(), &retained);
+            }
+            *self.0.link_fields.borrow_mut() = snapshot.link_fields;
+        }
+        self.0.reconciling_fields.set(false);
     }
 
     fn publish_change(&self) {
@@ -1179,20 +1419,8 @@ impl ContentPool {
                 InlineSnapshotKind::Bold(_) => Bold::new().upcast(),
                 InlineSnapshotKind::Italic(_) => Italic::new().upcast(),
                 InlineSnapshotKind::Underline(_) => Underline::new().upcast(),
-                InlineSnapshotKind::Hyperlink {
-                    navigate_uri,
-                    target_name,
-                    ..
-                } => {
-                    let source = self.inlines.iter().find_map(|entry| {
-                        let link = entry.value.cast::<Hyperlink>()?;
-                        (link.navigate_uri() == *navigate_uri && link.target_name() == *target_name)
-                            .then_some(link)
-                    });
-                    source
-                        .map(|source| Hyperlink::with_behavior_from(&source))
-                        .unwrap_or_else(Hyperlink::new)
-                        .upcast()
+                InlineSnapshotKind::Hyperlink { behavior, .. } => {
+                    Hyperlink::with_snapshot_behavior(behavior).upcast()
                 }
                 InlineSnapshotKind::LineBreak => LineBreak::new().upcast(),
                 InlineSnapshotKind::Embedded(_) => InlineUIContainer::new().upcast(),
@@ -1210,6 +1438,7 @@ impl ContentPool {
                 }
             }
             InlineSnapshotKind::Hyperlink {
+                field_id,
                 navigate_uri,
                 target_name,
                 is_enabled,
@@ -1220,6 +1449,7 @@ impl ContentPool {
                 ..
             } => {
                 if let Some(link) = inline.cast::<Hyperlink>() {
+                    link.set_field_id(*field_id);
                     link.set_navigate_uri(navigate_uri.clone());
                     link.set_target_name(target_name.clone());
                     link.set_is_enabled(*is_enabled);
@@ -1282,16 +1512,24 @@ fn compatible(a: &InlineSnapshotKind, b: &InlineSnapshotKind) -> bool {
     match (a, b) {
         (
             InlineSnapshotKind::Hyperlink {
+                field_id: ai,
+                behavior: ab,
                 navigate_uri: a,
                 target_name: at,
                 ..
             },
             InlineSnapshotKind::Hyperlink {
+                field_id: bi,
+                behavior: bb,
                 navigate_uri: b,
                 target_name: bt,
                 ..
             },
-        ) => a == b && at == bt,
+        ) => match (ai, bi) {
+            (Some(a), Some(b)) => a == b,
+            (None, None) => a == b && at == bt,
+            _ => ab.shares_handlers(bb),
+        },
         (InlineSnapshotKind::Embedded(a), InlineSnapshotKind::Embedded(b)) => a == b,
         _ => std::mem::discriminant(a) == std::mem::discriminant(b),
     }

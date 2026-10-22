@@ -437,6 +437,7 @@ fn rich_selection_home_end_excludes_platform_soft_break_and_structural_separator
                     },
                     ParagraphSnapshot::default(),
                 ],
+                ..Default::default()
             })
             .unwrap();
         let document = if associated {
@@ -490,6 +491,7 @@ fn rich_selection_home_end_headless_crlf_and_paragraph_controls_exclude_the_whol
                 inlines: vec![InlineSnapshot::run("a\r\nb\u{b}c\u{c}d\u{2029}")],
                 ..Default::default()
             }],
+            ..Default::default()
         })
         .unwrap();
     let document = RichEditTextDocument::new(model);

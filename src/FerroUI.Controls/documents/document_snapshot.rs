@@ -1,6 +1,7 @@
 use super::{
-    Bold, CharacterFormat, Hyperlink, Inline, InlineCollection, InlineUIContainer, Italic,
-    LineBreak, Paragraph, ParagraphFormat, Run, Span, Underline, UnderlineStyle,
+    Bold, CharacterFormat, DocumentLinkField, Hyperlink, HyperlinkBehavior, Inline,
+    InlineCollection, InlineUIContainer, Italic, LineBreak, Paragraph, ParagraphFormat, Run, Span,
+    Underline, UnderlineStyle,
 };
 use crate::Control;
 use ferroui_base::Ref;
@@ -9,9 +10,24 @@ use std::ops::Range;
 
 /// An owned image of document content. Character data and formatting collections
 /// are independent of the live document; embedded controls retain their identity.
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct DocumentSnapshot {
     pub paragraphs: Vec<ParagraphSnapshot>,
+    /// Instruction metadata in visible UTF-16 coordinates. Rendered hyperlink
+    /// segments carry the matching identity; one field may cross paragraphs.
+    pub link_fields: Vec<DocumentLinkField>,
+    /// The next available identity in this snapshot. A live document also keeps
+    /// a monotonic allocation floor across undo, so retired handles never alias.
+    pub next_link_field_id: u64,
+}
+impl Default for DocumentSnapshot {
+    fn default() -> Self {
+        Self {
+            paragraphs: Vec::new(),
+            link_fields: Vec::new(),
+            next_link_field_id: 1,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -37,6 +53,8 @@ pub enum InlineSnapshotKind {
     Underline(Vec<InlineSnapshot>),
     Hyperlink {
         inlines: Vec<InlineSnapshot>,
+        field_id: Option<u64>,
+        behavior: HyperlinkBehavior,
         navigate_uri: Option<String>,
         target_name: Option<String>,
         is_enabled: bool,
@@ -65,6 +83,7 @@ impl DocumentSnapshot {
                     },
                 })
                 .collect(),
+            ..Default::default()
         }
     }
 
@@ -115,6 +134,7 @@ impl DocumentSnapshot {
                 }
             }
         }
+        self.validate_link_fields()?;
         Ok(())
     }
 
@@ -132,7 +152,10 @@ impl DocumentSnapshot {
 
     pub(crate) fn slice_unchecked(&self, range: Range<usize>) -> Self {
         if self.paragraphs.is_empty() {
-            return Self::default();
+            return Self {
+                next_link_field_id: self.next_link_field_id,
+                ..Self::default()
+            };
         }
         let (start_index, start_offset) = self.locate(range.start);
         let (end_index, end_offset) = self.locate(range.end);
@@ -147,7 +170,26 @@ impl DocumentSnapshot {
             );
             paragraphs[last].inlines = slice_inlines(&paragraphs[last].inlines, 0..end_offset);
         }
-        Self { paragraphs }
+        let link_fields = self
+            .link_fields
+            .iter()
+            .filter_map(|field| {
+                let start = field.range.start.max(range.start);
+                let end = field.range.end.min(range.end);
+                (start < end).then(|| {
+                    let mut field = field.clone();
+                    field.range = start - range.start..end - range.start;
+                    field
+                })
+            })
+            .collect();
+        let mut result = Self {
+            paragraphs,
+            link_fields,
+            next_link_field_id: self.next_link_field_id,
+        };
+        result.prune_orphan_field_projections();
+        result
     }
 }
 
@@ -186,6 +228,8 @@ impl InlineSnapshot {
         } else if let Some(link) = inline.cast::<Hyperlink>() {
             InlineSnapshotKind::Hyperlink {
                 inlines: capture_inlines(&link.inlines()),
+                field_id: link.field_id(),
+                behavior: link.snapshot_behavior(),
                 navigate_uri: link.navigate_uri(),
                 target_name: link.target_name(),
                 is_enabled: link.is_enabled(),
@@ -361,5 +405,9 @@ pub(crate) fn normalize_paragraph_breaks(text: &str) -> String {
 }
 
 fn inline_line_break() -> &'static str {
-    if cfg!(windows) { "\r\n" } else { "\n" }
+    if cfg!(windows) {
+        "\r\n"
+    } else {
+        "\n"
+    }
 }
