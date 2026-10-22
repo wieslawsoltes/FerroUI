@@ -104,7 +104,7 @@ namespaces and counts; their loader, theme and Gallery results keep their histor
 scope.
 
 The current source map identifies **315 type candidates and 1,537 member candidates**;
-the existing-API guard reports **205 additive types**. The only new matches are
+the existing-API guard reports **204 additive types**. The only new matches are
 `NumberBoxValueChangedEventArgs` and its `OldValue`/`NewValue` members, without a
 behavior-status upgrade. The current theme ledger records **6,912 ported, 1,974 waived
 and 87 pending definitions**, including twelve RadioButtons definitions whose obsolete

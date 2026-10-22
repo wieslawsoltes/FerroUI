@@ -5,7 +5,7 @@ use ferroui_base::media::imaging::PngBitmapEncoderOptions;
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{Rect, Ref};
 use ferroui_controls::{
-    winui::AutoSuggestBox, AppBuilder, Application, ComboBox, Control, Image, ScrollViewer, Window,
+    AppBuilder, Application, AutoSuggestBox, ComboBox, Control, Image, ScrollViewer, Window,
 };
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 use ferroui_headless::{

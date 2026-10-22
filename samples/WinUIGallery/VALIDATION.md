@@ -76,7 +76,7 @@ promotion. Loader, theme and Gallery executions retain their separately stated s
 The current comparison reports **315 type candidates and 1,537 member candidates**.
 The increase consists only of the newly matching native `NumberBoxValueChangedEventArgs`
 type and its `OldValue`/`NewValue` members; their behavior remains unverified. The
-existing-API guard reports **205 additive types** against the unchanged protected
+existing-API guard reports **204 additive types** against the unchanged protected
 baseline. No API behavior or Gallery page status advances from these source matches.
 
 The current [theme ledger](../../docs/porting/winui-theme/TRACKING.md) records

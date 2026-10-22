@@ -162,7 +162,7 @@ The **native control promotion** has a new
 **182 native control tests passed across 12 targets**, with **53 source hashes**
 checked before and after execution. All 521 current API evidence entries reference
 this record. The current maps report **315 type candidates, 1,537 member candidates
-and 205 additive types**; the new source matches are `NumberBoxValueChangedEventArgs`
+and 204 additive types**; the new source matches are `NumberBoxValueChangedEventArgs`
 and its `OldValue`/`NewValue` members. Behavior classifications and page statuses are
 unchanged. Loader, theme and Gallery results below remain tied to their stated
 historical checkpoints.
