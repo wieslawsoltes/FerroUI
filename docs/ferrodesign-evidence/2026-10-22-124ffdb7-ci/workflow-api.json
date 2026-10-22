@@ -1,0 +1,384 @@
+{
+  "schema": 1,
+  "retrievedAt": "2026-10-22 22:05:36 UTC",
+  "source": "GitHub connector GET responses; selected run fields and complete returned job/step summaries",
+  "sourceSha": "124ffdb74e2b39ca09d5a1bcd4052bbb9a61a165",
+  "runs": [
+    {
+      "endpoint": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/runs/39858027509",
+      "metadata": {
+        "id": 39858027509,
+        "name": "FerroDesign browser",
+        "head_sha": "124ffdb74e2b39ca09d5a1bcd4052bbb9a61a165",
+        "head_branch": "feat/ferrodesign-editor",
+        "path": ".github/workflows/ferrodesign.yml",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_attempt": 1,
+        "run_started_at": "2026-10-22T21:32:02Z",
+        "created_at": "2026-10-22T21:32:02Z",
+        "updated_at": "2026-10-22T21:52:51Z",
+        "html_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39858027509"
+      },
+      "jobsEndpoint": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/runs/39858027509/jobs",
+      "jobs": [
+        {
+          "id": 120102469519,
+          "name": "Browser validation",
+          "status": "completed",
+          "conclusion": "failure",
+          "run_id": 39858027509,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Restore pinned toolchain",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Restore dependencies and compiled framework",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Install pinned Rust, Emscripten and wasm-bindgen",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Install native Fontconfig and FreeType development files",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Build actual FerroUI Vello WebAssembly application",
+              "status": "completed",
+              "conclusion": "failure",
+              "number": 8
+            },
+            {
+              "name": "Install Chromium for browser validation",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 9
+            },
+            {
+              "name": "Validate browser persistence and IndexedDB transactions",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 10
+            },
+            {
+              "name": "Validate pixels, pointer editing, keyboard history and serialization",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 11
+            },
+            {
+              "name": "Measure native text panning in both browser surfaces",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 12
+            },
+            {
+              "name": "Upload complete browser build",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Upload validation screenshots, traces, reports and lockfiles",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Cache pinned toolchain",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 15
+            },
+            {
+              "name": "Cache partial build for subsequent fixes",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16
+            },
+            {
+              "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 31
+            },
+            {
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 32
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 33
+            }
+          ]
+        },
+        {
+          "id": 120102469680,
+          "name": "Native validation",
+          "status": "completed",
+          "conclusion": "failure",
+          "run_id": 39858027509,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Restore pinned toolchain",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Restore dependencies and compiled framework",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Install pinned Rust, Emscripten and wasm-bindgen",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Check source and test document engine",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Verify Vello without Skia on every supported application target",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Compare scoped editing, history and serialization costs",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Install native Fontconfig and FreeType development files",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Test native text preedit ownership",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Test public compositing recording and Vello pixels",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Test public geometry and shaped text outline APIs",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Check native launcher and shared UI compilation",
+              "status": "completed",
+              "conclusion": "failure",
+              "number": 14
+            },
+            {
+              "name": "Test native editor, incremental rendering and background blur",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 15
+            },
+            {
+              "name": "Upload native validation logs, pixel diagnostics and lockfiles",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16
+            },
+            {
+              "name": "Cache pinned toolchain",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 17
+            },
+            {
+              "name": "Cache partial build for subsequent fixes",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 18
+            },
+            {
+              "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 35
+            },
+            {
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 36
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 37
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/runs/39858027415",
+      "metadata": {
+        "id": 39858027415,
+        "name": "FerroDesign native feedback",
+        "head_sha": "124ffdb74e2b39ca09d5a1bcd4052bbb9a61a165",
+        "head_branch": "feat/ferrodesign-editor",
+        "path": ".github/workflows/ferrodesign-native.yml",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_attempt": 1,
+        "run_started_at": "2026-10-22T21:32:02Z",
+        "created_at": "2026-10-22T21:32:02Z",
+        "updated_at": "2026-10-22T21:55:30Z",
+        "html_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39858027415"
+      },
+      "jobsEndpoint": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/runs/39858027415/jobs",
+      "jobs": [
+        {
+          "id": 120106042788,
+          "name": "native",
+          "status": "completed",
+          "conclusion": "failure",
+          "run_id": 39858027415,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Configure runner-local toolchain paths",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Install pinned Rust and native font dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Validate public unhinted glyph geometry and pixels",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Validate shared paragraph layout and native editing",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Validate native editor and public renderer pixels",
+              "status": "completed",
+              "conclusion": "failure",
+              "number": 8
+            },
+            {
+              "name": "Run actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 18
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 19
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "retrievedAt": "2026-10-22 22:05:36 UTC",
+  "endpoint": "https://api.github.com/repos/wieslawsoltes/FerroUI/compare/58deaeeeae2226ece8220d4abcda9d0a3678ca20...124ffdb74e2b39ca09d5a1bcd4052bbb9a61a165",
+  "source": "Selected exact fields from the GitHub comparison response; all changed filenames retained",
+  "base": "58deaeeeae2226ece8220d4abcda9d0a3678ca20",
+  "head": "124ffdb74e2b39ca09d5a1bcd4052bbb9a61a165",
+  "status": "ahead",
+  "totalCommits": 1,
+  "files": [
+    {
+      "filename": ".github/workflows/ferrodesign-native.yml",
+      "status": "modified",
+      "changes": 4,
+      "patch": "@@ -63,6 +63,10 @@ jobs:\n           sudo apt-get update\n           sudo apt-get install --no-install-recommends -y pkg-config libfontconfig1-dev libfreetype6-dev\n       - name: Validate public unhinted glyph geometry and pixels\n+        # Record actual cache invalidation reasons without changing Cargo's\n+        # freshness decisions or any validation gate.\n+        env:\n+          CARGO_LOG: cargo::core::compiler::fingerprint=info\n         run: cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-vello --lib unhinted_ --jobs 1 -- --test-threads=1\n       - name: Validate shared paragraph layout and native editing\n         run: |"
+    },
+    {
+      "filename": ".github/workflows/ferrodesign.yml",
+      "status": "modified",
+      "changes": 5
+    },
+    {
+      "filename": "samples/FerroDesign/docs/TEXT_RENDERING.md",
+      "status": "modified",
+      "changes": 43
+    },
+    {
+      "filename": "samples/FerroDesign/tests/text-pan-trace-analysis.mjs",
+      "status": "added",
+      "changes": 206
+    },
+    {
+      "filename": "samples/FerroDesign/tests/text-pan-trace-analysis.test.mjs",
+      "status": "added",
+      "changes": 213
+    },
+    {
+      "filename": "samples/FerroDesign/tests/text-pan-trace.mjs",
+      "status": "added",
+      "changes": 320
+    },
+    {
+      "filename": "samples/FerroDesign/tests/text-render-benchmark.mjs",
+      "status": "modified",
+      "changes": 110
+    }
+  ]
+}

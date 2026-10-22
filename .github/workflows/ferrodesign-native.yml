@@ -63,10 +63,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y pkg-config libfontconfig1-dev libfreetype6-dev
       - name: Validate public unhinted glyph geometry and pixels
-        # Record actual cache invalidation reasons without changing Cargo's
-        # freshness decisions or any validation gate.
+        # Cargo 1.99 uses compiler, without the older core::compiler prefix.
+        # Record freshness reasons without changing cache decisions or validation.
         env:
-          CARGO_LOG: cargo::core::compiler::fingerprint=info
+          CARGO_LOG: cargo::compiler::fingerprint=trace
         run: cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-vello --lib unhinted_ --jobs 1 -- --test-threads=1
       - name: Validate shared paragraph layout and native editing
         run: |
