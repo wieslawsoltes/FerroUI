@@ -202,6 +202,36 @@ fn text_xaml_preserves_nested_ancestor_shear_reflection_and_isolated_overlap_alp
 }
 
 #[test]
+fn text_xaml_ancestor_background_ignores_visible_zero_opacity_fills() {
+    let _dispatcher = ferroui_base::threading::Dispatcher::unit_test_scope();
+    let scope = backend();
+    let mut document = Document::new("Inactive ancestor paint");
+    let mut parent = Node::new(NodeKind::Frame, "One active background", 24.0, 20.0, 240.0, 150.0);
+    parent.clip_content = false;
+    parent.blend_mode = core::BlendMode::Normal;
+    parent.fills = vec![
+        Fill { paint: Paint::Solid(Color::rgba(255, 0, 0, 255)), opacity: 0.0, visible: true },
+        Fill::solid(Color::rgba(37, 99, 235, 255)),
+    ];
+    let parent = document.insert_node(1, parent).unwrap();
+    let mut child = text("Native text\nafter an inactive fill");
+    child.x = 12.0;
+    child.y = 10.0;
+    child.width = 200.0;
+    child.height = 110.0;
+    child.fills = vec![Fill::solid(Color::BLACK)];
+    document.insert_node(parent, child).unwrap();
+
+    // The native renderer and the supported-stack guard both ignore the first
+    // paint. Looking up merely the first visible fill would lose the blue
+    // background, even though exactly one active background is supported.
+    let xaml = assert_document_pixels(document, &[parent]);
+    assert!(xaml.contains("Background=\"#FF2563EB\""));
+    assert!(!xaml.contains("#FFFF0000"));
+    scope.dispose();
+}
+
+#[test]
 fn text_xaml_rejects_unrepresented_ancestor_features_before_any_result_is_returned() {
     let plain = Node::new(NodeKind::Frame, "Unsupported text ancestor", 0.0, 0.0, 200.0, 150.0);
     for parent in [

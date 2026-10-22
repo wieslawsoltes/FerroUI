@@ -3263,7 +3263,7 @@ fn xaml_node(doc: &core::Document, id: NodeId, depth: usize, result: &mut String
     }
     if n.kind != NodeKind::Line {
         let property = if container { "Background" } else if n.kind == NodeKind::Text { "Foreground" } else { "Fill" };
-        if let Some(fill) = n.fills.iter().find(|fill| fill.visible).filter(|_| !(container && smooth_box)) {
+        if let Some(fill) = n.fills.iter().find(|fill| fill.visible && fill.opacity > 0.0).filter(|_| !(container && smooth_box)) {
             xaml_paint(tag, property, &fill.paint, fill.opacity, depth + 1, &mut attributes, &mut properties);
         } else {
             attributes += &format!(" {property}=\"#00000000\"");
