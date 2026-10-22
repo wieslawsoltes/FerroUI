@@ -7,6 +7,7 @@ mod layout_drag;
 mod selection;
 mod input_observations;
 mod vector_width;
+mod corner_radius;
 use crate::{
     icons::brush,
     renderer::{RenderStats, ScenePainter},
@@ -202,6 +203,7 @@ pub struct DesignCanvas {
     selection_pointer: Cell<Option<Point>>,
     pointer_presses: RefCell<input_observations::PointerPresses>,
     stroke_width: RefCell<vector_width::WidthState>,
+    corner_radius: RefCell<corner_radius::CornerRadiusState>,
 }
 ferro_class!(DesignCanvas:Control);
 ferro_impl_classes!(DesignCanvas:FerroObjectImpl,StyledElementImpl,LayoutableImpl,InteractiveImpl,ControlImpl);
@@ -248,6 +250,7 @@ impl DesignCanvas {
             selection_pointer: Cell::new(None),
             pointer_presses: RefCell::new(input_observations::PointerPresses::default()),
             stroke_width: RefCell::new(vector_width::WidthState::default()),
+            corner_radius: RefCell::new(corner_radius::CornerRadiusState::default()),
         });
         this.set_focusable(true);
         this.set_clip_to_bounds(true);
@@ -287,6 +290,8 @@ impl DesignCanvas {
     }
     /// Activation changes cannot reuse a press or hover from an earlier frame.
     pub fn reset_presentation_input(&self) {
+        self.cancel_corner_radius_gesture();
+        self.clear_corner_radius_hover();
         self.leave_stroke_width_edit();
         self.cancel_layout_drag();
         self.prototype_press.set(None);
@@ -294,6 +299,8 @@ impl DesignCanvas {
         self.space.set(false);
     }
     pub fn set_tool(&self, tool: Tool) {
+        self.cancel_corner_radius_gesture();
+        self.clear_corner_radius_hover();
         self.leave_stroke_width_edit();
         self.cancel_network_bucket_gesture();
         self.clear_bucket_hover();
@@ -309,11 +316,15 @@ impl DesignCanvas {
         self.emit(CanvasEvent::Tool);
     }
     pub fn reset_fit(&self) {
+        self.cancel_corner_radius_gesture();
+        self.clear_corner_radius_hover();
         self.cancel_layout_drag();
         self.initialized.set(false);
         self.invalidate_visual();
     }
     pub fn zoom(&self, factor: f64) {
+        self.cancel_corner_radius_gesture();
+        self.clear_corner_radius_hover();
         self.cancel_layout_drag();
         let mut v = self.viewport.get();
         v.zoom_at(Point::new(v.width / 2.0, v.height / 2.0), v.zoom * factor);
@@ -322,6 +333,8 @@ impl DesignCanvas {
         self.emit(CanvasEvent::Camera);
     }
     pub fn zoom_to_selection(&self) {
+        self.cancel_corner_radius_gesture();
+        self.clear_corner_radius_hover();
         self.cancel_layout_drag();
         let editor = self.editor.borrow();
         let bounds = editor
@@ -416,6 +429,7 @@ impl DesignCanvas {
     /// Undo during a live pointer edit cancels that transaction and its gesture.
     /// Later pointer events must never continue writing after history restored it.
     pub fn cancel_active_edit(&self) -> bool {
+        if self.cancel_corner_radius_gesture() { return true; }
         if self.cancel_stroke_width_gesture() { return true; }
         if self.cancel_network_bucket_gesture() { return true; }
         if self.cancel_layout_drag() { return true; }
@@ -429,6 +443,8 @@ impl DesignCanvas {
     }
     pub fn cancel(&self) {
         self.layout_grids.borrow_mut().clear_snap();
+        if self.cancel_corner_radius_gesture() { return; }
+        self.clear_corner_radius_hover();
         if self.cancel_stroke_width_gesture() { return; }
         if self.cancel_network_bucket_gesture() { return; }
         // This preview owns no transaction. In particular, Escape must not
@@ -446,6 +462,8 @@ impl DesignCanvas {
     }
     /// Enter direct path editing without replacing the retained document node.
     pub fn edit_vector(&self) -> bool {
+        self.cancel_corner_radius_gesture();
+        self.clear_corner_radius_hover();
         self.leave_stroke_width_edit();
         self.cancel_network_bucket_gesture();
         self.cancel_layout_drag();
@@ -482,6 +500,7 @@ impl DesignCanvas {
         self.invalidate_visual();
     }
     pub fn reconcile_vector_edit(&self) {
+        self.reconcile_corner_radius();
         self.reconcile_stroke_width();
         self.reconcile_network_bucket();
         let editor = self.editor.borrow();
@@ -720,6 +739,7 @@ impl InputElementImpl for DesignCanvas {
     fn on_pointer_pressed(this: &Self, e: &PointerPressedEventArgs) {
         Self::parent_on_pointer_pressed(this, e);
         this.layout_grids.borrow_mut().clear_snap();
+        this.cancel_corner_radius_gesture();
         this.cancel_stroke_width_gesture();
         this.cancel_network_bucket_gesture();
         this.cancel_layout_drag();
@@ -763,6 +783,8 @@ impl InputElementImpl for DesignCanvas {
             Tool::Comment => this.emit(CanvasEvent::Comment(world)),
             Tool::Select => {
                 let deep = e.key_modifiers().intersects(KeyModifiers::CONTROL | KeyModifiers::META);
+                if this.corner_radius_press(world, e.key_modifiers()) { return; }
+                this.clear_corner_radius_hover();
                 if e.key_modifiers().contains(KeyModifiers::ALT) && !deep && this.vector_node.get().is_none() {
                     this.cycle_selection_at(world, if additive { core::SelectionCycle::InFront } else { core::SelectionCycle::Behind });
                     return;
@@ -987,11 +1009,16 @@ impl InputElementImpl for DesignCanvas {
             }
             return;
         }
+        if this.corner_radius_move(world) { return; }
         if this.image_crop_move(world) { return; }
         if this.stroke_width_move(world) { return; }
         if this.network_bucket_move(world, e.key_modifiers().contains(KeyModifiers::SHIFT)) { return; }
         let shift = e.key_modifiers().contains(KeyModifiers::SHIFT);
         if this.layout_drag_move_constrained(world, Point::new(screen.x, screen.y), shift) { return; }
+        if this.corner_radius_hover(world, e.key_modifiers()) {
+            if this.hover.take().is_some() { this.invalidate_visual(); }
+            return;
+        }
         let mut camera_changed = false;
         let mut gesture = this.gesture.borrow_mut();
         match &mut *gesture {
@@ -1324,6 +1351,14 @@ impl InputElementImpl for DesignCanvas {
             e.set_handled(true);
             return;
         }
+        if this.corner_radius_active() {
+            this.corner_radius_move(this.world(e.get_position(Some(this))));
+        }
+        if this.finish_corner_radius_edit() {
+            e.pointer().capture(None);
+            e.set_handled(true);
+            return;
+        }
         if this.image_crop_release() {
             e.pointer().capture(None);
             e.set_handled(true);
@@ -1397,6 +1432,7 @@ impl InputElementImpl for DesignCanvas {
     }
     fn on_pointer_capture_lost(this: &Self, e: &PointerCaptureLostEventArgs) {
         Self::parent_on_pointer_capture_lost(this, e);
+        if this.cancel_corner_radius_gesture() { return; }
         if this.cancel_stroke_width_gesture() { return; }
         if this.cancel_network_bucket_gesture() { return; }
         if this.cancel_layout_drag() { return; }
@@ -1412,6 +1448,7 @@ impl InputElementImpl for DesignCanvas {
     }
     fn on_pointer_exited(this: &Self, e: &PointerEventArgs) {
         Self::parent_on_pointer_exited(this, e);
+        this.clear_corner_radius_hover();
         this.clear_stroke_width_hover();
         this.clear_bucket_hover();
         if this.presentation.get().is_some() {
@@ -1423,6 +1460,8 @@ impl InputElementImpl for DesignCanvas {
     }
     fn on_pointer_wheel_changed(this: &Self, e: &PointerWheelEventArgs) {
         Self::parent_on_pointer_wheel_changed(this, e);
+        this.cancel_corner_radius_gesture();
+        this.clear_corner_radius_hover();
         this.cancel_stroke_width_gesture();
         this.clear_stroke_width_hover();
         this.cancel_network_bucket_gesture();
@@ -1459,6 +1498,10 @@ impl InputElementImpl for DesignCanvas {
             e.set_handled(true);
             return;
         }
+        if e.key == Key::Escape && this.cancel_corner_radius_gesture() {
+            e.set_handled(true);
+            return;
+        }
         if this.image_crop_key(e.key) { e.set_handled(true); return; }
         if this.stroke_width_key(e.key, e.key_modifiers) { e.set_handled(true); return; }
         if e.key == Key::Escape && this.cancel_network_bucket_gesture() {
@@ -1466,6 +1509,8 @@ impl InputElementImpl for DesignCanvas {
             return;
         }
         if e.key == Key::Space {
+            this.cancel_corner_radius_gesture();
+            this.clear_corner_radius_hover();
             this.cancel_stroke_width_gesture();
             this.clear_stroke_width_hover();
             this.cancel_network_bucket_gesture();
@@ -1506,6 +1551,7 @@ impl InputElementImpl for DesignCanvas {
         let shift = e.key_modifiers.contains(KeyModifiers::SHIFT);
         let alt = e.key_modifiers.contains(KeyModifiers::ALT);
         if matches!(e.key, Key::Left | Key::Right | Key::Up | Key::Down | Key::Enter | Key::Tab | Key::Delete | Key::Back) {
+            this.finish_corner_radius_edit();
             this.finish_network_bucket();
         }
         if this.selection_key(e) {
@@ -2094,6 +2140,7 @@ impl VisualImpl for DesignCanvas {
                         "#FFFFFF",
                     );
                 }
+                this.render_corner_radius(ctx, &editor, id);
             }
         }
         if let Gesture::Marquee { start, current, .. } = &*this.gesture.borrow() {

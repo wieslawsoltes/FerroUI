@@ -312,6 +312,10 @@ impl DesignCanvas {
         self.stroke_width.borrow().gesture.is_some()
     }
 
+    pub(super) fn stroke_width_mode_active(&self) -> bool {
+        self.stroke_width.borrow().node.is_some()
+    }
+
     pub(super) fn clear_stroke_width_hover(&self) {
         if self.stroke_width.borrow_mut().hover.take().is_some() {
             self.invalidate_visual();

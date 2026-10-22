@@ -95,12 +95,12 @@ pub fn polygon_corner_path(node: &Node) -> VectorPath {
 }
 
 #[derive(Clone, Copy, Default)]
-struct Corner {
-    incoming: Point,
-    outgoing: Point,
-    turn: f64,
-    radius: f64,
-    tangent_factor: f64,
+pub(crate) struct Corner {
+    pub(crate) incoming: Point,
+    pub(crate) outgoing: Point,
+    pub(crate) turn: f64,
+    pub(crate) radius: f64,
+    pub(crate) tangent_factor: f64,
 }
 
 fn dot(a: Point, b: Point) -> f64 {
@@ -114,17 +114,9 @@ fn rotate(point: Point, angle: f64) -> Point {
     Point::new(point.x * cos - point.y * sin, point.x * sin + point.y * cos)
 }
 
-fn fillet_path(points: &[Point], radius: f64) -> VectorPath {
-    let sharp = || VectorPath::polygon(points, true);
-    if points.len() < 3 || !radius.is_finite() || radius <= 0.0 {
-        return sharp();
-    }
-    if points
-        .iter()
-        .any(|point| !point.x.is_finite() || !point.y.is_finite())
-    {
-        return VectorPath::default();
-    }
+/// The same bounded corner plan drives artwork and native radius handles.
+/// Callers validate finite vertices/radius; a zero radius still has directions.
+pub(crate) fn fillet_corners(points: &[Point], radius: f64) -> (Vec<Corner>, f64) {
     let count = points.len();
     let lengths: Vec<_> = (0..count)
         .map(|index| points[index].distance(points[(index + 1) % count]))
@@ -189,6 +181,22 @@ fn fillet_path(points: &[Point], radius: f64) -> VectorPath {
             scale = scale.min(used.recip());
         }
     }
+    (corners, scale)
+}
+
+fn fillet_path(points: &[Point], radius: f64) -> VectorPath {
+    let sharp = || VectorPath::polygon(points, true);
+    if points.len() < 3 || !radius.is_finite() || radius <= 0.0 {
+        return sharp();
+    }
+    if points
+        .iter()
+        .any(|point| !point.x.is_finite() || !point.y.is_finite())
+    {
+        return VectorPath::default();
+    }
+    let count = points.len();
+    let (corners, scale) = fillet_corners(points, radius);
     if corners.iter().all(|corner| corner.radius * scale == 0.0) {
         return sharp();
     }

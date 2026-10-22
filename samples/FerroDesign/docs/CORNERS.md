@@ -7,6 +7,10 @@ independent radii remain editable. A batch skips locked layers, validates every
 target before mutation and records one undo step. Repeating the current value
 retains redo. Component instances retain explicit smoothing overrides.
 
+[Native radius handles](CORNER_RADIUS_HANDLES.md) also edit the radius directly
+on the selected shape. Uniform drags preserve smoothing; Alt/Option at press
+edits one Rectangle corner. Smoothing itself remains a numeric inspector field.
+
 ## Geometry and performance
 
 The shared core `corner_path` implements the cubic/arc/cubic construction in

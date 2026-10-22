@@ -6,6 +6,10 @@ values. Changing it keeps the layer kind, point count, star inner ratio, authore
 box, center rotation, reflection and affine transform intact. The procedural
 layer remains editable; it does not become an arbitrary vector path.
 
+[Native canvas radius handles](CORNER_RADIUS_HANDLES.md) provide the same
+uniform-radius authoring through captured pointer input. They preserve the
+primitive and its affine geometry, with one undo step per changed drag.
+
 No document field or schema version is added. Existing JSON already stores
 `corner_radius`; a nonzero value on a Polygon or Star now affects its visible
 outline and picking. The default zero value preserves the prior sharp geometry
@@ -145,8 +149,8 @@ integrated gates; their presence alone is not a passing validation result.
 ## Remaining scope
 
 This feature does not add arbitrary vector-anchor fillets, per-vertex radius
-authoring for polygons/stars, smoothing for their nonrectangular corners, or an
-on-canvas radius-drag handle. Changing a star's point count or inner ratio still
+authoring for polygons/stars or smoothing for their nonrectangular corners.
+Changing a star's point count or inner ratio still
 uses the existing procedural-shape functionality. Figma-native file-format
 interchange and pixel-identical parity with all Figma primitive configurations
 remain separate work.
