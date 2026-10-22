@@ -290,6 +290,54 @@ fn bundled_language_settings_decode_through_typed_contracts() {
     }
 }
 
+#[cfg(feature = "bundled-grammars")]
+#[test]
+fn bundled_filename_patterns_override_generic_extensions() {
+    let catalog = BundledCatalog::new().unwrap();
+    assert_eq!(
+        catalog
+            .languages()
+            .iter()
+            .map(|language| language.filename_patterns.len())
+            .sum::<usize>(),
+        15
+    );
+    for (filename, expected) in [
+        ("/work/Dockerfile.release", "dockerfile"),
+        ("C:\\work\\CONTAINERFILE.Debug", "dockerfile"),
+        ("Jenkinsfile.integration", "groovy"),
+        ("/home/user/.config/git/config", "properties"),
+        ("C:\\work\\project\\.git\\config", "properties"),
+        (".git/config", "properties"),
+        ("compose.yml", "dockercompose"),
+        ("compose.yaml", "dockercompose"),
+        ("/work/compose.production.yml", "dockercompose"),
+        ("/work/compose.production.yaml", "dockercompose"),
+        ("my-docker-compose-test.yml", "dockercompose"),
+        ("MY-DOCKER-COMPOSE-TEST.YAML", "dockercompose"),
+        ("tsconfig.app.json", "jsonc"),
+        ("jsconfig.editor.json", "jsonc"),
+        ("tsconfig-node.json", "jsonc"),
+        ("jsconfig-web.json", "jsonc"),
+        ("regular.json", "json"),
+        ("ordinary.yaml", "yaml"),
+        ("tsconfig.json", "jsonc"),
+        ("Dockerfile", "dockerfile"),
+        ("lib.rs", "rust"),
+    ] {
+        assert_eq!(
+            catalog
+                .language_by_filename(filename)
+                .map(|language| language.id.as_str()),
+            Some(expected),
+            "{filename}"
+        );
+    }
+    assert!(catalog
+        .language_by_filename("unknown.extension-not-registered")
+        .is_none());
+}
+
 #[test]
 fn package_metadata_preserves_contributions_and_maps_host_language_ids() {
     let package = GrammarDefinition::from_json(r##"{

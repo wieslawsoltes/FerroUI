@@ -8,7 +8,14 @@ pub enum Error {
     MissingGrammar(String),
     MissingResource(String),
     InvalidSelector(String),
-    Regex { pattern: String, message: String },
+    InvalidFilenamePattern {
+        pattern: String,
+        error: crate::FilenameGlobError,
+    },
+    Regex {
+        pattern: String,
+        message: String,
+    },
     RegexLimit(String),
     InvalidState,
     InvalidLine(usize),
@@ -25,6 +32,9 @@ impl fmt::Display for Error {
             Self::MissingGrammar(s) => write!(f, "grammar is not registered: {s}"),
             Self::MissingResource(s) => write!(f, "resource is not registered: {s}"),
             Self::InvalidSelector(s) => write!(f, "invalid scope selector: {s}"),
+            Self::InvalidFilenamePattern { pattern, error } => {
+                write!(f, "filename pattern {pattern:?}: {error}")
+            }
             Self::Regex { pattern, message } => {
                 write!(f, "regular expression {pattern:?}: {message}")
             }

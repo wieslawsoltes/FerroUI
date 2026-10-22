@@ -31,6 +31,21 @@ mod browser {
     pub async fn verify_host_contracts() -> std::result::Result<String, JsValue> {
         initialize_browser_oniguruma().await.map_err(error)?;
         let catalog = Rc::new(BundledCatalog::new().map_err(error)?);
+        for (path, expected) in [
+            ("C:\\work\\tsconfig.app.json", "jsonc"),
+            ("project/.git/config", "properties"),
+            ("compose.dev.yaml", "dockercompose"),
+        ] {
+            if catalog
+                .language_by_filename(path)
+                .map(|language| language.id.as_str())
+                != Some(expected)
+            {
+                return Err(JsValue::from_str(
+                    "browser filename pattern detection failed",
+                ));
+            }
+        }
         let registry = catalog.lazy_registry().map_err(error)?;
         if registry.scope_names().count() != 0 {
             return Err(JsValue::from_str("lazy catalog loaded eagerly"));
@@ -75,7 +90,7 @@ mod browser {
                 "browser word lookup did not preserve UTF-16 coordinates",
             ));
         }
-        Ok("lazy registry, incremental model events/disposal and Unicode word lookup pass through Rust/Wasm".into())
+        Ok("lazy registry, filename globs, incremental model events/disposal and Unicode word lookup pass through Rust/Wasm".into())
     }
 
     fn error(error: Error) -> JsValue {

@@ -13,6 +13,7 @@ mod browser;
 mod catalog;
 mod encoded_tokens;
 mod error;
+mod filename_glob;
 mod grammar;
 mod language_configuration;
 mod line_text;
@@ -32,6 +33,7 @@ pub use browser::{browser_oniguruma_ready, initialize_browser_oniguruma};
 pub use catalog::{BundledCatalog, Language, LanguageConfiguration, ThemeName};
 pub use encoded_tokens::{ColorMap, GrammarConfiguration, TokenizeLineResult2};
 pub use error::{Error, Result};
+pub use filename_glob::{FilenameGlob, FilenameGlobError, FilenameGlobErrorKind};
 pub use grammar::{Grammar, StateStack, Token, TokenizeLineResult, TokenizeOptions};
 pub use language_configuration::{
     AutoClosingPairs, AutoPair, Comments, EnterAction, EnterRule, Folding, IndentAction,

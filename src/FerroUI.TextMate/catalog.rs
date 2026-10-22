@@ -1,6 +1,7 @@
 use crate::{
-    read_json, regex_source::RegexCache, Error, GrammarConfiguration, GrammarContribution,
-    GrammarDefinition, IRegistryOptions, LanguageSnippets, RawGrammar, Registry, Result, Theme,
+    read_json, regex_source::RegexCache, Error, FilenameGlob, GrammarConfiguration,
+    GrammarContribution, GrammarDefinition, IRegistryOptions, LanguageSnippets, RawGrammar,
+    Registry, Result, Theme,
 };
 use serde_json::Value;
 use std::{collections::BTreeMap, fmt, rc::Rc};
@@ -45,6 +46,7 @@ pub struct Language {
     pub aliases: Vec<String>,
     pub extensions: Vec<String>,
     pub filenames: Vec<String>,
+    pub filename_patterns: Vec<String>,
     pub first_line: Option<String>,
     pub mime_types: Vec<String>,
     pub configuration_file: Option<String>,
@@ -156,6 +158,7 @@ pub struct BundledCatalog {
     packages: Vec<(String, GrammarDefinition)>,
     grammar_contributions: Vec<GrammarContribution>,
     default_theme: ThemeName,
+    filename_patterns: Vec<(usize, FilenameGlob)>,
     detection_cache: RegexCache,
 }
 impl BundledCatalog {
@@ -236,6 +239,7 @@ impl BundledCatalog {
                         aliases: strings(entry.get("aliases")),
                         extensions: strings(entry.get("extensions")),
                         filenames: strings(entry.get("filenames")),
+                        filename_patterns: strings(entry.get("filenamePatterns")),
                         first_line: entry
                             .get("firstLine")
                             .and_then(Value::as_str)
@@ -253,6 +257,20 @@ impl BundledCatalog {
             }
         }
         languages.sort_by(|a, b| a.id.cmp(&b.id));
+        let mut filename_patterns = Vec::new();
+        for (index, language) in languages.iter().enumerate() {
+            for pattern in &language.filename_patterns {
+                let glob =
+                    FilenameGlob::new(pattern).map_err(|error| Error::InvalidFilenamePattern {
+                        pattern: pattern.clone(),
+                        error,
+                    })?;
+                filename_patterns.push((index, glob));
+            }
+        }
+        // Stable sorting preserves language-ID order for equally long patterns.
+        filename_patterns
+            .sort_by(|(_, left), (_, right)| right.pattern().len().cmp(&left.pattern().len()));
         grammar_paths.sort();
         grammar_paths.dedup();
         Ok(Self {
@@ -261,6 +279,7 @@ impl BundledCatalog {
             packages,
             grammar_contributions,
             default_theme,
+            filename_patterns,
             detection_cache: RegexCache::default(),
         })
     }
@@ -323,11 +342,28 @@ impl BundledCatalog {
                 .any(|e| e.eq_ignore_ascii_case(&extension))
         })
     }
+    /// Exact basenames take priority, followed by the longest matching filename
+    /// pattern and then the longest extension. Patterns with `/` inspect the
+    /// full path; other patterns inspect the basename. Comparisons fold ASCII
+    /// case consistently on every host. Equally long patterns use language-ID
+    /// order. All patterns are checked and compiled when the catalog is built.
     pub fn language_by_filename(&self, filename: &str) -> Option<&Language> {
         let name = filename.rsplit(['/', '\\']).next().unwrap_or(filename);
         self.languages
             .iter()
             .find(|l| l.filenames.iter().any(|f| f.eq_ignore_ascii_case(name)))
+            .or_else(|| {
+                self.filename_patterns.iter().find_map(|(index, pattern)| {
+                    let candidate = if pattern.has_path_separator() {
+                        filename
+                    } else {
+                        name
+                    };
+                    pattern
+                        .is_match_ignore_ascii_case(candidate)
+                        .then(|| &self.languages[*index])
+                })
+            })
             .or_else(|| {
                 self.languages
                     .iter()
@@ -335,7 +371,8 @@ impl BundledCatalog {
                         l.extensions
                             .iter()
                             .filter(|extension| {
-                                name.to_lowercase().ends_with(&extension.to_lowercase())
+                                name.to_ascii_lowercase()
+                                    .ends_with(&extension.to_ascii_lowercase())
                             })
                             .map(|extension| (extension.len(), l))
                             .max_by_key(|(length, _)| *length)

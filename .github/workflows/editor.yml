@@ -64,6 +64,8 @@ jobs:
           key: editor-wasm
       - name: Check editor control portability
         run: cargo check --locked -p ferroui-edit-core -p ferroui-edit --target wasm32-unknown-unknown
+      - name: Verify scanner assets with the production browser site composer
+        run: node src/FerroUI.TextMate/tests/oracle/check-browser-packaging.mjs
       - name: Build the real Rust/Wasm conformance harness
         run: cargo build --locked -p ferroui-textmate --example textmate_browser_conformance --target wasm32-unknown-unknown
       - name: Install matching bindings generator

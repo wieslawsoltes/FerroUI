@@ -27,6 +27,7 @@ Outstanding API and conformance boundaries are listed below.
 | Model, line tokens, invalidation and changed ranges | `model.rs`, `model_contract.rs`, `model_events.rs`: `TokenizationModel`, `ITMModel`, `IModelLines`, `ModelTokensChangedEvent` | Caller-scheduled batches and FerroUI event subscriptions replace managed background tasks |
 | Borrowed input and tokenizer contract | `line_text.rs`: `LineText`, `ITokenizationSupport` | Borrowed/owned UTF-8 input with checked UTF-16 slice coordinates |
 | Bundled registry options, language packages and themes | `catalog.rs`, `package.rs`: `BundledCatalog`, `Language`, `GrammarDefinition`, `GrammarContribution`, `ThemeName` | Typed package metadata, compile-time resources and host-assigned embedded language IDs |
+| Filename pattern matching | `filename_glob.rs`: `FilenameGlob`, `FilenameGlobError` | Bounded iterative parser and epsilon-NFA, with checked glob syntax and no filesystem dependency |
 | Language configuration and snippet data | `language_configuration.rs`: `Comments`, `Folding`, `Indentation`, `EnterRule`, `AutoPair`, `LanguageSnippets` | Typed settings preserve optional expressions, flags, multi-character pairs and snippet bodies |
 | Browser regex engine | `browser.rs`, `browser/adapter.js` | Official `vscode-oniguruma` JavaScript/Wasm through `wasm-bindgen` |
 
@@ -143,11 +144,19 @@ time limits.
 |---|---|---|
 | Native default | `onig` 6.5.3, `onig_sys` 69.9.3, Oniguruma 6.9.10 | Native compilation from the dependency's vendored sources; bindgen is disabled |
 | `wasm32-unknown-unknown` default | Official `vscode-oniguruma` 2.0.1, Oniguruma 6.9.5_rev1 | Await `initialize_browser_oniguruma()` once in each JS realm before tokenizing |
+| FerroUI Emscripten browser host | Same official browser scanner | Flat `raw_module` import and `OUT_DIR/browser-site` assets follow the existing browser site builder; application linking/rendering requires the host SDK |
 | Explicit `portable-regex`, or native without `native-onig` | `fancy-regex` 0.19.2 in Oniguruma mode | Restricted fallback; not full Oniguruma compatibility |
 
 Browser builds embed the official unmodified scanner glue and Wasm binary.
-The crate's build script wraps the glue in an inline `wasm-bindgen` module and
-the initializer supplies owned Wasm bytes. It does not fetch an asset URL.
+For `wasm32-unknown-unknown`, the crate's build script wraps the glue in an
+inline `wasm-bindgen` module. For Emscripten, it emits the same glue and adapter
+as `OUT_DIR/browser-site/ferroui-textmate-oniguruma.js`, along with the complete
+scanner license and third-party notices. The binding uses a flat `raw_module`
+import, matching FerroUI's existing browser interop. `scripts/build-browser.sh`
+copies those assets and `scripts/browser/combine-site.mjs` shares one module
+between the plain and threaded application variants. Inline snippet directory
+imports would not satisfy that site's flat shared-import contract.
+The initializer supplies owned Wasm bytes; it does not fetch an asset URL.
 Initialization is shared per realm, so repeated calls await the same promise.
 Workers initialize independently. Scanner captures cross the JS boundary as
 UTF-16 indices and are translated back to byte offsets before scope processing.
@@ -178,14 +187,35 @@ reports which engine is active.
 The catalog contains 51 upstream packages with 72 language contributions,
 79 grammar contributions, and 21 theme files. Language contributions can share
 grammars; these counts are manifest entries, not a claim of 79 independent
-language implementations. Extension lookup accepts a leading dot, filename
-lookup prefers an exact name and otherwise the longest extension, and language
-IDs are case-insensitive. `language_by_first_line` executes upstream shebang
+language implementations. Extension lookup accepts a leading dot. Filename
+lookup prefers exact basenames, then the longest matching filename pattern,
+then the longest extension. All 15 bundled filename patterns are compiled when
+the catalog is constructed. Patterns containing `/` inspect the full path;
+other patterns inspect the basename. Both input path separators are recognized,
+and comparisons fold ASCII case independently of the host operating system.
+Equal-length filename patterns use deterministic language-ID order. This
+identifies `tsconfig.app.json` as JSON with comments, `compose.dev.yaml` as
+Docker Compose, and `.git/config` as Properties despite generic suffixes.
+`language_by_first_line` executes upstream shebang
 and other first-line detection patterns through the selected regex backend.
 Alias lists, MIME types, configuration resource paths and snippets retain their
 upstream values. Typed `GrammarDefinition` values preserve package provenance,
 engines, scripts, repository and contribution metadata; unrecognized package
 fields remain available in their `other` maps.
+
+`FilenameGlob` supports the documented [VS Code glob operators](https://code.visualstudio.com/docs/editor/glob-patterns):
+`*`, `?`, whole-component `**`, brace alternatives, and positive/negative
+character classes and ranges. Nested brace groups use an explicit parse stack;
+alternatives are never expanded into combinations. Compiled matching uses an
+epsilon-NFA with work bounded by path length times pattern size and no recursive
+backtracking. Patterns are limited to 8,192 UTF-8 bytes and 128 nested groups.
+Malformed classes, reversed ranges, unmatched groups and backslash syntax return
+structured errors with byte offsets. A character class cannot consume a path
+separator. Brackets quote special characters, including `[[]` and `[]]`.
+`?` consumes one Unicode scalar value; the optional insensitive comparison
+folds ASCII, rather than claiming JavaScript UTF-16 or full Unicode case-folding
+equivalence. Matching reads neither the filesystem nor the host OS. These
+explicit rules also apply when applications use `FilenameGlob` directly.
 
 `LanguageConfiguration` exposes comments, brackets, folding markers, indentation
 rules, enter actions, automatic/surrounding pairs and word expressions. Regex
@@ -290,16 +320,20 @@ The recorded verification checkpoint has the following results:
 
 | Check | Result | What it establishes |
 |---|---|---|
-| Native default `ferroui-textmate` library tests | 31 passed | Core semantics, all bundled metadata/config parsing, host contracts and the 74-line independent corpus |
-| Explicit portable backend library tests | 30 passed | Bounded fallback behavior for supported cases; the full grammar corpus is intentionally excluded |
+| Native default `ferroui-textmate` library tests | 37 passed | Core semantics, all bundled metadata/config parsing, host contracts, filename globs and the 74-line independent corpus |
+| Explicit portable backend library tests | 36 passed | Bounded fallback behavior and filename globs for supported cases; the full grammar corpus is intentionally excluded |
 | Compiled Rust/Wasm with official browser scanner under Node | 74 corpus lines matched | Token ranges, scope stacks and continuation depth match the independent oracle through actual Wasm/JS execution |
-| Additional compiled Wasm host checks | Passed | Explicit pre-initialization failure, lazy resource loading, incremental event subscriptions/disposal and Unicode word coordinates |
+| Additional compiled Wasm host checks | Passed | Explicit pre-initialization failure, lazy resource loading, filename-glob detection, incremental event subscriptions/disposal and Unicode word coordinates |
 | FerroUI installation integration tests | 6 passed | Document snapshot invalidation/convergence, theme/grammar notifications and deterministic multi-edit cache comparison |
+| Actual editor/core library check for `wasm32-unknown-unknown` | Passed | `ferroui-edit-core` and `ferroui-edit`, including the real Base/Controls dependency chain, compile for bare Wasm |
+| Emscripten scanner asset/site composition regression | Passed | Real build-script outputs, retained notices, the production plain/threaded site composer, shared scanner initialization, lookbehind/backreferences and UTF-16 captures |
 
 ```sh
 cargo test -p ferroui-textmate --lib
 cargo test -p ferroui-textmate --lib --features portable-regex
 cargo check -p ferroui-textmate --target wasm32-unknown-unknown
+cargo check -p ferroui-edit-core -p ferroui-edit --lib --target wasm32-unknown-unknown
+node src/FerroUI.TextMate/tests/oracle/check-browser-packaging.mjs
 
 # Regenerate the independent oracle; inspect fixture changes before committing.
 cd src/FerroUI.TextMate/tests/oracle
@@ -321,7 +355,12 @@ node src/FerroUI.TextMate/tests/oracle/check-wasm.mjs \
 ```
 
 This exercises Wasm execution and JavaScript interop under Node. A browser
-rendering or worker-lifecycle test is a separate host integration check.
+rendering or worker-lifecycle test is a separate host integration check. The
+packaging regression compiles and executes the actual Rust build script for
+both browser packaging modes, composes minimal application shells using the
+production site builder, and executes the emitted official scanner. It does
+not link an Emscripten application. No Emscripten SDK was available at this
+verification checkpoint, so that host link/render check remains outstanding.
 
 ## Remaining port and verification boundaries
 
@@ -332,9 +371,8 @@ rendering or worker-lifecycle test is a separate host integration check.
   host; the engine owns immutable compiled programs and bounded batches.
 - Typed language settings and snippets are available, but applying every
   language-specific automatic-pair, enter-rule, indentation and snippet policy
-  to editor interactions remains host integration work. Package filename glob
-  declarations are retained; filename detection currently uses exact names and
-  extension suffixes. Numeric language IDs remain a host responsibility.
+  to editor interactions remains host integration work. Numeric language IDs
+  remain a host responsibility.
 - The language-configuration word helper uses the selected Oniguruma-compatible
   backend. JavaScript-specific regex behavior outside the supported single-line
   flag interpretation has not been proven equivalent.
