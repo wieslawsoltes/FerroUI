@@ -67,3 +67,5 @@ mod tests;
 mod vector_edit_tests;
 #[cfg(test)]
 mod angular_gradient_tests;
+#[cfg(test)]
+mod text_preview_tests;

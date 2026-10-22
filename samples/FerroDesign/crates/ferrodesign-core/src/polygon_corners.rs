@@ -142,8 +142,19 @@ fn fillet_path(points: &[Point], radius: f64) -> VectorPath {
             {
                 return Corner::default();
             }
-            let incoming = (points[index] - points[previous]) * incoming_length.recip();
-            let outgoing = (points[next] - points[index]) * outgoing_length.recip();
+            // Component division remains finite for positive subnormal edge
+            // lengths; multiplying by their reciprocal can produce infinity
+            // before the vector components have a chance to cancel it.
+            let before = points[index] - points[previous];
+            let after = points[next] - points[index];
+            let incoming = Point::new(before.x / incoming_length, before.y / incoming_length);
+            let outgoing = Point::new(after.x / outgoing_length, after.y / outgoing_length);
+            if ![incoming.x, incoming.y, outgoing.x, outgoing.y]
+                .iter()
+                .all(|value| value.is_finite())
+            {
+                return Corner::default();
+            }
             let turn = cross(incoming, outgoing).atan2(dot(incoming, outgoing).clamp(-1.0, 1.0));
             // Straight and reversing edges have no unique finite fillet. Keeping
             // the original vertex also preserves zero-area/duplicate-point input.

@@ -204,6 +204,10 @@ fn fillets_remain_finite_for_zero_duplicate_straight_and_reversing_edges() {
             (100.0, 0.0),
             (1e-9, 100.0),
             (100.0, 1e-9),
+            (1e-310, 1e-310),
+            (1e-310, 100.0),
+            (100.0, 1e-310),
+            (f64::from_bits(1), f64::from_bits(1)),
         ] {
             let mut node = shape(kind, 1e300);
             node.width = width;
@@ -221,6 +225,26 @@ fn fillets_remain_finite_for_zero_duplicate_straight_and_reversing_edges() {
         polygon_corner_path(&zero_star),
         VectorPath::polygon(&zero_star.polygon_points(), true)
     );
+}
+
+#[test]
+fn half_edge_radius_ceiling_also_applies_when_obtuse_corner_tangents_would_fit() {
+    let mut node = shape(NodeKind::Polygon, 60.0);
+    node.polygon_sides = 6;
+    node.width = 200.0;
+    node.height = 200.0;
+    // Each hexagon edge is 100. A radius of 60 would fit by tangent lengths
+    // alone, but the documented radius ceiling is still half the edge.
+    let requested = polygon_corner_path(&node);
+    node.corner_radius = 50.0;
+    let capped = polygon_corner_path(&node);
+    let actual = all_points(&requested);
+    let expected = all_points(&capped);
+    assert_eq!(actual.len(), expected.len());
+    assert!(actual
+        .iter()
+        .zip(expected)
+        .all(|(a, b)| a.distance(b) < 1e-9));
 }
 
 #[test]

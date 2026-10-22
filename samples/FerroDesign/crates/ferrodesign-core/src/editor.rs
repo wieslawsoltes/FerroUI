@@ -435,6 +435,12 @@ impl Editor {
         self.capture_pending_nodes(changed, true);
         self.refresh_nodes(changed);
     }
+    /// Whether any document node uses auto layout. The count follows refreshed
+    /// node edits, imports and history, so querying it does not scan the scene.
+    /// Callers with arbitrary direct document mutations must first `refresh`.
+    pub fn has_auto_layout(&self) -> bool {
+        self.layout_node_count != 0
+    }
     /// Refresh a known set of node edits without comparing unrelated text,
     /// paths, images, or paint stacks. Arbitrary mutations through `document`
     /// still use `refresh`, and generic transactions retain that full scan.
