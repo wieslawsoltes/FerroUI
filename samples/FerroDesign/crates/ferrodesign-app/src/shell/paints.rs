@@ -1364,7 +1364,7 @@ mod angular_xaml_tests {
         node.fills = vec![Fill { paint: paint.clone(), opacity: 0.6, visible: true }];
         node.strokes = vec![core::Stroke { paint, opacity: 0.4, ..core::Stroke::new(Color::BLACK, 3.0) }];
         let id = document.insert_node(1, node).unwrap();
-        let xaml = export_xaml(&document, &[id]);
+        let xaml = export_xaml(&document, &[id]).unwrap();
         assert!(xaml.contains("<Rectangle.Fill>"));
         assert!(xaml.contains("<Rectangle.Stroke>"));
         assert_eq!(xaml.matches("<ConicGradientBrush ").count(), 2);

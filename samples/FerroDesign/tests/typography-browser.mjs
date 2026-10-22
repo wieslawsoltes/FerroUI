@@ -58,6 +58,13 @@ export async function typographyRegressions(page, reference, check, helpers, out
             observation.input = await stopInputObservation(page);
             observation.after = inlineInputState(await state(page));
             await writeFile(path, JSON.stringify(observation, null, 2));
+            if (observation.status === "failed") console.error(`${mode} inline input evidence: ${JSON.stringify(observation)}`);
+            else console.log(`${mode}: native inline entry ${inlineEntry} ${JSON.stringify({
+                beforeSerial: observation.beforeDoubleClick.pointerPresses?.serial,
+                presses: observation.after.pointerPresses?.entries.filter(entry =>
+                    entry.serial > (observation.beforeDoubleClick.pointerPresses?.serial ?? 0)),
+                frame: observation.after.renderedFrames, scene: observation.after.sceneFrames,
+            })}`);
         }
     };
     const closeInline = async () => {

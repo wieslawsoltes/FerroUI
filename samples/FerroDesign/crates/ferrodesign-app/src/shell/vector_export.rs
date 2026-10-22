@@ -159,7 +159,7 @@ fn stroke_stack(node: &Node, stroke_path: &str, widths: &[Option<WidthBand>], de
 /// Native editable geometry export for a non-network layer containing at
 /// least one variable-width stroke. Effects, blend modes and image brushes
 /// retain the existing export limitations; no raster fallback is introduced.
-pub(super) fn profiled_xaml(doc: &core::Document, node: &Node, depth: usize, output: &mut String) {
+pub(super) fn profiled_xaml(doc: &core::Document, node: &Node, depth: usize, output: &mut String) -> Result<(), String> {
     let pad = "  ".repeat(depth);
     open_canvas(node, depth, output);
     let prefix = format!("Profile{}", node.id);
@@ -175,13 +175,14 @@ pub(super) fn profiled_xaml(doc: &core::Document, node: &Node, depth: usize, out
             // The frame's own fills/strokes are outside its child clip. In
             // particular, an outside-aligned border must not clip itself.
             let _ = writeln!(output, "{pad}  <Canvas Width=\"{}\" Height=\"{}\" Clip=\"{{StaticResource {fill}}}\">", node.width, node.height);
-            for &child in &node.children { xaml_node(doc, child, depth + 2, output); }
+            for &child in &node.children { xaml_node(doc, child, depth + 2, output)?; }
             let _ = writeln!(output, "{pad}  </Canvas>");
         } else {
-            for &child in &node.children { xaml_node(doc, child, depth + 1, output); }
+            for &child in &node.children { xaml_node(doc, child, depth + 1, output)?; }
         }
     }
     let _ = writeln!(output, "{pad}</Canvas>");
+    Ok(())
 }
 
 pub(super) fn network_xaml(node: &Node, network: &core::VectorNetwork, depth: usize, output: &mut String) {

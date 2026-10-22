@@ -56,7 +56,7 @@ fn render(document: &Document, id: NodeId) -> (Vec<u8>, Vec<u8>) {
         assert_eq!(stats.unsupported_effects, 0);
     }
     ferroui_markup_xaml::register_types();
-    let xaml = export_xaml(document, &[id]);
+    let xaml = export_xaml(document, &[id]).unwrap();
     let loaded = FerroRuntimeXamlLoader::load(&xaml, None, None, None, false)
         .unwrap_or_else(|error| panic!("Exported native XAML must load: {error}\n{xaml}"));
     let canvas = from_markup_value::<Ref<Canvas>>(&Some(loaded)).expect("root Canvas");
@@ -92,7 +92,7 @@ fn inherited_only_network_xaml_keeps_translucent_curved_edge_coverage() {
         node.fills = vec![Fill::solid(Color::rgba(40, 90, 220, 128))];
         let mut document = Document::new("Legacy inherited XAML pixels");
         let id = document.insert_node(1, node).unwrap();
-        let xaml = export_xaml(&document, &[id]);
+        let xaml = export_xaml(&document, &[id]).unwrap();
         assert!(!xaml.contains(" Clip="), "an inherited-only fill needs no self clip");
         let (native, exported) = render(&document, id);
         equivalent(&native, &exported);
@@ -192,7 +192,7 @@ fn variable_width_xaml_presets_custom_points_caps_and_mixed_stack_preserve_nativ
         let mut document = Document::new("Profiled XAML line");
         let page = document.pages[0].id;
         let id = document.insert_node(page, node).unwrap();
-        let xaml = export_xaml(&document, &[id]);
+        let xaml = export_xaml(&document, &[id]).unwrap();
         assert!(xaml.contains("<Canvas.OpacityMask>"));
         assert!(xaml.contains(&format!("x:Key=\"Profile{id}Width0\"")));
         assert!(xaml.contains("StrokeThickness=\"3\""), "uniform stack entry stays native");
@@ -220,7 +220,7 @@ fn aligned_variable_width_xaml_keeps_raw_band_gradient_bounds_and_clips_only_onc
             let mut document = Document::new("Aligned XAML gradient");
             let page = document.pages[0].id;
             let id = document.insert_node(page, node).unwrap();
-            let xaml = export_xaml(&document, &[id]);
+            let xaml = export_xaml(&document, &[id]).unwrap();
             let raw_path = format!("Data=\"{{StaticResource Profile{id}Width0}}\"");
             assert!(xaml.contains(&raw_path), "alignment must not replace the raw band used by relative brushes");
             if align == core::StrokeAlign::Center {
@@ -254,7 +254,7 @@ fn network_xaml_variable_width_and_uniform_stacks_keep_region_replacement_and_tr
             Stroke { width_profile: core::StrokeWidthProfile::Eye, opacity: 0.6,
                 ..Stroke::new(Color::rgb(20, 210, 90), 9.0) },
         ];
-        let xaml = export_xaml(&document, &[id]);
+        let xaml = export_xaml(&document, &[id]).unwrap();
         assert!(xaml.contains(&format!("x:Key=\"Network{id}Width0\"")));
         assert!(xaml.contains(&format!("x:Key=\"Network{id}Width2\"")));
         assert!(!xaml.contains(&format!("x:Key=\"Network{id}Width1\"")));
@@ -284,7 +284,7 @@ fn profiled_frame_xaml_clips_children_without_clipping_its_outside_border() {
     let child = Node::new(NodeKind::Rectangle, "Clipped red content", -20.0, -20.0, 150.0, 120.0)
         .with_fill(Color::rgb(230, 30, 20));
     document.insert_node(id, child).unwrap();
-    let xaml = export_xaml(&document, &[id]);
+    let xaml = export_xaml(&document, &[id]).unwrap();
     assert!(xaml.contains(&format!("<Canvas Width=\"110\" Height=\"80\" Clip=\"{{StaticResource Profile{id}Fill}}\">")));
     let (native, exported) = render(&document, id);
     equivalent(&native, &exported);

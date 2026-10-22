@@ -66,13 +66,34 @@ impl ScenePainter {
             return false;
         }
         let mut dirty = BTreeSet::new();
-        for id in nodes.iter().chain(ancestors) {
+        for (id, is_ancestor) in nodes
+            .iter()
+            .map(|id| (id, false))
+            .chain(ancestors.iter().map(|id| (id, true)))
+        {
+            let Some(node) = document.nodes.get(id) else {
+                return false;
+            };
             // Hidden nodes, external ancestors of exported roots, and unusual
             // overlapping root lists deliberately retain full preparation.
             let Some(&index) = self.prepared_indices.get(id) else {
-                return false;
-            };
-            let Some(node) = document.nodes.get(id) else {
+                // Entering/leaving inline editing invalidates the scene. With
+                // that state and the editor ledger still continuous, this
+                // exact leaf remains absent from preparation because the
+                // native text editor paints it. Its ancestors are NOT skipped:
+                // the remaining ledger entries still refresh their transforms,
+                // derived geometry and bounds through the normal path below.
+                if !is_ancestor
+                    && self.editing_text == Some(*id)
+                    && node.kind == NodeKind::Text
+                    && node.children.is_empty()
+                    && node.visible
+                    && node.opacity > 0.0
+                    && !node.is_mask
+                    && valid_node_bounds(node)
+                {
+                    continue;
+                }
                 return false;
             };
             if !node.visible
@@ -126,8 +147,10 @@ impl ScenePainter {
             prepared.opacity = unit(node.opacity);
             prepared.blend = node.blend_mode;
             prepared.mask = node.is_mask.then_some(node.mask_type);
-            prepared.clip = (node.clip_content && node.corner_smoothing == 0.0).then(|| rounded_rect(node));
-            prepared.content_clip = (node.clip_content && node.corner_smoothing > 0.0).then(|| corner_geometry(node));
+            prepared.clip =
+                (node.clip_content && node.corner_smoothing == 0.0).then(|| rounded_rect(node));
+            prepared.content_clip =
+                (node.clip_content && node.corner_smoothing > 0.0).then(|| corner_geometry(node));
             prepared.child_blur_outset = blur_outset_world(&node.effects, world);
             prepared.outline = inherited_outline
                 || node.kind == NodeKind::Boolean
@@ -165,7 +188,10 @@ impl ScenePainter {
         self.isolates_document = self.isolation_nodes != 0;
         // A changed earlier sibling may affect any later backdrop in the same
         // isolation scope. Keep this bounded cache conservatively invalidated.
-        self.backdrops.clear();
+        // A suppressed root text leaf alone cannot change that painted prefix.
+        if !dirty.is_empty() {
+            self.backdrops.clear();
+        }
         true
     }
 }
@@ -190,7 +216,7 @@ mod tests {
         scope
     }
 
-    fn render(
+    pub(super) fn render(
         painter: &mut ScenePainter,
         editor: &Editor,
         pan: f64,
@@ -205,7 +231,7 @@ mod tests {
         )
     }
 
-    fn render_roots(
+    pub(super) fn render_roots(
         painter: &mut ScenePainter,
         editor: &Editor,
         roots: &[NodeId],
@@ -231,7 +257,7 @@ mod tests {
         (pixels, stats)
     }
 
-    fn equal_pixels(actual: &[u8], expected: &[u8]) {
+    pub(super) fn equal_pixels(actual: &[u8], expected: &[u8]) {
         assert_eq!(actual.len(), expected.len());
         let difference = actual.iter().zip(expected).position(|(a, b)| a != b);
         assert!(
@@ -241,14 +267,17 @@ mod tests {
         );
     }
 
-    fn equals_fresh(painter: &mut ScenePainter, editor: &Editor) -> (Vec<u8>, RenderStats) {
+    pub(super) fn equals_fresh(
+        painter: &mut ScenePainter,
+        editor: &Editor,
+    ) -> (Vec<u8>, RenderStats) {
         let result = render(painter, editor, 0.0, true);
         let reference = render(&mut ScenePainter::default(), editor, 0.0, false);
         equal_pixels(&result.0, &reference.0);
         result
     }
 
-    fn rectangles(count: usize) -> (Editor, NodeId) {
+    pub(super) fn rectangles(count: usize) -> (Editor, NodeId) {
         let mut document = Document::new("Incremental pixels");
         let mut first = 0;
         for i in 0..count {
@@ -827,3 +856,7 @@ mod tests {
         scope.dispose();
     }
 }
+
+#[cfg(all(test, not(target_os = "emscripten")))]
+#[path = "incremental_text_tests.rs"]
+mod incremental_text_tests;

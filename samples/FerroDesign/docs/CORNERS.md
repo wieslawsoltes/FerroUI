@@ -43,7 +43,8 @@ SVG, and compares the PNG silhouette with Chromium's independent SVG decoder.
 Run results belong in [VALIDATION.md](VALIDATION.md); the existence of a test is
 not a claim that a particular source revision has passed it.
 
-This field currently operates on box-shaped layers. Rounding arbitrary vector
-vertices and polygon/star corners is a separate authoring operation and is not
-implied by this implementation. A matched Figma reference capture is still
-needed to establish visual parity.
+This smoothing field operates on box-shaped layers. [Polygon and star corner
+rounding](POLYGON_CORNERS.md) uses the native radius field and a shared circular
+fillet path. Arbitrary vector-anchor fillets and nonrectangular smoothing remain
+separate work. A matched Figma reference capture is still needed to establish
+visual parity.

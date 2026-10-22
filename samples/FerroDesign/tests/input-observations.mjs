@@ -2,10 +2,10 @@
 // events, call application commands, poll the native bridge or alter defaults.
 // Native state is sampled by the caller outside the input handlers so collecting
 // evidence does not put control-tree serialization inside a multi-click window.
-export async function startInputObservation(page, types = ["pointerdown", "pointerup", "mousedown", "mouseup", "dblclick"]) {
-    await page.evaluate((types) => {
+export async function startInputObservation(page, types = ["pointerdown", "pointerup", "mousedown", "mouseup", "dblclick"], limit = 64) {
+    await page.evaluate(({ types, limit }) => {
         if (globalThis.__ferroDesignInputObservation) throw new Error("An input observation is already active");
-        const started = performance.now(), events = [], longTasks = [], limit = 64;
+        const started = performance.now(), events = [], longTasks = [];
         let droppedEvents = 0, droppedLongTasks = 0;
         const record = (phase) => (event) => {
             if (events.length >= limit) { droppedEvents++; return; }
@@ -41,7 +41,7 @@ export async function startInputObservation(page, types = ["pointerdown", "point
             return { clock: "page performance milliseconds", startedAtMs: started, endedAtMs: performance.now(),
                 events, droppedEvents, longTaskSupported: supported, longTasks, droppedLongTasks };
         } };
-    }, types);
+    }, { types, limit: Math.max(1, Math.min(1024, limit)) });
 }
 
 export async function stopInputObservation(page) {

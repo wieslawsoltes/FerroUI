@@ -16,6 +16,7 @@ mod rich_text;
 mod text;
 mod variables;
 mod vector_export;
+mod text_export;
 mod stroke_profiles;
 use crate::{
     canvas::{CanvasEvent, DesignCanvas, Tool},
@@ -1446,6 +1447,10 @@ impl EditorShell {
                 .unwrap_or_default(),
         );
         self.visible("CornerSmoothingOptions", node.is_some_and(|n| matches!(n.kind, NodeKind::Rectangle | NodeKind::Frame | NodeKind::Component | NodeKind::Instance | NodeKind::Section)));
+        self.visible("IndependentCornersButton", node.is_some_and(|n| matches!(n.kind, NodeKind::Rectangle | NodeKind::Frame | NodeKind::Component | NodeKind::Instance | NodeKind::Section)));
+        self.field("RadiusField").set_is_enabled(editor.selection.iter().any(|id|
+            editor.document.nodes.get(id).is_some_and(|n| core::supports_corner_radius(n.kind))
+                && !editor.document.effective_locked(*id)));
         self.visible("StrokeOptions", node.is_some_and(|n| !n.strokes.is_empty()));
         self.refresh_stroke_profiles(node);
         self.visible(
@@ -1678,6 +1683,14 @@ impl EditorShell {
                 n.replace_text_preserving_runs(text.clone());
             }),
             "FontFamilyField" => self.modify("Font family", |n| n.font_family = text.clone()),
+            "RadiusField" => {
+                let Some(value) = number.filter(|value| *value >= 0.0) else {
+                    return self.reject_inspector_field(name, "Corner radius must be a finite nonnegative number, at most 10,000,000.");
+                };
+                let ids = self.editor.borrow().selection.clone();
+                let outcome = self.editor.borrow_mut().set_corner_radius(&ids, value);
+                if let Err(error) = outcome { return self.reject_inspector_field(name, &error.to_string()); }
+            }
             "CornerSmoothingField" => {
                 let Some(value) = number.filter(|v| (0.0..=100.0).contains(v)) else {
                     return self.reject_inspector_field(name, "Corner smoothing must be between 0 and 100%.");
@@ -1769,10 +1782,6 @@ impl EditorShell {
                         "YField" => n.y = value,
                         "RotationField" => n.rotation = value,
                         "OpacityField" => n.opacity = (value / 100.0).clamp(0.0, 1.0),
-                        "RadiusField" => {
-                            n.corner_radius = value.max(0.0);
-                            n.corner_radii = None;
-                        }
                         "FontSizeField" => n.font_size = value.clamp(1.0, 4096.0),
                         "FontWeightField" => {
                             n.font_weight = value.round().clamp(1.0, 1000.0) as u16
@@ -2263,8 +2272,13 @@ impl EditorShell {
                 };
                 let xaml = export_xaml(&editor.document, &roots);
                 drop(editor);
-                platform::download("Design.xaml", &xaml, "application/xml");
-                self.close_modal();
+                match xaml {
+                    Ok(xaml) => {
+                        platform::download("Design.xaml", &xaml, "application/xml");
+                        self.close_modal();
+                    }
+                    Err(message) => self.toast(&message),
+                }
                 return true;
             }
             _ => {}
@@ -3115,13 +3129,13 @@ fn xaml_color(color: Color) -> String {
         color.a, color.r, color.g, color.b
     )
 }
-fn export_xaml(doc: &core::Document, roots: &[NodeId]) -> String {
-    let mut result=String::from("<Canvas xmlns=\"https://github.com/ferroui\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\">\n");
+fn export_xaml(doc: &core::Document, roots: &[NodeId]) -> Result<String, String> {
+    let mut result=String::from("<Canvas xmlns=\"https://github.com/ferroui\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" UseLayoutRounding=\"False\">\n");
     for &id in roots {
-        xaml_node(doc, id, 1, &mut result)
+        xaml_node(doc, id, 1, &mut result)?;
     }
     result += "</Canvas>\n";
-    result
+    Ok(result)
 }
 /// Emit public native brush properties, retaining stop ordering and paint alpha.
 fn xaml_paint(
@@ -3155,27 +3169,52 @@ fn xaml_paint(
     }
 }
 
-fn xaml_node(doc: &core::Document, id: NodeId, depth: usize, result: &mut String) {
-    let Some(n) = doc.nodes.get(&id) else { return };
-    if let Some(network) = n.vector_network.as_ref().filter(|_| n.kind == NodeKind::Vector) {
-        vector_export::network_xaml(n, network, depth, result);
-        return;
+fn xaml_node(doc: &core::Document, id: NodeId, depth: usize, result: &mut String) -> Result<(), String> {
+    let Some(n) = doc.nodes.get(&id) else { return Ok(()) };
+    if n.kind == NodeKind::Text { return text_export::write_node(n, depth, result); }
+    let unsupported = |detail: &str| format!("Layer ‘{}’: XAML export cannot preserve {detail}. Use native PNG for this artwork or keep the editable design.", n.name);
+    if n.is_mask || n.effects.iter().any(|effect| effect.visible)
+        || !matches!(n.blend_mode, core::BlendMode::Normal | core::BlendMode::PassThrough) {
+        return Err(unsupported("masks, effects or non-normal layer blends"));
     }
-    if n.strokes.iter().any(|stroke| !stroke.width_profile.is_uniform()) {
-        vector_export::profiled_xaml(doc, n, depth, result);
-        return;
-    }
-    let pad = "  ".repeat(depth);
-    let mut attributes = format!("Canvas.Left=\"{}\" Canvas.Top=\"{}\" Width=\"{}\" Height=\"{}\" Opacity=\"{}\" IsVisible=\"{}\"",
-        number(n.x), number(n.y), number(n.width), number(n.height), number(n.opacity), if n.visible { "True" } else { "False" });
-    if n.rotation != 0.0 {
-        attributes += &format!(" RenderTransform=\"rotate({}deg)\" RenderTransformOrigin=\"50%,50%\"", number(n.rotation));
+    let transform = n.local_transform();
+    if ![n.width, n.height, n.opacity, transform.a, transform.b, transform.c,
+        transform.d, transform.e, transform.f].into_iter().all(f64::is_finite)
+        || n.width < 0.0 || n.height < 0.0 || !(0.0..=1.0).contains(&n.opacity) {
+        return Err(unsupported("invalid dimensions, opacity or affine transforms"));
     }
     let container = n.kind.is_container();
+    if container && n.fills.iter().any(|fill| fill.visible && fill.opacity > 0.0 && matches!(fill.paint, Paint::Image { .. })) {
+        return Err(unsupported("image-painted container backgrounds"));
+    }
+    if let Some(network) = n.vector_network.as_ref().filter(|_| n.kind == NodeKind::Vector) {
+        vector_export::network_xaml(n, network, depth, result);
+        return Ok(());
+    }
+    if n.strokes.iter().any(|stroke| !stroke.width_profile.is_uniform())
+        || (matches!(n.kind, NodeKind::Polygon | NodeKind::Star) && n.corner_radius > 0.0) {
+        return vector_export::profiled_xaml(doc, n, depth, result);
+    }
+    let pad = "  ".repeat(depth);
+    // The complete local matrix includes editable rotation/reflection and the
+    // residual affine scale/shear. Canvas.Left/Top would apply translation twice.
+    let mut attributes = format!("Width=\"{}\" Height=\"{}\" IsVisible=\"{}\" UseLayoutRounding=\"False\" RenderTransformOrigin=\"0%,0%\"",
+        n.width, n.height, if n.visible { "True" } else { "False" });
     let smooth_box = n.corner_smoothing > 0.0 && matches!(n.kind, NodeKind::Rectangle | NodeKind::Frame | NodeKind::Component | NodeKind::Instance | NodeKind::Section);
+    if container {
+        if n.kind == NodeKind::Boolean {
+            return Err(unsupported("a derived boolean container through ordinary child canvases"));
+        }
+        if n.strokes.iter().any(|stroke| stroke.visible && stroke.opacity > 0.0 && stroke.width > 0.0) {
+            return Err(unsupported("uniform container strokes in the generic canvas path"));
+        }
+        if !smooth_box && (n.fills.iter().filter(|fill| fill.visible && fill.opacity > 0.0).count() > 1
+            || n.corner_radii.unwrap_or([n.corner_radius; 4]).iter().any(|radius| *radius > 0.0)) {
+            return Err(unsupported("stacked backgrounds or rounded clipping in the generic canvas path"));
+        }
+    }
     let tag = if container { "Canvas" } else if smooth_box { "Path" } else {
         match n.kind {
-            NodeKind::Text => "TextBlock",
             NodeKind::Ellipse => "Ellipse",
             NodeKind::Vector => "Path",
             NodeKind::Line => "Line",
@@ -3192,8 +3231,6 @@ fn xaml_node(doc: &core::Document, id: NodeId, depth: usize, result: &mut String
         attributes += &format!(" Data=\"{}\" Stretch=\"None\"", vector_export::path_data(&core::corner_path(n)));
     } else {
         match n.kind {
-            NodeKind::Text => attributes += &format!(" Text=\"{}\" FontFamily=\"{}\" FontSize=\"{}\" FontWeight=\"{}\" TextWrapping=\"Wrap\"",
-                xml(&n.text), xml(&n.font_family), number(n.font_size), n.font_weight),
             NodeKind::Vector => {
                 let mut data = String::new();
                 for segment in &n.path.segments {
@@ -3216,7 +3253,14 @@ fn xaml_node(doc: &core::Document, id: NodeId, depth: usize, result: &mut String
             _ => attributes += &format!(" RadiusX=\"{}\" RadiusY=\"{}\"", number(n.corner_radius), number(n.corner_radius)),
         }
     }
-    let mut properties = String::new();
+    let mut properties = format!("{pad}  <{tag}.RenderTransform><MatrixTransform Matrix=\"{},{},{},{},{},{}\"/></{tag}.RenderTransform>\n",
+        transform.a, transform.b, transform.c, transform.d, transform.e, transform.f);
+    if n.opacity != 1.0 || (container && n.blend_mode == core::BlendMode::Normal && !n.children.is_empty()) {
+        // Match the native compositing boundary: first render the complete
+        // fill/stroke/descendant stack, then consume this layer's alpha once.
+        // Visual.Opacity alone multiplies each draw in the immediate renderer.
+        properties += &format!("{pad}  <{tag}.OpacityMask><SolidColorBrush Color=\"#FFFFFFFF\" Opacity=\"{}\"/></{tag}.OpacityMask>\n", n.opacity);
+    }
     if n.kind != NodeKind::Line {
         let property = if container { "Background" } else if n.kind == NodeKind::Text { "Foreground" } else { "Fill" };
         if let Some(fill) = n.fills.iter().find(|fill| fill.visible).filter(|_| !(container && smooth_box)) {
@@ -3244,10 +3288,11 @@ fn xaml_node(doc: &core::Document, id: NodeId, depth: usize, result: &mut String
                     *result += &format!("{pad}  <Path {attrs}>\n{props}{pad}  </Path>\n");
                 }
             }
-            for &child in &n.children { xaml_node(doc, child, depth + 1, result); }
+            for &child in &n.children { xaml_node(doc, child, depth + 1, result)?; }
         }
         *result += &format!("{pad}</{tag}>\n");
     }
+    Ok(())
 }
 const BLEND_OPTIONS: &[(&str, core::BlendMode)] = &[
     ("Normal", core::BlendMode::Normal), ("Multiply", core::BlendMode::Multiply),

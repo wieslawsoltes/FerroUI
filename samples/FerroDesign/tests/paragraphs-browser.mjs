@@ -211,4 +211,149 @@ export async function paragraphRegressions(page, reference, check, helpers, outp
     assert.deepEqual(await documentState(page), split);
     assert.equal(before.nodes[2].text, split.nodes[2].text.replace("🦀\n", "🦀"));
     check("Real native Unicode editing splits paragraph styles with correct UTF-8 remapping and shared line/caret offsets; cancel restores the original, commit is one exact undo/redo step and JSON round-trip preserves every paragraph field");
+
+    // Identical text makes a string-diff guess ambiguous. Give each repeated
+    // paragraph distinct character and paragraph styling, then edit at an
+    // exact native caret/selection and exercise the TextBox's own undo stack.
+    const repeatedUnit = "A🦀\n", unitBytes = Buffer.byteLength(repeatedUnit);
+    const repeated = fixtureNode(reference, 2, {
+        ...text, name: "Repeated styled paragraphs", text: repeatedUnit.repeat(3),
+        text_runs: [0, 1, 2].map(index => ({
+            start: index * unitBytes, end: (index + 1) * unitBytes,
+            font_family: null, font_size: 20 + index * 2, font_weight: 400 + index * 200,
+            color: [{ r: 190, g: 30, b: 50, a: 255 }, { r: 20, g: 90, b: 190, a: 255 },
+                { r: 25, g: 140, b: 60, a: 255 }][index],
+            italic: index === 1, decoration: index === 2 ? "strikethrough" : "none",
+        })),
+        text_paragraphs: [0, 1, 2, 3].map(index => ({
+            start: index * unitBytes, end: Math.min(index + 1, 3) * unitBytes,
+            alignment: "left", direction: "ltr", indent: 10 + index * 10,
+            space_before: index, space_after: 2 + index, line_height: 1.2 + index * 0.1,
+        })),
+    });
+    const repeatedFixture = isolatedDocument(reference, [repeated], "Exact native rich text history");
+    const rich = node => ({ text: node.text, text_runs: node.text_runs, text_paragraphs: node.text_paragraphs });
+    const shift = (range, delta) => ({ ...range, start: range.start + delta, end: range.end + delta });
+    const assertRich = async (expected, depth, label) => {
+        await waitDocument((doc, expected) => doc.nodes[2].text === expected.text &&
+            JSON.stringify(doc.nodes[2].text_runs) === JSON.stringify(expected.text_runs) &&
+            JSON.stringify(doc.nodes[2].text_paragraphs) === JSON.stringify(expected.text_paragraphs), expected);
+        assert.deepEqual(rich((await documentState(page)).nodes[2]), expected, label + " restores both exact UTF-8 style collections");
+        const view = await state(page);
+        assert.equal(view.editingText, 2, label + " stays inside the native TextBox");
+        assert.equal(view.chrome.InlineTextBox.focused, true, label + " retains native keyboard focus");
+        assert.equal(view.chrome.InlineTextBox.text, expected.text);
+        assert.equal(view.historyLength, depth, label + " does not commit the open document transaction");
+        const native = await typography("InlineTextBox");
+        assert.equal(native.preedit, null);
+        assert.deepEqual(native.lines.map(line => line.x), expected.text_paragraphs.map(style => style.indent),
+            label + " restores the actual independently indented TextPresenter lines");
+    };
+    const nativeHistory = async (key, expected, depth, label) => {
+        const before = await state(page);
+        await page.keyboard.press(key);
+        await assertRich(expected, depth, label);
+        await waitForNativeFrame(page, before.renderedFrames, label);
+        await waitForNativeScene(page, before.sceneFrames, label);
+    };
+    const selectFirstParagraph = async () => {
+        await page.keyboard.press("Control+Home");
+        for (let index = 0; index < 3; index++) await page.keyboard.press("Shift+ArrowRight");
+        const native = await typography("InlineTextBox");
+        assert.deepEqual([Math.min(native.selectionStart, native.selectionEnd), Math.max(native.selectionStart, native.selectionEnd)],
+            [0, repeatedUnit.length], "The actual native selection includes one non-BMP paragraph and its separator");
+    };
+
+    await importFixture(page, repeatedFixture);
+    const repeatedDocument = await documentState(page), originalRich = rich(repeatedDocument.nodes[2]);
+    const insertedRich = {
+        text: repeatedUnit.repeat(4),
+        text_runs: [{ ...originalRich.text_runs[0], end: unitBytes * 2 },
+            ...originalRich.text_runs.slice(1).map(run => shift(run, unitBytes))],
+        text_paragraphs: [originalRich.text_paragraphs[0],
+            ...originalRich.text_paragraphs.map(style => shift(style, unitBytes))],
+    };
+    let repeatedDepth = (await state(page)).historyLength;
+    await enterInline();
+    await page.keyboard.press("Control+Home");
+    assert.equal((await typography("InlineTextBox")).caretIndex, 0);
+    await page.keyboard.insertText(repeatedUnit);
+    await assertRich(insertedRich, repeatedDepth, "Repeated paragraph insertion at native caret zero");
+    await nativeHistory("Control+z", originalRich, repeatedDepth, "Native insertion undo");
+    await nativeHistory("Control+Shift+z", insertedRich, repeatedDepth, "Native insertion redo");
+    const insertedDocument = await documentState(page);
+    await page.keyboard.press("Control+Enter");
+    await page.waitForFunction(() => JSON.parse(globalThis.ferroDesign.ferroDesignState()).editingText === null,
+        undefined, { timeout: 10000 });
+    await history(repeatedDocument, insertedDocument, repeatedDepth, "Repeated paragraph edit session");
+    check("A real native insertion at the start of identical Unicode paragraphs inherits the first paragraph only; native Ctrl+Z/Ctrl+Shift+Z restore exact character and paragraph ranges and actual line indentation, while the complete session remains one document history step");
+
+    await importFixture(page, repeatedFixture);
+    repeatedDepth = (await state(page)).historyLength;
+    await enterInline();
+    await selectFirstParagraph();
+    await page.keyboard.press("Delete");
+    const deletedRich = {
+        text: repeatedUnit.repeat(2),
+        text_runs: originalRich.text_runs.slice(1).map(run => shift(run, -unitBytes)),
+        text_paragraphs: originalRich.text_paragraphs.slice(1).map(style => shift(style, -unitBytes)),
+    };
+    await assertRich(deletedRich, repeatedDepth, "Complete first-paragraph deletion");
+    await nativeHistory("Control+z", originalRich, repeatedDepth, "Native deletion undo");
+    await nativeHistory("Control+Shift+z", deletedRich, repeatedDepth, "Native deletion redo");
+    await page.keyboard.press("Escape");
+    await page.waitForFunction(() => JSON.parse(globalThis.ferroDesign.ferroDesignState()).editingText === null,
+        undefined, { timeout: 10000 });
+    assert.deepEqual(await documentState(page), repeatedDocument, "Cancel restores every deleted character and paragraph style");
+    assert.equal((await state(page)).historyLength, repeatedDepth);
+    check("Deleting a complete repeated paragraph keeps the surviving suffix's distinct fonts, colors and paragraph metrics; native undo restores the deleted rich data, redo restores the exact deletion, and Escape cancels without a document history entry");
+
+    // Reuse the existing production browser text-input bridge. These synthetic
+    // composition lifecycle events exercise the real native client, not an OS
+    // IME; no JavaScript assigns Text, a caret, style ranges or document state.
+    await enterInline();
+    await selectFirstParagraph();
+    const ime = page.locator(".ferroui-input-element");
+    assert.equal(await ime.count(), 1);
+    const preedit = repeatedUnit.repeat(2);
+    const beginComposition = async () => {
+        await ime.evaluate((input, data) => {
+            if (document.activeElement !== input) throw new Error("The native inline TextBox must own the browser input bridge");
+            input.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true, data: "" }));
+            input.dispatchEvent(new CompositionEvent("compositionupdate", { bubbles: true, data }));
+            input.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertCompositionText", data, isComposing: true }));
+        }, preedit);
+        await page.waitForFunction(preedit => {
+            const view = JSON.parse(globalThis.ferroDesign.ferroDesignState());
+            return view.editingComposition && view.chrome.InlineTextBox?.typography?.preedit === preedit;
+        }, preedit, { timeout: 10000 });
+        assert.deepEqual(await documentState(page), repeatedDocument, "Provisional replacement must not alter confirmed text or either rich style collection");
+        assert.equal((await state(page)).historyLength, repeatedDepth);
+        assert.deepEqual((await typography("InlineTextBox")).lines.map(line => line.x), [10, 10, 20, 30, 40],
+            "Repeated preedit uses the captured replacement location in actual native paragraph geometry");
+    };
+    await beginComposition();
+    await ime.evaluate(input => input.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true, cancelable: true, data: "" })));
+    await page.waitForFunction(() => !JSON.parse(globalThis.ferroDesign.ferroDesignState()).editingComposition,
+        undefined, { timeout: 10000 });
+    await assertRich(originalRich, repeatedDepth, "Empty composition-end cancellation");
+    let restored = await typography("InlineTextBox");
+    assert.deepEqual([Math.min(restored.selectionStart, restored.selectionEnd), Math.max(restored.selectionStart, restored.selectionEnd)],
+        [0, repeatedUnit.length], "Cancellation restores the confirmed native selection before any later input");
+    await beginComposition();
+    await ime.evaluate((input, data) => {
+        input.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true, cancelable: true, data }));
+        input.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data, isComposing: false }));
+    }, preedit);
+    await page.waitForFunction(() => !JSON.parse(globalThis.ferroDesign.ferroDesignState()).editingComposition,
+        undefined, { timeout: 10000 });
+    await assertRich(insertedRich, repeatedDepth, "Committed repeated-paragraph composition");
+    await nativeHistory("Control+z", originalRich, repeatedDepth, "Native composition undo");
+    await nativeHistory("Control+Shift+z", insertedRich, repeatedDepth, "Native composition redo");
+    const composedDocument = await documentState(page);
+    await page.keyboard.press("Control+Enter");
+    await page.waitForFunction(() => JSON.parse(globalThis.ferroDesign.ferroDesignState()).editingText === null,
+        undefined, { timeout: 10000 });
+    await history(repeatedDocument, composedDocument, repeatedDepth, "Repeated paragraph composition session");
+    check("Production browser composition events keep confirmed rich data unchanged during repeated preedit, restore the selected rich paragraph on cancellation, commit exactly once despite trailing insertText, and preserve exact native and document undo/redo for both style collections");
 }

@@ -10,6 +10,7 @@ mod angular_tests;
 mod backdrop;
 pub(crate) mod flatten;
 pub(crate) mod typography;
+pub(crate) mod text_export;
 mod incremental;
 #[cfg(all(test, not(target_os = "emscripten")))]
 mod mask_tests;
@@ -25,6 +26,8 @@ mod svg_regions_tests;
 mod shadow_tests;
 #[cfg(all(test, not(target_os = "emscripten")))]
 mod corner_tests;
+#[cfg(all(test, not(target_os = "emscripten")))]
+mod polygon_corner_tests;
 
 use std::cell::Cell;
 use std::collections::{hash_map::DefaultHasher, HashMap, HashSet};
@@ -1216,7 +1219,7 @@ fn shape_geometry(node: &Node) -> Ref<Geometry> {
             &[Point::new(0.0, 0.0), Point::new(node.width, node.height)],
             false,
         ),
-        NodeKind::Polygon | NodeKind::Star => polyline_geometry(&node.polygon_points(), true),
+        NodeKind::Polygon | NodeKind::Star => path_geometry(&ferrodesign_core::polygon_corner_path(node)),
         NodeKind::Vector => {
             if let Some(network) = &node.vector_network {
                 path_geometry(&network.fill_path())

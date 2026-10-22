@@ -8,6 +8,7 @@ impl EditorShell {
         let editor = self.editor.borrow();
         let viewport = self.canvas.viewport.get();
         let stats = self.canvas.render_stats();
+        let projection = self.layer_projection.borrow().stats();
         let mut state = json!({
             "renderedFrames":self.canvas.frames.get(),"sceneFrames":self.scene_frames.get(),
             "documentRevision":editor.document.revision,
@@ -20,6 +21,7 @@ impl EditorShell {
             "rootQueryReused":stats.root_query_reused,
             "totalFullPrepares":stats.total_full_prepares,"totalIncrementalPrepares":stats.total_incremental_prepares,
             "totalPreparedNodes":stats.total_prepared_nodes,"totalRebuiltVisuals":stats.total_rebuilt_visuals,
+            "layerProjectionBuilds":projection.builds,"layerProjectionReuses":projection.reuses,
         });
         #[cfg(target_os = "emscripten")]
         {
