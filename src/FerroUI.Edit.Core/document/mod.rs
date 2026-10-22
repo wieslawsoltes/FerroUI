@@ -1,7 +1,10 @@
 mod document_change_event_args;
 mod document_line;
 mod document_text_writer;
+mod i_document;
 mod i_line_tracker;
+mod i_text_anchor;
+mod i_text_source_version;
 mod i_undoable_operation;
 mod line_manager;
 mod live_document_line;
@@ -22,7 +25,10 @@ pub use crate::utils::DocumentSubscription;
 pub use document_change_event_args::{DocumentChangeEventArgs, TextChangeEventArgs};
 pub use document_line::DocumentLine;
 pub use document_text_writer::DocumentTextWriter;
+pub use i_document::{IDocument, IDocumentLine, UndoableAction};
 pub use i_line_tracker::ILineTracker;
+pub use i_text_anchor::ITextAnchor;
+pub use i_text_source_version::ITextSourceVersion;
 pub use i_undoable_operation::{IUndoableOperation, IUndoableOperationWithContext};
 pub use live_document_line::LiveDocumentLine;
 pub use offset_change_map::{

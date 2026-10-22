@@ -118,6 +118,8 @@ struct DocumentState {
 struct DocumentInner {
     state: RefCell<DocumentState>,
     lines: RefCell<Option<Rc<LineManager>>>,
+    file_name: RefCell<Option<String>>,
+    file_name_changed: Event<()>,
     in_change: Cell<bool>,
     finishing: Cell<bool>,
     changing: Event<DocumentChangeEventArgs>,
@@ -219,6 +221,8 @@ impl TextDocument {
                 is_read_only: false,
             }),
             lines: RefCell::new(None),
+            file_name: RefCell::new(None),
+            file_name_changed: Event::default(),
             in_change: Cell::new(false),
             finishing: Cell::new(false),
             changing: Event::default(),
@@ -240,6 +244,24 @@ impl TextDocument {
     }
     pub fn text_length(&self) -> usize {
         self.0.state.borrow().snapshot.text_length()
+    }
+    /// Host-owned file metadata; changing it does not edit text or history.
+    pub fn file_name(&self) -> Option<String> {
+        self.0.file_name.borrow().clone()
+    }
+    pub fn set_file_name(&self, value: Option<String>) -> bool {
+        {
+            let mut name = self.0.file_name.borrow_mut();
+            if *name == value {
+                return false;
+            }
+            *name = value;
+        }
+        self.0.file_name_changed.raise(&());
+        true
+    }
+    pub fn file_name_changed(&self, handler: impl Fn() + 'static) -> DocumentSubscription {
+        self.0.file_name_changed.subscribe(move |_| handler())
     }
     pub fn line_count(&self) -> usize {
         self.0.state.borrow().snapshot.line_count()
@@ -506,6 +528,13 @@ impl TextDocument {
 
     pub fn begin_update(&self) -> Result<UpdateGuard, DocumentError> {
         self.begin_update_impl(false)
+    }
+    /// Starts a manually paired group. Call `end_update` or the document
+    /// interface's `end_undoable_action` exactly once after a successful call.
+    pub fn start_undoable_action(&self) -> Result<(), DocumentError> {
+        let mut guard = self.begin_update()?;
+        guard.document.take();
+        Ok(())
     }
     pub fn run_update(&self) -> Result<UpdateGuard, DocumentError> {
         self.begin_update()

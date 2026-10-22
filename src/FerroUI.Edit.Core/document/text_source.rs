@@ -1,5 +1,6 @@
-use super::{DocumentError, DocumentLine, DocumentVersion, TextLocation};
+use super::{DocumentError, DocumentLine, DocumentVersion, ITextSourceVersion, TextLocation};
 use crate::utils::Utf16Rope;
+use std::sync::Arc;
 
 /// Read-only UTF-16 text source. Snapshot values are `Send + Sync`; the mutable
 /// document handle is deliberately local to its owning UI thread.
@@ -9,6 +10,18 @@ pub trait ITextSource {
     fn get_text(&self, offset: usize, length: usize) -> Result<String, DocumentError>;
     fn get_text_utf16(&self, offset: usize, length: usize) -> Result<Vec<u16>, DocumentError>;
     fn create_snapshot(&self) -> TextSnapshot;
+    fn create_snapshot_range(
+        &self,
+        offset: usize,
+        length: usize,
+    ) -> Result<TextSnapshot, DocumentError> {
+        self.create_snapshot().slice(offset, length)
+    }
+    fn version(&self) -> Option<Arc<dyn ITextSourceVersion>> {
+        self.create_snapshot()
+            .version()
+            .map(|version| version.as_text_source_version())
+    }
     fn text(&self) -> String {
         self.create_snapshot().text()
     }

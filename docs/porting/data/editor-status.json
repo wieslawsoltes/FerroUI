@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "inventory_sha256": "70e060d1ca9836ade3c7c6b451169e52b4209b38458309ccb4c2694bb77541b5",
-  "mappings_sha256": "a48bf3e8f815cfe8f018e39b716732132aa9e928b72fc7e3be27bde33cd604c4",
+  "mappings_sha256": "74f9978372ab3c276b47e529dbb9f80e88beaea89a00d3c8a2f7f64d5bff8dee",
   "counts": {
     "mapped": 21,
     "adapted": 163,
@@ -10,8 +10,8 @@
   "file_count": 375,
   "declared_type_occurrences": 1310,
   "distinct_type_declarations_per_file": 554,
-  "mapped_declared_types": 226,
-  "unmapped_declared_types": 328,
+  "mapped_declared_types": 229,
+  "unmapped_declared_types": 325,
   "repositories": {
     "avaloniaedit": {
       "mapped": 12,
@@ -1439,6 +1439,8 @@
         }
       ],
       "mapped_types": [
+        "AvaloniaEdit.Document.IDocument",
+        "AvaloniaEdit.Document.IDocumentLine",
         "AvaloniaEdit.Document.TextChangeEventArgs"
       ],
       "status": "adapted",
@@ -1454,15 +1456,30 @@
               "rust": "TextChangeEventArgs"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/document/i_document.rs",
+          "symbols": [
+            "IDocument",
+            "IDocumentLine",
+            "UndoableAction"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Document.IDocument",
+              "rust": "IDocument"
+            },
+            {
+              "upstream": "AvaloniaEdit.Document.IDocumentLine",
+              "rust": "IDocumentLine"
+            }
+          ]
         }
       ],
-      "unmapped_types": [
-        "AvaloniaEdit.Document.IDocument",
-        "AvaloniaEdit.Document.IDocumentLine"
-      ],
-      "notes": "Generic text-source change event mapping and inversion.",
+      "unmapped_types": [],
+      "notes": "Object-safe document/live-line interfaces, source edits, edit/group events, undo groups and filename access; generic change mapping is retained.",
       "limitations": [
-        "IDocument and IDocumentLine interfaces, IServiceProvider and their full member contracts are absent."
+        "No IServiceProvider inheritance: framework service discovery remains host-owned. Deleted coordinates return Result; IDocumentLine::segment supplies an infallible segment value only after validation."
       ]
     },
     {
@@ -1530,7 +1547,8 @@
         }
       ],
       "mapped_types": [
-        "AvaloniaEdit.Document.AnchorMovementType"
+        "AvaloniaEdit.Document.AnchorMovementType",
+        "AvaloniaEdit.Document.ITextAnchor"
       ],
       "status": "adapted",
       "targets": [
@@ -1545,14 +1563,24 @@
               "rust": "AnchorMovementType"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/document/i_text_anchor.rs",
+          "symbols": [
+            "ITextAnchor"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Document.ITextAnchor",
+              "rust": "ITextAnchor"
+            }
+          ]
         }
       ],
-      "unmapped_types": [
-        "AvaloniaEdit.Document.ITextAnchor"
-      ],
-      "notes": "Default/before/after insertion movement enum.",
+      "unmapped_types": [],
+      "notes": "Object-safe anchor contract preserves movement/deletion policy, coordinates, identity and explicit deletion subscriptions.",
       "limitations": [
-        "Concrete TextAnchor is exposed; a separate ITextAnchor trait is absent."
+        "Deleted coordinates return Result; separate interface wrapper allocations use explicit underlying identity comparison."
       ]
     },
     {
@@ -1622,10 +1650,22 @@
               "rust": "DocumentVersion"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/document/i_text_source_version.rs",
+          "symbols": [
+            "ITextSourceVersion"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Document.ITextSourceVersion",
+              "rust": "ITextSourceVersion"
+            }
+          ]
         }
       ],
       "unmapped_types": [],
-      "notes": "Snapshot text source plus concrete immutable versions.",
+      "notes": "Snapshot text source with range snapshots and optional thread-safe version interfaces; concrete immutable versions remain available.",
       "limitations": [
         "Managed TextReader/TextWriter and the full StringComparison overload family are absent; String conversion replaces isolated surrogates."
       ]
@@ -2102,9 +2142,9 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Shared UI-thread document with UTF-16 edits, grouped notifications, anchors, optional live line tracking, immutable snapshots, versions and undo.",
+      "notes": "Shared UI-thread document with UTF-16 edits, grouped notifications, anchors, live line tracking, interfaces, filename metadata, snapshots, versions and undo.",
       "limitations": [
-        "Missing service container, filename metadata, owner-thread transfer/locking and full interface families; see editor-document.md."
+        "Service container, owner-thread transfer/locking, shared undo stacks and selected managed IO overloads remain; see editor-document.md."
       ]
     },
     {

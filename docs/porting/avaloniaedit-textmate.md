@@ -168,6 +168,10 @@ Checkpoint evidence is recorded with the commits and updated as tests land:
 - The incremental installation tests compare 200 batches of queued CR/LF/comment
   edits with fresh highlighting, plus line insertion/deletion, multiline state,
   bounded work, cancellation and theme-change reentrancy.
+- The actual headless demo completes all six smoke-action stages with exit code
+  zero and no renderer panic: search/replace, completion, snippets, folding,
+  wrapping/theme changes and switching to the C# document/grammar. Scroll
+  invalidation is coalesced through the dispatcher after the render pass.
 - The source-inventory fixture tests cover exact-symbol validation and invalid
   mappings. Asset hashing and release metadata checks run independently.
 
