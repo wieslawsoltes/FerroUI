@@ -108,8 +108,18 @@ Namespace promotion does not upgrade API or Gallery parity statuses. See the
 [control contracts](CONTROL-CONTRACTS.md) and
 [validation ledger](../../../samples/WinUIGallery/VALIDATION.md) for exact scope and
 execution evidence. The promotion's
-[native-control record](data/executions/native-controls-005.json) records 182 passing
-tests across 12 integration targets and 53 frozen source hashes. All 521 current API
-evidence entries reference this run without advancing their behavior statuses.
+[local native-control record](data/executions/native-controls-005.json) preserves
+182 passing tests across 12 integration targets and 53 source hashes frozen before
+and checked after the local run. All 521 current API evidence entries reference the
+fresh [CI native-control record](data/executions/native-controls-006.json), which
+records 182 passing tests on actual checkout `63e82a17`, tree `523b4d4e`, with main
+`87fb`'s updated `Cargo.lock`. Its source hashes were extracted afterward from that
+checkout's Git blobs, without an execution-time before/after snapshot. The published
+merge `aae91cbe` has the same tree and was not the execution commit. These records do
+not advance any behavior classification.
+
+The [promotion validation record](data/native-promotion-validation.json) separately
+records loader, theme, external-path and CI results, including corrected failures
+and the scope of source-hash capture.
 Historical records retain their original source paths, counts and hashes; loader,
 theme and Gallery execution results remain separately scoped.

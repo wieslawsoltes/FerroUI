@@ -157,15 +157,23 @@ preview behavior and actual native event/property interactions. Tests that const
 controls do not claim an interactive desktop run, pixel equality, keyboard traversal,
 screen-reader interoperability or verification on every host.
 
-The **native control promotion** has a new
-[execution record](../../docs/porting/winui-gallery/data/executions/native-controls-005.json):
+The **native control promotion** preserves its
+[local execution record](../../docs/porting/winui-gallery/data/executions/native-controls-005.json):
 **182 native control tests passed across 12 targets**, with **53 source hashes**
-checked before and after execution. All 521 current API evidence entries reference
-this record. The current maps report **315 type candidates, 1,537 member candidates
-and 204 additive types**; the new source matches are `NumberBoxValueChangedEventArgs`
-and its `OldValue`/`NewValue` members. Behavior classifications and page statuses are
-unchanged. Loader, theme and Gallery results below remain tied to their stated
-historical checkpoints.
+frozen before and checked after the local run. All 521 current API evidence entries
+reference the fresh
+[CI execution record](../../docs/porting/winui-gallery/data/executions/native-controls-006.json),
+with **182 native tests passed** on actual checkout `63e82a17`, tree `523b4d4e`, after
+main `87fb` updated `Cargo.lock`. The CI source hashes were extracted afterward from
+that checkout's Git blobs; they are not execution-time before/after snapshots.
+Published merge `aae91cbe` has the same tree, but was not the execution commit.
+[VALIDATION.md](VALIDATION.md) records the full identities and separate execution scopes.
+
+The current maps report **315 type candidates, 1,537 member candidates and 204
+additive types**; the new source matches are `NumberBoxValueChangedEventArgs` and its
+`OldValue`/`NewValue` members. Behavior classifications and page statuses are unchanged.
+Loader, theme and Gallery results below remain tied to their stated historical
+checkpoints.
 
 The **main integration checkpoint `7c679ceb`** incorporates main's TextLineBounds
 work at `0ce4e90c` and regenerates the complete combined WinUI theme reference.

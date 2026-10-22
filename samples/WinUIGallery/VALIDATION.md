@@ -64,20 +64,32 @@ page. API behavior statuses are also unchanged. The promotion changes source ide
 and usage; it does not demonstrate additional source-example, rendering or platform
 coverage. Original catalog/source/assets and their upstream hashes remain intact.
 
-The promotion's [native-control execution record](../../docs/porting/winui-gallery/data/executions/native-controls-005.json)
+The promotion's [local native-control execution record](../../docs/porting/winui-gallery/data/executions/native-controls-005.json)
 records **182 passing tests across all 12 integration targets**, with no failures or
 ignored tests. Its **53 frozen source hashes** cover the moved implementations,
 extracted peers/settings and updated tests and were checked before and after the
-command. All **521 current API evidence entries** now reference this execution.
-The record identifies the tested source by its hashes; its parent commit identifies
-the base of the changes. This establishes native-control test evidence for the
-promotion. Loader, theme and Gallery executions retain their separately stated scopes.
+local command. The record identifies that tested source by its hashes; its parent
+commit identifies the base of the changes. Record 005 retains this original evidence
+after main integration changed `Cargo.lock`.
+
+All **521 current API evidence entries** reference the fresh
+[CI native-control execution record](../../docs/porting/winui-gallery/data/executions/native-controls-006.json),
+which records **182 native tests passed across 12 targets** on actual CI checkout
+`63e82a1722719a7ea98bb63144498dcc2c377286`, tree
+`523b4d4e2723173b733b61076b029012eb81d9c4`, incorporating main `87fb`'s updated
+`Cargo.lock`. The native step passed on **2026-10-22, 20:59:32–21:01:10 UTC**. Record
+006's source hashes were extracted afterward from the actual checkout's Git blobs;
+they are not execution-time before/after snapshots. The published proper merge
+[`aae91cbe3732d54dca1b48705ae04f5d8ecef250`](https://github.com/wieslawsoltes/FerroUI/commit/aae91cbe3732d54dca1b48705ae04f5d8ecef250)
+has the same tree, but was not the execution commit. Loader, theme, Gallery and
+rendering CI results require their own separately recorded observations.
 
 The current comparison reports **315 type candidates and 1,537 member candidates**.
 The increase consists only of the newly matching native `NumberBoxValueChangedEventArgs`
 type and its `OldValue`/`NewValue` members; their behavior remains unverified. The
 existing-API guard reports **204 additive types** against the unchanged protected
-baseline. No API behavior or Gallery page status advances from these source matches.
+baseline, also confirmed by a clean local comparison after main integration. No API
+behavior or Gallery page status advances from these source matches.
 
 The current [theme ledger](../../docs/porting/winui-theme/TRACKING.md) records
 **6,912 ported, 1,974 waived and 87 pending definitions**. Twelve RadioButtons source
@@ -85,6 +97,84 @@ definitions are now pending after obsolete no-control waivers were removed. They
 join InfoBadge's 27, ProgressRing's 8, RatingControl's 35 and five NavigationView
 style definitions. These are source-definition dispositions, separate from runtime
 or visual acceptance.
+
+### Promotion executions and source identity
+
+The native migration is published in
+[`6df94f5`](https://github.com/wieslawsoltes/FerroUI/commit/6df94f599f3584974220cf3d1014a57c63d7c775).
+The capture consumer's final nested import was corrected in
+[`4651974`](https://github.com/wieslawsoltes/FerroUI/commit/4651974b44c18a4b73efd15fac1e1edd899d1e1a).
+The [promotion validation record](../../docs/porting/winui-gallery/data/native-promotion-validation.json)
+keeps commands, result lines, test names, log hashes, published source hashes,
+preserved reference hashes and CI observations together.
+
+| Local execution | Actual result | Evidence scope |
+| --- | --- | --- |
+| Native controls, all 12 targets | **182 passed** | The 53 source hashes in execution 005 were frozen before and checked after execution. |
+| Compiled/interpreted XAML | **9 passed, 1 ignored** | Includes direct presentation-namespace construction and matching compiled output. |
+| WinUI source migration | **45 passed** | Explicit importer policy, native mappings and existing native-XAML preservation. |
+| Complete WinUI theme | **295 passed, 2 ignored** | Both complete compiler-reference comparisons passed. |
+| Explicit theme regeneration | **1 passed** | Separately executed before the complete theme suite. |
+| Existing Fluent/Simple themes | **1 passed in each** | Native metadata-template fallback preserves existing theme coverage. |
+| Public Rust paths/accessors | **3 passed, 1 ignored** | Validation from an external crate; the fixture-regeneration task remains explicit. |
+| Scanner/generator regressions | **47 passed** | Namespace maps, evidence, protected declarations and scoped builder names. |
+| Source/generation gates | **Passed** | Exact source comparison, event owners, Symbol values, builders, Rust paths, catalog and assets. |
+| Strict completeness | **Expected exit 2** | 1,544 types, 7,264 members and all 126 pages still lack complete execution evidence. |
+| Gallery library | **Build blocked before tests** | The local compiler exhausted disk space; no local success is inferred. |
+| Declarative API compilation | **Not run locally** | The serial local consumer plan stopped after disk exhaustion; CI includes this check. |
+
+The expanded native fixture initially failed because its test host lacked a rendering
+service for path geometry. Installing the framework's standard styled-window mock
+services, with the theme disabled to retain metadata defaults, resolved the failure;
+the complete fixture remained intact. The first existing-theme link also encountered
+disk exhaustion, then both existing-theme checks passed after cache cleanup.
+
+The local native control run in 005 has its own before/after source snapshot. The
+broader integration hashes were captured from published Git blobs after the local
+runs; they are not presented as execution-time before/after snapshots. The capture-import
+fix changes only that executable consumer, after the successful local suites. The
+fresh CI native record 006 also uses afterward extraction from the actual checkout,
+with the updated lockfile, and preserves the local record unchanged.
+
+Clean CI on `6df94f5` passed the source/evidence comparison and confirmed
+**204 additive types**. The earlier local value of 205 included an untracked,
+unreferenced `Controls/page_stack_entry.rs` duplicate. No published tree contains
+that duplicate; the canonical type is `FerroUI.Navigation.PageStackEntry`.
+The protected baseline counts and 315/1,537 candidate counts are unchanged.
+
+The first rendering CI build found the capture binary's obsolete nested import and
+failed before producing images. The correction is recorded separately from that
+failure. The main-integrated source was executed by
+[parity CI](https://github.com/wieslawsoltes/FerroUI/actions/runs/39852856008) and
+[general CI](https://github.com/wieslawsoltes/FerroUI/actions/runs/39852856388).
+
+| Integration CI execution | Actual result |
+| --- | --- |
+| Native controls | **182 passed** across 12 targets; record 006 preserves this successful step separately from the later job failure. |
+| Local values / binding lifetime / deferred resources | **13 / 13 / 3 passed** respectively. |
+| XAML migration / compiled and interpreted XAML | **45 / 9 passed**, with one explicit regeneration task ignored. |
+| WinUI theme / existing Fluent and Simple fallback | **295 / 2 passed**, with two WinUI regeneration tasks ignored. |
+| Public Rust paths | **3 passed, 1 ignored**. |
+| Gallery library | **51 passed, 3 failed** on source-visible NavigationView header labels. |
+| Declarative API compilation | **Skipped** after the Gallery failure. |
+| Rendering | **151 PNGs produced**: 126 light catalog pages, nine dark representatives and 16 NavigationView compositions. |
+
+The Gallery failures expected `Sample Page N` headers but observed `Sample FramePage N`.
+Commit [`d176a88`](https://github.com/wieslawsoltes/FerroUI/commit/d176a88cf8e21acb4583d1836cd980c792381bbc)
+restores the two display-string literals while retaining the native `FramePage`
+type. Existing assertions remain unchanged. Consumer CI for that correction is
+recorded separately when it completes.
+
+The old source-comparison step rejected `Cargo.lock` after main advanced. Record 006
+and the regenerated maps address that stale evidence using the actual successful
+native step; record 005 remains unchanged. The exact source guard is unchanged.
+
+The [rendering artifact](https://github.com/wieslawsoltes/FerroUI/actions/runs/39852856008/artifacts/12459321306)
+has SHA-256 `ab43a3905b430cd4a56ce608120f73ad690eafaa63e31dde1b36728a767a015d`.
+All 151 images decoded at 1280×900; the validation record retains each file's hash.
+Inspection of NumberBox, InfoBar, NavigationView and AutoSuggestBox captures showed
+native compositions, with missing icon-font glyph boxes on Linux. These captures
+do not establish pixel equality with Windows WinUI or complete page behavior.
 
 The revision-specific executions and captures below predate this promotion. They
 retain their original commands, namespaces, paths, counts and hashes as historical

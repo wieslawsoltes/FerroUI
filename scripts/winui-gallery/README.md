@@ -183,6 +183,10 @@ remain a separate source-comparison measure and never promote behavior status.
 - Rust comparison uses the crate's namespace table, public member declarations
   and unambiguous base-class lookup. It does not prove Rust signatures, XAML
   registration behavior, property defaults, event ordering or visual equality.
+- The map's `registered` flag observes names in each crate's `register_types.rs`.
+  It does not inventory every markup-only enum or event-argument registration;
+  `false` does not establish that the public path or markup metadata is unavailable.
+  Generated public-path fixtures and loader tests check those separate surfaces.
 - Alternate control candidates such as `ListView` to `ListBox` retain explicit
   semantic cautions and cannot be treated as interchangeable aliases. New native
   implementations such as `NumberBox` map directly to `FerroUI.Controls`; genuine

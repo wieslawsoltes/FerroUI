@@ -95,13 +95,20 @@ settings and InfoBarPanel follow `FerroUI.Controls.Primitives`, and the eight
 automation peers follow `FerroUI.Automation.Peers`. The source importer maps the
 pinned WinUI identities to these native APIs. There is no separate controls shim.
 
-The [native-promotion execution record](data/executions/native-controls-005.json)
-records **182 passing tests across 12 native integration targets**, with **53 source
-hashes** checked before and after execution. All **521 API evidence entries** now
-reference that record. Behavior classifications and Gallery page statuses remain
-unchanged. Earlier execution records and captures retain their original revisions,
-namespaces and counts; their loader, theme and Gallery results keep their historical
-scope.
+The [local native-promotion record](data/executions/native-controls-005.json)
+preserves **182 passing tests across 12 native integration targets**, with **53 source
+hashes** frozen before and checked after that local execution. The fresh
+[CI native-control record](data/executions/native-controls-006.json) records another
+**182 passing tests** on actual checkout `63e82a17`, tree `523b4d4e`, after main
+`87fb` changed `Cargo.lock`. All **521 current API evidence entries** reference 006.
+Its hashes were extracted afterward from the actual checkout's Git blobs; they are
+not execution-time before/after snapshots. Published merge `aae91cbe` has the same
+tree, but it was not the execution commit. See the
+[validation ledger](../../../samples/WinUIGallery/VALIDATION.md) for full identities.
+
+Behavior classifications and Gallery page statuses remain unchanged. Earlier
+execution records and captures retain their original revisions, namespaces and
+counts; loader, theme and Gallery results keep their separately recorded scopes.
 
 The current source map identifies **315 type candidates and 1,537 member candidates**;
 the existing-API guard reports **204 additive types**. The only new matches are

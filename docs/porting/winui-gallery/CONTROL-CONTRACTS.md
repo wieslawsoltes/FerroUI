@@ -714,14 +714,22 @@ evidence must point at an actual successful execution record tied to the
 implementation/test file hashes. Partial evidence keeps its boundaries and
 does not turn a whole type or Gallery page into verified parity.
 
-The current native-promotion execution is
+The local native-promotion execution remains in
 [`data/executions/native-controls-005.json`](data/executions/native-controls-005.json):
 **182 tests passed across all 12 native integration targets**, with **53 source
-hashes** checked before and after execution. All 521 API evidence entries now
-reference this record. Their behavior classifications remain unchanged; the newly
-matching `NumberBoxValueChangedEventArgs` source type and `OldValue`/`NewValue`
-member candidates do not acquire behavior evidence from a name match. The earlier
-records below retain their original source scope and test counts.
+hashes** frozen before and checked after that local run. All 521 current API evidence
+entries now reference the fresh
+[`data/executions/native-controls-006.json`](data/executions/native-controls-006.json):
+**182 native tests passed** on CI checkout `63e82a17`, tree `523b4d4e`, including
+main `87fb`'s updated `Cargo.lock`. Its source hashes were extracted afterward from
+the actual checkout's Git blobs; no execution-time before/after snapshot is claimed.
+The published merge `aae91cbe` has the same tree, but was not the execution commit.
+Full source identities are in the [validation ledger](../../../samples/WinUIGallery/VALIDATION.md).
+
+Behavior classifications remain unchanged; the newly matching
+`NumberBoxValueChangedEventArgs` source type and `OldValue`/`NewValue` member
+candidates do not acquire behavior evidence from a name match. The earlier records
+below retain their original source scope and test counts.
 
 The first recorded native-control execution is
 [`data/executions/native-controls-001.json`](data/executions/native-controls-001.json):
