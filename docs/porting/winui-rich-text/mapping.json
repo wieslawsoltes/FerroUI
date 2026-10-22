@@ -315,6 +315,26 @@
         {
           "path": "src/FerroUI.Controls/documents/text_element.rs",
           "symbol": "pub fn font_features("
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/text_element.rs",
+          "symbol": "pub fn find_name("
+        },
+        {
+          "path": "src/FerroUI.Controls/markup_types/classes.rs",
+          "symbol": "fn FindName(String)"
+        },
+        {
+          "path": "scripts/markup_types_overrides.py",
+          "symbol": "'TextElement':"
+        },
+        {
+          "path": "src/FerroUI.Controls/primitives/templated_control.rs",
+          "symbol": "NameScope::set_name_scope("
+        },
+        {
+          "path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers.rs",
+          "symbol": "struct WeakParentNameScope"
         }
       ],
       "tests": [
@@ -325,12 +345,81 @@
         {
           "path": "src/FerroUI.Controls/documents/rich_text_document_tests.rs",
           "symbol": "semantic_snapshot_containers_keep_defaults_under_inherited_parent_formatting"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/text_element_namescope_tests.rs",
+          "symbol": "text_element_find_name_shares_control_and_text_registrations"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/text_element_namescope_tests.rs",
+          "symbol": "text_element_find_name_stops_at_nearest_scope_even_when_name_is_missing"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/text_element_namescope_tests.rs",
+          "symbol": "text_element_find_name_preserves_child_scope_completion_policy"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/text_element_namescope_tests.rs",
+          "symbol": "text_element_find_name_rechecks_reparenting_and_replaced_scopes"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/text_element_namescope_tests.rs",
+          "symbol": "text_element_find_name_uses_registration_and_does_not_keep_scope_owner_alive"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/text_element_namescope_tests.rs",
+          "symbol": "text_element_find_name_metadata_returns_the_same_live_object_or_none"
+        },
+        {
+          "path": "tests/FerroUI.Markup.Xaml.UnitTests/xaml/rich_text_tests.rs",
+          "symbol": "rich_text_find_name_uses_xaml_names_across_controls_and_text_elements"
+        },
+        {
+          "path": "tests/FerroUI.Markup.Xaml.UnitTests/xaml/rich_text_tests.rs",
+          "symbol": "rich_text_find_name_uses_each_xaml_template_instance_scope"
+        },
+        {
+          "path": "src/FerroUI.Controls/primitives/templated_control_tests.rs",
+          "symbol": "template_scope_is_discoverable_before_template_applied"
+        },
+        {
+          "path": "src/FerroUI.Controls/primitives/templated_control_tests.rs",
+          "symbol": "template_application_preserves_explicit_root_name_scope"
+        },
+        {
+          "path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs",
+          "symbol": "instantiated_deferred_name_scope_does_not_retain_declaring_scope"
+        },
+        {
+          "path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs",
+          "symbol": "instantiated_deferred_name_scope_preserves_live_parent_async_lookup"
+        },
+        {
+          "path": "tests/FerroUI.Markup.Xaml.UnitTests/xaml/rich_text_tests.rs",
+          "symbol": "rich_text_find_name_template_replacement_releases_old_scope_and_declaring_tree"
+        },
+        {
+          "path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs",
+          "symbol": "nested_deferred_resource_scope_keeps_live_outer_fallback_without_retaining_it"
+        },
+        {
+          "path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs",
+          "symbol": "nested_deferred_resource_scope_prefers_live_local_before_expired_fallback"
+        },
+        {
+          "path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs",
+          "symbol": "nested_deferred_resource_scope_preserves_pending_live_outer_lookup"
+        },
+        {
+          "path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs",
+          "symbol": "nested_deferred_resource_live_incomplete_scope_delays_outer_fallback"
         }
       ],
-      "reason": "Inherited text formatting and inline-host invalidation reuse the FerroUI property system. Native access-key/focus/language/structural-position members remain unmapped.",
+      "reason": "Inherited text formatting and inline-host invalidation reuse the FerroUI property system. Native access-key/focus/language/structural-position members remain unmapped. FindName delegates to the current framework namescope; template instance scope attachment and weak parent retention supply end-to-end discoverability. Native deferred realization remains absent. Deferred resources retain a weak scope-chain context so a nested template can skip an expired temporary construction scope and still resolve its live declaring scope, without retaining either named tree or bypassing a live incomplete scope.",
       "deviations": [
         "RT-A01",
-        "RT-I03"
+        "RT-I03",
+        "RT-I33"
       ]
     },
     "dxaml/xcp/core/inc/inline.h": {
@@ -1446,6 +1535,14 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block.rs",
           "symbol": "pub fn select("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "pub fn text_line_bounds("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "pub fn set_text_line_bounds("
         }
       ],
       "tests": [
@@ -1472,14 +1569,55 @@
         {
           "path": "tests/FerroUI.Markup.Xaml.UnitTests/xaml/rich_text_tests.rs",
           "symbol": "rich_text_markup_links_overflow_to_the_same_document"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_all_modes_reach_each_line_and_empty_document"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_inheritance_local_override_and_clear_rebuild_the_source"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_stacking_uses_family_mode_ratio_on_framework_lines"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_draw_origin_and_range_caret_boxes_share_the_formatted_line"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_overflow_uses_head_policy_and_reflows_without_document_edits"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_clipping_keeps_local_choice_and_unlinked_pages"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_mixed_font_metrics_match_shared_textblock_policy"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_explicit_spacing_remains_authoritative"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_trimming_keeps_visible_ranges_and_embedded_ink"
         }
       ],
-      "reason": "The rich view lays out the shared document through the existing TextFormatter/TextLine pipeline. This maps the stated property/operation, while exact native formatter, visual and platform behavior remains under review. Public properties and native projection members are reviewed individually in the API map.",
+      "reason": "The rich view lays out the shared document through the existing TextFormatter/TextLine pipeline. This maps the stated property/operation, while exact native formatter, visual and platform behavior remains under review. Public properties and native projection members are reviewed individually in the API map. Rich TextLineBounds reuses the main formatter/property and propagates head-owned policy to linked layouts, with explicit source/cache invalidation and clipping. Native metric/pixel policy remains separately qualified.",
       "deviations": [
         "RT-A02",
         "RT-I01",
         "RT-I02",
-        "RT-I03"
+        "RT-I03",
+        "RT-I31"
       ]
     },
     "dxaml/xcp/dxaml/lib/RichTextBlock_Partial.cpp": {
@@ -1721,6 +1859,18 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block.rs",
           "symbol": "pub fn text_view_for_position("
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "pub struct TextInputMethodRangeGeometry"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry.rs",
+          "symbol": "pub(super) fn query_text_range_geometry("
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_layout.rs",
+          "symbol": "TextInputMethodRangeGeometry"
         }
       ],
       "tests": [
@@ -1739,13 +1889,111 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_overflow_rejects_cycles_and_second_owners"
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "input_range_geometry_keeps_utf16_indices_and_unflattened_fragments"
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "input_range_geometry_rejects_missing_invalid_and_nonfinite_bounds"
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "input_range_geometry_rejects_client_changes_and_reentrant_visual_changes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_uses_requested_range_without_moving_the_selection"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_preserves_surrogate_and_font_cluster_requests"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_queries_visible_preedit_and_retires_after_cancel"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_keeps_scrolled_off_viewport_text_in_owner_coordinates"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_uses_break_allocations_without_a_selection_marker"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_covers_embedded_controls_soft_breaks_and_wrapped_bidi"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_reports_invalid_hidden_unmeasured_and_trimmed_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_tracks_inherited_format_transforms_and_layout_identity"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_follows_inherited_line_bounds_and_retires_old_layouts"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_requires_complete_attached_overflow_coverage"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_rejects_reentrant_document_selection_and_view_changes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_does_not_retain_removed_controls_or_input_sessions"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_source_callbacks_preserve_newer_source_and_layout_caches"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_preserves_the_requested_utf16_indices_and_exact_bounds"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_uses_legacy_caret_only_for_an_unsupported_capability"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_rejects_a_wrong_range_or_stale_client_snapshot"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_composes_fragment_rotations_before_taking_screen_bounds"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_preserves_exact_small_carets_and_zero_advance_breaks"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_rejects_invalid_fragment_native_points_and_scale"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_rechecks_snapshot_between_native_publication_setters"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_does_not_discard_zero_area_fragment_positions"
         }
       ],
-      "reason": "Hit testing, caret/range geometry and linked view resolution use the formatted page and document offsets; synthetic positions, native view ABI and remaining source view contracts are not reproduced implicitly.",
+      "reason": "Hit testing, caret/range geometry and linked view resolution use the formatted page and document offsets; synthetic positions, native view ABI and remaining source view contracts are not reproduced implicitly. The shared optional requested-range geometry capability now preserves exact UTF-16 indices, shaped fragments, insertion/break geometry and full coverage through RichEditBox and CoreText. Weak source/layout/session guards reject callback-owned stale state; individual corners reach screen coordinates before union, and Unsupported alone selects the legacy caret. This is a FerroUI service translation, with native execution/candidate/proofing boundaries retained.",
       "deviations": [
         "RT-A02",
         "RT-I01",
-        "RT-I02"
+        "RT-I02",
+        "RT-A04",
+        "RT-I16"
       ]
     },
     "dxaml/xcp/core/text/Inc/LinkedRichTextBlockView.h": {
@@ -2225,6 +2473,10 @@
         {
           "path": "src/FerroUI.Controls/rich_text_layout.rs",
           "symbol": "RichTextLine"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "fn apply_line_stacking_strategy("
         }
       ],
       "tests": [
@@ -2243,13 +2495,50 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_overflow_rejects_cycles_and_second_owners"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_single_and_empty_lines_take_first_line_precedence"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress"
         }
       ],
-      "reason": "Native block/page/paragraph layout roles are consolidated into the existing formatter-driven Rust page layout. Every internal node/cache/invalidation member and exact LineServices behavior still requires review; these files remain partial.",
+      "reason": "Native block/page/paragraph layout roles are consolidated into the existing formatter-driven Rust page layout. Every internal node/cache/invalidation member and exact LineServices behavior still requires review; these files remain partial. ApplyLineStackingStrategy is ported with separate line advance/draw offset and a reproducible comparison of the actual C++ and Rust function bodies across 960 cases; this does not close other node, formatter or native rendering contracts.",
       "deviations": [
         "RT-A02",
         "RT-I02",
-        "RT-I03"
+        "RT-I03",
+        "RT-I31"
       ]
     },
     "dxaml/xcp/core/text/BlockLayout/ParagraphNode.h": {
@@ -2262,6 +2551,10 @@
         {
           "path": "src/FerroUI.Controls/rich_text_layout.rs",
           "symbol": "RichTextLine"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "fn apply_line_stacking_strategy("
         }
       ],
       "tests": [
@@ -2280,13 +2573,50 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_overflow_rejects_cycles_and_second_owners"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_single_and_empty_lines_take_first_line_precedence"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress"
         }
       ],
-      "reason": "Native block/page/paragraph layout roles are consolidated into the existing formatter-driven Rust page layout. Every internal node/cache/invalidation member and exact LineServices behavior still requires review; these files remain partial.",
+      "reason": "Native block/page/paragraph layout roles are consolidated into the existing formatter-driven Rust page layout. Every internal node/cache/invalidation member and exact LineServices behavior still requires review; these files remain partial. ApplyLineStackingStrategy is ported with separate line advance/draw offset and a reproducible comparison of the actual C++ and Rust function bodies across 960 cases; this does not close other node, formatter or native rendering contracts.",
       "deviations": [
         "RT-A02",
         "RT-I02",
-        "RT-I03"
+        "RT-I03",
+        "RT-I31"
       ]
     },
     "dxaml/xcp/core/text/BlockLayout/BlockNodeBreak.cpp": {
@@ -6186,6 +6516,18 @@
         {
           "path": "src/Browser/FerroUI.Browser/browser_text_input_projection.rs",
           "symbol": "pub(crate) struct DomTextProjection"
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "pub struct TextInputMethodRangeGeometry"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry.rs",
+          "symbol": "pub(super) fn query_text_range_geometry("
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_layout.rs",
+          "symbol": "TextInputMethodRangeGeometry"
         }
       ],
       "tests": [
@@ -6508,9 +6850,125 @@
         {
           "path": "src/Browser/FerroUI.Browser/browser_text_input_projection.rs",
           "symbol": "browser_dom_projection_rejects_crlf_interiors_and_new_collapsed_pairs"
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "input_range_geometry_keeps_utf16_indices_and_unflattened_fragments"
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "input_range_geometry_rejects_missing_invalid_and_nonfinite_bounds"
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "input_range_geometry_rejects_client_changes_and_reentrant_visual_changes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_uses_requested_range_without_moving_the_selection"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_preserves_surrogate_and_font_cluster_requests"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_queries_visible_preedit_and_retires_after_cancel"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_keeps_scrolled_off_viewport_text_in_owner_coordinates"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_uses_break_allocations_without_a_selection_marker"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_covers_embedded_controls_soft_breaks_and_wrapped_bidi"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_reports_invalid_hidden_unmeasured_and_trimmed_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_tracks_inherited_format_transforms_and_layout_identity"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_follows_inherited_line_bounds_and_retires_old_layouts"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_requires_complete_attached_overflow_coverage"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_rejects_reentrant_document_selection_and_view_changes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_does_not_retain_removed_controls_or_input_sessions"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_source_callbacks_preserve_newer_source_and_layout_caches"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_preserves_the_requested_utf16_indices_and_exact_bounds"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_uses_legacy_caret_only_for_an_unsupported_capability"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_rejects_a_wrong_range_or_stale_client_snapshot"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_composes_fragment_rotations_before_taking_screen_bounds"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_preserves_exact_small_carets_and_zero_advance_breaks"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_rejects_invalid_fragment_native_points_and_scale"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_rechecks_snapshot_between_native_publication_setters"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_does_not_discard_zero_area_fragment_positions"
+        },
+        {
+          "path": "src/Browser/FerroUI.Browser/browser_text_input_dom_tests.rs",
+          "symbol": "browser_dom_composition_empty_final_commits_directed_selection_and_one_undo_unit"
+        },
+        {
+          "path": "src/Browser/FerroUI.Browser/browser_text_input_dom_tests.rs",
+          "symbol": "browser_dom_composition_empty_final_preserves_raw_line_endings_and_maps_selection"
+        },
+        {
+          "path": "src/Browser/FerroUI.Browser/browser_text_input_dom_tests.rs",
+          "symbol": "browser_dom_composition_invalid_final_value_or_selection_cancels_without_history"
+        },
+        {
+          "path": "src/Browser/FerroUI.Browser/browser_text_input_dom_tests.rs",
+          "symbol": "browser_dom_composition_intercepted_empty_final_or_focus_handoff_restores_owner"
+        },
+        {
+          "path": "src/Browser/FerroUI.Browser/browser_text_input_dom_tests.rs",
+          "symbol": "browser_dom_composition_empty_final_after_read_only_cannot_modify_owner"
         }
       ],
-      "reason": "Input-method surrounding text, selection, cursor geometry and preedit use the existing framework client. Native windowless hosting, TSF/UI-manager callbacks and unavailable system services are not mechanically ported. The persistent presenter is the text-view visual while cursor rectangles are converted to semantic-owner coordinates; surrounding text and selection remain on the owner/editor. Native TSF/windowless/UI-manager and other host members remain pending. Exact native input requests retain the UTF-16 replacement range, replacement text and resulting directed selection through the shared connection and rich editor. Empty replacements delete their requested range. Composition retains its whole active span independently of the caret, commits once and keeps the original cancellation snapshot. Invalid or filtered/limited/cancelled/reentrant requests reject success. CoreText keeps last-acknowledged state separate from current state so failed notifications retry from the old native length and late/reentrant acknowledgements cannot hide newer state. Unsupported CoreText clause formatting reports Failed; legacy TextBox transport and actual OS conformance remain separate. Native HSTRING query slices retain exact counted UTF-16 units and NULs; edit payloads use strict scalar decoding. Native adapter disposal, accessor, subscription and state callbacks are fenced against client replacement. Windows-only adapter fixture definitions do not assert an executed OS/CoreText gate. CoreText now captures the semantic whole-control bounds separately from the current-caret TextBounds fallback, transforms both complete rectangles through the native panel, and applies validated rasterization scale plus HWND client-to-screen origin. Unavailable native geometry leaves the request unpopulated. Client/connection/composition/revision/focus/root/owner/bounds/transform and nested-request checks fence callbacks and native setters, including a final callback-bearing revision query before pure geometry comparisons. The Base cursor manager separately fences binding and query generations around custom caret getters so replacement owners/clients, resets, focus round trips or nested same-client geometry cannot be overwritten by an old result. The arbitrary CoreText LayoutRequest.Range is still not consumed; actual candidate-window bounds/alignment, native input services and OS host conformance remain pending. Portable and Windows-only test definitions have separate execution records. The keyboard records its accepted destination in the shared input manager before LostFocus/GotFocus, while ordinary client installation remains after those events. Legitimate synchronous template/view requery now resolves the accepted owner and preserves an owned-popup composition. Accepted focus generations fence nested Losing/Getting/Lost/Got transitions, including round trips; canceled nested requests do not supersede an outer accepted transition. Input-client and view-accessor callbacks recheck both binding and focus identity. This covers synchronous framework focus/requery ownership, not arbitrary native asynchronous focus order. The browser exact DOM edit bridge and IBus ContentType consumer now use these shared input contracts with owner/revision/context guards. Their test definitions and completed runtime gates are recorded separately; real browser/device and IBus-engine execution are not inferred. IMM32 now associates complete equal-weight scope arrays through SetInputScopes with weak HWND identity, retry and release compensation; optional AppKit semantic content hints retain the old interface ABI. Browser coordinates translate through an LF-only DOM projection while unchanged CR/CRLF model content remains exact. These backend-specific limits are recorded in RT-I29/RT-I30 and do not supply TSF Document Manager, native proofing or keyboard UI.",
+      "reason": "Input-method surrounding text, selection, cursor geometry and preedit use the existing framework client. Native windowless hosting, TSF/UI-manager callbacks and unavailable system services are not mechanically ported. The persistent presenter is the text-view visual while cursor rectangles are converted to semantic-owner coordinates; surrounding text and selection remain on the owner/editor. Native TSF/windowless/UI-manager and other host members remain pending. Exact native input requests retain the UTF-16 replacement range, replacement text and resulting directed selection through the shared connection and rich editor. Empty replacements delete their requested range. Composition retains its whole active span independently of the caret, commits once and keeps the original cancellation snapshot. Invalid or filtered/limited/cancelled/reentrant requests reject success. CoreText keeps last-acknowledged state separate from current state so failed notifications retry from the old native length and late/reentrant acknowledgements cannot hide newer state. Unsupported CoreText clause formatting reports Failed; legacy TextBox transport and actual OS conformance remain separate. Native HSTRING query slices retain exact counted UTF-16 units and NULs; edit payloads use strict scalar decoding. Native adapter disposal, accessor, subscription and state callbacks are fenced against client replacement. Windows-only adapter fixture definitions do not assert an executed OS/CoreText gate. CoreText now captures the semantic whole-control bounds separately from the current-caret TextBounds fallback, transforms both complete rectangles through the native panel, and applies validated rasterization scale plus HWND client-to-screen origin. Unavailable native geometry leaves the request unpopulated. Client/connection/composition/revision/focus/root/owner/bounds/transform and nested-request checks fence callbacks and native setters, including a final callback-bearing revision query before pure geometry comparisons. The Base cursor manager separately fences binding and query generations around custom caret getters so replacement owners/clients, resets, focus round trips or nested same-client geometry cannot be overwritten by an old result. The arbitrary CoreText LayoutRequest.Range is still not consumed; actual candidate-window bounds/alignment, native input services and OS host conformance remain pending. Portable and Windows-only test definitions have separate execution records. The keyboard records its accepted destination in the shared input manager before LostFocus/GotFocus, while ordinary client installation remains after those events. Legitimate synchronous template/view requery now resolves the accepted owner and preserves an owned-popup composition. Accepted focus generations fence nested Losing/Getting/Lost/Got transitions, including round trips; canceled nested requests do not supersede an outer accepted transition. Input-client and view-accessor callbacks recheck both binding and focus identity. This covers synchronous framework focus/requery ownership, not arbitrary native asynchronous focus order. The browser exact DOM edit bridge and IBus ContentType consumer now use these shared input contracts with owner/revision/context guards. Their test definitions and completed runtime gates are recorded separately; real browser/device and IBus-engine execution are not inferred. IMM32 now associates complete equal-weight scope arrays through SetInputScopes with weak HWND identity, retry and release compensation; optional AppKit semantic content hints retain the old interface ABI. Browser coordinates translate through an LF-only DOM projection while unchanged CR/CRLF model content remains exact. These backend-specific limits are recorded in RT-I29/RT-I30 and do not supply TSF Document Manager, native proofing or keyboard UI. The shared optional requested-range geometry capability now preserves exact UTF-16 indices, shaped fragments, insertion/break geometry and full coverage through RichEditBox and CoreText. Weak source/layout/session guards reject callback-owned stale state; individual corners reach screen coordinates before union, and Unsupported alone selects the legacy caret. This is a FerroUI service translation, with native execution/candidate/proofing boundaries retained. Accepted empty DOM composition uses the existing exact preview/completion transaction with final directed selection; all final value/UTF-16 endpoints are validated, including LF-only source, with rollback/interception/focus regression coverage.",
       "deviations": [
         "RT-A04",
         "RT-I06",
@@ -6684,6 +7142,18 @@
         {
           "path": "src/Browser/FerroUI.Browser/browser_text_input_projection.rs",
           "symbol": "pub(crate) struct DomTextProjection"
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "pub struct TextInputMethodRangeGeometry"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry.rs",
+          "symbol": "pub(super) fn query_text_range_geometry("
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_layout.rs",
+          "symbol": "TextInputMethodRangeGeometry"
         }
       ],
       "tests": [
@@ -7006,9 +7476,125 @@
         {
           "path": "src/Browser/FerroUI.Browser/browser_text_input_projection.rs",
           "symbol": "browser_dom_projection_rejects_crlf_interiors_and_new_collapsed_pairs"
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "input_range_geometry_keeps_utf16_indices_and_unflattened_fragments"
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "input_range_geometry_rejects_missing_invalid_and_nonfinite_bounds"
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "input_range_geometry_rejects_client_changes_and_reentrant_visual_changes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_uses_requested_range_without_moving_the_selection"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_preserves_surrogate_and_font_cluster_requests"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_queries_visible_preedit_and_retires_after_cancel"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_keeps_scrolled_off_viewport_text_in_owner_coordinates"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_uses_break_allocations_without_a_selection_marker"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_covers_embedded_controls_soft_breaks_and_wrapped_bidi"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_reports_invalid_hidden_unmeasured_and_trimmed_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_tracks_inherited_format_transforms_and_layout_identity"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_follows_inherited_line_bounds_and_retires_old_layouts"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_requires_complete_attached_overflow_coverage"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_rejects_reentrant_document_selection_and_view_changes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_does_not_retain_removed_controls_or_input_sessions"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_source_callbacks_preserve_newer_source_and_layout_caches"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_preserves_the_requested_utf16_indices_and_exact_bounds"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_uses_legacy_caret_only_for_an_unsupported_capability"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_rejects_a_wrong_range_or_stale_client_snapshot"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_composes_fragment_rotations_before_taking_screen_bounds"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_preserves_exact_small_carets_and_zero_advance_breaks"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_rejects_invalid_fragment_native_points_and_scale"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_rechecks_snapshot_between_native_publication_setters"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_does_not_discard_zero_area_fragment_positions"
+        },
+        {
+          "path": "src/Browser/FerroUI.Browser/browser_text_input_dom_tests.rs",
+          "symbol": "browser_dom_composition_empty_final_commits_directed_selection_and_one_undo_unit"
+        },
+        {
+          "path": "src/Browser/FerroUI.Browser/browser_text_input_dom_tests.rs",
+          "symbol": "browser_dom_composition_empty_final_preserves_raw_line_endings_and_maps_selection"
+        },
+        {
+          "path": "src/Browser/FerroUI.Browser/browser_text_input_dom_tests.rs",
+          "symbol": "browser_dom_composition_invalid_final_value_or_selection_cancels_without_history"
+        },
+        {
+          "path": "src/Browser/FerroUI.Browser/browser_text_input_dom_tests.rs",
+          "symbol": "browser_dom_composition_intercepted_empty_final_or_focus_handoff_restores_owner"
+        },
+        {
+          "path": "src/Browser/FerroUI.Browser/browser_text_input_dom_tests.rs",
+          "symbol": "browser_dom_composition_empty_final_after_read_only_cannot_modify_owner"
         }
       ],
-      "reason": "Input-method surrounding text, selection, cursor geometry and preedit use the existing framework client. Native windowless hosting, TSF/UI-manager callbacks and unavailable system services are not mechanically ported. The persistent presenter is the text-view visual while cursor rectangles are converted to semantic-owner coordinates; surrounding text and selection remain on the owner/editor. Native TSF/windowless/UI-manager and other host members remain pending. Exact native input requests retain the UTF-16 replacement range, replacement text and resulting directed selection through the shared connection and rich editor. Empty replacements delete their requested range. Composition retains its whole active span independently of the caret, commits once and keeps the original cancellation snapshot. Invalid or filtered/limited/cancelled/reentrant requests reject success. CoreText keeps last-acknowledged state separate from current state so failed notifications retry from the old native length and late/reentrant acknowledgements cannot hide newer state. Unsupported CoreText clause formatting reports Failed; legacy TextBox transport and actual OS conformance remain separate. Native HSTRING query slices retain exact counted UTF-16 units and NULs; edit payloads use strict scalar decoding. Native adapter disposal, accessor, subscription and state callbacks are fenced against client replacement. Windows-only adapter fixture definitions do not assert an executed OS/CoreText gate. CoreText now captures the semantic whole-control bounds separately from the current-caret TextBounds fallback, transforms both complete rectangles through the native panel, and applies validated rasterization scale plus HWND client-to-screen origin. Unavailable native geometry leaves the request unpopulated. Client/connection/composition/revision/focus/root/owner/bounds/transform and nested-request checks fence callbacks and native setters, including a final callback-bearing revision query before pure geometry comparisons. The Base cursor manager separately fences binding and query generations around custom caret getters so replacement owners/clients, resets, focus round trips or nested same-client geometry cannot be overwritten by an old result. The arbitrary CoreText LayoutRequest.Range is still not consumed; actual candidate-window bounds/alignment, native input services and OS host conformance remain pending. Portable and Windows-only test definitions have separate execution records. The keyboard records its accepted destination in the shared input manager before LostFocus/GotFocus, while ordinary client installation remains after those events. Legitimate synchronous template/view requery now resolves the accepted owner and preserves an owned-popup composition. Accepted focus generations fence nested Losing/Getting/Lost/Got transitions, including round trips; canceled nested requests do not supersede an outer accepted transition. Input-client and view-accessor callbacks recheck both binding and focus identity. This covers synchronous framework focus/requery ownership, not arbitrary native asynchronous focus order. The browser exact DOM edit bridge and IBus ContentType consumer now use these shared input contracts with owner/revision/context guards. Their test definitions and completed runtime gates are recorded separately; real browser/device and IBus-engine execution are not inferred. IMM32 now associates complete equal-weight scope arrays through SetInputScopes with weak HWND identity, retry and release compensation; optional AppKit semantic content hints retain the old interface ABI. Browser coordinates translate through an LF-only DOM projection while unchanged CR/CRLF model content remains exact. These backend-specific limits are recorded in RT-I29/RT-I30 and do not supply TSF Document Manager, native proofing or keyboard UI.",
+      "reason": "Input-method surrounding text, selection, cursor geometry and preedit use the existing framework client. Native windowless hosting, TSF/UI-manager callbacks and unavailable system services are not mechanically ported. The persistent presenter is the text-view visual while cursor rectangles are converted to semantic-owner coordinates; surrounding text and selection remain on the owner/editor. Native TSF/windowless/UI-manager and other host members remain pending. Exact native input requests retain the UTF-16 replacement range, replacement text and resulting directed selection through the shared connection and rich editor. Empty replacements delete their requested range. Composition retains its whole active span independently of the caret, commits once and keeps the original cancellation snapshot. Invalid or filtered/limited/cancelled/reentrant requests reject success. CoreText keeps last-acknowledged state separate from current state so failed notifications retry from the old native length and late/reentrant acknowledgements cannot hide newer state. Unsupported CoreText clause formatting reports Failed; legacy TextBox transport and actual OS conformance remain separate. Native HSTRING query slices retain exact counted UTF-16 units and NULs; edit payloads use strict scalar decoding. Native adapter disposal, accessor, subscription and state callbacks are fenced against client replacement. Windows-only adapter fixture definitions do not assert an executed OS/CoreText gate. CoreText now captures the semantic whole-control bounds separately from the current-caret TextBounds fallback, transforms both complete rectangles through the native panel, and applies validated rasterization scale plus HWND client-to-screen origin. Unavailable native geometry leaves the request unpopulated. Client/connection/composition/revision/focus/root/owner/bounds/transform and nested-request checks fence callbacks and native setters, including a final callback-bearing revision query before pure geometry comparisons. The Base cursor manager separately fences binding and query generations around custom caret getters so replacement owners/clients, resets, focus round trips or nested same-client geometry cannot be overwritten by an old result. The arbitrary CoreText LayoutRequest.Range is still not consumed; actual candidate-window bounds/alignment, native input services and OS host conformance remain pending. Portable and Windows-only test definitions have separate execution records. The keyboard records its accepted destination in the shared input manager before LostFocus/GotFocus, while ordinary client installation remains after those events. Legitimate synchronous template/view requery now resolves the accepted owner and preserves an owned-popup composition. Accepted focus generations fence nested Losing/Getting/Lost/Got transitions, including round trips; canceled nested requests do not supersede an outer accepted transition. Input-client and view-accessor callbacks recheck both binding and focus identity. This covers synchronous framework focus/requery ownership, not arbitrary native asynchronous focus order. The browser exact DOM edit bridge and IBus ContentType consumer now use these shared input contracts with owner/revision/context guards. Their test definitions and completed runtime gates are recorded separately; real browser/device and IBus-engine execution are not inferred. IMM32 now associates complete equal-weight scope arrays through SetInputScopes with weak HWND identity, retry and release compensation; optional AppKit semantic content hints retain the old interface ABI. Browser coordinates translate through an LF-only DOM projection while unchanged CR/CRLF model content remains exact. These backend-specific limits are recorded in RT-I29/RT-I30 and do not supply TSF Document Manager, native proofing or keyboard UI. The shared optional requested-range geometry capability now preserves exact UTF-16 indices, shaped fragments, insertion/break geometry and full coverage through RichEditBox and CoreText. Weak source/layout/session guards reject callback-owned stale state; individual corners reach screen coordinates before union, and Unsupported alone selects the legacy caret. This is a FerroUI service translation, with native execution/candidate/proofing boundaries retained. Accepted empty DOM composition uses the existing exact preview/completion transaction with final directed selection; all final value/UTF-16 endpoints are validated, including LF-only source, with rollback/interception/focus regression coverage.",
       "deviations": [
         "RT-A04",
         "RT-I06",
@@ -7030,19 +7616,129 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block.rs",
           "symbol": "pub fn get_rects_for_range("
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "pub struct TextInputMethodRangeGeometry"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry.rs",
+          "symbol": "pub(super) fn query_text_range_geometry("
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_layout.rs",
+          "symbol": "TextInputMethodRangeGeometry"
         }
       ],
       "tests": [
         {
           "path": "src/FerroUI.Controls/rich_edit_box_tests.rs",
           "symbol": "rich_edit_control_text_services_share_selection_history_and_visual_geometry"
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "input_range_geometry_keeps_utf16_indices_and_unflattened_fragments"
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "input_range_geometry_rejects_missing_invalid_and_nonfinite_bounds"
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "input_range_geometry_rejects_client_changes_and_reentrant_visual_changes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_uses_requested_range_without_moving_the_selection"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_preserves_surrogate_and_font_cluster_requests"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_queries_visible_preedit_and_retires_after_cancel"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_keeps_scrolled_off_viewport_text_in_owner_coordinates"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_uses_break_allocations_without_a_selection_marker"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_covers_embedded_controls_soft_breaks_and_wrapped_bidi"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_reports_invalid_hidden_unmeasured_and_trimmed_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_tracks_inherited_format_transforms_and_layout_identity"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_follows_inherited_line_bounds_and_retires_old_layouts"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_requires_complete_attached_overflow_coverage"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_rejects_reentrant_document_selection_and_view_changes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_does_not_retain_removed_controls_or_input_sessions"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_source_callbacks_preserve_newer_source_and_layout_caches"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_preserves_the_requested_utf16_indices_and_exact_bounds"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_uses_legacy_caret_only_for_an_unsupported_capability"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_rejects_a_wrong_range_or_stale_client_snapshot"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_composes_fragment_rotations_before_taking_screen_bounds"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_preserves_exact_small_carets_and_zero_advance_breaks"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_rejects_invalid_fragment_native_points_and_scale"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_rechecks_snapshot_between_native_publication_setters"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_does_not_discard_zero_area_fragment_positions"
         }
       ],
-      "reason": "Editable text reuses the same shaped view as read-only text and resolves input/selection geometry there. Native editor view and host ABI members remain adapted or pending.",
+      "reason": "Editable text reuses the same shaped view as read-only text and resolves input/selection geometry there. Native editor view and host ABI members remain adapted or pending. The shared optional requested-range geometry capability now preserves exact UTF-16 indices, shaped fragments, insertion/break geometry and full coverage through RichEditBox and CoreText. Weak source/layout/session guards reject callback-owned stale state; individual corners reach screen coordinates before union, and Unsupported alone selects the legacy caret. This is a FerroUI service translation, with native execution/candidate/proofing boundaries retained.",
       "deviations": [
         "RT-A02",
         "RT-I01",
-        "RT-I06"
+        "RT-I06",
+        "RT-A04",
+        "RT-I16"
       ]
     },
     "dxaml/xcp/core/native/text/Controls/TextBoxView.h": {
@@ -7055,19 +7751,129 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block.rs",
           "symbol": "pub fn get_rects_for_range("
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "pub struct TextInputMethodRangeGeometry"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry.rs",
+          "symbol": "pub(super) fn query_text_range_geometry("
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_layout.rs",
+          "symbol": "TextInputMethodRangeGeometry"
         }
       ],
       "tests": [
         {
           "path": "src/FerroUI.Controls/rich_edit_box_tests.rs",
           "symbol": "rich_edit_control_text_services_share_selection_history_and_visual_geometry"
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "input_range_geometry_keeps_utf16_indices_and_unflattened_fragments"
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "input_range_geometry_rejects_missing_invalid_and_nonfinite_bounds"
+        },
+        {
+          "path": "src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs",
+          "symbol": "input_range_geometry_rejects_client_changes_and_reentrant_visual_changes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_uses_requested_range_without_moving_the_selection"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_preserves_surrogate_and_font_cluster_requests"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_queries_visible_preedit_and_retires_after_cancel"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_keeps_scrolled_off_viewport_text_in_owner_coordinates"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_uses_break_allocations_without_a_selection_marker"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_covers_embedded_controls_soft_breaks_and_wrapped_bidi"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_reports_invalid_hidden_unmeasured_and_trimmed_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_tracks_inherited_format_transforms_and_layout_identity"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_follows_inherited_line_bounds_and_retires_old_layouts"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_requires_complete_attached_overflow_coverage"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_rejects_reentrant_document_selection_and_view_changes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_does_not_retain_removed_controls_or_input_sessions"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_edit_input_range_geometry_tests.rs",
+          "symbol": "rich_input_range_geometry_source_callbacks_preserve_newer_source_and_layout_caches"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_preserves_the_requested_utf16_indices_and_exact_bounds"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_uses_legacy_caret_only_for_an_unsupported_capability"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_rejects_a_wrong_range_or_stale_client_snapshot"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_composes_fragment_rotations_before_taking_screen_bounds"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_preserves_exact_small_carets_and_zero_advance_breaks"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_rejects_invalid_fragment_native_points_and_scale"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_rechecks_snapshot_between_native_publication_setters"
+        },
+        {
+          "path": "src/Windows/FerroUI.WinUI/core_text_range_geometry_tests.rs",
+          "symbol": "core_text_range_geometry_does_not_discard_zero_area_fragment_positions"
         }
       ],
-      "reason": "Editable text reuses the same shaped view as read-only text and resolves input/selection geometry there. Native editor view and host ABI members remain adapted or pending.",
+      "reason": "Editable text reuses the same shaped view as read-only text and resolves input/selection geometry there. Native editor view and host ABI members remain adapted or pending. The shared optional requested-range geometry capability now preserves exact UTF-16 indices, shaped fragments, insertion/break geometry and full coverage through RichEditBox and CoreText. Weak source/layout/session guards reject callback-owned stale state; individual corners reach screen coordinates before union, and Unsupported alone selects the legacy caret. This is a FerroUI service translation, with native execution/candidate/proofing boundaries retained.",
       "deviations": [
         "RT-A02",
         "RT-I01",
-        "RT-I06"
+        "RT-I06",
+        "RT-A04",
+        "RT-I16"
       ]
     },
     "dxaml/xcp/dxaml/lib/TextBoxView_Partial.cpp": {
@@ -11915,6 +12721,10 @@
         {
           "path": "src/FerroUI.Controls/documents/block.rs",
           "symbol": "pub fn line_height("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "fn apply_line_stacking_strategy("
         }
       ],
       "tests": [
@@ -11925,12 +12735,49 @@
         {
           "path": "src/FerroUI.Controls/documents/rich_text_document_tests.rs",
           "symbol": "paragraph_margin_validation_matches_nonnegative_source_contract"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_single_and_empty_lines_take_first_line_precedence"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress"
         }
       ],
-      "reason": "The block stores this value through the FerroUI property system and snapshots preserve it. Formatting units, inherited defaults and every downstream native layout case are not claimed complete.",
+      "reason": "The block stores this value through the FerroUI property system and snapshots preserve it. Formatting units, inherited defaults and every downstream native layout case are not claimed complete. Source-derived stacking now distinguishes allocation advance from the draw origin, with actual C++/Rust formula evidence and wrapped/empty/overflow geometry fixtures.",
       "deviations": [
         "RT-A01",
-        "RT-I03"
+        "RT-I03",
+        "RT-I31"
       ]
     },
     "P:Microsoft.UI.Xaml.Documents.Block.LineHeightProperty": {
@@ -11939,6 +12786,10 @@
         {
           "path": "src/FerroUI.Controls/documents/block.rs",
           "symbol": "line_height_property"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "fn apply_line_stacking_strategy("
         }
       ],
       "tests": [
@@ -11949,12 +12800,49 @@
         {
           "path": "src/FerroUI.Controls/documents/rich_text_document_tests.rs",
           "symbol": "paragraph_margin_validation_matches_nonnegative_source_contract"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_single_and_empty_lines_take_first_line_precedence"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress"
         }
       ],
-      "reason": "The registered FerroUI property supplies metadata and invalidation for this mapped value. The block stores this value through the FerroUI property system and snapshots preserve it. Formatting units, inherited defaults and every downstream native layout case are not claimed complete.",
+      "reason": "The registered FerroUI property supplies metadata and invalidation for this mapped value. The block stores this value through the FerroUI property system and snapshots preserve it. Formatting units, inherited defaults and every downstream native layout case are not claimed complete. Source-derived stacking now distinguishes allocation advance from the draw origin, with actual C++/Rust formula evidence and wrapped/empty/overflow geometry fixtures.",
       "deviations": [
         "RT-A01",
-        "RT-I03"
+        "RT-I03",
+        "RT-I31"
       ]
     },
     "P:Microsoft.UI.Xaml.Documents.Block.LineStackingStrategy": {
@@ -11963,6 +12851,10 @@
         {
           "path": "src/FerroUI.Controls/documents/block.rs",
           "symbol": "pub fn line_stacking_strategy("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "fn apply_line_stacking_strategy("
         }
       ],
       "tests": [
@@ -11973,12 +12865,49 @@
         {
           "path": "src/FerroUI.Controls/documents/rich_text_document_tests.rs",
           "symbol": "paragraph_margin_validation_matches_nonnegative_source_contract"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_single_and_empty_lines_take_first_line_precedence"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress"
         }
       ],
-      "reason": "The block stores this value through the FerroUI property system and snapshots preserve it. Formatting units, inherited defaults and every downstream native layout case are not claimed complete.",
+      "reason": "The block stores this value through the FerroUI property system and snapshots preserve it. Formatting units, inherited defaults and every downstream native layout case are not claimed complete. Source-derived stacking now distinguishes allocation advance from the draw origin, with actual C++/Rust formula evidence and wrapped/empty/overflow geometry fixtures.",
       "deviations": [
         "RT-A01",
-        "RT-I03"
+        "RT-I03",
+        "RT-I31"
       ]
     },
     "P:Microsoft.UI.Xaml.Documents.Block.LineStackingStrategyProperty": {
@@ -11987,6 +12916,10 @@
         {
           "path": "src/FerroUI.Controls/documents/block.rs",
           "symbol": "line_stacking_strategy_property"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "fn apply_line_stacking_strategy("
         }
       ],
       "tests": [
@@ -11997,12 +12930,49 @@
         {
           "path": "src/FerroUI.Controls/documents/rich_text_document_tests.rs",
           "symbol": "paragraph_margin_validation_matches_nonnegative_source_contract"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_single_and_empty_lines_take_first_line_precedence"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress"
         }
       ],
-      "reason": "The registered FerroUI property supplies metadata and invalidation for this mapped value. The block stores this value through the FerroUI property system and snapshots preserve it. Formatting units, inherited defaults and every downstream native layout case are not claimed complete.",
+      "reason": "The registered FerroUI property supplies metadata and invalidation for this mapped value. The block stores this value through the FerroUI property system and snapshots preserve it. Formatting units, inherited defaults and every downstream native layout case are not claimed complete. Source-derived stacking now distinguishes allocation advance from the draw origin, with actual C++/Rust formula evidence and wrapped/empty/overflow geometry fixtures.",
       "deviations": [
         "RT-A01",
-        "RT-I03"
+        "RT-I03",
+        "RT-I31"
       ]
     },
     "P:Microsoft.UI.Xaml.Documents.Block.Margin": {
@@ -14232,6 +15202,10 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block.rs",
           "symbol": "pub fn line_height("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "fn apply_line_stacking_strategy("
         }
       ],
       "tests": [
@@ -14242,14 +15216,51 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_wrapping_reuses_shaping_and_selection_geometry"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_single_and_empty_lines_take_first_line_precedence"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress"
         }
       ],
-      "reason": "The rich view lays out the shared document through the existing TextFormatter/TextLine pipeline. This maps the stated property/operation, while exact native formatter, visual and platform behavior remains under review.",
+      "reason": "The rich view lays out the shared document through the existing TextFormatter/TextLine pipeline. This maps the stated property/operation, while exact native formatter, visual and platform behavior remains under review. Source-derived stacking now distinguishes allocation advance from the draw origin, with actual C++/Rust formula evidence and wrapped/empty/overflow geometry fixtures.",
       "deviations": [
         "RT-A02",
         "RT-I01",
         "RT-I02",
-        "RT-I03"
+        "RT-I03",
+        "RT-I31"
       ]
     },
     "P:Microsoft.UI.Xaml.Controls.RichTextBlock.LineHeightProperty": {
@@ -14258,6 +15269,10 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block.rs",
           "symbol": "line_height_property"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "fn apply_line_stacking_strategy("
         }
       ],
       "tests": [
@@ -14268,14 +15283,51 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_wrapping_reuses_shaping_and_selection_geometry"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_single_and_empty_lines_take_first_line_precedence"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress"
         }
       ],
-      "reason": "The registered FerroUI property supplies metadata and invalidation for this mapped value. The rich view lays out the shared document through the existing TextFormatter/TextLine pipeline. This maps the stated property/operation, while exact native formatter, visual and platform behavior remains under review.",
+      "reason": "The registered FerroUI property supplies metadata and invalidation for this mapped value. The rich view lays out the shared document through the existing TextFormatter/TextLine pipeline. This maps the stated property/operation, while exact native formatter, visual and platform behavior remains under review. Source-derived stacking now distinguishes allocation advance from the draw origin, with actual C++/Rust formula evidence and wrapped/empty/overflow geometry fixtures.",
       "deviations": [
         "RT-A02",
         "RT-I01",
         "RT-I02",
-        "RT-I03"
+        "RT-I03",
+        "RT-I31"
       ]
     },
     "P:Microsoft.UI.Xaml.Controls.RichTextBlock.TextWrapping": {
@@ -22719,19 +23771,60 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block.rs",
           "symbol": "pub fn line_stacking_strategy("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "fn apply_line_stacking_strategy("
         }
       ],
       "tests": [
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_finite_height_trims_and_indentation_respects_paragraph_local_values"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_single_and_empty_lines_take_first_line_precedence"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress"
         }
       ],
-      "reason": "The view consumes the existing formatter value/strategy, preserves local paragraph overrides and distinguishes actual ellipsis trimming from linked overflow continuation. Native engine/pixel and all option-value parity remain partial.",
+      "reason": "The view consumes the existing formatter value/strategy, preserves local paragraph overrides and distinguishes actual ellipsis trimming from linked overflow continuation. Native engine/pixel and all option-value parity remain partial. Source-derived stacking now distinguishes allocation advance from the draw origin, with actual C++/Rust formula evidence and wrapped/empty/overflow geometry fixtures.",
       "deviations": [
         "RT-A02",
         "RT-I02",
-        "RT-I03"
+        "RT-I03",
+        "RT-I31"
       ]
     },
     "P:Microsoft.UI.Xaml.Controls.RichTextBlock.LineStackingStrategyProperty": {
@@ -22740,19 +23833,60 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block.rs",
           "symbol": "line_stacking_strategy_property"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "fn apply_line_stacking_strategy("
         }
       ],
       "tests": [
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_finite_height_trims_and_indentation_respects_paragraph_local_values"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_single_and_empty_lines_take_first_line_precedence"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_stacking_tests.rs",
+          "symbol": "rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress"
         }
       ],
-      "reason": "The registered FerroUI property supplies metadata and invalidation for this mapped value. The view consumes the existing formatter value/strategy, preserves local paragraph overrides and distinguishes actual ellipsis trimming from linked overflow continuation. Native engine/pixel and all option-value parity remain partial.",
+      "reason": "The registered FerroUI property supplies metadata and invalidation for this mapped value. The view consumes the existing formatter value/strategy, preserves local paragraph overrides and distinguishes actual ellipsis trimming from linked overflow continuation. Native engine/pixel and all option-value parity remain partial. Source-derived stacking now distinguishes allocation advance from the draw origin, with actual C++/Rust formula evidence and wrapped/empty/overflow geometry fixtures.",
       "deviations": [
         "RT-A02",
         "RT-I02",
-        "RT-I03"
+        "RT-I03",
+        "RT-I31"
       ]
     },
     "P:Microsoft.UI.Xaml.Controls.RichTextBlock.TextTrimming": {
@@ -40217,6 +41351,626 @@
       "deviations": [
         "RT-I25"
       ]
+    },
+    "T:Microsoft.UI.Xaml.TextLineBounds": {
+      "state": "complete",
+      "targets": [
+        {
+          "path": "src/FerroUI.Base/media/text_line_bounds.rs",
+          "symbol": "TextLineBounds"
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes"
+        }
+      ],
+      "deviations": [
+        "RT-A02",
+        "RT-I31"
+      ],
+      "reason": "Reuses the existing shared TextLineBounds enum with all four exact native names and values, checked by the typed metadata and real-layout fixture. Completion covers the enum value contract only; the rich control properties retain their separately mapped metric and platform boundaries."
+    },
+    "F:Microsoft.UI.Xaml.TextLineBounds.Full": {
+      "state": "complete",
+      "targets": [
+        {
+          "path": "src/FerroUI.Base/media/text_line_bounds.rs",
+          "symbol": "Full,"
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes"
+        }
+      ],
+      "deviations": [
+        "RT-A02",
+        "RT-I31"
+      ],
+      "reason": "Reuses the existing shared TextLineBounds enum with all four exact native names and values, checked by the typed metadata and real-layout fixture. Completion covers the enum value contract only; the rich control properties retain their separately mapped metric and platform boundaries."
+    },
+    "F:Microsoft.UI.Xaml.TextLineBounds.TrimToCapHeight": {
+      "state": "complete",
+      "targets": [
+        {
+          "path": "src/FerroUI.Base/media/text_line_bounds.rs",
+          "symbol": "TrimToCapHeight,"
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes"
+        }
+      ],
+      "deviations": [
+        "RT-A02",
+        "RT-I31"
+      ],
+      "reason": "Reuses the existing shared TextLineBounds enum with all four exact native names and values, checked by the typed metadata and real-layout fixture. Completion covers the enum value contract only; the rich control properties retain their separately mapped metric and platform boundaries."
+    },
+    "F:Microsoft.UI.Xaml.TextLineBounds.TrimToBaseline": {
+      "state": "complete",
+      "targets": [
+        {
+          "path": "src/FerroUI.Base/media/text_line_bounds.rs",
+          "symbol": "TrimToBaseline,"
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes"
+        }
+      ],
+      "deviations": [
+        "RT-A02",
+        "RT-I31"
+      ],
+      "reason": "Reuses the existing shared TextLineBounds enum with all four exact native names and values, checked by the typed metadata and real-layout fixture. Completion covers the enum value contract only; the rich control properties retain their separately mapped metric and platform boundaries."
+    },
+    "F:Microsoft.UI.Xaml.TextLineBounds.Tight": {
+      "state": "complete",
+      "targets": [
+        {
+          "path": "src/FerroUI.Base/media/text_line_bounds.rs",
+          "symbol": "Tight,"
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes"
+        }
+      ],
+      "deviations": [
+        "RT-A02",
+        "RT-I31"
+      ],
+      "reason": "Reuses the existing shared TextLineBounds enum with all four exact native names and values, checked by the typed metadata and real-layout fixture. Completion covers the enum value contract only; the rich control properties retain their separately mapped metric and platform boundaries."
+    },
+    "P:Microsoft.UI.Xaml.Controls.RichTextBlock.TextLineBounds": {
+      "state": "partial",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "fn text_line_bounds("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "fn set_text_line_bounds("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "text_line_bounds: TextLineBounds"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "pub fn new("
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/generic_text_paragraph_properties.rs",
+          "symbol": "fn set_text_line_bounds("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_all_modes_reach_each_line_and_empty_document"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_inheritance_local_override_and_clear_rebuild_the_source"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_stacking_uses_family_mode_ratio_on_framework_lines"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_draw_origin_and_range_caret_boxes_share_the_formatted_line"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_overflow_uses_head_policy_and_reflows_without_document_edits"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_clipping_keeps_local_choice_and_unlinked_pages"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_mixed_font_metrics_match_shared_textblock_policy"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_explicit_spacing_remains_authoritative"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_trimming_keeps_visible_ranges_and_embedded_ink"
+        }
+      ],
+      "deviations": [
+        "RT-A02",
+        "RT-I31"
+      ],
+      "reason": "The head RichTextBlock owns the shared TextLineBounds policy and passes it through paragraph, empty-line and overflow formatting. Inherited/local values, clearing, markup, clipping and reflow use existing framework properties. Draw origins, caret/range geometry and inline controls share retained line metrics. This initial checkpoint retains the shared formatter half-gap, actual-fallback-face aggregation and aggregate object trimming; native requested-family metrics, font matching, TextDpi and pixels remain partial under RT-I31."
+    },
+    "P:Microsoft.UI.Xaml.Controls.RichTextBlock.TextLineBoundsProperty": {
+      "state": "partial",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "fn text_line_bounds_property("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "text_line_bounds: TextLineBounds"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "pub fn new("
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/generic_text_paragraph_properties.rs",
+          "symbol": "fn set_text_line_bounds("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_all_modes_reach_each_line_and_empty_document"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_inheritance_local_override_and_clear_rebuild_the_source"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_stacking_uses_family_mode_ratio_on_framework_lines"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_draw_origin_and_range_caret_boxes_share_the_formatted_line"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_overflow_uses_head_policy_and_reflows_without_document_edits"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_clipping_keeps_local_choice_and_unlinked_pages"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_mixed_font_metrics_match_shared_textblock_policy"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_explicit_spacing_remains_authoritative"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
+          "symbol": "rich_text_line_bounds_trimming_keeps_visible_ranges_and_embedded_ink"
+        }
+      ],
+      "deviations": [
+        "RT-A02",
+        "RT-I31"
+      ],
+      "reason": "The head RichTextBlock owns the shared TextLineBounds policy and passes it through paragraph, empty-line and overflow formatting. Inherited/local values, clearing, markup, clipping and reflow use existing framework properties. Draw origins, caret/range geometry and inline controls share retained line metrics. This initial checkpoint retains the shared formatter half-gap, actual-fallback-face aggregation and aggregate object trimming; native requested-family metrics, font matching, TextDpi and pixels remain partial under RT-I31."
+    },
+    "T:Microsoft.UI.Text.RangeGravity": {
+      "state": "complete",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs",
+          "symbol": "pub enum RangeGravity"
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_retains_native_enum_values_and_checked_conversion"
+        }
+      ],
+      "reason": "Exact public names and discriminants are retained in the typed Rust enum and FerroUI markup metadata. Complete covers the enum contract only; native-compatible setter readback, independent range semantics and the remaining behavior boundaries are assessed under the Gravity properties.",
+      "deviations": [
+        "RT-A03",
+        "RT-I32"
+      ]
+    },
+    "F:Microsoft.UI.Text.RangeGravity.UIBehavior": {
+      "state": "complete",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs",
+          "symbol": "UIBehavior = 0"
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_retains_native_enum_values_and_checked_conversion"
+        }
+      ],
+      "reason": "The public UIBehavior discriminant is exactly 0. Outward remains value 4 as a public constant even though the measured range setter canonicalizes a requested 4 to stored/readback UIBehavior 0.",
+      "deviations": [
+        "RT-A03",
+        "RT-I32"
+      ]
+    },
+    "F:Microsoft.UI.Text.RangeGravity.Backward": {
+      "state": "complete",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs",
+          "symbol": "Backward = 1"
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_retains_native_enum_values_and_checked_conversion"
+        }
+      ],
+      "reason": "The public Backward discriminant is exactly 1. Outward remains value 4 as a public constant even though the measured range setter canonicalizes a requested 4 to stored/readback UIBehavior 0.",
+      "deviations": [
+        "RT-A03",
+        "RT-I32"
+      ]
+    },
+    "F:Microsoft.UI.Text.RangeGravity.Forward": {
+      "state": "complete",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs",
+          "symbol": "Forward = 2"
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_retains_native_enum_values_and_checked_conversion"
+        }
+      ],
+      "reason": "The public Forward discriminant is exactly 2. Outward remains value 4 as a public constant even though the measured range setter canonicalizes a requested 4 to stored/readback UIBehavior 0.",
+      "deviations": [
+        "RT-A03",
+        "RT-I32"
+      ]
+    },
+    "F:Microsoft.UI.Text.RangeGravity.Inward": {
+      "state": "complete",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs",
+          "symbol": "Inward = 3"
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_retains_native_enum_values_and_checked_conversion"
+        }
+      ],
+      "reason": "The public Inward discriminant is exactly 3. Outward remains value 4 as a public constant even though the measured range setter canonicalizes a requested 4 to stored/readback UIBehavior 0.",
+      "deviations": [
+        "RT-A03",
+        "RT-I32"
+      ]
+    },
+    "F:Microsoft.UI.Text.RangeGravity.Outward": {
+      "state": "complete",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs",
+          "symbol": "Outward = 4"
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_retains_native_enum_values_and_checked_conversion"
+        }
+      ],
+      "reason": "The public Outward discriminant is exactly 4. Outward remains value 4 as a public constant even though the measured range setter canonicalizes a requested 4 to stored/readback UIBehavior 0.",
+      "deviations": [
+        "RT-A03",
+        "RT-I32"
+      ]
+    },
+    "P:Microsoft.UI.Text.ITextRange.Gravity": {
+      "state": "partial",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs",
+          "symbol": "pub fn gravity("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs",
+          "symbol": "pub fn set_gravity("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs",
+          "symbol": "pub fn set_gravity_value("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs",
+          "symbol": "fn caret_character_format("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor.rs",
+          "symbol": "pub(super) fn replace_range_typing_format("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_replays_45_native_format_and_insertion_fixtures"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_replays_190_native_retention_commands"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_replays_24_invalid_native_setters_without_effects"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_shared_clone_and_independent_duplicate_have_distinct_modes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_mode_is_observational_on_readonly_composition_and_history"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_terminal_and_endpoint_validation_use_visible_model_contract"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_same_rebased_caret_restores_exact_independent_typing_patch"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_set_text_publishes_range_before_newer_mode_or_endpoint_requests"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_rich_snapshot_publishes_endpoints_and_defaults_before_callbacks"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_format_query_rejects_callback_owned_state_without_borrow_panics"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs",
+          "symbol": "rich_range_gravity_pending_clipboard_rejects_mode_changed_away_and_back"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs",
+          "symbol": "rich_range_gravity_paste_late_typing_restore_rejects_newer_range_ownership"
+        }
+      ],
+      "reason": "Independent ranges retain native-valued formatting affinity, including measured Outward-to-UI readback and duplicate reset-to-UI. Collapsed format queries and plain SetText/paste use the same previous/following-run resolution; explicit patches override the resolved source, and paragraph formatting stays with the current paragraph. Native 45 affinity, ten retention and 24 invalid fixtures are literal tests. Range generations preserve newer callback ownership and invalidate pending clipboard work; grouped edits restore the exact independent typing snapshot. Native physical endpoint rebasing differs from current TextPointer tracking and is not changed here. The model excludes a synthetic terminal EOP, so forward story-end affinity samples final paragraph defaults; signed native clamping is adapted to scalar-safe usize/Result validation. The actual selection's inherited Gravity behavior and the external WinUI engine remain unmeasured. Range metadata is not document history; successful undo and failed outer text groups retain accepted explicit mode changes as a stated FerroUI policy.",
+      "deviations": [
+        "RT-A03",
+        "RT-I32"
+      ]
+    },
+    "P:Microsoft.UI.Text.RichEditTextRange.Gravity": {
+      "state": "partial",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs",
+          "symbol": "pub fn gravity("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs",
+          "symbol": "pub fn set_gravity("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs",
+          "symbol": "pub fn set_gravity_value("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs",
+          "symbol": "fn caret_character_format("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor.rs",
+          "symbol": "pub(super) fn replace_range_typing_format("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_replays_45_native_format_and_insertion_fixtures"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_replays_190_native_retention_commands"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_replays_24_invalid_native_setters_without_effects"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_shared_clone_and_independent_duplicate_have_distinct_modes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_mode_is_observational_on_readonly_composition_and_history"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_terminal_and_endpoint_validation_use_visible_model_contract"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_same_rebased_caret_restores_exact_independent_typing_patch"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_set_text_publishes_range_before_newer_mode_or_endpoint_requests"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_rich_snapshot_publishes_endpoints_and_defaults_before_callbacks"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs",
+          "symbol": "rich_range_gravity_format_query_rejects_callback_owned_state_without_borrow_panics"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs",
+          "symbol": "rich_range_gravity_pending_clipboard_rejects_mode_changed_away_and_back"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs",
+          "symbol": "rich_range_gravity_paste_late_typing_restore_rejects_newer_range_ownership"
+        }
+      ],
+      "reason": "Independent ranges retain native-valued formatting affinity, including measured Outward-to-UI readback and duplicate reset-to-UI. Collapsed format queries and plain SetText/paste use the same previous/following-run resolution; explicit patches override the resolved source, and paragraph formatting stays with the current paragraph. Native 45 affinity, ten retention and 24 invalid fixtures are literal tests. Range generations preserve newer callback ownership and invalidate pending clipboard work; grouped edits restore the exact independent typing snapshot. Native physical endpoint rebasing differs from current TextPointer tracking and is not changed here. The model excludes a synthetic terminal EOP, so forward story-end affinity samples final paragraph defaults; signed native clamping is adapted to scalar-safe usize/Result validation. The actual selection's inherited Gravity behavior and the external WinUI engine remain unmeasured. Range metadata is not document history; successful undo and failed outer text groups retain accepted explicit mode changes as a stated FerroUI policy.",
+      "deviations": [
+        "RT-A03",
+        "RT-I32"
+      ]
+    },
+    "M:Microsoft.UI.Xaml.Documents.TextElement.FindName(System.String)": {
+      "state": "partial",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/documents/text_element.rs",
+          "symbol": "pub fn find_name("
+        },
+        {
+          "path": "src/FerroUI.Controls/markup_types/classes.rs",
+          "symbol": "fn FindName(String)"
+        },
+        {
+          "path": "scripts/markup_types_overrides.py",
+          "symbol": "'TextElement':"
+        },
+        {
+          "path": "src/FerroUI.Controls/primitives/templated_control.rs",
+          "symbol": "NameScope::set_name_scope("
+        },
+        {
+          "path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers.rs",
+          "symbol": "struct WeakParentNameScope"
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/documents/text_element_namescope_tests.rs",
+          "symbol": "text_element_find_name_shares_control_and_text_registrations"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/text_element_namescope_tests.rs",
+          "symbol": "text_element_find_name_stops_at_nearest_scope_even_when_name_is_missing"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/text_element_namescope_tests.rs",
+          "symbol": "text_element_find_name_preserves_child_scope_completion_policy"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/text_element_namescope_tests.rs",
+          "symbol": "text_element_find_name_rechecks_reparenting_and_replaced_scopes"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/text_element_namescope_tests.rs",
+          "symbol": "text_element_find_name_uses_registration_and_does_not_keep_scope_owner_alive"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/text_element_namescope_tests.rs",
+          "symbol": "text_element_find_name_metadata_returns_the_same_live_object_or_none"
+        },
+        {
+          "path": "tests/FerroUI.Markup.Xaml.UnitTests/xaml/rich_text_tests.rs",
+          "symbol": "rich_text_find_name_uses_xaml_names_across_controls_and_text_elements"
+        },
+        {
+          "path": "tests/FerroUI.Markup.Xaml.UnitTests/xaml/rich_text_tests.rs",
+          "symbol": "rich_text_find_name_uses_each_xaml_template_instance_scope"
+        },
+        {
+          "path": "src/FerroUI.Controls/primitives/templated_control_tests.rs",
+          "symbol": "template_scope_is_discoverable_before_template_applied"
+        },
+        {
+          "path": "src/FerroUI.Controls/primitives/templated_control_tests.rs",
+          "symbol": "template_application_preserves_explicit_root_name_scope"
+        },
+        {
+          "path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs",
+          "symbol": "instantiated_deferred_name_scope_does_not_retain_declaring_scope"
+        },
+        {
+          "path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs",
+          "symbol": "instantiated_deferred_name_scope_preserves_live_parent_async_lookup"
+        },
+        {
+          "path": "tests/FerroUI.Markup.Xaml.UnitTests/xaml/rich_text_tests.rs",
+          "symbol": "rich_text_find_name_template_replacement_releases_old_scope_and_declaring_tree"
+        },
+        {
+          "path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs",
+          "symbol": "nested_deferred_resource_scope_keeps_live_outer_fallback_without_retaining_it"
+        },
+        {
+          "path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs",
+          "symbol": "nested_deferred_resource_scope_prefers_live_local_before_expired_fallback"
+        },
+        {
+          "path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs",
+          "symbol": "nested_deferred_resource_scope_preserves_pending_live_outer_lookup"
+        },
+        {
+          "path": "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs",
+          "symbol": "nested_deferred_resource_live_incomplete_scope_delays_outer_fallback"
+        }
+      ],
+      "reason": "TextElement delegates to the current nearest FerroUI NameScopeExtensions scope and its find implementation, returning the same live registered object as controls and other text elements. No scope/registration returns None, lookup rechecks reparenting/replaced scopes and holds no scope owner alive. Existing XAML x:Name and per-template-instance registration are exercised through runtime XAML. Equivalence is partial: FerroUI ChildNameScope falls back to its parent after completion, while ordinary nested NameScope is isolated; runtime Name/registration follows StyledElement and explicit NameScope policy. WinUI deferred element realization and automatic runtime renaming/registration are not provided. Template application attaches its actual result scope before callbacks while preserving explicit root scopes; a private weak parent adapter avoids retaining named owners and declaring trees. Real runtime-XAML template lookup, reapplication and destruction are covered without test-side scope attachment. Pending async completion after destruction of an incomplete parent retains existing framework policy. Deferred resources retain a weak scope-chain context so a nested template can skip an expired temporary construction scope and still resolve its live declaring scope, without retaining either named tree or bypassing a live incomplete scope.",
+      "deviations": [
+        "RT-A01",
+        "RT-I33"
+      ]
     }
   },
   "capabilities": {
@@ -40226,15 +41980,15 @@
     },
     "Rich view and overflow": {
       "state": "partial",
-      "description": "Existing TextFormatter/TextLine integration, linked continuation, selection, embedded controls and hyperlinks, paragraph spacing/signed indents, inherited language, shaped explicit/default tabs with leaders and RTL decimal fields, and a persistent editor presenter with logical scrolling. Full native formatting/appearance and remaining members stay pending."
+      "description": "Existing TextFormatter/TextLine integration, linked continuation, selection, embedded controls and hyperlinks, paragraph spacing/signed indents, inherited language, shaped explicit/default tabs with leaders and RTL decimal fields, and a persistent editor presenter with logical scrolling. Full native formatting/appearance and remaining members stay pending. Rich line bounds and source-derived stacking retain common allocation/draw geometry; native font metric and rendering boundaries are explicit in RT-I31."
     },
     "Editing, history and text object services": {
       "state": "partial",
-      "description": "Shared formats/history, cancellable reentrant selection, typed flags, UTF-16 live ranges, eight native-valued TOM units including shaped Cluster, range Delete/Character with scalar-safe Rust extensions, movement/index services, Line/Story Home/End with native-derived real-paragraph endpoints, Line/Paragraph vertical navigation with retained collapsed columns and stepwise extension clamping, logical Character/Word horizontal selection movement with grapheme keyboard Character independent of scalar range Character, Unicode case conversion and transactional Rust streams. Layout/publication mutation fences retain external edits and protect callback-owned navigation state. Further units, synthetic terminal EOP, full selection Gravity, shape classification and automatic affinity/activity, arbitrary stories, advanced formats, locale-specific casing and external ABI remain pending. Shared Options/Type and native-derived overtype/TypeText behavior now have explicit mappings, including 316 literal native observations, accepted-input length planning and callback/history ownership under RT-I26."
+      "description": "Shared formats/history, cancellable reentrant selection, typed flags, UTF-16 live ranges, eight native-valued TOM units including shaped Cluster, range Delete/Character with scalar-safe Rust extensions, movement/index services, Line/Story Home/End with native-derived real-paragraph endpoints, Line/Paragraph vertical navigation with retained collapsed columns and stepwise extension clamping, logical Character/Word horizontal selection movement with grapheme keyboard Character independent of scalar range Character, Unicode case conversion and transactional Rust streams. Layout/publication mutation fences retain external edits and protect callback-owned navigation state. Further units, synthetic terminal EOP, full selection Gravity, shape classification and automatic affinity/activity, arbitrary stories, advanced formats, locale-specific casing and external ABI remain pending. Shared Options/Type and native-derived overtype/TypeText behavior now have explicit mappings, including 316 literal native observations, accepted-input length planning and callback/history ownership under RT-I26. Independent range Gravity now controls collapsed format queries/plain insertion with literal native affinity/retention fixtures and reentrant typing restoration; physical range tracking and live selection Gravity remain separate."
     },
     "Clipboard, RTF and input method": {
       "state": "partial",
-      "description": "Exact in-process snapshots, bounded RTF with resolved styles, multi-paragraph links and 17 portable byte encodings; explicit Read/Write policies and stale-paste guards. Semantic input ownership, exact UTF-16 composition and whole accepted event ranges share framework services. Live input policies and lazy CoreText scope delivery retain ownership. Context-menu requests use shared routed arguments, transformed selection-edge anchors and existing popup lifecycle; dismissal retains the original input connection. Cursor getters and CoreText whole-control/screen-bound publication reject stale callback state. InputScope uses real shared objects, all 43 exact enum values and ordered immutable Names transport with live weak subscriptions; single-purpose hosts consume the first name or supported fallback hints, while IMM32 delivers the entire equal-weight array and optional AppKit consumes supported content meanings. Exact browser DOM/model newline projection preserves raw CR/CRLF content. Arbitrary requested-range geometry, TSF Document Manager integration, candidate/proofing/handwriting services and full native conformance remain pending. Independent TOM clipboard Copy/Cut/Paste/CanPaste and document permission/availability facades use asynchronous framework services with exact named format policies, disposal and stale-target guards; native protection/format/ABI limits are explicit in RT-I24. Accepted focus is prepared before synchronous focus events so actual template remounts requery the semantic owner; nested focus callbacks retain final binding ownership. Browser exact replacement/composition delivery and IBus ContentType option delivery now have independent source/test mappings under RT-I27/RT-I28; actual OS/browser execution remains separate."
+      "description": "Exact in-process snapshots, bounded RTF with resolved styles, multi-paragraph links and 17 portable byte encodings; explicit Read/Write policies and stale-paste guards. Semantic input ownership, exact UTF-16 composition and whole accepted event ranges share framework services. Live input policies and lazy CoreText scope delivery retain ownership. Context-menu requests use shared routed arguments, transformed selection-edge anchors and existing popup lifecycle; dismissal retains the original input connection. Cursor getters and CoreText whole-control/screen-bound publication reject stale callback state. InputScope uses real shared objects, all 43 exact enum values and ordered immutable Names transport with live weak subscriptions; single-purpose hosts consume the first name or supported fallback hints, while IMM32 delivers the entire equal-weight array and optional AppKit consumes supported content meanings. Exact browser DOM/model newline projection preserves raw CR/CRLF content. Native requested-range execution, TSF Document Manager integration, candidate/proofing/handwriting services and full native conformance remain pending. Independent TOM clipboard Copy/Cut/Paste/CanPaste and document permission/availability facades use asynchronous framework services with exact named format policies, disposal and stale-target guards; native protection/format/ABI limits are explicit in RT-I24. Accepted focus is prepared before synchronous focus events so actual template remounts requery the semantic owner; nested focus callbacks retain final binding ownership. Browser exact replacement/composition delivery and IBus ContentType option delivery now have independent source/test mappings under RT-I27/RT-I28; actual OS/browser execution remains separate. Exact requested-range geometry uses current shaped fragments with complete coverage and generation guards; unsupported legacy clients retain their caret fallback."
     },
     "Text accessibility and Windows bridge": {
       "state": "partial",
@@ -40246,7 +42000,7 @@
     },
     "Rich editor themes and markup": {
       "state": "partial",
-      "description": "Compiled WinUI, Fluent and Simple ControlThemes host the persistent presenter and framework command flyout. Independent mixed formatting queries and one-transaction toggles retain history. Runtime/emitted rich-document fixtures include copied TextRange value construction, actual rich collection comparison and a ControlCatalog page. Generated references and complete suite results have separate records. Native command-bar/touch/lazy-part behavior, localization and appearance remain pending. Context/composition/selection/text-changing metadata now uses the shared routed-argument representation with runtime/compiled base-handler and typed-subscriber parity."
+      "description": "Compiled WinUI, Fluent and Simple ControlThemes host the persistent presenter and framework command flyout. Independent mixed formatting queries and one-transaction toggles retain history. Runtime/emitted rich-document fixtures include copied TextRange value construction, actual rich collection comparison and a ControlCatalog page. Generated references and complete suite results have separate records. Native command-bar/touch/lazy-part behavior, localization and appearance remain pending. Context/composition/selection/text-changing metadata now uses the shared routed-argument representation with runtime/compiled base-handler and typed-subscriber parity. TextElement.FindName uses shared nearest scopes; real template scopes are discoverable without retaining their declaring trees."
     },
     "Typography and font features": {
       "state": "partial",
@@ -40634,6 +42388,78 @@
       "source": "Linux rich job 119922820165 and broader Linux/macOS jobs at workflow head c43a907c.",
       "command": "Dedicated rich-text and broader repository workflow steps",
       "result": "Base 4,425 and Linux host bridge Win32 329 / WinUI 42 passed. Controls 5,065 passed / 2 failed on the semantic snapshot issue; XAML 613 passed / 4 failed / 17 ignored on stale references/count. Theme and broad Linux/macOS builds hit IBus E0282 at the guarded generated-signal callback. Source conventions identified stale Typography View builders. Subsequent fixes have independent records; this CI checkpoint is not green."
+    },
+    {
+      "kind": "build",
+      "source": "2026-10-22 coordinated layout, requested-range geometry, range Gravity, template scope and Browser integration.",
+      "command": "cargo test --locked --offline --no-default-features -p ferroui-base -p ferroui-controls -p ferroui-markup-xaml-tests -p ferroui-markup-xaml -p ferroui-harfbuzz -p ferroui-winui -p ferroui-win32 -p ferroui-browser -p ferroui-freedesktop -p ferroui-native -p ferroui-wayland -p ferroui-view -p ferroui-android -p ferroui-ios --lib --no-run",
+      "result": "PASS with Rust 1.99.0, one build job, debug/incremental output disabled. Earlier attempts failed on five private range helper calls, fixture metadata/trait/import/boxing errors, a disk-full linker and a compiler SIGKILL; none counts as a runtime pass. Final compiled graph includes every listed crate."
+    },
+    {
+      "kind": "runtime",
+      "source": "Same integration; shared Base tests.",
+      "command": "target/debug/deps/ferroui_base-d981390d574d238e",
+      "result": "PASS: 4,437 passed, zero failed/ignored. Includes three optional-range geometry cases and independent paragraph-copy preservation of tabs, spacing and bounds."
+    },
+    {
+      "kind": "runtime",
+      "source": "Same integration; full Controls initial and corrected gates.",
+      "command": "target/debug/deps/ferroui_controls-4b5f7625385788b3",
+      "result": "Initial 5,132 passed / 4 failed: enum supplemental-parser assumption, a nested font-manager fixture, an already parented overflow fixture and Name metadata lookup. Intermediate reruns had 5,129/7 with six loopback-permission failures and 5,135/1 with loopback available but the old metadata fixture. Name uses the registered direct-property registry. Final fresh binary with loopback access: 5,136 passed, zero failed/ignored. All 23 Gravity, nine stacking, ten bounds and 13 rich-range geometry definitions pass."
+    },
+    {
+      "kind": "runtime",
+      "source": "Same integration; actual runtime/emitted XAML and deferred scope behavior.",
+      "command": "target/debug/deps/ferroui_markup_xaml_tests-8d3ff40dfb300431; target/debug/deps/ferroui_markup_xaml-f126a12c2cf05a3b",
+      "result": "Initial full XAML: 618 passed / 2 failed / 17 ignored, both real template outer-scope lookup assertions. A weak declaring-scope chain preserves fallback after a temporary deferred-resource scope expires. Final full XAML: 620 passed / 0 failed / 17 existing ignored; full runtime: 202 passed / 0 failed. Three actual rich-name XAML tests, replacement/drop and four nested deferred-resource cases pass. Formatting-only cleanup was checked byte-equivalent after canonical rustfmt."
+    },
+    {
+      "kind": "runtime",
+      "source": "Same integration; actual portable Browser adapter.",
+      "command": "target/debug/deps/ferroui_browser-fd8025d57463152c",
+      "result": "Initial 271 passed / 2 failed. Empty accepted composition used legacy empty cancellation; a separate tail-format fixture sampled the preceding run at an insertion boundary. Exact preview/completion and complete-tail query repair those defects. Final full suite: 278 passed / 0 failed/ignored, including five new regression definitions for directed undo/redo, raw line endings, invalid final values/UTF-16 selection, interception, focus and read-only changes. No real browser/virtual-keyboard claim."
+    },
+    {
+      "kind": "runtime",
+      "source": "Portable host gates in the same coordinated source batch; before the final XAML scope-chain-only correction.",
+      "command": "Direct fresh --lib executables for ferroui-winui, ferroui-win32, ferroui-view, ferroui-native, ferroui-wayland, ferroui-android, ferroui-ios and ferroui-harfbuzz",
+      "result": "PASS: WinUI host 50, Win32 host 329, View 73, Native 6, Wayland 118, Android 165, iOS 102 and HarfBuzz 8. Eight portable CoreText requested-range geometry cases pass. These Linux host gates do not run the five new Windows-only native geometry tests or physical mobile/AppKit sessions; Windows execution follows publication."
+    },
+    {
+      "kind": "runtime",
+      "source": "Same integration; IBus private-session protocol gate.",
+      "command": "dbus-run-session -- env FERROUI_FREEDESKTOP_TEST_BUS=session target/debug/deps/ferroui_freedesktop-7e45813435d195dd dbus_ime --test-threads=1",
+      "result": "PASS: 35 tests on a private session bus, zero failures. Exercises generated signal callback types, ContentType delivery and input ownership; not a real desktop IME session."
+    },
+    {
+      "kind": "source_integrity",
+      "source": "Pinned ParagraphNode::ApplyLineStackingStrategy and actual Rust helper.",
+      "command": "python3 scripts/porting/check-rich-text-line-stacking.py --reference /tmp/ferroui-rich-winui --output docs/porting/winui-rich-text/line-stacking-formula.json",
+      "result": "PASS: 960 compiled C++/Rust formula cases; maximum absolute difference 2.7791000007937328e-6. Function hashes and tolerance recorded in line-stacking-formula.json. No native font selection, LineServices or pixel inference."
+    },
+    {
+      "kind": "source_integrity",
+      "source": "Same integration; generated API/source/reference accounting.",
+      "command": "python3 scripts/generate_view_builders.py --check; python3 scripts/porting/winui-rich-text-inventory.py --reference /tmp/ferroui-rich-winui --check",
+      "result": "PASS: View builder and pinned inventory checks. 640 selected files, 1,362 exact API identifiers, 938 framework dependencies and 827 include-boundary edges. Reviewed public states: 159 complete enum/value/accessor contracts, 654 partial, 549 pending; zero complete runtime source files. XAML full-suite reference freshness also passes."
+    },
+    {
+      "kind": "native_observations",
+      "source": "Native actual selection at measured checkout 038c29ce3cc8491b5b4a6fe8ef22eb8624ecdfec, workflow head 8508220d7f2323acfb32293d7d0afeb7abf75bfd, probe blob 7d80afb5ee5b62e301a09f574d508a603efb411c; run 39825948407/job119989156686/artifact12448130293.",
+      "command": "python3 scripts/porting/rich-text-tom-observations.py --log system-msftedit.log --commit 038c29ce3cc8491b5b4a6fe8ef22eb8624ecdfec --probe-blob 7d80afb5ee5b62e301a09f574d508a603efb411c --run-url https://github.com/wieslawsoltes/FerroUI/actions/runs/39825948407 --job-url https://github.com/wieslawsoltes/FerroUI/actions/runs/39825948407/job/119989156686 --output docs/porting/winui-rich-text/native-msftedit-selection-gravity.json; python3 scripts/porting/test_rich_text_tom_observations.py",
+      "result": "PASS: 250 actual-selection commands / 18 fixtures / 18 extended-interface identity records. MSFTEDIT 6.2.26100.33648, Windows 10.0.26100. All old declarations, counts and six observation families equal the earlier .33438 link/gravity record. ZIP digest matches GitHub: 0b71f796c5c86db34fe23d9f37819f469992c45a8e3adbba365ebc02e83e5793. All 34 parser tests pass including new immutable-record replay. Evidence does not implement selection Gravity."
+    },
+    {
+      "kind": "ci_runtime",
+      "source": "Published workflow head 8508220d7f2323acfb32293d7d0afeb7abf75bfd; rich run39825948407 jobs119989156361/119989156686.",
+      "command": "Rich text conformance workflow",
+      "result": "Both jobs PASS: Linux Base 4,433, Controls 5,073, Win32 329, WinUI 42, Fluent 210 / 2 ignored, Simple 213 / 3 ignored, WinUI theme 301 / 2 ignored, XAML 617 / 17 ignored; all five explicit reference checks. Windows WinUI 52, exact UTF-16 2, IMM32 scopes 23, native MSFTEDIT 7, selected rich Controls 609. This published checkpoint precedes the new layout/geometry/Gravity/namescope/Browser changes."
+    },
+    {
+      "kind": "ci_runtime",
+      "source": "Broader workflow at 8508220d; run39825948242, ARM64 job119989156134.",
+      "command": "Windows ARM64 informative backend tests; remaining broad repository jobs",
+      "result": "ARM64: 370 passed / 1 failed on vertical_utf16 native setup: selection.text() was empty after WM_SETTEXT rather than A\ud83d\ude00B\\rxy\\rA\ud83d\ude00B. The exact setup assertion is retained; dedicated x64 serial native probes passed separately. Successful broad jobs: Android, framebuffer, both Wayland jobs, source conventions and package checks. macOS, Windows x64, iOS, Linux X11 and all browser checks were cancelled, so the broader run is not a complete passing gate. Native ARM64 setup/isolation remains to diagnose."
     }
   ]
 }

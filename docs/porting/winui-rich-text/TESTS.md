@@ -1,5 +1,53 @@
 # Rich text verification
 
+## Layout, input geometry, range Gravity and scope integration
+
+The coordinated Linux build uses Rust 1.99.0, locked/offline dependencies, one
+build job, and disabled incremental/debug artifacts. All 14 selected crate
+test targets compile in one feature graph. The measured runtime results are:
+
+| Gate | Result |
+|---|---:|
+| Base, full | 4,437 passed |
+| Controls, full, with loopback for remote tests | 5,136 passed |
+| XAML, full runtime/emitter corpus | 620 passed; 17 existing ignored |
+| XAML runtime helpers, full | 202 passed |
+| Browser portable adapter, full | 278 passed |
+| WinUI / Win32 portable host suites | 50 / 329 passed |
+| View, full | 73 passed |
+| IBus on a private session bus | 35 passed |
+| Native / Wayland host suites | 6 / 118 passed |
+| Android / iOS host suites | 165 / 102 passed |
+| HarfBuzz, full | 8 passed |
+
+Controls includes 23 independent-range Gravity tests, nine line-stacking tests,
+ten TextLineBounds tests and 13 requested-range geometry tests. The Gravity
+families replay 45 literal native affinity fixtures, 190 retention commands and
+24 invalid values. The geometry capability adds three Base and eight portable
+CoreText cases. Five Windows-only native geometry tests require the subsequent
+Windows workflow; the host counts do not execute them. Backend/View counts
+precede the final XAML-only scope-chain correction; final full XAML, runtime
+helpers and Controls gates cover that correction separately.
+
+Initial failures led to concrete corrections. Browser initially passed 271 and
+failed two: accepting empty composition incorrectly took legacy cancellation,
+and a tail-format fixture queried an insertion boundary. Controls initially
+passed 5,132 and failed four fixtures: font-manager scope, enum metadata access,
+already parented overflow and Name property registry lookup. Intermediate runs
+also exposed six loopback permission failures. Full XAML initially passed 618
+and failed two actual template outer-scope lookups; the weak scope-chain fix
+keeps those original assertions. The corrected gates above have zero failures.
+Earlier compilation attempts also encountered fixture visibility/import/type
+errors and disk/memory limits; they are not counted as test passes.
+
+The actual pinned C++ line-stacking function and Rust helper agree in all
+**960 formula cases**, with maximum absolute difference `2.7791000007937328e-6`.
+View builder freshness and generated source/API tracking pass. The inventory
+remains 640 selected files, 1,362 exact API identifiers, 938 framework dependencies
+and 827 include-boundary edges. Public states are 159 complete, 654 partial and
+549 pending; no runtime source file is marked complete. These are scoped
+implementation and traceability gates, not external WinUI engine or pixel parity.
+
 ## Published checkpoint 8508220d
 
 Both jobs in the [rich-text workflow](https://github.com/wieslawsoltes/FerroUI/actions/runs/39825948407)

@@ -15,7 +15,7 @@ The type plan locates all retained public types, including entirely pending type
 | `Microsoft.UI.Text.HorizontalCharacterAlignment` | 4 | 0 / 0 | R3/R8 | `src/FerroUI.Controls/rich_text/`, `src/FerroUI.Controls/documents/` |
 | `Microsoft.UI.Text.ITextCharacterFormat` | 28 | 18 / 0 | R3/R8 | `src/FerroUI.Controls/documents/character_format.rs` |
 | `Microsoft.UI.Text.ITextParagraphFormat` | 32 | 18 / 0 | R3/R8 | `src/FerroUI.Controls/documents/character_format.rs` |
-| `Microsoft.UI.Text.ITextRange` | 44 | 38 / 0 | R3/R8 | `src/FerroUI.Controls/rich_text/rich_edit_text_document.rs` |
+| `Microsoft.UI.Text.ITextRange` | 44 | 39 / 0 | R3/R8 | `src/FerroUI.Controls/rich_text/rich_edit_text_document.rs` |
 | `Microsoft.UI.Text.ITextSelection` | 10 | 10 / 0 | R3/R8 | `src/FerroUI.Controls/rich_text/rich_edit_text_document.rs` |
 | `Microsoft.UI.Text.LetterCase` | 3 | 0 / 3 | R3/R8 | `src/FerroUI.Controls/rich_text/`, `src/FerroUI.Controls/documents/` |
 | `Microsoft.UI.Text.LineSpacingRule` | 9 | 0 / 9 | R3/R8 | `src/FerroUI.Controls/rich_text/`, `src/FerroUI.Controls/documents/` |
@@ -26,10 +26,10 @@ The type plan locates all retained public types, including entirely pending type
 | `Microsoft.UI.Text.ParagraphAlignment` | 6 | 0 / 0 | R3/R8 | `src/FerroUI.Controls/rich_text/`, `src/FerroUI.Controls/documents/` |
 | `Microsoft.UI.Text.ParagraphStyle` | 13 | 0 / 0 | R3/R8 | `src/FerroUI.Controls/rich_text/`, `src/FerroUI.Controls/documents/` |
 | `Microsoft.UI.Text.PointOptions` | 9 | 0 / 0 | R3/R8 | `src/FerroUI.Controls/rich_text/`, `src/FerroUI.Controls/documents/` |
-| `Microsoft.UI.Text.RangeGravity` | 6 | 0 / 0 | R3/R8 | `src/FerroUI.Controls/rich_text/`, `src/FerroUI.Controls/documents/` |
+| `Microsoft.UI.Text.RangeGravity` | 6 | 0 / 6 | R3/R8 | `src/FerroUI.Controls/rich_text/`, `src/FerroUI.Controls/documents/` |
 | `Microsoft.UI.Text.RichEditMathMode` | 3 | 0 / 0 | R3/R8 | `src/FerroUI.Controls/rich_text/`, `src/FerroUI.Controls/documents/` |
 | `Microsoft.UI.Text.RichEditTextDocument` | 28 | 23 / 0 | R3/R8 | `src/FerroUI.Controls/rich_text/rich_edit_text_document.rs` |
-| `Microsoft.UI.Text.RichEditTextRange` | 44 | 38 / 0 | R3/R8 | `src/FerroUI.Controls/rich_text/rich_edit_text_document.rs` |
+| `Microsoft.UI.Text.RichEditTextRange` | 44 | 39 / 0 | R3/R8 | `src/FerroUI.Controls/rich_text/rich_edit_text_document.rs` |
 | `Microsoft.UI.Text.SelectionOptions` | 6 | 0 / 6 | R3/R8 | `src/FerroUI.Controls/rich_text/`, `src/FerroUI.Controls/documents/` |
 | `Microsoft.UI.Text.SelectionType` | 6 | 0 / 6 | R3/R8 | `src/FerroUI.Controls/rich_text/`, `src/FerroUI.Controls/documents/` |
 | `Microsoft.UI.Text.TabAlignment` | 6 | 0 / 6 | R3/R8 | `src/FerroUI.Controls/rich_text/`, `src/FerroUI.Controls/documents/` |
@@ -77,7 +77,7 @@ The type plan locates all retained public types, including entirely pending type
 | `Microsoft.UI.Xaml.Controls.RichEditBoxSelectionChangingEventArgs` | 4 | 4 / 0 | R5/R7 | `src/FerroUI.Controls/rich_edit_box.rs`, `src/FerroUI.Controls/rich_edit_box_text_input_method_client.rs` |
 | `Microsoft.UI.Xaml.Controls.RichEditBoxTextChangingEventArgs` | 2 | 2 / 0 | R5/R7 | `src/FerroUI.Controls/rich_edit_box.rs`, `src/FerroUI.Controls/rich_edit_box_text_input_method_client.rs` |
 | `Microsoft.UI.Xaml.Controls.RichEditClipboardFormat` | 3 | 0 / 0 | R5/R7 | `src/FerroUI.Controls/rich_edit_box.rs`, `src/FerroUI.Controls/rich_edit_box_text_input_method_client.rs` |
-| `Microsoft.UI.Xaml.Controls.RichTextBlock` | 74 | 57 / 0 | R2/R7 | `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block_overflow.rs`, `src/FerroUI.Controls/rich_text_layout.rs` |
+| `Microsoft.UI.Xaml.Controls.RichTextBlock` | 74 | 59 / 0 | R2/R7 | `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block_overflow.rs`, `src/FerroUI.Controls/rich_text_layout.rs` |
 | `Microsoft.UI.Xaml.Controls.RichTextBlockOverflow` | 18 | 18 / 0 | R2/R7 | `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block_overflow.rs`, `src/FerroUI.Controls/rich_text_layout.rs` |
 | `Microsoft.UI.Xaml.Controls.TextChangedEventArgs` | 1 | 0 / 0 | R5/R7 | `src/FerroUI.Controls/rich_edit_box.rs`, `src/FerroUI.Controls/rich_edit_box_text_input_method_client.rs` |
 | `Microsoft.UI.Xaml.Controls.TextCompositionChangedEventArgs` | 3 | 3 / 0 | R5/R7 | `src/FerroUI.Controls/rich_edit_box.rs`, `src/FerroUI.Controls/rich_edit_box_text_input_method_client.rs` |
@@ -101,7 +101,7 @@ The type plan locates all retained public types, including entirely pending type
 | `Microsoft.UI.Xaml.Documents.Paragraph` | 5 | 5 / 0 | R1/R2 | `src/FerroUI.Controls/documents/paragraph.rs` |
 | `Microsoft.UI.Xaml.Documents.Run` | 5 | 3 / 0 | R1/R2 | `src/FerroUI.Controls/documents/run.rs` |
 | `Microsoft.UI.Xaml.Documents.Span` | 3 | 3 / 0 | R1/R2 | `src/FerroUI.Controls/documents/span.rs` |
-| `Microsoft.UI.Xaml.Documents.TextElement` | 48 | 19 / 0 | R1/R2 | `src/FerroUI.Controls/documents/text_element.rs` |
+| `Microsoft.UI.Xaml.Documents.TextElement` | 48 | 20 / 0 | R1/R2 | `src/FerroUI.Controls/documents/text_element.rs` |
 | `Microsoft.UI.Xaml.Documents.TextHighlighter` | 7 | 7 / 0 | R6 | `src/FerroUI.Controls/documents/text_highlighter.rs`, `src/FerroUI.Controls/documents/text_highlight_range.rs`, `src/FerroUI.Controls/documents/text_highlight_merge.rs` |
 | `Microsoft.UI.Xaml.Documents.TextHighlighterBase` | 1 | 1 / 0 | R6 | `src/FerroUI.Controls/documents/text_highlighter.rs`, `src/FerroUI.Controls/documents/text_highlight_range.rs`, `src/FerroUI.Controls/documents/text_highlight_merge.rs` |
 | `Microsoft.UI.Xaml.Documents.TextPointer` | 7 | 7 / 0 | R1/R2 | `src/FerroUI.Controls/documents/text_position.rs` |
@@ -122,7 +122,7 @@ The type plan locates all retained public types, including entirely pending type
 | `Microsoft.UI.Xaml.LineStackingStrategy` | 4 | 0 / 0 | R2/R6 | `src/FerroUI.Base/media/`, `src/FerroUI.Controls/rich_text_layout.rs` |
 | `Microsoft.UI.Xaml.OpticalMarginAlignment` | 3 | 0 / 0 | R2/R6 | `src/FerroUI.Base/media/`, `src/FerroUI.Controls/rich_text_layout.rs` |
 | `Microsoft.UI.Xaml.TextAlignment` | 8 | 0 / 0 | R2/R6 | `src/FerroUI.Base/media/`, `src/FerroUI.Controls/rich_text_layout.rs` |
-| `Microsoft.UI.Xaml.TextLineBounds` | 5 | 0 / 0 | R2/R6 | `src/FerroUI.Base/media/`, `src/FerroUI.Controls/rich_text_layout.rs` |
+| `Microsoft.UI.Xaml.TextLineBounds` | 5 | 0 / 5 | R2/R6 | `src/FerroUI.Base/media/`, `src/FerroUI.Controls/rich_text_layout.rs` |
 | `Microsoft.UI.Xaml.TextReadingOrder` | 4 | 0 / 0 | R2/R6 | `src/FerroUI.Base/media/`, `src/FerroUI.Controls/rich_text_layout.rs` |
 | `Microsoft.UI.Xaml.TextTrimming` | 5 | 0 / 0 | R2/R6 | `src/FerroUI.Base/media/`, `src/FerroUI.Controls/rich_text_layout.rs` |
 | `Microsoft.UI.Xaml.TextWrapping` | 4 | 0 / 0 | R2/R6 | `src/FerroUI.Base/media/`, `src/FerroUI.Controls/rich_text_layout.rs` |
@@ -1417,6 +1417,29 @@ State: **partial**. Formatted range copies preserve the supported structured doc
 - Test: [src/FerroUI.Controls/rich_text/rich_edit_text_document_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_document_tests.rs) — `formatted_text_transfer_and_history_facade_keep_document_identity_separate`.
 - Differences: [RT-I01](DEVIATIONS.md), [RT-I03](DEVIATIONS.md), [RT-I08](DEVIATIONS.md), [RT-A03](DEVIATIONS.md).
 
+#### `P:Microsoft.UI.Text.ITextRange.Gravity`
+
+State: **partial**. Independent ranges retain native-valued formatting affinity, including measured Outward-to-UI readback and duplicate reset-to-UI. Collapsed format queries and plain SetText/paste use the same previous/following-run resolution; explicit patches override the resolved source, and paragraph formatting stays with the current paragraph. Native 45 affinity, ten retention and 24 invalid fixtures are literal tests. Range generations preserve newer callback ownership and invalidate pending clipboard work; grouped edits restore the exact independent typing snapshot. Native physical endpoint rebasing differs from current TextPointer tracking and is not changed here. The model excludes a synthetic terminal EOP, so forward story-end affinity samples final paragraph defaults; signed native clamping is adapted to scalar-safe usize/Result validation. The actual selection's inherited Gravity behavior and the external WinUI engine remain unmeasured. Range metadata is not document history; successful undo and failed outer text groups retain accepted explicit mode changes as a stated FerroUI policy.
+
+- Target: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs) — `pub fn gravity(`.
+- Target: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs) — `pub fn set_gravity(`.
+- Target: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs) — `pub fn set_gravity_value(`.
+- Target: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs) — `fn caret_character_format(`.
+- Target: [src/FerroUI.Controls/rich_text/rich_text_editor.rs](../../../src/FerroUI.Controls/rich_text/rich_text_editor.rs) — `pub(super) fn replace_range_typing_format(`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_replays_45_native_format_and_insertion_fixtures`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_replays_190_native_retention_commands`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_replays_24_invalid_native_setters_without_effects`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_shared_clone_and_independent_duplicate_have_distinct_modes`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_mode_is_observational_on_readonly_composition_and_history`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_terminal_and_endpoint_validation_use_visible_model_contract`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_same_rebased_caret_restores_exact_independent_typing_patch`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_set_text_publishes_range_before_newer_mode_or_endpoint_requests`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_rich_snapshot_publishes_endpoints_and_defaults_before_callbacks`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_format_query_rejects_callback_owned_state_without_borrow_panics`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs) — `rich_range_gravity_pending_clipboard_rejects_mode_changed_away_and_back`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs) — `rich_range_gravity_paste_late_typing_restore_rejects_newer_range_ownership`.
+- Differences: [RT-A03](DEVIATIONS.md), [RT-I32](DEVIATIONS.md).
+
 #### `P:Microsoft.UI.Text.ITextRange.Length`
 
 State: **partial**. This range value is represented by the live UTF-16 model, structured snapshot, or composite Uniform/Mixed formatting query. The native TOM value/object model is adapted.
@@ -1935,7 +1958,53 @@ All retained members remain pending.
 
 The native implementation is external to the pinned repository. Review this exact enum/format/service contract and its consumers before claiming equivalent behavior.
 
-All retained members remain pending.
+#### `F:Microsoft.UI.Text.RangeGravity.Backward`
+
+State: **complete**. The public Backward discriminant is exactly 1. Outward remains value 4 as a public constant even though the measured range setter canonicalizes a requested 4 to stored/readback UIBehavior 0.
+
+- Target: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs) — `Backward = 1`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_retains_native_enum_values_and_checked_conversion`.
+- Differences: [RT-A03](DEVIATIONS.md), [RT-I32](DEVIATIONS.md).
+
+#### `F:Microsoft.UI.Text.RangeGravity.Forward`
+
+State: **complete**. The public Forward discriminant is exactly 2. Outward remains value 4 as a public constant even though the measured range setter canonicalizes a requested 4 to stored/readback UIBehavior 0.
+
+- Target: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs) — `Forward = 2`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_retains_native_enum_values_and_checked_conversion`.
+- Differences: [RT-A03](DEVIATIONS.md), [RT-I32](DEVIATIONS.md).
+
+#### `F:Microsoft.UI.Text.RangeGravity.Inward`
+
+State: **complete**. The public Inward discriminant is exactly 3. Outward remains value 4 as a public constant even though the measured range setter canonicalizes a requested 4 to stored/readback UIBehavior 0.
+
+- Target: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs) — `Inward = 3`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_retains_native_enum_values_and_checked_conversion`.
+- Differences: [RT-A03](DEVIATIONS.md), [RT-I32](DEVIATIONS.md).
+
+#### `F:Microsoft.UI.Text.RangeGravity.Outward`
+
+State: **complete**. The public Outward discriminant is exactly 4. Outward remains value 4 as a public constant even though the measured range setter canonicalizes a requested 4 to stored/readback UIBehavior 0.
+
+- Target: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs) — `Outward = 4`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_retains_native_enum_values_and_checked_conversion`.
+- Differences: [RT-A03](DEVIATIONS.md), [RT-I32](DEVIATIONS.md).
+
+#### `F:Microsoft.UI.Text.RangeGravity.UIBehavior`
+
+State: **complete**. The public UIBehavior discriminant is exactly 0. Outward remains value 4 as a public constant even though the measured range setter canonicalizes a requested 4 to stored/readback UIBehavior 0.
+
+- Target: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs) — `UIBehavior = 0`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_retains_native_enum_values_and_checked_conversion`.
+- Differences: [RT-A03](DEVIATIONS.md), [RT-I32](DEVIATIONS.md).
+
+#### `T:Microsoft.UI.Text.RangeGravity`
+
+State: **complete**. Exact public names and discriminants are retained in the typed Rust enum and FerroUI markup metadata. Complete covers the enum contract only; native-compatible setter readback, independent range semantics and the remaining behavior boundaries are assessed under the Gravity properties.
+
+- Target: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs) — `pub enum RangeGravity`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_retains_native_enum_values_and_checked_conversion`.
+- Differences: [RT-A03](DEVIATIONS.md), [RT-I32](DEVIATIONS.md).
 
 ### `Microsoft.UI.Text.RichEditMathMode`
 
@@ -2943,6 +3012,29 @@ State: **partial**. This range value is represented by the live UTF-16 model, st
 - Test: [src/FerroUI.Controls/rich_edit_box_tests.rs](../../../src/FerroUI.Controls/rich_edit_box_tests.rs) — `rich_edit_live_ranges_follow_edits_and_support_independent_clones`.
 - Test: [src/FerroUI.Controls/rich_edit_box_tests.rs](../../../src/FerroUI.Controls/rich_edit_box_tests.rs) — `rich_edit_range_replacement_rebases_independent_selection_and_undoes_once`.
 - Differences: [RT-I01](DEVIATIONS.md), [RT-I03](DEVIATIONS.md), [RT-I08](DEVIATIONS.md).
+
+#### `P:Microsoft.UI.Text.RichEditTextRange.Gravity`
+
+State: **partial**. Independent ranges retain native-valued formatting affinity, including measured Outward-to-UI readback and duplicate reset-to-UI. Collapsed format queries and plain SetText/paste use the same previous/following-run resolution; explicit patches override the resolved source, and paragraph formatting stays with the current paragraph. Native 45 affinity, ten retention and 24 invalid fixtures are literal tests. Range generations preserve newer callback ownership and invalidate pending clipboard work; grouped edits restore the exact independent typing snapshot. Native physical endpoint rebasing differs from current TextPointer tracking and is not changed here. The model excludes a synthetic terminal EOP, so forward story-end affinity samples final paragraph defaults; signed native clamping is adapted to scalar-safe usize/Result validation. The actual selection's inherited Gravity behavior and the external WinUI engine remain unmeasured. Range metadata is not document history; successful undo and failed outer text groups retain accepted explicit mode changes as a stated FerroUI policy.
+
+- Target: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs) — `pub fn gravity(`.
+- Target: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs) — `pub fn set_gravity(`.
+- Target: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs) — `pub fn set_gravity_value(`.
+- Target: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs) — `fn caret_character_format(`.
+- Target: [src/FerroUI.Controls/rich_text/rich_text_editor.rs](../../../src/FerroUI.Controls/rich_text/rich_text_editor.rs) — `pub(super) fn replace_range_typing_format(`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_replays_45_native_format_and_insertion_fixtures`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_replays_190_native_retention_commands`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_replays_24_invalid_native_setters_without_effects`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_shared_clone_and_independent_duplicate_have_distinct_modes`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_mode_is_observational_on_readonly_composition_and_history`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_terminal_and_endpoint_validation_use_visible_model_contract`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_same_rebased_caret_restores_exact_independent_typing_patch`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_set_text_publishes_range_before_newer_mode_or_endpoint_requests`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_rich_snapshot_publishes_endpoints_and_defaults_before_callbacks`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity_tests.rs) — `rich_range_gravity_format_query_rejects_callback_owned_state_without_borrow_panics`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs) — `rich_range_gravity_pending_clipboard_rejects_mode_changed_away_and_back`.
+- Test: [src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs](../../../src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs) — `rich_range_gravity_paste_late_typing_restore_rejects_newer_range_ownership`.
+- Differences: [RT-A03](DEVIATIONS.md), [RT-I32](DEVIATIONS.md).
 
 #### `P:Microsoft.UI.Text.RichEditTextRange.Length`
 
@@ -5845,37 +5937,77 @@ State: **partial**. The registered FerroUI property supplies metadata and invali
 
 #### `P:Microsoft.UI.Xaml.Controls.RichTextBlock.LineHeight`
 
-State: **partial**. The rich view lays out the shared document through the existing TextFormatter/TextLine pipeline. This maps the stated property/operation, while exact native formatter, visual and platform behavior remains under review.
+State: **partial**. The rich view lays out the shared document through the existing TextFormatter/TextLine pipeline. This maps the stated property/operation, while exact native formatter, visual and platform behavior remains under review. Source-derived stacking now distinguishes allocation advance from the draw origin, with actual C++/Rust formula evidence and wrapped/empty/overflow geometry fixtures.
 
 - Target: [src/FerroUI.Controls/rich_text_block.rs](../../../src/FerroUI.Controls/rich_text_block.rs) — `pub fn line_height(`.
+- Target: [src/FerroUI.Controls/rich_text_layout.rs](../../../src/FerroUI.Controls/rich_text_layout.rs) — `fn apply_line_stacking_strategy(`.
 - Test: [src/FerroUI.Controls/rich_text_block_tests.rs](../../../src/FerroUI.Controls/rich_text_block_tests.rs) — `rich_paragraphs_measure_and_report_document_offsets`.
 - Test: [src/FerroUI.Controls/rich_text_block_tests.rs](../../../src/FerroUI.Controls/rich_text_block_tests.rs) — `rich_wrapping_reuses_shaping_and_selection_geometry`.
-- Differences: [RT-A02](DEVIATIONS.md), [RT-I01](DEVIATIONS.md), [RT-I02](DEVIATIONS.md), [RT-I03](DEVIATIONS.md).
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_single_and_empty_lines_take_first_line_precedence`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress`.
+- Differences: [RT-A02](DEVIATIONS.md), [RT-I01](DEVIATIONS.md), [RT-I02](DEVIATIONS.md), [RT-I03](DEVIATIONS.md), [RT-I31](DEVIATIONS.md).
 
 #### `P:Microsoft.UI.Xaml.Controls.RichTextBlock.LineHeightProperty`
 
-State: **partial**. The registered FerroUI property supplies metadata and invalidation for this mapped value. The rich view lays out the shared document through the existing TextFormatter/TextLine pipeline. This maps the stated property/operation, while exact native formatter, visual and platform behavior remains under review.
+State: **partial**. The registered FerroUI property supplies metadata and invalidation for this mapped value. The rich view lays out the shared document through the existing TextFormatter/TextLine pipeline. This maps the stated property/operation, while exact native formatter, visual and platform behavior remains under review. Source-derived stacking now distinguishes allocation advance from the draw origin, with actual C++/Rust formula evidence and wrapped/empty/overflow geometry fixtures.
 
 - Target: [src/FerroUI.Controls/rich_text_block.rs](../../../src/FerroUI.Controls/rich_text_block.rs) — `line_height_property`.
+- Target: [src/FerroUI.Controls/rich_text_layout.rs](../../../src/FerroUI.Controls/rich_text_layout.rs) — `fn apply_line_stacking_strategy(`.
 - Test: [src/FerroUI.Controls/rich_text_block_tests.rs](../../../src/FerroUI.Controls/rich_text_block_tests.rs) — `rich_paragraphs_measure_and_report_document_offsets`.
 - Test: [src/FerroUI.Controls/rich_text_block_tests.rs](../../../src/FerroUI.Controls/rich_text_block_tests.rs) — `rich_wrapping_reuses_shaping_and_selection_geometry`.
-- Differences: [RT-A02](DEVIATIONS.md), [RT-I01](DEVIATIONS.md), [RT-I02](DEVIATIONS.md), [RT-I03](DEVIATIONS.md).
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_single_and_empty_lines_take_first_line_precedence`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress`.
+- Differences: [RT-A02](DEVIATIONS.md), [RT-I01](DEVIATIONS.md), [RT-I02](DEVIATIONS.md), [RT-I03](DEVIATIONS.md), [RT-I31](DEVIATIONS.md).
 
 #### `P:Microsoft.UI.Xaml.Controls.RichTextBlock.LineStackingStrategy`
 
-State: **partial**. The view consumes the existing formatter value/strategy, preserves local paragraph overrides and distinguishes actual ellipsis trimming from linked overflow continuation. Native engine/pixel and all option-value parity remain partial.
+State: **partial**. The view consumes the existing formatter value/strategy, preserves local paragraph overrides and distinguishes actual ellipsis trimming from linked overflow continuation. Native engine/pixel and all option-value parity remain partial. Source-derived stacking now distinguishes allocation advance from the draw origin, with actual C++/Rust formula evidence and wrapped/empty/overflow geometry fixtures.
 
 - Target: [src/FerroUI.Controls/rich_text_block.rs](../../../src/FerroUI.Controls/rich_text_block.rs) — `pub fn line_stacking_strategy(`.
+- Target: [src/FerroUI.Controls/rich_text_layout.rs](../../../src/FerroUI.Controls/rich_text_layout.rs) — `fn apply_line_stacking_strategy(`.
 - Test: [src/FerroUI.Controls/rich_text_block_tests.rs](../../../src/FerroUI.Controls/rich_text_block_tests.rs) — `rich_finite_height_trims_and_indentation_respects_paragraph_local_values`.
-- Differences: [RT-A02](DEVIATIONS.md), [RT-I02](DEVIATIONS.md), [RT-I03](DEVIATIONS.md).
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_single_and_empty_lines_take_first_line_precedence`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress`.
+- Differences: [RT-A02](DEVIATIONS.md), [RT-I02](DEVIATIONS.md), [RT-I03](DEVIATIONS.md), [RT-I31](DEVIATIONS.md).
 
 #### `P:Microsoft.UI.Xaml.Controls.RichTextBlock.LineStackingStrategyProperty`
 
-State: **partial**. The registered FerroUI property supplies metadata and invalidation for this mapped value. The view consumes the existing formatter value/strategy, preserves local paragraph overrides and distinguishes actual ellipsis trimming from linked overflow continuation. Native engine/pixel and all option-value parity remain partial.
+State: **partial**. The registered FerroUI property supplies metadata and invalidation for this mapped value. The view consumes the existing formatter value/strategy, preserves local paragraph overrides and distinguishes actual ellipsis trimming from linked overflow continuation. Native engine/pixel and all option-value parity remain partial. Source-derived stacking now distinguishes allocation advance from the draw origin, with actual C++/Rust formula evidence and wrapped/empty/overflow geometry fixtures.
 
 - Target: [src/FerroUI.Controls/rich_text_block.rs](../../../src/FerroUI.Controls/rich_text_block.rs) — `line_stacking_strategy_property`.
+- Target: [src/FerroUI.Controls/rich_text_layout.rs](../../../src/FerroUI.Controls/rich_text_layout.rs) — `fn apply_line_stacking_strategy(`.
 - Test: [src/FerroUI.Controls/rich_text_block_tests.rs](../../../src/FerroUI.Controls/rich_text_block_tests.rs) — `rich_finite_height_trims_and_indentation_respects_paragraph_local_values`.
-- Differences: [RT-A02](DEVIATIONS.md), [RT-I02](DEVIATIONS.md), [RT-I03](DEVIATIONS.md).
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_single_and_empty_lines_take_first_line_precedence`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress`.
+- Differences: [RT-A02](DEVIATIONS.md), [RT-I02](DEVIATIONS.md), [RT-I03](DEVIATIONS.md), [RT-I31](DEVIATIONS.md).
 
 #### `P:Microsoft.UI.Xaml.Controls.RichTextBlock.MaxLines`
 
@@ -6027,6 +6159,47 @@ State: **partial**. The registered FerroUI property supplies metadata and invali
 - Target: [src/FerroUI.Controls/rich_text_block.rs](../../../src/FerroUI.Controls/rich_text_block.rs) — `text_indent_property`.
 - Test: [src/FerroUI.Controls/rich_text_block_tests.rs](../../../src/FerroUI.Controls/rich_text_block_tests.rs) — `rich_finite_height_trims_and_indentation_respects_paragraph_local_values`.
 - Differences: [RT-A02](DEVIATIONS.md), [RT-I02](DEVIATIONS.md), [RT-I03](DEVIATIONS.md).
+
+#### `P:Microsoft.UI.Xaml.Controls.RichTextBlock.TextLineBounds`
+
+State: **partial**. The head RichTextBlock owns the shared TextLineBounds policy and passes it through paragraph, empty-line and overflow formatting. Inherited/local values, clearing, markup, clipping and reflow use existing framework properties. Draw origins, caret/range geometry and inline controls share retained line metrics. This initial checkpoint retains the shared formatter half-gap, actual-fallback-face aggregation and aggregate object trimming; native requested-family metrics, font matching, TextDpi and pixels remain partial under RT-I31.
+
+- Target: [src/FerroUI.Controls/rich_text_block.rs](../../../src/FerroUI.Controls/rich_text_block.rs) — `fn text_line_bounds(`.
+- Target: [src/FerroUI.Controls/rich_text_block.rs](../../../src/FerroUI.Controls/rich_text_block.rs) — `fn set_text_line_bounds(`.
+- Target: [src/FerroUI.Controls/rich_text_layout.rs](../../../src/FerroUI.Controls/rich_text_layout.rs) — `text_line_bounds: TextLineBounds`.
+- Target: [src/FerroUI.Controls/rich_text_layout.rs](../../../src/FerroUI.Controls/rich_text_layout.rs) — `pub fn new(`.
+- Target: [src/FerroUI.Base/media/text_formatting/generic_text_paragraph_properties.rs](../../../src/FerroUI.Base/media/text_formatting/generic_text_paragraph_properties.rs) — `fn set_text_line_bounds(`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_all_modes_reach_each_line_and_empty_document`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_inheritance_local_override_and_clear_rebuild_the_source`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_stacking_uses_family_mode_ratio_on_framework_lines`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_draw_origin_and_range_caret_boxes_share_the_formatted_line`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_overflow_uses_head_policy_and_reflows_without_document_edits`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_clipping_keeps_local_choice_and_unlinked_pages`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_mixed_font_metrics_match_shared_textblock_policy`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_explicit_spacing_remains_authoritative`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_trimming_keeps_visible_ranges_and_embedded_ink`.
+- Differences: [RT-A02](DEVIATIONS.md), [RT-I31](DEVIATIONS.md).
+
+#### `P:Microsoft.UI.Xaml.Controls.RichTextBlock.TextLineBoundsProperty`
+
+State: **partial**. The head RichTextBlock owns the shared TextLineBounds policy and passes it through paragraph, empty-line and overflow formatting. Inherited/local values, clearing, markup, clipping and reflow use existing framework properties. Draw origins, caret/range geometry and inline controls share retained line metrics. This initial checkpoint retains the shared formatter half-gap, actual-fallback-face aggregation and aggregate object trimming; native requested-family metrics, font matching, TextDpi and pixels remain partial under RT-I31.
+
+- Target: [src/FerroUI.Controls/rich_text_block.rs](../../../src/FerroUI.Controls/rich_text_block.rs) — `fn text_line_bounds_property(`.
+- Target: [src/FerroUI.Controls/rich_text_layout.rs](../../../src/FerroUI.Controls/rich_text_layout.rs) — `text_line_bounds: TextLineBounds`.
+- Target: [src/FerroUI.Controls/rich_text_layout.rs](../../../src/FerroUI.Controls/rich_text_layout.rs) — `pub fn new(`.
+- Target: [src/FerroUI.Base/media/text_formatting/generic_text_paragraph_properties.rs](../../../src/FerroUI.Base/media/text_formatting/generic_text_paragraph_properties.rs) — `fn set_text_line_bounds(`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_all_modes_reach_each_line_and_empty_document`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_inheritance_local_override_and_clear_rebuild_the_source`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_stacking_uses_family_mode_ratio_on_framework_lines`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_draw_origin_and_range_caret_boxes_share_the_formatted_line`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_overflow_uses_head_policy_and_reflows_without_document_edits`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_clipping_keeps_local_choice_and_unlinked_pages`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_mixed_font_metrics_match_shared_textblock_policy`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_explicit_spacing_remains_authoritative`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_trimming_keeps_visible_ranges_and_embedded_ink`.
+- Differences: [RT-A02](DEVIATIONS.md), [RT-I31](DEVIATIONS.md).
 
 #### `P:Microsoft.UI.Xaml.Controls.RichTextBlock.TextTrimming`
 
@@ -6595,39 +6768,79 @@ State: **partial**. The registered FerroUI property supplies metadata and invali
 
 #### `P:Microsoft.UI.Xaml.Documents.Block.LineHeight`
 
-State: **partial**. The block stores this value through the FerroUI property system and snapshots preserve it. Formatting units, inherited defaults and every downstream native layout case are not claimed complete.
+State: **partial**. The block stores this value through the FerroUI property system and snapshots preserve it. Formatting units, inherited defaults and every downstream native layout case are not claimed complete. Source-derived stacking now distinguishes allocation advance from the draw origin, with actual C++/Rust formula evidence and wrapped/empty/overflow geometry fixtures.
 
 - Target: [src/FerroUI.Controls/documents/block.rs](../../../src/FerroUI.Controls/documents/block.rs) — `pub fn line_height(`.
+- Target: [src/FerroUI.Controls/rich_text_layout.rs](../../../src/FerroUI.Controls/rich_text_layout.rs) — `fn apply_line_stacking_strategy(`.
 - Test: [src/FerroUI.Controls/documents/rich_text_document_tests.rs](../../../src/FerroUI.Controls/documents/rich_text_document_tests.rs) — `paragraph_splice_merges_boundaries_and_restores_snapshot`.
 - Test: [src/FerroUI.Controls/documents/rich_text_document_tests.rs](../../../src/FerroUI.Controls/documents/rich_text_document_tests.rs) — `paragraph_margin_validation_matches_nonnegative_source_contract`.
-- Differences: [RT-A01](DEVIATIONS.md), [RT-I03](DEVIATIONS.md).
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_single_and_empty_lines_take_first_line_precedence`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress`.
+- Differences: [RT-A01](DEVIATIONS.md), [RT-I03](DEVIATIONS.md), [RT-I31](DEVIATIONS.md).
 
 #### `P:Microsoft.UI.Xaml.Documents.Block.LineHeightProperty`
 
-State: **partial**. The registered FerroUI property supplies metadata and invalidation for this mapped value. The block stores this value through the FerroUI property system and snapshots preserve it. Formatting units, inherited defaults and every downstream native layout case are not claimed complete.
+State: **partial**. The registered FerroUI property supplies metadata and invalidation for this mapped value. The block stores this value through the FerroUI property system and snapshots preserve it. Formatting units, inherited defaults and every downstream native layout case are not claimed complete. Source-derived stacking now distinguishes allocation advance from the draw origin, with actual C++/Rust formula evidence and wrapped/empty/overflow geometry fixtures.
 
 - Target: [src/FerroUI.Controls/documents/block.rs](../../../src/FerroUI.Controls/documents/block.rs) — `line_height_property`.
+- Target: [src/FerroUI.Controls/rich_text_layout.rs](../../../src/FerroUI.Controls/rich_text_layout.rs) — `fn apply_line_stacking_strategy(`.
 - Test: [src/FerroUI.Controls/documents/rich_text_document_tests.rs](../../../src/FerroUI.Controls/documents/rich_text_document_tests.rs) — `paragraph_splice_merges_boundaries_and_restores_snapshot`.
 - Test: [src/FerroUI.Controls/documents/rich_text_document_tests.rs](../../../src/FerroUI.Controls/documents/rich_text_document_tests.rs) — `paragraph_margin_validation_matches_nonnegative_source_contract`.
-- Differences: [RT-A01](DEVIATIONS.md), [RT-I03](DEVIATIONS.md).
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_single_and_empty_lines_take_first_line_precedence`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress`.
+- Differences: [RT-A01](DEVIATIONS.md), [RT-I03](DEVIATIONS.md), [RT-I31](DEVIATIONS.md).
 
 #### `P:Microsoft.UI.Xaml.Documents.Block.LineStackingStrategy`
 
-State: **partial**. The block stores this value through the FerroUI property system and snapshots preserve it. Formatting units, inherited defaults and every downstream native layout case are not claimed complete.
+State: **partial**. The block stores this value through the FerroUI property system and snapshots preserve it. Formatting units, inherited defaults and every downstream native layout case are not claimed complete. Source-derived stacking now distinguishes allocation advance from the draw origin, with actual C++/Rust formula evidence and wrapped/empty/overflow geometry fixtures.
 
 - Target: [src/FerroUI.Controls/documents/block.rs](../../../src/FerroUI.Controls/documents/block.rs) — `pub fn line_stacking_strategy(`.
+- Target: [src/FerroUI.Controls/rich_text_layout.rs](../../../src/FerroUI.Controls/rich_text_layout.rs) — `fn apply_line_stacking_strategy(`.
 - Test: [src/FerroUI.Controls/documents/rich_text_document_tests.rs](../../../src/FerroUI.Controls/documents/rich_text_document_tests.rs) — `paragraph_splice_merges_boundaries_and_restores_snapshot`.
 - Test: [src/FerroUI.Controls/documents/rich_text_document_tests.rs](../../../src/FerroUI.Controls/documents/rich_text_document_tests.rs) — `paragraph_margin_validation_matches_nonnegative_source_contract`.
-- Differences: [RT-A01](DEVIATIONS.md), [RT-I03](DEVIATIONS.md).
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_single_and_empty_lines_take_first_line_precedence`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress`.
+- Differences: [RT-A01](DEVIATIONS.md), [RT-I03](DEVIATIONS.md), [RT-I31](DEVIATIONS.md).
 
 #### `P:Microsoft.UI.Xaml.Documents.Block.LineStackingStrategyProperty`
 
-State: **partial**. The registered FerroUI property supplies metadata and invalidation for this mapped value. The block stores this value through the FerroUI property system and snapshots preserve it. Formatting units, inherited defaults and every downstream native layout case are not claimed complete.
+State: **partial**. The registered FerroUI property supplies metadata and invalidation for this mapped value. The block stores this value through the FerroUI property system and snapshots preserve it. Formatting units, inherited defaults and every downstream native layout case are not claimed complete. Source-derived stacking now distinguishes allocation advance from the draw origin, with actual C++/Rust formula evidence and wrapped/empty/overflow geometry fixtures.
 
 - Target: [src/FerroUI.Controls/documents/block.rs](../../../src/FerroUI.Controls/documents/block.rs) — `line_stacking_strategy_property`.
+- Target: [src/FerroUI.Controls/rich_text_layout.rs](../../../src/FerroUI.Controls/rich_text_layout.rs) — `fn apply_line_stacking_strategy(`.
 - Test: [src/FerroUI.Controls/documents/rich_text_document_tests.rs](../../../src/FerroUI.Controls/documents/rich_text_document_tests.rs) — `paragraph_splice_merges_boundaries_and_restores_snapshot`.
 - Test: [src/FerroUI.Controls/documents/rich_text_document_tests.rs](../../../src/FerroUI.Controls/documents/rich_text_document_tests.rs) — `paragraph_margin_validation_matches_nonnegative_source_contract`.
-- Differences: [RT-A01](DEVIATIONS.md), [RT-I03](DEVIATIONS.md).
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_single_and_empty_lines_take_first_line_precedence`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_mixed_run_sizes_use_paragraph_font_ratio`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_range_bounds`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_continuations_reapply_first_line_rule_without_losing_text`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_local_values_and_inherited_changes_reflow_each_paragraph`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry`.
+- Test: [src/FerroUI.Controls/rich_text_line_stacking_tests.rs](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) — `rich_line_stacking_max_lines_trimming_and_oversized_first_line_make_progress`.
+- Differences: [RT-A01](DEVIATIONS.md), [RT-I03](DEVIATIONS.md), [RT-I31](DEVIATIONS.md).
 
 #### `P:Microsoft.UI.Xaml.Documents.Block.Margin`
 
@@ -7102,6 +7315,34 @@ State: **partial**. The shared FerroUI document element preserves the mapped str
 ### `Microsoft.UI.Xaml.Documents.TextElement`
 
 Review each document property, collection identity, inherited formatting, invalidation, markup and observable edge case against the pinned source.
+
+#### `M:Microsoft.UI.Xaml.Documents.TextElement.FindName(System.String)`
+
+State: **partial**. TextElement delegates to the current nearest FerroUI NameScopeExtensions scope and its find implementation, returning the same live registered object as controls and other text elements. No scope/registration returns None, lookup rechecks reparenting/replaced scopes and holds no scope owner alive. Existing XAML x:Name and per-template-instance registration are exercised through runtime XAML. Equivalence is partial: FerroUI ChildNameScope falls back to its parent after completion, while ordinary nested NameScope is isolated; runtime Name/registration follows StyledElement and explicit NameScope policy. WinUI deferred element realization and automatic runtime renaming/registration are not provided. Template application attaches its actual result scope before callbacks while preserving explicit root scopes; a private weak parent adapter avoids retaining named owners and declaring trees. Real runtime-XAML template lookup, reapplication and destruction are covered without test-side scope attachment. Pending async completion after destruction of an incomplete parent retains existing framework policy. Deferred resources retain a weak scope-chain context so a nested template can skip an expired temporary construction scope and still resolve its live declaring scope, without retaining either named tree or bypassing a live incomplete scope.
+
+- Target: [src/FerroUI.Controls/documents/text_element.rs](../../../src/FerroUI.Controls/documents/text_element.rs) — `pub fn find_name(`.
+- Target: [src/FerroUI.Controls/markup_types/classes.rs](../../../src/FerroUI.Controls/markup_types/classes.rs) — `fn FindName(String)`.
+- Target: [scripts/markup_types_overrides.py](../../../scripts/markup_types_overrides.py) — `'TextElement':`.
+- Target: [src/FerroUI.Controls/primitives/templated_control.rs](../../../src/FerroUI.Controls/primitives/templated_control.rs) — `NameScope::set_name_scope(`.
+- Target: [src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers.rs](../../../src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers.rs) — `struct WeakParentNameScope`.
+- Test: [src/FerroUI.Controls/documents/text_element_namescope_tests.rs](../../../src/FerroUI.Controls/documents/text_element_namescope_tests.rs) — `text_element_find_name_shares_control_and_text_registrations`.
+- Test: [src/FerroUI.Controls/documents/text_element_namescope_tests.rs](../../../src/FerroUI.Controls/documents/text_element_namescope_tests.rs) — `text_element_find_name_stops_at_nearest_scope_even_when_name_is_missing`.
+- Test: [src/FerroUI.Controls/documents/text_element_namescope_tests.rs](../../../src/FerroUI.Controls/documents/text_element_namescope_tests.rs) — `text_element_find_name_preserves_child_scope_completion_policy`.
+- Test: [src/FerroUI.Controls/documents/text_element_namescope_tests.rs](../../../src/FerroUI.Controls/documents/text_element_namescope_tests.rs) — `text_element_find_name_rechecks_reparenting_and_replaced_scopes`.
+- Test: [src/FerroUI.Controls/documents/text_element_namescope_tests.rs](../../../src/FerroUI.Controls/documents/text_element_namescope_tests.rs) — `text_element_find_name_uses_registration_and_does_not_keep_scope_owner_alive`.
+- Test: [src/FerroUI.Controls/documents/text_element_namescope_tests.rs](../../../src/FerroUI.Controls/documents/text_element_namescope_tests.rs) — `text_element_find_name_metadata_returns_the_same_live_object_or_none`.
+- Test: [tests/FerroUI.Markup.Xaml.UnitTests/xaml/rich_text_tests.rs](../../../tests/FerroUI.Markup.Xaml.UnitTests/xaml/rich_text_tests.rs) — `rich_text_find_name_uses_xaml_names_across_controls_and_text_elements`.
+- Test: [tests/FerroUI.Markup.Xaml.UnitTests/xaml/rich_text_tests.rs](../../../tests/FerroUI.Markup.Xaml.UnitTests/xaml/rich_text_tests.rs) — `rich_text_find_name_uses_each_xaml_template_instance_scope`.
+- Test: [src/FerroUI.Controls/primitives/templated_control_tests.rs](../../../src/FerroUI.Controls/primitives/templated_control_tests.rs) — `template_scope_is_discoverable_before_template_applied`.
+- Test: [src/FerroUI.Controls/primitives/templated_control_tests.rs](../../../src/FerroUI.Controls/primitives/templated_control_tests.rs) — `template_application_preserves_explicit_root_name_scope`.
+- Test: [src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs](../../../src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs) — `instantiated_deferred_name_scope_does_not_retain_declaring_scope`.
+- Test: [src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs](../../../src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs) — `instantiated_deferred_name_scope_preserves_live_parent_async_lookup`.
+- Test: [tests/FerroUI.Markup.Xaml.UnitTests/xaml/rich_text_tests.rs](../../../tests/FerroUI.Markup.Xaml.UnitTests/xaml/rich_text_tests.rs) — `rich_text_find_name_template_replacement_releases_old_scope_and_declaring_tree`.
+- Test: [src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs](../../../src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs) — `nested_deferred_resource_scope_keeps_live_outer_fallback_without_retaining_it`.
+- Test: [src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs](../../../src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs) — `nested_deferred_resource_scope_prefers_live_local_before_expired_fallback`.
+- Test: [src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs](../../../src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs) — `nested_deferred_resource_scope_preserves_pending_live_outer_lookup`.
+- Test: [src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs](../../../src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_runtime_helpers_tests.rs) — `nested_deferred_resource_live_incomplete_scope_delays_outer_fallback`.
+- Differences: [RT-A01](DEVIATIONS.md), [RT-I33](DEVIATIONS.md).
 
 #### `P:Microsoft.UI.Xaml.Documents.TextElement.CharacterSpacing`
 
@@ -10220,7 +10461,45 @@ All retained members remain pending.
 
 Audit shared layout/rendering enum values and all consumers, including unsupported values and native defaults.
 
-All retained members remain pending.
+#### `F:Microsoft.UI.Xaml.TextLineBounds.Full`
+
+State: **complete**. Reuses the existing shared TextLineBounds enum with all four exact native names and values, checked by the typed metadata and real-layout fixture. Completion covers the enum value contract only; the rich control properties retain their separately mapped metric and platform boundaries.
+
+- Target: [src/FerroUI.Base/media/text_line_bounds.rs](../../../src/FerroUI.Base/media/text_line_bounds.rs) — `Full,`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes`.
+- Differences: [RT-A02](DEVIATIONS.md), [RT-I31](DEVIATIONS.md).
+
+#### `F:Microsoft.UI.Xaml.TextLineBounds.Tight`
+
+State: **complete**. Reuses the existing shared TextLineBounds enum with all four exact native names and values, checked by the typed metadata and real-layout fixture. Completion covers the enum value contract only; the rich control properties retain their separately mapped metric and platform boundaries.
+
+- Target: [src/FerroUI.Base/media/text_line_bounds.rs](../../../src/FerroUI.Base/media/text_line_bounds.rs) — `Tight,`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes`.
+- Differences: [RT-A02](DEVIATIONS.md), [RT-I31](DEVIATIONS.md).
+
+#### `F:Microsoft.UI.Xaml.TextLineBounds.TrimToBaseline`
+
+State: **complete**. Reuses the existing shared TextLineBounds enum with all four exact native names and values, checked by the typed metadata and real-layout fixture. Completion covers the enum value contract only; the rich control properties retain their separately mapped metric and platform boundaries.
+
+- Target: [src/FerroUI.Base/media/text_line_bounds.rs](../../../src/FerroUI.Base/media/text_line_bounds.rs) — `TrimToBaseline,`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes`.
+- Differences: [RT-A02](DEVIATIONS.md), [RT-I31](DEVIATIONS.md).
+
+#### `F:Microsoft.UI.Xaml.TextLineBounds.TrimToCapHeight`
+
+State: **complete**. Reuses the existing shared TextLineBounds enum with all four exact native names and values, checked by the typed metadata and real-layout fixture. Completion covers the enum value contract only; the rich control properties retain their separately mapped metric and platform boundaries.
+
+- Target: [src/FerroUI.Base/media/text_line_bounds.rs](../../../src/FerroUI.Base/media/text_line_bounds.rs) — `TrimToCapHeight,`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes`.
+- Differences: [RT-A02](DEVIATIONS.md), [RT-I31](DEVIATIONS.md).
+
+#### `T:Microsoft.UI.Xaml.TextLineBounds`
+
+State: **complete**. Reuses the existing shared TextLineBounds enum with all four exact native names and values, checked by the typed metadata and real-layout fixture. Completion covers the enum value contract only; the rich control properties retain their separately mapped metric and platform boundaries.
+
+- Target: [src/FerroUI.Base/media/text_line_bounds.rs](../../../src/FerroUI.Base/media/text_line_bounds.rs) — `TextLineBounds`.
+- Test: [src/FerroUI.Controls/rich_text_line_bounds_tests.rs](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) — `rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes`.
+- Differences: [RT-A02](DEVIATIONS.md), [RT-I31](DEVIATIONS.md).
 
 ### `Microsoft.UI.Xaml.TextReadingOrder`
 

@@ -32,6 +32,12 @@ parity at this reference.
   input-method and accessibility architecture with Rust and XAML examples.
 - [TYPOGRAPHY.md](TYPOGRAPHY.md): all named typography properties, enum/feature
   projection, inherited snapshots, formatter integration and verification limits.
+- [LAYOUT.md](LAYOUT.md): source-derived line stacking, shared TextLineBounds,
+  linked-page ownership, allocation and draw-origin contracts.
+- [INPUT-GEOMETRY.md](INPUT-GEOMETRY.md): exact requested UTF-16 range geometry,
+  shaped fragments, native transforms and callback ownership.
+- [RANGE-GRAVITY.md](RANGE-GRAVITY.md): independent range formatting affinity,
+  native-valued modes, insertion/clipboard behavior and tracking boundaries.
 - [API-MAP.md](API-MAP.md): a destination/review plan for every public API owner,
   with exact member, Rust target, test and deviation evidence for reviewed entries.
 - [JOURNAL.md](JOURNAL.md): implementation/checkpoint history and the distinction

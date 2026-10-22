@@ -108,6 +108,34 @@ The loader's normal whitespace rules still apply. Put intentional spaces in the
 text and use adjacent tags when testing structure independently of whitespace.
 The implementation does not bypass the regular runtime/compiled markup system.
 
+## Text element names and template scopes
+
+`TextElement::find_name` resolves the current nearest logical namescope using
+FerroUI's `NameScopeExtensions`, then returns the same registered live object
+that a control would receive. It has no separate registry or cached scope. A
+missing scope or registration returns `None`; reparenting and scope replacement
+take effect on the next call. Typed method metadata has a durable generator
+override, so regenerating the ordinary Controls declarations preserves FindName.
+
+Template instances publish their existing `TemplateResult` scope on the built
+root before `TemplateApplied`. An explicitly scoped root retains its nearer
+scope. The XAML deferred scope keeps its declaring parent weak, allowing live
+outer-name fallback without a cycle through a named template owner. Real XAML
+fixtures obtain Runs from the event's per-instance scope and invoke FindName
+without attaching a scope themselves. Replacement and destruction checks cover
+the old instance and the declaring tree. A chain of weak scope references
+allows a nested deferred resource to skip an expired temporary construction
+scope and reach its surviving declaring scope. A live scope still controls
+local names, misses and asynchronous completion.
+
+FerroUI's completed `ChildNameScope` can fall back to its parent, while ordinary
+nested NameScopes are isolated. Runtime registration follows the shared
+StyledElement/NameScope policy; changing Name does not add a new automatic
+registration mechanism. Native deferred element realization is not implemented.
+An already pending asynchronous lookup retains the framework's existing
+completion policy if an incomplete declaring scope disappears. These boundaries
+remain explicit in RT-I33.
+
 ## Linked columns and page geometry
 
 ```xml
@@ -309,6 +337,19 @@ an editable character in this model.
 Search supports forward/backward and whole-word options with Unicode lowercase
 mapping and preserved UTF-16 offsets; it is not a locale collation or full case
 folding implementation. Remaining units/options stay in the exact API inventory.
+
+### Independent range formatting gravity
+
+The native-valued `RangeGravity` enum and the range's getter/setter select the
+character format at a collapsed boundary. Character-format queries and plain
+SetText/paste share the same resolver, with explicit typing patches applied last.
+Independent range duplicates reset to UIBehavior; shared Rust clones share the
+accepted mode. Reentrant reads and asynchronous clipboard work use range/model
+generations, and grouped edits restore the independent editor typing snapshot
+exactly. [RANGE-GRAVITY.md](RANGE-GRAVITY.md) records the measured mode readback,
+paragraph and terminal boundaries, transaction policy and native fixture scope.
+The range's physical endpoint tracking and the live selection's Gravity are
+separate contracts, not inferred from formatting affinity.
 
 ### Selection Home and End
 
@@ -1121,9 +1162,16 @@ uses validated rasterization scale and the HWND client-to-screen origin.
 The existing minimum caret size applies in root DIPs before the native transform;
 it does not inflate the whole control. Missing native roots, invalid scale,
 unavailable HWND screen mapping, invalid rectangles or stale ownership leave the
-request unpopulated. TextBounds still uses the current caret. An arbitrary
-`LayoutRequest.Range` requires a framework client capability for the exact
-visible UTF-16 story, including preedit; it remains pending.
+request unpopulated. The optional framework range-geometry capability now accepts
+the exact `LayoutRequest.Range` in the visible UTF-16 story, including preedit.
+RichEditBox returns shaped range fragments or an insertion rectangle for an
+empty range; complete coverage is checked before native publication. The old
+caret path is used only when a client reports the capability unsupported, not
+when an implemented request is invalid or stale. Range fragments retain their
+own transforms until all corners have reached screen coordinates, preventing
+an early axis-aligned union from inflating rotated content. Whole-control bounds
+remain separate. [INPUT-GEOMETRY.md](INPUT-GEOMETRY.md) describes the API, zero-width
+breaks, partial-layout rejection and callback/publication fences.
 
 Publication checks client/connection/composition identity, intrinsic revision,
 focus, root, owner, bounds, transform and nested-request generation around
@@ -1318,6 +1366,17 @@ one undoable operation. RTF document loading restores document defaults; inserti
 RTF into an existing range uses that destination document's default interval.
 Explicit stops survive both paths. Clipboard export resolves effective external
 context while the in-process transfer retains the exact snapshot.
+
+## Rich line stacking and line bounds
+
+Rich layout consumes the shared `TextLineBounds` enum and TextBlock property
+added on main. It passes the head's policy through each paragraph, empty lines
+and overflow continuation. Source invalidation, inherited/local override and
+clipping coercion follow the existing property and layout system. The line's
+allocation advance is distinct from its draw origin: caret/range geometry,
+drawing, page splitting and embedded controls use the same retained metrics.
+[LAYOUT.md](LAYOUT.md) records the native line-stacking formulas, the extracted
+960-case C++/Rust comparison and the remaining font-metric differences.
 
 ## Inherited typography
 
