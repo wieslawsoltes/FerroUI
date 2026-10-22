@@ -2,6 +2,47 @@
 
 Crate-level notices for `ferroui-base` in addition to the project-wide notices in the repository root `NOTICE.md`. Notices of code derived from third-party sources live next to that code (`media/NOTICE.md`, `utilities/NOTICE.md` and the others under this directory).
 
+## WinUI rich text metrics and fallback
+
+The requested-family metrics and optional font fallback scale contracts under
+`media/text_formatting/`, `media/font_manager.rs`, `media/font_fallback_mapping.rs`
+and `platform/i_font_fallback_mapper.rs` adapt source and public contracts from
+[microsoft/microsoft-ui-xaml](https://github.com/microsoft/microsoft-ui-xaml),
+commit `fe244ca6ac4d482712b234a9de3cf771cc6481de`.
+
+The source families are `dxaml/xcp/core/text/Fonts/CompositeFontFamily.cpp`,
+`Fonts/FontTypeface.cpp`,
+`RichTextServices/TextFormatter/TextSegment.cpp`, `LsRun.cpp`, `LsTextLine.cpp`,
+`lineservicescallbacks.cpp` and `InlineObjectHandlers.cpp`. The regular-family
+box formulas live in `media/text_formatting/font_family_line_metrics.rs`;
+formatter integration retains the existing FerroUI font, shaping and drawing
+services. The complete mapping and remaining boundaries are recorded in
+[the rich text port record](../../docs/porting/winui-rich-text/LAYOUT.md).
+
+```text
+MIT License
+
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
 ## Test fonts
 
 The fonts under `test_assets/fonts/` are used by the crate's tests only (`media/glyph_typeface_tests.rs`, the font table tests, `media/synthetic_font_variable_tests.rs`); they are not part of the library. Each font carries its own licence.

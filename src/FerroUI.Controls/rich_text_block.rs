@@ -1639,6 +1639,12 @@ impl RichTextBlock {
         self.layout.borrow().clone()
     }
 
+    /// The baseline published with the current page cache. Reading it does
+    /// not format, invoke a virtual origin, or enter nested layout.
+    pub(crate) fn cached_baseline_offset(&self) -> Option<f64> {
+        self.layout.borrow().as_ref().map(|_| self.reported_baseline.get())
+    }
+
     pub(crate) fn page_layout(&self) -> Rc<RichTextLayout> {
         if let Some(layout) = self.layout.borrow().as_ref() {
             return layout.clone();

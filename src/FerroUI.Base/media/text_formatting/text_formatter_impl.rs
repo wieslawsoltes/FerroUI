@@ -10,7 +10,7 @@ use crate::media::text_formatting::unicode::{
 use crate::media::text_formatting::wrapping_text_line_break::WrappingTextLineBreak;
 use crate::media::text_formatting::{
     GlyphInfo, ITextSource, ShapedBuffer, ShapedTextRun, SplitResult, TextCharacters,
-    TextFormatter, TextLine, TextLineBreak, TextParagraphProperties, TextRun, TextRunCache,
+    TextFormatter, TextLine, TextLineBreak, TextLineMetricsMode, TextParagraphProperties, TextRun, TextRunCache,
     TextRunProperties, TextShaper, TextShaperOptions, UnshapedTextRun, DEFAULT_TEXT_SOURCE_LENGTH,
 };
 use crate::media::{FlowDirection, FontManager, TextWrapping};
@@ -301,6 +301,7 @@ impl TextFormatterImpl {
             text_runs,
             bidi_algorithm.resolved_levels(),
             font_manager,
+            paragraph_properties.line_metrics_mode(),
             &mut processed_runs,
         );
 
@@ -339,6 +340,7 @@ impl TextFormatterImpl {
                                 if Self::can_shape_together(
                                     &*properties,
                                     &**next_run.run_properties(),
+                                    paragraph_properties.line_metrics_mode(),
                                 ) {
                                     grouped_runs.push(next_run.clone());
                                     index += 1;
@@ -354,11 +356,11 @@ impl TextFormatterImpl {
 
                     let shaper_options = TextShaperOptions::with_all(
                         properties.cached_glyph_typeface(),
-                        properties.font_rendering_em_size(),
+                        properties.effective_font_rendering_em_size(),
                         shapeable_run.bidi_level(),
                         properties.culture_info().cloned(),
                         paragraph_properties.default_incremental_tab(),
-                        paragraph_properties.letter_spacing(),
+                        paragraph_properties.letter_spacing() * properties.font_scale(),
                         properties
                             .font_features()
                             .map(|features| Rc::new(features.to_vec())),
@@ -422,10 +424,21 @@ impl TextFormatterImpl {
         None
     }
 
-    fn can_shape_together(x: &dyn TextRunProperties, y: &dyn TextRunProperties) -> bool {
+    fn can_shape_together(
+        x: &dyn TextRunProperties,
+        y: &dyn TextRunProperties,
+        line_metrics_mode: TextLineMetricsMode,
+    ) -> bool {
         MathUtilities::are_close(x.font_rendering_em_size(), y.font_rendering_em_size())
             && x.typeface() == y.typeface()
+            && x.font_scale() == y.font_scale()
             && x.baseline_alignment() == y.baseline_alignment()
+            // A cluster crossing a run boundary can absorb that run during
+            // splitting. Preserve each requested family's metric contribution
+            // even when both runs resolve to the same fallback glyph font.
+            && (line_metrics_mode == TextLineMetricsMode::GlyphTypeface
+                || (x.requested_font_family() == y.requested_font_family()
+                    && Rc::ptr_eq(&x.cached_glyph_typeface(), &y.cached_glyph_typeface())))
             // Each group is shaped using its first run's feature list. Keep
             // different choices separate while allowing independent resolved
             // collections with the same ordered values to share shaping.
@@ -486,6 +499,7 @@ impl TextFormatterImpl {
         text_characters: &[Rc<dyn TextRun>],
         levels: &[i8],
         font_manager: &FontManager,
+        mode: TextLineMetricsMode,
         processed_runs: &mut Vec<Rc<dyn TextRun>>,
     ) {
         if levels.is_empty() {
@@ -524,10 +538,11 @@ impl TextFormatterImpl {
                 j += count;
 
                 if j == run_text.len() {
-                    current_run.get_shapeable_characters(
+                    current_run.get_shapeable_characters_with_metrics_mode(
                         run_text.slice(0, j),
                         run_level,
                         font_manager,
+                        mode,
                         &mut previous_properties,
                         processed_runs,
                     );
@@ -542,10 +557,11 @@ impl TextFormatterImpl {
                 }
 
                 // End of this run
-                current_run.get_shapeable_characters(
+                current_run.get_shapeable_characters_with_metrics_mode(
                     run_text.slice(0, j),
                     run_level,
                     font_manager,
+                    mode,
                     &mut previous_properties,
                     processed_runs,
                 );
@@ -567,10 +583,11 @@ impl TextFormatterImpl {
             return;
         }
 
-        current_run.get_shapeable_characters(
+        current_run.get_shapeable_characters_with_metrics_mode(
             run_text,
             run_level,
             font_manager,
+            mode,
             &mut previous_properties,
             processed_runs,
         );
@@ -731,7 +748,7 @@ impl TextFormatterImpl {
             EMPTY.with(|empty| empty.clone()),
             1,
             glyph_typeface,
-            properties.font_rendering_em_size(),
+            properties.effective_font_rendering_em_size(),
             flow_direction as i8,
         );
         shaped_buffer.set(0, GlyphInfo::new(glyph, first_text_source_index, 0.0));
@@ -857,11 +874,10 @@ impl TextFormatterImpl {
                 // The runs are moved out of the rented list, which is returned below.
                 remaining_runs.append(post_split_runs);
 
-                Some(Rc::new(WrappingTextLineBreak::new(
-                    None,
-                    resolved_flow_direction,
-                    remaining_runs,
-                )))
+                Some(Rc::new(
+                    WrappingTextLineBreak::new(None, resolved_flow_direction, remaining_runs)
+                        .with_line_metrics_mode(paragraph_properties.line_metrics_mode()),
+                ))
             }
             _ => current_line_break
                 .and_then(|line_break| line_break.text_end_of_line())
@@ -1193,7 +1209,9 @@ impl TextFormatter for TextFormatterImpl {
 
         // we've wrapped the previous line and need to continue wrapping: ignore the text source and do that instead
         if let Some(previous_line_break) = previous_line_break {
-            if WrappingTextLineBreak::is_wrapping(previous_line_break) {
+            if WrappingTextLineBreak::is_wrapping(previous_line_break)
+                && previous_line_break.line_metrics_mode() == paragraph_properties.line_metrics_mode()
+            {
                 if let Some(mut remaining_runs) =
                     WrappingTextLineBreak::acquire_remaining_runs(previous_line_break)
                 {
@@ -1215,7 +1233,10 @@ impl TextFormatter for TextFormatterImpl {
 
         // Try to use cached shaped runs to avoid redundant shaping/bidi processing.
         if let Some(text_run_cache) = text_run_cache {
-            if let Some(cached) = text_run_cache.try_get_shaped_runs(first_text_source_index) {
+            if let Some(cached) = text_run_cache
+                .try_get_shaped_runs(first_text_source_index)
+                .filter(|cached| cached.line_metrics_mode == paragraph_properties.line_metrics_mode())
+            {
                 crate::perf_count!(TextRunCacheHits);
                 return Some(Self::format_line_from_cache(
                     &cached,
@@ -1262,7 +1283,8 @@ impl TextFormatter for TextFormatterImpl {
                     resolved_flow_direction,
                     text_end_of_line,
                     text_source_length,
-                ),
+                )
+                .with_line_metrics_mode(paragraph_properties.line_metrics_mode()),
             );
         }
 

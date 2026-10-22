@@ -64,7 +64,7 @@ fn rich_line_stacking_automatic_height_uses_natural_metrics_for_all_strategies()
         assert_lines(&layout, &[22.0; 3], &[0.0; 3]);
         for line in &layout.lines {
             close(line.line.height(), 22.0);
-            close(line.line.baseline(), 17.0);
+            close(line.line.baseline(), 16.0);
         }
     }
 }
@@ -111,10 +111,10 @@ fn rich_line_stacking_full_bounds_fixture_matrix_retains_natural_glyph_boxes() {
         let metrics = view.line_metrics();
         for (entry, metric) in layout.lines.iter().zip(metrics) {
             close(entry.line.height(), 22.0);
-            close(entry.line.baseline(), 17.0);
+            close(entry.line.baseline(), 16.0);
             close(metric.bounds.y, entry.allocation_y);
             close(metric.bounds.height, entry.advance);
-            close(metric.baseline, entry.origin.y + 17.0);
+            close(metric.baseline, entry.origin.y + 16.0);
         }
     }
 }
@@ -133,7 +133,7 @@ fn rich_line_stacking_single_and_empty_lines_take_first_line_precedence() {
         // A one-line fragment is both first and last. The native `if / else if`
         // applies the leading adjustment only: 33 - (33 - 22) * 8/11 = 25.
         assert_lines(&layout, &[25.0], &[0.0]);
-        close(view.baseline_offset(), 17.0);
+        close(view.baseline_offset(), 16.0);
         let caret = view.get_rect_from_character_index(0);
         close(caret.y, 0.0);
         close(caret.height, 25.0);
@@ -188,7 +188,7 @@ fn rich_line_stacking_draws_at_glyph_origin_and_exposes_allocated_caret_and_rang
                 _ => None,
             })
             .expect("the real line must draw its glyph run");
-        close(drawn.y, 15.0 + index as f64 * 33.0);
+        close(drawn.y, 14.0 + index as f64 * 33.0);
         close(drawn.x, 4.0);
 
         let caret = view.get_rect_from_character_index(entry.start());
@@ -278,7 +278,7 @@ fn rich_line_stacking_explicit_spacing_rules_keep_precedence_and_range_geometry(
     let _scope = test_scope();
     let _text = TextTestScope::new();
     for (rule, spacing, advance, natural, baseline) in [
-        (LineSpacingRule::Multiple, 2.0, 44.0, 22.0, 17.0),
+        (LineSpacingRule::Multiple, 2.0, 44.0, 22.0, 16.0),
         (LineSpacingRule::Exactly, 12.0, 12.0, 12.0, 16.0),
     ] {
         for strategy in [

@@ -669,6 +669,21 @@ impl TextBlock {
         text_layout
     }
 
+    /// Baseline of the current measured text, without creating a layout or
+    /// invoking its formatter. Embedded rich objects use the rendered origin,
+    /// including padding and the existing layout-rounding placement policy.
+    pub(crate) fn cached_text_baseline(&self) -> Option<f64> {
+        let layout = self.text_layout.borrow().clone()?;
+        let mut padding = self.padding();
+        let mut scale = None;
+        if self.use_layout_rounding() {
+            let value = LayoutHelper::get_layout_scale(self);
+            padding = LayoutHelper::round_layout_thickness(padding, value);
+            scale = Some(value);
+        }
+        Some(padding.top + self.layout_rounding_offset_of(&layout, padding, scale) + layout.baseline())
+    }
+
     /// The physical alignment of a logical one for the flow direction of the
     /// control.
     fn resolve_text_alignment(&self, text_alignment: TextAlignment) -> TextAlignment {

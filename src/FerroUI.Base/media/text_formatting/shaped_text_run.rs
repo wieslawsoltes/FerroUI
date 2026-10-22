@@ -25,7 +25,7 @@ pub struct ShapedTextRun {
 
 impl ShapedTextRun {
     pub fn new(shaped_buffer: Rc<ShapedBuffer>, properties: Rc<dyn TextRunProperties>) -> Self {
-        let text_metrics = TextMetrics::new(&properties.cached_glyph_typeface(), properties.font_rendering_em_size());
+        let text_metrics = TextMetrics::new(&properties.cached_glyph_typeface(), properties.effective_font_rendering_em_size());
 
         Self {
             glyph_run: OnceCell::new(),

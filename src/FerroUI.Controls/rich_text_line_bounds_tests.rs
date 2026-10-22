@@ -1,6 +1,6 @@
-//! Rich views consume the framework's TextLineBounds metrics. The native
-//! stacking transform is tested separately from the shared formatter's
-//! retained half-gap and fallback-font policy.
+//! Rich views opt into requested-family metrics in the shared formatter.
+//! Source-formula expectations remain separate from native shaping and pixel
+//! comparisons; plain TextBlock keeps its glyph-typeface metric policy.
 
 use crate::documents::{InlineUIContainer, LineSpacingRule, LineStackingStrategy, Paragraph, Run};
 use crate::test_support::test_scope;
@@ -14,9 +14,9 @@ use ferroui_base::{Point, Rect, Ref, Size, StaticType};
 use std::rc::Rc;
 
 const MODES: [(TextLineBounds, f64, f64); 4] = [
-    (TextLineBounds::Full, 22.0, 17.0),
-    (TextLineBounds::TrimToCapHeight, 16.2, 11.2),
-    (TextLineBounds::TrimToBaseline, 17.0, 17.0),
+    (TextLineBounds::Full, 22.0, 16.0),
+    (TextLineBounds::TrimToCapHeight, 17.2, 11.2),
+    (TextLineBounds::TrimToBaseline, 16.0, 16.0),
     (TextLineBounds::Tight, 11.2, 11.2),
 ];
 
@@ -121,8 +121,8 @@ fn rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes() 
     let view = rich("Hxg", TextLineBounds::Full);
     for (name, expected, height) in [
         ("Full", TextLineBounds::Full, 22.0),
-        ("TrimToCapHeight", TextLineBounds::TrimToCapHeight, 16.2),
-        ("TrimToBaseline", TextLineBounds::TrimToBaseline, 17.0),
+        ("TrimToCapHeight", TextLineBounds::TrimToCapHeight, 17.2),
+        ("TrimToBaseline", TextLineBounds::TrimToBaseline, 16.0),
         ("Tight", TextLineBounds::Tight, 11.2),
     ] {
         let member = value_type.find_enum_member(name, false).unwrap();
@@ -141,30 +141,30 @@ fn rich_text_line_bounds_markup_enum_and_property_deliver_real_layout_changes() 
 }
 
 #[test]
-fn rich_text_line_bounds_stacking_uses_family_mode_ratio_on_framework_lines() {
+fn rich_text_line_bounds_stacking_uses_the_same_family_mode_as_natural_lines() {
     let _scope = test_scope();
     let _text = TextTestScope::new();
-    // At em 20, the shared formatter produces cap-trimmed height 16.2.
+    // At em 20, requested-family metrics give cap-trimmed height 17.2.
     // The pinned family stacking ratio is 560 / (560 + 200 + 100) = 28/43.
-    // Baseline and Tight bounds have ratio 1. These allocation results are
-    // intentionally distinct from a native formatter/rasterization claim.
+    // Baseline and Tight bounds have ratio 1. Native shaping and rendering
+    // remain separate from these family and stacking formula expectations.
     let cases = [
         (
             TextLineBounds::TrimToCapHeight,
             6.0,
-            -285.6 / 43.0,
-            543.6 / 43.0,
-            411.0 / 43.0,
+            -313.6 / 43.0,
+            571.6 / 43.0,
+            426.0 / 43.0,
         ),
         (
             TextLineBounds::TrimToCapHeight,
             26.0,
-            274.4 / 43.0,
-            843.6 / 43.0,
-            971.0 / 43.0,
+            246.4 / 43.0,
+            871.6 / 43.0,
+            986.0 / 43.0,
         ),
-        (TextLineBounds::TrimToBaseline, 6.0, -11.0, 17.0, 6.0),
-        (TextLineBounds::TrimToBaseline, 26.0, 9.0, 17.0, 26.0),
+        (TextLineBounds::TrimToBaseline, 6.0, -10.0, 16.0, 6.0),
+        (TextLineBounds::TrimToBaseline, 26.0, 10.0, 16.0, 26.0),
         (TextLineBounds::Tight, 6.0, -5.2, 11.2, 6.0),
         (TextLineBounds::Tight, 26.0, 14.8, 11.2, 26.0),
     ];
@@ -303,7 +303,7 @@ fn rich_text_line_bounds_clipping_keeps_local_choice_and_unlinked_pages() {
 }
 
 #[test]
-fn rich_text_line_bounds_mixed_font_metrics_match_shared_textblock_policy() {
+fn rich_text_line_bounds_family_fallback_policy_keeps_textblock_compatible() {
     let _scope = ferroui_base::threading::Dispatcher::unit_test_scope();
     let _text = TextTestScope::with_fonts(vec![
         TestFont::new("Latin")
@@ -319,12 +319,10 @@ fn rich_text_line_bounds_mixed_font_metrics_match_shared_textblock_policy() {
             .name(),
         "Latin"
     );
-    for (mode, expected_height, expected_baseline) in [
-        (TextLineBounds::Full, 30.0, 21.0),
-        (TextLineBounds::TrimToCapHeight, 20.2, 11.2),
-        (TextLineBounds::TrimToBaseline, 21.0, 21.0),
-        (TextLineBounds::Tight, 11.2, 11.2),
-    ] {
+    for ((mode, rich_height, rich_baseline), (plain_height, plain_baseline)) in MODES
+        .into_iter()
+        .zip([(30.0, 21.0), (20.2, 11.2), (21.0, 21.0), (11.2, 11.2)])
+    {
         let rich = rich("Hあg", mode);
         let plain = TextBlock::new();
         plain.set_font_size(20.0);
@@ -338,10 +336,10 @@ fn rich_text_line_bounds_mixed_font_metrics_match_shared_textblock_policy() {
         let plain_lines = plain_layout.text_lines();
         assert_eq!(rich_layout.lines.len(), 1);
         assert_eq!(plain_lines.len(), 1);
-        close(rich_layout.lines[0].line.height(), expected_height);
-        close(rich_layout.lines[0].line.baseline(), expected_baseline);
-        close(plain_lines[0].height(), expected_height);
-        close(plain_lines[0].baseline(), expected_baseline);
+        close(rich_layout.lines[0].line.height(), rich_height);
+        close(rich_layout.lines[0].line.baseline(), rich_baseline);
+        close(plain_lines[0].height(), plain_height);
+        close(plain_lines[0].baseline(), plain_baseline);
     }
 }
 
@@ -407,6 +405,10 @@ fn rich_text_line_bounds_trimming_keeps_visible_ranges_and_embedded_ink() {
     view.set_max_lines(0);
     measure(&view, 200.0);
     assert_eq!(child.bounds().size(), Size::new(30.0, 40.0));
+    let line = &view.page_layout().lines[0];
+    close(line.line.baseline(), 40.0);
+    close(line.line.height(), 40.0);
+    close(view.get_rects_for_range(1..2)[0].height, 40.0);
     assert!(!view.clip_to_bounds());
     assert_eq!(view.text(), "H\u{fffc}g");
 }

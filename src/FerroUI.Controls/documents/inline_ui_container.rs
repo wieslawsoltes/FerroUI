@@ -15,6 +15,7 @@ use std::rc::Rc;
 pub struct InlineUIContainer {
     base: Inline,
     measured_width: Cell<f64>,
+    measured_metrics: Cell<Option<(Size, f64)>>,
 }
 
 ferro_class!(InlineUIContainer: Inline);
@@ -85,16 +86,16 @@ impl InlineImpl for InlineUIContainer {
     fn measure_embedded_controls(this: &Self, block_size: Size) -> bool {
         let Some(child) = this.child() else { return false };
 
-        if this.measured_width.get() == block_size.width && child.is_measure_valid() {
-            return false;
+        if this.measured_width.get() != block_size.width || !child.is_measure_valid() {
+            child.measure(Size::new(block_size.width, f64::INFINITY));
+            this.measured_width.set(block_size.width);
         }
 
-        let previous_size = child.desired_size();
-
-        child.measure(Size::new(block_size.width, f64::INFINITY));
-        this.measured_width.set(block_size.width);
-
-        child.desired_size() != previous_size
+        // A different first-line baseline can leave desired size unchanged.
+        // Also detect a child that was independently remeasured before its host.
+        // This is layout invalidation only; the document's text is unchanged.
+        let metrics = (child.desired_size(), EmbeddedControlRun::measured_baseline(&child));
+        this.measured_metrics.replace(Some(metrics)) != Some(metrics)
     }
 
     fn append_text(this: &Self, string_builder: &mut String) {
@@ -120,7 +121,7 @@ ferroui_base::ferro_properties! { impl InlineUIContainer {
 impl InlineUIContainer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
-        Self { base: Inline::construct(), measured_width: Cell::new(f64::NAN) }
+        Self { base: Inline::construct(), measured_width: Cell::new(f64::NAN), measured_metrics: Cell::new(None) }
     }
 
     /// Initializes a new instance of the `InlineUIContainer` class.

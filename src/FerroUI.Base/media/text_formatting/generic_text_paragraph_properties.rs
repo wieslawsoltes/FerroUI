@@ -1,7 +1,7 @@
 use std::cell::Cell;
 use std::rc::Rc;
 
-use crate::media::text_formatting::{TextParagraphProperties, TextRunProperties, TextTabStop, TextTabStops};
+use crate::media::text_formatting::{TextLineMetricsMode, TextParagraphProperties, TextRunProperties, TextTabStop, TextTabStops};
 use crate::media::{FlowDirection, TextAlignment, TextLineBounds, TextWrapping};
 
 /// Generic implementation of `TextParagraphProperties`.
@@ -20,6 +20,7 @@ pub struct GenericTextParagraphProperties {
     default_tab: f64,
     tab_origin: f64,
     text_line_bounds: Cell<TextLineBounds>,
+    line_metrics_mode: Cell<TextLineMetricsMode>,
 }
 
 impl GenericTextParagraphProperties {
@@ -64,6 +65,7 @@ impl GenericTextParagraphProperties {
             default_tab: 0.0,
             tab_origin: 0.0,
             text_line_bounds: Cell::new(TextLineBounds::Full),
+            line_metrics_mode: Cell::new(TextLineMetricsMode::GlyphTypeface),
         }
     }
 
@@ -95,6 +97,7 @@ impl GenericTextParagraphProperties {
             default_tab: 0.0,
             tab_origin: 0.0,
             text_line_bounds: Cell::new(TextLineBounds::Full),
+            line_metrics_mode: Cell::new(TextLineMetricsMode::GlyphTypeface),
         }
     }
 
@@ -115,6 +118,13 @@ impl GenericTextParagraphProperties {
     /// Text block).
     pub fn set_text_line_bounds(&self, text_line_bounds: TextLineBounds) {
         self.text_line_bounds.set(text_line_bounds);
+    }
+
+    /// Selects which font metrics allocate the line box. The glyph-typeface
+    /// mode remains the default; family mode preserves metrics across glyph
+    /// fallback and retains full embedded-object contributions.
+    pub fn set_line_metrics_mode(&self, mode: TextLineMetricsMode) {
+        self.line_metrics_mode.set(mode);
     }
 
     /// Creates a copy of other paragraph properties.
@@ -145,6 +155,7 @@ impl GenericTextParagraphProperties {
             }
         }
         result.set_text_line_bounds(text_paragraph_properties.text_line_bounds());
+        result.set_line_metrics_mode(text_paragraph_properties.line_metrics_mode());
         result
     }
 
@@ -188,6 +199,10 @@ impl TextParagraphProperties for GenericTextParagraphProperties {
 
     fn text_line_bounds(&self) -> TextLineBounds {
         self.text_line_bounds.get()
+    }
+
+    fn line_metrics_mode(&self) -> TextLineMetricsMode {
+        self.line_metrics_mode.get()
     }
 
     fn first_line_in_paragraph(&self) -> bool {

@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::media::text_formatting::{TextRunProperties, TextTabStop};
+use crate::media::text_formatting::{TextLineMetricsMode, TextRunProperties, TextTabStop};
 use crate::media::{FlowDirection, TextAlignment, TextDecorationCollection, TextLineBounds, TextWrapping};
 
 /// Provides a set of properties that are used during the paragraph layout.
@@ -25,6 +25,12 @@ pub trait TextParagraphProperties: 'static {
     /// trimmed to its cap height and to the baseline.
     fn text_line_bounds(&self) -> TextLineBounds {
         TextLineBounds::Full
+    }
+
+    /// Chooses the font metrics used to allocate line boxes. Custom paragraph
+    /// implementations retain the existing glyph-typeface behavior by default.
+    fn line_metrics_mode(&self) -> TextLineMetricsMode {
+        TextLineMetricsMode::GlyphTypeface
     }
 
     /// Indicates the first line of the paragraph.

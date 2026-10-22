@@ -9,9 +9,9 @@ use crate::text_block::InlinesTextSource;
 use crate::RichTextBlockImplExt;
 use ferroui_base::media::text_formatting::TextRun;
 use ferroui_base::media::text_formatting::{
-    GenericTextParagraphProperties, GenericTextRunProperties, ITextDrawingSink,
+    FontFamilyLineMetrics, GenericTextParagraphProperties, GenericTextRunProperties, ITextDrawingSink,
     InterWordJustification, LogicalTextRunEnumerator, TextCollapsingProperties, TextEndOfParagraph,
-    TextFormatter, TextFormatterImpl, TextLine, TextLineBreak, TextLineImpl,
+    TextFormatter, TextFormatterImpl, TextLine, TextLineBreak, TextLineImpl, TextLineMetricsMode,
     TextParagraphProperties, TextRunCache, TextRunProperties, TextTabStops,
 };
 use ferroui_base::media::{
@@ -62,6 +62,11 @@ impl RichTextSource {
         for block in blocks {
             let mut runs = Vec::new();
             block.build_text_runs(&mut runs);
+            for run in &mut runs {
+                if let Some(embedded) = run.downcast_ref::<EmbeddedControlRun>() {
+                    *run = Rc::new(embedded.with_measured_metrics());
+                }
+            }
             let length = block.text_length();
             let properties: Rc<dyn TextRunProperties> = if empty {
                 Rc::new(GenericTextRunProperties::with_all(
@@ -521,26 +526,13 @@ impl RichTextLayout {
                 && line_height.is_finite()
                 && line_height > 0.0
             {
-                let glyph_typeface =
-                    Typeface::new(paragraph.properties.typeface().font_family().clone())
-                        .glyph_typeface();
-                let metrics = glyph_typeface.metrics();
-                let baseline = -(metrics.ascent as f64);
-                let advance = metrics.descent as f64 + baseline + metrics.line_gap as f64;
-                let cap_height = metrics.cap_height as f64;
-                // The stacking ratio uses the requested paragraph family's
-                // native bounds policy. Natural run metrics remain the shared
-                // formatter's policy, including its existing half line gaps.
-                let (baseline, advance) = match result.source.text_line_bounds {
-                    TextLineBounds::Full => (baseline, advance),
-                    TextLineBounds::TrimToCapHeight => {
-                        (cap_height, advance - baseline + cap_height)
-                    }
-                    TextLineBounds::TrimToBaseline => (baseline, baseline),
-                    TextLineBounds::Tight => (cap_height, cap_height),
-                };
-                if advance > 0.0 {
-                    baseline / advance
+                let metrics = FontFamilyLineMetrics::new(
+                    paragraph.properties.requested_font_family(),
+                    paragraph.properties.font_rendering_em_size(),
+                    result.source.text_line_bounds,
+                );
+                if metrics.height > 0.0 {
+                    metrics.baseline / metrics.height
                 } else {
                     0.0
                 }
@@ -593,6 +585,7 @@ impl RichTextLayout {
                     indent + if rtl { margin.right } else { margin.left },
                 );
                 properties.set_text_line_bounds(result.source.text_line_bounds);
+                properties.set_line_metrics_mode(TextLineMetricsMode::FontFamily);
                 let properties: Rc<dyn TextParagraphProperties> = Rc::new(properties);
                 let input_break = previous.as_ref().map(|value| value.fork());
                 let Some(index) = i32::try_from(local).ok() else {
@@ -899,7 +892,7 @@ impl RichTextLayout {
                             + TextLineImpl::get_baseline_offset(&*entry.line, drawable);
                         result.push((
                             child.clone(),
-                            Rect::from_position_size(Point::new(x, y), child.desired_size()),
+                            Rect::from_position_size(Point::new(x, y), drawable.size()),
                         ));
                     }
                     x += drawable.size().width;
@@ -917,3 +910,11 @@ mod line_stacking_tests;
 #[cfg(test)]
 #[path = "rich_text_line_bounds_tests.rs"]
 mod line_bounds_tests;
+
+#[cfg(test)]
+#[path = "rich_text_family_metrics_tests.rs"]
+mod family_metrics_tests;
+
+#[cfg(test)]
+#[path = "rich_text_fallback_scale_tests.rs"]
+mod fallback_scale_tests;
