@@ -73,16 +73,23 @@ commit identifies the base of the changes. Record 005 retains this original evid
 after main integration changed `Cargo.lock`.
 
 All **521 current API evidence entries** reference the fresh
-[CI native-control execution record](../../docs/porting/winui-gallery/data/executions/native-controls-006.json),
+[CI native-control execution record](../../docs/porting/winui-gallery/data/executions/native-controls-007.json),
 which records **182 native tests passed across 12 targets** on actual CI checkout
-`63e82a1722719a7ea98bb63144498dcc2c377286`, tree
-`523b4d4e2723173b733b61076b029012eb81d9c4`, incorporating main `87fb`'s updated
-`Cargo.lock`. The native step passed on **2026-10-22, 20:59:32–21:01:10 UTC**. Record
-006's source hashes were extracted afterward from the actual checkout's Git blobs;
-they are not execution-time before/after snapshots. The published proper merge
-[`aae91cbe3732d54dca1b48705ae04f5d8ecef250`](https://github.com/wieslawsoltes/FerroUI/commit/aae91cbe3732d54dca1b48705ae04f5d8ecef250)
+`2041e251e6c8f9e1ad1aa7415b4a5eaa338c979c`, tree
+`ab341a631368ffd094359ceb503c040aa003b6ad`, incorporating main `171a9ad8`'s updated
+`Cargo.lock`. Record 007's 53 source hashes were extracted afterward from the actual
+checkout's Git blobs; they are not execution-time before/after snapshots. The
+corresponding proper merge
+[`34671e41fbd5367c0c9c744edfd39f13a3fed0dc`](https://github.com/wieslawsoltes/FerroUI/commit/34671e41fbd5367c0c9c744edfd39f13a3fed0dc)
 has the same tree, but was not the execution commit. Loader, theme, Gallery and
 rendering CI results require their own separately recorded observations.
+
+The preceding [record 006](../../docs/porting/winui-gallery/data/executions/native-controls-006.json)
+retains its successful 182-test native step on checkout `63e82a17`, tree `523b4d4e`,
+with main `87fb` and the corresponding merge `aae91cbe`. That step passed on
+**2026-10-22, 20:59:32–21:01:10 UTC**; the later Gallery label failures remain recorded
+below. Only `Cargo.lock` changed among the 53 native inputs between records 006 and
+007. Neither historical record nor the exact source guard was changed.
 
 The current comparison reports **315 type candidates and 1,537 member candidates**.
 The increase consists only of the newly matching native `NumberBoxValueChangedEventArgs`
@@ -133,8 +140,8 @@ The local native control run in 005 has its own before/after source snapshot. Th
 broader integration hashes were captured from published Git blobs after the local
 runs; they are not presented as execution-time before/after snapshots. The capture-import
 fix changes only that executable consumer, after the successful local suites. The
-fresh CI native record 006 also uses afterward extraction from the actual checkout,
-with the updated lockfile, and preserves the local record unchanged.
+CI native records 006 and 007 also use afterward extraction from their actual
+checkouts, with each execution's lockfile, and preserve the local record unchanged.
 
 Clean CI on `6df94f5` passed the source/evidence comparison and confirmed
 **204 additive types**. The earlier local value of 205 included an untracked,
@@ -148,7 +155,7 @@ failure. The main-integrated source was executed by
 [parity CI](https://github.com/wieslawsoltes/FerroUI/actions/runs/39852856008) and
 [general CI](https://github.com/wieslawsoltes/FerroUI/actions/runs/39852856388).
 
-| Integration CI execution | Actual result |
+| Earlier integration CI execution (`63e82a17`) | Actual result |
 | --- | --- |
 | Native controls | **182 passed** across 12 targets; record 006 preserves this successful step separately from the later job failure. |
 | Local values / binding lifetime / deferred resources | **13 / 13 / 3 passed** respectively. |
@@ -162,12 +169,14 @@ failure. The main-integrated source was executed by
 The Gallery failures expected `Sample Page N` headers but observed `Sample FramePage N`.
 Commit [`d176a88`](https://github.com/wieslawsoltes/FerroUI/commit/d176a88cf8e21acb4583d1836cd980c792381bbc)
 restores the two display-string literals while retaining the native `FramePage`
-type. Existing assertions remain unchanged. Consumer CI for that correction is
-recorded separately when it completes.
+type. Existing assertions remain unchanged. The later consumer execution on
+`2041e251` passed all 54 Gallery tests and declarative API compilation, as recorded
+separately below.
 
-The old source-comparison step rejected `Cargo.lock` after main advanced. Record 006
-and the regenerated maps address that stale evidence using the actual successful
-native step; record 005 remains unchanged. The exact source guard is unchanged.
+At that checkpoint the source-comparison step rejected `Cargo.lock` after main
+advanced. Record 006 and the regenerated maps addressed that stale evidence using
+the actual successful native step; record 005 remains unchanged. The exact source
+guard is unchanged.
 
 The [rendering artifact](https://github.com/wieslawsoltes/FerroUI/actions/runs/39852856008/artifacts/12459321306)
 has SHA-256 `ab43a3905b430cd4a56ce608120f73ad690eafaa63e31dde1b36728a767a015d`.
@@ -175,6 +184,50 @@ All 151 images decoded at 1280×900; the validation record retains each file's h
 Inspection of NumberBox, InfoBar, NavigationView and AutoSuggestBox captures showed
 native compositions, with missing icon-font glyph boxes on Linux. These captures
 do not establish pixel equality with Windows WinUI or complete page behavior.
+
+### Current integration after main `171a9ad8`
+
+The [native/XAML/Gallery contract job](https://github.com/wieslawsoltes/FerroUI/actions/runs/39862318897/job/120115819634)
+completed successfully on actual checkout `2041e251`, tree `ab341a63`. This execution
+includes the `Sample Page N` label correction and the newer main integration. The
+proper branch merge `34671e41` has the same tree; it is recorded separately from the
+commit that GitHub Actions actually checked out.
+
+| Current integration CI execution | Actual result |
+| --- | --- |
+| Native controls | **182 passed** across all 12 targets; immutable record 007 retains the exact native-step log. |
+| Local values / binding lifetime / deferred resources | **13 / 13 / 3 passed** respectively. |
+| XAML migration / compiled and interpreted XAML | **45 / 9 passed**, with one explicit regeneration task ignored. |
+| WinUI theme / existing Fluent and Simple fallback | **295 / 2 passed**, with two WinUI regeneration tasks ignored. |
+| Public Rust paths | **3 passed, 1 ignored**. |
+| Gallery library | **54 passed, 0 failed**; the three original label assertions pass unchanged. |
+| Declarative API compilation | **Passed**: `cargo check --locked -p ferroui-view`. |
+| Rendering | **151 PNGs produced and decoded**, covering 126 light catalog pages, nine dark representatives and 16 NavigationView compositions. |
+
+The source-comparison job first passed all 47 scanner regressions, then rejected the
+lockfile from the newer main integration because record 006 identifies the preceding
+execution. Record 007 records a new successful native execution with that lockfile;
+006 is unchanged. The refreshed maps and source gates are recorded separately in
+the promotion validation JSON. No evidence guard or completeness requirement was
+relaxed.
+
+The [current rendering artifact](https://github.com/wieslawsoltes/FerroUI/actions/runs/39862318897/artifacts/12462876765)
+has SHA-256 `5dee24eb38174ccfa2354ac0551c31ab35fa93e434a4a03f09156a12d5d56363`.
+All 151 files decoded at 1280×900. Of these, 136 are byte-identical to the preceding
+artifact; the remaining 15 retain per-file comparison bounds in the validation
+record. Manual inspection confirmed `Sample Page 1` in the light data-binding and
+dark hierarchical NavigationView compositions, and visible native ProgressRing
+controls. Missing icon-font glyph boxes remain visible on Linux. Neither capture
+success nor these inspections advance any page or behavioral parity classification.
+
+The separate [general-CI Wayland job](https://github.com/wieslawsoltes/FerroUI/actions/runs/39862319404/job/120116005313)
+passed 116 unit tests and its later EGL scale/fallback checks, but the first EGL
+scenario reported 98 passed and five failed checks after a Chinese IME commit did
+not appear in the TextBox. The same six inspected Wayland/TextBox/helper blobs passed
+the corresponding scenario on main `171a9ad8` and the preceding PR checkout
+`63e82a17`. The cause remains unclassified; the observed timeout and serial-quiescence
+heuristic suggest a timing issue without proving one. This failure is retained
+separately from the successful native control and Gallery contract job.
 
 The revision-specific executions and captures below predate this promotion. They
 retain their original commands, namespaces, paths, counts and hashes as historical

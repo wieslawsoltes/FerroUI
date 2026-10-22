@@ -162,7 +162,6 @@ systems. They do not replace the existing Avalonia-compatible API. Source corres
 | `auto_suggest_box.rs`, `automation/peers/auto_suggest_box_automation_peer.rs` | `dxaml/xcp/tools/XCPTypesAutoGen/Modules/AutoSuggestBox/AutoSuggestBox.cs`; `dxaml/xcp/dxaml/lib/AutoSuggestBox_Partial.cpp`, `AutoSuggestBoxTextChangedEventArgs_Partial.h`, `AutoSuggestBoxAutomationPeer_Partial.cpp`; `dxaml/xcp/components/DependencyObject/DependencyProperty.cpp` |
 | `info_bar.rs`, `primitives/info_bar_panel.rs`, `primitives/info_bar_template_settings.rs`, `automation/peers/info_bar_automation_peer.rs` | `controls/dev/InfoBar/InfoBar.idl`, `InfoBar.cpp`, `InfoBarPanel.cpp`, `InfoBar.xaml`, `InfoBar_themeresources.xaml` |
 | `icon_source.rs` | `dxaml/xcp/dxaml/lib/IconSource_Partial.cpp`, `FontIconSource_Partial.cpp`, `SymbolIconSource_Partial.cpp`, `PathIconSource_Partial.cpp`, `DependencyProperty.cpp`; light/dark resource fallbacks follow the existing WinUI theme and `Common_themeresources_any.xaml` |
-
 | `info_badge.rs`, `primitives/info_badge_template_settings.rs` | `controls/dev/InfoBadge/InfoBadge.idl`, `InfoBadge.cpp`, `InfoBadge.xaml` |
 | `progress_ring.rs`, `primitives/progress_ring_template_settings.rs`, `automation/peers/progress_ring_automation_peer.rs` | `controls/dev/ProgressRing/ProgressRing.idl`, `ProgressRing.cpp`, `ProgressRingAutomationPeer.cpp` |
 | `rating_control.rs`, `rating_item_info.rs`, `automation/peers/rating_control_automation_peer.rs` | `controls/dev/RatingControl/RatingControl.idl`, `RatingControl.cpp`, `RatingControlAutomationPeer.cpp` |

@@ -719,11 +719,14 @@ The local native-promotion execution remains in
 **182 tests passed across all 12 native integration targets**, with **53 source
 hashes** frozen before and checked after that local run. All 521 current API evidence
 entries now reference the fresh
-[`data/executions/native-controls-006.json`](data/executions/native-controls-006.json):
-**182 native tests passed** on CI checkout `63e82a17`, tree `523b4d4e`, including
-main `87fb`'s updated `Cargo.lock`. Its source hashes were extracted afterward from
-the actual checkout's Git blobs; no execution-time before/after snapshot is claimed.
-The published merge `aae91cbe` has the same tree, but was not the execution commit.
+[`data/executions/native-controls-007.json`](data/executions/native-controls-007.json):
+**182 native tests passed** on CI checkout `2041e251`, tree `ab341a63`, including
+main `171a9ad8`'s updated `Cargo.lock`. Its 53 source hashes were extracted afterward
+from the actual checkout's Git blobs; no execution-time before/after snapshot is
+claimed. The corresponding merge `34671e41` has the same tree, but was not the
+execution commit. Only `Cargo.lock` changed among those inputs since
+[`data/executions/native-controls-006.json`](data/executions/native-controls-006.json);
+that earlier execution remains unchanged, and the exact source guard still applies.
 Full source identities are in the [validation ledger](../../../samples/WinUIGallery/VALIDATION.md).
 
 Behavior classifications remain unchanged; the newly matching

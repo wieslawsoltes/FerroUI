@@ -162,11 +162,14 @@ The **native control promotion** preserves its
 **182 native control tests passed across 12 targets**, with **53 source hashes**
 frozen before and checked after the local run. All 521 current API evidence entries
 reference the fresh
-[CI execution record](../../docs/porting/winui-gallery/data/executions/native-controls-006.json),
-with **182 native tests passed** on actual checkout `63e82a17`, tree `523b4d4e`, after
-main `87fb` updated `Cargo.lock`. The CI source hashes were extracted afterward from
-that checkout's Git blobs; they are not execution-time before/after snapshots.
-Published merge `aae91cbe` has the same tree, but was not the execution commit.
+[CI execution record](../../docs/porting/winui-gallery/data/executions/native-controls-007.json),
+with **182 native tests passed** on actual checkout `2041e251`, tree `ab341a63`, after
+main `171a9ad8` updated `Cargo.lock`. The 53 CI source hashes were extracted afterward
+from that checkout's Git blobs; they are not execution-time before/after snapshots.
+The corresponding merge `34671e41` has the same tree, but was not the execution
+commit. Only `Cargo.lock` changed among these inputs since
+[record 006](../../docs/porting/winui-gallery/data/executions/native-controls-006.json),
+which remains unchanged. The exact source guard remains in place.
 [VALIDATION.md](VALIDATION.md) records the full identities and separate execution scopes.
 
 The current maps report **315 type candidates, 1,537 member candidates and 204

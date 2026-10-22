@@ -111,12 +111,14 @@ execution evidence. The promotion's
 [local native-control record](data/executions/native-controls-005.json) preserves
 182 passing tests across 12 integration targets and 53 source hashes frozen before
 and checked after the local run. All 521 current API evidence entries reference the
-fresh [CI native-control record](data/executions/native-controls-006.json), which
-records 182 passing tests on actual checkout `63e82a17`, tree `523b4d4e`, with main
-`87fb`'s updated `Cargo.lock`. Its source hashes were extracted afterward from that
-checkout's Git blobs, without an execution-time before/after snapshot. The published
-merge `aae91cbe` has the same tree and was not the execution commit. These records do
-not advance any behavior classification.
+fresh [CI native-control record](data/executions/native-controls-007.json), which
+records 182 passing tests on actual checkout `2041e251`, tree `ab341a63`, with main
+`171a9ad8`'s updated `Cargo.lock`. Its 53 source hashes were extracted afterward from
+that checkout's Git blobs, without an execution-time before/after snapshot. The
+corresponding merge `34671e41` has the same tree and was not the execution commit.
+Only `Cargo.lock` changed among the 53 inputs since the
+[preceding CI execution](data/executions/native-controls-006.json), which remains
+unchanged. The exact source guard and behavior classifications remain unchanged.
 
 The [promotion validation record](data/native-promotion-validation.json) separately
 records loader, theme, external-path and CI results, including corrected failures

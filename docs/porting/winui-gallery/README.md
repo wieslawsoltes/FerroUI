@@ -98,12 +98,14 @@ pinned WinUI identities to these native APIs. There is no separate controls shim
 The [local native-promotion record](data/executions/native-controls-005.json)
 preserves **182 passing tests across 12 native integration targets**, with **53 source
 hashes** frozen before and checked after that local execution. The fresh
-[CI native-control record](data/executions/native-controls-006.json) records another
-**182 passing tests** on actual checkout `63e82a17`, tree `523b4d4e`, after main
-`87fb` changed `Cargo.lock`. All **521 current API evidence entries** reference 006.
-Its hashes were extracted afterward from the actual checkout's Git blobs; they are
-not execution-time before/after snapshots. Published merge `aae91cbe` has the same
-tree, but it was not the execution commit. See the
+[CI native-control record](data/executions/native-controls-007.json) records another
+**182 passing tests** on actual checkout `2041e251`, tree `ab341a63`, after main
+`171a9ad8` changed `Cargo.lock`. All **521 current API evidence entries** reference 007.
+Its 53 hashes were extracted afterward from the actual checkout's Git blobs; they
+are not execution-time before/after snapshots. The corresponding merge `34671e41`
+has the same tree, but it was not the execution commit. Only `Cargo.lock` changed
+among these inputs since [record 006](data/executions/native-controls-006.json),
+which remains unchanged. The exact source guard is unchanged. See the
 [validation ledger](../../../samples/WinUIGallery/VALIDATION.md) for full identities.
 
 Behavior classifications and Gallery page statuses remain unchanged. Earlier
