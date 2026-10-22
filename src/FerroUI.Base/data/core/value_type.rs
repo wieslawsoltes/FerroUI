@@ -364,7 +364,7 @@ impl ValueTypes {
 
     /// Registers `T` as convertible to text through its [`fmt::Display`]
     /// implementation (the `ToString()` of the value), and to `String`.
-    pub fn register_display<T: fmt::Display + PartialEq + 'static>() {
+    pub fn register_display<T: fmt::Display + 'static>() {
         fn display<T: fmt::Display + 'static>(value: &dyn AnyValue) -> String {
             value.downcast_ref::<T>().map(T::to_string).unwrap_or_default()
         }

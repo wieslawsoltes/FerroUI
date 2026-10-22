@@ -6,7 +6,7 @@ use crate::diagnostics::view_models::MainViewModel;
 use crate::diagnostics::{DevToolsOptions, HotKeyConfiguration};
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::input::raw::{RawKeyEventArgs, RawKeyEventType, RawPointerEventArgs};
-use ferroui_base::input::{ICloseable, InputElement, InputElementImpl, InputManager, Key, KeyGesture, KeyModifiers};
+use ferroui_base::input::{ICloseable, IInputRoot, InputElement, InputElementImpl, InputManager, Key, KeyGesture, KeyModifiers};
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::metadata::{from_markup_value, into_markup_value};
@@ -337,10 +337,7 @@ impl MainWindow {
             return;
         };
         // `vm.PointerOverRoot is TopLevel root`: the top level of the input root.
-        let Some(mut root) = vm
-            .pointer_over_root()
-            .and_then(|pointer_over_root| pointer_over_root.try_root_element())
-            .and_then(|root_element| root_element.cast::<TopLevel>())
+        let Some(mut root) = vm.pointer_over_root().and_then(|pointer_over_root| top_level_of_root(&*pointer_over_root))
         else {
             return;
         };
@@ -469,4 +466,19 @@ impl MainWindow {
             }
         }
     }
+}
+
+/// The top level of an input root.
+///
+/// Deviation (DEVIATIONS.md, Developer tools): the root element of the input root of a top level
+/// is its host (the `TopLevelHost` that holds the window decorations), with the top level as its
+/// visual child; the developer tools were written for the framework version whose input root was
+/// the top level itself (`vm.PointerOverRoot is TopLevel root`), and with the host in between the
+/// hot keys that need the hovered top level (Ctrl+Shift, Ctrl+Alt+F) did nothing.
+pub(crate) fn top_level_of_root(root: &dyn IInputRoot) -> Option<Ref<TopLevel>> {
+    let element = root.try_root_element()?;
+    if let Some(top_level) = element.clone().cast::<TopLevel>() {
+        return Some(top_level);
+    }
+    element.visual_children().to_vec().into_iter().find_map(|child| child.cast::<TopLevel>())
 }

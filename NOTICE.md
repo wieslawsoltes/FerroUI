@@ -51,7 +51,7 @@ Avalonia itself incorporates code from other projects (for example WPF-derived l
 
 - Project: <https://github.com/dotnet/runtime>
 - License: MIT, Copyright (c) .NET Foundation and Contributors
-- Used for: the masked text engine `src/FerroUI.Controls/utils/masked_text_provider.rs`, derived from `System.ComponentModel.MaskedTextProvider` (the class the upstream masked text box is built on).
+- Used for: the masked text engine `src/FerroUI.Controls/utils/masked_text_provider.rs`, derived from `System.ComponentModel.MaskedTextProvider` (the class the upstream masked text box is built on); and `src/FerroUI.DependencyInjection` plus `tests/FerroUI.DependencyInjection.Tests`, derived from Microsoft.Extensions.DependencyInjection, its abstractions and specification tests at `v10.0.13` (`6aa72daa24f66c01c3d7b6a32519e9d21396deec`). See `src/FerroUI.DependencyInjection/NOTICE.md` and `docs/porting/dependency-injection.md`.
 
 ## microsoft-ui-xaml (WinUI 3)
 
@@ -69,7 +69,7 @@ Avalonia itself incorporates code from other projects (for example WPF-derived l
 
 - Project: <https://github.com/reactiveui/splat> (commit `39466de`)
 - License: MIT, Copyright (c) ReactiveUI 2018 - 2025
-- Used for: `src/FerroUI.Splat` (a port of Splat.Core, Splat.Logging, Splat.Builder, and the mode detection and feature usage tracking of Splat) and its unit tests in `tests/FerroUI.Splat.Tests`, ported from Splat.Tests, Splat.Logging.Tests and Splat.Builder.Tests (`docs/porting/reactive.md`).
+- Used for: the optional `src/FerroUI.DependencyInjection/splat.rs` adapter from Splat.Microsoft.Extensions.DependencyInjection (same commit), and `src/FerroUI.Splat` (a port of Splat.Core, Splat.Logging, Splat.Builder, and the mode detection and feature usage tracking of Splat) and its unit tests in `tests/FerroUI.Splat.Tests`, ported from Splat.Tests, Splat.Logging.Tests and Splat.Builder.Tests (`docs/porting/reactive.md`).
 
 ## DynamicData
 

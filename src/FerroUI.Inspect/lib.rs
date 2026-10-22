@@ -4,6 +4,7 @@ mod frames;
 mod input;
 mod logs;
 mod schema;
+pub mod target;
 use base64::Engine;
 use ferroui_base::controls::{IResourceHost, ResourceKey};
 use ferroui_base::data::core::{ValueType, ValueTypes};

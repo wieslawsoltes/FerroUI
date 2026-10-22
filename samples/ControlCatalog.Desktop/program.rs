@@ -168,7 +168,9 @@ pub fn build_ferro_app() -> AppBuilder {
                 embed_sample_gtk::EmbedSampleGtk::default(),
             )));
             select_theme_of_the_environment();
-            smoke_run()
+            smoke_run();
+            #[cfg(feature = "cdp")]
+            start_cdp();
         })
         .after_setup(attach_dev_tools)
         .log_to_trace(LogEventLevel::Warning, &[])
@@ -1232,6 +1234,35 @@ fn dev_tools_run(directory: PathBuf) {
             let save = save.clone();
             Box::new(move || save("01-combined-tree"))
         },
+        // The time a selection takes until the details of the control are laid out: controls of the
+        // catalog selected in turn in the combined tree (the property grid, the layout and the value
+        // frames of each), as a developer clicks through the tree.
+        Box::new(|| {
+            if let (Some((window, view_model)), Some(catalog)) = (dev_tools(), main_window()) {
+                let controls: Vec<Ref<ferroui_controls::Control>> = catalog
+                    .upcast::<Visual>()
+                    .get_visual_descendants()
+                    .filter_map(|visual| visual.cast::<ferroui_controls::Control>())
+                    .step_by(7)
+                    .take(16)
+                    .collect();
+                let mut times = Vec::new();
+                for control in controls.iter().cycle().take(std::env::var("FERROUI_SMOKE_SELECTIONS").ok().and_then(|n| n.parse().ok()).unwrap_or(48)) {
+                    let start = std::time::Instant::now();
+                    view_model.combined_tree().select_control(control);
+                    window.update_layout();
+                    times.push(start.elapsed().as_secs_f64() * 1000.0);
+                }
+                times.sort_by(|a, b| a.total_cmp(b));
+                println!(
+                    "DevTools: selection to laid-out details, {} selections: median {:.1} ms, p90 {:.1} ms, max {:.1} ms",
+                    times.len(),
+                    times[times.len() / 2],
+                    times[times.len() * 9 / 10],
+                    times[times.len() - 1]
+                );
+            }
+        }),
         Box::new(|| {
             // A text block of the home page: the button above is part of a template, which the
             // logical tree does not show.
@@ -1425,4 +1456,18 @@ mod tests {
         assert_eq!(client_size_that_fits(area, PixelPoint::new(0, 0), client, client, 1.0), Some(client));
         assert_eq!(client_size_that_fits(area, PixelPoint::new(60, 30), client, client, 1.0), None);
     }
+}
+
+#[cfg(feature = "cdp")]
+ferroui_base::ferro_thread_local! {
+    static CDP_SERVER: std::cell::RefCell<Option<ferroui_devtools::DevToolsServer>> = const { std::cell::RefCell::new(None) };
+}
+
+#[cfg(feature = "cdp")]
+fn start_cdp() {
+    let Ok(value) = std::env::var("FERROUI_CDP_PORT") else { return; };
+    let port: u16 = value.parse().expect("FERROUI_CDP_PORT must be a port number (0 selects a free port)");
+    let server = ferroui_devtools::DevToolsServer::start(port).expect("Could not start the CDP endpoint");
+    println!("FerroUI CDP: http://{}", server.local_addr());
+    CDP_SERVER.with(|slot| *slot.borrow_mut() = Some(server));
 }

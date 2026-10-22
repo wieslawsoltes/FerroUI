@@ -62,6 +62,7 @@ One crate joins, `ferroui-diagnostics`. The additions since the preview are list
   - a combined tree, the first tab and the default view: the logical tree with the parts of the template of each element, greyed out;
   - a header in the title bar with a button that collapses the tree pane and a command bar in place of the menus, and the pages in the tab view of WinUI 3;
   - one design for every view (`DevToolsStyles.xaml`): consistent spacing, section headers, thin dividers, a status bar, and a property grid whose editors share one compact form, with read-only values shown as text and brushes as outlined swatches;
+  - Ctrl+Shift selects the control under the pointer; selecting a node shows its properties without a delay and the property grid scrolls smoothly (its editors are kept for the recycled rows and the view of the details is reused); the colours of the TreeDataGrids, the colour picker and the layout box model follow the light and dark variants of the WinUI 3 theme; the tree pane is set apart from the details, a toggle hides the side pane of the details, and a page with nothing to show says what to do;
   - `MainViewModel::register_page` adds pages of other crates to the tools;
   - the ControlCatalog attaches them in debug builds, and `FERROUI_SMOKE_DEVTOOLS=<directory>` runs them without a person and writes pictures of their window;
   - the facade has them as the feature `diagnostics`.

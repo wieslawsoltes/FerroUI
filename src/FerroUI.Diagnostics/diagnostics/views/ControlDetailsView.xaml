@@ -4,6 +4,7 @@
              xmlns:local="using:FerroUI.Diagnostics.Views"
              xmlns:controls="using:FerroUI.Diagnostics.Controls"
              xmlns:vm="using:FerroUI.Diagnostics.ViewModels"
+             xmlns:vmm="using:FerroUI.Diagnostics.ViewModels"
              xmlns:lb="using:FerroUI.Diagnostics.Behaviors"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              x:Class="FerroUI.Diagnostics.Views.ControlDetailsView"
@@ -52,6 +53,23 @@
                      />
         </DockPanel>
       </DataTemplate>
+      <!-- Deviation (DEVIATIONS.md, Developer tools): the menu of a setter of the value frames is a
+           flyout shared by the setters, which takes the setter it is opened on as its data
+           context (a flyout is the child of the control it is shown at), in place of a context
+           menu with its items built for every setter of every selected control. -->
+      <MenuFlyout x:Key="SetterMenu" x:DataType="vm:SetterViewModel">
+        <MenuItem Header="Copy property name" Command="{Binding CopyPropertyName}" />
+        <MenuItem Header="Copy value" Command="{Binding CopyValue}" />
+      </MenuFlyout>
+      <MenuFlyout x:Key="BindingSetterMenu" x:DataType="vm:BindingSetterViewModel">
+        <MenuItem Header="Copy property name" Command="{Binding CopyPropertyName}" />
+        <MenuItem Header="Copy value" Command="{Binding CopyValue}" />
+      </MenuFlyout>
+      <MenuFlyout x:Key="ResourceSetterMenu" x:DataType="vm:ResourceSetterViewModel">
+        <MenuItem Header="Copy property name" Command="{Binding CopyPropertyName}" />
+        <MenuItem Header="Copy value" Command="{Binding CopyValue}" />
+        <MenuItem Header="Copy resource key" Command="{Binding CopyResourceKey}" />
+      </MenuFlyout>
       <!-- The cells of the "Value" column of the property grid: the editor of the value. -->
       <DataTemplate x:Key="PropertyValueCell" x:DataType="vm:PropertiesViewItem">
         <local:PropertyValueEditorView />
@@ -78,7 +96,16 @@
       and if we hide the contents of the column, the space is not reclaimed 
       (see discussion https://github.com/FerroUI/FerroUI/discussions/6773). 
       -->
-      <ColumnDefinition Width="320" lb:ColumnDefinition.IsVisible="{Binding Layout, Converter={x:Static ObjectConverters.IsNotNull}}" />
+      <!-- Deviation (DEVIATIONS.md, Developer tools): the side pane is also hidden while the toggle
+           of the header (IsSidePaneOpen of the main view model, an addition of the port) is off. -->
+      <ColumnDefinition Width="320">
+        <lb:ColumnDefinition.IsVisible>
+          <MultiBinding Converter="{x:Static BoolConverters.And}">
+            <Binding Path="Layout" Converter="{x:Static ObjectConverters.IsNotNull}" />
+            <Binding Path="$parent[local:MainView].((vmm:MainViewModel)DataContext).IsSidePaneOpen" />
+          </MultiBinding>
+        </lb:ColumnDefinition.IsVisible>
+      </ColumnDefinition>
     </Grid.ColumnDefinitions>
     
     <Grid Grid.Column="0" RowDefinitions="Auto,Auto,*">
@@ -139,10 +166,16 @@
 
     </Grid>
 
-    <GridSplitter Grid.Column="1" Classes="divider vertical"/>
+    <GridSplitter Grid.Column="1" Classes="divider vertical"
+                  IsVisible="{Binding $parent[local:MainView].((vmm:MainViewModel)DataContext).IsSidePaneOpen}"/>
 
-    <Grid Grid.Column="2" RowDefinitions="*,Auto,*"
-          IsVisible="{Binding Layout, Converter={x:Static ObjectConverters.IsNotNull}}">
+    <Grid Grid.Column="2" RowDefinitions="*,Auto,*">
+      <Grid.IsVisible>
+        <MultiBinding Converter="{x:Static BoolConverters.And}">
+          <Binding Path="Layout" Converter="{x:Static ObjectConverters.IsNotNull}" />
+          <Binding Path="$parent[local:MainView].((vmm:MainViewModel)DataContext).IsSidePaneOpen" />
+        </MultiBinding>
+      </Grid.IsVisible>
 
       <Grid RowDefinitions="Auto,*" Grid.Row="0">
         <TextBlock Classes="section-header" Grid.Row="0" Text="Layout" Margin="12,10,12,4" />
@@ -226,14 +259,14 @@
 
                         <DataTemplate DataType="IBrush">
                           <StackPanel Orientation="Horizontal" Spacing="2">
-                            <Border BorderThickness="1" BorderBrush="Black" Background="{Binding}" Width="8" Height="8"/>
+                            <Border BorderThickness="1" BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}" Background="{Binding}" Width="8" Height="8"/>
                             <TextBlock Text="{Binding}" />
                           </StackPanel>
                         </DataTemplate>
 
                         <DataTemplate DataType="Color">
                           <StackPanel Orientation="Horizontal" Spacing="2">
-                            <Border BorderThickness="1" BorderBrush="Black" Width="8" Height="8">
+                            <Border BorderThickness="1" BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}" Width="8" Height="8">
                               <Border.Background>
                                 <SolidColorBrush Color="{Binding}" />
                               </Border.Background>
@@ -243,13 +276,7 @@
                         </DataTemplate>
                         
                         <DataTemplate DataType="vm:BindingSetterViewModel">
-                          <Panel Opacity="{Binding IsActive, Converter={StaticResource BoolToOpacity}}" IsVisible="{Binding IsVisible}" HorizontalAlignment="Left">
-                            <Panel.ContextMenu>
-                              <ContextMenu>
-                                <MenuItem Header="Copy property name" Command="{Binding CopyPropertyName} "/>
-                                <MenuItem Header="Copy value" Command="{Binding CopyValue} "/>
-                              </ContextMenu>
-                            </Panel.ContextMenu>
+                          <Panel ContextFlyout="{StaticResource BindingSetterMenu}" Opacity="{Binding IsActive, Converter={StaticResource BoolToOpacity}}" IsVisible="{Binding IsVisible}" HorizontalAlignment="Left">
                             <StackPanel Orientation="Horizontal" Spacing="2">
                               <TextBlock Classes="property-name" PointerPressed="PropertyNamePressed" Text="{Binding Name}" />
                               <TextBlock Text=":" />
@@ -263,14 +290,7 @@
                         </DataTemplate>
 
                         <DataTemplate DataType="vm:ResourceSetterViewModel">
-                          <Panel Opacity="{Binding IsActive, Converter={StaticResource BoolToOpacity}}" IsVisible="{Binding IsVisible}" HorizontalAlignment="Left">
-                            <Panel.ContextMenu>
-                              <ContextMenu>
-                                <MenuItem Header="Copy property name" Command="{Binding CopyPropertyName} "/>
-                                <MenuItem Header="Copy value" Command="{Binding CopyValue} "/>
-                                <MenuItem Header="Copy resource key" Command="{Binding CopyResourceKey}" />
-                              </ContextMenu>
-                            </Panel.ContextMenu>
+                          <Panel ContextFlyout="{StaticResource ResourceSetterMenu}" Opacity="{Binding IsActive, Converter={StaticResource BoolToOpacity}}" IsVisible="{Binding IsVisible}" HorizontalAlignment="Left">
                             <StackPanel Orientation="Horizontal" Spacing="2" HorizontalAlignment="Left">
                               <TextBlock Classes="property-name" PointerPressed="PropertyNamePressed" Text="{Binding Name}" />
                               <TextBlock Text=":" />
@@ -285,13 +305,7 @@
                         </DataTemplate>
 
                         <DataTemplate DataType="vm:SetterViewModel">
-                          <Panel Opacity="{Binding IsActive, Converter={StaticResource BoolToOpacity}}" IsVisible="{Binding IsVisible}" HorizontalAlignment="Left">
-                            <Panel.ContextMenu>
-                              <ContextMenu>
-                                <MenuItem Header="Copy property name" Command="{Binding CopyPropertyName} "/>
-                                <MenuItem Header="Copy value" Command="{Binding CopyValue} "/>
-                              </ContextMenu>
-                            </Panel.ContextMenu>
+                          <Panel ContextFlyout="{StaticResource SetterMenu}" Opacity="{Binding IsActive, Converter={StaticResource BoolToOpacity}}" IsVisible="{Binding IsVisible}" HorizontalAlignment="Left">
                             <StackPanel Orientation="Horizontal" Spacing="2">
                               <TextBlock Classes="property-name" PointerPressed="PropertyNamePressed" Text="{Binding Name}" />
                               <TextBlock Text=":" />

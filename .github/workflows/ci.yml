@@ -690,6 +690,9 @@ jobs:
           -p ferroui-browser --features vello --examples
           && cargo check --locked --target wasm32-unknown-emscripten
           -p control-catalog-browser --features vello
+      # The JavaScript bridge of the CDP developer tools (docs/devtools-cdp.md), also behind a feature.
+      - name: Check the catalog host with the CDP bridge
+        run: cargo check --locked --target wasm32-unknown-emscripten -p control-catalog-browser --features cdp
       - name: Build the themed view site
         run: scripts/build-browser.sh themed_view
       - name: Behaviour tests in headless Chrome
@@ -1443,7 +1446,7 @@ jobs:
       # The catalog on the virtual framebuffer: the content of the device per page, as pictures
       # (the memory of the framebuffer device, read from its node).
       - name: Build the ControlCatalog
-        run: cargo build --locked -p control-catalog-desktop --features mcp
+        run: cargo build --locked -p control-catalog-desktop --features mcp,cdp
       - name: Inspect and drive the headless ControlCatalog over MCP
         timeout-minutes: 5
         run: python3 scripts/test-mcp.py

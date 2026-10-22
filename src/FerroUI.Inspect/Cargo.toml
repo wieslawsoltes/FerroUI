@@ -1,6 +1,6 @@
 [package]
 name = "ferroui-inspect"
-description = "Opt-in application inspection core for FerroUI"
+description = "Opt-in application inspection core for FerroUI, shared by its MCP server and its Chrome DevTools Protocol endpoint"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

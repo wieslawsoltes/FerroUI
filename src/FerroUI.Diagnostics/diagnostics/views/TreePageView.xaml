@@ -53,34 +53,41 @@
       <ColumnDefinition Width="1" lb:ColumnDefinition.IsVisible="{Binding $parent[local:MainView].((vmm:MainViewModel)DataContext).IsTreePaneOpen}" />
       <ColumnDefinition Width="0.65*" />
     </Grid.ColumnDefinitions>
-    <TreeDataGrid Name="tree"
-                  BorderThickness="0"
-                  ShowColumnHeaders="False"
-                  CanUserResizeColumns="False"
-                  CanUserSortColumns="False"
-                  Source="{Binding NodesSource}"
-                  PointerMoved="UpdateAdorner"
-                  PointerExited="RemoveAdorner"
-                  DoubleTapped="ToggleExpanded">
-      <TreeDataGrid.ContextFlyout>
-        <MenuFlyout>
-          <MenuItem Header="Copy">
-            <MenuItem Header="Copy individual node selector" Command="{Binding CopySelector}" />
-            <MenuItem Header="Copy selector from template parent" Command="{Binding CopySelectorFromTemplateParent}" />
-          </MenuItem>
-          <MenuItem Header="-" />
-          <MenuItem Header="Expand recursively" Command="{Binding ExpandRecursively}" />
-          <MenuItem Header="Collapse children" Command="{Binding CollapseChildren}" />
-          <MenuItem Header="Capture node screenshot" Command="{Binding CaptureNodeScreenshot}" />
-          <MenuItem Header="Bring into view" Command="{Binding BringIntoView}" />
-          <MenuItem Header="Focus" Command="{Binding Focus}" />
-        </MenuFlyout>
-      </TreeDataGrid.ContextFlyout>
-    </TreeDataGrid>
+    <!-- The tree in a pane of its own colour, set off from the details (DevToolsStyles.xaml). -->
+    <Border Classes="tree-pane" Grid.Column="0">
+      <TreeDataGrid Name="tree"
+                    BorderThickness="0"
+                    ShowColumnHeaders="False"
+                    CanUserResizeColumns="False"
+                    CanUserSortColumns="False"
+                    Source="{Binding NodesSource}"
+                    PointerMoved="UpdateAdorner"
+                    PointerExited="RemoveAdorner"
+                    DoubleTapped="ToggleExpanded">
+        <TreeDataGrid.ContextFlyout>
+          <MenuFlyout>
+            <MenuItem Header="Copy">
+              <MenuItem Header="Copy individual node selector" Command="{Binding CopySelector}" />
+              <MenuItem Header="Copy selector from template parent" Command="{Binding CopySelectorFromTemplateParent}" />
+            </MenuItem>
+            <MenuItem Header="-" />
+            <MenuItem Header="Expand recursively" Command="{Binding ExpandRecursively}" />
+            <MenuItem Header="Collapse children" Command="{Binding CollapseChildren}" />
+            <MenuItem Header="Capture node screenshot" Command="{Binding CaptureNodeScreenshot}" />
+            <MenuItem Header="Bring into view" Command="{Binding BringIntoView}" />
+            <MenuItem Header="Focus" Command="{Binding Focus}" />
+          </MenuFlyout>
+        </TreeDataGrid.ContextFlyout>
+      </TreeDataGrid>
+    </Border>
 
     <!-- Deviation (DEVIATIONS.md, Developer tools): a divider of the sheet of the tools
          (DevToolsStyles.xaml) in place of a splitter of the Simple theme. -->
     <GridSplitter Classes="divider vertical" Grid.Column="1"/>
     <ContentControl Content="{Binding Details}" Grid.Column="2"/>
+    <!-- Nothing selected: what to do, so that a page with the tree pane collapsed is not blank. -->
+    <TextBlock Grid.Column="2" Classes="empty-state"
+               IsVisible="{Binding Details, Converter={x:Static ObjectConverters.IsNull}}"
+               Text="Select a control in the tree, or hold Ctrl+Shift over a control to inspect it." />
   </Grid>
 </UserControl>
