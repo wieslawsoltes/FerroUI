@@ -78,6 +78,16 @@ impl CompletionList {
     pub fn current_list(&self) -> impl ExactSizeIterator<Item = &CompletionItem> {
         self.visible.iter().map(|i| &self.data[*i])
     }
+    /// Original item indices in display order, for hosts with rich item data.
+    pub fn current_indices(&self) -> impl ExactSizeIterator<Item = usize> + '_ {
+        self.visible.iter().copied()
+    }
+    pub fn selected_data_index(&self) -> Option<usize> {
+        self.selected.and_then(|index| self.visible.get(index)).copied()
+    }
+    pub fn clear_selection(&mut self) {
+        self.selected = None;
+    }
     pub fn selected_item(&self) -> Option<&CompletionItem> {
         self.selected
             .and_then(|i| self.visible.get(i))

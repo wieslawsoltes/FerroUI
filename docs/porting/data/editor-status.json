@@ -1,22 +1,22 @@
 {
   "schema_version": 1,
   "inventory_sha256": "70e060d1ca9836ade3c7c6b451169e52b4209b38458309ccb4c2694bb77541b5",
-  "mappings_sha256": "005bf48ff490fac1ab0efa126210355873a199ff4189310f0f5432e858fc4177",
+  "mappings_sha256": "f5ef0f8aef87589f53b80a331bc7d9baba73c4292d32eb770a9bb9a5f2285347",
   "counts": {
-    "mapped": 21,
-    "adapted": 176,
-    "unmapped": 178
+    "mapped": 22,
+    "adapted": 187,
+    "unmapped": 166
   },
   "file_count": 375,
   "declared_type_occurrences": 1310,
   "distinct_type_declarations_per_file": 554,
-  "mapped_declared_types": 245,
-  "unmapped_declared_types": 309,
+  "mapped_declared_types": 256,
+  "unmapped_declared_types": 298,
   "repositories": {
     "avaloniaedit": {
-      "mapped": 12,
-      "adapted": 106,
-      "unmapped": 123
+      "mapped": 13,
+      "adapted": 117,
+      "unmapped": 111
     },
     "textmatesharp": {
       "mapped": 9,
@@ -645,13 +645,26 @@
           "line": 6
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.CodeCompletion.CompletionAcceptAction"
       ],
-      "notes": "This completion/insight presentation or extension contract has no implementation in the current editor.",
+      "status": "mapped",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/completion_list.rs",
+          "symbols": [
+            "CompletionAcceptAction"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.CodeCompletion.CompletionAcceptAction",
+              "rust": "CompletionAcceptAction"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Pointer-pressed, pointer-released and double-tapped acceptance with matching discriminants and native markup enum registration.",
       "limitations": []
     },
     {
@@ -686,12 +699,27 @@
               "rust": "CompletionList"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit/completion_list.rs",
+          "symbols": [
+            "CompletionList",
+            "CompletionInsertionRequestedEventArgs",
+            "CompletionList::handle_key",
+            "CompletionList::request_insertion"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.CodeCompletion.CompletionList",
+              "rust": "CompletionList"
+            }
+          ]
         }
       ],
       "unmapped_types": [],
-      "notes": "Completion data, insertion text, ranking and selection/navigation.",
+      "notes": "Headless ranking model plus native content/list presentation, shared observable rich items, configurable pointer/key acceptance and routed insertion requests.",
       "limitations": [
-        "Rich descriptions, full event contracts and overload-insight UI are absent."
+        "Core Unicode ranking does not reproduce every locale-sensitive managed comparison. Native composition does not expose the upstream template-part names."
       ]
     },
     {
@@ -702,11 +730,28 @@
       "sha256": "683833b7cd3774a3ad78d9c19ad0010a6d1a697a9ecd13e91a86075158a2ee43",
       "types": [],
       "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/completion_list.rs",
+          "symbols": [
+            "CompletionList::build_content"
+          ],
+          "aliases": []
+        },
+        {
+          "path": "src/FerroUI.Edit/completion_list_box.rs",
+          "symbols": [
+            "CompletionListBox"
+          ],
+          "aliases": []
+        }
+      ],
       "unmapped_types": [],
-      "notes": "No file-for-file markup/theme port; the current FerroUI editor is constructed and styled through Rust APIs.",
-      "limitations": []
+      "notes": "The item image/content template and completion list are composed using native controls and FuncDataTemplate; ListBox theme inheritance preserves native virtualization.",
+      "limitations": [
+        "The literal XAML, PART_ListBox template contract, resource names and exact layout metrics are not copied."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/CodeCompletion/CompletionListBox.cs",
@@ -724,14 +769,30 @@
           "line": 29
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.CodeCompletion.CompletionListBox"
       ],
-      "notes": "This completion/insight presentation or extension contract has no implementation in the current editor.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/completion_list_box.rs",
+          "symbols": [
+            "CompletionListBox",
+            "CompletionListBox::set_first_visible_item"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.CodeCompletion.CompletionListBox",
+              "rust": "CompletionListBox"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Native ListBox specialization supplies selection clamping, visible-page helpers and inherited framework list theming/virtualization.",
+      "limitations": [
+        "Visible-page calculations follow FerroUI layout and native scrolling rather than managed container access."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/CodeCompletion/CompletionTipContentControl.cs",
@@ -749,14 +810,29 @@
           "line": 5
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.CodeCompletion.CompletionTipContentControl"
       ],
-      "notes": "This completion/insight presentation or extension contract has no implementation in the current editor.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/completion_tip_content_control.rs",
+          "symbols": [
+            "CompletionTipContentControl"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.CodeCompletion.CompletionTipContentControl",
+              "rust": "CompletionTipContentControl"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Native content control preserves rich boxed content and data-template behavior, wrapping and bounded width.",
+      "limitations": [
+        "Completion descriptions are displayed below the list in its popup instead of a secondary popup beside the selected row."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/CodeCompletion/CompletionTipContentControl.xaml",
@@ -766,11 +842,21 @@
       "sha256": "e803fd48ba016366897bba595ac7462904922ef0d4fc33b2e9b9c3041300af29",
       "types": [],
       "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/completion_tip_content_control.rs",
+          "symbols": [
+            "CompletionTipContentControl"
+          ],
+          "aliases": []
+        }
+      ],
       "unmapped_types": [],
-      "notes": "No file-for-file markup/theme port; the current FerroUI editor is constructed and styled through Rust APIs.",
-      "limitations": []
+      "notes": "Native ContentControl composition supplies the rich presenter, inherited content/template properties and padding.",
+      "limitations": [
+        "The source resource keys, PART_ContentPresenter contract and literal XAML style are not reproduced; styling follows the native content/editor controls."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/CodeCompletion/CompletionWindow.cs",
@@ -808,7 +894,9 @@
         {
           "path": "src/FerroUI.Edit/completion_window.rs",
           "symbols": [
-            "CompletionWindow"
+            "CompletionWindow",
+            "CompletionWindow::show_with_data",
+            "CompletionWindow::request_insertion"
           ],
           "aliases": [
             {
@@ -819,9 +907,9 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Anchored completion session plus FerroUI popup/list presentation and input handling.",
+      "notes": "Headless completion session plus native popup with rich/custom items, explicit insertion preflight, original input events, lifecycle dismissal and close-before-custom-action ordering.",
       "limitations": [
-        "Insight/overload UI, full base-window lifecycle and rich completion description contracts remain absent."
+        "Descriptions use inline rich content below the list, not the source secondary popup. Browser/OS popup appearance and all IME/template permutations require platform validation."
       ]
     },
     {
@@ -849,41 +937,44 @@
         }
       ],
       "mapped_types": [
-        "AvaloniaEdit.CodeCompletion.CompletionWindowBase"
+        "AvaloniaEdit.CodeCompletion.CompletionWindowBase",
+        "AvaloniaEdit.CodeCompletion.CompletionWindowBase.InputHandler"
       ],
       "status": "adapted",
       "targets": [
         {
-          "path": "src/FerroUI.Edit.Core/completion/completion_session.rs",
+          "path": "src/FerroUI.Edit/completion_window_base.rs",
           "symbols": [
-            "CompletionSession"
+            "CompletionWindowBase",
+            "CompletionWindowBase::attach_to_editor",
+            "CompletionWindowBase::close_window"
           ],
           "aliases": [
             {
               "upstream": "AvaloniaEdit.CodeCompletion.CompletionWindowBase",
-              "rust": "CompletionSession"
+              "rust": "CompletionWindowBase"
             }
           ]
         },
         {
-          "path": "src/FerroUI.Edit/completion_window.rs",
+          "path": "src/FerroUI.Edit/completion_window_base.rs",
           "symbols": [
-            "CompletionWindow"
+            "CompletionWindowBase::forward_key",
+            "CompletionWindowBase::owns_editor_input",
+            "CompletionWindowBase::detach"
           ],
           "aliases": [
             {
-              "upstream": "AvaloniaEdit.CodeCompletion.CompletionWindowBase",
-              "rust": "CompletionWindow"
+              "upstream": "AvaloniaEdit.CodeCompletion.CompletionWindowBase.InputHandler",
+              "rust": "CompletionWindowBase::forward_key"
             }
           ]
         }
       ],
-      "unmapped_types": [
-        "AvaloniaEdit.CodeCompletion.CompletionWindowBase.InputHandler"
-      ],
-      "notes": "Anchored completion session plus FerroUI popup/list presentation and input handling.",
+      "unmapped_types": [],
+      "notes": "Tracked UTF-16 ranges, attached active-window ownership, popup positioning, focus/document/scroll lifecycle, virtual extension hooks and explicit subscription detachment. The nested input handler is consolidated into native routed input forwarding.",
       "limitations": [
-        "Insight/overload UI, full base-window lifecycle and rich completion description contracts remain absent."
+        "Active popup input ownership uses attached window handles and native event subscriptions instead of exposing the managed stacked-input-handler object hierarchy."
       ]
     },
     {
@@ -918,12 +1009,27 @@
               "rust": "ICompletionData"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit/completion_data.rs",
+          "symbols": [
+            "ICompletionData",
+            "CompletionData",
+            "CompletionDataRef",
+            "CompletionAction"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.CodeCompletion.ICompletionData",
+              "rust": "ICompletionData"
+            }
+          ]
         }
       ],
       "unmapped_types": [],
-      "notes": "Completion data, insertion text, ranking and selection/navigation.",
+      "notes": "Core metadata contract and native rich completion trait with boxed content/description, images, priority and custom insertion receiving the original input event.",
       "limitations": [
-        "Rich descriptions, full event contracts and overload-insight UI are absent."
+        "Custom completion actions are Rust trait callbacks and are not serializable XAML objects. Custom writes beyond the preflighted range must use the editing session protection APIs."
       ]
     },
     {
@@ -942,14 +1048,31 @@
           "line": 26
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.CodeCompletion.IOverloadProvider"
       ],
-      "notes": "This completion/insight presentation or extension contract has no implementation in the current editor.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/overload_provider.rs",
+          "symbols": [
+            "IOverloadProvider",
+            "OverloadProvider",
+            "OverloadProviderRef"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.CodeCompletion.IOverloadProvider",
+              "rust": "IOverloadProvider"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Native INotifyPropertyChanged provider contract with rich header/content and a clamped observable convenience provider.",
+      "limitations": [
+        "Indices use usize; an empty provider exposes index zero together with count zero instead of a negative sentinel."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/CodeCompletion/InsightWindow.cs",
@@ -967,14 +1090,30 @@
           "line": 29
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.CodeCompletion.InsightWindow"
       ],
-      "notes": "This completion/insight presentation or extension contract has no implementation in the current editor.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/insight_window.rs",
+          "symbols": [
+            "InsightWindow",
+            "InsightWindow::show_for"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.CodeCompletion.InsightWindow",
+              "rust": "InsightWindow"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Native rich content popup with editor segment tracking, automatic/manual lifetime and explicit theme subscription cleanup.",
+      "limitations": [
+        "Native popup positioning and theme composition replace the managed presentation; platform appearance is validated separately."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/CodeCompletion/InsightWindow.xaml",
@@ -984,11 +1123,21 @@
       "sha256": "2fb867980e64411560d9bf759e8b4013930452f525bb61c93d793179f5495c68",
       "types": [],
       "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/overload_viewer.rs",
+          "symbols": [
+            "OverloadViewer::build_content"
+          ],
+          "aliases": []
+        }
+      ],
       "unmapped_types": [],
-      "notes": "No file-for-file markup/theme port; the current FerroUI editor is constructed and styled through Rust APIs.",
-      "limitations": []
+      "notes": "Overload navigation buttons, current-index text and rich header/body are composed with native controls and presenters.",
+      "limitations": [
+        "The source XAML resource keys, PART_UP/PART_DOWN template contracts and exact grid/button metrics are not copied."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/CodeCompletion/OverloadInsightWindow.cs",
@@ -1006,14 +1155,30 @@
           "line": 28
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.CodeCompletion.OverloadInsightWindow"
       ],
-      "notes": "This completion/insight presentation or extension contract has no implementation in the current editor.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/overload_insight_window.rs",
+          "symbols": [
+            "OverloadInsightWindow",
+            "OverloadInsightWindow::set_provider"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.CodeCompletion.OverloadInsightWindow",
+              "rust": "OverloadInsightWindow"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Observable overload provider, Up/Down navigation while editor focus remains active, and provider detachment on replacement and close.",
+      "limitations": [
+        "Uses the native popup input-ownership and property-notification contracts documented for CompletionWindowBase."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/CodeCompletion/OverloadViewer.cs",
@@ -1039,15 +1204,43 @@
           "line": 111
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.CodeCompletion.CollapseIfSingleOverloadConverter",
         "AvaloniaEdit.CodeCompletion.OverloadViewer"
       ],
-      "notes": "This completion/insight presentation or extension contract has no implementation in the current editor.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/overload_viewer.rs",
+          "symbols": [
+            "OverloadViewer",
+            "OverloadViewer::change_index"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.CodeCompletion.OverloadViewer",
+              "rust": "OverloadViewer"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.Edit/collapse_if_single_overload_converter.rs",
+          "symbols": [
+            "CollapseIfSingleOverloadConverter"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.CodeCompletion.CollapseIfSingleOverloadConverter",
+              "rust": "CollapseIfSingleOverloadConverter"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Rich header/body, provider notifications, navigation buttons and zero/one-count behavior. The one-way converter returns a descriptive BindingError for reverse conversion.",
+      "limitations": [
+        "Native content composition replaces the source template parts. Empty-provider selection uses usize with explicit count checks."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/CodeCompletion/PopupWithCustomPosition.cs",
@@ -1065,14 +1258,30 @@
           "line": 6
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.CodeCompletion.PopupWithCustomPosition"
       ],
-      "notes": "This completion/insight presentation or extension contract has no implementation in the current editor.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/popup_with_custom_position.rs",
+          "symbols": [
+            "PopupWithCustomPosition",
+            "PopupWithCustomPosition::set_offset"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.CodeCompletion.PopupWithCustomPosition",
+              "rust": "PopupWithCustomPosition"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Native Popup specialization maps a point offset onto the existing horizontal and vertical offset properties.",
+      "limitations": [
+        "Screen constraints and placement are delegated to the framework popup positioner."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Converters/TextLengthToBoolConverter.cs",
@@ -3210,13 +3419,39 @@
               "rust": "EditorSession::replace_virtual_selections"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/editing/editor_session/rectangular_paste.rs",
+          "symbols": [
+            "EditorSession::paste_rectangle",
+            "EditorSession::paste_rectangle_at"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Editing.RectangleSelection",
+              "rust": "EditorSession::paste_rectangle"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.Edit/text_area.rs",
+          "symbols": [
+            "TextArea::set_rectangular_selection"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Editing.RectangleSelection",
+              "rust": "TextArea::set_rectangular_selection"
+            }
+          ]
         }
       ],
       "unmapped_types": [],
-      "notes": "Rectangle mode, line-only tab/grapheme projection with virtual endpoints, per-row typing and bounded multiline paste retaining remaining text in the final selected row.",
+      "notes": "Rectangle mode, line-only tab/grapheme projection with virtual endpoints, native pixel rectangle projection, per-row typing, bounded active-rectangle replacement and atomic clipboard column paste with existing-row/final-column fallback and prepared native positions.",
       "limitations": [
         "Core cell projection is not pixel or bidirectional geometry; native layout integration is verified separately. Distinct virtual carets sharing one physical EOL are rejected atomically by the general multicaret extension.",
-        "Rectangular clipboard metadata and automatic column paste at an ordinary caret are not yet connected; active-rectangle multiline replacement is implemented."
+        "Clipboard paste recognizes standalone CR as well as CRLF/LF and selects inserted multiline ranges when requested; these correct the source LF-only count and selection-flag limitation. A protected row rejects the complete plan instead of skipping individual rows.",
+        "Native rectangular clipboard metadata and transport interoperability are tracked separately from the verified core paste APIs. Wrapped box-caret movement still advances between visible logical lines."
       ]
     },
     {
@@ -3335,15 +3570,32 @@
           "line": 38
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
+      "mapped_types": [
+        "AvaloniaEdit.Editing.SelectionMouseHandler"
+      ],
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/text_area.rs",
+          "symbols": [
+            "TextArea",
+            "TextArea::set_rectangular_selection"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Editing.SelectionMouseHandler",
+              "rust": "TextArea"
+            }
+          ]
+        }
+      ],
       "unmapped_types": [
-        "AvaloniaEdit.Editing.SelectionMouseHandler",
         "AvaloniaEdit.Editing.SelectionMouseHandler.SelectionMode"
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "notes": "Native TextArea routed pointer handlers implement click/Shift extension, pointer capture and drag selection, double/triple-click selection, line-gutter selection and Alt-drag rectangles with virtual/pixel geometry.",
+      "limitations": [
+        "The independent managed input-handler class and SelectionMode state machine are consolidated into the control. Text drag/drop, whole-word/whole-line drag modes and source scroll-coupled drag behavior are not implemented."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Editing/SelectionSegment.cs",

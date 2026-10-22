@@ -1,3 +1,4 @@
+mod rectangular_paste;
 mod virtual_space;
 
 use super::{

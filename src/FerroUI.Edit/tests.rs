@@ -653,3 +653,41 @@ fn shift_home_in_wrapped_text_retains_a_virtual_anchor() {
     assert_eq!(editor.selection().primary().anchor_tuple(), (3, 3));
     assert_eq!(editor.selection().primary().caret_tuple(), (0, 0));
 }
+
+#[test]
+fn ime_composition_keeps_virtual_padding_visual_until_commit_or_cancel() {
+    use crate::{TextLocation, TextViewPosition};
+    use ferroui_base::input::{InputElement, TextInputEventArgs};
+    let _scope = test_scope();
+    for text in ["abc", "abc אבג"] {
+        let editor = laid_out_editor(text);
+        let length = editor.document().text_length();
+        let position =
+            TextViewPosition::with_visual_column(TextLocation::new(1, length + 1), length + 3);
+        editor.set_caret_position(position).unwrap();
+        editor.document().clear_undo_history().unwrap();
+        let area = editor.text_area();
+        let initial = area.cursor_rectangle();
+        let version = editor.document().version();
+        area.set_preedit(Some("漢😀"), Some(0));
+        render_editor(&editor);
+        assert!((area.cursor_rectangle().x - initial.x).abs() < 1.0);
+        assert_eq!(editor.text(), text);
+        assert_eq!(editor.document().version(), version);
+        assert!(!editor.document().can_undo());
+        area.set_preedit(None, None);
+        render_editor(&editor);
+        assert_eq!(editor.caret_position(), position);
+        assert_eq!(area.cursor_rectangle(), initial);
+        area.set_preedit(Some("漢😀"), Some(3));
+        render_editor(&editor);
+        assert!(area.cursor_rectangle().x > initial.x);
+        let mut input = TextInputEventArgs::new();
+        input.text = Some("漢😀".into());
+        input.set_routed_event(Some(InputElement::text_input_event()));
+        area.raise_event(&input);
+        assert_eq!(editor.text(), format!("{text}   漢😀"));
+        editor.undo().unwrap();
+        assert_eq!(editor.text(), text);
+    }
+}

@@ -1113,11 +1113,18 @@ impl TextArea {
         let preedit = self.preedit.borrow().as_ref().and_then(|(text, _)| {
             let selected = editor.selection().primary();
             if selected.start_offset() >= line.offset() && selected.end_offset() <= end {
-                Some(display.apply_preedit(
+                match display.apply_preedit(
                     selected.start_offset() - line.offset(),
                     selected.end_offset() - line.offset(),
                     text,
-                ))
+                    selected.start_virtual_space(),
+                ) {
+                    Ok(range) => Some(range),
+                    Err(error) => {
+                        editor.report_error(error.to_string());
+                        None
+                    }
+                }
             } else {
                 None
             }

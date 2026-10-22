@@ -26,9 +26,20 @@ pub fn register_types() {
             crate::TextArea::TYPE,
             crate::SearchPanel::TYPE,
             crate::CompletionWindow::TYPE,
+            crate::CompletionList::TYPE,
+            crate::CompletionListBox::TYPE,
+            crate::CompletionTipContentControl::TYPE,
+            crate::CompletionWindowBase::TYPE,
+            crate::InsightWindow::TYPE,
+            crate::OverloadInsightWindow::TYPE,
+            crate::OverloadViewer::TYPE,
+            crate::PopupWithCustomPosition::TYPE,
             crate::automation::TextEditorAutomationPeer::TYPE,
         ]);
         crate::rust_paths::register_rust_paths();
+        ferroui_base::metadata::MarkupType::register(
+            <crate::CompletionAcceptAction as ferroui_base::metadata::MarkupTyped>::MARKUP,
+        );
         MarkupAssembly::register(&ASSEMBLY);
     });
 }

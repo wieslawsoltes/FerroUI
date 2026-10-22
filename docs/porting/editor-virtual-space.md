@@ -15,6 +15,7 @@ document, undo stack, input system, or text buffer.
 | `Editing/RectangleSelection.cs` | `editing/rectangle_selection.rs` | Logical-line rectangle projection and explicit virtual coordinates |
 | `Editing/Selection.cs::AddSpacesIfRequired` | `editing/editor_session/virtual_space.rs::EditorSession::with_virtual_padding` | Conditional materialization of virtual space |
 | `Editing/RectangleSelection.cs::ReplaceSelectionWithText` | `editing/editor_session/virtual_space.rs::EditorSession::replace_virtual_selections` | Broadcast typing and bounded multiline paste |
+| `Editing/RectangleSelection.cs::PerformRectangularPaste` | `editing/editor_session/rectangular_paste.rs::EditorSession::paste_rectangle` and `paste_rectangle_at` | Clipboard column paste, prepared native positions, atomic preflight, final selection |
 | `Editing/CaretNavigationCommandHandler.cs` | `editing/caret_navigation.rs` and `editing/editor_session/virtual_space.rs` | Grapheme navigation, virtual movement, persistent desired column |
 | `Editing/EditingCommandHandler.cs` | `editing/editor_session.rs` and its `virtual_space` module | Delete, Backspace, Enter, Tab, protection checks, undo grouping |
 
@@ -83,6 +84,7 @@ borrows; it does not retain the session through a document-reference cycle.
 | Tab across a multiline rectangle | Indent its selected logical lines, following the source command's multiline rule |
 | Left/Right beyond EOL | Move by virtual cells; extending a selection retains its anchor's virtual coordinate |
 | Up/Down | Preserve the desired cell column across shorter lines, tabs and grapheme clusters |
+| IME preedit beyond EOL in the native view | Render a transient virtual gap and composition text without changing document text or history; materialize padding only on committed input |
 
 Padding uses spaces on a line containing ordinary text. When tab conversion is
 disabled and the existing line is empty or contains only tabs, it uses complete
@@ -132,6 +134,64 @@ rectangle mode and uses the first inserted row's physical column to place the
 caret on the rectangle's original bottom logical line, clamped to existing
 text, following the source's final-caret rule.
 
+### Rectangular clipboard paste at an ordinary caret
+
+The session also exposes the source's column-paste operation independently of
+the native clipboard transport:
+
+```rust
+pub fn paste_rectangle(
+    &self,
+    text: &str,
+    select_inserted_text: bool,
+) -> Result<bool, EditError>;
+
+pub fn paste_rectangle_at(
+    &self,
+    positions: &Selection,
+    text: &str,
+    select_inserted_text: bool,
+) -> Result<(), EditError>;
+```
+
+`paste_rectangle` accepts one empty caret and projects its cell column onto
+successive existing logical lines. It reads only the affected lines. It returns
+`Ok(false)` without changing document text, selection, version, or undo history
+when the current selection is nonempty or has multiple carets, when too few
+existing lines remain, or when virtual space is disabled and the final row
+cannot reach the initial physical UTF-16 column. The final-row condition follows
+`PerformRectangularPaste`; a short intermediate row can still receive padding.
+The caller can perform an ordinary paste after `Ok(false)`, preserving the full
+input and allowing that ordinary operation to add lines at EOF. An error such
+as `ReadOnly` or `StaleEditPlan` must not trigger that fallback.
+
+CR, LF, and CRLF delimit the clipboard's rows. A trailing delimiter represents
+an additional empty row and therefore participates in the fit check. Delimiters
+in the existing document remain unchanged; the row separators do not replace
+them. This explicitly fixes the source method's LF-only row count for standalone
+CR text. The operation never silently extends the document to accommodate a
+rectangle that cannot fit.
+
+`paste_rectangle_at` accepts positions projected by a native view without first
+changing the live selection. Its selection must be in rectangle mode, have one
+empty segment per input row, and place those segments on distinct ascending
+logical lines. The rows can skip folded lines, and their physical columns can
+differ when proportional glyph geometry requires it. Virtual endpoints must be
+at real logical line ends. A row count mismatch, a nonempty segment, a position
+inside a line delimiter, or two carets on the same logical row returns an error
+before mutation. The caller supplies positions from the current document; it
+must not reuse an unversioned position plan across unrelated document edits.
+
+Every nonempty row receives its own necessary padding. Empty rows preserve their
+virtual positions without inserting padding or creating a spurious undo entry.
+With `select_inserted_text = true`, the inserted ranges stay selected in
+rectangle mode and exclude the materialized padding. The prepared selection's
+primary row is preserved. This makes the selection flag effective for multiline
+input as well; the source's implementation only restores an inserted selection
+if replacement has left rectangle mode active. With the flag false, one caret
+ends on the final target row at the first inserted row's resulting physical
+column, clamped to that row. A single empty row retains its virtual caret.
+
 ## Protection, change events and undo
 
 Replacement plans use original document coordinates. Before any real mutation,
@@ -142,6 +202,17 @@ document's update-start event in case the host changes its policy there. If that
 event edits the document, `EditError::StaleEditPlan` rejects the old plan before
 applying any of its replacements. A host's independent event-handler edit is
 not rolled back by that rejection.
+
+The clipboard-paste plan also captures its document version before the first
+read-only-provider callback. A provider that changes text during its initial
+preflight cannot cause the old row coordinates to commit. Protection is checked
+for the complete insertion plan before and after update-start; a protected row
+rejects the entire paste. This atomic error contract is deliberate: the source's
+rectangle replacement can skip individual protected row insertions. New
+clipboard selections are installed only after all insertions succeed and before
+consolidated text-change notifications. Reentrant notification edits therefore
+map the final selection through the existing document subscription without
+outstanding selection borrows.
 
 Accepted edits use the document's shared batch operation and one update guard.
 Temporary surviving anchors track the replacement starts through edits earlier
@@ -160,21 +231,36 @@ Rust session's general multicaret extension.
 
 ## Verification and remaining boundaries
 
-The standalone document/editing suite passes **148 tests**, including **21 new
-virtual-space regressions**, using the real source modules and the existing
+The standalone document/editing suite passes **165 tests**, including **21
+virtual-space regressions** and **17 rectangular clipboard-paste regressions**,
+using the real source modules and the existing
 regex and Unicode-segmentation dependencies. The tests cover reversed virtual
 ranges, distinct virtual carets, short-line rectangles, CRLF, supplementary and
 combining text, navigation, tab-aware padding, no-op history, protected row
 preflight, undo/redo, multiline paste, update-start changes and allocation
 overflow. They also verify that virtual-only selections at offset zero do not
 underflow the line-selection calculations in indentation or transformations.
-The shared integration gate also passes **240 core tests, 45 native editor
-control tests and 2 EditorDemo tests**, with no failures or filtered tests. The
+The integrated gate including this paste service and completion controls passes
+**257 core tests, 61 native editor control tests and 2 EditorDemo tests**, with no
+failures or filtered tests. The
 native regressions exercise formatter round trips, short-line box typing,
 folded-line rectangle geometry, wrapped-row affinity and notification order,
 page movement with virtual anchors, Shift+Home anchor preservation, routed
 Alt pointer press/release, keyboard rectangle anchors, and virtual cells after
-bidirectional text. These tests use the actual FerroUI control and layout APIs.
+bidirectional text. IME composition tests verify the same virtual screen position
+before commit, supplementary composition text, cancellation, unchanged document
+version/history during preview, and one-step undo after committing with padding
+in both Latin and mixed bidirectional lines. These tests use the actual FerroUI
+control and layout APIs.
+
+The new clipboard-paste tests cover all three newline forms, trailing empty
+rows, unchanged document delimiters and suffixes, EOF fallback, final-row fit,
+short intermediate lines, tab padding, supplementary and combining text,
+prepared native positions that skip lines, selection excluding padding, all-row
+protection, document and session read-only flags, update-start policy changes,
+document changes during both preflight stages, no-op history, one-step undo and
+redo, allocation overflow, and reentrant consolidated notifications. Native
+clipboard transport validation is recorded separately when that adapter lands.
 
 This component does not reproduce the managed selection inheritance hierarchy.
 The logical projection does not expose custom visual-line elements, wrapped
@@ -192,15 +278,12 @@ the [source inventory](editor-source-map.md).
   distinction requires retaining the box caret's wrapped-row position
   independently of the projected row segments; first-row rectangle projection
   itself follows the source.
-- IME preedit currently appears at the physical line end when composition starts
-  at a virtual caret. The committed insertion receives correct padding and undo
-  behavior, but the composition preview still needs a transient visual gap that
-  preserves the virtual caret's screen position without editing the document.
-- Clipboard copy/cut/paste currently transfers plain text. Replacing an active
-  rectangle is implemented, but the upstream rectangular clipboard marker and
-  automatic column paste at an ordinary caret are not yet connected. That
-  round trip needs a native data-transfer marker plus an atomic core rectangle
-  paste plan; ordinary text must retain its normal paste semantics.
+- The core now supports atomic rectangular clipboard paste at an ordinary caret
+  and explicitly projected native positions. The native transport must preserve
+  a separate rectangular-selection marker and invoke ordinary text replacement
+  only after `Ok(false)`. Active rectangular selections continue to use the
+  bounded replacement operation described above. Native marker interoperability
+  and clipboard round-trip validation are tracked with the presentation adapter.
 - The core `LineStart` movement goes directly to logical BOL. The source's
   first-nonwhitespace smart-Home toggle is a separate remaining command behavior.
 

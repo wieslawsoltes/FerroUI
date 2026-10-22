@@ -105,7 +105,7 @@ impl EditorSession {
         )
     }
 
-    fn with_virtual_padding(
+    pub(super) fn with_virtual_padding(
         &self,
         segment: SelectionSegment,
         text: &str,

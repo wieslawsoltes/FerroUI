@@ -185,13 +185,44 @@ impl DisplayLine {
     /// Projects IME composition without changing document storage. Both the
     /// inserted composition and the removed selection still map to document
     /// boundaries; only its visual text is transient.
-    pub fn apply_preedit(&mut self, start: usize, end: usize, text: &str) -> (usize, usize) {
+    pub fn apply_preedit(
+        &mut self,
+        start: usize,
+        end: usize,
+        text: &str,
+        virtual_padding: usize,
+    ) -> Result<(usize, usize), ferroui_edit_core::editing::EditError> {
+        use ferroui_edit_core::editing::EditError;
+        if end < start {
+            return Err(EditError::InvalidSelection);
+        }
         let first = self.visual_offset(start);
         let last = self.visual_offset(end);
-        let units: Vec<_> = text.encode_utf16().collect();
-        let length = units.len();
+        let composition_length = text.encode_utf16().count();
+        let length = virtual_padding
+            .checked_add(composition_length)
+            .ok_or(EditError::VirtualSpaceTooLarge)?;
+        let projected_length = self
+            .text
+            .len()
+            .checked_sub(last - first)
+            .and_then(|length_without_selection| length_without_selection.checked_add(length))
+            .filter(|&length| length <= i32::MAX as usize)
+            .ok_or(EditError::VirtualSpaceTooLarge)?;
+        let mut units = Vec::new();
+        units
+            .try_reserve_exact(length)
+            .map_err(|_| EditError::VirtualSpaceTooLarge)?;
+        units.resize(virtual_padding, 32);
+        units.extend(text.encode_utf16());
+        let mut positions = Vec::new();
+        positions
+            .try_reserve_exact(self.positions.len().saturating_add(2))
+            .map_err(|_| EditError::VirtualSpaceTooLarge)?;
+        self.text
+            .try_reserve(projected_length.saturating_sub(self.text.len()))
+            .map_err(|_| EditError::VirtualSpaceTooLarge)?;
         self.text.splice(first..last, units);
-        let mut positions = Vec::with_capacity(self.positions.len() + 2);
         positions.extend(self.positions.iter().copied().filter(|p| p.0 < start));
         positions.push((start, first));
         positions.push((end, first + length));
@@ -202,7 +233,7 @@ impl DisplayLine {
                 .map(|&(d, v)| (d, v - (last - first) + length)),
         );
         self.positions = positions;
-        (first, length)
+        Ok((first + virtual_padding, composition_length))
     }
 
     fn push_position(&mut self, offset: usize) {
@@ -309,10 +340,25 @@ mod tests {
     #[test]
     fn preedit_replaces_visual_selection_and_retains_document_mapping() {
         let mut display = DisplayLine::new(&"a😀z".encode_utf16().collect::<Vec<_>>(), 4);
-        assert_eq!(display.apply_preedit(1, 3, "日本語"), (1, 3));
+        assert_eq!(display.apply_preedit(1, 3, "日本語", 0).unwrap(), (1, 3));
         assert_eq!(String::from_utf16_lossy(&display.text), "a日本語z");
         assert_eq!(display.visual_offset(4), 5);
         assert_eq!(display.document_offset(4), 3);
         assert_eq!(display.document_offset(5), 4);
+    }
+
+    #[test]
+    fn virtual_preedit_padding_maps_back_to_eol_and_rejects_overflow_atomically() {
+        let mut display = DisplayLine::new(&[65], 4);
+        let old_text = display.text.clone();
+        let old_positions = display.positions.clone();
+        assert!(display.apply_preedit(1, 1, "X", usize::MAX).is_err());
+        assert_eq!(display.text, old_text);
+        assert_eq!(display.positions, old_positions);
+        assert_eq!(display.apply_preedit(1, 1, "😀", 3).unwrap(), (4, 2));
+        assert_eq!(String::from_utf16_lossy(&display.text), "A   😀");
+        for index in 1..=6 {
+            assert_eq!(display.document_offset(index), 1);
+        }
     }
 }
