@@ -203,7 +203,7 @@ impl DesignCanvas {
         }
         let protected = protected_targets(node, transform, viewport);
         let spacing = state.spacing.as_ref().unwrap();
-        let handles = source
+        let handles: Vec<Handle> = source
             .into_iter()
             .zip(&spacing.maximum_offsets)
             .filter_map(|(source, &maximum)| {
