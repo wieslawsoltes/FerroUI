@@ -1091,8 +1091,15 @@ impl TextBoxImpl for TextBox {
                 TextMutationKind::InternalSynchronization => {}
 
                 TextMutationKind::ExternalReplacement => {
-                    this.clear_undo_redo();
-                    this.needs_undo_redo_snapshot_after_text_change.set(true);
+                    // A newly applied TwoWay template binding can echo the
+                    // current Text before the property store checks equality.
+                    // That is not a replacement: clearing history here would
+                    // discard redo, and the unchanged value would leave the
+                    // deferred snapshot flag for an unrelated later change.
+                    if this.text() != value {
+                        this.clear_undo_redo();
+                        this.needs_undo_redo_snapshot_after_text_change.set(true);
+                    }
                 }
             }
         }

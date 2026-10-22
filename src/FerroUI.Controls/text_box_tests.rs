@@ -1361,6 +1361,41 @@ fn two_way_binding_source_echo_does_not_clear_undo_history() {
     assert_eq!(Some("initial edit"), source.bar().as_deref());
 }
 
+#[test]
+fn unchanged_external_text_assignments_preserve_native_redo() {
+    let _scope = test_scope();
+    let target = TextBox::new();
+    target.set_text(Some("original"));
+    target.set_caret_index(8);
+    target.set_selected_text(Some("!"));
+    assert_eq!(target.text().as_deref(), Some("original!"));
+    target.undo();
+    assert_eq!(target.text().as_deref(), Some("original"));
+    assert!(!target.can_undo() && target.can_redo());
+
+    let changes = Rc::new(Cell::new(0));
+    let observed = changes.clone();
+    target.text_changing(move |_, _| observed.set(observed.get() + 1));
+    target.set_text(Some("original"));
+    assert!(!target.can_undo() && target.can_redo(), "An identical public assignment must preserve redo");
+    // This is the setter used by a TwoWay TemplateBinding source echo.
+    target.set_current_value(TextBox::text_property(), Some("original".to_string()));
+    assert!(!target.can_undo() && target.can_redo(), "An identical binding echo must preserve redo");
+    assert_eq!(changes.get(), 0, "Unchanged Text has no change notification to consume a deferred snapshot");
+
+    target.redo();
+    assert_eq!(target.text().as_deref(), Some("original!"));
+    assert!(target.can_undo() && !target.can_redo());
+    target.undo();
+    assert_eq!(target.text().as_deref(), Some("original"));
+    assert!(!target.can_undo() && target.can_redo());
+    assert_eq!(changes.get(), 2);
+
+    target.set_text(Some("replacement"));
+    assert_eq!(target.text().as_deref(), Some("replacement"));
+    assert!(!target.can_undo() && !target.can_redo(), "A different external Text still resets history");
+}
+
 /// Gets the undo and redo stacks of a text box in a state where both were
 /// active.
 fn exercise_undo_redo(tb: &TextBox) {
@@ -2968,13 +3003,22 @@ fn paragraph_preedit_template_removal_restores_confirmation_without_discarding_r
     let root = host_in_root(&target);
     let previous = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
     let client = get_input_method_client(&target);
+    let original_snapshot = Rc::new(original.to_string());
+    let edited_snapshot = Rc::new("A🦀\nB!".to_string());
+    target.set_text_undo_state(Some(original_snapshot.clone()));
+    let assert_snapshot = |expected: &Rc<String>| {
+        let actual = target.text_undo_state().unwrap().downcast::<String>().unwrap();
+        assert!(Rc::ptr_eq(&actual, expected));
+    };
 
     target.set_caret_index(5);
     target.set_selected_text(Some("!"));
     assert_eq!(target.text().as_deref(), Some("A🦀\nB!"));
+    target.set_text_undo_state(Some(edited_snapshot.clone()));
     target.undo();
     assert_eq!(target.text().as_deref(), Some(original));
     assert!(!target.can_undo() && target.can_redo());
+    assert_snapshot(&original_snapshot);
     target.set_selection_start(0);
     target.set_selection_end(4);
     client.set_preedit_text(Some("pending"));
@@ -2992,6 +3036,7 @@ fn paragraph_preedit_template_removal_restores_confirmation_without_discarding_r
     assert!(Rc::ptr_eq(target.text_style_overrides().as_ref().unwrap(), &characters));
     assert!(!target.is_composing_text());
     assert!(!target.can_undo() && target.can_redo());
+    assert_snapshot(&original_snapshot);
     previous.set_preedit_text(Some("obsolete template"));
     client.set_preedit_text(Some("late client update"));
     assert_eq!(target.text().as_deref(), Some(original));
@@ -3000,11 +3045,17 @@ fn paragraph_preedit_template_removal_restores_confirmation_without_discarding_r
     assert!(!target.can_undo() && target.can_redo());
     target.redo();
     assert_eq!(target.text().as_deref(), Some("A🦀\nB!"));
+    assert!(target.can_undo() && !target.can_redo());
+    assert_snapshot(&edited_snapshot);
     target.undo();
     assert_eq!(target.text().as_deref(), Some(original));
+    assert!(!target.can_undo() && target.can_redo());
+    assert_snapshot(&original_snapshot);
 
     target.set_template(create_themed_template());
     root.execute_initial_layout_pass();
+    assert!(!target.can_undo() && target.can_redo(), "Installing the new native template must not alter history");
+    assert_snapshot(&original_snapshot);
     let current = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
     assert!(current != previous);
     assert!(Rc::ptr_eq(current.text_paragraph_styles().as_ref().unwrap(), &paragraphs));
@@ -3013,6 +3064,7 @@ fn paragraph_preedit_template_removal_restores_confirmation_without_discarding_r
     target.set_selection_end(4);
     client.set_preedit_text(Some("new template"));
     assert_eq!(target.text().as_deref(), Some("B"));
+    assert!(!target.can_undo() && target.can_redo(), "The new presenter's provisional deletion is not an edit");
     client.set_preedit_text(None);
     assert_eq!(target.text().as_deref(), Some(original));
     assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
@@ -3020,6 +3072,19 @@ fn paragraph_preedit_template_removal_restores_confirmation_without_discarding_r
     assert!(Rc::ptr_eq(target.text_style_overrides().as_ref().unwrap(), &characters));
     assert!(!target.is_composing_text());
     assert!(!target.can_undo() && target.can_redo());
+    assert_snapshot(&original_snapshot);
+    // Prove the surviving redo still restores its real text and rich payload;
+    // CanRedo alone is insufficient if an echo changed its stored checkpoint.
+    target.redo();
+    assert_eq!(target.text().as_deref(), Some("A🦀\nB!"));
+    assert!(target.can_undo() && !target.can_redo());
+    assert_snapshot(&edited_snapshot);
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &paragraphs));
+    assert!(Rc::ptr_eq(target.text_style_overrides().as_ref().unwrap(), &characters));
+    target.undo();
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert!(!target.can_undo() && target.can_redo());
+    assert_snapshot(&original_snapshot);
 }
 
 #[test]
