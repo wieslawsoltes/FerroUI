@@ -1,0 +1,2434 @@
+{
+  "schema": 1,
+  "files": [
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/asciidoc/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/asciidoc/cgmanifest.json",
+      "sha256": "6226b6f73aae6ac11d074416efcc44e1d21b49d471943c5af993587d6fc9a6e4"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/asciidoc/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/asciidoc/language-configuration.json",
+      "sha256": "bf80d5e29801a5e96496f2c99ee3fbc5f982ddc5ef66e834fc91ad01c0736c5a"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/asciidoc/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/asciidoc/package.json",
+      "sha256": "7c903e5edff9df161a47c40ac8a4533b088224b25acf2614dcf6254f4a768ced"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/asciidoc/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/asciidoc/package.nls.json",
+      "sha256": "6781a73c82076c94c34ef89fb5c5fe2d7098f5e22b63cc157c0121cce4b80e06"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/asciidoc/syntaxes/asciidoc.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/asciidoc/syntaxes/asciidoc.tmLanguage.json",
+      "sha256": "3ed60bbfff9707704743cc69c229e6c8f3f9f56c02465bd4de46d20f8e241471"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/bat/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/bat/cgmanifest.json",
+      "sha256": "c90a5f02b88c9dc9d7e254b0d0a1a810812abe687169e045ebeea815b00185a8"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/bat/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/bat/language-configuration.json",
+      "sha256": "2fa72cbbccd02949ddf31bce00eec6cf2fa29b5d56214af2a161ad4de4845279"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/bat/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/bat/package.json",
+      "sha256": "a8c3c1e43b087e982e0aa96aee26938a5078c112851867cfec3eae611b877fe9"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/bat/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/bat/package.nls.json",
+      "sha256": "c4bf067755ce5b89af3bd40a0f624946a4e7eaa5067ee860f43952c7e11e82da"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/bat/snippets/batchfile.code-snippets",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/bat/snippets/batchfile.code-snippets",
+      "sha256": "9560bde2f73105ea18bdee6ec52e8a39ba4f4b803c17a043612e9a65b4471c45"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/bat/syntaxes/batchfile.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/bat/syntaxes/batchfile.tmLanguage.json",
+      "sha256": "33660a9b5e6a9188d64dcfdf122fd6422dfb40ec3141f628aee9adce17e65961"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/clojure/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/clojure/cgmanifest.json",
+      "sha256": "5a4a03fb8f412eeeef31e3d13df0d52835d26c10e750a04b0f39443c7dd7ce21"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/clojure/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/clojure/language-configuration.json",
+      "sha256": "431f0f2c638b7c81e151900873b2714618172cfcb804d87049452e2e69f0f16b"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/clojure/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/clojure/package.json",
+      "sha256": "e557fe266e33dde9a660a75b9ece2157a04bb4976f78126d5307c445aeec2359"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/clojure/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/clojure/package.nls.json",
+      "sha256": "6d77a414c8560c375f2543b870842a7807913e109c5737c364552eb9607d2762"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/clojure/syntaxes/clojure.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/clojure/syntaxes/clojure.tmLanguage.json",
+      "sha256": "0ba6a4b3e022af127547006692ccc3bc97ee3f291550233eec229dc614d94595"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/coffeescript/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/coffeescript/cgmanifest.json",
+      "sha256": "71d64ff9843cec96bb84b80101aaeed6c2934e91dddeadcf10a7634359c13253"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/coffeescript/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/coffeescript/language-configuration.json",
+      "sha256": "9018a39dabb484f6bad29a76c01f2658da985277e992fcad3d5ae11e50f45fc2"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/coffeescript/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/coffeescript/package.json",
+      "sha256": "03a1e18dca5ba197b2286b1a1f252368864b6b1b393318358e9b7de00dd45ff4"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/coffeescript/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/coffeescript/package.nls.json",
+      "sha256": "7ac919b070ac999ab694599a816b8f6503c0701383ab3a49b4a2e4b4d731caa8"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/coffeescript/snippets/coffeescript.code-snippets",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/coffeescript/snippets/coffeescript.code-snippets",
+      "sha256": "0f30741635cd0b31b20bbdcb3d477cf8a1903490d0bec2bd64c262f4f7f53d60"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/coffeescript/syntaxes/coffeescript.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/coffeescript/syntaxes/coffeescript.tmLanguage.json",
+      "sha256": "097c4da7143a2e710a92128ac275df9855c53b529c7902d9ebae69eba9abfeef"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/cpp/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/cpp/cgmanifest.json",
+      "sha256": "76323350e05443871445dfc174de47b6d4e4391fceb717b5fcc8af7a22ef4a6d"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/cpp/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/cpp/language-configuration.json",
+      "sha256": "c34e912ab1b1cbaaa8000931c0da039d8a1992e39dc40e12fbe1120698a29c3f"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/cpp/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/cpp/package.json",
+      "sha256": "769a5b30e6747cf3e516de1c1971b896579799ccf6f313dbb7c4d2d7fbf9ba0f"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/cpp/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/cpp/package.nls.json",
+      "sha256": "7dd8bc05c827d5f5c84f0db20f16b7aa2289c7996d73c11681ec14006076f9c5"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/cpp/snippets/c.code-snippets",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/cpp/snippets/c.code-snippets",
+      "sha256": "af1c65f7f1579efc3e4d531ce6c8b79f60e8b1e7b6dd398990f82d7567665544"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/cpp/snippets/cpp.code-snippets",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/cpp/snippets/cpp.code-snippets",
+      "sha256": "af1c65f7f1579efc3e4d531ce6c8b79f60e8b1e7b6dd398990f82d7567665544"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/cpp/syntaxes/c.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/cpp/syntaxes/c.tmLanguage.json",
+      "sha256": "9d0a305bc6595526ffc0680eccbf23a12512ded99a632d9f1deab3ce81b62957"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/cpp/syntaxes/cpp.embedded.macro.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/cpp/syntaxes/cpp.embedded.macro.tmLanguage.json",
+      "sha256": "5a0b8adf702a00d01e81012af0d12fee8ad2e824f3f64040c3a3b365b9c3a5d0"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/cpp/syntaxes/cpp.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/cpp/syntaxes/cpp.tmLanguage.json",
+      "sha256": "717d5b7d4b9f9ab192cee6b59482d9491813a5ea3641e143af7103ffbf5adbe1"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/cpp/syntaxes/cuda-cpp.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/cpp/syntaxes/cuda-cpp.tmLanguage.json",
+      "sha256": "4dae61eeef3cebd9d1cc44fdc6123e786156be1cbfbd5b19230c9054e85902f0"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/cpp/syntaxes/platform.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/cpp/syntaxes/platform.tmLanguage.json",
+      "sha256": "9e73e3ecf009c6243615c83dbfbd041da1d5a8c049739d1c9ae11f95f2c56c3b"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/csharp/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/csharp/cgmanifest.json",
+      "sha256": "000a553410d9b13ecafeb97898193e0cc872580cac3eccb499a88b1519015726"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/csharp/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/csharp/language-configuration.json",
+      "sha256": "376ce0462cda69d61c6c3658ed4510c26302dbdd9e9ada7cf9fd4539c51f60de"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/csharp/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/csharp/package.json",
+      "sha256": "c18736308e96add7a20c0a9139a451f762dd6fa54af13a2865dca89e70876301"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/csharp/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/csharp/package.nls.json",
+      "sha256": "0e51a5e864548e12011c2638d3d846e074fa04a1406301d867755fa8d0920634"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/csharp/snippets/csharp.code-snippets",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/csharp/snippets/csharp.code-snippets",
+      "sha256": "3936cc09f4635d516b8aefb3a0b451be0e32900b8515b1b7788ebc10b1f56b45"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/csharp/syntaxes/csharp.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/csharp/syntaxes/csharp.tmLanguage.json",
+      "sha256": "f75869c0d5f9471e7c2b86009acf9d6cde1c1021eda9774f0972eaed2af04c81"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/css/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/css/cgmanifest.json",
+      "sha256": "e541e7de8298fca41a3383759708aba01d30bb709798b72c5023a505b35f3eb8"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/css/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/css/language-configuration.json",
+      "sha256": "97891fb0d515aa124c0eab14e961aeebb50ea0c7d3634e01853f6f41ce61f28d"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/css/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/css/package.json",
+      "sha256": "936f59635293e8c7a3443046d29f591be16991eeb9b6415fe90f21213e184bd4"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/css/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/css/package.nls.json",
+      "sha256": "95ede9485939c93620bbcae1d197c0684446247ecf98c7f84e677c949c346b97"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/css/syntaxes/css.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/css/syntaxes/css.tmLanguage.json",
+      "sha256": "a6ef4f3dc1a772c6f5999b6eaaa4ba10e90eeddab1fd3c78820fa289da46be66"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/dart/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/dart/cgmanifest.json",
+      "sha256": "26a125be3dba6df0060cf510688c69281088e8a954325ccad0084ea6c696362b"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/dart/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/dart/language-configuration.json",
+      "sha256": "7ccd2e5e4ff7a29b0d2897067cd5c66d0a404892886c162bd5af81234aed3a2e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/dart/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/dart/package.json",
+      "sha256": "3b2646441c74946a661ce8971c2adb36253adaeb2211dbfc5429082a7e61c947"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/dart/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/dart/package.nls.json",
+      "sha256": "6e85ef49ca6c24e34c4e06f17aa6c61912b1b821c2612fba191b890535046959"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/dart/syntaxes/dart.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/dart/syntaxes/dart.tmLanguage.json",
+      "sha256": "f9aa27d8b232f38891edea7351f7dbab7d3d163151b5b757dcef2812549912f1"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/diff/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/diff/cgmanifest.json",
+      "sha256": "c1e11c03198b29fec829ee9ec09e1a41540697c32c9a6e03a5422b7ae30f4741"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/diff/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/diff/language-configuration.json",
+      "sha256": "c6f567c346902039a391e120b6c52390a90d88fc235a63abb685cd841093b2c7"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/diff/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/diff/package.json",
+      "sha256": "efcf02cd65cdcce6d8bc9a495eb01704099a0375562e68a055dc23b65a647a6e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/diff/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/diff/package.nls.json",
+      "sha256": "423f8b0d4a6827d5cef13de2d9df4583791603aa9bb0ce2104eabff77d414ea5"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/diff/syntaxes/diff.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/diff/syntaxes/diff.tmLanguage.json",
+      "sha256": "cba6db0303642b5218a7a3ef8e946df05d17745ece381a978ff171d29a51e2f0"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/docker/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/docker/cgmanifest.json",
+      "sha256": "6a4f471ecf038d71205b3f10a0025dfa7367cddef8dfd8eb4177c59752bc3289"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/docker/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/docker/language-configuration.json",
+      "sha256": "73ee3fc417b0e200f38987a7cfb16129284203caff8cb0b20af68c325418483e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/docker/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/docker/package.json",
+      "sha256": "6a36616db82cc5777571ca3f8e2cc0dff4cd3fdfbffc597590b2281147c451c4"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/docker/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/docker/package.nls.json",
+      "sha256": "49b65293ba8fbc074fa765576df96c69582c4c2e2cf0802615950cacb2ebba6e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/docker/syntaxes/docker.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/docker/syntaxes/docker.tmLanguage.json",
+      "sha256": "99ae6173ae9152034e35e17de092f4e11273acefb82320592bbfa627a29bb03c"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/fsharp/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/fsharp/cgmanifest.json",
+      "sha256": "939ba0986c3b40e2aaed9c568b63548cf41018eefeea001089b912b2b653d587"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/fsharp/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/fsharp/language-configuration.json",
+      "sha256": "9d6ad91b61798b077afa663374b726a9af575b196e57e98ccc6584f9fe6f41aa"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/fsharp/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/fsharp/package.json",
+      "sha256": "acdbaf426d1d6d5e8f2c9bf91f006b4d61bef2226784e9a5c68c218b49e13774"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/fsharp/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/fsharp/package.nls.json",
+      "sha256": "f6c9f0b928b58a0df80762f9590d582e00c6479be95b6e34499a5a8dececcac8"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/fsharp/snippets/fsharp.code-snippets",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/fsharp/snippets/fsharp.code-snippets",
+      "sha256": "5451efe09da10267156bc2c8b45d3dedce46399da0e8611d46b6efed19c34c71"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/fsharp/syntaxes/fsharp.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/fsharp/syntaxes/fsharp.tmLanguage.json",
+      "sha256": "9d648240f52560c094f315104e72a2efc2cf8577ba4ad67d3de79901b49796e0"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/git/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/git/cgmanifest.json",
+      "sha256": "f310dd96533c680354fe2b92af80011474e7e2d1eb01b2565ae65d3db092f632"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/git/languages/diff.language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/git/languages/diff.language-configuration.json",
+      "sha256": "dcdc6abf710180b0943c0368dc6e41812cdaf4e7002d945e8b05f86fb45647f9"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/git/languages/ignore.language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/git/languages/ignore.language-configuration.json",
+      "sha256": "df244aed617a8d20bb2a52876dbec5626c4bc203acf454de5415f4686c093fa0"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/git/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/git/package.json",
+      "sha256": "b5691c2f785d3094777032f602f4d3f4875d4464c361f966b45d34c6c7a568f5"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/git/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/git/package.nls.json",
+      "sha256": "584147d4228c8f3c9efeb0e2a761ccefa11f65fea33718145af49a311c635436"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/git/syntaxes/diff.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/git/syntaxes/diff.tmLanguage.json",
+      "sha256": "cba6db0303642b5218a7a3ef8e946df05d17745ece381a978ff171d29a51e2f0"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/git/syntaxes/ignore.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/git/syntaxes/ignore.tmLanguage.json",
+      "sha256": "1a3ed223e92899c46954118389f941dd2567bf8f8cfdb99e591e4ed74079f3aa"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/go/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/go/cgmanifest.json",
+      "sha256": "2352f4b5dcee8c9bac1d462f55bd2dc4d0c6243aa3bf9ccbe165d4faa196940c"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/go/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/go/language-configuration.json",
+      "sha256": "48f42eab6913f0cfbfdf34c5562f675f151acc6a55c78a60f1e121551d39b664"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/go/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/go/package.json",
+      "sha256": "5f31ff4eb1d5811436f3cce4a1fcc682035e662a6230a9ed97e26b3d4e85bdd5"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/go/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/go/package.nls.json",
+      "sha256": "77b42a07dea689fa77a8589de079e612f6e561caf9da11fee2b8ea2c503a546e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/go/syntaxes/go.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/go/syntaxes/go.tmLanguage.json",
+      "sha256": "7bd9e97c9179ac73f63ddd8f581e8bee307a25c89d671784162e24e288548e6f"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/groovy/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/groovy/cgmanifest.json",
+      "sha256": "23212ef4a052cd7bb45efeac3a6b3443f456ab13feffa4d4b0e20a36de20a84e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/groovy/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/groovy/language-configuration.json",
+      "sha256": "088c1a197ee97fa93bb70ff1ba94a0651eb13ae921cec6a2249a56f511c1b104"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/groovy/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/groovy/package.json",
+      "sha256": "017360a2f647be95ee5ef07bd624c09068906cf3a5c49f67c9a9930760d70245"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/groovy/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/groovy/package.nls.json",
+      "sha256": "ebcef76d083914ad2fe3a19a4016ab6cac7942545711e86150614e50ec1cf279"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/groovy/snippets/groovy.code-snippets",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/groovy/snippets/groovy.code-snippets",
+      "sha256": "047af6d39a246071aef7345b5d9252dab4449ef063acdb70a607b5b63e6c3379"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/groovy/syntaxes/groovy.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/groovy/syntaxes/groovy.tmLanguage.json",
+      "sha256": "7e61dc6646a8e931d838d0fc62fc3408749f21aeeb989431b87d49c51b559b5f"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/handlebars/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/handlebars/cgmanifest.json",
+      "sha256": "cb07099887acb1f909f296d3570b92f64a815c545121d0e2dcf2d281787fb78e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/handlebars/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/handlebars/language-configuration.json",
+      "sha256": "b4c514c6fc5152b8f2b093c996927503859335beacf8daad377722bf49bfe1bd"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/handlebars/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/handlebars/package.json",
+      "sha256": "6b5b509523b4ea1ea78da28fbd0d3e2984a90b0d043156e88aff5c4726cbb10c"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/handlebars/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/handlebars/package.nls.json",
+      "sha256": "693fbd7b4a2429938c37b2bdef7d81b66b1e3588831f62eb1c375915510d0c14"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/handlebars/syntaxes/Handlebars.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/handlebars/syntaxes/Handlebars.tmLanguage.json",
+      "sha256": "13f19762187b28e21eb8f11cae42af873f0b63835b030eeb6c6df538ff433d8f"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/hlsl/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/hlsl/cgmanifest.json",
+      "sha256": "28af6ebc6beab704b499a69e8194779f866050b3bcbcc3aa212c0d8ffcfcbc21"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/hlsl/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/hlsl/language-configuration.json",
+      "sha256": "28799d8ca46a660481b60636e15d106bf980932bb0456238fe5a9fe9b705c564"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/hlsl/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/hlsl/package.json",
+      "sha256": "43f9bbcc76018cb356f7e9e10bca1c368bb6fef162a89a1ecd6b589e4af1f87e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/hlsl/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/hlsl/package.nls.json",
+      "sha256": "a461beaaaefdbf3916767e9d53415dc5a91c3942f7c38d6425136522450816e4"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/hlsl/syntaxes/hlsl.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/hlsl/syntaxes/hlsl.tmLanguage.json",
+      "sha256": "8b122d67bdae6bbd1c581dbe123e9e83f3413062c8fc744712d0429ce6c30a2c"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/html/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/html/cgmanifest.json",
+      "sha256": "11afee8c58cc61ade7bc2eaafc46dfbea25ae2ef3bc6b49f98a2a399123ff410"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/html/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/html/language-configuration.json",
+      "sha256": "3d8983fa5bdc43a3928c639362cc3afbf27763c9ea297669ebad83c7f1c37a19"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/html/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/html/package.json",
+      "sha256": "8e99ecc730e79c78638254782d6ae826a8dd28faf0bb816cd71794707d32f9a9"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/html/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/html/package.nls.json",
+      "sha256": "ce914529b57c2e8df0db4cef7ac2f9843b3ded6819efe0f59031dde0b6885124"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/html/syntaxes/html-derivative.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/html/syntaxes/html-derivative.tmLanguage.json",
+      "sha256": "57c6b53a014fe87301f8716caf4e79f69796e556068d33641b0ed9ff77db70c5"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/html/syntaxes/html.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/html/syntaxes/html.tmLanguage.json",
+      "sha256": "4aca5cecb499423481b6d5107dc9e9cd1b596ad723d5dcf5c6a7775fb410e504"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/ini/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/ini/cgmanifest.json",
+      "sha256": "c4a8a7b3eba11e096e5d056514dd8b63e1fbd183d1ef0d0769e7d8f8c6c3ce4e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/ini/ini.language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/ini/ini.language-configuration.json",
+      "sha256": "97e22c7d0bcceae80ad970d014dd0412d9fdc44d451ad6918fe5058b17db7973"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/ini/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/ini/package.json",
+      "sha256": "fd4e0e27d64288bab1db85fe6e216857e72815f5c30340d4b7bf1818eedf4e31"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/ini/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/ini/package.nls.json",
+      "sha256": "d10af7a51334007178bae214bddaf2f31753882861bbb97aab245bec22258bda"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/ini/properties.language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/ini/properties.language-configuration.json",
+      "sha256": "004b952449d92603da2bc342de8dd47e821d4c0b41dc83421f5b7de92df009a7"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/ini/syntaxes/ini.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/ini/syntaxes/ini.tmLanguage.json",
+      "sha256": "a46613bd993739695cb62be04d23c5d779754bce9fda8a6ead61ecd4616f95fd"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/java/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/java/cgmanifest.json",
+      "sha256": "e879d4c72310fcee81379ba196c00a3525bfe6b93da87cb4522d33979bff6ec5"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/java/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/java/language-configuration.json",
+      "sha256": "9f64f169415d2475a8409a033b8979cd5e06ea1cd126c1ee05bbd33be3dc9c0d"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/java/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/java/package.json",
+      "sha256": "110ad578d110df1a6a1548bb43fb0dbd1cbd4e1f2fbf1bbe32dc41312ab4eff6"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/java/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/java/package.nls.json",
+      "sha256": "6ca68d3d38d8b952de9682ca21daad8f145034614ba0432ad71df7b7c58fe1ed"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/java/snippets/java.code-snippets",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/java/snippets/java.code-snippets",
+      "sha256": "1d29d8d95fbaa460f56841ef13e5e4257ba31bef80621c22ff6213cd566742f2"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/java/syntaxes/java.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/java/syntaxes/java.tmLanguage.json",
+      "sha256": "e33e9e116e6687eacc4948c10ff706ca516f721027f6adc53e744eeac076c82f"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/javascript/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/javascript/cgmanifest.json",
+      "sha256": "f55981960c1be3a57059231517846fe564f1fd58b89c2619165d7916cfa13a81"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/javascript/javascript-language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/javascript/javascript-language-configuration.json",
+      "sha256": "d029e138e7d2beec7936edc74f2fa66cd133c31f91de206de7abd5c00271a89f"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/javascript/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/javascript/package.json",
+      "sha256": "729587f7375d885eae32af9b4cb1829dfad5e79916a2b9db42ca627745c5c163"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/javascript/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/javascript/package.nls.json",
+      "sha256": "b45e7380f7090822bffb2a5cfb7ab7cd536ad3bc7c11609aee566f68d98470c1"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/javascript/snippets/javascript.code-snippets",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/javascript/snippets/javascript.code-snippets",
+      "sha256": "22edc3cafc5efe622dc952c8267e1a20839fcf7e39fd74ce6399f999958ebafe"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/javascript/syntaxes/JavaScript.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/javascript/syntaxes/JavaScript.tmLanguage.json",
+      "sha256": "c673480376f970c926964e18a163c97c12f8ed5590598716115b394f3521ee8a"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/javascript/syntaxes/JavaScriptReact.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/javascript/syntaxes/JavaScriptReact.tmLanguage.json",
+      "sha256": "9f5cbc2b30de51304866a736e62ac08f92ac1571ea40a61824371a8ec1a15af3"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/javascript/syntaxes/Readme.md",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/javascript/syntaxes/Readme.md",
+      "sha256": "7d62fcd43f8bab3ccf90634fbffeb060eb40d77fe6ecd7c5db066c61a3beb9a6"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/javascript/syntaxes/Regular Expressions (JavaScript).tmLanguage",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/javascript/syntaxes/Regular Expressions (JavaScript).tmLanguage",
+      "sha256": "00108c41e49aa8312f0e94e1da961580d79c92b64eab0d608f9071d1081718ef"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/javascript/tags-language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/javascript/tags-language-configuration.json",
+      "sha256": "fe91d6ab8f5887867c5696241a3155ecb50e4ae6606c30e6fee9a5b92202c226"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/json/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/json/cgmanifest.json",
+      "sha256": "ccfd6a24b11dca217cf83beb2154247e668931207d5dad715294605b99c4f4d8"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/json/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/json/language-configuration.json",
+      "sha256": "1b0d161916d1e35bbcfa545cc3554d1e757eed632208f99c242535235c06c600"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/json/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/json/package.json",
+      "sha256": "40d3295c1392dd4c515b3c7479974183ceee3b1ab9e43738260234bd1a59b61d"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/json/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/json/package.nls.json",
+      "sha256": "f937f6d689d1358f2276ccbdbe87857810da059c9a931c2a800500d6bf7f65a2"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/json/syntaxes/JSON.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/json/syntaxes/JSON.tmLanguage.json",
+      "sha256": "d7238f1cc9033993b9816b0945cab4bb8ea108de0399663c551f28f913e94c70"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/json/syntaxes/JSONC.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/json/syntaxes/JSONC.tmLanguage.json",
+      "sha256": "c4d433de28d275b39250253ed5d154e98069d6269fcc7678ebda5ec182318b59"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/julia/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/julia/cgmanifest.json",
+      "sha256": "b1a493c3eab439bf2cd226db2897a72b6b763e64fc638f22fb15a174218e4a25"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/julia/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/julia/language-configuration.json",
+      "sha256": "e36fb03abfc9f83a9cda1c2ec41c015be5da67e08687c8cc71f41e1f6dc3913a"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/julia/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/julia/package.json",
+      "sha256": "97bf929920fd135d8dba60c207694397c6b6dc238fcdeb569b4fb01da43e9c2b"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/julia/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/julia/package.nls.json",
+      "sha256": "a2b11e75efeab68fecd2cd76b6c18b54cd34eeb606d7bbf2c6038d754be75ede"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/julia/syntaxes/julia.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/julia/syntaxes/julia.tmLanguage.json",
+      "sha256": "60e899cf6d7c34a8dfb3ba94a76d45c13bbcd5014082038e69652452198ac3db"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/latex/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/latex/cgmanifest.json",
+      "sha256": "bdb02927ba0c2d3334fa93b43971d4f80c04c676b3f691f9d7e70043740c03c0"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/latex/latex-cpp-embedded-language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/latex/latex-cpp-embedded-language-configuration.json",
+      "sha256": "c34e912ab1b1cbaaa8000931c0da039d8a1992e39dc40e12fbe1120698a29c3f"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/latex/latex-language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/latex/latex-language-configuration.json",
+      "sha256": "2578ecaa564e76cd598fe316ac3fcb63c1533062c051045067b5d9e9d8d533ca"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/latex/markdown-latex-combined-language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/latex/markdown-latex-combined-language-configuration.json",
+      "sha256": "7cce58e54ef3601323a641d97a0e6f35feb6af059c262bfd29ee26047d346dc9"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/latex/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/latex/package.json",
+      "sha256": "377f00ab8a829d3652ee7bf81b3d1986917b4164be371e0b80f1676f720b9a56"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/latex/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/latex/package.nls.json",
+      "sha256": "862d652ee5cb2d83dc77524b6ee02676c1cb3a21243624db653ed760da5f3a20"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/latex/syntaxes/Bibtex.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/latex/syntaxes/Bibtex.tmLanguage.json",
+      "sha256": "bdb8283058ed4d0903234a0aae241673042950f649e462ee9fb58cc2b7bb989a"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/latex/syntaxes/LaTeX.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/latex/syntaxes/LaTeX.tmLanguage.json",
+      "sha256": "11cd579088757bd0798c670775e93d32dc69467afb050ed3fc210041dfef73ea"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/latex/syntaxes/TeX.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/latex/syntaxes/TeX.tmLanguage.json",
+      "sha256": "b443387d5ad115f1d1b77bae77acacae2dbd6f1b429a5a936d30c57d174cdd1e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/latex/syntaxes/cpp-grammar-bailout.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/latex/syntaxes/cpp-grammar-bailout.tmLanguage.json",
+      "sha256": "9c01e5c315a4e2563d0827f723cde5e9761724fc013947d0993324fa497441d2"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/latex/syntaxes/markdown-latex-combined.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/latex/syntaxes/markdown-latex-combined.tmLanguage.json",
+      "sha256": "87a45091d318f54d3e9aac184387f92ccac9b3b9aa2b6fbd0c9f8c9637c5d1bb"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/less/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/less/cgmanifest.json",
+      "sha256": "bf3c2e1a1be4f6ff9a466d43795d41b6077a922831f888da318659527260ea02"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/less/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/less/language-configuration.json",
+      "sha256": "8a9853f3587270acd7e3fef21bbfba4a6a185303c63c3f85e95a9d1a104b3d2d"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/less/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/less/package.json",
+      "sha256": "36ef944f18ea1b8517bbc5d5eac2154c0723265193f2c461a1555d9e9e067ace"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/less/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/less/package.nls.json",
+      "sha256": "77949a68bf869d614d6355792e2bed433aa0e7aa7af4c028bc72df1357739b2a"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/less/syntaxes/less.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/less/syntaxes/less.tmLanguage.json",
+      "sha256": "ea308ce89f8de1e9516c12305d81cda42d270ba3d0a91250952347a7527af00c"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/log/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/log/cgmanifest.json",
+      "sha256": "dcd19c25f620900fcfeeef193fe67693f66e4dfbc3d597a93341964bb66248f1"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/log/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/log/package.json",
+      "sha256": "6a62eca4605df48ce96e3ad1e3992884fc52839cd71161ac9bfe567bfb5cb2cd"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/log/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/log/package.nls.json",
+      "sha256": "a71221da31adf20a8fddcc16d1ce80a536245fd3f941d66165968a68ad776f01"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/log/syntaxes/log.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/log/syntaxes/log.tmLanguage.json",
+      "sha256": "e80a1b1cc545d112f2c8fac8d71636df5b8bffaa282a669fe1038a631b2b19a9"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/lua/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/lua/cgmanifest.json",
+      "sha256": "a03470c642a6ee4718131516d23979706261711e7fd300d5311622a040dbc8b8"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/lua/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/lua/language-configuration.json",
+      "sha256": "df548aa9a1290cadf7fb3762c7770eb28c68f05d24b08e4e1504e0e3d3e73998"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/lua/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/lua/package.json",
+      "sha256": "bf64292ab05134833373dca1a41ee8fa67dff230cd205858db4262add63bbc3c"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/lua/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/lua/package.nls.json",
+      "sha256": "d06318008ae611e9650ab93838b30c9cef867b4521b3d074e20bd026af61f412"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/lua/syntaxes/lua.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/lua/syntaxes/lua.tmLanguage.json",
+      "sha256": "a95f00743c4385c0da518b6c05fe903771e55911e7a1f7b126d81006f76b55f6"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/make/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/make/cgmanifest.json",
+      "sha256": "49f368e002b66149e00a67fa7bc01e32911817ccab8436459bb75f892041b7e6"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/make/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/make/language-configuration.json",
+      "sha256": "589b0936c27fbbd210f990c098f72b5ef3884c86daa1a42091ccb2300b9ef5cc"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/make/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/make/package.json",
+      "sha256": "4c9dae1b71d9aeb76d112f7c252cb5a198936a4469b15b91179a54d8cdab1cb6"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/make/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/make/package.nls.json",
+      "sha256": "743cdc6a2692685e8d9b22284436ba7933da2c558263fa1e707d35da999522d0"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/make/syntaxes/make.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/make/syntaxes/make.tmLanguage.json",
+      "sha256": "49ba7a58f0e41b37994f7a537ce264d8a44d9cc0d100840d847fa9c5da0a4f52"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/markdownbasics/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/markdownbasics/cgmanifest.json",
+      "sha256": "7b67ebc4c307960424c22dce34a003703a3059af84b2a5502ad0a1c2b7bb4130"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/markdownbasics/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/markdownbasics/language-configuration.json",
+      "sha256": "4e3054e3c10c26638d60cccf8ab34fde169c8e3de9d8d93f6228a9cbcc9af466"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/markdownbasics/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/markdownbasics/package.json",
+      "sha256": "9103ce0cedd951e04e0f41e611b77f55f62b47296babe91efb09decfd03ac6ff"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/markdownbasics/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/markdownbasics/package.nls.json",
+      "sha256": "30e43dc7c4b19d0460cadf343bfeb8e8e6f81469a8610ebd8a56846cf6e72399"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/markdownbasics/snippets/markdown.code-snippets",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/markdownbasics/snippets/markdown.code-snippets",
+      "sha256": "18842546f37e161a0f6f4069604031c8e1bc6a685e20e77ad0c0d567cd129835"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/markdownbasics/syntaxes/markdown.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/markdownbasics/syntaxes/markdown.tmLanguage.json",
+      "sha256": "d816e51a17db0c0e69b7dd4cdf3d391372965e72c422c422d680ab0c37c73d26"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/markdownmath/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/markdownmath/cgmanifest.json",
+      "sha256": "b129169630b18531bf3c8e84eb421105b88fa2990f7219b2951768bf9d094b2c"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/markdownmath/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/markdownmath/language-configuration.json",
+      "sha256": "225b5514e4898b86406f2c8623a617de4a89a22c1b4996aea65b8adb83ce49a6"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/markdownmath/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/markdownmath/package.json",
+      "sha256": "75bc6d71a51a8d799dfe362c418dfe91a14f6b325ed9d632fae8b96312315e0a"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/markdownmath/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/markdownmath/package.nls.json",
+      "sha256": "55480c8048d84c227509ee34c82ba31dc1c444acb702e521308796bafcddf3fc"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/markdownmath/syntaxes/md-math-block.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/markdownmath/syntaxes/md-math-block.tmLanguage.json",
+      "sha256": "5c4d291dec5beedeb893f916c3692fe17daeb2a57464b8acedb4b35ab1dc708d"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/markdownmath/syntaxes/md-math-inline.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/markdownmath/syntaxes/md-math-inline.tmLanguage.json",
+      "sha256": "1ec770947a8e37a8fbe1a18f79d001322f4c2f83026563dd9b3e38c1233ec85a"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/markdownmath/syntaxes/md-math.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/markdownmath/syntaxes/md-math.tmLanguage.json",
+      "sha256": "57b8044a8998e885d9b2f034392f4af3671dd7e4dc35f015dcdead144f4afe37"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/objectivec/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/objectivec/cgmanifest.json",
+      "sha256": "78624d6d20dfd3b124941d3fde5b0d4b266e980fe3c711a7ceeea987a470f90a"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/objectivec/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/objectivec/language-configuration.json",
+      "sha256": "088c1a197ee97fa93bb70ff1ba94a0651eb13ae921cec6a2249a56f511c1b104"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/objectivec/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/objectivec/package.json",
+      "sha256": "59ac1382e34149d30ccdbe61242f023ba2438f45778e20568fd0ae858dee7773"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/objectivec/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/objectivec/package.nls.json",
+      "sha256": "efd4dd88d1c9fc7326c4d265dcb3054f962706a68ff1136d2a85dfd06187d1af"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/objectivec/syntaxes/objective-c++.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/objectivec/syntaxes/objective-c++.tmLanguage.json",
+      "sha256": "1bf723b8388449e2d85aeec81427f03a04c0663d9c3d239c0d4eafd4aada544c"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/objectivec/syntaxes/objective-c.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/objectivec/syntaxes/objective-c.tmLanguage.json",
+      "sha256": "6357d1484dde0e802c35fa1314332e887e44d1401184890c8ab21f4c4fd5498e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/pascal/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/pascal/cgmanifest.json",
+      "sha256": "33baa63d1ba35adcb08e206ae695e89ff111b4e6ba3d792840ba673c7087a793"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/pascal/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/pascal/language-configuration.json",
+      "sha256": "44484ae7735ca9602c514f65ab476d0e762bffea71b29f3e798f3bbb2606347e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/pascal/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/pascal/package.json",
+      "sha256": "f0e3938182834b10e57d61301f50992025b95c2d8eaedd501a12e6cb20050d82"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/pascal/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/pascal/package.nls.json",
+      "sha256": "a657680fec425230482deefbc0283f590794efdff658c1b69522ef8ded183da1"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/pascal/syntaxes/pascal.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/pascal/syntaxes/pascal.tmLanguage.json",
+      "sha256": "b45f81928edde666748ae8b2c853c20217264a05c06a4bc100acb5ef0ffce9c5"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/perl/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/perl/cgmanifest.json",
+      "sha256": "f2499e2e17f6875848f65a387677e84ffc2c774ed64cb735327505d259686c5c"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/perl/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/perl/package.json",
+      "sha256": "5104bd7fd713bd07281276adb6563e1ab6fde91b41a4eb0d43273945c380932e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/perl/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/perl/package.nls.json",
+      "sha256": "9012d4cf1a82704166ad74de5ba937d2dbe79f1c685d0debd95e9ea5d4d5a846"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/perl/perl.language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/perl/perl.language-configuration.json",
+      "sha256": "97c537d85a20276e60d21ff2fa23ca5966105b9fb8ed9dcc2fe5935e718d7611"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/perl/perl6.language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/perl/perl6.language-configuration.json",
+      "sha256": "0bbef22404726cc0c85e81589a98dc9dfe6aae8e29e0f85263c94920546a4947"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/perl/syntaxes/perl.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/perl/syntaxes/perl.tmLanguage.json",
+      "sha256": "a58440e3d71c3af267ca0fae803d4c9c09e32398848e445486e1fe89f2c65d5c"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/perl/syntaxes/perl6.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/perl/syntaxes/perl6.tmLanguage.json",
+      "sha256": "29e4e23b69f780cfd2213424c56d5e09bea9f16f7b1fa348a68b6f9286684d38"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/php/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/php/cgmanifest.json",
+      "sha256": "d2bb6abaeea434b2679e9394e4a2115a176345fb1a08913737669361b82cafcb"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/php/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/php/language-configuration.json",
+      "sha256": "95144ff26a778d4484977ba7be0f1e38cd51e8e513083c163eb2f315fa1274f3"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/php/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/php/package.json",
+      "sha256": "af7d22f416c599b855f84896405c12678b30b70a6c254a9c34496680b9c41497"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/php/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/php/package.nls.json",
+      "sha256": "78b3d8eeaa3ca77b3c98c254df654647bc8cef0be4832e6bb5ec49fec3a4b115"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/php/snippets/php.code-snippets",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/php/snippets/php.code-snippets",
+      "sha256": "2dc613ca822a9d1e25ede36b2e9aa63005a720a6cb913eb886f5548e8e6df870"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/php/syntaxes/html.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/php/syntaxes/html.tmLanguage.json",
+      "sha256": "5837b97d4bd47fc9741afc48c54459ebca035f97a3ecae9df63493ee341c949d"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/php/syntaxes/php.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/php/syntaxes/php.tmLanguage.json",
+      "sha256": "4a2e84bf658c98a9b2693cc8df8e4d176761bed8263acdf554891f695883f0e1"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/powershell/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/powershell/cgmanifest.json",
+      "sha256": "d9ecca941a6f8fb3ae076e54ee30d0d35091a7b919bb6fbc5d7edd286e18db84"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/powershell/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/powershell/language-configuration.json",
+      "sha256": "4e649e764e1c02cf20ae73ca6750e48ca5ed505f5b1c948c12b67395e740e310"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/powershell/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/powershell/package.json",
+      "sha256": "acb06c2e963255958eb61097e4cea25adadb8ff0f0ffdc55081349ef17564303"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/powershell/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/powershell/package.nls.json",
+      "sha256": "033226a7e60dbfa3a80d08301e2128b0a3739c152225719b4ab33645e72e7697"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/powershell/snippets/powershell.code-snippets",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/powershell/snippets/powershell.code-snippets",
+      "sha256": "3936cc09f4635d516b8aefb3a0b451be0e32900b8515b1b7788ebc10b1f56b45"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/powershell/syntaxes/powershell.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/powershell/syntaxes/powershell.tmLanguage.json",
+      "sha256": "627e2e51b034420d1ae596e57d69dfdaa037d32240437371ee8206fb3e9acc53"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/pug/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/pug/cgmanifest.json",
+      "sha256": "6341c125f39647ebfd109acd66bfd8eb9c1632d30b40597f64ac09b686144ca2"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/pug/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/pug/language-configuration.json",
+      "sha256": "e20fa1d8b42599add05f16f96c61244dcd1c855105121aea6b1be43b818c9765"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/pug/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/pug/package.json",
+      "sha256": "31f63bdcff9ae30347b2a315e6da32f50a2fe0deb169453238245adac0d1ccbf"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/pug/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/pug/package.nls.json",
+      "sha256": "f215f4f52998786d0efaef4f310a11e35420aa3da2bd0e70e749a5f7a355f339"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/pug/syntaxes/pug.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/pug/syntaxes/pug.tmLanguage.json",
+      "sha256": "4b97c9f52e96ed226735e418b8996a201e42083cbe1f8045c9fbf2e8c0c0ed3b"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/python/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/python/cgmanifest.json",
+      "sha256": "81f4fb2e2d79696c0fa2561ecba75db21cd9f55f7ee596af29a4f4583c40d290"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/python/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/python/language-configuration.json",
+      "sha256": "141f93a99e92b9d399cbe4e18f36757fc6bcb94df765607b57b149c1749fda28"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/python/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/python/package.json",
+      "sha256": "91a384cdd06a2f14dbdd9dddc921c4167e8a2b77b9701e0cfb2df48d31f2f597"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/python/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/python/package.nls.json",
+      "sha256": "2392efe2c5fbf510a030ac59c8d3b11cb1f452d2a694aa320837fbe75d625d24"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/python/syntaxes/MagicPython.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/python/syntaxes/MagicPython.tmLanguage.json",
+      "sha256": "8e2e104a74706b80c3342b60553984fa9473b77cb4cc3f27441744b25404e91f"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/python/syntaxes/MagicRegExp.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/python/syntaxes/MagicRegExp.tmLanguage.json",
+      "sha256": "d44f8811521bd35ea6bb9f7049b9e8a2cb6a04c514dcb9ec369633ab2cb139d1"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/r/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/r/cgmanifest.json",
+      "sha256": "964889d7ea2a4987ba0dd90814fb745dcf6f2c48219f12b015b4cdb03fdd5c7a"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/r/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/r/language-configuration.json",
+      "sha256": "f7ab477effa039b2b11c99a231371a924abb274031ee47c36aca7724e8bd486b"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/r/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/r/package.json",
+      "sha256": "ece2df695658d3d6007fea477ade292dddde4c6bb5f9b5262b8e71bce58018f4"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/r/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/r/package.nls.json",
+      "sha256": "2617d9759d4460d51e01632bf5185098d26abfe8853c7d126d87901048d58195"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/r/syntaxes/r.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/r/syntaxes/r.tmLanguage.json",
+      "sha256": "5cee0fec39a9ee5e784142d10880022aa791e60558410c0e4c65319895cd97f1"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/razor/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/razor/cgmanifest.json",
+      "sha256": "feed2ff060ed186428ed7312e6baf7498af801eec5b8bd578e7ec6768952e2c2"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/razor/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/razor/language-configuration.json",
+      "sha256": "3c1456e9ff859c09bc411095214372be2d7d4dcf9695f7e9a4e48574aee90e34"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/razor/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/razor/package.json",
+      "sha256": "a294ba666c53090c967601cbdd7223f70eb299c1d6c831264447cc4e7ab87a2b"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/razor/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/razor/package.nls.json",
+      "sha256": "82d5da34f4dce95b3189b642209b85652195a5b1db19de184b6845cf2a3c205c"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/razor/syntaxes/cshtml.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/razor/syntaxes/cshtml.tmLanguage.json",
+      "sha256": "b5ae561822c91537576b8d8cdb2d937c992091ee630040dd155d74bde428e18d"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/ruby/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/ruby/cgmanifest.json",
+      "sha256": "1d017a42621687d08e256bbf02a0f33faa065b8b7efe3d2f1acc84ee79e78b7c"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/ruby/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/ruby/language-configuration.json",
+      "sha256": "4814be7382b8dc3a59f6a6aba9ea5ca27df3ffaae61e7ed2cca6f91cc0b96b59"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/ruby/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/ruby/package.json",
+      "sha256": "71d816f881701b335eab4634c377d5f06098158e3cd4d6febd11102c2b24e7ae"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/ruby/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/ruby/package.nls.json",
+      "sha256": "907149f052e3c433e871991b564d6c32f3f1251b771f0e0f7feec503716f8841"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/ruby/syntaxes/ruby.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/ruby/syntaxes/ruby.tmLanguage.json",
+      "sha256": "241a8d95350746cff04219962567bc8875e23db9b4e08f0ab0b4d37f640713e1"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/rust/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/rust/cgmanifest.json",
+      "sha256": "ae6bae143ac03730b14db98e257cef6c5636db04c4e4cb7edc4e82c4f906931d"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/rust/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/rust/language-configuration.json",
+      "sha256": "ce72b08a92b7274f12eab12653076f3bddcdc8a07bc52fe707c188c1fdb9d9b8"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/rust/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/rust/package.json",
+      "sha256": "11442fde036c642b7d86cc51e80506edad9fa5318422d7ee398552ff6a80e83d"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/rust/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/rust/package.nls.json",
+      "sha256": "b0213fc4f033b09d1af53c8cfb8e9a3c5499d5e84bc983e74c9a2e2d99aff22d"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/rust/syntaxes/rust.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/rust/syntaxes/rust.tmLanguage.json",
+      "sha256": "d1f150238e1195527970f5222d7a505afa3ec21cb97b019cafc1be1fb16a883d"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/scss/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/scss/cgmanifest.json",
+      "sha256": "1fe32056eb2cb9faabeb41757448798cb2e51c860b4bee71953b6107dd6733f4"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/scss/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/scss/language-configuration.json",
+      "sha256": "03a2713a4f4eb738bcb1fc829ea452ebfec40c1409da2aafa60ee52c939254a3"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/scss/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/scss/package.json",
+      "sha256": "aa6bc9262fc35eaf61d6095e515cbd463738e7f9ccc3f75ed074167f540e7b5c"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/scss/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/scss/package.nls.json",
+      "sha256": "7c13521f1cb9056bfff8ca721b7cfd5426557b5c58520c59ecc53b7a2712c330"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/scss/syntaxes/sassdoc.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/scss/syntaxes/sassdoc.tmLanguage.json",
+      "sha256": "e733d9c2ca02f250ffa5501732f3a1117d2f59d88ae8efaa7c471587fb7237b3"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/scss/syntaxes/scss.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/scss/syntaxes/scss.tmLanguage.json",
+      "sha256": "8f2824a80a7c6fd558fc538ec52d0a7a42a4d7ecb7ddf20d79f0d1f00fa6602b"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/shaderlab/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/shaderlab/cgmanifest.json",
+      "sha256": "a2597e795818e11849b890f5bf7036b8c77a682d941387a06b1c45f56cc8ff83"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/shaderlab/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/shaderlab/language-configuration.json",
+      "sha256": "6995e05b8f2b03bf6e064c13f34b0499d7fe6d8f1689f751c6d51c57e052c5bb"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/shaderlab/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/shaderlab/package.json",
+      "sha256": "7b5ef1aa861c2745a9c7451a1992d41415e9e0e3c0f3ee2577e03be10bcce787"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/shaderlab/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/shaderlab/package.nls.json",
+      "sha256": "08f60b19673171daeef8f1a1d39771418f12c75b36d280b1a105eb18eac32f99"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/shaderlab/syntaxes/shaderlab.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/shaderlab/syntaxes/shaderlab.tmLanguage.json",
+      "sha256": "56faa4d5de6eda070036118e52bcbee38a3777a175406501fab1d8ea7339ec8e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/shellscript/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/shellscript/cgmanifest.json",
+      "sha256": "76a6b21727f55f5f8499e5e51117e258649e7f644f86fbcb17e59683cee024ad"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/shellscript/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/shellscript/language-configuration.json",
+      "sha256": "fb8dec83d74b1fc928862b966fd86adac1d7fab5eaa9d425ba813c92169c8a89"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/shellscript/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/shellscript/package.json",
+      "sha256": "8df81b5a7251689f01246aec81ebf4282e904594b8d9da6fafb78b02b30b108d"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/shellscript/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/shellscript/package.nls.json",
+      "sha256": "e455ae18401171f2b3ec0e9f8e3c00e7b4d3410a327a647aa976325bc344b573"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/shellscript/syntaxes/shell-unix-bash.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/shellscript/syntaxes/shell-unix-bash.tmLanguage.json",
+      "sha256": "2916d594889cdacc4d806ebaac013b5f00a2db470533878ac316face6deddb33"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/sql/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/sql/cgmanifest.json",
+      "sha256": "4c1c6655277e153454c8b9bac71fffd17160668c254d2edd61a75e6e555a4f28"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/sql/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/sql/language-configuration.json",
+      "sha256": "8395c0b6bed6f0f20543f2d7deba8420b6e9bddf06979cfdfad8828d724b5fd7"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/sql/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/sql/package.json",
+      "sha256": "bc4132afbdaa2be3442706db9aa8f23d923f1bd056e1215511a02a4d3109ac00"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/sql/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/sql/package.nls.json",
+      "sha256": "cddaa6f07235ee147e3ba333dcacf05609e79b127b2994f1aac874b926c076cb"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/sql/syntaxes/sql.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/sql/syntaxes/sql.tmLanguage.json",
+      "sha256": "4d431b8b6fe37789ec335c62c96178d912cf47fd0e49622cf8e26f13bc279cfc"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/swift/LICENSE.md",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/swift/LICENSE.md",
+      "sha256": "d087ecb987e4aa0678b0abe8bfef2d95837678e5421990f012c3f723c9e52120"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/swift/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/swift/cgmanifest.json",
+      "sha256": "2a5120e46cd1dddd73ef0496211ba6e38e4dd72f82c5fac0f0b136b1bfee9a1b"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/swift/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/swift/language-configuration.json",
+      "sha256": "e1921adb3e445862e464e755ec408bb09235e24f3faa92bae7baddc047b43d46"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/swift/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/swift/package.json",
+      "sha256": "2507428533cd85f208a72f803106ff8f1b33ab99126c37dd75c7387e5c81b5d3"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/swift/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/swift/package.nls.json",
+      "sha256": "b4c46dc584cc494286b291fd2af6a87cf3792806019d3b6eecc2752c9e8e3132"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/swift/snippets/swift.code-snippets",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/swift/snippets/swift.code-snippets",
+      "sha256": "6181e7d02f2e49766f033503488c42b92c279155f34d5b9ef134dad90bb5f441"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/swift/syntaxes/swift.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/swift/syntaxes/swift.tmLanguage.json",
+      "sha256": "c7439021049632066b72843359fdd1933bf9d2cc5a074f0d7783d0fb4c49388b"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/typescriptbasics/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/typescriptbasics/cgmanifest.json",
+      "sha256": "79efcb921746eee3c969d7a7d46eabc48ae3fda3ca246285b26f4c90399a6f22"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/typescriptbasics/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/typescriptbasics/language-configuration.json",
+      "sha256": "46f12114bebc3a8fe3e0b49dc4bdb7b425982a35ba226be75ef635125901930a"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/typescriptbasics/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/typescriptbasics/package.json",
+      "sha256": "7eda09bc890bcacdf1c285406595d4c9ed07c11b95354b74ed222e9b76ff20ea"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/typescriptbasics/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/typescriptbasics/package.nls.json",
+      "sha256": "b1178acf3662cd0704d564ec62e77f31b3c1a64393547bb35ec074803077f7de"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/typescriptbasics/snippets/typescript.code-snippets",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/typescriptbasics/snippets/typescript.code-snippets",
+      "sha256": "523463983a2cb07e44b45eeb72a69e46ce6f4614f750138f352f6946f69a7541"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/typescriptbasics/syntaxes/Readme.md",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/typescriptbasics/syntaxes/Readme.md",
+      "sha256": "af8add11d12bc86585120caeab273bb7ab1c4510ed7fce9d7973e24b69789e7a"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/typescriptbasics/syntaxes/TypeScript.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/typescriptbasics/syntaxes/TypeScript.tmLanguage.json",
+      "sha256": "afbc633e95fe6186c557814ce1273a53a815e8b9bf0f7fca3dcaa0961c6afcc3"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/typescriptbasics/syntaxes/TypeScriptReact.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/typescriptbasics/syntaxes/TypeScriptReact.tmLanguage.json",
+      "sha256": "346ac414a675e2dca370aada760392b3279fa3743c7c74398dc0f40f2e536ce6"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/typescriptbasics/syntaxes/jsdoc.js.injection.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/typescriptbasics/syntaxes/jsdoc.js.injection.tmLanguage.json",
+      "sha256": "c11fde5c9bb2d9b6bd6faaad51f398b127438a93b3047641a270552a760e76b6"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/typescriptbasics/syntaxes/jsdoc.ts.injection.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/typescriptbasics/syntaxes/jsdoc.ts.injection.tmLanguage.json",
+      "sha256": "526076af53f330358ae3f5293a7779ac0dbd19d5ef27b71effd94faeef4f1249"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/typst/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/typst/cgmanifest.json",
+      "sha256": "0068586580610dc77304b52977e5dd3f879695449498ca2cbb2b6d19b54b43bf"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/typst/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/typst/language-configuration.json",
+      "sha256": "47fb9d6efd2241dbe4a89e621f0e6a6b2f5acb119f93ac3e10ab9825cb42e513"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/typst/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/typst/package.json",
+      "sha256": "d07a266e8f3062ea8251957b1f5937b5288173be90f247fe9df5c842075daf77"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/typst/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/typst/package.nls.json",
+      "sha256": "8d38382d9bbdb1d2f49776a8b43b4f6de4284b7a67b116dee756f6d745260390"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/typst/syntaxes/typst-code.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/typst/syntaxes/typst-code.tmLanguage.json",
+      "sha256": "16bbece6c436408b3f4ec9266360f811c522c1754b7bef594f56ea9c241d3c4d"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/typst/syntaxes/typst-markdown-injection.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/typst/syntaxes/typst-markdown-injection.json",
+      "sha256": "7db1be0ade9b445fa8c3f6a8bb83ad279e4d1778321fb7854df47e6f7a0a2ce4"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/typst/syntaxes/typst.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/typst/syntaxes/typst.tmLanguage.json",
+      "sha256": "3338eaa7a6780fbab38554bae7ae5d2f278a56dbdb4ed0525a0a86cc6810cfbc"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/vb/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/vb/cgmanifest.json",
+      "sha256": "ecd418cda380a0c17bcd7153c612596e7a150db16bf6543658140a835822850b"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/vb/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/vb/language-configuration.json",
+      "sha256": "d868ad8db38ccb4bafc3ca673b1f4d76c257ea435da9abeb365fe5256cfc464a"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/vb/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/vb/package.json",
+      "sha256": "6d8169930569670ffabc55a9a6c2ae916f8c68f872f75b00739f9da0ac4ea5c1"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/vb/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/vb/package.nls.json",
+      "sha256": "ae10cd0293d48affe793765988ee3a84013f8e494fcebd5735f5a25967fba02d"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/vb/snippets/vb.code-snippets",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/vb/snippets/vb.code-snippets",
+      "sha256": "40bb73261f555dc1e8eeef63637d6adbeee348b0552850edd6e5edea7e6b3d72"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/vb/syntaxes/asp-vb-net.tmlanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/vb/syntaxes/asp-vb-net.tmlanguage.json",
+      "sha256": "d507207ef0bbdca536e9f9b2d3e4185bbcd4cd8819c96e1f941141925a0ad7dc"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/x86asm/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/x86asm/cgmanifest.json",
+      "sha256": "62b3ab01821a4bcb9fc9a6734d8ac091248722b8f154f3ce794c8aff4c8e0f7e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/x86asm/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/x86asm/language-configuration.json",
+      "sha256": "d594bb534b2034276cda92c8abe4d1c6a7b2f6eb3ccfd27d7ee6d1f3eaa23fa0"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/x86asm/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/x86asm/package.json",
+      "sha256": "0077161c47f08f11138a5de5e331721214dc0a6875de230c61b8c00d85d30b13"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/x86asm/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/x86asm/package.nls.json",
+      "sha256": "ba9ed79002fc4ce5b92af7f0d5e0ff025042fac59e4d8226b33c334b0102c86f"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/x86asm/syntaxes/x86asm.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/x86asm/syntaxes/x86asm.tmLanguage.json",
+      "sha256": "87a0ff72ffa3ad75b478c46f9ea8bf699207f4b0b4ea173b9c982892a18d85af"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/xml/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/xml/cgmanifest.json",
+      "sha256": "606269b981031acc967b732dcd915d0e4a8900f880da1aedd0411efbd7c546c3"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/xml/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/xml/package.json",
+      "sha256": "f02116932624469ae57ada468573ab05f382ad3ca6ad991219e58b0e0c881678"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/xml/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/xml/package.nls.json",
+      "sha256": "1d9b67c576effd24177cca83fdc90492d6ca7a4e842c2ed62b57f6f07fa01e92"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/xml/syntaxes/xml.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/xml/syntaxes/xml.tmLanguage.json",
+      "sha256": "652660d5e80a0e1c6c33134b0d90ec9bb1cb6a27d10019799576de9ec3d26617"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/xml/syntaxes/xsl.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/xml/syntaxes/xsl.tmLanguage.json",
+      "sha256": "3b766c5273bd8ef7acb85c2cfd227692c0f75b35d262584d7559c9a543219b12"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/xml/xml.language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/xml/xml.language-configuration.json",
+      "sha256": "179cf64e218f912b16c2cda117ff896720fb2d4d728bcbd9d9a9e4e56a8f84fb"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/xml/xsl.language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/xml/xsl.language-configuration.json",
+      "sha256": "5554e67cad48e2801fa45e07fa3661e4bca1c924a11f9183be000789f02c7c6e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/yaml/cgmanifest.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/yaml/cgmanifest.json",
+      "sha256": "6173ab4918e5be92ba89f869bf53f0714381c742800d6a95134acbef3cddb908"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/yaml/language-configuration.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/yaml/language-configuration.json",
+      "sha256": "306c8f6951dddc6214ff80766123a0315fc63773a0bd2909423968fa712b4a26"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/yaml/package.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/yaml/package.json",
+      "sha256": "b03c9935395e0b34c8f05b5bcb380c3ffe19ca45a37fe808d52f2fbaf6ba785a"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/yaml/package.nls.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/yaml/package.nls.json",
+      "sha256": "da21e8d12d2e8b333c46712cdd4972fca5e556a0dd3917b4e984a9d144353740"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/grammars/yaml/syntaxes/yaml.tmLanguage.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Grammars/yaml/syntaxes/yaml.tmLanguage.json",
+      "sha256": "0e9e3669a65b5d1f957398844f50ee6e51e713f5a18f782ec458cdfbaebf1bb6"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/Red-color-theme.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/Red-color-theme.json",
+      "sha256": "091c6ed98637d8e847cf9c286ea2e2e498c0009e315cb91f22c4b4586364bd79"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/abyss-color-theme.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/abyss-color-theme.json",
+      "sha256": "81f9650b31cf7cc1037369490db53943f380a56d708018f0b77c6ac7f4c84540"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/atom-one-dark-color-theme.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/atom-one-dark-color-theme.json",
+      "sha256": "22dcdbdf9201c5153e45f650783889945284b1a16b380267dce1b439fe56a230"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/atom-one-light-color-theme.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/atom-one-light-color-theme.json",
+      "sha256": "a016a9fc987b779a0ff7e354f6c39f99039d36446d825eb851bd3e873f5c3a0c"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/dark_plus.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/dark_plus.json",
+      "sha256": "14882e0918060aba73e3a60ccd906473d42dd4cbecb86a705d58a4f56078f1b7"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/dark_vs.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/dark_vs.json",
+      "sha256": "578dafa7ea7fc4818b4c5fbf25a93742e1ba426bb4539d34529ad369b7712580"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/dimmed-monokai-color-theme.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/dimmed-monokai-color-theme.json",
+      "sha256": "6b940a575d7dc53db927323b8ff94dd06735fbdcc1e1b794314bd18908d77178"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/dracula-color-theme.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/dracula-color-theme.json",
+      "sha256": "d157ef14c42ee034bd2b169344d687f3a6cbb0f6f0721d36be73508bed5ef517"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/hc_black.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/hc_black.json",
+      "sha256": "5ef2d0729061f49cbbd8916c9e885141ad0cf1bc0d20850d4ebb6ddc4a62dc93"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/hc_light.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/hc_light.json",
+      "sha256": "358e65d88cb18be44e6671e0d2837e9b30917fad41402b7b358a59f0c36e2109"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/kimbie-dark-color-theme.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/kimbie-dark-color-theme.json",
+      "sha256": "14fd2354df1a1b10014031f5b76cde5f501623924e4ff283d4408c1c630e65da"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/light_plus.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/light_plus.json",
+      "sha256": "3cb2d6f0914bead9aae893d0f7a9e0589948bf8bb5ba8a2af52e0f38921dbf86"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/light_vs.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/light_vs.json",
+      "sha256": "31d3a9dc2361c051e45883a52e8af4d1a6b628611f6c9d4233ede59c25efff61"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/monokai-color-theme.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/monokai-color-theme.json",
+      "sha256": "edddc56c4531fd3742243254c9d123a870b8d0391d0a0e4297617c00e186370d"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/onedark-color-theme.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/onedark-color-theme.json",
+      "sha256": "6ff96c314c9ca63adc78c848594c1e3d973bd4449f13e2f0d8e22a24c51d8a5f"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/quietlight-color-theme.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/quietlight-color-theme.json",
+      "sha256": "a707474bf13eeb17a24e370c4d27e8aed035fb3abf90ddb13aaf860f037ab222"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/solarized-dark-color-theme.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/solarized-dark-color-theme.json",
+      "sha256": "9d8ff0c743644f8e5c1688f7fbcd5db59e3111177dbdee012e1179787f136261"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/solarized-light-color-theme.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/solarized-light-color-theme.json",
+      "sha256": "2c86c32de56adda4ec7259e1cbc58a90e125a355fdd55941e859daf6ac59489d"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/tomorrow-night-blue-color-theme.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/tomorrow-night-blue-color-theme.json",
+      "sha256": "2bd981500792cdc7710729c22682446891f672bb1532ab29b02d882bac8a2a2e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/visual-studio-dark-theme.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/visual-studio-dark-theme.json",
+      "sha256": "e8399e3641dac605bb4181f7a33dbf3c6bfa6fc10fd421874dbdf182a4f8b86e"
+    },
+    {
+      "path": "src/FerroUI.TextMate/resources/themes/visual-studio-light-theme.json",
+      "project": "TextMateSharp",
+      "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+      "source": "src/TextMateSharp.Grammars/Resources/Themes/visual-studio-light-theme.json",
+      "sha256": "cc2ade96be5ddb2ce257caaeb855a03e795266c50992e1b90aa8f2e36ba7c15b"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/ASPX.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/ASPX.xshd",
+      "sha256": "4e425a1c4e0e8b10affb846a43cc006d417950d3c57c34ba43e7fc1ef4d7d2c9"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/Boo.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/Boo.xshd",
+      "sha256": "14910cc9a4f43ef8ac3e6d924a85cecec24e95beb514da850fb4cd5fe43a594a"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/CPP-Mode.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/CPP-Mode.xshd",
+      "sha256": "89b6be9f0923d2f68734462cf3597f01a25d3221b840c8bfb88eb0c5cf0d598a"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/CSS-Mode.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/CSS-Mode.xshd",
+      "sha256": "e683338b1a3f901a8c167283a6432321cb8f8f53af4827e5fbbf2b4429c339bb"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/CSharp-Mode.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/CSharp-Mode.xshd",
+      "sha256": "eabca0739696fcd195d4ddb79430684fc1c04c5570fd2fffd9773ced8bc26e1c"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/Coco-Mode.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/Coco-Mode.xshd",
+      "sha256": "6ede59c7fe1de4c4e6647f63ebf597b2fdc9fdfba7bda53fbd6c32d1a0e23952"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/HTML-Mode.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/HTML-Mode.xshd",
+      "sha256": "e835e950dee43dee6bd288a9677b471ad9cf903d3252b89b0b3855a18e8f20d3"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/Java-Mode.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/Java-Mode.xshd",
+      "sha256": "1c887e3ffd47558ed072866631f71387bd5699828138c78682ff871d8fa95d49"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/JavaScript-Mode.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/JavaScript-Mode.xshd",
+      "sha256": "d847929fc8368b9fb5835dee326b36dcc71681e16fb77af0bba222ce7974107e"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/Json.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/Json.xshd",
+      "sha256": "48bb2c10b85bb4cc869498f49f2efa4b2fdffbcbdaab11988593ac32c9b52e16"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/MarkDown-Mode.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/MarkDown-Mode.xshd",
+      "sha256": "021c55f45bf0299ceca5216ee91b36129e6b72b09028dbaafe157fcccd6ad631"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/MarkDownWithFontSize-Mode.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/MarkDownWithFontSize-Mode.xshd",
+      "sha256": "631d9a44b3c24eb184ddedbe8d65959f2640a70342b3d0ec1a527c648e7ad75f"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/PHP-Mode.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/PHP-Mode.xshd",
+      "sha256": "801fbbbba9e200ff76f655c23bf459e204188f0964f8d3164d65d0c57bd9aa14"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/Patch-Mode.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/Patch-Mode.xshd",
+      "sha256": "258d8d346431d31f442110165cf1d09764ee0c861f8d98c91164277aeaabb4a3"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/PowerShell.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/PowerShell.xshd",
+      "sha256": "7be97890c87217fbbde6b962b5a6f85909de223e947a11428ed783d42ac3e616"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/Python-Mode.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/Python-Mode.xshd",
+      "sha256": "a854111e0f9c0df8186bfedb1dfbb11d79d69256edbfcecb017863fe9cb7191f"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/TSQL-Mode.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/TSQL-Mode.xshd",
+      "sha256": "bb7f1e81e38be8b67a4eef0d1e46e06260156be51c30451bb4f87a24af73ed9d"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/Tex-Mode.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/Tex-Mode.xshd",
+      "sha256": "5c0527feb2343928f9a182adb479c9e4c9c0c628ad176121f9285abba15b4478"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/VB-Mode.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/VB-Mode.xshd",
+      "sha256": "ca79b9ad2d43b2cb31d9c3fe0c73c179966ee7fba850c0e6e059cd285e8b150a"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/XML-Mode.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/XML-Mode.xshd",
+      "sha256": "ee8428888ce49e4c3ecad27bd761aadd2e1a18d758e3e4607ac01ef185df14b5"
+    },
+    {
+      "path": "src/FerroUI.Edit.Core/highlighting/resources/XmlDoc.xshd",
+      "project": "AvaloniaEdit",
+      "revision": "7277e36366d754219d7ede16b6613786b32caf4c",
+      "source": "src/AvaloniaEdit/Highlighting/Resources/XmlDoc.xshd",
+      "sha256": "9f96ab26961fa870a527a2778c69c8013573cbbcd2a28c4b63b5957f6ac9df98"
+    }
+  ]
+}

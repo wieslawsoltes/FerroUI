@@ -1,7 +1,7 @@
+use super::folding_events::FoldingEvents;
 use crate::document::{AnchorMovementType, DocumentError, TextAnchor, TextDocument};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
-use super::folding_events::FoldingEvents;
 
 struct SectionInner {
     start: TextAnchor,
@@ -57,7 +57,9 @@ impl FoldingSection {
         self.inner.folded.get()
     }
     pub fn set_is_folded(&self, folded: bool) {
-        if self.inner.folded.replace(folded) != folded { self.notify(); }
+        if self.inner.folded.replace(folded) != folded {
+            self.notify();
+        }
     }
     pub fn title(&self) -> Option<String> {
         self.inner.title.borrow().clone()
@@ -65,13 +67,17 @@ impl FoldingSection {
     pub fn set_title(&self, title: Option<String>) {
         let changed = *self.inner.title.borrow() != title;
         *self.inner.title.borrow_mut() = title;
-        if changed { self.notify(); }
+        if changed {
+            self.notify();
+        }
     }
     pub fn is_definition(&self) -> bool {
         self.inner.definition.get()
     }
     pub fn set_is_definition(&self, value: bool) {
-        if self.inner.definition.replace(value) != value { self.notify(); }
+        if self.inner.definition.replace(value) != value {
+            self.notify();
+        }
     }
     pub(crate) fn set_end_offset(
         &self,
@@ -88,5 +94,9 @@ impl FoldingSection {
     pub(crate) fn ptr_eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.inner, &other.inner)
     }
-    fn notify(&self) { if let Some(events) = self.inner.events.upgrade() { events.notify(); } }
+    fn notify(&self) {
+        if let Some(events) = self.inner.events.upgrade() {
+            events.notify();
+        }
+    }
 }

@@ -15,13 +15,21 @@ impl FoldingEvents {
         let id = self.next.get();
         self.next.set(id + 1);
         self.handlers.borrow_mut().insert(id, Rc::new(handler));
-        FoldingSubscription { events: Rc::downgrade(self), id }
+        FoldingSubscription {
+            events: Rc::downgrade(self),
+            id,
+        }
     }
 
     pub fn notify(&self) {
-        if self.depth.get() != 0 { self.pending.set(true); return; }
+        if self.depth.get() != 0 {
+            self.pending.set(true);
+            return;
+        }
         let handlers: Vec<_> = self.handlers.borrow().values().cloned().collect();
-        for handler in handlers { handler(); }
+        for handler in handlers {
+            handler();
+        }
     }
 
     pub fn batch(self: &Rc<Self>) -> FoldingUpdate {
@@ -34,7 +42,9 @@ pub(crate) struct FoldingUpdate(Rc<FoldingEvents>);
 impl Drop for FoldingUpdate {
     fn drop(&mut self) {
         self.0.depth.set(self.0.depth.get() - 1);
-        if self.0.depth.get() == 0 && self.0.pending.replace(false) { self.0.notify(); }
+        if self.0.depth.get() == 0 && self.0.pending.replace(false) {
+            self.0.notify();
+        }
     }
 }
 
@@ -45,7 +55,13 @@ pub struct FoldingSubscription {
 }
 impl FoldingSubscription {
     pub fn dispose(&self) {
-        if let Some(events) = self.events.upgrade() { events.handlers.borrow_mut().remove(&self.id); }
+        if let Some(events) = self.events.upgrade() {
+            events.handlers.borrow_mut().remove(&self.id);
+        }
     }
 }
-impl Drop for FoldingSubscription { fn drop(&mut self) { self.dispose(); } }
+impl Drop for FoldingSubscription {
+    fn drop(&mut self) {
+        self.dispose();
+    }
+}

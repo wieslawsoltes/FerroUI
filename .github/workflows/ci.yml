@@ -50,10 +50,16 @@ jobs:
       - name: Upstream project name stays out of the sources
         run: |
           if grep -rIli -E "avalonia|axaml|avares|\bavn" \
-              src external tests samples native Cargo.toml --exclude=NOTICE.md; then
+              src external tests samples native Cargo.toml --exclude=NOTICE.md \
+              | grep -Fvx 'src/FerroUI.TextMate/resources/grammars/xml/package.json'; then
             echo "::error::the files above name the upstream project; only docs/, scripts/ and NOTICE.md may"
             exit 1
           fi
+      # The unchanged third-party XML language manifest contains a legacy file
+      # extension. It is data, not a framework API; its exact source bytes and
+      # all bundled editor assets are pinned and verified separately.
+      - name: Pinned editor resources
+        run: python3 scripts/edit-port/check_assets.py
       # The composition property blocks are written by a script: a change made to them by hand
       # is lost at the next regeneration, so it has to be made in the script.
       - name: Generated composition code is up to date

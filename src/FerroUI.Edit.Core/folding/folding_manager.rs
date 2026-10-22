@@ -1,9 +1,9 @@
+use super::folding_events::{FoldingEvents, FoldingSubscription};
 use super::{FoldingSection, NewFolding};
 use crate::document::{DocumentError, TextDocument};
 use std::cell::{Cell, RefCell};
 use std::fmt;
 use std::rc::Rc;
-use super::folding_events::{FoldingEvents, FoldingSubscription};
 
 #[derive(Debug)]
 pub enum FoldingError {
@@ -147,21 +147,24 @@ impl FoldingManager {
                 old[old_index].set_is_folded(false);
                 old_index += 1;
             }
-            let section = if old_index < old.len()
-                && old[old_index].start_offset() == region.start_offset
-            {
-                let section = old[old_index].clone();
-                old_index += 1;
-                section.set_end_offset(&self.document, region.end_offset)?;
-                section
-            } else {
-                let section =
-                    FoldingSection::new(&self.document, region.start_offset, region.end_offset, &self.events)?;
-                if self.first_update.get() {
-                    section.set_is_folded(region.default_closed);
-                }
-                section
-            };
+            let section =
+                if old_index < old.len() && old[old_index].start_offset() == region.start_offset {
+                    let section = old[old_index].clone();
+                    old_index += 1;
+                    section.set_end_offset(&self.document, region.end_offset)?;
+                    section
+                } else {
+                    let section = FoldingSection::new(
+                        &self.document,
+                        region.start_offset,
+                        region.end_offset,
+                        &self.events,
+                    )?;
+                    if self.first_update.get() {
+                        section.set_is_folded(region.default_closed);
+                    }
+                    section
+                };
             section.set_title(region.name.clone());
             section.set_is_definition(region.is_definition);
             next.push(section);
@@ -210,29 +213,38 @@ mod tests {
     fn invalid_update_is_atomic() {
         let manager = FoldingManager::new(TextDocument::from_text("123456"));
         manager.create_folding(0, 4).unwrap();
-        assert!(manager
-            .update_foldings(&[NewFolding::new(2, 5), NewFolding::new(1, 6)], None)
-            .is_err());
+        assert!(
+            manager
+                .update_foldings(&[NewFolding::new(2, 5), NewFolding::new(1, 6)], None)
+                .is_err()
+        );
         assert_eq!(manager.all_foldings().len(), 1);
     }
 
     #[test]
     fn notifications_observe_committed_state_and_batch_bulk_updates() {
-        let manager=Rc::new(FoldingManager::new(TextDocument::from_text("0123456789")));
-        let observed=Rc::new(RefCell::new(Vec::new()));
-        let weak=Rc::downgrade(&manager);let values=observed.clone();
-        let subscription=manager.changed(move||{
-            let manager=weak.upgrade().unwrap();
-            values.borrow_mut().push(manager.all_foldings().iter().filter(|s|s.is_folded()).count());
+        let manager = Rc::new(FoldingManager::new(TextDocument::from_text("0123456789")));
+        let observed = Rc::new(RefCell::new(Vec::new()));
+        let weak = Rc::downgrade(&manager);
+        let values = observed.clone();
+        let subscription = manager.changed(move || {
+            let manager = weak.upgrade().unwrap();
+            values.borrow_mut().push(
+                manager
+                    .all_foldings()
+                    .iter()
+                    .filter(|s| s.is_folded())
+                    .count(),
+            );
         });
-        let first=manager.create_folding(0,4).unwrap();
-        manager.create_folding(5,9).unwrap();
+        let first = manager.create_folding(0, 4).unwrap();
+        manager.create_folding(5, 9).unwrap();
         first.set_is_folded(true);
-        manager.set_all_folded(true,false);
+        manager.set_all_folded(true, false);
         manager.clear();
-        assert_eq!(*observed.borrow(),vec![0,0,1,2,0]);
+        assert_eq!(*observed.borrow(), vec![0, 0, 1, 2, 0]);
         subscription.dispose();
-        manager.create_folding(0,2).unwrap();
-        assert_eq!(observed.borrow().len(),5);
+        manager.create_folding(0, 2).unwrap();
+        assert_eq!(observed.borrow().len(), 5);
     }
 }

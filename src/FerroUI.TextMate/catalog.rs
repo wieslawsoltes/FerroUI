@@ -1,4 +1,4 @@
-use crate::{read_json, Error, Registry, Result, Theme};
+use crate::{read_json, regex_source::RegexCache, Error, Registry, Result, Theme};
 use serde_json::Value;
 use std::collections::BTreeMap;
 
@@ -129,6 +129,7 @@ impl ThemeName {
 pub struct BundledCatalog {
     languages: Vec<Language>,
     grammar_paths: Vec<String>,
+    detection_cache: RegexCache,
 }
 impl BundledCatalog {
     pub fn new() -> Result<Self> {
@@ -213,6 +214,7 @@ impl BundledCatalog {
         Ok(Self {
             languages,
             grammar_paths,
+            detection_cache: RegexCache::default(),
         })
     }
     pub fn languages(&self) -> &[Language] {
@@ -255,6 +257,22 @@ impl BundledCatalog {
                     .max_by_key(|(length, _)| *length)
                     .map(|(_, l)| l)
             })
+    }
+    /// Detects shebangs and other upstream first-line declarations using the
+    /// active regex backend. Browser callers initialize Oniguruma first.
+    pub fn language_by_first_line(&self, line: &str) -> Result<Option<&Language>> {
+        for language in &self.languages {
+            if let Some(pattern) = &language.first_line {
+                if self
+                    .detection_cache
+                    .search(pattern, line, 0, true, false)?
+                    .is_some()
+                {
+                    return Ok(Some(language));
+                }
+            }
+        }
+        Ok(None)
     }
     pub fn scope_by_extension(&self, extension: &str) -> Option<&str> {
         self.language_by_extension(extension)?.scope_name.as_deref()

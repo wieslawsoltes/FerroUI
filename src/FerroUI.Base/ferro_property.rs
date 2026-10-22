@@ -225,6 +225,13 @@ impl PropertyChangedObservable {
         Self { handlers: HandlerList::new() }
     }
 
+    /// Whether the property has class-wide observers. Controls with expensive
+    /// computed values can avoid materializing notification values when no
+    /// object or property observer exists.
+    pub fn has_observers(&self) -> bool {
+        !self.handlers.is_empty()
+    }
+
     /// Subscribes to changes of the property on any object.
     pub fn subscribe(&'static self, handler: impl Fn(&FerroPropertyChangedEventArgs<'_>) + 'static) -> Rc<dyn IDisposable> {
         let token = self.handlers.add(Rc::new(handler));

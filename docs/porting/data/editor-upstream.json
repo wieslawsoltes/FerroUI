@@ -8,10 +8,22 @@
       "commit": "7277e36366d754219d7ede16b6613786b32caf4c",
       "extensions": [
         ".cs",
-        ".xaml"
+        ".xaml",
+        ".axaml"
       ],
       "root": "src",
       "files": [
+        {
+          "path": "src/AvaloniaEdit.Demo/App.axaml",
+          "kind": "xaml",
+          "category": "demo",
+          "git_blob": "ea576625ff2900c74e284f760c03d04854280f84",
+          "git_mode": "100644",
+          "sha256": "d2400a067a7362efe32223a40ae28e5179b5e58e9ecbd7e9353007bf9a600b90",
+          "bytes": 820,
+          "lines": 28,
+          "types": []
+        },
         {
           "path": "src/AvaloniaEdit.Demo/App.axaml.cs",
           "kind": "csharp",
@@ -51,6 +63,17 @@
               "line": 19
             }
           ]
+        },
+        {
+          "path": "src/AvaloniaEdit.Demo/MainWindow.axaml",
+          "kind": "xaml",
+          "category": "demo",
+          "git_blob": "ca6bcfc0f063d041c88975f4c47f41a2aa6c34c1",
+          "git_mode": "100644",
+          "sha256": "195ea3fccf1543237b3df5488a31eff57eef790d9148efa3a77ca816fd9c993b",
+          "bytes": 6072,
+          "lines": 80,
+          "types": []
         },
         {
           "path": "src/AvaloniaEdit.Demo/MainWindow.axaml.cs",

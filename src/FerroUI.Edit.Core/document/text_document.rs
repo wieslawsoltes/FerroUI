@@ -1,9 +1,10 @@
+use super::line_manager::{LineEvent, LineManager};
 use super::text_anchor_tree::TextAnchorTree;
 use super::undo_stack::{UndoHistory, UndoOperation};
 use super::{
     AnchorMovementType, DocumentChangeEventArgs, DocumentLine, DocumentSubscription,
-    DocumentVersion, ITextSource, OffsetChangeMap, OffsetChangeMappingType, TextAnchor,
-    TextLocation, TextSnapshot, UndoStack,
+    DocumentVersion, ILineTracker, ITextSource, LiveDocumentLine, OffsetChangeMap,
+    OffsetChangeMappingType, TextAnchor, TextLocation, TextSnapshot, UndoStack,
 };
 use crate::utils::Event;
 use std::cell::{Cell, RefCell};
@@ -29,6 +30,7 @@ pub enum DocumentError {
     InvalidNewLine,
     InvalidOffsetMap,
     DeletedAnchor,
+    DeletedLine,
     DifferentDocument,
     InvalidVersion,
     VersionOverflow,
@@ -67,6 +69,7 @@ impl fmt::Display for DocumentError {
             Self::InvalidNewLine => f.write_str("expected CR, LF, or CRLF newline sequence"),
             Self::InvalidOffsetMap => f.write_str("the offset map does not describe this edit"),
             Self::DeletedAnchor => f.write_str("the anchor was deleted"),
+            Self::DeletedLine => f.write_str("the document line was deleted"),
             Self::DifferentDocument => f.write_str("the versions belong to different documents"),
             Self::InvalidVersion => f.write_str("the version is not a valid successor"),
             Self::VersionOverflow => f.write_str("the document revision counter is exhausted"),
@@ -114,6 +117,7 @@ struct DocumentState {
 
 struct DocumentInner {
     state: RefCell<DocumentState>,
+    lines: RefCell<Option<Rc<LineManager>>>,
     in_change: Cell<bool>,
     finishing: Cell<bool>,
     changing: Event<DocumentChangeEventArgs>,
@@ -211,6 +215,7 @@ impl TextDocument {
                 history: UndoHistory::default(),
                 is_read_only: false,
             }),
+            lines: RefCell::new(None),
             in_change: Cell::new(false),
             finishing: Cell::new(false),
             changing: Event::default(),
@@ -266,6 +271,38 @@ impl TextDocument {
     }
     pub fn get_line_by_offset(&self, offset: usize) -> Result<DocumentLine, DocumentError> {
         self.create_snapshot().get_line_by_offset(offset)
+    }
+    fn ensure_live_lines(&self) -> Rc<LineManager> {
+        if let Some(manager) = self.0.lines.borrow().clone() {
+            return manager;
+        }
+        let manager = LineManager::new(&self.create_snapshot());
+        *self.0.lines.borrow_mut() = Some(manager.clone());
+        manager
+    }
+    pub fn get_live_line_by_number(
+        &self,
+        line_number: usize,
+    ) -> Result<LiveDocumentLine, DocumentError> {
+        self.ensure_live_lines().by_number(line_number)
+    }
+    pub fn get_live_line_by_offset(
+        &self,
+        offset: usize,
+    ) -> Result<LiveDocumentLine, DocumentError> {
+        self.ensure_live_lines().by_offset(offset)
+    }
+    pub fn live_lines(&self) -> Vec<LiveDocumentLine> {
+        self.ensure_live_lines().lines()
+    }
+    pub fn add_line_tracker(&self, tracker: Rc<dyn ILineTracker>) -> DocumentSubscription {
+        self.subscribe_line_events(move |event| event.dispatch(tracker.as_ref()))
+    }
+    pub(crate) fn subscribe_line_events(
+        &self,
+        handler: impl Fn(&LineEvent) + 'static,
+    ) -> DocumentSubscription {
+        self.ensure_live_lines().subscribe(handler)
     }
     pub fn get_location(&self, offset: usize) -> Result<TextLocation, DocumentError> {
         self.create_snapshot().get_location(offset)
@@ -691,11 +728,15 @@ impl TextDocument {
                 length: change.removal_length(),
                 text_length: snapshot.text_length(),
             })?;
-        let version = snapshot.version.expect("documents always have a version");
+        let version = snapshot
+            .version
+            .clone()
+            .expect("documents always have a version");
         if version.revision() == u64::MAX {
             return Err(DocumentError::VersionOverflow);
         }
         self.0.changing.raise(&change);
+        let line_manager = self.0.lines.borrow().clone();
         let version = version.append(change.clone())?;
         let mut deleted = Vec::new();
         {
@@ -706,9 +747,18 @@ impl TextDocument {
             };
             state.change_pending = true;
             state.history.record(change.clone());
+        }
+        if let Some(manager) = &line_manager {
+            manager.apply_change(&snapshot, &self.create_snapshot(), &change);
+        }
+        {
+            let mut state = self.0.state.borrow_mut();
             for entry in change.offset_change_map.entries() {
                 state.anchors.handle_text_change(entry, &mut deleted);
             }
+        }
+        if let Some(manager) = &line_manager {
+            manager.change_complete(&change);
         }
         self.flush_retired_operations();
         // All anchor deletion flags are set before any deletion handler runs.

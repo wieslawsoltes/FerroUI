@@ -32,7 +32,10 @@ pub use metadata::{EncodedTokenAttributes, StandardTokenType};
 pub use model::{LineTokens, TokenizationModel, TokenizationUpdate};
 pub use raw::{read_json, RawGrammar, RawRule};
 pub use regex_source::RegexBackend;
-pub use registry::Registry;
+pub use registry::{
+    DefaultLocator, GrammarLoadDiagnostic, IGrammarRepository, IRegistryOptions, IThemeProvider,
+    Registry,
+};
 pub use selector::{ScopeSelector, SelectorPriority};
 pub use theme::{Color, FontStyle, Theme, TokenStyle};
 

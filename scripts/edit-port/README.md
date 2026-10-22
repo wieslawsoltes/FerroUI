@@ -12,7 +12,7 @@ Both generation and `--check` use committed JSON and local Rust sources. They do
 
 ## Inputs and outputs
 
-- `docs/porting/data/editor-upstream.json`: every tracked source file under each pinned `src` root, its Git blob and SHA-256 hash, byte/line counts, category, and C# type declarations including nested types. AvaloniaEdit includes `.cs` and `.xaml`; TextMateSharp includes `.cs`. Demo/test/sample sources remain visible. Grammar/theme/resource assets have separate bundling provenance.
+- `docs/porting/data/editor-upstream.json`: every tracked source file under each pinned `src` root, its Git blob and SHA-256 hash, byte/line counts, category, and C# type declarations including nested types. AvaloniaEdit includes `.cs`, `.xaml`, and `.axaml`; TextMateSharp includes `.cs`. Demo/test/sample sources remain visible. Grammar/theme/resource assets have separate bundling provenance.
 - `docs/porting/data/editor-mappings.json`: one explicit decision per captured file. Every declared type needs an exact alias or an explicit `unmapped_types` entry. A destination specifies a repository-relative `.rs` path and existing Rust symbols. Renamed and consolidated types use `adapted` status. `notes` explains the decision and `limitations` records known missing behavior.
 - `docs/porting/data/editor-status.json` and `docs/porting/editor-source-map.md`: deterministic generated reports; `--check` fails if either differs, an input is missing, a pin changes, a mapping is incomplete, or a destination symbol disappears.
 

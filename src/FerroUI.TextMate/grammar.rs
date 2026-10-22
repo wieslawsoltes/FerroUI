@@ -36,7 +36,10 @@ pub(crate) struct Program {
 }
 
 impl Program {
-    pub fn compile(grammars: &BTreeMap<String, RawGrammar>) -> Result<Self> {
+    pub fn compile(
+        grammars: &BTreeMap<String, RawGrammar>,
+        injection_targets: &BTreeMap<String, Vec<String>>,
+    ) -> Result<Self> {
         let mut result = Self {
             nodes: Vec::new(),
             roots: BTreeMap::new(),
@@ -61,7 +64,9 @@ impl Program {
             for (selector, raw) in &grammar.injections {
                 let id = result.reserve();
                 result.fill(id, raw, root, repository.clone());
-                injections.push((ScopeSelector::parse(selector)?, id));
+                for selector in ScopeSelector::parse_many(selector)? {
+                    injections.push((selector, id));
+                }
             }
             result.injections.insert(root, injections);
         }
@@ -72,12 +77,23 @@ impl Program {
                 grammar
                     .injection_selector
                     .as_ref()
-                    .map(|s| (s.clone(), result.roots[scope]))
+                    .map(|s| (scope.clone(), s.clone(), result.roots[scope]))
             })
             .collect();
-        for list in result.injections.values_mut() {
-            for (selector, rule) in &external {
-                list.push((ScopeSelector::parse(selector)?, *rule));
+        for (host, root) in &result.roots {
+            let list = result
+                .injections
+                .get_mut(root)
+                .expect("registered root injections");
+            for (scope, selector, rule) in &external {
+                if let Some(targets) = injection_targets.get(host) {
+                    if !targets.contains(scope) {
+                        continue;
+                    }
+                }
+                for selector in ScopeSelector::parse_many(selector)? {
+                    list.push((selector, *rule));
+                }
             }
             list.sort_by_key(|(selector, _)| selector.priority);
         }

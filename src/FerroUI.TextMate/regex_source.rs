@@ -52,6 +52,10 @@ impl RegexCache {
         first_line: bool,
         allow_g: bool,
     ) -> Result<Option<Captures>> {
+        #[cfg(all(target_arch = "wasm32", not(feature = "portable-regex")))]
+        if !crate::browser::browser_oniguruma_ready() {
+            return Err(Error::BackendNotInitialized);
+        }
         let pattern = resolve_anchors(pattern, first_line, allow_g);
         let existing = self.values.borrow().get(pattern.as_ref()).cloned();
         let regex = if let Some(regex) = existing {

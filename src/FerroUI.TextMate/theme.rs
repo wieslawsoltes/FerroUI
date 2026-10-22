@@ -1,4 +1,4 @@
-use crate::{read_json, Error, Result, ScopeSelector};
+use crate::{raw::read_json_or_plist, Error, Result, ScopeSelector};
 use serde_json::Value;
 use std::{
     cell::RefCell,
@@ -74,6 +74,7 @@ pub struct TokenStyle {
 
 #[derive(Clone, Debug)]
 struct Rule {
+    layer: usize,
     selector: ScopeSelector,
     foreground: Option<Color>,
     background: Option<Color>,
@@ -87,6 +88,7 @@ pub struct Theme {
     pub colors: BTreeMap<String, Color>,
     defaults: TokenStyle,
     rules: Vec<Rule>,
+    next_layer: usize,
     cache: RefCell<HashMap<Vec<String>, TokenStyle>>,
 }
 impl Default for Theme {
@@ -100,6 +102,7 @@ impl Default for Theme {
                 font_style: FontStyle::NONE,
             },
             rules: Vec::new(),
+            next_layer: 0,
             cache: RefCell::new(HashMap::new()),
         }
     }
@@ -122,7 +125,7 @@ impl Theme {
         resolver: &dyn Fn(&str) -> Result<String>,
         seen: &mut HashSet<String>,
     ) -> Result<()> {
-        let raw = read_json(source)?;
+        let raw = read_json_or_plist(source)?;
         if let Some(include) = raw.get("include").and_then(Value::as_str) {
             if !seen.insert(include.into()) {
                 return Err(Error::ResourceCycle(include.into()));
@@ -155,6 +158,10 @@ impl Theme {
             seen.remove(path);
         }
         if let Some(entries) = entries.and_then(Value::as_array) {
+            // The including theme takes precedence over its inherited theme,
+            // even when an inherited rule matches a deeper scope.
+            let layer = self.next_layer;
+            self.next_layer += 1;
             for entry in entries {
                 let Some(settings) = entry.get("settings") else {
                     continue;
@@ -189,6 +196,7 @@ impl Theme {
                 } else {
                     for scope in scopes {
                         self.rules.push(Rule {
+                            layer,
                             selector: ScopeSelector::parse(scope)?,
                             foreground,
                             background,
@@ -214,12 +222,12 @@ impl Theme {
             .filter_map(|(index, rule)| {
                 rule.selector
                     .specificity(scopes)
-                    .map(|rank| (rank, index, rule))
+                    .map(|rank| (rule.layer, rank, index, rule))
             })
             .collect();
-        matched.sort_by(|a, b| a.0.cmp(&b.0).then(a.1.cmp(&b.1)));
+        matched.sort_by(|a, b| a.0.cmp(&b.0).then(a.1.cmp(&b.1)).then(a.2.cmp(&b.2)));
         let mut style = self.defaults;
-        for (_, _, rule) in matched {
+        for (_, _, _, rule) in matched {
             if rule.foreground.is_some() {
                 style.foreground = rule.foreground;
             }

@@ -1,22 +1,22 @@
 {
   "schema_version": 1,
-  "inventory_sha256": "0c709af1cd44f5259c695b6dbf3c2c1a46b80983f64d586ab1194756cbcfc14c",
-  "mappings_sha256": "9cf1324a7d7b64342ab40147853172cd69c155dc9fc6a676f77380b8d94336f6",
+  "inventory_sha256": "70e060d1ca9836ade3c7c6b451169e52b4209b38458309ccb4c2694bb77541b5",
+  "mappings_sha256": "c3aac0de1b94c20a7fe6c8bd6cd714aa827d316be697dee73b0310c8a9f47b32",
   "counts": {
-    "mapped": 19,
-    "adapted": 138,
-    "unmapped": 216
+    "mapped": 21,
+    "adapted": 140,
+    "unmapped": 214
   },
-  "file_count": 373,
+  "file_count": 375,
   "declared_type_occurrences": 1310,
   "distinct_type_declarations_per_file": 554,
-  "mapped_declared_types": 174,
-  "unmapped_declared_types": 380,
+  "mapped_declared_types": 180,
+  "unmapped_declared_types": 374,
   "repositories": {
     "avaloniaedit": {
-      "mapped": 10,
-      "adapted": 78,
-      "unmapped": 151
+      "mapped": 12,
+      "adapted": 80,
+      "unmapped": 149
     },
     "textmatesharp": {
       "mapped": 9,
@@ -25,6 +25,20 @@
     }
   },
   "files": [
+    {
+      "source": "avaloniaedit:src/AvaloniaEdit.Demo/App.axaml",
+      "repository": "avaloniaedit",
+      "path": "src/AvaloniaEdit.Demo/App.axaml",
+      "category": "demo",
+      "sha256": "d2400a067a7362efe32223a40ae28e5179b5e58e9ecbd7e9353007bf9a600b90",
+      "types": [],
+      "mapped_types": [],
+      "status": "unmapped",
+      "targets": [],
+      "unmapped_types": [],
+      "notes": "Managed demo markup has no file-for-file port; the FerroUI EditorDemo is a separate native integration example.",
+      "limitations": []
+    },
     {
       "source": "avaloniaedit:src/AvaloniaEdit.Demo/App.axaml.cs",
       "repository": "avaloniaedit",
@@ -73,6 +87,20 @@
         "AvaloniaEdit.Demo.CustomMargin"
       ],
       "notes": "Managed demo source has no file-for-file Rust counterpart in this inventory.",
+      "limitations": []
+    },
+    {
+      "source": "avaloniaedit:src/AvaloniaEdit.Demo/MainWindow.axaml",
+      "repository": "avaloniaedit",
+      "path": "src/AvaloniaEdit.Demo/MainWindow.axaml",
+      "category": "demo",
+      "sha256": "195ea3fccf1543237b3df5488a31eff57eef790d9148efa3a77ca816fd9c993b",
+      "types": [],
+      "mapped_types": [],
+      "status": "unmapped",
+      "targets": [],
+      "unmapped_types": [],
+      "notes": "Managed demo markup has no file-for-file port; the FerroUI EditorDemo is a separate native integration example.",
       "limitations": []
     },
     {
@@ -566,16 +594,40 @@
           "line": 136
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.ApplicationCommands",
         "AvaloniaEdit.AvaloniaEditCommands",
         "AvaloniaEdit.EditingCommands"
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/commands.rs",
+          "symbols": [
+            "EditorCommand",
+            "EditorCommandKind"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.ApplicationCommands",
+              "rust": "EditorCommand"
+            },
+            {
+              "upstream": "AvaloniaEdit.AvaloniaEditCommands",
+              "rust": "EditorCommandKind"
+            },
+            {
+              "upstream": "AvaloniaEdit.EditingCommands",
+              "rust": "EditorCommand"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Editor commands implement the existing FerroUI ICommand contract for buttons, menus and key bindings.",
+      "limitations": [
+        "Implemented command subset is explicit in EditorCommandKind; the managed routed-command subsystem and all specialized editing commands are not reproduced."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/CodeCompletion/CompletionAcceptAction.cs",
@@ -1197,22 +1249,22 @@
       "status": "adapted",
       "targets": [
         {
-          "path": "src/FerroUI.Edit.Core/utils/rope.rs",
+          "path": "src/FerroUI.Edit.Core/document/line_manager.rs",
           "symbols": [
-            "Utf16Rope"
+            "LineNode"
           ],
           "aliases": [
             {
               "upstream": "AvaloniaEdit.Document.DocumentLine",
-              "rust": "Utf16Rope"
+              "rust": "LineNode"
             }
           ]
         }
       ],
       "unmapped_types": [],
-      "notes": "Line indexing is consolidated into persistent rope length/newline metrics.",
+      "notes": "Private arena line nodes hold identity, parent links, subtree counts and lengths.",
       "limitations": [
-        "No live line node or external ILineTracker callbacks."
+        "Implicit-order treap replaces embedded red-black nodes; no public node mutation API."
       ]
     },
     {
@@ -1247,12 +1299,24 @@
               "rust": "DocumentLine"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/document/live_document_line.rs",
+          "symbols": [
+            "LiveDocumentLine"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Document.DocumentLine",
+              "rust": "LiveDocumentLine"
+            }
+          ]
         }
       ],
       "unmapped_types": [],
-      "notes": "Line offsets/lengths are immutable revision values.",
+      "notes": "Immutable revision values coexist with stable live line handles, deletion state and sibling access.",
       "limitations": [
-        "Live line identity, PreviousLine/NextLine and IsDeleted semantics are absent."
+        "Live identity uses separate get_live_line_by_number/offset methods; deleted coordinate access returns Result."
       ]
     },
     {
@@ -1277,22 +1341,29 @@
       "status": "adapted",
       "targets": [
         {
-          "path": "src/FerroUI.Edit.Core/utils/rope.rs",
+          "path": "src/FerroUI.Edit.Core/document/line_manager.rs",
           "symbols": [
-            "Utf16Rope"
+            "DocumentLineTree"
           ],
           "aliases": [
             {
               "upstream": "AvaloniaEdit.Document.DocumentLineTree",
-              "rust": "Utf16Rope"
+              "rust": "DocumentLineTree"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/utils/rope.rs",
+          "symbols": [
+            "Utf16Rope"
+          ],
+          "aliases": []
         }
       ],
       "unmapped_types": [],
-      "notes": "Line indexing is consolidated into persistent rope length/newline metrics.",
+      "notes": "Lazy live line index maintains stable identities; the persistent rope independently supplies snapshot line metrics.",
       "limitations": [
-        "No live line node or external ILineTracker callbacks."
+        "Expected logarithmic treap bounds replace worst-case red-black bounds; collection facade differs."
       ]
     },
     {
@@ -1410,14 +1481,29 @@
           "line": 34
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Document.ILineTracker"
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "status": "mapped",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/document/i_line_tracker.rs",
+          "symbols": [
+            "ILineTracker"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Document.ILineTracker",
+              "rust": "ILineTracker"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "All five low-level notifications use LiveDocumentLine handles and run outside internal borrows.",
+      "limitations": [
+        "Registration returns a disposable subscription instead of exposing a mutable tracker list."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Document/ITextAnchor.cs",
@@ -1620,22 +1706,22 @@
       "status": "adapted",
       "targets": [
         {
-          "path": "src/FerroUI.Edit.Core/utils/rope.rs",
+          "path": "src/FerroUI.Edit.Core/document/line_manager.rs",
           "symbols": [
-            "Utf16Rope"
+            "LineManager"
           ],
           "aliases": [
             {
               "upstream": "AvaloniaEdit.Document.LineManager",
-              "rust": "Utf16Rope"
+              "rust": "LineManager"
             }
           ]
         }
       ],
       "unmapped_types": [],
-      "notes": "Line indexing is consolidated into persistent rope length/newline metrics.",
+      "notes": "Incremental split, merge, CRLF repair and rebuild preserve reference line identity rules and tracker order.",
       "limitations": [
-        "No live line node or external ILineTracker callbacks."
+        "Low-level trackers see final document text during transitional line-index updates; see editor-document.md."
       ]
     },
     {
@@ -2016,9 +2102,9 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Shared UI-thread document with UTF-16 edits, grouped notifications, anchors, immutable snapshots, versions and undo.",
+      "notes": "Shared UI-thread document with UTF-16 edits, grouped notifications, anchors, optional live line tracking, immutable snapshots, versions and undo.",
       "limitations": [
-        "Missing service container, filename metadata, owner-thread transfer/locking, and live line-tracker API; see editor-document.md."
+        "Missing service container, filename metadata, owner-thread transfer/locking and full interface families; see editor-document.md."
       ]
     },
     {
@@ -2520,14 +2606,29 @@
           "line": 26
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Document.WeakLineTracker"
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "status": "mapped",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/document/weak_line_tracker.rs",
+          "symbols": [
+            "WeakLineTracker"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Document.WeakLineTracker",
+              "rust": "WeakLineTracker"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Weak target registration, explicit deregistration and automatic removal on notification after target expiry.",
+      "limitations": [
+        "A weak registration handle does not retain its document."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Editing/AbstractMargin.cs",
@@ -2782,12 +2883,24 @@
               "rust": "EditorSession"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit/commands.rs",
+          "symbols": [
+            "EditorCommand"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Editing.EditingCommandHandler",
+              "rust": "EditorCommand"
+            }
+          ]
         }
       ],
       "unmapped_types": [
         "AvaloniaEdit.Editing.EditingCommandHandler.DefaultSegmentType"
       ],
-      "notes": "Multicaret replacement, delete, tab, newline and indentation commands.",
+      "notes": "Core editing operations plus native ICommand wrappers for undo, redo, clipboard, selection, indentation and search.",
       "limitations": [
         "Not every upstream line-transform/edit command is present."
       ]
@@ -3298,7 +3411,7 @@
         "AvaloniaEdit.Editing.TextArea.RestoreCaretAndSelectionUndoAction",
         "AvaloniaEdit.Editing.TextEventArgs"
       ],
-      "notes": "FerroUI input/render/scroll control plus a reusable editing session and IME adapter.",
+      "notes": "FerroUI input/render/scroll control with reusable editing session, platform hotkeys, whitespace and IME preedit adapter.",
       "limitations": [
         "Custom input-handler stack, full lifecycle events and caret/selection undo operations remain."
       ]
@@ -3333,14 +3446,36 @@
           "line": 29
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Editing.TextAreaDefaultInputHandler"
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/commands.rs",
+          "symbols": [
+            "EditorCommand"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Editing.TextAreaDefaultInputHandler",
+              "rust": "EditorCommand"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.Edit/text_area.rs",
+          "symbols": [
+            "TextArea"
+          ],
+          "aliases": []
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Command bindings and default pointer/keyboard handling are integrated into the control and framework commands.",
+      "limitations": [
+        "Public configurable input-handler stack and managed routed-command attachment lifecycle are absent."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Editing/TextAreaInputHandler.cs",
@@ -3513,9 +3648,9 @@
       "unmapped_types": [
         "AvaloniaEdit.Folding.FoldingManager.FoldingManagerInstallation"
       ],
-      "notes": "Anchored folding data and state-preserving region reconciliation.",
+      "notes": "Anchored folding data, state-preserving reconciliation and change subscriptions feed collapsed-range rendering.",
       "limitations": [
-        "Presentation installation and full managed extension contracts are separate."
+        "Control consumes a FoldingManager directly; the managed installation wrapper and full extension contracts remain absent."
       ]
     },
     {
@@ -5419,9 +5554,9 @@
       "unmapped_types": [
         "AvaloniaEdit.Rendering.HeightTree.UpdateAfterChildrenChangeRecursionMode"
       ],
-      "notes": "Sparse Fenwick line-height indexing for virtualized layout.",
+      "notes": "Sparse Fenwick line-height indexing with collapsed intervals for virtualized layout.",
       "limitations": [
-        "No reference live line identity or matching red-black node APIs."
+        "No matching red-black node APIs or live-line-identity indexed HeightTree contract."
       ]
     },
     {
@@ -5925,7 +6060,7 @@
       "unmapped_types": [
         "AvaloniaEdit.Rendering.TextView.LayerCollection"
       ],
-      "notes": "Viewport and rendering are combined into TextArea using FerroUI text APIs.",
+      "notes": "Viewport, shaped TextLayout rendering, inline folding placeholders, hit mapping and syntax runs are combined into TextArea using FerroUI APIs.",
       "limitations": [
         "Separate TextView, layers, element generators, transformers and visual-line public extension contracts are absent."
       ]

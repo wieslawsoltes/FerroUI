@@ -1,0 +1,20 @@
+// FerroUI editor: try search, completion, linked snippets and folding.
+// Unicode positions remain stable: café, Ελληνικά, 日本語, 😀.
+
+// region Greeting
+fn greeting(name: &str) -> String {
+    format!("Hello, {name}!")
+}
+// endregion
+
+// region Entry point
+fn main() {
+    let names = ["FerroUI", "Rust", "😀"];
+    for name in names {
+        println!("{}", greeting(name));
+    }
+}
+// endregion
+
+// Select text and press Find; search results and replacement use UTF-16 offsets.
+// Insert a snippet, edit its selected name, then press Tab for the next field.

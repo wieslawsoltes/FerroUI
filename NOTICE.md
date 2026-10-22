@@ -35,6 +35,13 @@ SOFTWARE.
 
 Avalonia itself incorporates code from other projects (for example WPF-derived layout and text code under the MIT license from the .NET Foundation, and Chromium-derived snippets in the native macOS backend); those notices are carried in the upstream `NOTICE.md` and, where the corresponding code is ported or imported here, in the component-level notices.
 
+## AvaloniaEdit, AvalonEdit and TextMateSharp
+
+- Projects: <https://github.com/AvaloniaUI/AvaloniaEdit>, <https://github.com/icsharpcode/AvalonEdit> and <https://github.com/danipen/TextMateSharp>.
+- Licenses: MIT; the full upstream copyright notices and license texts are retained in `src/FerroUI.Edit.Core/NOTICE.md`, `src/FerroUI.Edit/NOTICE.md` and `src/FerroUI.TextMate/NOTICE.md`.
+- Used for: the document and editor services, editor controls, XSHD definitions, TextMate grammar engine, language packages and themes. The source pins, exact mappings and unchanged asset hashes are recorded in `docs/porting/avaloniaedit-textmate.md` and its linked inventories.
+- Bundled language packages retain their individual license files. The browser Oniguruma scanner and reference fixtures retain their component notices, pinned versions and binary/source hashes under `src/FerroUI.TextMate/resources` and `src/FerroUI.TextMate/tests/oracle`.
+
 ## XamlX
 
 - Project: <https://github.com/kekekeks/XamlX>

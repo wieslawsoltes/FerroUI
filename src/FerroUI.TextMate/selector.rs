@@ -25,6 +25,53 @@ pub struct ScopeSelector {
 
 impl ScopeSelector {
     pub fn parse(value: &str) -> Result<Self> {
+        let mut selectors = Self::parse_many(value)?;
+        if selectors.len() == 1 {
+            return Ok(selectors.remove(0));
+        }
+        let priority = selectors
+            .iter()
+            .map(|s| s.priority)
+            .min()
+            .unwrap_or_default();
+        Ok(Self {
+            expression: Expr::Any(selectors.into_iter().map(|s| s.expression).collect()),
+            priority,
+        })
+    }
+
+    /// Each top-level comma alternative has its own injection priority.
+    pub fn parse_many(value: &str) -> Result<Vec<Self>> {
+        let mut result = Vec::new();
+        let mut start = 0;
+        let mut depth = 0usize;
+        for (index, character) in value.char_indices() {
+            match character {
+                '(' => depth += 1,
+                ')' => {
+                    depth = depth
+                        .checked_sub(1)
+                        .ok_or_else(|| Error::InvalidSelector(value.into()))?
+                }
+                ',' if depth == 0 => {
+                    if !value[start..index].trim().is_empty() {
+                        result.push(Self::parse_one(&value[start..index])?);
+                    }
+                    start = index + 1;
+                }
+                _ => {}
+            }
+        }
+        if depth != 0 {
+            return Err(Error::InvalidSelector(value.into()));
+        }
+        if !value[start..].trim().is_empty() {
+            result.push(Self::parse_one(&value[start..])?);
+        }
+        Ok(result)
+    }
+
+    fn parse_one(value: &str) -> Result<Self> {
         let mut source = value.trim();
         let priority = if let Some(rest) = source.strip_prefix("L:") {
             source = rest;
@@ -63,7 +110,7 @@ impl Expr {
         match self {
             Self::Path(names) => {
                 if names.is_empty() {
-                    return Some(vec![0]);
+                    return None;
                 }
                 let mut cursor = scopes.len();
                 let mut rank = Vec::new();
@@ -108,7 +155,9 @@ fn lex(source: &str) -> Vec<String> {
     let mut out = Vec::new();
     let mut word = String::new();
     for c in source.chars() {
-        if c.is_whitespace() || matches!(c, '(' | ')' | ',' | '|') {
+        if c == '-' && word.is_empty() {
+            out.push("-".into());
+        } else if c.is_whitespace() || matches!(c, '(' | ')' | ',' | '|') {
             if !word.is_empty() {
                 out.push(std::mem::take(&mut word));
             }
@@ -134,10 +183,18 @@ impl Parser {
         self.tokens.get(self.pos).map(String::as_str)
     }
     fn alternative(&mut self) -> Result<Expr> {
-        let mut alternatives = vec![self.conjunction()?];
-        while matches!(self.peek(), Some("," | "|")) {
-            self.pos += 1;
+        let mut alternatives = Vec::new();
+        loop {
+            while matches!(self.peek(), Some("," | "|")) {
+                self.pos += 1;
+            }
+            if matches!(self.peek(), None | Some(")")) {
+                break;
+            }
             alternatives.push(self.conjunction()?);
+            if !matches!(self.peek(), Some("," | "|")) {
+                break;
+            }
         }
         Ok(if alternatives.len() == 1 {
             alternatives.remove(0)
@@ -156,31 +213,7 @@ impl Parser {
                 if !names.is_empty() {
                     items.push(Expr::Path(std::mem::take(&mut names)));
                 }
-                let negate = token == "-";
-                if negate {
-                    self.pos += 1;
-                }
-                let expr = if self.peek() == Some("(") {
-                    self.pos += 1;
-                    let expr = self.alternative()?;
-                    if self.peek() != Some(")") {
-                        return Err(Error::InvalidSelector("missing ')'".into()));
-                    }
-                    self.pos += 1;
-                    expr
-                } else {
-                    let token = self
-                        .peek()
-                        .ok_or_else(|| Error::InvalidSelector("missing exclusion".into()))?
-                        .to_owned();
-                    self.pos += 1;
-                    Expr::Path(vec![token])
-                };
-                items.push(if negate {
-                    Expr::Not(Box::new(expr))
-                } else {
-                    expr
-                });
+                items.push(self.operand()?);
             } else {
                 names.push(token.to_owned());
                 self.pos += 1;
@@ -196,5 +229,28 @@ impl Parser {
         } else {
             Expr::All(items)
         })
+    }
+    fn operand(&mut self) -> Result<Expr> {
+        match self.peek() {
+            Some("-") => {
+                self.pos += 1;
+                Ok(Expr::Not(Box::new(self.operand()?)))
+            }
+            Some("(") => {
+                self.pos += 1;
+                let expr = self.alternative()?;
+                if self.peek() != Some(")") {
+                    return Err(Error::InvalidSelector("missing ')'".into()));
+                }
+                self.pos += 1;
+                Ok(expr)
+            }
+            Some("," | "|" | ")") | None => Err(Error::InvalidSelector("missing operand".into())),
+            Some(name) => {
+                let name = name.to_owned();
+                self.pos += 1;
+                Ok(Expr::Path(vec![name]))
+            }
+        }
     }
 }

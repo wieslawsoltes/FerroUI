@@ -154,8 +154,10 @@ The catalog contains 51 upstream packages with 72 language contributions,
 grammars; these counts are manifest entries, not a claim of 79 independent
 language implementations. Extension lookup accepts a leading dot, filename
 lookup prefers an exact name and otherwise the longest extension, and language
-IDs are case-insensitive. Alias lists, first-line expressions, raw language
-configuration and snippets retain their upstream values.
+IDs are case-insensitive. `language_by_first_line` executes upstream shebang
+and other first-line detection patterns through the selected regex backend.
+Alias lists, raw language configuration and snippets retain their upstream
+values.
 
 `LanguageConfiguration` exposes common comment, bracket and word-pattern
 settings, with the complete raw JSON available to host services for additional
@@ -163,12 +165,14 @@ settings. Package and grammar resources remain accessible by name. Compiling
 without `bundled-grammars` omits embedded resources while retaining runtime
 grammar/theme loading from caller-supplied strings.
 
-Themes accept JSON with comments and trailing commas, `tokenColors`/legacy
-`settings`, string and array selectors, inherited includes through a resolver,
+Themes accept JSON with comments and trailing commas, XML plist `.tmTheme`
+files, `tokenColors`/legacy `settings`, string and array selectors, inherited includes through a resolver,
 editor colors, and explicit empty font-style resets. Include cycles return an
 error. Scope selectors support ordered ancestry, prefix matching, alternatives,
 exclusions, and parentheses. Theme rules cascade by specificity and source
-order; the resolved style cache is bounded at 16,384 scope stacks.
+order within each inheritance layer. The including theme's rules take
+precedence over included rules, preserving TextMateSharp's theme layering.
+The resolved style cache is bounded at 16,384 scope stacks.
 
 The original package `cgmanifest.json` files are retained. The crate's
 `resources/asset-licenses.json` records all 58 declared source components and
@@ -251,9 +255,6 @@ rendering or worker-lifecycle test is a separate host integration check.
 - Raw package settings are retained, but the catalog does not automatically
   assign host language IDs or translate every contributed embedded-language
   setting into `GrammarConfiguration`; the host supplies those IDs.
-- Language first-line expressions and configuration regex values are retained
-  as data. File selection currently exposes filename and extension lookup;
-  it does not automatically execute first-line language detection.
 - Theme lookup uses a selector cascade rather than the upstream trie. The
   full upstream theme and selector unit-test suites have not all been
   translated; the source map must not mark trie internals as an exact port.
@@ -263,9 +264,6 @@ rendering or worker-lifecycle test is a separate host integration check.
 - The corpus verifies 74 lines in 11 language families. Broader generated
   differential tests, all upstream grammar tests, and a browser rendering
   test remain necessary before claiming complete behavioral parity.
-- Legacy XML grammar plist parsing is implemented. Theme loading currently
-  accepts JSON/JSONC and legacy JSON `settings`; XML `.tmTheme` parsing has
-  not yet been exposed by `Theme`.
 
 These boundaries are tracked explicitly rather than represented by stubs or
 silently substituted regex semantics.

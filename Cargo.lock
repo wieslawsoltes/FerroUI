@@ -735,6 +735,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75b325c5dbd37f80359721ad39aca5a29fb04c89279657cffdda8736d0c0b9d2"
 
 [[package]]
+name = "editor-demo"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-edit",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-themes-fluent",
+ "sample-support",
+]
+
+[[package]]
 name = "either"
 version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1105,6 +1120,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-edit-core",
+ "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
  "ferroui-textmate",
 ]
@@ -1480,6 +1496,7 @@ name = "ferroui-textmate"
 version = "0.4.0"
 dependencies = [
  "fancy-regex",
+ "ferroui-system",
  "js-sys",
  "onig",
  "roxmltree 0.20.0",

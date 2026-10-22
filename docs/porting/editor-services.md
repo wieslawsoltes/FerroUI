@@ -83,9 +83,10 @@ introduced.
 
 | Upstream source | Rust source | Behavior |
 |---|---|---|
-| `Search/SearchPanel.cs`, `SearchInputHandler.cs` | `search_panel.rs` | Overlay search/replace input, case/word/regex flags, wrapped next/previous navigation, capture replacement, atomic protected replace-all, diagnostics, visible result range queries |
+| `Search/SearchPanel.cs`, `SearchPanel.xaml`, `SearchCommands.cs` | `search_panel.rs` | Overlay search/replace input, case/word/regex flags, wrapped next/previous navigation, capture replacement, atomic protected replace-all, diagnostics, visible result range queries |
 | `CodeCompletion/CompletionWindow.cs`, `CompletionWindowBase.cs`, `CompletionList.cs` | `completion_window.rs` | Caret-positioned popup with framework `ListBox`, filtered prefix, selected description, tunneled navigation, Enter/Tab/double-click insertion, caret/document dismissal and focus restoration |
 | `Snippets/SnippetInputHandler.cs`, `InsertionContext.cs` | `snippet_controller.rs` | Prevalidated selection replacement, active-field selection, Tab/Shift+Tab traversal, Escape termination, automatic mirror permission checks, document replacement cleanup |
+| `Editing/EditingCommandHandler.cs`, `TextAreaDefaultInputHandlers.cs`, `Search/SearchCommands.cs` | `commands.rs` | Framework `ICommand` actions with weak editor ownership, read-only/selection/history enabled state, protected edit checks and disposable enabled-state notifications |
 
 `SearchPanel::install` returns a reusable popup attached to an editor; its
 `show(replace)` method focuses the query and `close_panel` returns focus to the
@@ -99,11 +100,25 @@ list. Selecting an item with the pointer updates the same core model. Completion
 never holds its session `RefCell` borrow while mutating the document, since that
 mutation synchronously raises editor events. Unchanged prefix refreshes retain
 the user's chosen item, and replacing the editor document closes the session.
+An attached framework property retains the active completion popup on its
+editor. While it is active, snippet handlers defer Tab/Escape to completion;
+field navigation resumes when completion closes.
+Keyboard subscriptions attach to the text area itself, so this ordering also
+works before the editor's control template has attached its visual children.
 
 `SnippetController` is an `Rc` controller rather than a visual control. A host
 retains it for the session lifetime. `TextEditor::insert_snippet` performs that
 retention; dropping the controller detaches its input handlers. A linked
 insertion requires one selection and reports a clear error for multiple carets.
+
+`EditorCommand` adapts common actions to the existing FerroUI `ICommand`
+contract. It watches routed text/selection changes and document update
+completion, so undo availability is queried after the history transaction is
+committed. Its property-specific observers avoid subscribing to the editor's
+expensive full-text value. Hosts can call `refresh` after changing an external
+protected-range provider. Clipboard execution uses the editor's asynchronous
+platform clipboard methods; paste availability reflects edit permissions rather
+than synchronously inspecting clipboard contents.
 
 The runnable [EditorDemo](../../samples/EditorDemo/README.md) loads its main view
 from runtime XAML and exercises these APIs with bundled Rust/C# TextMate
@@ -132,11 +147,17 @@ These are executable regression tests, not a complete upstream differential
 suite. The central port inventory records missing counterparts separately.
 
 Run `cargo test -p ferroui-edit --lib` for the control-service integration tests
-and `cargo test -p editor-demo --lib` for runtime XAML construction and demo
-commands. These cover Unicode search selection, replace-all undo, zero-width
+and `cargo test -p editor-demo --lib --no-default-features` for runtime XAML
+construction and demo commands. These cover Unicode search selection,
+replace-all undo, zero-width
 navigation, completion commit, snippet replacement/mirrors/tab traversal, and
 invalid/read-only snippet insertion without partial deletion. Desktop rendering
 and platform input still require actual graphical runs.
+
+The demo's default desktop feature uses FerroUI's standard desktop backend;
+the optional headless feature supports application-lifetime smoke runs without
+that native renderer. Headless results do not establish pixel-level visual
+parity or operating-system clipboard/input-method behavior.
 
 ## Explicit remaining differences
 

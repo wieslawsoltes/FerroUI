@@ -1357,6 +1357,22 @@ The port of upstream's developer tools at their last open-source version (`src/A
 | The tabs are the logical tree, the visual tree and the events (and the hot keys); the logical tree is the default view (`DevToolsViewKind.LogicalTree`). | A combined tree is the first tab and the default view (`DevToolsViewKind::CombinedTree`): the logical tree, where each element lists first the parts of its template, greyed out and in italics, then its logical children; a part lists the visual children below it that are not in the logical tree (an element is in the logical tree when it and its logical ancestors are among the logical children of their parents). The tabs after it keep their order (`MainViewModel::COMBINED_TREE_TAB` to `HOT_KEYS_TAB`; the extension pages from 5). | Addition | The owner asked for one tree with the logical structure and the templates of each element. | #293 |
 | A menu bar (File, Options, Highlight focused element) above a `TabStrip` and a `ContentControl` for the pages; the window keeps the title bar of the system. | A header in the title bar (the window extends into its decorations, with a title bar of 48 px): a button that shows or hides the tree pane (`MainViewModel::IsTreePaneOpen`, `ToggleTreePane`), the name of the tools, and a `CommandBar` with the commands used most (screenshot, freeze popups, margins, the brush of the focus highlight) and the others in its overflow; the pages are the items of a `TabControl`, which the WinUI 3 theme draws as its tab view, extension pages included. | Behaviour | The owner asked for the tab view of WinUI 3, a pane that can be collapsed, a command bar in place of the menus, and a better use of the title bar. | #293 |
 
+## Text editor and TextMate port
+
+The ongoing editor port records its pinned sources and complete file/type inventory
+in [avaloniaedit-textmate.md](avaloniaedit-textmate.md) and
+[editor-source-map.md](editor-source-map.md). The source map distinguishes partial
+Rust adaptations from unimplemented contracts; it is not a parity percentage.
+The document, services and engine reports linked there explain the UTF-16 offset
+contract, persistent storage, value versus live line handles, callback timing,
+consolidated viewport types, browser scanner boundary and remaining API gaps.
+
+The unchanged XML language package manifest under
+`src/FerroUI.TextMate/resources/grammars/xml/package.json` retains its upstream
+`.axaml` file-extension contribution. CI exempts that exact data file from the
+source naming check, while the editor asset checker verifies its upstream hash.
+Rust sources and public control names follow the normal naming rules.
+
 ## Corrected divergences
 
 Places where the port did work that upstream does not do, or did it differently, and a later change made it match upstream again. They are kept here so a regression can be recognised. Extra allocations and copies on hot paths belong here too: `PORTING-GUIDE.md` rules out allocations on hot paths that upstream avoids.

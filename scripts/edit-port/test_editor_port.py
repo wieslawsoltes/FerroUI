@@ -163,7 +163,8 @@ class EditorPortTests(unittest.TestCase):
         source.write_text("namespace Editor { public class Document {} }\n")
         body = source.read_bytes()
         (source.parent / "View.xaml").write_text("<Control/>\n")
-        (source.parent / "Ignored.axaml").write_text("<Control/>\n")
+        (source.parent / "View.axaml").write_text("<Control/>\n")
+        (source.parent / "Ignored.txt").write_text("Sample input\n")
         git("add", ".")
         git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-qm", "Fixture")
         revision = git("rev-parse", "HEAD")
@@ -171,7 +172,8 @@ class EditorPortTests(unittest.TestCase):
         pin = {**port.PINS["avaloniaedit"], "commit": revision}
         with patch.dict(port.PINS, {"avaloniaedit": pin}):
             inventory = port.capture_repository("avaloniaedit", upstream)
-        self.assertEqual(len(inventory["files"]), 2)
+        self.assertEqual(len(inventory["files"]), 3)
+        self.assertEqual([file["kind"] for file in inventory["files"]], ["csharp", "xaml", "xaml"])
         captured = inventory["files"][0]
         self.assertEqual(captured["sha256"], port.sha256(body))
         self.assertEqual(captured["types"][0]["qualified_name"], "Editor.Document")

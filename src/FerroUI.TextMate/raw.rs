@@ -1,6 +1,6 @@
 use crate::{Error, Result};
 use serde::Deserialize;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Clone, Debug, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -57,17 +57,54 @@ fn bool_or_number<'de, D: serde::Deserializer<'de>>(d: D) -> std::result::Result
 }
 
 impl RawGrammar {
+    /// External scope dependencies, including nested repositories and captures.
+    pub fn dependencies(&self) -> Vec<String> {
+        let mut scopes = BTreeSet::new();
+        let mut pending: Vec<&RawRule> = self
+            .patterns
+            .iter()
+            .chain(self.repository.values())
+            .chain(self.injections.values())
+            .collect();
+        while let Some(rule) = pending.pop() {
+            if let Some(include) = &rule.include {
+                if !include.starts_with(['$', '#']) {
+                    let scope = include.split('#').next().unwrap_or_default();
+                    if !scope.is_empty() && scope != self.scope_name {
+                        scopes.insert(scope.to_owned());
+                    }
+                }
+            }
+            pending.extend(rule.patterns.iter());
+            pending.extend(rule.repository.values());
+            for captures in [
+                &rule.captures,
+                &rule.begin_captures,
+                &rule.end_captures,
+                &rule.while_captures,
+            ] {
+                pending.extend(captures.values());
+            }
+        }
+        scopes.into_iter().collect()
+    }
+
     pub fn from_json(text: &str) -> Result<Self> {
-        let grammar: Self = serde_json::from_value(if text.trim_start().starts_with('<') {
-            read_plist(text)?
-        } else {
-            read_json(text)?
-        })
-        .map_err(|e| Error::Json(e.to_string()))?;
+        let grammar: Self = serde_json::from_value(read_json_or_plist(text)?)
+            .map_err(|e| Error::Json(e.to_string()))?;
         if grammar.scope_name.trim().is_empty() {
             return Err(Error::InvalidGrammar("scopeName is empty".into()));
         }
         Ok(grammar)
+    }
+}
+
+pub(crate) fn read_json_or_plist(text: &str) -> Result<serde_json::Value> {
+    let text = text.strip_prefix('\u{feff}').unwrap_or(text);
+    if text.trim_start().starts_with('<') {
+        read_plist(text)
+    } else {
+        read_json(text)
     }
 }
 
