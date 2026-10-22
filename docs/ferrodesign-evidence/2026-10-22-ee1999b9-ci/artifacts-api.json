@@ -1,0 +1,62 @@
+{
+  "artifacts": [
+    {
+      "id": 12458160518,
+      "name": "FerroDesign-browser-ee1999b93e6ebbcd089690e7690e672edf0a902e",
+      "size_in_bytes": 12431186,
+      "url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/artifacts/12458160518",
+      "archive_download_url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/artifacts/12458160518/zip",
+      "expired": false,
+      "created_at": "2026-10-22T20:47:16Z",
+      "expires_at": "2026-11-21T20:47:14Z",
+      "updated_at": "2026-10-22T20:47:16Z",
+      "digest": "sha256:64dfc2b2a2ddb244c3e3e375191c136d42bb2c73bff6b494d78b0d7533cccb59",
+      "workflow_run": {
+        "id": 39845598638,
+        "repository_id": 1405576478,
+        "head_repository_id": 1405576478,
+        "head_branch": "feat/ferrodesign-editor",
+        "head_sha": "ee1999b93e6ebbcd089690e7690e672edf0a902e"
+      }
+    },
+    {
+      "id": 12457049011,
+      "name": "FerroDesign-validation-ee1999b93e6ebbcd089690e7690e672edf0a902e",
+      "size_in_bytes": 23977142,
+      "url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/artifacts/12457049011",
+      "archive_download_url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/artifacts/12457049011/zip",
+      "expired": false,
+      "created_at": "2026-10-22T20:47:18Z",
+      "expires_at": "2026-11-21T20:47:17Z",
+      "updated_at": "2026-10-22T20:47:18Z",
+      "digest": "sha256:43f9845fadbcf76af8818ebd970c83f960c21cd08204e7ec0460128cc88219d4",
+      "workflow_run": {
+        "id": 39845598638,
+        "repository_id": 1405576478,
+        "head_repository_id": 1405576478,
+        "head_branch": "feat/ferrodesign-editor",
+        "head_sha": "ee1999b93e6ebbcd089690e7690e672edf0a902e"
+      }
+    },
+    {
+      "id": 12454809818,
+      "name": "FerroDesign-native-validation-ee1999b93e6ebbcd089690e7690e672edf0a902e",
+      "size_in_bytes": 66393,
+      "url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/artifacts/12454809818",
+      "archive_download_url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/artifacts/12454809818/zip",
+      "expired": false,
+      "created_at": "2026-10-22T20:17:02Z",
+      "expires_at": "2026-11-21T20:17:01Z",
+      "updated_at": "2026-10-22T20:17:02Z",
+      "digest": "sha256:6b73cacec827595606a994e40786b8ba886dbd64e5aac6a44705c7ad46dd069d",
+      "workflow_run": {
+        "id": 39845598638,
+        "repository_id": 1405576478,
+        "head_repository_id": 1405576478,
+        "head_branch": "feat/ferrodesign-editor",
+        "head_sha": "ee1999b93e6ebbcd089690e7690e672edf0a902e"
+      }
+    }
+  ]
+}
+

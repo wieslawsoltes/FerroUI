@@ -1,0 +1,624 @@
+[
+  {
+    "benchmark": "native-text-pan-v2",
+    "label": "ee1999b93e6ebbcd089690e7690e672edf0a902e",
+    "mode": "Software2D",
+    "metricBridge": {
+      "kind": "compact-v1"
+    },
+    "dispatch": {
+      "count": 36,
+      "medianMs": 12.843729499999881,
+      "p95Ms": 13.784915999999612,
+      "minMs": 6.399739000000409,
+      "maxMs": 20.92290899999989
+    },
+    "frameObservation": {
+      "count": 36,
+      "medianMs": 2.2313145000002805,
+      "p95Ms": 6.2658769999998185,
+      "minMs": 1.779617000000144,
+      "maxMs": 12.335777999999664
+    },
+    "nativePresentation": {
+      "count": 36,
+      "medianMs": 76.60948599999983,
+      "p95Ms": 109.21342000000004,
+      "minMs": 69.74267200000031,
+      "maxMs": 109.49377299999924
+    },
+    "longTaskSupported": true,
+    "recordedLongTasks": 19,
+    "droppedLongTasks": 0,
+    "slowestSamples": [
+      {
+        "index": 20,
+        "durationMs": 25.170819999999367,
+        "dispatchMs": 20.92290899999989,
+        "frameObservationMs": 4.247910999999476,
+        "presentationMs": 109.49377299999924,
+        "settledObservationMs": 136.42826999999943,
+        "browserObservation": {
+          "startedAtMs": 4554.800000000047,
+          "initialReadMs": 0,
+          "pollCount": 1,
+          "pollReadMs": 0.10000000009313226,
+          "maxPollReadMs": 0.10000000009313226,
+          "maxPayloadCharacters": 575,
+          "frameObservedAtMs": 4578.600000000093,
+          "endedAtMs": 4698.200000000186
+        },
+        "pointerDelta": {
+          "x": 0,
+          "y": 4
+        },
+        "frameDelta": 1,
+        "presentedFrameDelta": 1,
+        "zoom": 0.7453207150368034,
+        "pan": {
+          "x": 50.000420609884316,
+          "y": 227.16382754994743
+        },
+        "preparationDelta": {
+          "totalFullPrepares": 0,
+          "totalIncrementalPrepares": 0,
+          "totalPreparedNodes": 0,
+          "totalRebuiltVisuals": 0,
+          "layerProjectionBuilds": 0,
+          "layerProjectionReuses": 0
+        },
+        "frameCounters": {
+          "visibleNodes": 150,
+          "culledNodes": 0,
+          "cachedNodes": 150,
+          "preparedNodes": 0,
+          "rebuiltVisuals": 0,
+          "fullPrepares": 0,
+          "incrementalPrepares": 0,
+          "rootBoundsTests": 1,
+          "rootCandidates": 150,
+          "rootQueryReused": false
+        },
+        "input": [
+          {
+            "type": "pointermove",
+            "phase": "capture",
+            "trusted": true,
+            "eventTimeMs": 4558,
+            "observedAtMs": 4573,
+            "detail": 0,
+            "button": -1,
+            "buttons": 4,
+            "pointerId": 1,
+            "pointerType": "mouse",
+            "x": 804,
+            "y": 554,
+            "target": {
+              "tag": "MAIN",
+              "className": "ferroui-container"
+            }
+          },
+          {
+            "type": "pointermove",
+            "phase": "bubble",
+            "trusted": true,
+            "eventTimeMs": 4558,
+            "observedAtMs": 4573.40000000014,
+            "detail": 0,
+            "button": -1,
+            "buttons": 4,
+            "pointerId": 1,
+            "pointerType": "mouse",
+            "x": 804,
+            "y": 554,
+            "target": {
+              "tag": "MAIN",
+              "className": "ferroui-container"
+            }
+          }
+        ],
+        "longTasks": [
+          {
+            "startTimeMs": 4589.5,
+            "durationMs": 73
+          }
+        ]
+      },
+      {
+        "index": 31,
+        "durationMs": 21.51141699999971,
+        "dispatchMs": 9.175639000000047,
+        "frameObservationMs": 12.335777999999664,
+        "presentationMs": 106.8279250000005,
+        "settledObservationMs": 141.69574199999988,
+        "browserObservation": {
+          "startedAtMs": 5814.5,
+          "initialReadMs": 0.09999999986030161,
+          "pollCount": 1,
+          "pollReadMs": 0.20000000018626451,
+          "maxPollReadMs": 0.20000000018626451,
+          "maxPayloadCharacters": 575,
+          "frameObservedAtMs": 5827.700000000186,
+          "endedAtMs": 5958.899999999907
+        },
+        "pointerDelta": {
+          "x": -4,
+          "y": 0
+        },
+        "frameDelta": 1,
+        "presentedFrameDelta": 1,
+        "zoom": 0.7453207150368034,
+        "pan": {
+          "x": 46.000420609884316,
+          "y": 223.16382754994743
+        },
+        "preparationDelta": {
+          "totalFullPrepares": 0,
+          "totalIncrementalPrepares": 0,
+          "totalPreparedNodes": 0,
+          "totalRebuiltVisuals": 0,
+          "layerProjectionBuilds": 0,
+          "layerProjectionReuses": 0
+        },
+        "frameCounters": {
+          "visibleNodes": 150,
+          "culledNodes": 0,
+          "cachedNodes": 150,
+          "preparedNodes": 0,
+          "rebuiltVisuals": 0,
+          "fullPrepares": 0,
+          "incrementalPrepares": 0,
+          "rootBoundsTests": 1,
+          "rootCandidates": 150,
+          "rootQueryReused": false
+        },
+        "input": [
+          {
+            "type": "pointermove",
+            "phase": "capture",
+            "trusted": true,
+            "eventTimeMs": 5819.200000000186,
+            "observedAtMs": 5822.90000000014,
+            "detail": 0,
+            "button": -1,
+            "buttons": 4,
+            "pointerId": 1,
+            "pointerType": "mouse",
+            "x": 800,
+            "y": 550,
+            "target": {
+              "tag": "MAIN",
+              "className": "ferroui-container"
+            }
+          },
+          {
+            "type": "pointermove",
+            "phase": "bubble",
+            "trusted": true,
+            "eventTimeMs": 5819.200000000186,
+            "observedAtMs": 5823.300000000047,
+            "detail": 0,
+            "button": -1,
+            "buttons": 4,
+            "pointerId": 1,
+            "pointerType": "mouse",
+            "x": 800,
+            "y": 550,
+            "target": {
+              "tag": "MAIN",
+              "className": "ferroui-container"
+            }
+          }
+        ],
+        "longTasks": [
+          {
+            "startTimeMs": 5839.600000000093,
+            "durationMs": 79
+          }
+        ]
+      },
+      {
+        "index": 32,
+        "durationMs": 16.49387300000035,
+        "dispatchMs": 13.382166000000325,
+        "frameObservationMs": 3.111707000000024,
+        "presentationMs": 75.36125100000027,
+        "settledObservationMs": 96.62342200000057,
+        "browserObservation": {
+          "startedAtMs": 5959.899999999907,
+          "initialReadMs": 0.09999999962747097,
+          "pollCount": 1,
+          "pollReadMs": 0.10000000009313226,
+          "maxPollReadMs": 0.10000000009313226,
+          "maxPayloadCharacters": 575,
+          "frameObservedAtMs": 5975.600000000093,
+          "endedAtMs": 6059.300000000279
+        },
+        "pointerDelta": {
+          "x": -4,
+          "y": -4
+        },
+        "frameDelta": 1,
+        "presentedFrameDelta": 1,
+        "zoom": 0.7453207150368034,
+        "pan": {
+          "x": 46.000420609884316,
+          "y": 219.16382754994743
+        },
+        "preparationDelta": {
+          "totalFullPrepares": 0,
+          "totalIncrementalPrepares": 0,
+          "totalPreparedNodes": 0,
+          "totalRebuiltVisuals": 0,
+          "layerProjectionBuilds": 0,
+          "layerProjectionReuses": 0
+        },
+        "frameCounters": {
+          "visibleNodes": 150,
+          "culledNodes": 0,
+          "cachedNodes": 150,
+          "preparedNodes": 0,
+          "rebuiltVisuals": 0,
+          "fullPrepares": 0,
+          "incrementalPrepares": 0,
+          "rootBoundsTests": 1,
+          "rootCandidates": 150,
+          "rootQueryReused": false
+        },
+        "input": [
+          {
+            "type": "pointermove",
+            "phase": "capture",
+            "trusted": true,
+            "eventTimeMs": 5960.700000000186,
+            "observedAtMs": 5972.800000000279,
+            "detail": 0,
+            "button": -1,
+            "buttons": 4,
+            "pointerId": 1,
+            "pointerType": "mouse",
+            "x": 800,
+            "y": 546,
+            "target": {
+              "tag": "MAIN",
+              "className": "ferroui-container"
+            }
+          },
+          {
+            "type": "pointermove",
+            "phase": "bubble",
+            "trusted": true,
+            "eventTimeMs": 5960.700000000186,
+            "observedAtMs": 5973.200000000186,
+            "detail": 0,
+            "button": -1,
+            "buttons": 4,
+            "pointerId": 1,
+            "pointerType": "mouse",
+            "x": 800,
+            "y": 546,
+            "target": {
+              "tag": "MAIN",
+              "className": "ferroui-container"
+            }
+          }
+        ],
+        "longTasks": []
+      }
+    ]
+  },
+  {
+    "benchmark": "native-text-pan-v2",
+    "label": "ee1999b93e6ebbcd089690e7690e672edf0a902e",
+    "mode": "WebGL2",
+    "metricBridge": {
+      "kind": "compact-v1"
+    },
+    "dispatch": {
+      "count": 36,
+      "medianMs": 11.418601499999568,
+      "p95Ms": 1265.2065970000003,
+      "minMs": 3.628562999998394,
+      "maxMs": 1289.190217000003
+    },
+    "frameObservation": {
+      "count": 36,
+      "medianMs": 4.082760999996026,
+      "p95Ms": 10.152841000002809,
+      "minMs": 2.6046599999972386,
+      "maxMs": 83.6451820000002
+    },
+    "nativePresentation": {
+      "count": 36,
+      "medianMs": 127.00794649999807,
+      "p95Ms": 1358.522836,
+      "minMs": 91.92818999999872,
+      "maxMs": 1377.8825510000024
+    },
+    "longTaskSupported": true,
+    "recordedLongTasks": 48,
+    "droppedLongTasks": 0,
+    "slowestSamples": [
+      {
+        "index": 46,
+        "durationMs": 1293.8224210000044,
+        "dispatchMs": 1289.190217000003,
+        "frameObservationMs": 4.632204000001366,
+        "presentationMs": 1377.8825510000024,
+        "settledObservationMs": 2627.5393780000013,
+        "browserObservation": {
+          "startedAtMs": 39823,
+          "initialReadMs": 0,
+          "pollCount": 1,
+          "pollReadMs": 0.10000000009313226,
+          "maxPollReadMs": 0.10000000009313226,
+          "maxPayloadCharacters": 575,
+          "frameObservedAtMs": 41115.89999999991,
+          "endedAtMs": 42455.10000000009
+        },
+        "pointerDelta": {
+          "x": 4,
+          "y": 4
+        },
+        "frameDelta": 1,
+        "presentedFrameDelta": 1,
+        "zoom": 0.7453207150368034,
+        "pan": {
+          "x": 54.000420609884316,
+          "y": 227.16382754994743
+        },
+        "preparationDelta": {
+          "totalFullPrepares": 0,
+          "totalIncrementalPrepares": 0,
+          "totalPreparedNodes": 0,
+          "totalRebuiltVisuals": 0,
+          "layerProjectionBuilds": 0,
+          "layerProjectionReuses": 0
+        },
+        "frameCounters": {
+          "visibleNodes": 150,
+          "culledNodes": 0,
+          "cachedNodes": 150,
+          "preparedNodes": 0,
+          "rebuiltVisuals": 0,
+          "fullPrepares": 0,
+          "incrementalPrepares": 0,
+          "rootBoundsTests": 1,
+          "rootCandidates": 150,
+          "rootQueryReused": false
+        },
+        "input": [
+          {
+            "type": "pointermove",
+            "phase": "capture",
+            "trusted": true,
+            "eventTimeMs": 39824.39999999991,
+            "observedAtMs": 41110.799999999814,
+            "detail": 0,
+            "button": -1,
+            "buttons": 4,
+            "pointerId": 1,
+            "pointerType": "mouse",
+            "x": 808,
+            "y": 554,
+            "target": {
+              "tag": "MAIN",
+              "className": "ferroui-container"
+            }
+          },
+          {
+            "type": "pointermove",
+            "phase": "bubble",
+            "trusted": true,
+            "eventTimeMs": 39824.39999999991,
+            "observedAtMs": 41111.200000000186,
+            "detail": 0,
+            "button": -1,
+            "buttons": 4,
+            "pointerId": 1,
+            "pointerType": "mouse",
+            "x": 808,
+            "y": 554,
+            "target": {
+              "tag": "MAIN",
+              "className": "ferroui-container"
+            }
+          }
+        ],
+        "longTasks": [
+          {
+            "startTimeMs": 41118.200000000186,
+            "durationMs": 76
+          }
+        ]
+      },
+      {
+        "index": 31,
+        "durationMs": 1275.3594380000031,
+        "dispatchMs": 1265.2065970000003,
+        "frameObservationMs": 10.152841000002809,
+        "presentationMs": 1358.522836,
+        "settledObservationMs": 2659.440405000001,
+        "browserObservation": {
+          "startedAtMs": 18557.200000000186,
+          "initialReadMs": 0,
+          "pollCount": 1,
+          "pollReadMs": 0.10000000009313226,
+          "maxPollReadMs": 0.10000000009313226,
+          "maxPayloadCharacters": 575,
+          "frameObservedAtMs": 19829.200000000186,
+          "endedAtMs": 21224.299999999814
+        },
+        "pointerDelta": {
+          "x": -4,
+          "y": 0
+        },
+        "frameDelta": 1,
+        "presentedFrameDelta": 1,
+        "zoom": 0.7453207150368034,
+        "pan": {
+          "x": 46.000420609884316,
+          "y": 223.16382754994743
+        },
+        "preparationDelta": {
+          "totalFullPrepares": 0,
+          "totalIncrementalPrepares": 0,
+          "totalPreparedNodes": 0,
+          "totalRebuiltVisuals": 0,
+          "layerProjectionBuilds": 0,
+          "layerProjectionReuses": 0
+        },
+        "frameCounters": {
+          "visibleNodes": 150,
+          "culledNodes": 0,
+          "cachedNodes": 150,
+          "preparedNodes": 0,
+          "rebuiltVisuals": 0,
+          "fullPrepares": 0,
+          "incrementalPrepares": 0,
+          "rootBoundsTests": 1,
+          "rootCandidates": 150,
+          "rootQueryReused": false
+        },
+        "input": [
+          {
+            "type": "pointermove",
+            "phase": "capture",
+            "trusted": true,
+            "eventTimeMs": 18558.700000000186,
+            "observedAtMs": 19821.700000000186,
+            "detail": 0,
+            "button": -1,
+            "buttons": 4,
+            "pointerId": 1,
+            "pointerType": "mouse",
+            "x": 800,
+            "y": 550,
+            "target": {
+              "tag": "MAIN",
+              "className": "ferroui-container"
+            }
+          },
+          {
+            "type": "pointermove",
+            "phase": "bubble",
+            "trusted": true,
+            "eventTimeMs": 18558.700000000186,
+            "observedAtMs": 19822.200000000186,
+            "detail": 0,
+            "button": -1,
+            "buttons": 4,
+            "pointerId": 1,
+            "pointerType": "mouse",
+            "x": 800,
+            "y": 550,
+            "target": {
+              "tag": "MAIN",
+              "className": "ferroui-container"
+            }
+          }
+        ],
+        "longTasks": [
+          {
+            "startTimeMs": 19834.799999999814,
+            "durationMs": 77
+          }
+        ]
+      },
+      {
+        "index": 27,
+        "durationMs": 314.9514139999992,
+        "dispatchMs": 231.306231999999,
+        "frameObservationMs": 83.6451820000002,
+        "presentationMs": 318.436146,
+        "settledObservationMs": 1656.346303000002,
+        "browserObservation": {
+          "startedAtMs": 13873.700000000186,
+          "initialReadMs": 0.10000000009313226,
+          "pollCount": 1,
+          "pollReadMs": 0.09999999962747097,
+          "maxPollReadMs": 0.09999999962747097,
+          "maxPayloadCharacters": 575,
+          "frameObservedAtMs": 14186.299999999814,
+          "endedAtMs": 15534.5
+        },
+        "pointerDelta": {
+          "x": 4,
+          "y": 0
+        },
+        "frameDelta": 1,
+        "presentedFrameDelta": 1,
+        "zoom": 0.7453207150368034,
+        "pan": {
+          "x": 54.000420609884316,
+          "y": 223.16382754994743
+        },
+        "preparationDelta": {
+          "totalFullPrepares": 0,
+          "totalIncrementalPrepares": 0,
+          "totalPreparedNodes": 0,
+          "totalRebuiltVisuals": 0,
+          "layerProjectionBuilds": 0,
+          "layerProjectionReuses": 0
+        },
+        "frameCounters": {
+          "visibleNodes": 150,
+          "culledNodes": 0,
+          "cachedNodes": 150,
+          "preparedNodes": 0,
+          "rebuiltVisuals": 0,
+          "fullPrepares": 0,
+          "incrementalPrepares": 0,
+          "rootBoundsTests": 1,
+          "rootCandidates": 150,
+          "rootQueryReused": false
+        },
+        "input": [
+          {
+            "type": "pointermove",
+            "phase": "capture",
+            "trusted": true,
+            "eventTimeMs": 13874.899999999907,
+            "observedAtMs": 14101.200000000186,
+            "detail": 0,
+            "button": -1,
+            "buttons": 4,
+            "pointerId": 1,
+            "pointerType": "mouse",
+            "x": 808,
+            "y": 550,
+            "target": {
+              "tag": "MAIN",
+              "className": "ferroui-container"
+            }
+          },
+          {
+            "type": "pointermove",
+            "phase": "bubble",
+            "trusted": true,
+            "eventTimeMs": 13874.899999999907,
+            "observedAtMs": 14101.5,
+            "detail": 0,
+            "button": -1,
+            "buttons": 4,
+            "pointerId": 1,
+            "pointerType": "mouse",
+            "x": 808,
+            "y": 550,
+            "target": {
+              "tag": "MAIN",
+              "className": "ferroui-container"
+            }
+          }
+        ],
+        "longTasks": [
+          {
+            "startTimeMs": 14104,
+            "durationMs": 81
+          }
+        ]
+      }
+    ]
+  }
+]
+

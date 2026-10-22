@@ -1,0 +1,24 @@
+{
+  "repository": "wieslawsoltes/FerroUI",
+  "commit": "bbcd8b5e625e8f892ebf29d2b678bbac71887f42",
+  "tree": "e33550aef367968abdf2f2eb0b1f5b146d278c16",
+  "run_id": 39843175376,
+  "job_id": 120049403093,
+  "job_conclusion": "success",
+  "command": "cargo +1.99.0 test --locked -p ferrodesign-core --jobs 1",
+  "tests": {
+    "passed": 493,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filtered_out": 0,
+    "elapsed_seconds": 2.48
+  },
+  "doc_tests": {
+    "passed": 0,
+    "failed": 0
+  },
+  "source": "Ordinary decoded UTF-8 GitHub Actions job log",
+  "scope": "Complete ferrodesign-core suite at the stated commit; no native application, browser or full Figma parity result."
+}
+

@@ -1,0 +1,708 @@
+﻿2026-10-22T19:47:41.1516011Z Current runner version: '2.338.0'
+2026-10-22T19:47:41.1542222Z ##[group]Runner Image Provisioner
+2026-10-22T19:47:41.1543245Z Hosted Compute Agent
+2026-10-22T19:47:41.1543896Z Version: 20261012.601
+2026-10-22T19:47:41.1544599Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-22T19:47:41.1545414Z Build Date: 2026-10-12T17:48:21Z
+2026-10-22T19:47:41.1546134Z Worker ID: {2c72749f-19e9-4bac-bb94-809d24db6dd6}
+2026-10-22T19:47:41.1546841Z Region: westus
+2026-10-22T19:47:41.1547494Z Cloud: Azure
+2026-10-22T19:47:41.1548265Z ##[endgroup]
+2026-10-22T19:47:41.1550009Z ##[group]Operating System
+2026-10-22T19:47:41.1550749Z Ubuntu
+2026-10-22T19:47:41.1551280Z 24.04.5
+2026-10-22T19:47:41.1551899Z LTS
+2026-10-22T19:47:41.1552483Z ##[endgroup]
+2026-10-22T19:47:41.1553117Z ##[group]Runner Image
+2026-10-22T19:47:41.1553773Z Image: ubuntu-24.04
+2026-10-22T19:47:41.1554371Z Version: 20261012.334.1
+2026-10-22T19:47:41.1555747Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-22T19:47:41.1557425Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-22T19:47:41.1558773Z ##[endgroup]
+2026-10-22T19:47:41.1560329Z ##[group]GITHUB_TOKEN Permissions
+2026-10-22T19:47:41.1562609Z Contents: read
+2026-10-22T19:47:41.1563231Z Metadata: read
+2026-10-22T19:47:41.1563903Z ##[endgroup]
+2026-10-22T19:47:41.1566057Z Secret source: Actions
+2026-10-22T19:47:41.1567139Z Cache mode: write
+2026-10-22T19:47:41.1568420Z Prepare workflow directory
+2026-10-22T19:47:41.2014848Z Prepare all required actions
+2026-10-22T19:47:41.2078100Z Getting action download info
+2026-10-22T19:47:41.5590762Z Download action repository 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-22T19:47:41.7393057Z Complete job name: core
+2026-10-22T19:47:41.8241000Z ##[group]Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+2026-10-22T19:47:41.8242004Z with:
+2026-10-22T19:47:41.8242523Z   ref: bbcd8b5e625e8f892ebf29d2b678bbac71887f42
+2026-10-22T19:47:41.8243158Z   repository: wieslawsoltes/FerroUI
+2026-10-22T19:47:41.8247736Z   token: ***
+2026-10-22T19:47:41.8248190Z   ssh-strict: true
+2026-10-22T19:47:41.8248642Z   ssh-user: git
+2026-10-22T19:47:41.8249098Z   persist-credentials: true
+2026-10-22T19:47:41.8249611Z   clean: true
+2026-10-22T19:47:41.8250073Z   sparse-checkout-cone-mode: true
+2026-10-22T19:47:41.8250610Z   fetch-depth: 1
+2026-10-22T19:47:41.8251052Z   fetch-tags: false
+2026-10-22T19:47:41.8251505Z   show-progress: true
+2026-10-22T19:47:41.8251956Z   lfs: false
+2026-10-22T19:47:41.8252374Z   submodules: false
+2026-10-22T19:47:41.8252833Z   set-safe-directory: true
+2026-10-22T19:47:41.8253345Z   allow-unsafe-pr-checkout: false
+2026-10-22T19:47:41.8254083Z env:
+2026-10-22T19:47:41.8254493Z   CARGO_BUILD_JOBS: 1
+2026-10-22T19:47:41.8255010Z   CARGO_TERM_COLOR: always
+2026-10-22T19:47:41.8255494Z ##[endgroup]
+2026-10-22T19:47:41.9270460Z Syncing repository: wieslawsoltes/FerroUI
+2026-10-22T19:47:41.9272276Z ##[group]Getting Git version info
+2026-10-22T19:47:41.9272976Z Working directory is '/home/runner/work/FerroUI/FerroUI'
+2026-10-22T19:47:41.9274005Z [command]/usr/bin/git version
+2026-10-22T19:47:41.9326177Z git version 2.55.0
+2026-10-22T19:47:41.9345155Z ##[endgroup]
+2026-10-22T19:47:41.9359088Z Temporarily overriding HOME='/home/runner/work/_temp/ec5e184e-baa2-4c39-848b-aaf99090ba23' before making global git config changes
+2026-10-22T19:47:41.9361227Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-22T19:47:41.9364470Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/FerroUI/FerroUI
+2026-10-22T19:47:41.9412845Z Deleting the contents of '/home/runner/work/FerroUI/FerroUI'
+2026-10-22T19:47:41.9416769Z ##[group]Initializing the repository
+2026-10-22T19:47:41.9420775Z [command]/usr/bin/git init /home/runner/work/FerroUI/FerroUI
+2026-10-22T19:47:41.9517205Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-22T19:47:41.9519220Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-22T19:47:41.9520736Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-22T19:47:41.9521867Z hint: call:
+2026-10-22T19:47:41.9522499Z hint:
+2026-10-22T19:47:41.9523281Z hint: 	git config --global init.defaultBranch <name>
+2026-10-22T19:47:41.9524225Z hint:
+2026-10-22T19:47:41.9525110Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-22T19:47:41.9526555Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-22T19:47:41.9527861Z hint:
+2026-10-22T19:47:41.9528504Z hint: 	git branch -m <name>
+2026-10-22T19:47:41.9529210Z hint:
+2026-10-22T19:47:41.9530222Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-22T19:47:41.9531789Z Initialized empty Git repository in /home/runner/work/FerroUI/FerroUI/.git/
+2026-10-22T19:47:41.9534163Z [command]/usr/bin/git remote add origin https://github.com/wieslawsoltes/FerroUI
+2026-10-22T19:47:41.9577111Z ##[endgroup]
+2026-10-22T19:47:41.9581771Z ##[group]Disabling automatic garbage collection
+2026-10-22T19:47:41.9582469Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-22T19:47:41.9611974Z ##[endgroup]
+2026-10-22T19:47:41.9612735Z ##[group]Setting up auth
+2026-10-22T19:47:41.9618665Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-22T19:47:41.9649004Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-22T19:47:41.9989617Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-22T19:47:42.0021284Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-22T19:47:42.0252009Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-22T19:47:42.0284395Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-22T19:47:42.0516195Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-22T19:47:42.0555661Z ##[endgroup]
+2026-10-22T19:47:42.0556619Z ##[group]Fetching the repository
+2026-10-22T19:47:42.0564812Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin bbcd8b5e625e8f892ebf29d2b678bbac71887f42
+2026-10-22T19:47:46.4438587Z From https://github.com/wieslawsoltes/FerroUI
+2026-10-22T19:47:46.4440491Z  * branch            bbcd8b5e625e8f892ebf29d2b678bbac71887f42 -> FETCH_HEAD
+2026-10-22T19:47:46.4446788Z ##[endgroup]
+2026-10-22T19:47:46.4448198Z ##[group]Determining the checkout info
+2026-10-22T19:47:46.4449516Z ##[endgroup]
+2026-10-22T19:47:46.4452325Z [command]/usr/bin/git sparse-checkout disable
+2026-10-22T19:47:46.4501299Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-22T19:47:46.4530386Z ##[group]Checking out the ref
+2026-10-22T19:47:46.4570501Z [command]/usr/bin/git checkout --progress --force bbcd8b5e625e8f892ebf29d2b678bbac71887f42
+2026-10-22T19:47:47.4109718Z Note: switching to 'bbcd8b5e625e8f892ebf29d2b678bbac71887f42'.
+2026-10-22T19:47:47.4110750Z 
+2026-10-22T19:47:47.4111380Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-22T19:47:47.4112717Z changes and commit them, and you can discard any commits you make in this
+2026-10-22T19:47:47.4114092Z state without impacting any branches by switching back to a branch.
+2026-10-22T19:47:47.4114893Z 
+2026-10-22T19:47:47.4115532Z If you want to create a new branch to retain commits you create, you may
+2026-10-22T19:47:47.4116792Z do so (now or later) by using -c with the switch command. Example:
+2026-10-22T19:47:47.4118155Z 
+2026-10-22T19:47:47.4118535Z   git switch -c <new-branch-name>
+2026-10-22T19:47:47.4119105Z 
+2026-10-22T19:47:47.4119484Z Or undo this operation with:
+2026-10-22T19:47:47.4120005Z 
+2026-10-22T19:47:47.4120331Z   git switch -
+2026-10-22T19:47:47.4120780Z 
+2026-10-22T19:47:47.4121523Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-22T19:47:47.4122596Z 
+2026-10-22T19:47:47.4123548Z HEAD is now at bbcd8b5 perf(ferrodesign): scope text previews while preserving imported auto layout
+2026-10-22T19:47:47.4143843Z ##[endgroup]
+2026-10-22T19:47:47.4189975Z [command]/usr/bin/git log -1 --format=%H
+2026-10-22T19:47:47.4220991Z bbcd8b5e625e8f892ebf29d2b678bbac71887f42
+2026-10-22T19:47:47.4485080Z ##[group]Run rustup toolchain install 1.99.0 --profile minimal --no-self-update
+2026-10-22T19:47:47.4487902Z [36;1mrustup toolchain install 1.99.0 --profile minimal --no-self-update[0m
+2026-10-22T19:47:47.4732041Z shell: /usr/bin/bash -e {0}
+2026-10-22T19:47:47.4733290Z env:
+2026-10-22T19:47:47.4734222Z   CARGO_BUILD_JOBS: 1
+2026-10-22T19:47:47.4735271Z   CARGO_TERM_COLOR: always
+2026-10-22T19:47:47.4736383Z ##[endgroup]
+2026-10-22T19:47:47.5240545Z info: syncing channel updates for 1.99.0-x86_64-unknown-linux-gnu
+2026-10-22T19:47:47.6285985Z info: latest update on 2026-10-01 for version 1.99.0 (b940084d7 2026-09-28)
+2026-10-22T19:47:47.6288563Z info: downloading 3 components
+2026-10-22T19:47:55.6308066Z 
+2026-10-22T19:47:55.6380195Z   1.99.0-x86_64-unknown-linux-gnu installed - rustc 1.99.0 (b940084d7 2026-09-28)
+2026-10-22T19:47:55.6380883Z 
+2026-10-22T19:47:55.6481647Z ##[group]Run cargo +1.99.0 test --locked -p ferrodesign-core --jobs 1
+2026-10-22T19:47:55.6482217Z [36;1mcargo +1.99.0 test --locked -p ferrodesign-core --jobs 1[0m
+2026-10-22T19:47:55.6554447Z shell: /usr/bin/bash -e {0}
+2026-10-22T19:47:55.6554770Z env:
+2026-10-22T19:47:55.6555045Z   CARGO_BUILD_JOBS: 1
+2026-10-22T19:47:55.6555333Z   CARGO_TERM_COLOR: always
+2026-10-22T19:47:55.6555652Z ##[endgroup]
+2026-10-22T19:47:55.7063363Z [1m[92m    Updating[0m crates.io index
+2026-10-22T19:47:56.1223513Z [1m[92m Downloading[0m crates ...
+2026-10-22T19:47:56.1782236Z [1m[92m  Downloaded[0m zmij v1.0.23
+2026-10-22T19:47:56.1806443Z [1m[92m  Downloaded[0m proc-macro2 v1.0.107
+2026-10-22T19:47:56.1837263Z [1m[92m  Downloaded[0m itoa v1.0.18
+2026-10-22T19:47:56.1851190Z [1m[92m  Downloaded[0m autocfg v1.5.1
+2026-10-22T19:47:56.1871542Z [1m[92m  Downloaded[0m euclid v0.22.14
+2026-10-22T19:47:56.1905981Z [1m[92m  Downloaded[0m arrayvec v0.7.8
+2026-10-22T19:47:56.1927896Z [1m[92m  Downloaded[0m serde_core v1.0.229
+2026-10-22T19:47:56.1958865Z [1m[92m  Downloaded[0m siphasher v1.0.4
+2026-10-22T19:47:56.1974358Z [1m[92m  Downloaded[0m smallvec v1.16.3
+2026-10-22T19:47:56.1987991Z [1m[92m  Downloaded[0m kurbo v0.11.3
+2026-10-22T19:47:56.2038157Z [1m[92m  Downloaded[0m serde_json v1.0.154
+2026-10-22T19:47:56.2112550Z [1m[92m  Downloaded[0m roxmltree v0.20.0
+2026-10-22T19:47:56.2242892Z [1m[92m  Downloaded[0m quote v1.0.47
+2026-10-22T19:47:56.2269095Z [1m[92m  Downloaded[0m serde v1.0.229
+2026-10-22T19:47:56.2304169Z [1m[92m  Downloaded[0m serde_derive v1.0.229
+2026-10-22T19:47:56.2334162Z [1m[92m  Downloaded[0m svgtypes v0.15.3
+2026-10-22T19:47:56.2357394Z [1m[92m  Downloaded[0m memchr v2.8.3
+2026-10-22T19:47:56.2413330Z [1m[92m  Downloaded[0m num-traits v0.2.19
+2026-10-22T19:47:56.2438373Z [1m[92m  Downloaded[0m syn v3.0.9
+2026-10-22T19:47:56.2545721Z [1m[92m  Downloaded[0m unicode-ident v1.0.27
+2026-10-22T19:47:56.2718742Z [1m[92m   Compiling[0m proc-macro2 v1.0.107
+2026-10-22T19:47:56.4950230Z [1m[92m   Compiling[0m quote v1.0.47
+2026-10-22T19:47:56.5689846Z [1m[92m   Compiling[0m unicode-ident v1.0.27
+2026-10-22T19:47:56.9457380Z [1m[92m   Compiling[0m serde_core v1.0.229
+2026-10-22T19:47:57.1546205Z [1m[92m   Compiling[0m zmij v1.0.23
+2026-10-22T19:47:57.2411334Z [1m[92m   Compiling[0m syn v3.0.9
+2026-10-22T19:47:59.8979459Z [1m[92m   Compiling[0m serde_json v1.0.154
+2026-10-22T19:47:59.9471464Z [1m[92m   Compiling[0m serde v1.0.229
+2026-10-22T19:48:00.0323204Z [1m[92m   Compiling[0m smallvec v1.16.3
+2026-10-22T19:48:00.1373094Z [1m[92m   Compiling[0m arrayvec v0.7.8
+2026-10-22T19:48:00.2239988Z [1m[92m   Compiling[0m kurbo v0.11.3
+2026-10-22T19:48:00.9088816Z [1m[92m   Compiling[0m serde_derive v1.0.229
+2026-10-22T19:48:02.7211964Z [1m[92m   Compiling[0m memchr v2.8.3
+2026-10-22T19:48:03.0748428Z [1m[92m   Compiling[0m siphasher v1.0.4
+2026-10-22T19:48:03.1635380Z [1m[92m   Compiling[0m itoa v1.0.18
+2026-10-22T19:48:03.9973657Z [1m[92m   Compiling[0m svgtypes v0.15.3
+2026-10-22T19:48:04.6445634Z [1m[92m   Compiling[0m roxmltree v0.20.0
+2026-10-22T19:48:05.0109863Z [1m[92m   Compiling[0m ferrodesign-core v0.1.0 (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/crates/ferrodesign-core)
+2026-10-22T19:48:27.3142837Z [1m[92m    Finished[0m `test` profile [unoptimized] target(s) in 31.64s
+2026-10-22T19:48:27.3763716Z [1m[92m     Running[0m unittests src/lib.rs (target/debug/deps/ferrodesign_core-7f7339aacffa6634)
+2026-10-22T19:48:27.3790712Z 
+2026-10-22T19:48:27.3790886Z running 493 tests
+2026-10-22T19:48:27.3833911Z test angular_gradient_tests::angular_gradient_document_preserves_duplicate_stops_alpha_and_strokes ... ok
+2026-10-22T19:48:27.3858371Z test angular_gradient_tests::angular_gradient_smart_animate_uses_shortest_angle_and_interpolates_stops ... ok
+2026-10-22T19:48:27.3888878Z test angular_gradient_tests::angular_gradient_rejected_style_update_preserves_document_redo_and_allocator ... ok
+2026-10-22T19:48:27.3898689Z test angular_gradient_tests::angular_gradient_import_rejects_invalid_center_angle_and_stop_offsets ... ok
+2026-10-22T19:48:27.3918380Z test angular_gradient_tests::angular_gradient_scoped_edit_has_exact_undo_redo_and_unchanged_noop ... ok
+2026-10-22T19:48:27.3928636Z test angular_gradient_tests::angular_gradient_style_propagation_retains_bindings_and_manual_edit_detaches ... ok
+2026-10-22T19:48:27.3958315Z test components::tests::authoring_exposed_value_clears_only_its_direct_flags_on_all_bound_layers ... ok
+2026-10-22T19:48:27.3988463Z test components::tests::component_set_grouping_and_variant_copy_preserve_geometry_and_bindings ... ok
+2026-10-22T19:48:27.4009019Z test components::tests::dependent_component_sync_updates_nested_defaults_but_keeps_user_overrides ... ok
+2026-10-22T19:48:27.4018606Z test components::tests::duplicate_named_siblings_keep_occurrence_overrides_across_variants ... ok
+2026-10-22T19:48:27.4030681Z test angular_gradient_tests::angular_gradient_svg_approximation_is_bounded_explicit_and_preserves_alpha ... ok
+2026-10-22T19:48:27.4040028Z test angular_gradient_tests::angular_gradient_svg_large_stop_stacks_have_fixed_geometry_budget ... ok
+2026-10-22T19:48:27.4078636Z test components::tests::duplication_deletion_and_detach_keep_component_references_valid ... ok
+2026-10-22T19:48:27.4080282Z test components::tests::exposed_text_boolean_reset_and_invalid_types_are_atomic ... ok
+2026-10-22T19:48:27.4108655Z test components::tests::manual_nested_swap_survives_containing_component_refresh ... ok
+2026-10-22T19:48:27.4168411Z test components::tests::nested_instance_swap_preserves_ids_overrides_and_outer_source_identity ... ok
+2026-10-22T19:48:27.4189659Z test compositing::tests::compositing_edits_are_atomic_scoped_history_and_keep_disabled_mask_type ... ok
+2026-10-22T19:48:27.4191029Z test components::tests::exposed_views_and_reset_follow_direct_edits_over_stale_stored_values ... ok
+2026-10-22T19:48:27.4192609Z test components::tests::variant_switch_preserves_matching_ids_manual_overrides_and_exact_undo ... ok
+2026-10-22T19:48:27.4203828Z test compositing::tests::compositing_invalid_mask_group_does_not_allocate_or_discard_redo ... ok
+2026-10-22T19:48:27.4205905Z test compositing::tests::compositing_mask_group_preserves_order_world_transforms_and_one_step_undo ... ok
+2026-10-22T19:48:27.4214094Z test compositing::tests::compositing_stale_targets_noops_and_locked_layers_preserve_history ... ok
+2026-10-22T19:48:27.4217323Z test compositing::tests::compositing_new_groups_pass_through_but_legacy_omitted_blends_stay_normal ... ok
+2026-10-22T19:48:27.4219408Z test corners::tests::independent_corners_and_degenerate_shapes_have_finite_closed_geometry ... ok
+2026-10-22T19:48:27.4223681Z test corners::tests::shared_smoothing_geometry_survives_document_roundtrip_and_svg ... ok
+2026-10-22T19:48:27.4225490Z test corners::tests::smoothing_recedes_before_radius_and_asymmetric_radii_stay_proportional ... ok
+2026-10-22T19:48:27.4228087Z test compositing::tests::compositing_legacy_defaults_and_all_modes_round_trip ... ok
+2026-10-22T19:48:27.4236415Z test corners::tests::smoothing_command_is_atomic_locked_aware_and_preserves_redo_on_noop ... ok
+2026-10-22T19:48:27.4243551Z test corners::tests::smoothing_retains_cubics_symmetry_and_zero_curvature_at_edges ... ok
+2026-10-22T19:48:27.4288499Z test editor::performance_tests::ancestor_selection_filter_preserves_order_duplicates_and_locked_semantics ... ok
+2026-10-22T19:48:27.4348535Z test angular_gradient_tests::angular_gradient_svg_strokes_have_user_space_tiles_and_native_reference_centers ... ok
+2026-10-22T19:48:27.4638770Z test editor::performance_tests::inspector_scope_preserves_introduced_layout_and_cached_layout_history ... ok
+2026-10-22T19:48:27.5033975Z test editor::performance_tests::scoped_gesture_promotes_before_general_edits_and_unreported_full_refresh ... ok
+2026-10-22T19:48:27.5083433Z test editor::performance_tests::scoped_gesture_uses_full_snapshot_for_nested_auto_layout ... ok
+2026-10-22T19:48:27.5085343Z test editor::performance_tests::spatial_updates_match_exact_bounds_across_bucket_and_oversized_transitions ... ok
+2026-10-22T19:48:27.5098778Z test editor::performance_tests::transaction_identity_survives_promotion_and_never_reuses_a_replaced_editor ... ok
+2026-10-22T19:48:27.5158499Z test editor::render_change_tests::render_change_feed_bounds_retained_history_and_declines_skipped_revisions ... ok
+2026-10-22T19:48:27.5328676Z test editor::performance_tests::scoped_noop_keeps_redo_and_open_generic_transaction_preserves_all_changes ... ok
+2026-10-22T19:48:27.5348591Z test editor::render_change_tests::render_change_feed_does_not_reuse_replaced_editor_or_tampered_revision ... ok
+2026-10-22T19:48:27.5368882Z test editor::render_change_tests::render_change_feed_includes_transformed_descendants_and_coalesces_missed_frames ... ok
+2026-10-22T19:48:27.5408602Z test editor::render_change_tests::render_change_feed_preserves_preview_cancel_commit_and_undo_redo_continuity ... ok
+2026-10-22T19:48:27.5410212Z test editor::render_change_tests::render_change_feed_requires_full_for_direct_structural_and_visibility_changes ... ok
+2026-10-22T19:48:27.5438582Z test editor::render_change_tests::render_change_feed_tracks_leaf_dependencies_and_ignores_noop_edits ... ok
+2026-10-22T19:48:27.5468364Z test effects_edit::tests::batch_edits_are_one_undo_step_and_preserve_selection_and_layout ... ok
+2026-10-22T19:48:27.5478240Z test effects_edit::tests::changing_kind_preserves_shadow_settings_and_signed_spread ... ok
+2026-10-22T19:48:27.5498423Z test effects_edit::tests::duplicate_and_move_preserve_stack_order_then_remove_and_clear ... ok
+2026-10-22T19:48:27.5528467Z test effects_edit::tests::every_effect_kind_defaults_and_round_trips_without_new_schema_fields ... ok
+2026-10-22T19:48:27.5558408Z test effects_edit::tests::insertion_replacement_validate_complete_stack_before_mutation ... ok
+2026-10-22T19:48:27.5568287Z test effects_edit::tests::invalid_later_candidate_cannot_partially_commit_earlier_layer ... ok
+2026-10-22T19:48:27.5588454Z test effects_edit::tests::invalid_numeric_values_leave_document_redo_and_revision_untouched ... ok
+2026-10-22T19:48:27.5618280Z test effects_edit::tests::missing_rows_and_locked_ancestors_are_not_mutated ... ok
+2026-10-22T19:48:27.5648339Z test effects_edit::tests::only_effect_changes_detach_styles_and_mark_instance_overrides ... ok
+2026-10-22T19:48:27.5658250Z test effects_edit::tests::rgb_preserves_individual_alpha_and_opacity_preserves_rgb ... ok
+2026-10-22T19:48:27.5678599Z test flatten::tests::flatten_adjacent_uniform_shapes_retains_parent_stack_and_one_step_history ... ok
+2026-10-22T19:48:27.5708417Z test flatten::tests::flatten_box_drop_shadow_requires_an_opaque_covering_fill_atomically ... ok
+2026-10-22T19:48:27.5738352Z test flatten::tests::flatten_box_shadow_outward_spread_rejects_square_corners_atomically ... ok
+2026-10-22T19:48:27.5739690Z test flatten::tests::flatten_empty_container_rejects_inner_shadow_stroke_order_change_atomically ... ok
+2026-10-22T19:48:27.5768445Z test flatten::tests::flatten_existing_vector_is_noop_and_preserves_evenodd_and_redo ... ok
+2026-10-22T19:48:27.5779184Z test flatten::tests::flatten_group_checks_locked_descendants_and_retains_references ... ok
+2026-10-22T19:48:27.5780652Z test flatten::tests::flatten_kind_changes_keep_structural_container_mask_and_component_invalidation ... ok
+2026-10-22T19:48:27.5782829Z test flatten::tests::flatten_multiple_layers_rejects_different_parents_colors_and_interleaved_order ... ok
+2026-10-22T19:48:27.5784142Z test flatten::tests::flatten_preserves_exact_host_fill_rule_and_curves ... ok
+2026-10-22T19:48:27.5785385Z test flatten::tests::flatten_region_paints_rejects_groups_atomically_and_keeps_single_vectors_unchanged ... ok
+2026-10-22T19:48:27.5786853Z test editor::performance_tests::scoped_edits_match_full_transactions_and_rebuilt_scene_through_history ... ok
+2026-10-22T19:48:27.5788559Z test flatten::tests::flatten_rejects_locked_selection_and_unavailable_outline_atomically ... ok
+2026-10-22T19:48:27.5798773Z test flatten::tests::flatten_rejects_translucent_text_paints_but_retains_whole_layer_opacity ... ok
+2026-10-22T19:48:27.5809473Z test flatten::tests::flatten_shape_retains_identity_hierarchy_affine_paints_strokes_effects_and_history ... ok
+2026-10-22T19:48:27.5814982Z test grid_tracks::tests::grid_tracks_content_and_fraction_share_space_without_resizing_fixed_children ... ok
+2026-10-22T19:48:27.5835156Z test grid_tracks::tests::grid_tracks_empty_authored_frames_and_implicit_rows_keep_their_track_extents ... ok
+2026-10-22T19:48:27.5858527Z test grid_tracks::tests::grid_tracks_hug_overlapping_fill_spans_converge_and_do_not_accumulate_size ... ok
+2026-10-22T19:48:27.5878641Z test grid_tracks::tests::grid_tracks_fixed_and_weighted_axes_arrange_exact_cells_and_undo_redo ... ok
+2026-10-22T19:48:27.5918505Z test grid_tracks::tests::grid_tracks_native_syntax_roundtrips_and_rejects_ambiguous_or_invalid_items ... ok
+2026-10-22T19:48:27.5928502Z test grid_tracks::tests::grid_tracks_invalid_counts_spans_weights_and_overflow_are_atomic ... ok
+2026-10-22T19:48:27.5958499Z test grid_tracks::tests::grid_tracks_reverse_hidden_and_absolute_children_retain_their_geometry_and_metadata ... ok
+2026-10-22T19:48:27.5978343Z test grid_tracks::tests::grid_tracks_roundtrip_import_validates_authored_tracks ... ok
+2026-10-22T19:48:27.6008364Z test grid_tracks::tests::grid_tracks_noop_and_reset_keep_history_redo_and_legacy_serialization ... ok
+2026-10-22T19:48:27.6018460Z test grid_tracks::tests::grid_tracks_spans_fixed_tracks_and_child_limits_are_resolved_together ... ok
+2026-10-22T19:48:27.6038177Z test image_edit::tests::all_corners_and_expansion_keep_affine_pixels_fixed ... ok
+2026-10-22T19:48:27.6068334Z test image_edit::tests::canceled_crop_restores_styles_bindings_and_geometry_without_history ... ok
+2026-10-22T19:48:27.6078243Z test image_edit::tests::cover_crop_uses_real_source_aspect_and_pan_clamps ... ok
+2026-10-22T19:48:27.6108316Z test image_edit::tests::corner_crop_preserves_source_pixel_positions_under_affine_transform ... ok
+2026-10-22T19:48:27.6128299Z test image_edit::tests::direct_crop_rejects_invalid_mapping_and_flow_resize_is_atomic ... ok
+2026-10-22T19:48:27.6158222Z test image_edit::tests::invalid_crop_is_atomic_and_legacy_images_default_to_full_source ... ok
+2026-10-22T19:48:27.6168467Z test image_edit::tests::nested_cover_window_retains_source_coordinates_and_scale_modes ... ok
+2026-10-22T19:48:27.6198214Z test image_info::tests::reads_raster_container_dimensions_without_pixel_decoding ... ok
+2026-10-22T19:48:27.6218366Z test image_info::tests::truncated_or_untrusted_headers_fail_without_allocating_image_data ... ok
+2026-10-22T19:48:27.6280819Z test layout::performance_tests::dense_mixed_fill_layout_preserves_payloads_and_excluded_children ... ok
+2026-10-22T19:48:27.6315892Z test editor::render_change_tests::render_change_feed_declines_oversized_subtree_and_resets_identity_at_sequence_wrap ... ok
+2026-10-22T19:48:27.6338551Z test layout_drag::tests::automatic_grid_spans_keep_sizing_and_placement_during_reorder ... ok
+2026-10-22T19:48:27.6368665Z test layout_drag::tests::affine_reflected_ancestors_transform_hit_edges_and_preview_outline_exactly ... ok
+2026-10-22T19:48:27.6398446Z test layout_drag::tests::grid_reorder_preserves_hidden_absolute_and_pinned_list_slots_and_metadata ... ok
+2026-10-22T19:48:27.6400480Z test layout_drag::tests::cancellation_and_noop_drop_preserve_document_revision_history_and_redo ... ok
+2026-10-22T19:48:27.6401805Z test layout_drag::tests::invalid_pointer_and_drop_indices_never_create_history ... ok
+2026-10-22T19:48:27.6403064Z test layout_drag::tests::rejected_sources_and_instance_descendants_cannot_start_reorder_sessions ... ok
+2026-10-22T19:48:27.6404455Z test layout_drag::tests::nested_wrap_reorder_records_ancestor_and_other_sibling_reflow_in_one_history_entry ... ok
+2026-10-22T19:48:27.6429059Z test layout_drag::tests::reversed_visual_flow_maps_back_to_stored_sibling_order ... ok
+2026-10-22T19:48:27.6458492Z test layout::performance_tests::no_layout_document_retains_all_content_and_geometry ... ok
+2026-10-22T19:48:27.6524320Z test layout_drag::tests::row_and_column_drag_reflow_once_and_restore_exact_history_and_selection ... ok
+2026-10-22T19:48:27.6548647Z test layout_drag::tests::wrap_targets_distinguish_rows_columns_and_both_edges_at_a_line_break ... ok
+2026-10-22T19:48:27.6550024Z test layout_drag::tests::stale_geometry_parent_order_revision_and_transaction_ownership_fail_atomically ... ok
+2026-10-22T19:48:27.6578603Z test layout_drag::transfer::tests::candidate_frame_hit_testing_honors_painter_order_affine_clips_and_cycles ... ok
+2026-10-22T19:48:27.6580237Z test layout_drag::transfer::tests::affine_cross_frame_and_page_drops_preserve_translated_world_geometry_and_absolute_flags ... ok
+2026-10-22T19:48:27.6638541Z test layout_drag::transfer::tests::cross_frame_multi_selection_keeps_visual_order_and_exact_single_history ... ok
+2026-10-22T19:48:27.6698665Z test layout_drag::transfer::tests::destination_changes_pending_transactions_selection_and_bad_targets_never_partially_apply ... ok
+2026-10-22T19:48:27.6718685Z test layout_drag::transfer::tests::instance_descendants_locked_frames_and_invalid_spans_are_rejected_atomically ... ok
+2026-10-22T19:48:27.6758483Z test layout_drag::transfer::tests::multi_flow_reorder_handles_row_column_wrap_grid_and_reverse ... ok
+2026-10-22T19:48:27.6778491Z test layout_drag::transfer::tests::multi_source_parents_and_ancestor_selection_move_each_subtree_once ... ok
+2026-10-22T19:48:27.6779805Z test layout_drag::transfer::tests::selected_pins_become_automatic_without_losing_spans_or_child_sizing ... ok
+2026-10-22T19:48:27.6798555Z test layout_drag::transfer::tests::sole_child_empty_frame_and_returned_selection_preserve_noop_redo ... ok
+2026-10-22T19:48:27.6800159Z test layout_drag::transfer::tests::unselected_pinned_hidden_and_absolute_slots_remain_exact_during_same_parent_reorder ... ok
+2026-10-22T19:48:27.6848449Z test layout_edit::tests::absent_grid_metadata_keeps_legacy_json_and_partial_row_geometry ... ok
+2026-10-22T19:48:27.6878514Z test layout_edit::tests::explicit_partial_and_spanning_cells_reserve_nonoverlapping_tracks ... ok
+2026-10-22T19:48:27.6888284Z test layout_edit::tests::grid_hug_fill_minimum_and_maximum_apply_to_whole_spans ... ok
+2026-10-22T19:48:27.6968471Z test layout_edit::tests::invalid_grid_edits_are_atomic_and_direct_layout_reports_bounded_errors ... ok
+2026-10-22T19:48:27.6998680Z test layout_edit::tests::native_layout_transaction_reorders_reversed_flow_and_restores_exact_history ... ok
+2026-10-22T19:48:27.7068509Z test layout_edit::tests::overlapping_fill_row_spans_have_stable_hug_sizes_and_noop_history ... ok
+2026-10-22T19:48:27.7128344Z test layout_edit::tests::pinned_grid_cells_survive_reorder_and_child_sizing_undo_is_atomic ... ok
+2026-10-22T19:48:27.7133726Z test layout_guides::bindings::tests::bad_ranges_in_any_mode_wrong_targets_and_locks_are_atomic ... ok
+2026-10-22T19:48:27.7188804Z test layout_guides::bindings::tests::component_refresh_preserves_overridden_guide_bindings_and_prunes_missing_visibility_slots ... ok
+2026-10-22T19:48:27.7238703Z test layout_guides::bindings::tests::guide_bindings_resolve_aliases_modes_and_exact_undo_redo ... ok
+2026-10-22T19:48:27.7278430Z test layout_guides::bindings::tests::legacy_square_commands_detach_literal_binding_and_clear_dangling_slots ... ok
+2026-10-22T19:48:27.7298786Z test layout_guides::bindings::tests::literal_equal_value_takes_ownership_and_unbind_freezes_resolved_value ... ok
+2026-10-22T19:48:27.7362937Z test layout_guides::bindings::tests::reordering_duplicate_remove_and_orientation_keep_binding_ownership_exact ... ok
+2026-10-22T19:48:27.7398669Z test layout_guides::bindings::tests::styles_own_stack_values_but_local_visibility_binding_survives_propagation ... ok
+2026-10-22T19:48:27.7418574Z test layout_guides::constraints::tests::collapsed_and_million_section_guides_do_not_expand_or_create_nonfinite_geometry ... ok
+2026-10-22T19:48:27.7438521Z test layout_guides::constraints::tests::five_constraints_follow_nearest_stretch_columns_with_frame_fallback_on_other_axis ... ok
+2026-10-22T19:48:27.7458824Z test layout_guides::constraints::tests::guide_constraints_skip_auto_layout_flow_but_resize_absolute_and_locked_children ... ok
+2026-10-22T19:48:27.7478700Z test layout_guides::constraints::tests::spanning_hidden_guides_keep_edge_offsets_and_first_compatible_stack_order ... ok
+2026-10-22T19:48:27.7508783Z test layout_guides::constraints::tests::transformed_child_preserves_source_geometry_and_exact_resize_history ... ok
+2026-10-22T19:48:27.7518525Z test layout_guides::snapping::tests::aspect_ray_remains_collinear_and_near_singular_pairs_do_not_jump ... ok
+2026-10-22T19:48:27.7538646Z test layout_guides::snapping::tests::dense_million_sections_and_excess_candidate_points_have_constant_work ... ok
+2026-10-22T19:48:27.7568499Z test layout_guides::snapping::tests::hidden_bands_snap_both_edges_but_not_gutter_centers ... ok
+2026-10-22T19:48:27.7598577Z test layout_guides::snapping::tests::rotated_sheared_and_flipped_guides_use_screen_distance_and_parent_clips ... ok
+2026-10-22T19:48:27.7608479Z test layout_guides::snapping::tests::square_snaps_two_axes_exactly_and_restricts_shift_motion ... ok
+2026-10-22T19:48:27.7628700Z test layout_guides::tests::automatic_counts_are_finite_and_fixed_sections_fit_available_extent ... ok
+2026-10-22T19:48:27.7658618Z test layout_guides::tests::bands_compute_viewport_intersection_without_scanning_authored_count ... ok
+2026-10-22T19:48:27.7688520Z test layout_guides::tests::clearing_an_empty_shared_stack_detaches_ownership_in_one_edit ... ok
+2026-10-22T19:48:27.7689774Z test layout_guides::tests::component_refresh_preserves_independent_stack_and_per_index_visibility_overrides ... ok
+2026-10-22T19:48:27.7690903Z test layout_guides::tests::fixed_guides_resolve_exact_start_center_end_alignment ... ok
+2026-10-22T19:48:27.7692089Z test layout_guides::tests::grid_stack_styles_propagate_across_pages_preserving_local_visibility_and_detach_on_geometry ... ok
+2026-10-22T19:48:27.7693337Z test layout_guides::tests::indexed_edits_leave_missing_rows_and_effective_locks_unchanged ... ok
+2026-10-22T19:48:27.7694387Z test layout_guides::tests::invalid_batches_and_guide_limits_preserve_every_field_and_redo ... ok
+2026-10-22T19:48:27.7695575Z test layout_drag::transfer::tests::frame_broad_phase_matches_exhaustive_geometry_across_a_thousand_destinations ... ok
+2026-10-22T19:48:27.7696835Z test layout_guides::tests::old_grid_styles_can_be_upgraded_to_stacks_without_changing_style_identity ... ok
+2026-10-22T19:48:27.7698231Z test layout_guides::tests::legacy_square_and_new_stack_documents_round_trip_without_migration_loss ... ok
+2026-10-22T19:48:27.7699763Z test layout_guides::tests::orientation_changes_preserve_each_targets_latest_fields_with_exact_history ... ok
+2026-10-22T19:48:27.7700959Z test layout_guides::tests::stretch_tracks_retain_margins_and_gutters_across_frame_resize ... ok
+2026-10-22T19:48:27.7702026Z test layout_guides::tests::unsupported_nodes_and_orphan_overlays_fail_document_validation ... ok
+2026-10-22T19:48:27.7808624Z test paragraphs::tests::component_paragraph_overrides_rebase_master_splits_and_merges_with_exact_history ... ok
+2026-10-22T19:48:27.7888691Z test layout_guides::tests::stack_add_edit_duplicate_reorder_remove_are_exact_single_history_transactions ... ok
+2026-10-22T19:48:27.7890026Z test paragraphs::tests::paragraph_commands_are_one_history_edit_locked_aware_and_serialize_exactly ... ok
+2026-10-22T19:48:27.7891280Z test paragraphs::tests::paragraph_range_apply_inherit_and_boundary_selection_preserve_other_overrides ... ok
+2026-10-22T19:48:27.7892584Z test paragraphs::tests::paragraph_unicode_replacement_splits_inherits_merges_and_remaps_following_styles ... ok
+2026-10-22T19:48:27.7908600Z test paragraphs::tests::paragraphs_cover_crlf_unicode_breaks_and_trailing_empty_text_exactly ... ok
+2026-10-22T19:48:27.7909812Z test paragraphs::tests::paragraphs_validate_complete_ranges_values_and_keep_failed_commands_atomic ... ok
+2026-10-22T19:48:27.7928834Z test polygon_corners::tests::adjacent_tangent_distances_clamp_large_triangle_radii_without_reversing_edges ... ok
+2026-10-22T19:48:27.7944661Z test polygon_corners::tests::affine_rounding_keeps_local_radius_and_preserves_path_area_by_determinant ... ok
+2026-10-22T19:48:27.7958983Z test paragraphs::tests::exact_paragraph_deletion_keeps_surviving_suffix_styles_and_merge_ownership ... ok
+2026-10-22T19:48:27.7976850Z test polygon_corners::tests::fillets_remain_finite_for_zero_duplicate_straight_and_reversing_edges ... ok
+2026-10-22T19:48:27.7978403Z test polygon_corners::tests::half_edge_radius_ceiling_also_applies_when_obtuse_corner_tangents_would_fit ... ok
+2026-10-22T19:48:27.7979903Z test polygon_corners::tests::native_primitive_picking_outline_and_profiled_strokes_share_rounded_geometry ... ok
+2026-10-22T19:48:27.7981255Z test polygon_corners::tests::polygon_radius_is_independent_of_rectangle_only_corner_settings ... ok
+2026-10-22T19:48:27.7990745Z test polygon_corners::tests::quarter_circle_fillets_have_tangent_controls_and_expected_area ... ok
+2026-10-22T19:48:27.7996251Z test polygon_corners::tests::radius_command_preserves_inherited_locks_and_skips_unsupported_mixed_targets ... ok
+2026-10-22T19:48:27.8028854Z test layout_drag::tests::retained_edge_tree_matches_exhaustive_geometric_nearest_targets_on_dense_affine_grid ... ok
+2026-10-22T19:48:27.8030074Z test polygon_corners::tests::radius_roundtrip_validation_and_one_step_history_preserve_authored_geometry ... ok
+2026-10-22T19:48:27.8038814Z test polygon_corners::tests::same_value_direct_radius_edit_detaches_variable_with_exact_undo_redo ... ok
+2026-10-22T19:48:27.8045888Z test polygon_corners::tests::zero_radius_retains_the_exact_legacy_polygon_and_star_commands ... ok
+2026-10-22T19:48:27.8060948Z test prototype::tests::prototype_authoring_rejects_invalid_references_and_preserves_the_document ... ok
+2026-10-22T19:48:27.8083047Z test prototype::tests::prototype_authoring_rules_roundtrip_with_one_undo_step_per_transaction ... ok
+2026-10-22T19:48:27.8086855Z test polygon_corners::tests::rounded_paths_stay_inside_authored_boxes_with_bounded_command_counts ... ok
+2026-10-22T19:48:27.8088514Z test prototype::tests::prototype_easing_and_zero_duration_have_finite_exact_endpoints ... ok
+2026-10-22T19:48:27.8089594Z test prototype::tests::prototype_edited_hidden_and_long_delay_events_never_fire_early_or_stale ... ok
+2026-10-22T19:48:27.8095711Z test prototype::tests::prototype_external_and_scroll_actions_remain_explicit_host_requests ... ok
+2026-10-22T19:48:27.8097474Z test prototype::tests::prototype_frame_capture_copies_only_active_subtrees_and_positions_overlays ... ok
+2026-10-22T19:48:27.8104714Z test prototype::tests::prototype_hit_filters_before_z_order_and_retains_clipping_and_cross_page_overlays ... ok
+2026-10-22T19:48:27.8105877Z test prototype::tests::prototype_hover_press_drag_respect_visibility_and_allow_locked_design_layers ... ok
+2026-10-22T19:48:27.8106929Z test prototype::tests::prototype_delay_requires_elapsed_time_and_fires_only_once_per_activation ... ok
+2026-10-22T19:48:27.8108440Z test prototype::tests::prototype_invalid_actions_leave_transition_navigation_and_variables_unchanged ... ok
+2026-10-22T19:48:27.8109318Z test prototype::tests::prototype_invalid_delayed_action_is_consumed_once_without_a_busy_retry ... ok
+2026-10-22T19:48:27.8110350Z test prototype::tests::prototype_key_chords_match_modifiers_aliases_and_exact_authored_keys ... ok
+2026-10-22T19:48:27.8111612Z test polygon_corners::tests::concave_star_rounds_both_tips_and_notches_and_preserves_winding ... ok
+2026-10-22T19:48:27.8112846Z test prototype::tests::prototype_navigation_cancels_queued_delays_including_same_frame_reentry ... ok
+2026-10-22T19:48:27.8113807Z test prototype::tests::prototype_navigation_resets_destination_scroll_and_back_keeps_prior_offset ... ok
+2026-10-22T19:48:27.8114922Z test prototype::tests::prototype_nested_scroll_chains_boundaries_and_scroll_to_aligns_the_target ... ok
+2026-10-22T19:48:27.8116290Z test prototype::tests::prototype_nested_roots_ignore_external_clips_but_preserve_internal_clip_and_boolean_rules ... ok
+2026-10-22T19:48:27.8117453Z test prototype::tests::prototype_opaque_dissolve_does_not_dim_the_source_twice ... ok
+2026-10-22T19:48:27.8119754Z test prototype::tests::prototype_overlay_motion_keeps_the_base_frame_still_and_fades_its_scrim ... ok
+2026-10-22T19:48:27.8120883Z test prototype::tests::prototype_overlay_scopes_preserve_base_timers_and_rearm_only_reopened_instances ... ok
+2026-10-22T19:48:27.8121922Z test prototype::tests::prototype_overlay_scroll_cannot_move_the_background_frame ... ok
+2026-10-22T19:48:27.8126047Z test prototype::tests::prototype_smart_animate_crossfades_changed_text_and_reparented_layers ... ok
+2026-10-22T19:48:27.8129402Z test prototype::tests::prototype_smart_animate_matches_duplicate_names_by_sibling_occurrence ... ok
+2026-10-22T19:48:27.8130556Z test prototype::tests::prototype_smart_animate_interpolates_named_geometry_paints_and_short_rotation ... ok
+2026-10-22T19:48:27.8131673Z test prototype::tests::prototype_text_variable_updates_keep_unicode_rich_text_ranges_valid ... ok
+2026-10-22T19:48:27.8133318Z test prototype::tests::prototype_smart_animate_morphs_gradient_path_and_disabling_blur ... ok
+2026-10-22T19:48:27.8135328Z test prototype::tests::prototype_variables_are_preview_overrides_with_authored_aliases_and_modes_intact ... ok
+2026-10-22T19:48:27.8136847Z test prototype::tests::prototype_vertical_scrolling_clamps_content_and_preserves_the_other_axis ... ok
+2026-10-22T19:48:27.8139409Z test prototype::tests::prototype_while_press_restores_inside_hover_then_hover_restores_authored_preview ... ok
+2026-10-22T19:48:27.8149189Z test selection::matching::tests::exact_paint_stacks_respect_order_opacity_visibility_gradients_and_signed_zero ... ok
+2026-10-22T19:48:27.8151174Z test prototype::tests::prototype_while_hover_restores_navigation_and_uses_original_hit_region ... ok
+2026-10-22T19:48:27.8153502Z test selection::matching::tests::font_matching_uses_only_rendered_faces_and_first_starting_overlap_precedence ... ok
+2026-10-22T19:48:27.8159387Z test selection::matching::tests::inversion_excludes_selected_descendants_and_skips_hidden_locked_roots ... ok
+2026-10-22T19:48:27.8168004Z test selection::matching::tests::instances_match_exact_component_and_unsupported_sources_preserve_selection ... ok
+2026-10-22T19:48:27.8177114Z test selection::matching::tests::matching_preserves_document_redo_scene_and_active_transaction_ownership ... ok
+2026-10-22T19:48:27.8180031Z test selection::matching::tests::matching_walks_visible_unlocked_page_once_in_layers_order_and_unions_seeds ... ok
+2026-10-22T19:48:27.8188998Z test selection::matching::tests::paragraph_matching_uses_effective_styles_without_text_or_byte_offset_identity ... ok
+2026-10-22T19:48:27.8198577Z test selection::matching::tests::property_matching_includes_complete_strokes_effect_order_and_ignores_geometry ... ok
+2026-10-22T19:48:27.8209793Z test selection::matching::tests::text_matching_resolves_unicode_ranges_defaults_and_opentype_order_without_content ... ok
+2026-10-22T19:48:27.8211764Z test selection::tests::selection_candidates_follow_exact_geometry_painter_order_and_visibility ... ok
+2026-10-22T19:48:27.8219566Z test selection::tests::selection_candidates_respect_affine_rounded_clips_and_boolean_ownership ... ok
+2026-10-22T19:48:27.8234149Z test selection::tests::selection_cycle_wraps_deduplicates_and_preserves_document_history_redo_and_render_token ... ok
+2026-10-22T19:48:27.8249330Z test selection::tests::selection_filtered_pick_only_calls_predicate_for_real_hits_and_stops_when_accepted ... ok
+2026-10-22T19:48:27.8257041Z test selection::tests::selection_group_context_descends_one_level_and_keeps_selected_ancestor_scopes_open ... ok
+2026-10-22T19:48:27.8264487Z test selection::tests::selection_invalid_queries_are_empty_and_never_reach_the_visibility_filter ... ok
+2026-10-22T19:48:27.8273861Z test selection::tests::selection_isolated_index_retains_affine_transforms_and_internal_clips ... ok
+2026-10-22T19:48:27.8277288Z test selection::tests::selection_isolated_prototype_candidates_ignore_external_clips_and_other_pages ... ok
+2026-10-22T19:48:27.8278609Z test prototype::tests::prototype_slide_tracks_only_two_roots_and_moves_both_inside_a_clip ... ok
+2026-10-22T19:48:27.8285338Z test selection::tests::selection_navigation_and_cycling_do_not_borrow_an_external_edit_transaction ... ok
+2026-10-22T19:48:27.8295322Z test selection::tests::selection_navigation_enters_children_in_layer_order_and_wraps_siblings ... ok
+2026-10-22T19:48:27.8308609Z test selection::tests::selection_navigation_preserves_parallel_scopes_and_filters_stale_ids ... ok
+2026-10-22T19:48:27.8341734Z test stroke_edit::tests::base_width_preflights_every_profile_and_preserves_undo_redo_on_error ... ok
+2026-10-22T19:48:27.8361651Z test stroke_edit::tests::invalid_or_dashed_width_edits_preserve_all_targets_and_redo ... ok
+2026-10-22T19:48:27.8398413Z test stroke_edit::tests::stroke_profiles_are_atomic_round_trip_and_undoable_with_arrow_conversion ... ok
+2026-10-22T19:48:27.8428261Z test stroke_hit::tests::aligned_variable_width_hits_clip_the_doubled_band_only_once ... ok
+2026-10-22T19:48:27.8429602Z test stroke_hit::tests::variable_width_picking_uses_real_ink_and_retains_geometry_for_placement_and_paint ... ok
+2026-10-22T19:48:27.8968694Z test stroke_hit::tests::variable_width_scene_bounds_transform_ink_and_respect_frame_clip ... ok
+2026-10-22T19:48:27.8998727Z test stroke_profile::tests::stroke_width_caps_use_the_endpoint_width_and_do_not_extend_zero_tips ... ok
+2026-10-22T19:48:27.9000532Z test stroke_profile::tests::stroke_width_closed_seams_allow_unequal_endpoint_widths_and_affine_transforms_stay_external ... ok
+2026-10-22T19:48:27.9002132Z test stroke_profile::tests::stroke_width_curve_subdivision_handles_cubics_quadratics_and_retains_source_commands ... ok
+2026-10-22T19:48:27.9003536Z test stroke_profile::tests::stroke_width_custom_points_extend_endpoints_and_reject_invalid_authored_order ... ok
+2026-10-22T19:48:27.9004876Z test editor::performance_tests::scoped_gesture_previews_commit_once_and_cancel_without_full_snapshot ... ok
+2026-10-22T19:48:27.9006239Z test stroke_profile::tests::stroke_width_handle_projection_uses_transformed_distance_under_shear_and_reflection ... ok
+2026-10-22T19:48:27.9018660Z test stroke_profile::tests::stroke_width_handle_sampling_shares_curve_lengths_knots_and_local_normals ... ok
+2026-10-22T19:48:27.9020332Z test stroke_profile::tests::stroke_width_inside_outside_return_one_doubled_band_and_open_paths_stay_centered ... ok
+2026-10-22T19:48:27.9029401Z test stroke_profile::tests::stroke_width_json_keeps_legacy_uniform_defaults_and_custom_authorship ... ok
+2026-10-22T19:48:27.9039542Z test stroke_profile::tests::stroke_width_line_wedge_and_eye_have_real_nonuniform_silhouettes ... ok
+2026-10-22T19:48:27.9041143Z test stroke_profile::tests::stroke_width_miter_round_and_bevel_joins_remain_distinct ... ok
+2026-10-22T19:48:27.9042431Z test stroke_profile::tests::stroke_width_narrow_custom_features_are_inserted_between_geometry_samples ... ok
+2026-10-22T19:48:27.9043820Z test stroke_profile::tests::stroke_width_presets_have_the_published_anchors_and_explicit_linear_interpolation ... ok
+2026-10-22T19:48:27.9045241Z test stroke_profile::tests::stroke_width_profiles_repeat_per_contour_and_nonzero_pieces_preserve_holes ... ok
+2026-10-22T19:48:27.9388652Z test stroke_profile::tests::stroke_width_ellipse_polygon_and_smoothed_box_share_the_prepared_path_api ... ok
+2026-10-22T19:48:27.9390088Z test stroke_profile::tests::stroke_width_small_geometry_and_zero_profiles_are_finite_and_malformed_paths_fail ... ok
+2026-10-22T19:48:27.9448564Z test stroke_profile::tests::stroke_width_support_rejects_real_branches_but_ignores_nonstroked_fill_edges ... ok
+2026-10-22T19:48:27.9449900Z test stroke_profile::tests::stroke_width_unrepresentable_custom_knots_fail_instead_of_dropping_the_feature ... ok
+2026-10-22T19:48:27.9478442Z test stroke_profile::tests::stroke_width_unsupported_combinations_fail_without_uniform_substitution ... ok
+2026-10-22T19:48:27.9479605Z test style_edit::tests::apply_style_changes_only_bound_nodes_and_retains_incremental_rendering ... ok
+2026-10-22T19:48:27.9480793Z test style_edit::tests::create_apply_propagate_delete_is_portable_and_each_action_has_exact_history ... ok
+2026-10-22T19:48:27.9508812Z test style_edit::tests::create_from_nodes_preserves_selection_complete_stacks_and_one_undo ... ok
+2026-10-22T19:48:27.9509947Z test style_edit::tests::definitions_propagate_across_pages_and_delete_cleans_all_legacy_binding_slots ... ok
+2026-10-22T19:48:27.9511217Z test style_edit::tests::direct_apply_and_detach_respect_locked_ancestry_but_shared_definition_updates_propagate ... ok
+2026-10-22T19:48:27.9512439Z test style_edit::tests::effects_apply_and_propagate_all_entries_without_detaching_the_definition ... ok
+2026-10-22T19:48:27.9513555Z test style_edit::tests::exhausted_style_id_space_returns_error_without_panicking_or_writing ... ok
+2026-10-22T19:48:27.9514688Z test style_edit::tests::explicit_apply_removes_competing_variable_binding_and_undo_restores_it ... ok
+2026-10-22T19:48:27.9658389Z test style_edit::tests::geometry_and_content_edits_keep_large_paint_text_and_effect_bindings ... ok
+2026-10-22T19:48:27.9659710Z test style_edit::tests::grid_component_reconciliation_preserves_local_visibility_and_explicit_style_ownership ... ok
+2026-10-22T19:48:27.9702047Z test style_edit::tests::grid_create_apply_propagate_detach_delete_preserves_effective_values_and_history ... ok
+2026-10-22T19:48:27.9728499Z test stroke_profile::tests::stroke_width_resource_and_coordinate_limits_fail_explicitly ... ok
+2026-10-22T19:48:27.9729640Z test style_edit::tests::grid_definition_updates_locked_cross_page_users_but_preserves_visibility_and_custom_values ... ok
+2026-10-22T19:48:27.9743401Z test style_edit::tests::grid_direct_edits_detach_only_grid_binding_and_visibility_keeps_style_ownership ... ok
+2026-10-22T19:48:27.9744975Z test style_edit::tests::grid_definitions_remain_editable_and_skip_incompatible_layers ... ok
+2026-10-22T19:48:27.9760212Z test style_edit::tests::grid_edits_respect_ancestor_locks_and_remove_is_one_scoped_transaction ... ok
+2026-10-22T19:48:27.9775163Z test style_edit::tests::grid_missing_invalid_and_unchanged_operations_preserve_redo_and_change_feed ... ok
+2026-10-22T19:48:27.9776503Z test style_edit::tests::grid_json_is_backward_compatible_and_rejects_invalid_layer_grids ... ok
+2026-10-22T19:48:27.9782474Z test style_edit::tests::imported_invalid_styles_cannot_bypass_application_validation ... ok
+2026-10-22T19:48:27.9797804Z test style_edit::tests::imported_mismatched_style_ids_cannot_create_dangling_bindings ... ok
+2026-10-22T19:48:27.9799217Z test style_edit::tests::invalid_style_payloads_reject_atomically_including_hidden_gradient_and_effect_fields ... ok
+2026-10-22T19:48:27.9813557Z test style_edit::tests::legacy_customized_bindings_are_detached_without_overwriting_custom_values ... ok
+2026-10-22T19:48:27.9821198Z test style_edit::tests::manual_property_edits_detach_only_changed_style_kinds_and_undo_relinks ... ok
+2026-10-22T19:48:27.9833160Z test style_edit::tests::missing_targets_reject_create_apply_and_detach_without_metadata_or_history_changes ... ok
+2026-10-22T19:48:27.9840536Z test style_edit::tests::no_op_and_invalid_style_edits_keep_redo_revision_and_change_feed ... ok
+2026-10-22T19:48:27.9846011Z test style_edit::tests::renaming_is_metadata_only_even_for_legacy_customized_users ... ok
+2026-10-22T19:48:27.9873791Z test style_edit::tests::pending_style_edits_cancel_and_commit_with_exact_bindings ... ok
+2026-10-22T19:48:27.9892575Z test style_edit::tests::same_value_variable_binding_takes_style_ownership_in_one_undoable_action ... ok
+2026-10-22T19:48:27.9898471Z test style_edit::tests::source_and_instance_style_links_survive_component_reconciliation_and_explicit_override ... ok
+2026-10-22T19:48:27.9900058Z test style_edit::tests::style_and_variable_ownership_survives_component_reconciliation_both_directions ... ok
+2026-10-22T19:48:27.9917780Z test style_edit::tests::text_size_variables_detach_typography_only_and_invalid_binding_is_atomic ... ok
+2026-10-22T19:48:27.9926653Z test style_edit::tests::text_styles_skip_shapes_preserve_unicode_runs_and_retain_one_history_transaction ... ok
+2026-10-22T19:48:27.9932721Z test style_edit::tests::update_from_a_matching_new_source_keeps_its_existing_binding ... ok
+2026-10-22T19:48:27.9938896Z test style_edit::tests::unrefreshed_legacy_overrides_are_compared_to_current_values ... ok
+2026-10-22T19:48:27.9940242Z test svg::paragraph_tests::svg_auto_paragraph_direction_uses_plaintext_bidi_and_reports_native_layout_limits ... ok
+2026-10-22T19:48:27.9943957Z test svg::paragraph_tests::svg_editable_paragraphs_preserve_hard_breaks_independent_metrics_direction_and_rich_runs ... ok
+2026-10-22T19:48:28.0208589Z test svg::regions::tests::region_svg_angular_brushes_use_original_region_and_aggregate_bounds ... ok
+2026-10-22T19:48:28.0228507Z test svg::regions::tests::region_svg_image_servers_use_region_origin_and_source_pixel_tile_size ... ok
+2026-10-22T19:48:28.0308427Z test svg::regions::tests::region_svg_keeps_explicit_empty_cutters_and_imports_portable_masks ... ok
+2026-10-22T19:48:28.0368330Z test svg::regions::tests::region_svg_paint_stacks_keep_first_entry_topmost ... ok
+2026-10-22T19:48:28.0398252Z test svg::regions::tests::region_svg_vector_masks_ignore_zero_alpha_and_whiten_visible_coverage ... ok
+2026-10-22T19:48:28.0428444Z test svg::stroke_export_tests::svg_content_clip_contains_descendants_but_not_the_frames_outside_stroke ... ok
+2026-10-22T19:48:28.0429835Z test svg::stroke_export_tests::svg_layer_mask_region_contains_profiles_larger_than_a_base_width_heuristic ... ok
+2026-10-22T19:48:28.0458488Z test svg::stroke_export_tests::svg_profiled_descendant_clip_preserves_the_authored_frame_viewport ... ok
+2026-10-22T19:48:28.0488348Z test svg::stroke_export_tests::svg_profiled_descendant_overflow_uses_full_affine_ancestry ... ok
+2026-10-22T19:48:28.0518460Z test svg::stroke_export_tests::svg_uniform_frame_does_not_gain_the_conservative_mask_allocation_margin ... ok
+2026-10-22T19:48:28.0548508Z test svg::stroke_export_tests::svg_variable_stroke_bounds_ignore_disabled_and_zero_opacity_entries ... ok
+2026-10-22T19:48:28.0569261Z test svg::stroke_export_tests::svg_variable_stroke_viewport_contains_the_outside_aligned_band ... ok
+2026-10-22T19:48:28.0575304Z test svg::stroke_export_tests::svg_variable_stroke_viewport_contains_wide_round_caps ... ok
+2026-10-22T19:48:28.0576576Z test svg_import::compositing_tests::svg_alpha_object_bounds_and_definition_inheritance_preserve_rotated_geometry ... ok
+2026-10-22T19:48:28.0578575Z test svg_import::compositing_tests::svg_clip_path_uses_geometry_and_clip_rule_instead_of_paint_stroke_or_opacity ... ok
+2026-10-22T19:48:28.0579961Z test svg_import::compositing_tests::svg_export_emits_cumulative_masks_with_explicit_modes_units_and_srgb ... ok
+2026-10-22T19:48:28.0582001Z test svg_import::compositing_tests::svg_export_normal_and_pass_through_have_distinct_explicit_isolation ... ok
+2026-10-22T19:48:28.0583396Z test svg_import::compositing_tests::svg_group_mask_does_not_escape_its_parent_and_external_blend_limit_is_reported ... ok
+2026-10-22T19:48:28.0584809Z test svg_import::compositing_tests::svg_isolation_auto_isolate_opacity_and_explicit_inherit_keep_blend_scope ... ok
+2026-10-22T19:48:28.0586215Z test svg_import::compositing_tests::svg_luminance_default_mask_mode_override_and_empty_mask_are_explicit ... ok
+2026-10-22T19:48:28.0587840Z test svg::regions::tests::region_svg_cut_tree_stays_linear_in_path_definitions_and_logarithmic_in_reference_depth ... ok
+2026-10-22T19:48:28.0638198Z test selection::tests::selection_sparse_ten_thousand_layer_queries_have_one_exact_candidate ... ok
+2026-10-22T19:48:28.0639206Z test svg_import::compositing_tests::svg_mask_import_is_one_undoable_edit ... ok
+2026-10-22T19:48:28.0640263Z test svg_import::compositing_tests::svg_mask_rejections_preserve_document_selection_revision_history_and_redo ... ok
+2026-10-22T19:48:28.0641920Z test svg_import::compositing_tests::svg_nested_clips_and_alpha_mask_intersect_in_a_bounded_sibling_scope ... ok
+2026-10-22T19:48:28.0643171Z test svg_import::compositing_tests::svg_selection_retains_ancestor_and_sibling_mask_dependencies_without_unselected_paint ... ok
+2026-10-22T19:48:28.0645243Z test svg_import::compositing_tests::svg_root_viewbox_mask_preserves_content_and_definition_coordinate_systems ... ok
+2026-10-22T19:48:28.0658676Z test svg_import_tests::affine_scene_updates_hit_geometry_and_invalid_matrices_are_rejected ... ok
+2026-10-22T19:48:28.0660271Z test svg_import::compositing_tests::svg_user_space_mask_reuse_creates_independent_sources_in_each_reference_space ... ok
+2026-10-22T19:48:28.0669943Z test svg_import_tests::imported_affine_layers_keep_geometry_through_move_resize_group_and_ungroup ... ok
+2026-10-22T19:48:28.0671877Z test svg_import::compositing_tests::svg_vector_mask_exports_opaque_fill_and_stroke_geometry_without_effects ... ok
+2026-10-22T19:48:28.0678324Z test svg_import_tests::svg_embedded_raster_is_preserved_and_external_images_rejected ... ok
+2026-10-22T19:48:28.0679958Z test svg_import_tests::svg_css_cascade_and_unicode_runs_remain_editable ... ok
+2026-10-22T19:48:28.0689724Z test svg_import_tests::svg_failure_does_not_cancel_an_existing_gesture ... ok
+2026-10-22T19:48:28.0708534Z test svg_import_tests::svg_internal_use_and_symbol_copy_geometry_without_shared_edit_state ... ok
+2026-10-22T19:48:28.0709609Z test svg_import_tests::svg_import_selects_positions_and_undoes_the_entire_import_once ... ok
+2026-10-22T19:48:28.0710545Z test svg_import_tests::svg_linear_gradient_transforms_normals_and_inherits_stops ... ok
+2026-10-22T19:48:28.0719804Z test svg_import_tests::svg_nested_viewports_clip_children_after_aspect_mapping ... ok
+2026-10-22T19:48:28.0721717Z test svg_import_tests::svg_paths_expand_relative_smooth_and_arc_commands_to_editable_segments ... ok
+2026-10-22T19:48:28.0728263Z test tests::affine_inverse_and_composition_survive_reflection ... ok
+2026-10-22T19:48:28.0736490Z test tests::auto_layout_flexible_children_redistribute_after_max_clamp ... ok
+2026-10-22T19:48:28.0738084Z test tests::bezier_flattening_retains_endpoints_and_evenodd_holes ... ok
+2026-10-22T19:48:28.0739301Z test svg_import_tests::svg_viewbox_and_nested_affine_groups_preserve_source_coordinates ... ok
+2026-10-22T19:48:28.0744595Z test tests::boolean_operations_evaluate_rotated_operand_geometry ... ok
+2026-10-22T19:48:28.0745673Z test tests::clip_and_shape_hit_testing_excludes_hidden_locked_and_ellipse_corners ... ok
+2026-10-22T19:48:28.0754823Z test tests::component_sync_applies_updates_while_retaining_text_override ... ok
+2026-10-22T19:48:28.0758131Z test tests::constrained_resize_honors_end_center_stretch_scale ... ok
+2026-10-22T19:48:28.0763466Z test tests::duplicate_remaps_internal_links_and_preserves_external_links ... ok
+2026-10-22T19:48:28.0771242Z test tests::comments_stay_on_their_page_and_follow_reparented_layers_through_history ... ok
+2026-10-22T19:48:28.0775121Z test tests::gesture_has_one_undo_step_and_cancel_restores_baseline ... ok
+2026-10-22T19:48:28.0776685Z test tests::grid_layout_sizes_last_partial_row ... ok
+2026-10-22T19:48:28.0790443Z test tests::grouping_rotated_children_preserves_global_geometry_and_z_order ... ok
+2026-10-22T19:48:28.0791581Z test tests::history_restores_deleted_subtree_and_prototype_references ... ok
+2026-10-22T19:48:28.0792764Z test tests::hierarchy_validation_rejects_cycles_unreachable_nodes_and_bad_utf8_ranges ... ok
+2026-10-22T19:48:28.0794019Z test tests::id_allocator_after_import_cannot_overwrite_existing_nodes ... ok
+2026-10-22T19:48:28.0795005Z test tests::move_world_delta_under_rotated_parent_is_exact ... ok
+2026-10-22T19:48:28.0796025Z test tests::oversized_corner_radius_uses_the_same_clamp_as_rendered_geometry ... ok
+2026-10-22T19:48:28.0798192Z test tests::prototype_navigation_has_back_history_and_overlay_stack ... ok
+2026-10-22T19:48:28.0803989Z test tests::incremental_scene_update_matches_rebuild_when_clipped_subtree_moves_into_view ... ok
+2026-10-22T19:48:28.0818298Z test tests::resize_and_position_refresh_once_with_constraints_spatial_bounds_and_history ... ok
+2026-10-22T19:48:28.0826077Z test tests::selection_parent_and_child_move_only_once ... ok
+2026-10-22T19:48:28.1255028Z test tests::spatial_index_ten_thousand_nodes_and_huge_frames_remain_queryable ... ok
+2026-10-22T19:48:28.1260289Z test tests::style_variables_alias_modes_and_cycles_are_deterministic ... ok
+2026-10-22T19:48:28.1264129Z test tests::svg_export_preserves_gradients_paths_unicode_escaping_and_world_position ... ok
+2026-10-22T19:48:28.1273009Z test tests::svg_image_export_rejects_script_urls ... ok
+2026-10-22T19:48:28.1320790Z test selection::matching::tests::large_mixed_selection_deduplicates_borrowed_signatures_and_is_deterministic ... ok
+2026-10-22T19:48:28.1322162Z test tests::top_level_reorder_updates_hit_test_and_undo_restores_stacking ... ok
+2026-10-22T19:48:28.1338846Z test tests::viewport_zoom_keeps_cursor_world_position ... ok
+2026-10-22T19:48:28.1342850Z test tests::wrapped_layout_hugs_multiple_lines_and_ignores_absolute_children ... ok
+2026-10-22T19:48:28.1343925Z test tests::seed_is_fully_editable_serializable_and_prototyped ... ok
+2026-10-22T19:48:28.1344745Z test text_edit::tests::combining_character_and_ime_replacement_are_valid ... ok
+2026-10-22T19:48:28.1345612Z test text_edit::tests::deletion_across_runs_leaves_only_surviving_ranges ... ok
+2026-10-22T19:48:28.1346565Z test text_edit::tests::entire_replacement_and_empty_text_do_not_leave_invalid_runs ... ok
+2026-10-22T19:48:28.1347835Z test text_edit::tests::exact_native_edit_retains_style_ownership_in_repeated_paragraphs ... ok
+2026-10-22T19:48:28.1349050Z test text_edit::tests::exact_native_replacement_preserves_unicode_suffix_and_rejects_stale_ranges_atomically ... ok
+2026-10-22T19:48:28.1350246Z test text_edit::tests::gap_styling_and_explicit_false_remain_independent_of_layer_defaults ... ok
+2026-10-22T19:48:28.1351417Z test text_edit::tests::inheriting_one_property_preserves_other_overrides_and_inheriting_all_creates_a_gap ... ok
+2026-10-22T19:48:28.1352597Z test text_edit::tests::imported_overlaps_normalize_using_native_first_starting_span_precedence ... ok
+2026-10-22T19:48:28.1353685Z test text_edit::tests::invalid_style_and_byte_ranges_are_atomic_and_empty_selection_is_a_noop ... ok
+2026-10-22T19:48:28.1368492Z test text_edit::tests::native_range_conversion_preserves_supplementary_and_combining_characters ... ok
+2026-10-22T19:48:28.1369631Z test text_edit::tests::range_style_history_is_one_entry_with_exact_undo_redo_and_noop_coalescing ... ok
+2026-10-22T19:48:28.1370515Z test text_edit::tests::replacement_preserves_unaffected_styles ... ok
+2026-10-22T19:48:28.1371777Z test text_edit::tests::style_edit_respects_locked_ancestors_and_rejects_non_text_layers ... ok
+2026-10-22T19:48:28.1372654Z test text_edit::tests::suffix_does_not_overlap_common_prefix ... ok
+2026-10-22T19:48:28.1373858Z test text_edit::tests::style_patch_splits_and_merges_without_changing_text_or_base_style ... ok
+2026-10-22T19:48:28.1388601Z test text_edit::tests::unicode_insertion_inherits_previous_run_and_shifts_suffix ... ok
+2026-10-22T19:48:28.1390108Z test text_preview_tests::text_preview_nested_auto_layout_preserves_full_fallback_and_text_independent_geometry ... ok
+2026-10-22T19:48:28.1400156Z test text_edit::tests::restyling_many_adjacent_spans_keeps_serialized_storage_bounded ... ok
+2026-10-22T19:48:28.1441670Z test text_preview_tests::text_preview_of_unsettled_import_retains_first_edit_arrangement_and_exact_cancel_history ... ok
+2026-10-22T19:48:28.1443177Z test text_preview_tests::text_preview_preserves_existing_component_and_variable_binding_policy ... ok
+2026-10-22T19:48:28.1460343Z test typography::tests::feature_authoring_is_typed_strict_and_round_trippable ... ok
+2026-10-22T19:48:28.1468566Z test typography::tests::direction_and_features_batch_is_one_undo_and_preserves_unicode_ranges ... ok
+2026-10-22T19:48:28.1486108Z test typography::tests::invalid_locked_and_stale_batches_are_atomic ... ok
+2026-10-22T19:48:28.1538445Z test typography::tests::imported_invalid_features_fail_document_validation ... ok
+2026-10-22T19:48:28.1568567Z test variable_edit::tests::binding_text_replacements_preserves_rich_ranges_and_unbinding_freezes_content ... ok
+2026-10-22T19:48:28.1582821Z test typography::tests::legacy_documents_keep_their_shape_and_explicit_direction_round_trips ... ok
+2026-10-22T19:48:28.1598901Z test variable_edit::tests::binding_validation_handles_new_strokes_locked_nodes_and_wrong_types_atomically ... ok
+2026-10-22T19:48:28.1628825Z test variable_edit::tests::changing_type_resets_all_modes_and_bound_incompatible_properties_block_it ... ok
+2026-10-22T19:48:28.1630079Z test variable_edit::tests::collection_and_global_mode_renames_preserve_ids_and_default_fallback ... ok
+2026-10-22T19:48:28.1631341Z test variable_edit::tests::cyclic_fallback_aliases_and_type_changes_are_rejected_without_allocating_or_history ... ok
+2026-10-22T19:48:28.1632527Z test variable_edit::tests::deleting_variables_used_by_prototype_actions_is_atomic ... ok
+2026-10-22T19:48:28.1633650Z test variable_edit::tests::duplicate_names_nonfinite_values_and_repeated_noops_do_not_create_history ... ok
+2026-10-22T19:48:28.1634924Z test variable_edit::tests::deletion_detaches_bindings_preserves_appearance_and_blocks_external_aliases ... ok
+2026-10-22T19:48:28.1636106Z test variable_edit::tests::mode_values_and_aliases_apply_atomically_to_bindings_with_undo ... ok
+2026-10-22T19:48:28.1637256Z test vector_edit::vector_layout::tests::auto_layout_fill_resizes_vector_geometry_once_and_converges ... ok
+2026-10-22T19:48:28.1638706Z test vector_edit::vector_layout::tests::constraints_scale_vector_geometry_with_assigned_bounds_for_paths_and_networks ... ok
+2026-10-22T19:48:28.1640109Z test vector_edit::vector_layout::tests::parent_resize_undo_restores_constrained_network_geometry_and_stable_ids ... ok
+2026-10-22T19:48:28.1641428Z test vector_edit::vector_layout::tests::vector_geometry_resize_declines_overflow_without_partial_changes ... ok
+2026-10-22T19:48:28.1642777Z test vector_edit::vector_network::faces::tests::cached_network_batch_updates_once_and_rolls_back_allocator_exhaustion ... ok
+2026-10-22T19:48:28.1644182Z test vector_edit::vector_network::faces::tests::cached_network_faces_are_read_only_keep_holes_and_reject_changed_geometry ... ok
+2026-10-22T19:48:28.1738551Z test vector_edit::vector_network::faces::tests::cached_network_faces_keep_curved_micro_annuli_and_segment_crossings ... ok
+2026-10-22T19:48:28.1768411Z test vector_edit::vector_network::faces::tests::cached_network_segments_visit_narrow_intermediate_faces_in_order ... ok
+2026-10-22T19:48:28.1798506Z test vector_edit::vector_network::faces::tests::network_faces_affine_reflection_shear_and_large_translation_preserve_exact_commands ... ok
+2026-10-22T19:48:28.1800174Z test vector_edit::vector_network::faces::tests::network_faces_articulation_boundaries_and_disconnected_regions_are_deterministic ... ok
+2026-10-22T19:48:28.1802069Z test vector_edit::vector_network::faces::tests::network_faces_crossing_cubics_and_duplicate_curve_contacts_are_declined ... ok
+2026-10-22T19:48:28.2789144Z test vector_edit::vector_network::faces::tests::network_faces_curved_micro_annuli_use_polynomial_containment_without_flattening ... ok
+2026-10-22T19:48:28.2790657Z test vector_edit::vector_network::faces::tests::network_faces_default_fill_detaches_empty_style_in_the_same_transaction ... ok
+2026-10-22T19:48:28.2792140Z test vector_edit::vector_network::faces::tests::network_faces_degenerate_invalid_and_exhausted_networks_never_allocate_partially ... ok
+2026-10-22T19:48:28.2838704Z test vector_edit::vector_network::faces::tests::network_faces_editor_history_locks_noops_and_errors_preserve_redo ... ok
+2026-10-22T19:48:28.2848619Z test vector_edit::vector_network::faces::tests::network_faces_exact_curved_area_distinguishes_self_loop_orientation ... ok
+2026-10-22T19:48:28.2878824Z test vector_edit::vector_network::faces::tests::network_faces_extract_adjacent_cells_with_exact_opposite_shared_boundaries ... ok
+2026-10-22T19:48:28.2880707Z test vector_edit::vector_network::faces::tests::network_faces_keep_existing_ids_reversed_contours_and_new_allocator_identity ... ok
+2026-10-22T19:48:28.2948746Z test vector_edit::vector_network::faces::tests::network_faces_keep_nested_holes_and_inner_faces_for_both_fill_rules ... ok
+2026-10-22T19:48:28.2979379Z test vector_edit::vector_network::faces::tests::network_faces_preserve_cubic_lenses_hidden_closures_and_curved_shared_edges ... ok
+2026-10-22T19:48:28.3019058Z test variable_edit::tests::shared_long_alias_chains_resolve_iteratively_and_fallback_cycles_are_detected ... ok
+2026-10-22T19:48:28.3048806Z test vector_edit::vector_network::faces::tests::network_faces_prune_bridges_and_dangling_trees_without_deleting_strokes ... ok
+2026-10-22T19:48:28.3050590Z test vector_edit::vector_network::faces::tests::network_faces_reject_unsplit_crossings_overlaps_and_unwelded_contacts_atomically ... ok
+2026-10-22T19:48:28.3119671Z test vector_edit::vector_network::planarize::tests::planarize_ambiguous_overlaps_tangencies_and_id_exhaustion_are_atomic ... ok
+2026-10-22T19:48:28.3138687Z test vector_edit::vector_network::planarize::tests::planarize_concurrence_predicate_is_exact_even_when_rounded_coordinates_cancel ... ok
+2026-10-22T19:48:28.3168688Z test vector_edit::vector_network::planarize::tests::planarize_cubic_subdivision_preserves_bezier_commands_and_exact_midpoint_handles ... ok
+2026-10-22T19:48:28.3198573Z test vector_edit::vector_network::planarize::tests::planarize_exact_nondyadic_line_concurrence_survives_translation ... ok
+2026-10-22T19:48:28.3258833Z test vector_edit::vector_network::planarize::tests::planarize_fill_component_override_keeps_subdivision_and_default_paint_after_reconciliation ... ok
+2026-10-22T19:48:28.3285736Z test vector_edit::vector_network::planarize::tests::planarize_isolates_three_line_cubic_roots_and_cubic_self_intersection ... ok
+2026-10-22T19:48:28.3347867Z test vector_edit::vector_network::planarize::tests::planarize_native_fill_and_bucket_preserve_affine_bounds_and_one_history_step ... ok
+2026-10-22T19:48:28.3368608Z test vector_edit::vector_network::planarize::tests::planarize_nearby_distinct_crossings_cannot_collapse_a_face_into_one_junction ... ok
+2026-10-22T19:48:28.3399109Z test vector_edit::vector_network::planarize::tests::planarize_outside_bucket_and_open_fill_do_not_change_document_or_redo ... ok
+2026-10-22T19:48:28.3468661Z test vector_edit::vector_network::planarize::tests::planarize_preparation_is_read_only_and_line_cubic_crossings_keep_first_edge_ids ... ok
+2026-10-22T19:48:28.3498519Z test vector_edit::vector_network::planarize::tests::planarize_prepared_map_handles_paint_changes_but_rejects_allocator_or_geometry_changes ... ok
+2026-10-22T19:48:28.3518672Z test vector_edit::vector_network::planarize::tests::planarize_preserves_explicit_paints_reversed_contours_and_unstroked_edges ... ok
+2026-10-22T19:48:28.3528506Z test vector_edit::vector_network::planarize::tests::planarize_three_line_crossing_has_one_shared_vertex_and_six_faces ... ok
+2026-10-22T19:48:28.3578651Z test vector_edit::vector_network::planarize::tests::planarize_transform_covariance_keeps_crossing_topology_for_small_large_and_reflected_geometry ... ok
+2026-10-22T19:48:28.3588543Z test vector_edit::vector_network::planarize::tests::planarize_welds_exact_endpoint_and_t_junction_contacts_without_renumbering ... ok
+2026-10-22T19:48:28.3608598Z test vector_edit::vector_network::region_paints_tests::region_paints_atomic_history_affine_ownership_styles_and_locks ... ok
+2026-10-22T19:48:28.3638610Z test vector_edit::vector_network::faces::tests::network_faces_shared_junction_grid_is_topological_and_idempotent ... ok
+2026-10-22T19:48:28.3668698Z test vector_edit::vector_network::region_paints_tests::region_paints_component_override_survives_reconciliation_with_local_style ... ok
+2026-10-22T19:48:28.3671346Z test vector_edit::vector_network::region_paints_tests::region_paints_bucket_replaces_inherited_square_without_changing_geometry_or_ids ... ok
+2026-10-22T19:48:28.3677321Z test vector_edit::vector_network::region_paints_tests::region_paints_fill_all_preserves_composite_overrides_and_priority ... ok
+2026-10-22T19:48:28.3689734Z test vector_edit::vector_network::region_paints_tests::region_paints_import_validation_rejects_invalid_explicit_stacks ... ok
+2026-10-22T19:48:28.3691222Z test vector_edit::vector_network::region_paints_tests::region_paints_fill_all_preserves_stacks_and_never_adds_unused_default_fill ... ok
+2026-10-22T19:48:28.3700230Z test vector_edit::vector_network::region_paints_tests::region_paints_later_explicit_footprint_replaces_even_when_transparent ... ok
+2026-10-22T19:48:28.3702740Z test vector_edit::vector_network::region_paints_tests::region_paints_invalid_inputs_and_exhausted_ids_never_mutate ... ok
+2026-10-22T19:48:28.3709526Z test vector_edit::vector_network::region_paints_tests::region_paints_legacy_json_and_explicit_empty_round_trip_without_schema_change ... ok
+2026-10-22T19:48:28.3739236Z test vector_edit::vector_network::region_paints_tests::region_paints_mixed_composite_reset_is_rejected_atomically ... ok
+2026-10-22T19:48:28.3740886Z test vector_edit::vector_network::region_paints_tests::region_paints_new_face_reset_restores_live_inheritance_and_full_stack ... ok
+2026-10-22T19:48:28.3749712Z test vector_edit::vector_network::region_paints_tests::region_paints_reset_respects_compound_evenodd_holes_and_nested_faces ... ok
+2026-10-22T19:48:28.3751638Z test vector_edit::vector_network::region_paints_tests::region_paints_split_curve_and_transform_keep_owned_stacks_and_region_ids ... ok
+2026-10-22T19:48:28.3753331Z test vector_edit::vector_network::tests::network_bend_keeps_anchors_regions_and_ids_while_matching_the_pointer ... ok
+2026-10-22T19:48:28.3759248Z test vector_edit::vector_network::tests::network_bend_propagates_symmetric_partners_and_declines_constrained_loops_atomically ... ok
+2026-10-22T19:48:28.3763898Z test vector_edit::vector_network::tests::network_document_roundtrip_rejects_mixed_geometry_and_invalid_region_references ... ok
+2026-10-22T19:48:28.3765570Z test vector_edit::vector_network::tests::network_edge_and_vertex_erase_remove_only_regions_with_missing_boundaries ... ok
+2026-10-22T19:48:28.3791637Z test vector_edit::vector_network::tests::network_editor_branch_is_atomic_and_legacy_or_locked_edits_are_declined ... ok
+2026-10-22T19:48:28.3818703Z test vector_edit::vector_network::tests::network_explicit_region_boundaries_support_holes_and_ignore_unfilled_branches ... ok
+2026-10-22T19:48:28.3838861Z test vector_edit::vector_network::tests::network_import_elevates_quadratics_and_keeps_implicit_fill_edges_unstroked ... ok
+2026-10-22T19:48:28.3842414Z test vector_edit::vector_network::tests::network_import_welds_only_closed_aliases_and_retains_tangent_constraints ... ok
+2026-10-22T19:48:28.3843788Z test vector_edit::vector_network::tests::network_invalid_edits_and_exhausted_ids_do_not_partially_change_graphs ... ok
+2026-10-22T19:48:28.3845440Z test vector_edit::vector_network::tests::network_nearest_queries_and_bounds_distinguish_strokes_from_fill_closures ... ok
+2026-10-22T19:48:28.3846844Z test vector_edit::vector_network::tests::network_region_creation_rejects_discontinuous_reused_and_ambiguous_edges_atomically ... ok
+2026-10-22T19:48:28.3848470Z test vector_edit::vector_network::tests::network_editor_conversion_and_scoped_drag_preserve_world_geometry_and_one_undo ... ok
+2026-10-22T19:48:28.3849861Z test vector_edit::vector_network::tests::network_resize_scales_authoritative_graph_and_retains_topology_on_undo ... ok
+2026-10-22T19:48:28.3851266Z test vector_edit::vector_network::tests::network_shared_vertex_drag_translates_each_attached_handle_once_including_self_loops ... ok
+2026-10-22T19:48:28.3852630Z test vector_edit::vector_network::tests::network_splitting_relaxes_only_affected_symmetric_handle_lengths ... ok
+2026-10-22T19:48:28.3853915Z test vector_edit::vector_network::tests::network_stroke_trails_paint_every_edge_once_with_correct_reverse_controls ... ok
+2026-10-22T19:48:28.3855229Z test vector_edit::vector_network::tests::network_split_is_exact_and_preserves_shared_region_orientation_and_ids ... ok
+2026-10-22T19:48:28.3856591Z test vector_edit::vector_network::tests::network_tangent_constraints_follow_vertex_ownership_independent_of_edge_direction ... ok
+2026-10-22T19:48:28.3858152Z test vector_edit::vector_network::tests::network_welding_preserves_edge_region_ids_and_translates_source_handles ... ok
+2026-10-22T19:48:28.3859688Z test vector_edit::vector_tools::tests::bend_declines_linked_single_anchor_loop_when_midpoint_cannot_move ... ok
+2026-10-22T19:48:28.3861001Z test vector_edit::vector_tools::tests::bend_passes_through_pointer_with_fixed_anchors_and_minimum_control_displacement ... ok
+2026-10-22T19:48:28.3862337Z test vector_edit::vector_tools::tests::bend_and_erase_use_normalized_world_coordinates_and_transaction_history ... ok
+2026-10-22T19:48:28.3863630Z test vector_edit::vector_tools::tests::bend_propagates_persistent_tangents_and_rejects_invalid_edits_atomically ... ok
+2026-10-22T19:48:28.3864912Z test vector_edit::vector_tools::tests::bending_implicit_close_keeps_the_edge_id_and_tail_metadata_stable ... ok
+2026-10-22T19:48:28.3866204Z test vector_edit::vector_tools::tests::bending_line_and_quadratic_elevates_degree_and_preserves_other_contours ... ok
+2026-10-22T19:48:28.3867492Z test vector_edit::vector_tools::tests::erasing_closed_edge_rotates_retained_anchors_and_modes_without_curve_changes ... ok
+2026-10-22T19:48:28.3899164Z test vector_edit::vector_tools::tests::erasing_open_edge_splits_contour_without_reconnecting_or_changing_retained_curves ... ok
+2026-10-22T19:48:28.3900430Z test vector_edit_tests::vector_anchor_conversion_establishes_smooth_and_symmetric_tangents ... ok
+2026-10-22T19:48:28.3901591Z test vector_edit_tests::vector_anchor_move_translates_adjacent_handles_and_preserves_unrelated_points ... ok
+2026-10-22T19:48:28.3902736Z test vector_edit_tests::vector_anchor_delete_preserves_tangents_at_the_retained_endpoints ... ok
+2026-10-22T19:48:28.3903848Z test vector_edit_tests::vector_cancel_restores_bounds_path_and_selection_after_multiple_edits ... ok
+2026-10-22T19:48:28.3904873Z test vector_edit_tests::vector_closed_aliases_share_one_persistent_constraint ... ok
+2026-10-22T19:48:28.3905914Z test vector_edit_tests::vector_closed_anchor_move_welds_both_endpoints_and_moves_each_handle_once ... ok
+2026-10-22T19:48:28.3907053Z test vector_edit_tests::vector_closed_anchor_delete_rotates_the_seam_and_preserves_other_contours ... ok
+2026-10-22T19:48:28.3908333Z test vector_edit_tests::vector_control_move_changes_only_the_requested_control ... ok
+2026-10-22T19:48:28.3909403Z test vector_edit_tests::vector_delete_remaps_retained_modes_across_contours_and_removes_deleted_modes ... ok
+2026-10-22T19:48:28.3910604Z test vector_edit_tests::vector_gesture_is_one_undo_and_normalization_preserves_affine_world_geometry ... ok
+2026-10-22T19:48:28.3911813Z test vector_edit_tests::vector_imported_arcs_quadratics_and_closed_contours_remain_editable_with_history ... ok
+2026-10-22T19:48:28.3913248Z test vector_edit_tests::vector_invalid_or_locked_edits_leave_document_and_history_unchanged ... ok
+2026-10-22T19:48:28.3914352Z test vector_edit_tests::vector_materializing_close_and_deleting_first_anchor_remaps_later_modes ... ok
+2026-10-22T19:48:28.3915473Z test vector_edit_tests::vector_invalid_constraints_and_overflowing_mirror_edits_are_rejected ... ok
+2026-10-22T19:48:28.3938573Z test vector_edit_tests::vector_normalization_updates_scene_bounds_for_anchor_edits_outside_old_extents ... ok
+2026-10-22T19:48:28.3998457Z test vector_edit_tests::vector_persistent_constraint_gesture_round_trips_with_one_undo ... ok
+2026-10-22T19:48:28.3999590Z test vector_edit_tests::vector_quadratic_conversion_degree_elevates_untouched_endpoint_tangents ... ok
+2026-10-22T19:48:28.4000744Z test vector_edit_tests::vector_smooth_handle_drags_preserve_opposite_length_and_anchor_translation ... ok
+2026-10-22T19:48:28.4001873Z test vector_edit_tests::vector_split_quadratic_has_independent_constrained_cubic_handles ... ok
+2026-10-22T19:48:28.4028464Z test vector_edit_tests::vector_subdivision_of_close_keeps_closure_and_never_bridges_move_commands ... ok
+2026-10-22T19:48:28.4029654Z test vector_edit_tests::vector_subdivision_preserves_cubic_and_quadratic_curves_for_every_parameter ... ok
+2026-10-22T19:48:28.4058503Z test vector_edit_tests::vector_subdivision_remaps_modes_and_preserves_geometry_when_symmetry_relaxes ... ok
+2026-10-22T19:48:28.4088343Z test vector_edit_tests::vector_symmetric_handles_mirror_retract_and_release_to_corner ... ok
+2026-10-22T19:48:28.4089763Z test vector_edit_tests::vector_tangent_modes_round_trip_and_legacy_paths_keep_independent_handles ... ok
+2026-10-22T19:48:28.4090875Z test vector_edit_tests::vector_tight_bounds_use_curve_extrema_instead_of_the_control_hull ... ok
+2026-10-22T19:48:28.4099966Z test vector_edit_tests::vector_topology_welds_closed_endpoint_aliases_and_keeps_subpaths_separate ... ok
+2026-10-22T19:48:28.4320518Z test vector_edit_tests::vector_nearest_curve_retains_global_minimum_on_loops_cusps_and_large_translations ... ok
+2026-10-22T19:48:28.4328469Z test svg_import_tests::svg_bad_input_never_mutates_document_selection_or_history ... ok
+2026-10-22T19:48:29.8565768Z test text_preview_tests::text_previews_in_ten_thousand_nodes_match_full_reference_and_keep_scoped_history ... ok
+2026-10-22T19:48:29.8566280Z 
+2026-10-22T19:48:29.8566579Z test result: ok. 493 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.48s
+2026-10-22T19:48:29.8566967Z 
+2026-10-22T19:48:29.8585054Z [1m[92m   Doc-tests[0m ferrodesign_core
+2026-10-22T19:48:30.3328148Z 
+2026-10-22T19:48:30.3328735Z running 0 tests
+2026-10-22T19:48:30.3328993Z 
+2026-10-22T19:48:30.3329397Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-22T19:48:30.3329799Z 
+2026-10-22T19:48:30.3611756Z Post job cleanup.
+2026-10-22T19:48:30.4481655Z [command]/usr/bin/git version
+2026-10-22T19:48:30.4519163Z git version 2.55.0
+2026-10-22T19:48:30.4554033Z Temporarily overriding HOME='/home/runner/work/_temp/ceb0e5ee-f46e-452b-b112-589d96cf8e64' before making global git config changes
+2026-10-22T19:48:30.4555269Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-22T19:48:30.4560536Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/FerroUI/FerroUI
+2026-10-22T19:48:30.4597704Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-22T19:48:30.4630301Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-22T19:48:30.4881597Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-22T19:48:30.4909021Z http.https://github.com/.extraheader
+2026-10-22T19:48:30.4919795Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-22T19:48:30.4953906Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-22T19:48:30.5222515Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-22T19:48:30.5241210Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-22T19:48:30.5639829Z Cleaning up orphan processes
+2026-10-22T19:48:30.5945142Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11d5960a326750d5838078e36cf38b85af677262. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+
