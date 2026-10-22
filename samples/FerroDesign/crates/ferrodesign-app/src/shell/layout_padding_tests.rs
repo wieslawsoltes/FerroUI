@@ -178,7 +178,7 @@ fn native_empty_layout_exposes_padding_and_link_mode_never_equalizes_on_open_or_
         Some("")
     );
     assert_eq!(
-        fixture.shell.field("PaddingField").watermark().as_deref(),
+        fixture.shell.field("PaddingField").placeholder_text().as_deref(),
         Some("Mixed")
     );
     assert_eq!(

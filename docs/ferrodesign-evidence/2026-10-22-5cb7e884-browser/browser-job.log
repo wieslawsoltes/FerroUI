@@ -1,0 +1,1457 @@
+﻿2026-10-22T22:08:45.7456034Z Current runner version: '2.338.0'
+2026-10-22T22:08:45.7495701Z ##[group]Runner Image Provisioner
+2026-10-22T22:08:45.7497102Z Hosted Compute Agent
+2026-10-22T22:08:45.7498129Z Version: 20261012.601
+2026-10-22T22:08:45.7499465Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-22T22:08:45.7500742Z Build Date: 2026-10-12T17:48:21Z
+2026-10-22T22:08:45.7501981Z Worker ID: {e843e9bb-b460-402e-b479-65450836412b}
+2026-10-22T22:08:45.7503127Z Region: eastus
+2026-10-22T22:08:45.7504086Z Cloud: Azure
+2026-10-22T22:08:45.7504976Z ##[endgroup]
+2026-10-22T22:08:45.7507402Z ##[group]Operating System
+2026-10-22T22:08:45.7508437Z Ubuntu
+2026-10-22T22:08:45.7509581Z 24.04.5
+2026-10-22T22:08:45.7510514Z LTS
+2026-10-22T22:08:45.7511402Z ##[endgroup]
+2026-10-22T22:08:45.7512377Z ##[group]Runner Image
+2026-10-22T22:08:45.7513462Z Image: ubuntu-24.04
+2026-10-22T22:08:45.7514330Z Version: 20261012.334.1
+2026-10-22T22:08:45.7516538Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-22T22:08:45.7519629Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-22T22:08:45.7521335Z ##[endgroup]
+2026-10-22T22:08:45.7523353Z ##[group]GITHUB_TOKEN Permissions
+2026-10-22T22:08:45.7526640Z Contents: read
+2026-10-22T22:08:45.7527686Z Metadata: read
+2026-10-22T22:08:45.7528856Z ##[endgroup]
+2026-10-22T22:08:45.7531954Z Secret source: Actions
+2026-10-22T22:08:45.7533630Z Cache mode: write
+2026-10-22T22:08:45.7535209Z Prepare workflow directory
+2026-10-22T22:08:45.8389346Z Prepare all required actions
+2026-10-22T22:08:45.8468466Z Getting action download info
+2026-10-22T22:08:46.0658782Z Download action repository 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-22T22:08:46.1592819Z Download action repository 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-22T22:08:46.2902851Z Download action repository 'actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830' (SHA:0057852bfaa89a56745cba8c7296529d2fc39830)
+2026-10-22T22:08:46.4455321Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-22T22:08:46.7616684Z Complete job name: Browser validation
+2026-10-22T22:08:46.8695615Z ##[group]Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+2026-10-22T22:08:46.8697417Z with:
+2026-10-22T22:08:46.8698306Z   ref: 5cb7e8847746a2bfae45bf46cafed40889f1affb
+2026-10-22T22:08:46.8699790Z   repository: wieslawsoltes/FerroUI
+2026-10-22T22:08:46.8708952Z   token: ***
+2026-10-22T22:08:46.8709775Z   ssh-strict: true
+2026-10-22T22:08:46.8710586Z   ssh-user: git
+2026-10-22T22:08:46.8711404Z   persist-credentials: true
+2026-10-22T22:08:46.8712308Z   clean: true
+2026-10-22T22:08:46.8713129Z   sparse-checkout-cone-mode: true
+2026-10-22T22:08:46.8714092Z   fetch-depth: 1
+2026-10-22T22:08:46.8714888Z   fetch-tags: false
+2026-10-22T22:08:46.8715754Z   show-progress: true
+2026-10-22T22:08:46.8716583Z   lfs: false
+2026-10-22T22:08:46.8717350Z   submodules: false
+2026-10-22T22:08:46.8718174Z   set-safe-directory: true
+2026-10-22T22:08:46.8719357Z   allow-unsafe-pr-checkout: false
+2026-10-22T22:08:46.8720760Z env:
+2026-10-22T22:08:46.8721514Z   CARGO_BUILD_JOBS: 1
+2026-10-22T22:08:46.8722440Z   CARGO_TERM_COLOR: always
+2026-10-22T22:08:46.8723339Z   FERRODESIGN_BUILD_JOBS: 1
+2026-10-22T22:08:46.8724681Z   CARGO_TARGET_DIR: /home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target
+2026-10-22T22:08:46.8726130Z ##[endgroup]
+2026-10-22T22:08:46.9789219Z Syncing repository: wieslawsoltes/FerroUI
+2026-10-22T22:08:46.9792526Z ##[group]Getting Git version info
+2026-10-22T22:08:46.9793857Z Working directory is '/home/runner/work/FerroUI/FerroUI'
+2026-10-22T22:08:46.9795723Z [command]/usr/bin/git version
+2026-10-22T22:08:46.9854967Z git version 2.55.0
+2026-10-22T22:08:46.9876632Z ##[endgroup]
+2026-10-22T22:08:46.9892856Z Temporarily overriding HOME='/home/runner/work/_temp/9cfccdf9-43fd-417f-b9b3-23fa58cad34f' before making global git config changes
+2026-10-22T22:08:46.9896120Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-22T22:08:46.9899356Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/FerroUI/FerroUI
+2026-10-22T22:08:46.9953422Z Deleting the contents of '/home/runner/work/FerroUI/FerroUI'
+2026-10-22T22:08:46.9957324Z ##[group]Initializing the repository
+2026-10-22T22:08:46.9962076Z [command]/usr/bin/git init /home/runner/work/FerroUI/FerroUI
+2026-10-22T22:08:47.0066322Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-22T22:08:47.0069281Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-22T22:08:47.0072874Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-22T22:08:47.0075203Z hint: call:
+2026-10-22T22:08:47.0076086Z hint:
+2026-10-22T22:08:47.0077243Z hint: 	git config --global init.defaultBranch <name>
+2026-10-22T22:08:47.0078829Z hint:
+2026-10-22T22:08:47.0080126Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-22T22:08:47.0082184Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-22T22:08:47.0083654Z hint:
+2026-10-22T22:08:47.0084683Z hint: 	git branch -m <name>
+2026-10-22T22:08:47.0086084Z hint:
+2026-10-22T22:08:47.0087315Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-22T22:08:47.0090169Z Initialized empty Git repository in /home/runner/work/FerroUI/FerroUI/.git/
+2026-10-22T22:08:47.0093837Z [command]/usr/bin/git remote add origin https://github.com/wieslawsoltes/FerroUI
+2026-10-22T22:08:47.0142037Z ##[endgroup]
+2026-10-22T22:08:47.0143474Z ##[group]Disabling automatic garbage collection
+2026-10-22T22:08:47.0145574Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-22T22:08:47.0180739Z ##[endgroup]
+2026-10-22T22:08:47.0182121Z ##[group]Setting up auth
+2026-10-22T22:08:47.0187965Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-22T22:08:47.0223427Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-22T22:08:47.0592046Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-22T22:08:47.0628509Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-22T22:08:47.0871543Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-22T22:08:47.0905464Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-22T22:08:47.1157786Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-22T22:08:47.1200115Z ##[endgroup]
+2026-10-22T22:08:47.1201624Z ##[group]Fetching the repository
+2026-10-22T22:08:47.1210097Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 5cb7e8847746a2bfae45bf46cafed40889f1affb
+2026-10-22T22:08:53.2230571Z From https://github.com/wieslawsoltes/FerroUI
+2026-10-22T22:08:53.2231673Z  * branch            5cb7e8847746a2bfae45bf46cafed40889f1affb -> FETCH_HEAD
+2026-10-22T22:08:53.2235570Z ##[endgroup]
+2026-10-22T22:08:53.2236428Z ##[group]Determining the checkout info
+2026-10-22T22:08:53.2239228Z ##[endgroup]
+2026-10-22T22:08:53.2249516Z [command]/usr/bin/git sparse-checkout disable
+2026-10-22T22:08:53.2303159Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-22T22:08:53.2335873Z ##[group]Checking out the ref
+2026-10-22T22:08:53.2350014Z [command]/usr/bin/git checkout --progress --force 5cb7e8847746a2bfae45bf46cafed40889f1affb
+2026-10-22T22:08:54.1780810Z Note: switching to '5cb7e8847746a2bfae45bf46cafed40889f1affb'.
+2026-10-22T22:08:54.1781577Z 
+2026-10-22T22:08:54.1781925Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-22T22:08:54.1782815Z changes and commit them, and you can discard any commits you make in this
+2026-10-22T22:08:54.1783545Z state without impacting any branches by switching back to a branch.
+2026-10-22T22:08:54.1783978Z 
+2026-10-22T22:08:54.1784303Z If you want to create a new branch to retain commits you create, you may
+2026-10-22T22:08:54.1784974Z do so (now or later) by using -c with the switch command. Example:
+2026-10-22T22:08:54.1785365Z 
+2026-10-22T22:08:54.1785529Z   git switch -c <new-branch-name>
+2026-10-22T22:08:54.1785789Z 
+2026-10-22T22:08:54.1785951Z Or undo this operation with:
+2026-10-22T22:08:54.1786202Z 
+2026-10-22T22:08:54.1786339Z   git switch -
+2026-10-22T22:08:54.1786556Z 
+2026-10-22T22:08:54.1786880Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-22T22:08:54.1787373Z 
+2026-10-22T22:08:54.1787844Z HEAD is now at 5cb7e88 fix(ferrodesign): type corner handle cache and isolate export coverage
+2026-10-22T22:08:54.1837888Z ##[endgroup]
+2026-10-22T22:08:54.1884270Z [command]/usr/bin/git log -1 --format=%H
+2026-10-22T22:08:54.1914994Z 5cb7e8847746a2bfae45bf46cafed40889f1affb
+2026-10-22T22:08:54.2215325Z ##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+2026-10-22T22:08:54.2215761Z with:
+2026-10-22T22:08:54.2215983Z   node-version: 22
+2026-10-22T22:08:54.2216201Z   always-auth: false
+2026-10-22T22:08:54.2216422Z   check-latest: false
+2026-10-22T22:08:54.2219286Z   token: ***
+2026-10-22T22:08:54.2219507Z env:
+2026-10-22T22:08:54.2219739Z   CARGO_BUILD_JOBS: 1
+2026-10-22T22:08:54.2219974Z   CARGO_TERM_COLOR: always
+2026-10-22T22:08:54.2220227Z   FERRODESIGN_BUILD_JOBS: 1
+2026-10-22T22:08:54.2220597Z   CARGO_TARGET_DIR: /home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target
+2026-10-22T22:08:54.2221023Z ##[endgroup]
+2026-10-22T22:08:54.3728249Z Found in cache @ /opt/hostedtoolcache/node/22.23.3/x64
+2026-10-22T22:08:54.3731809Z (node:2347) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-22T22:08:54.3732713Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T22:08:54.3735619Z ##[group]Environment details
+2026-10-22T22:08:54.7861196Z node: v22.23.3
+2026-10-22T22:08:54.7861606Z npm: 10.9.9
+2026-10-22T22:08:54.7861978Z yarn: 1.22.22
+2026-10-22T22:08:54.7863327Z ##[endgroup]
+2026-10-22T22:08:54.8009247Z ##[group]Run actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+2026-10-22T22:08:54.8009689Z with:
+2026-10-22T22:08:54.8010449Z   path: /home/runner/work/_temp/ferrodesign-tools/rustup
+/home/runner/work/_temp/ferrodesign-tools/cargo/bin
+/home/runner/work/_temp/ferrodesign-tools/bin
+/home/runner/work/_temp/ferrodesign-tools/emsdk
+
+2026-10-22T22:08:54.8011396Z   key: ferrodesign-tools-Linux-rust1.99.0-em6.0.10-bindgen0.2.129
+2026-10-22T22:08:54.8011790Z   enableCrossOsArchive: false
+2026-10-22T22:08:54.8012040Z   fail-on-cache-miss: false
+2026-10-22T22:08:54.8012270Z   lookup-only: false
+2026-10-22T22:08:54.8012472Z env:
+2026-10-22T22:08:54.8012656Z   CARGO_BUILD_JOBS: 1
+2026-10-22T22:08:54.8012871Z   CARGO_TERM_COLOR: always
+2026-10-22T22:08:54.8013100Z   FERRODESIGN_BUILD_JOBS: 1
+2026-10-22T22:08:54.8013470Z   CARGO_TARGET_DIR: /home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target
+2026-10-22T22:08:54.8013869Z ##[endgroup]
+2026-10-22T22:08:54.9149927Z (node:2378) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-22T22:08:54.9151455Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T22:08:54.9768077Z Cache hit for: ferrodesign-tools-Linux-rust1.99.0-em6.0.10-bindgen0.2.129
+2026-10-22T22:08:54.9890722Z (node:2378) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-22T22:08:56.0468280Z Received 247463936 of 727970091 (34.0%), 236.0 MBs/sec
+2026-10-22T22:08:57.0535124Z Received 511705088 of 727970091 (70.3%), 243.3 MBs/sec
+2026-10-22T22:08:58.0351173Z Received 727970091 of 727970091 (100.0%), 232.3 MBs/sec
+2026-10-22T22:08:58.0353670Z Cache Size: ~694 MB (727970091 B)
+2026-10-22T22:08:58.0514046Z [command]/usr/bin/tar -xf /home/runner/work/_temp/c9bdb12b-a65a-4d4d-a7d4-330e0fd9944a/cache.tzst -P -C /home/runner/work/FerroUI/FerroUI --use-compress-program unzstd
+2026-10-22T22:09:03.1188485Z Cache restored successfully
+2026-10-22T22:09:03.5581599Z Cache restored from key: ferrodesign-tools-Linux-rust1.99.0-em6.0.10-bindgen0.2.129
+2026-10-22T22:09:03.8597153Z ##[group]Run actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+2026-10-22T22:09:03.8597890Z with:
+2026-10-22T22:09:03.8599320Z   path: /home/runner/work/_temp/ferrodesign-tools/cargo/registry
+/home/runner/work/_temp/ferrodesign-tools/cargo/git
+samples/FerroDesign/target
+
+2026-10-22T22:09:03.8600536Z   key: ferrodesign-build-Linux-v3-browser-f62c3446d937d58fa75af60ee954c7914ea80b77f9a8c07b1a05ebca2e89ad90-5cb7e8847746a2bfae45bf46cafed40889f1affb
+2026-10-22T22:09:03.8602023Z   restore-keys: ferrodesign-build-Linux-v3-browser-f62c3446d937d58fa75af60ee954c7914ea80b77f9a8c07b1a05ebca2e89ad90-
+ferrodesign-build-Linux-v2-f62c3446d937d58fa75af60ee954c7914ea80b77f9a8c07b1a05ebca2e89ad90-
+
+2026-10-22T22:09:03.8603041Z   enableCrossOsArchive: false
+2026-10-22T22:09:03.8603328Z   fail-on-cache-miss: false
+2026-10-22T22:09:03.8603585Z   lookup-only: false
+2026-10-22T22:09:03.8603804Z env:
+2026-10-22T22:09:03.8603995Z   CARGO_BUILD_JOBS: 1
+2026-10-22T22:09:03.8604313Z   CARGO_TERM_COLOR: always
+2026-10-22T22:09:03.8604556Z   FERRODESIGN_BUILD_JOBS: 1
+2026-10-22T22:09:03.8604929Z   CARGO_TARGET_DIR: /home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target
+2026-10-22T22:09:03.8605348Z ##[endgroup]
+2026-10-22T22:09:03.9707839Z (node:2494) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-22T22:09:03.9709153Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T22:09:04.0463745Z Cache hit for restore-key: ferrodesign-build-Linux-v3-browser-f62c3446d937d58fa75af60ee954c7914ea80b77f9a8c07b1a05ebca2e89ad90-2b7a37fff2906c4835da178ba40856148f6267a7
+2026-10-22T22:09:04.0555958Z (node:2494) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-22T22:09:05.0840942Z Received 197132288 of 420038075 (46.9%), 187.1 MBs/sec
+2026-10-22T22:09:05.9755635Z Received 420038075 of 420038075 (100.0%), 211.1 MBs/sec
+2026-10-22T22:09:05.9758079Z Cache Size: ~401 MB (420038075 B)
+2026-10-22T22:09:05.9877494Z [command]/usr/bin/tar -xf /home/runner/work/_temp/14fc2745-c0b7-47ad-9449-60b1cabd7b2f/cache.tzst -P -C /home/runner/work/FerroUI/FerroUI --use-compress-program unzstd
+2026-10-22T22:09:09.2089008Z Cache restored successfully
+2026-10-22T22:09:09.2360158Z Cache restored from key: ferrodesign-build-Linux-v3-browser-f62c3446d937d58fa75af60ee954c7914ea80b77f9a8c07b1a05ebca2e89ad90-2b7a37fff2906c4835da178ba40856148f6267a7
+2026-10-22T22:09:09.2546528Z ##[group]Run set -o pipefail
+2026-10-22T22:09:09.2546931Z [36;1mset -o pipefail[0m
+2026-10-22T22:09:09.2547206Z [36;1mmkdir -p browser-report[0m
+2026-10-22T22:09:09.2547700Z [36;1mscripts/setup.sh "$RUNNER_TEMP/ferrodesign-tools" 2>&1 | tee browser-report/toolchain.log[0m
+2026-10-22T22:09:09.2548193Z [36;1mfree -h[0m
+2026-10-22T22:09:09.7585169Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T22:09:09.7585649Z env:
+2026-10-22T22:09:09.7585930Z   CARGO_BUILD_JOBS: 1
+2026-10-22T22:09:09.7586235Z   CARGO_TERM_COLOR: always
+2026-10-22T22:09:09.7586809Z   FERRODESIGN_BUILD_JOBS: 1
+2026-10-22T22:09:09.7587316Z   CARGO_TARGET_DIR: /home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target
+2026-10-22T22:09:09.7587867Z ##[endgroup]
+2026-10-22T22:09:09.8343746Z info: syncing channel updates for 1.99.0-x86_64-unknown-linux-gnu
+2026-10-22T22:09:10.4254710Z info: latest update on 2026-10-01 for version 1.99.0 (b940084d7 2026-09-28)
+2026-10-22T22:09:10.4395652Z info: component rust-std for target wasm32-unknown-emscripten is up to date
+2026-10-22T22:09:10.4407368Z 
+2026-10-22T22:09:10.4490303Z   1.99.0-x86_64-unknown-linux-gnu unchanged - rustc 1.99.0 (b940084d7 2026-09-28)
+2026-10-22T22:09:10.4490747Z 
+2026-10-22T22:09:10.5432769Z Resolving SDK version '6.0.10' to 'sdk-releases-666337b525e673e769121856d175f6f52b8ead64-64bit'
+2026-10-22T22:09:10.5434089Z Installing SDK 'sdk-releases-666337b525e673e769121856d175f6f52b8ead64-64bit'..
+2026-10-22T22:09:10.5434999Z Skipped installing node-24.19.0-64bit, already installed.
+2026-10-22T22:09:10.5436089Z Skipped installing releases-666337b525e673e769121856d175f6f52b8ead64-64bit, already installed.
+2026-10-22T22:09:10.5437489Z All SDK components already installed: 'sdk-releases-666337b525e673e769121856d175f6f52b8ead64-64bit'.
+2026-10-22T22:09:10.6669458Z Resolving SDK version '6.0.10' to 'sdk-releases-666337b525e673e769121856d175f6f52b8ead64-64bit'
+2026-10-22T22:09:10.6670599Z Setting the following tools as active:
+2026-10-22T22:09:10.6671260Z    node-24.19.0-64bit
+2026-10-22T22:09:10.6672510Z    releases-666337b525e673e769121856d175f6f52b8ead64-64bit
+2026-10-22T22:09:10.6673160Z 
+2026-10-22T22:09:10.6673393Z Next steps:
+2026-10-22T22:09:10.6674226Z - To conveniently access emsdk tools from the command line,
+2026-10-22T22:09:10.6675500Z   consider adding the following directories to your PATH:
+2026-10-22T22:09:10.6676648Z     /home/runner/work/_temp/ferrodesign-tools/emsdk
+2026-10-22T22:09:10.6677774Z     /home/runner/work/_temp/ferrodesign-tools/emsdk/upstream/emscripten
+2026-10-22T22:09:10.6679292Z - This can be done for the current shell by running:
+2026-10-22T22:09:10.6680524Z     source "/home/runner/work/_temp/ferrodesign-tools/emsdk/emsdk_env.sh"
+2026-10-22T22:09:10.6681663Z - Configure emsdk in your shell startup scripts by running:
+2026-10-22T22:09:10.6682493Z     echo 'source "/home/runner/work/_temp/ferrodesign-tools/emsdk/emsdk_env.sh"' >> $HOME/.bash_profile
+2026-10-22T22:09:10.8196888Z rustc 1.99.0 (b940084d7 2026-09-28)
+2026-10-22T22:09:10.9365244Z emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.10 (d6c521a7f05449857c76bd99e396895583cf2083)
+2026-10-22T22:09:10.9524781Z wasm-bindgen 0.2.129
+2026-10-22T22:09:10.9525534Z 
+2026-10-22T22:09:10.9526159Z Ready. Run: source "/home/runner/work/_temp/ferrodesign-tools/env.sh"
+2026-10-22T22:09:10.9547010Z                total        used        free      shared  buff/cache   available
+2026-10-22T22:09:10.9548372Z Mem:            15Gi       2.0Gi       6.8Gi        47Mi       7.3Gi        13Gi
+2026-10-22T22:09:10.9549203Z Swap:          3.0Gi          0B       3.0Gi
+2026-10-22T22:09:10.9588215Z ##[group]Run sudo apt-get update
+2026-10-22T22:09:10.9588892Z [36;1msudo apt-get update[0m
+2026-10-22T22:09:10.9589431Z [36;1msudo apt-get install --no-install-recommends -y pkg-config libfontconfig1-dev libfreetype6-dev[0m
+2026-10-22T22:09:10.9590047Z [36;1mpkg-config --modversion fontconfig freetype2[0m
+2026-10-22T22:09:10.9652422Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T22:09:10.9652797Z env:
+2026-10-22T22:09:10.9653016Z   CARGO_BUILD_JOBS: 1
+2026-10-22T22:09:10.9653265Z   CARGO_TERM_COLOR: always
+2026-10-22T22:09:10.9653515Z   FERRODESIGN_BUILD_JOBS: 1
+2026-10-22T22:09:10.9653898Z   CARGO_TARGET_DIR: /home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target
+2026-10-22T22:09:10.9654324Z ##[endgroup]
+2026-10-22T22:09:11.0542957Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-10-22T22:09:11.0916091Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+2026-10-22T22:09:11.0919230Z Get:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+2026-10-22T22:09:11.0921081Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+2026-10-22T22:09:11.0993188Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+2026-10-22T22:09:11.1036277Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+2026-10-22T22:09:11.2441805Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble/main armhf Packages [12.4 kB]
+2026-10-22T22:09:11.2560958Z Get:8 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [633 kB]
+2026-10-22T22:09:11.2651280Z Get:9 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [571 kB]
+2026-10-22T22:09:11.2985118Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1400 kB]
+2026-10-22T22:09:11.3073166Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [310 kB]
+2026-10-22T22:09:11.3099237Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1706 kB]
+2026-10-22T22:09:11.3190875Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [342 kB]
+2026-10-22T22:09:11.3268875Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1805 kB]
+2026-10-22T22:09:11.3373327Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [411 kB]
+2026-10-22T22:09:11.4164441Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1146 kB]
+2026-10-22T22:09:11.4236742Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [231 kB]
+2026-10-22T22:09:11.4257937Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1222 kB]
+2026-10-22T22:09:11.4385748Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [246 kB]
+2026-10-22T22:09:11.4870885Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1713 kB]
+2026-10-22T22:09:11.4983798Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [392 kB]
+2026-10-22T22:09:16.5605907Z Fetched 12.5 MB in 1s (9509 kB/s)
+2026-10-22T22:09:17.6551183Z Reading package lists...
+2026-10-22T22:09:17.6871816Z Reading package lists...
+2026-10-22T22:09:17.9569107Z Building dependency tree...
+2026-10-22T22:09:17.9577049Z Reading state information...
+2026-10-22T22:09:18.2883758Z pkg-config is already the newest version (1.8.1-2build1).
+2026-10-22T22:09:18.2884526Z The following additional packages will be installed:
+2026-10-22T22:09:18.2895532Z   libbrotli-dev libbz2-dev libfontconfig-dev libpng-dev uuid-dev
+2026-10-22T22:09:18.2908824Z Suggested packages:
+2026-10-22T22:09:18.2909446Z   freetype2-doc
+2026-10-22T22:09:18.2909724Z Recommended packages:
+2026-10-22T22:09:18.2909994Z   bzip2-doc libpng-tools
+2026-10-22T22:09:18.3173816Z The following NEW packages will be installed:
+2026-10-22T22:09:18.3175621Z   libbrotli-dev libbz2-dev libfontconfig-dev libfontconfig1-dev
+2026-10-22T22:09:18.3184974Z   libfreetype-dev libpng-dev uuid-dev
+2026-10-22T22:09:18.3432127Z 0 upgraded, 7 newly installed, 0 to remove and 99 not upgraded.
+2026-10-22T22:09:18.3433141Z Need to get 1422 kB of archives.
+2026-10-22T22:09:18.3434062Z After this operation, 4752 kB of additional disk space will be used.
+2026-10-22T22:09:18.3435135Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-10-22T22:09:18.3763759Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libbrotli-dev amd64 1.1.0-2build2 [353 kB]
+2026-10-22T22:09:18.3962440Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libbz2-dev amd64 1.0.8-5.1ubuntu0.1 [33.6 kB]
+2026-10-22T22:09:18.4111280Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libpng-dev amd64 1.6.43-5ubuntu0.7 [265 kB]
+2026-10-22T22:09:18.4276252Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libfreetype-dev amd64 2.13.2+dfsg-1ubuntu0.2 [574 kB]
+2026-10-22T22:09:18.4457039Z Get:6 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 uuid-dev amd64 2.39.3-9ubuntu6.6 [33.5 kB]
+2026-10-22T22:09:18.4605512Z Get:7 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libfontconfig-dev amd64 2.15.0-1.1ubuntu2 [161 kB]
+2026-10-22T22:09:18.4759846Z Get:8 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libfontconfig1-dev amd64 2.15.0-1.1ubuntu2 [1840 B]
+2026-10-22T22:09:18.7747418Z Fetched 1422 kB in 0s (9854 kB/s)
+2026-10-22T22:09:18.7985855Z Selecting previously unselected package libbrotli-dev:amd64.
+2026-10-22T22:09:18.8248330Z (Reading database ... 
+2026-10-22T22:09:18.8249175Z (Reading database ... 5%
+2026-10-22T22:09:18.8249577Z (Reading database ... 10%
+2026-10-22T22:09:18.8249962Z (Reading database ... 15%
+2026-10-22T22:09:18.8250344Z (Reading database ... 20%
+2026-10-22T22:09:18.8250709Z (Reading database ... 25%
+2026-10-22T22:09:18.8251075Z (Reading database ... 30%
+2026-10-22T22:09:18.8251437Z (Reading database ... 35%
+2026-10-22T22:09:18.8251845Z (Reading database ... 40%
+2026-10-22T22:09:18.8252213Z (Reading database ... 45%
+2026-10-22T22:09:18.8252582Z (Reading database ... 50%
+2026-10-22T22:09:18.8296545Z (Reading database ... 55%
+2026-10-22T22:09:18.9521522Z (Reading database ... 60%
+2026-10-22T22:09:19.1443993Z (Reading database ... 65%
+2026-10-22T22:09:19.3520200Z (Reading database ... 70%
+2026-10-22T22:09:19.5401382Z (Reading database ... 75%
+2026-10-22T22:09:19.7055489Z (Reading database ... 80%
+2026-10-22T22:09:19.9359902Z (Reading database ... 85%
+2026-10-22T22:09:20.0949862Z (Reading database ... 90%
+2026-10-22T22:09:20.3109079Z (Reading database ... 95%
+2026-10-22T22:09:20.3109790Z (Reading database ... 100%
+2026-10-22T22:09:20.3110787Z (Reading database ... 203540 files and directories currently installed.)
+2026-10-22T22:09:20.3156490Z Preparing to unpack .../0-libbrotli-dev_1.1.0-2build2_amd64.deb ...
+2026-10-22T22:09:20.3182529Z Unpacking libbrotli-dev:amd64 (1.1.0-2build2) ...
+2026-10-22T22:09:20.3498046Z Selecting previously unselected package libbz2-dev:amd64.
+2026-10-22T22:09:20.3633011Z Preparing to unpack .../1-libbz2-dev_1.0.8-5.1ubuntu0.1_amd64.deb ...
+2026-10-22T22:09:20.3641034Z Unpacking libbz2-dev:amd64 (1.0.8-5.1ubuntu0.1) ...
+2026-10-22T22:09:20.3850488Z Selecting previously unselected package libpng-dev:amd64.
+2026-10-22T22:09:20.3983296Z Preparing to unpack .../2-libpng-dev_1.6.43-5ubuntu0.7_amd64.deb ...
+2026-10-22T22:09:20.3989713Z Unpacking libpng-dev:amd64 (1.6.43-5ubuntu0.7) ...
+2026-10-22T22:09:20.4367642Z Selecting previously unselected package libfreetype-dev:amd64.
+2026-10-22T22:09:20.4500160Z Preparing to unpack .../3-libfreetype-dev_2.13.2+dfsg-1ubuntu0.2_amd64.deb ...
+2026-10-22T22:09:20.4506219Z Unpacking libfreetype-dev:amd64 (2.13.2+dfsg-1ubuntu0.2) ...
+2026-10-22T22:09:20.4851453Z Selecting previously unselected package uuid-dev:amd64.
+2026-10-22T22:09:20.4986585Z Preparing to unpack .../4-uuid-dev_2.39.3-9ubuntu6.6_amd64.deb ...
+2026-10-22T22:09:20.4993110Z Unpacking uuid-dev:amd64 (2.39.3-9ubuntu6.6) ...
+2026-10-22T22:09:20.5251047Z Selecting previously unselected package libfontconfig-dev:amd64.
+2026-10-22T22:09:20.5385204Z Preparing to unpack .../5-libfontconfig-dev_2.15.0-1.1ubuntu2_amd64.deb ...
+2026-10-22T22:09:20.5391637Z Unpacking libfontconfig-dev:amd64 (2.15.0-1.1ubuntu2) ...
+2026-10-22T22:09:20.5626948Z Selecting previously unselected package libfontconfig1-dev:amd64.
+2026-10-22T22:09:20.5760940Z Preparing to unpack .../6-libfontconfig1-dev_2.15.0-1.1ubuntu2_amd64.deb ...
+2026-10-22T22:09:20.5768015Z Unpacking libfontconfig1-dev:amd64 (2.15.0-1.1ubuntu2) ...
+2026-10-22T22:09:20.6156046Z Setting up libpng-dev:amd64 (1.6.43-5ubuntu0.7) ...
+2026-10-22T22:09:20.6176685Z Setting up uuid-dev:amd64 (2.39.3-9ubuntu6.6) ...
+2026-10-22T22:09:20.6191842Z Setting up libbrotli-dev:amd64 (1.1.0-2build2) ...
+2026-10-22T22:09:20.6207467Z Setting up libbz2-dev:amd64 (1.0.8-5.1ubuntu0.1) ...
+2026-10-22T22:09:20.6223379Z Setting up libfreetype-dev:amd64 (2.13.2+dfsg-1ubuntu0.2) ...
+2026-10-22T22:09:20.6240053Z Setting up libfontconfig-dev:amd64 (2.15.0-1.1ubuntu2) ...
+2026-10-22T22:09:20.6256369Z Setting up libfontconfig1-dev:amd64 (2.15.0-1.1ubuntu2) ...
+2026-10-22T22:09:20.6276474Z Processing triggers for man-db (2.12.0-4build2) ...
+2026-10-22T22:09:20.6298415Z Not building database; man-db/auto-update is not 'true'.
+2026-10-22T22:09:21.2822189Z 
+2026-10-22T22:09:21.2822921Z Running kernel seems to be up-to-date.
+2026-10-22T22:09:21.2823417Z 
+2026-10-22T22:09:21.2823729Z No services need to be restarted.
+2026-10-22T22:09:21.2823994Z 
+2026-10-22T22:09:21.2824202Z No containers need to be restarted.
+2026-10-22T22:09:21.2824449Z 
+2026-10-22T22:09:21.2824701Z No user sessions are running outdated binaries.
+2026-10-22T22:09:21.2824996Z 
+2026-10-22T22:09:21.2825384Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-10-22T22:09:22.7132688Z 2.15.0
+2026-10-22T22:09:22.7133052Z 26.1.20
+2026-10-22T22:09:22.7185909Z ##[group]Run set -o pipefail
+2026-10-22T22:09:22.7186533Z [36;1mset -o pipefail[0m
+2026-10-22T22:09:22.7187102Z [36;1msource "$RUNNER_TEMP/ferrodesign-tools/env.sh"[0m
+2026-10-22T22:09:22.7187898Z [36;1mscripts/build-browser.sh 2>&1 | tee browser-report/build.log[0m
+2026-10-22T22:09:22.7277639Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T22:09:22.7278285Z env:
+2026-10-22T22:09:22.7278946Z   CARGO_BUILD_JOBS: 1
+2026-10-22T22:09:22.7279358Z   CARGO_TERM_COLOR: always
+2026-10-22T22:09:22.7279773Z   FERRODESIGN_BUILD_JOBS: 1
+2026-10-22T22:09:22.7280422Z   CARGO_TARGET_DIR: /home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target
+2026-10-22T22:09:22.7281145Z ##[endgroup]
+2026-10-22T22:09:24.6099861Z npm warn skipping integrity check for git dependency ssh://git@github.com/jimmywarting/native-file-system-adapter.git
+2026-10-22T22:09:25.7095928Z npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+2026-10-22T22:09:25.8513714Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2026-10-22T22:09:25.9257977Z npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-22T22:09:25.9994778Z npm warn deprecated eslint-config-standard-with-typescript@23.0.0: Please use eslint-config-love, instead.
+2026-10-22T22:09:26.1150218Z npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+2026-10-22T22:09:26.1339136Z npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+2026-10-22T22:09:26.3610591Z npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+2026-10-22T22:09:27.4260613Z npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+2026-10-22T22:09:31.2640374Z 
+2026-10-22T22:09:31.2641098Z added 270 packages in 8s
+2026-10-22T22:09:31.4335940Z 
+2026-10-22T22:09:31.4336549Z > typecheck
+2026-10-22T22:09:31.4337128Z > tsc --noEmit -p tsconfig.json
+2026-10-22T22:09:32.7701350Z 
+2026-10-22T22:09:32.7701369Z 
+2026-10-22T22:09:32.7701975Z > test:input
+2026-10-22T22:09:32.7702564Z > node tests/text-input.test.mjs
+2026-10-22T22:09:32.7702937Z 
+2026-10-22T22:09:32.8562532Z TAP version 13
+2026-10-22T22:09:32.8573418Z # Subtest: input-only Unicode reaches the native text client once without stale DOM surrounding text
+2026-10-22T22:09:32.8579260Z ok 1 - input-only Unicode reaches the native text client once without stale DOM surrounding text
+2026-10-22T22:09:32.8580253Z   ---
+2026-10-22T22:09:32.8580571Z   duration_ms: 3.793195
+2026-10-22T22:09:32.8581042Z   type: 'test'
+2026-10-22T22:09:32.8581517Z   ...
+2026-10-22T22:09:32.8582335Z # Subtest: empty, generic and non-insertion input events do not enter the native text client
+2026-10-22T22:09:32.8584198Z ok 2 - empty, generic and non-insertion input events do not enter the native text client
+2026-10-22T22:09:32.8585012Z   ---
+2026-10-22T22:09:32.8585314Z   duration_ms: 0.773386
+2026-10-22T22:09:32.8585658Z   type: 'test'
+2026-10-22T22:09:32.8585948Z   ...
+2026-10-22T22:09:32.8587601Z # Subtest: composition preedit stays separate and its commit is delivered once despite trailing input
+2026-10-22T22:09:32.8590620Z ok 3 - composition preedit stays separate and its commit is delivered once despite trailing input
+2026-10-22T22:09:32.8591423Z   ---
+2026-10-22T22:09:32.8591793Z   duration_ms: 0.716149
+2026-10-22T22:09:32.8592185Z   type: 'test'
+2026-10-22T22:09:32.8592448Z   ...
+2026-10-22T22:09:32.8658793Z # Subtest: an identical input-only edit in a later task survives a composition with no trailing input
+2026-10-22T22:09:32.8662373Z ok 4 - an identical input-only edit in a later task survives a composition with no trailing input
+2026-10-22T22:09:32.8663129Z   ---
+2026-10-22T22:09:32.8663448Z   duration_ms: 4.717505
+2026-10-22T22:09:32.8663969Z   type: 'test'
+2026-10-22T22:09:32.8664300Z   ...
+2026-10-22T22:09:32.8666900Z # Subtest: a distinct input-only edit immediately after composition is an independent insertion
+2026-10-22T22:09:32.8668891Z ok 5 - a distinct input-only edit immediately after composition is an independent insertion
+2026-10-22T22:09:32.8669591Z   ---
+2026-10-22T22:09:32.8669918Z   duration_ms: 0.673359
+2026-10-22T22:09:32.8670445Z   type: 'test'
+2026-10-22T22:09:32.8670860Z   ...
+2026-10-22T22:09:32.8673565Z # Subtest: native client reset accepts fresh input before a canceled composition sends its delayed end
+2026-10-22T22:09:32.8676130Z ok 6 - native client reset accepts fresh input before a canceled composition sends its delayed end
+2026-10-22T22:09:32.8676923Z   ---
+2026-10-22T22:09:32.8677317Z   duration_ms: 0.494581
+2026-10-22T22:09:32.8677714Z   type: 'test'
+2026-10-22T22:09:32.8678115Z   ...
+2026-10-22T22:09:32.8679273Z # Subtest: a native reset permits a new composition without waiting for the canceled one to end
+2026-10-22T22:09:32.8680579Z ok 7 - a native reset permits a new composition without waiting for the canceled one to end
+2026-10-22T22:09:32.8681321Z   ---
+2026-10-22T22:09:32.8681703Z   duration_ms: 0.761955
+2026-10-22T22:09:32.8682091Z   type: 'test'
+2026-10-22T22:09:32.8682484Z   ...
+2026-10-22T22:09:32.8690374Z # Subtest: ordinary character keydown prevents a duplicate DOM insertion (native handled: false)
+2026-10-22T22:09:32.8691990Z ok 8 - ordinary character keydown prevents a duplicate DOM insertion (native handled: false)
+2026-10-22T22:09:32.8692522Z   ---
+2026-10-22T22:09:32.8693173Z   duration_ms: 1.753563
+2026-10-22T22:09:32.8693498Z   type: 'test'
+2026-10-22T22:09:32.8693714Z   ...
+2026-10-22T22:09:32.8694718Z # Subtest: ordinary character keydown prevents a duplicate DOM insertion (native handled: true)
+2026-10-22T22:09:32.8695576Z ok 9 - ordinary character keydown prevents a duplicate DOM insertion (native handled: true)
+2026-10-22T22:09:32.8696042Z   ---
+2026-10-22T22:09:32.8696649Z   duration_ms: 0.667627
+2026-10-22T22:09:32.8697015Z   type: 'test'
+2026-10-22T22:09:32.8697348Z   ...
+2026-10-22T22:09:32.8698507Z # Subtest: unsubscribe removes every text event callback and permits a fresh subscription
+2026-10-22T22:09:32.8700154Z ok 10 - unsubscribe removes every text event callback and permits a fresh subscription
+2026-10-22T22:09:32.8701266Z   ---
+2026-10-22T22:09:32.8701631Z   duration_ms: 4.708738
+2026-10-22T22:09:32.8702064Z   type: 'test'
+2026-10-22T22:09:32.8702411Z   ...
+2026-10-22T22:09:32.8711634Z 1..10
+2026-10-22T22:09:32.8712256Z # tests 10
+2026-10-22T22:09:32.8712673Z # suites 0
+2026-10-22T22:09:32.8713062Z # pass 10
+2026-10-22T22:09:32.8713722Z # fail 0
+2026-10-22T22:09:32.8714177Z # cancelled 0
+2026-10-22T22:09:32.8714749Z # skipped 0
+2026-10-22T22:09:32.8715218Z # todo 0
+2026-10-22T22:09:32.8716354Z # duration_ms 25.310891
+2026-10-22T22:09:32.9940285Z 
+2026-10-22T22:09:32.9941329Z > build
+2026-10-22T22:09:32.9941786Z > node build.js
+2026-10-22T22:09:32.9942041Z 
+2026-10-22T22:09:33.0557525Z Done
+2026-10-22T22:09:33.2303400Z [1m[92m   Compiling[0m ferroui-build-scan v0.4.0-preview.1 (/home/runner/work/FerroUI/FerroUI/src/FerroUI.Build.Scan)
+2026-10-22T22:09:36.0064230Z [1m[92m   Compiling[0m ferroui-base v0.4.0-preview.1 (/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base)
+2026-10-22T22:09:42.3871476Z [1m[92m   Compiling[0m ferroui-controls v0.4.0-preview.1 (/home/runner/work/FerroUI/FerroUI/src/FerroUI.Controls)
+2026-10-22T22:09:52.1797366Z [1m[92m   Compiling[0m ferroui-system v0.4.0-preview.1 (/home/runner/work/FerroUI/FerroUI/src/FerroUI.System)
+2026-10-22T22:09:54.4873008Z [1m[33mwarning[0m[1m: unused import: `crate::platform::IBitmapImpl`[0m
+2026-10-22T22:09:54.4874410Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/media/imaging/i_bitmap.rs:3:5
+2026-10-22T22:09:54.4875154Z   [1m[94m|[0m
+2026-10-22T22:09:54.4875803Z [1m[94m3[0m [1m[94m|[0m use crate::platform::IBitmapImpl;
+2026-10-22T22:09:54.4876496Z   [1m[94m|[0m     [1m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:09:54.4876974Z   [1m[94m|[0m
+2026-10-22T22:09:54.4877673Z   [1m[94m= [0m[1mnote[0m: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+2026-10-22T22:09:54.4878176Z 
+2026-10-22T22:09:54.4946240Z [1m[33mwarning[0m[1m: unused import: `crate::platform::IBitmapImpl`[0m
+2026-10-22T22:09:54.4947209Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/media/i_image_brush.rs:3:5
+2026-10-22T22:09:54.4947837Z   [1m[94m|[0m
+2026-10-22T22:09:54.4948410Z [1m[94m3[0m [1m[94m|[0m use crate::platform::IBitmapImpl;
+2026-10-22T22:09:54.4949245Z   [1m[94m|[0m     [1m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:09:54.4949544Z 
+2026-10-22T22:09:54.5172873Z [1m[33mwarning[0m[1m: unused import: `crate::platform::IBitmapImpl`[0m
+2026-10-22T22:09:54.5174398Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/rendering/composition/server/server_composition_surface.rs:2:5
+2026-10-22T22:09:54.5175804Z   [1m[94m|[0m
+2026-10-22T22:09:54.5176750Z [1m[94m2[0m [1m[94m|[0m use crate::platform::IBitmapImpl;
+2026-10-22T22:09:54.5177624Z   [1m[94m|[0m     [1m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:09:54.5178180Z 
+2026-10-22T22:09:54.5185201Z [1m[33mwarning[0m[1m: unused import: `ServerJob`[0m
+2026-10-22T22:09:54.5186420Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/rendering/composition/server/server_compositor.rs:8:101
+2026-10-22T22:09:54.5187433Z   [1m[94m|[0m
+2026-10-22T22:09:54.5188763Z [1m[94m8[0m [1m[94m|[0m     BatchMarker, BatchObject, BatchStreamData, BatchStreamReader, CommittedBatch, CompositionBatch, ServerJob,
+2026-10-22T22:09:54.5190191Z   [1m[94m|[0m                                                                                                     [1m[33m^^^^^^^^^[0m
+2026-10-22T22:09:54.5190688Z 
+2026-10-22T22:10:04.6713497Z [1m[33mwarning[0m[1m: unused import: `IBitmapImpl`[0m
+2026-10-22T22:10:04.6715505Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/media/imaging/bitmap.rs:5:42
+2026-10-22T22:10:04.6717570Z   [1m[94m|[0m
+2026-10-22T22:10:04.6734354Z [1m[94m5[0m [1m[94m|[0m use crate::platform::{self, AlphaFormat, IBitmapImpl, ILockedFramebuffer, PixelFormat};
+2026-10-22T22:10:04.6735664Z   [1m[94m|[0m                                          [1m[33m^^^^^^^^^^^[0m
+2026-10-22T22:10:04.6736118Z 
+2026-10-22T22:10:04.6736622Z [1m[33mwarning[0m[1m: unused import: `IBitmapImpl`[0m
+2026-10-22T22:10:04.6737867Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/media/imaging/render_target_bitmap.rs:3:29
+2026-10-22T22:10:04.6739061Z   [1m[94m|[0m
+2026-10-22T22:10:04.6740136Z [1m[94m3[0m [1m[94m|[0m use crate::platform::{self, IBitmapImpl, IDrawingContextImpl, IRenderTargetBitmapImpl};
+2026-10-22T22:10:04.6740895Z   [1m[94m|[0m                             [1m[33m^^^^^^^^^^^[0m
+2026-10-22T22:10:04.6741490Z 
+2026-10-22T22:10:04.6741795Z [1m[33mwarning[0m[1m: unused import: `IBitmapImpl`[0m
+2026-10-22T22:10:04.6742581Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/media/imaging/writeable_bitmap.rs:5:42
+2026-10-22T22:10:04.6743182Z   [1m[94m|[0m
+2026-10-22T22:10:04.6744004Z [1m[94m5[0m [1m[94m|[0m use crate::platform::{self, AlphaFormat, IBitmapImpl, ILockedFramebuffer, IWriteableBitmapImpl, PixelFormat};
+2026-10-22T22:10:04.6744776Z   [1m[94m|[0m                                          [1m[33m^^^^^^^^^^^[0m
+2026-10-22T22:10:04.6745032Z 
+2026-10-22T22:10:04.6745414Z [1m[33mwarning[0m[1m: unused import: `crate::platform::IBitmapImpl`[0m
+2026-10-22T22:10:04.6747673Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/rendering/composition/brushes/server_simple_image_brush.rs:8:5
+2026-10-22T22:10:04.6748531Z   [1m[94m|[0m
+2026-10-22T22:10:04.6749485Z [1m[94m8[0m [1m[94m|[0m use crate::platform::IBitmapImpl;
+2026-10-22T22:10:04.6749969Z   [1m[94m|[0m     [1m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:10:04.6750214Z 
+2026-10-22T22:10:04.6750486Z [1m[33mwarning[0m[1m: unused import: `IBitmapImpl`[0m
+2026-10-22T22:10:04.6751309Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/platform/i_external_objects_render_interface_context_feature.rs:1:13
+2026-10-22T22:10:04.6751934Z   [1m[94m|[0m
+2026-10-22T22:10:04.6752758Z [1m[94m1[0m [1m[94m|[0m use super::{IBitmapImpl, IPlatformHandle, PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageProperties};
+2026-10-22T22:10:04.6753481Z   [1m[94m|[0m             [1m[33m^^^^^^^^^^^[0m
+2026-10-22T22:10:04.6753695Z 
+2026-10-22T22:10:04.6753947Z [1m[33mwarning[0m[1m: unused import: `IBitmapImpl`[0m
+2026-10-22T22:10:04.6754783Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/rendering/composition/server/server_composition_drawing_surface.rs:2:23
+2026-10-22T22:10:04.6755412Z   [1m[94m|[0m
+2026-10-22T22:10:04.6756203Z [1m[94m2[0m [1m[94m|[0m use crate::platform::{IBitmapImpl, IPlatformRenderInterfaceContext, PlatformGraphicsContextLostException};
+2026-10-22T22:10:04.6756945Z   [1m[94m|[0m                       [1m[33m^^^^^^^^^^^[0m
+2026-10-22T22:10:04.6757175Z 
+2026-10-22T22:10:04.6757428Z [1m[33mwarning[0m[1m: unused import: `IBitmapImpl`[0m
+2026-10-22T22:10:04.6758172Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/rendering/composition/server/server_compositor.rs:6:23
+2026-10-22T22:10:04.6759130Z   [1m[94m|[0m
+2026-10-22T22:10:04.6760414Z [1m[94m6[0m [1m[94m|[0m use crate::platform::{IBitmapImpl, IPlatformGraphics, IRenderTarget, LtrbRect};
+2026-10-22T22:10:04.6761697Z   [1m[94m|[0m                       [1m[33m^^^^^^^^^^^[0m
+2026-10-22T22:10:04.6762094Z 
+2026-10-22T22:10:11.3601185Z [1m[33mwarning[0m[1m: method `create_snapshot` is never used[0m
+2026-10-22T22:10:11.3602570Z    [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/rendering/composition/animations/composition_animation.rs:108:19
+2026-10-22T22:10:11.3604151Z     [1m[94m|[0m
+2026-10-22T22:10:11.3605111Z [1m[94m 30[0m [1m[94m|[0m impl CompositionAnimation {
+2026-10-22T22:10:11.3606457Z     [1m[94m|[0m [1m[94m-------------------------[0m [1m[94mmethod in this implementation[0m
+2026-10-22T22:10:11.3607530Z [1m[94m...[0m
+2026-10-22T22:10:11.3608940Z [1m[94m108[0m [1m[94m|[0m     pub(crate) fn create_snapshot(&self) -> Rc<PropertySetSnapshot> {
+2026-10-22T22:10:11.3609894Z     [1m[94m|[0m                   [1m[33m^^^^^^^^^^^^^^^[0m
+2026-10-22T22:10:11.3610385Z     [1m[94m|[0m
+2026-10-22T22:10:11.3611049Z     [1m[94m= [0m[1mnote[0m: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+2026-10-22T22:10:11.3611521Z 
+2026-10-22T22:10:11.3611950Z [1m[33mwarning[0m[1m: method `is_disposed` is never used[0m
+2026-10-22T22:10:11.3613401Z   [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/rendering/composition/server/server_composition_target.rs:69:19
+2026-10-22T22:10:11.3615237Z    [1m[94m|[0m
+2026-10-22T22:10:11.3616196Z [1m[94m66[0m [1m[94m|[0m impl ServerCompositionTarget {
+2026-10-22T22:10:11.3617606Z    [1m[94m|[0m [1m[94m----------------------------[0m [1m[94mmethod in this implementation[0m
+2026-10-22T22:10:11.3618458Z [1m[94m...[0m
+2026-10-22T22:10:11.3619515Z [1m[94m69[0m [1m[94m|[0m     pub(crate) fn is_disposed(&self) -> bool {
+2026-10-22T22:10:11.3620443Z    [1m[94m|[0m                   [1m[33m^^^^^^^^^^^[0m
+2026-10-22T22:10:11.3620826Z 
+2026-10-22T22:10:11.3621340Z [1m[33mwarning[0m[1m: method `snapshot` is never used[0m
+2026-10-22T22:10:11.3622742Z    [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/rendering/composition/composition_property_set.rs:154:19
+2026-10-22T22:10:11.3623855Z     [1m[94m|[0m
+2026-10-22T22:10:11.3626528Z [1m[94m 31[0m [1m[94m|[0m impl CompositionPropertySet {
+2026-10-22T22:10:11.3627710Z     [1m[94m|[0m [1m[94m---------------------------[0m [1m[94mmethod in this implementation[0m
+2026-10-22T22:10:11.3628458Z [1m[94m...[0m
+2026-10-22T22:10:11.3629548Z [1m[94m154[0m [1m[94m|[0m     pub(crate) fn snapshot(&self) -> PropertySetSnapshot {
+2026-10-22T22:10:11.3630511Z     [1m[94m|[0m                   [1m[33m^^^^^^^^[0m
+2026-10-22T22:10:11.3630881Z 
+2026-10-22T22:10:11.3631751Z [1m[33mwarning[0m[1m: methods `with_value` and `set_local_value_and_raise_untyped` are never used[0m
+2026-10-22T22:10:11.3633284Z   [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/property_store/effective_value.rs:20:8
+2026-10-22T22:10:11.3634031Z    [1m[94m|[0m
+2026-10-22T22:10:11.3634497Z [1m[94m11[0m [1m[94m|[0m pub(crate) trait EffectiveValueDyn: Any {
+2026-10-22T22:10:11.3635124Z    [1m[94m|[0m                  [1m[94m-----------------[0m [1m[94mmethods in this trait[0m
+2026-10-22T22:10:11.3635533Z [1m[94m...[0m
+2026-10-22T22:10:11.3635998Z [1m[94m20[0m [1m[94m|[0m     fn with_value(&self, f: &mut dyn FnMut(&dyn Any));
+2026-10-22T22:10:11.3636460Z    [1m[94m|[0m        [1m[33m^^^^^^^^^^[0m
+2026-10-22T22:10:11.3636764Z [1m[94m...[0m
+2026-10-22T22:10:11.3637357Z [1m[94m30[0m [1m[94m|[0m     fn set_local_value_and_raise_untyped(&self, owner: &FerroObject, value: &dyn Any);
+2026-10-22T22:10:11.3637973Z    [1m[94m|[0m        [1m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:10:11.3638208Z 
+2026-10-22T22:10:11.3638525Z [1m[33mwarning[0m[1m: function `invalid_value_type` is never used[0m
+2026-10-22T22:10:11.3639553Z    [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/property_store/effective_value.rs:326:4
+2026-10-22T22:10:11.3640078Z     [1m[94m|[0m
+2026-10-22T22:10:11.3640567Z [1m[94m326[0m [1m[94m|[0m fn invalid_value_type(property: &FerroProperty) -> ! {
+2026-10-22T22:10:11.3641065Z     [1m[94m|[0m    [1m[33m^^^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:10:11.3641276Z 
+2026-10-22T22:10:11.3641672Z [1m[33mwarning[0m[1m: associated items `new_shared` and `is_shared` are never used[0m
+2026-10-22T22:10:11.3642420Z   [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/property_store/value_frame.rs:30:12
+2026-10-22T22:10:11.3642921Z    [1m[94m|[0m
+2026-10-22T22:10:11.3643268Z [1m[94m17[0m [1m[94m|[0m impl ValueFrameBase {
+2026-10-22T22:10:11.3643854Z    [1m[94m|[0m [1m[94m-------------------[0m [1m[94massociated items in this implementation[0m
+2026-10-22T22:10:11.3644292Z [1m[94m...[0m
+2026-10-22T22:10:11.3644860Z [1m[94m30[0m [1m[94m|[0m     pub fn new_shared(priority: BindingPriority, type_: FrameType) -> Self {
+2026-10-22T22:10:11.3645410Z    [1m[94m|[0m            [1m[33m^^^^^^^^^^[0m
+2026-10-22T22:10:11.3645719Z [1m[94m...[0m
+2026-10-22T22:10:11.3646124Z [1m[94m36[0m [1m[94m|[0m     pub fn is_shared(&self) -> bool {
+2026-10-22T22:10:11.3646563Z    [1m[94m|[0m            [1m[33m^^^^^^^^^[0m
+2026-10-22T22:10:11.3646779Z 
+2026-10-22T22:10:11.3647489Z [1m[33mwarning[0m[1m: methods `is_evaluating`, `remove_frame`, and `get_priority` are never used[0m
+2026-10-22T22:10:11.3648291Z    [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/property_store/value_store.rs:88:12
+2026-10-22T22:10:11.3649632Z     [1m[94m|[0m
+2026-10-22T22:10:11.3650226Z [1m[94m 73[0m [1m[94m|[0m impl ValueStore {
+2026-10-22T22:10:11.3651114Z     [1m[94m|[0m [1m[94m---------------[0m [1m[94mmethods in this implementation[0m
+2026-10-22T22:10:11.3651805Z [1m[94m...[0m
+2026-10-22T22:10:11.3652508Z [1m[94m 88[0m [1m[94m|[0m     pub fn is_evaluating(&self) -> bool {
+2026-10-22T22:10:11.3653249Z     [1m[94m|[0m            [1m[33m^^^^^^^^^^^^^[0m
+2026-10-22T22:10:11.3653595Z [1m[94m...[0m
+2026-10-22T22:10:11.3654775Z [1m[94m657[0m [1m[94m|[0m     pub fn remove_frame(&self, owner: &FerroObject, frame: &Rc<dyn ValueFrame>) -> bool {
+2026-10-22T22:10:11.3655482Z     [1m[94m|[0m            [1m[33m^^^^^^^^^^^^[0m
+2026-10-22T22:10:11.3655821Z [1m[94m...[0m
+2026-10-22T22:10:11.3656426Z [1m[94m705[0m [1m[94m|[0m     pub fn get_priority(&self, property: &FerroProperty) -> BindingPriority {
+2026-10-22T22:10:11.3657014Z     [1m[94m|[0m            [1m[33m^^^^^^^^^^^^[0m
+2026-10-22T22:10:11.3657229Z 
+2026-10-22T22:10:11.3657516Z [1m[33mwarning[0m[1m: method `with_sender` is never used[0m
+2026-10-22T22:10:11.3658240Z    [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/ferro_property_changed_event_args.rs:103:19
+2026-10-22T22:10:11.3659065Z     [1m[94m|[0m
+2026-10-22T22:10:11.3659541Z [1m[94m 19[0m [1m[94m|[0m impl<'a> FerroPropertyChangedEventArgs<'a> {
+2026-10-22T22:10:11.3660237Z     [1m[94m|[0m [1m[94m------------------------------------------[0m [1m[94mmethod in this implementation[0m
+2026-10-22T22:10:11.3660712Z [1m[94m...[0m
+2026-10-22T22:10:11.3661454Z [1m[94m103[0m [1m[94m|[0m     pub(crate) fn with_sender<'b>(&'b self, sender: &'b FerroObject) -> FerroPropertyChangedEventArgs<'b> {
+2026-10-22T22:10:11.3662142Z     [1m[94m|[0m                   [1m[33m^^^^^^^^^^^[0m
+2026-10-22T22:10:11.3662366Z 
+2026-10-22T22:10:11.3662610Z [1m[33mwarning[0m[1m: method `base` is never used[0m
+2026-10-22T22:10:11.3663284Z    [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/ferro_property_metadata.rs:165:8
+2026-10-22T22:10:11.3663784Z     [1m[94m|[0m
+2026-10-22T22:10:11.3664254Z [1m[94m164[0m [1m[94m|[0m pub trait PropertyMetadata: Sized + 'static {
+2026-10-22T22:10:11.3664850Z     [1m[94m|[0m           [1m[94m----------------[0m [1m[94mmethod in this trait[0m
+2026-10-22T22:10:11.3665465Z [1m[94m165[0m [1m[94m|[0m     fn base(&self) -> &FerroPropertyMetadata;
+2026-10-22T22:10:11.3665905Z     [1m[94m|[0m        [1m[33m^^^^[0m
+2026-10-22T22:10:11.3666104Z 
+2026-10-22T22:10:11.3666417Z [1m[33mwarning[0m[1m: method `default_metadata` is never used[0m
+2026-10-22T22:10:11.3667108Z    [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/ferro_property_metadata.rs:269:12
+2026-10-22T22:10:11.3667609Z     [1m[94m|[0m
+2026-10-22T22:10:11.3668051Z [1m[94m240[0m [1m[94m|[0m impl<M: PropertyMetadata> MetadataTable<M> {
+2026-10-22T22:10:11.3668960Z     [1m[94m|[0m [1m[94m------------------------------------------[0m [1m[94mmethod in this implementation[0m
+2026-10-22T22:10:11.3669449Z [1m[94m...[0m
+2026-10-22T22:10:11.3669899Z [1m[94m269[0m [1m[94m|[0m     pub fn default_metadata(&self) -> &Rc<M> {
+2026-10-22T22:10:11.3670373Z     [1m[94m|[0m            [1m[33m^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:10:11.3670593Z 
+2026-10-22T22:10:11.3670873Z [1m[33mwarning[0m[1m: method `properties` is never used[0m
+2026-10-22T22:10:11.3671527Z   [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/ferro_property_registry.rs:63:19
+2026-10-22T22:10:11.3672024Z    [1m[94m|[0m
+2026-10-22T22:10:11.3672428Z [1m[94m53[0m [1m[94m|[0m impl FerroPropertyRegistry {
+2026-10-22T22:10:11.3673196Z    [1m[94m|[0m [1m[94m--------------------------[0m [1m[94mmethod in this implementation[0m
+2026-10-22T22:10:11.3673633Z [1m[94m...[0m
+2026-10-22T22:10:11.3674162Z [1m[94m63[0m [1m[94m|[0m     pub(crate) fn properties(&self) -> Vec<&'static FerroProperty> {
+2026-10-22T22:10:11.3674711Z    [1m[94m|[0m                   [1m[33m^^^^^^^^^^[0m
+2026-10-22T22:10:11.3674938Z 
+2026-10-22T22:10:11.3675348Z [1m[33mwarning[0m[1m: associated function `rooted_visual_children_count` is never used[0m
+2026-10-22T22:10:11.3676040Z    [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/visual.rs:961:19
+2026-10-22T22:10:11.3676471Z     [1m[94m|[0m
+2026-10-22T22:10:11.3676795Z [1m[94m585[0m [1m[94m|[0m impl Visual {
+2026-10-22T22:10:11.3677338Z     [1m[94m|[0m [1m[94m-----------[0m [1m[94massociated function in this implementation[0m
+2026-10-22T22:10:11.3677904Z [1m[94m...[0m
+2026-10-22T22:10:11.3678389Z [1m[94m961[0m [1m[94m|[0m     pub(crate) fn rooted_visual_children_count() -> i32 {
+2026-10-22T22:10:11.3679173Z     [1m[94m|[0m                   [1m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:10:11.3679415Z 
+2026-10-22T22:14:00.3157838Z [1m[33mwarning[0m: `ferroui-base` (lib) generated 23 warnings (run `cargo fix --lib -p ferroui-base` to apply 4 suggestions)
+2026-10-22T22:14:01.1907775Z [1m[92m   Compiling[0m xamlx v0.4.0-preview.1 (/home/runner/work/FerroUI/FerroUI/external/XamlX/src/XamlX)
+2026-10-22T22:14:23.6161676Z [1m[33mwarning[0m[1m: function `local_path` is never used[0m
+2026-10-22T22:14:23.6162990Z     [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/media/fonts/font_collection_base.rs:1594:4
+2026-10-22T22:14:23.6163856Z      [1m[94m|[0m
+2026-10-22T22:14:23.6164429Z [1m[94m1594[0m [1m[94m|[0m fn local_path(uri: &Uri) -> String {
+2026-10-22T22:14:23.6165250Z      [1m[94m|[0m    [1m[33m^^^^^^^^^^[0m
+2026-10-22T22:14:23.6165941Z      [1m[94m|[0m
+2026-10-22T22:14:23.6166904Z      [1m[94m= [0m[1mnote[0m: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+2026-10-22T22:14:23.6167482Z 
+2026-10-22T22:14:23.6168074Z [1m[33mwarning[0m[1m: method `create_snapshot` is never used[0m
+2026-10-22T22:14:23.6170087Z    [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Base/rendering/composition/animations/composition_animation.rs:108:19
+2026-10-22T22:14:23.6171432Z     [1m[94m|[0m
+2026-10-22T22:14:23.6172224Z [1m[94m 30[0m [1m[94m|[0m impl CompositionAnimation {
+2026-10-22T22:14:23.6173432Z     [1m[94m|[0m [1m[94m-------------------------[0m [1m[94mmethod in this implementation[0m
+2026-10-22T22:14:23.6174286Z [1m[94m...[0m
+2026-10-22T22:14:23.6174861Z [1m[94m108[0m [1m[94m|[0m     pub(crate) fn create_snapshot(&self) -> Rc<PropertySetSnapshot> {
+2026-10-22T22:14:23.6175447Z     [1m[94m|[0m                   [1m[33m^^^^^^^^^^^^^^^[0m
+2026-10-22T22:14:23.6175694Z 
+2026-10-22T22:17:53.8461911Z [1m[33mwarning[0m: `ferroui-base` (lib) generated 24 warnings (22 duplicates)
+2026-10-22T22:17:53.8463640Z [1m[92m   Compiling[0m ferroui-markup v0.4.0-preview.1 (/home/runner/work/FerroUI/FerroUI/src/Markup/FerroUI.Markup)
+2026-10-22T22:17:54.1184185Z [1m[92m   Compiling[0m ferroui-markup-xaml-loader v0.4.0-preview.1 (/home/runner/work/FerroUI/FerroUI/src/Markup/FerroUI.Markup.Xaml.Loader)
+2026-10-22T22:17:58.8380220Z [1m[92m   Compiling[0m ferroui-remote-protocol v0.4.0-preview.1 (/home/runner/work/FerroUI/FerroUI/src/FerroUI.Remote.Protocol)
+2026-10-22T22:18:04.0455654Z [1m[33mwarning[0m[1m: unused import: `ferroui_base::platform::IBitmapImpl`[0m
+2026-10-22T22:18:04.0457175Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Controls/platform/i_platform_icon_loader.rs:2:5
+2026-10-22T22:18:04.0458073Z   [1m[94m|[0m
+2026-10-22T22:18:04.0459002Z [1m[94m2[0m [1m[94m|[0m use ferroui_base::platform::IBitmapImpl;
+2026-10-22T22:18:04.0459706Z   [1m[94m|[0m     [1m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:18:04.0460434Z   [1m[94m|[0m
+2026-10-22T22:18:04.0461073Z   [1m[94m= [0m[1mnote[0m: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+2026-10-22T22:18:04.0461521Z 
+2026-10-22T22:18:04.0593062Z [1m[33mwarning[0m[1m: unused import: `Vector`[0m
+2026-10-22T22:18:04.0594173Z   [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Controls/markup_types/classes.rs:41:118
+2026-10-22T22:18:04.0594956Z    [1m[94m|[0m
+2026-10-22T22:18:04.0596511Z [1m[94m41[0m [1m[94m|[0m use ferroui_base::{ferro_class_info, BoxedValue, FerroObject, IFerroDependencyResolver, PixelPoint, Rect, Ref, Size, Vector};
+2026-10-22T22:18:04.0597939Z    [1m[94m|[0m                                                                                                                      [1m[33m^^^^^^[0m
+2026-10-22T22:18:04.0598440Z 
+2026-10-22T22:18:04.0667731Z [1m[33mwarning[0m[1m: unused doc comment[0m
+2026-10-22T22:18:04.0669404Z    [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Controls/markup_types/contracts.rs:143:1
+2026-10-22T22:18:04.0670237Z     [1m[94m|[0m
+2026-10-22T22:18:04.0670875Z [1m[94m143[0m [1m[94m|[0m /// The types declared in this file.
+2026-10-22T22:18:04.0672008Z     [1m[94m|[0m [1m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[33mrustdoc does not generate documentation for macro invocations[0m
+2026-10-22T22:18:04.0672802Z     [1m[94m|[0m
+2026-10-22T22:18:04.0673831Z     [1m[94m= [0m[1mhelp[0m: to document an item produced by a macro, the macro must produce the documentation as part of its expansion
+2026-10-22T22:18:04.0675133Z     [1m[94m= [0m[1mnote[0m: `#[warn(unused_doc_comments)]` (part of `#[warn(unused)]`) on by default
+2026-10-22T22:18:04.0675679Z 
+2026-10-22T22:18:18.1561569Z [1m[33mwarning[0m[1m: method `is_disposed` is never used[0m
+2026-10-22T22:18:18.1562947Z    [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Controls/animation/connected_animation.rs:252:19
+2026-10-22T22:18:18.1563748Z     [1m[94m|[0m
+2026-10-22T22:18:18.1564309Z [1m[94m124[0m [1m[94m|[0m impl ConnectedAnimation {
+2026-10-22T22:18:18.1565138Z     [1m[94m|[0m [1m[94m-----------------------[0m [1m[94mmethod in this implementation[0m
+2026-10-22T22:18:18.1565749Z [1m[94m...[0m
+2026-10-22T22:18:18.1566393Z [1m[94m252[0m [1m[94m|[0m     pub(crate) fn is_disposed(&self) -> bool {
+2026-10-22T22:18:18.1567095Z     [1m[94m|[0m                   [1m[33m^^^^^^^^^^^[0m
+2026-10-22T22:18:18.1567555Z     [1m[94m|[0m
+2026-10-22T22:18:18.1568214Z     [1m[94m= [0m[1mnote[0m: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+2026-10-22T22:18:18.1568901Z 
+2026-10-22T22:18:18.1575894Z [1m[33mwarning[0m[1m: method `set_root` is never used[0m
+2026-10-22T22:18:18.1576706Z    [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Controls/calendar/calendar.rs:570:19
+2026-10-22T22:18:18.1577266Z     [1m[94m|[0m
+2026-10-22T22:18:18.1577639Z [1m[94m468[0m [1m[94m|[0m impl Calendar {
+2026-10-22T22:18:18.1578217Z     [1m[94m|[0m [1m[94m-------------[0m [1m[94mmethod in this implementation[0m
+2026-10-22T22:18:18.1578946Z [1m[94m...[0m
+2026-10-22T22:18:18.1579497Z [1m[94m570[0m [1m[94m|[0m     pub(crate) fn set_root(&self, value: Option<Ref<Panel>>) {
+2026-10-22T22:18:18.1580059Z     [1m[94m|[0m                   [1m[33m^^^^^^^^[0m
+2026-10-22T22:18:18.1580292Z 
+2026-10-22T22:18:18.1580605Z [1m[33mwarning[0m[1m: method `set_month_view` is never used[0m
+2026-10-22T22:18:18.1581349Z    [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Controls/calendar/calendar_item.rs:330:19
+2026-10-22T22:18:18.1581894Z     [1m[94m|[0m
+2026-10-22T22:18:18.1582261Z [1m[94m189[0m [1m[94m|[0m impl CalendarItem {
+2026-10-22T22:18:18.1582852Z     [1m[94m|[0m [1m[94m-----------------[0m [1m[94mmethod in this implementation[0m
+2026-10-22T22:18:18.1583317Z [1m[94m...[0m
+2026-10-22T22:18:18.1583909Z [1m[94m330[0m [1m[94m|[0m     pub(crate) fn set_month_view(&self, value: Option<Ref<Grid>>) {
+2026-10-22T22:18:18.1584823Z     [1m[94m|[0m                   [1m[33m^^^^^^^^^^^^^^[0m
+2026-10-22T22:18:18.1585068Z 
+2026-10-22T22:18:18.1880078Z [1m[33mwarning[0m[1m: bounds on generic parameters in type aliases are not enforced[0m
+2026-10-22T22:18:18.1881661Z   [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.Controls/platform/win32_properties.rs:48:25
+2026-10-22T22:18:18.1882618Z    [1m[94m|[0m
+2026-10-22T22:18:18.1883621Z [1m[94m48[0m [1m[94m|[0m type InvocationLists<F: ?Sized> = RefCell<Vec<(Weak<F>, Vec<Rc<F>>)>>;
+2026-10-22T22:18:18.1884754Z    [1m[94m|[0m                         [1m[33m^^^^^^[0m [1m[33mwill not be checked at usage sites of the type alias[0m
+2026-10-22T22:18:18.1885432Z    [1m[94m|[0m
+2026-10-22T22:18:18.1886609Z    [1m[94m= [0m[1mnote[0m: this is a known limitation of the type checker that may be lifted in a future edition.
+2026-10-22T22:18:18.1887686Z            see issue #112792 <https://github.com/rust-lang/rust/issues/112792> for more information
+2026-10-22T22:18:18.1888821Z    [1m[94m= [0m[1mnote[0m: `#[warn(type_alias_bounds)]` on by default
+2026-10-22T22:18:18.1889472Z [1m[96mhelp[0m: remove this bound
+2026-10-22T22:18:18.1889883Z    [1m[94m|[0m
+2026-10-22T22:18:18.1890743Z [1m[94m48[0m [91m- [0mtype InvocationLists<F[91m: ?Sized[0m> = RefCell<Vec<(Weak<F>, Vec<Rc<F>>)>>;
+2026-10-22T22:18:18.1891843Z [1m[94m48[0m [92m+ [0mtype InvocationLists<F> = RefCell<Vec<(Weak<F>, Vec<Rc<F>>)>>;
+2026-10-22T22:18:18.1892468Z    [1m[94m|[0m
+2026-10-22T22:18:18.1892648Z 
+2026-10-22T22:22:08.2208495Z [1m[33mwarning[0m: `ferroui-controls` (lib) generated 7 warnings (run `cargo fix --lib -p ferroui-controls` to apply 3 suggestions)
+2026-10-22T22:22:08.2211111Z [1m[92m   Compiling[0m ferroui-build v0.4.0-preview.1 (/home/runner/work/FerroUI/FerroUI/src/FerroUI.Build.Tasks)
+2026-10-22T22:22:09.6249305Z [1m[92m   Compiling[0m ferroui-markup-xaml v0.4.0-preview.1 (/home/runner/work/FerroUI/FerroUI/src/Markup/FerroUI.Markup.Xaml)
+2026-10-22T22:22:10.1406207Z [1m[92m   Compiling[0m ferroui-dialogs v0.4.0-preview.1 (/home/runner/work/FerroUI/FerroUI/src/FerroUI.Dialogs)
+2026-10-22T22:22:10.8634968Z [1m[92m   Compiling[0m ferroui-opengl v0.4.0-preview.1 (/home/runner/work/FerroUI/FerroUI/src/FerroUI.OpenGL)
+2026-10-22T22:22:11.2461133Z [1m[92m   Compiling[0m ferroui-themes-fluent v0.4.0-preview.1 (/home/runner/work/FerroUI/FerroUI/src/FerroUI.Themes.Fluent)
+2026-10-22T22:22:13.0640005Z [1m[33mwarning[0m[1m: unused import: `ferroui_base::media::IImage`[0m
+2026-10-22T22:22:13.0641803Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/Markup/FerroUI.Markup.Xaml/converters/bitmap_type_converter.rs:8:5
+2026-10-22T22:22:13.0643050Z   [1m[94m|[0m
+2026-10-22T22:22:13.0643943Z [1m[94m8[0m [1m[94m|[0m use ferroui_base::media::IImage;
+2026-10-22T22:22:13.0644912Z   [1m[94m|[0m     [1m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:22:13.0645590Z   [1m[94m|[0m
+2026-10-22T22:22:13.0646598Z   [1m[94m= [0m[1mnote[0m: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+2026-10-22T22:22:13.0647241Z 
+2026-10-22T22:22:14.3364074Z [1m[33mwarning[0m[1m: associated function `new` is never used[0m
+2026-10-22T22:22:14.3366198Z   [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/Markup/FerroUI.Markup.Xaml/data/dynamic_resource_expression.rs:71:19
+2026-10-22T22:22:14.3367009Z    [1m[94m|[0m
+2026-10-22T22:22:14.3367763Z [1m[94m70[0m [1m[94m|[0m impl DynamicResourceExpression {
+2026-10-22T22:22:14.3369582Z    [1m[94m|[0m [1m[94m------------------------------[0m [1m[94massociated function in this implementation[0m
+2026-10-22T22:22:14.3370686Z [1m[94m71[0m [1m[94m|[0m     pub(crate) fn new(
+2026-10-22T22:22:14.3371375Z    [1m[94m|[0m                   [1m[33m^^^[0m
+2026-10-22T22:22:14.3371911Z    [1m[94m|[0m
+2026-10-22T22:22:14.3372722Z    [1m[94m= [0m[1mnote[0m: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+2026-10-22T22:22:14.3373658Z 
+2026-10-22T22:22:33.8115212Z [1m[33mwarning[0m: `ferroui-markup-xaml` (lib) generated 2 warnings (run `cargo fix --lib -p ferroui-markup-xaml` to apply 1 suggestion)
+2026-10-22T22:22:38.1472214Z [1m[33mwarning[0m[1m: unused import: `std::error::Error`[0m
+2026-10-22T22:22:38.1473256Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.OpenGL/composition/task_support.rs:9:5
+2026-10-22T22:22:38.1473989Z   [1m[94m|[0m
+2026-10-22T22:22:38.1474627Z [1m[94m9[0m [1m[94m|[0m use std::error::Error;
+2026-10-22T22:22:38.1475206Z   [1m[94m|[0m     [1m[33m^^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:22:38.1475652Z   [1m[94m|[0m
+2026-10-22T22:22:38.1476358Z   [1m[94m= [0m[1mnote[0m: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+2026-10-22T22:22:38.1476865Z 
+2026-10-22T22:22:38.1477297Z [1m[33mwarning[0m[1m: unused import: `std::rc::Rc`[0m
+2026-10-22T22:22:38.1478787Z   [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.OpenGL/composition/task_support.rs:12:5
+2026-10-22T22:22:38.1479594Z    [1m[94m|[0m
+2026-10-22T22:22:38.1480193Z [1m[94m12[0m [1m[94m|[0m use std::rc::Rc;
+2026-10-22T22:22:38.1480755Z    [1m[94m|[0m     [1m[33m^^^^^^^^^^^[0m
+2026-10-22T22:22:38.1481037Z 
+2026-10-22T22:22:38.3145925Z [1m[33mwarning[0m[1m: unused import: `ferroui_base::reactive::IDisposable`[0m
+2026-10-22T22:22:38.3147415Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.OpenGL/controls/open_gl_control_base.rs:9:5
+2026-10-22T22:22:38.3148296Z   [1m[94m|[0m
+2026-10-22T22:22:38.3149466Z [1m[94m9[0m [1m[94m|[0m use ferroui_base::reactive::IDisposable;
+2026-10-22T22:22:38.3150348Z   [1m[94m|[0m     [1m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:22:38.3150799Z 
+2026-10-22T22:22:38.4915525Z [1m[33mwarning[0m[1m: methods `is_import_memory_fd_ext_available` and `is_import_semaphore_fd_ext_available` are never used[0m
+2026-10-22T22:22:38.4917068Z    [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.OpenGL/entry_points.rs:112:21
+2026-10-22T22:22:38.4917888Z     [1m[94m|[0m
+2026-10-22T22:22:38.4918512Z [1m[94m 90[0m [1m[94m|[0m           impl $Owner {
+2026-10-22T22:22:38.4919764Z     [1m[94m|[0m           [1m[94m-----------[0m [1m[94mmethods in this implementation[0m
+2026-10-22T22:22:38.4920469Z [1m[94m...[0m
+2026-10-22T22:22:38.4921278Z [1m[94m112[0m [1m[94m|[0m               $vis fn [<is_ $name _available>](&self) -> bool {
+2026-10-22T22:22:38.4922211Z     [1m[94m|[0m                       [1m[33m^^^^^^^^^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:22:38.4922785Z     [1m[94m|[0m
+2026-10-22T22:22:38.4924087Z    [1m[94m::: [0m/home/runner/work/FerroUI/FerroUI/src/FerroUI.OpenGL/features/external_objects_open_gl_extension_feature.rs:35:1
+2026-10-22T22:22:38.4925095Z     [1m[94m|[0m
+2026-10-22T22:22:38.4925874Z [1m[94m 35[0m [1m[94m|[0m [1m[94m/[0m gl_entry_points! {
+2026-10-22T22:22:38.4927253Z [1m[94m 36[0m [1m[94m|[0m [1m[94m|[0m     table ExternalObjectsEntryPoints for ExternalObjectsInterface.ext(get, info: ());
+2026-10-22T22:22:38.4928346Z [1m[94m 37[0m [1m[94m|[0m [1m[94m|[0m
+2026-10-22T22:22:38.4930068Z [1m[94m 38[0m [1m[94m|[0m [1m[94m|[0m     optional safe pub(crate) fn import_memory_fd_ext(memory: u32, size: u64, handle_type: i32, fd: i32)
+2026-10-22T22:22:38.4931177Z [1m[94m...[0m   [1m[94m|[0m
+2026-10-22T22:22:38.4932653Z [1m[94m 85[0m [1m[94m|[0m [1m[94m|[0m     optional unsafe pub(crate) fn get_unsigned_bytev_ext(target: i32, data: *mut u8) = get("glGetUnsignedBytevEXT");
+2026-10-22T22:22:38.4933842Z [1m[94m 86[0m [1m[94m|[0m [1m[94m|[0m }
+2026-10-22T22:22:38.4934578Z     [1m[94m|[0m [1m[94m|_-[0m [1m[94min this macro invocation[0m
+2026-10-22T22:22:38.4935176Z     [1m[94m|[0m
+2026-10-22T22:22:38.4935949Z     [1m[94m= [0m[1mnote[0m: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+2026-10-22T22:22:38.4937479Z     [1m[94m= [0m[1mnote[0m: this warning originates in the macro `gl_entry_points` (in Nightly builds, run with -Z macro-backtrace for more info)
+2026-10-22T22:22:38.4938967Z 
+2026-10-22T22:22:41.7930853Z [1m[33mwarning[0m: `ferroui-opengl` (lib) generated 4 warnings (run `cargo fix --lib -p ferroui-opengl` to apply 2 suggestions)
+2026-10-22T22:22:41.7934232Z [1m[92m   Compiling[0m ferroui-vello v0.4.0-preview.1 (/home/runner/work/FerroUI/FerroUI/src/Vello/FerroUI.Vello)
+2026-10-22T22:22:41.8762288Z [1m[33mwarning[0m[1m: unused import: `skrifa::raw::TableProvider`[0m
+2026-10-22T22:22:41.8763494Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/Vello/FerroUI.Vello/glyph_run_impl.rs:9:5
+2026-10-22T22:22:41.8764259Z   [1m[94m|[0m
+2026-10-22T22:22:41.8764971Z [1m[94m9[0m [1m[94m|[0m use skrifa::raw::TableProvider;
+2026-10-22T22:22:41.8765676Z   [1m[94m|[0m     [1m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:22:41.8766460Z   [1m[94m|[0m
+2026-10-22T22:22:41.8767215Z   [1m[94m= [0m[1mnote[0m: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+2026-10-22T22:22:41.8767742Z 
+2026-10-22T22:22:42.1751497Z [1m[33mwarning[0m[1m: unused import: `Shape`[0m
+2026-10-22T22:22:42.1752741Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/Vello/FerroUI.Vello/vello_extensions.rs:7:38
+2026-10-22T22:22:42.1753641Z   [1m[94m|[0m
+2026-10-22T22:22:42.1754592Z [1m[94m7[0m [1m[94m|[0m use kurbo::{Affine, BezPath, PathEl, Shape};
+2026-10-22T22:22:42.1755506Z   [1m[94m|[0m                                      [1m[33m^^^^^[0m
+2026-10-22T22:22:42.1755933Z 
+2026-10-22T22:22:42.5210835Z [1m[33mwarning[0m[1m: function `not_built` is never used[0m
+2026-10-22T22:22:42.5212958Z    [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/Vello/FerroUI.Vello/drawing_context_impl.rs:201:15
+2026-10-22T22:22:42.5214516Z     [1m[94m|[0m
+2026-10-22T22:22:42.5216054Z [1m[94m201[0m [1m[94m|[0m pub(crate) fn not_built(feature: &str, stage: &str) -> ! {
+2026-10-22T22:22:42.5217258Z     [1m[94m|[0m               [1m[33m^^^^^^^^^[0m
+2026-10-22T22:22:42.5217761Z     [1m[94m|[0m
+2026-10-22T22:22:42.5218423Z     [1m[94m= [0m[1mnote[0m: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+2026-10-22T22:22:42.5219200Z 
+2026-10-22T22:22:42.5219648Z [1m[33mwarning[0m[1m: struct `Shared` is never constructed[0m
+2026-10-22T22:22:42.5220624Z    [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/Vello/FerroUI.Vello/geometry_impl.rs:157:12
+2026-10-22T22:22:42.5221338Z     [1m[94m|[0m
+2026-10-22T22:22:42.5221954Z [1m[94m157[0m [1m[94m|[0m pub struct Shared<T>(Mutex<T>);
+2026-10-22T22:22:42.5222554Z     [1m[94m|[0m            [1m[33m^^^^^^[0m
+2026-10-22T22:22:42.5222843Z 
+2026-10-22T22:22:42.5223375Z [1m[33mwarning[0m[1m: associated items `new`, `get`, and `set` are never used[0m
+2026-10-22T22:22:42.5224419Z    [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/Vello/FerroUI.Vello/geometry_impl.rs:161:12
+2026-10-22T22:22:42.5225112Z     [1m[94m|[0m
+2026-10-22T22:22:42.5225648Z [1m[94m159[0m [1m[94m|[0m impl<T: Clone> Shared<T> {
+2026-10-22T22:22:42.5226523Z     [1m[94m|[0m [1m[94m------------------------[0m [1m[94massociated items in this implementation[0m
+2026-10-22T22:22:42.5227344Z [1m[94m160[0m [1m[94m|[0m     /// Wraps `value`.
+2026-10-22T22:22:42.5227961Z [1m[94m161[0m [1m[94m|[0m     pub fn new(value: T) -> Self {
+2026-10-22T22:22:42.5228405Z     [1m[94m|[0m            [1m[33m^^^[0m
+2026-10-22T22:22:42.5228963Z [1m[94m...[0m
+2026-10-22T22:22:42.5229387Z [1m[94m166[0m [1m[94m|[0m     pub fn get(&self) -> T {
+2026-10-22T22:22:42.5229801Z     [1m[94m|[0m            [1m[33m^^^[0m
+2026-10-22T22:22:42.5230108Z [1m[94m...[0m
+2026-10-22T22:22:42.5230505Z [1m[94m171[0m [1m[94m|[0m     pub fn set(&self, value: T) {
+2026-10-22T22:22:42.5230915Z     [1m[94m|[0m            [1m[33m^^^[0m
+2026-10-22T22:22:42.5231115Z 
+2026-10-22T22:22:55.7935004Z [1m[33mwarning[0m: `ferroui-vello` (lib) generated 5 warnings (run `cargo fix --lib -p ferroui-vello` to apply 1 suggestion)
+2026-10-22T22:22:55.7937373Z [1m[92m   Compiling[0m ferroui-harfbuzz v0.4.0-preview.1 (/home/runner/work/FerroUI/FerroUI/src/HarfBuzz/FerroUI.HarfBuzz)
+2026-10-22T22:23:16.8352860Z [1m[92m   Compiling[0m ferrodesign-app v0.1.0 (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/crates/ferrodesign-app)
+2026-10-22T22:23:17.1288371Z [1m[92m   Compiling[0m ferrodesign-core v0.1.0 (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/crates/ferrodesign-core)
+2026-10-22T22:26:08.3274153Z [1m[92m   Compiling[0m ferroui-browser v0.4.0-preview.1 (/home/runner/work/FerroUI/FerroUI/src/Browser/FerroUI.Browser)
+2026-10-22T22:26:08.5757408Z [1m[33mwarning[0m[1m: unused import: `ferroui_base::platform::IBitmapImpl`[0m
+2026-10-22T22:26:08.5759006Z  [1m[94m--> [0m/home/runner/work/FerroUI/FerroUI/src/Browser/FerroUI.Browser/win_stubs.rs:1:5
+2026-10-22T22:26:08.5760112Z   [1m[94m|[0m
+2026-10-22T22:26:08.5760818Z [1m[94m1[0m [1m[94m|[0m use ferroui_base::platform::IBitmapImpl;
+2026-10-22T22:26:08.5761548Z   [1m[94m|[0m     [1m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:26:08.5762027Z   [1m[94m|[0m
+2026-10-22T22:26:08.5762708Z   [1m[94m= [0m[1mnote[0m: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+2026-10-22T22:26:08.5763206Z 
+2026-10-22T22:26:15.9919837Z [1m[33mwarning[0m: `ferroui-browser` (lib) generated 1 warning (run `cargo fix --lib -p ferroui-browser` to apply 1 suggestion)
+2026-10-22T22:26:15.9921439Z [1m[92m   Compiling[0m ferroui-fonts-inter v0.4.0-preview.1 (/home/runner/work/FerroUI/FerroUI/src/FerroUI.Fonts.Inter)
+2026-10-22T22:26:19.1412762Z [1m[33mwarning[0m[1m: methods `layout_drag_move` and `layout_drag_release` are never used[0m
+2026-10-22T22:26:19.1414103Z    [1m[94m--> [0mcrates/ferrodesign-app/src/canvas/layout_drag.rs:193:19
+2026-10-22T22:26:19.1414943Z     [1m[94m|[0m
+2026-10-22T22:26:19.1415532Z [1m[94m121[0m [1m[94m|[0m impl DesignCanvas {
+2026-10-22T22:26:19.1416471Z     [1m[94m|[0m [1m[94m-----------------[0m [1m[94mmethods in this implementation[0m
+2026-10-22T22:26:19.1417178Z [1m[94m...[0m
+2026-10-22T22:26:19.1418135Z [1m[94m193[0m [1m[94m|[0m     pub(super) fn layout_drag_move(&self, world: Point, screen: Point) -> bool {
+2026-10-22T22:26:19.1419347Z     [1m[94m|[0m                   [1m[33m^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:26:19.1419813Z [1m[94m...[0m
+2026-10-22T22:26:19.1420668Z [1m[94m342[0m [1m[94m|[0m     pub(super) fn layout_drag_release(&self, world: Point, screen: Point) -> bool {
+2026-10-22T22:26:19.1421520Z     [1m[94m|[0m                   [1m[33m^^^^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:26:19.1421982Z     [1m[94m|[0m
+2026-10-22T22:26:19.1422615Z     [1m[94m= [0m[1mnote[0m: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+2026-10-22T22:26:19.1423075Z 
+2026-10-22T22:26:19.1423437Z [1m[33mwarning[0m[1m: method `pick` is never used[0m
+2026-10-22T22:26:19.1424147Z   [1m[94m--> [0mcrates/ferrodesign-app/src/canvas/selection.rs:61:19
+2026-10-22T22:26:19.1424681Z    [1m[94m|[0m
+2026-10-22T22:26:19.1425135Z [1m[94m18[0m [1m[94m|[0m impl DesignCanvas {
+2026-10-22T22:26:19.1425856Z    [1m[94m|[0m [1m[94m-----------------[0m [1m[94mmethod in this implementation[0m
+2026-10-22T22:26:19.1426409Z [1m[94m...[0m
+2026-10-22T22:26:19.1427109Z [1m[94m61[0m [1m[94m|[0m     pub(super) fn pick(&self, point: Point) -> Option<NodeId> {
+2026-10-22T22:26:19.1427804Z    [1m[94m|[0m                   [1m[33m^^^^[0m
+2026-10-22T22:26:19.1428089Z 
+2026-10-22T22:26:19.1428422Z [1m[33mwarning[0m[1m: method `variables_dialog` is never used[0m
+2026-10-22T22:26:19.1429180Z     [1m[94m--> [0mcrates/ferrodesign-app/src/shell.rs:2711:8
+2026-10-22T22:26:19.1429576Z      [1m[94m|[0m
+2026-10-22T22:26:19.1429951Z [1m[94m  88[0m [1m[94m|[0m impl EditorShell {
+2026-10-22T22:26:19.1430557Z      [1m[94m|[0m [1m[94m----------------[0m [1m[94mmethod in this implementation[0m
+2026-10-22T22:26:19.1431304Z [1m[94m...[0m
+2026-10-22T22:26:19.1431789Z [1m[94m2711[0m [1m[94m|[0m     fn variables_dialog(self: &Rc<Self>) {
+2026-10-22T22:26:19.1432308Z      [1m[94m|[0m        [1m[33m^^^^^^^^^^^^^^^^[0m
+2026-10-22T22:26:19.1432550Z 
+2026-10-22T22:27:20.0092508Z [1m[33mwarning[0m: `ferrodesign-app` (lib) generated 3 warnings
+2026-10-22T22:33:55.8892035Z [1m[33mwarning[0m[1m: linker stderr: em++: WASM_BIGINT is deprecated (no longer needed. Should only ever be implicitly disabled by -sWASM=0). Please open a bug if you have a continuing need for this setting [-Wdeprecated][0m
+2026-10-22T22:33:55.8893804Z          [1mem++: -sWASM_BINDGEN is experimental and subject to change [-Wexperimental][0m
+2026-10-22T22:33:55.8894412Z   [1m[94m|[0m
+2026-10-22T22:33:55.8894913Z   [1m[94m= [0m[1mnote[0m: `#[warn(linker_messages)]` on by default
+2026-10-22T22:33:55.8897283Z 
+2026-10-22T22:33:55.9044209Z [1m[33mwarning[0m: `ferrodesign-app` (bin "ferrodesign-app") generated 1 warning
+2026-10-22T22:33:55.9045727Z [1m[92m    Finished[0m `browser` profile [optimized] target(s) in 24m 22s
+2026-10-22T22:33:56.0416931Z Verified 6 required JavaScript modules in the browser distribution.
+2026-10-22T22:33:56.0423635Z (node:4252) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+2026-10-22T22:33:56.0424530Z (Use `node --trace-warnings ...` to show where the warning was created)
+2026-10-22T22:33:56.0508001Z Browser distribution: /home/runner/work/FerroUI/FerroUI/samples/FerroDesign/dist
+2026-10-22T22:33:56.0509514Z Renderer: FerroUI Vello (WebGL2 hybrid, CPU fallback)
+2026-10-22T22:33:56.0510483Z Serve with: python3 -m http.server 8080 --directory "/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/dist"
+2026-10-22T22:33:56.0568267Z ##[group]Run npm ci --no-audit --no-fund
+2026-10-22T22:33:56.0568945Z [36;1mnpm ci --no-audit --no-fund[0m
+2026-10-22T22:33:56.0569285Z [36;1mnpx playwright install --with-deps chromium[0m
+2026-10-22T22:33:56.0629785Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T22:33:56.0630140Z env:
+2026-10-22T22:33:56.0630349Z   CARGO_BUILD_JOBS: 1
+2026-10-22T22:33:56.0630579Z   CARGO_TERM_COLOR: always
+2026-10-22T22:33:56.0630830Z   FERRODESIGN_BUILD_JOBS: 1
+2026-10-22T22:33:56.0631220Z   CARGO_TARGET_DIR: /home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target
+2026-10-22T22:33:56.0631630Z ##[endgroup]
+2026-10-22T22:33:56.7196741Z 
+2026-10-22T22:33:56.7197219Z added 3 packages in 597ms
+2026-10-22T22:33:57.5500102Z Installing dependencies...
+2026-10-22T22:33:57.5572381Z Switching to root user to install dependencies...
+2026-10-22T22:33:57.6230732Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-10-22T22:33:57.6543149Z Hit:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease
+2026-10-22T22:33:57.7376844Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+2026-10-22T22:33:57.7388069Z Hit:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease
+2026-10-22T22:33:57.7399005Z Hit:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease
+2026-10-22T22:33:57.7412197Z Hit:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease
+2026-10-22T22:33:59.1328119Z Reading package lists...
+2026-10-22T22:33:59.1564264Z Reading package lists...
+2026-10-22T22:33:59.4076726Z Building dependency tree...
+2026-10-22T22:33:59.4084590Z Reading state information...
+2026-10-22T22:33:59.6280448Z libasound2t64 is already the newest version (1.2.11-1ubuntu0.3).
+2026-10-22T22:33:59.6281724Z libasound2t64 set to manually installed.
+2026-10-22T22:33:59.6282956Z libatk-bridge2.0-0t64 is already the newest version (2.52.0-1build1).
+2026-10-22T22:33:59.6284031Z libatk-bridge2.0-0t64 set to manually installed.
+2026-10-22T22:33:59.6284678Z libatk1.0-0t64 is already the newest version (2.52.0-1build1).
+2026-10-22T22:33:59.6285229Z libatk1.0-0t64 set to manually installed.
+2026-10-22T22:33:59.6285820Z libatspi2.0-0t64 is already the newest version (2.52.0-1build1).
+2026-10-22T22:33:59.6286798Z libatspi2.0-0t64 set to manually installed.
+2026-10-22T22:33:59.6287346Z libcairo2 is already the newest version (1.18.0-3build1).
+2026-10-22T22:33:59.6287852Z libcairo2 set to manually installed.
+2026-10-22T22:33:59.6288422Z libcups2t64 is already the newest version (2.4.7-1.2ubuntu7.14).
+2026-10-22T22:33:59.6289561Z libcups2t64 set to manually installed.
+2026-10-22T22:33:59.6290384Z libdbus-1-3 is already the newest version (1.14.10-4ubuntu4.1).
+2026-10-22T22:33:59.6290936Z libdbus-1-3 set to manually installed.
+2026-10-22T22:33:59.6291509Z libdrm2 is already the newest version (2.4.125-1ubuntu0.1~24.04.2).
+2026-10-22T22:33:59.6292047Z libdrm2 set to manually installed.
+2026-10-22T22:33:59.6292604Z libgbm1 is already the newest version (25.2.8-0ubuntu0.24.04.4).
+2026-10-22T22:33:59.6293129Z libgbm1 set to manually installed.
+2026-10-22T22:33:59.6293672Z libnspr4 is already the newest version (2:4.35-1.1build1).
+2026-10-22T22:33:59.6294120Z libnspr4 set to manually installed.
+2026-10-22T22:33:59.6294611Z libpango-1.0-0 is already the newest version (1.52.1+ds-1build1).
+2026-10-22T22:33:59.6295363Z libpango-1.0-0 set to manually installed.
+2026-10-22T22:33:59.6295937Z libx11-6 is already the newest version (2:1.8.7-1ubuntu0.1).
+2026-10-22T22:33:59.6296335Z libx11-6 set to manually installed.
+2026-10-22T22:33:59.6296724Z libxcb1 is already the newest version (1.15-1ubuntu2).
+2026-10-22T22:33:59.6297096Z libxcb1 set to manually installed.
+2026-10-22T22:33:59.6297518Z libxcomposite1 is already the newest version (1:0.4.5-1build3).
+2026-10-22T22:33:59.6297943Z libxcomposite1 set to manually installed.
+2026-10-22T22:33:59.6298363Z libxdamage1 is already the newest version (1:1.1.6-1build1).
+2026-10-22T22:33:59.6298927Z libxdamage1 set to manually installed.
+2026-10-22T22:33:59.6299603Z libxext6 is already the newest version (2:1.3.4-1build2).
+2026-10-22T22:33:59.6300004Z libxext6 set to manually installed.
+2026-10-22T22:33:59.6300427Z libxfixes3 is already the newest version (1:6.0.0-2build1).
+2026-10-22T22:33:59.6300840Z libxfixes3 set to manually installed.
+2026-10-22T22:33:59.6301261Z libxkbcommon0 is already the newest version (1.6.0-1build1).
+2026-10-22T22:33:59.6301660Z libxkbcommon0 set to manually installed.
+2026-10-22T22:33:59.6302076Z libxrandr2 is already the newest version (2:1.5.2-2build1).
+2026-10-22T22:33:59.6302461Z libxrandr2 set to manually installed.
+2026-10-22T22:33:59.6302966Z fonts-noto-color-emoji is already the newest version (2.047-0ubuntu0.24.04.1).
+2026-10-22T22:33:59.6303539Z libfontconfig1 is already the newest version (2.15.0-1.1ubuntu2).
+2026-10-22T22:33:59.6303980Z libfontconfig1 set to manually installed.
+2026-10-22T22:33:59.6304442Z libfreetype6 is already the newest version (2.13.2+dfsg-1ubuntu0.2).
+2026-10-22T22:33:59.6304882Z libfreetype6 set to manually installed.
+2026-10-22T22:33:59.6305304Z fonts-liberation is already the newest version (1:2.1.5-3).
+2026-10-22T22:33:59.6305719Z fonts-liberation set to manually installed.
+2026-10-22T22:33:59.6306131Z The following additional packages will be installed:
+2026-10-22T22:33:59.6306597Z   gir1.2-glib-2.0 libglib2.0-bin libglib2.0-data libnss3-tools
+2026-10-22T22:33:59.6307016Z   xfonts-encodings xfonts-utils xserver-common
+2026-10-22T22:33:59.6307340Z Suggested packages:
+2026-10-22T22:33:59.6307577Z   low-memory-monitor
+2026-10-22T22:33:59.6307817Z Recommended packages:
+2026-10-22T22:33:59.6308125Z   fonts-ipafont-mincho fonts-tlwg-loma xfonts-base
+2026-10-22T22:33:59.6532067Z The following NEW packages will be installed:
+2026-10-22T22:33:59.6532920Z   fonts-freefont-ttf fonts-ipafont-gothic fonts-tlwg-loma-otf fonts-unifont
+2026-10-22T22:33:59.6541052Z   fonts-wqy-zenhei xfonts-cyrillic xfonts-encodings xfonts-scalable
+2026-10-22T22:33:59.6541791Z   xfonts-utils
+2026-10-22T22:33:59.6545086Z The following packages will be upgraded:
+2026-10-22T22:33:59.6547200Z   gir1.2-glib-2.0 libglib2.0-0t64 libglib2.0-bin libglib2.0-data libnss3
+2026-10-22T22:33:59.6551761Z   libnss3-tools xserver-common xvfb
+2026-10-22T22:33:59.6725863Z 8 upgraded, 9 newly installed, 0 to remove and 91 not upgraded.
+2026-10-22T22:33:59.6726365Z Need to get 25.9 MB of archives.
+2026-10-22T22:33:59.6726810Z After this operation, 79.5 MB of additional disk space will be used.
+2026-10-22T22:33:59.6727324Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-10-22T22:33:59.7060236Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-ipafont-gothic all 00303-21ubuntu1 [3513 kB]
+2026-10-22T22:33:59.7455221Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libglib2.0-data all 2.80.0-6ubuntu3.10 [50.2 kB]
+2026-10-22T22:33:59.7611344Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libglib2.0-bin amd64 2.80.0-6ubuntu3.10 [97.9 kB]
+2026-10-22T22:33:59.7773457Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 gir1.2-glib-2.0 amd64 2.80.0-6ubuntu3.10 [183 kB]
+2026-10-22T22:33:59.7938879Z Get:6 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libglib2.0-0t64 amd64 2.80.0-6ubuntu3.10 [1548 kB]
+2026-10-22T22:33:59.8175158Z Get:7 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 fonts-freefont-ttf all 20211204+svn4273-2 [5641 kB]
+2026-10-22T22:33:59.8643253Z Get:8 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-tlwg-loma-otf all 1:0.7.3-1 [107 kB]
+2026-10-22T22:33:59.8806564Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-unifont all 1:15.1.01-1build1 [2993 kB]
+2026-10-22T22:33:59.9132032Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-wqy-zenhei all 0.9.45-8 [7472 kB]
+2026-10-22T22:33:59.9688277Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libnss3 amd64 2:3.98-1ubuntu0.3 [1445 kB]
+2026-10-22T22:33:59.9923819Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libnss3-tools amd64 2:3.98-1ubuntu0.3 [615 kB]
+2026-10-22T22:34:00.0115088Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-encodings all 1:1.0.5-0ubuntu2 [578 kB]
+2026-10-22T22:34:00.0377327Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-utils amd64 1:7.7+6build3 [94.4 kB]
+2026-10-22T22:34:00.0540944Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 xfonts-cyrillic all 1:1.0.5+nmu1 [384 kB]
+2026-10-22T22:34:00.0720198Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-scalable all 1:1.0.3-1.3 [304 kB]
+2026-10-22T22:34:00.0890928Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 xserver-common all 2:21.1.12-1ubuntu1.9 [35.0 kB]
+2026-10-22T22:34:00.1048097Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 xvfb amd64 2:21.1.12-1ubuntu1.9 [877 kB]
+2026-10-22T22:34:00.3812771Z Fetched 25.9 MB in 0s (57.9 MB/s)
+2026-10-22T22:34:00.4013717Z Selecting previously unselected package fonts-ipafont-gothic.
+2026-10-22T22:34:00.4067219Z (Reading database ... 
+2026-10-22T22:34:00.4067881Z (Reading database ... 5%
+2026-10-22T22:34:00.4068436Z (Reading database ... 10%
+2026-10-22T22:34:00.4069050Z (Reading database ... 15%
+2026-10-22T22:34:00.4070281Z (Reading database ... 20%
+2026-10-22T22:34:00.4070723Z (Reading database ... 25%
+2026-10-22T22:34:00.4071163Z (Reading database ... 30%
+2026-10-22T22:34:00.4071614Z (Reading database ... 35%
+2026-10-22T22:34:00.4072086Z (Reading database ... 40%
+2026-10-22T22:34:00.4072544Z (Reading database ... 45%
+2026-10-22T22:34:00.4072997Z (Reading database ... 50%
+2026-10-22T22:34:00.4088757Z (Reading database ... 55%
+2026-10-22T22:34:00.4216470Z (Reading database ... 60%
+2026-10-22T22:34:00.4249868Z (Reading database ... 65%
+2026-10-22T22:34:00.4273289Z (Reading database ... 70%
+2026-10-22T22:34:00.4315089Z (Reading database ... 75%
+2026-10-22T22:34:00.4348204Z (Reading database ... 80%
+2026-10-22T22:34:00.4514842Z (Reading database ... 85%
+2026-10-22T22:34:00.4785745Z (Reading database ... 90%
+2026-10-22T22:34:00.4894570Z (Reading database ... 95%
+2026-10-22T22:34:00.4895176Z (Reading database ... 100%
+2026-10-22T22:34:00.4896020Z (Reading database ... 203689 files and directories currently installed.)
+2026-10-22T22:34:00.4943371Z Preparing to unpack .../00-fonts-ipafont-gothic_00303-21ubuntu1_all.deb ...
+2026-10-22T22:34:00.5018868Z Unpacking fonts-ipafont-gothic (00303-21ubuntu1) ...
+2026-10-22T22:34:00.7522817Z Preparing to unpack .../01-libglib2.0-data_2.80.0-6ubuntu3.10_all.deb ...
+2026-10-22T22:34:00.7539284Z Unpacking libglib2.0-data (2.80.0-6ubuntu3.10) over (2.80.0-6ubuntu3.9) ...
+2026-10-22T22:34:00.7883378Z Preparing to unpack .../02-libglib2.0-bin_2.80.0-6ubuntu3.10_amd64.deb ...
+2026-10-22T22:34:00.7898970Z Unpacking libglib2.0-bin (2.80.0-6ubuntu3.10) over (2.80.0-6ubuntu3.9) ...
+2026-10-22T22:34:00.8372928Z Preparing to unpack .../03-gir1.2-glib-2.0_2.80.0-6ubuntu3.10_amd64.deb ...
+2026-10-22T22:34:00.8390886Z Unpacking gir1.2-glib-2.0:amd64 (2.80.0-6ubuntu3.10) over (2.80.0-6ubuntu3.9) ...
+2026-10-22T22:34:00.8799052Z Preparing to unpack .../04-libglib2.0-0t64_2.80.0-6ubuntu3.10_amd64.deb ...
+2026-10-22T22:34:00.8868990Z Unpacking libglib2.0-0t64:amd64 (2.80.0-6ubuntu3.10) over (2.80.0-6ubuntu3.9) ...
+2026-10-22T22:34:00.9312620Z Selecting previously unselected package fonts-freefont-ttf.
+2026-10-22T22:34:00.9454196Z Preparing to unpack .../05-fonts-freefont-ttf_20211204+svn4273-2_all.deb ...
+2026-10-22T22:34:00.9462363Z Unpacking fonts-freefont-ttf (20211204+svn4273-2) ...
+2026-10-22T22:34:01.0341883Z Selecting previously unselected package fonts-tlwg-loma-otf.
+2026-10-22T22:34:01.0475790Z Preparing to unpack .../06-fonts-tlwg-loma-otf_1%3a0.7.3-1_all.deb ...
+2026-10-22T22:34:01.0559305Z Unpacking fonts-tlwg-loma-otf (1:0.7.3-1) ...
+2026-10-22T22:34:01.0777522Z Selecting previously unselected package fonts-unifont.
+2026-10-22T22:34:01.0908423Z Preparing to unpack .../07-fonts-unifont_1%3a15.1.01-1build1_all.deb ...
+2026-10-22T22:34:01.0915386Z Unpacking fonts-unifont (1:15.1.01-1build1) ...
+2026-10-22T22:34:01.2050134Z Selecting previously unselected package fonts-wqy-zenhei.
+2026-10-22T22:34:01.2182167Z Preparing to unpack .../08-fonts-wqy-zenhei_0.9.45-8_all.deb ...
+2026-10-22T22:34:01.2286904Z Unpacking fonts-wqy-zenhei (0.9.45-8) ...
+2026-10-22T22:34:01.7203438Z Preparing to unpack .../09-libnss3_2%3a3.98-1ubuntu0.3_amd64.deb ...
+2026-10-22T22:34:01.7237921Z Unpacking libnss3:amd64 (2:3.98-1ubuntu0.3) over (2:3.98-1ubuntu0.2) ...
+2026-10-22T22:34:01.7767306Z Preparing to unpack .../10-libnss3-tools_2%3a3.98-1ubuntu0.3_amd64.deb ...
+2026-10-22T22:34:01.7789777Z Unpacking libnss3-tools (2:3.98-1ubuntu0.3) over (2:3.98-1ubuntu0.2) ...
+2026-10-22T22:34:01.8212176Z Selecting previously unselected package xfonts-encodings.
+2026-10-22T22:34:01.8348787Z Preparing to unpack .../11-xfonts-encodings_1%3a1.0.5-0ubuntu2_all.deb ...
+2026-10-22T22:34:01.8355855Z Unpacking xfonts-encodings (1:1.0.5-0ubuntu2) ...
+2026-10-22T22:34:01.8654970Z Selecting previously unselected package xfonts-utils.
+2026-10-22T22:34:01.8791595Z Preparing to unpack .../12-xfonts-utils_1%3a7.7+6build3_amd64.deb ...
+2026-10-22T22:34:01.8798340Z Unpacking xfonts-utils (1:7.7+6build3) ...
+2026-10-22T22:34:01.9122075Z Selecting previously unselected package xfonts-cyrillic.
+2026-10-22T22:34:01.9257454Z Preparing to unpack .../13-xfonts-cyrillic_1%3a1.0.5+nmu1_all.deb ...
+2026-10-22T22:34:01.9265053Z Unpacking xfonts-cyrillic (1:1.0.5+nmu1) ...
+2026-10-22T22:34:01.9619231Z Selecting previously unselected package xfonts-scalable.
+2026-10-22T22:34:01.9751519Z Preparing to unpack .../14-xfonts-scalable_1%3a1.0.3-1.3_all.deb ...
+2026-10-22T22:34:01.9758394Z Unpacking xfonts-scalable (1:1.0.3-1.3) ...
+2026-10-22T22:34:02.0134933Z Preparing to unpack .../15-xserver-common_2%3a21.1.12-1ubuntu1.9_all.deb ...
+2026-10-22T22:34:02.0152358Z Unpacking xserver-common (2:21.1.12-1ubuntu1.9) over (2:21.1.12-1ubuntu1.8) ...
+2026-10-22T22:34:02.0512987Z Preparing to unpack .../16-xvfb_2%3a21.1.12-1ubuntu1.9_amd64.deb ...
+2026-10-22T22:34:02.0531481Z Unpacking xvfb (2:21.1.12-1ubuntu1.9) over (2:21.1.12-1ubuntu1.8) ...
+2026-10-22T22:34:02.1097708Z Setting up fonts-wqy-zenhei (0.9.45-8) ...
+2026-10-22T22:34:02.1213150Z Setting up fonts-freefont-ttf (20211204+svn4273-2) ...
+2026-10-22T22:34:02.1229209Z Setting up libnss3:amd64 (2:3.98-1ubuntu0.3) ...
+2026-10-22T22:34:02.1245525Z Setting up libglib2.0-0t64:amd64 (2.80.0-6ubuntu3.10) ...
+2026-10-22T22:34:02.1351287Z Setting up libglib2.0-data (2.80.0-6ubuntu3.10) ...
+2026-10-22T22:34:02.1366836Z Setting up fonts-tlwg-loma-otf (1:0.7.3-1) ...
+2026-10-22T22:34:02.1382442Z Setting up xfonts-encodings (1:1.0.5-0ubuntu2) ...
+2026-10-22T22:34:02.1397261Z Setting up gir1.2-glib-2.0:amd64 (2.80.0-6ubuntu3.10) ...
+2026-10-22T22:34:02.1412196Z Setting up fonts-ipafont-gothic (00303-21ubuntu1) ...
+2026-10-22T22:34:02.1478448Z update-alternatives: using /usr/share/fonts/opentype/ipafont-gothic/ipag.ttf to provide /usr/share/fonts/truetype/fonts-japanese-gothic.ttf (fonts-japanese-gothic.ttf) in auto mode
+2026-10-22T22:34:02.1493390Z Setting up xserver-common (2:21.1.12-1ubuntu1.9) ...
+2026-10-22T22:34:02.1510250Z Setting up libnss3-tools (2:3.98-1ubuntu0.3) ...
+2026-10-22T22:34:02.1527382Z Setting up fonts-unifont (1:15.1.01-1build1) ...
+2026-10-22T22:34:02.1543992Z Setting up xvfb (2:21.1.12-1ubuntu1.9) ...
+2026-10-22T22:34:02.1561123Z Setting up libglib2.0-bin (2.80.0-6ubuntu3.10) ...
+2026-10-22T22:34:02.1577202Z Setting up xfonts-utils (1:7.7+6build3) ...
+2026-10-22T22:34:02.1618334Z Setting up xfonts-cyrillic (1:1.0.5+nmu1) ...
+2026-10-22T22:34:02.1921372Z Setting up xfonts-scalable (1:1.0.3-1.3) ...
+2026-10-22T22:34:02.2200108Z Processing triggers for libc-bin (2.39-0ubuntu8.9) ...
+2026-10-22T22:34:02.2540069Z Processing triggers for man-db (2.12.0-4build2) ...
+2026-10-22T22:34:02.2555941Z Not building database; man-db/auto-update is not 'true'.
+2026-10-22T22:34:02.2568807Z Processing triggers for fontconfig (2.15.0-1.1ubuntu2) ...
+2026-10-22T22:34:02.8139232Z 
+2026-10-22T22:34:02.8139915Z Running kernel seems to be up-to-date.
+2026-10-22T22:34:02.8140317Z 
+2026-10-22T22:34:02.8140503Z Restarting services...
+2026-10-22T22:34:02.8646286Z  systemctl restart packagekit.service php8.3-fpm.service polkit.service udisks2.service
+2026-10-22T22:34:02.9940343Z 
+2026-10-22T22:34:02.9941011Z Service restarts being deferred:
+2026-10-22T22:34:02.9941597Z  systemctl restart ModemManager.service
+2026-10-22T22:34:02.9942051Z  systemctl restart networkd-dispatcher.service
+2026-10-22T22:34:02.9942327Z 
+2026-10-22T22:34:02.9942504Z No containers need to be restarted.
+2026-10-22T22:34:02.9942734Z 
+2026-10-22T22:34:02.9942941Z No user sessions are running outdated binaries.
+2026-10-22T22:34:02.9943206Z 
+2026-10-22T22:34:02.9943549Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-10-22T22:34:04.2858832Z Downloading Chrome for Testing 156.0.8078.4 (playwright chromium v1248) from https://cdn.playwright.dev/builds/cft/156.0.8078.4/linux64/chrome-linux64.zip
+2026-10-22T22:34:04.6850407Z |                                                                                |   0% of 191.1 MiB
+2026-10-22T22:34:04.8525535Z |■■■■■■■■                                                                        |  10% of 191.1 MiB
+2026-10-22T22:34:04.9458956Z |■■■■■■■■■■■■■■■■                                                                |  20% of 191.1 MiB
+2026-10-22T22:34:05.0213151Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 191.1 MiB
+2026-10-22T22:34:05.0967769Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 191.1 MiB
+2026-10-22T22:34:05.1834210Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 191.1 MiB
+2026-10-22T22:34:05.2575761Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 191.1 MiB
+2026-10-22T22:34:05.3369105Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 191.1 MiB
+2026-10-22T22:34:05.4295762Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 191.1 MiB
+2026-10-22T22:34:05.5220314Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 191.1 MiB
+2026-10-22T22:34:05.6221426Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 191.1 MiB
+2026-10-22T22:34:08.4056595Z Chrome for Testing 156.0.8078.4 (playwright chromium v1248) downloaded to /home/runner/.cache/ms-playwright/chromium-1248
+2026-10-22T22:34:08.4061228Z Downloading FFmpeg (playwright ffmpeg v1013) from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1013/ffmpeg-linux.zip
+2026-10-22T22:34:08.8397044Z |                                                                                |   0% of 2.2 MiB
+2026-10-22T22:34:08.8934187Z |■■■■■■■■                                                                        |  10% of 2.2 MiB
+2026-10-22T22:34:08.9132918Z |■■■■■■■■■■■■■■■■                                                                |  20% of 2.2 MiB
+2026-10-22T22:34:08.9317377Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 2.2 MiB
+2026-10-22T22:34:08.9371328Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 2.2 MiB
+2026-10-22T22:34:08.9519868Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 2.2 MiB
+2026-10-22T22:34:08.9664897Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 2.2 MiB
+2026-10-22T22:34:08.9690080Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 2.2 MiB
+2026-10-22T22:34:08.9713916Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 2.2 MiB
+2026-10-22T22:34:08.9739491Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 2.2 MiB
+2026-10-22T22:34:08.9867095Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 2.2 MiB
+2026-10-22T22:34:09.0486193Z FFmpeg (playwright ffmpeg v1013) downloaded to /home/runner/.cache/ms-playwright/ffmpeg-1013
+2026-10-22T22:34:09.0491301Z Downloading Chrome Headless Shell 156.0.8078.4 (playwright chromium-headless-shell v1248) from https://cdn.playwright.dev/builds/cft/156.0.8078.4/linux64/chrome-headless-shell-linux64.zip
+2026-10-22T22:34:09.4493345Z |                                                                                |   0% of 120 MiB
+2026-10-22T22:34:09.6034489Z |■■■■■■■■                                                                        |  10% of 120 MiB
+2026-10-22T22:34:09.6942512Z |■■■■■■■■■■■■■■■■                                                                |  20% of 120 MiB
+2026-10-22T22:34:09.7629131Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 120 MiB
+2026-10-22T22:34:09.8090266Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 120 MiB
+2026-10-22T22:34:09.8521269Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 120 MiB
+2026-10-22T22:34:09.8966601Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 120 MiB
+2026-10-22T22:34:09.9511720Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 120 MiB
+2026-10-22T22:34:10.0030695Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 120 MiB
+2026-10-22T22:34:10.0394706Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 120 MiB
+2026-10-22T22:34:10.0814976Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 120 MiB
+2026-10-22T22:34:12.0616570Z Chrome Headless Shell 156.0.8078.4 (playwright chromium-headless-shell v1248) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1248
+2026-10-22T22:34:12.0895609Z ##[group]Run set -o pipefail
+2026-10-22T22:34:12.0895948Z [36;1mset -o pipefail[0m
+2026-10-22T22:34:12.0896393Z [36;1mnode tests/document-store-browser.mjs 2>&1 | tee browser-report/indexeddb-tests.log[0m
+2026-10-22T22:34:12.0958252Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T22:34:12.0958977Z env:
+2026-10-22T22:34:12.0959297Z   CARGO_BUILD_JOBS: 1
+2026-10-22T22:34:12.0959667Z   CARGO_TERM_COLOR: always
+2026-10-22T22:34:12.0959927Z   FERRODESIGN_BUILD_JOBS: 1
+2026-10-22T22:34:12.0960331Z   CARGO_TARGET_DIR: /home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target
+2026-10-22T22:34:12.0960765Z ##[endgroup]
+2026-10-22T22:34:13.2137010Z {
+2026-10-22T22:34:13.2142967Z   "passed": true,
+2026-10-22T22:34:13.2143719Z   "browser": "156.0.8078.4",
+2026-10-22T22:34:13.2146740Z   "checks": [
+2026-10-22T22:34:13.2147399Z     "Legacy migration and current/previous snapshots commit atomically",
+2026-10-22T22:34:13.2148870Z     "A write request that succeeds before transaction abort is not acknowledged or persisted",
+2026-10-22T22:34:13.2154371Z     "Two real browser tabs cannot overwrite a snapshot loaded at an older revision",
+2026-10-22T22:34:13.2156149Z     "A document exceeding 10 MiB survives a real browser reload without localStorage",
+2026-10-22T22:34:13.2156875Z     "An aborted migration keeps the original localStorage document readable and intact"
+2026-10-22T22:34:13.2157500Z   ],
+2026-10-22T22:34:13.2157838Z   "largeDocument": {
+2026-10-22T22:34:13.2158231Z     "flushed": true,
+2026-10-22T22:34:13.2158835Z     "state": {
+2026-10-22T22:34:13.2159220Z       "phase": "saved",
+2026-10-22T22:34:13.2159659Z       "backend": "indexedDB",
+2026-10-22T22:34:13.2160109Z       "dirty": false,
+2026-10-22T22:34:13.2160508Z       "draftDirty": false,
+2026-10-22T22:34:13.2161037Z       "serializationPending": false,
+2026-10-22T22:34:13.2161562Z       "revision": 5,
+2026-10-22T22:34:13.2161977Z       "sequence": 5,
+2026-10-22T22:34:13.2162411Z       "committedSequence": 5,
+2026-10-22T22:34:13.2162880Z       "characters": 12000042,
+2026-10-22T22:34:13.2163307Z       "error": ""
+2026-10-22T22:34:13.2163691Z     },
+2026-10-22T22:34:13.2164030Z     "characters": 12000042,
+2026-10-22T22:34:13.2164500Z     "saveMs": 40.800000000046566
+2026-10-22T22:34:13.2165261Z   }
+2026-10-22T22:34:13.2165574Z }
+2026-10-22T22:34:13.2545186Z ##[group]Run set -o pipefail
+2026-10-22T22:34:13.2545527Z [36;1mset -o pipefail[0m
+2026-10-22T22:34:13.2545895Z [36;1mnpm run test:browser 2>&1 | tee browser-report/browser-tests.log[0m
+2026-10-22T22:34:13.2608430Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T22:34:13.2609086Z env:
+2026-10-22T22:34:13.2609306Z   CARGO_BUILD_JOBS: 1
+2026-10-22T22:34:13.2609555Z   CARGO_TERM_COLOR: always
+2026-10-22T22:34:13.2609810Z   FERRODESIGN_BUILD_JOBS: 1
+2026-10-22T22:34:13.2610209Z   CARGO_TARGET_DIR: /home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target
+2026-10-22T22:34:13.2610635Z ##[endgroup]
+2026-10-22T22:34:13.3691695Z 
+2026-10-22T22:34:13.3692679Z > test:browser
+2026-10-22T22:34:13.3693154Z > node tests/browser.mjs
+2026-10-22T22:34:13.3693387Z 
+2026-10-22T22:34:31.2931285Z Software2D: starting vector-network
+2026-10-22T22:34:39.2155189Z Software2D: starting native-authoring
+2026-10-22T22:34:46.3361414Z Software2D: starting corners
+2026-10-22T22:34:49.0475851Z [corners-alpha Software2D] {"width":200,"height":140,"pixels":28000,"differingOver12":288,"edgeCoverageDifferences":288,"oppositeOpaqueTransparent":0,"threshold128Differences":44,"maxAlphaDifference":78,"nativePartialPixels":484,"svgPartialPixels":236,"nativeAlphaArea":26555.215686,"svgAlphaArea":26548.501961,"absoluteAlphaAreaDifference":35.576471,"differenceBounds":{"left":0,"top":0,"right":199,"bottom":139},"quadrantDifferences":[72,72,72,72],"nativeMirrorMax":{"horizontal":0,"vertical":0},"svgMirrorMax":{"horizontal":64,"vertical":64},"samples":[{"x":34,"y":0,"native":30,"svg":0},{"x":36,"y":0,"native":80,"svg":64},{"x":37,"y":0,"native":102,"svg":64},{"x":145,"y":0,"native":241,"svg":255},{"x":146,"y":0,"native":240,"svg":255},{"x":147,"y":0,"native":238,"svg":255},{"x":0,"y":85,"native":241,"svg":255},{"x":199,"y":85,"native":241,"svg":255},{"x":0,"y":86,"native":240,"svg":255},{"x":199,"y":86,"native":240,"svg":255},{"x":0,"y":87,"native":238,"svg":255},{"x":199,"y":87,"native":238,"svg":255}]}
+2026-10-22T22:34:49.1418276Z Software2D: AssertionError [ERR_ASSERTION]: Independent SVG decoder and FerroUI PNG share the smooth silhouette: 288
+2026-10-22T22:34:49.1421357Z     at cornerRegressions (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/corners-browser.mjs:135:12)
+2026-10-22T22:34:49.1423287Z     at async scenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1002:21)
+2026-10-22T22:34:49.1425082Z     at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1016:13
+2026-10-22T22:38:45.3029849Z WebGL2: starting vector-network
+2026-10-22T22:40:51.5200091Z WebGL2: starting native-authoring
+2026-10-22T22:43:15.7807721Z WebGL2: starting corners
+2026-10-22T22:44:24.9869449Z [corners-alpha WebGL2] {"width":200,"height":140,"pixels":28000,"differingOver12":288,"edgeCoverageDifferences":288,"oppositeOpaqueTransparent":0,"threshold128Differences":44,"maxAlphaDifference":78,"nativePartialPixels":484,"svgPartialPixels":236,"nativeAlphaArea":26555.215686,"svgAlphaArea":26548.501961,"absoluteAlphaAreaDifference":35.576471,"differenceBounds":{"left":0,"top":0,"right":199,"bottom":139},"quadrantDifferences":[72,72,72,72],"nativeMirrorMax":{"horizontal":0,"vertical":0},"svgMirrorMax":{"horizontal":64,"vertical":64},"samples":[{"x":34,"y":0,"native":30,"svg":0},{"x":36,"y":0,"native":80,"svg":64},{"x":37,"y":0,"native":102,"svg":64},{"x":145,"y":0,"native":241,"svg":255},{"x":146,"y":0,"native":240,"svg":255},{"x":147,"y":0,"native":238,"svg":255},{"x":0,"y":85,"native":241,"svg":255},{"x":199,"y":85,"native":241,"svg":255},{"x":0,"y":86,"native":240,"svg":255},{"x":199,"y":86,"native":240,"svg":255},{"x":0,"y":87,"native":238,"svg":255},{"x":199,"y":87,"native":238,"svg":255}]}
+2026-10-22T22:44:25.0799527Z WebGL2: AssertionError [ERR_ASSERTION]: Independent SVG decoder and FerroUI PNG share the smooth silhouette: 288
+2026-10-22T22:44:25.0801685Z     at cornerRegressions (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/corners-browser.mjs:135:12)
+2026-10-22T22:44:25.0803305Z     at async scenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1002:21)
+2026-10-22T22:44:25.0804940Z     at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1016:13
+2026-10-22T22:44:25.7143032Z {
+2026-10-22T22:44:25.7143492Z   "passed": false,
+2026-10-22T22:44:25.7143884Z   "scope": {
+2026-10-22T22:44:25.7144314Z     "full": true,
+2026-10-22T22:44:25.7144700Z     "modes": [
+2026-10-22T22:44:25.7145081Z       "Software2D",
+2026-10-22T22:44:25.7145442Z       "WebGL2"
+2026-10-22T22:44:25.7145783Z     ],
+2026-10-22T22:44:25.7146114Z     "scenarios": "all"
+2026-10-22T22:44:25.7146352Z   },
+2026-10-22T22:44:25.7146558Z   "browser": "156.0.8078.4",
+2026-10-22T22:44:25.7146851Z   "results": [
+2026-10-22T22:44:25.7147062Z     {
+2026-10-22T22:44:25.7147305Z       "requestedMode": "Software2D",
+2026-10-22T22:44:25.7147624Z       "status": "failed",
+2026-10-22T22:44:25.7147881Z       "surface": {
+2026-10-22T22:44:25.7148102Z         "kind": "Software2D"
+2026-10-22T22:44:25.7148373Z       },
+2026-10-22T22:44:25.7149027Z       "checks": [
+2026-10-22T22:44:25.7149439Z         "Native FerroUI canvas contains rendered UI and document pixels",
+2026-10-22T22:44:25.7150006Z         "R shortcut and pointer drag create and render a selected rectangle",
+2026-10-22T22:44:25.7150502Z         "Keyboard undo removes the pointer-created node",
+2026-10-22T22:44:25.7150879Z         "Keyboard redo restores the node",
+2026-10-22T22:44:25.7151246Z         "Delete keyboard action removes the selection",
+2026-10-22T22:44:25.7151700Z         "Document JSON round-trip restores the complete edited document",
+2026-10-22T22:44:25.7152353Z         "SVG file import selects an editable frame with affine groups, gradients, curves, and Unicode text",
+2026-10-22T22:44:25.7153265Z         "PNG download has exact artboard dimensions and verified background, affine gradient, curved stroke, and text pixels",
+2026-10-22T22:44:25.7154121Z         "JSON round-trip preserves the complete imported SVG hierarchy and visual properties",
+2026-10-22T22:44:25.7154972Z         "Enter enters native vector editing; an anchor drag rebases bounds without moving other anchors and forms one undo/redo step",
+2026-10-22T22:44:25.7155839Z         "Native Pen pointer drags create a cubic curve and the complete path is one undo/redo step",
+2026-10-22T22:44:25.7156632Z         "Enter while the Pen pointer is held finalizes the gesture and ignores later handle movement until release",
+2026-10-22T22:44:25.7157643Z         "Native on-canvas TextBox handles multiline Unicode, UTF-8 rich-text ranges, Ctrl+Enter commit, Escape cancel, one-step history, and autosave",
+2026-10-22T22:44:25.7159007Z         "Browser composition events commit once, keep preedit out of the document, and cannot block or overwrite a new native text client after cancellation",
+2026-10-22T22:44:25.7160204Z         "Pagehide during unfinished composition durably saves confirmed Unicode and formatting, preserves one-step history, and survives a real reload",
+2026-10-22T22:44:25.7161431Z         "Native paint dialog pointer/keyboard input converts a fill to a gradient, edits alpha/opacity/stop positions, rejects NaN, and supports one-step stop undo",
+2026-10-22T22:44:25.7162565Z         "Native graph conversion, branching, stable-ID vertex dragging and edge subdivision preserve regions and exact one-step history",
+2026-10-22T22:44:25.7163589Z         "Native network Bend and Erase edit authoritative cubic edges, retain unrelated fill regions and serialize stable topology",
+2026-10-22T22:44:25.7164766Z         "Native Fill all closed regions discovers planar faces, excludes open branches, paints every face, preserves topology IDs and commits one exact idempotent undo/redo edit",
+2026-10-22T22:44:25.7166555Z         "Native Fill all closed regions splits transverse intersections, preserves original first-edge and branch identities, paints four new faces, and keeps subdivision plus fill in one idempotent undo/redo edit",
+2026-10-22T22:44:25.7168282Z         "Native automatic intersection preparation rejects ambiguous overlapping edges with a fresh exact error, preserves the entire graph and allocator, and retains the preceding redo transaction",
+2026-10-22T22:44:25.7170098Z         "Native character selection styles one non-BMP emoji at exact UTF-8 boundaries, retains selection across field focus, previews the shared native text layout, clears overrides and restores one-step history",
+2026-10-22T22:44:25.7171683Z         "Native variable controls edit typed alpha colors, create aliases, bind layers, switch modes, rename collections, reject referenced deletion and preserve appearance with one-step undo",
+2026-10-22T22:44:25.7172929Z         "Native smoothing commits one history step, rejects out-of-range drafts atomically, and restores exact document fields through undo/redo"
+2026-10-22T22:44:25.7173585Z       ]
+2026-10-22T22:44:25.7173800Z     },
+2026-10-22T22:44:25.7173987Z     {
+2026-10-22T22:44:25.7174238Z       "requestedMode": "WebGL2",
+2026-10-22T22:44:25.7174527Z       "status": "failed",
+2026-10-22T22:44:25.7174786Z       "surface": {
+2026-10-22T22:44:25.7174998Z         "kind": "WebGL2",
+2026-10-22T22:44:25.7175549Z         "device": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+2026-10-22T22:44:25.7176050Z       },
+2026-10-22T22:44:25.7176279Z       "checks": [
+2026-10-22T22:44:25.7176655Z         "Native FerroUI canvas contains rendered UI and document pixels",
+2026-10-22T22:44:25.7177235Z         "R shortcut and pointer drag create and render a selected rectangle",
+2026-10-22T22:44:25.7177734Z         "Keyboard undo removes the pointer-created node",
+2026-10-22T22:44:25.7178126Z         "Keyboard redo restores the node",
+2026-10-22T22:44:25.7178513Z         "Delete keyboard action removes the selection",
+2026-10-22T22:44:25.7179315Z         "Document JSON round-trip restores the complete edited document",
+2026-10-22T22:44:25.7180038Z         "SVG file import selects an editable frame with affine groups, gradients, curves, and Unicode text",
+2026-10-22T22:44:25.7180917Z         "PNG download has exact artboard dimensions and verified background, affine gradient, curved stroke, and text pixels",
+2026-10-22T22:44:25.7181724Z         "JSON round-trip preserves the complete imported SVG hierarchy and visual properties",
+2026-10-22T22:44:25.7182596Z         "Enter enters native vector editing; an anchor drag rebases bounds without moving other anchors and forms one undo/redo step",
+2026-10-22T22:44:25.7183415Z         "Native Pen pointer drags create a cubic curve and the complete path is one undo/redo step",
+2026-10-22T22:44:25.7184205Z         "Enter while the Pen pointer is held finalizes the gesture and ignores later handle movement until release",
+2026-10-22T22:44:25.7185181Z         "Native on-canvas TextBox handles multiline Unicode, UTF-8 rich-text ranges, Ctrl+Enter commit, Escape cancel, one-step history, and autosave",
+2026-10-22T22:44:25.7186349Z         "Browser composition events commit once, keep preedit out of the document, and cannot block or overwrite a new native text client after cancellation",
+2026-10-22T22:44:25.7187504Z         "Pagehide during unfinished composition durably saves confirmed Unicode and formatting, preserves one-step history, and survives a real reload",
+2026-10-22T22:44:25.7188924Z         "Native paint dialog pointer/keyboard input converts a fill to a gradient, edits alpha/opacity/stop positions, rejects NaN, and supports one-step stop undo",
+2026-10-22T22:44:25.7190082Z         "Native graph conversion, branching, stable-ID vertex dragging and edge subdivision preserve regions and exact one-step history",
+2026-10-22T22:44:25.7191095Z         "Native network Bend and Erase edit authoritative cubic edges, retain unrelated fill regions and serialize stable topology",
+2026-10-22T22:44:25.7192456Z         "Native Fill all closed regions discovers planar faces, excludes open branches, paints every face, preserves topology IDs and commits one exact idempotent undo/redo edit",
+2026-10-22T22:44:25.7194074Z         "Native Fill all closed regions splits transverse intersections, preserves original first-edge and branch identities, paints four new faces, and keeps subdivision plus fill in one idempotent undo/redo edit",
+2026-10-22T22:44:25.7195666Z         "Native automatic intersection preparation rejects ambiguous overlapping edges with a fresh exact error, preserves the entire graph and allocator, and retains the preceding redo transaction",
+2026-10-22T22:44:25.7197211Z         "Native character selection styles one non-BMP emoji at exact UTF-8 boundaries, retains selection across field focus, previews the shared native text layout, clears overrides and restores one-step history",
+2026-10-22T22:44:25.7198905Z         "Native variable controls edit typed alpha colors, create aliases, bind layers, switch modes, rename collections, reject referenced deletion and preserve appearance with one-step undo",
+2026-10-22T22:44:25.7200203Z         "Native smoothing commits one history step, rejects out-of-range drafts atomically, and restores exact document fields through undo/redo"
+2026-10-22T22:44:25.7200853Z       ]
+2026-10-22T22:44:25.7201053Z     }
+2026-10-22T22:44:25.7201255Z   ]
+2026-10-22T22:44:25.7201460Z }
+2026-10-22T22:44:25.7424748Z ##[error]Process completed with exit code 1.
+2026-10-22T22:44:25.7480966Z ##[group]Run set -o pipefail
+2026-10-22T22:44:25.7481318Z [36;1mset -o pipefail[0m
+2026-10-22T22:44:25.7481804Z [36;1mnode tests/text-render-benchmark.mjs 2>&1 | tee browser-report/text-render-benchmark.log[0m
+2026-10-22T22:44:25.7542705Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T22:44:25.7543073Z env:
+2026-10-22T22:44:25.7543280Z   CARGO_BUILD_JOBS: 1
+2026-10-22T22:44:25.7543527Z   CARGO_TERM_COLOR: always
+2026-10-22T22:44:25.7543778Z   FERRODESIGN_BUILD_JOBS: 1
+2026-10-22T22:44:25.7544198Z   CARGO_TARGET_DIR: /home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target
+2026-10-22T22:44:25.7544736Z   FERRODESIGN_REPORT: browser-report/text-render-benchmark
+2026-10-22T22:44:25.7545211Z   FERRODESIGN_BENCHMARK_LABEL: 5cb7e8847746a2bfae45bf46cafed40889f1affb
+2026-10-22T22:44:25.7545631Z   FERRODESIGN_TRACE_TEXT_PAN: 1
+2026-10-22T22:44:25.7545897Z ##[endgroup]
+2026-10-22T22:44:33.9792095Z 5cb7e8847746a2bfae45bf46cafed40889f1affb Software2D: 14.79 ms median / 32.57 ms p95 (36 native pan observations)
+2026-10-22T22:44:33.9794520Z 5cb7e8847746a2bfae45bf46cafed40889f1affb Software2D: dispatch p95 18.34 ms; frame-observation p95 10.52 ms; native-presentation p95 108.98 ms (compact-v1)
+2026-10-22T22:44:33.9836354Z {"benchmark":"native-text-pan-v2","label":"5cb7e8847746a2bfae45bf46cafed40889f1affb","mode":"Software2D","browserTransport":"owned-playwright-server-websocket","traceDiagnosticRequested":true,"metricBridge":{"kind":"compact-v1"},"dispatch":{"count":36,"medianMs":12.013515999999981,"p95Ms":18.337282999999843,"minMs":7.417515000000094,"maxMs":22.051265000000058},"frameObservation":{"count":36,"medianMs":2.78586949999999,"p95Ms":10.517480999999862,"minMs":2.4439910000000964,"maxMs":17.04303400000026},"nativePresentation":{"count":36,"medianMs":75.0518649999999,"p95Ms":108.98403099999996,"minMs":73.20498000000043,"maxMs":113.02438900000016},"longTaskSupported":true,"recordedLongTasks":8,"droppedLongTasks":0,"slowestSamples":[{"index":31,"durationMs":35.380317000000105,"dispatchMs":18.337282999999843,"frameObservationMs":17.04303400000026,"presentationMs":108.98403099999996,"settledObservationMs":134.72565599999962,"browserObservation":{"startedAtMs":5613.100000000093,"initialReadMs":0,"pollCount":1,"pollReadMs":0,"maxPollReadMs":0,"maxPayloadCharacters":575,"frameObservedAtMs":5638.300000000279,"endedAtMs":5751.700000000186},"pointerDelta":{"x":-4,"y":0},"frameDelta":1,"presentedFrameDelta":1,"zoom":0.7453207150368034,"pan":{"x":46.000420609884316,"y":223.16382754994743},"preparationDelta":{"totalFullPrepares":0,"totalIncrementalPrepares":0,"totalPreparedNodes":0,"totalRebuiltVisuals":0,"layerProjectionBuilds":0,"layerProjectionReuses":0},"frameCounters":{"visibleNodes":150,"culledNodes":0,"cachedNodes":150,"preparedNodes":0,"rebuiltVisuals":0,"fullPrepares":0,"incrementalPrepares":0,"rootBoundsTests":1,"rootCandidates":150,"rootQueryReused":false},"input":[{"type":"pointermove","phase":"capture","trusted":true,"eventTimeMs":5616.9000000003725,"observedAtMs":5631.700000000186,"detail":0,"button":-1,"buttons":4,"pointerId":1,"pointerType":"mouse","x":800,"y":550,"target":{"tag":"MAIN","className":"ferroui-container"}},{"type":"pointermove","phase":"bubble","trusted":true,"eventTimeMs":5616.9000000003725,"observedAtMs":5632,"detail":0,"button":-1,"buttons":4,"pointerId":1,"pointerType":"mouse","x":800,"y":550,"target":{"tag":"MAIN","className":"ferroui-container"}}],"longTasks":[{"startTimeMs":5648.200000000186,"durationMs":69}]},{"index":21,"durationMs":32.56874599999992,"dispatchMs":22.051265000000058,"frameObservationMs":10.517480999999862,"presentationMs":93.86353099999997,"settledObservationMs":120.63287800000035,"browserObservation":{"startedAtMs":4511.200000000186,"initialReadMs":0.10000000009313226,"pollCount":1,"pollReadMs":0,"maxPollReadMs":0,"maxPayloadCharacters":575,"frameObservedAtMs":4539.100000000093,"endedAtMs":4635.5},"pointerDelta":{"x":-4,"y":4},"frameDelta":1,"presentedFrameDelta":1,"zoom":0.7453207150368034,"pan":{"x":46.000420609884316,"y":227.16382754994743},"preparationDelta":{"totalFullPrepares":0,"totalIncrementalPrepares":0,"totalPreparedNodes":0,"totalRebuiltVisuals":0,"layerProjectionBuilds":0,"layerProjectionReuses":0},"frameCounters":{"visibleNodes":150,"culledNodes":0,"cachedNodes":150,"preparedNodes":0,"rebuiltVisuals":0,"fullPrepares":0,"incrementalPrepares":0,"rootBoundsTests":1,"rootCandidates":150,"rootQueryReused":false},"input":[{"type":"pointermove","phase":"capture","trusted":true,"eventTimeMs":4515.800000000279,"observedAtMs":4531.700000000186,"detail":0,"button":-1,"buttons":4,"pointerId":1,"pointerType":"mouse","x":800,"y":554,"target":{"tag":"MAIN","className":"ferroui-container"}},{"type":"pointermove","phase":"bubble","trusted":true,"eventTimeMs":4515.800000000279,"observedAtMs":4532,"detail":0,"button":-1,"buttons":4,"pointerId":1,"pointerType":"mouse","x":800,"y":554,"target":{"tag":"MAIN","className":"ferroui-container"}}],"longTasks":[{"startTimeMs":4548.200000000186,"durationMs":55}]},{"index":40,"durationMs":25.646874000000025,"dispatchMs":17.41359300000022,"frameObservationMs":8.233280999999806,"presentationMs":113.02438900000016,"settledObservationMs":132.85282900000038,"browserObservation":{"startedAtMs":6598.9000000003725,"initialReadMs":0.10000000009313226,"pollCount":1,"pollReadMs":0,"maxPollReadMs":0,"maxPayloadCharacters":575,"frameObservedAtMs":6622.100000000093,"endedAtMs":6736.5},"pointerDelta":{"x":-4,"y":0},"frameDelta":1,"presentedFrameDelta":1,"zoom":0.7453207150368034,"pan":{"x":46.000420609884316,"y":223.16382754994743},"preparationDelta":{"totalFullPrepares":0,"totalIncrementalPrepares":0,"totalPreparedNodes":0,"totalRebuiltVisuals":0,"layerProjectionBuilds":0,"layerProjectionReuses":0},"frameCounters":{"visibleNodes":150,"culledNodes":0,"cachedNodes":150,"preparedNodes":0,"rebuiltVisuals":0,"fullPrepares":0,"incrementalPrepares":0,"rootBoundsTests":1,"rootCandidates":150,"rootQueryReused":false},"input":[{"type":"pointermove","phase":"capture","trusted":true,"eventTimeMs":6600.5,"observedAtMs":6615,"detail":0,"button":-1,"buttons":4,"pointerId":1,"pointerType":"mouse","x":800,"y":550,"target":{"tag":"MAIN","className":"ferroui-container"}},{"type":"pointermove","phase":"bubble","trusted":true,"eventTimeMs":6600.5,"observedAtMs":6615.300000000279,"detail":0,"button":-1,"buttons":4,"pointerId":1,"pointerType":"mouse","x":800,"y":550,"target":{"tag":"MAIN","className":"ferroui-container"}}],"longTasks":[{"startTimeMs":6631.800000000279,"durationMs":76}]}]}
+2026-10-22T22:44:35.1152775Z {"diagnostic":"native-text-pan-trace-v1","mode":"Software2D","build":"current","status":"completed","normalSamplesIncluded":false,"pageErrors":0,"consoleErrors":0,"droppedErrors":0,"completedSamples":6,"trace":{"file":"current-Software2D-pan-trace.json","bytes":1863580,"dataLossOccurred":false,"streamTruncated":false},"analysisStatus":"complete","clock":{"traceUnit":"monotonic microseconds","pageUnit":"performance.now/Event.timeStamp milliseconds","hostClockUsed":false,"method":"Intersect trace-marker offsets bracketed by page performance.now before/after performance.mark.","anchorCount":42,"aligned":true,"offsetUs":2504468302,"uncertaintyMs":0.181,"quantizationAllowanceMs":0.25},"evidence":{"inputEvents":7965,"analyzedEvents":7965,"eventLimitExceeded":false,"unmatchedEnds":0,"unmatchedBegins":16,"invalidDurations":0,"asyncOrFlowRecords":1849,"dataLossOccurred":false,"streamTruncated":false,"peakBufferFraction":0.006155252456665039,"bufferMayBeFull":false,"missingMarkers":0,"duplicateMarkers":0,"wrongThreadMarkers":0,"droppedInputEvents":0},"samples":[{"index":0,"pageClock":{"eventToCaptureMs":16.7,"captureToBubbleMs":0.3},"phases":{"eventTimestampToCapture":{"durationMs":16.718,"observedWallMs":{"mainThread":0.779,"mainThreadTasks":0.779,"input":0.419,"compositor":1.045,"gpu":0.159,"animationFrame":0.09},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":0.773}],"inputAsyncOrFlowRecords":20,"animationFrameSlices":1},"captureToBubble":{"durationMs":0.306,"observedWallMs":{"mainThread":0.306,"mainThreadTasks":0.306,"input":0.306,"compositor":0.306,"gpu":0,"animationFrame":0},"mainThreadTopEvents":[{"event":"EventDispatch","observedWallMs":0.306}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":0},"bubbleToFrame":{"durationMs":2.574,"observedWallMs":{"mainThread":1.419,"mainThreadTasks":1.419,"input":0.117,"compositor":0.518,"gpu":0.059,"animationFrame":0.064},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":1.412}],"inputAsyncOrFlowRecords":8,"animationFrameSlices":1},"presentationToSettled":{"durationMs":38.049,"observedWallMs":{"mainThread":3.134,"mainThreadTasks":3.134,"input":2.228,"compositor":7.111,"gpu":4.86,"animationFrame":0.691},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":3.102}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":7}}},{"index":1,"pageClock":{"eventToCaptureMs":1.5,"captureToBubbleMs":0.3},"phases":{"eventTimestampToCapture":{"durationMs":1.508,"observedWallMs":{"mainThread":0.156,"mainThreadTasks":0.156,"input":0.246,"compositor":0.514,"gpu":0.054,"animationFrame":0},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":0.152}],"inputAsyncOrFlowRecords":17,"animationFrameSlices":0},"captureToBubble":{"durationMs":0.318,"observedWallMs":{"mainThread":0.318,"mainThreadTasks":0.318,"input":0.318,"compositor":0.318,"gpu":0,"animationFrame":0},"mainThreadTopEvents":[{"event":"EventDispatch","observedWallMs":0.318}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":0},"bubbleToFrame":{"durationMs":4.134,"observedWallMs":{"mainThread":1.544,"mainThreadTasks":1.544,"input":0.101,"compositor":0.632,"gpu":0.054,"animationFrame":0.065},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":1.536}],"inputAsyncOrFlowRecords":7,"animationFrameSlices":1},"presentationToSettled":{"durationMs":37.097,"observedWallMs":{"mainThread":2.362,"mainThreadTasks":2.362,"input":0.348,"compositor":3.451,"gpu":2.315,"animationFrame":0.467},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":2.33}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":6}}},{"index":2,"pageClock":{"eventToCaptureMs":13.1,"captureToBubbleMs":0.5},"phases":{"eventTimestampToCapture":{"durationMs":13.198,"observedWallMs":{"mainThread":0.199,"mainThreadTasks":0.199,"input":0.25,"compositor":0.509,"gpu":0.068,"animationFrame":0},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":0.196}],"inputAsyncOrFlowRecords":20,"animationFrameSlices":0},"captureToBubble":{"durationMs":0.352,"observedWallMs":{"mainThread":0.352,"mainThreadTasks":0.352,"input":0.352,"compositor":0.352,"gpu":0,"animationFrame":0},"mainThreadTopEvents":[{"event":"EventDispatch","observedWallMs":0.352}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":0},"bubbleToFrame":{"durationMs":4.791,"observedWallMs":{"mainThread":1.516,"mainThreadTasks":1.516,"input":0.125,"compositor":0.577,"gpu":0.052,"animationFrame":0.072},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":1.509}],"inputAsyncOrFlowRecords":8,"animationFrameSlices":1},"presentationToSettled":{"durationMs":36.111,"observedWallMs":{"mainThread":2.038,"mainThreadTasks":2.038,"input":0.367,"compositor":2.685,"gpu":2.259,"animationFrame":0.439},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":2.011}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":6}}},{"index":3,"pageClock":{"eventToCaptureMs":7.4,"captureToBubbleMs":0.2},"phases":{"eventTimestampToCapture":{"durationMs":7.333,"observedWallMs":{"mainThread":0.166,"mainThreadTasks":0.166,"input":0.194,"compositor":0.41,"gpu":0.047,"animationFrame":0},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":0.161}],"inputAsyncOrFlowRecords":14,"animationFrameSlices":0},"captureToBubble":{"durationMs":0.299,"observedWallMs":{"mainThread":0.299,"mainThreadTasks":0.299,"input":0.299,"compositor":0.299,"gpu":0,"animationFrame":0},"mainThreadTopEvents":[{"event":"EventDispatch","observedWallMs":0.299}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":0},"bubbleToFrame":{"durationMs":2.149,"observedWallMs":{"mainThread":1.614,"mainThreadTasks":1.614,"input":0.542,"compositor":0.647,"gpu":0.168,"animationFrame":0.077},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":1.604}],"inputAsyncOrFlowRecords":7,"animationFrameSlices":1},"presentationToSettled":{"durationMs":21.638,"observedWallMs":{"mainThread":1.972,"mainThreadTasks":1.972,"input":0.557,"compositor":3.435,"gpu":1.922,"animationFrame":0.359},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":1.945}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":6}}},{"index":4,"pageClock":{"eventToCaptureMs":5.3,"captureToBubbleMs":0.4},"phases":{"eventTimestampToCapture":{"durationMs":5.369,"observedWallMs":{"mainThread":0.166,"mainThreadTasks":0.166,"input":0.223,"compositor":0.442,"gpu":0.081,"animationFrame":0},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":0.163}],"inputAsyncOrFlowRecords":20,"animationFrameSlices":0},"captureToBubble":{"durationMs":0.362,"observedWallMs":{"mainThread":0.362,"mainThreadTasks":0.362,"input":0.362,"compositor":0.362,"gpu":0,"animationFrame":0},"mainThreadTopEvents":[{"event":"EventDispatch","observedWallMs":0.362}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":0},"bubbleToFrame":{"durationMs":1.83,"observedWallMs":{"mainThread":1.274,"mainThreadTasks":1.274,"input":0.099,"compositor":0.519,"gpu":0.062,"animationFrame":0.076},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":1.268}],"inputAsyncOrFlowRecords":7,"animationFrameSlices":1},"presentationToSettled":{"durationMs":21.435,"observedWallMs":{"mainThread":2.018,"mainThreadTasks":2.018,"input":0.368,"compositor":2.639,"gpu":1.805,"animationFrame":0.349},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":1.99}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":6}}},{"index":5,"pageClock":{"eventToCaptureMs":4.4,"captureToBubbleMs":0.3},"phases":{"eventTimestampToCapture":{"durationMs":4.364,"observedWallMs":{"mainThread":0.17,"mainThreadTasks":0.17,"input":0.215,"compositor":0.444,"gpu":0.059,"animationFrame":0},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":0.167}],"inputAsyncOrFlowRecords":20,"animationFrameSlices":0},"captureToBubble":{"durationMs":0.31,"observedWallMs":{"mainThread":0.31,"mainThreadTasks":0.31,"input":0.31,"compositor":0.31,"gpu":0,"animationFrame":0},"mainThreadTopEvents":[{"event":"EventDispatch","observedWallMs":0.31}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":0},"bubbleToFrame":{"durationMs":1.845,"observedWallMs":{"mainThread":1.261,"mainThreadTasks":1.261,"input":0.106,"compositor":0.522,"gpu":0.08,"animationFrame":0.104},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":1.257}],"inputAsyncOrFlowRecords":8,"animationFrameSlices":1},"presentationToSettled":{"durationMs":21.32,"observedWallMs":{"mainThread":2.025,"mainThreadTasks":2.025,"input":0.285,"compositor":3.899,"gpu":2.184,"animationFrame":0.411},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":2}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":6}}}],"error":null,"cleanupErrors":[]}
+2026-10-22T22:45:20.4021065Z 5cb7e8847746a2bfae45bf46cafed40889f1affb WebGL2: 16.89 ms median / 1377.48 ms p95 (36 native pan observations)
+2026-10-22T22:45:20.4032244Z 5cb7e8847746a2bfae45bf46cafed40889f1affb WebGL2: dispatch p95 1289.95 ms; frame-observation p95 87.85 ms; native-presentation p95 1401.39 ms (compact-v1)
+2026-10-22T22:45:20.4076038Z {"benchmark":"native-text-pan-v2","label":"5cb7e8847746a2bfae45bf46cafed40889f1affb","mode":"WebGL2","browserTransport":"owned-playwright-server-websocket","traceDiagnosticRequested":true,"metricBridge":{"kind":"compact-v1"},"dispatch":{"count":36,"medianMs":12.182660000000396,"p95Ms":1289.9501189999937,"minMs":2.58191099999749,"maxMs":1316.5470999999998},"frameObservation":{"count":36,"medianMs":5.461432499998409,"p95Ms":87.85344199999963,"minMs":3.3763470000012603,"maxMs":123.13278299999729},"nativePresentation":{"count":36,"medianMs":134.0455135000011,"p95Ms":1401.3936070000018,"minMs":99.3602830000018,"maxMs":1416.956879999998},"longTaskSupported":true,"recordedLongTasks":48,"droppedLongTasks":0,"slowestSamples":[{"index":29,"durationMs":1395.6424299999999,"dispatchMs":1272.5096470000026,"frameObservationMs":123.13278299999729,"presentationMs":1401.3936070000018,"settledObservationMs":2720.3828490000014,"browserObservation":{"startedAtMs":16154,"initialReadMs":0.10000000009313226,"pollCount":1,"pollReadMs":0,"maxPollReadMs":0,"maxPayloadCharacters":575,"frameObservedAtMs":17546.100000000093,"endedAtMs":18879.200000000186},"pointerDelta":{"x":0,"y":4},"frameDelta":1,"presentedFrameDelta":1,"zoom":0.7453207150368034,"pan":{"x":50.000420609884316,"y":227.16382754994743},"preparationDelta":{"totalFullPrepares":0,"totalIncrementalPrepares":0,"totalPreparedNodes":0,"totalRebuiltVisuals":0,"layerProjectionBuilds":0,"layerProjectionReuses":0},"frameCounters":{"visibleNodes":150,"culledNodes":0,"cachedNodes":150,"preparedNodes":0,"rebuiltVisuals":0,"fullPrepares":0,"incrementalPrepares":0,"rootBoundsTests":1,"rootCandidates":150,"rootQueryReused":false},"input":[{"type":"pointermove","phase":"capture","trusted":true,"eventTimeMs":16157.899999999907,"observedAtMs":17426.299999999814,"detail":0,"button":-1,"buttons":4,"pointerId":1,"pointerType":"mouse","x":804,"y":554,"target":{"tag":"MAIN","className":"ferroui-container"}},{"type":"pointermove","phase":"bubble","trusted":true,"eventTimeMs":16157.899999999907,"observedAtMs":17426.600000000093,"detail":0,"button":-1,"buttons":4,"pointerId":1,"pointerType":"mouse","x":804,"y":554,"target":{"tag":"MAIN","className":"ferroui-container"}}],"longTasks":[{"startTimeMs":17428.100000000093,"durationMs":117}]},{"index":42,"durationMs":1377.483619999999,"dispatchMs":1289.9501189999937,"frameObservationMs":87.53350100000534,"presentationMs":1381.8130209999945,"settledObservationMs":2727.3209569999963,"browserObservation":{"startedAtMs":34954.60000000009,"initialReadMs":0.10000000009313226,"pollCount":1,"pollReadMs":0.10000000009313226,"maxPollReadMs":0.10000000009313226,"maxPayloadCharacters":575,"frameObservedAtMs":36330.39999999991,"endedAtMs":37691.10000000009},"pointerDelta":{"x":0,"y":-4},"frameDelta":1,"presentedFrameDelta":1,"zoom":0.7453207150368034,"pan":{"x":50.000420609884316,"y":219.16382754994743},"preparationDelta":{"totalFullPrepares":0,"totalIncrementalPrepares":0,"totalPreparedNodes":0,"totalRebuiltVisuals":0,"layerProjectionBuilds":0,"layerProjectionReuses":0},"frameCounters":{"visibleNodes":150,"culledNodes":0,"cachedNodes":150,"preparedNodes":0,"rebuiltVisuals":0,"fullPrepares":0,"incrementalPrepares":0,"rootBoundsTests":1,"rootCandidates":150,"rootQueryReused":false},"input":[{"type":"pointermove","phase":"capture","trusted":true,"eventTimeMs":34956.200000000186,"observedAtMs":36244.10000000009,"detail":0,"button":-1,"buttons":4,"pointerId":1,"pointerType":"mouse","x":804,"y":546,"target":{"tag":"MAIN","className":"ferroui-container"}},{"type":"pointermove","phase":"bubble","trusted":true,"eventTimeMs":34956.200000000186,"observedAtMs":36244.39999999991,"detail":0,"button":-1,"buttons":4,"pointerId":1,"pointerType":"mouse","x":804,"y":546,"target":{"tag":"MAIN","className":"ferroui-container"}}],"longTasks":[{"startTimeMs":36247.299999999814,"durationMs":82}]},{"index":31,"durationMs":1322.8267639999976,"dispatchMs":1316.5470999999998,"frameObservationMs":6.279663999997865,"presentationMs":1416.956879999998,"settledObservationMs":2778.688457,"browserObservation":{"startedAtMs":19018.799999999814,"initialReadMs":0,"pollCount":1,"pollReadMs":0.10000000009313226,"maxPollReadMs":0.10000000009313226,"maxPayloadCharacters":575,"frameObservedAtMs":20340.899999999907,"endedAtMs":21804},"pointerDelta":{"x":-4,"y":0},"frameDelta":1,"presentedFrameDelta":1,"zoom":0.7453207150368034,"pan":{"x":46.000420609884316,"y":223.16382754994743},"preparationDelta":{"totalFullPrepares":0,"totalIncrementalPrepares":0,"totalPreparedNodes":0,"totalRebuiltVisuals":0,"layerProjectionBuilds":0,"layerProjectionReuses":0},"frameCounters":{"visibleNodes":150,"culledNodes":0,"cachedNodes":150,"preparedNodes":0,"rebuiltVisuals":0,"fullPrepares":0,"incrementalPrepares":0,"rootBoundsTests":1,"rootCandidates":150,"rootQueryReused":false},"input":[{"type":"pointermove","phase":"capture","trusted":true,"eventTimeMs":19020.5,"observedAtMs":20333.799999999814,"detail":0,"button":-1,"buttons":4,"pointerId":1,"pointerType":"mouse","x":800,"y":550,"target":{"tag":"MAIN","className":"ferroui-container"}},{"type":"pointermove","phase":"bubble","trusted":true,"eventTimeMs":19020.5,"observedAtMs":20334.100000000093,"detail":0,"button":-1,"buttons":4,"pointerId":1,"pointerType":"mouse","x":800,"y":550,"target":{"tag":"MAIN","className":"ferroui-container"}}],"longTasks":[{"startTimeMs":20344.700000000186,"durationMs":84}]}]}
+2026-10-22T22:45:31.4368896Z {"diagnostic":"native-text-pan-trace-v1","mode":"WebGL2","build":"current","status":"completed","normalSamplesIncluded":false,"pageErrors":0,"consoleErrors":0,"droppedErrors":0,"completedSamples":6,"trace":{"file":"current-WebGL2-pan-trace.json","bytes":3205716,"dataLossOccurred":false,"streamTruncated":false},"analysisStatus":"complete","clock":{"traceUnit":"monotonic microseconds","pageUnit":"performance.now/Event.timeStamp milliseconds","hostClockUsed":false,"method":"Intersect trace-marker offsets bracketed by page performance.now before/after performance.mark.","anchorCount":42,"aligned":true,"offsetUs":2513337502,"uncertaintyMs":0.174,"quantizationAllowanceMs":0.25},"evidence":{"inputEvents":12870,"analyzedEvents":12870,"eventLimitExceeded":false,"unmatchedEnds":0,"unmatchedBegins":18,"invalidDurations":0,"asyncOrFlowRecords":4114,"dataLossOccurred":false,"streamTruncated":false,"peakBufferFraction":0.14772725105285645,"bufferMayBeFull":false,"missingMarkers":0,"duplicateMarkers":0,"wrongThreadMarkers":0,"droppedInputEvents":0},"samples":[{"index":0,"pageClock":{"eventToCaptureMs":16.3,"captureToBubbleMs":0.3},"phases":{"eventTimestampToCapture":{"durationMs":16.285,"observedWallMs":{"mainThread":0.274,"mainThreadTasks":0.274,"input":0.338,"compositor":1.847,"gpu":0.036,"animationFrame":0},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":0.27}],"inputAsyncOrFlowRecords":20,"animationFrameSlices":0},"captureToBubble":{"durationMs":0.307,"observedWallMs":{"mainThread":0.307,"mainThreadTasks":0.307,"input":0.307,"compositor":0.307,"gpu":0,"animationFrame":0},"mainThreadTopEvents":[{"event":"EventDispatch","observedWallMs":0.307}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":0},"bubbleToFrame":{"durationMs":4.584,"observedWallMs":{"mainThread":1.467,"mainThreadTasks":1.467,"input":0.141,"compositor":0.375,"gpu":0.032,"animationFrame":0.045},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":1.458}],"inputAsyncOrFlowRecords":7,"animationFrameSlices":1},"presentationToSettled":{"durationMs":1265.22,"observedWallMs":{"mainThread":6.034,"mainThreadTasks":6.034,"input":0.88,"compositor":8.63,"gpu":1261.922,"animationFrame":0.587},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":5.987}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":6}}},{"index":1,"pageClock":{"eventToCaptureMs":2.4,"captureToBubbleMs":2.4},"phases":{"eventTimestampToCapture":{"durationMs":2.341,"observedWallMs":{"mainThread":0.186,"mainThreadTasks":0.186,"input":0.21,"compositor":0.472,"gpu":0.054,"animationFrame":0},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":0.183}],"inputAsyncOrFlowRecords":14,"animationFrameSlices":0},"captureToBubble":{"durationMs":2.383,"observedWallMs":{"mainThread":2.383,"mainThreadTasks":2.383,"input":2.383,"compositor":2.383,"gpu":0,"animationFrame":0},"mainThreadTopEvents":[{"event":"EventDispatch","observedWallMs":2.383}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":0},"bubbleToFrame":{"durationMs":2.417,"observedWallMs":{"mainThread":1.615,"mainThreadTasks":1.615,"input":0.161,"compositor":0.816,"gpu":0.05,"animationFrame":0.08},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":1.603}],"inputAsyncOrFlowRecords":8,"animationFrameSlices":1},"presentationToSettled":{"durationMs":9.511,"observedWallMs":{"mainThread":7.232,"mainThreadTasks":7.232,"input":0.33,"compositor":8.541,"gpu":3.145,"animationFrame":5.519},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":7.207}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":5}}},{"index":2,"pageClock":{"eventToCaptureMs":1295.8,"captureToBubbleMs":0.3},"phases":{"eventTimestampToCapture":{"durationMs":1295.799,"observedWallMs":{"mainThread":0.379,"mainThreadTasks":0.379,"input":2.783,"compositor":3.956,"gpu":1292.888,"animationFrame":0},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":0.357}],"inputAsyncOrFlowRecords":15,"animationFrameSlices":0},"captureToBubble":{"durationMs":0.324,"observedWallMs":{"mainThread":0.324,"mainThreadTasks":0.324,"input":0.324,"compositor":0.324,"gpu":0,"animationFrame":0},"mainThreadTopEvents":[{"event":"EventDispatch","observedWallMs":0.324}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":0},"bubbleToFrame":{"durationMs":5.902,"observedWallMs":{"mainThread":1.587,"mainThreadTasks":1.587,"input":1.904,"compositor":0.688,"gpu":0.072,"animationFrame":0.067},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":1.573}],"inputAsyncOrFlowRecords":7,"animationFrameSlices":1},"presentationToSettled":{"durationMs":1331.286,"observedWallMs":{"mainThread":1.478,"mainThreadTasks":1.478,"input":1.321,"compositor":3.242,"gpu":1317.286,"animationFrame":0.374},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":1.44}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":4}}},{"index":3,"pageClock":{"eventToCaptureMs":12.2,"captureToBubbleMs":0.4},"phases":{"eventTimestampToCapture":{"durationMs":12.193,"observedWallMs":{"mainThread":0.207,"mainThreadTasks":0.207,"input":0.313,"compositor":0.541,"gpu":0.061,"animationFrame":0},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":0.201}],"inputAsyncOrFlowRecords":20,"animationFrameSlices":0},"captureToBubble":{"durationMs":0.337,"observedWallMs":{"mainThread":0.337,"mainThreadTasks":0.337,"input":0.337,"compositor":0.337,"gpu":0,"animationFrame":0},"mainThreadTopEvents":[{"event":"EventDispatch","observedWallMs":0.337}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":0},"bubbleToFrame":{"durationMs":3.546,"observedWallMs":{"mainThread":1.608,"mainThreadTasks":1.608,"input":0.233,"compositor":0.632,"gpu":0.055,"animationFrame":0.087},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":1.599}],"inputAsyncOrFlowRecords":8,"animationFrameSlices":1},"presentationToSettled":{"durationMs":1295.946,"observedWallMs":{"mainThread":5.156,"mainThreadTasks":5.156,"input":0.909,"compositor":6.947,"gpu":1294.2,"animationFrame":1.849},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":5.092}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":6}}},{"index":4,"pageClock":{"eventToCaptureMs":14.7,"captureToBubbleMs":0.3},"phases":{"eventTimestampToCapture":{"durationMs":14.663,"observedWallMs":{"mainThread":0.254,"mainThreadTasks":0.254,"input":0.323,"compositor":0.609,"gpu":0.07,"animationFrame":0},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":0.249}],"inputAsyncOrFlowRecords":17,"animationFrameSlices":0},"captureToBubble":{"durationMs":0.399,"observedWallMs":{"mainThread":0.399,"mainThreadTasks":0.399,"input":0.399,"compositor":0.399,"gpu":0,"animationFrame":0},"mainThreadTopEvents":[{"event":"EventDispatch","observedWallMs":0.399}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":0},"bubbleToFrame":{"durationMs":4.684,"observedWallMs":{"mainThread":1.862,"mainThreadTasks":1.862,"input":0.121,"compositor":0.707,"gpu":0.057,"animationFrame":0.073},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":1.853}],"inputAsyncOrFlowRecords":7,"animationFrameSlices":1},"presentationToSettled":{"durationMs":1313.083,"observedWallMs":{"mainThread":4.486,"mainThreadTasks":4.486,"input":2.105,"compositor":7.549,"gpu":1310.294,"animationFrame":0.514},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":4.423}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":6}}},{"index":5,"pageClock":{"eventToCaptureMs":0.7,"captureToBubbleMs":0.3},"phases":{"eventTimestampToCapture":{"durationMs":0.689,"observedWallMs":{"mainThread":0.161,"mainThreadTasks":0.161,"input":0.308,"compositor":0.439,"gpu":0.054,"animationFrame":0},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":0.158}],"inputAsyncOrFlowRecords":17,"animationFrameSlices":0},"captureToBubble":{"durationMs":0.309,"observedWallMs":{"mainThread":0.309,"mainThreadTasks":0.309,"input":0.309,"compositor":0.309,"gpu":0,"animationFrame":0},"mainThreadTopEvents":[{"event":"EventDispatch","observedWallMs":0.309}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":0},"bubbleToFrame":{"durationMs":6.611,"observedWallMs":{"mainThread":1.572,"mainThreadTasks":1.572,"input":0.122,"compositor":0.534,"gpu":0.052,"animationFrame":0.058},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":1.551}],"inputAsyncOrFlowRecords":8,"animationFrameSlices":1},"presentationToSettled":{"durationMs":1303.076,"observedWallMs":{"mainThread":3.298,"mainThreadTasks":3.298,"input":0.795,"compositor":3.996,"gpu":1302.228,"animationFrame":0.453},"mainThreadTopEvents":[{"event":"ThreadControllerImpl::RunTask","observedWallMs":3.235}],"inputAsyncOrFlowRecords":0,"animationFrameSlices":6}}}],"error":null,"cleanupErrors":[]}
+2026-10-22T22:45:34.4616575Z {"diagnostic":"native-text-pan-browser-shutdown-v1","browserTransport":"owned-playwright-server-websocket","reason":"Text benchmark finished","processId":5360,"status":"forced","gracefulCloseCompleted":false,"forcedKillAttempted":true,"directKillAttempted":false,"processExit":{"observed":true,"code":null,"signal":"SIGKILL"},"errors":["TraceDiagnosticTimeout: Trace diagnostic deadline: close owned trace browser\n    at Timeout.<anonymous> (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/text-pan-trace.mjs:27:59)\n    at listOnTimeout (node:internal/timers:585:17)\n    at process.processTimers (node:internal/timers:521:7)"]}
+2026-10-22T22:45:34.4824696Z ##[error]Process completed with exit code 1.
+2026-10-22T22:45:34.4885893Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-10-22T22:45:34.4886675Z with:
+2026-10-22T22:45:34.4887184Z   name: FerroDesign-browser-5cb7e8847746a2bfae45bf46cafed40889f1affb
+2026-10-22T22:45:34.4887715Z   path: samples/FerroDesign/dist
+2026-10-22T22:45:34.4888145Z   if-no-files-found: ignore
+2026-10-22T22:45:34.4888523Z   retention-days: 30
+2026-10-22T22:45:34.4889166Z   compression-level: 6
+2026-10-22T22:45:34.4889523Z   overwrite: false
+2026-10-22T22:45:34.4889919Z   include-hidden-files: false
+2026-10-22T22:45:34.4890277Z env:
+2026-10-22T22:45:34.4890599Z   CARGO_BUILD_JOBS: 1
+2026-10-22T22:45:34.4890975Z   CARGO_TERM_COLOR: always
+2026-10-22T22:45:34.4891375Z   FERRODESIGN_BUILD_JOBS: 1
+2026-10-22T22:45:34.4891890Z   CARGO_TARGET_DIR: /home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target
+2026-10-22T22:45:34.4892414Z ##[endgroup]
+2026-10-22T22:45:34.6543275Z (node:5458) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-22T22:45:34.6544345Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T22:45:34.6621693Z With the provided path, there will be 16 files uploaded
+2026-10-22T22:45:34.6626235Z Artifact name is valid!
+2026-10-22T22:45:34.6626867Z Root directory input is valid!
+2026-10-22T22:45:34.8596852Z Beginning upload of artifact content to blob storage
+2026-10-22T22:45:35.6981303Z (node:5458) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-22T22:45:35.9469028Z Uploaded bytes 8388608
+2026-10-22T22:45:36.1451545Z Uploaded bytes 12450636
+2026-10-22T22:45:36.1624117Z Finished uploading artifact content to blob storage!
+2026-10-22T22:45:36.1625364Z SHA256 digest of uploaded artifact zip is c87c319bed7718645758b347fb855525778dfa63b10b75b20a2bf64d1c35ad63
+2026-10-22T22:45:36.1626565Z Finalizing artifact upload
+2026-10-22T22:45:36.5797548Z Artifact FerroDesign-browser-5cb7e8847746a2bfae45bf46cafed40889f1affb.zip successfully finalized. Artifact ID 12464282776
+2026-10-22T22:45:36.5800692Z Artifact FerroDesign-browser-5cb7e8847746a2bfae45bf46cafed40889f1affb has been successfully uploaded! Final size is 12450636 bytes. Artifact ID is 12464282776
+2026-10-22T22:45:36.5805950Z Artifact download URL: https://github.com/wieslawsoltes/FerroUI/actions/runs/39862047469/artifacts/12464282776
+2026-10-22T22:45:36.5992362Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-10-22T22:45:36.5992825Z with:
+2026-10-22T22:45:36.5993235Z   name: FerroDesign-validation-5cb7e8847746a2bfae45bf46cafed40889f1affb
+2026-10-22T22:45:36.5993988Z   path: samples/FerroDesign/browser-report
+samples/FerroDesign/Cargo.lock
+samples/FerroDesign/package-lock.json
+
+2026-10-22T22:45:36.5994560Z   if-no-files-found: warn
+2026-10-22T22:45:36.5994818Z   retention-days: 30
+2026-10-22T22:45:36.5995058Z   compression-level: 6
+2026-10-22T22:45:36.5995299Z   overwrite: false
+2026-10-22T22:45:36.5995540Z   include-hidden-files: false
+2026-10-22T22:45:36.5995820Z env:
+2026-10-22T22:45:36.5996019Z   CARGO_BUILD_JOBS: 1
+2026-10-22T22:45:36.5996253Z   CARGO_TERM_COLOR: always
+2026-10-22T22:45:36.5996502Z   FERRODESIGN_BUILD_JOBS: 1
+2026-10-22T22:45:36.5996897Z   CARGO_TARGET_DIR: /home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target
+2026-10-22T22:45:36.5997316Z ##[endgroup]
+2026-10-22T22:45:36.7686313Z (node:5470) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-22T22:45:36.7687163Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T22:45:36.7861511Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-10-22T22:45:36.7864642Z The least common ancestor is /home/runner/work/FerroUI/FerroUI/samples/FerroDesign. This will be the root directory of the artifact
+2026-10-22T22:45:36.7865930Z With the provided path, there will be 71 files uploaded
+2026-10-22T22:45:36.7870451Z Artifact name is valid!
+2026-10-22T22:45:36.7871366Z Root directory input is valid!
+2026-10-22T22:45:36.9856647Z Beginning upload of artifact content to blob storage
+2026-10-22T22:45:37.2925743Z (node:5470) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-22T22:45:37.4424949Z Uploaded bytes 8388608
+2026-10-22T22:45:37.6918820Z Uploaded bytes 16777216
+2026-10-22T22:45:38.0504767Z Uploaded bytes 25165824
+2026-10-22T22:45:38.0694818Z Uploaded bytes 25427855
+2026-10-22T22:45:38.0872079Z Finished uploading artifact content to blob storage!
+2026-10-22T22:45:38.0873289Z SHA256 digest of uploaded artifact zip is cbae6863b92aef7ff9f36c2b57cb68ed29587952798b809417545601aeb41fcd
+2026-10-22T22:45:38.0875315Z Finalizing artifact upload
+2026-10-22T22:45:38.5238326Z Artifact FerroDesign-validation-5cb7e8847746a2bfae45bf46cafed40889f1affb.zip successfully finalized. Artifact ID 12465250117
+2026-10-22T22:45:38.5241525Z Artifact FerroDesign-validation-5cb7e8847746a2bfae45bf46cafed40889f1affb has been successfully uploaded! Final size is 25427855 bytes. Artifact ID is 12465250117
+2026-10-22T22:45:38.5247364Z Artifact download URL: https://github.com/wieslawsoltes/FerroUI/actions/runs/39862047469/artifacts/12465250117
+2026-10-22T22:45:38.5443898Z ##[group]Run actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+2026-10-22T22:45:38.5444322Z with:
+2026-10-22T22:45:38.5444906Z   path: /home/runner/work/_temp/ferrodesign-tools/cargo/registry
+/home/runner/work/_temp/ferrodesign-tools/cargo/git
+samples/FerroDesign/target
+
+2026-10-22T22:45:38.5446018Z   key: ferrodesign-build-Linux-v3-browser-f62c3446d937d58fa75af60ee954c7914ea80b77f9a8c07b1a05ebca2e89ad90-5cb7e8847746a2bfae45bf46cafed40889f1affb
+2026-10-22T22:45:38.5446792Z   enableCrossOsArchive: false
+2026-10-22T22:45:38.5447051Z env:
+2026-10-22T22:45:38.5447246Z   CARGO_BUILD_JOBS: 1
+2026-10-22T22:45:38.5447483Z   CARGO_TERM_COLOR: always
+2026-10-22T22:45:38.5447750Z   FERRODESIGN_BUILD_JOBS: 1
+2026-10-22T22:45:38.5448130Z   CARGO_TARGET_DIR: /home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target
+2026-10-22T22:45:38.5448838Z ##[endgroup]
+2026-10-22T22:45:38.6518246Z (node:5484) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-22T22:45:38.6519522Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T22:45:38.6732765Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/FerroUI/FerroUI --files-from manifest.txt --use-compress-program zstdmt
+2026-10-22T22:45:42.9438166Z (node:5484) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-22T22:45:43.9329287Z Sent 20168764 of 422821948 (4.8%), 19.2 MBs/sec
+2026-10-22T22:45:44.8254920Z Sent 422821948 of 422821948 (100.0%), 212.5 MBs/sec
+2026-10-22T22:45:44.9619964Z Cache saved with key: ferrodesign-build-Linux-v3-browser-f62c3446d937d58fa75af60ee954c7914ea80b77f9a8c07b1a05ebca2e89ad90-5cb7e8847746a2bfae45bf46cafed40889f1affb
+2026-10-22T22:45:44.9819733Z Post job cleanup.
+2026-10-22T22:45:45.0661222Z [command]/usr/bin/git version
+2026-10-22T22:45:45.0702138Z git version 2.55.0
+2026-10-22T22:45:45.0742688Z Temporarily overriding HOME='/home/runner/work/_temp/8ce8eef2-96fd-4f47-b375-ced98b4e9be5' before making global git config changes
+2026-10-22T22:45:45.0744695Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-22T22:45:45.0749140Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/FerroUI/FerroUI
+2026-10-22T22:45:45.0785898Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-22T22:45:45.0820205Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-22T22:45:45.1055768Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-22T22:45:45.1081741Z http.https://github.com/.extraheader
+2026-10-22T22:45:45.1091865Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-22T22:45:45.1122127Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-22T22:45:45.1355243Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-22T22:45:45.1386371Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-22T22:45:45.1773712Z Cleaning up orphan processes
+2026-10-22T22:45:45.2110346Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830, actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830, actions/checkout@11d5960a326750d5838078e36cf38b85af677262, actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

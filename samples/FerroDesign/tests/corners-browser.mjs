@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { PNG } from "pngjs";
+import { areaAverageAlpha, coverageConvergence } from "./alpha-coverage.mjs";
 
 // Scalar diagnostics for the independent decoder comparison. Retain the
 // original pixel gate below: these distinguish edge coverage from a displaced
@@ -60,6 +61,53 @@ function alphaDiagnostics(png, svgAlpha) {
     return summary;
 }
 
+async function areaAveragedSvgAlpha(page, source, width, height, scale) {
+    // Keep the large RGBA buffer in the page. Only 28000 averaged alpha values
+    // cross the protocol; the same pure averaging function is unit tested.
+    const pixels = await page.evaluateHandle(async ({ source, width, height, scale }) => {
+        if (width !== 200 || height !== 140 || ![8, 16].includes(scale)) {
+            throw new Error("The corner coverage reference has a fixed bounded fixture and scales.");
+        }
+        const parsed = new DOMParser().parseFromString(source, "image/svg+xml");
+        if (parsed.querySelector("parsererror")) throw new Error("Exported SVG must parse.");
+        const root = parsed.documentElement, viewBox = root.getAttribute("viewBox");
+        if (!viewBox) throw new Error("An explicit SVG viewBox is required to preserve export coordinates.");
+        const paths = [...parsed.querySelectorAll("path")].map(path => path.getAttribute("d"));
+        root.setAttribute("width", String(width * scale));
+        root.setAttribute("height", String(height * scale));
+        const encoded = new XMLSerializer().serializeToString(parsed);
+        const verified = new DOMParser().parseFromString(encoded, "image/svg+xml");
+        if (verified.documentElement.getAttribute("viewBox") !== viewBox ||
+            JSON.stringify([...verified.querySelectorAll("path")].map(path => path.getAttribute("d"))) !== JSON.stringify(paths)) {
+            throw new Error("Changing the SVG viewport must preserve its viewBox and every path.");
+        }
+        const url = URL.createObjectURL(new Blob([encoded], { type: "image/svg+xml" }));
+        const image = new Image(), canvas = document.createElement("canvas");
+        try {
+            image.src = url;
+            await image.decode();
+            if (image.naturalWidth !== width * scale || image.naturalHeight !== height * scale) {
+                throw new Error("SVG must decode at its declared reference resolution.");
+            }
+            canvas.width = image.naturalWidth; canvas.height = image.naturalHeight;
+            const context = canvas.getContext("2d");
+            if (!context) throw new Error("The independent SVG decoder requires Canvas2D.");
+            context.imageSmoothingEnabled = false;
+            context.drawImage(image, 0, 0); // Intrinsic 1:1; no canvas downscale filter.
+            return context.getImageData(0, 0, canvas.width, canvas.height).data;
+        } finally {
+            image.removeAttribute("src");
+            canvas.width = 0; canvas.height = 0;
+            URL.revokeObjectURL(url);
+        }
+    }, { source, width, height, scale });
+    try {
+        return await page.evaluate(areaAverageAlpha, { pixels, width, height, scale });
+    } finally {
+        await pixels.dispose();
+    }
+}
+
 // Author through the native inspector, export through the public FerroUI path.
 export async function cornerRegressions(page, reference, check, helpers, output, mode) {
     const { fixtureNode, isolatedDocument, importFixture, documentState, state,
@@ -114,24 +162,35 @@ export async function cornerRegressions(page, reference, check, helpers, output,
         const parsed = new DOMParser().parseFromString(source, "image/svg+xml");
         const paths = [...parsed.querySelectorAll("path")].map(p => p.getAttribute("d"));
         const url = URL.createObjectURL(new Blob([source], { type: "image/svg+xml" }));
+        const image = new Image(), canvas = document.createElement("canvas");
         try {
-            const image = new Image(); image.src = url; await image.decode();
-            const canvas = document.createElement("canvas");
+            image.src = url; await image.decode();
             canvas.width = image.width; canvas.height = image.height;
             const context = canvas.getContext("2d"); context.drawImage(image, 0, 0);
             const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
             return { width: canvas.width, height: canvas.height, paths,
                 alpha: Array.from({ length: pixels.length / 4 }, (_, i) => pixels[i * 4 + 3]) };
-        } finally { URL.revokeObjectURL(url); }
+        } finally {
+            image.removeAttribute("src");
+            canvas.width = 0; canvas.height = 0;
+            URL.revokeObjectURL(url);
+        }
     }, svg);
     assert.deepEqual([external.width, external.height], [200, 140]);
     assert.ok(external.paths.some(path => (path.match(/C/g) || []).length === 12),
         "SVG retains the four cubic/arc/cubic corners");
-    let edgeDifferences = 0;
-    for (let i = 0; i < external.alpha.length; i++) {
-        if (Math.abs(external.alpha[i] - png.data[i * 4 + 3]) > 12) edgeDifferences++;
-    }
+    // Preserve the original 1x evidence, but do not use its unverified edge AA
+    // samples as a pixel-area oracle. Both fixed references must converge.
     console.log("[corners-alpha " + mode + "] " + JSON.stringify(alphaDiagnostics(png, external.alpha)));
+    const coarse = await areaAveragedSvgAlpha(page, svg, png.width, png.height, 8);
+    const fine = await areaAveragedSvgAlpha(page, svg, png.width, png.height, 16);
+    const convergence = coverageConvergence(coarse, fine);
+    console.log("[corners-coverage-convergence " + mode + "] " + JSON.stringify({ scales: [8, 16], ...convergence }));
+    assert.ok(convergence.converged, "Independent SVG area coverage must converge within 4 alpha units without opposite opaque/transparent pixels");
+    const referenceAlpha = fine.map(alpha => Math.round(alpha));
+    const comparison = alphaDiagnostics(png, referenceAlpha);
+    console.log("[corners-area-alpha " + mode + "] " + JSON.stringify({ referenceScale: 16, ...comparison }));
+    const edgeDifferences = comparison.differingOver12;
     assert.ok(edgeDifferences <= 48, "Independent SVG decoder and FerroUI PNG share the smooth silhouette: " + edgeDifferences);
     assert.deepEqual(await documentState(page), after, "Both exports preserve editable corner parameters");
     check("Public FerroUI PNG and independently decoded SVG retain the same twelve-cubic smoothed silhouette and transparent exterior");

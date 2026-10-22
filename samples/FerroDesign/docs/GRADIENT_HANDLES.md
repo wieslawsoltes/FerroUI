@@ -161,6 +161,12 @@ portable design download and bounded read-only touch observations for each
 renderer mode. The native/core tests separately cover invalid targets and
 coordinates, limits, metadata cleanup and transaction ownership.
 
+Stop swatches retain typed immutable FerroUI brushes with explicit alpha, red,
+green and blue channels. They do not pass the document's RGBA hexadecimal text
+through FerroUI's ARGB parser. A native regression covers two translucent colors
+and zero alpha over the actual white marker backing, plus brush reuse and
+unchanged document/history state. It awaits the same native CI execution gate.
+
 The [exact-source core CI at `7f813672`](../../../docs/ferrodesign-evidence/2026-10-22-7f813672-core/README.md) passed all 511 tests in 1.65 seconds, including all five gradient core cases.
 
 These are authored assertions. Node syntax checking does not execute a browser

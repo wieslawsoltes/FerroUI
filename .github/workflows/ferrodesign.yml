@@ -61,12 +61,26 @@ jobs:
             ferrodesign-build-${{ runner.os }}-v3-native-${{ hashFiles('samples/FerroDesign/**/Cargo.toml', 'samples/FerroDesign/Cargo.lock') }}-
             ferrodesign-build-${{ runner.os }}-v2-${{ hashFiles('samples/FerroDesign/**/Cargo.toml', 'samples/FerroDesign/Cargo.lock') }}-
 
+      - name: Restore content-verified source timestamps
+        id: source-mtimes-restore
+        run: |
+          python3 scripts/test_source_mtime_cache.py
+          mkdir -p "$CARGO_TARGET_DIR"
+          python3 scripts/source_mtime_cache.py restore --repo "$GITHUB_WORKSPACE" --target-dir "$CARGO_TARGET_DIR"
+
       - name: Install pinned Rust, Emscripten and wasm-bindgen
         run: |
           set -o pipefail
           mkdir -p native-report
           scripts/setup.sh "$RUNNER_TEMP/ferrodesign-tools" 2>&1 | tee native-report/toolchain.log
           free -h
+
+      - name: Verify source timestamp reuse and changed-input rebuilding
+        id: source-mtimes-cargo
+        run: |
+          set -o pipefail
+          source "$RUNNER_TEMP/ferrodesign-tools/env.sh"
+          python3 scripts/test_source_mtime_cargo.py 2>&1 | tee native-report/source-mtime-cargo.log
 
       - name: Check source and test document engine
         run: |
@@ -82,9 +96,11 @@ jobs:
           node --check tests/input-observations.mjs
           node --check tests/input-observations.test.mjs
           node --check tests/isolated-scenario.mjs
+          node --check tests/alpha-coverage.mjs
           for file in tests/*-browser.mjs; do node --check "$file"; done
           node --test tests/document-store.test.mjs
           node --test tests/isolated-scenario.test.mjs 2>&1 | tee native-report/isolated-scenario-tests.log
+          node --test tests/alpha-coverage.test.mjs 2>&1 | tee native-report/alpha-coverage-tests.log
           node tests/input-observations.test.mjs 2>&1 | tee native-report/input-observation-tests.log
           node tests/text-pan-trace-analysis.test.mjs 2>&1 | tee native-report/text-pan-trace-analysis-tests.log
           cargo metadata --locked --no-deps --format-version 1 > native-report/cargo-metadata.json
@@ -171,8 +187,13 @@ jobs:
             ${{ runner.temp }}/ferrodesign-tools/emsdk
           key: ${{ steps.tools.outputs.cache-primary-key }}
 
+      - name: Snapshot source timestamps with the partial build
+        id: source-mtimes-snapshot
+        if: ${{ !cancelled() && steps.source-mtimes-restore.outcome == 'success' && steps.source-mtimes-cargo.outcome == 'success' }}
+        run: python3 scripts/source_mtime_cache.py snapshot --repo "$GITHUB_WORKSPACE" --target-dir "$CARGO_TARGET_DIR"
+
       - name: Cache partial build for subsequent fixes
-        if: always() && steps.build-cache.outputs.cache-hit != 'true'
+        if: ${{ !cancelled() && steps.source-mtimes-snapshot.outcome == 'success' && steps.build-cache.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |

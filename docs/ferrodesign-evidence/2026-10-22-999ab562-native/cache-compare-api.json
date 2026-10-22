@@ -1,0 +1,238 @@
+{
+  "repository_full_name": "wieslawsoltes/FerroUI",
+  "base": "5cb7e8847746a2bfae45bf46cafed40889f1affb",
+  "head": "999ab562276fc45c1757aee304330f9571e021f3",
+  "status": "ahead",
+  "ahead_by": 1,
+  "behind_by": 0,
+  "total_commits": 1,
+  "too_large": null,
+  "base_commit": {
+    "sha": "5cb7e8847746a2bfae45bf46cafed40889f1affb",
+    "url": "https://api.github.com/repos/wieslawsoltes/FerroUI/commits/5cb7e8847746a2bfae45bf46cafed40889f1affb",
+    "html_url": "https://github.com/wieslawsoltes/FerroUI/commit/5cb7e8847746a2bfae45bf46cafed40889f1affb"
+  },
+  "merge_base_commit": {
+    "sha": "5cb7e8847746a2bfae45bf46cafed40889f1affb",
+    "url": "https://api.github.com/repos/wieslawsoltes/FerroUI/commits/5cb7e8847746a2bfae45bf46cafed40889f1affb",
+    "html_url": "https://github.com/wieslawsoltes/FerroUI/commit/5cb7e8847746a2bfae45bf46cafed40889f1affb"
+  },
+  "files": [
+    {
+      "filename": ".github/workflows/ferrodesign-native.yml",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 3,
+      "changes": 6,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-124ffdb7-ci/NATIVE_CACHE.md",
+      "status": "added",
+      "additions": 30,
+      "deletions": 0,
+      "changes": 30,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-124ffdb7-ci/README.md",
+      "status": "added",
+      "additions": 68,
+      "deletions": 0,
+      "changes": 68,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-124ffdb7-ci/browser-job.log",
+      "status": "added",
+      "additions": 1001,
+      "deletions": 0,
+      "changes": 1001,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-124ffdb7-ci/cache-compare-api.json",
+      "status": "added",
+      "additions": 48,
+      "deletions": 0,
+      "changes": 48,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-124ffdb7-ci/fingerprint-probe/Cargo.lock",
+      "status": "added",
+      "additions": 7,
+      "deletions": 0,
+      "changes": 7,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-124ffdb7-ci/fingerprint-probe/Cargo.toml",
+      "status": "added",
+      "additions": 6,
+      "deletions": 0,
+      "changes": 6,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-124ffdb7-ci/fingerprint-probe/current.log",
+      "status": "added",
+      "additions": 9,
+      "deletions": 0,
+      "changes": 9,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-124ffdb7-ci/fingerprint-probe/old.log",
+      "status": "added",
+      "additions": 2,
+      "deletions": 0,
+      "changes": 2,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-124ffdb7-ci/fingerprint-probe/result.json",
+      "status": "added",
+      "additions": 24,
+      "deletions": 0,
+      "changes": 24,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-124ffdb7-ci/fingerprint-probe/src/lib.rs",
+      "status": "added",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-124ffdb7-ci/native-feedback-job.log",
+      "status": "added",
+      "additions": 3154,
+      "deletions": 0,
+      "changes": 3154,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-124ffdb7-ci/native-job.log",
+      "status": "added",
+      "additions": 6250,
+      "deletions": 0,
+      "changes": 6250,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-124ffdb7-ci/summary.json",
+      "status": "added",
+      "additions": 295,
+      "deletions": 0,
+      "changes": 295,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-124ffdb7-ci/workflow-api.json",
+      "status": "added",
+      "additions": 384,
+      "deletions": 0,
+      "changes": 384,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-40dafdab-browser/README.md",
+      "status": "added",
+      "additions": 52,
+      "deletions": 0,
+      "changes": 52,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-40dafdab-browser/browser-job.log",
+      "status": "added",
+      "additions": 1538,
+      "deletions": 0,
+      "changes": 1538,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-40dafdab-browser/indexeddb-summary.json",
+      "status": "added",
+      "additions": 28,
+      "deletions": 0,
+      "changes": 28,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-40dafdab-browser/printed-summary.json",
+      "status": "added",
+      "additions": 81,
+      "deletions": 0,
+      "changes": 81,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-40dafdab-browser/text-pan-phases.json",
+      "status": "added",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-58deaeee-ci/README.md",
+      "status": "added",
+      "additions": 39,
+      "deletions": 0,
+      "changes": 39,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-58deaeee-ci/generated-provenance.json",
+      "status": "added",
+      "additions": 49,
+      "deletions": 0,
+      "changes": 49,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-58deaeee-ci/generator-job.log",
+      "status": "added",
+      "additions": 2851,
+      "deletions": 0,
+      "changes": 2851,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-58deaeee-ci/jobs-api.json",
+      "status": "added",
+      "additions": 192,
+      "deletions": 0,
+      "changes": 192,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/ferrodesign-evidence/2026-10-22-58deaeee-ci/native-feedback-job.log",
+      "status": "added",
+      "additions": 3118,
+      "deletions": 0,
+      "changes": 3118,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/README.md",
+      "status": "modified",
+      "additions": 8,
+      "deletions": 7,
+      "changes": 15,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/VALIDATION.md",
+      "status": "modified",
+      "additions": 30,
+      "deletions": 5,
+      "changes": 35,
+      "previous_filename": null
+    }
+  ]
+}
