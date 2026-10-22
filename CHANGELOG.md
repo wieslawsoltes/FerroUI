@@ -4,6 +4,11 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
+### Added
+
+- Opt-in application inspection and automation through MCP (#235): `ferroui-inspect` provides weak node IDs, trees, properties and styles, resource lookup, selectors, raw input, automation patterns, PNG screenshots, condition probes, logs and render/layout statistics. `ferroui-mcp` exposes the core over stdio and authenticated loopback Streamable HTTP, with UI dispatcher marshalling and separate input/property-write permissions.
+- ControlCatalog's `mcp` feature, native and headless launch modes, a protocol smoke test for both transports, and [MCP/Claude Code setup documentation](docs/mcp.md).
+
 ## [0.4.0] - 2026-10-22
 
 The fourth release. It completes the declarative Rust API of `0.4.0-preview.1` and adds the developer tools:

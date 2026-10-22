@@ -16,6 +16,8 @@ name = "control-catalog-desktop"
 path = "program.rs"
 
 [dependencies]
+ferroui-mcp = { workspace = true, optional = true }
+ferroui-headless = { workspace = true, optional = true }
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-desktop = { workspace = true }
@@ -43,6 +45,7 @@ ferroui-wayland = { workspace = true }
 ferroui-linuxframebuffer = { workspace = true }
 
 [features]
+mcp = ["dep:ferroui-mcp", "dep:ferroui-headless"]
 # The Vello render backend beside Skia: `FERROUI_RENDERER=vello` (the default order of its modes),
 # `vello-hybrid`, `vello-gpu` or `vello-cpu` then chooses it at start.
 vello = ["dep:ferroui-vello"]

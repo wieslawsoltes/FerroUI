@@ -86,6 +86,9 @@
 //! (`EmbedSample.Implementation`). The one for Linux is ported
 //! (`NativeControls/Gtk`).
 
+#[cfg(feature = "mcp")]
+mod mcp;
+
 #[cfg(windows)]
 mod window_capture;
 
@@ -117,7 +120,13 @@ use std::time::Duration;
 fn main() -> std::process::ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
 
+    // Reserve the protocol writer before builder configuration can print platform diagnostics.
+    #[cfg(feature = "mcp")]
+    let mcp_output = args.iter().any(|arg| arg == "--mcp-stdio")
+        .then(|| ferroui_mcp::reserve_stdout().expect("reserve stdout for MCP"));
     let builder = build_ferro_app();
+    #[cfg(feature = "mcp")]
+    let builder = mcp::configure(builder, &args, mcp_output);
 
     // As the desktop entry point of the reference: `--fbdev` and `--drm`
     // run the catalog on the Linux framebuffer platform, on a framebuffer
