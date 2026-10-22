@@ -1,4 +1,6 @@
 use super::{caret_navigation::line_ranges, Selection, SelectionSegment};
+use crate::document::{DocumentError, TextDocument};
+use unicode_segmentation::UnicodeSegmentation;
 
 /// Rectangular selection expressed in zero-based lines and visual columns.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -23,7 +25,7 @@ impl RectangleSelection {
                 start + offset_at_column(content, self.caret_column, tab_size),
             )
         });
-        Selection::from_segments(
+        Selection::from_rectangle_segments(
             segments,
             if self.caret_line < self.anchor_line {
                 0
@@ -32,6 +34,82 @@ impl RectangleSelection {
             },
         )
     }
+
+    /// Projects zero-based line and cell coordinates without flattening the
+    /// document. Short lines retain cells beyond their ends as virtual spaces.
+    /// Tabs advance to stops and extended grapheme clusters occupy one cell.
+    /// Native views may instead project pixel positions through their layout.
+    pub fn to_document_selection(
+        self,
+        document: &TextDocument,
+        tab_size: usize,
+    ) -> Result<Selection, DocumentError> {
+        let first = self
+            .anchor_line
+            .min(self.caret_line)
+            .min(document.line_count() - 1);
+        let last = self
+            .anchor_line
+            .max(self.caret_line)
+            .min(document.line_count() - 1);
+        let mut segments = Vec::with_capacity(last - first + 1);
+        for number in first..=last {
+            let line = document.get_line_by_number(number + 1)?;
+            let text = document.get_text(line.offset, line.length)?;
+            let anchor = position_at_column(&text, self.anchor_column, tab_size);
+            let caret = position_at_column(&text, self.caret_column, tab_size);
+            segments.push(SelectionSegment::with_virtual_space(
+                line.offset + anchor.0,
+                anchor.1,
+                line.offset + caret.0,
+                caret.1,
+            ));
+        }
+        Ok(Selection::from_rectangle_segments(
+            segments,
+            if self.caret_line < self.anchor_line {
+                0
+            } else {
+                last - first
+            },
+        ))
+    }
+
+    /// String-based equivalent of `to_document_selection`. The original
+    /// `to_selection` method deliberately keeps its clamped endpoint contract.
+    pub fn to_selection_with_virtual_space(self, text: &str, tab_size: usize) -> Selection {
+        self.to_document_selection(&TextDocument::from_text(text), tab_size)
+            .expect("clamped line numbers and complete logical lines are valid")
+    }
+}
+
+pub(crate) fn position_at_column(text: &str, column: usize, tab_size: usize) -> (usize, usize) {
+    let tab_size = tab_size.max(1);
+    let (mut visual, mut offset) = (0, 0);
+    for grapheme in text.graphemes(true) {
+        if visual >= column {
+            return (offset, 0);
+        }
+        visual += if grapheme == "\t" {
+            tab_size - visual % tab_size
+        } else {
+            1
+        };
+        offset += grapheme.encode_utf16().count();
+    }
+    (offset, column.saturating_sub(visual))
+}
+
+pub(crate) fn visual_column(text: &str, tab_size: usize) -> usize {
+    let tab_size = tab_size.max(1);
+    text.graphemes(true).fold(0, |column, grapheme| {
+        column
+            + if grapheme == "\t" {
+                tab_size - column % tab_size
+            } else {
+                1
+            }
+    })
 }
 
 pub(crate) fn offset_at_column(text: &[u16], column: usize, tab_size: usize) -> usize {

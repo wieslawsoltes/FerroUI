@@ -7,6 +7,7 @@ mod highlighting_manager;
 mod html_clipboard;
 mod rich_text;
 mod rich_text_writer;
+pub mod xshd;
 
 pub use document_highlighter::DocumentHighlighter;
 pub use highlighted_line::{HighlightedLine, HighlightedSection};

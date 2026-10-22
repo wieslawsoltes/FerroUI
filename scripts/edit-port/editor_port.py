@@ -399,7 +399,7 @@ def render(inventory: dict, mappings: dict, rows: list[dict]) -> tuple[dict, str
         values = Counter(row["status"] for row in rows if row["category"] == name)
         lines.append(f"| {name} | {values['mapped']} | {values['adapted']} | {values['unmapped']} | {sum(values.values())} |")
     lines += ["", "## Behavioral reports", "",
-              "The [document report](editor-document.md), [editor services report](editor-services.md), and [TextMate engine report](textmate-engine.md) record behavior, algorithm adaptations, verification, and remaining gaps. The crate notices retain source attribution. Per-file limitations below describe each decision; an absent limitation is not a parity certification. Repeated declarations in sample resources or conditional branches are retained in the cached occurrence list and deduplicated by qualified name within each file for mapping decisions.", ""]
+              "The [document report](editor-document.md), [editor services report](editor-services.md), [virtual-space report](editor-virtual-space.md), and [TextMate engine report](textmate-engine.md) record behavior, algorithm adaptations, verification, and remaining gaps. The crate notices retain source attribution. Per-file limitations below describe each decision; an absent limitation is not a parity certification. Repeated declarations in sample resources or conditional branches are retained in the cached occurrence list and deduplicated by qualified name within each file for mapping decisions.", ""]
     for name, pin in PINS.items():
         lines += [f"## {pin['title']} files", ""]
         projects = sorted({PurePosixPath(row["path"]).parts[1] for row in rows if row["repository"] == name})

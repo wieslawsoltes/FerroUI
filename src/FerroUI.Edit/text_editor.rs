@@ -268,6 +268,39 @@ impl TextEditor {
     pub fn caret_offset(&self) -> usize {
         self.session().caret_offset()
     }
+    pub fn caret_position(&self) -> crate::TextViewPosition {
+        self.text_area().caret_position().unwrap_or_else(|| {
+            crate::TextViewPosition::from_location(
+                self.document()
+                    .get_location(self.caret_offset())
+                    .unwrap_or_default(),
+            )
+        })
+    }
+    pub fn set_caret_position(&self, position: crate::TextViewPosition) -> Result<(), EditError> {
+        let document = self.document();
+        let offset = document.get_offset(position.location())?;
+        if let Some(manager) = self.folding_manager() {
+            manager.unfold_at(offset);
+        }
+        let extra = if let Some(visual) = position.visual_column {
+            let logical = document.get_line_by_offset(offset)?;
+            if offset == logical.end_offset() {
+                visual.saturating_sub(
+                    self.text_area()
+                        .visual_column_for_offset(offset)
+                        .unwrap_or(visual),
+                )
+            } else {
+                0
+            }
+        } else {
+            0
+        };
+        self.session().set_caret_position(offset, extra)?;
+        self.selection_changed_with_affinity(position.is_at_end_of_line);
+        Ok(())
+    }
     pub fn set_caret_offset(&self, offset: usize) -> Result<(), EditError> {
         self.session().set_caret_offset(offset)?;
         self.selection_changed();
@@ -455,8 +488,12 @@ impl TextEditor {
     }
 
     pub(crate) fn selection_changed(&self) {
+        self.selection_changed_with_affinity(false);
+    }
+
+    pub(crate) fn selection_changed_with_affinity(&self, at_end_of_line: bool) {
         if let Some(area) = self.area.get() {
-            area.selection_changed();
+            area.selection_changed_with_affinity(at_end_of_line);
         }
         let selection = self.selection();
         let changed = *self.previous_selection.borrow() != selection;

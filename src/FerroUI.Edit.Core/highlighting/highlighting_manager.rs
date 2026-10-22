@@ -1,3 +1,4 @@
+use super::xshd::XshdSyntaxDefinition;
 use super::{HighlightingDefinition, HighlightingError};
 use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
@@ -6,7 +7,7 @@ use std::rc::Rc;
 /// Lazily compiles embedded and application-provided XSHD definitions. Only the
 /// transitive dependencies of the requested language are compiled.
 pub struct HighlightingManager {
-    sources: BTreeMap<String, Rc<str>>,
+    sources: BTreeMap<String, Rc<XshdSyntaxDefinition>>,
     extensions: HashMap<String, String>,
     cache: RefCell<HashMap<String, Rc<HighlightingDefinition>>>,
 }
@@ -36,27 +37,29 @@ impl HighlightingManager {
         self.sources.keys().map(String::as_str)
     }
     pub fn register_highlighting(&mut self, source: &str) -> Result<String, HighlightingError> {
-        let document = roxmltree::Document::parse(source)
-            .map_err(|e| HighlightingError::Xml(e.to_string()))?;
-        let root = document.root_element();
-        let name = root
-            .attribute("name")
+        self.register_syntax_definition(XshdSyntaxDefinition::load(source)?)
+    }
+
+    /// Registers an editable definition without compiling its expressions.
+    /// Replacing a name invalidates cached dependents and its old extensions.
+    pub fn register_syntax_definition(
+        &mut self,
+        syntax: XshdSyntaxDefinition,
+    ) -> Result<String, HighlightingError> {
+        let name = syntax
+            .name
+            .as_deref()
             .filter(|s| !s.is_empty())
             .ok_or_else(|| {
                 HighlightingError::InvalidDefinition("Registered definitions need a name".into())
             })?
             .to_owned();
         self.extensions.retain(|_, value| value != &name);
-        for extension in root
-            .attribute("extensions")
-            .unwrap_or("")
-            .split(';')
-            .filter(|s| !s.is_empty())
-        {
+        for extension in syntax.extensions.iter().filter(|s| !s.is_empty()) {
             self.extensions
                 .insert(extension.to_lowercase(), name.clone());
         }
-        self.sources.insert(name.clone(), Rc::from(source));
+        self.sources.insert(name.clone(), Rc::new(syntax));
         self.cache.borrow_mut().clear();
         Ok(name)
     }
@@ -81,27 +84,16 @@ impl HighlightingManager {
                 .sources
                 .get(&current)
                 .ok_or_else(|| HighlightingError::Reference(current.clone()))?;
-            let document = roxmltree::Document::parse(current_source)
-                .map_err(|e| HighlightingError::Xml(e.to_string()))?;
-            for node in document.descendants().filter(|n| n.is_element()) {
-                for key in ["ruleSet", "color"] {
-                    if let Some((dependency, _)) =
-                        node.attribute(key).and_then(|s| s.rsplit_once('/'))
-                    {
-                        if !visited.contains(dependency) {
-                            pending.push(dependency.to_owned());
-                        }
-                    }
+            for dependency in current_source.external_definitions() {
+                if !visited.contains(dependency) {
+                    pending.push(dependency.to_owned());
                 }
             }
             if current != name {
                 dependencies.push(current_source.as_ref());
             }
         }
-        let definition = Rc::new(HighlightingDefinition::load_with_dependencies(
-            source,
-            &dependencies,
-        )?);
+        let definition = Rc::new(source.compile_with_dependencies(&dependencies)?);
         self.cache
             .borrow_mut()
             .insert(name.to_owned(), definition.clone());
@@ -153,6 +145,97 @@ const BUILTINS: &[&str] = &[
 mod tests {
     use super::*;
     use crate::highlighting::{HighlightingEngine, HighlightingState};
+
+    fn foreground(definition: Rc<HighlightingDefinition>, text: &str) -> Option<String> {
+        HighlightingEngine::new(definition)
+            .highlight_line(text, 1, 0, &HighlightingState::default())
+            .unwrap()
+            .sections
+            .first()
+            .and_then(|section| section.color.foreground.clone())
+    }
+
+    #[test]
+    fn typed_registry_resolves_legacy_dependencies_and_extension_separators() {
+        let mut manager = HighlightingManager::empty();
+        manager.register_highlighting(r#"<SyntaxDefinition name="Dependency/Language"><RuleSet><Rule foreground="Red">x</Rule></RuleSet></SyntaxDefinition>"#).unwrap();
+        manager.register_highlighting(r#"<SyntaxDefinition name="Legacy" extensions=".old|.alt;.third" extends="Dependency/Language"><RuleSets><RuleSet/></RuleSets></SyntaxDefinition>"#).unwrap();
+        manager.register_highlighting(r#"<SyntaxDefinition name="Referenced"><RuleSets><RuleSet reference="Dependency/Language"/></RuleSets></SyntaxDefinition>"#).unwrap();
+        for name in ["Legacy", "Referenced"] {
+            assert_eq!(
+                foreground(manager.get_definition(name).unwrap().unwrap(), "x"),
+                Some("Red".into())
+            );
+        }
+        for extension in [".old", ".alt", ".third", "file.OLD"] {
+            assert_eq!(
+                manager
+                    .get_definition_by_extension(extension)
+                    .unwrap()
+                    .unwrap()
+                    .name,
+                "Legacy"
+            );
+        }
+    }
+
+    #[test]
+    fn replacing_typed_definition_invalidates_dependents_and_preserves_lazy_compilation() {
+        let mut manager = HighlightingManager::empty();
+        manager.register_highlighting(r#"<SyntaxDefinition name="Base" extensions=".old"><RuleSet><Rule foreground="Red">x</Rule></RuleSet></SyntaxDefinition>"#).unwrap();
+        manager.register_highlighting(r#"<SyntaxDefinition name="Dependent"><RuleSet><Import ruleSet="Base/"/></RuleSet></SyntaxDefinition>"#).unwrap();
+        manager.register_highlighting(r#"<SyntaxDefinition name="Unrelated"><RuleSet><Rule>(</Rule></RuleSet></SyntaxDefinition>"#).unwrap();
+        let first = manager.get_definition("Dependent").unwrap().unwrap();
+        assert!(Rc::ptr_eq(
+            &first,
+            &manager.get_definition("Dependent").unwrap().unwrap()
+        ));
+        assert_eq!(foreground(first.clone(), "x"), Some("Red".into()));
+        let replacement = XshdSyntaxDefinition::load(r#"<SyntaxDefinition name="Base" extensions=".new"><RuleSet><Rule foreground="Blue">x</Rule></RuleSet></SyntaxDefinition>"#).unwrap();
+        manager.register_syntax_definition(replacement).unwrap();
+        let second = manager.get_definition("Dependent").unwrap().unwrap();
+        assert!(!Rc::ptr_eq(&first, &second));
+        assert_eq!(foreground(second, "x"), Some("Blue".into()));
+        assert!(manager
+            .get_definition_by_extension(".old")
+            .unwrap()
+            .is_none());
+        assert_eq!(
+            manager
+                .get_definition_by_extension(".new")
+                .unwrap()
+                .unwrap()
+                .name,
+            "Base"
+        );
+        assert!(matches!(
+            manager.get_definition("Unrelated"),
+            Err(HighlightingError::Pattern(_))
+        ));
+        assert!(manager
+            .register_highlighting(r#"<SyntaxDefinition name="Base"><Unknown/></SyntaxDefinition>"#)
+            .is_err());
+        assert_eq!(
+            foreground(manager.get_definition("Dependent").unwrap().unwrap(), "x"),
+            Some("Blue".into())
+        );
+    }
+
+    #[test]
+    fn missing_external_colors_are_resolved_through_the_registry() {
+        let mut manager = HighlightingManager::empty();
+        manager.register_highlighting(r#"<SyntaxDefinition name="Consumer"><RuleSet><Span begin="\[" end="\]"><RuleSet><Rule color="Colors/Word">x</Rule></RuleSet></Span></RuleSet></SyntaxDefinition>"#).unwrap();
+        assert!(matches!(
+            manager.get_definition("Consumer"),
+            Err(HighlightingError::Reference(_))
+        ));
+        manager.register_highlighting(r#"<SyntaxDefinition name="Colors"><Color name="Word" foreground="Green"/><RuleSet/></SyntaxDefinition>"#).unwrap();
+        assert_eq!(
+            foreground(manager.get_definition("Consumer").unwrap().unwrap(), "[x]"),
+            Some("Green".into())
+        );
+    }
+
     #[test]
     fn all_bundled_definitions_compile_and_execute() {
         let manager = HighlightingManager::new();

@@ -191,11 +191,12 @@ fn line_ranges(
         let first = snapshot
             .get_line_by_offset(segment.start_offset())?
             .line_number;
-        let last_offset = if deleting_lines || segment.is_empty() {
-            segment.end_offset()
-        } else {
-            segment.end_offset() - 1
-        };
+        let last_offset =
+            if deleting_lines || segment.length() == 0 || segment.end_virtual_space() != 0 {
+                segment.end_offset()
+            } else {
+                segment.end_offset() - 1
+            };
         let last = snapshot.get_line_by_offset(last_offset)?.line_number;
         match ranges.last_mut() {
             Some((_, previous_last)) if first <= previous_last.saturating_add(1) => {

@@ -1,3 +1,5 @@
+mod virtual_space;
+
 use super::{
     next_caret_position, plan_text_transformation, CaretMovement, DefaultIndentationStrategy,
     IReadOnlySectionProvider, IndentationError, IndentationStrategy, NoReadOnlySections, Selection,
@@ -56,6 +58,9 @@ pub enum EditError {
     ReadOnly,
     InvalidSelection,
     ReplacementCount,
+    AmbiguousVirtualCarets,
+    VirtualSpaceTooLarge,
+    StaleEditPlan,
 }
 impl fmt::Display for EditError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -66,6 +71,15 @@ impl fmt::Display for EditError {
             Self::InvalidSelection => f.write_str("The selection lies outside the document"),
             Self::ReplacementCount => {
                 f.write_str("Supply one replacement or one replacement per selection")
+            }
+            Self::AmbiguousVirtualCarets => f.write_str(
+                "Distinct virtual selections at one physical line end cannot be edited together",
+            ),
+            Self::VirtualSpaceTooLarge => {
+                f.write_str("The requested virtual-space padding is too large")
+            }
+            Self::StaleEditPlan => {
+                f.write_str("The document changed while the edit was being prepared")
             }
         }
     }
@@ -94,6 +108,7 @@ struct SessionInner {
     document: TextDocument,
     selection: Rc<RefCell<Selection>>,
     options: RefCell<EditorOptions>,
+    desired_columns: RefCell<Vec<Option<usize>>>,
     indentation_strategy: RefCell<Option<Rc<dyn IndentationStrategy>>>,
     read_only: Cell<bool>,
     read_only_sections: RefCell<Rc<dyn IReadOnlySectionProvider>>,
@@ -113,26 +128,30 @@ pub struct EditorSession {
 }
 impl EditorSession {
     pub fn new(document: TextDocument) -> Self {
-        let selection = Rc::new(RefCell::new(Selection::default()));
-        let weak = Rc::downgrade(&selection);
-        let subscription = document.changed(move |change| {
-            if let Some(selection) = weak.upgrade() {
-                let updated = selection.borrow().update_on_document_change(change);
-                *selection.borrow_mut() = updated;
-            }
-        });
-        Self {
-            inner: Rc::new(SessionInner {
+        let inner = Rc::new_cyclic(|weak: &std::rc::Weak<SessionInner>| {
+            let listener = weak.clone();
+            let subscription = document.changed(move |change| {
+                if let Some(inner) = listener.upgrade() {
+                    let updated = inner.selection.borrow().update_on_document_change(change);
+                    let updated = virtual_space::normalize_selection(&inner.document, updated);
+                    *inner.selection.borrow_mut() = updated;
+                    inner.desired_columns.borrow_mut().clear();
+                }
+            });
+            SessionInner {
                 document,
-                selection,
+                selection: Rc::new(RefCell::new(Selection::default())),
                 options: RefCell::new(EditorOptions::default()),
+                desired_columns: RefCell::new(Vec::new()),
                 indentation_strategy: RefCell::new(Some(Rc::new(DefaultIndentationStrategy))),
                 read_only: Cell::new(false),
                 read_only_sections: RefCell::new(Rc::new(NoReadOnlySections)),
                 subscription,
-            }),
-        }
+            }
+        });
+        Self { inner }
     }
+
     pub fn document(&self) -> &TextDocument {
         &self.inner.document
     }
@@ -147,7 +166,19 @@ impl EditorSession {
         if !matches!(options.newline.as_str(), "\n" | "\r" | "\r\n") {
             options.newline = "\n".into();
         }
+        let disable_virtual = !options.enable_virtual_space;
         *self.inner.options.borrow_mut() = options;
+        self.inner.desired_columns.borrow_mut().clear();
+        let selection = self.selection();
+        if disable_virtual && !selection.is_rectangular() {
+            *self.inner.selection.borrow_mut() = Selection::from_segments(
+                selection
+                    .segments()
+                    .iter()
+                    .map(|s| SelectionSegment::new(s.anchor, s.caret)),
+                selection.primary_index(),
+            );
+        }
     }
     pub fn indentation_strategy(&self) -> Option<Rc<dyn IndentationStrategy>> {
         self.inner.indentation_strategy.borrow().clone()
@@ -167,16 +198,12 @@ impl EditorSession {
         *self.inner.read_only_sections.borrow_mut() = provider;
     }
     pub fn set_selection(&self, selection: Selection) -> Result<(), EditError> {
-        if selection
-            .segments()
-            .iter()
-            .any(|s| s.end_offset() > self.document().text_length())
-        {
-            return Err(EditError::InvalidSelection);
-        }
+        self.validate_selection(&selection)?;
         *self.inner.selection.borrow_mut() = selection;
+        self.inner.desired_columns.borrow_mut().clear();
         Ok(())
     }
+
     pub fn select(&self, start: usize, length: usize) -> Result<(), EditError> {
         self.set_selection(Selection::simple(
             start,
@@ -187,12 +214,29 @@ impl EditorSession {
     }
     pub fn select_all(&self) {
         *self.inner.selection.borrow_mut() = Selection::simple(0, self.document().text_length());
+        self.inner.desired_columns.borrow_mut().clear();
     }
     pub fn caret_offset(&self) -> usize {
         self.selection().primary().caret
     }
     pub fn set_caret_offset(&self, offset: usize) -> Result<(), EditError> {
-        self.set_selection(Selection::empty(offset))
+        self.set_caret_position(offset, 0)
+    }
+    pub fn caret_virtual_space(&self) -> usize {
+        self.selection().primary().caret_virtual_space
+    }
+    /// Places a caret at a UTF-16 offset and, optionally, cells beyond its
+    /// logical line end. Virtual cells are valid only at that end offset.
+    pub fn set_caret_position(&self, offset: usize, virtual_space: usize) -> Result<(), EditError> {
+        self.set_selection(Selection::from_segments(
+            [SelectionSegment::with_virtual_space(
+                offset,
+                virtual_space,
+                offset,
+                virtual_space,
+            )],
+            0,
+        ))
     }
     pub fn selected_text(&self) -> Result<String, EditError> {
         let mut text = String::new();
@@ -213,22 +257,7 @@ impl EditorSession {
         self.replace_selections(&[text.to_owned()])
     }
     pub fn replace_selections(&self, replacements: &[String]) -> Result<(), EditError> {
-        let selection = self.selection();
-        if replacements.len() != 1 && replacements.len() != selection.segments().len() {
-            return Err(EditError::ReplacementCount);
-        }
-        let edits: Vec<_> = selection
-            .segments()
-            .iter()
-            .enumerate()
-            .map(|(i, s)| {
-                (
-                    s.segment(),
-                    replacements[if replacements.len() == 1 { 0 } else { i }].clone(),
-                )
-            })
-            .collect();
-        self.replace_segments(&edits, selection.primary_index())
+        self.replace_virtual_selections(replacements)
     }
 
     fn replace_segments(
@@ -236,31 +265,19 @@ impl EditorSession {
         edits: &[(SimpleSegment, String)],
         primary: usize,
     ) -> Result<(), EditError> {
-        self.validate_edits(edits)?;
-        if edits
-            .windows(2)
-            .any(|pair| pair[0].0.offset + pair[0].0.length > pair[1].0.offset)
-        {
-            return Err(DocumentError::OverlappingEdits.into());
-        }
-        let _update = self.document().begin_update()?;
-        let mut carets = Vec::with_capacity(edits.len());
-        for (segment, replacement) in edits.iter().rev() {
-            self.document()
-                .replace(segment.offset, segment.length, replacement)?;
-            let anchor = self
-                .document()
-                .create_anchor(segment.offset + replacement.encode_utf16().count())?;
-            anchor.set_movement_type(AnchorMovementType::AfterInsertion);
-            anchor.set_survive_deletion(true);
-            carets.push(anchor);
-        }
-        carets.reverse();
-        let segments: Result<Vec<_>, _> = carets
-            .iter()
-            .map(|anchor| anchor.offset().map(SelectionSegment::empty))
-            .collect();
-        self.set_selection(Selection::from_segments(segments?, primary))
+        self.execute_replacements(
+            edits
+                .iter()
+                .map(|(segment, text)| virtual_space::PlannedReplacement {
+                    segment: *segment,
+                    text: text.clone(),
+                    virtual_space: 0,
+                })
+                .collect(),
+            primary,
+            false,
+            false,
+        )
     }
 
     fn validate_edits(&self, edits: &[(SimpleSegment, String)]) -> Result<(), EditError> {
@@ -332,28 +349,9 @@ impl EditorSession {
         }))
     }
     pub fn move_caret(&self, movement: CaretMovement, extend_selection: bool) {
-        let selection = self.selection();
-        let segments = selection.segments().iter().map(|s| {
-            let target =
-                if !extend_selection && !s.is_empty() && movement == CaretMovement::CharacterLeft {
-                    s.start_offset()
-                } else if !extend_selection
-                    && !s.is_empty()
-                    && movement == CaretMovement::CharacterRight
-                {
-                    s.end_offset()
-                } else {
-                    self.move_position(s.caret, movement)
-                };
-            if extend_selection {
-                SelectionSegment::new(s.anchor, target)
-            } else {
-                SelectionSegment::empty(target)
-            }
-        });
-        *self.inner.selection.borrow_mut() =
-            Selection::from_segments(segments, selection.primary_index());
+        self.move_caret_with_virtual_space(movement, extend_selection);
     }
+
     fn move_position(&self, offset: usize, movement: CaretMovement) -> usize {
         let document = self.document();
         if movement == CaretMovement::DocumentStart {
@@ -419,36 +417,16 @@ impl EditorSession {
         line.offset + next_caret_position(&text, offset - line.offset, movement)
     }
     pub fn delete(&self, backward: bool, by_word: bool) -> Result<(), EditError> {
-        let original = self.selection();
-        let movement = match (backward, by_word) {
-            (true, false) => CaretMovement::CharacterLeft,
-            (false, false) => CaretMovement::CharacterRight,
-            (true, true) => CaretMovement::WordLeft,
-            (false, true) => CaretMovement::WordRight,
-        };
-        let selection = Selection::from_segments(
-            original.segments().iter().map(|s| {
-                if s.is_empty() {
-                    SelectionSegment::new(s.caret, self.move_position(s.caret, movement))
-                } else {
-                    *s
-                }
-            }),
-            original.primary_index(),
-        );
-        self.set_selection(selection)?;
-        let result = self.replace_selection_with_text("");
-        if result.is_err() {
-            self.set_selection(original)?;
-        }
-        result
+        self.delete_with_virtual_space(backward, by_word)
     }
+
     pub fn insert_new_line(&self) -> Result<(), EditError> {
         let options = self.options();
         let Some(strategy) = self.indentation_strategy() else {
             return self.replace_selection_with_text(&options.newline);
         };
         let selection = self.selection();
+        self.validate_virtual_edit_positions(&selection)?;
         let source = self.document().create_snapshot();
         let mut edits = Vec::with_capacity(selection.segments().len());
         for (index, segment) in selection.segments().iter().enumerate() {
@@ -496,35 +474,9 @@ impl EditorSession {
         self.replace_segments(&edits, selection.primary_index())
     }
     pub fn insert_tab(&self) -> Result<(), EditError> {
-        if !self.selection().is_empty() {
-            return self.indent_selection(false);
-        }
-        let options = self.options();
-        let replacements: Result<Vec<_>, DocumentError> = self
-            .selection()
-            .segments()
-            .iter()
-            .map(|s| {
-                if !options.convert_tabs_to_spaces {
-                    return Ok("\t".into());
-                }
-                let line = self.document().get_line_by_offset(s.caret)?;
-                let prefix = self
-                    .document()
-                    .get_text(line.offset, s.caret - line.offset)?;
-                let mut visual = 0;
-                for c in prefix.chars() {
-                    visual += if c == '\t' {
-                        options.indentation_size - visual % options.indentation_size
-                    } else {
-                        1
-                    };
-                }
-                Ok(" ".repeat(options.indentation_size - visual % options.indentation_size))
-            })
-            .collect();
-        self.replace_selections(&replacements?)
+        self.insert_tab_with_virtual_space()
     }
+
     pub fn indent_selection(&self, unindent: bool) -> Result<(), EditError> {
         let selected_lines = self.selected_lines()?;
         let options = self.options();
@@ -617,7 +569,7 @@ impl EditorSession {
                 .document()
                 .get_line_by_offset(segment.start_offset())?
                 .line_number;
-            let end = if segment.is_empty() {
+            let end = if segment.length() == 0 || segment.end_virtual_space() != 0 {
                 segment.end_offset()
             } else {
                 segment.end_offset() - 1

@@ -143,19 +143,22 @@ FerroUI's existing Rust scanner. It does not infer method parity from a name.
 |---|---|
 | [Document](editor-document.md) | Rope metrics, anchors, intervals, live lines, tracker timing, version translation, custom/optional undo, event ordering and deterministic model tests |
 | [Editor services](editor-services.md) | Selection/edit policy, search, XSHD, folding, completion, snippets, commands and popup behavior |
+| [Virtual space and rectangles](editor-virtual-space.md) | Logical/visual positions, native geometry, virtual padding, rectangular replacement and protected edit plans |
 | [TextMate engine](textmate-engine.md) | Grammar/scanner semantics, registry/catalog, metadata, theme rules, incremental states, native/Wasm oracle and remaining engine differences |
 | [Source inventory](editor-source-map.md) | Per-file source hashes, exact aliases, partial contracts and unmapped APIs |
 | [Editor demo](../../samples/EditorDemo/README.md) | Run commands, runtime XAML, toolbar, explicit-region provider and headless/desktop limits |
 
 Checkpoint evidence is recorded with the commits and updated as tests land:
 
-- The combined checkpoint passes **185 core tests, 34 control tests and two demo tests**. It includes
+- The checkpoint passes **240 core tests, 45 control tests and two demo tests**. It includes
   1,600 randomized rope edits, 5,000 appends, dense anchor tests, 2,500 interval
   model edits, 8,000 lazily shifted intervals, 2,500 live-line edits with replay,
   custom undo, C# indentation, protected text transformations, rich text/HTML
-  exports, incremental XSHD convergence and all XSHD resources.
-- The native TextMate library passes **31 tests** and the explicit portable
-  backend passes **30 tests**. Native TextMate and actual compiled Rust/Wasm
+  exports, document service traits, virtual-space/rectangular editing, typed
+  XSHD visitors/serialization/legacy import, incremental XSHD convergence and
+  all XSHD resources.
+- The native TextMate library passes **37 tests** and the explicit portable
+  backend passes **36 tests**. Native TextMate and actual compiled Rust/Wasm
   both match all **74 reference
   lines across 11 language families**, comparing token boundaries, scopes and
   continuation depths. The fixture is generated independently with the pinned
@@ -163,7 +166,10 @@ Checkpoint evidence is recorded with the commits and updated as tests land:
 - Control tests exercise framework rendering, visible-line cache bounds over a
   100,000-line document, UTF-16/tab hit testing, folding, routed keys, direct Text
   notifications, runtime XAML, popups, snippets, IME visual composition, wrapped
-  visual-row navigation and incremental tokenization. The render notification
+  visual-row navigation, soft-wrap caret affinity, rectangular selections,
+  visible popup anchoring, Page Up/Down, real routed Alt-click, virtual columns
+  after right-to-left runs, atomic caret-affinity notifications and incremental
+  tokenization. The render notification
   regression checks that extent updates publish outside the render pass.
 - The incremental installation tests compare 200 batches of queued CR/LF/comment
   edits with fresh highlighting, plus line insertion/deletion, multiline state,
@@ -174,6 +180,11 @@ Checkpoint evidence is recorded with the commits and updated as tests land:
   invalidation is coalesced through the dispatcher after the render pass.
 - The source-inventory fixture tests cover exact-symbol validation and invalid
   mappings. Asset hashing and release metadata checks run independently.
+- Both editor crates compile for `wasm32-unknown-unknown`. The scanner packaging
+  regression invokes FerroUI's production site composer and executes the
+  generated flat JavaScript module against the actual Oniguruma binary. This
+  verifies the asset/import contract, shared initialization and regex behavior;
+  a full Emscripten editor application has not yet been linked or exercised.
 
 The dedicated [editor CI workflow](../../.github/workflows/editor.yml) runs the
 source/asset checks, native core/control/demo tests, explicit fallback tests,
@@ -211,10 +222,12 @@ change: inspect differences before accepting a new baseline.
 
 The generated map is the authoritative detailed backlog. The substantial open
 areas include the complete visual-line element/transformer/layer/margin
-extension contracts; rectangular selection and virtual-space parity; remaining
+extension contracts; remaining rectangular pointer/wrap and virtual-space edge
+cases described in the linked report; remaining
 command and modern C# lexical edge cases; overload insight and rich completion
-content; native rich-text control/clipboard integration and XSHD visitor/writer interfaces;
-complete managed service/reader/version overload equivalents; text-range
+content; native rich-text control/clipboard integration and remaining XSHD
+runtime brush/XSD/.NET-regex differences; complete managed reader/comparison
+overload equivalents; text-range
 accessibility; and the full upstream behavior/test corpus.
 
 Ported functionality still needs platform verification for pointer capture,

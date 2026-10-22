@@ -17,7 +17,7 @@ has been implemented. Presentation members belong to `FerroUI.Edit`.
 |---|---|---|
 | `Editing/SelectionSegment.cs`, `Selection.cs`, `SimpleSelection.cs`, `EmptySelection.cs` | `editing/selection.rs` | Directed selections, coalescing, multicaret normalization, document change mapping |
 | `Editing/CaretNavigationCommandHandler.cs`, `Document/TextUtilities.cs` | `editing/caret_navigation.rs` | Grapheme, word, line and document movement; surrogate and CRLF boundaries |
-| `Editing/RectangleSelection.cs` | `editing/rectangle_selection.rs` | Rectangular logical-line ranges and tab-expanded visual columns |
+| `Editing/RectangleSelection.cs` | `editing/rectangle_selection.rs`, `editing/editor_session/virtual_space.rs` | Rectangular logical-line ranges, tab-expanded cells, explicit virtual endpoints, padded insertion and bounded multiline paste |
 | `Editing/IReadOnlySectionProvider.cs`, `NoReadOnlySections.cs`, `TextSegmentReadOnlySectionProvider.cs` | `editing/read_only_section_provider.rs` | Anchored protected ranges, boundary insertion policy, writable interval subtraction |
 | `Editing/TextArea.cs`, `EditingCommandHandler.cs`, `TextEditorOptions.cs` | `editing/editor_session.rs` | Shared editing session, multicaret replacement, grouped undo, delete, selection, indentation, newline and tab commands |
 | `Editing/EditingCommandHandler.cs` transformation helpers and commands | `editing/text_transformations.rs` | Leading/trailing whitespace cleanup, tab/space conversion, Unicode casing and selected/current-line deletion |
@@ -37,8 +37,13 @@ has been implemented. Presentation members belong to `FerroUI.Edit`.
 | `CodeCompletion/CompletionWindow.cs`, `CompletionWindowBase.cs` | `completion/completion_session.rs` | Anchored insertion range, live filter prefix, caret dismissal and completion commit |
 | `Snippets/Snippet.cs`, `SnippetElement.cs`, `SnippetContainerElement.cs`, `SnippetTextElement.cs`, `SnippetReplaceableTextElement.cs`, `SnippetBoundElement.cs`, `SnippetCaretElement.cs`, `SnippetSelectionElement.cs` | `snippets/snippet.rs` | Structured expansion, selected-text insertion, linked fields, final caret; additional numeric snippet notation |
 | `Snippets/InsertionContext.cs`, `IActiveElement.cs`, `SnippetInputHandler.cs` | `snippets/snippet_session.rs` | Active field traversal, document anchors, automatic bound-text synchronization and single-step undo |
-| `Highlighting/HighlightingColor.cs`, `HighlightingRule.cs`, `HighlightingSpan.cs`, `HighlightingRuleSet.cs`, `IHighlightingDefinition.cs`, `Xshd/V2Loader.cs`, `Xshd/XmlHighlightingDefinition.cs`, `Xshd/HighlightingLoader.cs` | `highlighting/highlighting_definition.rs` | Named/inline colors, XSHD v2 parsing, local/inline/external rulesets, bounded regex compilation |
-| `Highlighting/Xshd/V1Loader.cs` and legacy TeX resource | `highlighting/highlighting_definition.rs` | Legacy literal spans, keywords, digit rules and preceding/following markers needed by the bundled TeX definition |
+| `Highlighting/HighlightingColor.cs`, `HighlightingRule.cs`, `HighlightingSpan.cs`, `HighlightingRuleSet.cs`, `IHighlightingDefinition.cs` | `highlighting/highlighting_definition.rs` | Runtime color/rule/span model and public loading APIs routed through typed syntax trees |
+| `Highlighting/Xshd/XshdElement.cs`, `XshdSyntaxDefinition.cs`, `XshdReference.cs`, `XshdColor.cs`, `XshdProperty.cs`, `XshdRuleSet.cs`, `XshdKeywords.cs`, `XshdSpan.cs`, `XshdImport.cs`, `XshdRule.cs` | `highlighting/xshd/model.rs` | Ordered editable syntax nodes, unresolved local/external/inline references, full XML color metadata and source positions |
+| `Highlighting/Xshd/IXshdVisitor.cs` | `highlighting/xshd/visitor.rs` | Typed fallible visitors, explicit child traversal, property visitation and an additional mutable visitor |
+| `Highlighting/Xshd/V2Loader.cs`, `HighlightingLoader.cs` | `highlighting/xshd/loader.rs` | Namespace-aware v2 syntax loading, source diagnostics, structural/value checks and distinct parsing/compilation phases |
+| `Highlighting/Xshd/XmlHighlightingDefinition.cs` | `highlighting/xshd/compiler.rs` | Forward reference registration, named/inline/external rules, ordered import expansion, case inheritance, cycle detection and bounded regex compilation |
+| `Highlighting/Xshd/SaveXshdVisitor.cs` | `highlighting/xshd/writer.rs` | Validated XML serialization, complete color/property output, regex-mode preservation and inline-import hoisting |
+| Archived/commented `Highlighting/Xshd/V1Loader.cs` and legacy TeX resource | `highlighting/xshd/legacy.rs` | Compatibility conversion for legacy categories, references, extensions, escaping, marker rules and the historical `@` mini-language |
 | `Highlighting/HighlightingEngine.cs` | `highlighting/highlighting_engine.rs` | Nested multiline spans, imports, ambient color merging, UTF-16 runs, span precedence, zero-width cycle protection |
 | `Highlighting/HighlightedLine.cs`, `HighlightedSection.cs` | `highlighting/highlighted_line.rs` | Highlighted line results and styled ranges |
 | `Highlighting/RichText.cs`, `RichTextModel.cs` | `highlighting/rich_text.rs` | Lossless UTF-16 text, formatting overlays, slices, concatenation and offset mapping |
@@ -58,6 +63,15 @@ Selections are copied out before mutation and updated outside document borrows.
 Every multicaret operation preflights all replacement ranges before making the
 first change and groups its changes in one document undo unit. Overlapping
 selections are normalized, preventing duplicate edits to the same text.
+
+Selections retain directed physical and virtual endpoints. Logical rectangles
+preserve columns after short lines, and insertion materializes only the padding
+it needs. Their detailed coordinate contract, tab behavior, multiline paste,
+protection checks and undo rules are recorded in
+[Virtual space and rectangular editing](editor-virtual-space.md). The original
+string-based `RectangleSelection::to_selection` keeps its clamped behavior;
+`to_document_selection` and `to_selection_with_virtual_space` preserve virtual
+cells explicitly.
 
 Ordinary navigation, delete, newline and tab commands query the current or
 adjacent logical line. They do not flatten the whole document for each key.
@@ -171,6 +185,100 @@ interrupts the operation, and later requests recover from the new document.
 Explicit subscription disposal and weak tracker ownership prevent retained
 listeners after the highlighter is disposed or dropped.
 
+### Editable XSHD definitions
+
+XSHD loading now has separate XML, editable-tree and executable-definition
+stages. `XshdSyntaxDefinition::load` (or `load_xshd`) creates an ordered tree;
+`compile` and `compile_with_dependencies` resolve it. The existing
+`HighlightingDefinition::load` and `load_with_dependencies` signatures route
+through these stages. The earlier direct XML compiler was removed, so the
+public loading paths share the same validation and rule semantics.
+
+`XshdElement` is an enum for colors, properties, rule sets, keywords, spans,
+imports and rules. `XshdReference<T>` distinguishes absent, local, external and
+inline references. A reference splits on its final slash, permitting definition
+names that themselves contain slashes and an empty rule-set name for a main
+rule set. Tree positions record one-based XML lines and UTF-16 columns; nodes
+created by a host use zero coordinates. Source positions decorate structural,
+reference and pattern errors without collapsing their error categories.
+
+`XshdVisitor` has associated output and error types and is also exported as
+`IXshdVisitor`. `XshdVisitorMut` supports tree transformations before compilation.
+Traversal is explicit through node, reference and child-list helpers. Property
+nodes participate in both visitor contracts; the pinned property's visitor
+method returned no result. Owned Rust trees use structural equality rather
+than managed object identity for inline references.
+
+The parser accepts the standard namespace, prefixed uses of that namespace,
+and namespace-free v2 documents. Foreign-namespace extension elements are
+skipped. Unknown grammar elements, duplicate span members, conflicting inline
+and named rule sets, invalid booleans and invalid font values produce errors.
+It distinguishes attribute expressions, which retain whitespace, from element
+expressions, which use extended regex whitespace/comment handling. Named color
+references take precedence over inline style attributes, following the source.
+XML parsing does not fetch external resources or enable DTD processing.
+
+Compilation registers named colors and rule sets before translation, so forward
+references work. Imports expand at their exact source position within both rule
+and span sequences. Consequently, a preceding import wins an equal-position
+match and a following import does not silently outrank an earlier local rule.
+Cyclic imports are errors; a span can still recursively reference its own rule
+set. Case settings inherit through inline definitions and local imports, while
+explicit settings override them. A named rule set retains the case context of
+its first translation, as in the pinned visitor. External definitions retain
+their own root context. Simple keyword groups sort by descending UTF-16 length
+inside an atomic alternation; punctuation-bearing groups add boundaries only
+at letter/digit ends.
+
+The engine also preserves the source's equal-position span rule: an inner span
+start takes precedence over its enclosing span's end. This matters for escaped
+delimiters, such as doubled quotes with a separately colored final delimiter.
+An unterminated non-multiline span ends at the logical line boundary. Extended
+end expressions preserve trailing comments and explicit whitespace-mode changes
+when that boundary alternative is added.
+
+`XshdSyntaxDefinition::to_xml` and `SaveXshdVisitor` write canonical v2 XML.
+The writer preserves properties and all color metadata, including font family,
+font size, underline, strikethrough and example text that parts of the pinned
+writer omitted. It escapes XML characters and preserves attribute tabs/newlines
+with character references. Forbidden XML characters and nonfinite font sizes
+fail before replacing the writer's last complete output. Regex mode is preserved
+when a default-mode expression must become element text. Programmatic inline
+imports are hoisted to collision-free named rule sets, carrying their inherited
+case setting; named inline colors are likewise emitted as named definitions.
+Serialization preserves behavior and metadata, while canonicalizing tree layout
+and discarding source coordinates. It does not reproduce the original XML
+formatting, comments or prefixes.
+
+`HighlightingManager` parses each registration once and keeps that typed tree.
+It compiles only the requested definition and its transitive external
+dependencies. `external_definitions` discovers references in colors, delimiter
+colors, inline rule sets and imports. Hosts can also register an edited tree
+directly with `register_syntax_definition`. Replacing a registration removes
+its old extension associations and invalidates cached dependents. Expression
+compilation remains lazy, so an unrelated malformed pattern does not prevent
+another language from loading.
+
+### Historical XSHD compatibility
+
+The pinned `V1Loader.cs` and its dispatch in `HighlightingLoader` are commented
+out. The legacy importer is therefore a documented compatibility extension
+based on archived source, rather than an assertion that the active upstream
+loader still supports v1. It converts the historical `RuleSets` representation
+to the same editable v2 tree and keeps the bundled TeX resource usable.
+
+Conversion preserves the historical category order: reference imports, keyword
+groups, spans, preceding markers, following markers, then digit rules. Root
+`extends` imports follow the main set's local rules. Legacy extension lists
+split on both semicolons and vertical bars. It supports inherited/per-span
+escape characters, backslash-style escapes, doubled closing delimiters,
+`singleword` and `startofline` guards, marker inclusion/exclusion and the
+`@C`, `@@`, `@!literal@` and `@-literal@` constructs. Unknown or unfinished
+constructs return source-positioned errors. Legacy delimiter metadata remains
+ignored as in the archived importer. Empty escape-character attributes return
+errors instead of indexing an empty string; supplementary escape characters
+use a complete Rust scalar instead of half a UTF-16 pair.
+
 Search and XSHD use `fancy-regex` with an explicit backtracking limit and bounded
 regex compilation. Its linear regex delegate handles simple expressions; the
 backtracking engine supplies lookaround and backreferences. Compilation and
@@ -263,7 +371,8 @@ Run `cargo test -p ferroui-edit-core --lib`. Service regressions cover:
 
 - overlapping selections, duplicate carets, multicaret edits and grouped undo;
 - grapheme clusters, supplementary characters, CRLF, short lines and final empty lines;
-- tab-expanded rectangles and protected-range intersections;
+- tab-expanded rectangles, virtual navigation/padding, bounded multiline paste,
+  no-op virtual deletion, protected-range intersections and stale-plan rejection;
 - preflight rejection without partial multicaret mutation;
 - C# blocks, labels, continuations, bracket alignment, comments and string states;
 - automatic indentation after a split, multi-caret preview context, error
@@ -280,6 +389,13 @@ Run `cargo test -p ferroui-edit-core --lib`. Service regressions cover:
 - protected snippet mirror rejection and preserved completion keyboard selection;
 - XSHD multiline stacks, lookahead, span boundaries and bounded zero-width recursion;
 - compilation and execution of every one of the 21 bundled XSHD definitions;
+- typed XSHD namespace handling, UTF-16 source coordinates, immutable/mutable
+  visitors, forward/external references, import ordering/cycles, case inheritance,
+  keyword prefixes, serializer escaping and transactional failure;
+- compile/serialize/reparse highlighting comparisons for all 21 bundled
+  definitions, including multiline state, and historical escaping/marker rules;
+- lazy registry dependency discovery, legacy extension separators, missing
+  dependencies and dependent-cache invalidation after replacing a definition;
 - incremental convergence after a one-line edit in 1,000 cached lines, stable
   suffix identities after insertion/removal, independent queued edits and lazy
   frontier behavior;
@@ -295,6 +411,10 @@ Run `cargo test -p ferroui-edit-core --lib`. Service regressions cover:
 
 These are executable regression tests, not a complete upstream differential
 suite. The central port inventory records missing counterparts separately.
+At the typed-XSHD integration checkpoint, the unfiltered Core command passed
+**240 tests**, including **22 typed-XSHD tests** and **three additional registry
+regressions**. Later port stages can add tests without changing that historical
+checkpoint count.
 
 Run `cargo test -p ferroui-edit --lib` for the control-service integration tests
 and `cargo test -p editor-demo --lib --no-default-features` for runtime XAML
@@ -314,11 +434,14 @@ parity or operating-system clipboard/input-method behavior.
 - Protected multicaret replacement is atomic: an operation intersecting a
   protected interval is rejected. Upstream can delete only writable portions of
   a selection. Interval subtraction is exposed for hosts needing that policy.
-- Rectangular selections clamp to existing text. Virtual-space insertion,
-  pixel-based rectangles and bidirectional visual columns still need the text
-  view integration.
-- Vertical movement in the service layer uses logical UTF-16 columns. Wrapped
-  visual-line movement and sticky preferred X positions belong to the text view.
+- Logical rectangles retain virtual cells and support padded insertion and
+  bounded multiline paste. Distinct virtual carets at the same physical line
+  end are explicitly rejected for combined replacement. Native pixel-based
+  rectangles, proportional fonts and bidirectional visual columns require text
+  view validation separately from the logical service tests.
+- Vertical movement in the service layer uses tab-expanded grapheme cells and
+  retains its desired column across short lines. Wrapped visual-line movement
+  and preferred pixel X positions belong to the text view.
 - C# indentation is the pinned heuristic state machine. Dedicated raw-string
   and interpolation-expression parsing and syntax-tree formatting are absent
   from that source and are not added here. Locale-specific casing and every
@@ -336,10 +459,13 @@ parity or operating-system clipboard/input-method behavior.
   variables, nested defaults, choices and transformations explicitly. Custom
   active-element implementations and every upstream snippet lifecycle event
   are not exposed.
-- XSHD v2 runtime semantics are covered by representative tests. XML schema
-  validation, XSHD serialization/visitors and comprehensive .NET regex
-  differential parity remain. The legacy importer supports bundled TeX; the
-  full historical v1 escape-character and `@` mini-language is not implemented.
+- Typed XSHD loading, visitors, serialization and archived v1 conversion have
+  regression coverage. XML Schema validation and comprehensive .NET regex
+  differential parity remain absent. Validation is implemented directly in the
+  Rust parser/compiler; unknown attributes are not checked against an XSD.
+  Regex Unicode/culture behavior and .NET's `ExplicitCapture` option are not
+  identical to the selected Rust regex backend. Source positions and XML
+  formatting are not preserved by serialization.
 - XML folding preserves previous regions while the input is malformed instead
   of publishing a partial recovery parse. Its generated document offsets are
   still UTF-16.
@@ -356,7 +482,10 @@ parity or operating-system clipboard/input-method behavior.
   writers; the corresponding upstream model-writer implementation was commented
   out. Native UI `Run` construction, colorizer integration, font families,
   strikethrough, arbitrary font weights and framework brush/resource resolution
-  are not represented by the current core color model. HTML customization uses
+  are not represented by the current runtime color model. The editable XSHD
+  tree does retain those XML metadata fields for inspection and serialization;
+  compiling it currently maps font weight/style to the runtime's bold/italic
+  subset. HTML customization uses
   concrete options instead of overridable style/class callbacks. Export uses
   flat spans, `<br/>`, pixel font sizes and ten-digit CF_HTML offsets. UTF-8
   projections replace lone surrogates; a surrogate pair split by formatting

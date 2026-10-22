@@ -4,6 +4,7 @@
 //! language services are reusable independently through the re-exported crates.
 
 pub use ferroui_edit_core as core;
+pub use ferroui_edit_core::TextViewPosition;
 pub use ferroui_edit_core::document::{TextDocument, TextLocation};
 pub use ferroui_textmate as textmate;
 

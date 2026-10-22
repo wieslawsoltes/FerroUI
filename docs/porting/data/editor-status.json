@@ -1,22 +1,22 @@
 {
   "schema_version": 1,
   "inventory_sha256": "70e060d1ca9836ade3c7c6b451169e52b4209b38458309ccb4c2694bb77541b5",
-  "mappings_sha256": "74f9978372ab3c276b47e529dbb9f80e88beaea89a00d3c8a2f7f64d5bff8dee",
+  "mappings_sha256": "005bf48ff490fac1ab0efa126210355873a199ff4189310f0f5432e858fc4177",
   "counts": {
     "mapped": 21,
-    "adapted": 163,
-    "unmapped": 191
+    "adapted": 176,
+    "unmapped": 178
   },
   "file_count": 375,
   "declared_type_occurrences": 1310,
   "distinct_type_declarations_per_file": 554,
-  "mapped_declared_types": 229,
-  "unmapped_declared_types": 325,
+  "mapped_declared_types": 245,
+  "unmapped_declared_types": 309,
   "repositories": {
     "avaloniaedit": {
       "mapped": 12,
-      "adapted": 93,
-      "unmapped": 136
+      "adapted": 106,
+      "unmapped": 123
     },
     "textmatesharp": {
       "mapped": 9,
@@ -2791,12 +2791,25 @@
               "rust": "next_caret_position"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/editing/editor_session/virtual_space.rs",
+          "symbols": [
+            "EditorSession::move_caret_with_virtual_space"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Editing.CaretNavigationCommandHandler",
+              "rust": "EditorSession::move_caret_with_virtual_space"
+            }
+          ]
         }
       ],
       "unmapped_types": [],
-      "notes": "Unicode grapheme, word, line and document navigation.",
+      "notes": "Unicode grapheme/word navigation, virtual horizontal movement and persistent visual-cell columns across logical lines, including short-line clamping.",
       "limitations": [
-        "Wrapped visual-line navigation and routed-command binding surface are absent."
+        "Core navigation addresses logical lines; native wrapped-line and bidirectional geometry require the presentation layer. Framework ICommand and routed input replace the managed command-binding hierarchy.",
+        "Wrapped box-caret movement and the first-nonwhitespace smart-Home toggle remain separate parity gaps."
       ]
     },
     {
@@ -2948,12 +2961,25 @@
               "rust": "plan_text_transformation"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/editing/editor_session/virtual_space.rs",
+          "symbols": [
+            "EditorSession::delete_with_virtual_space",
+            "EditorSession::insert_tab_with_virtual_space"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Editing.EditingCommandHandler",
+              "rust": "EditorSession::delete_with_virtual_space"
+            }
+          ]
         }
       ],
       "unmapped_types": [
         "AvaloniaEdit.Editing.EditingCommandHandler.DefaultSegmentType"
       ],
-      "notes": "Core editing and native ICommand wrappers, language indentation, whitespace/tab/case transformations and selected/current-line deletion.",
+      "notes": "Core editing and native ICommand wrappers, virtual padding/deletion/tab commands, language indentation, whitespace/tab/case transformations and selected/current-line deletion.",
       "limitations": [
         "Casing uses locale-independent Rust Unicode mappings; title case is not implemented in the pinned source; not every upstream input mode is reproduced."
       ]
@@ -3162,7 +3188,9 @@
         {
           "path": "src/FerroUI.Edit.Core/editing/rectangle_selection.rs",
           "symbols": [
-            "RectangleSelection"
+            "RectangleSelection",
+            "RectangleSelection::to_document_selection",
+            "RectangleSelection::to_selection_with_virtual_space"
           ],
           "aliases": [
             {
@@ -3170,12 +3198,25 @@
               "rust": "RectangleSelection"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/editing/editor_session/virtual_space.rs",
+          "symbols": [
+            "EditorSession::replace_virtual_selections"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Editing.RectangleSelection",
+              "rust": "EditorSession::replace_virtual_selections"
+            }
+          ]
         }
       ],
       "unmapped_types": [],
-      "notes": "Tab-expanded rectangular ranges over logical lines.",
+      "notes": "Rectangle mode, line-only tab/grapheme projection with virtual endpoints, per-row typing and bounded multiline paste retaining remaining text in the final selected row.",
       "limitations": [
-        "Virtual-space insertion and bidirectional/pixel rectangles remain."
+        "Core cell projection is not pixel or bidirectional geometry; native layout integration is verified separately. Distinct virtual carets sharing one physical EOL are rejected atomically by the general multicaret extension.",
+        "Rectangular clipboard metadata and automatic column paste at an ordinary caret are not yet connected; active-rectangle multiline replacement is implemented."
       ]
     },
     {
@@ -3202,7 +3243,9 @@
         {
           "path": "src/FerroUI.Edit.Core/editing/selection.rs",
           "symbols": [
-            "Selection"
+            "Selection",
+            "Selection::from_rectangle_segments",
+            "Selection::is_rectangular"
           ],
           "aliases": [
             {
@@ -3213,9 +3256,9 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Directed UTF-16 selections and range mapping.",
+      "notes": "Directed UTF-16 offsets and explicit virtual-cell endpoints, tuple ordering, physical-length-independent emptiness, rectangle mode and document-change mapping.",
       "limitations": [
-        "Visual-line geometry and virtual-space contracts are not reproduced."
+        "Managed selection inheritance is represented by Rust values; visual-line geometry is provided by the native text layout rather than the core selection type."
       ]
     },
     {
@@ -3326,7 +3369,10 @@
         {
           "path": "src/FerroUI.Edit.Core/editing/selection.rs",
           "symbols": [
-            "SelectionSegment"
+            "SelectionSegment",
+            "SelectionSegment::with_virtual_space",
+            "SelectionSegment::start_tuple",
+            "SelectionSegment::end_tuple"
           ],
           "aliases": [
             {
@@ -3337,9 +3383,9 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Directed UTF-16 selections and range mapping.",
+      "notes": "Directed UTF-16 offsets and explicit virtual-cell endpoints, tuple ordering, physical-length-independent emptiness, rectangle mode and document-change mapping.",
       "limitations": [
-        "Visual-line geometry and virtual-space contracts are not reproduced."
+        "Managed selection inheritance is represented by Rust values; visual-line geometry is provided by the native text layout rather than the core selection type."
       ]
     },
     {
@@ -4272,9 +4318,9 @@
         "AvaloniaEdit.Highlighting.HighlightingManager.DefaultHighlightingManager",
         "AvaloniaEdit.Highlighting.HighlightingManager.DelayLoadedHighlightingDefinition"
       ],
-      "notes": "Runtime multiline highlighting, line results, lazy invalidation and definition registry.",
+      "notes": "Name/extension registry with lazy typed-tree parsing, transitive external color/ruleset dependency discovery, syntax-tree registration and dependent-cache invalidation.",
       "limitations": [
-        "Representative regression coverage; not a complete upstream differential suite."
+        "Rust registration and owned error values replace managed lazy factories and framework service lookup."
       ]
     },
     {
@@ -4827,22 +4873,35 @@
       "status": "adapted",
       "targets": [
         {
-          "path": "src/FerroUI.Edit.Core/highlighting/highlighting_definition.rs",
+          "path": "src/FerroUI.Edit.Core/highlighting/xshd/loader.rs",
           "symbols": [
-            "HighlightingDefinition"
+            "load_xshd"
           ],
           "aliases": [
             {
               "upstream": "AvaloniaEdit.Highlighting.Xshd.HighlightingLoader",
-              "rust": "HighlightingDefinition"
+              "rust": "load_xshd"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/highlighting_definition.rs",
+          "symbols": [
+            "HighlightingDefinition::load",
+            "HighlightingDefinition::load_with_dependencies"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.Xshd.HighlightingLoader",
+              "rust": "HighlightingDefinition::load"
             }
           ]
         }
       ],
       "unmapped_types": [],
-      "notes": "XSHD runtime loading including named, local/inline/external rulesets.",
+      "notes": "Separate syntax loading and compilation APIs; existing runtime loading signatures now route through the same typed parser/compiler and transitive dependency handling.",
       "limitations": [
-        "No XML schema validation, XSHD serialization, complete visitor model or full .NET regex compatibility."
+        "No XSD validation service or full .NET regex compatibility; callers pass owned XML strings and Rust syntax trees rather than XmlReader instances."
       ]
     },
     {
@@ -4861,14 +4920,30 @@
           "line": 24
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Highlighting.Xshd.IXshdVisitor"
       ],
-      "notes": "The runtime XSHD loader does not expose this schema/visitor/serialization object-model contract.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/xshd/visitor.rs",
+          "symbols": [
+            "XshdVisitor",
+            "XshdVisitorMut"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.Xshd.IXshdVisitor",
+              "rust": "XshdVisitor"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Typed fallible visitor with associated output/error types, explicit child traversal and property visitation; exported compatibility alias IXshdVisitor and additional mutable visitor.",
+      "limitations": [
+        "Rust associated types replace object return values; mutable visitation and property callbacks extend the pinned interface."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/Xshd/SaveXshdVisitor.cs",
@@ -4886,14 +4961,29 @@
           "line": 29
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Highlighting.Xshd.SaveXshdVisitor"
       ],
-      "notes": "The runtime XSHD loader does not expose this schema/visitor/serialization object-model contract.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/xshd/writer.rs",
+          "symbols": [
+            "SaveXshdVisitor"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.Xshd.SaveXshdVisitor",
+              "rust": "SaveXshdVisitor"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Validated v2 XML serialization retains full color/property metadata, regex whitespace modes, inline-import semantics and attribute whitespace; output is committed only after validation.",
+      "limitations": [
+        "Canonical XML output does not retain input formatting, comments, prefixes or source coordinates. Complete property/color output deliberately fixes omissions in the pinned writer."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/Xshd/V1Loader.cs",
@@ -4906,17 +4996,18 @@
       "status": "adapted",
       "targets": [
         {
-          "path": "src/FerroUI.Edit.Core/highlighting/highlighting_definition.rs",
+          "path": "src/FerroUI.Edit.Core/highlighting/xshd/legacy.rs",
           "symbols": [
-            "HighlightingDefinition::load"
+            "load_legacy",
+            "import_regex"
           ],
           "aliases": []
         }
       ],
       "unmapped_types": [],
-      "notes": "The pinned v1 loader is entirely commented out; a deliberate legacy importer supports the bundled TeX definition.",
+      "notes": "The pinned v1 loader is entirely commented out; an additional compatibility importer converts legacy categories, references, extensions, escapes, markers and the historical @ mini-language to the editable tree.",
       "limitations": [
-        "Full archived v1 escape-character and @ mini-language behavior is not reproduced; this is not an active upstream runtime loader gap."
+        "This is an extension for inactive upstream legacy code, not an active missing runtime port. Serialization emits v2 XML and regex-backend differences still apply."
       ]
     },
     {
@@ -4941,22 +5032,23 @@
       "status": "adapted",
       "targets": [
         {
-          "path": "src/FerroUI.Edit.Core/highlighting/highlighting_definition.rs",
+          "path": "src/FerroUI.Edit.Core/highlighting/xshd/loader.rs",
           "symbols": [
-            "HighlightingDefinition"
+            "load_xshd",
+            "Parser"
           ],
           "aliases": [
             {
               "upstream": "AvaloniaEdit.Highlighting.Xshd.V2Loader",
-              "rust": "HighlightingDefinition"
+              "rust": "load_xshd"
             }
           ]
         }
       ],
       "unmapped_types": [],
-      "notes": "XSHD runtime loading including named, local/inline/external rulesets.",
+      "notes": "Namespace-aware v2 XML parser builds editable syntax nodes, validates structural/value contracts and decorates errors with UTF-16 source positions.",
       "limitations": [
-        "No XML schema validation, XSHD serialization, complete visitor model or full .NET regex compatibility."
+        "There is no XML schema-validation service; unknown attributes are not checked against an XSD. Regex compilation is a separate phase and uses a bounded Rust backend."
       ]
     },
     {
@@ -4992,30 +5084,39 @@
         }
       ],
       "mapped_types": [
-        "AvaloniaEdit.Highlighting.Xshd.XmlHighlightingDefinition"
+        "AvaloniaEdit.Highlighting.Xshd.XmlHighlightingDefinition",
+        "AvaloniaEdit.Highlighting.Xshd.XmlHighlightingDefinition.RegisterNamedElementsVisitor",
+        "AvaloniaEdit.Highlighting.Xshd.XmlHighlightingDefinition.TranslateElementVisitor"
       ],
       "status": "adapted",
       "targets": [
         {
-          "path": "src/FerroUI.Edit.Core/highlighting/highlighting_definition.rs",
+          "path": "src/FerroUI.Edit.Core/highlighting/xshd/compiler.rs",
           "symbols": [
-            "HighlightingDefinition"
+            "compile_xshd",
+            "Compiler::register_element",
+            "Compiler::compile_set"
           ],
           "aliases": [
             {
               "upstream": "AvaloniaEdit.Highlighting.Xshd.XmlHighlightingDefinition",
-              "rust": "HighlightingDefinition"
+              "rust": "compile_xshd"
+            },
+            {
+              "upstream": "AvaloniaEdit.Highlighting.Xshd.XmlHighlightingDefinition.RegisterNamedElementsVisitor",
+              "rust": "Compiler::register_element"
+            },
+            {
+              "upstream": "AvaloniaEdit.Highlighting.Xshd.XmlHighlightingDefinition.TranslateElementVisitor",
+              "rust": "Compiler::compile_set"
             }
           ]
         }
       ],
-      "unmapped_types": [
-        "AvaloniaEdit.Highlighting.Xshd.XmlHighlightingDefinition.RegisterNamedElementsVisitor",
-        "AvaloniaEdit.Highlighting.Xshd.XmlHighlightingDefinition.TranslateElementVisitor"
-      ],
-      "notes": "XSHD runtime loading including named, local/inline/external rulesets.",
+      "unmapped_types": [],
+      "notes": "Forward declaration registration and compilation are consolidated into one compiler: named/inline/external references, source-ordered imports, case inheritance, cyclic-import errors and bounded regular expressions.",
       "limitations": [
-        "No XML schema validation, XSHD serialization, complete visitor model or full .NET regex compatibility."
+        "Registration/translation use a private Rust compiler rather than managed visitor subclasses. Runtime font metadata is a subset of the editable tree, and regex Unicode/culture/ExplicitCapture behavior can differ from .NET."
       ]
     },
     {
@@ -5034,14 +5135,30 @@
           "line": 26
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Highlighting.Xshd.XshdColor"
       ],
-      "notes": "The runtime XSHD loader does not expose this schema/visitor/serialization object-model contract.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/xshd/model.rs",
+          "symbols": [
+            "XshdColor"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.Xshd.XshdColor",
+              "rust": "XshdColor"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Editable ordered XSHD syntax tree, source positions and unresolved local/external/inline references; parsing and executable compilation are separate stages.",
+      "limitations": [
+        "Owned Rust syntax nodes and enums replace the managed mutable inheritance model; visitors are explicit and fallible.",
+        "The editable tree preserves complete XML metadata, but runtime highlighting maps font weight/style to its bold/italic subset and does not resolve framework brush resources."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/Xshd/XshdElement.cs",
@@ -5059,14 +5176,29 @@
           "line": 24
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Highlighting.Xshd.XshdElement"
       ],
-      "notes": "The runtime XSHD loader does not expose this schema/visitor/serialization object-model contract.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/xshd/model.rs",
+          "symbols": [
+            "XshdElement"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.Xshd.XshdElement",
+              "rust": "XshdElement"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Editable ordered XSHD syntax tree, source positions and unresolved local/external/inline references; parsing and executable compilation are separate stages.",
+      "limitations": [
+        "Owned Rust syntax nodes and enums replace the managed mutable inheritance model; visitors are explicit and fallible."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/Xshd/XshdImport.cs",
@@ -5084,14 +5216,29 @@
           "line": 24
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Highlighting.Xshd.XshdImport"
       ],
-      "notes": "The runtime XSHD loader does not expose this schema/visitor/serialization object-model contract.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/xshd/model.rs",
+          "symbols": [
+            "XshdImport"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.Xshd.XshdImport",
+              "rust": "XshdImport"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Editable ordered XSHD syntax tree, source positions and unresolved local/external/inline references; parsing and executable compilation are separate stages.",
+      "limitations": [
+        "Owned Rust syntax nodes and enums replace the managed mutable inheritance model; visitors are explicit and fallible."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/Xshd/XshdKeywords.cs",
@@ -5109,14 +5256,29 @@
           "line": 27
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Highlighting.Xshd.XshdKeywords"
       ],
-      "notes": "The runtime XSHD loader does not expose this schema/visitor/serialization object-model contract.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/xshd/model.rs",
+          "symbols": [
+            "XshdKeywords"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.Xshd.XshdKeywords",
+              "rust": "XshdKeywords"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Editable ordered XSHD syntax tree, source positions and unresolved local/external/inline references; parsing and executable compilation are separate stages.",
+      "limitations": [
+        "Owned Rust syntax nodes and enums replace the managed mutable inheritance model; visitors are explicit and fallible."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/Xshd/XshdProperty.cs",
@@ -5134,14 +5296,30 @@
           "line": 24
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Highlighting.Xshd.XshdProperty"
       ],
-      "notes": "The runtime XSHD loader does not expose this schema/visitor/serialization object-model contract.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/xshd/model.rs",
+          "symbols": [
+            "XshdProperty"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.Xshd.XshdProperty",
+              "rust": "XshdProperty"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Editable ordered XSHD syntax tree, source positions and unresolved local/external/inline references; parsing and executable compilation are separate stages.",
+      "limitations": [
+        "Owned Rust syntax nodes and enums replace the managed mutable inheritance model; visitors are explicit and fallible.",
+        "Property visitation and serialization are intentional extensions over the pinned visitor/writer omissions."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/Xshd/XshdReference.cs",
@@ -5159,14 +5337,30 @@
           "line": 26
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Highlighting.Xshd.XshdReference"
       ],
-      "notes": "The runtime XSHD loader does not expose this schema/visitor/serialization object-model contract.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/xshd/model.rs",
+          "symbols": [
+            "XshdReference"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.Xshd.XshdReference",
+              "rust": "XshdReference"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Editable ordered XSHD syntax tree, source positions and unresolved local/external/inline references; parsing and executable compilation are separate stages.",
+      "limitations": [
+        "Owned Rust syntax nodes and enums replace the managed mutable inheritance model; visitors are explicit and fallible.",
+        "Inline references use structural equality and owned Box values instead of managed object identity."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/Xshd/XshdRule.cs",
@@ -5184,14 +5378,29 @@
           "line": 24
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Highlighting.Xshd.XshdRule"
       ],
-      "notes": "The runtime XSHD loader does not expose this schema/visitor/serialization object-model contract.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/xshd/model.rs",
+          "symbols": [
+            "XshdRule"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.Xshd.XshdRule",
+              "rust": "XshdRule"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Editable ordered XSHD syntax tree, source positions and unresolved local/external/inline references; parsing and executable compilation are separate stages.",
+      "limitations": [
+        "Owned Rust syntax nodes and enums replace the managed mutable inheritance model; visitors are explicit and fallible."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/Xshd/XshdRuleSet.cs",
@@ -5209,14 +5418,29 @@
           "line": 27
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Highlighting.Xshd.XshdRuleSet"
       ],
-      "notes": "The runtime XSHD loader does not expose this schema/visitor/serialization object-model contract.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/xshd/model.rs",
+          "symbols": [
+            "XshdRuleSet"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.Xshd.XshdRuleSet",
+              "rust": "XshdRuleSet"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Editable ordered XSHD syntax tree, source positions and unresolved local/external/inline references; parsing and executable compilation are separate stages.",
+      "limitations": [
+        "Owned Rust syntax nodes and enums replace the managed mutable inheritance model; visitors are explicit and fallible."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/Xshd/XshdSpan.cs",
@@ -5242,15 +5466,35 @@
           "line": 41
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Highlighting.Xshd.XshdRegexType",
         "AvaloniaEdit.Highlighting.Xshd.XshdSpan"
       ],
-      "notes": "The runtime XSHD loader does not expose this schema/visitor/serialization object-model contract.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/xshd/model.rs",
+          "symbols": [
+            "XshdSpan",
+            "XshdRegexType"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.Xshd.XshdSpan",
+              "rust": "XshdSpan"
+            },
+            {
+              "upstream": "AvaloniaEdit.Highlighting.Xshd.XshdRegexType",
+              "rust": "XshdRegexType"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Editable ordered XSHD syntax tree, source positions and unresolved local/external/inline references; parsing and executable compilation are separate stages.",
+      "limitations": [
+        "Owned Rust syntax nodes and enums replace the managed mutable inheritance model; visitors are explicit and fallible."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/Xshd/XshdSyntaxDefinition.cs",
@@ -5268,14 +5512,30 @@
           "line": 27
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Highlighting.Xshd.XshdSyntaxDefinition"
       ],
-      "notes": "The runtime XSHD loader does not expose this schema/visitor/serialization object-model contract.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/highlighting/xshd/model.rs",
+          "symbols": [
+            "XshdSyntaxDefinition"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.Xshd.XshdSyntaxDefinition",
+              "rust": "XshdSyntaxDefinition"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Editable ordered XSHD syntax tree, source positions and unresolved local/external/inline references; parsing and executable compilation are separate stages.",
+      "limitations": [
+        "Owned Rust syntax nodes and enums replace the managed mutable inheritance model; visitors are explicit and fallible.",
+        "Serialization emits canonical v2 XML and does not preserve original formatting, comments, namespace prefixes or source coordinates."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Indentation/CSharp/CSharpIndentationStrategy.cs",
@@ -7787,7 +8047,7 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Options consumed by the Rust editing session.",
+      "notes": "Options consumed by the Rust editing session, including active virtual-space navigation and tab-aware editing policies.",
       "limitations": [
         "Complete upstream option set and property-notification contract are not ported."
       ]
@@ -7808,14 +8068,29 @@
           "line": 29
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.TextViewPosition"
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/text_view_position.rs",
+          "symbols": [
+            "TextViewPosition"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.TextViewPosition",
+              "rust": "TextViewPosition"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "UTF-16 logical position, optional zero-based visual column, wrapped-row end affinity, value ordering, location conversion and formatting.",
+      "limitations": [
+        "Rust Option represents an unresolved visual column instead of the managed negative sentinel; projection remains a presentation-layer responsibility."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Themes/Base.xaml",

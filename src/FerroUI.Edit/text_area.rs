@@ -59,7 +59,12 @@ pub struct TextArea {
     scroll_notification_pending: Cell<bool>,
     dragging: Cell<bool>,
     drag_anchor: Cell<usize>,
+    drag_anchor_virtual_space: Cell<usize>,
+    rectangle_drag_anchor: Cell<Option<(usize, f64)>>,
+    rectangle_keyboard_anchor: Cell<Option<(usize, f64)>>,
+    space_advance: Cell<f64>,
     caret_visible: Cell<bool>,
+    caret_at_end_of_line: Cell<bool>,
     blink_timer: OnceCell<Rc<DispatcherTimer>>,
     im_client: OnceCell<Rc<EditorTextInputMethodClient>>,
     preedit: RefCell<Option<(String, Option<i32>)>>,
@@ -245,6 +250,29 @@ impl VisualImpl for TextArea {
                             );
                         }
                     }
+                    let line_end = line.offset + line.length;
+                    if segment.end_offset() == line_end && segment.end_virtual_space() > 0 {
+                        let first = if segment.start_offset() == line_end {
+                            segment.start_virtual_space()
+                        } else {
+                            0
+                        };
+                        let last = segment.end_virtual_space();
+                        if last > first {
+                            let edge = Self::virtual_space_bounds(&line.layout);
+                            let width = this.space_advance();
+                            context.fill_rectangle(
+                                &brush,
+                                Rect::new(
+                                    origin.x + edge.x + first as f64 * width,
+                                    origin.y + edge.y,
+                                    (last - first) as f64 * width,
+                                    edge.height.max(this.line_height()),
+                                ),
+                                0.0,
+                            );
+                        }
+                    }
                 }
             }
             line.layout.draw(context, origin);
@@ -282,14 +310,30 @@ impl VisualImpl for TextArea {
                         } else {
                             line.display.visual_offset(segment.caret - line.offset)
                         };
-                        let r = line.layout.hit_test_text_position(position as i32);
+                        let r = if line.preedit.is_none() && segment.caret_virtual_space > 0 {
+                            Self::virtual_space_bounds(&line.layout)
+                        } else {
+                            Self::caret_bounds(
+                                &line.layout,
+                                position,
+                                line.preedit.is_none()
+                                    && *segment == selection.primary()
+                                    && this.caret_at_end_of_line.get(),
+                            )
+                        };
                         let brush = editor.foreground().unwrap_or_else(|| {
                             Rc::new(ImmutableSolidColorBrush::from_uint32(0xff202020))
                         });
                         context.fill_rectangle(
                             &brush,
                             Rect::new(
-                                origin.x + r.x,
+                                origin.x
+                                    + r.x
+                                    + if line.preedit.is_none() {
+                                        segment.caret_virtual_space as f64 * this.space_advance()
+                                    } else {
+                                        0.0
+                                    },
                                 origin.y + r.y,
                                 1.0,
                                 r.height.max(this.line_height()),
@@ -419,31 +463,136 @@ impl InputElementImpl for TextArea {
             }
         }
         let session = editor.session();
-        if matches!(e.key, Key::Up | Key::Down) && !command && this.viewport.get().width > 0.0 {
+        if modifiers.contains(KeyModifiers::ALT | KeyModifiers::SHIFT)
+            && matches!(
+                e.key,
+                Key::Left | Key::Right | Key::Up | Key::Down | Key::Home | Key::End
+            )
+        {
+            let selection = session.selection();
+            let primary = selection.primary();
+            if let Ok(logical) = editor.document().get_line_by_offset(primary.caret) {
+                let index = this
+                    .heights
+                    .borrow()
+                    .visible_owner(logical.line_number() - 1);
+                let x = this.x_for_position(primary.caret, primary.caret_virtual_space);
+                let anchor = this
+                    .rectangle_keyboard_anchor
+                    .get()
+                    .filter(|_| selection.is_rectangular())
+                    .unwrap_or_else(|| this.rectangle_anchor_for_selection(&selection));
+                let mut target = (index, x);
+                match e.key {
+                    Key::Up => {
+                        target.0 = this.heights.borrow().visible_owner(index.saturating_sub(1))
+                    }
+                    Key::Down => {
+                        target.0 = this
+                            .heights
+                            .borrow()
+                            .next_visible(index + 1)
+                            .min(editor.document().line_count() - 1)
+                    }
+                    Key::Home => target.1 = 0.0,
+                    Key::End => target.1 = this.x_for_position(logical.end_offset(), 0),
+                    Key::Left | Key::Right => {
+                        let right = e.key == Key::Right;
+                        let (offset, extra) = if primary.caret_virtual_space > 0 {
+                            (
+                                primary.caret,
+                                if right {
+                                    primary.caret_virtual_space.saturating_add(1)
+                                } else if word {
+                                    0
+                                } else {
+                                    primary.caret_virtual_space - 1
+                                },
+                            )
+                        } else if right && primary.caret == logical.end_offset() {
+                            (primary.caret, 1)
+                        } else {
+                            let text = editor
+                                .document()
+                                .get_text(logical.offset(), logical.length())
+                                .unwrap_or_default();
+                            let movement = match (right, word) {
+                                (false, false) => CaretMovement::CharacterLeft,
+                                (true, false) => CaretMovement::CharacterRight,
+                                (false, true) => CaretMovement::WordLeft,
+                                (true, true) => CaretMovement::WordRight,
+                            };
+                            (
+                                logical.offset()
+                                    + ferroui_edit_core::editing::next_caret_position(
+                                        &text,
+                                        primary.caret - logical.offset(),
+                                        movement,
+                                    ),
+                                0,
+                            )
+                        };
+                        target.1 = this.x_for_position(offset, extra);
+                    }
+                    _ => {}
+                }
+                if let Err(error) = this.select_rectangle_to(anchor, target) {
+                    editor.report_error(error.to_string());
+                }
+                this.rectangle_keyboard_anchor.set(Some(anchor));
+                e.set_handled(true);
+                return;
+            }
+        }
+        this.rectangle_keyboard_anchor.set(None);
+        if matches!(e.key, Key::Up | Key::Down | Key::PageUp | Key::PageDown)
+            && !command
+            && this.viewport.get().width > 0.0
+        {
             let rect = this.cursor_rectangle();
             let scroll = this.offset.get();
             let x = this.desired_x.get().unwrap_or(rect.x + scroll.x);
             this.desired_x.set(Some(x));
-            let target = this.offset_at_point(Point::new(
+            let current = session.selection().primary();
+            let distance = if matches!(e.key, Key::PageUp | Key::PageDown) {
+                this.viewport.get().height.max(this.line_height())
+            } else {
+                this.line_height()
+            };
+            let target_point = Point::new(
                 x - scroll.x,
                 rect.y
                     + rect.height * 0.5
-                    + if e.key == Key::Up {
-                        -this.line_height()
+                    + if matches!(e.key, Key::Up | Key::PageUp) {
+                        -distance
                     } else {
-                        this.line_height()
+                        distance
                     },
-            ));
-            let selection = if shift {
-                Selection::simple(session.selection().primary().anchor, target)
+            );
+            let target_affinity = this
+                .position_at_point(target_point, false)
+                .is_some_and(|p| p.is_at_end_of_line);
+            let (target, extra) = this.selection_position_at_point(
+                target_point,
+                editor.options().enable_virtual_space
+                    || current.caret_virtual_space > 0
+                    || session.selection().is_rectangular(),
+            );
+            let segment = if shift {
+                SelectionSegment::with_virtual_space(
+                    current.anchor,
+                    current.anchor_virtual_space,
+                    target,
+                    extra,
+                )
             } else {
-                Selection::empty(target)
+                SelectionSegment::with_virtual_space(target, extra, target, extra)
             };
-            if let Err(error) = session.set_selection(selection) {
+            if let Err(error) = session.set_selection(Selection::from_segments([segment], 0)) {
                 editor.report_error(error.to_string());
             }
             this.moving_vertically.set(true);
-            editor.selection_changed();
+            editor.selection_changed_with_affinity(target_affinity);
             this.moving_vertically.set(false);
             e.set_handled(true);
             return;
@@ -510,6 +659,7 @@ impl InputElementImpl for TextArea {
                 Key::Down => Some(CaretMovement::LineDown),
                 _ => None,
             });
+        let target_affinity = Cell::new(false);
         let result = if let Some(movement) = movement {
             if editor.word_wrap()
                 && matches!(movement, CaretMovement::LineStart | CaretMovement::LineEnd)
@@ -521,12 +671,26 @@ impl InputElementImpl for TextArea {
                 } else {
                     f64::MAX
                 };
-                let offset = this.offset_at_point(Point::new(x, rect.y + rect.height / 2.0));
-                session.set_selection(if extend {
-                    Selection::simple(session.selection().primary().anchor, offset)
-                } else {
-                    Selection::empty(offset)
-                })
+                let point = Point::new(x, rect.y + rect.height / 2.0);
+                let offset = this.offset_at_point(point);
+                target_affinity.set(
+                    this.position_at_point(point, false)
+                        .is_some_and(|p| p.is_at_end_of_line),
+                );
+                let primary = session.selection().primary();
+                session.set_selection(Selection::from_segments(
+                    [SelectionSegment::with_virtual_space(
+                        if extend { primary.anchor } else { offset },
+                        if extend {
+                            primary.anchor_virtual_space
+                        } else {
+                            0
+                        },
+                        offset,
+                        0,
+                    )],
+                    0,
+                ))
             } else {
                 session.move_caret(movement, extend);
                 Ok(())
@@ -577,7 +741,7 @@ impl InputElementImpl for TextArea {
         if let Err(error) = result {
             editor.report_error(error.to_string());
         }
-        editor.selection_changed();
+        editor.selection_changed_with_affinity(target_affinity.get());
         e.set_handled(true);
     }
     fn on_pointer_pressed(this: &Self, e: &PointerPressedEventArgs) {
@@ -592,7 +756,14 @@ impl InputElementImpl for TextArea {
             return;
         };
         this.focus();
-        let offset = this.offset_at_point(point.position);
+        this.rectangle_keyboard_anchor.set(None);
+        let (offset, extra) = this.selection_position_at_point(
+            point.position,
+            editor.options().enable_virtual_space || e.key_modifiers().contains(KeyModifiers::ALT),
+        );
+        let point_affinity = this
+            .position_at_point(point.position, false)
+            .is_some_and(|p| p.is_at_end_of_line);
         if point.position.x >= this.gutter_width() - this.folding_gutter_width()
             && point.position.x < this.gutter_width()
         {
@@ -614,15 +785,29 @@ impl InputElementImpl for TextArea {
             }
         }
         let session = editor.session();
+        this.rectangle_drag_anchor.set(
+            e.key_modifiers()
+                .contains(KeyModifiers::ALT)
+                .then(|| this.rectangle_anchor_at_point(point.position)),
+        );
         let selection = if e.key_modifiers().contains(KeyModifiers::SHIFT) {
-            Selection::simple(session.selection().primary().anchor, offset)
-        } else if e.key_modifiers().contains(KeyModifiers::ALT) {
-            let mut segments = session.selection().segments().to_vec();
-            segments.push(SelectionSegment::empty(offset));
-            let primary = segments.len() - 1;
-            Selection::from_segments(segments, primary)
+            let current = session.selection().primary();
+            Selection::from_segments(
+                [SelectionSegment::with_virtual_space(
+                    current.anchor,
+                    current.anchor_virtual_space,
+                    offset,
+                    extra,
+                )],
+                0,
+            )
         } else {
-            Selection::empty(offset)
+            Selection::from_segments(
+                [SelectionSegment::with_virtual_space(
+                    offset, extra, offset, extra,
+                )],
+                0,
+            )
         };
         let _ = session.set_selection(selection);
         if e.click_count() >= 3 || point.position.x < this.gutter_width() {
@@ -634,9 +819,13 @@ impl InputElementImpl for TextArea {
             let _ = session.move_caret(CaretMovement::WordRight, true);
         }
         this.drag_anchor.set(session.selection().primary().anchor);
+        this.drag_anchor_virtual_space
+            .set(session.selection().primary().anchor_virtual_space);
         this.dragging.set(true);
         e.pointer().capture(Some(&this.to_ref().upcast()));
-        editor.selection_changed();
+        editor.selection_changed_with_affinity(
+            e.click_count() == 1 && point.position.x >= this.gutter_width() && point_affinity,
+        );
         e.set_handled(true);
     }
     fn on_pointer_moved(this: &Self, e: &PointerEventArgs) {
@@ -645,13 +834,41 @@ impl InputElementImpl for TextArea {
         }
         if let Some(editor) = this.editor() {
             let point = e.get_position(Some(this));
-            let offset = this.offset_at_point(point);
-            let _ = editor.set_selection(Selection::simple(this.drag_anchor.get(), offset));
+            if let Some(anchor) = this.rectangle_drag_anchor.get() {
+                if let Err(error) =
+                    this.select_rectangle_to(anchor, this.rectangle_anchor_at_point(point))
+                {
+                    editor.report_error(error.to_string());
+                }
+            } else {
+                let affinity = this
+                    .position_at_point(point, false)
+                    .is_some_and(|p| p.is_at_end_of_line);
+                let (offset, extra) = this.selection_position_at_point(
+                    point,
+                    editor.options().enable_virtual_space
+                        || this.drag_anchor_virtual_space.get() > 0,
+                );
+                let result = editor.session().set_selection(Selection::from_segments(
+                    [SelectionSegment::with_virtual_space(
+                        this.drag_anchor.get(),
+                        this.drag_anchor_virtual_space.get(),
+                        offset,
+                        extra,
+                    )],
+                    0,
+                ));
+                match result {
+                    Ok(()) => editor.selection_changed_with_affinity(affinity),
+                    Err(error) => editor.report_error(error.to_string()),
+                }
+            }
             e.set_handled(true);
         }
     }
     fn on_pointer_released(this: &Self, e: &PointerReleasedEventArgs) {
         if this.dragging.replace(false) {
+            this.rectangle_drag_anchor.set(None);
             e.pointer().capture(None);
             e.set_handled(true);
         }
@@ -691,7 +908,12 @@ impl TextArea {
             scroll_notification_pending: Cell::new(false),
             dragging: Cell::new(false),
             drag_anchor: Cell::new(0),
+            drag_anchor_virtual_space: Cell::new(0),
+            rectangle_drag_anchor: Cell::new(None),
+            rectangle_keyboard_anchor: Cell::new(None),
+            space_advance: Cell::new(0.0),
             caret_visible: Cell::new(true),
+            caret_at_end_of_line: Cell::new(false),
             blink_timer: OnceCell::new(),
             im_client: OnceCell::new(),
             preedit: RefCell::new(None),
@@ -742,6 +964,7 @@ impl TextArea {
     }
     fn reset_line_metrics(&self) {
         self.cache.borrow_mut().clear();
+        self.space_advance.set(0.0);
         let mut active = Vec::<FoldingSection>::new();
         let mut collapsed = Vec::new();
         if let Some(editor) = self.editor() {
@@ -778,7 +1001,9 @@ impl TextArea {
             client.raise_selection_changed();
         }
     }
-    pub(crate) fn selection_changed(&self) {
+    pub(crate) fn selection_changed_with_affinity(&self, at_end_of_line: bool) {
+        self.caret_at_end_of_line.set(at_end_of_line);
+        self.rectangle_keyboard_anchor.set(None);
         if !self.moving_vertically.get() {
             self.desired_x.set(None);
         }
@@ -811,6 +1036,28 @@ impl TextArea {
                 .fold(self.extent.get().width, f64::max)
                 .max(viewport.width)
         };
+        let virtual_width = self.editor().map_or(0.0, |editor| {
+            let primary = editor.selection().primary();
+            if primary.caret_virtual_space == 0 {
+                return 0.0;
+            }
+            let Ok(document_line) = editor.document().get_line_by_offset(primary.caret) else {
+                return 0.0;
+            };
+            let index = self
+                .heights
+                .borrow()
+                .visible_owner(document_line.line_number() - 1);
+            let line = self.cache.borrow().get(&index).cloned();
+            line.map_or(0.0, |line| {
+                let edge = Self::virtual_space_bounds(&line.layout);
+                edge.x
+                    + primary.caret_virtual_space as f64 * self.space_advance()
+                    + self.gutter_width()
+                    + 8.0
+            })
+        });
+        let width = width.max(virtual_width);
         let extent = Size::new(width, height.max(viewport.height));
         if self.extent.replace(extent) != extent {
             self.raise_scroll_invalidated();
@@ -1117,21 +1364,304 @@ impl TextArea {
         );
     }
     pub fn offset_at_point(&self, point: Point) -> usize {
+        self.selection_position_at_point(point, false).0
+    }
+
+    fn space_advance(&self) -> f64 {
+        if self.space_advance.get() > 0.0 {
+            return self.space_advance.get();
+        }
+        let Some(editor) = self.editor() else {
+            return 7.0;
+        };
+        let layout = TextLayout::new(
+            " ",
+            Typeface::new(editor.font_family()),
+            TextLayoutOptions {
+                font_size: editor.font_size(),
+                ..Default::default()
+            },
+        );
+        let width = layout.width_including_trailing_whitespace().max(1.0);
+        self.space_advance.set(width);
+        width
+    }
+
+    fn selection_position_on_line(
+        &self,
+        line: &VisualLine,
+        point: Point,
+        allow_virtual_space: bool,
+    ) -> (usize, usize) {
+        if allow_virtual_space {
+            let edge = Self::virtual_space_bounds(&line.layout);
+            if point.x.is_finite() && point.x > edge.x && point.y >= edge.y {
+                let extra = ((point.x - edge.x) / self.space_advance()).round().max(0.0) as usize;
+                return (
+                    line.offset + line.display.document_offset(line.display.text.len()),
+                    extra,
+                );
+            }
+        }
+        let hit = line.layout.hit_test_point(point);
+        let visual = (hit.text_position().max(0) as usize).min(line.display.text.len());
+        let offset = line.offset + line.display.document_offset(visual);
+        (offset, 0)
+    }
+
+    fn selection_position_at_point(
+        &self,
+        point: Point,
+        allow_virtual_space: bool,
+    ) -> (usize, usize) {
         let offset = self.offset.get();
         let y = (point.y + offset.y).max(0.0);
         let index = self.heights.borrow().line_at(y);
         let Some(line) = self.line_layout(index) else {
-            return 0;
+            return (0, 0);
         };
         let top = self.heights.borrow().top(index);
-        let hit = line.layout.hit_test_point(Point::new(
-            point.x + offset.x - self.gutter_width(),
-            y - top,
-        ));
-        line.offset
-            + line
-                .display
-                .document_offset(hit.text_position().max(0) as usize)
+        self.selection_position_on_line(
+            &line,
+            Point::new(point.x + offset.x - self.gutter_width(), y - top),
+            allow_virtual_space,
+        )
+    }
+
+    /// Resolves a viewport point through the actual formatter, including tabs,
+    /// folded text and optional cells beyond the final glyph of a logical line.
+    pub fn position_at_point(
+        &self,
+        point: Point,
+        allow_virtual_space: bool,
+    ) -> Option<crate::TextViewPosition> {
+        let editor = self.editor()?;
+        let (offset, extra) = self.selection_position_at_point(point, allow_virtual_space);
+        let location = editor.document().get_location(offset).ok()?;
+        let index = self.heights.borrow().visible_owner(location.line - 1);
+        let line = self.line_layout(index)?;
+        let visual = line.display.visual_offset(offset - line.offset);
+        let mut result =
+            crate::TextViewPosition::with_visual_column(location, visual.saturating_add(extra));
+        let normal = line.layout.hit_test_text_position(visual as i32);
+        let local_y = point.y + self.offset.get().y - self.heights.borrow().top(index);
+        result.is_at_end_of_line = extra == 0 && local_y < normal.y;
+        Some(result)
+    }
+
+    pub(crate) fn caret_position(&self) -> Option<crate::TextViewPosition> {
+        let editor = self.editor()?;
+        let primary = editor.selection().primary();
+        let location = editor.document().get_location(primary.caret).ok()?;
+        let mut result = crate::TextViewPosition::with_visual_column(
+            location,
+            self.visual_column_for_offset(primary.caret)?
+                .saturating_add(primary.caret_virtual_space),
+        );
+        result.is_at_end_of_line = self.caret_at_end_of_line.get();
+        Some(result)
+    }
+
+    pub(crate) fn visual_column_for_offset(&self, offset: usize) -> Option<usize> {
+        let editor = self.editor()?;
+        let logical = editor.document().get_line_by_offset(offset).ok()?;
+        if self.viewport.get().width > 0.0 {
+            let index = self
+                .heights
+                .borrow()
+                .visible_owner(logical.line_number() - 1);
+            let line = self.line_layout(index)?;
+            return Some(line.display.visual_offset(offset - line.offset));
+        }
+        let source = editor
+            .document()
+            .get_text_utf16(logical.offset(), logical.length())
+            .ok()?;
+        let mut display = DisplayLine::empty();
+        display.push_text(&source, 0, editor.options().indentation_size);
+        Some(display.visual_offset(offset - logical.offset()))
+    }
+
+    fn caret_bounds(layout: &TextLayout, visual: usize, at_end: bool) -> Rect {
+        if !at_end {
+            return layout.hit_test_text_position(visual as i32);
+        }
+        let index = layout
+            .get_line_index_from_character_index(visual as i32, true)
+            .max(0) as usize;
+        let Some(row) = layout.text_lines().get(index) else {
+            return Rect::default();
+        };
+        Rect::new(
+            row.get_distance_from_character_hit(ferroui_base::media::CharacterHit::new(
+                visual as i32,
+            )),
+            layout
+                .text_lines()
+                .iter()
+                .take(index)
+                .map(|line| line.height())
+                .sum(),
+            1.0,
+            row.height(),
+        )
+    }
+
+    fn rectangle_anchor_at_point(&self, point: Point) -> (usize, f64) {
+        let scroll = self.offset.get();
+        let line = self.heights.borrow().line_at((point.y + scroll.y).max(0.0));
+        (line, point.x + scroll.x - self.gutter_width())
+    }
+
+    /// Virtual cells follow the final formatted row's physical right edge.
+    /// The logical EOL caret may be inside that row for a trailing RTL run.
+    fn virtual_space_bounds(layout: &TextLayout) -> Rect {
+        let rows = layout.text_lines();
+        let Some(last) = rows.last() else {
+            return layout.hit_test_text_position(0);
+        };
+        Rect::new(
+            last.start() + last.width_including_trailing_whitespace(),
+            rows.iter()
+                .take(rows.len() - 1)
+                .map(|row| row.height())
+                .sum(),
+            1.0,
+            last.height(),
+        )
+    }
+
+    fn rectangle_anchor_for_selection(&self, selection: &Selection) -> (usize, f64) {
+        let primary = selection.primary();
+        let segment = if selection.is_rectangular() {
+            if selection.primary_index() == 0 {
+                selection.segments().last().copied().unwrap_or(primary)
+            } else {
+                selection.segments().first().copied().unwrap_or(primary)
+            }
+        } else {
+            primary
+        };
+        let index = self
+            .editor()
+            .and_then(|editor| editor.document().get_line_by_offset(segment.anchor).ok())
+            .map_or(0, |line| {
+                self.heights.borrow().visible_owner(line.line_number() - 1)
+            });
+        (
+            index,
+            self.x_for_position(segment.anchor, segment.anchor_virtual_space),
+        )
+    }
+
+    fn x_for_position(&self, offset: usize, extra: usize) -> f64 {
+        let Some(editor) = self.editor() else {
+            return 0.0;
+        };
+        let Ok(document_line) = editor.document().get_line_by_offset(offset) else {
+            return 0.0;
+        };
+        let index = self
+            .heights
+            .borrow()
+            .visible_owner(document_line.line_number() - 1);
+        let Some(line) = self.line_layout(index) else {
+            return 0.0;
+        };
+        let visual = line.display.visual_offset(offset - line.offset);
+        let edge = if extra > 0 {
+            Self::virtual_space_bounds(&line.layout)
+        } else {
+            line.layout.hit_test_text_position(visual as i32)
+        };
+        edge.x + extra as f64 * self.space_advance()
+    }
+
+    /// Gets a visible insertion rectangle in this control's coordinates.
+    /// Returns `None` for invalid offsets, hidden fold interiors, or positions
+    /// outside the arranged viewport. Popup hosts can anchor to a tracked
+    /// document offset without moving the editor's caret.
+    pub fn rectangle_for_offset(&self, offset: usize) -> Option<Rect> {
+        let viewport = self.viewport.get();
+        if viewport.width <= 0.0 || viewport.height <= 0.0 {
+            return None;
+        }
+        let editor = self.editor()?;
+        let document_line = editor.document().get_line_by_offset(offset).ok()?;
+        if self
+            .folds
+            .borrow()
+            .iter()
+            .any(|fold| fold.start_offset() < offset && offset < fold.end_offset())
+        {
+            return None;
+        }
+        let index = self
+            .heights
+            .borrow()
+            .visible_owner(document_line.line_number() - 1);
+        let scroll = self.offset.get();
+        let top = self.heights.borrow().top(index) - scroll.y;
+        if top >= viewport.height {
+            return None;
+        }
+        let line = self.line_layout(index)?;
+        let visual = line.display.visual_offset(offset - line.offset);
+        let rect = line.layout.hit_test_text_position(visual as i32);
+        let result = Rect::new(
+            rect.x + self.gutter_width() - scroll.x,
+            rect.y + top,
+            1.0,
+            rect.height.max(self.line_height()),
+        );
+        (result.y + result.height > 0.0
+            && result.y < viewport.height
+            && result.x + result.width > self.gutter_width()
+            && result.x < viewport.width)
+            .then_some(result)
+    }
+
+    fn select_rectangle_to(
+        &self,
+        anchor: (usize, f64),
+        caret: (usize, f64),
+    ) -> Result<(), ferroui_edit_core::editing::EditError> {
+        let editor = self
+            .editor()
+            .ok_or(ferroui_edit_core::editing::EditError::InvalidSelection)?;
+        let count = editor.document().line_count();
+        let first = anchor.0.min(caret.0).min(count - 1);
+        let last = anchor.0.max(caret.0).min(count - 1);
+        let mut segments = Vec::new();
+        let mut index = self.heights.borrow().visible_owner(first);
+        while index <= last {
+            let line = self
+                .line_layout(index)
+                .ok_or(ferroui_edit_core::editing::EditError::InvalidSelection)?;
+            let (a, av) = self.selection_position_on_line(&line, Point::new(anchor.1, 0.0), true);
+            let (c, cv) = self.selection_position_on_line(&line, Point::new(caret.1, 0.0), true);
+            segments.push(SelectionSegment::with_virtual_space(a, av, c, cv));
+            index = self.heights.borrow().next_visible(index + 1);
+        }
+        let primary = if caret.0 < anchor.0 {
+            0
+        } else {
+            segments.len().saturating_sub(1)
+        };
+        editor.set_selection(Selection::from_rectangle_segments(segments, primary))
+    }
+
+    /// Selects a rectangle using viewport coordinates and the shaped glyph
+    /// positions of each visible logical line. Collapsed lines are skipped.
+    pub fn set_rectangular_selection(
+        &self,
+        anchor: Point,
+        caret: Point,
+    ) -> Result<(), ferroui_edit_core::editing::EditError> {
+        self.select_rectangle_to(
+            self.rectangle_anchor_at_point(anchor),
+            self.rectangle_anchor_at_point(caret),
+        )
     }
     pub fn cursor_rectangle(&self) -> Rect {
         if self.viewport.get().width <= 0.0 || self.viewport.get().height <= 0.0 {
@@ -1162,10 +1692,23 @@ impl TextArea {
         } else {
             line.display.visual_offset(offset - line.offset)
         };
-        let r = line.layout.hit_test_text_position(position as i32);
+        let r = if line.preedit.is_none() && editor.selection().primary().caret_virtual_space > 0 {
+            Self::virtual_space_bounds(&line.layout)
+        } else {
+            Self::caret_bounds(
+                &line.layout,
+                position,
+                line.preedit.is_none() && self.caret_at_end_of_line.get(),
+            )
+        };
         let scroll = self.offset.get();
         Rect::new(
-            r.x + self.gutter_width() - scroll.x,
+            r.x + self.gutter_width() - scroll.x
+                + if line.preedit.is_none() {
+                    editor.selection().primary().caret_virtual_space as f64 * self.space_advance()
+                } else {
+                    0.0
+                },
             r.y + self.heights.borrow().top(index) - scroll.y,
             1.0,
             r.height.max(self.line_height()),

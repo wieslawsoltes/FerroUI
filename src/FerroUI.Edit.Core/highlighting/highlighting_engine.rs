@@ -240,7 +240,10 @@ impl HighlightingEngine {
                 .find_from_pos(text, position)
                 .map_err(|e| HighlightingError::MatchBudget(e.to_string()))?
             {
-                if candidate.as_ref().is_none_or(|c| m.start() < c.start()) {
+                if candidate.as_ref().is_none_or(|c| {
+                    m.start() < c.start()
+                        || (m.start() == c.start() && matches!(c, Candidate::End(_, _)))
+                }) {
                     *candidate = Some(Candidate::Span(set, index, m.start(), m.end()));
                 }
             }
