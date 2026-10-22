@@ -2,6 +2,7 @@
 //! exact native brush box; markers and hit tolerances use screen pixels.
 use super::*;
 use ferrodesign_core::{LinearGradientEdit, MAX_GRADIENT_COORDINATE};
+use ferroui_base::media::{immutable::ImmutableSolidColorBrush, IBrush};
 
 const HIT_RADIUS: f64 = 7.0;
 const STOP_OFFSET: f64 = 16.0;
@@ -46,6 +47,7 @@ struct PreparedGradient {
     axis: [Point; 2],
     screen_axis: [Point; 2],
     handles: Vec<Handle>,
+    stop_brushes: Vec<Rc<dyn IBrush>>,
 }
 
 struct GradientGesture {
@@ -282,6 +284,19 @@ impl DesignCanvas {
         let value = LinearGradientEdit::from_node(&editor.document.nodes[&id], fill)
             .map_err(|error| error.to_string())?;
         let (axis, screen_axis, handles) = prepare_handles(&value, bounds, transform, viewport)?;
+        // Core colors serialize translucent values as RGBA, whereas FerroUI's
+        // eight-digit hex parser expects ARGB. Keep typed, cached brushes so
+        // marker rendering preserves every channel without per-frame parsing.
+        let stop_brushes: Vec<Rc<dyn IBrush>> = value
+            .stops
+            .iter()
+            .map(|stop| -> Rc<dyn IBrush> {
+                let color = stop.color;
+                Rc::new(ImmutableSolidColorBrush::new(
+                    ferroui_base::media::Color::from_argb(color.a, color.r, color.g, color.b),
+                ))
+            })
+            .collect();
         let result = Rc::new(PreparedGradient {
             node: id,
             fill,
@@ -293,6 +308,7 @@ impl DesignCanvas {
             axis,
             screen_axis,
             handles,
+            stop_brushes,
         });
         state.cache = Some(Rc::clone(&result));
         #[cfg(test)]
@@ -924,8 +940,6 @@ impl DesignCanvas {
                     &BoxShadows::default(),
                 ),
                 Part::Stop(index) => {
-                    let color = prepared.value.stops[index].color;
-                    let color = brush(&color.hex());
                     context.draw_ellipse_at(
                         Some(&white),
                         Some(if selected { &highlight } else { &ink }),
@@ -933,7 +947,13 @@ impl DesignCanvas {
                         5.0,
                         5.0,
                     );
-                    context.draw_ellipse_at(Some(&color), None, ui(handle.marker), 3.0, 3.0);
+                    context.draw_ellipse_at(
+                        Some(&prepared.stop_brushes[index]),
+                        None,
+                        ui(handle.marker),
+                        3.0,
+                        3.0,
+                    );
                 }
                 Part::Axis => {}
             }

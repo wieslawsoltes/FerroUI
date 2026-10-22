@@ -182,6 +182,71 @@ fn native_gradient_hover_reuses_bounded_preparation_and_paints_distinct_tied_sto
 }
 
 #[test]
+fn native_gradient_stop_markers_preserve_translucent_rgba_over_white_and_reuse_brushes() {
+    let scope = backend();
+    let (canvas, id) = fixture();
+    let colors = [
+        Color { r: 43, g: 97, b: 211, a: 0 },
+        Color { r: 37, g: 151, b: 219, a: 113 },
+        Color { r: 203, g: 67, b: 131, a: 179 },
+    ];
+    let mut gradient = value(&canvas, id);
+    for (stop, color) in gradient.stops.iter_mut().zip(colors) {
+        stop.color = color;
+    }
+    assert!(canvas.editor.borrow_mut().set_linear_gradient(id, 1, gradient).unwrap());
+    let before = json(&canvas);
+    let token = canvas.editor.borrow().render_change_token();
+    let history = canvas.editor.borrow().history_len();
+    let plan = prepared(&canvas, id);
+    let preparations = canvas.linear_gradient.borrow().preparations;
+    let bitmap = RenderTargetBitmap::new(PixelSize::new(260, 180));
+    for _ in 0..2 {
+        let mut context = bitmap.create_drawing_context();
+        assert!(canvas.render_linear_gradient(&mut context, &canvas.editor.borrow(), id));
+        context.dispose();
+    }
+    let mut pixels = vec![0; 260 * 180 * 4];
+    bitmap.copy_pixels(PixelRect::new(0, 0, 260, 180), &mut pixels, 260 * 4);
+    if bitmap.format() == Some(PixelFormat::BGRA8888) {
+        for pixel in pixels.chunks_exact_mut(4) {
+            pixel.swap(0, 2);
+        }
+    }
+    for (index, color) in colors.into_iter().enumerate() {
+        let center = plan.handles.iter().find(|handle| handle.part == Part::Stop(index)).unwrap().marker;
+        // The full-coverage center is authored stop color over the opaque white
+        // marker disc. Fill-stack opacity does not change this color swatch.
+        let alpha = u32::from(color.a);
+        let expected = [color.r, color.g, color.b].map(|channel| {
+            ((u32::from(channel) * alpha + 255 * (255 - alpha) + 127) / 255) as u8
+        });
+        for (dx, dy) in [(0, 0), (-1, 0), (0, -1), (-1, -1)] {
+            let x = center.x.round() as i32 + dx;
+            let y = center.y.round() as i32 + dy;
+            let offset = (y as usize * 260 + x as usize) * 4;
+            let actual = &pixels[offset..offset + 4];
+            assert_eq!(actual[3], 255, "Stop {index} retains its opaque white backing");
+            for channel in 0..3 {
+                assert!(actual[channel].abs_diff(expected[channel]) <= 2,
+                    "Stop {index}, channel {channel}: rendered {actual:?}, expected RGB {expected:?} from RGBA {color:?}");
+            }
+        }
+    }
+    let repeated = prepared(&canvas, id);
+    for (original, retained) in plan.stop_brushes.iter().zip(&repeated.stop_brushes) {
+        assert!(Rc::ptr_eq(original, retained), "Unchanged overlays retain their typed stop brushes");
+    }
+    assert_eq!(canvas.linear_gradient.borrow().preparations, preparations);
+    assert_eq!(json(&canvas), before);
+    assert_eq!(canvas.editor.borrow().render_change_token(), token);
+    assert_eq!(canvas.editor.borrow().history_len(), history);
+    assert!(!canvas.editor.borrow().has_active_transaction());
+    bitmap.dispose();
+    scope.dispose();
+}
+
+#[test]
 fn affine_gradient_endpoint_and_axis_drags_keep_other_fills_and_commit_one_scoped_history_step() {
     let scope = backend();
     let (canvas, id) = fixture();
