@@ -352,7 +352,7 @@ pub fn outline_path(node: &Node) -> VectorPath {
             .unwrap_or_else(|| node.path.clone());
     }
     if node.kind == NodeKind::Polygon || node.kind == NodeKind::Star {
-        return VectorPath::polygon(&node.polygon_points(), true);
+        return crate::polygon_corner_path(node);
     }
     if node.kind == NodeKind::Line {
         return VectorPath::polygon(

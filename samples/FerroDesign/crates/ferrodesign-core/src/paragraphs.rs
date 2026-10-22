@@ -284,7 +284,11 @@ pub(crate) fn remap(
     text_paragraph_ranges(text)
         .into_iter()
         .filter_map(|range| {
-            let source = if range.start <= prefix {
+            // At a deletion boundary the new paragraph starts with the
+            // surviving suffix, even when the removed text was a complete
+            // paragraph (or only the LF half of CRLF). A paragraph that
+            // survives before the cut still owns a separator-only merge.
+            let source = if range.start < prefix {
                 range.start
             } else if range.start >= new_end {
                 old_end + range.start - new_end

@@ -125,6 +125,53 @@ fn paragraph_unicode_replacement_splits_inherits_merges_and_remaps_following_sty
 }
 
 #[test]
+fn exact_paragraph_deletion_keeps_surviving_suffix_styles_and_merge_ownership() {
+    for (original, removed, expected_text, expected_indents) in [
+        ("A\nA\nA\n", 0..2, "A\nA\n", vec![20.0, 30.0, 40.0]),
+        ("A\nA\nA\n", 2..4, "A\nA\n", vec![10.0, 30.0, 40.0]),
+        ("A\nA\nA\n", 4..6, "A\nA\n", vec![10.0, 20.0, 40.0]),
+        ("A\nBC\nD", 0..3, "C\nD", vec![20.0, 30.0]),
+        ("A\nBC\nD", 1..2, "ABC\nD", vec![10.0, 30.0]),
+        ("\nA\n", 0..1, "A\n", vec![20.0, 30.0]),
+        ("🦀\r\nשלום\u{2029}Ω\n", 0..6, "שלום\u{2029}Ω\n", vec![20.0, 30.0, 40.0]),
+        ("🦀\r\nשלום\u{2029}Ω\n", 6..17, "🦀\r\nΩ\n", vec![10.0, 30.0, 40.0]),
+        ("🦀\r\nשלום\u{2029}Ω\n", 4..6, "🦀שלום\u{2029}Ω\n", vec![10.0, 30.0, 40.0]),
+        ("A\r\nB", 1..2, "A\nB", vec![10.0, 20.0]),
+        ("A\r\nB", 2..3, "A\rB", vec![10.0, 20.0]),
+    ] {
+        let mut node = text(original);
+        node.text_paragraphs = text_paragraph_ranges(original).into_iter().enumerate()
+            .map(|(index, range)| TextParagraph {
+                start: range.start, end: range.end, indent: Some((index + 1) as f64 * 10.0),
+                ..Default::default()
+            }).collect();
+        let mut document = Document::new("Exact paragraph deletion");
+        let page = document.pages[0].id;
+        let id = document.insert_node(page, node).unwrap();
+        let mut editor = Editor::new(document);
+        let before = editor.document.to_json().unwrap();
+        let new_end = removed.start;
+        assert_eq!(editor.update_node(id, "Delete exact text range", |node| {
+            node.replace_text_range_preserving_runs(expected_text.into(), removed.clone(), new_end)
+        }), Some(Ok(true)), "{original:?}, deletion {removed:?}");
+        let node = &editor.document.nodes[&id];
+        assert_eq!(node.text, expected_text);
+        assert_eq!(node.text_paragraphs.iter().map(|style| style.indent.unwrap()).collect::<Vec<_>>(),
+            expected_indents, "{original:?}, deletion {removed:?}");
+        assert_eq!(node.text_paragraphs.iter().map(|style| style.start..style.end).collect::<Vec<_>>(),
+            text_paragraph_ranges(expected_text));
+        validate_text_paragraphs(node).unwrap();
+        let after = editor.document.to_json().unwrap();
+        assert_eq!(editor.history_len(), 1);
+        assert_eq!(Document::from_json(&after).unwrap().to_json().unwrap(), after);
+        assert!(editor.undo());
+        assert_eq!(editor.document.to_json().unwrap(), before);
+        assert!(editor.redo());
+        assert_eq!(editor.document.to_json().unwrap(), after);
+    }
+}
+
+#[test]
 fn paragraphs_validate_complete_ranges_values_and_keep_failed_commands_atomic() {
     let mut node = text("A🦀\nB");
     let before = node.clone();

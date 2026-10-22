@@ -240,7 +240,7 @@ fn node_stroke_path(node: &Node) -> Result<VectorPath, DocumentError> {
             }
         }
         NodeKind::Ellipse => ellipse_path(node.width, node.height),
-        NodeKind::Polygon | NodeKind::Star => VectorPath::polygon(&node.polygon_points(), true),
+        NodeKind::Polygon | NodeKind::Star => crate::polygon_corner_path(node),
         NodeKind::Rectangle
         | NodeKind::Frame
         | NodeKind::Section

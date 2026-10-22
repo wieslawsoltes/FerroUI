@@ -256,7 +256,10 @@ impl Node {
     /// Replace a text layer's content while preserving the styles of unchanged
     /// characters. The smallest changed character range inherits the style at
     /// the selection start; typing at a boundary inherits the preceding run.
-    /// This also keeps IME replacement and non-BMP text on valid byte boundaries.
+    /// This also keeps programmatic replacement and non-BMP text on valid byte
+    /// boundaries. Native editors should use `replace_text_range_preserving_runs`
+    /// when their exact edit coordinates are known: repeated strings make a
+    /// common-prefix comparison ambiguous.
     pub fn replace_text_preserving_runs(&mut self, text: String) -> bool {
         if self.kind != NodeKind::Text || self.text == text {
             return false;
@@ -277,6 +280,27 @@ impl Node {
             .sum::<usize>();
         let old_end = self.text.len() - suffix;
         let new_end = text.len() - suffix;
+        self.replace_text_range_preserving_runs(text, prefix..old_end, new_end)
+            .expect("the inferred replacement has matching UTF-8 boundaries")
+    }
+
+    /// Apply an exact replacement using UTF-8 document coordinates. `range`
+    /// refers to the old text and `new_end` is the end of the insertion in the
+    /// supplied complete new text. The unchanged prefix and suffix must match.
+    /// Invalid or stale coordinates leave text and both style collections alone.
+    pub fn replace_text_range_preserving_runs(
+        &mut self, text: String, range: Range<usize>, new_end: usize,
+    ) -> Result<bool, TextStyleError> {
+        if self.kind != NodeKind::Text { return Err(TextStyleError::NotText); }
+        let prefix = range.start;
+        let old_end = range.end;
+        if prefix > old_end || old_end > self.text.len() || prefix > new_end || new_end > text.len()
+            || !self.text.is_char_boundary(prefix) || !self.text.is_char_boundary(old_end)
+            || !text.is_char_boundary(prefix) || !text.is_char_boundary(new_end)
+            || self.text[..prefix] != text[..prefix] || self.text[old_end..] != text[new_end..] {
+            return Err(TextStyleError::InvalidRange);
+        }
+        if self.text == text { return Ok(false); }
         let mut runs = Vec::with_capacity(self.text_runs.len() + 2);
         for run in &self.text_runs {
             if run.start >= run.end
@@ -309,7 +333,7 @@ impl Node {
         self.text = text;
         self.text_runs = runs;
         self.text_paragraphs = paragraphs;
-        true
+        Ok(true)
     }
 }
 
@@ -358,6 +382,44 @@ mod tests {
             && n.text.is_char_boundary(r.end)));
         n.text_runs.iter().map(|r| (r.start, r.end)).collect()
     }
+    #[test]
+    fn exact_native_edit_retains_style_ownership_in_repeated_paragraphs() {
+        let mut n = node("A\nA\n", &[(0, 2), (2, 4)]);
+        n.apply_paragraph_style(0..2, &crate::ParagraphStylePatch {
+            indent: TextStyleChange::Set(10.0), ..Default::default()
+        }).unwrap();
+        n.apply_paragraph_style(2..4, &crate::ParagraphStylePatch {
+            indent: TextStyleChange::Set(20.0), ..Default::default()
+        }).unwrap();
+        assert!(n.replace_text_range_preserving_runs("A\nA\nA\n".into(), 0..0, 2).unwrap());
+        assert_eq!(ranges(&n), [(0, 4), (4, 6)]);
+        assert_eq!(n.text_runs[1].font_weight, Some(500));
+        assert_eq!(n.text_paragraphs.iter().map(|style| (style.start, style.end, style.indent)).collect::<Vec<_>>(),
+            [(0,2,Some(10.0)), (2,4,Some(10.0)), (4,6,Some(20.0))]);
+        crate::validate_text_paragraphs(&n).unwrap();
+        assert!(n.replace_text_range_preserving_runs("A\nA\n".into(), 0..2, 0).unwrap());
+        assert_eq!(ranges(&n), [(0, 2), (2, 4)]);
+        assert_eq!(n.text_paragraphs[1].indent, Some(20.0));
+    }
+
+    #[test]
+    fn exact_native_replacement_preserves_unicode_suffix_and_rejects_stale_ranges_atomically() {
+        let mut n = node("🦀🦀z", &[(0, 4), (4, 8), (8, 9)]);
+        assert!(n.replace_text_range_preserving_runs("🦀z".into(), 0..4, 0).unwrap());
+        assert_eq!(ranges(&n), [(0, 4), (4, 5)]);
+        assert_eq!(n.text_runs[0].font_weight, Some(500), "The second identical glyph survives");
+        let before = n.clone();
+        for (text, range, new_end) in [
+            ("X🦀z", 1..1, 2), ("X🦀z", 0..99, 1),
+            ("wrong", 4..5, 5), ("🦀z", 4..4, 1),
+        ] {
+            assert_eq!(n.replace_text_range_preserving_runs(text.into(), range, new_end), Err(TextStyleError::InvalidRange));
+            assert_eq!(n, before);
+        }
+        assert!(!n.replace_text_range_preserving_runs("🦀z".into(), 0..0, 0).unwrap());
+        assert_eq!(n, before);
+    }
+
     #[test]
     fn unicode_insertion_inherits_previous_run_and_shifts_suffix() {
         let mut n = node("A🦀B", &[(0, 5), (5, 6)]);

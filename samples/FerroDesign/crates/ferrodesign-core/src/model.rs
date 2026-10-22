@@ -1061,6 +1061,13 @@ impl Node {
                     <= stroke.max(tolerance)
             }
             NodeKind::Polygon | NodeKind::Star => {
+                if self.corner_radius > 0.0 {
+                    let path = crate::polygon_corner_path(self);
+                    let contours = path.flattened(0.1);
+                    return crate::geometry::path_contours_contain(path.fill_rule, &contours, p)
+                        || contours.iter().any(|contour| contour.windows(2)
+                            .any(|edge| distance_to_segment(p, edge[0], edge[1]) <= stroke));
+                }
                 let ps = self.polygon_points();
                 point_in_polygon(p, &ps)
                     || ps
