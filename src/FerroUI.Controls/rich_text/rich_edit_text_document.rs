@@ -35,6 +35,10 @@ mod selection_movement;
 mod selection_options;
 pub use selection_options::{SelectionOptions, SelectionType};
 
+#[path = "rich_edit_text_range_gravity.rs"]
+mod range_gravity;
+pub use range_gravity::RangeGravity;
+
 #[path = "rich_edit_text_units.rs"]
 mod units;
 use units::TextUnits;
@@ -437,13 +441,15 @@ impl RichEditTextDocument {
 struct RangeData {
     start: TextPointer,
     end: TextPointer,
-    typing_format: CharacterFormat,
+    typing_format: Rc<CharacterFormat>,
+    gravity: RangeGravity,
     // Explicit range/format ownership changes are distinct from the document's
     // mutation identity, including an asynchronous target moved away and back.
     generation: u64,
 }
 
-/// A live, independent range. Its endpoints follow document edits using explicit gravity.
+/// A live, independent range. Its endpoints use the document's TextPointer tracking.
+/// RangeGravity independently selects formatting at a collapsed boundary.
 /// Cloning shares the range object; [`get_clone`](Self::get_clone) creates independent endpoints.
 #[derive(Clone)]
 pub struct RichEditTextRange {
@@ -464,7 +470,8 @@ impl RichEditTextRange {
             data: Rc::new(RefCell::new(RangeData {
                 start: document.create_pointer(range.start, start_gravity)?,
                 end: document.create_pointer(range.end, TextGravity::Forward)?,
-                typing_format: CharacterFormat::default(),
+                typing_format: Rc::new(CharacterFormat::default()),
+                gravity: RangeGravity::UIBehavior,
                 generation: 0,
             })),
             editor,
@@ -560,12 +567,17 @@ impl RichEditTextRange {
         Ok(result)
     }
 
-    fn set_range_typing_format(&self, format: CharacterFormat) {
-        let mut data = self.data.borrow_mut();
-        if data.typing_format != format {
-            data.typing_format = format;
+    fn set_range_typing_format(&self, format: CharacterFormat) -> Result<(), EditError> {
+        let checkpoint = self.range_read_checkpoint();
+        let previous = self.data.borrow().typing_format.clone();
+        let changed = *previous != format;
+        self.ensure_range_read(checkpoint)?;
+        if changed {
+            let mut data = self.data.borrow_mut();
+            data.typing_format = Rc::new(format);
             data.generation = data.generation.wrapping_add(1);
         }
+        Ok(())
     }
 
     pub fn formatted_text(&self) -> Result<Self, EditError> {
@@ -602,7 +614,8 @@ impl RichEditTextRange {
             end: self
                 .document()
                 .create_pointer(range.end, TextGravity::Forward)?,
-            typing_format: CharacterFormat::default(),
+            typing_format: Rc::new(CharacterFormat::default()),
+            gravity: self.data.borrow().gravity,
             generation: self.data.borrow().generation.wrapping_add(1),
         };
         let old = self.data.replace(replacement);
@@ -662,33 +675,59 @@ impl RichEditTextRange {
     /// The change, formatting, and selection are one undoable transaction.
     pub fn set_text(&self, text: &str) -> Result<(), EditError> {
         self.editor.prepare_edit()?;
-        let range = self.range();
+        let checkpoint = self.range_read_checkpoint();
+        let original = self.range();
         let before_length = self.document().text_length();
         let selection = self.editor.selection();
+        let editor_checkpoint = self.editor.navigation_checkpoint();
         let typing_format = self.editor.typing_format();
-        let range_format = self.data.borrow().typing_format.clone();
-        self.editor.edit_group(|editor| {
-            editor.set_selection(EditorSelection::new(range.start, range.end))?;
-            if range.is_empty() && range_format != CharacterFormat::default() {
-                editor.apply_format(&range_format)?;
+        let original_format = self.range_typing_format();
+        let insertion_format = original
+            .is_empty()
+            .then(|| self.caret_character_format())
+            .transpose()?;
+        self.ensure_range_read(checkpoint)?;
+        if self.editor.navigation_checkpoint() != editor_checkpoint {
+            return Err(EditError::ReentrantEdit);
+        }
+        let mut owned_generation = checkpoint.0;
+        let external_generation = self.editor.external_change_generation();
+        let result = self.editor.edit_group(|editor| {
+            self.ensure_range_read(checkpoint)?;
+            editor.set_selection(EditorSelection::new(original.start, original.end))?;
+            if let Some(format) = &insertion_format {
+                editor.replace_range_typing_format(format)?;
+                // A collapsed typing patch changes no document content. Any
+                // model write during its services belongs to the callback.
+                self.ensure_range_read(checkpoint)?;
             }
+            self.ensure_range_generation(checkpoint.0)?;
             editor.insert_text(text, EditKind::Programmatic)?;
+            self.ensure_range_generation(checkpoint.0)?;
             let inserted = self
                 .document()
                 .text_length()
-                .saturating_sub(before_length - range.len());
-            let updated = rebase_selection(selection, range.clone(), inserted);
+                .saturating_sub(before_length - original.len());
+            let updated = rebase_selection(selection, original.clone(), inserted);
             editor.set_selection(updated)?;
             if updated.is_empty() {
-                editor.apply_format(&typing_format)?;
+                editor.replace_range_typing_format(&typing_format)?;
             }
+            self.ensure_range_generation(checkpoint.0)?;
+            // Install before editor publication. A newer callback-owned range
+            // or affinity must survive the enclosing command's completion.
+            self.set_range(original.start, original.start + inserted)?;
+            owned_generation = self.data.borrow().generation;
             Ok(())
-        })?;
-        let inserted = self
-            .document()
-            .text_length()
-            .saturating_sub(before_length - range.len());
-        self.set_range(range.start, range.start + inserted)
+        });
+        if result.is_err()
+            && self.editor.external_change_generation() == external_generation
+            && self.data.borrow().generation == owned_generation
+        {
+            self.set_range(original.start, original.end)?;
+            self.set_range_typing_format(original_format)?;
+        }
+        result
     }
 
     pub fn set_text_with_options(
@@ -701,10 +740,15 @@ impl RichEditTextRange {
             Some(RtfReader::read(&rtf_text_bytes(text)?)?)
         } else if options.contains(TextSetOptions::UNLINK) {
             let mut fragment = DocumentSnapshot::from_text(text);
-            let format = self
-                .document()
-                .character_format_at(self.start_position())?
-                .overlay(&self.data.borrow().typing_format);
+            let checkpoint = self.range_read_checkpoint();
+            let format = if self.is_degenerate() {
+                self.caret_character_format()?
+            } else {
+                self.document()
+                    .character_format_at(self.start_position())?
+                    .overlay(&self.range_typing_format())
+            };
+            self.ensure_range_read(checkpoint)?;
             for paragraph in &mut fragment.paragraphs {
                 paragraph.format.character = format.clone();
             }
@@ -774,58 +818,80 @@ impl RichEditTextRange {
     pub fn set_snapshot(&self, snapshot: &DocumentSnapshot) -> Result<(), EditError> {
         snapshot.validate()?;
         self.editor.prepare_edit()?;
-        let empty_paragraph = (snapshot.text_length() == 0)
-            .then(|| snapshot.paragraphs.first())
-            .flatten();
         if snapshot.paragraphs.is_empty() {
             return self.set_text("");
         }
-        let range = self.range();
+        let checkpoint = self.range_read_checkpoint();
+        let original = self.range();
         let before_length = self.document().text_length();
         let selection = self.editor.selection();
+        let editor_checkpoint = self.editor.navigation_checkpoint();
         let typing_format = self.editor.typing_format();
-        self.editor.edit_group(|editor| {
-            editor.set_selection(EditorSelection::new(range.start, range.end))?;
+        let original_format = self.range_typing_format();
+        let empty_paragraph = (snapshot.text_length() == 0)
+            .then(|| snapshot.paragraphs.first().cloned())
+            .flatten();
+        let empty_format = empty_paragraph
+            .as_ref()
+            .map(|paragraph| paragraph.format.character.clone());
+        self.ensure_range_read(checkpoint)?;
+        if self.editor.navigation_checkpoint() != editor_checkpoint {
+            return Err(EditError::ReentrantEdit);
+        }
+        let mut owned_generation = checkpoint.0;
+        let external_generation = self.editor.external_change_generation();
+        let result = self.editor.edit_group(|editor| {
+            self.ensure_range_read(checkpoint)?;
+            editor.set_selection(EditorSelection::new(original.start, original.end))?;
             if let Some(paragraph) = empty_paragraph {
                 // An empty rich paragraph still carries formatting. Delete the
                 // selected content and retain that paragraph if the resulting
                 // target is empty, without restyling surrounding surviving text.
                 editor.insert_text("", EditKind::Programmatic)?;
+                self.ensure_range_generation(checkpoint.0)?;
+                let mutation = self.document().mutation_version();
                 let mut document = self.document().snapshot();
-                let (index, _) = document.locate(range.start);
+                self.ensure_range_read((checkpoint.0, mutation))?;
+                let (index, _) = document.locate(original.start);
                 if document.paragraphs.is_empty() {
-                    document.paragraphs.push(paragraph.clone());
+                    document.paragraphs.push(paragraph);
                     editor.document().restore(&document)?;
                 } else if document.paragraphs[index].text_length() == 0 {
-                    document.paragraphs[index] = paragraph.clone();
+                    document.paragraphs[index] = paragraph;
                     editor.document().restore(&document)?;
                 }
             } else {
                 editor.insert_fragment(snapshot, EditKind::Paste)?;
             }
+            self.ensure_range_generation(checkpoint.0)?;
             let inserted = self
                 .document()
                 .text_length()
-                .saturating_sub(before_length - range.len());
-            let updated = rebase_selection(selection, range.clone(), inserted);
+                .saturating_sub(before_length - original.len());
+            let updated = rebase_selection(selection, original.clone(), inserted);
             editor.set_selection(updated)?;
             if updated.is_empty() {
-                editor.apply_format(&typing_format)?;
+                editor.replace_range_typing_format(&typing_format)?;
+            }
+            self.ensure_range_generation(checkpoint.0)?;
+            self.set_range(original.start, original.start + inserted)?;
+            owned_generation = self.data.borrow().generation;
+            if let Some(format) = empty_format {
+                // Degenerate range defaults belong to this independent range,
+                // and must be installed before publication can change ownership.
+                self.set_range_typing_format(format)?;
+                owned_generation = self.data.borrow().generation;
             }
             Ok(())
-        })?;
-        let inserted = self
-            .document()
-            .text_length()
-            .saturating_sub(before_length - range.len());
-        self.set_range(range.start, range.start + inserted)?;
-        if let Some(paragraph) = empty_paragraph {
-            // A degenerate independent range owns its insertion defaults; it
-            // must not apply those character properties to the user's selection
-            // or to unrelated content in a nonempty paragraph.
-            self.set_range_typing_format(paragraph.format.character.clone());
+        });
+        if result.is_err()
+            && self.editor.external_change_generation() == external_generation
+            && self.data.borrow().generation == owned_generation
+        {
+            self.set_range(original.start, original.end)?;
+            self.set_range_typing_format(original_format)?;
         }
-        Ok(())
+        result
     }
 
     fn apply_to_selection(
@@ -841,7 +907,7 @@ impl RichEditTextRange {
             action(editor)?;
             editor.set_selection(selection)?;
             if selection.is_empty() {
-                editor.apply_format(&typing_format)?;
+                editor.replace_range_typing_format(&typing_format)?;
             }
             Ok(())
         })
@@ -850,9 +916,11 @@ impl RichEditTextRange {
         format.validate()?;
         if self.is_degenerate() {
             self.editor.prepare_edit()?;
-            let updated = self.data.borrow().typing_format.overlay(format).clone();
-            self.set_range_typing_format(updated);
-            return Ok(());
+            let checkpoint = self.range_read_checkpoint();
+            let current = self.data.borrow().typing_format.clone();
+            let updated = current.overlay(format).clone();
+            self.ensure_range_read(checkpoint)?;
+            return self.set_range_typing_format(updated);
         }
         self.apply_to_selection(|editor| editor.apply_format(format))
     }
@@ -863,30 +931,24 @@ impl RichEditTextRange {
 
     /// Queries effective formats at run boundaries, so a long uniform run is inspected once.
     pub fn character_format(&self) -> Result<TextFormatValue<CharacterFormat>, EditError> {
+        let checkpoint = self.range_read_checkpoint();
         let range = self.range();
+        if range.is_empty() {
+            return self.caret_character_format().map(TextFormatValue::Uniform);
+        }
         let document = self.document();
         let format_at = |offset| {
             document
-                .element_at(
-                    offset,
-                    if range.is_empty() {
-                        TextGravity::Backward
-                    } else {
-                        TextGravity::Forward
-                    },
-                )
+                .element_at(offset, TextGravity::Forward)
                 .map(|element| CharacterFormat::effective(&element))
                 .unwrap_or_else(|| self.editor.insertion_defaults().character)
         };
         let first = format_at(range.start);
-        if range.is_empty() {
-            return Ok(TextFormatValue::Uniform(
-                first.overlay(&self.data.borrow().typing_format),
-            ));
-        }
+        self.ensure_range_read(checkpoint)?;
         let mut boundaries = Vec::new();
         let mut offset = 0;
         let snapshot = document.snapshot();
+        self.ensure_range_read(checkpoint)?;
         for (index, paragraph) in snapshot.paragraphs.iter().enumerate() {
             if index > 0 {
                 boundaries.push(offset);
@@ -898,7 +960,9 @@ impl RichEditTextRange {
             .into_iter()
             .filter(|offset| *offset > range.start && *offset < range.end)
         {
-            if format_at(offset) != first {
+            let mixed = format_at(offset) != first;
+            self.ensure_range_read(checkpoint)?;
+            if mixed {
                 return Ok(TextFormatValue::Mixed);
             }
         }

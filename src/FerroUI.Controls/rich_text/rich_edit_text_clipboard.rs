@@ -279,13 +279,23 @@ impl RichEditTextRange {
         &self,
         content: Option<&RichTextTransferContent>,
     ) -> Result<(), EditError> {
+        let checkpoint = self.range_read_checkpoint();
         let original = self.range();
-        let original_format = self.data.borrow().typing_format.clone();
-        let generation = self.data.borrow().generation;
+        let original_format = self.range_typing_format();
+        let insertion_format = if original.is_empty()
+            && matches!(content, Some(RichTextTransferContent::PlainText(_)))
+        {
+            Some(self.caret_character_format()?)
+        } else {
+            None
+        };
+        self.ensure_range_read(checkpoint)?;
+        let generation = checkpoint.0;
         let mut owned_generation = generation;
         let external_generation = self.editor.external_change_generation();
         let document = self.document();
         let result = self.editor.edit_group(|editor| {
+            self.ensure_range_read(checkpoint)?;
             let selection = editor.selection();
             let typing_format = editor.typing_format();
             let inserted = match content {
@@ -303,11 +313,8 @@ impl RichEditTextRange {
                             &editor.insertion_defaults(),
                         )?;
                     }
-                    if original.is_empty() && original_format != CharacterFormat::default() {
-                        document.apply_format(
-                            original.start..original.start + inserted,
-                            &original_format,
-                        )?;
+                    if let Some(format) = &insertion_format {
+                        document.apply_format(original.start..original.start + inserted, format)?;
                     }
                     inserted
                 }
@@ -322,8 +329,9 @@ impl RichEditTextRange {
             let selection = rebase_selection(selection, original.clone(), inserted);
             editor.set_selection(selection)?;
             if selection.is_empty() {
-                editor.apply_format(&typing_format)?;
+                editor.replace_range_typing_format(&typing_format)?;
             }
+            self.ensure_range_generation(generation)?;
             self.set_range(original.start, original.start + inserted)?;
             owned_generation = self.data.borrow().generation;
             Ok(())
@@ -336,7 +344,7 @@ impl RichEditTextRange {
             // explicit endpoints only while this command still owns them;
             // reentrant range changes and external document writes survive.
             self.set_range(original.start, original.end)?;
-            self.set_range_typing_format(original_format);
+            self.set_range_typing_format(original_format)?;
         }
         result
     }

@@ -1131,3 +1131,23 @@ adapter regressions compile/run only in the separate Windows gate after push.
 `INPUT-GEOMETRY.md` documents the capability, ownership checks and limits; this
 framework translation does not claim native WinUI engine geometry or candidate
 window verification.
+
+## 2026-10-22 — Implement independent range formatting Gravity
+
+Independent RichEditTextRange objects now expose all five native-valued
+RangeGravity constants through the ordinary typed registry. Setters canonicalize
+Outward to UIBehavior and reject invalid raw values. Shared Rust clones retain
+one range object; independent Duplicate-style clones reset the mode. One resolver
+supplies collapsed queries, plain insertion, clipboard text and Unlink, with
+the range's explicit typing patch overlaid afterward.
+
+The 23 focused Gravity tests pass, including 45 literal native affinity fixtures,
+190 commands from ten retention fixtures and 24 invalid values. Reentrant
+brush callbacks, exact restoration of temporary editor typing, late clipboard
+changes and endpoint publication keep the newer accepted state. Range metadata
+stays separate from document undo and grouped rollback.
+
+`RANGE-GRAVITY.md` explains the visible UTF-16/EOP boundary and states what this
+commit does not complete: physical TextPointer rebasing and the live selection's
+Gravity. The newly measured actual-selection record is independent evidence for
+that next consumer. No completion is inferred from enum registration alone.

@@ -65,7 +65,7 @@ impl RichEditTextRange {
         let replacement = range.start..range.start + previous.len_utf16();
         let selection = self.editor.selection();
         let typing_format = self.editor.typing_format();
-        let own_typing_format = self.data.borrow().typing_format.clone();
+        let own_typing_format = self.range_typing_format();
         let external_generation = self.editor.external_change_generation();
         let document = self.document();
         let element = document.element_at(range.start, TextGravity::Forward);
@@ -95,7 +95,7 @@ impl RichEditTextRange {
             let selection = rebase_selection(selection, replacement.clone(), value.len_utf16());
             editor.set_selection(selection)?;
             if selection.is_empty() {
-                editor.apply_format(&typing_format)?;
+                editor.replace_range_typing_format(&typing_format)?;
             }
             // The property replaces a character; it does not navigate the range.
             // Its far endpoint continues to encompass the same remaining text.
@@ -105,12 +105,12 @@ impl RichEditTextRange {
                 range.end - previous.len_utf16() + value.len_utf16()
             };
             self.set_range(range.start, end)?;
-            self.set_range_typing_format(own_typing_format.clone());
+            self.set_range_typing_format(own_typing_format.clone())?;
             Ok(true)
         });
         if result.is_err() && self.editor.external_change_generation() == external_generation {
             self.set_range(range.start, range.end)?;
-            self.set_range_typing_format(own_typing_format);
+            self.set_range_typing_format(own_typing_format)?;
         }
         result
     }
@@ -149,7 +149,7 @@ impl RichEditTextRange {
 
         let original = self.range();
         let external_generation = self.editor.external_change_generation();
-        let own_typing_format = self.data.borrow().typing_format.clone();
+        let own_typing_format = self.range_typing_format();
         let result = self.editor.edit_group(|editor| {
             let mut position = self.start_position();
             let mut removed = 0;
@@ -168,14 +168,14 @@ impl RichEditTextRange {
                 }
             }
             self.set_range(position, position)?;
-            self.set_range_typing_format(own_typing_format.clone());
+            self.set_range_typing_format(own_typing_format.clone())?;
             Ok(removed)
         });
         if result.is_err() && self.editor.external_change_generation() == external_generation {
             // The shared editor restores model/history/selection. This service
             // also restores the independent range's explicitly changed endpoints.
             self.set_range(original.start, original.end)?;
-            self.set_range_typing_format(own_typing_format);
+            self.set_range_typing_format(own_typing_format)?;
         }
         result
     }
@@ -370,7 +370,7 @@ pub(super) fn delete_span(
     let selection = rebase_selection(selection, range.clone(), 0);
     editor.set_selection(selection)?;
     if selection.is_empty() {
-        editor.apply_format(&typing_format)?;
+        editor.replace_range_typing_format(&typing_format)?;
     }
     Ok(range.start)
 }

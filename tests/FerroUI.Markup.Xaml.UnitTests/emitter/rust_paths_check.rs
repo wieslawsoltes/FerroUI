@@ -884,6 +884,7 @@ pub fn markup_types() -> Vec<(&'static ::ferroui_base::metadata::MarkupType, &'s
         (<::ferroui_controls::primitives::popup_positioning::PopupPositionerConstraintAdjustment as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_controls::primitives::popup_positioning::PopupPositionerConstraintAdjustment", false),
         (<::ferroui_controls::rich_text::FindOptions as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_controls::rich_text::FindOptions", false),
         (<::ferroui_controls::rich_text::LetterCase as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_controls::rich_text::LetterCase", false),
+        (<::ferroui_controls::rich_text::RangeGravity as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_controls::rich_text::RangeGravity", false),
         (<::ferroui_controls::rich_text::RichEditClipboardFormat as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_controls::rich_text::RichEditClipboardFormat", false),
         (<::ferroui_controls::rich_text::SelectionOptions as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_controls::rich_text::SelectionOptions", false),
         (<::ferroui_controls::rich_text::SelectionType as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_controls::rich_text::SelectionType", false),

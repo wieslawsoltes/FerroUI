@@ -1113,3 +1113,192 @@ fn rich_tom_publication_keeps_handler_owned_range_and_external_document_changes(
         }
     }
 }
+
+#[test]
+fn rich_range_gravity_pending_clipboard_rejects_mode_changed_away_and_back() {
+    use crate::rich_text::RangeGravity;
+    let _scope = Dispatcher::unit_test_scope();
+    for cut in [false, true] {
+        let document = services("abcd");
+        let range = document.get_range(1, 3).unwrap();
+        let shared = range.clone();
+        let (clipboard, _) = text_clipboard("paste");
+        let gate = Rc::new(Gate::default());
+        *clipboard.read_gate.borrow_mut() = Some(gate.clone());
+        *clipboard.write_gate.borrow_mut() = Some(gate.clone());
+        let mut operation = if cut {
+            range.cut_to_clipboard_async(clipboard)
+        } else {
+            range.paste_from_clipboard_async(clipboard, RichTextPasteFormat::PlainText)
+        };
+        pending(&mut operation);
+        shared.set_gravity(RangeGravity::Forward);
+        shared.set_gravity(RangeGravity::UIBehavior);
+        gate.release();
+        assert_eq!(
+            ready(operation).unwrap_err().kind(),
+            ClipboardErrorKind::Canceled
+        );
+        assert_eq!(document.text(), "abcd");
+        assert_eq!(range.range(), 1..3);
+        assert_eq!(range.gravity(), RangeGravity::UIBehavior);
+        assert!(!document.can_undo());
+    }
+}
+
+#[test]
+fn rich_range_gravity_pending_paste_keeps_independent_clone_and_canonical_noop_valid() {
+    use crate::rich_text::RangeGravity;
+    let _scope = Dispatcher::unit_test_scope();
+    let document = services("abcd");
+    let range = document.get_range(1, 3).unwrap();
+    let independent = range.get_clone().unwrap();
+    let (clipboard, _) = text_clipboard("X");
+    let gate = Rc::new(Gate::default());
+    *clipboard.read_gate.borrow_mut() = Some(gate.clone());
+    let mut operation = range.paste_from_clipboard_async(clipboard, RichTextPasteFormat::PlainText);
+    pending(&mut operation);
+    independent.set_gravity(RangeGravity::Forward);
+    range.set_gravity(RangeGravity::Outward);
+    assert!(range.set_gravity_value(5).is_err());
+    gate.release();
+    ready(operation).unwrap();
+    assert_eq!(document.text(), "aXd");
+    assert_eq!(range.gravity(), RangeGravity::UIBehavior);
+    assert_eq!(independent.gravity(), RangeGravity::Forward);
+}
+
+#[test]
+fn rich_range_gravity_plain_paste_uses_affinity_and_restores_exact_typing_patch() {
+    use crate::rich_text::{RangeGravity, TextFormatValue};
+    let _scope = Dispatcher::unit_test_scope();
+    let document = services("abCD");
+    document
+        .document()
+        .apply_format(
+            0..2,
+            &CharacterFormat {
+                font_weight: Some(FontWeight::Bold),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    document
+        .document()
+        .apply_format(
+            2..4,
+            &CharacterFormat {
+                font_style: Some(FontStyle::Italic),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    document.selection().set_range(2, 2).unwrap();
+    document
+        .editor()
+        .apply_format(&CharacterFormat {
+            font_size: Some(30.0),
+            ..Default::default()
+        })
+        .unwrap();
+    let typing = document.editor().typing_format();
+    document.clear_undo_redo_history();
+    let before = document.document().snapshot();
+    let range = document.get_range(2, 2).unwrap();
+    range.set_gravity(RangeGravity::Forward);
+    ready(range.paste_from_clipboard_async(text_clipboard("X").0, RichTextPasteFormat::PlainText))
+        .unwrap();
+    let TextFormatValue::Uniform(inserted) = range.character_format().unwrap() else {
+        panic!()
+    };
+    assert_eq!(inserted.font_weight, Some(FontWeight::Normal));
+    assert_eq!(inserted.font_style, Some(FontStyle::Italic));
+    assert_ne!(inserted.font_size, Some(30.0));
+    assert_eq!(document.editor().typing_format(), typing);
+    assert_eq!(document.selection().selection(), EditorSelection::caret(3));
+    assert!(document.undo().unwrap());
+    assert_eq!(document.document().snapshot(), before);
+    assert_eq!(document.editor().typing_format(), typing);
+    assert_eq!(range.gravity(), RangeGravity::Forward);
+    assert!(!document.can_undo());
+}
+
+struct LateTypingCallbackBrush {
+    ready: Box<dyn Fn() -> bool>,
+    callback: RefCell<Option<Box<dyn FnOnce()>>>,
+}
+impl ferroui_base::media::IBrush for LateTypingCallbackBrush {
+    fn opacity(&self) -> f64 {
+        1.0
+    }
+    fn transform(&self) -> Option<Rc<dyn ferroui_base::media::ITransform>> {
+        None
+    }
+    fn transform_origin(&self) -> ferroui_base::RelativePoint {
+        ferroui_base::RelativePoint::CENTER
+    }
+    fn relative_transform(&self) -> Option<Rc<dyn ferroui_base::media::ITransform>> {
+        None
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+    fn as_solid_color_brush(&self) -> Option<&dyn ferroui_base::media::ISolidColorBrush> {
+        if (self.ready)() {
+            let callback = self.callback.borrow_mut().take();
+            if let Some(callback) = callback {
+                callback();
+            }
+        }
+        None
+    }
+}
+
+#[test]
+fn rich_range_gravity_paste_late_typing_restore_rejects_newer_range_ownership() {
+    use crate::rich_text::RangeGravity;
+    let _scope = Dispatcher::unit_test_scope();
+    let document = services("abCD");
+    document.selection().set_range(4, 4).unwrap();
+    let range = document.get_range(2, 2).unwrap();
+    range.set_gravity(RangeGravity::Forward);
+    let editor = Rc::downgrade(&document.editor());
+    let brush = Rc::new(LateTypingCallbackBrush {
+        ready: Box::new(move || {
+            editor.upgrade().is_some_and(|editor| {
+                editor.document().text() == "abXCD"
+                    && editor.selection() == EditorSelection::caret(5)
+            })
+        }),
+        callback: RefCell::new(None),
+    });
+    document
+        .editor()
+        .apply_format(&CharacterFormat {
+            foreground: Some(Some(brush.clone())),
+            ..Default::default()
+        })
+        .unwrap();
+    document.clear_undo_redo_history();
+    let before = document.document().snapshot();
+    let typing = document.editor().typing_format();
+    let changed_range = range.clone();
+    let called = Rc::new(Cell::new(false));
+    let observed = called.clone();
+    *brush.callback.borrow_mut() = Some(Box::new(move || {
+        observed.set(true);
+        changed_range.set_range(0, 0).unwrap();
+        changed_range.set_gravity(RangeGravity::Backward);
+    }));
+    let error = ready(
+        range.paste_from_clipboard_async(text_clipboard("X").0, RichTextPasteFormat::PlainText),
+    )
+    .unwrap_err();
+    assert_eq!(error.kind(), ClipboardErrorKind::Canceled);
+    assert!(called.get());
+    assert_eq!(document.document().snapshot(), before);
+    assert_eq!(document.editor().typing_format(), typing);
+    assert_eq!(range.range(), 0..0);
+    assert_eq!(range.gravity(), RangeGravity::Backward);
+    assert!(!document.can_undo());
+}

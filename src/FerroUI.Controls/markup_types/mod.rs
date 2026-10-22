@@ -61,6 +61,7 @@ const RICH_TEXT_TYPES: &[&MarkupType] = &[
     <crate::RichEditBoxTextChangingRoutedEvent as MarkupTyped>::MARKUP,
     <crate::rich_text::RichEditClipboardFormat as MarkupTyped>::MARKUP,
     <crate::rich_text::FindOptions as MarkupTyped>::MARKUP,
+    <crate::rich_text::RangeGravity as MarkupTyped>::MARKUP,
     <crate::rich_text::SelectionOptions as MarkupTyped>::MARKUP,
     <crate::rich_text::SelectionType as MarkupTyped>::MARKUP,
     <crate::rich_text::TextGetOptions as MarkupTyped>::MARKUP,
@@ -119,6 +120,7 @@ fn register_rich_text_value_types() {
     ValueTypes::register_nullable::<crate::DisabledFormattingAccelerators>();
     ValueTypes::register_nullable::<crate::rich_text::RichEditClipboardFormat>();
     ValueTypes::register_nullable::<crate::rich_text::FindOptions>();
+    ValueTypes::register_nullable::<crate::rich_text::RangeGravity>();
     ValueTypes::register_nullable::<crate::rich_text::SelectionOptions>();
     ValueTypes::register_nullable::<crate::rich_text::SelectionType>();
     ValueTypes::register_nullable::<crate::rich_text::TextGetOptions>();

@@ -398,6 +398,7 @@ ferroui_base::ferro_rust_paths! {
         crate::primitives::popup_positioning::PopupPositionerConstraintAdjustment,
         crate::rich_text::FindOptions,
         crate::rich_text::LetterCase,
+        crate::rich_text::RangeGravity,
         crate::rich_text::RichEditClipboardFormat,
         crate::rich_text::SelectionOptions,
         crate::rich_text::SelectionType,

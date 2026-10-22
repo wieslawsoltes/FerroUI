@@ -388,6 +388,39 @@ impl RichTextEditor {
         self.typing_format.borrow().clone()
     }
 
+    /// Replaces the temporary typing snapshot used by an independent range
+    /// inside a grouped transaction, including exact restoration afterwards.
+    /// Applying a patch would merge unrelated selection and range defaults.
+    pub(super) fn replace_range_typing_format(
+        &self,
+        format: &CharacterFormat,
+    ) -> Result<(), EditError> {
+        if self.group_depth.get() == 0 || self.in_operation.get() || self.projecting_selection.get() {
+            return Err(EditError::ReentrantEdit);
+        }
+        format.validate()?;
+        let mutation = self.document.mutation_version();
+        let checkpoint = self.navigation_checkpoint();
+        let replacement = format.clone();
+        if self.document.mutation_version() != mutation {
+            self.observe_external_document_change();
+            return Err(EditError::ReentrantEdit);
+        }
+        if self.navigation_checkpoint() != checkpoint {
+            return Err(EditError::ReentrantEdit);
+        }
+        let old = self.typing_format.replace(replacement);
+        drop(old);
+        if self.document.mutation_version() != mutation {
+            self.observe_external_document_change();
+            return Err(EditError::ReentrantEdit);
+        }
+        if self.navigation_checkpoint() != checkpoint {
+            return Err(EditError::ReentrantEdit);
+        }
+        Ok(())
+    }
+
     /// Assigned document defaults. Unassigned fields continue to inherit the host's
     /// FerroUI text properties; callers receive an independent value snapshot.
     pub fn default_character_format(&self) -> CharacterFormat {
