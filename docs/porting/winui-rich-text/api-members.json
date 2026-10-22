@@ -3951,6 +3951,18 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rtf.rs",
           "symbol": "pub struct RtfWriter;"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf.rs",
+          "symbol": "fn read_field("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_link_fields.rs",
+          "symbol": "fn link_field_document("
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "pub struct DocumentLinkField"
         }
       ],
       "tests": [
@@ -3969,15 +3981,53 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rtf_encoding_tests.rs",
           "symbol": "rich_edit_rtf_code_pages_decode_independent_multilingual_fixtures"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
+          "symbol": "rich_rtf_field_paragraph_segments_round_trip_through_canonical_rtf"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
+          "symbol": "rich_rtf_fields_with_equal_targets_remain_distinct_when_adjacent"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
+          "symbol": "rich_rtf_separator_only_field_retains_target_and_frame_without_invisible_inline"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
+          "symbol": "rich_rtf_cross_paragraph_field_closure_preserves_suffix_metrics_and_nested_formats"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
+          "symbol": "rich_rtf_field_spans_and_limits_count_the_platform_structured_soft_break_length"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
+          "symbol": "rich_rtf_literal_run_line_separators_use_unicode_without_platform_expansion"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
+          "symbol": "rich_rtf_unicode_field_targets_frames_and_results_preserve_literal_scalars"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
+          "symbol": "rich_rtf_quoted_unc_and_switch_like_targets_remain_literal_data"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
+          "symbol": "rich_rtf_rejects_unrepresentable_field_state_without_dropping_metadata"
         }
       ],
       "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation",
-      "reason": "Native numeric flags and FerroUI markup metadata are declared by the Rust type. Only the associated mapped operations implement flag behavior; unsupported modes return typed errors before mutation. This record does not count declaration of an unsupported flag as functional implementation of that mode. The RTF writer retains Unicode-escaped canonical output; multilingual import/export fixtures validate text recovery without claiming preservation of original byte encoding or native full-content parity.",
+      "reason": "Native numeric flags and FerroUI markup metadata are declared by the Rust type. Only the associated mapped operations implement flag behavior; unsupported modes return typed errors before mutation. This record does not count declaration of an unsupported flag as functional implementation of that mode. The RTF writer retains Unicode-escaped canonical output; multilingual import/export fixtures validate text recovery without claiming preservation of original byte encoding or native full-content parity. Supported hyperlink fields now use one canonical cross-paragraph field record and one emitted field group, retaining separator-only coverage, targets/TargetName, formats and grouping. External RTF allocates fresh local IDs; exact transfer/history preserves process-local IDs. Literal Run/instruction CR/LF/U+2028 use Unicode escapes, quoted UNC/switch-like tokens remain data, and structured LineBreak counts its actual platform UTF-16 length. Materialized metadata and destination/body text limits remain checked. Nested/empty results, sentinel export and unrepresentable content fail explicitly; complete native RTF/engine equivalence remains pending.",
       "deviations": [
         "RT-A03",
         "RT-I08",
         "RT-I04",
-        "RT-I18"
+        "RT-I18",
+        "RT-I19",
+        "RT-I34"
       ]
     },
     {
@@ -5406,6 +5456,14 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rtf.rs",
           "symbol": "fn read_field("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_link_fields.rs",
+          "symbol": "fn link_field_document("
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "pub struct DocumentLinkField"
         }
       ],
       "tests": [
@@ -5528,16 +5586,49 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
           "symbol": "rich_rtf_field_metadata_expansion_is_bounded_across_the_whole_document"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
+          "symbol": "rich_rtf_fields_with_equal_targets_remain_distinct_when_adjacent"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
+          "symbol": "rich_rtf_separator_only_field_retains_target_and_frame_without_invisible_inline"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
+          "symbol": "rich_rtf_cross_paragraph_field_closure_preserves_suffix_metrics_and_nested_formats"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
+          "symbol": "rich_rtf_field_spans_and_limits_count_the_platform_structured_soft_break_length"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
+          "symbol": "rich_rtf_literal_run_line_separators_use_unicode_without_platform_expansion"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
+          "symbol": "rich_rtf_unicode_field_targets_frames_and_results_preserve_literal_scalars"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
+          "symbol": "rich_rtf_quoted_unc_and_switch_like_targets_remain_literal_data"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rtf_field_tests.rs",
+          "symbol": "rich_rtf_rejects_unrepresentable_field_state_without_dropping_metadata"
         }
       ],
       "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation",
-      "reason": "Native numeric flags and FerroUI markup metadata are declared by the Rust type. Only the associated mapped operations implement flag behavior; unsupported modes return typed errors before mutation. This record does not count declaration of an unsupported flag as functional implementation of that mode. Portable byte decoding supports 874, 932, 936, 949, 950, 1250..1258, 10000, 10007 and 65001 through pinned encoding_rs tables. Raw/escaped multibyte tokens share one incremental UTF-16 decoder; malformed input and incomplete sequences at syntax boundaries fail without replacement. Font-scoped fcharset/cpg, default-font/plain resets, font names and field destinations share that codec. Symbol/OEM/Johab and unspecified pages remain explicit errors. Export retains the canonical Unicode-escaped writer; byte-for-byte native code-page roundtrip and full RTF content are not claimed. Paragraph/character stylesheet references now resolve forward based-on chains, additive formatting and subsequent direct overrides through the shared property decoder, with cycle/kind/reference/depth checks and an independent expansion work budget. Ignored style names/keycodes/metadata never become story text. Resolved appearance is retained; live named-style identity, next-style policies and section/table styles are not implemented. Hyperlink field results spanning paragraphs become separate paragraph-owned links with identical URI/target and retained metrics/formatting; empty paragraphs create no invisible links. Cumulative materialized URI/target bytes are checked against max_bytes before cloning. Imports finish parsing before model/history/preview mutation. Native field identity and full content/format conformance remain pending.",
+      "reason": "Native numeric flags and FerroUI markup metadata are declared by the Rust type. Only the associated mapped operations implement flag behavior; unsupported modes return typed errors before mutation. This record does not count declaration of an unsupported flag as functional implementation of that mode. Portable byte decoding supports 874, 932, 936, 949, 950, 1250..1258, 10000, 10007 and 65001 through pinned encoding_rs tables. Raw/escaped multibyte tokens share one incremental UTF-16 decoder; malformed input and incomplete sequences at syntax boundaries fail without replacement. Font-scoped fcharset/cpg, default-font/plain resets, font names and field destinations share that codec. Symbol/OEM/Johab and unspecified pages remain explicit errors. Export retains the canonical Unicode-escaped writer; byte-for-byte native code-page roundtrip and full RTF content are not claimed. Paragraph/character stylesheet references now resolve forward based-on chains, additive formatting and subsequent direct overrides through the shared property decoder, with cycle/kind/reference/depth checks and an independent expansion work budget. Ignored style names/keycodes/metadata never become story text. Resolved appearance is retained; live named-style identity, next-style policies and section/table styles are not implemented. Supported hyperlink fields now use one canonical cross-paragraph field record and one emitted field group, retaining separator-only coverage, targets/TargetName, formats and grouping. External RTF allocates fresh local IDs; exact transfer/history preserves process-local IDs. Literal Run/instruction CR/LF/U+2028 use Unicode escapes, quoted UNC/switch-like tokens remain data, and structured LineBreak counts its actual platform UTF-16 length. Materialized metadata and destination/body text limits remain checked. Nested/empty results, sentinel export and unrepresentable content fail explicitly; complete native RTF/engine equivalence remains pending.",
       "deviations": [
         "RT-A03",
         "RT-I08",
         "RT-I04",
         "RT-I18",
-        "RT-I19"
+        "RT-I19",
+        "RT-I34"
       ]
     },
     {
@@ -10695,6 +10786,14 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_document.rs",
           "symbol": "struct RangeData"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "fn remap_link_field_ids("
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "fn remap_link_field_offsets("
         }
       ],
       "tests": [
@@ -10809,15 +10908,32 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs",
           "symbol": "rich_tom_publication_keeps_handler_owned_range_and_external_document_changes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_transfer_keeps_exact_identity_watermark_sentinel_and_target_frame"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_malformed_exact_payload_is_rejected_before_rtf_or_plain_fallback"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_tom_copy_of_only_paragraph_marks_keeps_shared_field_metadata"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_tom_paste_remaps_collisions_once_and_undo_restores_exact_snapshot"
         }
       ],
       "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation",
-      "reason": "The TOM clipboard family uses injected FerroUI IClipboard and LocalBoxFuture services. BestAvailable chooses exact in-process content, then supported RTF aliases, then Unicode text; explicit PlainText/Rtf never fall back outside the requested representation. CanPaste checks fallible advertised formats without decoding payloads, ending composition or modifying history. Document CanCopy is permission, independent of selection length and edit read-only state; the current model has no copy-protection policy. Copy captures immutable visible content. Nonempty Cut ends an original preview before capturing committed content, then deletes only after a successful write and current-target validation; a failed write does not restart that preview. Paste validates/parses/limits before canceling an original preview and recaptures committed live endpoints. Empty or rejected content cannot delete the target. Plain text inherits insertion formatting; rich fragments retain supported structure; directed editor selection is rebased and the edit forms one undo group. Document mutation identity, shared range/format generation and a disposable editor-change subscription reject stale asynchronous edits, including away-and-back changes and held batches. Retrieved transfers dispose on success, error or future cancellation and before final validation; outgoing transfers belong to the clipboard. These asynchronous named-format APIs are an intentional Rust translation, not synchronous native ABI or arbitrary numeric-format support. Native copy/per-range protection, OLE cloning, unsupported formats/RTF grammar, terminal EOP and external WinUI behavior remain pending. Control routed clipboard events/casing policy is separate from this independent TOM range service. Test definitions and completed execution evidence are recorded separately.",
+      "reason": "The TOM clipboard family uses injected FerroUI IClipboard and LocalBoxFuture services. BestAvailable chooses exact in-process content, then supported RTF aliases, then Unicode text; explicit PlainText/Rtf never fall back outside the requested representation. CanPaste checks fallible advertised formats without decoding payloads, ending composition or modifying history. Document CanCopy is permission, independent of selection length and edit read-only state; the current model has no copy-protection policy. Copy captures immutable visible content. Nonempty Cut ends an original preview before capturing committed content, then deletes only after a successful write and current-target validation; a failed write does not restart that preview. Paste validates/parses/limits before canceling an original preview and recaptures committed live endpoints. Empty or rejected content cannot delete the target. Plain text inherits insertion formatting; rich fragments retain supported structure; directed editor selection is rebased and the edit forms one undo group. Document mutation identity, shared range/format generation and a disposable editor-change subscription reject stale asynchronous edits, including away-and-back changes and held batches. Retrieved transfers dispose on success, error or future cancellation and before final validation; outgoing transfers belong to the clipboard. These asynchronous named-format APIs are an intentional Rust translation, not synchronous native ABI or arbitrary numeric-format support. Native copy/per-range protection, OLE cloning, unsupported formats/RTF grammar, terminal EOP and external WinUI behavior remain pending. Control routed clipboard events/casing policy is separate from this independent TOM range service. Test definitions and completed execution evidence are recorded separately. The shared snapshot carries canonical cross-paragraph field IDs/spans/TargetName/sentinel state. Slice/copy retains grouped identity, inserted rich fragments remap each field once, and exact advertised payloads validate before external fallback or preview mutation. Case/filter maps preserve scalar-safe offsets and a post-filter ownership fence rejects stale callback results. External RTF retains field grouping with fresh numeric IDs; unsupported projected/RTF cases remain RT-I34.",
       "deviations": [
         "RT-A04",
         "RT-I04",
         "RT-I08",
-        "RT-I24"
+        "RT-I24",
+        "RT-I34"
       ]
     },
     {
@@ -11889,6 +12005,14 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_document.rs",
           "symbol": "struct RangeData"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "fn remap_link_field_ids("
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "fn remap_link_field_offsets("
         }
       ],
       "tests": [
@@ -12003,15 +12127,32 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs",
           "symbol": "rich_tom_publication_keeps_handler_owned_range_and_external_document_changes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_transfer_keeps_exact_identity_watermark_sentinel_and_target_frame"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_malformed_exact_payload_is_rejected_before_rtf_or_plain_fallback"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_tom_copy_of_only_paragraph_marks_keeps_shared_field_metadata"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_tom_paste_remaps_collisions_once_and_undo_restores_exact_snapshot"
         }
       ],
       "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation",
-      "reason": "The TOM clipboard family uses injected FerroUI IClipboard and LocalBoxFuture services. BestAvailable chooses exact in-process content, then supported RTF aliases, then Unicode text; explicit PlainText/Rtf never fall back outside the requested representation. CanPaste checks fallible advertised formats without decoding payloads, ending composition or modifying history. Document CanCopy is permission, independent of selection length and edit read-only state; the current model has no copy-protection policy. Copy captures immutable visible content. Nonempty Cut ends an original preview before capturing committed content, then deletes only after a successful write and current-target validation; a failed write does not restart that preview. Paste validates/parses/limits before canceling an original preview and recaptures committed live endpoints. Empty or rejected content cannot delete the target. Plain text inherits insertion formatting; rich fragments retain supported structure; directed editor selection is rebased and the edit forms one undo group. Document mutation identity, shared range/format generation and a disposable editor-change subscription reject stale asynchronous edits, including away-and-back changes and held batches. Retrieved transfers dispose on success, error or future cancellation and before final validation; outgoing transfers belong to the clipboard. These asynchronous named-format APIs are an intentional Rust translation, not synchronous native ABI or arbitrary numeric-format support. Native copy/per-range protection, OLE cloning, unsupported formats/RTF grammar, terminal EOP and external WinUI behavior remain pending. Control routed clipboard events/casing policy is separate from this independent TOM range service. Test definitions and completed execution evidence are recorded separately.",
+      "reason": "The TOM clipboard family uses injected FerroUI IClipboard and LocalBoxFuture services. BestAvailable chooses exact in-process content, then supported RTF aliases, then Unicode text; explicit PlainText/Rtf never fall back outside the requested representation. CanPaste checks fallible advertised formats without decoding payloads, ending composition or modifying history. Document CanCopy is permission, independent of selection length and edit read-only state; the current model has no copy-protection policy. Copy captures immutable visible content. Nonempty Cut ends an original preview before capturing committed content, then deletes only after a successful write and current-target validation; a failed write does not restart that preview. Paste validates/parses/limits before canceling an original preview and recaptures committed live endpoints. Empty or rejected content cannot delete the target. Plain text inherits insertion formatting; rich fragments retain supported structure; directed editor selection is rebased and the edit forms one undo group. Document mutation identity, shared range/format generation and a disposable editor-change subscription reject stale asynchronous edits, including away-and-back changes and held batches. Retrieved transfers dispose on success, error or future cancellation and before final validation; outgoing transfers belong to the clipboard. These asynchronous named-format APIs are an intentional Rust translation, not synchronous native ABI or arbitrary numeric-format support. Native copy/per-range protection, OLE cloning, unsupported formats/RTF grammar, terminal EOP and external WinUI behavior remain pending. Control routed clipboard events/casing policy is separate from this independent TOM range service. Test definitions and completed execution evidence are recorded separately. The shared snapshot carries canonical cross-paragraph field IDs/spans/TargetName/sentinel state. Slice/copy retains grouped identity, inserted rich fragments remap each field once, and exact advertised payloads validate before external fallback or preview mutation. Case/filter maps preserve scalar-safe offsets and a post-filter ownership fence rejects stale callback results. External RTF retains field grouping with fresh numeric IDs; unsupported projected/RTF cases remain RT-I34.",
       "deviations": [
         "RT-A04",
         "RT-I04",
         "RT-I08",
-        "RT-I24"
+        "RT-I24",
+        "RT-I34"
       ]
     },
     {
@@ -13392,6 +13533,10 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_text_editor.rs",
           "symbol": "EditKind::Typing"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor_gravity.rs",
+          "symbol": "fn insertion_character_format("
         }
       ],
       "tests": [
@@ -13422,14 +13567,35 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_options_tests.rs",
           "symbol": "rich_selection_options_preserves_structured_soft_breaks_as_model_policy"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_replays_ten_native_collapsed_format_and_typing_fixtures"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_native_nonempty_replacement_keeps_model_paragraph_merge_policy"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_is_shared_and_drives_real_control_typing"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_does_not_promote_resolved_format_into_typing_patch"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_explicit_affinity_survives_overtype_extent_planning"
         }
       ],
       "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation",
-      "reason": "Typing uses the shared editor and its actual Overtype mode. Each accepted input scalar consumes one target grapheme; a selected range is consumed by the first scalar. Typed CR and LF insert separate paragraph breaks without consuming target text, so typed CRLF differs from bulk newline normalization. MaxLength plans accepted input and target consumption together, preserving targets for rejected suffixes. Empty TypeText is a no-op even during preedit/read-only state. Rich structure, formatting and one undo unit are preserved. Existing CR/LF soft breaks are protected as a documented FerroUI model policy; unmeasured native soft-break encodings, terminal EOP and external WinUI engine parity remain separate.",
+      "reason": "Typing uses the shared editor and its actual Overtype mode. Each accepted input scalar consumes one target grapheme; a selected range is consumed by the first scalar. Typed CR and LF insert separate paragraph breaks without consuming target text, so typed CRLF differs from bulk newline normalization. MaxLength plans accepted input and target consumption together, preserving targets for rejected suffixes. Empty TypeText is a no-op even during preedit/read-only state. Rich structure, formatting and one undo unit are preserved. Existing CR/LF soft breaks are protected as a documented FerroUI model policy; unmeasured native soft-break encodings, terminal EOP and external WinUI engine parity remain separate. Collapsed typing additionally consumes the separately measured live Gravity resolver with explicit typing overrides; actual nonempty cross-paragraph replacement retains the documented leading-format merge difference under RT-I35.",
       "deviations": [
         "RT-I01",
         "RT-I07",
-        "RT-I26"
+        "RT-I26",
+        "RT-I35"
       ]
     },
     {
@@ -15032,6 +15198,14 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_document.rs",
           "symbol": "struct RangeData"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "fn remap_link_field_ids("
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "fn remap_link_field_offsets("
         }
       ],
       "tests": [
@@ -15146,15 +15320,32 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs",
           "symbol": "rich_tom_publication_keeps_handler_owned_range_and_external_document_changes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_transfer_keeps_exact_identity_watermark_sentinel_and_target_frame"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_malformed_exact_payload_is_rejected_before_rtf_or_plain_fallback"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_tom_copy_of_only_paragraph_marks_keeps_shared_field_metadata"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_tom_paste_remaps_collisions_once_and_undo_restores_exact_snapshot"
         }
       ],
       "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation",
-      "reason": "The TOM clipboard family uses injected FerroUI IClipboard and LocalBoxFuture services. BestAvailable chooses exact in-process content, then supported RTF aliases, then Unicode text; explicit PlainText/Rtf never fall back outside the requested representation. CanPaste checks fallible advertised formats without decoding payloads, ending composition or modifying history. Document CanCopy is permission, independent of selection length and edit read-only state; the current model has no copy-protection policy. Copy captures immutable visible content. Nonempty Cut ends an original preview before capturing committed content, then deletes only after a successful write and current-target validation; a failed write does not restart that preview. Paste validates/parses/limits before canceling an original preview and recaptures committed live endpoints. Empty or rejected content cannot delete the target. Plain text inherits insertion formatting; rich fragments retain supported structure; directed editor selection is rebased and the edit forms one undo group. Document mutation identity, shared range/format generation and a disposable editor-change subscription reject stale asynchronous edits, including away-and-back changes and held batches. Retrieved transfers dispose on success, error or future cancellation and before final validation; outgoing transfers belong to the clipboard. These asynchronous named-format APIs are an intentional Rust translation, not synchronous native ABI or arbitrary numeric-format support. Native copy/per-range protection, OLE cloning, unsupported formats/RTF grammar, terminal EOP and external WinUI behavior remain pending. Control routed clipboard events/casing policy is separate from this independent TOM range service. Test definitions and completed execution evidence are recorded separately.",
+      "reason": "The TOM clipboard family uses injected FerroUI IClipboard and LocalBoxFuture services. BestAvailable chooses exact in-process content, then supported RTF aliases, then Unicode text; explicit PlainText/Rtf never fall back outside the requested representation. CanPaste checks fallible advertised formats without decoding payloads, ending composition or modifying history. Document CanCopy is permission, independent of selection length and edit read-only state; the current model has no copy-protection policy. Copy captures immutable visible content. Nonempty Cut ends an original preview before capturing committed content, then deletes only after a successful write and current-target validation; a failed write does not restart that preview. Paste validates/parses/limits before canceling an original preview and recaptures committed live endpoints. Empty or rejected content cannot delete the target. Plain text inherits insertion formatting; rich fragments retain supported structure; directed editor selection is rebased and the edit forms one undo group. Document mutation identity, shared range/format generation and a disposable editor-change subscription reject stale asynchronous edits, including away-and-back changes and held batches. Retrieved transfers dispose on success, error or future cancellation and before final validation; outgoing transfers belong to the clipboard. These asynchronous named-format APIs are an intentional Rust translation, not synchronous native ABI or arbitrary numeric-format support. Native copy/per-range protection, OLE cloning, unsupported formats/RTF grammar, terminal EOP and external WinUI behavior remain pending. Control routed clipboard events/casing policy is separate from this independent TOM range service. Test definitions and completed execution evidence are recorded separately. The shared snapshot carries canonical cross-paragraph field IDs/spans/TargetName/sentinel state. Slice/copy retains grouped identity, inserted rich fragments remap each field once, and exact advertised payloads validate before external fallback or preview mutation. Case/filter maps preserve scalar-safe offsets and a post-filter ownership fence rejects stale callback results. External RTF retains field grouping with fresh numeric IDs; unsupported projected/RTF cases remain RT-I34.",
       "deviations": [
         "RT-A04",
         "RT-I04",
         "RT-I08",
-        "RT-I24"
+        "RT-I24",
+        "RT-I34"
       ]
     },
     {
@@ -16163,6 +16354,14 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_document.rs",
           "symbol": "struct RangeData"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "fn remap_link_field_ids("
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "fn remap_link_field_offsets("
         }
       ],
       "tests": [
@@ -16277,15 +16476,32 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs",
           "symbol": "rich_tom_publication_keeps_handler_owned_range_and_external_document_changes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_transfer_keeps_exact_identity_watermark_sentinel_and_target_frame"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_malformed_exact_payload_is_rejected_before_rtf_or_plain_fallback"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_tom_copy_of_only_paragraph_marks_keeps_shared_field_metadata"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_tom_paste_remaps_collisions_once_and_undo_restores_exact_snapshot"
         }
       ],
       "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation",
-      "reason": "The TOM clipboard family uses injected FerroUI IClipboard and LocalBoxFuture services. BestAvailable chooses exact in-process content, then supported RTF aliases, then Unicode text; explicit PlainText/Rtf never fall back outside the requested representation. CanPaste checks fallible advertised formats without decoding payloads, ending composition or modifying history. Document CanCopy is permission, independent of selection length and edit read-only state; the current model has no copy-protection policy. Copy captures immutable visible content. Nonempty Cut ends an original preview before capturing committed content, then deletes only after a successful write and current-target validation; a failed write does not restart that preview. Paste validates/parses/limits before canceling an original preview and recaptures committed live endpoints. Empty or rejected content cannot delete the target. Plain text inherits insertion formatting; rich fragments retain supported structure; directed editor selection is rebased and the edit forms one undo group. Document mutation identity, shared range/format generation and a disposable editor-change subscription reject stale asynchronous edits, including away-and-back changes and held batches. Retrieved transfers dispose on success, error or future cancellation and before final validation; outgoing transfers belong to the clipboard. These asynchronous named-format APIs are an intentional Rust translation, not synchronous native ABI or arbitrary numeric-format support. Native copy/per-range protection, OLE cloning, unsupported formats/RTF grammar, terminal EOP and external WinUI behavior remain pending. Control routed clipboard events/casing policy is separate from this independent TOM range service. Test definitions and completed execution evidence are recorded separately.",
+      "reason": "The TOM clipboard family uses injected FerroUI IClipboard and LocalBoxFuture services. BestAvailable chooses exact in-process content, then supported RTF aliases, then Unicode text; explicit PlainText/Rtf never fall back outside the requested representation. CanPaste checks fallible advertised formats without decoding payloads, ending composition or modifying history. Document CanCopy is permission, independent of selection length and edit read-only state; the current model has no copy-protection policy. Copy captures immutable visible content. Nonempty Cut ends an original preview before capturing committed content, then deletes only after a successful write and current-target validation; a failed write does not restart that preview. Paste validates/parses/limits before canceling an original preview and recaptures committed live endpoints. Empty or rejected content cannot delete the target. Plain text inherits insertion formatting; rich fragments retain supported structure; directed editor selection is rebased and the edit forms one undo group. Document mutation identity, shared range/format generation and a disposable editor-change subscription reject stale asynchronous edits, including away-and-back changes and held batches. Retrieved transfers dispose on success, error or future cancellation and before final validation; outgoing transfers belong to the clipboard. These asynchronous named-format APIs are an intentional Rust translation, not synchronous native ABI or arbitrary numeric-format support. Native copy/per-range protection, OLE cloning, unsupported formats/RTF grammar, terminal EOP and external WinUI behavior remain pending. Control routed clipboard events/casing policy is separate from this independent TOM range service. Test definitions and completed execution evidence are recorded separately. The shared snapshot carries canonical cross-paragraph field IDs/spans/TargetName/sentinel state. Slice/copy retains grouped identity, inserted rich fragments remap each field once, and exact advertised payloads validate before external fallback or preview mutation. Case/filter maps preserve scalar-safe offsets and a post-filter ownership fence rejects stale callback results. External RTF retains field grouping with fresh numeric IDs; unsupported projected/RTF cases remain RT-I34.",
       "deviations": [
         "RT-A04",
         "RT-I04",
         "RT-I08",
-        "RT-I24"
+        "RT-I24",
+        "RT-I34"
       ]
     },
     {
@@ -23755,6 +23971,14 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_document.rs",
           "symbol": "pub fn set_formatted_text("
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "pub struct DocumentLinkField"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "fn replace_link_fields("
         }
       ],
       "tests": [
@@ -23769,15 +23993,32 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_document_tests.rs",
           "symbol": "formatted_text_transfer_and_history_facade_keep_document_identity_separate"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_transfer_keeps_exact_identity_watermark_sentinel_and_target_frame"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_malformed_exact_payload_is_rejected_before_rtf_or_plain_fallback"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_tom_copy_of_only_paragraph_marks_keeps_shared_field_metadata"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_tom_paste_remaps_collisions_once_and_undo_restores_exact_snapshot"
         }
       ],
       "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation",
-      "reason": "Formatted range copies preserve the supported structured document snapshot and replace content through the shared editor transaction. Arbitrary embedded controls retain identity, and unsupported native object stories/format fields are not synthesized.",
+      "reason": "Formatted range copies preserve the supported structured document snapshot and replace content through the shared editor transaction. Arbitrary embedded controls retain identity, and unsupported native object stories/format fields are not synthesized. The shared snapshot carries canonical cross-paragraph field IDs/spans/TargetName/sentinel state. Slice/copy retains grouped identity, inserted rich fragments remap each field once, and exact advertised payloads validate before external fallback or preview mutation. Case/filter maps preserve scalar-safe offsets and a post-filter ownership fence rejects stale callback results. External RTF retains field grouping with fresh numeric IDs; unsupported projected/RTF cases remain RT-I34.",
       "deviations": [
         "RT-I01",
         "RT-I03",
         "RT-I08",
-        "RT-A03"
+        "RT-A03",
+        "RT-I34"
       ]
     },
     {
@@ -23806,6 +24047,34 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_text_editor.rs",
           "symbol": "pub(super) fn replace_range_typing_format("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity.rs",
+          "symbol": "pub fn gravity("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity.rs",
+          "symbol": "pub fn set_gravity("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity.rs",
+          "symbol": "pub fn set_gravity_value("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor_gravity.rs",
+          "symbol": "pub fn selection_gravity("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor_gravity.rs",
+          "symbol": "pub fn set_selection_gravity("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor_gravity.rs",
+          "symbol": "fn insertion_character_format("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor_gravity.rs",
+          "symbol": "fn ensure_selection_format("
         }
       ],
       "tests": [
@@ -23856,13 +24125,54 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs",
           "symbol": "rich_range_gravity_paste_late_typing_restore_rejects_newer_range_ownership"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_replays_248_native_commands_and_keeps_two_null_observations"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_replays_ten_native_collapsed_format_and_typing_fixtures"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_native_nonempty_replacement_keeps_model_paragraph_merge_policy"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_is_shared_and_drives_real_control_typing"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_does_not_promote_resolved_format_into_typing_patch"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_history_retains_current_mode_and_failed_group_restores_it"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_read_rejects_same_value_newer_intent"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_composition_preflight_model_writes_survive"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_model_restore_callbacks_cannot_resurrect_cleared_history"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_exact_completion_fences_custom_brush_equality"
         }
       ],
       "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation",
-      "reason": "Independent ranges retain native-valued formatting affinity, including measured Outward-to-UI readback and duplicate reset-to-UI. Collapsed format queries and plain SetText/paste use the same previous/following-run resolution; explicit patches override the resolved source, and paragraph formatting stays with the current paragraph. Native 45 affinity, ten retention and 24 invalid fixtures are literal tests. Range generations preserve newer callback ownership and invalidate pending clipboard work; grouped edits restore the exact independent typing snapshot. Native physical endpoint rebasing differs from current TextPointer tracking and is not changed here. The model excludes a synthetic terminal EOP, so forward story-end affinity samples final paragraph defaults; signed native clamping is adapted to scalar-safe usize/Result validation. The actual selection's inherited Gravity behavior and the external WinUI engine remain unmeasured. Range metadata is not document history; successful undo and failed outer text groups retain accepted explicit mode changes as a stated FerroUI policy.",
+      "reason": "Independent ranges retain the measured five-value formatting-affinity contract, Outward-to-UI readback and duplicate reset-to-UI; collapsed queries/plain SetText/paste share the resolver with explicit patches last. Their 45 affinity fixtures, 190 retention commands and 24 invalid setters remain literal tests. The separately measured actual selection now shares an editor mode and uses the same resolver for collapsed queries, TypeText and live-caret IME input without promoting the transient source into its explicit patch. Its record has 250 commands/18 fixtures/18 canonical identities, 248 representable Rust calls and two retained null-BSTR transport observations. Same-value live setters record newer intent; callback-bearing copies and restore/history paths reject stale ownership. Physical pointer rebasing, duplicate native caches, initial setup caches, synthetic terminal EOP, automatic AT_END_OF_LINE and native trailing-paragraph replacement alignment remain partial. Successful undo retains current modes. Failed groups retain explicitly accepted independent-range metadata but restore the starting live-selection editor mode; these are stated FerroUI policies. System engine observations do not establish the external WinUI engine.",
       "deviations": [
         "RT-A03",
-        "RT-I32"
+        "RT-I32",
+        "RT-I35"
       ]
     },
     {
@@ -23900,10 +24210,95 @@
       "source": "packaging/Intellisense/generated/Microsoft.UI.Text.xml",
       "owner": "Microsoft.UI.Text.ITextRange",
       "kind": "P",
-      "state": "pending",
-      "targets": [],
-      "tests": [],
-      "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation"
+      "state": "partial",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story.rs",
+          "symbol": "pub fn field_story("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story.rs",
+          "symbol": "pub struct RichEditTextFieldRange"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story.rs",
+          "symbol": "pub fn get_link("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story.rs",
+          "symbol": "pub fn set_link("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_field_story.rs",
+          "symbol": "pub struct FieldStoryOffset"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "pub struct DocumentLinkField"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "fn validate_link_fields("
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/rich_text_document.rs",
+          "symbol": "fn ensure_install_read("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor.rs",
+          "symbol": "fn install_field_snapshot("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_tests.rs",
+          "symbol": "rich_link_native_transition_oracle_uses_observed_before_ranges"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story_tests.rs",
+          "symbol": "rich_field_live_replays_all_137_measured_link_transitions_with_observed_before_ranges"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story_tests.rs",
+          "symbol": "rich_field_live_projection_keeps_visible_selection_and_typed_boundaries_separate"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story_tests.rs",
+          "symbol": "rich_field_live_history_restores_exact_fields_sentinel_selection_and_typing_patch"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story_tests.rs",
+          "symbol": "rich_field_live_target_updates_reuse_interactive_nodes_and_undo_restores_handlers"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story_tests.rs",
+          "symbol": "rich_field_live_provisional_instruction_cannot_alias_a_later_authoritative_id"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_installation_tests.rs",
+          "symbol": "rich_field_live_model_install_preflight_preserves_every_accepted_callback_write"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_installation_tests.rs",
+          "symbol": "rich_field_live_noop_install_does_not_accept_a_callback_changed_source"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_installation_tests.rs",
+          "symbol": "rich_field_live_link_install_read_sweep_preserves_callback_content_and_discards_stale_history"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_tests.rs",
+          "symbol": "rich_link_unmeasured_prepend_and_equal_target_gap_preserve_existing_fields"
+        }
+      ],
+      "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation",
+      "reason": "The bounded 137-command/59-fixture system-MSFTEDIT Link contract is implemented through RichEditTextDocument::field_story and typed instruction-inclusive FieldStoryOffset ranges over the ordinary DocumentSnapshot field table. Existing visible range/selection coordinates are retained, so this is an explicit Rust API translation rather than a same-signature Link property on visible ranges. A canonical ID spans paragraph-owned Hyperlinks; exact history/slicing retains identity, copied insertion remaps it, and RTF/transfer/filter consumers preserve grouping. GetLink relocates only the acted range. SetLink preflights and installs one editor transaction with callback/model generation fences. Live replay uses all observed before ranges and does not prove native paired-range tracking. Instruction-interior commands, plain-prefix getters, surrogate-interior mutation, sentinel-empty arguments, synthetic terminal mark mutation, nested fields, unmeasured prepend/gap merging, TargetName projected spelling and sentinel RTF encoding remain explicit unsupported boundaries. Native visual effects, arbitrary direct-child structural setter mutation and external WinUI engine parity remain separate.",
+      "deviations": [
+        "RT-A03",
+        "RT-I01",
+        "RT-I08",
+        "RT-I34"
+      ]
     },
     {
       "id": "P:Microsoft.UI.Text.ITextRange.ParagraphFormat",
@@ -24426,6 +24821,14 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_document.rs",
           "symbol": "pub fn snapshot("
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "pub struct DocumentLinkField"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "fn replace_link_fields("
         }
       ],
       "tests": [
@@ -24436,14 +24839,31 @@
         {
           "path": "src/FerroUI.Controls/rich_edit_box_tests.rs",
           "symbol": "rich_edit_range_replacement_rebases_independent_selection_and_undoes_once"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_transfer_keeps_exact_identity_watermark_sentinel_and_target_frame"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_malformed_exact_payload_is_rejected_before_rtf_or_plain_fallback"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_tom_copy_of_only_paragraph_marks_keeps_shared_field_metadata"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs",
+          "symbol": "rich_edit_link_tom_paste_remaps_collisions_once_and_undo_restores_exact_snapshot"
         }
       ],
       "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation",
-      "reason": "This range value is represented by the live UTF-16 model, structured snapshot, or composite Uniform/Mixed formatting query. The native TOM value/object model is adapted.",
+      "reason": "This range value is represented by the live UTF-16 model, structured snapshot, or composite Uniform/Mixed formatting query. The native TOM value/object model is adapted. The shared snapshot carries canonical cross-paragraph field IDs/spans/TargetName/sentinel state. Slice/copy retains grouped identity, inserted rich fragments remap each field once, and exact advertised payloads validate before external fallback or preview mutation. Case/filter maps preserve scalar-safe offsets and a post-filter ownership fence rejects stale callback results. External RTF retains field grouping with fresh numeric IDs; unsupported projected/RTF cases remain RT-I34.",
       "deviations": [
         "RT-I01",
         "RT-I03",
-        "RT-I08"
+        "RT-I08",
+        "RT-I34"
       ]
     },
     {
@@ -24472,6 +24892,34 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_text_editor.rs",
           "symbol": "pub(super) fn replace_range_typing_format("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity.rs",
+          "symbol": "pub fn gravity("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity.rs",
+          "symbol": "pub fn set_gravity("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity.rs",
+          "symbol": "pub fn set_gravity_value("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor_gravity.rs",
+          "symbol": "pub fn selection_gravity("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor_gravity.rs",
+          "symbol": "pub fn set_selection_gravity("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor_gravity.rs",
+          "symbol": "fn insertion_character_format("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor_gravity.rs",
+          "symbol": "fn ensure_selection_format("
         }
       ],
       "tests": [
@@ -24522,13 +24970,54 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs",
           "symbol": "rich_range_gravity_paste_late_typing_restore_rejects_newer_range_ownership"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_replays_248_native_commands_and_keeps_two_null_observations"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_replays_ten_native_collapsed_format_and_typing_fixtures"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_native_nonempty_replacement_keeps_model_paragraph_merge_policy"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_is_shared_and_drives_real_control_typing"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_does_not_promote_resolved_format_into_typing_patch"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_history_retains_current_mode_and_failed_group_restores_it"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_read_rejects_same_value_newer_intent"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_composition_preflight_model_writes_survive"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_model_restore_callbacks_cannot_resurrect_cleared_history"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_exact_completion_fences_custom_brush_equality"
         }
       ],
       "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation",
-      "reason": "Independent ranges retain native-valued formatting affinity, including measured Outward-to-UI readback and duplicate reset-to-UI. Collapsed format queries and plain SetText/paste use the same previous/following-run resolution; explicit patches override the resolved source, and paragraph formatting stays with the current paragraph. Native 45 affinity, ten retention and 24 invalid fixtures are literal tests. Range generations preserve newer callback ownership and invalidate pending clipboard work; grouped edits restore the exact independent typing snapshot. Native physical endpoint rebasing differs from current TextPointer tracking and is not changed here. The model excludes a synthetic terminal EOP, so forward story-end affinity samples final paragraph defaults; signed native clamping is adapted to scalar-safe usize/Result validation. The actual selection's inherited Gravity behavior and the external WinUI engine remain unmeasured. Range metadata is not document history; successful undo and failed outer text groups retain accepted explicit mode changes as a stated FerroUI policy.",
+      "reason": "Independent ranges retain the measured five-value formatting-affinity contract, Outward-to-UI readback and duplicate reset-to-UI; collapsed queries/plain SetText/paste share the resolver with explicit patches last. Their 45 affinity fixtures, 190 retention commands and 24 invalid setters remain literal tests. The separately measured actual selection now shares an editor mode and uses the same resolver for collapsed queries, TypeText and live-caret IME input without promoting the transient source into its explicit patch. Its record has 250 commands/18 fixtures/18 canonical identities, 248 representable Rust calls and two retained null-BSTR transport observations. Same-value live setters record newer intent; callback-bearing copies and restore/history paths reject stale ownership. Physical pointer rebasing, duplicate native caches, initial setup caches, synthetic terminal EOP, automatic AT_END_OF_LINE and native trailing-paragraph replacement alignment remain partial. Successful undo retains current modes. Failed groups retain explicitly accepted independent-range metadata but restore the starting live-selection editor mode; these are stated FerroUI policies. System engine observations do not establish the external WinUI engine.",
       "deviations": [
         "RT-A03",
-        "RT-I32"
+        "RT-I32",
+        "RT-I35"
       ]
     },
     {
@@ -24566,10 +25055,95 @@
       "source": "packaging/Intellisense/generated/Microsoft.UI.Text.xml",
       "owner": "Microsoft.UI.Text.RichEditTextRange",
       "kind": "P",
-      "state": "pending",
-      "targets": [],
-      "tests": [],
-      "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation"
+      "state": "partial",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story.rs",
+          "symbol": "pub fn field_story("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story.rs",
+          "symbol": "pub struct RichEditTextFieldRange"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story.rs",
+          "symbol": "pub fn get_link("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story.rs",
+          "symbol": "pub fn set_link("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_field_story.rs",
+          "symbol": "pub struct FieldStoryOffset"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "pub struct DocumentLinkField"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/document_link_field.rs",
+          "symbol": "fn validate_link_fields("
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/rich_text_document.rs",
+          "symbol": "fn ensure_install_read("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor.rs",
+          "symbol": "fn install_field_snapshot("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_tests.rs",
+          "symbol": "rich_link_native_transition_oracle_uses_observed_before_ranges"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story_tests.rs",
+          "symbol": "rich_field_live_replays_all_137_measured_link_transitions_with_observed_before_ranges"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story_tests.rs",
+          "symbol": "rich_field_live_projection_keeps_visible_selection_and_typed_boundaries_separate"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story_tests.rs",
+          "symbol": "rich_field_live_history_restores_exact_fields_sentinel_selection_and_typing_patch"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story_tests.rs",
+          "symbol": "rich_field_live_target_updates_reuse_interactive_nodes_and_undo_restores_handlers"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story_tests.rs",
+          "symbol": "rich_field_live_provisional_instruction_cannot_alias_a_later_authoritative_id"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_installation_tests.rs",
+          "symbol": "rich_field_live_model_install_preflight_preserves_every_accepted_callback_write"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_installation_tests.rs",
+          "symbol": "rich_field_live_noop_install_does_not_accept_a_callback_changed_source"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_installation_tests.rs",
+          "symbol": "rich_field_live_link_install_read_sweep_preserves_callback_content_and_discards_stale_history"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_tests.rs",
+          "symbol": "rich_link_unmeasured_prepend_and_equal_target_gap_preserve_existing_fields"
+        }
+      ],
+      "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation",
+      "reason": "The bounded 137-command/59-fixture system-MSFTEDIT Link contract is implemented through RichEditTextDocument::field_story and typed instruction-inclusive FieldStoryOffset ranges over the ordinary DocumentSnapshot field table. Existing visible range/selection coordinates are retained, so this is an explicit Rust API translation rather than a same-signature Link property on visible ranges. A canonical ID spans paragraph-owned Hyperlinks; exact history/slicing retains identity, copied insertion remaps it, and RTF/transfer/filter consumers preserve grouping. GetLink relocates only the acted range. SetLink preflights and installs one editor transaction with callback/model generation fences. Live replay uses all observed before ranges and does not prove native paired-range tracking. Instruction-interior commands, plain-prefix getters, surrogate-interior mutation, sentinel-empty arguments, synthetic terminal mark mutation, nested fields, unmeasured prepend/gap merging, TargetName projected spelling and sentinel RTF encoding remain explicit unsupported boundaries. Native visual effects, arbitrary direct-child structural setter mutation and external WinUI engine parity remain separate.",
+      "deviations": [
+        "RT-A03",
+        "RT-I01",
+        "RT-I08",
+        "RT-I34"
+      ]
     },
     {
       "id": "P:Microsoft.UI.Text.RichEditTextRange.ParagraphFormat",
@@ -29477,6 +30051,10 @@
         {
           "path": "src/FerroUI.Base/media/text_formatting/generic_text_paragraph_properties.rs",
           "symbol": "fn set_text_line_bounds("
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/text_line_impl.rs",
+          "symbol": "fn font_family_line_metrics("
         }
       ],
       "tests": [
@@ -29494,7 +30072,7 @@
         },
         {
           "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
-          "symbol": "rich_text_line_bounds_stacking_uses_family_mode_ratio_on_framework_lines"
+          "symbol": "rich_text_line_bounds_stacking_uses_the_same_family_mode_as_natural_lines"
         },
         {
           "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
@@ -29510,7 +30088,7 @@
         },
         {
           "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
-          "symbol": "rich_text_line_bounds_mixed_font_metrics_match_shared_textblock_policy"
+          "symbol": "rich_text_line_bounds_family_fallback_policy_keeps_textblock_compatible"
         },
         {
           "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
@@ -29519,13 +30097,21 @@
         {
           "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
           "symbol": "rich_text_line_bounds_trimming_keeps_visible_ranges_and_embedded_ink"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_family_metrics_tests.rs",
+          "symbol": "rich_family_metrics_nested_rich_and_overflow_use_their_first_measured_line_baselines"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_fallback_scale_tests.rs",
+          "symbol": "rich_text_fallback_scale_reaches_real_bounds_caret_and_ranges_without_changing_source_font_size"
         }
       ],
       "deviations": [
         "RT-A02",
         "RT-I31"
       ],
-      "reason": "The head RichTextBlock owns the shared TextLineBounds policy and passes it through paragraph, empty-line and overflow formatting. Inherited/local values, clearing, markup, clipping and reflow use existing framework properties. Draw origins, caret/range geometry and inline controls share retained line metrics. This initial checkpoint retains the shared formatter half-gap, actual-fallback-face aggregation and aggregate object trimming; native requested-family metrics, font matching, TextDpi and pixels remain partial under RT-I31."
+      "reason": "The head RichTextBlock owns the shared TextLineBounds policy through paragraph, empty-line and overflow formatting. Inherited/local values, clearing, markup, clipping, draw/caret/range geometry and reflow use existing framework APIs. Rich layout opts into requested regular-family metrics, per-run bounds and full baseline-object contributions while ordinary TextBlock retains GlyphTypeface behavior. Optional fallback scale transport is functional for custom providers; current Skia/Vello providers use scale one. Native family matching, missing-cap-height policy, object host/alignment cases, TextDpi and pixels remain partial under RT-I31."
     },
     {
       "id": "P:Microsoft.UI.Xaml.Controls.RichTextBlock.TextLineBoundsProperty",
@@ -29549,6 +30135,10 @@
         {
           "path": "src/FerroUI.Base/media/text_formatting/generic_text_paragraph_properties.rs",
           "symbol": "fn set_text_line_bounds("
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/text_line_impl.rs",
+          "symbol": "fn font_family_line_metrics("
         }
       ],
       "tests": [
@@ -29566,7 +30156,7 @@
         },
         {
           "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
-          "symbol": "rich_text_line_bounds_stacking_uses_family_mode_ratio_on_framework_lines"
+          "symbol": "rich_text_line_bounds_stacking_uses_the_same_family_mode_as_natural_lines"
         },
         {
           "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
@@ -29582,7 +30172,7 @@
         },
         {
           "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
-          "symbol": "rich_text_line_bounds_mixed_font_metrics_match_shared_textblock_policy"
+          "symbol": "rich_text_line_bounds_family_fallback_policy_keeps_textblock_compatible"
         },
         {
           "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
@@ -29591,13 +30181,21 @@
         {
           "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
           "symbol": "rich_text_line_bounds_trimming_keeps_visible_ranges_and_embedded_ink"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_family_metrics_tests.rs",
+          "symbol": "rich_family_metrics_nested_rich_and_overflow_use_their_first_measured_line_baselines"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_fallback_scale_tests.rs",
+          "symbol": "rich_text_fallback_scale_reaches_real_bounds_caret_and_ranges_without_changing_source_font_size"
         }
       ],
       "deviations": [
         "RT-A02",
         "RT-I31"
       ],
-      "reason": "The head RichTextBlock owns the shared TextLineBounds policy and passes it through paragraph, empty-line and overflow formatting. Inherited/local values, clearing, markup, clipping and reflow use existing framework properties. Draw origins, caret/range geometry and inline controls share retained line metrics. This initial checkpoint retains the shared formatter half-gap, actual-fallback-face aggregation and aggregate object trimming; native requested-family metrics, font matching, TextDpi and pixels remain partial under RT-I31."
+      "reason": "The head RichTextBlock owns the shared TextLineBounds policy through paragraph, empty-line and overflow formatting. Inherited/local values, clearing, markup, clipping, draw/caret/range geometry and reflow use existing framework APIs. Rich layout opts into requested regular-family metrics, per-run bounds and full baseline-object contributions while ordinary TextBlock retains GlyphTypeface behavior. Optional fallback scale transport is functional for custom providers; current Skia/Vello providers use scale one. Native family matching, missing-cap-height policy, object host/alignment cases, TextDpi and pixels remain partial under RT-I31."
     },
     {
       "id": "P:Microsoft.UI.Xaml.Controls.RichTextBlock.TextReadingOrder",
@@ -36214,6 +36812,22 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_document.rs",
           "symbol": "RichEditTextRange"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story.rs",
+          "symbol": "pub fn field_story("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story.rs",
+          "symbol": "pub struct RichEditTextFieldRange"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story.rs",
+          "symbol": "pub fn get_link("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story.rs",
+          "symbol": "pub fn set_link("
         }
       ],
       "tests": [
@@ -36224,13 +36838,26 @@
         {
           "path": "src/FerroUI.Controls/rich_edit_box_tests.rs",
           "symbol": "rich_edit_range_replacement_rebases_independent_selection_and_undoes_once"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_tests.rs",
+          "symbol": "rich_link_native_transition_oracle_uses_observed_before_ranges"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story_tests.rs",
+          "symbol": "rich_field_live_replays_all_137_measured_link_transitions_with_observed_before_ranges"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story_tests.rs",
+          "symbol": "rich_field_live_projection_keeps_visible_selection_and_typed_boundaries_separate"
         }
       ],
       "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation",
-      "reason": "Live gravity-based Rust ranges cover the mapped operations over one UTF-16 document. Native stories, option flags, objects, units and ABI require separate implementation.",
+      "reason": "Live gravity-based Rust ranges cover the mapped operations over one UTF-16 document. Native stories, option flags, objects, units and ABI require separate implementation. The Link contract now has a separately typed instruction-inclusive field_story facade over common canonical metadata; visible offsets are unchanged and unsupported native field/track/ABI boundaries remain RT-I34.",
       "deviations": [
         "RT-I01",
-        "RT-I08"
+        "RT-I08",
+        "RT-I34"
       ]
     },
     {
@@ -36263,6 +36890,34 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_text_editor.rs",
           "symbol": "struct NavigationAffinity"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity.rs",
+          "symbol": "pub fn gravity("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity.rs",
+          "symbol": "pub fn set_gravity("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity.rs",
+          "symbol": "pub fn set_gravity_value("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor_gravity.rs",
+          "symbol": "pub fn selection_gravity("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor_gravity.rs",
+          "symbol": "pub fn set_selection_gravity("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor_gravity.rs",
+          "symbol": "fn insertion_character_format("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor_gravity.rs",
+          "symbol": "fn ensure_selection_format("
         }
       ],
       "tests": [
@@ -36469,15 +37124,41 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_movement_tests.rs",
           "symbol": "rich_selection_vertical_redirected_extensions_count_actual_story_edge_units"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_replays_248_native_commands_and_keeps_two_null_observations"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_replays_ten_native_collapsed_format_and_typing_fixtures"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_native_nonempty_replacement_keeps_model_paragraph_merge_policy"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_is_shared_and_drives_real_control_typing"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_does_not_promote_resolved_format_into_typing_patch"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_gravity_history_retains_current_mode_and_failed_group_restores_it"
         }
       ],
       "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation",
-      "reason": "The Rust selection facade shares editor selection/history and implements Line/Story Home/End plus Line/Paragraph MoveUp/MoveDown with directed extension, accepted-result accounting, shaped geometry and reentrant publication fences. Native-derived Home/End corrections retain real paragraph marks and line-end affinity; vertical movement retains the desired horizontal coordinate. Synthetic terminal EOP, full native Gravity, remaining directional units, Options/Type and external-engine equivalence remain pending.",
+      "reason": "The shared Rust selection facade implements directed selection, format queries/changes, mapped Home/End and Line/Paragraph/Character/Word movement, Options/Type classification and native-informed TypeText/overtype through the ordinary editor. Live formatting Gravity now has its own 250-command actual-selection evidence and transient query/typing/IME consumer with generation/history ownership guards. Supported shape classification is limited to the model; automatic line affinity/activity, native caches/physical rebasing, synthetic terminal EOP, cross-paragraph trailing alignment, further movement units and external WinUI ABI/engine parity remain partial. Independent range and live-selection metadata history policies are explicit FerroUI adaptations.",
       "deviations": [
         "RT-I01",
         "RT-I08",
         "RT-I21",
-        "RT-I23"
+        "RT-I23",
+        "RT-I26",
+        "RT-I35"
       ]
     },
     {
@@ -36674,6 +37355,22 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_document.rs",
           "symbol": "RichEditTextRange"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story.rs",
+          "symbol": "pub fn field_story("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story.rs",
+          "symbol": "pub struct RichEditTextFieldRange"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story.rs",
+          "symbol": "pub fn get_link("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story.rs",
+          "symbol": "pub fn set_link("
         }
       ],
       "tests": [
@@ -36684,13 +37381,26 @@
         {
           "path": "src/FerroUI.Controls/rich_edit_box_tests.rs",
           "symbol": "rich_edit_range_replacement_rebases_independent_selection_and_undoes_once"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_link_tests.rs",
+          "symbol": "rich_link_native_transition_oracle_uses_observed_before_ranges"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story_tests.rs",
+          "symbol": "rich_field_live_replays_all_137_measured_link_transitions_with_observed_before_ranges"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_field_story_tests.rs",
+          "symbol": "rich_field_live_projection_keeps_visible_selection_and_typed_boundaries_separate"
         }
       ],
       "implementation_source": "external WinUIEdit/Microsoft.UI.Text implementation",
-      "reason": "Live gravity-based Rust ranges cover the mapped operations over one UTF-16 document. Native stories, option flags, objects, units and ABI require separate implementation.",
+      "reason": "Live gravity-based Rust ranges cover the mapped operations over one UTF-16 document. Native stories, option flags, objects, units and ABI require separate implementation. The Link contract now has a separately typed instruction-inclusive field_story facade over common canonical metadata; visible offsets are unchanged and unsupported native field/track/ABI boundaries remain RT-I34.",
       "deviations": [
         "RT-I01",
-        "RT-I08"
+        "RT-I08",
+        "RT-I34"
       ]
     },
     {

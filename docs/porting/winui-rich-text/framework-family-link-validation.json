@@ -1,0 +1,322 @@
+{
+  "schema_version": 1,
+  "source_base_commit": "86f2cd639836991ca336612dc0073612104e5436",
+  "source_scope": "Changed production, test and script sources at the coordinated final family/Link/selection-Gravity build9. Windows-only oracle sources require native CI execution; Python scripts have separate gates.",
+  "source_sha256": {
+    ".github/workflows/rich-text.yml": "7285c11916ab830473995471f583dcabf3bd843ff0797c18118f1d77a68dd1c1",
+    "scripts/porting/check-rich-text-family-metrics.py": "96e34e3c2d1a9445a13d6083e6da9d13eb8bdb7d8a06e5a56c0aacfe2e53dc62",
+    "scripts/porting/rich-text-tom-observations.py": "50777bd2c98ea1b7c9e8061be2b8c3c36ef726a5ea2821c06a8918f06fc31a21",
+    "scripts/porting/test_rich_text_tom_observations.py": "ecf7adec0a06ee1e9a4fee15ba01d3f4a19743fc2abc7a9a2333ab2bfbddd2cb",
+    "src/FerroUI.Base/media/font_fallback_mapping.rs": "d05d5498c5534ec18b781602795f8a48c141e3f9684d972ba5de7e12448372e0",
+    "src/FerroUI.Base/media/font_manager.rs": "be8d3f3ed3289d6daf99aca3705f3f8cada12947620e004f8cdf80406285495f",
+    "src/FerroUI.Base/media/mod.rs": "a26ad3aa20928838f35b3b208cefebf40ff9846b132bfbe700fe94d93cd3b04d",
+    "src/FerroUI.Base/media/text_formatting/font_fallback_scale_tests.rs": "2220e029ffb36a5806e6a78fed88563e8a03c3c0c86b3fc42e92d268c174b650",
+    "src/FerroUI.Base/media/text_formatting/font_family_line_metrics.rs": "ffb37a03cb29ba1a14cbc65c4ec18b8f77147a4ccd69847a6e2979426826384f",
+    "src/FerroUI.Base/media/text_formatting/font_family_line_metrics_tests.rs": "bd2ec82663a6cecb91447ea3e106c8085a3dc416961b2725dc758f619c96f02a",
+    "src/FerroUI.Base/media/text_formatting/generic_text_paragraph_properties.rs": "72b9da59d8ec103275bdadc5d839452724c09c7d3b0f4c91f13b7ac63f35b51c",
+    "src/FerroUI.Base/media/text_formatting/generic_text_run_properties.rs": "42ab0ac77328065445e0e5b4d4afd0ca517cfbe6b2fafdeca5430cf79feb84ca",
+    "src/FerroUI.Base/media/text_formatting/mod.rs": "6b276c8fe363dbf91d42fb43e7456cec48a3a2ac04df5315c272da656d14a8ea",
+    "src/FerroUI.Base/media/text_formatting/shaped_text_run.rs": "551dba05ded573a9e8c7e85cca25c4ed3833e37f853b9f193130c26eb6026466",
+    "src/FerroUI.Base/media/text_formatting/testing/fonts.rs": "f09db824d5df26d63d12a9a56ccc7a2c19361d531a3e3768bcf4aae099fc1635",
+    "src/FerroUI.Base/media/text_formatting/testing/mod.rs": "c4d2bcd3e0db824c90aa0d7bb8e508ceef3e37ecd263018343697217327468e5",
+    "src/FerroUI.Base/media/text_formatting/text_characters.rs": "3877b9b4f27ea98a73a0b99ac7ca5cd33ba60e48c357d90bf94488256892fb70",
+    "src/FerroUI.Base/media/text_formatting/text_formatter.rs": "2ca03289703515d3f7c1c3989048bb2ccaea6b9dd84db6c1ddd61bbde1d86018",
+    "src/FerroUI.Base/media/text_formatting/text_formatter_impl.rs": "d18aa29f8880be9312c56c17f58e67464ed68ed3fd3ae737745d92bac45edc0a",
+    "src/FerroUI.Base/media/text_formatting/text_line_break.rs": "467c1256c604c3a055249133751ba0d756a39e5e03fdba3c4805bb46c20ada57",
+    "src/FerroUI.Base/media/text_formatting/text_line_impl.rs": "f108236035f82c9a01e276002e9f0829aac988b61b0a7f6111635d030245cc2d",
+    "src/FerroUI.Base/media/text_formatting/text_line_metrics_mode.rs": "6572d13d9071255cf975f6d934bb4a0586fafa2efbad57ec9a9ed48b20d45d89",
+    "src/FerroUI.Base/media/text_formatting/text_paragraph_properties.rs": "6aa248c6a50bfc41ee233ea22c41d6992cef1dd344a532cc6c60cdd58921e421",
+    "src/FerroUI.Base/media/text_formatting/text_run_cache.rs": "64c543ff5c864548434df1bceb55c0e19e8fcbd7f65525ad431f416764462b4d",
+    "src/FerroUI.Base/media/text_formatting/text_run_properties.rs": "1efba3678d1386caef78a44d8e51bbe678ea35900eb3a52dcd1241e6a3199a37",
+    "src/FerroUI.Base/platform/i_font_fallback_mapper.rs": "363a68930ae9cd1dd5c8e05b0dcd6bcac5eeecec35e56aa84b0e0e3a8b6fbbe1",
+    "src/FerroUI.Base/platform/i_font_manager_impl.rs": "3d96c69dbb82287ca5792b36518aeb1dc3318aca5032ec00597bddddaaa3dbd7",
+    "src/FerroUI.Base/platform/mod.rs": "5908a1b9ad55d44c61315e9282ad95aa996e055b9c419d6231b0a5a6a35e9df8",
+    "src/FerroUI.Controls/documents/document_link_field.rs": "5038c2ca71102f49683ac2c6823690d43e774099dd0a0dd459596db4c231125d",
+    "src/FerroUI.Controls/documents/document_snapshot.rs": "308bc7d35708f411409da3c383c9a3819bc231e49633ec67545c20a7f37a3b46",
+    "src/FerroUI.Controls/documents/hyperlink.rs": "053d619dc2c3071a208664c164263a3580ee316234f53b99f33c766eaa5f1b6e",
+    "src/FerroUI.Controls/documents/inline_run.rs": "1c258c7db1bfae538b39030395163e5816a830a93859171fdad87bdc19f5f483",
+    "src/FerroUI.Controls/documents/inline_ui_container.rs": "d0666b9c91444304e9929d3556b2ee706daa454aa1fa10c56ac1c1d96047e9f5",
+    "src/FerroUI.Controls/documents/mod.rs": "0e8c1ec1d77ae67a05cd8b071abaa8370ebd3b62b33086f86d878009735d2352",
+    "src/FerroUI.Controls/documents/rich_text_document.rs": "589ced53ad38aa4e63be8773fff050abaf84ce1164ca9b0ea75b3f63a650208e",
+    "src/FerroUI.Controls/documents/rich_text_document_tests.rs": "4f56e7b9f8206b6ac622e049ffdb019292d5ee7fc87c38b8832a5a93ca78a2c2",
+    "src/FerroUI.Controls/rich_edit_box.rs": "b26da4972a11e1a54c945715da3c55e307975d8901f3f60b2147515150014c89",
+    "src/FerroUI.Controls/rich_edit_box_tests.rs": "de44b609114919f5438dc4695b8b7b76ece6b3e92ebec14e4f72aace79b6e2f9",
+    "src/FerroUI.Controls/rich_edit_format_command_tests.rs": "955d5bc94f7790edb3dd0f75f43743e9dff6cef4eda970b624fb313255ea2533",
+    "src/FerroUI.Controls/rich_edit_fragment_filter.rs": "bb14bce05bee4ea0419c27037c664ad9fa0a1342b1fb9e0cf78300da00a79018",
+    "src/FerroUI.Controls/rich_text/mod.rs": "b9dec108f08e85c368f3c29759ffbbb12e23bf9fd6282ba377015a4af9c73fe3",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_case.rs": "80df183ac18c04942552e288b7a366f72f761ac8a35393d312da154df51c466c",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_case_tests.rs": "187cce9f5d512904196b94209691ec4e8631565bb0aa16bddd66203dae4b9467",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_clipboard_tests.rs": "a65d8a053ded3c76088f3955754aa6eb23a0ec1143ab698a2e681334b8c5ad56",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_document.rs": "322df62f2f6711aa2e92a8a545d8fd985525b7ca980672473ffff2f040e174e3",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_document_tests.rs": "72fdbe0f055c1d7ce4ca802da32a037c76ddb949007e65c3536aef1d9fe7017e",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_empty_fragment_tests.rs": "cd3c1e5ab314b29e0aee3076de967f971586dbf0a5e0f0a005a06e0a57c45de2",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_field_installation_tests.rs": "09984b797be089b6375e92b5a29660ea377af325535b9e39f8357547f491588a",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_field_story.rs": "d728d8efeb97dff162bb971a5a1677d97999f0db5a7fee5cade261939d782968",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_field_story_tests.rs": "3f61c98b7de32658bb81bacb6da11e0cabbe3f388d944d2c476dde998e24b5af",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_range_gravity.rs": "71ddf0d0182adeebdd286f935466f5ba9ef6a4580d3e3a0d56355011c4bedf33",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_range_operations.rs": "8b7e14a0b02f3a2674a74ecd3945139aea6bce9ee9176cac74a61f62c43f890a",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_range_operations_tests.rs": "56f02c74b55d542ac7163dc85a6027e7aefcae309ac68ffb6b37f50a5a30a9c4",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity.rs": "53526085a867d22df00421f6213c70bdbe884bf1350203179efe55ffc383bd32",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_native_cases.rs": "7d8d8fc94ef78d9f8c2785a35f9be441ad75bda79a3d12e9ae62b0e0c52036c9",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs": "4f9b9b64a577b9447eb7ba63b6d9609a32aa6309c840d676fcf2b617e4d9c694",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_selection_movement_tests.rs": "e854ef5f9419dd0961d629bb00498ed936aa14e4ec8e7c5d80b25889fa7ebf69",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_selection_navigation_tests.rs": "4fdc07cc40ae957b428ee68e4b01b19563c3e2cf5b3263298daae7f6a8c7fe37",
+    "src/FerroUI.Controls/rich_text/rich_edit_text_units_tests.rs": "d41a16b615a7b3b51ad08165c9d8bd4d2922e0174ac450f0d7e9036debc56fbd",
+    "src/FerroUI.Controls/rich_text/rich_text_editor.rs": "553e50dc9482a1c5827b65be5ca4c9b330795911a1b78422d7d6131c61bb78d1",
+    "src/FerroUI.Controls/rich_text/rich_text_editor_gravity.rs": "bc36016888b560ca6ac8eb07a5bfa6de24b78601ad52d60bcb22c502454762af",
+    "src/FerroUI.Controls/rich_text/rich_text_exact_edit.rs": "7a6c0bfd671779cdd80426e6f4db2c8c9bd1b7400e97e40a0cbba869b67c6ee8",
+    "src/FerroUI.Controls/rich_text/rich_text_field_story.rs": "973625c3b33ae7b520131e040121d07bcc2f93ca3cc02c3e6db388ada393f28c",
+    "src/FerroUI.Controls/rich_text/rich_text_link.rs": "892005a831b836f60841fa8fd91350639cae123f8b300cb967dbb1913124452d",
+    "src/FerroUI.Controls/rich_text/rich_text_link_native_cases.rs": "5b907493b0c0be79a5bc8269415e45d7ba9b2cb318649809bb0cc649477e396a",
+    "src/FerroUI.Controls/rich_text/rich_text_link_tests.rs": "0bf894e77dd88cbdda7dadf68643e67e10a412bcce5f8df5d3d7bd16b8a98b65",
+    "src/FerroUI.Controls/rich_text/rich_text_link_transfer_tests.rs": "887d34a7213e1e5726e4f308b359a1832f6080c066efcd39a2e1675f20ad4eee",
+    "src/FerroUI.Controls/rich_text/rich_text_transfer.rs": "62437aed97b5940d00810732cdf2af33e19cf7c3c8189397479fb20922d8773d",
+    "src/FerroUI.Controls/rich_text/rtf.rs": "329f7ae4d9e59012e25f98534720660a747cb8f6b58a3fdab540ed7e793e3704",
+    "src/FerroUI.Controls/rich_text/rtf_field_tests.rs": "8af6c1cd624b808d6923a129e9f776a4233a619cc63b00c47946be51df7683e8",
+    "src/FerroUI.Controls/rich_text/rtf_formatting_tests.rs": "056e92d82ab6a1a54ec92ebd64124d7fc410291fe93bf97b1c6e33e4e35a34b3",
+    "src/FerroUI.Controls/rich_text/rtf_link_fields.rs": "f7c7023c129f98b7ecef31910e322c86c7d57c110b804387734df2229c70fca6",
+    "src/FerroUI.Controls/rich_text_block.rs": "7cb32ef1713a6bb8797897b96eaf28911539066a15878073c7acc4eaee39a7af",
+    "src/FerroUI.Controls/rich_text_fallback_scale_tests.rs": "17cf60eab75214baebb2b21ad0d5dcf192812d8f1238c1d07d9c60d81ce74efd",
+    "src/FerroUI.Controls/rich_text_family_metrics_tests.rs": "56e4e878d452dfae0c8748cf47c8eb9809bd0c6708a589046fc4c28b09a332c6",
+    "src/FerroUI.Controls/rich_text_layout.rs": "6e35839d8dd7414291150dd19f9c5cf60dfb72499dba1067891a5066eea85132",
+    "src/FerroUI.Controls/rich_text_line_bounds_tests.rs": "25e69e272d932fba428bfae1ab64eb440b7a630df4dd0f0d2bb2a836f3d82ffd",
+    "src/FerroUI.Controls/rich_text_line_stacking_tests.rs": "d5b32f8b5dda55b9e9bb4ae14ca1e7b79d2cb6aeeee16f4e4cd7037c7d913ef4",
+    "src/FerroUI.Controls/text_block.rs": "350a0386799ceaf12a1e43ad41318dc13379bde64eb52f0b6431adec55923f1c",
+    "src/Windows/FerroUI.Win32/rich_text_tom_oracle_tests.rs": "badca96a18e3c921cd2d45cf4b8e9cc86a2bfcee16491558625251ecc45f9ac4",
+    "tests/FerroUI.Markup.Xaml.UnitTests/xaml/rich_text_tests.rs": "fd1f1f1842812d1168762d16b6fa955fef51e41bd786b3742e58b93fd3a345c5"
+  },
+  "environment": {
+    "host": "x86_64-unknown-linux-gnu",
+    "rust": "1.99.0",
+    "dependencies": "locked, offline",
+    "cargo_build_jobs": 1,
+    "incremental": false,
+    "dev_debug": 0,
+    "test_debug": 0
+  },
+  "compilation": {
+    "result": "PASS",
+    "crate_targets": 14,
+    "command": "cargo test --locked --offline --no-default-features -p ferroui-base -p ferroui-controls -p ferroui-markup-xaml-tests -p ferroui-markup-xaml -p ferroui-harfbuzz -p ferroui-winui -p ferroui-win32 -p ferroui-browser -p ferroui-freedesktop -p ferroui-native -p ferroui-wayland -p ferroui-view -p ferroui-android -p ferroui-ios --lib --no-run",
+    "log_name": "ferroui-rich-family-link-gravity-build-9.log",
+    "log_sha256": "e24d6bf69af256b538a03381de8f6521a1c572dd31c2245fb86f0c80d8f4eb10"
+  },
+  "runtime": {
+    "base": {
+      "passed": 4470,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 0,
+      "duration_seconds": 1.39,
+      "command": [
+        "target/debug/deps/ferroui_base-d981390d574d238e"
+      ],
+      "log_name": "ferroui-rich-family-link-final-base.log",
+      "log_sha256": "ae2a698304884daf3f08b2599eb57ec2a32e6ef3a392306bef815d4e19646ff7"
+    },
+    "controls": {
+      "passed": 5251,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 0,
+      "duration_seconds": 7.04,
+      "command": [
+        "target/debug/deps/ferroui_controls-4b5f7625385788b3"
+      ],
+      "log_name": "ferroui-rich-family-link-final-controls.log",
+      "log_sha256": "a412f00323a75daa01efbe1589d67ec6a8305520aa0b1354b8acfefe95b8c909"
+    },
+    "xaml": {
+      "passed": 620,
+      "failed": 0,
+      "ignored": 17,
+      "measured": 0,
+      "filtered_out": 0,
+      "duration_seconds": 32.19,
+      "command": [
+        "target/debug/deps/ferroui_markup_xaml_tests-8d3ff40dfb300431"
+      ],
+      "log_name": "ferroui-rich-family-link-final-xaml.log",
+      "log_sha256": "560a9335de51c3c0c8a9471b87715022fd423130dcad06f674ea8e36704b1b43"
+    },
+    "markup_xaml": {
+      "passed": 202,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 0,
+      "duration_seconds": 0.15,
+      "command": [
+        "target/debug/deps/ferroui_markup_xaml-f126a12c2cf05a3b"
+      ],
+      "log_name": "ferroui-rich-family-link-final-markup_xaml.log",
+      "log_sha256": "a07264a891ec54983f2cddb6a53463f8a66cbd2ca0fc792eea1e27ab38a4d94c"
+    },
+    "browser": {
+      "passed": 278,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 0,
+      "duration_seconds": 0.17,
+      "command": [
+        "target/debug/deps/ferroui_browser-fd8025d57463152c"
+      ],
+      "log_name": "ferroui-rich-family-link-final-browser.log",
+      "log_sha256": "4b5aef798efa881bfc30f3af5cd766510f6c8cf4625379e2a608b4239c4516ba"
+    },
+    "winui": {
+      "passed": 50,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 0,
+      "duration_seconds": 0.0,
+      "command": [
+        "target/debug/deps/ferroui_winui-c2a56573280efb85"
+      ],
+      "log_name": "ferroui-rich-family-link-final-winui.log",
+      "log_sha256": "e17a72468c775d629d800bd87b37b4accc136fc6bb1703082e52d4bbbc51ebc6"
+    },
+    "win32": {
+      "passed": 329,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 0,
+      "duration_seconds": 0.16,
+      "command": [
+        "target/debug/deps/ferroui_win32-63563e15cc0a1b71"
+      ],
+      "log_name": "ferroui-rich-family-link-final-win32.log",
+      "log_sha256": "74898830db6774670e46712a1a9379d46cecd5e4195f2dad7470092fe89fa15e"
+    },
+    "view": {
+      "passed": 73,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 0,
+      "duration_seconds": 0.18,
+      "command": [
+        "target/debug/deps/ferroui_view-74ec142960b76040"
+      ],
+      "log_name": "ferroui-rich-family-link-final-view.log",
+      "log_sha256": "3f02a8e602a078b77c61b64adc4c141849ecc72278edd6cf8bc2fc1b6e920df5"
+    },
+    "native": {
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 0,
+      "duration_seconds": 0.0,
+      "command": [
+        "target/debug/deps/ferroui_native-685302201f066589"
+      ],
+      "log_name": "ferroui-rich-family-link-final-native.log",
+      "log_sha256": "5241acf7a6e47bd382daee6363a3f3d94ba1ce6b18f46a236879a2d342b8a86e"
+    },
+    "wayland": {
+      "passed": 118,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 0,
+      "duration_seconds": 0.27,
+      "command": [
+        "target/debug/deps/ferroui_wayland-5bc53172ff12d0e3"
+      ],
+      "log_name": "ferroui-rich-family-link-final-wayland.log",
+      "log_sha256": "67c03fe583a064f5f01b02bec1c3a6154ff4e159adb9414032a12dd27b60fc07"
+    },
+    "android": {
+      "passed": 165,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 0,
+      "duration_seconds": 0.03,
+      "command": [
+        "target/debug/deps/ferroui_android-9e45391522e24ebe"
+      ],
+      "log_name": "ferroui-rich-family-link-final-android.log",
+      "log_sha256": "354e35f6ba3a3792754411dee64d2a3497a727a38141d905e897ec4ec4fac435"
+    },
+    "ios": {
+      "passed": 102,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 0,
+      "duration_seconds": 0.02,
+      "command": [
+        "target/debug/deps/ferroui_ios-4f34484da68d0efc"
+      ],
+      "log_name": "ferroui-rich-family-link-final-ios.log",
+      "log_sha256": "ac1b2667708381f095e3356ae6bb3cd42ec72eaf1c8ce4e7814ecc7295146da7"
+    },
+    "harfbuzz": {
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 0,
+      "duration_seconds": 0.02,
+      "command": [
+        "target/debug/deps/ferroui_harfbuzz-4231f63c2987fbab"
+      ],
+      "log_name": "ferroui-rich-family-link-final-harfbuzz.log",
+      "log_sha256": "62ca2122aa1724abe01c6722f99a6ce33e9174416ea66d51fa5fa617ffd11b18"
+    },
+    "ibus": {
+      "passed": 35,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 99,
+      "duration_seconds": 0.74,
+      "command": [
+        "dbus-run-session",
+        "--",
+        "env",
+        "FERROUI_FREEDESKTOP_TEST_BUS=session",
+        "target/debug/deps/ferroui_freedesktop-7e45813435d195dd",
+        "dbus_ime",
+        "--test-threads=1"
+      ],
+      "log_name": "ferroui-rich-family-link-final-ibus.log",
+      "log_sha256": "9a6261ceac30cd12ee305249c7103ff701db1f77db15fb8d24051dfd88aef5c6"
+    }
+  },
+  "initial_failures": [
+    {
+      "gate": "Base full",
+      "passed": 4468,
+      "failed": 2,
+      "correction": "Two drawing fixtures lacked a foreground brush. Supplying a brush retains every existing draw-origin, baseline and ink assertion; production drawing policy is unchanged."
+    },
+    {
+      "gate": "Controls full",
+      "passed": 5242,
+      "failed": 7,
+      "correction": "Four facade checkpoint-ordering failures now synchronize completed direct model changes before guarded reads. Three fixture corrections retain accepted callback history, provide explicit standalone RTF tab spacing and explicitly invalidate an off-tree host. Two new regressions check one current undo/redo unit after direct external changes."
+    },
+    {
+      "gate": "XAML full before binding correction",
+      "passed": 619,
+      "failed": 1,
+      "correction": "An equal direct Text property binding echo reentered set_text during undo. The direct-property setter suppresses identical echoes; public set_text retains replacement semantics. Exact rich state/history and real two-way binding undo/redo are covered."
+    }
+  ],
+  "unsuccessful_build_attempts": "Earlier attempts encountered fixture API/type errors, stale renderer cache artifacts, one unsupported Cargo flag and a Controls compiler SIGKILL. These are not passing gates. The successful coordinated build above incorporates their corrections.",
+  "limits": [
+    "Host suites do not execute Windows-only probes, physical IMEs, mobile devices, browser DOM/OS integration or native pixels.",
+    "System MSFTEDIT observations do not establish external WinUIEdit or LineServices parity.",
+    "New 490-command selection and 90-command endpoint native matrices await execution; historical observations remain immutable.",
+    "Skia/Vello production font managers do not supply nonunit fallback mappings; optional-provider transport and shared metrics are covered.",
+    "The separate paired-range and page-host measurement tranches are not part of this source checkpoint."
+  ]
+}

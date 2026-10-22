@@ -15,7 +15,7 @@ Every file in the three primary roots is retained, including build and data file
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/LsHostContext.h` | pending | — |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/LsParagraphSpan.cpp` | pending | — |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/LsParagraphSpan.h` | pending | — |
-| `dxaml/xcp/core/text/RichTextServices/TextFormatter/LsRun.cpp` | pending | — |
+| `dxaml/xcp/core/text/RichTextServices/TextFormatter/LsRun.cpp` | partial | `src/FerroUI.Base/media/text_formatting/generic_text_run_properties.rs`, `src/FerroUI.Base/media/text_formatting/text_run_properties.rs` |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/LsRun.h` | pending | — |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/LsRunCache.cpp` | pending | — |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/LsRunCache.h` | pending | — |
@@ -23,11 +23,11 @@ Every file in the three primary roots is retained, including build and data file
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/LsSpan.h` | pending | — |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/LsTextFormatter.cpp` | pending | — |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/LsTextFormatter.h` | pending | — |
-| `dxaml/xcp/core/text/RichTextServices/TextFormatter/LsTextLine.cpp` | pending | — |
+| `dxaml/xcp/core/text/RichTextServices/TextFormatter/LsTextLine.cpp` | partial | `src/FerroUI.Base/media/text_formatting/text_line_impl.rs`, `src/FerroUI.Base/media/text_formatting/text_line_impl.rs` |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/LsTextLine.h` | pending | — |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/LsTextLineBreak.cpp` | pending | — |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/LsTextLineBreak.h` | pending | — |
-| `dxaml/xcp/core/text/RichTextServices/TextFormatter/lineservicescallbacks.cpp` | pending | — |
+| `dxaml/xcp/core/text/RichTextServices/TextFormatter/lineservicescallbacks.cpp` | partial | `src/FerroUI.Base/media/text_formatting/text_run_properties.rs`, `src/FerroUI.Base/media/text_formatting/text_run_properties.rs`, `src/FerroUI.Base/media/text_formatting/text_line_impl.rs`, `src/FerroUI.Base/media/text_formatting/shaped_text_run.rs` |
 | `dxaml/xcp/core/text/RichTextServices/inci/Ls.h` | pending | — |
 
 ## Unicode and shaping
@@ -63,7 +63,7 @@ Every file in the three primary roots is retained, including build and data file
 |---|---|---|
 | `dxaml/xcp/core/text/BlockLayout/BlockLayoutEngine.cpp` | partial | `src/FerroUI.Controls/rich_text_layout.rs`, `src/FerroUI.Controls/rich_text_layout.rs` |
 | `dxaml/xcp/core/text/BlockLayout/BlockLayoutEngine.h` | partial | `src/FerroUI.Controls/rich_text_layout.rs`, `src/FerroUI.Controls/rich_text_layout.rs` |
-| `dxaml/xcp/core/text/BlockLayout/BlockLayoutHelpers.cpp` | pending | — |
+| `dxaml/xcp/core/text/BlockLayout/BlockLayoutHelpers.cpp` | partial | `src/FerroUI.Controls/documents/inline_run.rs`, `src/FerroUI.Controls/text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs` |
 | `dxaml/xcp/core/text/BlockLayout/BlockLayoutHelpers.h` | pending | — |
 | `dxaml/xcp/core/text/BlockLayout/BlockNode.cpp` | partial | `src/FerroUI.Controls/rich_text_layout.rs`, `src/FerroUI.Controls/rich_text_layout.rs` |
 | `dxaml/xcp/core/text/BlockLayout/BlockNode.h` | partial | `src/FerroUI.Controls/rich_text_layout.rs`, `src/FerroUI.Controls/rich_text_layout.rs` |
@@ -76,7 +76,7 @@ Every file in the three primary roots is retained, including build and data file
 | `dxaml/xcp/core/text/BlockLayout/DrawingContext.cpp` | partial | `src/FerroUI.Controls/rich_text_layout.rs` |
 | `dxaml/xcp/core/text/BlockLayout/DrawingContext.h` | partial | `src/FerroUI.Controls/rich_text_layout.rs` |
 | `dxaml/xcp/core/text/BlockLayout/LineMetrics.h` | partial | `src/FerroUI.Controls/rich_text_layout.rs` |
-| `dxaml/xcp/core/text/BlockLayout/PageHostedObjectRun.cpp` | partial | `src/FerroUI.Controls/rich_text_layout.rs` |
+| `dxaml/xcp/core/text/BlockLayout/PageHostedObjectRun.cpp` | partial | `src/FerroUI.Controls/rich_text_layout.rs`, `src/FerroUI.Controls/documents/inline_run.rs`, `src/FerroUI.Controls/documents/inline_ui_container.rs`, `src/FerroUI.Controls/rich_text_layout.rs` |
 | `dxaml/xcp/core/text/BlockLayout/PageHostedObjectRun.h` | partial | `src/FerroUI.Controls/rich_text_layout.rs` |
 | `dxaml/xcp/core/text/BlockLayout/PageNode.cpp` | partial | `src/FerroUI.Controls/rich_text_layout.rs`, `src/FerroUI.Controls/rich_text_layout.rs` |
 | `dxaml/xcp/core/text/BlockLayout/PageNode.h` | partial | `src/FerroUI.Controls/rich_text_layout.rs`, `src/FerroUI.Controls/rich_text_layout.rs` |
@@ -214,9 +214,9 @@ Every file in the three primary roots is retained, including build and data file
 |---|---|---|
 | `dxaml/xcp/core/inc/FontAndScriptServices.h` | reuse_candidate | — |
 | `dxaml/xcp/core/inc/FontFamily.h` | reuse_candidate | — |
-| `dxaml/xcp/core/text/Fonts/CompositeFontFamily.cpp` | reuse_candidate | — |
+| `dxaml/xcp/core/text/Fonts/CompositeFontFamily.cpp` | partial | `src/FerroUI.Base/media/text_formatting/font_family_line_metrics.rs`, `src/FerroUI.Base/media/font_manager.rs` |
 | `dxaml/xcp/core/text/Fonts/FontFamily.cpp` | reuse_candidate | — |
-| `dxaml/xcp/core/text/Fonts/FontTypeface.cpp` | reuse_candidate | — |
+| `dxaml/xcp/core/text/Fonts/FontTypeface.cpp` | partial | `src/FerroUI.Base/platform/i_font_manager_impl.rs`, `src/FerroUI.Base/platform/i_font_fallback_mapper.rs`, `src/FerroUI.Base/media/font_fallback_mapping.rs` |
 | `dxaml/xcp/core/text/Fonts/SharedName.cpp` | reuse_candidate | — |
 | `dxaml/xcp/core/text/Fonts/TypefaceCollection.cpp` | reuse_candidate | — |
 | `dxaml/xcp/core/text/Inc/Fonts.h` | reuse_candidate | — |
@@ -441,7 +441,7 @@ Every file in the three primary roots is retained, including build and data file
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/EndOfLineRun.cpp` | reuse_candidate | — |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/EndOfParagraphRun.cpp` | reuse_candidate | — |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/HiddenRun.cpp` | reuse_candidate | — |
-| `dxaml/xcp/core/text/RichTextServices/TextFormatter/InlineObjectHandlers.cpp` | reuse_candidate | — |
+| `dxaml/xcp/core/text/RichTextServices/TextFormatter/InlineObjectHandlers.cpp` | partial | `src/FerroUI.Base/media/text_formatting/text_line_impl.rs`, `src/FerroUI.Controls/rich_text_layout.rs` |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/InlineObjectHandlers.h` | reuse_candidate | — |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/ObjectRun.cpp` | reuse_candidate | — |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/TextAnalysisNode.h` | reuse_candidate | — |
@@ -459,7 +459,7 @@ Every file in the three primary roots is retained, including build and data file
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/TextRunData.cpp` | reuse_candidate | — |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/TextRunData.h` | reuse_candidate | — |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/TextRunProperties.cpp` | reuse_candidate | — |
-| `dxaml/xcp/core/text/RichTextServices/TextFormatter/TextSegment.cpp` | reuse_candidate | — |
+| `dxaml/xcp/core/text/RichTextServices/TextFormatter/TextSegment.cpp` | partial | `src/FerroUI.Base/media/text_formatting/text_characters.rs`, `src/FerroUI.Base/media/text_formatting/text_formatter_impl.rs` |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/TextSegment.h` | reuse_candidate | — |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/TextStore.cpp` | reuse_candidate | — |
 | `dxaml/xcp/core/text/RichTextServices/TextFormatter/TextStore.h` | reuse_candidate | — |

@@ -1174,3 +1174,117 @@ full XAML suite passes 620 with 17 existing ignores; runtime helpers pass all
 202 tests. The final full Controls executable passes 5,136, with loopback access
 for its six existing remote tests. Prior Name metadata fixture errors and the
 loopback-restricted run are recorded as failed gates rather than passing counts.
+
+## 2026-10-22 — Shared Link fields and measured live selection Gravity
+
+The source tranche adds a common canonical field table to DocumentSnapshot and
+consumes it from typed projected Link ranges, paragraph-owned Hyperlink nodes,
+history, transformations, RTF and transfer. The existing visible UTF-16 APIs keep
+their coordinate contract. The bounded Link engine uses all 137 native
+transitions from 59 fixtures; live replay reseeds their observed before ranges
+and does not claim native paired-range tracking.
+
+Actual-selection Gravity now has a separate shared-editor consumer, based on the
+250-command/18-fixture record with canonical interface identity checks. Its 29
+regression definitions cover transient formatting, real typing, composition,
+metadata and callback/history ownership. Two null-BSTR calls remain native
+transport observations. Synthetic EOP, cached duplicate formatting, automatic
+AT_END_OF_LINE and native trailing-paragraph replacement alignment stay partial.
+
+Read-only review found callback-bearing equality/content-pool reads between
+snapshot validation and structural mutation. The follow-up checks the model
+mutation version at both preflight boundaries, including no-op restoration, and
+marks externally interrupted editor groups so stale rollback cannot overwrite a
+callback's accepted content. Four focused installation definitions cover the
+identified gap. Arbitrary direct-child writes during reused-object structural
+setters remain a separate stronger boundary.
+
+The actual standalone Link core passed 23 tests; all newly added framework test
+results remain pending the combined central gate at this documentation checkpoint.
+No earlier green framework result is attributed to this new source. Details,
+source anchors and remaining contracts are in LINK-FIELDS.md, RANGE-GRAVITY.md,
+RT-I34/RT-I35 and the appended TESTS.md evidence ledger.
+
+## 2026-10-22 — Verify the published layout and input checkpoint
+
+The dedicated workflow at `86f2cd639836991ca336612dc0073612104e5436`
+completed both jobs successfully (run 39852362560). Linux repeats the full
+4,437 Base, 5,136 Controls and 620 XAML passes, all three theme suites, both
+portable Windows host suites and all five generated-reference checks. Windows
+passes 65 WinUI tests, including the five requested-range geometry cases, two
+UTF-16 contracts, 23 IMM32 scope tests, seven native MSFTEDIT probes and 664
+selected rich-control tests. This closes the Windows execution gap recorded for
+that checkpoint without attributing these results to later source changes.
+
+## 2026-10-22 — Extend paragraph TypeText characterization and retain architecture provenance
+
+Prepared and integrated a native-only paragraph TypeText extension: 16 fresh
+actual-selection fixtures add 240 commands while retaining the original
+250-command matrix unchanged. The complete family now declares 490 commands /
+34 fixtures. Existing snapshots inspect actual post-edit UTF-16 spans, primary
+and duplicate state, exact strings/HRESULTs, Bold/Italic and paragraph alignment.
+No production paragraph replacement policy or historical evidence was changed.
+
+The isolated extractor gate passed 39 tests with zero failures. It now accepts a
+bounded 512-command family while retaining exact per-fixture, identity, width and
+continuity checks; tests preserve all original 250 rows and 18 interface records.
+The main-checkout rerun also passed the same 39-test suite. Windows
+execution of the added native fixtures is pending; the earlier published green
+checkpoint is not attributed to this later probe source.
+
+The ARM64 collection workflow records verified runner/toolchain architecture,
+measured checkout, probe blob, exact commands and exit codes. Its serial log is
+canonical extractor input. The separate four-thread process is diagnostic only;
+interleaved output and a tolerated diagnostic failure are not a native conformance
+pass. New observations will receive a distinct immutable record with verified
+archive/artifact provenance. The existing RT-I35 paragraph-policy limitation
+remains until those measurements and a subsequent implementation gate resolve it.
+
+## 2026-10-22 — Prepare bounded passive endpoint measurements
+
+Added a separate system-MSFTEDIT `range_tracking` source family: 15 fresh controls,
+six calls each, 90 commands. The matrix configures primary ranges and duplicates,
+then records external replacements and both mode readbacks for previously
+unmeasured endpoint relationships. Identical-text and retained-prefix/suffix
+inputs test whether tracking depends on the original operation span rather than
+the minimal visible-text difference. No result is predicted or used to change
+production behavior before measurement.
+
+The entire earlier oracle is an unchanged prefix, including the 490-selection,
+1,577-independent-Gravity and 137-Link source matrices and ARM64 diagnostics.
+The additive schema preserves raw failed HRESULTs, exact state continuity,
+six-step fixture declarations and a 90-command family budget. The isolated and
+real-checkout extractor gates each passed 50 tests, including 11 new protocol
+regressions; independent review found no concrete source/schema blocker.
+
+Existing measured JSON remains immutable. New native execution and artifact
+capture are pending. Snapshot GetFont/GetPara calls make these records unsuitable
+for Stage B untouched/duplicate formatting-cache conclusions. The prepared probe
+blob is `64262e70bb48d4241fbe4626d27df85c388284ba`; the source patch SHA-256 is
+`2fc8c2e0d1cd99dbf12b6227086fe76d74516656cea42c3ec9233828b3602b51`.
+
+## 2026-10-22 — Validate requested-family metrics, common fields and live-selection Gravity
+
+Completed the coordinated fourteen-target build and final host execution after
+integrating family metrics/optional fallback-scale transport, common Link fields,
+typed projection, exact RTF/clipboard/filter preservation, live selection Gravity
+and model-install preflight. Full Base passed 4,470; full Controls 5,251; full XAML
+620 with 17 existing ignored. Runtime helpers passed 202, Browser 278, WinUI/Win32
+host 50/329, View 73, HarfBuzz eight, Native/Wayland six/118, Android/iOS host
+165/102 and private-session IBus 35. All executed tests passed.
+
+The first complete gates exposed two missing-brush drawing fixtures, four real
+history/checkpoint synchronization errors and three fixture setup/expectation
+errors. Earlier XAML execution exposed an equal Text binding echo during undo.
+Corrections retain the original native/geometry/inheritance assertions and add
+exact current-history and binding undo/redo checks. Accepted callback changes
+remain authoritative; no guard is weakened to accept an obsolete outer edit.
+The final record preserves unsuccessful compile/runtime attempts separately.
+
+The durable framework-family-link-validation.json records all 81 changed source
+hashes, the prior published base, exact build/runtime commands and log hashes.
+The family arithmetic script freshly compiled the pinned C++ and actual Rust
+helper and passed 3,240 cases. The native extractor passed 50 cases. New Windows
+execution of the 490-selection and 90-endpoint matrices remains pending; existing
+measured JSON is immutable. No full native source-file completion or external
+WinUI/LineServices/pixel equivalence is claimed.

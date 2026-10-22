@@ -27292,13 +27292,39 @@
       "lines": 1064,
       "scope_reason": "dxaml/xcp/core/text/",
       "component": "block layout",
-      "state": "pending",
+      "state": "partial",
       "reuse_or_destination_candidates": [
         "src/FerroUI.Controls/rich_text_block.rs",
         "src/FerroUI.Base/media/text_formatting/"
       ],
-      "targets": [],
-      "tests": [],
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/documents/inline_run.rs",
+          "symbol": "fn measured_baseline("
+        },
+        {
+          "path": "src/FerroUI.Controls/text_block.rs",
+          "symbol": "fn cached_text_baseline("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "fn cached_baseline_offset("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_family_metrics_tests.rs",
+          "symbol": "rich_family_metrics_nested_textblock_uses_measured_baseline_padding_and_full_object_box"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_family_metrics_tests.rs",
+          "symbol": "rich_family_metrics_nested_rich_and_overflow_use_their_first_measured_line_baselines"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_family_metrics_tests.rs",
+          "symbol": "rich_family_metrics_absent_and_stale_nested_caches_never_force_formatting"
+        }
+      ],
       "includes": [
         {
           "header": "precomp.h",
@@ -27510,6 +27536,11 @@
           "kind": "scoped_callable_definition_candidate",
           "state": "unreviewed"
         }
+      ],
+      "reason": "Nested text controls contribute completed first-line cached baselines; absent/stale cache falls back to desired height without forcing nested layout. Existing nonzero attached baseline override semantics remain. This maps the baseline helper, not every native block-layout utility.",
+      "deviations": [
+        "RT-A02",
+        "RT-I31"
       ]
     },
     {
@@ -28801,12 +28832,32 @@
         {
           "path": "src/FerroUI.Controls/rich_text_layout.rs",
           "symbol": "embedded_controls"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/inline_run.rs",
+          "symbol": "fn with_measured_metrics("
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/inline_ui_container.rs",
+          "symbol": "fn measure_embedded_controls("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "fn embedded_controls("
         }
       ],
       "tests": [
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_embedded_controls_keep_text_offsets_and_receive_layout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_family_metrics_tests.rs",
+          "symbol": "rich_family_metrics_equal_size_baseline_change_reflows_without_document_or_history_change"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_family_metrics_tests.rs",
+          "symbol": "rich_family_metrics_captured_object_size_matches_run_geometry_after_independent_child_measure"
         }
       ],
       "includes": [
@@ -28937,10 +28988,11 @@
           "state": "unreviewed"
         }
       ],
-      "reason": "Embedded control measurement and arrangement use the existing drawable text-run/control layout contracts, preserving the model object offset. Native hosted-object ABI and every sizing case remain pending.",
+      "reason": "Rich runs freeze measured size and baseline for consistent later metrics/child geometry; equal-size baseline changes retire source/layout without document or history edits. Native PageHostedObjectRun is fixed with respect to line position and measures using the current paragraph host Size, not the generic remaining-width argument. Paragraph/page measurement constraints and measure-time host attachment remain partial.",
       "deviations": [
         "RT-A02",
-        "RT-I02"
+        "RT-I02",
+        "RT-I31"
       ]
     },
     {
@@ -30903,13 +30955,39 @@
       "lines": 1095,
       "scope_reason": "dxaml/xcp/core/text/",
       "component": "font and script services",
-      "state": "reuse_candidate",
+      "state": "partial",
       "reuse_or_destination_candidates": [
         "src/FerroUI.Base/media/font_manager.rs",
         "src/FerroUI.Base/media/text_formatting/text_shaper.rs"
       ],
-      "targets": [],
-      "tests": [],
+      "targets": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_family_line_metrics.rs",
+          "symbol": "pub struct FontFamilyLineMetrics"
+        },
+        {
+          "path": "src/FerroUI.Base/media/font_manager.rs",
+          "symbol": "fn map_characters("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_family_line_metrics_tests.rs",
+          "symbol": "font_family_line_metrics_full_and_trimmed_boxes_use_the_requested_regular_family"
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_family_line_metrics_tests.rs",
+          "symbol": "font_family_line_metrics_composite_family_uses_first_available_face_before_character_fallback"
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_fallback_scale_tests.rs",
+          "symbol": "font_fallback_scale_configured_fallbacks_and_aliases_retain_existing_precedence"
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_fallback_scale_tests.rs",
+          "symbol": "font_fallback_scale_keyed_embedded_and_composite_families_do_not_bypass_collection_rules"
+        }
+      ],
       "includes": [
         {
           "header": "precomp.h",
@@ -31046,6 +31124,11 @@
           "kind": "scoped_callable_definition_candidate",
           "state": "unreviewed"
         }
+      ],
+      "reason": "The shared opt-in FontFamily policy resolves a regular requested-family box and retains native per-run bounds formulas. Optional actual-face/prefix/scale transport preserves configured resolver precedence. DirectWrite composite construction, production scale provision, font lookup and opaque cap-height policy remain partial; the formula oracle does not execute those services.",
+      "deviations": [
+        "RT-A02",
+        "RT-I31"
       ]
     },
     {
@@ -31164,13 +31247,35 @@
       "lines": 49,
       "scope_reason": "dxaml/xcp/core/text/",
       "component": "font and script services",
-      "state": "reuse_candidate",
+      "state": "partial",
       "reuse_or_destination_candidates": [
         "src/FerroUI.Base/media/font_manager.rs",
         "src/FerroUI.Base/media/text_formatting/text_shaper.rs"
       ],
-      "targets": [],
-      "tests": [],
+      "targets": [
+        {
+          "path": "src/FerroUI.Base/platform/i_font_manager_impl.rs",
+          "symbol": "fn font_fallback_mapper("
+        },
+        {
+          "path": "src/FerroUI.Base/platform/i_font_fallback_mapper.rs",
+          "symbol": "fn try_map_characters("
+        },
+        {
+          "path": "src/FerroUI.Base/media/font_fallback_mapping.rs",
+          "symbol": "pub struct FontFallbackMapping"
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_fallback_scale_tests.rs",
+          "symbol": "font_fallback_scale_mapping_requires_positive_finite_scale_and_nonempty_prefix"
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_fallback_scale_tests.rs",
+          "symbol": "font_fallback_scale_absent_provider_keeps_legacy_matching_at_unit_scale"
+        }
+      ],
       "includes": [
         {
           "header": "precomp.h",
@@ -31232,6 +31337,11 @@
           "kind": "scoped_callable_definition_candidate",
           "state": "unreviewed"
         }
+      ],
+      "reason": "An optional Rust capability transports an owned actual face, logical UTF-16 prefix and positive finite scale. Existing providers default to no capability and scale one. No native DirectWrite provider or measured nonunit-scale parity is claimed.",
+      "deviations": [
+        "RT-A02",
+        "RT-I31"
       ]
     },
     {
@@ -34067,7 +34177,7 @@
         },
         {
           "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
-          "symbol": "rich_text_line_bounds_stacking_uses_family_mode_ratio_on_framework_lines"
+          "symbol": "rich_text_line_bounds_stacking_uses_the_same_family_mode_as_natural_lines"
         },
         {
           "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
@@ -34083,7 +34193,7 @@
         },
         {
           "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
-          "symbol": "rich_text_line_bounds_mixed_font_metrics_match_shared_textblock_policy"
+          "symbol": "rich_text_line_bounds_family_fallback_policy_keeps_textblock_compatible"
         },
         {
           "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
@@ -36514,12 +36624,30 @@
       "lines": 258,
       "scope_reason": "dxaml/xcp/core/text/",
       "component": "rich formatting contracts and structures",
-      "state": "reuse_candidate",
+      "state": "partial",
       "reuse_or_destination_candidates": [
         "src/FerroUI.Base/media/text_formatting/"
       ],
-      "targets": [],
-      "tests": [],
+      "targets": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/text_line_impl.rs",
+          "symbol": "fn font_family_line_metrics("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "fn embedded_controls("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_family_line_metrics_tests.rs",
+          "symbol": "font_family_line_metrics_embedded_objects_retain_full_ascent_and_descent_after_text_trimming"
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_family_line_metrics_tests.rs",
+          "symbol": "font_family_line_metrics_different_object_baselines_contribute_the_complete_envelope"
+        }
+      ],
       "includes": [
         {
           "header": "precomp.h",
@@ -36686,6 +36814,11 @@
           "kind": "scoped_callable_definition_candidate",
           "state": "unreviewed"
         }
+      ],
+      "reason": "Baseline-aligned objects contribute full measured height, baseline and descent independently of text bounds. The generic callback accepts width/position, while the concrete hosted control uses its paragraph host Size. FerroUI retains its object placement/position model; native paragraph/page measurement constraints, host ownership, other alignments and the full generic object protocol remain partial.",
+      "deviations": [
+        "RT-A02",
+        "RT-I31"
       ]
     },
     {
@@ -37068,13 +37201,31 @@
       "lines": 445,
       "scope_reason": "dxaml/xcp/core/text/",
       "component": "LineServices adapters",
-      "state": "pending",
+      "state": "partial",
       "reuse_or_destination_candidates": [
         "src/FerroUI.Base/media/text_formatting/text_formatter_impl.rs",
         "src/FerroUI.Base/media/text_formatting/text_line_impl.rs"
       ],
-      "targets": [],
-      "tests": [],
+      "targets": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/generic_text_run_properties.rs",
+          "symbol": "font_scale: f64"
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/text_run_properties.rs",
+          "symbol": "fn font_scale("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_fallback_scale_tests.rs",
+          "symbol": "font_fallback_scale_cached_and_forked_wrapped_runs_preserve_scale_without_remapping"
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_fallback_scale_tests.rs",
+          "symbol": "font_fallback_scale_decorations_letter_spacing_and_copied_properties_apply_scale_once"
+        }
+      ],
       "includes": [
         {
           "header": "precomp.h",
@@ -37214,6 +37365,11 @@
           "kind": "scoped_callable_definition_candidate",
           "state": "unreviewed"
         }
+      ],
+      "reason": "Shaped Rust run properties retain original requested family, source em and an independent scale, including copies and continuation snapshots. This covers scale transport, not the full native LsRun class or engine ABI.",
+      "deviations": [
+        "RT-A02",
+        "RT-I31"
       ]
     },
     {
@@ -37849,13 +38005,35 @@
       "lines": 2109,
       "scope_reason": "dxaml/xcp/core/text/",
       "component": "LineServices adapters",
-      "state": "pending",
+      "state": "partial",
       "reuse_or_destination_candidates": [
         "src/FerroUI.Base/media/text_formatting/text_formatter_impl.rs",
         "src/FerroUI.Base/media/text_formatting/text_line_impl.rs"
       ],
-      "targets": [],
-      "tests": [],
+      "targets": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/text_line_impl.rs",
+          "symbol": "fn create_line_metrics("
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/text_line_impl.rs",
+          "symbol": "fn font_family_line_metrics("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_family_line_metrics_tests.rs",
+          "symbol": "font_family_line_metrics_nonempty_runs_do_not_inherit_a_default_font_height_floor"
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_family_line_metrics_tests.rs",
+          "symbol": "font_family_line_metrics_empty_lines_and_break_only_runs_use_default_family"
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_family_line_metrics_tests.rs",
+          "symbol": "font_family_line_metrics_different_object_baselines_contribute_the_complete_envelope"
+        }
+      ],
       "includes": [
         {
           "header": "precomp.h",
@@ -38139,6 +38317,11 @@
           "kind": "scoped_callable_definition_candidate",
           "state": "unreviewed"
         }
+      ],
+      "reason": "FontFamily mode combines per-run family boxes and full object contributions, retaining maximum individual height and the ascent-plus-descent envelope. Empty lines use default-family metrics. Actual LineServices aggregation, hit testing, rounding and rendering remain partial.",
+      "deviations": [
+        "RT-A02",
+        "RT-I31"
       ]
     },
     {
@@ -39629,12 +39812,34 @@
       "lines": 1308,
       "scope_reason": "dxaml/xcp/core/text/",
       "component": "rich formatting contracts and structures",
-      "state": "reuse_candidate",
+      "state": "partial",
       "reuse_or_destination_candidates": [
         "src/FerroUI.Base/media/text_formatting/"
       ],
-      "targets": [],
-      "tests": [],
+      "targets": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/text_characters.rs",
+          "symbol": "fn create_shapeable_run_with_mapping("
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/text_formatter_impl.rs",
+          "symbol": "fn can_shape_together("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_fallback_scale_tests.rs",
+          "symbol": "font_fallback_scale_different_scales_split_shaping_even_with_the_same_face"
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_fallback_scale_tests.rs",
+          "symbol": "font_fallback_scale_distinct_actual_faces_with_equal_metadata_do_not_merge"
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_fallback_scale_tests.rs",
+          "symbol": "font_fallback_scale_invalid_prefixes_preserve_whole_graphemes_and_later_mappings"
+        }
+      ],
       "includes": [
         {
           "header": "precomp.h",
@@ -39885,6 +40090,11 @@
           "kind": "scoped_callable_definition_candidate",
           "state": "unreviewed"
         }
+      ],
+      "reason": "Mapped face identity and scale split shared shaping; requested-family provenance remains intact. Prefix validation preserves complete scalars/graphemes and bounded fallback progress. Other native text segmentation, number substitution and DirectWrite/LineServices behavior remain partial.",
+      "deviations": [
+        "RT-A02",
+        "RT-I31"
       ]
     },
     {
@@ -40146,13 +40356,47 @@
       "lines": 2107,
       "scope_reason": "dxaml/xcp/core/text/",
       "component": "LineServices adapters",
-      "state": "pending",
+      "state": "partial",
       "reuse_or_destination_candidates": [
         "src/FerroUI.Base/media/text_formatting/text_formatter_impl.rs",
         "src/FerroUI.Base/media/text_formatting/text_line_impl.rs"
       ],
-      "targets": [],
-      "tests": [],
+      "targets": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/text_run_properties.rs",
+          "symbol": "fn requested_font_family("
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/text_run_properties.rs",
+          "symbol": "fn effective_font_rendering_em_size("
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/text_line_impl.rs",
+          "symbol": "fn font_family_line_metrics("
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/shaped_text_run.rs",
+          "symbol": "properties.effective_font_rendering_em_size()"
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_family_line_metrics_tests.rs",
+          "symbol": "font_family_line_metrics_bounds_are_applied_per_run_before_aggregation"
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_family_line_metrics_tests.rs",
+          "symbol": "font_family_line_metrics_glyph_fallback_preserves_the_requested_family_and_glyph_font"
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_fallback_scale_tests.rs",
+          "symbol": "font_fallback_scale_decorations_letter_spacing_and_copied_properties_apply_scale_once"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_fallback_scale_tests.rs",
+          "symbol": "rich_text_fallback_scale_reaches_real_bounds_caret_and_ranges_without_changing_source_font_size"
+        }
+      ],
       "includes": [
         {
           "header": "precomp.h",
@@ -40532,6 +40776,11 @@
           "kind": "scoped_callable_definition_candidate",
           "state": "unreviewed"
         }
+      ],
+      "reason": "The visible run metrics use requested-family boxes at source em times optional mapped scale. Actual glyph metrics, decorations and character spacing consume scale once. Empty/break marker handling uses the shared formatter. Full native callbacks, TextDpi quantization, production mapping and rendered pixels remain partial.",
+      "deviations": [
+        "RT-A02",
+        "RT-I31"
       ]
     },
     {

@@ -36,8 +36,10 @@ parity at this reference.
   linked-page ownership, allocation and draw-origin contracts.
 - [INPUT-GEOMETRY.md](INPUT-GEOMETRY.md): exact requested UTF-16 range geometry,
   shaped fragments, native transforms and callback ownership.
-- [RANGE-GRAVITY.md](RANGE-GRAVITY.md): independent range formatting affinity,
-  native-valued modes, insertion/clipboard behavior and tracking boundaries.
+- [RANGE-GRAVITY.md](RANGE-GRAVITY.md): independently measured range and live-selection
+  formatting affinity, insertion/clipboard behavior and tracking boundaries.
+- [LINK-FIELDS.md](LINK-FIELDS.md): common cross-paragraph field metadata, typed
+  projected Link ranges, RTF/transfer preservation and measured limits.
 - [API-MAP.md](API-MAP.md): a destination/review plan for every public API owner,
   with exact member, Rust target, test and deviation evidence for reviewed entries.
 - [JOURNAL.md](JOURNAL.md): implementation/checkpoint history and the distinction

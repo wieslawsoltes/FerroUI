@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "result": "PASS",
+  "cases": 3240,
+  "upstream_pin": "fe244ca6ac4d482712b234a9de3cf771cc6481de",
+  "native_path": "dxaml/xcp/core/text/Fonts/CompositeFontFamily.cpp",
+  "rust_path": "src/FerroUI.Base/media/text_formatting/font_family_line_metrics.rs",
+  "native_source_sha256": "66d3866fcd25ab993a358f5b4433f1dc30cb7bdb5331398e4f0f4b64c6d9da9d",
+  "native_function_sha256": "030e7a861e39352a2be8e5744038fd1169d25c0da69cb17da97b16c4bf45313e",
+  "rust_source_sha256": "ffb37a03cb29ba1a14cbc65c4ec18b8f77147a4ccd69847a6e2979426826384f",
+  "input_rows_sha256": "e1a38e8b0ce851480e8978a4be06ff16ce2a72d8eafefab237bdfb4b96862104",
+  "native_output_sha256": "3ccb8aa99e4e00e2343c07724958b84a3d6f36d1302cbeea3725b002c86b8e17",
+  "rust_output_sha256": "64c79cbc3de60ae5eae0091acaada1374e586e5db50a856d4052e24d4c86c2ae",
+  "maximum_absolute_error": 8.239746108529289e-06,
+  "absolute_tolerance": 1e-05,
+  "relative_tolerance": 1e-06,
+  "comparison": "absolute error <= absolute tolerance + relative tolerance * abs(native value)",
+  "scope": "Actual pinned C++ family-bounds function and current Rust helper; no font lookup, LineServices aggregation, native controls or rendered pixels.",
+  "assumptions": [
+    "Native GetLineMetrics receives supplied normalized ascent, total spacing and cap height.",
+    "Rust receives the same design metrics; the ascent sign follows FerroUI's font convention.",
+    "The native calculation uses float and the Rust calculation uses f64.",
+    "Cap height is round(ascent * cap_ratio); modes 0, 1, 2, 3 are Full, TrimToCapHeight, TrimToBaseline and Tight."
+  ],
+  "inputs": {
+    "design_em": [
+      1000,
+      2048
+    ],
+    "ascent": [
+      600,
+      800,
+      950
+    ],
+    "descent": [
+      100,
+      200,
+      400
+    ],
+    "gap": [
+      0,
+      100,
+      350
+    ],
+    "cap_ratio": [
+      0.55,
+      0.7,
+      0.9
+    ],
+    "size": [
+      10,
+      12,
+      20,
+      33,
+      72
+    ],
+    "bounds_modes": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "execution": "compiled current sources with this script"
+}

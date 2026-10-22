@@ -1,5 +1,63 @@
 # Rich text verification
 
+## Requested-family metrics, common Link fields and live-selection Gravity
+
+The complete changed source graph compiles with Rust 1.99.0 and locked/offline
+dependencies, one build job and disabled incremental/debug artifacts. All fourteen
+crate targets were rebuilt together and their selected suites executed afterward.
+[framework-family-link-validation.json](framework-family-link-validation.json)
+records the base commit, all 81 changed source hashes, exact commands, execution
+counts and log hashes. This gate precedes the separate paired-range and page-host
+measurement tranches.
+
+| Gate | Completed result |
+|---|---:|
+| Base, full | 4,470 passed |
+| Controls, full, including loopback tests | 5,251 passed |
+| XAML, full runtime/emitter corpus | 620 passed; 17 existing ignored |
+| XAML runtime helpers, full | 202 passed |
+| Browser portable adapter, full | 278 passed |
+| WinUI / Win32 portable host suites | 50 / 329 passed |
+| View / HarfBuzz | 73 / 8 passed |
+| Native / Wayland host suites | 6 / 118 passed |
+| Android / iOS host suites | 165 / 102 passed |
+| IBus under a private session bus | 35 passed |
+| Native observation extractor | 50 passed |
+| Pinned C++ / Rust family-metrics formula | 3,240 cases passed |
+
+All executed Rust tests above have zero failures. The only ignored tests are the
+17 existing XAML cases. The 43 new family-metrics/fallback-scale regressions are
+33 Base and ten Controls tests. Common fields, codecs, live Gravity and preflight
+add 102 Controls cases; two further history-ordering regressions and one equal
+Text-property echo regression bring the Controls increase to 115 over 86f2cd63.
+The real XAML binding case also now verifies redo and history state.
+
+The first full Base gate passed 4,468 and failed two drawing fixtures because
+neither supplied a foreground brush. Both now paint while retaining every glyph
+origin, baseline, height and ink assertion. The first Controls gate passed 5,242
+and failed seven. Four failures exposed facade guards captured before ordinary
+history synchronization; synchronization now precedes those guarded reads,
+without weakening callback/version checks. The other three fixtures now preserve
+an accepted callback's undo unit, supply explicit standalone RTF tab spacing,
+and explicitly invalidate an off-tree parent after its child's measurement
+changes. The previous XAML gate passed 619 and failed one: a binding echo called
+public set_text during undo. Equal direct-property echoes are now suppressed,
+while explicit set_text retains its replacement contract. Original behavior
+assertions remain, with added exact history/snapshot checks.
+
+Earlier build attempts encountered test-fixture API/type errors, stale renderer
+artifacts, an unsupported Cargo argument and a compiler SIGKILL. They are recorded
+as unsuccessful attempts, not runtime passes. Fresh final compilation and the
+executions above include every correction. The native extractor's 50 tests and
+3,240 formula comparisons have separate provenance below and in
+[family-metrics-formula.json](family-metrics-formula.json).
+
+Windows-only execution of the new paragraph/endpoint probes remains pending.
+Host tests do not establish physical IME, native-pixel or external WinUI engine
+parity. Production Skia/Vello font managers retain scale one unless a mapper is
+provided. Source/API inventory integrity is a separate gate; no runtime source
+file is marked complete by these test results.
+
 ## Layout, input geometry, range Gravity and scope integration
 
 The coordinated Linux build uses Rust 1.99.0, locked/offline dependencies, one
@@ -47,6 +105,23 @@ remains 640 selected files, 1,362 exact API identifiers, 938 framework dependenc
 and 827 include-boundary edges. Public states are 159 complete, 654 partial and
 549 pending; no runtime source file is marked complete. These are scoped
 implementation and traceability gates, not external WinUI engine or pixel parity.
+
+## Published checkpoint 86f2cd63
+
+Both jobs in the [dedicated rich-text workflow](https://github.com/wieslawsoltes/FerroUI/actions/runs/39852362560)
+passed. The [Linux job](https://github.com/wieslawsoltes/FerroUI/actions/runs/39852362560/job/120081607308)
+passed Base 4,437, Controls 5,136, Win32 329, WinUI host 50, Fluent 210
+(two ignored), Simple 213 (three ignored), WinUI theme 301 (two ignored), and
+XAML 620 (17 ignored). All five explicit generated-reference checks passed.
+The [Windows job](https://github.com/wieslawsoltes/FerroUI/actions/runs/39852362560/job/120081607668)
+passed WinUI 65, exact UTF-16 two, IMM32 input scopes 23, native MSFTEDIT seven,
+and the selected rich-control family 664. The WinUI gate executes all five new
+Windows-only requested-range geometry regressions described above. These are
+actual adapter tests; they do not measure a physical IME candidate window.
+
+This completed checkpoint precedes the requested-family metrics, optional
+fallback scale, common Link fields and actual-selection Gravity changes below.
+Their new local and subsequent CI gates are recorded separately.
 
 ## Published checkpoint 8508220d
 
@@ -581,14 +656,14 @@ state transitions, malformed records and incomplete declared counts.
 | [Cursor publication tests](../../../src/FerroUI.Controls/rich_edit_input_geometry_tests.rs) | Three public input-manager cases deliberately return an old rectangle after getter callbacks change owner/client, reset, leave/return, or publish newer geometry for the same client. The accepted backend rectangle, connection and history are asserted without exposing private manager APIs. |
 | [CoreText geometry tests](../../../src/Windows/FerroUI.WinUI/core_text_layout.rs) and [native adapter tests](../../../src/Windows/FerroUI.WinUI/win_ui_text_input_method_reentrancy_tests.rs) | Seven portable geometry cases cover complete rectangle transforms, reflection/rotation, scaling/origin, caret-only minimum, unavailable geometry, cancellation/reentry and native setter failure. Six Windows-only cases cover semantic ownership, accessor/revision replacement, deferred mutation, nested/focus/reset invalidation and a real attached owner resized by the final revision callback. Arbitrary requested-range and candidate-window geometry remain pending; native execution is recorded separately. |
 | [Shared formatter marker regression](../../../src/FerroUI.Base/media/text_formatting/text_line_tests.rs) | The direct structural-terminator case covers LTR/RTL caret-distance/hit inverses, selected fragment bounds, nonzero source starts, one/two-unit line/paragraph markers and trailing marker positions. It failed against the preceding Base library and passed after the shared correction. |
-| [System MSFTEDIT probe](../../../src/Windows/FerroUI.Win32/rich_text_tom_oracle_tests.rs) | The latest measured record contains 60 Home/End commands, 60 repeats, 290 vertical, 300 horizontal, 316 options/typing, 137 Link commands across 59 fixtures, and 1,577 Gravity commands across 199 fixtures. Captures counted UTF-16, OS/DLL versions, range/selection states, formats, HRESULTs, signed deltas and complete fixture counts. Strict extraction and 23 Python regressions pass. System MSFTEDIT characterization is distinct from the external WinUI engine and from Rust API implementation. |
+| [System MSFTEDIT probe](../../../src/Windows/FerroUI.Win32/rich_text_tom_oracle_tests.rs) | The latest measured record contains 60 Home/End commands, 60 repeats, 290 vertical, 300 horizontal, 316 options/typing, 137 Link commands across 59 fixtures, 1,577 independent Gravity commands across 199 fixtures, and 250 actual-selection Gravity commands across 18 fixtures with 18 canonical identity records. It captures counted UTF-16, OS/DLL versions, exact range/selection states, formats, HRESULTs and counts. The strict extractor checkpoint passed 34 Python regressions. System MSFTEDIT characterization is distinct from the external WinUI engine and from Rust API implementation. |
 | [Native observation extractor tests](../../../scripts/porting/test_rich_text_tom_observations.py) | Seven Python tests passed at 4c0bae3. Exact historical replay, Unicode escaping and strict family/fixture/phase/type/flag/count validation protect immutable native evidence; this pass does not execute the new native commands. |
 | [Text stream tests](../../../src/FerroUI.Controls/rich_text/rich_edit_text_stream_tests.rs) | UTF-8/UTF-16 and BOM handling, raw RTF, validation before I/O/mutation, exact byte bounds, interrupted and partial I/O, prefix failure, caller position/ownership, transactional range replacement and reentrant output snapshots. |
 | [Language tests](../../../src/FerroUI.Controls/documents/rich_language_tests.rs) | Source validation grammar, inheritance into shaping, local overrides, snapshots/history, RTF default/scope/plain reset, representability errors and owner/presenter identity. |
 | [Inherited presentation tests](../../../src/FerroUI.Controls/documents/rich_presentation_invalidation_tests.rs) | Theme/owner presentation preserves semantic revision, mutation identity, undo and active composition; font/language/flow and inherited mutable collections still invalidate layout. Explicit local formatting and clearing to inheritance remain semantic changes. The Base inheritance tests distinguish actual notification origin from the resulting inherited priority and preserve it in owned event arguments. |
 | [Composition cause tests](../../../src/FerroUI.Controls/rich_text/rich_text_composition_tests.rs) | Accepted Unicode deltas, cursor filtering/normalization, one finalization/undo unit, explicit cancellation, read-only/reentrant rejection, group event ordering/rollback, stale preview invalidation inside held model batches and weak disposable observers. Routed argument ranges have the separate tests below; actual backend event order remains a platform gate. |
 | [Composition event tests](../../../src/FerroUI.Controls/rich_edit_composition_event_tests.rs) and [begin lifecycle tests](../../../src/FerroUI.Controls/rich_edit_composition_start_tests.rs) | Native unavailable defaults and whole UTF-16 ranges; accepted filtered/limited completion payloads; no cursor-only changed events; exact disjoint/empty replacements; explicit begin before text without selected-text deletion/history; empty completion/cancel; legacy implicit start; reentrant caret/model/start/end callbacks and stale acknowledgement rejection. |
-| [RTF style tests](../../../src/FerroUI.Controls/rich_text/rtf_styles_tests.rs) and [field tests](../../../src/FerroUI.Controls/rich_text/rtf_field_tests.rs) | Literal grammar fixtures for forward/cyclic inheritance, additive/scoped character formatting, font charset selection, direct overrides, names/metadata isolation, metrics/tabs/empty paragraphs and expansion limits. Multi-paragraph fields preserve targets, surrounding content and formatting, exclude invisible empty links, count separators, bound cumulative metadata expansion and reject before mutation during streamed import. Canonical export retains resolved appearance rather than style/field identity. |
+| [RTF style tests](../../../src/FerroUI.Controls/rich_text/rtf_styles_tests.rs) and [field tests](../../../src/FerroUI.Controls/rich_text/rtf_field_tests.rs) | Literal grammar fixtures for forward/cyclic inheritance, additive/scoped character formatting, font charset selection, direct overrides, names/metadata isolation, metrics/tabs/empty paragraphs and expansion limits. Multi-paragraph fields preserve targets, surrounding content and formatting, exclude invisible empty links, count separators, bound cumulative metadata expansion and reject before mutation during streamed import. Canonical export retains resolved style appearance and common field grouping; named-style identity and process-local numeric field IDs are not external RTF identities. |
 | [Highlighter tests](../../../src/FerroUI.Controls/documents/text_highlighter_tests.rs) | All ten literal upstream overlap fixtures plus an independent per-character layering oracle, signed range value copies, markup boxing, empty/invalid clipping, brush defaults, mutable brush invalidation and weak/reentrant subscriptions. Native raster/high-contrast comparisons remain separate. |
 | [Portable text automation tests](../../../src/FerroUI.Controls/automation/provider/rich_text_automation_tests.rs) | Six Text/eighteen TextRange operations, Text2 caret and TextChild contracts over the live model, scalar-safe text, range identity/rebasing/lifetime, selection policies, format and text search, unit normalization, 25 typed attributes/sentinels, stable hyperlink peers, children, events and shaped/clipped overflow geometry. The 92551b30 checkpoint covers scroll alignment and presenter ownership. TextEdit composition, payload and subscription additions require the later corresponding record. |
 | [Native text pattern tests](../../../src/Windows/FerroUI.Win32/automation/text_pattern_tests.rs) and [range identity lifetime test](../../../src/Windows/FerroUI.Win32/automation/text_range_node.rs) | Native provider slots, worker-to-UI dispatch, BSTR/SAFEARRAY/VARIANT/HRESULT values, correct reserved sentinels/COLORREFs, geometry/children, document replacement, foreign ranges, text/selection events and delayed COM release. Test definitions and a cross-compile are not evidence of an actual Windows UI Automation client or screen-reader run. |
@@ -701,3 +776,182 @@ cover client replacement from disposal, connection access, subscription
 registration and state queries. Those Windows-only tests exercise the actual
 adapter without a COM context or desktop window; their definitions are not
 proof of execution or a real platform IME integration pass.
+
+## Link/common-field and live-selection Gravity integration
+
+This source tranche combines the common Link model, the RTF/transfer consumer,
+live selection Gravity and the late-install preflight guard. Previous green
+framework checkpoints above precede these changes. The combined framework gate now passes all 5,251 Controls tests, including the
+102 original additions and two subsequent history-ordering regressions. The full
+source checkpoint and unsuccessful earlier gates are recorded above.
+
+| Family | Source definitions | Evidence and validation boundary |
+|---|---:|---|
+| `rich_link_` core | 23 new | Actual production core passed a standalone std-only `rustc --test` gate, including 137 native literal transitions. This does not compile the framework consumer. |
+| `rich_field_live_` consumer | 24 new | Shared model/history, visible/projected coordinates, handler identity, transforms, lifetime and callback ownership; native replay reseeds all 137 observed before ranges. Passed in the full 5,251-case Controls gate. |
+| `rich_field_live_` installation | 4 new | Measured brush-read sweeps cover old snapshot/equality (including no-op), pool preflight, direct restore and grouped set_link; accepted callback writes survive and stale history is discarded. Passed in the full 5,251-case Controls gate. |
+| `rich_edit_link_` transfer/filter | 13 new | Exact identity/watermark/sentinel/frame, cross-paragraph RTF, invalid advertised content, separator-only copy, ID remapping/undo, MaxLength, Unicode policy mapping and callback fencing. Passed in the full 5,251-case Controls gate. |
+| RTF `field_tests` | 15 total: 10 new, 5 strengthened | Cross-paragraph groups, equal-target identity, separator-only results, bounds, suffix metrics, Unicode instruction/run scalars, UNC/switch-like quoting and platform LineBreak length. Passed in the full 5,251-case Controls gate. |
+| `rich_selection_gravity_` | 29 new | 248 representable native commands plus two retained null-BSTR observations; ten collapsed-format/typing fixtures with 75 target format and ten inserted-range checks; five documented paragraph-merge differences; shared mode, real typing, IME/history and callback ownership. Passed in the full 5,251-case Controls gate. |
+
+Native records are immutable and have distinct provenance:
+
+| Record | Exact families relevant here | Measured checkout / DLL |
+|---|---|---|
+| [Link and independent Gravity](native-msftedit-links-gravity.json) | 137 Link commands / 59 fixtures / 274 snapshots; 1,577 independent Gravity commands / 199 fixtures | `dc99ba00a692c51391fa18a767f7d16a4f6f2415`; MSFTEDIT `6.2.26100.33438` |
+| [Actual selection Gravity](native-msftedit-selection-gravity.json) | 250 selection commands / 18 fixtures / 18 canonical identity records; 80 setup and 170 target commands | `038c29ce3cc8491b5b4a6fe8ef22eb8624ecdfec`; MSFTEDIT `6.2.26100.33648` |
+
+The later record also retains the earlier 60 Home/End, 60 repeats, 290 vertical,
+300 horizontal, 316 options/typing, 137 Link and 1,577 independent Gravity rows.
+It does not replace or rewrite the earlier observations. Its strict extractor
+checkpoint passed 34 Python tests. The files' SHA-256 values are respectively
+`8e0fc9f9605aefd02ea20949d1b9fd3305f427d1fb493f600969bcda16623987`
+and `82d939ced91a3517a25a7dbc5586f501795b20701454b934c83a0617aa3771de`.
+
+The Link artifact is run `39807011198`, job `119922819095`, artifact
+`12439885287`; archive SHA-256
+`24c9e2c012fa83e3f294fee886f0804db03463a4d712521fdd8bd16884e00fe1`.
+Its workflow head is `c43a907cf13c6589b98922b7a1e9f017094519d6`, distinct
+from the measured checkout above, and its probe blob is
+`4accd7fdb21888f9fe4843f3c957420ab2cc38ab`.
+The selection artifact is run `39825948407`, job `119989156686`, artifact
+`12448130293`; archive SHA-256
+`0b71f796c5c86db34fe23d9f37819f469992c45a8e3adbba365ebc02e83e5793`.
+Its workflow head is `8508220d7f2323acfb32293d7d0afeb7abf75bfd` and probe
+blob `7d80afb5ee5b62e301a09f574d508a603efb411c`.
+
+Framework validation must use the actual combined production graph. Focused
+filters are `rich_link_`, `rich_field_live_`, `rich_edit_link_`,
+`rich_text::rtf::field_tests` and `rich_selection_gravity_`; broad Controls rich
+text, document, clipboard and composition gates cover the common snapshot/editor
+schema change. Results must identify the compiled source checkpoint and report
+failures/ignored tests separately. RT-I34/RT-I35 and their detailed documents
+retain the native parity limits even after these gates pass.
+
+## Paragraph TypeText probe extension and ARM64 collection
+
+The [native oracle](../../../src/Windows/FerroUI.Win32/rich_text_tom_oracle_tests.rs)
+now defines 16 additional actual-selection paragraph fixtures. Each fresh control
+runs 15 commands: six formatting setup calls, two range/Gravity configuration
+calls, Duplicate, TypeText, four independent format inspections and a final
+primary GetGravity. These add 240 commands to the unchanged 250-command matrix:
+**490 commands, 34 fixtures and 34 interface records** in the `selection_gravity`
+family. The combined roles are 176 Setup and 314 Target commands. This describes
+source coverage; execution of the added native cases is pending.
+
+The new fixtures cover forward/reversed selections, a real paragraph mark,
+paragraph start/end boundaries, empty/ordinary/supplementary/newline input,
+opposite leading/trailing alignments and a three-paragraph replacement. External
+inspection ranges come from the actual UTF-16 story and resulting selection.
+Their existing snapshots retain full text, null/empty BSTR distinction,
+HRESULTs, primary/duplicate state, Bold, Italic and alignment. They do not assume
+that empty input deletes a selection or that trailing formatting survives.
+
+The original [250-command record](native-msftedit-selection-gravity.json) remains
+immutable, including its source and artifact provenance. The new source uses the
+same schema version and verified COM interfaces. The extractor accepts an
+explicit maximum of 512 selection-family commands, retaining the separate
+250-command per-fixture limit, exact declared completion/interface counts,
+configuration/default rules, UTF-16 widths and before/after continuity checks.
+A larger declared matrix does not relax these checks.
+
+The isolated prepared source passed **39 extractor tests, zero failures**, using
+`python3 scripts/porting/test_rich_text_tom_observations.py -v`. The five additions
+cover a 490-row extension preserving every historical row and identity, exact
+512 acceptance, rejection at 513, fixture/interface completeness and raw
+paragraph-format inspection fields. Synthetic test rows establish parser
+integrity only. The main-checkout rerun also passed the same 39-test suite. Native Windows
+execution of the new matrix is pending. No
+production paragraph policy changes in this tranche.
+
+The [workflow](../../../.github/workflows/rich-text.yml) preserves architecture
+and process provenance as follows:
+
+| Collection | Command suffix and artifact | Evidence policy |
+|---|---|---|
+| Windows x64 | `rich_text_tom_oracle -- --nocapture --test-threads=1`; `rich-text-system-msftedit` | Canonical serial log plus measured checkout and exact probe blob, uploaded before the full Controls step. |
+| Windows ARM64 serial | Same filter with `--test-threads=1`; `system-msftedit.log` in `rich-text-system-msftedit-arm64` | Canonical extractor input. The job verifies both runner architecture ARM64 and toolchain host `aarch64-pc-windows-msvc`; the pipeline exit code is retained. |
+| Windows ARM64 concurrent | A fresh test process with `--test-threads=4`; `concurrent-diagnostic.log` in the ARM64 artifact | Diagnostic only. Interleaved output is not canonical serial extractor input. `continue-on-error` does not make a failed diagnostic a passing native result; its exit code is saved separately. |
+
+The ARM64 artifact also retains runner/image identity, target, toolchain details,
+workflow/job/run attempt, both exact commands, measured source commit and probe
+blob. Before publishing a new immutable JSON, verify the archive SHA-256 and
+record the artifact ID, architecture, serial command and exit status, measured
+checkout, exact probe blob and workflow head separately. Keep concurrent output
+as a separate diagnostic attachment. Never append it to a serial log or replace
+the earlier 250-command record. ARM64 fixtures retain exact setup assertions and
+use fresh controls for independent cases; raw
+`MSFTEDIT_VERTICAL_SETUP_DIAGNOSTIC` rows remain outside the strict
+`SYSTEM_MSFTEDIT_` observation schema.
+
+## Stage A: passive range endpoint follow-up probe
+
+The [system MSFTEDIT oracle](../../../src/Windows/FerroUI.Win32/rich_text_tom_oracle_tests.rs)
+adds a separate `range_tracking` family with **90 commands in 15 fresh-control
+fixtures**. Every fixture starts with `abcdef`, an independent primary range and
+one duplicate. Its six target calls are Primary SetRange, Primary SetGravity,
+Primary Duplicate, External SetText, Primary GetGravity and Duplicate GetGravity.
+Twelve relationships request UIBehavior (0); right overlap, exact-span replacement
+and an interior caret repeat with Forward (2).
+
+The relationships cover right overlap, exact replacement, shared start/end,
+interior/start/end carets, covering replacements that share an endpoint,
+identical replacement text and replacements that retain a prefix or suffix.
+The last three distinguish the original edit span from a minimal difference
+between visible strings. The source does not predict the resulting endpoints,
+accepted mode, story or command success. New Windows measurements are pending.
+
+The entire earlier oracle remains a byte-identical prefix of this extension.
+Its **490-command / 34-fixture actual-selection**, **1,577-command / 199-fixture
+independent Gravity** and **137-command / 59-fixture Link** source matrices,
+completion assertions, ARM64 fresh-control diagnostics and existing ABI
+declarations are unchanged. Source coverage is distinct from measured evidence:
+the immutable [actual-selection record](native-msftedit-selection-gravity.json)
+still contains 250 commands in 18 fixtures, while the immutable
+[Link/Gravity record](native-msftedit-links-gravity.json) retains its original
+137 Link and 1,577 independent Gravity observations and provenance.
+
+The additive raw prefixes are `SYSTEM_MSFTEDIT_RANGE_TRACKING_FIXTURE`,
+`SYSTEM_MSFTEDIT_RANGE_TRACKING` and
+`SYSTEM_MSFTEDIT_RANGE_TRACKING_PROBE_COMPLETE`. Schema version 1 gains only the
+optional `range_tracking` array and its two count keys. Historical records that
+lack this family omit the keys and round-trip unchanged. A fixture declares
+exactly six calls; a completed family is nonempty, contains at most 90 calls and
+matches its exact declared command/fixture totals. Identity, action order,
+duplicate lifetime, signed native widths, UTF-16 counts, acted/tracked range
+consistency and adjacent before/after continuity are checked. The existing
+selection-family maximum of 512 and its separate per-fixture limit of 250 remain
+unchanged.
+
+Each command preserves its raw HRESULT, output and full before/after state.
+Failures are observations, not normalized successes. Essential supporting
+interface, duplicate or text-read failures retain the existing abort behavior;
+they leave an incomplete log that the strict extractor rejects. All added
+SetText inputs are non-null. No new nullable-BSTR transport experiment or COM ABI
+is introduced.
+
+Both the isolated preparation and the completed real-checkout gate passed
+**50 extractor tests, zero failures**. The 11 additions check the exact 90-call
+protocol, historical compatibility, failed edit/getter outputs, malformed and
+missing records, duplicate lifetime, integer/UTF-16 bounds, continuity and
+overbudget rejection. Synthetic readbacks deliberately differ from requested
+modes so the parser cannot encode an expected native result. This establishes
+extractor integrity; it is not native execution or a framework runtime pass.
+
+The prepared oracle blob is `64262e70bb48d4241fbe4626d27df85c388284ba`, from patch
+SHA-256 `2fc8c2e0d1cd99dbf12b6227086fe76d74516656cea42c3ec9233828b3602b51`.
+The existing serial workflow filter includes the new nonignored
+`rich_text_tom_oracle_system_msftedit_range_tracking_characterization` test.
+Publish a new immutable observation file only after verifying the serial
+artifact, its measured checkout and probe blob, separately recorded workflow
+head, run/job/artifact IDs, archive SHA-256, architecture, engine identity,
+command and exit status. The ARM64 four-thread log remains a separate raw
+diagnostic, never canonical serial extractor input.
+
+This family reuses `GravitySnapshot`, including GetFont and GetPara reads around
+each action. Those reads can initialize native formatting caches. The retained
+format values do not establish untouched-cache behavior, duplicate cached
+formatting or same-mode cache invalidation. That Stage B experiment requires
+separately controlled read timing and is not implemented here. No production
+endpoint, paragraph-replacement or formatting-cache policy changes in this
+probe tranche; external WinUI engine equivalence remains unestablished.

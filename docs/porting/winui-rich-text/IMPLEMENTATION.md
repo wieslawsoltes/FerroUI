@@ -348,8 +348,33 @@ accepted mode. Reentrant reads and asynchronous clipboard work use range/model
 generations, and grouped edits restore the independent editor typing snapshot
 exactly. [RANGE-GRAVITY.md](RANGE-GRAVITY.md) records the measured mode readback,
 paragraph and terminal boundaries, transaction policy and native fixture scope.
-The range's physical endpoint tracking and the live selection's Gravity are
-separate contracts, not inferred from formatting affinity.
+The range's physical endpoint tracking remains a separate contract. Live selection
+Gravity has its own measured consumer; see [RANGE-GRAVITY.md](RANGE-GRAVITY.md).
+
+### Live selection formatting gravity
+
+`RichEditTextSelection` shares `RangeGravity` with its editor. Collapsed format
+queries, TypeText and live-caret IME insertion consume the same transient affinity
+resolver, with explicit typing patches applied last. The resolved source is not
+stored back into the typing patch. Unknown numeric values fail without mutation;
+accepted same-value setters still record newer intent for callback ownership.
+Successful history operations retain the current mode, while failed groups restore
+the starting editor mode as an explicit FerroUI transaction policy. The separate
+250-command actual-selection record supplies mode/navigation/typing observations.
+Synthetic EOP, native cached duplicate formatting, automatic AT_END_OF_LINE and
+the native trailing-paragraph merge difference remain partial under RT-I35.
+
+### Projected Link fields
+
+`RichEditTextDocument::field_story()` exposes explicit instruction-inclusive
+`FieldStoryOffset` coordinates and independently movable projected ranges.
+`RichEditTextFieldRange::{get_link,set_link}` use the measured 137-command Link
+transition engine over the common `DocumentSnapshot::link_fields` table. Existing
+visible text offsets retain their meaning. A single field ID can span paragraph
+separators and multiple paragraph-owned Hyperlink projections. Slice/history,
+copy remapping, rich transforms, RTF and clipboard all consume that shared table.
+See [LINK-FIELDS.md](LINK-FIELDS.md) for exact APIs, callback fences and RT-I34
+unsupported boundaries.
 
 ### Selection Home and End
 
@@ -453,7 +478,9 @@ selection gate passed all 70 tests, including these mixed-mode, geometry-cost
 and callback-ownership regressions.
 Fresh final-empty-line Up1 and Down(-1) both reach 4, resolving the previous
 reused-state difference. Synthetic terminal EOP and the remaining
-Gravity/Options/Type contracts remain explicit under RT-I23.
+Automatic line-affinity/activity and shape classification remain explicit under
+RT-I23/RT-I26. Measured range/live-selection formatting Gravity is covered by
+RT-I32/RT-I35.
 
 Validation also exposed an existing shared formatter prerequisite: structural
 EOL/EOP markers were entering RTL directional glyph groups, causing every caret
@@ -487,7 +514,8 @@ The completed [300-command horizontal record](native-msftedit-navigation-options
 contains ASCII, combining/ZWJ, word punctuation, mixed Hebrew/LTR and empty-story
 fixtures. Its default and RTL-reading windows use the same logical source
 offsets for the recorded left/right commands. That is the current Rust policy;
-visual bidi left/right and arbitrary Gravity behavior remain separate contracts.
+visual bidi left/right, automatic AT_END_OF_LINE and native cached caret behavior
+remain separate contracts; formatting Gravity uses RT-I32/RT-I35.
 For example, in `A😀é👩‍👩‍👦B`, Character Right moves UTF-16 offsets 1→3,
 3→5 and 5→13. Literal Rust regressions replay 294 recorded rows, including 78
 additional aligned-word and grapheme-interior cases. Six synthetic terminal-EOP
@@ -660,23 +688,34 @@ not editable named-style identity, next-style policies or linked style updates.
 Export writes canonical direct formatting rather than reconstructing the original
 style sheet. These limitations are recorded as RT-I19.
 
-A hyperlink field result may span multiple paragraphs. FerroUI's document tree
-gives each nonempty result segment its own paragraph-owned `Hyperlink`, retaining
-the URI, target, inline formatting, paragraph metrics and surrounding text. Empty
-paragraphs create no invisible hyperlink or automation focus target. Paragraph
-separators count toward the text limit. The cumulative URI/target strings
-materialized across all segments are separately bounded by `max_bytes` before
-cloning, including across multiple fields. Stream imports parse and validate the
-complete result before touching the live model or canceling composition. The
-separate link identities are an explicit model translation of the original field.
+A hyperlink field result may span multiple paragraphs. One canonical
+`DocumentLinkField` retains its visible UTF-16 span, stable ID, target, TargetName
+and sentinel state. Nonempty paragraph-owned Hyperlink projections share that ID;
+empty paragraphs create no invisible hyperlink or automation focus target.
+Separator-only field intersections remain represented in the common table. The
+canonical writer emits one field group across paragraphs and preserves distinct
+adjacent equal-target fields. External RTF assigns fresh local IDs on import;
+exact in-process snapshots and history retain their numeric identity.
+
+Paragraph separators and structured LineBreak sequences count their actual UTF-16
+length toward the text limit. Literal Run/instruction CR, LF and U+2028 use signed
+Unicode escapes, and quoted UNC/switch-like targets remain literal data. Cumulative
+target/TargetName expansion is separately bounded by `max_bytes` before cloning.
+Imports parse and validate before touching the model or cancelling composition.
+Sentinel RTF encoding, nested/empty fields and other unsupported content fail
+explicitly; [LINK-FIELDS.md](LINK-FIELDS.md) records RT-I34 boundaries.
 
 [RichTextTransfer](../../../src/FerroUI.Controls/rich_text/rich_text_transfer.rs)
 offers an exact in-process snapshot and, when encodable, platform RTF formats
 alongside plain text. Embedded controls retain identity in in-process transfer;
 plain text remains available to external applications when the rich snapshot has
 no supported RTF representation. Import prioritizes the in-process snapshot,
-then advertised RTF, then plain text. Malformed/unsupported advertised RTF returns
-an error rather than silently flattening it.
+then advertised RTF, then plain text. Malformed advertised exact snapshots and
+malformed/unsupported advertised RTF return errors before fallback or model
+mutation. Copy/slicing retains field grouping; paste remaps each copied field ID
+once. Policy filtering rebases spans through actual scalar-safe Unicode expansion
+and newline/tab/paragraph changes, retires empty fields and validates the result.
+A post-filter model/editor/selection fence preserves newer callback-owned state.
 
 Clipboard actions are asynchronous through the existing framework transfer
 contracts. Copy captures the fragment before awaiting the platform. Paste checks
