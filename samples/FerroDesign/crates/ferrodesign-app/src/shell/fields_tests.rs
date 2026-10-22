@@ -143,7 +143,7 @@ fn native_rejected_radius_enter_keeps_focus_and_escape_restores_without_canvas_s
         assert_eq!(fixture.shell.editor.borrow().history_len(), 0);
         fixture.key(&field, Key::Escape);
         assert!(field.is_focused());
-        assert_eq!(field.text().as_deref(), Some("12.5"));
+        assert_eq!(field.text().as_deref(), Some("12.50"));
         assert_eq!(fixture.shell.editor.borrow().selection, vec![fixture.id]);
         assert_eq!(fixture.json(), before);
         assert_eq!(fixture.shell.editor.borrow().history_len(), 0);
@@ -227,7 +227,8 @@ fn native_explicit_equal_radius_enter_detaches_binding_once_while_blur_and_flush
     assert!(field.focus());
     // Same bytes as the displayed confirmed value: only explicit submission
     // can express the direct literal override here.
-    field.set_text(Some("12.5"));
+    assert_eq!(field.text().as_deref(), Some("12.50"));
+    field.set_text(Some("12.50"));
     fixture.key(&field, Key::Enter);
     assert!(fixture.shell.canvas.is_focused());
     assert!(!fixture.shell.editor.borrow().document.nodes[&fixture.id]

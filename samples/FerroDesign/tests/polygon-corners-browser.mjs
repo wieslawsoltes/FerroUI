@@ -82,7 +82,7 @@ export async function polygonCornerRegressions(page, reference, check, helpers, 
         assert.equal((await state(page)).historyLength, depth + 1);
         assert.equal((await state(page)).chrome.RadiusField.text, invalid);
         await page.keyboard.press("Escape"); await frames(page);
-        assert.equal((await state(page)).chrome.RadiusField.text, "18.5");
+        assert.equal((await state(page)).chrome.RadiusField.text, "18.50");
     }
     await captureNativeScreenshot(mode + "-polygon-corner-radius", { controls: ["RadiusField", "CanvasHost"] });
     await history(before, rounded, depth, 130, 120, "Polygon radius");
@@ -165,13 +165,15 @@ export async function polygonCornerRegressions(page, reference, check, helpers, 
         values: { Default: { type: "number", value: 12.5 } } } };
     await importFixture(page, bound); await select(2, 130, 120);
     const boundBefore = await documentState(page), boundDepth = (await state(page)).historyLength;
-    await editRadius("12.5");
+    assert.equal((await state(page)).chrome.RadiusField.text, "12.50");
+    await editRadius("12.50");
     await waitDocument(document => !("corner_radius" in document.nodes[2].variable_bindings));
     const detached = await documentState(page);
     assert.equal(detached.nodes[2].corner_radius, 12.5);
     assert.deepEqual(placement(detached.nodes[2]), placement(boundBefore.nodes[2]));
     await history(boundBefore, detached, boundDepth, 130, 120, "Equal-value radius override");
-    await editRadius("12.5");
+    assert.equal((await state(page)).chrome.RadiusField.text, "12.50");
+    await editRadius("12.50");
     assert.deepEqual(await documentState(page), detached);
     assert.equal((await state(page)).historyLength, boundDepth + 1, "An unbound equal literal is a true no-op");
     assert.equal((await state(page)).invalidNodes, 0);
