@@ -278,6 +278,36 @@ impl VisualImpl for TextBox {
 }
 
 impl LayoutableImpl for TextBox {
+    fn apply_template(this: &Self) {
+        // The base class does not raise on_apply_template when a null template
+        // removes the old subtree. Stop listening before that subtree detaches.
+        // While logically detached it deliberately retains the old template;
+        // preserve that behavior until a real removal can take place.
+        let removing = this.template().is_none() && this.is_attached_to_logical_tree();
+        if removing {
+            this.subscribe_presenter_property_changes(None);
+        }
+        Self::parent_apply_template(this);
+        if removing && this.template().is_none() && this.visual_children_count() == 0 {
+            let previous = this.presenter.borrow_mut().take();
+            this.scroll_viewer.borrow_mut().take();
+            if previous.is_some() {
+                // Keep the old presenter alive until the client has restored
+                // its confirmed text/selection and cleared provisional state.
+                // Drop the cached references before synchronous notifications,
+                // so callbacks may safely install a different template.
+                this.im_client.set_presenter(None, None);
+                if this.is_attached_to_visual_tree() {
+                    if let Some(current) = this.presenter() {
+                        // A restoration callback installed a new template.
+                        // The outer detach must not leave its client cleared.
+                        this.im_client.set_presenter(Some(&current), Some(&this.to_ref()));
+                    }
+                }
+            }
+        }
+    }
+
     fn measure_override(this: &Self, available_size: Size) -> Size {
         if let Some(scroll_viewer) = this.scroll_viewer() {
             let mut max_height = f64::INFINITY;

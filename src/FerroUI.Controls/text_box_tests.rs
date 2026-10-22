@@ -2949,6 +2949,128 @@ fn paragraph_preedit_subscription_tracks_late_template_replacement_and_detach() 
 }
 
 #[test]
+fn paragraph_preedit_template_removal_restores_confirmation_without_discarding_redo() {
+    use ferroui_base::media::text_formatting::{GenericTextRunProperties, TextParagraphStyle, TextParagraphStyles, TextRunProperties};
+    use ferroui_base::media::Typeface;
+    use ferroui_base::utilities::ValueSpan;
+    let _scope = test_scope();
+    let original = "A🦀\nB";
+    let target = templated_text_box(Some(original));
+    target.set_accepts_return(true);
+    let paragraphs: TextParagraphStyles = Rc::from([
+        ValueSpan::new(0, 4, TextParagraphStyle { indent: 10.0, ..Default::default() }),
+        ValueSpan::new(4, 1, TextParagraphStyle { indent: 20.0, ..Default::default() }),
+    ]);
+    let properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_font_size(Typeface::default(), 24.0));
+    let characters: crate::presenters::TextStyleOverrides = Rc::from([ValueSpan::new(0, 4, properties)]);
+    target.set_text_paragraph_styles(Some(paragraphs.clone()));
+    target.set_text_style_overrides(Some(characters.clone()));
+    let root = host_in_root(&target);
+    let previous = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    let client = get_input_method_client(&target);
+
+    target.set_caret_index(5);
+    target.set_selected_text(Some("!"));
+    assert_eq!(target.text().as_deref(), Some("A🦀\nB!"));
+    target.undo();
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert!(!target.can_undo() && target.can_redo());
+    target.set_selection_start(0);
+    target.set_selection_end(4);
+    client.set_preedit_text(Some("pending"));
+    assert_eq!(target.text().as_deref(), Some("B"));
+    assert!(target.is_composing_text());
+
+    target.set_template(None);
+    target.apply_template();
+    assert_eq!(target.visual_children_count(), 0);
+    assert!(target.find_descendant_of_type::<TextPresenter>(false).is_none());
+    assert!(client.text_view_visual().is_none());
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &paragraphs));
+    assert!(Rc::ptr_eq(target.text_style_overrides().as_ref().unwrap(), &characters));
+    assert!(!target.is_composing_text());
+    assert!(!target.can_undo() && target.can_redo());
+    previous.set_preedit_text(Some("obsolete template"));
+    client.set_preedit_text(Some("late client update"));
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+    assert!(!target.is_composing_text());
+    assert!(!target.can_undo() && target.can_redo());
+    target.redo();
+    assert_eq!(target.text().as_deref(), Some("A🦀\nB!"));
+    target.undo();
+    assert_eq!(target.text().as_deref(), Some(original));
+
+    target.set_template(create_themed_template());
+    root.execute_initial_layout_pass();
+    let current = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    assert!(current != previous);
+    assert!(Rc::ptr_eq(current.text_paragraph_styles().as_ref().unwrap(), &paragraphs));
+    assert!(Rc::ptr_eq(current.text_style_overrides().as_ref().unwrap(), &characters));
+    target.set_selection_start(0);
+    target.set_selection_end(4);
+    client.set_preedit_text(Some("new template"));
+    assert_eq!(target.text().as_deref(), Some("B"));
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &paragraphs));
+    assert!(Rc::ptr_eq(target.text_style_overrides().as_ref().unwrap(), &characters));
+    assert!(!target.is_composing_text());
+    assert!(!target.can_undo() && target.can_redo());
+}
+
+#[test]
+fn paragraph_preedit_template_removal_respects_reentrant_template_installation() {
+    use ferroui_base::media::text_formatting::{TextParagraphStyle, TextParagraphStyles};
+    use ferroui_base::utilities::ValueSpan;
+    let _scope = test_scope();
+    let target = templated_text_box(Some("old"));
+    let paragraphs: TextParagraphStyles = Rc::from([
+        ValueSpan::new(0, 3, TextParagraphStyle { indent: 9.0, ..Default::default() }),
+    ]);
+    target.set_text_paragraph_styles(Some(paragraphs.clone()));
+    let root = host_in_root(&target);
+    let previous = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    let client = get_input_method_client(&target);
+    target.select_all();
+    client.set_preedit_text(Some("pending"));
+    assert_eq!(target.text().as_deref(), Some(""));
+
+    let installed = Rc::new(Cell::new(false));
+    let observed = installed.clone();
+    let weak = target.downgrade();
+    target.text_changing(move |_, _| {
+        let target = weak.upgrade().unwrap();
+        if target.template().is_none() && target.text().as_deref() == Some("old")
+            && !observed.replace(true) {
+            target.set_template(create_themed_template());
+            target.apply_template();
+        }
+    });
+    target.set_template(None);
+    target.apply_template();
+    root.execute_initial_layout_pass();
+    assert!(installed.get());
+    let current = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    assert!(current != previous);
+    assert!(client.text_view_visual().is_some());
+    assert_eq!(target.text().as_deref(), Some("old"));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 3));
+    assert!(Rc::ptr_eq(current.text_paragraph_styles().as_ref().unwrap(), &paragraphs));
+    client.set_preedit_text(Some("new presenter"));
+    assert_eq!(target.text().as_deref(), Some(""), "The outer removal must not disconnect the template installed by TextChanging");
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some("old"));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 3));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &paragraphs));
+    assert!(!target.is_composing_text());
+    assert!(!target.can_undo() && !target.can_redo());
+}
+
+#[test]
 fn paragraph_ime_cancellation_does_not_enter_native_history_or_discard_redo() {
     use ferroui_base::media::text_formatting::{TextParagraphStyle, TextParagraphStyles};
     use ferroui_base::utilities::ValueSpan;
