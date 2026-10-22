@@ -17,6 +17,32 @@ fn validate_child_settings(settings: LayoutChild) -> Result<(), DocumentError> {
 }
 
 impl Editor {
+    /// Set all four padding sides atomically, then arrange the complete layout
+    /// tree. An equal value is a true no-op, including on an unsettled import:
+    /// it neither creates an instance override nor consumes a redo entry.
+    pub fn set_layout_padding(&mut self, parent: NodeId, padding: Padding) -> Result<LayoutResult, DocumentError> {
+        if self.has_active_transaction() {
+            return Err(layout_error("Finish the current edit before changing layout padding"));
+        }
+        if ![padding.top, padding.right, padding.bottom, padding.left].iter()
+            .all(|value| value.is_finite() && *value >= 0.0)
+        {
+            return Err(layout_error("Padding must contain four finite nonnegative numbers"));
+        }
+        let node = self.document.nodes.get(&parent).ok_or(DocumentError::MissingNode(parent))?;
+        let layout = node.layout.as_ref().ok_or_else(|| layout_error("Select an auto-layout frame"))?;
+        if self.document.effective_locked(parent) {
+            return Err(layout_error("The auto-layout frame is locked"));
+        }
+        if layout.padding == padding { return Ok(LayoutResult::default()); }
+        let mut candidate = self.document.clone();
+        let node = candidate.nodes.get_mut(&parent).unwrap();
+        node.layout.as_mut().unwrap().padding = padding;
+        if node.component_source.is_some() { node.overridden_properties.insert("layout".into()); }
+        candidate.validate_layout_node_settings(parent)?;
+        self.commit_layout_candidate("Edit layout padding", candidate)
+    }
+
     fn layout_parent_for_edit(&self, child: NodeId) -> Result<NodeId, DocumentError> {
         let node = self.document.nodes.get(&child).ok_or(DocumentError::MissingNode(child))?;
         let parent = node.parent.and_then(|id| self.document.nodes.get(&id))
@@ -90,6 +116,10 @@ impl Editor {
         self.commit_layout_candidate(if after { "Move layout child after" } else { "Move layout child before" }, candidate)
     }
 }
+
+#[cfg(test)]
+#[path = "layout_padding_tests.rs"]
+mod padding_tests;
 
 #[cfg(test)]
 mod tests {

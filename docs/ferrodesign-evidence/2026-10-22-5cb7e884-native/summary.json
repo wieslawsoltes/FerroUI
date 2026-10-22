@@ -1,0 +1,105 @@
+{
+  "source_commit": "5cb7e8847746a2bfae45bf46cafed40889f1affb",
+  "run_id": 39862047515,
+  "job_id": 120114911173,
+  "conclusion": "success",
+  "terminal_observed_at_utc": "2026-10-22T22:16:04Z",
+  "checkout_log_line": 129,
+  "test_results": [
+    {
+      "gate": "vello_unhinted",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "filtered_out": 516,
+      "seconds": 0.34,
+      "log_line": 698
+    },
+    {
+      "gate": "base_paragraph",
+      "passed": 15,
+      "failed": 0,
+      "ignored": 0,
+      "filtered_out": 4376,
+      "seconds": 0.03,
+      "log_line": 1596
+    },
+    {
+      "gate": "controls_paragraph",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0,
+      "filtered_out": 4441,
+      "seconds": 0.17,
+      "log_line": 1894
+    },
+    {
+      "gate": "text_box",
+      "passed": 174,
+      "failed": 0,
+      "ignored": 0,
+      "filtered_out": 4283,
+      "seconds": 2.7,
+      "log_line": 2348
+    },
+    {
+      "gate": "rich_history",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "filtered_out": 4452,
+      "seconds": 0.07,
+      "log_line": 2633
+    },
+    {
+      "gate": "application_library",
+      "passed": 217,
+      "failed": 0,
+      "ignored": 0,
+      "filtered_out": 0,
+      "seconds": 25.49,
+      "log_line": 3296
+    }
+  ],
+  "overlapping_framework_filters_are_not_additive": true,
+  "radius_handle_cases": {
+    "passed": 8,
+    "log_lines": [
+      3078,
+      3085
+    ]
+  },
+  "independent_native_curve_coverage": {
+    "passed": true,
+    "log_line": 3148,
+    "fixture": {
+      "width": 200,
+      "height": 140,
+      "radius": 40,
+      "smoothing": 0.6
+    },
+    "reference": "Bernstein cubic sampling and per-pixel polygon-area clipping; independent of renderer flattening",
+    "samples_per_cubic": [
+      256,
+      512
+    ],
+    "maximum_convergence_alpha_delta": 0.1,
+    "comparison_alpha_difference_threshold": 12,
+    "maximum_differing_pixels": 48,
+    "native_png_alpha_roundtrip": true,
+    "fresh_retained_undo_redo_alpha_equality": true
+  },
+  "browser_result_inferred": false,
+  "later_gradient_or_padding_validated": false,
+  "full_figma_parity_established": false,
+  "files": {
+    "native-job.log": {
+      "bytes": 316085,
+      "sha256": "3bf122b695af5272af4e0325449788d46f8e58ca54f31a9332272ba53b06d0b6"
+    },
+    "jobs-api.json": {
+      "bytes": 2198,
+      "sha256": "b05854119d2e09c83e3c13068b46f9d27e1c10483ecab9c53f8d4b60281775dd"
+    }
+  }
+}
