@@ -1,9 +1,9 @@
 //! Exercise the compiled native inspector's routed Enter/Escape and real
 //! focus-loss handlers. Core setters alone cannot expose these two regressions.
 use super::*;
-use ferroui_base::FerroLocator;
 use ferroui_base::input::KeyEventArgs;
 use ferroui_base::threading::{Dispatcher, UnitTestDispatcherScope};
+use ferroui_base::FerroLocator;
 use ferroui_controls::{AppBuilder, Application, Window};
 use ferroui_fonts_inter::AppBuilderExtension;
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
@@ -21,6 +21,10 @@ struct Fixture {
 
 impl Fixture {
     fn new(bound: bool) -> Self {
+        Self::with_kind(bound, NodeKind::Polygon)
+    }
+
+    fn with_kind(bound: bool, kind: NodeKind) -> Self {
         let dispatcher = Dispatcher::unit_test_scope();
         AppBuilder::reset_setup_for_unit_tests();
         let locator = FerroLocator::enter_scope();
@@ -43,8 +47,7 @@ impl Fixture {
             .styles()
             .add(FluentTheme::new().as_style());
         let mut document = core::Document::new("Native inspector field regression");
-        let mut node =
-            Node::new(NodeKind::Polygon, "Radius", 20.0, 20.0, 120.0, 120.0).with_radius(12.5);
+        let mut node = Node::new(kind, "Radius", 20.0, 20.0, 120.0, 120.0).with_radius(12.5);
         if bound {
             document.variables.insert(
                 900,
@@ -167,6 +170,46 @@ fn native_rejected_radius_enter_keeps_focus_and_escape_restores_without_canvas_s
 }
 
 #[test]
+fn native_smoothing_rejected_enter_then_escape_restores_last_committed_percent_and_selection() {
+    // Match the browser's actual failure sequence on a supported box. Polygon
+    // radius uses the same submission handler but does not expose smoothing.
+    let fixture = Fixture::with_kind(false, NodeKind::Rectangle);
+    let field = fixture.shell.field("CornerSmoothingField");
+    assert!(field.is_effectively_visible());
+    assert!(field.is_enabled());
+    let before = fixture.json();
+    assert!(field.focus());
+    field.set_text(Some("60"));
+    fixture.key(&field, Key::Enter);
+    assert!(fixture.shell.canvas.is_focused());
+    assert_eq!(
+        fixture.shell.editor.borrow().document.nodes[&fixture.id].corner_smoothing,
+        0.6
+    );
+    assert_eq!(fixture.shell.editor.borrow().history_len(), 1);
+    let after = fixture.json();
+
+    assert!(field.focus());
+    field.set_text(Some("101"));
+    fixture.key(&field, Key::Enter);
+    assert!(field.is_focused());
+    assert_eq!(field.text().as_deref(), Some("101"));
+    assert_eq!(fixture.json(), after);
+    assert_eq!(fixture.shell.editor.borrow().history_len(), 1);
+
+    fixture.key(&field, Key::Escape);
+    assert!(field.is_focused());
+    assert_eq!(field.text().as_deref(), Some("60"));
+    assert_eq!(fixture.shell.editor.borrow().selection, vec![fixture.id]);
+    assert_eq!(fixture.json(), after);
+    assert_eq!(fixture.shell.editor.borrow().history_len(), 1);
+    assert!(fixture.shell.editor.borrow_mut().undo());
+    assert_eq!(fixture.json(), before);
+    assert!(fixture.shell.editor.borrow_mut().redo());
+    assert_eq!(fixture.json(), after);
+}
+
+#[test]
 fn native_explicit_equal_radius_enter_detaches_binding_once_while_blur_and_flush_remain_passive() {
     let fixture = Fixture::new(true);
     let field = fixture.shell.field("RadiusField");
@@ -187,11 +230,9 @@ fn native_explicit_equal_radius_enter_detaches_binding_once_while_blur_and_flush
     field.set_text(Some("12.5"));
     fixture.key(&field, Key::Enter);
     assert!(fixture.shell.canvas.is_focused());
-    assert!(
-        !fixture.shell.editor.borrow().document.nodes[&fixture.id]
-            .variable_bindings
-            .contains_key("corner_radius")
-    );
+    assert!(!fixture.shell.editor.borrow().document.nodes[&fixture.id]
+        .variable_bindings
+        .contains_key("corner_radius"));
     assert_eq!(
         fixture.shell.editor.borrow().document.nodes[&fixture.id].corner_radius,
         12.5

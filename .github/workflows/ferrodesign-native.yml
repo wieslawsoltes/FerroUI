@@ -66,10 +66,14 @@ jobs:
         run: cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-vello --lib unhinted_ --jobs 1 -- --test-threads=1
       - name: Validate shared paragraph layout and native editing
         run: |
-          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-base --lib paragraph --jobs 1 -- --test-threads=1
-          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-controls --lib paragraph --jobs 1 -- --test-threads=1
-          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-controls --lib text_box_tests:: --jobs 1 -- --test-threads=1
-          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-controls --lib text_box_history:: --jobs 1 -- --test-threads=1
+          # Exercise every independent editing suite even if an earlier one
+          # fails. Preserve a failing step/job after collecting all results.
+          failed=0
+          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-base --lib paragraph --jobs 1 -- --test-threads=1 || failed=1
+          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-controls --lib paragraph --jobs 1 -- --test-threads=1 || failed=1
+          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-controls --lib text_box_tests:: --jobs 1 -- --test-threads=1 || failed=1
+          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-controls --lib text_box_history:: --jobs 1 -- --test-threads=1 || failed=1
+          exit "$failed"
       - name: Validate native editor and public renderer pixels
         # Keep independent application compiler/pixel feedback available if a
         # preceding framework test fails. Its failure still fails this job.

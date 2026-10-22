@@ -261,20 +261,8 @@ impl VisualImpl for TextBox {
             } else if this.is_inactive_selection_highlight_enabled() {
                 presenter.set_show_selection_highlight(true);
             }
-
-            let weak = this.to_ref().downgrade();
-            let subscription = presenter.property_changed(move |e| {
-                if let Some(this) = weak.upgrade() {
-                    this.presenter_property_changed(e);
-                }
-            });
-
-            let previous = this.presenter_property_changed.borrow_mut().replace(subscription);
-
-            if let Some(previous) = previous {
-                previous.dispose();
-            }
         }
+        this.subscribe_presenter_property_changes(this.presenter().as_ref());
     }
 
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
@@ -282,13 +270,8 @@ impl VisualImpl for TextBox {
 
         if let Some(presenter) = this.presenter() {
             presenter.hide_caret();
-
-            let subscription = this.presenter_property_changed.borrow_mut().take();
-
-            if let Some(subscription) = subscription {
-                subscription.dispose();
-            }
         }
+        this.subscribe_presenter_property_changes(None);
 
         this.im_client.set_presenter(None, None);
     }
@@ -1045,6 +1028,12 @@ impl TemplatedControlImpl for TextBox {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         let presenter = e.name_scope().get_as::<TextPresenter>("PART_TextPresenter");
         *this.presenter.borrow_mut() = Some(presenter.clone());
+        // Templates are normally applied during layout, after the TextBox
+        // itself has attached. Also replace the subscription when a live
+        // control changes template, so an obsolete presenter cannot edit it.
+        this.subscribe_presenter_property_changes(
+            this.is_attached_to_visual_tree().then_some(&presenter),
+        );
 
         let scroll_viewer = e.name_scope().find_as::<ScrollViewer>("PART_ScrollViewer");
         *this.scroll_viewer.borrow_mut() = scroll_viewer;
@@ -2127,6 +2116,22 @@ impl TextBox {
 
             (height / 2.0) as i32 + 5
         })
+    }
+
+    fn subscribe_presenter_property_changes(&self, presenter: Option<&Ref<TextPresenter>>) {
+        let previous = self.presenter_property_changed.borrow_mut().take();
+        if let Some(previous) = previous {
+            previous.dispose();
+        }
+        if let Some(presenter) = presenter {
+            let weak = self.to_ref().downgrade();
+            let subscription = presenter.property_changed(move |e| {
+                if let Some(this) = weak.upgrade() {
+                    this.presenter_property_changed(e);
+                }
+            });
+            *self.presenter_property_changed.borrow_mut() = Some(subscription);
+        }
     }
 
     fn presenter_property_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {

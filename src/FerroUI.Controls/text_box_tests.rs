@@ -2868,6 +2868,87 @@ fn paragraph_ime_restore_respects_a_synchronous_application_replacement() {
 }
 
 #[test]
+fn paragraph_preedit_subscription_tracks_late_template_replacement_and_detach() {
+    use ferroui_base::media::text_formatting::{TextParagraphStyle, TextParagraphStyles};
+    use ferroui_base::utilities::ValueSpan;
+    let _scope = test_scope();
+    let _focus = focus_scope();
+    let original = "A🦀\nB";
+    let target = templated_text_box(Some(original));
+    target.set_accepts_return(true);
+    let styles: TextParagraphStyles = Rc::from([
+        ValueSpan::new(0, 4, TextParagraphStyle { indent: 10.0, ..Default::default() }),
+        ValueSpan::new(4, 1, TextParagraphStyle { indent: 20.0, ..Default::default() }),
+    ]);
+    target.set_text_paragraph_styles(Some(styles.clone()));
+    assert!(target.find_descendant_of_type::<TextPresenter>(false).is_none());
+    // Do not pre-apply the template: first layout after attachment is the
+    // ordinary production path that must install the preedit observer too.
+    let root = host_in_root(&target);
+    let previous = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    assert!(Rc::ptr_eq(previous.text_paragraph_styles().as_ref().unwrap(), &styles));
+    let client = get_input_method_client(&target);
+    target.set_selection_start(0);
+    target.set_selection_end(4);
+    client.set_preedit_text(Some("first"));
+    assert_eq!(target.text().as_deref(), Some("B"));
+    assert!(target.is_composing_text());
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+    assert!(!target.can_undo() && !target.can_redo());
+
+    target.set_template(create_themed_template());
+    target.apply_template();
+    root.execute_initial_layout_pass();
+    let current = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    assert!(current != previous);
+    assert!(Rc::ptr_eq(current.text_paragraph_styles().as_ref().unwrap(), &styles));
+    previous.set_preedit_text(Some("obsolete presenter"));
+    assert_eq!(target.text().as_deref(), Some(original), "The replaced presenter must no longer delete the current selection");
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+    client.set_preedit_text(Some("second"));
+    assert_eq!(target.text().as_deref(), Some("B"), "The replacement presenter must own preedit selection deletion");
+    assert!(target.is_composing_text());
+
+    root.set_child(Button::new());
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+    assert!(!target.is_composing_text());
+    current.set_preedit_text(Some("detached presenter"));
+    client.set_preedit_text(Some("late input method update"));
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &styles));
+    assert!(!target.is_composing_text());
+    assert!(!target.can_undo() && !target.can_redo());
+
+    // Clear only the detached presenter's direct-notification probe above.
+    // The old input client update itself was ignored. Reattachment must use
+    // the same cached presenter; actual focus reconnects its native client.
+    current.set_preedit_text(None);
+    root.set_child(target.clone());
+    root.execute_initial_layout_pass();
+    assert!(target.find_descendant_of_type::<TextPresenter>(false).unwrap() == current);
+    assert!(target.focus());
+    assert!(target.is_focused());
+    let reattached_client = get_input_method_client(&target);
+    assert!(Rc::ptr_eq(&reattached_client, &client));
+    target.set_selection_start(0);
+    target.set_selection_end(4);
+    reattached_client.set_preedit_text(Some("reattached composition"));
+    assert_eq!(target.text().as_deref(), Some("B"));
+    assert!(target.is_composing_text());
+    reattached_client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &styles));
+    assert!(Rc::ptr_eq(current.text_paragraph_styles().as_ref().unwrap(), &styles));
+    assert!(!target.is_composing_text());
+    assert!(!target.can_undo() && !target.can_redo());
+}
+
+#[test]
 fn paragraph_ime_cancellation_does_not_enter_native_history_or_discard_redo() {
     use ferroui_base::media::text_formatting::{TextParagraphStyle, TextParagraphStyles};
     use ferroui_base::utilities::ValueSpan;
