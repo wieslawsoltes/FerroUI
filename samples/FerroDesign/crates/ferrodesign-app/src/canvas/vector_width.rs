@@ -1,7 +1,7 @@
 //! Native contour width-point handles. Hover is immutable; pointer edits own
 //! an explicit scoped transaction and cannot cancel another editor's draft.
 use super::*;
-use core::{StrokeWidthContour, StrokeWidthPoint, StrokeWidthProfile};
+use ferrodesign_core::{StrokeWidthContour, StrokeWidthPoint, StrokeWidthProfile};
 
 const STROKE_INDEX: usize = 0;
 const MAX_EDIT_CONTOURS: usize = 64;
