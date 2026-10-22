@@ -9,6 +9,7 @@ pub use ferroui_edit_core::document::{TextDocument, TextLocation};
 pub use ferroui_textmate as textmate;
 
 pub mod automation;
+mod clipboard_event_args;
 mod collapse_if_single_overload_converter;
 mod commands;
 mod completion_data;
@@ -17,6 +18,8 @@ mod completion_list_box;
 mod completion_tip_content_control;
 mod completion_window;
 mod completion_window_base;
+mod editor_clipboard;
+mod highlighting_brush;
 mod insight_window;
 mod overload_insight_window;
 mod overload_provider;
@@ -24,6 +27,7 @@ mod overload_viewer;
 mod popup_with_custom_position;
 mod register_types;
 mod rendering;
+mod rich_text_adapter;
 mod rust_paths;
 mod search_panel;
 mod snippet_controller;
@@ -32,6 +36,10 @@ mod text_editor;
 mod text_input_method_client;
 mod textmate_installation;
 
+pub use clipboard_event_args::{
+    ClipboardSelectionKind, CopyingToClipboardEventArgs, PastingFromClipboardEventArgs,
+    TextCopiedEventArgs, TextPastedEventArgs,
+};
 pub use collapse_if_single_overload_converter::CollapseIfSingleOverloadConverter;
 pub use commands::{EditorCommand, EditorCommandKind};
 pub use completion_data::{CompletionAction, CompletionData, CompletionDataRef, ICompletionData};
@@ -44,6 +52,14 @@ pub use completion_window::CompletionWindow;
 pub use completion_window_base::{
     CompletionWindowBase, CompletionWindowBaseImpl, CompletionWindowBaseImplExt,
 };
+pub use editor_clipboard::{
+    ClipboardCopyOutcome, ClipboardPasteOutcome, ClipboardText, EditorClipboard,
+    EditorClipboardData, EditorClipboardError,
+};
+pub use highlighting_brush::{
+    HighlightingBrush, HighlightingBrushError, ResourceHighlightingBrush, SimpleHighlightingBrush,
+    resolve_highlighting_brush,
+};
 pub use insight_window::InsightWindow;
 pub use overload_insight_window::OverloadInsightWindow;
 pub use overload_provider::{
@@ -52,6 +68,7 @@ pub use overload_provider::{
 pub use overload_viewer::OverloadViewer;
 pub use popup_with_custom_position::PopupWithCustomPosition;
 pub use register_types::{ASSEMBLY, register_types};
+pub use rich_text_adapter::{NativeHighlightingStyle, RichTextDisplayError, RichTextDisplayExt};
 pub use search_panel::SearchPanel;
 pub use snippet_controller::SnippetController;
 pub use text_area::TextArea;

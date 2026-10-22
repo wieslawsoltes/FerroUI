@@ -683,13 +683,26 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Document/DataObjectCopyingEventArgs.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Document.DataObjectCopyingEventArgs"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/clipboard_event_args.rs",
+          "symbols": [
+            "CopyingToClipboardEventArgs"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Document.DataObjectCopyingEventArgs",
+              "rust": "CopyingToClipboardEventArgs"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Shared mutable routed event arguments expose native transfer customization and cancellation before copy/cut publication.",
+      "limitations": [
+        "Copy/cut intent replaces the source IsDragDrop flag; drag/drop copying is not implemented. Events also expose formatting errors and replaceable transfer values."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Document/DocumentChangeEventArgs.cs",
@@ -1083,7 +1096,7 @@
       "unmapped_types": [],
       "notes": "CR/LF/CRLF detection and newline normalization/inference.",
       "limitations": [
-        "No environment-dependent newline fallback; uses LF."
+        "Delimiter-free documents use the target platform default: CRLF on Windows, LF elsewhere. Managed environment/IO wrappers are not reproduced."
       ]
     },
     {
@@ -1253,7 +1266,8 @@
         {
           "path": "src/FerroUI.Edit.Core/document/text_document.rs",
           "symbols": [
-            "TextDocument"
+            "TextDocument",
+            "TextDocument::apply_edits_with_mapping"
           ],
           "aliases": [
             {
@@ -1264,7 +1278,7 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Shared UI-thread document with UTF-16 edits, grouped notifications, anchors, live line tracking, interfaces, filename metadata, snapshots, versions and undo.",
+      "notes": "Shared UI-thread document with UTF-16 edits, grouped notifications, anchors, live line tracking, interfaces, filename metadata, snapshots, versions and undo. Mapped batch edits prevalidate all original-coordinate replacements and preserve requested anchor mapping across one accepted undo group.",
       "limitations": [
         "Service container, owner-thread transfer/locking, shared undo stacks and selected managed IO overloads remain; see editor-document.md."
       ]
@@ -1576,10 +1590,22 @@
               "rust": "EditorSession::move_caret_with_virtual_space"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit/text_area.rs",
+          "symbols": [
+            "TextArea::adjacent_row_y"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Editing.CaretNavigationCommandHandler",
+              "rust": "TextArea::adjacent_row_y"
+            }
+          ]
         }
       ],
       "unmapped_types": [],
-      "notes": "Unicode grapheme/word navigation, virtual horizontal movement and persistent visual-cell columns across logical lines, including short-line clamping.",
+      "notes": "Unicode grapheme/word navigation, virtual horizontal movement and persistent visual-cell columns across logical lines, including short-line clamping. Native Up/Down measures the adjacent formatted row before choosing its center, supporting variable font sizes and wrapped rows.",
       "limitations": [
         "Core navigation addresses logical lines; native wrapped-line and bidirectional geometry require the presentation layer. Framework ICommand and routed input replace the managed command-binding hierarchy.",
         "Wrapped box-caret movement and the first-nonwhitespace smart-Home toggle remain separate parity gaps."
@@ -1669,14 +1695,29 @@
               "rust": "EditorSession::delete_with_virtual_space"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit/editor_clipboard.rs",
+          "symbols": [
+            "EditorClipboard",
+            "EditorClipboard::prepare_copy",
+            "EditorClipboard::paste_from_clipboard"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Editing.EditingCommandHandler",
+              "rust": "EditorClipboard"
+            }
+          ]
         }
       ],
       "unmapped_types": [
         "AvaloniaEdit.Editing.EditingCommandHandler.DefaultSegmentType"
       ],
-      "notes": "Core editing and native ICommand wrappers, virtual padding/deletion/tab commands, language indentation, whitespace/tab/case transformations and selected/current-line deletion.",
+      "notes": "Core editing and native ICommand wrappers, protected/versioned batch plans, virtual commands, indentation/transformation, and native rich/plain async clipboard with routed customization and safe cut completion.",
       "limitations": [
-        "Casing uses locale-independent Rust Unicode mappings; title case is not implemented in the pinned source; not every upstream input mode is reproduced."
+        "Casing uses locale-independent Rust Unicode mappings; title case is not implemented in the pinned source; not every upstream input mode is reproduced.",
+        "Clipboard text preserves the Rust editor exact-text contract rather than source platform newline/tab normalization. Whole-line paste markers are recognized, but empty-selection whole-line copying is not an option yet."
       ]
     },
     {
@@ -1816,22 +1857,41 @@
         {
           "path": "src/FerroUI.Edit/text_area.rs",
           "symbols": [
-            "TextArea::set_rectangular_selection"
+            "TextArea::set_rectangular_selection",
+            "TextArea::paste_rectangle"
           ],
           "aliases": [
             {
               "upstream": "AvaloniaEdit.Editing.RectangleSelection",
               "rust": "TextArea::set_rectangular_selection"
+            },
+            {
+              "upstream": "AvaloniaEdit.Editing.RectangleSelection",
+              "rust": "TextArea::paste_rectangle"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.Edit/editor_clipboard.rs",
+          "symbols": [
+            "EditorClipboard",
+            "EditorClipboard::prepare_copy",
+            "EditorClipboard::paste_from_clipboard"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Editing.RectangleSelection",
+              "rust": "EditorClipboard"
             }
           ]
         }
       ],
       "unmapped_types": [],
-      "notes": "Rectangle mode, line-only tab/grapheme projection with virtual endpoints, native pixel rectangle projection, per-row typing, bounded active-rectangle replacement and atomic clipboard column paste with existing-row/final-column fallback and prepared native positions.",
+      "notes": "Rectangle mode, line-only tab/grapheme projection with virtual endpoints, native pixel rectangle projection, per-row typing, bounded active-rectangle replacement and atomic clipboard column paste with existing-row/final-column fallback and prepared native positions. Native marker transport invokes shaped horizontal projection over existing visible rows, with unarranged-view cell fallback.",
       "limitations": [
         "Core cell projection is not pixel or bidirectional geometry; native layout integration is verified separately. Distinct virtual carets sharing one physical EOL are rejected atomically by the general multicaret extension.",
         "Clipboard paste recognizes standalone CR as well as CRLF/LF and selects inserted multiline ranges when requested; these correct the source LF-only count and selection-flag limitation. A protected row rejects the complete plan instead of skipping individual rows.",
-        "Native rectangular clipboard metadata and transport interoperability are tracked separately from the verified core paste APIs. Wrapped box-caret movement still advances between visible logical lines."
+        "The native marker uses a FerroUI application string rather than the source byte format; cross-application marker interoperability is not guaranteed. Wrapped box-caret movement still advances between visible logical lines."
       ]
     },
     {
@@ -1851,10 +1911,24 @@
               "rust": "Selection"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit/editor_clipboard.rs",
+          "symbols": [
+            "EditorClipboard",
+            "EditorClipboard::prepare_copy",
+            "EditorClipboard::paste_from_clipboard"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Editing.Selection",
+              "rust": "EditorClipboard"
+            }
+          ]
         }
       ],
       "unmapped_types": [],
-      "notes": "Directed UTF-16 offsets and explicit virtual-cell endpoints, tuple ordering, physical-length-independent emptiness, rectangle mode and document-change mapping.",
+      "notes": "Directed UTF-16 offsets and explicit virtual-cell endpoints, tuple ordering, physical-length-independent emptiness, rectangle mode and document-change mapping. Native clipboard preparation extracts exact text and UTF-16 styles through the editor clipboard adapter.",
       "limitations": [
         "Managed selection inheritance is represented by Rust values; visual-line geometry is provided by the native text layout rather than the core selection type."
       ]
@@ -2273,14 +2347,33 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/HighlightingBrush.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Highlighting.HighlightingBrush",
-        "AvaloniaEdit.Highlighting.SimpleHighlightingBrush"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/highlighting_brush.rs",
+          "symbols": [
+            "HighlightingBrush",
+            "SimpleHighlightingBrush",
+            "ResourceHighlightingBrush",
+            "resolve_highlighting_brush"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.HighlightingBrush",
+              "rust": "HighlightingBrush"
+            },
+            {
+              "upstream": "AvaloniaEdit.Highlighting.SimpleHighlightingBrush",
+              "rust": "SimpleHighlightingBrush"
+            }
+          ]
+        }
       ],
-      "notes": "This highlighting/rich-text/clipboard contract has no direct implementation; runtime token coloring is tracked separately.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Native brush trait, immutable solid brush snapshots with source color equality/hash, and context-aware FerroUI brush resolution. ResourceHighlightingBrush adds resource-tree/theme lookup.",
+      "limitations": [
+        "Brush values and native traits replace managed abstract/freezable classes. Constructed runs are snapshots, without automatic dynamic-resource subscriptions."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/HighlightingColor.cs",
@@ -2300,20 +2393,46 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Runtime highlighting value/rule/span model.",
+      "notes": "Runtime foreground/background, family, size, numeric weight, exact slant, underline and strikethrough values, with legacy bold/italic overlay compatibility.",
       "limitations": [
-        "Managed mutable/freezable/brush extension surface is adapted to Rust values."
+        "Managed mutable/freezable/brush extension surface is adapted to Rust values. Native brush resources are resolved in the presentation adapter; arbitrary brush objects are not stored in Core."
       ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/HighlightingColorizer.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Highlighting.HighlightingColorizer"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/rich_text_adapter.rs",
+          "symbols": [
+            "NativeHighlightingStyle",
+            "NativeHighlightingStyle::text_run_properties"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.HighlightingColorizer",
+              "rust": "NativeHighlightingStyle::text_run_properties"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.Edit/text_area.rs",
+          "symbols": [
+            "TextArea::line_layout"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.HighlightingColorizer",
+              "rust": "TextArea::line_layout"
+            }
+          ]
+        }
       ],
-      "notes": "This highlighting/rich-text/clipboard contract has no direct implementation; runtime token coloring is tracked separately.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Highlighter sections are translated into native brush, family, weight, slant and decoration properties when TextArea constructs its formatted lines.",
+      "limitations": [
+        "Style application and invalidation responsibilities are adapted; the source public HighlightingColorizer subclass and visual-line transformer extension API are not provided by this checkpoint."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Highlighting/HighlightingDefinitionInvalidException.cs",
@@ -2479,12 +2598,25 @@
               "rust": "HtmlClipboard"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit/editor_clipboard.rs",
+          "symbols": [
+            "EditorClipboard",
+            "EditorClipboard::prepare_copy"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.HtmlClipboard",
+              "rust": "EditorClipboard::prepare_copy"
+            }
+          ]
         }
       ],
       "unmapped_types": [],
-      "notes": "Lossless UTF-16 rich text, format overlays, nested writing and validated HTML/CF_HTML export through typed core services.",
+      "notes": "Typed HTML/CF_HTML generation and native clipboard publication. The native SetHtml/copy customization responsibilities are restored from commented code in the pinned source, not counted as active-source runtime parity.",
       "limitations": [
-        "Owned buffers and concrete options replace managed writers and subclass callbacks; framework brush/font/run adapters and operating-system clipboard writes remain separate."
+        "Native HTML uses platform-specific formats, including UTF-8 CF_HTML bytes on Windows. Tests use native clipboard abstractions; operating-system interoperability is not certified."
       ]
     },
     {
@@ -2505,9 +2637,9 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Lossless UTF-16 rich text, format overlays, nested writing and validated HTML/CF_HTML export through typed core services.",
+      "notes": "Validated HTML/CF_HTML export with full font/decoration CSS, family escaping, native ARGB-to-CSS RGBA conversion and UTF-8 byte offsets.",
       "limitations": [
-        "Owned buffers and concrete options replace managed writers and subclass callbacks; framework brush/font/run adapters and operating-system clipboard writes remain separate."
+        "Owned buffers and concrete options replace managed writers and virtual class/style callbacks. Native brush resolution and clipboard ownership are implemented in FerroUI.Edit; OS interoperability is separately bounded."
       ]
     },
     {
@@ -2528,9 +2660,9 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Lossless UTF-16 rich text, format overlays, nested writing and validated HTML/CF_HTML export through typed core services.",
+      "notes": "Validated HTML/CF_HTML export with full font/decoration CSS, family escaping, native ARGB-to-CSS RGBA conversion and UTF-8 byte offsets.",
       "limitations": [
-        "Owned buffers and concrete options replace managed writers and subclass callbacks; framework brush/font/run adapters and operating-system clipboard writes remain separate."
+        "Owned buffers and concrete options replace managed writers and virtual class/style callbacks. Native brush resolution and clipboard ownership are implemented in FerroUI.Edit; OS interoperability is separately bounded."
       ]
     },
     {
@@ -2632,12 +2764,25 @@
               "rust": "RichText"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit/rich_text_adapter.rs",
+          "symbols": [
+            "RichTextDisplayExt",
+            "NativeHighlightingStyle"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Highlighting.RichText",
+              "rust": "RichTextDisplayExt"
+            }
+          ]
         }
       ],
       "unmapped_types": [],
-      "notes": "Lossless UTF-16 rich text, format overlays, nested writing and validated HTML/CF_HTML export through typed core services.",
+      "notes": "Lossless UTF-16 rich text and style boundaries, plus native Run/TextBlock construction through RichTextDisplayExt. Native run construction restores methods that are commented out in the pinned source.",
       "limitations": [
-        "Owned buffers and concrete options replace managed writers and subclass callbacks; framework brush/font/run adapters and operating-system clipboard writes remain separate."
+        "Native UTF-8 projection replaces isolated surrogates and assigns a scalar crossing a style boundary to its leading unit. Native runs are snapshots; the adapter does not install runtime-resource subscriptions."
       ]
     },
     {
@@ -2668,9 +2813,9 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Lossless UTF-16 rich text, format overlays, nested writing and validated HTML/CF_HTML export through typed core services.",
+      "notes": "Lossless UTF-16 format overlays with full font metadata, independent setters/clearing, precedence and offset mapping.",
       "limitations": [
-        "Owned buffers and concrete options replace managed writers and subclass callbacks; framework brush/font/run adapters and operating-system clipboard writes remain separate."
+        "Owned Rust format boundaries replace the managed mutable model. Native brush objects remain outside the backend-independent Core color value."
       ]
     },
     {
@@ -2847,7 +2992,7 @@
       "unmapped_types": [],
       "notes": "Forward declaration registration and compilation are consolidated into one compiler: named/inline/external references, source-ordered imports, case inheritance, cyclic-import errors and bounded regular expressions.",
       "limitations": [
-        "Registration/translation use a private Rust compiler rather than managed visitor subclasses. Runtime font metadata is a subset of the editable tree, and regex Unicode/culture/ExplicitCapture behavior can differ from .NET."
+        "Registration/translation use a private Rust compiler rather than managed visitor subclasses. Runtime font/decoration metadata is retained; regex Unicode/culture/ExplicitCapture behavior can differ from .NET."
       ]
     },
     {
@@ -2871,7 +3016,7 @@
       "notes": "Editable ordered XSHD syntax tree, source positions and unresolved local/external/inline references; parsing and executable compilation are separate stages.",
       "limitations": [
         "Owned Rust syntax nodes and enums replace the managed mutable inheritance model; visitors are explicit and fallible.",
-        "The editable tree preserves complete XML metadata, but runtime highlighting maps font weight/style to its bold/italic subset and does not resolve framework brush resources."
+        "Family, weight, slant and decorations survive compilation. Core retains brush names as values; native resource resolution belongs to the presentation adapter."
       ]
     },
     {
@@ -4326,13 +4471,26 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Utils/DataObjectEx.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Utils.DataObjectEx"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/text_editor.rs",
+          "symbols": [
+            "TextEditor::copying_to_clipboard_event"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Utils.DataObjectEx",
+              "rust": "TextEditor::copying_to_clipboard_event"
+            }
+          ]
+        }
       ],
-      "notes": "No standalone port of this managed utility API. Rust standard-library or FerroUI services may replace internal uses without providing this public contract.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Native editor-owned bubbling CopyingToClipboard routed event replaces the source static copying-event shim.",
+      "limitations": [
+        "The native event name and owning type differ; this checkpoint does not implement drag/drop copying."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Utils/DelayedEvents.cs",

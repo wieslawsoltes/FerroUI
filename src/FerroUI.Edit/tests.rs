@@ -40,6 +40,67 @@ fn editors_have_distinct_default_documents_and_shared_documents_update_both_sess
 }
 
 #[test]
+fn large_highlight_fonts_expand_rows_and_vertical_keys_use_actual_row_boundaries() {
+    use ferroui_base::input::{InputElement, Key, KeyEventArgs};
+    use ferroui_edit_core::highlighting::HighlightingDefinition;
+    use std::rc::Rc;
+    let _scope = test_scope();
+    let editor = laid_out_editor("TALL\nsmall\nlast");
+    let definition = HighlightingDefinition::load(r#"<SyntaxDefinition><RuleSet><Rule fontSize="56">TALL</Rule></RuleSet></SyntaxDefinition>"#).unwrap();
+    editor.set_syntax_highlighting(Some(Rc::new(definition)));
+    editor.set_caret_offset(0).unwrap();
+    render_editor(&editor);
+    assert!(editor.text_area().cursor_rectangle().height > editor.text_area().line_height() * 2.0);
+    for (key, offset) in [(Key::Down, 5), (Key::Down, 11), (Key::Up, 5), (Key::Up, 0)] {
+        let mut event = KeyEventArgs::new();
+        event.key = key;
+        event.set_routed_event(Some(InputElement::key_down_event()));
+        editor.text_area().raise_event(&event);
+        assert!(event.handled());
+        assert_eq!(editor.caret_offset(), offset);
+    }
+}
+
+#[test]
+fn rectangular_paste_uses_shaped_width_and_preserves_one_undo_group() {
+    use ferroui_edit_core::highlighting::HighlightingDefinition;
+    use std::rc::Rc;
+    let _scope = test_scope();
+    let editor = laid_out_editor("iiii\nWWWW\nzzzz");
+    let definition = HighlightingDefinition::load(r#"<SyntaxDefinition><RuleSet><Rule fontSize="56">WWWW</Rule></RuleSet></SyntaxDefinition>"#).unwrap();
+    editor.set_syntax_highlighting(Some(Rc::new(definition)));
+    editor.set_caret_offset(1).unwrap();
+    editor.document().clear_undo_history().unwrap();
+    assert!(editor.text_area().paste_rectangle("A\r\nB", false).unwrap());
+    editor.selection_changed();
+    assert_eq!(editor.text(), "iAiii\nBWWWW\nzzzz");
+    assert!(editor.undo().unwrap());
+    assert_eq!(editor.text(), "iiii\nWWWW\nzzzz");
+    assert!(!editor.undo().unwrap());
+}
+
+#[test]
+fn highlighting_resource_changes_invalidate_resolved_cached_layouts() {
+    use ferroui_base::media::Colors;
+    use ferroui_edit_core::highlighting::HighlightingDefinition;
+    use std::rc::Rc;
+    let _scope = test_scope();
+    let editor = laid_out_editor("word");
+    editor.resources().add_value("Accent", Colors::RED);
+    let definition = HighlightingDefinition::load(r#"<SyntaxDefinition><RuleSet><Rule foreground="resource:Accent">word</Rule></RuleSet></SyntaxDefinition>"#).unwrap();
+    editor.set_syntax_highlighting(Some(Rc::new(definition)));
+    render_editor(&editor);
+    assert_eq!(editor.text_area().cached_visual_line_count(), 1);
+    editor
+        .resources()
+        .set("Accent", Some(Rc::new(Colors::BLUE)));
+    assert_eq!(editor.text_area().cached_visual_line_count(), 0);
+    render_editor(&editor);
+    assert_eq!(editor.text_area().cached_visual_line_count(), 1);
+    assert!(editor.last_error().is_none());
+}
+
+#[test]
 fn multi_caret_ui_commands_share_the_document_undo_group() {
     let _scope = test_scope();
     let editor = TextEditor::new();

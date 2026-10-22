@@ -1,5 +1,6 @@
 use super::{
-    HighlightedSection, HighlightingColor, HighlightingError, HtmlOptions, RichTextWriter,
+    HighlightedSection, HighlightingColor, HighlightingError, HighlightingFontStyle, HtmlOptions,
+    RichTextWriter,
 };
 use crate::document::{
     AnchorMovementType, DocumentChangeEventArgs, DocumentError, OffsetChangeMap,
@@ -263,7 +264,10 @@ impl RichTextModel {
         length: usize,
         value: Option<bool>,
     ) -> Result<(), RichTextError> {
-        self.edit_range(offset, length, |color| color.bold = value)
+        self.edit_range(offset, length, |color| {
+            color.bold = value;
+            color.font_weight = None;
+        })
     }
 
     pub fn set_italic(
@@ -272,7 +276,10 @@ impl RichTextModel {
         length: usize,
         value: Option<bool>,
     ) -> Result<(), RichTextError> {
-        self.edit_range(offset, length, |color| color.italic = value)
+        self.edit_range(offset, length, |color| {
+            color.italic = value;
+            color.font_style = None;
+        })
     }
 
     pub fn set_underline(
@@ -291,6 +298,50 @@ impl RichTextModel {
         value: Option<f64>,
     ) -> Result<(), RichTextError> {
         self.edit_range(offset, length, |color| color.font_size = value)
+    }
+
+    pub fn set_font_family(
+        &mut self,
+        offset: usize,
+        length: usize,
+        value: Option<&str>,
+    ) -> Result<(), RichTextError> {
+        self.edit_range(offset, length, |color| {
+            color.font_family = value.map(str::to_owned)
+        })
+    }
+
+    pub fn set_font_weight(
+        &mut self,
+        offset: usize,
+        length: usize,
+        value: Option<u16>,
+    ) -> Result<(), RichTextError> {
+        self.edit_range(offset, length, |color| {
+            color.font_weight = value;
+            color.bold = value.map(|weight| weight >= 700);
+        })
+    }
+
+    pub fn set_font_style(
+        &mut self,
+        offset: usize,
+        length: usize,
+        value: Option<HighlightingFontStyle>,
+    ) -> Result<(), RichTextError> {
+        self.edit_range(offset, length, |color| {
+            color.font_style = value;
+            color.italic = value.map(|style| style != HighlightingFontStyle::Normal);
+        })
+    }
+
+    pub fn set_strikethrough(
+        &mut self,
+        offset: usize,
+        length: usize,
+        value: Option<bool>,
+    ) -> Result<(), RichTextError> {
+        self.edit_range(offset, length, |color| color.strikethrough = value)
     }
 
     /// Returns a complete partition of the requested range with absolute offsets.
@@ -610,6 +661,86 @@ mod tests {
     }
 
     #[test]
+    fn semantic_font_values_and_compatibility_overlays_have_explicit_precedence() {
+        let base = HighlightingColor {
+            font_family: Some("Test Sans".into()),
+            font_weight: Some(650),
+            font_style: Some(HighlightingFontStyle::Oblique),
+            strikethrough: Some(true),
+            ..Default::default()
+        };
+        let inherited = base.merge_with(&HighlightingColor {
+            foreground: Some("red".into()),
+            ..Default::default()
+        });
+        assert_eq!(inherited.effective_font_weight(), Some(650));
+        assert_eq!(
+            inherited.effective_font_style(),
+            Some(HighlightingFontStyle::Oblique)
+        );
+        let compatibility = base.merge_with(&HighlightingColor {
+            bold: Some(false),
+            italic: Some(false),
+            ..Default::default()
+        });
+        assert_eq!(compatibility.font_weight, None);
+        assert_eq!(compatibility.font_style, None);
+        assert_eq!(compatibility.effective_font_weight(), Some(400));
+        assert_eq!(
+            compatibility.effective_font_style(),
+            Some(HighlightingFontStyle::Normal)
+        );
+        assert_eq!(compatibility.font_family, base.font_family);
+        assert_eq!(compatibility.strikethrough, Some(true));
+        let semantic = compatibility.merge_with(&HighlightingColor {
+            bold: Some(false),
+            italic: Some(false),
+            font_weight: Some(800),
+            font_style: Some(HighlightingFontStyle::Oblique),
+            ..Default::default()
+        });
+        assert_eq!(semantic.bold, Some(true));
+        assert_eq!(semantic.italic, Some(true));
+        assert_eq!(semantic.effective_font_weight(), Some(800));
+        assert_eq!(
+            semantic.effective_font_style(),
+            Some(HighlightingFontStyle::Oblique)
+        );
+    }
+
+    #[test]
+    fn individual_font_setters_clear_related_compatibility_state_and_keep_unrelated_style() {
+        let mut model = RichTextModel::new();
+        model.set_font_family(1, 4, Some("Test Sans")).unwrap();
+        model.set_font_weight(1, 4, Some(650)).unwrap();
+        model
+            .set_font_style(1, 4, Some(HighlightingFontStyle::Oblique))
+            .unwrap();
+        model.set_strikethrough(1, 4, Some(true)).unwrap();
+        model.set_bold(2, 1, Some(true)).unwrap();
+        model.set_italic(2, 1, Some(false)).unwrap();
+        let inner = model.get_highlighting_at(2);
+        assert_eq!(inner.font_weight, None);
+        assert_eq!(inner.font_style, None);
+        assert_eq!(inner.effective_font_weight(), Some(700));
+        assert_eq!(
+            inner.effective_font_style(),
+            Some(HighlightingFontStyle::Normal)
+        );
+        assert_eq!(inner.font_family.as_deref(), Some("Test Sans"));
+        assert_eq!(inner.strikethrough, Some(true));
+        assert_eq!(model.get_highlighting_at(3).font_weight, Some(650));
+        model.set_font_weight(2, 1, None).unwrap();
+        model.set_font_style(2, 1, None).unwrap();
+        model.set_strikethrough(2, 1, None).unwrap();
+        let cleared = model.get_highlighting_at(2);
+        assert_eq!(cleared.effective_font_weight(), None);
+        assert_eq!(cleared.effective_font_style(), None);
+        assert_eq!(cleared.strikethrough, None);
+        assert_eq!(cleared.font_family.as_deref(), Some("Test Sans"));
+    }
+
+    #[test]
     fn replacement_and_individual_clearing_preserve_other_properties() {
         let mut model = RichTextModel::new();
         model.apply_highlighting(0, 6, &red()).unwrap();
@@ -724,11 +855,9 @@ mod tests {
         let mut model = RichTextModel::new();
         model.apply_highlighting(5, 2, &red()).unwrap();
         let original = model.clone();
-        assert!(
-            model
-                .update_offsets_for_entry(OffsetChangeMapEntry::new(1, 0, usize::MAX))
-                .is_err()
-        );
+        assert!(model
+            .update_offsets_for_entry(OffsetChangeMapEntry::new(1, 0, usize::MAX))
+            .is_err());
         assert_eq!(model, original);
     }
 

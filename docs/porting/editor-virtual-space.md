@@ -165,6 +165,16 @@ The caller can perform an ordinary paste after `Ok(false)`, preserving the full
 input and allowing that ordinary operation to add lines at EOF. An error such
 as `ReadOnly` or `StaleEditPlan` must not trigger that fallback.
 
+The native `TextArea::paste_rectangle` prepares positions at the caret's shaped
+horizontal coordinate, reading each existing visible line through FerroUI text
+layout and skipping collapsed rows. It does not temporarily replace the live
+selection. It verifies document identity, version and selection before handing
+the positions to the core batch. A view without an arranged width uses the core
+cell projection. The native clipboard adapter invokes this path for the separate
+`FerroUI.Edit.RectangularSelection` string marker; marker and plain text are
+independent payloads. Native formatting, transfer ownership, customization and
+fallback tests are documented in [editor-rich-text-clipboard.md](editor-rich-text-clipboard.md).
+
 CR, LF, and CRLF delimit the clipboard's rows. A trailing delimiter represents
 an additional empty row and therefore participates in the fit check. Delimiters
 in the existing document remain unchanged; the row separators do not replace
@@ -203,11 +213,14 @@ event edits the document, `EditError::StaleEditPlan` rejects the old plan before
 applying any of its replacements. A host's independent event-handler edit is
 not rolled back by that rejection.
 
-The clipboard-paste plan also captures its document version before the first
+The common prepared-edit path captures its document version before the first
 read-only-provider callback. A provider that changes text during its initial
-preflight cannot cause the old row coordinates to commit. Protection is checked
-for the complete insertion plan before and after update-start; a protected row
-rejects the entire paste. This atomic error contract is deliberate: the source's
+preflight cannot cause old coordinates to commit. Replacement, indentation,
+newline insertion, transformations and rectangle paste all use this guard.
+Custom indentation callbacks are checked for document changes too. Protection
+and current document/session read-only flags are checked before and after
+update-start; a protected row rejects the entire paste. This atomic error
+contract is deliberate: the source's
 rectangle replacement can skip individual protected row insertions. New
 clipboard selections are installed only after all insertions succeed and before
 consolidated text-change notifications. Reentrant notification edits therefore
@@ -215,6 +228,13 @@ map the final selection through the existing document subscription without
 outstanding selection borrows.
 
 Accepted edits use the document's shared batch operation and one update guard.
+`TextDocument::apply_edits_with_mapping` preserves the requested anchor mapping
+for every replacement, including character-preserving transformations. The
+complete batch is accepted before individual change callbacks run. A callback
+changing read-only policy after the first edit cannot leave that accepted batch
+half applied; subsequent operations use the new policy. Overlapping batches
+are rejected before publishing update-start, and a stale plan does not undo an
+independent host callback edit.
 Temporary surviving anchors track the replacement starts through edits earlier
 in the document, keeping adjacent replacement carets on their own sides of a
 boundary. No-op virtual edits do not create a document update or undo entry.
@@ -231,7 +251,7 @@ Rust session's general multicaret extension.
 
 ## Verification and remaining boundaries
 
-The standalone document/editing suite passes **165 tests**, including **21
+The standalone document/editing suite passes **172 tests**, including **21
 virtual-space regressions** and **17 rectangular clipboard-paste regressions**,
 using the real source modules and the existing
 regex and Unicode-segmentation dependencies. The tests cover reversed virtual
@@ -240,9 +260,13 @@ combining text, navigation, tab-aware padding, no-op history, protected row
 preflight, undo/redo, multiline paste, update-start changes and allocation
 overflow. They also verify that virtual-only selections at offset zero do not
 underflow the line-selection calculations in indentation or transformations.
-The integrated gate including this paste service and completion controls passes
-**257 core tests, 61 native editor control tests and 2 EditorDemo tests**, with no
-failures or filtered tests. The
+Seven additional prepared-edit regressions exercise first-policy and
+update-start mutations across five entry points, policy changes during both
+preflight stages, character-mapped batch completion after a change handler
+sets read-only, overlap rejection, and a custom indentation callback that edits
+the real document. The integrated rich-text/clipboard gate passes
+**271 core tests, 91 native editor control tests and 2 EditorDemo tests**, with no
+failures, ignored tests or filtered tests. The
 native regressions exercise formatter round trips, short-line box typing,
 folded-line rectangle geometry, wrapped-row affinity and notification order,
 page movement with virtual anchors, Shift+Home anchor preservation, routed
@@ -253,14 +277,25 @@ version/history during preview, and one-step undo after committing with padding
 in both Latin and mixed bidirectional lines. These tests use the actual FerroUI
 control and layout APIs.
 
+Native formatting regressions also check semantic font and decoration values,
+resource/theme cache invalidation, and row heights produced by the text
+formatter. Up/Down measures its target row before consulting the height index,
+then uses that row's center; changing font sizes or wrapping therefore does
+not send the caret back into the row it just left. Native rectangular clipboard
+tests verify prepared shaped positions and folded-row skipping. A headless
+native demo smoke run completed all six stages with exit code zero and no panic;
+these checks do not certify operating-system clipboard interoperability or
+pixel equivalence across font backends.
+
 The new clipboard-paste tests cover all three newline forms, trailing empty
 rows, unchanged document delimiters and suffixes, EOF fallback, final-row fit,
 short intermediate lines, tab padding, supplementary and combining text,
 prepared native positions that skip lines, selection excluding padding, all-row
 protection, document and session read-only flags, update-start policy changes,
 document changes during both preflight stages, no-op history, one-step undo and
-redo, allocation overflow, and reentrant consolidated notifications. Native
-clipboard transport validation is recorded separately when that adapter lands.
+redo, allocation overflow, and reentrant consolidated notifications. The native
+clipboard report records exact rich/plain payloads, cancellation, async cut
+races, marker fallback, protected row atomicity and transfer disposal.
 
 This component does not reproduce the managed selection inheritance hierarchy.
 The logical projection does not expose custom visual-line elements, wrapped
@@ -278,12 +313,12 @@ the [source inventory](editor-source-map.md).
   distinction requires retaining the box caret's wrapped-row position
   independently of the projected row segments; first-row rectangle projection
   itself follows the source.
-- The core now supports atomic rectangular clipboard paste at an ordinary caret
-  and explicitly projected native positions. The native transport must preserve
-  a separate rectangular-selection marker and invoke ordinary text replacement
-  only after `Ok(false)`. Active rectangular selections continue to use the
-  bounded replacement operation described above. Native marker interoperability
-  and clipboard round-trip validation are tracked with the presentation adapter.
+- Native rectangular clipboard transport and shaped positions are implemented.
+  Ordinary text replacement runs only after a non-mutating `Ok(false)`, while
+  active rectangular selections retain bounded replacement. The FerroUI-named
+  string marker adapts the source byte format; cross-application marker
+  interoperability and real operating-system clipboard behavior remain outside
+  the deterministic native service tests.
 - The core `LineStart` movement goes directly to logical BOL. The source's
   first-nonwhitespace smart-Home toggle is a separate remaining command behavior.
 

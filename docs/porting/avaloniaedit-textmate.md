@@ -144,19 +144,24 @@ FerroUI's existing Rust scanner. It does not infer method parity from a name.
 | [Document](editor-document.md) | Rope metrics, anchors, intervals, live lines, tracker timing, version translation, custom/optional undo, event ordering and deterministic model tests |
 | [Editor services](editor-services.md) | Selection/edit policy, search, XSHD, folding, completion, snippets, commands and popup behavior |
 | [Virtual space and rectangles](editor-virtual-space.md) | Logical/visual positions, native geometry, virtual padding, rectangular replacement and protected edit plans |
+| [Native completion and insight](editor-completion.md) | Rich completion items, list filtering, shared popup lifecycle, observable overload providers and runtime XAML |
+| [Rich text and clipboard](editor-rich-text-clipboard.md) | Native brushes/runs, complete font styles, HTML formats, cancelable events, delayed cut ownership and rectangle paste |
 | [TextMate engine](textmate-engine.md) | Grammar/scanner semantics, registry/catalog, metadata, theme rules, incremental states, native/Wasm oracle and remaining engine differences |
 | [Source inventory](editor-source-map.md) | Per-file source hashes, exact aliases, partial contracts and unmapped APIs |
 | [Editor demo](../../samples/EditorDemo/README.md) | Run commands, runtime XAML, toolbar, explicit-region provider and headless/desktop limits |
 
 Checkpoint evidence is recorded with the commits and updated as tests land:
 
-- The checkpoint passes **240 core tests, 45 control tests and two demo tests**. It includes
+- The checkpoint passes **271 core tests, 91 control tests and two demo tests**. It includes
   1,600 randomized rope edits, 5,000 appends, dense anchor tests, 2,500 interval
   model edits, 8,000 lazily shifted intervals, 2,500 live-line edits with replay,
   custom undo, C# indentation, protected text transformations, rich text/HTML
   exports, document service traits, virtual-space/rectangular editing, typed
-  XSHD visitors/serialization/legacy import, incremental XSHD convergence and
-  all XSHD resources.
+  XSHD visitors/serialization/legacy import, full runtime fonts/decorations,
+  incremental XSHD convergence and all XSHD resources. Prepared edits reject
+  stale coordinates after both host protection callbacks and update-start
+  handlers. Character-mapped transformations use the document's atomic batch
+  path while retaining anchor mapping and one undo group.
 - The native TextMate library passes **37 tests** and the explicit portable
   backend passes **36 tests**. Native TextMate and actual compiled Rust/Wasm
   both match all **74 reference
@@ -169,7 +174,10 @@ Checkpoint evidence is recorded with the commits and updated as tests land:
   visual-row navigation, soft-wrap caret affinity, rectangular selections,
   visible popup anchoring, Page Up/Down, real routed Alt-click, virtual columns
   after right-to-left runs, atomic caret-affinity notifications and incremental
-  tokenization. The render notification
+  tokenization. Additional regressions cover native completion/overload
+  controls, virtual IME padding, proportional-font rectangle paste, variable
+  formatted-row heights, resource invalidation, native rich text and asynchronous
+  clipboard races. The render notification
   regression checks that extent updates publish outside the render pass.
 - The incremental installation tests compare 200 batches of queued CR/LF/comment
   edits with fresh highlighting, plus line insertion/deletion, multiline state,
@@ -224,9 +232,10 @@ The generated map is the authoritative detailed backlog. The substantial open
 areas include the complete visual-line element/transformer/layer/margin
 extension contracts; remaining rectangular pointer/wrap and virtual-space edge
 cases described in the linked report; remaining
-command and modern C# lexical edge cases; overload insight and rich completion
-content; native rich-text control/clipboard integration and remaining XSHD
-runtime brush/XSD/.NET-regex differences; complete managed reader/comparison
+command and modern C# lexical edge cases; secondary completion-description
+placement and platform popup behavior; structured/custom snippet lifecycle;
+whole-line copy options, live rich writers, and remaining XSHD
+XSD/.NET-regex differences; complete managed reader/comparison
 overload equivalents; text-range
 accessibility; and the full upstream behavior/test corpus.
 

@@ -4,6 +4,7 @@ use super::{
     RichTextWriter,
 };
 use crate::document::{DocumentError, SimpleSegment, TextDocument};
+use std::borrow::Cow;
 
 /// Options for HTML fragments. Tabs expand to a fixed number of nonbreaking spaces.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -54,10 +55,11 @@ impl HtmlOptions {
 impl HighlightingColor {
     /// Produces inline CSS from supported formatting properties.
     ///
-    /// Colors accept alphabetic names, hexadecimal notation, and numeric CSS
+    /// Colors accept alphabetic names, native hexadecimal notation, and numeric CSS
     /// color functions. Declaration delimiters, URLs, variables, and nested
     /// expressions are rejected rather than copied into a style attribute.
-    /// Font sizes are finite positive pixel values; color names are metadata.
+    /// Native ARGB hexadecimal values are reordered to CSS RGBA. Font family
+    /// names are quoted and escaped, and font sizes are finite positive pixels.
     pub fn to_css(&self) -> Result<String, RichTextError> {
         let mut css = String::new();
         for (property, value) in [
@@ -68,7 +70,7 @@ impl HighlightingColor {
                 let color = checked_css_color(value, property)?;
                 css.push_str(property);
                 css.push_str(": ");
-                css.push_str(color);
+                css.push_str(&color);
                 css.push_str("; ");
             }
         }
@@ -81,32 +83,47 @@ impl HighlightingColor {
             }
             css.push_str(&format!("font-size: {size}px; "));
         }
-        if let Some(bold) = self.bold {
-            css.push_str(if bold {
-                "font-weight: bold; "
-            } else {
-                "font-weight: normal; "
-            });
+        if let Some(family) = &self.font_family {
+            css.push_str("font-family: ");
+            css.push_str(&checked_css_font_family(family)?);
+            css.push_str("; ");
         }
-        if let Some(italic) = self.italic {
-            css.push_str(if italic {
-                "font-style: italic; "
-            } else {
-                "font-style: normal; "
-            });
+        if let Some(weight) = self.effective_font_weight() {
+            if !(1..=1000).contains(&weight) {
+                return Err(RichTextError::InvalidCssValue {
+                    property: "font-weight",
+                    value: weight.to_string(),
+                });
+            }
+            match weight {
+                400 => css.push_str("font-weight: normal; "),
+                700 => css.push_str("font-weight: bold; "),
+                weight => css.push_str(&format!("font-weight: {weight}; ")),
+            }
         }
-        if let Some(underline) = self.underline {
-            css.push_str(if underline {
-                "text-decoration: underline; "
-            } else {
-                "text-decoration: none; "
+        if let Some(style) = self.effective_font_style() {
+            css.push_str("font-style: ");
+            css.push_str(style.css_name());
+            css.push_str("; ");
+        }
+        if self.underline.is_some() || self.strikethrough.is_some() {
+            css.push_str("text-decoration: ");
+            css.push_str(match (self.underline, self.strikethrough) {
+                (Some(true), Some(true)) => "underline line-through",
+                (Some(true), _) => "underline",
+                (_, Some(true)) => "line-through",
+                _ => "none",
             });
+            css.push_str("; ");
         }
         Ok(css)
     }
 }
 
-fn checked_css_color<'a>(value: &'a str, property: &'static str) -> Result<&'a str, RichTextError> {
+fn checked_css_color<'a>(
+    value: &'a str,
+    property: &'static str,
+) -> Result<Cow<'a, str>, RichTextError> {
     let color = value.trim();
     let valid = if let Some(hex) = color.strip_prefix('#') {
         matches!(hex.len(), 3 | 4 | 6 | 8) && hex.bytes().all(|byte| byte.is_ascii_hexdigit())
@@ -130,13 +147,65 @@ fn checked_css_color<'a>(value: &'a str, property: &'static str) -> Result<&'a s
         false
     };
     if valid && !value.chars().any(char::is_control) {
-        Ok(color)
+        Ok(match color.strip_prefix('#') {
+            Some(hex) if hex.len() == 4 => Cow::Owned(format!("#{}{}", &hex[1..], &hex[..1])),
+            Some(hex) if hex.len() == 8 => Cow::Owned(format!("#{}{}", &hex[2..], &hex[..2])),
+            _ => Cow::Borrowed(color),
+        })
     } else {
         Err(RichTextError::InvalidCssValue {
             property,
             value: value.to_owned(),
         })
     }
+}
+
+fn checked_css_font_family(value: &str) -> Result<String, RichTextError> {
+    if value.chars().any(char::is_control) {
+        return Err(RichTextError::InvalidCssValue {
+            property: "font-family",
+            value: value.to_owned(),
+        });
+    }
+    let mut families = Vec::new();
+    for family in value.split(',').map(str::trim) {
+        if family.is_empty() {
+            return Err(RichTextError::InvalidCssValue {
+                property: "font-family",
+                value: value.to_owned(),
+            });
+        }
+        let generic = matches!(
+            family.to_ascii_lowercase().as_str(),
+            "serif"
+                | "sans-serif"
+                | "monospace"
+                | "cursive"
+                | "fantasy"
+                | "system-ui"
+                | "ui-serif"
+                | "ui-sans-serif"
+                | "ui-monospace"
+                | "ui-rounded"
+                | "emoji"
+                | "math"
+                | "fangsong"
+        );
+        if generic {
+            families.push(family.to_owned());
+        } else {
+            let mut quoted = String::from("\"");
+            for character in family.chars() {
+                if matches!(character, '\\' | '"') {
+                    quoted.push('\\');
+                }
+                quoted.push(character);
+            }
+            quoted.push('"');
+            families.push(quoted);
+        }
+    }
+    Ok(families.join(", "))
 }
 
 fn push_escaped_char(output: &mut String, value: char) {
@@ -614,6 +683,101 @@ mod tests {
             color.to_css().unwrap(),
             "background-color: #abc; font-size: 12.5px; "
         );
+    }
+
+    #[test]
+    fn full_font_style_and_native_alpha_colors_are_preserved_in_css() {
+        let color = HighlightingColor {
+            foreground: Some("#80112233".into()),
+            background: Some("#8abc".into()),
+            font_family: Some("Fira Code, monospace".into()),
+            font_weight: Some(650),
+            font_style: Some(super::super::HighlightingFontStyle::Oblique),
+            bold: Some(false),
+            italic: Some(false),
+            underline: Some(true),
+            strikethrough: Some(true),
+            ..Default::default()
+        };
+        assert_eq!(color.to_css().unwrap(), "color: #11223380; background-color: #abc8; font-family: \"Fira Code\", monospace; font-weight: 650; font-style: oblique; text-decoration: underline line-through; ");
+        let mut writer = HtmlRichTextWriter::default();
+        writer.begin_span(&color).unwrap();
+        writer.write("font").unwrap();
+        writer.end_span().unwrap();
+        assert!(writer
+            .finish()
+            .unwrap()
+            .contains("font-family: &quot;Fira Code&quot;, monospace;"));
+        for weight in [0, 1001, u16::MAX] {
+            assert!(HighlightingColor {
+                font_weight: Some(weight),
+                ..Default::default()
+            }
+            .to_css()
+            .is_err());
+        }
+    }
+
+    #[test]
+    fn family_names_are_quoted_and_escaped_without_executable_css() {
+        let family = "Font\\Name\"; color: red; /*";
+        let color = HighlightingColor {
+            font_family: Some(family.into()),
+            ..Default::default()
+        };
+        assert_eq!(
+            color.to_css().unwrap(),
+            "font-family: \"Font\\\\Name\\\"; color: red; /*\"; "
+        );
+        let mut writer = HtmlRichTextWriter::default();
+        writer.begin_span(&color).unwrap();
+        writer.write("safe").unwrap();
+        writer.end_span().unwrap();
+        let html = writer.finish().unwrap();
+        assert!(html.contains("\\&quot;; color: red; /*&quot;"));
+        assert!(!html.contains("\"; color: red"));
+        for family in ["", "  ", "Font,", ",Font", "Font\nOther", "Font\0"] {
+            assert!(
+                HighlightingColor {
+                    font_family: Some(family.into()),
+                    ..Default::default()
+                }
+                .to_css()
+                .is_err(),
+                "{family:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn nested_decoration_clearing_retains_the_other_effective_decoration() {
+        let mut writer = HtmlRichTextWriter::default();
+        writer
+            .begin_span(&HighlightingColor {
+                underline: Some(true),
+                strikethrough: Some(true),
+                ..Default::default()
+            })
+            .unwrap();
+        writer.write("a").unwrap();
+        writer
+            .begin_span(&HighlightingColor {
+                underline: Some(false),
+                ..Default::default()
+            })
+            .unwrap();
+        writer.write("b").unwrap();
+        writer.end_span().unwrap();
+        writer
+            .begin_span(&HighlightingColor {
+                strikethrough: Some(false),
+                ..Default::default()
+            })
+            .unwrap();
+        writer.write("c").unwrap();
+        writer.end_span().unwrap();
+        writer.end_span().unwrap();
+        assert_eq!(writer.finish().unwrap(), "<span style=\"text-decoration: underline line-through; \">a</span><span style=\"text-decoration: line-through; \">b</span><span style=\"text-decoration: underline; \">c</span>");
     }
 
     #[test]

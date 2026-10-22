@@ -1,5 +1,7 @@
-use crate::{TextArea, TextMateInstallation};
-use ferroui_base::input::platform::ClipboardExtensions;
+use crate::{
+    CopyingToClipboardEventArgs, PastingFromClipboardEventArgs, TextArea, TextCopiedEventArgs,
+    TextMateInstallation, TextPastedEventArgs,
+};
 use ferroui_base::input::{InputElementImpl, InputElementImplExt};
 use ferroui_base::interactivity::{
     InteractiveImpl, RoutedEvent, RoutedEventArgs, RoutingStrategies,
@@ -8,14 +10,13 @@ use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{FontFamily, IBrush};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::threading::Dispatcher;
 use ferroui_base::{
     DirectProperty, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, Ref, StyledElementImpl, StyledProperty, StyledPropertyOptions,
     VisualImpl, ferro_class, ferro_impl_classes, ferro_properties, ferro_routed_event, instantiate,
 };
 use ferroui_controls::primitives::ScrollBarVisibility;
-use ferroui_controls::{ControlImpl, Decorator, ScrollViewer, TextBlock, TopLevel};
+use ferroui_controls::{ControlImpl, Decorator, ScrollViewer, TextBlock};
 use ferroui_edit_core::document::{
     DocumentError, DocumentSubscription, TextDocument, TextSnapshot,
 };
@@ -51,6 +52,7 @@ pub struct TextEditor {
     textmate_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     previous_selection: RefCell<Selection>,
     commands: RefCell<HashMap<crate::EditorCommandKind, Rc<crate::EditorCommand>>>,
+    style_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
 }
 
 ferro_class!(TextEditor: Decorator);
@@ -106,6 +108,21 @@ impl FerroObjectImpl for TextEditor {
             Self::document_property(),
             Some(this.session().document().clone()),
         );
+        let weak = this.to_ref().downgrade();
+        let resources = this.resources_changed(move |_| {
+            if let Some(editor) = weak.upgrade() {
+                editor.text_area().invalidate_layout_cache();
+            }
+        });
+        let weak = this.to_ref().downgrade();
+        let theme = this.actual_theme_variant_changed(move || {
+            if let Some(editor) = weak.upgrade() {
+                editor.text_area().invalidate_layout_cache();
+            }
+        });
+        this.style_subscriptions
+            .borrow_mut()
+            .extend([resources, theme]);
     }
 
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
@@ -168,6 +185,15 @@ ferro_properties! { impl TextEditor {
 } }
 
 impl TextEditor {
+    fn static_constructor() {
+        Self::text_changed_event();
+        Self::selection_changed_event();
+        Self::copying_to_clipboard_event();
+        Self::text_copied_event();
+        Self::pasting_from_clipboard_event();
+        Self::text_pasted_event();
+    }
+
     pub fn construct() -> Self {
         Self {
             base: Decorator::construct(),
@@ -187,6 +213,7 @@ impl TextEditor {
             textmate_subscription: RefCell::new(None),
             previous_selection: RefCell::new(Selection::empty(0)),
             commands: RefCell::new(HashMap::new()),
+            style_subscriptions: RefCell::new(Vec::new()),
         }
     }
     pub fn new() -> Ref<Self> {
@@ -201,6 +228,29 @@ impl TextEditor {
     ferro_routed_event!(
         pub fn selection_changed_event() -> RoutedEvent<RoutedEventArgs> {
             RoutedEvent::register::<TextEditor, _>("SelectionChanged", RoutingStrategies::BUBBLE)
+        }
+    );
+    ferro_routed_event!(
+        pub fn copying_to_clipboard_event() -> RoutedEvent<CopyingToClipboardEventArgs> {
+            RoutedEvent::register::<TextEditor, _>("CopyingToClipboard", RoutingStrategies::BUBBLE)
+        }
+    );
+    ferro_routed_event!(
+        pub fn text_copied_event() -> RoutedEvent<TextCopiedEventArgs> {
+            RoutedEvent::register::<TextEditor, _>("TextCopied", RoutingStrategies::BUBBLE)
+        }
+    );
+    ferro_routed_event!(
+        pub fn pasting_from_clipboard_event() -> RoutedEvent<PastingFromClipboardEventArgs> {
+            RoutedEvent::register::<TextEditor, _>(
+                "PastingFromClipboard",
+                RoutingStrategies::BUBBLE,
+            )
+        }
+    );
+    ferro_routed_event!(
+        pub fn text_pasted_event() -> RoutedEvent<TextPastedEventArgs> {
+            RoutedEvent::register::<TextEditor, _>("TextPasted", RoutingStrategies::BUBBLE)
         }
     );
 
@@ -580,77 +630,18 @@ impl TextEditor {
         self.copy_or_cut(true);
     }
     fn copy_or_cut(&self, cut: bool) {
-        let session = self.session();
-        let Ok(text) = session.selected_text() else {
-            return;
-        };
-        if text.is_empty() || cut && self.is_read_only() {
-            return;
-        }
-        let Some(clipboard) = TopLevel::get_top_level(Some(self)).and_then(|top| top.clipboard())
-        else {
-            return;
-        };
-        let selection = session.selection();
-        let version = session.document().version();
-        let weak = self.to_ref().downgrade();
-        drop(
-            Dispatcher::ui_thread()
-                .to_task_scheduler()
-                .start_local(async move {
-                    let result = clipboard.set_text_async(Some(&text)).await;
-                    if let Some(editor) = weak.upgrade() {
-                        match result {
-                            Ok(())
-                                if cut
-                                    && editor.document() == *session.document()
-                                    && editor.document().version() == version
-                                    && editor.selection() == selection =>
-                            {
-                                if let Err(error) = editor.replace_selection_with_text("") {
-                                    editor.report_error(error.to_string());
-                                }
-                            }
-                            Err(error) => editor.report_error(error.to_string()),
-                            _ => {}
-                        }
-                    }
-                }),
-        );
+        crate::EditorClipboard::copy_or_cut(self, cut);
     }
     pub fn paste(&self) {
-        if self.is_read_only() {
-            return;
-        }
-        let Some(clipboard) = TopLevel::get_top_level(Some(self)).and_then(|top| top.clipboard())
-        else {
-            return;
-        };
-        let document = self.document();
-        let weak = self.to_ref().downgrade();
-        drop(
-            Dispatcher::ui_thread()
-                .to_task_scheduler()
-                .start_local(async move {
-                    let result = clipboard.try_get_text_async().await;
-                    if let Some(editor) = weak.upgrade() {
-                        match result {
-                            Ok(Some(text)) if editor.document() == document => {
-                                if let Err(error) = editor.replace_selection_with_text(&text) {
-                                    editor.report_error(error.to_string());
-                                }
-                            }
-                            Err(error) => editor.report_error(error.to_string()),
-                            _ => {}
-                        }
-                    }
-                }),
-        );
+        crate::EditorClipboard::paste(self);
     }
 }
 
 impl Drop for TextEditor {
     fn drop(&mut self) {
+        for subscription in self.style_subscriptions.get_mut().drain(..) {
+            subscription.dispose();
+        }
         if let Some(subscription) = self.subscription.get_mut().take() {
             subscription.dispose();
         }

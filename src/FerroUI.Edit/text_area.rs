@@ -63,6 +63,7 @@ pub struct TextArea {
     rectangle_drag_anchor: Cell<Option<(usize, f64)>>,
     rectangle_keyboard_anchor: Cell<Option<(usize, f64)>>,
     space_advance: Cell<f64>,
+    default_line_height: Cell<f64>,
     caret_visible: Cell<bool>,
     caret_at_end_of_line: Cell<bool>,
     blink_timer: OnceCell<Rc<DispatcherTimer>>,
@@ -554,21 +555,15 @@ impl InputElementImpl for TextArea {
             let x = this.desired_x.get().unwrap_or(rect.x + scroll.x);
             this.desired_x.set(Some(x));
             let current = session.selection().primary();
-            let distance = if matches!(e.key, Key::PageUp | Key::PageDown) {
-                this.viewport.get().height.max(this.line_height())
+            let upward = matches!(e.key, Key::Up | Key::PageUp);
+            let target_y = if matches!(e.key, Key::PageUp | Key::PageDown) {
+                let distance = this.viewport.get().height.max(this.line_height());
+                rect.y + rect.height * 0.5 + if upward { -distance } else { distance }
             } else {
-                this.line_height()
+                this.adjacent_row_y(upward)
+                    .unwrap_or(rect.y + rect.height * 0.5)
             };
-            let target_point = Point::new(
-                x - scroll.x,
-                rect.y
-                    + rect.height * 0.5
-                    + if matches!(e.key, Key::Up | Key::PageUp) {
-                        -distance
-                    } else {
-                        distance
-                    },
-            );
+            let target_point = Point::new(x - scroll.x, target_y);
             let target_affinity = this
                 .position_at_point(target_point, false)
                 .is_some_and(|p| p.is_at_end_of_line);
@@ -912,6 +907,7 @@ impl TextArea {
             rectangle_drag_anchor: Cell::new(None),
             rectangle_keyboard_anchor: Cell::new(None),
             space_advance: Cell::new(0.0),
+            default_line_height: Cell::new(0.0),
             caret_visible: Cell::new(true),
             caret_at_end_of_line: Cell::new(false),
             blink_timer: OnceCell::new(),
@@ -936,7 +932,23 @@ impl TextArea {
         self.cache.borrow().len()
     }
     pub fn line_height(&self) -> f64 {
-        self.editor().map_or(20.0, |e| e.font_size() * 1.5)
+        if self.default_line_height.get() > 0.0 {
+            return self.default_line_height.get();
+        }
+        let Some(editor) = self.editor() else {
+            return 20.0;
+        };
+        let layout = TextLayout::new(
+            "x",
+            Typeface::new(editor.font_family()),
+            TextLayoutOptions {
+                font_size: editor.font_size(),
+                ..Default::default()
+            },
+        );
+        let height = layout.height().max(1.0);
+        self.default_line_height.set(height);
+        height
     }
     fn gutter_width(&self) -> f64 {
         self.editor().map_or(6.0, |editor| {
@@ -965,13 +977,15 @@ impl TextArea {
     fn reset_line_metrics(&self) {
         self.cache.borrow_mut().clear();
         self.space_advance.set(0.0);
+        self.default_line_height.set(0.0);
         let mut active = Vec::<FoldingSection>::new();
         let mut collapsed = Vec::new();
         if let Some(editor) = self.editor() {
             let document = editor.document();
+            let line_height = self.line_height();
             self.heights
                 .borrow_mut()
-                .reset(document.line_count(), self.line_height());
+                .reset(document.line_count(), line_height);
             if let Some(manager) = editor.folding_manager() {
                 let mut sections = manager.all_foldings();
                 sections.sort_by_key(|s| (s.start_offset(), std::cmp::Reverse(s.end_offset())));
@@ -1212,52 +1226,26 @@ impl TextArea {
                 match highlighter.highlight_line(source_number) {
                     Ok(highlighted) => {
                         for section in highlighted.sections {
-                            let color = section.color;
-                            let foreground = color
-                                .foreground
-                                .as_deref()
-                                .and_then(|s| Color::parse(s).ok())
-                                .map(|c| {
-                                    Rc::new(ImmutableSolidColorBrush::new(c)) as Rc<dyn IBrush>
-                                })
-                                .or_else(|| editor.foreground());
-                            let background = color
-                                .background
-                                .as_deref()
-                                .and_then(|s| Color::parse(s).ok())
-                                .map(|c| {
-                                    Rc::new(ImmutableSolidColorBrush::new(c)) as Rc<dyn IBrush>
-                                });
-                            let typeface = Typeface::with_style(
-                                editor.font_family(),
-                                if color.italic == Some(true) {
-                                    FontStyle::Italic
-                                } else {
-                                    FontStyle::Normal
-                                },
-                                if color.bold == Some(true) {
-                                    FontWeight::Bold
-                                } else {
-                                    FontWeight::Normal
-                                },
-                                FontStretch::Normal,
-                            );
-                            let decorations = if color.underline == Some(true) {
-                                TextDecorationCollection::parse("Underline").ok()
-                            } else {
-                                None
-                            };
-                            let properties = Rc::new(GenericTextRunProperties::with_all(
-                                typeface,
-                                color.font_size.unwrap_or(editor.font_size()),
-                                decorations,
-                                foreground,
-                                background,
+                            let defaults = GenericTextRunProperties::with_all(
+                                Typeface::new(editor.font_family()),
+                                editor.font_size(),
+                                None,
+                                editor.foreground(),
+                                None,
                                 BaselineAlignment::Baseline,
                                 None,
                                 None,
-                            ))
-                                as Rc<dyn TextRunProperties>;
+                            );
+                            let properties = match crate::NativeHighlightingStyle::resolve(
+                                &section.color,
+                                Some(&editor),
+                            ) {
+                                Ok(style) => style.text_run_properties(&defaults),
+                                Err(error) => {
+                                    editor.report_error(error.to_string());
+                                    continue;
+                                }
+                            };
                             let start =
                                 display.visual_offset(section.offset.saturating_sub(line.offset()));
                             let end = display.visual_offset(
@@ -1324,7 +1312,7 @@ impl TextArea {
                 } else {
                     f64::INFINITY
                 },
-                line_height: self.line_height(),
+                line_height: f64::NAN,
                 text_style_overrides: if styles.is_empty() {
                     None
                 } else {
@@ -1512,6 +1500,147 @@ impl TextArea {
             1.0,
             row.height(),
         )
+    }
+
+    /// Finds the center of the adjacent formatted row. Measuring that row
+    /// before consulting its top keeps variable font sizes and wrapped lines
+    /// from moving the caret back into the row it just left.
+    fn adjacent_row_y(&self, upward: bool) -> Option<f64> {
+        let editor = self.editor()?;
+        let document = editor.document();
+        let caret = editor.selection().primary();
+        let logical = document.get_line_by_offset(caret.caret).ok()?;
+        let index = self
+            .heights
+            .borrow()
+            .visible_owner(logical.line_number() - 1);
+        let line = self.line_layout(index)?;
+        let visual = line.display.visual_offset(caret.caret - line.offset);
+        let rows = line.layout.text_lines();
+        let current = if caret.caret_virtual_space > 0 {
+            rows.len().checked_sub(1)?
+        } else {
+            line.layout
+                .get_line_index_from_character_index(visual as i32, self.caret_at_end_of_line.get())
+                .max(0) as usize
+        };
+        let scroll_y = self.offset.get().y;
+        let row_center = |layout: &TextLayout, row: usize| -> Option<f64> {
+            Some(
+                layout
+                    .text_lines()
+                    .iter()
+                    .take(row)
+                    .map(|row| row.height())
+                    .sum::<f64>()
+                    + layout.text_lines().get(row)?.height() * 0.5,
+            )
+        };
+        if upward && current > 0 {
+            return Some(
+                self.heights.borrow().top(index) - scroll_y
+                    + row_center(&line.layout, current - 1)?,
+            );
+        }
+        if !upward && current + 1 < rows.len() {
+            return Some(
+                self.heights.borrow().top(index) - scroll_y
+                    + row_center(&line.layout, current + 1)?,
+            );
+        }
+        let next = if upward {
+            self.heights.borrow().visible_owner(index.checked_sub(1)?)
+        } else {
+            let next = self.heights.borrow().next_visible(index + 1);
+            if next >= document.line_count() {
+                return None;
+            }
+            next
+        };
+        let target = self.line_layout(next)?;
+        let row = if upward {
+            target.layout.text_lines().len().checked_sub(1)?
+        } else {
+            0
+        };
+        Some(self.heights.borrow().top(next) - scroll_y + row_center(&target.layout, row)?)
+    }
+
+    /// Inserts rectangle clipboard rows at the same shaped horizontal
+    /// position without temporarily changing the live selection. Folded rows
+    /// are omitted. A view that has not been arranged uses core cell metrics.
+    pub(crate) fn paste_rectangle(
+        &self,
+        text: &str,
+        select_inserted_text: bool,
+    ) -> Result<bool, ferroui_edit_core::editing::EditError> {
+        use ferroui_edit_core::editing::EditError;
+        let Some(editor) = self.editor() else {
+            return Ok(false);
+        };
+        let session = editor.session();
+        if self.viewport.get().width <= 0.0 {
+            return session.paste_rectangle(text, select_inserted_text);
+        }
+        let selection = session.selection();
+        if !selection.is_empty() || selection.segments().len() != 1 {
+            return Ok(false);
+        }
+        let document = editor.document();
+        let version = document.version();
+        let caret = selection.primary();
+        let first = document.get_line_by_offset(caret.caret)?;
+        let mut row_count = 1_usize;
+        let mut bytes = text.bytes().peekable();
+        while let Some(byte) = bytes.next() {
+            if byte == b'\r' || byte == b'\n' {
+                if byte == b'\r' && bytes.peek() == Some(&b'\n') {
+                    bytes.next();
+                }
+                row_count += 1;
+                if row_count > document.line_count() {
+                    return Ok(false);
+                }
+            }
+        }
+        let x = self.x_for_position(caret.caret, caret.caret_virtual_space);
+        let mut positions = Vec::new();
+        positions
+            .try_reserve_exact(row_count)
+            .map_err(|_| EditError::VirtualSpaceTooLarge)?;
+        positions.push(caret);
+        let mut index = self.heights.borrow().visible_owner(first.line_number() - 1);
+        for _ in 1..row_count {
+            index = self.heights.borrow().next_visible(index + 1);
+            if index >= document.line_count() {
+                return Ok(false);
+            }
+            let Some(line) = self.line_layout(index) else {
+                return Ok(false);
+            };
+            let (offset, extra) = self.selection_position_on_line(&line, Point::new(x, 0.0), true);
+            positions.push(SelectionSegment::with_virtual_space(
+                offset, extra, offset, extra,
+            ));
+        }
+        if !session.options().enable_virtual_space && !selection.is_rectangular() {
+            let last = document.get_line_by_offset(positions.last().unwrap().caret)?;
+            if last.length() < caret.caret - first.offset() {
+                return Ok(false);
+            }
+        }
+        if editor.document() != document
+            || document.version() != version
+            || editor.selection() != selection
+        {
+            return Err(EditError::StaleEditPlan);
+        }
+        session.paste_rectangle_at(
+            &Selection::from_rectangle_segments(positions, row_count - 1),
+            text,
+            select_inserted_text,
+        )?;
+        Ok(true)
     }
 
     fn rectangle_anchor_at_point(&self, point: Point) -> (usize, f64) {

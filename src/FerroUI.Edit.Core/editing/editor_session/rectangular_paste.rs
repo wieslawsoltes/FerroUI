@@ -1,5 +1,5 @@
 use super::*;
-use crate::document::{DocumentEdit, DocumentVersion};
+use crate::document::DocumentEdit;
 use crate::editing::rectangle_selection::{position_at_column, visual_column};
 
 struct PasteRow {
@@ -140,16 +140,7 @@ impl EditorSession {
             .filter(|row| !row.text.is_empty())
             .map(|row| DocumentEdit::new(row.position.caret, 0, &row.text))
             .collect();
-        self.validate_rectangle_paste_plan(&edits, &version)?;
-        let update = if edits.is_empty() {
-            None
-        } else {
-            let update = self.document().begin_update()?;
-            // The outer update can call the host. Recheck both coordinates and
-            // policy before anchors or the first insertion become observable.
-            self.validate_rectangle_paste_plan(&edits, &version)?;
-            Some(update)
-        };
+        let update = self.begin_prepared_update(&edits, &version)?;
         let anchors: Result<Vec<_>, DocumentError> = plan
             .iter()
             .map(|row| {
@@ -198,22 +189,6 @@ impl EditorSession {
         // installed first so its normal document subscription tracks that edit.
         if let Some(update) = update {
             update.finish()?;
-        }
-        Ok(())
-    }
-
-    fn validate_rectangle_paste_plan(
-        &self,
-        edits: &[DocumentEdit],
-        version: &DocumentVersion,
-    ) -> Result<(), EditError> {
-        let policy = self.validate_document_edits(edits);
-        if self.document().version().revision() != version.revision() {
-            return Err(EditError::StaleEditPlan);
-        }
-        policy?;
-        if self.is_read_only() || self.document().is_read_only() {
-            return Err(EditError::ReadOnly);
         }
         Ok(())
     }

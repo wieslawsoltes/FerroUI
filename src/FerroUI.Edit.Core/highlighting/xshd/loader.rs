@@ -1,6 +1,7 @@
 use super::model::*;
 use super::writer::XSHD_NAMESPACE;
-use crate::highlighting::HighlightingError;
+use crate::highlighting::highlighting_definition::parse_font_weight;
+use crate::highlighting::{HighlightingError, HighlightingFontStyle};
 use roxmltree::Node;
 
 /// Loads an editable syntax tree. References and import cycles are resolved
@@ -280,28 +281,7 @@ impl<'input> Parser<'input> {
         let font_weight = node
             .attribute("fontWeight")
             .map(|value| {
-                let lower = value.to_ascii_lowercase();
-                if matches!(
-                    lower.as_str(),
-                    "thin"
-                        | "extralight"
-                        | "ultralight"
-                        | "light"
-                        | "semilight"
-                        | "normal"
-                        | "regular"
-                        | "medium"
-                        | "demibold"
-                        | "semibold"
-                        | "bold"
-                        | "extrabold"
-                        | "ultrabold"
-                        | "black"
-                        | "heavy"
-                        | "extrablack"
-                        | "ultrablack"
-                ) || value.parse::<u16>().is_ok()
-                {
+                if parse_font_weight(value).is_some() {
                     Ok(value.to_owned())
                 } else {
                     Err(self.error(node, format!("Unknown fontWeight {value}")))
@@ -311,10 +291,7 @@ impl<'input> Parser<'input> {
         let font_style = node
             .attribute("fontStyle")
             .map(|value| {
-                if matches!(
-                    value.to_ascii_lowercase().as_str(),
-                    "normal" | "italic" | "oblique" | "0" | "1" | "2"
-                ) {
+                if HighlightingFontStyle::parse(value).is_some() {
                     Ok(value.to_owned())
                 } else {
                     Err(self.error(node, format!("Unknown fontStyle {value}")))

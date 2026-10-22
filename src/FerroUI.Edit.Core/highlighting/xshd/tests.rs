@@ -301,6 +301,82 @@ fn writer_preserves_all_color_properties_and_xml_sensitive_text() {
 }
 
 #[test]
+fn compiled_colors_keep_font_family_numeric_weight_slant_and_strikethrough() {
+    let syntax = load_xshd(r#"<SyntaxDefinition><Color name="Typeface" fontFamily="Fira Code, monospace" fontWeight="650" fontStyle="Oblique" underline="false" strikethrough="true" fontSize="13.5"/><RuleSet><Rule color="Typeface">word</Rule></RuleSet></SyntaxDefinition>"#).unwrap();
+    let definition = syntax.compile().unwrap();
+    let color = &definition.colors["Typeface"];
+    assert_eq!(color.font_family.as_deref(), Some("Fira Code, monospace"));
+    assert_eq!(color.font_weight, Some(650));
+    assert_eq!(color.bold, Some(false));
+    assert_eq!(
+        color.font_style,
+        Some(crate::highlighting::HighlightingFontStyle::Oblique)
+    );
+    assert_eq!(color.italic, Some(true));
+    assert_eq!(color.strikethrough, Some(true));
+    assert_eq!(color.underline, Some(false));
+    assert_eq!(color.font_size, Some(13.5));
+    assert_eq!(
+        definition.rule_sets[definition.main_rule_set].rules[0]
+            .color
+            .as_ref(),
+        Some(color)
+    );
+}
+
+#[test]
+fn inline_font_colors_validate_programmatic_ast_and_named_weight_aliases() {
+    for (name, expected) in [
+        ("Thin", 100),
+        ("SemiLight", 350),
+        ("SemiBold", 600),
+        ("Solid", 900),
+        ("UltraBlack", 950),
+        ("1", 1),
+        ("1000", 1000),
+    ] {
+        let xml = format!("<SyntaxDefinition><RuleSet><Rule fontWeight=\"{name}\" fontStyle=\"2\">x</Rule></RuleSet></SyntaxDefinition>");
+        let definition = load_xshd(&xml).unwrap().compile().unwrap();
+        let color = definition.rule_sets[definition.main_rule_set].rules[0]
+            .color
+            .as_ref()
+            .unwrap();
+        assert_eq!(color.font_weight, Some(expected), "{name}");
+        assert_eq!(
+            color.font_style,
+            Some(crate::highlighting::HighlightingFontStyle::Oblique)
+        );
+    }
+    for invalid in [
+        XshdColor {
+            font_weight: Some("1001".into()),
+            ..Default::default()
+        },
+        XshdColor {
+            font_style: Some("Sideways".into()),
+            ..Default::default()
+        },
+        XshdColor {
+            font_size: Some(f64::INFINITY),
+            ..Default::default()
+        },
+    ] {
+        let syntax = XshdSyntaxDefinition {
+            elements: vec![XshdElement::RuleSet(XshdRuleSet {
+                elements: vec![XshdElement::Rule(XshdRule {
+                    regex: Some("x".into()),
+                    color: XshdReference::inline(invalid),
+                    ..Default::default()
+                })],
+                ..Default::default()
+            })],
+            ..Default::default()
+        };
+        assert!(syntax.compile().is_err());
+    }
+}
+
+#[test]
 fn default_regex_mode_and_colored_delimiters_survive_serialization() {
     let red = XshdReference::inline(XshdColor {
         foreground: Some("Red".into()),

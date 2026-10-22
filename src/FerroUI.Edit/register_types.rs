@@ -40,6 +40,9 @@ pub fn register_types() {
         ferroui_base::metadata::MarkupType::register(
             <crate::CompletionAcceptAction as ferroui_base::metadata::MarkupTyped>::MARKUP,
         );
+        ferroui_base::metadata::MarkupType::register(
+            <crate::ClipboardSelectionKind as ferroui_base::metadata::MarkupTyped>::MARKUP,
+        );
         MarkupAssembly::register(&ASSEMBLY);
     });
 }

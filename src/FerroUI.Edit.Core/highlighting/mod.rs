@@ -14,7 +14,7 @@ pub use highlighted_line::{HighlightedLine, HighlightedSection};
 pub use highlighter::IHighlighter as Highlighter;
 pub use highlighter::{HighlightingStateChangedEventArgs, IHighlighter};
 pub use highlighting_definition::{
-    HighlightingColor, HighlightingDefinition, HighlightingError, HighlightingRule,
+    HighlightingColor, HighlightingDefinition, HighlightingError, HighlightingFontStyle, HighlightingRule,
     HighlightingRuleSet, HighlightingSpan,
 };
 pub use highlighting_engine::{HighlightingEngine, HighlightingState};

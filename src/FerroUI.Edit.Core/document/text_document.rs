@@ -835,6 +835,17 @@ impl TextDocument {
     /// Applies nonoverlapping edits expressed in the same original revision.
     /// All ranges are checked before editing, and the result is one undo step.
     pub fn apply_edits(&self, edits: &[DocumentEdit]) -> Result<(), DocumentError> {
+        self.apply_edits_with_mapping(edits, OffsetChangeMappingType::Normal)
+    }
+
+    /// Applies a complete edit batch using the requested anchor-mapping policy.
+    /// The policy is shared by all replacements, while ranges and read-only
+    /// state are validated for the entire batch before its first mutation.
+    pub fn apply_edits_with_mapping(
+        &self,
+        edits: &[DocumentEdit],
+        mapping: OffsetChangeMappingType,
+    ) -> Result<(), DocumentError> {
         self.validate_mutation(0, 0)?;
         let mut edits: Vec<_> = edits.iter().collect();
         edits.sort_by_key(|edit| edit.offset);
@@ -862,7 +873,7 @@ impl TextDocument {
                 edit.offset,
                 edit.length,
                 inserted.text_length(),
-                OffsetChangeMappingType::Normal,
+                mapping,
             );
             if edit.length != 0 || inserted.text_length() != 0 {
                 self.apply_change(DocumentChangeEventArgs::with_map(
@@ -918,7 +929,7 @@ impl TextDocument {
         struct ResetReplay(TextDocument);
         impl Drop for ResetReplay {
             fn drop(&mut self) {
-                self.0.0.state.borrow_mut().history.replaying = false;
+                self.0 .0.state.borrow_mut().history.replaying = false;
             }
         }
         let _reset = ResetReplay(self.clone());

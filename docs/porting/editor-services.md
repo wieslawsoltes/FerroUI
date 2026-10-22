@@ -17,7 +17,7 @@ has been implemented. Presentation members belong to `FerroUI.Edit`.
 |---|---|---|
 | `Editing/SelectionSegment.cs`, `Selection.cs`, `SimpleSelection.cs`, `EmptySelection.cs` | `editing/selection.rs` | Directed selections, coalescing, multicaret normalization, document change mapping |
 | `Editing/CaretNavigationCommandHandler.cs`, `Document/TextUtilities.cs` | `editing/caret_navigation.rs` | Grapheme, word, line and document movement; surrogate and CRLF boundaries |
-| `Editing/RectangleSelection.cs` | `editing/rectangle_selection.rs`, `editing/editor_session/virtual_space.rs` | Rectangular logical-line ranges, tab-expanded cells, explicit virtual endpoints, padded insertion and bounded multiline paste |
+| `Editing/RectangleSelection.cs` | `editing/rectangle_selection.rs`, `editing/editor_session/virtual_space.rs`, `editing/editor_session/rectangular_paste.rs` | Rectangular logical-line ranges, tab-expanded cells, explicit virtual endpoints, padded insertion, bounded replacement and clipboard column paste |
 | `Editing/IReadOnlySectionProvider.cs`, `NoReadOnlySections.cs`, `TextSegmentReadOnlySectionProvider.cs` | `editing/read_only_section_provider.rs` | Anchored protected ranges, boundary insertion policy, writable interval subtraction |
 | `Editing/TextArea.cs`, `EditingCommandHandler.cs`, `TextEditorOptions.cs` | `editing/editor_session.rs` | Shared editing session, multicaret replacement, grouped undo, delete, selection, indentation, newline and tab commands |
 | `Editing/EditingCommandHandler.cs` transformation helpers and commands | `editing/text_transformations.rs` | Leading/trailing whitespace cleanup, tab/space conversion, Unicode casing and selected/current-line deletion |
@@ -37,7 +37,7 @@ has been implemented. Presentation members belong to `FerroUI.Edit`.
 | `CodeCompletion/CompletionWindow.cs`, `CompletionWindowBase.cs` | `completion/completion_session.rs` | Anchored insertion range, live filter prefix, caret dismissal and completion commit |
 | `Snippets/Snippet.cs`, `SnippetElement.cs`, `SnippetContainerElement.cs`, `SnippetTextElement.cs`, `SnippetReplaceableTextElement.cs`, `SnippetBoundElement.cs`, `SnippetCaretElement.cs`, `SnippetSelectionElement.cs` | `snippets/snippet.rs` | Structured expansion, selected-text insertion, linked fields, final caret; additional numeric snippet notation |
 | `Snippets/InsertionContext.cs`, `IActiveElement.cs`, `SnippetInputHandler.cs` | `snippets/snippet_session.rs` | Active field traversal, document anchors, automatic bound-text synchronization and single-step undo |
-| `Highlighting/HighlightingColor.cs`, `HighlightingRule.cs`, `HighlightingSpan.cs`, `HighlightingRuleSet.cs`, `IHighlightingDefinition.cs` | `highlighting/highlighting_definition.rs` | Runtime color/rule/span model and public loading APIs routed through typed syntax trees |
+| `Highlighting/HighlightingColor.cs`, `HighlightingRule.cs`, `HighlightingSpan.cs`, `HighlightingRuleSet.cs`, `IHighlightingDefinition.cs` | `highlighting/highlighting_definition.rs` | Full runtime font/color/decoration model, rules/spans and public loading APIs routed through typed syntax trees |
 | `Highlighting/Xshd/XshdElement.cs`, `XshdSyntaxDefinition.cs`, `XshdReference.cs`, `XshdColor.cs`, `XshdProperty.cs`, `XshdRuleSet.cs`, `XshdKeywords.cs`, `XshdSpan.cs`, `XshdImport.cs`, `XshdRule.cs` | `highlighting/xshd/model.rs` | Ordered editable syntax nodes, unresolved local/external/inline references, full XML color metadata and source positions |
 | `Highlighting/Xshd/IXshdVisitor.cs` | `highlighting/xshd/visitor.rs` | Typed fallible visitors, explicit child traversal, property visitation and an additional mutable visitor |
 | `Highlighting/Xshd/V2Loader.cs`, `HighlightingLoader.cs` | `highlighting/xshd/loader.rs` | Namespace-aware v2 syntax loading, source diagnostics, structural/value checks and distinct parsing/compilation phases |
@@ -147,13 +147,17 @@ Highlighted lines validate ranges and nesting before merging additional
 properties or exporting a selection. Existing parser state is preserved.
 HTML uses flattened effective spans so an inner `underline: false` can clear
 an outer underline. Text and attributes are escaped; CSS values accept a
-conservative color syntax and finite positive font sizes, and hyperlinks reject
+conservative color syntax, safely quoted font families, numeric weights, exact
+slant, independent decorations and finite positive font sizes. Native ARGB
+hexadecimal colors are converted to CSS RGBA, and hyperlinks reject
 executable schemes. Document-range export validates the highlighter's document
 identity and preserves CR, LF, CRLF, blank and trailing lines. The document
 exporters consume `IHighlighter`, allowing hosts to supply another highlighting
 implementation through the same contract. CF_HTML generation returns a payload
 with CRLF headers and UTF-8 byte offsets. It does not write to an operating-system
-clipboard.
+clipboard. Native run construction, resource resolution, renderer style
+application, HTML publication and transactional copy/cut/paste are connected by
+the separate [native rich-text and clipboard adapter](editor-rich-text-clipboard.md).
 
 ### Incremental document highlighting
 
@@ -406,8 +410,11 @@ Run `cargo test -p ferroui-edit-core --lib`. Service regressions cover:
   compared with fresh highlighting;
 - rich-text property overlays and clears, offset affinity, nested section
   merging, UTF-16 slicing and restoration of split surrogate pairs;
+- semantic font family/weight/slant/strikethrough retention, legacy boolean
+  overlay compatibility, independent setters and full XSHD runtime validation;
 - HTML escaping, CSS/hyperlink rejection, blank/trailing lines and CF_HTML
-  offsets in UTF-8 bytes.
+  offsets in UTF-8 bytes, including native alpha-channel conversion and safe
+  font-family fallback lists.
 
 These are executable regression tests, not a complete upstream differential
 suite. The central port inventory records missing counterparts separately.
@@ -415,6 +422,12 @@ At the typed-XSHD integration checkpoint, the unfiltered Core command passed
 **240 tests**, including **22 typed-XSHD tests** and **three additional registry
 regressions**. Later port stages can add tests without changing that historical
 checkpoint count.
+
+The later runtime-style checkpoint passed **264 Core tests** with no failures,
+ignored tests or filters. The subsequent rich-text/clipboard integration gate
+passed **271 Core tests, 91 control tests, and two demo tests**, also unfiltered
+with no failures or ignores. The [rich-text/clipboard report](editor-rich-text-clipboard.md)
+records the native integration coverage and command separately.
 
 Run `cargo test -p ferroui-edit --lib` for the control-service integration tests
 and `cargo test -p editor-demo --lib --no-default-features` for runtime XAML
@@ -447,13 +460,17 @@ parity or operating-system clipboard/input-method behavior.
   from that source and are not added here. Locale-specific casing and every
   upstream input mode still require separate work. Title-case conversion throws
   in the pinned source and is not exposed as a working command here.
-- Completion insight/overload-provider windows and rich completion descriptions
-  require separate presentation work. The popup currently displays plain text
-  descriptions and concrete `CompletionItem` values.
-- Search localization and custom search strategy injection remain separate
-  extension surfaces. The panel exposes snapshot result ranges to the renderer.
-  The built-in panel handles literal and regex modes; wildcard matching is
-  available through the service factory.
+- Native completion and insight/overload controls, custom completion actions,
+  rich descriptions and observable collections are implemented; see
+  [editor-completion.md](editor-completion.md). Description placement remains
+  inline below the list instead of a secondary side tooltip, and native
+  composition replaces the source's literal XAML templates.
+- The panel exposes snapshot search-result ranges to the renderer and handles
+  literal and regex modes; wildcard matching is available through the service
+  factory. Source search-option events and several lifecycle/command aliases
+  remain separate presentation work. Localization and public strategy injection
+  are potential extensions; the pinned panel has no localization class or
+  public strategy setter.
 - Structured snippet nodes support text, replacement fields, bound fields,
   selected text, containers and a final caret. Numeric snippet notation rejects
   variables, nested defaults, choices and transformations explicitly. Custom
@@ -480,13 +497,11 @@ parity or operating-system clipboard/input-method behavior.
   pinned concrete source to follow the interface's inclusive contract.
 - Rich-text writers are owned buffers rather than live-document insertion
   writers; the corresponding upstream model-writer implementation was commented
-  out. Native UI `Run` construction, colorizer integration, font families,
-  strikethrough, arbitrary font weights and framework brush/resource resolution
-  are not represented by the current runtime color model. The editable XSHD
-  tree does retain those XML metadata fields for inspection and serialization;
-  compiling it currently maps font weight/style to the runtime's bold/italic
-  subset. HTML customization uses
-  concrete options instead of overridable style/class callbacks. Export uses
+  out. Runtime XSHD retains font families, exact weights/slants and both
+  decorations; native `Run`, brush and clipboard adapters are documented in
+  [editor-rich-text-clipboard.md](editor-rich-text-clipboard.md). HTML
+  customization uses concrete options instead of overridable style/class
+  callbacks. Export uses
   flat spans, `<br/>`, pixel font sizes and ten-digit CF_HTML offsets. UTF-8
   projections replace lone surrogates; a surrogate pair split by formatting
   takes the leading code unit's style.

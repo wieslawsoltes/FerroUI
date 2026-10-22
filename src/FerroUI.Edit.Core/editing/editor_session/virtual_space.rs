@@ -1,5 +1,5 @@
 use super::*;
-use crate::document::{DocumentEdit, DocumentVersion};
+use crate::document::DocumentEdit;
 use crate::editing::rectangle_selection::{position_at_column, visual_column};
 
 pub(super) struct PlannedReplacement {
@@ -144,12 +144,12 @@ impl EditorSession {
         rectangular: bool,
         collapse_rectangle: bool,
     ) -> Result<(), EditError> {
+        let original_version = self.document().version();
         let document_edits: Vec<_> = edits
             .iter()
             .filter(|edit| edit.segment.length != 0 || !edit.text.is_empty())
             .map(|edit| DocumentEdit::new(edit.segment.offset, edit.segment.length, &edit.text))
             .collect();
-        self.validate_document_edits(&document_edits)?;
         if edits
             .windows(2)
             .any(|pair| pair[0].segment.end_offset() > pair[1].segment.offset)
@@ -163,17 +163,7 @@ impl EditorSession {
         } else {
             1
         };
-        let original_version = self.document().version();
-        let update = if document_edits.is_empty() {
-            None
-        } else {
-            let update = self.document().begin_update()?;
-            // Update-start subscribers may change the host's protection policy.
-            // Check the complete plan again before applying its first edit.
-            self.validate_document_edits(&document_edits)?;
-            ensure_current_version(&original_version, &self.document().version())?;
-            Some(update)
-        };
+        let update = self.begin_prepared_update(&document_edits, &original_version)?;
         let carets: Result<Vec<_>, DocumentError> = edits
             .iter()
             .map(|edit| {
@@ -408,16 +398,6 @@ impl EditorSession {
             .collect();
         self.replace_selections(&replacements?)
     }
-}
-
-fn ensure_current_version(
-    expected: &DocumentVersion,
-    current: &DocumentVersion,
-) -> Result<(), EditError> {
-    if expected.revision() != current.revision() {
-        return Err(EditError::StaleEditPlan);
-    }
-    Ok(())
 }
 
 fn split_rectangular_text(text: &str, maximum_rows: usize) -> Vec<&str> {

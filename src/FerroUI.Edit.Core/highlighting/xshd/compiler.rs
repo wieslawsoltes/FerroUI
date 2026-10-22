@@ -1,7 +1,8 @@
 use super::model::*;
+use crate::highlighting::highlighting_definition::parse_font_weight;
 use crate::highlighting::{
-    HighlightingColor, HighlightingDefinition, HighlightingError, HighlightingRule,
-    HighlightingRuleSet, HighlightingSpan,
+    HighlightingColor, HighlightingDefinition, HighlightingError, HighlightingFontStyle,
+    HighlightingRule, HighlightingRuleSet, HighlightingSpan,
 };
 use fancy_regex::{Regex, RegexBuilder};
 use std::collections::HashMap;
@@ -169,6 +170,30 @@ impl<'a> Compiler<'a> {
         definition: usize,
         color: &'a XshdColor,
     ) -> Result<(), HighlightingError> {
+        if color
+            .font_weight
+            .as_deref()
+            .is_some_and(|value| parse_font_weight(value).is_none())
+        {
+            return Err(color
+                .position
+                .error("fontWeight must be a named weight or a number in 1..=1000"));
+        }
+        if color
+            .font_style
+            .as_deref()
+            .is_some_and(|value| HighlightingFontStyle::parse(value).is_none())
+        {
+            return Err(color
+                .position
+                .error("fontStyle must be Normal, Italic or Oblique"));
+        }
+        if color
+            .font_size
+            .is_some_and(|size| !size.is_finite() || size <= 0.0)
+        {
+            return Err(color.position.error("fontSize must be finite and positive"));
+        }
         if let Some(name) = color.name.as_deref() {
             validate_name(name, color.position)?;
             if self.colors.insert((definition, name), color).is_some() {
@@ -404,27 +429,22 @@ fn validate_name(name: &str, position: XshdPosition) -> Result<(), HighlightingE
 }
 
 fn runtime_color(color: &XshdColor) -> HighlightingColor {
+    let font_weight = color.font_weight.as_deref().and_then(parse_font_weight);
+    let font_style = color
+        .font_style
+        .as_deref()
+        .and_then(HighlightingFontStyle::parse);
     HighlightingColor {
         name: color.name.clone(),
         foreground: color.foreground.clone(),
         background: color.background.clone(),
-        bold: color.font_weight.as_deref().map(|weight| {
-            matches!(
-                weight.to_ascii_lowercase().as_str(),
-                "bold"
-                    | "extrabold"
-                    | "ultrabold"
-                    | "black"
-                    | "heavy"
-                    | "extrablack"
-                    | "ultrablack"
-            ) || weight.parse::<u16>().is_ok_and(|value| value >= 700)
-        }),
-        italic: color
-            .font_style
-            .as_deref()
-            .map(|style| !style.eq_ignore_ascii_case("normal") && style != "0"),
+        bold: font_weight.map(|weight| weight >= 700),
+        italic: font_style.map(|style| style != HighlightingFontStyle::Normal),
         underline: color.underline,
+        strikethrough: color.strikethrough,
+        font_family: color.font_family.clone(),
+        font_weight,
+        font_style,
         font_size: color.font_size,
     }
 }

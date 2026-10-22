@@ -1,14 +1,17 @@
 mod rectangular_paste;
 mod virtual_space;
 
+#[cfg(test)]
+mod preflight_tests;
+
 use super::{
     next_caret_position, plan_text_transformation, CaretMovement, DefaultIndentationStrategy,
     IReadOnlySectionProvider, IndentationError, IndentationStrategy, NoReadOnlySections, Selection,
     SelectionSegment, TextTransformation,
 };
 use crate::document::{
-    AnchorMovementType, DocumentError, DocumentSubscription, OffsetChangeMappingType,
-    SimpleSegment, TextDocument, TextUtilities,
+    AnchorMovementType, DocumentEdit, DocumentError, DocumentSubscription, DocumentVersion,
+    OffsetChangeMappingType, SimpleSegment, TextDocument, TextUtilities, UpdateGuard,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeSet;
@@ -292,37 +295,45 @@ impl EditorSession {
         &self,
         edits: impl IntoIterator<Item = (SimpleSegment, bool)>,
     ) -> Result<(), EditError> {
+        let version = self.document().version();
+        let result = (|| {
+            if self.is_read_only() || self.document().is_read_only() {
+                return Err(EditError::ReadOnly);
+            }
+            let provider = self.inner.read_only_sections.borrow().clone();
+            let length = self.document().text_length();
+            for (segment, inserts_text) in edits {
+                if segment.offset > length || segment.length > length - segment.offset {
+                    return Err(EditError::InvalidSelection);
+                }
+                if inserts_text && !provider.can_insert(segment.offset) {
+                    return Err(EditError::ReadOnly);
+                }
+                let writable: usize = provider
+                    .get_deletable_segments(segment)
+                    .iter()
+                    .map(|s| s.length)
+                    .sum();
+                if writable != segment.length {
+                    return Err(EditError::ReadOnly);
+                }
+            }
+            Ok(())
+        })();
+        self.ensure_document_version(&version)?;
+        // A provider is host code and may change global protection while its
+        // insertion/deletion callbacks are running.
         if self.is_read_only() || self.document().is_read_only() {
             return Err(EditError::ReadOnly);
         }
-        let provider = self.inner.read_only_sections.borrow().clone();
-        let length = self.document().text_length();
-        for (segment, inserts_text) in edits {
-            if segment.offset > length || segment.length > length - segment.offset {
-                return Err(EditError::InvalidSelection);
-            }
-            if inserts_text && !provider.can_insert(segment.offset) {
-                return Err(EditError::ReadOnly);
-            }
-            let writable: usize = provider
-                .get_deletable_segments(segment)
-                .iter()
-                .map(|s| s.length)
-                .sum();
-            if writable != segment.length {
-                return Err(EditError::ReadOnly);
-            }
-        }
-        Ok(())
+        result
     }
     fn apply_edits(&self, edits: &[(SimpleSegment, String)]) -> Result<(), EditError> {
-        self.validate_edits(edits)?;
-        let _update = self.document().begin_update()?;
-        for (segment, text) in edits.iter().rev() {
-            self.document()
-                .replace(segment.offset, segment.length, text)?;
-        }
-        Ok(())
+        let edits: Vec<_> = edits
+            .iter()
+            .map(|(segment, text)| DocumentEdit::new(segment.offset, segment.length, text))
+            .collect();
+        self.apply_document_edits(&edits)
     }
 
     /// Applies a precomputed edit plan using original document coordinates.
@@ -332,9 +343,56 @@ impl EditorSession {
         &self,
         edits: &[crate::document::DocumentEdit],
     ) -> Result<(), EditError> {
-        self.validate_document_edits(edits)?;
-        self.document().apply_edits(edits)?;
+        self.apply_mapped_document_edits(edits, OffsetChangeMappingType::Normal)
+    }
+
+    fn apply_mapped_document_edits(
+        &self,
+        edits: &[DocumentEdit],
+        mapping: OffsetChangeMappingType,
+    ) -> Result<(), EditError> {
+        let version = self.document().version();
+        if let Some(update) = self.begin_prepared_update(edits, &version)? {
+            self.document().apply_edits_with_mapping(edits, mapping)?;
+            update.finish()?;
+        }
         Ok(())
+    }
+
+    fn ensure_document_version(&self, expected: &DocumentVersion) -> Result<(), EditError> {
+        if self.document().version().revision() != expected.revision() {
+            return Err(EditError::StaleEditPlan);
+        }
+        Ok(())
+    }
+
+    /// Keeps an already prepared plan in its original revision across both
+    /// provider callbacks and the outer update-start notification.
+    fn begin_prepared_update(
+        &self,
+        edits: &[DocumentEdit],
+        version: &DocumentVersion,
+    ) -> Result<Option<UpdateGuard>, EditError> {
+        self.ensure_document_version(version)?;
+        let mut ranges: Vec<_> = edits
+            .iter()
+            .map(|edit| (edit.offset, edit.length))
+            .collect();
+        ranges.sort_unstable();
+        if ranges
+            .windows(2)
+            .any(|pair| pair[0].0.saturating_add(pair[0].1) > pair[1].0)
+        {
+            return Err(DocumentError::OverlappingEdits.into());
+        }
+        self.validate_document_edits(edits)?;
+        if edits.is_empty() {
+            return Ok(None);
+        }
+        let update = self.document().begin_update()?;
+        self.ensure_document_version(version)?;
+        self.validate_document_edits(edits)?;
+        Ok(Some(update))
     }
     /// Checks the host's read-only policy without changing the document. Other
     /// editing services can use this before applying their own undo grouping.
@@ -422,6 +480,7 @@ impl EditorSession {
     }
 
     pub fn insert_new_line(&self) -> Result<(), EditError> {
+        let version = self.document().version();
         let options = self.options();
         let Some(strategy) = self.indentation_strategy() else {
             return self.replace_selection_with_text(&options.newline);
@@ -472,6 +531,7 @@ impl EditorSession {
                 .1
                 .push_str(&preview.get_text(indentation.offset, indentation.length)?);
         }
+        self.ensure_document_version(&version)?;
         self.replace_segments(&edits, selection.primary_index())
     }
     pub fn insert_tab(&self) -> Result<(), EditError> {
@@ -512,11 +572,13 @@ impl EditorSession {
     /// undo unit. A selection ending at a line start excludes that last line,
     /// matching the Tab/Shift+Tab line-selection behavior.
     pub fn reindent_selection(&self) -> Result<(), EditError> {
+        let version = self.document().version();
         let Some(strategy) = self.indentation_strategy() else {
             return Ok(());
         };
         if self.selection().is_empty() {
             let edits = strategy.indent_lines(self.document(), 1, self.document().line_count())?;
+            self.ensure_document_version(&version)?;
             return self.apply_document_edits(&edits);
         }
         let selected_lines = self.selected_lines()?;
@@ -530,6 +592,7 @@ impl EditorSession {
         let mut edits = Vec::new();
         for (begin, end) in ranges {
             edits.extend(strategy.indent_lines(self.document(), begin, end)?);
+            self.ensure_document_version(&version)?;
         }
         self.apply_document_edits(&edits)
     }
@@ -545,22 +608,7 @@ impl EditorSession {
             &self.options(),
             transformation,
         )?;
-        self.validate_document_edits(&edits)?;
-        let mapping = transformation.offset_change_mapping();
-        if mapping == OffsetChangeMappingType::Normal {
-            self.document().apply_edits(&edits)?;
-        } else if !edits.is_empty() {
-            let _update = self.document().begin_update()?;
-            for edit in edits.iter().rev() {
-                self.document().replace_with_mapping(
-                    edit.offset,
-                    edit.length,
-                    &edit.text,
-                    mapping,
-                )?;
-            }
-        }
-        Ok(())
+        self.apply_mapped_document_edits(&edits, transformation.offset_change_mapping())
     }
 
     fn selected_lines(&self) -> Result<BTreeSet<usize>, EditError> {
