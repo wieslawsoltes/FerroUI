@@ -8,6 +8,7 @@ mod selection;
 mod input_observations;
 mod vector_width;
 mod corner_radius;
+mod gradient_edit;
 use crate::{
     icons::brush,
     renderer::{RenderStats, ScenePainter},
@@ -204,6 +205,7 @@ pub struct DesignCanvas {
     pointer_presses: RefCell<input_observations::PointerPresses>,
     stroke_width: RefCell<vector_width::WidthState>,
     corner_radius: RefCell<corner_radius::CornerRadiusState>,
+    linear_gradient: RefCell<gradient_edit::GradientState>,
 }
 ferro_class!(DesignCanvas:Control);
 ferro_impl_classes!(DesignCanvas:FerroObjectImpl,StyledElementImpl,LayoutableImpl,InteractiveImpl,ControlImpl);
@@ -251,6 +253,7 @@ impl DesignCanvas {
             pointer_presses: RefCell::new(input_observations::PointerPresses::default()),
             stroke_width: RefCell::new(vector_width::WidthState::default()),
             corner_radius: RefCell::new(corner_radius::CornerRadiusState::default()),
+            linear_gradient: RefCell::new(gradient_edit::GradientState::default()),
         });
         this.set_focusable(true);
         this.set_clip_to_bounds(true);
@@ -290,6 +293,7 @@ impl DesignCanvas {
     }
     /// Activation changes cannot reuse a press or hover from an earlier frame.
     pub fn reset_presentation_input(&self) {
+        self.leave_linear_gradient_edit();
         self.cancel_corner_radius_gesture();
         self.clear_corner_radius_hover();
         self.leave_stroke_width_edit();
@@ -299,6 +303,7 @@ impl DesignCanvas {
         self.space.set(false);
     }
     pub fn set_tool(&self, tool: Tool) {
+        self.leave_linear_gradient_edit();
         self.cancel_corner_radius_gesture();
         self.clear_corner_radius_hover();
         self.leave_stroke_width_edit();
@@ -316,6 +321,8 @@ impl DesignCanvas {
         self.emit(CanvasEvent::Tool);
     }
     pub fn reset_fit(&self) {
+        self.cancel_linear_gradient_gesture();
+        self.clear_gradient_hover();
         self.cancel_corner_radius_gesture();
         self.clear_corner_radius_hover();
         self.cancel_layout_drag();
@@ -323,6 +330,8 @@ impl DesignCanvas {
         self.invalidate_visual();
     }
     pub fn zoom(&self, factor: f64) {
+        self.cancel_linear_gradient_gesture();
+        self.clear_gradient_hover();
         self.cancel_corner_radius_gesture();
         self.clear_corner_radius_hover();
         self.cancel_layout_drag();
@@ -333,6 +342,8 @@ impl DesignCanvas {
         self.emit(CanvasEvent::Camera);
     }
     pub fn zoom_to_selection(&self) {
+        self.cancel_linear_gradient_gesture();
+        self.clear_gradient_hover();
         self.cancel_corner_radius_gesture();
         self.clear_corner_radius_hover();
         self.cancel_layout_drag();
@@ -429,6 +440,7 @@ impl DesignCanvas {
     /// Undo during a live pointer edit cancels that transaction and its gesture.
     /// Later pointer events must never continue writing after history restored it.
     pub fn cancel_active_edit(&self) -> bool {
+        if self.cancel_linear_gradient_gesture() { return true; }
         if self.cancel_corner_radius_gesture() { return true; }
         if self.cancel_stroke_width_gesture() { return true; }
         if self.cancel_network_bucket_gesture() { return true; }
@@ -443,6 +455,8 @@ impl DesignCanvas {
     }
     pub fn cancel(&self) {
         self.layout_grids.borrow_mut().clear_snap();
+        if self.cancel_linear_gradient_gesture() { return; }
+        self.clear_gradient_hover();
         if self.cancel_corner_radius_gesture() { return; }
         self.clear_corner_radius_hover();
         if self.cancel_stroke_width_gesture() { return; }
@@ -462,6 +476,7 @@ impl DesignCanvas {
     }
     /// Enter direct path editing without replacing the retained document node.
     pub fn edit_vector(&self) -> bool {
+        self.leave_linear_gradient_edit();
         self.cancel_corner_radius_gesture();
         self.clear_corner_radius_hover();
         self.leave_stroke_width_edit();
@@ -500,6 +515,7 @@ impl DesignCanvas {
         self.invalidate_visual();
     }
     pub fn reconcile_vector_edit(&self) {
+        self.reconcile_linear_gradient();
         self.reconcile_corner_radius();
         self.reconcile_stroke_width();
         self.reconcile_network_bucket();
@@ -739,6 +755,7 @@ impl InputElementImpl for DesignCanvas {
     fn on_pointer_pressed(this: &Self, e: &PointerPressedEventArgs) {
         Self::parent_on_pointer_pressed(this, e);
         this.layout_grids.borrow_mut().clear_snap();
+        this.cancel_linear_gradient_gesture();
         this.cancel_corner_radius_gesture();
         this.cancel_stroke_width_gesture();
         this.cancel_network_bucket_gesture();
@@ -776,6 +793,7 @@ impl InputElementImpl for DesignCanvas {
             };
             return;
         }
+        if this.linear_gradient_press(world, e.click_count()) { return; }
         if this.image_crop_press(world) { return; }
         if this.stroke_width_press(world) { return; }
         let additive = e.key_modifiers().contains(KeyModifiers::SHIFT);
@@ -1009,6 +1027,7 @@ impl InputElementImpl for DesignCanvas {
             }
             return;
         }
+        if this.linear_gradient_move(world) { return; }
         if this.corner_radius_move(world) { return; }
         if this.image_crop_move(world) { return; }
         if this.stroke_width_move(world) { return; }
@@ -1351,6 +1370,14 @@ impl InputElementImpl for DesignCanvas {
             e.set_handled(true);
             return;
         }
+        if this.linear_gradient_active() {
+            this.linear_gradient_move(this.world(e.get_position(Some(this))));
+        }
+        if this.finish_linear_gradient_edit() {
+            e.pointer().capture(None);
+            e.set_handled(true);
+            return;
+        }
         if this.corner_radius_active() {
             this.corner_radius_move(this.world(e.get_position(Some(this))));
         }
@@ -1432,6 +1459,7 @@ impl InputElementImpl for DesignCanvas {
     }
     fn on_pointer_capture_lost(this: &Self, e: &PointerCaptureLostEventArgs) {
         Self::parent_on_pointer_capture_lost(this, e);
+        if this.cancel_linear_gradient_gesture() { return; }
         if this.cancel_corner_radius_gesture() { return; }
         if this.cancel_stroke_width_gesture() { return; }
         if this.cancel_network_bucket_gesture() { return; }
@@ -1448,6 +1476,7 @@ impl InputElementImpl for DesignCanvas {
     }
     fn on_pointer_exited(this: &Self, e: &PointerEventArgs) {
         Self::parent_on_pointer_exited(this, e);
+        this.clear_gradient_hover();
         this.clear_corner_radius_hover();
         this.clear_stroke_width_hover();
         this.clear_bucket_hover();
@@ -1460,6 +1489,8 @@ impl InputElementImpl for DesignCanvas {
     }
     fn on_pointer_wheel_changed(this: &Self, e: &PointerWheelEventArgs) {
         Self::parent_on_pointer_wheel_changed(this, e);
+        this.cancel_linear_gradient_gesture();
+        this.clear_gradient_hover();
         this.cancel_corner_radius_gesture();
         this.clear_corner_radius_hover();
         this.cancel_stroke_width_gesture();
@@ -1498,6 +1529,7 @@ impl InputElementImpl for DesignCanvas {
             e.set_handled(true);
             return;
         }
+        if this.linear_gradient_key(e.key, e.key_modifiers) { e.set_handled(true); return; }
         if e.key == Key::Escape && this.cancel_corner_radius_gesture() {
             e.set_handled(true);
             return;
@@ -1509,6 +1541,8 @@ impl InputElementImpl for DesignCanvas {
             return;
         }
         if e.key == Key::Space {
+            this.cancel_linear_gradient_gesture();
+            this.clear_gradient_hover();
             this.cancel_corner_radius_gesture();
             this.clear_corner_radius_hover();
             this.cancel_stroke_width_gesture();
@@ -2069,6 +2103,7 @@ impl VisualImpl for DesignCanvas {
             let Some(t) = doc.world_transform(id) else {
                 continue;
             };
+            if this.render_linear_gradient(ctx, &editor, id) { continue; }
             if this.render_image_crop(ctx, n, t, v) { continue; }
             if this.render_stroke_width(ctx, &editor, id, t, v) { continue; }
             if this.vector_node.get() == Some(id) {

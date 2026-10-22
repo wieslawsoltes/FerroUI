@@ -2,6 +2,9 @@
 use super::*;
 use ferrodesign_core::{GridPlacement, LayoutChild, SizingMode};
 
+#[path = "layout_padding.rs"]
+mod padding;
+
 struct UpdatingLayout<'a>(&'a Cell<bool>, bool);
 impl Drop for UpdatingLayout<'_> { fn drop(&mut self) { self.0.set(self.1); } }
 
@@ -15,6 +18,27 @@ struct LayoutSnapshot {
     reverse: bool,
     children: Vec<(NodeId, String)>,
     layout: core::AutoLayout,
+}
+
+// Padding and track controls edit the same frame without rebuilding the
+// dialog. Share their accepted baseline, but reject another editor, selection,
+// page or intervening document edit before applying a still-visible draft.
+struct LayoutEditGuard {
+    token: core::EditorRenderToken,
+    parent: Node,
+    selection: Vec<NodeId>,
+    page: NodeId,
+}
+impl LayoutEditGuard {
+    fn new(editor: &Editor, parent: NodeId) -> Self {
+        Self { token: editor.render_change_token(), parent: editor.document.nodes[&parent].clone(),
+            selection: editor.selection.clone(), page: editor.active_page }
+    }
+    fn matches(&self, editor: &Editor) -> bool {
+        self.token == editor.render_change_token() && self.selection == editor.selection
+            && self.page == editor.active_page && editor.document.nodes.get(&self.parent.id) == Some(&self.parent)
+    }
+    fn accept(&mut self, editor: &Editor) { *self = Self::new(editor, self.parent.id); }
 }
 
 struct LayoutInputs {
@@ -88,11 +112,12 @@ impl EditorShell {
             })
         };
         let _updating = UpdatingLayout(&self.updating, self.updating.replace(true));
-        self.modal("Layout placement and order", "Size grid tracks or a child, place layers across cells, or move them relative to a sibling. Each Apply or reorder is one undo step.");
+        self.modal("Layout padding, placement and order", "Edit frame padding, size grid tracks or a child, and arrange layers. Each committed edit is one undo step.");
         let host = self.control::<StackPanel>("ModalContent");
         host.set_spacing(12.0);
         let actions = self.control::<StackPanel>("ModalActions");
         actions.children().add(self.layout_button("Done", "LayoutDone", true, |shell| shell.close_modal()));
+        actions.children().add(self.layout_button("Save design", "LayoutSave", true, |shell| { shell.command("save"); }));
         let Some(snapshot) = snapshot else {
             host.children().add(layout_text("Select an auto-layout frame or one of its direct children.", true));
             return;
@@ -107,7 +132,9 @@ impl EditorShell {
         error.set_foreground(Some(icons::brush("#C8372B")));
         error.set_is_visible(false);
         host.children().add(error.clone());
-        if is_grid { self.layout_track_controls(&snapshot, &error); }
+        let guard = Rc::new(RefCell::new(LayoutEditGuard::new(&self.editor.borrow(), parent_id)));
+        self.layout_padding_controls(&snapshot, &error, guard.clone());
+        if is_grid { self.layout_track_controls(&snapshot, &error, guard); }
         let Some(child_id) = snapshot.child else {
             host.children().add(layout_text("This frame has no children. Add or drag layers into it to edit child sizing and placement.", true));
             return;
@@ -233,14 +260,14 @@ impl EditorShell {
         }
     }
 
-    fn layout_track_controls(self: &Rc<Self>, snapshot: &LayoutSnapshot, error: &Ref<TextBlock>) {
+    fn layout_track_controls(self: &Rc<Self>, snapshot: &LayoutSnapshot, error: &Ref<TextBlock>,
+        expected: Rc<RefCell<LayoutEditGuard>>) {
         let host = self.control::<StackPanel>("ModalContent");
         host.children().add(layout_text("Grid track sizing", false));
         host.children().add(layout_text("Separate tracks with commas: 120, auto, 2fr. Sizes are pixels, auto fits content, and fr shares remaining space. A blank list restores implicit tracks. Enter, Tab, Apply, or Save commits both lists together.", true));
         let columns = layout_input("LayoutColumnTracks", &core::format_grid_tracks(&snapshot.layout.column_tracks));
         let rows = layout_input("LayoutRowTracks", &core::format_grid_tracks(&snapshot.layout.row_tracks));
         host.children().add(layout_pair("Column tracks", &columns, "Row tracks", &rows));
-        let expected = Rc::new(RefCell::new(snapshot.layout.clone()));
         let committed_columns = Rc::new(RefCell::new(columns.text().unwrap_or_default()));
         let committed_rows = Rc::new(RefCell::new(rows.text().unwrap_or_default()));
         let weak_columns = columns.downgrade(); let weak_rows = rows.downgrade();
@@ -257,7 +284,7 @@ impl EditorShell {
                 .and_then(|columns| core::parse_grid_tracks(&row_text, core::MAX_GRID_ROWS).map(|rows| (columns, rows)));
             let result = parsed.and_then(|(columns, rows)| {
                 let mut editor = shell.editor.borrow_mut();
-                if editor.document.nodes.get(&parent).and_then(|node| node.layout.as_ref()) != Some(&*expected.borrow()) {
+                if !expected.borrow().matches(&editor) {
                     return Err(core::DocumentError::Invalid("The frame changed. Reopen layout authoring before applying these tracks.".into()));
                 }
                 let revision = editor.revision;
@@ -267,9 +294,7 @@ impl EditorShell {
                 Ok((result, changed)) => {
                     *previous_columns.borrow_mut() = column_text;
                     *previous_rows.borrow_mut() = row_text;
-                    if let Some(layout) = shell.editor.borrow().document.nodes.get(&parent).and_then(|node| node.layout.clone()) {
-                        *expected.borrow_mut() = layout;
-                    }
+                    expected.borrow_mut().accept(&shell.editor.borrow());
                     if let Some(error) = weak_error.upgrade() { error.set_is_visible(false); }
                     if changed { shell.changed(); }
                     if !result.warnings.is_empty() { shell.toast(&result.warnings.join("\n")); }

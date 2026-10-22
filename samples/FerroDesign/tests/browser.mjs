@@ -1,6 +1,7 @@
 import { paragraphRegressions } from "./paragraphs-browser.mjs";
 import { widthProfileRegressions } from "./width-profiles-browser.mjs";
 import { widthHandleRegressions } from "./width-handles-browser.mjs";
+import { gradientHandleRegressions } from "./gradient-handles-browser.mjs";
 import { cornerRegressions } from "./corners-browser.mjs";
 import { polygonCornerRegressions } from "./polygon-corners-browser.mjs";
 import { cornerRadiusHandleRegressions } from "./corner-radius-handles-browser.mjs";
@@ -15,6 +16,7 @@ import { svgCompositingRegressions } from "./svg-compositing-browser.mjs";
 import { maskAuthoringRegressions } from "./masks-browser.mjs";
 import { pageInspectorRegressions } from "./page-inspector-browser.mjs";
 import { layoutAuthoringRegressions } from "./layout-browser.mjs";
+import { layoutPaddingRegressions } from "./layout-padding-browser.mjs";
 import { layoutDragRegressions } from "./layout-drag-browser.mjs";
 import { effectAuthoringRegressions } from "./effects-browser.mjs";
 import { inspectorLifecycleRegressions } from "./inspector-lifecycle-browser.mjs";
@@ -32,6 +34,7 @@ import { regionPaintRegressions } from "./region-paints-browser.mjs";
 import { compactAutosaveRegressions } from "./serialization-browser.mjs";
 import { boundedHistoryRegressions } from "./history-browser.mjs";
 import { networkBucketRegressions } from "./network-bucket-browser.mjs";
+import { captureWithinDeadline, runIsolatedScenario } from "./isolated-scenario.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createServer } from "node:http";
@@ -199,6 +202,32 @@ function largeDocument(reference, count = 10000) {
 const digest = (text) => createHash("sha256").update(text).digest("hex");
 const documentState = (page) => page.evaluate(() => JSON.parse(globalThis.ferroDesign.ferroDesignExportJson()));
 const documentNode = (page, id) => page.evaluate((id) => JSON.parse(globalThis.ferroDesign.ferroDesignExportJson()).nodes[id], id);
+async function captureFailure(page, stem) {
+    const diagnostic = await page.evaluate(() => {
+        const read = callback => { try { return callback(); } catch (error) { return { error: String(error) }; } };
+        const element = input => input && ({
+            tag: input.tagName, id: input.id, value: input.value,
+            selectionStart: input.selectionStart, selectionEnd: input.selectionEnd,
+        });
+        return {
+            state: read(() => JSON.parse(globalThis.ferroDesign.ferroDesignState())),
+            storage: read(() => globalThis.ferroDesignStorage?.status()),
+            focus: element(document.activeElement),
+            textInputs: [...document.querySelectorAll(".ferroui-input-element")].map(element),
+            documentJson: read(() => globalThis.ferroDesign.ferroDesignExportJson()),
+        };
+    }).catch(error => ({ error: String(error) }));
+    if (typeof diagnostic.documentJson === "string") {
+        const file = stem + ".ferrodesign";
+        await writeFile(resolve(output, file), diagnostic.documentJson);
+        diagnostic.document = { file, bytes: Buffer.byteLength(diagnostic.documentJson), sha256: digest(diagnostic.documentJson) };
+    }
+    delete diagnostic.documentJson;
+    await page.screenshot({ path: resolve(output, stem + ".png"), timeout: 15000 }).catch(error => {
+        diagnostic.screenshotError = String(error);
+    });
+    return diagnostic;
+}
 function worldPoint(view, x, y) {
     return { x: view.chrome.CanvasHost.x + view.pan.x + x * view.zoom, y: view.chrome.CanvasHost.y + view.pan.y + y * view.zoom };
 }
@@ -975,39 +1004,45 @@ try {
                     return;
                 }
                 console.log(mode + ": starting " + name);
-                const started = performance.now();
-                try {
-                    const before = await documentState(page);
-                    assert.equal(await page.evaluate(() => globalThis.ferroDesign.ferroDesignCommand("commit-edit")), true,
-                        name + " requires a successful native draft flush");
-                    assert.deepEqual(await documentState(page), before,
-                        name + " must not inherit an uncommitted edit from the previous scenario");
-                    const saved = await flushStorage(page);
-                    assert.equal(saved.saved, true, name + " requires durable storage before reload");
-                    assert.equal(saved.dirty, false);
-                    await committedDocumentInfo(page);
-                    const previousPanics = await page.evaluate(() => ({
-                        startup: globalThis.ferroDesignErrors || [],
-                        render: globalThis.ferroDesignRenderPanics?.() || [],
-                    }));
-                    assert.deepEqual(previousPanics, { startup: [], render: [] },
-                        "Reload cannot hide a previous scenario's native panic");
-                    await page.reload({ waitUntil: "domcontentloaded", timeout: 120000 });
-                    await waitForReload(page);
-                    assert.deepEqual(await documentState(page), before,
-                        name + " reload must preserve every committed document field");
-                    const reloaded = await state(page);
-                    assert.equal(reloaded.historyLength, 0, "A new application session starts with empty undo history");
-                    assert.equal(reloaded.canRedo, false);
-                    await run();
-                    entry.status = "passed";
-                    entry.checks = result.checks.length - entry.checksBefore;
-                } catch (error) {
-                    entry.status = "failed";
-                    throw error;
-                } finally {
-                    entry.durationMs = Math.round(performance.now() - started);
-                }
+                const passed = await runIsolatedScenario(entry, {
+                    prepare: async () => {
+                        const before = await documentState(page);
+                        assert.equal(await page.evaluate(() => globalThis.ferroDesign.ferroDesignCommand("commit-edit")), true,
+                            name + " requires a successful native draft flush");
+                        assert.deepEqual(await documentState(page), before,
+                            name + " must not inherit an uncommitted edit from the previous scenario");
+                        const saved = await flushStorage(page);
+                        assert.equal(saved.saved, true, name + " requires durable storage before reload");
+                        assert.equal(saved.dirty, false);
+                        await committedDocumentInfo(page);
+                        const previousPanics = await page.evaluate(() => ({
+                            startup: globalThis.ferroDesignErrors || [],
+                            render: globalThis.ferroDesignRenderPanics?.() || [],
+                        }));
+                        assert.deepEqual(previousPanics, { startup: [], render: [] },
+                            "Reload cannot hide a previous scenario's native panic");
+                        await page.reload({ waitUntil: "domcontentloaded", timeout: 120000 });
+                        await waitForReload(page);
+                        assert.deepEqual(await documentState(page), before,
+                            name + " reload must preserve every committed document field");
+                        const reloaded = await state(page);
+                        assert.equal(reloaded.historyLength, 0, "A new application session starts with empty undo history");
+                        assert.equal(reloaded.canRedo, false);
+                    },
+                    run,
+                    checkCount: () => result.checks.length,
+                    captureFailure: async current => {
+                        failed = true;
+                        console.error(mode + ": " + name + " failed during " + current.failureStage + ": " + current.error);
+                        const stem = mode + "-" + name + "-failure";
+                        result.failureScreenshot ||= stem + ".png";
+                        current.failure = await captureFailure(page, stem);
+                    },
+                });
+                // Keep the failed gate and complete only later scenarios whose
+                // normal session-boundary checks independently succeed. A
+                // boundary failure throws and aborts this renderer mode.
+                if (!passed) failed = true;
             };
             await scenario("vector-network", () => vectorNetworkRegressions(page, svgDocument, check,
                 nativeHelpers, output, mode));
@@ -1021,6 +1056,7 @@ try {
                 nativeHelpers, output, mode));
             await scenario("width-profiles", () => widthProfileRegressions(page, svgDocument, check, nativeHelpers, output, mode));
             await scenario("width-handles", () => widthHandleRegressions(page, svgDocument, check, nativeHelpers, output, mode));
+            await scenario("gradient-handles", () => gradientHandleRegressions(page, svgDocument, check, nativeHelpers, output, mode));
             await scenario("paragraphs", () => paragraphRegressions(page, svgDocument, check, nativeHelpers, output, mode));
             await scenario("typography", () => typographyRegressions(page, svgDocument, check,
                 nativeHelpers, output, mode));
@@ -1044,6 +1080,8 @@ try {
                 nativeHelpers, output, mode));
             await scenario("auto-layout", () => layoutAuthoringRegressions(page, svgDocument, check,
                 nativeHelpers, output, mode));
+            await scenario("layout-padding", () => layoutPaddingRegressions(page, svgDocument, check,
+                { ...nativeHelpers, flushStorage }, output, mode));
             await scenario("layout-drag", () => layoutDragRegressions(page, svgDocument, check,
                 nativeHelpers, output, mode));
             await scenario("layout-transfer", () => layoutTransferRegressions(page, svgDocument, check,
@@ -1283,34 +1321,23 @@ try {
             }));
             assert.deepEqual(panics, { startup: [], render: [] }, "No startup or rendering panics");
             assert.ok(!result.consoleErrors.some((line) => /panicked|unreachable|RuntimeError|TypeError|ReferenceError|RangeError/i.test(line)), "No runtime errors in the browser console");
-            result.status = "passed";
+            const failedScenarios = result.scenarios.filter(entry => entry.status === "failed");
+            result.status = failedScenarios.length ? "failed" : "passed";
+            if (failedScenarios.length) {
+                failed = true;
+                result.error = failedScenarios.map(entry => entry.name + ": " + entry.error).join("\n\n");
+            }
         } catch (error) {
             failed = true;
             result.status = "failed";
-            result.error = error.stack || String(error);
-            const diagnostic = await page.evaluate(() => {
-                const read = (callback) => { try { return callback(); } catch (error) { return { error: String(error) }; } };
-                const element = (input) => input && ({
-                    tag: input.tagName, id: input.id, value: input.value,
-                    selectionStart: input.selectionStart, selectionEnd: input.selectionEnd,
-                });
-                return {
-                    state: read(() => JSON.parse(globalThis.ferroDesign.ferroDesignState())),
-                    storage: read(() => globalThis.ferroDesignStorage?.status()),
-                    focus: element(document.activeElement),
-                    textInputs: [...document.querySelectorAll(".ferroui-input-element")].map(element),
-                    documentJson: read(() => globalThis.ferroDesign.ferroDesignExportJson()),
-                };
-            }).catch((error) => ({ error: String(error) }));
-            if (typeof diagnostic.documentJson === "string") {
-                const file = mode + "-failure.ferrodesign";
-                await writeFile(resolve(output, file), diagnostic.documentJson);
-                diagnostic.document = { file, bytes: Buffer.byteLength(diagnostic.documentJson), sha256: digest(diagnostic.documentJson) };
-            }
-            delete diagnostic.documentJson;
-            result.failure = diagnostic;
-            await page.screenshot({ path: resolve(output, mode + "-failure.png"), timeout: 15000 }).catch(() => {});
+            const primary = error.stack || String(error);
+            const previous = (result.scenarios || []).filter(entry => entry.status === "failed");
+            result.error = previous.map(entry => entry.name + ": " + entry.error)
+                .concat(previous.some(entry => entry.error === primary) ? [] : [primary]).join("\n\n");
             console.error(mode + ": " + result.error);
+            result.failure = await captureWithinDeadline(() => captureFailure(page, mode + "-failure"))
+                .catch(captureError => ({ error: String(captureError) }));
+            result.failureScreenshot = mode + "-failure.png";
         } finally {
             await context.tracing.stop({ path: resolve(output, mode + "-trace.zip") }).catch(() => {});
             await context.close();
@@ -1326,10 +1353,11 @@ try {
     report.passed = !failed;
     await writeFile(resolve(output, "report.json"), JSON.stringify(report, null, 2));
     const escape = (text) => String(text).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-    const body = report.results.map((item) => "<section><h2>" + escape(item.requestedMode + ": " + item.status) + "</h2><p>Actual surface: " + escape(item.surface?.kind || "not initialized") + "</p><ul>" + item.checks.map((check) => "<li>" + escape(check) + "</li>").join("") + "</ul><img src='" + item.requestedMode + (item.status === "passed" ? "-edited.png" : "-failure.png") + "' alt='Actual browser screenshot'>" + (item.svgImport ? "<h3>Imported SVG in the application</h3><img src='" + item.requestedMode + "-svg.png' alt='SVG imported and rendered by FerroUI'>" : "") + (item.pngExport ? "<h3>Actual PNG download</h3><img class='export' src='" + item.requestedMode + "-export.png' alt='PNG exported by the application'>" : "") + "<pre>" + escape(item.error || JSON.stringify(item, null, 2)) + "</pre></section>").join("");
-    const coverage = report.scope.full ? "Full suite · Software2D and WebGL2"
-        : "Selected coverage · modes: " + selectedModes.join(", ") + "; scenarios: " + (selectedScenarios ? [...selectedScenarios].join(", ") : "all");
+    const body = report.results.map((item) => "<section><h2>" + escape(item.requestedMode + ": " + item.status) + "</h2><p>Actual surface: " + escape(item.surface?.kind || "not initialized") + "</p><ul>" + item.checks.map((check) => "<li>" + escape(check) + "</li>").join("") + "</ul><img src='" + (item.status === "passed" ? item.requestedMode + "-edited.png" : item.failureScreenshot || item.requestedMode + "-failure.png") + "' alt='Actual browser screenshot'>" + (item.svgImport ? "<h3>Imported SVG in the application</h3><img src='" + item.requestedMode + "-svg.png' alt='SVG imported and rendered by FerroUI'>" : "") + (item.pngExport ? "<h3>Actual PNG download</h3><img class='export' src='" + item.requestedMode + "-export.png' alt='PNG exported by the application'>" : "") + "<pre>" + escape(item.error || JSON.stringify(item, null, 2)) + "</pre></section>").join("");
+    const coverage = report.scope.full ? "Full suite requested · Software2D and WebGL2"
+        : "Selected coverage requested · modes: " + selectedModes.join(", ") + "; scenarios: " + (selectedScenarios ? [...selectedScenarios].join(", ") : "all");
     await writeFile(resolve(output, "index.html"), "<!doctype html><meta charset='utf-8'><title>FerroDesign browser validation</title><style>body{font:15px system-ui;margin:32px;background:#f6f6f6;color:#222}section{background:white;padding:24px;margin:24px 0;border-radius:12px}img{width:100%;border:1px solid #ddd}pre{overflow:auto;font-size:12px;white-space:pre-wrap}</style><h1>FerroDesign browser validation</h1><p><strong>" + escape(coverage) + "</strong></p><p>Chromium " + escape(report.browser) + ". Each explicit rendering mode must match its observed canvas context. This harness uses SwiftShader for WebGL2 and does not measure hardware-GPU throughput.</p>" + body);
-    console.log(JSON.stringify({ passed: report.passed, scope: report.scope, browser: report.browser, results: report.results.map(({requestedMode,status,surface,checks}) => ({requestedMode,status,surface,checks})) }, null, 2));
+    console.log(JSON.stringify({ passed: report.passed, scope: report.scope, browser: report.browser, results: report.results.map(({requestedMode,status,surface,checks,scenarios = []}) => ({requestedMode,status,surface,checks,
+        scenarios: scenarios.map(({name,status,ran,checks,failureStage,error,durationMs}) => ({name,status,ran,checks,failureStage,error,durationMs}))})) }, null, 2));
 }
 if (failed) process.exitCode = 1;

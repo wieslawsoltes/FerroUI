@@ -1,0 +1,523 @@
+import assert from "node:assert/strict";
+import { readFile, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { PNG } from "pngjs";
+import { startInputObservation, stopInputObservation } from "./input-observations.mjs";
+
+// Fixtures are imported once. All subsequent edits use native controls and
+// trusted browser input; gradientEdit supplies read-only handle coordinates.
+export async function gradientHandleRegressions(page, reference, check, helpers, output, mode) {
+    const { fixtureNode, isolatedDocument, importFixture, documentState, state,
+        clickNative, clickWorld, moveWorld, frames, waitForNativeFrame, waitForNativeScene,
+        captureNativeScreenshot } = helpers;
+    const near = (actual, expected, label) => assert.ok(Math.abs(actual - expected) < 1e-6,
+        `${label}: ${actual} != ${expected}`);
+    const wait = (predicate, args) => page.waitForFunction(({ source, args }) => {
+        const view = JSON.parse(globalThis.ferroDesign.ferroDesignState());
+        const document = JSON.parse(globalThis.ferroDesign.ferroDesignExportJson());
+        return new Function("view", "document", "args", "return (" + source + ")(view,document,args)")(view, document, args);
+    }, { source: predicate.toString(), args }, { timeout: 10000 });
+    const published = async (before, label) => {
+        await waitForNativeFrame(page, before.renderedFrames, label);
+        await waitForNativeScene(page, before.sceneFrames, label);
+    };
+    const world = (node, x, y) => {
+        const matrix = node.affine_transform || { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+        const dx = (matrix.a * x + matrix.c * y + matrix.e - node.width / 2) * (node.flip_x ? -1 : 1);
+        const dy = (matrix.b * x + matrix.d * y + matrix.f - node.height / 2) * (node.flip_y ? -1 : 1);
+        const angle = node.rotation * Math.PI / 180;
+        return { x: node.x + node.width / 2 + dx * Math.cos(angle) - dy * Math.sin(angle),
+            y: node.y + node.height / 2 + dx * Math.sin(angle) + dy * Math.cos(angle) };
+    };
+    const localDelta = (node, x, y) => {
+        const zero = world(node, 0, 0), moved = world(node, x, y);
+        return { x: moved.x - zero.x, y: moved.y - zero.y };
+    };
+    const sameTarget = (actual, expected) => actual?.kind === expected.kind && actual.stop === expected.stop;
+    let fillIndex = 1;
+    const paint = document => structuredClone(document.nodes[2].fills[fillIndex].paint);
+    const assertPaint = (actual, expected) => {
+        const normalized = structuredClone(expected);
+        for (const endpoint of ["start", "end"]) for (const coordinate of ["x", "y"]) {
+            near(actual[endpoint][coordinate], expected[endpoint][coordinate], endpoint + "." + coordinate);
+            normalized[endpoint][coordinate] = actual[endpoint][coordinate];
+        }
+        assert.equal(actual.stops.length, expected.stops.length, "Stop count");
+        for (let index = 0; index < expected.stops.length; index++) {
+            near(actual.stops[index].offset, expected.stops[index].offset, "Stop " + index + " offset");
+            normalized.stops[index].offset = actual.stops[index].offset;
+        }
+        assert.deepEqual(actual, normalized, "Stop source order, colors and every non-coordinate paint field remain exact");
+    };
+    const assertChange = (before, after, expectedPaint) => {
+        assertPaint(after.nodes[2].fills[fillIndex].paint, expectedPaint);
+        const expected = structuredClone(before), node = expected.nodes[2];
+        node.fills[fillIndex].paint = structuredClone(after.nodes[2].fills[fillIndex].paint);
+        node.fill_style = null;
+        delete node.variable_bindings.fill;
+        node.overridden_properties = [...new Set([...node.overridden_properties, "fills"])].sort();
+        assert.deepEqual(after, expected,
+            "Only the chosen fill paint and its explicit layer-wide style/override metadata may change");
+    };
+    const waitPaint = expected => wait((_view, document, args) => {
+        const actual = document.nodes[2].fills[args.fill].paint;
+        return ["start", "end"].every(endpoint => ["x", "y"].every(coordinate =>
+            Math.abs(actual[endpoint][coordinate] - args.paint[endpoint][coordinate]) < 1e-6)) &&
+            actual.stops.length === args.paint.stops.length && actual.stops.every((stop, index) =>
+                Math.abs(stop.offset - args.paint.stops[index].offset) < 1e-6 &&
+                JSON.stringify(stop.color) === JSON.stringify(args.paint.stops[index].color));
+    }, { fill: fillIndex, paint: expected });
+    const revealPaintCard = async name => {
+        // Fill 1 follows a complete card and can start below the modal clip.
+        // Publish each real wheel scroll before using the rearranged hit target;
+        // there is still only one eventual button click and no action retry.
+        await wait((view, _document, name) => {
+            const bounds = view.chrome[name];
+            return bounds?.visible && bounds.enabled && bounds.measureValid && bounds.arrangeValid &&
+                bounds.width > 0 && bounds.height > 0;
+        }, name);
+        for (let scroll = 0; scroll < 16; scroll++) {
+            const view = await state(page), bounds = view.chrome[name], clip = view.chrome.ModalViewport;
+            assert.ok(bounds && clip, "Native paint card and modal viewport must exist");
+            const x = bounds.x + bounds.width / 2, y = bounds.y + bounds.height / 2;
+            if (x >= clip.x && x <= clip.x + clip.width && y >= clip.y + 3 && y <= clip.y + clip.height - 3) return;
+            const delta = y - clip.y - clip.height / 2;
+            await page.mouse.move(clip.x + clip.width / 2, clip.y + clip.height / 2);
+            await page.mouse.wheel(0, Math.sign(delta) * Math.min(240, Math.max(80, Math.abs(delta))));
+            await waitForNativeScene(page, view.sceneFrames, "Publish native paint-card scroll");
+        }
+        assert.fail("Could not reveal native gradient entry " + name);
+    };
+    const load = async (fixture, fill) => {
+        fillIndex = fill;
+        const previous = await state(page);
+        await importFixture(page, fixture);
+        await waitForNativeScene(page, previous.sceneFrames, "Gradient fixture import");
+        await clickNative(page, "SelectTool");
+        const selected = await state(page);
+        if (selected.selection.length) {
+            await page.keyboard.press("Escape");
+            await wait(view => view.selection.length === 0);
+            await published(selected, "Clear gradient fixture selection");
+        }
+        const node = fixture.nodes[2], center = world(node, node.width / 2, node.height / 2);
+        await clickWorld(page, center.x, center.y);
+        await wait(view => view.selection.join() === "2" && view.chrome.CanvasHost.focusWithin);
+        const beforeDialog = await state(page);
+        await clickNative(page, "EditPaintsButton", "InspectorViewport");
+        await wait((view, _document, fill) => view.chrome.ModalBackdrop.visible &&
+            view.chrome["PaintCanvasGradient" + fill]?.visible, fill);
+        await waitForNativeScene(page, beforeDialog.sceneFrames, "Open native gradient paint card");
+        await revealPaintCard("PaintCanvasGradient" + fill);
+        const beforeEntry = await state(page);
+        await clickNative(page, "PaintCanvasGradient" + fill, "ModalViewport");
+        await wait((view, _document, fill) => view.gradientEdit.node === 2 && view.gradientEdit.fill === fill &&
+            !view.gradientEdit.active && !view.chrome.ModalBackdrop.visible && view.chrome.CanvasHost.focusWithin, fill);
+        await published(beforeEntry, "Enter native canvas gradient editor");
+    };
+    const handle = async (kind, stop = null) => {
+        const view = await state(page);
+        assert.equal(view.gradientEdit.node, 2);
+        assert.equal(view.gradientEdit.fill, fillIndex);
+        const item = view.gradientEdit.handles.find(item => item.kind === kind && item.stop === stop);
+        assert.ok(item, "The native gradient editor exposes " + kind + " " + stop);
+        for (const point of [item.local, item.world, item.screen, item.markerWorld, item.markerScreen]) {
+            assert.ok(Number.isFinite(point.x) && Number.isFinite(point.y), "Native handle coordinates are finite");
+        }
+        return item;
+    };
+    const axis = async offset => {
+        const { axis } = (await state(page)).gradientEdit;
+        assert.ok(axis && Math.hypot(axis.end.x - axis.start.x, axis.end.y - axis.start.y) > 0);
+        return { kind: "axis", stop: null, markerWorld: {
+            x: axis.start.x + (axis.end.x - axis.start.x) * offset,
+            y: axis.start.y + (axis.end.y - axis.start.y) * offset,
+        } };
+    };
+    const stopDelta = async offset => {
+        const { axis } = (await state(page)).gradientEdit;
+        return { x: (axis.end.x - axis.start.x) * offset, y: (axis.end.y - axis.start.y) * offset };
+    };
+    const press = async item => {
+        await moveWorld(page, item.markerWorld.x, item.markerWorld.y);
+        await wait((view, _document, item) => view.gradientEdit.hover?.kind === item.kind &&
+            view.gradientEdit.hover.stop === item.stop, { kind: item.kind, stop: item.stop });
+        const before = await documentState(page), baseline = await state(page);
+        await page.mouse.down();
+        await wait((view, _document, item) => view.gradientEdit.active &&
+            view.gradientEdit.selected?.kind === item.kind && view.gradientEdit.selected.stop === item.stop,
+        { kind: item.kind, stop: item.stop });
+        const pressed = await state(page);
+        assert.deepEqual(await documentState(page), before, "Displaced gradient markers cannot jump the paint on press");
+        assert.equal(pressed.documentRevision, baseline.documentRevision);
+        assert.equal(pressed.historyLength, baseline.historyLength);
+        assert.equal(pressed.canRedo, baseline.canRedo);
+        return { before, baseline };
+    };
+    const move = async (item, delta, expected) => {
+        await moveWorld(page, item.markerWorld.x + delta.x, item.markerWorld.y + delta.y);
+        await waitPaint(expected);
+        assert.equal((await state(page)).gradientEdit.active, true);
+    };
+    const release = async label => {
+        const before = await state(page);
+        await page.mouse.up();
+        await wait(view => !view.gradientEdit.active);
+        await published(before, label);
+    };
+    const drag = async (item, delta, expected) => {
+        let held = false;
+        try {
+            held = true;
+            const { baseline } = await press(item);
+            await move(item, delta, expected);
+            assert.equal((await state(page)).historyLength, baseline.historyLength, "Held previews do not append history");
+            await release("Commit native gradient drag"); held = false;
+        } finally { if (held) await page.mouse.up(); }
+    };
+    const history = async (before, after, depth, label) => {
+        assert.equal((await state(page)).historyLength, depth + 1, label + " commits once");
+        let view = await state(page);
+        await page.keyboard.press("Control+z");
+        await published(view, label + " undo");
+        assert.deepEqual(await documentState(page), before, label + " exact undo");
+        view = await state(page);
+        await page.keyboard.press("Control+Shift+z");
+        await published(view, label + " redo");
+        assert.deepEqual(await documentState(page), after, label + " exact redo");
+        const restored = await state(page);
+        assert.deepEqual(restored.selection, [2]);
+        assert.equal(restored.gradientEdit.node, 2);
+        assert.equal(restored.gradientEdit.fill, fillIndex);
+    };
+    const red = { r: 255, g: 0, b: 0, a: 255 }, blue = { r: 0, g: 0, b: 255, a: 255 };
+    const fills = [
+        { paint: { type: "solid", r: 20, g: 30, b: 40, a: 32 }, opacity: 0.25, visible: true },
+        { paint: { type: "linear_gradient", start: { x: 0.125, y: 0.5 }, end: { x: 0.875, y: 0.5 }, stops: [
+            { offset: 0, color: red }, { offset: 0.5, color: { r: 0, g: 255, b: 0, a: 192 } },
+            { offset: 0.5, color: { ...blue, a: 128 } }, { offset: 1, color: { r: 255, g: 255, b: 255, a: 255 } },
+        ] }, opacity: 0.85, visible: true },
+        { paint: { type: "solid", r: 248, g: 250, b: 252, a: 255 }, opacity: 1, visible: true },
+    ];
+    const fixture = isolatedDocument(reference, [
+        fixtureNode(reference, 2, { kind: "rectangle", name: "Affine gradient with a shared fill stack", x: 240, y: 130,
+            width: 240, height: 160, rotation: 17, flip_x: true,
+            affine_transform: { a: 1.1, b: 0.15, c: 0.2, d: 0.9, e: 3, f: -5 },
+            fills: structuredClone(fills), corner_radius: 6, corner_radii: null, corner_smoothing: 0,
+            fill_style: 900, variable_bindings: { corner_radius: 901 } }),
+        fixtureNode(reference, 3, { kind: "ellipse", name: "Unchanged linked sibling", x: 590, y: 160,
+            width: 100, height: 80, fills: structuredClone(fills), fill_style: 900,
+            corner_radius: 0, corner_radii: null }),
+    ], "Native affine gradient handles");
+    fixture.styles = { 900: { id: 900, name: "Shared gradient stack", description: "Preserve the definition and sibling",
+        value: { type: "fill", fills: structuredClone(fills) } } };
+    fixture.variable_mode = "Default";
+    fixture.variables = { 901: { id: 901, name: "Independent radius", collection: "Shape",
+        values: { Default: { type: "number", value: 6 } } } };
+    fixture.next_id = 902;
+    await load(fixture, 1);
+    const original = await documentState(page), initial = await state(page);
+    const firstTie = await handle("stop", 1), secondTie = await handle("stop", 2);
+    near(firstTie.world.x, secondTie.world.x, "Tied stop world x");
+    near(firstTie.world.y, secondTie.world.y, "Tied stop world y");
+    assert.ok(Math.hypot(firstTie.markerScreen.x - secondTie.markerScreen.x,
+        firstTie.markerScreen.y - secondTie.markerScreen.y) > 14, "Tied stops have separate native hit targets");
+    const expectedEnd = world(original.nodes[2], 0.875 * 240, 0.5 * 160), endHandle = await handle("end");
+    near(endHandle.world.x, expectedEnd.x, "Reflected/sheared endpoint world x");
+    near(endHandle.world.y, expectedEnd.y, "Reflected/sheared endpoint world y");
+    await moveWorld(page, firstTie.markerWorld.x, firstTie.markerWorld.y);
+    await wait(view => view.gradientEdit.hover?.kind === "stop" && view.gradientEdit.hover.stop === 1);
+    await published(initial, "Native gradient hover");
+    let view = await state(page);
+    assert.equal(view.documentRevision, initial.documentRevision);
+    assert.equal(view.historyLength, initial.historyLength);
+    assert.deepEqual(await documentState(page), original);
+    await captureNativeScreenshot(mode + "-gradient-handles-tied-affine", { controls: ["CanvasHost"] });
+    check("Native paint-card entry and immutable hover expose distinct tied-stop markers for one affine reflected gradient fill while preserving the shared style, radius binding, sibling and complete document");
+
+    let expected = paint(original);
+    expected.end = { x: 0.9375, y: 0.4375 };
+    await drag(await handle("end"), localDelta(original.nodes[2], 15, -10), expected);
+    const endpoint = await documentState(page);
+    assertChange(original, endpoint, expected);
+    await history(original, endpoint, initial.historyLength, "Affine gradient endpoint");
+    check("A fractional endpoint drag uses the inverse full layer transform, changes only the chosen paint, detaches its shared fill style, preserves unrelated bindings and commits one exactly reversible edit");
+
+    view = await state(page); await page.keyboard.press("Control+z");
+    await published(view, "Prepare gradient cancellation redo");
+    assert.deepEqual(await documentState(page), original);
+    const cancellation = await state(page);
+    assert.equal(cancellation.canRedo, true);
+    let held = false, item = await handle("stop", 1);
+    try {
+        held = true; await press(item);
+        expected = paint(original); expected.stops[1].offset = 0.625;
+        const delta = await stopDelta(0.125);
+        await move(item, delta, expected);
+        assertChange(original, await documentState(page), expected);
+        const beforeEscape = await state(page);
+        await page.keyboard.press("Escape");
+        await wait(view => !view.gradientEdit.active && view.gradientEdit.node === 2);
+        await published(beforeEscape, "Cancel captured gradient stop");
+        await moveWorld(page, item.markerWorld.x + delta.x * 1.2, item.markerWorld.y + delta.y * 1.2);
+        await page.mouse.up(); held = false;
+    } finally { if (held) await page.mouse.up(); }
+    assert.deepEqual(await documentState(page), original);
+    assert.equal((await state(page)).historyLength, cancellation.historyLength);
+    assert.equal((await state(page)).canRedo, true);
+    // A genuine round trip must also restore metadata, not merely coordinates.
+    item = await handle("end");
+    try {
+        held = true; await press(item);
+        expected = paint(original); expected.end.x += 0.0625;
+        await move(item, localDelta(original.nodes[2], 15, 0), expected);
+        await move(item, { x: 0, y: 0 }, paint(original));
+        await release("Return gradient endpoint to original value"); held = false;
+    } finally { if (held) await page.mouse.up(); }
+    try {
+        held = true; await press(await handle("stop", 2));
+        await release("Unchanged gradient marker press"); held = false;
+    } finally { if (held) await page.mouse.up(); }
+    assert.deepEqual(await documentState(page), original);
+    assert.equal((await state(page)).historyLength, cancellation.historyLength);
+    assert.equal((await state(page)).canRedo, true);
+    assert.deepEqual((await state(page)).selection, [2]);
+    check("Escape, late pointer events, an exact drag-back and an unchanged tied-stop press restore every style/binding field and preserve a real redo entry without appending history");
+
+    item = await handle("stop", 2);
+    const touchView = await state(page), touchDelta = await stopDelta(-0.125);
+    const css = point => ({ x: touchView.chrome.CanvasHost.x + touchView.pan.x + point.x * touchView.zoom,
+        y: touchView.chrome.CanvasHost.y + touchView.pan.y + point.y * touchView.zoom });
+    const touchStart = css(item.markerWorld), touchEnd = css({ x: item.markerWorld.x + touchDelta.x,
+        y: item.markerWorld.y + touchDelta.y }), viewport = page.viewportSize();
+    for (const point of [touchStart, touchEnd]) assert.ok(point.x > 0 && point.x < viewport.width &&
+        point.y > 0 && point.y < viewport.height, "Touch uses in-viewport CSS pixels, without a device-scale multiplier");
+    const client = await page.context().newCDPSession(page);
+    let touchHeld = false, observing = false, observation;
+    try {
+        await startInputObservation(page, ["pointerdown", "pointermove", "pointercancel"]); observing = true;
+        touchHeld = true;
+        await client.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ ...touchStart, id: 37, force: 1 }] });
+        await wait(view => view.gradientEdit.active && view.gradientEdit.selected?.kind === "stop" && view.gradientEdit.selected.stop === 2);
+        assert.deepEqual(await documentState(page), original);
+        await client.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ ...touchEnd, id: 37, force: 1 }] });
+        expected = paint(original); expected.stops[2].offset = 0.375;
+        await waitPaint(expected);
+        assertChange(original, await documentState(page), expected);
+        const beforeCancel = await state(page);
+        await client.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] }); touchHeld = false;
+        await wait(view => !view.gradientEdit.active);
+        await published(beforeCancel, "Cancel gradient touch capture");
+    } finally {
+        try { if (touchHeld) await client.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] }); }
+        finally {
+            try {
+                if (observing) {
+                    observation = await stopInputObservation(page);
+                    await writeFile(resolve(output, mode + "-gradient-handles-touch-input.json"), JSON.stringify(observation, null, 2));
+                }
+            } finally { await client.detach(); }
+        }
+    }
+    for (const type of ["pointerdown", "pointermove", "pointercancel"]) assert.ok(observation.events.some(event =>
+        event.type === type && event.phase === "capture" && event.trusted && event.pointerType === "touch"),
+    "The production bridge must receive trusted touch " + type);
+    assert.deepEqual(await documentState(page), original);
+    view = await state(page);
+    assert.equal(view.historyLength, cancellation.historyLength);
+    assert.equal(view.canRedo, true); assert.deepEqual(view.selection, [2]);
+    await page.keyboard.press("Control+Shift+z");
+    await published(view, "Redo after canceled gradient gestures");
+    assert.deepEqual(await documentState(page), endpoint);
+    check("Real Chromium touch cancellation reaches the native gradient capture-loss path, restores the full shared-style snapshot and selection, and leaves the prior endpoint edit exactly redoable");
+
+    let before = await documentState(page), depth = (await state(page)).historyLength;
+    expected = paint(before); expected.stops[1].offset = 0.75;
+    await drag(await handle("stop", 1), await stopDelta(0.25), expected);
+    let after = await documentState(page);
+    assertChange(before, after, expected);
+    await history(before, after, depth, "Move one tied gradient stop past its neighbor");
+    before = await documentState(page); depth = (await state(page)).historyLength;
+    expected = paint(before); expected.stops[1].offset = 1;
+    await drag(await handle("stop", 1), await stopDelta(0.375), expected);
+    after = await documentState(page);
+    assertChange(before, after, expected);
+    await history(before, after, depth, "Clamp gradient stop to the axis end");
+    check("Stop drags project onto the transformed world axis, clamp to 0–1, and retain authored stop indices and RGBA colors through crossings and ties with exact single-step undo/redo");
+
+    before = await documentState(page); depth = (await state(page)).historyLength;
+    expected = paint(before);
+    for (const endpoint of ["start", "end"]) {
+        expected[endpoint].x += 8 / before.nodes[2].width;
+        expected[endpoint].y -= 6 / before.nodes[2].height;
+    }
+    await drag(await axis(0.25), localDelta(before.nodes[2], 8, -6), expected);
+    after = await documentState(page);
+    assertChange(before, after, expected);
+    await history(before, after, depth, "Translate the complete gradient axis");
+    await captureNativeScreenshot(mode + "-gradient-handles-translated", { controls: ["CanvasHost"] });
+    check("Dragging a bare native gradient axis translates both relative endpoints together without changing stops, paint order, opacity, shape geometry, transforms or the linked sibling");
+
+    const storage = () => page.evaluate(() => globalThis.ferroDesignStorage.status());
+    const durable = () => page.evaluate(async () => JSON.parse((await globalThis.ferroDesignStorage.backend.load()).text));
+    const flushBaseline = async () => {
+        const saved = await page.evaluate(async () => {
+            let timeout;
+            try {
+                return await Promise.race([globalThis.ferroDesignStorage.flush(), new Promise((_, reject) => {
+                    timeout = setTimeout(() => reject(new Error("Gradient baseline storage flush exceeded 30 seconds")), 30000);
+                })]);
+            } finally { clearTimeout(timeout); }
+        });
+        assert.equal(saved, true);
+        const savedStatus = await storage(), native = await state(page);
+        assert.equal(savedStatus.dirty, false); assert.equal(savedStatus.draftDirty, false);
+        assert.equal(native.serializationPending, false);
+        assert.deepEqual(await durable(), await documentState(page));
+        return { savedStatus, native };
+    };
+    const saved = await flushBaseline();
+    before = await documentState(page); item = await handle("end");
+    let lifecycle;
+    try {
+        held = true; await press(item);
+        expected = paint(before); expected.end.x += 10 / before.nodes[2].width;
+        await move(item, localDelta(before.nodes[2], 10, 0), expected);
+        lifecycle = await documentState(page); assertChange(before, lifecycle, expected);
+        assert.equal((await state(page)).historyLength, saved.native.historyLength);
+        assert.equal((await storage()).draftDirty, true);
+        assert.equal((await state(page)).saveSerializations, saved.native.saveSerializations);
+        assert.deepEqual(await durable(), before, "Held gradient previews do not replace the last durable snapshot");
+        await page.evaluate(() => globalThis.dispatchEvent(new Event("pagehide")));
+        await page.waitForFunction(() => {
+            const view = JSON.parse(globalThis.ferroDesign.ferroDesignState()), saved = globalThis.ferroDesignStorage.status();
+            return !view.gradientEdit.active && !view.serializationPending && !saved.dirty && !saved.draftDirty && saved.phase === "saved";
+        }, undefined, { timeout: 30000 });
+        assert.deepEqual(await durable(), lifecycle);
+        assert.equal((await state(page)).historyLength, saved.native.historyLength + 1);
+        assert.equal((await state(page)).saveSerializations, saved.native.saveSerializations + 1);
+        assert.equal((await storage()).revision, saved.savedStatus.revision + 1);
+        await page.mouse.up(); held = false;
+    } finally { if (held) await page.mouse.up(); }
+    await frames(page);
+    assert.deepEqual(await documentState(page), lifecycle);
+    assert.deepEqual(await durable(), lifecycle);
+    assert.equal((await state(page)).historyLength, saved.native.historyLength + 1);
+    assert.equal((await state(page)).saveSerializations, saved.native.saveSerializations + 1);
+    assert.equal((await storage()).revision, saved.savedStatus.revision + 1);
+    await history(before, lifecycle, saved.native.historyLength, "Pagehide gradient gesture");
+    check("From a clean IndexedDB baseline, a held gradient draft is committed by real pagehide alone into exactly one history entry, serialization and durable revision; late release cannot duplicate the commit");
+
+    await flushBaseline();
+    before = await documentState(page); depth = (await state(page)).historyLength; item = await handle("start");
+    let portable;
+    try {
+        held = true; await press(item);
+        expected = paint(before); expected.start.x += 6 / before.nodes[2].width; expected.start.y += 5 / before.nodes[2].height;
+        await move(item, localDelta(before.nodes[2], 6, 5), expected);
+        portable = await documentState(page); assertChange(before, portable, expected);
+        const [download] = await Promise.all([page.waitForEvent("download", { timeout: 30000 }), page.keyboard.press("Control+s")]);
+        assert.equal(await download.failure(), null);
+        const path = resolve(output, mode + "-gradient-held-save.ferrodesign");
+        await download.saveAs(path);
+        assert.deepEqual(JSON.parse(await readFile(path, "utf8")), portable,
+            "The actual Save shortcut serializes the committed held preview");
+        await wait(view => !view.gradientEdit.active);
+        assert.equal((await state(page)).historyLength, depth + 1);
+        await page.mouse.up(); held = false;
+    } finally { if (held) await page.mouse.up(); }
+    await frames(page);
+    assert.deepEqual(await documentState(page), portable);
+    await history(before, portable, depth, "Save during gradient capture");
+    check("Actual Ctrl+S finishes a held native gradient drag once before the portable download is serialized; the file contains every preview field and the late release preserves exact undo/redo");
+
+    const simple = isolatedDocument(reference, [fixtureNode(reference, 2, {
+        kind: "rectangle", name: "Native gradient stop authoring", x: 80, y: 80, width: 240, height: 160,
+        corner_radius: 0, corner_radii: null, corner_smoothing: 0,
+        fills: [{ paint: { type: "linear_gradient", start: { x: 0, y: 0.5 }, end: { x: 1, y: 0.5 },
+            stops: [{ offset: 0, color: red }, { offset: 1, color: blue }] }, opacity: 1, visible: true }],
+    })], "Native gradient insertion and artwork");
+    await load(simple, 0);
+    before = await documentState(page); depth = (await state(page)).historyLength;
+    const insertion = await axis(0.25);
+    await clickWorld(page, insertion.markerWorld.x, insertion.markerWorld.y, { clickCount: 2, delay: 80 });
+    await wait(view => view.gradientEdit.selected?.kind === "stop" && view.gradientEdit.selected.stop === 2);
+    expected = paint(before); expected.stops.push({ offset: 0.25, color: { r: 191, g: 0, b: 64, a: 255 } });
+    await waitPaint(expected);
+    after = await documentState(page); assertChange(before, after, expected);
+    await history(before, after, depth, "Double-click native gradient insertion");
+    // Re-select the newly authored stop through its actual marker after history,
+    // then prove Tab traverses source indices rather than sorted offsets.
+    try {
+        held = true; await press(await handle("stop", 2));
+        await release("Select inserted gradient stop"); held = false;
+    } finally { if (held) await page.mouse.up(); }
+    before = after; depth = (await state(page)).historyLength;
+    expected = paint(before); expected.stops[2].offset = 0.251;
+    await page.keyboard.press("Alt+ArrowRight");
+    await waitPaint(expected);
+    after = await documentState(page); assertChange(before, after, expected);
+    await history(before, after, depth, "Fine native gradient-stop keyboard nudge");
+    const tabBaseline = await state(page);
+    for (const target of [{ kind: "start", stop: null }, { kind: "end", stop: null },
+        { kind: "stop", stop: 0 }, { kind: "stop", stop: 1 }, { kind: "stop", stop: 2 }]) {
+        await page.keyboard.press("Tab");
+        await wait((view, _document, target) => view.gradientEdit.selected?.kind === target.kind &&
+            view.gradientEdit.selected.stop === target.stop && view.chrome.CanvasHost.focusWithin, target);
+        assert.ok(sameTarget((await state(page)).gradientEdit.selected, target));
+    }
+    assert.deepEqual(await documentState(page), after);
+    assert.equal((await state(page)).historyLength, tabBaseline.historyLength);
+    assert.equal((await state(page)).documentRevision, tabBaseline.documentRevision);
+    before = after; depth = (await state(page)).historyLength;
+    await page.keyboard.press("Delete");
+    await wait(view => view.gradientEdit.selected === null);
+    expected = paint(before); expected.stops.splice(2, 1); await waitPaint(expected);
+    after = await documentState(page); assertChange(before, after, expected);
+    await history(before, after, depth, "Delete one native gradient stop");
+    check("A real axis double-click appends an interpolated stop, Alt+ArrowRight nudges its offset by 0.001, Tab visits authored source indices without editing, and Delete removes exactly that stop with exact history without deleting the layer");
+
+    before = await documentState(page); depth = (await state(page)).historyLength;
+    expected = paint(before); expected.start.x = 0.25;
+    await drag(await handle("start"), { x: 60, y: 0 }, expected);
+    const artwork = await documentState(page); assertChange(before, artwork, expected);
+    view = await state(page); await page.keyboard.press("Control+z");
+    await published(view, "Prepare two-stop rejection redo");
+    assert.deepEqual(await documentState(page), before);
+    try {
+        held = true; await press(await handle("stop", 0));
+        await release("Select protected minimum gradient stop"); held = false;
+    } finally { if (held) await page.mouse.up(); }
+    const rejected = await state(page), minimumMessage = "Keep at least two gradient stops.";
+    assert.equal(rejected.canRedo, true);
+    assert.ok(!(rejected.chrome.Toast?.visible && rejected.chrome.ToastText?.text?.includes(minimumMessage)),
+        "The expected native rejection must not already be visible");
+    await page.keyboard.press("Delete");
+    await wait((view, _document, message) => view.chrome.Toast?.visible && view.chrome.ToastText?.text?.includes(message), minimumMessage);
+    assert.deepEqual(await documentState(page), before);
+    view = await state(page);
+    assert.equal(view.historyLength, depth); assert.equal(view.canRedo, true);
+    assert.ok(sameTarget(view.gradientEdit.selected, { kind: "stop", stop: 0 }));
+    await page.keyboard.press("Control+Shift+z");
+    await published(view, "Redo after rejected two-stop deletion");
+    assert.deepEqual(await documentState(page), artwork);
+    await page.keyboard.press("Enter");
+    await wait(view => view.gradientEdit.node === null && view.chrome.CanvasHost.focusWithin);
+    const [pngDownload] = await Promise.all([page.waitForEvent("download", { timeout: 60000 }),
+        clickNative(page, "ExportPngButton", "InspectorViewport")]);
+    assert.equal(await pngDownload.failure(), null);
+    const pngPath = resolve(output, mode + "-gradient-handles-artwork.png");
+    await pngDownload.saveAs(pngPath);
+    const png = PNG.sync.read(await readFile(pngPath));
+    assert.deepEqual([png.width, png.height], [240, 160]);
+    const pixel = (x, y) => [...png.data.subarray((y * png.width + x) * 4, (y * png.width + x) * 4 + 4)];
+    const start = pixel(12, 80), midpoint = pixel(150, 80), end = pixel(236, 80);
+    assert.ok(start[0] > 250 && start[1] === 0 && start[2] < 5 && start[3] === 255, "Native clamped red start: " + start);
+    assert.ok(end[2] > 240 && end[1] === 0 && end[0] < 15 && end[3] === 255, "Native blue gradient end: " + end);
+    assert.ok(Math.abs(midpoint[0] - midpoint[2]) < 4 && midpoint[1] === 0 && midpoint[3] === 255,
+        "Native midpoint follows the authored endpoint movement: " + midpoint);
+    assert.deepEqual(await documentState(page), artwork, "Leaving the editor and PNG export do not change artwork");
+    assert.equal((await state(page)).invalidNodes, 0);
+    assert.equal((await state(page)).unsupportedEffects, 0);
+    check("Deleting below two stops produces a fresh native error while preserving exact redo; Enter exits the editor and native PNG pixels verify the edited gradient without adorners or unsupported rendering effects");
+}

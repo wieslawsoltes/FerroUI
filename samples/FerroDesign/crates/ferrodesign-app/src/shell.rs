@@ -607,7 +607,8 @@ impl EditorShell {
                 // A no-op stroke still needs to resume a previous edit's
                 // background save if its timer elapsed during pointer capture.
                 if !self.canvas.network_bucket_state().1 && !self.canvas.stroke_width_active()
-                    && !self.canvas.corner_radius_active() && self.pending_save.get() {
+                    && !self.canvas.corner_radius_active() && !self.canvas.linear_gradient_active()
+                    && self.pending_save.get() {
                     self.schedule_pending_save();
                 }
             }
@@ -807,6 +808,7 @@ impl EditorShell {
             "networkBucket":{"face":bucket_face,"active":bucket_active,"visited":bucket_visited},
             "strokeWidth":self.canvas.stroke_width_state(),
             "cornerRadius":self.canvas.corner_radius_state(),
+            "gradientEdit":self.canvas.linear_gradient_state(),
             "imageCrop":self.canvas.image_crop_state(),
             "pointerPresses":self.canvas.pointer_press_observations(),
             "layoutDrag":self.canvas.layout_drag_state(),
@@ -969,7 +971,7 @@ impl EditorShell {
         // held bucket preview must remain cancelable; release/cancel schedules
         // a fresh save, while explicit lifecycle boundaries finish it first.
         if self.canvas.network_bucket_state().1 || self.canvas.stroke_width_active()
-            || self.canvas.corner_radius_active() { return; }
+            || self.canvas.corner_radius_active() || self.canvas.linear_gradient_active() { return; }
         if let Some(timer) = self.pending_save_timer.borrow_mut().take() { timer.dispose(); }
         if !self.pending_save.get() { return; }
         let started = Instant::now();
@@ -1409,7 +1411,10 @@ impl EditorShell {
             ),
             (
                 "PaddingField",
-                node.and_then(|n| n.layout.as_ref().map(|l| l.padding.left)),
+                node.and_then(|n| n.layout.as_ref().and_then(|l| {
+                    let p = l.padding;
+                    (p.top == p.left && p.right == p.left && p.bottom == p.left).then_some(p.left)
+                })),
             ),
         ] {
             set(name, value.map(number).unwrap_or_default());
@@ -1636,6 +1641,7 @@ impl EditorShell {
         }
     }
     fn modify(self: &Rc<Self>, label: &str, mut operation: impl FnMut(&mut Node)) {
+        self.canvas.finish_linear_gradient_edit();
         self.canvas.finish_corner_radius_edit();
         self.canvas.finish_network_bucket();
         self.canvas.finish_stroke_width_edit();
@@ -1649,6 +1655,7 @@ impl EditorShell {
         }
         let text = self.field(name).text().unwrap_or_default();
         let id = self.editor.borrow().selection.first().copied();
+        self.canvas.finish_linear_gradient_edit();
         self.canvas.finish_corner_radius_edit();
         self.canvas.finish_network_bucket();
         self.canvas.finish_stroke_width_edit();
@@ -1838,6 +1845,7 @@ impl EditorShell {
 
     pub fn command(self: &Rc<Self>, command: &str) -> bool {
         if command == "commit-edit" {
+            self.canvas.finish_linear_gradient_edit();
             self.canvas.finish_corner_radius_edit();
             self.canvas.finish_network_bucket();
             self.canvas.finish_stroke_width_edit();
@@ -1856,6 +1864,7 @@ impl EditorShell {
         if matches!(command, "undo" | "redo") && self.canvas.cancel_active_edit() {
             return true;
         }
+        self.canvas.finish_linear_gradient_edit();
         self.canvas.finish_corner_radius_edit();
         self.canvas.finish_network_bucket();
         self.canvas.finish_stroke_width_edit();

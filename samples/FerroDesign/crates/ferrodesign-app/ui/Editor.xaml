@@ -221,7 +221,7 @@
                 </UniformGrid>
                 <Grid ColumnDefinitions="*,12,*">
                   <StackPanel Spacing="4"><TextBlock Text="Gap" Classes="label"/><TextBox Name="GapField" Text="12"/></StackPanel>
-                  <StackPanel Grid.Column="2" Spacing="4"><TextBlock Text="Padding" Classes="label"/><TextBox Name="PaddingField" Text="16"/></StackPanel>
+                  <StackPanel Grid.Column="2" Spacing="4"><TextBlock Text="Padding" Classes="label"/><TextBox Name="PaddingField" Text="16" Watermark="Mixed"/></StackPanel>
                 </Grid>
                 <Grid ColumnDefinitions="*,12,*">
                   <StackPanel Spacing="4"><TextBlock Text="Cross gap" Classes="label"/><TextBox Name="CrossGapField"/></StackPanel>

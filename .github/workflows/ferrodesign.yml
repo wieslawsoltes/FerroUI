@@ -81,8 +81,10 @@ jobs:
           node --check tests/text-pan-trace-analysis.test.mjs
           node --check tests/input-observations.mjs
           node --check tests/input-observations.test.mjs
+          node --check tests/isolated-scenario.mjs
           for file in tests/*-browser.mjs; do node --check "$file"; done
           node --test tests/document-store.test.mjs
+          node --test tests/isolated-scenario.test.mjs 2>&1 | tee native-report/isolated-scenario-tests.log
           node tests/input-observations.test.mjs 2>&1 | tee native-report/input-observation-tests.log
           node tests/text-pan-trace-analysis.test.mjs 2>&1 | tee native-report/text-pan-trace-analysis-tests.log
           cargo metadata --locked --no-deps --format-version 1 > native-report/cargo-metadata.json

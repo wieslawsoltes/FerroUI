@@ -222,6 +222,7 @@ impl EditorShell {
             || self.canvas.network_bucket_state().1
             || self.canvas.stroke_width_active()
             || self.canvas.corner_radius_active()
+            || self.canvas.linear_gradient_active()
             || self
                 .live_inspector_drafts()
                 .iter()
