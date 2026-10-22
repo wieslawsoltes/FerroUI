@@ -1,5 +1,6 @@
 use super::*;
 use crate::presenters::TextPresenter;
+use crate::test_support::TestRoot;
 use crate::text_box_tests::{templated_text_box, test_scope};
 use ferroui_base::media::text_formatting::{
     GenericTextRunProperties, TextParagraphStyle, TextRunProperties,
@@ -83,6 +84,21 @@ fn native_rich_history_restores_both_styles_and_application_state_before_text_ch
         original_styles.clone(),
         original_paragraphs.clone(),
     );
+    // A detached measure does not instantiate the template. Exercise history
+    // with the actual presenter and theme bindings installed by initial layout.
+    let root = TestRoot::with_child(field.clone());
+    root.execute_initial_layout_pass();
+    let presenter = field
+        .find_descendant_of_type::<TextPresenter>(false)
+        .expect("initial hosted layout must create the native text presenter");
+    assert!(Rc::ptr_eq(
+        presenter.text_style_overrides().as_ref().unwrap(),
+        &original_styles
+    ));
+    assert!(Rc::ptr_eq(
+        presenter.text_paragraph_styles().as_ref().unwrap(),
+        &original_paragraphs
+    ));
     let observed = Rc::new(RefCell::new(Vec::new()));
     let recorded = observed.clone();
     let weak = field.downgrade();
@@ -139,10 +155,15 @@ fn native_rich_history_restores_both_styles_and_application_state_before_text_ch
     assert!(Rc::ptr_eq(&observed[0].2, &original_paragraphs));
     assert!(Rc::ptr_eq(&observed[1].1, &edited_styles));
     assert!(Rc::ptr_eq(&observed[1].2, &edited_paragraphs));
-    let presenter = field
-        .find_descendant_of_type::<TextPresenter>(false)
-        .unwrap();
     assert_eq!(presenter.text(), field.text());
+    assert!(Rc::ptr_eq(
+        presenter.text_style_overrides().as_ref().unwrap(),
+        &edited_styles
+    ));
+    assert!(Rc::ptr_eq(
+        presenter.text_paragraph_styles().as_ref().unwrap(),
+        &edited_paragraphs
+    ));
 }
 
 fn record_native_edits(field: &Ref<TextBox>) {
