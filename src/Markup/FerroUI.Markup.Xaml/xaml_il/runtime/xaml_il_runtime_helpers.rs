@@ -10,13 +10,16 @@ use crate::{
     EagerParentStackEnumerator, IRootObjectProvider, IXamlTypeResolver, ServiceProviderExtensions, XamlLoadException,
     XamlResourceNode,
 };
-use ferroui_base::controls::{ChildNameScope, IDeferredContent, INameScope, NameScope, NameScopeRef};
+use ferroui_base::controls::{
+    ChildNameScope, IDeferredContent, INameScope, NameScope, NameScopeError, NameScopeRef,
+};
+use ferroui_base::utilities::SynchronousCompletionAsyncResult;
 use ferroui_base::data::core::expression_nodes::CastTarget;
 use ferroui_base::data::core::{ValueType, ValueTypes, WeakValue};
 use ferroui_base::data::{BindingBase, BindingPriority};
 use ferroui_base::metadata::{service, IServiceProvider, MarkupAssembly, MarkupType};
 use ferroui_base::{
-    ferro_markup_type, BoxedValue, FerroProperty, TypeInfo, UnsetValueType, WeakRef,
+    ferro_markup_type, BoxedValue, FerroObject, FerroProperty, Ref, TypeInfo, UnsetValueType, WeakRef,
 };
 use ferroui_base::platform::IRuntimePlatform;
 use ferroui_base::{FerroLocator, LocatorExtensions};
@@ -104,11 +107,78 @@ pub struct DeferredResult {
 /// here. An instantiation sees the ones that are still alive.
 pub struct DeferredContent {
     this: Weak<DeferredContent>,
-    parent_name_scope: Option<Weak<dyn INameScope>>,
+    parent_name_scope: Option<Rc<DeferredNameScopeContext>>,
     root_object: Option<WeakValue>,
     parent_resource_nodes: Rc<CapturedResourceNodes>,
     builder: DeferredContentBuilder,
     result_type: ValueType,
+}
+
+/// A weak chain of declaring scopes. A deferred resource can return another
+/// deferred template while its temporary construction scope has no owner and
+/// expires. Retaining the chain structure lets that template still reach the
+/// live outer scope; no node retains a scope or any named element strongly.
+struct DeferredNameScopeContext {
+    scope: Weak<dyn INameScope>,
+    parent: Option<Rc<DeferredNameScopeContext>>,
+}
+
+impl DeferredNameScopeContext {
+    fn capture(provider: &Rc<dyn IServiceProvider>) -> Option<Rc<Self>> {
+        let scope = provider.get_name_scope()?;
+        if let Some(context) = provider.get_service_of::<Rc<Self>>() {
+            // A custom provider may override the public scope while forwarding
+            // other services. Its scope must not acquire an unrelated fallback.
+            if Weak::ptr_eq(&context.scope, &Rc::downgrade(&scope)) {
+                return Some(context);
+            }
+        }
+        Some(Rc::new(Self { scope: Rc::downgrade(&scope), parent: None }))
+    }
+
+    fn nearest_live(&self) -> Option<Rc<dyn INameScope>> {
+        let mut current = Some(self);
+        while let Some(context) = current {
+            if let Some(scope) = context.scope.upgrade() {
+                return Some(scope);
+            }
+            current = context.parent.as_deref();
+        }
+        None
+    }
+}
+
+/// ChildNameScope still controls local names and completion. Only an expired
+/// construction scope is skipped; a live scope's miss and asynchronous lookup
+/// keep their original semantics. Retaining the declaring scope itself here
+/// would cycle through its named control and that control's template root.
+struct WeakParentNameScope(Rc<DeferredNameScopeContext>);
+
+impl INameScope for WeakParentNameScope {
+    fn try_register(&self, name: &str, element: Ref<FerroObject>) -> Result<(), NameScopeError> {
+        self.0.nearest_live().ok_or(NameScopeError::Completed)?.try_register(name, element)
+    }
+
+    fn find_async(&self, name: &str) -> SynchronousCompletionAsyncResult<Option<Ref<FerroObject>>> {
+        match self.0.nearest_live() {
+            Some(parent) => parent.find_async(name),
+            None => SynchronousCompletionAsyncResult::new(None),
+        }
+    }
+
+    fn find(&self, name: &str) -> Option<Ref<FerroObject>> {
+        self.0.nearest_live().and_then(|parent| parent.find(name))
+    }
+
+    fn complete(&self) {
+        if let Some(parent) = self.0.nearest_live() {
+            parent.complete();
+        }
+    }
+
+    fn is_completed(&self) -> bool {
+        self.0.nearest_live().is_none_or(|parent| parent.is_completed())
+    }
 }
 
 /// The resource nodes above a declaration, held weakly, shared by the
@@ -136,13 +206,13 @@ impl DeferredContent {
     fn new(
         parent_resource_nodes: Rc<CapturedResourceNodes>,
         root_object: Option<BoxedValue>,
-        parent_name_scope: Option<NameScopeRef>,
+        parent_name_scope: Option<Rc<DeferredNameScopeContext>>,
         builder: DeferredContentBuilder,
         result_type: ValueType,
     ) -> Rc<Self> {
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
-            parent_name_scope: parent_name_scope.map(|scope| Rc::downgrade(&scope.0)),
+            parent_name_scope,
             root_object: root_object.as_ref().map(WeakValue::new),
             parent_resource_nodes,
             builder,
@@ -174,10 +244,19 @@ impl DeferredContent {
         &self,
         service_provider: Option<&Rc<dyn IServiceProvider>>,
     ) -> Result<DeferredResult, XamlLoadException> {
-        let scope = match self.parent_name_scope.as_ref().and_then(Weak::upgrade) {
+        // Retain the captured parent for construction only. Once built, the
+        // instance's scope must not keep its declaring control tree alive.
+        let _parent_scope = self.parent_name_scope.as_ref().and_then(|context| context.nearest_live());
+        let scope = match &self.parent_name_scope {
             None => NameScopeRef::new(NameScope::new()),
-            Some(parent) => NameScopeRef::new(ChildNameScope::new(NameScopeRef(parent))),
+            Some(parent) => NameScopeRef::new(ChildNameScope::new(NameScopeRef::new(
+                WeakParentNameScope(parent.clone()),
+            ))),
         };
+        let scope_context = Rc::new(DeferredNameScopeContext {
+            scope: Rc::downgrade(&scope.0),
+            parent: self.parent_name_scope.clone(),
+        });
         // The captured objects that are still alive, for the time of the
         // instantiation.
         let provider: Rc<dyn IServiceProvider> = DeferredParentServiceProvider::new(
@@ -185,6 +264,7 @@ impl DeferredContent {
             self.parent_resource_nodes.alive(),
             self.root_object.as_ref().and_then(WeakValue::upgrade),
             scope.clone(),
+            scope_context,
         );
         let obj = self.builder.invoke(&provider)?;
         scope.complete();
@@ -227,6 +307,7 @@ struct DeferredParentServiceProvider {
     parent_provider: Option<Rc<dyn IServiceProvider>>,
     parent_resource_nodes: Rc<Vec<BoxedValue>>,
     name_scope: NameScopeRef,
+    scope_context: Rc<DeferredNameScopeContext>,
     root_object: Option<BoxedValue>,
     runtime_platform: RefCell<Option<Rc<dyn IRuntimePlatform>>>,
     parent_stack_provider: RefCell<Option<Option<Rc<dyn IFerroXamlIlEagerParentStackProvider>>>>,
@@ -238,12 +319,14 @@ impl DeferredParentServiceProvider {
         parent_resource_nodes: Rc<Vec<BoxedValue>>,
         root_object: Option<BoxedValue>,
         name_scope: NameScopeRef,
+        scope_context: Rc<DeferredNameScopeContext>,
     ) -> Rc<Self> {
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
             parent_provider,
             parent_resource_nodes,
             name_scope,
+            scope_context,
             root_object,
             runtime_platform: RefCell::new(None),
             parent_stack_provider: RefCell::new(None),
@@ -301,6 +384,9 @@ impl IFerroXamlIlEagerParentStackProvider for DeferredParentServiceProvider {
 
 impl IServiceProvider for DeferredParentServiceProvider {
     fn get_service(&self, service_type: TypeId) -> Option<Rc<dyn Any>> {
+        if let Some(context) = service(service_type, || self.scope_context.clone()) {
+            return Some(context);
+        }
         if let Some(scope) = name_scope_service(service_type, &self.name_scope) {
             return Some(scope);
         }
@@ -456,7 +542,7 @@ impl XamlIlRuntimeHelpers {
             .get_service_of::<Rc<dyn IRootObjectProvider>>()
             .ok_or_else(|| missing("IRootObjectProvider"))?
             .root_object();
-        let parent_scope = provider.get_name_scope().map(NameScopeRef);
+        let parent_scope = DeferredNameScopeContext::capture(provider);
 
         Ok(DeferredContent::new(resource_nodes, root_object, parent_scope, builder, result_type))
     }

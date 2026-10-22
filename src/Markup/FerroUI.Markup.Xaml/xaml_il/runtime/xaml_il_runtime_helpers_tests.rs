@@ -3,6 +3,7 @@
 
 use super::*;
 use crate::markup_extensions::DynamicResourceExtension;
+use crate::object_casts::rc_of;
 use crate::test_support::{boxed, TestServiceProvider};
 use crate::{register_types, IRootObjectProvider, IXamlTypeResolver, ServiceProviderExtensions, XamlResourceNode};
 use ferroui_base::controls::{IDeferredContent, NameScope, NameScopeRef, ResourceDictionary};
@@ -64,6 +65,57 @@ fn the_name_scope_of_an_instantiation_is_a_child_of_the_declaring_scope() {
     assert!(built.name_scope.find("Outer").unwrap().ptr_eq(&named));
     assert!(built.name_scope.find("PART_Button").is_some());
     assert!(outer.find("PART_Button").is_none());
+}
+
+#[test]
+fn instantiated_deferred_name_scope_does_not_retain_declaring_scope() {
+    let outer = NameScopeRef::new(NameScope::new());
+    let named = TextBlock::new();
+    outer.register("Outer", named.clone().upcast());
+    outer.complete();
+    let weak_outer = Rc::downgrade(&outer.0);
+    let weak_named = named.downgrade();
+    let provider = declaration_context(vec![], boxed(Border::new()), Some(outer.clone()));
+    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(
+        button_builder(), &provider,
+    );
+    let built = content.build_with(None);
+    assert!(built.name_scope.find("Outer").unwrap().ptr_eq(&named));
+    assert!(built.name_scope.is_completed());
+    drop(provider);
+    drop(outer);
+    drop(named);
+
+    assert!(weak_outer.upgrade().is_none());
+    assert!(weak_named.upgrade().is_none());
+    assert!(built.name_scope.find("PART_Button").is_some());
+    assert!(built.name_scope.find("Outer").is_none());
+    assert!(built.name_scope.is_completed());
+    let missing = built.name_scope.find_async("Outer");
+    assert!(missing.is_completed());
+    assert!(missing.get_result().is_none());
+}
+
+#[test]
+fn instantiated_deferred_name_scope_preserves_live_parent_async_lookup() {
+    let outer = NameScopeRef::new(NameScope::new());
+    let provider = declaration_context(vec![], boxed(Border::new()), Some(outer.clone()));
+    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(
+        button_builder(), &provider,
+    );
+    let built = content.build_with(None);
+    let pending = built.name_scope.find_async("Later");
+    assert!(!pending.is_completed());
+    assert!(!built.name_scope.is_completed());
+    let named = TextBlock::new();
+    outer.register("Later", named.clone().upcast());
+    assert!(pending.is_completed());
+    assert!(pending.get_result().unwrap().ptr_eq(&named));
+    let missing = built.name_scope.find_async("Missing");
+    outer.complete();
+    assert!(missing.is_completed());
+    assert!(missing.get_result().is_none());
+    assert!(built.name_scope.is_completed());
 }
 
 #[test]
@@ -642,4 +694,129 @@ fn the_bindings_of_the_binding_extensions_are_bound() {
     )
     .unwrap();
     assert_eq!(border.tag().unwrap().downcast_ref::<String>().unwrap(), "source");
+}
+
+
+/// A ControlTemplate stored as a deferred resource is a non-StyledElement:
+/// IDeferredContent::build returns its object and drops the transient scope.
+type ObservedDeferredScope = Rc<RefCell<Option<std::rc::Weak<dyn ferroui_base::controls::INameScope>>>>;
+
+fn nested_deferred_resource(provider: &Rc<dyn IServiceProvider>) -> (Rc<DeferredContent>, ObservedDeferredScope) {
+    let observed: ObservedDeferredScope = Default::default();
+    let captured = observed.clone();
+    let deferred = XamlIlRuntimeHelpers::deferred_transformation_factory_for(
+        ValueType::object(),
+        DeferredContentBuilder::new(move |sp| {
+            let local = TextBlock::new();
+            let scope = sp.get_name_scope().unwrap();
+            captured.replace(Some(Rc::downgrade(&scope)));
+            scope.register("Outer", local.upcast());
+            let nested = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(
+                button_builder(),
+                sp,
+            );
+            Some(nested as BoxedValue)
+        }),
+        provider,
+    );
+    (deferred, observed)
+}
+
+#[test]
+fn nested_deferred_resource_scope_keeps_live_outer_fallback_without_retaining_it() {
+    let outer = NameScopeRef::new(NameScope::new());
+    let named = TextBlock::new();
+    outer.register("Outer", named.clone().upcast());
+    outer.complete();
+    let weak_outer = Rc::downgrade(&outer.0);
+    let weak_named = named.downgrade();
+    let provider = declaration_context(vec![], boxed(Border::new()), Some(outer.clone()));
+    let (resource, transient) = nested_deferred_resource(&provider);
+    let value = resource.as_deferred_content().build(None).unwrap();
+    let nested = rc_of::<DeferredContent>(&value).unwrap();
+    assert!(transient.borrow().as_ref().unwrap().upgrade().is_none());
+    let built = nested.build_with(None);
+    assert!(built.name_scope.find("Outer").unwrap().ptr_eq(&named));
+    assert!(built.name_scope.find("PART_Button").is_some());
+    drop(provider);
+    drop(outer);
+    drop(named);
+    assert!(weak_outer.upgrade().is_none());
+    assert!(weak_named.upgrade().is_none());
+    assert!(built.name_scope.find("Outer").is_none());
+    assert!(built.name_scope.is_completed());
+}
+
+#[test]
+fn nested_deferred_resource_scope_prefers_live_local_before_expired_fallback() {
+    let outer = NameScopeRef::new(NameScope::new());
+    let named = TextBlock::new();
+    outer.register("Outer", named.clone().upcast());
+    outer.complete();
+    let provider = declaration_context(vec![], boxed(Border::new()), Some(outer));
+    let (resource, _) = nested_deferred_resource(&provider);
+    let intermediate = resource.build_with(None);
+    let local = intermediate.name_scope.find("Outer").unwrap();
+    assert!(!local.ptr_eq(&named));
+    let weak_local = local.downgrade();
+    let nested = rc_of::<DeferredContent>(intermediate.result.as_ref().unwrap()).unwrap();
+    let built = nested.build_with(None);
+    assert!(built.name_scope.find("Outer").unwrap().ptr_eq(&local));
+    drop(local);
+    drop(intermediate);
+    assert!(weak_local.upgrade().is_none());
+    assert!(built.name_scope.find("Outer").unwrap().ptr_eq(&named));
+}
+
+#[test]
+fn nested_deferred_resource_scope_preserves_pending_live_outer_lookup() {
+    let outer = NameScopeRef::new(NameScope::new());
+    let provider = declaration_context(vec![], boxed(Border::new()), Some(outer.clone()));
+    let (resource, _) = nested_deferred_resource(&provider);
+    let value = resource.as_deferred_content().build(None).unwrap();
+    let nested = rc_of::<DeferredContent>(&value).unwrap();
+    let built = nested.build_with(None);
+    let pending = built.name_scope.find_async("Later");
+    assert!(!pending.is_completed());
+    assert!(!built.name_scope.is_completed());
+    let named = TextBlock::new();
+    outer.register("Later", named.clone().upcast());
+    assert!(pending.is_completed());
+    assert!(pending.get_result().unwrap().ptr_eq(&named));
+    let missing = built.name_scope.find_async("Missing");
+    outer.complete();
+    assert!(missing.is_completed());
+    assert!(missing.get_result().is_none());
+    assert!(built.name_scope.is_completed());
+}
+
+#[test]
+fn nested_deferred_resource_live_incomplete_scope_delays_outer_fallback() {
+    let outer = NameScopeRef::new(NameScope::new());
+    let named = TextBlock::new();
+    outer.register("Outer", named.clone().upcast());
+    outer.complete();
+    let provider = declaration_context(vec![], boxed(Border::new()), Some(outer));
+    let observed = Rc::new(RefCell::new(None));
+    let capture = observed.clone();
+    let resource = XamlIlRuntimeHelpers::deferred_transformation_factory_for(
+        ValueType::object(),
+        DeferredContentBuilder::new(move |sp| {
+            let nested = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(
+                button_builder(),
+                sp,
+            );
+            let built = nested.build_with(None);
+            assert!(built.name_scope.find("Outer").is_none());
+            let pending = built.name_scope.find_async("Outer");
+            assert!(!pending.is_completed());
+            *capture.borrow_mut() = Some(pending);
+            Some(nested as BoxedValue)
+        }),
+        &provider,
+    );
+    let _built = resource.build_with(None);
+    let pending = observed.borrow_mut().take().unwrap();
+    assert!(pending.is_completed());
+    assert!(pending.get_result().unwrap().ptr_eq(&named));
 }

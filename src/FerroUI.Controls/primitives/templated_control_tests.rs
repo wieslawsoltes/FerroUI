@@ -7,10 +7,11 @@ use crate::primitives::TemplatedControl;
 use crate::templates::{FuncControlTemplate, IControlTemplate};
 use crate::test_support::{test_scope, TestRoot};
 use crate::{Border, ContentControl, Control, Decorator, Panel};
+use ferroui_base::controls::{NameScope, NameScopeRef};
 use ferroui_base::data::BindingPriority;
 use ferroui_base::styling::{Selectors, Setter, Style};
 use ferroui_base::{AnyValue, BoxedValue, FerroObject, FerroObjectExtensions, Ref, Size, TypeInfo, Visual};
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 fn template(build: impl Fn() -> Ref<Control> + 'static) -> Option<Rc<dyn IControlTemplate>> {
@@ -231,6 +232,70 @@ fn apply_template_should_raise_template_applied() {
     target.apply_template();
 
     assert!(raised.get());
+}
+
+#[test]
+fn template_scope_is_discoverable_before_template_applied() {
+    let target = TemplatedControl::new();
+    target.set_template(Some(FuncControlTemplate::new(|_, scope| {
+        let child = Control::new();
+        let root = Decorator::new();
+        root.set_child(&child);
+        scope.register("root", root.clone().upcast());
+        scope.register("child", child.upcast());
+        root.upcast()
+    })));
+    let seen = Rc::new(Cell::new(false));
+    let flag = seen.clone();
+    target.template_applied(move |_, event| {
+        let root = event.name_scope().get_as::<Decorator>("root");
+        let child = event.name_scope().get_as::<Control>("child");
+        assert!(NameScope::get_name_scope(&root).as_ref() == Some(event.name_scope()));
+        assert_eq!(root.find_control::<Control>("child"), Some(child.clone()));
+        assert_eq!(child.find_control::<Decorator>("root"), Some(root));
+        flag.set(true);
+    });
+    target.apply_template();
+    assert!(seen.get());
+
+    let child = single_visual_child(&target);
+    let weak_root = child.downgrade();
+    let weak_child = child.cast::<Decorator>().unwrap().child().unwrap().downgrade();
+    drop(child);
+    drop(target);
+    assert!(weak_root.upgrade().is_none(), "a named root must not retain its attached scope");
+    assert!(weak_child.upgrade().is_none());
+}
+
+#[test]
+fn template_application_preserves_explicit_root_name_scope() {
+    let target = TemplatedControl::new();
+    let explicit = NameScopeRef::new(NameScope::new());
+    let expected = explicit.clone();
+    let applied = Rc::new(RefCell::new(None));
+    let observed = applied.clone();
+    target.set_template(Some(FuncControlTemplate::new(move |_, scope| {
+        let root = Decorator::new();
+        let own = Control::new();
+        let template_name = Control::new();
+        explicit.register("local", own.clone().upcast());
+        explicit.complete();
+        scope.register("templateName", template_name.upcast());
+        root.set_child(own);
+        NameScope::set_name_scope(&root, Some(explicit.clone()));
+        root.upcast()
+    })));
+    target.template_applied(move |_, event| {
+        *observed.borrow_mut() = Some(event.name_scope().clone());
+    });
+    target.apply_template();
+    let root = single_visual_child(&target).cast::<Decorator>().unwrap();
+    assert!(NameScope::get_name_scope(&root).as_ref() == Some(&expected));
+    assert_eq!(root.find_control::<Control>("local"), root.child());
+    assert!(root.find_control::<Control>("templateName").is_none());
+    let template_scope = applied.borrow_mut().take().unwrap();
+    assert!(template_scope != expected);
+    assert!(template_scope.find("templateName").is_some());
 }
 
 #[test]

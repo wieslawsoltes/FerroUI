@@ -1151,3 +1151,26 @@ stays separate from document undo and grouped rollback.
 commit does not complete: physical TextPointer rebasing and the live selection's
 Gravity. The newly measured actual-selection record is independent evidence for
 that next consumer. No completion is inferred from enum registration alone.
+
+## 2026-10-22 — Resolve text names through live template scopes
+
+TextElement.FindName delegates to the existing nearest logical NameScope and
+returns the registered live object. Ordinary reparenting, explicit scope changes
+and shared control/text registrations require no cached lookup state. A durable
+metadata-generator override exposes the method. The inherited Name property
+continues through the registered direct-property system, with no duplicate
+supplementary markup declaration.
+
+Template application attaches the actual TemplateResult scope before callbacks,
+preserving an explicit nearer root scope. Deferred XAML uses weak scope-chain
+context: a nested resource can outlive its temporary construction scope and
+still find a live declaring scope, without retaining the named control tree.
+A live incomplete scope keeps its normal local and asynchronous behavior.
+
+The initial actual-XAML gate passed 618 and failed two outer-lookup assertions.
+The scope-chain correction preserves both assertions, and all three rich-name
+XAML cases now pass, including replacement and declaring-tree release. The final
+full XAML suite passes 620 with 17 existing ignores; runtime helpers pass all
+202 tests. The final full Controls executable passes 5,136, with loopback access
+for its six existing remote tests. Prior Name metadata fixture errors and the
+loopback-restricted run are recorded as failed gates rather than passing counts.

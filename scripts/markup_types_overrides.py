@@ -275,6 +275,12 @@ BASE = {
 }
 
 CONTROLS = {
+    'TextElement': {
+        'methods': [
+            """fn FindName(String) -> Option<Ref<FerroObject>> =>
+                |element: &Ref<TextElement>, name: String| element.find_name(&name)""",
+        ],
+    },
     'AutomationPeer': {
         'properties': [
             """EventsSource: Option<Ref<AutomationPeer>> {

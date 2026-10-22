@@ -2,7 +2,7 @@ use super::TemplateAppliedEventArgs;
 use crate::documents::TextElement;
 use crate::templates::IControlTemplate;
 use crate::{Border, Control, ControlImpl, Decorator};
-use ferroui_base::controls::ResourcesChangedEventArgs;
+use ferroui_base::controls::{NameScope, ResourcesChangedEventArgs};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutedEvent, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::layout::LayoutableImpl;
@@ -110,6 +110,13 @@ impl LayoutableImpl for TemplatedControl {
                 let this_ref = this.to_ref();
                 if let Some(template_result) = template.build(&this_ref) {
                     let (child, name_scope) = template_result.deconstruct();
+                    // TemplateApplied exposes this scope to the control. Attach it
+                    // to the built root as well so descendants can discover their
+                    // own template names through the usual logical-ancestor lookup.
+                    // An explicitly scoped root remains a nearer scope boundary.
+                    if NameScope::get_name_scope(&child).is_none() {
+                        NameScope::set_name_scope(&child, Some(name_scope.clone()));
+                    }
                     Self::apply_templated_parent(&child, Some(&this_ref.clone().upcast()));
                     child.set_parent(this_ref);
                     this.visual_children().add(child.upcast());

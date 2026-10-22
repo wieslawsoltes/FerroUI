@@ -1,5 +1,6 @@
 use super::IInlineHost;
 use crate::{Border, Control};
+use ferroui_base::controls::NameScopeExtensions;
 use ferroui_base::media::{
     subscribe_invalidated, Brushes, FontFamily, FontFeatureCollection, FontStretch, FontStyle,
     FontWeight, IBrush,
@@ -7,7 +8,7 @@ use ferroui_base::media::{
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::{
-    ferro_class, ferro_property, AttachedProperty, FerroObjectImpl, FerroObjectImplExt,
+    ferro_class, ferro_property, AttachedProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt, Ref,
     FerroProperty, FerroPropertyChangedEventArgs, StyledElement, StyledElementImpl, StyledProperty,
     StyledPropertyOptions,
 };
@@ -17,6 +18,10 @@ use std::rc::Rc;
 #[cfg(test)]
 #[path = "rich_presentation_invalidation_tests.rs"]
 mod rich_presentation_invalidation_tests;
+
+#[cfg(test)]
+#[path = "text_element_namescope_tests.rs"]
+mod text_element_namescope_tests;
 
 /// `TextElement` is the base class for content in text based controls.
 /// It also defines the inherited font and foreground attached properties
@@ -193,6 +198,18 @@ ferroui_base::ferro_properties! { impl TextElement {
 } }
 
 impl TextElement {
+    /// Finds a registered object in this element's nearest logical name scope.
+    ///
+    /// The result may be a control or another text element. A missing name or
+    /// name scope returns `None`. The nearest scope controls lookup, including
+    /// `ChildNameScope`'s parent fallback after completion; no descendant tree
+    /// search or additional ancestor-scope search is performed here. XAML
+    /// registers names when it loads, while code-created content uses the
+    /// existing `NameScope` API. Each call follows the current parent chain.
+    pub fn find_name(&self, name: &str) -> Option<Ref<FerroObject>> {
+        NameScopeExtensions::find_name_scope(self)?.find(name)
+    }
+
     pub(crate) fn invalidate_format_change(&self, change: &FerroPropertyChangedEventArgs<'_>) {
         if let Some(host) = self.inline_host() {
             if change.is_inherited_value_change() {

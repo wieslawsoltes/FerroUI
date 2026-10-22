@@ -323,3 +323,226 @@ fn rich_input_scope_name_markup_supports_native_enum_constructor_and_content() {
         assert_eq!(parse::<Ref<InputScopeName>>(source).name_value(), Scope::TelephoneNumber);
     }
 }
+
+#[test]
+fn rich_text_find_name_uses_xaml_names_across_controls_and_text_elements() {
+    use ferroui_controls::documents::{Hyperlink, Paragraph, Run};
+
+    let _scope = xaml_test_base();
+    let root = parse::<Ref<UserControl>>(
+        r#"
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel>
+        <Button x:Name="action" />
+        <RichTextBlock x:Name="display">
+            <Paragraph x:Name="paragraph">
+                <Hyperlink x:Name="link" NavigateUri="https://example.test">
+                    <Run x:Name="source" Text="named content" />
+                </Hyperlink>
+            </Paragraph>
+        </RichTextBlock>
+    </StackPanel>
+</UserControl>"#,
+    );
+    let source = root.get_control::<Run>("source");
+    let paragraph = root.get_control::<Paragraph>("paragraph");
+    let link = root.get_control::<Hyperlink>("link");
+    let action = root.get_control::<Button>("action");
+    let display = root.get_control::<RichTextBlock>("display");
+    assert_eq!(source.name().as_deref(), Some("source"));
+    assert_eq!(source.find_name("source"), Some(source.clone().upcast()));
+    assert_eq!(
+        source.find_name("paragraph"),
+        Some(paragraph.clone().upcast())
+    );
+    assert_eq!(source.find_name("link"), Some(link.upcast()));
+    assert_eq!(source.find_name("action"), Some(action.upcast()));
+    assert_eq!(paragraph.find_name("display"), Some(display.upcast()));
+    assert_eq!(paragraph.find_name("source"), Some(source.upcast()));
+    assert!(paragraph.find_name("missing").is_none());
+}
+
+fn apply_rich_text_template_with_scope(
+    control: &ferroui_controls::primitives::TemplatedControl,
+) -> ferroui_base::controls::NameScopeRef {
+    use ferroui_controls::primitives::TemplatedControl;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    let applied = Rc::new(RefCell::new(None));
+    let observed = applied.clone();
+    let token = control.template_applied(move |_, event| {
+        assert!(observed.borrow().is_none());
+        *observed.borrow_mut() = Some(event.name_scope().clone());
+    });
+    control.apply_template();
+    assert!(control.remove_handler(TemplatedControl::template_applied_event(), token));
+    let scope = applied.borrow_mut().take().expect("the actual TemplateApplied scope");
+    scope
+}
+
+#[test]
+fn rich_text_find_name_uses_each_xaml_template_instance_scope() {
+    use ferroui_controls::documents::Run;
+    use ferroui_controls::{ContentControl, StackPanel};
+
+    let _scope = xaml_test_base();
+    let root = parse::<Ref<UserControl>>(
+        r#"
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <ControlTemplate x:Key="textTemplate">
+            <StackPanel x:Name="templateRoot">
+                <Button x:Name="target" />
+                <RichTextBlock>
+                    <Paragraph><Run x:Name="source" Text="template content" /></Paragraph>
+                </RichTextBlock>
+            </StackPanel>
+        </ControlTemplate>
+    </UserControl.Resources>
+    <StackPanel>
+        <Button x:Name="target" />
+        <Button x:Name="outerOnly" />
+        <ContentControl x:Name="first" Template="{StaticResource textTemplate}" />
+        <ContentControl x:Name="second" Template="{StaticResource textTemplate}" />
+    </StackPanel>
+</UserControl>"#,
+    );
+    let first = root.get_control::<ContentControl>("first");
+    let second = root.get_control::<ContentControl>("second");
+    let outer_target = root.get_control::<Button>("target");
+    let outer_only = root.get_control::<Button>("outerOnly");
+    let first_scope = apply_rich_text_template_with_scope(&first);
+    let second_scope = apply_rich_text_template_with_scope(&second);
+    assert!(first_scope != second_scope);
+    // Get the source from the actual template contract. FindName below must
+    // discover that scope itself; the fixture attaches no name scopes.
+    let first_source = first_scope.get_as::<Run>("source");
+    let second_source = second_scope.get_as::<Run>("source");
+    let first_target = first_scope.get_as::<Button>("target");
+    let second_target = second_scope.get_as::<Button>("target");
+    let first_root = first_scope.get_as::<StackPanel>("templateRoot");
+    let second_root = second_scope.get_as::<StackPanel>("templateRoot");
+    assert_eq!(first_root, first.get_visual_children()[0]);
+    assert_eq!(second_root, second.get_visual_children()[0]);
+    assert_eq!(first_source.find_name("templateRoot"), Some(first_root.upcast()));
+    assert_eq!(second_source.find_name("templateRoot"), Some(second_root.upcast()));
+    assert_ne!(first_source, second_source);
+    assert_ne!(first_target, second_target);
+    assert_ne!(first_target, outer_target);
+    assert_ne!(second_target, outer_target);
+    assert_eq!(
+        first_source.find_name("source"),
+        Some(first_source.clone().upcast())
+    );
+    assert_eq!(
+        second_source.find_name("source"),
+        Some(second_source.clone().upcast())
+    );
+    assert_eq!(
+        first_source.find_name("target"),
+        Some(first_target.upcast())
+    );
+    assert_eq!(
+        second_source.find_name("target"),
+        Some(second_target.upcast())
+    );
+    // FerroUI's completed ChildNameScope keeps its existing fallback to
+    // the containing XAML scope; local template names still win above.
+    assert_eq!(
+        first_source.find_name("outerOnly"),
+        Some(outer_only.clone().upcast())
+    );
+    assert_eq!(
+        second_source.find_name("outerOnly"),
+        Some(outer_only.upcast())
+    );
+    assert!(root.find_control::<Run>("source").is_none());
+}
+
+
+#[test]
+fn rich_text_find_name_template_replacement_releases_old_scope_and_declaring_tree() {
+    use ferroui_base::controls::NameScope;
+    use ferroui_controls::documents::Run;
+    use ferroui_controls::{ContentControl, StackPanel};
+    use std::rc::Rc;
+
+    let _scope = xaml_test_base();
+    let root = parse::<Ref<UserControl>>(
+        r#"
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <ControlTemplate x:Key="firstTemplate">
+            <StackPanel x:Name="templateRoot">
+                <Button x:Name="target" />
+                <RichTextBlock>
+                    <Paragraph><Run x:Name="source" Text="first" /></Paragraph>
+                </RichTextBlock>
+            </StackPanel>
+        </ControlTemplate>
+        <ControlTemplate x:Key="replacementTemplate">
+            <StackPanel x:Name="templateRoot">
+                <Button x:Name="target" />
+                <RichTextBlock>
+                    <Paragraph><Run x:Name="source" Text="replacement" /></Paragraph>
+                </RichTextBlock>
+            </StackPanel>
+        </ControlTemplate>
+    </UserControl.Resources>
+    <StackPanel>
+        <Button x:Name="outerOnly" />
+        <ContentControl x:Name="owner" Template="{StaticResource firstTemplate}" />
+        <ContentControl x:Name="replacement" Template="{StaticResource replacementTemplate}" />
+    </StackPanel>
+</UserControl>"#,
+    );
+    let owner = root.get_control::<ContentControl>("owner");
+    let replacement = root.get_control::<ContentControl>("replacement");
+    let outer = NameScope::get_name_scope(&root).unwrap();
+    let weak_outer = Rc::downgrade(&outer.0);
+    let weak_root = root.downgrade();
+    let weak_owner = owner.downgrade();
+    let first_scope = apply_rich_text_template_with_scope(&owner);
+    let weak_first_scope = Rc::downgrade(&first_scope.0);
+    let first_source = first_scope.get_as::<Run>("source");
+    let weak_first_source = first_source.downgrade();
+    let weak_first_root = first_scope.get_as::<StackPanel>("templateRoot").downgrade();
+    assert_eq!(first_source.text().as_deref(), Some("first"));
+    assert_eq!(first_source.find_name("source"), Some(first_source.clone().upcast()));
+    drop(first_source);
+    drop(first_scope);
+
+    owner.set_template(replacement.template());
+    let current_scope = apply_rich_text_template_with_scope(&owner);
+    assert!(weak_first_scope.upgrade().is_none());
+    assert!(weak_first_source.upgrade().is_none());
+    assert!(weak_first_root.upgrade().is_none());
+    let source = current_scope.get_as::<Run>("source");
+    let target = current_scope.get_as::<Button>("target");
+    assert_eq!(source.text().as_deref(), Some("replacement"));
+    assert_eq!(source.find_name("source"), Some(source.clone().upcast()));
+    assert_eq!(source.find_name("target"), Some(target.clone().upcast()));
+    assert_eq!(source.find_name("outerOnly"), outer.find("outerOnly"));
+    assert!(root.find_control::<Run>("source").is_none());
+
+    let weak_current_scope = Rc::downgrade(&current_scope.0);
+    let weak_current_source = source.downgrade();
+    let weak_current_target = target.downgrade();
+    drop(current_scope);
+    drop(source);
+    drop(target);
+    drop(outer);
+    drop(replacement);
+    drop(owner);
+    drop(root);
+    assert!(weak_root.upgrade().is_none());
+    assert!(weak_outer.upgrade().is_none());
+    assert!(weak_owner.upgrade().is_none());
+    assert!(weak_current_scope.upgrade().is_none());
+    assert!(weak_current_source.upgrade().is_none());
+    assert!(weak_current_target.upgrade().is_none());
+}

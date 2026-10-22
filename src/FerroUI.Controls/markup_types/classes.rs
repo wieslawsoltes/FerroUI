@@ -1107,6 +1107,8 @@ ferro_class_info!(TextElement {
             },
         ],
         methods: [
+            fn FindName(String) -> Option<Ref<FerroObject>> =>
+                |element: &Ref<TextElement>, name: String| element.find_name(&name),
             static fn GetFontFamily(Ref<Control>) -> FontFamily =>
                 |element: Ref<Control>| element.get_value(TextElement::font_family_property()),
             static fn SetFontFamily(Ref<Control>, FontFamily) =>
