@@ -1071,3 +1071,22 @@ pass with the new record included in historical round-trip validation.
 This is native behavioral evidence for the next selection implementation;
 recording it does not make the pending selection Gravity or external WinUI
 engine contracts complete. Older records remain immutable.
+
+## 2026-10-22 — Accept empty browser composition results
+
+The full Browser suite exposed an actual empty-result defect: the DOM adapter
+called the legacy `commit("")` path, whose established meaning is cancellation.
+Exact clients now update their retained preview through the existing exact-edit
+composition API. An accepted empty result replaces that tracked span and calls
+`complete`, with the final directed selection already included in the single
+undo transaction. Native Escape cancellation retains its original-value test.
+Final value and UTF-16 selection validation now also covers LF-only source.
+
+Five regressions cover absent/repeated previews, empty deletion, directed
+undo/redo, raw CR/CRLF preservation, invalid values and surrogate endpoints,
+interception, focus handoff and read-only changes. Preview range publication
+checks the original session and generation after callbacks. The retained tail
+format regression now queries the whole nonempty tail rather than a backward
+insertion boundary. The initial Browser gate passed 271 and failed two; the
+corrected fresh full executable passes 278 with no failures or ignored tests.
+This is the portable adapter gate, not a physical browser/IME session.

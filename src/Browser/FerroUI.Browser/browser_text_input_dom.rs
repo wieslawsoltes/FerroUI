@@ -1,5 +1,5 @@
 use super::BrowserTextInputMethod;
-use crate::browser_text_input_edit::edit_from_dom;
+use crate::browser_text_input_edit::{edit_from_dom, utf16_length};
 use crate::browser_text_input_projection::DomTextProjection;
 use ferroui_base::input::text_input::{
     TextInputMethodClient, TextInputMethodConnection, TextInputMethodEdit, TextInputMethodError,
@@ -48,6 +48,8 @@ struct PendingEdit {
 struct Composition {
     token: u32,
     generation: u64,
+    exact: bool,
+    range: TextSelection,
     original: TextInputMethodState,
     original_dom: String,
 }
@@ -405,6 +407,19 @@ impl BrowserTextInputMethod {
         dom.composition = Some(Composition {
             token,
             generation,
+            exact: snapshot.exact,
+            range: TextSelection::new(
+                snapshot
+                    .state
+                    .selection
+                    .start
+                    .min(snapshot.state.selection.end),
+                snapshot
+                    .state
+                    .selection
+                    .start
+                    .max(snapshot.state.selection.end),
+            ),
             original: snapshot.state,
             original_dom: snapshot.projection.state.text,
         });
@@ -413,10 +428,34 @@ impl BrowserTextInputMethod {
 
     pub(crate) fn on_dom_composition_update(&self, token: u32, data: &str) {
         let composition = self.dom.borrow().composition.clone();
-        if composition.is_some_and(|composition| {
+        let Some(composition) = composition.filter(|composition| {
             composition.token == token && composition.generation == self.generation.get()
-        }) {
+        }) else {
+            return;
+        };
+        if !composition.exact {
             self.on_composition_update(Some(data));
+            return;
+        }
+        let data = data.replace("\r\n", "\n").replace('\r', "\n");
+        let Some(end) = utf16_length(&data)
+            .ok()
+            .and_then(|length| composition.range.start.checked_add(length))
+        else {
+            return;
+        };
+        let edit = TextInputMethodEdit::new(composition.range, data, TextSelection::new(end, end));
+        let session = self.composition_session.borrow().clone();
+        if session.is_some_and(|session| session.apply_edit(&edit).is_ok() && session.is_current())
+            && self.generation.get() == composition.generation
+        {
+            // Editing publishes application callbacks. Retain the new span only
+            // if those callbacks left this exact native composition installed.
+            if let Some(current) = self.dom.borrow_mut().composition.as_mut() {
+                if current.token == token && current.generation == composition.generation {
+                    current.range = TextSelection::new(composition.range.start, end);
+                }
+            }
         }
     }
 
@@ -439,30 +478,63 @@ impl BrowserTextInputMethod {
         // Escape restores the original DOM value and reports empty data. An
         // empty accepted replacement instead removes the selected text.
         let cancelled = data.is_empty() && value == composition.original_dom;
-        // The committed range belongs to the original model, while the native
-        // value belongs to its LF projection. Reject a newly formed CRLF across
-        // the replacement boundary before committing the retained preview.
-        let representable = cancelled || !composition.original.text.contains('\r') || {
-            let selection = composition.original.selection;
-            let edit = TextInputMethodEdit::new(
-                TextSelection::new(
-                    selection.start.min(selection.end),
-                    selection.start.max(selection.end),
-                ),
-                data.replace("\r\n", "\n").replace('\r', "\n"),
-                TextSelection::default(),
-            );
-            edit.apply_to(&composition.original.text)
-                .and_then(|text| {
-                    DomTextProjection::new(&TextInputMethodState {
-                        text,
-                        selection: TextSelection::default(),
+        let data = data.replace("\r\n", "\n").replace('\r', "\n");
+        // Validate the entire final value and both directed UTF-16 endpoints,
+        // including LF-only models. The committed range belongs to the original
+        // model; the native value and selection belong to its LF projection.
+        let final_selection = (!cancelled)
+            .then(|| {
+                let selection = composition.original.selection;
+                let edit = TextInputMethodEdit::new(
+                    TextSelection::new(
+                        selection.start.min(selection.end),
+                        selection.start.max(selection.end),
+                    ),
+                    &data,
+                    TextSelection::default(),
+                );
+                edit.apply_to(&composition.original.text)
+                    .and_then(|text| {
+                        DomTextProjection::new(&TextInputMethodState {
+                            text,
+                            selection: TextSelection::default(),
+                        })
                     })
-                })
-                .is_ok_and(|projection| projection.state.text == value)
-        };
-        self.on_composition_end((!cancelled && representable).then_some(data));
+                    .and_then(|projection| {
+                        if projection.state.text != value {
+                            return Err(TextInputMethodError::InvalidRange);
+                        }
+                        projection.selection_to_model(TextSelection::new(anchor, active))
+                    })
+            })
+            .and_then(Result::ok);
+        if composition.exact && data.is_empty() && final_selection.is_some() {
+            // Legacy commit("") means cancellation. Complete the exact preview
+            // to accept a deletion, with its final selection in the undo unit.
+            let session = self.composition_session.borrow().clone();
+            if let Some(session) = session {
+                let edit =
+                    TextInputMethodEdit::new(composition.range, "", final_selection.unwrap());
+                let applied = session.apply_edit(&edit);
+                if self.generation.get() == composition.generation {
+                    self.is_composing.set(false);
+                    if applied.is_ok() {
+                        let result = session.complete(
+                            self.input_handler
+                                .upgrade()
+                                .map_or(0, |handler| handler.timestamp()),
+                        );
+                        if result.is_ok() && self.generation.get() == composition.generation {
+                            self.composition_session.take();
+                        }
+                    }
+                }
+            }
+        } else {
+            self.on_composition_end(final_selection.is_some().then_some(data.as_str()));
+        }
         if self.generation.get() == composition.generation {
+            self.is_composing.set(false);
             // The browser ended this native session and cannot retry a rejected
             // commit. Roll back its retained preview before mirroring the model.
             let rejected = self.composition_session.borrow().clone();
@@ -471,7 +543,7 @@ impl BrowserTextInputMethod {
             }
             if self.generation.get() == composition.generation {
                 self.composition_session.take();
-                if !cancelled && representable {
+                if final_selection.is_some() {
                     if let Ok(snapshot) = self.capture_snapshot() {
                         let selection = TextSelection::new(anchor, active);
                         if snapshot.exact && snapshot.projection.state.text == value {

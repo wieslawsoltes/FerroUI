@@ -10,6 +10,7 @@ use ferroui_base::media::text_formatting::testing::TextTestScope;
 use ferroui_base::media::FontWeight;
 use ferroui_base::Ref;
 use ferroui_controls::documents::{CharacterFormat, Paragraph, Run};
+use ferroui_controls::rich_text::TextFormatValue;
 use ferroui_controls::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
 use ferroui_controls::testing::{
     MockWindowingPlatform, TestServices, UnitTestApplication, UnitTestApplicationScope,
@@ -376,14 +377,19 @@ fn browser_dom_input_raw_run_replacement_maps_both_selections_and_preserves_tail
 
     assert_eq!(f.owner.text(), "head\r\nX\rtail");
     assert_eq!((f.owner.selection_start(), f.owner.selection_end()), (7, 6));
-    assert_eq!(
-        f.owner
-            .document()
-            .character_format_at(8)
-            .unwrap()
-            .font_weight,
-        Some(FontWeight::Bold)
-    );
+    // Offset 8 is the insertion boundary before the tail. Query its complete
+    // nonempty range so caret affinity cannot select the preceding CR's format.
+    let TextFormatValue::Uniform(tail) = f
+        .owner
+        .text_document()
+        .get_range(8, 12)
+        .unwrap()
+        .character_format()
+        .unwrap()
+    else {
+        panic!("the whole retained tail must keep a uniform format");
+    };
+    assert_eq!(tail.font_weight, Some(FontWeight::Bold));
     f.assert_mirror();
     assert!(f.owner.undo().unwrap());
     assert_eq!(f.owner.document().snapshot(), before);
@@ -763,6 +769,148 @@ fn browser_dom_composition_cancel_empty_deletion_and_interception_restore_the_ri
     assert!(!f.method.is_composing());
     assert!(!f.owner.editor().is_composing());
     f.assert_mirror();
+}
+
+#[test]
+fn browser_dom_composition_empty_final_commits_directed_selection_and_one_undo_unit() {
+    for previews in [
+        vec![],
+        vec!["preview"],
+        vec!["候補", "😀", ""],
+        vec!["😀", "next"],
+    ] {
+        let f = Fixture::new();
+        let before = f.owner.document().snapshot();
+        let count = f.record_input();
+        let token = f.compose();
+        for preview in previews {
+            f.method.on_dom_composition_update(token, preview);
+            assert!(!f.owner.can_undo());
+        }
+
+        f.method.on_dom_composition_end(token, "", "ad", 2, 0);
+
+        assert_eq!(f.owner.text(), "ad");
+        assert_eq!((f.owner.selection_start(), f.owner.selection_end()), (2, 0));
+        assert!(!f.method.is_composing());
+        assert!(!f.owner.editor().is_composing());
+        assert_eq!(count.get(), 1);
+        f.assert_mirror();
+        let after = f.owner.document().snapshot();
+        assert!(f.owner.undo().unwrap());
+        assert_eq!(f.owner.document().snapshot(), before);
+        assert_eq!((f.owner.selection_start(), f.owner.selection_end()), (1, 3));
+        assert!(!f.owner.undo().unwrap());
+        assert!(f.owner.redo().unwrap());
+        assert_eq!(f.owner.document().snapshot(), after);
+        assert_eq!((f.owner.selection_start(), f.owner.selection_end()), (2, 0));
+        assert!(!f.owner.redo().unwrap());
+    }
+}
+
+#[test]
+fn browser_dom_composition_empty_final_preserves_raw_line_endings_and_maps_selection() {
+    let f = Fixture::new();
+    f.set_raw_run("a\r\nbc\rd");
+    f.owner.select(3, 5);
+    let before = f.owner.document().snapshot();
+    let token = f.compose();
+    f.method.on_dom_composition_update(token, "😀\r\n候補");
+    assert_eq!(f.owner.text(), "a\r\n😀\n候補\rd");
+
+    f.method.on_dom_composition_end(token, "", "a\n\nd", 4, 2);
+
+    assert_eq!(f.owner.text(), "a\r\n\rd");
+    assert_eq!((f.owner.selection_start(), f.owner.selection_end()), (5, 3));
+    f.assert_mirror();
+    assert!(f.owner.undo().unwrap());
+    assert_eq!(f.owner.document().snapshot(), before);
+    assert!(!f.owner.undo().unwrap());
+    assert!(f.owner.redo().unwrap());
+    assert_eq!((f.owner.selection_start(), f.owner.selection_end()), (5, 3));
+}
+
+#[test]
+fn browser_dom_composition_invalid_final_value_or_selection_cancels_without_history() {
+    for (data, value, anchor, active) in [
+        ("", "aXd", 1, 1),
+        ("", "ad", -1, 1),
+        ("", "ad", 1, 3),
+        ("X", "aYd", 2, 2),
+        ("😀", "a😀d", 2, 2),
+        ("X", "aXd", 2, 10),
+    ] {
+        let f = Fixture::new();
+        let before = f.owner.document().snapshot();
+        let count = f.record_input();
+        let token = f.compose();
+        f.method.on_dom_composition_update(token, "preview");
+
+        f.method
+            .on_dom_composition_end(token, data, value, anchor, active);
+
+        assert_eq!(f.owner.document().snapshot(), before);
+        assert_eq!((f.owner.selection_start(), f.owner.selection_end()), (1, 3));
+        assert_eq!(count.get(), 0);
+        assert!(!f.owner.can_undo());
+        assert!(!f.method.is_composing());
+        assert!(!f.owner.editor().is_composing());
+        f.assert_mirror();
+    }
+}
+
+#[test]
+fn browser_dom_composition_intercepted_empty_final_or_focus_handoff_restores_owner() {
+    for handoff in [false, true] {
+        let f = Fixture::new();
+        let before = f.owner.document().snapshot();
+        let other_before = f.other.document().snapshot();
+        let token = f.compose();
+        f.method.on_dom_composition_update(token, "preview");
+        let other = f.other.clone();
+        f.owner.add_handler_with(
+            InputElement::text_input_event(),
+            move |_, event: &TextInputEventArgs| {
+                assert_eq!(event.text.as_deref(), Some(""));
+                if handoff {
+                    other.focus();
+                } else {
+                    event.set_handled(true);
+                }
+            },
+            RoutingStrategies::TUNNEL,
+            false,
+        );
+
+        f.method.on_dom_composition_end(token, "", "ad", 1, 1);
+
+        assert_eq!(f.owner.document().snapshot(), before);
+        assert_eq!(f.other.document().snapshot(), other_before);
+        assert!(!f.owner.can_undo());
+        assert!(!f.other.can_undo());
+        assert!(!f.owner.editor().is_composing());
+        assert!(!f.method.is_composing());
+        assert_eq!(f.other.is_focused(), handoff);
+        f.assert_mirror();
+    }
+}
+
+#[test]
+fn browser_dom_composition_empty_final_after_read_only_cannot_modify_owner() {
+    let f = Fixture::new();
+    let before = f.owner.document().snapshot();
+    let token = f.compose();
+    f.method.on_dom_composition_update(token, "preview");
+    f.owner.set_is_read_only(true);
+
+    f.method.on_dom_composition_end(token, "", "ad", 1, 1);
+
+    assert_eq!(f.owner.document().snapshot(), before);
+    assert!(!f.owner.can_undo());
+    assert!(!f.owner.editor().is_composing());
+    assert!(!f.method.is_composing());
+    assert!(f.method.client().is_none());
+    assert_eq!(*f.page.text.borrow(), "");
 }
 
 #[test]
