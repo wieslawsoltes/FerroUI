@@ -80,17 +80,14 @@ fn paragraph_preedit_replacement_uses_confirmed_ranges_and_blur_restores_the_col
         ValueSpan::new(4, 2, TextParagraphStyle { flow_direction: Some(FlowDirection::RightToLeft), line_height: Some(30.0), ..Default::default() }),
     ]);
     target.set_text_paragraph_styles(Some(styles.clone()));
-    target.apply_template();
-    let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
-    // The test template predates paragraph styles. The production Simple and
-    // Fluent templates bind this property; mirror their exact value here.
-    presenter.set_text_paragraph_styles(Some(styles.clone()));
     let other = Button::new();
     let panel = StackPanel::new();
     panel.children().add(target.clone());
     panel.children().add(other.clone());
     let root = TestRoot::with_child(panel);
     root.execute_initial_layout_pass();
+    let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    assert!(Rc::ptr_eq(presenter.text_paragraph_styles().as_ref().unwrap(), &styles));
     assert!(target.focus());
     target.set_selection_start(1);
     target.set_selection_end(5);
@@ -111,6 +108,7 @@ fn paragraph_preedit_replacement_uses_confirmed_ranges_and_blur_restores_the_col
     assert_eq!(target.text().as_deref(), Some("A🦀\nB\nC"));
     assert_eq!((target.selection_start(), target.selection_end()), (1,5));
     assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &styles));
+    assert!(Rc::ptr_eq(presenter.text_paragraph_styles().as_ref().unwrap(), &styles));
     assert_eq!(presenter.text_layout().line_flow_direction(1), FlowDirection::RightToLeft);
 }
 
@@ -160,14 +158,12 @@ fn repeated_paragraph_ime_replacement_uses_owned_selection_and_restores_on_blur(
         ValueSpan::new(6, 0, TextParagraphStyle { indent: 40.0, ..Default::default() }),
     ]);
     target.set_text_paragraph_styles(Some(styles.clone()));
-    target.apply_template();
-    let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
-    // This minimal test template predates the production theme binding.
-    presenter.set_text_paragraph_styles(Some(styles.clone()));
     let other = Button::new();
     let panel = StackPanel::new();
     panel.children().add(target.clone()); panel.children().add(other.clone());
     let root = TestRoot::with_child(panel); root.execute_initial_layout_pass();
+    let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    assert!(Rc::ptr_eq(presenter.text_paragraph_styles().as_ref().unwrap(), &styles));
     assert!(target.focus());
     target.set_selection_start(0); target.set_selection_end(4);
     let args = TextInputMethodClientRequestedEventArgs::new();
@@ -184,6 +180,7 @@ fn repeated_paragraph_ime_replacement_uses_owned_selection_and_restores_on_blur(
     assert!(other.focus());
     assert_eq!(target.text().as_deref(), Some("A\nA\nA\n"));
     assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+    assert!(Rc::ptr_eq(presenter.text_paragraph_styles().as_ref().unwrap(), &styles));
     let restored = presenter.text_layout();
     assert_eq!((0..4).map(|index| restored.line_origin(index).x).collect::<Vec<_>>(), [10.0, 20.0, 30.0, 40.0]);
 }

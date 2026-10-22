@@ -97,6 +97,10 @@ fn build_template(_control: &Ref<TextBox>, scope: &NameScopeRef) -> Ref<Control>
     presenter.bind_binding(TextPresenter::text_property().as_property(), &template_binding("Text"));
     presenter.bind_binding(TextPresenter::caret_index_property().as_property(), &template_binding("CaretIndex"));
     presenter.bind_binding(TextPresenter::text_style_overrides_property().as_property(), &template_binding("TextStyleOverrides"));
+    presenter.bind_binding(
+        TextPresenter::text_paragraph_styles_property().as_property(),
+        &TemplateBinding::new(TextBox::text_paragraph_styles_property().as_property()),
+    );
 
     let scroll_viewer = ScrollViewer::new();
     scroll_viewer.set_name(Some("PART_ScrollViewer".to_string()));
@@ -131,6 +135,7 @@ fn build_themed_template(_control: &Ref<TextBox>, scope: &NameScopeRef) -> Ref<C
         (TextPresenter::password_char_property().as_property(), TextBox::password_char_property().as_property()),
         (TextPresenter::reveal_password_property().as_property(), TextBox::reveal_password_property().as_property()),
         (TextPresenter::text_style_overrides_property().as_property(), TextBox::text_style_overrides_property().as_property()),
+        (TextPresenter::text_paragraph_styles_property().as_property(), TextBox::text_paragraph_styles_property().as_property()),
     ];
 
     for (target, source) in one_way {
