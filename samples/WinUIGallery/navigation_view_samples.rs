@@ -187,7 +187,7 @@ fn wire_selection(
                     value.downcast_ref::<CategoryEntry>()
                 {
                     nav.set_header(Some(Rc::new(format!(
-                        "Sample FramePage {}",
+                        "Sample Page {}",
                         name.chars().last().unwrap()
                     ))));
                     Some(SamplePage1::TYPE)
@@ -198,7 +198,7 @@ fn wire_selection(
                     let target = page_type(tag)?;
                     if update_header {
                         nav.set_header(Some(Rc::new(format!(
-                            "Sample FramePage {}",
+                            "Sample Page {}",
                             tag.chars().last().unwrap()
                         ))));
                     }
