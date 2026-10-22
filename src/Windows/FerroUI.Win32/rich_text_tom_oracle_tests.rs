@@ -623,11 +623,14 @@ impl NativeSelection {
     }
 
     fn set_range(&self, anchor: i32, active: i32) -> TestResult {
+        self.set_range_result(anchor, active).map(|_| ())
+    }
+
+    fn set_range_result(&self, anchor: i32, active: i32) -> TestResult<i32> {
         // SAFETY: the SDK SetRange ABI accepts two signed character positions.
-        check_hresult(
-            unsafe { (self.table().set_range)(self.0.as_ptr().cast(), anchor, active) },
-            "ITextRange::SetRange",
-        )
+        let result = unsafe { (self.table().set_range)(self.0.as_ptr().cast(), anchor, active) };
+        check_hresult(result, "ITextRange::SetRange")?;
+        Ok(result)
     }
 
     fn set_flags(&self, flags: i32) -> TestResult<i32> {
@@ -945,14 +948,47 @@ fn observe_vertical(
     Ok(())
 }
 
+/// Setup diagnostics are retained in the raw native log, outside the strict
+/// SYSTEM_MSFTEDIT_ movement-record schema. Reads must not move the selection.
+/// Keep their individual failures visible without replacing the exact text
+/// assertion immediately following this diagnostic.
+fn describe_vertical_reset(
+    window: &HiddenRichEdit,
+    selection: &NativeSelection,
+    fixture: &str,
+    case: usize,
+    supplied_length: i32,
+    set_range_result: i32,
+) {
+    let before = selection.state();
+    let selected_text = selection.text();
+    let story_length = selection.number(selection.table().get_story_length, "GetStoryLength");
+    let independent = window.document().and_then(|document| {
+        let range = document.range(0, supplied_length)?;
+        Ok((range.state()?, range.text()?))
+    });
+    let fresh_selection = window
+        .selection()
+        .and_then(|fresh| Ok((fresh.state()?, fresh.text()?)));
+    let after = selection.state();
+    println!(
+        "MSFTEDIT_VERTICAL_SETUP_DIAGNOSTIC fixture={fixture} case={case} supplied_utf16_length={supplied_length} set_range_hresult=0x{:08X} selection={before:?} selected_text={selected_text:?} native_story_length={story_length:?} independent_range={independent:?} fresh_selection={fresh_selection:?} selection_after_reads={after:?}",
+        set_range_result as u32,
+    );
+    if let (Ok(before), Ok(after)) = (before, after) {
+        assert_eq!(
+            before, after,
+            "{fixture}: setup diagnostics retain the native selection"
+        );
+    }
+}
+
 fn characterize_vertical() -> TestResult {
     // Same ownership order as the Home/End probe; all COM work stays on this
     // thread and no HWND is shown or focused.
     let _apartment = OleApartment::new()?;
     let library = SystemRichEditLibrary::load()?;
     library.describe()?;
-    let window = HiddenRichEdit::new()?;
-    let selection = window.selection()?;
     let mut commands = 0;
     for (name, text, ranges) in [
         (
@@ -964,9 +1000,15 @@ fn characterize_vertical() -> TestResult {
         ("vertical_empty_lines", "ab\r\rxy\r", &[(3, 3), (7, 7)][..]),
         ("vertical_empty_story", "", &[(0, 0)][..]),
     ] {
+        // Independent fixtures must not inherit navigation or selection state
+        // from a prior WM_SETTEXT on another story. The command ordering within
+        // this fixture remains intentional and unchanged.
+        let window = HiddenRichEdit::new()?;
         window.set_text(text)?;
+        let selection = window.selection()?;
         let length = text.encode_utf16().count() as i32;
-        selection.set_range(0, length)?;
+        let reset = selection.set_range_result(0, length)?;
+        describe_vertical_reset(&window, &selection, name, 0, length, reset);
         assert_eq!(selection.text()?, text, "{name}: exact native setup");
         let story_length =
             selection.number(selection.table().get_story_length, "GetStoryLength")?;
@@ -996,50 +1038,67 @@ fn characterize_vertical() -> TestResult {
             }
         }
     }
-    let text = "abcdef\rx\rabcdef";
-    window.set_text(text)?;
-    selection.set_range(0, text.encode_utf16().count() as i32)?;
-    assert_eq!(
-        selection.text()?,
-        text,
-        "column fixture: exact native setup"
-    );
-    let story_length = selection.number(selection.table().get_story_length, "GetStoryLength")?;
-    println!(
-        "SYSTEM_MSFTEDIT_VERTICAL_FIXTURE name=retained_column text={text:?} supplied_utf16_length={} native_story_length={story_length}",
-        text.encode_utf16().count()
-    );
-    // Unlike matrix rows, these calls deliberately retain native navigation state.
-    selection.set_range(5, 5)?;
-    for down in [true, true, false, false] {
-        observe_vertical(
-            &selection,
-            "retained_column",
-            story_length,
-            Unit::Line,
-            1,
-            false,
-            down,
-        )?;
-        commands += 1;
-    }
-    println!(
-        "SYSTEM_MSFTEDIT_VERTICAL_FIXTURE name=vertical_boundary text={text:?} supplied_utf16_length={} native_story_length={story_length}",
-        text.encode_utf16().count()
-    );
-    for (position, down) in [(0, false), (text.encode_utf16().count() as i32, true)] {
-        for unit in [Unit::Line, Unit::Paragraph] {
-            selection.set_range(position, position)?;
+    {
+        let text = "abcdef\rx\rabcdef";
+        let window = HiddenRichEdit::new()?;
+        window.set_text(text)?;
+        let selection = window.selection()?;
+        let length = text.encode_utf16().count() as i32;
+        let reset = selection.set_range_result(0, length)?;
+        describe_vertical_reset(&window, &selection, "retained_column", 0, length, reset);
+        assert_eq!(
+            selection.text()?,
+            text,
+            "column fixture: exact native setup"
+        );
+        let story_length = selection.number(selection.table().get_story_length, "GetStoryLength")?;
+        println!(
+            "SYSTEM_MSFTEDIT_VERTICAL_FIXTURE name=retained_column text={text:?} supplied_utf16_length={} native_story_length={story_length}",
+            text.encode_utf16().count()
+        );
+        // Unlike matrix rows, these calls deliberately retain native navigation state.
+        selection.set_range(5, 5)?;
+        for down in [true, true, false, false] {
             observe_vertical(
                 &selection,
-                "vertical_boundary",
+                "retained_column",
                 story_length,
-                unit,
+                Unit::Line,
                 1,
                 false,
                 down,
             )?;
             commands += 1;
+        }
+    }
+    {
+        let text = "abcdef\rx\rabcdef";
+        let window = HiddenRichEdit::new()?;
+        window.set_text(text)?;
+        let selection = window.selection()?;
+        let length = text.encode_utf16().count() as i32;
+        let reset = selection.set_range_result(0, length)?;
+        describe_vertical_reset(&window, &selection, "vertical_boundary", 0, length, reset);
+        assert_eq!(selection.text()?, text, "boundary fixture: exact native setup");
+        let story_length = selection.number(selection.table().get_story_length, "GetStoryLength")?;
+        println!(
+            "SYSTEM_MSFTEDIT_VERTICAL_FIXTURE name=vertical_boundary text={text:?} supplied_utf16_length={} native_story_length={story_length}",
+            text.encode_utf16().count()
+        );
+        for (position, down) in [(0, false), (text.encode_utf16().count() as i32, true)] {
+            for unit in [Unit::Line, Unit::Paragraph] {
+                selection.set_range(position, position)?;
+                observe_vertical(
+                    &selection,
+                    "vertical_boundary",
+                    story_length,
+                    unit,
+                    1,
+                    false,
+                    down,
+                )?;
+                commands += 1;
+            }
         }
     }
     commands += characterize_isolated_vertical()?;
@@ -1082,7 +1141,8 @@ fn characterize_isolated_vertical() -> TestResult<usize> {
             window.set_text(text)?;
             let selection = window.selection()?;
             let length = text.encode_utf16().count() as i32;
-            selection.set_range(0, length)?;
+            let reset = selection.set_range_result(0, length)?;
+            describe_vertical_reset(&window, &selection, name, index, length, reset);
             assert_eq!(selection.text()?, text, "{name}: exact isolated setup");
             let story_length =
                 selection.number(selection.table().get_story_length, "GetStoryLength")?;
@@ -1114,7 +1174,8 @@ fn characterize_isolated_vertical() -> TestResult<usize> {
         window.set_text(text)?;
         let selection = window.selection()?;
         let length = text.encode_utf16().count() as i32;
-        selection.set_range(0, length)?;
+        let reset = selection.set_range_result(0, length)?;
+        describe_vertical_reset(&window, &selection, name, 0, length, reset);
         assert_eq!(selection.text()?, text, "{name}: exact isolated setup");
         let story_length =
             selection.number(selection.table().get_story_length, "GetStoryLength")?;
@@ -1143,7 +1204,8 @@ fn characterize_isolated_vertical() -> TestResult<usize> {
         window.set_text(text)?;
         let selection = window.selection()?;
         let length = text.encode_utf16().count() as i32;
-        selection.set_range(0, length)?;
+        let reset = selection.set_range_result(0, length)?;
+        describe_vertical_reset(&window, &selection, name, 0, length, reset);
         assert_eq!(selection.text()?, text, "{name}: exact mixed-column setup");
         let story_length =
             selection.number(selection.table().get_story_length, "GetStoryLength")?;
@@ -2906,6 +2968,19 @@ fn characterize_selection_gravity_fixture(
     initial: Option<((i32, i32), i32)>,
     actions: &[SelectionGravityAction<'_>],
 ) -> TestResult<usize> {
+    characterize_selection_gravity_fixture_with_paragraph_inspection(
+        name, text, setup, initial, actions, false,
+    )
+}
+
+fn characterize_selection_gravity_fixture_with_paragraph_inspection(
+    name: &str,
+    text: &str,
+    setup: &[SelectionGravityAction<'_>],
+    initial: Option<((i32, i32), i32)>,
+    actions: &[SelectionGravityAction<'_>],
+    inspect_paragraphs: bool,
+) -> TestResult<usize> {
     let window = HiddenRichEdit::new()?;
     window.set_text(text)?;
     let document = window.document()?;
@@ -2931,7 +3006,8 @@ fn characterize_selection_gravity_fixture(
     } else {
         "Default"
     };
-    let commands = setup.len() + prefix.len() + actions.len();
+    let initial_commands = setup.len() + prefix.len() + actions.len();
+    let commands = initial_commands + if inspect_paragraphs { 5 } else { 0 };
     println!("SYSTEM_MSFTEDIT_SELECTION_GRAVITY_FIXTURE name={name} text={text:?} supplied_utf16_length={length} native_story_length={story_length} window_ex_style=0 expected_commands={commands} initialization={initialization}");
     let (source_hresult, source_identity) = native_query(&selection.0, &IID_NATIVE_UNKNOWN);
     let source_null = source_identity.is_none();
@@ -2982,7 +3058,148 @@ fn characterize_selection_gravity_fixture(
             check_hresult(hresult, "selection gravity formatting setup")?;
         }
     }
+    if inspect_paragraphs {
+        let ((start, end), _) =
+            initial.ok_or("paragraph inspection requires a configured range")?;
+        let observations = selection_paragraph_inspections(
+            start.min(end),
+            &document,
+            &selection,
+            duplicate.as_ref(),
+        )?;
+        for (offset, action) in observations.into_iter().enumerate() {
+            observe_selection_gravity_step(
+                name,
+                initial_commands + offset,
+                "Target",
+                action,
+                &primary,
+                &mut duplicate,
+                &document,
+                &selection,
+                &source_identity,
+            )?;
+        }
+    }
     Ok(commands)
+}
+
+// Reuse the existing action snapshots: each independent GetGravity also records
+// text, Bold, Italic, paragraph alignment, null BSTRs and each getter's HRESULT.
+// Derive inspection ranges from the observed story, never an expected TypeText
+// result. The first query covers the old replacement start to the resulting
+// caret when collapsed; an unchanged nonempty selection is sampled at its old
+// start. The remaining queries cover the first, second and final paragraphs,
+// including their actual CR marks. Missing paragraphs repeat the final span.
+fn selection_paragraph_inspections(
+    original_start: i32,
+    document: &NativeDocument,
+    selection: &NativeSelection,
+    duplicate: Option<&NativeRange2>,
+) -> TestResult<[SelectionGravityAction<'static>; 5]> {
+    use SelectionGravityAction as A;
+    use SelectionGravityOperation::GetGravity;
+    let selected = selection.state()?;
+    let duplicate_range = duplicate.map(NativeRange2::state).transpose()?;
+    let length = selection.number(selection.table().get_story_length, "GetStoryLength")?;
+    let story = document.range(0, length)?.observed_text()?;
+    check_hresult(story.hresult, "paragraph inspection story text")?;
+    let units: Vec<_> = story.text.encode_utf16().collect();
+    assert_eq!(
+        units.len(),
+        length as usize,
+        "inspect the exact native story"
+    );
+    let mut paragraphs = Vec::new();
+    let mut paragraph_start = 0;
+    for (index, unit) in units.iter().enumerate() {
+        if *unit == u16::from(b'\r') {
+            let end = index as i32 + 1;
+            paragraphs.push((paragraph_start, end));
+            paragraph_start = end;
+        }
+    }
+    if paragraph_start < length {
+        paragraphs.push((paragraph_start, length));
+    }
+    let last = paragraphs.last().copied().unwrap_or((0, 0));
+    let first = paragraphs.first().copied().unwrap_or(last);
+    let second = paragraphs.get(1).copied().unwrap_or(last);
+    let start = original_start.clamp(0, length);
+    let end = if selected.start == selected.end {
+        selected.start
+    } else {
+        start
+    };
+    assert_eq!(
+        selection.state()?,
+        selected,
+        "inspection planning retains selection"
+    );
+    assert_eq!(
+        duplicate.map(NativeRange2::state).transpose()?,
+        duplicate_range,
+        "inspection planning retains duplicate endpoints"
+    );
+    Ok([
+        A::external(start.min(end), start.max(end), GetGravity),
+        A::external(first.0, first.1, GetGravity),
+        A::external(second.0, second.1, GetGravity),
+        A::external(last.0, last.1, GetGravity),
+        A::primary(GetGravity),
+    ])
+}
+
+fn characterize_selection_paragraph_typing() -> TestResult<(usize, usize)> {
+    use SelectionGravityAction as A;
+    use SelectionGravityOperation::*;
+    // Gravity 0 is explicit in each new fixture. The original 250-command
+    // matrix already compares all five modes, including reversed emoji typing.
+    // These cases vary only the missing replacement boundaries/input shapes.
+    let cases = [
+        ("inner_forward", "ab\rcd", (1, 4), "X", 0, 2, 3),
+        ("inner_reverse", "ab\rcd", (4, 1), "X", 0, 2, 3),
+        ("mark_forward", "ab\rcd", (2, 3), "X", 0, 2, 3),
+        ("mark_reverse", "ab\rcd", (3, 2), "X", 0, 2, 3),
+        ("end_at_next_start", "ab\rcd", (1, 3), "X", 0, 2, 3),
+        ("whole_first", "ab\rcd", (0, 3), "X", 0, 2, 3),
+        ("end_at_visible_end", "ab\rcd", (1, 5), "X", 0, 2, 3),
+        ("whole_visible", "ab\rcd", (0, 5), "X", 0, 2, 3),
+        ("empty_forward", "ab\rcd", (1, 4), "", 0, 2, 3),
+        ("empty_reverse", "ab\rcd", (4, 1), "", 0, 2, 3),
+        ("emoji_forward", "ab\rcd", (1, 4), "😀", 0, 2, 3),
+        ("cr_forward", "ab\rcd", (1, 4), "\r", 0, 2, 3),
+        ("lf_forward", "ab\rcd", (1, 4), "\n", 0, 2, 3),
+        ("crlf_reverse", "ab\rcd", (4, 1), "\r\n", 0, 2, 3),
+        ("opposite_alignment", "ab\rcd", (1, 4), "X", 2, 0, 3),
+        ("three_paragraphs", "ab\rcd\ref", (1, 7), "X", 0, 2, 6),
+    ];
+    let mut commands = 0;
+    for (name, text, initial, typed, leading, trailing, last_start) in cases {
+        let length = text.encode_utf16().count() as i32;
+        let setup = [
+            A::external(0, length, SetBold(0)),
+            A::external(0, length, SetItalic(0)),
+            A::external(0, length, SetAlignment(leading)),
+            A::external(0, 3, SetBold(-1)),
+            A::external(last_start, length, SetItalic(-1)),
+            A::external(last_start, length, SetAlignment(trailing)),
+        ];
+        commands += characterize_selection_gravity_fixture_with_paragraph_inspection(
+            &format!("selection_paragraph_typing_{name}"),
+            text,
+            &setup,
+            Some((initial, 0)),
+            &[A::primary(Duplicate), A::primary(TypeText(Some(typed)))],
+            true,
+        )?;
+    }
+    assert_eq!(
+        (commands, cases.len()),
+        (240, 16),
+        "keep paragraph typing coverage complete"
+    );
+    Ok((commands, cases.len()))
 }
 
 fn characterize_selection_gravity() -> TestResult {
@@ -3094,6 +3311,14 @@ fn characterize_selection_gravity() -> TestResult {
         (250, 18),
         "keep the actual selection matrix bounded and complete"
     );
+    let (paragraph_commands, paragraph_fixtures) = characterize_selection_paragraph_typing()?;
+    commands += paragraph_commands;
+    fixtures += paragraph_fixtures;
+    assert_eq!(
+        (commands, fixtures),
+        (490, 34),
+        "keep the extended selection matrix complete"
+    );
     println!(
         "SYSTEM_MSFTEDIT_SELECTION_GRAVITY_PROBE_COMPLETE commands={commands} fixtures={fixtures}"
     );
@@ -3109,4 +3334,223 @@ fn rich_text_tom_oracle_system_msftedit_selection_gravity_characterization() {
         .join()
         .expect("the actual selection Gravity probe thread panicked")
         .expect("the actual selection Gravity probe failed");
+}
+
+
+// Additional endpoint relationships are a separate observation family. This
+// stage deliberately reuses GravitySnapshot (including its format getters) to
+// compare with the older endpoint cases. It is not a cache-cold/GetFont-free
+// experiment and must not be used to infer independent duplicate font caches.
+fn observe_range_tracking_step(
+    name: &str,
+    step: usize,
+    action: GravityAction<'_>,
+    primary: &NativeRange2,
+    duplicate: &mut Option<NativeRange2>,
+    document: &NativeDocument,
+    selection: &NativeSelection,
+) -> TestResult<i32> {
+    use GravityOperation::*;
+    let (target, range) = match action.target {
+        GravityTarget::Primary => ("Primary", primary.clone()),
+        GravityTarget::Duplicate => (
+            "Duplicate",
+            duplicate
+                .as_ref()
+                .ok_or("range tracking getter has no duplicate")?
+                .clone(),
+        ),
+        GravityTarget::External(start, end) => ("External", document.range(start, end)?),
+    };
+    let (method, mut argument1, mut argument2, value, text) = match action.operation {
+        SetRange(start, end) => ("SetRange", start, end, 0, ""),
+        SetGravity(value) => ("SetGravity", 0, 0, value, ""),
+        Duplicate => ("Duplicate", 0, 0, 0, ""),
+        SetText(text) => ("SetText", 0, 0, 0, text),
+        GetGravity => ("GetGravity", 0, 0, 0, ""),
+        _ => return Err("unexpected operation in range tracking matrix".into()),
+    };
+    if let GravityTarget::External(start, end) = action.target {
+        assert!(matches!(action.operation, SetText(_)));
+        argument1 = start;
+        argument2 = end;
+    }
+    let before = GravitySnapshot::capture(primary, duplicate.as_ref(), document, selection)?;
+    let action_before = range.state()?;
+    let table = range.table();
+    let mut output = None;
+    let hresult = match action.operation {
+        SetRange(start, end) => {
+            // SAFETY: use the verified SDK signed-LONG endpoint signature.
+            unsafe { (table.base.set_range)(range.0.as_ptr().cast(), start, end) }
+        }
+        SetGravity(value) => {
+            // SAFETY: preserve the requested signed enum and raw native result.
+            unsafe { (table.set_gravity)(range.0.as_ptr().cast(), value) }
+        }
+        Duplicate => {
+            assert!(matches!(action.target, GravityTarget::Primary));
+            assert!(
+                duplicate.is_none(),
+                "one passive duplicate per fresh control"
+            );
+            let (result, copy) = range.duplicate()?;
+            *duplicate = copy;
+            result
+        }
+        SetText(text) => {
+            let text = Bstr(string_to_bstr(text));
+            if text.0.is_null() {
+                return Err("SysAllocStringLen for range tracking SetText failed".into());
+            }
+            // SAFETY: SetText borrows this allocated explicit-length BSTR.
+            // Do not assert success or predict the surviving passive endpoints.
+            unsafe { (table.base.set_text)(range.0.as_ptr().cast(), text.0) }
+        }
+        GetGravity => {
+            let number = range.raw_number(table.get_gravity);
+            output = Some(number.value);
+            number.hresult
+        }
+        _ => unreachable!("the operation was validated before snapshot capture"),
+    };
+    let action_after = range.state()?;
+    let after = GravitySnapshot::capture(primary, duplicate.as_ref(), document, selection)?;
+    let text_utf16_length = text.encode_utf16().count();
+    println!("SYSTEM_MSFTEDIT_RANGE_TRACKING fixture={name} step={step} role=Target target={target} operation={method} argument1={argument1} argument2={argument2} value={value} text={text:?} text_utf16_length={text_utf16_length} action_before={action_before:?} action_after={action_after:?} before={before:?} after={after:?} hresult=0x{:08X} output={output:?}", hresult as u32);
+    Ok(hresult)
+}
+
+fn characterize_range_tracking_fixture(
+    name: &str,
+    initial: (i32, i32),
+    gravity: i32,
+    edited: (i32, i32),
+    replacement: &str,
+) -> TestResult<usize> {
+    use GravityAction as A;
+    use GravityOperation::*;
+    let window = HiddenRichEdit::new()?;
+    let text = "abcdef";
+    window.set_text(text)?;
+    let document = window.document()?;
+    let selection = document.selection()?;
+    let primary = document.range(0, 0)?;
+    let length = text.encode_utf16().count() as i32;
+    let story_length = primary.number(primary.table().base.get_story_length, "GetStoryLength")?;
+    assert_eq!(
+        document.range(0, length)?.text()?,
+        text,
+        "exact endpoint fixture"
+    );
+    let actions = [
+        A::primary(SetRange(initial.0, initial.1)),
+        A::primary(SetGravity(gravity)),
+        A::primary(Duplicate),
+        A::external(edited.0, edited.1, SetText(replacement)),
+        A::primary(GetGravity),
+        A::duplicate(GetGravity),
+    ];
+    let commands = actions.len();
+    println!("SYSTEM_MSFTEDIT_RANGE_TRACKING_FIXTURE name={name} text={text:?} supplied_utf16_length={length} native_story_length={story_length} window_ex_style=0 expected_commands={commands}");
+    let mut duplicate = None;
+    for (step, action) in actions.into_iter().enumerate() {
+        observe_range_tracking_step(
+            name,
+            step,
+            action,
+            &primary,
+            &mut duplicate,
+            &document,
+            &selection,
+        )?;
+    }
+    Ok(commands)
+}
+
+fn characterize_range_tracking() -> TestResult {
+    let _apartment = OleApartment::new()?;
+    let library = SystemRichEditLibrary::load()?;
+    library.describe()?;
+    // Twelve relationships at UIBehavior (0); three representative cases also
+    // request Forward (2). Preserve raw mode readback rather than predicting it.
+    let cases = [
+        (
+            "passive_tracking_0_right_overlap_text",
+            (1, 4),
+            0,
+            (3, 6),
+            "XY",
+        ),
+        ("passive_tracking_0_exact_span", (1, 4), 0, (1, 4), "XY"),
+        ("passive_tracking_0_shared_start", (1, 4), 0, (1, 3), "XY"),
+        ("passive_tracking_0_shared_end", (1, 4), 0, (2, 4), "XY"),
+        ("passive_tracking_0_caret_inside", (2, 2), 0, (0, 4), "XY"),
+        ("passive_tracking_0_caret_at_start", (2, 2), 0, (2, 4), "XY"),
+        ("passive_tracking_0_caret_at_end", (2, 2), 0, (0, 2), "XY"),
+        ("passive_tracking_0_same_text", (1, 4), 0, (1, 4), "bcd"),
+        (
+            "passive_tracking_0_retained_prefix",
+            (1, 4),
+            0,
+            (0, 2),
+            "abX",
+        ),
+        (
+            "passive_tracking_0_retained_suffix",
+            (1, 4),
+            0,
+            (0, 2),
+            "Xab",
+        ),
+        (
+            "passive_tracking_0_covered_shared_start",
+            (1, 4),
+            0,
+            (1, 6),
+            "Z",
+        ),
+        (
+            "passive_tracking_0_covered_shared_end",
+            (1, 4),
+            0,
+            (0, 4),
+            "Z",
+        ),
+        (
+            "passive_tracking_2_right_overlap_text",
+            (1, 4),
+            2,
+            (3, 6),
+            "XY",
+        ),
+        ("passive_tracking_2_exact_span", (1, 4), 2, (1, 4), "XY"),
+        ("passive_tracking_2_caret_inside", (2, 2), 2, (0, 4), "XY"),
+    ];
+    let mut commands = 0;
+    for (name, initial, gravity, edited, replacement) in cases {
+        commands +=
+            characterize_range_tracking_fixture(name, initial, gravity, edited, replacement)?;
+    }
+    let fixtures = cases.len();
+    assert_eq!(
+        (commands, fixtures),
+        (90, 15),
+        "keep endpoint follow-up complete"
+    );
+    println!(
+        "SYSTEM_MSFTEDIT_RANGE_TRACKING_PROBE_COMPLETE commands={commands} fixtures={fixtures}"
+    );
+    Ok(())
+}
+
+#[test]
+fn rich_text_tom_oracle_system_msftedit_range_tracking_characterization() {
+    std::thread::Builder::new()
+        .name("system-msftedit-range-tracking".into())
+        .spawn(characterize_range_tracking)
+        .expect("start the native passive range tracking probe thread")
+        .join()
+        .expect("the native passive range tracking probe thread panicked")
+        .expect("the native passive range tracking probe failed");
 }

@@ -150,3 +150,71 @@ jobs:
       - name: Rich text control contracts on Windows
         if: ${{ !cancelled() }}
         run: cargo test --locked -p ferroui-controls --lib rich_ --no-fail-fast
+
+  windows-arm64-native:
+    name: System MSFTEDIT oracle (Windows ARM64)
+    runs-on: windows-11-arm
+    timeout-minutes: 45
+    env:
+      CARGO_BUILD_TARGET: aarch64-pc-windows-msvc
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          targets: aarch64-pc-windows-msvc
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rich-text-windows-arm64
+      - name: Record and verify the native ARM64 environment
+        id: native_environment
+        run: |
+          mkdir -p system-msftedit-arm64
+          git rev-parse HEAD > system-msftedit-arm64/source-commit.txt
+          git rev-parse HEAD:src/Windows/FerroUI.Win32/rich_text_tom_oracle_tests.rs > system-msftedit-arm64/probe-blob.txt
+          rustc -vV | tee system-msftedit-arm64/rustc.txt
+          {
+            printf 'runner_label=%s\n' 'windows-11-arm'
+            printf 'runner_arch=%s\n' "$RUNNER_ARCH"
+            printf 'runner_os=%s\n' "$RUNNER_OS"
+            printf 'image_os=%s\n' "${ImageOS:-unknown}"
+            printf 'image_version=%s\n' "${ImageVersion:-unknown}"
+            printf 'cargo_build_target=%s\n' "$CARGO_BUILD_TARGET"
+            printf 'workflow=%s\n' "$GITHUB_WORKFLOW"
+            printf 'job=%s\n' "$GITHUB_JOB"
+            printf 'run_attempt=%s\n' "$GITHUB_RUN_ATTEMPT"
+            printf 'run_url=%s/%s/actions/runs/%s/attempts/%s\n' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+          } > system-msftedit-arm64/runner.txt
+          printf '%s\n' 'cargo test --locked -p ferroui-win32 --no-default-features --lib rich_text_tom_oracle -- --nocapture --test-threads=1' > system-msftedit-arm64/serial-command.txt
+          printf '%s\n' 'cargo test --locked -p ferroui-win32 --no-default-features --lib rich_text_tom_oracle -- --nocapture --test-threads=4' > system-msftedit-arm64/concurrent-command.txt
+          test "$RUNNER_ARCH" = ARM64
+          tr -d '\r' < system-msftedit-arm64/rustc.txt | grep -Fx 'host: aarch64-pc-windows-msvc'
+      - name: Characterize system MSFTEDIT with the canonical serial command
+        if: ${{ !cancelled() && steps.native_environment.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          status=0
+          cargo test --locked -p ferroui-win32 --no-default-features --lib rich_text_tom_oracle -- --nocapture --test-threads=1 2>&1 | tee system-msftedit-arm64/system-msftedit.log || status=$?
+          printf '%s\n' "$status" > system-msftedit-arm64/serial-pipeline-exit-code.txt
+          exit "$status"
+      # A vertical-only filter has one test. The complete oracle filter lets vertical
+      # setup overlap sibling native tests in a separate process from the serial run.
+      # Its interleaved output is diagnostic, not serial extractor input.
+      - name: Diagnose concurrent native oracle setup in a fresh test process
+        if: ${{ !cancelled() && steps.native_environment.outcome == 'success' }}
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          status=0
+          cargo test --locked -p ferroui-win32 --no-default-features --lib rich_text_tom_oracle -- --nocapture --test-threads=4 2>&1 | tee system-msftedit-arm64/concurrent-diagnostic.log || status=$?
+          printf '%s\n' "$status" > system-msftedit-arm64/concurrent-pipeline-exit-code.txt
+          exit "$status"
+      - name: Preserve ARM64 native observations and diagnostic provenance
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: rich-text-system-msftedit-arm64
+          retention-days: 14
+          path: system-msftedit-arm64/

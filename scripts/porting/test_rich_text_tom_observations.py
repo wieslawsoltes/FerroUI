@@ -278,6 +278,30 @@ def synthetic_selection_gravity_record(default: bool = False) -> dict:
 
 
 
+def synthetic_selection_gravity_extension(count: int) -> dict:
+    """Independent invented fixtures for validating the extended family budget.
+
+    A repeated final getter makes each fixture 15 commands. This tests the
+    declared-count protocol; it is not a prediction of paragraph typing.
+    """
+    result = synthetic_selection_gravity_record()
+    for key in ("fixtures", "selection_gravity_interfaces", "selection_gravity"):
+        result[key] = []
+    for index in range(count):
+        fixture = synthetic_selection_gravity_record()
+        name = f"synthetic_extension_{index}"
+        fixture["fixtures"][0]["name"] = name
+        fixture["fixtures"][0]["expected_commands"] = 15
+        fixture["selection_gravity_interfaces"][0]["fixture"] = name
+        fixture["selection_gravity"].append(copy.deepcopy(fixture["selection_gravity"][-1]))
+        for step, row in enumerate(fixture["selection_gravity"]):
+            row["fixture"], row["step"] = name, step
+        for key in ("fixtures", "selection_gravity_interfaces", "selection_gravity"):
+            result[key].extend(fixture[key])
+    result["counts"].update(selection_gravity=15 * count, selection_gravity_fixtures=count)
+    return result
+
+
 def record_log(record: dict) -> str:
     """Reconstitute the probe grammar from immutable previously captured rows."""
     engine = record["engine"]
@@ -332,7 +356,9 @@ def record_log(record: dict) -> str:
         lines.append(gravity_row(row))
     for row in record.get("selection_gravity", []):
         lines.append(selection_gravity_row(row))
-    for family in ("home_end", "vertical", "horizontal", "options", "link", "gravity", "selection_gravity"):
+    for row in record.get("range_tracking", []):
+        lines.append(gravity_row(row).replace("GRAVITY ", "RANGE_TRACKING ", 1))
+    for family in ("home_end", "vertical", "horizontal", "options", "link", "gravity", "selection_gravity", "range_tracking"):
         count = record["counts"].get(family, 0)
         if not count:
             continue
@@ -342,8 +368,8 @@ def record_log(record: dict) -> str:
             lines.append(f'LINK_PROBE_COMPLETE commands={count} fixtures={record["counts"]["link_fixtures"]}')
         elif family == "selection_gravity":
             lines.append(f'SELECTION_GRAVITY_PROBE_COMPLETE commands={count} fixtures={record["counts"]["selection_gravity_fixtures"]}')
-        elif family == "gravity":
-            lines.append(f'GRAVITY_PROBE_COMPLETE commands={count} fixtures={record["counts"]["gravity_fixtures"]}')
+        elif family in ("gravity", "range_tracking"):
+            lines.append(f'{family.upper()}_PROBE_COMPLETE commands={count} fixtures={record["counts"][family + "_fixtures"]}')
         else:
             lines.append(f'{family.upper()}_PROBE_COMPLETE commands={count}')
     return "\n".join("SYSTEM_MSFTEDIT_" + line for line in lines)
@@ -483,6 +509,44 @@ def synthetic_gravity_record() -> dict:
         "home_end": [], "vertical": [], "gravity": rows,
         "counts": {"home_end": 0, "home_end_repeats": 0, "vertical": 0, "gravity": len(rows), "gravity_fixtures": 1},
     }
+
+
+def synthetic_range_tracking_record(count: int = 1) -> dict:
+    """Invented six-step protocol rows; these are not endpoint expectations.
+
+    Requested mode 0 or 2 deliberately reads back as 4. The parser must retain
+    observed output rather than infer native behavior from the requested mode.
+    """
+    old = synthetic_gravity_record()
+    template = copy.deepcopy(old["gravity"][1:5])
+    current = template[-1]["after"]
+    for target in ("Primary", "Duplicate"):
+        template.append({
+            "fixture": "synthetic_tracking", "step": len(template), "role": "Target",
+            "target": target, "operation": "GetGravity", "argument1": 0, "argument2": 0,
+            "value": 0, "text": "", "text_utf16_length": 0,
+            "action_before": copy.deepcopy(current[target.lower()]["range"]),
+            "action_after": copy.deepcopy(current[target.lower()]["range"]),
+            "before": copy.deepcopy(current), "after": copy.deepcopy(current),
+            "hresult": "0x00000000", "output": current[target.lower()]["gravity"]["value"],
+        })
+    record = {
+        "engine": copy.deepcopy(old["engine"]), "fixtures": [], "home_end": [], "vertical": [],
+        "range_tracking": [],
+        "counts": {"home_end": 0, "home_end_repeats": 0, "vertical": 0,
+                   "range_tracking": 6 * count, "range_tracking_fixtures": count},
+    }
+    for index in range(count):
+        name = f"synthetic_tracking_{index}"
+        fixture = copy.deepcopy(old["fixtures"][0])
+        fixture.update(family="range_tracking", name=name, expected_commands=6)
+        record["fixtures"].append(fixture)
+        rows = copy.deepcopy(template)
+        for step, row in enumerate(rows):
+            row["fixture"], row["step"] = name, step
+        rows[1]["value"] = 0 if index < 12 else 2
+        record["range_tracking"].extend(rows)
+    return record
 
 
 class NativeObservationExtractionTests(unittest.TestCase):
@@ -967,6 +1031,239 @@ class NativeObservationExtractionTests(unittest.TestCase):
         self.assertNotIn("selection_gravity", old)
         self.assertNotIn("selection_gravity_interfaces", old)
         self.assertNotIn("selection_gravity", old["counts"])
+
+
+    def test_selection_gravity_extension_preserves_all_250_historical_rows(self) -> None:
+        path = SCRIPT.parents[2] / "docs/porting/winui-rich-text/native-msftedit-selection-gravity.json"
+        saved_bytes = path.read_bytes()
+        saved = json.loads(saved_bytes)
+        original = {key: value for key, value in saved.items() if key not in ("schema_version", "scope", "provenance")}
+        self.assertEqual(len(original["selection_gravity"]), 250)
+        combined = copy.deepcopy(original)
+        extension = synthetic_selection_gravity_extension(16)
+        for key in ("fixtures", "selection_gravity_interfaces", "selection_gravity"):
+            combined[key].extend(extension[key])
+        combined["counts"].update(selection_gravity=490, selection_gravity_fixtures=34)
+        actual = PARSER.extract(record_log(combined))
+        self.assertEqual(actual, combined)
+        self.assertEqual(actual["selection_gravity"][:250], original["selection_gravity"])
+        self.assertEqual(actual["selection_gravity_interfaces"][:18], original["selection_gravity_interfaces"])
+        self.assertEqual(path.read_bytes(), saved_bytes)
+
+    def test_selection_gravity_family_accepts_exact_budget_with_independent_defaults(self) -> None:
+        record = synthetic_selection_gravity_extension(34)
+        default = synthetic_selection_gravity_record(default=True)
+        for key in ("fixtures", "selection_gravity_interfaces", "selection_gravity"):
+            record[key].extend(default[key])
+        record["counts"].update(selection_gravity=512, selection_gravity_fixtures=35)
+        self.assertEqual(PARSER.extract(record_log(record)), record)
+
+    def test_selection_gravity_family_rejects_a_real_row_over_budget(self) -> None:
+        record = synthetic_selection_gravity_extension(34)
+        default = synthetic_selection_gravity_record(default=True)
+        for key in ("fixtures", "selection_gravity_interfaces", "selection_gravity"):
+            record[key].extend(default[key])
+        # The extra row is valid and consecutive inside its own configured
+        # fixture; only the total family budget makes this record invalid.
+        row = copy.deepcopy(record["selection_gravity"][14])
+        row["step"] = 15
+        record["selection_gravity"].insert(15, row)
+        record["fixtures"][0]["expected_commands"] = 16
+        record["counts"].update(selection_gravity=513, selection_gravity_fixtures=35)
+        with self.assertRaisesRegex(ValueError, "bounded completion counts"):
+            PARSER.extract(record_log(record))
+
+    def test_selection_gravity_extension_still_requires_each_interface_and_complete_fixture(self) -> None:
+        record = synthetic_selection_gravity_extension(18)
+        for change in ("interface", "duplicate_identity", "missing_row"):
+            changed = copy.deepcopy(record)
+            if change == "interface":
+                changed["selection_gravity_interfaces"].pop()
+            elif change == "duplicate_identity":
+                changed["fixtures"][-1]["name"] = changed["fixtures"][0]["name"]
+            else:
+                changed["selection_gravity"].pop(-2)
+                changed["counts"]["selection_gravity"] -= 1
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                PARSER.extract(record_log(changed))
+
+    def test_selection_gravity_external_paragraph_reads_preserve_raw_formats_and_utf16(self) -> None:
+        record = synthetic_selection_gravity_record()
+        row = record["selection_gravity"][11]
+        story = row["before"]["story_text"]
+        row["argument1"], row["argument2"] = 0, 6
+        for phase in ("action_before", "action_after"):
+            row[phase]["range"] = {"start": 0, "end": 6}
+            row[phase]["text"] = copy.deepcopy(story)
+            row[phase]["bold"] = {"hresult": "0x00000000", "value": -9_999_999}
+            row[phase]["italic"] = {"hresult": "0x80004001", "value": -(2 ** 31)}
+            row[phase]["alignment"] = {"hresult": "0x00000000", "value": 2}
+        self.assertEqual(PARSER.extract(record_log(record)), record)
+        self.assertEqual(row["action_after"]["text"]["text"], "aX😀b\r")
+        self.assertEqual(row["before"], row["after"])
+        row["action_after"]["text"]["text_utf16_length"] = 5
+        with self.assertRaises(ValueError):
+            PARSER.extract(record_log(record))
+
+
+    def test_range_tracking_roundtrips_90_raw_commands_without_predicting_mode_or_endpoints(self) -> None:
+        record = synthetic_range_tracking_record(15)
+        actual = PARSER.extract(record_log(record))
+        self.assertEqual(actual, record)
+        self.assertEqual(actual["counts"]["range_tracking"], 90)
+        self.assertEqual(actual["counts"]["range_tracking_fixtures"], 15)
+        self.assertEqual([actual["range_tracking"][6 * index + 1]["value"] for index in range(15)], [0] * 12 + [2] * 3)
+        self.assertEqual(actual["range_tracking"][1]["after"]["primary"]["gravity"]["value"], 4)
+        self.assertEqual(actual["range_tracking"][5]["output"], 4)
+
+    def test_range_tracking_preserves_historical_families_and_490_selection_protocol(self) -> None:
+        path = SCRIPT.parents[2] / "docs/porting/winui-rich-text/native-msftedit-selection-gravity.json"
+        raw = path.read_bytes()
+        saved = json.loads(raw)
+        original = {key: value for key, value in saved.items() if key not in ("schema_version", "scope", "provenance")}
+        combined = copy.deepcopy(original)
+        selection_extension = synthetic_selection_gravity_extension(16)
+        for key in ("fixtures", "selection_gravity_interfaces", "selection_gravity"):
+            combined[key].extend(selection_extension[key])
+        combined["counts"].update(selection_gravity=490, selection_gravity_fixtures=34)
+        before_tracking = copy.deepcopy(combined)
+        tracking = synthetic_range_tracking_record(15)
+        combined["fixtures"].extend(tracking["fixtures"])
+        combined["range_tracking"] = tracking["range_tracking"]
+        combined["counts"].update(range_tracking=90, range_tracking_fixtures=15)
+        actual = PARSER.extract(record_log(combined))
+        self.assertEqual(actual, combined)
+        for family in ("home_end", "vertical", "horizontal", "options", "link", "gravity", "selection_gravity", "selection_gravity_interfaces"):
+            self.assertEqual(actual[family], before_tracking[family], family)
+        self.assertEqual((len(actual["link"]), len(actual["gravity"]), len(actual["selection_gravity"])), (137, 1577, 490))
+        self.assertNotIn("range_tracking", PARSER.extract(record_log(original)))
+        self.assertEqual(path.read_bytes(), raw)
+
+    def test_range_tracking_keeps_failed_edit_and_getter_hresult_outputs(self) -> None:
+        record = synthetic_range_tracking_record()
+        rows = record["range_tracking"]
+        unchanged = copy.deepcopy(rows[3]["before"])
+        rows[3]["hresult"] = "0x80070057"
+        rows[3]["after"] = copy.deepcopy(unchanged)
+        rows[3]["action_after"] = copy.deepcopy(rows[3]["action_before"])
+        for row in rows[4:]:
+            row["before"] = copy.deepcopy(unchanged)
+            row["after"] = copy.deepcopy(unchanged)
+            row["action_before"] = copy.deepcopy(unchanged[row["target"].lower()]["range"])
+            row["action_after"] = copy.deepcopy(row["action_before"])
+        rows[5]["hresult"], rows[5]["output"] = "0x80004001", -(2 ** 31)
+        rows[1]["hresult"] = "0x00000001"
+        self.assertEqual(PARSER.extract(record_log(record)), record)
+
+    def test_range_tracking_rejects_incomplete_duplicate_and_wrong_completion_counts(self) -> None:
+        log = record_log(synthetic_range_tracking_record())
+        for value in (
+            log.rsplit("\n", 1)[0], log + "\n" + log.splitlines()[-1],
+            log.replace("PROBE_COMPLETE commands=6", "PROBE_COMPLETE commands=5"),
+            log.replace("fixtures=1", "fixtures=2"),
+            log + "\n" + log.splitlines()[1], log + "\n" + log.splitlines()[-2],
+            log.replace("expected_commands=6", "expected_commands=7"),
+        ):
+            with self.subTest(tail=value[-90:]), self.assertRaises(ValueError):
+                PARSER.extract(value)
+
+    def test_range_tracking_rejects_unknown_early_and_duplicate_fixture_identity(self) -> None:
+        record = synthetic_range_tracking_record(2)
+        log = record_log(record)
+        lines = log.splitlines()
+        for value in (
+            "\n".join([lines[0], lines[3], lines[1], lines[2], *lines[4:]]),
+            log.replace("fixture=synthetic_tracking_0", "fixture=unknown"),
+            log.replace("name=synthetic_tracking_1", "name=synthetic_tracking_0"),
+        ):
+            with self.assertRaises(ValueError):
+                PARSER.extract(value)
+
+    def test_range_tracking_rejects_changed_six_step_protocol_and_requested_modes(self) -> None:
+        for index, field, value in (
+            (0, "operation", "GetGravity"), (1, "value", 1),
+            (1, "role", "Setup"), (2, "target", "External"),
+            (3, "target", "Primary"), (4, "target", "Duplicate"),
+            (5, "target", "Primary"), (4, "step", 5),
+        ):
+            record = synthetic_range_tracking_record()
+            record["range_tracking"][index][field] = value
+            with self.subTest(index=index, field=field), self.assertRaises(ValueError):
+                PARSER.extract(record_log(record))
+
+    def test_range_tracking_rejects_duplicate_lifetime_and_nonfresh_initial_state(self) -> None:
+        for index, phase, target, value in (
+            (2, "after", "duplicate", None),
+            (1, "after", "duplicate", "present"),
+            (0, "before", "duplicate", "present"),
+            (4, "after", "duplicate", None),
+        ):
+            record = synthetic_range_tracking_record()
+            row = record["range_tracking"][index]
+            row[phase][target] = copy.deepcopy(row[phase]["primary"]) if value == "present" else value
+            with self.subTest(index=index, phase=phase), self.assertRaises(ValueError):
+                PARSER.extract(record_log(record))
+        record = synthetic_range_tracking_record()
+        row = record["range_tracking"][0]
+        row["before"]["primary"]["range"] = {"start": 1, "end": 1}
+        row["action_before"] = {"start": 1, "end": 1}
+        with self.assertRaises(ValueError):
+            PARSER.extract(record_log(record))
+
+    def test_range_tracking_rejects_range_action_extent_and_native_width_mismatches(self) -> None:
+        for index, path, value in (
+            (0, ("action_after", "end"), 4),
+            (3, ("argument1",), 0),
+            (3, ("action_after", "end"), 7),
+            (3, ("after", "duplicate", "range", "end"), 7),
+            (0, ("before", "story_length"), 2 ** 31),
+            (1, ("after", "primary", "gravity", "value"), 2 ** 31),
+            (5, ("output",), 2 ** 31),
+        ):
+            record = synthetic_range_tracking_record()
+            target = record["range_tracking"][index]
+            for key in path[:-1]:
+                target = target[key]
+            target[path[-1]] = value
+            with self.subTest(index=index, path=path), self.assertRaises(ValueError):
+                PARSER.extract(record_log(record))
+        record = synthetic_range_tracking_record()
+        row = record["range_tracking"][0]
+        row["before"]["primary"].update(text="X", text_utf16_length=1)
+        with self.assertRaisesRegex(ValueError, "endpoint extent"):
+            PARSER.extract(record_log(record))
+
+    def test_range_tracking_rejects_malformed_utf16_inputs_stories_and_output_shapes(self) -> None:
+        for index, path, value in (
+            (3, ("text",), "😀"), (3, ("text_utf16_length",), 2),
+            (3, ("after", "story_text_utf16_length"), 5),
+            (0, ("after", "primary", "text_utf16_length"), 1),
+            (4, ("text",), "X"), (4, ("output",), None),
+            (3, ("output",), 0), (4, ("value",), 1),
+        ):
+            record = synthetic_range_tracking_record()
+            target = record["range_tracking"][index]
+            for key in path[:-1]:
+                target = target[key]
+            target[path[-1]] = value
+            with self.subTest(index=index, path=path), self.assertRaises(ValueError):
+                PARSER.extract(record_log(record))
+
+    def test_range_tracking_rejects_unobserved_state_between_steps(self) -> None:
+        for target, field in (("primary", "bold"), ("duplicate", "gravity")):
+            record = synthetic_range_tracking_record()
+            record["range_tracking"][4]["before"][target][field]["value"] = -123
+            with self.subTest(target=target, field=field), self.assertRaisesRegex(ValueError, "between consecutive"):
+                PARSER.extract(record_log(record))
+
+    def test_range_tracking_rejects_overbudget_or_empty_complete_families(self) -> None:
+        for count in (0, 16):
+            record = synthetic_range_tracking_record(count)
+            log = record_log(record)
+            if count == 0:
+                log += "\nSYSTEM_MSFTEDIT_RANGE_TRACKING_PROBE_COMPLETE commands=0 fixtures=0"
+            with self.subTest(count=count), self.assertRaisesRegex(ValueError, "bounded completion"):
+                PARSER.extract(log)
 
 
 if __name__ == "__main__":

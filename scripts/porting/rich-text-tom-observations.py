@@ -15,6 +15,10 @@ from pathlib import Path
 
 
 PREFIX = "SYSTEM_MSFTEDIT_"
+# The original 250 commands plus a bounded paragraph-TypeText extension.
+# Per-fixture limits and exact declared completion counts remain independent.
+MAX_SELECTION_GRAVITY_COMMANDS = 512
+MAX_RANGE_TRACKING_COMMANDS = 90
 DEBUG_STRING = r'"(?:\\.|[^"\\])*"'
 STATE = r"SelectionState \{ start: (-?\d+), end: (-?\d+), flags: (\d+) \}"
 ENGINE = re.compile(
@@ -130,6 +134,16 @@ GRAVITY = re.compile(
     r"action_after=RangeState \{ start: (?P<action_after_start>-?\d+), end: (?P<action_after_end>-?\d+) \} "
     r"before=" + gravity_snapshot_pattern("before") + r" after=" + gravity_snapshot_pattern("after")
     + r" hresult=(?P<hresult>0x[0-9A-F]{8}) output=(?:None|Some\((?P<output>-?\d+)\))"
+)
+
+
+# Stage A has its own identity and completion contract while retaining the
+# exact previously reviewed Gravity snapshot/command representation.
+RANGE_TRACKING = re.compile(GRAVITY.pattern.replace("GRAVITY fixture=", "RANGE_TRACKING fixture=", 1))
+RANGE_TRACKING_FIXTURE = re.compile(
+    rf'RANGE_TRACKING_FIXTURE name=(\S+) text=({DEBUG_STRING}) '
+    r"supplied_utf16_length=(\d+) native_story_length=(\d+) "
+    r"window_ex_style=(\d+) expected_commands=(\d+)"
 )
 
 
@@ -411,6 +425,32 @@ def validate_gravity_steps(fixture: dict, rows: list[dict]) -> None:
             raise ValueError("gravity state changed between consecutive observed commands")
 
 
+def range_tracking_command(match: re.Match) -> dict:
+    result = gravity_command(match)
+    for phase in ("before", "after"):
+        for target in ("primary", "duplicate"):
+            state = result[phase][target]
+            if state is not None and state["text_utf16_length"] > state["range"]["end"] - state["range"]["start"]:
+                raise ValueError("range tracking text exceeds its observed endpoint extent")
+    return result
+
+
+def validate_range_tracking_steps(fixture: dict, rows: list[dict]) -> None:
+    validate_gravity_steps(fixture, rows)
+    expected = [
+        ("Target", "Primary", "SetRange"),
+        ("Target", "Primary", "SetGravity"),
+        ("Target", "Primary", "Duplicate"),
+        ("Target", "External", "SetText"),
+        ("Target", "Primary", "GetGravity"),
+        ("Target", "Duplicate", "GetGravity"),
+    ]
+    if [(row["role"], row["target"], row["operation"]) for row in rows] != expected:
+        raise ValueError("range tracking requires its exact six-command target sequence")
+    if rows[1]["value"] not in (0, 2):
+        raise ValueError("range tracking requests only UIBehavior or Forward")
+
+
 def native_interface_pattern(prefix: str) -> str:
     return (
         rf"NativeInterface \{{ hresult: (?P<{prefix}_hresult>0x[0-9A-F]{{8}}), "
@@ -657,6 +697,7 @@ def extract(log: str) -> dict:
     options = []
     link = []
     gravity = []
+    range_tracking = []
     selection_gravity = []
     selection_gravity_interfaces = []
     completed = {}
@@ -675,6 +716,32 @@ def extract(log: str) -> dict:
             if engine is not None and engine != current:
                 raise ValueError("engine changed within one probe record")
             engine = current
+            continue
+        match = RANGE_TRACKING_FIXTURE.fullmatch(row)
+        if match:
+            if "range_tracking" in completed:
+                raise ValueError("range tracking fixture follows completion")
+            text = rust_string(match[2])
+            supplied, story, style, commands = map(int, match.group(3, 4, 5, 6))
+            if len(text.encode("utf-16-le")) // 2 != supplied or not supplied <= story < 2 ** 31 or style > 0xFFFFFFFF or commands != 6:
+                raise ValueError("range tracking fixture has inconsistent native lengths/style/six-command count")
+            fixtures.append({"family": "range_tracking", "name": match[1], "text": text,
+                             "supplied_utf16_length": supplied, "native_story_length": story,
+                             "window_ex_style": style, "expected_commands": commands})
+            continue
+        match = RANGE_TRACKING.fullmatch(row)
+        if match:
+            if "range_tracking" in completed:
+                raise ValueError("range tracking command follows completion")
+            if not any(fixture["family"] == "range_tracking" and fixture["name"] == match["fixture"] for fixture in fixtures):
+                raise ValueError("range tracking command precedes its exact fixture")
+            range_tracking.append(range_tracking_command(match))
+            continue
+        match = re.fullmatch(r"RANGE_TRACKING_PROBE_COMPLETE commands=(\d+) fixtures=(\d+)", row)
+        if match:
+            if "range_tracking" in completed:
+                raise ValueError("duplicate range tracking completion")
+            completed["range_tracking"] = (int(match[1]), int(match[2]))
             continue
         match = SELECTION_GRAVITY_FIXTURE.fullmatch(row)
         if match:
@@ -914,9 +981,13 @@ def extract(log: str) -> dict:
         counts = (len(gravity), sum(fixture["family"] == "gravity" for fixture in fixtures))
         if counts != completed.get("gravity") or not gravity:
             raise ValueError("gravity observations do not match the completion counts")
+    if range_tracking or "range_tracking" in completed:
+        counts = (len(range_tracking), sum(fixture["family"] == "range_tracking" for fixture in fixtures))
+        if counts != completed.get("range_tracking") or not 0 < counts[0] <= MAX_RANGE_TRACKING_COMMANDS:
+            raise ValueError("range tracking observations disagree with bounded completion counts")
     if selection_gravity or "selection_gravity" in completed:
         counts = (len(selection_gravity), sum(fixture["family"] == "selection_gravity" for fixture in fixtures))
-        if counts != completed.get("selection_gravity") or not 0 < counts[0] <= 250 or len(selection_gravity_interfaces) != counts[1]:
+        if counts != completed.get("selection_gravity") or not 0 < counts[0] <= MAX_SELECTION_GRAVITY_COMMANDS or len(selection_gravity_interfaces) != counts[1]:
             raise ValueError("selection gravity observations/interfaces disagree with bounded completion counts")
     by_fixture = {}
     for fixture in fixtures:
@@ -962,6 +1033,15 @@ def extract(log: str) -> dict:
         gravity_rows.setdefault(identity, []).append(row)
     for identity, rows in gravity_rows.items():
         validate_gravity_steps(by_fixture[identity], rows)
+    range_tracking_rows = {}
+    for row in range_tracking:
+        identity = ("range_tracking", row["fixture"])
+        if identity not in by_fixture:
+            raise ValueError("range tracking command has no exact fixture")
+        used_fixtures.add(identity)
+        range_tracking_rows.setdefault(identity, []).append(row)
+    for identity, rows in range_tracking_rows.items():
+        validate_range_tracking_steps(by_fixture[identity], rows)
     selection_gravity_rows = {}
     for row in selection_gravity:
         identity = ("selection_gravity", row["fixture"])
@@ -1000,6 +1080,10 @@ def extract(log: str) -> dict:
         result["gravity"] = gravity
         result["counts"]["gravity"] = len(gravity)
         result["counts"]["gravity_fixtures"] = len(gravity_rows)
+    if range_tracking:
+        result["range_tracking"] = range_tracking
+        result["counts"]["range_tracking"] = len(range_tracking)
+        result["counts"]["range_tracking_fixtures"] = len(range_tracking_rows)
     if selection_gravity:
         result["selection_gravity_interfaces"] = selection_gravity_interfaces
         result["selection_gravity"] = selection_gravity
