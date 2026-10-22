@@ -30,7 +30,7 @@ fn paragraph_caret_navigation_uses_real_spacing_and_first_line_offsets() {
     assert_eq!(field.cursor_rectangle().y, 4.0);
     assert_eq!(field.cursor_rectangle().height, 20.0);
     let layout = field.text_layout();
-    let styles = Rc::from(vec![ValueSpan::new(0, 3, TextParagraphStyle {
+    let styles: ferroui_base::media::text_formatting::TextParagraphStyles = Rc::from(vec![ValueSpan::new(0, 3, TextParagraphStyle {
         flow_direction: Some(FlowDirection::RightToLeft), ..Default::default()
     })]);
     field.set_text_paragraph_styles(Some(styles));
@@ -120,7 +120,7 @@ fn repeated_paragraph_ime_insertion_uses_caret_instead_of_a_text_diff() {
     let field = TextPresenter::new();
     field.set_text(Some("A\nA\n"));
     field.set_line_height(20.0);
-    let styles = Rc::from(vec![
+    let styles: ferroui_base::media::text_formatting::TextParagraphStyles = Rc::from(vec![
         ValueSpan::new(0, 2, TextParagraphStyle { indent: 10.0, ..Default::default() }),
         ValueSpan::new(2, 2, TextParagraphStyle { indent: 20.0, ..Default::default() }),
         ValueSpan::new(4, 0, TextParagraphStyle { indent: 30.0, ..Default::default() }),

@@ -7,7 +7,7 @@ use crate::text_box_text_input_method_client::TextBoxTextInputMethodClient;
 use crate::utils::{ClipboardHelper, IUndoRedoHost, PrimarySelectionHelper, StringUtils, UndoRedoHelper};
 use crate::{
     Application, Border, ContentControl, ControlImpl, Decorator, PastingFromClipboardEventArgs, ScrollViewer,
-    SelectableTextBlock, TextBlock, TextChangedEventArgs, TextChangingEventArgs, TopLevel,
+    SelectableTextBlock, TextBlock, TextBoxTextChange, TextChangedEventArgs, TextChangingEventArgs, TopLevel,
 };
 use ferroui_base::input::platform::{ClipboardError, ClipboardExtensions, ClipboardType, IClipboard};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
@@ -46,28 +46,9 @@ use ferroui_base::{
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
 
-/// Stores the state information for the available actions of the undo/redo
-/// helper.
-///
-/// Two states are equal when their texts are: the caret position does not
-/// take part in the comparison.
-#[derive(Clone, Debug)]
-pub(crate) struct UndoRedoState {
-    text: Option<String>,
-    caret_position: i32,
-}
-
-impl UndoRedoState {
-    fn new(text: Option<String>, caret_position: i32) -> Self {
-        Self { text, caret_position }
-    }
-}
-
-impl PartialEq for UndoRedoState {
-    fn eq(&self, other: &Self) -> bool {
-        self.text == other.text
-    }
-}
+#[path = "text_box_history.rs"]
+mod text_box_history;
+use text_box_history::UndoRedoState;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum TextMutationKind {
@@ -108,6 +89,9 @@ pub struct TextBox {
     undo_redo_host: RefCell<Option<Rc<dyn IUndoRedoHost<UndoRedoState>>>>,
     is_undoing_redoing: Cell<bool>,
     text_mutation_kind: Cell<TextMutationKind>,
+    native_text_change: RefCell<Option<TextBoxTextChange>>,
+    text_change_generation: Cell<u64>,
+    text_undo_state: RefCell<Option<Rc<dyn Any>>>,
     // Coercion runs before the new value is committed, so a snapshot taken there would capture the old text.
     needs_undo_redo_snapshot_after_text_change: Cell<bool>,
     can_cut: Cell<bool>,
@@ -223,6 +207,7 @@ impl FerroObjectImpl for TextBox {
         let property = change.property();
 
         if property == Self::text_property().as_property() {
+            this.text_change_generation.set(this.text_change_generation.get().wrapping_add(1));
             // Do not expose a selection with only one endpoint coerced to the new text.
             let _change = this.im_client.begin_change();
 
@@ -235,7 +220,8 @@ impl FerroObjectImpl for TextBox {
             this.coerce_value(Self::selection_start_property().as_property());
             this.coerce_value(Self::selection_end_property().as_property());
 
-            this.raise_text_change_events();
+            let (old_text, new_text) = change.get_old_and_new_value::<Option<String>>();
+            this.raise_text_change_events(old_text.as_deref().unwrap_or_default(), new_text.as_deref().unwrap_or_default());
 
             this.update_pseudoclasses();
             this.update_command_states();
@@ -624,7 +610,10 @@ impl InputElementImpl for TextBox {
 
                                 remove_range(&mut text, start, end - start);
 
-                                this.set_text_from_edit(Some(String::from_utf16_lossy(&text)));
+                                if !this.set_text_from_range_edit(Some(String::from_utf16_lossy(&text)), start..end, 0) {
+                                    e.set_handled(true);
+                                    return;
+                                }
 
                                 this.set_current_value(Self::caret_index_property(), start);
 
@@ -658,7 +647,10 @@ impl InputElementImpl for TextBox {
 
                                 remove_range(&mut text, start, end - start);
 
-                                this.set_text_from_edit(Some(String::from_utf16_lossy(&text)));
+                                if !this.set_text_from_range_edit(Some(String::from_utf16_lossy(&text)), start..end, 0) {
+                                    e.set_handled(true);
+                                    return;
+                                }
                             }
                         }
 
@@ -1096,16 +1088,14 @@ struct TextBoxUndoRedoHost(WeakRef<TextBox>);
 impl IUndoRedoHost<UndoRedoState> for TextBoxUndoRedoHost {
     fn undo_redo_state(&self) -> UndoRedoState {
         match self.0.upgrade() {
-            Some(text_box) => UndoRedoState::new(text_box.text(), text_box.caret_index()),
+            Some(text_box) => text_box.capture_text_history_state(),
             None => UndoRedoState::new(None, 0),
         }
     }
 
     fn set_undo_redo_state(&self, value: UndoRedoState) {
         if let Some(text_box) = self.0.upgrade() {
-            text_box.set_current_value(TextBox::text_property(), value.text);
-            text_box.set_current_value(TextBox::caret_index_property(), value.caret_position);
-            text_box.clear_selection();
+            text_box.restore_text_history_state(value);
         }
     }
 
@@ -1533,6 +1523,9 @@ impl TextBox {
             undo_redo_host: RefCell::new(None),
             is_undoing_redoing: Cell::new(false),
             text_mutation_kind: Cell::new(TextMutationKind::ExternalReplacement),
+            native_text_change: RefCell::new(None),
+            text_change_generation: Cell::new(0),
+            text_undo_state: RefCell::new(None),
             needs_undo_redo_snapshot_after_text_change: Cell::new(false),
             can_cut: Cell::new(false),
             can_copy: Cell::new(false),
@@ -2145,7 +2138,10 @@ impl TextBox {
             {
                 self.pseudo_classes().set(":empty", false);
 
-                self.delete_selection();
+                // Removing the selection only makes room for the IME's
+                // provisional visual. Cancellation restores it; neither side
+                // may create an undo checkpoint or discard an existing redo.
+                self.delete_selection_with_kind(TextMutationKind::InternalSynchronization);
             }
         }
     }
@@ -2200,7 +2196,9 @@ impl TextBox {
 
             let text = String::from_utf16_lossy(&text);
 
-            self.set_text_from_edit(Some(text.clone()));
+            if !self.set_text_from_range_edit(Some(text.clone()), insert_at as i32..insert_at as i32 + selection_length, input_length) {
+                return;
+            }
 
             self.clear_selection();
 
@@ -2485,7 +2483,7 @@ impl TextBox {
 
     /// Clears the text in the text box.
     pub fn clear(&self) {
-        self.set_text_from_edit(Some(String::new()))
+        self.set_text_from_range_edit(Some(String::new()), 0..self.text_length(), 0);
     }
 
     fn move_horizontal(&self, direction: i32, whole_word: bool, is_selecting: bool, move_caret_position: bool) {
@@ -2688,6 +2686,10 @@ impl TextBox {
     /// Deletes the selected text. Returns whether there was a selection (or
     /// the text box is read-only).
     pub(crate) fn delete_selection(&self) -> bool {
+        self.delete_selection_with_kind(TextMutationKind::Edit)
+    }
+
+    fn delete_selection_with_kind(&self, mutation_kind: TextMutationKind) -> bool {
         if self.is_read_only() {
             return true;
         }
@@ -2701,7 +2703,9 @@ impl TextBox {
 
             remove_range(&mut text, start, end - start);
 
-            self.set_text_from_edit(Some(String::from_utf16_lossy(&text)));
+            if !self.set_text_from_range_change(Some(String::from_utf16_lossy(&text)), start..end, 0, mutation_kind) {
+                return true;
+            }
 
             if let Some(presenter) = self.presenter() {
                 presenter.move_caret_to_text_position(start, false);
@@ -2759,6 +2763,27 @@ impl TextBox {
     pub(crate) fn set_text_from_edit(&self, value: Option<String>) {
         self.set_text_core(value, TextMutationKind::Edit)
     }
+
+    fn set_text_from_range_edit(&self, value: Option<String>, replaced: std::ops::Range<i32>, inserted_length: i32) -> bool {
+        self.set_text_from_range_change(value, replaced, inserted_length, TextMutationKind::Edit)
+    }
+
+    fn set_text_from_range_change(&self, value: Option<String>, replaced: std::ops::Range<i32>, inserted_length: i32, mutation_kind: TextMutationKind) -> bool {
+        let generation = self.text_change_generation.get();
+        let change = TextBoxTextChange::new(self.text().unwrap_or_default(), replaced, inserted_length);
+        let previous = self.native_text_change.replace(Some(change));
+        struct Restore<'a>(&'a RefCell<Option<TextBoxTextChange>>, Option<TextBoxTextChange>);
+        impl Drop for Restore<'_> {
+            fn drop(&mut self) { self.0.replace(self.1.take()); }
+        }
+        let _restore = Restore(&self.native_text_change, previous);
+        self.set_text_core(value.clone(), mutation_kind);
+        // Synchronous handlers or subclass coercion may replace the result.
+        // The caller must not overwrite their presenter/selection afterward.
+        self.text_change_generation.get().wrapping_sub(generation) <= 1 && self.text() == value
+    }
+
+    pub(crate) fn text_change_generation(&self) -> u64 { self.text_change_generation.get() }
 
     /// Sets the text as a synchronization of the control with itself: the
     /// undo history is neither extended nor cleared.
@@ -2857,13 +2882,15 @@ impl TextBox {
     /// Raises both the `TextChanging` and `TextChanged` events.
     ///
     /// This must be called after the `Text` property is set.
-    fn raise_text_change_events(&self) {
+    fn raise_text_change_events(&self, previous: &str, next: &str) {
         // Note the following sequence of these events:
         // 1. TextChanging occurs synchronously when text starts to change but before it is rendered.
         //    This occurs after the Text property is set.
         // 2. TextChanged occurs asynchronously after text changes and the new text is rendered.
 
-        let text_changing_event_args = TextChangingEventArgs::with_event(Self::text_changing_event());
+        let change = self.native_text_change.borrow().as_ref()
+            .filter(|change| change.matches(previous, next)).cloned();
+        let text_changing_event_args = TextChangingEventArgs::with_event(Self::text_changing_event()).with_text_change(change);
         self.raise_event(&text_changing_event_args);
 
         let this = self.to_ref();

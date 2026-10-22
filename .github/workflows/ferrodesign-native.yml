@@ -67,6 +67,8 @@ jobs:
         run: |
           cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-base --lib paragraph --jobs 1 -- --test-threads=1
           cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-controls --lib paragraph --jobs 1 -- --test-threads=1
+          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-controls --lib text_box_tests:: --jobs 1 -- --test-threads=1
+          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-controls --lib text_box_history:: --jobs 1 -- --test-threads=1
       - name: Validate native editor and public renderer pixels
         run: cargo +1.99.0 test --locked -p ferrodesign-app --lib --jobs 1 -- --test-threads=1
       - uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830

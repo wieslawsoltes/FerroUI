@@ -2155,7 +2155,7 @@ fn pending_preedit_survives_selection_deletion_before_text_changing() {
     raise_text_event(&text_box, "\u{304b}");
     assert!(!text_box.is_composing_text());
     assert_eq!(
-        vec![(Some(String::new()), true), (Some("\u{304b}".to_string()), false)],
+        vec![(Some(String::new()), true), (Some("hello".to_string()), true), (Some("\u{304b}".to_string()), false)],
         *changes.borrow()
     );
 }
@@ -2723,4 +2723,198 @@ fn hot_keyed_text_box_focus_performed_on_hotkey() {
     ));
 
     assert!(hot_keyed_text_box.is_focused());
+}
+
+#[test]
+fn native_text_change_reports_exact_repeated_text_and_utf16_edits() {
+    let _scope = test_scope();
+    let target = templated_text_box(Some("🦀🦀z"));
+    let _root = host_in_root(&target);
+    let changes = Rc::new(RefCell::new(Vec::new()));
+    let recorded = changes.clone();
+    target.text_changing(move |_, event| { recorded.borrow_mut().push(event.text_change().cloned()); });
+    target.set_selection_start(0);
+    target.set_selection_end(2);
+    target.set_selected_text(None);
+    let change = changes.borrow()[0].clone().unwrap();
+    assert_eq!(change.previous_text(), "🦀🦀z");
+    assert_eq!(change.replaced_range(), 0..2);
+    assert_eq!(change.inserted_length(), 0);
+    assert_eq!(target.text().as_deref(), Some("🦀z"));
+    target.set_caret_index(0);
+    target.clear_selection();
+    raise_text_event(&target, "🦀");
+    let change = changes.borrow()[1].clone().unwrap();
+    assert_eq!(change.previous_text(), "🦀z");
+    assert_eq!(change.replaced_range(), 0..0);
+    assert_eq!(change.inserted_length(), 2);
+    target.clear();
+    let change = changes.borrow()[2].clone().unwrap();
+    assert_eq!(change.replaced_range(), 0..5);
+    target.set_text(Some("external"));
+    assert!(changes.borrow().last().unwrap().is_none());
+}
+
+#[test]
+fn native_text_change_does_not_leak_into_reentrant_external_assignments() {
+    let _scope = test_scope();
+    let target = templated_text_box(Some("A"));
+    let _root = host_in_root(&target);
+    let weak = target.downgrade();
+    let changes = Rc::new(RefCell::new(Vec::new()));
+    let recorded = changes.clone();
+    target.text_changing(move |_, event| {
+        recorded.borrow_mut().push(event.text_change().cloned());
+        if event.text_change().is_some() {
+            let target = weak.upgrade().unwrap();
+            target.set_text(Some("handler replacement"));
+            target.set_caret_index(7);
+            target.set_selection_start(3);
+            target.set_selection_end(7);
+        }
+    });
+    target.set_caret_index(1);
+    raise_text_event(&target, "B");
+    assert_eq!(changes.borrow().len(), 2);
+    assert!(changes.borrow()[0].is_some());
+    assert!(changes.borrow()[1].is_none());
+    let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    assert_eq!(presenter.text(), target.text());
+    assert_eq!(target.text().as_deref(), Some("handler replacement"));
+    assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (7, 3, 7));
+}
+
+#[test]
+fn paragraph_ime_cancel_restores_confirmation_and_commit_reports_original_selection() {
+    use ferroui_base::media::text_formatting::{TextParagraphStyle, TextParagraphStyles};
+    use ferroui_base::utilities::ValueSpan;
+    let _scope = test_scope();
+    let target = templated_text_box(Some("A\nA\n"));
+    target.set_accepts_return(true);
+    target.apply_template();
+    let _root = host_in_root(&target);
+    let styles: TextParagraphStyles = Rc::from([
+        ValueSpan::new(0, 2, TextParagraphStyle { indent: 10.0, ..Default::default() }),
+        ValueSpan::new(2, 2, TextParagraphStyle { indent: 20.0, ..Default::default() }),
+    ]);
+    target.set_text_paragraph_styles(Some(styles.clone()));
+    target.set_selection_start(0);
+    target.set_selection_end(2);
+    let client = get_input_method_client(&target);
+    let changes = Rc::new(RefCell::new(Vec::new()));
+    let recorded = changes.clone();
+    let weak = target.downgrade();
+    target.text_changing(move |_, event| {
+        let target = weak.upgrade().unwrap();
+        recorded.borrow_mut().push((target.text(), target.is_composing_text(), event.text_change().cloned()));
+    });
+    client.set_preedit_text(Some("B\n"));
+    assert_eq!(target.text().as_deref(), Some("A\n"));
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some("A\nA\n"));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 2));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &styles));
+    assert!(!target.is_composing_text());
+    assert!(changes.borrow().iter().all(|(_, composing, _)| *composing));
+    client.set_preedit_text(Some("B\n"));
+    client.set_preedit_text(None);
+    raise_text_event(&target, "B\nB\n");
+    let changes = changes.borrow();
+    let (value, composing, change) = changes.last().unwrap();
+    assert_eq!(value.as_deref(), Some("B\nB\nA\n"));
+    assert!(!composing);
+    let change = change.as_ref().unwrap();
+    assert_eq!(change.previous_text(), "A\nA\n");
+    assert_eq!(change.replaced_range(), 0..2);
+    assert_eq!(change.inserted_length(), 4);
+}
+
+#[test]
+fn paragraph_ime_restore_respects_a_synchronous_application_replacement() {
+    use ferroui_base::media::text_formatting::{TextParagraphStyle, TextParagraphStyles};
+    use ferroui_base::utilities::ValueSpan;
+    let _scope = test_scope();
+    let target = templated_text_box(Some("old\nold"));
+    target.apply_template();
+    let _root = host_in_root(&target);
+    let old: TextParagraphStyles = Rc::from([ValueSpan::new(0, 4, TextParagraphStyle { indent: 10.0, ..Default::default() })]);
+    let replacement: TextParagraphStyles = Rc::from([ValueSpan::new(0, 11, TextParagraphStyle { indent: 40.0, ..Default::default() })]);
+    target.set_text_paragraph_styles(Some(old));
+    target.select_all();
+    let client = get_input_method_client(&target);
+    client.set_preedit_text(Some("preedit"));
+    let weak = target.downgrade();
+    let next = replacement.clone();
+    target.text_changing(move |_, _| {
+        let target = weak.upgrade().unwrap();
+        if target.text().as_deref() == Some("old\nold") {
+            target.set_text(Some("replacement"));
+            target.set_text_paragraph_styles(Some(next.clone()));
+            target.set_caret_index(5);
+            target.set_selection_start(2);
+            target.set_selection_end(5);
+        }
+    });
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some("replacement"));
+    assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (5, 2, 5));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &replacement));
+    assert!(!target.is_composing_text());
+}
+
+#[test]
+fn paragraph_ime_cancellation_does_not_enter_native_history_or_discard_redo() {
+    use ferroui_base::media::text_formatting::{TextParagraphStyle, TextParagraphStyles};
+    use ferroui_base::utilities::ValueSpan;
+    let _scope = test_scope();
+    let target = templated_text_box(Some("A🦀\nB"));
+    target.set_accepts_return(true);
+    target.apply_template();
+    let _root = host_in_root(&target);
+    let styles: TextParagraphStyles = Rc::from([
+        ValueSpan::new(0, 4, TextParagraphStyle { indent: 10.0, ..Default::default() }),
+        ValueSpan::new(4, 1, TextParagraphStyle { indent: 20.0, ..Default::default() }),
+    ]);
+    target.set_text_paragraph_styles(Some(styles.clone()));
+    target.set_text_undo_state(Some(Rc::new("confirmed")));
+    let client = get_input_method_client(&target);
+    target.set_selection_start(0);
+    target.set_selection_end(4);
+    assert!(!target.can_undo());
+    assert!(!target.can_redo());
+
+    client.set_preedit_text(Some("provisional"));
+    assert_eq!(target.text().as_deref(), Some("B"));
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some("A🦀\nB"));
+    assert!(!target.can_undo(), "Canceled provisional deletion is not a user edit");
+    assert!(!target.can_redo());
+    target.undo();
+    assert_eq!(target.text().as_deref(), Some("A🦀\nB"));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &styles));
+
+    // A committed replacement has exactly the confirmed source as its undo
+    // checkpoint, even after an earlier canceled composition.
+    client.set_preedit_text(Some("C\n"));
+    client.set_preedit_text(None);
+    raise_text_event(&target, "C\n");
+    assert_eq!(target.text().as_deref(), Some("C\nB"));
+    target.undo();
+    assert_eq!(target.text().as_deref(), Some("A🦀\nB"));
+    assert!(!target.can_undo(), "No provisional text can be revisited by a second undo");
+    assert!(target.can_redo());
+
+    // Cancellation while an older checkpoint is selected cannot erase redo.
+    target.set_selection_start(0);
+    target.set_selection_end(4);
+    client.set_preedit_text(Some("another draft"));
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some("A🦀\nB"));
+    assert!(!target.can_undo());
+    assert!(target.can_redo());
+    target.redo();
+    assert_eq!(target.text().as_deref(), Some("C\nB"));
+    target.undo();
+    assert_eq!(target.text().as_deref(), Some("A🦀\nB"));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &styles));
 }

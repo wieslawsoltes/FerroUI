@@ -56,10 +56,14 @@ pub(super) fn compose(
         let provisional = if paragraph.start <= insertion { paragraph.start }
             else if after_insert { paragraph.start - inserted_length }
             else { insertion };
-        // A new line inside the insertion inherits the source paragraph. At
-        // the far edge of a replacement, preserve the original suffix style.
+        // A new line inside the insertion inherits the source paragraph. A
+        // surviving paragraph starting at the deletion cut belongs to the
+        // suffix, including a cut through the LF half of a CRLF terminator.
+        // A separator-only merge still starts before the cut, so its prefix
+        // keeps the original style.
         let source = if provisional > removed.start
-            || (provisional == removed.start && insertion == removed.start && after_insert && inserted_length > 0) {
+            || (provisional == removed.start
+                && (inserted_length == 0 || insertion != removed.start || after_insert)) {
             provisional + removed_length
         } else { provisional };
         while paragraph_index + 1 < original_paragraphs.len()
@@ -136,6 +140,35 @@ mod tests {
         let visible: Vec<_> = "X\nA\nB\n".encode_utf16().collect();
         let actual = compose(Some(styles), &before, &visible, 0..0, 0, 2).unwrap();
         assert_eq!(actual.iter().map(|style| style.value().indent).collect::<Vec<_>>(), [10.0, 10.0, 25.0, 30.0]);
+    }
+
+    #[test]
+    fn empty_preedit_keeps_surviving_paragraphs_at_the_deletion_cut() {
+        let before: Vec<_> = "A\nB\nC\n".encode_utf16().collect();
+        let styles: TextParagraphStyles = Rc::from(vec![
+            ValueSpan::new(0, 2, TextParagraphStyle { indent: 10.0, ..Default::default() }),
+            ValueSpan::new(2, 2, TextParagraphStyle { indent: 20.0, ..Default::default() }),
+            ValueSpan::new(4, 2, TextParagraphStyle { indent: 30.0, ..Default::default() }),
+            ValueSpan::new(6, 0, TextParagraphStyle { indent: 40.0, ..Default::default() }),
+        ]);
+        for (removed, text, expected) in [
+            (0..2, "B\nC\n", vec![20.0, 30.0, 40.0]),
+            (0..3, "\nC\n", vec![20.0, 30.0, 40.0]),
+            (2..4, "A\nC\n", vec![10.0, 30.0, 40.0]),
+            (1..2, "AB\nC\n", vec![10.0, 30.0, 40.0]),
+        ] {
+            let visible: Vec<_> = text.encode_utf16().collect();
+            let actual = compose(Some(styles.clone()), &before, &visible, removed.clone(), removed.start, 0).unwrap();
+            assert_eq!(actual.iter().map(|style| style.value().indent).collect::<Vec<_>>(), expected, "{removed:?}");
+        }
+        let crlf: Vec<_> = "A\r\nB".encode_utf16().collect();
+        let styles: TextParagraphStyles = Rc::from(vec![
+            ValueSpan::new(0, 3, TextParagraphStyle { indent: 10.0, ..Default::default() }),
+            ValueSpan::new(3, 1, TextParagraphStyle { indent: 20.0, ..Default::default() }),
+        ]);
+        let visible: Vec<_> = "A\rB".encode_utf16().collect();
+        let actual = compose(Some(styles), &crlf, &visible, 2..3, 2, 0).unwrap();
+        assert_eq!(actual.iter().map(|style| style.value().indent).collect::<Vec<_>>(), [10.0, 20.0]);
     }
 
     #[test]

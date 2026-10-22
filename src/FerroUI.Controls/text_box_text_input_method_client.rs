@@ -163,7 +163,15 @@ impl TextInputMethodClient for TextBoxTextInputMethodClient {
         if preedit_text.is_some() && !self.pending_preedit.get() {
             *self.confirmed_preedit.borrow_mut() = Some(ConfirmedPreedit::capture(&parent));
         } else if preedit_text.is_none() {
-            self.confirmed_preedit.borrow_mut().take();
+            // Clearing a composition may mean cancellation or may precede its
+            // committed TextInput. Restore the confirmed selection first, so
+            // either case uses its real text/range rather than a provisional
+            // deletion. Keep pending true during synchronous notifications.
+            // Take the snapshot before property writes: callbacks can reenter.
+            let confirmed = self.confirmed_preedit.borrow_mut().take();
+            if let Some(confirmed) = confirmed {
+                self.restore_confirmed(&parent, confirmed);
+            }
         }
         self.pending_preedit.set(preedit_text.is_some());
         presenter.set_current_value(TextPresenter::preedit_text_property(), preedit_text.map(str::to_owned));
@@ -243,21 +251,39 @@ impl TextBoxTextInputMethodClient {
         Some((ReadOnlyMemory::<u16>::from_str(confirmed.text.as_deref().unwrap_or_default()), start..end))
     }
 
+    fn restore_confirmed(&self, parent: &TextBox, confirmed: ConfirmedPreedit) {
+        if parent.text() != confirmed.provisional_text || confirmed.text == confirmed.provisional_text { return; }
+        let _change = self.begin_change();
+        let styles = parent.text_style_overrides();
+        let paragraphs = parent.text_paragraph_styles();
+        let selection = (parent.caret_index(), parent.selection_start(), parent.selection_end());
+        let generation = parent.text_change_generation().wrapping_add(1);
+        parent.set_text_from_internal_synchronization(confirmed.text.clone());
+        // TextChanging and style notifications are synchronous. Respect a
+        // handler's replacement instead of applying an obsolete IME snapshot.
+        if parent.text_change_generation() != generation || parent.text() != confirmed.text { return; }
+        if parent.text_style_overrides() == styles {
+            parent.set_current_value(TextBox::text_style_overrides_property(), confirmed.styles);
+        }
+        if parent.text_change_generation() != generation || parent.text() != confirmed.text { return; }
+        if parent.text_paragraph_styles() == paragraphs {
+            parent.set_current_value(TextBox::text_paragraph_styles_property(), confirmed.paragraph_styles);
+        }
+        if parent.text_change_generation() == generation && parent.text() == confirmed.text
+            && (parent.caret_index(), parent.selection_start(), parent.selection_end()) == selection {
+            parent.set_current_value(TextBox::caret_index_property(), confirmed.caret);
+            parent.set_current_value(TextBox::selection_start_property(), confirmed.selection.start);
+            parent.set_current_value(TextBox::selection_end_property(), confirmed.selection.end);
+        }
+    }
+
     pub(crate) fn set_presenter(&self, presenter: Option<&Ref<TextPresenter>>, parent: Option<&Ref<TextBox>>) {
         let confirmed = self.confirmed_preedit.borrow_mut().take();
         if self.pending_preedit.get() {
             if let (Some(old_parent), Some(confirmed)) = (self.parent(), confirmed) {
                 // A host may already have restored or replaced Text. Never
                 // overwrite that later value with an obsolete IME snapshot.
-                if old_parent.text() == confirmed.provisional_text && confirmed.text != confirmed.provisional_text {
-                    let _change = self.begin_change();
-                    old_parent.set_text_from_internal_synchronization(confirmed.text);
-                    old_parent.set_current_value(TextBox::text_style_overrides_property(), confirmed.styles);
-                    old_parent.set_current_value(TextBox::text_paragraph_styles_property(), confirmed.paragraph_styles);
-                    old_parent.set_current_value(TextBox::caret_index_property(), confirmed.caret);
-                    old_parent.set_current_value(TextBox::selection_start_property(), confirmed.selection.start);
-                    old_parent.set_current_value(TextBox::selection_end_property(), confirmed.selection.end);
-                }
+                self.restore_confirmed(&old_parent, confirmed);
             }
         }
         self.pending_preedit.set(false);
