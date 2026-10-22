@@ -146,24 +146,37 @@ impl EditorShell {
         let weak_shell = Rc::downgrade(self);
         let weak_field = field.downgrade();
         let value = committed.clone();
-        let commit: Rc<dyn Fn()> = Rc::new(move || {
+        let submit: Rc<dyn Fn(bool) -> bool> = Rc::new(move |explicit| {
             let (Some(shell), Some(field)) = (weak_shell.upgrade(), weak_field.upgrade()) else {
-                return;
+                return false;
             };
             if shell.updating.get() || field.is_composing_text() {
-                return;
+                return false;
             }
-            if field.text().unwrap_or_default() == *value.borrow() {
-                return;
+            // Enter is an explicit literal override for radius, even if its
+            // displayed number already equals the bound variable. Passive
+            // blur/flush must not detach an unchanged binding or add history.
+            if !(explicit && name == "RadiusField")
+                && field.text().unwrap_or_default() == *value.borrow()
+            {
+                return true;
             }
-            if shell.commit_field(name) {
+            let accepted = shell.commit_field(name);
+            if accepted {
+                // Update before moving focus: the resulting LostFocus event
+                // sees a clean field and cannot submit this command twice.
                 *value.borrow_mut() = field.text().unwrap_or_default();
             }
             shell.sync_document_draft_dirty();
+            accepted
+        });
+        let passive = submit.clone();
+        let commit: Rc<dyn Fn()> = Rc::new(move || {
+            passive(false);
         });
         let blur = commit.clone();
         field.add_handler(InputElement::lost_focus_event(), move |_, _| blur());
-        let enter = commit.clone();
+        let enter = submit;
         let weak_shell = Rc::downgrade(self);
         let weak_field = field.downgrade();
         field.add_handler(InputElement::key_down_event(), move |_, event| {
@@ -176,10 +189,13 @@ impl EditorShell {
             {
                 return;
             }
-            enter();
-            if let Some(shell) = weak_shell.upgrade() {
-                shell.canvas.focus();
+            if enter(true) {
+                if let Some(shell) = weak_shell.upgrade() {
+                    shell.canvas.focus();
+                }
             }
+            // A rejected Enter retains the TextBox and its draft. Escape then
+            // reaches bind_inspector_draft's native restoration handler.
             event.set_handled(true);
         });
         self.bind_inspector_draft(&field, committed, commit, None);
@@ -237,3 +253,7 @@ impl EditorShell {
             .any(|draft| draft.is_dirty())
     }
 }
+
+#[cfg(all(test, not(target_os = "emscripten")))]
+#[path = "fields_tests.rs"]
+mod tests;
