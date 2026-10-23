@@ -1,0 +1,112 @@
+{
+  "source_commit": "c7dbf26f1e184fc1113f9c96fcdc1dd0e2627834",
+  "production_equivalent_to": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "run_id": 39955698269,
+  "job_id": 120423823557,
+  "job_name": "Native validation",
+  "conclusion": "success",
+  "started_at": "2026-10-23T12:52:08Z",
+  "completed_at": "2026-10-23T13:17:24Z",
+  "core": {
+    "passed": 533,
+    "failed": 0,
+    "ignored": 0,
+    "test_seconds": 2.37
+  },
+  "app": {
+    "passed": 239,
+    "failed": 0,
+    "ignored": 0,
+    "test_seconds": 43.13,
+    "compilation_seconds": 339
+  },
+  "framework_filters": [
+    {
+      "crate": "ferroui-controls",
+      "filter": "preedit",
+      "passed": 15,
+      "seconds": 0.14
+    },
+    {
+      "crate": "ferroui-controls",
+      "filter": "rich_ranges",
+      "passed": 2,
+      "seconds": 0.01
+    },
+    {
+      "crate": "ferroui-controls",
+      "filter": "replacing_range_styles_and_font_features_invalidates_shaped_layout",
+      "passed": 1,
+      "seconds": 0.01
+    },
+    {
+      "crate": "ferroui-base",
+      "filter": "compositing_layer",
+      "passed": 7,
+      "seconds": 0.0
+    },
+    {
+      "crate": "ferroui-vello",
+      "filter": "compositing_layer",
+      "passed": 8,
+      "seconds": 0.12
+    },
+    {
+      "crate": "ferroui-vello",
+      "filter": "geometry_path_data",
+      "passed": 2,
+      "seconds": 0.0
+    },
+    {
+      "crate": "ferroui-vello",
+      "filter": "text_layout_build_geometry",
+      "passed": 3,
+      "seconds": 0.66
+    },
+    {
+      "crate": "ferroui-vello",
+      "filter": "glyph_run_complete_geometry",
+      "passed": 2,
+      "seconds": 0.02
+    },
+    {
+      "crate": "ferroui-vello",
+      "filter": "unhinted_",
+      "passed": 8,
+      "seconds": 0.33
+    }
+  ],
+  "native_launcher_check": {
+    "passed": true,
+    "started_at": "2026-10-23T13:02:10Z",
+    "completed_at": "2026-10-23T13:10:35Z"
+  },
+  "build_cache": {
+    "restore": "No matching native cache; source timestamp manifest missing.",
+    "snapshot_files": 10501,
+    "saved_key": "ferrodesign-build-Linux-v3-native-d6306b456adbf0ac2518e09e338152dbf4b13dc3ee879ff86d4c77487dd3cdb9-c7dbf26f1e184fc1113f9c96fcdc1dd0e2627834"
+  },
+  "raw_log": {
+    "bytes": 656156,
+    "sha256": "78c30cd67b4ca56227d340a77af109ed3983b219e7f40d48d0d85c90df06e84c"
+  },
+  "compressed_log": {
+    "bytes": 112481,
+    "sha256": "6ee18eccddb082d45563d6c02f78884b2ee234ce711f0cce313914d3ec905a83"
+  },
+  "test_result_lines": [
+    "2026-10-23T12:53:14.9415518Z test result: ok. 533 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.37s",
+    "2026-10-23T12:53:15.3928109Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+    "2026-10-23T12:57:30.9191591Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 4463 filtered out; finished in 0.14s",
+    "2026-10-23T12:57:31.0941195Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 4476 filtered out; finished in 0.01s",
+    "2026-10-23T12:57:31.2565969Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4477 filtered out; finished in 0.01s",
+    "2026-10-23T12:59:05.6912208Z test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 4559 filtered out; finished in 0.00s",
+    "2026-10-23T13:02:08.3484196Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 516 filtered out; finished in 0.12s",
+    "2026-10-23T13:02:08.6630764Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 522 filtered out; finished in 0.00s",
+    "2026-10-23T13:02:09.5072781Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 521 filtered out; finished in 0.66s",
+    "2026-10-23T13:02:09.7194466Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 522 filtered out; finished in 0.02s",
+    "2026-10-23T13:02:10.2231452Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 516 filtered out; finished in 0.33s",
+    "2026-10-23T13:16:58.2275195Z test result: ok. 239 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 43.13s"
+  ],
+  "scope": "Full-workflow native job only. Browser job was still running when this record was made. This source precedes the diagnosed first-preedit correction, so passing preedit tests do not prove that later regression."
+}

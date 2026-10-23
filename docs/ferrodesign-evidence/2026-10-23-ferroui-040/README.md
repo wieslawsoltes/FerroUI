@@ -66,8 +66,31 @@ complete archive/resource/module closure were verified. The copied web host,
 relative favicon link and SVG bytes match exact `c549` source. The independent
 workflow restored **10,459 matching source timestamps** and skipped **nine
 changed files**, then rebuilt the application. [Current build evidence](browser-build-c549/README.md)
-preserves the exact observations. **Selected editor interactions on this
-runtime remain pending**; build success is separate from runtime validation.
+preserves the exact observations. The subsequent [selected editor replay](browser-runtime-c549/README.md)
+completed **50 Software2D / 38 WebGL2 checks but failed overall**. Software2D
+gradients passed all 17 groups; both modes failed the newly reached polygon,
+first-preedit and guide checks, and WebGL2 failed a later gradient insertion.
+The original reports, exports, screenshots and diagnoses remain unchanged.
+
+The separate [strict text-pan benchmark](browser-text-pan-c549/README.md)
+passed **36 normal plus six separate trace observations per mode**, with empty
+error lists and graceful process exit. Its long timing tails remain recorded;
+an exact trace join shows a two-callback settled marker 829.460 ms before its
+matching display swap completes. Neither presentation observation nor settling
+is a display-completion or FPS measurement.
+
+The [polygon reference diagnosis](polygon-coverage-c549/README.md) reproduced
+the 212 direct-raster edge differences, found zero against the existing
+converged area-coverage method, and rejected a deliberately one-pixel-shifted
+control. The [double-click correction record](input-corrections-c549/README.md)
+retains the real input semantics and unchanged native 500 ms threshold.
+Published harness checkpoint `0aab9d7c` also uses actual native zoom so guide
+fixtures respect the existing screen-space attraction radius. All 53 helper
+checks passed; new editor replay remains a separate gate.
+
+The [full native c7 workflow](full-native-c7/README.md) passed 533 core and 239
+application tests, launcher compilation and configured public API/pixel gates.
+Its production matches c549 and does not cover the new first-preedit defect.
 
 The full browser workflow at `c7dbf26f` now searches the independent browser-build cache
 prefix, including the root lockfile hash, before its older fallback prefixes.

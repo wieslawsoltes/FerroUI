@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "name": "Native gradient insertion and artwork",
+  "pages": [
+    {
+      "id": 1,
+      "name": "Native input",
+      "children": [
+        2
+      ],
+      "background": {
+        "r": 30,
+        "g": 30,
+        "b": 30,
+        "a": 255
+      },
+      "prototype_start": null
+    }
+  ],
+  "nodes": {
+    "2": {
+      "id": 2,
+      "parent": 1,
+      "children": [],
+      "kind": "rectangle",
+      "name": "Native gradient stop authoring",
+      "x": 80.0,
+      "y": 80.0,
+      "width": 240.0,
+      "height": 160.0,
+      "rotation": 0.0,
+      "flip_x": false,
+      "flip_y": false,
+      "affine_transform": null,
+      "visible": true,
+      "locked": false,
+      "opacity": 1.0,
+      "blend_mode": "pass_through",
+      "clip_content": false,
+      "prototype_overflow": "none",
+      "fills": [
+        {
+          "paint": {
+            "type": "linear_gradient",
+            "start": {
+              "x": 0.0,
+              "y": 0.5
+            },
+            "end": {
+              "x": 1.0,
+              "y": 0.5
+            },
+            "stops": [
+              {
+                "offset": 0.0,
+                "color": {
+                  "r": 255,
+                  "g": 0,
+                  "b": 0,
+                  "a": 255
+                }
+              },
+              {
+                "offset": 1.0,
+                "color": {
+                  "r": 0,
+                  "g": 0,
+                  "b": 255,
+                  "a": 255
+                }
+              }
+            ]
+          },
+          "opacity": 1.0,
+          "visible": true
+        }
+      ],
+      "strokes": [],
+      "effects": [],
+      "corner_radius": 0.0,
+      "corner_radii": null,
+      "text": "",
+      "font_family": "Inter",
+      "font_size": 14.0,
+      "font_weight": 400,
+      "italic": false,
+      "line_height": 1.4,
+      "letter_spacing": 0.0,
+      "text_align": "left",
+      "text_vertical_align": "top",
+      "text_decoration": "none",
+      "text_auto_resize": "fixed",
+      "text_runs": [],
+      "polygon_sides": 3,
+      "star_inner_radius": 0.45,
+      "path": {
+        "segments": [],
+        "fill_rule": "non_zero"
+      },
+      "boolean_operation": "union",
+      "constraints": {
+        "horizontal": "start",
+        "vertical": "start"
+      },
+      "layout": null,
+      "layout_child": {
+        "width": "fixed",
+        "height": "fixed",
+        "min_width": 0.0,
+        "max_width": null,
+        "min_height": 0.0,
+        "max_height": null,
+        "absolute": false,
+        "grow": 1.0
+      },
+      "component_id": null,
+      "component_source": null,
+      "overridden_properties": [],
+      "variant_properties": {},
+      "fill_style": null,
+      "text_style": null,
+      "effect_style": null,
+      "variable_bindings": {},
+      "interactions": [],
+      "export_settings": [],
+      "metadata": {}
+    }
+  },
+  "styles": {},
+  "variables": {},
+  "variable_mode": "Default",
+  "comments": [],
+  "guides": {},
+  "next_id": 3
+}

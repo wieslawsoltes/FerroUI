@@ -1,0 +1,262 @@
+{
+  "runtime_commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "runtime_tree": "8c5bbcc8ed5e5a61d287708cf4e2c0e7c912259d",
+  "harness_commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "harness_tree": "8c5bbcc8ed5e5a61d287708cf4e2c0e7c912259d",
+  "runtime_artifact_id": 12502207600,
+  "runtime_wasm_sha256": "64bd8f8b2dd9f3bc951776c9db7e3cb4bfc973ad754230219606d514bebc4115",
+  "playwright": "1.64.1",
+  "chromium": "156.0.8078.4",
+  "node": "24.19.0",
+  "exit_code": 1,
+  "full_suite": false,
+  "result": "failed",
+  "harness_hash_verification": "All 55 recorded input files matched the immutable snapshot and exact c549 Git objects after execution; before-run verification is retained in the input provenance.",
+  "resource_baseline": {
+    "utc": "2026-10-23T12:48:38.575143+00:00",
+    "disk_free_bytes": 1789575168,
+    "memory_current": 5497356288,
+    "memory_stat": {
+      "anon": 3043033088,
+      "file": 1916928000,
+      "kernel": 535822336,
+      "kernel_stack": 1572864,
+      "pagetables": 13721600,
+      "sec_pagetables": 0,
+      "percpu": 12408,
+      "sock": 0,
+      "vmalloc": 8192,
+      "shmem": 38367232,
+      "file_mapped": 172408832,
+      "file_dirty": 313610240,
+      "file_writeback": 0,
+      "swapcached": 0,
+      "anon_thp": 0,
+      "file_thp": 111149056,
+      "shmem_thp": 0,
+      "inactive_anon": 3051081728,
+      "active_anon": 29945856,
+      "inactive_file": 1032577024,
+      "active_file": 845955072,
+      "unevictable": 0,
+      "slab_reclaimable": 518142800,
+      "slab_unreclaimable": 2313728,
+      "slab": 520456528,
+      "workingset_refault_anon": 0,
+      "workingset_refault_file": 181148091,
+      "workingset_activate_anon": 0,
+      "workingset_activate_file": 65656274,
+      "workingset_restore_anon": 0,
+      "workingset_restore_file": 33604618,
+      "workingset_nodereclaim": 0,
+      "pgdemote_kswapd": 0,
+      "pgdemote_direct": 0,
+      "pgdemote_khugepaged": 0,
+      "pgdemote_proactive": 0,
+      "pgscan": 1852205145,
+      "pgsteal": 188423585,
+      "pswpin": 0,
+      "pswpout": 0,
+      "pgscan_kswapd": 391709,
+      "pgscan_direct": 1851813436,
+      "pgscan_khugepaged": 0,
+      "pgscan_proactive": 0,
+      "pgsteal_kswapd": 183203,
+      "pgsteal_direct": 188240382,
+      "pgsteal_khugepaged": 0,
+      "pgsteal_proactive": 0,
+      "pgfault": 288126971,
+      "pgmajfault": 262452,
+      "pgrefill": 86636582,
+      "pgactivate": 19324838,
+      "pgdeactivate": 76971961,
+      "pglazyfree": 2741,
+      "pglazyfreed": 264,
+      "swpin_zero": 0,
+      "swpout_zero": 0,
+      "thp_fault_alloc": 0,
+      "thp_collapse_alloc": 0,
+      "thp_swpout": 0,
+      "thp_swpout_fallback": 0
+    },
+    "memory_events": {
+      "low": 0,
+      "high": 0,
+      "max": 4141953,
+      "oom": 74,
+      "oom_kill": 6,
+      "oom_group_kill": 0
+    }
+  },
+  "finished": {
+    "exit_code": 1,
+    "report_file_written_at": "2026-10-23T13:02:53.686411+00:00",
+    "verified_at": "2026-10-23T13:05:00.296291+00:00",
+    "input_hashes_unchanged": true,
+    "source_git_objects_verified": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+    "node_pid_absent": 183967,
+    "browser_pid_absent": 183979,
+    "resource_snapshot": {
+      "disk_free_bytes": 592449536,
+      "memory_current": 4125986816,
+      "memory_events": {
+        "low": 0,
+        "high": 0,
+        "max": 4209071,
+        "oom": 74,
+        "oom_kill": 6,
+        "oom_group_kill": 0
+      }
+    }
+  },
+  "files": {
+    "report.json": {
+      "bytes": 1601982,
+      "sha256": "80e19dbb78014b8a3e7d915a5b9a8e09d15f9ea79b80b7c2fec610cc960e24b3",
+      "retention": "complete local original; lossless gzip in repository"
+    },
+    "Software2D-trace.zip": {
+      "bytes": 38772796,
+      "sha256": "03df01f17d82a7c552609da4c1d4994bca93520941ac6531130d0c8f34b56b82",
+      "retention": "complete local original; ZIP not duplicated in repository"
+    },
+    "WebGL2-trace.zip": {
+      "bytes": 21888784,
+      "sha256": "0529fe327d6373680764d572c65ecd3d80f80006c5a438bdff2340674b9cba58",
+      "retention": "complete local original; ZIP not duplicated in repository"
+    }
+  },
+  "archives": {
+    "report.json.gz": {
+      "bytes": 85670,
+      "sha256": "b87d5dabfaa632b9f162c5f4eaa02835b6eb8290f27ae1c6f72a583111f06783",
+      "uncompressed_bytes": 1601982,
+      "uncompressed_sha256": "80e19dbb78014b8a3e7d915a5b9a8e09d15f9ea79b80b7c2fec610cc960e24b3"
+    },
+    "browser.log.gz": {
+      "bytes": 4611,
+      "sha256": "dc652e833e302e837e13345afe88a4d5db2366a304c03e41015e06808316e643",
+      "uncompressed_bytes": 30596,
+      "uncompressed_sha256": "f81ce51d84bc0a59aeceae6414aa12bf179ce95baf274e38453b044fcf14a2c0"
+    }
+  },
+  "retained_files": {
+    "Software2D-gradient-handles-angular-capture.json": {
+      "bytes": 3177,
+      "sha256": "f60f774bd842cecba1b5319487f01ea92a2b1f6b84b9052c06761603293c966a"
+    },
+    "Software2D-gradient-handles-angular.png": {
+      "bytes": 168815,
+      "sha256": "24d74017945fc6af24ab67ed5583f328c6e6d67f7e116a3b7223409bd33f13da"
+    },
+    "Software2D-gradient-handles-radial-capture.json": {
+      "bytes": 3176,
+      "sha256": "054655806fa056cc29cdf3854839cbc82e363dd4ec6ca4e159f5c836d6f4f138"
+    },
+    "Software2D-gradient-handles-radial.png": {
+      "bytes": 179562,
+      "sha256": "12a4810da7e9fa8a55ca03bf98175b693a2d4b212e0a793e7739cd582d96586f"
+    },
+    "Software2D-guide-bindings-failure.ferrodesign": {
+      "bytes": 4423,
+      "sha256": "bbd6355c71f38ca3facaee1b962a1d18ccc2c42eb4e9fce0ff5ade3b0cf1442a"
+    },
+    "Software2D-guide-bindings-failure.png": {
+      "bytes": 69575,
+      "sha256": "e64076f129f88898a574e6cd0b44fbcbd69822fb970151be61a67e1e2da65480"
+    },
+    "Software2D-initial.png": {
+      "bytes": 187960,
+      "sha256": "14ace8cd02acaec6fa68055c284956905ca52c999e268fec187018b657d52fe2"
+    },
+    "Software2D-native-paragraph-paste-input.json": {
+      "bytes": 15631,
+      "sha256": "4e2c238bfb697e0fef92556ac8e6dfe3e6248af8df1c7d31768621094c6e8251"
+    },
+    "Software2D-paragraphs-failure.ferrodesign": {
+      "bytes": 4512,
+      "sha256": "b1fa38f897f9ac605969f6e690966f6644fd649523932d40458c03708eea3152"
+    },
+    "Software2D-paragraphs-failure.png": {
+      "bytes": 72627,
+      "sha256": "5fe72c5e4f9cd86b3105dde3df903a815134eb996abfa888aa829f10dd90cf91"
+    },
+    "Software2D-polygon-corners-failure.ferrodesign": {
+      "bytes": 2472,
+      "sha256": "bbab53467464500cd6ab3e4e1fe0a3cac85477a81c0844eaea31bf103690ee85"
+    },
+    "Software2D-polygon-corners-failure.png": {
+      "bytes": 76597,
+      "sha256": "13980346c8fbbdb410cc70e47cf758efbf23f4b4312768fb3b6e7bf7c7f2ed59"
+    },
+    "Software2D-polygon-corners-triangle.png": {
+      "bytes": 2665,
+      "sha256": "a2a43d411bd53602f28f7c9aa9fd0c2eeacc46943808714aa86579d0c2877317"
+    },
+    "Software2D-polygon-corners-triangle.svg": {
+      "bytes": 859,
+      "sha256": "4deb2fb86a042fd560a533de5dff27bdcdd1fbbf8181cad45c4b650ebff1bece"
+    },
+    "Software2D-polygon-corners-triangle.xaml": {
+      "bytes": 1262,
+      "sha256": "33abd203cd2874f0de09077cc622f4f0797a70dfd2eafb08d0a76909d6316ce1"
+    },
+    "WebGL2-gradient-handles-failure.ferrodesign": {
+      "bytes": 3030,
+      "sha256": "8596f4a2e6daf644cc136bc8578282778ae6064fb937d7831c65ceca62fe58a6"
+    },
+    "WebGL2-gradient-handles-failure.png": {
+      "bytes": 70096,
+      "sha256": "85f37559a32ea4d95d5c56d2031c53f690ea707efd601ff64dc024a358bd055e"
+    },
+    "WebGL2-guide-bindings-failure.ferrodesign": {
+      "bytes": 4423,
+      "sha256": "bbd6355c71f38ca3facaee1b962a1d18ccc2c42eb4e9fce0ff5ade3b0cf1442a"
+    },
+    "WebGL2-guide-bindings-failure.png": {
+      "bytes": 69742,
+      "sha256": "bacabfcb73d68d281939dcb40b6b887f0f2b577ab172072964dfccca75fe4743"
+    },
+    "WebGL2-native-paragraph-paste-input.json": {
+      "bytes": 15620,
+      "sha256": "0ebc14f2a59a07fe970708aa3c29e70dfb040c4368055e465ddfaee42d21e442"
+    },
+    "WebGL2-paragraphs-failure.ferrodesign": {
+      "bytes": 4512,
+      "sha256": "b1fa38f897f9ac605969f6e690966f6644fd649523932d40458c03708eea3152"
+    },
+    "WebGL2-paragraphs-failure.png": {
+      "bytes": 72765,
+      "sha256": "7f40a7ab05177fdf225b60d6432426b205ff568915c48a5f59a0f07c1e51783d"
+    },
+    "WebGL2-polygon-corners-failure.ferrodesign": {
+      "bytes": 2472,
+      "sha256": "bbab53467464500cd6ab3e4e1fe0a3cac85477a81c0844eaea31bf103690ee85"
+    },
+    "WebGL2-polygon-corners-failure.png": {
+      "bytes": 76719,
+      "sha256": "41deaa00d759caa204d5481fe14b0f5edb0d0c5aedcf237ea54569eb72f4fccd"
+    },
+    "WebGL2-polygon-corners-triangle.png": {
+      "bytes": 2665,
+      "sha256": "a2a43d411bd53602f28f7c9aa9fd0c2eeacc46943808714aa86579d0c2877317"
+    },
+    "WebGL2-polygon-corners-triangle.svg": {
+      "bytes": 859,
+      "sha256": "4deb2fb86a042fd560a533de5dff27bdcdd1fbbf8181cad45c4b650ebff1bece"
+    },
+    "WebGL2-polygon-corners-triangle.xaml": {
+      "bytes": 1262,
+      "sha256": "33abd203cd2874f0de09077cc622f4f0797a70dfd2eafb08d0a76909d6316ce1"
+    },
+    "paragraph-preedit-diagnosis.json": {
+      "bytes": 11812,
+      "sha256": "e936d537ab9bce4dc0dbc1aa02e26e7ad4a3051cf4eb6e0d465af5640c2c5db2"
+    },
+    "gradient-insertion-diagnosis.json": {
+      "bytes": 20019,
+      "sha256": "036c521831c9384dc0f51a7948cdebe77a296b3deda637d3690c6f17aa78a626"
+    }
+  },
+  "scope_note": "Shared-host headless Chromium; WebGL2 uses SwiftShader. This selected scenario replay does not establish complete feature/visual parity or physical-device FPS. Failures remain recorded without assertion relaxation."
+}

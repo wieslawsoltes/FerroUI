@@ -175,11 +175,17 @@ radial/angular gradient handles, spacing-variable controls and prototype reflow.
 seven required GPU fragment tests in 9.09 s.** Its core source is identical to
 the integrated `1c7151f5` tree that passed 533 core tests; the native job did not
 rerun that suite. Both the `1c7151f5` and `c549f6bc` browser builds and delivered
-files are verified. Selected editor interactions on `c549f6bc` remain pending,
-and matched Figma visual parity is not established.
+files are verified. The exact `c549f6bc` focused replay completed **50 / 38
+checks** but **failed overall**; its strict text-pan measurement passed in both
+modes. The failures and subsequent corrections retain separate source records.
+A complete current-source browser pass and matched Figma visual parity are not
+established.
 
 | Gate | Exact source and completed result |
 | --- | --- |
+| Current selected browser execution | Exact `c549f6bc` runtime and harness: **50 Software2D / 38 WebGL2 completed checks**; **1 of 8** complete scenario executions passed. Software2D gradients passed all **17** groups. Polygon coverage, first IME preedit and guide input failed in both modes; WebGL2 also failed a later double-click insertion. Both modes had no console/page errors. [Unabridged failure evidence](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-runtime-c549/README.md) |
+| Current strict text-pan measurement | Exact `c549f6bc`: **36 normal plus 6 separate trace observations per mode**, all invariants and graceful browser shutdown passed. Slow timing tails remain recorded; this is not an FPS or physical-GPU result. [All phases, traces and boundaries](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-text-pan-c549/README.md) |
+| Full native workflow | [`c7dbf26f`, job 120423823557](https://github.com/wieslawsoltes/FerroUI/actions/runs/39955698269/job/120423823557): **533 core / 239 application tests**, native launcher compilation and configured public input/compositing/text/geometry gates passed. Production is identical to `c549`; this predates the new first-preedit fix. [Exact full native record](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/full-native-c7/README.md) |
 | Current native application and framework | [`c549f6bc`, job 120410483091](https://github.com/wieslawsoltes/FerroUI/actions/runs/39952473854/job/120410483091): **239/239 app tests**, **43.60 s**, and all configured framework filters passed, including the new native hover/pressed projection. Mandatory GPU fragments: **7/7**, **9.09 s**, with `FERROUI_VELLO_REQUIRE_GPU=1`; no failed or ignored tests. [Exact native evidence](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/native-c549/README.md) |
 | Current browser build and delivery | [`c549f6bc`, job 120415321864](https://github.com/wieslawsoltes/FerroUI/actions/runs/39952473917/job/120415321864): build step **10 min 10 s**; verified **53,785,830-byte WASM**, **17 payload files plus the provenance manifest**, Vello/no-Skia graph, local resource/module closure and exact-source relative favicon. [Artifact and cache evidence](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-build-c549/README.md); runtime checks remain separately labeled |
 | Integrated core | [`1c7151f5`, run 39950194410](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194410): **533 passed**, **2.41 s**, with the FerroUI 0.4.0 lockfile |
@@ -187,7 +193,7 @@ and matched Figma visual parity is not established.
 | Integrated browser build and delivery | [`1c7151f5`, job 120403095053](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194298/job/120403095053): build step **28 min 17 s**; verified **53,785,479-byte WASM**, **16 payload files plus the provenance manifest**, Vello/no-Skia graph and local module/resource closure. [Archive, payload hashes and scope](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-build-1c/README.md). No editor or benchmark was executed against this runtime |
 | Integrated native application and framework | [`2d6284d9`, run 39950436412](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950436412): **239/239 app tests**, **26.03 s**, and all configured framework filters passed. Mandatory native GPU fragments: **7/7**, **7.14 s**; no skipped adapter fallback |
 | Feature browser execution | Verified `08e29e4f` WASM with frozen `0f073278` harness: **9/12 Software2D and 8/12 WebGL2 scenarios passed**, **88 / 68 completed check groups**. Both modes failed overall. All five spacing-variable checks passed in both modes; all 17 gradient checks passed in Software2D. [Exact results and failures](../../docs/ferrodesign-evidence/2026-10-23-continuation/browser-runtime08-harness0f/README.md) |
-| Current browser helper checks | Published `c549f6bc` source tree: **46/46 local cases passed** across coverage, pointer expectations, passive input evidence, isolated scenarios and trace/process ownership. Separate from actual editor execution |
+| Current browser helper checks | Published `0aab9d7c` correction tree: **53/53 local cases passed** across coverage, pointer expectations, passive input evidence, isolated scenarios and trace/process ownership. Separate from actual editor execution |
 | Pre-integration production core | [`1637a093`, run 39944253726](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253726): **533 passed**, **2.50 s**, including prototype spacing reflow/rollback and unchanged-binding redo preservation |
 | Pre-integration native application | [`1637a093`, run 39944253747](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253747): **239 passed**, **43.57 s**, including the clipped-selection/radius-control priority regression and native diagnostic controls |
 | Feature core | [`dfab0ed9`, run 39942848092](https://github.com/wieslawsoltes/FerroUI/actions/runs/39942848092): **528 passed**, **1.72 s**, including radial/angular authoring and spacing-variable ownership/reflow |
@@ -205,6 +211,18 @@ favicon asset. The [input evidence](../../docs/ferrodesign-evidence/2026-10-23-c
 preserves the preceding failures and unchanged assertions. These corrections
 require the new browser runtime; no activation retry or tolerance relaxation
 turns the earlier run into a pass.
+
+The subsequent [`0aab9d7c`](https://github.com/wieslawsoltes/FerroUI/commit/0aab9d7c4a2a9ce7921cd239a4e1f6412230c911)
+harness checkpoint delivers one real no-delay double-click and requires native
+click counts `[1, 2]` inside the unchanged 500 ms limit. Guide pointer fixtures
+use the native zoom control to enter the existing five-screen-pixel attraction
+range. The polygon test shares the independently converged SVG coverage
+reference with box corners, retaining its original 12-alpha / 85-pixel gate.
+The [static polygon diagnostic](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/polygon-coverage-c549/README.md)
+reproduces the raw 212 differences, finds zero against converged coverage, and
+rejects a deliberate one-pixel shift with 468 differences. A separate native
+first-preedit visibility defect requires a framework correction and new runtime.
+The completed failed replay is preserved unchanged.
 
 [Current evidence](../../docs/ferrodesign-evidence/2026-10-23-continuation/README.md)
 records exact commits, CI links, log digests and selected result lines.
@@ -259,6 +277,15 @@ These are configured reuse and preservation paths; a subsequent full-workflow
 cache hit or reduced build time has not yet been observed.
 
 ## Rendering performance
+
+The [current c549 measurement](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-text-pan-c549/README.md)
+completed 36 normal motions and six separate traced motions per mode, with no
+additional scene preparation, rebuilt visuals or layer projections. Median
+dispatch-to-observed-frame times were 20.148 ms in Software2D and 17.433 ms in
+WebGL2; p95 was 369.758 ms and 1,012.635 ms. The trace preserves substantial
+application callback work and late browser display waits. These shared-host
+SwiftShader observations do not establish smooth frame delivery or physical-GPU
+throughput; all phases and long tails are retained in the linked record.
 
 The [completed feature-runtime text-pan measurement](../../docs/ferrodesign-evidence/2026-10-23-continuation/browser-text-pan-runtime08-harness0f/README.md)
 at `08e29e4f` recorded 36 motions per mode. WebGL2's observed dispatch-to-frame

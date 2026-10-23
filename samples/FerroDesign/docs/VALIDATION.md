@@ -2,7 +2,67 @@
 
 This file distinguishes implemented paths, completed checks and measurements. Each observation belongs to its stated source, runtime and run; older successful runs do not validate later changes. The branch incorporates FerroUI `934b9ce1` / `0.4.0` and uses Vello for every application target through public FerroUI APIs. [PR #254](https://github.com/wieslawsoltes/FerroUI/pull/254) collects the complete source and current review status. Current continuation evidence is recorded first; earlier checkpoints remain below with their original scope.
 
-## Current native checks and verified browser delivery (2026-10-23)
+## Completed c549 browser runs and subsequent corrections (2026-10-23)
+
+The exact `c549f6bc` runtime and frozen harness completed the four selected
+scenarios in both browser modes with all normal common checks. **The replay
+failed:** Software2D completed **50** checks and WebGL2 **38**. The Software2D
+gradient scenario passed all **17** groups; seven of the eight complete
+scenario executions failed. Both modes had empty page/console error lists and
+zero unsupported effects. All 55 harness/package hashes and all 17 runtime
+payloads matched their frozen source records.
+
+| Scenario | Software2D | WebGL2 |
+| --- | --- | --- |
+| Polygon corners | Failed after 1 group at the direct 1× SVG alpha comparison | Same |
+| Gradient handles | 17 groups passed | Failed after 8 groups at native double-click insertion |
+| Paragraphs | Failed after 6 groups at first visible IME preedit | Same |
+| Guide bindings | Failed after 4 groups at a guide-attraction expectation | Same |
+
+[Complete report, exports, screenshots and diagnoses](../../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-runtime-c549/README.md)
+retain the failed status. The new failures are beyond the earlier repaired
+native gradient entry, multiline clipboard and hidden Inspect-tab checks.
+The native preedit clause is cleared by synchronous selection deletion on its
+first update; confirmed document text, rich ranges and history remain intact.
+That is a framework defect requiring a new runtime. The other diagnoses retain
+the actual input/raster conditions and do not justify loosening production
+thresholds.
+
+The published [`0aab9d7c` harness correction](https://github.com/wieslawsoltes/FerroUI/commit/0aab9d7c4a2a9ce7921cd239a4e1f6412230c911)
+uses one no-delay trusted double-click, with passive DOM timing and native
+`[1, 2]` recognition inside 500 ms; it does not retry activation. Guide fixtures
+zoom out through the actual native control so their existing four-world-unit
+attraction is inside five screen pixels. Document/history and final geometry
+assertions remain exact. The polygon reference now shares the existing
+16×/32× independent area-coverage method, requires convergence within four
+alpha units, and retains the original 12-alpha / 85-pixel candidate gate. Its
+[separate static experiment](../../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/polygon-coverage-c549/README.md)
+reproduced 212 direct-raster differences, found zero with converged coverage,
+and rejected a deliberately shifted one-pixel control with 468 differences.
+All **53 pure helper cases** passed locally; a corrected editor replay remains
+separate from these helper and static checks.
+
+The same c549 runtime completed the independent strict text-pan measurement
+successfully: **36 normal observations after 12 warm-ups, plus six separate
+trace observations per mode**. All 72 normal motions advanced native frame and
+presentation counters once, kept 150 visible/cached labels, and added zero
+prepares, rebuilt visuals or layer projections. All errors were empty, and the
+owned browser exited gracefully with code 0 and no forced kill.
+
+| Host-observed phase, median / p95 | Software2D | WebGL2 / SwiftShader |
+| --- | ---: | ---: |
+| Dispatch start to native frame observation | 20.148 / 369.758 ms | 17.433 / 1,012.635 ms |
+| Dispatch start to native presentation observation | 117.309 / 414.673 ms | 88.698 / 1,030.543 ms |
+| Through settling and two subsequent animation callbacks | 170.637 / 525.854 ms | 1,028.347 / 1,913.189 ms |
+
+[All timing phases, raw traces and independent verification](../../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-text-pan-c549/README.md)
+retain the slow tails. The six traced WebGL2 display swaps take 762.630–1,014.279
+ms; one two-callback settled marker occurs 829.460 ms before its matched swap
+ends. Native presentation and two animation callbacks therefore do not fence
+display/GPU completion. These shared-host SwiftShader observations do not
+establish FPS, physical-GPU performance or a causal speedup.
+
+## Native checks and verified browser delivery (2026-10-23)
 
 The exact `c549f6bc` native feedback job
 [120410483091](https://github.com/wieslawsoltes/FerroUI/actions/runs/39952473854/job/120410483091)
@@ -41,9 +101,18 @@ five copied web files, lockfile and loader match exact `c549` Git objects,
 including the relative favicon link and SVG bytes. Its independent workflow
 restored **10,459 matching source timestamps**, skipped **nine changed files**
 and rebuilt the application. [Current browser-build evidence](../../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-build-c549/README.md)
-records these actual observations. **Selected editor interactions on that
-runtime remain pending**; build delivery and runtime execution retain separate
-gates.
+records these actual observations. Its completed failed selected replay and
+successful separate benchmark are recorded above; build delivery and runtime
+execution retain separate gates.
+
+The later full native workflow at `c7dbf26f` also
+[completed successfully](https://github.com/wieslawsoltes/FerroUI/actions/runs/39955698269/job/120423823557):
+**533 core tests in 2.37 s**, **239 application tests in 43.13 s**, native
+launcher/shared UI compilation and the configured public preedit, compositing,
+Vello geometry and shaped-text gates passed. [Full native evidence](../../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/full-native-c7/README.md)
+preserves all counts and the complete decoded log. Its production code equals
+c549 and predates the new first-preedit correction; the prior tests did not
+require visibility on the first selected-range composition update.
 
 The full browser workflow at `c7dbf26f` now prepends the independent browser-build cache
 prefix, with the root `Cargo.lock` included in the hash, to its existing

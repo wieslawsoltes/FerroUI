@@ -1,0 +1,699 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-10-23T13:12:29.838202+00:00",
+  "scope": "Read-only diagnosis of frozen c549 gradient insertion using retained traces and exact source; no browser launch, source edit or replay.",
+  "runtimeCommit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "harnessCommit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "report": {
+    "path": "/tmp/ferrodesign-e99-browser-c549-focused-report/report.json",
+    "bytes": 1601982,
+    "sha256": "80e19dbb78014b8a3e7d915a5b9a8e09d15f9ea79b80b7c2fec610cc960e24b3"
+  },
+  "traces": [
+    {
+      "path": "/tmp/ferrodesign-e99-browser-c549-focused-report/WebGL2-trace.zip",
+      "bytes": 21888784,
+      "sha256": "0529fe327d6373680764d572c65ecd3d80f80006c5a438bdff2340674b9cba58",
+      "entry": "trace.trace",
+      "entrySha256": "2ecba0b3eaaa3f30f6605e92d3470c7924e0e3b38de101d759639b909d24543d"
+    },
+    {
+      "path": "/tmp/ferrodesign-e99-browser-c549-focused-report/Software2D-trace.zip",
+      "bytes": 38772796,
+      "sha256": "03df01f17d82a7c552609da4c1d4994bca93520941ac6531130d0c8f34b56b82",
+      "entry": "trace.trace",
+      "entrySha256": "391e398bfc47dab88cf6e2e53a1ab7e525a894c85f69dc6991a1c069c617e04e"
+    }
+  ],
+  "scenarioResults": [
+    {
+      "mode": "Software2D",
+      "status": "passed",
+      "checksBefore": 17,
+      "ran": true,
+      "completedCheckGroups": 17,
+      "durationMs": 46490
+    },
+    {
+      "mode": "WebGL2",
+      "status": "failed",
+      "checksBefore": 17,
+      "ran": true,
+      "failureStage": "scenario",
+      "completedCheckGroups": 8,
+      "durationMs": 87574
+    }
+  ],
+  "cases": {
+    "WebGL2": {
+      "before": {
+        "callId": "rjjn@7939",
+        "endTimeMs": 474202.392,
+        "state": {
+          "historyLength": 8,
+          "documentRevision": 39,
+          "renderedFrames": 61,
+          "sceneFrames": 60,
+          "selection": [
+            2
+          ],
+          "gradientEdit": {
+            "node": 2,
+            "fill": 0,
+            "gradientKind": "linear",
+            "active": false,
+            "axis": {
+              "end": {
+                "x": 320,
+                "y": 160
+              },
+              "start": {
+                "x": 80,
+                "y": 160
+              }
+            },
+            "selected": null,
+            "hover": null
+          },
+          "nativePressSerial": 12,
+          "canvasFocusWithin": true,
+          "modalVisible": false
+        }
+      },
+      "action": {
+        "callId": "rjjn@7941",
+        "method": "mouseClick",
+        "parameters": {
+          "x": 582.5,
+          "y": 478,
+          "delay": 80,
+          "clickCount": 2
+        },
+        "startTimeMs": 474238.112,
+        "endTimeMs": 476896.496,
+        "durationMs": 2658.383999999962,
+        "traceInputRecord": {
+          "type": "input",
+          "callId": "rjjn@7941",
+          "point": {
+            "x": 582.5,
+            "y": 478
+          }
+        }
+      },
+      "after": {
+        "callId": "rjjn@7943",
+        "endTimeMs": 476939.103,
+        "state": {
+          "historyLength": 8,
+          "documentRevision": 41,
+          "renderedFrames": 62,
+          "sceneFrames": 60,
+          "selection": [
+            2
+          ],
+          "gradientEdit": {
+            "node": 2,
+            "fill": 0,
+            "gradientKind": "linear",
+            "active": false,
+            "axis": {
+              "end": {
+                "x": 320,
+                "y": 160
+              },
+              "start": {
+                "x": 80,
+                "y": 160
+              }
+            },
+            "selected": {
+              "kind": "axis",
+              "stop": null
+            },
+            "hover": null
+          },
+          "nativePressSerial": 14,
+          "canvasFocusWithin": true,
+          "modalVisible": false
+        },
+        "newNativePresses": [
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -230.33333333333337,
+              "y": -112.66666666666674
+            },
+            "renderedFramesBefore": 61,
+            "screen": {
+              "x": 286.5,
+              "y": 478
+            },
+            "selectionCountBefore": 1,
+            "serial": 13,
+            "timestamp": 73906,
+            "world": {
+              "x": 140,
+              "y": 160
+            },
+            "zoom": 3.691666666666667
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -230.33333333333337,
+              "y": -112.66666666666674
+            },
+            "renderedFramesBefore": 62,
+            "screen": {
+              "x": 286.5,
+              "y": 478
+            },
+            "selectionCountBefore": 1,
+            "serial": 14,
+            "timestamp": 74900,
+            "world": {
+              "x": 140,
+              "y": 160
+            },
+            "zoom": 3.691666666666667
+          }
+        ]
+      },
+      "nativePressIntervalMs": 994,
+      "nativeClickCounts": [
+        1,
+        1
+      ],
+      "wait": {
+        "callId": "rjjn@7945",
+        "startTimeMs": 476956.338,
+        "endTimeMs": 487671.843,
+        "error": {
+          "message": "Timeout 10000ms exceeded.",
+          "stack": "TimeoutError: Timeout 10000ms exceeded.\n    at _ProgressController.run (/workspace/scratch/e99dd7d32d05/FerroUI/samples/FerroDesign/node_modules/playwright-core/lib/coreBundle.js:13004:32)\n    at DispatcherConnection.dispatch (/workspace/scratch/e99dd7d32d05/FerroUI/samples/FerroDesign/node_modules/playwright-core/lib/coreBundle.js:20191:44)",
+          "name": "TimeoutError"
+        }
+      },
+      "documentEqualBeforeAfter": true,
+      "paintBefore": {
+        "type": "linear_gradient",
+        "start": {
+          "x": 0,
+          "y": 0.5
+        },
+        "end": {
+          "x": 1,
+          "y": 0.5
+        },
+        "stops": [
+          {
+            "offset": 0,
+            "color": {
+              "r": 255,
+              "g": 0,
+              "b": 0,
+              "a": 255
+            }
+          },
+          {
+            "offset": 1,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 255,
+              "a": 255
+            }
+          }
+        ]
+      },
+      "paintAfter": {
+        "type": "linear_gradient",
+        "start": {
+          "x": 0,
+          "y": 0.5
+        },
+        "end": {
+          "x": 1,
+          "y": 0.5
+        },
+        "stops": [
+          {
+            "offset": 0,
+            "color": {
+              "r": 255,
+              "g": 0,
+              "b": 0,
+              "a": 255
+            }
+          },
+          {
+            "offset": 1,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 255,
+              "a": 255
+            }
+          }
+        ]
+      },
+      "failure": {
+        "callId": "rjjn@7947",
+        "endTimeMs": 488259.816,
+        "state": {
+          "historyLength": 8,
+          "documentRevision": 41,
+          "renderedFrames": 63,
+          "sceneFrames": 61,
+          "selection": [
+            2
+          ],
+          "gradientEdit": {
+            "node": 2,
+            "fill": 0,
+            "gradientKind": "linear",
+            "active": false,
+            "axis": {
+              "end": {
+                "x": 320,
+                "y": 160
+              },
+              "start": {
+                "x": 80,
+                "y": 160
+              }
+            },
+            "selected": {
+              "kind": "axis",
+              "stop": null
+            },
+            "hover": null
+          },
+          "nativePressSerial": 14,
+          "canvasFocusWithin": true,
+          "modalVisible": false
+        },
+        "focus": {
+          "tag": "MAIN",
+          "id": "out",
+          "value": null,
+          "selectionStart": null,
+          "selectionEnd": null
+        },
+        "storage": {
+          "phase": "saved",
+          "backend": "indexedDB",
+          "dirty": false,
+          "draftDirty": false,
+          "serializationPending": false,
+          "revision": 42,
+          "sequence": 22,
+          "committedSequence": 22,
+          "characters": 1729,
+          "error": ""
+        }
+      }
+    },
+    "Software2D": {
+      "before": {
+        "callId": "rjjn@2047",
+        "endTimeMs": 56551.422,
+        "state": {
+          "historyLength": 8,
+          "documentRevision": 39,
+          "renderedFrames": 67,
+          "sceneFrames": 94,
+          "selection": [
+            2
+          ],
+          "gradientEdit": {
+            "node": 2,
+            "fill": 0,
+            "gradientKind": "linear",
+            "active": false,
+            "axis": {
+              "end": {
+                "x": 320,
+                "y": 160
+              },
+              "start": {
+                "x": 80,
+                "y": 160
+              }
+            },
+            "selected": null,
+            "hover": null
+          },
+          "nativePressSerial": 12,
+          "canvasFocusWithin": true,
+          "modalVisible": false
+        }
+      },
+      "action": {
+        "callId": "rjjn@2049",
+        "method": "mouseClick",
+        "parameters": {
+          "x": 582.5,
+          "y": 478,
+          "delay": 80,
+          "clickCount": 2
+        },
+        "startTimeMs": 56560.911,
+        "endTimeMs": 56837.369,
+        "durationMs": 276.4579999999987,
+        "traceInputRecord": {
+          "type": "input",
+          "callId": "rjjn@2049",
+          "point": {
+            "x": 582.5,
+            "y": 478
+          }
+        }
+      },
+      "after": {
+        "callId": "rjjn@2051",
+        "endTimeMs": 56888.799,
+        "state": {
+          "historyLength": 9,
+          "documentRevision": 42,
+          "renderedFrames": 72,
+          "sceneFrames": 97,
+          "selection": [
+            2
+          ],
+          "gradientEdit": {
+            "node": 2,
+            "fill": 0,
+            "gradientKind": "linear",
+            "active": false,
+            "axis": {
+              "end": {
+                "x": 320,
+                "y": 160
+              },
+              "start": {
+                "x": 80,
+                "y": 160
+              }
+            },
+            "selected": {
+              "kind": "stop",
+              "stop": 2
+            },
+            "hover": null
+          },
+          "nativePressSerial": 14,
+          "canvasFocusWithin": true,
+          "modalVisible": false
+        },
+        "newNativePresses": [
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -230.33333333333337,
+              "y": -112.66666666666674
+            },
+            "renderedFramesBefore": 68,
+            "screen": {
+              "x": 286.5,
+              "y": 478
+            },
+            "selectionCountBefore": 1,
+            "serial": 13,
+            "timestamp": 15488,
+            "world": {
+              "x": 140,
+              "y": 160
+            },
+            "zoom": 3.691666666666667
+          },
+          {
+            "buttons": 1,
+            "clickCount": 2,
+            "pan": {
+              "x": -230.33333333333337,
+              "y": -112.66666666666674
+            },
+            "renderedFramesBefore": 70,
+            "screen": {
+              "x": 286.5,
+              "y": 478
+            },
+            "selectionCountBefore": 1,
+            "serial": 14,
+            "timestamp": 15663,
+            "world": {
+              "x": 140,
+              "y": 160
+            },
+            "zoom": 3.691666666666667
+          }
+        ]
+      },
+      "nativePressIntervalMs": 175,
+      "nativeClickCounts": [
+        1,
+        2
+      ],
+      "wait": {
+        "callId": "rjjn@2053",
+        "startTimeMs": 56931.635,
+        "endTimeMs": 56953.126,
+        "error": null
+      },
+      "documentEqualBeforeAfter": false,
+      "paintBefore": {
+        "type": "linear_gradient",
+        "start": {
+          "x": 0,
+          "y": 0.5
+        },
+        "end": {
+          "x": 1,
+          "y": 0.5
+        },
+        "stops": [
+          {
+            "offset": 0,
+            "color": {
+              "r": 255,
+              "g": 0,
+              "b": 0,
+              "a": 255
+            }
+          },
+          {
+            "offset": 1,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 255,
+              "a": 255
+            }
+          }
+        ]
+      },
+      "paintAfter": {
+        "type": "linear_gradient",
+        "start": {
+          "x": 0,
+          "y": 0.5
+        },
+        "end": {
+          "x": 1,
+          "y": 0.5
+        },
+        "stops": [
+          {
+            "offset": 0,
+            "color": {
+              "r": 255,
+              "g": 0,
+              "b": 0,
+              "a": 255
+            }
+          },
+          {
+            "offset": 1,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 255,
+              "a": 255
+            }
+          },
+          {
+            "offset": 0.25,
+            "color": {
+              "r": 191,
+              "g": 0,
+              "b": 64,
+              "a": 255
+            }
+          }
+        ]
+      }
+    }
+  },
+  "sameImportedDocumentAcrossModes": true,
+  "sourceEvidence": [
+    {
+      "path": "samples/FerroDesign/tests/gradient-handles-browser.mjs",
+      "commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+      "sha256": "2d0bacff02503cdfded6f71bdc322209043ab0946d0d75c896796d8584597873",
+      "lineRanges": [
+        [
+          619,
+          636
+        ]
+      ],
+      "fact": "Linear insertion requests one real page mouse double-click with delay80, then requires selected stop2 and exact paint/history."
+    },
+    {
+      "path": "samples/FerroDesign/tests/browser.mjs",
+      "commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+      "sha256": "78dd7a5aa0d104f31627b034e0998fc78f627b187594575f0db561a35f20f678",
+      "lineRanges": [
+        [
+          267,
+          282
+        ]
+      ],
+      "fact": "clickWorld converts world coordinates and performs the supplied mouse action; it does not manufacture native click counts."
+    },
+    {
+      "path": "src/Browser/FerroUI.Browser/webapp/modules/ferroui/input.ts",
+      "commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+      "sha256": "24f09d5ccbda0f2da4ff5bdf27163c7b19477815961be94b45bacfa86ea89d18",
+      "lineRanges": [
+        [
+          84,
+          84
+        ],
+        [
+          620,
+          638
+        ]
+      ],
+      "fact": "The browser pointer bridge sends performance.now()-event.timeStamp to native."
+    },
+    {
+      "path": "src/Browser/FerroUI.Browser/interop/input_helper.rs",
+      "commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+      "sha256": "37aa1927666580a0237092593e0ac0d0972b4ea7d369e8879aa52ee11fc78c35",
+      "lineRanges": [
+        [
+          352,
+          383
+        ]
+      ],
+      "fact": "Pointer down forwards event_age to the native handler."
+    },
+    {
+      "path": "src/Browser/FerroUI.Browser/browser_input_handler.rs",
+      "commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+      "sha256": "a85942003f8e06f2775dbc81459153b0154771ec3082a3cdaf305b314a3afd71",
+      "lineRanges": [
+        [
+          77,
+          77
+        ],
+        [
+          201,
+          219
+        ],
+        [
+          393,
+          411
+        ],
+        [
+          650,
+          657
+        ]
+      ],
+      "fact": "Native timestamp subtracts valid event age up to5000ms and clamps monotonic; it is not unconditionally processing time."
+    },
+    {
+      "path": "src/Browser/FerroUI.Browser/browser_platform_settings.rs",
+      "commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+      "sha256": "24438d564ad42c8ecfd12d0c2b68d48e21d47aae47b498b7387b8fa2f46784c4",
+      "lineRanges": [
+        [
+          132,
+          134
+        ]
+      ],
+      "fact": "Browser settings delegate double-tap time to the default settings."
+    },
+    {
+      "path": "src/FerroUI.Base/platform/default_platform_settings.rs",
+      "commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+      "sha256": "cbc93744f408bd181eda993c24ce6bbe79ea2514f4f96e495d9655561c9e63f4",
+      "lineRanges": [
+        [
+          84,
+          86
+        ]
+      ],
+      "fact": "Default mouse double-tap threshold is500ms."
+    },
+    {
+      "path": "src/FerroUI.Base/input/mouse_device.rs",
+      "commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+      "sha256": "d1874140203a432ae448ceadd195013b614ae4d3554a03dba0f0687ef143a5b8",
+      "lineRanges": [
+        [
+          216,
+          244
+        ]
+      ],
+      "fact": "Native press count resets when time or positional limits are exceeded."
+    },
+    {
+      "path": "samples/FerroDesign/crates/ferrodesign-app/src/canvas/gradient_edit.rs",
+      "commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+      "sha256": "6365335cf16ee1148939e37d3ae9d04e5c3c69ed5e2ca8f89714ed996238f49e",
+      "lineRanges": [
+        [
+          551,
+          583
+        ],
+        [
+          610,
+          623
+        ]
+      ],
+      "fact": "Native gradient stop insertion requires an axis hit and at least two native clicks; each observed click1 instead selects/drags the axis."
+    }
+  ],
+  "playwrightSource": {
+    "path": "/workspace/scratch/e99dd7d32d05/FerroUI/samples/FerroDesign/node_modules/playwright-core/lib/coreBundle.js",
+    "bytes": 3585406,
+    "sha256": "829521b67ed7be90c7d6d6098ff39f2241562d47e4ad7ccab13710924a56001d",
+    "version": "1.64.1",
+    "lineRanges": [
+      [
+        22660,
+        22685
+      ]
+    ],
+    "delayedSequence": "With nonzero delay, await move; for each click await down, wait80, await up; between clicks wait80. Browser/CDP completion delays therefore add to the down-to-down interval.",
+    "noDelaySequence": "Without delay, move/down/up operations are issued before Promise.all awaits completion; ordered real browser input remains the path."
+  },
+  "supportedConclusion": "WebGL2 delivered two native single presses at the correct axis point994ms apart, exceeding the unchanged500ms native threshold. The second press did not satisfy the insertion condition, so the selected target remained axis and the document/history were unchanged. Software2D delivered175ms and native counts1,2, and inserted the expected stop using the identical source and fixture.",
+  "inferenceLimits": [
+    "The original run records exact native pointer-press timestamps in native monotonic milliseconds. Individual DOM event.timeStamp and observation-time values were not passively recorded for this linear insertion.",
+    "The browser/native source reconstructs event creation time using event age. Therefore an unconditional processing-time timestamp bug is not supported. Invalid age fallback or monotonic clamping cannot be individually ruled out without original DOM event measurements.",
+    "The delayed Playwright code and2658.384ms action duration are consistent with late emission during renderer/CDP stalls. This trace has no per-command CDP dispatch timing or Chromium performance trace for that action, so the precise blocking phase is unrecorded.",
+    "The native500ms threshold and insertion behavior should not be increased or bypassed to accommodate the failed requested timing."
+  ],
+  "narrowNextStep": [
+    "For the real gradient double-click action, remove the artificial80ms inter-command waits and issue the normal ordered no-delay browser mouse clickCount2 sequence once.",
+    "Collect passive capture/bubble pointerdown/up creation and observation times outside the click window; assert exactly two trusted presses, native click counts1,2, correct point and interval within the unchanged platform rule.",
+    "Keep exact inserted stop/color/metadata, one-undo/redo and document comparisons. Preserve the original failure if evidence collection fails; do not retry activation."
+  ]
+}

@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "reviewedAtUtc": "2026-10-23T12:58:57.792123+00:00",
+  "scope": "Independent read-only review of completed c549 benchmark files; no browser or compilation. No source or benchmark evidence files changed.",
+  "runtimeCommit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "harnessCommit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "reviewedFiles": [
+    {
+      "path": "/tmp/ferrodesign-e99-browser-c549-text-benchmark/report.json",
+      "bytes": 776161,
+      "sha256": "69415dfd5842dd1a3857d426a0357b4beed647b2055d04e169bcd392252b2acc"
+    },
+    {
+      "path": "/tmp/ferrodesign-e99-harness-c549/source-provenance.json",
+      "bytes": 11677,
+      "sha256": "914f5bd821efcb18276f09946065c4a8f1f8ad78a374ea0561d03b2b1aafa85e"
+    },
+    {
+      "path": "/tmp/ferrodesign-e99-browser-c549-provenance.json",
+      "bytes": 4621,
+      "sha256": "b008686ecbc4c055fa5034898f66ac5e642f81cd9947f738e85eb71a7705050b"
+    },
+    {
+      "path": "/tmp/ferrodesign-e99-c549-browser-execution-provenance.json",
+      "bytes": 16244,
+      "sha256": "c1b2c95d8ed8d22eb84105ed5b617bf8bc15bdfbb5463478a54e8d2113996e20"
+    },
+    {
+      "path": "/tmp/ferrodesign-e99-c549-presentation-joins.json",
+      "bytes": 16338,
+      "sha256": "b33a40679267e7b28d5796e0d81ad73370daea9fe9531d1289ba1050d8e49175"
+    },
+    {
+      "path": "/tmp/ferrodesign-e99-browser-c549-text-benchmark/current-Software2D-pan-trace.json",
+      "bytes": 3401087,
+      "sha256": "a55c1be7730fd12e9c4fb7ddccf3cf5321a31b459e4ae0e984df8dcc1c80820b"
+    },
+    {
+      "path": "/tmp/ferrodesign-e99-browser-c549-text-benchmark/current-Software2D-pan-trace-summary.json",
+      "bytes": 196062,
+      "sha256": "3e182901dd3e07b09be4bf26a53abc5f2c70eea2a9662652c293134ffa035308"
+    },
+    {
+      "path": "/tmp/ferrodesign-e99-browser-c549-text-benchmark/current-WebGL2-pan-trace.json",
+      "bytes": 2934015,
+      "sha256": "d5029c3834886ce429e3c37eb7e9d7e1721023b35deaeab6042c42c76f7307ef"
+    },
+    {
+      "path": "/tmp/ferrodesign-e99-browser-c549-text-benchmark/current-WebGL2-pan-trace-summary.json",
+      "bytes": 197528,
+      "sha256": "f820e0466d764471c1ea5b4811892b3fd499b9dc3ced45c36bf43cd89cc07648"
+    }
+  ],
+  "executionProvenanceScope": "The execution provenance file can later gain the separate focused replay result. Its hash here identifies the bytes read for this benchmark review; benchmark_finished is the component reviewed.",
+  "hashChecks": {
+    "frozenSourceFilesAgainstManifestAndExactGitObjects": 55,
+    "runtimePayloadsAgainstManifest": 17,
+    "reportRuntimeFingerprintPayloads": 9,
+    "rawTraceBytesAndSha256MatchBothReports": true,
+    "standaloneTraceSummariesEqualReportTraceCohorts": true,
+    "pureTraceAnalysisRerun": "Previously rerun directly using the frozen analyzeTextPanTrace export; both results deep-equal the saved analysis. No browser was launched."
+  },
+  "modes": [
+    {
+      "mode": "Software2D",
+      "normalSamples": 36,
+      "normalIndices": [
+        12,
+        47
+      ],
+      "warmupMotions": 12,
+      "separateTraceMotions": 6,
+      "traceNormalSamplesIncluded": false,
+      "documentSha256": "c194e8b0f22a4d157b666c917c50cf0f5b9f80ca8c13dc271839c546e7a7a89e",
+      "recomputedNormalStatistics": {
+        "dispatchMs": {
+          "count": 36,
+          "medianMs": 10.64486350000061,
+          "p95Ms": 51.54747999999927,
+          "minMs": 2.977355000000898,
+          "maxMs": 282.7616259999995
+        },
+        "durationMs": {
+          "count": 36,
+          "medianMs": 20.148416499999257,
+          "p95Ms": 369.757787999999,
+          "minMs": 8.152766000001066,
+          "maxMs": 832.7068340000005
+        },
+        "frameObservationMs": {
+          "count": 36,
+          "medianMs": 6.804095999999845,
+          "p95Ms": 228.3554329999988,
+          "minMs": 3.084007000001293,
+          "maxMs": 781.1593540000013
+        },
+        "presentationMs": {
+          "count": 36,
+          "medianMs": 117.30923499999972,
+          "p95Ms": 414.67338800000107,
+          "minMs": 74.31686000000263,
+          "maxMs": 839.6499000000003
+        },
+        "settledObservationMs": {
+          "count": 36,
+          "medianMs": 170.63733200000024,
+          "p95Ms": 525.8541740000001,
+          "minMs": 109.57566699999734,
+          "maxMs": 867.7525179999993
+        }
+      },
+      "eachNormalSampleFrameAndPresentedFrameDelta": 1,
+      "eachNormalSampleVisibleAndCachedNodes": 150,
+      "preparationDelta": {
+        "totalFullPrepares": 0,
+        "totalIncrementalPrepares": 0,
+        "totalPreparedNodes": 0,
+        "totalRebuiltVisuals": 0,
+        "layerProjectionBuilds": 0,
+        "layerProjectionReuses": 0
+      },
+      "errors": {
+        "page": [],
+        "console": [],
+        "renderPanics": [],
+        "traceCleanup": []
+      }
+    },
+    {
+      "mode": "WebGL2",
+      "normalSamples": 36,
+      "normalIndices": [
+        12,
+        47
+      ],
+      "warmupMotions": 12,
+      "separateTraceMotions": 6,
+      "traceNormalSamplesIncluded": false,
+      "documentSha256": "c194e8b0f22a4d157b666c917c50cf0f5b9f80ca8c13dc271839c546e7a7a89e",
+      "recomputedNormalStatistics": {
+        "dispatchMs": {
+          "count": 36,
+          "medianMs": 13.848831499999505,
+          "p95Ms": 954.3036340000035,
+          "minMs": 2.2321479999955045,
+          "maxMs": 967.327115
+        },
+        "durationMs": {
+          "count": 36,
+          "medianMs": 17.432543499995518,
+          "p95Ms": 1012.6353670000026,
+          "minMs": 4.995371000004525,
+          "maxMs": 1017.1228249999986
+        },
+        "frameObservationMs": {
+          "count": 36,
+          "medianMs": 3.912790499998664,
+          "p95Ms": 159.3271040000036,
+          "minMs": 2.1187669999999343,
+          "maxMs": 281.06638699999894
+        },
+        "presentationMs": {
+          "count": 36,
+          "medianMs": 88.69847800000207,
+          "p95Ms": 1030.5425869999963,
+          "minMs": 67.98305500000424,
+          "maxMs": 1031.236321000004
+        },
+        "settledObservationMs": {
+          "count": 36,
+          "medianMs": 1028.3467065000004,
+          "p95Ms": 1913.1892450000014,
+          "minMs": 74.49090499999875,
+          "maxMs": 2045.5092680000016
+        }
+      },
+      "eachNormalSampleFrameAndPresentedFrameDelta": 1,
+      "eachNormalSampleVisibleAndCachedNodes": 150,
+      "preparationDelta": {
+        "totalFullPrepares": 0,
+        "totalIncrementalPrepares": 0,
+        "totalPreparedNodes": 0,
+        "totalRebuiltVisuals": 0,
+        "layerProjectionBuilds": 0,
+        "layerProjectionReuses": 0
+      },
+      "errors": {
+        "page": [],
+        "console": [],
+        "renderPanics": [],
+        "traceCleanup": []
+      }
+    }
+  ],
+  "measurementBoundaries": {
+    "dispatchMs": "Host Node clock before page.mouse.move until its RPC resolves; includes transport and browser scheduling.",
+    "durationMs": "Host dispatch start until observation of native renderedFrames advance at the expected camera; the native canvas counter advances inside render before all visual recording finishes.",
+    "frameObservationMs": "Host duration after mouse dispatch resolves until that same native frame observation.",
+    "presentationMs": "Host dispatch start until the public native RenderStatistics.frames counter advances; Software2D increments after pixel submission and WebGL2 after flush/disposal. Neither is a Chrome display or GPU completion fence.",
+    "settledObservationMs": "Host dispatch start through two following requestAnimationFrame callbacks. These callbacks also do not fence actual display completion.",
+    "clockDomains": "Host phases use Node time; DOM/long-task observations use page time; trace markers are separately bracket-aligned. No subtraction across unaligned clock origins.",
+    "traceGroups": "Wall interval unions may overlap between nested groups and must not be added as CPU time. Thread tdur is separate and does not measure all SwiftShader workers."
+  },
+  "concreteFindings": [
+    "All 72 normal motions advance one native canvas and one native presentation count with zero prepare/rebuild/projection deltas and 150 cached visible nodes. This supports retained-scene reuse, not a speedup claim.",
+    "WebGL2 normal frame observation median is 17.4325435ms, but p95 is 1012.635367ms; normal settling median is 1028.3467065ms and p95 is 1913.189245ms. The small frame median is not evidence of smooth display FPS.",
+    "WebGL2 normal slow samples 12 and 24 spend 954.303634ms and 936.424879ms respectively inside input dispatch; observed DOM event-to-capture delays are 945.2ms and 934.4ms. Sample 42 also has 281.066387ms after dispatch.",
+    "The longest identifiable main-thread FunctionCall in each trace motion is the FerroUI animation callback (source-map timer.ts:5). Software2D callback wall/tdur spans 74.089-308.591ms / 74.077-238.566ms; WebGL2 spans 47.098-59.543ms / 46.297-58.178ms. The trace cannot attribute these intervals to a particular Rust text-shaping or rendering routine.",
+    "The separate exact-ID WebGL2 join record uniquely links all six submitted surfaces to display swaps lasting 762.630-1014.279ms. Motion 3 reaches its two-rAF marker 829.460ms before the matched swap finishes, proving settling is not a display-completion fence."
+  ],
+  "comparisonLimits": [
+    "Only one current build is present and comparisons is empty; no matched speedup conclusion is available.",
+    "Normal and trace cohorts are separate (36 and 6 per mode); trace timings must not replace normal percentiles.",
+    "Trace-enabled execution uses owned BrowserServer WebSocket transport; a trace-off launch is not transport-identical.",
+    "Recorded WebGL2 uses SwiftShader, not a measured hardware-GPU throughput configuration.",
+    "No OOM increment occurred during this run, but shared-host resource contention is not excluded."
+  ],
+  "shutdown": {
+    "reason": "Text benchmark finished",
+    "processId": 180768,
+    "status": "closed",
+    "clientDisconnectAttempted": true,
+    "clientDisconnectCompleted": true,
+    "clientDisconnected": true,
+    "gracefulCloseCompleted": true,
+    "forcedKillAttempted": false,
+    "directKillAttempted": false,
+    "processExit": {
+      "observed": true,
+      "code": 0,
+      "signal": null
+    },
+    "errors": []
+  },
+  "ownedBrowserPidAbsentAtReview": 180768,
+  "benchmarkExitCode": 0,
+  "oomCountersBeforeAfter": {
+    "before": {
+      "oom": 74,
+      "oom_kill": 6
+    },
+    "after": {
+      "oom": 74,
+      "oom_kill": 6
+    }
+  }
+}
