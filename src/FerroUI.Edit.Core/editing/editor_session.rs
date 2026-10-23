@@ -5,9 +5,9 @@ mod virtual_space;
 mod preflight_tests;
 
 use super::{
-    next_caret_position, plan_text_transformation, CaretMovement, DefaultIndentationStrategy,
-    IReadOnlySectionProvider, IndentationError, IndentationStrategy, NoReadOnlySections, Selection,
-    SelectionSegment, TextTransformation,
+    CaretMovement, DefaultIndentationStrategy, IReadOnlySectionProvider, IndentationError,
+    IndentationStrategy, NoReadOnlySections, Selection, SelectionSegment, TextTransformation,
+    next_caret_position, plan_text_transformation,
 };
 use crate::document::{
     AnchorMovementType, DocumentEdit, DocumentError, DocumentSubscription, DocumentVersion,
@@ -34,6 +34,9 @@ pub struct EditorOptions {
     pub enable_email_hyperlinks: bool,
     pub require_control_modifier_for_hyperlink_click: bool,
     pub highlight_current_line: bool,
+    /// Draws column guides at the configured wide-space columns.
+    pub show_column_rulers: bool,
+    pub column_ruler_positions: Vec<i32>,
     pub newline: String,
 }
 impl Default for EditorOptions {
@@ -52,6 +55,8 @@ impl Default for EditorOptions {
             enable_email_hyperlinks: true,
             require_control_modifier_for_hyperlink_click: true,
             highlight_current_line: false,
+            show_column_rulers: false,
+            column_ruler_positions: vec![80],
             newline: "\n".into(),
         }
     }

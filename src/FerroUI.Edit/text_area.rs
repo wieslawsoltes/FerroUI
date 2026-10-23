@@ -2,10 +2,16 @@ use crate::TextEditor;
 use crate::rendering::HeightTree;
 use crate::text_input_method_client::EditorTextInputMethodClient;
 #[cfg(test)]
+#[path = "text_area_background_tests.rs"]
+mod background_tests;
+#[path = "text_area_backgrounds.rs"]
+mod backgrounds;
+#[cfg(test)]
 #[path = "text_area_visual_line_tests.rs"]
 mod visual_line_tests;
 #[path = "text_area_visual_lines.rs"]
 mod visual_lines;
+use backgrounds::BackgroundRendererHost;
 use ferroui_base::input::text_input::TextInputMethodClient;
 use ferroui_base::input::{
     FocusChangedEventArgs, ICommand, IScrollable, InputElement, InputElementImpl,
@@ -55,6 +61,7 @@ pub struct TextArea {
     vertical: Cell<bool>,
     cache: RefCell<BTreeMap<usize, Rc<CachedVisualLine>>>,
     visual_lines: VisualLineHost,
+    background_layers: BackgroundRendererHost,
     heights: RefCell<HeightTree>,
     scroll_invalidated: Rc<HandlerList<dyn Fn()>>,
     rendering: Cell<bool>,
@@ -68,6 +75,7 @@ pub struct TextArea {
     default_line_height: Cell<f64>,
     caret_visible: Cell<bool>,
     caret_at_end_of_line: Cell<bool>,
+    caret_geometry_pending: Cell<bool>,
     blink_timer: OnceCell<Rc<DispatcherTimer>>,
     im_client: OnceCell<Rc<EditorTextInputMethodClient>>,
     preedit: RefCell<Option<(String, Option<i32>)>>,
@@ -98,6 +106,12 @@ impl FerroObjectImpl for TextArea {
         });
         this.blink_timer.set(timer).ok();
         this.connect_visual_line_extensions();
+        this.connect_background_renderers();
+    }
+
+    fn on_property_changed(this: &Self, change: &ferroui_base::FerroPropertyChangedEventArgs<'_>) {
+        Self::parent_on_property_changed(this, change);
+        this.on_background_property_changed(change);
     }
 }
 
@@ -121,308 +135,7 @@ impl LayoutableImpl for TextArea {
 
 impl VisualImpl for TextArea {
     fn render(this: &Self, context: &mut DrawingContext) {
-        let Some(editor) = this.editor() else {
-            return;
-        };
-        let size = this.viewport.get();
-        if size.width <= 0.0 || size.height <= 0.0 {
-            return;
-        }
-        struct RenderScope<'a>(&'a Cell<bool>, bool);
-        impl Drop for RenderScope<'_> {
-            fn drop(&mut self) {
-                self.0.set(self.1);
-            }
-        }
-        let _render_scope = RenderScope(&this.rendering, this.rendering.replace(true));
-        let clip = context.push_clip(Rect::new(0.0, 0.0, size.width, size.height));
-        if let Some(background) = editor.background() {
-            context.fill_rectangle(
-                &background,
-                Rect::new(0.0, 0.0, size.width, size.height),
-                0.0,
-            );
-        }
-        let offset = this.offset.get();
-        let first = this.heights.borrow().line_at(offset.y);
-        let needs_construction = {
-            let heights = this.heights.borrow();
-            let cache = this.cache.borrow();
-            let count = editor.document().line_count();
-            std::iter::successors(Some(first), |&index| {
-                let next = heights.next_visible(index + 1);
-                (next < count).then_some(next)
-            })
-            .take_while(|&index| heights.top(index) - offset.y <= size.height)
-            .any(|index| !cache.contains_key(&index))
-        };
-        let _batch = if needs_construction {
-            match this.begin_visual_line_batch(first) {
-                Ok(batch) => Some(batch),
-                Err(error) => {
-                    editor.report_error(error.to_string());
-                    context.pop(clip);
-                    return;
-                }
-            }
-        } else {
-            None
-        };
-        let first = this.heights.borrow().line_at(offset.y);
-        let line_count = editor.document().line_count();
-        let gutter = this.gutter_width();
-        let selection = editor.selection();
-        let caret = editor.caret_offset();
-        let folding_sections = editor
-            .folding_manager()
-            .map(|m| m.all_foldings())
-            .unwrap_or_default();
-        let current_line = editor
-            .document()
-            .get_line_by_offset(caret)
-            .map(|l| l.line_number() - 1)
-            .unwrap_or(0);
-        let mut last = first;
-        let mut index = first;
-        while index < line_count {
-            let top = this.heights.borrow().top(index) - offset.y;
-            if top > size.height {
-                break;
-            }
-            let Some(line) = this.line_layout(index) else {
-                break;
-            };
-            this.heights
-                .borrow_mut()
-                .set_height(index, line.layout.height().max(this.line_height()));
-            let origin = Point::new(gutter - offset.x, top);
-            let text_clip = context.push_clip(Rect::new(
-                gutter,
-                0.0,
-                (size.width - gutter).max(0.0),
-                size.height,
-            ));
-            if index <= current_line
-                && current_line < line.display.last_document_line().line_number()
-                && editor.options().highlight_current_line
-            {
-                let brush =
-                    Rc::new(ImmutableSolidColorBrush::from_uint32(0x14808080)) as Rc<dyn IBrush>;
-                context.fill_rectangle(
-                    &brush,
-                    Rect::new(
-                        gutter,
-                        top,
-                        (size.width - gutter).max(0.0),
-                        line.layout.height(),
-                    ),
-                    0.0,
-                );
-            }
-            for element in line.display.elements() {
-                if let Some(brush) = element.data().background_brush() {
-                    for rect in line.layout.hit_test_text_range(
-                        element.data().visual_column() as i32,
-                        element.data().visual_length() as i32,
-                    ) {
-                        context.fill_rectangle(
-                            brush,
-                            Rect::new(
-                                origin.x + rect.x,
-                                origin.y + rect.y,
-                                rect.width,
-                                rect.height,
-                            ),
-                            0.0,
-                        );
-                    }
-                }
-            }
-            if let Some(panel) = editor.installed_search_panel().filter(|p| p.is_open()) {
-                let brush =
-                    Rc::new(ImmutableSolidColorBrush::from_uint32(0x70e7b83a)) as Rc<dyn IBrush>;
-                for matched in panel.results_in_range(line.offset, line.length) {
-                    let start = matched.offset.max(line.offset);
-                    let end = (matched.offset + matched.length).min(line.offset + line.length);
-                    let a = line.display.visual_offset(start - line.offset);
-                    let b = line.display.visual_offset(end - line.offset);
-                    for rect in line
-                        .layout
-                        .hit_test_text_range(a as i32, (b - a).max(1) as i32)
-                    {
-                        context.fill_rectangle(
-                            &brush,
-                            Rect::new(
-                                origin.x + rect.x,
-                                origin.y + rect.y,
-                                rect.width.max(2.0),
-                                rect.height,
-                            ),
-                            0.0,
-                        );
-                    }
-                }
-            }
-            if let Some(brush) = editor.selection_brush().filter(|_| line.preedit.is_none()) {
-                for segment in selection.segments() {
-                    let start = segment.start_offset().max(line.offset);
-                    let end = segment.end_offset().min(line.offset + line.length);
-                    if end > start {
-                        let a = line.display.visual_offset(start - line.offset);
-                        let b = line.display.visual_offset(end - line.offset);
-                        for rect in line.layout.hit_test_text_range(a as i32, (b - a) as i32) {
-                            context.fill_rectangle(
-                                &brush,
-                                Rect::new(
-                                    rect.x + origin.x,
-                                    rect.y + origin.y,
-                                    rect.width,
-                                    rect.height,
-                                ),
-                                0.0,
-                            );
-                        }
-                    }
-                    let line_end = line.offset + line.length;
-                    if segment.end_offset() == line_end && segment.end_virtual_space() > 0 {
-                        let first = if segment.start_offset() == line_end {
-                            segment.start_virtual_space()
-                        } else {
-                            0
-                        };
-                        let last = segment.end_virtual_space();
-                        if last > first {
-                            let edge = Self::virtual_space_bounds(&line.layout);
-                            let width = this.space_advance();
-                            context.fill_rectangle(
-                                &brush,
-                                Rect::new(
-                                    origin.x + edge.x + first as f64 * width,
-                                    origin.y + edge.y,
-                                    (last - first) as f64 * width,
-                                    edge.height.max(this.line_height()),
-                                ),
-                                0.0,
-                            );
-                        }
-                    }
-                }
-            }
-            line.layout.draw(context, origin);
-            if this.is_focused() && this.caret_visible.get() {
-                for segment in selection.segments().iter().filter(|s| {
-                    s.is_empty() || line.preedit.is_some() && **s == selection.primary()
-                }) {
-                    if line.preedit.is_some() && *segment == selection.primary()
-                        || segment.caret >= line.offset
-                            && segment.caret <= line.offset + line.length
-                            && line
-                                .display
-                                .is_document_offset_visible(segment.caret - line.offset)
-                    {
-                        let position = if let Some((start, length)) = line.preedit {
-                            start
-                                + this
-                                    .preedit
-                                    .borrow()
-                                    .as_ref()
-                                    .and_then(|p| p.1)
-                                    .map_or(length, |c| (c.max(0) as usize).min(length))
-                        } else {
-                            line.display.visual_offset(segment.caret - line.offset)
-                        };
-                        let r = if line.preedit.is_none() && segment.caret_virtual_space > 0 {
-                            Self::virtual_space_bounds(&line.layout)
-                        } else {
-                            Self::caret_bounds(
-                                &line.layout,
-                                position,
-                                line.preedit.is_none()
-                                    && *segment == selection.primary()
-                                    && this.caret_at_end_of_line.get(),
-                            )
-                        };
-                        let brush = editor.foreground().unwrap_or_else(|| {
-                            Rc::new(ImmutableSolidColorBrush::from_uint32(0xff202020))
-                        });
-                        context.fill_rectangle(
-                            &brush,
-                            Rect::new(
-                                origin.x
-                                    + r.x
-                                    + if line.preedit.is_none() {
-                                        segment.caret_virtual_space as f64 * this.space_advance()
-                                    } else {
-                                        0.0
-                                    },
-                                origin.y + r.y,
-                                1.0,
-                                r.height.max(this.line_height()),
-                            ),
-                            0.0,
-                        );
-                    }
-                }
-            }
-            context.pop(text_clip);
-            if editor.show_line_numbers() {
-                let number = TextLayout::new(
-                    &(index + 1).to_string(),
-                    Typeface::new(editor.font_family()),
-                    TextLayoutOptions {
-                        font_size: editor.font_size(),
-                        foreground: editor.line_numbers_foreground(),
-                        ..Default::default()
-                    },
-                );
-                number.draw(
-                    context,
-                    Point::new(
-                        gutter - number.width() - this.folding_gutter_width() - 8.0,
-                        top,
-                    ),
-                );
-            }
-            if !folding_sections.is_empty() {
-                let first = folding_sections.partition_point(|s| s.start_offset() < line.offset);
-                if let Some(section) = folding_sections.get(first).filter(|s| {
-                    editor
-                        .document()
-                        .get_line_by_offset(s.start_offset())
-                        .is_ok_and(|l| l.line_number() == index + 1)
-                }) {
-                    let marker = TextLayout::new(
-                        if section.is_folded() { "+" } else { "−" },
-                        Typeface::new(editor.font_family()),
-                        TextLayoutOptions {
-                            font_size: editor.font_size(),
-                            foreground: editor.line_numbers_foreground(),
-                            ..Default::default()
-                        },
-                    );
-                    marker.draw(context, Point::new(gutter - 16.0, top));
-                }
-            }
-            last = index;
-            // Construction can discover a new multiline span. Advance only
-            // after that span has updated the height tree; an iterator that
-            // precomputes its successor would format one hidden row as well.
-            index = this.heights.borrow().next_visible(index + 1);
-        }
-        let evicted = {
-            let mut cache = this.cache.borrow_mut();
-            let keys: Vec<_> = cache
-                .keys()
-                .copied()
-                .filter(|index| *index < first.saturating_sub(8) || *index > last + 8)
-                .collect();
-            keys.into_iter()
-                .filter_map(|key| cache.remove(&key))
-                .collect::<Vec<_>>()
-        };
-        drop(evicted);
-        this.update_extent();
-        context.pop(clip);
+        this.render_text_view(context);
     }
 }
 
@@ -954,6 +667,7 @@ impl TextArea {
             vertical: Cell::new(true),
             cache: RefCell::new(BTreeMap::new()),
             visual_lines: VisualLineHost::new(),
+            background_layers: BackgroundRendererHost::new(),
             heights: RefCell::new(HeightTree::new(1, 20.0)),
             scroll_invalidated: Rc::new(HandlerList::new()),
             rendering: Cell::new(false),
@@ -967,6 +681,7 @@ impl TextArea {
             default_line_height: Cell::new(0.0),
             caret_visible: Cell::new(true),
             caret_at_end_of_line: Cell::new(false),
+            caret_geometry_pending: Cell::new(false),
             blink_timer: OnceCell::new(),
             im_client: OnceCell::new(),
             preedit: RefCell::new(None),
@@ -1086,12 +801,34 @@ impl TextArea {
             self.desired_x.set(None);
         }
         self.caret_visible.set(true);
+        self.update_caret_geometry();
+        self.invalidate_visual();
+    }
+    fn update_caret_geometry(&self) {
+        if self.visual_line_construction_in_progress() {
+            self.defer_caret_geometry();
+            return;
+        }
         self.bring_caret_into_view();
         if let Some(client) = self.im_client.get() {
             client.raise_selection_changed();
             client.raise_cursor_rectangle_changed();
         }
-        self.invalidate_visual();
+    }
+    fn defer_caret_geometry(&self) {
+        if self.caret_geometry_pending.replace(true) {
+            return;
+        }
+        let weak = self.to_ref().downgrade();
+        Dispatcher::ui_thread().post_local(
+            move || {
+                if let Some(area) = weak.upgrade() {
+                    area.caret_geometry_pending.set(false);
+                    area.update_caret_geometry();
+                }
+            },
+            DispatcherPriority::NORMAL,
+        );
     }
     fn update_extent(&self) {
         let viewport = self.viewport.get();
@@ -1641,6 +1378,10 @@ impl TextArea {
         )
     }
     pub fn cursor_rectangle(&self) -> Rect {
+        if self.visual_line_construction_in_progress() {
+            self.defer_caret_geometry();
+            return Rect::default();
+        }
         if self.viewport.get().width <= 0.0 || self.viewport.get().height <= 0.0 {
             return Rect::default();
         }
@@ -1696,6 +1437,10 @@ impl TextArea {
         )
     }
     pub fn bring_caret_into_view(&self) {
+        if self.visual_line_construction_in_progress() {
+            self.defer_caret_geometry();
+            return;
+        }
         if let Some(editor) = self.editor() {
             if let Some(manager) = editor.folding_manager() {
                 manager.unfold_at(editor.caret_offset());
@@ -1853,6 +1598,7 @@ impl ILogicalScrollable for TextArea {
 
 impl Drop for TextArea {
     fn drop(&mut self) {
+        self.disconnect_background_renderers();
         self.disconnect_visual_line_extensions();
         if let Some(timer) = self.blink_timer.get() {
             timer.stop();

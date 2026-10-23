@@ -1551,13 +1551,26 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Editing/CaretLayer.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Editing.CaretLayer"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/text_area_backgrounds.rs",
+          "symbols": [
+            "TextArea::draw_viewport_carets"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Editing.CaretLayer",
+              "rust": "TextArea::draw_viewport_carets"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "The native TextArea paints visible primary/multicaret/IME geometry after the Caret renderer phase; its dispatcher timer and input notifications own blinking and invalidation.",
+      "limitations": [
+        "No independently replaceable CaretLayer child control; per-platform caret customization remains acceptance work."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Editing/CaretNavigationCommandHandler.cs",
@@ -1946,13 +1959,27 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Editing/SelectionLayer.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Editing.SelectionLayer"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/text_area_backgrounds.rs",
+          "symbols": [
+            "TextArea::draw_search_and_selection",
+            "TextArea::selection_rectangles"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Editing.SelectionLayer",
+              "rust": "TextArea::draw_search_and_selection"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Selection geometry shares native bidi/wrap/virtual-space projection and is painted globally between selection renderers and text renderers.",
+      "limitations": [
+        "Per-selection border/corner styled properties and a separately replaceable SelectionLayer control are not implemented."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Editing/SelectionMouseHandler.cs",
@@ -3399,13 +3426,38 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Rendering/BackgroundGeometryBuilder.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Rendering.BackgroundGeometryBuilder"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/background_geometry_builder.rs",
+          "symbols": [
+            "BackgroundGeometryBuilder",
+            "BackgroundGeometryError"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.BackgroundGeometryBuilder",
+              "rust": "BackgroundGeometryBuilder"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.Edit/background_geometry_rects.rs",
+          "symbols": [
+            "BackgroundGeometryLine",
+            "BackgroundGeometryViewport",
+            "get_rects_for_segment",
+            "get_rects_for_selection",
+            "get_rects_from_visual_segment"
+          ],
+          "aliases": []
+        }
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Native StreamGeometry row outlines, rounded joins, high-DPI stroke alignment and shaped bidi/wrap/newline/virtual-space projection. Live view methods retain visible layouts and reject stale callback results; see editor-backgrounds.md.",
+      "limitations": [
+        "Projection requires current retained native line views and does not shape arbitrary offscreen lines."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Rendering/CollapsedLineSection.cs",
@@ -3442,22 +3494,44 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Rendering/ColumnRulerRenderer.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Rendering.ColumnRulerRenderer"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/column_ruler_renderer.rs",
+          "symbols": [
+            "ColumnRulerRenderer"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.ColumnRulerRenderer",
+              "rust": "ColumnRulerRenderer"
+            }
+          ]
+        }
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
+      "unmapped_types": [],
+      "notes": "Native connected background renderer with weak view lifetime, real TextArea geometry and native drawing resources. The live host drives options and FerroUI styled properties; see editor-built-in-backgrounds.md.",
       "limitations": []
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Rendering/CurrentLineHighlightRenderer.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Rendering.CurrentLineHighlightRenderer"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/current_line_highlight_renderer.rs",
+          "symbols": [
+            "CurrentLineHighlightRenderer"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.CurrentLineHighlightRenderer",
+              "rust": "CurrentLineHighlightRenderer"
+            }
+          ]
+        }
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
+      "unmapped_types": [],
+      "notes": "Native connected background renderer with weak view lifetime, real TextArea geometry and native drawing resources. The live host drives options and FerroUI styled properties; see editor-built-in-backgrounds.md.",
       "limitations": []
     },
     {
@@ -3566,12 +3640,24 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Rendering/IBackgroundRenderer.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Rendering.IBackgroundRenderer"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/background_renderer.rs",
+          "symbols": [
+            "IBackgroundRenderer",
+            "BackgroundRendererRef"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.IBackgroundRenderer",
+              "rust": "IBackgroundRenderer"
+            }
+          ]
+        }
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
+      "unmapped_types": [],
+      "notes": "Fallible native draw trait extends ITextViewConnect. The live FerroList connects shared identities safely and draws retained renderer snapshots before each known layer.",
       "limitations": []
     },
     {
@@ -3664,15 +3750,29 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Rendering/LayerPosition.cs",
-      "status": "unmapped",
-      "targets": [],
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/background_renderer.rs",
+          "symbols": [
+            "KnownLayer"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.KnownLayer",
+              "rust": "KnownLayer"
+            }
+          ]
+        }
+      ],
       "unmapped_types": [
-        "AvaloniaEdit.Rendering.KnownLayer",
         "AvaloniaEdit.Rendering.LayerInsertionPosition",
         "AvaloniaEdit.Rendering.LayerPosition"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
-      "limitations": []
+      "notes": "Four ordered native paint phases: Background, Selection, Text and Caret.",
+      "limitations": [
+        "Arbitrary native child-layer insertion/replacement and the LayerInsertionPosition/LayerPosition public controls remain unmapped."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Rendering/LinkElementGenerator.cs",
@@ -3839,14 +3939,30 @@
             "TextArea::visual_line_construction_starting"
           ],
           "aliases": []
+        },
+        {
+          "path": "src/FerroUI.Edit/text_area_backgrounds.rs",
+          "symbols": [
+            "BackgroundRendererHost",
+            "TextArea::background_renderers",
+            "TextArea::invalidate_layer",
+            "TextArea::ensure_visual_lines",
+            "TextArea::segment_rectangles",
+            "TextArea::selection_rectangles",
+            "TextArea::visual_line_bounds",
+            "TextArea::column_ruler_pen",
+            "TextArea::current_line_background",
+            "TextArea::current_line_border"
+          ],
+          "aliases": []
         }
       ],
       "unmapped_types": [
         "AvaloniaEdit.Rendering.TextView.LayerCollection"
       ],
-      "notes": "TextArea combines native TextView ownership with the input surface: snapshot construction batches, shared observable extensions, actual measured heights, folds/custom multiline spans, IME, URI pointer routing, syntax transforms and retained caret/selection/popup geometry.",
+      "notes": "TextArea consolidates native TextView/input ownership: retained visual-line batches, observable generators/transformers/renderers, current-line and ruler styles, global paint phases, bounded visible range geometry, safe callback invalidation, folds/IME and native caret/popup maps.",
       "limitations": [
-        "Separate native margin/layer and embedded-control hosts, public collapsible-height handles, complete visual-position APIs and full text-range accessibility are not yet established."
+        "Arbitrary native margin/layer and embedded-control hosts, public collapsible-height handles, complete visual-position APIs and full text-range accessibility are not yet established."
       ]
     },
     {
@@ -4278,13 +4394,26 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Search/SearchResultBackgroundRenderer.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Search.SearchResultBackgroundRenderer"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/text_area_backgrounds.rs",
+          "symbols": [
+            "TextArea::draw_search_and_selection"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Search.SearchResultBackgroundRenderer",
+              "rust": "TextArea::draw_search_and_selection"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Visible indexed search results use native shared background geometry in the selection phase.",
+      "limitations": [
+        "The separate renderer styling API and custom marker border/corner properties are not exposed."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Search/SearchStrategyFactory.cs",
@@ -4643,15 +4772,23 @@
               "rust": "ActiveElement"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit/snippet_background_renderer.rs",
+          "symbols": [
+            "SnippetBackgroundRenderer"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Snippets.ReplaceableActiveElement.Renderer",
+              "rust": "SnippetBackgroundRenderer"
+            }
+          ]
         }
       ],
-      "unmapped_types": [
-        "AvaloniaEdit.Snippets.ReplaceableActiveElement.Renderer"
-      ],
-      "notes": "Tracked editable fields expose text-change subscriptions, participate in both numeric and cyclic positional traversal, and synchronize mirrors with atomic protection checks.",
-      "limitations": [
-        "The dedicated upstream active-field background renderer is not yet supplied."
-      ]
+      "unmapped_types": [],
+      "notes": "Tracked editable fields expose text-change subscriptions, participate in both numeric and cyclic positional traversal, and synchronize mirrors with atomic protection checks. Paired native Background/Text renderers decorate active and linked fields; they attach/detach with the snippet controller and reject stale field snapshots.",
+      "limitations": []
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Snippets/SnippetSelectionElement.cs",
@@ -4758,7 +4895,7 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Options consumed by the Rust editing session, including active virtual-space navigation and tab-aware editing policies.",
+      "notes": "Rust editing options drive indentation, virtual space, whitespace/control markers, links, whole-line clipboard commands, current-line highlighting and column rulers. The native Options styled property publishes replacement snapshots.",
       "limitations": [
         "Complete upstream option set and property-notification contract are not ported."
       ]
@@ -4945,13 +5082,43 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Utils/FileReader.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Utils.FileReader"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/utils/file_reader.rs",
+          "symbols": [
+            "FileReader"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Utils.FileReader",
+              "rust": "FileReader"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/utils/file_text_reader.rs",
+          "symbols": [
+            "FileTextReader",
+            "Utf8FileTextReader"
+          ],
+          "aliases": []
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/utils/text_encoding.rs",
+          "symbols": [
+            "TextEncoding",
+            "DecodingErrorPolicy",
+            "FileReaderOptions"
+          ],
+          "aliases": []
+        }
       ],
-      "notes": "No standalone port of this managed utility API. Rust standard-library or FerroUI services may replace internal uses without providing this public contract.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Bounded 500,000-byte encoding probe with nonseekable replay, Unicode BOM decoding, UTF-16 reads, explicit UTF-8 Read/BufRead adapter, streaming external writers and real path helpers. Accepts native IStorageFile byte streams directly; see editor-file-io.md.",
+      "limitations": [
+        "Eight explicit encodings replace the open .NET Encoding catalog; UTF-7/custom fallback objects are unsupported. UTF-32 classification corrects a pinned source omission, and path overloads restore upstream NotImplementedException methods. File saving and native TextEditor load/save wrappers remain separate work."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Utils/IFreezable.cs",
@@ -4999,13 +5166,35 @@
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Utils/PixelSnapHelpers.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "AvaloniaEdit.Utils.PixelSnapHelpers"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/background_geometry_builder.rs",
+          "symbols": [
+            "BackgroundGeometryBuilder::pixel_size",
+            "BackgroundGeometryBuilder::add_rectangle_aligned"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Utils.PixelSnapHelpers",
+              "rust": "BackgroundGeometryBuilder::pixel_size"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.Edit/column_ruler_renderer.rs",
+          "symbols": [
+            "pixel_align",
+            "snap_to_device_pixels"
+          ],
+          "aliases": []
+        }
       ],
-      "notes": "No standalone port of this managed utility API. Rust standard-library or FerroUI services may replace internal uses without providing this public contract.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Consolidated geometry/ruler pixel helpers use native TopLevel scaling and visual transforms, preserving midpoint-away-from-zero and transformed truncation semantics.",
+      "limitations": [
+        "No standalone managed PixelSnapHelpers object; callers use the native geometry builder or ruler renderer."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Utils/PropertyChangedWeakEventManager.cs",

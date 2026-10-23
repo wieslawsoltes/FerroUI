@@ -38,7 +38,7 @@ pub(super) struct VisualLineHost {
     subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
     starting: Rc<HandlerList<ConstructionHandler>>,
     batch: RefCell<Option<Rc<VisualLineBatch>>>,
-    revision: Cell<u64>,
+    pub(super) revision: Cell<u64>,
     building: Cell<bool>,
     synchronizing: Cell<bool>,
     synchronize_again: Cell<bool>,
@@ -112,6 +112,9 @@ impl Drop for ConstructionScope<'_> {
 }
 
 impl TextArea {
+    pub(super) fn visual_line_construction_in_progress(&self) -> bool {
+        self.visual_lines.building.get()
+    }
     /// Ordered custom generators. Changes reconnect the view and invalidate its
     /// retained lines. The built-in composition/folding/tab generators are added
     /// by the host after these entries (composition always has first priority).

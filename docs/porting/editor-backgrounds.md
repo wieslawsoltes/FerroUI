@@ -1,4 +1,4 @@
-# Editor background geometry and rendering contracts
+# Editor background geometry and live rendering layers
 
 Reference: AvaloniaEdit `7277e36366d754219d7ede16b6613786b32caf4c`.
 The implementation uses FerroUI's native `StreamGeometry`, `IGeometryContext`,
@@ -17,13 +17,14 @@ license are retained in `src/FerroUI.Edit/NOTICE.md`.
 | [`Rendering/IBackgroundRenderer.cs`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Rendering/IBackgroundRenderer.cs) | `src/FerroUI.Edit/background_renderer.rs` | `IBackgroundRenderer` using native view/context references and a fallible draw callback |
 | [`Rendering/LayerPosition.cs`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Rendering/LayerPosition.cs): `KnownLayer` | `KnownLayer` | Ordered `Background`, `Selection`, `Text`, `Caret` values |
 | [`Rendering/ITextViewConnect.cs`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Rendering/ITextViewConnect.cs) | Existing `ITextViewConnect` supertrait | The same connection lifetime contract as generators and transformers |
+| [`Rendering/TextView.cs`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Rendering/TextView.cs): background collection, `RenderBackground`, `InvalidateLayer`, range projection and built-in renderer ownership | `src/FerroUI.Edit/text_area_backgrounds.rs` | Live native `TextArea` integration, retained visible lines, safe connection hooks and globally ordered painting |
+| [`Editing/SelectionLayer.cs`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Editing/SelectionLayer.cs) and [`Editing/CaretLayer.cs`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Editing/CaretLayer.cs): native range geometry and layer placement | Same live host | Selection and search geometry before all text, then caret renderers and actual carets |
 
-This checkpoint supplies the geometry, projection, and renderer contracts.
-Live TextArea renderer collection ownership, layer dispatch, invalidation, and
-segment convenience methods are a separate integration step. Adding these
-types alone does not claim that the live host invokes custom background
-renderers. Arbitrary child-control insertion/replacement through upstream's
-`LayerInsertionPosition` and `LayerPosition` is not implemented by these files.
+The live `TextArea` owns and invokes custom background renderers. Its public
+geometry methods project actual retained native layouts. Arbitrary child-control
+insertion/replacement through upstream's `LayerInsertionPosition` and
+`LayerPosition` remains outside these APIs. The four known rendering phases
+share one native control rather than introducing four redundant visual trees.
 
 ## Geometry construction
 
@@ -130,7 +131,7 @@ final formatted row's physical right edge, matching the editor's existing RTL
 rectangular selection and virtual caret behavior. Virtual endpoints remain
 available independently of full-width extension.
 
-## Host integration contract
+## Live host integration
 
 `IBackgroundRenderer` extends `ITextViewConnect`. `BackgroundRendererRef`
 preserves `Rc` identity for `FerroList` membership, forwards connection hooks,
@@ -140,24 +141,80 @@ callback receives `&TextArea` and `&mut DrawingContext`, and returns
 as other visual-line extensions. `BackgroundGeometryError` converts into that
 error type.
 
-The live host must invoke each renderer before its chosen known-layer content,
-in layer order: Background, Selection, Text, Caret. Renderers in the same layer
-retain collection order. The collection and cache must be snapshotted before
-application callbacks so callbacks run without a mutable collection borrow.
-Connection/disconnection and invalidation should use the same reentrancy and
-destructor precautions as visual-line generators.
+`TextArea::background_renderers` exposes an ordered `FerroList` of renderer
+handles. Shared identities connect once while present in the list. Reordering
+or changing membership invalidates painting without discarding shaped lines.
+Collection callbacks run outside list and connection-state borrows. Reentrant
+connection changes are reconciled in a loop; removing a renderer during a frame
+defers its disconnect until the retained drawing snapshot finishes. Teardown
+hooks use weak view identity, since a control being destroyed cannot recreate
+a strong `Ref` to itself.
 
-For segment convenience methods, the host can clone retained cached-line
-handles, construct `BackgroundGeometryLine` views over those handles, and then
-call these projection functions. `full_width` must be supplied in the same
-content coordinates as the line origins. Drawing still needs the host's text
-viewport clip; the projection deliberately preserves rectangles outside the
-horizontal viewport so scrolling and full-width geometry remain consistent.
+Each frame first retains its visible `VisualLine`/`TextLayout` handles and a
+document/version, selection, layout revision, scroll offset and viewport
+snapshot. It then paints these global phases:
+
+1. Background renderers, followed by visual-element background brushes.
+2. Selection renderers, followed by search matches and selection geometry.
+3. Text renderers, followed by every retained native glyph layout.
+4. Caret renderers, followed by the actual native carets.
+
+Renderers in the same phase retain collection order. A callback that edits the
+document, replaces it, changes selection or invalidates the layout causes the
+old frame to stop before subsequent content is painted. The host requests
+another frame and reports the invalidation through the editor diagnostic path.
+A fallible renderer is handled by the same path. Both the text-content clip
+and outer viewport clip are restored on these failures. Line numbers and fold
+markers remain in the gutter outside the text-content clip.
+
+`ensure_visual_lines` constructs visible owners only. A fully retained viewport
+does not raise another construction-start event. Generated multiline elements
+update collapsed height ranges before the next owner is chosen, and cache
+eviction releases custom element destructors outside cache borrows.
+
+`segment_rectangles` and `selection_rectangles` construct or retain the visible
+line handles before invoking the projection helpers. `visual_line_bounds`
+returns the full content-width native bounds of a visible owner, including all
+its wrapped rows. Folded logical continuations use that same owner; offscreen
+lines return `None`. These APIs never shape an entire offscreen document to
+answer a range request. `content_viewport` excludes the gutter, and
+`wide_space_width` uses the native font metric shared by virtual carets.
+
+The host obtains full-width range metrics from its extent and viewport. Native
+selection uses `BackgroundGeometryBuilder` with whole-pixel alignment; its
+virtual endpoints follow the selection model. Selection and search painting
+therefore use the same shaped bidi/wrap rectangles as custom renderers.
+Rectangles may extend outside the horizontal viewport; the native content clip
+is applied while drawing.
+
+`invalidate_layer` requests native view repaint without reshaping text. FerroUI's
+compositor currently invalidates the owning visual as a whole, so the layer
+argument determines semantic ordering rather than an independently damaged
+child visual. Per-selection border/corner styled properties and arbitrary
+replacement layer controls remain separate parity work.
+
+## Built-in renderer ownership and styles
+
+The view connects a `CurrentLineHighlightRenderer` and `ColumnRulerRenderer`
+through the same public collection as application renderers. The freshly
+collected frame drives current-line enablement and logical caret line, together
+with `EditorOptions::show_column_rulers` and `column_ruler_positions` (defaults
+`false` and `[80]`). This captures changes made by construction callbacks.
+
+`ColumnRulerPen`, `CurrentLineBackground`, and `CurrentLineBorder` are native
+FerroUI styled properties. Their change notifications update the connected
+renderers and repaint without clearing text shaping. The ruler's host pen is
+the pinned translucent gray (`#5A808080`). Current-line styled values default
+to `None`, while the renderer retains the pinned default fill/border until an
+actual property change overrides them. `set_default_highlight_line_colors`
+restores renderer colors without assigning a style value, as upstream does.
+See [the built-in renderer report](editor-built-in-backgrounds.md) for ruler,
+current-line and snippet decoration details.
 
 ## Validation
 
-The shared native gate passed **13/13 background geometry tests** for this
-checkpoint. Existing host tests are separately gated as integration progresses.
+The standalone geometry checkpoint passed **13/13 background geometry tests**.
+The integrated native checkpoint passes **174/174 control tests** and **337/337 Core tests**, including live host, built-in renderer and file-reader regressions.
 
 `src/FerroUI.Edit/background_geometry_tests.rs` contains focused path and native
 formatter regressions for rounded caps; expanding/contracting row joins;
@@ -177,5 +234,7 @@ The path recorder implements the actual native `IGeometryContext` contract.
 Native layout tests use FerroUI's deterministic text formatter test services;
 they do not replace the projection with estimated character widths. The native
 `StreamGeometry` snapshot test uses the framework's geometry test renderer.
-Live drawing order and connection lifecycle require host integration tests in
-addition to these independent regressions.
+`text_area_background_tests.rs` exercises actual host drawing order, layer-only
+invalidation with retained shaping, deferred disconnect during a frame,
+document mutation during a renderer callback, restored clips after errors,
+native property changes, built-in option wiring and bounded visible geometry.

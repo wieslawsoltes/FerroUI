@@ -18,6 +18,7 @@ objects use Rust handles and interior mutability; fallible operations return
 | [AvaloniaUI/AvaloniaEdit](https://github.com/AvaloniaUI/AvaloniaEdit) | `7277e36366d754219d7ede16b6613786b32caf4c` | Document/editor services, controls, highlighting definitions and integration contracts |
 | [danipen/TextMateSharp](https://github.com/danipen/TextMateSharp) | `e0db45be30278c0f3f80302c31f498c8f8f1c4f2` | TextMate engine, grammar registry, themes, language packages and reference tests |
 | FerroUI starting point | `d5405346e680e060c9675572efe02df131428c08` | Existing framework APIs, renderer, input, platform services and port conventions |
+| FerroUI merged base | `934b9ce16e2ada890ee31534f1a98808f483a14f` | Current framework changes merged into the port branch; both README crate entries retained |
 | `vscode-textmate` | `9.3.2` | Independent token stream oracle |
 | `vscode-oniguruma` | `2.0.1` | Oracle scanner and bundled browser scanner |
 
@@ -148,8 +149,11 @@ FerroUI's existing Rust scanner. It does not infer method parity from a name.
 | [Native completion and insight](editor-completion.md) | Rich completion items, list filtering, shared popup lifecycle, observable overload providers and runtime XAML |
 | [Rich text and clipboard](editor-rich-text-clipboard.md) | Native brushes/runs, complete font styles, HTML formats, cancelable events, delayed cut ownership and rectangle paste |
 | [Visual lines](editor-visual-lines.md) | Live generators/transformers, native runs, multiline projections, extension ownership, URI routing and measured geometry |
+| [Background geometry and live layers](editor-backgrounds.md) | Native StreamGeometry, bidi/wrapped range projection, retained rendering phases, callback invalidation and styled renderer settings |
+| [Built-in background renderers](editor-built-in-backgrounds.md) | Column guides, current-line highlight, active/linked snippet fields and weak control lifetime |
 | [Snippets](editor-snippets.md) | Extensible insertion contexts, tracked custom elements, lifecycle events, transformed fields and native undo ownership |
-| [XSHD runtime](editor-xshd-runtime.md) | Explicit capture, bounded region matching, zero-width diagnostics and remaining .NET regex differences |
+| [XSHD runtime](editor-xshd-runtime.md) | Explicit capture, bounded region matching, span-only state scanning, zero-width diagnostics and remaining .NET regex differences |
+| [File and stream input](editor-file-io.md) | Bounded encoding detection/replay, BOM decoding, UTF-16 readers and standard Rust/native-storage byte streams |
 | [Browser editor](editor-browser.md) | Linked native application, production Oniguruma initialization, renderer/input conformance gates and current evidence |
 | [TextMate engine](textmate-engine.md) | Grammar/scanner semantics, registry/catalog, metadata, theme rules, incremental states, native/Wasm oracle and remaining engine differences |
 | [Source inventory](editor-source-map.md) | Per-file source hashes, exact aliases, partial contracts and unmapped APIs |
@@ -157,8 +161,8 @@ FerroUI's existing Rust scanner. It does not infer method parity from a name.
 
 Checkpoint evidence is recorded with the commits and updated as tests land:
 
-- The current core checkpoint passes **318 tests** and the live visual-line
-  control checkpoint passes **126 tests**; the earlier demo gate passed both
+- The verified core checkpoint passes **337 tests** and the live rendering
+  control checkpoint passes **174 tests**; the hosted demo gate passed both
   public-API integration tests. It includes
   1,600 randomized rope edits, 5,000 appends, dense anchor tests, 2,500 interval
   model edits, 8,000 lazily shifted intervals, 2,500 live-line edits with replay,
@@ -184,7 +188,12 @@ Checkpoint evidence is recorded with the commits and updated as tests land:
   tokenization. Additional regressions cover native completion/overload
   controls, virtual IME padding, proportional-font rectangle paste, variable
   formatted-row heights, resource invalidation, native rich text and asynchronous
-  clipboard races. The render notification
+  clipboard races. Whole-line copy/cut publishes native text/HTML/line markers,
+  defers deletion until successful platform writes, and validates the original
+  captured edit after asynchronous callbacks. Marked paste respects destination
+  line endings, tabs and protected ranges. Live background and snippet tests
+  exercise native geometry, global phase ordering, identity connection lifetime,
+  folded/wrapped current lines and active/bound field teardown. The render notification
   regression checks that extent updates publish outside the render pass.
 - The incremental installation tests compare 200 batches of queued CR/LF/comment
   edits with fresh highlighting, plus line insertion/deletion, multiline state,
@@ -199,8 +208,10 @@ Checkpoint evidence is recorded with the commits and updated as tests land:
   regression invokes FerroUI's production site composer and executes the
   generated flat JavaScript module against the actual Oniguruma binary. This
   verifies the asset/import contract, shared initialization and regex behavior;
-  the linked Emscripten host and browser input suite are now checked in and
-  run in a separate hosted job. Its link/runtime result is tracked in the browser
+  the linked Emscripten host and browser input suite run in separate hosted
+  build and acceptance jobs. The first linked build started the real editor
+  under both Software2D and WebGL2; the corrected composition-input acceptance
+  result is tracked in the browser
   report rather than inferred from portability checks.
 
 The dedicated [editor CI workflow](../../.github/workflows/editor.yml) runs the
@@ -243,12 +254,12 @@ areas include native inline-control hosting and the remaining layer/margin
 extension contracts; remaining rectangular pointer/wrap and virtual-space edge
 cases described in the linked report; remaining command and modern C# lexical
 edge cases; secondary completion-description placement and platform popup
-behavior; native snippet field decorations; whole-line copy options and live
-rich writers; remaining .NET regex/capture and culture-sensitive comparison
+behavior; live rich writers; remaining .NET regex/capture and culture-sensitive comparison
 contracts; text-range accessibility; and the full upstream behavior/test corpus.
 Live generators/transformers, snapshot streaming readers, custom snippet
-lifecycle and ordinal comparisons now have concrete implementations and their
-own source/member reports. The XSHD schema is disabled in the pinned upstream
+lifecycle, native snippet decorations, whole-line clipboard commands, background
+rendering, encoding-aware stream input and ordinal comparisons now have concrete
+implementations and their own source/member reports. The XSHD schema is disabled in the pinned upstream
 loader; compatibility checks must compare actual loader behavior rather than
 introducing new schema restrictions.
 
