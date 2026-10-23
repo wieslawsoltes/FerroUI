@@ -645,9 +645,55 @@ fn reveal_section() -> Ref<StackPanel> {
         grid.children().add(tile.upcast());
     }
     surface.set_child(grid);
+    let focus_kind = {
+        let toggle = Button::new();
+        let set_label = |toggle: &Ref<Button>| {
+            let on = ferroui_controls::media::RevealFocus::focus_visual_kind() == ferroui_controls::media::FocusVisualKind::Reveal;
+            toggle.set_content(Some(label(if on { "Reveal focus: on (Tab to see it)" } else { "Reveal focus: off" })));
+        };
+        set_label(&toggle);
+        let weak = toggle.downgrade();
+        toggle.click(move |_, _| {
+            use ferroui_controls::media::{FocusVisualKind, RevealFocus};
+            let next = if RevealFocus::focus_visual_kind() == FocusVisualKind::Reveal {
+                FocusVisualKind::HighVisibility
+            } else {
+                FocusVisualKind::Reveal
+            };
+            RevealFocus::set_focus_visual_kind(next);
+            if let Some(toggle) = weak.upgrade() {
+                set_label(&toggle);
+            }
+        });
+        toggle
+    };
+    let buttons = row(8.0);
+    for (theme, name) in [("ButtonRevealStyle", "ButtonRevealStyle"), ("ToggleButtonRevealStyle", "ToggleButtonRevealStyle"), ("RepeatButtonRevealStyle", "RepeatButtonRevealStyle")] {
+        let _ = theme;
+        let button: Ref<Control> = match name {
+            "ToggleButtonRevealStyle" => {
+                let toggle = ferroui_controls::primitives::ToggleButton::new();
+                toggle.set_content(Some(label(name)));
+                toggle.upcast()
+            }
+            "RepeatButtonRevealStyle" => {
+                let repeat = ferroui_controls::RepeatButton::new();
+                repeat.set_content(Some(label(name)));
+                repeat.upcast()
+            }
+            _ => button(name, || {}).upcast(),
+        };
+        apply_theme(&button, theme);
+        buttons.children().add(button);
+    }
+    let content = column(10.0);
+    content.children().add(surface.upcast());
+    content.children().add(buttons.upcast());
+    content.children().add(focus_kind.upcast());
+    let surface = content;
     section(
         "Reveal",
-        "RevealBackgroundBrush and RevealBorderBrush (TargetTheme Dark) with the Reveal states of WinUI set by the pointer: RevealBrush.State adds a RevealHoverLight and a RevealPressLight to the element (XamlLight, its Lights); the border lights of the window (RevealBorderLight, with the XamlAmbientLight) light the borders near the pointer through the scene lighting effect of the brush.",
+        "RevealBackgroundBrush and RevealBorderBrush (TargetTheme Dark) with the Reveal states of WinUI set by the pointer: RevealBrush.State adds a RevealHoverLight and a RevealPressLight to the element (XamlLight, its Lights); the border lights of the window (RevealBorderLight, with the XamlAmbientLight) light the borders near the pointer through the scene lighting effect of the brush, across adjacent tiles. The buttons use ButtonRevealStyle, ToggleButtonRevealStyle and RepeatButtonRevealStyle of the WinUI theme. With Reveal focus (FocusVisualKind.Reveal), the element keyboard focus moves to glows, lit by a spot light that travels in the direction focus moved, a pulsing light and a press light (Space or Enter).",
         &surface.upcast(),
     )
 }
@@ -782,4 +828,24 @@ pub fn winui_materials_page() -> Ref<ContentPage> {
     scroller.set_content(Some(Control::boxed(panel)));
     page.set_content(Some(Control::boxed(scroller)));
     page
+}
+
+/// Applies the control theme `key` of the application's resources (the
+/// Reveal styles of the WinUI theme) to `control`, when the theme has it.
+fn apply_theme(control: &Ref<Control>, key: &str) {
+    let key = ferroui_base::controls::ResourceKey::from(key);
+    let weak = control.downgrade();
+    let _ = control.attached_to_visual_tree(move |_| {
+        let Some(control) = weak.upgrade() else { return };
+        if let Some(theme) = control
+            .try_find_resource(&key, None)
+            .flatten()
+            .and_then(|value| {
+                let value: &dyn ferroui_base::AnyValue = &*value;
+                value.downcast_ref::<Ref<ferroui_base::styling::ControlTheme>>().cloned()
+            })
+        {
+            control.set_theme(Some(theme));
+        }
+    });
 }
