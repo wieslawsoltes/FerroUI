@@ -1,3 +1,4 @@
+use crate::TextArea;
 use crate::formatted_text_element::FormattedTextElement;
 use crate::i_text_run_construction_context::ITextRunConstructionContext;
 use crate::i_text_view_connect::ITextViewConnect;
@@ -5,12 +6,11 @@ use crate::visual_line_element::{VisualLineElement, VisualLineElementData};
 use crate::visual_line_element_generator::VisualLineElementGenerator;
 use crate::visual_line_element_text_run_properties::VisualLineElementTextRunProperties;
 use crate::visual_line_error::VisualLineError;
-use crate::TextArea;
+use ferroui_base::WeakRef;
 use ferroui_base::input::PointerPressedEventArgs;
 use ferroui_base::media::immutable::{ImmutablePen, ImmutableSolidColorBrush};
 use ferroui_base::media::text_formatting::TextRun;
 use ferroui_base::media::{BrushExtensions, Color, IBrush, IPen};
-use ferroui_base::WeakRef;
 use ferroui_edit_core::document::DocumentError;
 use ferroui_edit_core::folding::{FoldingManager, FoldingSection, FoldingSubscription};
 use std::any::Any;
@@ -81,10 +81,12 @@ impl ITextViewConnect for FoldingElementGenerator {
         connections.push((weak, subscription));
     }
     fn remove_from_text_view(&self, view: &TextArea) {
-        let handle = view.to_ref();
+        // Disconnect also runs while the view is being dropped. Compare weak
+        // identities without attempting to recreate a strong view reference.
+        let handle = view.to_weak();
         self.connections
             .borrow_mut()
-            .retain(|(view, _)| view.upgrade().is_some_and(|current| current != handle));
+            .retain(|(view, _)| !view.ptr_eq(&handle) && view.upgrade().is_some());
     }
 }
 impl VisualLineElementGenerator for FoldingElementGenerator {

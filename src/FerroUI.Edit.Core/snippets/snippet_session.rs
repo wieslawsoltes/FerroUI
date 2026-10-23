@@ -23,6 +23,16 @@ pub(crate) struct SnippetLifecycle {
 
 pub type SnippetEditValidator = dyn Fn(&[DocumentEdit]) -> Result<(), DocumentError>;
 
+/// Current anchored ranges belonging to one built-in replaceable field.
+/// Ranges use document UTF-16 offsets. Bound occurrences retain their insertion
+/// order and may have different lengths after a text transformation.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SnippetField {
+    pub id: usize,
+    pub segment: SimpleSegment,
+    pub bound_segments: Vec<SimpleSegment>,
+}
+
 struct ActiveElement {
     id: usize,
     start: TextAnchor,
@@ -440,6 +450,38 @@ impl SnippetSession {
             .iter()
             .find(|element| element.editable && element.id == id)
             .map(|element| element.clone() as Rc<dyn IReplaceableActiveElement>)
+    }
+    /// Snapshots built-in replaceable fields in document insertion order, with
+    /// the exact bound occurrences belonging to each field identity. Named
+    /// anchors and custom active elements are not built-in field decorations.
+    /// Closed sessions and ranges whose anchors have been deleted are omitted.
+    pub fn fields(&self) -> Vec<SnippetField> {
+        if self.is_closed() {
+            return Vec::new();
+        }
+        let mut bound = BTreeMap::<usize, Vec<SimpleSegment>>::new();
+        for element in self
+            .inner
+            .elements
+            .iter()
+            .filter(|element| !element.editable)
+        {
+            if let Some(segment) = element.segment() {
+                bound.entry(element.id).or_default().push(segment);
+            }
+        }
+        self.inner
+            .elements
+            .iter()
+            .filter(|element| element.editable)
+            .filter_map(|element| {
+                Some(SnippetField {
+                    id: element.id,
+                    segment: element.segment()?,
+                    bound_segments: bound.get(&element.id).cloned().unwrap_or_default(),
+                })
+            })
+            .collect()
     }
     pub fn named_anchor(&self, name: &str) -> Option<Rc<AnchorElement>> {
         self.inner

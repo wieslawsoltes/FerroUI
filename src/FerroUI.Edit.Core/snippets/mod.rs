@@ -12,7 +12,7 @@ pub use snippet::{PreparedSnippet, Snippet, SnippetElement, SnippetError};
 pub use snippet_anchor_element::AnchorElement;
 pub use snippet_element::{ISnippetElement, SnippetElementRef, SnippetTextTransform};
 pub use snippet_event_args::{DeactivateReason, SnippetEventArgs};
-pub use snippet_session::{SnippetEditValidator, SnippetSession, WeakSnippetSession};
+pub use snippet_session::{SnippetEditValidator, SnippetField, SnippetSession, WeakSnippetSession};
 
 #[cfg(test)]
 mod snippet_extension_tests;

@@ -12,8 +12,10 @@ pub mod automation;
 mod background_geometry_builder;
 mod background_geometry_rects;
 mod background_renderer;
+mod background_renderer_connections;
 mod clipboard_event_args;
 mod collapse_if_single_overload_converter;
+mod column_ruler_renderer;
 mod commands;
 mod completion_data;
 mod completion_list;
@@ -21,6 +23,7 @@ mod completion_list_box;
 mod completion_tip_content_control;
 mod completion_window;
 mod completion_window_base;
+mod current_line_highlight_renderer;
 mod editor_clipboard;
 mod folding_element_generator;
 mod formatted_text_element;
@@ -40,6 +43,7 @@ mod rich_text_adapter;
 mod rust_paths;
 mod search_panel;
 mod single_character_element_generator;
+mod snippet_background_renderer;
 mod snippet_controller;
 mod tab_element_generator;
 mod text_area;
@@ -67,6 +71,7 @@ pub use clipboard_event_args::{
     TextCopiedEventArgs, TextPastedEventArgs,
 };
 pub use collapse_if_single_overload_converter::CollapseIfSingleOverloadConverter;
+pub use column_ruler_renderer::ColumnRulerRenderer;
 pub use commands::{EditorCommand, EditorCommandKind};
 pub use completion_data::{CompletionAction, CompletionData, CompletionDataRef, ICompletionData};
 pub use completion_list::{
@@ -78,6 +83,7 @@ pub use completion_window::CompletionWindow;
 pub use completion_window_base::{
     CompletionWindowBase, CompletionWindowBaseImpl, CompletionWindowBaseImplExt,
 };
+pub use current_line_highlight_renderer::CurrentLineHighlightRenderer;
 pub use editor_clipboard::{
     ClipboardCopyOutcome, ClipboardPasteOutcome, ClipboardText, EditorClipboard,
     EditorClipboardData, EditorClipboardError,
@@ -109,6 +115,7 @@ pub use search_panel::SearchPanel;
 pub use single_character_element_generator::{
     IBuiltinElementGenerator, SingleCharacterElementGenerator,
 };
+pub use snippet_background_renderer::SnippetBackgroundRenderer;
 pub use snippet_controller::SnippetController;
 pub use tab_element_generator::{TabElementGenerator, TabTextElement};
 pub use text_area::TextArea;
@@ -133,8 +140,10 @@ pub use visual_line_transformer::{
 };
 
 #[cfg(test)]
+mod background_geometry_tests;
+#[cfg(test)]
+mod builtin_background_renderer_tests;
+#[cfg(test)]
 mod tests;
 #[cfg(test)]
 mod visual_line_tests;
-#[cfg(test)]
-mod background_geometry_tests;

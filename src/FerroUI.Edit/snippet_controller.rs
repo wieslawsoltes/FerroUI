@@ -1,4 +1,5 @@
-use crate::TextEditor;
+use crate::snippet_background_renderer::SnippetBackgroundRegistration;
+use crate::{KnownLayer, SnippetBackgroundRenderer, TextEditor};
 use ferroui_base::input::{InputElement, Key, KeyEventArgs, KeyModifiers};
 use ferroui_base::interactivity::RoutingStrategies;
 use ferroui_base::reactive::IDisposable;
@@ -23,6 +24,7 @@ pub struct SnippetController {
     session: SnippetSession,
     subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
     deactivated: RefCell<Option<DocumentSubscription>>,
+    backgrounds: RefCell<Option<SnippetBackgroundRegistration>>,
 }
 
 impl SnippetController {
@@ -102,6 +104,7 @@ impl SnippetController {
             session,
             subscriptions: RefCell::new(Vec::new()),
             deactivated: RefCell::new(None),
+            backgrounds: RefCell::new(None),
         });
         let weak = Rc::downgrade(&controller);
         *controller.deactivated.borrow_mut() =
@@ -144,10 +147,27 @@ impl SnippetController {
                             .is_none_or(|editor| editor.document() != controller.document)
                         {
                             controller.finish();
+                        } else {
+                            controller.invalidate_backgrounds(false);
                         }
                     }
                 }),
             );
+        let weak = Rc::downgrade(&controller);
+        controller
+            .subscriptions
+            .borrow_mut()
+            .push(editor.add_disposable_handler(
+                TextEditor::selection_changed_event(),
+                move |_, _| {
+                    if let Some(controller) = weak.upgrade() {
+                        controller.invalidate_backgrounds(true);
+                    }
+                },
+            ));
+        let backgrounds =
+            SnippetBackgroundRegistration::attach(&editor.text_area(), &controller.session);
+        *controller.backgrounds.borrow_mut() = backgrounds;
         drop(update);
         controller.select_active()?;
         if !controller.is_active() {
@@ -163,6 +183,22 @@ impl SnippetController {
         !self.session.is_closed()
     }
 
+    /// The live fill renderer, for host-specific snippet field styling.
+    pub fn field_background_renderer(&self) -> Option<Rc<SnippetBackgroundRenderer>> {
+        self.backgrounds
+            .borrow()
+            .as_ref()
+            .map(|backgrounds| backgrounds.background.clone())
+    }
+
+    /// The live dotted-border renderer for the caret's field and its mirrors.
+    pub fn active_field_renderer(&self) -> Option<Rc<SnippetBackgroundRenderer>> {
+        self.backgrounds
+            .borrow()
+            .as_ref()
+            .map(|backgrounds| backgrounds.foreground.clone())
+    }
+
     /// Ends the session without changing document text or current selection.
     pub fn finish(&self) {
         self.session
@@ -171,12 +207,27 @@ impl SnippetController {
     }
 
     fn dispose_input(&self) {
-        if let Some(subscription) = self.deactivated.borrow_mut().take() {
+        let backgrounds = self.backgrounds.take();
+        drop(backgrounds);
+        if let Some(subscription) = self.deactivated.take() {
             subscription.dispose();
         }
         let subscriptions = std::mem::take(&mut *self.subscriptions.borrow_mut());
         for subscription in subscriptions {
             subscription.dispose();
+        }
+    }
+
+    fn invalidate_backgrounds(&self, foreground_only: bool) {
+        if !self.is_active() {
+            return;
+        }
+        if let Some(editor) = self.editor.upgrade() {
+            let view = editor.text_area();
+            if !foreground_only {
+                view.invalidate_layer(KnownLayer::Background);
+            }
+            view.invalidate_layer(KnownLayer::Text);
         }
     }
 
@@ -281,12 +332,7 @@ impl Drop for SnippetController {
     fn drop(&mut self) {
         self.session
             .deactivate(DeactivateReason::InputHandlerDetached);
-        if let Some(subscription) = self.deactivated.get_mut().take() {
-            subscription.dispose();
-        }
-        for subscription in self.subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
+        self.dispose_input();
     }
 }
 

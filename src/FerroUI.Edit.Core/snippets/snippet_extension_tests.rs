@@ -6,6 +6,91 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 #[test]
+fn field_snapshots_preserve_utf16_identity_transformed_mirrors_and_insertion_order() {
+    let document = TextDocument::from_text("prefix:");
+    let snippet = Snippet {
+        elements: vec![
+            SnippetElement::Replaceable {
+                id: 2,
+                text: "😀".into(),
+            },
+            SnippetElement::Anchor {
+                name: "bookmark".into(),
+            },
+            SnippetElement::Text("/".into()),
+            SnippetElement::Bound { id: 2 },
+            SnippetElement::Text("/".into()),
+            SnippetElement::Replaceable {
+                id: 1,
+                text: "a".into(),
+            },
+            SnippetElement::Text("/".into()),
+            SnippetElement::TransformedBound {
+                id: 1,
+                transform: SnippetTextTransform::new(|text| format!("[{text}]")),
+            },
+        ],
+    };
+    let session = snippet.insert(document.clone(), 7, "").unwrap();
+    assert_eq!(
+        session.fields(),
+        vec![
+            SnippetField {
+                id: 2,
+                segment: SimpleSegment::new(7, 2),
+                bound_segments: vec![SimpleSegment::new(10, 2)]
+            },
+            SnippetField {
+                id: 1,
+                segment: SimpleSegment::new(13, 1),
+                bound_segments: vec![SimpleSegment::new(15, 3)]
+            },
+        ]
+    );
+    session.replace_active("long").unwrap();
+    document.insert(0, "!").unwrap();
+    assert_eq!(document.text(), "!prefix:😀/😀/long/[long]");
+    assert_eq!(
+        session.fields(),
+        vec![
+            SnippetField {
+                id: 2,
+                segment: SimpleSegment::new(8, 2),
+                bound_segments: vec![SimpleSegment::new(11, 2)]
+            },
+            SnippetField {
+                id: 1,
+                segment: SimpleSegment::new(14, 4),
+                bound_segments: vec![SimpleSegment::new(19, 6)]
+            },
+        ]
+    );
+    session.finish();
+    assert!(session.fields().is_empty());
+}
+
+#[test]
+fn field_snapshot_maps_bound_occurrences_before_their_source_after_length_changes() {
+    let document = TextDocument::from_text("one|one");
+    let session = SnippetSession::link(
+        document.clone(),
+        SimpleSegment::new(4, 3),
+        &[SimpleSegment::new(0, 3)],
+    )
+    .unwrap();
+    session.replace_active("😀").unwrap();
+    assert_eq!(document.text(), "😀|😀");
+    assert_eq!(
+        session.fields(),
+        vec![SnippetField {
+            id: 1,
+            segment: SimpleSegment::new(3, 2),
+            bound_segments: vec![SimpleSegment::new(0, 2)]
+        }]
+    );
+}
+
+#[test]
 fn formatting_expands_tabs_before_normalizing_cross_boundary_crlf() {
     let options = SnippetInsertionOptions {
         indentation: "  ".into(),
