@@ -15,6 +15,7 @@ text shaper or graphics abstraction is introduced.
 | --- | --- | --- |
 | [`Rendering/ColumnRulerRenderer.cs`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Rendering/ColumnRulerRenderer.cs) | `src/FerroUI.Edit/column_ruler_renderer.rs` | Ordered column guides, native pen, measured space advances, horizontal scroll and device-pixel alignment |
 | [`Rendering/CurrentLineHighlightRenderer.cs`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Rendering/CurrentLineHighlightRenderer.cs) | `src/FerroUI.Edit/current_line_highlight_renderer.rs` | Full visible-line rectangle, native measured height, default translucent fill and border, explicit current logical line |
+| [`Rendering/TextView.cs`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Rendering/TextView.cs) and [`TextEditorOptions.cs`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/TextEditorOptions.cs) | `src/FerroUI.Edit/text_area_backgrounds.rs` and Core `EditorOptions` | Automatic built-in renderer registration, current-caret line, enabled state, ruler positions and native styled brush/pen properties |
 | [`Utils/PixelSnapHelpers.cs`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Utils/PixelSnapHelpers.cs) and [`Utils/ExtensionMethods.cs`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Utils/ExtensionMethods.cs) | Ruler pixel alignment and native `Visual::transform_to_visual` / `TopLevel::render_scaling` | Away-from-zero midpoint rounding followed by transformed device-pixel center snapping |
 | [`Snippets/SnippetReplaceableTextElement.cs`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Snippets/SnippetReplaceableTextElement.cs) | `src/FerroUI.Edit/snippet_background_renderer.rs`, `snippet_controller.rs` | Background field fills, active source and bound-field outlines, caret/document invalidation and deterministic removal |
 | [`Snippets/SnippetBoundElement.cs`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Snippets/SnippetBoundElement.cs) field-target relationship | `SnippetSession::fields` and `SnippetField` in `FerroUI.Edit.Core` | UTF-16 range snapshots preserve the exact source-to-bound relationship, including transformed lengths and occurrences preceding their source |
@@ -34,6 +35,15 @@ would panic after the native object's last strong reference has gone away. The
 same fix is applied to `FoldingElementGenerator`, and `ITextViewConnect` now
 documents this lifecycle constraint for application extensions.
 
+`TextArea` owns its normal current-line and ruler renderer instances and registers
+them automatically. `highlight_current_line`, `show_column_rulers` and
+`column_ruler_positions` in `EditorOptions` drive those instances using the
+current paint frame after line-construction callbacks have completed. Defaults
+are both visibility flags false and ruler positions `[80]`. Accessors
+`current_line_highlight_renderer()` and `column_ruler_renderer()` expose the
+built-in objects. Independently positioned or styled additional decorations can
+be registered through the same collection:
+
 ```rust
 use ferroui_edit::{ColumnRulerRenderer, CurrentLineHighlightRenderer};
 use std::rc::Rc;
@@ -51,7 +61,7 @@ editor.text_area().background_renderers().add(current_line.clone().into());
 The general renderer API leaves current-line and option policy with the host.
 `CurrentLineHighlightRenderer::set_line` receives a one-based logical line and
 zero suppresses the highlight; `set_enabled` controls visibility. The existing
-editor `highlight_current_line` option can drive that state. The renderer itself
+editor `highlight_current_line` option drives the built-in instance. The renderer itself
 does not install a competing caret subscription. Rulers default to no columns
 and accept an owned ordered `Vec<i32>` snapshot, preserving negative and repeated
 columns from the upstream enumerable. `set_ruler` changes columns and pen with
@@ -74,6 +84,9 @@ Lines extend from the content viewport's top through the greater of the native
 scroll extent and viewport height. They do not depend on the visible document
 line count or an assumed monospace glyph advance. The pen is FerroUI's real
 `IPen`; the default is one logical unit in LightGray (`#FFD3D3D3`).
+The host's `ColumnRulerPen` styled property replaces that standalone default with
+the pinned TextView stroke, ARGB `#5A808080`, also one logical unit. Changing the
+host pen does not override the ruler visibility option.
 
 The upstream device snap dereferences its root and inverts its transform. The
 Rust implementation permits an unattached view or a singular transform: it
@@ -96,6 +109,13 @@ native `StreamGeometry`. It retains the pinned defaults: background ARGB
 `#1614DCE0`, border ARGB `#3400FF6E`, and a one-unit native pen. Background and pen
 are separately optional and configurable. `set_default_colors` restores both
 defaults in one invalidation. No fixed-row-height approximation is used.
+
+The native host `CurrentLineBackground` and `CurrentLineBorder` styled properties
+retain the upstream `None` defaults. They update the renderer on effective
+property changes, including clearing a previously set brush or pen. They do not
+overwrite the renderer's initial colors merely because the highlight is enabled.
+`TextArea::set_default_highlight_line_colors()` restores the renderer defaults
+without rewriting the styled property values, matching the pinned reset helper.
 
 ## Snippet decorations
 
@@ -143,6 +163,13 @@ moves document anchors or the caret, the old range snapshot is rejected with
 `ConstructionInvalidated` so the host can paint the new state on its next frame.
 
 ## Verification
+
+The combined checkpoint passed **323 Core tests** and **169 native control
+tests**, including both new Core field-snapshot regressions, all twelve focused
+renderer regressions and the existing snippet controller tests. Formatting and
+`git diff --check` also passed. The native gate caught an incorrect geometry
+reference conversion; both renderers now use FerroUI's borrowed
+`Ref::upcast_ref::<Geometry>()`, and the passing gate includes that correction.
 
 The focused native tests live in
 `src/FerroUI.Edit/builtin_background_renderer_tests.rs`. They draw through

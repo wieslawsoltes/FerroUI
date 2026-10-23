@@ -122,7 +122,7 @@ impl IBackgroundRenderer for CurrentLineHighlightRenderer {
             context.draw_geometry(
                 background.as_ref(),
                 border.as_ref(),
-                geometry.as_ref_of::<Geometry>(),
+                geometry.upcast_ref::<Geometry>(),
             );
         }
         Ok(())

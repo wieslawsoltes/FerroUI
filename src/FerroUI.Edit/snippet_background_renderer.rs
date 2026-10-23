@@ -152,7 +152,7 @@ impl IBackgroundRenderer for SnippetBackgroundRenderer {
                         background.as_ref()
                     },
                     if foreground { border.as_ref() } else { None },
-                    geometry.as_ref_of::<Geometry>(),
+                    geometry.upcast_ref::<Geometry>(),
                 );
             }
         }
