@@ -5,7 +5,7 @@ use crate::documents::{Block, LineBreak, Paragraph, Run};
 use crate::rich_text::RichEditTextDocument;
 use crate::test_support::test_scope;
 use crate::RichEditBox;
-use ferroui_base::media::{FontStyle, FontWeight, TextAlignment};
+use ferroui_base::media::{FlowDirection, FontStyle, FontWeight, TextAlignment};
 use std::cell::RefCell;
 
 fn model(text: &str) -> RichTextDocument {
@@ -64,6 +64,9 @@ fn rich_selection_paragraph_typing_retains_inherited_alignment_without_baking_a_
     let _scope = test_scope();
     let document = RichTextDocument::from_text("ab\ncd");
     let paragraphs = document.paragraphs();
+    for paragraph in &paragraphs {
+        paragraph.set_flow_direction(FlowDirection::LeftToRight);
+    }
     paragraphs[0].set_text_alignment(TextAlignment::Right);
     paragraphs[0].set_left_indent(14.0);
     paragraphs[1].set_left_indent(28.0);
@@ -80,7 +83,15 @@ fn rich_selection_paragraph_typing_retains_inherited_alignment_without_baking_a_
         paragraph.get_base_value(Block::text_alignment_property()),
         None
     );
-    assert_eq!(paragraph.text_alignment(), TextAlignment::Left);
+    // TextBlock's inherited default is logical Start. TextLineImpl resolves it
+    // to physical Left for this explicitly LTR fixture, without storing Left
+    // in the paragraph's local formatting or snapshot.
+    assert_eq!(paragraph.text_alignment(), TextAlignment::Start);
+    assert_eq!(paragraph.flow_direction(), FlowDirection::LeftToRight);
+    assert_eq!(
+        document.snapshot().paragraphs[0].format.text_alignment,
+        None
+    );
     // Native alignment evidence does not silently redefine unmeasured indents.
     assert_eq!(paragraph.left_indent(), 14.0);
     assert!(editor.undo().unwrap());

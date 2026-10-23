@@ -1,5 +1,88 @@
 # Rich text verification
 
+## 2026-10-23 continuation: measured typing and hosted objects
+
+The continuation is integrated with main `0526a3ca17ec2da5b44489617393c382153678b8`
+and published as `f7e9899e17ac7e26f01db2ece820e2fcdb6f7270`. Its tree is
+`ee937eaa0ae528f6f009eb4039b92120e477b28b`. TypeText paragraph semantics were
+published in `2381b5d024d6a4112d0ff40fd3eaa91e9bed630a`; paragraph/page hosted
+measurement and the final typing-fixture corrections were published in
+`8ffe7e6015f961982fa5b53497f094faea26a63d`.
+
+The local locked/offline Base and Controls `--tests` metadata check passed with
+Rust 1.99.1, one build job, incremental compilation disabled and debug output
+disabled. The native observation extractor passed all 50 tests. The pinned
+inventory check passed with 640 source/reference files, 1,362 exact API entries,
+938 framework dependencies and 827 include edges. Metadata compilation and
+inventory checks are not executed Rust test results. Local runtime execution
+and the two source-bound workflows are recorded separately as they complete:
+
+- [Rich text conformance 39943952972](https://github.com/wieslawsoltes/FerroUI/actions/runs/39943952972).
+- [Broad platform CI 39943953089](https://github.com/wieslawsoltes/FerroUI/actions/runs/39943953089).
+
+Earlier local baseline/continuation code-generation attempts were killed by
+SIGKILL under shared resource pressure. The first metadata attempt exposed two
+test-only API errors: a test collection needed its actual length accessor, and
+the soft-break fixture needed the paragraph's length after installing its
+LineBreak. Both were corrected before the successful integrated check. Main's
+new workspace dependencies initially required missing registry metadata;
+existing cache entries were reused only after matching the exact locked
+version and checksum. Manifests and Cargo.lock were not changed to bypass
+dependency resolution.
+
+The first executed Controls binary is bound to the published tree above in
+[continuation-validation.json](continuation-validation.json), including 278
+changed source/input hashes, exact commands, binary and log hashes. Its hosted
+filter passed 20 and failed one height expectation; paragraph typing passed 12
+and failed one inherited-alignment expectation; selection Gravity passed 28 and
+failed one native-alignment conversion; Options passed all 20. The full binary
+passed 5,292 and failed nine. Three were those same fixture failures; six remote
+tests could not open a loopback socket in the restricted sandbox. The unchanged
+binary subsequently passed all eight remote tests with approved loopback access.
+That separate filter does not turn the failed full run into a passing gate.
+
+The hosted fixture now retains text descent below the object's baseline:
+padding 12 + first line 11 + collapsed margin 15 + mixed line 23 = 61. Its
+original object constraint, margin and placement assertions remain. Native
+paragraph replays now explicitly use the probe's LTR direction and resolve
+logical Start/End against that direction, preserving distinct Left, Center,
+Right, Justify and Mixed values. The framework inheritance fixture inspects
+the actual local/snapshot None and effective Start values, retaining exact
+undo/redo checks. No captured native row is changed. Execution after these
+fixture corrections is a separate checkpoint.
+
+### Recovered published baseline and native evidence
+
+All three jobs in [conformance run 39865036758](https://github.com/wieslawsoltes/FerroUI/actions/runs/39865036758)
+passed at workflow head `e5a0778a9be45d82e9915c985fc835b575bdf337`.
+Linux passed Base 4,470, Controls 5,251, XAML 620 with 17 existing ignored,
+WinUI/Win32 host 50/329, all three theme suites and all five generated-reference
+checks. Windows passed WinUI 65, exact UTF-16 two, IMM32 23, native MSFTEDIT
+eight and selected rich Controls 779. ARM64's canonical serial probes and its
+separate concurrent diagnostic both completed successfully. These baseline
+results precede the continuation implementation above.
+
+The corresponding [broad platform run 39865036853](https://github.com/wieslawsoltes/FerroUI/actions/runs/39865036853)
+had 13 successful jobs and one X11 failure. Its IBus smoke service lacked the
+write-only ContentType property and rejected a valid production request with
+UnknownProperty. The correction in `8227e3cb4de506dcbc02f5574b5c50a2a8b15d89`
+also checks ordered InputScope delivery, a change while focused and legacy
+Number fallback. Execution of that correction belongs to the later broad
+workflow; the older run is not described as wholly successful.
+
+The immutable [x64 record](native-msftedit-e5a0778a-x64.json) and
+[ARM64 record](native-msftedit-e5a0778a-arm64.json) were extracted from the
+original official artifact ZIPs after length, SHA-256 and member CRC checks.
+Both record measured merge `87aa7390668cf0450e18c4f3f7839df5db22ccd1`, workflow
+head `e5a0778a9be45d82e9915c985fc835b575bdf337` and probe blob
+`64262e70bb48d4241fbe4626d27df85c388284ba`. All behavioral arrays agree between
+architectures, including 490 actual-selection commands across 34 fixtures and
+90 passive-range commands across 15 fixtures. The earlier 1,577 independent
+Gravity and 137 Link commands remain present. x64 uses MSFTEDIT
+6.2.26100.33648; ARM64 uses 6.2.26100.9278. Source, runner, engine and archive
+provenance remain distinct. These are system-engine measurements; they do not
+establish packaged WinUI runtime parity or untouched duplicate-format caches.
+
 ## Requested-family metrics, common Link fields and live-selection Gravity
 
 The complete changed source graph compiles with Rust 1.99.0 and locked/offline

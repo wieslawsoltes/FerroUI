@@ -1379,3 +1379,42 @@ count and LineBreak length), both corrected. A separate review tightened native
 alignment assertions so Center/Justify can no longer masquerade as Left. Final
 metadata/runtime validation follows main integration. Native paragraph detach/
 backtracking scheduling, TextDpi and physical rendering remain explicit limits.
+
+## 2026-10-23 — Integrate current main and reopen source-bound CI
+
+Hosted-object changes were published as `8ffe7e6015f961982fa5b53497f094faea26a63d`.
+Merge `f7e9899e17ac7e26f01db2ece820e2fcdb6f7270` integrates main
+`0526a3ca17ec2da5b44489617393c382153678b8` with tree
+`ee937eaa0ae528f6f009eb4039b92120e477b28b`. TextBlock retains both main's
+layout-cache optimization and the rich cached-baseline reader. The catalog has
+77 pages, preserving Rich Text and the incoming Composition page. Independent
+review checked the two conflict resolutions, workspace/lock dependency edges,
+catalog registrations and retained conformance workflow. The isolated merge
+checkout was removed after publication and exact local/remote tree comparison.
+
+GitHub now reports PR #243 as mergeable. Conformance run 39943952972 and broad
+platform run 39943953089 test this new head independently of the recovered
+e5a0778a results. The local Base/Controls test-target metadata check passed in
+4m34s with Rust 1.99.1, locked/offline dependencies, one build job and disabled
+incremental/debug output. The source inventory also passes unchanged counts.
+Runtime gates and any corrections are recorded separately after execution;
+successful compilation alone does not close the hosted/typing contracts.
+
+## 2026-10-23 — Execute the continuation and correct fixture assumptions
+
+The first frozen Controls binary compiled in 5m57s. Hosted-object tests passed
+20/21, paragraph typing 12/13, selection Gravity 28/29 and Options 20/20. Full
+Controls passed 5,292 and failed nine: the same three new fixture assumptions
+and six loopback permission failures. The identical binary passed all eight
+remote tests after approved loopback execution. Exact source, binary, argv and
+log hashes are retained in `continuation-validation.json`; the failed full run
+is not relabeled as successful.
+
+The hosted fixture's expected height omitted text descent below an embedded
+object's baseline. The correct envelope is 61, with the original constraint,
+margin and placement assertions unchanged. Paragraph fixtures now distinguish
+FerroUI's inherited logical Start from native physical Left. Native fixtures
+explicitly use their default LTR direction; the converter resolves Start/End
+by direction and still distinguishes all physical alignments and Mixed. The
+inheritance regression asserts local and snapshot None, effective Start and
+exact undo/redo. No recorded native expectation or production policy changed.

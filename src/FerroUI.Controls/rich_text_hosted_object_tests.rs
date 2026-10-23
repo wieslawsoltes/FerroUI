@@ -144,7 +144,9 @@ fn rich_hosted_constraints_use_page_padding_remaining_height_and_collapsed_margi
     close(view.line_metrics()[0].bounds.y, 5.0);
     close(view.line_metrics()[1].bounds.y, 31.0);
     close(child.bounds().x, 39.0);
-    close(view.desired_size().height, 58.0);
+    // The mixed line retains the text descent below the object's baseline:
+    // padding 12 + first line 11 + collapsed margin 15 + (baseline 20 + descent 3).
+    close(view.desired_size().height, 61.0);
 }
 
 #[test]

@@ -4,7 +4,7 @@ use crate::test_support::test_scope;
 use crate::RichEditBox;
 use ferroui_base::input::text_input::{TextInputMethodEdit, TextSelection};
 use ferroui_base::media::{
-    FontStyle, FontWeight, IBrush, ISolidColorBrush, ITransform, TextAlignment,
+    FlowDirection, FontStyle, FontWeight, IBrush, ISolidColorBrush, ITransform, TextAlignment,
 };
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{Rect, Ref, RelativePoint, Size};
@@ -134,6 +134,12 @@ impl Replay {
         view.set_document(RichTextDocument::from_text(
             &fixture.text.replace('\r', "\n"),
         ));
+        // These native probe fixtures create a default LTR Rich Edit window.
+        // Keep its direction explicit when comparing logical FerroUI alignment
+        // with the native physical paragraph-alignment values.
+        for paragraph in view.document().paragraphs() {
+            paragraph.set_flow_direction(FlowDirection::LeftToRight);
+        }
         let document = RichEditTextDocument::new(view.document());
         document.editor().set_text_view(Some(view.clone())).unwrap();
         Self {
@@ -351,6 +357,16 @@ fn native_paragraph_alignment(value: TextFormatValue<ParagraphFormat>) -> i32 {
             Some(TextAlignment::Center) => 1,
             Some(TextAlignment::Right) => 2,
             Some(TextAlignment::Justify) => 3,
+            Some(TextAlignment::Start) => match format.flow_direction {
+                Some(FlowDirection::LeftToRight) => 0,
+                Some(FlowDirection::RightToLeft) => 2,
+                None => panic!("Logical native replay alignment requires resolved direction"),
+            },
+            Some(TextAlignment::End) => match format.flow_direction {
+                Some(FlowDirection::LeftToRight) => 2,
+                Some(FlowDirection::RightToLeft) => 0,
+                None => panic!("Logical native replay alignment requires resolved direction"),
+            },
             Some(other) => panic!("Unmapped native paragraph alignment {other:?}"),
             // The queried fixtures contain paragraphs; effective formatting
             // must resolve even an inherited alignment to its concrete value.
