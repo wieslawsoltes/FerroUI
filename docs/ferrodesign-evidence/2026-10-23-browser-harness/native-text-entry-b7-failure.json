@@ -1,0 +1,799 @@
+{
+  "scope": "Historical failure diagnosis only; b7 application with later harness, before common text-entry correction. Missing historic DOM pointer timestamps prevent direct event-creation-time comparison.",
+  "browser": "156.0.8078.4",
+  "runtime": {
+    "source_commit": "b7b0b8853dd47a3426537a6babc11fcc0e0e40cc",
+    "workflow_run": 39869066118,
+    "artifact_id": 12467852902,
+    "archive_sha256": "ea240fad23dbd67d4569c283ccf0d0f74bb1f284b3c98a914cf5ad06c838ec98"
+  },
+  "harness": {
+    "harness_source_base_commit": "1637a093723a4f899b7f4e371fd53f0b91914a98",
+    "harness_includes_working_tree_changes": true,
+    "harness_files": {
+      "samples/FerroDesign/tests/browser.mjs": "faf91c0e7ce151d055aec7e4eb0b2a27ef3d79ba2e017eb3a2a5606aebcf7bd6",
+      "samples/FerroDesign/tests/corner-radius-handles-browser.mjs": "17a82205d52399eb76e7117eca1ff7a6485325f3e5a34b37dd5c0c153490177f",
+      "samples/FerroDesign/tests/corner-radius-input.test.mjs": "bdaf5265fc7eee1797fe6ece48d3291c99baac6211cb8459e9a4bfcaf8c25435",
+      "samples/FerroDesign/tests/input-observations.mjs": "c1e6d5fa29a2c32288c86701891f2b34afdcc637cd4241d50f07ad123a659b2a"
+    }
+  },
+  "original_report": {
+    "filename": "report.json",
+    "sha256": "fe9e5fb82fc6f9150e981cf74dec7e94959833b1b5e5b142c69d824bb6ebc823"
+  },
+  "original_trace": {
+    "filename": "WebGL2-trace.zip",
+    "sha256": "d8fbabba153d77d3e1f753d543d40b59e9c19c7d55f45067c7ee74caa05e16fe",
+    "trace_sha256": "2e0ec89036de975168f99f42a05d5bf6ac7db531fc16a6a5c2bd297374b87a10"
+  },
+  "observed_dom_creation_timestamps": null,
+  "calls": [
+    {
+      "call_id": "ngfp@2119",
+      "label": "Blank selection reset",
+      "method": "mouseClick",
+      "start_ms": 143013.3,
+      "end_ms": 143028.026,
+      "duration_ms": 14.726,
+      "parameters": {
+        "x": 392.08771929824564,
+        "y": 726.7017543859649
+      }
+    },
+    {
+      "call_id": "ngfp@2123",
+      "label": "Wait for rendered frame after reset",
+      "method": "waitForFunction",
+      "start_ms": 143070.788,
+      "end_ms": 143472.128,
+      "duration_ms": 401.34
+    },
+    {
+      "call_id": "ngfp@2125",
+      "label": "Wait for scene after reset",
+      "method": "waitForFunction",
+      "start_ms": 143479.858,
+      "end_ms": 143495.448,
+      "duration_ms": 15.59
+    },
+    {
+      "call_id": "ngfp@2129",
+      "label": "Requested double click",
+      "method": "mouseClick",
+      "start_ms": 143533.793,
+      "end_ms": 145097.044,
+      "duration_ms": 1563.251,
+      "parameters": {
+        "x": 982.7543859649123,
+        "y": 459.34736842105264,
+        "delay": 80,
+        "clickCount": 2
+      }
+    },
+    {
+      "call_id": "ngfp@2137",
+      "label": "Text editor open wait",
+      "method": "waitForFunction",
+      "start_ms": 145173.221,
+      "end_ms": 175254.935,
+      "duration_ms": 30081.714,
+      "error": "Timeout 30000ms exceeded."
+    }
+  ],
+  "states": {
+    "before_blank": {
+      "selection": [
+        3
+      ],
+      "editingText": null,
+      "editingComposition": false,
+      "renderedFrames": 97,
+      "sceneFrames": 67,
+      "historyLength": 9,
+      "canRedo": true,
+      "documentRevision": 105,
+      "zoom": 1.5543859649122806,
+      "pan": {
+        "x": 33.91228070175441,
+        "y": 322.56140350877195
+      },
+      "tool": "Select",
+      "pointerPresses": {
+        "capacity": 8,
+        "entries": [
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 89,
+            "screen": {
+              "x": 686.75439453125,
+              "y": 459.3473815917969
+            },
+            "selectionCountBefore": 0,
+            "serial": 10,
+            "timestamp": 77789,
+            "world": {
+              "x": 420.0000055110751,
+              "y": 88.00000847327789
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 2,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 90,
+            "screen": {
+              "x": 686.75439453125,
+              "y": 459.3473815917969
+            },
+            "selectionCountBefore": 1,
+            "serial": 11,
+            "timestamp": 77978,
+            "world": {
+              "x": 420.0000055110751,
+              "y": 88.00000847327789
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 91,
+            "screen": {
+              "x": 96.08770751953125,
+              "y": 726.7017822265625
+            },
+            "selectionCountBefore": 1,
+            "serial": 12,
+            "timestamp": 82013,
+            "world": {
+              "x": 39.99999242227178,
+              "y": 260.0000179109939
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 93,
+            "screen": {
+              "x": 686.75439453125,
+              "y": 459.3473815917969
+            },
+            "selectionCountBefore": 0,
+            "serial": 13,
+            "timestamp": 84684,
+            "world": {
+              "x": 420.0000055110751,
+              "y": 88.00000847327789
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 2,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 93,
+            "screen": {
+              "x": 686.75439453125,
+              "y": 459.3473815917969
+            },
+            "selectionCountBefore": 1,
+            "serial": 14,
+            "timestamp": 84865,
+            "world": {
+              "x": 420.0000055110751,
+              "y": 88.00000847327789
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 94,
+            "screen": {
+              "x": 96.08770751953125,
+              "y": 726.7017822265625
+            },
+            "selectionCountBefore": 1,
+            "serial": 15,
+            "timestamp": 87429,
+            "world": {
+              "x": 39.99999242227178,
+              "y": 260.0000179109939
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 96,
+            "screen": {
+              "x": 686.75439453125,
+              "y": 459.3473815917969
+            },
+            "selectionCountBefore": 0,
+            "serial": 16,
+            "timestamp": 88907,
+            "world": {
+              "x": 420.0000055110751,
+              "y": 88.00000847327789
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 2,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 96,
+            "screen": {
+              "x": 686.75439453125,
+              "y": 459.3473815917969
+            },
+            "selectionCountBefore": 1,
+            "serial": 17,
+            "timestamp": 89078,
+            "world": {
+              "x": 420.0000055110751,
+              "y": 88.00000847327789
+            },
+            "zoom": 1.5543859649122806
+          }
+        ],
+        "serial": 17,
+        "timestampUnit": "native monotonic milliseconds"
+      },
+      "chrome": {
+        "CanvasHost": {
+          "x": 296,
+          "y": 0,
+          "width": 1016,
+          "height": 1000,
+          "visible": true,
+          "focused": false,
+          "focusWithin": true,
+          "measureValid": false,
+          "arrangeValid": false
+        },
+        "InlineTextBox": {
+          "x": 827.3157894736842,
+          "y": 415.82456140350877,
+          "width": 270,
+          "height": 33.599999999999994,
+          "visible": false,
+          "focused": false,
+          "focusWithin": false,
+          "measureValid": true,
+          "arrangeValid": true
+        },
+        "ModalBackdrop": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "visible": false,
+          "focused": false,
+          "focusWithin": false,
+          "measureValid": true,
+          "arrangeValid": true
+        }
+      }
+    },
+    "after_blank_scene": {
+      "selection": [],
+      "editingText": null,
+      "editingComposition": false,
+      "renderedFrames": 98,
+      "sceneFrames": 68,
+      "historyLength": 9,
+      "canRedo": true,
+      "documentRevision": 105,
+      "zoom": 1.5543859649122806,
+      "pan": {
+        "x": 33.91228070175441,
+        "y": 322.56140350877195
+      },
+      "tool": "Select",
+      "pointerPresses": {
+        "capacity": 8,
+        "entries": [
+          {
+            "buttons": 1,
+            "clickCount": 2,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 90,
+            "screen": {
+              "x": 686.75439453125,
+              "y": 459.3473815917969
+            },
+            "selectionCountBefore": 1,
+            "serial": 11,
+            "timestamp": 77978,
+            "world": {
+              "x": 420.0000055110751,
+              "y": 88.00000847327789
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 91,
+            "screen": {
+              "x": 96.08770751953125,
+              "y": 726.7017822265625
+            },
+            "selectionCountBefore": 1,
+            "serial": 12,
+            "timestamp": 82013,
+            "world": {
+              "x": 39.99999242227178,
+              "y": 260.0000179109939
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 93,
+            "screen": {
+              "x": 686.75439453125,
+              "y": 459.3473815917969
+            },
+            "selectionCountBefore": 0,
+            "serial": 13,
+            "timestamp": 84684,
+            "world": {
+              "x": 420.0000055110751,
+              "y": 88.00000847327789
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 2,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 93,
+            "screen": {
+              "x": 686.75439453125,
+              "y": 459.3473815917969
+            },
+            "selectionCountBefore": 1,
+            "serial": 14,
+            "timestamp": 84865,
+            "world": {
+              "x": 420.0000055110751,
+              "y": 88.00000847327789
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 94,
+            "screen": {
+              "x": 96.08770751953125,
+              "y": 726.7017822265625
+            },
+            "selectionCountBefore": 1,
+            "serial": 15,
+            "timestamp": 87429,
+            "world": {
+              "x": 39.99999242227178,
+              "y": 260.0000179109939
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 96,
+            "screen": {
+              "x": 686.75439453125,
+              "y": 459.3473815917969
+            },
+            "selectionCountBefore": 0,
+            "serial": 16,
+            "timestamp": 88907,
+            "world": {
+              "x": 420.0000055110751,
+              "y": 88.00000847327789
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 2,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 96,
+            "screen": {
+              "x": 686.75439453125,
+              "y": 459.3473815917969
+            },
+            "selectionCountBefore": 1,
+            "serial": 17,
+            "timestamp": 89078,
+            "world": {
+              "x": 420.0000055110751,
+              "y": 88.00000847327789
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 97,
+            "screen": {
+              "x": 96.08770751953125,
+              "y": 726.7017822265625
+            },
+            "selectionCountBefore": 1,
+            "serial": 18,
+            "timestamp": 91200,
+            "world": {
+              "x": 39.99999242227178,
+              "y": 260.0000179109939
+            },
+            "zoom": 1.5543859649122806
+          }
+        ],
+        "serial": 18,
+        "timestampUnit": "native monotonic milliseconds"
+      },
+      "chrome": {
+        "CanvasHost": {
+          "x": 296,
+          "y": 0,
+          "width": 1016,
+          "height": 1000,
+          "visible": true,
+          "focused": false,
+          "focusWithin": true,
+          "measureValid": true,
+          "arrangeValid": true
+        },
+        "InlineTextBox": {
+          "x": 827.3157894736842,
+          "y": 415.82456140350877,
+          "width": 270,
+          "height": 33.599999999999994,
+          "visible": false,
+          "focused": false,
+          "focusWithin": false,
+          "measureValid": true,
+          "arrangeValid": true
+        },
+        "ModalBackdrop": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "visible": false,
+          "focused": false,
+          "focusWithin": false,
+          "measureValid": true,
+          "arrangeValid": true
+        }
+      }
+    },
+    "after_requested_double_click": {
+      "selection": [
+        3
+      ],
+      "editingText": null,
+      "editingComposition": false,
+      "renderedFrames": 100,
+      "sceneFrames": 69,
+      "historyLength": 9,
+      "canRedo": true,
+      "documentRevision": 107,
+      "zoom": 1.5543859649122806,
+      "pan": {
+        "x": 33.91228070175441,
+        "y": 322.56140350877195
+      },
+      "tool": "Select",
+      "pointerPresses": {
+        "capacity": 8,
+        "entries": [
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 93,
+            "screen": {
+              "x": 686.75439453125,
+              "y": 459.3473815917969
+            },
+            "selectionCountBefore": 0,
+            "serial": 13,
+            "timestamp": 84684,
+            "world": {
+              "x": 420.0000055110751,
+              "y": 88.00000847327789
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 2,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 93,
+            "screen": {
+              "x": 686.75439453125,
+              "y": 459.3473815917969
+            },
+            "selectionCountBefore": 1,
+            "serial": 14,
+            "timestamp": 84865,
+            "world": {
+              "x": 420.0000055110751,
+              "y": 88.00000847327789
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 94,
+            "screen": {
+              "x": 96.08770751953125,
+              "y": 726.7017822265625
+            },
+            "selectionCountBefore": 1,
+            "serial": 15,
+            "timestamp": 87429,
+            "world": {
+              "x": 39.99999242227178,
+              "y": 260.0000179109939
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 96,
+            "screen": {
+              "x": 686.75439453125,
+              "y": 459.3473815917969
+            },
+            "selectionCountBefore": 0,
+            "serial": 16,
+            "timestamp": 88907,
+            "world": {
+              "x": 420.0000055110751,
+              "y": 88.00000847327789
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 2,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 96,
+            "screen": {
+              "x": 686.75439453125,
+              "y": 459.3473815917969
+            },
+            "selectionCountBefore": 1,
+            "serial": 17,
+            "timestamp": 89078,
+            "world": {
+              "x": 420.0000055110751,
+              "y": 88.00000847327789
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 97,
+            "screen": {
+              "x": 96.08770751953125,
+              "y": 726.7017822265625
+            },
+            "selectionCountBefore": 1,
+            "serial": 18,
+            "timestamp": 91200,
+            "world": {
+              "x": 39.99999242227178,
+              "y": 260.0000179109939
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 99,
+            "screen": {
+              "x": 686.75439453125,
+              "y": 459.3473815917969
+            },
+            "selectionCountBefore": 0,
+            "serial": 19,
+            "timestamp": 92542,
+            "world": {
+              "x": 420.0000055110751,
+              "y": 88.00000847327789
+            },
+            "zoom": 1.5543859649122806
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": 33.91228070175441,
+              "y": 322.56140350877195
+            },
+            "renderedFramesBefore": 100,
+            "screen": {
+              "x": 686.75439453125,
+              "y": 459.3473815917969
+            },
+            "selectionCountBefore": 1,
+            "serial": 20,
+            "timestamp": 93178,
+            "world": {
+              "x": 420.0000055110751,
+              "y": 88.00000847327789
+            },
+            "zoom": 1.5543859649122806
+          }
+        ],
+        "serial": 20,
+        "timestampUnit": "native monotonic milliseconds"
+      },
+      "chrome": {
+        "CanvasHost": {
+          "x": 296,
+          "y": 0,
+          "width": 1016,
+          "height": 1000,
+          "visible": true,
+          "focused": false,
+          "focusWithin": true,
+          "measureValid": true,
+          "arrangeValid": true
+        },
+        "InlineTextBox": {
+          "x": 827.3157894736842,
+          "y": 415.82456140350877,
+          "width": 270,
+          "height": 33.599999999999994,
+          "visible": false,
+          "focused": false,
+          "focusWithin": false,
+          "measureValid": true,
+          "arrangeValid": true
+        },
+        "ModalBackdrop": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "visible": false,
+          "focused": false,
+          "focusWithin": false,
+          "measureValid": true,
+          "arrangeValid": true
+        }
+      }
+    }
+  },
+  "native_press_intervals_ms": {
+    "last_successful_pair": 171,
+    "failed_pair": 636
+  },
+  "native_platform_double_click_window_ms": 500,
+  "timestamp_source": {
+    "typescript": "performance.now() - event.timeStamp is forwarded as event_age",
+    "rust": "event_timestamp subtracts valid event_age from monotonic elapsed milliseconds before dispatch",
+    "valid_age_ms": [
+      0,
+      5000
+    ],
+    "shipped_monotonic_clock": "emscripten_get_now returns performance.now()",
+    "dispatch": "synchronous; no timestamp replacement",
+    "unchanged_between": "b7b0b885 and 08e29e4f"
+  },
+  "playwright_click_scheduling": {
+    "version": "1.64.1",
+    "delay_ms": 80,
+    "sequence": [
+      "await mouse move",
+      "await first CDP down",
+      "wait 80 ms",
+      "await first CDP up",
+      "wait 80 ms",
+      "await second CDP down",
+      "wait 80 ms",
+      "await second CDP up"
+    ],
+    "explicit_cdp_timestamp": false
+  },
+  "conclusion": "Native click classification matches its recorded timestamps. Selection reset, scene publication, hit location and focus succeeded. The source preserves creation time, while sequential delayed automation can send the second press late; exact historical DOM timestamps were not captured."
+}

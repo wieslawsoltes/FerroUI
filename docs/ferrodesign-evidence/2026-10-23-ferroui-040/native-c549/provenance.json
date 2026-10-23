@@ -1,0 +1,243 @@
+{
+  "captured_at": "2026-10-23T12:32:29.615930+00:00",
+  "repository": "wieslawsoltes/FerroUI",
+  "source_commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "source_tree": "8c5bbcc8ed5e5a61d287708cf4e2c0e7c912259d",
+  "run_id": 39952473854,
+  "job_id": 120410483091,
+  "run_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39952473854",
+  "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39952473854/job/120410483091",
+  "status": "completed",
+  "conclusion": "success",
+  "started_at": "2026-10-23T12:20:43Z",
+  "completed_at": "2026-10-23T12:30:50Z",
+  "steps": [
+    {
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 1,
+      "started_at": "2026-10-23T12:20:44Z",
+      "completed_at": "2026-10-23T12:20:45Z"
+    },
+    {
+      "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 2,
+      "started_at": "2026-10-23T12:20:45Z",
+      "completed_at": "2026-10-23T12:20:51Z"
+    },
+    {
+      "name": "Configure runner-local toolchain paths",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 3,
+      "started_at": "2026-10-23T12:20:51Z",
+      "completed_at": "2026-10-23T12:20:51Z"
+    },
+    {
+      "name": "Run actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 4,
+      "started_at": "2026-10-23T12:20:51Z",
+      "completed_at": "2026-10-23T12:21:26Z"
+    },
+    {
+      "name": "Restore content-verified source timestamps",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-23T12:21:26Z",
+      "completed_at": "2026-10-23T12:21:29Z"
+    },
+    {
+      "name": "Install pinned Rust and native font dependencies",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 6,
+      "started_at": "2026-10-23T12:21:29Z",
+      "completed_at": "2026-10-23T12:28:51Z"
+    },
+    {
+      "name": "Verify source timestamp reuse and changed-input rebuilding",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 7,
+      "started_at": "2026-10-23T12:28:51Z",
+      "completed_at": "2026-10-23T12:28:51Z"
+    },
+    {
+      "name": "Validate public unhinted glyph geometry and pixels",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 8,
+      "started_at": "2026-10-23T12:28:51Z",
+      "completed_at": "2026-10-23T12:28:52Z"
+    },
+    {
+      "name": "Validate shared paragraph layout and native editing",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 9,
+      "started_at": "2026-10-23T12:28:52Z",
+      "completed_at": "2026-10-23T12:28:56Z"
+    },
+    {
+      "name": "Validate GPU fragment capture and clip pixels",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 10,
+      "started_at": "2026-10-23T12:28:56Z",
+      "completed_at": "2026-10-23T12:29:05Z"
+    },
+    {
+      "name": "Validate native editor and public renderer pixels",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 11,
+      "started_at": "2026-10-23T12:29:05Z",
+      "completed_at": "2026-10-23T12:30:28Z"
+    },
+    {
+      "name": "Snapshot source timestamps with the partial build",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 12,
+      "started_at": "2026-10-23T12:30:28Z",
+      "completed_at": "2026-10-23T12:30:29Z"
+    },
+    {
+      "name": "Run actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 13,
+      "started_at": "2026-10-23T12:30:29Z",
+      "completed_at": "2026-10-23T12:30:48Z"
+    },
+    {
+      "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 26,
+      "started_at": "2026-10-23T12:30:48Z",
+      "completed_at": "2026-10-23T12:30:48Z"
+    },
+    {
+      "name": "Complete job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 27,
+      "started_at": "2026-10-23T12:30:48Z",
+      "completed_at": "2026-10-23T12:30:48Z"
+    }
+  ],
+  "test_results": [
+    {
+      "suite": "Vello unhinted glyph geometry/pixels",
+      "result": "ok",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 516,
+      "seconds": 0.34
+    },
+    {
+      "suite": "Base paragraph layout",
+      "result": "ok",
+      "passed": 17,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 4549,
+      "seconds": 0.04
+    },
+    {
+      "suite": "Base text_line_bounds",
+      "result": "ok",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 4558,
+      "seconds": 0.02
+    },
+    {
+      "suite": "Controls paragraph editing",
+      "result": "ok",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 4462,
+      "seconds": 0.16
+    },
+    {
+      "suite": "Controls TextBox",
+      "result": "ok",
+      "passed": 174,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 4304,
+      "seconds": 2.57
+    },
+    {
+      "suite": "Controls text history",
+      "result": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 4473,
+      "seconds": 0.06
+    },
+    {
+      "suite": "Vello GPU fragment capture/replay",
+      "result": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 539,
+      "seconds": 9.09
+    },
+    {
+      "suite": "FerroDesign application",
+      "result": "ok",
+      "passed": 239,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "seconds": 43.6
+    }
+  ],
+  "required_gpu": {
+    "feature": "gpu",
+    "FERROUI_VELLO_REQUIRE_GPU": "1",
+    "no_adapter_or_no_compute_fails": true,
+    "tests_executed": 7
+  },
+  "current_diagnostics_test": "shell::layout::padding::tests::native_padding_diagnostics_publish_real_fields_and_export_controls",
+  "core_source_tree_equivalence": {
+    "integrated_1c": "3c91aeeed4ff3d22eff9eae1f63fd6aef1cd3f24",
+    "current_c549": "3c91aeeed4ff3d22eff9eae1f63fd6aef1cd3f24"
+  },
+  "core_scope_note": "The native feedback job does not rerun core tests. Its unchanged core tree is covered by the recorded533-test1c job.",
+  "decoded_log": {
+    "file": "native-feedback.log.gz",
+    "encoding": "Exact UTF-8 decoded GitHub response including BOM",
+    "raw_bytes": 737962,
+    "raw_sha256": "cd191068bbe3dbfa48528dfe5d4268d10f56bac4baea0db6f58b4a8128505784",
+    "gzip_bytes": 88568,
+    "gzip_sha256": "844f6fe8937a075cab129a695df0f383833066832f5b2699e3f1ad8ffc3315c6"
+  },
+  "limitations": [
+    "Native tests do not establish browser input, compositor or physical GPU behavior.",
+    "Base paragraph and text_line_bounds filters overlap; counts must not be summed as unique tests.",
+    "Browser build and exact-runtime replay were pending when this native evidence was written."
+  ]
+}

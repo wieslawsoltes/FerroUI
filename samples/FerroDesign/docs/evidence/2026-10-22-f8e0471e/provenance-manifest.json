@@ -1,0 +1,78 @@
+{
+  "updatedAtUtc": "2026-10-22T17:04:00Z",
+  "repository": "wieslawsoltes/FerroUI",
+  "harnessSourceCommit": "f8e0471eb4301a9b893e8185810550ebba5ddafc",
+  "buildSourceCommit": "3a0bf1f13c6ede9abe5360bc3691085a3bc981f0",
+  "documentationBaseCommit": "e0d3cee368f991fb8a0f4bd411b00e102bc4447b",
+  "selfExcluded": true,
+  "completeBrowserGate": "Exact-f2bb CI completed successfully with full=true, 141 Software2D / 138 WebGL2 checks and all28 scenario starts per mode. Committed production inputs are unchanged through e0d3cee. The later f8 matching harness has a separate focused both-mode pass; no exact-f8/current-head complete-suite pass is inferred. Earlier local failures and the zero-check launch block remain unchanged. Successful official artifact ZIP bytes were not retrieved; decoded-log proof and its derived ZIP are preserved separately.",
+  "originalReportsPreservedByteForByte": true,
+  "files": {
+    "README.md": {
+      "bytes": 11489,
+      "sha256": "0c832cb1728c80fcdceb7ae4d52f08ce5e07d66f11800d1f0491d0cbfd63f322"
+    },
+    "Software2D-initial.png": {
+      "bytes": 187960,
+      "sha256": "14ace8cd02acaec6fa68055c284956905ca52c999e268fec187018b657d52fe2"
+    },
+    "Software2D-native-matching-fill.png": {
+      "bytes": 81122,
+      "sha256": "cfac9314108aa48cd93e69f217de26d3e4b4b408bb829119183bdb99a2d4db22"
+    },
+    "WebGL2-initial.png": {
+      "bytes": 187503,
+      "sha256": "6c8f778a92c2ff61c9c35649fe66272f4685b046c9a7765a214b0d0796592463"
+    },
+    "WebGL2-native-matching-fill.png": {
+      "bytes": 81331,
+      "sha256": "2b719df923d45f657187b1172477274e23c9cacf5ae607106695676f330de4f8"
+    },
+    "input-equivalence.json": {
+      "bytes": 7232,
+      "sha256": "5f5f504240f54b2e5912cc82e04cdea1b8007b68f5f9d1d7b15c00fce99e1b06"
+    },
+    "matching-focused-report.zip": {
+      "bytes": 199324,
+      "sha256": "67d1b3021e8934efa6cacae230c8e902b34ed7c816c477a549642b05adb86838"
+    },
+    "matching-focused-summary.json": {
+      "bytes": 12442,
+      "sha256": "e15aef94a9df098a0ef90085a36d5874ee51ffd43e3e97cf894e2a9c8692814f"
+    },
+    "remaining-webgl2-launch-block.zip": {
+      "bytes": 20156,
+      "sha256": "8a535c9b59f74c6165e2cc973cb2060a10d703b950b2d584caf0b29f55271ec7"
+    },
+    "remaining-webgl2-launch-summary.json": {
+      "bytes": 2899,
+      "sha256": "d0db68a37462a9dc7423dd9c91ac8f28c2c353aa9d22c93734036b6f477453c4"
+    },
+    "validation-source.json": {
+      "bytes": 14578,
+      "sha256": "1bb33f3e6e9f5d6778c2f4f361711de1aad8d2ec3c269ec4dbe035e48bbdce41"
+    }
+  },
+  "subsequentCompleteCi": {
+    "sourceCommit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+    "runId": 39799180117,
+    "browserJobId": 119894677332,
+    "browserJobCompletedAtUtc": "2026-10-22T16:43:12Z",
+    "observedAtUtc": "2026-10-22T16:50:41Z",
+    "scope": {
+      "full": true,
+      "modes": [
+        "Software2D",
+        "WebGL2"
+      ],
+      "scenarios": "all"
+    },
+    "passedChecks": {
+      "Software2D": 141,
+      "WebGL2": 138
+    },
+    "scenarioStartsPerMode": 28,
+    "nativeCaptureRetryWarnings": 2,
+    "proof": "Connector-decoded job log, exact extracted printed JSON and canonical API metadata; official artifact ZIP bytes and detailed sidecars were not retrieved."
+  }
+}

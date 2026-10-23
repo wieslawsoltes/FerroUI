@@ -1,0 +1,28 @@
+{
+  "origin": "Derived from root read-only cgroup snapshots during failure cleanup, not a per-process memory attribution",
+  "memoryLimitBytes": 8589934592,
+  "samples": [
+    {
+      "observedAtUtc": "2026-10-22T15:16:41Z",
+      "memoryCurrentBytes": 8589881344,
+      "memoryEvents": {
+        "max": 8585985,
+        "oom": 16,
+        "oom_kill": 11
+      }
+    },
+    {
+      "observedAtUtc": "2026-10-22T15:17:47Z",
+      "memoryCurrentBytes": 8414126080,
+      "anonymousBytes": 5941313536,
+      "fileBytes": 2075901952,
+      "sharedMemoryBytes": 894218240,
+      "memoryEvents": {
+        "max": 9154512,
+        "oom": 18,
+        "oom_kill": 12
+      }
+    }
+  ],
+  "limits": "Counters are cumulative. The positive delta establishes new events during this interval, but the killed process and cause of the earlier predicate timeout are not identified."
+}

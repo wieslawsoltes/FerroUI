@@ -1,0 +1,26 @@
+{
+  "repo": "wieslawsoltes/FerroUI",
+  "sourceSha": "3a0bf1f13c6ede9abe5360bc3691085a3bc981f0",
+  "runId": 39771204240,
+  "jobId": 119817020969,
+  "jobConclusion": "success",
+  "retrievedAtUtc": "2026-10-22 14:47:11 UTC",
+  "origin": "Decoded completed native job log fetched from GitHub after workspace recovery; distinct from f36 benchmark evidence",
+  "coreTests": {
+    "passed": 394,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filteredOut": 0
+  },
+  "nativeAppTests": {
+    "passed": 155,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filteredOut": 0
+  },
+  "logFile": "native-job-119817020969-decoded.log",
+  "logBytes": 608837,
+  "logSha256": "bfa407caa8d38c797841718f521dfc2af602a432017548ae16e26fd0e88e78b8"
+}

@@ -1,0 +1,422 @@
+{
+  "created": "2026-10-22T15:27:25.386Z",
+  "completedUtc": "2026-10-22T15:39:17.236650+00:00",
+  "exitCode": 1,
+  "durationSeconds": 705.9240975379944,
+  "passed": false,
+  "scope": {
+    "full": true,
+    "modes": [
+      "Software2D",
+      "WebGL2"
+    ],
+    "scenarios": "all"
+  },
+  "browser": "156.0.8078.4",
+  "harnessSourceCommit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+  "buildSourceCommit": "3a0bf1f13c6ede9abe5360bc3691085a3bc981f0",
+  "runtimeArtifactId": 12427798904,
+  "wasm": {
+    "bytes": 51205801,
+    "sha256": "7880a628e7117ab88f896f69baa9c9ccedcdc33792302a01f653b4465e1499b9"
+  },
+  "predicateInstrumentation": false,
+  "results": [
+    {
+      "requestedRenderer": "Vello",
+      "requestedMode": "Software2D",
+      "actualSurface": {
+        "kind": "Software2D"
+      },
+      "status": "passed",
+      "checks": 141,
+      "scenariosEntered": 28,
+      "scenariosPassed": 28,
+      "scenarios": [
+        {
+          "name": "vector-network",
+          "status": "passed",
+          "checksBefore": 16,
+          "checks": 4,
+          "durationMs": 6012
+        },
+        {
+          "name": "native-authoring",
+          "status": "passed",
+          "checksBefore": 20,
+          "checks": 2,
+          "durationMs": 7234
+        },
+        {
+          "name": "typography",
+          "status": "passed",
+          "checksBefore": 22,
+          "checks": 4,
+          "durationMs": 6094
+        },
+        {
+          "name": "components",
+          "status": "passed",
+          "checksBefore": 26,
+          "checks": 5,
+          "durationMs": 11728
+        },
+        {
+          "name": "image-crop",
+          "status": "passed",
+          "checksBefore": 31,
+          "checks": 5,
+          "durationMs": 9445
+        },
+        {
+          "name": "compositing",
+          "status": "passed",
+          "checksBefore": 36,
+          "checks": 4,
+          "durationMs": 3090
+        },
+        {
+          "name": "svg-compositing",
+          "status": "passed",
+          "checksBefore": 40,
+          "checks": 4,
+          "durationMs": 4573
+        },
+        {
+          "name": "masks",
+          "status": "passed",
+          "checksBefore": 44,
+          "checks": 5,
+          "durationMs": 13334
+        },
+        {
+          "name": "effects",
+          "status": "passed",
+          "checksBefore": 49,
+          "checks": 5,
+          "durationMs": 12510
+        },
+        {
+          "name": "inspector-lifecycle",
+          "status": "passed",
+          "checksBefore": 54,
+          "checks": 4,
+          "durationMs": 5078
+        },
+        {
+          "name": "floating-panels",
+          "status": "passed",
+          "checksBefore": 58,
+          "checks": 3,
+          "durationMs": 2387
+        },
+        {
+          "name": "page-inspector",
+          "status": "passed",
+          "checksBefore": 61,
+          "checks": 1,
+          "durationMs": 1866
+        },
+        {
+          "name": "auto-layout",
+          "status": "passed",
+          "checksBefore": 62,
+          "checks": 4,
+          "durationMs": 8592
+        },
+        {
+          "name": "layout-drag",
+          "status": "passed",
+          "checksBefore": 66,
+          "checks": 3,
+          "durationMs": 10390
+        },
+        {
+          "name": "layout-transfer",
+          "status": "passed",
+          "checksBefore": 69,
+          "checks": 4,
+          "durationMs": 7609
+        },
+        {
+          "name": "selection",
+          "status": "passed",
+          "checksBefore": 73,
+          "checks": 9,
+          "durationMs": 15918
+        },
+        {
+          "name": "matching",
+          "status": "passed",
+          "checksBefore": 82,
+          "checks": 3,
+          "durationMs": 5144
+        },
+        {
+          "name": "geometry-authoring",
+          "status": "passed",
+          "checksBefore": 85,
+          "checks": 5,
+          "durationMs": 6334
+        },
+        {
+          "name": "flatten",
+          "status": "passed",
+          "checksBefore": 90,
+          "checks": 4,
+          "durationMs": 11472
+        },
+        {
+          "name": "local-styles",
+          "status": "passed",
+          "checksBefore": 94,
+          "checks": 8,
+          "durationMs": 26253
+        },
+        {
+          "name": "angular-paints",
+          "status": "passed",
+          "checksBefore": 102,
+          "checks": 5,
+          "durationMs": 6933
+        },
+        {
+          "name": "grid-styles",
+          "status": "passed",
+          "checksBefore": 107,
+          "checks": 7,
+          "durationMs": 27451
+        },
+        {
+          "name": "region-paints",
+          "status": "passed",
+          "checksBefore": 114,
+          "checks": 5,
+          "durationMs": 14548
+        },
+        {
+          "name": "network-bucket",
+          "status": "passed",
+          "checksBefore": 119,
+          "checks": 6,
+          "durationMs": 5261
+        },
+        {
+          "name": "compact-autosave",
+          "status": "passed",
+          "checksBefore": 125,
+          "checks": 1,
+          "durationMs": 1029
+        },
+        {
+          "name": "prototype-input",
+          "status": "passed",
+          "checksBefore": 126,
+          "checks": 5,
+          "durationMs": 2111
+        },
+        {
+          "name": "prototype-motion",
+          "status": "passed",
+          "checksBefore": 131,
+          "checks": 3,
+          "durationMs": 4643
+        },
+        {
+          "name": "bounded-history",
+          "status": "passed",
+          "checksBefore": 134,
+          "checks": 1,
+          "durationMs": 3316
+        }
+      ],
+      "nativeCaptures": 46,
+      "captureAttempts": 46,
+      "captureRetries": 0,
+      "allCaptureFinalAttemptsPassed": true,
+      "retriedCaptures": [],
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "error": null,
+      "largeDocument": {
+        "nodeCount": 10000,
+        "importBytes": 12932068,
+        "importAndFirstFrameMs": 1217,
+        "layerRows": 10000,
+        "realizedRows": 25,
+        "visibleNodes": 10000,
+        "realizedAfterScroll": 25,
+        "nudgeMs": 181,
+        "preparation": {
+          "nudge": {
+            "full": 0,
+            "incremental": 1,
+            "nodes": 1,
+            "visuals": 0
+          },
+          "undo": {
+            "full": 0,
+            "incremental": 1,
+            "nodes": 1,
+            "visuals": 0
+          },
+          "redo": {
+            "full": 0,
+            "incremental": 1,
+            "nodes": 1,
+            "visuals": 0
+          }
+        },
+        "layerProjection": {
+          "nudge": {
+            "builds": 0,
+            "reuses": 1
+          },
+          "undo": {
+            "builds": 0,
+            "reuses": 1
+          },
+          "redo": {
+            "builds": 0,
+            "reuses": 1
+          }
+        },
+        "spatialQuery": {
+          "roots": 10000,
+          "candidates": 1,
+          "boundsTests": 27,
+          "reused": false,
+          "visibleNodes": 1,
+          "zoom": 17.083333333333332
+        },
+        "commitMs": 4,
+        "autosaveBytes": 13192068,
+        "autosaveSerializationMs": 42.6,
+        "reloadMs": 2135,
+        "exportBytes": 20712219,
+        "sha256": "1b0704b9a7d482cafbea57cbcaa510ce3e4511173c010880e5a22051b9461397"
+      }
+    },
+    {
+      "requestedRenderer": "Vello",
+      "requestedMode": "WebGL2",
+      "actualSurface": {
+        "kind": "WebGL2",
+        "device": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+      },
+      "status": "failed",
+      "checks": 27,
+      "scenariosEntered": 4,
+      "scenariosPassed": 3,
+      "scenarios": [
+        {
+          "name": "vector-network",
+          "status": "passed",
+          "checksBefore": 16,
+          "checks": 4,
+          "durationMs": 64776
+        },
+        {
+          "name": "native-authoring",
+          "status": "passed",
+          "checksBefore": 20,
+          "checks": 2,
+          "durationMs": 79385
+        },
+        {
+          "name": "typography",
+          "status": "passed",
+          "checksBefore": 22,
+          "checks": 4,
+          "durationMs": 52964
+        },
+        {
+          "name": "components",
+          "status": "failed",
+          "checksBefore": 26,
+          "durationMs": 114558
+        }
+      ],
+      "nativeCaptures": 7,
+      "captureAttempts": 7,
+      "captureRetries": 0,
+      "allCaptureFinalAttemptsPassed": true,
+      "retriedCaptures": [],
+      "pageErrors": [],
+      "consoleErrors": [],
+      "error": "Error: ComponentValue2 is not ready for native pointer input: {\"bounds\":{\"arrangeValid\":true,\"composing\":false,\"enabled\":true,\"focusWithin\":false,\"focused\":false,\"height\":28,\"measureValid\":true,\"text\":\"Manual layer override\",\"visible\":true,\"width\":572,\"x\":988,\"y\":502},\"scrollContainer\":{\"arrangeValid\":true,\"enabled\":true,\"focusWithin\":false,\"focused\":false,\"height\":407,\"measureValid\":true,\"visible\":true,\"width\":572,\"x\":988,\"y\":123},\"modal\":{\"arrangeValid\":true,\"enabled\":true,\"focusWithin\":false,\"focused\":false,\"height\":1000,\"measureValid\":true,\"visible\":true,\"width\":1600,\"x\":0,\"y\":0},\"selection\":[10],\"renderedFrames\":6,\"sceneFrames\":18}\n    at clickNative (file:///tmp/ferrodesign-full-f2bb1d61-9b313a0caa46/harness/tests/browser.mjs:260:15)\n    at async componentAuthoringRegressions (file:///tmp/ferrodesign-full-f2bb1d61-9b313a0caa46/harness/tests/components-browser.mjs:93:5)\n    at async scenario (file:///tmp/ferrodesign-full-f2bb1d61-9b313a0caa46/harness/tests/browser.mjs:995:21)\n    at async file:///tmp/ferrodesign-full-f2bb1d61-9b313a0caa46/harness/tests/browser.mjs:1011:13",
+      "largeDocument": null
+    }
+  ],
+  "integrity": {
+    "all31SourceFilesUnchanged": true,
+    "all16RuntimeFilesUnchanged": true
+  },
+  "resources": {
+    "sampleCount": 143,
+    "sampleIntervalSeconds": 5,
+    "baselineMemory": 7557861376,
+    "finalMemory": 8241369088,
+    "peakMemory": 8589934592,
+    "memoryLimit": 8589934592,
+    "baselineEvents": {
+      "low": 0,
+      "high": 0,
+      "max": 9183409,
+      "oom": 18,
+      "oom_kill": 12,
+      "oom_group_kill": 0
+    },
+    "finalEvents": {
+      "low": 0,
+      "high": 0,
+      "max": 10814991,
+      "oom": 18,
+      "oom_kill": 12,
+      "oom_group_kill": 0
+    },
+    "eventsDelta": {
+      "low": 0,
+      "high": 0,
+      "max": 1631582,
+      "oom": 0,
+      "oom_kill": 0,
+      "oom_group_kill": 0
+    },
+    "peakOwnedSummedRssBytes": 2373701632,
+    "finalOwnedProcesses": [],
+    "caveat": "Cgroup totals can include other work. Summed process RSS includes shared pages and is not a unique allocation measurement."
+  },
+  "rawFiles": {
+    "report/report.json": {
+      "bytes": 661396,
+      "sha256": "f076d8da502bff4c83f639579ddfec15623e07cab3365cc2e7f9b1b2d09c3f1b"
+    },
+    "report/validation-source.json": {
+      "bytes": 13526,
+      "sha256": "3ca167418f939880eb4193d7b7810fd6d7445ec762f2b2bc91701929c57133e8"
+    },
+    "report/input-equivalence.json": {
+      "bytes": 11630,
+      "sha256": "84fe802e24886c625bb74f485f67a16ab7b1a98fe2d108d12ee278ccc32d3044"
+    },
+    "report/post-run-integrity.json": {
+      "bytes": 8768,
+      "sha256": "153eedb15231331297756995455ae5c776978a487eeb4cd91811ef0121ba4d9d"
+    },
+    "browser.log": {
+      "bytes": 28312,
+      "sha256": "c2a72a2d48030473e8d21ab7265bac6a9fccad89cc391851fe0589bedad9656f"
+    },
+    "resources.jsonl": {
+      "bytes": 502512,
+      "sha256": "fa210f5fad62d71105459033746d031a49ef491c05466dcf337255e76ca225ab"
+    },
+    "terminal.json": {
+      "bytes": 5080,
+      "sha256": "38841cf1e46c9ea386bae907c8b23cc01db34931de1a0ac931af86ccae834830"
+    }
+  }
+}

@@ -1,0 +1,1779 @@
+{
+  "schema": 1,
+  "source_commit": "5cb7e8847746a2bfae45bf46cafed40889f1affb",
+  "repository": "wieslawsoltes/FerroUI",
+  "run_id": 39862047469,
+  "browser_job_id": 120117259515,
+  "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39862047469/job/120117259515",
+  "job_conclusion": "failure",
+  "raw_log": {
+    "file": "browser-job.log",
+    "bytes": 161929,
+    "sha256": "8d8a6d0fbdac9f14427495fa59d736e203afecd7c1e40dff3ec80277e2b773b4",
+    "lines": 1457,
+    "utf8_bom": true
+  },
+  "build": {
+    "successful": true,
+    "finished_log_line": 928,
+    "renderer_log_line": 933,
+    "reported_renderer": "FerroUI Vello (WebGL2 hybrid, CPU fallback)",
+    "runtime_artifact_downloaded": false
+  },
+  "persistence": {
+    "passed": true,
+    "checks": 5,
+    "printed_lines": [
+      1191,
+      1218
+    ],
+    "extracted_file": "indexeddb-summary.json",
+    "largeDocument": {
+      "flushed": true,
+      "state": {
+        "phase": "saved",
+        "backend": "indexedDB",
+        "dirty": false,
+        "draftDirty": false,
+        "serializationPending": false,
+        "revision": 5,
+        "sequence": 5,
+        "committedSequence": 5,
+        "characters": 12000042,
+        "error": ""
+      },
+      "characters": 12000042,
+      "saveMs": 40.800000000046566
+    }
+  },
+  "editor": {
+    "passed": false,
+    "requested_scope": {
+      "full": true,
+      "modes": [
+        "Software2D",
+        "WebGL2"
+      ],
+      "scenarios": "all"
+    },
+    "browser": "156.0.8078.4",
+    "printed_lines": [
+      1249,
+      1329
+    ],
+    "extracted_file": "printed-summary.json",
+    "completed_full_suite": false,
+    "modes": [
+      {
+        "requestedMode": "Software2D",
+        "status": "failed",
+        "surface": {
+          "kind": "Software2D"
+        },
+        "completedChecks": 24,
+        "namedScenarioStarts": [
+          {
+            "scenario": "vector-network",
+            "log_line": 1233
+          },
+          {
+            "scenario": "native-authoring",
+            "log_line": 1234
+          },
+          {
+            "scenario": "corners",
+            "log_line": 1235
+          }
+        ],
+        "failedScenario": "corners",
+        "failure": "Independent SVG decoder and FerroUI PNG share the smooth silhouette: 288",
+        "failure_location": "tests/corners-browser.mjs:135:12",
+        "failure_log_lines": [
+          1237,
+          1240
+        ]
+      },
+      {
+        "requestedMode": "WebGL2",
+        "status": "failed",
+        "surface": {
+          "kind": "WebGL2",
+          "device": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+        },
+        "completedChecks": 24,
+        "namedScenarioStarts": [
+          {
+            "scenario": "vector-network",
+            "log_line": 1241
+          },
+          {
+            "scenario": "native-authoring",
+            "log_line": 1242
+          },
+          {
+            "scenario": "corners",
+            "log_line": 1243
+          }
+        ],
+        "failedScenario": "corners",
+        "failure": "Independent SVG decoder and FerroUI PNG share the smooth silhouette: 288",
+        "failure_location": "tests/corners-browser.mjs:135:12",
+        "failure_log_lines": [
+          1245,
+          1248
+        ]
+      }
+    ],
+    "scope_note": "Full is requested unfiltered scope, not completion. Both modes stop at the corners pixel assertion after 24 completed checks; later scenarios did not run. The printed summary does not expose complete capture/error sidecars."
+  },
+  "corner_alpha": {
+    "gate": {
+      "absolute_alpha_delta_exceeds": 12,
+      "allowed_pixels": 48,
+      "observed_pixels": 288
+    },
+    "per_mode": [
+      {
+        "mode": "Software2D",
+        "log_line": 1236,
+        "width": 200,
+        "height": 140,
+        "pixels": 28000,
+        "differingOver12": 288,
+        "edgeCoverageDifferences": 288,
+        "oppositeOpaqueTransparent": 0,
+        "threshold128Differences": 44,
+        "maxAlphaDifference": 78,
+        "nativePartialPixels": 484,
+        "svgPartialPixels": 236,
+        "nativeAlphaArea": 26555.215686,
+        "svgAlphaArea": 26548.501961,
+        "absoluteAlphaAreaDifference": 35.576471,
+        "differenceBounds": {
+          "left": 0,
+          "top": 0,
+          "right": 199,
+          "bottom": 139
+        },
+        "quadrantDifferences": [
+          72,
+          72,
+          72,
+          72
+        ],
+        "nativeMirrorMax": {
+          "horizontal": 0,
+          "vertical": 0
+        },
+        "svgMirrorMax": {
+          "horizontal": 64,
+          "vertical": 64
+        },
+        "samples": [
+          {
+            "x": 34,
+            "y": 0,
+            "native": 30,
+            "svg": 0
+          },
+          {
+            "x": 36,
+            "y": 0,
+            "native": 80,
+            "svg": 64
+          },
+          {
+            "x": 37,
+            "y": 0,
+            "native": 102,
+            "svg": 64
+          },
+          {
+            "x": 145,
+            "y": 0,
+            "native": 241,
+            "svg": 255
+          },
+          {
+            "x": 146,
+            "y": 0,
+            "native": 240,
+            "svg": 255
+          },
+          {
+            "x": 147,
+            "y": 0,
+            "native": 238,
+            "svg": 255
+          },
+          {
+            "x": 0,
+            "y": 85,
+            "native": 241,
+            "svg": 255
+          },
+          {
+            "x": 199,
+            "y": 85,
+            "native": 241,
+            "svg": 255
+          },
+          {
+            "x": 0,
+            "y": 86,
+            "native": 240,
+            "svg": 255
+          },
+          {
+            "x": 199,
+            "y": 86,
+            "native": 240,
+            "svg": 255
+          },
+          {
+            "x": 0,
+            "y": 87,
+            "native": 238,
+            "svg": 255
+          },
+          {
+            "x": 199,
+            "y": 87,
+            "native": 238,
+            "svg": 255
+          }
+        ]
+      },
+      {
+        "mode": "WebGL2",
+        "log_line": 1244,
+        "width": 200,
+        "height": 140,
+        "pixels": 28000,
+        "differingOver12": 288,
+        "edgeCoverageDifferences": 288,
+        "oppositeOpaqueTransparent": 0,
+        "threshold128Differences": 44,
+        "maxAlphaDifference": 78,
+        "nativePartialPixels": 484,
+        "svgPartialPixels": 236,
+        "nativeAlphaArea": 26555.215686,
+        "svgAlphaArea": 26548.501961,
+        "absoluteAlphaAreaDifference": 35.576471,
+        "differenceBounds": {
+          "left": 0,
+          "top": 0,
+          "right": 199,
+          "bottom": 139
+        },
+        "quadrantDifferences": [
+          72,
+          72,
+          72,
+          72
+        ],
+        "nativeMirrorMax": {
+          "horizontal": 0,
+          "vertical": 0
+        },
+        "svgMirrorMax": {
+          "horizontal": 64,
+          "vertical": 64
+        },
+        "samples": [
+          {
+            "x": 34,
+            "y": 0,
+            "native": 30,
+            "svg": 0
+          },
+          {
+            "x": 36,
+            "y": 0,
+            "native": 80,
+            "svg": 64
+          },
+          {
+            "x": 37,
+            "y": 0,
+            "native": 102,
+            "svg": 64
+          },
+          {
+            "x": 145,
+            "y": 0,
+            "native": 241,
+            "svg": 255
+          },
+          {
+            "x": 146,
+            "y": 0,
+            "native": 240,
+            "svg": 255
+          },
+          {
+            "x": 147,
+            "y": 0,
+            "native": 238,
+            "svg": 255
+          },
+          {
+            "x": 0,
+            "y": 85,
+            "native": 241,
+            "svg": 255
+          },
+          {
+            "x": 199,
+            "y": 85,
+            "native": 241,
+            "svg": 255
+          },
+          {
+            "x": 0,
+            "y": 86,
+            "native": 240,
+            "svg": 255
+          },
+          {
+            "x": 199,
+            "y": 86,
+            "native": 240,
+            "svg": 255
+          },
+          {
+            "x": 0,
+            "y": 87,
+            "native": 238,
+            "svg": 255
+          },
+          {
+            "x": 199,
+            "y": 87,
+            "native": 238,
+            "svg": 255
+          }
+        ]
+      }
+    ],
+    "interpretation": "Every >12-alpha discrepancy involves partial coverage; no opaque-versus-transparent swaps were reported. This localizes the observed disagreement to edge coverage but does not identify a faulty decoder or establish mathematical equivalence. Native PNG and SVG artifacts were not retrieved or inspected.",
+    "absoluteAlphaAreaDifference_definition": "sum(abs(nativeAlpha - svgAlpha) / 255), not abs(sum(nativeAlpha/255) - sum(svgAlpha/255))"
+  },
+  "text_pan": {
+    "command_conclusion": "failure",
+    "measurement_cohorts_completed": true,
+    "normal_measurements": [
+      {
+        "benchmark": "native-text-pan-v2",
+        "label": "5cb7e8847746a2bfae45bf46cafed40889f1affb",
+        "mode": "Software2D",
+        "browserTransport": "owned-playwright-server-websocket",
+        "traceDiagnosticRequested": true,
+        "metricBridge": {
+          "kind": "compact-v1"
+        },
+        "dispatch": {
+          "count": 36,
+          "medianMs": 12.013515999999981,
+          "p95Ms": 18.337282999999843,
+          "minMs": 7.417515000000094,
+          "maxMs": 22.051265000000058
+        },
+        "frameObservation": {
+          "count": 36,
+          "medianMs": 2.78586949999999,
+          "p95Ms": 10.517480999999862,
+          "minMs": 2.4439910000000964,
+          "maxMs": 17.04303400000026
+        },
+        "nativePresentation": {
+          "count": 36,
+          "medianMs": 75.0518649999999,
+          "p95Ms": 108.98403099999996,
+          "minMs": 73.20498000000043,
+          "maxMs": 113.02438900000016
+        },
+        "longTaskSupported": true,
+        "recordedLongTasks": 8,
+        "droppedLongTasks": 0,
+        "log_line": 1346,
+        "slowestSamples": [
+          {
+            "index": 31,
+            "durationMs": 35.380317000000105,
+            "dispatchMs": 18.337282999999843,
+            "frameObservationMs": 17.04303400000026,
+            "presentationMs": 108.98403099999996,
+            "settledObservationMs": 134.72565599999962,
+            "preparationDelta": {
+              "totalFullPrepares": 0,
+              "totalIncrementalPrepares": 0,
+              "totalPreparedNodes": 0,
+              "totalRebuiltVisuals": 0,
+              "layerProjectionBuilds": 0,
+              "layerProjectionReuses": 0
+            },
+            "frameCounters": {
+              "visibleNodes": 150,
+              "culledNodes": 0,
+              "cachedNodes": 150,
+              "preparedNodes": 0,
+              "rebuiltVisuals": 0,
+              "fullPrepares": 0,
+              "incrementalPrepares": 0,
+              "rootBoundsTests": 1,
+              "rootCandidates": 150,
+              "rootQueryReused": false
+            },
+            "browserObservation": {
+              "startedAtMs": 5613.100000000093,
+              "initialReadMs": 0,
+              "pollCount": 1,
+              "pollReadMs": 0,
+              "maxPollReadMs": 0,
+              "maxPayloadCharacters": 575,
+              "frameObservedAtMs": 5638.300000000279,
+              "endedAtMs": 5751.700000000186
+            },
+            "pageClock": {
+              "eventToCaptureMs": 14.8,
+              "captureToBubbleMs": 0.3
+            },
+            "bothEventsTrusted": true
+          },
+          {
+            "index": 21,
+            "durationMs": 32.56874599999992,
+            "dispatchMs": 22.051265000000058,
+            "frameObservationMs": 10.517480999999862,
+            "presentationMs": 93.86353099999997,
+            "settledObservationMs": 120.63287800000035,
+            "preparationDelta": {
+              "totalFullPrepares": 0,
+              "totalIncrementalPrepares": 0,
+              "totalPreparedNodes": 0,
+              "totalRebuiltVisuals": 0,
+              "layerProjectionBuilds": 0,
+              "layerProjectionReuses": 0
+            },
+            "frameCounters": {
+              "visibleNodes": 150,
+              "culledNodes": 0,
+              "cachedNodes": 150,
+              "preparedNodes": 0,
+              "rebuiltVisuals": 0,
+              "fullPrepares": 0,
+              "incrementalPrepares": 0,
+              "rootBoundsTests": 1,
+              "rootCandidates": 150,
+              "rootQueryReused": false
+            },
+            "browserObservation": {
+              "startedAtMs": 4511.200000000186,
+              "initialReadMs": 0.10000000009313226,
+              "pollCount": 1,
+              "pollReadMs": 0,
+              "maxPollReadMs": 0,
+              "maxPayloadCharacters": 575,
+              "frameObservedAtMs": 4539.100000000093,
+              "endedAtMs": 4635.5
+            },
+            "pageClock": {
+              "eventToCaptureMs": 15.9,
+              "captureToBubbleMs": 0.3
+            },
+            "bothEventsTrusted": true
+          },
+          {
+            "index": 40,
+            "durationMs": 25.646874000000025,
+            "dispatchMs": 17.41359300000022,
+            "frameObservationMs": 8.233280999999806,
+            "presentationMs": 113.02438900000016,
+            "settledObservationMs": 132.85282900000038,
+            "preparationDelta": {
+              "totalFullPrepares": 0,
+              "totalIncrementalPrepares": 0,
+              "totalPreparedNodes": 0,
+              "totalRebuiltVisuals": 0,
+              "layerProjectionBuilds": 0,
+              "layerProjectionReuses": 0
+            },
+            "frameCounters": {
+              "visibleNodes": 150,
+              "culledNodes": 0,
+              "cachedNodes": 150,
+              "preparedNodes": 0,
+              "rebuiltVisuals": 0,
+              "fullPrepares": 0,
+              "incrementalPrepares": 0,
+              "rootBoundsTests": 1,
+              "rootCandidates": 150,
+              "rootQueryReused": false
+            },
+            "browserObservation": {
+              "startedAtMs": 6598.9000000003725,
+              "initialReadMs": 0.10000000009313226,
+              "pollCount": 1,
+              "pollReadMs": 0,
+              "maxPollReadMs": 0,
+              "maxPayloadCharacters": 575,
+              "frameObservedAtMs": 6622.100000000093,
+              "endedAtMs": 6736.5
+            },
+            "pageClock": {
+              "eventToCaptureMs": 14.5,
+              "captureToBubbleMs": 0.3
+            },
+            "bothEventsTrusted": true
+          }
+        ],
+        "dispatchToObservedFrameRounded": {
+          "count": 36,
+          "medianMs": 14.79,
+          "p95Ms": 32.57,
+          "log_line": 1344,
+          "precision": "rounded stdout values, not recovered full report statistics"
+        }
+      },
+      {
+        "benchmark": "native-text-pan-v2",
+        "label": "5cb7e8847746a2bfae45bf46cafed40889f1affb",
+        "mode": "WebGL2",
+        "browserTransport": "owned-playwright-server-websocket",
+        "traceDiagnosticRequested": true,
+        "metricBridge": {
+          "kind": "compact-v1"
+        },
+        "dispatch": {
+          "count": 36,
+          "medianMs": 12.182660000000396,
+          "p95Ms": 1289.9501189999937,
+          "minMs": 2.58191099999749,
+          "maxMs": 1316.5470999999998
+        },
+        "frameObservation": {
+          "count": 36,
+          "medianMs": 5.461432499998409,
+          "p95Ms": 87.85344199999963,
+          "minMs": 3.3763470000012603,
+          "maxMs": 123.13278299999729
+        },
+        "nativePresentation": {
+          "count": 36,
+          "medianMs": 134.0455135000011,
+          "p95Ms": 1401.3936070000018,
+          "minMs": 99.3602830000018,
+          "maxMs": 1416.956879999998
+        },
+        "longTaskSupported": true,
+        "recordedLongTasks": 48,
+        "droppedLongTasks": 0,
+        "log_line": 1350,
+        "slowestSamples": [
+          {
+            "index": 29,
+            "durationMs": 1395.6424299999999,
+            "dispatchMs": 1272.5096470000026,
+            "frameObservationMs": 123.13278299999729,
+            "presentationMs": 1401.3936070000018,
+            "settledObservationMs": 2720.3828490000014,
+            "preparationDelta": {
+              "totalFullPrepares": 0,
+              "totalIncrementalPrepares": 0,
+              "totalPreparedNodes": 0,
+              "totalRebuiltVisuals": 0,
+              "layerProjectionBuilds": 0,
+              "layerProjectionReuses": 0
+            },
+            "frameCounters": {
+              "visibleNodes": 150,
+              "culledNodes": 0,
+              "cachedNodes": 150,
+              "preparedNodes": 0,
+              "rebuiltVisuals": 0,
+              "fullPrepares": 0,
+              "incrementalPrepares": 0,
+              "rootBoundsTests": 1,
+              "rootCandidates": 150,
+              "rootQueryReused": false
+            },
+            "browserObservation": {
+              "startedAtMs": 16154,
+              "initialReadMs": 0.10000000009313226,
+              "pollCount": 1,
+              "pollReadMs": 0,
+              "maxPollReadMs": 0,
+              "maxPayloadCharacters": 575,
+              "frameObservedAtMs": 17546.100000000093,
+              "endedAtMs": 18879.200000000186
+            },
+            "pageClock": {
+              "eventToCaptureMs": 1268.4,
+              "captureToBubbleMs": 0.3
+            },
+            "bothEventsTrusted": true
+          },
+          {
+            "index": 42,
+            "durationMs": 1377.483619999999,
+            "dispatchMs": 1289.9501189999937,
+            "frameObservationMs": 87.53350100000534,
+            "presentationMs": 1381.8130209999945,
+            "settledObservationMs": 2727.3209569999963,
+            "preparationDelta": {
+              "totalFullPrepares": 0,
+              "totalIncrementalPrepares": 0,
+              "totalPreparedNodes": 0,
+              "totalRebuiltVisuals": 0,
+              "layerProjectionBuilds": 0,
+              "layerProjectionReuses": 0
+            },
+            "frameCounters": {
+              "visibleNodes": 150,
+              "culledNodes": 0,
+              "cachedNodes": 150,
+              "preparedNodes": 0,
+              "rebuiltVisuals": 0,
+              "fullPrepares": 0,
+              "incrementalPrepares": 0,
+              "rootBoundsTests": 1,
+              "rootCandidates": 150,
+              "rootQueryReused": false
+            },
+            "browserObservation": {
+              "startedAtMs": 34954.60000000009,
+              "initialReadMs": 0.10000000009313226,
+              "pollCount": 1,
+              "pollReadMs": 0.10000000009313226,
+              "maxPollReadMs": 0.10000000009313226,
+              "maxPayloadCharacters": 575,
+              "frameObservedAtMs": 36330.39999999991,
+              "endedAtMs": 37691.10000000009
+            },
+            "pageClock": {
+              "eventToCaptureMs": 1287.9,
+              "captureToBubbleMs": 0.3
+            },
+            "bothEventsTrusted": true
+          },
+          {
+            "index": 31,
+            "durationMs": 1322.8267639999976,
+            "dispatchMs": 1316.5470999999998,
+            "frameObservationMs": 6.279663999997865,
+            "presentationMs": 1416.956879999998,
+            "settledObservationMs": 2778.688457,
+            "preparationDelta": {
+              "totalFullPrepares": 0,
+              "totalIncrementalPrepares": 0,
+              "totalPreparedNodes": 0,
+              "totalRebuiltVisuals": 0,
+              "layerProjectionBuilds": 0,
+              "layerProjectionReuses": 0
+            },
+            "frameCounters": {
+              "visibleNodes": 150,
+              "culledNodes": 0,
+              "cachedNodes": 150,
+              "preparedNodes": 0,
+              "rebuiltVisuals": 0,
+              "fullPrepares": 0,
+              "incrementalPrepares": 0,
+              "rootBoundsTests": 1,
+              "rootCandidates": 150,
+              "rootQueryReused": false
+            },
+            "browserObservation": {
+              "startedAtMs": 19018.799999999814,
+              "initialReadMs": 0,
+              "pollCount": 1,
+              "pollReadMs": 0.10000000009313226,
+              "maxPollReadMs": 0.10000000009313226,
+              "maxPayloadCharacters": 575,
+              "frameObservedAtMs": 20340.899999999907,
+              "endedAtMs": 21804
+            },
+            "pageClock": {
+              "eventToCaptureMs": 1313.3,
+              "captureToBubbleMs": 0.3
+            },
+            "bothEventsTrusted": true
+          }
+        ],
+        "dispatchToObservedFrameRounded": {
+          "count": 36,
+          "medianMs": 16.89,
+          "p95Ms": 1377.48,
+          "log_line": 1348,
+          "precision": "rounded stdout values, not recovered full report statistics"
+        }
+      }
+    ],
+    "trace_diagnostics": [
+      {
+        "diagnostic": "native-text-pan-trace-v1",
+        "mode": "Software2D",
+        "build": "current",
+        "status": "completed",
+        "normalSamplesIncluded": false,
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "droppedErrors": 0,
+        "completedSamples": 6,
+        "trace": {
+          "file": "current-Software2D-pan-trace.json",
+          "bytes": 1863580,
+          "dataLossOccurred": false,
+          "streamTruncated": false
+        },
+        "analysisStatus": "complete",
+        "clock": {
+          "traceUnit": "monotonic microseconds",
+          "pageUnit": "performance.now/Event.timeStamp milliseconds",
+          "hostClockUsed": false,
+          "method": "Intersect trace-marker offsets bracketed by page performance.now before/after performance.mark.",
+          "anchorCount": 42,
+          "aligned": true,
+          "offsetUs": 2504468302,
+          "uncertaintyMs": 0.181,
+          "quantizationAllowanceMs": 0.25
+        },
+        "evidence": {
+          "inputEvents": 7965,
+          "analyzedEvents": 7965,
+          "eventLimitExceeded": false,
+          "unmatchedEnds": 0,
+          "unmatchedBegins": 16,
+          "invalidDurations": 0,
+          "asyncOrFlowRecords": 1849,
+          "dataLossOccurred": false,
+          "streamTruncated": false,
+          "peakBufferFraction": 0.006155252456665039,
+          "bufferMayBeFull": false,
+          "missingMarkers": 0,
+          "duplicateMarkers": 0,
+          "wrongThreadMarkers": 0,
+          "droppedInputEvents": 0
+        },
+        "error": null,
+        "cleanupErrors": [],
+        "log_line": 1347,
+        "samples": [
+          {
+            "index": 0,
+            "pageClock": {
+              "eventToCaptureMs": 16.7,
+              "captureToBubbleMs": 0.3
+            },
+            "phases": {
+              "eventTimestampToCapture": {
+                "durationMs": 16.718,
+                "observedWallMs": {
+                  "mainThread": 0.779,
+                  "mainThreadTasks": 0.779,
+                  "input": 0.419,
+                  "compositor": 1.045,
+                  "gpu": 0.159,
+                  "animationFrame": 0.09
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 0.773
+                  }
+                ]
+              },
+              "captureToBubble": {
+                "durationMs": 0.306,
+                "observedWallMs": {
+                  "mainThread": 0.306,
+                  "mainThreadTasks": 0.306,
+                  "input": 0.306,
+                  "compositor": 0.306,
+                  "gpu": 0,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "EventDispatch",
+                    "observedWallMs": 0.306
+                  }
+                ]
+              },
+              "bubbleToFrame": {
+                "durationMs": 2.574,
+                "observedWallMs": {
+                  "mainThread": 1.419,
+                  "mainThreadTasks": 1.419,
+                  "input": 0.117,
+                  "compositor": 0.518,
+                  "gpu": 0.059,
+                  "animationFrame": 0.064
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 1.412
+                  }
+                ]
+              },
+              "presentationToSettled": {
+                "durationMs": 38.049,
+                "observedWallMs": {
+                  "mainThread": 3.134,
+                  "mainThreadTasks": 3.134,
+                  "input": 2.228,
+                  "compositor": 7.111,
+                  "gpu": 4.86,
+                  "animationFrame": 0.691
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 3.102
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "index": 1,
+            "pageClock": {
+              "eventToCaptureMs": 1.5,
+              "captureToBubbleMs": 0.3
+            },
+            "phases": {
+              "eventTimestampToCapture": {
+                "durationMs": 1.508,
+                "observedWallMs": {
+                  "mainThread": 0.156,
+                  "mainThreadTasks": 0.156,
+                  "input": 0.246,
+                  "compositor": 0.514,
+                  "gpu": 0.054,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 0.152
+                  }
+                ]
+              },
+              "captureToBubble": {
+                "durationMs": 0.318,
+                "observedWallMs": {
+                  "mainThread": 0.318,
+                  "mainThreadTasks": 0.318,
+                  "input": 0.318,
+                  "compositor": 0.318,
+                  "gpu": 0,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "EventDispatch",
+                    "observedWallMs": 0.318
+                  }
+                ]
+              },
+              "bubbleToFrame": {
+                "durationMs": 4.134,
+                "observedWallMs": {
+                  "mainThread": 1.544,
+                  "mainThreadTasks": 1.544,
+                  "input": 0.101,
+                  "compositor": 0.632,
+                  "gpu": 0.054,
+                  "animationFrame": 0.065
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 1.536
+                  }
+                ]
+              },
+              "presentationToSettled": {
+                "durationMs": 37.097,
+                "observedWallMs": {
+                  "mainThread": 2.362,
+                  "mainThreadTasks": 2.362,
+                  "input": 0.348,
+                  "compositor": 3.451,
+                  "gpu": 2.315,
+                  "animationFrame": 0.467
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 2.33
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "index": 2,
+            "pageClock": {
+              "eventToCaptureMs": 13.1,
+              "captureToBubbleMs": 0.5
+            },
+            "phases": {
+              "eventTimestampToCapture": {
+                "durationMs": 13.198,
+                "observedWallMs": {
+                  "mainThread": 0.199,
+                  "mainThreadTasks": 0.199,
+                  "input": 0.25,
+                  "compositor": 0.509,
+                  "gpu": 0.068,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 0.196
+                  }
+                ]
+              },
+              "captureToBubble": {
+                "durationMs": 0.352,
+                "observedWallMs": {
+                  "mainThread": 0.352,
+                  "mainThreadTasks": 0.352,
+                  "input": 0.352,
+                  "compositor": 0.352,
+                  "gpu": 0,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "EventDispatch",
+                    "observedWallMs": 0.352
+                  }
+                ]
+              },
+              "bubbleToFrame": {
+                "durationMs": 4.791,
+                "observedWallMs": {
+                  "mainThread": 1.516,
+                  "mainThreadTasks": 1.516,
+                  "input": 0.125,
+                  "compositor": 0.577,
+                  "gpu": 0.052,
+                  "animationFrame": 0.072
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 1.509
+                  }
+                ]
+              },
+              "presentationToSettled": {
+                "durationMs": 36.111,
+                "observedWallMs": {
+                  "mainThread": 2.038,
+                  "mainThreadTasks": 2.038,
+                  "input": 0.367,
+                  "compositor": 2.685,
+                  "gpu": 2.259,
+                  "animationFrame": 0.439
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 2.011
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "index": 3,
+            "pageClock": {
+              "eventToCaptureMs": 7.4,
+              "captureToBubbleMs": 0.2
+            },
+            "phases": {
+              "eventTimestampToCapture": {
+                "durationMs": 7.333,
+                "observedWallMs": {
+                  "mainThread": 0.166,
+                  "mainThreadTasks": 0.166,
+                  "input": 0.194,
+                  "compositor": 0.41,
+                  "gpu": 0.047,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 0.161
+                  }
+                ]
+              },
+              "captureToBubble": {
+                "durationMs": 0.299,
+                "observedWallMs": {
+                  "mainThread": 0.299,
+                  "mainThreadTasks": 0.299,
+                  "input": 0.299,
+                  "compositor": 0.299,
+                  "gpu": 0,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "EventDispatch",
+                    "observedWallMs": 0.299
+                  }
+                ]
+              },
+              "bubbleToFrame": {
+                "durationMs": 2.149,
+                "observedWallMs": {
+                  "mainThread": 1.614,
+                  "mainThreadTasks": 1.614,
+                  "input": 0.542,
+                  "compositor": 0.647,
+                  "gpu": 0.168,
+                  "animationFrame": 0.077
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 1.604
+                  }
+                ]
+              },
+              "presentationToSettled": {
+                "durationMs": 21.638,
+                "observedWallMs": {
+                  "mainThread": 1.972,
+                  "mainThreadTasks": 1.972,
+                  "input": 0.557,
+                  "compositor": 3.435,
+                  "gpu": 1.922,
+                  "animationFrame": 0.359
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 1.945
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "index": 4,
+            "pageClock": {
+              "eventToCaptureMs": 5.3,
+              "captureToBubbleMs": 0.4
+            },
+            "phases": {
+              "eventTimestampToCapture": {
+                "durationMs": 5.369,
+                "observedWallMs": {
+                  "mainThread": 0.166,
+                  "mainThreadTasks": 0.166,
+                  "input": 0.223,
+                  "compositor": 0.442,
+                  "gpu": 0.081,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 0.163
+                  }
+                ]
+              },
+              "captureToBubble": {
+                "durationMs": 0.362,
+                "observedWallMs": {
+                  "mainThread": 0.362,
+                  "mainThreadTasks": 0.362,
+                  "input": 0.362,
+                  "compositor": 0.362,
+                  "gpu": 0,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "EventDispatch",
+                    "observedWallMs": 0.362
+                  }
+                ]
+              },
+              "bubbleToFrame": {
+                "durationMs": 1.83,
+                "observedWallMs": {
+                  "mainThread": 1.274,
+                  "mainThreadTasks": 1.274,
+                  "input": 0.099,
+                  "compositor": 0.519,
+                  "gpu": 0.062,
+                  "animationFrame": 0.076
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 1.268
+                  }
+                ]
+              },
+              "presentationToSettled": {
+                "durationMs": 21.435,
+                "observedWallMs": {
+                  "mainThread": 2.018,
+                  "mainThreadTasks": 2.018,
+                  "input": 0.368,
+                  "compositor": 2.639,
+                  "gpu": 1.805,
+                  "animationFrame": 0.349
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 1.99
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "index": 5,
+            "pageClock": {
+              "eventToCaptureMs": 4.4,
+              "captureToBubbleMs": 0.3
+            },
+            "phases": {
+              "eventTimestampToCapture": {
+                "durationMs": 4.364,
+                "observedWallMs": {
+                  "mainThread": 0.17,
+                  "mainThreadTasks": 0.17,
+                  "input": 0.215,
+                  "compositor": 0.444,
+                  "gpu": 0.059,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 0.167
+                  }
+                ]
+              },
+              "captureToBubble": {
+                "durationMs": 0.31,
+                "observedWallMs": {
+                  "mainThread": 0.31,
+                  "mainThreadTasks": 0.31,
+                  "input": 0.31,
+                  "compositor": 0.31,
+                  "gpu": 0,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "EventDispatch",
+                    "observedWallMs": 0.31
+                  }
+                ]
+              },
+              "bubbleToFrame": {
+                "durationMs": 1.845,
+                "observedWallMs": {
+                  "mainThread": 1.261,
+                  "mainThreadTasks": 1.261,
+                  "input": 0.106,
+                  "compositor": 0.522,
+                  "gpu": 0.08,
+                  "animationFrame": 0.104
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 1.257
+                  }
+                ]
+              },
+              "presentationToSettled": {
+                "durationMs": 21.32,
+                "observedWallMs": {
+                  "mainThread": 2.025,
+                  "mainThreadTasks": 2.025,
+                  "input": 0.285,
+                  "compositor": 3.899,
+                  "gpu": 2.184,
+                  "animationFrame": 0.411
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "diagnostic": "native-text-pan-trace-v1",
+        "mode": "WebGL2",
+        "build": "current",
+        "status": "completed",
+        "normalSamplesIncluded": false,
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "droppedErrors": 0,
+        "completedSamples": 6,
+        "trace": {
+          "file": "current-WebGL2-pan-trace.json",
+          "bytes": 3205716,
+          "dataLossOccurred": false,
+          "streamTruncated": false
+        },
+        "analysisStatus": "complete",
+        "clock": {
+          "traceUnit": "monotonic microseconds",
+          "pageUnit": "performance.now/Event.timeStamp milliseconds",
+          "hostClockUsed": false,
+          "method": "Intersect trace-marker offsets bracketed by page performance.now before/after performance.mark.",
+          "anchorCount": 42,
+          "aligned": true,
+          "offsetUs": 2513337502,
+          "uncertaintyMs": 0.174,
+          "quantizationAllowanceMs": 0.25
+        },
+        "evidence": {
+          "inputEvents": 12870,
+          "analyzedEvents": 12870,
+          "eventLimitExceeded": false,
+          "unmatchedEnds": 0,
+          "unmatchedBegins": 18,
+          "invalidDurations": 0,
+          "asyncOrFlowRecords": 4114,
+          "dataLossOccurred": false,
+          "streamTruncated": false,
+          "peakBufferFraction": 0.14772725105285645,
+          "bufferMayBeFull": false,
+          "missingMarkers": 0,
+          "duplicateMarkers": 0,
+          "wrongThreadMarkers": 0,
+          "droppedInputEvents": 0
+        },
+        "error": null,
+        "cleanupErrors": [],
+        "log_line": 1351,
+        "samples": [
+          {
+            "index": 0,
+            "pageClock": {
+              "eventToCaptureMs": 16.3,
+              "captureToBubbleMs": 0.3
+            },
+            "phases": {
+              "eventTimestampToCapture": {
+                "durationMs": 16.285,
+                "observedWallMs": {
+                  "mainThread": 0.274,
+                  "mainThreadTasks": 0.274,
+                  "input": 0.338,
+                  "compositor": 1.847,
+                  "gpu": 0.036,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 0.27
+                  }
+                ]
+              },
+              "captureToBubble": {
+                "durationMs": 0.307,
+                "observedWallMs": {
+                  "mainThread": 0.307,
+                  "mainThreadTasks": 0.307,
+                  "input": 0.307,
+                  "compositor": 0.307,
+                  "gpu": 0,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "EventDispatch",
+                    "observedWallMs": 0.307
+                  }
+                ]
+              },
+              "bubbleToFrame": {
+                "durationMs": 4.584,
+                "observedWallMs": {
+                  "mainThread": 1.467,
+                  "mainThreadTasks": 1.467,
+                  "input": 0.141,
+                  "compositor": 0.375,
+                  "gpu": 0.032,
+                  "animationFrame": 0.045
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 1.458
+                  }
+                ]
+              },
+              "presentationToSettled": {
+                "durationMs": 1265.22,
+                "observedWallMs": {
+                  "mainThread": 6.034,
+                  "mainThreadTasks": 6.034,
+                  "input": 0.88,
+                  "compositor": 8.63,
+                  "gpu": 1261.922,
+                  "animationFrame": 0.587
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 5.987
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "index": 1,
+            "pageClock": {
+              "eventToCaptureMs": 2.4,
+              "captureToBubbleMs": 2.4
+            },
+            "phases": {
+              "eventTimestampToCapture": {
+                "durationMs": 2.341,
+                "observedWallMs": {
+                  "mainThread": 0.186,
+                  "mainThreadTasks": 0.186,
+                  "input": 0.21,
+                  "compositor": 0.472,
+                  "gpu": 0.054,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 0.183
+                  }
+                ]
+              },
+              "captureToBubble": {
+                "durationMs": 2.383,
+                "observedWallMs": {
+                  "mainThread": 2.383,
+                  "mainThreadTasks": 2.383,
+                  "input": 2.383,
+                  "compositor": 2.383,
+                  "gpu": 0,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "EventDispatch",
+                    "observedWallMs": 2.383
+                  }
+                ]
+              },
+              "bubbleToFrame": {
+                "durationMs": 2.417,
+                "observedWallMs": {
+                  "mainThread": 1.615,
+                  "mainThreadTasks": 1.615,
+                  "input": 0.161,
+                  "compositor": 0.816,
+                  "gpu": 0.05,
+                  "animationFrame": 0.08
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 1.603
+                  }
+                ]
+              },
+              "presentationToSettled": {
+                "durationMs": 9.511,
+                "observedWallMs": {
+                  "mainThread": 7.232,
+                  "mainThreadTasks": 7.232,
+                  "input": 0.33,
+                  "compositor": 8.541,
+                  "gpu": 3.145,
+                  "animationFrame": 5.519
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 7.207
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "index": 2,
+            "pageClock": {
+              "eventToCaptureMs": 1295.8,
+              "captureToBubbleMs": 0.3
+            },
+            "phases": {
+              "eventTimestampToCapture": {
+                "durationMs": 1295.799,
+                "observedWallMs": {
+                  "mainThread": 0.379,
+                  "mainThreadTasks": 0.379,
+                  "input": 2.783,
+                  "compositor": 3.956,
+                  "gpu": 1292.888,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 0.357
+                  }
+                ]
+              },
+              "captureToBubble": {
+                "durationMs": 0.324,
+                "observedWallMs": {
+                  "mainThread": 0.324,
+                  "mainThreadTasks": 0.324,
+                  "input": 0.324,
+                  "compositor": 0.324,
+                  "gpu": 0,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "EventDispatch",
+                    "observedWallMs": 0.324
+                  }
+                ]
+              },
+              "bubbleToFrame": {
+                "durationMs": 5.902,
+                "observedWallMs": {
+                  "mainThread": 1.587,
+                  "mainThreadTasks": 1.587,
+                  "input": 1.904,
+                  "compositor": 0.688,
+                  "gpu": 0.072,
+                  "animationFrame": 0.067
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 1.573
+                  }
+                ]
+              },
+              "presentationToSettled": {
+                "durationMs": 1331.286,
+                "observedWallMs": {
+                  "mainThread": 1.478,
+                  "mainThreadTasks": 1.478,
+                  "input": 1.321,
+                  "compositor": 3.242,
+                  "gpu": 1317.286,
+                  "animationFrame": 0.374
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 1.44
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "index": 3,
+            "pageClock": {
+              "eventToCaptureMs": 12.2,
+              "captureToBubbleMs": 0.4
+            },
+            "phases": {
+              "eventTimestampToCapture": {
+                "durationMs": 12.193,
+                "observedWallMs": {
+                  "mainThread": 0.207,
+                  "mainThreadTasks": 0.207,
+                  "input": 0.313,
+                  "compositor": 0.541,
+                  "gpu": 0.061,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 0.201
+                  }
+                ]
+              },
+              "captureToBubble": {
+                "durationMs": 0.337,
+                "observedWallMs": {
+                  "mainThread": 0.337,
+                  "mainThreadTasks": 0.337,
+                  "input": 0.337,
+                  "compositor": 0.337,
+                  "gpu": 0,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "EventDispatch",
+                    "observedWallMs": 0.337
+                  }
+                ]
+              },
+              "bubbleToFrame": {
+                "durationMs": 3.546,
+                "observedWallMs": {
+                  "mainThread": 1.608,
+                  "mainThreadTasks": 1.608,
+                  "input": 0.233,
+                  "compositor": 0.632,
+                  "gpu": 0.055,
+                  "animationFrame": 0.087
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 1.599
+                  }
+                ]
+              },
+              "presentationToSettled": {
+                "durationMs": 1295.946,
+                "observedWallMs": {
+                  "mainThread": 5.156,
+                  "mainThreadTasks": 5.156,
+                  "input": 0.909,
+                  "compositor": 6.947,
+                  "gpu": 1294.2,
+                  "animationFrame": 1.849
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 5.092
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "index": 4,
+            "pageClock": {
+              "eventToCaptureMs": 14.7,
+              "captureToBubbleMs": 0.3
+            },
+            "phases": {
+              "eventTimestampToCapture": {
+                "durationMs": 14.663,
+                "observedWallMs": {
+                  "mainThread": 0.254,
+                  "mainThreadTasks": 0.254,
+                  "input": 0.323,
+                  "compositor": 0.609,
+                  "gpu": 0.07,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 0.249
+                  }
+                ]
+              },
+              "captureToBubble": {
+                "durationMs": 0.399,
+                "observedWallMs": {
+                  "mainThread": 0.399,
+                  "mainThreadTasks": 0.399,
+                  "input": 0.399,
+                  "compositor": 0.399,
+                  "gpu": 0,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "EventDispatch",
+                    "observedWallMs": 0.399
+                  }
+                ]
+              },
+              "bubbleToFrame": {
+                "durationMs": 4.684,
+                "observedWallMs": {
+                  "mainThread": 1.862,
+                  "mainThreadTasks": 1.862,
+                  "input": 0.121,
+                  "compositor": 0.707,
+                  "gpu": 0.057,
+                  "animationFrame": 0.073
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 1.853
+                  }
+                ]
+              },
+              "presentationToSettled": {
+                "durationMs": 1313.083,
+                "observedWallMs": {
+                  "mainThread": 4.486,
+                  "mainThreadTasks": 4.486,
+                  "input": 2.105,
+                  "compositor": 7.549,
+                  "gpu": 1310.294,
+                  "animationFrame": 0.514
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 4.423
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "index": 5,
+            "pageClock": {
+              "eventToCaptureMs": 0.7,
+              "captureToBubbleMs": 0.3
+            },
+            "phases": {
+              "eventTimestampToCapture": {
+                "durationMs": 0.689,
+                "observedWallMs": {
+                  "mainThread": 0.161,
+                  "mainThreadTasks": 0.161,
+                  "input": 0.308,
+                  "compositor": 0.439,
+                  "gpu": 0.054,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 0.158
+                  }
+                ]
+              },
+              "captureToBubble": {
+                "durationMs": 0.309,
+                "observedWallMs": {
+                  "mainThread": 0.309,
+                  "mainThreadTasks": 0.309,
+                  "input": 0.309,
+                  "compositor": 0.309,
+                  "gpu": 0,
+                  "animationFrame": 0
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "EventDispatch",
+                    "observedWallMs": 0.309
+                  }
+                ]
+              },
+              "bubbleToFrame": {
+                "durationMs": 6.611,
+                "observedWallMs": {
+                  "mainThread": 1.572,
+                  "mainThreadTasks": 1.572,
+                  "input": 0.122,
+                  "compositor": 0.534,
+                  "gpu": 0.052,
+                  "animationFrame": 0.058
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 1.551
+                  }
+                ]
+              },
+              "presentationToSettled": {
+                "durationMs": 1303.076,
+                "observedWallMs": {
+                  "mainThread": 3.298,
+                  "mainThreadTasks": 3.298,
+                  "input": 0.795,
+                  "compositor": 3.996,
+                  "gpu": 1302.228,
+                  "animationFrame": 0.453
+                },
+                "mainThreadTopEvents": [
+                  {
+                    "event": "ThreadControllerImpl::RunTask",
+                    "observedWallMs": 3.235
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "browser_shutdown": {
+      "log_line": 1352,
+      "diagnostic": "native-text-pan-browser-shutdown-v1",
+      "browserTransport": "owned-playwright-server-websocket",
+      "reason": "Text benchmark finished",
+      "processId": 5360,
+      "status": "forced",
+      "gracefulCloseCompleted": false,
+      "forcedKillAttempted": true,
+      "directKillAttempted": false,
+      "processExit": {
+        "observed": true,
+        "code": null,
+        "signal": "SIGKILL"
+      },
+      "errors": [
+        "TraceDiagnosticTimeout: Trace diagnostic deadline: close owned trace browser\n    at Timeout.<anonymous> (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/text-pan-trace.mjs:27:59)\n    at listOnTimeout (node:internal/timers:585:17)\n    at process.processTimers (node:internal/timers:521:7)"
+      ]
+    },
+    "exit_code": 1,
+    "exit_log_line": 1353,
+    "limitations": [
+      "The 36 normal measured samples per mode are separate from six trace-instrumented samples per mode; the latter are excluded from normal performance statistics.",
+      "Trace-enabled launch used owned-playwright-server-websocket transport; compare with matching transport/diagnostic configurations.",
+      "Host dispatch/frame/presentation durations and page event clocks are separately reported, not subtracted across origins.",
+      "Trace markers align page clock to trace time with reported uncertainty; observed group times are unions of classified recorded wall-time slices, not CPU/GPU utilization or an identified cause. Groups may overlap.",
+      "The WebGL2 presentation surface reports SwiftShader; this is not physical-GPU throughput.",
+      "Printed diagnostics report no trace data loss/truncation or page/console errors, but have 16/18 unmatched begin events; full trace bytes were not retrieved or independently inspected.",
+      "The benchmark completed its measurements and diagnostic cohorts, then failed finalization because bounded graceful browser close timed out and an owned-process forced kill was required. Successful cohort records do not make the command pass."
+    ]
+  },
+  "evidence_limits": {
+    "archive_downloaded": false,
+    "raw_trace_downloaded": false,
+    "png_downloaded": false,
+    "full_artifact_report_downloaded": false,
+    "later_source_validated": false
+  }
+}

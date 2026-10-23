@@ -1,0 +1,199 @@
+{
+  "checkedUtc": "2026-10-22T16:16:13.008174+00:00",
+  "publishedCommit": "f8e0471eb4301a9b893e8185810550ebba5ddafc",
+  "publishedTree": "bd39bd8077fc0c2060164ef5a0c5e572b4c30c6b",
+  "files": {
+    "tests/angular-paints-browser.mjs": {
+      "sha256": "5a7eebeea291b425fc1075d3e55f5af5f8191f0f8f24a9a10fc8a954b7be4908",
+      "bytes": 12898,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/authoring-browser.mjs": {
+      "sha256": "806ebeb7d73ae0be421137cbb8c0ef9f360f8c87d26c73d34562d7a82a13fd87",
+      "bytes": 7951,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/browser.mjs": {
+      "sha256": "3a3d0b9f86b9590da9ee8e2e9b2745a12545a934afe1a67de8c892406f480030",
+      "bytes": 91542,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/components-browser.mjs": {
+      "sha256": "cf3ed180f41a62e0b2520917735b3ad238f5013a091ddf1a70743661a9940c96",
+      "bytes": 15683,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/compositing-browser.mjs": {
+      "sha256": "897c50eba3d818f5603aaa08a9c025a44e91192f7e4ea325b8c2e652ca4ad9d4",
+      "bytes": 8623,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/document-store-browser.mjs": {
+      "sha256": "466adceb3877b299ce92d610a15b40ff2e47cfa1f71a8e0901bcb9f15f49c0cf",
+      "bytes": 8000,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/document-store.test.mjs": {
+      "sha256": "d3794e220039aed72b31745dd1601443bf06f7378b2ccffce90e4ea601fc3334",
+      "bytes": 17126,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/effects-browser.mjs": {
+      "sha256": "814aad28948d9bdf677ffc69e3e32817be87915ed3fb4cd6e42d042dc9a47dbe",
+      "bytes": 8345,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/flatten-browser.mjs": {
+      "sha256": "dc706d5e13e7471c0b075f2d9978b9d958420d703e566ddc401250396fd21585",
+      "bytes": 16921,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/geometry-authoring-browser.mjs": {
+      "sha256": "720d3ab736b1c83ac399c1e5619b9f0b299d2485ba774a67401b6d7dd40e70d3",
+      "bytes": 9247,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/grid-styles-browser.mjs": {
+      "sha256": "cb17248da5fea1a5d3d93b750484484c93633ad89963e83549a0169824bb63f4",
+      "bytes": 18195,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/history-browser.mjs": {
+      "sha256": "7fa18bd154e1e041d3184d4536b0116b6d9c82cde01f3291106f826b043eeae7",
+      "bytes": 2581,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/image-crop-browser.mjs": {
+      "sha256": "c85627f32166fb1855f814d51c07cfd6ccf8371f82f02923a6887df76548c95c",
+      "bytes": 16397,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/inspector-lifecycle-browser.mjs": {
+      "sha256": "32ccdcf1f7b10942ce1a9df22f5be6092a461661e17838b6f9e9058c4db777a8",
+      "bytes": 8236,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/layout-browser.mjs": {
+      "sha256": "604b4ba44c7367e2247b7f6aba5605b29a2d4ccb2745c77a8911280a291befe0",
+      "bytes": 11067,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/layout-drag-browser.mjs": {
+      "sha256": "9f1e1383c7b325b7e31411e0122f91da9aa2fc116201feff454b87e406ac5ff3",
+      "bytes": 11848,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/layout-transfer-browser.mjs": {
+      "sha256": "a6d1a86daccc8f480ce2f5f34eae295f9ee2bd2bbbc9e414bd0a51f7a4de4ff3",
+      "bytes": 13306,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/masks-browser.mjs": {
+      "sha256": "9a451dd494d98ec8c05a8460c2665c9b15d4194c3b4f25ef61f86e429fca01fd",
+      "bytes": 12770,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/matching-browser.mjs": {
+      "sha256": "a6a20bd9fb0254dbbec64364dc3532eb1bd2d6919ac66e890133d139e6e59eb1",
+      "bytes": 8741,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": false
+    },
+    "tests/network-browser.mjs": {
+      "sha256": "e314d9e163fce0e4967ef8ace3b87d964528e79f16830013e33390c114e1433a",
+      "bytes": 13807,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/network-bucket-browser.mjs": {
+      "sha256": "c13ec56dbc1edc18d48a8c5caa248cf9896780774cbe4497cb1eeb0d3dedf353",
+      "bytes": 15196,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/page-inspector-browser.mjs": {
+      "sha256": "d1f36523f17c1dbfd0792365fe61ac14a8b98ce71e26cf4571948cb9dd82f733",
+      "bytes": 3551,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/panels-browser.mjs": {
+      "sha256": "2e6ee77644f053cb6fc47346e3907e85ca4f913dcebdfa9dbc1692182e8e00bc",
+      "bytes": 4402,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/prototype-browser.mjs": {
+      "sha256": "1a2c4a3c44d36534bb32a844bc4e0a97e4c5701937a1167d967d83fb549c70b7",
+      "bytes": 7627,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/region-paints-browser.mjs": {
+      "sha256": "8ec7e757e05821916fc5bc809748091608b37e11eae119af17c7b3e2c43087af",
+      "bytes": 19801,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/selection-browser.mjs": {
+      "sha256": "dda878869a63fb4623df43ffb35c53c1ccb767f39d2109024178f7fd9d26162b",
+      "bytes": 14609,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/serialization-browser.mjs": {
+      "sha256": "47d8b18654497944c92eec207da238ac4bf483a52ad840a4477540d6fd35699b",
+      "bytes": 6097,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/styles-browser.mjs": {
+      "sha256": "9805ac10253ef5abab7fd8ea9da153017d9f1e19c653af191d3b6467244222d7",
+      "bytes": 16181,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/svg-compositing-browser.mjs": {
+      "sha256": "3fec5edd0697a24103e1d3094fb52e1357420048e29f7017824461fe50fffdd9",
+      "bytes": 9841,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/text-render-benchmark.mjs": {
+      "sha256": "b7fcfe0aae8d16ab13a48c8992254fbf5889f5802737a5abb579219d05f8d3c7",
+      "bytes": 19627,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    },
+    "tests/typography-browser.mjs": {
+      "sha256": "fba3c1bd6379b0040067527b090c27a21db13dd049cf3cda32051f2936c16eee",
+      "bytes": 10742,
+      "equalsPublishedCommit": true,
+      "equalsOriginalF2bb": true
+    }
+  },
+  "all31MatchPublishedCommit": true,
+  "onlyChangedFileFromF2bb": [
+    "tests/matching-browser.mjs"
+  ],
+  "applicationBuildInputDiffFrom3a": [],
+  "runtime16HashesVerified": true
+}

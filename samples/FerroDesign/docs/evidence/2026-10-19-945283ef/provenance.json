@@ -1,0 +1,75 @@
+{
+  "sourceCommit": "945283ef24202dab638c85bc9dc3d5f47fcc902d",
+  "workflowRun": 39306364660,
+  "workflowUrl": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39306364660",
+  "conclusion": "success",
+  "browser": "Chromium 156.0.8078.4",
+  "artifacts": [
+    {
+      "id": 12215744957,
+      "name": "FerroDesign-browser-945283ef24202dab638c85bc9dc3d5f47fcc902d",
+      "bytes": 11705819,
+      "sha256": "9c3d9dc52203774b0087bf9c36b315781dcd3730ac1ffe1e5c9617fce4557110",
+      "publishedSizeAndDigestMatch": true,
+      "zipCrc": "passed",
+      "expiresAt": "2026-11-18T19:57:08Z"
+    },
+    {
+      "id": 12217631378,
+      "name": "FerroDesign-validation-945283ef24202dab638c85bc9dc3d5f47fcc902d",
+      "bytes": 54191011,
+      "sha256": "9fb53a95f653e44148270e097642e4105c4a971ff35f6a514e487fe6dc457739",
+      "publishedSizeAndDigestMatch": true,
+      "zipCrc": "passed",
+      "expiresAt": "2026-11-18T19:57:10Z"
+    }
+  ],
+  "copiedWithoutModification": [
+    {
+      "path": "report.json",
+      "bytes": 440718,
+      "sha256": "c06210131d8a1542f381743eccb72c0037e192bfdb2d022dd8f5c7da189de3e9"
+    },
+    {
+      "path": "Software2D-initial.png",
+      "bytes": 183995,
+      "sha256": "c49a46e52433f506638e1245e73f11a66e0aec3f2831dc083a062d35daded224"
+    },
+    {
+      "path": "Software2D-native-effect-stack.png",
+      "bytes": 121620,
+      "sha256": "76efbb6a293bc695b6504fc7741a8b889ced910c9229c3a25553598d0a3c6ab5"
+    },
+    {
+      "path": "Software2D-native-layout-drag-preview.png",
+      "bytes": 62637,
+      "sha256": "cdcd251324a19c7b63a741f7aba44266071b956cd08a2a75c93468e148c90834"
+    },
+    {
+      "path": "WebGL2-initial.png",
+      "bytes": 183637,
+      "sha256": "4fed726380110834b960cfa1391feefee9a2b21c79967c8a05f020739ceb9ebb"
+    },
+    {
+      "path": "WebGL2-native-effect-stack.png",
+      "bytes": 121834,
+      "sha256": "98d35038be23090276e98825ca068e8c1b9cf33380706dd50000f1db05cdb720"
+    },
+    {
+      "path": "WebGL2-native-layout-drag-preview.png",
+      "bytes": 62694,
+      "sha256": "bf6163992852b6496d36d17076ec2957411162db08bbfad24f7476d061681b99"
+    },
+    {
+      "path": "../../benchmarks/2026-10-19-945283ef-editor-performance.json",
+      "bytes": 7424,
+      "sha256": "fc7a2776c0f9438204e120096a8746c4b1672bb0081f9313325033a4fb31e497"
+    }
+  ],
+  "note": "The report, benchmark and six PNGs are unchanged copies from the validation artifact. This manifest records verification performed after downloading both workflow artifacts. The full trace ZIPs also passed CRC checks. No matched Figma screenshot comparison was performed.",
+  "browserWasm": {
+    "path": "ferrodesign_app.wasm",
+    "bytes": 49841600,
+    "sha256": "da5ffef914865f71d5cdcad2e4703c7e9b0b699dc2565af385ded1bb5a3fe9e0"
+  }
+}

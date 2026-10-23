@@ -1,0 +1,81 @@
+{
+  "passed": false,
+  "scope": {
+    "full": true,
+    "modes": [
+      "Software2D",
+      "WebGL2"
+    ],
+    "scenarios": "all"
+  },
+  "browser": "156.0.8078.4",
+  "results": [
+    {
+      "requestedMode": "Software2D",
+      "status": "failed",
+      "surface": {
+        "kind": "Software2D"
+      },
+      "checks": [
+        "Native FerroUI canvas contains rendered UI and document pixels",
+        "R shortcut and pointer drag create and render a selected rectangle",
+        "Keyboard undo removes the pointer-created node",
+        "Keyboard redo restores the node",
+        "Delete keyboard action removes the selection",
+        "Document JSON round-trip restores the complete edited document",
+        "SVG file import selects an editable frame with affine groups, gradients, curves, and Unicode text",
+        "PNG download has exact artboard dimensions and verified background, affine gradient, curved stroke, and text pixels",
+        "JSON round-trip preserves the complete imported SVG hierarchy and visual properties",
+        "Enter enters native vector editing; an anchor drag rebases bounds without moving other anchors and forms one undo/redo step",
+        "Native Pen pointer drags create a cubic curve and the complete path is one undo/redo step",
+        "Enter while the Pen pointer is held finalizes the gesture and ignores later handle movement until release",
+        "Native on-canvas TextBox handles multiline Unicode, UTF-8 rich-text ranges, Ctrl+Enter commit, Escape cancel, one-step history, and autosave",
+        "Browser composition events commit once, keep preedit out of the document, and cannot block or overwrite a new native text client after cancellation",
+        "Pagehide during unfinished composition durably saves confirmed Unicode and formatting, preserves one-step history, and survives a real reload",
+        "Native paint dialog pointer/keyboard input converts a fill to a gradient, edits alpha/opacity/stop positions, rejects NaN, and supports one-step stop undo",
+        "Native graph conversion, branching, stable-ID vertex dragging and edge subdivision preserve regions and exact one-step history",
+        "Native network Bend and Erase edit authoritative cubic edges, retain unrelated fill regions and serialize stable topology",
+        "Native Fill all closed regions discovers planar faces, excludes open branches, paints every face, preserves topology IDs and commits one exact idempotent undo/redo edit",
+        "Native Fill all closed regions splits transverse intersections, preserves original first-edge and branch identities, paints four new faces, and keeps subdivision plus fill in one idempotent undo/redo edit",
+        "Native automatic intersection preparation rejects ambiguous overlapping edges with a fresh exact error, preserves the entire graph and allocator, and retains the preceding redo transaction",
+        "Native character selection styles one non-BMP emoji at exact UTF-8 boundaries, retains selection across field focus, previews the shared native text layout, clears overrides and restores one-step history",
+        "Native variable controls edit typed alpha colors, create aliases, bind layers, switch modes, rename collections, reject referenced deletion and preserve appearance with one-step undo",
+        "Native smoothing commits one history step, rejects out-of-range drafts atomically, and restores exact document fields through undo/redo"
+      ]
+    },
+    {
+      "requestedMode": "WebGL2",
+      "status": "failed",
+      "surface": {
+        "kind": "WebGL2",
+        "device": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+      },
+      "checks": [
+        "Native FerroUI canvas contains rendered UI and document pixels",
+        "R shortcut and pointer drag create and render a selected rectangle",
+        "Keyboard undo removes the pointer-created node",
+        "Keyboard redo restores the node",
+        "Delete keyboard action removes the selection",
+        "Document JSON round-trip restores the complete edited document",
+        "SVG file import selects an editable frame with affine groups, gradients, curves, and Unicode text",
+        "PNG download has exact artboard dimensions and verified background, affine gradient, curved stroke, and text pixels",
+        "JSON round-trip preserves the complete imported SVG hierarchy and visual properties",
+        "Enter enters native vector editing; an anchor drag rebases bounds without moving other anchors and forms one undo/redo step",
+        "Native Pen pointer drags create a cubic curve and the complete path is one undo/redo step",
+        "Enter while the Pen pointer is held finalizes the gesture and ignores later handle movement until release",
+        "Native on-canvas TextBox handles multiline Unicode, UTF-8 rich-text ranges, Ctrl+Enter commit, Escape cancel, one-step history, and autosave",
+        "Browser composition events commit once, keep preedit out of the document, and cannot block or overwrite a new native text client after cancellation",
+        "Pagehide during unfinished composition durably saves confirmed Unicode and formatting, preserves one-step history, and survives a real reload",
+        "Native paint dialog pointer/keyboard input converts a fill to a gradient, edits alpha/opacity/stop positions, rejects NaN, and supports one-step stop undo",
+        "Native graph conversion, branching, stable-ID vertex dragging and edge subdivision preserve regions and exact one-step history",
+        "Native network Bend and Erase edit authoritative cubic edges, retain unrelated fill regions and serialize stable topology",
+        "Native Fill all closed regions discovers planar faces, excludes open branches, paints every face, preserves topology IDs and commits one exact idempotent undo/redo edit",
+        "Native Fill all closed regions splits transverse intersections, preserves original first-edge and branch identities, paints four new faces, and keeps subdivision plus fill in one idempotent undo/redo edit",
+        "Native automatic intersection preparation rejects ambiguous overlapping edges with a fresh exact error, preserves the entire graph and allocator, and retains the preceding redo transaction",
+        "Native character selection styles one non-BMP emoji at exact UTF-8 boundaries, retains selection across field focus, previews the shared native text layout, clears overrides and restores one-step history",
+        "Native variable controls edit typed alpha colors, create aliases, bind layers, switch modes, rename collections, reject referenced deletion and preserve appearance with one-step undo",
+        "Native smoothing commits one history step, rejects out-of-range drafts atomically, and restores exact document fields through undo/redo"
+      ]
+    }
+  ]
+}

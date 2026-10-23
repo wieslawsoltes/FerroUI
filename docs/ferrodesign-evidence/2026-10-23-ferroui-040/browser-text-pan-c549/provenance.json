@@ -1,0 +1,79 @@
+{
+  "repository": "wieslawsoltes/FerroUI",
+  "runtime_commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "harness_commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "source_tree": "8c5bbcc8ed5e5a61d287708cf4e2c0e7c912259d",
+  "runtime_artifact_id": 12502207600,
+  "runtime_wasm_sha256": "64bd8f8b2dd9f3bc951776c9db7e3cb4bfc973ad754230219606d514bebc4115",
+  "input_hashes_checked_before_and_after": true,
+  "input_file_count": 55,
+  "browser_pid_absent_after_completion": 180768,
+  "raw_files": [
+    {
+      "source_file": "report.json",
+      "archive": "report.json.gz",
+      "raw_bytes": 776161,
+      "raw_sha256": "69415dfd5842dd1a3857d426a0357b4beed647b2055d04e169bcd392252b2acc",
+      "gzip_bytes": 37848,
+      "gzip_sha256": "5c9e28f1f97bf3ee83de14d868239f781a0f25fb4483b4bdfc727c2de3ca464d"
+    },
+    {
+      "source_file": "fixture.json",
+      "archive": "fixture.json.gz",
+      "raw_bytes": 99251,
+      "raw_sha256": "adaa9a7e4d2a10fb3c96fce28de8a1dfe58c75c13cc8b5cb4baec46a97a26492",
+      "gzip_bytes": 3875,
+      "gzip_sha256": "7a2e9ccb651176219eccc9b7307a5e6a4cf186a7598e8d5491d1748439e5ec95"
+    },
+    {
+      "source_file": "current-Software2D-pan-trace.json",
+      "archive": "current-Software2D-pan-trace.json.gz",
+      "raw_bytes": 3401087,
+      "raw_sha256": "a55c1be7730fd12e9c4fb7ddccf3cf5321a31b459e4ae0e984df8dcc1c80820b",
+      "gzip_bytes": 305008,
+      "gzip_sha256": "9e88338197e29cde2fab712dedfa725b80aba140c815a50494769ba34e8d1e8c"
+    },
+    {
+      "source_file": "current-Software2D-pan-trace-summary.json",
+      "archive": "current-Software2D-pan-trace-summary.json.gz",
+      "raw_bytes": 196062,
+      "raw_sha256": "3e182901dd3e07b09be4bf26a53abc5f2c70eea2a9662652c293134ffa035308",
+      "gzip_bytes": 10551,
+      "gzip_sha256": "d2f4511237c4ceb72350c5686abab3cc8b4c6f6fc328224bc70092d984cead46"
+    },
+    {
+      "source_file": "current-WebGL2-pan-trace.json",
+      "archive": "current-WebGL2-pan-trace.json.gz",
+      "raw_bytes": 2934015,
+      "raw_sha256": "d5029c3834886ce429e3c37eb7e9d7e1721023b35deaeab6042c42c76f7307ef",
+      "gzip_bytes": 277483,
+      "gzip_sha256": "0ca966dedf18b80478cc723159b6f04a06629e6039abef36bcc9eb0db86b596b"
+    },
+    {
+      "source_file": "current-WebGL2-pan-trace-summary.json",
+      "archive": "current-WebGL2-pan-trace-summary.json.gz",
+      "raw_bytes": 197528,
+      "raw_sha256": "f820e0466d764471c1ea5b4811892b3fd499b9dc3ced45c36bf43cd89cc07648",
+      "gzip_bytes": 10305,
+      "gzip_sha256": "8dc515fbab847555e8e60fa2ccd658d1bd825c7d8b000c155b4d3dc4c4499207"
+    },
+    {
+      "source_file": "benchmark.log",
+      "archive": "benchmark.log.gz",
+      "raw_bytes": 32399,
+      "raw_sha256": "fe79efed5089027d3874a9f9ccd345077c769f56d51fb8a9d329cabc1f4df716",
+      "gzip_bytes": 4908,
+      "gzip_sha256": "ddf9e88c671c80093d30f263cefe1045a16d49c6392fd15f3bb2d215506e691c"
+    }
+  ],
+  "source_provenance_file": "source-provenance.json",
+  "build_provenance_file": "../browser-build-c549/build-provenance.json",
+  "previous_failed_run": "../../2026-10-23-continuation/browser-text-pan-runtime08-harness0f/",
+  "scope": "One exact c549 traced benchmark run; two36-sample normal cohorts and two separate6-sample trace cohorts. No FPS or isolated renderer performance claim.",
+  "independent_presentation_join": {
+    "file": "presentation-joins.json",
+    "bytes": 16338,
+    "sha256": "b33a40679267e7b28d5796e0d81ad73370daea9fe9531d1289ba1050d8e49175",
+    "scope": "Separate six-motion WebGL2 trace diagnostic; exact frame-token/display-submit/swap joins do not alter the normal36-sample statistics."
+  }
+}

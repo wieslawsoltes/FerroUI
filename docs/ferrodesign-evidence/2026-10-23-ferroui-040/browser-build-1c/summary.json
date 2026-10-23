@@ -1,0 +1,74 @@
+{
+  "repository": "wieslawsoltes/FerroUI",
+  "source_commit": "1c7151f57614915796e4aa54f9b497f1ac842aad",
+  "source_tree": "aef243ffe3c0c035b9e1686079b19d635f78a626",
+  "run_id": 39950194298,
+  "job_id": 120403095053,
+  "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194298/job/120403095053",
+  "conclusion": "success",
+  "build_started_at": "2026-10-23T12:03:37Z",
+  "build_completed_at": "2026-10-23T12:31:54Z",
+  "build_seconds": 1697,
+  "artifact_id": 12502190198,
+  "archive_sha256": "74601c652bce2108f7bd2396154d59d43040d1b25ef4a01edbc521cd186ee545",
+  "archive_bytes": 12636328,
+  "wasm": {
+    "path": "ferrodesign_app.wasm",
+    "bytes": 53785479,
+    "sha256": "0f3dfcbe958a619519abdce19ad2bd0378c30778cfccdf660f002c34b4314543"
+  },
+  "payload_files": 16,
+  "manifest_files": 1,
+  "active_vello_no_skia": true,
+  "static_module_closure_checked": 7,
+  "dynamic_storage_explicitly_checked": true,
+  "source_timestamp_cache": [
+    {
+      "already_equal": 0,
+      "bytes_hashed": 0,
+      "manifest": "/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target/.ferrodesign-source-mtimes-v1.json",
+      "operation": "restore",
+      "reason": "manifest_missing",
+      "recorded": 0,
+      "restored": 0,
+      "schema_version": 1,
+      "skip_reasons": {},
+      "skipped": 0,
+      "status": "skipped",
+      "tracked_files": 0
+    },
+    {
+      "already_equal": 0,
+      "bytes_hashed": 231536585,
+      "manifest": "/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target/.ferrodesign-source-mtimes-v1.json",
+      "operation": "snapshot",
+      "recorded": 10468,
+      "restored": 0,
+      "schema_version": 1,
+      "skip_reasons": {},
+      "skipped": 0,
+      "status": "snapshotted",
+      "tracked_files": 10468
+    }
+  ],
+  "decoded_log": {
+    "file": "browser-build.log.gz",
+    "raw_bytes": 129702,
+    "raw_sha256": "0ec1b44c076fb7bfbafb7a618afa45767be7d5bcd0f3f4ea5f2a08aa97a90e6d",
+    "gzip_bytes": 28651,
+    "gzip_sha256": "5de1466a19c09cee59d7f6f560ca9d646ab8627205a0496633bba6885fe34e7f"
+  },
+  "verification": [
+    "GitHub ZIP SHA256 and bytes, CRCs and safe member paths",
+    "Exact source commit/tree/run and pinned toolchain",
+    "Every manifest payload hash/size and exact manifest/file-set equality",
+    "WASM magic/version and generated module referenced WASM filename",
+    "Active FerroUI Vello graph and no Skia dependency",
+    "Relative host CSS/JS resource paths",
+    "Seven parsed static/dynamic-root JavaScript modules including every generated inline snippet and explicit storage.js"
+  ],
+  "limitations": [
+    "No editor or benchmark was run against this1c runtime.",
+    "Laterc549 source adds hover/pressed diagnostics and favicon; its exact runtime is validated separately."
+  ]
+}

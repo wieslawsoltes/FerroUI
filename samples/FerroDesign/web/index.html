@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+    <meta name="theme-color" content="#1e1e1e">
+    <meta name="description" content="FerroDesign — a native FerroUI design workspace running in your browser.">
+    <title>FerroDesign — Design workspace</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <link rel="stylesheet" href="./app.css">
+</head>
+<body>
+    <main id="out" aria-label="FerroDesign design workspace">
+        <div class="ferroui-splash" role="status" aria-live="polite">
+            <div class="splash-inner">
+                <div class="wordmark"><span class="brand-mark" aria-hidden="true">F</span>FerroDesign</div>
+                <p id="loading-message">Opening your workspace</p>
+                <div class="loading-track" aria-hidden="true"><span></span></div>
+                <pre id="loading-error" hidden></pre>
+            </div>
+        </div>
+    </main>
+    <noscript>Enable JavaScript to open the FerroDesign workspace.</noscript>
+    <script type="module" src="./main.js"></script>
+</body>
+</html>

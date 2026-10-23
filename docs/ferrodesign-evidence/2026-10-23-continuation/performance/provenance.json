@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "commit": "08e29e4f530c0ae65f6e2ac072f381605e23ed0c",
+    "repositoryTree": "99802b5a5b6db4d40109baee75e816303be056f0",
+    "coreTree": "3c91aeeed4ff3d22eff9eae1f63fd6aef1cd3f24",
+    "cargoLockBlob": "a1a86fcc239634a707398fd475cb1f448941d609",
+    "sameCoreTreeAsProductionCommit": "1637a093723a4f899b7f4e371fd53f0b91914a98",
+    "coreTreeEqualityVerified": true,
+    "sourceUnchangedDuringRun": true
+  },
+  "build": {
+    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)",
+    "profile": "release",
+    "command": "cargo run --locked --offline --release -p ferrodesign-core --example performance --jobs 1 -- 10000",
+    "environmentOverrides": {
+      "CARGO_INCREMENTAL": "0",
+      "CARGO_BUILD_JOBS": "1"
+    },
+    "compileElapsed": "1m 43s"
+  },
+  "run": {
+    "startedUtc": "2026-10-23T11:24:18.203487+00:00",
+    "capturedCompletedUtc": "2026-10-23T11:27:10.817500+00:00",
+    "exitCode": 0,
+    "nodes": 10000,
+    "equivalenceChecks": {
+      "paired_document_and_history": true,
+      "serialization_round_trip": true,
+      "component_documents_and_ids": true,
+      "component_exact_history": true
+    }
+  },
+  "host": {
+    "scope": "Shared execution host; other work can affect timing.",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "machine": "x86_64",
+    "availableLogicalCpus": 9,
+    "cgroupCpuMax": "800000 100000",
+    "cgroupMemoryMaxBytes": 8589934592
+  },
+  "result": {
+    "path": "native-engine-10000.json",
+    "bytes": 7527,
+    "sha256": "b8b1f859e1a0896776ff3cbc5378f12fbc450365f8d98e832ceacf9b4a5455df"
+  },
+  "scope": "Native CPU engine only. Existing paired scoped/full-reference workload with equivalence assertions. Shared host, no browser/frame-rate inference."
+}

@@ -1,0 +1,211 @@
+{
+  "allSelectionRoots": {
+    "roots": 10000,
+    "selected": 10000,
+    "totalMs": 1.0971030000000002
+  },
+  "createMs": 11.129682,
+  "equivalentDocumentsAndHistory": true,
+  "gesture": {
+    "deltaPerUpdate": [
+      0.25,
+      0.125
+    ],
+    "gestures": 12,
+    "includesBrowserEvents": false,
+    "scoped": {
+      "begin": {
+        "maxMs": 0.033052,
+        "p50Ms": 0.010199,
+        "p95Ms": 0.012402999999999999,
+        "samples": 12,
+        "totalMs": 0.13402999999999998
+      },
+      "commit": {
+        "maxMs": 0.015429,
+        "p50Ms": 0.009347000000000001,
+        "p95Ms": 0.010319,
+        "samples": 12,
+        "totalMs": 0.11734699999999999
+      },
+      "total": {
+        "maxMs": 0.077454,
+        "p50Ms": 0.043900999999999996,
+        "p95Ms": 0.047036999999999995,
+        "samples": 12,
+        "totalMs": 0.5100790000000001
+      },
+      "update": {
+        "maxMs": 0.011301,
+        "p50Ms": 0.0006309999999999999,
+        "p95Ms": 0.001012,
+        "samples": 288,
+        "totalMs": 0.2391280000000004
+      }
+    },
+    "unscopedReference": {
+      "begin": {
+        "maxMs": 3.568768,
+        "p50Ms": 2.3463809999999996,
+        "p95Ms": 2.413455,
+        "samples": 12,
+        "totalMs": 29.225228
+      },
+      "commit": {
+        "maxMs": 7.973993,
+        "p50Ms": 7.247931,
+        "p95Ms": 7.56386,
+        "samples": 12,
+        "totalMs": 87.879457
+      },
+      "total": {
+        "maxMs": 52.08972,
+        "p50Ms": 46.007771000000005,
+        "p95Ms": 49.348324,
+        "samples": 12,
+        "totalMs": 561.978026
+      },
+      "update": {
+        "maxMs": 3.124049,
+        "p50Ms": 1.453538,
+        "p95Ms": 2.0732820000000003,
+        "samples": 288,
+        "totalMs": 444.80674800000014
+      }
+    },
+    "updatesPerGesture": 24
+  },
+  "indexMs": 27.240752999999998,
+  "layout": {
+    "denseMixedFill": {
+      "changedPerIteration": [
+        9999,
+        9998,
+        9998,
+        9998,
+        9998
+      ],
+      "children": 9999,
+      "kind": "fixed-row-three-quarter-fill-text-children",
+      "nodes": 10000,
+      "parentWidthDelta": 16.0,
+      "textBytesPerChild": 448,
+      "timing": {
+        "maxMs": 8.743206,
+        "p50Ms": 8.213610999999998,
+        "p95Ms": 8.743206,
+        "samples": 5,
+        "totalMs": 41.548373999999995
+      }
+    },
+    "noLayout": {
+      "maxMs": 1.874011,
+      "p50Ms": 1.722157,
+      "p95Ms": 1.874011,
+      "samples": 5,
+      "totalMs": 8.752934
+    }
+  },
+  "measurement": "native-engine-same-process",
+  "nodes": 10000,
+  "nudge": {
+    "scoped": {
+      "maxMs": 0.033012,
+      "p50Ms": 0.019938,
+      "p95Ms": 0.024936999999999997,
+      "samples": 48,
+      "totalMs": 0.864731
+    },
+    "unscopedReference": {
+      "maxMs": 17.798515000000002,
+      "p50Ms": 9.252976,
+      "p95Ms": 9.989147,
+      "samples": 48,
+      "totalMs": 455.8294850000001
+    }
+  },
+  "parseValidateAndIndex": {
+    "maxMs": 51.101729999999996,
+    "p50Ms": 50.906036,
+    "p95Ms": 51.101729999999996,
+    "samples": 3,
+    "totalMs": 152.798557
+  },
+  "pointQueries": {
+    "hits": 10000,
+    "queries": 10000,
+    "totalMs": 17.918107
+  },
+  "redo": {
+    "scoped": {
+      "maxMs": 0.029295,
+      "p50Ms": 0.007574,
+      "p95Ms": 0.025407,
+      "samples": 48,
+      "totalMs": 0.44972900000000005
+    },
+    "unscopedReference": {
+      "maxMs": 3.213466,
+      "p50Ms": 1.490887,
+      "p95Ms": 2.994137,
+      "samples": 48,
+      "totalMs": 78.897586
+    }
+  },
+  "releaseBuild": true,
+  "schemaVersion": 3,
+  "serialization": {
+    "changesProductionFormat": false,
+    "compactCandidate": {
+      "bytes": 12802055,
+      "timing": {
+        "maxMs": 20.361739,
+        "p50Ms": 19.621019999999998,
+        "p95Ms": 20.361739,
+        "samples": 5,
+        "totalMs": 98.879719
+      }
+    },
+    "pretty": {
+      "bytes": 20152206,
+      "timing": {
+        "maxMs": 38.603328,
+        "p50Ms": 36.594807,
+        "p95Ms": 38.603328,
+        "samples": 5,
+        "totalMs": 184.814814
+      }
+    }
+  },
+  "undo": {
+    "scoped": {
+      "maxMs": 0.026981,
+      "p50Ms": 0.008225,
+      "p95Ms": 0.013856,
+      "samples": 48,
+      "totalMs": 0.4352279999999999
+    },
+    "unscopedReference": {
+      "maxMs": 3.212314,
+      "p50Ms": 1.50904,
+      "p95Ms": 2.3311629999999997,
+      "samples": 48,
+      "totalMs": 78.39650400000002
+    }
+  },
+  "viewportQueries": {
+    "queries": 1000,
+    "totalMs": 30.612013,
+    "totalVisible": 259007
+  },
+  "workload": {
+    "columns": 100,
+    "delta": [
+      1.0,
+      -0.25
+    ],
+    "kind": "flat-filled-rectangle-grid",
+    "nudgeIterations": 48,
+    "selectedNodes": 1
+  }
+}

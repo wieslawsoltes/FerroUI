@@ -1,0 +1,320 @@
+{
+  "created": "2026-10-22T14:55:48.210317+00:00",
+  "repository": "wieslawsoltes/FerroUI",
+  "branch": "feat/ferrodesign-editor",
+  "commit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+  "tree": "054e0d03d4d49f327e30e62f22ef78609618a5d2",
+  "harnessSourceCommit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+  "harnessSourceTree": "054e0d03d4d49f327e30e62f22ef78609618a5d2",
+  "buildSourceCommit": "3a0bf1f13c6ede9abe5360bc3691085a3bc981f0",
+  "buildSourceTree": "49fdfab92731cd56b86f582f30e504d70b9efcf9",
+  "appSourceCommit": "3a0bf1f13c6ede9abe5360bc3691085a3bc981f0",
+  "applicationInputsUnchangedFromBuildSource": true,
+  "sourceChangeScope": "Exactly five browser-test files changed between the CI build source and the tested checkpoint; no application/build input changes.",
+  "runtimeArtifact": {
+    "id": 12427798904,
+    "name": "FerroDesign-browser-3a0bf1f13c6ede9abe5360bc3691085a3bc981f0",
+    "size_in_bytes": 12215547,
+    "url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/artifacts/12427798904",
+    "archive_download_url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/artifacts/12427798904/zip",
+    "expired": false,
+    "created_at": "2026-10-22T13:12:58Z",
+    "expires_at": "2026-11-21T13:12:56Z",
+    "updated_at": "2026-10-22T13:12:58Z",
+    "digest": "sha256:b1f9a2014b2762a05b1483a79a9a1ecc4f3194f6f3ca79464e555f12b2d8882c",
+    "workflow_run": {
+      "id": 39771204240,
+      "repository_id": 1405576478,
+      "head_repository_id": 1405576478,
+      "head_branch": "feat/ferrodesign-editor",
+      "head_sha": "3a0bf1f13c6ede9abe5360bc3691085a3bc981f0"
+    }
+  },
+  "runtimeZipVerified": {
+    "bytes": 12215547,
+    "sha256": "b1f9a2014b2762a05b1483a79a9a1ecc4f3194f6f3ca79464e555f12b2d8882c",
+    "crcPassed": true
+  },
+  "artifacts": {
+    "Cargo.lock": {
+      "bytes": 80875,
+      "sha256": "081eb615a98880837025dd242e96f4efd2d4633265b5c83a33650a3b29aeb578"
+    },
+    "app.css": {
+      "bytes": 1698,
+      "sha256": "bc13442e4a8b8d92c33428c53a65ebcd0e22423d623c1418bc137a0a23b9453b"
+    },
+    "dependencies.txt": {
+      "bytes": 52922,
+      "sha256": "47b189f7e3220cef316c89cb04b20f3519eecacce75df38d6b852722d38ef82b"
+    },
+    "document-store.js": {
+      "bytes": 15559,
+      "sha256": "6e6cca56c8af8567bd8b1f183eceed55815b2ec63e3ea222d45be93f25b4f012"
+    },
+    "ferrodesign-app.js": {
+      "bytes": 208382,
+      "sha256": "b59f17c689a8e4db6ca2e5b93ef1c5c7544f2cfbe097aa6998dffae00329ebeb"
+    },
+    "ferrodesign_app.wasm": {
+      "bytes": 51205801,
+      "sha256": "7880a628e7117ab88f896f69baa9c9ccedcdc33792302a01f653b4465e1499b9"
+    },
+    "ferroui-loader.js": {
+      "bytes": 16165,
+      "sha256": "817aa151802ca2aa17c25861fac1271538edeaac4161b198e461d2e306fe5db6"
+    },
+    "ferroui-sw.js": {
+      "bytes": 1528,
+      "sha256": "339767474c06dc15f8230f690701a6b5e915cbeea68ff1dce53a830e71d8bbbb"
+    },
+    "ferroui-sw.js.map": {
+      "bytes": 7970,
+      "sha256": "11f37d837801cc53a3da0effb98b669a42a1e3673e8b58c2430ba66aed913af8"
+    },
+    "ferroui.js": {
+      "bytes": 35910,
+      "sha256": "40f2c812b4ee1c8fa3ebbc1e0ff453256cc08f8a73fa5bbc01b96ab9bd2e2a20"
+    },
+    "ferroui.js.map": {
+      "bytes": 155919,
+      "sha256": "13e462b3c4f182ab0b4f544468b622f18cb5a770def9477476083cb2f7f46d75"
+    },
+    "index.html": {
+      "bytes": 1125,
+      "sha256": "c97a61dcefaff6a02bd3608c82ade55b341a11fe27241749f6fca62ac9becf2f"
+    },
+    "main.js": {
+      "bytes": 2720,
+      "sha256": "8f81710a5fe670e9fe5438e1c2cd8feec6d1c05dfbbf8ad21be1aaa1d4f638ea"
+    },
+    "snippets/ferrodesign-app-f10485043b6c20d9/inline0.js": {
+      "bytes": 3013,
+      "sha256": "89166deca77a446127adbe9767606b79f84a8253395a468643a977030fe32734"
+    },
+    "storage.js": {
+      "bytes": 27573,
+      "sha256": "a0c9d1ba7aef2a9e7cba10a79d61a99ba61db9faaa9290224ab07d39112d61fb"
+    },
+    "storage.js.map": {
+      "bytes": 94853,
+      "sha256": "43ca70c7239cfb3a736dada8df9e8f5926864c013a06190bd41f5d956f2d7931"
+    }
+  },
+  "harnessFiles": {
+    "tests/angular-paints-browser.mjs": {
+      "bytes": 12898,
+      "sha256": "5a7eebeea291b425fc1075d3e55f5af5f8191f0f8f24a9a10fc8a954b7be4908"
+    },
+    "tests/authoring-browser.mjs": {
+      "bytes": 7951,
+      "sha256": "806ebeb7d73ae0be421137cbb8c0ef9f360f8c87d26c73d34562d7a82a13fd87"
+    },
+    "tests/browser.mjs": {
+      "bytes": 91542,
+      "sha256": "3a3d0b9f86b9590da9ee8e2e9b2745a12545a934afe1a67de8c892406f480030"
+    },
+    "tests/components-browser.mjs": {
+      "bytes": 15683,
+      "sha256": "cf3ed180f41a62e0b2520917735b3ad238f5013a091ddf1a70743661a9940c96"
+    },
+    "tests/compositing-browser.mjs": {
+      "bytes": 8623,
+      "sha256": "897c50eba3d818f5603aaa08a9c025a44e91192f7e4ea325b8c2e652ca4ad9d4"
+    },
+    "tests/document-store-browser.mjs": {
+      "bytes": 8000,
+      "sha256": "466adceb3877b299ce92d610a15b40ff2e47cfa1f71a8e0901bcb9f15f49c0cf"
+    },
+    "tests/document-store.test.mjs": {
+      "bytes": 17126,
+      "sha256": "d3794e220039aed72b31745dd1601443bf06f7378b2ccffce90e4ea601fc3334"
+    },
+    "tests/effects-browser.mjs": {
+      "bytes": 8345,
+      "sha256": "814aad28948d9bdf677ffc69e3e32817be87915ed3fb4cd6e42d042dc9a47dbe"
+    },
+    "tests/flatten-browser.mjs": {
+      "bytes": 16921,
+      "sha256": "dc706d5e13e7471c0b075f2d9978b9d958420d703e566ddc401250396fd21585"
+    },
+    "tests/geometry-authoring-browser.mjs": {
+      "bytes": 9247,
+      "sha256": "720d3ab736b1c83ac399c1e5619b9f0b299d2485ba774a67401b6d7dd40e70d3"
+    },
+    "tests/grid-styles-browser.mjs": {
+      "bytes": 18195,
+      "sha256": "cb17248da5fea1a5d3d93b750484484c93633ad89963e83549a0169824bb63f4"
+    },
+    "tests/history-browser.mjs": {
+      "bytes": 2581,
+      "sha256": "7fa18bd154e1e041d3184d4536b0116b6d9c82cde01f3291106f826b043eeae7"
+    },
+    "tests/image-crop-browser.mjs": {
+      "bytes": 16397,
+      "sha256": "c85627f32166fb1855f814d51c07cfd6ccf8371f82f02923a6887df76548c95c"
+    },
+    "tests/inspector-lifecycle-browser.mjs": {
+      "bytes": 8236,
+      "sha256": "32ccdcf1f7b10942ce1a9df22f5be6092a461661e17838b6f9e9058c4db777a8"
+    },
+    "tests/layout-browser.mjs": {
+      "bytes": 11067,
+      "sha256": "604b4ba44c7367e2247b7f6aba5605b29a2d4ccb2745c77a8911280a291befe0"
+    },
+    "tests/layout-drag-browser.mjs": {
+      "bytes": 11848,
+      "sha256": "9f1e1383c7b325b7e31411e0122f91da9aa2fc116201feff454b87e406ac5ff3"
+    },
+    "tests/layout-transfer-browser.mjs": {
+      "bytes": 13306,
+      "sha256": "a6d1a86daccc8f480ce2f5f34eae295f9ee2bd2bbbc9e414bd0a51f7a4de4ff3"
+    },
+    "tests/masks-browser.mjs": {
+      "bytes": 12770,
+      "sha256": "9a451dd494d98ec8c05a8460c2665c9b15d4194c3b4f25ef61f86e429fca01fd"
+    },
+    "tests/matching-browser.mjs": {
+      "bytes": 7604,
+      "sha256": "a06cca5a5302f53b18a54798b555fe64b808ba63a47a21de938ac5ef9b59192b"
+    },
+    "tests/network-browser.mjs": {
+      "bytes": 13807,
+      "sha256": "e314d9e163fce0e4967ef8ace3b87d964528e79f16830013e33390c114e1433a"
+    },
+    "tests/network-bucket-browser.mjs": {
+      "bytes": 15196,
+      "sha256": "c13ec56dbc1edc18d48a8c5caa248cf9896780774cbe4497cb1eeb0d3dedf353"
+    },
+    "tests/page-inspector-browser.mjs": {
+      "bytes": 3551,
+      "sha256": "d1f36523f17c1dbfd0792365fe61ac14a8b98ce71e26cf4571948cb9dd82f733"
+    },
+    "tests/panels-browser.mjs": {
+      "bytes": 4402,
+      "sha256": "2e6ee77644f053cb6fc47346e3907e85ca4f913dcebdfa9dbc1692182e8e00bc"
+    },
+    "tests/prototype-browser.mjs": {
+      "bytes": 7627,
+      "sha256": "1a2c4a3c44d36534bb32a844bc4e0a97e4c5701937a1167d967d83fb549c70b7"
+    },
+    "tests/region-paints-browser.mjs": {
+      "bytes": 19801,
+      "sha256": "8ec7e757e05821916fc5bc809748091608b37e11eae119af17c7b3e2c43087af"
+    },
+    "tests/selection-browser.mjs": {
+      "bytes": 14609,
+      "sha256": "dda878869a63fb4623df43ffb35c53c1ccb767f39d2109024178f7fd9d26162b"
+    },
+    "tests/serialization-browser.mjs": {
+      "bytes": 6097,
+      "sha256": "47d8b18654497944c92eec207da238ac4bf483a52ad840a4477540d6fd35699b"
+    },
+    "tests/styles-browser.mjs": {
+      "bytes": 16181,
+      "sha256": "9805ac10253ef5abab7fd8ea9da153017d9f1e19c653af191d3b6467244222d7"
+    },
+    "tests/svg-compositing-browser.mjs": {
+      "bytes": 9841,
+      "sha256": "3fec5edd0697a24103e1d3094fb52e1357420048e29f7017824461fe50fffdd9"
+    },
+    "tests/text-render-benchmark.mjs": {
+      "bytes": 19627,
+      "sha256": "b7fcfe0aae8d16ab13a48c8992254fbf5889f5802737a5abb579219d05f8d3c7"
+    },
+    "tests/typography-browser.mjs": {
+      "bytes": 10742,
+      "sha256": "fba3c1bd6379b0040067527b090c27a21db13dd049cf3cda32051f2936c16eee"
+    }
+  },
+  "scope": {
+    "full": true,
+    "modes": [
+      "Software2D",
+      "WebGL2"
+    ],
+    "scenarios": "all"
+  },
+  "requestedRenderer": "Vello",
+  "node": "24.19.0",
+  "playwright": "1.64.1",
+  "chromium": "156.0.8078.4",
+  "captureTimeoutsMs": {
+    "first": 30000,
+    "singleGuardedRetry": 60000
+  },
+  "staticModuleCheck": {
+    "requiredModules": 6,
+    "passed": true
+  },
+  "dependencyGraph": {
+    "source": "CI artifact dependencies.txt",
+    "velloPresent": true,
+    "skiaAbsent": true,
+    "lockfileEqualsCheckout": true
+  },
+  "paths": {
+    "stableRoot": "/tmp/ferrodesign-full-f2bb1d61-9b313a0caa46",
+    "harness": "/tmp/ferrodesign-full-f2bb1d61-9b313a0caa46/harness",
+    "runtime": "/tmp/ferrodesign-full-f2bb1d61-9b313a0caa46/runtime",
+    "report": "/tmp/ferrodesign-full-f2bb1d61-9b313a0caa46/report",
+    "log": "/tmp/ferrodesign-full-f2bb1d61-9b313a0caa46/browser.log"
+  },
+  "recovery": {
+    "priorLocalWorkspaceFilesUnavailable": true,
+    "priorLocalWasm": {
+      "bytes": 51209724,
+      "sha256": "ea97294298eb4537155e0f84231387f4119c9a5ec6084d09e6687d630376f29f",
+      "availableToThisAgent": false
+    },
+    "currentRuntimeIsDifferentBinary": true,
+    "priorLocalReports": "Previous local reports/traces are not available to this agent after workspace loss; parent is separately recovering previously uploaded Git objects. Prior focused-pass observations in conversation are not substituted for this new complete run.",
+    "stableExecutionCopy": "All test files and runtime artifacts copied byte-for-byte to this task-owned /tmp directory; exact hashes verified before launch. Primary report/log live there to preserve evidence if workspace files disappear again."
+  },
+  "runStarted": "2026-10-22T14:55:48.210317+00:00",
+  "priorLaunchFailure": {
+    "cause": "Native Chrome executable files were0644 after restoration/copy across tool contexts; spawn returned EACCES before any browser/app checks.",
+    "correction": "Restored only executable file modes from official Chrome for Testing ZIP metadata in the same execution context as the new launch. No app, test, capture, or browser-security flags changed.",
+    "restoredFiles": [
+      {
+        "path": "chrome-linux64/chrome",
+        "mode": "0o755"
+      },
+      {
+        "path": "chrome-linux64/chrome-wrapper",
+        "mode": "0o755"
+      },
+      {
+        "path": "chrome-linux64/chrome_crashpad_handler",
+        "mode": "0o755"
+      },
+      {
+        "path": "chrome-linux64/chrome_sandbox",
+        "mode": "0o755"
+      },
+      {
+        "path": "chrome-linux64/libEGL.so",
+        "mode": "0o755"
+      },
+      {
+        "path": "chrome-linux64/libGLESv2.so",
+        "mode": "0o755"
+      },
+      {
+        "path": "chrome-linux64/libvk_swiftshader.so",
+        "mode": "0o755"
+      },
+      {
+        "path": "chrome-linux64/libvulkan.so.1",
+        "mode": "0o755"
+      },
+      {
+        "path": "chrome-linux64/WidevineCdm/_platform_specific/linux_x64/libwidevinecdm.so",
+        "mode": "0o755"
+      }
+    ],
+    "chromeZipSha256": "43fd31766c7533a02dda2ded5ad50c2f861cd5400be7509c0abad71129f79d79",
+    "failedReport": "/tmp/ferrodesign-full-f2bb1d61-9b313a0caa46/launch-permission-failure/report.json",
+    "failedLog": "/tmp/ferrodesign-full-f2bb1d61-9b313a0caa46/launch-permission-failure.log"
+  }
+}

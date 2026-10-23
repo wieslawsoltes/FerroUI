@@ -1,0 +1,854 @@
+{
+  "createdUtc": "2026-10-22T16:15:05.366381+00:00",
+  "status": "Failed original preserved; trace supports a narrow test-only Escape publication boundary correction; no runtime change or rerun performed for this diagnosis",
+  "provenance": {
+    "harnessCommit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+    "buildCommit": "3a0bf1f13c6ede9abe5360bc3691085a3bc981f0",
+    "runtimeArtifactId": 12427798904,
+    "wasmSha256": "7880a628e7117ab88f896f69baa9c9ccedcdc33792302a01f653b4465e1499b9",
+    "scope": {
+      "full": false,
+      "modes": [
+        "WebGL2"
+      ],
+      "scenarios": "all"
+    },
+    "sourceFilesUnchanged": 31,
+    "runtimeFilesUnchanged": 16
+  },
+  "terminal": {
+    "passed": false,
+    "checks": 82,
+    "scenariosPassed": 16,
+    "scenariosEntered": 17,
+    "scenario": "matching",
+    "failure": "SelectSameStroke did not become ready after one SelectMatchingButton click; native modal remained closed",
+    "captures": 29,
+    "captureAttempts": 29,
+    "captureRetries": 0,
+    "pageErrors": [],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ]
+  },
+  "directObservations": [
+    "The first native Select same dialog opened successfully, Same fill selected [8,3,2], all original document/history/revision assertions passed, and its native PNG capture succeeded.",
+    "Escape call npnl@9055 starts1264377.377ms and ends1264381.823ms. Exact empty-selection wait npnl@9057 resolves1264385.632ms; there is no separate native frame/scene publication barrier for Escape.",
+    "State npnl@9059 at1264388.566\u20131264397.162ms is selection[], renderedFrames6, sceneFrames8, SelectMatchingButton.visible=false. These6/8 values become the later clickWorld floors.",
+    "The source canvas click npnl@9061 runs1264401.413\u20131264415.912ms. State npnl@9063 at1264419.787\u20131264430.810ms already reports selection[2], renderedFrames7, sceneFrames9 and live SelectMatchingButton bounds(1329,174,89,28), visible/enabled/measureValid/arrangeValid=true.",
+    "The existing native frame>6 wait npnl@9065 and native scene>8 wait npnl@9067 both complete immediately. Exact selected[2] then resolves; no new scene counter is required after the already-observed9.",
+    "Screencast matching-frame-3.jpeg shows the empty-selection Page inspector. Its CDP frameSwapWallTime mapped into trace monotonic time is1264418.613ms; Playwright receives it at1264923.443ms. Its presented image predates the inspector click and differs from the newly reported live native layout.",
+    "Pre-click state npnl@9077 at1264508.985\u20131264517.871ms still reports selected[2], frame7/scene9, valid visible SelectMatchingButton bounds(1329,174,89,28), CanvasHost focusWithin=true and ModalBackdrop.visible=false.",
+    "Exactly one actual native pointer click npnl@9079 is sent at(1373.5,188), from1264521.535\u20131264525.986ms. The click is inside the live button and InspectorViewport. No fallback command or second click is sent.",
+    "The following two host requestAnimationFrame callbacks complete at1264936.932ms. Screencast matching-frame-4.jpeg has swap time1264935.260ms and first shows the selected source/Rectangle inspector with Select same visible. This swap is after the button click.",
+    "SelectSameStroke readiness wait npnl@9083 runs1264940.114\u20131274945.160ms, delivering its configured10000ms timeout after10005.046ms. Catch state npnl@9085 takes8.783ms and still reports frame7/scene9, selected[2], closed modal and no SelectSameStroke control. No stroke-row pointer click is reached.",
+    "Final native failure PNG succeeds in58.571ms and visibly contains the source selection and Rectangle inspector with Select same; the dialog is closed. This is not the prior ready-control timeout pattern."
+  ],
+  "preAndPostClickState": {
+    "beforeEscapeSelection": {
+      "selection": [
+        8,
+        3,
+        2
+      ],
+      "renderedFrames": 5,
+      "sceneFrames": 8,
+      "revision": 5,
+      "documentRevision": 5,
+      "historyLength": 1,
+      "canRedo": true,
+      "controls": {
+        "CanvasHost": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": true,
+          "focused": false,
+          "height": 1000,
+          "measureValid": true,
+          "visible": true,
+          "width": 1016,
+          "x": 296,
+          "y": 0
+        },
+        "SelectMatchingButton": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 28,
+          "measureValid": true,
+          "visible": true,
+          "width": 89,
+          "x": 1329,
+          "y": 174
+        },
+        "ModalBackdrop": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 1000,
+          "measureValid": true,
+          "visible": false,
+          "width": 1600,
+          "x": 0,
+          "y": 0
+        },
+        "ModalPanel": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 475,
+          "measureValid": true,
+          "visible": false,
+          "width": 620,
+          "x": 490,
+          "y": 262
+        },
+        "ModalViewport": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 298,
+          "measureValid": true,
+          "visible": false,
+          "width": 572,
+          "x": 514,
+          "y": 369
+        },
+        "SelectSameFill": null,
+        "SelectSameStroke": null,
+        "SelectSameProperties": null,
+        "PageInspector": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 376,
+          "measureValid": true,
+          "visible": false,
+          "width": 255,
+          "x": 1329,
+          "y": 160
+        },
+        "DesignInspector": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 1347,
+          "measureValid": true,
+          "visible": true,
+          "width": 255,
+          "x": 1329,
+          "y": 210
+        },
+        "Toast": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 0,
+          "measureValid": true,
+          "visible": false,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "ToastText": {
+          "arrangeValid": false,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 0,
+          "measureValid": false,
+          "text": null,
+          "visible": false,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "afterEscape": {
+      "selection": [],
+      "renderedFrames": 6,
+      "sceneFrames": 8,
+      "revision": 5,
+      "documentRevision": 5,
+      "historyLength": 1,
+      "canRedo": true,
+      "controls": {
+        "CanvasHost": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": true,
+          "focused": false,
+          "height": 1000,
+          "measureValid": true,
+          "visible": true,
+          "width": 1016,
+          "x": 296,
+          "y": 0
+        },
+        "SelectMatchingButton": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 28,
+          "measureValid": true,
+          "visible": false,
+          "width": 89,
+          "x": 1329,
+          "y": 174
+        },
+        "ModalBackdrop": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 1000,
+          "measureValid": true,
+          "visible": false,
+          "width": 1600,
+          "x": 0,
+          "y": 0
+        },
+        "ModalPanel": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 475,
+          "measureValid": true,
+          "visible": false,
+          "width": 620,
+          "x": 490,
+          "y": 262
+        },
+        "ModalViewport": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 298,
+          "measureValid": true,
+          "visible": false,
+          "width": 572,
+          "x": 514,
+          "y": 369
+        },
+        "SelectSameFill": null,
+        "SelectSameStroke": null,
+        "SelectSameProperties": null,
+        "PageInspector": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 376,
+          "measureValid": true,
+          "visible": true,
+          "width": 255,
+          "x": 1329,
+          "y": 160
+        },
+        "DesignInspector": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 1347,
+          "measureValid": true,
+          "visible": false,
+          "width": 255,
+          "x": 1329,
+          "y": 210
+        },
+        "Toast": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 0,
+          "measureValid": true,
+          "visible": false,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "ToastText": {
+          "arrangeValid": false,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 0,
+          "measureValid": false,
+          "text": null,
+          "visible": false,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "afterSourceClick": {
+      "selection": [
+        2
+      ],
+      "renderedFrames": 7,
+      "sceneFrames": 9,
+      "revision": 6,
+      "documentRevision": 6,
+      "historyLength": 1,
+      "canRedo": true,
+      "controls": {
+        "CanvasHost": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": true,
+          "focused": false,
+          "height": 1000,
+          "measureValid": true,
+          "visible": true,
+          "width": 1016,
+          "x": 296,
+          "y": 0
+        },
+        "SelectMatchingButton": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 28,
+          "measureValid": true,
+          "visible": true,
+          "width": 89,
+          "x": 1329,
+          "y": 174
+        },
+        "ModalBackdrop": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 1000,
+          "measureValid": true,
+          "visible": false,
+          "width": 1600,
+          "x": 0,
+          "y": 0
+        },
+        "ModalPanel": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 475,
+          "measureValid": true,
+          "visible": false,
+          "width": 620,
+          "x": 490,
+          "y": 262
+        },
+        "ModalViewport": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 298,
+          "measureValid": true,
+          "visible": false,
+          "width": 572,
+          "x": 514,
+          "y": 369
+        },
+        "SelectSameFill": null,
+        "SelectSameStroke": null,
+        "SelectSameProperties": null,
+        "PageInspector": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 376,
+          "measureValid": true,
+          "visible": false,
+          "width": 255,
+          "x": 1329,
+          "y": 160
+        },
+        "DesignInspector": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 1472,
+          "measureValid": true,
+          "visible": true,
+          "width": 255,
+          "x": 1329,
+          "y": 210
+        },
+        "Toast": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 0,
+          "measureValid": true,
+          "visible": false,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "ToastText": {
+          "arrangeValid": false,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 0,
+          "measureValid": false,
+          "text": null,
+          "visible": false,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "beforeInspectorClick": {
+      "selection": [
+        2
+      ],
+      "renderedFrames": 7,
+      "sceneFrames": 9,
+      "revision": 6,
+      "documentRevision": 6,
+      "historyLength": 1,
+      "canRedo": true,
+      "controls": {
+        "CanvasHost": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": true,
+          "focused": false,
+          "height": 1000,
+          "measureValid": true,
+          "visible": true,
+          "width": 1016,
+          "x": 296,
+          "y": 0
+        },
+        "SelectMatchingButton": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 28,
+          "measureValid": true,
+          "visible": true,
+          "width": 89,
+          "x": 1329,
+          "y": 174
+        },
+        "ModalBackdrop": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 1000,
+          "measureValid": true,
+          "visible": false,
+          "width": 1600,
+          "x": 0,
+          "y": 0
+        },
+        "ModalPanel": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 475,
+          "measureValid": true,
+          "visible": false,
+          "width": 620,
+          "x": 490,
+          "y": 262
+        },
+        "ModalViewport": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 298,
+          "measureValid": true,
+          "visible": false,
+          "width": 572,
+          "x": 514,
+          "y": 369
+        },
+        "SelectSameFill": null,
+        "SelectSameStroke": null,
+        "SelectSameProperties": null,
+        "PageInspector": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 376,
+          "measureValid": true,
+          "visible": false,
+          "width": 255,
+          "x": 1329,
+          "y": 160
+        },
+        "DesignInspector": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 1472,
+          "measureValid": true,
+          "visible": true,
+          "width": 255,
+          "x": 1329,
+          "y": 210
+        },
+        "Toast": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 0,
+          "measureValid": true,
+          "visible": false,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "ToastText": {
+          "arrangeValid": false,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 0,
+          "measureValid": false,
+          "text": null,
+          "visible": false,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "afterReadinessTimeout": {
+      "selection": [
+        2
+      ],
+      "renderedFrames": 7,
+      "sceneFrames": 9,
+      "revision": 6,
+      "documentRevision": 6,
+      "historyLength": 1,
+      "canRedo": true,
+      "controls": {
+        "CanvasHost": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": true,
+          "focused": false,
+          "height": 1000,
+          "measureValid": true,
+          "visible": true,
+          "width": 1016,
+          "x": 296,
+          "y": 0
+        },
+        "SelectMatchingButton": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 28,
+          "measureValid": true,
+          "visible": true,
+          "width": 89,
+          "x": 1329,
+          "y": 174
+        },
+        "ModalBackdrop": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 1000,
+          "measureValid": true,
+          "visible": false,
+          "width": 1600,
+          "x": 0,
+          "y": 0
+        },
+        "ModalPanel": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 475,
+          "measureValid": true,
+          "visible": false,
+          "width": 620,
+          "x": 490,
+          "y": 262
+        },
+        "ModalViewport": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 298,
+          "measureValid": true,
+          "visible": false,
+          "width": 572,
+          "x": 514,
+          "y": 369
+        },
+        "SelectSameFill": null,
+        "SelectSameStroke": null,
+        "SelectSameProperties": null,
+        "PageInspector": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 376,
+          "measureValid": true,
+          "visible": false,
+          "width": 255,
+          "x": 1329,
+          "y": 160
+        },
+        "DesignInspector": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 1472,
+          "measureValid": true,
+          "visible": true,
+          "width": 255,
+          "x": 1329,
+          "y": 210
+        },
+        "Toast": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 0,
+          "measureValid": true,
+          "visible": false,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "ToastText": {
+          "arrangeValid": false,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 0,
+          "measureValid": false,
+          "text": null,
+          "visible": false,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        }
+      }
+    }
+  },
+  "publicationInference": {
+    "supported": "The outstanding Escape transition can satisfy later clickWorld frame/scene floors while the newly selected inspector is still unpublished. The displayed empty Page inspector spans the source-click state snapshot, and the selected Rectangle inspector appears after the inspector click. A scalar scene counter does not identify the layout generation belonging to a control.",
+    "sourceSupport": [
+      "samples/FerroDesign/tests/matching-browser.mjs:48\u201356: selectSource presses Escape and waits only exact empty selection before clickWorld.",
+      "samples/FerroDesign/tests/browser.mjs:228\u2013244: clickWorld captures current frame/scene counters immediately before its selecting click; it waits only larger counters after selection changes.",
+      "samples/FerroDesign/crates/ferrodesign-app/src/shell.rs:145\u2013157: sceneFrames counts public renderer.scene_invalidated notifications;659\u2013670 exposes current layout/visibility, not hit-test readback.",
+      "src/FerroUI.Base/rendering/composition/compositing_renderer.rs:293\u2013313: only one scene-invalidated completion callback is queued; it is posted at INPUT after commit.rendered(), so a prior outstanding completion may satisfy a later scalar counter threshold.",
+      "src/FerroUI.Base/rendering/composition/server/server_compositor.rs:739\u2013770: targets render before visual_readback_update_pass; the completed notification follows those operations.",
+      "samples/FerroDesign/crates/ferrodesign-app/src/shell.rs:440,1860 and shell/selection.rs:7\u201328: the button dispatches select-matching; after draft validation the handler shows ModalBackdrop and builds named row controls synchronously."
+    ],
+    "notProven": [
+      "The trace does not expose the actual native hit-test target, pointer-capture owner, button Click event, or callback invocation. It therefore cannot prove the exact event-consumption path or exclude every application guard.",
+      "Screencast frameSwapWallTime is a presentation timestamp, not a native per-control hit-test generation. Pixel timing corroborates the boundary but is not itself an input-hit query.",
+      "The frame+scene counters are coalesced and cannot prove per-target readiness; adding another unconditional idle scene wait could deadlock a quiescent canvas.",
+      "This diagnosis does not claim high memory caused this failure."
+    ]
+  },
+  "publicApiCondition": {
+    "availableInCurrentBrowserBridge": false,
+    "description": "At the exact center coordinate that JavaScript will click, query the full native input root and accept only a returned input element identical to the intended control or a visual descendant of it, while retaining the existing valid-layout/visible/enabled checks.",
+    "nativePath": "control.get_input_root().root_element(); translate the EditorRoot-space click point using self.root.translate_point(point, &input_root); input_root.input_hit_test(translated); require hit identity==target OR target.is_visual_ancestor_of(hit).",
+    "reasonForFullRoot": "The full root query includes current clipping and occluding siblings; hit testing only the target subtree would incorrectly bypass blockers.",
+    "source": "visual_extensions.rs:461,471,538; input_extensions.rs:65,338; composition/compositing_renderer.rs:232; composition/composition_target.rs:304.",
+    "limitations": "This samples current uncaptured native hit-test readiness. MouseDevice::mouse_down chooses existing pointer capture first. It does not guarantee future delivery, immutable scene state, pointer release/click activation, or command success. Preserve a single real pointer click and exact modal-open/command outcome afterward; do not invoke commands or force rendering."
+  },
+  "proposedTestOnlyCorrection": {
+    "scope": "Only matching-browser.mjs; parent authorized separate agent to prepare this correction. Original f2bb files remain unchanged in the preserved harness.",
+    "beforeSourceSelection": "Capture native state before Escape; when selection is actually cleared, require exact empty selection and the corresponding native frame and scene progression before issuing the next selecting canvas click. Retain clickWorld publication checks for that subsequent transition.",
+    "afterInspectorClick": "Require exact ModalBackdrop-visible and intended named row visibility/validity before the one row click, with the existing finite10000ms deadline. Preserve existing exact selected IDs, modal closure, document, history, redo and revision assertions.",
+    "verificationNeeded": "One bounded both-mode matching run on a separately copied, published corrected harness; no automatic full rerun or application rebuild."
+  },
+  "resourcesAtFailure": {
+    "samples": [
+      {
+        "utc": "2026-10-22T16:06:29.194495+00:00",
+        "memoryCurrent": 4178927616,
+        "memoryMax": 8589934592,
+        "anon": 818167808,
+        "inactiveFile": 1075855360,
+        "events": {
+          "low": 0,
+          "high": 0,
+          "max": 10935830,
+          "oom": 18,
+          "oom_kill": 12,
+          "oom_group_kill": 0
+        }
+      },
+      {
+        "utc": "2026-10-22T16:06:34.196804+00:00",
+        "memoryCurrent": 4207341568,
+        "memoryMax": 8589934592,
+        "anon": 843296768,
+        "inactiveFile": 1077047296,
+        "events": {
+          "low": 0,
+          "high": 0,
+          "max": 10935830,
+          "oom": 18,
+          "oom_kill": 12,
+          "oom_group_kill": 0
+        }
+      },
+      {
+        "utc": "2026-10-22T16:06:39.198663+00:00",
+        "memoryCurrent": 4182515712,
+        "memoryMax": 8589934592,
+        "anon": 812433408,
+        "inactiveFile": 1077465088,
+        "events": {
+          "low": 0,
+          "high": 0,
+          "max": 10935830,
+          "oom": 18,
+          "oom_kill": 12,
+          "oom_group_kill": 0
+        }
+      },
+      {
+        "utc": "2026-10-22T16:06:44.200705+00:00",
+        "memoryCurrent": 4273954816,
+        "memoryMax": 8589934592,
+        "anon": 846913536,
+        "inactiveFile": 1137037312,
+        "events": {
+          "low": 0,
+          "high": 0,
+          "max": 10935830,
+          "oom": 18,
+          "oom_kill": 12,
+          "oom_group_kill": 0
+        }
+      }
+    ],
+    "conclusion": "Around this failure cgroup memory is4.18\u20134.27GB of8GiB and max/oom/oom_kill counters are stable. Surrounding evaluate calls take8\u201312ms, unlike the earlier two recovered combined-run scheduling stalls. Whole-run peak8GiB alone is not causal evidence.",
+    "samplerLimit": "Cgroup scope may include broader work; path-matched process RSS is not descendant/PSS/per-PID-cgroup attribution."
+  },
+  "artifacts": {
+    "report/report.json": {
+      "path": "/tmp/ferrodesign-webgl2-all-f2bb1d61-9b313a0caa46/report/report.json",
+      "bytes": 319307,
+      "sha256": "dc52df1f7ed3c803ef78bd2d3d929577f77084453585544a065a870f9cb0bd41"
+    },
+    "report/validation-source.json": {
+      "path": "/tmp/ferrodesign-webgl2-all-f2bb1d61-9b313a0caa46/report/validation-source.json",
+      "bytes": 14088,
+      "sha256": "72c88d8f91f995d356a86935040055dc95c99ebdffcb4722ab8f684f81c4b118"
+    },
+    "report/input-equivalence.json": {
+      "path": "/tmp/ferrodesign-webgl2-all-f2bb1d61-9b313a0caa46/report/input-equivalence.json",
+      "bytes": 11630,
+      "sha256": "84fe802e24886c625bb74f485f67a16ab7b1a98fe2d108d12ee278ccc32d3044"
+    },
+    "report/post-run-integrity.json": {
+      "path": "/tmp/ferrodesign-webgl2-all-f2bb1d61-9b313a0caa46/report/post-run-integrity.json",
+      "bytes": 8768,
+      "sha256": "fdcb52266d05b98b3488f9ce4f263cf3d478e73b90267e61e1a0b9fcdb2cbfa9"
+    },
+    "report/WebGL2-failure.png": {
+      "path": "/tmp/ferrodesign-webgl2-all-f2bb1d61-9b313a0caa46/report/WebGL2-failure.png",
+      "bytes": 81930,
+      "sha256": "526df17367a406a0cfdb22c480eb13e96a1b315d7dd5fb741bce1a189edd8418"
+    },
+    "report/WebGL2-failure.ferrodesign": {
+      "path": "/tmp/ferrodesign-webgl2-all-f2bb1d61-9b313a0caa46/report/WebGL2-failure.ferrodesign",
+      "bytes": 19799,
+      "sha256": "1825e791d419942a9c93c449db768b393f99b0e61a0ef7b449aad173309b8373"
+    },
+    "report/WebGL2-native-matching-fill.png": {
+      "path": "/tmp/ferrodesign-webgl2-all-f2bb1d61-9b313a0caa46/report/WebGL2-native-matching-fill.png",
+      "bytes": 81331,
+      "sha256": "2b719df923d45f657187b1172477274e23c9cacf5ae607106695676f330de4f8"
+    },
+    "terminal.json": {
+      "path": "/tmp/ferrodesign-webgl2-all-f2bb1d61-9b313a0caa46/terminal.json",
+      "bytes": 5070,
+      "sha256": "d4a30cd1e8bdb03e04975c0b73c72e9e5fda60a8b4ae72d7b171e542ee4b0a38"
+    },
+    "terminal-summary.json": {
+      "path": "/tmp/ferrodesign-webgl2-all-f2bb1d61-9b313a0caa46/terminal-summary.json",
+      "bytes": 7417,
+      "sha256": "fbba00e257eb57ddbc39a56d322be106309b1253f0573d54413bc69269203bb9"
+    },
+    "resources.jsonl": {
+      "path": "/tmp/ferrodesign-webgl2-all-f2bb1d61-9b313a0caa46/resources.jsonl",
+      "bytes": 910593,
+      "sha256": "6160d314663695f3096a8fe1b7f863428eded8ba1bc00b8a3780d34e0df446a5"
+    },
+    "browser.log": {
+      "path": "/tmp/ferrodesign-webgl2-all-f2bb1d61-9b313a0caa46/browser.log",
+      "bytes": 14116,
+      "sha256": "b135161d4ce363caed9197d35492aad9529e18681ff5202ee8f7cd1ac548424f"
+    },
+    "diagnosis/matching-late-events.json": {
+      "path": "/tmp/ferrodesign-webgl2-all-f2bb1d61-9b313a0caa46/diagnosis/matching-late-events.json",
+      "bytes": 36950,
+      "sha256": "881fdd756208b8efb24573fc305c019f3c07a10d8974b9f0a7916eb1340b3ed2"
+    },
+    "diagnosis/matching-frames.json": {
+      "path": "/tmp/ferrodesign-webgl2-all-f2bb1d61-9b313a0caa46/diagnosis/matching-frames.json",
+      "bytes": 2942,
+      "sha256": "0023d1f8a947b70976627a17adc15e32c044f9c2afc3dff427754a7ecd513b52"
+    },
+    "diagnosis/matching-resource-window.json": {
+      "path": "/tmp/ferrodesign-webgl2-all-f2bb1d61-9b313a0caa46/diagnosis/matching-resource-window.json",
+      "bytes": 19631,
+      "sha256": "7e2d12487ee8ffa55adb17fd716af8a629a55c57056f0757f93f68c5c512bc72"
+    },
+    "diagnosis/matching-frame-3.jpeg": {
+      "path": "/tmp/ferrodesign-webgl2-all-f2bb1d61-9b313a0caa46/diagnosis/matching-frame-3.jpeg",
+      "bytes": 24847,
+      "sha256": "c631d02884d5c28dac79f5c6972e8a78c53c3ef57787ac5672ff92e8305c7bad"
+    },
+    "diagnosis/matching-frame-4.jpeg": {
+      "path": "/tmp/ferrodesign-webgl2-all-f2bb1d61-9b313a0caa46/diagnosis/matching-frame-4.jpeg",
+      "bytes": 32334,
+      "sha256": "52d778a20db6104f117f30fbddcbf169de0e414fffd9c7afccb0b597cf88147e"
+    }
+  },
+  "nextRunStatus": "Not launched; waiting for corrected test-only checkpoint identity from parent"
+}

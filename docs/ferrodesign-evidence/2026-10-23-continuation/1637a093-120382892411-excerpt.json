@@ -1,0 +1,47 @@
+{
+  "source_sha": "1637a093723a4f899b7f4e371fd53f0b91914a98",
+  "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253747/job/120382892411",
+  "whole_log_sha256": "f0015c79bac1acb6e6c41aea2c892212e5c82d1a1a06e8fbe6a18d80788cd997",
+  "lines": [
+    {
+      "line": 196,
+      "text": "2026-10-23T11:12:10.1085959Z {\"already_equal\": 0, \"bytes_hashed\": 223608957, \"manifest\": \"/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target/.ferrodesign-source-mtimes-v1.json\", \"operation\": \"restore\", \"recorded\": 0, \"restored\": 9849, \"schema_version\": 1, \"skip_reasons\": {\"content_mismatch\": 21}, \"skipped\": 21, \"status\": \"restored\", \"tracked_files\": 9878}"
+    },
+    {
+      "line": 1515,
+      "text": "2026-10-23T11:12:28.2081934Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 516 filtered out; finished in 0.34s"
+    },
+    {
+      "line": 2410,
+      "text": "2026-10-23T11:12:28.4005712Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 4376 filtered out; finished in 0.03s"
+    },
+    {
+      "line": 2706,
+      "text": "2026-10-23T11:12:28.7378379Z test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 4441 filtered out; finished in 0.18s"
+    },
+    {
+      "line": 3160,
+      "text": "2026-10-23T11:12:31.4469811Z test result: ok. 174 passed; 0 failed; 0 ignored; 0 measured; 4283 filtered out; finished in 2.57s"
+    },
+    {
+      "line": 3445,
+      "text": "2026-10-23T11:12:31.6644041Z test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 4452 filtered out; finished in 0.06s"
+    },
+    {
+      "line": 3898,
+      "text": "2026-10-23T11:13:19.9341560Z test canvas::grids::tests::frame_grids_honor_clipped_transformed_ancestors_and_hide_other_pages ... ok"
+    },
+    {
+      "line": 4073,
+      "text": "2026-10-23T11:13:44.7104233Z test shell::layout::padding::tests::native_padding_diagnostics_publish_real_fields_and_export_controls ... ok"
+    },
+    {
+      "line": 4113,
+      "text": "2026-10-23T11:14:03.3427242Z test result: ok. 239 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 43.57s"
+    },
+    {
+      "line": 4127,
+      "text": "2026-10-23T11:14:04.4631941Z {\"already_equal\": 0, \"bytes_hashed\": 223635766, \"manifest\": \"/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target/.ferrodesign-source-mtimes-v1.json\", \"operation\": \"snapshot\", \"recorded\": 9878, \"restored\": 0, \"schema_version\": 1, \"skip_reasons\": {}, \"skipped\": 0, \"status\": \"snapshotted\", \"tracked_files\": 9878}"
+    }
+  ]
+}

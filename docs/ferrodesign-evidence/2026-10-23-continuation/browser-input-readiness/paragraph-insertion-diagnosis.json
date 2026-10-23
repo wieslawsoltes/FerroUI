@@ -1,0 +1,153 @@
+{
+  "runtimeCommit": "08e29e4f530c0ae65f6e2ac072f381605e23ed0c",
+  "harnessCommit": "0f0732784bd6fdf1cb2477a61dd332d9a007fec2",
+  "scope": "Exact saved document and requested-input diagnosis for the original failed08/0f scenarios in both renderers. No c549 replay.",
+  "originalUnit": "A🦀\n",
+  "originalText": "A🦀\nA🦀\nA🦀\n",
+  "expectedAfterInsertion": "A🦀\nA🦀\nA🦀\nA🦀\n",
+  "expectedInsertedUtf8Bytes": 6,
+  "actualInsertedUtf8Bytes": 5,
+  "modes": [
+    {
+      "renderer": "Software2D",
+      "failureDocument": "Software2D-paragraphs-failure.ferrodesign",
+      "failureDocumentHash": {
+        "bytes": 4521,
+        "sha256": "b009f17656becb00a21a446cb3ab0a90563b508697bf14d3f50b01b1a5ab5e5f"
+      },
+      "trace": "Software2D-trace.zip",
+      "traceHash": {
+        "bytes": 61632834,
+        "sha256": "46494ee1d72d0ae4aa55af50ecd7bcd9b05f9511d3eb42c8a6ca0f57aed4785a",
+        "retention": "complete local original; large trace not committed"
+      },
+      "requestedInsertion": {
+        "callId": "xvrq@7313",
+        "method": "keyboardInsertText",
+        "requestedText": "A🦀\n",
+        "traceStartMs": 147040.361
+      },
+      "actualUtf8Bytes": 23,
+      "actualMatchesInsertionWithoutNewline": true
+    },
+    {
+      "renderer": "WebGL2",
+      "failureDocument": "WebGL2-paragraphs-failure.ferrodesign",
+      "failureDocumentHash": {
+        "bytes": 4521,
+        "sha256": "b009f17656becb00a21a446cb3ab0a90563b508697bf14d3f50b01b1a5ab5e5f"
+      },
+      "trace": "WebGL2-trace.zip",
+      "traceHash": {
+        "bytes": 39723975,
+        "sha256": "99b4d0d9b9eecd504e8d4f31905b0823b10ed88cdc4264d04d50485d0ce8627d",
+        "retention": "complete local original; large trace not committed"
+      },
+      "requestedInsertion": {
+        "callId": "xvrq@16493",
+        "method": "keyboardInsertText",
+        "requestedText": "A🦀\n",
+        "traceStartMs": 793825.086
+      },
+      "actualUtf8Bytes": 23,
+      "actualMatchesInsertionWithoutNewline": true
+    }
+  ],
+  "actualRichText": {
+    "text": "A🦀A🦀\nA🦀\nA🦀\n",
+    "text_runs": [
+      {
+        "start": 0,
+        "end": 11,
+        "font_family": null,
+        "font_size": 20.0,
+        "font_weight": 400,
+        "color": {
+          "r": 190,
+          "g": 30,
+          "b": 50,
+          "a": 255
+        },
+        "italic": false,
+        "decoration": "none"
+      },
+      {
+        "start": 11,
+        "end": 17,
+        "font_family": null,
+        "font_size": 22.0,
+        "font_weight": 600,
+        "color": {
+          "r": 20,
+          "g": 90,
+          "b": 190,
+          "a": 255
+        },
+        "italic": true,
+        "decoration": "none"
+      },
+      {
+        "start": 17,
+        "end": 23,
+        "font_family": null,
+        "font_size": 24.0,
+        "font_weight": 800,
+        "color": {
+          "r": 25,
+          "g": 140,
+          "b": 60,
+          "a": 255
+        },
+        "italic": false,
+        "decoration": "strikethrough"
+      }
+    ],
+    "text_paragraphs": [
+      {
+        "start": 0,
+        "end": 11,
+        "alignment": "left",
+        "direction": "ltr",
+        "line_height": 1.2,
+        "space_before": 0.0,
+        "space_after": 2.0,
+        "indent": 10.0
+      },
+      {
+        "start": 11,
+        "end": 17,
+        "alignment": "left",
+        "direction": "ltr",
+        "line_height": 1.3,
+        "space_before": 1.0,
+        "space_after": 3.0,
+        "indent": 20.0
+      },
+      {
+        "start": 17,
+        "end": 23,
+        "alignment": "left",
+        "direction": "ltr",
+        "line_height": 1.4,
+        "space_before": 2.0,
+        "space_after": 4.0,
+        "indent": 30.0
+      },
+      {
+        "start": 23,
+        "end": 23,
+        "alignment": "left",
+        "direction": "ltr",
+        "line_height": 1.5,
+        "space_before": 3.0,
+        "space_after": 5.0,
+        "indent": 40.0
+      }
+    ]
+  },
+  "observedConclusion": "Both saved failures contain the exact result of inserting A🦀 without the requested newline. Character and paragraph ranges are consistent with the five-byte insertion; no inconsistent range rebasing is established.",
+  "unrecorded": "The historical DOM InputEvent.data payload was not collected. A newline filtered by the single-line browser bridge is a source-backed explanation, not an observed event-payload fact.",
+  "sourceContract": "The browser bridge uses input type=text and forwards InputEvent.data. Native inline TextBox accepts returns. Public native clipboard paste snapshots native undo once, then inserts the complete text/plain value.",
+  "c549Correction": "Write and read back the actual browser clipboard text/plain payload, issue one trusted Ctrl+V, and retain full rich-text, native one-undo/redo, line-indentation and one document-session history assertions.",
+  "c549BrowserStatus": "Not replayed in this evidence snapshot."
+}

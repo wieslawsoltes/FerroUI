@@ -1,0 +1,47 @@
+✔ nonoverlapping RGBA blocks keep row/column indexing and conserve alpha area (8.031634ms)
+✔ opaque and transparent coverage stays exact at both declared reference scales (3.645789ms)
+✔ fractionally translated analytic rectangle coverage survives byte rounding and averaging (10.198243ms)
+✔ sequential strips preserve coverage across row seams and a short final strip (4.437273ms)
+✔ unstable references are rejected even when the finer raster would match a candidate (0.473885ms)
+✔ invalid dimensions, excessive work and malformed coverage fail explicitly (1.296646ms)
+✔ the b7 Alt-radius failure matches delivered float32 input without weakening the authored-radius assertion (0.546094ms)
+✔ the pointer oracle preserves local radius units under reflection, shear, rotation and viewport zoom (0.389478ms)
+✔ invalid geometry fails the oracle and negative delivered radius clamps to the authored lower bound (8.031854ms)
+✔ quantized affine pointer samples preserve the strict angular oracle across the 360-degree seam (3.855645ms)
+✔ logical local-pixel rays ignore displaced markers and preserve source-stop identity on a nonsquare box (0.565413ms)
+✔ angular input accumulates winding and restores the complete original paint on exact drag-back (0.572994ms)
+✔ insertion derives the actual affine ray before exact RGBA interpolation at a rounding boundary (2.425038ms)
+✔ stable authored tie order supplies the same exact color on and after a repeated offset (0.244539ms)
+✔ input observation remains passive, labels synthetic input honestly, and does not call the native bridge (1.048802ms)
+✔ reading pointer evidence retains listeners and returns a stable bounded snapshot (0.704142ms)
+✔ input evidence is bounded and records overflow instead of silently discarding it (0.427194ms)
+✔ nested observers fail explicitly and leave the first observation intact (1.952876ms)
+✔ inline evidence retains native pointer facts and excludes document and typography payloads (0.440875ms)
+✔ union clips overlap without adding nested or parallel wall time (0.282055ms)
+✔ marked clock alignment identifies the page thread and clips actual pre-capture work (6.683ms)
+✔ inconsistent or absent anchors suppress projected input windows rather than mixing clocks (13.873206ms)
+✔ duplicate markers, input loss and CDP data loss are explicit incomplete evidence (3.745319ms)
+✔ async input records are counted without pretending their spans are synchronous thread work (16.382234ms)
+✔ a timestamp from an incompatible origin is not projected onto the trace (3.212776ms)
+✔ the event-count ceiling marks bounded analysis incomplete rather than silently omitting work (70.41015ms)
+✔ unmatched synchronous slices are reported and do not invent activity (2.482204ms)
+✔ the console projection is bounded and never prints trace events or input payloads (1.763861ms)
+✔ owned shutdown confirms exit and is reused by the outer finalizer (1.219149ms)
+✔ hung graceful and kill cleanup still return bounded actual process-exit evidence (18.47752ms)
+✔ a failed public server kill falls back only to its exact owned ChildProcess (6.036905ms)
+✔ a kill request without an actual exit is never reported as stopped (13.387963ms)
+✔ owned shutdown disconnects the connected Browser before closing its BrowserServer (0.780267ms)
+✔ a stalled client disconnect still closes the owned process and remains a failed shutdown (4.917547ms)
+✔ resolved client close cannot claim successful disposal while the client stays connected (0.412052ms)
+✔ a disconnected client and completed server close still require actual process-exit evidence (13.551399ms)
+✔ normal process exit can arrive after the graceful close promise without requiring a kill (0.657662ms)
+✔ an already crashed owned process cannot be reported as a clean shutdown (0.367794ms)
+✔ client ownership is unique and cannot change after shutdown starts (0.581267ms)
+ℹ tests 39
+ℹ suites 0
+ℹ pass 39
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 309.267254

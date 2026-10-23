@@ -1,0 +1,34 @@
+{
+  "recorded_at": "2026-10-23T14:21:48.088015+00:00",
+  "runtime_commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "scope": "Separate static SVG decoding of preserved c549 exports; no application WASM or user-interface interaction in this diagnostic.",
+  "browser": "156.0.8078.4",
+  "executed_script_note": "Exact scratch script as executed, including original absolute snapshot/input/tool paths. It copies the c549 corner reference functions, changing only fixed fixture dimensions. Convergence uses original bounded chunks. The new shared production-test helper is checked by the normal browser harness.",
+  "files": {
+    "diagnostic-executed.mjs": {
+      "bytes": 11364,
+      "sha256": "b18405d5f3e821d9a72e35577da98f1feac58caea4090d2c4bbf33f949f336fa"
+    },
+    "diagnostic-report.json": {
+      "bytes": 7084,
+      "sha256": "eb5713c52cd13ed9c59ba11427e8e9440cc5cedf10df65b3e4cf39dc512a3e82"
+    }
+  },
+  "helper_validation": {
+    "alpha_coverage_cases": 7,
+    "passed": 7,
+    "syntax_passed": [
+      "svg-alpha-reference.mjs",
+      "polygon-corners-browser.mjs",
+      "corners-browser.mjs"
+    ],
+    "existing_corner_interaction_body_byte_identical": true,
+    "alpha_diagnostics_function_byte_identical": true
+  },
+  "unchanged_gates": {
+    "maximum_alpha_error": 12,
+    "maximum_differing_pixels": 85,
+    "maximum_reference_convergence_alpha": 4,
+    "opposite_opaque_transparent_reference_pixels": 0
+  }
+}

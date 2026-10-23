@@ -1,0 +1,812 @@
+{
+  "schemaVersion": 1,
+  "scope": "Read-only reanalysis of a preserved six-motion diagnostic; no new runtime execution.",
+  "derivation": {
+    "script": "analyze.py",
+    "sha256": "940b1f3821c3796e17d88987c522d22d105901060b23bc5968ee71ed5c1fa097",
+    "requires": "Python 3.11+ and the named git objects"
+  },
+  "runtimeRevision": "08e29e4f530c0ae65f6e2ac072f381605e23ed0c",
+  "harnessRevision": "0f0732784bd6fdf1cb2477a61dd332d9a007fec2",
+  "sourceComparisonRevision": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "inputs": [
+    {
+      "path": "../current-WebGL2-pan-trace.json.gz",
+      "uncompressedBytes": 2739494,
+      "uncompressedSha256": "5fb1aefbc1c5a239892f608e6cc19a7caf6386f0800fb18917b0ecfdc96074b4",
+      "archiveSha256": "3865a14d6b7b2f5bc83976deeaa7a06d23b5cab8a46eb2fa4584117711fdc925"
+    },
+    {
+      "path": "../current-WebGL2-pan-trace-summary.json.gz",
+      "uncompressedBytes": 198822,
+      "uncompressedSha256": "3281ff32b2bc32b12aa5e9acba9ceab97ad77bc0b6d942982aa44e461777788c",
+      "archiveSha256": "663499a6b3c5a340277949289d23940392dee18b9dd8f666d8667d43daa9edce"
+    },
+    {
+      "path": "../report.json.gz",
+      "uncompressedBytes": 481638,
+      "uncompressedSha256": "6ad35e76c8bcc5f937a10acd08c06984878653e66f904a4d7c88b7bdef568cca",
+      "archiveSha256": "7180763a0c98091d9a5e9b598f81c1b1b443fc3913c39d9dc84df24a493acc25"
+    }
+  ],
+  "clock": {
+    "traceUnit": "monotonic microseconds",
+    "pageUnit": "performance.now/Event.timeStamp milliseconds",
+    "hostClockUsed": false,
+    "method": "Intersect trace-marker offsets bracketed by page performance.now before/after performance.mark.",
+    "anchorCount": 42,
+    "aligned": true,
+    "offsetUs": 8127703097.499999,
+    "uncertaintyMs": 0.2,
+    "quantizationAllowanceMs": 0.25
+  },
+  "traceCompleteness": {
+    "inputEvents": 11154,
+    "analyzedEvents": 11154,
+    "eventLimitExceeded": false,
+    "unmatchedEnds": 0,
+    "unmatchedBegins": 28,
+    "invalidDurations": 0,
+    "asyncOrFlowRecords": 3135,
+    "dataLossOccurred": false,
+    "streamTruncated": false,
+    "peakBufferFraction": 0.13257575035095215,
+    "bufferMayBeFull": false,
+    "missingMarkers": [],
+    "duplicateMarkers": [],
+    "wrongThreadMarkers": [],
+    "droppedInputEvents": 0
+  },
+  "rendererMainThread": {
+    "id": "144761:144761",
+    "name": "CrRendererMain"
+  },
+  "environment": {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "hardwareConcurrency": 9,
+    "devicePixelRatio": 1,
+    "canvas": {
+      "width": 1600,
+      "height": 1100
+    },
+    "surface": "WebGL2",
+    "device": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+  },
+  "normal36MotionCohort": {
+    "timing": {
+      "count": 36,
+      "medianMs": 15.237483500000963,
+      "p95Ms": 26.77441099999851,
+      "minMs": 4.242373999994015,
+      "maxMs": 117.06411999999546
+    },
+    "presentationTiming": {
+      "count": 36,
+      "medianMs": 77.60555050000403,
+      "p95Ms": 118.86267800000496,
+      "minMs": 62.08816800000204,
+      "maxMs": 124.00124099999812
+    },
+    "settlingTiming": {
+      "count": 36,
+      "medianMs": 775.3144654999996,
+      "p95Ms": 905.0304170000018,
+      "minMs": 681.4241299999994,
+      "maxMs": 1018.558812000003
+    },
+    "preparationDelta": {
+      "totalFullPrepares": 0,
+      "totalIncrementalPrepares": 0,
+      "totalPreparedNodes": 0,
+      "totalRebuiltVisuals": 0,
+      "layerProjectionBuilds": 0,
+      "layerProjectionReuses": 0
+    },
+    "nativeFrameDelta": 36,
+    "maxCompactBridgeCharacters": 575,
+    "maxCompactBridgeReadMs": 0.20000000018626451,
+    "maxFramePollCount": 1
+  },
+  "diagnosticMotions": [
+    {
+      "index": 0,
+      "traceMarkersUs": {
+        "armed": 8176714173,
+        "capture": 8176723912,
+        "bubble": 8176725685,
+        "frame": 8176729284,
+        "presentation": 8176794337,
+        "raf1": 8176807261,
+        "settled": 8177501405
+      },
+      "inputToFrameMs": 5.372,
+      "inputToNativePresentationMs": 70.425,
+      "inputToSettledMs": 777.493,
+      "ferroUiAnimationCallback": {
+        "startUs": 8176740013,
+        "wallUs": 54144,
+        "threadCpuUs": 54128,
+        "enclosingFireAnimationFrame": {
+          "startUs": 8176739987,
+          "wallUs": 54183
+        },
+        "source": {
+          "columnNumber": 24984,
+          "frame": "5B531DAEE06F2B3B499FAC9EDB4A44AC",
+          "functionName": "e",
+          "isolate": "3475654076737981301",
+          "lineNumber": 1,
+          "sampleTraceId": 2915322334570131,
+          "scriptId": "5",
+          "url": "http://127.0.0.1:42851/current/ferroui.js"
+        }
+      },
+      "rendererSubmission": {
+        "timestampUs": 8176796630,
+        "surfaceFrameId": "-9113676285595071072"
+      },
+      "displayAggregation": {
+        "timestampUs": 8176797074,
+        "displayId": "-9113676285595071060",
+        "surfaceFrameIds": [
+          "-9113676285595071072",
+          "-9113676285595072090"
+        ]
+      },
+      "browserSwap": {
+        "processId": 144304,
+        "threadId": 144304,
+        "threadName": "CrGpuMain",
+        "startUs": 8176798056,
+        "endUs": 8177500185,
+        "wallUs": 702129,
+        "threadCpuUs": 1771,
+        "postSubmitStartUs": 8176798067,
+        "postSubmitWallUs": 702064,
+        "finishBufferSwapUs": 8177500045,
+        "throttleAssociationWindow": "matched display aggregation through matched swap end",
+        "throttles": [
+          {
+            "timestampUs": 8176806712,
+            "relativeToSwapStartUs": 8656,
+            "processId": 144304,
+            "threadId": 144325,
+            "max_pending_swaps": 1,
+            "pending_swaps": 1
+          },
+          {
+            "timestampUs": 8176808061,
+            "relativeToSwapStartUs": 10005,
+            "processId": 144304,
+            "threadId": 144325,
+            "max_pending_swaps": 1,
+            "pending_swaps": 1
+          }
+        ]
+      },
+      "presentationToSettled": {
+        "wallMs": 707.068,
+        "observedMainThreadSliceUnionMs": 4.815,
+        "observedGpuGroupSliceUnionMs": 705.1
+      },
+      "settledAfterSwapEndMs": 1.22
+    },
+    {
+      "index": 1,
+      "traceMarkersUs": {
+        "armed": 8177508090,
+        "capture": 8177523602,
+        "bubble": 8177524297,
+        "frame": 8177527072,
+        "presentation": 8177590224,
+        "raf1": 8177607847,
+        "settled": 8178302787
+      },
+      "inputToFrameMs": 3.47,
+      "inputToNativePresentationMs": 66.622,
+      "inputToSettledMs": 779.185,
+      "ferroUiAnimationCallback": {
+        "startUs": 8177540251,
+        "wallUs": 49806,
+        "threadCpuUs": 49326,
+        "enclosingFireAnimationFrame": {
+          "startUs": 8177540235,
+          "wallUs": 49835
+        },
+        "source": {
+          "columnNumber": 24984,
+          "frame": "5B531DAEE06F2B3B499FAC9EDB4A44AC",
+          "functionName": "e",
+          "isolate": "3475654076737981301",
+          "lineNumber": 1,
+          "sampleTraceId": 2915322334570007,
+          "scriptId": "5",
+          "url": "http://127.0.0.1:42851/current/ferroui.js"
+        }
+      },
+      "rendererSubmission": {
+        "timestampUs": 8177594210,
+        "surfaceFrameId": "-9113676285595071043"
+      },
+      "displayAggregation": {
+        "timestampUs": 8177594557,
+        "displayId": "-9113676285595071048",
+        "surfaceFrameIds": [
+          "-9113676285595071043",
+          "-9113676285595072090"
+        ]
+      },
+      "browserSwap": {
+        "processId": 144304,
+        "threadId": 144304,
+        "threadName": "CrGpuMain",
+        "startUs": 8177595462,
+        "endUs": 8178301737,
+        "wallUs": 706275,
+        "threadCpuUs": 1596,
+        "postSubmitStartUs": 8177595496,
+        "postSubmitWallUs": 706213,
+        "finishBufferSwapUs": 8178301649,
+        "throttleAssociationWindow": "matched display aggregation through matched swap end",
+        "throttles": [
+          {
+            "timestampUs": 8177606830,
+            "relativeToSwapStartUs": 11368,
+            "processId": 144304,
+            "threadId": 144325,
+            "max_pending_swaps": 1,
+            "pending_swaps": 1
+          },
+          {
+            "timestampUs": 8177610898,
+            "relativeToSwapStartUs": 15436,
+            "processId": 144304,
+            "threadId": 144325,
+            "max_pending_swaps": 1,
+            "pending_swaps": 1
+          }
+        ]
+      },
+      "presentationToSettled": {
+        "wallMs": 712.563,
+        "observedMainThreadSliceUnionMs": 3.793,
+        "observedGpuGroupSliceUnionMs": 710.685
+      },
+      "settledAfterSwapEndMs": 1.05
+    },
+    {
+      "index": 2,
+      "traceMarkersUs": {
+        "armed": 8178312156,
+        "capture": 8178323418,
+        "bubble": 8178323816,
+        "frame": 8178326463,
+        "presentation": 8178382958,
+        "raf1": 8178391538,
+        "settled": 8179123704
+      },
+      "inputToFrameMs": 3.045,
+      "inputToNativePresentationMs": 59.54,
+      "inputToSettledMs": 800.286,
+      "ferroUiAnimationCallback": {
+        "startUs": 8178340211,
+        "wallUs": 42545,
+        "threadCpuUs": 42146,
+        "enclosingFireAnimationFrame": {
+          "startUs": 8178340199,
+          "wallUs": 42569
+        },
+        "source": {
+          "columnNumber": 24984,
+          "frame": "5B531DAEE06F2B3B499FAC9EDB4A44AC",
+          "functionName": "e",
+          "isolate": "3475654076737981301",
+          "lineNumber": 1,
+          "sampleTraceId": 2915322334574998,
+          "scriptId": "5",
+          "url": "http://127.0.0.1:42851/current/ferroui.js"
+        }
+      },
+      "rendererSubmission": {
+        "timestampUs": 8178385188,
+        "surfaceFrameId": "-9113676285595071160"
+      },
+      "displayAggregation": {
+        "timestampUs": 8178385517,
+        "displayId": "-9113676285595071145",
+        "surfaceFrameIds": [
+          "-9113676285595071160",
+          "-9113676285595072090"
+        ]
+      },
+      "browserSwap": {
+        "processId": 144304,
+        "threadId": 144304,
+        "threadName": "CrGpuMain",
+        "startUs": 8178386285,
+        "endUs": 8179122024,
+        "wallUs": 735739,
+        "threadCpuUs": 2223,
+        "postSubmitStartUs": 8178386355,
+        "postSubmitWallUs": 735638,
+        "finishBufferSwapUs": 8179121916,
+        "throttleAssociationWindow": "matched display aggregation through matched swap end",
+        "throttles": [
+          {
+            "timestampUs": 8178389884,
+            "relativeToSwapStartUs": 3599,
+            "processId": 144304,
+            "threadId": 144325,
+            "max_pending_swaps": 1,
+            "pending_swaps": 1
+          },
+          {
+            "timestampUs": 8178392328,
+            "relativeToSwapStartUs": 6043,
+            "processId": 144304,
+            "threadId": 144325,
+            "max_pending_swaps": 1,
+            "pending_swaps": 1
+          }
+        ]
+      },
+      "presentationToSettled": {
+        "wallMs": 740.746,
+        "observedMainThreadSliceUnionMs": 4.149,
+        "observedGpuGroupSliceUnionMs": 738.608
+      },
+      "settledAfterSwapEndMs": 1.68
+    },
+    {
+      "index": 3,
+      "traceMarkersUs": {
+        "armed": 8179137356,
+        "capture": 8179139955,
+        "bubble": 8179140560,
+        "frame": 8179142877,
+        "presentation": 8179204194,
+        "raf1": 8179939767,
+        "settled": 8179940546
+      },
+      "inputToFrameMs": 2.922,
+      "inputToNativePresentationMs": 64.239,
+      "inputToSettledMs": 800.591,
+      "ferroUiAnimationCallback": {
+        "startUs": 8179156719,
+        "wallUs": 47308,
+        "threadCpuUs": 47071,
+        "enclosingFireAnimationFrame": {
+          "startUs": 8179156634,
+          "wallUs": 47409
+        },
+        "source": {
+          "columnNumber": 24984,
+          "frame": "5B531DAEE06F2B3B499FAC9EDB4A44AC",
+          "functionName": "e",
+          "isolate": "3475654076737981301",
+          "lineNumber": 1,
+          "sampleTraceId": 2915322334574868,
+          "scriptId": "5",
+          "url": "http://127.0.0.1:42851/current/ferroui.js"
+        }
+      },
+      "rendererSubmission": {
+        "timestampUs": 8179205581,
+        "surfaceFrameId": "-9113676285595071129"
+      },
+      "displayAggregation": {
+        "timestampUs": 8179205889,
+        "displayId": "-9113676285595071134",
+        "surfaceFrameIds": [
+          "-9113676285595071129",
+          "-9113676285595072090"
+        ]
+      },
+      "browserSwap": {
+        "processId": 144304,
+        "threadId": 144304,
+        "threadName": "CrGpuMain",
+        "startUs": 8179206455,
+        "endUs": 8179938866,
+        "wallUs": 732411,
+        "threadCpuUs": 1958,
+        "postSubmitStartUs": 8179206468,
+        "postSubmitWallUs": 732368,
+        "finishBufferSwapUs": 8179938771,
+        "throttleAssociationWindow": "matched display aggregation through matched swap end",
+        "throttles": [
+          {
+            "timestampUs": 8179206245,
+            "relativeToSwapStartUs": -210,
+            "processId": 144304,
+            "threadId": 144325,
+            "max_pending_swaps": 1,
+            "pending_swaps": 1
+          },
+          {
+            "timestampUs": 8179208494,
+            "relativeToSwapStartUs": 2039,
+            "processId": 144304,
+            "threadId": 144325,
+            "max_pending_swaps": 1,
+            "pending_swaps": 1
+          }
+        ]
+      },
+      "presentationToSettled": {
+        "wallMs": 736.352,
+        "observedMainThreadSliceUnionMs": 4.819,
+        "observedGpuGroupSliceUnionMs": 733.886
+      },
+      "settledAfterSwapEndMs": 1.68
+    },
+    {
+      "index": 4,
+      "traceMarkersUs": {
+        "armed": 8179951787,
+        "capture": 8179956763,
+        "bubble": 8179957248,
+        "frame": 8179959213,
+        "presentation": 8180017737,
+        "raf1": 8180650347,
+        "settled": 8180656547
+      },
+      "inputToFrameMs": 2.45,
+      "inputToNativePresentationMs": 60.974,
+      "inputToSettledMs": 699.784,
+      "ferroUiAnimationCallback": {
+        "startUs": 8179973338,
+        "wallUs": 44260,
+        "threadCpuUs": 44274,
+        "enclosingFireAnimationFrame": {
+          "startUs": 8179973324,
+          "wallUs": 44286
+        },
+        "source": {
+          "columnNumber": 24984,
+          "frame": "5B531DAEE06F2B3B499FAC9EDB4A44AC",
+          "functionName": "e",
+          "isolate": "3475654076737981301",
+          "lineNumber": 1,
+          "sampleTraceId": 2915322334574747,
+          "scriptId": "5",
+          "url": "http://127.0.0.1:42851/current/ferroui.js"
+        }
+      },
+      "rendererSubmission": {
+        "timestampUs": 8180019362,
+        "surfaceFrameId": "-9113676285595071115"
+      },
+      "displayAggregation": {
+        "timestampUs": 8180019710,
+        "displayId": "-9113676285595071120",
+        "surfaceFrameIds": [
+          "-9113676285595071115",
+          "-9113676285595072090"
+        ]
+      },
+      "browserSwap": {
+        "processId": 144304,
+        "threadId": 144304,
+        "threadName": "CrGpuMain",
+        "startUs": 8180020198,
+        "endUs": 8180649521,
+        "wallUs": 629323,
+        "threadCpuUs": 1598,
+        "postSubmitStartUs": 8180020206,
+        "postSubmitWallUs": 629262,
+        "finishBufferSwapUs": 8180649327,
+        "throttleAssociationWindow": "matched display aggregation through matched swap end",
+        "throttles": [
+          {
+            "timestampUs": 8180022927,
+            "relativeToSwapStartUs": 2729,
+            "processId": 144304,
+            "threadId": 144325,
+            "max_pending_swaps": 1,
+            "pending_swaps": 1
+          },
+          {
+            "timestampUs": 8180025690,
+            "relativeToSwapStartUs": 5492,
+            "processId": 144304,
+            "threadId": 144325,
+            "max_pending_swaps": 1,
+            "pending_swaps": 1
+          }
+        ]
+      },
+      "presentationToSettled": {
+        "wallMs": 638.81,
+        "observedMainThreadSliceUnionMs": 4.455,
+        "observedGpuGroupSliceUnionMs": 631.376
+      },
+      "settledAfterSwapEndMs": 7.026
+    },
+    {
+      "index": 5,
+      "traceMarkersUs": {
+        "armed": 8180672306,
+        "capture": 8180689946,
+        "bubble": 8180690546,
+        "frame": 8180694144,
+        "presentation": 8180754589,
+        "raf1": 8180773767,
+        "settled": 8181457267
+      },
+      "inputToFrameMs": 4.198,
+      "inputToNativePresentationMs": 64.643,
+      "inputToSettledMs": 767.321,
+      "ferroUiAnimationCallback": {
+        "startUs": 8180706573,
+        "wallUs": 47857,
+        "threadCpuUs": 47849,
+        "enclosingFireAnimationFrame": {
+          "startUs": 8180706559,
+          "wallUs": 47886
+        },
+        "source": {
+          "columnNumber": 24984,
+          "frame": "5B531DAEE06F2B3B499FAC9EDB4A44AC",
+          "functionName": "e",
+          "isolate": "3475654076737981301",
+          "lineNumber": 1,
+          "sampleTraceId": 2915322334574623,
+          "scriptId": "5",
+          "url": "http://127.0.0.1:42851/current/ferroui.js"
+        }
+      },
+      "rendererSubmission": {
+        "timestampUs": 8180756065,
+        "surfaceFrameId": "-9113676285595071218"
+      },
+      "displayAggregation": {
+        "timestampUs": 8180756581,
+        "displayId": "-9113676285595071221",
+        "surfaceFrameIds": [
+          "-9113676285595071218",
+          "-9113676285595072090"
+        ]
+      },
+      "browserSwap": {
+        "processId": 144304,
+        "threadId": 144304,
+        "threadName": "CrGpuMain",
+        "startUs": 8180757419,
+        "endUs": 8181454706,
+        "wallUs": 697287,
+        "threadCpuUs": 6206,
+        "postSubmitStartUs": 8180757428,
+        "postSubmitWallUs": 696973,
+        "finishBufferSwapUs": 8181454106,
+        "throttleAssociationWindow": "matched display aggregation through matched swap end",
+        "throttles": [
+          {
+            "timestampUs": 8180773003,
+            "relativeToSwapStartUs": 15584,
+            "processId": 144304,
+            "threadId": 144325,
+            "max_pending_swaps": 1,
+            "pending_swaps": 1
+          },
+          {
+            "timestampUs": 8180774566,
+            "relativeToSwapStartUs": 17147,
+            "processId": 144304,
+            "threadId": 144325,
+            "max_pending_swaps": 1,
+            "pending_swaps": 1
+          }
+        ]
+      },
+      "presentationToSettled": {
+        "wallMs": 702.678,
+        "observedMainThreadSliceUnionMs": 8.361,
+        "observedGpuGroupSliceUnionMs": 700.152
+      },
+      "settledAfterSwapEndMs": 2.561
+    }
+  ],
+  "unchangedDirectBrowserSources": [
+    {
+      "path": "src/Browser/FerroUI.Browser/webapp/modules/ferroui/timer.ts",
+      "identicalAtBothRevisions": true,
+      "gitBlob": "11681202607865513291fa06b1a121622e7b5437",
+      "bytes": 605,
+      "sha256": "6851348a348a3a41b374d777632a29aba3e26b77d8200901a7aa1f4778c7a643"
+    },
+    {
+      "path": "src/Browser/FerroUI.Browser/rendering/browser_render_timer.rs",
+      "identicalAtBothRevisions": true,
+      "gitBlob": "3065c2bfdf9e44d8e6315440545236dbbcd3c3a8",
+      "bytes": 19981,
+      "sha256": "471e6962aea0c8df1536e55960f76d9cde310ff6e0b6cc2d17685e798cb84745"
+    },
+    {
+      "path": "src/Browser/FerroUI.Browser/rendering/browser_web_gl_render_target.rs",
+      "identicalAtBothRevisions": true,
+      "gitBlob": "894a8e0eadec3fbe3199f6e571c3af5a885a0cec",
+      "bytes": 13771,
+      "sha256": "c159bc700da018dd18ba139d144bb24dec01b3b3327ade8d175baaf9ec950b8a"
+    },
+    {
+      "path": "src/Browser/FerroUI.Browser/rendering/render_statistics.rs",
+      "identicalAtBothRevisions": true,
+      "gitBlob": "31fb86f7b6c63bb1f67e72314b72214df7480b0d",
+      "bytes": 9820,
+      "sha256": "c896bc603458ce6c610856fa72ded49ee7f294c39bb6b3ce76bc96a7390c5938"
+    },
+    {
+      "path": "src/Vello/FerroUI.Vello/web_gl/mod.rs",
+      "identicalAtBothRevisions": true,
+      "gitBlob": "4a901f10896d680affc08304a3d35581a1dc25ea",
+      "bytes": 17286,
+      "sha256": "aed5a9b3cece71cfd86170d08593c26e1ce8846d423c0a6b3a52ede47256922a"
+    },
+    {
+      "path": "src/Vello/FerroUI.Vello/scene/vello_web_gl_scene_sink.rs",
+      "identicalAtBothRevisions": true,
+      "gitBlob": "7f37a242bc3ce57a74b010d1a1ab74868ad8550d",
+      "bytes": 11544,
+      "sha256": "53e69b074be3af8fb61630f90673e6d22e92be0cbeb8bd8a4a9ae168c7473cb8"
+    },
+    {
+      "path": "src/Vello/FerroUI.Vello/platform_render_interface.rs",
+      "identicalAtBothRevisions": true,
+      "gitBlob": "226f21ba7f30aa0dfa41a829771fad2eaabbb733",
+      "bytes": 12011,
+      "sha256": "c6e0b4df1064885c84b8463c7e99687860702489299d45cd29925bb099b0becc"
+    },
+    {
+      "path": "samples/FerroDesign/crates/ferrodesign-app/src/canvas.rs",
+      "identicalAtBothRevisions": true,
+      "gitBlob": "a2abd3359f7c22f1a4c6875030cc8d52bd26b299",
+      "bytes": 91854,
+      "sha256": "bc6497cdcec15710fe4cfb6cee02ff8cf1f4f0e97f242eb716dfff9004dfb4a6"
+    },
+    {
+      "path": "samples/FerroDesign/Cargo.toml",
+      "identicalAtBothRevisions": true,
+      "gitBlob": "e23daa88835c9bf349b86143e6159989ca421329",
+      "bytes": 2043,
+      "sha256": "98fe1ec3a81e18c5bba6eec81c5585c80c10f26cb757f336fdce63d50b876cb7"
+    }
+  ],
+  "unchangedDependencies": [
+    {
+      "completeLockEntryUnchanged": true,
+      "name": "vello_gpu",
+      "version": "0.3.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "f0e01b02c55094a3bcfbf80d736221a74bc3f8914b566298b4ad3c9f05e7ac08",
+      "dependencies": [
+        "bytemuck",
+        "glifo",
+        "hashbrown 0.17.1",
+        "js-sys",
+        "log",
+        "thiserror",
+        "vello_common",
+        "vello_gpu_shaders",
+        "web-sys",
+        "wgpu"
+      ]
+    },
+    {
+      "completeLockEntryUnchanged": true,
+      "name": "vello_common",
+      "version": "0.3.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "73c2fbe53548bcd25c8ff42f75a93770a8611a16b37bee56d7ef7b44e36027f1",
+      "dependencies": [
+        "bytemuck",
+        "fearless_simd",
+        "guillotiere",
+        "log",
+        "peniko",
+        "png",
+        "smallvec",
+        "thiserror"
+      ]
+    },
+    {
+      "completeLockEntryUnchanged": true,
+      "name": "vello_gpu_shaders",
+      "version": "0.3.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "ccf14e175813d9ddefdf52d9430d075de46c1d72560e917575857c97d6fc74cc",
+      "dependencies": [
+        "naga",
+        "wesl",
+        "wesl-macros",
+        "wgsl-parse",
+        "wgsl-types"
+      ]
+    },
+    {
+      "completeLockEntryUnchanged": true,
+      "name": "glifo",
+      "version": "0.4.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "9f1218dedd5348c1b166ec3b8b3cbca49d2f527bd43b3fa072ea5123c523ed3f",
+      "dependencies": [
+        "bytemuck",
+        "foldhash",
+        "hashbrown 0.17.1",
+        "log",
+        "peniko",
+        "png",
+        "skrifa",
+        "smallvec",
+        "vello_common"
+      ]
+    },
+    {
+      "completeLockEntryUnchanged": true,
+      "name": "peniko",
+      "version": "0.6.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "839c8299360d2e998bdb106dc0a6cd71dcc5f4df51df1b620361bf50e283cca6",
+      "dependencies": [
+        "bytemuck",
+        "color",
+        "kurbo 0.13.1",
+        "linebender_resource_handle",
+        "smallvec"
+      ]
+    },
+    {
+      "completeLockEntryUnchanged": true,
+      "name": "web-sys",
+      "version": "0.3.106",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "88261b9deccee56594c11a3460c462c41f58d148598fe70ad77070126a68aba4",
+      "dependencies": [
+        "js-sys",
+        "wasm-bindgen"
+      ]
+    },
+    {
+      "completeLockEntryUnchanged": true,
+      "name": "js-sys",
+      "version": "0.3.106",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "7883d941dae510fb2d978fc3fe018c71c9e2892fd38854de3e8b92c2e5ad9cc5",
+      "dependencies": [
+        "cfg-if",
+        "futures-util",
+        "wasm-bindgen"
+      ]
+    }
+  ],
+  "comparisonOnlySources": [
+    {
+      "path": "src/Vello/FerroUI.Vello/drawing_context_impl/fragments.rs",
+      "gitBlob": "c9e6820505b6c4fa86ec7263d940aeb55dbe3430",
+      "bytes": 4796,
+      "sha256": "a4daf3c12bd3ff937d60d40c519a342e4410e65d8cace87c69cc83ef17c1de80"
+    },
+    {
+      "path": "src/Vello/FerroUI.Vello/scene/vello_hybrid_scene_sink.rs",
+      "gitBlob": "2aee0e08e03e6128b832fb6245833f727a8e44c8",
+      "bytes": 25881,
+      "sha256": "fef6dfa6f78f24832821e09a207442a1b00c1d55055af7a450d32c2937e06ec1"
+    },
+    {
+      "path": "src/Vello/FerroUI.Vello/gpu/metal.rs",
+      "gitBlob": "ea4d98391d2442bb4c768fa84aed7da2519ae3cb",
+      "bytes": 21078,
+      "sha256": "0b4411b483c9df516003147f4dd2924515d76ec490135d25780b9af631a43808"
+    }
+  ],
+  "caveats": [
+    "The 36 normal samples and six traced samples are distinct cohorts; do not derive the normal p95 from the trace.",
+    "Slice unions describe observed wall-clock coverage and overlap; they are not additive CPU utilisation.",
+    "threadCpuUs is Chromium's tdur on the named thread, not total SwiftShader worker CPU, hardware GPU time, or time on other processes.",
+    "Each matched display swap aggregates this renderer's surface and another surface; matching proves inclusion, not exclusive causation.",
+    "The trace does not resolve driver/device waiting, unrecorded worker work, or shared-host scheduling inside the long swap.",
+    "The native presentedFrames counter marks the platform drawing-session disposal, before Chromium's actual display swap completion.",
+    "SkiaOutputSurfaceImplOnGpu names Chromium's own compositor; the application renderer remains FerroUI Vello.",
+    "Matching direct browser-source blobs does not make the full current framework identical; current 0.4 runtime behavior remains unmeasured here."
+  ]
+}

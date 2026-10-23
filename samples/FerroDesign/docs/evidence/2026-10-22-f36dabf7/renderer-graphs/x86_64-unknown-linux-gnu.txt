@@ -1,0 +1,746 @@
+ferrodesign-app v0.1.0 (/workspace/scratch/9b313a0caa46/FerroUI/samples/FerroDesign/crates/ferrodesign-app)
+├── ferrodesign-core v0.1.0 (/workspace/scratch/9b313a0caa46/FerroUI/samples/FerroDesign/crates/ferrodesign-core)
+│   ├── roxmltree v0.20.0
+│   ├── serde v1.0.229
+│   │   ├── serde_core v1.0.229
+│   │   └── serde_derive v1.0.229 (proc-macro)
+│   │       ├── proc-macro2 v1.0.107
+│   │       │   └── unicode-ident v1.0.27
+│   │       ├── quote v1.0.47
+│   │       │   └── proc-macro2 v1.0.107 (*)
+│   │       └── syn v3.0.9
+│   │           ├── proc-macro2 v1.0.107 (*)
+│   │           ├── quote v1.0.47 (*)
+│   │           └── unicode-ident v1.0.27
+│   ├── serde_json v1.0.154
+│   │   ├── itoa v1.0.18
+│   │   ├── memchr v2.8.3
+│   │   ├── serde_core v1.0.229
+│   │   └── zmij v1.0.23
+│   └── svgtypes v0.15.3
+│       ├── kurbo v0.11.3
+│       │   ├── arrayvec v0.7.8
+│       │   │   └── serde v1.0.229 (*)
+│       │   └── smallvec v1.16.3
+│       │       └── serde v1.0.229 (*)
+│       └── siphasher v1.0.4
+├── ferroui-base v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base)
+│   ├── bitflags v2.13.2
+│   ├── ferroui-system v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.System)
+│   │   └── smallvec v1.16.3 (*)
+│   ├── libc v0.2.191
+│   ├── paste v1.0.15 (proc-macro)
+│   ├── rust_decimal v1.43.0
+│   │   ├── arrayvec v0.7.8 (*)
+│   │   └── num-traits v0.2.19
+│   │       └── libm v0.2.16
+│   │       [build-dependencies]
+│   │       └── autocfg v1.5.1
+│   ├── rustc-hash v2.1.3
+│   ├── smallvec v1.16.3 (*)
+│   └── time v0.3.55
+│       ├── deranged v0.5.9
+│       ├── num-conv v0.2.2
+│       ├── powerfmt v0.2.1
+│       └── time-core v0.1.9
+│   [build-dependencies]
+│   └── ferroui-build-scan v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Build.Scan)
+│       ├── proc-macro2 v1.0.107 (*)
+│       ├── quote v1.0.47 (*)
+│       └── syn v2.0.119
+│           ├── proc-macro2 v1.0.107 (*)
+│           ├── quote v1.0.47 (*)
+│           └── unicode-ident v1.0.27
+├── ferroui-controls v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls)
+│   ├── bitflags v2.13.2
+│   ├── ferroui-base v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base) (*)
+│   ├── ferroui-remote-protocol v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Remote.Protocol)
+│   ├── ferroui-system v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.System) (*)
+│   └── rustc-hash v2.1.3
+│   [build-dependencies]
+│   └── ferroui-build-scan v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Build.Scan) (*)
+├── ferroui-fonts-inter v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Fonts.Inter)
+│   ├── ferroui-base v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base) (*)
+│   └── ferroui-controls v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls) (*)
+├── ferroui-harfbuzz v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/HarfBuzz/FerroUI.HarfBuzz)
+│   ├── ferroui-base v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base) (*)
+│   ├── ferroui-controls v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls) (*)
+│   └── harfbuzz-sys v0.8.0
+│       [build-dependencies]
+│       ├── cc v1.8.0
+│       │   ├── find-msvc-tools v0.1.14
+│       │   └── shlex v2.0.1
+│       └── pkg-config v0.3.34
+├── ferroui-headless v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/Headless/FerroUI.Headless)
+│   ├── ferroui-base v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base) (*)
+│   ├── ferroui-controls v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls) (*)
+│   └── ferroui-harfbuzz v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/HarfBuzz/FerroUI.HarfBuzz) (*)
+├── ferroui-markup v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/Markup/FerroUI.Markup)
+│   └── ferroui-base v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base) (*)
+├── ferroui-markup-xaml v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/Markup/FerroUI.Markup.Xaml)
+│   ├── ferroui-base v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base) (*)
+│   ├── ferroui-controls v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls) (*)
+│   └── ferroui-markup v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/Markup/FerroUI.Markup) (*)
+│   [build-dependencies]
+│   └── ferroui-build-scan v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Build.Scan) (*)
+├── ferroui-themes-fluent v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Themes.Fluent)
+│   ├── ferroui-base v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base) (*)
+│   ├── ferroui-controls v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls) (*)
+│   ├── ferroui-dialogs v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Dialogs)
+│   │   ├── ferroui-base v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base) (*)
+│   │   ├── ferroui-controls v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls) (*)
+│   │   ├── ferroui-markup-xaml v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/Markup/FerroUI.Markup.Xaml) (*)
+│   │   └── sysinfo v0.37.2
+│   │       └── libc v0.2.191
+│   │   [build-dependencies]
+│   │   └── ferroui-build v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Build.Tasks)
+│   │       ├── ferroui-base v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base)
+│   │       │   ├── bitflags v2.13.2
+│   │       │   ├── ferroui-system v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.System)
+│   │       │   │   └── smallvec v1.16.3
+│   │       │   ├── libc v0.2.191
+│   │       │   ├── paste v1.0.15 (proc-macro)
+│   │       │   ├── rust_decimal v1.43.0
+│   │       │   │   ├── arrayvec v0.7.8
+│   │       │   │   └── num-traits v0.2.19
+│   │       │   │       └── libm v0.2.16
+│   │       │   │       [build-dependencies]
+│   │       │   │       └── autocfg v1.5.1
+│   │       │   ├── rustc-hash v2.1.3
+│   │       │   ├── smallvec v1.16.3
+│   │       │   └── time v0.3.55
+│   │       │       ├── deranged v0.5.9
+│   │       │       ├── num-conv v0.2.2
+│   │       │       ├── powerfmt v0.2.1
+│   │       │       └── time-core v0.1.9
+│   │       │   [build-dependencies]
+│   │       │   └── ferroui-build-scan v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Build.Scan) (*)
+│   │       ├── ferroui-build-scan v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Build.Scan) (*)
+│   │       ├── ferroui-markup-xaml-loader v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/Markup/FerroUI.Markup.Xaml.Loader)
+│   │       │   ├── ferroui-base v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base) (*)
+│   │       │   ├── ferroui-build-scan v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Build.Scan) (*)
+│   │       │   ├── ferroui-markup v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/Markup/FerroUI.Markup)
+│   │       │   │   └── ferroui-base v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base) (*)
+│   │       │   └── xamlx v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/external/XamlX/src/XamlX)
+│   │       │       └── roxmltree v0.20.0
+│   │       └── xamlx v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/external/XamlX/src/XamlX) (*)
+│   └── ferroui-markup-xaml v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/Markup/FerroUI.Markup.Xaml) (*)
+│   [build-dependencies]
+│   └── ferroui-build v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Build.Tasks) (*)
+├── ferroui-vello v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/Vello/FerroUI.Vello)
+│   ├── ferroui-base v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base) (*)
+│   ├── ferroui-controls v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls) (*)
+│   ├── ferroui-opengl v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.OpenGL)
+│   │   ├── ferroui-base v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base) (*)
+│   │   ├── ferroui-controls v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls) (*)
+│   │   ├── libc v0.2.191
+│   │   └── paste v1.0.15 (proc-macro)
+│   │   [build-dependencies]
+│   │   └── ferroui-build-scan v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Build.Scan) (*)
+│   ├── fontique v0.12.0
+│   │   ├── hashbrown v0.17.1
+│   │   │   └── foldhash v0.2.0
+│   │   ├── linebender_resource_handle v0.1.1
+│   │   ├── memmap2 v0.9.11
+│   │   │   └── libc v0.2.191
+│   │   ├── parlance v0.1.1
+│   │   ├── read-fonts v0.41.0
+│   │   │   ├── bytemuck v1.25.2
+│   │   │   │   └── bytemuck_derive v1.12.1 (proc-macro)
+│   │   │   │       ├── proc-macro2 v1.0.107 (*)
+│   │   │   │       ├── quote v1.0.47 (*)
+│   │   │   │       └── syn v3.0.9 (*)
+│   │   │   ├── font-types v0.12.7
+│   │   │   │   └── bytemuck v1.25.2 (*)
+│   │   │   └── once_cell v1.21.4
+│   │   ├── smallvec v1.16.3 (*)
+│   │   └── yeslogic-fontconfig-sys v6.0.1
+│   │       ├── dlib v0.5.3
+│   │       │   └── libloading v0.8.9
+│   │       │       └── cfg-if v1.0.5
+│   │       └── once_cell v1.21.4
+│   │       [build-dependencies]
+│   │       └── pkg-config v0.3.34
+│   ├── gif v0.14.2
+│   │   └── weezl v0.1.12
+│   ├── glifo v0.4.0
+│   │   ├── bytemuck v1.25.2 (*)
+│   │   ├── foldhash v0.2.0
+│   │   ├── hashbrown v0.17.1 (*)
+│   │   ├── log v0.4.34
+│   │   ├── peniko v0.6.1
+│   │   │   ├── bytemuck v1.25.2 (*)
+│   │   │   ├── color v0.3.3
+│   │   │   │   └── bytemuck v1.25.2 (*)
+│   │   │   ├── kurbo v0.13.1
+│   │   │   │   ├── arrayvec v0.7.8 (*)
+│   │   │   │   ├── polycool v0.4.0
+│   │   │   │   │   └── arrayvec v0.7.8 (*)
+│   │   │   │   ├── serde v1.0.229 (*)
+│   │   │   │   └── smallvec v1.16.3 (*)
+│   │   │   ├── linebender_resource_handle v0.1.1
+│   │   │   └── smallvec v1.16.3 (*)
+│   │   ├── png v0.18.1
+│   │   │   ├── bitflags v2.13.2
+│   │   │   ├── crc32fast v1.5.2
+│   │   │   │   └── cfg-if v1.0.5
+│   │   │   ├── fdeflate v0.3.7
+│   │   │   │   └── simd-adler32 v0.3.10
+│   │   │   ├── flate2 v1.1.10
+│   │   │   │   ├── crc32fast v1.5.2 (*)
+│   │   │   │   └── miniz_oxide v0.9.1
+│   │   │   │       ├── adler2 v2.0.1
+│   │   │   │       └── simd-adler32 v0.3.10
+│   │   │   └── miniz_oxide v0.8.9
+│   │   │       ├── adler2 v2.0.1
+│   │   │       └── simd-adler32 v0.3.10
+│   │   ├── skrifa v0.44.0
+│   │   │   ├── bytemuck v1.25.2 (*)
+│   │   │   └── read-fonts v0.41.0 (*)
+│   │   ├── smallvec v1.16.3 (*)
+│   │   └── vello_common v0.3.0
+│   │       ├── bytemuck v1.25.2 (*)
+│   │       ├── fearless_simd v0.7.0
+│   │       ├── guillotiere v0.7.0
+│   │       │   └── euclid v0.22.14
+│   │       │       └── num-traits v0.2.19 (*)
+│   │       ├── log v0.4.34
+│   │       ├── peniko v0.6.1 (*)
+│   │       ├── png v0.18.1 (*)
+│   │       ├── smallvec v1.16.3 (*)
+│   │       └── thiserror v2.0.21
+│   │           └── thiserror-impl v2.0.21 (proc-macro)
+│   │               ├── proc-macro2 v1.0.107 (*)
+│   │               ├── quote v1.0.47 (*)
+│   │               └── syn v3.0.9 (*)
+│   ├── jpeg-encoder v0.7.1
+│   ├── kurbo v0.13.1 (*)
+│   ├── linesweeper v0.5.0
+│   │   ├── arrayvec v0.7.8 (*)
+│   │   ├── kurbo v0.13.1 (*)
+│   │   ├── polycool v0.4.0 (*)
+│   │   ├── rustc-hash v2.1.3
+│   │   └── smallvec v1.16.3 (*)
+│   ├── peniko v0.6.1 (*)
+│   ├── png v0.18.1 (*)
+│   ├── skrifa v0.44.0 (*)
+│   ├── vello_cpu v0.3.0
+│   │   ├── bytemuck v1.25.2 (*)
+│   │   ├── crossbeam-channel v0.5.17
+│   │   │   └── crossbeam-utils v0.8.23
+│   │   ├── glifo v0.4.0 (*)
+│   │   ├── hashbrown v0.17.1 (*)
+│   │   ├── ordered-channel v1.2.0
+│   │   │   └── crossbeam-channel v0.5.17 (*)
+│   │   ├── png v0.18.1 (*)
+│   │   ├── rayon v1.12.0
+│   │   │   ├── either v1.19.0
+│   │   │   └── rayon-core v1.13.0
+│   │   │       ├── crossbeam-deque v0.8.8
+│   │   │       │   ├── crossbeam-epoch v0.9.21
+│   │   │       │   │   └── crossbeam-utils v0.8.23
+│   │   │       │   └── crossbeam-utils v0.8.23
+│   │   │       └── crossbeam-utils v0.8.23
+│   │   ├── thread_local v1.1.10
+│   │   │   └── cfg-if v1.0.5
+│   │   └── vello_common v0.3.0 (*)
+│   ├── vello_gpu v0.3.0
+│   │   ├── bytemuck v1.25.2 (*)
+│   │   ├── glifo v0.4.0 (*)
+│   │   ├── hashbrown v0.17.1 (*)
+│   │   ├── log v0.4.34
+│   │   ├── thiserror v2.0.21 (*)
+│   │   ├── vello_common v0.3.0 (*)
+│   │   ├── vello_gpu_shaders v0.3.0
+│   │   │   [build-dependencies]
+│   │   │   ├── naga v30.0.1
+│   │   │   │   ├── arrayvec v0.7.8
+│   │   │   │   ├── bit-set v0.10.0
+│   │   │   │   │   └── bit-vec v0.9.1
+│   │   │   │   ├── bitflags v2.13.2
+│   │   │   │   ├── cfg-if v1.0.5
+│   │   │   │   ├── codespan-reporting v0.13.1
+│   │   │   │   │   └── unicode-width v0.2.2
+│   │   │   │   ├── half v2.7.1
+│   │   │   │   │   ├── cfg-if v1.0.5
+│   │   │   │   │   ├── num-traits v0.2.19 (*)
+│   │   │   │   │   └── zerocopy v0.8.63
+│   │   │   │   │       └── zerocopy-derive v0.8.63 (proc-macro)
+│   │   │   │   │           ├── proc-macro2 v1.0.107 (*)
+│   │   │   │   │           ├── quote v1.0.47 (*)
+│   │   │   │   │           └── syn v2.0.119 (*)
+│   │   │   │   ├── hashbrown v0.17.1
+│   │   │   │   │   └── foldhash v0.2.0
+│   │   │   │   ├── indexmap v2.14.2
+│   │   │   │   │   ├── equivalent v1.0.3
+│   │   │   │   │   └── hashbrown v0.17.1 (*)
+│   │   │   │   ├── libm v0.2.16
+│   │   │   │   ├── log v0.4.34
+│   │   │   │   ├── naga-types v30.0.1
+│   │   │   │   │   ├── hashbrown v0.17.1 (*)
+│   │   │   │   │   ├── indexmap v2.14.2 (*)
+│   │   │   │   │   ├── rustc-hash v1.1.0
+│   │   │   │   │   └── thiserror v2.0.21
+│   │   │   │   │       └── thiserror-impl v2.0.21 (proc-macro) (*)
+│   │   │   │   ├── num-traits v0.2.19 (*)
+│   │   │   │   ├── once_cell v1.21.4
+│   │   │   │   ├── rustc-hash v1.1.0
+│   │   │   │   ├── thiserror v2.0.21 (*)
+│   │   │   │   └── unicode-ident v1.0.27
+│   │   │   │   [build-dependencies]
+│   │   │   │   └── cfg_aliases v0.2.2
+│   │   │   ├── wesl v0.4.0
+│   │   │   │   ├── annotate-snippets v0.12.16
+│   │   │   │   │   ├── anstyle v1.0.14
+│   │   │   │   │   └── unicode-width v0.2.2
+│   │   │   │   ├── derive_more v2.1.1
+│   │   │   │   │   └── derive_more-impl v2.1.1 (proc-macro)
+│   │   │   │   │       ├── convert_case v0.10.0
+│   │   │   │   │       │   └── unicode-segmentation v1.13.3
+│   │   │   │   │       ├── proc-macro2 v1.0.107 (*)
+│   │   │   │   │       ├── quote v1.0.47 (*)
+│   │   │   │   │       ├── syn v2.0.119 (*)
+│   │   │   │   │       └── unicode-xid v0.2.6
+│   │   │   │   │       [build-dependencies]
+│   │   │   │   │       └── rustc_version v0.4.1
+│   │   │   │   │           └── semver v1.0.28
+│   │   │   │   ├── half v2.7.1 (*)
+│   │   │   │   ├── itertools v0.14.0
+│   │   │   │   │   └── either v1.19.0
+│   │   │   │   ├── num-traits v0.2.19 (*)
+│   │   │   │   ├── thiserror v2.0.21 (*)
+│   │   │   │   ├── wesl-macros v0.4.0 (proc-macro)
+│   │   │   │   │   ├── itertools v0.14.0 (*)
+│   │   │   │   │   ├── proc-macro2 v1.0.107 (*)
+│   │   │   │   │   ├── quote v1.0.47 (*)
+│   │   │   │   │   └── syn v2.0.119 (*)
+│   │   │   │   ├── wgsl-parse v0.4.0
+│   │   │   │   │   ├── annotate-snippets v0.12.16 (*)
+│   │   │   │   │   ├── derive_more v2.1.1 (*)
+│   │   │   │   │   ├── itertools v0.14.0 (*)
+│   │   │   │   │   ├── lalrpop-util v0.22.2
+│   │   │   │   │   │   ├── regex-automata v0.4.18
+│   │   │   │   │   │   │   ├── aho-corasick v1.1.5
+│   │   │   │   │   │   │   │   └── memchr v2.8.3
+│   │   │   │   │   │   │   ├── memchr v2.8.3
+│   │   │   │   │   │   │   └── regex-syntax v0.8.11
+│   │   │   │   │   │   └── rustversion v1.0.23 (proc-macro)
+│   │   │   │   │   ├── lexical v7.0.5
+│   │   │   │   │   │   └── lexical-core v1.0.6
+│   │   │   │   │   │       ├── lexical-parse-float v1.0.6
+│   │   │   │   │   │       │   ├── lexical-parse-integer v1.0.6
+│   │   │   │   │   │       │   │   └── lexical-util v1.0.7
+│   │   │   │   │   │       │   └── lexical-util v1.0.7
+│   │   │   │   │   │       ├── lexical-parse-integer v1.0.6 (*)
+│   │   │   │   │   │       ├── lexical-util v1.0.7
+│   │   │   │   │   │       ├── lexical-write-float v1.0.6
+│   │   │   │   │   │       │   ├── lexical-util v1.0.7
+│   │   │   │   │   │       │   └── lexical-write-integer v1.0.6
+│   │   │   │   │   │       │       └── lexical-util v1.0.7
+│   │   │   │   │   │       └── lexical-write-integer v1.0.6 (*)
+│   │   │   │   │   ├── logos v0.16.1
+│   │   │   │   │   │   └── logos-derive v0.16.1 (proc-macro)
+│   │   │   │   │   │       └── logos-codegen v0.16.1
+│   │   │   │   │   │           ├── fnv v1.0.7
+│   │   │   │   │   │           ├── proc-macro2 v1.0.107 (*)
+│   │   │   │   │   │           ├── quote v1.0.47 (*)
+│   │   │   │   │   │           ├── regex-automata v0.4.18 (*)
+│   │   │   │   │   │           ├── regex-syntax v0.8.11
+│   │   │   │   │   │           └── syn v2.0.119 (*)
+│   │   │   │   │   ├── thiserror v2.0.21 (*)
+│   │   │   │   │   └── wgsl-types v0.4.0
+│   │   │   │   │       ├── half v2.7.1 (*)
+│   │   │   │   │       ├── itertools v0.14.0 (*)
+│   │   │   │   │       └── num-traits v0.2.19 (*)
+│   │   │   │   │   [build-dependencies]
+│   │   │   │   │   └── lalrpop v0.22.2
+│   │   │   │   │       ├── ascii-canvas v4.0.0
+│   │   │   │   │       │   └── term v1.2.1
+│   │   │   │   │       ├── bit-set v0.8.0
+│   │   │   │   │       │   └── bit-vec v0.8.0
+│   │   │   │   │       ├── ena v0.14.4
+│   │   │   │   │       │   └── log v0.4.34
+│   │   │   │   │       ├── itertools v0.14.0 (*)
+│   │   │   │   │       ├── lalrpop-util v0.22.2 (*)
+│   │   │   │   │       ├── petgraph v0.7.1
+│   │   │   │   │       │   ├── fixedbitset v0.5.7
+│   │   │   │   │       │   └── indexmap v2.14.2 (*)
+│   │   │   │   │       ├── regex v1.13.1
+│   │   │   │   │       │   ├── regex-automata v0.4.18 (*)
+│   │   │   │   │       │   └── regex-syntax v0.8.11
+│   │   │   │   │       ├── regex-syntax v0.8.11
+│   │   │   │   │       ├── sha3 v0.10.9
+│   │   │   │   │       │   ├── digest v0.10.7
+│   │   │   │   │       │   │   ├── block-buffer v0.10.4
+│   │   │   │   │       │   │   │   └── generic-array v0.14.7
+│   │   │   │   │       │   │   │       └── typenum v1.20.1
+│   │   │   │   │       │   │   │       [build-dependencies]
+│   │   │   │   │       │   │   │       └── version_check v0.9.5
+│   │   │   │   │       │   │   └── crypto-common v0.1.7
+│   │   │   │   │       │   │       ├── generic-array v0.14.7 (*)
+│   │   │   │   │       │   │       └── typenum v1.20.1
+│   │   │   │   │       │   └── keccak v0.1.6
+│   │   │   │   │       ├── string_cache v0.8.9
+│   │   │   │   │       │   ├── new_debug_unreachable v1.0.6
+│   │   │   │   │       │   ├── parking_lot v0.12.5
+│   │   │   │   │       │   │   ├── lock_api v0.4.14
+│   │   │   │   │       │   │   │   └── scopeguard v1.2.0
+│   │   │   │   │       │   │   └── parking_lot_core v0.9.12
+│   │   │   │   │       │   │       ├── cfg-if v1.0.5
+│   │   │   │   │       │   │       ├── libc v0.2.191
+│   │   │   │   │       │   │       └── smallvec v1.16.3
+│   │   │   │   │       │   ├── phf_shared v0.11.3
+│   │   │   │   │       │   │   └── siphasher v1.0.4
+│   │   │   │   │       │   └── precomputed-hash v0.1.1
+│   │   │   │   │       ├── term v1.2.1
+│   │   │   │   │       ├── unicode-xid v0.2.6
+│   │   │   │   │       └── walkdir v2.5.0
+│   │   │   │   │           └── same-file v1.0.6
+│   │   │   │   └── wgsl-types v0.4.0 (*)
+│   │   │   ├── wesl-macros v0.4.0 (proc-macro) (*)
+│   │   │   ├── wgsl-parse v0.4.0 (*)
+│   │   │   └── wgsl-types v0.4.0 (*)
+│   │   └── wgpu v30.0.1
+│   │       ├── arrayvec v0.7.8 (*)
+│   │       ├── bitflags v2.13.2
+│   │       ├── bytemuck v1.25.2 (*)
+│   │       ├── cfg-if v1.0.5
+│   │       ├── document-features v0.2.12 (proc-macro)
+│   │       │   └── litrs v1.0.1
+│   │       ├── hashbrown v0.17.1 (*)
+│   │       ├── log v0.4.34
+│   │       ├── profiling v1.0.18
+│   │       ├── raw-window-handle v0.6.2
+│   │       ├── smallvec v1.16.3 (*)
+│   │       ├── static_assertions v1.1.0
+│   │       ├── wgpu-core v30.0.1
+│   │       │   ├── arrayvec v0.7.8 (*)
+│   │       │   ├── bit-set v0.10.0
+│   │       │   │   └── bit-vec v0.9.1
+│   │       │   ├── bit-vec v0.9.1
+│   │       │   ├── bitflags v2.13.2
+│   │       │   ├── bytemuck v1.25.2 (*)
+│   │       │   ├── document-features v0.2.12 (proc-macro) (*)
+│   │       │   ├── hashbrown v0.17.1 (*)
+│   │       │   ├── indexmap v2.14.2
+│   │       │   │   ├── equivalent v1.0.3
+│   │       │   │   └── hashbrown v0.17.1 (*)
+│   │       │   ├── log v0.4.34
+│   │       │   ├── naga v30.0.1
+│   │       │   │   ├── arrayvec v0.7.8 (*)
+│   │       │   │   ├── bit-set v0.10.0 (*)
+│   │       │   │   ├── bitflags v2.13.2
+│   │       │   │   ├── cfg-if v1.0.5
+│   │       │   │   ├── codespan-reporting v0.13.1
+│   │       │   │   │   └── unicode-width v0.2.2
+│   │       │   │   ├── half v2.7.1
+│   │       │   │   │   ├── cfg-if v1.0.5
+│   │       │   │   │   ├── num-traits v0.2.19 (*)
+│   │       │   │   │   └── zerocopy v0.8.63
+│   │       │   │   │       └── zerocopy-derive v0.8.63 (proc-macro) (*)
+│   │       │   │   ├── hashbrown v0.17.1 (*)
+│   │       │   │   ├── indexmap v2.14.2 (*)
+│   │       │   │   ├── libm v0.2.16
+│   │       │   │   ├── log v0.4.34
+│   │       │   │   ├── naga-types v30.0.1
+│   │       │   │   │   ├── hashbrown v0.17.1 (*)
+│   │       │   │   │   ├── indexmap v2.14.2 (*)
+│   │       │   │   │   ├── rustc-hash v1.1.0
+│   │       │   │   │   └── thiserror v2.0.21 (*)
+│   │       │   │   ├── num-traits v0.2.19 (*)
+│   │       │   │   ├── once_cell v1.21.4
+│   │       │   │   ├── rustc-hash v1.1.0
+│   │       │   │   ├── spirv v0.4.0+sdk-1.4.341.0
+│   │       │   │   │   └── bitflags v2.13.2
+│   │       │   │   ├── thiserror v2.0.21 (*)
+│   │       │   │   └── unicode-ident v1.0.27
+│   │       │   │   [build-dependencies]
+│   │       │   │   └── cfg_aliases v0.2.2
+│   │       │   ├── naga-types v30.0.1 (*)
+│   │       │   ├── once_cell v1.21.4
+│   │       │   ├── parking_lot v0.12.5
+│   │       │   │   ├── lock_api v0.4.14
+│   │       │   │   │   └── scopeguard v1.2.0
+│   │       │   │   └── parking_lot_core v0.9.12
+│   │       │   │       ├── cfg-if v1.0.5
+│   │       │   │       ├── libc v0.2.191
+│   │       │   │       └── smallvec v1.16.3 (*)
+│   │       │   ├── profiling v1.0.18
+│   │       │   ├── raw-window-handle v0.6.2
+│   │       │   ├── rustc-hash v1.1.0
+│   │       │   ├── smallvec v1.16.3 (*)
+│   │       │   ├── thiserror v2.0.21 (*)
+│   │       │   ├── wgpu-core-deps-windows-linux-android v30.0.1
+│   │       │   │   └── wgpu-hal v30.0.1
+│   │       │   │       ├── arrayvec v0.7.8 (*)
+│   │       │   │       ├── ash v0.38.0+1.3.281
+│   │       │   │       │   └── libloading v0.8.9 (*)
+│   │       │   │       ├── bitflags v2.13.2
+│   │       │   │       ├── bytemuck v1.25.2 (*)
+│   │       │   │       ├── cfg-if v1.0.5
+│   │       │   │       ├── glow v0.17.0
+│   │       │   │       ├── gpu-allocator v0.28.0
+│   │       │   │       │   ├── ash v0.38.0+1.3.281 (*)
+│   │       │   │       │   ├── hashbrown v0.16.1
+│   │       │   │       │   │   ├── allocator-api2 v0.2.21
+│   │       │   │       │   │   ├── equivalent v1.0.3
+│   │       │   │       │   │   └── foldhash v0.2.0
+│   │       │   │       │   ├── log v0.4.34
+│   │       │   │       │   ├── presser v0.3.1
+│   │       │   │       │   └── thiserror v2.0.21 (*)
+│   │       │   │       ├── hashbrown v0.17.1 (*)
+│   │       │   │       ├── khronos-egl v6.0.0
+│   │       │   │       │   ├── libc v0.2.191
+│   │       │   │       │   └── libloading v0.8.9 (*)
+│   │       │   │       ├── libc v0.2.191
+│   │       │   │       ├── libloading v0.8.9 (*)
+│   │       │   │       ├── log v0.4.34
+│   │       │   │       ├── naga v30.0.1 (*)
+│   │       │   │       ├── naga-types v30.0.1 (*)
+│   │       │   │       ├── ordered-float v5.5.0
+│   │       │   │       │   └── num-traits v0.2.19 (*)
+│   │       │   │       ├── parking_lot v0.12.5 (*)
+│   │       │   │       ├── profiling v1.0.18
+│   │       │   │       ├── raw-window-handle v0.6.2
+│   │       │   │       ├── renderdoc-sys v1.1.0
+│   │       │   │       ├── smallvec v1.16.3 (*)
+│   │       │   │       ├── static_assertions v1.1.0
+│   │       │   │       ├── thiserror v2.0.21 (*)
+│   │       │   │       ├── wayland-sys v0.31.11
+│   │       │   │       │   ├── dlib v0.5.3 (*)
+│   │       │   │       │   ├── log v0.4.34
+│   │       │   │       │   └── once_cell v1.21.4
+│   │       │   │       │   [build-dependencies]
+│   │       │   │       │   └── pkg-config v0.3.34
+│   │       │   │       ├── wgpu-naga-bridge v30.0.1
+│   │       │   │       │   ├── naga v30.0.1 (*)
+│   │       │   │       │   └── wgpu-types v30.0.1
+│   │       │   │       │       ├── bitflags v2.13.2
+│   │       │   │       │       ├── bytemuck v1.25.2 (*)
+│   │       │   │       │       ├── log v0.4.34
+│   │       │   │       │       ├── naga-types v30.0.1 (*)
+│   │       │   │       │       ├── raw-window-handle v0.6.2
+│   │       │   │       │       └── static_assertions v1.1.0
+│   │       │   │       └── wgpu-types v30.0.1 (*)
+│   │       │   │       [build-dependencies]
+│   │       │   │       └── cfg_aliases v0.2.2
+│   │       │   ├── wgpu-hal v30.0.1 (*)
+│   │       │   ├── wgpu-naga-bridge v30.0.1 (*)
+│   │       │   └── wgpu-types v30.0.1 (*)
+│   │       │   [build-dependencies]
+│   │       │   └── cfg_aliases v0.2.2
+│   │       ├── wgpu-hal v30.0.1 (*)
+│   │       └── wgpu-types v30.0.1 (*)
+│   │       [build-dependencies]
+│   │       └── cfg_aliases v0.2.2
+│   ├── wgpu v30.0.1 (*)
+│   ├── x11-dl v2.21.0
+│   │   ├── libc v0.2.191
+│   │   └── once_cell v1.21.4
+│   │   [build-dependencies]
+│   │   └── pkg-config v0.3.34
+│   ├── zune-bmp v0.5.2
+│   │   ├── log v0.4.34
+│   │   └── zune-core v0.5.3
+│   ├── zune-core v0.5.3
+│   └── zune-jpeg v0.5.15
+│       └── zune-core v0.5.3
+├── ferroui-x11 v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.X11)
+│   ├── bitflags v2.13.2
+│   ├── ferroui-base v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base) (*)
+│   ├── ferroui-controls v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls) (*)
+│   ├── ferroui-dialogs v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Dialogs) (*)
+│   ├── ferroui-freedesktop v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.FreeDesktop)
+│   │   ├── bitflags v2.13.2
+│   │   ├── ferroui-base v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base) (*)
+│   │   ├── ferroui-controls v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls) (*)
+│   │   ├── futures-util v0.3.34
+│   │   │   ├── futures-core v0.3.34
+│   │   │   ├── futures-task v0.3.34
+│   │   │   ├── pin-project-lite v0.2.17
+│   │   │   └── slab v0.4.12
+│   │   └── zbus v5.19.0
+│   │       ├── async-broadcast v0.7.2
+│   │       │   ├── event-listener v5.4.2
+│   │       │   │   ├── parking v2.2.1
+│   │       │   │   └── pin-project-lite v0.2.17
+│   │       │   ├── event-listener-strategy v0.5.4
+│   │       │   │   ├── event-listener v5.4.2 (*)
+│   │       │   │   └── pin-project-lite v0.2.17
+│   │       │   ├── futures-core v0.3.34
+│   │       │   └── pin-project-lite v0.2.17
+│   │       ├── async-executor v1.14.0
+│   │       │   ├── async-task v4.7.1
+│   │       │   ├── concurrent-queue v2.5.0
+│   │       │   │   └── crossbeam-utils v0.8.23
+│   │       │   ├── fastrand v2.5.0
+│   │       │   ├── futures-lite v2.6.1
+│   │       │   │   ├── fastrand v2.5.0
+│   │       │   │   ├── futures-core v0.3.34
+│   │       │   │   ├── futures-io v0.3.34
+│   │       │   │   ├── parking v2.2.1
+│   │       │   │   └── pin-project-lite v0.2.17
+│   │       │   ├── pin-project-lite v0.2.17
+│   │       │   └── slab v0.4.12
+│   │       ├── async-io v2.6.0
+│   │       │   ├── cfg-if v1.0.5
+│   │       │   ├── concurrent-queue v2.5.0 (*)
+│   │       │   ├── futures-io v0.3.34
+│   │       │   ├── futures-lite v2.6.1 (*)
+│   │       │   ├── parking v2.2.1
+│   │       │   ├── polling v3.11.0
+│   │       │   │   ├── cfg-if v1.0.5
+│   │       │   │   └── rustix v1.1.5
+│   │       │   │       ├── bitflags v2.13.2
+│   │       │   │       └── linux-raw-sys v0.12.1
+│   │       │   ├── rustix v1.1.5 (*)
+│   │       │   └── slab v0.4.12
+│   │       │   [build-dependencies]
+│   │       │   └── autocfg v1.5.1
+│   │       ├── async-lock v3.4.2
+│   │       │   ├── event-listener v5.4.2 (*)
+│   │       │   ├── event-listener-strategy v0.5.4 (*)
+│   │       │   └── pin-project-lite v0.2.17
+│   │       ├── async-process v2.5.0
+│   │       │   ├── async-channel v2.5.0
+│   │       │   │   ├── concurrent-queue v2.5.0 (*)
+│   │       │   │   ├── event-listener-strategy v0.5.4 (*)
+│   │       │   │   ├── futures-core v0.3.34
+│   │       │   │   └── pin-project-lite v0.2.17
+│   │       │   ├── async-io v2.6.0 (*)
+│   │       │   ├── async-lock v3.4.2 (*)
+│   │       │   ├── async-signal v0.2.14
+│   │       │   │   ├── async-io v2.6.0 (*)
+│   │       │   │   ├── cfg-if v1.0.5
+│   │       │   │   ├── futures-core v0.3.34
+│   │       │   │   ├── futures-io v0.3.34
+│   │       │   │   ├── rustix v1.1.5 (*)
+│   │       │   │   └── signal-hook-registry v1.4.8
+│   │       │   │       ├── errno v0.3.14
+│   │       │   │       │   └── libc v0.2.191
+│   │       │   │       └── libc v0.2.191
+│   │       │   ├── async-task v4.7.1
+│   │       │   ├── cfg-if v1.0.5
+│   │       │   ├── event-listener v5.4.2 (*)
+│   │       │   ├── futures-lite v2.6.1 (*)
+│   │       │   └── rustix v1.1.5 (*)
+│   │       ├── async-recursion v1.2.0 (proc-macro)
+│   │       │   ├── proc-macro2 v1.0.107 (*)
+│   │       │   ├── quote v1.0.47 (*)
+│   │       │   └── syn v3.0.9 (*)
+│   │       ├── async-task v4.7.1
+│   │       ├── async-trait v0.1.92 (proc-macro)
+│   │       │   ├── proc-macro2 v1.0.107 (*)
+│   │       │   ├── quote v1.0.47 (*)
+│   │       │   └── syn v3.0.9 (*)
+│   │       ├── blocking v1.7.0
+│   │       │   ├── async-channel v2.5.0 (*)
+│   │       │   ├── async-task v4.7.1
+│   │       │   ├── futures-io v0.3.34
+│   │       │   ├── futures-lite v2.6.1 (*)
+│   │       │   └── piper v0.2.5
+│   │       │       ├── atomic-waker v1.1.2
+│   │       │       ├── fastrand v2.5.0
+│   │       │       └── futures-io v0.3.34
+│   │       ├── enumflags2 v0.7.12
+│   │       │   ├── enumflags2_derive v0.7.12 (proc-macro)
+│   │       │   │   ├── proc-macro2 v1.0.107 (*)
+│   │       │   │   ├── quote v1.0.47 (*)
+│   │       │   │   └── syn v2.0.119 (*)
+│   │       │   └── serde v1.0.229 (*)
+│   │       ├── event-listener v5.4.2 (*)
+│   │       ├── futures-core v0.3.34
+│   │       ├── futures-lite v2.6.1 (*)
+│   │       ├── hex v0.4.3
+│   │       ├── libc v0.2.191
+│   │       ├── ordered-stream v0.2.0
+│   │       │   ├── futures-core v0.3.34
+│   │       │   └── pin-project-lite v0.2.17
+│   │       ├── rustix v1.1.5 (*)
+│   │       ├── serde v1.0.229 (*)
+│   │       ├── serde_repr v0.1.21 (proc-macro)
+│   │       │   ├── proc-macro2 v1.0.107 (*)
+│   │       │   ├── quote v1.0.47 (*)
+│   │       │   └── syn v3.0.9 (*)
+│   │       ├── tracing v0.1.44
+│   │       │   ├── pin-project-lite v0.2.17
+│   │       │   ├── tracing-attributes v0.1.31 (proc-macro)
+│   │       │   │   ├── proc-macro2 v1.0.107 (*)
+│   │       │   │   ├── quote v1.0.47 (*)
+│   │       │   │   └── syn v2.0.119 (*)
+│   │       │   └── tracing-core v0.1.36
+│   │       │       └── once_cell v1.21.4
+│   │       ├── uuid v1.28.0
+│   │       │   └── serde_core v1.0.229
+│   │       ├── winnow v1.0.4
+│   │       ├── zbus_macros v5.19.0 (proc-macro)
+│   │       │   ├── proc-macro-crate v3.5.0
+│   │       │   │   └── toml_edit v0.25.17+spec-1.1.0
+│   │       │   │       ├── indexmap v2.14.2 (*)
+│   │       │   │       ├── toml_datetime v1.1.2+spec-1.1.0
+│   │       │   │       ├── toml_parser v1.1.5+spec-1.1.0
+│   │       │   │       │   └── winnow v1.0.4
+│   │       │   │       └── winnow v1.0.4
+│   │       │   ├── proc-macro2 v1.0.107 (*)
+│   │       │   ├── quote v1.0.47 (*)
+│   │       │   ├── syn v3.0.9 (*)
+│   │       │   ├── zbus_names v4.3.5
+│   │       │   │   ├── serde v1.0.229
+│   │       │   │   │   ├── serde_core v1.0.229
+│   │       │   │   │   └── serde_derive v1.0.229 (proc-macro) (*)
+│   │       │   │   ├── winnow v1.0.4
+│   │       │   │   └── zvariant v5.15.1
+│   │       │   │       ├── endi v1.1.1
+│   │       │   │       ├── enumflags2 v0.7.12
+│   │       │   │       │   ├── enumflags2_derive v0.7.12 (proc-macro) (*)
+│   │       │   │       │   └── serde v1.0.229 (*)
+│   │       │   │       ├── serde v1.0.229 (*)
+│   │       │   │       ├── winnow v1.0.4
+│   │       │   │       ├── zcheapstr v1.1.0
+│   │       │   │       │   └── serde v1.0.229 (*)
+│   │       │   │       ├── zvariant_derive v5.15.1 (proc-macro)
+│   │       │   │       │   ├── proc-macro-crate v3.5.0 (*)
+│   │       │   │       │   ├── proc-macro2 v1.0.107 (*)
+│   │       │   │       │   ├── quote v1.0.47 (*)
+│   │       │   │       │   ├── syn v3.0.9 (*)
+│   │       │   │       │   └── zvariant_utils v4.2.0
+│   │       │   │       │       ├── proc-macro2 v1.0.107 (*)
+│   │       │   │       │       ├── quote v1.0.47 (*)
+│   │       │   │       │       ├── serde v1.0.229 (*)
+│   │       │   │       │       ├── syn v3.0.9 (*)
+│   │       │   │       │       └── winnow v1.0.4
+│   │       │   │       └── zvariant_utils v4.2.0 (*)
+│   │       │   ├── zvariant v5.15.1 (*)
+│   │       │   └── zvariant_utils v4.2.0 (*)
+│   │       ├── zbus_names v4.3.5
+│   │       │   ├── serde v1.0.229 (*)
+│   │       │   ├── winnow v1.0.4
+│   │       │   └── zvariant v5.15.1
+│   │       │       ├── endi v1.1.1
+│   │       │       ├── enumflags2 v0.7.12 (*)
+│   │       │       ├── serde v1.0.229 (*)
+│   │       │       ├── winnow v1.0.4
+│   │       │       ├── zcheapstr v1.1.0
+│   │       │       │   └── serde v1.0.229 (*)
+│   │       │       ├── zvariant_derive v5.15.1 (proc-macro) (*)
+│   │       │       └── zvariant_utils v4.2.0
+│   │       │           ├── proc-macro2 v1.0.107
+│   │       │           │   └── unicode-ident v1.0.27
+│   │       │           ├── quote v1.0.47
+│   │       │           │   └── proc-macro2 v1.0.107 (*)
+│   │       │           ├── serde v1.0.229 (*)
+│   │       │           ├── syn v3.0.9
+│   │       │           │   ├── proc-macro2 v1.0.107 (*)
+│   │       │           │   ├── quote v1.0.47 (*)
+│   │       │           │   └── unicode-ident v1.0.27
+│   │       │           └── winnow v1.0.4
+│   │       └── zvariant v5.15.1 (*)
+│   ├── ferroui-opengl v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.OpenGL) (*)
+│   ├── ferroui-vulkan v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Vulkan)
+│   │   ├── ash v0.38.0+1.3.281 (*)
+│   │   └── ferroui-base v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base) (*)
+│   ├── libc v0.2.191
+│   └── x11-dl v2.21.0 (*)
+└── serde_json v1.0.154 (*)
+[build-dependencies]
+└── ferroui-build v0.4.0-preview.1 (/workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Build.Tasks) (*)

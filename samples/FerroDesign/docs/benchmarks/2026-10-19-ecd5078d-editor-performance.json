@@ -1,0 +1,314 @@
+{
+  "allSelectionRoots": {
+    "roots": 10000,
+    "selected": 10000,
+    "totalMs": 1.138876
+  },
+  "componentAuthoring": {
+    "documentOperationsWithoutHistory": {
+      "fullDocumentCloneReference": {
+        "text": {
+          "maxMs": 9.571532000000001,
+          "p50Ms": 8.976711,
+          "p95Ms": 9.571532000000001,
+          "samples": 8,
+          "totalMs": 71.102603
+        },
+        "variant": {
+          "maxMs": 16.413838,
+          "p50Ms": 9.598332,
+          "p95Ms": 16.413838,
+          "samples": 8,
+          "totalMs": 79.17292
+        },
+        "visibility": {
+          "maxMs": 9.529614,
+          "p50Ms": 9.197564,
+          "p95Ms": 9.529614,
+          "samples": 8,
+          "totalMs": 69.520268
+        }
+      },
+      "plannedChanges": {
+        "text": {
+          "maxMs": 4.047809,
+          "p50Ms": 3.833929,
+          "p95Ms": 4.047809,
+          "samples": 8,
+          "totalMs": 29.799833000000003
+        },
+        "variant": {
+          "maxMs": 4.180365,
+          "p50Ms": 3.9910120000000004,
+          "p95Ms": 4.180365,
+          "samples": 8,
+          "totalMs": 31.707234
+        },
+        "visibility": {
+          "maxMs": 4.152835,
+          "p50Ms": 3.9751830000000004,
+          "p95Ms": 4.152835,
+          "samples": 8,
+          "totalMs": 30.783178
+        }
+      },
+      "referenceDefinition": "the same operation plus a whole-document candidate clone and replacement"
+    },
+    "editorWithHistory": {
+      "exactHistoryRoundTrip": true,
+      "operation": {
+        "text": {
+          "maxMs": 18.387113,
+          "p50Ms": 17.93037,
+          "p95Ms": 18.387113,
+          "samples": 8,
+          "totalMs": 140.776688
+        },
+        "variant": {
+          "maxMs": 18.76084,
+          "p50Ms": 17.678349,
+          "p95Ms": 18.76084,
+          "samples": 8,
+          "totalMs": 142.090921
+        },
+        "visibility": {
+          "maxMs": 25.699516,
+          "p50Ms": 24.783445,
+          "p95Ms": 25.699516,
+          "samples": 8,
+          "totalMs": 196.61510899999996
+        }
+      },
+      "redo": {
+        "maxMs": 10.559627,
+        "p50Ms": 3.4827730000000003,
+        "p95Ms": 10.140395,
+        "samples": 24,
+        "totalMs": 133.50515199999998
+      },
+      "snapshotScope": "whole-document",
+      "undo": {
+        "maxMs": 10.714184999999999,
+        "p50Ms": 3.5124079999999998,
+        "p95Ms": 10.320791,
+        "samples": 24,
+        "totalMs": 134.204896
+      }
+    },
+    "embeddedPngHrefBytesPerSourceImage": 87542,
+    "equivalentDocumentsAndStableIds": true,
+    "includesBrowserEvents": false,
+    "instanceNodes": 33,
+    "iterations": 24,
+    "kind": "two-matched-variants-with-text-visibility-images-and-vector-paths",
+    "nodes": 10000,
+    "operationsPerKind": 8,
+    "serializedBytes": 27266203,
+    "unrelatedEmbeddedPngHrefBytes": 5592566,
+    "unrelatedNodes": 9900
+  },
+  "createMs": 13.220455000000001,
+  "equivalentDocumentsAndHistory": true,
+  "gesture": {
+    "deltaPerUpdate": [
+      0.25,
+      0.125
+    ],
+    "gestures": 12,
+    "includesBrowserEvents": false,
+    "scoped": {
+      "begin": {
+        "maxMs": 0.031379,
+        "p50Ms": 0.012924,
+        "p95Ms": 0.024586,
+        "samples": 12,
+        "totalMs": 0.156612
+      },
+      "commit": {
+        "maxMs": 0.015489000000000001,
+        "p50Ms": 0.01097,
+        "p95Ms": 0.012232999999999999,
+        "samples": 12,
+        "totalMs": 0.132047
+      },
+      "total": {
+        "maxMs": 0.089677,
+        "p50Ms": 0.059361000000000004,
+        "p95Ms": 0.070712,
+        "samples": 12,
+        "totalMs": 0.6675850000000001
+      },
+      "update": {
+        "maxMs": 0.014678,
+        "p50Ms": 0.0009620000000000001,
+        "p95Ms": 0.001523,
+        "samples": 288,
+        "totalMs": 0.357111
+      }
+    },
+    "unscopedReference": {
+      "begin": {
+        "maxMs": 3.905111,
+        "p50Ms": 3.25612,
+        "p95Ms": 3.510244,
+        "samples": 12,
+        "totalMs": 39.853062
+      },
+      "commit": {
+        "maxMs": 10.764078999999999,
+        "p50Ms": 10.370384,
+        "p95Ms": 10.649465000000001,
+        "samples": 12,
+        "totalMs": 123.636615
+      },
+      "total": {
+        "maxMs": 86.236461,
+        "p50Ms": 82.62674100000001,
+        "p95Ms": 84.37916299999999,
+        "samples": 12,
+        "totalMs": 982.8544949999999
+      },
+      "update": {
+        "maxMs": 3.466693,
+        "p50Ms": 2.8444719999999997,
+        "p95Ms": 3.141465,
+        "samples": 288,
+        "totalMs": 819.2819979999994
+      }
+    },
+    "updatesPerGesture": 24
+  },
+  "indexMs": 33.057946,
+  "layout": {
+    "denseMixedFill": {
+      "changedPerIteration": [
+        9999,
+        9998,
+        9998,
+        9998,
+        9998
+      ],
+      "children": 9999,
+      "kind": "fixed-row-three-quarter-fill-text-children",
+      "nodes": 10000,
+      "parentWidthDelta": 16.0,
+      "textBytesPerChild": 448,
+      "timing": {
+        "maxMs": 13.214383,
+        "p50Ms": 9.699621,
+        "p95Ms": 13.214383,
+        "samples": 5,
+        "totalMs": 52.00897
+      }
+    },
+    "noLayout": {
+      "maxMs": 2.098939,
+      "p50Ms": 1.674086,
+      "p95Ms": 2.098939,
+      "samples": 5,
+      "totalMs": 8.786496
+    }
+  },
+  "measurement": "native-engine-same-process",
+  "nodes": 10000,
+  "nudge": {
+    "scoped": {
+      "maxMs": 0.043932,
+      "p50Ms": 0.024095,
+      "p95Ms": 0.029144,
+      "samples": 48,
+      "totalMs": 1.027364
+    },
+    "unscopedReference": {
+      "maxMs": 21.754239000000002,
+      "p50Ms": 13.742229,
+      "p95Ms": 14.329486000000001,
+      "samples": 48,
+      "totalMs": 664.0264470000003
+    }
+  },
+  "parseValidateAndIndex": {
+    "maxMs": 57.546690999999996,
+    "p50Ms": 56.717824,
+    "p95Ms": 57.546690999999996,
+    "samples": 3,
+    "totalMs": 170.718516
+  },
+  "pointQueries": {
+    "hits": 10000,
+    "queries": 10000,
+    "totalMs": 19.107227
+  },
+  "redo": {
+    "scoped": {
+      "maxMs": 0.027571000000000002,
+      "p50Ms": 0.012713,
+      "p95Ms": 0.018194,
+      "samples": 48,
+      "totalMs": 0.6499950000000001
+    },
+    "unscopedReference": {
+      "maxMs": 3.517638,
+      "p50Ms": 2.7138470000000003,
+      "p95Ms": 3.383709,
+      "samples": 48,
+      "totalMs": 133.52165
+    }
+  },
+  "releaseBuild": true,
+  "schemaVersion": 5,
+  "serialization": {
+    "compactAutosave": {
+      "bytes": 12802055,
+      "timing": {
+        "maxMs": 20.61353,
+        "p50Ms": 20.210145999999998,
+        "p95Ms": 20.61353,
+        "samples": 5,
+        "totalMs": 101.029413
+      }
+    },
+    "equivalentDocumentRoundTrip": true,
+    "portablePretty": {
+      "bytes": 20152206,
+      "timing": {
+        "maxMs": 37.76268,
+        "p50Ms": 36.18821,
+        "p95Ms": 37.76268,
+        "samples": 5,
+        "totalMs": 181.424444
+      }
+    }
+  },
+  "undo": {
+    "scoped": {
+      "maxMs": 0.027621,
+      "p50Ms": 0.012193,
+      "p95Ms": 0.017773,
+      "samples": 48,
+      "totalMs": 0.61576
+    },
+    "unscopedReference": {
+      "maxMs": 3.5670699999999997,
+      "p50Ms": 2.5720520000000002,
+      "p95Ms": 2.9604269999999997,
+      "samples": 48,
+      "totalMs": 124.58323699999998
+    }
+  },
+  "viewportQueries": {
+    "queries": 1000,
+    "totalMs": 30.485292,
+    "totalVisible": 259007
+  },
+  "workload": {
+    "columns": 100,
+    "delta": [
+      1.0,
+      -0.25
+    ],
+    "kind": "flat-filled-rectangle-grid",
+    "nudgeIterations": 48,
+    "selectedNodes": 1
+  }
+}

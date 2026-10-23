@@ -1,0 +1,248 @@
+{
+  "created": "2026-10-22T15:04:14.707112+00:00",
+  "testedCommit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+  "testedTree": "054e0d03d4d49f327e30e62f22ef78609618a5d2",
+  "docsCommit": "177f92cdb743d1897aa65a8c8c92e5b4b844e521",
+  "docsTree": "92f8d9d08f7d3966b8552ab8a01de936be69e5a7",
+  "docsOnlyChangedPaths": [
+    "samples/FerroDesign/README.md",
+    "samples/FerroDesign/docs/FEATURES.md",
+    "samples/FerroDesign/docs/LAYOUT_GUIDES.md",
+    "samples/FerroDesign/docs/SELECTION.md",
+    "samples/FerroDesign/docs/VALIDATION.md",
+    "samples/FerroDesign/docs/VECTOR_FACES.md",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/README.md",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/Software2D-bucket-hover-face.png",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/Software2D-initial.png",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/Software2D-native-matching-fill.png",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/Software2D-stacked-layout-guides.png",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/WebGL2-initial.png",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/WebGL2-native-matching-fill.png",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/WebGL2-stacked-layout-guides.png",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/browser-build-oom.log",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/ci-3a0bf1f1-browser-failure-provenance.json",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/ci-3a0bf1f1-logs.zip",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/ci-3a0bf1f1-native-log-provenance.json",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/ci-3a0bf1f1-terminal-ferrodesign-39771204240.json",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/ci-f36dabf7-logs.zip",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/core-tests.log",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/failed-browser-first-run.zip",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/failed-browser-second-run.zip",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/failed-ci-browser-f36dabf7.zip",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/framework-ci-3a0bf1f1-summary.json",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/framework-ci-summary.json",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/host-browser-ci-3a0bf1f1-provenance.json",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/indexeddb-ci-3a0bf1f1-extracted-log.json",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/native-performance/performance-extracted-log.json",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/native-performance/performance-step.log",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/native-performance/provenance.json",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/native-tests.log",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/original-logs.zip",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/prior-browser-summary.json",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/provenance-manifest.json",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/renderer-graphs/aarch64-apple-darwin.txt",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/renderer-graphs/wasm32-unknown-emscripten.txt",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/renderer-graphs/x86_64-apple-darwin.txt",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/renderer-graphs/x86_64-pc-windows-msvc.txt",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/renderer-graphs/x86_64-unknown-linux-gnu.txt",
+    "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/targeted-palette-report.zip"
+  ],
+  "buildSourceCommit": "3a0bf1f13c6ede9abe5360bc3691085a3bc981f0",
+  "buildToTestChangedPaths": [
+    "samples/FerroDesign/tests/browser.mjs",
+    "samples/FerroDesign/tests/geometry-authoring-browser.mjs",
+    "samples/FerroDesign/tests/network-browser.mjs",
+    "samples/FerroDesign/tests/network-bucket-browser.mjs",
+    "samples/FerroDesign/tests/region-paints-browser.mjs"
+  ],
+  "applicationAndBuildInputsUnchanged": true,
+  "fileCount": 31,
+  "files": {
+    "samples/FerroDesign/tests/angular-paints-browser.mjs": {
+      "bytes": 12898,
+      "sha256": "5a7eebeea291b425fc1075d3e55f5af5f8191f0f8f24a9a10fc8a954b7be4908",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/authoring-browser.mjs": {
+      "bytes": 7951,
+      "sha256": "806ebeb7d73ae0be421137cbb8c0ef9f360f8c87d26c73d34562d7a82a13fd87",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/browser.mjs": {
+      "bytes": 91542,
+      "sha256": "3a3d0b9f86b9590da9ee8e2e9b2745a12545a934afe1a67de8c892406f480030",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/components-browser.mjs": {
+      "bytes": 15683,
+      "sha256": "cf3ed180f41a62e0b2520917735b3ad238f5013a091ddf1a70743661a9940c96",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/compositing-browser.mjs": {
+      "bytes": 8623,
+      "sha256": "897c50eba3d818f5603aaa08a9c025a44e91192f7e4ea325b8c2e652ca4ad9d4",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/document-store-browser.mjs": {
+      "bytes": 8000,
+      "sha256": "466adceb3877b299ce92d610a15b40ff2e47cfa1f71a8e0901bcb9f15f49c0cf",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/document-store.test.mjs": {
+      "bytes": 17126,
+      "sha256": "d3794e220039aed72b31745dd1601443bf06f7378b2ccffce90e4ea601fc3334",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/effects-browser.mjs": {
+      "bytes": 8345,
+      "sha256": "814aad28948d9bdf677ffc69e3e32817be87915ed3fb4cd6e42d042dc9a47dbe",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/flatten-browser.mjs": {
+      "bytes": 16921,
+      "sha256": "dc706d5e13e7471c0b075f2d9978b9d958420d703e566ddc401250396fd21585",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/geometry-authoring-browser.mjs": {
+      "bytes": 9247,
+      "sha256": "720d3ab736b1c83ac399c1e5619b9f0b299d2485ba774a67401b6d7dd40e70d3",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/grid-styles-browser.mjs": {
+      "bytes": 18195,
+      "sha256": "cb17248da5fea1a5d3d93b750484484c93633ad89963e83549a0169824bb63f4",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/history-browser.mjs": {
+      "bytes": 2581,
+      "sha256": "7fa18bd154e1e041d3184d4536b0116b6d9c82cde01f3291106f826b043eeae7",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/image-crop-browser.mjs": {
+      "bytes": 16397,
+      "sha256": "c85627f32166fb1855f814d51c07cfd6ccf8371f82f02923a6887df76548c95c",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/inspector-lifecycle-browser.mjs": {
+      "bytes": 8236,
+      "sha256": "32ccdcf1f7b10942ce1a9df22f5be6092a461661e17838b6f9e9058c4db777a8",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/layout-browser.mjs": {
+      "bytes": 11067,
+      "sha256": "604b4ba44c7367e2247b7f6aba5605b29a2d4ccb2745c77a8911280a291befe0",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/layout-drag-browser.mjs": {
+      "bytes": 11848,
+      "sha256": "9f1e1383c7b325b7e31411e0122f91da9aa2fc116201feff454b87e406ac5ff3",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/layout-transfer-browser.mjs": {
+      "bytes": 13306,
+      "sha256": "a6d1a86daccc8f480ce2f5f34eae295f9ee2bd2bbbc9e414bd0a51f7a4de4ff3",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/masks-browser.mjs": {
+      "bytes": 12770,
+      "sha256": "9a451dd494d98ec8c05a8460c2665c9b15d4194c3b4f25ef61f86e429fca01fd",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/matching-browser.mjs": {
+      "bytes": 7604,
+      "sha256": "a06cca5a5302f53b18a54798b555fe64b808ba63a47a21de938ac5ef9b59192b",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/network-browser.mjs": {
+      "bytes": 13807,
+      "sha256": "e314d9e163fce0e4967ef8ace3b87d964528e79f16830013e33390c114e1433a",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/network-bucket-browser.mjs": {
+      "bytes": 15196,
+      "sha256": "c13ec56dbc1edc18d48a8c5caa248cf9896780774cbe4497cb1eeb0d3dedf353",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/page-inspector-browser.mjs": {
+      "bytes": 3551,
+      "sha256": "d1f36523f17c1dbfd0792365fe61ac14a8b98ce71e26cf4571948cb9dd82f733",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/panels-browser.mjs": {
+      "bytes": 4402,
+      "sha256": "2e6ee77644f053cb6fc47346e3907e85ca4f913dcebdfa9dbc1692182e8e00bc",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/prototype-browser.mjs": {
+      "bytes": 7627,
+      "sha256": "1a2c4a3c44d36534bb32a844bc4e0a97e4c5701937a1167d967d83fb549c70b7",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/region-paints-browser.mjs": {
+      "bytes": 19801,
+      "sha256": "8ec7e757e05821916fc5bc809748091608b37e11eae119af17c7b3e2c43087af",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/selection-browser.mjs": {
+      "bytes": 14609,
+      "sha256": "dda878869a63fb4623df43ffb35c53c1ccb767f39d2109024178f7fd9d26162b",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/serialization-browser.mjs": {
+      "bytes": 6097,
+      "sha256": "47d8b18654497944c92eec207da238ac4bf483a52ad840a4477540d6fd35699b",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/styles-browser.mjs": {
+      "bytes": 16181,
+      "sha256": "9805ac10253ef5abab7fd8ea9da153017d9f1e19c653af191d3b6467244222d7",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/svg-compositing-browser.mjs": {
+      "bytes": 9841,
+      "sha256": "3fec5edd0697a24103e1d3094fb52e1357420048e29f7017824461fe50fffdd9",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/text-render-benchmark.mjs": {
+      "bytes": 19627,
+      "sha256": "b7fcfe0aae8d16ab13a48c8992254fbf5889f5802737a5abb579219d05f8d3c7",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    },
+    "samples/FerroDesign/tests/typography-browser.mjs": {
+      "bytes": 10742,
+      "sha256": "fba3c1bd6379b0040067527b090c27a21db13dd049cf3cda32051f2936c16eee",
+      "equalsTestedCommit": true,
+      "equalsDocsCommit": true
+    }
+  }
+}

@@ -1,0 +1,568 @@
+warning: unused import: `crate::platform::IBitmapImpl`
+ --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/media/imaging/i_bitmap.rs:3:5
+  |
+3 | use crate::platform::IBitmapImpl;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `crate::platform::IBitmapImpl`
+ --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/media/i_image_brush.rs:3:5
+  |
+3 | use crate::platform::IBitmapImpl;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::platform::IBitmapImpl`
+ --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/rendering/composition/server/server_composition_surface.rs:2:5
+  |
+2 | use crate::platform::IBitmapImpl;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `ServerJob`
+ --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/rendering/composition/server/server_compositor.rs:8:101
+  |
+8 |     BatchMarker, BatchObject, BatchStreamData, BatchStreamReader, CommittedBatch, CompositionBatch, ServerJob,
+  |                                                                                                     ^^^^^^^^^
+
+warning: unused import: `IBitmapImpl`
+ --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/media/imaging/bitmap.rs:5:42
+  |
+5 | use crate::platform::{self, AlphaFormat, IBitmapImpl, ILockedFramebuffer, PixelFormat};
+  |                                          ^^^^^^^^^^^
+
+warning: unused import: `IBitmapImpl`
+ --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/media/imaging/render_target_bitmap.rs:3:29
+  |
+3 | use crate::platform::{self, IBitmapImpl, IDrawingContextImpl, IRenderTargetBitmapImpl};
+  |                             ^^^^^^^^^^^
+
+warning: unused import: `IBitmapImpl`
+ --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/media/imaging/writeable_bitmap.rs:5:42
+  |
+5 | use crate::platform::{self, AlphaFormat, IBitmapImpl, ILockedFramebuffer, IWriteableBitmapImpl, PixelFormat};
+  |                                          ^^^^^^^^^^^
+
+warning: unused import: `IBitmapImpl`
+ --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/platform/i_external_objects_render_interface_context_feature.rs:1:13
+  |
+1 | use super::{IBitmapImpl, IPlatformHandle, PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageProperties};
+  |             ^^^^^^^^^^^
+
+warning: unused import: `IBitmapImpl`
+ --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/rendering/composition/server/server_composition_drawing_surface.rs:2:23
+  |
+2 | use crate::platform::{IBitmapImpl, IPlatformRenderInterfaceContext, PlatformGraphicsContextLostException};
+  |                       ^^^^^^^^^^^
+
+warning: unused import: `crate::platform::IBitmapImpl`
+ --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/rendering/composition/brushes/server_simple_image_brush.rs:8:5
+  |
+8 | use crate::platform::IBitmapImpl;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `IBitmapImpl`
+ --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/rendering/composition/server/server_compositor.rs:6:23
+  |
+6 | use crate::platform::{IBitmapImpl, IPlatformGraphics, IRenderTarget, LtrbRect};
+  |                       ^^^^^^^^^^^
+
+warning: method `create_snapshot` is never used
+   --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/rendering/composition/animations/composition_animation.rs:108:19
+    |
+ 30 | impl CompositionAnimation {
+    | ------------------------- method in this implementation
+...
+108 |     pub(crate) fn create_snapshot(&self) -> Rc<PropertySetSnapshot> {
+    |                   ^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `is_disposed` is never used
+  --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/rendering/composition/server/server_composition_target.rs:69:19
+   |
+66 | impl ServerCompositionTarget {
+   | ---------------------------- method in this implementation
+...
+69 |     pub(crate) fn is_disposed(&self) -> bool {
+   |                   ^^^^^^^^^^^
+
+warning: method `snapshot` is never used
+   --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/rendering/composition/composition_property_set.rs:154:19
+    |
+ 31 | impl CompositionPropertySet {
+    | --------------------------- method in this implementation
+...
+154 |     pub(crate) fn snapshot(&self) -> PropertySetSnapshot {
+    |                   ^^^^^^^^
+
+warning: methods `with_value` and `set_local_value_and_raise_untyped` are never used
+  --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/property_store/effective_value.rs:20:8
+   |
+11 | pub(crate) trait EffectiveValueDyn: Any {
+   |                  ----------------- methods in this trait
+...
+20 |     fn with_value(&self, f: &mut dyn FnMut(&dyn Any));
+   |        ^^^^^^^^^^
+...
+30 |     fn set_local_value_and_raise_untyped(&self, owner: &FerroObject, value: &dyn Any);
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `invalid_value_type` is never used
+   --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/property_store/effective_value.rs:326:4
+    |
+326 | fn invalid_value_type(property: &FerroProperty) -> ! {
+    |    ^^^^^^^^^^^^^^^^^^
+
+warning: associated items `new_shared` and `is_shared` are never used
+  --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/property_store/value_frame.rs:30:12
+   |
+17 | impl ValueFrameBase {
+   | ------------------- associated items in this implementation
+...
+30 |     pub fn new_shared(priority: BindingPriority, type_: FrameType) -> Self {
+   |            ^^^^^^^^^^
+...
+36 |     pub fn is_shared(&self) -> bool {
+   |            ^^^^^^^^^
+
+warning: methods `is_evaluating`, `remove_frame`, and `get_priority` are never used
+   --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/property_store/value_store.rs:88:12
+    |
+ 73 | impl ValueStore {
+    | --------------- methods in this implementation
+...
+ 88 |     pub fn is_evaluating(&self) -> bool {
+    |            ^^^^^^^^^^^^^
+...
+657 |     pub fn remove_frame(&self, owner: &FerroObject, frame: &Rc<dyn ValueFrame>) -> bool {
+    |            ^^^^^^^^^^^^
+...
+705 |     pub fn get_priority(&self, property: &FerroProperty) -> BindingPriority {
+    |            ^^^^^^^^^^^^
+
+warning: method `with_sender` is never used
+   --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/ferro_property_changed_event_args.rs:103:19
+    |
+ 19 | impl<'a> FerroPropertyChangedEventArgs<'a> {
+    | ------------------------------------------ method in this implementation
+...
+103 |     pub(crate) fn with_sender<'b>(&'b self, sender: &'b FerroObject) -> FerroPropertyChangedEventArgs<'b> {
+    |                   ^^^^^^^^^^^
+
+warning: method `base` is never used
+   --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/ferro_property_metadata.rs:165:8
+    |
+164 | pub trait PropertyMetadata: Sized + 'static {
+    |           ---------------- method in this trait
+165 |     fn base(&self) -> &FerroPropertyMetadata;
+    |        ^^^^
+
+warning: method `default_metadata` is never used
+   --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/ferro_property_metadata.rs:269:12
+    |
+240 | impl<M: PropertyMetadata> MetadataTable<M> {
+    | ------------------------------------------ method in this implementation
+...
+269 |     pub fn default_metadata(&self) -> &Rc<M> {
+    |            ^^^^^^^^^^^^^^^^
+
+warning: method `properties` is never used
+  --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/ferro_property_registry.rs:63:19
+   |
+53 | impl FerroPropertyRegistry {
+   | -------------------------- method in this implementation
+...
+63 |     pub(crate) fn properties(&self) -> Vec<&'static FerroProperty> {
+   |                   ^^^^^^^^^^
+
+warning: associated function `rooted_visual_children_count` is never used
+   --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Base/visual.rs:961:19
+    |
+585 | impl Visual {
+    | ----------- associated function in this implementation
+...
+961 |     pub(crate) fn rooted_visual_children_count() -> i32 {
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `ferroui-base` (lib) generated 23 warnings (run `cargo fix --lib -p ferroui-base` to apply 4 suggestions)
+warning: `ferroui-base` (lib) generated 23 warnings (23 duplicates)
+warning: unused import: `ferroui_base::platform::IBitmapImpl`
+ --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls/platform/i_platform_icon_loader.rs:2:5
+  |
+2 | use ferroui_base::platform::IBitmapImpl;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `Vector`
+  --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls/markup_types/classes.rs:41:118
+   |
+41 | use ferroui_base::{ferro_class_info, BoxedValue, FerroObject, IFerroDependencyResolver, PixelPoint, Rect, Ref, Size, Vector};
+   |                                                                                                                      ^^^^^^
+
+warning: unused doc comment
+   --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls/markup_types/contracts.rs:143:1
+    |
+143 | /// The types declared in this file.
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ rustdoc does not generate documentation for macro invocations
+    |
+    = help: to document an item produced by a macro, the macro must produce the documentation as part of its expansion
+    = note: `#[warn(unused_doc_comments)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `is_disposed` is never used
+   --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls/animation/connected_animation.rs:252:19
+    |
+124 | impl ConnectedAnimation {
+    | ----------------------- method in this implementation
+...
+252 |     pub(crate) fn is_disposed(&self) -> bool {
+    |                   ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `set_root` is never used
+   --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls/calendar/calendar.rs:570:19
+    |
+468 | impl Calendar {
+    | ------------- method in this implementation
+...
+570 |     pub(crate) fn set_root(&self, value: Option<Ref<Panel>>) {
+    |                   ^^^^^^^^
+
+warning: method `set_month_view` is never used
+   --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls/calendar/calendar_item.rs:330:19
+    |
+189 | impl CalendarItem {
+    | ----------------- method in this implementation
+...
+330 |     pub(crate) fn set_month_view(&self, value: Option<Ref<Grid>>) {
+    |                   ^^^^^^^^^^^^^^
+
+warning: bounds on generic parameters in type aliases are not enforced
+  --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.Controls/platform/win32_properties.rs:48:25
+   |
+48 | type InvocationLists<F: ?Sized> = RefCell<Vec<(Weak<F>, Vec<Rc<F>>)>>;
+   |                         ^^^^^^ will not be checked at usage sites of the type alias
+   |
+   = note: this is a known limitation of the type checker that may be lifted in a future edition.
+           see issue #112792 <https://github.com/rust-lang/rust/issues/112792> for more information
+   = note: `#[warn(type_alias_bounds)]` on by default
+help: remove this bound
+   |
+48 - type InvocationLists<F: ?Sized> = RefCell<Vec<(Weak<F>, Vec<Rc<F>>)>>;
+48 + type InvocationLists<F> = RefCell<Vec<(Weak<F>, Vec<Rc<F>>)>>;
+   |
+
+warning: `ferroui-controls` (lib) generated 7 warnings (run `cargo fix --lib -p ferroui-controls` to apply 3 suggestions)
+warning: unused import: `ferroui_base::media::IImage`
+ --> /workspace/scratch/9b313a0caa46/FerroUI/src/Markup/FerroUI.Markup.Xaml/converters/bitmap_type_converter.rs:8:5
+  |
+8 | use ferroui_base::media::IImage;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: associated function `new` is never used
+  --> /workspace/scratch/9b313a0caa46/FerroUI/src/Markup/FerroUI.Markup.Xaml/data/dynamic_resource_expression.rs:71:19
+   |
+70 | impl DynamicResourceExpression {
+   | ------------------------------ associated function in this implementation
+71 |     pub(crate) fn new(
+   |                   ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `ferroui-markup-xaml` (lib) generated 2 warnings (run `cargo fix --lib -p ferroui-markup-xaml` to apply 1 suggestion)
+warning: unused import: `std::error::Error`
+ --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.OpenGL/composition/task_support.rs:9:5
+  |
+9 | use std::error::Error;
+  |     ^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `std::rc::Rc`
+  --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.OpenGL/composition/task_support.rs:12:5
+   |
+12 | use std::rc::Rc;
+   |     ^^^^^^^^^^^
+
+warning: unused import: `ferroui_base::reactive::IDisposable`
+ --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.OpenGL/controls/open_gl_control_base.rs:9:5
+  |
+9 | use ferroui_base::reactive::IDisposable;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: methods `is_import_memory_fd_ext_available` and `is_import_semaphore_fd_ext_available` are never used
+   --> /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.OpenGL/entry_points.rs:112:21
+    |
+ 90 |           impl $Owner {
+    |           ----------- methods in this implementation
+...
+112 |               $vis fn [<is_ $name _available>](&self) -> bool {
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: /workspace/scratch/9b313a0caa46/FerroUI/src/FerroUI.OpenGL/features/external_objects_open_gl_extension_feature.rs:35:1
+    |
+ 35 | / gl_entry_points! {
+ 36 | |     table ExternalObjectsEntryPoints for ExternalObjectsInterface.ext(get, info: ());
+ 37 | |
+ 38 | |     optional safe pub(crate) fn import_memory_fd_ext(memory: u32, size: u64, handle_type: i32, fd: i32)
+...   |
+ 85 | |     optional unsafe pub(crate) fn get_unsigned_bytev_ext(target: i32, data: *mut u8) = get("glGetUnsignedBytevEXT");
+ 86 | | }
+    | |_- in this macro invocation
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+    = note: this warning originates in the macro `gl_entry_points` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: `ferroui-opengl` (lib) generated 4 warnings (run `cargo fix --lib -p ferroui-opengl` to apply 2 suggestions)
+   Compiling ferrodesign-app v0.1.0 (/workspace/scratch/9b313a0caa46/FerroUI/samples/FerroDesign/crates/ferrodesign-app)
+warning: unused import: `skrifa::raw::TableProvider`
+ --> /workspace/scratch/9b313a0caa46/FerroUI/src/Vello/FerroUI.Vello/glyph_run_impl.rs:9:5
+  |
+9 | use skrifa::raw::TableProvider;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `Shape`
+ --> /workspace/scratch/9b313a0caa46/FerroUI/src/Vello/FerroUI.Vello/vello_extensions.rs:7:38
+  |
+7 | use kurbo::{Affine, BezPath, PathEl, Shape};
+  |                                      ^^^^^
+
+warning: function `not_built` is never used
+   --> /workspace/scratch/9b313a0caa46/FerroUI/src/Vello/FerroUI.Vello/drawing_context_impl.rs:201:15
+    |
+201 | pub(crate) fn not_built(feature: &str, stage: &str) -> ! {
+    |               ^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: struct `Shared` is never constructed
+   --> /workspace/scratch/9b313a0caa46/FerroUI/src/Vello/FerroUI.Vello/geometry_impl.rs:157:12
+    |
+157 | pub struct Shared<T>(Mutex<T>);
+    |            ^^^^^^
+
+warning: associated items `new`, `get`, and `set` are never used
+   --> /workspace/scratch/9b313a0caa46/FerroUI/src/Vello/FerroUI.Vello/geometry_impl.rs:161:12
+    |
+159 | impl<T: Clone> Shared<T> {
+    | ------------------------ associated items in this implementation
+160 |     /// Wraps `value`.
+161 |     pub fn new(value: T) -> Self {
+    |            ^^^
+...
+166 |     pub fn get(&self) -> T {
+    |            ^^^
+...
+171 |     pub fn set(&self, value: T) {
+    |            ^^^
+
+warning: `ferroui-vello` (lib) generated 5 warnings (run `cargo fix --lib -p ferroui-vello` to apply 1 suggestion)
+warning: function `is_definition_field` is never used
+    --> /workspace/scratch/9b313a0caa46/FerroUI/src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/runtime_type_system.rs:1621:4
+     |
+1621 | fn is_definition_field(type_: ValueType) -> bool {
+     |    ^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `ferroui-markup-xaml-loader` (lib) generated 1 warning
+warning: unused import: `Cell`
+  --> /workspace/scratch/9b313a0caa46/FerroUI/src/Headless/FerroUI.Headless/headless_platform_render_interface.rs:22:17
+   |
+22 | use std::cell::{Cell, RefCell};
+   |                 ^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `IBitmapImpl`
+  --> /workspace/scratch/9b313a0caa46/FerroUI/src/Headless/FerroUI.Headless/headless_platform_stubs.rs:15:30
+   |
+15 | use ferroui_base::platform::{IBitmapImpl, ICursorFactory, ICursorImpl, IFontManagerImpl};
+   |                              ^^^^^^^^^^^
+
+warning: unused import: `LocatorExtensions`
+  --> /workspace/scratch/9b313a0caa46/FerroUI/src/Headless/FerroUI.Headless/ferro_headless_platform.rs:17:34
+   |
+17 | use ferroui_base::{FerroLocator, LocatorExtensions};
+   |                                  ^^^^^^^^^^^^^^^^^
+
+warning: `ferroui-headless` (lib) generated 3 warnings (run `cargo fix --lib -p ferroui-headless` to apply 1 suggestion)
+   Compiling ferrodesign-core v0.1.0 (/workspace/scratch/9b313a0caa46/FerroUI/samples/FerroDesign/crates/ferrodesign-core)
+warning: method `variables_dialog` is never used
+    --> crates/ferrodesign-app/src/shell.rs:2655:8
+     |
+  85 | impl EditorShell {
+     | ---------------- method in this implementation
+...
+2655 |     fn variables_dialog(self: &Rc<Self>) {
+     |        ^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `ferrodesign-app` (lib test) generated 1 warning
+    Finished `test` profile [unoptimized] target(s) in 30.57s
+     Running unittests src/lib.rs (/workspace/scratch/9b313a0caa46/native-target/debug/deps/ferrodesign_app-8cee0d43d085fbc3)
+
+running 155 tests
+test canvas::grids::tests::frame_grids_honor_clipped_transformed_ancestors_and_hide_other_pages ... ok
+test canvas::grids::tests::frame_grids_use_native_transforms_exact_spacing_and_rounded_clips ... ok
+test canvas::grids::tests::grid_candidate_cache_reuses_camera_frames_and_scoped_edits_without_scanning_plain_layers ... ok
+test canvas::grids::tests::grid_density_is_measured_perpendicular_to_affine_axes_and_work_is_bounded ... ok
+test canvas::grids::tests::million_column_guides_do_only_viewport_work_and_preserve_transformed_clips ... ok
+test canvas::grids::tests::stacked_columns_and_rows_render_native_bands_in_authored_order_with_exact_gutters ... ok
+test canvas::grids::tests::stretched_native_columns_resize_without_changing_authored_margin_or_gutter ... ok
+test canvas::layout_drag::tests::actual_native_capture_loss_discards_preview_and_late_release_without_history ... ok
+test canvas::layout_drag::tests::deferred_gesture_does_not_own_unrelated_pending_history_or_replaced_selection ... ok
+test canvas::layout_drag::tests::escape_cancellation_does_not_restore_or_commit_an_unrelated_pending_edit ... ok
+test canvas::layout_drag::tests::free_handoff_escape_and_native_capture_loss_preserve_document_and_late_release ... ok
+test canvas::layout_drag::tests::late_free_move_does_not_cancel_or_commit_an_external_transaction ... ok
+test canvas::layout_drag::tests::native_drag_threshold_and_release_position_do_not_need_intermediate_pointer_events ... ok
+test canvas::layout_drag::tests::normal_free_release_retains_the_existing_scoped_commit_path ... ok
+test canvas::layout_drag::tests::replacing_editor_at_the_same_revision_cannot_reuse_either_gesture_owner ... ok
+test canvas::layout_drag::tests::selection_change_cancels_owned_free_preview_without_leaving_pending_history ... ok
+test canvas::layout_drag::tests::snapped_free_preview_hands_off_to_one_atomic_layout_transfer ... ok
+test canvas::layout_drag::tests::successful_drop_clears_preview_before_synchronous_capture_loss_can_cancel_it ... ok
+test canvas::network_bucket::tests::bucket_cancellation_preserves_new_selection_and_never_owns_replacement_transactions ... ok
+test canvas::network_bucket::tests::bucket_clear_and_escape_capture_loss_restore_exact_graph_and_redo ... ok
+test canvas::network_bucket::tests::bucket_fast_affine_drag_paints_intermediate_faces_once_and_commits_one_history_step ... ok
+test canvas::network_bucket::tests::bucket_hover_is_read_only_cached_and_uses_real_native_face_pixels ... ok
+test canvas::network_bucket::tests::bucket_tool_switch_and_invalid_topology_keep_history_and_cached_failures_stable ... ok
+test canvas::prototype_key_tests::native_key_adapter_preserves_symbols_backspace_and_named_shift_chords ... ok
+test canvas::selection::tests::native_selection_capture_loss_escape_and_commands_leave_foreign_history_owned ... ok
+test canvas::selection::tests::native_selection_enter_text_uses_existing_native_editor_event ... ok
+test canvas::selection::tests::native_selection_group_preference_keeps_control_and_meta_deep_and_context_fresh ... ok
+test canvas::selection::tests::native_selection_keyboard_navigation_and_idle_escape_never_open_history ... ok
+test canvas::selection::tests::native_selection_picking_and_cycles_skip_masked_pixels_and_refresh_before_repaint ... ok
+test canvas::selection::tests::native_selection_prototype_reuses_one_isolated_index_for_thousand_layer_pointer_queries ... ok
+test desktop::tests::native_services_select_vello_without_opening_a_display ... ok
+test platform::persistence_tests::atomic_autosave_replaces_the_complete_unicode_document ... ok
+test platform::persistence_tests::failed_atomic_replace_preserves_existing_data_and_cleans_its_temporary_file ... ok
+test renderer::angular_tests::angular_gradient_center_and_outside_strokes_cover_pixels_beyond_geometry ... ok
+test renderer::angular_tests::angular_gradient_fill_and_layer_opacity_accumulate_once ... ok
+test renderer::angular_tests::angular_gradient_horizontal_stroke_uses_nonzero_pen_bounds ... ok
+test renderer::angular_tests::angular_gradient_incremental_angle_center_and_stop_edits_match_fresh_pixels ... ok
+test renderer::angular_tests::angular_gradient_pixels_start_above_center_and_sweep_clockwise ... ok
+test renderer::angular_tests::angular_gradient_stroke_uses_native_sweep_and_retains_empty_interior ... ok
+test renderer::backdrop::tests::backdrop_blur_high_resolution_surfaces_use_the_complete_source_pixel_rectangle ... ok
+test renderer::backdrop::tests::backdrop_blur_node_opacity_weights_the_complete_source_and_filtered_backdrop_once ... ok
+test renderer::backdrop::tests::backdrop_blur_oversized_regions_are_declined_before_allocation_and_reported ... ok
+test renderer::backdrop::tests::backdrop_blur_preserves_transparent_export_and_applies_ancestor_opacity_once ... ok
+test renderer::backdrop::tests::backdrop_blur_reuses_pan_frames_and_invalidates_after_prefix_changes ... ok
+test renderer::backdrop::tests::backdrop_blur_samples_previous_pixels_and_preserves_rounded_corners ... ok
+test renderer::backdrop::tests::backdrop_blur_uses_parent_local_prefix_under_world_scale_and_frame_clip ... ok
+test renderer::flatten::tests::flatten_native_boolean_retains_hole_inherited_fill_hierarchy_and_pixels ... ok
+test renderer::flatten::tests::flatten_native_box_shadow_exposes_interior_through_translucent_fills_and_rejects ... ok
+test renderer::flatten::tests::flatten_native_box_shadow_outward_spread_rounds_square_corners_and_rejects ... ok
+test renderer::flatten::tests::flatten_native_empty_container_inner_shadow_stroke_order_changes_and_rejects ... ok
+test renderer::flatten::tests::flatten_native_leaf_conversion_refreshes_one_visual_and_matches_fresh_pixels ... ok
+test renderer::flatten::tests::flatten_native_mixed_colour_glyph_text_rejects_partial_geometry_atomically ... ok
+test renderer::flatten::tests::flatten_native_multi_union_preserves_evenodd_holes ... ok
+test renderer::flatten::tests::flatten_native_opaque_overlapping_text_retains_isolated_layer_opacity ... ok
+test renderer::flatten::tests::flatten_native_opaque_union_preserves_overlapping_sibling_pixels ... ok
+test renderer::flatten::tests::flatten_native_round_shape_effects_keep_rendered_appearance ... ok
+test renderer::flatten::tests::flatten_native_rounded_shape_preserves_gradient_stroke_and_affine_pixels ... ok
+test renderer::flatten::tests::flatten_native_text_preserves_fractional_views_and_rich_run_positions ... ok
+test renderer::flatten::tests::flatten_native_text_uses_actual_shaping_rich_fonts_and_decorations ... ok
+test renderer::flatten::tests::flatten_native_translucent_text_overlap_requires_independent_paint_regions ... ok
+test renderer::incremental::tests::incremental_renderer_cumulative_work_survives_cached_frames_bounds_queries_and_clear ... ok
+test renderer::incremental::tests::incremental_renderer_generic_document_and_explicit_invalidation_keep_full_fallback ... ok
+test renderer::incremental::tests::incremental_renderer_image_registration_and_replacement_invalidate_visuals ... ok
+test renderer::incremental::tests::incremental_renderer_invalidates_filtered_prefix_cache_without_repreparing_unrelated_nodes ... ok
+test renderer::incremental::tests::incremental_renderer_prepares_one_leaf_in_ten_thousand_and_reuses_pan_frames ... ok
+test renderer::incremental::tests::incremental_renderer_preview_cancel_and_undo_redo_match_complete_scene_pixels ... ok
+test renderer::incremental::tests::incremental_renderer_rebuilds_derived_boolean_and_group_geometry_bottom_up ... ok
+test renderer::incremental::tests::incremental_renderer_refreshes_ancestor_transforms_rounded_clips_and_child_bounds ... ok
+test renderer::incremental::tests::incremental_renderer_topology_editor_replacement_and_skipped_ledger_use_full_preparation ... ok
+test renderer::incremental::tests::spatial_root_culling_matches_exhaustive_pixels_through_moves_history_and_stacking ... ok
+test renderer::incremental::tests::spatial_root_culling_retains_offscreen_backdrop_sampling_sources ... ok
+test renderer::mask_tests::masks_alpha_gradient_and_transparent_luminance_are_not_binary_clips ... ok
+test renderer::mask_tests::masks_alpha_vector_luminance_use_distinct_coverage_and_preserve_history ... ok
+test renderer::mask_tests::masks_and_unmasked_blends_use_document_backdrops_consistently_over_host_decoration ... ok
+test renderer::mask_tests::masks_cumulative_sibling_scopes_apply_each_alpha_once_and_reuse_cache ... ok
+test renderer::mask_tests::masks_group_boundary_transform_and_incremental_source_changes_match_fresh_pixels ... ok
+test renderer::mask_tests::masks_imported_svg_preserves_alpha_luminance_and_clip_geometry_pixels ... ok
+test renderer::mask_tests::masks_picking_respects_gradient_luminance_and_cumulative_transparent_pixels ... ok
+test renderer::mask_tests::masks_picking_reuses_rendered_coverage_and_refreshes_before_repaint_or_undo ... ok
+test renderer::mask_tests::masks_picking_vector_holes_and_isolated_roots_follow_rendered_scopes ... ok
+test renderer::mask_tests::masks_preserve_child_blending_with_external_backdrop ... ok
+test renderer::mask_tests::masks_vector_includes_stroke_regions_without_filling_their_holes ... ok
+test renderer::mask_tests::pass_through_fractional_group_opacity_interpolates_the_completed_blended_result_once ... ok
+test renderer::mask_tests::pass_through_translucent_backdrop_alpha_is_not_added_twice ... ok
+test renderer::region_tests::region_paints_empty_override_is_a_hole_and_reset_restores_exact_pixels ... ok
+test renderer::region_tests::region_paints_incremental_stack_edits_history_and_camera_reuse_match_fresh_pixels ... ok
+test renderer::region_tests::region_paints_layer_opacity_applies_once_and_first_stack_row_is_topmost ... ok
+test renderer::region_tests::region_paints_replace_inherited_alpha_and_keep_other_faces_for_both_rules ... ok
+test renderer::region_tests::region_paints_vector_and_alpha_masks_respect_transparent_replacements ... ok
+test renderer::regions::scaling_tests::region_scaling_bounds_include_touches_and_unknowns_but_reject_definite_gaps ... ok
+test renderer::regions::scaling_tests::region_scaling_overlaps_holes_empty_and_hidden_cutters_match_exhaustive_pixels ... ok
+test renderer::regions::scaling_tests::region_scaling_pruned_curves_and_gradient_bounds_match_exhaustive_pixels ... ok
+test renderer::regions::scaling_tests::region_scaling_prunes_ten_thousand_disjoint_regions_in_both_axes ... ok
+test renderer::regions::scaling_tests::region_scaling_ten_thousand_prepared_faces_have_logarithmic_boolean_depth ... ok
+test renderer::root_index::tests::overlap_boundary_contact_empty_tree_and_nonfinite_bounds_are_conservative ... ok
+test renderer::root_index::tests::refitting_moved_roots_invalidates_candidates_and_preserves_order_and_counts ... ok
+test renderer::root_index::tests::spatial_partition_culls_scrambled_stacking_without_reordering_paint ... ok
+test renderer::shadow_tests::boolean_result_uses_leaf_shadow_order_and_keeps_operands_suppressed ... ok
+test renderer::shadow_tests::containers_keep_inner_shadow_above_their_compound_paints ... ok
+test renderer::shadow_tests::curved_path_shadows_retain_order_through_clipping ... ok
+test renderer::shadow_tests::leaf_inner_shadow_changes_fill_pixels_without_covering_opaque_strokes ... ok
+test renderer::shadow_tests::rectangle_drop_shadows_put_first_effect_on_top ... ok
+test renderer::shadow_tests::rectangle_inner_shadows_put_first_effect_on_top ... ok
+test renderer::shadow_tests::vector_drop_shadows_put_first_effect_on_top ... ok
+test renderer::shadow_tests::vector_inner_shadows_put_first_effect_on_top ... ok
+test renderer::svg_regions_tests::region_svg_native_roundtrip_keeps_original_gradient_bounds_after_replacement ... ok
+test renderer::svg_regions_tests::region_svg_native_roundtrip_keeps_vector_mask_coverage_and_ignores_transparent_paints ... ok
+test renderer::svg_regions_tests::region_svg_native_roundtrip_retains_translucent_replacement_empty_faces_and_paint_order ... ok
+test renderer::svg_regions_tests::svg_native_roundtrip_preserves_standard_fill_and_stroke_stack_order ... ok
+test renderer::tests::ferro_ui_transform_preserves_core_rotation_reflection_and_parent_order ... ok
+test renderer::tests::image_data_decoder_preserves_bytes_and_rejects_invalid_payloads ... ok
+test renderer::tests::imported_svg_text_preserves_anchor_and_baseline_with_real_font_metrics ... ok
+test renderer::tests::moving_a_node_reuses_visuals_but_fill_and_boolean_operands_invalidate_them ... ok
+test renderer::tests::overflowing_children_are_visible_and_frame_clips_limit_their_bounds ... ok
+test renderer::tests::parent_blur_expands_overflowing_child_bounds ... ok
+test renderer::tests::utf8_run_offsets_convert_to_utf16_without_splitting_codepoints ... ok
+test renderer::typography::tests::typography_auto_direction_uses_unicode_strong_classes_and_explicit_direction_wins ... ok
+test renderer::typography::tests::typography_feature_changes_shape_real_inter_advances_and_invalidate_the_retained_visual ... ok
+test renderer::typography::tests::typography_inline_baseline_and_height_follow_actual_rich_layout_metrics ... ok
+test renderer::typography::tests::typography_native_presenter_and_canvas_have_identical_styled_unicode_pixels_and_hit_geometry ... ok
+test shell::effects::tests::displayed_opacity_round_trips_every_document_alpha_without_rounding_loss ... ok
+test shell::effects::tests::native_effect_fields_reject_nonfinite_units_and_out_of_range_values ... ok
+test shell::effects::tests::rgb_entry_does_not_accept_hidden_alpha_or_non_hex_input ... ok
+test shell::geometry_authoring::tests::affine_authoring_invalid_locked_stale_and_external_drafts_never_mutate_or_take_history ... ok
+test shell::geometry_authoring::tests::affine_authoring_preserves_child_geometry_parent_coordinates_and_complete_undo ... ok
+test shell::geometry_authoring::tests::constraint_diagram_edges_drive_actual_resize_without_losing_child_content ... ok
+test shell::layer_projection::tests::layer_projection_expansion_snapshot_exposes_previously_excluded_edits ... ok
+test shell::layer_projection::tests::layer_projection_identity_full_refresh_and_expired_feed_are_conservative ... ok
+test shell::layer_projection::tests::layer_projection_pages_assets_and_kind_changes_are_context_boundaries ... ok
+test shell::layer_projection::tests::layer_projection_preview_cancel_and_repeated_noops_advance_the_token ... ok
+test shell::layer_projection::tests::layer_projection_rebuilds_changed_names_lock_and_visibility ... ok
+test shell::layer_projection::tests::layer_projection_scoped_move_undo_redo_reuses_10000_rows_and_names ... ok
+test shell::layer_projection::tests::layer_projection_search_rebuilds_when_an_excluded_node_becomes_a_match ... ok
+test shell::layer_projection::tests::layer_projection_topology_order_and_membership_use_full_projection ... ok
+test shell::layout::tests::native_grid_fields_translate_one_based_tracks_and_reject_invalid_numbers ... ok
+test shell::paints::angular_tests::angular_gradient_css_preserves_authored_hard_stops_and_bounds_extra_work ... ok
+test shell::paints::angular_tests::angular_gradient_css_reports_center_angle_all_colors_and_hard_stops ... ok
+test shell::paints::angular_tests::angular_gradient_css_samples_match_native_straight_alpha_between_stops ... ok
+test shell::paints::angular_tests::angular_gradient_css_single_stop_is_a_valid_constant_with_fill_opacity ... ok
+test shell::paints::angular_tests::angular_gradient_fields_reject_nonfinite_values_and_preserve_noops ... ok
+test shell::paints::angular_tests::angular_gradient_type_conversion_preserves_latest_colors_stops_and_alpha ... ok
+test shell::paints::angular_xaml_tests::angular_gradient_xaml_retains_public_brush_coordinates_alpha_and_stroke ... ok
+test shell::paints::tests::adding_a_stop_interpolates_the_largest_gap ... ok
+test shell::paints::tests::gradient_conversion_preserves_stops_and_live_offset_indices ... ok
+test shell::paints::tests::image_crop_percentages_are_atomic_and_preserve_scaling_and_embedded_data ... ok
+test shell::paints::tests::invalid_numbers_and_colors_never_enter_the_document ... ok
+test shell::paints::tests::paint_reorder_and_non_image_edits_preserve_embedded_bytes ... ok
+test shell::rich_text::tests::rich_text_fields_reject_nonfinite_sizes_and_out_of_range_weights ... ok
+test shell::styles::tests::native_style_fields_reject_nonfinite_numbers_and_parse_alpha_colors ... ok
+test shell::styles::tests::style_stack_operations_preserve_order_and_reject_stale_indices ... ok
+test shell::variables::tests::typed_native_variable_values_preserve_strings_and_validate_numbers_aliases_and_alpha ... ok
+test shell::vector_export::tests::inherited_only_network_xaml_keeps_translucent_curved_edge_coverage ... ok
+test shell::vector_export::tests::network_xaml_all_native_gradients_keep_their_original_bounds_and_affine_transform ... ok
+test shell::vector_export::tests::network_xaml_loads_and_retains_replacement_cutouts_paint_order_and_layer_alpha ... ok
+test shell::vector_export::tests::network_xaml_strokes_the_edge_graph_once_and_css_identifies_regional_artwork ... ok
+
+test result: ok. 155 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.56s

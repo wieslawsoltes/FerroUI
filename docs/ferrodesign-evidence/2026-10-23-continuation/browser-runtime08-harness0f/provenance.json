@@ -1,0 +1,37 @@
+{
+  "runtime_commit": "08e29e4f530c0ae65f6e2ac072f381605e23ed0c",
+  "runtime_tree": "99802b5a5b6db4d40109baee75e816303be056f0",
+  "harness_commit": "0f0732784bd6fdf1cb2477a61dd332d9a007fec2",
+  "harness_tree": "a5d55ba6c2325651c62d30249715c1ec21b93b15",
+  "playwright": "1.64.1",
+  "chromium": "156.0.8078.4",
+  "node": "24.19.0",
+  "exit_code": 1,
+  "full_suite": false,
+  "result": "failed",
+  "harness_hash_verification": "All 55 recorded inputs matched before and after execution.",
+  "scope_note": "Pre-upstream-integration production runtime. This result does not validate integration 1c7151f5 or later source. Shared-host headless SwiftShader; no hardware-FPS claim.",
+  "files": {
+    "report.json": {
+      "bytes": 1611112,
+      "sha256": "a9f51d61f3ede13a7fc4cb25d17c0799743f9974367c106adb1d205433d096ea",
+      "retention": "complete local original; report also committed as report.json.gz"
+    },
+    "Software2D-trace.zip": {
+      "bytes": 61632834,
+      "sha256": "46494ee1d72d0ae4aa55af50ecd7bcd9b05f9511d3eb42c8a6ca0f57aed4785a",
+      "retention": "complete local original; large trace not committed"
+    },
+    "WebGL2-trace.zip": {
+      "bytes": 39723975,
+      "sha256": "99b4d0d9b9eecd504e8d4f31905b0823b10ed88cdc4264d04d50485d0ce8627d",
+      "retention": "complete local original; large trace not committed"
+    }
+  },
+  "archive": {
+    "report.json.gz": {
+      "bytes": 92950,
+      "sha256": "48417e3d913ed0a6ecb5447259ddf7b3f8ee4e5900a5a35588d37f10a157baa4"
+    }
+  }
+}

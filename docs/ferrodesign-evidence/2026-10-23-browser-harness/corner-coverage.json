@@ -1,0 +1,50 @@
+{
+  "browser": "156.0.8078.4",
+  "fixture": "official b7 Software2D native PNG+SVG, local baseline run",
+  "comparisons": [
+    {
+      "scale": 16,
+      "max": 11,
+      "differingOver12": 0,
+      "stripFullMax": 0.25,
+      "stripFullPixels": 4
+    },
+    {
+      "scale": 32,
+      "max": 10,
+      "differingOver12": 0,
+      "stripFullMax": 0.125,
+      "stripFullPixels": 8,
+      "convergence": {
+        "maxAlphaDifference": 1.96875,
+        "absoluteAlphaAreaDifference": 0.855086,
+        "oppositeOpaqueTransparent": 0,
+        "maxAllowedAlphaDifference": 4,
+        "converged": true
+      }
+    }
+  ],
+  "scope": "Standalone independent SVG decoder of native exports from the official b7 browser distribution; not a full editor regression run or proof of latest-source browser pass.",
+  "applicationSource": "b7b0b8853dd47a3426537a6babc11fcc0e0e40cc",
+  "applicationArtifactId": 12467852902,
+  "applicationWorkflow": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39869066118",
+  "decoderArgs": [
+    "--use-gl=angle",
+    "--use-angle=swiftshader",
+    "--enable-unsafe-swiftshader",
+    "--ignore-gpu-blocklist"
+  ],
+  "viewport": {
+    "width": 1600,
+    "height": 1000,
+    "deviceScaleFactor": 1
+  },
+  "inputSha256": {
+    "b7-software2d-smoothed-corners.png": "9e291cc9a8238eb6e4a40a39efe23e2cb9bd1a6721a062c22a2e1aea3b673527",
+    "b7-software2d-smoothed-corners.svg": "a732be48d8bdc9a64455039a36fc5f37b2d31fbd2fe862019e0529256cfe82c9"
+  },
+  "testedSourceSha256": {
+    "samples/FerroDesign/tests/alpha-coverage.mjs": "1d713576779375cae9f47836f65c43e824a130be237569333a7ce34abb876f15",
+    "samples/FerroDesign/tests/corners-browser.mjs": "42ef284c1ffcbc7b08cfb0735758788c9985303886203b6a0d3e0cda03c6365e"
+  }
+}

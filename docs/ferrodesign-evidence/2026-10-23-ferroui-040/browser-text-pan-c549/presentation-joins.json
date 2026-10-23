@@ -1,0 +1,474 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-10-23T12:53:37.803876+00:00",
+  "scope": "Read-only exact-ID reanalysis of preserved c549 WebGL2 trace; no browser, compile, source or harness change. Runtime/harness identity is recorded by the separate validated execution provenance.",
+  "sourceCommit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "harnessCommit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "trace": {
+    "file": "current-WebGL2-pan-trace.json",
+    "bytes": 2934015,
+    "sha256": "d5029c3834886ce429e3c37eb7e9d7e1721023b35deaeab6042c42c76f7307ef"
+  },
+  "summary": {
+    "file": "current-WebGL2-pan-trace-summary.json",
+    "bytes": 197528,
+    "sha256": "f820e0466d764471c1ea5b4811892b3fd499b9dc3ced45c36bf43cd89cc07648"
+  },
+  "mainThread": {
+    "id": "181515:181515",
+    "name": "CrRendererMain"
+  },
+  "clock": {
+    "traceUnit": "monotonic microseconds",
+    "pageUnit": "performance.now/Event.timeStamp milliseconds",
+    "hostClockUsed": false,
+    "method": "Intersect trace-marker offsets bracketed by page performance.now before/after performance.mark.",
+    "anchorCount": 42,
+    "aligned": true,
+    "offsetUs": 10261692293.000002,
+    "uncertaintyMs": 0.174,
+    "quantizationAllowanceMs": 0.25
+  },
+  "joinMethod": [
+    "Find each motion renderer STEP_SUBMIT_COMPOSITOR_FRAME inside its actual capture-to-settled markers.",
+    "Match its exact surface ID to unique STEP_SURFACE_AGGREGATION, then the display ID to unique post-submit and finish events over the entire trace.",
+    "Match the containing same-process/same-thread SkiaOutputSurfaceImplOnGpu::SwapBuffers complete slice. Finish and swap end can occur after this motion settled, so do not truncate this join at that marker.",
+    "Preserve all matched frame IDs as strings to avoid JavaScript integer precision loss."
+  ],
+  "motions": [
+    {
+      "index": 0,
+      "traceMarkersUs": {
+        "armed": 10321354582,
+        "capture": 10321371189,
+        "bubble": 10321371620,
+        "frame": 10321374976,
+        "presentation": 10321443885,
+        "raf1": 10321454428,
+        "settled": 10322283047
+      },
+      "surfaceFrameId": "9032297663306711948",
+      "rendererSubmitUs": 10321447201,
+      "displayId": "9032297663306711951",
+      "aggregationUs": 10321447800,
+      "aggregatedSurfaceFrameIds": [
+        "9032297663306711948",
+        "9032297663306718290"
+      ],
+      "matchedSwap": {
+        "processId": 180872,
+        "threadId": 180872,
+        "threadName": "CrGpuMain",
+        "startUs": 10321450772,
+        "endUs": 10322282152,
+        "wallUs": 831380,
+        "threadCpuUs": 1776,
+        "postSubmitStartUs": 10321450786,
+        "postSubmitWallUs": 831332,
+        "finishBufferSwapUs": 10322282039
+      },
+      "throttleAssociationWindow": "matching display aggregation through matching swap end, over the full trace",
+      "throttles": [
+        {
+          "timestampUs": 10321453967,
+          "threadId": 180893,
+          "relativeToSwapStartUs": 3195,
+          "afterSettledMarker": false,
+          "max_pending_swaps": 1,
+          "pending_swaps": 1
+        },
+        {
+          "timestampUs": 10321455162,
+          "threadId": 180893,
+          "relativeToSwapStartUs": 4390,
+          "afterSettledMarker": false,
+          "max_pending_swaps": 1,
+          "pending_swaps": 1
+        }
+      ],
+      "ferroUiAnimationCallback": {
+        "startUs": 10321387654,
+        "wallUs": 56096,
+        "threadCpuUs": 54975,
+        "enclosingFireAnimationFrameStartUs": 10321387641,
+        "source": {
+          "columnNumber": 24984,
+          "frame": "01FFFB512112C3E0E8B76829871FECC9",
+          "functionName": "e",
+          "isolate": "14933328976846518556",
+          "lineNumber": 1,
+          "sampleTraceId": 3436319887820227,
+          "scriptId": "6",
+          "url": "http://127.0.0.1:43749/current/ferroui.js"
+        }
+      },
+      "presentationToSettledWallMs": 839.162,
+      "presentationToSettledMainThreadCompleteSliceUnionMs": 4.537,
+      "settledMinusSwapEndMs": 0.895,
+      "swapEndsAfterSettledMarker": false
+    },
+    {
+      "index": 1,
+      "traceMarkersUs": {
+        "armed": 10322290293,
+        "capture": 10322304526,
+        "bubble": 10322305009,
+        "frame": 10322310550,
+        "presentation": 10322380735,
+        "raf1": 10323403187,
+        "settled": 10323404169
+      },
+      "surfaceFrameId": "9032297663306711953",
+      "rendererSubmitUs": 10322382469,
+      "displayId": "9032297663306711956",
+      "aggregationUs": 10322385618,
+      "aggregatedSurfaceFrameIds": [
+        "9032297663306711953",
+        "9032297663306718290"
+      ],
+      "matchedSwap": {
+        "processId": 180872,
+        "threadId": 180872,
+        "threadName": "CrGpuMain",
+        "startUs": 10322387747,
+        "endUs": 10323402026,
+        "wallUs": 1014279,
+        "threadCpuUs": 2068,
+        "postSubmitStartUs": 10322387766,
+        "postSubmitWallUs": 1014226,
+        "finishBufferSwapUs": 10323401814
+      },
+      "throttleAssociationWindow": "matching display aggregation through matching swap end, over the full trace",
+      "throttles": [
+        {
+          "timestampUs": 10322387259,
+          "threadId": 180893,
+          "relativeToSwapStartUs": -488,
+          "afterSettledMarker": false,
+          "max_pending_swaps": 1,
+          "pending_swaps": 1
+        },
+        {
+          "timestampUs": 10322388795,
+          "threadId": 180893,
+          "relativeToSwapStartUs": 1048,
+          "afterSettledMarker": false,
+          "max_pending_swaps": 1,
+          "pending_swaps": 1
+        }
+      ],
+      "ferroUiAnimationCallback": {
+        "startUs": 10322321007,
+        "wallUs": 59543,
+        "threadCpuUs": 58178,
+        "enclosingFireAnimationFrameStartUs": 10322320991,
+        "source": {
+          "columnNumber": 24984,
+          "frame": "01FFFB512112C3E0E8B76829871FECC9",
+          "functionName": "e",
+          "isolate": "14933328976846518556",
+          "lineNumber": 1,
+          "sampleTraceId": 3436319887820105,
+          "scriptId": "6",
+          "url": "http://127.0.0.1:43749/current/ferroui.js"
+        }
+      },
+      "presentationToSettledWallMs": 1023.434,
+      "presentationToSettledMainThreadCompleteSliceUnionMs": 5.16,
+      "settledMinusSwapEndMs": 2.143,
+      "swapEndsAfterSettledMarker": false
+    },
+    {
+      "index": 2,
+      "traceMarkersUs": {
+        "armed": 10323412259,
+        "capture": 10323421189,
+        "bubble": 10323422036,
+        "frame": 10323426576,
+        "presentation": 10323495096,
+        "raf1": 10323505078,
+        "settled": 10324391049
+      },
+      "surfaceFrameId": "9032297663306712038",
+      "rendererSubmitUs": 10323499174,
+      "displayId": "9032297663306712057",
+      "aggregationUs": 10323500023,
+      "aggregatedSurfaceFrameIds": [
+        "9032297663306712038",
+        "9032297663306718290"
+      ],
+      "matchedSwap": {
+        "processId": 180872,
+        "threadId": 180872,
+        "threadName": "CrGpuMain",
+        "startUs": 10323500636,
+        "endUs": 10324389985,
+        "wallUs": 889349,
+        "threadCpuUs": 1769,
+        "postSubmitStartUs": 10323500697,
+        "postSubmitWallUs": 889258,
+        "finishBufferSwapUs": 10324389899
+      },
+      "throttleAssociationWindow": "matching display aggregation through matching swap end, over the full trace",
+      "throttles": [
+        {
+          "timestampUs": 10323503948,
+          "threadId": 180893,
+          "relativeToSwapStartUs": 3312,
+          "afterSettledMarker": false,
+          "max_pending_swaps": 1,
+          "pending_swaps": 1
+        },
+        {
+          "timestampUs": 10323506324,
+          "threadId": 180893,
+          "relativeToSwapStartUs": 5688,
+          "afterSettledMarker": false,
+          "max_pending_swaps": 1,
+          "pending_swaps": 1
+        }
+      ],
+      "ferroUiAnimationCallback": {
+        "startUs": 10323437643,
+        "wallUs": 57331,
+        "threadCpuUs": 56027,
+        "enclosingFireAnimationFrameStartUs": 10323437628,
+        "source": {
+          "columnNumber": 24984,
+          "frame": "01FFFB512112C3E0E8B76829871FECC9",
+          "functionName": "e",
+          "isolate": "14933328976846518556",
+          "lineNumber": 1,
+          "sampleTraceId": 3436319887819994,
+          "scriptId": "6",
+          "url": "http://127.0.0.1:43749/current/ferroui.js"
+        }
+      },
+      "presentationToSettledWallMs": 895.953,
+      "presentationToSettledMainThreadCompleteSliceUnionMs": 3.994,
+      "settledMinusSwapEndMs": 1.064,
+      "swapEndsAfterSettledMarker": false
+    },
+    {
+      "index": 3,
+      "traceMarkersUs": {
+        "armed": 10324399689,
+        "capture": 10324404398,
+        "bubble": 10324404813,
+        "frame": 10324408352,
+        "presentation": 10324468235,
+        "raf1": 10324473243,
+        "settled": 10324487677
+      },
+      "surfaceFrameId": "9032297663306712055",
+      "rendererSubmitUs": 10324472451,
+      "displayId": "9032297663306712012",
+      "aggregationUs": 10324472865,
+      "aggregatedSurfaceFrameIds": [
+        "9032297663306712055",
+        "9032297663306718290"
+      ],
+      "matchedSwap": {
+        "processId": 180872,
+        "threadId": 180872,
+        "threadName": "CrGpuMain",
+        "startUs": 10324473522,
+        "endUs": 10325317137,
+        "wallUs": 843615,
+        "threadCpuUs": 1578,
+        "postSubmitStartUs": 10324473535,
+        "postSubmitWallUs": 843574,
+        "finishBufferSwapUs": 10325317047
+      },
+      "throttleAssociationWindow": "matching display aggregation through matching swap end, over the full trace",
+      "throttles": [
+        {
+          "timestampUs": 10324487202,
+          "threadId": 180893,
+          "relativeToSwapStartUs": 13680,
+          "afterSettledMarker": false,
+          "max_pending_swaps": 1,
+          "pending_swaps": 1
+        },
+        {
+          "timestampUs": 10324488425,
+          "threadId": 180893,
+          "relativeToSwapStartUs": 14903,
+          "afterSettledMarker": true,
+          "max_pending_swaps": 1,
+          "pending_swaps": 1
+        }
+      ],
+      "ferroUiAnimationCallback": {
+        "startUs": 10324420952,
+        "wallUs": 47098,
+        "threadCpuUs": 46297,
+        "enclosingFireAnimationFrameStartUs": 10324420937,
+        "source": {
+          "columnNumber": 24984,
+          "frame": "01FFFB512112C3E0E8B76829871FECC9",
+          "functionName": "e",
+          "isolate": "14933328976846518556",
+          "lineNumber": 1,
+          "sampleTraceId": 3436319887819871,
+          "scriptId": "6",
+          "url": "http://127.0.0.1:43749/current/ferroui.js"
+        }
+      },
+      "presentationToSettledWallMs": 19.442,
+      "presentationToSettledMainThreadCompleteSliceUnionMs": 4.613,
+      "settledMinusSwapEndMs": -829.46,
+      "swapEndsAfterSettledMarker": true
+    },
+    {
+      "index": 4,
+      "traceMarkersUs": {
+        "armed": 10324505397,
+        "capture": 10325318164,
+        "bubble": 10325318707,
+        "frame": 10325374747,
+        "presentation": 10325374815,
+        "raf1": 10325388259,
+        "settled": 10326138129
+      },
+      "surfaceFrameId": "9032297663306712025",
+      "rendererSubmitUs": 10325373527,
+      "displayId": "9032297663306712028",
+      "aggregationUs": 10325373924,
+      "aggregatedSurfaceFrameIds": [
+        "9032297663306712025",
+        "9032297663306718290"
+      ],
+      "matchedSwap": {
+        "processId": 180872,
+        "threadId": 180872,
+        "threadName": "CrGpuMain",
+        "startUs": 10325374592,
+        "endUs": 10326137222,
+        "wallUs": 762630,
+        "threadCpuUs": 1572,
+        "postSubmitStartUs": 10325374601,
+        "postSubmitWallUs": 762592,
+        "finishBufferSwapUs": 10326137139
+      },
+      "throttleAssociationWindow": "matching display aggregation through matching swap end, over the full trace",
+      "throttles": [
+        {
+          "timestampUs": 10325387157,
+          "threadId": 180893,
+          "relativeToSwapStartUs": 12565,
+          "afterSettledMarker": false,
+          "max_pending_swaps": 1,
+          "pending_swaps": 1
+        },
+        {
+          "timestampUs": 10325389124,
+          "threadId": 180893,
+          "relativeToSwapStartUs": 14532,
+          "afterSettledMarker": false,
+          "max_pending_swaps": 1,
+          "pending_swaps": 1
+        }
+      ],
+      "ferroUiAnimationCallback": {
+        "startUs": 10325321535,
+        "wallUs": 50737,
+        "threadCpuUs": 46777,
+        "enclosingFireAnimationFrameStartUs": 10325321532,
+        "source": {
+          "columnNumber": 24984,
+          "frame": "01FFFB512112C3E0E8B76829871FECC9",
+          "functionName": "e",
+          "isolate": "14933328976846518556",
+          "lineNumber": 1,
+          "sampleTraceId": 3436319887820757,
+          "scriptId": "6",
+          "url": "http://127.0.0.1:43749/current/ferroui.js"
+        }
+      },
+      "presentationToSettledWallMs": 763.314,
+      "presentationToSettledMainThreadCompleteSliceUnionMs": 3.406,
+      "settledMinusSwapEndMs": 0.907,
+      "swapEndsAfterSettledMarker": false
+    },
+    {
+      "index": 5,
+      "traceMarkersUs": {
+        "armed": 10326152455,
+        "capture": 10326171052,
+        "bubble": 10326171542,
+        "frame": 10326174984,
+        "presentation": 10326239117,
+        "raf1": 10326255474,
+        "settled": 10327106715
+      },
+      "surfaceFrameId": "9032297663306711854",
+      "rendererSubmitUs": 10326240566,
+      "displayId": "9032297663306711841",
+      "aggregationUs": 10326240905,
+      "aggregatedSurfaceFrameIds": [
+        "9032297663306711854",
+        "9032297663306718290"
+      ],
+      "matchedSwap": {
+        "processId": 180872,
+        "threadId": 180872,
+        "threadName": "CrGpuMain",
+        "startUs": 10326241441,
+        "endUs": 10327104796,
+        "wallUs": 863355,
+        "threadCpuUs": 1353,
+        "postSubmitStartUs": 10326241449,
+        "postSubmitWallUs": 863242,
+        "finishBufferSwapUs": 10327104633
+      },
+      "throttleAssociationWindow": "matching display aggregation through matching swap end, over the full trace",
+      "throttles": [
+        {
+          "timestampUs": 10326254718,
+          "threadId": 180893,
+          "relativeToSwapStartUs": 13277,
+          "afterSettledMarker": false,
+          "max_pending_swaps": 1,
+          "pending_swaps": 1
+        },
+        {
+          "timestampUs": 10326256958,
+          "threadId": 180893,
+          "relativeToSwapStartUs": 15517,
+          "afterSettledMarker": false,
+          "max_pending_swaps": 1,
+          "pending_swaps": 1
+        }
+      ],
+      "ferroUiAnimationCallback": {
+        "startUs": 10326187561,
+        "wallUs": 51376,
+        "threadCpuUs": 50899,
+        "enclosingFireAnimationFrameStartUs": 10326187548,
+        "source": {
+          "columnNumber": 24984,
+          "frame": "01FFFB512112C3E0E8B76829871FECC9",
+          "functionName": "e",
+          "isolate": "14933328976846518556",
+          "lineNumber": 1,
+          "sampleTraceId": 3436319887820636,
+          "scriptId": "6",
+          "url": "http://127.0.0.1:43749/current/ferroui.js"
+        }
+      },
+      "presentationToSettledWallMs": 867.598,
+      "presentationToSettledMainThreadCompleteSliceUnionMs": 8.912,
+      "settledMinusSwapEndMs": 1.919,
+      "swapEndsAfterSettledMarker": false
+    }
+  ],
+  "conclusions": [
+    "All six actual submitted surfaces join uniquely to a display swap. Five swap ends are 0.895\u20132.143ms before the two-rAF settled marker.",
+    "Motion 3 settles 19.442ms after the native presentation marker while its matched 843.615ms swap is still outstanding; swap end is 829.460ms later. Therefore two-rAF settled is not a browser display-completion fence.",
+    "Recorded wall time and the named GPU-thread tdur are distinct; the latter does not measure all SwiftShader workers or hardware GPU execution.",
+    "Each display aggregates an additional surface; inclusion does not establish exclusive causation.",
+    "Chromium SkiaOutputSurface event names refer to its own compositor, not an application Skia renderer dependency.",
+    "These six diagnostic motions are separate from 36 normal samples and cannot be substituted for normal median/p95 statistics."
+  ]
+}

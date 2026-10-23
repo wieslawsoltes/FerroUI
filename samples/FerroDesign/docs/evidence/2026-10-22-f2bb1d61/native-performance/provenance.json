@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "source_sha": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+  "repository": "wieslawsoltes/FerroUI",
+  "workflow_run_id": 39799180117,
+  "workflow_run_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39799180117",
+  "native_job_id": 119894677519,
+  "native_job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39799180117/job/119894677519",
+  "native_job_conclusion": "success",
+  "api_logs_url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/jobs/119894677519/logs",
+  "api_tool": "mcp__codex_apps__github_fetch_workflow_job_logs",
+  "raw_log": {
+    "bytes": 545093,
+    "sha256": "d45c000c41472622b2e0fa931edab61d866c69810279f8cd4099f52d99c2392a",
+    "archive": "../native-ci-log.zip",
+    "pathInArchive": "native-job-119894677519.log"
+  },
+  "step_name": "Compare scoped editing, history and serialization costs",
+  "command": "cargo run --locked --release -p ferrodesign-core --example performance -- 10000",
+  "timestamped_step": {
+    "file": "performance-step.log",
+    "bytes": 17897,
+    "sha256": "c2648edd66d447eb48b46df64170330007d5076c851e850a282ede3dceae81a6",
+    "first_line_1based_in_raw_log": 826,
+    "last_line_1based_in_raw_log": 1154,
+    "first_timestamp": "2026-10-22T14:51:33.9658910Z",
+    "last_timestamp": "2026-10-22T14:52:17.7499630Z"
+  },
+  "json_extract": {
+    "file": "performance-extracted-log.json",
+    "bytes": 7561,
+    "sha256": "758f544841855f50008f394f57e7b905618bb2b2387ec125be856b17fb2afe61",
+    "first_line_1based_in_raw_log": 841,
+    "last_line_1based_in_raw_log": 1154
+  },
+  "extraction": "Retained the complete timestamped step from its Run command group through the final JSON line, excluding the next Run group. Removed exactly one GitHub timestamp prefix and following single space from each JSON line; preserved payload spacing, numeric spelling and a final newline. Parsed the single object and asserted schemaVersion=5 and releaseBuild=true. No source, benchmark, or tests were changed or rerun.",
+  "artifact_scope": "Extracted from the successful job decoded text log, not downloaded from a benchmark artifact; byte identity with a separate artifact is not asserted.",
+  "timing_scope": "Native release document-engine and transaction measurements in one process. Excludes browser events, native UI layout, scene drawing, GPU execution, display frame rate and durable storage. Reference is the explicit same-process full-document workload, not a historical version.",
+  "provenancePackagingNote": "The benchmark JSON and timestamped step are copied byte-for-byte from the extraction. This provenance record updates the raw-log location to its committed archive; log bytes and digest are unchanged."
+}

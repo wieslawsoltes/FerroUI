@@ -1,0 +1,168 @@
+{
+  "repository": "wieslawsoltes/FerroUI",
+  "branch": "feat/ferrodesign-editor",
+  "completed_ci": [
+    {
+      "sha": "3be16cb735c9636673fc43e95692503f7cac0144",
+      "scope": "Native feedback: correction checkpoint",
+      "run_id": 39941952822,
+      "job_id": 120375277944,
+      "conclusion": "success",
+      "core_tests": null,
+      "app_tests": 230,
+      "app_seconds": 27.27,
+      "notes": [
+        "Formerly failing all-padding Escape draft test passed.",
+        "Public unhinted 8, Base paragraph 15, Controls paragraph 16, TextBox 174 and history 5 tests passed."
+      ],
+      "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39941952822/job/120375277944",
+      "log_sha256": "a2f706f5402b5b83d063c3cba280522a90e0d1271cf93a8e713cd76f5cdc6641",
+      "log_bytes": 559950,
+      "log_line_count": 4924,
+      "excerpt_file": "3be16cb7-120375277944-excerpt.json"
+    },
+    {
+      "sha": "3be16cb735c9636673fc43e95692503f7cac0144",
+      "scope": "Native job of full browser workflow: correction checkpoint",
+      "run_id": 39941952796,
+      "job_id": 120375278062,
+      "conclusion": "success",
+      "core_tests": 511,
+      "app_tests": 230,
+      "app_seconds": 19.43,
+      "notes": [
+        "Native compiler check and public text/geometry/compositing pixel gates passed.",
+        "Active application dependency graphs: Vello and no Skia on 5 targets."
+      ],
+      "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39941952796/job/120375278062",
+      "log_sha256": "2aa8206891c6aa415dbcad906fa12e327d6c1d76b5551c35348ebd0437e0e3ed",
+      "log_bytes": 661909,
+      "log_line_count": 7414,
+      "excerpt_file": "3be16cb7-120375278062-excerpt.json"
+    },
+    {
+      "sha": "dfab0ed9a0146a892b40d2db0590b0193c80f672",
+      "scope": "Core: gradients and layout spacing variables feature checkpoint",
+      "run_id": 39942848092,
+      "job_id": 120378251111,
+      "conclusion": "success",
+      "core_tests": 528,
+      "core_seconds": 1.72,
+      "app_tests": null,
+      "notes": [
+        "Before subsequent prototype SetVariable spacing reflow correction."
+      ],
+      "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39942848092/job/120378251111",
+      "log_sha256": "8be61bfaec9d97148b2253464574073d2e4de4ea510f74a549b24aa16ab7cd94",
+      "log_bytes": 87834,
+      "log_line_count": 743,
+      "excerpt_file": "dfab0ed9-120378251111-excerpt.json"
+    },
+    {
+      "sha": "dfab0ed9a0146a892b40d2db0590b0193c80f672",
+      "scope": "Native feedback: gradients and layout spacing variables feature checkpoint",
+      "run_id": 39942848091,
+      "job_id": 120381540661,
+      "conclusion": "success",
+      "core_tests": null,
+      "app_tests": 238,
+      "app_seconds": 28.42,
+      "notes": [
+        "Includes 5 new radial/angular native tests and 3 native spacing-variable UI tests.",
+        "Content-verified restore reused 9846 files and skipped 20 changed inputs.",
+        "Does not include the later native corner clip-hit regression or PresentButton diagnostics."
+      ],
+      "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39942848091/job/120381540661",
+      "log_sha256": "4d842fc11d5ec03a4e443e47823b350815c062d34376f0b700e1a58ee8348b0a",
+      "log_bytes": 636331,
+      "log_line_count": 4179,
+      "excerpt_file": "dfab0ed9-120381540661-excerpt.json"
+    },
+    {
+      "sha": "1637a093723a4f899b7f4e371fd53f0b91914a98",
+      "scope": "Core: final production source including prototype spacing reflow",
+      "run_id": 39944253726,
+      "job_id": 120382892496,
+      "conclusion": "success",
+      "core_tests": 533,
+      "core_seconds": 2.5,
+      "app_tests": null,
+      "notes": [
+        "All 5 prototype spacing reflow, alias/session, rollback and authored-preservation regressions passed.",
+        "No ignored tests; 0 doc-tests."
+      ],
+      "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253726/job/120382892496",
+      "log_sha256": "65497f871b07540237ca84484e894030878adbbbb8572d5fdc97543587f82152",
+      "log_bytes": 88597,
+      "log_line_count": 748,
+      "excerpt_file": "1637a093-120382892496-excerpt.json"
+    },
+    {
+      "sha": "1637a093723a4f899b7f4e371fd53f0b91914a98",
+      "scope": "Native feedback: final production source including rounded-clip hit regression",
+      "run_id": 39944253747,
+      "job_id": 120382892411,
+      "conclusion": "success",
+      "core_tests": null,
+      "app_tests": 239,
+      "app_seconds": 43.57,
+      "notes": [
+        "Includes radial/angular native cases, spacing-variable native UI and corner rounded-clip marker distinction regression.",
+        "Public unhinted 8, Base paragraph 15, Controls paragraph 16, TextBox 174 and history 5 tests passed.",
+        "Content-verified restore matched 9849 files and skipped 21 changed inputs."
+      ],
+      "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253747/job/120382892411",
+      "log_sha256": "f0015c79bac1acb6e6c41aea2c892212e5c82d1a1a06e8fbe6a18d80788cd997",
+      "log_bytes": 635679,
+      "log_line_count": 4170,
+      "excerpt_file": "1637a093-120382892411-excerpt.json"
+    }
+  ],
+  "latest_production_sha": "1637a093723a4f899b7f4e371fd53f0b91914a98",
+  "latest_production_status": "533 core and 239 native application tests passed in CI; browser build/interaction validation remains separate.",
+  "browser_status": "This record covers completed core/native/helper gates. Exact-runtime browser outcomes and their limits are recorded separately in the continuation README and browser-harness evidence.",
+  "local_core": {
+    "source_sha": "1637a093723a4f899b7f4e371fd53f0b91914a98",
+    "source_tree": "30d4ef3b1db917318a11163e7d92aa493b3d0203",
+    "command": "cargo test --locked -p ferrodesign-core",
+    "toolchain": "Rust 1.99.0",
+    "passed": 533,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 5.91,
+    "log_sha256": "74863e1431912546d5f50ae73885c7f89e63065c275d2346807400785363c69f",
+    "log_bytes": 57499,
+    "note": "Executed before publication; the locally tested commit and published commit have the identical verified Git tree."
+  },
+  "local_pure_js": {
+    "source_sha": "08e29e4f530c0ae65f6e2ac072f381605e23ed0c",
+    "command": "node --test --test-isolation=none --test-reporter=spec tests/alpha-coverage.test.mjs tests/input-observations.test.mjs tests/corner-radius-input.test.mjs tests/gradient-input.test.mjs tests/text-pan-trace-analysis.test.mjs",
+    "node": "v24.19.0",
+    "passed": 39,
+    "failed": 0,
+    "skipped": 0,
+    "log_sha256": "2934ee7f656136c23800218debbe128ced52d6c48426c44944e8b280d2750440",
+    "log_bytes": 4063,
+    "scope": "All executed helper modules match 08e29e4f. Coverage arithmetic, trace analysis/process ownership, passive observations, radius and angular input oracles; not editor browser execution.",
+    "log_file": "08e29e4f-browser-helper-tests.log"
+  },
+  "local_pure_js_previous": {
+    "source_sha": "1637a093723a4f899b7f4e371fd53f0b91914a98",
+    "command": "node --test --test-isolation=none --test-reporter=spec tests/alpha-coverage.test.mjs tests/text-pan-trace-analysis.test.mjs tests/input-observations.test.mjs tests/corner-radius-input.test.mjs",
+    "passed": 34,
+    "failed": 0,
+    "scope": "Coverage arithmetic, trace analysis/process ownership, passive observations and radius input oracle; not editor browser execution."
+  },
+  "local_native_performance": {
+    "source_sha": "08e29e4f530c0ae65f6e2ac072f381605e23ed0c",
+    "core_tree": "3c91aeeed4ff3d22eff9eae1f63fd6aef1cd3f24",
+    "core_matches_production_sha": "1637a093723a4f899b7f4e371fd53f0b91914a98",
+    "nodes": 10000,
+    "equivalence_assertions": "passed",
+    "exit_code": 0,
+    "result_file": "performance/native-engine-10000.json",
+    "provenance_file": "performance/provenance.json",
+    "result_sha256": "b8b1f859e1a0896776ff3cbc5378f12fbc450365f8d98e832ceacf9b4a5455df",
+    "scope": "Native CPU engine on shared host. Browser events, control layout, artwork rendering and presentation are excluded."
+  }
+}

@@ -1,0 +1,705 @@
+{
+  "schemaVersion": 1,
+  "repository": "wieslawsoltes/FerroUI",
+  "testedCommit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+  "comparedHead": "e0d3cee368f991fb8a0f4bd411b00e102bc4447b",
+  "comparisonUrl": "https://github.com/wieslawsoltes/FerroUI/compare/f2bb1d618843bf777b76859d2e06bf361bef009b...e0d3cee368f991fb8a0f4bd411b00e102bc4447b",
+  "status": "ahead",
+  "aheadBy": 4,
+  "behindBy": 0,
+  "totalCommits": 4,
+  "changedFileCount": 84,
+  "applicationAndFrameworkBuildInputsChanged": false,
+  "nonDocumentationChanges": [
+    {
+      "filename": "samples/FerroDesign/tests/matching-browser.mjs",
+      "status": "modified",
+      "additions": 16,
+      "deletions": 2,
+      "changes": 18,
+      "previous_filename": null
+    }
+  ],
+  "verifiedStatement": "The 84 reported changes after the successful exact-f2 CI source are README/evidence documentation and one matching browser-test module. No application, framework, Cargo manifest/lockfile, compiled XAML, browser host, asset or build-script path changed.",
+  "testChange": "f8e0471e adds explicit native frame/scene and inspector-state publication barriers after Escape, and a modal-open assertion after one matching-button click. It changes no application or runtime input.",
+  "limitations": [
+    "This compares committed source inputs; it does not compare the successful CI distribution's binary bytes with the recovered 3a distribution.",
+    "The full successful CI harness is f2bb1d61. The later f8 matching harness has its separately recorded focused both-mode pass.",
+    "The e0d3cee workflow was observed in progress at 16:50:41 UTC on 22 October 2026; no exact-e0 full-suite pass is inferred."
+  ],
+  "files": [
+    {
+      "filename": "samples/FerroDesign/README.md",
+      "status": "modified",
+      "additions": 44,
+      "deletions": 8,
+      "changes": 52,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/FEATURES.md",
+      "status": "modified",
+      "additions": 7,
+      "deletions": 4,
+      "changes": 11,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/LAYOUT_GUIDES.md",
+      "status": "added",
+      "additions": 352,
+      "deletions": 0,
+      "changes": 352,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/SELECTION.md",
+      "status": "added",
+      "additions": 49,
+      "deletions": 0,
+      "changes": 49,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/VALIDATION.md",
+      "status": "modified",
+      "additions": 172,
+      "deletions": 4,
+      "changes": 176,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/VECTOR_FACES.md",
+      "status": "modified",
+      "additions": 244,
+      "deletions": 98,
+      "changes": 342,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/README.md",
+      "status": "added",
+      "additions": 141,
+      "deletions": 0,
+      "changes": 141,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/Software2D-bucket-hover-face.png",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/Software2D-initial.png",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/Software2D-native-matching-fill.png",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/Software2D-stacked-layout-guides.png",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/WebGL2-initial.png",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/failed-authoring-diagnosis.json",
+      "status": "added",
+      "additions": 122,
+      "deletions": 0,
+      "changes": 122,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/failed-components-diagnosis.json",
+      "status": "added",
+      "additions": 224,
+      "deletions": 0,
+      "changes": 224,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/failed-full-browser-report.zip",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/failed-full-summary.json",
+      "status": "added",
+      "additions": 276,
+      "deletions": 0,
+      "changes": 276,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/failed-matching-diagnosis.json",
+      "status": "added",
+      "additions": 854,
+      "deletions": 0,
+      "changes": 854,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/failed-second-full-browser-report.zip",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/failed-second-full-summary.json",
+      "status": "added",
+      "additions": 422,
+      "deletions": 0,
+      "changes": 422,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/failed-webgl2-all-scenarios-report.zip",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/failed-webgl2-all-scenarios-summary.json",
+      "status": "added",
+      "additions": 237,
+      "deletions": 0,
+      "changes": 237,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/focused-authoring-diagnostic.zip",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/focused-authoring-summary.json",
+      "status": "added",
+      "additions": 611,
+      "deletions": 0,
+      "changes": 611,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/focused-authoring-terminal-summary.json",
+      "status": "added",
+      "additions": 162,
+      "deletions": 0,
+      "changes": 162,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/input-equivalence.json",
+      "status": "added",
+      "additions": 248,
+      "deletions": 0,
+      "changes": 248,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/native-ci-log.zip",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/native-ci-summary.json",
+      "status": "added",
+      "additions": 273,
+      "deletions": 0,
+      "changes": 273,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/native-performance/SUMMARY.md",
+      "status": "added",
+      "additions": 54,
+      "deletions": 0,
+      "changes": 54,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/native-performance/performance-extracted-log.json",
+      "status": "added",
+      "additions": 314,
+      "deletions": 0,
+      "changes": 314,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/native-performance/performance-step.log",
+      "status": "added",
+      "additions": 329,
+      "deletions": 0,
+      "changes": 329,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/native-performance/provenance.json",
+      "status": "added",
+      "additions": 40,
+      "deletions": 0,
+      "changes": 40,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/provenance-manifest.json",
+      "status": "added",
+      "additions": 132,
+      "deletions": 0,
+      "changes": 132,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/resource-pressure-observations.json",
+      "status": "added",
+      "additions": 28,
+      "deletions": 0,
+      "changes": 28,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/resource-sampler-audit.json",
+      "status": "added",
+      "additions": 59,
+      "deletions": 0,
+      "changes": 59,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/source-delivery-audit.json",
+      "status": "added",
+      "additions": 58,
+      "deletions": 0,
+      "changes": 58,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f2bb1d61/validation-source.json",
+      "status": "added",
+      "additions": 320,
+      "deletions": 0,
+      "changes": 320,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/README.md",
+      "status": "added",
+      "additions": 66,
+      "deletions": 0,
+      "changes": 66,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/Software2D-bucket-hover-face.png",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/Software2D-initial.png",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/Software2D-native-matching-fill.png",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/Software2D-stacked-layout-guides.png",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/WebGL2-initial.png",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/WebGL2-native-matching-fill.png",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/WebGL2-stacked-layout-guides.png",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/browser-build-oom.log",
+      "status": "added",
+      "additions": 434,
+      "deletions": 0,
+      "changes": 434,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/ci-3a0bf1f1-browser-failure-provenance.json",
+      "status": "added",
+      "additions": 62,
+      "deletions": 0,
+      "changes": 62,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/ci-3a0bf1f1-logs.zip",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/ci-3a0bf1f1-native-log-provenance.json",
+      "status": "added",
+      "additions": 26,
+      "deletions": 0,
+      "changes": 26,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/ci-3a0bf1f1-terminal-ferrodesign-39771204240.json",
+      "status": "added",
+      "additions": 38,
+      "deletions": 0,
+      "changes": 38,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/ci-f36dabf7-logs.zip",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/core-tests.log",
+      "status": "added",
+      "additions": 407,
+      "deletions": 0,
+      "changes": 407,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/failed-browser-first-run.zip",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/failed-browser-second-run.zip",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/failed-ci-browser-f36dabf7.zip",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/framework-ci-3a0bf1f1-summary.json",
+      "status": "added",
+      "additions": 2160,
+      "deletions": 0,
+      "changes": 2160,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/framework-ci-summary.json",
+      "status": "added",
+      "additions": 1666,
+      "deletions": 0,
+      "changes": 1666,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/host-browser-ci-3a0bf1f1-provenance.json",
+      "status": "added",
+      "additions": 34,
+      "deletions": 0,
+      "changes": 34,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/indexeddb-ci-3a0bf1f1-extracted-log.json",
+      "status": "added",
+      "additions": 28,
+      "deletions": 0,
+      "changes": 28,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/native-performance/performance-extracted-log.json",
+      "status": "added",
+      "additions": 314,
+      "deletions": 0,
+      "changes": 314,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/native-performance/performance-step.log",
+      "status": "added",
+      "additions": 329,
+      "deletions": 0,
+      "changes": 329,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/native-performance/provenance.json",
+      "status": "added",
+      "additions": 68,
+      "deletions": 0,
+      "changes": 68,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/native-tests.log",
+      "status": "added",
+      "additions": 568,
+      "deletions": 0,
+      "changes": 568,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/original-logs.zip",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/prior-browser-summary.json",
+      "status": "added",
+      "additions": 1366,
+      "deletions": 0,
+      "changes": 1366,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/provenance-manifest.json",
+      "status": "added",
+      "additions": 153,
+      "deletions": 0,
+      "changes": 153,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/renderer-graphs/aarch64-apple-darwin.txt",
+      "status": "added",
+      "additions": 567,
+      "deletions": 0,
+      "changes": 567,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/renderer-graphs/wasm32-unknown-emscripten.txt",
+      "status": "added",
+      "additions": 448,
+      "deletions": 0,
+      "changes": 448,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/renderer-graphs/x86_64-apple-darwin.txt",
+      "status": "added",
+      "additions": 567,
+      "deletions": 0,
+      "changes": 567,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/renderer-graphs/x86_64-pc-windows-msvc.txt",
+      "status": "added",
+      "additions": 596,
+      "deletions": 0,
+      "changes": 596,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/renderer-graphs/x86_64-unknown-linux-gnu.txt",
+      "status": "added",
+      "additions": 746,
+      "deletions": 0,
+      "changes": 746,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f36dabf7/targeted-palette-report.zip",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f8e0471e/README.md",
+      "status": "added",
+      "additions": 62,
+      "deletions": 0,
+      "changes": 62,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f8e0471e/Software2D-initial.png",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f8e0471e/Software2D-native-matching-fill.png",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f8e0471e/WebGL2-initial.png",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f8e0471e/WebGL2-native-matching-fill.png",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f8e0471e/input-equivalence.json",
+      "status": "added",
+      "additions": 199,
+      "deletions": 0,
+      "changes": 199,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f8e0471e/matching-focused-report.zip",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f8e0471e/matching-focused-summary.json",
+      "status": "added",
+      "additions": 485,
+      "deletions": 0,
+      "changes": 485,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f8e0471e/provenance-manifest.json",
+      "status": "added",
+      "additions": 56,
+      "deletions": 0,
+      "changes": 56,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f8e0471e/remaining-webgl2-launch-block.zip",
+      "status": "added",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f8e0471e/remaining-webgl2-launch-summary.json",
+      "status": "added",
+      "additions": 89,
+      "deletions": 0,
+      "changes": 89,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/docs/evidence/2026-10-22-f8e0471e/validation-source.json",
+      "status": "added",
+      "additions": 389,
+      "deletions": 0,
+      "changes": 389,
+      "previous_filename": null
+    },
+    {
+      "filename": "samples/FerroDesign/tests/matching-browser.mjs",
+      "status": "modified",
+      "additions": 16,
+      "deletions": 2,
+      "changes": 18,
+      "previous_filename": null
+    }
+  ],
+  "recordedAt": "2026-10-22T16:56:49Z"
+}

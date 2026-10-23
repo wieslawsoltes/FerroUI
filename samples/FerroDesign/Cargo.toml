@@ -1,0 +1,91 @@
+[workspace]
+resolver = "2"
+members = ["crates/ferrodesign-core", "crates/ferrodesign-app"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.99"
+license = "MIT"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 8
+
+# The framework has large generated metadata and monomorphized control code.
+# Split code generation and avoid whole-program LTO to fit ordinary CI runners.
+[profile.browser]
+inherits = "release"
+opt-level = 2
+lto = false
+codegen-units = 16
+debug = false
+strip = "debuginfo"
+
+[profile.browser.package.ferroui-base]
+opt-level = 1
+codegen-units = 16
+
+[profile.browser.package.ferroui-controls]
+opt-level = 1
+codegen-units = 16
+
+[profile.browser.package.ferrodesign-app]
+codegen-units = 1
+
+[profile.browser.package.ferroui-themes-fluent]
+# Keep the generated theme tables in a single compilation unit.
+codegen-units = 1
+
+[profile.browser.package.ferroui-markup-xaml]
+# Avoid empty optimized Emscripten object units in the markup runtime.
+codegen-units = 1
+
+[profile.browser.package.ferroui-vello]
+opt-level = 3
+
+[profile.browser.package.vello_cpu]
+opt-level = 3
+
+[profile.browser.package.vello_common]
+opt-level = 3
+
+[profile.browser.package.vello_gpu]
+opt-level = 3
+
+[profile.browser.package.glifo]
+opt-level = 3
+
+[profile.browser.package.kurbo]
+opt-level = 3
+
+[profile.browser.package.fearless_simd]
+opt-level = 3
+
+[profile.browser.package.skrifa]
+opt-level = 3
+
+[profile.browser.package.read-fonts]
+opt-level = 3
+# Rust 1.99's Emscripten backend can emit an empty font-parser object when
+# splitting this crate across 16 codegen units. Keep its optimized code in one.
+codegen-units = 1
+
+[profile.dev]
+debug = 0
+codegen-units = 16
+
+[profile.dev.package.ferroui-base]
+opt-level = 1
+
+[profile.dev.package.ferroui-controls]
+opt-level = 1
+
+# Native correctness tests exercise generated control code without the large
+# optimizer peak. Browser/release builds keep the optimized profiles above.
+[profile.test.package.ferroui-base]
+opt-level = 0
+
+[profile.test.package.ferroui-controls]
+opt-level = 0

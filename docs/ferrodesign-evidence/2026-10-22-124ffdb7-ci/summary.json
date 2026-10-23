@@ -1,0 +1,295 @@
+{
+  "schema": 1,
+  "sourceSha": "124ffdb74e2b39ca09d5a1bcd4052bbb9a61a165",
+  "sourceTree": "804c58d5eb0274fed484f743ddde660b3adc0702",
+  "interpretation": "Completed gates at this exact source only. Both workflows failed. No application test suite or Chromium validation executed successfully at this source.",
+  "fullWorkflow": {
+    "runId": 39858027509,
+    "status": "completed",
+    "conclusion": "failure",
+    "native": {
+      "jobId": 120102469680,
+      "status": "completed",
+      "conclusion": "failure",
+      "gates": [
+        {
+          "name": "source syntax and metadata",
+          "status": "passed",
+          "logLines": [
+            248,
+            277
+          ]
+        },
+        {
+          "name": "persistence host",
+          "passed": 19,
+          "failed": 0,
+          "resultLine": 389
+        },
+        {
+          "name": "input observations",
+          "passed": 4,
+          "failed": 0,
+          "resultLine": 423
+        },
+        {
+          "name": "trace analysis and mocked teardown",
+          "passed": 13,
+          "failed": 0,
+          "resultLine": 511
+        },
+        {
+          "name": "core",
+          "passed": 498,
+          "failed": 0,
+          "filtered": 0,
+          "seconds": 2.07,
+          "resultLine": 1062
+        },
+        {
+          "name": "Vello/no-Skia active dependency graphs",
+          "passed": 5,
+          "targets": [
+            "wasm32-unknown-emscripten",
+            "x86_64-unknown-linux-gnu",
+            "x86_64-pc-windows-msvc",
+            "aarch64-apple-darwin",
+            "x86_64-apple-darwin"
+          ],
+          "resultLines": [
+            1309,
+            1310,
+            1343,
+            1360,
+            1361
+          ]
+        },
+        {
+          "name": "release engine performance example",
+          "status": "passed",
+          "requestedNodes": 10000,
+          "printedJsonLines": [
+            1394,
+            1707
+          ],
+          "scope": "Native document-engine benchmark; no browser rendering or GPU timings"
+        },
+        {
+          "name": "Controls preedit",
+          "passed": 15,
+          "failed": 0,
+          "resultLine": 2160
+        },
+        {
+          "name": "Controls rich_ranges",
+          "passed": 2,
+          "failed": 0,
+          "resultLine": 2442
+        },
+        {
+          "name": "Controls text-layout invalidation",
+          "passed": 1,
+          "failed": 0,
+          "resultLine": 2723
+        },
+        {
+          "name": "Base compositing_layer",
+          "passed": 7,
+          "failed": 0,
+          "resultLine": 3604
+        },
+        {
+          "name": "Vello compositing_layer",
+          "passed": 8,
+          "failed": 0,
+          "resultLine": 4051
+        },
+        {
+          "name": "Vello geometry_path_data",
+          "passed": 2,
+          "failed": 0,
+          "resultLine": 4423
+        },
+        {
+          "name": "Vello text_layout_build_geometry",
+          "passed": 3,
+          "failed": 0,
+          "resultLine": 4782
+        },
+        {
+          "name": "Vello glyph_run_complete_geometry",
+          "passed": 2,
+          "failed": 0,
+          "resultLine": 5140
+        },
+        {
+          "name": "Vello unhinted_",
+          "passed": 8,
+          "failed": 0,
+          "resultLine": 5504
+        }
+      ],
+      "applicationCompilation": {
+        "status": "failed",
+        "error": "E0282",
+        "file": "crates/ferrodesign-app/src/canvas/corner_radius.rs",
+        "line": 206,
+        "logLines": [
+          6162,
+          6178
+        ]
+      },
+      "applicationTests": "skipped"
+    },
+    "browser": {
+      "jobId": 120102469519,
+      "status": "completed",
+      "conclusion": "failure",
+      "prebuildHostTextInput": {
+        "passed": 10,
+        "failed": 0,
+        "resultLine": 474
+      },
+      "wasmBuild": {
+        "status": "failed",
+        "error": "E0282",
+        "file": "crates/ferrodesign-app/src/canvas/corner_radius.rs",
+        "line": 206,
+        "logLines": [
+          895,
+          911
+        ]
+      },
+      "chromiumInstall": "skipped",
+      "indexedDb": "skipped",
+      "editorScenarios": "skipped",
+      "textPanMeasurements": "skipped",
+      "browserExecuted": false,
+      "browserReportAvailable": false,
+      "software2dChecksExecuted": 0,
+      "webgl2ChecksExecuted": 0,
+      "completeBuildArtifactUploaded": false
+    }
+  },
+  "nativeFeedback": {
+    "runId": 39858027415,
+    "jobId": 120106042788,
+    "status": "completed",
+    "conclusion": "failure",
+    "gates": [
+      {
+        "name": "Vello unhinted_",
+        "passed": 8,
+        "failed": 0,
+        "seconds": 0.34,
+        "resultLine": 696
+      },
+      {
+        "name": "Base paragraph",
+        "passed": 15,
+        "failed": 0,
+        "seconds": 0.03,
+        "resultLine": 1594
+      },
+      {
+        "name": "Controls paragraph",
+        "passed": 16,
+        "failed": 0,
+        "seconds": 0.17,
+        "resultLine": 1892
+      },
+      {
+        "name": "Controls text_box_tests::",
+        "passed": 174,
+        "failed": 0,
+        "seconds": 2.55,
+        "resultLine": 2346
+      },
+      {
+        "name": "Controls text_box_history::",
+        "passed": 5,
+        "failed": 0,
+        "seconds": 0.06,
+        "resultLine": 2631
+      }
+    ],
+    "applicationCompilation": {
+      "status": "failed",
+      "error": "E0282",
+      "file": "crates/ferrodesign-app/src/canvas/corner_radius.rs",
+      "line": 206,
+      "logLines": [
+        3060,
+        3076
+      ]
+    },
+    "applicationTests": "not executed",
+    "cache": {
+      "restored": true,
+      "sourceSha": "58deaeeeae2226ece8220d4abcda9d0a3678ca20",
+      "restoredBytes": 913854929,
+      "restoreLines": [
+        165,
+        177,
+        180
+      ],
+      "fingerprintLogFilter": "cargo::core::compiler::fingerprint=info",
+      "filterLine": 323,
+      "fingerprintReasonRecordsObserved": 0,
+      "firstGlyphBuildSecondsReported": 125,
+      "cause": "not established",
+      "comparison": "cache-compare-api.json",
+      "loggingFilterIssue": "Outdated target includes ::core; pinned Cargo 1.99.0 uses cargo::compiler::fingerprint"
+    }
+  },
+  "followup": {
+    "publishedCorrection": "5cb7e8847746a2bfae45bf46cafed40889f1affb",
+    "description": "Explicit handle Vec type and bounded corner coverage diagnostics",
+    "validation": "No successful rerun of this later source is established by these records"
+  },
+  "caveats": [
+    "Filtered framework suites may overlap; counts are not summed as unique tests.",
+    "Host trace tests use analysis fixtures and mocked lifecycle objects; no Chromium trace ran.",
+    "No artifact ZIP bytes or browser runtime binaries were retrieved for this record.",
+    "No cache freshness reason or application speedup is established."
+  ],
+  "provenance": {
+    "api": "workflow-api.json",
+    "sourceComparison": "cache-compare-api.json",
+    "logs": [
+      {
+        "file": "native-job.log",
+        "bytes": 551154,
+        "sha256": "a3195f0b6c5e06736e07aa627db3578b4d38e2bd009a8b0dc6c4aae30f4ca35f",
+        "checkoutLine": 130
+      },
+      {
+        "file": "browser-job.log",
+        "bytes": 85862,
+        "sha256": "31e8d354db984ab7bf0b2f5da438e4e4dc4396293026c1e66e3b1f7b807b46a1",
+        "checkoutLine": 130
+      },
+      {
+        "file": "native-feedback-job.log",
+        "bytes": 287830,
+        "sha256": "8626a3b7c648baf802998933285a333614317ab08075c53dbe68c0dc991aa617",
+        "checkoutLine": 129
+      }
+    ]
+  },
+  "loggingFilterProbe": {
+    "scope": "Separate local dependency-free cargo check --offline in two fresh target directories; no FerroUI build, cache freshness or performance claim",
+    "cargoVersion": "1.99.0",
+    "cargoCommit": "5f94df4789f005f9a352888e8355ffc645b7ed0e",
+    "oldFilter": "cargo::core::compiler::fingerprint=trace",
+    "oldRecords": 0,
+    "correctedFilter": "cargo::compiler::fingerprint=trace",
+    "correctedRecords": 4,
+    "exitCodes": [
+      0,
+      0
+    ],
+    "result": "fingerprint-probe/result.json",
+    "officialDocumentation": "https://doc.rust-lang.org/stable/nightly-rustc/cargo/compiler/fingerprint/index.html"
+  }
+}

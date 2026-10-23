@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "recordedUtc": "2026-10-23T12:23:23.188943+00:00",
+  "recordedClock": "executor UTC clock; not used to align DOM, native or trace event timestamps",
+  "observedRuntime": {
+    "commit": "08e29e4f530c0ae65f6e2ac072f381605e23ed0c",
+    "tree": "99802b5a5b6db4d40109baee75e816303be056f0",
+    "workflowRun": 39945441130,
+    "artifactId": 12499117711,
+    "archiveSha256": "3f2b2df64116f1d4ccdcd93f915879a5f6e6bbfb05a2a45debd31904606f4b2c",
+    "wasmSha256": "ae7f7a1c5642e99786d94ff7ef272c97c5e48a90415654e335e337ebe49d7958"
+  },
+  "observedHarness": {
+    "commit": "0f0732784bd6fdf1cb2477a61dd332d9a007fec2",
+    "tree": "a5d55ba6c2325651c62d30249715c1ec21b93b15",
+    "inputs": "../browser-runtime08-harness0f/harness-inputs.json",
+    "verification": "All 55 recorded inputs matched before and after execution."
+  },
+  "observedTools": {
+    "node": "24.19.0",
+    "playwright": "1.64.1",
+    "chromium": "156.0.8078.4",
+    "webglDevice": "SwiftShader"
+  },
+  "originalRunResult": {
+    "exitCode": 1,
+    "status": "failed",
+    "fullSuite": false
+  },
+  "preservedRunFolders": [
+    "../browser-runtime08-harness0f/",
+    "../browser-text-pan-runtime08-harness0f/"
+  ],
+  "sourceCorrection": {
+    "commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+    "tree": "8c5bbcc8ed5e5a61d287708cf4e2c0e7c912259d",
+    "commitUrl": "https://github.com/wieslawsoltes/FerroUI/commit/c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+    "files": [
+      {
+        "path": "samples/FerroDesign/crates/ferrodesign-app/src/shell.rs",
+        "bytes": 151266,
+        "sha256": "e70a699394d0f716161272f55e7959963da1e5bc097072c7fb3d3d5fa30bb6f6"
+      },
+      {
+        "path": "samples/FerroDesign/crates/ferrodesign-app/src/shell/layout_padding_tests.rs",
+        "bytes": 18563,
+        "sha256": "965884b559f50f30281d6f09227b23dde18c99fdbfb9bfb22b98928d9aef746f"
+      },
+      {
+        "path": "samples/FerroDesign/tests/gradient-handles-browser.mjs",
+        "bytes": 58981,
+        "sha256": "2d0bacff02503cdfded6f71bdc322209043ab0946d0d75c896796d8584597873"
+      },
+      {
+        "path": "samples/FerroDesign/tests/input-observations.mjs",
+        "bytes": 4833,
+        "sha256": "4ca6a96bb6c5a61bf9963e1bff0bb66690f222972b2ebe9e92b79470ef1af576"
+      },
+      {
+        "path": "samples/FerroDesign/tests/input-observations.test.mjs",
+        "bytes": 6410,
+        "sha256": "6fc6d90dc556d0173ef5661d1c246dda513356015f6082a88bc51c6386c96996"
+      },
+      {
+        "path": "samples/FerroDesign/tests/paragraphs-browser.mjs",
+        "bytes": 28394,
+        "sha256": "e784ba2e202f4aa8a391b7008315ef6635cf356def24f8f1dea697e5eeb82a85"
+      },
+      {
+        "path": "samples/FerroDesign/tests/polygon-corners-browser.mjs",
+        "bytes": 15414,
+        "sha256": "709f2060c725fc812e4fb60140ff7eea84703f9b696ccd8a6b8eca1bda4ae115"
+      },
+      {
+        "path": "samples/FerroDesign/web/favicon.svg",
+        "bytes": 222,
+        "sha256": "883347dbc8832de4f398160d8fff0f69e8ef4ca831ffca045d670a3228ed08a7"
+      },
+      {
+        "path": "samples/FerroDesign/web/index.html",
+        "bytes": 1189,
+        "sha256": "5655bc554cb0568f2eadb3fe81085103c270821dac6c9e9443219d3541a5531d"
+      }
+    ],
+    "nativeReplay": "Not recorded in this evidence snapshot.",
+    "browserReplay": "Not recorded in this evidence snapshot."
+  },
+  "originalEvidence": {
+    "gradientDiagnosis": {
+      "source": "/tmp/ferrodesign-e99-webgl-gradient-entry-diagnosis.json",
+      "bytes": 4132,
+      "sha256": "7418cd1857e3098943a26a3b7b810b67f114533d6fd98df5bfed6bd64810b142",
+      "preservedAs": "gradient-entry-diagnosis.json",
+      "copy": "byte-for-byte"
+    },
+    "nativeAudit": {
+      "source": "/tmp/ferrodesign-e99-gradient-entry-native-audit.json",
+      "bytes": 5426,
+      "sha256": "d61d144a27706153eb3b39021aa266c7e6688f8d646c8915ddcb0e06bb5907fc",
+      "preservedAs": "gradient-entry-native-audit.json",
+      "correction": "Only compositing_renderer.rs source line range corrected from328–347 to293–312 for exact08; source-byte SHA and every audit conclusion remain unchanged. Original reviewer authorized this source-location correction."
+    },
+    "paragraphCandidateDiagnosis": {
+      "source": "/tmp/ferrodesign-e99-paragraph-paste-draft/diagnosis.json",
+      "bytes": 2145,
+      "sha256": "2a4e2f86d0ebaaaefaa8b557e69f588899469a0ebb0d8aacad7de52c018a87d1",
+      "retention": "New compact paragraph record verifies both renderer documents and extracts both exact requested-input calls; no claim that the earlier candidate status still applies."
+    },
+    "webglGradientTraceExtraction": {
+      "source": "/tmp/ferrodesign-e99-webgl-gradient-entry-trace.json",
+      "bytes": 21157,
+      "sha256": "2a8efbb6ddcaad8a61a330550242fdaa762351367e957c93b397d3105f067931",
+      "retention": "Relevant predicates and timeline retained in gradient-entry-diagnosis.json; full extracted states remain local."
+    },
+    "report": {
+      "bytes": 1611112,
+      "sha256": "a9f51d61f3ede13a7fc4cb25d17c0799743f9974367c106adb1d205433d096ea",
+      "retention": "complete local original; report also committed as report.json.gz"
+    },
+    "softwareTrace": {
+      "bytes": 61632834,
+      "sha256": "46494ee1d72d0ae4aa55af50ecd7bcd9b05f9511d3eb42c8a6ca0f57aed4785a",
+      "retention": "complete local original; large trace not committed"
+    },
+    "webglTrace": {
+      "bytes": 39723975,
+      "sha256": "99b4d0d9b9eecd504e8d4f31905b0823b10ed88cdc4264d04d50485d0ce8627d",
+      "retention": "complete local original; large trace not committed"
+    }
+  },
+  "largeArtifacts": "No trace ZIP, PNG, or full native-state dump is copied into this folder. Original archive hashes are retained in the prior run folder.",
+  "verificationScope": "Static source review,46 local helper cases and browser-module syntax. The correction requires a rebuilt runtime and actual browser validation."
+}

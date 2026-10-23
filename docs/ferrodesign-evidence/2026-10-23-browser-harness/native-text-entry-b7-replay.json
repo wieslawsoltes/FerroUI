@@ -1,0 +1,685 @@
+{
+  "scope": "Focused standard browser harness, WebGL2 common editing/IME gates plus corner-radius-handles and responsive/persistence gates. Official b7 application with a later corrected harness. No full-suite or newer application-feature claim.",
+  "passed": true,
+  "exit_code": 0,
+  "browser": "156.0.8078.4",
+  "node": "24.19.0",
+  "playwright": "1.64.1",
+  "created": "2026-10-23T11:27:50.795Z",
+  "runtime": {
+    "source_commit": "b7b0b8853dd47a3426537a6babc11fcc0e0e40cc",
+    "workflow_run": 39869066118,
+    "artifact_id": 12467852902,
+    "archive_sha256": "ea240fad23dbd67d4569c283ccf0d0f74bb1f284b3c98a914cf5ad06c838ec98"
+  },
+  "runtime_wasm": {
+    "size": 51967841,
+    "sha256": "2088e5948b08de6ab3688252ec00aa0808991c05040179d4440c7a39e4e86ec4"
+  },
+  "harness_base_commit": "08e29e4f530c0ae65f6e2ac072f381605e23ed0c",
+  "harness_includes_working_tree_changes": true,
+  "executed_harness_sha256": {
+    "samples/FerroDesign/tests/browser.mjs": "b8819f556de0c90f5257c2f5d2e881332a16ef2f5fa380c14ee58da0c91c9742",
+    "samples/FerroDesign/tests/corner-radius-handles-browser.mjs": "17a82205d52399eb76e7117eca1ff7a6485325f3e5a34b37dd5c0c153490177f",
+    "samples/FerroDesign/tests/input-observations.mjs": "c1e6d5fa29a2c32288c86701891f2b34afdcc637cd4241d50f07ad123a659b2a"
+  },
+  "requested_scope": {
+    "full": false,
+    "modes": [
+      "WebGL2"
+    ],
+    "scenarios": [
+      "corner-radius-handles"
+    ]
+  },
+  "check_count": 26,
+  "checks": [
+    "Native FerroUI canvas contains rendered UI and document pixels",
+    "R shortcut and pointer drag create and render a selected rectangle",
+    "Keyboard undo removes the pointer-created node",
+    "Keyboard redo restores the node",
+    "Delete keyboard action removes the selection",
+    "Document JSON round-trip restores the complete edited document",
+    "SVG file import selects an editable frame with affine groups, gradients, curves, and Unicode text",
+    "PNG download has exact artboard dimensions and verified background, affine gradient, curved stroke, and text pixels",
+    "JSON round-trip preserves the complete imported SVG hierarchy and visual properties",
+    "Enter enters native vector editing; an anchor drag rebases bounds without moving other anchors and forms one undo/redo step",
+    "Native Pen pointer drags create a cubic curve and the complete path is one undo/redo step",
+    "Enter while the Pen pointer is held finalizes the gesture and ignores later handle movement until release",
+    "Native on-canvas TextBox handles multiline Unicode, UTF-8 rich-text ranges, Ctrl+Enter commit, Escape cancel, one-step history, and autosave",
+    "Browser composition events commit once, keep preedit out of the document, and cannot block or overwrite a new native text client after cancellation",
+    "Pagehide during unfinished composition durably saves confirmed Unicode and formatting, preserves one-step history, and survives a real reload",
+    "Native paint dialog pointer/keyboard input converts a fill to a gradient, edits alpha/opacity/stop positions, rejects NaN, and supports one-step stop undo",
+    "Native corner hover paints a public FerroUI handle while preserving every document field, bound radius, revision and history",
+    "A captured fractional corner drag preserves the editable rectangle, smoothing, affine transform and artwork; it detaches only the radius binding and commits one exactly reversible edit",
+    "Escape restores the complete bound document, selection and redo; late pointer events and an unchanged radius press cannot detach the binding or consume the previous edit",
+    "Real Chromium touch cancellation reaches the production pointer bridge and rolls back the captured radius edit, including its variable binding, while preserving exact redo and selection",
+    "Alt at pointer press changes only the chosen rectangle corner; its other three radii, uniform value, transform and smoothing remain exact through one-step undo/redo",
+    "A held radius drag marks the clean host draft; real pagehide commits one history entry, serializes and saves one exact IndexedDB revision, and late release cannot duplicate either operation",
+    "Native polygon and star radius drags preserve editable point geometry, center rotation, reflection and shear; fractional local radii and complete documents survive exact single-step history",
+    "All nine toolbar controls fit at 980×650; native toolbar pointer input switches tools",
+    "Native Add page clicks retain a scrollable page list and usable layer viewport at 980×650",
+    "A committed IndexedDB autosave restores the exact document after a real browser reload"
+  ],
+  "requested_scenarios": [
+    {
+      "name": "corner-radius-handles",
+      "status": "passed",
+      "checksBefore": 16,
+      "ran": true,
+      "checks": 7,
+      "durationMs": 49851
+    }
+  ],
+  "page_errors": [],
+  "console_errors": [
+    {
+      "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "verified_trace_url": "http://127.0.0.1:43839/favicon.ico"
+    }
+  ],
+  "input_entries": [
+    {
+      "index": 0,
+      "method": "double-click",
+      "native_presses": [
+        {
+          "buttons": 1,
+          "clickCount": 1,
+          "pan": {
+            "x": 33.91228070175441,
+            "y": 322.56140350877195
+          },
+          "renderedFramesBefore": 89,
+          "screen": {
+            "x": 686.75439453125,
+            "y": 459.3473815917969
+          },
+          "selectionCountBefore": 0,
+          "serial": 10,
+          "timestamp": 57969,
+          "world": {
+            "x": 420.0000055110751,
+            "y": 88.00000847327789
+          },
+          "zoom": 1.5543859649122806
+        },
+        {
+          "buttons": 1,
+          "clickCount": 2,
+          "pan": {
+            "x": 33.91228070175441,
+            "y": 322.56140350877195
+          },
+          "renderedFramesBefore": 90,
+          "screen": {
+            "x": 686.75439453125,
+            "y": 459.3473815917969
+          },
+          "selectionCountBefore": 1,
+          "serial": 11,
+          "timestamp": 58152,
+          "world": {
+            "x": 420.0000055110751,
+            "y": 88.00000847327789
+          },
+          "zoom": 1.5543859649122806
+        }
+      ],
+      "browser_pointer_downs": [
+        {
+          "type": "pointerdown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 59534.09999999963,
+          "observedAtMs": 59548.199999999255,
+          "detail": 0,
+          "button": 0,
+          "buttons": 1,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 982.75439453125,
+          "y": 459.3473815917969,
+          "offsetX": 982.75439453125,
+          "offsetY": 459.3473815917969,
+          "target": {
+            "tag": "DIV",
+            "className": "ferroui-native-host"
+          }
+        },
+        {
+          "type": "pointerdown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 59717,
+          "observedAtMs": 59718.199999999255,
+          "detail": 0,
+          "button": 0,
+          "buttons": 1,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 982.75439453125,
+          "y": 459.3473815917969,
+          "offsetX": 982.75439453125,
+          "offsetY": 459.3473815917969,
+          "target": {
+            "tag": "DIV",
+            "className": "ferroui-native-host"
+          }
+        }
+      ],
+      "dom_creation_intervals_ms": [
+        182.90000000037253
+      ],
+      "dom_observation_intervals_ms": [
+        170
+      ],
+      "native_press_intervals_ms": [
+        183
+      ],
+      "dom_delivery_ages_ms": [
+        14.099999999627471,
+        1.199999999254942
+      ],
+      "dropped_events": 0,
+      "dropped_long_tasks": 0,
+      "long_tasks": [],
+      "after_pointer": {
+        "selection": [
+          3
+        ],
+        "editingText": 3,
+        "renderedFrames": 90,
+        "sceneFrames": 60,
+        "historyLength": 8,
+        "documentRevision": 90,
+        "canvas_focus_within": true,
+        "inline_visible": true
+      },
+      "after_entry": {
+        "selection": [
+          3
+        ],
+        "editingText": 3,
+        "renderedFrames": 90,
+        "sceneFrames": 60,
+        "historyLength": 8,
+        "documentRevision": 90,
+        "canvas_focus_within": true,
+        "inline_visible": true
+      }
+    },
+    {
+      "index": 1,
+      "method": "selection-enter",
+      "native_presses": [
+        {
+          "buttons": 1,
+          "clickCount": 1,
+          "pan": {
+            "x": 33.91228070175441,
+            "y": 322.56140350877195
+          },
+          "renderedFramesBefore": 92,
+          "screen": {
+            "x": 686.75439453125,
+            "y": 459.3473815917969
+          },
+          "selectionCountBefore": 0,
+          "serial": 13,
+          "timestamp": 62535,
+          "world": {
+            "x": 420.0000055110751,
+            "y": 88.00000847327789
+          },
+          "zoom": 1.5543859649122806
+        }
+      ],
+      "browser_pointer_downs": [
+        {
+          "type": "pointerdown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 64100.39999999944,
+          "observedAtMs": 64101.5,
+          "detail": 0,
+          "button": 0,
+          "buttons": 1,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 982.75439453125,
+          "y": 459.3473815917969,
+          "offsetX": 982.75439453125,
+          "offsetY": 459.3473815917969,
+          "target": {
+            "tag": "DIV",
+            "className": "ferroui-native-host"
+          }
+        }
+      ],
+      "dom_creation_intervals_ms": [],
+      "dom_observation_intervals_ms": [],
+      "native_press_intervals_ms": [],
+      "dom_delivery_ages_ms": [
+        1.1000000005587935
+      ],
+      "dropped_events": 0,
+      "dropped_long_tasks": 0,
+      "long_tasks": [],
+      "after_pointer": {
+        "selection": [
+          3
+        ],
+        "editingText": null,
+        "renderedFrames": 93,
+        "sceneFrames": 66,
+        "historyLength": 9,
+        "documentRevision": 97,
+        "canvas_focus_within": true,
+        "inline_visible": false
+      },
+      "after_entry": {
+        "selection": [
+          3
+        ],
+        "editingText": 3,
+        "renderedFrames": 93,
+        "sceneFrames": 66,
+        "historyLength": 9,
+        "documentRevision": 97,
+        "canvas_focus_within": true,
+        "inline_visible": true
+      }
+    },
+    {
+      "index": 2,
+      "method": "selection-enter",
+      "native_presses": [
+        {
+          "buttons": 1,
+          "clickCount": 1,
+          "pan": {
+            "x": 33.91228070175441,
+            "y": 322.56140350877195
+          },
+          "renderedFramesBefore": 95,
+          "screen": {
+            "x": 686.75439453125,
+            "y": 459.3473815917969
+          },
+          "selectionCountBefore": 0,
+          "serial": 15,
+          "timestamp": 63509,
+          "world": {
+            "x": 420.0000055110751,
+            "y": 88.00000847327789
+          },
+          "zoom": 1.5543859649122806
+        }
+      ],
+      "browser_pointer_downs": [
+        {
+          "type": "pointerdown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 65074.5,
+          "observedAtMs": 65075.299999999814,
+          "detail": 0,
+          "button": 0,
+          "buttons": 1,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 982.75439453125,
+          "y": 459.3473815917969,
+          "offsetX": 982.75439453125,
+          "offsetY": 459.3473815917969,
+          "target": {
+            "tag": "DIV",
+            "className": "ferroui-native-host"
+          }
+        }
+      ],
+      "dom_creation_intervals_ms": [],
+      "dom_observation_intervals_ms": [],
+      "native_press_intervals_ms": [],
+      "dom_delivery_ages_ms": [
+        0.7999999998137355
+      ],
+      "dropped_events": 0,
+      "dropped_long_tasks": 0,
+      "long_tasks": [],
+      "after_pointer": {
+        "selection": [
+          3
+        ],
+        "editingText": null,
+        "renderedFrames": 96,
+        "sceneFrames": 68,
+        "historyLength": 9,
+        "documentRevision": 102,
+        "canvas_focus_within": true,
+        "inline_visible": false
+      },
+      "after_entry": {
+        "selection": [
+          3
+        ],
+        "editingText": 3,
+        "renderedFrames": 96,
+        "sceneFrames": 68,
+        "historyLength": 9,
+        "documentRevision": 102,
+        "canvas_focus_within": true,
+        "inline_visible": true
+      }
+    },
+    {
+      "index": 3,
+      "method": "selection-enter",
+      "native_presses": [
+        {
+          "buttons": 1,
+          "clickCount": 1,
+          "pan": {
+            "x": 33.91228070175441,
+            "y": 322.56140350877195
+          },
+          "renderedFramesBefore": 98,
+          "screen": {
+            "x": 686.75439453125,
+            "y": 459.3473815917969
+          },
+          "selectionCountBefore": 0,
+          "serial": 17,
+          "timestamp": 65382,
+          "world": {
+            "x": 420.0000055110751,
+            "y": 88.00000847327789
+          },
+          "zoom": 1.5543859649122806
+        }
+      ],
+      "browser_pointer_downs": [
+        {
+          "type": "pointerdown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 66947.09999999963,
+          "observedAtMs": 66948,
+          "detail": 0,
+          "button": 0,
+          "buttons": 1,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 982.75439453125,
+          "y": 459.3473815917969,
+          "offsetX": 982.75439453125,
+          "offsetY": 459.3473815917969,
+          "target": {
+            "tag": "DIV",
+            "className": "ferroui-native-host"
+          }
+        }
+      ],
+      "dom_creation_intervals_ms": [],
+      "dom_observation_intervals_ms": [],
+      "native_press_intervals_ms": [],
+      "dom_delivery_ages_ms": [
+        0.900000000372529
+      ],
+      "dropped_events": 0,
+      "dropped_long_tasks": 0,
+      "long_tasks": [],
+      "after_pointer": {
+        "selection": [
+          3
+        ],
+        "editingText": null,
+        "renderedFrames": 99,
+        "sceneFrames": 70,
+        "historyLength": 9,
+        "documentRevision": 106,
+        "canvas_focus_within": true,
+        "inline_visible": false
+      },
+      "after_entry": {
+        "selection": [
+          3
+        ],
+        "editingText": 3,
+        "renderedFrames": 99,
+        "sceneFrames": 70,
+        "historyLength": 9,
+        "documentRevision": 106,
+        "canvas_focus_within": true,
+        "inline_visible": true
+      }
+    },
+    {
+      "index": 4,
+      "method": "selection-enter",
+      "native_presses": [
+        {
+          "buttons": 1,
+          "clickCount": 1,
+          "pan": {
+            "x": 33.91228070175441,
+            "y": 322.56140350877195
+          },
+          "renderedFramesBefore": 101,
+          "screen": {
+            "x": 686.75439453125,
+            "y": 459.3473815917969
+          },
+          "selectionCountBefore": 0,
+          "serial": 19,
+          "timestamp": 67012,
+          "world": {
+            "x": 420.0000055110751,
+            "y": 88.00000847327789
+          },
+          "zoom": 1.5543859649122806
+        }
+      ],
+      "browser_pointer_downs": [
+        {
+          "type": "pointerdown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 68577.09999999963,
+          "observedAtMs": 68578.29999999981,
+          "detail": 0,
+          "button": 0,
+          "buttons": 1,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 982.75439453125,
+          "y": 459.3473815917969,
+          "offsetX": 982.75439453125,
+          "offsetY": 459.3473815917969,
+          "target": {
+            "tag": "DIV",
+            "className": "ferroui-native-host"
+          }
+        }
+      ],
+      "dom_creation_intervals_ms": [],
+      "dom_observation_intervals_ms": [],
+      "native_press_intervals_ms": [],
+      "dom_delivery_ages_ms": [
+        1.2000000001862645
+      ],
+      "dropped_events": 0,
+      "dropped_long_tasks": 0,
+      "long_tasks": [],
+      "after_pointer": {
+        "selection": [
+          3
+        ],
+        "editingText": null,
+        "renderedFrames": 102,
+        "sceneFrames": 72,
+        "historyLength": 9,
+        "documentRevision": 108,
+        "canvas_focus_within": true,
+        "inline_visible": false
+      },
+      "after_entry": {
+        "selection": [
+          3
+        ],
+        "editingText": 3,
+        "renderedFrames": 102,
+        "sceneFrames": 72,
+        "historyLength": 9,
+        "documentRevision": 108,
+        "canvas_focus_within": true,
+        "inline_visible": true
+      }
+    },
+    {
+      "index": 5,
+      "method": "selection-enter",
+      "native_presses": [
+        {
+          "buttons": 1,
+          "clickCount": 1,
+          "pan": {
+            "x": 33.91228070175441,
+            "y": 322.56140350877195
+          },
+          "renderedFramesBefore": 103,
+          "screen": {
+            "x": 686.75439453125,
+            "y": 459.3473815917969
+          },
+          "selectionCountBefore": 0,
+          "serial": 21,
+          "timestamp": 68201,
+          "world": {
+            "x": 420.0000055110751,
+            "y": 88.00000847327789
+          },
+          "zoom": 1.5543859649122806
+        }
+      ],
+      "browser_pointer_downs": [
+        {
+          "type": "pointerdown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 69766.39999999944,
+          "observedAtMs": 69768.39999999944,
+          "detail": 0,
+          "button": 0,
+          "buttons": 1,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 982.75439453125,
+          "y": 459.3473815917969,
+          "offsetX": 982.75439453125,
+          "offsetY": 459.3473815917969,
+          "target": {
+            "tag": "DIV",
+            "className": "ferroui-native-host"
+          }
+        }
+      ],
+      "dom_creation_intervals_ms": [],
+      "dom_observation_intervals_ms": [],
+      "native_press_intervals_ms": [],
+      "dom_delivery_ages_ms": [
+        2
+      ],
+      "dropped_events": 0,
+      "dropped_long_tasks": 0,
+      "long_tasks": [
+        {
+          "startTimeMs": 70802,
+          "durationMs": 99
+        }
+      ],
+      "after_pointer": {
+        "selection": [
+          3
+        ],
+        "editingText": null,
+        "renderedFrames": 104,
+        "sceneFrames": 74,
+        "historyLength": 9,
+        "documentRevision": 112,
+        "canvas_focus_within": true,
+        "inline_visible": false
+      },
+      "after_entry": {
+        "selection": [
+          3
+        ],
+        "editingText": 3,
+        "renderedFrames": 104,
+        "sceneFrames": 74,
+        "historyLength": 9,
+        "documentRevision": 112,
+        "canvas_focus_within": true,
+        "inline_visible": true
+      }
+    }
+  ],
+  "original_files": [
+    {
+      "filename": "provenance.json",
+      "size": 10183,
+      "sha256": "7241fcbb38f0bd1385de4c3d077cb08926427b6b7ad6dd2f3d301706005f933b"
+    },
+    {
+      "filename": "report.json",
+      "size": 432794,
+      "sha256": "7afa0615ea5f9d21b3901256041897d4657f7e806fdfbc69ca24a885c75dcbdb"
+    },
+    {
+      "filename": "WebGL2-trace.zip",
+      "size": 8876021,
+      "sha256": "451ba8e8078c8c5fadd30ba5648e9d05c3379a742f6c736c760e82a20c96a632"
+    },
+    {
+      "filename": "WebGL2-native-text-entry-input.json",
+      "size": 147666,
+      "sha256": "0bab6189d2bbd14f7d7ecb314b86170e5747f4008884d1df2b3afd61c4bfadbb"
+    },
+    {
+      "filename": "WebGL2-corner-radius-input.json",
+      "size": 56349,
+      "sha256": "2b620b3d3eefebb85931a37fb8da2d9431d54ed5baeace62bc8a584314973ae5"
+    },
+    {
+      "filename": "WebGL2-corner-radius-touch-input.json",
+      "size": 3229,
+      "sha256": "1ce0b838e67a8e2c418ce49c70ac5ec4ae34a831ff4cc877418b90c1d127a292"
+    }
+  ],
+  "memory_events_before": "low 0\nhigh 0\nmax 3949579\noom 73\noom_kill 5\noom_group_kill 0",
+  "memory_events_after": "low 0\nhigh 0\nmax 3949579\noom 73\noom_kill 5\noom_group_kill 0",
+  "owned_process_exit": {
+    "node_pid": 91399,
+    "chrome_pid": 91411,
+    "both_absent_after_run": true
+  },
+  "pure_tests": {
+    "command": "node --test --test-isolation=none --test-reporter=spec tests/input-observations.test.mjs tests/corner-radius-input.test.mjs tests/gradient-input.test.mjs",
+    "individual_cases": 13,
+    "passed": 13,
+    "failed": 0
+  },
+  "post_replay_harness_change": {
+    "description": "Bound diagnostic collection to five seconds and preserve the original input failure if evidence capture also fails; an evidence-only failure still fails the run. Actual input and successful-path assertions unchanged.",
+    "browser_mjs_sha256": "78dd7a5aa0d104f31627b034e0998fc78f627b187594575f0db561a35f20f678",
+    "included_in_recorded_b7_browser_replay": false,
+    "source_validation": {
+      "node_syntax": "passed",
+      "command": "node --test --test-isolation=none --test-reporter=spec tests/input-observations.test.mjs tests/corner-radius-input.test.mjs tests/gradient-input.test.mjs tests/isolated-scenario.test.mjs",
+      "individual_cases": 18,
+      "passed": 18,
+      "failed": 0
+    }
+  }
+}

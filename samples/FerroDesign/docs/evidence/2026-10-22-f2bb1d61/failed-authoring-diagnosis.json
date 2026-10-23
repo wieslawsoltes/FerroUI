@@ -1,0 +1,122 @@
+{
+  "status": "Preserved full failure; copy-only focused diagnostic passed without changing source/polling/deadline/input/assertions. Root cause not conclusively attributed.",
+  "reportSha256": "3193d1988728a222fabd6c24eb2c7a5248ef853b8774dbda640a3844481d6e8d",
+  "failure": "Native authoring alias deletion predicate !doc.variables[102] timed out",
+  "traceTimeUnit": "milliseconds in Playwright trace monotonic clock",
+  "directTraceObservations": [
+    {
+      "callId": "ewaz@17967",
+      "start": 790182.668,
+      "end": 790224.013,
+      "state": {
+        "renderedFrames": 13,
+        "sceneFrames": 55,
+        "documentRevision": 17,
+        "VariableName": "Native alias",
+        "VariableDelete": {
+          "x": 372,
+          "y": 919,
+          "width": 94,
+          "height": 28,
+          "visible": true,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true
+        },
+        "VariablesErrorVisible": false
+      }
+    },
+    {
+      "callId": "ewaz@17969",
+      "method": "mouseClick",
+      "start": 790231.179,
+      "end": 790435.354,
+      "x": 419,
+      "y": 933,
+      "actualClickCount": 1
+    },
+    {
+      "callId": "ewaz@17971",
+      "method": "two requestAnimationFrame callbacks",
+      "start": 790542.126,
+      "end": 792669.56,
+      "durationMs": 2127.434
+    },
+    {
+      "callId": "ewaz@17973",
+      "method": "waitForFunction",
+      "predicate": "!doc.variables[102]",
+      "start": 793685.814,
+      "end": 827979.47,
+      "configuredTimeoutMs": 10000,
+      "elapsedMs": 34293.656,
+      "nominalDeadline": 803685.814,
+      "error": "Timeout10000ms exceeded"
+    },
+    {
+      "type": "screencast-frame",
+      "receivedMonotonic": 794077.221,
+      "frameSwapWallTime": 1792681740706.147,
+      "mappedSwapMonotonicApprox": 792369.8469238281,
+      "image": "authoring-late-frame-1.jpeg",
+      "visualObservation": "Native dialog shows exactly2 variables (Accent and Alias), editing Accent; Native alias row gone. Receipt precedes nominal wait deadline."
+    },
+    {
+      "callId": "ewaz@17975",
+      "method": "failure diagnostic evaluate",
+      "start": 830982.946,
+      "end": 948984.846,
+      "durationMs": 118001.9,
+      "observedState": {
+        "renderedFrames": 14,
+        "sceneFrames": 58,
+        "documentRevision": 18,
+        "variableIds": [
+          "100",
+          "101"
+        ],
+        "node2VariableBindings": {}
+      }
+    },
+    {
+      "callId": "ewaz@17977",
+      "method": "failure screenshot",
+      "start": 952049.303,
+      "end": 970054.013,
+      "configuredTimeoutMs": 15000,
+      "elapsedMs": 18004.71,
+      "error": "Timeout15000ms exceeded"
+    }
+  ],
+  "codeSupportedInterpretation": [
+    "The native Delete handler commits the captured variable ID before rebuilding the variable dialog. The rendered two-variable dialog therefore supports a successful native deletion before the wait deadline; the final exported document confirms the exact intended deletion eventually.",
+    "Playwright1.64.1 waitForFunctionExpression calls next() synchronously for the first predicate evaluation, then defaults to requestAnimationFrame for subsequent evaluations. Merely switching polling to setTimeout is not a demonstrated correction for this failure.",
+    "The trace proves large scheduling/protocol delays but does not record predicate invocation times/results or identify the responsible process. No conclusion about application performance, CPU contention, or transport root cause is established."
+  ],
+  "nextStepProposal": "No application or polling correction is justified by current evidence. Preserve the failed full result; use an unchanged unfiltered rerun and/or exact-source CI full validation for the required gate.",
+  "sourceMutations": false,
+  "artifactMutations": "Only separate diagnosis files and byte-for-byte extracted trace JPEGs were created; raw report/log/trace unchanged.",
+  "focusedDiagnostic": {
+    "sourceManifest": "/tmp/ferrodesign-authoring-diagnostic-f2bb1d61-9b313a0caa46/diagnostic-source.json",
+    "reportPath": "/tmp/ferrodesign-authoring-diagnostic-f2bb1d61-9b313a0caa46/report/report.json",
+    "reportSha256": "5742e0e84fe8db7a00b8f96138866479791cc0313feec0fecc6757dec27729f3",
+    "passed": true,
+    "scope": {
+      "full": false,
+      "modes": [
+        "WebGL2"
+      ],
+      "scenarios": [
+        "native-authoring"
+      ]
+    },
+    "checks": 21,
+    "aliasDeleteWaitMs": 6,
+    "aliasDeletePredicateEvaluations": 1,
+    "allDocumentWaitsTrueOnFirstEvaluation": true,
+    "resourceEventsUnchanged": true,
+    "peakCgroupMemory": 8437272576,
+    "peakOwnedSummedRss": 1556766720,
+    "caveat": "Diagnostic timing instrumentation exists only in a separate copy. A focused pass does not establish full-run success or prove the prior stall cause."
+  }
+}

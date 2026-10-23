@@ -1,0 +1,611 @@
+{
+  "passed": true,
+  "scope": {
+    "full": false,
+    "modes": [
+      "WebGL2"
+    ],
+    "scenarios": [
+      "native-authoring"
+    ]
+  },
+  "results": [
+    {
+      "mode": "WebGL2",
+      "status": "passed",
+      "surface": {
+        "kind": "WebGL2",
+        "device": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+      },
+      "checks": 21,
+      "scenarios": [
+        {
+          "name": "vector-network",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "native-authoring",
+          "status": "passed",
+          "checksBefore": 16,
+          "checks": 2,
+          "durationMs": 60852
+        },
+        {
+          "name": "typography",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "components",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "image-crop",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "compositing",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "svg-compositing",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "masks",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "effects",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "inspector-lifecycle",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "floating-panels",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "page-inspector",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "auto-layout",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "layout-drag",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "layout-transfer",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "selection",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "matching",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "geometry-authoring",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "flatten",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "local-styles",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "angular-paints",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "grid-styles",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "region-paints",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "network-bucket",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "compact-autosave",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "prototype-input",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "prototype-motion",
+          "status": "not-requested",
+          "checksBefore": 18
+        },
+        {
+          "name": "bounded-history",
+          "status": "not-requested",
+          "checksBefore": 18
+        }
+      ],
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "nativeCaptures": 3,
+      "retries": 0
+    }
+  ],
+  "documentWaits": [
+    {
+      "id": 1,
+      "predicate": "(doc) => doc.nodes[2].text_runs.length === 1 && doc.nodes[2].text_runs[0].font_weight === 700",
+      "nodeBeforeWallMs": 1792682642998,
+      "evaluations": 1,
+      "first": {
+        "nodeReceiptWallMs": 1792682643003,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 1,
+          "startedWallMs": 1792682643000,
+          "startedPerformanceMs": 17730.199999999255,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682643001,
+          "finishedPerformanceMs": 17730.5,
+          "result": true,
+          "variableIds": [],
+          "node2Bindings": {}
+        }
+      },
+      "last": {
+        "nodeReceiptWallMs": 1792682643003,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 1,
+          "startedWallMs": 1792682643000,
+          "startedPerformanceMs": 17730.199999999255,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682643001,
+          "finishedPerformanceMs": 17730.5,
+          "result": true,
+          "variableIds": [],
+          "node2Bindings": {}
+        }
+      },
+      "nodeEndPhase": "node-wait-resolved",
+      "nodeDurationMs": 7
+    },
+    {
+      "id": 2,
+      "predicate": "(doc) => doc.nodes[2].text_runs.length === 0",
+      "nodeBeforeWallMs": 1792682645935,
+      "evaluations": 1,
+      "first": {
+        "nodeReceiptWallMs": 1792682645940,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 2,
+          "startedWallMs": 1792682645938,
+          "startedPerformanceMs": 20668.29999999702,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682645939,
+          "finishedPerformanceMs": 20668.699999999255,
+          "result": true,
+          "variableIds": [],
+          "node2Bindings": {}
+        }
+      },
+      "last": {
+        "nodeReceiptWallMs": 1792682645940,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 2,
+          "startedWallMs": 1792682645938,
+          "startedPerformanceMs": 20668.29999999702,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682645939,
+          "finishedPerformanceMs": 20668.699999999255,
+          "result": true,
+          "variableIds": [],
+          "node2Bindings": {}
+        }
+      },
+      "nodeEndPhase": "node-wait-resolved",
+      "nodeDurationMs": 9
+    },
+    {
+      "id": 3,
+      "predicate": "(doc) => doc.variables[100].values.Default.value.a === 128",
+      "nodeBeforeWallMs": 1792682652967,
+      "evaluations": 1,
+      "first": {
+        "nodeReceiptWallMs": 1792682652971,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 3,
+          "startedWallMs": 1792682652970,
+          "startedPerformanceMs": 27699.599999997765,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682652970,
+          "finishedPerformanceMs": 27700,
+          "result": true,
+          "variableIds": [
+            "100",
+            "101"
+          ],
+          "node2Bindings": {}
+        }
+      },
+      "last": {
+        "nodeReceiptWallMs": 1792682652971,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 3,
+          "startedWallMs": 1792682652970,
+          "startedPerformanceMs": 27699.599999997765,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682652970,
+          "finishedPerformanceMs": 27700,
+          "result": true,
+          "variableIds": [
+            "100",
+            "101"
+          ],
+          "node2Bindings": {}
+        }
+      },
+      "nodeEndPhase": "node-wait-resolved",
+      "nodeDurationMs": 6
+    },
+    {
+      "id": 4,
+      "predicate": "(doc) => doc.nodes[2].variable_bindings.fill === 100",
+      "nodeBeforeWallMs": 1792682657258,
+      "evaluations": 1,
+      "first": {
+        "nodeReceiptWallMs": 1792682657266,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 4,
+          "startedWallMs": 1792682657263,
+          "startedPerformanceMs": 31992.5,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682657263,
+          "finishedPerformanceMs": 31992.699999999255,
+          "result": true,
+          "variableIds": [
+            "100",
+            "101"
+          ],
+          "node2Bindings": {
+            "fill": 100
+          }
+        }
+      },
+      "last": {
+        "nodeReceiptWallMs": 1792682657266,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 4,
+          "startedWallMs": 1792682657263,
+          "startedPerformanceMs": 31992.5,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682657263,
+          "finishedPerformanceMs": 31992.699999999255,
+          "result": true,
+          "variableIds": [
+            "100",
+            "101"
+          ],
+          "node2Bindings": {
+            "fill": 100
+          }
+        }
+      },
+      "nodeEndPhase": "node-wait-resolved",
+      "nodeDurationMs": 12
+    },
+    {
+      "id": 5,
+      "predicate": "(doc) => doc.variables[102]?.name === \"Native alias\"",
+      "nodeBeforeWallMs": 1792682666024,
+      "evaluations": 1,
+      "first": {
+        "nodeReceiptWallMs": 1792682666039,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 5,
+          "startedWallMs": 1792682666037,
+          "startedPerformanceMs": 40767,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682666038,
+          "finishedPerformanceMs": 40767.699999999255,
+          "result": true,
+          "variableIds": [
+            "100",
+            "101",
+            "102"
+          ],
+          "node2Bindings": {
+            "fill": 100
+          }
+        }
+      },
+      "last": {
+        "nodeReceiptWallMs": 1792682666039,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 5,
+          "startedWallMs": 1792682666037,
+          "startedPerformanceMs": 40767,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682666038,
+          "finishedPerformanceMs": 40767.699999999255,
+          "result": true,
+          "variableIds": [
+            "100",
+            "101",
+            "102"
+          ],
+          "node2Bindings": {
+            "fill": 100
+          }
+        }
+      },
+      "nodeEndPhase": "node-wait-resolved",
+      "nodeDurationMs": 18
+    },
+    {
+      "id": 6,
+      "predicate": "(doc) => doc.nodes[2].variable_bindings.fill === 102",
+      "nodeBeforeWallMs": 1792682669492,
+      "evaluations": 1,
+      "first": {
+        "nodeReceiptWallMs": 1792682669496,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 6,
+          "startedWallMs": 1792682669494,
+          "startedPerformanceMs": 44224.099999997765,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682669494,
+          "finishedPerformanceMs": 44224.29999999702,
+          "result": true,
+          "variableIds": [
+            "100",
+            "101",
+            "102"
+          ],
+          "node2Bindings": {
+            "fill": 102
+          }
+        }
+      },
+      "last": {
+        "nodeReceiptWallMs": 1792682669496,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 6,
+          "startedWallMs": 1792682669494,
+          "startedPerformanceMs": 44224.099999997765,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682669494,
+          "finishedPerformanceMs": 44224.29999999702,
+          "result": true,
+          "variableIds": [
+            "100",
+            "101",
+            "102"
+          ],
+          "node2Bindings": {
+            "fill": 102
+          }
+        }
+      },
+      "nodeEndPhase": "node-wait-resolved",
+      "nodeDurationMs": 5
+    },
+    {
+      "id": 7,
+      "predicate": "(doc) => doc.variable_mode === \"Dark\"",
+      "nodeBeforeWallMs": 1792682675040,
+      "evaluations": 1,
+      "first": {
+        "nodeReceiptWallMs": 1792682675044,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 7,
+          "startedWallMs": 1792682675043,
+          "startedPerformanceMs": 49773,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682675043,
+          "finishedPerformanceMs": 49773.29999999702,
+          "result": true,
+          "variableIds": [
+            "100",
+            "101",
+            "102"
+          ],
+          "node2Bindings": {
+            "fill": 102
+          }
+        }
+      },
+      "last": {
+        "nodeReceiptWallMs": 1792682675044,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 7,
+          "startedWallMs": 1792682675043,
+          "startedPerformanceMs": 49773,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682675043,
+          "finishedPerformanceMs": 49773.29999999702,
+          "result": true,
+          "variableIds": [
+            "100",
+            "101",
+            "102"
+          ],
+          "node2Bindings": {
+            "fill": 102
+          }
+        }
+      },
+      "nodeEndPhase": "node-wait-resolved",
+      "nodeDurationMs": 6
+    },
+    {
+      "id": 8,
+      "predicate": "(doc) => Object.values(doc.variables).every((variable) => variable.collection === \"Design tokens\")",
+      "nodeBeforeWallMs": 1792682678573,
+      "evaluations": 1,
+      "first": {
+        "nodeReceiptWallMs": 1792682678576,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 8,
+          "startedWallMs": 1792682678575,
+          "startedPerformanceMs": 53305.199999999255,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682678576,
+          "finishedPerformanceMs": 53305.599999997765,
+          "result": true,
+          "variableIds": [
+            "100",
+            "101",
+            "102"
+          ],
+          "node2Bindings": {
+            "fill": 102
+          }
+        }
+      },
+      "last": {
+        "nodeReceiptWallMs": 1792682678576,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 8,
+          "startedWallMs": 1792682678575,
+          "startedPerformanceMs": 53305.199999999255,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682678576,
+          "finishedPerformanceMs": 53305.599999997765,
+          "result": true,
+          "variableIds": [
+            "100",
+            "101",
+            "102"
+          ],
+          "node2Bindings": {
+            "fill": 102
+          }
+        }
+      },
+      "nodeEndPhase": "node-wait-resolved",
+      "nodeDurationMs": 7
+    },
+    {
+      "id": 9,
+      "predicate": "(doc) => !doc.variables[102]",
+      "nodeBeforeWallMs": 1792682684416,
+      "evaluations": 1,
+      "first": {
+        "nodeReceiptWallMs": 1792682684420,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 9,
+          "startedWallMs": 1792682684418,
+          "startedPerformanceMs": 59148.29999999702,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682684419,
+          "finishedPerformanceMs": 59148.599999997765,
+          "result": true,
+          "variableIds": [
+            "100",
+            "101"
+          ],
+          "node2Bindings": {}
+        }
+      },
+      "last": {
+        "nodeReceiptWallMs": 1792682684420,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 9,
+          "startedWallMs": 1792682684418,
+          "startedPerformanceMs": 59148.29999999702,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682684419,
+          "finishedPerformanceMs": 59148.599999997765,
+          "result": true,
+          "variableIds": [
+            "100",
+            "101"
+          ],
+          "node2Bindings": {}
+        }
+      },
+      "nodeEndPhase": "node-wait-resolved",
+      "nodeDurationMs": 6
+    }
+  ],
+  "resources": {
+    "sampleCount": 37,
+    "baselineMemory": 4575178752,
+    "peakMemory": 8437272576,
+    "finalMemory": 8337711104,
+    "memoryLimit": 8589934592,
+    "baselineEvents": {
+      "low": 0,
+      "high": 0,
+      "max": 9169512,
+      "oom": 18,
+      "oom_kill": 12,
+      "oom_group_kill": 0
+    },
+    "finalEvents": {
+      "low": 0,
+      "high": 0,
+      "max": 9169512,
+      "oom": 18,
+      "oom_kill": 12,
+      "oom_group_kill": 0
+    },
+    "peakOwnedRssBytes": 1556766720
+  }
+}

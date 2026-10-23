@@ -1,0 +1,162 @@
+{
+  "exitCode": 0,
+  "durationSeconds": 175.12351512908936,
+  "passed": true,
+  "scope": {
+    "full": false,
+    "modes": [
+      "WebGL2"
+    ],
+    "scenarios": [
+      "native-authoring"
+    ]
+  },
+  "harnessBaseCommit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+  "buildCommit": "3a0bf1f13c6ede9abe5360bc3691085a3bc981f0",
+  "wasmSha256": "7880a628e7117ab88f896f69baa9c9ccedcdc33792302a01f653b4465e1499b9",
+  "instrumentedCopyOnly": true,
+  "publishedSourceChanged": false,
+  "result": {
+    "requestedRenderer": "Vello",
+    "actualSurface": {
+      "kind": "WebGL2",
+      "device": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+    },
+    "checks": 21,
+    "requestedScenario": "native-authoring",
+    "scenarioChecks": 2,
+    "scenarioPassed": true,
+    "otherScenarios": "27 not requested; this is not full validation",
+    "nativeCaptures": 3,
+    "captureRetries": 0,
+    "pageErrors": [],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ]
+  },
+  "unchangedSemanticBoundary": [
+    "Original native input sequence, including one actual click for the final alias deletion, remains unchanged.",
+    "All original document, appearance, binding, Unicode, pixel, history and exact undo/redo assertions remain unchanged.",
+    "waitDocument retains the10000ms timeout and default requestAnimationFrame polling.",
+    "Only read-only timestamps, already-read document predicate results/variable IDs/bindings and Node receipt logging were added in a separate copy. The added instrumentation may affect scheduling; it was never applied to the published or full-run source."
+  ],
+  "predicateResult": {
+    "all9WaitsTrueOnFirstEvaluation": true,
+    "aliasDelete": {
+      "id": 9,
+      "predicate": "(doc) => !doc.variables[102]",
+      "nodeBeforeWallMs": 1792682684416,
+      "evaluations": 1,
+      "first": {
+        "nodeReceiptWallMs": 1792682684420,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 9,
+          "startedWallMs": 1792682684418,
+          "startedPerformanceMs": 59148.29999999702,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682684419,
+          "finishedPerformanceMs": 59148.599999997765,
+          "result": true,
+          "variableIds": [
+            "100",
+            "101"
+          ],
+          "node2Bindings": {}
+        }
+      },
+      "last": {
+        "nodeReceiptWallMs": 1792682684420,
+        "phase": "browser-predicate",
+        "data": {
+          "id": 9,
+          "startedWallMs": 1792682684418,
+          "startedPerformanceMs": 59148.29999999702,
+          "timeOrigin": 1792682625270.7,
+          "finishedWallMs": 1792682684419,
+          "finishedPerformanceMs": 59148.599999997765,
+          "result": true,
+          "variableIds": [
+            "100",
+            "101"
+          ],
+          "node2Bindings": {}
+        }
+      },
+      "nodeEndPhase": "node-wait-resolved",
+      "nodeDurationMs": 6
+    }
+  },
+  "resources": {
+    "sampleCount": 37,
+    "baselineMemory": 4575178752,
+    "peakMemory": 8437272576,
+    "finalMemory": 8337711104,
+    "memoryLimit": 8589934592,
+    "baselineEvents": {
+      "low": 0,
+      "high": 0,
+      "max": 9169512,
+      "oom": 18,
+      "oom_kill": 12,
+      "oom_group_kill": 0
+    },
+    "finalEvents": {
+      "low": 0,
+      "high": 0,
+      "max": 9169512,
+      "oom": 18,
+      "oom_kill": 12,
+      "oom_group_kill": 0
+    },
+    "peakOwnedRssBytes": 1556766720
+  },
+  "conclusion": "Focused pass did not reproduce the prior scheduling stall. It does not establish full-run success or identify the root cause, and it does not justify a production or polling change.",
+  "files": {
+    "report/report.json": {
+      "path": "/tmp/ferrodesign-authoring-diagnostic-f2bb1d61-9b313a0caa46/report/report.json",
+      "bytes": 214299,
+      "sha256": "5742e0e84fe8db7a00b8f96138866479791cc0313feec0fecc6757dec27729f3"
+    },
+    "diagnostic-source.json": {
+      "path": "/tmp/ferrodesign-authoring-diagnostic-f2bb1d61-9b313a0caa46/diagnostic-source.json",
+      "bytes": 860,
+      "sha256": "384b433e39449833888bb1721c9d49755702339c42bf854d1fcdd0f25f8f0f50"
+    },
+    "instrumentation.diff": {
+      "path": "/tmp/ferrodesign-authoring-diagnostic-f2bb1d61-9b313a0caa46/instrumentation.diff",
+      "bytes": 3050,
+      "sha256": "b186fa711b69bc2cc3d05ba66dd2b853491623f20e856fa12c30f7ca626c4583"
+    },
+    "predicates.jsonl": {
+      "path": "/tmp/ferrodesign-authoring-diagnostic-f2bb1d61-9b313a0caa46/predicates.jsonl",
+      "bytes": 4899,
+      "sha256": "597be80732d9ffe611e0dd29ba0a8747ca1f71569760c144dcae273bdec36825"
+    },
+    "resources.jsonl": {
+      "path": "/tmp/ferrodesign-authoring-diagnostic-f2bb1d61-9b313a0caa46/resources.jsonl",
+      "bytes": 126435,
+      "sha256": "7fbef032460a8185ece02268359a8a46925078a6c3ff23c4910b65247d87332b"
+    },
+    "terminal.json": {
+      "path": "/tmp/ferrodesign-authoring-diagnostic-f2bb1d61-9b313a0caa46/terminal.json",
+      "bytes": 5091,
+      "sha256": "0b5f306f55d9de44be8682132090a1effc3ca891c6a3c365d3e7ea58f45ba7f9"
+    },
+    "diagnostic-summary.json": {
+      "path": "/tmp/ferrodesign-authoring-diagnostic-f2bb1d61-9b313a0caa46/diagnostic-summary.json",
+      "bytes": 16398,
+      "sha256": "759989fefeb58e2af781efd2ce0cf560eff1bc9d9f6cc99698b80e6c0e5a5827"
+    },
+    "browser.log": {
+      "path": "/tmp/ferrodesign-authoring-diagnostic-f2bb1d61-9b313a0caa46/browser.log",
+      "bytes": 2878,
+      "sha256": "96c89cbdda36926cb131c5eaf9699966e46823cf981febca32ad30b3d0d65397"
+    },
+    "run-diagnostic.py": {
+      "path": "/tmp/ferrodesign-authoring-diagnostic-f2bb1d61-9b313a0caa46/run-diagnostic.py",
+      "bytes": 3433,
+      "sha256": "dfe27f1e2f7eab3715cbcf42ad84bb1d95a028f39de577d6da59a715dc542160"
+    }
+  }
+}

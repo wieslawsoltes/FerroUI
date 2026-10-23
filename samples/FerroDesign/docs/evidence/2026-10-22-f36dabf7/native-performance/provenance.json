@@ -1,0 +1,68 @@
+{
+  "repo": "wieslawsoltes/FerroUI",
+  "sourceSha": "f36dabf795f9e7b42ada46e34878b3ae5fd50697",
+  "workflowRunId": 39765407889,
+  "workflowRunUrl": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39765407889",
+  "workflowName": "FerroDesign browser",
+  "jobId": 119783951316,
+  "jobName": "Native validation",
+  "jobUrl": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39765407889/job/119783951316",
+  "jobConclusion": "success",
+  "performanceStep": {
+    "number": 9,
+    "name": "Compare scoped editing, history and serialization costs",
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "command": "cargo run --locked --release -p ferrodesign-core --example performance -- 10000 > native-report/performance.json",
+  "origin": "decoded GitHub Actions job log",
+  "extractionAtUtc": "2026-10-22 11:18:33 UTC",
+  "extraction": {
+    "rawStepLines": [
+      824,
+      1152
+    ],
+    "jsonLines": [
+      839,
+      1152
+    ],
+    "transform": "Removed GitHub timestamp prefixes and ANSI escape sequences from JSON lines; kept JSON formatting and numeric values. Raw supporting step text retains timestamps and decoded log text."
+  },
+  "artifactDownloaded": false,
+  "artifactByteIdentityClaimed": false,
+  "files": {
+    "performance": "performance-extracted-log.json",
+    "supportingStep": "performance-step.log"
+  },
+  "validation": {
+    "schemaVersion5": true,
+    "nativeSameProcess": true,
+    "releaseBuild": true,
+    "nodes10000": true,
+    "equivalentDocumentsAndHistory": true,
+    "equivalentSerializationRoundTrip": true,
+    "equivalentComponentDocumentsAndStableIds": true,
+    "exactComponentHistoryRoundTrip": true,
+    "componentNodes10000": true,
+    "denseLayoutNodes10000": true,
+    "finiteNonnegativeTimings": true
+  },
+  "scope": "Paired native engine measurements from one release process; does not measure browser events, GPU throughput or display frame rate.",
+  "fileChecksums": {
+    "performance-extracted-log.json": {
+      "bytes": 7493,
+      "sha256": "21c34a563a17f290ae3ab9eb2aa0f8e911c03d524dfcba411bed4f82fa87f578",
+      "matchesKnownPreLossDigest": true
+    },
+    "performance-step.log": {
+      "bytes": 17829,
+      "sha256": "5ff6dc4f2799030ce9edeef66f07ffb6a7a3094d703ca3a66ef6bb0c9ba8fb31",
+      "matchesKnownPreLossDigest": true
+    }
+  },
+  "workspaceRecovery": {
+    "method": "Reconstructed from preserved session copy of the decoded completed GitHub Actions native job log after scratch workspace loss.",
+    "performanceAndStepBytes": "Both restored files match the known pre-loss SHA256 digests exactly.",
+    "provenanceFile": "Regenerated from original stored provenance metadata with restored checksums; byte identity with the prior provenance.json is not claimed."
+  }
+}

@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+  "workflowRunId": 39799180117,
+  "browserJobId": 119894677332,
+  "workflowUrl": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39799180117",
+  "evidenceArchive": "successful-ci-browser-log.zip",
+  "decodedLog": {
+    "member": "browser-job-119894677332.log",
+    "bytes": 172150,
+    "sha256": "7f8a311ddad46493a6dea336bafb4d78153c0ea06178bff7680b77f80217df53"
+  },
+  "record": "Native text-panning observations, derived from rounded successful CI log lines",
+  "apiStep": {
+    "number": 12,
+    "name": "Measure native text panning in both browser surfaces",
+    "status": "completed",
+    "conclusion": "success",
+    "startedAt": "2026-10-22T16:41:27Z",
+    "completedAt": "2026-10-22T16:42:49Z"
+  },
+  "command": {
+    "decodedLogLine": 1557,
+    "value": "node tests/text-render-benchmark.mjs 2>&1 | tee browser-report/text-render-benchmark.log"
+  },
+  "observations": [
+    {
+      "requestedMode": "Software2D",
+      "medianMsRounded": 14.28,
+      "p95MsRounded": 20.62,
+      "measuredObservations": 36,
+      "decodedLogLine": 1567,
+      "rawTimestampedLogLine": "2026-10-22T16:41:36.0350679Z f2bb1d618843bf777b76859d2e06bf361bef009b Software2D: 14.28 ms median / 20.62 ms p95 (36 native pan observations)"
+    },
+    {
+      "requestedMode": "WebGL2",
+      "medianMsRounded": 20.3,
+      "p95MsRounded": 1366.94,
+      "measuredObservations": 36,
+      "decodedLogLine": 1568,
+      "rawTimestampedLogLine": "2026-10-22T16:42:19.7080717Z f2bb1d618843bf777b76859d2e06bf361bef009b WebGL2: 20.30 ms median / 1366.94 ms p95 (36 native pan observations)"
+    }
+  ],
+  "precision": "The log prints median and p95 to two decimal places via toFixed(2). Raw sample values and full-precision statistics were not retrieved.",
+  "exactMethodSource": {
+    "path": "samples/FerroDesign/tests/text-render-benchmark.mjs",
+    "commit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+    "gitBlob": "0c33e585e3a9224aaf6394cf3d9392331c6831d9",
+    "bytes": 19627,
+    "sha256": "b7fcfe0aae8d16ab13a48c8992254fbf5889f5802737a5abb579219d05f8d3c7",
+    "workingFileByteEqualToExactCommit": true,
+    "sourceUrl": "https://github.com/wieslawsoltes/FerroUI/blob/f2bb1d618843bf777b76859d2e06bf361bef009b/samples/FerroDesign/tests/text-render-benchmark.mjs",
+    "lineReferences": {
+      "viewport": 25,
+      "countsAndSeed": 26,
+      "statistics": [
+        38,
+        43
+      ],
+      "fixture": [
+        48,
+        73
+      ],
+      "methodAndLimitations": [
+        106,
+        111
+      ],
+      "requestedSwiftShader": 134,
+      "measuredInterval": [
+        191,
+        207
+      ],
+      "warmupAndMeasuredLoops": [
+        209,
+        219
+      ],
+      "postconditionsAndPrintedRoundedResult": [
+        221,
+        227
+      ]
+    }
+  },
+  "workload": {
+    "visibleLabels": 150,
+    "columns": 5,
+    "rows": 30,
+    "font": "Inter",
+    "fontSize": 12.75,
+    "fontStyles": [
+      "regular",
+      "bold",
+      "italic",
+      "bold italic"
+    ],
+    "fractionalPositions": true,
+    "ligatures": "liga/clig/calt disabled",
+    "seed": 1332896361,
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    },
+    "deviceScaleFactor": 1,
+    "actualRenderedGlyphCount": null,
+    "glyphCountLimitation": "Not exposed by the bridge; input character counts are not substituted for actual shaped/drawn glyph totals."
+  },
+  "sampling": {
+    "warmupObservationsPerMode": 12,
+    "measuredObservationsPerMode": 36,
+    "interaction": "Real middle-button pointer panning",
+    "medianDefinition": "Average of the two middle sorted durations for the even 36-sample set.",
+    "p95Definition": "Nearest-rank sorted duration at ceil(sampleCount * 0.95), using one-based rank.",
+    "modeOrder": [
+      "Software2D",
+      "WebGL2"
+    ],
+    "orderRandomized": false
+  },
+  "measurement": {
+    "start": "Node-side performance.now immediately before Playwright mouse.move.",
+    "end": "Node-side performance.now after waitForFunction observes a larger native renderedFrames counter and the expected camera position.",
+    "included": [
+      "Playwright input dispatch",
+      "browser automation protocol transport",
+      "native input handling and work until the observed frame counter advances",
+      "bridge state serialization and parsing used by the wait predicate",
+      "browser and host scheduling"
+    ],
+    "subsequentAnimationCallbacks": "Two requestAnimationFrame callbacks form a separately recorded settling observation; those settling metrics were not printed or retrieved here.",
+    "isFpsMeasurement": false,
+    "isIsolatedRendererTiming": false,
+    "isGpuCompletionTiming": false,
+    "speedThresholdAsserted": false
+  },
+  "rendererEvidence": {
+    "sourceAssertsRenderer": "FerroUI Vello",
+    "sourceAssertsRequestedSurface": true,
+    "webglBackendRequestedBySource": "ANGLE / SwiftShader",
+    "actualBenchmarkDeviceStringRead": false,
+    "hardwareGpuThroughputClaim": false
+  },
+  "sourceEnforcedPostconditionsBeforePrinting": [
+    "Every label remains visible during each measured pan.",
+    "Panning preserves the authored document revision and final exported document hash.",
+    "Render panic, page error, and console error arrays are asserted empty before the successful line is printed."
+  ],
+  "verificationLimit": {
+    "officialBenchmarkJsonRead": false,
+    "rawSamplesRead": false,
+    "runtimeBuildManifestRead": false,
+    "originalBenchmarkErrorArraysRead": false,
+    "officialValidationZipDownloaded": false,
+    "officialValidationZipCrcVerified": false,
+    "explanation": "The two rounded log lines and the exact-commit method source are verified. Original benchmark JSON, sample arrays, runtime fingerprints and device details remain unavailable because artifact bytes were not downloaded."
+  },
+  "interpretation": "The observed WebGL2 p95 is 1366.94 ms on this CI workload. These results do not establish uniformly low browser latency, physical-GPU throughput, FPS, or a speedup over another build."
+}

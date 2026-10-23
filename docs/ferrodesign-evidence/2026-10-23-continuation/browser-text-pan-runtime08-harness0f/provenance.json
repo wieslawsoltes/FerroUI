@@ -1,0 +1,61 @@
+{
+  "runtime_commit": "08e29e4f530c0ae65f6e2ac072f381605e23ed0c",
+  "harness_commit": "0f0732784bd6fdf1cb2477a61dd332d9a007fec2",
+  "browser": "156.0.8078.4",
+  "playwright": "1.64.1",
+  "node": "24.19.0",
+  "exit_code": 1,
+  "frozen_dependency_files_verified_before_and_after": 6,
+  "source_snapshot": "Exact git-object bytes; separate from subsequent repository edits.",
+  "scope": "Single shared-host headless run with trace diagnostics enabled; native WASM app. No hardware-GPU throughput or FPS claim.",
+  "files": {
+    "report.json": {
+      "bytes": 481638,
+      "sha256": "6ad35e76c8bcc5f937a10acd08c06984878653e66f904a4d7c88b7bdef568cca",
+      "archive": "report.json.gz",
+      "archive_sha256": "7180763a0c98091d9a5e9b598f81c1b1b443fc3913c39d9dc84df24a493acc25"
+    },
+    "current-WebGL2-pan-trace.json": {
+      "bytes": 2739494,
+      "sha256": "5fb1aefbc1c5a239892f608e6cc19a7caf6386f0800fb18917b0ecfdc96074b4",
+      "archive": "current-WebGL2-pan-trace.json.gz",
+      "archive_sha256": "3865a14d6b7b2f5bc83976deeaa7a06d23b5cab8a46eb2fa4584117711fdc925"
+    },
+    "current-WebGL2-pan-trace-summary.json": {
+      "bytes": 198822,
+      "sha256": "3281ff32b2bc32b12aa5e9acba9ceab97ad77bc0b6d942982aa44e461777788c",
+      "archive": "current-WebGL2-pan-trace-summary.json.gz",
+      "archive_sha256": "663499a6b3c5a340277949289d23940392dee18b9dd8f666d8667d43daa9edce"
+    },
+    "fixture.json": {
+      "bytes": 99251,
+      "sha256": "adaa9a7e4d2a10fb3c96fce28de8a1dfe58c75c13cc8b5cb4baec46a97a26492",
+      "archive": "fixture.json.gz",
+      "archive_sha256": "73de84020ce2ce2e5f79a51d4b4178e0a1eaa0a09b4116f56cd8441d59e1f561"
+    }
+  },
+  "browser_shutdown": {
+    "reason": "Text benchmark finished",
+    "processId": 144265,
+    "status": "closed",
+    "clientDisconnectAttempted": true,
+    "clientDisconnectCompleted": true,
+    "clientDisconnected": true,
+    "gracefulCloseCompleted": true,
+    "forcedKillAttempted": false,
+    "directKillAttempted": false,
+    "processExit": {
+      "observed": true,
+      "code": 0,
+      "signal": null
+    },
+    "errors": []
+  },
+  "owned_process_exit_verified": true,
+  "favicon_evidence": {
+    "source": "Software2D editor Playwright trace, console record",
+    "url": "http://127.0.0.1:39649/favicon.ico",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "note": "The same missing-root-icon message is preserved in the benchmark Software2D console error; its strict assertion was not changed."
+  }
+}

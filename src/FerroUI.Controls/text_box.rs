@@ -1,12 +1,13 @@
-use crate::presenters::TextPresenter;
+use crate::presenters::{TextPresenter, TextStyleOverrides};
+use ferroui_base::media::text_formatting::TextParagraphStyles;
 use crate::primitives::{
     ScrollBarVisibility, TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl,
 };
-use crate::text_box_text_input_method_client::TextBoxTextInputMethodClient;
+use crate::text_box_text_input_method_client::{PreeditSelectionError, TextBoxTextInputMethodClient};
 use crate::utils::{ClipboardHelper, IUndoRedoHost, PrimarySelectionHelper, StringUtils, UndoRedoHelper};
 use crate::{
     Application, Border, ContentControl, ControlImpl, Decorator, PastingFromClipboardEventArgs, ScrollViewer,
-    SelectableTextBlock, TextBlock, TextChangedEventArgs, TextChangingEventArgs, TopLevel,
+    SelectableTextBlock, TextBlock, TextBoxTextChange, TextChangedEventArgs, TextChangingEventArgs, TopLevel,
 };
 use ferroui_base::input::platform::{ClipboardError, ClipboardExtensions, ClipboardType, IClipboard};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
@@ -45,28 +46,9 @@ use ferroui_base::{
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
 
-/// Stores the state information for the available actions of the undo/redo
-/// helper.
-///
-/// Two states are equal when their texts are: the caret position does not
-/// take part in the comparison.
-#[derive(Clone, Debug)]
-pub(crate) struct UndoRedoState {
-    text: Option<String>,
-    caret_position: i32,
-}
-
-impl UndoRedoState {
-    fn new(text: Option<String>, caret_position: i32) -> Self {
-        Self { text, caret_position }
-    }
-}
-
-impl PartialEq for UndoRedoState {
-    fn eq(&self, other: &Self) -> bool {
-        self.text == other.text
-    }
-}
+#[path = "text_box_history.rs"]
+mod text_box_history;
+use text_box_history::UndoRedoState;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum TextMutationKind {
@@ -107,6 +89,9 @@ pub struct TextBox {
     undo_redo_host: RefCell<Option<Rc<dyn IUndoRedoHost<UndoRedoState>>>>,
     is_undoing_redoing: Cell<bool>,
     text_mutation_kind: Cell<TextMutationKind>,
+    native_text_change: RefCell<Option<TextBoxTextChange>>,
+    text_change_generation: Cell<u64>,
+    text_undo_state: RefCell<Option<Rc<dyn Any>>>,
     // Coercion runs before the new value is committed, so a snapshot taken there would capture the old text.
     needs_undo_redo_snapshot_after_text_change: Cell<bool>,
     can_cut: Cell<bool>,
@@ -222,6 +207,7 @@ impl FerroObjectImpl for TextBox {
         let property = change.property();
 
         if property == Self::text_property().as_property() {
+            this.text_change_generation.set(this.text_change_generation.get().wrapping_add(1));
             // Do not expose a selection with only one endpoint coerced to the new text.
             let _change = this.im_client.begin_change();
 
@@ -234,7 +220,8 @@ impl FerroObjectImpl for TextBox {
             this.coerce_value(Self::selection_start_property().as_property());
             this.coerce_value(Self::selection_end_property().as_property());
 
-            this.raise_text_change_events();
+            let (old_text, new_text) = change.get_old_and_new_value::<Option<String>>();
+            this.raise_text_change_events(old_text.as_deref().unwrap_or_default(), new_text.as_deref().unwrap_or_default());
 
             this.update_pseudoclasses();
             this.update_command_states();
@@ -274,20 +261,8 @@ impl VisualImpl for TextBox {
             } else if this.is_inactive_selection_highlight_enabled() {
                 presenter.set_show_selection_highlight(true);
             }
-
-            let weak = this.to_ref().downgrade();
-            let subscription = presenter.property_changed(move |e| {
-                if let Some(this) = weak.upgrade() {
-                    this.presenter_property_changed(e);
-                }
-            });
-
-            let previous = this.presenter_property_changed.borrow_mut().replace(subscription);
-
-            if let Some(previous) = previous {
-                previous.dispose();
-            }
         }
+        this.subscribe_presenter_property_changes(this.presenter().as_ref());
     }
 
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
@@ -295,19 +270,44 @@ impl VisualImpl for TextBox {
 
         if let Some(presenter) = this.presenter() {
             presenter.hide_caret();
-
-            let subscription = this.presenter_property_changed.borrow_mut().take();
-
-            if let Some(subscription) = subscription {
-                subscription.dispose();
-            }
         }
+        this.subscribe_presenter_property_changes(None);
 
         this.im_client.set_presenter(None, None);
     }
 }
 
 impl LayoutableImpl for TextBox {
+    fn apply_template(this: &Self) {
+        // The base class does not raise on_apply_template when a null template
+        // removes the old subtree. Stop listening before that subtree detaches.
+        // While logically detached it deliberately retains the old template;
+        // preserve that behavior until a real removal can take place.
+        let removing = this.template().is_none() && this.is_attached_to_logical_tree();
+        if removing {
+            this.subscribe_presenter_property_changes(None);
+        }
+        Self::parent_apply_template(this);
+        if removing && this.template().is_none() && this.visual_children_count() == 0 {
+            let previous = this.presenter.borrow_mut().take();
+            this.scroll_viewer.borrow_mut().take();
+            if previous.is_some() {
+                // Keep the old presenter alive until the client has restored
+                // its confirmed text/selection and cleared provisional state.
+                // Drop the cached references before synchronous notifications,
+                // so callbacks may safely install a different template.
+                this.im_client.set_presenter(None, None);
+                if this.is_attached_to_visual_tree() {
+                    if let Some(current) = this.presenter() {
+                        // A restoration callback installed a new template.
+                        // The outer detach must not leave its client cleared.
+                        this.im_client.set_presenter(Some(&current), Some(&this.to_ref()));
+                    }
+                }
+            }
+        }
+    }
+
     fn measure_override(this: &Self, available_size: Size) -> Size {
         if let Some(scroll_viewer) = this.scroll_viewer() {
             let mut max_height = f64::INFINITY;
@@ -381,6 +381,10 @@ impl InputElementImpl for TextBox {
     fn on_lost_focus(this: &Self, e: &FocusChangedEventArgs) {
         Self::parent_on_lost_focus(this, e);
 
+        // Restore a still-pending composition before applying normal blur
+        // selection policy or notifying application LostFocus handlers.
+        this.im_client.set_presenter(None, None);
+
         if !this.context_flyout().is_some_and(|flyout| flyout.is_open())
             && !this.context_menu().is_some_and(|menu| menu.is_open())
         {
@@ -401,8 +405,6 @@ impl InputElementImpl for TextBox {
         if let Some(presenter) = &presenter {
             presenter.hide_caret();
         }
-
-        this.im_client.set_presenter(None, None);
 
         if let Some(presenter) = &presenter {
             if !this.is_inactive_selection_highlight_enabled() {
@@ -621,7 +623,10 @@ impl InputElementImpl for TextBox {
 
                                 remove_range(&mut text, start, end - start);
 
-                                this.set_text_from_edit(Some(String::from_utf16_lossy(&text)));
+                                if !this.set_text_from_range_edit(Some(String::from_utf16_lossy(&text)), start..end, 0) {
+                                    e.set_handled(true);
+                                    return;
+                                }
 
                                 this.set_current_value(Self::caret_index_property(), start);
 
@@ -655,7 +660,10 @@ impl InputElementImpl for TextBox {
 
                                 remove_range(&mut text, start, end - start);
 
-                                this.set_text_from_edit(Some(String::from_utf16_lossy(&text)));
+                                if !this.set_text_from_range_edit(Some(String::from_utf16_lossy(&text)), start..end, 0) {
+                                    e.set_handled(true);
+                                    return;
+                                }
                             }
                         }
 
@@ -1050,6 +1058,12 @@ impl TemplatedControlImpl for TextBox {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         let presenter = e.name_scope().get_as::<TextPresenter>("PART_TextPresenter");
         *this.presenter.borrow_mut() = Some(presenter.clone());
+        // Templates are normally applied during layout, after the TextBox
+        // itself has attached. Also replace the subscription when a live
+        // control changes template, so an obsolete presenter cannot edit it.
+        this.subscribe_presenter_property_changes(
+            this.is_attached_to_visual_tree().then_some(&presenter),
+        );
 
         let scroll_viewer = e.name_scope().find_as::<ScrollViewer>("PART_ScrollViewer");
         *this.scroll_viewer.borrow_mut() = scroll_viewer;
@@ -1077,8 +1091,15 @@ impl TextBoxImpl for TextBox {
                 TextMutationKind::InternalSynchronization => {}
 
                 TextMutationKind::ExternalReplacement => {
-                    this.clear_undo_redo();
-                    this.needs_undo_redo_snapshot_after_text_change.set(true);
+                    // A newly applied TwoWay template binding can echo the
+                    // current Text before the property store checks equality.
+                    // That is not a replacement: clearing history here would
+                    // discard redo, and the unchanged value would leave the
+                    // deferred snapshot flag for an unrelated later change.
+                    if this.text() != value {
+                        this.clear_undo_redo();
+                        this.needs_undo_redo_snapshot_after_text_change.set(true);
+                    }
                 }
             }
         }
@@ -1093,16 +1114,14 @@ struct TextBoxUndoRedoHost(WeakRef<TextBox>);
 impl IUndoRedoHost<UndoRedoState> for TextBoxUndoRedoHost {
     fn undo_redo_state(&self) -> UndoRedoState {
         match self.0.upgrade() {
-            Some(text_box) => UndoRedoState::new(text_box.text(), text_box.caret_index()),
+            Some(text_box) => text_box.capture_text_history_state(),
             None => UndoRedoState::new(None, 0),
         }
     }
 
     fn set_undo_redo_state(&self, value: UndoRedoState) {
         if let Some(text_box) = self.0.upgrade() {
-            text_box.set_current_value(TextBox::text_property(), value.text);
-            text_box.set_current_value(TextBox::caret_index_property(), value.caret_position);
-            text_box.clear_selection();
+            text_box.restore_text_history_state(value);
         }
     }
 
@@ -1299,6 +1318,22 @@ ferroui_base::ferro_properties! { impl TextBox, also [
                     .with_default_binding_mode(BindingMode::TwoWay)
                     .with_enable_data_validation(true),
             )
+        }
+    );
+
+    ferro_property!(
+        /// Defines the `TextStyleOverrides` property. Control templates bind
+        /// this to the presenter's property, just like `Text` and `TextWrapping`.
+        pub fn text_style_overrides_property() -> StyledProperty<Option<TextStyleOverrides>> {
+            FerroProperty::register::<TextBox, _>("TextStyleOverrides", None)
+        }
+    );
+
+    ferro_property!(
+        /// Defines immutable UTF-16 paragraph formatting. Templates bind this
+        /// to TextPresenter, keeping rendering, IME and caret geometry shared.
+        pub fn text_paragraph_styles_property() -> StyledProperty<Option<TextParagraphStyles>> {
+            FerroProperty::register::<TextBox, _>("TextParagraphStyles", None)
         }
     );
 
@@ -1514,6 +1549,9 @@ impl TextBox {
             undo_redo_host: RefCell::new(None),
             is_undoing_redoing: Cell::new(false),
             text_mutation_kind: Cell::new(TextMutationKind::ExternalReplacement),
+            native_text_change: RefCell::new(None),
+            text_change_generation: Cell::new(0),
+            text_undo_state: RefCell::new(None),
             needs_undo_redo_snapshot_after_text_change: Cell::new(false),
             can_cut: Cell::new(false),
             can_copy: Cell::new(false),
@@ -1747,6 +1785,16 @@ impl TextBox {
         self.set_value(Self::text_property(), value.map(str::to_owned))
     }
 
+    /// Whether the input method has supplied pending preedit text.
+    ///
+    /// An empty preedit update is still pending. The input method clears this
+    /// state explicitly with `None`, or it is cleared when the client detaches
+    /// from its presenter. Unlike the presenter's visual preedit, this state
+    /// survives selection and caret synchronization during `TextChanging`.
+    pub fn is_composing_text(&self) -> bool {
+        self.im_client.has_pending_preedit()
+    }
+
     fn coerce_text_callback(sender: &FerroObject, value: Option<String>) -> Option<String> {
         match sender.downcast_ref::<TextBox>() {
             Some(text_box) => text_box.coerce_text(value),
@@ -1788,6 +1836,29 @@ impl TextBox {
 
     pub fn set_vertical_content_alignment(&self, value: VerticalAlignment) {
         self.set_value(Self::vertical_content_alignment_property(), value)
+    }
+
+    /// Complete run properties at UTF-16 ranges of `Text`. Applications that
+    /// own rich documents should update the immutable collection in
+    /// `TextChanging` after rebasing their committed ranges. IME preedit remains
+    /// a temporary presentation and does not alter the supplied collection.
+    pub fn text_style_overrides(&self) -> Option<TextStyleOverrides> {
+        self.get_value(Self::text_style_overrides_property())
+    }
+
+    pub fn set_text_style_overrides(&self, value: Option<TextStyleOverrides>) {
+        self.set_value(Self::text_style_overrides_property(), value)
+    }
+
+    /// Whole-paragraph styles at UTF-16 positions. Rebase committed ranges in
+    /// TextChanging as with TextStyleOverrides; provisional IME text is remapped
+    /// automatically without mutating this collection.
+    pub fn text_paragraph_styles(&self) -> Option<TextParagraphStyles> {
+        self.get_value(Self::text_paragraph_styles_property())
+    }
+
+    pub fn set_text_paragraph_styles(&self, value: Option<TextParagraphStyles>) {
+        self.set_value(Self::text_paragraph_styles_property(), value)
     }
 
     /// The text alignment of the text box.
@@ -2084,6 +2155,22 @@ impl TextBox {
         })
     }
 
+    fn subscribe_presenter_property_changes(&self, presenter: Option<&Ref<TextPresenter>>) {
+        let previous = self.presenter_property_changed.borrow_mut().take();
+        if let Some(previous) = previous {
+            previous.dispose();
+        }
+        if let Some(presenter) = presenter {
+            let weak = self.to_ref().downgrade();
+            let subscription = presenter.property_changed(move |e| {
+                if let Some(this) = weak.upgrade() {
+                    this.presenter_property_changed(e);
+                }
+            });
+            *self.presenter_property_changed.borrow_mut() = Some(subscription);
+        }
+    }
+
     fn presenter_property_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {
         if e.property() == TextPresenter::preedit_text_property().as_property() {
             let (old_value, new_value) = e.get_old_and_new_value::<Option<String>>();
@@ -2093,7 +2180,10 @@ impl TextBox {
             {
                 self.pseudo_classes().set(":empty", false);
 
-                self.delete_selection();
+                // Removing the selection only makes room for the IME's
+                // provisional visual. Cancellation restores it; neither side
+                // may create an undo checkpoint or discard an existing redo.
+                self.delete_selection_with_kind(TextMutationKind::InternalSynchronization);
             }
         }
     }
@@ -2148,7 +2238,9 @@ impl TextBox {
 
             let text = String::from_utf16_lossy(&text);
 
-            self.set_text_from_edit(Some(text.clone()));
+            if !self.set_text_from_range_edit(Some(text.clone()), insert_at as i32..insert_at as i32 + selection_length, input_length) {
+                return;
+            }
 
             self.clear_selection();
 
@@ -2433,7 +2525,7 @@ impl TextBox {
 
     /// Clears the text in the text box.
     pub fn clear(&self) {
-        self.set_text_from_edit(Some(String::new()))
+        self.set_text_from_range_edit(Some(String::new()), 0..self.text_length(), 0);
     }
 
     fn move_horizontal(&self, direction: i32, whole_word: bool, is_selecting: bool, move_caret_position: bool) {
@@ -2636,6 +2728,85 @@ impl TextBox {
     /// Deletes the selected text. Returns whether there was a selection (or
     /// the text box is read-only).
     pub(crate) fn delete_selection(&self) -> bool {
+        self.delete_selection_with_kind(TextMutationKind::Edit)
+    }
+
+    /// Makes room for the first IME clause before its visual is published.
+    /// Synchronous TextChanging, caret and selection observers may replace the
+    /// input owner, text or selection; stop before applying stale writes.
+    pub(crate) fn prepare_preedit_selection(&self, owns_update: impl Fn() -> bool) -> Result<u64, PreeditSelectionError> {
+        if !owns_update() {
+            return Err(PreeditSelectionError::Superseded);
+        }
+        if self.is_read_only() {
+            return Ok(self.text_change_generation());
+        }
+        let change = self.im_client.begin_change();
+        let (start, end) = self.get_selection_range();
+        let selection = || (self.caret_index(), self.selection_start(), self.selection_end());
+        let original_selection = selection();
+        if start != end {
+            let mut text = self.text_utf16();
+            remove_range(&mut text, start, end - start);
+            if !self.set_text_from_range_change(
+                Some(String::from_utf16_lossy(&text)), start..end, 0,
+                TextMutationKind::InternalSynchronization,
+            ) {
+                return Err(PreeditSelectionError::TextChanged);
+            }
+            // Text automatically coerces the old caret and endpoints before
+            // TextChanging. A coerced caret collapses both endpoints; equal
+            // coerced endpoints move the caret. Anything else is a host-owned
+            // selection change, which this older clause must not overwrite.
+            let caret = Self::coerce_caret_index(self, original_selection.0);
+            let expected = if caret != original_selection.0 {
+                (caret, caret, caret)
+            } else {
+                let start = Self::coerce_caret_index(self, original_selection.1);
+                let end = Self::coerce_caret_index(self, original_selection.2);
+                (if start == end { start } else { caret }, start, end)
+            };
+            if selection() != expected {
+                return Err(PreeditSelectionError::SelectionChanged);
+            }
+        }
+        let generation = self.text_change_generation();
+        let check_current = || {
+            if !owns_update() { Err(PreeditSelectionError::Superseded) }
+            else if self.text_change_generation() != generation { Err(PreeditSelectionError::TextChanged) }
+            else { Ok(()) }
+        };
+        check_current()?;
+        let caret = Self::coerce_caret_index(self, start);
+        let previous_caret = self.caret_index();
+        let previous_end = self.selection_end();
+        self.set_current_value(Self::caret_index_property(), caret);
+        check_current()?;
+        if self.caret_index() != caret {
+            return Err(PreeditSelectionError::SelectionChanged);
+        }
+        if previous_caret == caret {
+            // An unchanged caret does not trigger its normal selection
+            // collapse. Check each explicit endpoint write before continuing.
+            self.set_current_value(Self::selection_start_property(), caret);
+            check_current()?;
+            if selection() != (caret, caret, previous_end) {
+                return Err(PreeditSelectionError::SelectionChanged);
+            }
+            self.set_current_value(Self::selection_end_property(), caret);
+        }
+        // The coalesced SelectionChanged notification can itself cancel the
+        // composition or supply a newer clause/selection. Check after it runs.
+        drop(change);
+        check_current()?;
+        if selection() != (caret, caret, caret) {
+            Err(PreeditSelectionError::SelectionChanged)
+        } else {
+            Ok(generation)
+        }
+    }
+
+    fn delete_selection_with_kind(&self, mutation_kind: TextMutationKind) -> bool {
         if self.is_read_only() {
             return true;
         }
@@ -2649,7 +2820,9 @@ impl TextBox {
 
             remove_range(&mut text, start, end - start);
 
-            self.set_text_from_edit(Some(String::from_utf16_lossy(&text)));
+            if !self.set_text_from_range_change(Some(String::from_utf16_lossy(&text)), start..end, 0, mutation_kind) {
+                return true;
+            }
 
             if let Some(presenter) = self.presenter() {
                 presenter.move_caret_to_text_position(start, false);
@@ -2707,6 +2880,27 @@ impl TextBox {
     pub(crate) fn set_text_from_edit(&self, value: Option<String>) {
         self.set_text_core(value, TextMutationKind::Edit)
     }
+
+    fn set_text_from_range_edit(&self, value: Option<String>, replaced: std::ops::Range<i32>, inserted_length: i32) -> bool {
+        self.set_text_from_range_change(value, replaced, inserted_length, TextMutationKind::Edit)
+    }
+
+    fn set_text_from_range_change(&self, value: Option<String>, replaced: std::ops::Range<i32>, inserted_length: i32, mutation_kind: TextMutationKind) -> bool {
+        let generation = self.text_change_generation.get();
+        let change = TextBoxTextChange::new(self.text().unwrap_or_default(), replaced, inserted_length);
+        let previous = self.native_text_change.replace(Some(change));
+        struct Restore<'a>(&'a RefCell<Option<TextBoxTextChange>>, Option<TextBoxTextChange>);
+        impl Drop for Restore<'_> {
+            fn drop(&mut self) { self.0.replace(self.1.take()); }
+        }
+        let _restore = Restore(&self.native_text_change, previous);
+        self.set_text_core(value.clone(), mutation_kind);
+        // Synchronous handlers or subclass coercion may replace the result.
+        // The caller must not overwrite their presenter/selection afterward.
+        self.text_change_generation.get().wrapping_sub(generation) <= 1 && self.text() == value
+    }
+
+    pub(crate) fn text_change_generation(&self) -> u64 { self.text_change_generation.get() }
 
     /// Sets the text as a synchronization of the control with itself: the
     /// undo history is neither extended nor cleared.
@@ -2805,13 +2999,15 @@ impl TextBox {
     /// Raises both the `TextChanging` and `TextChanged` events.
     ///
     /// This must be called after the `Text` property is set.
-    fn raise_text_change_events(&self) {
+    fn raise_text_change_events(&self, previous: &str, next: &str) {
         // Note the following sequence of these events:
         // 1. TextChanging occurs synchronously when text starts to change but before it is rendered.
         //    This occurs after the Text property is set.
         // 2. TextChanged occurs asynchronously after text changes and the new text is rendered.
 
-        let text_changing_event_args = TextChangingEventArgs::with_event(Self::text_changing_event());
+        let change = self.native_text_change.borrow().as_ref()
+            .filter(|change| change.matches(previous, next)).cloned();
+        let text_changing_event_args = TextChangingEventArgs::with_event(Self::text_changing_event()).with_text_change(change);
         self.raise_event(&text_changing_event_args);
 
         let this = self.to_ref();

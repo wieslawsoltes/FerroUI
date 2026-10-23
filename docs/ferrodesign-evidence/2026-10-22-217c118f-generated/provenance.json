@@ -1,0 +1,49 @@
+{
+  "repository": "wieslawsoltes/FerroUI",
+  "source_commit": "217c118f2d7237a025d20f2ef6b2ac196536aacb",
+  "source_tree": "d59fb3da98395933ce66e7ce56ac4d5ce87b6f79",
+  "event_sha": "217c118f2d7237a025d20f2ef6b2ac196536aacb",
+  "ref": "refs/heads/feat/ferrodesign-editor",
+  "run_id": "39838126723",
+  "run_attempt": "1",
+  "run_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39838126723",
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1",
+  "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)",
+  "cargo_lock_sha256": "06fe95f8bd1f42a1811095b6c04bef2f7584529867b7b13ddc0feb7d290a6fa9",
+  "steps": {
+    "rust_paths": "success",
+    "fluent": "success",
+    "simple": "success",
+    "rust_paths_check": "success",
+    "fluent_check": "success",
+    "simple_check": "success"
+  },
+  "all_generators_and_drift_checks_passed": true,
+  "files": {
+    "tests/FerroUI.Markup.Xaml.UnitTests/emitter/rust_paths_check.rs": {
+      "sha256": "d49a6ee8223226223744117e2a7d4db57c829bcbc03451546e38f8b56b8ce050",
+      "source_sha256": "9c2f78e72f590657765df1f5fc5ac4afe34c073dcfadd6206a25521c265c876f",
+      "generator": "rust_paths"
+    },
+    "src/FerroUI.Themes.Fluent/compiled_xaml.rs": {
+      "sha256": "afdb5f128a9df40d7a37f50266acfd07b446ee6133c5ba846dca2d4ad7cfc11f",
+      "source_sha256": "4d1e0ecb14e3caae4c5cdee42ea4391779b8f7cbb01d32ec18121113831207ab",
+      "generator": "fluent"
+    },
+    "src/FerroUI.Themes.Fluent/compiled_xaml.xamlmeta": {
+      "sha256": "347247a773bd7fa91ebc1e53d3d32fea21f4d19e0715f18ba1bb76a349db12c6",
+      "source_sha256": "347247a773bd7fa91ebc1e53d3d32fea21f4d19e0715f18ba1bb76a349db12c6",
+      "generator": "fluent"
+    },
+    "src/FerroUI.Themes.Simple/compiled_xaml.rs": {
+      "sha256": "50ed389afbc314ca643dcbc376a440a3fdfe55b84b9aacf8fede7d837447da91",
+      "source_sha256": "8b3e293d813e7af723193d52d2f9e50ff36de81b96ca591b2d7e2af591fd7e94",
+      "generator": "simple"
+    },
+    "src/FerroUI.Themes.Simple/compiled_xaml.xamlmeta": {
+      "sha256": "04064abfb747ee8750665f2e005d16f1fe5edb770ad560e594bb48a4003f0efa",
+      "source_sha256": "04064abfb747ee8750665f2e005d16f1fe5edb770ad560e594bb48a4003f0efa",
+      "generator": "simple"
+    }
+  }
+}

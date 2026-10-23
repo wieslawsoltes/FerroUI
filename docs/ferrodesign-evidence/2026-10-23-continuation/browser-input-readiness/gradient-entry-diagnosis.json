@@ -1,0 +1,109 @@
+{
+  "runtime": "08e29e4f",
+  "harness": "0f073278",
+  "renderer": "WebGL2",
+  "scope": "Read-only diagnosis of the first native gradient entry; no browser replay or repository changes.",
+  "trace": "/tmp/ferrodesign-e99-browser-08-focused-report/WebGL2-trace.zip",
+  "traceSha256": "99b4d0d9b9eecd504e8d4f31905b0823b10ed88cdc4264d04d50485d0ce8627d",
+  "button": "PaintCanvasGradient1",
+  "beforeClick": {
+    "sceneFrames": 11,
+    "gradientEdit": {
+      "active": false,
+      "axis": null,
+      "fill": null,
+      "gradientKind": null,
+      "handles": [],
+      "hover": null,
+      "node": null,
+      "ring": null,
+      "selected": null
+    },
+    "selection": [
+      2
+    ],
+    "documentRevision": 3,
+    "historyLength": 1
+  },
+  "beforeButton": {
+    "arrangeValid": true,
+    "enabled": true,
+    "focusWithin": false,
+    "focused": false,
+    "height": 30,
+    "measureValid": true,
+    "visible": true,
+    "width": 92,
+    "x": 1001,
+    "y": 366
+  },
+  "click": {
+    "callId": "xvrq@15443",
+    "startMs": 654233.899,
+    "endMs": 654238.745,
+    "x": 1047,
+    "y": 381
+  },
+  "failure": {
+    "sceneFrames": 13,
+    "gradientEdit": {
+      "active": false,
+      "axis": null,
+      "fill": null,
+      "gradientKind": null,
+      "handles": [],
+      "hover": null,
+      "node": null,
+      "ring": null,
+      "selected": null
+    },
+    "modalVisible": true,
+    "canvasFocusWithin": true,
+    "storage": {
+      "phase": "saved",
+      "backend": "indexedDB",
+      "dirty": false,
+      "draftDirty": false,
+      "serializationPending": false,
+      "revision": 95,
+      "sequence": 1,
+      "committedSequence": 1,
+      "characters": 4578,
+      "error": ""
+    },
+    "domFocus": {
+      "tag": "MAIN",
+      "id": "out",
+      "value": null,
+      "selectionStart": null,
+      "selectionEnd": null
+    },
+    "nativeChangedKeys": [
+      "sceneFrames"
+    ]
+  },
+  "entryConditions": {
+    "node2": false,
+    "fill1": false,
+    "gestureInactive": true,
+    "modalClosed": false,
+    "canvasFocus": true
+  },
+  "observations": [
+    "Two trusted wheel requests each scroll 240 pixels. Native button layout y moves from846 to606 to366. Scene counters advance8,9,11. The single requested click is centered in the final native bounds.",
+    "All native fields, selection, history, document revision and chrome diagnostics are unchanged after failure. Only sceneFrames advances11 to13. The stored document has no dirty field draft.",
+    "The screencast still shows the previous scroll position at the sampled frame presented approximately110.712ms before the click. The first sampled frame showing the new position was presented approximately522.597ms after the click.",
+    "Scene notifications correspond to completed compositor batches but are coalesced and do not identify which layout mutation a batch contains. Control bounds use current UI layout; composition hit testing uses server readback matrices.",
+    "Historic DOM pointer events and the native button event source were not recorded. Missed-button routing through an older rendered scene is a strongly supported inference, not an observed native event target."
+  ],
+  "recommendation": "Expose passive native pointerOver (and Button pressed for event evidence), move once to the intended target, wait until the native hover belongs to that button, then perform exactly one down/up entry. Keep the same success predicate, all geometry/history/color assertions, timeouts and tolerances. Do not retry activation.",
+  "sourceReferences": [
+    "samples/FerroDesign/crates/ferrodesign-app/src/shell.rs:wire_scene_diagnostics and state_json/native_bounds",
+    "samples/FerroDesign/crates/ferrodesign-app/src/shell/paints.rs:paint_button",
+    "samples/FerroDesign/crates/ferrodesign-app/src/shell/fields.rs:flush_inspector_drafts",
+    "src/FerroUI.Base/rendering/composition/compositing_renderer.rs:update_core",
+    "src/FerroUI.Base/rendering/composition/composition_target.rs:hit_test_visual",
+    "src/FerroUI.Base/input/mouse_device.rs:mouse_down",
+    "src/FerroUI.Controls/button.rs:on_pointer_pressed/on_pointer_released"
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "recordedAtUtc": "2026-10-22T15:49:58.945061+00:00",
+  "kind": "Derived read-only audit of saved sampler and browser lifecycle",
+  "harnessSourceCommit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+  "rawFiles": {
+    "run-full.py": {
+      "bytes": 3865,
+      "sha256": "7e4cc539eb1acba6d69b44d41976e7338dae75e3ad8bbda443c673c73a7f0cec",
+      "archive": "failed-second-full-browser-report.zip",
+      "pathInArchive": "run-full.py"
+    },
+    "resources.jsonl": {
+      "bytes": 502512,
+      "sha256": "fa210f5fad62d71105459033746d031a49ef491c05466dcf337255e76ca225ab",
+      "archive": "failed-second-full-browser-report.zip",
+      "pathInArchive": "resources.jsonl"
+    }
+  },
+  "processSelection": "The launched Node PID, plus visible /proc command lines containing the recovered chrome-linux64 directory. This is PID/path matching, not descendant traversal or proof of exclusive ownership.",
+  "browserLifecycle": {
+    "browserPid": 226057,
+    "gpuPid": 226087,
+    "sharedAcrossModes": true,
+    "softwareRendererPids": [
+      226146,
+      226157,
+      226158
+    ],
+    "webglRendererPids": [
+      235377,
+      235386,
+      235387
+    ],
+    "softwareRenderersLastSampleUtc": "2026-10-22T15:31:55Z",
+    "webglRenderersFirstSampleUtc": "2026-10-22T15:32:00Z",
+    "sourceContract": "Chromium launches once outside the mode loop. Each mode creates a fresh context. The per-mode finally awaits tracing.stop, swallowing trace-stop errors, then context.close. The outer finally awaits browser.close. Both actual trace archives are readable and renderer replacement is observed."
+  },
+  "reparenting": "Matching helpers with PPID1 are included; reparenting alone does not explain missing RSS. A fallback role label of browser does not mean a separate browser instance.",
+  "measurementLimitations": [
+    "Matching can include another invocation using the same Chrome directory and miss nonmatching, unreadable or namespace-invisible processes.",
+    "Skipped /proc reads are not counted; sampler/services are omitted unless their command matches.",
+    "No PSS, per-PID cgroup identity, anonymous/file/shared RSS breakdown or complete process inventory was recorded.",
+    "RSS sums can double-count shared pages. Non-atomic five-second samples can miss peaks."
+  ],
+  "observations": [
+    {
+      "utc": "2026-10-22T15:38:20Z",
+      "cgroupAnonBytes": 7390818304,
+      "selectedRssSumBytes": 1030680576
+    },
+    {
+      "utc": "2026-10-22T15:39:10Z",
+      "cgroupAnonBytes": 6507683840,
+      "selectedRssSumBytes": 0
+    }
+  ],
+  "conclusion": "The saved samples do not identify the owner of remaining cgroup anonymous memory, establish an application leak, or prove the readiness timeout cause. The later low-anonymous-memory cleanup observation is outside this saved sampler series.",
+  "sourceAndProcessMutations": false
+}

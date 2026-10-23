@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "browser": "156.0.8078.4",
+  "checks": [
+    "Legacy migration and current/previous snapshots commit atomically",
+    "A write request that succeeds before transaction abort is not acknowledged or persisted",
+    "Two real browser tabs cannot overwrite a snapshot loaded at an older revision",
+    "A document exceeding 10 MiB survives a real browser reload without localStorage",
+    "An aborted migration keeps the original localStorage document readable and intact"
+  ],
+  "largeDocument": {
+    "flushed": true,
+    "state": {
+      "phase": "saved",
+      "backend": "indexedDB",
+      "dirty": false,
+      "draftDirty": false,
+      "serializationPending": false,
+      "revision": 5,
+      "sequence": 5,
+      "committedSequence": 5,
+      "characters": 12000042,
+      "error": ""
+    },
+    "characters": 12000042,
+    "saveMs": 61.699999999953434
+  }
+}

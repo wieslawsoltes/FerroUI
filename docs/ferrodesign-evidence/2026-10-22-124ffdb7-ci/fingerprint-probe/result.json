@@ -1,0 +1,24 @@
+{
+  "cargo_version": "cargo 1.99.0 (5f94df478 2026-08-27)\nrelease: 1.99.0\ncommit-hash: 5f94df4789f005f9a352888e8355ffc645b7ed0e\ncommit-date: 2026-08-27\nhost: x86_64-unknown-linux-gnu\nlibgit2: 1.9.6 (sys:0.21.0 vendored)\nlibcurl: 8.21.0-DEV (sys:0.4.90+curl-8.21.0 vendored ssl:OpenSSL/3.6.3)\nssl: OpenSSL 3.6.3 9 Jun 2026\nos: Ubuntu 24.4.0 (noble) [64-bit]\n",
+  "scope": "Isolated dependency-free logging-filter probe only; no FerroUI or cache freshness performance claim.",
+  "results": [
+    {
+      "filter": "cargo::core::compiler::fingerprint=trace",
+      "exit_code": 0,
+      "fingerprint_records": 0,
+      "log_sha256": "d0fe27666b28e2023c04026936d56c435117638396d20d15a404e946c4562ccc",
+      "sample": []
+    },
+    {
+      "filter": "cargo::compiler::fingerprint=trace",
+      "exit_code": 0,
+      "fingerprint_records": 4,
+      "log_sha256": "387ee1dd987d42968e2a275203621e27962b1e4c6d6082ce4be8a5680d9c301c",
+      "sample": [
+        "   0.035594498s DEBUG prepare_target{force=false package_id=ferrodesign-fingerprint-probe v0.0.0 (/workspace/scratch/9b313a0caa46/cargo-fingerprint-probe) target=\"ferrodesign_fingerprint_probe\"}: cargo::compiler::fingerprint: fingerprint at: /workspace/scratch/9b313a0caa46/cargo-fingerprint-probe/target-current/debug/.fingerprint/ferrodesign-fingerprint-probe-5e305fa4c8e6646d/lib-ferrodesign_fingerprint_probe",
+        "   0.035665213s  INFO prepare_target{force=false package_id=ferrodesign-fingerprint-probe v0.0.0 (/workspace/scratch/9b313a0caa46/cargo-fingerprint-probe) target=\"ferrodesign_fingerprint_probe\"}: cargo::compiler::fingerprint: fingerprint error for ferrodesign-fingerprint-probe v0.0.0 (/workspace/scratch/9b313a0caa46/cargo-fingerprint-probe)/Check { test: false }/TargetInner { name_inferred: true, ..: lib_target(\"ferrodesign_fingerprint_probe\", [\"lib\"], \"/workspace/scratch/9b313a0caa46/cargo-fingerprint-probe/src/lib.rs\", Edition2021) }",
+        "   0.035694687s  INFO prepare_target{force=false package_id=ferrodesign-fingerprint-probe v0.0.0 (/workspace/scratch/9b313a0caa46/cargo-fingerprint-probe) target=\"ferrodesign_fingerprint_probe\"}: cargo::compiler::fingerprint:     err: failed to read `/workspace/scratch/9b313a0caa46/cargo-fingerprint-probe/target-current/debug/.fingerprint/ferrodesign-fingerprint-probe-5e305fa4c8e6646d/lib-ferrodesign_fingerprint_probe`"
+      ]
+    }
+  ]
+}

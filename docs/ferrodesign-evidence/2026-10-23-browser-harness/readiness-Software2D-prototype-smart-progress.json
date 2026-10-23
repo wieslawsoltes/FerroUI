@@ -1,0 +1,194 @@
+{
+  "sourcePixel": {
+    "x": 562,
+    "y": 420,
+    "rgba": [
+      255,
+      0,
+      0,
+      255
+    ]
+  },
+  "sourceFrames": {
+    "renderedFrames": 4,
+    "sceneFrames": 6
+  },
+  "durationMs": 2000,
+  "midpointRange": [
+    0.2,
+    0.8
+  ],
+  "midpointTimeoutMs": 10000,
+  "status": "passed",
+  "observation": {
+    "clock": "page performance milliseconds",
+    "polling": "raf",
+    "startedAtMs": 3518,
+    "limit": 240,
+    "samples": [
+      {
+        "observedAtMs": 3535.899999999441,
+        "renderedFrames": 5,
+        "sceneFrames": 6,
+        "presentation": 20,
+        "progress": 0,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3561,
+        "renderedFrames": 5,
+        "sceneFrames": 6,
+        "presentation": 20,
+        "progress": 0,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3563.199999999255,
+        "renderedFrames": 5,
+        "sceneFrames": 6,
+        "presentation": 20,
+        "progress": 0,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3595,
+        "renderedFrames": 6,
+        "sceneFrames": 7,
+        "presentation": 20,
+        "progress": 0.016,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3596.5999999996275,
+        "renderedFrames": 6,
+        "sceneFrames": 7,
+        "presentation": 20,
+        "progress": 0.016,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3632.399999999441,
+        "renderedFrames": 7,
+        "sceneFrames": 7,
+        "presentation": 20,
+        "progress": 0.033,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3654.5999999996275,
+        "renderedFrames": 8,
+        "sceneFrames": 7,
+        "presentation": 20,
+        "progress": 0.051,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3683,
+        "renderedFrames": 9,
+        "sceneFrames": 8,
+        "presentation": 20,
+        "progress": 0.0625,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3707.5,
+        "renderedFrames": 10,
+        "sceneFrames": 8,
+        "presentation": 20,
+        "progress": 0.0765,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3731.2999999998137,
+        "renderedFrames": 11,
+        "sceneFrames": 9,
+        "presentation": 20,
+        "progress": 0.0885,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3755.899999999441,
+        "renderedFrames": 12,
+        "sceneFrames": 9,
+        "presentation": 20,
+        "progress": 0.1005,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3782.5,
+        "renderedFrames": 13,
+        "sceneFrames": 10,
+        "presentation": 20,
+        "progress": 0.1125,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3808.5999999996275,
+        "renderedFrames": 14,
+        "sceneFrames": 10,
+        "presentation": 20,
+        "progress": 0.126,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3832.199999999255,
+        "renderedFrames": 15,
+        "sceneFrames": 11,
+        "presentation": 20,
+        "progress": 0.139,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3856.0999999996275,
+        "renderedFrames": 16,
+        "sceneFrames": 11,
+        "presentation": 20,
+        "progress": 0.151,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3878.7999999998137,
+        "renderedFrames": 17,
+        "sceneFrames": 12,
+        "presentation": 20,
+        "progress": 0.1625,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3902.5,
+        "renderedFrames": 18,
+        "sceneFrames": 12,
+        "presentation": 20,
+        "progress": 0.174,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3926.699999999255,
+        "renderedFrames": 19,
+        "sceneFrames": 13,
+        "presentation": 20,
+        "progress": 0.186,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3954.199999999255,
+        "renderedFrames": 20,
+        "sceneFrames": 13,
+        "presentation": 20,
+        "progress": 0.198,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 3977.5999999996275,
+        "renderedFrames": 21,
+        "sceneFrames": 13,
+        "presentation": 20,
+        "progress": 0.212,
+        "animatedNodes": 1
+      }
+    ],
+    "droppedSamples": 0,
+    "lastDroppedSample": null,
+    "endedAtMs": 4341.5
+  }
+}

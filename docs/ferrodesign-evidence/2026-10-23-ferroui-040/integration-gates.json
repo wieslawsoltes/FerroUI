@@ -1,0 +1,65 @@
+{
+  "recorded_at_utc": "2026-10-23T11:57:01.951949+00:00",
+  "prior_branch_commit": "0f0732784bd6fdf1cb2477a61dd332d9a007fec2",
+  "upstream_release_commit": "934b9ce16e2ada890ee31534f1a98808f483a14f",
+  "framework_version": "0.4.0",
+  "core_source_tree": "3c91aeeed4ff3d22eff9eae1f63fd6aef1cd3f24",
+  "core_tests": {
+    "passed": 533,
+    "failed": 0,
+    "ignored": 0,
+    "filtered_out": 0,
+    "seconds": 4.24,
+    "command": "cargo test --locked --offline -p ferrodesign-core --jobs 1",
+    "rust": "1.99.0",
+    "log": "core-tests.log",
+    "log_sha256": "8380b54ddc2041412a6425b251ca5019dba1a774677a3a90873b79d461a3df91"
+  },
+  "active_renderer_graphs": [
+    {
+      "target": "aarch64-apple-darwin",
+      "sha256": "9d609dfffd108af29e1d0e91c1edf1bf1486f7864d39bf41978daadc7e37bbe5",
+      "bytes": 34058,
+      "vello": true,
+      "skia": false
+    },
+    {
+      "target": "wasm32-unknown-emscripten",
+      "sha256": "2c52ee29bec8925bda4e9b5ed6341a91bed10a5a2ba8010da687a345d5c6db33",
+      "bytes": 28651,
+      "vello": true,
+      "skia": false
+    },
+    {
+      "target": "x86_64-apple-darwin",
+      "sha256": "9d609dfffd108af29e1d0e91c1edf1bf1486f7864d39bf41978daadc7e37bbe5",
+      "bytes": 34058,
+      "vello": true,
+      "skia": false
+    },
+    {
+      "target": "x86_64-pc-windows-msvc",
+      "sha256": "af54fefc8e97c7d0f42764c0af4a6c572b5c3940c2442e8be5e7856df3a1a55c",
+      "bytes": 35986,
+      "vello": true,
+      "skia": false
+    },
+    {
+      "target": "x86_64-unknown-linux-gnu",
+      "sha256": "26129f96d21e090d7fbc204eee8dc3ea0967f3b7f9e2e488a0b48d95904363ca",
+      "bytes": 44061,
+      "vello": true,
+      "skia": false
+    }
+  ],
+  "sample_lockfile": {
+    "sha256": "1e11d66cfe586f859f3f7027d83b1f596a401184feb81e08fdf2f658ca5b87a9",
+    "changes": "Only 26 local FerroUI packages change version from 0.4.0-preview.1 to 0.4.0; external packages and checksums are identical."
+  },
+  "pending_at_integration": [
+    "Changed public TextLineBounds inheritance regression and upstream text-line-bounds tests",
+    "Seven GPU fragment tests with a required compute adapter",
+    "Native application suite and merged-source WASM/browser execution"
+  ],
+  "scope": "Local core behavior and active dependency selection only. Existing 08 runtime browser evidence belongs to the preceding framework and does not validate this merge."
+}

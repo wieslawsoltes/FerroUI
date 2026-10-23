@@ -1,0 +1,89 @@
+{
+  "createdUtc": "2026-10-22T16:25:16.107772+00:00",
+  "status": "Blocked before browser launch; no application validation ran",
+  "exitCode": 1,
+  "durationSeconds": 5.003632307052612,
+  "harnessSourceCommit": "f8e0471eb4301a9b893e8185810550ebba5ddafc",
+  "buildSourceCommit": "3a0bf1f13c6ede9abe5360bc3691085a3bc981f0",
+  "plannedScope": {
+    "full": false,
+    "modes": [
+      "WebGL2"
+    ],
+    "scenarios": [
+      "geometry-authoring",
+      "flatten",
+      "local-styles",
+      "angular-paints",
+      "grid-styles",
+      "region-paints",
+      "network-bucket",
+      "compact-autosave",
+      "prototype-input",
+      "prototype-motion",
+      "bounded-history"
+    ]
+  },
+  "actualBrowserLaunched": false,
+  "scenariosEntered": 0,
+  "checks": 0,
+  "reportJsonCreated": false,
+  "source31Unchanged": true,
+  "runtime16Unchanged": true,
+  "error": {
+    "code": "EPERM",
+    "syscall": "listen",
+    "address": "127.0.0.1",
+    "description": "Default filesystem/network sandbox rejected the local HTTP server listen before Chromium startup. No application, capture, semantic, pixel or history checks were reached."
+  },
+  "launchResources": {
+    "memoryCurrent": 5861343232,
+    "memoryMax": 8589934592,
+    "headroomBytes": 2728591360,
+    "inactiveFileBytes": 993157120,
+    "memoryEvents": {
+      "low": 0,
+      "high": 0,
+      "max": 10977611,
+      "oom": 18,
+      "oom_kill": 12,
+      "oom_group_kill": 0
+    }
+  },
+  "baselineDiskFreeBytes": 7738277888,
+  "permissionBoundary": "No escalation, alternative execution route, browser-security flag changes or additional attempts were made after this denial. The remaining11 local scenarios are not reported as passed. Parent is retaining exact-source upstream CI independently.",
+  "rawFiles": {
+    "browser.log": {
+      "bytes": 597,
+      "sha256": "d88e327a0cbad0341c298f088993052b28781acf6129fed98c9c1a86a5a7569e"
+    },
+    "resources.jsonl": {
+      "bytes": 6171,
+      "sha256": "760dfbb1c0d32244cfc8575769a283f268d892c67ae61931ffb5d55521b26be5"
+    },
+    "terminal.json": {
+      "bytes": 5302,
+      "sha256": "af759b5528778a45e7115cfc9a1e27876a195d6193b20fb31428b74d16b927be"
+    },
+    "report/validation-source.json": {
+      "bytes": 15448,
+      "sha256": "3c4495688882f7fb1e5fec66d7474e5f5b73ee337ef3ee89ca37ee995d6bfd14"
+    },
+    "report/input-equivalence.json": {
+      "bytes": 7232,
+      "sha256": "5f5f504240f54b2e5912cc82e04cdea1b8007b68f5f9d1d7b15c00fce99e1b06"
+    },
+    "report/post-run-integrity.json": {
+      "bytes": 8768,
+      "sha256": "2ff36e2cc09293ef6bb1d0913c0d7f7ce38a9c3b69d63b77c026b14009b91b8f"
+    },
+    "run-tail.py": {
+      "bytes": 4441,
+      "sha256": "0f574ef2ea398346ac32c0e7ecab439fec082d9273602a3001958f39537d149f"
+    },
+    "summarize-run.py": {
+      "bytes": 5070,
+      "sha256": "3694df4bceee6bdef407802dfb6d75f989ed687c20b77a97fe1023a2a89a378e"
+    }
+  }
+}

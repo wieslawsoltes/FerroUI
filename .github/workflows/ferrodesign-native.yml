@@ -1,0 +1,116 @@
+name: FerroDesign native feedback
+
+on:
+  push:
+    branches: [feat/ferrodesign-editor]
+    paths:
+      - samples/FerroDesign/crates/**
+      - samples/FerroDesign/Cargo.toml
+      - samples/FerroDesign/Cargo.lock
+      - samples/FerroDesign/scripts/source_mtime_cache.py
+      - samples/FerroDesign/scripts/test_source_mtime_cache.py
+      - samples/FerroDesign/scripts/test_source_mtime_cargo.py
+      - src/Vello/FerroUI.Vello/**
+      - src/FerroUI.Base/**
+      - src/FerroUI.Controls/**
+      - src/FerroUI.Themes.Simple/**
+      - src/FerroUI.Themes.Fluent/**
+      - .github/workflows/ferrodesign-native.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Keep native compiler/pixel feedback independent of the complete browser run.
+# The full browser workflow is still the source of browser validation evidence.
+concurrency:
+  group: ferrodesign-native-feedback-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      CARGO_BUILD_JOBS: 1
+      CARGO_TERM_COLOR: always
+      CARGO_TARGET_DIR: ${{ github.workspace }}/samples/FerroDesign/target
+      CARGO_PROFILE_TEST_DEBUG: '0'
+      CARGO_PROFILE_TEST_CODEGEN_UNITS: '16'
+    defaults:
+      run:
+        shell: bash
+        working-directory: samples/FerroDesign
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+      - name: Configure runner-local toolchain paths
+        run: |
+          echo "CARGO_HOME=$RUNNER_TEMP/ferrodesign-tools/cargo" >> "$GITHUB_ENV"
+          echo "RUSTUP_HOME=$RUNNER_TEMP/ferrodesign-tools/rustup" >> "$GITHUB_ENV"
+      - uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            ${{ runner.temp }}/ferrodesign-tools/cargo/registry
+            ${{ runner.temp }}/ferrodesign-tools/cargo/git
+            samples/FerroDesign/target
+          key: ferrodesign-native-feedback-${{ runner.os }}-${{ hashFiles('samples/FerroDesign/**/Cargo.toml', 'samples/FerroDesign/Cargo.lock', 'Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            ferrodesign-native-feedback-${{ runner.os }}-${{ hashFiles('samples/FerroDesign/**/Cargo.toml', 'samples/FerroDesign/Cargo.lock', 'Cargo.lock') }}-
+            ferrodesign-build-${{ runner.os }}-v3-native-${{ hashFiles('samples/FerroDesign/**/Cargo.toml', 'samples/FerroDesign/Cargo.lock') }}-
+      - name: Restore content-verified source timestamps
+        id: source-mtimes-restore
+        run: |
+          python3 scripts/test_source_mtime_cache.py
+          mkdir -p "$CARGO_TARGET_DIR"
+          python3 scripts/source_mtime_cache.py restore --repo "$GITHUB_WORKSPACE" --target-dir "$CARGO_TARGET_DIR"
+      - name: Install pinned Rust and native font dependencies
+        id: native_toolchain
+        run: |
+          rustup toolchain install 1.99.0 --profile minimal --no-self-update
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y pkg-config libfontconfig1-dev libfreetype6-dev libvulkan1 mesa-vulkan-drivers
+      - name: Verify source timestamp reuse and changed-input rebuilding
+        id: source-mtimes-cargo
+        run: python3 scripts/test_source_mtime_cargo.py
+      - name: Validate public unhinted glyph geometry and pixels
+        # Cargo 1.99 uses compiler, without the older core::compiler prefix.
+        # Record freshness reasons without changing cache decisions or validation.
+        env:
+          CARGO_LOG: cargo::compiler::fingerprint=trace
+        run: cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-vello --lib unhinted_ --jobs 1 -- --test-threads=1
+      - name: Validate shared paragraph layout and native editing
+        run: |
+          # Exercise every independent editing suite even if an earlier one
+          # fails. Preserve a failing step/job after collecting all results.
+          failed=0
+          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-base --lib paragraph --jobs 1 -- --test-threads=1 || failed=1
+          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-base --lib text_line_bounds --jobs 1 -- --test-threads=1 || failed=1
+          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-controls --lib paragraph --jobs 1 -- --test-threads=1 || failed=1
+          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-controls --lib text_box_tests:: --jobs 1 -- --test-threads=1 || failed=1
+          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-controls --lib text_box_history:: --jobs 1 -- --test-threads=1 || failed=1
+          exit "$failed"
+      - name: Validate GPU fragment capture and clip pixels
+        if: ${{ !cancelled() && steps.native_toolchain.outcome == 'success' && steps.source-mtimes-cargo.outcome == 'success' }}
+        env:
+          FERROUI_VELLO_REQUIRE_GPU: '1'
+        run: |
+          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-vello --features gpu --lib gpu::fragment_tests:: --jobs 1 -- --test-threads=1 --nocapture
+      - name: Validate native editor and public renderer pixels
+        # Keep independent application compiler/pixel feedback available if a
+        # preceding framework test fails. Its failure still fails this job.
+        if: ${{ !cancelled() && steps.native_toolchain.outcome == 'success' && steps.source-mtimes-cargo.outcome == 'success' }}
+        run: cargo +1.99.0 test --locked -p ferrodesign-app --lib --jobs 1 -- --test-threads=1
+      - name: Snapshot source timestamps with the partial build
+        id: source-mtimes-snapshot
+        if: ${{ !cancelled() && steps.source-mtimes-restore.outcome == 'success' && steps.source-mtimes-cargo.outcome == 'success' }}
+        run: python3 scripts/source_mtime_cache.py snapshot --repo "$GITHUB_WORKSPACE" --target-dir "$CARGO_TARGET_DIR"
+      - uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        if: ${{ !cancelled() && steps.source-mtimes-snapshot.outcome == 'success' }}
+        with:
+          path: |
+            ${{ runner.temp }}/ferrodesign-tools/cargo/registry
+            ${{ runner.temp }}/ferrodesign-tools/cargo/git
+            samples/FerroDesign/target
+          key: ferrodesign-native-feedback-${{ runner.os }}-${{ hashFiles('samples/FerroDesign/**/Cargo.toml', 'samples/FerroDesign/Cargo.lock', 'Cargo.lock') }}-${{ github.sha }}

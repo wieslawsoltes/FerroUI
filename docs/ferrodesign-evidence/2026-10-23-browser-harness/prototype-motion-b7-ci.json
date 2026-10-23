@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "repository": "https://github.com/wieslawsoltes/FerroUI",
+    "commit": "b7b0b8853dd47a3426537a6babc11fcc0e0e40cc",
+    "workflowRun": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39869066118",
+    "browserJobId": 120138674133,
+    "validationArtifactId": 12467743199,
+    "validationArtifactBytes": 177898902,
+    "validationArtifactSha256": "cbed2d5178fe9280b3a6eb85f1ef8c5f87043739d7ce41ecfe76108926e6639c",
+    "browserVersion": "156.0.8078.4",
+    "reportCreated": "2026-10-22T23:19:09.978Z",
+    "traceEntry": "WebGL2-trace.zip/trace.trace"
+  },
+  "animationGate": {
+    "durationMs": 2000,
+    "strictProgressRange": [
+      0.2,
+      0.8
+    ],
+    "polling": "raf",
+    "timeoutMs": 10000
+  },
+  "results": [
+    {
+      "mode": "Software2D",
+      "status": "passed",
+      "checks": 3,
+      "durationMs": 4416
+    },
+    {
+      "mode": "WebGL2",
+      "status": "failed",
+      "checks": 0,
+      "durationMs": 16958,
+      "error": "page.waitForFunction: Timeout 10000ms exceeded.\n    at prototypeMotionRegressions (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/prototype-browser.mjs:45:34)\n    at async runIsolatedScenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1112:13",
+      "finalNativeState": {
+        "presentation": 20,
+        "prototypeAnimation": null,
+        "renderedFrames": 15,
+        "sceneFrames": 11,
+        "zoom": 3.9545454545454546,
+        "pan": {
+          "x": -1414.5454545454545,
+          "y": 65
+        },
+        "pointerPresses": {
+          "capacity": 8,
+          "entries": [
+            {
+              "buttons": 1,
+              "clickCount": 1,
+              "pan": {
+                "x": 167.27272727272725,
+                "y": 65
+              },
+              "renderedFramesBefore": 3,
+              "screen": {
+                "x": 562.727294921875,
+                "y": 420.9090881347656
+              },
+              "selectionCountBefore": 0,
+              "serial": 1,
+              "timestamp": 460,
+              "world": {
+                "x": 100.00000561242817,
+                "y": 89.99999929844648
+              },
+              "zoom": 3.9545454545454546
+            }
+          ],
+          "serial": 1,
+          "timestampUnit": "native monotonic milliseconds"
+        },
+        "renderer": "FerroUI Vello",
+        "documentRevision": 4
+      }
+    }
+  ],
+  "traceClockAnchor": {
+    "version": 10,
+    "browserName": "chromium",
+    "wallTime": 1792711407389,
+    "monotonicTime": 257689.001
+  },
+  "calls": [
+    {
+      "callId": "krro@40417",
+      "label": "import motion fixture",
+      "method": "evaluateExpression",
+      "startTimeMs": 2831358.102,
+      "endTimeMs": 2831362.495
+    },
+    {
+      "callId": "krro@40425",
+      "label": "start source presentation",
+      "method": "evaluateExpression",
+      "startTimeMs": 2831428.734,
+      "endTimeMs": 2831430.267
+    },
+    {
+      "callId": "krro@40429",
+      "label": "two DOM requestAnimationFrames",
+      "method": "evaluateExpression",
+      "startTimeMs": 2831436.521,
+      "endTimeMs": 2831458.413
+    },
+    {
+      "callId": "krro@40431",
+      "label": "read initial native state",
+      "method": "evaluateExpression",
+      "startTimeMs": 2831464.11,
+      "endTimeMs": 2831474.962
+    },
+    {
+      "callId": "krro@40435",
+      "label": "move pointer into source button",
+      "method": "mouseMove",
+      "startTimeMs": 2831499.755,
+      "endTimeMs": 2831505.134
+    },
+    {
+      "callId": "krro@40437",
+      "label": "native mouse click",
+      "method": "mouseClick",
+      "startTimeMs": 2831509.02,
+      "endTimeMs": 2831511.793
+    },
+    {
+      "callId": "krro@40439",
+      "label": "wait for 20\u201380% animation progress",
+      "method": "waitForFunction",
+      "startTimeMs": 2831515.246,
+      "endTimeMs": 2841516.23
+    }
+  ],
+  "screencastFrames": [
+    {
+      "index": 0,
+      "traceResource": "screencast/page@16bd3da18f9c89b333221de2fc31db8f-1792713981569.jpeg",
+      "receivedAtMonotonicMs": 2831868.923,
+      "frameSwapWallTimeMs": 1792713980888.008,
+      "frameSwapConvertedMonotonicMs": 2831188.009,
+      "deliveryDelayMs": 680.914
+    },
+    {
+      "index": 1,
+      "traceResource": "screencast/page@16bd3da18f9c89b333221de2fc31db8f-1792713982128.jpeg",
+      "receivedAtMonotonicMs": 2832428.085,
+      "frameSwapWallTimeMs": 1792713980904.674,
+      "frameSwapConvertedMonotonicMs": 2831204.675,
+      "deliveryDelayMs": 1223.41
+    },
+    {
+      "index": 2,
+      "traceResource": "screencast/page@16bd3da18f9c89b333221de2fc31db8f-1792713989301.jpeg",
+      "receivedAtMonotonicMs": 2839600.874,
+      "frameSwapWallTimeMs": 1792713980921.339,
+      "frameSwapConvertedMonotonicMs": 2831221.34,
+      "deliveryDelayMs": 8379.534,
+      "savedResource": "prototype-motion-b7-previous-document.jpeg",
+      "sha256": "0b059c519b06b33d309ef6778df2492d0afe92cb113ccaac5e6abebad1265980",
+      "imageDimensions": [
+        800,
+        500
+      ],
+      "samplePixel": {
+        "x": 400,
+        "y": 250,
+        "rgb": [
+          20,
+          145,
+          103
+        ]
+      }
+    },
+    {
+      "index": 3,
+      "traceResource": "screencast/page@16bd3da18f9c89b333221de2fc31db8f-1792713990427.jpeg",
+      "receivedAtMonotonicMs": 2840726.649,
+      "frameSwapWallTimeMs": 1792713989321.004,
+      "frameSwapConvertedMonotonicMs": 2839621.005,
+      "deliveryDelayMs": 1105.644,
+      "savedResource": "prototype-motion-b7-early-tween.jpeg",
+      "sha256": "596945805f2681eb42421303772971f451ff21a9043e537d63f2ab475c914740",
+      "imageDimensions": [
+        800,
+        500
+      ],
+      "samplePixel": {
+        "x": 318,
+        "y": 227,
+        "rgb": [
+          210,
+          0,
+          45
+        ]
+      }
+    },
+    {
+      "index": 4,
+      "traceResource": "screencast/page@16bd3da18f9c89b333221de2fc31db8f-1792713990927.jpeg",
+      "receivedAtMonotonicMs": 2841226.853,
+      "frameSwapWallTimeMs": 1792713989337.6702,
+      "frameSwapConvertedMonotonicMs": 2839637.671,
+      "deliveryDelayMs": 1589.182,
+      "savedResource": "prototype-motion-b7-completed.jpeg",
+      "sha256": "ed50702f9a00c751dc544c9d422f4cb419698f9ef8dd6afda479ede8c7deed3e",
+      "imageDimensions": [
+        800,
+        500
+      ],
+      "samplePixel": {
+        "x": 498,
+        "y": 309,
+        "rgb": [
+          0,
+          0,
+          254
+        ]
+      }
+    },
+    {
+      "index": 5,
+      "traceResource": "screencast/page@16bd3da18f9c89b333221de2fc31db8f-1792713991268.jpeg",
+      "receivedAtMonotonicMs": 2841567.84,
+      "frameSwapWallTimeMs": 1792713991254.259,
+      "frameSwapConvertedMonotonicMs": 2841554.26,
+      "deliveryDelayMs": 13.58
+    }
+  ],
+  "derived": {
+    "clickCompletionToWaitCallStartMs": 3.453,
+    "frame2ToFrame3SwapGapMs": 8399.665,
+    "earlyTweenJpegBlueChannelFraction": 0.17647058823529413
+  },
+  "limits": [
+    "The Playwright trace records API call start, not first page-predicate execution. It does not retain every waitForFunction predicate result; the exact polling/progress sample sequence is unavailable.",
+    "JPEG pixel values are lossy. The early-tween blue fraction is an approximate visual observation, not the native animation progress.",
+    "Screencast delivery and swap times establish delayed/stale frames. They do not identify whether renderer work, the graphics driver, or host scheduling caused the delay.",
+    "These are the original failing b7 CI artifacts, not results for the later readiness/diagnostics harness or newer application source."
+  ]
+}

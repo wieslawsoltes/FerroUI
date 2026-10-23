@@ -1,0 +1,39 @@
+name: FerroDesign core
+
+on:
+  push:
+    branches: [feat/ferrodesign-editor]
+    paths:
+      - samples/FerroDesign/crates/ferrodesign-core/**
+      - samples/FerroDesign/Cargo.toml
+      - samples/FerroDesign/Cargo.lock
+      - .github/workflows/ferrodesign-core.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Geometry/model feedback must not wait for the complete two-surface browser run.
+# The existing native and browser workflow remains required validation evidence.
+concurrency:
+  group: ferrodesign-core-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: samples/FerroDesign
+    env:
+      CARGO_BUILD_JOBS: 1
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+      - name: Install pinned Rust
+        run: rustup toolchain install 1.99.0 --profile minimal --no-self-update
+      - name: Validate complete document engine
+        run: cargo +1.99.0 test --locked -p ferrodesign-core --jobs 1

@@ -1,5 +1,6 @@
 use crate::collections::NotifyCollectionChangedAction;
 use crate::media::effects::{EffectExtensions, IEffect};
+use crate::media::imaging::BitmapBlendingMode;
 use crate::media::{
     BoxShadows, Drawing, DrawingCollection, DrawingContext, DrawingImpl, Geometry, GeometryDrawing, GlyphRun,
     GlyphRunDrawing, IBrush, IDrawingContextCore, IPen, MatrixTransform, PlatformGeometry, PushedState,
@@ -29,6 +30,7 @@ pub struct DrawingGroup {
     render_options: Cell<Option<RenderOptions>>,
     text_options: Cell<Option<TextOptions>>,
     effect_bounds: Cell<Option<Rect>>,
+    compositing_layer: Cell<Option<(BitmapBlendingMode, f64, Rect)>>,
 }
 
 ferro_class!(DrawingGroup: Drawing);
@@ -69,6 +71,11 @@ impl DrawingImpl for DrawingGroup {
 
         let s_transform =
             context.push_transform(this.transform().map(|transform| transform.value()).unwrap_or(Matrix::IDENTITY));
+        let s_compositing = match this.compositing_layer.get() {
+            Some((blend, opacity, bounds)) => context.try_push_compositing_layer(blend, opacity, bounds)
+                .expect("The replay backend does not support the recorded compositing layer"),
+            None => PushedState::NONE,
+        };
         let s_opacity = context.push_opacity(this.opacity());
         let s_clip = match this.clip_geometry() {
             Some(clip) => context.push_geometry_clip(&clip),
@@ -101,6 +108,7 @@ impl DrawingImpl for DrawingGroup {
         context.pop(s_opacity_mask);
         context.pop(s_clip);
         context.pop(s_opacity);
+        context.pop(s_compositing);
         context.pop(s_transform);
     }
 
@@ -183,6 +191,7 @@ impl DrawingGroup {
             render_options: Cell::new(None),
             text_options: Cell::new(None),
             effect_bounds: Cell::new(None),
+            compositing_layer: Cell::new(None),
         }
     }
 
@@ -559,6 +568,18 @@ impl IDrawingContextCore for DrawingGroupDrawingContext {
         drawing_group.set_opacity(opacity);
     }
 
+    fn try_push_compositing_layer_core(&mut self, blend: BitmapBlendingMode, opacity: f64, bounds: Rect) -> bool {
+        if !self.platform_render_interface.supports_compositing_layers() {
+            return false;
+        }
+        self.push_new_drawing_group().compositing_layer.set(Some((blend, opacity, bounds)));
+        true
+    }
+
+    fn pop_compositing_layer_core(&mut self) {
+        self.pop();
+    }
+
     fn push_opacity_mask_core(&mut self, mask: &Rc<dyn IBrush>, _bounds: Rect) {
         let drawing_group = self.push_new_drawing_group();
 
@@ -681,6 +702,44 @@ mod tests {
         let c = count.clone();
         drawing.invalidated(move || c.set(c.get() + 1));
         count
+    }
+
+    #[test]
+    fn compositing_layer_drawing_group_open_preserves_the_recorded_scope() {
+        use crate::media::immutable::ImmutableSolidColorBrush;
+        use crate::media::{Colors, PlatformDrawingContext};
+        use crate::rendering::testing::{DrawingLog, MockDrawingContextImpl, MockPlatformRenderInterface};
+
+        let (scope, backend) = MockPlatformRenderInterface::install();
+        backend.set_supports_compositing_layers(true);
+        let group = DrawingGroup::new();
+        let brush: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::new(Colors::RED));
+        {
+            let mut context = group.open();
+            let _layer = context.try_push_compositing_layer(
+                BitmapBlendingMode::Multiply, 0.5, Rect::new(0.0, 0.0, 1.0, 1.0),
+            ).unwrap();
+            context.fill_rectangle(&brush, Rect::new(5.0, 6.0, 10.0, 20.0), 0.0);
+        }
+        assert_eq!(group.get_bounds(), Rect::new(5.0, 6.0, 10.0, 20.0));
+        let log = DrawingLog::new();
+        let mut implementation = MockDrawingContextImpl::new(log.clone());
+        implementation.supports_compositing_layers = true;
+        implementation.log_transforms = false;
+        {
+            let mut core = PlatformDrawingContext::borrowed(&mut implementation);
+            let mut context = DrawingContext::new(&mut core);
+            group.draw(&mut context);
+        }
+        let relevant: Vec<_> = log.entries().into_iter().filter(|entry| {
+            entry.contains("CompositingLayer") || entry.starts_with("Draw")
+        }).collect();
+        assert_eq!(relevant, [
+            "PushCompositingLayer Multiply 0.5 0, 0, 1, 1",
+            "DrawGeometry Red none 5, 6, 10, 20",
+            "PopCompositingLayer",
+        ]);
+        scope.dispose();
     }
 
     #[test]

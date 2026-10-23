@@ -1,0 +1,224 @@
+{
+  "status": "Preserved failed full run; no app or test correction justified by this boundary",
+  "harnessSourceCommit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+  "buildSourceCommit": "3a0bf1f13c6ede9abe5360bc3691085a3bc981f0",
+  "wasmSha256": "7880a628e7117ab88f896f69baa9c9ccedcdc33792302a01f653b4465e1499b9",
+  "scope": {
+    "full": true,
+    "modes": [
+      "Software2D",
+      "WebGL2"
+    ],
+    "scenarios": "all"
+  },
+  "passed": false,
+  "failure": "ComponentValue2 initial readiness wait in shared clickNative; no field click or scrolling phase was reached",
+  "sourceLocations": {
+    "callsite": "samples/FerroDesign/tests/components-browser.mjs:93",
+    "helper": "samples/FerroDesign/tests/browser.mjs:250-264"
+  },
+  "directTraceObservations": [
+    {
+      "callId": "gkuv@18581",
+      "action": "one native EditComponentsButton click to reopen dialog",
+      "start": 608109.533,
+      "end": 608164.482,
+      "point": [
+        1456.5,
+        871
+      ]
+    },
+    {
+      "callId": "gkuv@18585",
+      "action": "wait for modal and ComponentDone visible",
+      "start": 610641.216,
+      "end": 614814.914,
+      "status": "resolved"
+    },
+    {
+      "callId": "gkuv@18587",
+      "action": "selection-preservation state read before target readiness wait",
+      "start": 616599.65,
+      "end": 623742.122,
+      "durationMs": 7142.472,
+      "readinessPredicateOfflineEvaluation": true,
+      "state": {
+        "selection": [
+          10
+        ],
+        "renderedFrames": 6,
+        "sceneFrames": 18,
+        "documentRevision": 6,
+        "historyDepth": null,
+        "controls": {
+          "ComponentValue2": {
+            "arrangeValid": true,
+            "composing": false,
+            "enabled": true,
+            "focusWithin": false,
+            "focused": false,
+            "height": 28,
+            "measureValid": true,
+            "text": "Manual layer override",
+            "visible": true,
+            "width": 572,
+            "x": 988,
+            "y": 502
+          },
+          "ModalContent": {
+            "arrangeValid": true,
+            "enabled": true,
+            "focusWithin": false,
+            "focused": false,
+            "height": 407,
+            "measureValid": true,
+            "visible": true,
+            "width": 572,
+            "x": 988,
+            "y": 123
+          },
+          "ModalViewport": {
+            "arrangeValid": true,
+            "enabled": true,
+            "focusWithin": false,
+            "focused": false,
+            "height": 407,
+            "measureValid": true,
+            "visible": true,
+            "width": 572,
+            "x": 988,
+            "y": 123
+          },
+          "ComponentDone": {
+            "arrangeValid": true,
+            "enabled": true,
+            "focusWithin": false,
+            "focused": false,
+            "height": 30,
+            "measureValid": true,
+            "visible": true,
+            "width": 44,
+            "x": 1189,
+            "y": 548
+          }
+        }
+      }
+    },
+    {
+      "callId": "gkuv@18589",
+      "action": "ComponentValue2 readiness wait",
+      "start": 626760.596,
+      "end": 639765.502,
+      "configuredTimeoutMs": 10000,
+      "elapsedMs": 13004.906,
+      "error": "Timeout10000ms exceeded"
+    },
+    {
+      "callId": "gkuv@18591",
+      "action": "catch diagnostic state read",
+      "start": 642769.75,
+      "end": 697805.447,
+      "durationMs": 55035.697,
+      "readinessPredicateOfflineEvaluation": true,
+      "boundsAndFrameSceneRevisionUnchanged": true
+    },
+    {
+      "callId": "gkuv@18595",
+      "action": "failure PNG",
+      "start": 700919.561,
+      "end": 701604.459,
+      "status": "passed"
+    }
+  ],
+  "geometry": {
+    "targetBounds": {
+      "arrangeValid": true,
+      "composing": false,
+      "enabled": true,
+      "focusWithin": false,
+      "focused": false,
+      "height": 28,
+      "measureValid": true,
+      "text": "Manual layer override",
+      "visible": true,
+      "width": 572,
+      "x": 988,
+      "y": 502
+    },
+    "scrollViewport": {
+      "arrangeValid": true,
+      "enabled": true,
+      "focusWithin": false,
+      "focused": false,
+      "height": 407,
+      "measureValid": true,
+      "visible": true,
+      "width": 572,
+      "x": 988,
+      "y": 123
+    },
+    "targetCenter": [
+      1274.0,
+      516.0
+    ],
+    "targetCenterInsideViewport": true,
+    "fieldClickCount": 0,
+    "fieldScrollEvents": 0
+  },
+  "resourceCorrelation": {
+    "rawSamples": "/tmp/ferrodesign-full-retry-f2bb1d61-9b313a0caa46/resources.jsonl",
+    "alignedWindow": "/tmp/ferrodesign-full-retry-f2bb1d61-9b313a0caa46/diagnosis/components-resource-window.json",
+    "samplesInWindow": 18,
+    "minimumCgroupMemory": 8589307904,
+    "maximumCgroupMemory": 8589934592,
+    "memoryLimit": 8589934592,
+    "oomDeltaForRun": 0,
+    "oomKillDeltaForRun": 0,
+    "memoryMaxEventDeltaForRun": 1631582,
+    "caveat": "Resource pressure coincides with the stalled automation calls. The cgroup includes work not identified by the owned browser/Node process list; exact responsible process and causal chain are not proven."
+  },
+  "interpretation": [
+    "This failure occurred before any attempt to click or scroll the target field; a missed field click is not its cause.",
+    "The same target already satisfied every readiness predicate term in the preceding returned state, and the catch state has the identical geometry and native frame/scene/revision. There is no evidence here for a missing native publication barrier or an application component-editing defect.",
+    "Playwright evaluates the readiness predicate immediately once before default rAF polling. A polling change or additional layout delay is not an evidence-backed correction for these large scheduling/protocol delays.",
+    "The prior alias-delete boundary and complete native-authoring/typography scenarios passed unchanged in this run."
+  ],
+  "nextStep": "Keep source, assertions and deadlines unchanged. Preserve failed local evidence and inspect the independent dedicated CI full-run result; no new local run has started.",
+  "rawArtifacts": {
+    "report/report.json": {
+      "path": "/tmp/ferrodesign-full-retry-f2bb1d61-9b313a0caa46/report/report.json",
+      "bytes": 661396,
+      "sha256": "f076d8da502bff4c83f639579ddfec15623e07cab3365cc2e7f9b1b2d09c3f1b"
+    },
+    "report/validation-source.json": {
+      "path": "/tmp/ferrodesign-full-retry-f2bb1d61-9b313a0caa46/report/validation-source.json",
+      "bytes": 13526,
+      "sha256": "3ca167418f939880eb4193d7b7810fd6d7445ec762f2b2bc91701929c57133e8"
+    },
+    "report/post-run-integrity.json": {
+      "path": "/tmp/ferrodesign-full-retry-f2bb1d61-9b313a0caa46/report/post-run-integrity.json",
+      "bytes": 8768,
+      "sha256": "153eedb15231331297756995455ae5c776978a487eeb4cd91811ef0121ba4d9d"
+    },
+    "report/WebGL2-failure.ferrodesign": {
+      "path": "/tmp/ferrodesign-full-retry-f2bb1d61-9b313a0caa46/report/WebGL2-failure.ferrodesign",
+      "bytes": 35946,
+      "sha256": "a926d10f454e587520bdfdd86189b419ff6d643039e8f6f0de06e2c54f4165c5"
+    },
+    "report/WebGL2-failure.png": {
+      "path": "/tmp/ferrodesign-full-retry-f2bb1d61-9b313a0caa46/report/WebGL2-failure.png",
+      "bytes": 82544,
+      "sha256": "e9def45416b298d796760e8a715a72875054b058c2b5a05d87006f4504661b34"
+    },
+    "terminal-summary.json": {
+      "path": "/tmp/ferrodesign-full-retry-f2bb1d61-9b313a0caa46/terminal-summary.json",
+      "bytes": 11897,
+      "sha256": "bea867490a5a57bbda3085383d85d02a47edafee2f07948e858152ce0b81c7b6"
+    }
+  },
+  "derivedControlKeyCorrection": {
+    "corrected": "ComponentDone",
+    "incorrectPreviousDerivedKey": "ComponentsDone",
+    "source": "Exact chrome.ComponentDone values reread from the unchanged raw trace; no report/input/harness edits."
+  }
+}

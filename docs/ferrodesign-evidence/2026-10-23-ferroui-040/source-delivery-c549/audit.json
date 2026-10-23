@@ -1,0 +1,294 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-10-23T12:48:35.595020+00:00",
+  "kind": "Read-only tracked-source delivery audit and offline active dependency-graph validation; no build or browser execution",
+  "sourceCommit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "sourceTree": "8c5bbcc8ed5e5a61d287708cf4e2c0e7c912259d",
+  "initialObservationRevision": "3d7b8fc6da73485acbcfbe80e2abf6868cd5fb36",
+  "provenanceNote": "The original source/path/include/font/symlink audit and offline five-target graph command ran at 3d7b8fc6. The listed git objects prove its build inputs are identical to c549. The whole pinned c549 tree LFS-prefix scan and equivalence comparison were performed when recording this evidence. Numeric observations are retained from those actual checks; no archive rebuild was performed.",
+  "buildInputEquivalence": [
+    {
+      "path": "src",
+      "identicalGitObject": "10675aa5161f2a8e81e2655ed3c39569b6b76892"
+    },
+    {
+      "path": "native",
+      "identicalGitObject": "46fcaf7f089e3c5be2ba596c7ad94bf3f42a8276"
+    },
+    {
+      "path": "scripts",
+      "identicalGitObject": "a63dfb79f010a8b2cc9feeec00e51e31d6419362"
+    },
+    {
+      "path": "samples/FerroDesign/crates",
+      "identicalGitObject": "24d04c2d23bc70e1ecae66872bc501c02e536a5c"
+    },
+    {
+      "path": "samples/FerroDesign/scripts",
+      "identicalGitObject": "58291ea40fefebb6ee9147acffe3ee2657d0f8eb"
+    },
+    {
+      "path": "samples/FerroDesign/web",
+      "identicalGitObject": "ed0b402ee4ff9f6ee4fdd3cd200269f2579c33d2"
+    },
+    {
+      "path": "samples/FerroDesign/tests",
+      "identicalGitObject": "e6d45a7d7247b9b62dbbbd83f735c76d2e8de2b4"
+    },
+    {
+      "path": "samples/FerroDesign/Cargo.toml",
+      "identicalGitObject": "e23daa88835c9bf349b86143e6159989ca421329"
+    },
+    {
+      "path": "samples/FerroDesign/Cargo.lock",
+      "identicalGitObject": "97d16b77e5d44732b442c72f0d9705dcb634af13"
+    },
+    {
+      "path": "samples/FerroDesign/package.json",
+      "identicalGitObject": "d3de09adff3b6e889960afd2e997a8e85f11059a"
+    },
+    {
+      "path": "samples/FerroDesign/package-lock.json",
+      "identicalGitObject": "8bfb97592da0b809af29749af4f4c340a025c8c0"
+    },
+    {
+      "path": "Cargo.toml",
+      "identicalGitObject": "5af8dde385f04c3d094bbd14eac9c9413dd2f493"
+    },
+    {
+      "path": "Cargo.lock",
+      "identicalGitObject": "49851f3c015ba4201662ff89a1f532cd4a1e83b9"
+    },
+    {
+      "path": ".cargo/config.toml",
+      "identicalGitObject": "8e9a4c94d116a195fe3dc91b51229f58e69250e1"
+    }
+  ],
+  "trackedTree": {
+    "entries": 10585,
+    "regularFilesCheckedForLfsPrefix": 10469,
+    "gitLfsPointers": 0,
+    "missingRegularFiles": 0,
+    "gitlinks": 0,
+    "symlinks": 116,
+    "allSymlinksResolveWithinRepository": true,
+    "lfsScanMethod": "Enumerate the pinned c549 git tree. Read the first 200 bytes of unchanged working-tree files; for files changed since c549, inspect the pinned blob itself. Check the standard Git LFS version prefix. Symlink blobs are handled separately."
+  },
+  "cargoPathClosure": {
+    "manifests": 30,
+    "pathEdges": 103,
+    "trackedRustSourcesInspected": 3950,
+    "literalCompileTimeIncludeReferences": 70,
+    "uniqueLiteralIncludedFiles": 58,
+    "missingManifestsOrLiteralIncludes": 0,
+    "pathsOutsideRepository": 0,
+    "scope": "Conservative normal/build path dependencies across all target conditions and optional edges; development-only edges are not traversed. Workspace-inherited paths are resolved from their workspace root. This source closure is separate from active-feature graph validation. Literal include_bytes!/include_str! paths in the tracked Rust files are checked; generated OUT_DIR references are not classified as missing source."
+  },
+  "embeddedFonts": [
+    {
+      "path": "src/FerroUI.Fonts.Inter/Assets/Inter-Bold.ttf",
+      "bytes": 316100,
+      "sha256": "790c108befe859dac2ddbd20af3fbb6917c601b3d544c8a05761519f3b5508fe",
+      "sfntHeaderHex": "00010000",
+      "gitLfsPointer": false
+    },
+    {
+      "path": "src/FerroUI.Fonts.Inter/Assets/Inter-Light.ttf",
+      "bytes": 310420,
+      "sha256": "c44ff7a5fde4816f94fc1e5e232b021a812a411339ddd08b0a475ca6e21db810",
+      "sfntHeaderHex": "00010000",
+      "gitLfsPointer": false
+    },
+    {
+      "path": "src/FerroUI.Fonts.Inter/Assets/Inter-Medium.ttf",
+      "bytes": 314712,
+      "sha256": "10d48331f5b3c7362ca357b00c17ac4863ad35199b13b0eceb0962c8c1ad7dc9",
+      "sfntHeaderHex": "00010000",
+      "gitLfsPointer": false
+    },
+    {
+      "path": "src/FerroUI.Fonts.Inter/Assets/Inter-Regular.ttf",
+      "bytes": 309828,
+      "sha256": "41ab0f707a2bfab8133ccdfcdab52282f5f79e5751f43a264805451c7bb95fb8",
+      "sfntHeaderHex": "00010000",
+      "gitLfsPointer": false
+    },
+    {
+      "path": "src/FerroUI.Fonts.Inter/Assets/Inter-SemiBold.ttf",
+      "bytes": 315756,
+      "sha256": "e8cbc2b88bc4268237ff5e251776d3c54edcb14e015a9e66e4883bde4b55f13f",
+      "sfntHeaderHex": "00010000",
+      "gitLfsPointer": false
+    },
+    {
+      "path": "src/FerroUI.Fonts.Inter/Assets/Inter-Thin.ttf",
+      "bytes": 310516,
+      "sha256": "b778a52b84f39ba1d3b08553a246643573b33453b5481b4d09c604bccced930d",
+      "sfntHeaderHex": "00010000",
+      "gitLfsPointer": false
+    }
+  ],
+  "requiredInputHashes": [
+    {
+      "path": "samples/FerroDesign/crates/ferrodesign-app/Cargo.toml",
+      "bytes": 1954,
+      "sha256": "af9bf06d5e14fe819726c956c711c774d6a79d86bc5c4df9f17cb52b7d37083d"
+    },
+    {
+      "path": "samples/FerroDesign/crates/ferrodesign-app/build.rs",
+      "bytes": 359,
+      "sha256": "8ee2cf8c5189a61ee765ec25b919f95a663bee922a770c89757cb12c2bff641c"
+    },
+    {
+      "path": "samples/FerroDesign/crates/ferrodesign-app/ui/Editor.xaml",
+      "bytes": 31322,
+      "sha256": "23aa0728248b32e5d6a26475875565fc3e405b851b877325f0e4da5e6f74395e"
+    },
+    {
+      "path": "samples/FerroDesign/crates/ferrodesign-app/src/app.rs",
+      "bytes": 2681,
+      "sha256": "048eac0e3b002129475924bb0c9c00ae71f293d561bfb220112707ef70d86838"
+    },
+    {
+      "path": "samples/FerroDesign/crates/ferrodesign-app/src/main.rs",
+      "bytes": 3353,
+      "sha256": "a52c4074416d3b906f3ad5bc2521fd25235d1f9839981ff2c3b185865c518f82"
+    },
+    {
+      "path": "samples/FerroDesign/crates/ferrodesign-app/src/desktop.rs",
+      "bytes": 7034,
+      "sha256": "76b7150bf5f3e2b9a7441545913817296d68c55ef0cc74da7864fb708ac8d50e"
+    },
+    {
+      "path": "samples/FerroDesign/scripts/setup.sh",
+      "bytes": 6066,
+      "sha256": "f09efa87d78a0b033c10ef4d852397ed6f97e23fbf482ccf56a36bb18b5c49b5"
+    },
+    {
+      "path": "samples/FerroDesign/scripts/build-browser.sh",
+      "bytes": 7564,
+      "sha256": "ad0e42083e28f728b214f2cb3c6d25f82930e39c00726ec96996f913d781b745"
+    },
+    {
+      "path": "samples/FerroDesign/scripts/check-renderer.sh",
+      "bytes": 1229,
+      "sha256": "faf72aefe18d5a91eebf1b69477ca1ca979d63aa23c8044c48a9c105fd45dc4a"
+    },
+    {
+      "path": ".cargo/config.toml",
+      "bytes": 1450,
+      "sha256": "55c373894eccc64a4580f27495a21601bc2bfd484a7fb14a96c7af0b01de8a10"
+    },
+    {
+      "path": "src/Browser/FerroUI.Browser/webapp/package-lock.json",
+      "bytes": 154549,
+      "sha256": "23f805032b15c172d9f7e0c9bd77deb2effe6a8e1ff7356b0c03c0107043f523"
+    },
+    {
+      "path": "scripts/browser/threads/ferroui-loader.js",
+      "bytes": 16165,
+      "sha256": "817aa151802ca2aa17c25861fac1271538edeaac4161b198e461d2e306fe5db6"
+    },
+    {
+      "path": "src/FerroUI.Fonts.Inter/assets.rs",
+      "bytes": 950,
+      "sha256": "d581b9f770395f8ff6d0245596df7facd806d0491f5a35dd2695860e59388186"
+    },
+    {
+      "path": "src/FerroUI.Themes.Fluent/build.rs",
+      "bytes": 7700,
+      "sha256": "d3b26869e95363aed536f0eda33de519cac5de7a0f544eccdd737f1fd3a1836d"
+    },
+    {
+      "path": "src/FerroUI.Native/build.rs",
+      "bytes": 6520,
+      "sha256": "b67100bda55ecf1f995daa86ea62eddebad50d0a8000821533c1aad7adb22edf"
+    }
+  ],
+  "activeRendererGraphCheck": {
+    "command": "CARGO_NET_OFFLINE=true ./scripts/check-renderer.sh",
+    "workingDirectory": "samples/FerroDesign",
+    "toolchainEnvironment": "Existing pinned Rust 1.99.0 environment from /tmp/ferrodesign-e99-tools/env.sh",
+    "sourceRevisionAtExecution": "3d7b8fc6da73485acbcfbe80e2abf6868cd5fb36",
+    "exitCode": 0,
+    "scope": "cargo tree --locked for normal/build edges only; no compilation or network access",
+    "targets": [
+      {
+        "target": "wasm32-unknown-emscripten",
+        "velloPresent": true,
+        "skiaRendererDependenciesAbsent": true
+      },
+      {
+        "target": "x86_64-unknown-linux-gnu",
+        "velloPresent": true,
+        "skiaRendererDependenciesAbsent": true
+      },
+      {
+        "target": "x86_64-pc-windows-msvc",
+        "velloPresent": true,
+        "skiaRendererDependenciesAbsent": true
+      },
+      {
+        "target": "aarch64-apple-darwin",
+        "velloPresent": true,
+        "skiaRendererDependenciesAbsent": true
+      },
+      {
+        "target": "x86_64-apple-darwin",
+        "velloPresent": true,
+        "skiaRendererDependenciesAbsent": true
+      }
+    ],
+    "stdout": [
+      "Verified FerroUI Vello without Skia: wasm32-unknown-emscripten",
+      "Verified FerroUI Vello without Skia: x86_64-unknown-linux-gnu",
+      "Verified FerroUI Vello without Skia: x86_64-pc-windows-msvc",
+      "Verified FerroUI Vello without Skia: aarch64-apple-darwin",
+      "Verified FerroUI Vello without Skia: x86_64-apple-darwin"
+    ]
+  },
+  "publicApiReview": {
+    "browser": "BrowserPlatformOptions selects BrowserRenderer::Vello; explicit surfaces are WebGL2 or Software2D. Browser crate default Skia feature is disabled by the app manifest.",
+    "native": "VelloApplicationExtensions configures Hybrid/Cpu through public platform builders.",
+    "drawing": "Application artwork uses FerroUI DrawingContext, geometry/brush/text APIs, public compositing layers and RenderTargetBitmap.",
+    "fixtureNote": "The native regression font under src/Skia/FerroUI.Skia/test_assets is a tracked font fixture, not an active renderer dependency."
+  },
+  "buildFromExtractedSource": {
+    "requiresFullRepositoryLayout": true,
+    "sampleOnlyArchiveSufficient": false,
+    "documentedSetupBuildCheckScriptsExecutable": true,
+    "rootCargoConfigurationRequired": true,
+    "inspectedBuildLogicRequiresRepositoryGitMetadata": false,
+    "setupUsesGitForExternalEmsdkClone": true,
+    "generatedXamlAndBrowserBundlesHaveTrackedInputs": true,
+    "macosNativeSourceFallback": "src/FerroUI.Native/build.rs uses ../../native/FerroUI.Native if its local native link is not a directory.",
+    "externalDownloadsRequired": [
+      "Pinned Rust toolchain and Cargo dependencies",
+      "Pinned Emscripten SDK",
+      "Pinned wasm-bindgen release or locked Cargo installation",
+      "npm dependencies, including the pinned public GitHub native-file-system-adapter source"
+    ]
+  },
+  "browserArtifactRequirements": {
+    "hostFiles": [
+      "index.html",
+      "app.css",
+      "favicon.svg",
+      "main.js",
+      "document-store.js",
+      "ferroui-loader.js",
+      "ferroui.js"
+    ],
+    "generatedModules": "Verify every static import from host/application and generated snippets plus the exact referenced WASM filename.",
+    "dynamicModule": "Check storage.js explicitly: dynamic import is not covered by the existing static-only traversal.",
+    "fonts": "Six Inter TTFs are embedded in the native module; no separate dist/fonts directory is required.",
+    "manifest": "Verify exact source/tree/toolchain, complete payload file set and every size/SHA256.",
+    "runtimeNetworkScope": "No mandatory external runtime font, stylesheet or CDN was found in the inspected app host path. Serve the complete distribution over HTTP; source-build downloads are separate."
+  },
+  "limitations": [
+    "No independently downloaded source ZIP was extracted, CRC-checked or built in this audit.",
+    "Source closure and offline graph validation do not establish compilation, browser behavior, visual parity or performance.",
+    "The no-.git conclusion is based on inspected repository build logic, not an archive rebuild; setup still requires the git executable to clone Emscripten.",
+    "The initial tree audit was at 3d7b8fc6; the listed object equality establishes the c549 application/framework input correspondence. Later documentation/CI-only commits are not relabeled as an executed c549 build."
+  ]
+}

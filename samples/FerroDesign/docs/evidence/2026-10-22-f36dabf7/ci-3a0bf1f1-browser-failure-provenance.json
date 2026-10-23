@@ -1,0 +1,62 @@
+{
+  "repo": "wieslawsoltes/FerroUI",
+  "sourceSha": "3a0bf1f13c6ede9abe5360bc3691085a3bc981f0",
+  "runId": 39771204240,
+  "jobId": 119817021322,
+  "jobUrl": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39771204240/job/119817021322",
+  "restoredAtUtc": "2026-10-22 14:45:48 UTC",
+  "origin": "Re-extracted from surviving session copy of the decoded completed GitHub Actions job log after scratch workspace loss; not a downloaded artifact",
+  "reportLogLines": [
+    1306,
+    1544
+  ],
+  "failureContextLogLines": [
+    1259,
+    1305
+  ],
+  "passed": false,
+  "scope": {
+    "full": true,
+    "modes": [
+      "Software2D",
+      "WebGL2"
+    ],
+    "scenarios": "all"
+  },
+  "results": [
+    {
+      "mode": "Software2D",
+      "status": "failed",
+      "checks": 88,
+      "surface": {
+        "kind": "Software2D"
+      }
+    },
+    {
+      "mode": "WebGL2",
+      "status": "failed",
+      "checks": 118,
+      "surface": {
+        "kind": "WebGL2",
+        "device": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+      }
+    }
+  ],
+  "failures": [
+    {
+      "mode": "Software2D",
+      "file": "tests/geometry-authoring-browser.mjs",
+      "line": 98,
+      "assertion": "Expected rect [20,40,140,30]; actual [20,10,40,160]",
+      "relationshipToNewerFix": "Exact same geometry assertion as f36; the newer geometry test adds parent-selection frame/scene barriers and exact parent size assertions."
+    },
+    {
+      "mode": "WebGL2",
+      "file": "tests/region-paints-browser.mjs",
+      "line": 251,
+      "assertion": "NetworkBucketButton is not ready for native pointer input: visible false; selection [2], renderedFrames 42, sceneFrames 136",
+      "relationshipToNewerFix": "Same region vector-entry failure point as local second full run; the newer region test adds keyboard-selection frame/scene barriers and exact vector entry assertion."
+    }
+  ],
+  "screenshotTimeoutObserved": false
+}

@@ -1,0 +1,204 @@
+name: FerroDesign generated references
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/ferrodesign-editor]
+    # Run when a shared text property changes the compiled theme bindings.
+    paths:
+      - .github/workflows/ferrodesign-generated-references.yml
+      - src/FerroUI.Base/media/text_formatting/**
+      - src/FerroUI.Controls/text_box.rs
+      - src/FerroUI.Controls/presenters/text_presenter.rs
+      - src/FerroUI.Themes.Simple/Controls/TextBox.xaml
+      - src/FerroUI.Themes.Fluent/Controls/TextBox.xaml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ferrodesign-references-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  references:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      CARGO_BUILD_JOBS: 1
+      CARGO_TERM_COLOR: always
+      CARGO_INCREMENTAL: '0'
+      CARGO_PROFILE_DEV_DEBUG: '0'
+      CARGO_PROFILE_TEST_DEBUG: '0'
+      CARGO_PROFILE_TEST_CODEGEN_UNITS: '16'
+      CARGO_TARGET_DIR: ${{ github.workspace }}/target/generated-references
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          toolchain: 1.99.0
+
+      - name: Restore generator dependencies and compiled framework
+        id: build-cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/generated-references
+          key: ferroui-generated-references-${{ runner.os }}-rust1.99.0-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            ferroui-generated-references-${{ runner.os }}-rust1.99.0-${{ hashFiles('Cargo.lock') }}-
+
+      - name: Prepare framework test prerequisites
+        run: |
+          set -euo pipefail
+          mkdir -p reference-report/logs
+          # The canonical Simple-theme unit-test graph already includes Desktop
+          # and Skia as dev dependencies. This does not change FerroDesign's
+          # Vello-only application graph or its independent renderer gates.
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            pkg-config libfontconfig1-dev libfreetype6-dev fonts-dejavu-core
+          pkg-config --modversion fontconfig freetype2
+
+      - name: Regenerate registered Rust paths
+        id: rust_paths
+        run: |
+          set -euo pipefail
+          cargo test --locked --manifest-path Cargo.toml -p ferroui-markup-xaml-tests --lib emitter::rust_paths_tests::regenerate_rust_paths_check --jobs 1 -- --ignored --exact 2>&1 | tee reference-report/logs/rust-paths-generate.log
+
+      - name: Regenerate Fluent compiled XAML and runtime metadata
+        id: fluent
+        run: |
+          set -euo pipefail
+          cargo test --locked --manifest-path Cargo.toml -p ferroui-themes-fluent --lib tests::compiled_xaml_tests::regenerate_compiled_xaml --jobs 1 -- --ignored --exact 2>&1 | tee reference-report/logs/fluent-generate.log
+
+      - name: Regenerate Simple compiled XAML and runtime metadata
+        id: simple
+        run: |
+          set -euo pipefail
+          cargo test --locked --manifest-path Cargo.toml -p ferroui-themes-simple --lib tests::compiled_xaml_tests::regenerate_compiled_xaml --jobs 1 -- --ignored --exact 2>&1 | tee reference-report/logs/simple-generate.log
+
+      - name: Recompile and verify the registered Rust-path reference
+        id: rust_paths_check
+        run: |
+          set -euo pipefail
+          # Recompile after writing the include_str!/included source reference.
+          cargo test --locked --manifest-path Cargo.toml -p ferroui-markup-xaml-tests --lib emitter::rust_paths_tests::rust_paths_check_is_up_to_date --jobs 1 -- --exact --test-threads=1 2>&1 | tee reference-report/logs/rust-paths-check.log
+
+      - name: Verify Fluent runtime emitter and build-script reference checks
+        id: fluent_check
+        run: |
+          set -euo pipefail
+          # Runs both existing drift tests; the generator remains ignored.
+          cargo test --locked --manifest-path Cargo.toml -p ferroui-themes-fluent --lib tests::compiled_xaml_tests --jobs 1 -- --test-threads=1 2>&1 | tee reference-report/logs/fluent-check.log
+
+      - name: Verify Simple runtime emitter and build-script reference checks
+        id: simple_check
+        run: |
+          set -euo pipefail
+          cargo test --locked --manifest-path Cargo.toml -p ferroui-themes-simple --lib tests::compiled_xaml_tests --jobs 1 -- --test-threads=1 2>&1 | tee reference-report/logs/simple-check.log
+
+      - name: Collect generated files, exact source provenance and output hashes
+        if: always()
+        env:
+          RUST_PATHS_OUTCOME: ${{ steps.rust_paths.outcome }}
+          FLUENT_OUTCOME: ${{ steps.fluent.outcome }}
+          SIMPLE_OUTCOME: ${{ steps.simple.outcome }}
+          RUST_PATHS_CHECK_OUTCOME: ${{ steps.rust_paths_check.outcome }}
+          FLUENT_CHECK_OUTCOME: ${{ steps.fluent_check.outcome }}
+          SIMPLE_CHECK_OUTCOME: ${{ steps.simple_check.outcome }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import shutil
+          import subprocess
+
+          report = Path("reference-report")
+          report.mkdir(exist_ok=True)
+          groups = {
+              "rust_paths": ["tests/FerroUI.Markup.Xaml.UnitTests/emitter/rust_paths_check.rs"],
+              "fluent": ["src/FerroUI.Themes.Fluent/compiled_xaml.rs", "src/FerroUI.Themes.Fluent/compiled_xaml.xamlmeta"],
+              "simple": ["src/FerroUI.Themes.Simple/compiled_xaml.rs", "src/FerroUI.Themes.Simple/compiled_xaml.xamlmeta"],
+          }
+          outcomes = {
+              step: os.environ.get(f"{step.upper()}_OUTCOME", "unknown")
+              for step in (*groups, "rust_paths_check", "fluent_check", "simple_check")
+          }
+          def command(*args):
+              return subprocess.check_output(args, text=True).strip()
+
+          files = {}
+          for group, paths in groups.items():
+              # Failed/skipped generators never masquerade as fresh output.
+              if outcomes[group] != "success":
+                  continue
+              for name in paths:
+                  source = Path(name)
+                  destination = report / "generated" / name
+                  destination.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copy2(source, destination)
+                  original = subprocess.check_output(["git", "show", f"HEAD:{name}"])
+                  files[name] = {
+                      "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+                      "source_sha256": hashlib.sha256(original).hexdigest(),
+                      "generator": group,
+                  }
+          provenance = {
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "source_commit": command("git", "rev-parse", "HEAD"),
+              "source_tree": command("git", "rev-parse", "HEAD^{tree}"),
+              "event_sha": os.environ["GITHUB_SHA"],
+              "ref": os.environ["GITHUB_REF"],
+              "run_id": os.environ["GITHUB_RUN_ID"],
+              "run_attempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "run_url": f'{os.environ["GITHUB_SERVER_URL"]}/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{os.environ["GITHUB_RUN_ID"]}',
+              "rustc": command("rustc", "--version", "--verbose"),
+              "cargo": command("cargo", "--version"),
+              "cargo_lock_sha256": hashlib.sha256(Path("Cargo.lock").read_bytes()).hexdigest(),
+              "steps": outcomes,
+              "all_generators_and_drift_checks_passed": all(value == "success" for value in outcomes.values()),
+              "files": files,
+          }
+          (report / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
+          if files:
+              patch = subprocess.check_output(["git", "diff", "--binary", "--", *files])
+              (report / "generated-references.patch").write_bytes(patch)
+              # Publish the generated UTF-8 diff alongside its source/hash
+              # provenance so it can be reviewed through ordinary job logs.
+              # This contains repository source changes only, not credentials
+              # or the artifact archive, and never marks a failed generator fresh.
+              print("FERROUI_GENERATED_PATCH_BEGIN")
+              print(patch.decode("utf-8"), end="")
+              print("FERROUI_GENERATED_PATCH_END")
+          shutil.copy2(".github/workflows/ferrodesign-generated-references.yml", report / "workflow.yml")
+          shutil.copy2("Cargo.lock", report / "Cargo.lock")
+          print(json.dumps(provenance, indent=2))
+          PY
+
+      - name: Upload generated references, logs and provenance for review
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: FerroUI-generated-references-${{ github.sha }}
+          path: reference-report
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Cache partial generator build for subsequent runs
+        if: always() && steps.build-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/generated-references
+          key: ${{ steps.build-cache.outputs.cache-primary-key }}

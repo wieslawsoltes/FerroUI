@@ -1,0 +1,153 @@
+{
+  "recordedAtUtc": "2026-10-22T14:59:17.619697+00:00",
+  "repository": "wieslawsoltes/FerroUI",
+  "applicationSource": "93a896797a37dd965a988c9e80e9187800d803fb",
+  "currentHarness": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+  "scope": "Mixed source-tagged prior results and illustrative pre-recovery screenshots; see README for exact per-record identities and limits. Subsequent recovered-runtime terminal results are preserved in the f2bb1d61 evidence index.",
+  "recovery": {
+    "originalUploadedBlobs": 26,
+    "method": "Recovered uploaded Git blobs after loss of local checkout; subsequent CI decoded logs restored from retained tool responses or retrieved again. Original archived raw reports/logs are kept byte-for-byte.",
+    "lostEvidence": "The latest keyboard/network focused raw reports were not recovered; their counts are contextual only.",
+    "derivedFiles": "This README, report indexes and manifest were reconstructed from preserved raw records after recovery. Performance provenance explicitly identifies its regenerated metadata."
+  },
+  "selfExcluded": true,
+  "files": {
+    "README.md": {
+      "bytes": 10646,
+      "sha256": "ca242be83e06012cd5dea0a2b0dac2f66cc0e6b2d17a8f37366bac73236510be"
+    },
+    "Software2D-bucket-hover-face.png": {
+      "bytes": 83606,
+      "sha256": "39a70e1acbd6ac97f84e4d7b269c9359fd18b7c4da7a18bb7b30e587a8a1fea0"
+    },
+    "Software2D-initial.png": {
+      "bytes": 187960,
+      "sha256": "14ace8cd02acaec6fa68055c284956905ca52c999e268fec187018b657d52fe2"
+    },
+    "Software2D-native-matching-fill.png": {
+      "bytes": 81122,
+      "sha256": "cfac9314108aa48cd93e69f217de26d3e4b4b408bb829119183bdb99a2d4db22"
+    },
+    "Software2D-stacked-layout-guides.png": {
+      "bytes": 54690,
+      "sha256": "66896fdc463e122d0b26566c33ed1c54034c4f38a0e4b3bbf1c0aecb94576aec"
+    },
+    "WebGL2-initial.png": {
+      "bytes": 187503,
+      "sha256": "6c8f778a92c2ff61c9c35649fe66272f4685b046c9a7765a214b0d0796592463"
+    },
+    "WebGL2-native-matching-fill.png": {
+      "bytes": 81331,
+      "sha256": "2b719df923d45f657187b1172477274e23c9cacf5ae607106695676f330de4f8"
+    },
+    "WebGL2-stacked-layout-guides.png": {
+      "bytes": 54680,
+      "sha256": "c5a675cf8833e05515b6237093995bcdd660e8e86bffb6029c6483affd6ba46a"
+    },
+    "browser-build-oom.log": {
+      "bytes": 181859,
+      "sha256": "685f719231c2790b431740b9a5bee66ec7dcaee3fc8fd7c548f6b9edc4170973"
+    },
+    "ci-3a0bf1f1-browser-failure-provenance.json": {
+      "bytes": 1966,
+      "sha256": "0d9d780fbce85583d0d9a6d34d33c815c869dcac9723a88f9b06c5cbae8cbf00"
+    },
+    "ci-3a0bf1f1-logs.zip": {
+      "bytes": 148485,
+      "sha256": "f71e20f67afb94de55ed7af9495bc1614c8e7953518d473c2fe147eccc282473"
+    },
+    "ci-3a0bf1f1-native-log-provenance.json": {
+      "bytes": 748,
+      "sha256": "327511efad52fe3f03a0ed0c008066ab036f855037039447ef441e9b9b1c3a6c"
+    },
+    "ci-3a0bf1f1-terminal-ferrodesign-39771204240.json": {
+      "bytes": 1072,
+      "sha256": "572a8da0b9a9e87b100841fa4ab4000999046b24bef7afbdbf25a572eeab03f3"
+    },
+    "ci-f36dabf7-logs.zip": {
+      "bytes": 97084,
+      "sha256": "32b0a325bb96b27c41dee233ef809bee54fbe1bded61dbc2d7d6242c28b3a873"
+    },
+    "core-tests.log": {
+      "bytes": 41821,
+      "sha256": "53c9f69f0990e25355552789487aa537c0dcd583f58a2a9ffedbfce08b43240d"
+    },
+    "failed-browser-first-run.zip": {
+      "bytes": 133339,
+      "sha256": "bc1bcae2660e5ad0388fc918c5445af5af5b1ba2bab1a253ef52169fe5ac5845"
+    },
+    "failed-browser-second-run.zip": {
+      "bytes": 127308,
+      "sha256": "e7aef3c3bdc2025721c22a509e06a4134dd6242b3a4e7079170fbfe9aed3f9e6"
+    },
+    "failed-ci-browser-f36dabf7.zip": {
+      "bytes": 194753,
+      "sha256": "12785009514e04d87004df6251ec0907d4e04bc9f62bc226a57dec3785f1ebfd"
+    },
+    "framework-ci-3a0bf1f1-summary.json": {
+      "bytes": 74420,
+      "sha256": "5241c08467a9a0c8f647533fb55af3835b1a08ab118424fd3e770f467a5cdfab"
+    },
+    "framework-ci-summary.json": {
+      "bytes": 50592,
+      "sha256": "44ebf90f439144bca825d2b6c838525d54ed912aca3d06af7b7c0b825fd2f77e"
+    },
+    "host-browser-ci-3a0bf1f1-provenance.json": {
+      "bytes": 1127,
+      "sha256": "cc965b59cde6f2ac727f3f50fd78e715d15aea176df92fd96d81cc90dca5e64d"
+    },
+    "indexeddb-ci-3a0bf1f1-extracted-log.json": {
+      "bytes": 887,
+      "sha256": "3b115b18a1a541fc0eee2dd0c3b9a13e35c169c7eb95edff03643276344f7332"
+    },
+    "native-performance/performance-extracted-log.json": {
+      "bytes": 7493,
+      "sha256": "21c34a563a17f290ae3ab9eb2aa0f8e911c03d524dfcba411bed4f82fa87f578"
+    },
+    "native-performance/performance-step.log": {
+      "bytes": 17829,
+      "sha256": "5ff6dc4f2799030ce9edeef66f07ffb6a7a3094d703ca3a66ef6bb0c9ba8fb31"
+    },
+    "native-performance/provenance.json": {
+      "bytes": 2761,
+      "sha256": "49b276a6e247d6d9d1384f03e6adfe2aae1985210483eec34ed642b6d76d4ad8"
+    },
+    "native-tests.log": {
+      "bytes": 35565,
+      "sha256": "7104567188df0d50c163baad5da5496c2580f9d17894f970051200f1d1d7b8e8"
+    },
+    "original-logs.zip": {
+      "bytes": 65508,
+      "sha256": "adb4b3ad141be405c5374113049bfa9d59c7cb6551cdb5ec0c9779e198835a39"
+    },
+    "prior-browser-summary.json": {
+      "bytes": 40246,
+      "sha256": "45f95a92a4213a8f183d7eec677f65d5de699c438473b2a13804d4a53afaee2c"
+    },
+    "renderer-graphs/aarch64-apple-darwin.txt": {
+      "bytes": 34698,
+      "sha256": "6721fb1242a17c6f2f4208e5679ffcd4d09fbdc530710b46a1fbf91f46cf37ed"
+    },
+    "renderer-graphs/wasm32-unknown-emscripten.txt": {
+      "bytes": 29191,
+      "sha256": "9e392f7d03715755c238a3bd02d7b81b64c1b3bdbbb812adda3a7652356035d6"
+    },
+    "renderer-graphs/x86_64-apple-darwin.txt": {
+      "bytes": 34698,
+      "sha256": "6721fb1242a17c6f2f4208e5679ffcd4d09fbdc530710b46a1fbf91f46cf37ed"
+    },
+    "renderer-graphs/x86_64-pc-windows-msvc.txt": {
+      "bytes": 36606,
+      "sha256": "c893bffbe513b793c6ad285a6f68af663687ddad31e29988eb671affe7b3434a"
+    },
+    "renderer-graphs/x86_64-unknown-linux-gnu.txt": {
+      "bytes": 44701,
+      "sha256": "f64e77632de2b1c4d747929279f84e4c4cab356228c1d24b1cd0ed803b2bb87a"
+    },
+    "targeted-palette-report.zip": {
+      "bytes": 30952,
+      "sha256": "10466f77d45a3b0470574189bea1817da72abe67a0c605b5b0ba36723444b8d6"
+    }
+  },
+  "updatedAtUtc": "2026-10-22T16:19:22.908703+00:00"
+}

@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "source": "3ba7d1b76c3a28d31f41e4bf7ef410af885d6d7f",
+  "workflow": "FerroDesign native feedback",
+  "run": 39866066908,
+  "job": 120130749670,
+  "status": "completed",
+  "conclusion": "failure",
+  "run_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39866066908",
+  "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39866066908/job/120130749670",
+  "terminal_observed_utc": "2026-10-22T22:53:45Z",
+  "scope": "Exact-source native framework filters passed; the FerroDesign application failed during compiled-XAML generation before its test binary could run.",
+  "checkout": {
+    "full_sha_log_line": 129,
+    "command_log_line": 128,
+    "value": "3ba7d1b76c3a28d31f41e4bf7ef410af885d6d7f"
+  },
+  "toolchain": {
+    "log_line": 196,
+    "rustc": "1.99.0 (b940084d7 2026-09-28)",
+    "target": "x86_64-unknown-linux-gnu"
+  },
+  "framework_results": [
+    {
+      "package": "ferroui-vello",
+      "filter": "unhinted_",
+      "command_log_line": 309,
+      "tests_log_lines": [
+        1402,
+        1409
+      ],
+      "line": 1411,
+      "text": "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 516 filtered out; finished in 0.38s",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 516,
+      "duration_seconds": 0.38,
+      "independently_counted_passed_test_names": 8
+    },
+    {
+      "package": "ferroui-base",
+      "filter": "paragraph",
+      "command_log_line": 1417,
+      "tests_log_lines": [
+        2293,
+        2307
+      ],
+      "line": 2309,
+      "text": "test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 4376 filtered out; finished in 0.03s",
+      "passed": 15,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 4376,
+      "duration_seconds": 0.03,
+      "independently_counted_passed_test_names": 15
+    },
+    {
+      "package": "ferroui-controls",
+      "filter": "paragraph",
+      "command_log_line": 1418,
+      "tests_log_lines": [
+        2590,
+        2605
+      ],
+      "line": 2607,
+      "text": "test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 4441 filtered out; finished in 0.17s",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 4441,
+      "duration_seconds": 0.17,
+      "independently_counted_passed_test_names": 16
+    },
+    {
+      "package": "ferroui-controls",
+      "filter": "text_box_tests::",
+      "command_log_line": 1419,
+      "tests_log_lines": [
+        2886,
+        3059
+      ],
+      "line": 3061,
+      "text": "test result: ok. 174 passed; 0 failed; 0 ignored; 0 measured; 4283 filtered out; finished in 2.64s",
+      "passed": 174,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 4283,
+      "duration_seconds": 2.64,
+      "independently_counted_passed_test_names": 174
+    },
+    {
+      "package": "ferroui-controls",
+      "filter": "text_box_history::",
+      "command_log_line": 1420,
+      "tests_log_lines": [
+        3340,
+        3344
+      ],
+      "line": 3346,
+      "text": "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 4452 filtered out; finished in 0.06s",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 4452,
+      "duration_seconds": 0.06,
+      "independently_counted_passed_test_names": 5
+    }
+  ],
+  "application": {
+    "compiled": false,
+    "tests_executed": false,
+    "command_log_line": 3348,
+    "command": "cargo +1.99.0 test --locked -p ferrodesign-app --lib --jobs 1 -- --test-threads=1",
+    "error_code": "FRN2000",
+    "error": "Unable to resolve suitable regular or attached property Watermark on type FerroUI.Controls:FerroUI.Controls.TextBox",
+    "location": "ui/Editor.xaml(224,103)",
+    "error_log_lines": [
+      3741,
+      3807,
+      3810
+    ],
+    "custom_build_command_failure_log_line": 3742,
+    "build_script_exit_status": 1,
+    "build_script_exit_log_line": 3745,
+    "cargo_exit_code": 101,
+    "cargo_exit_log_line": 3811,
+    "application_test_result_lines": []
+  },
+  "followup": {
+    "change": "Use registered PlaceholderText=\"Mixed\" in compiled XAML and placeholder_text() in the existing native padding assertion.",
+    "source_confirmation": [
+      {
+        "path": "src/FerroUI.Controls/text_box.rs",
+        "lines": [
+          1377,
+          1378,
+          1384,
+          1387,
+          1875,
+          1876,
+          1885,
+          1887
+        ],
+        "finding": "PlaceholderText is the registered styled property; watermark_property() and watermark() are deprecated Rust forwarding aliases."
+      },
+      {
+        "path": "src/FerroUI.Themes.Simple/compiled_xaml.rs",
+        "lines": [
+          16542
+        ],
+        "finding": "Compiled TextBox theme binds placeholder_text_property()."
+      },
+      {
+        "path": "src/FerroUI.Themes.Fluent/compiled_xaml.rs",
+        "lines": [
+          55800
+        ],
+        "finding": "Compiled TextBox theme binds placeholder_text_property()."
+      },
+      {
+        "path": "samples/FerroDesign/crates/ferrodesign-app/ui/Editor.xaml",
+        "lines": [
+          224
+        ],
+        "finding": "Follow-up PaddingField uses PlaceholderText=\"Mixed\"."
+      },
+      {
+        "path": "samples/FerroDesign/crates/ferrodesign-app/src/shell/layout_padding_tests.rs",
+        "lines": [
+          181
+        ],
+        "finding": "Follow-up native assertion uses placeholder_text()."
+      }
+    ],
+    "execution": "Read-only source confirmation only. No completed application, WebAssembly or browser validation of the follow-up is established by this record."
+  },
+  "not_established": [
+    "FerroDesign application compilation or application test execution at this source",
+    "Full document-engine suite execution in this native-feedback job",
+    "WebAssembly build or browser execution in this native-feedback job",
+    "Execution success for the follow-up PlaceholderText correction",
+    "Source-mtime helper or build-time speedup validation"
+  ],
+  "files": {
+    "native-feedback-job.log": {
+      "bytes": 593668,
+      "sha256": "4d394cea69a3c0c888e78be13b118b41d5b5ef673c5fb3258a8221a833a84cd3",
+      "encoding": "UTF-8 with BOM",
+      "physical_lines": 3853
+    },
+    "jobs-api.json": {
+      "bytes": 2198,
+      "sha256": "54bade039e23b5159a5288c30722dd322d686343d1d7829c26d722f5b3169199",
+      "encoding": "UTF-8"
+    }
+  },
+  "provenance": {
+    "log": "Previously saved GitHub connector decoded job log; original saved bytes left unchanged.",
+    "api": "Previously saved normalized terminal jobs response; original saved bytes left unchanged.",
+    "line_numbering": "One-based lines after strict UTF-8 BOM decoding; no lines removed or reordered.",
+    "extraction": "Every reported result count was checked against distinct passed test names in its own logged suite. The filters overlap, so counts are not summed as a unique-test total.",
+    "terminal_observation": "Retained from the original capture summary; the normalized jobs response does not include observation timestamps.",
+    "binary_artifact_downloaded": false
+  }
+}

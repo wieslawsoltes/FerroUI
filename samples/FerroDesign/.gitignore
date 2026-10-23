@@ -1,0 +1,10 @@
+/target/
+/dist/
+/artifacts/
+/.tools/
+/browser-report/
+/node_modules/
+/test-results/
+/playwright-report/
+/ferrodesign-autosave.json
+.DS_Store

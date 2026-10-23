@@ -1,0 +1,384 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Name="EditorRoot" Background="#E5E5E5" FontFamily="fonts:Inter#Inter" FontSize="11">
+  <UserControl.Styles>
+    <Style Selector="Button">
+      <Setter Property="MinHeight" Value="28"/>
+      <Setter Property="MinWidth" Value="24"/>
+      <Setter Property="Padding" Value="8,5"/>
+      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button:pointerover"><Setter Property="Background" Value="#F0F0F0"/></Style>
+    <Style Selector="Button.active">
+      <Setter Property="Background" Value="#E5F4FF"/>
+      <Setter Property="Foreground" Value="#007BE5"/>
+    </Style>
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#0D99FF"/>
+      <Setter Property="Foreground" Value="White"/>
+    </Style>
+    <Style Selector="Button.constraint">
+      <Setter Property="MinWidth" Value="0"/><Setter Property="MinHeight" Value="0"/>
+      <Setter Property="Padding" Value="0"/><Setter Property="CornerRadius" Value="2"/>
+      <Setter Property="Background" Value="#BDBDBD"/>
+    </Style>
+    <Style Selector="Button.constraint.active"><Setter Property="Background" Value="#0D99FF"/></Style>
+    <Style Selector="Button.tool">
+      <Setter Property="Width" Value="38"/><Setter Property="Height" Value="38"/>
+      <Setter Property="Padding" Value="9"/><Setter Property="CornerRadius" Value="8"/>
+    </Style>
+    <Style Selector="Button.layer">
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+      <Setter Property="Padding" Value="6,3"/>
+      <Setter Property="Height" Value="29"/>
+      <Setter Property="CornerRadius" Value="4"/>
+    </Style>
+    <Style Selector="TextBox">
+      <Setter Property="MinHeight" Value="28"/><Setter Property="FontSize" Value="11"/>
+      <Setter Property="Padding" Value="8,4"/><Setter Property="CornerRadius" Value="5"/>
+      <Setter Property="BorderThickness" Value="0"/><Setter Property="Background" Value="#F5F5F5"/>
+    </Style>
+    <Style Selector="TextBlock.label"><Setter Property="Foreground" Value="#777777"/><Setter Property="FontSize" Value="10"/></Style>
+    <Style Selector="TextBlock.heading"><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="FontSize" Value="11"/></Style>
+    <Style Selector="Border.rule"><Setter Property="Background" Value="#EEEEEE"/><Setter Property="Height" Value="1"/><Setter Property="Margin" Value="0,12"/></Style>
+    <Style Selector="ComboBox">
+      <Setter Property="MinHeight" Value="28"/><Setter Property="FontSize" Value="11"/>
+      <Setter Property="Padding" Value="8,4"/><Setter Property="Background" Value="#F5F5F5"/>
+      <Setter Property="BorderThickness" Value="0"/><Setter Property="CornerRadius" Value="5"/>
+    </Style>
+  </UserControl.Styles>
+  <Grid Name="Workspace" ColumnDefinitions="48,248,*,288">
+    <Grid Name="CanvasHost" Grid.Column="2" ClipToBounds="True">
+      <Canvas Name="InlineTextHost" IsVisible="False">
+        <TextBox Name="InlineTextBox" AcceptsReturn="True" TextWrapping="Wrap"
+                 MinWidth="0" MinHeight="0" Padding="0" BorderThickness="0"
+                 CornerRadius="0" Background="Transparent"
+                 HorizontalContentAlignment="Left" VerticalContentAlignment="Top"/>
+      </Canvas>
+    </Grid>
+    <Border Name="NavigationRail" Grid.Column="0" Background="#F7F7F7" BorderBrush="#D9D9D9" BorderThickness="0,0,1,0">
+      <Grid RowDefinitions="48,*,48">
+        <Button Name="MenuButton" Classes="tool" HorizontalAlignment="Center" ToolTip.Tip="FerroDesign menu"/>
+        <StackPanel Grid.Row="1" Spacing="8" HorizontalAlignment="Center" Margin="0,12,0,0">
+          <Button Name="FileRailButton" Classes="tool active" ToolTip.Tip="File and layers"/>
+          <Button Name="AssetsRailButton" Classes="tool" ToolTip.Tip="Components and assets"/>
+          <Button Name="ToolsRailButton" Classes="tool" ToolTip.Tip="Tools and actions"/>
+          <Button Name="VariablesRailButton" Classes="tool" ToolTip.Tip="Local variables and styles"/>
+          <Button Name="CommentsRailButton" Classes="tool" ToolTip.Tip="Comments"/>
+          <Button Name="HistoryRailButton" Classes="tool" ToolTip.Tip="Undo history"/>
+        </StackPanel>
+        <Button Name="ThemeButton" Grid.Row="2" Classes="tool" HorizontalAlignment="Center" ToolTip.Tip="Toggle canvas theme"/>
+      </Grid>
+    </Border>
+    <Border Name="LeftPanel" Grid.Column="1" Background="White" BorderBrush="#D9D9D9" BorderThickness="0,0,1,0">
+      <Grid RowDefinitions="78,Auto,Auto,*,32">
+        <StackPanel Margin="16,19,12,0" Spacing="8">
+          <Grid ColumnDefinitions="*,30">
+            <TextBlock Name="FileTitle" Text="Orbit · Mobile banking" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <Button Name="FileActionsButton" Grid.Column="1" Content="···" Padding="0" ToolTip.Tip="File actions"/>
+          </Grid>
+          <TextBlock Text="Drafts / FerroDesign" Classes="label"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Margin="12,0,12,12" Spacing="4">
+          <Grid ColumnDefinitions="*,28" Margin="4,0,0,4">
+            <TextBlock Text="Pages" Classes="heading" VerticalAlignment="Center"/>
+            <Button Name="AddPageButton" Grid.Column="1" Content="+" ToolTip.Tip="Add page"/>
+          </Grid>
+          <ScrollViewer Name="PagesViewport" MaxHeight="155" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel Name="PagesHost" Spacing="2"/>
+          </ScrollViewer>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Margin="12,0,12,8" Spacing="8">
+          <Border Height="1" Background="#EEEEEE" Margin="-12,0"/>
+          <Grid ColumnDefinitions="*,28" Margin="4,4,0,0">
+            <TextBlock Name="LeftTitle" Text="Layers" Classes="heading" VerticalAlignment="Center"/>
+            <Button Name="CollapseLayersButton" Grid.Column="1" Content="⌃" ToolTip.Tip="Expand or collapse all"/>
+          </Grid>
+          <TextBox Name="LayerSearch" PlaceholderText="Search layers…"/>
+        </StackPanel>
+        <ScrollViewer Name="LayersViewport" Grid.Row="3" HorizontalScrollBarVisibility="Disabled">
+          <ItemsControl Name="LayersHost" Margin="8,0,8,12">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+          </ItemsControl>
+        </ScrollViewer>
+        <TextBlock Name="EmptyLayers" Grid.Row="3" Text="Draw a frame or shape to get started." Margin="20,12" TextWrapping="Wrap" Foreground="#888888" IsVisible="False"/>
+        <Border Grid.Row="4" BorderBrush="#EEEEEE" BorderThickness="0,1,0,0" Padding="12,9">
+          <TextBlock Name="DocumentStatus" Text="All changes saved locally" FontSize="9" Foreground="#777777"/>
+        </Border>
+      </Grid>
+    </Border>
+    <Border Name="RightPanel" Grid.Column="3" Background="White" BorderBrush="#D9D9D9" BorderThickness="1,0,0,0">
+      <Grid RowDefinitions="48,40,*">
+        <Grid ColumnDefinitions="*,34,64" Margin="12,8">
+          <Border Width="28" Height="28" CornerRadius="14" Background="#7B61FF" HorizontalAlignment="Left">
+            <TextBlock Text="WS" FontSize="10" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          </Border>
+          <Button Name="PresentButton" Grid.Column="1" ToolTip.Tip="Present prototype"/>
+          <Button Name="ShareButton" Grid.Column="2" Classes="primary" Content="Share"/>
+        </Grid>
+        <Border Grid.Row="1" BorderBrush="#EEEEEE" BorderThickness="0,0,0,1">
+          <StackPanel Orientation="Horizontal" Spacing="4" Margin="12,0">
+            <Button Name="DesignTab" Content="Design" Classes="active"/>
+            <Button Name="PrototypeTab" Content="Prototype"/>
+            <Button Name="InspectTab" Content="Inspect"/>
+          </StackPanel>
+        </Border>
+        <ScrollViewer Name="InspectorViewport" Grid.Row="2" HorizontalScrollBarVisibility="Disabled">
+          <StackPanel Name="Inspector" Margin="16,14,16,24" Spacing="8">
+            <Grid ColumnDefinitions="*,28,28">
+              <TextBlock Name="SelectionTitle" Text="Page" Classes="heading" VerticalAlignment="Center"/>
+              <Button Name="VisibleButton" Grid.Column="1" ToolTip.Tip="Show or hide layer"/>
+              <Button Name="LockedButton" Grid.Column="2" ToolTip.Tip="Lock or unlock layer"/>
+            </Grid>
+            <TextBox Name="NameField" PlaceholderText="Layer name"/>
+            <Button Name="SelectMatchingButton" Content="Select same…" HorizontalContentAlignment="Left" IsVisible="False"/>
+            <Button Name="LayoutGridSettingsButton" Content="Layout grid" HorizontalContentAlignment="Left" IsVisible="False"/>
+            <StackPanel Name="VectorOptions" Spacing="8" IsVisible="False">
+              <Button Name="EditVectorButton" Content="Edit vector" ToolTip.Tip="Edit vector points (Enter)" HorizontalContentAlignment="Left"/>
+              <Button Name="ConvertNetworkButton" Content="Convert to vector network"/>
+              <Button Name="DoneVectorButton" Content="Done editing" Classes="primary" IsVisible="False"/>
+              <StackPanel Name="VectorPointOptions" Spacing="8" IsVisible="False">
+                <UniformGrid Columns="3">
+                  <Button Name="VectorSelectButton" Content="Points"/>
+                  <Button Name="VectorBendButton" Content="Bend" ToolTip.Tip="Drag a segment to bend its curve"/>
+                  <Button Name="VectorEraseButton" Content="Erase" ToolTip.Tip="Remove a segment without reconnecting it"/>
+                </UniformGrid>
+                <UniformGrid Columns="3">
+                  <Button Name="CornerPointButton" Content="Corner"/>
+                  <Button Name="SmoothPointButton" Content="Smooth"/>
+                  <Button Name="SymmetricPointButton" Content="Mirror" ToolTip.Tip="Make both handles symmetric"/>
+                </UniformGrid>
+                <StackPanel Name="NetworkOptions" Spacing="6" IsVisible="False">
+                  <UniformGrid Columns="2"><Button Name="NetworkPenButton" Content="Connect tool"/><Button Name="NetworkJoinButton" Content="Join selected"/></UniformGrid>
+                  <UniformGrid Columns="2"><Button Name="NetworkFillButton" Content="Fill region"/><Button Name="NetworkWeldButton" Content="Weld vertices"/></UniformGrid>
+                  <Button Name="NetworkDetectFacesButton" Content="Fill all closed regions"/>
+                  <Button Name="NetworkBucketButton" Content="Paint bucket" ToolTip.Tip="Preview a closed face, then drag to paint faces. Hold Shift before dragging to clear fills. Escape cancels the stroke."/>
+                  <UniformGrid Columns="2"><Button Name="NetworkRegionPaintsButton" Content="Region paints"/><Button Name="NetworkRegionResetButton" Content="Use layer fills"/></UniformGrid>
+                  <TextBlock Text="Connect extends any vertex. Paint bucket previews faces; drag to fill, or hold Shift before dragging to clear. Escape cancels the stroke. Region paints edits its paint stack; Use layer fills restores inheritance." TextWrapping="Wrap" Classes="label"/>
+                </StackPanel>
+                <TextBlock Text="Drag a point or handle. Double-click a segment to add a point. Delete removes the selected point." TextWrapping="Wrap" Classes="label"/>
+              </StackPanel>
+            </StackPanel>
+            <StackPanel Name="PageInspector" Spacing="12">
+              <Border Classes="rule"/>
+              <TextBlock Text="Page background" Classes="heading"/>
+              <Grid ColumnDefinitions="28,8,*">
+                <Border Name="PageBackgroundSwatch" Width="26" Height="26" CornerRadius="4" BorderBrush="#D9D9D9" BorderThickness="1"/>
+                <TextBox Name="PageBackgroundField" Grid.Column="2" ToolTip.Tip="Canvas background color"/>
+              </Grid>
+              <Border Classes="rule"/>
+              <TextBlock Text="Local resources" Classes="heading"/>
+              <TextBlock Name="PageResourcesSummary" Classes="label" TextWrapping="Wrap"/>
+              <Button Name="PageStylesButton" Content="Styles" HorizontalContentAlignment="Left"/>
+              <Button Name="PageVariablesButton" Content="Variables" HorizontalContentAlignment="Left"/>
+              <Button Name="PageComponentsButton" Content="Components" HorizontalContentAlignment="Left"/>
+              <Border Classes="rule"/>
+              <Button Name="PageFramePresetsButton" Content="Frame presets…" HorizontalContentAlignment="Left"/>
+            </StackPanel>
+            <StackPanel Name="DesignInspector" Spacing="8" IsVisible="False">
+              <UniformGrid Columns="6">
+                <Button Name="AlignLeftButton" ToolTip.Tip="Align left"/>
+                <Button Name="AlignCenterButton" ToolTip.Tip="Align horizontal centers"/>
+                <Button Name="AlignRightButton" ToolTip.Tip="Align right"/>
+                <Button Name="AlignTopButton" ToolTip.Tip="Align top"/>
+                <Button Name="AlignMiddleButton" ToolTip.Tip="Align vertical centers"/>
+                <Button Name="AlignBottomButton" ToolTip.Tip="Align bottom"/>
+              </UniformGrid>
+              <Border Classes="rule"/>
+              <TextBlock Text="Position" Classes="heading"/>
+              <Grid ColumnDefinitions="*,12,*">
+                <StackPanel Spacing="4"><TextBlock Text="X" Classes="label"/><TextBox Name="XField" Text="0"/></StackPanel>
+                <StackPanel Grid.Column="2" Spacing="4"><TextBlock Text="Y" Classes="label"/><TextBox Name="YField" Text="0"/></StackPanel>
+              </Grid>
+              <Grid ColumnDefinitions="*,12,*">
+                <StackPanel Spacing="4"><TextBlock Text="Rotation" Classes="label"/><TextBox Name="RotationField" Text="0"/></StackPanel>
+                <Button Name="FlipButton" Grid.Column="2" Content="Flip horizontal" VerticalAlignment="Bottom"/>
+              </Grid>
+              <Button Name="AffineButton" Content="Affine transform and skew…" HorizontalContentAlignment="Left"/>
+              <Border Classes="rule"/>
+              <Grid ColumnDefinitions="*,28"><TextBlock Text="Layout" Classes="heading" VerticalAlignment="Center"/><Button Name="AddLayoutButton" Grid.Column="1" Content="+" ToolTip.Tip="Add auto layout"/></Grid>
+              <Grid ColumnDefinitions="*,12,*">
+                <StackPanel Spacing="4"><TextBlock Text="W" Classes="label"/><TextBox Name="WidthField" Text="0"/></StackPanel>
+                <StackPanel Grid.Column="2" Spacing="4"><TextBlock Text="H" Classes="label"/><TextBox Name="HeightField" Text="0"/></StackPanel>
+              </Grid>
+              <Grid ColumnDefinitions="*,12,*">
+                <ComboBox Name="WidthSizingChoice" HorizontalAlignment="Stretch" ToolTip.Tip="Width sizing"/>
+                <ComboBox Name="HeightSizingChoice" Grid.Column="2" HorizontalAlignment="Stretch" ToolTip.Tip="Height sizing"/>
+              </Grid>
+              <CheckBox Name="ClipCheck" Content="Clip content" FontSize="11"/>
+              <Button Name="FramePresetsButton" Content="Create a preset frame…" HorizontalContentAlignment="Left"/>
+              <Button Name="EditLayoutButton" Content="Layout and grid placement…" HorizontalAlignment="Stretch" IsVisible="False"/>
+              <StackPanel Name="LayoutOptions" IsVisible="False" Spacing="8">
+                <UniformGrid Columns="3">
+                  <Button Name="LayoutRowButton" Content="Horizontal"/>
+                  <Button Name="LayoutColumnButton" Content="Vertical"/>
+                  <Button Name="LayoutGridButton" Content="Grid"/>
+                </UniformGrid>
+                <Grid ColumnDefinitions="*,12,*">
+                  <StackPanel Spacing="4"><TextBlock Text="Gap" Classes="label"/><TextBox Name="GapField" Text="12"/></StackPanel>
+                  <StackPanel Grid.Column="2" Spacing="4"><TextBlock Text="Padding" Classes="label"/><TextBox Name="PaddingField" Text="16" PlaceholderText="Mixed"/></StackPanel>
+                </Grid>
+                <Grid ColumnDefinitions="*,12,*">
+                  <StackPanel Spacing="4"><TextBlock Text="Cross gap" Classes="label"/><TextBox Name="CrossGapField"/></StackPanel>
+                  <StackPanel Grid.Column="2" Spacing="4"><TextBlock Text="Grid columns" Classes="label"/><TextBox Name="LayoutColumnsField"/></StackPanel>
+                </Grid>
+                <Grid ColumnDefinitions="*,12,*">
+                  <StackPanel Spacing="4"><TextBlock Text="Main alignment" Classes="label"/><ComboBox Name="LayoutMainChoice" HorizontalAlignment="Stretch"/></StackPanel>
+                  <StackPanel Grid.Column="2" Spacing="4"><TextBlock Text="Cross alignment" Classes="label"/><ComboBox Name="LayoutCrossChoice" HorizontalAlignment="Stretch"/></StackPanel>
+                </Grid>
+                <UniformGrid Columns="2"><Button Name="LayoutWrapButton" Content="Wrap"/><Button Name="LayoutReverseButton" Content="Reverse"/></UniformGrid>
+              </StackPanel>
+              <Border Classes="rule"/>
+              <TextBlock Text="Constraints" Classes="heading"/>
+              <Grid ColumnDefinitions="72,12,*">
+                <Border Width="72" Height="64" BorderBrush="#D9D9D9" BorderThickness="1" CornerRadius="4" Padding="8">
+                  <Grid ColumnDefinitions="8,*,8" RowDefinitions="8,*,8">
+                    <Button Name="ConstraintTop" Grid.Column="1" Classes="constraint" Width="22" Height="5" HorizontalAlignment="Center" ToolTip.Tip="Pin to top"/>
+                    <Button Name="ConstraintLeft" Grid.Row="1" Classes="constraint" Width="5" Height="18" VerticalAlignment="Center" ToolTip.Tip="Pin to left"/>
+                    <Border Grid.Column="1" Grid.Row="1" Width="22" Height="18" BorderBrush="#BDBDBD" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Button Name="ConstraintRight" Grid.Column="2" Grid.Row="1" Classes="constraint" Width="5" Height="18" VerticalAlignment="Center" ToolTip.Tip="Pin to right"/>
+                    <Button Name="ConstraintBottom" Grid.Column="1" Grid.Row="2" Classes="constraint" Width="22" Height="5" HorizontalAlignment="Center" ToolTip.Tip="Pin to bottom"/>
+                  </Grid>
+                </Border>
+                <StackPanel Grid.Column="2" Spacing="4">
+                  <Button Name="ConstraintCenterX" Content="Horizontal center" HorizontalContentAlignment="Left"/>
+                  <Button Name="ConstraintCenterY" Content="Vertical center" HorizontalContentAlignment="Left"/>
+                </StackPanel>
+              </Grid>
+              <Grid ColumnDefinitions="*,12,*">
+                <StackPanel Spacing="4"><TextBlock Text="Horizontal" Classes="label"/><ComboBox Name="HorizontalConstraint" HorizontalAlignment="Stretch"/></StackPanel>
+                <StackPanel Grid.Column="2" Spacing="4"><TextBlock Text="Vertical" Classes="label"/><ComboBox Name="VerticalConstraint" HorizontalAlignment="Stretch"/></StackPanel>
+              </Grid>
+              <Border Classes="rule"/>
+              <TextBlock Text="Appearance" Classes="heading"/>
+              <ComboBox Name="BlendModeChoice" HorizontalAlignment="Stretch" ToolTip.Tip="Blend the completed layer with the content underneath"/>
+              <Button Name="CompositingButton" Content="Masks and compositing…" HorizontalContentAlignment="Left"/>
+              <Grid ColumnDefinitions="*,12,*">
+                <StackPanel Spacing="4"><TextBlock Text="Opacity %" Classes="label"/><TextBox Name="OpacityField" Text="100"/></StackPanel>
+                <StackPanel Grid.Column="2" Spacing="4"><TextBlock Text="Corner radius" Classes="label"/><TextBox Name="RadiusField" Text="0"/></StackPanel>
+              </Grid>
+              <Grid Name="CornerSmoothingOptions" ColumnDefinitions="*,72"><TextBlock Text="Corner smoothing %" Classes="label" VerticalAlignment="Center"/><TextBox Name="CornerSmoothingField" Grid.Column="1" Text="0" ToolTip.Tip="Smooth the transition between straight edges and rounded corners (0–100%)"/></Grid>
+              <Button Name="IndependentCornersButton" Content="Independent corners" HorizontalContentAlignment="Left"/>
+              <Grid Name="CornerOptions" IsVisible="False" ColumnDefinitions="*,8,*,8,*,8,*">
+                <TextBox Name="CornerTLField" ToolTip.Tip="Top left radius"/>
+                <TextBox Name="CornerTRField" Grid.Column="2" ToolTip.Tip="Top right radius"/>
+                <TextBox Name="CornerBRField" Grid.Column="4" ToolTip.Tip="Bottom right radius"/>
+                <TextBox Name="CornerBLField" Grid.Column="6" ToolTip.Tip="Bottom left radius"/>
+              </Grid>
+              <Border Classes="rule"/>
+              <Grid ColumnDefinitions="*,28"><TextBlock Text="Fill" Classes="heading" VerticalAlignment="Center"/><Button Name="AddFillButton" Grid.Column="1" Content="+"/></Grid>
+              <Button Name="EditPaintsButton" Content="Edit paint stack…" HorizontalAlignment="Stretch"/>
+              <Button Name="CropImageButton" Content="Crop image…" HorizontalAlignment="Stretch" IsVisible="False"/>
+              <Button Name="CropDoneButton" Content="Done cropping" HorizontalAlignment="Stretch" IsVisible="False" Classes="primary"/>
+              <Grid ColumnDefinitions="28,8,*,32">
+                <Button Name="FillSwatch" Width="26" Height="26" Background="#D9D9D9" ToolTip.Tip="Color palette"/>
+                <TextBox Name="FillField" Grid.Column="2" Text="D9D9D9"/>
+                <Button Name="GradientButton" Grid.Column="3" Content="◩" ToolTip.Tip="Toggle linear gradient"/>
+              </Grid>
+              <StackPanel Name="ColorPalette" IsVisible="False" Spacing="6"/>
+              <Border Classes="rule"/>
+              <Grid ColumnDefinitions="*,28"><TextBlock Text="Stroke" Classes="heading" VerticalAlignment="Center"/><Button Name="AddStrokeButton" Grid.Column="1" Content="+"/></Grid>
+              <Grid ColumnDefinitions="*,8,64"><TextBox Name="StrokeField" Text="000000"/><TextBox Name="StrokeWidthField" Grid.Column="2" Text="0"/></Grid>
+              <StackPanel Name="StrokeOptions" Spacing="8" IsVisible="False">
+                <ComboBox Name="StrokeAlignChoice" HorizontalAlignment="Stretch" ToolTip.Tip="Stroke alignment"/>
+                <Grid ColumnDefinitions="*,12,*">
+                  <StackPanel Spacing="4"><TextBlock Text="Cap" Classes="label"/><ComboBox Name="StrokeCapChoice" HorizontalAlignment="Stretch"/></StackPanel>
+                  <StackPanel Grid.Column="2" Spacing="4"><TextBlock Text="Join" Classes="label"/><ComboBox Name="StrokeJoinChoice" HorizontalAlignment="Stretch"/></StackPanel>
+                </Grid>
+                <TextBox Name="DashField" PlaceholderText="Dash pattern, for example 8, 4"/>
+                <TextBlock Text="Width profile" Classes="label"/>
+                <ComboBox Name="StrokeProfileChoice" HorizontalAlignment="Stretch" ToolTip.Tip="Vary stroke width along the path; selecting a profile removes arrowheads"/>
+                <Button Name="StrokeWidthCustomButton" Content="Edit width points…" HorizontalAlignment="Stretch"/>
+                <Button Name="StrokeWidthHandlesButton" Content="Edit width on canvas" HorizontalAlignment="Stretch"/>
+              </StackPanel>
+              <Border Classes="rule"/>
+              <Grid ColumnDefinitions="*,28"><TextBlock Text="Effects" Classes="heading" VerticalAlignment="Center"/><Button Name="AddEffectButton" Grid.Column="1" Content="+"/></Grid>
+              <Button Name="EffectButton" Content="Drop shadow" HorizontalContentAlignment="Left"/>
+              <StackPanel Name="TextOptions" IsVisible="False" Spacing="8">
+                <Border Classes="rule"/><TextBlock Text="Typography" Classes="heading"/>
+                <TextBox Name="TextField" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="64"/>
+                <Button Name="RichTextButton" Content="Style selected characters…" HorizontalAlignment="Stretch"/>
+                <TextBox Name="FontFamilyField" Text="Inter"/>
+                <Grid ColumnDefinitions="*,8,*,8,28,28"><TextBox Name="FontSizeField" Text="16" ToolTip.Tip="Font size"/><TextBox Name="FontWeightField" Grid.Column="2" Text="400" ToolTip.Tip="Font weight (1–1000)"/><Button Name="BoldButton" Grid.Column="4" Content="B" FontWeight="Bold"/><Button Name="ItalicButton" Grid.Column="5" Content="I" FontStyle="Italic"/></Grid>
+                <Grid ColumnDefinitions="*,12,*">
+                  <StackPanel Spacing="4"><TextBlock Text="Line height %" Classes="label"/><TextBox Name="LineHeightField"/></StackPanel>
+                  <StackPanel Grid.Column="2" Spacing="4"><TextBlock Text="Letter spacing" Classes="label"/><TextBox Name="LetterSpacingField"/></StackPanel>
+                </Grid>
+                <UniformGrid Columns="4">
+                  <Button Name="TextLeftButton" Content="Left"/>
+                  <Button Name="TextCenterButton" Content="Center"/>
+                  <Button Name="TextRightButton" Content="Right"/>
+                  <Button Name="TextJustifyButton" Content="Justify"/>
+                </UniformGrid>
+                <Grid ColumnDefinitions="*,12,*"><ComboBox Name="TextVerticalChoice" HorizontalAlignment="Stretch" ToolTip.Tip="Vertical text alignment"/><ComboBox Name="TextDecorationChoice" Grid.Column="2" HorizontalAlignment="Stretch" ToolTip.Tip="Text decoration"/></Grid>
+                <ComboBox Name="TextResizeChoice" HorizontalAlignment="Stretch" ToolTip.Tip="Text auto resize"/>
+              </StackPanel>
+              <Border Classes="rule"/>
+              <Grid ColumnDefinitions="*,28"><TextBlock Text="Component" Classes="heading" VerticalAlignment="Center"/><Button Name="CreateComponentButton" Grid.Column="1" ToolTip.Tip="Create component"/></Grid>
+              <UniformGrid Columns="2"><Button Name="CreateInstanceButton" Content="Create instance"/><Button Name="DetachButton" Content="Detach instance"/></UniformGrid>
+              <Button Name="EditComponentsButton" Content="Properties and variants…" HorizontalAlignment="Stretch"/>
+            </StackPanel>
+            <StackPanel Name="PrototypeInspector" IsVisible="False" Spacing="12">
+              <Border Classes="rule"/><TextBlock Text="Interactions" Classes="heading"/>
+              <TextBlock Text="Select a layer, then choose the destination frame." TextWrapping="Wrap" Classes="label"/>
+              <ComboBox Name="PrototypeTarget" HorizontalAlignment="Stretch"/>
+              <Button Name="ConnectButton" Classes="primary" Content="On click → Navigate to"/>
+              <Button Name="EditInteractionsButton" Content="Edit interactions…" HorizontalAlignment="Stretch"/>
+              <Button Name="StartFrameButton" Content="Set as flow starting point"/>
+              <Button Name="PresentFlowButton" Content="Present flow"/>
+              <TextBlock Name="PrototypeSummary" TextWrapping="Wrap" Classes="label"/>
+            </StackPanel>
+            <StackPanel Name="InspectInspector" IsVisible="False" Spacing="8">
+              <Border Classes="rule"/><TextBlock Text="CSS" Classes="heading"/>
+              <TextBox Name="CodeField" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="220" FontSize="10"/>
+              <Button Name="CopyCodeButton" Content="Copy CSS"/>
+              <Button Name="ExportXamlButton" Content="Export FerroUI XAML"/>
+            </StackPanel>
+            <Border Classes="rule"/>
+            <TextBlock Text="Export" Classes="heading"/>
+            <UniformGrid Columns="2"><Button Name="ExportSvgButton" Content="Export SVG"/><Button Name="ExportPngButton" Content="Export PNG"/></UniformGrid>
+          </StackPanel>
+        </ScrollViewer>
+      </Grid>
+    </Border>
+    <TextBlock Name="CanvasCaption" Grid.Column="2" Text="" FontSize="10" Foreground="#868686" Margin="24,25" HorizontalAlignment="Left" VerticalAlignment="Top" IsHitTestVisible="False"/>
+    <Border Name="Toolbar" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="8,0,8,24" Padding="7" Background="White" CornerRadius="13" BorderBrush="#D7D7D7" BorderThickness="1" BoxShadow="0 3 14 0 #20000000">
+      <StackPanel Orientation="Horizontal" Spacing="1">
+        <Button Name="SelectTool" Classes="tool active" ToolTip.Tip="Move (V)"/>
+        <Button Name="FrameTool" Classes="tool" ToolTip.Tip="Frame (F)"/>
+        <Button Name="RectTool" Classes="tool" ToolTip.Tip="Rectangle (R)"/>
+        <Button Name="EllipseTool" Classes="tool" ToolTip.Tip="Ellipse (O)"/>
+        <Button Name="PenTool" Classes="tool" ToolTip.Tip="Pen (P)"/>
+        <Button Name="TextTool" Classes="tool" ToolTip.Tip="Text (T)"/>
+        <Button Name="HandTool" Classes="tool" ToolTip.Tip="Hand (H) · Hold Space to pan"/>
+        <Button Name="CommentTool" Classes="tool" ToolTip.Tip="Comment (C)"/>
+        <Border Width="1" Background="#EEEEEE" Margin="5,5"/>
+        <Button Name="ActionsButton" Classes="tool" ToolTip.Tip="Actions (Ctrl+K)"/>
+      </StackPanel>
+    </Border>
+    <Border Name="ZoomPanel" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="16,0,16,94" Background="White" CornerRadius="8" Padding="3" BorderBrush="#D9D9D9" BorderThickness="1">
+      <StackPanel Orientation="Horizontal"><Button Name="ZoomOutButton" Content="−"/><Button Name="ZoomValueButton" Content="65%" ToolTip.Tip="Zoom to fit"/><Button Name="ZoomInButton" Content="+"/></StackPanel>
+    </Border>
+    <Border Name="Toast" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="16" Padding="16,10" Background="#252525" CornerRadius="8" IsVisible="False">
+      <TextBlock Name="ToastText" Foreground="White"/>
+    </Border>
+    <Border Name="ModalBackdrop" Grid.ColumnSpan="4" Background="#55000000" IsVisible="False">
+      <Border Name="ModalPanel" Width="620" MaxHeight="660" Background="White" CornerRadius="12" Padding="24" HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 12 48 0 #30000000">
+        <Grid RowDefinitions="Auto,Auto,*,Auto">
+          <Grid Name="ModalHeader" ColumnDefinitions="*,32" Background="Transparent" ToolTip.Tip="Drag to move the editor">
+            <TextBlock Name="ModalTitle" FontSize="17" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <Button Name="CloseModalButton" Grid.Column="1" Content="×" FontSize="18"/>
+          </Grid>
+          <TextBlock Name="ModalDescription" Grid.Row="1" Margin="0,8,0,16" TextWrapping="Wrap" Foreground="#777777"/>
+          <ScrollViewer Name="ModalViewport" Grid.Row="2" MaxHeight="470"><StackPanel Name="ModalContent" Spacing="8"/></ScrollViewer>
+          <StackPanel Name="ModalActions" Grid.Row="3" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,18,0,0"/>
+        </Grid>
+      </Border>
+    </Border>
+  </Grid>
+</UserControl>

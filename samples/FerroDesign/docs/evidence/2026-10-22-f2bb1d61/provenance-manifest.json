@@ -1,0 +1,188 @@
+{
+  "recordedAtUtc": "2026-10-22T15:45:20.002650+00:00",
+  "repository": "wieslawsoltes/FerroUI",
+  "harnessSourceCommit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+  "buildSourceCommit": "3a0bf1f13c6ede9abe5360bc3691085a3bc981f0",
+  "documentationCheckpoint": "177f92cdb743d1897aa65a8c8c92e5b4b844e521",
+  "selfExcluded": true,
+  "completeBrowserGate": "Exact-f2bb CI completed successfully with full=true, 141 Software2D / 138 WebGL2 checks and all28 scenario starts per mode. Committed production inputs are unchanged through e0d3cee. The later f8 matching harness has a separate focused both-mode pass; no exact-f8/current-head complete-suite pass is inferred. Earlier local failures and the zero-check launch block remain unchanged. Successful official artifact ZIP bytes were not retrieved; decoded-log proof and its derived ZIP are preserved separately.",
+  "source": "validation-source.json",
+  "inputEquivalence": "input-equivalence.json",
+  "originalReportsPreservedByteForByte": true,
+  "files": {
+    "README.md": {
+      "bytes": 27824,
+      "sha256": "50a452021e877dd6cbb460b8dfa9441ebbe190a97c325e69293e034201723d7a"
+    },
+    "Software2D-bucket-hover-face.png": {
+      "bytes": 83606,
+      "sha256": "39a70e1acbd6ac97f84e4d7b269c9359fd18b7c4da7a18bb7b30e587a8a1fea0"
+    },
+    "Software2D-initial.png": {
+      "bytes": 187960,
+      "sha256": "14ace8cd02acaec6fa68055c284956905ca52c999e268fec187018b657d52fe2"
+    },
+    "Software2D-native-matching-fill.png": {
+      "bytes": 81122,
+      "sha256": "cfac9314108aa48cd93e69f217de26d3e4b4b408bb829119183bdb99a2d4db22"
+    },
+    "Software2D-stacked-layout-guides.png": {
+      "bytes": 54690,
+      "sha256": "66896fdc463e122d0b26566c33ed1c54034c4f38a0e4b3bbf1c0aecb94576aec"
+    },
+    "WebGL2-initial.png": {
+      "bytes": 187503,
+      "sha256": "6c8f778a92c2ff61c9c35649fe66272f4685b046c9a7765a214b0d0796592463"
+    },
+    "failed-authoring-diagnosis.json": {
+      "bytes": 4849,
+      "sha256": "26b5c92631fcde0b02fd300d67d7932710848bc982292ec68dcc578a88e030cf"
+    },
+    "failed-components-diagnosis.json": {
+      "bytes": 7843,
+      "sha256": "0132d73129765a0e2467af59d9596ed8e142d3349d0ed01128f60079c532fef9"
+    },
+    "failed-full-browser-report.zip": {
+      "bytes": 214284,
+      "sha256": "8c325f85972f7d4a69fc328cd9570099772aa5215fa189263f811e986321fee8"
+    },
+    "failed-full-summary.json": {
+      "bytes": 7891,
+      "sha256": "e3e8d42a4e8fe6d679a3373709df2e66caffcf7406e4967474525249c568ee7b"
+    },
+    "failed-matching-diagnosis.json": {
+      "bytes": 30042,
+      "sha256": "160ca225c52a5ef96908fc56c4ec1c3477b3018eb72d4dec51efecfd076ee663"
+    },
+    "failed-second-full-browser-report.zip": {
+      "bytes": 194252,
+      "sha256": "0095e507327bc5b1db3636c22ed5e6a6ce53471e8a2c92f7f07cf9551e16ba4c"
+    },
+    "failed-second-full-summary.json": {
+      "bytes": 11897,
+      "sha256": "bea867490a5a57bbda3085383d85d02a47edafee2f07948e858152ce0b81c7b6"
+    },
+    "failed-webgl2-all-scenarios-report.zip": {
+      "bytes": 340579,
+      "sha256": "5b21943dfcd20fc7ca129e33192e3246a5b58c5a6c70c5aeff00bb8d4d92a092"
+    },
+    "failed-webgl2-all-scenarios-summary.json": {
+      "bytes": 7417,
+      "sha256": "fbba00e257eb57ddbc39a56d322be106309b1253f0573d54413bc69269203bb9"
+    },
+    "focused-authoring-diagnostic.zip": {
+      "bytes": 144537,
+      "sha256": "fecdc3f17cad622181d47d61be71391a0749873e952102a4adc835b6c03ecf94"
+    },
+    "focused-authoring-summary.json": {
+      "bytes": 16398,
+      "sha256": "759989fefeb58e2af781efd2ce0cf560eff1bc9d9f6cc99698b80e6c0e5a5827"
+    },
+    "focused-authoring-terminal-summary.json": {
+      "bytes": 5872,
+      "sha256": "19448b42295afd17aea5f0f56422e94ed15db1a07ed5fcf38af1f61e6e758a26"
+    },
+    "input-equivalence.json": {
+      "bytes": 11630,
+      "sha256": "84fe802e24886c625bb74f485f67a16ab7b1a98fe2d108d12ee278ccc32d3044"
+    },
+    "native-ci-log.zip": {
+      "bytes": 88080,
+      "sha256": "23748cf1ec3826f7e5ea858933390dcceba7a93a3d5b563bea38124edd188bc5"
+    },
+    "native-ci-summary.json": {
+      "bytes": 11633,
+      "sha256": "a6c4b591e31916965e66f9b104a1f8ae7c8866283051b6b99335dc806b6c0b35"
+    },
+    "native-performance/SUMMARY.md": {
+      "bytes": 4618,
+      "sha256": "7b9161f13e446f4bf23635c011aa14c9de48fbd8a53a6448a32e587be320e4a4"
+    },
+    "native-performance/performance-extracted-log.json": {
+      "bytes": 7561,
+      "sha256": "758f544841855f50008f394f57e7b905618bb2b2387ec125be856b17fb2afe61"
+    },
+    "native-performance/performance-step.log": {
+      "bytes": 17897,
+      "sha256": "c2648edd66d447eb48b46df64170330007d5076c851e850a282ede3dceae81a6"
+    },
+    "native-performance/provenance.json": {
+      "bytes": 2718,
+      "sha256": "45f300e1ced1a622235d2f48b1bb36c8fca7f86dfba566c51308e5737532efd1"
+    },
+    "resource-pressure-observations.json": {
+      "bytes": 868,
+      "sha256": "7d46292068def16cec849a4e0ad690a8aa62f67490273a70086c3bd108fc496c"
+    },
+    "resource-sampler-audit.json": {
+      "bytes": 2853,
+      "sha256": "47f63c7a290106b5d167046a4765cabe04ca785269d48157346d70755266335d"
+    },
+    "source-delivery-audit.json": {
+      "bytes": 2603,
+      "sha256": "9b833fd056e199a6d854c99dada32158a03215d2d058e41f189aa0e77b0b8ef7"
+    },
+    "successful-ci-browser-log.zip": {
+      "bytes": 44151,
+      "sha256": "3cc10ba49280556138c39995c93c4d3812a93938a8864f8a7411ed500ed8f9d8"
+    },
+    "successful-ci-browser-summary.json": {
+      "bytes": 6843,
+      "sha256": "f7201f185bf7ec0bfe9321da9598a3d69e33096f29de321105a28a22bf62416e"
+    },
+    "successful-ci-build-download-status.json": {
+      "bytes": 1092,
+      "sha256": "1bdad1e6d6657a00c71c4f80b0acba50b9d6c7c459e0a65ce0fa8a541b12e3b0"
+    },
+    "successful-ci-input-equivalence.json": {
+      "bytes": 21748,
+      "sha256": "2c1de9a41c80e230cd14261728b1d718a4322420842a693c0782bde7acd45585"
+    },
+    "successful-ci-persistence-summary.json": {
+      "bytes": 4138,
+      "sha256": "4407e7820ad1eac1f143c7e771c1bd374041d2a4deb01ffb5b18b0b9d5231f81"
+    },
+    "successful-ci-text-pan-summary.json": {
+      "bytes": 6068,
+      "sha256": "6bfd23d164bea7e6605a1655f5364ddad71d503532f7e1d7637ced2f007da875"
+    },
+    "validation-source.json": {
+      "bytes": 12011,
+      "sha256": "f8007efd456247c2caa18106fb0cae9eb60fd5392bc136635b53111d56dfd72b"
+    },
+    "../../../../../docs/ferrodesign-evidence/2026-10-22-f2bb1d61/successful-ci-artifact-metadata.json": {
+      "bytes": 36736,
+      "sha256": "4a216db921500f84aee369d3a46277c751be76cc18ae974ad43460cb03be9fb5"
+    }
+  },
+  "updatedAtUtc": "2026-10-22T17:04:00Z",
+  "documentationBaseCommit": "e0d3cee368f991fb8a0f4bd411b00e102bc4447b",
+  "subsequentCompleteCi": {
+    "sourceCommit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+    "runId": 39799180117,
+    "browserJobId": 119894677332,
+    "browserJobCompletedAtUtc": "2026-10-22T16:43:12Z",
+    "observedAtUtc": "2026-10-22T16:50:41Z",
+    "scope": {
+      "full": true,
+      "modes": [
+        "Software2D",
+        "WebGL2"
+      ],
+      "scenarios": "all"
+    },
+    "passedChecks": {
+      "Software2D": 141,
+      "WebGL2": 138
+    },
+    "scenarioStartsPerMode": 28,
+    "nativeCaptureRetryWarnings": 2,
+    "proof": "Connector-decoded job log, exact extracted printed JSON and canonical API metadata; official artifact ZIP bytes and detailed sidecars were not retrieved."
+  },
+  "metadataRelocation": {
+    "reason": "Keep verbatim external API repository descriptions in the top-level documentation tree required by the repository source conventions.",
+    "bytesUnchanged": true,
+    "originalPath": "successful-ci-artifact-metadata.json",
+    "currentPath": "../../../../../docs/ferrodesign-evidence/2026-10-22-f2bb1d61/successful-ci-artifact-metadata.json"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "source_commit": "0f0732784bd6fdf1cb2477a61dd332d9a007fec2",
+  "source_tree": "a5d55ba6c2325651c62d30249715c1ec21b93b15",
+  "runtime_commit": "08e29e4f530c0ae65f6e2ac072f381605e23ed0c",
+  "source_method": "Exact tracked file bytes from git show; complete relative module dependency set for the text-pan benchmark.",
+  "files": {
+    "tests/text-render-benchmark.mjs": {
+      "bytes": 34401,
+      "sha256": "edd21fc76ba181f765a7b90461e89e8db9527042c68957f01ce7b2d0a6f6ca5b"
+    },
+    "tests/input-observations.mjs": {
+      "bytes": 4343,
+      "sha256": "c1e6d5fa29a2c32288c86701891f2b34afdcc637cd4241d50f07ad123a659b2a"
+    },
+    "tests/text-pan-trace.mjs": {
+      "bytes": 23813,
+      "sha256": "e00f71644d1c533567b849d5b1d506459765962c0baae00cd3848eb6a9e0de05"
+    },
+    "tests/text-pan-trace-analysis.mjs": {
+      "bytes": 15220,
+      "sha256": "1c3ec7b5c479e73bbf349ea542a99528c9764cfa426bd31525633a963523dc0a"
+    },
+    "package.json": {
+      "bytes": 228,
+      "sha256": "b4a693a06e7c2390b63afcb926e222641d7edf900d7299837d8b21143a013da2"
+    },
+    "package-lock.json": {
+      "bytes": 1552,
+      "sha256": "79084a131673247139b5baac8e065ed4604ede5c79d750b076a18455de41d2d0"
+    }
+  }
+}

@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 1,
+  "application": {
+    "commit": "b7b0b8853dd47a3426537a6babc11fcc0e0e40cc",
+    "browserArtifactId": 12467852902,
+    "workflowRun": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39869066118",
+    "browserArtifactZipSha256": "ea240fad23dbd67d4569c283ccf0d0f74bb1f284b3c98a914cf5ad06c838ec98",
+    "wasmSha256": "2088e5948b08de6ab3688252ec00aa0808991c05040179d4440c7a39e4e86ec4"
+  },
+  "testedHarness": {
+    "baseCommit": "1637a093723a4f899b7f4e371fd53f0b91914a98",
+    "browserHarnessSha256": "faf91c0e7ce151d055aec7e4eb0b2a27ef3d79ba2e017eb3a2a5606aebcf7bd6",
+    "motionModuleSha256": "8be66151238e66c71e22624ad1bdc3fe8faaa6cc64c074ee0fac009ab06cb0cb",
+    "extractedNativeHelpersSha256": "3cc984385e71947f75efbd0d30d2e7b0fa415c834b4346e7a31d3f26159e4f7e"
+  },
+  "browser": "156.0.8078.4",
+  "standardSelectedRun": {
+    "created": "2026-10-23T11:15:44.523Z",
+    "passed": false,
+    "scope": {
+      "full": false,
+      "modes": [
+        "Software2D",
+        "WebGL2"
+      ],
+      "scenarios": [
+        "prototype-motion"
+      ]
+    },
+    "fullReportSha256": "8e7a239706e6b2431a7da8bc3a6bb51d68934bce3f667a91a81d9a86aa837ff3",
+    "results": [
+      {
+        "mode": "Software2D",
+        "status": "failed",
+        "completedChecks": 13,
+        "motion": {
+          "status": "not-run",
+          "reason": "Common native editing IME preparation timed out before scenario dispatch."
+        },
+        "error": "page.waitForFunction: Timeout 30000ms exceeded.\n    at openTextEditor (/workspace/scratch/e99dd7d32d05/FerroUI/samples/FerroDesign/tests/browser.mjs:586:20)\n    at async beginComposition (/workspace/scratch/e99dd7d32d05/FerroUI/samples/FerroDesign/tests/browser.mjs:633:9)\n    at async nativeEditingRegressions (/workspace/scratch/e99dd7d32d05/FerroUI/samples/FerroDesign/tests/browser.mjs:656:5)\n    at async file:///workspace/scratch/e99dd7d32d05/FerroUI/samples/FerroDesign/tests/browser.mjs:985:13"
+      },
+      {
+        "mode": "WebGL2",
+        "status": "passed",
+        "completedChecks": 22,
+        "motion": {
+          "name": "prototype-motion",
+          "status": "passed",
+          "checksBefore": 16,
+          "ran": true,
+          "checks": 3,
+          "durationMs": 22273
+        }
+      }
+    ]
+  },
+  "isolatedSoftware2DRun": {
+    "created": "2026-10-23T11:22:26.336Z",
+    "passed": true,
+    "scope": {
+      "full": false,
+      "moduleOnly": true,
+      "modes": [
+        "Software2D"
+      ],
+      "scenarios": [
+        "prototype-motion"
+      ],
+      "excluded": "Normal shared browser gates, all other feature scenarios and benchmarks are not executed by this isolated module replay."
+    },
+    "fullReportSha256": "1dbf2356d3ba208d1b61d8eefe703b7eb3e8d82ff6cbf989aa8bbf2daa11665c",
+    "runnerSha256": "d6dba411d2ee5e9a111e2af869701e95d58b05b827b18fe62cc5699f453a17eb",
+    "results": [
+      {
+        "mode": "Software2D",
+        "status": "passed",
+        "checks": [
+          "Native FerroUI Clock renders Smart Animate midpoint position, size and brush color, then restores the exact authored document on exit",
+          "ScrollTo and actual native wheel input move clamped frame contents without panning the camera or changing authored nodes",
+          "Actual pointer hover/exit and press/release restore reversible prototype navigation; hover survives changed destination node IDs"
+        ],
+        "pageErrors": [],
+        "consoleErrors": [],
+        "surface": {
+          "kind": "Software2D",
+          "contextLost": false
+        },
+        "motionDurationMs": 4517,
+        "durationMs": 7586
+      }
+    ],
+    "preliminaryRun": {
+      "passed": false,
+      "fullReportSha256": "743ee4745384ccdd9d8e24ed1ded2c54499eca0f23d91bb47e2317bf9535823b",
+      "motionChecks": 3,
+      "motionDurationMs": 4530,
+      "failure": "A temporary replay-server favicon.ico 404 failed the standalone console-empty assertion after all three motion checks had passed.",
+      "verifiedConsoleLocation": "http://127.0.0.1:38841/favicon.ico",
+      "correction": "The temporary static server returns HTTP204 for favicon.ico; the unchanged application and motion module were rerun with all original assertions."
+    }
+  },
+  "progress": {
+    "WebGL2": {
+      "status": "passed",
+      "sourcePixel": {
+        "x": 562,
+        "y": 420,
+        "rgba": [
+          255,
+          0,
+          0,
+          255
+        ]
+      },
+      "durationMs": 2000,
+      "midpointRange": [
+        0.2,
+        0.8
+      ],
+      "midpointTimeoutMs": 10000,
+      "sampleCount": 6,
+      "droppedSamples": 0,
+      "lastSample": {
+        "observedAtMs": 6706.9000000003725,
+        "renderedFrames": 7,
+        "sceneFrames": 5,
+        "presentation": 20,
+        "progress": 0.275,
+        "animatedNodes": 1
+      },
+      "sourceFrames": {
+        "renderedFrames": 3,
+        "sceneFrames": 4
+      }
+    },
+    "Software2D": {
+      "status": "passed",
+      "sourcePixel": {
+        "x": 562,
+        "y": 420,
+        "rgba": [
+          255,
+          0,
+          0,
+          255
+        ]
+      },
+      "durationMs": 2000,
+      "midpointRange": [
+        0.2,
+        0.8
+      ],
+      "midpointTimeoutMs": 10000,
+      "sampleCount": 20,
+      "droppedSamples": 0,
+      "lastSample": {
+        "observedAtMs": 3977.5999999996275,
+        "renderedFrames": 21,
+        "sceneFrames": 13,
+        "presentation": 20,
+        "progress": 0.212,
+        "animatedNodes": 1
+      },
+      "sourceFrames": {
+        "renderedFrames": 4,
+        "sceneFrames": 6
+      }
+    }
+  },
+  "files": [
+    {
+      "file": "readiness-WebGL2-prototype-smart-source.png",
+      "sha256": "4f72181e025bab2ee3c0c019f5759ff9cbbb1a476c3db1763fea5d4c25240496",
+      "bytes": 8944,
+      "dimensions": [
+        1600,
+        1000
+      ]
+    },
+    {
+      "file": "readiness-WebGL2-prototype-smart-midpoint.png",
+      "sha256": "554ce4af97961d474351dd44f6c53b42e640e23ff77f4a315090063a0a7b7876",
+      "bytes": 8958,
+      "dimensions": [
+        1600,
+        1000
+      ],
+      "largestIntermediateSolidColor": {
+        "rgba": [
+          184,
+          0,
+          71,
+          255
+        ],
+        "pixelCount": 127710
+      }
+    },
+    {
+      "file": "readiness-WebGL2-prototype-smart-progress.json",
+      "sha256": "58c0430c26d12c983efef7ba0f16f016e79fe906369124c89a1409b827fedfd7",
+      "bytes": 1724
+    },
+    {
+      "file": "readiness-Software2D-prototype-smart-progress.json",
+      "sha256": "6b4d3802f3624ec3817e99d061accb78f8dc062ffda4860d0bc744af341c4d6c",
+      "bytes": 4429
+    }
+  ],
+  "limits": [
+    "This runs the exact official b7 application artifact with a newer readiness/diagnostics harness. It does not validate newer application source.",
+    "The normal Software2D run remains failed before scenario dispatch in shared IME setup. Its isolated motion-module pass does not turn that common gate or the full suite green.",
+    "The isolated replay uses exact extracted current native helpers and the same public SVG import/fixture, but does not run normal shared gates, other features or benchmarks.",
+    "A passing bounded replay does not prove the original CI delay root cause or guarantee recovery under other graphics-driver/host workloads."
+  ]
+}

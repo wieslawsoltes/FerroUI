@@ -1,0 +1,276 @@
+{
+  "created": "2026-10-22T15:20:48.724943+00:00",
+  "harnessSourceCommit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+  "buildSourceCommit": "3a0bf1f13c6ede9abe5360bc3691085a3bc981f0",
+  "passed": false,
+  "scope": {
+    "full": true,
+    "modes": [
+      "Software2D",
+      "WebGL2"
+    ],
+    "scenarios": "all"
+  },
+  "rawReportSha256": "3193d1988728a222fabd6c24eb2c7a5248ef853b8774dbda640a3844481d6e8d",
+  "rawReportArchive": "failed-full-browser-report.zip",
+  "results": [
+    {
+      "requestedMode": "Software2D",
+      "requestedRenderer": "Vello",
+      "status": "passed",
+      "surface": {
+        "kind": "Software2D"
+      },
+      "firstFrameMs": 1644,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "passedCheckCount": 141,
+      "scenarios": [
+        {
+          "name": "vector-network",
+          "status": "passed",
+          "checksBefore": 16,
+          "checks": 4,
+          "durationMs": 7617
+        },
+        {
+          "name": "native-authoring",
+          "status": "passed",
+          "checksBefore": 20,
+          "checks": 2,
+          "durationMs": 8062
+        },
+        {
+          "name": "typography",
+          "status": "passed",
+          "checksBefore": 22,
+          "checks": 4,
+          "durationMs": 6492
+        },
+        {
+          "name": "components",
+          "status": "passed",
+          "checksBefore": 26,
+          "checks": 5,
+          "durationMs": 12618
+        },
+        {
+          "name": "image-crop",
+          "status": "passed",
+          "checksBefore": 31,
+          "checks": 5,
+          "durationMs": 16603
+        },
+        {
+          "name": "compositing",
+          "status": "passed",
+          "checksBefore": 36,
+          "checks": 4,
+          "durationMs": 5261
+        },
+        {
+          "name": "svg-compositing",
+          "status": "passed",
+          "checksBefore": 40,
+          "checks": 4,
+          "durationMs": 6165
+        },
+        {
+          "name": "masks",
+          "status": "passed",
+          "checksBefore": 44,
+          "checks": 5,
+          "durationMs": 19844
+        },
+        {
+          "name": "effects",
+          "status": "passed",
+          "checksBefore": 49,
+          "checks": 5,
+          "durationMs": 16090
+        },
+        {
+          "name": "inspector-lifecycle",
+          "status": "passed",
+          "checksBefore": 54,
+          "checks": 4,
+          "durationMs": 8097
+        },
+        {
+          "name": "floating-panels",
+          "status": "passed",
+          "checksBefore": 58,
+          "checks": 3,
+          "durationMs": 3278
+        },
+        {
+          "name": "page-inspector",
+          "status": "passed",
+          "checksBefore": 61,
+          "checks": 1,
+          "durationMs": 2146
+        },
+        {
+          "name": "auto-layout",
+          "status": "passed",
+          "checksBefore": 62,
+          "checks": 4,
+          "durationMs": 16530
+        },
+        {
+          "name": "layout-drag",
+          "status": "passed",
+          "checksBefore": 66,
+          "checks": 3,
+          "durationMs": 29371
+        },
+        {
+          "name": "layout-transfer",
+          "status": "passed",
+          "checksBefore": 69,
+          "checks": 4,
+          "durationMs": 9109
+        },
+        {
+          "name": "selection",
+          "status": "passed",
+          "checksBefore": 73,
+          "checks": 9,
+          "durationMs": 16197
+        },
+        {
+          "name": "matching",
+          "status": "passed",
+          "checksBefore": 82,
+          "checks": 3,
+          "durationMs": 5319
+        },
+        {
+          "name": "geometry-authoring",
+          "status": "passed",
+          "checksBefore": 85,
+          "checks": 5,
+          "durationMs": 6308
+        },
+        {
+          "name": "flatten",
+          "status": "passed",
+          "checksBefore": 90,
+          "checks": 4,
+          "durationMs": 14129
+        },
+        {
+          "name": "local-styles",
+          "status": "passed",
+          "checksBefore": 94,
+          "checks": 8,
+          "durationMs": 27969
+        },
+        {
+          "name": "angular-paints",
+          "status": "passed",
+          "checksBefore": 102,
+          "checks": 5,
+          "durationMs": 8905
+        },
+        {
+          "name": "grid-styles",
+          "status": "passed",
+          "checksBefore": 107,
+          "checks": 7,
+          "durationMs": 31315
+        },
+        {
+          "name": "region-paints",
+          "status": "passed",
+          "checksBefore": 114,
+          "checks": 5,
+          "durationMs": 15609
+        },
+        {
+          "name": "network-bucket",
+          "status": "passed",
+          "checksBefore": 119,
+          "checks": 6,
+          "durationMs": 5326
+        },
+        {
+          "name": "compact-autosave",
+          "status": "passed",
+          "checksBefore": 125,
+          "checks": 1,
+          "durationMs": 1189
+        },
+        {
+          "name": "prototype-input",
+          "status": "passed",
+          "checksBefore": 126,
+          "checks": 5,
+          "durationMs": 2435
+        },
+        {
+          "name": "prototype-motion",
+          "status": "passed",
+          "checksBefore": 131,
+          "checks": 3,
+          "durationMs": 5267
+        },
+        {
+          "name": "bounded-history",
+          "status": "passed",
+          "checksBefore": 134,
+          "checks": 1,
+          "durationMs": 4442
+        }
+      ],
+      "error": null,
+      "nativeCaptureCount": 46,
+      "captureAttempts": 46,
+      "captureFailures": []
+    },
+    {
+      "requestedMode": "WebGL2",
+      "requestedRenderer": "Vello",
+      "status": "failed",
+      "surface": {
+        "kind": "WebGL2",
+        "device": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+      },
+      "firstFrameMs": 3791,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "passedCheckCount": 21,
+      "scenarios": [
+        {
+          "name": "vector-network",
+          "status": "passed",
+          "checksBefore": 16,
+          "checks": 4,
+          "durationMs": 200210
+        },
+        {
+          "name": "native-authoring",
+          "status": "failed",
+          "checksBefore": 20,
+          "durationMs": 130196
+        }
+      ],
+      "error": "page.waitForFunction: Timeout 10000ms exceeded.\n    at waitDocument (/tmp/ferrodesign-full-f2bb1d61-9b313a0caa46/harness/tests/authoring-browser.mjs:20:52)\n    at nativeAuthoringRegressions (/tmp/ferrodesign-full-f2bb1d61-9b313a0caa46/harness/tests/authoring-browser.mjs:120:11)\n    at async scenario (/tmp/ferrodesign-full-f2bb1d61-9b313a0caa46/harness/tests/browser.mjs:995:21)\n    at async file:///tmp/ferrodesign-full-f2bb1d61-9b313a0caa46/harness/tests/browser.mjs:1007:13",
+      "nativeCaptureCount": 6,
+      "captureAttempts": 6,
+      "captureFailures": []
+    }
+  ],
+  "timingDiagnosis": {
+    "origin": "Derived from retained Playwright trace and review by two agents; raw trace retained outside checkout",
+    "nominalPredicateDeadlineMs": 10000,
+    "actualPredicateWaitMs": 34293.656,
+    "subsequentDiagnosticEvaluateMs": 118001.9,
+    "eventualState": "Alias102 absent; selected layer binding cleared; document revision17\u219218 and history9\u219210",
+    "firstPredicateExecutionTime": "Not established by this trace; an isolated instrumented diagnostic is required",
+    "screencastObservation": "A received frame391ms after wait began already showed the deleted alias absent, with swap timestamp mapped before the wait began. This indicates deletion occurred; it does not locate predicate/CDP result delivery.",
+    "failureScreenshot": "The15-second catch screenshot also timed out and no failure PNG exists."
+  }
+}

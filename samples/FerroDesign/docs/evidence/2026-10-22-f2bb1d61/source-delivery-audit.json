@@ -1,0 +1,58 @@
+{
+  "recordedAtUtc": "2026-10-22T16:05:02.490463+00:00",
+  "kind": "Read-only tracked-source and archiveability audit; no ZIP body downloaded and no additional build run",
+  "sourceCommit": "b83deee6fd6f12eab635f209978f1a3601c5fbb4",
+  "sourceTree": "50740e2942c8b149788d380b81ae850952dbdb2e",
+  "completeRepositoryArchive": "https://github.com/wieslawsoltes/FerroUI/archive/b83deee6fd6f12eab635f209978f1a3601c5fbb4.zip",
+  "trackedTree": {
+    "entries": 9762,
+    "contentBytes": 212675550,
+    "gitlinks": 0,
+    "gitmodulesFiles": 0,
+    "gitLfsPointers": 0,
+    "exportIgnoreRules": 0,
+    "symlinks": 96,
+    "allSymlinksResolve": true
+  },
+  "cargoPathClosure": {
+    "manifests": 31,
+    "edges": 151,
+    "allReferencedManifestsTracked": true,
+    "allPathsInsideRepository": true,
+    "scope": "Conservative source closure across all targets, optional dependencies and development dependencies. This is not the active Vello/no-Skia application graph audit."
+  },
+  "requiredInputs": [
+    "Application XAML",
+    "Six embedded Inter font files",
+    "86 Fluent-theme XAML files",
+    "Framework browser bridge and loader sources",
+    "Root Cargo configuration",
+    "Cargo and npm lockfiles",
+    "Literal compile-time asset references inspected",
+    "Color-emoji regression font fixture; its source-folder name does not activate a renderer dependency"
+  ],
+  "buildFromExtractedSource": {
+    "requiresFullRepositoryLayout": true,
+    "sampleOnlyArchiveSufficient": false,
+    "inspectedBuildLogicRequiresGitMetadata": false,
+    "setupRequiresGitExecutableForExternalEmsdkClone": true,
+    "generatedXamlAndBrowserBundlesBuiltFromTrackedInputs": true,
+    "macosFlattenedSymlinkFallback": "src/FerroUI.Native/build.rs falls back to ../../native/FerroUI.Native when its local native path is not a directory.",
+    "freshBuildMustBuildFrameworkBrowserBridge": true,
+    "externalDownloadsRequired": [
+      "Rust crates/toolchain",
+      "npm packages",
+      "Emscripten SDK",
+      "wasm-bindgen release or Cargo installation",
+      "Pinned public GitHub native-file-system-adapter dependency"
+    ]
+  },
+  "documentationFollowup": [
+    "Explicit Bash/tar/install and sha256sum-or-shasum prerequisites",
+    "Bare-Linux browser validation can install Chromium OS dependencies with npx playwright install --with-deps chromium"
+  ],
+  "limits": [
+    "The pinned public archive URL returned HTTP200, but body contents/CRC/extraction were not independently verified.",
+    "Source closure and script inspection do not replace the separately recorded CI build and browser validation."
+  ]
+}

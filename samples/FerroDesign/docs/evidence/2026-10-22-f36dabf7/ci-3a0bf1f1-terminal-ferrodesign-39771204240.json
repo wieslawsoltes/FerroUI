@@ -1,0 +1,38 @@
+{
+  "repo": "wieslawsoltes/FerroUI",
+  "sourceSha": "3a0bf1f13c6ede9abe5360bc3691085a3bc981f0",
+  "runId": 39771204240,
+  "runName": "FerroDesign browser",
+  "event": "push",
+  "status": "completed",
+  "conclusion": "failure",
+  "runUrl": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39771204240",
+  "createdAt": "2026-10-22T11:31:20Z",
+  "updatedAt": "2026-10-22T13:13:16Z",
+  "observedAtUtc": "2026-10-22 13:13:17 UTC",
+  "origin": "Read-only GitHub Actions run and latest-attempt job API summaries",
+  "jobCount": 2,
+  "jobs": [
+    {
+      "id": 119817020969,
+      "name": "Native validation",
+      "status": "completed",
+      "conclusion": "success",
+      "failedSteps": []
+    },
+    {
+      "id": 119817021322,
+      "name": "Browser validation",
+      "status": "completed",
+      "conclusion": "failure",
+      "failedSteps": [
+        {
+          "number": 11,
+          "name": "Validate pixels, pointer editing, keyboard history and serialization",
+          "status": "completed",
+          "conclusion": "failure"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "name": "Exact native rich text history",
+  "pages": [
+    {
+      "id": 1,
+      "name": "Native input",
+      "children": [
+        2
+      ],
+      "background": {
+        "r": 30,
+        "g": 30,
+        "b": 30,
+        "a": 255
+      },
+      "prototype_start": null
+    }
+  ],
+  "nodes": {
+    "2": {
+      "id": 2,
+      "parent": 1,
+      "children": [],
+      "kind": "text",
+      "name": "Repeated styled paragraphs",
+      "x": 40.0,
+      "y": 40.0,
+      "width": 440.0,
+      "height": 200.0,
+      "rotation": 0.0,
+      "flip_x": false,
+      "flip_y": false,
+      "affine_transform": null,
+      "visible": true,
+      "locked": false,
+      "opacity": 1.0,
+      "blend_mode": "pass_through",
+      "clip_content": false,
+      "prototype_overflow": "none",
+      "fills": [
+        {
+          "paint": {
+            "type": "solid",
+            "r": 20,
+            "g": 20,
+            "b": 20,
+            "a": 255
+          },
+          "opacity": 1.0,
+          "visible": true
+        }
+      ],
+      "strokes": [],
+      "effects": [],
+      "corner_radius": 0.0,
+      "corner_radii": null,
+      "text": "A🦀\nA🦀\nA🦀\n",
+      "font_family": "Inter",
+      "font_size": 20.0,
+      "font_weight": 400,
+      "italic": false,
+      "line_height": 1.2,
+      "letter_spacing": 0.0,
+      "text_align": "left",
+      "text_vertical_align": "top",
+      "text_decoration": "none",
+      "text_auto_resize": "fixed",
+      "text_runs": [
+        {
+          "start": 0,
+          "end": 6,
+          "font_family": null,
+          "font_size": 20.0,
+          "font_weight": 400,
+          "color": {
+            "r": 190,
+            "g": 30,
+            "b": 50,
+            "a": 255
+          },
+          "italic": false,
+          "decoration": "none"
+        },
+        {
+          "start": 6,
+          "end": 12,
+          "font_family": null,
+          "font_size": 22.0,
+          "font_weight": 600,
+          "color": {
+            "r": 20,
+            "g": 90,
+            "b": 190,
+            "a": 255
+          },
+          "italic": true,
+          "decoration": "none"
+        },
+        {
+          "start": 12,
+          "end": 18,
+          "font_family": null,
+          "font_size": 24.0,
+          "font_weight": 800,
+          "color": {
+            "r": 25,
+            "g": 140,
+            "b": 60,
+            "a": 255
+          },
+          "italic": false,
+          "decoration": "strikethrough"
+        }
+      ],
+      "text_paragraphs": [
+        {
+          "start": 0,
+          "end": 6,
+          "alignment": "left",
+          "direction": "ltr",
+          "line_height": 1.2,
+          "space_before": 0.0,
+          "space_after": 2.0,
+          "indent": 10.0
+        },
+        {
+          "start": 6,
+          "end": 12,
+          "alignment": "left",
+          "direction": "ltr",
+          "line_height": 1.3,
+          "space_before": 1.0,
+          "space_after": 3.0,
+          "indent": 20.0
+        },
+        {
+          "start": 12,
+          "end": 18,
+          "alignment": "left",
+          "direction": "ltr",
+          "line_height": 1.4,
+          "space_before": 2.0,
+          "space_after": 4.0,
+          "indent": 30.0
+        },
+        {
+          "start": 18,
+          "end": 18,
+          "alignment": "left",
+          "direction": "ltr",
+          "line_height": 1.5,
+          "space_before": 3.0,
+          "space_after": 5.0,
+          "indent": 40.0
+        }
+      ],
+      "text_direction": "auto",
+      "polygon_sides": 3,
+      "star_inner_radius": 0.45,
+      "path": {
+        "segments": [],
+        "fill_rule": "non_zero"
+      },
+      "boolean_operation": "union",
+      "constraints": {
+        "horizontal": "start",
+        "vertical": "start"
+      },
+      "layout": null,
+      "layout_child": {
+        "width": "fixed",
+        "height": "fixed",
+        "min_width": 0.0,
+        "max_width": null,
+        "min_height": 0.0,
+        "max_height": null,
+        "absolute": false,
+        "grow": 1.0
+      },
+      "component_id": null,
+      "component_source": null,
+      "overridden_properties": [],
+      "variant_properties": {},
+      "fill_style": null,
+      "text_style": null,
+      "effect_style": null,
+      "variable_bindings": {},
+      "interactions": [],
+      "export_settings": [],
+      "metadata": {}
+    }
+  },
+  "styles": {},
+  "variables": {},
+  "variable_mode": "Default",
+  "comments": [],
+  "guides": {},
+  "next_id": 3
+}

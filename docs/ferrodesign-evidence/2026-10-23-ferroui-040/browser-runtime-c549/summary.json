@@ -1,0 +1,276 @@
+{
+  "runtime_commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "harness_commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "tree": "8c5bbcc8ed5e5a61d287708cf4e2c0e7c912259d",
+  "passed": false,
+  "exit_code": 1,
+  "scope": {
+    "full": false,
+    "modes": [
+      "Software2D",
+      "WebGL2"
+    ],
+    "scenarios": [
+      "polygon-corners",
+      "gradient-handles",
+      "paragraphs",
+      "guide-bindings"
+    ]
+  },
+  "browser": "156.0.8078.4",
+  "playwright": "1.64.1",
+  "complete_scenario_executions": {
+    "passed": 1,
+    "failed": 7,
+    "requested": 8
+  },
+  "results": [
+    {
+      "mode": "Software2D",
+      "status": "failed",
+      "surface": {
+        "kind": "Software2D"
+      },
+      "completed_checks": 50,
+      "common_checks": 22,
+      "checks": [
+        "Native FerroUI canvas contains rendered UI and document pixels",
+        "R shortcut and pointer drag create and render a selected rectangle",
+        "Keyboard undo removes the pointer-created node",
+        "Keyboard redo restores the node",
+        "Delete keyboard action removes the selection",
+        "Document JSON round-trip restores the complete edited document",
+        "SVG file import selects an editable frame with affine groups, gradients, curves, and Unicode text",
+        "PNG download has exact artboard dimensions and verified background, affine gradient, curved stroke, and text pixels",
+        "JSON round-trip preserves the complete imported SVG hierarchy and visual properties",
+        "Enter enters native vector editing; an anchor drag rebases bounds without moving other anchors and forms one undo/redo step",
+        "Native Pen pointer drags create a cubic curve and the complete path is one undo/redo step",
+        "Enter while the Pen pointer is held finalizes the gesture and ignores later handle movement until release",
+        "Native on-canvas TextBox handles multiline Unicode, UTF-8 rich-text ranges, Ctrl+Enter commit, Escape cancel, one-step history, and autosave",
+        "Browser composition events commit once, keep preedit out of the document, and cannot block or overwrite a new native text client after cancellation",
+        "Pagehide during unfinished composition durably saves confirmed Unicode and formatting, preserves one-step history, and survives a real reload",
+        "Native paint dialog pointer/keyboard input converts a fill to a gradient, edits alpha/opacity/stop positions, rejects NaN, and supports one-step stop undo",
+        "Native fractional polygon radius preserves the editable triangle, box and transform, rejects negative/nonfinite drafts without changing history, and restores the complete document with one undo/redo",
+        "Native paint-card entry and immutable hover expose distinct tied-stop markers for one affine reflected gradient fill while preserving the shared style, radius binding, sibling and complete document",
+        "A fractional endpoint drag uses the inverse full layer transform, changes only the chosen paint, detaches its shared fill style, preserves unrelated bindings and commits one exactly reversible edit",
+        "Escape, late pointer events, an exact drag-back and an unchanged tied-stop press restore every style/binding field and preserve a real redo entry without appending history",
+        "Real Chromium touch cancellation reaches the native gradient capture-loss path, restores the full shared-style snapshot and selection, and leaves the prior endpoint edit exactly redoable",
+        "Stop drags project onto the transformed world axis, clamp to 0–1, and retain authored stop indices and RGBA colors through crossings and ties with exact single-step undo/redo",
+        "Dragging a bare native gradient axis translates both relative endpoints together without changing stops, paint order, opacity, shape geometry, transforms or the linked sibling",
+        "From a clean IndexedDB baseline, a held gradient draft is committed by real pagehide alone into exactly one history entry, serialization and durable revision; late release cannot duplicate the commit",
+        "Actual Ctrl+S finishes a held native gradient drag once before the portable download is serialized; the file contains every preview field and the late release preserves exact undo/redo",
+        "A real axis double-click appends an interpolated stop, Alt+ArrowRight nudges its offset by 0.001, Tab visits authored source indices without editing, and Delete removes exactly that stop with exact history without deleting the layer",
+        "Deleting below two stops produces a fresh native error while preserving exact redo; Enter exits the editor and native PNG pixels verify the edited gradient without adorners or unsupported rendering effects",
+        "Native radial paint-card entry exposes the actual ellipse and center/radius controls; reflected and sheared pointer motion edits the shared relative radius and center with exact undo/redo and unchanged stops",
+        "Radial handle drag-back restores the exact document during capture, leaves redo executable, and paints a real native ellipse adorner without adding history",
+        "Angular gradient handles preserve native local-pixel angles on a nonsquare affine box; a real sweep-handle drag crosses 360 degrees continuously while distinct seam stops retain their source order",
+        "Dragging a tied conic color stop uses the inverse layer transform and local sweep angle, preserving every other stop, RGBA color and authored gradient parameter with exact history",
+        "Double-clicking the native conic ring appends a correctly interpolated RGBA stop without changing existing indices, and undo/redo preserves the complete angular paint",
+        "Native PNG pixels independently confirm the edited radial brush's equal relative radii on a nonsquare rectangle, with no exported handle adorners or changes from export",
+        "Native conic PNG samples prove a real canvas sweep-handle rotation changes the exported start ray and quarter/half-turn colors while preserving document state and excluding adorners",
+        "Native UTF-16 selection across a non-BMP character authors one complete UTF-8 paragraph with independent alignment, Auto direction, line height, letter spacing, before/after spacing and first-line indentation in the actual TextPresenter",
+        "A collapsed native caret styles only its paragraph; RTL alignment and spacing move the real layout, invalid metrics fail atomically and repeated Apply remains a no-op",
+        "Paragraph Inherit has exact one-step undo/redo and preserves the first paragraph; its native clipped-artboard PNG has exact dimensions, three text bands and the authored transparent spacing gap",
+        "Real native Unicode editing splits paragraph styles with correct UTF-8 remapping and shared line/caret offsets; cancel restores the original, commit is one exact undo/redo step and JSON round-trip preserves every paragraph field",
+        "A real native clipboard paste at the start of identical Unicode paragraphs inherits the first paragraph only; native Ctrl+Z/Ctrl+Shift+Z restore exact character and paragraph ranges and actual line indentation, while the complete session remains one document history step",
+        "Deleting a complete repeated paragraph keeps the surviving suffix's distinct fonts, colors and paragraph metrics; native undo restores the deleted rich data, redo restores the exact deletion, and Escape cancels without a document history entry",
+        "Native guide-variable pickers bind numeric count and alpha color through typed controls, resolve the actual stack values and preserve exact single-step history",
+        "Invalid fractional count bindings are rejected atomically; native mode activation updates bound geometry/color together, and explicit Enter on an equal literal detaches only that field",
+        "Moving a guide remaps its variable keys with the complete stack entry, retains each resolved value and round-trips every binding through native JSON and exact undo/redo",
+        "Native child constraints resize relative to hidden stretch guide sections; switching the same guide to a fixed alignment restores ordinary frame-relative resizing without changing hierarchy",
+        "All nine toolbar controls fit at 980×650; native toolbar pointer input switches tools",
+        "Native Add page clicks retain a scrollable page list and usable layer viewport at 980×650",
+        "A committed IndexedDB autosave restores the exact document after a real browser reload",
+        "Native nudge/undo/redo in 10,000 layers each prepare one leaf, rebuild no immutable visuals, and reuse the scene and layer projection",
+        "Native zoom into 10,000 layers narrows root bounds testing and paint candidates to the local viewport without dropping visible layers",
+        "10,000 rendered layers retain bounded native row realization, real pointer/nudge/undo/redo, and exact durable reload"
+      ],
+      "page_errors": [],
+      "console_errors": [],
+      "final_renderer": "FerroUI Vello",
+      "final_unsupported_effects": 0,
+      "large_document": {
+        "nodeCount": 10000,
+        "importBytes": 12932068,
+        "importAndFirstFrameMs": 2939,
+        "layerRows": 10000,
+        "realizedRows": 25,
+        "visibleNodes": 10000,
+        "realizedAfterScroll": 25,
+        "nudgeMs": 218,
+        "preparation": {
+          "nudge": {
+            "full": 0,
+            "incremental": 1,
+            "nodes": 1,
+            "visuals": 0
+          },
+          "undo": {
+            "full": 0,
+            "incremental": 1,
+            "nodes": 1,
+            "visuals": 0
+          },
+          "redo": {
+            "full": 0,
+            "incremental": 1,
+            "nodes": 1,
+            "visuals": 0
+          }
+        },
+        "layerProjection": {
+          "nudge": {
+            "builds": 0,
+            "reuses": 1
+          },
+          "undo": {
+            "builds": 0,
+            "reuses": 1
+          },
+          "redo": {
+            "builds": 0,
+            "reuses": 1
+          }
+        },
+        "spatialQuery": {
+          "roots": 10000,
+          "candidates": 1,
+          "boundsTests": 27,
+          "reused": false,
+          "visibleNodes": 1,
+          "zoom": 17.083333333333332
+        },
+        "commitMs": 7,
+        "autosaveBytes": 13192068,
+        "autosaveSerializationMs": 37.8,
+        "reloadMs": 2897,
+        "exportBytes": 20712219,
+        "sha256": "1b0704b9a7d482cafbea57cbcaa510ce3e4511173c010880e5a22051b9461397"
+      },
+      "scenarios": [
+        {
+          "name": "polygon-corners",
+          "status": "failed",
+          "checks": 1,
+          "durationMs": 5212,
+          "failureStage": "scenario",
+          "error": "AssertionError [ERR_ASSERTION]: Independent SVG and native PNG share the rounded silhouette: 212\n    at polygonCornerRegressions (file:///tmp/ferrodesign-e99-harness-c549/tests/polygon-corners-browser.mjs:167:12)\n    at async runIsolatedScenario (file:///tmp/ferrodesign-e99-harness-c549/tests/isolated-scenario.mjs:31:9)\n    at async scenario (file:///tmp/ferrodesign-e99-harness-c549/tests/browser.mjs:1062:32)\n    at async file:///tmp/ferrodesign-e99-harness-c549/tests/browser.mjs:1108:13"
+        },
+        {
+          "name": "gradient-handles",
+          "status": "passed",
+          "checks": 17,
+          "durationMs": 46490,
+          "failureStage": null,
+          "error": null
+        },
+        {
+          "name": "paragraphs",
+          "status": "failed",
+          "checks": 6,
+          "durationMs": 41012,
+          "failureStage": "scenario",
+          "error": "page.waitForFunction: Timeout 10000ms exceeded.\n    at beginComposition (/tmp/ferrodesign-e99-harness-c549/tests/paragraphs-browser.mjs:400:20)\n    at async paragraphRegressions (/tmp/ferrodesign-e99-harness-c549/tests/paragraphs-browser.mjs:409:5)\n    at async runIsolatedScenario (/tmp/ferrodesign-e99-harness-c549/tests/isolated-scenario.mjs:31:9)\n    at async scenario (/tmp/ferrodesign-e99-harness-c549/tests/browser.mjs:1062:32)\n    at async file:///tmp/ferrodesign-e99-harness-c549/tests/browser.mjs:1115:13"
+        },
+        {
+          "name": "guide-bindings",
+          "status": "failed",
+          "checks": 4,
+          "durationMs": 40601,
+          "failureStage": "scenario",
+          "error": "page.waitForFunction: Timeout 10000ms exceeded.\n    at waitDocument (/tmp/ferrodesign-e99-harness-c549/tests/guide-bindings-browser.mjs:11:52)\n    at guideBindingRegressions (/tmp/ferrodesign-e99-harness-c549/tests/guide-bindings-browser.mjs:201:11)\n    at async runIsolatedScenario (/tmp/ferrodesign-e99-harness-c549/tests/isolated-scenario.mjs:31:9)\n    at async scenario (/tmp/ferrodesign-e99-harness-c549/tests/browser.mjs:1062:32)\n    at async file:///tmp/ferrodesign-e99-harness-c549/tests/browser.mjs:1160:13"
+        }
+      ]
+    },
+    {
+      "mode": "WebGL2",
+      "status": "failed",
+      "surface": {
+        "kind": "WebGL2",
+        "device": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+      },
+      "completed_checks": 38,
+      "common_checks": 19,
+      "checks": [
+        "Native FerroUI canvas contains rendered UI and document pixels",
+        "R shortcut and pointer drag create and render a selected rectangle",
+        "Keyboard undo removes the pointer-created node",
+        "Keyboard redo restores the node",
+        "Delete keyboard action removes the selection",
+        "Document JSON round-trip restores the complete edited document",
+        "SVG file import selects an editable frame with affine groups, gradients, curves, and Unicode text",
+        "PNG download has exact artboard dimensions and verified background, affine gradient, curved stroke, and text pixels",
+        "JSON round-trip preserves the complete imported SVG hierarchy and visual properties",
+        "Enter enters native vector editing; an anchor drag rebases bounds without moving other anchors and forms one undo/redo step",
+        "Native Pen pointer drags create a cubic curve and the complete path is one undo/redo step",
+        "Enter while the Pen pointer is held finalizes the gesture and ignores later handle movement until release",
+        "Native on-canvas TextBox handles multiline Unicode, UTF-8 rich-text ranges, Ctrl+Enter commit, Escape cancel, one-step history, and autosave",
+        "Browser composition events commit once, keep preedit out of the document, and cannot block or overwrite a new native text client after cancellation",
+        "Pagehide during unfinished composition durably saves confirmed Unicode and formatting, preserves one-step history, and survives a real reload",
+        "Native paint dialog pointer/keyboard input converts a fill to a gradient, edits alpha/opacity/stop positions, rejects NaN, and supports one-step stop undo",
+        "Native fractional polygon radius preserves the editable triangle, box and transform, rejects negative/nonfinite drafts without changing history, and restores the complete document with one undo/redo",
+        "Native paint-card entry and immutable hover expose distinct tied-stop markers for one affine reflected gradient fill while preserving the shared style, radius binding, sibling and complete document",
+        "A fractional endpoint drag uses the inverse full layer transform, changes only the chosen paint, detaches its shared fill style, preserves unrelated bindings and commits one exactly reversible edit",
+        "Escape, late pointer events, an exact drag-back and an unchanged tied-stop press restore every style/binding field and preserve a real redo entry without appending history",
+        "Real Chromium touch cancellation reaches the native gradient capture-loss path, restores the full shared-style snapshot and selection, and leaves the prior endpoint edit exactly redoable",
+        "Stop drags project onto the transformed world axis, clamp to 0–1, and retain authored stop indices and RGBA colors through crossings and ties with exact single-step undo/redo",
+        "Dragging a bare native gradient axis translates both relative endpoints together without changing stops, paint order, opacity, shape geometry, transforms or the linked sibling",
+        "From a clean IndexedDB baseline, a held gradient draft is committed by real pagehide alone into exactly one history entry, serialization and durable revision; late release cannot duplicate the commit",
+        "Actual Ctrl+S finishes a held native gradient drag once before the portable download is serialized; the file contains every preview field and the late release preserves exact undo/redo",
+        "Native UTF-16 selection across a non-BMP character authors one complete UTF-8 paragraph with independent alignment, Auto direction, line height, letter spacing, before/after spacing and first-line indentation in the actual TextPresenter",
+        "A collapsed native caret styles only its paragraph; RTL alignment and spacing move the real layout, invalid metrics fail atomically and repeated Apply remains a no-op",
+        "Paragraph Inherit has exact one-step undo/redo and preserves the first paragraph; its native clipped-artboard PNG has exact dimensions, three text bands and the authored transparent spacing gap",
+        "Real native Unicode editing splits paragraph styles with correct UTF-8 remapping and shared line/caret offsets; cancel restores the original, commit is one exact undo/redo step and JSON round-trip preserves every paragraph field",
+        "A real native clipboard paste at the start of identical Unicode paragraphs inherits the first paragraph only; native Ctrl+Z/Ctrl+Shift+Z restore exact character and paragraph ranges and actual line indentation, while the complete session remains one document history step",
+        "Deleting a complete repeated paragraph keeps the surviving suffix's distinct fonts, colors and paragraph metrics; native undo restores the deleted rich data, redo restores the exact deletion, and Escape cancels without a document history entry",
+        "Native guide-variable pickers bind numeric count and alpha color through typed controls, resolve the actual stack values and preserve exact single-step history",
+        "Invalid fractional count bindings are rejected atomically; native mode activation updates bound geometry/color together, and explicit Enter on an equal literal detaches only that field",
+        "Moving a guide remaps its variable keys with the complete stack entry, retains each resolved value and round-trips every binding through native JSON and exact undo/redo",
+        "Native child constraints resize relative to hidden stretch guide sections; switching the same guide to a fixed alignment restores ordinary frame-relative resizing without changing hierarchy",
+        "All nine toolbar controls fit at 980×650; native toolbar pointer input switches tools",
+        "Native Add page clicks retain a scrollable page list and usable layer viewport at 980×650",
+        "A committed IndexedDB autosave restores the exact document after a real browser reload"
+      ],
+      "page_errors": [],
+      "console_errors": [],
+      "final_renderer": "FerroUI Vello",
+      "final_unsupported_effects": 0,
+      "large_document": null,
+      "scenarios": [
+        {
+          "name": "polygon-corners",
+          "status": "failed",
+          "checks": 1,
+          "durationMs": 32804,
+          "failureStage": "scenario",
+          "error": "AssertionError [ERR_ASSERTION]: Independent SVG and native PNG share the rounded silhouette: 212\n    at polygonCornerRegressions (file:///tmp/ferrodesign-e99-harness-c549/tests/polygon-corners-browser.mjs:167:12)\n    at async runIsolatedScenario (file:///tmp/ferrodesign-e99-harness-c549/tests/isolated-scenario.mjs:31:9)\n    at async scenario (file:///tmp/ferrodesign-e99-harness-c549/tests/browser.mjs:1062:32)\n    at async file:///tmp/ferrodesign-e99-harness-c549/tests/browser.mjs:1108:13"
+        },
+        {
+          "name": "gradient-handles",
+          "status": "failed",
+          "checks": 8,
+          "durationMs": 87574,
+          "failureStage": "scenario",
+          "error": "page.waitForFunction: Timeout 10000ms exceeded.\n    at wait (/tmp/ferrodesign-e99-harness-c549/tests/gradient-handles-browser.mjs:17:44)\n    at gradientHandleRegressions (/tmp/ferrodesign-e99-harness-c549/tests/gradient-handles-browser.mjs:630:11)\n    at async runIsolatedScenario (/tmp/ferrodesign-e99-harness-c549/tests/isolated-scenario.mjs:31:9)\n    at async scenario (/tmp/ferrodesign-e99-harness-c549/tests/browser.mjs:1062:32)\n    at async file:///tmp/ferrodesign-e99-harness-c549/tests/browser.mjs:1114:13"
+        },
+        {
+          "name": "paragraphs",
+          "status": "failed",
+          "checks": 6,
+          "durationMs": 192068,
+          "failureStage": "scenario",
+          "error": "page.waitForFunction: Timeout 10000ms exceeded.\n    at beginComposition (/tmp/ferrodesign-e99-harness-c549/tests/paragraphs-browser.mjs:400:20)\n    at async paragraphRegressions (/tmp/ferrodesign-e99-harness-c549/tests/paragraphs-browser.mjs:409:5)\n    at async runIsolatedScenario (/tmp/ferrodesign-e99-harness-c549/tests/isolated-scenario.mjs:31:9)\n    at async scenario (/tmp/ferrodesign-e99-harness-c549/tests/browser.mjs:1062:32)\n    at async file:///tmp/ferrodesign-e99-harness-c549/tests/browser.mjs:1115:13"
+        },
+        {
+          "name": "guide-bindings",
+          "status": "failed",
+          "checks": 4,
+          "durationMs": 155791,
+          "failureStage": "scenario",
+          "error": "page.waitForFunction: Timeout 10000ms exceeded.\n    at waitDocument (/tmp/ferrodesign-e99-harness-c549/tests/guide-bindings-browser.mjs:11:52)\n    at guideBindingRegressions (/tmp/ferrodesign-e99-harness-c549/tests/guide-bindings-browser.mjs:201:11)\n    at async runIsolatedScenario (/tmp/ferrodesign-e99-harness-c549/tests/isolated-scenario.mjs:31:9)\n    at async scenario (/tmp/ferrodesign-e99-harness-c549/tests/browser.mjs:1062:32)\n    at async file:///tmp/ferrodesign-e99-harness-c549/tests/browser.mjs:1160:13"
+        }
+      ]
+    }
+  ],
+  "scope_note": "Exact FerroUI 0.4.0 integration runtime and harness. All standard common checks retained; the 10,000-node common fixture intentionally runs only in Software2D. This is a failed selected-scenario result, not a full-suite or visual-parity pass."
+}

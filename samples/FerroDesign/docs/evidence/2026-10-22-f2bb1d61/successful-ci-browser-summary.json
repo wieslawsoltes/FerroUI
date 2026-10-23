@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+  "observationUtc": "2026-10-22 16:50:41 UTC",
+  "workflow": {
+    "id": 39799180117,
+    "name": "FerroDesign browser",
+    "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39799180117",
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "browserJob": {
+    "id": 119894677332,
+    "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39799180117/job/119894677332",
+    "status": "completed",
+    "conclusion": "success",
+    "startedAt": "2026-10-22T14:50:11Z",
+    "completedAt": "2026-10-22T16:43:12Z"
+  },
+  "evidenceKind": "Connector-decoded successful browser job log and its exact printed editor summary; not the downloaded official validation artifact.",
+  "verified": {
+    "checkout": {
+      "commit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+      "decodedLogLine": 130
+    },
+    "editorSummary": {
+      "passed": true,
+      "scope": {
+        "full": true,
+        "modes": [
+          "Software2D",
+          "WebGL2"
+        ],
+        "scenarios": "all"
+      },
+      "browserVersion": "156.0.8078.4",
+      "decodedLogLines": {
+        "first": 1243,
+        "last": 1554,
+        "inclusive": true,
+        "base": 1
+      }
+    },
+    "modes": [
+      {
+        "requestedMode": "Software2D",
+        "status": "passed",
+        "surface": {
+          "kind": "Software2D"
+        },
+        "checks": 141,
+        "scenarioStartNames": [
+          "vector-network",
+          "native-authoring",
+          "typography",
+          "components",
+          "image-crop",
+          "compositing",
+          "svg-compositing",
+          "masks",
+          "effects",
+          "inspector-lifecycle",
+          "floating-panels",
+          "page-inspector",
+          "auto-layout",
+          "layout-drag",
+          "layout-transfer",
+          "selection",
+          "matching",
+          "geometry-authoring",
+          "flatten",
+          "local-styles",
+          "angular-paints",
+          "grid-styles",
+          "region-paints",
+          "network-bucket",
+          "compact-autosave",
+          "prototype-input",
+          "prototype-motion",
+          "bounded-history"
+        ],
+        "scenarioStarts": 28
+      },
+      {
+        "requestedMode": "WebGL2",
+        "status": "passed",
+        "surface": {
+          "kind": "WebGL2",
+          "device": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+        },
+        "checks": 138,
+        "scenarioStartNames": [
+          "vector-network",
+          "native-authoring",
+          "typography",
+          "components",
+          "image-crop",
+          "compositing",
+          "svg-compositing",
+          "masks",
+          "effects",
+          "inspector-lifecycle",
+          "floating-panels",
+          "page-inspector",
+          "auto-layout",
+          "layout-drag",
+          "layout-transfer",
+          "selection",
+          "matching",
+          "geometry-authoring",
+          "flatten",
+          "local-styles",
+          "angular-paints",
+          "grid-styles",
+          "region-paints",
+          "network-bucket",
+          "compact-autosave",
+          "prototype-input",
+          "prototype-motion",
+          "bounded-history"
+        ],
+        "scenarioStarts": 28
+      }
+    ],
+    "screenshotRetryMessages": {
+      "count": 2,
+      "entries": [
+        {
+          "line": 1233,
+          "text": "2026-10-22T16:08:59.3844222Z WebGL2-native-local-styles: one compositor screenshot timed out; retrying once after verified unchanged native state. See WebGL2-native-local-styles-capture.json."
+        },
+        {
+          "line": 1236,
+          "text": "2026-10-22T16:23:40.0365248Z WebGL2-native-grid-style: one compositor screenshot timed out; retrying once after verified unchanged native state. See WebGL2-native-grid-style-capture.json."
+        }
+      ],
+      "meaning": "Two log messages report one compositor screenshot timeout followed by the harness's single retry after verified unchanged native state. This summary does not claim all captures succeeded on their first attempt."
+    },
+    "rawTextPanBenchmarkLines": [
+      {
+        "line": 1567,
+        "text": "2026-10-22T16:41:36.0350679Z f2bb1d618843bf777b76859d2e06bf361bef009b Software2D: 14.28 ms median / 20.62 ms p95 (36 native pan observations)"
+      },
+      {
+        "line": 1568,
+        "text": "2026-10-22T16:42:19.7080717Z f2bb1d618843bf777b76859d2e06bf361bef009b WebGL2: 20.30 ms median / 1366.94 ms p95 (36 native pan observations)"
+      }
+    ]
+  },
+  "unavailableOfficialArtifactDetails": {
+    "officialValidationZipDownloaded": false,
+    "officialValidationZipDigestLocallyVerified": false,
+    "officialValidationZipCrcVerified": false,
+    "originalReportJsonRead": false,
+    "detailedScenarioResultObjectsRead": false,
+    "captureSidecarsRead": false,
+    "totalNativeCaptureCount": null,
+    "captureFirstAttemptCount": null,
+    "pageErrorArrayRead": false,
+    "consoleErrorArrayRead": false,
+    "runtimeSourceManifestRead": false,
+    "wasmSha256": null,
+    "reason": "GitHub connector returned an artifact file reference, but ordinary local retrieval was blocked by Operation not permitted. No escalation or alternative network path was used. The full pass and 141/138 checks above are verified from the successful job's printed JSON; fields absent from that printed summary are not invented."
+  },
+  "decodedFiles": {
+    "log": {
+      "file": "browser-job-119894677332.log",
+      "bytes": 172150,
+      "sha256": "7f8a311ddad46493a6dea336bafb4d78153c0ea06178bff7680b77f80217df53",
+      "utf8BomPreserved": true,
+      "finalNewlinePreserved": true
+    },
+    "printedEditorSummary": {
+      "file": "editor-summary-extracted-log.json",
+      "bytes": 44244,
+      "sha256": "f1a6260b96c3b50b69e58d5954715842fe2a911be0cb371811e9a3f9849b6c40",
+      "extraction": "Remove only the leading GitHub ISO UTC timestamp and one following space from decoded log lines 1243–1554 inclusive; preserve payload indentation, content, and final newline."
+    },
+    "archive": "successful-ci-browser-log.zip",
+    "archiveKind": "Locally created evidence ZIP containing the two decoded files above and their SHA256SUMS; distinct from all GitHub Actions artifact ZIPs."
+  },
+  "scopeLimits": [
+    "The exact full CI pass is for f2bb1d618843bf777b76859d2e06bf361bef009b, including its predecessor matching helper.",
+    "The later f8e0471e matching-only focused pass and e0d3cee3 current-head pending/in-progress CI are separate evidence.",
+    "The WebGL2 device is ANGLE over SwiftShader, a software Vulkan device; it is not proof of physical GPU performance.",
+    "This result is not a Figma visual-parity or full-feature-parity result."
+  ]
+}

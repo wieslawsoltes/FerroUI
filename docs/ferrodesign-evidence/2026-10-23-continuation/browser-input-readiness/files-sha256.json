@@ -1,0 +1,37 @@
+{
+  "sourceCorrection": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "algorithm": "sha256",
+  "excludes": [
+    "files-sha256.json"
+  ],
+  "files": {
+    "README.md": {
+      "bytes": 8569,
+      "sha256": "fa777eabb3e7f75b92202cc48703853f91e730feaec04992b3bf08628e15a6d4"
+    },
+    "gradient-entry-diagnosis.json": {
+      "bytes": 4132,
+      "sha256": "7418cd1857e3098943a26a3b7b810b67f114533d6fd98df5bfed6bd64810b142"
+    },
+    "gradient-entry-native-audit.json": {
+      "bytes": 5426,
+      "sha256": "ac21fa8850bbf93c6a1ea9d237820c5e62e1c52d5358c72adf2fd321e7de1dca"
+    },
+    "gradient-entry-timeline.json": {
+      "bytes": 6766,
+      "sha256": "49820a1ae4ce147c7e8432346b7194f6dd37b372a0b22c0be3b0c2e4af90a84b"
+    },
+    "local-checks.json": {
+      "bytes": 7673,
+      "sha256": "8f9e0c65896e1faa3e429a1c5241074a2a4f6b61a8753823ff4b76495070b5d7"
+    },
+    "paragraph-insertion-diagnosis.json": {
+      "bytes": 4932,
+      "sha256": "223f848d36d74159965b9912f42fb526ccf76526dd9aad045ad7eec57ac70369"
+    },
+    "provenance.json": {
+      "bytes": 5931,
+      "sha256": "a51b294822b5820811ddb4f53ea854ea419197da24c61730228629a945fc9000"
+    }
+  }
+}

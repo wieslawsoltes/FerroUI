@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "runId": 39799180117,
+  "commit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+  "successfulBrowserJobId": 119894677332,
+  "artifact": {
+    "id": 12441488818,
+    "name": "FerroDesign-browser-f2bb1d618843bf777b76859d2e06bf361bef009b",
+    "apiReportedSizeBytes": 12215547,
+    "apiReportedSha256": "33a528b61c2a110f1cd92421687da520e80f72086fcf7714e9f6e44376b34a22",
+    "reportedFileCount": 16
+  },
+  "connectorFileReferenceObtained": true,
+  "localDownloadSucceeded": false,
+  "archiveBytesVerified": false,
+  "archiveCrcVerified": false,
+  "runtimeMemberHashesVerified": false,
+  "normalDownloadFailure": "curl exit 7: Failed to connect to browser-proxy port 8889",
+  "alternativeRuntimeIdentityClaimed": false,
+  "statement": "The successful build and validation are established by exact-source GitHub Actions job logs and API status. The artifact API advertises this build ZIP, but its bytes and per-file hashes were not independently retrieved in this session.",
+  "noEscalationOrNetworkWorkaroundAttempted": true,
+  "temporarySignedDownloadUrlOmitted": true
+}

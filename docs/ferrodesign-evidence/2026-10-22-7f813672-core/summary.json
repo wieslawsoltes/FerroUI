@@ -1,0 +1,116 @@
+{
+  "source_commit": "7f81367248e26dfb2d07cfa73619646fa4de6ad1",
+  "run_id": 39864431287,
+  "job_id": 120122942802,
+  "job_name": "core",
+  "status": "completed",
+  "conclusion": "success",
+  "run_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39864431287",
+  "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39864431287/job/120122942802",
+  "checkout_log_line": 125,
+  "command": "cargo +1.99.0 test --locked -p ferrodesign-core --jobs 1",
+  "command_log_line": 140,
+  "toolchain": "Rust 1.99.0 (b940084d7 2026-09-28)",
+  "toolchain_log_line": 137,
+  "complete_core": {
+    "passed": 511,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filtered_out": 0,
+    "seconds": 1.65,
+    "log_line": 702,
+    "raw_log_line": "2026-10-22T22:23:09.0435976Z test result: ok. 511 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.65s"
+  },
+  "doc_tests": {
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filtered_out": 0,
+    "seconds": 0.0,
+    "log_line": 708,
+    "raw_log_line": "2026-10-22T22:23:09.4419513Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+  },
+  "unique_successful_core_test_lines": 511,
+  "gradient_edit_tests": [
+    {
+      "name": "gradient_edit::tests::canvas_gradient_bounds_match_only_supported_box_geometries_and_affine_projection",
+      "log_line": 262
+    },
+    {
+      "name": "gradient_edit::tests::gradient_stop_authoring_preserves_source_order_ties_and_limits",
+      "log_line": 263
+    },
+    {
+      "name": "gradient_edit::tests::gradient_translation_clamps_endpoints_together_without_changing_extent",
+      "log_line": 264
+    },
+    {
+      "name": "gradient_edit::tests::linear_gradient_changes_only_one_fill_and_detaches_metadata_only_on_change",
+      "log_line": 265
+    },
+    {
+      "name": "gradient_edit::tests::invalid_gradient_edits_fail_atomically_and_locked_targets_retain_redo",
+      "log_line": 267
+    }
+  ],
+  "layout_padding_tests": [
+    {
+      "name": "layout_edit::padding_tests::changed_instance_padding_is_an_override_but_equal_padding_is_not",
+      "log_line": 310
+    },
+    {
+      "name": "layout_edit::padding_tests::empty_hug_frame_can_author_zero_and_fractional_sides",
+      "log_line": 311
+    },
+    {
+      "name": "layout_edit::padding_tests::equal_padding_preserves_unsettled_geometry_render_token_and_redo",
+      "log_line": 312
+    },
+    {
+      "name": "layout_edit::padding_tests::independent_padding_reflows_without_replacing_other_layout_settings_and_has_exact_history",
+      "log_line": 313
+    },
+    {
+      "name": "layout_edit::padding_tests::invalid_padding_and_overflow_are_atomic_and_preserve_real_redo",
+      "log_line": 314
+    },
+    {
+      "name": "layout_edit::padding_tests::nested_hug_padding_moves_siblings_and_restores_the_entire_tree_in_one_step",
+      "log_line": 315
+    },
+    {
+      "name": "layout_edit::padding_tests::padding_respects_inherited_locks_missing_layout_and_transaction_ownership",
+      "log_line": 316
+    },
+    {
+      "name": "layout_edit::padding_tests::padding_updates_explicit_grid_available_space_without_touching_tracks_or_placements",
+      "log_line": 317
+    }
+  ],
+  "scope": {
+    "core_library": true,
+    "native_application": false,
+    "browser": false,
+    "performance_benchmark": false,
+    "figma_parity_established": false
+  },
+  "provenance": "Derived from the preserved connector-decoded UTF-8 log and saved structured jobs API response. Hashes identify these saved files, not original transport/archive bytes. Log timestamps, ANSI escapes, BOM and final newline are retained. No artifact ZIP, executable, screenshot or CRC was verified.",
+  "files": {
+    "core-job.log": {
+      "bytes": 85424,
+      "sha256": "7f16bd6612007a39b33d81510bb59c5cb21d2b376a7cbb662f4ba7e148b70f58",
+      "encoding": "UTF-8",
+      "utf8_bom": true,
+      "final_newline": true
+    },
+    "jobs-api.json": {
+      "bytes": 1216,
+      "sha256": "bbd079570f11980eb2cacc8ab7803d9eb556bd9de975d18923725626769b16c1",
+      "encoding": "UTF-8",
+      "utf8_bom": false,
+      "final_newline": true
+    }
+  }
+}

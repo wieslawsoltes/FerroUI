@@ -1,0 +1,342 @@
+{
+  "schema": 1,
+  "source_commit": "999ab562276fc45c1757aee304330f9571e021f3",
+  "cached_commit_from_key": "5cb7e8847746a2bfae45bf46cafed40889f1affb",
+  "repository": "wieslawsoltes/FerroUI",
+  "run_id": 39863039315,
+  "job_id": 120120323807,
+  "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39863039315/job/120120323807",
+  "conclusion": "success",
+  "scope": {
+    "native": true,
+    "browser": false,
+    "core_suite": false,
+    "later_gradient_and_padding": false,
+    "note": "Framework filters overlap; do not sum them as unique tests. The application suite ran all 217 tests in this source."
+  },
+  "log": {
+    "file": "native-feedback-job.log",
+    "bytes": 618597,
+    "sha256": "f3b288ccf9e2daad288f31c60cdbd61862adc91b9b3409ee073fa1498c26b4b5",
+    "lines": 4052,
+    "utf8_bom": true,
+    "first_timestamp": "2026-10-22T22:16:23.5637276Z",
+    "last_timestamp": "2026-10-22T22:29:02.3304883Z"
+  },
+  "tests": [
+    {
+      "suite": "Vello unhinted geometry/pixels",
+      "log_line": 1411,
+      "outcome": "ok",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 516,
+      "seconds": 0.34
+    },
+    {
+      "suite": "Base paragraph layout",
+      "log_line": 2309,
+      "outcome": "ok",
+      "passed": 15,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 4376,
+      "seconds": 0.03
+    },
+    {
+      "suite": "Controls paragraph editing",
+      "log_line": 2607,
+      "outcome": "ok",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 4441,
+      "seconds": 0.17
+    },
+    {
+      "suite": "Controls text_box_tests",
+      "log_line": 3061,
+      "outcome": "ok",
+      "passed": 174,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 4283,
+      "seconds": 2.7
+    },
+    {
+      "suite": "Controls text_box_history",
+      "log_line": 3346,
+      "outcome": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 4452,
+      "seconds": 0.06
+    },
+    {
+      "suite": "FerroDesign app complete library suite",
+      "log_line": 4009,
+      "outcome": "ok",
+      "passed": 217,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 0,
+      "seconds": 25.84
+    }
+  ],
+  "cache": {
+    "restored": true,
+    "bytes": 913900044,
+    "restore_lines": [
+      165,
+      177
+    ],
+    "requested_key_line": 147,
+    "saved_key_line": 4036,
+    "source_compare_file": "cache-compare-api.json",
+    "production_changes_between_cache_key_commit_and_tested_source": false,
+    "compare_changed_files": 27,
+    "diagnostic_environment": "cargo::compiler::fingerprint=trace",
+    "diagnostic_environment_log_line": 320,
+    "traced_invocation_lines": [
+      309,
+      1411
+    ],
+    "reported_dirty_units": 15,
+    "reported_dirty_packages": 9,
+    "direct_mtime_units": 3,
+    "stale_dependency_units": 12,
+    "dirty_units": [
+      {
+        "log_line": 867,
+        "package": "ferroui-vello",
+        "target": "ferroui_vello",
+        "reason": "FsStatusOutdated(StaleDepFingerprint { unit: UnitIndex(36) })",
+        "kind": "stale-dependency"
+      },
+      {
+        "log_line": 870,
+        "package": "ferroui-base",
+        "target": "ferroui_base",
+        "reason": "FsStatusOutdated(StaleDepFingerprint { unit: UnitIndex(41) })",
+        "kind": "stale-dependency"
+      },
+      {
+        "log_line": 874,
+        "package": "ferroui-base",
+        "target": "build-script-build",
+        "reason": "FsStatusOutdated(StaleDepFingerprint { unit: UnitIndex(30) })",
+        "kind": "stale-dependency"
+      },
+      {
+        "log_line": 877,
+        "package": "ferroui-base",
+        "target": "build-script-build",
+        "reason": "FsStatusOutdated(StaleDepFingerprint { unit: UnitIndex(31) })",
+        "kind": "stale-dependency"
+      },
+      {
+        "log_line": 880,
+        "package": "ferroui-build-scan",
+        "target": "ferroui_build_scan",
+        "reason": "FsStatusOutdated(StaleItem(ChangedFile { reference: \"/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target/debug/.fingerprint/ferroui-build-scan-401e3c1953e4fff9/dep-lib-ferroui_build_scan\", reference_mtime: FileTime { seconds: 1792706681, nanos: 305163439 }, stale: \"/home/runner/work/FerroUI/FerroUI/src/FerroUI.Build.Scan/scanner/constants.rs\", stale_mtime: FileTime { seconds: 1792707389, nanos: 360386485 } }))",
+        "kind": "source-mtime",
+        "reference_path": "/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target/debug/.fingerprint/ferroui-build-scan-401e3c1953e4fff9/dep-lib-ferroui_build_scan",
+        "source_path": "/home/runner/work/FerroUI/FerroUI/src/FerroUI.Build.Scan/scanner/constants.rs",
+        "reference_mtime_ns": "1792706681305163439",
+        "source_mtime_ns": "1792707389360386485",
+        "reference_mtime_utc": "2026-10-22T22:04:41.305163439Z",
+        "source_mtime_utc": "2026-10-22T22:16:29.360386485Z",
+        "source_newer_by_seconds": 708.055223046
+      },
+      {
+        "log_line": 891,
+        "package": "ferroui-system",
+        "target": "ferroui_system",
+        "reason": "FsStatusOutdated(StaleItem(ChangedFile { reference: \"/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target/debug/.fingerprint/ferroui-system-cf263c112127f3ff/dep-lib-ferroui_system\", reference_mtime: FileTime { seconds: 1792706695, nanos: 55210599 }, stale: \"/home/runner/work/FerroUI/FerroUI/src/FerroUI.System/component_model/backing_field.rs\", stale_mtime: FileTime { seconds: 1792707389, nanos: 502799947 } }))",
+        "kind": "source-mtime",
+        "reference_path": "/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target/debug/.fingerprint/ferroui-system-cf263c112127f3ff/dep-lib-ferroui_system",
+        "source_path": "/home/runner/work/FerroUI/FerroUI/src/FerroUI.System/component_model/backing_field.rs",
+        "reference_mtime_ns": "1792706695055210599",
+        "source_mtime_ns": "1792707389502799947",
+        "reference_mtime_utc": "2026-10-22T22:04:55.055210599Z",
+        "source_mtime_utc": "2026-10-22T22:16:29.502799947Z",
+        "source_newer_by_seconds": 694.447589348
+      },
+      {
+        "log_line": 923,
+        "package": "ferroui-controls",
+        "target": "ferroui_controls",
+        "reason": "FsStatusOutdated(StaleDepFingerprint { unit: UnitIndex(33) })",
+        "kind": "stale-dependency"
+      },
+      {
+        "log_line": 926,
+        "package": "ferroui-controls",
+        "target": "build-script-build",
+        "reason": "FsStatusOutdated(StaleDepFingerprint { unit: UnitIndex(29) })",
+        "kind": "stale-dependency"
+      },
+      {
+        "log_line": 929,
+        "package": "ferroui-controls",
+        "target": "build-script-build",
+        "reason": "FsStatusOutdated(StaleDepFingerprint { unit: UnitIndex(31) })",
+        "kind": "stale-dependency"
+      },
+      {
+        "log_line": 932,
+        "package": "ferroui-remote-protocol",
+        "target": "ferroui_remote_protocol",
+        "reason": "FsStatusOutdated(StaleItem(ChangedFile { reference: \"/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target/debug/.fingerprint/ferroui-remote-protocol-859e09f23389b177/dep-lib-ferroui_remote_protocol\", reference_mtime: FileTime { seconds: 1792706745, nanos: 565398073 }, stale: \"/home/runner/work/FerroUI/FerroUI/src/FerroUI.Remote.Protocol/default_message_type_resolver.rs\", stale_mtime: FileTime { seconds: 1792707389, nanos: 497423801 } }))",
+        "kind": "source-mtime",
+        "reference_path": "/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target/debug/.fingerprint/ferroui-remote-protocol-859e09f23389b177/dep-lib-ferroui_remote_protocol",
+        "source_path": "/home/runner/work/FerroUI/FerroUI/src/FerroUI.Remote.Protocol/default_message_type_resolver.rs",
+        "reference_mtime_ns": "1792706745565398073",
+        "source_mtime_ns": "1792707389497423801",
+        "reference_mtime_utc": "2026-10-22T22:05:45.565398073Z",
+        "source_mtime_utc": "2026-10-22T22:16:29.497423801Z",
+        "source_newer_by_seconds": 643.932025728
+      },
+      {
+        "log_line": 935,
+        "package": "ferroui-fonts-inter",
+        "target": "ferroui_fonts_inter",
+        "reason": "FsStatusOutdated(StaleDepFingerprint { unit: UnitIndex(32) })",
+        "kind": "stale-dependency"
+      },
+      {
+        "log_line": 938,
+        "package": "ferroui-harfbuzz",
+        "target": "ferroui_harfbuzz",
+        "reason": "FsStatusOutdated(StaleDepFingerprint { unit: UnitIndex(32) })",
+        "kind": "stale-dependency"
+      },
+      {
+        "log_line": 948,
+        "package": "ferroui-opengl",
+        "target": "ferroui_opengl",
+        "reason": "FsStatusOutdated(StaleDepFingerprint { unit: UnitIndex(32) })",
+        "kind": "stale-dependency"
+      },
+      {
+        "log_line": 951,
+        "package": "ferroui-opengl",
+        "target": "build-script-build",
+        "reason": "FsStatusOutdated(StaleDepFingerprint { unit: UnitIndex(29) })",
+        "kind": "stale-dependency"
+      },
+      {
+        "log_line": 954,
+        "package": "ferroui-opengl",
+        "target": "build-script-build",
+        "reason": "FsStatusOutdated(StaleDepFingerprint { unit: UnitIndex(31) })",
+        "kind": "stale-dependency"
+      }
+    ],
+    "compiled_packages_first_invocation": [
+      {
+        "log_line": 1022,
+        "package": "ferroui-build-scan"
+      },
+      {
+        "log_line": 1024,
+        "package": "ferroui-base"
+      },
+      {
+        "log_line": 1028,
+        "package": "ferroui-controls"
+      },
+      {
+        "log_line": 1032,
+        "package": "ferroui-system"
+      },
+      {
+        "log_line": 1222,
+        "package": "ferroui-remote-protocol"
+      },
+      {
+        "log_line": 1293,
+        "package": "ferroui-opengl"
+      },
+      {
+        "log_line": 1297,
+        "package": "ferroui-harfbuzz"
+      },
+      {
+        "log_line": 1344,
+        "package": "ferroui-fonts-inter"
+      },
+      {
+        "log_line": 1346,
+        "package": "ferroui-vello"
+      }
+    ],
+    "build_finish_records": [
+      {
+        "log_line": 1398,
+        "record": "2026-10-22T22:19:53.8190879Z     Finished `test` profile [unoptimized] target(s) in 2m 09s"
+      },
+      {
+        "log_line": 2289,
+        "record": "2026-10-22T22:21:25.9862119Z     Finished `test` profile [unoptimized] target(s) in 1m 31s"
+      },
+      {
+        "log_line": 2586,
+        "record": "2026-10-22T22:23:54.6312320Z     Finished `test` profile [unoptimized] target(s) in 2m 28s"
+      },
+      {
+        "log_line": 2882,
+        "record": "2026-10-22T22:23:54.9718945Z     Finished `test` profile [unoptimized] target(s) in 0.11s"
+      },
+      {
+        "log_line": 3336,
+        "record": "2026-10-22T22:23:57.8304130Z     Finished `test` profile [unoptimized] target(s) in 0.11s"
+      },
+      {
+        "log_line": 3787,
+        "record": "2026-10-22T22:28:21.6663537Z     Finished `test` profile [unoptimized] target(s) in 4m 23s"
+      }
+    ],
+    "registry_reuse_examples": [
+      {
+        "package": "quote",
+        "log_line": 346
+      },
+      {
+        "package": "syn",
+        "log_line": 361
+      }
+    ],
+    "workflow_source_file": "workflow-source-api.json",
+    "workflow_diff": "--- 5cb7e884/.github/workflows/ferrodesign-native.yml\n+++ 999ab562/.github/workflows/ferrodesign-native.yml\n@@ -63,10 +63,10 @@\n           sudo apt-get update\n           sudo apt-get install --no-install-recommends -y pkg-config libfontconfig1-dev libfreetype6-dev\n       - name: Validate public unhinted glyph geometry and pixels\n-        # Record actual cache invalidation reasons without changing Cargo's\n-        # freshness decisions or any validation gate.\n+        # Cargo 1.99 uses compiler, without the older core::compiler prefix.\n+        # Record freshness reasons without changing cache decisions or validation.\n         env:\n-          CARGO_LOG: cargo::core::compiler::fingerprint=info\n+          CARGO_LOG: cargo::compiler::fingerprint=trace\n         run: cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-vello --lib unhinted_ --jobs 1 -- --test-threads=1\n       - name: Validate shared paragraph layout and native editing\n         run: |\n"
+  },
+  "interpretation": {
+    "established": "The first traced invocation reports newer checked-out source mtimes than restored dep-info for unchanged tracked workspace inputs, followed by stale dependency propagation. The cache was restored successfully.",
+    "limits": [
+      "Cargo reports the first dirty input/dependency for a unit; the three paths are examples, not a census of every newer source file.",
+      "Fingerprint tracing is scoped to the first Vello invocation. Later builds have distinct package/test contexts and their reasons are not established by this trace.",
+      "The cache archive was not downloaded or independently byte-verified; cache identity is the key printed by CI.",
+      "No native/browser runtime performance improvement or exact avoidable-build-time estimate was measured.",
+      "This job predates the gradient and padding feature source and contains no browser validation."
+    ]
+  },
+  "optimization": {
+    "status": "proposal only; not integrated or tested in Cargo/CI",
+    "candidate": "Co-cache a versioned per-file SHA256/size/mtime_ns manifest with the target. Restore only exact-content matching tracked regular files under the repository, leaving new/changed/unknown files fresh and rejecting malformed or unsafe paths; preserve Cargo dependency checks.",
+    "required_validation": [
+      "Prove unchanged-source reuse on the same native commands and unchanged semantic test gates.",
+      "Prove byte changes, new/deleted inputs, build-script inputs, symlinks and mismatched/corrupt manifests cannot be made falsely fresh.",
+      "Keep manifest recording paired with the exact archived target and actual source mtimes; do not assign commit timestamps or touch outputs/fingerprints.",
+      "Account for tracked generated source changes and input mutation during snapshot/build; fail closed if ownership or equality cannot be established."
+    ],
+    "not_recommended": "Blind timestamp backdating, touching target outputs/dep-info, or assuming a broad cache restore makes units current."
+  }
+}

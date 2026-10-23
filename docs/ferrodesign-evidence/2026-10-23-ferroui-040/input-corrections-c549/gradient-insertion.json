@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-10-23T14:25:51.330361+00:00",
+  "scope": "Source correction, installed Playwright source review, and pure Node validator tests after the preserved c549 browser failure. The corrected insertion has not been rerun in a browser at this checkpoint.",
+  "failedExecution": {
+    "runtimeCommit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+    "harnessCommit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+    "diagnosis": "../browser-runtime-c549/gradient-insertion-diagnosis.json",
+    "nativePressIntervalMs": {
+      "Software2D": 175,
+      "WebGL2": 994
+    },
+    "nativeClickCounts": {
+      "Software2D": [
+        1,
+        2
+      ],
+      "WebGL2": [
+        1,
+        1
+      ]
+    },
+    "webglBrowserActionDurationMs": 2658.384,
+    "originalDomTimestampsAvailable": false,
+    "preservedOriginalEvidenceUnchanged": true
+  },
+  "correctionSource": {
+    "repositoryHeadAtInspection": "2c501d095c1d5923062736c42a5eca4a98f325fb",
+    "sourceCommit": "Working-tree correction identified by exact file hashes below; commit and push are owned by the parent integration task.",
+    "files": [
+      {
+        "path": "samples/FerroDesign/tests/gradient-handles-browser.mjs",
+        "bytes": 63144,
+        "sha256": "dbab66644e67057b0b63e3902394569ccaab1bf37e463a640ce0c47daa5b615d"
+      },
+      {
+        "path": "samples/FerroDesign/tests/gradient-input.mjs",
+        "bytes": 9878,
+        "sha256": "377dc27ea56191da15e0f6bbedb3f56bdb64ba44c5571a3f8a831541a5b0890f"
+      },
+      {
+        "path": "samples/FerroDesign/tests/gradient-input.test.mjs",
+        "bytes": 11320,
+        "sha256": "8026377652fdaf825163cd3c1075cdb1b1bc4cfef0745c294627912abe1b538a"
+      }
+    ],
+    "unchangedObservationHelpers": [
+      {
+        "path": "samples/FerroDesign/tests/input-observations.mjs",
+        "bytes": 4833,
+        "sha256": "4ca6a96bb6c5a61bf9963e1bff0bb66690f222972b2ebe9e92b79470ef1af576"
+      },
+      {
+        "path": "samples/FerroDesign/tests/input-observations.test.mjs",
+        "bytes": 6410,
+        "sha256": "6fc6d90dc556d0173ef5661d1c246dda513356015f6082a88bc51c6386c96996"
+      },
+      {
+        "path": "samples/FerroDesign/tests/isolated-scenario.mjs",
+        "bytes": 2116,
+        "sha256": "c2216ac8f127f7922cff5e803c88641bfd433ac2fa5b1186526288ec489e953e"
+      },
+      {
+        "path": "samples/FerroDesign/tests/isolated-scenario.test.mjs",
+        "bytes": 5327,
+        "sha256": "97104f6ce5ddd019857527a83ff363db5e064cb60e954e0235f9f41166422031"
+      }
+    ],
+    "callSites": [
+      {
+        "path": "samples/FerroDesign/tests/gradient-handles-browser.mjs",
+        "line": 694,
+        "label": "Linear axis insertion",
+        "target": "Actual native axis marker at normalized offset 0.25"
+      },
+      {
+        "path": "samples/FerroDesign/tests/gradient-handles-browser.mjs",
+        "line": 863,
+        "label": "Angular ring insertion",
+        "target": "Actual transformed conic ring point at the requested quarter-turn"
+      }
+    ],
+    "radialScope": "The current radial fixtures contain no double-click insertion call; no radial scenario was added or removed.",
+    "action": "Exactly one page.mouse.click at measured world-to-page coordinates with clickCount:2 and no delay option; no retry, synthetic JavaScript event, native command bypass, or production change.",
+    "observation": "Existing passive document capture/bubble observers collect pointer and compatibility mouse events. Native state is read before and after the complete browser action, never between its two presses. Compatibility mouse events are retained when emitted but are not required because the native bridge prevents pointer defaults.",
+    "requiredRecognition": [
+      "One ordered trusted mouse pointerdown/pointerup/pointerdown/pointerup sequence in capture and bubble, with the same actual point, pointer identity and left-button state.",
+      "No pointer cancellation or dropped observed events.",
+      "Exactly two additional native canvas press serials with independently classified click counts [1,2].",
+      "Browser event-creation and native monotonic press intervals each between 0 and 500 ms inclusive; observer processing delays are recorded separately.",
+      "Same native canvas and world hit points, unchanged viewport and canvas bounds, and correspondence to the delivered browser coordinates.",
+      "Requested coordinates permit exact delivery or the existing Chromium float32 conversion only; existing 1e-6 native-coordinate correspondence is retained.",
+      "Every existing inserted-stop count, offset, RGBA color, paint metadata, selected stop, full document, undo and redo assertion remains in place."
+    ],
+    "failureHandling": "Observation stop, native state capture and evidence writing have bounded deadlines. A diagnostic failure cannot replace the original browser action error; missing evidence fails an otherwise successful action.",
+    "runtimeEvidenceOutput": "<mode>-gradient-insertion-input.json, including before/after native records, passive DOM capture/bubble events, three distinct timing intervals, event delivery ages and Node-clock action wall time."
+  },
+  "playwrightReview": {
+    "version": "1.64.1",
+    "installedSource": {
+      "path": "samples/FerroDesign/node_modules/playwright-core/lib/coreBundle.js",
+      "bytes": 3585406,
+      "sha256": "829521b67ed7be90c7d6d6098ff39f2241562d47e4ad7ccab13710924a56001d"
+    },
+    "mouseClickLines": [
+      22660,
+      22685
+    ],
+    "chromiumDispatchLines": [
+      37192,
+      37244
+    ],
+    "sessionSendLines": [
+      36354,
+      36361
+    ],
+    "connectionSendLines": [
+      36293,
+      36301
+    ],
+    "delayedPath": "A nonzero delay awaits each CDP command, waits between down and up, and waits between clicks. With delay80 and two clicks there are three explicit 80 ms waits in addition to command response delays.",
+    "noDelayPath": "Move/down/up/down/up calls are issued in order before Promise.all waits for completion. Chromium RawMouseImpl sends real Input.dispatchMouseEvent commands; CRSession.send synchronously calls the ordered connection transport before returning the response promise. Native event counts and timing still have to pass the independent observations.",
+    "limits": "This is an inspection of the pinned installed implementation, not a guarantee about browser scheduling or proof that the corrected action passes under the measured host load."
+  },
+  "unchangedNativeRule": {
+    "milliseconds": 500,
+    "platformSettings": {
+      "path": "src/FerroUI.Base/platform/default_platform_settings.rs",
+      "bytes": 7107,
+      "sha256": "cbc93744f408bd181eda993c24ce6bbe79ea2514f4f96e495d9655561c9e63f4"
+    },
+    "platformSettingsLines": [
+      84,
+      86
+    ],
+    "mouseDevice": {
+      "path": "src/FerroUI.Base/input/mouse_device.rs",
+      "bytes": 14950,
+      "sha256": "d1874140203a432ae448ceadd195013b614ae4d3554a03dba0f0687ef143a5b8"
+    },
+    "mouseDeviceLines": [
+      216,
+      244
+    ],
+    "rule": "The native click count resets when the position escapes its rectangle or the native press interval exceeds 500 ms. No threshold or input timestamp source is changed."
+  },
+  "verification": {
+    "cwd": "samples/FerroDesign",
+    "tests": [
+      {
+        "command": "node tests/gradient-input.test.mjs",
+        "passed": 11,
+        "failed": 0,
+        "newCases": 6
+      },
+      {
+        "command": "node tests/input-observations.test.mjs",
+        "passed": 7,
+        "failed": 0
+      },
+      {
+        "command": "node tests/isolated-scenario.test.mjs",
+        "passed": 5,
+        "failed": 0
+      }
+    ],
+    "syntax": "node --check tests/gradient-handles-browser.mjs passed; changed helper modules were parsed by their test execution.",
+    "diffCheck": "git diff --check for all three changed files passed.",
+    "newCaseCoverage": [
+      "Complete immutable native [1,2] evidence at the delivered point.",
+      "Accept native and creation intervals exactly 500 ms, reject 501 ms, and keep a 994 ms observer-processing interval separate.",
+      "Reject native [1,1] even when browser double-click was requested.",
+      "Reject missing, extra, cancelled, untrusted, shifted or inconsistent pointer input.",
+      "Reject extra or missing native presses, a different native hit point, and a changing viewport.",
+      "Accept exact/float32 requested-point delivery while rejecting a different requested point."
+    ],
+    "browserRerun": false,
+    "productionBuild": false,
+    "nativeTestExecution": false,
+    "interpretation": "The Node cases validate evidence handling using explicitly labelled fixtures. They are not real browser input, native UI execution or a visual-parity result."
+  }
+}

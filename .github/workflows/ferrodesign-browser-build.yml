@@ -1,0 +1,195 @@
+name: FerroDesign browser build feedback
+
+on:
+  push:
+    branches: [feat/ferrodesign-editor]
+    paths:
+      - samples/FerroDesign/crates/**
+      - samples/FerroDesign/web/**
+      - samples/FerroDesign/tests/**
+      - samples/FerroDesign/Cargo.toml
+      - samples/FerroDesign/Cargo.lock
+      - samples/FerroDesign/.cargo/**
+      - samples/FerroDesign/rust-toolchain.toml
+      - samples/FerroDesign/scripts/**
+      - src/**
+      - scripts/browser/**
+      - Cargo.toml
+      - Cargo.lock
+      - rust-toolchain.toml
+      - .cargo/**
+      - .github/workflows/ferrodesign-browser-build.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Build feedback is independent of the complete interaction/benchmark queue.
+# This artifact does not replace the full browser validation workflow.
+concurrency:
+  group: ferrodesign-browser-build-feedback-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  browser-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      CARGO_BUILD_JOBS: 1
+      CARGO_TERM_COLOR: always
+      FERRODESIGN_BUILD_JOBS: 1
+      CARGO_TARGET_DIR: ${{ github.workspace }}/samples/FerroDesign/target
+    defaults:
+      run:
+        shell: bash
+        working-directory: samples/FerroDesign
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: Restore pinned toolchain
+        id: tools
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ${{ runner.temp }}/ferrodesign-tools/rustup
+            ${{ runner.temp }}/ferrodesign-tools/cargo/bin
+            ${{ runner.temp }}/ferrodesign-tools/bin
+            ${{ runner.temp }}/ferrodesign-tools/emsdk
+          key: ferrodesign-tools-${{ runner.os }}-rust1.99.0-em6.0.10-bindgen0.2.129
+      - name: Restore browser dependencies and compiled framework
+        id: build-cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ${{ runner.temp }}/ferrodesign-tools/cargo/registry
+            ${{ runner.temp }}/ferrodesign-tools/cargo/git
+            samples/FerroDesign/target
+          key: ferrodesign-browser-build-${{ runner.os }}-${{ hashFiles('samples/FerroDesign/**/Cargo.toml', 'samples/FerroDesign/Cargo.lock', 'Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            ferrodesign-browser-build-${{ runner.os }}-${{ hashFiles('samples/FerroDesign/**/Cargo.toml', 'samples/FerroDesign/Cargo.lock', 'Cargo.lock') }}-
+            ferrodesign-build-${{ runner.os }}-v3-browser-${{ hashFiles('samples/FerroDesign/**/Cargo.toml', 'samples/FerroDesign/Cargo.lock') }}-
+      - name: Restore content-verified source timestamps
+        id: source-mtimes-restore
+        run: |
+          set -o pipefail
+          python3 scripts/test_source_mtime_cache.py
+          mkdir -p "$CARGO_TARGET_DIR" browser-build-report
+          python3 scripts/source_mtime_cache.py restore --repo "$GITHUB_WORKSPACE" --target-dir "$CARGO_TARGET_DIR" | tee browser-build-report/source-mtime-restore.json
+      - name: Install pinned Rust, Emscripten and wasm-bindgen
+        run: |
+          set -o pipefail
+          scripts/setup.sh "$RUNNER_TEMP/ferrodesign-tools" 2>&1 | tee browser-build-report/toolchain.log
+      - name: Verify source timestamp reuse and changed-input rebuilding
+        id: source-mtimes-cargo
+        run: |
+          set -o pipefail
+          source "$RUNNER_TEMP/ferrodesign-tools/env.sh"
+          python3 scripts/test_source_mtime_cargo.py 2>&1 | tee browser-build-report/source-mtime-cargo.log
+      - name: Install native font build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y pkg-config libfontconfig1-dev libfreetype6-dev
+          pkg-config --modversion fontconfig freetype2
+      - name: Build actual FerroUI Vello WebAssembly application
+        id: browser-build
+        run: |
+          set -o pipefail
+          source "$RUNNER_TEMP/ferrodesign-tools/env.sh"
+          scripts/build-browser.sh 2>&1 | tee browser-build-report/build.log
+      - name: Record exact browser build provenance
+        id: provenance
+        run: |
+          source "$RUNNER_TEMP/ferrodesign-tools/env.sh"
+          python3 - <<'PY'
+          from datetime import datetime, timezone
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+
+          repo = Path(os.environ["GITHUB_WORKSPACE"])
+          dist = repo / "samples/FerroDesign/dist"
+          def output(*args):
+              return subprocess.check_output(args, cwd=repo, text=True).strip()
+          commit = output("git", "rev-parse", "HEAD")
+          if commit != os.environ["GITHUB_SHA"]:
+              raise RuntimeError("Built checkout does not match the workflow commit")
+          subprocess.run(["git", "diff", "--quiet", "HEAD", "--"], cwd=repo, check=True)
+          files = []
+          for path in sorted(dist.rglob("*")):
+              if path.is_file() and path.name != "ferrodesign-provenance.json":
+                  data = path.read_bytes()
+                  files.append({"path": path.relative_to(dist).as_posix(),
+                                "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()})
+          if not any(row["path"].endswith(".wasm") for row in files):
+              raise RuntimeError("Browser distribution contains no WebAssembly payload")
+          provenance = {
+              "schema_version": 1,
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "commit": commit, "tree": output("git", "rev-parse", "HEAD^{tree}"),
+              "ref": os.environ["GITHUB_REF"], "run_id": os.environ["GITHUB_RUN_ID"],
+              "run_attempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "run_url": os.environ["GITHUB_SERVER_URL"] + "/" + os.environ["GITHUB_REPOSITORY"]
+                         + "/actions/runs/" + os.environ["GITHUB_RUN_ID"],
+              "created_utc": datetime.now(timezone.utc).isoformat(),
+              "profile": "browser", "target": "wasm32-unknown-emscripten",
+              "renderer_graph": "dependencies.txt",
+              "validation_scope": "Build, active Vello/no-Skia graph, host input tests and static module imports; browser interactions require the separate full workflow.",
+              "tools": {tool: output(tool, "--version").splitlines()[0]
+                        for tool in ("rustc", "cargo", "emcc", "wasm-bindgen", "node", "npm")},
+              "files": files,
+          }
+          encoded = json.dumps(provenance, indent=2) + "\n"
+          (dist / "ferrodesign-provenance.json").write_text(encoded, encoding="utf-8")
+          (repo / "samples/FerroDesign/browser-build-report/provenance.json").write_text(encoded, encoding="utf-8")
+          print(f"Recorded {len(files)} distribution payload files for {commit}.")
+          PY
+      - name: Upload complete browser build with provenance
+        if: ${{ !cancelled() && steps.browser-build.outcome == 'success' && steps.provenance.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: FerroDesign-browser-build-${{ github.sha }}
+          path: samples/FerroDesign/dist
+          if-no-files-found: error
+          retention-days: 30
+      - name: Snapshot source timestamps with the partial build
+        id: source-mtimes-snapshot
+        if: ${{ !cancelled() && steps.source-mtimes-restore.outcome == 'success' && steps.source-mtimes-cargo.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          python3 scripts/source_mtime_cache.py snapshot --repo "$GITHUB_WORKSPACE" --target-dir "$CARGO_TARGET_DIR" | tee browser-build-report/source-mtime-snapshot.json
+      - name: Upload browser build logs and provenance
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: FerroDesign-browser-build-report-${{ github.sha }}
+          path: |
+            samples/FerroDesign/browser-build-report
+            samples/FerroDesign/Cargo.lock
+            samples/FerroDesign/package-lock.json
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Cache pinned toolchain
+        if: always() && steps.tools.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ${{ runner.temp }}/ferrodesign-tools/rustup
+            ${{ runner.temp }}/ferrodesign-tools/cargo/bin
+            ${{ runner.temp }}/ferrodesign-tools/bin
+            ${{ runner.temp }}/ferrodesign-tools/emsdk
+          key: ${{ steps.tools.outputs.cache-primary-key }}
+      - name: Cache partial browser build
+        if: ${{ !cancelled() && steps.source-mtimes-snapshot.outcome == 'success' && steps.build-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ${{ runner.temp }}/ferrodesign-tools/cargo/registry
+            ${{ runner.temp }}/ferrodesign-tools/cargo/git
+            samples/FerroDesign/target
+          key: ${{ steps.build-cache.outputs.cache-primary-key }}

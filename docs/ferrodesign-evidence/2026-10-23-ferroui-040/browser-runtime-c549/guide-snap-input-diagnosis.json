@@ -1,0 +1,140 @@
+{
+  "runtime_commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "harness_commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "report_sha256": "80e19dbb78014b8a3e7d915a5b9a8e09d15f9ea79b80b7c2fec610cc960e24b3",
+  "diagnosis": "The fixture requests horizontal attraction outside the native five-screen-pixel guide snap radius after fit-to-document zoom.",
+  "classification": "Input fixture assumption; no change to production snapping or assertion tolerance is implied.",
+  "source_references": {
+    "samples/FerroDesign/tests/guide-bindings-browser.mjs": [
+      190,
+      201
+    ],
+    "samples/FerroDesign/crates/ferrodesign-app/src/canvas.rs": [
+      1062,
+      1106
+    ],
+    "samples/FerroDesign/crates/ferrodesign-core/src/layout_guides/snapping.rs": [
+      26,
+      105
+    ]
+  },
+  "source_sha256": {
+    "samples/FerroDesign/tests/guide-bindings-browser.mjs": "3097696241c050fc79d3aeee5b24ef70e2171b8c4f7fed62dec7c5252c6dc800",
+    "samples/FerroDesign/crates/ferrodesign-app/src/canvas.rs": "bc6497cdcec15710fe4cfb6cee02ff8cf1f4f0e97f242eb716dfff9004dfb4a6",
+    "samples/FerroDesign/crates/ferrodesign-core/src/layout_guides/snapping.rs": "13c81928f83732624a359779f7b0f97fb33c1a4860d23ee1d6c8a32976a1e4ab"
+  },
+  "cases": [
+    {
+      "mode": "Software2D",
+      "zoom": 2.953333333333333,
+      "native_screen_radius_pixels": 5,
+      "world_radius": 1.6930022573363432,
+      "owner_world_origin": [
+        40,
+        40
+      ],
+      "guide_size": 25.5,
+      "before_local_xy": [
+        36,
+        43
+      ],
+      "size": [
+        23,
+        17
+      ],
+      "pointer_start_world": [
+        87.5,
+        91.5
+      ],
+      "pointer_end_world": [
+        98.5,
+        99.5
+      ],
+      "rounded_pointer_delta": [
+        11,
+        8
+      ],
+      "proposed_local_xy": [
+        47,
+        51
+      ],
+      "asserted_local_xy": [
+        51,
+        51
+      ],
+      "nearest_horizontal_attraction_world": 4,
+      "nearest_horizontal_attraction_screen_pixels": 11.813333333333333,
+      "vertical_attraction_world": 0,
+      "actual_local_xy": [
+        47.0,
+        51.0
+      ],
+      "actual_size": [
+        23.0,
+        17.0
+      ],
+      "selection": [
+        3
+      ],
+      "history_length": 14,
+      "saved_document": "Software2D-guide-bindings-failure.ferrodesign",
+      "saved_document_sha256": "bbd6355c71f38ca3facaee1b962a1d18ccc2c42eb4e9fce0ff5ade3b0cf1442a"
+    },
+    {
+      "mode": "WebGL2",
+      "zoom": 2.953333333333333,
+      "native_screen_radius_pixels": 5,
+      "world_radius": 1.6930022573363432,
+      "owner_world_origin": [
+        40,
+        40
+      ],
+      "guide_size": 25.5,
+      "before_local_xy": [
+        36,
+        43
+      ],
+      "size": [
+        23,
+        17
+      ],
+      "pointer_start_world": [
+        87.5,
+        91.5
+      ],
+      "pointer_end_world": [
+        98.5,
+        99.5
+      ],
+      "rounded_pointer_delta": [
+        11,
+        8
+      ],
+      "proposed_local_xy": [
+        47,
+        51
+      ],
+      "asserted_local_xy": [
+        51,
+        51
+      ],
+      "nearest_horizontal_attraction_world": 4,
+      "nearest_horizontal_attraction_screen_pixels": 11.813333333333333,
+      "vertical_attraction_world": 0,
+      "actual_local_xy": [
+        47.0,
+        51.0
+      ],
+      "actual_size": [
+        23.0,
+        17.0
+      ],
+      "selection": [
+        3
+      ],
+      "history_length": 14,
+      "saved_document": "WebGL2-guide-bindings-failure.ferrodesign",
+      "saved_document_sha256": "bbd6355c71f38ca3facaee1b962a1d18ccc2c42eb4e9fce0ff5ade3b0cf1442a"
+    }
+  ]
+}

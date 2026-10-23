@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "f2bb1d618843bf777b76859d2e06bf361bef009b",
+  "workflowRunId": 39799180117,
+  "browserJobId": 119894677332,
+  "workflowUrl": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39799180117",
+  "evidenceArchive": "successful-ci-browser-log.zip",
+  "decodedLog": {
+    "member": "browser-job-119894677332.log",
+    "bytes": 172150,
+    "sha256": "7f8a311ddad46493a6dea336bafb4d78153c0ea06178bff7680b77f80217df53"
+  },
+  "record": "Real browser IndexedDB persistence checks",
+  "apiStep": {
+    "number": 10,
+    "name": "Validate browser persistence and IndexedDB transactions",
+    "status": "completed",
+    "conclusion": "success",
+    "startedAt": "2026-10-22T15:15:43Z",
+    "completedAt": "2026-10-22T15:15:45Z"
+  },
+  "command": {
+    "decodedLogLine": 1135,
+    "value": "node tests/document-store-browser.mjs 2>&1 | tee browser-report/indexeddb-tests.log"
+  },
+  "extraction": {
+    "decodedLogFirstLine": 1143,
+    "decodedLogLastLine": 1170,
+    "lineNumbersOneBasedInclusive": true,
+    "operation": "Remove only each leading GitHub ISO UTC timestamp and one following space; preserve all JSON payload bytes and its final newline.",
+    "bytes": 885,
+    "sha256": "0dfa939caef8b59413752b70ec54d6aea2acfb0d9c4133452e795e66d130c60c",
+    "finalNewline": true
+  },
+  "exactPrintedJson": "{\n  \"passed\": true,\n  \"browser\": \"156.0.8078.4\",\n  \"checks\": [\n    \"Legacy migration and current/previous snapshots commit atomically\",\n    \"A write request that succeeds before transaction abort is not acknowledged or persisted\",\n    \"Two real browser tabs cannot overwrite a snapshot loaded at an older revision\",\n    \"A document exceeding 10 MiB survives a real browser reload without localStorage\",\n    \"An aborted migration keeps the original localStorage document readable and intact\"\n  ],\n  \"largeDocument\": {\n    \"flushed\": true,\n    \"state\": {\n      \"phase\": \"saved\",\n      \"backend\": \"indexedDB\",\n      \"dirty\": false,\n      \"draftDirty\": false,\n      \"serializationPending\": false,\n      \"revision\": 5,\n      \"sequence\": 5,\n      \"committedSequence\": 5,\n      \"characters\": 12000042,\n      \"error\": \"\"\n    },\n    \"characters\": 12000042,\n    \"saveMs\": 82.0999999998603\n  }\n}\n",
+  "report": {
+    "passed": true,
+    "browser": "156.0.8078.4",
+    "checks": [
+      "Legacy migration and current/previous snapshots commit atomically",
+      "A write request that succeeds before transaction abort is not acknowledged or persisted",
+      "Two real browser tabs cannot overwrite a snapshot loaded at an older revision",
+      "A document exceeding 10 MiB survives a real browser reload without localStorage",
+      "An aborted migration keeps the original localStorage document readable and intact"
+    ],
+    "largeDocument": {
+      "flushed": true,
+      "state": {
+        "phase": "saved",
+        "backend": "indexedDB",
+        "dirty": false,
+        "draftDirty": false,
+        "serializationPending": false,
+        "revision": 5,
+        "sequence": 5,
+        "committedSequence": 5,
+        "characters": 12000042,
+        "error": ""
+      },
+      "characters": 12000042,
+      "saveMs": 82.0999999998603
+    }
+  },
+  "checkCount": 5,
+  "checkNames": [
+    "Legacy migration and current/previous snapshots commit atomically",
+    "A write request that succeeds before transaction abort is not acknowledged or persisted",
+    "Two real browser tabs cannot overwrite a snapshot loaded at an older revision",
+    "A document exceeding 10 MiB survives a real browser reload without localStorage",
+    "An aborted migration keeps the original localStorage document readable and intact"
+  ],
+  "scope": "These are five real-browser IndexedDB checks, separate from the native validation job's 19 host persistence tests. This record does not combine or duplicate those test counts.",
+  "officialArtifactReportRead": false,
+  "provenanceLimit": "Verified from decoded successful job output. The official validation ZIP and its original persistence report file were not downloaded or CRC-verified."
+}

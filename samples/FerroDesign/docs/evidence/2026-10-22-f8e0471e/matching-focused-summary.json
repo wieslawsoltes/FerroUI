@@ -1,0 +1,485 @@
+{
+  "created": "2026-10-22T16:16:31.841Z",
+  "completedUtc": "2026-10-22T16:19:41.835227+00:00",
+  "exitCode": 0,
+  "durationSeconds": 180.12886595726013,
+  "passed": true,
+  "scope": {
+    "full": false,
+    "modes": [
+      "Software2D",
+      "WebGL2"
+    ],
+    "scenarios": [
+      "matching"
+    ]
+  },
+  "browser": "156.0.8078.4",
+  "harnessSourceCommit": "f8e0471eb4301a9b893e8185810550ebba5ddafc",
+  "buildSourceCommit": "3a0bf1f13c6ede9abe5360bc3691085a3bc981f0",
+  "runtimeArtifactId": 12427798904,
+  "wasm": {
+    "bytes": 51205801,
+    "sha256": "7880a628e7117ab88f896f69baa9c9ccedcdc33792302a01f653b4465e1499b9"
+  },
+  "predicateInstrumentation": false,
+  "results": [
+    {
+      "requestedRenderer": "Vello",
+      "requestedMode": "Software2D",
+      "actualSurface": {
+        "kind": "Software2D"
+      },
+      "status": "passed",
+      "checks": 25,
+      "scenariosEntered": 1,
+      "scenariosPassed": 1,
+      "scenarios": [
+        {
+          "name": "vector-network",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "native-authoring",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "typography",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "components",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "image-crop",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "compositing",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "svg-compositing",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "masks",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "effects",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "inspector-lifecycle",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "floating-panels",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "page-inspector",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "auto-layout",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "layout-drag",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "layout-transfer",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "selection",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "matching",
+          "status": "passed",
+          "checksBefore": 16,
+          "checks": 3,
+          "durationMs": 4751
+        },
+        {
+          "name": "geometry-authoring",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "flatten",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "local-styles",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "angular-paints",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "grid-styles",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "region-paints",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "network-bucket",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "compact-autosave",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "prototype-input",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "prototype-motion",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "bounded-history",
+          "status": "not-requested",
+          "checksBefore": 19
+        }
+      ],
+      "nativeCaptures": 2,
+      "captureAttempts": 2,
+      "captureRetries": 0,
+      "allCaptureFinalAttemptsPassed": true,
+      "retriedCaptures": [],
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "error": null,
+      "largeDocument": {
+        "nodeCount": 10000,
+        "importBytes": 12932068,
+        "importAndFirstFrameMs": 1297,
+        "layerRows": 10000,
+        "realizedRows": 25,
+        "visibleNodes": 10000,
+        "realizedAfterScroll": 25,
+        "nudgeMs": 295,
+        "preparation": {
+          "nudge": {
+            "full": 0,
+            "incremental": 1,
+            "nodes": 1,
+            "visuals": 0
+          },
+          "undo": {
+            "full": 0,
+            "incremental": 1,
+            "nodes": 1,
+            "visuals": 0
+          },
+          "redo": {
+            "full": 0,
+            "incremental": 1,
+            "nodes": 1,
+            "visuals": 0
+          }
+        },
+        "layerProjection": {
+          "nudge": {
+            "builds": 0,
+            "reuses": 1
+          },
+          "undo": {
+            "builds": 0,
+            "reuses": 1
+          },
+          "redo": {
+            "builds": 0,
+            "reuses": 1
+          }
+        },
+        "spatialQuery": {
+          "roots": 10000,
+          "candidates": 1,
+          "boundsTests": 27,
+          "reused": false,
+          "visibleNodes": 1,
+          "zoom": 17.083333333333332
+        },
+        "commitMs": 5,
+        "autosaveBytes": 13192068,
+        "autosaveSerializationMs": 29,
+        "reloadMs": 1578,
+        "exportBytes": 20712219,
+        "sha256": "1b0704b9a7d482cafbea57cbcaa510ce3e4511173c010880e5a22051b9461397"
+      }
+    },
+    {
+      "requestedRenderer": "Vello",
+      "requestedMode": "WebGL2",
+      "actualSurface": {
+        "kind": "WebGL2",
+        "device": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+      },
+      "status": "passed",
+      "checks": 22,
+      "scenariosEntered": 1,
+      "scenariosPassed": 1,
+      "scenarios": [
+        {
+          "name": "vector-network",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "native-authoring",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "typography",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "components",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "image-crop",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "compositing",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "svg-compositing",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "masks",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "effects",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "inspector-lifecycle",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "floating-panels",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "page-inspector",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "auto-layout",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "layout-drag",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "layout-transfer",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "selection",
+          "status": "not-requested",
+          "checksBefore": 16
+        },
+        {
+          "name": "matching",
+          "status": "passed",
+          "checksBefore": 16,
+          "checks": 3,
+          "durationMs": 29270
+        },
+        {
+          "name": "geometry-authoring",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "flatten",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "local-styles",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "angular-paints",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "grid-styles",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "region-paints",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "network-bucket",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "compact-autosave",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "prototype-input",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "prototype-motion",
+          "status": "not-requested",
+          "checksBefore": 19
+        },
+        {
+          "name": "bounded-history",
+          "status": "not-requested",
+          "checksBefore": 19
+        }
+      ],
+      "nativeCaptures": 2,
+      "captureAttempts": 2,
+      "captureRetries": 0,
+      "allCaptureFinalAttemptsPassed": true,
+      "retriedCaptures": [],
+      "pageErrors": [],
+      "consoleErrors": [],
+      "error": null,
+      "largeDocument": null
+    }
+  ],
+  "integrity": {
+    "all31SourceFilesUnchanged": true,
+    "all16RuntimeFilesUnchanged": true
+  },
+  "resources": {
+    "sampleCount": 38,
+    "sampleIntervalSeconds": 5,
+    "baselineMemory": 6050922496,
+    "finalMemory": 5768900608,
+    "peakMemory": 8589934592,
+    "memoryLimit": 8589934592,
+    "baselineEvents": {
+      "low": 0,
+      "high": 0,
+      "max": 10966542,
+      "oom": 18,
+      "oom_kill": 12,
+      "oom_group_kill": 0
+    },
+    "finalEvents": {
+      "low": 0,
+      "high": 0,
+      "max": 10977611,
+      "oom": 18,
+      "oom_kill": 12,
+      "oom_group_kill": 0
+    },
+    "eventsDelta": {
+      "low": 0,
+      "high": 0,
+      "max": 11069,
+      "oom": 0,
+      "oom_kill": 0,
+      "oom_group_kill": 0
+    },
+    "peakOwnedSummedRssBytes": 1894105088,
+    "finalOwnedProcesses": [],
+    "caveat": "Cgroup totals can include other work. Process samples match the Node PID or task Chromium executable path; they are not a complete descendant-tree or per-PID cgroup/PSS inventory, and skipped reads were not counted. Summed RSS includes shared pages and is not a unique allocation measurement."
+  },
+  "rawFiles": {
+    "report/report.json": {
+      "bytes": 416968,
+      "sha256": "3e2878479902033c81502eaa45685bb19f0457d323da5399ab8f0dfcc4a0410a"
+    },
+    "report/validation-source.json": {
+      "bytes": 14578,
+      "sha256": "1bb33f3e6e9f5d6778c2f4f361711de1aad8d2ec3c269ec4dbe035e48bbdce41"
+    },
+    "report/input-equivalence.json": {
+      "bytes": 7232,
+      "sha256": "5f5f504240f54b2e5912cc82e04cdea1b8007b68f5f9d1d7b15c00fce99e1b06"
+    },
+    "report/post-run-integrity.json": {
+      "bytes": 8768,
+      "sha256": "d45910168154ef9e3ed10223e9415ca014c27d1bbaac0db852db565464772863"
+    },
+    "browser.log": {
+      "bytes": 6215,
+      "sha256": "a4483e6e67ed51f7bb8c3deae62dbacebde9cd5b565c413c3ed6dcb6fc984f5b"
+    },
+    "resources.jsonl": {
+      "bytes": 130149,
+      "sha256": "b29d02f3d07aab11946ee973dd35d13672bc50e6285ec3ebd64b0e22426a84ac"
+    },
+    "terminal.json": {
+      "bytes": 5077,
+      "sha256": "a7ee5ffb546521d7b0b3f9fcd6c1f56f055caeaad9721ee3067961481fd6ea54"
+    }
+  }
+}
