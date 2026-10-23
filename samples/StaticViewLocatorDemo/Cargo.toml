@@ -1,0 +1,41 @@
+[package]
+name = "static-view-locator-demo"
+description = "The sample of ferroui-static-view-locator: pages and a ReactiveUI view host whose views are located through locators generated at build time"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+build = "build.rs"
+
+# Unit tests live next to the code (the `tests` module of the library), not as integration test
+# targets.
+autotests = false
+autobenches = false
+autoexamples = false
+autobins = false
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "static-view-locator-demo"
+path = "main.rs"
+test = false
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-view = { workspace = true, features = ["desktop", "reactiveui"] }
+ferroui-themes-winui = { workspace = true }
+ferroui-reactiveui = { workspace = true }
+ferroui-reactiveui-controls = { workspace = true }
+ferroui-static-view-locator = { workspace = true, features = ["reactiveui"] }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+
+[build-dependencies]
+ferroui-static-view-locator-build = { workspace = true }

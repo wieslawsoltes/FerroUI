@@ -1091,6 +1091,11 @@ impl EmitTypes for ModelEmitTypes {
             FrameworkType::Setter => "FerroUI.Styling.Setter",
             FrameworkType::SetterBase => "FerroUI.Styling.SetterBase",
             FrameworkType::StyleBase => "FerroUI.Styling.StyleBase",
+            FrameworkType::ResourceDictionary => "FerroUI.Controls.ResourceDictionary",
+            FrameworkType::DeferredContent => "FerroUI.Controls.IDeferredContent",
+            FrameworkType::StaticResourceExtension => "FerroUI.Markup.Xaml.MarkupExtensions.StaticResourceExtension",
+            FrameworkType::DynamicResourceExtension => "FerroUI.Markup.Xaml.MarkupExtensions.DynamicResourceExtension",
+            FrameworkType::TemplateBinding => "FerroUI.Data.TemplateBinding",
         };
         public_path(self.set().type_at(self.system.named(full_name)?))
     }

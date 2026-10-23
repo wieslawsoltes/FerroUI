@@ -1599,3 +1599,29 @@ retains all earlier attempts and reports no pending gate. The regenerated map
 checks 644 files, 1,362 exact public API identifiers, 976 dependencies and 846
 include edges. The implementation, boundaries, test evidence and source-map
 changes form one reviewable checkpoint.
+
+
+## 2026-10-23 — Integrate main and regenerate through the real emitter
+
+The cached overflow-master source was published as 960eaf6b with the same tree
+as local commit 7e50f9e7. Main advanced to ae8be3bb, leaving the PR unmergeable
+and its two newest heads without PR-triggered CI runs. The integration retains
+both parents, preserves the completed Base/Controls rich-text source and the
+WinUI split-reference representation, and includes main's compiler helpers,
+workspace/catalog updates and static view locator work.
+
+Bootstrap conflict resolution was followed by actual WinUI, Fluent and Simple
+reference generation and all three XAML generators. Rebuilt library suites pass
+301 WinUI, 210 Fluent and 213 Simple tests; full rebuilt XAML passes 621. Existing
+ignored tests remain 2/2/3/17. Simple's canonical desktop-unified test graph
+exceeded local storage after an initial missing offline dependency. Its original
+complete library test crate instead passed against an actual Cargo-built XAML
+graph without the unused example-only desktop extern. TESTS.md and the embedded
+source-bound record preserve both failed attempts and this precise limitation.
+
+No native expected arrays or completion status was changed to obtain these
+results. The inventory remains 644 files and 1,362 exact APIs. Ordinary desktop,
+catalog and platform verification continues through the new head's CI; the old
+fa3b9033 green runs are not attributed to this integration. Resource, metadata,
+binding-lifecycle and command-flyout drafts remain separate, uncompiled work
+until their own reviewed checkpoints are applied and tested.

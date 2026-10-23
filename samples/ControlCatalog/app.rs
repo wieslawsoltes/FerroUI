@@ -14,10 +14,12 @@ use ferroui_base::{
 };
 use ferroui_controls::application_lifetimes::IActivatableLifetime;
 use ferroui_controls::{
-    Application, ApplicationImpl, ApplicationImplExt, Control, NativeDock, NativeMenuItem, NewApplication, Page,
-    PageNavigationHost, Window,
+    Application, ApplicationImpl, ApplicationImplExt, Control, ItemsSource, NativeDock, NativeMenuItem, NewApplication,
+    Page, PageNavigationHost, Window,
 };
+#[cfg(feature = "classic-themes")]
 use ferroui_themes_fluent::FluentTheme;
+#[cfg(feature = "classic-themes")]
 use ferroui_themes_simple::SimpleTheme;
 use ferroui_themes_winui::WinUITheme;
 use std::cell::{Cell, RefCell};
@@ -28,13 +30,18 @@ use std::rc::Rc;
 pub struct App {
     base: Application,
     theme_styles_container: Ref<Styles>,
+    /// The themes of the original, with the feature `classic-themes` only (`ClassicThemes.xaml`).
+    #[cfg(feature = "classic-themes")]
     fluent_theme: RefCell<Option<Ref<FluentTheme>>>,
+    #[cfg(feature = "classic-themes")]
     simple_theme: RefCell<Option<Ref<SimpleTheme>>>,
     /// The WinUI theme of the port (`CatalogTheme::WinUI`), not in the original.
     winui_theme: RefCell<Option<Ref<WinUITheme>>>,
     color_picker_fluent: RefCell<Option<Rc<dyn IStyle>>>,
+    #[cfg(feature = "classic-themes")]
     color_picker_simple: RefCell<Option<Rc<dyn IStyle>>>,
     tree_data_grid_fluent: RefCell<Option<Rc<dyn IStyle>>>,
+    #[cfg(feature = "classic-themes")]
     tree_data_grid_generic: RefCell<Option<Rc<dyn IStyle>>>,
     dock_menu_item_count: Cell<i32>,
     prev_theme: Cell<CatalogTheme>,
@@ -54,7 +61,10 @@ ferro_class_info!(App {
             fn OnDockAddItemClicked(Option<BoxedValue>, EventArgs) =>
                 |this: &Ref<App>, sender: Option<BoxedValue>, e: EventArgs| this.on_dock_add_item_clicked(&sender, &e),
         ],
-        fields: [CurrentTheme: CatalogTheme => App::current_theme],
+        fields: [
+            CurrentTheme: CatalogTheme => App::current_theme,
+            AvailableThemes: ItemsSource => App::available_themes,
+        ],
     },
 });
 ferro_impl_classes!(App: FerroObjectImpl);
@@ -72,16 +82,27 @@ impl ApplicationImpl for App {
 
         this.load_document();
 
-        *this.fluent_theme.borrow_mut() = from_markup_value::<Ref<FluentTheme>>(&this.resource("FluentTheme"));
-        *this.simple_theme.borrow_mut() = from_markup_value::<Ref<SimpleTheme>>(&this.resource("SimpleTheme"));
+        // The resources of the themes of the original (`ClassicThemes.xaml`), which `App.xaml` of
+        // the original declares itself: with the feature `classic-themes` only. The dictionary is
+        // merged into the resources of the application, and its entries are read from it
+        // (`Resources[key]` reads the entries of a dictionary itself, not of the ones it merges).
+        #[cfg(feature = "classic-themes")]
+        {
+            let classic_themes = crate::ClassicThemes::new().upcast::<ferroui_base::controls::ResourceDictionary>();
+            let resource = |key: &str| classic_themes.try_get_value(&ResourceKey::String(key.into())).flatten();
+            *this.fluent_theme.borrow_mut() = from_markup_value::<Ref<FluentTheme>>(&resource("FluentTheme"));
+            *this.simple_theme.borrow_mut() = from_markup_value::<Ref<SimpleTheme>>(&resource("SimpleTheme"));
+            *this.color_picker_simple.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&resource("ColorPickerSimple"));
+            *this.tree_data_grid_generic.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&resource("TreeDataGridGeneric"));
+            this.resources().merged_dictionaries().add(classic_themes.into());
+        }
         *this.winui_theme.borrow_mut() = from_markup_value::<Ref<WinUITheme>>(&this.resource("WinUITheme"));
         *this.color_picker_fluent.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("ColorPickerFluent"));
-        *this.color_picker_simple.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("ColorPickerSimple"));
         *this.tree_data_grid_fluent.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("TreeDataGridFluent"));
-        *this.tree_data_grid_generic.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("TreeDataGridGeneric"));
 
         // The port starts the catalog in its WinUI theme (not in the original, which starts in the
-        // Fluent theme); the settings page and `FERROUI_CATALOG_THEME` select the others.
+        // Fluent theme); with the feature `classic-themes` the settings page and
+        // `FERROUI_CATALOG_THEME` select the others.
         Self::set_catalog_themes(CatalogTheme::WinUI);
     }
 
@@ -114,12 +135,16 @@ impl App {
         Self {
             base: Application::construct(),
             theme_styles_container: Styles::new(),
+            #[cfg(feature = "classic-themes")]
             fluent_theme: RefCell::new(None),
+            #[cfg(feature = "classic-themes")]
             simple_theme: RefCell::new(None),
             winui_theme: RefCell::new(None),
             color_picker_fluent: RefCell::new(None),
+            #[cfg(feature = "classic-themes")]
             color_picker_simple: RefCell::new(None),
             tree_data_grid_fluent: RefCell::new(None),
+            #[cfg(feature = "classic-themes")]
             tree_data_grid_generic: RefCell::new(None),
             dock_menu_item_count: Cell::new(0),
             prev_theme: Cell::new(CatalogTheme::WinUI),
@@ -230,6 +255,21 @@ impl App {
         Self::current_app().prev_theme.get()
     }
 
+    /// Not in the original: the themes the catalog is built with, the items of the theme list
+    /// of the settings page. The WinUI theme alone; with the feature `classic-themes` the Fluent
+    /// and Simple themes of the original before it, in the order of the original.
+    pub fn available_themes() -> ItemsSource {
+        ItemsSource::from_values(Self::themes().iter().copied())
+    }
+
+    /// The themes of [`available_themes`](Self::available_themes).
+    pub fn themes() -> &'static [CatalogTheme] {
+        #[cfg(feature = "classic-themes")]
+        return &[CatalogTheme::Fluent, CatalogTheme::Simple, CatalogTheme::WinUI];
+        #[cfg(not(feature = "classic-themes"))]
+        return &[CatalogTheme::WinUI];
+    }
+
     /// Not in the original: selects the theme of the catalog before its main window exists (the
     /// theme a desktop run asks for with `FERROUI_CATALOG_THEME`), so that no window is reopened.
     pub fn select_initial_catalog_theme(theme: CatalogTheme) {
@@ -256,35 +296,50 @@ impl App {
         // The TreeDataGrid has Fluent styles, whose brushes come from resources the Fluent and the
         // WinUI themes define, and the generic styles they build on, which the Simple theme takes.
         let tree_data_grid_fluent = || app.tree_data_grid_fluent.borrow().clone().expect("the TreeDataGrid Fluent styles of App.xaml");
+        #[cfg(feature = "classic-themes")]
         let tree_data_grid_generic =
-            || app.tree_data_grid_generic.borrow().clone().expect("the TreeDataGrid generic styles of App.xaml");
+            || app.tree_data_grid_generic.borrow().clone().expect("the TreeDataGrid generic styles of ClassicThemes.xaml");
 
-        if theme == CatalogTheme::Fluent {
-            let fluent_theme = app.fluent_theme.borrow().clone().expect("the Fluent theme of App.xaml");
-            app.theme_styles_container.set(0, fluent_theme.as_style());
-            let color_picker_fluent = app.color_picker_fluent.borrow().clone().expect("the colour picker Fluent styles of App.xaml");
-            app.theme_styles_container.set(1, color_picker_fluent);
-            app.theme_styles_container.set(2, Style::new());
-            app.theme_styles_container.set(3, tree_data_grid_fluent());
-        } else if theme == CatalogTheme::Simple {
-            let simple_theme = app.simple_theme.borrow().clone().expect("the Simple theme of App.xaml");
-            app.theme_styles_container.set(0, simple_theme.as_style());
-            let color_picker_simple = app.color_picker_simple.borrow().clone().expect("the colour picker Simple styles of App.xaml");
-            app.theme_styles_container.set(1, color_picker_simple);
-            app.theme_styles_container.set(2, Style::new());
-            app.theme_styles_container.set(3, tree_data_grid_generic());
-        } else if theme == CatalogTheme::WinUI {
-            // Not in the original: the WinUI theme of the port (docs/porting/winui-theme.md), which
-            // themes every control, with the Fluent styles of the colour picker (the colour picker
-            // library has no WinUI styles; WinUI's ColorPicker is waived, docs/porting/winui-theme.md,
-            // section 5.1, and the Fluent styles take their brushes from the resources both themes
-            // define).
-            let winui_theme = app.winui_theme.borrow().clone().expect("the WinUI theme of App.xaml");
-            app.theme_styles_container.set(0, winui_theme.as_style());
-            let color_picker_fluent = app.color_picker_fluent.borrow().clone().expect("the colour picker Fluent styles of App.xaml");
-            app.theme_styles_container.set(1, color_picker_fluent);
-            app.theme_styles_container.set(2, Style::new());
-            app.theme_styles_container.set(3, tree_data_grid_fluent());
+        match theme {
+            #[cfg(feature = "classic-themes")]
+            CatalogTheme::Fluent => {
+                let fluent_theme = app.fluent_theme.borrow().clone().expect("the Fluent theme of ClassicThemes.xaml");
+                app.theme_styles_container.set(0, fluent_theme.as_style());
+                let color_picker_fluent =
+                    app.color_picker_fluent.borrow().clone().expect("the colour picker Fluent styles of App.xaml");
+                app.theme_styles_container.set(1, color_picker_fluent);
+                app.theme_styles_container.set(2, Style::new());
+                app.theme_styles_container.set(3, tree_data_grid_fluent());
+            }
+            #[cfg(feature = "classic-themes")]
+            CatalogTheme::Simple => {
+                let simple_theme = app.simple_theme.borrow().clone().expect("the Simple theme of ClassicThemes.xaml");
+                app.theme_styles_container.set(0, simple_theme.as_style());
+                let color_picker_simple =
+                    app.color_picker_simple.borrow().clone().expect("the colour picker Simple styles of ClassicThemes.xaml");
+                app.theme_styles_container.set(1, color_picker_simple);
+                app.theme_styles_container.set(2, Style::new());
+                app.theme_styles_container.set(3, tree_data_grid_generic());
+            }
+            CatalogTheme::WinUI => {
+                // Not in the original: the WinUI theme of the port (docs/porting/winui-theme.md),
+                // which themes every control, with the Fluent styles of the colour picker (the
+                // colour picker library has no WinUI styles; WinUI's ColorPicker is waived,
+                // docs/porting/winui-theme.md, section 5.1, and the Fluent styles take their
+                // brushes from the resources both themes define).
+                let winui_theme = app.winui_theme.borrow().clone().expect("the WinUI theme of App.xaml");
+                app.theme_styles_container.set(0, winui_theme.as_style());
+                let color_picker_fluent =
+                    app.color_picker_fluent.borrow().clone().expect("the colour picker Fluent styles of App.xaml");
+                app.theme_styles_container.set(1, color_picker_fluent);
+                app.theme_styles_container.set(2, Style::new());
+                app.theme_styles_container.set(3, tree_data_grid_fluent());
+            }
+            // Not in the original: the catalog is built without the themes of the original.
+            #[cfg(not(feature = "classic-themes"))]
+            CatalogTheme::Fluent | CatalogTheme::Simple => panic!(
+                "the theme {theme:?} is not built into the catalog: it needs the feature `classic-themes` of control-catalog"
+            ),
         }
 
         if should_reopen_window {

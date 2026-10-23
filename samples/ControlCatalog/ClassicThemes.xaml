@@ -1,0 +1,13 @@
+<!-- The themes of the original next to the WinUI theme of the port, with the feature
+     `classic-themes` of the catalog only (the build leaves the document out without it, and the
+     catalog then links neither theme; docs/binary-size.md). The resources are the ones the
+     original declares in App.xaml for its two themes; the application merges the dictionary
+     into its resources. -->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:Class="ControlCatalog.ClassicThemes">
+  <FluentTheme x:Key="FluentTheme" />
+  <SimpleTheme x:Key="SimpleTheme" />
+  <StyleInclude x:Key="ColorPickerSimple" Source="ferres://FerroUI.Controls.ColorPicker/Themes/Simple/Simple.xaml" />
+  <StyleInclude x:Key="TreeDataGridGeneric" Source="ferres://FerroUI.Controls.TreeDataGrid/Themes/Generic.xaml" />
+</ResourceDictionary>

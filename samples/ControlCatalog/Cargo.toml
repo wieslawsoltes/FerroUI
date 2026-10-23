@@ -42,6 +42,12 @@ count-allocations = ["ferroui-base/tagged-weak-references"]
 # are populated by the run-time XAML loader, as the sample was before its markup was compiled. For
 # working on the documents and the classes of the sample, where a build without the compiled markup is
 # several times shorter (docs/porting/xaml.md, 9.5.22, has the measures).
+# The Simple and Fluent themes of the original as the second and third theme of the catalog (the
+# settings page, `FERROUI_CATALOG_THEME`): off by default, so that the catalog compiles and links
+# the WinUI theme only (docs/binary-size.md, issue 306). With the feature the build also compiles
+# `ClassicThemes.xaml`, the dictionary of the two themes and of the Simple styles of the colour
+# picker and the TreeDataGrid, which the application merges into its resources.
+classic-themes = ["dep:ferroui-themes-simple", "dep:ferroui-themes-fluent"]
 runtime-markup = [
     "dep:ferroui-markup-xaml-loader",
     "ferroui-controls-color-picker/document-assets",
@@ -68,9 +74,10 @@ ferroui-markup-xaml = { workspace = true }
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"], optional = true }
 # The OpenGL pages: the OpenGL control and the entry points the scene of the pages draws with.
 ferroui-opengl = { workspace = true }
-ferroui-themes-simple = { workspace = true }
-ferroui-themes-fluent = { workspace = true }
-# The WinUI theme of the port, the third theme of the catalog (not in the original).
+# The themes of the original, only with the feature `classic-themes`.
+ferroui-themes-simple = { workspace = true, optional = true }
+ferroui-themes-fluent = { workspace = true, optional = true }
+# The WinUI theme of the port, the theme of the catalog (not in the original).
 ferroui-themes-winui = { workspace = true }
 # The Skia lease of `Pages/TabbedPage/FluidNavBar` (custom drawing on the canvas of the backend).
 ferroui-skia = { workspace = true }
@@ -87,6 +94,11 @@ ferroui-build = { workspace = true }
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
+# The themes of the test applications (`tests/support.rs`): the Simple theme of the unit test
+# application and the Fluent theme of the compositor tests, with or without the feature
+# `classic-themes`.
+ferroui-themes-simple = { workspace = true }
+ferroui-themes-fluent = { workspace = true }
 ferroui-controls = { workspace = true, features = ["testing"] }
 # The render interface, font manager and text shaper of the tests: the pages decode bitmaps and
 # lay out text, which the mock services of the framework tests do not.

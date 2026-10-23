@@ -460,11 +460,24 @@ Missing). `DEVIATIONS.md` points here for this area.
 
 ## 8. Verification in the catalog
 
-The page "Composition (WinUI)" of the ControlCatalog (`samples/ControlCatalog/Pages/winui_composition_page.rs`) shows a connected animation between a list of cards and a detail view, the implicit show and hide animations, a light that follows the pointer (the pointer position property set) and a parallax header (the manipulation property set of a scroll viewer). A screenshot run of the desktop entry point drives it without a person and saves the frames the compositor draws:
+The page "Composition (WinUI)" of the ControlCatalog (`samples/ControlCatalog/Pages/winui_composition_page.rs`) shows a connected animation between a list of cards and a detail view, the implicit show and hide animations, a light that follows the pointer (the pointer position property set) and a parallax header (the manipulation property set of a scroll viewer).
+
+Below them, one section per later phase (`samples/ControlCatalog/Pages/winui_composition_phases.rs`). Each section names the API it uses; its demo is built the first time its expander opens, so the page stays light until then:
+
+| Section | Phase | What it shows |
+|---|---|---|
+| Visuals | 2 | a `SpriteVisual` with a colour brush and a child turned by `RotationAngleInDegrees`; a `ShapeVisual` with rounded rectangle, ellipse and path geometries, the path animating `TrimEnd`; a `LayerVisual` whose `Effect` blurs its children as one; a `RedirectVisual` whose `Source` is the visual of a live element, drawn as its reflection |
+| Brushes | 2 | linear and radial gradient brushes with the WinUI members (`StartPoint`, `EndPoint`, `EllipseCenter`, `EllipseRadius`, `GradientOriginOffset`); a nine-grid brush over a `LoadedImageSurface` beside the same image stretched; a mask brush (a gradient through a radial mask) |
+| Animations | 3 | spring scalar (`Offset.X`) and vector (`Offset`) animations with sliders for `DampingRatio` and `Period`; one key frame animation per `CompositionEasingFunction` curve, side by side; a `CompositionAnimationGroup` started in a `CompositionScopedBatch` whose `Completed` reports the elapsed time |
+| Shadows and lights | 5 | a `DropShadow` with sliders for `BlurRadius` and `Offset` and buttons for `Color`; an `AmbientLight`, a `DistantLight`, a `PointLight` whose `Offset` animates and a `SpotLight`, each over its own scene |
+| InteractionTracker | 4 | a surface dragged through a `VisualInteractionSource` (`TryRedirectForManipulation` on pointer press), with inertia within `MinPosition` and `MaxPosition`, an expression animation of the content reading `tracker.Position`, the owner callbacks writing the state and the position, and buttons for `TryUpdatePositionWithAdditionalVelocity` and `TryUpdatePosition` |
+| Effects | 6 | effect brushes from `CompositionEffectFactory` over a checkerboard surface: `GaussianBlurEffect` (its `Blur.BlurAmount` from a slider), `OpacityEffect`, `CrossFadeEffect` (its `Crossfade.Weight` animated), `CompositeEffect` over a `ColorSourceEffect`, and a `ColorSourceEffect` alone |
+
+A screenshot run of the desktop entry point drives it without a person and saves the frames the compositor draws:
 
 ```sh
 FERROUI_SMOKE_SCREENSHOTS=<directory> FERROUI_SMOKE_SCREENSHOT_PAGES="Composition (WinUI)" \
-FERROUI_SMOKE_PAGES=6000 FERROUI_SMOKE_WINUI_FLIGHT=0 cargo run -p control-catalog-desktop --features vello
+FERROUI_SMOKE_PAGES=13000 FERROUI_SMOKE_WINUI_FLIGHT=0 cargo run -p control-catalog-desktop --features vello
 ```
 
-`FERROUI_SMOKE_WINUI_FLIGHT` chooses the configuration (0 gravity, 1 direct, 2 basic); the run opens the first card (`flight-NN-<ms>.png` during the flight there and back), then hides and shows the box of the implicit animations and scrolls the parallax scroller (`steps-<ms>.png`). `FERROUI_RENDERER=vello` selects the Vello backend; with a debug build `FERROUI_SMOKE_WINUI_FLIGHT_FEW=1` saves fewer frames, because the encoding of a picture blocks the thread of the compositor for long enough to shift the later frames. The flights, the implicit animations and the parallax were checked this way with Skia and Vello on macOS.
+`FERROUI_SMOKE_WINUI_FLIGHT` chooses the configuration (0 gravity, 1 direct, 2 basic); the run opens the first card (`flight-NN-<ms>.png` during the flight there and back), then hides and shows the box of the implicit animations and scrolls the parallax scroller (`steps-<ms>.png`). At 5 s it opens the expanders of the later sections, then brings each into view in turn, runs its demo as its buttons do (the springs, the easings, the group, a bigger shadow, a fling of the tracker, a stronger blur) and saves the window (`section-N-<ms>.png`, N from 0 for Visuals to 5 for Effects); `FERROUI_SMOKE_WINUI_SECTION_MS` sets the time between two sections (1200 ms by default, with `FERROUI_SMOKE_PAGES` raised to match). The six sections were checked this way on macOS with Skia (a debug build) and with Vello (a release build: in a debug build each saved Vello frame holds the compositor up for seconds, so the user interface falls behind the timers and the later frames repeat the same state). `FERROUI_RENDERER=vello` selects the Vello backend; with a debug build `FERROUI_SMOKE_WINUI_FLIGHT_FEW=1` saves fewer frames, because the encoding of a picture blocks the thread of the compositor for long enough to shift the later frames. The flights, the implicit animations and the parallax were checked this way with Skia and Vello on macOS.

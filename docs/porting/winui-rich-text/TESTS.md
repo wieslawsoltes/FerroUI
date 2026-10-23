@@ -1,5 +1,69 @@
 # Rich text verification
 
+## 2026-10-23 main integration and regenerated XAML
+
+The cached overflow-master checkpoint `960eaf6b54ad328ea6789398956cbf7d89b5d813`
+now integrates main `ae8be3bb24546c7f655e36f0a61959c39ac57973`. The four
+generated-file conflicts were bootstrap inputs only. Actual generators then
+produced the reference files through the integrated emitter. The final tested
+compiler-input tree is `ff747b4a6788ae508b0418b54d11592988456547`; subsequent
+changes in this checkpoint only append this documentation and evidence.
+
+| Executed gate | Actual result |
+|---|---:|
+| WinUI generator; rebuilt full library | 1 passed; 301 passed, 2 existing ignored |
+| Fluent generator; rebuilt full library | 1 passed; 210 passed, 2 existing ignored |
+| Simple generator; rebuilt original library tests through the XAML graph | 1 passed; 213 passed, 3 existing ignored |
+| XAML corpus, class-handler and Rust-path generators | 3 passed |
+| Rebuilt full XAML suite, serial | 621 passed, 17 existing ignored |
+
+Every executed test row has zero failures. The full XAML command completed in
+292.645s, including compilation; runtime was 252.33s. The class-handler and
+Rust-path generators reproduced their references unchanged. The corpus generator
+changed `generated.rs` and its map. WinUI retains its small checked-in include
+stub and three actual generated parts, each at most 4 MiB. Theme XAML inputs,
+rich-reader source, Base and Controls source subtrees are unchanged.
+
+**Simple has a distinct, explicit validation boundary.** Its standard offline
+Cargo test command failed before compilation because `async-broadcast 0.7.2`
+was not cached. The locked online retry then pulled the desktop backends from
+a dev dependency used only by the window example. It built a separate Base
+variant and was stopped by the storage guard before executing any test. These
+are retained failures, with exit codes 101 and -15 respectively.
+
+The successful alternative first used Cargo to build the ordinary Simple,
+Fluent and XAML-test library graph. The observed Cargo compiler invocation was
+then used to compile the **entire original Simple `lib.rs` with `--test`**,
+including every private test module and the real build-script output. All
+required library/test externs came from that successful Cargo graph. Only the
+unused example-only `ferroui-desktop` extern was omitted. Its actual ignored
+generator ran, then the dependencies and original test crate rebuilt before
+the 213-test pass. No manifest or test source was altered. This is full Simple
+library-test coverage on the recorded XAML graph, not a claim that the standard
+desktop-unified Cargo graph passed locally.
+
+The 12 source-bound gate records include both failed standard attempts, two
+real dependency builds, exact commands/environments, build-script output and
+extern identities for direct compilation, generated output hashes, executable
+identities and completed runtime logs. The aggregate is 89,515
+bytes, SHA-256 `ad509290ae41b6e1269be119f42d4aa69c8f729fd5b6a0d58dd251b0e493d7ad`, and is embedded in
+[continuation-validation.json](continuation-validation.json). Storage cleanup
+only removed identified task-owned obsolete or completed build products after
+recording their bytes and hashes. The OOM-kill count stayed unchanged. A transient
+workspace transport interruption did not stop the running XAML process.
+
+The final source check retains two whitespace diagnostics from incoming main
+and proves both entire affected files identical to that parent. No port change
+introduces a new whitespace diagnostic. Inventory check still reports 644 files,
+1,362 exact APIs, 976 dependencies and 846 include edges.
+
+The prior f3dbe07f and 960eaf6b heads had no PR-triggered workflow runs because
+the PR could not merge with the newer main. Their observations are appended
+separately. The all-green fa3b9033 CI remains evidence for that older head only.
+Broad platform, ordinary desktop-unified Simple and the new catalog classic-theme
+gates require CI for the newly published head. The port remains incomplete.
+
+
 ## 2026-10-23 cached overflow-master continuation
 
 [OVERFLOW-LINKS.md](OVERFLOW-LINKS.md) records the source-derived cached-primary

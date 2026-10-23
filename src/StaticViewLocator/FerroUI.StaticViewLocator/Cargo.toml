@@ -1,0 +1,49 @@
+[package]
+name = "ferroui-static-view-locator"
+description = "View locators generated at build time for FerroUI: view models mapped to views by naming convention, contracts and explicit mappings, without reflection"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords = ["gui", "mvvm", "view-locator", "codegen", "ui"]
+categories = ["gui"]
+build = "build.rs"
+# The build script states the features of the crate to the build scripts of the crates that depend
+# on it (`DEP_FERROUI_STATIC_VIEW_LOCATOR_REACTIVEUI`): the generator reports a locator that asks for
+# the view locator of ReactiveUI without the feature `reactiveui` (SVL0001).
+links = "ferroui_static_view_locator"
+
+# Unit tests live next to the code (`tests/` modules of the library), not as integration test
+# targets. The tests that compile generated locators are in `tests/FerroUI.StaticViewLocator.Tests`.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+default = []
+# The view locator of ReactiveUI (`generate_view_locator = true`): the generated locator implements
+# `ferroui_reactiveui::IViewLocator` and creates the views of controls that state their view model
+# (`IControlViewFor`).
+reactiveui = ["dep:ferroui-reactiveui", "dep:ferroui-reactiveui-controls", "dep:ferroui-splat"]
+
+[dependencies]
+ferroui-static-view-locator-macros = { workspace = true }
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-reactiveui = { workspace = true, optional = true }
+ferroui-reactiveui-controls = { workspace = true, optional = true }
+ferroui-splat = { workspace = true, optional = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"

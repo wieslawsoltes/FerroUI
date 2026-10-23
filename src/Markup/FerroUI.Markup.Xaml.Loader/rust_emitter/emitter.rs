@@ -392,6 +392,13 @@ fn fused_setter_add(types: &dyn EmitTypes, lines: &[String], call: &str) -> Opti
         return None;
     }
     let mut fused = Vec::with_capacity(value_statements.len() + 3);
+    if with_parent {
+        if let Some(key) = dynamic_resource_setter_value(types, value_statements, value) {
+            fused.push(format!("    {value_marker}"));
+            fused.push(format!("    rt::add_dynamic_resource_setter_with_parent(&context, {style}, {property}, {key});"));
+            return Some(fused);
+        }
+    }
     if value_statements.is_empty() && !with_parent {
         fused.push(format!("    rt::add_setter({style}, {property}, {value});"));
         return Some(fused);
@@ -403,6 +410,169 @@ fn fused_setter_add(types: &dyn EmitTypes, lines: &[String], call: &str) -> Opti
     fused.extend(value_statements.iter().map(|statement| format!("    {statement}")));
     fused.push(format!("    rt::add_setter_value{suffix}({context}{style}, &{local}, {value});"));
     Some(fused)
+}
+
+/// The body of deferred content that is `{StaticResource key}` alone (a resource of a dictionary
+/// that names another resource) as the shared helper of `rt` writes it: `lines` are the
+/// statements the emitter wrote for the body and `returned` its value. The helper
+/// `rt::static_resource_content(service_provider, &DOCUMENT, key, line, position)` creates the
+/// context of the build, the extension (`StaticResourceExtension::__markup_new_0`), sets its
+/// `ResourceKey` and calls `ProvideValue` with the context, with the error of an invoked member
+/// at the position, as the statements do. The marker of `ResourceKey` is kept.
+///
+/// `None` (the statements are kept as they are) for any other shape: the constructor with the
+/// key, other members, another service provider.
+fn fused_static_resource_content(types: &dyn EmitTypes, lines: &[String], returned: &str, document: &str) -> Option<Vec<String>> {
+    let extension = types.framework_path(FrameworkType::StaticResourceExtension)?;
+    let statements: Vec<&str> = lines.iter().map(|line| line.strip_prefix("    ").unwrap_or(line)).collect();
+    let [create, marker, set_key, provide] = statements.as_slice() else { return None };
+    if *create != format!("let static_resource_extension_0 = {extension}::__markup_new_0();") || !marker.starts_with("// ") {
+        return None;
+    }
+    let key = set_key
+        .strip_prefix(&format!("{extension}::__markup_set_ResourceKey(&static_resource_extension_0, rt::string_object("))?
+        .strip_suffix("));")?;
+    let position = provide
+        .strip_prefix(&format!(
+            "let provided_0 = rt::invoked({extension}::__markup_ProvideValue_0(&static_resource_extension_0, rt::service_provider(&context)), "
+        ))?
+        .strip_suffix(")?;")?;
+    let (line, column) = position.split_once(", ")?;
+    if !is_string_literal(key) || line.parse::<i32>().is_err() || column.parse::<i32>().is_err() || returned != "rt::to_value(provided_0)" {
+        return None;
+    }
+    Some(vec![
+        format!("    {marker}"),
+        format!("    rt::static_resource_content(service_provider, &{document}, {key}, {line}, {column})"),
+    ])
+}
+
+/// The literal of `::std::string::String::from("..")`, the form in which the emitter writes text
+/// of the markup: the string literal alone, `None` for any other expression.
+fn string_literal_of(expr: &str) -> Option<&str> {
+    let literal = expr.strip_prefix("::std::string::String::from(")?.strip_suffix(')')?;
+    is_string_literal(literal).then_some(literal)
+}
+
+/// Whether `text` is one Rust string literal (`"..."` with escapes, as `rust_string_literal`
+/// writes it) and nothing else.
+fn is_string_literal(text: &str) -> bool {
+    let Some(inner) = text.strip_prefix('"').and_then(|rest| rest.strip_suffix('"')) else { return false };
+    let mut escaped = false;
+    for c in inner.chars() {
+        match (escaped, c) {
+            (true, _) => escaped = false,
+            (false, '\\') => escaped = true,
+            (false, '"') => return false,
+            _ => {}
+        }
+    }
+    !escaped
+}
+
+/// The key of a setter value that is `{DynamicResource key}`, as the statements of the value
+/// write it (the extension created with the key, `ProvideValue` with `Setter.Value` as the
+/// provide-value target property) and `value`, the provided value as an object: the setter is
+/// then one call of `rt::add_dynamic_resource_setter_with_parent`, which makes those calls in
+/// the same order. `None` for any other value.
+fn dynamic_resource_setter_value<'s>(types: &dyn EmitTypes, statements: &[&'s str], value: &str) -> Option<&'s str> {
+    let extension = types.framework_path(FrameworkType::DynamicResourceExtension)?;
+    let [create, provide] = statements else { return None };
+    let (local, key) = dynamic_resource_extension(&extension, *create)?;
+    let (provided, target) = provided_value(&extension, local, *provide)?;
+    (target == "rt::setter_value_property()" && value == format!("rt::to_object(::core::clone::Clone::clone(&{provided}))"))
+        .then_some(key)
+}
+
+/// `let <local> = DynamicResourceExtension::__markup_new_1(rt::string_object(<key>));`: the
+/// local and the key.
+fn dynamic_resource_extension<'s>(extension: &str, statement: &'s str) -> Option<(&'s str, &'s str)> {
+    let (local, created) = statement.strip_prefix("let ")?.split_once(" = ")?;
+    let key = created.strip_prefix(&format!("{extension}::__markup_new_1(rt::string_object("))?.strip_suffix("));")?;
+    (is_identifier(local) && is_string_literal(key)).then_some((local, key))
+}
+
+/// `let <provided> = rt::provide_value(&context, <target>, &<local>, <extension>::__markup_ProvideValue_0);`:
+/// the local of the provided value and the provide-value target property.
+fn provided_value<'s>(extension: &str, local: &str, statement: &'s str) -> Option<(&'s str, &'s str)> {
+    let (provided, call) = statement.strip_prefix("let ")?.split_once(" = ")?;
+    let target = call
+        .strip_prefix("rt::provide_value(&context, ")?
+        .strip_suffix(&format!(", &{local}, {extension}::__markup_ProvideValue_0);"))?;
+    is_identifier(provided).then_some((provided, target))
+}
+
+/// The binding setter of a registered property whose value is `{DynamicResource key}`, as the
+/// shared helper of `rt` writes it: `lines` end with the statements of the value (the extension
+/// created with the key, `ProvideValue` with the property as the provide-value target property)
+/// and `statement` is the call of `rt::bind` with the provided value.
+/// `rt::bind_dynamic_resource(&context, target, property, key, line, position)` makes the same
+/// calls in the same order. `None` (the statements are kept) for any other shape.
+fn fused_dynamic_resource_bind(types: &dyn EmitTypes, lines: &[String], statement: &str) -> Option<String> {
+    let extension = types.framework_path(FrameworkType::DynamicResourceExtension)?;
+    let [.., create, provide] = lines else { return None };
+    let (local, key) = dynamic_resource_extension(&extension, create.strip_prefix("    ")?)?;
+    let (provided, target) = provided_value(&extension, local, provide.strip_prefix("    ")?)?;
+    let property = target.strip_prefix("rt::property_value(")?.strip_suffix(')')?;
+    let (object, rest) = statement.strip_prefix("rt::bind(")?.split_once(".upcast_ref::<::ferroui_base::FerroObject>(), ")?;
+    let (line, column) = rest.strip_prefix(&format!("{property}, {provided}, "))?.strip_suffix(")?;")?.split_once(", ")?;
+    if !is_identifier(object) || line.parse::<i32>().is_err() || column.parse::<i32>().is_err() {
+        return None;
+    }
+    Some(format!(
+        "rt::bind_dynamic_resource(&context, {object}.upcast_ref::<::ferroui_base::FerroObject>(), {property}, {key}, {line}, {column})?;"
+    ))
+}
+
+/// The binding setter of a registered property whose value is `{TemplateBinding source}`, as the
+/// shared helper of `rt` writes it: `lines` end with the statements of the value (the binding
+/// created for the property of the templated parent, `ProvideValue`) and `statement` is the call
+/// of `rt::bind` with the provided binding. `rt::bind_template_binding(target, property, source,
+/// line, position)` makes the same calls in the same order. `None` (the statements are kept) for
+/// any other shape.
+fn fused_template_binding_bind(types: &dyn EmitTypes, lines: &[String], statement: &str) -> Option<String> {
+    let template_binding = types.framework_path(FrameworkType::TemplateBinding)?;
+    let [.., create, provide] = lines else { return None };
+    let (local, source) = create.strip_prefix("    let ")?.split_once(" = ")?;
+    let source = source.strip_prefix(&format!("{template_binding}::__markup_new_1("))?.strip_suffix(");")?;
+    let (provided, call) = provide.strip_prefix("    let ")?.split_once(" = ")?;
+    if call != format!("{template_binding}::__markup_ProvideValue_0(&{local});") {
+        return None;
+    }
+    let source_path = source.strip_prefix("rt::property(")?.strip_suffix(')')?;
+    let (object, rest) = statement.strip_prefix("rt::bind(")?.split_once(".upcast_ref::<::ferroui_base::FerroObject>(), ")?;
+    let (property, rest) = rest.split_once(&format!(", {provided}, "))?;
+    let (line, column) = rest.strip_suffix(")?;")?.split_once(", ")?;
+    let plain_call = |text: &str| text.starts_with("::") && text.ends_with("()") && !text[..text.len() - 2].contains(['(', ')', ' ']);
+    if !is_identifier(local) || !is_identifier(provided) || !is_identifier(object) || !plain_call(source_path) || !plain_call(property)
+        || line.parse::<i32>().is_err() || column.parse::<i32>().is_err()
+    {
+        return None;
+    }
+    Some(format!(
+        "rt::bind_template_binding({object}.upcast_ref::<::ferroui_base::FerroObject>(), {property}, {source}, {line}, {column})?;"
+    ))
+}
+
+/// A deferred resource added to a resource dictionary under a text key, as the shared helper of
+/// `rt` writes it: `last` is the statement that created the deferred content `local`
+/// (`rt::defer`) and `call` the call of `ResourceDictionary.AddDeferred` with it, both at one
+/// position. `rt::add_deferred_resource(dictionary, key, type, &context, build, line, position)`
+/// makes the same calls in the same order. `None` (the statements are kept) for any other shape.
+fn fused_deferred_resource_add(types: &dyn EmitTypes, last: &str, local: &str, call: &str) -> Option<String> {
+    let dictionary_type = types.framework_path(FrameworkType::ResourceDictionary)?;
+    let deferred_content = types.framework_path(FrameworkType::DeferredContent)?;
+    let deferred = last.strip_prefix(&format!("    let {local} = rt::defer("))?.strip_suffix(")?;")?;
+    let (result_type, rest) = deferred.split_once(", &context, ")?;
+    let (build, position) = rest.split_once(", ")?;
+    let rest = call.strip_prefix(&format!("rt::invoked({dictionary_type}::__markup_AddDeferred_1("))?;
+    let rest = rest.strip_suffix(&format!(", ::core::clone::Clone::clone(&{local}) as ::std::rc::Rc<dyn {deferred_content}>), {position})?"))?;
+    let (dictionary, key) = rest.split_once(", rt::string_object(")?;
+    let key = key.strip_suffix(')')?;
+    if !is_identifier(local) || !is_identifier(build) || !is_plain_borrow(dictionary) || !is_string_literal(key) {
+        return None;
+    }
+    Some(format!("rt::add_deferred_resource({dictionary}, {key}, {result_type}, &context, {build}, {position})?;"))
 }
 
 /// The arguments of `rt::clr_property_info` for `Setter.Value`, which
@@ -1291,7 +1461,11 @@ impl<'a> Emitter<'a> {
                 } else if nullable == Some(target) {
                     Some(format!("::core::option::Option::Some({owned})"))
                 } else if target == object {
-                    Some(format!("rt::to_object({owned})"))
+                    // Text of the markup: one shared function makes the string and the object.
+                    Some(match string_literal_of(&owned) {
+                        Some(literal) => format!("rt::string_object({literal})"),
+                        None => format!("rt::to_object({owned})"),
+                    })
                 } else {
                     self.coerce_to_contract(id, &owned, target)
                 }
@@ -1520,7 +1694,7 @@ impl<'a> Emitter<'a> {
                 &SetterValues::Typed(&value, &value_node),
                 priority.as_deref(),
             )?;
-            self.line(statement);
+            self.setter_line(statement);
             return Ok(());
         }
         let [value_node] = values.as_slice() else {
@@ -1537,8 +1711,24 @@ impl<'a> Emitter<'a> {
             true => self.setter_statement(node, assignment, &setter, target, &SetterValues::Untyped(&value.expr, &value_node), None)?,
             false => self.setter_statement(node, assignment, &setter, target, &SetterValues::Typed(&value, &value_node), None)?,
         };
-        self.line(statement);
+        self.setter_line(statement);
         Ok(())
+    }
+
+    /// Writes the statement of a property assignment after the statements of its value: as one
+    /// call of a shared helper of `rt` when the value and the statement are a binding of
+    /// `{DynamicResource}` or `{TemplateBinding}` (`fused_dynamic_resource_bind`,
+    /// `fused_template_binding_bind`), which replaces the two statements of the value too.
+    fn setter_line(&mut self, statement: String) {
+        let fused = fused_dynamic_resource_bind(self.types, &self.lines, &statement)
+            .or_else(|| fused_template_binding_bind(self.types, &self.lines, &statement));
+        match fused {
+            Some(fused) => {
+                self.lines.truncate(self.lines.len() - 2);
+                self.line(fused);
+            }
+            None => self.line(statement),
+        }
     }
 
     /// Whether the value of `node` is the result of a checked cast, held untyped in a
@@ -2188,7 +2378,13 @@ impl<'a> Emitter<'a> {
         let key = self.value(&key_node.as_node())?;
         let value = self.value(&value_node.as_node())?;
         if !setter.emit_source_info {
+            let local = value.expr.clone();
             let call = self.declared_call(node, &adder, &[dictionary, key, value])?;
+            if let Some(fused) = self.lines.last().and_then(|last| fused_deferred_resource_add(self.types, last, &local, &call)) {
+                self.lines.pop();
+                self.line(fused);
+                return Ok(());
+            }
             self.line(format!("{call};"));
             return Ok(());
         }
@@ -2265,18 +2461,28 @@ impl<'a> Emitter<'a> {
         text.push_str(
             ") -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {\n",
         );
-        text.push_str(&format!(
-            "    let {context_name} = rt::deferred_context(service_provider, &{});\n",
-            self.document
-        ));
-        if uses_name_scope {
-            text.push_str("    let name_scope = context.name_scope_field();\n");
+        match fused_static_resource_content(self.types, &body_lines, &returned, &self.document) {
+            Some(fused) if !uses_name_scope => {
+                for line in fused {
+                    text.push_str(&line);
+                    text.push('\n');
+                }
+            }
+            _ => {
+                text.push_str(&format!(
+                    "    let {context_name} = rt::deferred_context(service_provider, &{});\n",
+                    self.document
+                ));
+                if uses_name_scope {
+                    text.push_str("    let name_scope = context.name_scope_field();\n");
+                }
+                for line in body_lines {
+                    text.push_str(&line);
+                    text.push('\n');
+                }
+                text.push_str(&format!("    ::core::result::Result::Ok({returned})\n"));
+            }
         }
-        for line in body_lines {
-            text.push_str(&line);
-            text.push('\n');
-        }
-        text.push_str(&format!("    ::core::result::Result::Ok({returned})\n"));
         text.push_str("}\n");
         self.deferred_functions[slot] = text;
 

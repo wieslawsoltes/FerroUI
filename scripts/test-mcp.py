@@ -29,7 +29,9 @@ class Catalog:
         if writable:
             args += ["--mcp-allow-input", "--mcp-allow-writes"]
         env = {key: value for key, value in os.environ.items() if not key.startswith("FERROUI_SMOKE_")}
-        env["FERROUI_CATALOG_THEME"] = "simple"
+        # The catalog's own theme (WinUI): the Simple and Fluent themes need the feature
+        # `classic-themes` of the catalog (docs/binary-size.md).
+        env.pop("FERROUI_CATALOG_THEME", None)
         self.process = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                         stderr=self.stderr, text=True, env=env)
         self.messages = queue.Queue()

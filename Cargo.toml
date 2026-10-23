@@ -17,6 +17,9 @@ members = [
     "src/FerroUI.Controls.ColorPicker",
     "src/TreeDataGrid/FerroUI.TreeDataGrid.Core",
     "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid",
+    "src/StaticViewLocator/FerroUI.StaticViewLocator",
+    "src/StaticViewLocator/FerroUI.StaticViewLocator.Macros",
+    "src/StaticViewLocator/FerroUI.StaticViewLocator.Build",
     "src/Markup/FerroUI.Markup",
     "src/Markup/FerroUI.Markup.Xaml",
     "src/Markup/FerroUI.Markup.Xaml.Loader",
@@ -73,6 +76,7 @@ members = [
     "tests/FerroUI.IntegrationTests.Appium",
     "tests/FerroUI.IntegrationTests.Win32",
     "tests/FerroUI.DesignerSupport.Tests",
+    "tests/FerroUI.StaticViewLocator.Tests",
     "samples/SevenGuis/Model",
     "samples/SevenGuis/Builders/Counter",
     "samples/SevenGuis/Macros/Counter",
@@ -115,6 +119,7 @@ members = [
     "samples/TreeDataGridDemo",
     "samples/ReactiveDemo",
     "samples/ReactiveUIExample",
+    "samples/StaticViewLocatorDemo",
     "samples/TextTestApp",
     "samples/Sandbox",
     "samples/AppWithoutLifetime",
@@ -169,6 +174,9 @@ ferroui-view-macros = { version = "=0.4.0", path = "src/FerroUI.View.Macros" }
 ferroui-controls-color-picker = { version = "=0.4.0", path = "src/FerroUI.Controls.ColorPicker" }
 ferroui-treedatagrid-core = { version = "=0.4.0", path = "src/TreeDataGrid/FerroUI.TreeDataGrid.Core" }
 ferroui-controls-treedatagrid = { version = "=0.4.0", path = "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid" }
+ferroui-static-view-locator = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator" }
+ferroui-static-view-locator-macros = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator.Macros" }
+ferroui-static-view-locator-build = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator.Build" }
 ferroui-markup = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup" }
 ferroui-markup-xaml = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup.Xaml" }
 # Without the default features: the default is the run-time back end, which links the XAML runtime library
@@ -324,10 +332,17 @@ lto = "thin"
 # (docs/porting/desktop-performance.md, section 6.2); the build takes about twice as long, because
 # every executable generates the code of the whole program on one core, and its link step needs
 # about 6 GB of memory.
+#
+# The symbol table is stripped (`strip = "symbols"`): it is a sixth to a quarter of an executable of
+# macOS or Linux, and nothing of the program reads it but the symbolisation of a panic backtrace, which
+# then shows addresses (docs/binary-size.md, section 4.3). On Windows the executable never holds the
+# symbols (they are in the PDB beside it), so the setting changes nothing there. Build with the
+# release profile for a backtrace with names.
 [profile.dist]
 inherits = "release"
 lto = "fat"
 codegen-units = 1
+strip = "symbols"
 
 # The WebAssembly module of the browser (scripts/build-browser.sh): optimised for size, because the
 # module is downloaded and compiled by every visitor (docs/porting/browser-platform.md, section 18).

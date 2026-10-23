@@ -2,7 +2,8 @@
 //! a connected animation between a list and a detail view, the implicit show and hide
 //! animations of `ElementCompositionPreview`, a light that follows the pointer through the
 //! pointer position property set, and a parallax header driven by the manipulation property set
-//! of a scroll viewer.
+//! of a scroll viewer. The sections of the later phases (visuals, brushes, animations, shadows and
+//! lights, the interaction tracker, effects) are in `winui_composition_phases.rs`.
 
 use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
@@ -31,7 +32,7 @@ const CARDS: &[(&str, (u8, u8, u8), &str)] = &[
     ("Orchid", (0x9B, 0x59, 0xB6), "A flower that grows on the branches of trees."),
 ];
 
-fn brush(color: Color) -> Rc<dyn IBrush> {
+pub(super) fn brush(color: Color) -> Rc<dyn IBrush> {
     Rc::new(ImmutableSolidColorBrush::new(color))
 }
 
@@ -39,7 +40,7 @@ fn rgb((r, g, b): (u8, u8, u8)) -> Color {
     Color::from_rgb(r, g, b)
 }
 
-fn text(value: &str, size: f64, weight: FontWeight) -> Ref<TextBlock> {
+pub(super) fn text(value: &str, size: f64, weight: FontWeight) -> Ref<TextBlock> {
     let block = TextBlock::new();
     block.set_text(Some(value));
     block.set_font_size(size);
@@ -52,7 +53,7 @@ fn label(value: &str) -> BoxedValue {
     Rc::new(value.to_owned()) as BoxedValue
 }
 
-fn section(title: &str, description: &str, content: &Control) -> Ref<StackPanel> {
+pub(super) fn section(title: &str, description: &str, content: &Control) -> Ref<StackPanel> {
     let panel = StackPanel::new();
     panel.set_spacing(8.0);
     panel.children().add(text(title, 18.0, FontWeight::SemiBold));
@@ -64,14 +65,14 @@ fn section(title: &str, description: &str, content: &Control) -> Ref<StackPanel>
 }
 
 /// The compositor of the window of `visual`.
-fn compositor_of(visual: &Visual) -> Option<Rc<Compositor>> {
+pub(super) fn compositor_of(visual: &Visual) -> Option<Rc<Compositor>> {
     ElementCompositionPreview::get_element_visual(visual)
         .map(|composition_visual| composition_visual.compositor().clone())
         .or_else(Compositor::try_get_default_compositor)
 }
 
 /// A scalar key frame animation of `target` from `from` to `to`.
-fn scalar(compositor: &Rc<Compositor>, target: &str, from: f32, to: f32, ms: u64) -> Rc<dyn ICompositionAnimation> {
+pub(super) fn scalar(compositor: &Rc<Compositor>, target: &str, from: f32, to: f32, ms: u64) -> Rc<dyn ICompositionAnimation> {
     let animation = compositor.create_scalar_key_frame_animation();
     animation.insert_key_frame(0.0, from);
     animation.insert_key_frame(1.0, to);
@@ -81,7 +82,7 @@ fn scalar(compositor: &Rc<Compositor>, target: &str, from: f32, to: f32, ms: u64
 }
 
 /// A vector key frame animation of `target` from `from` to `to`.
-fn vector(compositor: &Rc<Compositor>, target: &str, from: Vector3D, to: Vector3D, ms: u64) -> Rc<dyn ICompositionAnimation> {
+pub(super) fn vector(compositor: &Rc<Compositor>, target: &str, from: Vector3D, to: Vector3D, ms: u64) -> Rc<dyn ICompositionAnimation> {
     let animation = compositor.create_vector3d_key_frame_animation();
     animation.insert_key_frame(0.0, from);
     animation.insert_key_frame(1.0, to);
@@ -552,6 +553,9 @@ pub fn winui_composition_page() -> Ref<ContentPage> {
     panel.children().add(implicit_animations_section());
     panel.children().add(pointer_section());
     panel.children().add(parallax_section());
+    for section in super::winui_composition_phases::phase_sections() {
+        panel.children().add(section);
+    }
     let scroller = ScrollViewer::new();
     scroller.set_content(Some(Control::boxed(panel)));
     page.set_content(Some(Control::boxed(scroller)));

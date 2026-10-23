@@ -1,0 +1,25 @@
+[package]
+name = "ferroui-static-view-locator-macros"
+description = "The attributes #[static_view_locator] and #[static_view_mapping] of ferroui-static-view-locator"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords = ["gui", "mvvm", "view-locator", "codegen", "ui"]
+categories = ["gui"]
+
+[lib]
+path = "lib.rs"
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0.107"
+quote = "1.0.47"
+syn = { version = "2.0.119", features = ["full"] }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"

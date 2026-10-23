@@ -1532,6 +1532,49 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-static-view-locator"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-reactiveui",
+ "ferroui-reactiveui-controls",
+ "ferroui-splat",
+ "ferroui-static-view-locator-macros",
+]
+
+[[package]]
+name = "ferroui-static-view-locator-build"
+version = "0.4.0"
+dependencies = [
+ "ferroui-build-scan",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "ferroui-static-view-locator-macros"
+version = "0.4.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "ferroui-static-view-locator-tests"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-reactiveui",
+ "ferroui-reactiveui-controls",
+ "ferroui-static-view-locator",
+ "ferroui-static-view-locator-build",
+]
+
+[[package]]
 name = "ferroui-system"
 version = "0.4.0"
 dependencies = [
@@ -4115,6 +4158,20 @@ name = "stable_deref_trait"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
+
+[[package]]
+name = "static-view-locator-demo"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-reactiveui",
+ "ferroui-reactiveui-controls",
+ "ferroui-static-view-locator",
+ "ferroui-static-view-locator-build",
+ "ferroui-themes-winui",
+ "ferroui-view",
+]
 
 [[package]]
 name = "static_assertions"

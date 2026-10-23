@@ -112,6 +112,11 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
       - name: Test
         run: cargo test --workspace --locked --no-fail-fast --lib --tests --exclude ferroui-render-backends-comparison --exclude ferroui-vello
+      # The Simple and Fluent themes of the ControlCatalog are behind its feature `classic-themes`,
+      # off by default (docs/binary-size.md): the tests of the document of the two themes and of
+      # the settings page that switches between the three themes, with the feature.
+      - name: Test (the ControlCatalog with its feature classic-themes)
+        run: cargo test --locked -p control-catalog --features classic-themes --lib -- classic_themes the_settings_page
       # The tests of the Vello backend and its comparison with the Skia backend, apart from the other tests: on
       # the runner one scene of a GPU mode now and then comes out wholly different or differs
       # between two draws (docs/porting/vello-backend.md, section 13). A failure is tried again,

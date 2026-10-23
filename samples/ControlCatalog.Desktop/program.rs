@@ -6,15 +6,16 @@
 //! FERROUI_SMOKE_EXIT_MS=3000 cargo run -p control-catalog-desktop
 //! FERROUI_SMOKE_EXIT_MS=20000 FERROUI_SMOKE_PAGES=150 cargo run -p control-catalog-desktop
 //! FERROUI_SMOKE_SCREENSHOTS=target/screenshots cargo run -p control-catalog-desktop
-//! FERROUI_CATALOG_THEME=fluent cargo run -p control-catalog-desktop
-//! FERROUI_CATALOG_THEME=simple cargo run -p control-catalog-desktop
+//! FERROUI_CATALOG_THEME=fluent cargo run -p control-catalog-desktop --features classic-themes
+//! FERROUI_CATALOG_THEME=simple cargo run -p control-catalog-desktop --features classic-themes
 //! FERROUI_CATALOG_WAYLAND=0 cargo run -p control-catalog-desktop
 //! ```
 //!
 //! `FERROUI_CATALOG_THEME` selects the theme the catalog starts with: `winui`, the WinUI theme
-//! of the port (docs/porting/winui-theme.md) and the default of the port, `fluent` (the default
-//! of the original) or `simple`; the settings page switches between them as before. Not in the
-//! original.
+//! of the port (docs/porting/winui-theme.md) and the default of the port, and, with the feature
+//! `classic-themes` (off by default, docs/binary-size.md), `fluent` (the default of the original)
+//! or `simple`; the settings page switches between the themes the catalog is built with. Not in
+//! the original.
 //!
 //! On Linux the catalog uses the Wayland backend when a compositor can be
 //! reached, with the backend of the platform detection (X11) as its
@@ -202,6 +203,7 @@ fn attach_dev_tools(builder: &AppBuilder) {
 
 /// The theme of the catalog asked for with `FERROUI_CATALOG_THEME` (`winui`, the default, `fluent`
 /// or `simple`), selected after the application is set up and before its main window is created.
+/// `fluent` and `simple` need the feature `classic-themes`.
 fn select_theme_of_the_environment() {
     use control_catalog::models::CatalogTheme;
 
@@ -211,6 +213,9 @@ fn select_theme_of_the_environment() {
         Some("simple") => CatalogTheme::Simple,
         Some(other) => panic!("FERROUI_CATALOG_THEME: unknown theme {other:?} (fluent, simple, winui)"),
     };
+    if !App::themes().contains(&theme) {
+        panic!("FERROUI_CATALOG_THEME: the theme {theme:?} needs the feature `classic-themes` of control-catalog-desktop");
+    }
     println!("ControlCatalog: the theme {theme:?}");
     App::select_initial_catalog_theme(theme);
 }
@@ -1061,6 +1066,9 @@ fn screenshot_run(directory: PathBuf) {
 /// (`flight-NN-<ms>.png`, the time from the selection of the page). Not in the original. The
 /// page should be shown for 5 s at least (`FERROUI_SMOKE_PAGES=5000`). The box of the implicit
 /// animations is then hidden and shown and the parallax scroller scrolled (`steps-<ms>.png`).
+/// From 5 s the sections of the later phases are opened, and each is brought into view in turn
+/// with its demo run (`section-N-<ms>.png`); that part needs `FERROUI_SMOKE_PAGES=13000`, or
+/// more with `FERROUI_SMOKE_WINUI_SECTION_MS`.
 fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
     let open_at = selected_at + Duration::from_millis(400);
     let back_at = selected_at + Duration::from_millis(2000);
@@ -1104,6 +1112,35 @@ fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
             move || {
                 if let Some(window) = main_window() {
                     save_composed(&window, path.clone(), format!("step at {} ms", (at - selected_at).as_millis()));
+                }
+            },
+            at,
+            DispatcherPriority::NORMAL,
+        );
+    }
+    // The sections of the later phases: all opened (their demos are built then), then each
+    // brought into view with its demo run, and saved.
+    let _ = DispatcherTimer::run_once(
+        || println!("Flight: open the sections: {}", control_catalog::pages::smoke_expand_sections()),
+        selected_at + Duration::from_millis(5000),
+        DispatcherPriority::NORMAL,
+    );
+    // `FERROUI_SMOKE_WINUI_SECTION_MS`: the time between two sections (1200 ms by default); a
+    // debug build with Vello needs more, as each saved frame holds the compositor up.
+    let spacing = environment_milliseconds("FERROUI_SMOKE_WINUI_SECTION_MS").unwrap_or(1200);
+    for section in 0..6usize {
+        let shown = 5800 + section as u64 * spacing;
+        let _ = DispatcherTimer::run_once(
+            move || println!("Flight: show section {section}: {}", control_catalog::pages::smoke_show_section(section)),
+            selected_at + Duration::from_millis(shown),
+            DispatcherPriority::NORMAL,
+        );
+        let at = selected_at + Duration::from_millis(shown + 900);
+        let path = directory.join(format!("section-{section}-{}.png", (at - selected_at).as_millis()));
+        let _ = DispatcherTimer::run_once(
+            move || {
+                if let Some(window) = main_window() {
+                    save_composed(&window, path.clone(), format!("section {section}"));
                 }
             },
             at,

@@ -1,0 +1,32 @@
+[package]
+name = "ferroui-static-view-locator-tests"
+description = "The tests of ferroui-static-view-locator that compile and run generated locators, ported from StaticViewLocator's runtime tests"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+build = "build.rs"
+autotests = false
+autobenches = false
+autoexamples = false
+
+# The fixtures are the library: the build script generates their locators, as the build script of
+# an application does. The tests are the `tests` modules of the fixtures.
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-static-view-locator = { workspace = true, features = ["reactiveui"] }
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-reactiveui = { workspace = true }
+ferroui-reactiveui-controls = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+
+[build-dependencies]
+ferroui-static-view-locator-build = { workspace = true }
