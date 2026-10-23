@@ -1,0 +1,361 @@
+{
+  "name": "WebGL2-guide-variable-picker",
+  "before": {
+    "view": {
+      "activePage": 1,
+      "selection": [
+        2
+      ],
+      "tool": "Select",
+      "pan": {
+        "x": -53.133333333333326,
+        "y": 35
+      },
+      "zoom": 2.953333333333333,
+      "presentation": null,
+      "prototypeOverlays": [],
+      "imageCrop": null,
+      "layoutDrag": null,
+      "vectorNode": null,
+      "vectorPoint": null,
+      "modalVisible": true,
+      "controls": {
+        "ModalPanel": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 352,
+          "measureValid": true,
+          "pointerOver": false,
+          "visible": true,
+          "width": 620,
+          "x": 490,
+          "y": 324
+        },
+        "GuideVariableProperty": {
+          "arrangeValid": true,
+          "choice": {
+            "focusedIndex": null,
+            "itemCount": 6,
+            "open": false,
+            "selectedIndex": 4
+          },
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 28,
+          "measureValid": true,
+          "pointerOver": false,
+          "visible": true,
+          "width": 76,
+          "x": 514,
+          "y": 516
+        },
+        "GuideVariableValue": {
+          "arrangeValid": true,
+          "choice": {
+            "focusedIndex": null,
+            "itemCount": 2,
+            "open": false,
+            "selectedIndex": 1
+          },
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 28,
+          "measureValid": true,
+          "pointerOver": false,
+          "visible": true,
+          "width": 154,
+          "x": 514,
+          "y": 578
+        },
+        "GuideVariableApply": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": false,
+          "focused": false,
+          "height": 28,
+          "measureValid": true,
+          "pointerOver": true,
+          "pressed": false,
+          "visible": true,
+          "width": 88,
+          "x": 795,
+          "y": 624
+        }
+      }
+    },
+    "renderedFrames": 8,
+    "sceneFrames": 33,
+    "documentRevision": 7,
+    "fonts": {
+      "status": "loaded",
+      "faces": []
+    },
+    "surface": {
+      "kind": "WebGL2",
+      "width": 1600,
+      "height": 1000,
+      "contextLost": false
+    },
+    "visibility": "visible",
+    "focus": {
+      "tag": "MAIN",
+      "id": "out"
+    },
+    "startupErrors": [],
+    "renderPanics": [],
+    "document": {
+      "sha256": "852549413d7fc6433e0838751fcd18994c1640b0dbe3fea54c09a4b4372bc527",
+      "bytes": 4457
+    }
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "timeoutMs": 30000,
+      "error": "page.screenshot: Timeout 30000ms exceeded.\nCall log:\n  - taking page screenshot\n  - waiting for fonts to load...\n  - fonts loaded\n\n    at captureNativeScreenshot (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:471:38)\n    at async guideBindingRegressions (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/guide-bindings-browser.mjs:108:5)\n    at async runIsolatedScenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1062:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1160:13",
+      "status": "failed",
+      "after": {
+        "view": {
+          "activePage": 1,
+          "selection": [
+            2
+          ],
+          "tool": "Select",
+          "pan": {
+            "x": -53.133333333333326,
+            "y": 35
+          },
+          "zoom": 2.953333333333333,
+          "presentation": null,
+          "prototypeOverlays": [],
+          "imageCrop": null,
+          "layoutDrag": null,
+          "vectorNode": null,
+          "vectorPoint": null,
+          "modalVisible": true,
+          "controls": {
+            "ModalPanel": {
+              "arrangeValid": true,
+              "enabled": true,
+              "focusWithin": false,
+              "focused": false,
+              "height": 352,
+              "measureValid": true,
+              "pointerOver": false,
+              "visible": true,
+              "width": 620,
+              "x": 490,
+              "y": 324
+            },
+            "GuideVariableProperty": {
+              "arrangeValid": true,
+              "choice": {
+                "focusedIndex": null,
+                "itemCount": 6,
+                "open": false,
+                "selectedIndex": 4
+              },
+              "enabled": true,
+              "focusWithin": false,
+              "focused": false,
+              "height": 28,
+              "measureValid": true,
+              "pointerOver": false,
+              "visible": true,
+              "width": 76,
+              "x": 514,
+              "y": 516
+            },
+            "GuideVariableValue": {
+              "arrangeValid": true,
+              "choice": {
+                "focusedIndex": null,
+                "itemCount": 2,
+                "open": false,
+                "selectedIndex": 1
+              },
+              "enabled": true,
+              "focusWithin": false,
+              "focused": false,
+              "height": 28,
+              "measureValid": true,
+              "pointerOver": false,
+              "visible": true,
+              "width": 154,
+              "x": 514,
+              "y": 578
+            },
+            "GuideVariableApply": {
+              "arrangeValid": true,
+              "enabled": true,
+              "focusWithin": false,
+              "focused": false,
+              "height": 28,
+              "measureValid": true,
+              "pointerOver": true,
+              "pressed": false,
+              "visible": true,
+              "width": 88,
+              "x": 795,
+              "y": 624
+            }
+          }
+        },
+        "renderedFrames": 8,
+        "sceneFrames": 33,
+        "documentRevision": 7,
+        "fonts": {
+          "status": "loaded",
+          "faces": []
+        },
+        "surface": {
+          "kind": "WebGL2",
+          "width": 1600,
+          "height": 1000,
+          "contextLost": false
+        },
+        "visibility": "visible",
+        "focus": {
+          "tag": "MAIN",
+          "id": "out"
+        },
+        "startupErrors": [],
+        "renderPanics": [],
+        "document": {
+          "sha256": "852549413d7fc6433e0838751fcd18994c1640b0dbe3fea54c09a4b4372bc527",
+          "bytes": 4457
+        }
+      },
+      "durationMs": 30053
+    },
+    {
+      "attempt": 2,
+      "timeoutMs": 60000,
+      "pixels": {
+        "width": 1600,
+        "height": 1000,
+        "colors": 116
+      },
+      "after": {
+        "view": {
+          "activePage": 1,
+          "selection": [
+            2
+          ],
+          "tool": "Select",
+          "pan": {
+            "x": -53.133333333333326,
+            "y": 35
+          },
+          "zoom": 2.953333333333333,
+          "presentation": null,
+          "prototypeOverlays": [],
+          "imageCrop": null,
+          "layoutDrag": null,
+          "vectorNode": null,
+          "vectorPoint": null,
+          "modalVisible": true,
+          "controls": {
+            "ModalPanel": {
+              "arrangeValid": true,
+              "enabled": true,
+              "focusWithin": false,
+              "focused": false,
+              "height": 352,
+              "measureValid": true,
+              "pointerOver": false,
+              "visible": true,
+              "width": 620,
+              "x": 490,
+              "y": 324
+            },
+            "GuideVariableProperty": {
+              "arrangeValid": true,
+              "choice": {
+                "focusedIndex": null,
+                "itemCount": 6,
+                "open": false,
+                "selectedIndex": 4
+              },
+              "enabled": true,
+              "focusWithin": false,
+              "focused": false,
+              "height": 28,
+              "measureValid": true,
+              "pointerOver": false,
+              "visible": true,
+              "width": 76,
+              "x": 514,
+              "y": 516
+            },
+            "GuideVariableValue": {
+              "arrangeValid": true,
+              "choice": {
+                "focusedIndex": null,
+                "itemCount": 2,
+                "open": false,
+                "selectedIndex": 1
+              },
+              "enabled": true,
+              "focusWithin": false,
+              "focused": false,
+              "height": 28,
+              "measureValid": true,
+              "pointerOver": false,
+              "visible": true,
+              "width": 154,
+              "x": 514,
+              "y": 578
+            },
+            "GuideVariableApply": {
+              "arrangeValid": true,
+              "enabled": true,
+              "focusWithin": false,
+              "focused": false,
+              "height": 28,
+              "measureValid": true,
+              "pointerOver": true,
+              "pressed": false,
+              "visible": true,
+              "width": 88,
+              "x": 795,
+              "y": 624
+            }
+          }
+        },
+        "renderedFrames": 8,
+        "sceneFrames": 33,
+        "documentRevision": 7,
+        "fonts": {
+          "status": "loaded",
+          "faces": []
+        },
+        "surface": {
+          "kind": "WebGL2",
+          "width": 1600,
+          "height": 1000,
+          "contextLost": false
+        },
+        "visibility": "visible",
+        "focus": {
+          "tag": "MAIN",
+          "id": "out"
+        },
+        "startupErrors": [],
+        "renderPanics": [],
+        "document": {
+          "sha256": "852549413d7fc6433e0838751fcd18994c1640b0dbe3fea54c09a4b4372bc527",
+          "bytes": 4457
+        }
+      },
+      "status": "passed",
+      "durationMs": 1652
+    }
+  ],
+  "retriedTimeout": true,
+  "recoveredTimeout": true
+}

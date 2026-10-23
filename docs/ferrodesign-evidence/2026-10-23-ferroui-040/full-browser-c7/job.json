@@ -1,0 +1,204 @@
+{
+  "id": 120423823862,
+  "run_id": 39955698269,
+  "workflow_name": "FerroDesign browser",
+  "head_branch": "feat/ferrodesign-editor",
+  "run_url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/runs/39955698269",
+  "run_attempt": 1,
+  "node_id": "CR_kwDOU8dlHs8AAAAcCdG59g",
+  "head_sha": "c7dbf26f1e184fc1113f9c96fcdc1dd0e2627834",
+  "url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/jobs/120423823862",
+  "html_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39955698269/job/120423823862",
+  "status": "completed",
+  "conclusion": "cancelled",
+  "created_at": "2026-10-23T12:52:05Z",
+  "started_at": "2026-10-23T12:52:07Z",
+  "completed_at": "2026-10-23T14:52:44Z",
+  "name": "Browser validation",
+  "steps": [
+    {
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 1,
+      "started_at": "2026-10-23T12:52:08Z",
+      "completed_at": "2026-10-23T12:52:09Z"
+    },
+    {
+      "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 2,
+      "started_at": "2026-10-23T12:52:09Z",
+      "completed_at": "2026-10-23T12:52:15Z"
+    },
+    {
+      "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 3,
+      "started_at": "2026-10-23T12:52:15Z",
+      "completed_at": "2026-10-23T12:52:15Z"
+    },
+    {
+      "name": "Restore pinned toolchain",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 4,
+      "started_at": "2026-10-23T12:52:15Z",
+      "completed_at": "2026-10-23T12:52:24Z"
+    },
+    {
+      "name": "Restore dependencies and compiled framework",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-23T12:52:24Z",
+      "completed_at": "2026-10-23T12:52:30Z"
+    },
+    {
+      "name": "Restore content-verified source timestamps",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 6,
+      "started_at": "2026-10-23T12:52:30Z",
+      "completed_at": "2026-10-23T12:52:32Z"
+    },
+    {
+      "name": "Install pinned Rust, Emscripten and wasm-bindgen",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 7,
+      "started_at": "2026-10-23T12:52:32Z",
+      "completed_at": "2026-10-23T12:52:33Z"
+    },
+    {
+      "name": "Verify source timestamp reuse and changed-input rebuilding",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 8,
+      "started_at": "2026-10-23T12:52:33Z",
+      "completed_at": "2026-10-23T12:52:34Z"
+    },
+    {
+      "name": "Install native Fontconfig and FreeType development files",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 9,
+      "started_at": "2026-10-23T12:52:34Z",
+      "completed_at": "2026-10-23T12:52:49Z"
+    },
+    {
+      "name": "Build actual FerroUI Vello WebAssembly application",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 10,
+      "started_at": "2026-10-23T12:52:49Z",
+      "completed_at": "2026-10-23T13:02:43Z"
+    },
+    {
+      "name": "Upload complete browser build",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 11,
+      "started_at": "2026-10-23T13:02:43Z",
+      "completed_at": "2026-10-23T13:02:45Z"
+    },
+    {
+      "name": "Snapshot source timestamps with the partial build",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 12,
+      "started_at": "2026-10-23T13:02:45Z",
+      "completed_at": "2026-10-23T13:02:46Z"
+    },
+    {
+      "name": "Cache partial build for subsequent fixes",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 13,
+      "started_at": "2026-10-23T13:02:46Z",
+      "completed_at": "2026-10-23T13:02:53Z"
+    },
+    {
+      "name": "Install Chromium for browser validation",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 14,
+      "started_at": "2026-10-23T13:02:53Z",
+      "completed_at": "2026-10-23T13:03:08Z"
+    },
+    {
+      "name": "Validate browser persistence and IndexedDB transactions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 15,
+      "started_at": "2026-10-23T13:03:08Z",
+      "completed_at": "2026-10-23T13:03:10Z"
+    },
+    {
+      "name": "Validate pixels, pointer editing, keyboard history and serialization",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "number": 16,
+      "started_at": "2026-10-23T13:03:10Z",
+      "completed_at": "2026-10-23T14:52:31Z"
+    },
+    {
+      "name": "Measure native text panning in both browser surfaces",
+      "status": "completed",
+      "conclusion": "skipped",
+      "number": 17,
+      "started_at": "2026-10-23T14:52:31Z",
+      "completed_at": "2026-10-23T14:52:31Z"
+    },
+    {
+      "name": "Upload validation screenshots, traces, reports and lockfiles",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 18,
+      "started_at": "2026-10-23T14:52:31Z",
+      "completed_at": "2026-10-23T14:52:41Z"
+    },
+    {
+      "name": "Cache pinned toolchain",
+      "status": "completed",
+      "conclusion": "skipped",
+      "number": 19,
+      "started_at": "2026-10-23T14:52:41Z",
+      "completed_at": "2026-10-23T14:52:41Z"
+    },
+    {
+      "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+      "status": "completed",
+      "conclusion": "skipped",
+      "number": 37,
+      "started_at": "2026-10-23T14:52:41Z",
+      "completed_at": "2026-10-23T14:52:41Z"
+    },
+    {
+      "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 38,
+      "started_at": "2026-10-23T14:52:41Z",
+      "completed_at": "2026-10-23T14:52:42Z"
+    },
+    {
+      "name": "Complete job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 39,
+      "started_at": "2026-10-23T14:52:42Z",
+      "completed_at": "2026-10-23T14:52:42Z"
+    }
+  ],
+  "check_run_url": "https://api.github.com/repos/wieslawsoltes/FerroUI/check-runs/120423823862",
+  "labels": [
+    "ubuntu-24.04"
+  ],
+  "runner_id": 1000302615,
+  "runner_name": "GitHub Actions 1000302615",
+  "runner_group_id": 0,
+  "runner_group_name": "GitHub Actions"
+}

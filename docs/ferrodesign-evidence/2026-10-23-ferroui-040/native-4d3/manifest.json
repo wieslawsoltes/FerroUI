@@ -1,0 +1,56 @@
+{
+  "source_commit": "4d3c796c7d5b76eb1e9d7f4f24b523841adbd994",
+  "scope": "Failed native4d3 and same-source corroborating jobs; dc correction is source-only in this folder.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 7964,
+      "sha256": "d2870a6e7c9dc6f906a35b0c81f560edfce987261aa452e1c898cce18bf2f132"
+    },
+    {
+      "path": "analysis.json",
+      "bytes": 18920,
+      "sha256": "d60e6202175e2a8279c1274fd78f790adee39385958a5fc189357813a086eb54"
+    },
+    {
+      "path": "analyze_log.py",
+      "bytes": 4874,
+      "sha256": "1e13d5a52e847d1fdf9353d48c9c05b0e8afe79d5a7518ee6921904ab467e6a2"
+    },
+    {
+      "path": "compressed-provenance.json",
+      "bytes": 1463,
+      "sha256": "71bac3ba7bd1015990451e3b0bfd6448b9b86ad0a813e437af608ceef65c9de4"
+    },
+    {
+      "path": "full-log-analysis.json.gz",
+      "bytes": 15087,
+      "sha256": "7f4dabfc5fd57bb971c1943d886b801c13d4d3aa0fc5f6607f2b661080a18761"
+    },
+    {
+      "path": "full-workflow-native-job.log.gz",
+      "bytes": 51474,
+      "sha256": "ebd1d8c2f733d44ce5431c9aab14df6ddf4b678ed0e1956933b6bc41ebc37f9c"
+    },
+    {
+      "path": "generated-references-job.log.gz",
+      "bytes": 42953,
+      "sha256": "3e3d42d5a45d276445a515e87d99b37e857f6f535c25d71496fa462892bc49b1"
+    },
+    {
+      "path": "metadata.json",
+      "bytes": 18748,
+      "sha256": "425916e2a2a18c145bc07706066cd3cad3be83ddbdbd7b68a9f928856fb896b2"
+    },
+    {
+      "path": "native-job.log.gz",
+      "bytes": 101965,
+      "sha256": "e76a2fe1f784e2281d3f09af41aad1c85ee5ceec45011549336f657a7edb85cc"
+    },
+    {
+      "path": "source-provenance.json",
+      "bytes": 3043,
+      "sha256": "c0a06859f9e1c618fc73c478d699b7bed8b84724a920d31da855c46d65ca227a"
+    }
+  ]
+}

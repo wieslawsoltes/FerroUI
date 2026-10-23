@@ -1,0 +1,2450 @@
+[
+  {
+    "name": "browser-report/Software2D-angular-gradient-handles-artwork.png",
+    "size": 7898,
+    "compressed_size": 7868,
+    "crc32": "a48b17c9"
+  },
+  {
+    "name": "browser-report/Software2D-angular-gradient-input.json",
+    "size": 77345,
+    "compressed_size": 4514,
+    "crc32": "44b8df16"
+  },
+  {
+    "name": "browser-report/Software2D-angular-paint-authoring-capture.json",
+    "size": 5824,
+    "compressed_size": 1141,
+    "crc32": "51af4d50"
+  },
+  {
+    "name": "browser-report/Software2D-angular-paint-authoring.png",
+    "size": 160718,
+    "compressed_size": 156646,
+    "crc32": "6038b70f"
+  },
+  {
+    "name": "browser-report/Software2D-angular-paint.png",
+    "size": 3354,
+    "compressed_size": 3359,
+    "crc32": "80242cfc"
+  },
+  {
+    "name": "browser-report/Software2D-angular-paint.svg",
+    "size": 45649,
+    "compressed_size": 7023,
+    "crc32": "3c27a6b0"
+  },
+  {
+    "name": "browser-report/Software2D-angular-strokes.png",
+    "size": 5949,
+    "compressed_size": 5795,
+    "crc32": "a17388a7"
+  },
+  {
+    "name": "browser-report/Software2D-angular-strokes.svg",
+    "size": 141295,
+    "compressed_size": 21488,
+    "crc32": "c7f59787"
+  },
+  {
+    "name": "browser-report/Software2D-automatic-vector-faces-capture.json",
+    "size": 3971,
+    "compressed_size": 945,
+    "crc32": "0ca2fcf7"
+  },
+  {
+    "name": "browser-report/Software2D-automatic-vector-faces.png",
+    "size": 92409,
+    "compressed_size": 85164,
+    "crc32": "a7821e00"
+  },
+  {
+    "name": "browser-report/Software2D-background-blur-native-capture.json",
+    "size": 3145,
+    "compressed_size": 837,
+    "crc32": "93addbf9"
+  },
+  {
+    "name": "browser-report/Software2D-background-blur-native.png",
+    "size": 69218,
+    "compressed_size": 62262,
+    "crc32": "5999f33d"
+  },
+  {
+    "name": "browser-report/Software2D-bucket-artwork-export.png",
+    "size": 417,
+    "compressed_size": 112,
+    "crc32": "ce227d56"
+  },
+  {
+    "name": "browser-report/Software2D-bucket-hover-face-capture.json",
+    "size": 3160,
+    "compressed_size": 836,
+    "crc32": "7f3cf951"
+  },
+  {
+    "name": "browser-report/Software2D-bucket-hover-face.png",
+    "size": 83615,
+    "compressed_size": 76750,
+    "crc32": "dbf1fb13"
+  },
+  {
+    "name": "browser-report/Software2D-bucket-split-cubics-export.png",
+    "size": 2391,
+    "compressed_size": 2396,
+    "crc32": "51f22a1f"
+  },
+  {
+    "name": "browser-report/Software2D-compact.png",
+    "size": 91056,
+    "compressed_size": 89238,
+    "crc32": "a991576b"
+  },
+  {
+    "name": "browser-report/Software2D-component-instance-properties-capture.json",
+    "size": 5024,
+    "compressed_size": 1055,
+    "crc32": "70e8893e"
+  },
+  {
+    "name": "browser-report/Software2D-component-instance-properties.png",
+    "size": 82146,
+    "compressed_size": 75925,
+    "crc32": "5992b320"
+  },
+  {
+    "name": "browser-report/Software2D-component-main-properties-capture.json",
+    "size": 4768,
+    "compressed_size": 978,
+    "crc32": "f78a70ed"
+  },
+  {
+    "name": "browser-report/Software2D-component-main-properties.png",
+    "size": 84382,
+    "compressed_size": 77301,
+    "crc32": "973f2461"
+  },
+  {
+    "name": "browser-report/Software2D-component-set-authoring-capture.json",
+    "size": 5817,
+    "compressed_size": 1078,
+    "crc32": "04eeed79"
+  },
+  {
+    "name": "browser-report/Software2D-component-set-authoring.png",
+    "size": 87078,
+    "compressed_size": 80588,
+    "crc32": "3d94fd9c"
+  },
+  {
+    "name": "browser-report/Software2D-compositing-background-blur.png",
+    "size": 446,
+    "compressed_size": 189,
+    "crc32": "7124801a"
+  },
+  {
+    "name": "browser-report/Software2D-compositing-group-opacity.png",
+    "size": 395,
+    "compressed_size": 121,
+    "crc32": "87ce5c38"
+  },
+  {
+    "name": "browser-report/Software2D-compositing-multiply.png",
+    "size": 374,
+    "compressed_size": 105,
+    "crc32": "9e9b2fac"
+  },
+  {
+    "name": "browser-report/Software2D-compositing-transparent-backdrop.png",
+    "size": 373,
+    "compressed_size": 104,
+    "crc32": "5bdda4ec"
+  },
+  {
+    "name": "browser-report/Software2D-corner-radius-affine-polygon-capture.json",
+    "size": 3185,
+    "compressed_size": 869,
+    "crc32": "1b972a5e"
+  },
+  {
+    "name": "browser-report/Software2D-corner-radius-affine-polygon.png",
+    "size": 98623,
+    "compressed_size": 93134,
+    "crc32": "f0d54c20"
+  },
+  {
+    "name": "browser-report/Software2D-corner-radius-affine-star-capture.json",
+    "size": 3182,
+    "compressed_size": 865,
+    "crc32": "8f706170"
+  },
+  {
+    "name": "browser-report/Software2D-corner-radius-affine-star.png",
+    "size": 96679,
+    "compressed_size": 91219,
+    "crc32": "bd5bf2b8"
+  },
+  {
+    "name": "browser-report/Software2D-corner-radius-hover-capture.json",
+    "size": 3168,
+    "compressed_size": 857,
+    "crc32": "eeffd1e2"
+  },
+  {
+    "name": "browser-report/Software2D-corner-radius-hover.png",
+    "size": 96818,
+    "compressed_size": 90950,
+    "crc32": "a62b8251"
+  },
+  {
+    "name": "browser-report/Software2D-corner-radius-independent-capture.json",
+    "size": 3180,
+    "compressed_size": 859,
+    "crc32": "d380b42f"
+  },
+  {
+    "name": "browser-report/Software2D-corner-radius-independent.png",
+    "size": 97477,
+    "compressed_size": 92423,
+    "crc32": "6a59592f"
+  },
+  {
+    "name": "browser-report/Software2D-corner-radius-input.json",
+    "size": 71197,
+    "compressed_size": 4310,
+    "crc32": "627ef497"
+  },
+  {
+    "name": "browser-report/Software2D-corner-radius-touch-input.json",
+    "size": 4840,
+    "compressed_size": 604,
+    "crc32": "42afcbbe"
+  },
+  {
+    "name": "browser-report/Software2D-corner-smoothing-capture.json",
+    "size": 3305,
+    "compressed_size": 864,
+    "crc32": "a5e9b97d"
+  },
+  {
+    "name": "browser-report/Software2D-corner-smoothing.png",
+    "size": 79105,
+    "compressed_size": 74169,
+    "crc32": "004e543f"
+  },
+  {
+    "name": "browser-report/Software2D-edited.png",
+    "size": 203691,
+    "compressed_size": 198750,
+    "crc32": "4342bbbf"
+  },
+  {
+    "name": "browser-report/Software2D-empty-layout-padding-capture.json",
+    "size": 4825,
+    "compressed_size": 976,
+    "crc32": "d4a027bb"
+  },
+  {
+    "name": "browser-report/Software2D-empty-layout-padding.png",
+    "size": 111231,
+    "compressed_size": 105220,
+    "crc32": "69676789"
+  },
+  {
+    "name": "browser-report/Software2D-explicit-grid-track-controls-capture.json",
+    "size": 4871,
+    "compressed_size": 1040,
+    "crc32": "61f68dd5"
+  },
+  {
+    "name": "browser-report/Software2D-explicit-grid-track-controls.png",
+    "size": 121686,
+    "compressed_size": 115492,
+    "crc32": "ef6042cd"
+  },
+  {
+    "name": "browser-report/Software2D-export.png",
+    "size": 10440,
+    "compressed_size": 9986,
+    "crc32": "344fbdce"
+  },
+  {
+    "name": "browser-report/Software2D-flatten-rich-after-capture.json",
+    "size": 3131,
+    "compressed_size": 846,
+    "crc32": "f7fabaa7"
+  },
+  {
+    "name": "browser-report/Software2D-flatten-rich-after.png",
+    "size": 56142,
+    "compressed_size": 49980,
+    "crc32": "72334a3a"
+  },
+  {
+    "name": "browser-report/Software2D-flatten-rich-before-capture.json",
+    "size": 3130,
+    "compressed_size": 841,
+    "crc32": "562425db"
+  },
+  {
+    "name": "browser-report/Software2D-flatten-rich-before.png",
+    "size": 55991,
+    "compressed_size": 49901,
+    "crc32": "32340de1"
+  },
+  {
+    "name": "browser-report/Software2D-flatten-rich-redo-capture.json",
+    "size": 3130,
+    "compressed_size": 844,
+    "crc32": "557cb4eb"
+  },
+  {
+    "name": "browser-report/Software2D-flatten-rich-redo.png",
+    "size": 56142,
+    "compressed_size": 49980,
+    "crc32": "72334a3a"
+  },
+  {
+    "name": "browser-report/Software2D-flatten-rich-undo-capture.json",
+    "size": 3128,
+    "compressed_size": 842,
+    "crc32": "f5c12ab0"
+  },
+  {
+    "name": "browser-report/Software2D-flatten-rich-undo.png",
+    "size": 55991,
+    "compressed_size": 49901,
+    "crc32": "32340de1"
+  },
+  {
+    "name": "browser-report/Software2D-flatten-text-capture.json",
+    "size": 3161,
+    "compressed_size": 854,
+    "crc32": "020e1768"
+  },
+  {
+    "name": "browser-report/Software2D-flatten-text.png",
+    "size": 107471,
+    "compressed_size": 101797,
+    "crc32": "d7695bfc"
+  },
+  {
+    "name": "browser-report/Software2D-floating-native-palette-capture.json",
+    "size": 4938,
+    "compressed_size": 1010,
+    "crc32": "9a13b755"
+  },
+  {
+    "name": "browser-report/Software2D-floating-native-palette.png",
+    "size": 83695,
+    "compressed_size": 77543,
+    "crc32": "a98b1d2d"
+  },
+  {
+    "name": "browser-report/Software2D-gradient-entry-input.json",
+    "size": 187429,
+    "compressed_size": 12894,
+    "crc32": "ae87a605"
+  },
+  {
+    "name": "browser-report/Software2D-gradient-handles-angular-capture.json",
+    "size": 3177,
+    "compressed_size": 863,
+    "crc32": "8d3233db"
+  },
+  {
+    "name": "browser-report/Software2D-gradient-handles-angular.png",
+    "size": 168350,
+    "compressed_size": 163459,
+    "crc32": "4496b2a8"
+  },
+  {
+    "name": "browser-report/Software2D-gradient-handles-artwork.png",
+    "size": 569,
+    "compressed_size": 149,
+    "crc32": "45c42e92"
+  },
+  {
+    "name": "browser-report/Software2D-gradient-handles-radial-capture.json",
+    "size": 3176,
+    "compressed_size": 859,
+    "crc32": "888bd407"
+  },
+  {
+    "name": "browser-report/Software2D-gradient-handles-radial.png",
+    "size": 179542,
+    "compressed_size": 174909,
+    "crc32": "e2cc8bc8"
+  },
+  {
+    "name": "browser-report/Software2D-gradient-handles-tied-affine-capture.json",
+    "size": 3181,
+    "compressed_size": 865,
+    "crc32": "1382eefa"
+  },
+  {
+    "name": "browser-report/Software2D-gradient-handles-tied-affine.png",
+    "size": 128911,
+    "compressed_size": 123048,
+    "crc32": "854f1cc9"
+  },
+  {
+    "name": "browser-report/Software2D-gradient-handles-touch-input.json",
+    "size": 4871,
+    "compressed_size": 604,
+    "crc32": "098fb464"
+  },
+  {
+    "name": "browser-report/Software2D-gradient-handles-translated-capture.json",
+    "size": 3184,
+    "compressed_size": 866,
+    "crc32": "d2601b4f"
+  },
+  {
+    "name": "browser-report/Software2D-gradient-handles-translated.png",
+    "size": 136741,
+    "compressed_size": 130268,
+    "crc32": "652e524d"
+  },
+  {
+    "name": "browser-report/Software2D-gradient-held-save.ferrodesign",
+    "size": 9860,
+    "compressed_size": 1572,
+    "crc32": "713b4d8b"
+  },
+  {
+    "name": "browser-report/Software2D-grid-free-artwork.png",
+    "size": 369,
+    "compressed_size": 118,
+    "crc32": "e9c2ae70"
+  },
+  {
+    "name": "browser-report/Software2D-grid-placement-spans-capture.json",
+    "size": 4793,
+    "compressed_size": 1006,
+    "crc32": "1dd49f03"
+  },
+  {
+    "name": "browser-report/Software2D-grid-placement-spans.png",
+    "size": 102883,
+    "compressed_size": 96928,
+    "crc32": "b012d284"
+  },
+  {
+    "name": "browser-report/Software2D-guide-bindings-failure.ferrodesign",
+    "size": 4423,
+    "compressed_size": 964,
+    "crc32": "e8e9c089"
+  },
+  {
+    "name": "browser-report/Software2D-guide-bindings-failure.png",
+    "size": 69575,
+    "compressed_size": 62398,
+    "crc32": "9bf6fca4"
+  },
+  {
+    "name": "browser-report/Software2D-guide-variable-picker-capture.json",
+    "size": 6066,
+    "compressed_size": 1081,
+    "crc32": "53eff259"
+  },
+  {
+    "name": "browser-report/Software2D-guide-variable-picker.png",
+    "size": 108562,
+    "compressed_size": 102267,
+    "crc32": "7ce623eb"
+  },
+  {
+    "name": "browser-report/Software2D-image-crop-affine-native-capture.json",
+    "size": 4065,
+    "compressed_size": 968,
+    "crc32": "583dd96c"
+  },
+  {
+    "name": "browser-report/Software2D-image-crop-affine-native.png",
+    "size": 96538,
+    "compressed_size": 89259,
+    "crc32": "82f2415a"
+  },
+  {
+    "name": "browser-report/Software2D-image-crop-fit-export.png",
+    "size": 453,
+    "compressed_size": 267,
+    "crc32": "03d5b4d1"
+  },
+  {
+    "name": "browser-report/Software2D-image-crop-pan-export.png",
+    "size": 375,
+    "compressed_size": 173,
+    "crc32": "aa2d783d"
+  },
+  {
+    "name": "browser-report/Software2D-image-crop-pan-native-capture.json",
+    "size": 4036,
+    "compressed_size": 950,
+    "crc32": "8fb89807"
+  },
+  {
+    "name": "browser-report/Software2D-image-crop-pan-native.png",
+    "size": 72031,
+    "compressed_size": 65298,
+    "crc32": "932508de"
+  },
+  {
+    "name": "browser-report/Software2D-image-crop-percentages-native-capture.json",
+    "size": 4896,
+    "compressed_size": 1035,
+    "crc32": "48674ec7"
+  },
+  {
+    "name": "browser-report/Software2D-image-crop-percentages-native.png",
+    "size": 121783,
+    "compressed_size": 116424,
+    "crc32": "31672904"
+  },
+  {
+    "name": "browser-report/Software2D-image-crop-tile-export.png",
+    "size": 326,
+    "compressed_size": 120,
+    "crc32": "9c40718b"
+  },
+  {
+    "name": "browser-report/Software2D-initial.png",
+    "size": 187960,
+    "compressed_size": 182530,
+    "crc32": "6da1b213"
+  },
+  {
+    "name": "browser-report/Software2D-inline-text.png",
+    "size": 82502,
+    "compressed_size": 76911,
+    "crc32": "7ce10405"
+  },
+  {
+    "name": "browser-report/Software2D-large-document.png",
+    "size": 418680,
+    "compressed_size": 408390,
+    "crc32": "ce8a5f8a"
+  },
+  {
+    "name": "browser-report/Software2D-layout-grid-overlay-capture.json",
+    "size": 3136,
+    "compressed_size": 836,
+    "crc32": "a8fc9ece"
+  },
+  {
+    "name": "browser-report/Software2D-layout-grid-overlay.png",
+    "size": 54232,
+    "compressed_size": 47622,
+    "crc32": "8feaca35"
+  },
+  {
+    "name": "browser-report/Software2D-layout-independent-padding-capture.json",
+    "size": 4985,
+    "compressed_size": 1026,
+    "crc32": "2d903c34"
+  },
+  {
+    "name": "browser-report/Software2D-layout-independent-padding.png",
+    "size": 123568,
+    "compressed_size": 117783,
+    "crc32": "310e4ba8"
+  },
+  {
+    "name": "browser-report/Software2D-layout-literal-and-bound-spacing-capture.json",
+    "size": 3955,
+    "compressed_size": 943,
+    "crc32": "b6d67d4c"
+  },
+  {
+    "name": "browser-report/Software2D-layout-literal-and-bound-spacing.png",
+    "size": 71883,
+    "compressed_size": 64935,
+    "crc32": "6f72428f"
+  },
+  {
+    "name": "browser-report/Software2D-layout-native-reorder-capture.json",
+    "size": 5032,
+    "compressed_size": 1042,
+    "crc32": "6f033277"
+  },
+  {
+    "name": "browser-report/Software2D-layout-native-reorder.png",
+    "size": 105300,
+    "compressed_size": 99356,
+    "crc32": "86946e56"
+  },
+  {
+    "name": "browser-report/Software2D-layout-padding-save.ferrodesign",
+    "size": 2612,
+    "compressed_size": 875,
+    "crc32": "7d1af999"
+  },
+  {
+    "name": "browser-report/Software2D-layout-spacing-variables-capture.json",
+    "size": 4245,
+    "compressed_size": 967,
+    "crc32": "90276fbd"
+  },
+  {
+    "name": "browser-report/Software2D-layout-spacing-variables.png",
+    "size": 123767,
+    "compressed_size": 117759,
+    "crc32": "30a904ca"
+  },
+  {
+    "name": "browser-report/Software2D-many-pages.png",
+    "size": 45746,
+    "compressed_size": 43059,
+    "crc32": "6827ccc1"
+  },
+  {
+    "name": "browser-report/Software2D-masks-alpha.png",
+    "size": 396,
+    "compressed_size": 122,
+    "crc32": "ffa65186"
+  },
+  {
+    "name": "browser-report/Software2D-masks-grouped-alpha.png",
+    "size": 396,
+    "compressed_size": 122,
+    "crc32": "ffa65186"
+  },
+  {
+    "name": "browser-report/Software2D-masks-isolated-group.png",
+    "size": 387,
+    "compressed_size": 119,
+    "crc32": "de074b1a"
+  },
+  {
+    "name": "browser-report/Software2D-masks-luminance.png",
+    "size": 380,
+    "compressed_size": 111,
+    "crc32": "8aeeb777"
+  },
+  {
+    "name": "browser-report/Software2D-masks-pass-through-group.png",
+    "size": 387,
+    "compressed_size": 119,
+    "crc32": "fa551bc5"
+  },
+  {
+    "name": "browser-report/Software2D-masks-vector.png",
+    "size": 393,
+    "compressed_size": 120,
+    "crc32": "aa573f23"
+  },
+  {
+    "name": "browser-report/Software2D-multi-frame-layout-transfer-capture.json",
+    "size": 4458,
+    "compressed_size": 1100,
+    "crc32": "eb7d720b"
+  },
+  {
+    "name": "browser-report/Software2D-multi-frame-layout-transfer.png",
+    "size": 70014,
+    "compressed_size": 62982,
+    "crc32": "892d8a07"
+  },
+  {
+    "name": "browser-report/Software2D-native-affine-authoring-capture.json",
+    "size": 5672,
+    "compressed_size": 1041,
+    "crc32": "a7bfa2a0"
+  },
+  {
+    "name": "browser-report/Software2D-native-affine-authoring.png",
+    "size": 82499,
+    "compressed_size": 76314,
+    "crc32": "467b1de1"
+  },
+  {
+    "name": "browser-report/Software2D-native-alpha-mask-selection-capture.json",
+    "size": 3186,
+    "compressed_size": 841,
+    "crc32": "4ed123d1"
+  },
+  {
+    "name": "browser-report/Software2D-native-alpha-mask-selection.png",
+    "size": 81377,
+    "compressed_size": 73475,
+    "crc32": "572e9d8c"
+  },
+  {
+    "name": "browser-report/Software2D-native-effect-stack-capture.json",
+    "size": 5838,
+    "compressed_size": 1099,
+    "crc32": "92b891c7"
+  },
+  {
+    "name": "browser-report/Software2D-native-effect-stack.png",
+    "size": 121932,
+    "compressed_size": 116438,
+    "crc32": "902bd8ca"
+  },
+  {
+    "name": "browser-report/Software2D-native-grid-style-capture.json",
+    "size": 4912,
+    "compressed_size": 1030,
+    "crc32": "df00f1bb"
+  },
+  {
+    "name": "browser-report/Software2D-native-grid-style.png",
+    "size": 106713,
+    "compressed_size": 100602,
+    "crc32": "5bf1f1e3"
+  },
+  {
+    "name": "browser-report/Software2D-native-layout-drag-preview-capture.json",
+    "size": 4333,
+    "compressed_size": 1059,
+    "crc32": "c97af094"
+  },
+  {
+    "name": "browser-report/Software2D-native-layout-drag-preview.png",
+    "size": 67387,
+    "compressed_size": 60724,
+    "crc32": "38a7c43c"
+  },
+  {
+    "name": "browser-report/Software2D-native-local-styles-capture.json",
+    "size": 4938,
+    "compressed_size": 1063,
+    "crc32": "34f73bf0"
+  },
+  {
+    "name": "browser-report/Software2D-native-local-styles.png",
+    "size": 102310,
+    "compressed_size": 96865,
+    "crc32": "4a12a804"
+  },
+  {
+    "name": "browser-report/Software2D-native-luminance-mask-selection-capture.json",
+    "size": 3190,
+    "compressed_size": 843,
+    "crc32": "3f0a4211"
+  },
+  {
+    "name": "browser-report/Software2D-native-luminance-mask-selection.png",
+    "size": 81822,
+    "compressed_size": 73028,
+    "crc32": "45fd21a0"
+  },
+  {
+    "name": "browser-report/Software2D-native-mask-controls-capture.json",
+    "size": 6079,
+    "compressed_size": 1082,
+    "crc32": "83c8554a"
+  },
+  {
+    "name": "browser-report/Software2D-native-mask-controls.png",
+    "size": 109321,
+    "compressed_size": 102428,
+    "crc32": "49233c2e"
+  },
+  {
+    "name": "browser-report/Software2D-native-matching-fill-capture.json",
+    "size": 4019,
+    "compressed_size": 941,
+    "crc32": "1036fe5d"
+  },
+  {
+    "name": "browser-report/Software2D-native-matching-fill.png",
+    "size": 81123,
+    "compressed_size": 74383,
+    "crc32": "6b6a9556"
+  },
+  {
+    "name": "browser-report/Software2D-native-paragraph-authoring-capture.json",
+    "size": 13657,
+    "compressed_size": 1782,
+    "crc32": "97350098"
+  },
+  {
+    "name": "browser-report/Software2D-native-paragraph-authoring.png",
+    "size": 108344,
+    "compressed_size": 102307,
+    "crc32": "1bcfcf59"
+  },
+  {
+    "name": "browser-report/Software2D-native-region-paints-capture.json",
+    "size": 4743,
+    "compressed_size": 1020,
+    "crc32": "119e3c4c"
+  },
+  {
+    "name": "browser-report/Software2D-native-region-paints.png",
+    "size": 102300,
+    "compressed_size": 96176,
+    "crc32": "0eefc0f5"
+  },
+  {
+    "name": "browser-report/Software2D-native-rich-text-editing-capture.json",
+    "size": 11491,
+    "compressed_size": 1691,
+    "crc32": "330286fd"
+  },
+  {
+    "name": "browser-report/Software2D-native-rich-text-editing.png",
+    "size": 73526,
+    "compressed_size": 66873,
+    "crc32": "6a41669b"
+  },
+  {
+    "name": "browser-report/Software2D-native-selection-groups-capture.json",
+    "size": 3928,
+    "compressed_size": 923,
+    "crc32": "b88f5bec"
+  },
+  {
+    "name": "browser-report/Software2D-native-selection-groups.png",
+    "size": 66263,
+    "compressed_size": 59038,
+    "crc32": "e9e3bb74"
+  },
+  {
+    "name": "browser-report/Software2D-native-svg-masks-capture.json",
+    "size": 3085,
+    "compressed_size": 821,
+    "crc32": "9050102f"
+  },
+  {
+    "name": "browser-report/Software2D-native-svg-masks.png",
+    "size": 70178,
+    "compressed_size": 63166,
+    "crc32": "97428216"
+  },
+  {
+    "name": "browser-report/Software2D-native-text-entry-input.json",
+    "size": 157034,
+    "compressed_size": 4650,
+    "crc32": "178f0d31"
+  },
+  {
+    "name": "browser-report/Software2D-native-two-region-colors-capture.json",
+    "size": 3117,
+    "compressed_size": 839,
+    "crc32": "4dc50600"
+  },
+  {
+    "name": "browser-report/Software2D-native-two-region-colors.png",
+    "size": 83815,
+    "compressed_size": 76711,
+    "crc32": "077a13e4"
+  },
+  {
+    "name": "browser-report/Software2D-native-vector-mask-selection-capture.json",
+    "size": 3187,
+    "compressed_size": 841,
+    "crc32": "b1afab13"
+  },
+  {
+    "name": "browser-report/Software2D-native-vector-mask-selection.png",
+    "size": 76858,
+    "compressed_size": 69884,
+    "crc32": "a19d89a7"
+  },
+  {
+    "name": "browser-report/Software2D-page-inspector-native-capture.json",
+    "size": 4632,
+    "compressed_size": 983,
+    "crc32": "c185121e"
+  },
+  {
+    "name": "browser-report/Software2D-page-inspector-native.png",
+    "size": 50311,
+    "compressed_size": 43753,
+    "crc32": "afd12200"
+  },
+  {
+    "name": "browser-report/Software2D-paint-stack-capture.json",
+    "size": 4730,
+    "compressed_size": 996,
+    "crc32": "38bf8770"
+  },
+  {
+    "name": "browser-report/Software2D-paint-stack.png",
+    "size": 151522,
+    "compressed_size": 128853,
+    "crc32": "0bbcc394"
+  },
+  {
+    "name": "browser-report/Software2D-paragraph-artwork.png",
+    "size": 5288,
+    "compressed_size": 4678,
+    "crc32": "db6f98b9"
+  },
+  {
+    "name": "browser-report/Software2D-paragraphs-failure.ferrodesign",
+    "size": 2793,
+    "compressed_size": 891,
+    "crc32": "5de4fa64"
+  },
+  {
+    "name": "browser-report/Software2D-paragraphs-failure.png",
+    "size": 68825,
+    "compressed_size": 61951,
+    "crc32": "1d774f3d"
+  },
+  {
+    "name": "browser-report/Software2D-polygon-corner-radius-capture.json",
+    "size": 4050,
+    "compressed_size": 964,
+    "crc32": "c8c756b3"
+  },
+  {
+    "name": "browser-report/Software2D-polygon-corner-radius.png",
+    "size": 79222,
+    "compressed_size": 74702,
+    "crc32": "109cf745"
+  },
+  {
+    "name": "browser-report/Software2D-polygon-corners-failure.ferrodesign",
+    "size": 2472,
+    "compressed_size": 836,
+    "crc32": "de867e0f"
+  },
+  {
+    "name": "browser-report/Software2D-polygon-corners-failure.png",
+    "size": 76597,
+    "compressed_size": 71903,
+    "crc32": "210d5ef7"
+  },
+  {
+    "name": "browser-report/Software2D-polygon-corners-triangle.png",
+    "size": 2665,
+    "compressed_size": 2554,
+    "crc32": "7a977240"
+  },
+  {
+    "name": "browser-report/Software2D-polygon-corners-triangle.svg",
+    "size": 859,
+    "compressed_size": 517,
+    "crc32": "55a4f7c2"
+  },
+  {
+    "name": "browser-report/Software2D-polygon-corners-triangle.xaml",
+    "size": 1262,
+    "compressed_size": 677,
+    "crc32": "2b1ee9ec"
+  },
+  {
+    "name": "browser-report/Software2D-prototype-scroll.png",
+    "size": 8867,
+    "compressed_size": 2049,
+    "crc32": "98b84c53"
+  },
+  {
+    "name": "browser-report/Software2D-prototype-smart-midpoint.png",
+    "size": 8945,
+    "compressed_size": 2187,
+    "crc32": "c6c8c08c"
+  },
+  {
+    "name": "browser-report/Software2D-prototype-smart-progress.json",
+    "size": 3899,
+    "compressed_size": 577,
+    "crc32": "41130bdf"
+  },
+  {
+    "name": "browser-report/Software2D-prototype-smart-source.png",
+    "size": 8924,
+    "compressed_size": 2137,
+    "crc32": "5198744e"
+  },
+  {
+    "name": "browser-report/Software2D-prototype-spacing-after.png",
+    "size": 9007,
+    "compressed_size": 2259,
+    "crc32": "1416c326"
+  },
+  {
+    "name": "browser-report/Software2D-prototype-spacing-before.png",
+    "size": 8991,
+    "compressed_size": 2238,
+    "crc32": "607c8242"
+  },
+  {
+    "name": "browser-report/Software2D-prototype-spacing-save.ferrodesign",
+    "size": 7669,
+    "compressed_size": 1260,
+    "crc32": "5b4abe0d"
+  },
+  {
+    "name": "browser-report/Software2D-prototype-spacing-saved.png",
+    "size": 9007,
+    "compressed_size": 2259,
+    "crc32": "1416c326"
+  },
+  {
+    "name": "browser-report/Software2D-radial-gradient-handles-artwork.png",
+    "size": 8333,
+    "compressed_size": 8161,
+    "crc32": "20dffe38"
+  },
+  {
+    "name": "browser-report/Software2D-region-added-front-paint-capture.json",
+    "size": 3117,
+    "compressed_size": 840,
+    "crc32": "7678708f"
+  },
+  {
+    "name": "browser-report/Software2D-region-added-front-paint.png",
+    "size": 83661,
+    "compressed_size": 76670,
+    "crc32": "4af0ae5b"
+  },
+  {
+    "name": "browser-report/Software2D-region-blue-red.png",
+    "size": 384,
+    "compressed_size": 133,
+    "crc32": "d8f73f5c"
+  },
+  {
+    "name": "browser-report/Software2D-region-blue-red.svg",
+    "size": 1396,
+    "compressed_size": 548,
+    "crc32": "14983489"
+  },
+  {
+    "name": "browser-report/Software2D-region-cleared.png",
+    "size": 378,
+    "compressed_size": 127,
+    "crc32": "d9dfddba"
+  },
+  {
+    "name": "browser-report/Software2D-region-inherited.png",
+    "size": 375,
+    "compressed_size": 124,
+    "crc32": "3322672d"
+  },
+  {
+    "name": "browser-report/Software2D-region-lowered-paint-capture.json",
+    "size": 3113,
+    "compressed_size": 836,
+    "crc32": "1e5f0f65"
+  },
+  {
+    "name": "browser-report/Software2D-region-lowered-paint.png",
+    "size": 83667,
+    "compressed_size": 76683,
+    "crc32": "b4638a01"
+  },
+  {
+    "name": "browser-report/Software2D-region-raised-paint-capture.json",
+    "size": 3112,
+    "compressed_size": 837,
+    "crc32": "ccf8a0da"
+  },
+  {
+    "name": "browser-report/Software2D-region-raised-paint.png",
+    "size": 83661,
+    "compressed_size": 76670,
+    "crc32": "4af0ae5b"
+  },
+  {
+    "name": "browser-report/Software2D-reloaded.png",
+    "size": 169965,
+    "compressed_size": 163873,
+    "crc32": "53e31c9a"
+  },
+  {
+    "name": "browser-report/Software2D-rich-text-ranges-capture.json",
+    "size": 9469,
+    "compressed_size": 1601,
+    "crc32": "5380bfac"
+  },
+  {
+    "name": "browser-report/Software2D-rich-text-ranges.png",
+    "size": 94815,
+    "compressed_size": 88786,
+    "crc32": "df7f6a3d"
+  },
+  {
+    "name": "browser-report/Software2D-smoothed-corners.png",
+    "size": 2354,
+    "compressed_size": 2359,
+    "crc32": "77c1ec83"
+  },
+  {
+    "name": "browser-report/Software2D-smoothed-corners.svg",
+    "size": 1048,
+    "compressed_size": 538,
+    "crc32": "cd95003a"
+  },
+  {
+    "name": "browser-report/Software2D-split-vector-intersections-capture.json",
+    "size": 3975,
+    "compressed_size": 948,
+    "crc32": "21ebfaa2"
+  },
+  {
+    "name": "browser-report/Software2D-split-vector-intersections.png",
+    "size": 100224,
+    "compressed_size": 93096,
+    "crc32": "64fd9c47"
+  },
+  {
+    "name": "browser-report/Software2D-stacked-guides-free-artwork.png",
+    "size": 369,
+    "compressed_size": 118,
+    "crc32": "e9c2ae70"
+  },
+  {
+    "name": "browser-report/Software2D-stacked-layout-guides-capture.json",
+    "size": 3137,
+    "compressed_size": 840,
+    "crc32": "1cd9670b"
+  },
+  {
+    "name": "browser-report/Software2D-stacked-layout-guides.png",
+    "size": 54690,
+    "compressed_size": 48148,
+    "crc32": "11cc6078"
+  },
+  {
+    "name": "browser-report/Software2D-stroke-width-handles-capture.json",
+    "size": 3087,
+    "compressed_size": 824,
+    "crc32": "38f2dd74"
+  },
+  {
+    "name": "browser-report/Software2D-stroke-width-handles.png",
+    "size": 68293,
+    "compressed_size": 61939,
+    "crc32": "ce8b1afb"
+  },
+  {
+    "name": "browser-report/Software2D-stroke-width-input.json",
+    "size": 5501,
+    "compressed_size": 767,
+    "crc32": "d63bbdc4"
+  },
+  {
+    "name": "browser-report/Software2D-stroke-width-multiple-contours-capture.json",
+    "size": 3185,
+    "compressed_size": 852,
+    "crc32": "b17bcb6a"
+  },
+  {
+    "name": "browser-report/Software2D-stroke-width-multiple-contours.png",
+    "size": 86226,
+    "compressed_size": 80098,
+    "crc32": "4bb40fce"
+  },
+  {
+    "name": "browser-report/Software2D-svg-compositing-original.png",
+    "size": 403,
+    "compressed_size": 130,
+    "crc32": "16bd1ec8"
+  },
+  {
+    "name": "browser-report/Software2D-svg-compositing-reopened.png",
+    "size": 403,
+    "compressed_size": 130,
+    "crc32": "16bd1ec8"
+  },
+  {
+    "name": "browser-report/Software2D-svg-compositing-roundtrip.svg",
+    "size": 5056,
+    "compressed_size": 814,
+    "crc32": "b0813d34"
+  },
+  {
+    "name": "browser-report/Software2D-svg.png",
+    "size": 111444,
+    "compressed_size": 104997,
+    "crc32": "7fdf56a9"
+  },
+  {
+    "name": "browser-report/Software2D-trace.zip",
+    "size": 153121712,
+    "compressed_size": 131804866,
+    "crc32": "41b243cc"
+  },
+  {
+    "name": "browser-report/Software2D-typography-inline-entry-1.json",
+    "size": 23509,
+    "compressed_size": 1679,
+    "crc32": "70474cd8"
+  },
+  {
+    "name": "browser-report/Software2D-typography-inline-entry-2.json",
+    "size": 34602,
+    "compressed_size": 1910,
+    "crc32": "0f3310a0"
+  },
+  {
+    "name": "browser-report/Software2D-vector-edit.png",
+    "size": 83153,
+    "compressed_size": 77025,
+    "crc32": "5af839aa"
+  },
+  {
+    "name": "browser-report/Software2D-vector-network-capture.json",
+    "size": 3953,
+    "compressed_size": 932,
+    "crc32": "5cc44917"
+  },
+  {
+    "name": "browser-report/Software2D-vector-network-fill-capture.json",
+    "size": 3951,
+    "compressed_size": 935,
+    "crc32": "9ddb7fa7"
+  },
+  {
+    "name": "browser-report/Software2D-vector-network-fill.png",
+    "size": 99398,
+    "compressed_size": 91494,
+    "crc32": "8087f8d3"
+  },
+  {
+    "name": "browser-report/Software2D-vector-network.png",
+    "size": 99775,
+    "compressed_size": 91826,
+    "crc32": "67ea5cbe"
+  },
+  {
+    "name": "browser-report/Software2D-visual-variables-capture.json",
+    "size": 4771,
+    "compressed_size": 986,
+    "crc32": "6d99b631"
+  },
+  {
+    "name": "browser-report/Software2D-visual-variables.png",
+    "size": 116677,
+    "compressed_size": 110253,
+    "crc32": "c4175c2f"
+  },
+  {
+    "name": "browser-report/Software2D-width-profile-artwork-capture.json",
+    "size": 3176,
+    "compressed_size": 835,
+    "crc32": "0eafd0f1"
+  },
+  {
+    "name": "browser-report/Software2D-width-profile-artwork.png",
+    "size": 72767,
+    "compressed_size": 66507,
+    "crc32": "6ebc70ec"
+  },
+  {
+    "name": "browser-report/Software2D-width-profile-custom-stack-capture.json",
+    "size": 6899,
+    "compressed_size": 1151,
+    "crc32": "76b66c93"
+  },
+  {
+    "name": "browser-report/Software2D-width-profile-custom-stack.png",
+    "size": 88778,
+    "compressed_size": 82678,
+    "crc32": "45ed9f4a"
+  },
+  {
+    "name": "browser-report/Software2D-width-profile-invalid-draft-capture.json",
+    "size": 5056,
+    "compressed_size": 1045,
+    "crc32": "a0d87577"
+  },
+  {
+    "name": "browser-report/Software2D-width-profile-invalid-draft.png",
+    "size": 93876,
+    "compressed_size": 87995,
+    "crc32": "11c9931d"
+  },
+  {
+    "name": "browser-report/Software2D-width-profile-presets-capture.json",
+    "size": 4332,
+    "compressed_size": 980,
+    "crc32": "c636b7e9"
+  },
+  {
+    "name": "browser-report/Software2D-width-profile-presets.png",
+    "size": 71018,
+    "compressed_size": 64523,
+    "crc32": "d62156f3"
+  },
+  {
+    "name": "browser-report/Software2D-width-profiles.png",
+    "size": 2472,
+    "compressed_size": 2067,
+    "crc32": "c1b87111"
+  },
+  {
+    "name": "browser-report/Software2D-width-profiles.svg",
+    "size": 1644,
+    "compressed_size": 680,
+    "crc32": "f528a6b0"
+  },
+  {
+    "name": "browser-report/WebGL2-angular-gradient-handles-artwork.png",
+    "size": 7898,
+    "compressed_size": 7868,
+    "crc32": "a48b17c9"
+  },
+  {
+    "name": "browser-report/WebGL2-angular-gradient-input.json",
+    "size": 77374,
+    "compressed_size": 4542,
+    "crc32": "93016fca"
+  },
+  {
+    "name": "browser-report/WebGL2-angular-paint-authoring-capture.json",
+    "size": 9693,
+    "compressed_size": 1477,
+    "crc32": "cce30a33"
+  },
+  {
+    "name": "browser-report/WebGL2-angular-paint-authoring.png",
+    "size": 159747,
+    "compressed_size": 155740,
+    "crc32": "3c53ec46"
+  },
+  {
+    "name": "browser-report/WebGL2-angular-paint.png",
+    "size": 3354,
+    "compressed_size": 3359,
+    "crc32": "80242cfc"
+  },
+  {
+    "name": "browser-report/WebGL2-angular-paint.svg",
+    "size": 45649,
+    "compressed_size": 7023,
+    "crc32": "3c27a6b0"
+  },
+  {
+    "name": "browser-report/WebGL2-angular-strokes.png",
+    "size": 5949,
+    "compressed_size": 5795,
+    "crc32": "a17388a7"
+  },
+  {
+    "name": "browser-report/WebGL2-angular-strokes.svg",
+    "size": 141295,
+    "compressed_size": 21488,
+    "crc32": "c7f59787"
+  },
+  {
+    "name": "browser-report/WebGL2-automatic-vector-faces-capture.json",
+    "size": 3961,
+    "compressed_size": 946,
+    "crc32": "6dfd9fca"
+  },
+  {
+    "name": "browser-report/WebGL2-automatic-vector-faces.png",
+    "size": 92808,
+    "compressed_size": 85569,
+    "crc32": "8b4021aa"
+  },
+  {
+    "name": "browser-report/WebGL2-background-blur-native-capture.json",
+    "size": 3135,
+    "compressed_size": 837,
+    "crc32": "c522b838"
+  },
+  {
+    "name": "browser-report/WebGL2-background-blur-native.png",
+    "size": 69250,
+    "compressed_size": 62231,
+    "crc32": "995b48ff"
+  },
+  {
+    "name": "browser-report/WebGL2-component-instance-properties-capture.json",
+    "size": 5014,
+    "compressed_size": 1052,
+    "crc32": "08143c24"
+  },
+  {
+    "name": "browser-report/WebGL2-component-instance-properties.png",
+    "size": 82057,
+    "compressed_size": 75772,
+    "crc32": "cd8b89de"
+  },
+  {
+    "name": "browser-report/WebGL2-component-main-properties-capture.json",
+    "size": 4758,
+    "compressed_size": 976,
+    "crc32": "165c6eb2"
+  },
+  {
+    "name": "browser-report/WebGL2-component-main-properties.png",
+    "size": 84353,
+    "compressed_size": 77984,
+    "crc32": "4bcfc753"
+  },
+  {
+    "name": "browser-report/WebGL2-component-set-authoring-capture.json",
+    "size": 5805,
+    "compressed_size": 1080,
+    "crc32": "0a1ef289"
+  },
+  {
+    "name": "browser-report/WebGL2-component-set-authoring.png",
+    "size": 87147,
+    "compressed_size": 80711,
+    "crc32": "119c6458"
+  },
+  {
+    "name": "browser-report/WebGL2-compositing-background-blur.png",
+    "size": 446,
+    "compressed_size": 189,
+    "crc32": "7124801a"
+  },
+  {
+    "name": "browser-report/WebGL2-compositing-group-opacity.png",
+    "size": 395,
+    "compressed_size": 121,
+    "crc32": "87ce5c38"
+  },
+  {
+    "name": "browser-report/WebGL2-compositing-multiply.png",
+    "size": 374,
+    "compressed_size": 105,
+    "crc32": "9e9b2fac"
+  },
+  {
+    "name": "browser-report/WebGL2-compositing-transparent-backdrop.png",
+    "size": 373,
+    "compressed_size": 104,
+    "crc32": "5bdda4ec"
+  },
+  {
+    "name": "browser-report/WebGL2-corner-radius-affine-polygon-capture.json",
+    "size": 3175,
+    "compressed_size": 866,
+    "crc32": "64606049"
+  },
+  {
+    "name": "browser-report/WebGL2-corner-radius-affine-polygon.png",
+    "size": 99075,
+    "compressed_size": 93661,
+    "crc32": "f5a2831d"
+  },
+  {
+    "name": "browser-report/WebGL2-corner-radius-affine-star-capture.json",
+    "size": 3172,
+    "compressed_size": 865,
+    "crc32": "66c2d7e8"
+  },
+  {
+    "name": "browser-report/WebGL2-corner-radius-affine-star.png",
+    "size": 96836,
+    "compressed_size": 91481,
+    "crc32": "2ff1d51b"
+  },
+  {
+    "name": "browser-report/WebGL2-corner-radius-hover-capture.json",
+    "size": 3157,
+    "compressed_size": 856,
+    "crc32": "229c2a31"
+  },
+  {
+    "name": "browser-report/WebGL2-corner-radius-hover.png",
+    "size": 97084,
+    "compressed_size": 91187,
+    "crc32": "6229acc5"
+  },
+  {
+    "name": "browser-report/WebGL2-corner-radius-independent-capture.json",
+    "size": 3170,
+    "compressed_size": 858,
+    "crc32": "e1bc3272"
+  },
+  {
+    "name": "browser-report/WebGL2-corner-radius-independent.png",
+    "size": 98156,
+    "compressed_size": 93092,
+    "crc32": "831fa6ea"
+  },
+  {
+    "name": "browser-report/WebGL2-corner-radius-input.json",
+    "size": 71282,
+    "compressed_size": 4357,
+    "crc32": "34e6fe2a"
+  },
+  {
+    "name": "browser-report/WebGL2-corner-radius-touch-input.json",
+    "size": 4890,
+    "compressed_size": 607,
+    "crc32": "9fb99e5d"
+  },
+  {
+    "name": "browser-report/WebGL2-corner-smoothing-capture.json",
+    "size": 3297,
+    "compressed_size": 869,
+    "crc32": "eedcdc4b"
+  },
+  {
+    "name": "browser-report/WebGL2-corner-smoothing.png",
+    "size": 79258,
+    "compressed_size": 74251,
+    "crc32": "28833bfc"
+  },
+  {
+    "name": "browser-report/WebGL2-edited.png",
+    "size": 203396,
+    "compressed_size": 198261,
+    "crc32": "2e8b4846"
+  },
+  {
+    "name": "browser-report/WebGL2-empty-layout-padding-capture.json",
+    "size": 4815,
+    "compressed_size": 977,
+    "crc32": "55acb13d"
+  },
+  {
+    "name": "browser-report/WebGL2-empty-layout-padding.png",
+    "size": 111421,
+    "compressed_size": 105396,
+    "crc32": "86ac63d0"
+  },
+  {
+    "name": "browser-report/WebGL2-explicit-grid-track-controls-capture.json",
+    "size": 4861,
+    "compressed_size": 1041,
+    "crc32": "4b62e00a"
+  },
+  {
+    "name": "browser-report/WebGL2-explicit-grid-track-controls.png",
+    "size": 122383,
+    "compressed_size": 116403,
+    "crc32": "b6ad3327"
+  },
+  {
+    "name": "browser-report/WebGL2-export.png",
+    "size": 10440,
+    "compressed_size": 9986,
+    "crc32": "344fbdce"
+  },
+  {
+    "name": "browser-report/WebGL2-flatten-rich-after.png",
+    "size": 55824,
+    "compressed_size": 49722,
+    "crc32": "82d082c4"
+  },
+  {
+    "name": "browser-report/WebGL2-flatten-rich-before-capture.json",
+    "size": 3120,
+    "compressed_size": 841,
+    "crc32": "6c93e1f6"
+  },
+  {
+    "name": "browser-report/WebGL2-flatten-rich-after-capture.json",
+    "size": 3121,
+    "compressed_size": 844,
+    "crc32": "6034faae"
+  },
+  {
+    "name": "browser-report/WebGL2-flatten-rich-before.png",
+    "size": 55662,
+    "compressed_size": 49557,
+    "crc32": "bcd1e5d8"
+  },
+  {
+    "name": "browser-report/WebGL2-flatten-rich-redo-capture.json",
+    "size": 3119,
+    "compressed_size": 839,
+    "crc32": "13b32a51"
+  },
+  {
+    "name": "browser-report/WebGL2-flatten-rich-redo.png",
+    "size": 55824,
+    "compressed_size": 49722,
+    "crc32": "82d082c4"
+  },
+  {
+    "name": "browser-report/WebGL2-flatten-rich-undo-capture.json",
+    "size": 3117,
+    "compressed_size": 842,
+    "crc32": "1d17cf6c"
+  },
+  {
+    "name": "browser-report/WebGL2-flatten-rich-undo.png",
+    "size": 55662,
+    "compressed_size": 49557,
+    "crc32": "bcd1e5d8"
+  },
+  {
+    "name": "browser-report/WebGL2-flatten-text-capture.json",
+    "size": 3151,
+    "compressed_size": 854,
+    "crc32": "a323543f"
+  },
+  {
+    "name": "browser-report/WebGL2-flatten-text.png",
+    "size": 107630,
+    "compressed_size": 101803,
+    "crc32": "a2ed84b4"
+  },
+  {
+    "name": "browser-report/WebGL2-floating-native-palette-capture.json",
+    "size": 4928,
+    "compressed_size": 1010,
+    "crc32": "e0e57464"
+  },
+  {
+    "name": "browser-report/WebGL2-floating-native-palette.png",
+    "size": 83284,
+    "compressed_size": 77153,
+    "crc32": "2e986c44"
+  },
+  {
+    "name": "browser-report/WebGL2-gradient-entry-input.json",
+    "size": 187849,
+    "compressed_size": 12966,
+    "crc32": "9022ca5d"
+  },
+  {
+    "name": "browser-report/WebGL2-gradient-handles-angular-capture.json",
+    "size": 3167,
+    "compressed_size": 862,
+    "crc32": "605513c0"
+  },
+  {
+    "name": "browser-report/WebGL2-gradient-handles-angular.png",
+    "size": 168181,
+    "compressed_size": 163263,
+    "crc32": "a529bc79"
+  },
+  {
+    "name": "browser-report/WebGL2-gradient-handles-artwork.png",
+    "size": 569,
+    "compressed_size": 149,
+    "crc32": "45c42e92"
+  },
+  {
+    "name": "browser-report/WebGL2-gradient-handles-radial-capture.json",
+    "size": 3166,
+    "compressed_size": 860,
+    "crc32": "d681f237"
+  },
+  {
+    "name": "browser-report/WebGL2-gradient-handles-radial.png",
+    "size": 178956,
+    "compressed_size": 174230,
+    "crc32": "3ceb82b4"
+  },
+  {
+    "name": "browser-report/WebGL2-gradient-handles-tied-affine-capture.json",
+    "size": 3171,
+    "compressed_size": 862,
+    "crc32": "a9b72ffb"
+  },
+  {
+    "name": "browser-report/WebGL2-gradient-handles-tied-affine.png",
+    "size": 128085,
+    "compressed_size": 122215,
+    "crc32": "a6197736"
+  },
+  {
+    "name": "browser-report/WebGL2-gradient-handles-touch-input.json",
+    "size": 4853,
+    "compressed_size": 607,
+    "crc32": "e9f53f33"
+  },
+  {
+    "name": "browser-report/WebGL2-gradient-handles-translated-capture.json",
+    "size": 3174,
+    "compressed_size": 864,
+    "crc32": "c55a7c37"
+  },
+  {
+    "name": "browser-report/WebGL2-gradient-handles-translated.png",
+    "size": 136312,
+    "compressed_size": 129872,
+    "crc32": "c37c7747"
+  },
+  {
+    "name": "browser-report/WebGL2-gradient-held-save.ferrodesign",
+    "size": 9860,
+    "compressed_size": 1572,
+    "crc32": "713b4d8b"
+  },
+  {
+    "name": "browser-report/WebGL2-grid-free-artwork.png",
+    "size": 369,
+    "compressed_size": 118,
+    "crc32": "e9c2ae70"
+  },
+  {
+    "name": "browser-report/WebGL2-grid-placement-spans-capture.json",
+    "size": 4783,
+    "compressed_size": 1005,
+    "crc32": "c3f05b3c"
+  },
+  {
+    "name": "browser-report/WebGL2-grid-placement-spans.png",
+    "size": 103234,
+    "compressed_size": 97361,
+    "crc32": "19ca0b8c"
+  },
+  {
+    "name": "browser-report/WebGL2-guide-variable-picker-capture.json",
+    "size": 10065,
+    "compressed_size": 1411,
+    "crc32": "b0bf45d0"
+  },
+  {
+    "name": "browser-report/WebGL2-guide-variable-picker.png",
+    "size": 108453,
+    "compressed_size": 102059,
+    "crc32": "1470041e"
+  },
+  {
+    "name": "browser-report/WebGL2-image-crop-affine-native-capture.json",
+    "size": 4055,
+    "compressed_size": 967,
+    "crc32": "9ccee14d"
+  },
+  {
+    "name": "browser-report/WebGL2-image-crop-affine-native.png",
+    "size": 96959,
+    "compressed_size": 89459,
+    "crc32": "311b51e3"
+  },
+  {
+    "name": "browser-report/WebGL2-image-crop-fit-export.png",
+    "size": 453,
+    "compressed_size": 267,
+    "crc32": "03d5b4d1"
+  },
+  {
+    "name": "browser-report/WebGL2-image-crop-pan-export.png",
+    "size": 375,
+    "compressed_size": 173,
+    "crc32": "aa2d783d"
+  },
+  {
+    "name": "browser-report/WebGL2-image-crop-pan-native-capture.json",
+    "size": 4026,
+    "compressed_size": 947,
+    "crc32": "b5638518"
+  },
+  {
+    "name": "browser-report/WebGL2-image-crop-pan-native.png",
+    "size": 72064,
+    "compressed_size": 65073,
+    "crc32": "28d5f7b8"
+  },
+  {
+    "name": "browser-report/WebGL2-image-crop-percentages-native-capture.json",
+    "size": 4886,
+    "compressed_size": 1035,
+    "crc32": "baa2dc14"
+  },
+  {
+    "name": "browser-report/WebGL2-image-crop-percentages-native.png",
+    "size": 120723,
+    "compressed_size": 115119,
+    "crc32": "d8064c96"
+  },
+  {
+    "name": "browser-report/WebGL2-image-crop-tile-export.png",
+    "size": 326,
+    "compressed_size": 120,
+    "crc32": "9c40718b"
+  },
+  {
+    "name": "browser-report/WebGL2-initial.png",
+    "size": 187503,
+    "compressed_size": 182142,
+    "crc32": "d9c0ecf9"
+  },
+  {
+    "name": "browser-report/WebGL2-inline-text.png",
+    "size": 82407,
+    "compressed_size": 76796,
+    "crc32": "29a28a11"
+  },
+  {
+    "name": "browser-report/WebGL2-layout-grid-overlay-capture.json",
+    "size": 3126,
+    "compressed_size": 837,
+    "crc32": "90ab6812"
+  },
+  {
+    "name": "browser-report/WebGL2-layout-grid-overlay.png",
+    "size": 54223,
+    "compressed_size": 47803,
+    "crc32": "0a5b6641"
+  },
+  {
+    "name": "browser-report/WebGL2-layout-independent-padding-capture.json",
+    "size": 4975,
+    "compressed_size": 1025,
+    "crc32": "6a82eedd"
+  },
+  {
+    "name": "browser-report/WebGL2-layout-independent-padding.png",
+    "size": 124336,
+    "compressed_size": 118467,
+    "crc32": "340bd677"
+  },
+  {
+    "name": "browser-report/WebGL2-layout-literal-and-bound-spacing-capture.json",
+    "size": 3945,
+    "compressed_size": 945,
+    "crc32": "bda0bb77"
+  },
+  {
+    "name": "browser-report/WebGL2-layout-literal-and-bound-spacing.png",
+    "size": 72000,
+    "compressed_size": 64895,
+    "crc32": "e7979bbb"
+  },
+  {
+    "name": "browser-report/WebGL2-layout-native-reorder-capture.json",
+    "size": 5022,
+    "compressed_size": 1039,
+    "crc32": "0d2bdd12"
+  },
+  {
+    "name": "browser-report/WebGL2-layout-native-reorder.png",
+    "size": 106149,
+    "compressed_size": 100203,
+    "crc32": "47fcf532"
+  },
+  {
+    "name": "browser-report/WebGL2-layout-padding-save.ferrodesign",
+    "size": 2612,
+    "compressed_size": 875,
+    "crc32": "7d1af999"
+  },
+  {
+    "name": "browser-report/WebGL2-layout-spacing-variables-capture.json",
+    "size": 4235,
+    "compressed_size": 966,
+    "crc32": "39c38f08"
+  },
+  {
+    "name": "browser-report/WebGL2-layout-spacing-variables.png",
+    "size": 123632,
+    "compressed_size": 117415,
+    "crc32": "706ec6ec"
+  },
+  {
+    "name": "browser-report/WebGL2-masks-alpha.png",
+    "size": 396,
+    "compressed_size": 122,
+    "crc32": "ffa65186"
+  },
+  {
+    "name": "browser-report/WebGL2-masks-grouped-alpha.png",
+    "size": 396,
+    "compressed_size": 122,
+    "crc32": "ffa65186"
+  },
+  {
+    "name": "browser-report/WebGL2-masks-isolated-group.png",
+    "size": 387,
+    "compressed_size": 119,
+    "crc32": "de074b1a"
+  },
+  {
+    "name": "browser-report/WebGL2-masks-luminance.png",
+    "size": 380,
+    "compressed_size": 111,
+    "crc32": "8aeeb777"
+  },
+  {
+    "name": "browser-report/WebGL2-masks-pass-through-group.png",
+    "size": 387,
+    "compressed_size": 119,
+    "crc32": "fa551bc5"
+  },
+  {
+    "name": "browser-report/WebGL2-masks-vector.png",
+    "size": 393,
+    "compressed_size": 120,
+    "crc32": "aa573f23"
+  },
+  {
+    "name": "browser-report/WebGL2-multi-frame-layout-transfer-capture.json",
+    "size": 4448,
+    "compressed_size": 1100,
+    "crc32": "14147ebd"
+  },
+  {
+    "name": "browser-report/WebGL2-multi-frame-layout-transfer.png",
+    "size": 70134,
+    "compressed_size": 62991,
+    "crc32": "1ebad88d"
+  },
+  {
+    "name": "browser-report/WebGL2-native-affine-authoring-capture.json",
+    "size": 5663,
+    "compressed_size": 1044,
+    "crc32": "f6b5d5f9"
+  },
+  {
+    "name": "browser-report/WebGL2-native-affine-authoring.png",
+    "size": 81975,
+    "compressed_size": 75606,
+    "crc32": "4c0793b7"
+  },
+  {
+    "name": "browser-report/WebGL2-native-alpha-mask-selection-capture.json",
+    "size": 3176,
+    "compressed_size": 841,
+    "crc32": "199149c9"
+  },
+  {
+    "name": "browser-report/WebGL2-native-alpha-mask-selection.png",
+    "size": 81505,
+    "compressed_size": 73804,
+    "crc32": "f7194eeb"
+  },
+  {
+    "name": "browser-report/WebGL2-native-effect-stack-capture.json",
+    "size": 5828,
+    "compressed_size": 1096,
+    "crc32": "434782da"
+  },
+  {
+    "name": "browser-report/WebGL2-native-effect-stack.png",
+    "size": 121811,
+    "compressed_size": 116147,
+    "crc32": "798b7402"
+  },
+  {
+    "name": "browser-report/WebGL2-native-grid-style-capture.json",
+    "size": 8291,
+    "compressed_size": 1361,
+    "crc32": "02cf3821"
+  },
+  {
+    "name": "browser-report/WebGL2-native-grid-style.png",
+    "size": 107315,
+    "compressed_size": 101287,
+    "crc32": "e76aeb97"
+  },
+  {
+    "name": "browser-report/WebGL2-native-layout-drag-preview-capture.json",
+    "size": 4323,
+    "compressed_size": 1059,
+    "crc32": "3cea81d9"
+  },
+  {
+    "name": "browser-report/WebGL2-native-layout-drag-preview.png",
+    "size": 67461,
+    "compressed_size": 60759,
+    "crc32": "c2dad8ec"
+  },
+  {
+    "name": "browser-report/WebGL2-native-local-styles-capture.json",
+    "size": 8316,
+    "compressed_size": 1393,
+    "crc32": "f0cdd846"
+  },
+  {
+    "name": "browser-report/WebGL2-native-local-styles.png",
+    "size": 102548,
+    "compressed_size": 97286,
+    "crc32": "f131777d"
+  },
+  {
+    "name": "browser-report/WebGL2-native-luminance-mask-selection-capture.json",
+    "size": 3180,
+    "compressed_size": 842,
+    "crc32": "c0444f03"
+  },
+  {
+    "name": "browser-report/WebGL2-native-luminance-mask-selection.png",
+    "size": 81914,
+    "compressed_size": 73138,
+    "crc32": "bb3e0f5c"
+  },
+  {
+    "name": "browser-report/WebGL2-native-mask-controls-capture.json",
+    "size": 6069,
+    "compressed_size": 1081,
+    "crc32": "a2d17262"
+  },
+  {
+    "name": "browser-report/WebGL2-native-mask-controls.png",
+    "size": 108684,
+    "compressed_size": 101744,
+    "crc32": "40d4f8bd"
+  },
+  {
+    "name": "browser-report/WebGL2-native-matching-fill-capture.json",
+    "size": 4007,
+    "compressed_size": 942,
+    "crc32": "96d5a3d2"
+  },
+  {
+    "name": "browser-report/WebGL2-native-matching-fill.png",
+    "size": 81331,
+    "compressed_size": 74942,
+    "crc32": "8c48610b"
+  },
+  {
+    "name": "browser-report/WebGL2-native-paragraph-authoring-capture.json",
+    "size": 13645,
+    "compressed_size": 1783,
+    "crc32": "23e35e89"
+  },
+  {
+    "name": "browser-report/WebGL2-native-paragraph-authoring.png",
+    "size": 108970,
+    "compressed_size": 102899,
+    "crc32": "688c19f6"
+  },
+  {
+    "name": "browser-report/WebGL2-native-paragraph-inline-capture.json",
+    "size": 13427,
+    "compressed_size": 1752,
+    "crc32": "52b30afa"
+  },
+  {
+    "name": "browser-report/WebGL2-native-paragraph-inline.png",
+    "size": 77901,
+    "compressed_size": 71635,
+    "crc32": "07828f00"
+  },
+  {
+    "name": "browser-report/WebGL2-native-paragraph-paste-input.json",
+    "size": 15624,
+    "compressed_size": 1446,
+    "crc32": "0b1bc1b8"
+  },
+  {
+    "name": "browser-report/WebGL2-native-rich-text-editing-capture.json",
+    "size": 11483,
+    "compressed_size": 1693,
+    "crc32": "1a7e50ce"
+  },
+  {
+    "name": "browser-report/WebGL2-native-rich-text-editing.png",
+    "size": 73622,
+    "compressed_size": 67097,
+    "crc32": "199f393b"
+  },
+  {
+    "name": "browser-report/WebGL2-native-selection-groups-capture.json",
+    "size": 3918,
+    "compressed_size": 922,
+    "crc32": "acc3faf8"
+  },
+  {
+    "name": "browser-report/WebGL2-native-selection-groups.png",
+    "size": 66391,
+    "compressed_size": 59290,
+    "crc32": "2aa963a2"
+  },
+  {
+    "name": "browser-report/WebGL2-native-svg-masks-capture.json",
+    "size": 3075,
+    "compressed_size": 822,
+    "crc32": "a1f72309"
+  },
+  {
+    "name": "browser-report/WebGL2-native-svg-masks.png",
+    "size": 70065,
+    "compressed_size": 63139,
+    "crc32": "c5439259"
+  },
+  {
+    "name": "browser-report/WebGL2-native-text-entry-input.json",
+    "size": 157296,
+    "compressed_size": 4696,
+    "crc32": "d05e98f4"
+  },
+  {
+    "name": "browser-report/WebGL2-native-vector-mask-selection-capture.json",
+    "size": 3177,
+    "compressed_size": 840,
+    "crc32": "ed2da662"
+  },
+  {
+    "name": "browser-report/WebGL2-native-vector-mask-selection.png",
+    "size": 76972,
+    "compressed_size": 69908,
+    "crc32": "6c7a0ff8"
+  },
+  {
+    "name": "browser-report/WebGL2-page-inspector-native-capture.json",
+    "size": 4621,
+    "compressed_size": 984,
+    "crc32": "d14c1e05"
+  },
+  {
+    "name": "browser-report/WebGL2-page-inspector-native.png",
+    "size": 50073,
+    "compressed_size": 43627,
+    "crc32": "9d55866d"
+  },
+  {
+    "name": "browser-report/WebGL2-paint-stack-capture.json",
+    "size": 4722,
+    "compressed_size": 989,
+    "crc32": "5f95939c"
+  },
+  {
+    "name": "browser-report/WebGL2-paint-stack.png",
+    "size": 146064,
+    "compressed_size": 125355,
+    "crc32": "d5c9c667"
+  },
+  {
+    "name": "browser-report/WebGL2-paragraph-artwork.png",
+    "size": 5288,
+    "compressed_size": 4678,
+    "crc32": "db6f98b9"
+  },
+  {
+    "name": "browser-report/WebGL2-paragraphs-failure.ferrodesign",
+    "size": 4512,
+    "compressed_size": 1106,
+    "crc32": "9735983a"
+  },
+  {
+    "name": "browser-report/WebGL2-polygon-corner-radius-capture.json",
+    "size": 4028,
+    "compressed_size": 961,
+    "crc32": "320cc805"
+  },
+  {
+    "name": "browser-report/WebGL2-polygon-corner-radius.png",
+    "size": 79244,
+    "compressed_size": 74700,
+    "crc32": "3873a441"
+  },
+  {
+    "name": "browser-report/WebGL2-polygon-corners-failure.ferrodesign",
+    "size": 2472,
+    "compressed_size": 836,
+    "crc32": "de867e0f"
+  },
+  {
+    "name": "browser-report/WebGL2-polygon-corners-failure.png",
+    "size": 76719,
+    "compressed_size": 71933,
+    "crc32": "758526b9"
+  },
+  {
+    "name": "browser-report/WebGL2-polygon-corners-triangle.png",
+    "size": 2665,
+    "compressed_size": 2554,
+    "crc32": "7a977240"
+  },
+  {
+    "name": "browser-report/WebGL2-polygon-corners-triangle.svg",
+    "size": 859,
+    "compressed_size": 517,
+    "crc32": "55a4f7c2"
+  },
+  {
+    "name": "browser-report/WebGL2-polygon-corners-triangle.xaml",
+    "size": 1262,
+    "compressed_size": 677,
+    "crc32": "2b1ee9ec"
+  },
+  {
+    "name": "browser-report/WebGL2-prototype-spacing-after.png",
+    "size": 9026,
+    "compressed_size": 2288,
+    "crc32": "2252b9f3"
+  },
+  {
+    "name": "browser-report/WebGL2-prototype-spacing-before.png",
+    "size": 9009,
+    "compressed_size": 2263,
+    "crc32": "8c613fb3"
+  },
+  {
+    "name": "browser-report/WebGL2-prototype-spacing-save.ferrodesign",
+    "size": 7669,
+    "compressed_size": 1260,
+    "crc32": "5b4abe0d"
+  },
+  {
+    "name": "browser-report/WebGL2-prototype-spacing-saved.png",
+    "size": 9026,
+    "compressed_size": 2288,
+    "crc32": "2252b9f3"
+  },
+  {
+    "name": "browser-report/WebGL2-radial-gradient-handles-artwork.png",
+    "size": 8333,
+    "compressed_size": 8161,
+    "crc32": "20dffe38"
+  },
+  {
+    "name": "browser-report/WebGL2-rich-text-ranges-capture.json",
+    "size": 9459,
+    "compressed_size": 1599,
+    "crc32": "6b5cda86"
+  },
+  {
+    "name": "browser-report/WebGL2-rich-text-ranges.png",
+    "size": 95029,
+    "compressed_size": 88640,
+    "crc32": "76737808"
+  },
+  {
+    "name": "browser-report/WebGL2-smoothed-corners.png",
+    "size": 2354,
+    "compressed_size": 2359,
+    "crc32": "77c1ec83"
+  },
+  {
+    "name": "browser-report/WebGL2-smoothed-corners.svg",
+    "size": 1048,
+    "compressed_size": 538,
+    "crc32": "cd95003a"
+  },
+  {
+    "name": "browser-report/WebGL2-split-vector-intersections-capture.json",
+    "size": 3965,
+    "compressed_size": 947,
+    "crc32": "7d1bf928"
+  },
+  {
+    "name": "browser-report/WebGL2-split-vector-intersections.png",
+    "size": 100527,
+    "compressed_size": 93293,
+    "crc32": "6d947168"
+  },
+  {
+    "name": "browser-report/WebGL2-stacked-guides-free-artwork.png",
+    "size": 369,
+    "compressed_size": 118,
+    "crc32": "e9c2ae70"
+  },
+  {
+    "name": "browser-report/WebGL2-stacked-layout-guides-capture.json",
+    "size": 3128,
+    "compressed_size": 838,
+    "crc32": "18f89373"
+  },
+  {
+    "name": "browser-report/WebGL2-stacked-layout-guides.png",
+    "size": 54680,
+    "compressed_size": 48157,
+    "crc32": "dec14804"
+  },
+  {
+    "name": "browser-report/WebGL2-stroke-width-handles-capture.json",
+    "size": 3077,
+    "compressed_size": 823,
+    "crc32": "2dcd3960"
+  },
+  {
+    "name": "browser-report/WebGL2-stroke-width-handles.png",
+    "size": 68444,
+    "compressed_size": 62250,
+    "crc32": "cd55f23c"
+  },
+  {
+    "name": "browser-report/WebGL2-stroke-width-input.json",
+    "size": 5506,
+    "compressed_size": 769,
+    "crc32": "6f6f587f"
+  },
+  {
+    "name": "browser-report/WebGL2-stroke-width-multiple-contours-capture.json",
+    "size": 3175,
+    "compressed_size": 851,
+    "crc32": "b011deb0"
+  },
+  {
+    "name": "browser-report/WebGL2-stroke-width-multiple-contours.png",
+    "size": 86843,
+    "compressed_size": 80532,
+    "crc32": "1cb177eb"
+  },
+  {
+    "name": "browser-report/WebGL2-svg-compositing-original.png",
+    "size": 403,
+    "compressed_size": 130,
+    "crc32": "16bd1ec8"
+  },
+  {
+    "name": "browser-report/WebGL2-svg-compositing-reopened.png",
+    "size": 403,
+    "compressed_size": 130,
+    "crc32": "16bd1ec8"
+  },
+  {
+    "name": "browser-report/WebGL2-svg-compositing-roundtrip.svg",
+    "size": 5056,
+    "compressed_size": 814,
+    "crc32": "b0813d34"
+  },
+  {
+    "name": "browser-report/WebGL2-svg.png",
+    "size": 111559,
+    "compressed_size": 104773,
+    "crc32": "c10c79a4"
+  },
+  {
+    "name": "browser-report/WebGL2-typography-inline-entry-1.json",
+    "size": 23589,
+    "compressed_size": 1701,
+    "crc32": "e7ca584f"
+  },
+  {
+    "name": "browser-report/WebGL2-typography-inline-entry-2.json",
+    "size": 34635,
+    "compressed_size": 1919,
+    "crc32": "f2da3400"
+  },
+  {
+    "name": "browser-report/WebGL2-vector-edit.png",
+    "size": 83729,
+    "compressed_size": 77459,
+    "crc32": "6081b3f7"
+  },
+  {
+    "name": "browser-report/WebGL2-vector-network-capture.json",
+    "size": 3943,
+    "compressed_size": 935,
+    "crc32": "ff9c7eb3"
+  },
+  {
+    "name": "browser-report/WebGL2-vector-network-fill-capture.json",
+    "size": 3939,
+    "compressed_size": 932,
+    "crc32": "ef65d49e"
+  },
+  {
+    "name": "browser-report/WebGL2-vector-network-fill.png",
+    "size": 99215,
+    "compressed_size": 91281,
+    "crc32": "961c66d2"
+  },
+  {
+    "name": "browser-report/WebGL2-vector-network.png",
+    "size": 100063,
+    "compressed_size": 92040,
+    "crc32": "2d9dd044"
+  },
+  {
+    "name": "browser-report/WebGL2-visual-variables-capture.json",
+    "size": 4761,
+    "compressed_size": 987,
+    "crc32": "e7586c94"
+  },
+  {
+    "name": "browser-report/WebGL2-visual-variables.png",
+    "size": 115811,
+    "compressed_size": 109446,
+    "crc32": "f6422caf"
+  },
+  {
+    "name": "browser-report/WebGL2-width-profile-artwork-capture.json",
+    "size": 3166,
+    "compressed_size": 833,
+    "crc32": "b4517592"
+  },
+  {
+    "name": "browser-report/WebGL2-width-profile-artwork.png",
+    "size": 72902,
+    "compressed_size": 66742,
+    "crc32": "23a2e5b3"
+  },
+  {
+    "name": "browser-report/WebGL2-width-profile-custom-stack-capture.json",
+    "size": 11347,
+    "compressed_size": 1502,
+    "crc32": "524351d8"
+  },
+  {
+    "name": "browser-report/WebGL2-width-profile-custom-stack.png",
+    "size": 89392,
+    "compressed_size": 83566,
+    "crc32": "6f5171ca"
+  },
+  {
+    "name": "browser-report/WebGL2-width-profile-invalid-draft-capture.json",
+    "size": 5046,
+    "compressed_size": 1047,
+    "crc32": "84125bb4"
+  },
+  {
+    "name": "browser-report/WebGL2-width-profile-invalid-draft.png",
+    "size": 93982,
+    "compressed_size": 88316,
+    "crc32": "ca7d4386"
+  },
+  {
+    "name": "browser-report/WebGL2-width-profile-presets-capture.json",
+    "size": 4322,
+    "compressed_size": 984,
+    "crc32": "5d20cedc"
+  },
+  {
+    "name": "browser-report/WebGL2-width-profile-presets.png",
+    "size": 76210,
+    "compressed_size": 69430,
+    "crc32": "f2855765"
+  },
+  {
+    "name": "browser-report/WebGL2-width-profiles.png",
+    "size": 2472,
+    "compressed_size": 2067,
+    "crc32": "c1b87111"
+  },
+  {
+    "name": "browser-report/WebGL2-width-profiles.svg",
+    "size": 1644,
+    "compressed_size": 680,
+    "crc32": "f528a6b0"
+  },
+  {
+    "name": "browser-report/browser-tests.log",
+    "size": 12883,
+    "compressed_size": 2095,
+    "crc32": "6af5b7ec"
+  },
+  {
+    "name": "browser-report/build.log",
+    "size": 30780,
+    "compressed_size": 5977,
+    "crc32": "930a047f"
+  },
+  {
+    "name": "browser-report/indexeddb-tests.log",
+    "size": 873,
+    "compressed_size": 441,
+    "crc32": "72f02404"
+  },
+  {
+    "name": "browser-report/source-mtime-cargo.log",
+    "size": 1737,
+    "compressed_size": 573,
+    "crc32": "9e4736b1"
+  },
+  {
+    "name": "browser-report/source-mtime-restore.json",
+    "size": 339,
+    "compressed_size": 231,
+    "crc32": "7166f544"
+  },
+  {
+    "name": "browser-report/source-mtime-snapshot.json",
+    "size": 322,
+    "compressed_size": 212,
+    "crc32": "d495ad7e"
+  },
+  {
+    "name": "browser-report/toolchain.log",
+    "size": 1742,
+    "compressed_size": 673,
+    "crc32": "562e4fc8"
+  },
+  {
+    "name": "Cargo.lock",
+    "size": 80615,
+    "compressed_size": 19013,
+    "crc32": "258bae62"
+  },
+  {
+    "name": "package-lock.json",
+    "size": 1552,
+    "compressed_size": 586,
+    "crc32": "27bfc169"
+  }
+]

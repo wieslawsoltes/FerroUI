@@ -1,0 +1,73 @@
+{
+  "captured_utc": "2026-10-23T14:50:26.784900+00:00",
+  "repository": "wieslawsoltes/FerroUI",
+  "commit": "4d3c796c7d5b76eb1e9d7f4f24b523841adbd994",
+  "tree": "f5870c7d41ef51600b068829a3c40838e701a8ef",
+  "files": [
+    {
+      "path": ".github/workflows/ferrodesign-native.yml",
+      "bytes": 6498,
+      "sha256": "3a1f80a5ee0740462d3d5022efbf930c354efb06d7c59ee3f2d9dd52db725aab",
+      "working_tree_matches_git_object": true
+    },
+    {
+      "path": "src/FerroUI.Controls/text_box.rs",
+      "bytes": 122901,
+      "sha256": "eb2ea67ef3609e1ac5ea46a7f0b9e8aee7b6eb1f9d2ebe2f098fb5094e90a6af",
+      "working_tree_matches_git_object": true
+    },
+    {
+      "path": "src/FerroUI.Controls/text_box_text_input_method_client.rs",
+      "bytes": 24033,
+      "sha256": "77c37466f6d996ec8f4f2c50168f99ce4506abe535c618ab3924559841183f97",
+      "working_tree_matches_git_object": true
+    },
+    {
+      "path": "src/FerroUI.Controls/text_box_tests.rs",
+      "bytes": 146607,
+      "sha256": "73b99ec304e4370525530a3228686c2a6a6ac8861d00b23e8c4f2df42e3b6abb",
+      "working_tree_matches_git_object": true
+    },
+    {
+      "path": "Cargo.lock",
+      "bytes": 134974,
+      "sha256": "8cb61a9cb3c0ee2c4867d66dba8b3736009cfb0f11f7634eaf40a30daea264e7",
+      "working_tree_matches_git_object": true
+    },
+    {
+      "path": "samples/FerroDesign/Cargo.lock",
+      "bytes": 80615,
+      "sha256": "1e11d66cfe586f859f3f7027d83b1f596a401184feb81e08fdf2f658ca5b87a9",
+      "working_tree_matches_git_object": true
+    }
+  ],
+  "new_regression_test_names": [
+    "paragraph_first_preedit_preserves_unicode_styles_cancel_commit_and_native_history",
+    "first_preedit_respects_reentrant_cancellation_before_publication",
+    "first_preedit_respects_reentrant_detach_before_publication",
+    "first_preedit_respects_reentrant_template_replacement_before_publication",
+    "first_preedit_respects_reentrant_host_text_before_publication",
+    "first_preedit_keeps_reentrant_host_text_that_returns_to_the_provisional_value",
+    "preedit_clear_queues_a_new_clause_until_confirmed_selection_is_restored",
+    "first_preedit_coalesces_newer_clauses_during_provisional_text_changing",
+    "first_preedit_respects_reentrant_host_selection_before_publication_and_clear",
+    "first_preedit_checks_selection_notification_before_publication",
+    "first_preedit_accepts_native_caret_coercion_and_reversed_selection",
+    "first_preedit_does_not_overwrite_a_newer_clause_or_its_cursor",
+    "first_preedit_still_clears_on_external_text_or_caret_changes"
+  ],
+  "expected_native_suites": [
+    "unhinted_",
+    "ferroui-base paragraph",
+    "ferroui-base text_line_bounds",
+    "ferroui-controls paragraph",
+    "ferroui-controls text_box_tests::",
+    "ferroui-controls text_box_history::",
+    "ferroui-vello gpu::fragment_tests::",
+    "ferrodesign-app --lib"
+  ],
+  "required_gpu_env": "FERROUI_VELLO_REQUIRE_GPU=1",
+  "expected_application_test_count": 239,
+  "expected_gpu_test_count": 7,
+  "execution_status": "pending; source inventory only"
+}

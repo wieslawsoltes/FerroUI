@@ -1,0 +1,871 @@
+{
+  "repository": "wieslawsoltes/FerroUI",
+  "commit": "c7dbf26f1e184fc1113f9c96fcdc1dd0e2627834",
+  "runId": 39955698269,
+  "jobId": 120423823862,
+  "jobUrl": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39955698269/job/120423823862",
+  "result": "failed and incomplete; no final browser report",
+  "jobStatus": "completed",
+  "jobConclusion": "cancelled",
+  "jobStartedAt": "2026-10-23T12:52:07Z",
+  "jobCompletedAt": "2026-10-23T14:52:44Z",
+  "jobElapsedSeconds": 7237,
+  "configuredJobTimeoutMinutes": 120,
+  "configuredCancelInProgress": false,
+  "interactionStep": {
+    "name": "Validate pixels, pointer editing, keyboard history and serialization",
+    "status": "completed",
+    "conclusion": "cancelled",
+    "number": 16,
+    "started_at": "2026-10-23T13:03:10Z",
+    "completed_at": "2026-10-23T14:52:31Z"
+  },
+  "benchmarkStep": {
+    "name": "Measure native text panning in both browser surfaces",
+    "status": "completed",
+    "conclusion": "skipped",
+    "number": 17,
+    "started_at": "2026-10-23T14:52:31Z",
+    "completed_at": "2026-10-23T14:52:31Z"
+  },
+  "reportUploadStep": {
+    "name": "Upload validation screenshots, traces, reports and lockfiles",
+    "status": "completed",
+    "conclusion": "success",
+    "number": 18,
+    "started_at": "2026-10-23T14:52:31Z",
+    "completed_at": "2026-10-23T14:52:41Z"
+  },
+  "workflowRunObservation": {
+    "observedAt": "2026-10-23 14:59:19 UTC",
+    "status": "in_progress",
+    "conclusion": null,
+    "updatedAt": "2026-10-23T12:52:08Z",
+    "scope": "The run endpoint still reported in_progress at collection time although both returned jobs were completed. The terminal conclusion recorded here belongs to the browser job; the run status has not been rewritten."
+  },
+  "log": {
+    "file": "browser.log.gz",
+    "decodedBytes": 139023,
+    "decodedSha256": "1c60e820f24aaebc381ba3e86b9ddc01b5980f70925ecf70c9930dd2710c830a",
+    "gzipBytes": 29615,
+    "gzipSha256": "b8e73f932a24e26415876c22de297d1cee89e65ddb5053f312748cfa3079c967",
+    "losslessRoundTripVerified": true
+  },
+  "artifact": {
+    "id": 12510460715,
+    "bytes": 146122436,
+    "sha256": "1c06907bf00956f5b4543fa45b917e5acac43577f28a02c2332bcaad1e4e8f53",
+    "downloadedBytesMatchApi": true,
+    "downloadedSha256MatchesApi": true,
+    "memberCount": 408,
+    "uncompressedMemberBytes": 170456359,
+    "membersFile": "artifact-members.json",
+    "presence": {
+      "finalReport": false,
+      "finalHtml": false,
+      "softwareTrace": true,
+      "webglTrace": false
+    },
+    "scope": "Complete archive retained outside git; only small metadata/capture members extracted. No trace expanded. The archive hash matches the API digest; selected member reads verified their CRCs, not a full independent CRC pass of every member."
+  },
+  "registeredScenarios": [
+    "vector-network",
+    "native-authoring",
+    "corners",
+    "polygon-corners",
+    "corner-radius-handles",
+    "width-profiles",
+    "width-handles",
+    "gradient-handles",
+    "paragraphs",
+    "typography",
+    "components",
+    "image-crop",
+    "compositing",
+    "svg-compositing",
+    "masks",
+    "effects",
+    "inspector-lifecycle",
+    "floating-panels",
+    "page-inspector",
+    "auto-layout",
+    "layout-padding",
+    "layout-variables",
+    "layout-drag",
+    "layout-transfer",
+    "selection",
+    "matching",
+    "geometry-authoring",
+    "flatten",
+    "local-styles",
+    "angular-paints",
+    "grid-styles",
+    "guide-bindings",
+    "region-paints",
+    "network-bucket",
+    "compact-autosave",
+    "prototype-input",
+    "prototype-motion",
+    "bounded-history"
+  ],
+  "scenarioCoverage": {
+    "Software2D": {
+      "starts": 38,
+      "unreached": [],
+      "loggedScenarioFailures": [
+        "polygon-corners",
+        "paragraphs",
+        "guide-bindings"
+      ]
+    },
+    "WebGL2": {
+      "starts": 32,
+      "unreached": [
+        "region-paints",
+        "network-bucket",
+        "compact-autosave",
+        "prototype-input",
+        "prototype-motion",
+        "bounded-history"
+      ],
+      "loggedScenarioFailures": [
+        "polygon-corners",
+        "paragraphs"
+      ]
+    }
+  },
+  "scenarioStarts": [
+    {
+      "at": "2026-10-23T13:03:27.5065240Z",
+      "mode": "Software2D",
+      "scenario": "vector-network",
+      "nextScenarioStart": "2026-10-23T13:03:35.1010643Z",
+      "startToNextStartSeconds": 7.595
+    },
+    {
+      "at": "2026-10-23T13:03:35.1010643Z",
+      "mode": "Software2D",
+      "scenario": "native-authoring",
+      "nextScenarioStart": "2026-10-23T13:03:41.8642434Z",
+      "startToNextStartSeconds": 6.763
+    },
+    {
+      "at": "2026-10-23T13:03:41.8642434Z",
+      "mode": "Software2D",
+      "scenario": "corners",
+      "nextScenarioStart": "2026-10-23T13:03:45.8838702Z",
+      "startToNextStartSeconds": 4.02
+    },
+    {
+      "at": "2026-10-23T13:03:45.8838702Z",
+      "mode": "Software2D",
+      "scenario": "polygon-corners",
+      "nextScenarioStart": "2026-10-23T13:03:49.3913697Z",
+      "startToNextStartSeconds": 3.507
+    },
+    {
+      "at": "2026-10-23T13:03:49.3913697Z",
+      "mode": "Software2D",
+      "scenario": "corner-radius-handles",
+      "nextScenarioStart": "2026-10-23T13:03:56.6684449Z",
+      "startToNextStartSeconds": 7.277
+    },
+    {
+      "at": "2026-10-23T13:03:56.6684449Z",
+      "mode": "Software2D",
+      "scenario": "width-profiles",
+      "nextScenarioStart": "2026-10-23T13:04:10.5575318Z",
+      "startToNextStartSeconds": 13.889
+    },
+    {
+      "at": "2026-10-23T13:04:10.5575318Z",
+      "mode": "Software2D",
+      "scenario": "width-handles",
+      "nextScenarioStart": "2026-10-23T13:04:16.4597088Z",
+      "startToNextStartSeconds": 5.902
+    },
+    {
+      "at": "2026-10-23T13:04:16.4597088Z",
+      "mode": "Software2D",
+      "scenario": "gradient-handles",
+      "nextScenarioStart": "2026-10-23T13:04:40.0622469Z",
+      "startToNextStartSeconds": 23.603
+    },
+    {
+      "at": "2026-10-23T13:04:40.0622469Z",
+      "mode": "Software2D",
+      "scenario": "paragraphs",
+      "nextScenarioStart": "2026-10-23T13:04:51.5678110Z",
+      "startToNextStartSeconds": 11.506
+    },
+    {
+      "at": "2026-10-23T13:04:51.5678110Z",
+      "mode": "Software2D",
+      "scenario": "typography",
+      "nextScenarioStart": "2026-10-23T13:04:57.5229723Z",
+      "startToNextStartSeconds": 5.955
+    },
+    {
+      "at": "2026-10-23T13:04:57.5229723Z",
+      "mode": "Software2D",
+      "scenario": "components",
+      "nextScenarioStart": "2026-10-23T13:05:07.4443109Z",
+      "startToNextStartSeconds": 9.921
+    },
+    {
+      "at": "2026-10-23T13:05:07.4443109Z",
+      "mode": "Software2D",
+      "scenario": "image-crop",
+      "nextScenarioStart": "2026-10-23T13:05:15.8468250Z",
+      "startToNextStartSeconds": 8.403
+    },
+    {
+      "at": "2026-10-23T13:05:15.8468250Z",
+      "mode": "Software2D",
+      "scenario": "compositing",
+      "nextScenarioStart": "2026-10-23T13:05:19.7812926Z",
+      "startToNextStartSeconds": 3.934
+    },
+    {
+      "at": "2026-10-23T13:05:19.7812926Z",
+      "mode": "Software2D",
+      "scenario": "svg-compositing",
+      "nextScenarioStart": "2026-10-23T13:05:23.9540152Z",
+      "startToNextStartSeconds": 4.173
+    },
+    {
+      "at": "2026-10-23T13:05:23.9540152Z",
+      "mode": "Software2D",
+      "scenario": "masks",
+      "nextScenarioStart": "2026-10-23T13:05:37.1199286Z",
+      "startToNextStartSeconds": 13.166
+    },
+    {
+      "at": "2026-10-23T13:05:37.1199286Z",
+      "mode": "Software2D",
+      "scenario": "effects",
+      "nextScenarioStart": "2026-10-23T13:05:48.7295038Z",
+      "startToNextStartSeconds": 11.61
+    },
+    {
+      "at": "2026-10-23T13:05:48.7295038Z",
+      "mode": "Software2D",
+      "scenario": "inspector-lifecycle",
+      "nextScenarioStart": "2026-10-23T13:05:54.2815238Z",
+      "startToNextStartSeconds": 5.552
+    },
+    {
+      "at": "2026-10-23T13:05:54.2815238Z",
+      "mode": "Software2D",
+      "scenario": "floating-panels",
+      "nextScenarioStart": "2026-10-23T13:05:56.8861238Z",
+      "startToNextStartSeconds": 2.605
+    },
+    {
+      "at": "2026-10-23T13:05:56.8861238Z",
+      "mode": "Software2D",
+      "scenario": "page-inspector",
+      "nextScenarioStart": "2026-10-23T13:05:59.1587520Z",
+      "startToNextStartSeconds": 2.273
+    },
+    {
+      "at": "2026-10-23T13:05:59.1587520Z",
+      "mode": "Software2D",
+      "scenario": "auto-layout",
+      "nextScenarioStart": "2026-10-23T13:06:08.1324370Z",
+      "startToNextStartSeconds": 8.974
+    },
+    {
+      "at": "2026-10-23T13:06:08.1324370Z",
+      "mode": "Software2D",
+      "scenario": "layout-padding",
+      "nextScenarioStart": "2026-10-23T13:06:18.5710553Z",
+      "startToNextStartSeconds": 10.439
+    },
+    {
+      "at": "2026-10-23T13:06:18.5710553Z",
+      "mode": "Software2D",
+      "scenario": "layout-variables",
+      "nextScenarioStart": "2026-10-23T13:06:27.7194655Z",
+      "startToNextStartSeconds": 9.148
+    },
+    {
+      "at": "2026-10-23T13:06:27.7194655Z",
+      "mode": "Software2D",
+      "scenario": "layout-drag",
+      "nextScenarioStart": "2026-10-23T13:06:38.7045491Z",
+      "startToNextStartSeconds": 10.985
+    },
+    {
+      "at": "2026-10-23T13:06:38.7045491Z",
+      "mode": "Software2D",
+      "scenario": "layout-transfer",
+      "nextScenarioStart": "2026-10-23T13:06:46.9699312Z",
+      "startToNextStartSeconds": 8.265
+    },
+    {
+      "at": "2026-10-23T13:06:46.9699312Z",
+      "mode": "Software2D",
+      "scenario": "selection",
+      "nextScenarioStart": "2026-10-23T13:07:01.8212829Z",
+      "startToNextStartSeconds": 14.851
+    },
+    {
+      "at": "2026-10-23T13:07:01.8212829Z",
+      "mode": "Software2D",
+      "scenario": "matching",
+      "nextScenarioStart": "2026-10-23T13:07:06.7401197Z",
+      "startToNextStartSeconds": 4.919
+    },
+    {
+      "at": "2026-10-23T13:07:06.7401197Z",
+      "mode": "Software2D",
+      "scenario": "geometry-authoring",
+      "nextScenarioStart": "2026-10-23T13:07:11.6528952Z",
+      "startToNextStartSeconds": 4.913
+    },
+    {
+      "at": "2026-10-23T13:07:11.6528952Z",
+      "mode": "Software2D",
+      "scenario": "flatten",
+      "nextScenarioStart": "2026-10-23T13:07:22.1329500Z",
+      "startToNextStartSeconds": 10.48
+    },
+    {
+      "at": "2026-10-23T13:07:22.1329500Z",
+      "mode": "Software2D",
+      "scenario": "local-styles",
+      "nextScenarioStart": "2026-10-23T13:07:45.9754223Z",
+      "startToNextStartSeconds": 23.842
+    },
+    {
+      "at": "2026-10-23T13:07:45.9754223Z",
+      "mode": "Software2D",
+      "scenario": "angular-paints",
+      "nextScenarioStart": "2026-10-23T13:07:52.6083946Z",
+      "startToNextStartSeconds": 6.633
+    },
+    {
+      "at": "2026-10-23T13:07:52.6083946Z",
+      "mode": "Software2D",
+      "scenario": "grid-styles",
+      "nextScenarioStart": "2026-10-23T13:08:17.0684905Z",
+      "startToNextStartSeconds": 24.46
+    },
+    {
+      "at": "2026-10-23T13:08:17.0684905Z",
+      "mode": "Software2D",
+      "scenario": "guide-bindings",
+      "nextScenarioStart": "2026-10-23T13:08:38.8867187Z",
+      "startToNextStartSeconds": 21.818
+    },
+    {
+      "at": "2026-10-23T13:08:38.8867187Z",
+      "mode": "Software2D",
+      "scenario": "region-paints",
+      "nextScenarioStart": "2026-10-23T13:08:52.3479782Z",
+      "startToNextStartSeconds": 13.461
+    },
+    {
+      "at": "2026-10-23T13:08:52.3479782Z",
+      "mode": "Software2D",
+      "scenario": "network-bucket",
+      "nextScenarioStart": "2026-10-23T13:08:58.8923254Z",
+      "startToNextStartSeconds": 6.544
+    },
+    {
+      "at": "2026-10-23T13:08:58.8923254Z",
+      "mode": "Software2D",
+      "scenario": "compact-autosave",
+      "nextScenarioStart": "2026-10-23T13:08:59.7874375Z",
+      "startToNextStartSeconds": 0.895
+    },
+    {
+      "at": "2026-10-23T13:08:59.7874375Z",
+      "mode": "Software2D",
+      "scenario": "prototype-input",
+      "nextScenarioStart": "2026-10-23T13:09:02.1576612Z",
+      "startToNextStartSeconds": 2.37
+    },
+    {
+      "at": "2026-10-23T13:09:02.1576612Z",
+      "mode": "Software2D",
+      "scenario": "prototype-motion",
+      "nextScenarioStart": "2026-10-23T13:09:07.4477772Z",
+      "startToNextStartSeconds": 5.29
+    },
+    {
+      "at": "2026-10-23T13:09:07.4477772Z",
+      "mode": "Software2D",
+      "scenario": "bounded-history"
+    },
+    {
+      "at": "2026-10-23T13:13:18.1302430Z",
+      "mode": "WebGL2",
+      "scenario": "vector-network",
+      "nextScenarioStart": "2026-10-23T13:15:22.6715364Z",
+      "startToNextStartSeconds": 124.541
+    },
+    {
+      "at": "2026-10-23T13:15:22.6715364Z",
+      "mode": "WebGL2",
+      "scenario": "native-authoring",
+      "nextScenarioStart": "2026-10-23T13:17:44.7804693Z",
+      "startToNextStartSeconds": 142.109
+    },
+    {
+      "at": "2026-10-23T13:17:44.7804693Z",
+      "mode": "WebGL2",
+      "scenario": "corners",
+      "nextScenarioStart": "2026-10-23T13:18:50.3802505Z",
+      "startToNextStartSeconds": 65.6
+    },
+    {
+      "at": "2026-10-23T13:18:50.3802505Z",
+      "mode": "WebGL2",
+      "scenario": "polygon-corners",
+      "nextScenarioStart": "2026-10-23T13:20:06.9203919Z",
+      "startToNextStartSeconds": 76.54
+    },
+    {
+      "at": "2026-10-23T13:20:06.9203919Z",
+      "mode": "WebGL2",
+      "scenario": "corner-radius-handles",
+      "nextScenarioStart": "2026-10-23T13:21:38.2300200Z",
+      "startToNextStartSeconds": 91.31
+    },
+    {
+      "at": "2026-10-23T13:21:38.2300200Z",
+      "mode": "WebGL2",
+      "scenario": "width-profiles",
+      "nextScenarioStart": "2026-10-23T13:26:32.6414805Z",
+      "startToNextStartSeconds": 294.411
+    },
+    {
+      "at": "2026-10-23T13:26:32.6414805Z",
+      "mode": "WebGL2",
+      "scenario": "width-handles",
+      "nextScenarioStart": "2026-10-23T13:28:01.2854388Z",
+      "startToNextStartSeconds": 88.644
+    },
+    {
+      "at": "2026-10-23T13:28:01.2854388Z",
+      "mode": "WebGL2",
+      "scenario": "gradient-handles",
+      "nextScenarioStart": "2026-10-23T13:33:05.5001123Z",
+      "startToNextStartSeconds": 304.215
+    },
+    {
+      "at": "2026-10-23T13:33:05.5001123Z",
+      "mode": "WebGL2",
+      "scenario": "paragraphs",
+      "nextScenarioStart": "2026-10-23T13:38:00.4364487Z",
+      "startToNextStartSeconds": 294.936
+    },
+    {
+      "at": "2026-10-23T13:38:00.4364487Z",
+      "mode": "WebGL2",
+      "scenario": "typography",
+      "nextScenarioStart": "2026-10-23T13:39:53.7744485Z",
+      "startToNextStartSeconds": 113.338
+    },
+    {
+      "at": "2026-10-23T13:39:53.7744485Z",
+      "mode": "WebGL2",
+      "scenario": "components",
+      "nextScenarioStart": "2026-10-23T13:43:09.6000079Z",
+      "startToNextStartSeconds": 195.826
+    },
+    {
+      "at": "2026-10-23T13:43:09.6000079Z",
+      "mode": "WebGL2",
+      "scenario": "image-crop",
+      "nextScenarioStart": "2026-10-23T13:45:44.6874431Z",
+      "startToNextStartSeconds": 155.087
+    },
+    {
+      "at": "2026-10-23T13:45:44.6874431Z",
+      "mode": "WebGL2",
+      "scenario": "compositing",
+      "nextScenarioStart": "2026-10-23T13:46:55.0510160Z",
+      "startToNextStartSeconds": 70.364
+    },
+    {
+      "at": "2026-10-23T13:46:55.0510160Z",
+      "mode": "WebGL2",
+      "scenario": "svg-compositing",
+      "nextScenarioStart": "2026-10-23T13:47:48.1871545Z",
+      "startToNextStartSeconds": 53.136
+    },
+    {
+      "at": "2026-10-23T13:47:48.1871545Z",
+      "mode": "WebGL2",
+      "scenario": "masks",
+      "nextScenarioStart": "2026-10-23T13:51:49.4797281Z",
+      "startToNextStartSeconds": 241.293
+    },
+    {
+      "at": "2026-10-23T13:51:49.4797281Z",
+      "mode": "WebGL2",
+      "scenario": "effects",
+      "nextScenarioStart": "2026-10-23T13:56:05.0910939Z",
+      "startToNextStartSeconds": 255.611
+    },
+    {
+      "at": "2026-10-23T13:56:05.0910939Z",
+      "mode": "WebGL2",
+      "scenario": "inspector-lifecycle",
+      "nextScenarioStart": "2026-10-23T13:57:34.6366150Z",
+      "startToNextStartSeconds": 89.546
+    },
+    {
+      "at": "2026-10-23T13:57:34.6366150Z",
+      "mode": "WebGL2",
+      "scenario": "floating-panels",
+      "nextScenarioStart": "2026-10-23T13:58:05.9764018Z",
+      "startToNextStartSeconds": 31.34
+    },
+    {
+      "at": "2026-10-23T13:58:05.9764018Z",
+      "mode": "WebGL2",
+      "scenario": "page-inspector",
+      "nextScenarioStart": "2026-10-23T13:58:21.3998059Z",
+      "startToNextStartSeconds": 15.423
+    },
+    {
+      "at": "2026-10-23T13:58:21.3998059Z",
+      "mode": "WebGL2",
+      "scenario": "auto-layout",
+      "nextScenarioStart": "2026-10-23T14:01:03.3693590Z",
+      "startToNextStartSeconds": 161.97
+    },
+    {
+      "at": "2026-10-23T14:01:03.3693590Z",
+      "mode": "WebGL2",
+      "scenario": "layout-padding",
+      "nextScenarioStart": "2026-10-23T14:05:07.6686956Z",
+      "startToNextStartSeconds": 244.299
+    },
+    {
+      "at": "2026-10-23T14:05:07.6686956Z",
+      "mode": "WebGL2",
+      "scenario": "layout-variables",
+      "nextScenarioStart": "2026-10-23T14:07:58.4364279Z",
+      "startToNextStartSeconds": 170.768
+    },
+    {
+      "at": "2026-10-23T14:07:58.4364279Z",
+      "mode": "WebGL2",
+      "scenario": "layout-drag",
+      "nextScenarioStart": "2026-10-23T14:11:32.7427992Z",
+      "startToNextStartSeconds": 214.306
+    },
+    {
+      "at": "2026-10-23T14:11:32.7427992Z",
+      "mode": "WebGL2",
+      "scenario": "layout-transfer",
+      "nextScenarioStart": "2026-10-23T14:15:09.3009299Z",
+      "startToNextStartSeconds": 216.558
+    },
+    {
+      "at": "2026-10-23T14:15:09.3009299Z",
+      "mode": "WebGL2",
+      "scenario": "selection",
+      "nextScenarioStart": "2026-10-23T14:18:51.5372265Z",
+      "startToNextStartSeconds": 222.236
+    },
+    {
+      "at": "2026-10-23T14:18:51.5372265Z",
+      "mode": "WebGL2",
+      "scenario": "matching",
+      "nextScenarioStart": "2026-10-23T14:19:55.3761043Z",
+      "startToNextStartSeconds": 63.839
+    },
+    {
+      "at": "2026-10-23T14:19:55.3761043Z",
+      "mode": "WebGL2",
+      "scenario": "geometry-authoring",
+      "nextScenarioStart": "2026-10-23T14:21:48.9494918Z",
+      "startToNextStartSeconds": 113.573
+    },
+    {
+      "at": "2026-10-23T14:21:48.9494918Z",
+      "mode": "WebGL2",
+      "scenario": "flatten",
+      "nextScenarioStart": "2026-10-23T14:23:32.6559379Z",
+      "startToNextStartSeconds": 103.706
+    },
+    {
+      "at": "2026-10-23T14:23:32.6559379Z",
+      "mode": "WebGL2",
+      "scenario": "local-styles",
+      "nextScenarioStart": "2026-10-23T14:35:50.4304090Z",
+      "startToNextStartSeconds": 737.774
+    },
+    {
+      "at": "2026-10-23T14:35:50.4304090Z",
+      "mode": "WebGL2",
+      "scenario": "angular-paints",
+      "nextScenarioStart": "2026-10-23T14:39:56.6468159Z",
+      "startToNextStartSeconds": 246.216
+    },
+    {
+      "at": "2026-10-23T14:39:56.6468159Z",
+      "mode": "WebGL2",
+      "scenario": "grid-styles",
+      "nextScenarioStart": "2026-10-23T14:51:00.8057773Z",
+      "startToNextStartSeconds": 664.159
+    },
+    {
+      "at": "2026-10-23T14:51:00.8057773Z",
+      "mode": "WebGL2",
+      "scenario": "guide-bindings"
+    }
+  ],
+  "intervalScope": "Start-to-next-start intervals include scenario boundary/reload and failure capture. They are not exact per-scenario durations. A start marker is not a passed check. No final report exists to certify full counts.",
+  "loggedFailures": [
+    {
+      "at": "2026-10-23T13:03:49.2851534Z",
+      "mode": "Software2D",
+      "scenario": "polygon-corners",
+      "stage": "scenario",
+      "message": "AssertionError [ERR_ASSERTION]: Independent SVG and native PNG share the rounded silhouette: 212",
+      "logLine": 1367,
+      "originalLines": [
+        "2026-10-23T13:03:49.2851534Z Software2D: polygon-corners failed during scenario: AssertionError [ERR_ASSERTION]: Independent SVG and native PNG share the rounded silhouette: 212",
+        "2026-10-23T13:03:49.2854304Z     at polygonCornerRegressions (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/polygon-corners-browser.mjs:167:12)",
+        "2026-10-23T13:03:49.2856293Z     at async runIsolatedScenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)",
+        "2026-10-23T13:03:49.2858262Z     at async scenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1062:32)",
+        "2026-10-23T13:03:49.2859607Z     at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1108:13"
+      ]
+    },
+    {
+      "at": "2026-10-23T13:04:51.4406263Z",
+      "mode": "Software2D",
+      "scenario": "paragraphs",
+      "stage": "scenario",
+      "message": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+      "logLine": 1377,
+      "originalLines": [
+        "2026-10-23T13:04:51.4406263Z Software2D: paragraphs failed during scenario: AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "2026-10-23T13:04:51.4463516Z ",
+        "2026-10-23T13:04:51.4464556Z 1 !== 3",
+        "2026-10-23T13:04:51.4486685Z ",
+        "2026-10-23T13:04:51.4493730Z     at splitFirst (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/paragraphs-browser.mjs:214:16)",
+        "2026-10-23T13:04:51.4496758Z     at async paragraphRegressions (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/paragraphs-browser.mjs:231:19)",
+        "2026-10-23T13:04:51.4498870Z     at async runIsolatedScenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)",
+        "2026-10-23T13:04:51.4500924Z     at async scenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1062:32)",
+        "2026-10-23T13:04:51.4502654Z     at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1115:13"
+      ],
+      "sourceOracle": {
+        "file": "samples/FerroDesign/tests/paragraphs-browser.mjs",
+        "line": 214,
+        "actual": 1,
+        "expected": 3,
+        "field": "InlineTextBox typography caretIndex",
+        "precedingActions": [
+          "Control+Home",
+          "ArrowRight",
+          "ArrowRight"
+        ],
+        "followingEnterNotReached": true,
+        "callerLine": 231,
+        "scope": "Second inline-entry split attempt; the earlier split and Escape cancellation completed. No cause established without further runtime evidence."
+      }
+    },
+    {
+      "at": "2026-10-23T13:08:38.7902053Z",
+      "mode": "Software2D",
+      "scenario": "guide-bindings",
+      "stage": "scenario",
+      "message": "page.waitForFunction: Timeout 10000ms exceeded.",
+      "logLine": 1411,
+      "originalLines": [
+        "2026-10-23T13:08:38.7902053Z Software2D: guide-bindings failed during scenario: page.waitForFunction: Timeout 10000ms exceeded.",
+        "2026-10-23T13:08:38.7902989Z     at waitDocument (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/guide-bindings-browser.mjs:11:52)",
+        "2026-10-23T13:08:38.7904746Z     at guideBindingRegressions (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/guide-bindings-browser.mjs:201:11)",
+        "2026-10-23T13:08:38.7906548Z     at async runIsolatedScenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)",
+        "2026-10-23T13:08:38.7907602Z     at async scenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1062:32)",
+        "2026-10-23T13:08:38.7908395Z     at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1160:13"
+      ]
+    },
+    {
+      "at": "2026-10-23T13:20:06.8295548Z",
+      "mode": "WebGL2",
+      "scenario": "polygon-corners",
+      "stage": "scenario",
+      "message": "AssertionError [ERR_ASSERTION]: Independent SVG and native PNG share the rounded silhouette: 212",
+      "logLine": 1430,
+      "originalLines": [
+        "2026-10-23T13:20:06.8295548Z WebGL2: polygon-corners failed during scenario: AssertionError [ERR_ASSERTION]: Independent SVG and native PNG share the rounded silhouette: 212",
+        "2026-10-23T13:20:06.8297551Z     at polygonCornerRegressions (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/polygon-corners-browser.mjs:167:12)",
+        "2026-10-23T13:20:06.8298907Z     at runNextTicks (node:internal/process/task_queues:64:5)",
+        "2026-10-23T13:20:06.8299769Z     at process.processImmediate (node:internal/timers:452:9)",
+        "2026-10-23T13:20:06.8300696Z     at process.callbackTrampoline (node:internal/async_hooks:130:17)",
+        "2026-10-23T13:20:06.8302081Z     at async runIsolatedScenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)",
+        "2026-10-23T13:20:06.8303906Z     at async scenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1062:32)",
+        "2026-10-23T13:20:06.8305267Z     at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1108:13"
+      ]
+    },
+    {
+      "at": "2026-10-23T13:37:45.3785124Z",
+      "mode": "WebGL2",
+      "scenario": "paragraphs",
+      "stage": "scenario",
+      "message": "page.waitForFunction: Timeout 10000ms exceeded.",
+      "logLine": 1444,
+      "originalLines": [
+        "2026-10-23T13:37:45.3785124Z WebGL2: paragraphs failed during scenario: page.waitForFunction: Timeout 10000ms exceeded.",
+        "2026-10-23T13:37:45.3802732Z     at beginComposition (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/paragraphs-browser.mjs:400:20)",
+        "2026-10-23T13:37:45.3824235Z     at async paragraphRegressions (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/paragraphs-browser.mjs:409:5)",
+        "2026-10-23T13:37:45.3838848Z     at async runIsolatedScenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)",
+        "2026-10-23T13:37:45.3860282Z     at async scenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1062:32)",
+        "2026-10-23T13:37:45.3861866Z     at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1115:13"
+      ]
+    }
+  ],
+  "lastRetainedGuideCapture": {
+    "file": "guide-capture.json",
+    "member": "browser-report/WebGL2-guide-variable-picker-capture.json",
+    "bytes": 10065,
+    "sha256": "d3679a7505f29763d0edf8bd839bb631020826f02de414a78593fe661dc09ccd",
+    "zipMemberTimestamp": [
+      2026,
+      10,
+      23,
+      14,
+      52,
+      26
+    ],
+    "timestampScope": "ZIP member timestamp has two-second DOS granularity; exact attempt durations are in the original JSON.",
+    "attempts": [
+      {
+        "attempt": 1,
+        "timeoutMs": 30000,
+        "status": "failed",
+        "durationMs": 30053
+      },
+      {
+        "attempt": 2,
+        "timeoutMs": 60000,
+        "status": "passed",
+        "durationMs": 1652
+      }
+    ],
+    "sourceBoundary": "guide-bindings-browser.mjs:108 screenshot completed; following closeBinding/history/check and later operations are not independently certified by this capture.",
+    "scope": "The retry completed before cancellation. The exact command active at interruption is not present in retained evidence."
+  },
+  "captureTimingSummary": {
+    "Software2D": {
+      "retainedCaptureRecords": 69,
+      "retainedAttempts": 69,
+      "retainedAttemptDurationSumMs": 11022,
+      "recoveredTimeoutRecords": 0,
+      "scope": "Only retained capture records. Attempt duration includes native screenshot diagnostics; this is not isolated compositor or GPU work."
+    },
+    "WebGL2": {
+      "retainedCaptureRecords": 64,
+      "retainedAttempts": 69,
+      "retainedAttemptDurationSumMs": 1461816,
+      "recoveredTimeoutRecords": 5,
+      "scope": "Only retained capture records. Attempt duration includes native screenshot diagnostics; this is not isolated compositor or GPU work."
+    }
+  },
+  "cache": {
+    "restoreKey": "ferrodesign-browser-build-Linux-24a777fa3f5a49b7d3ee6f58d5272afd4ddeb69feae9cfcb0d339824746d878e-c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+    "saveKey": "ferrodesign-build-Linux-v3-browser-d6306b456adbf0ac2518e09e338152dbf4b13dc3ee879ff86d4c77487dd3cdb9-c7dbf26f1e184fc1113f9c96fcdc1dd0e2627834",
+    "sourceRestore": {
+      "already_equal": 0,
+      "bytes_hashed": 231565196,
+      "manifest": "/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target/.ferrodesign-source-mtimes-v1.json",
+      "operation": "restore",
+      "recorded": 0,
+      "restored": 10464,
+      "schema_version": 1,
+      "skip_reasons": {
+        "content_mismatch": 5
+      },
+      "skipped": 5,
+      "status": "restored",
+      "tracked_files": 10501
+    },
+    "sourceSnapshot": {
+      "already_equal": 0,
+      "bytes_hashed": 232313300,
+      "manifest": "/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target/.ferrodesign-source-mtimes-v1.json",
+      "operation": "snapshot",
+      "recorded": 10501,
+      "restored": 0,
+      "schema_version": 1,
+      "skip_reasons": {},
+      "skipped": 0,
+      "status": "snapshotted",
+      "tracked_files": 10501
+    },
+    "buildStartedAt": "2026-10-23T12:52:49Z",
+    "buildCompletedAt": "2026-10-23T13:02:43Z",
+    "buildStepDurationSeconds": 594,
+    "earlyCacheSaveStartedAt": "2026-10-23T13:02:46Z",
+    "earlyCacheSaveCompletedAt": "2026-10-23T13:02:53Z",
+    "scope": "Observed independent-browser cache prefix reuse and early full-workflow save; correctness of the incomplete browser run is a separate result."
+  },
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/ferrodesign.yml",
+      "commit": "c7dbf26f1e184fc1113f9c96fcdc1dd0e2627834",
+      "gitBlob": "71ee2ef75f38f267ce25c3fbb773dea3e8e54218",
+      "bytes": 18892,
+      "sha256": "2deaf7a606158f2af361e7084d9dd8583230cd6adb0d93bc09517e93cec471b0"
+    },
+    {
+      "path": "samples/FerroDesign/tests/browser.mjs",
+      "commit": "c7dbf26f1e184fc1113f9c96fcdc1dd0e2627834",
+      "gitBlob": "d9ae0b7f86637384eebf13a5925171c16791cbd0",
+      "bytes": 99547,
+      "sha256": "78dd7a5aa0d104f31627b034e0998fc78f627b187594575f0db561a35f20f678"
+    },
+    {
+      "path": "samples/FerroDesign/tests/isolated-scenario.mjs",
+      "commit": "c7dbf26f1e184fc1113f9c96fcdc1dd0e2627834",
+      "gitBlob": "fc5c2cc1693f9d5e7dbe8f13b01fe75856df76f5",
+      "bytes": 2116,
+      "sha256": "c2216ac8f127f7922cff5e803c88641bfd433ac2fa5b1186526288ec489e953e"
+    },
+    {
+      "path": "samples/FerroDesign/tests/guide-bindings-browser.mjs",
+      "commit": "c7dbf26f1e184fc1113f9c96fcdc1dd0e2627834",
+      "gitBlob": "d776a8b50cd9e0d62e18be04a6cb9ded2659a9e5",
+      "bytes": 15357,
+      "sha256": "3097696241c050fc79d3aeee5b24ef70e2171b8c4f7fed62dec7c5252c6dc800"
+    },
+    {
+      "path": "samples/FerroDesign/tests/styles-browser.mjs",
+      "commit": "c7dbf26f1e184fc1113f9c96fcdc1dd0e2627834",
+      "gitBlob": "af453a2461e1c31fba906cab30bc914a35ecee5e",
+      "bytes": 16181,
+      "sha256": "9805ac10253ef5abab7fd8ea9da153017d9f1e19c653af191d3b6467244222d7"
+    },
+    {
+      "path": "samples/FerroDesign/tests/grid-styles-browser.mjs",
+      "commit": "c7dbf26f1e184fc1113f9c96fcdc1dd0e2627834",
+      "gitBlob": "b7f94757be60a7a21ba7a3b4dff3518b472d271f",
+      "bytes": 18195,
+      "sha256": "cb17248da5fea1a5d3d93b750484484c93633ad89963e83549a0169824bb63f4"
+    },
+    {
+      "path": "samples/FerroDesign/tests/paragraphs-browser.mjs",
+      "commit": "c7dbf26f1e184fc1113f9c96fcdc1dd0e2627834",
+      "gitBlob": "e7a656d22ad6f58e379d5f41ef103cd5be37acc1",
+      "bytes": 28394,
+      "sha256": "e784ba2e202f4aa8a391b7008315ef6635cf356def24f8f1dea697e5eeb82a85"
+    },
+    {
+      "path": "samples/FerroDesign/package-lock.json",
+      "commit": "c7dbf26f1e184fc1113f9c96fcdc1dd0e2627834",
+      "gitBlob": "8bfb97592da0b809af29749af4f4c340a025c8c0",
+      "bytes": 1552,
+      "sha256": "79084a131673247139b5baac8e065ed4604ede5c79d750b076a18455de41d2d0"
+    }
+  ],
+  "conclusionScope": "Continued slow WebGL2 scenario work is observed through guide bindings near cancellation. There is no evidence that this job was stalled in tracing.stop/context.close/browser.close. The underlying browser/renderer/host cause of the slow intervals is not established. This is not a performance or parity pass."
+}

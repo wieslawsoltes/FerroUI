@@ -1,0 +1,47 @@
+{
+  "source_commit": "4d3c796c7d5b76eb1e9d7f4f24b523841adbd994",
+  "source_tree": "f5870c7d41ef51600b068829a3c40838e701a8ef",
+  "run_id": 39972889233,
+  "job_id": 120480440853,
+  "build_conclusion": "success",
+  "build_step_started_at": "2026-10-23T14:50:56Z",
+  "build_step_completed_at": "2026-10-23T15:06:20Z",
+  "cargo_seconds": 914,
+  "host_input_tests_passed": 10,
+  "build_static_modules_checked": 6,
+  "manifest_payloads": 17,
+  "artifact_id": 12510294431,
+  "archive_bytes": 12640159,
+  "archive_sha256": "de8c37f751c9a9fe8c59474ba28e931ef81001b4e31dead853fb7c68254376c5",
+  "wasm": {
+    "path": "ferrodesign_app.wasm",
+    "bytes": 53794092,
+    "sha256": "d8bc006d0a04502cd29b5aa4b0166a71b1c4410b2842641267e449b7e9a3d604"
+  },
+  "log": {
+    "file": "build.log.gz",
+    "decoded_bytes": 98694,
+    "decoded_sha256": "c0d357b26a8f08d4593c2d3cd3d63e9d1e39fc3f5299cb8c04fb995b936197b3",
+    "gzip_sha256": "930bdbf6991fdc60ef7401809d2227d203f1b584536615e9a13fa2b0349d587f"
+  },
+  "archive_verification": {
+    "all_manifest_sizes_and_hashes": true,
+    "safe_unique_paths": true,
+    "crc": true,
+    "copied_host_files_match_source": true,
+    "relative_favicon_present": true,
+    "active_vello_no_skia_graph": true,
+    "pinned_tools": true,
+    "extracted_locally": false
+  },
+  "cache": {
+    "restored_inputs": 10512,
+    "changed_inputs_skipped": 7,
+    "snapshot_inputs": 10578,
+    "base": "0aab9d7c4a2a9ce7921cd239a4e1f6412230c911"
+  },
+  "browser_execution": {
+    "performed": false,
+    "reason": "Held after the same-source native preedit suite passed25/28 and failed three newly added lifecycle regressions; a separately published correction is being prepared. This build record does not establish browser interactions or native test success."
+  }
+}

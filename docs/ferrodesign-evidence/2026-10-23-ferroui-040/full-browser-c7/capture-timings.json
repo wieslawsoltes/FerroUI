@@ -1,0 +1,1780 @@
+{
+  "scope": "Derived only from actual retained capture JSON members in the artifact; no browser/trace replay. Every read member passed ZIP CRC validation.",
+  "modes": {
+    "Software2D": {
+      "retainedCaptureRecords": 69,
+      "retainedAttempts": 69,
+      "retainedAttemptDurationSumMs": 11022,
+      "recoveredTimeoutRecords": 0,
+      "scope": "Only retained capture records. Attempt duration includes native screenshot diagnostics; this is not isolated compositor or GPU work."
+    },
+    "WebGL2": {
+      "retainedCaptureRecords": 64,
+      "retainedAttempts": 69,
+      "retainedAttemptDurationSumMs": 1461816,
+      "recoveredTimeoutRecords": 5,
+      "scope": "Only retained capture records. Attempt duration includes native screenshot diagnostics; this is not isolated compositor or GPU work."
+    }
+  },
+  "records": [
+    {
+      "member": "browser-report/Software2D-angular-paint-authoring-capture.json",
+      "sha256": "760b1e2157c6f3108b2455acbbd05c93d68743a0358e51422114bc8e938a447e",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 160
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-automatic-vector-faces-capture.json",
+      "sha256": "d321f697cb0db1667069303f7a31fda757a9c1b9bcbc44114995df20b5ee71fc",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 162
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-background-blur-native-capture.json",
+      "sha256": "57653cb5f3cae35892291178212661c15e170091bd36fd9aa6f9136658660a9c",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 139
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-bucket-hover-face-capture.json",
+      "sha256": "0d734c923699f2f0bfa36f511c8bf998c37eca3f22de14518c4b840957cb7f88",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 138
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-component-instance-properties-capture.json",
+      "sha256": "f4f5cd3490190e1d220e27e048a45c53ec02af717b1218216a65afd64d6e1768",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 166
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-component-main-properties-capture.json",
+      "sha256": "bd2454bdc9fba44c351046dbe3de6c0eaccfbfa003921a51b8e62f4c5299708e",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 160
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-component-set-authoring-capture.json",
+      "sha256": "b5da7da4af4632532ae241b265ef1d9f8ef0fe14ee9b9e0165778a23b7627841",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 174
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-corner-radius-affine-polygon-capture.json",
+      "sha256": "27b6a2a90bb03389b22aca7a5c947f7397faa62bd9192f0aed15afc68c55da0e",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 163
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-corner-radius-affine-star-capture.json",
+      "sha256": "77b25ef78aaa1f51fe0d0cd6889cadca668d56f39eadf4e06af71b151bb9dea5",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 164
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-corner-radius-hover-capture.json",
+      "sha256": "76ebf11b9f5d44ccbb7c9bd28b6d59da1ddcacdebe7aa5c23a292775ea483f7d",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 155
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-corner-radius-independent-capture.json",
+      "sha256": "d3db98550957d08390d1987fb63c869817cce084d41f99cb185a798a13dcb469",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 158
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-corner-smoothing-capture.json",
+      "sha256": "309b8a90157e71b9ae2191f3e12e739114aa4f050c48a3f4de2df6c81e5a7cd7",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 142
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-empty-layout-padding-capture.json",
+      "sha256": "d53be6fc3cf833d28134e811fe284278389a9a820eef8f3e9067ca835b15fbcb",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 153
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-explicit-grid-track-controls-capture.json",
+      "sha256": "e5bcfaed8b54f571d11bcb78cf5b98d09ee24e5009b050b97611aa9275d24baa",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 169
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-flatten-rich-after-capture.json",
+      "sha256": "48faef0f3fdc8859e3826803a6af7a27157520e4b8f9c788b5c638449791e7bf",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 159
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-flatten-rich-before-capture.json",
+      "sha256": "6ffecc504b2ad3ee77d508e9d7d87facb5d26fe0e2caae84e9ee8c1c4f23144f",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 136
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-flatten-rich-redo-capture.json",
+      "sha256": "320b5bb983bfbe541bb553e2e516263ae6c7e92058bd525ab6f14e4b77f59278",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 149
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-flatten-rich-undo-capture.json",
+      "sha256": "615e199d4a7deec728034ac98a627fe9c006596e5e08d652708b4250df9aa1b9",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 141
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-flatten-text-capture.json",
+      "sha256": "43a91649d0d70c44832bbf99130b0d687c29024ce6ae4d2e8aff2ea43d8de962",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 172
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-floating-native-palette-capture.json",
+      "sha256": "721bfd800a36e67dd0a0455a4fd0dc160d2d138d4538fb9417b3a0cdcffbd0ae",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 159
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-gradient-handles-angular-capture.json",
+      "sha256": "5d1be4884f0293199b8f369fa892a7a66b12ad411c966174525396982679ef58",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 197
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-gradient-handles-radial-capture.json",
+      "sha256": "865ce80817e695623f857e7ec37eccefbe24ca8357ceda8d1c9d207cb069064e",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 196
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-gradient-handles-tied-affine-capture.json",
+      "sha256": "0e0c0b6a92e856f1dce5c85372dadc33d68f9799a0af52344218221ca7f966a4",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 165
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-gradient-handles-translated-capture.json",
+      "sha256": "1898fb79894aaaac9ce2532c3ec36500585414441bb3e0af34460b01c3268283",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 193
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-grid-placement-spans-capture.json",
+      "sha256": "4fead7ad15ccc3b668ce46f569bee43803f88e44e8ba054be6ff0a687f039668",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 160
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-guide-variable-picker-capture.json",
+      "sha256": "afd009f021f971880d149b24d406c539d6166d49475ee91bd535d517d7074ed0",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 168
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-image-crop-affine-native-capture.json",
+      "sha256": "dc11deb95ade31f0aa00eacd5789f90c05aa58a8c879354627e85f6e45d2a23e",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 171
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-image-crop-pan-native-capture.json",
+      "sha256": "2889f239e07af95f9c40ecf605fd3cbc50b279e46030737882f6b04ea6815cff",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 155
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-image-crop-percentages-native-capture.json",
+      "sha256": "3cf12df250fb0a279ef74de1b69f593b44fc7f3bf237cb1b1054374f4f2c43a7",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 165
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-layout-grid-overlay-capture.json",
+      "sha256": "48d908e75c4499ce37036018386bcc73d9823e4ce088951da47469d530c70872",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 139
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-layout-independent-padding-capture.json",
+      "sha256": "4cb78545ab49550e78f9eade69ffdf2367b5e45fc94f29a0d4251285b53c5d6e",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 179
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-layout-literal-and-bound-spacing-capture.json",
+      "sha256": "c02d4315a3ebf9be37c730f29f7d7bb168dca4053e964bcde279098b1a752394",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 156
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-layout-native-reorder-capture.json",
+      "sha256": "e5382155b6bae65aa33fd08407b39d583aa8d46402489e98197fcdd0ed950e46",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 180
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-layout-spacing-variables-capture.json",
+      "sha256": "b7c766160242cf4be84148cc7c4a861ae8415521e2d644e6f5c377cfe2357e8f",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 178
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-multi-frame-layout-transfer-capture.json",
+      "sha256": "ec746180d207d3febbe0bbfe0cad27ba0d8ba18909a0a022e9d975bcc9824e74",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 158
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-native-affine-authoring-capture.json",
+      "sha256": "65cc4753e31c0957dd32515b821156ce3384e72e200df89c3847934e1253b746",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 156
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-native-alpha-mask-selection-capture.json",
+      "sha256": "601c18e71d894f144549e9984ea0d5e8171f6a4d82d938f365e2ceda641a6319",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 148
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-native-effect-stack-capture.json",
+      "sha256": "b29e01c50d12be4e1bc20a66b5b1b72119ec5b57b457b0a8b07567ffac6b3126",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 171
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-native-grid-style-capture.json",
+      "sha256": "84cd8a3e6c6091921411336f716ac3c4d469a75fad64ead64ba7beccb2532a2a",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 181
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-native-layout-drag-preview-capture.json",
+      "sha256": "707e3fac6a51a06a72a88d54b87b0e50651b27f9f1069cd6ca6ffa9e73e91326",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 128
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-native-local-styles-capture.json",
+      "sha256": "1afa1668124b6b6481140946fda8bfcbbf096694ef7004617ee5cf92f64671d1",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 187
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-native-luminance-mask-selection-capture.json",
+      "sha256": "f39d081d232502ee9d26f43a8e002c75c205d242d0e2a5472b11a54941975c8c",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 149
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-native-mask-controls-capture.json",
+      "sha256": "983c24f9011a3db8fd02fa38e7a4f58539a74b7922eafbbcbae9a248156aa0b2",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 135
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-native-matching-fill-capture.json",
+      "sha256": "9f2bc51cc5d7585cf5640ce48ae053262282acda9a3bceca35f764cadb24f128",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 142
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-native-paragraph-authoring-capture.json",
+      "sha256": "a28ad97acfcce89865cfa5062186a8fbbe0d8aef51da304480143cdbdea441d9",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 159
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-native-region-paints-capture.json",
+      "sha256": "e914f78c5ebdafd590a41f70000c6db3144f7a8265374f2d5267c0088e6eabf9",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 186
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-native-rich-text-editing-capture.json",
+      "sha256": "62ca7834df0f109257d8e83efb22c1feb980415db4597c0af76993ca2d3e6ad5",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 162
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-native-selection-groups-capture.json",
+      "sha256": "44cbb7e908140430dcaa9aaf4132703d895504b0b1b11e64af5335c1775b173b",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 142
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-native-svg-masks-capture.json",
+      "sha256": "8ae721f5ab3e200dbb9aed6ce11c3c32e73ab6b4a307440b28ba96af9e886861",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 140
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-native-two-region-colors-capture.json",
+      "sha256": "f7ce80122135bd46bd5c3a509d6cfd79b4dcf4e3e88312f59d9eb94b4d2eb832",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 149
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-native-vector-mask-selection-capture.json",
+      "sha256": "1619aced6d9f901440275633c35553c1eb3eb9fdfc968174b85f787727b37ed9",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 158
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-page-inspector-native-capture.json",
+      "sha256": "acb0b057734ab9982c2033efc79ffe5fe40a359c6c68aa579e0b556a92578980",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 174
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-paint-stack-capture.json",
+      "sha256": "db01d2c5b9a71057e9708a7d9a5bb18a1ee7183d0cbdab93fc97661b2f465fa3",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 219
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-polygon-corner-radius-capture.json",
+      "sha256": "56b91b4f17a71ce91998a7df85cc343163f0a9e3e4e4eafd6eb462e0be551c83",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 149
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-region-added-front-paint-capture.json",
+      "sha256": "a626ad26f491f6987b0edf86c224cc0aa5b1384f0877b442fd1230995a56112b",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 150
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-region-lowered-paint-capture.json",
+      "sha256": "5cea50e32804b44eb31e8d393c1e721f199d36b81cdaae1a72c4dd4e78930b0b",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 166
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-region-raised-paint-capture.json",
+      "sha256": "c729552bce6eb6cf24650a3f29ca8564bb0feba633ac81cf9c9d21623a91522d",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 163
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-rich-text-ranges-capture.json",
+      "sha256": "9be9d64b0191e6bf147fbe5f1a12ba02d0e3cb52116be787a8e121ad302d7960",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 165
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-split-vector-intersections-capture.json",
+      "sha256": "4d5d580b7df709a6ce38904f30b774a8a54cbd417bb5275e20c8569c8a1e25b9",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 161
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-stacked-layout-guides-capture.json",
+      "sha256": "9086c28924506e550170a4004d42e4a7cee8407a20005be7568ed2157f443ebc",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 142
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-stroke-width-handles-capture.json",
+      "sha256": "f774e15b6a4aab6bf7158de1dd4ad7ed62ae801be91e31bd59c47e31d6114e66",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 143
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-stroke-width-multiple-contours-capture.json",
+      "sha256": "e730a34e0b5841264f880e54712e585c0fd57a99406a3235236bb7a0448749d8",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 151
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-vector-network-capture.json",
+      "sha256": "c1ae3508ea9b70af7d283294783745d1f94a9b6bc9b7aa2933a190d6067a28ab",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 137
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-vector-network-fill-capture.json",
+      "sha256": "81059e2d9662c9a2e6a6bbdeac5c8d95bdc085604aefabb6383ef3788ad07b6b",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 184
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-visual-variables-capture.json",
+      "sha256": "542bb88477b5ed3ac57041afc9abc84b95e844a74d3c2b88d5421ce7b921af8a",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 153
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-width-profile-artwork-capture.json",
+      "sha256": "f3d19addf5bfb312691a63b9fa098f8d8922ed28ad319f474a8a3aab6514a2f8",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 145
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-width-profile-custom-stack-capture.json",
+      "sha256": "67cd7c2dd01dd45d691f08755dde3134a3065cc91dddf3913e27ab06a5eb6c9d",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 165
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-width-profile-invalid-draft-capture.json",
+      "sha256": "ed150bd50001de10eecc77e0aa0c6f869337ef185952b03f4a594c852579db97",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 140
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/Software2D-width-profile-presets-capture.json",
+      "sha256": "f3d04e1bc856db5114b071845e17967cd6deb4d9c5ba5012f206d8a03e6ba2c7",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 143
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-angular-paint-authoring-capture.json",
+      "sha256": "b1a55ed76c31d6b82bec6a68f454edef47af21e6bd881b33a6e05fcf01352700",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "failed",
+          "timeoutMs": 30000,
+          "durationMs": 31580
+        },
+        {
+          "attempt": 2,
+          "status": "passed",
+          "timeoutMs": 60000,
+          "durationMs": 33221
+        }
+      ],
+      "recoveredTimeout": true
+    },
+    {
+      "member": "browser-report/WebGL2-automatic-vector-faces-capture.json",
+      "sha256": "db3ebbbe202f3071931ef1e34ae502f0d7babbdca24dd77400fb325a1bf471ee",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 10373
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-background-blur-native-capture.json",
+      "sha256": "40df3385ceb1ac1c182f41be8728beb54b289d822ddcbfbcfddaad3900e8db0f",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 27947
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-component-instance-properties-capture.json",
+      "sha256": "bacfb67270359aa387205492930a22d04ad0c39a7ca7ba485fde57bc70d463cf",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 25538
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-component-main-properties-capture.json",
+      "sha256": "b9e6ebf4c912510bfcdc19624b789ec00176c09dc1f10de7a921b9022860ff38",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 24265
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-component-set-authoring-capture.json",
+      "sha256": "5d42a37c3d2c41cf271981dfeb61cdcfcf37c8d7fa2be2daa84cb8bf6c7968f2",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 21109
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-corner-radius-affine-polygon-capture.json",
+      "sha256": "f07734e0af2e793830a6a20482496b8235c98553b004df72a64ab04a8dd78c36",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 20751
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-corner-radius-affine-star-capture.json",
+      "sha256": "8766f3e8d0b630dddb196ad4ba9939a6413decbe6628cd703e06a25623e7b843",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 12095
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-corner-radius-hover-capture.json",
+      "sha256": "e14c8da20fca1a4dcdf75f31466ed460b9219b0cfd8c2481fa79f0dddd6aefeb",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 4732
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-corner-radius-independent-capture.json",
+      "sha256": "131b9480a0fcac9c37709336bc91b39daff35d690e0830b877bb88df93bd148b",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 24032
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-corner-smoothing-capture.json",
+      "sha256": "1f30e897c453d4bd4865bb312339365a7bbb1e1cac158b284510ff6b7613da53",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 13237
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-empty-layout-padding-capture.json",
+      "sha256": "4285df6a49c0f773953210cef722a1e5b14f0c7e9e5f3468b2b1fd7a2e27dbb9",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 24061
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-explicit-grid-track-controls-capture.json",
+      "sha256": "c58d3dd533daaf3b908aabfcf6833de28f91f0e2ad10252f715c0e4576ff2a08",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 26568
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-flatten-rich-before-capture.json",
+      "sha256": "57b59b3aa86b3d1a8841a4ef893dfe829656a2312e5bbca621b77bc36ab3b8fa",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 18394
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-flatten-rich-after-capture.json",
+      "sha256": "9d71df4d4467723d74adc43111afdb14d539d59234c2b8fb0b9f6c88971db7e1",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 11088
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-flatten-rich-redo-capture.json",
+      "sha256": "0c1ac4b961746fa8cdf210c68cf88ee9c633cefec2ee0b3cec3d5498e7452a02",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 3397
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-flatten-rich-undo-capture.json",
+      "sha256": "9480b1de146a9721a2598ebdcdbdd9e248c9a233c154b53335ccbc682e885011",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 3402
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-flatten-text-capture.json",
+      "sha256": "a195807be274054bf53111776a7c14bc1b832725ff0ead3171dccd1c3ec0fba5",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 15715
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-floating-native-palette-capture.json",
+      "sha256": "9322d118b4a573f07cb0a39717288ac920407794ee58a5838d66b25fe0449492",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 19817
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-gradient-handles-angular-capture.json",
+      "sha256": "be3f839b72985954ef47e348383203c9e1324b2dff175b694ba9fad4e5b92461",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 24742
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-gradient-handles-radial-capture.json",
+      "sha256": "27835ae9bc2c2afe76780ec0d9f3351b455145677c0ba3eae74887ca4a3152c7",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 22471
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-gradient-handles-tied-affine-capture.json",
+      "sha256": "02c1bcd40043bc9c8011fd012548f2bb33a1b2f3918f2c1d18fef6c39cc5faa2",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 20964
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-gradient-handles-translated-capture.json",
+      "sha256": "c1b0461b15fc740f1e612f6ac23e3ba25f41b055cf402ee2c1ca783350c660d2",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 23812
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-grid-placement-spans-capture.json",
+      "sha256": "4011ac87d96e56dbd04a9b81beba809df9bb3c60f233c0d9af7b96b2542995b5",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 28746
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-guide-variable-picker-capture.json",
+      "sha256": "d3679a7505f29763d0edf8bd839bb631020826f02de414a78593fe661dc09ccd",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "failed",
+          "timeoutMs": 30000,
+          "durationMs": 30053
+        },
+        {
+          "attempt": 2,
+          "status": "passed",
+          "timeoutMs": 60000,
+          "durationMs": 1652
+        }
+      ],
+      "recoveredTimeout": true
+    },
+    {
+      "member": "browser-report/WebGL2-image-crop-affine-native-capture.json",
+      "sha256": "dc5daf3a84665028c1e4468b6ffbe0e2d0ba48b943b69a2adb99faefb6b23da0",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 22388
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-image-crop-pan-native-capture.json",
+      "sha256": "44742855f2cd5b96a3e3ea4d04da3ad0849d225485e0dc00d65069ad3e2a8848",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 15798
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-image-crop-percentages-native-capture.json",
+      "sha256": "f3b1a495f1f6d0f43388a1074e77b3fbf46763f2356a59e51fdb5d76353fe726",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 26240
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-layout-grid-overlay-capture.json",
+      "sha256": "c393a9828b39a75fe047b0ef1b0d2a867d84490ebac26fb8415f0b19a8392985",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 27911
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-layout-independent-padding-capture.json",
+      "sha256": "e3df5511fdf528ae05d06faf72f3bdfd59b65e6889b4a38e8e6dd0c0f5cf4502",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 13121
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-layout-literal-and-bound-spacing-capture.json",
+      "sha256": "235057e48a88eb76942030755fabfe59ea3a296ea1b7f2623e7aa9d1afcd7fba",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 25594
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-layout-native-reorder-capture.json",
+      "sha256": "541b6d3ec572cb72768c143755a99124d25b6b2ac0d672423d864443b367f8b0",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 25937
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-layout-spacing-variables-capture.json",
+      "sha256": "99ae3a065a999a2da8179683ffe6cab24d734d780670a6bac2730ed6c6b708d6",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 26061
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-multi-frame-layout-transfer-capture.json",
+      "sha256": "456331c4d499c658e787e1221479f74b44c68d7a99fbb6ff56f3f2cc4ac68537",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 20194
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-native-affine-authoring-capture.json",
+      "sha256": "e09f864f04852e968d44cf8cd6963db43b09263b44668a9eea877828778623f4",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 12697
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-native-alpha-mask-selection-capture.json",
+      "sha256": "94fd8435c5e5e6fb6ccf3e620b94583dbcaa7c0333f078100ca1ef376fdeddcb",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 23724
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-native-effect-stack-capture.json",
+      "sha256": "2f73d911f37964d6b74c5dc6b0909fb3dea8508e387d12dfdfbb35ad621bab39",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 27758
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-native-grid-style-capture.json",
+      "sha256": "dcc8b31522c20c66e0394d6fb662fc9dddac6212d93b88bb7aac6b7c5c9fe2a1",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "failed",
+          "timeoutMs": 30000,
+          "durationMs": 33097
+        },
+        {
+          "attempt": 2,
+          "status": "passed",
+          "timeoutMs": 60000,
+          "durationMs": 36405
+        }
+      ],
+      "recoveredTimeout": true
+    },
+    {
+      "member": "browser-report/WebGL2-native-layout-drag-preview-capture.json",
+      "sha256": "c63266519a4c4ee4731d58ba69213cd31c3a0ea0e5494042eeed67dade968474",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 16052
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-native-local-styles-capture.json",
+      "sha256": "64778eda5da999ab12d1bc7475a17e0d46082a87ae67ac2b8d0d2fa245496586",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "failed",
+          "timeoutMs": 30000,
+          "durationMs": 30801
+        },
+        {
+          "attempt": 2,
+          "status": "passed",
+          "timeoutMs": 60000,
+          "durationMs": 37902
+        }
+      ],
+      "recoveredTimeout": true
+    },
+    {
+      "member": "browser-report/WebGL2-native-luminance-mask-selection-capture.json",
+      "sha256": "8fa6109b2286937533d92ed878ceff7ce6e16310547f2ddb91c17dd4a7fabf00",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 17127
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-native-mask-controls-capture.json",
+      "sha256": "f03efd48c3aa8b29f9f033cf392bb9afbb1008d1ffe9d10ba55d6b715e682938",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 22307
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-native-matching-fill-capture.json",
+      "sha256": "431f3c51bfd421f10ff99aca041abc65392475517c9b5af29437b0ea7606c7f5",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 10196
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-native-paragraph-authoring-capture.json",
+      "sha256": "4b453bcbfd66781d7f82c3cee449a80986ec7fef3653afc2ec39950def6ca0d9",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 28106
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-native-paragraph-inline-capture.json",
+      "sha256": "b6738aca1c60d31a7db37db1a4948a139fe57713387627fbfe072936245e1ec7",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 26487
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-native-rich-text-editing-capture.json",
+      "sha256": "32b0b0c55fbd536fc96675fd401508e6735dc9c03c9b9311280256997a2168a4",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 11474
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-native-selection-groups-capture.json",
+      "sha256": "406e0119b8a1eedfa9c4108a3b789091dd82be8744be1192405d4fcb0448ce46",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 24717
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-native-svg-masks-capture.json",
+      "sha256": "8cfa365c6120b62d8fa7231768f028d24a32228301a286c5eb67e0ae69ccf87c",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 12338
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-native-vector-mask-selection-capture.json",
+      "sha256": "5c8380b00ed90df48ff83212e4ff640084ad18dfb046336c5edc29033597c4b0",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 17757
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-page-inspector-native-capture.json",
+      "sha256": "4f4b3b5575c1db41e10650b8fad27ae6b74c0486b6b5be8b3137e75ba3cbc21c",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 5055
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-paint-stack-capture.json",
+      "sha256": "3722f85a95e471bd78551bb8412c72690c0d6f779a154556cd0a87b6d57c0cf3",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 24111
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-polygon-corner-radius-capture.json",
+      "sha256": "710d227f2cb72a639bc8a758d1541b724222ba36429538e33f1da93fd64501aa",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 22005
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-rich-text-ranges-capture.json",
+      "sha256": "328d8c7b10c39deb862c8d305bf9f576b3b97cd1eb79f8bdf343c96b02fd90e5",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 25562
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-split-vector-intersections-capture.json",
+      "sha256": "cdc28c38ac247da4a96874e23716ebd9c55173c3d5f396d3ad3ad8c5edc582c3",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 15051
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-stacked-layout-guides-capture.json",
+      "sha256": "7baf7cc361a2e4378d26825e6aebf9afc50647fdc052ab651cabf7f73e185299",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 25395
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-stroke-width-handles-capture.json",
+      "sha256": "ad80ab60c41108c5b5ee040b7ceb17961a9233a712c4111ae16be11f5abe1930",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 14493
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-stroke-width-multiple-contours-capture.json",
+      "sha256": "91ffa0d9426eca5b85686ff8ee3a5630cf1e2a6664dad5a13fe2cf2c960fcdd8",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 21914
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-vector-network-capture.json",
+      "sha256": "0ecca6e3ab77a450969709a195d0ce6285a0ef875504c2e63bd382af88b2dfe7",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 24240
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-vector-network-fill-capture.json",
+      "sha256": "6150ca789066528acf683dadc84dca57cf9f9f5a7136c16701667b5397c67ff7",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 4629
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-visual-variables-capture.json",
+      "sha256": "5037814525b06f4430c64f316a6b97010acec89a35b61db335d4ce70da0cad30",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 26334
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-width-profile-artwork-capture.json",
+      "sha256": "61044ae3b92e5e85d2f49f5e0125f25e43bad4d7f66f4ea7c97f09b985641357",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 22805
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-width-profile-custom-stack-capture.json",
+      "sha256": "182862e79a4000a05deb0dfb8160e7ba61f11af97b9176fd84e0fee89a7decc0",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "failed",
+          "timeoutMs": 30000,
+          "durationMs": 32236
+        },
+        {
+          "attempt": 2,
+          "status": "passed",
+          "timeoutMs": 60000,
+          "durationMs": 33646
+        }
+      ],
+      "recoveredTimeout": true
+    },
+    {
+      "member": "browser-report/WebGL2-width-profile-invalid-draft-capture.json",
+      "sha256": "0fe3868b6d414168e1e7e82a56fb4cee755e60a5b37d7febe0936549601ade2c",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 21293
+        }
+      ],
+      "recoveredTimeout": false
+    },
+    {
+      "member": "browser-report/WebGL2-width-profile-presets-capture.json",
+      "sha256": "46941e0718e212b2ff17343feed2b0285ad8bb9f21a652b2e56284dad9c07e53",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "passed",
+          "timeoutMs": 30000,
+          "durationMs": 27096
+        }
+      ],
+      "recoveredTimeout": false
+    }
+  ]
+}

@@ -2,6 +2,46 @@
 
 This file distinguishes implemented paths, completed checks and measurements. Each observation belongs to its stated source, runtime and run; older successful runs do not validate later changes. The branch incorporates FerroUI `934b9ce1` / `0.4.0` and uses Vello for every application target through public FerroUI APIs. [PR #254](https://github.com/wieslawsoltes/FerroUI/pull/254) collects the complete source and current review status. Current continuation evidence is recorded first; earlier checkpoints remain below with their original scope.
 
+## First-preedit native execution and correction (2026-10-23)
+
+The exact `4d3c796c` native feedback job **failed three new regression tests
+after successful compilation**. All 13 newly introduced functions ran: ten
+passed, including the styled Unicode first-clause/cancel/commit/history case
+and reentrant update/restoration cases. The complete `text_box_tests::`
+substring filter passed **184 of 187** cases; the three failures concern
+caret coercion, host caret ownership and immediate visual lookup after a
+template replacement. The substring filter includes 55 masked TextBox cases,
+all passing. The same run separately passed **239/239 application tests in
+42.94 s**, **7/7 required GPU fragment tests in 9.95 s**, and all other
+configured paragraph, bounds, glyph and rich-history filters. Counts from
+overlapping filters are not additive. [Exact native evidence and failure
+diagnosis](../../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/native-4d3/README.md)
+preserve all executed names, terminal outcomes and lossless logs.
+
+Its [verified browser build](../../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-build-4d3/README.md)
+contains a **53,794,092-byte WASM**, 17 payload files and a provenance manifest.
+Archive digest/size, CRCs, safe paths, every payload hash/size, exact
+source/tree/run and copied source resources passed verification. The build
+step took **15m24s**; Cargo reported **15m14s**. This archive was not extracted
+or replayed locally because the native editing gate required a correction.
+
+Published follow-up [`dc361996`](https://github.com/wieslawsoltes/FerroUI/commit/dc36199693472ac8297bafdaad6d4a0701acddf0)
+synchronizes provisional presenter Text before native caret coercion, so a
+TwoWay binding does not snap a valid new position against the old Unicode
+layout. It preserves all existing caret expectations and adds a five-case
+reentry regression. The template fixture checks restored text, selection and
+the replacement native owner synchronously, then checks visual attachment
+after normal child layout. There are now 14 new regression functions. Source
+review and Rust syntax parsing passed; this record does not assert a native
+or browser execution pass for the follow-up.
+
+The same follow-up adds bounded passive keydown/keyup evidence around the
+unchanged Control+Home, ArrowRight, ArrowRight sequence and immediate native
+caret assertion. This addresses the missing input evidence for c7's separate
+second-entry caret failure without changing its expected index or injecting
+a caret. Node syntax parsing and all seven passive-observer helper tests
+passed locally with explicit test-case reporting; editor replay is separate.
+
 ## Completed c549 browser runs and subsequent corrections (2026-10-23)
 
 The exact `c549f6bc` runtime and frozen harness completed the four selected
@@ -114,19 +154,25 @@ preserves all counts and the complete decoded log. Its production code equals
 c549 and predates the new first-preedit correction; the prior tests did not
 require visibility on the first selected-range composition update.
 
-The full browser workflow at `c7dbf26f` now prepends the independent browser-build cache
-prefix, with the root `Cargo.lock` included in the hash, to its existing
-fallback keys. The cache paths, pinned tools and browser profile match. Its
-source snapshot and target-cache save now run together after build/artifact
-publication and before Chromium and long interactions; subsequent steps do not
-invoke Cargo. Existing noncancelled-job and successful restore/probe guards
-still permit safe completed partial-build caching. Browser assertions and the
-120-minute job limit are unchanged. This configures cache reuse and protects a
-completed build from a later interaction timeout; **no subsequent full-workflow
-cache hit or duration improvement is claimed**. The recorded `1c` build itself
-had no timestamp manifest to restore, then snapshotted 10,468 tracked files.
-The later `c549` independent build's verified reuse above does not exercise
-this new full-workflow cache prefix or early-save ordering.
+The full browser job at `c7dbf26f`
+[completed as canceled](https://github.com/wieslawsoltes/FerroUI/actions/runs/39955698269/job/120423823862)
+after its 120-minute job budget, with **failed and incomplete coverage**.
+Software2D logged all 38 scenario starts with explicit polygon, paragraph-caret
+and guide failures. WebGL2 logged 32 starts with polygon and first-preedit
+failures and was still working on guides when canceled; six later scenarios
+were not reached. Its final guide capture recovered from a 30,053 ms timeout
+in 1,652 ms and was saved before interruption. There is no final report or
+WebGL2 trace, so starts are not counted as completed passes. The preserved
+[terminal job, capture timing and complete log](../../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/full-browser-c7/README.md)
+support continued slow scenario work, not a cleanup-stall diagnosis.
+
+The same run **did exercise the full-workflow cache bridge**. It restored the
+independent c549 browser-build cache and **10,464 matching source timestamps**,
+skipped **five changed inputs**, and completed its browser build in **9m54s**.
+It snapshotted 10,501 source timestamps and saved the target/cache before long
+interactions. The artifact upload also succeeded. These observations establish
+build reuse and preservation; they do not turn the incomplete correctness
+result into a pass or establish a controlled performance improvement.
 
 ## Completed feature-runtime browser run and input corrections (2026-10-23)
 

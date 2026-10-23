@@ -92,17 +92,32 @@ The [full native c7 workflow](full-native-c7/README.md) passed 533 core and 239
 application tests, launcher compilation and configured public API/pixel gates.
 Its production matches c549 and does not cover the new first-preedit defect.
 
-The full browser workflow at `c7dbf26f` now searches the independent browser-build cache
-prefix, including the root lockfile hash, before its older fallback prefixes.
-It also saves the target and its verified source-timestamp snapshot together
-after build/artifact publication, before lengthy browser checks. The existing
-cancellation/probe guards and safe partial-build behavior remain intact; no
-later browser step runs Cargo. Assertions and the 120-minute job limit are
-unchanged. This is a configured cache path and preservation change, with no
-subsequent full-workflow cache hit or measured speedup claimed. The recorded
-`1c` build had no source-timestamp manifest to restore and then snapshotted
-10,468 tracked files. The later `c549` reuse was observed in the independent
-workflow, not through this newly configured full-workflow cache bridge.
+The [first-preedit native checkpoint at 4d3](native-4d3/README.md) compiled but
+**failed three new caret/selection/template tests**. All 13 new functions ran;
+ten passed, including styled Unicode first-clause/cancellation/history and
+reentrant clause/restoration cases. Its full TextBox substring filter passed
+184/187, while the separate 239 application and seven required GPU fragment
+tests passed. The [matching browser build](browser-build-4d3/README.md)
+passed archive/source verification with a 53,794,092-byte WASM and 17 payloads;
+it was not replayed. The distinct `dc361996` correction preserves the failed
+expectations, synchronizes provisional Text before native caret movement,
+and adds a five-case reentry regression. Its source review is not an execution
+pass; the validation record distinguishes later results.
+
+The [completed sequential c7 browser job](full-browser-c7/README.md) was
+**canceled after its 120-minute budget with failed and incomplete coverage**.
+It continued WebGL2 work through guide bindings; six later scenarios were not
+reached and no final browser report was produced. The last retained guide
+capture completed its guarded retry before cancellation. The evidence does
+not support a cleanup-stall diagnosis or certify unreported scenario passes.
+
+This run did exercise the full-workflow cache bridge: it restored the
+independent c549 build cache and **10,464 matching source timestamps**, skipped
+**five** changed inputs, and completed its browser build step in **9m54s**.
+The build artifact, source snapshot and target-cache save completed before
+interactions. The exact cache keys, terminal job, incomplete coverage, capture
+timings and lossless log remain in the c7 evidence. Successful build reuse is
+separate from browser correctness and does not establish a controlled speedup.
 
 [The current source-delivery audit](source-delivery-c549/README.md) verifies the
 tracked framework dependencies, embedded fonts, source links and all five

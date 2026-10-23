@@ -1,0 +1,34 @@
+{
+  "artifacts": [
+    {
+      "file": "native-job.log.gz",
+      "compressed_bytes": 101965,
+      "compressed_sha256": "e76a2fe1f784e2281d3f09af41aad1c85ee5ceec45011549336f657a7edb85cc",
+      "uncompressed_bytes": 677027,
+      "uncompressed_sha256": "68b6152de0729797d508cd5a5a3d85daf70d94d3fd5bd0e4e232ccd4b34514ef"
+    },
+    {
+      "file": "full-workflow-native-job.log.gz",
+      "compressed_bytes": 51474,
+      "compressed_sha256": "ebd1d8c2f733d44ce5431c9aab14df6ddf4b678ed0e1956933b6bc41ebc37f9c",
+      "uncompressed_bytes": 228835,
+      "uncompressed_sha256": "d8859f6dcf05f88a207d733e3acfbfec31097034b74ffd821bef6ee5fc48d2fd"
+    },
+    {
+      "file": "generated-references-job.log.gz",
+      "compressed_bytes": 42953,
+      "compressed_sha256": "3e3d42d5a45d276445a515e87d99b37e857f6f535c25d71496fa462892bc49b1",
+      "uncompressed_bytes": 259393,
+      "uncompressed_sha256": "1759a621550112bdbe9fd4972724d29cdc633704b5c5716ddef7deb953ed1a97"
+    },
+    {
+      "file": "full-log-analysis.json.gz",
+      "compressed_bytes": 15087,
+      "compressed_sha256": "7f4dabfc5fd57bb971c1943d886b801c13d4d3aa0fc5f6607f2b661080a18761",
+      "uncompressed_bytes": 113074,
+      "uncompressed_sha256": "4bca8019579361d4f567bf1767e8666f30a879fbfd923d1b26e6f2020a31e11e"
+    }
+  ],
+  "compression": "lossless gzip level9, mtime0",
+  "raw_log_retrieval": "GitHub connector decoded UTF-8 job logs; ANSI escapes and original GitHub timestamps retained."
+}

@@ -1,0 +1,432 @@
+{
+  "commit": "4d3c796c7d5b76eb1e9d7f4f24b523841adbd994",
+  "tree": "f5870c7d41ef51600b068829a3c40838e701a8ef",
+  "native_conclusion": "failure",
+  "suites": [
+    {
+      "suite": "public unhinted glyphs",
+      "announced_count": 8,
+      "result": {
+        "outcome": "ok",
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 516,
+        "duration_seconds": 0.33,
+        "line": 1861
+      },
+      "all_case_lines_accounted_for": true,
+      "first_case": "glyph_run_impl::outline_cache::tests::unhinted_preparation_cache_evicts_old_transforms_and_bounds_path_bytes",
+      "last_case": "text_tests::outline_tests::unhinted_preparation_cache_preserves_pixels_clip_paints_and_separate_glyph_composition"
+    },
+    {
+      "suite": "Base paragraph filter",
+      "announced_count": 17,
+      "result": {
+        "outcome": "ok",
+        "passed": 17,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 4549,
+        "duration_seconds": 0.04,
+        "line": 2765
+      },
+      "all_case_lines_accounted_for": true,
+      "first_case": "media::formatted_text::tests::paragraph_setters_invalidate_the_metrics",
+      "last_case": "media::text_formatting::unicode::sentence_break_enumerator_tests::paragraph_separator_sep_splits_immediately"
+    },
+    {
+      "suite": "Base text_line_bounds filter",
+      "announced_count": 8,
+      "result": {
+        "outcome": "ok",
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 4558,
+        "duration_seconds": 0.02,
+        "line": 3631
+      },
+      "all_case_lines_accounted_for": true,
+      "first_case": "media::text_formatting::text_line_bounds_tests::a_line_height_centres_the_trimmed_box",
+      "last_case": "media::text_formatting::text_line_bounds_tests::trim_to_cap_height_puts_the_top_at_the_cap_height"
+    },
+    {
+      "suite": "Controls paragraph filter",
+      "announced_count": 17,
+      "result": {
+        "outcome": "ok",
+        "passed": 17,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 4474,
+        "duration_seconds": 0.18,
+        "line": 3918
+      },
+      "all_case_lines_accounted_for": true,
+      "first_case": "presenters::text_presenter_paragraph_tests::paragraph_caret_navigation_uses_real_spacing_and_first_line_offsets",
+      "last_case": "text_box_tests::paragraph_preedit_template_removal_restores_confirmation_without_discarding_redo"
+    },
+    {
+      "suite": "Controls text_box_tests:: substring filter",
+      "announced_count": 187,
+      "result": {
+        "outcome": "FAILED",
+        "passed": 184,
+        "failed": 3,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 4304,
+        "duration_seconds": 2.75,
+        "line": 4400
+      },
+      "all_case_lines_accounted_for": true,
+      "first_case": "masked_text_box_tests::ascii_only_should_not_accept_non_ascii",
+      "last_case": "text_box_tests::when_selection_from_right_to_left_pressing_up_should_remove_selection_moving_caret_to_end_of_previous_selection"
+    },
+    {
+      "suite": "Controls native text_box_history:: filter",
+      "announced_count": 5,
+      "result": {
+        "outcome": "ok",
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 4486,
+        "duration_seconds": 0.06,
+        "line": 4674
+      },
+      "all_case_lines_accounted_for": true,
+      "first_case": "text_box::text_box_history::tests::application_snapshot_updates_neither_add_history_nor_overwrite_future_redo",
+      "last_case": "text_box::text_box_history::tests::rich_payloads_are_released_by_the_native_history_limit_and_clear"
+    },
+    {
+      "suite": "required GPU fragments",
+      "announced_count": 7,
+      "result": {
+        "outcome": "ok",
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 539,
+        "duration_seconds": 9.95,
+        "line": 5158
+      },
+      "all_case_lines_accounted_for": true,
+      "first_case": "gpu::fragment_tests::a_fragment_gives_the_pixels_of_its_commands",
+      "last_case": "gpu::fragment_tests::target_bounded_layers_redraw_after_fragment_moves_and_target_resizes"
+    },
+    {
+      "suite": "FerroDesign application library",
+      "announced_count": 239,
+      "result": {
+        "outcome": "ok",
+        "passed": 239,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "duration_seconds": 42.94,
+        "line": 6154
+      },
+      "all_case_lines_accounted_for": true,
+      "first_case": "canvas::corner_radius::tests::alt_radius_markers_inside_a_rounded_clip_cutout_remain_distinct_from_layer_picking",
+      "last_case": "shell::vector_export::tests::variable_width_xaml_presets_custom_points_caps_and_mixed_stack_preserve_native_pixels"
+    }
+  ],
+  "new_regressions": {
+    "text_box_tests::paragraph_first_preedit_preserves_unicode_styles_cancel_commit_and_native_history": [
+      {
+        "name": "text_box_tests::paragraph_first_preedit_preserves_unicode_styles_cancel_commit_and_native_history",
+        "outcome": "ok",
+        "line": 3910,
+        "suffix": "ok"
+      },
+      {
+        "name": "text_box_tests::paragraph_first_preedit_preserves_unicode_styles_cancel_commit_and_native_history",
+        "outcome": "ok",
+        "line": 4300,
+        "suffix": "ok"
+      }
+    ],
+    "text_box_tests::first_preedit_respects_reentrant_cancellation_before_publication": [
+      {
+        "name": "text_box_tests::first_preedit_respects_reentrant_cancellation_before_publication",
+        "outcome": "ok",
+        "line": 4270,
+        "suffix": "ok"
+      }
+    ],
+    "text_box_tests::first_preedit_respects_reentrant_detach_before_publication": [
+      {
+        "name": "text_box_tests::first_preedit_respects_reentrant_detach_before_publication",
+        "outcome": "ok",
+        "line": 4271,
+        "suffix": "ok"
+      }
+    ],
+    "text_box_tests::first_preedit_respects_reentrant_template_replacement_before_publication": [
+      {
+        "name": "text_box_tests::first_preedit_respects_reentrant_template_replacement_before_publication",
+        "outcome": "FAILED",
+        "line": 4274,
+        "suffix": "FAILED"
+      }
+    ],
+    "text_box_tests::first_preedit_respects_reentrant_host_text_before_publication": [
+      {
+        "name": "text_box_tests::first_preedit_respects_reentrant_host_text_before_publication",
+        "outcome": "ok",
+        "line": 4273,
+        "suffix": "ok"
+      }
+    ],
+    "text_box_tests::first_preedit_keeps_reentrant_host_text_that_returns_to_the_provisional_value": [
+      {
+        "name": "text_box_tests::first_preedit_keeps_reentrant_host_text_that_returns_to_the_provisional_value",
+        "outcome": "ok",
+        "line": 4269,
+        "suffix": "ok"
+      }
+    ],
+    "text_box_tests::preedit_clear_queues_a_new_clause_until_confirmed_selection_is_restored": [
+      {
+        "name": "text_box_tests::preedit_clear_queues_a_new_clause_until_confirmed_selection_is_restored",
+        "outcome": "ok",
+        "line": 4316,
+        "suffix": "ok"
+      }
+    ],
+    "text_box_tests::first_preedit_coalesces_newer_clauses_during_provisional_text_changing": [
+      {
+        "name": "text_box_tests::first_preedit_coalesces_newer_clauses_during_provisional_text_changing",
+        "outcome": "ok",
+        "line": 4267,
+        "suffix": "ok"
+      }
+    ],
+    "text_box_tests::first_preedit_respects_reentrant_host_selection_before_publication_and_clear": [
+      {
+        "name": "text_box_tests::first_preedit_respects_reentrant_host_selection_before_publication_and_clear",
+        "outcome": "FAILED",
+        "line": 4272,
+        "suffix": "FAILED"
+      }
+    ],
+    "text_box_tests::first_preedit_checks_selection_notification_before_publication": [
+      {
+        "name": "text_box_tests::first_preedit_checks_selection_notification_before_publication",
+        "outcome": "ok",
+        "line": 4266,
+        "suffix": "ok"
+      }
+    ],
+    "text_box_tests::first_preedit_accepts_native_caret_coercion_and_reversed_selection": [
+      {
+        "name": "text_box_tests::first_preedit_accepts_native_caret_coercion_and_reversed_selection",
+        "outcome": "FAILED",
+        "line": 4265,
+        "suffix": "FAILED"
+      }
+    ],
+    "text_box_tests::first_preedit_does_not_overwrite_a_newer_clause_or_its_cursor": [
+      {
+        "name": "text_box_tests::first_preedit_does_not_overwrite_a_newer_clause_or_its_cursor",
+        "outcome": "ok",
+        "line": 4268,
+        "suffix": "ok"
+      }
+    ],
+    "text_box_tests::first_preedit_still_clears_on_external_text_or_caret_changes": [
+      {
+        "name": "text_box_tests::first_preedit_still_clears_on_external_text_or_caret_changes",
+        "outcome": "ok",
+        "line": 4275,
+        "suffix": "ok"
+      }
+    ]
+  },
+  "all_13_new_names_executed": true,
+  "unique_new_names_passed": 10,
+  "unique_new_names_failed": 3,
+  "text_box_substring_filter": {
+    "total": 187,
+    "text_box_cases": 132,
+    "masked_text_box_cases": 55,
+    "passed": 184,
+    "failed": 3
+  },
+  "required_gpu_environment_occurrences": [
+    {
+      "line": 4688,
+      "text": "FERROUI_VELLO_REQUIRE_GPU: 1"
+    }
+  ],
+  "checkout_and_source_occurrences": [
+    {
+      "line": 36,
+      "text": "ref: 4d3c796c7d5b76eb1e9d7f4f24b523841adbd994"
+    },
+    {
+      "line": 99,
+      "text": "[command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 4d3c796c7d5b76eb1e9d7f4f24b523841adbd994"
+    },
+    {
+      "line": 101,
+      "text": "* branch            4d3c796c7d5b76eb1e9d7f4f24b523841adbd994 -> FETCH_HEAD"
+    },
+    {
+      "line": 108,
+      "text": "[command]/usr/bin/git checkout --progress --force 4d3c796c7d5b76eb1e9d7f4f24b523841adbd994"
+    },
+    {
+      "line": 109,
+      "text": "Note: switching to '4d3c796c7d5b76eb1e9d7f4f24b523841adbd994'."
+    },
+    {
+      "line": 129,
+      "text": "4d3c796c7d5b76eb1e9d7f4f24b523841adbd994"
+    },
+    {
+      "line": 147,
+      "text": "key: ferrodesign-native-feedback-Linux-24a777fa3f5a49b7d3ee6f58d5272afd4ddeb69feae9cfcb0d339824746d878e-4d3c796c7d5b76eb1e9d7f4f24b523841adbd994"
+    },
+    {
+      "line": 165,
+      "text": "Cache not found for input keys: ferrodesign-native-feedback-Linux-24a777fa3f5a49b7d3ee6f58d5272afd4ddeb69feae9cfcb0d339824746d878e-4d3c796c7d5b76eb1e9d7f4f24b523841adbd994, ferrodesign-native-feedback-Linux-24a777fa3f5a49b7d3ee6f58d5272afd4ddeb69feae9cfcb0d339824746d878e-, ferrodesign-build-Linux-v3-native-d6306b456adbf0ac2518e09e338152dbf4b13dc3ee879ff86d4c77487dd3cdb9-"
+    },
+    {
+      "line": 6175,
+      "text": "key: ferrodesign-native-feedback-Linux-24a777fa3f5a49b7d3ee6f58d5272afd4ddeb69feae9cfcb0d339824746d878e-4d3c796c7d5b76eb1e9d7f4f24b523841adbd994"
+    },
+    {
+      "line": 6194,
+      "text": "Cache saved with key: ferrodesign-native-feedback-Linux-24a777fa3f5a49b7d3ee6f58d5272afd4ddeb69feae9cfcb0d339824746d878e-4d3c796c7d5b76eb1e9d7f4f24b523841adbd994"
+    }
+  ],
+  "failures": [
+    {
+      "line": 4265,
+      "text": "test text_box_tests::first_preedit_accepts_native_caret_coercion_and_reversed_selection ... FAILED"
+    },
+    {
+      "line": 4272,
+      "text": "test text_box_tests::first_preedit_respects_reentrant_host_selection_before_publication_and_clear ... FAILED"
+    },
+    {
+      "line": 4274,
+      "text": "test text_box_tests::first_preedit_respects_reentrant_template_replacement_before_publication ... FAILED"
+    },
+    {
+      "line": 4400,
+      "text": "test result: FAILED. 184 passed; 3 failed; 0 ignored; 0 measured; 4304 filtered out; finished in 2.75s"
+    },
+    {
+      "line": 4402,
+      "text": "error: test failed, to rerun pass `-p ferroui-controls --lib`"
+    },
+    {
+      "line": 4676,
+      "text": "##[error]Process completed with exit code 1."
+    }
+  ],
+  "full_workflow_native": {
+    "commit": "4d3c796c7d5b76eb1e9d7f4f24b523841adbd994",
+    "tree": "f5870c7d41ef51600b068829a3c40838e701a8ef",
+    "run_id": 39972889324,
+    "job_id": 120481660281,
+    "log_sha256": "d8859f6dcf05f88a207d733e3acfbfec31097034b74ffd821bef6ee5fc48d2fd",
+    "log_bytes": 228835,
+    "new_13_executed": true,
+    "new_13_results": {
+      "paragraph_first_preedit_preserves_unicode_styles_cancel_commit_and_native_history": [
+        "2026-10-23T14:58:00.5340166Z test text_box_tests::paragraph_first_preedit_preserves_unicode_styles_cancel_commit_and_native_history ... ok"
+      ],
+      "first_preedit_respects_reentrant_cancellation_before_publication": [
+        "2026-10-23T14:58:00.4617995Z test text_box_tests::first_preedit_respects_reentrant_cancellation_before_publication ... ok"
+      ],
+      "first_preedit_respects_reentrant_detach_before_publication": [
+        "2026-10-23T14:58:00.4708146Z test text_box_tests::first_preedit_respects_reentrant_detach_before_publication ... ok"
+      ],
+      "first_preedit_respects_reentrant_template_replacement_before_publication": [
+        "2026-10-23T14:58:00.5017523Z test text_box_tests::first_preedit_respects_reentrant_template_replacement_before_publication ... FAILED"
+      ],
+      "first_preedit_respects_reentrant_host_text_before_publication": [
+        "2026-10-23T14:58:00.4925199Z test text_box_tests::first_preedit_respects_reentrant_host_text_before_publication ... ok"
+      ],
+      "first_preedit_keeps_reentrant_host_text_that_returns_to_the_provisional_value": [
+        "2026-10-23T14:58:00.4539016Z test text_box_tests::first_preedit_keeps_reentrant_host_text_that_returns_to_the_provisional_value ... ok"
+      ],
+      "preedit_clear_queues_a_new_clause_until_confirmed_selection_is_restored": [
+        "2026-10-23T14:58:00.6062874Z test text_box_tests::preedit_clear_queues_a_new_clause_until_confirmed_selection_is_restored ... ok"
+      ],
+      "first_preedit_coalesces_newer_clauses_during_provisional_text_changing": [
+        "2026-10-23T14:58:00.4362403Z test text_box_tests::first_preedit_coalesces_newer_clauses_during_provisional_text_changing ... ok"
+      ],
+      "first_preedit_respects_reentrant_host_selection_before_publication_and_clear": [
+        "2026-10-23T14:58:00.4832723Z test text_box_tests::first_preedit_respects_reentrant_host_selection_before_publication_and_clear ... FAILED"
+      ],
+      "first_preedit_checks_selection_notification_before_publication": [
+        "2026-10-23T14:58:00.4236329Z test text_box_tests::first_preedit_checks_selection_notification_before_publication ... ok"
+      ],
+      "first_preedit_accepts_native_caret_coercion_and_reversed_selection": [
+        "2026-10-23T14:58:00.4117377Z test text_box_tests::first_preedit_accepts_native_caret_coercion_and_reversed_selection ... FAILED"
+      ],
+      "first_preedit_does_not_overwrite_a_newer_clause_or_its_cursor": [
+        "2026-10-23T14:58:00.4451887Z test text_box_tests::first_preedit_does_not_overwrite_a_newer_clause_or_its_cursor ... ok"
+      ],
+      "first_preedit_still_clears_on_external_text_or_caret_changes": [
+        "2026-10-23T14:58:00.5144762Z test text_box_tests::first_preedit_still_clears_on_external_text_or_caret_changes ... ok"
+      ]
+    },
+    "failure_excerpt": [
+      "2026-10-23T14:58:00.6269966Z ---- text_box_tests::first_preedit_accepts_native_caret_coercion_and_reversed_selection stdout ----",
+      "2026-10-23T14:58:00.6270283Z ",
+      "2026-10-23T14:58:00.6270829Z thread 'text_box_tests::first_preedit_accepts_native_caret_coercion_and_reversed_selection' (5622) panicked at src/FerroUI.Controls/text_box_tests.rs:3365:9:",
+      "2026-10-23T14:58:00.6271433Z assertion `left == right` failed",
+      "2026-10-23T14:58:00.6271693Z   left: None",
+      "2026-10-23T14:58:00.6271912Z  right: Some(\"first\")",
+      "2026-10-23T14:58:00.6272050Z ",
+      "2026-10-23T14:58:00.6272409Z ---- text_box_tests::first_preedit_respects_reentrant_host_selection_before_publication_and_clear stdout ----",
+      "2026-10-23T14:58:00.6272751Z ",
+      "2026-10-23T14:58:00.6273311Z thread 'text_box_tests::first_preedit_respects_reentrant_host_selection_before_publication_and_clear' (5629) panicked at src/FerroUI.Controls/text_box_tests.rs:3268:13:",
+      "2026-10-23T14:58:00.6273916Z assertion `left == right` failed",
+      "2026-10-23T14:58:00.6274229Z   left: (1, 1, 1)",
+      "2026-10-23T14:58:00.6274448Z  right: (2, 2, 2)",
+      "2026-10-23T14:58:00.6274572Z ",
+      "2026-10-23T14:58:00.6274921Z ---- text_box_tests::first_preedit_respects_reentrant_template_replacement_before_publication stdout ----",
+      "2026-10-23T14:58:00.6275563Z ",
+      "2026-10-23T14:58:00.6276295Z thread 'text_box_tests::first_preedit_respects_reentrant_template_replacement_before_publication' (5631) panicked at src/FerroUI.Controls/text_box_tests.rs:3051:74:",
+      "2026-10-23T14:58:00.6276931Z called `Option::unwrap()` on a `None` value",
+      "2026-10-23T14:58:00.6277122Z ",
+      "2026-10-23T14:58:00.6277127Z ",
+      "2026-10-23T14:58:00.6277215Z failures:",
+      "2026-10-23T14:58:00.6277584Z     text_box_tests::first_preedit_accepts_native_caret_coercion_and_reversed_selection",
+      "2026-10-23T14:58:00.6278302Z     text_box_tests::first_preedit_respects_reentrant_host_selection_before_publication_and_clear",
+      "2026-10-23T14:58:00.6278881Z     text_box_tests::first_preedit_respects_reentrant_template_replacement_before_publication",
+      "2026-10-23T14:58:00.6279183Z ",
+      "2026-10-23T14:58:00.6279515Z test result: FAILED. 25 passed; 3 failed; 0 ignored; 0 measured; 4463 filtered out; finished in 0.26s",
+      "2026-10-23T14:58:00.6279831Z ",
+      "2026-10-23T14:58:00.6284835Z error: test failed, to rerun pass `-p ferroui-controls --lib`",
+      "2026-10-23T14:58:00.6371906Z ##[error]Process completed with exit code 101."
+    ],
+    "classification": "Compilation succeeded; 28 preedit tests executed, 25 passed and 3 failed. The full-workflow native job stopped after this failing stage. Independent feedback job is recorded separately."
+  },
+  "correction": {
+    "commit": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+    "tree": "57c2625a948b9401b9517b2724b2715d8e7ca92b",
+    "scope": "Published followup, source-reviewed and rustfmt syntax parsed. No runtime or CI pass is claimed in this evidence folder.",
+    "source_hashes": {
+      "src/FerroUI.Controls/text_box.rs": "5016e1fa72ecbe0c01894369c3769b2f65d23c558ff5a53dc4c0a60a6e341ad3",
+      "src/FerroUI.Controls/text_box_text_input_method_client.rs": "eedbb0cab330323fea543cf093e3863de3efd3970e67f9913295ef2828141c57",
+      "src/FerroUI.Controls/text_box_tests.rs": "e741dea15cce9b34dee92610cc7e473af7fee9ee7348ad92c5b2207f890852a1"
+    },
+    "additional_test": "first_preedit_text_synchronization_respects_reentrant_owner_changes"
+  }
+}
