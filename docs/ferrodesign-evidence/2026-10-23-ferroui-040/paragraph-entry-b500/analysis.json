@@ -1,0 +1,599 @@
+{
+  "scope": "Failed Software2D text-effects shard; source-only correction has not been executed. This is not a full-browser, native-font, or visual-parity pass.",
+  "observed_utc": "2026-10-23T15:48:26.909643+00:00",
+  "source_commit": "b5008093b3c201b79131810f044e101058b1b165",
+  "source_tree": "a20788573f2ffcff7da17722770fdd5e864d001c",
+  "workflow_run": 39977448194,
+  "run_attempt": 1,
+  "job_id": 120501196550,
+  "job_conclusion": "failure",
+  "process_exit_code": 1,
+  "report_passed": false,
+  "report_scope": {
+    "full": false,
+    "modes": [
+      "Software2D"
+    ],
+    "scenarios": [
+      "paragraphs",
+      "typography",
+      "components",
+      "image-crop",
+      "compositing",
+      "svg-compositing",
+      "masks",
+      "effects"
+    ]
+  },
+  "browser": "156.0.8078.4",
+  "distribution_manifest_sha256": "14279dabac9d091103b4ea0235e815875fb624cffac36c9b9ec7ca38e2505552",
+  "harness_sha256": "dfe1beb4d0d6b9fee5296b716f19849a2ba620a106761ffdc9b010ae75192c36",
+  "paragraph_outcome": {
+    "name": "paragraphs",
+    "status": "failed",
+    "ran": true,
+    "checks": 3,
+    "durationMs": 9999,
+    "failureStage": "scenario",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n1 !== 3\n\n    at splitFirst (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/paragraphs-browser.mjs:228:20)\n    at async paragraphRegressions (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/paragraphs-browser.mjs:263:19)\n    at async runIsolatedScenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1062:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1115:13"
+  },
+  "all_selected_scenarios": [
+    {
+      "name": "paragraphs",
+      "status": "failed",
+      "ran": true,
+      "checks": 3,
+      "durationMs": 9999
+    },
+    {
+      "name": "typography",
+      "status": "passed",
+      "ran": true,
+      "checks": 4,
+      "durationMs": 5158
+    },
+    {
+      "name": "components",
+      "status": "passed",
+      "ran": true,
+      "checks": 5,
+      "durationMs": 8744
+    },
+    {
+      "name": "image-crop",
+      "status": "passed",
+      "ran": true,
+      "checks": 5,
+      "durationMs": 7290
+    },
+    {
+      "name": "compositing",
+      "status": "passed",
+      "ran": true,
+      "checks": 4,
+      "durationMs": 2686
+    },
+    {
+      "name": "svg-compositing",
+      "status": "passed",
+      "ran": true,
+      "checks": 4,
+      "durationMs": 3507
+    },
+    {
+      "name": "masks",
+      "status": "passed",
+      "ran": true,
+      "checks": 5,
+      "durationMs": 11194
+    },
+    {
+      "name": "effects",
+      "status": "passed",
+      "ran": true,
+      "checks": 5,
+      "durationMs": 9895
+    }
+  ],
+  "inputs": [
+    {
+      "entry": 1,
+      "expected_caret_index": 3,
+      "before": {
+        "caret_index": 0,
+        "selection_start": 0,
+        "selection_end": 26,
+        "paragraph_style_count": 3,
+        "line_count": 3,
+        "run_texts": [
+          "A",
+          "🦀 ",
+          "first\n",
+          "\n",
+          "second",
+          "שלום ",
+          "Last"
+        ],
+        "document_revision": 14,
+        "history_length": 6,
+        "editing_text": 2,
+        "canvas_focus_within": true,
+        "inline_focused": true
+      },
+      "after": {
+        "actual_text": "A🦀 first\nשלום second\nLast",
+        "caret_index": 3,
+        "document_revision": 14,
+        "history_length": 6
+      },
+      "native_recent_presses": [
+        {
+          "buttons": 1,
+          "clickCount": 1,
+          "pan": {
+            "x": -15.545454545454504,
+            "y": 196.09090909090907
+          },
+          "renderedFramesBefore": 9,
+          "screen": {
+            "x": 75.06817626953125,
+            "y": 286.7045593261719
+          },
+          "selectionCountBefore": 0,
+          "serial": 2,
+          "timestamp": 8281,
+          "world": {
+            "x": 44.99999724446245,
+            "y": 45.000006888843835
+          },
+          "zoom": 2.0136363636363637
+        },
+        {
+          "buttons": 1,
+          "clickCount": 1,
+          "pan": {
+            "x": -15.545454545454504,
+            "y": 196.09090909090907
+          },
+          "renderedFramesBefore": 12,
+          "screen": {
+            "x": 115.34091186523438,
+            "y": 316.9090881347656
+          },
+          "selectionCountBefore": 0,
+          "serial": 3,
+          "timestamp": 8916,
+          "world": {
+            "x": 65.00000137776874,
+            "y": 59.999998622231246
+          },
+          "zoom": 2.0136363636363637
+        }
+      ],
+      "native_timestamp_unit": "native monotonic milliseconds",
+      "passive_key_events": [
+        {
+          "type": "keydown",
+          "key": "Control",
+          "event_time_ms": 9295.400000000023,
+          "observed_at_ms": 9295.700000000012,
+          "trusted": true,
+          "default_prevented": false,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "key": "Home",
+          "event_time_ms": 9296,
+          "observed_at_ms": 9296.400000000023,
+          "trusted": true,
+          "default_prevented": true,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "key": "Home",
+          "event_time_ms": 9296.600000000035,
+          "observed_at_ms": 9296.700000000012,
+          "trusted": true,
+          "default_prevented": false,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "key": "Control",
+          "event_time_ms": 9298.200000000012,
+          "observed_at_ms": 9301.299999999988,
+          "trusted": true,
+          "default_prevented": false,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "key": "ArrowRight",
+          "event_time_ms": 9305.400000000023,
+          "observed_at_ms": 9307.299999999988,
+          "trusted": true,
+          "default_prevented": true,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "key": "ArrowRight",
+          "event_time_ms": 9307.600000000035,
+          "observed_at_ms": 9307.700000000012,
+          "trusted": true,
+          "default_prevented": false,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "key": "ArrowRight",
+          "event_time_ms": 9318.600000000035,
+          "observed_at_ms": 9319.5,
+          "trusted": true,
+          "default_prevented": true,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "key": "ArrowRight",
+          "event_time_ms": 9323.400000000023,
+          "observed_at_ms": 9329.299999999988,
+          "trusted": true,
+          "default_prevented": false,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        }
+      ],
+      "dropped_events": 0,
+      "navigation_error": null
+    },
+    {
+      "entry": 2,
+      "expected_caret_index": 3,
+      "before": {
+        "caret_index": 1,
+        "selection_start": 1,
+        "selection_end": 1,
+        "paragraph_style_count": 2,
+        "line_count": 2,
+        "run_texts": [
+          "\n",
+          " "
+        ],
+        "document_revision": 17,
+        "history_length": 6,
+        "editing_text": 2,
+        "canvas_focus_within": true,
+        "inline_focused": true
+      },
+      "after": {
+        "actual_text": "\n",
+        "caret_index": 1,
+        "document_revision": 17,
+        "history_length": 6
+      },
+      "native_recent_presses": [
+        {
+          "buttons": 1,
+          "clickCount": 1,
+          "pan": {
+            "x": -15.545454545454504,
+            "y": 196.09090909090907
+          },
+          "renderedFramesBefore": 12,
+          "screen": {
+            "x": 115.34091186523438,
+            "y": 316.9090881347656
+          },
+          "selectionCountBefore": 0,
+          "serial": 3,
+          "timestamp": 8916,
+          "world": {
+            "x": 65.00000137776874,
+            "y": 59.999998622231246
+          },
+          "zoom": 2.0136363636363637
+        },
+        {
+          "buttons": 1,
+          "clickCount": 2,
+          "pan": {
+            "x": -15.545454545454504,
+            "y": 196.09090909090907
+          },
+          "renderedFramesBefore": 16,
+          "screen": {
+            "x": 115.34091186523438,
+            "y": 316.9090881347656
+          },
+          "selectionCountBefore": 1,
+          "serial": 4,
+          "timestamp": 9375,
+          "world": {
+            "x": 65.00000137776874,
+            "y": 59.999998622231246
+          },
+          "zoom": 2.0136363636363637
+        }
+      ],
+      "native_timestamp_unit": "native monotonic milliseconds",
+      "passive_key_events": [
+        {
+          "type": "keydown",
+          "key": "Control",
+          "event_time_ms": 9760.299999999988,
+          "observed_at_ms": 9760.5,
+          "trusted": true,
+          "default_prevented": false,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "key": "Home",
+          "event_time_ms": 9760.700000000012,
+          "observed_at_ms": 9761.799999999988,
+          "trusted": true,
+          "default_prevented": true,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "key": "Home",
+          "event_time_ms": 9762,
+          "observed_at_ms": 9762.200000000012,
+          "trusted": true,
+          "default_prevented": false,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "key": "Control",
+          "event_time_ms": 9762.400000000023,
+          "observed_at_ms": 9762.400000000023,
+          "trusted": true,
+          "default_prevented": false,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "key": "ArrowRight",
+          "event_time_ms": 9763.900000000023,
+          "observed_at_ms": 9764.5,
+          "trusted": true,
+          "default_prevented": true,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "key": "ArrowRight",
+          "event_time_ms": 9764.700000000012,
+          "observed_at_ms": 9764.799999999988,
+          "trusted": true,
+          "default_prevented": false,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "key": "ArrowRight",
+          "event_time_ms": 9766.200000000012,
+          "observed_at_ms": 9766.400000000023,
+          "trusted": true,
+          "default_prevented": true,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "key": "ArrowRight",
+          "event_time_ms": 9766.5,
+          "observed_at_ms": 9766.600000000035,
+          "trusted": true,
+          "default_prevented": false,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        }
+      ],
+      "dropped_events": 0,
+      "navigation_error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n1 !== 3\n\n    at splitFirst (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/paragraphs-browser.mjs:228:20)\n    at async paragraphRegressions (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/paragraphs-browser.mjs:263:19)\n    at async runIsolatedScenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1062:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1115:13"
+    }
+  ],
+  "observations": [
+    "The first entry retains the original Unicode text; the three trusted navigation keys end at UTF16 caret3.",
+    "Before the second navigation, the native layout already consists of an LF and an empty-line placeholder, caret1, two paragraphs, and document revision17. After the same trusted keys, actualText is exactly LF and revision17 is unchanged.",
+    "The second entry click has native clickCount2,459ms after the preceding count1 press at the exact same native screen coordinate.",
+    "Both entries show CanvasHost.focusWithin true while InlineTextBox itself is focused; ancestor focus does not distinguish the command target."
+  ],
+  "source_inferred_mechanism": "Native canvas count2 emits EditText. begin_inline_text focuses the child and selects all. The old enterInline then unconditionally sends Enter, which is ordinary multiline input in the focused TextBox, replacing the selected original text with LF before the navigation assertion. The source and native observations support this setup failure; no pre-click DOM timing was captured for this original entry.",
+  "source_files": [
+    {
+      "path": "samples/FerroDesign/tests/paragraphs-browser.mjs",
+      "bytes": 30003,
+      "sha256": "99820e4aa77a3ef79cbcbab6afaac8bf45d9339dcb5e9f5c87af545cc1d1ca65",
+      "reviewed_line_ranges": [
+        [
+          198,
+          208
+        ],
+        [
+          211,
+          263
+        ]
+      ]
+    },
+    {
+      "path": "samples/FerroDesign/crates/ferrodesign-app/src/canvas.rs",
+      "bytes": 91854,
+      "sha256": "bc6497cdcec15710fe4cfb6cee02ff8cf1f4f0e97f242eb716dfff9004dfb4a6",
+      "reviewed_line_ranges": [
+        [
+          834,
+          848
+        ]
+      ]
+    },
+    {
+      "path": "samples/FerroDesign/crates/ferrodesign-app/src/shell/text.rs",
+      "bytes": 15172,
+      "sha256": "b2c3ca8b7b1a499a1d54797ef0908731c53e0f95a26eec64ce68661763e76f35",
+      "reviewed_line_ranges": [
+        [
+          104,
+          121
+        ],
+        [
+          125,
+          175
+        ]
+      ]
+    },
+    {
+      "path": "src/FerroUI.Base/input/mouse_device.rs",
+      "bytes": 14950,
+      "sha256": "d1874140203a432ae448ceadd195013b614ae4d3554a03dba0f0687ef143a5b8",
+      "reviewed_line_ranges": [
+        [
+          208,
+          244
+        ]
+      ]
+    },
+    {
+      "path": "samples/FerroDesign/tests/browser.mjs",
+      "bytes": 99547,
+      "sha256": "78dd7a5aa0d104f31627b034e0998fc78f627b187594575f0db561a35f20f678",
+      "reviewed_line_ranges": [
+        [
+          1050,
+          1075
+        ],
+        [
+          1115,
+          1115
+        ]
+      ]
+    }
+  ],
+  "correction": {
+    "status": "source-reviewed; browser execution pending",
+    "file": "samples/FerroDesign/tests/paragraphs-browser.mjs",
+    "baseline_commit": "b5008093b3c201b79131810f044e101058b1b165",
+    "original_helper_sha256": "e57fbda3759c694ae97f0cc868a6dd7e898f294d3fc12bd23596cb4dea6960ec",
+    "corrected_helper_sha256": "d2a7c9322c25e3d03e273b74f0758d91b9fc666f627cb8e464a019fab2c97b1c",
+    "corrected_module_sha256_if_only_this_patch_applied": "00cee1b66eb073fd3649ca0c35217007923ca4efb06860095784d66f4c12fbb3",
+    "patch_sha256": "615de86da2c3d29cdef182ce91cfaf432148b5e25ef0f7a5e548d30933c155c4",
+    "mechanism": "After the unchanged trusted canvas click, send Enter only when native editingText remains null. Otherwise require node2, focused InlineTextBox and native clickCount2. Before navigation require exact unchanged text, complete document and history. Retain bounded passive entry capture and all existing caret, styles, split, cancellation, commit and history assertions.",
+    "production_changes": false,
+    "browser_rerun_completed": false,
+    "deadline_or_expectation_relaxed": false
+  },
+  "retained_files": [
+    {
+      "file": "Software2D-native-paragraph-split-input.json",
+      "original_bytes": 53570,
+      "original_sha256": "cd4194516c4a77cdd2be1d53d607ffef125a18aba4c54e2fa5d058f47ac5cf6c",
+      "stored_bytes": 53570,
+      "stored_sha256": "cd4194516c4a77cdd2be1d53d607ffef125a18aba4c54e2fa5d058f47ac5cf6c",
+      "origin": "Selected original archive member; decompression CRC verified."
+    },
+    {
+      "file": "Software2D-paragraphs-failure.ferrodesign",
+      "original_bytes": 2793,
+      "original_sha256": "22c59d40051aee649c74cb7b5af47e46db947b49b47b6343eb8b39bb3a5df91e",
+      "stored_bytes": 2793,
+      "stored_sha256": "22c59d40051aee649c74cb7b5af47e46db947b49b47b6343eb8b39bb3a5df91e",
+      "origin": "Selected original archive member; decompression CRC verified."
+    },
+    {
+      "file": "Software2D-paragraphs-failure.png",
+      "original_bytes": 68825,
+      "original_sha256": "ec2c76dd788443e083b6d423d7aafbabe4390bd203def7feb543c5a9896cd4b5",
+      "stored_bytes": 68825,
+      "stored_sha256": "ec2c76dd788443e083b6d423d7aafbabe4390bd203def7feb543c5a9896cd4b5",
+      "origin": "Selected original archive member; decompression CRC verified."
+    },
+    {
+      "file": "report.json.gz",
+      "original_bytes": 662643,
+      "original_sha256": "8c0ab3f9ffa51c00ab952bf15c7e356fdb83e74eba090a8924cb1ca95f0b1393",
+      "stored_bytes": 34651,
+      "stored_sha256": "f0e0bcc03631bb3af9a302b60cc271fb7af397de239545669d4dbc51750a40e9",
+      "origin": "Selected original archive member; decompression CRC verified."
+    },
+    {
+      "file": "proof.json",
+      "original_bytes": 14632,
+      "original_sha256": "1744e446797492dd8ce4c4552cd8dab5be463f2392a6ed374ba1a6cf6140133a",
+      "stored_bytes": 14632,
+      "stored_sha256": "1744e446797492dd8ce4c4552cd8dab5be463f2392a6ed374ba1a6cf6140133a",
+      "origin": "Selected original archive member; decompression CRC verified."
+    },
+    {
+      "file": "job.log.gz",
+      "original_bytes": 94612,
+      "original_sha256": "3c5be62cf88028716011b1f331750fe422730bfd294b4360da27f2351441aeee",
+      "stored_bytes": 22210,
+      "stored_sha256": "d28d14630eea43590c81491e274e2f64cfcb1d8c9724d871de72f7a833b8455b",
+      "origin": "Exact UTF8 decoded GitHub job log, including BOM."
+    }
+  ],
+  "verification": {
+    "source_review": "independent read-only review completed; no blocker found",
+    "javascript_syntax": {
+      "command": "node --check samples/FerroDesign/tests/paragraphs-browser.mjs",
+      "node": "v24.19.0",
+      "exit_code": 0,
+      "checked_module_sha256": "00cee1b66eb073fd3649ca0c35217007923ca4efb06860095784d66f4c12fbb3"
+    },
+    "diff_check_exit_code": 0,
+    "gzip_roundtrip_and_retained_digests": "passed",
+    "exact_b500_source_digests": "passed",
+    "browser_execution": "not run for corrected helper"
+  }
+}

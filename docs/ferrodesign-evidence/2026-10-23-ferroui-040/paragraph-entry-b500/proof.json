@@ -1,0 +1,378 @@
+{
+  "schema_version": 1,
+  "kind": "scenario",
+  "group": "text-effects",
+  "mode": "Software2D",
+  "identity": {
+    "commit": "b5008093b3c201b79131810f044e101058b1b165",
+    "tree": "a20788573f2ffcff7da17722770fdd5e864d001c",
+    "repository": "wieslawsoltes/FerroUI",
+    "run_id": "39977448194",
+    "harness": {
+      "sha256": "dfe1beb4d0d6b9fee5296b716f19849a2ba620a106761ffdc9b010ae75192c36",
+      "files": [
+        {
+          "path": ".github/workflows/ferrodesign.yml",
+          "bytes": 24716,
+          "sha256": "6cb3196d8c855493b864eba06e50d14f256a8fbf6135a89b56f8e83ed88ea9ba"
+        },
+        {
+          "path": "samples/FerroDesign/package-lock.json",
+          "bytes": 1552,
+          "sha256": "79084a131673247139b5baac8e065ed4604ede5c79d750b076a18455de41d2d0"
+        },
+        {
+          "path": "samples/FerroDesign/package.json",
+          "bytes": 228,
+          "sha256": "b4a693a06e7c2390b63afcb926e222641d7edf900d7299837d8b21143a013da2"
+        },
+        {
+          "path": "samples/FerroDesign/scripts/browser-ci-groups.json",
+          "bytes": 1098,
+          "sha256": "22adee98ca44db6941677f895b9ef64ce437314f8d8f371fe8c031a738c8eb9d"
+        },
+        {
+          "path": "samples/FerroDesign/scripts/browser_ci.py",
+          "bytes": 33206,
+          "sha256": "3dd0740ffcb1da27b7629fc8add60874bea482282563a8e7891fb19f51dc9b3d"
+        },
+        {
+          "path": "samples/FerroDesign/scripts/test_browser_ci.py",
+          "bytes": 30289,
+          "sha256": "807c0ae0067e51b95bd9082c74d6c17bd924cc9eb399cf58d374b24428f8e264"
+        },
+        {
+          "path": "samples/FerroDesign/tests/alpha-coverage.mjs",
+          "bytes": 2842,
+          "sha256": "c4e27b7b5a4a82bd4dd6f9a5619d0c570b430ed0a2136e3a386289d5d04a7779"
+        },
+        {
+          "path": "samples/FerroDesign/tests/alpha-coverage.test.mjs",
+          "bytes": 5336,
+          "sha256": "d2da8b35fd7a32355d70b5e457b5440d485eca0b9524d27bfeb59825b9576302"
+        },
+        {
+          "path": "samples/FerroDesign/tests/angular-paints-browser.mjs",
+          "bytes": 12898,
+          "sha256": "5a7eebeea291b425fc1075d3e55f5af5f8191f0f8f24a9a10fc8a954b7be4908"
+        },
+        {
+          "path": "samples/FerroDesign/tests/authoring-browser.mjs",
+          "bytes": 7968,
+          "sha256": "776b73e603a00984d3d566e964bf1c911960bc7fce3cfe9344278f0679edb7ef"
+        },
+        {
+          "path": "samples/FerroDesign/tests/browser.mjs",
+          "bytes": 99547,
+          "sha256": "78dd7a5aa0d104f31627b034e0998fc78f627b187594575f0db561a35f20f678"
+        },
+        {
+          "path": "samples/FerroDesign/tests/components-browser.mjs",
+          "bytes": 15683,
+          "sha256": "cf3ed180f41a62e0b2520917735b3ad238f5013a091ddf1a70743661a9940c96"
+        },
+        {
+          "path": "samples/FerroDesign/tests/compositing-browser.mjs",
+          "bytes": 8623,
+          "sha256": "897c50eba3d818f5603aaa08a9c025a44e91192f7e4ea325b8c2e652ca4ad9d4"
+        },
+        {
+          "path": "samples/FerroDesign/tests/corner-radius-handles-browser.mjs",
+          "bytes": 25620,
+          "sha256": "17a82205d52399eb76e7117eca1ff7a6485325f3e5a34b37dd5c0c153490177f"
+        },
+        {
+          "path": "samples/FerroDesign/tests/corner-radius-input.test.mjs",
+          "bytes": 3110,
+          "sha256": "bdaf5265fc7eee1797fe6ece48d3291c99baac6211cb8459e9a4bfcaf8c25435"
+        },
+        {
+          "path": "samples/FerroDesign/tests/corners-browser.mjs",
+          "bytes": 6160,
+          "sha256": "6b9e400d2023a0a638b7c5e99e27920e03a9d272b7b8ee74f00b6d051daac22a"
+        },
+        {
+          "path": "samples/FerroDesign/tests/document-store-browser.mjs",
+          "bytes": 8000,
+          "sha256": "466adceb3877b299ce92d610a15b40ff2e47cfa1f71a8e0901bcb9f15f49c0cf"
+        },
+        {
+          "path": "samples/FerroDesign/tests/document-store.test.mjs",
+          "bytes": 17126,
+          "sha256": "d3794e220039aed72b31745dd1601443bf06f7378b2ccffce90e4ea601fc3334"
+        },
+        {
+          "path": "samples/FerroDesign/tests/effects-browser.mjs",
+          "bytes": 8345,
+          "sha256": "814aad28948d9bdf677ffc69e3e32817be87915ed3fb4cd6e42d042dc9a47dbe"
+        },
+        {
+          "path": "samples/FerroDesign/tests/flatten-browser.mjs",
+          "bytes": 16921,
+          "sha256": "dc706d5e13e7471c0b075f2d9978b9d958420d703e566ddc401250396fd21585"
+        },
+        {
+          "path": "samples/FerroDesign/tests/geometry-authoring-browser.mjs",
+          "bytes": 9247,
+          "sha256": "720d3ab736b1c83ac399c1e5619b9f0b299d2485ba774a67401b6d7dd40e70d3"
+        },
+        {
+          "path": "samples/FerroDesign/tests/gradient-handles-browser.mjs",
+          "bytes": 63144,
+          "sha256": "dbab66644e67057b0b63e3902394569ccaab1bf37e463a640ce0c47daa5b615d"
+        },
+        {
+          "path": "samples/FerroDesign/tests/gradient-input.mjs",
+          "bytes": 9878,
+          "sha256": "377dc27ea56191da15e0f6bbedb3f56bdb64ba44c5571a3f8a831541a5b0890f"
+        },
+        {
+          "path": "samples/FerroDesign/tests/gradient-input.test.mjs",
+          "bytes": 11320,
+          "sha256": "8026377652fdaf825163cd3c1075cdb1b1bc4cfef0745c294627912abe1b538a"
+        },
+        {
+          "path": "samples/FerroDesign/tests/grid-styles-browser.mjs",
+          "bytes": 18195,
+          "sha256": "cb17248da5fea1a5d3d93b750484484c93633ad89963e83549a0169824bb63f4"
+        },
+        {
+          "path": "samples/FerroDesign/tests/guide-bindings-browser.mjs",
+          "bytes": 16657,
+          "sha256": "2277edfc9db64a73d846fb56a804ef12d6527e65d98fb5d71d0ccb7a2fe9e92f"
+        },
+        {
+          "path": "samples/FerroDesign/tests/history-browser.mjs",
+          "bytes": 2581,
+          "sha256": "7fa18bd154e1e041d3184d4536b0116b6d9c82cde01f3291106f826b043eeae7"
+        },
+        {
+          "path": "samples/FerroDesign/tests/image-crop-browser.mjs",
+          "bytes": 16397,
+          "sha256": "c85627f32166fb1855f814d51c07cfd6ccf8371f82f02923a6887df76548c95c"
+        },
+        {
+          "path": "samples/FerroDesign/tests/input-observations.mjs",
+          "bytes": 4833,
+          "sha256": "4ca6a96bb6c5a61bf9963e1bff0bb66690f222972b2ebe9e92b79470ef1af576"
+        },
+        {
+          "path": "samples/FerroDesign/tests/input-observations.test.mjs",
+          "bytes": 6410,
+          "sha256": "6fc6d90dc556d0173ef5661d1c246dda513356015f6082a88bc51c6386c96996"
+        },
+        {
+          "path": "samples/FerroDesign/tests/inspector-lifecycle-browser.mjs",
+          "bytes": 8236,
+          "sha256": "32ccdcf1f7b10942ce1a9df22f5be6092a461661e17838b6f9e9058c4db777a8"
+        },
+        {
+          "path": "samples/FerroDesign/tests/isolated-scenario.mjs",
+          "bytes": 2116,
+          "sha256": "c2216ac8f127f7922cff5e803c88641bfd433ac2fa5b1186526288ec489e953e"
+        },
+        {
+          "path": "samples/FerroDesign/tests/isolated-scenario.test.mjs",
+          "bytes": 5327,
+          "sha256": "97104f6ce5ddd019857527a83ff363db5e064cb60e954e0235f9f41166422031"
+        },
+        {
+          "path": "samples/FerroDesign/tests/layout-browser.mjs",
+          "bytes": 11067,
+          "sha256": "604b4ba44c7367e2247b7f6aba5605b29a2d4ccb2745c77a8911280a291befe0"
+        },
+        {
+          "path": "samples/FerroDesign/tests/layout-drag-browser.mjs",
+          "bytes": 11848,
+          "sha256": "9f1e1383c7b325b7e31411e0122f91da9aa2fc116201feff454b87e406ac5ff3"
+        },
+        {
+          "path": "samples/FerroDesign/tests/layout-padding-browser.mjs",
+          "bytes": 16728,
+          "sha256": "129050daf3a324156671284d7e43481ea0c3e78d9b03ed4ed8940519991a9921"
+        },
+        {
+          "path": "samples/FerroDesign/tests/layout-transfer-browser.mjs",
+          "bytes": 13306,
+          "sha256": "a6d1a86daccc8f480ce2f5f34eae295f9ee2bd2bbbc9e414bd0a51f7a4de4ff3"
+        },
+        {
+          "path": "samples/FerroDesign/tests/layout-variables-browser.mjs",
+          "bytes": 14201,
+          "sha256": "7b0c426208eca77a2f35f1943e1348786f33b15849b4fb6de08157904141c14c"
+        },
+        {
+          "path": "samples/FerroDesign/tests/masks-browser.mjs",
+          "bytes": 12770,
+          "sha256": "9a451dd494d98ec8c05a8460c2665c9b15d4194c3b4f25ef61f86e429fca01fd"
+        },
+        {
+          "path": "samples/FerroDesign/tests/matching-browser.mjs",
+          "bytes": 8741,
+          "sha256": "a6a20bd9fb0254dbbec64364dc3532eb1bd2d6919ac66e890133d139e6e59eb1"
+        },
+        {
+          "path": "samples/FerroDesign/tests/network-browser.mjs",
+          "bytes": 16900,
+          "sha256": "e4f871fd55532c9ea8992373fdedcd8f779eb64873804b97b94e0adfd1b8d2bb"
+        },
+        {
+          "path": "samples/FerroDesign/tests/network-bucket-browser.mjs",
+          "bytes": 22037,
+          "sha256": "cc28fe60f63e7f09afad2c14e67cbb209f0873d6b6d6a760fedcda3379a431a7"
+        },
+        {
+          "path": "samples/FerroDesign/tests/page-inspector-browser.mjs",
+          "bytes": 3551,
+          "sha256": "d1f36523f17c1dbfd0792365fe61ac14a8b98ce71e26cf4571948cb9dd82f733"
+        },
+        {
+          "path": "samples/FerroDesign/tests/panels-browser.mjs",
+          "bytes": 4402,
+          "sha256": "2e6ee77644f053cb6fc47346e3907e85ca4f913dcebdfa9dbc1692182e8e00bc"
+        },
+        {
+          "path": "samples/FerroDesign/tests/paragraphs-browser.mjs",
+          "bytes": 30003,
+          "sha256": "99820e4aa77a3ef79cbcbab6afaac8bf45d9339dcb5e9f5c87af545cc1d1ca65"
+        },
+        {
+          "path": "samples/FerroDesign/tests/polygon-corners-browser.mjs",
+          "bytes": 16686,
+          "sha256": "69aaae8d5976b425d6c6aeb28641bb0e93df675a5ce596c4cd425e3ab4334932"
+        },
+        {
+          "path": "samples/FerroDesign/tests/prototype-browser.mjs",
+          "bytes": 12142,
+          "sha256": "8be66151238e66c71e22624ad1bdc3fe8faaa6cc64c074ee0fac009ab06cb0cb"
+        },
+        {
+          "path": "samples/FerroDesign/tests/region-paints-browser.mjs",
+          "bytes": 19801,
+          "sha256": "8ec7e757e05821916fc5bc809748091608b37e11eae119af17c7b3e2c43087af"
+        },
+        {
+          "path": "samples/FerroDesign/tests/selection-browser.mjs",
+          "bytes": 15997,
+          "sha256": "28b8129bf0ab07d879f2c65ff6f5ea2e4ad62ff158c1929b002a55923cb4dd35"
+        },
+        {
+          "path": "samples/FerroDesign/tests/serialization-browser.mjs",
+          "bytes": 6097,
+          "sha256": "47d8b18654497944c92eec207da238ac4bf483a52ad840a4477540d6fd35699b"
+        },
+        {
+          "path": "samples/FerroDesign/tests/styles-browser.mjs",
+          "bytes": 16181,
+          "sha256": "9805ac10253ef5abab7fd8ea9da153017d9f1e19c653af191d3b6467244222d7"
+        },
+        {
+          "path": "samples/FerroDesign/tests/svg-alpha-reference.mjs",
+          "bytes": 7428,
+          "sha256": "779d7dab31108ad243ce42d23eb8f7bdee4dac7ccceaf0b19c2dbe5e38178355"
+        },
+        {
+          "path": "samples/FerroDesign/tests/svg-compositing-browser.mjs",
+          "bytes": 9841,
+          "sha256": "3fec5edd0697a24103e1d3094fb52e1357420048e29f7017824461fe50fffdd9"
+        },
+        {
+          "path": "samples/FerroDesign/tests/text-pan-trace-analysis.mjs",
+          "bytes": 15220,
+          "sha256": "1c3ec7b5c479e73bbf349ea542a99528c9764cfa426bd31525633a963523dc0a"
+        },
+        {
+          "path": "samples/FerroDesign/tests/text-pan-trace-analysis.test.mjs",
+          "bytes": 18617,
+          "sha256": "5d1b90f2d8180d99219823f19213689fe019187fca7c6247cac7824d0bd92862"
+        },
+        {
+          "path": "samples/FerroDesign/tests/text-pan-trace.mjs",
+          "bytes": 23813,
+          "sha256": "e00f71644d1c533567b849d5b1d506459765962c0baae00cd3848eb6a9e0de05"
+        },
+        {
+          "path": "samples/FerroDesign/tests/text-render-benchmark.mjs",
+          "bytes": 34401,
+          "sha256": "edd21fc76ba181f765a7b90461e89e8db9527042c68957f01ce7b2d0a6f6ca5b"
+        },
+        {
+          "path": "samples/FerroDesign/tests/typography-browser.mjs",
+          "bytes": 13637,
+          "sha256": "5b50194c8e80bb2c5000227ef7b4818a6a1b7008bfaf6a544283c77661716ecc"
+        },
+        {
+          "path": "samples/FerroDesign/tests/width-handles-browser.mjs",
+          "bytes": 14682,
+          "sha256": "3e581626e0e7fc563d5a00b0540f7ebda71136e21196941908ca15347b971129"
+        },
+        {
+          "path": "samples/FerroDesign/tests/width-profiles-browser.mjs",
+          "bytes": 20326,
+          "sha256": "9c524052923414b4b185568661c52520d7b2a1416e6b65c1cf115cd22460b8cf"
+        },
+        {
+          "path": "samples/FerroDesign/web/app.css",
+          "bytes": 1698,
+          "sha256": "bc13442e4a8b8d92c33428c53a65ebcd0e22423d623c1418bc137a0a23b9453b"
+        },
+        {
+          "path": "samples/FerroDesign/web/document-store.js",
+          "bytes": 15559,
+          "sha256": "6e6cca56c8af8567bd8b1f183eceed55815b2ec63e3ea222d45be93f25b4f012"
+        },
+        {
+          "path": "samples/FerroDesign/web/favicon.svg",
+          "bytes": 222,
+          "sha256": "883347dbc8832de4f398160d8fff0f69e8ef4ca831ffca045d670a3228ed08a7"
+        },
+        {
+          "path": "samples/FerroDesign/web/index.html",
+          "bytes": 1189,
+          "sha256": "5655bc554cb0568f2eadb3fe81085103c270821dac6c9e9443219d3541a5531d"
+        },
+        {
+          "path": "samples/FerroDesign/web/main.js",
+          "bytes": 2720,
+          "sha256": "8f81710a5fe670e9fe5438e1c2cd8feec6d1c05dfbbf8ad21be1aaa1d4f638ea"
+        }
+      ]
+    },
+    "distribution_manifest_sha256": "14279dabac9d091103b4ea0235e815875fb624cffac36c9b9ec7ca38e2505552",
+    "build_run_attempt": "1"
+  },
+  "ci": {
+    "job": "browser-scenarios",
+    "run_attempt": "1"
+  },
+  "command": [
+    "node",
+    "tests/browser.mjs"
+  ],
+  "status": "failed",
+  "validation_errors": [
+    "GateError: Original scenario process exited 1"
+  ],
+  "process": {
+    "started_utc": "2026-10-23T15:32:23.853957+00:00",
+    "finished_utc": "2026-10-23T15:33:44.423672+00:00",
+    "exit_code": 1
+  },
+  "files": {
+    "report.json": {
+      "path": "report.json",
+      "bytes": 662643,
+      "sha256": "8c0ab3f9ffa51c00ab952bf15c7e356fdb83e74eba090a8924cb1ca95f0b1393"
+    },
+    "stdout.log": {
+      "path": "stdout.log",
+      "bytes": 14826,
+      "sha256": "762125e896822db2422876a5c68c700ca5f4a70c438097acab0ce4bd0e2fa705"
+    },
+    "stderr.log": {
+      "path": "stderr.log",
+      "bytes": 717,
+      "sha256": "0e95466a174627d2e9c354af86f8e35efbe80fcefe5076a2aedfc3314c4dbfec"
+    }
+  }
+}

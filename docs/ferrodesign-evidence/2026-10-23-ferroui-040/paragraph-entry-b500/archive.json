@@ -1,0 +1,400 @@
+{
+  "api_artifact_id": 12512816441,
+  "bytes": 37260313,
+  "sha256": "f8109de7150a9e8fe3c5a0cd54eed6819ab1fbccbb159526df9b22407377b1a1",
+  "api_digest_verified": true,
+  "central_directory_members": [
+    {
+      "name": "Software2D-background-blur-native-capture.json",
+      "bytes": 3145,
+      "compressed_bytes": 837,
+      "crc32": "cf763b6c"
+    },
+    {
+      "name": "Software2D-background-blur-native.png",
+      "bytes": 69218,
+      "compressed_bytes": 62262,
+      "crc32": "5999f33d"
+    },
+    {
+      "name": "Software2D-compact.png",
+      "bytes": 91056,
+      "compressed_bytes": 89238,
+      "crc32": "a991576b"
+    },
+    {
+      "name": "Software2D-component-instance-properties-capture.json",
+      "bytes": 5024,
+      "compressed_bytes": 1055,
+      "crc32": "b23827ee"
+    },
+    {
+      "name": "Software2D-component-instance-properties.png",
+      "bytes": 82146,
+      "compressed_bytes": 75925,
+      "crc32": "5992b320"
+    },
+    {
+      "name": "Software2D-component-main-properties-capture.json",
+      "bytes": 4768,
+      "compressed_bytes": 978,
+      "crc32": "982b8046"
+    },
+    {
+      "name": "Software2D-component-main-properties.png",
+      "bytes": 84382,
+      "compressed_bytes": 77301,
+      "crc32": "973f2461"
+    },
+    {
+      "name": "Software2D-component-set-authoring-capture.json",
+      "bytes": 5816,
+      "compressed_bytes": 1079,
+      "crc32": "7ed0bdcf"
+    },
+    {
+      "name": "Software2D-component-set-authoring.png",
+      "bytes": 87078,
+      "compressed_bytes": 80588,
+      "crc32": "3d94fd9c"
+    },
+    {
+      "name": "Software2D-compositing-background-blur.png",
+      "bytes": 446,
+      "compressed_bytes": 189,
+      "crc32": "7124801a"
+    },
+    {
+      "name": "Software2D-compositing-group-opacity.png",
+      "bytes": 395,
+      "compressed_bytes": 121,
+      "crc32": "87ce5c38"
+    },
+    {
+      "name": "Software2D-compositing-multiply.png",
+      "bytes": 374,
+      "compressed_bytes": 105,
+      "crc32": "9e9b2fac"
+    },
+    {
+      "name": "Software2D-compositing-transparent-backdrop.png",
+      "bytes": 373,
+      "compressed_bytes": 104,
+      "crc32": "5bdda4ec"
+    },
+    {
+      "name": "Software2D-edited.png",
+      "bytes": 203691,
+      "compressed_bytes": 198750,
+      "crc32": "4342bbbf"
+    },
+    {
+      "name": "Software2D-export.png",
+      "bytes": 10440,
+      "compressed_bytes": 9986,
+      "crc32": "344fbdce"
+    },
+    {
+      "name": "Software2D-image-crop-affine-native.png",
+      "bytes": 96538,
+      "compressed_bytes": 89259,
+      "crc32": "82f2415a"
+    },
+    {
+      "name": "Software2D-image-crop-affine-native-capture.json",
+      "bytes": 4065,
+      "compressed_bytes": 969,
+      "crc32": "6ebee162"
+    },
+    {
+      "name": "Software2D-image-crop-fit-export.png",
+      "bytes": 453,
+      "compressed_bytes": 267,
+      "crc32": "03d5b4d1"
+    },
+    {
+      "name": "Software2D-image-crop-pan-export.png",
+      "bytes": 375,
+      "compressed_bytes": 173,
+      "crc32": "aa2d783d"
+    },
+    {
+      "name": "Software2D-image-crop-pan-native-capture.json",
+      "bytes": 4036,
+      "compressed_bytes": 947,
+      "crc32": "a14e629f"
+    },
+    {
+      "name": "Software2D-image-crop-pan-native.png",
+      "bytes": 72031,
+      "compressed_bytes": 65298,
+      "crc32": "932508de"
+    },
+    {
+      "name": "Software2D-image-crop-percentages-native-capture.json",
+      "bytes": 4894,
+      "compressed_bytes": 1037,
+      "crc32": "8fa5b924"
+    },
+    {
+      "name": "Software2D-image-crop-percentages-native.png",
+      "bytes": 121960,
+      "compressed_bytes": 116590,
+      "crc32": "6fc2b1fb"
+    },
+    {
+      "name": "Software2D-image-crop-tile-export.png",
+      "bytes": 326,
+      "compressed_bytes": 120,
+      "crc32": "9c40718b"
+    },
+    {
+      "name": "Software2D-initial.png",
+      "bytes": 187960,
+      "compressed_bytes": 182530,
+      "crc32": "6da1b213"
+    },
+    {
+      "name": "Software2D-inline-text.png",
+      "bytes": 82501,
+      "compressed_bytes": 76923,
+      "crc32": "58159d1a"
+    },
+    {
+      "name": "Software2D-large-document.png",
+      "bytes": 418680,
+      "compressed_bytes": 408390,
+      "crc32": "ce8a5f8a"
+    },
+    {
+      "name": "Software2D-many-pages.png",
+      "bytes": 45746,
+      "compressed_bytes": 43059,
+      "crc32": "6827ccc1"
+    },
+    {
+      "name": "Software2D-masks-alpha.png",
+      "bytes": 396,
+      "compressed_bytes": 122,
+      "crc32": "ffa65186"
+    },
+    {
+      "name": "Software2D-masks-grouped-alpha.png",
+      "bytes": 396,
+      "compressed_bytes": 122,
+      "crc32": "ffa65186"
+    },
+    {
+      "name": "Software2D-masks-isolated-group.png",
+      "bytes": 387,
+      "compressed_bytes": 119,
+      "crc32": "de074b1a"
+    },
+    {
+      "name": "Software2D-masks-luminance.png",
+      "bytes": 380,
+      "compressed_bytes": 111,
+      "crc32": "8aeeb777"
+    },
+    {
+      "name": "Software2D-masks-pass-through-group.png",
+      "bytes": 387,
+      "compressed_bytes": 119,
+      "crc32": "fa551bc5"
+    },
+    {
+      "name": "Software2D-masks-vector.png",
+      "bytes": 393,
+      "compressed_bytes": 120,
+      "crc32": "aa573f23"
+    },
+    {
+      "name": "Software2D-native-effect-stack-capture.json",
+      "bytes": 5838,
+      "compressed_bytes": 1099,
+      "crc32": "f4435f82"
+    },
+    {
+      "name": "Software2D-native-effect-stack.png",
+      "bytes": 121932,
+      "compressed_bytes": 116438,
+      "crc32": "902bd8ca"
+    },
+    {
+      "name": "Software2D-native-mask-controls-capture.json",
+      "bytes": 6079,
+      "compressed_bytes": 1082,
+      "crc32": "e07317bc"
+    },
+    {
+      "name": "Software2D-native-mask-controls.png",
+      "bytes": 109321,
+      "compressed_bytes": 102428,
+      "crc32": "49233c2e"
+    },
+    {
+      "name": "Software2D-native-paragraph-authoring-capture.json",
+      "bytes": 13657,
+      "compressed_bytes": 1781,
+      "crc32": "92e373b8"
+    },
+    {
+      "name": "Software2D-native-paragraph-authoring.png",
+      "bytes": 108344,
+      "compressed_bytes": 102307,
+      "crc32": "1bcfcf59"
+    },
+    {
+      "name": "Software2D-native-paragraph-split-input.json",
+      "bytes": 53570,
+      "compressed_bytes": 2902,
+      "crc32": "e8dd4cb0"
+    },
+    {
+      "name": "Software2D-native-rich-text-editing-capture.json",
+      "bytes": 11489,
+      "compressed_bytes": 1692,
+      "crc32": "963a18aa"
+    },
+    {
+      "name": "Software2D-native-rich-text-editing.png",
+      "bytes": 73526,
+      "compressed_bytes": 66873,
+      "crc32": "6a41669b"
+    },
+    {
+      "name": "Software2D-native-svg-masks-capture.json",
+      "bytes": 3085,
+      "compressed_bytes": 822,
+      "crc32": "0355308f"
+    },
+    {
+      "name": "Software2D-native-svg-masks.png",
+      "bytes": 70178,
+      "compressed_bytes": 63166,
+      "crc32": "97428216"
+    },
+    {
+      "name": "Software2D-native-text-entry-input.json",
+      "bytes": 156787,
+      "compressed_bytes": 4610,
+      "crc32": "96fa75ff"
+    },
+    {
+      "name": "Software2D-paint-stack-capture.json",
+      "bytes": 4730,
+      "compressed_bytes": 996,
+      "crc32": "382c444f"
+    },
+    {
+      "name": "Software2D-paint-stack.png",
+      "bytes": 151019,
+      "compressed_bytes": 128371,
+      "crc32": "6becaae2"
+    },
+    {
+      "name": "Software2D-paragraph-artwork.png",
+      "bytes": 5288,
+      "compressed_bytes": 4678,
+      "crc32": "db6f98b9"
+    },
+    {
+      "name": "Software2D-paragraphs-failure.ferrodesign",
+      "bytes": 2793,
+      "compressed_bytes": 891,
+      "crc32": "5de4fa64"
+    },
+    {
+      "name": "Software2D-paragraphs-failure.png",
+      "bytes": 68825,
+      "compressed_bytes": 61951,
+      "crc32": "1d774f3d"
+    },
+    {
+      "name": "Software2D-reloaded.png",
+      "bytes": 169965,
+      "compressed_bytes": 163873,
+      "crc32": "53e31c9a"
+    },
+    {
+      "name": "Software2D-svg-compositing-original.png",
+      "bytes": 403,
+      "compressed_bytes": 130,
+      "crc32": "16bd1ec8"
+    },
+    {
+      "name": "Software2D-svg-compositing-reopened.png",
+      "bytes": 403,
+      "compressed_bytes": 130,
+      "crc32": "16bd1ec8"
+    },
+    {
+      "name": "Software2D-svg-compositing-roundtrip.svg",
+      "bytes": 5056,
+      "compressed_bytes": 814,
+      "crc32": "b0813d34"
+    },
+    {
+      "name": "Software2D-svg.png",
+      "bytes": 110959,
+      "compressed_bytes": 104523,
+      "crc32": "da65433d"
+    },
+    {
+      "name": "Software2D-trace.zip",
+      "bytes": 39602606,
+      "compressed_bytes": 34602835,
+      "crc32": "339f0436"
+    },
+    {
+      "name": "Software2D-typography-inline-entry-1.json",
+      "bytes": 23464,
+      "compressed_bytes": 1673,
+      "crc32": "5b7cdfad"
+    },
+    {
+      "name": "Software2D-typography-inline-entry-2.json",
+      "bytes": 34596,
+      "compressed_bytes": 1897,
+      "crc32": "b5f0a56a"
+    },
+    {
+      "name": "Software2D-vector-edit.png",
+      "bytes": 83153,
+      "compressed_bytes": 77025,
+      "crc32": "5af839aa"
+    },
+    {
+      "name": "index.html",
+      "bytes": 9551,
+      "compressed_bytes": 3743,
+      "crc32": "77eca0cd"
+    },
+    {
+      "name": "proof.json",
+      "bytes": 14632,
+      "compressed_bytes": 4199,
+      "crc32": "2ebcf3b5"
+    },
+    {
+      "name": "report.json",
+      "bytes": 662643,
+      "compressed_bytes": 37654,
+      "crc32": "83ec7480"
+    },
+    {
+      "name": "stderr.log",
+      "bytes": 717,
+      "compressed_bytes": 267,
+      "crc32": "e806eb18"
+    },
+    {
+      "name": "stdout.log",
+      "bytes": 14826,
+      "compressed_bytes": 4184,
+      "crc32": "dd5008ba"
+    }
+  ],
+  "complete_archive_crc_walk_performed": false,
+  "scope": "Only retained members were decompressed and CRC checked. The full ZIP SHA256 matches GitHub artifact metadata; the large trace archive remains outside git."
+}

@@ -195,17 +195,65 @@ export async function paragraphRegressions(page, reference, check, helpers, outp
     assert.deepEqual(await documentState(page), inherited, "Restore the exact authored document before native inline editing");
     check("Paragraph Inherit has exact one-step undo/redo and preserves the first paragraph; its native clipped-artboard PNG has exact dimensions, three text bands and the authored transparent spacing gap");
 
+    const inlineEntries = [];
     const enterInline = async () => {
-        await clickWorld(page, 65, 60);
-        assert.equal((await state(page)).chrome.CanvasHost.focusWithin, true);
-        const before = await state(page);
-        await page.keyboard.press("Enter");
-        await page.waitForFunction(() => {
-            const view = JSON.parse(globalThis.ferroDesign.ferroDesignState());
-            return view.editingText === 2 && view.chrome.InlineTextBox?.focused && view.chrome.InlineTextBox?.visible;
-        }, undefined, { timeout: 10000 });
-        await waitForNativeFrame(page, before.renderedFrames, "Native paragraph inline entry");
-        await waitForNativeScene(page, before.sceneFrames, "Native paragraph inline entry");
+        const documentBefore = await documentState(page), before = await state(page);
+        assert.equal(before.editingText, null, "Each paragraph session starts outside native editing");
+        const evidence = { entry: inlineEntries.length + 1, before: inlineInputState(before),
+            expectedText: documentBefore.nodes[2].text };
+        inlineEntries.push(evidence);
+        await startInputObservation(page, ["pointerdown", "pointerup", "mousedown", "mouseup", "dblclick", "keydown", "keyup"]);
+        let entryError;
+        try {
+            await clickWorld(page, 65, 60);
+            const clicked = await state(page);
+            evidence.afterClick = inlineInputState(clicked);
+            evidence.afterClickText = clicked.chrome.InlineTextBox?.text ?? null;
+            assert.equal(clicked.chrome.CanvasHost.focusWithin, true);
+            assert.deepEqual(clicked.selection, [2]);
+            // A fast click after Escape can legitimately be the native second
+            // click and already open/select the inline text. CanvasHost is an
+            // ancestor, so focusWithin alone does not mean Enter is an editor
+            // command: in the TextBox it would replace the selection with LF.
+            if (clicked.editingText === null) {
+                assert.equal(clicked.chrome.InlineTextBox?.focused, false);
+                evidence.mechanism = "keyboard-Enter";
+                await page.keyboard.press("Enter");
+            } else {
+                assert.equal(clicked.editingText, 2);
+                assert.equal(clicked.chrome.InlineTextBox?.focused, true);
+                assert.equal(clicked.pointerPresses.entries.at(-1).clickCount, 2);
+                evidence.mechanism = "native-double-click";
+            }
+            await page.waitForFunction(() => {
+                const view = JSON.parse(globalThis.ferroDesign.ferroDesignState());
+                return view.editingText === 2 && view.chrome.InlineTextBox?.focused && view.chrome.InlineTextBox?.visible;
+            }, undefined, { timeout: 10000 });
+            await waitForNativeFrame(page, before.renderedFrames, "Native paragraph inline entry");
+            await waitForNativeScene(page, before.sceneFrames, "Native paragraph inline entry");
+            const entered = await state(page);
+            evidence.after = inlineInputState(entered);
+            evidence.actualText = entered.chrome.InlineTextBox.text;
+            assert.equal(evidence.actualText, documentBefore.nodes[2].text,
+                "Opening native editing preserves the original complete text before navigation");
+            assert.deepEqual(await documentState(page), documentBefore,
+                "Opening native editing preserves exact character and paragraph styles");
+            assert.equal(entered.historyLength, before.historyLength);
+        } catch (error) {
+            evidence.error = error?.stack || String(error);
+            entryError = error;
+        }
+        try {
+            await captureWithinDeadline(async () => {
+                evidence.observation = await stopInputObservation(page);
+                await writeFile(resolve(output, mode + "-native-paragraph-entry-input.json"),
+                    JSON.stringify(inlineEntries, null, 2));
+            }, 5000);
+        } catch (error) {
+            evidence.captureError = error?.stack || String(error);
+            entryError ??= error;
+        }
+        if (entryError) throw entryError;
     };
     const splitInputs = [];
     const splitFirst = async () => {

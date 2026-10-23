@@ -1,0 +1,19 @@
+{
+  "id": 12512816441,
+  "name": "FerroDesign-browser-evidence-text-effects-Software2D-b5008093b3c201b79131810f044e101058b1b165",
+  "size_in_bytes": 37260313,
+  "url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/artifacts/12512816441",
+  "archive_download_url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/artifacts/12512816441/zip",
+  "expired": false,
+  "created_at": "2026-10-23T15:33:46Z",
+  "expires_at": "2026-11-22T15:33:44Z",
+  "updated_at": "2026-10-23T15:33:46Z",
+  "digest": "sha256:f8109de7150a9e8fe3c5a0cd54eed6819ab1fbccbb159526df9b22407377b1a1",
+  "workflow_run": {
+    "id": 39977448194,
+    "repository_id": 1405576478,
+    "head_repository_id": 1405576478,
+    "head_branch": "feat/ferrodesign-editor",
+    "head_sha": "b5008093b3c201b79131810f044e101058b1b165"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "README.md": {
+    "bytes": 5354,
+    "sha256": "24d115490bb76ad3597dadc6eccd14cd58d78d996b6179f5f6a61b705dcbe84e"
+  },
+  "Software2D-native-paragraph-split-input.json": {
+    "bytes": 53570,
+    "sha256": "cd4194516c4a77cdd2be1d53d607ffef125a18aba4c54e2fa5d058f47ac5cf6c"
+  },
+  "Software2D-paragraphs-failure.ferrodesign": {
+    "bytes": 2793,
+    "sha256": "22c59d40051aee649c74cb7b5af47e46db947b49b47b6343eb8b39bb3a5df91e"
+  },
+  "Software2D-paragraphs-failure.png": {
+    "bytes": 68825,
+    "sha256": "ec2c76dd788443e083b6d423d7aafbabe4390bd203def7feb543c5a9896cd4b5"
+  },
+  "analysis.json": {
+    "bytes": 19667,
+    "sha256": "3f93248b0c0f16d2b3f79c48de929dbd3b5b60487458bfbdacd0c73bdaa419d1"
+  },
+  "archive.json": {
+    "bytes": 9863,
+    "sha256": "c51ccdf638bc0cde477b4f301fba7d2dd329104307625b8b5ae897d60ef3d5b4"
+  },
+  "artifact-metadata.json": {
+    "bytes": 818,
+    "sha256": "d57b990b5ec113871edeb17b0895ea827727ca38da4738853c7872c89ef856b2"
+  },
+  "corrected-helper.mjs.txt": {
+    "bytes": 3537,
+    "sha256": "d2a7c9322c25e3d03e273b74f0758d91b9fc666f627cb8e464a019fab2c97b1c"
+  },
+  "correction.patch": {
+    "bytes": 4825,
+    "sha256": "615de86da2c3d29cdef182ce91cfaf432148b5e25ef0f7a5e548d30933c155c4"
+  },
+  "job-metadata.json": {
+    "bytes": 3782,
+    "sha256": "9f58ba61db37c267990d4b296a432b63aa104145707c564b7a07c278b051475d"
+  },
+  "job.log.gz": {
+    "bytes": 22210,
+    "sha256": "d28d14630eea43590c81491e274e2f64cfcb1d8c9724d871de72f7a833b8455b"
+  },
+  "proof.json": {
+    "bytes": 14632,
+    "sha256": "1744e446797492dd8ce4c4552cd8dab5be463f2392a6ed374ba1a6cf6140133a"
+  },
+  "report.json.gz": {
+    "bytes": 34651,
+    "sha256": "f0e0bcc03631bb3af9a302b60cc271fb7af397de239545669d4dbc51750a40e9"
+  }
+}
