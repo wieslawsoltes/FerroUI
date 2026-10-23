@@ -782,6 +782,92 @@ fn metadata_round_trips_all_bit_fields() {
 }
 
 #[test]
+fn token_type_matches_the_first_boundary_word_in_each_scope() {
+    use StandardTokenType::{Comment, Other, RegEx, String as StringToken};
+    for (scope, expected) in [
+        ("punctuation.definition.string.begin", StringToken),
+        ("meta.comment.block", Comment),
+        ("source.regex-token", RegEx),
+        ("comment.string", Comment),
+        ("string.meta.embedded", StringToken),
+        ("custom.meta.embedded.block.string", Other),
+        ("commentary", Other),
+        ("xcomment", Other),
+        ("_comment", Other),
+        ("comment2", Other),
+        ("Comment", Other),
+    ] {
+        assert_eq!(
+            EncodedTokenAttributes::infer_token_type(&[scope.into()]),
+            expected,
+            "{scope}",
+        );
+    }
+    // An unrecognized inner scope inherits its parent. An embedded scope
+    // explicitly resets that parent type, and a deeper typed scope overrides it.
+    for (scopes, expected) in [
+        (vec!["comment.block", "invalid.illegal"], Comment),
+        (
+            vec!["comment.block", "custom.meta.embedded.block.string", "invalid.illegal"],
+            Other,
+        ),
+        (
+            vec!["comment.block", "custom.meta.embedded", "punctuation.string.end"],
+            StringToken,
+        ),
+    ] {
+        let scopes: Vec<_> = scopes.into_iter().map(str::to_owned).collect();
+        assert_eq!(EncodedTokenAttributes::infer_token_type(&scopes), expected);
+    }
+}
+
+#[test]
+fn token_type_boundaries_follow_dotnet_unicode_categories_and_utf16() {
+    use StandardTokenType::{Comment, RegEx};
+    // .NET boundary words: letters, nonspacing marks, decimal digits,
+    // connector punctuation, and the two join controls. These prevent a match.
+    for character in ['é', 'Ω', '中', '\u{0301}', '\u{0663}', '\u{203f}', '\u{200c}', '\u{200d}'] {
+        for scope in [format!("{character}regex"), format!("regex{character}")] {
+            assert_eq!(
+                EncodedTokenAttributes::infer_token_type(&["comment".into(), scope.clone()]),
+                Comment,
+                "no word boundary in {scope:?}",
+            );
+        }
+    }
+    // Spacing/enclosing marks, letter/other numbers and supplementary letters
+    // are not boundary-word UTF-16 code units in .NET. Rust's Unicode \w set
+    // would incorrectly include several of them.
+    for character in ['\u{0903}', '\u{20dd}', '\u{2160}', '\u{00b2}', '𐐀', '😀', '-'] {
+        for scope in [format!("{character}regex"), format!("regex{character}")] {
+            assert_eq!(
+                EncodedTokenAttributes::infer_token_type(&["comment".into(), scope.clone()]),
+                RegEx,
+                "word boundary in {scope:?}",
+            );
+        }
+    }
+}
+
+#[test]
+fn encoded_token_types_preserve_component_matches_and_embedded_reset() {
+    use StandardTokenType::{Comment, Other, RegEx, String as StringToken};
+    let grammar = grammar(
+        r##"{"scopeName":"source.test","patterns":[{"match":"r","name":"meta.regex.token"},{"match":"s","name":"punctuation.definition.string.begin"},{"begin":"\\[","end":"\\]","name":"comment.block","patterns":[{"match":"x","name":"custom.meta.embedded.block.string"}]}]}"##,
+    );
+    let result = grammar
+        .tokenize_line2(
+            "rs[x]", None, &Theme::default(), &mut ColorMap::new(),
+            &GrammarConfiguration::default(),
+        )
+        .unwrap();
+    let types: Vec<_> = result.tokens.chunks_exact(2)
+        .map(|pair| (pair[0], EncodedTokenAttributes(pair[1]).token_type()))
+        .collect();
+    assert_eq!(types, vec![(0, RegEx), (1, StringToken), (2, Comment), (3, Other), (4, Comment)]);
+}
+
+#[test]
 fn encoded_tokens_apply_embedded_languages_overrides_and_brackets() {
     let grammar = grammar(
         r##"{"scopeName":"source.test","patterns":[{"match":"word","name":"meta.embedded.block string.quoted"}]}"##,
