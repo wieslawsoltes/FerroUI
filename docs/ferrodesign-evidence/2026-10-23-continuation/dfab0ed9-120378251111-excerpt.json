@@ -1,0 +1,63 @@
+{
+  "source_sha": "dfab0ed9a0146a892b40d2db0590b0193c80f672",
+  "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39942848092/job/120378251111",
+  "whole_log_sha256": "8be61bfaec9d97148b2253464574073d2e4de4ea510f74a549b24aa16ab7cd94",
+  "lines": [
+    {
+      "line": 190,
+      "text": "2026-10-23T10:59:27.7783660Z test angular_gradient_tests::angular_gradient_scoped_edit_has_exact_undo_redo_and_unchanged_noop ... ok"
+    },
+    {
+      "line": 191,
+      "text": "2026-10-23T10:59:27.7807789Z test angular_gradient_tests::angular_gradient_rejected_style_update_preserves_document_redo_and_allocator ... ok"
+    },
+    {
+      "line": 192,
+      "text": "2026-10-23T10:59:27.7838079Z test angular_gradient_tests::angular_gradient_document_preserves_duplicate_stops_alpha_and_strokes ... ok"
+    },
+    {
+      "line": 193,
+      "text": "2026-10-23T10:59:27.7839239Z test angular_gradient_tests::angular_gradient_smart_animate_uses_shortest_angle_and_interpolates_stops ... ok"
+    },
+    {
+      "line": 194,
+      "text": "2026-10-23T10:59:27.7857056Z test angular_gradient_tests::angular_gradient_import_rejects_invalid_center_angle_and_stop_offsets ... ok"
+    },
+    {
+      "line": 195,
+      "text": "2026-10-23T10:59:27.7858091Z test angular_gradient_tests::angular_gradient_style_propagation_retains_bindings_and_manual_edit_detaches ... ok"
+    },
+    {
+      "line": 201,
+      "text": "2026-10-23T10:59:27.7937676Z test angular_gradient_tests::angular_gradient_svg_approximation_is_bounded_explicit_and_preserves_alpha ... ok"
+    },
+    {
+      "line": 202,
+      "text": "2026-10-23T10:59:27.7967520Z test angular_gradient_tests::angular_gradient_svg_large_stop_stacks_have_fixed_geometry_budget ... ok"
+    },
+    {
+      "line": 225,
+      "text": "2026-10-23T10:59:27.8147668Z test angular_gradient_tests::angular_gradient_svg_strokes_have_user_space_tiles_and_native_reference_centers ... ok"
+    },
+    {
+      "line": 269,
+      "text": "2026-10-23T10:59:27.9354662Z test gradient_edit::tests::invalid_radial_angular_and_stale_kind_gradient_edits_are_atomic_with_real_redo ... ok"
+    },
+    {
+      "line": 271,
+      "text": "2026-10-23T10:59:27.9357472Z test gradient_edit::tests::radial_canvas_geometry_uses_both_native_relative_radii_and_translates_without_radius_change ... ok"
+    },
+    {
+      "line": 272,
+      "text": "2026-10-23T10:59:27.9358762Z test gradient_edit::tests::radial_angular_stop_edits_preserve_source_order_ties_and_exact_kind ... ok"
+    },
+    {
+      "line": 719,
+      "text": "2026-10-23T10:59:29.4954099Z test result: ok. 528 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.72s"
+    },
+    {
+      "line": 725,
+      "text": "2026-10-23T10:59:29.8758211Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "source_sha": "1637a093723a4f899b7f4e371fd53f0b91914a98",
+  "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253726/job/120382892496",
+  "whole_log_sha256": "65497f871b07540237ca84484e894030878adbbbb8572d5fdc97543587f82152",
+  "lines": [
+    {
+      "line": 394,
+      "text": "2026-10-23T11:15:07.8382893Z test prototype::layout_variable_tests::prototype_spacing_action_reflows_nested_hug_geometry_without_changing_authored_modes ... ok"
+    },
+    {
+      "line": 395,
+      "text": "2026-10-23T11:15:07.8384594Z test prototype::layout_variable_tests::invalid_prototype_spacing_restores_document_and_existing_or_absent_session_override ... ok"
+    },
+    {
+      "line": 396,
+      "text": "2026-10-23T11:15:07.8386179Z test prototype::layout_variable_tests::prototype_spacing_alias_detection_includes_prior_session_overrides ... ok"
+    },
+    {
+      "line": 397,
+      "text": "2026-10-23T11:15:07.8412089Z test prototype::layout_variable_tests::unrelated_prototype_color_action_keeps_the_existing_path_without_layout_reflow ... ok"
+    },
+    {
+      "line": 398,
+      "text": "2026-10-23T11:15:07.8422613Z test prototype::layout_variable_tests::transient_spacing_action_restores_every_reflowed_node_and_authored_variable ... ok"
+    },
+    {
+      "line": 568,
+      "text": "2026-10-23T11:15:08.1266887Z test tests::incremental_scene_update_matches_rebuild_when_clipped_subtree_moves_into_view ... ok"
+    },
+    {
+      "line": 724,
+      "text": "2026-10-23T11:15:09.8742972Z test result: ok. 533 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.50s"
+    },
+    {
+      "line": 730,
+      "text": "2026-10-23T11:15:10.3488533Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    }
+  ]
+}

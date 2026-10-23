@@ -2,7 +2,54 @@
 
 This file distinguishes implemented paths, completed checks and measurements. Each observation belongs to its stated source, runtime and run; older successful runs do not validate later changes. The branch incorporates FerroUI `ab7a15b8` / `0.4.0-preview.1` and uses Vello for every application target through public FerroUI APIs. [PR #254](https://github.com/wieslawsoltes/FerroUI/pull/254) collects the complete source and current review status. Current continuation evidence is recorded first; earlier checkpoints remain below with their original scope.
 
-## Current continuation after `76d3744c` (2026-10-22)
+## Gradient and spacing continuation (2026-10-23)
+
+The published production checkpoint `1637a093` passes **533 core and 239 native
+application tests in CI**, including radial/angular gradient interaction and
+pixels, native spacing-variable controls, prototype spacing reflow/rollback,
+and clipped selection/control priority. A complete browser pass on the new
+production source remains a separate gate. The
+[continuation evidence](../../../docs/ferrodesign-evidence/2026-10-23-continuation/README.md)
+records exact source IDs, CI links, decoded-log hashes and selected result lines.
+
+| Gate | Exact source and result |
+| --- | --- |
+| Current production core | `1637a093`, [core run 39944253726](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253726/job/120382892496): **533/533 passed**, **2.50 s**, including all five prototype-spacing cases and the strengthened stale-effective-value no-op regression |
+| Current native application | `1637a093`, [native feedback run 39944253747](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253747/job/120382892411): **239/239 passed**, **43.57 s**, including the clipped selection/radius-control priority regression and Present button diagnostic. All five configured framework filters also passed |
+| Corrected padding Escape and native application | `3be16cb7`, [native feedback run 39941952822](https://github.com/wieslawsoltes/FerroUI/actions/runs/39941952822/job/120375277944): **230/230 passed**, **27.27 s**, including the previously failing grouped-draft discard case |
+| Full-workflow native checks | `3be16cb7`, [native job 120375278062](https://github.com/wieslawsoltes/FerroUI/actions/runs/39941952796/job/120375278062): **511 core / 230 app**, native compile, configured public geometry/compositing/text gates and five **Vello/no-Skia** active target graphs passed |
+| Radial/angular and spacing-variable core | `dfab0ed9`, [core run 39942848092](https://github.com/wieslawsoltes/FerroUI/actions/runs/39942848092/job/120378251111): **528/528 passed**, **1.72 s** |
+| Radial/angular and native variable controls | `dfab0ed9`, [native feedback run 39942848091](https://github.com/wieslawsoltes/FerroUI/actions/runs/39942848091/job/120381540661): **238/238 app passed**, **28.42 s**. The **8 Vello / 15 Base / 16 Controls paragraph / 174 TextBox / 5 rich-history** filters also passed; these overlapping counts are not additive |
+| Prototype spacing reflow and rollback | Published tree of `1637a093`: **533 core passed locally**, **5.91 s**, including five new nested-layout, alias, rollback, transient and unrelated-action cases. The tested/published Git trees were verified identical |
+| Pure browser helpers | `1637a093`: **34/34 passed locally**, covering fixed-scale coverage math, passive pointer/radius expectations and bounded trace/browser-process ownership. These are not editor browser results |
+| Recovered full browser baseline | `b7b0b885`, [run 39869066118](https://github.com/wieslawsoltes/FerroUI/actions/runs/39869066118): actual WASM and IndexedDB passed; editor **failed**, with **161 Software2D / 155 WebGL2 completed checks**, **28/37 / 27/37 passed scenarios**. The [complete scenario outcome projection](../../../docs/ferrodesign-evidence/2026-10-23-continuation/b7-browser-outcome.json) preserves its failures |
+| Independent corner reference | [16×/32× Chromium strip experiment](../../../docs/ferrodesign-evidence/2026-10-23-browser-harness/README.md): **1.96875** maximum reference difference, **0** native pixels over 12 alpha units. Original limits remain **4** and **48** respectively. The editor was not loaded during this isolated numerical reference check |
+
+[Gradient handles](GRADIENT_HANDLES.md) now cover eligible linear, radial and
+angular paints. The editor retains stable source stop indices, tied/seam markers,
+owned native transactions, affine geometry and public FerroUI/Vello drawing.
+[Spacing variables](LAYOUT_VARIABLES.md) bind four padding sides and two gaps,
+validate every mode/alias, reflow in one authored transaction, and preserve
+component ownership. Prototype overrides reflow a private candidate and roll
+back both layout and session overrides on invalid values.
+
+The recovered baseline failures also exposed missing read-only native control
+names, pointer-delivery quantization, a selection probe overlapping a radius
+handle and conservative text paint bounds mistaken for a crop. Corrections
+retain strict numeric/history checks and explicit native pixel assertions.
+The 8×/16× corner reference failed its own convergence gate; the fixed 16×/32×
+reference increases numerical precision with bounded strips. Earlier failing
+results remain below rather than being relabeled as successful runs.
+
+The `dfab0ed9` native cache restore verified 9,846 unchanged sources and skipped
+20 changed inputs. Application compilation then took 41.49 s. This is observed
+reuse under those cache conditions, not a controlled speedup or an editor
+frame-rate measurement. The browser cache now uses the same verified helper and
+correctness probes. Complete distribution upload follows successful WASM/static
+import validation, before the independent browser interaction and benchmark
+gates. None of these results establishes full Figma visual or feature parity.
+
+## Earlier continuation snapshot after `76d3744c` (2026-10-22)
 
 The continuation contains production framework and application changes after the complete predecessor runs below. The newest completed core suite passed **511 tests at `7f813672`**, including all **five gradient / eight padding** core cases. The complete native feedback job at **`5cb7e884` passed**, including **217 application / 16 paragraph / 174 TextBox / 5 rich-history tests**, plus **8 Vello / 15 Base**. Its separate full-workflow native job also passed **498 core / 217 application tests** and all configured host/framework/renderer gates. Its actual WASM build and five IndexedDB checks passed, but the editor failed after **24 checks per mode** with **288** corner-edge alpha differences. The separate benchmark completed normal and traced measurements, then failed its bounded browser shutdown. The newer **`3ba7d1b7` native feedback failed compiled XAML** on the old `Watermark` name before any application tests executed. The follow-up uses registered `PlaceholderText`, fixes translucent gradient swatches and strengthens the independent SVG coverage reference; those changes still require exact-source native/browser execution. These source-specific outcomes do **not** establish full Figma parity.
 

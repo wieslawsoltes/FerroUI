@@ -1,0 +1,107 @@
+{
+  "source_sha": "dfab0ed9a0146a892b40d2db0590b0193c80f672",
+  "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39942848091/job/120381540661",
+  "whole_log_sha256": "4d842fc11d5ec03a4e443e47823b350815c062d34376f0b700e1a58ee8348b0a",
+  "lines": [
+    {
+      "line": 206,
+      "text": "2026-10-23T11:08:04.0258867Z {\"already_equal\": 0, \"bytes_hashed\": 223533915, \"manifest\": \"/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target/.ferrodesign-source-mtimes-v1.json\", \"operation\": \"restore\", \"recorded\": 0, \"restored\": 9846, \"schema_version\": 1, \"skip_reasons\": {\"content_mismatch\": 20}, \"skipped\": 20, \"status\": \"restored\", \"tracked_files\": 9870}"
+    },
+    {
+      "line": 1525,
+      "text": "2026-10-23T11:08:23.9595679Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 516 filtered out; finished in 0.24s"
+    },
+    {
+      "line": 2420,
+      "text": "2026-10-23T11:08:24.1195404Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 4376 filtered out; finished in 0.02s"
+    },
+    {
+      "line": 2716,
+      "text": "2026-10-23T11:08:24.3600865Z test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 4441 filtered out; finished in 0.12s"
+    },
+    {
+      "line": 3170,
+      "text": "2026-10-23T11:08:26.3322425Z test result: ok. 174 passed; 0 failed; 0 ignored; 0 measured; 4283 filtered out; finished in 1.85s"
+    },
+    {
+      "line": 3455,
+      "text": "2026-10-23T11:08:26.4997360Z test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 4452 filtered out; finished in 0.05s"
+    },
+    {
+      "line": 3903,
+      "text": "2026-10-23T11:09:08.1371258Z test canvas::gradient_edit::tests::native_radial_handles_follow_relative_brush_ellipse_under_affine_transforms_and_history ... ok"
+    },
+    {
+      "line": 3953,
+      "text": "2026-10-23T11:09:08.4594479Z test renderer::angular_tests::angular_gradient_center_and_outside_strokes_cover_pixels_beyond_geometry ... ok"
+    },
+    {
+      "line": 3954,
+      "text": "2026-10-23T11:09:08.4687971Z test renderer::angular_tests::angular_gradient_fill_and_layer_opacity_accumulate_once ... ok"
+    },
+    {
+      "line": 3955,
+      "text": "2026-10-23T11:09:08.4708355Z test renderer::angular_tests::angular_gradient_horizontal_stroke_uses_nonzero_pen_bounds ... ok"
+    },
+    {
+      "line": 3956,
+      "text": "2026-10-23T11:09:08.5133835Z test renderer::angular_tests::angular_gradient_incremental_angle_center_and_stop_edits_match_fresh_pixels ... ok"
+    },
+    {
+      "line": 3957,
+      "text": "2026-10-23T11:09:08.5191608Z test renderer::angular_tests::angular_gradient_pixels_start_above_center_and_sweep_clockwise ... ok"
+    },
+    {
+      "line": 3958,
+      "text": "2026-10-23T11:09:08.5236071Z test renderer::angular_tests::angular_gradient_stroke_uses_native_sweep_and_retains_empty_interior ... ok"
+    },
+    {
+      "line": 4081,
+      "text": "2026-10-23T11:09:23.6972317Z test shell::layout::padding::tests::native_fractional_padding_edit_relinquishes_only_the_changed_side_variable ... ok"
+    },
+    {
+      "line": 4082,
+      "text": "2026-10-23T11:09:24.5883891Z test shell::layout::padding::tests::native_padding_diagnostics_publish_real_fields_and_export_controls ... ok"
+    },
+    {
+      "line": 4086,
+      "text": "2026-10-23T11:09:31.1615352Z test shell::layout::padding::tests::native_variable_binding_controls_reflow_padding_and_unbind_exactly_once ... ok"
+    },
+    {
+      "line": 4088,
+      "text": "2026-10-23T11:09:31.1719020Z test shell::paints::angular_tests::angular_gradient_css_preserves_authored_hard_stops_and_bounds_extra_work ... ok"
+    },
+    {
+      "line": 4089,
+      "text": "2026-10-23T11:09:31.1720029Z test shell::paints::angular_tests::angular_gradient_css_reports_center_angle_all_colors_and_hard_stops ... ok"
+    },
+    {
+      "line": 4090,
+      "text": "2026-10-23T11:09:31.1721805Z test shell::paints::angular_tests::angular_gradient_css_samples_match_native_straight_alpha_between_stops ... ok"
+    },
+    {
+      "line": 4091,
+      "text": "2026-10-23T11:09:31.1722570Z test shell::paints::angular_tests::angular_gradient_css_single_stop_is_a_valid_constant_with_fill_opacity ... ok"
+    },
+    {
+      "line": 4092,
+      "text": "2026-10-23T11:09:31.1723315Z test shell::paints::angular_tests::angular_gradient_fields_reject_nonfinite_values_and_preserve_noops ... ok"
+    },
+    {
+      "line": 4093,
+      "text": "2026-10-23T11:09:31.1724107Z test shell::paints::angular_tests::angular_gradient_type_conversion_preserves_latest_colors_stops_and_alpha ... ok"
+    },
+    {
+      "line": 4094,
+      "text": "2026-10-23T11:09:31.1726622Z test shell::paints::angular_xaml_tests::angular_gradient_xaml_retains_public_brush_coordinates_alpha_and_stroke ... ok"
+    },
+    {
+      "line": 4122,
+      "text": "2026-10-23T11:09:36.4712836Z test result: ok. 238 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 28.42s"
+    },
+    {
+      "line": 4136,
+      "text": "2026-10-23T11:09:37.1559544Z {\"already_equal\": 0, \"bytes_hashed\": 223575192, \"manifest\": \"/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target/.ferrodesign-source-mtimes-v1.json\", \"operation\": \"snapshot\", \"recorded\": 9870, \"restored\": 0, \"schema_version\": 1, \"skip_reasons\": {}, \"skipped\": 0, \"status\": \"snapshotted\", \"tracked_files\": 9870}"
+    }
+  ]
+}

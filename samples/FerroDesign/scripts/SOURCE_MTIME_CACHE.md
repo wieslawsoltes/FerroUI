@@ -207,6 +207,17 @@ browser screenshots, traces and reports remain a separate validation artifact,
 and a failed browser test or benchmark still fails the job. The browser report
 also records the restore, correctness probe and post-build snapshot diagnostics.
 
+The separate `FerroDesign browser build feedback` workflow applies the same
+restore/probe/build/snapshot sequence in an independent concurrency group. Its
+own build cache falls back to an existing browser target cache and never copies
+timestamp metadata separately. It uploads the complete distribution before cache
+publication, with `ferrodesign-provenance.json` recording the exact checkout
+commit/tree, tool versions and every payload file's size and SHA-256 (excluding
+the provenance file itself). It verifies that the build has not modified tracked
+source bytes. This workflow provides a runtime for independent browser replay
+while the full interaction/benchmark workflow remains queued or running; it
+does not replace those validation gates.
+
 The local probe establishes this isolated fixture's correctness. Actual FerroUI
 cache-hit rates and reduced CI duration still require subsequent completed jobs;
 no editor runtime speedup follows from this build optimization.

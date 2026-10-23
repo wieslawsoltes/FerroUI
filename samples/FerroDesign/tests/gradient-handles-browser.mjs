@@ -3,6 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { PNG } from "pngjs";
 import { startInputObservation, stopInputObservation } from "./input-observations.mjs";
+import { angularInsertionFromPointerInput, angularPaintFromPointerInput } from "./gradient-input.mjs";
 
 // Fixtures are imported once. All subsequent edits use native controls and
 // trusted browser input; gradientEdit supplies read-only handle coordinates.
@@ -20,6 +21,34 @@ export async function gradientHandleRegressions(page, reference, check, helpers,
     const published = async (before, label) => {
         await waitForNativeFrame(page, before.renderedFrames, label);
         await waitForNativeScene(page, before.sceneFrames, label);
+    };
+    const angularInputs = [];
+    const saveAngularInputs = () => writeFile(resolve(output, mode + "-angular-gradient-input.json"), JSON.stringify(angularInputs, null, 2));
+    const observeAngularPointer = async (type, action, count = 1) => {
+        const input = { type };
+        await startInputObservation(page, [type], 32);
+        try { input.requested = await action(); }
+        finally {
+            input.observation = await stopInputObservation(page);
+            angularInputs.push(input); await saveAngularInputs();
+        }
+        assert.equal(input.observation.droppedEvents, 0, "Angular input evidence must be complete");
+        const events = input.observation.events.filter(event => event.type === type && event.phase === "capture");
+        assert.equal(events.length, count, "Each requested angular pointer action supplies its actual positions");
+        assert.ok(events.every(event => event.trusted && event.pointerType === "mouse" &&
+            Number.isFinite(event.offsetX) && Number.isFinite(event.offsetY)));
+        input.event = events.at(-1);
+        return input;
+    };
+    const angularPress = (view, baseline, input, count = 1) => {
+        const press = view.pointerPresses.entries.at(-1);
+        assert.equal(press.serial, baseline.pointerPresses.serial + count);
+        assert.equal(press.buttons, 1);
+        near(press.world.x, (input.event.x - view.chrome.CanvasHost.x - press.pan.x) / press.zoom,
+            "Observed angular press world X");
+        near(press.world.y, (input.event.y - view.chrome.CanvasHost.y - press.pan.y) / press.zoom,
+            "Observed angular press world Y");
+        return press;
     };
     const world = (node, x, y) => {
         const matrix = node.affine_transform || { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
@@ -145,11 +174,13 @@ export async function gradientHandleRegressions(page, reference, check, helpers,
         return { x: (axis.end.x - axis.start.x) * offset, y: (axis.end.y - axis.start.y) * offset };
     };
     const press = async item => {
-        await moveWorld(page, item.markerWorld.x, item.markerWorld.y);
+        const requested = await moveWorld(page, item.markerWorld.x, item.markerWorld.y);
         await wait((view, _document, item) => view.gradientEdit.hover?.kind === item.kind &&
             view.gradientEdit.hover.stop === item.stop, { kind: item.kind, stop: item.stop });
         const before = await documentState(page), baseline = await state(page);
-        await page.mouse.down();
+        const angular = paint(before).type === "angular_gradient" && ["end", "stop"].includes(item.kind);
+        const input = angular ? await observeAngularPointer("pointerdown", () => page.mouse.down()) : null;
+        if (!angular) await page.mouse.down();
         await wait((view, _document, item) => view.gradientEdit.active &&
             view.gradientEdit.selected?.kind === item.kind && view.gradientEdit.selected.stop === item.stop,
         { kind: item.kind, stop: item.stop });
@@ -158,12 +189,35 @@ export async function gradientHandleRegressions(page, reference, check, helpers,
         assert.equal(pressed.documentRevision, baseline.documentRevision);
         assert.equal(pressed.historyLength, baseline.historyLength);
         assert.equal(pressed.canRedo, baseline.canRedo);
+        item.angularInput = angular ? { node: before.nodes[2], paint: paint(before), part: { kind: item.kind, stop: item.stop },
+            press: angularPress(pressed, baseline, input), down: input.event, moves: [],
+            requestedDown: { offsetX: requested.x, offsetY: requested.y }, requestedMoves: [] } : null;
         return { before, baseline };
     };
     const move = async (item, delta, expected) => {
-        await moveWorld(page, item.markerWorld.x + delta.x, item.markerWorld.y + delta.y);
+        if (item.angularInput) {
+            const input = await observeAngularPointer("pointermove", () =>
+                moveWorld(page, item.markerWorld.x + delta.x, item.markerWorld.y + delta.y));
+            const original = item.angularInput, view = await state(page);
+            assert.equal(view.zoom, original.press.zoom); assert.deepEqual(view.pan, original.press.pan);
+            assert.equal(input.event.pointerId, original.down.pointerId);
+            // Captured events can retarget from the host overlay to its parent
+            // container; the actual coordinate origin must remain identical.
+            near(input.event.offsetX - input.event.x, original.down.offsetX - original.down.x, "Angular pointer X origin");
+            near(input.event.offsetY - input.event.y, original.down.offsetY - original.down.y, "Angular pointer Y origin");
+            original.moves.push(input.event);
+            original.requestedMoves.push({ offsetX: input.requested.x, offsetY: input.requested.y });
+            assertPaint(angularPaintFromPointerInput({ ...original, zoom: view.zoom,
+                down: original.requestedDown, moves: original.requestedMoves }), expected);
+            expected = angularPaintFromPointerInput({ ...original, zoom: view.zoom });
+            input.expectation = { original: structuredClone(original), paint: expected };
+            await saveAngularInputs();
+        } else {
+            await moveWorld(page, item.markerWorld.x + delta.x, item.markerWorld.y + delta.y);
+        }
         await waitPaint(expected);
         assert.equal((await state(page)).gradientEdit.active, true);
+        return expected;
     };
     const release = async label => {
         const before = await state(page);
@@ -176,9 +230,10 @@ export async function gradientHandleRegressions(page, reference, check, helpers,
         try {
             held = true;
             const { baseline } = await press(item);
-            await move(item, delta, expected);
+            expected = await move(item, delta, expected);
             assert.equal((await state(page)).historyLength, baseline.historyLength, "Held previews do not append history");
             await release("Commit native gradient drag"); held = false;
+            return expected;
         } finally { if (held) await page.mouse.up(); }
     };
     const history = async (before, after, depth, label) => {
@@ -593,7 +648,7 @@ export async function gradientHandleRegressions(page, reference, check, helpers,
         held = true; await press(item);
         for (const degrees of [15, 30, 45]) {
             expected = paint(before); expected.angle += degrees;
-            await move(item, angularDelta(before.nodes[2], paint(before).angle, degrees), expected);
+            expected = await move(item, angularDelta(before.nodes[2], paint(before).angle, degrees), expected);
         }
         await release("Angular seam rotation"); held = false;
     } finally { if (held) await page.mouse.up(); }
@@ -604,7 +659,7 @@ export async function gradientHandleRegressions(page, reference, check, helpers,
     before = after; depth = (await state(page)).historyLength;
     item = await handle("stop", 2);
     expected = paint(before); expected.stops[2].offset = 0.625;
-    await drag(item, angularDelta(before.nodes[2], paint(before).angle + 180, 45), expected);
+    expected = await drag(item, angularDelta(before.nodes[2], paint(before).angle + 180, 45), expected);
     after = await documentState(page); assertChange(before, after, expected);
     await history(before, after, depth, "Native conic color-stop rotation");
     check("Dragging a tied conic color stop uses the inverse layer transform and local sweep angle, preserving every other stop, RGBA color and authored gradient parameter with exact history");
@@ -615,8 +670,14 @@ export async function gradientHandleRegressions(page, reference, check, helpers,
     const angle = (paint(before).angle + 90) * Math.PI / 180;
     const angularInsertion = world(before.nodes[2], before.nodes[2].width * paint(before).center.x + Math.sin(angle) * 80,
         before.nodes[2].height * paint(before).center.y - Math.cos(angle) * 80);
-    await clickWorld(page, angularInsertion.x, angularInsertion.y, { clickCount: 2, delay: 80 });
-    expected = paint(before); expected.stops.push({ offset: 0.25, color: { r: 128, g: 128, b: 0, a: 224 } });
+    const beforeInsertion = await state(page);
+    const insertionInput = await observeAngularPointer("pointerdown", () =>
+        clickWorld(page, angularInsertion.x, angularInsertion.y, { clickCount: 2, delay: 80 }), 2);
+    const insertionPress = angularPress(await state(page), beforeInsertion, insertionInput, 2);
+    assert.equal(insertionPress.clickCount, 2, "The native second press performs the conic insertion");
+    expected = angularInsertionFromPointerInput({ node: before.nodes[2], paint: paint(before), nativeWorld: insertionPress.world });
+    insertionInput.expectation = { node: before.nodes[2], paint: paint(before), press: insertionPress, expected };
+    await saveAngularInputs();
     await waitPaint(expected);
     await wait(view => view.gradientEdit.selected?.kind === "stop" && view.gradientEdit.selected.stop === 4 && !view.gradientEdit.active);
     after = await documentState(page); assertChange(before, after, expected);
@@ -655,8 +716,9 @@ export async function gradientHandleRegressions(page, reference, check, helpers,
     angularPixels.nodes[2].fills[0].paint.stops = [{ offset: 0, color: red }, { offset: 1, color: blue }];
     await load(angularPixels, 0);
     before = await documentState(page); expected = paint(before); expected.angle = 90;
-    await drag(await handle("end"), { x: 80, y: 80 }, expected);
+    expected = await drag(await handle("end"), { x: 80, y: 80 }, expected);
     const angularArtwork = await documentState(page);
+    assertChange(before, angularArtwork, expected);
     const [angularDownload] = await Promise.all([page.waitForEvent("download", { timeout: 60000 }),
         clickNative(page, "ExportPngButton", "InspectorViewport")]);
     assert.equal(await angularDownload.failure(), null);

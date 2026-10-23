@@ -160,25 +160,30 @@ Artwork also retains documented limits: arbitrary vector-anchor fillets, every s
 
 ## Validation
 
-The current continuation has completed core, native application, generated-reference, WASM-build and persistence checks. **The complete native feedback job passed at `5cb7e884`; the later gradient/padding UI checkpoint hit a compiled-XAML error, and a complete current-source editor-browser pass remains outstanding.** Historical complete passes do not validate newer features. The source-specific results on **22 October 2026** are:
+The 23 October continuation has completed native and core checks for the new
+radial/angular gradient handles, spacing-variable controls and prototype reflow.
+**The production checkpoint `1637a093` passed 533 core and 239 native application
+tests in CI.** A current-source complete browser pass and matched Figma visual
+parity are not yet established.
 
-| Gate | Recorded result and exact scope |
+| Gate | Exact source and completed result |
 | --- | --- |
-| New gradient/padding UI build | Exact [`3ba7d1b7`](../../docs/ferrodesign-evidence/2026-10-22-3ba7d1b7-native/README.md) passed the framework filters but **failed before application tests** on `Editor.xaml(224,103)`: unresolved `Watermark`. The follow-up uses registered `PlaceholderText`; the UI additions still require a completed build and execution |
-| Later browser diagnostics | Exact [`5cb7e884`](../../docs/ferrodesign-evidence/2026-10-22-5cb7e884-browser/README.md) built actual Vello WASM and passed all five IndexedDB checks. Editor validation failed after **24 checks/mode** with **288** partial-edge alpha differences. Normal and traced text measurements completed, but benchmark shutdown timed out and the step failed. Later editor scenarios did not run |
-| Document core | Exact [`7f813672`](../../docs/ferrodesign-evidence/2026-10-22-7f813672-core/README.md) passed **511 tests**, **1.65 s**, including all five gradient and eight four-side padding regressions. Native controls and browser execution for those additions remain separate gates |
-| Host and renderer selection | The successful `5cb7e884` [full-workflow native job](../../docs/ferrodesign-evidence/2026-10-22-5cb7e884-native/README.md) passed **19 persistence-host / 4 input-host / 13 trace-analysis tests**, **five Vello/no-Skia target graphs**, **498 core tests** and **217 app tests**. Its browser sibling is a separate result |
-| Official generated references | All **three generators and three drift/recompile gates passed** at `ed4f03dd`, `c88ad28f`, `cdee5f26` and [`58deaeee`](../../docs/ferrodesign-evidence/2026-10-22-58deaeee-ci/README.md#official-generated-references), with the same five source/output hashes and zero drift |
-| Complete native application suite | Exact [`5cb7e884`](../../docs/ferrodesign-evidence/2026-10-22-5cb7e884-native/README.md) passed **217/217 application tests**, **25.49 s**, including all eight native radius-handle cases and the independent dense-curve coverage/PNG/history check. The overall native feedback job **passed** |
-| Native text lifecycle | The same successful [`5cb7e884`](../../docs/ferrodesign-evidence/2026-10-22-5cb7e884-native/README.md) job passed **16/16 paragraph, 174/174 TextBox, and 5/5 rich-history tests**, including actual Redo/Undo after template replacement and canceled composition; **8 Vello / 15 Base** also passed. These overlapping filters are not additive |
-| Actual WASM build and browser persistence | Exact `ee1999b9` and [`40dafdab`](../../docs/ferrodesign-evidence/2026-10-22-40dafdab-browser/README.md) **built successfully** and each passed **all five real Chromium IndexedDB checks**; this is separate from editor interaction coverage |
-| Complete editor-browser request | Exact `ee1999b9` passed **23 Software2D / 23 WebGL2 checks**, then **both modes failed** at the corner-field Escape assertion. The remaining feature scenarios did not execute; [failed summary and decoded logs](../../docs/ferrodesign-evidence/2026-10-22-ee1999b9-ci/README.md#browser-scope-and-failure) |
-| Later browser execution | Exact [`40dafdab`](../../docs/ferrodesign-evidence/2026-10-22-40dafdab-browser/README.md) completed **24 Software2D / 24 WebGL2 checks**, including invalid Enter/Escape and exact smoothing Undo/Redo, then both modes failed the independent SVG/native PNG silhouette comparison with **288** differences at `corners-browser.mjs:77`. The benchmark completed separately. Later scenarios did not run; no cause or fix is established by that log |
-| Later full build gate and correction | `124ffdb7` [run 39858027509](https://github.com/wieslawsoltes/FerroUI/actions/runs/39858027509) failed native/browser application compilation on **E0282 at `canvas/corner_radius.rs:206`**; [preserved evidence](../../docs/ferrodesign-evidence/2026-10-22-124ffdb7-ci/README.md). The explicit-type correction at `5cb7e884` subsequently passed the complete native feedback job. Its [completed browser workflow](../../docs/ferrodesign-evidence/2026-10-22-5cb7e884-browser/README.md) then reached the existing silhouette assertion and failed it; the compiled-XAML correction for later padding controls is separate |
+| Current production core | [`1637a093`, run 39944253726](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253726): **533 passed**, **2.50 s**, including prototype spacing reflow/rollback and unchanged-binding redo preservation |
+| Current native application | [`1637a093`, run 39944253747](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253747): **239 passed**, **43.57 s**, including the clipped-selection/radius-control priority regression and native diagnostic controls |
+| Feature core | [`dfab0ed9`, run 39942848092](https://github.com/wieslawsoltes/FerroUI/actions/runs/39942848092): **528 passed**, **1.72 s**, including radial/angular authoring and spacing-variable ownership/reflow |
+| Feature native application | [`dfab0ed9`, run 39942848091](https://github.com/wieslawsoltes/FerroUI/actions/runs/39942848091): **238 passed**, **28.42 s**, including five new radial/angular native cases and three native spacing-variable UI cases |
+| Padding Escape correction | [`3be16cb7`, run 39941952822](https://github.com/wieslawsoltes/FerroUI/actions/runs/39941952822): **230 application tests passed**, including the previously failing grouped-draft Escape case |
+| Native framework and renderer | The successful `dfab0ed9` feedback job also passed **8 Vello / 15 Base / 16 Controls paragraph / 174 TextBox / 5 rich-history** tests; overlapping filters are not additive. The [`3be16cb7` full native job](https://github.com/wieslawsoltes/FerroUI/actions/runs/39941952796/job/120375278062) passed all five active **Vello/no-Skia** target graphs, native compilation and configured public geometry/compositing/text gates |
+| Prototype spacing integration | Exact published tree of [`1637a093`](https://github.com/wieslawsoltes/FerroUI/commit/1637a093723a4f899b7f4e371fd53f0b91914a98): **533 core tests passed locally**, **5.91 s**, including five preview reflow/rollback cases. **34 pure JavaScript** coverage/input/trace-ownership tests passed separately |
+| Latest recovered full browser result | [`b7b0b885`, run 39869066118](https://github.com/wieslawsoltes/FerroUI/actions/runs/39869066118) built actual Vello WASM and passed IndexedDB checks, but **failed overall**: **161 Software2D / 155 WebGL2 completed checks**, with **9 / 10 failed scenarios** among 37 requested per mode. The failures and subsequent corrections are preserved; this is not a current-source pass |
+| Independent corner reference | The [fixed 16×/32× Chromium decoder experiment](../../docs/ferrodesign-evidence/2026-10-23-browser-harness/README.md) converged at **1.96875 alpha units** and had **0 native PNG pixels differing by more than 12**, retaining the original limits. This isolated reference check is separate from complete editor execution |
 
-The separate [complete predecessor at `76d3744c`](../../docs/ferrodesign-evidence/2026-10-22-76d3744c-ci/README.md), [run 39825808707](https://github.com/wieslawsoltes/FerroUI/actions/runs/39825808707), passed **394 core / 155 application / 19 host tests** and **141 Software2D / 138 WebGL2 checks**, all **28 scenarios per mode**. Exact `f2bb1d61` [run 39799180117](https://github.com/wieslawsoltes/FerroUI/actions/runs/39799180117) had also passed that browser scope. Both runs precede automatic intersection preparation, continuous/polygon corners, width profiles/handles, paragraph/rich-history changes, guide bindings and the new text-cache/preview work. Their decoded logs and API statuses establish their own passes; unavailable official ZIP bytes do not support additional raw-report or binary-equality claims.
-
-[Validation and measurements](docs/VALIDATION.md) preserves each failure and follow-up. The native text lifecycle, invalid-Enter/Escape, canonical draft formatting and radius-handle compilation corrections now pass together in the successful `5cb7e884` native job. CI collects all four text-editing filters before returning their combined result. The independent native coverage pass does not resolve the browser SVG/PNG comparison. Its follow-up preserves the original scalar diagnostics and existing PNG threshold, and requires fixed 8×/16× independently decoded SVG coverage to converge before comparing it. The new reference still needs browser execution. A separately reviewed [native build-cache helper](scripts/SOURCE_MTIME_CACHE.md) passed 33 filesystem tests and an isolated offline Cargo reuse/changed-input probe; no FerroUI build-speed improvement is yet claimed.
+[Current evidence](../../docs/ferrodesign-evidence/2026-10-23-continuation/README.md)
+records exact commits, CI links, log digests and selected result lines.
+[Validation and measurements](docs/VALIDATION.md) preserves earlier successes,
+failures and subsequent corrections. The historical complete `76d3744c` run
+passed 141 Software2D / 138 WebGL2 checks over 28 scenarios per mode; it predates
+the current additions and does not validate them.
 
 ```sh
 cargo test --locked -p ferrodesign-core
@@ -203,6 +208,13 @@ On a bare Linux validation host, use `npx playwright install --with-deps chromiu
 Both Chromium suites accept `FERRODESIGN_CHROMIUM=/absolute/path/to/chrome` to use an existing executable. Without this variable, they use Playwright's installed Chromium. The editor suite also exercises native local-style definition editing and text/Boolean flattening, including rejected conversions and exact undo/redo.
 
 The GitHub Actions workflow `.github/workflows/ferrodesign.yml` has independent native and browser jobs. The native job runs locked core tests, paired release benchmarks, focused native TextBox preedit tests, public compositing/geometry/text-outline tests, native compilation and the complete native application suite. The browser job builds the real WebAssembly application and runs persistence and editor interaction validation. A separate `.github/workflows/ferrodesign-native.yml` supplies focused glyph/paragraph/TextBox/history feedback and the complete application tests. Its application gate can run after an earlier framework-test failure, but that failure still fails the job. The suites include native pixels, cache/bounds checks, gesture ownership and authoring/parser regressions, with new corner, width, guide-binding and paragraph scenarios. Build and validation artifacts are attached to workflow runs. [Validation and measurements](docs/VALIDATION.md) records completed executions separately from this configured coverage.
+
+The independent `.github/workflows/ferrodesign-browser-build.yml` publishes a
+reviewable browser distribution without waiting for an older complete suite.
+It uses the same locked build, Vello/no-Skia graph, host checks and static import
+validation, and includes the exact commit/tree, tool versions and SHA-256 of
+each payload in `ferrodesign-provenance.json`. This build-only feedback does not
+replace persistence, interaction, pixel or benchmark validation.
 
 ## Rendering performance
 

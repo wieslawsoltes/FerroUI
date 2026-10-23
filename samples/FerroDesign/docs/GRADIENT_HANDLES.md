@@ -260,6 +260,18 @@ separated seam stops; stable-index conic stop movement; ring insertion and
 exact RGBA interpolation; and native PNG samples at equal normalized X/Y radii
 on a nonsquare rectangle; and conic PNG samples proving the edited start ray and
 quarter/half-turn colors. The browser scenario now has seventeen feature checks.
+
+Angular angle and insertion-color expectations use the trusted pointer
+coordinates delivered to the production bridge. The independent input oracle
+inverts the fixture's authored affine transform, accumulates local ray changes
+across the seam, and samples the original source-ordered stops at the actual
+second-press offset. This retains the `1e-6` angle/offset assertions and exact
+RGBA checks despite Chromium rounding requested fractional coordinates.
+Requested and delivered positions, native press evidence and the computed
+expectations are saved in `*-angular-gradient-input.json`. Five focused oracle
+tests cover quantized affine motion, displaced markers on nonsquare boxes,
+winding and exact drag-back, byte interpolation boundaries and tied-stop order.
+
 The existing linear checks, original pixel expectations and lifecycle gates
 remain enforced. New source assertions are separate from executed validation;
 terminal results and exact source identities are recorded in [VALIDATION.md](VALIDATION.md).

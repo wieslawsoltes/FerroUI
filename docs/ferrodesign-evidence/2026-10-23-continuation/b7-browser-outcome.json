@@ -1,0 +1,426 @@
+{
+  "source_sha": "b7b0b8853dd47a3426537a6babc11fcc0e0e40cc",
+  "workflow_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39869066118",
+  "report_sha256": "486590640473d601ce5619c5ea6d93a4eaa40456961d0235da821cfb429adb31",
+  "report_bytes": 2190133,
+  "scope": {
+    "full": true,
+    "modes": [
+      "Software2D",
+      "WebGL2"
+    ],
+    "scenarios": "all"
+  },
+  "passed": false,
+  "results": [
+    {
+      "mode": "Software2D",
+      "status": "failed",
+      "completed_checks": 161,
+      "scenario_count": 37,
+      "passed_scenarios": 28,
+      "failed_scenarios": 9,
+      "scenarios": [
+        {
+          "name": "vector-network",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "native-authoring",
+          "status": "passed",
+          "checks": 2
+        },
+        {
+          "name": "corners",
+          "status": "failed",
+          "checks": 1,
+          "error": "AssertionError [ERR_ASSERTION]: Independent SVG area coverage must converge within 4 alpha units without opposite opaque/transparent pixels\n    at cornerRegressions (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/corners-browser.mjs:189:12)\n    at async runIsolatedScenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1051:13"
+        },
+        {
+          "name": "polygon-corners",
+          "status": "failed",
+          "checks": 1,
+          "error": "Error: ExportXamlButton is not ready for native pointer input: {\"scrollContainer\":{\"arrangeValid\":true,\"enabled\":true,\"focusWithin\":false,\"focused\":false,\"height\":912,\"measureValid\":true,\"visible\":true,\"width\":287,\"x\":1313,\"y\":88},\"modal\":{\"arrangeValid\":true,\"enabled\":true,\"focusWithin\":false,\"focused\":false,\"height\":0,\"measureValid\":true,\"visible\":false,\"width\":0,\"x\":0,\"y\":0},\"selection\":[2],\"renderedFrames\":8,\"sceneFrames\":25}\n    at clickNative (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:296:15)\n    at async Promise.all (index 1)\n    at async download (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/polygon-corners-browser.mjs:61:24)\n    at async polygonCornerRegressions (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/polygon-corners-browser.mjs:93:19)\n    at async runIsolatedScenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1053:13"
+        },
+        {
+          "name": "corner-radius-handles",
+          "status": "failed",
+          "checks": 4,
+          "error": "page.waitForFunction: Timeout 10000ms exceeded.\n    at wait (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/corner-radius-handles-browser.mjs:14:44)\n    at move (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/corner-radius-handles-browser.mjs:108:15)\n    at async drag (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/corner-radius-handles-browser.mjs:125:30)\n    at async cornerRadiusHandleRegressions (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/corner-radius-handles-browser.mjs:256:22)\n    at async runIsolatedScenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1055:13"
+        },
+        {
+          "name": "width-profiles",
+          "status": "failed",
+          "checks": 1,
+          "error": "page.waitForFunction: TypeError: Cannot read properties of undefined (reading 'text')\n    at eval (eval at <anonymous> (eval at predicate (eval at evaluate (:370:30))), <anonymous>:3:77)\n    at eval (eval at <anonymous> (eval at predicate (eval at evaluate (:370:30))), <anonymous>:5:77)\n    at eval (eval at predicate (eval at evaluate (:370:30)), <anonymous>:4:103)\n    at predicate (eval at evaluate (:370:30), <anonymous>:7:27)\n    at next (eval at evaluate (:370:30), <anonymous>:29:33)\n    at eval (eval at evaluate (:370:30), <anonymous>:42:13)\n    at UtilityScript.evaluate (<anonymous>:372:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at wait (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/width-profiles-browser.mjs:12:44)\n    at openPoints (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/width-profiles-browser.mjs:73:15)\n    at async widthProfileRegressions (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/width-profiles-browser.mjs:144:5)\n    at async runIsolatedScenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1057:13"
+        },
+        {
+          "name": "width-handles",
+          "status": "failed",
+          "checks": 0,
+          "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    points: [\n      {\n        position: 0,\n        width: 1\n...\n        position: 0.5,\n+       width: 2.5000002755537536\n-       width: 2.5\n      },\n      {\n        position: 1,\n        width: 1\n      }\n\n    at widthHandleRegressions (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/width-handles-browser.mjs:59:12)\n    at async runIsolatedScenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1058:13"
+        },
+        {
+          "name": "gradient-handles",
+          "status": "passed",
+          "checks": 10
+        },
+        {
+          "name": "paragraphs",
+          "status": "failed",
+          "checks": 2,
+          "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n  [\n+   448,\n+   208\n-   440,\n-   200\n  ]\n\n    at paragraphRegressions (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/paragraphs-browser.mjs:161:12)\n    at async runIsolatedScenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1060:13"
+        },
+        {
+          "name": "typography",
+          "status": "passed",
+          "checks": 4
+        },
+        {
+          "name": "components",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "image-crop",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "compositing",
+          "status": "passed",
+          "checks": 4
+        },
+        {
+          "name": "svg-compositing",
+          "status": "passed",
+          "checks": 4
+        },
+        {
+          "name": "masks",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "effects",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "inspector-lifecycle",
+          "status": "passed",
+          "checks": 4
+        },
+        {
+          "name": "floating-panels",
+          "status": "passed",
+          "checks": 3
+        },
+        {
+          "name": "page-inspector",
+          "status": "passed",
+          "checks": 1
+        },
+        {
+          "name": "auto-layout",
+          "status": "passed",
+          "checks": 4
+        },
+        {
+          "name": "layout-padding",
+          "status": "failed",
+          "checks": 0,
+          "error": "TypeError: Cannot read properties of undefined (reading 'text')\n    at layoutPaddingRegressions (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/layout-padding-browser.mjs:89:58)\n    at async runIsolatedScenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1083:13"
+        },
+        {
+          "name": "layout-drag",
+          "status": "passed",
+          "checks": 3
+        },
+        {
+          "name": "layout-transfer",
+          "status": "passed",
+          "checks": 4
+        },
+        {
+          "name": "selection",
+          "status": "failed",
+          "checks": 7,
+          "error": "page.waitForFunction: Timeout 10000ms exceeded.\n    at selected (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/selection-browser.mjs:13:47)\n    at click (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/selection-browser.mjs:29:15)\n    at async selectionRegressions (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/selection-browser.mjs:216:5)\n    at async runIsolatedScenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1089:13"
+        },
+        {
+          "name": "matching",
+          "status": "passed",
+          "checks": 3
+        },
+        {
+          "name": "geometry-authoring",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "flatten",
+          "status": "passed",
+          "checks": 4
+        },
+        {
+          "name": "local-styles",
+          "status": "passed",
+          "checks": 8
+        },
+        {
+          "name": "angular-paints",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "grid-styles",
+          "status": "passed",
+          "checks": 7
+        },
+        {
+          "name": "guide-bindings",
+          "status": "failed",
+          "checks": 0,
+          "error": "page.waitForFunction: Timeout 10000ms exceeded.\n    at ready (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/guide-bindings-browser.mjs:15:32)\n    at openBinding (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/guide-bindings-browser.mjs:49:15)\n    at async guideBindingRegressions (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/guide-bindings-browser.mjs:94:25)\n    at async runIsolatedScenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1103:13"
+        },
+        {
+          "name": "region-paints",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "network-bucket",
+          "status": "passed",
+          "checks": 8
+        },
+        {
+          "name": "compact-autosave",
+          "status": "passed",
+          "checks": 1
+        },
+        {
+          "name": "prototype-input",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "prototype-motion",
+          "status": "passed",
+          "checks": 3
+        },
+        {
+          "name": "bounded-history",
+          "status": "passed",
+          "checks": 1
+        }
+      ]
+    },
+    {
+      "mode": "WebGL2",
+      "status": "failed",
+      "completed_checks": 155,
+      "scenario_count": 37,
+      "passed_scenarios": 27,
+      "failed_scenarios": 10,
+      "scenarios": [
+        {
+          "name": "vector-network",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "native-authoring",
+          "status": "passed",
+          "checks": 2
+        },
+        {
+          "name": "corners",
+          "status": "failed",
+          "checks": 1,
+          "error": "AssertionError [ERR_ASSERTION]: Independent SVG area coverage must converge within 4 alpha units without opposite opaque/transparent pixels\n    at cornerRegressions (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/corners-browser.mjs:189:12)\n    at async runIsolatedScenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1051:13"
+        },
+        {
+          "name": "polygon-corners",
+          "status": "failed",
+          "checks": 1,
+          "error": "Error: ExportXamlButton is not ready for native pointer input: {\"scrollContainer\":{\"arrangeValid\":true,\"enabled\":true,\"focusWithin\":false,\"focused\":false,\"height\":912,\"measureValid\":true,\"visible\":true,\"width\":287,\"x\":1313,\"y\":88},\"modal\":{\"arrangeValid\":true,\"enabled\":true,\"focusWithin\":false,\"focused\":false,\"height\":0,\"measureValid\":true,\"visible\":false,\"width\":0,\"x\":0,\"y\":0},\"selection\":[2],\"renderedFrames\":8,\"sceneFrames\":34}\n    at clickNative (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:296:15)\n    at async Promise.all (index 1)\n    at async download (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/polygon-corners-browser.mjs:61:24)\n    at async polygonCornerRegressions (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/polygon-corners-browser.mjs:93:19)\n    at async runIsolatedScenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1053:13"
+        },
+        {
+          "name": "corner-radius-handles",
+          "status": "failed",
+          "checks": 4,
+          "error": "page.waitForFunction: Timeout 10000ms exceeded.\n    at wait (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/corner-radius-handles-browser.mjs:14:44)\n    at move (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/corner-radius-handles-browser.mjs:108:15)\n    at async drag (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/corner-radius-handles-browser.mjs:125:30)\n    at async cornerRadiusHandleRegressions (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/corner-radius-handles-browser.mjs:256:22)\n    at async runIsolatedScenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1055:13"
+        },
+        {
+          "name": "width-profiles",
+          "status": "failed",
+          "checks": 1,
+          "error": "page.waitForFunction: TypeError: Cannot read properties of undefined (reading 'text')\n    at eval (eval at <anonymous> (eval at predicate (eval at evaluate (:370:30))), <anonymous>:3:77)\n    at eval (eval at <anonymous> (eval at predicate (eval at evaluate (:370:30))), <anonymous>:5:77)\n    at eval (eval at predicate (eval at evaluate (:370:30)), <anonymous>:4:103)\n    at predicate (eval at evaluate (:370:30), <anonymous>:7:27)\n    at next (eval at evaluate (:370:30), <anonymous>:29:33)\n    at eval (eval at evaluate (:370:30), <anonymous>:42:13)\n    at UtilityScript.evaluate (<anonymous>:372:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at wait (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/width-profiles-browser.mjs:12:44)\n    at openPoints (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/width-profiles-browser.mjs:73:15)\n    at async widthProfileRegressions (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/width-profiles-browser.mjs:144:5)\n    at async runIsolatedScenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1057:13"
+        },
+        {
+          "name": "width-handles",
+          "status": "failed",
+          "checks": 0,
+          "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    points: [\n      {\n        position: 0,\n        width: 1\n...\n        position: 0.5,\n+       width: 2.5000002755537536\n-       width: 2.5\n      },\n      {\n        position: 1,\n        width: 1\n      }\n\n    at widthHandleRegressions (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/width-handles-browser.mjs:59:12)\n    at async runIsolatedScenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1058:13"
+        },
+        {
+          "name": "gradient-handles",
+          "status": "passed",
+          "checks": 10
+        },
+        {
+          "name": "paragraphs",
+          "status": "failed",
+          "checks": 2,
+          "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n  [\n+   448,\n+   208\n-   440,\n-   200\n  ]\n\n    at paragraphRegressions (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/paragraphs-browser.mjs:161:12)\n    at async runIsolatedScenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1060:13"
+        },
+        {
+          "name": "typography",
+          "status": "passed",
+          "checks": 4
+        },
+        {
+          "name": "components",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "image-crop",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "compositing",
+          "status": "passed",
+          "checks": 4
+        },
+        {
+          "name": "svg-compositing",
+          "status": "passed",
+          "checks": 4
+        },
+        {
+          "name": "masks",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "effects",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "inspector-lifecycle",
+          "status": "passed",
+          "checks": 4
+        },
+        {
+          "name": "floating-panels",
+          "status": "passed",
+          "checks": 3
+        },
+        {
+          "name": "page-inspector",
+          "status": "passed",
+          "checks": 1
+        },
+        {
+          "name": "auto-layout",
+          "status": "passed",
+          "checks": 4
+        },
+        {
+          "name": "layout-padding",
+          "status": "failed",
+          "checks": 0,
+          "error": "TypeError: Cannot read properties of undefined (reading 'text')\n    at layoutPaddingRegressions (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/layout-padding-browser.mjs:89:58)\n    at async runIsolatedScenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1083:13"
+        },
+        {
+          "name": "layout-drag",
+          "status": "passed",
+          "checks": 3
+        },
+        {
+          "name": "layout-transfer",
+          "status": "passed",
+          "checks": 4
+        },
+        {
+          "name": "selection",
+          "status": "failed",
+          "checks": 7,
+          "error": "page.waitForFunction: Timeout 10000ms exceeded.\n    at selected (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/selection-browser.mjs:13:47)\n    at click (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/selection-browser.mjs:29:15)\n    at async selectionRegressions (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/selection-browser.mjs:216:5)\n    at async runIsolatedScenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1089:13"
+        },
+        {
+          "name": "matching",
+          "status": "passed",
+          "checks": 3
+        },
+        {
+          "name": "geometry-authoring",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "flatten",
+          "status": "passed",
+          "checks": 4
+        },
+        {
+          "name": "local-styles",
+          "status": "passed",
+          "checks": 8
+        },
+        {
+          "name": "angular-paints",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "grid-styles",
+          "status": "passed",
+          "checks": 7
+        },
+        {
+          "name": "guide-bindings",
+          "status": "failed",
+          "checks": 0,
+          "error": "page.waitForFunction: Timeout 10000ms exceeded.\n    at ready (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/guide-bindings-browser.mjs:15:32)\n    at openBinding (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/guide-bindings-browser.mjs:49:15)\n    at async guideBindingRegressions (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/guide-bindings-browser.mjs:94:25)\n    at async runIsolatedScenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1103:13"
+        },
+        {
+          "name": "region-paints",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "network-bucket",
+          "status": "passed",
+          "checks": 8
+        },
+        {
+          "name": "compact-autosave",
+          "status": "passed",
+          "checks": 1
+        },
+        {
+          "name": "prototype-input",
+          "status": "passed",
+          "checks": 5
+        },
+        {
+          "name": "prototype-motion",
+          "status": "failed",
+          "checks": 0,
+          "error": "page.waitForFunction: Timeout 10000ms exceeded.\n    at prototypeMotionRegressions (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/prototype-browser.mjs:45:34)\n    at async runIsolatedScenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/isolated-scenario.mjs:31:9)\n    at async scenario (/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1007:32)\n    at async file:///home/runner/work/FerroUI/FerroUI/samples/FerroDesign/tests/browser.mjs:1112:13"
+        },
+        {
+          "name": "bounded-history",
+          "status": "passed",
+          "checks": 1
+        }
+      ]
+    }
+  ]
+}
