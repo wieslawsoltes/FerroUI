@@ -1,8 +1,8 @@
 use super::*;
-use ferroui_base::input::platform::{Clipboard, ClipboardErrorKind, IClipboardImpl};
-use ferroui_base::input::IAsyncDataTransferItem;
-use ferroui_base::reactive::IDisposable;
 use ferroui_base::Ref;
+use ferroui_base::input::platform::{Clipboard, ClipboardErrorKind, IClipboardImpl};
+use ferroui_base::input::{IAsyncDataTransferItem, ICommand};
+use ferroui_base::reactive::IDisposable;
 use ferroui_controls::testing::TestClipboardImpl;
 use ferroui_edit_core::document::TextDocument;
 use ferroui_edit_core::editing::{SelectionSegment, TextSegmentReadOnlySectionProvider};
@@ -88,14 +88,18 @@ fn prepared_copy_keeps_text_exact_and_publishes_html_on_the_same_native_item() {
         Some(text)
     );
     assert_eq!(payload.data.formats().len(), 2);
-    assert!(payload
-        .data
-        .formats()
-        .contains(&EditorClipboard::html_format()));
-    assert!(!payload
-        .data
-        .formats()
-        .contains(&EditorClipboard::rectangular_selection_format().into()));
+    assert!(
+        payload
+            .data
+            .formats()
+            .contains(&EditorClipboard::html_format())
+    );
+    assert!(
+        !payload
+            .data
+            .formats()
+            .contains(&EditorClipboard::rectangular_selection_format().into())
+    );
     let html = current_html(item);
     assert!(html.contains("😀"));
     assert!(html.contains("&lt;&amp;"));
@@ -258,11 +262,13 @@ fn failed_rich_format_retains_plain_text_and_reports_the_error_to_copying_handle
         ClipboardCopyOutcome::Copied
     );
     assert_eq!(platform.text().as_deref(), Some("word"));
-    assert!(recorded
-        .borrow()
-        .as_ref()
-        .unwrap()
-        .contains("MissingClipboardBrush"));
+    assert!(
+        recorded
+            .borrow()
+            .as_ref()
+            .unwrap()
+            .contains("MissingClipboardBrush")
+    );
     assert_eq!(editor.last_error(), recorded.borrow().clone());
 }
 
@@ -454,10 +460,11 @@ fn pending_cut_rechecks_document_selection_and_current_readonly_policy() {
         let old_document = editor.document();
         let platform = GateClipboard::new();
         let mut cut = EditorClipboard::copy_to_clipboard(&editor, platform.clipboard(), true);
-        assert!(cut
-            .as_mut()
-            .poll(&mut Context::from_waker(Waker::noop()))
-            .is_pending());
+        assert!(
+            cut.as_mut()
+                .poll(&mut Context::from_waker(Waker::noop()))
+                .is_pending()
+        );
         assert_eq!(editor.text(), "original");
         match change {
             0 => editor.select(1, 2).unwrap(),
@@ -525,6 +532,9 @@ fn protected_cut_is_rejected_before_platform_write_and_empty_copy_is_noop() {
     ));
     assert_eq!(platform.set_data_count(), 0);
     editor.select(0, 0).unwrap();
+    let mut options = editor.options();
+    options.cut_copy_whole_line = false;
+    editor.set_options(options);
     assert_eq!(
         ready(EditorClipboard::copy_to_clipboard(
             &editor,
@@ -680,10 +690,12 @@ fn pending_paste_uses_current_selection_but_declines_a_replaced_document() {
         *platform.data.borrow_mut() = Some(data);
         platform.read_ready.set(false);
         let mut paste = EditorClipboard::paste_from_clipboard(&editor, platform.clipboard());
-        assert!(paste
-            .as_mut()
-            .poll(&mut Context::from_waker(Waker::noop()))
-            .is_pending());
+        assert!(
+            paste
+                .as_mut()
+                .poll(&mut Context::from_waker(Waker::noop()))
+                .is_pending()
+        );
         if replace_document {
             editor.set_document(TextDocument::from_text("new"));
         } else {
@@ -767,10 +779,11 @@ fn incoming_transfer_is_disposed_after_success_error_and_dropped_pending_read() 
         *platform.data.borrow_mut() = Some(transfer);
         let mut read = EditorClipboard::read_clipboard(platform.clipboard());
         if mode == 2 {
-            assert!(read
-                .as_mut()
-                .poll(&mut Context::from_waker(Waker::noop()))
-                .is_pending());
+            assert!(
+                read.as_mut()
+                    .poll(&mut Context::from_waker(Waker::noop()))
+                    .is_pending()
+            );
             assert_eq!(disposed.get(), 0);
             drop(read);
         } else {
@@ -870,5 +883,538 @@ fn whole_line_policy_callbacks_cannot_commit_a_stale_plan_or_bypass_new_readonly
                 assert!(!editor.document().can_undo());
             }
         }
+    }
+}
+
+#[test]
+fn whole_line_copy_defaults_to_the_caret_line_with_native_marker_and_rich_formats() {
+    let _scope = crate::tests::test_scope();
+    let newline = if cfg!(windows) { "\r\n" } else { "\n" };
+    for (text, caret, expected) in [
+        ("one\r\na😀b\r\nlast", 8, "a😀b\n"),
+        ("one\n\nlast", 4, "\n"),
+        ("one\rsecond", 5, "second"),
+        ("a\nb", 3, "b"),
+        ("a", 1, "a"),
+        ("\n", 0, "\n"),
+        ("\r\n", 1, "\n"),
+        ("x\r\ny", 2, "x\n"),
+    ] {
+        let editor = editor_with_text(text);
+        editor.set_caret_offset(caret).unwrap();
+        assert!(editor.options().cut_copy_whole_line);
+        let selection = editor.selection();
+        let prepared = EditorClipboard::prepare_copy(&editor).unwrap().unwrap();
+        assert_eq!(prepared.text, expected.replace('\n', newline));
+        assert_eq!(prepared.kind, ClipboardSelectionKind::WholeLine);
+        assert!(prepared.formatting_error.is_none());
+        assert_eq!(prepared.data.items().len(), 1);
+        let item = &prepared.data.items()[0];
+        assert_eq!(
+            item.try_get_value(&EditorClipboard::whole_line_selection_format())
+                .as_deref(),
+            Some("1")
+        );
+        assert!(
+            !prepared
+                .data
+                .formats()
+                .contains(&EditorClipboard::rectangular_selection_format().into())
+        );
+        assert_eq!(prepared.data.formats().len(), 3);
+        assert!(!current_html(item).is_empty());
+        assert_eq!(editor.selection(), selection);
+        assert_eq!(editor.text(), text);
+        assert_eq!(
+            EditorClipboard::selected_rich_text(&editor).unwrap().text(),
+            ""
+        );
+        assert!(!editor.document().can_undo());
+    }
+}
+
+#[test]
+fn whole_line_copy_skips_empty_eof_and_empty_multiple_carets_without_writing() {
+    let _scope = crate::tests::test_scope();
+    for (text, caret) in [("", 0), ("\n", 1), ("a\n", 2), ("a\r\n", 3)] {
+        let editor = editor_with_text(text);
+        editor.set_caret_offset(caret).unwrap();
+        // The reference enables the command with the option, even when its
+        // execution will find no text on the final logical line.
+        assert!(EditorClipboard::can_copy(&editor));
+        assert!(EditorClipboard::can_cut(&editor));
+        for cut in [false, true] {
+            let platform = TestClipboardImpl::new();
+            assert_eq!(
+                ready(EditorClipboard::copy_to_clipboard(
+                    &editor,
+                    platform.clipboard(),
+                    cut
+                ))
+                .unwrap(),
+                ClipboardCopyOutcome::Empty
+            );
+            assert_eq!(platform.set_data_count(), 0);
+            assert_eq!(editor.text(), text);
+            assert!(!editor.document().can_undo());
+        }
+    }
+    for rectangle in [false, true] {
+        let editor = editor_with_text("first\nsecond");
+        let carets = [SelectionSegment::empty(1), SelectionSegment::empty(8)];
+        let selection = if rectangle {
+            Selection::from_rectangle_segments(carets, 0)
+        } else {
+            Selection::from_segments(carets, 0)
+        };
+        editor.set_selection(selection.clone()).unwrap();
+        assert!(EditorClipboard::prepare_copy(&editor).unwrap().is_none());
+        assert!(!EditorClipboard::can_copy(&editor));
+        assert!(!EditorClipboard::can_cut(&editor));
+        assert_eq!(editor.selection(), selection);
+    }
+}
+
+#[test]
+fn whole_line_commands_requery_option_changes_and_full_line_protection() {
+    let _scope = crate::tests::test_scope();
+    let editor = editor_with_text("first\nsecond");
+    editor.set_caret_offset(3).unwrap();
+    let copy = crate::EditorCommand::new(&editor, crate::EditorCommandKind::Copy);
+    let cut = crate::EditorCommand::new(&editor, crate::EditorCommandKind::Cut);
+    let changes = Rc::new(Cell::new(0));
+    let observed = changes.clone();
+    let subscription = copy.can_execute_changed(Rc::new(move || observed.set(observed.get() + 1)));
+    assert!(copy.can_execute(None));
+    assert!(cut.can_execute(None));
+    let mut options = editor.options();
+    options.cut_copy_whole_line = false;
+    editor.set_options(options.clone());
+    assert!(!copy.can_execute(None));
+    assert!(!cut.can_execute(None));
+    assert_eq!(changes.get(), 1);
+    options.cut_copy_whole_line = true;
+    editor.set_options(options);
+    assert!(copy.can_execute(None));
+    assert!(cut.can_execute(None));
+    assert_eq!(changes.get(), 2);
+    let protected = Rc::new(TextSegmentReadOnlySectionProvider::new(editor.document()));
+    protected.add(0, 1).unwrap();
+    editor.session().set_read_only_section_provider(protected);
+    assert!(copy.can_execute(None));
+    assert!(!cut.can_execute(None));
+    let mut options = editor.options();
+    options.cut_copy_whole_line = false;
+    editor.set_options(options);
+    editor.select(1, 2).unwrap();
+    assert!(copy.can_execute(None));
+    assert!(cut.can_execute(None));
+    let prepared = EditorClipboard::prepare_copy(&editor).unwrap().unwrap();
+    assert_eq!(prepared.text, "ir");
+    assert_eq!(prepared.kind, ClipboardSelectionKind::Plain);
+    editor.set_is_read_only(true);
+    assert!(copy.can_execute(None));
+    assert!(!cut.can_execute(None));
+    subscription.dispose();
+}
+
+#[test]
+fn whole_line_cut_deletes_the_delimiter_and_preserves_final_line_boundaries_in_one_undo() {
+    let _scope = crate::tests::test_scope();
+    for (text, caret, expected, expected_caret, copied) in [
+        ("first\r\nsecond", 3, "second", 0, "first\n"),
+        (
+            "first\r\nsecond\r\nlast",
+            10,
+            "first\r\nlast",
+            7,
+            "second\n",
+        ),
+        ("first\nlast", 10, "first\n", 6, "last"),
+        ("first\n\nlast", 6, "first\nlast", 6, "\n"),
+        ("a😀b", 3, "", 0, "a😀b"),
+    ] {
+        let editor = editor_with_text(text);
+        editor.set_caret_offset(caret).unwrap();
+        let platform = TestClipboardImpl::new();
+        assert_eq!(
+            ready(EditorClipboard::copy_to_clipboard(
+                &editor,
+                platform.clipboard(),
+                true
+            ))
+            .unwrap(),
+            ClipboardCopyOutcome::Cut
+        );
+        assert_eq!(editor.text(), expected);
+        assert_eq!(editor.caret_offset(), expected_caret);
+        assert!(editor.selection().is_empty());
+        assert_eq!(editor.document().undo_count(), 1);
+        let payload = ready(EditorClipboard::read_clipboard(platform.clipboard()))
+            .unwrap()
+            .unwrap();
+        assert_eq!(payload.kind, ClipboardSelectionKind::WholeLine);
+        assert_eq!(
+            payload.text,
+            copied.replace('\n', if cfg!(windows) { "\r\n" } else { "\n" })
+        );
+        editor.undo().unwrap();
+        assert_eq!(editor.text(), text);
+        editor.redo().unwrap();
+        assert_eq!(editor.text(), expected);
+    }
+}
+
+#[test]
+fn whole_line_cut_respects_protection_cancellation_and_failed_platform_writes() {
+    let _scope = crate::tests::test_scope();
+    for mode in 0..3 {
+        let editor = editor_with_text("first\nsecond");
+        editor.set_caret_offset(3).unwrap();
+        if mode == 0 {
+            let protected = Rc::new(TextSegmentReadOnlySectionProvider::new(editor.document()));
+            protected.add(0, 1).unwrap();
+            editor.session().set_read_only_section_provider(protected);
+        }
+        editor.add_disposable_handler(TextEditor::copying_to_clipboard_event(), move |_, args| {
+            assert_eq!(args.kind(), ClipboardSelectionKind::WholeLine);
+            assert!(args.is_cut());
+            args.set_cancel(mode == 1);
+        });
+        let copied = Rc::new(Cell::new(0));
+        let observed = copied.clone();
+        editor.add_disposable_handler(TextEditor::text_copied_event(), move |_, _| {
+            observed.set(observed.get() + 1);
+        });
+        let platform = if mode == 2 {
+            TestClipboardImpl::throwing(ClipboardErrorKind::AccessDenied)
+        } else {
+            TestClipboardImpl::new()
+        };
+        let result = ready(EditorClipboard::copy_to_clipboard(
+            &editor,
+            platform.clipboard(),
+            true,
+        ));
+        match mode {
+            0 => assert!(matches!(
+                result,
+                Err(EditorClipboardError::Edit(EditError::ReadOnly))
+            )),
+            1 => assert_eq!(result.unwrap(), ClipboardCopyOutcome::Cancelled),
+            2 => assert!(matches!(result, Err(EditorClipboardError::Clipboard(_)))),
+            _ => unreachable!(),
+        }
+        if mode != 2 {
+            assert_eq!(platform.set_data_count(), 0);
+        }
+        assert_eq!(copied.get(), 0);
+        assert_eq!(editor.text(), "first\nsecond");
+        assert_eq!(editor.caret_offset(), 3);
+        assert!(!editor.document().can_undo());
+    }
+}
+
+#[test]
+fn pending_whole_line_cut_keeps_its_original_line_and_rechecks_current_policy() {
+    let _scope = crate::tests::test_scope();
+    for change in 0..5 {
+        let editor = editor_with_text("first\nsecond");
+        editor.set_caret_offset(2).unwrap();
+        let old_document = editor.document();
+        let platform = GateClipboard::new();
+        let mut cut = EditorClipboard::copy_to_clipboard(&editor, platform.clipboard(), true);
+        assert!(
+            cut.as_mut()
+                .poll(&mut Context::from_waker(Waker::noop()))
+                .is_pending()
+        );
+        match change {
+            0 => editor.set_caret_offset(9).unwrap(),
+            1 => old_document.insert(0, "!").unwrap(),
+            2 => editor.set_document(TextDocument::from_text("replacement")),
+            3 => editor.set_is_read_only(true),
+            4 => {
+                let protected = Rc::new(TextSegmentReadOnlySectionProvider::new(editor.document()));
+                protected.add(0, 1).unwrap();
+                editor.session().set_read_only_section_provider(protected);
+            }
+            _ => unreachable!(),
+        }
+        let expected = editor.text();
+        let version = editor.document().version();
+        platform.write_ready.set(true);
+        let result = ready(cut);
+        if change >= 3 {
+            assert!(matches!(
+                result,
+                Err(EditorClipboardError::Edit(EditError::ReadOnly))
+            ));
+        } else {
+            assert_eq!(result.unwrap(), ClipboardCopyOutcome::CopiedWithoutCut);
+        }
+        assert_eq!(editor.text(), expected);
+        assert_eq!(editor.document().version(), version);
+        assert!(old_document.text().contains("first\nsecond"));
+    }
+}
+
+#[test]
+fn whole_line_cut_customization_keeps_its_source_and_success_handlers_can_decline_deletion() {
+    let _scope = crate::tests::test_scope();
+    for move_caret in [false, true] {
+        let editor = editor_with_text("first\nsecond");
+        editor.set_caret_offset(2).unwrap();
+        editor.add_disposable_handler(TextEditor::copying_to_clipboard_event(), |_, args| {
+            assert_eq!(args.kind(), ClipboardSelectionKind::WholeLine);
+            let data = DataTransfer::new();
+            data.add(DataTransferItem::create_text(Some("custom")));
+            args.set_data(data);
+        });
+        let weak = editor.downgrade();
+        editor.add_disposable_handler(TextEditor::text_copied_event(), move |_, args| {
+            assert_eq!(args.text(), Some("custom"));
+            assert!(args.is_cut());
+            let editor = weak.upgrade().unwrap();
+            assert_eq!(editor.text(), "first\nsecond");
+            assert_eq!(editor.caret_offset(), 2);
+            if move_caret {
+                editor.set_caret_offset(9).unwrap();
+            }
+        });
+        let platform = TestClipboardImpl::new();
+        let result = ready(EditorClipboard::copy_to_clipboard(
+            &editor,
+            platform.clipboard(),
+            true,
+        ))
+        .unwrap();
+        assert_eq!(platform.text().as_deref(), Some("custom"));
+        if move_caret {
+            assert_eq!(result, ClipboardCopyOutcome::CopiedWithoutCut);
+            assert_eq!(editor.text(), "first\nsecond");
+            assert!(!editor.document().can_undo());
+        } else {
+            assert_eq!(result, ClipboardCopyOutcome::Cut);
+            assert_eq!(editor.text(), "second");
+            assert_eq!(editor.document().undo_count(), 1);
+        }
+    }
+}
+
+struct DeleteCallbackPolicy(Rc<dyn Fn()>);
+
+impl ferroui_edit_core::editing::IReadOnlySectionProvider for DeleteCallbackPolicy {
+    fn can_insert(&self, _: usize) -> bool {
+        true
+    }
+    fn get_deletable_segments(&self, segment: SimpleSegment) -> Vec<SimpleSegment> {
+        (self.0)();
+        vec![segment]
+    }
+}
+
+#[test]
+fn whole_line_cut_rejects_reentry_at_preflight_post_write_and_update_start() {
+    let _scope = crate::tests::test_scope();
+    for callback_number in 1..=3 {
+        for change in 0..4 {
+            let editor = editor_with_text("first\nsecond");
+            editor.set_caret_offset(2).unwrap();
+            let calls = Cell::new(0);
+            let weak = editor.downgrade();
+            editor
+                .session()
+                .set_read_only_section_provider(Rc::new(DeleteCallbackPolicy(Rc::new(
+                    move || {
+                        calls.set(calls.get() + 1);
+                        if calls.get() == callback_number {
+                            let editor = weak.upgrade().unwrap();
+                            match change {
+                                0 => editor.set_caret_offset(9).unwrap(),
+                                1 => editor.document().insert(0, "!").unwrap(),
+                                2 => editor.set_document(TextDocument::from_text("replacement")),
+                                3 => editor.set_is_read_only(true),
+                                _ => unreachable!(),
+                            }
+                        }
+                    },
+                ))));
+            let platform = TestClipboardImpl::new();
+            let result = ready(EditorClipboard::copy_to_clipboard(
+                &editor,
+                platform.clipboard(),
+                true,
+            ));
+            if change == 3 {
+                assert!(matches!(
+                    result,
+                    Err(EditorClipboardError::Edit(EditError::ReadOnly))
+                ));
+            } else {
+                assert!(matches!(
+                    result,
+                    Err(EditorClipboardError::Edit(EditError::StaleEditPlan))
+                ));
+            }
+            assert_eq!(platform.set_data_count(), usize::from(callback_number != 1));
+            assert_eq!(
+                editor.text(),
+                match change {
+                    1 => "!first\nsecond",
+                    2 => "replacement",
+                    _ => "first\nsecond",
+                }
+            );
+        }
+    }
+    // The outer update-start event is another callback boundary, distinct from
+    // the provider's last validation call.
+    let editor = editor_with_text("first\nsecond");
+    editor.set_caret_offset(2).unwrap();
+    let weak = editor.downgrade();
+    let subscription = editor.document().update_started(move || {
+        weak.upgrade().unwrap().set_caret_offset(9).unwrap();
+    });
+    assert!(matches!(
+        ready(EditorClipboard::copy_to_clipboard(
+            &editor,
+            TestClipboardImpl::new().clipboard(),
+            true
+        )),
+        Err(EditorClipboardError::Edit(EditError::StaleEditPlan))
+    ));
+    assert_eq!(editor.text(), "first\nsecond");
+    assert!(!editor.document().can_undo());
+    subscription.dispose();
+}
+
+#[test]
+fn whole_line_marker_round_trip_uses_destination_delimiters_and_one_undo() {
+    let _scope = crate::tests::test_scope();
+    let source = editor_with_text("first\r\na😀b\r\nlast");
+    source.set_caret_offset(8).unwrap();
+    let platform = TestClipboardImpl::new();
+    ready(EditorClipboard::copy_to_clipboard(
+        &source,
+        platform.clipboard(),
+        false,
+    ))
+    .unwrap();
+    let destination = editor_with_text("one\rtwo");
+    destination.set_caret_offset(6).unwrap();
+    let mut options = destination.options();
+    options.cut_copy_whole_line = false;
+    destination.set_options(options);
+    ready(EditorClipboard::paste_from_clipboard(
+        &destination,
+        platform.clipboard(),
+    ))
+    .unwrap();
+    assert_eq!(destination.text(), "one\ra😀b\rtwo");
+    assert!(destination.selection().is_empty());
+    assert_eq!(destination.caret_offset(), 11);
+    assert_eq!(destination.document().undo_count(), 1);
+    destination.undo().unwrap();
+    assert_eq!(destination.text(), "one\rtwo");
+}
+
+#[test]
+fn whole_line_paste_normalizes_to_the_target_line_and_reports_the_inserted_text() {
+    let _scope = crate::tests::test_scope();
+    for (document, caret, newline, prefix, suffix) in [
+        ("first\r\nsecond", 10, "\r\n", "first\r\n", "second"),
+        ("first\rsecond\nlast", 8, "\n", "first\r", "second\nlast"),
+        ("first\rsecond", 2, "\r", "", "first\rsecond"),
+        ("", 0, if cfg!(windows) { "\r\n" } else { "\n" }, "", ""),
+    ] {
+        let editor = editor_with_text(document);
+        editor.set_caret_offset(caret).unwrap();
+        let mut options = editor.options();
+        options.convert_tabs_to_spaces = true;
+        options.indentation_size = 3;
+        options.newline = "\r".into();
+        editor.set_options(options);
+        let expected = format!("one   two{newline}three{newline}four{newline}");
+        editor.add_disposable_handler(TextEditor::pasting_from_clipboard_event(), |_, args| {
+            assert_eq!(args.text(), "original");
+            args.set_text("one\ttwo\nthree\rfour\r\n".into());
+        });
+        let pasted = Rc::new(RefCell::new(None));
+        let observed = pasted.clone();
+        editor.add_disposable_handler(TextEditor::text_pasted_event(), move |_, args| {
+            *observed.borrow_mut() = Some((args.text().to_owned(), args.kind()));
+        });
+        ready(EditorClipboard::paste_from_clipboard(
+            &editor,
+            clipboard_with_payload("original", ClipboardSelectionKind::WholeLine),
+        ))
+        .unwrap();
+        assert_eq!(editor.text(), format!("{prefix}{expected}{suffix}"));
+        assert_eq!(
+            *pasted.borrow(),
+            Some((expected, ClipboardSelectionKind::WholeLine))
+        );
+        assert_eq!(editor.document().undo_count(), 1);
+    }
+}
+
+#[test]
+fn whole_line_marker_keeps_selected_text_and_multiple_caret_fallbacks_exact() {
+    let _scope = crate::tests::test_scope();
+    let editor = editor_with_text("first\nsecond");
+    let mut options = editor.options();
+    options.convert_tabs_to_spaces = true;
+    editor.set_options(options);
+    editor.select(2, 2).unwrap();
+    ready(EditorClipboard::paste_from_clipboard(
+        &editor,
+        clipboard_with_payload("a\t\r\nb", ClipboardSelectionKind::WholeLine),
+    ))
+    .unwrap();
+    assert_eq!(editor.text(), "fia\t\r\nbt\nsecond");
+    let editor = editor_with_text("ab\ncd");
+    editor
+        .set_selection(Selection::from_segments(
+            [SelectionSegment::empty(1), SelectionSegment::empty(4)],
+            0,
+        ))
+        .unwrap();
+    ready(EditorClipboard::paste_from_clipboard(
+        &editor,
+        clipboard_with_payload("X", ClipboardSelectionKind::WholeLine),
+    ))
+    .unwrap();
+    assert_eq!(editor.text(), "aXb\ncXd");
+    assert_eq!(editor.document().undo_count(), 1);
+}
+
+#[test]
+fn whole_line_paste_rejects_caret_changes_inside_policy_callbacks() {
+    let _scope = crate::tests::test_scope();
+    for callback_number in [1, 2] {
+        let editor = editor_with_text("first\nsecond");
+        editor.set_caret_offset(8).unwrap();
+        let calls = Cell::new(0);
+        let weak = editor.downgrade();
+        editor
+            .session()
+            .set_read_only_section_provider(Rc::new(CallbackPolicy {
+                can_insert: Rc::new(move || {
+                    calls.set(calls.get() + 1);
+                    if calls.get() == callback_number {
+                        weak.upgrade().unwrap().set_caret_offset(2).unwrap();
+                    }
+                }),
+            }));
+        assert!(matches!(
+            ready(EditorClipboard::paste_from_clipboard(
+                &editor,
+                clipboard_with_payload("copied\n", ClipboardSelectionKind::WholeLine),
+            )),
+            Err(EditorClipboardError::Edit(EditError::StaleEditPlan))
+        ));
+        assert_eq!(editor.text(), "first\nsecond");
+        assert!(!editor.document().can_undo());
     }
 }

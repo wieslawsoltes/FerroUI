@@ -1,4 +1,4 @@
-use crate::TextEditor;
+use crate::{EditorClipboard, TextEditor};
 use ferroui_base::input::ICommand;
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::utilities::HandlerList;
@@ -67,6 +67,7 @@ impl EditorCommand {
         for property in [
             TextEditor::is_read_only_property().as_property(),
             TextEditor::document_property().as_property(),
+            TextEditor::options_property().as_property(),
         ] {
             let weak = Rc::downgrade(&command);
             command
@@ -182,10 +183,8 @@ impl ICommand for EditorCommand {
         match self.kind {
             EditorCommandKind::Undo => writable && document.can_undo(),
             EditorCommandKind::Redo => writable && document.can_redo(),
-            EditorCommandKind::Copy => selected,
-            EditorCommandKind::Cut => {
-                writable && selected && Self::replacement_allowed(&editor, false, false)
-            }
+            EditorCommandKind::Copy => EditorClipboard::can_copy(&editor),
+            EditorCommandKind::Cut => writable && EditorClipboard::can_cut(&editor),
             EditorCommandKind::Paste => writable && Self::replacement_allowed(&editor, true, false),
             EditorCommandKind::Delete => {
                 writable
@@ -318,6 +317,9 @@ mod tests {
         editor.redo().unwrap();
         assert_eq!(events.get(), 4);
         let copy = EditorCommand::new(&editor, EditorCommandKind::Copy);
+        let mut options = editor.options();
+        options.cut_copy_whole_line = false;
+        editor.set_options(options);
         assert!(!copy.can_execute(None));
         editor.select_all();
         assert!(copy.can_execute(None));

@@ -22,6 +22,8 @@ use std::rc::Rc;
 pub struct EditorOptions {
     pub indentation_size: usize,
     pub convert_tabs_to_spaces: bool,
+    /// Copies or cuts the current logical line when there is one empty caret.
+    pub cut_copy_whole_line: bool,
     pub enable_virtual_space: bool,
     pub allow_scroll_below_document: bool,
     pub show_spaces: bool,
@@ -39,6 +41,7 @@ impl Default for EditorOptions {
         Self {
             indentation_size: 4,
             convert_tabs_to_spaces: false,
+            cut_copy_whole_line: true,
             enable_virtual_space: false,
             allow_scroll_below_document: false,
             show_spaces: false,

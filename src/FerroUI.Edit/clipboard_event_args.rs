@@ -5,7 +5,8 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 /// How plain clipboard text should be inserted. Marker formats carry this
-/// intent separately; the text format itself is never padded or rewritten.
+/// intent separately. Whole-line insertion normalizes line endings and tabs
+/// according to the destination document and editor options.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 #[repr(i32)]
 pub enum ClipboardSelectionKind {

@@ -1,9 +1,9 @@
+use crate::TextEditor;
 use crate::clipboard_event_args::{
     ClipboardSelectionKind, CopyingToClipboardEventArgs, PastingFromClipboardEventArgs,
     TextCopiedEventArgs, TextPastedEventArgs,
 };
 use crate::rich_text_adapter::{NativeHighlightingStyle, RichTextDisplayError};
-use crate::TextEditor;
 use ferroui_base::input::platform::{ClipboardError, IClipboard};
 use ferroui_base::input::{
     AsyncDataTransferExtensions, DataFormat, DataFormatOf, DataTransfer, DataTransferItem,
@@ -11,7 +11,9 @@ use ferroui_base::input::{
 };
 use ferroui_base::threading::Dispatcher;
 use ferroui_controls::TopLevel;
-use ferroui_edit_core::document::{DocumentEdit, DocumentError, SimpleSegment};
+use ferroui_edit_core::document::{
+    DocumentEdit, DocumentError, DocumentVersion, SimpleSegment, TextDocument, TextUtilities,
+};
 use ferroui_edit_core::editing::{EditError, Selection};
 use ferroui_edit_core::highlighting::{
     HighlightingColor, HtmlClipboard, HtmlOptions, RichText, RichTextError, RichTextModel,
@@ -157,6 +159,21 @@ impl Drop for ReadTransfer {
     }
 }
 
+struct CopySelection {
+    selection: Selection,
+    kind: ClipboardSelectionKind,
+}
+
+impl CopySelection {
+    fn deletion_edits(&self) -> Vec<DocumentEdit> {
+        self.selection
+            .segments()
+            .iter()
+            .map(|segment| DocumentEdit::new(segment.start_offset(), segment.length(), ""))
+            .collect()
+    }
+}
+
 /// Native rich copy, cut and paste using the framework's platform service.
 pub struct EditorClipboard;
 
@@ -182,23 +199,80 @@ impl EditorClipboard {
     pub fn prepare_copy(
         editor: &TextEditor,
     ) -> Result<Option<EditorClipboardData>, EditorClipboardError> {
+        let Some(copy) = Self::copy_selection(editor)? else {
+            return Ok(None);
+        };
+        Self::prepare_selection_copy(editor, &copy)
+    }
+
+    fn copy_selection(editor: &TextEditor) -> Result<Option<CopySelection>, EditorClipboardError> {
         let selection = editor.selection();
         if selection.is_empty() {
-            return Ok(None);
-        }
-        let text = editor.selected_text()?;
-        if text.is_empty() {
-            return Ok(None);
+            if !editor.session().options().cut_copy_whole_line || selection.segments().len() != 1 {
+                return Ok(None);
+            }
+            // Keep the user's empty selection unchanged. The document range is
+            // captured separately for formatting and a possible deferred cut.
+            let line = editor
+                .document()
+                .get_line_by_offset(selection.primary().caret)?;
+            return Ok(Some(CopySelection {
+                selection: Selection::simple(line.offset(), line.offset() + line.total_length()),
+                kind: ClipboardSelectionKind::WholeLine,
+            }));
         }
         let kind = if selection.is_rectangular() {
             ClipboardSelectionKind::Rectangular
         } else {
             ClipboardSelectionKind::Plain
         };
+        Ok(Some(CopySelection { selection, kind }))
+    }
+
+    pub(crate) fn can_copy(editor: &TextEditor) -> bool {
+        Self::copy_selection(editor).is_ok_and(|selection| selection.is_some())
+    }
+
+    pub(crate) fn can_cut(editor: &TextEditor) -> bool {
+        let document = editor.document();
+        let version = document.version();
+        let selection = editor.selection();
+        let Ok(Some(copy)) = Self::copy_selection(editor) else {
+            return false;
+        };
+        let policy = editor
+            .session()
+            .validate_document_edits(&copy.deletion_edits());
+        policy.is_ok() && Self::matches_prepared_state(editor, &document, &version, &selection)
+    }
+
+    fn prepare_selection_copy(
+        editor: &TextEditor,
+        copy: &CopySelection,
+    ) -> Result<Option<EditorClipboardData>, EditorClipboardError> {
+        let document = editor.document();
+        let newline = editor.session().options().newline;
+        let mut text = String::new();
+        for (index, segment) in copy.selection.segments().iter().enumerate() {
+            if index != 0 {
+                text.push_str(&newline);
+            }
+            text.push_str(&document.get_text(segment.start_offset(), segment.length())?);
+        }
+        if text.is_empty() {
+            // A delimiter-only line is copyable; the empty final line is not.
+            return Ok(None);
+        }
+        if copy.kind == ClipboardSelectionKind::WholeLine {
+            text = TextUtilities::normalize_new_lines(
+                &text,
+                if cfg!(windows) { "\r\n" } else { "\n" },
+            )?;
+        }
         let options = HtmlOptions {
             tab_size: editor.session().options().indentation_size,
         };
-        let (html, formatting_error) = match Self::rich_selection(editor, &selection)
+        let (html, formatting_error) = match Self::rich_selection(editor, &copy.selection)
             .and_then(|rich| Ok(rich.to_html(&options)?))
         {
             Ok(html) => (Some(html), None),
@@ -212,14 +286,20 @@ impl EditorClipboard {
                 formatting_error = Some(error.to_string());
             }
         }
-        if kind == ClipboardSelectionKind::Rectangular {
-            item.set(&Self::rectangular_selection_format(), Some("1".to_owned()));
+        match copy.kind {
+            ClipboardSelectionKind::Rectangular => {
+                item.set(&Self::rectangular_selection_format(), Some("1".to_owned()));
+            }
+            ClipboardSelectionKind::WholeLine => {
+                item.set(&Self::whole_line_selection_format(), Some("1".to_owned()));
+            }
+            ClipboardSelectionKind::Plain => {}
         }
         data.add(item);
         Ok(Some(EditorClipboardData {
             data,
             text,
-            kind,
+            kind: copy.kind,
             formatting_error,
         }))
     }
@@ -236,15 +316,17 @@ impl EditorClipboard {
             let document = editor.document();
             let selection = editor.selection();
             let version = document.version();
+            let Some(copy) = Self::copy_selection(editor)? else {
+                return Ok(None);
+            };
             if cut {
-                let edits = selection
-                    .segments()
-                    .iter()
-                    .map(|segment| DocumentEdit::new(segment.start_offset(), segment.length(), ""))
-                    .collect::<Vec<_>>();
-                session.validate_document_edits(&edits)?;
+                let policy = session.validate_document_edits(&copy.deletion_edits());
+                if !Self::matches_prepared_state(editor, &document, &version, &selection) {
+                    return Err(EditError::StaleEditPlan.into());
+                }
+                policy?;
             }
-            let Some(data) = Self::prepare_copy(editor)? else {
+            let Some(data) = Self::prepare_selection_copy(editor, &copy)? else {
                 return Ok(None);
             };
             if let Some(error) = &data.formatting_error {
@@ -269,14 +351,16 @@ impl EditorClipboard {
             for item in args.data().items().iter() {
                 data.add(item.clone());
             }
-            Ok::<_, EditorClipboardError>(Some(Ok((document, version, selection, data, text))))
+            Ok::<_, EditorClipboardError>(Some(Ok((
+                document, version, selection, copy, data, text,
+            ))))
         })();
         let weak = editor.to_ref().downgrade();
         Box::pin(async move {
             let Some(prepared) = prepared? else {
                 return Ok(ClipboardCopyOutcome::Empty);
             };
-            let (document, version, selection, data, text) = match prepared {
+            let (document, version, selection, copy, data, text) = match prepared {
                 Ok(value) => value,
                 Err(outcome) => return Ok(outcome),
             };
@@ -296,15 +380,21 @@ impl EditorClipboard {
             if !cut {
                 return Ok(ClipboardCopyOutcome::Copied);
             }
-            if editor.document() != document
-                || document.version() != version
-                || editor.selection() != selection
-            {
+            if !Self::matches_prepared_state(&editor, &document, &version, &selection) {
                 return Ok(ClipboardCopyOutcome::CopiedWithoutCut);
             }
-            // The session rechecks the current read-only provider and applies
-            // all selected ranges as one document transaction.
-            editor.replace_selection_with_text("")?;
+            if copy.kind == ClipboardSelectionKind::WholeLine {
+                Self::apply_clipboard_edits(
+                    &editor,
+                    &document,
+                    &version,
+                    &selection,
+                    &copy.deletion_edits(),
+                )?;
+            } else {
+                // Preserve the session's rectangular/virtual-selection behavior.
+                editor.replace_selection_with_text("")?;
+            }
             Ok(ClipboardCopyOutcome::Cut)
         })
     }
@@ -391,7 +481,7 @@ impl EditorClipboard {
             if editor.document() != document {
                 return Ok(ClipboardPasteOutcome::DocumentReplaced);
             }
-            let text = args.text();
+            let mut text = args.text();
             if text.is_empty() {
                 return Ok(ClipboardPasteOutcome::Empty);
             }
@@ -404,7 +494,7 @@ impl EditorClipboard {
                 && editor.selection().is_empty()
                 && editor.selection().segments().len() == 1
             {
-                Self::paste_whole_line(&editor, &text)?;
+                text = Self::paste_whole_line(&editor, &text)?;
             } else {
                 editor.replace_selection_with_text(&text)?;
             }
@@ -440,15 +530,48 @@ impl EditorClipboard {
         );
     }
 
-    fn paste_whole_line(editor: &TextEditor, text: &str) -> Result<(), EditorClipboardError> {
+    fn paste_whole_line(editor: &TextEditor, text: &str) -> Result<String, EditorClipboardError> {
         let session = editor.session();
         let document = editor.document();
         let version = document.version();
+        let selection = editor.selection();
         let line = document.get_line_by_offset(session.caret_offset())?;
-        let edits = [DocumentEdit::new(line.offset(), 0, text)];
+        let newline = TextUtilities::get_new_line_from_document(&document, line.line_number())?;
+        let mut text = TextUtilities::normalize_new_lines(text, &newline)?;
+        let options = session.options();
+        if options.convert_tabs_to_spaces {
+            text = text.replace('\t', &" ".repeat(options.indentation_size));
+        }
+        let edits = [DocumentEdit::new(line.offset(), 0, &text)];
+        Self::apply_clipboard_edits(editor, &document, &version, &selection, &edits)?;
+        Ok(text)
+    }
+
+    fn matches_prepared_state(
+        editor: &TextEditor,
+        document: &TextDocument,
+        version: &DocumentVersion,
+        selection: &Selection,
+    ) -> bool {
+        editor.document() == *document
+            && document.version() == *version
+            && editor.selection() == *selection
+    }
+
+    fn apply_clipboard_edits(
+        editor: &TextEditor,
+        document: &TextDocument,
+        version: &DocumentVersion,
+        selection: &Selection,
+        edits: &[DocumentEdit],
+    ) -> Result<(), EditorClipboardError> {
+        let session = editor.session();
         let validate = || -> Result<(), EditorClipboardError> {
-            let policy = session.validate_document_edits(&edits);
-            if document.version() != version || editor.document() != document {
+            if !Self::matches_prepared_state(editor, document, version, selection) {
+                return Err(EditError::StaleEditPlan.into());
+            }
+            let policy = session.validate_document_edits(edits);
+            if !Self::matches_prepared_state(editor, document, version, selection) {
                 return Err(EditError::StaleEditPlan.into());
             }
             policy?;
@@ -462,7 +585,7 @@ impl EditorClipboard {
         // Host policy and update-start callbacks run outside document borrows.
         // Both can edit or replace the document while coordinates are prepared.
         validate()?;
-        document.apply_edits(&edits)?;
+        document.apply_edits(edits)?;
         guard.finish()?;
         editor.selection_changed();
         Ok(())
