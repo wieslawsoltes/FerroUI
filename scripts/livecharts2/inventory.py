@@ -43,6 +43,13 @@ def sha256(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
 
 
+def extraction_input_hash(path: Path) -> str:
+    # Git's Windows checkout may expand LF to CRLF. The extractor inputs are
+    # UTF-8 text, so checkout line endings must not look like a source change.
+    # Pinned upstream inventory hashes still cover the exact Git object bytes.
+    return sha256(path.read_bytes().replace(b"\r\n", b"\n"))
+
+
 def git_archive(upstream: Path, reference: dict) -> bytes:
     roots = reference["source_roots"] + reference["test_roots"] + reference["sample_roots"]
     roots += reference["extra_files"]
@@ -120,9 +127,9 @@ def extract_api(archive: bytes, reference: dict, dotnet: str) -> dict:
         combined["profiles"] = profile_records
         combined["extraction"] = {
             "kind": "Roslyn syntax union; no semantic compilation or generated sources",
-            "extractor_sha256": sha256((REPO / "scripts/api-extract/Program.cs").read_bytes()),
-            "projects_sha256": sha256((REPO / "scripts/livecharts2/projects.json").read_bytes()),
-            "profiles_sha256": sha256((REPO / "scripts/livecharts2/profiles.json").read_bytes()),
+            "extractor_sha256": extraction_input_hash(REPO / "scripts/api-extract/Program.cs"),
+            "projects_sha256": extraction_input_hash(REPO / "scripts/livecharts2/projects.json"),
+            "profiles_sha256": extraction_input_hash(REPO / "scripts/livecharts2/profiles.json"),
         }
         return combined
 
@@ -359,7 +366,7 @@ def main() -> int:
         for key, filename in (("extractor_sha256", "scripts/api-extract/Program.cs"),
                               ("projects_sha256", "scripts/livecharts2/projects.json"),
                               ("profiles_sha256", "scripts/livecharts2/profiles.json")):
-            if api["extraction"][key] != sha256((REPO / filename).read_bytes()):
+            if api["extraction"][key] != extraction_input_hash(REPO / filename):
                 raise ValueError(f"Extraction input changed: {filename}; refresh with --extract-api")
     paths = [f["path"] for f in source_inventory["files"]]
     if len(paths) != len(set(paths)):
