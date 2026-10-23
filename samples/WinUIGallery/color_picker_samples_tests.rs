@@ -332,3 +332,132 @@ fn color_picker_callbacks_do_not_retain_the_gallery_page() {
         InputElement::lost_focus_event(),
     ));
 }
+
+#[cfg(feature = "theme")]
+mod themed {
+    use super::*;
+    use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+    use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
+    use ferroui_base::styling::ThemeVariant;
+    use ferroui_controls::shapes::Path;
+    use ferroui_controls::testing::{TestServices, UnitTestApplication};
+    use ferroui_controls::{PathIcon, TabItem, Window};
+    use std::cell::Cell;
+    use std::rc::Rc;
+
+    // The real theme needs a clock for its transitions. Like its own test host,
+    // this clock does not pulse; the header foregrounds have no transitions.
+    struct ThemeClock {
+        ticks: LightweightSubject<TimeSpan>,
+        state: Cell<PlayState>,
+    }
+
+    impl IObservable<TimeSpan> for ThemeClock {
+        fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+            self.ticks.subscribe(observer)
+        }
+    }
+
+    impl IClock for ThemeClock {
+        fn play_state(&self) -> PlayState {
+            self.state.get()
+        }
+
+        fn set_play_state(&self, value: PlayState) {
+            self.state.set(value);
+        }
+    }
+
+    impl IGlobalClock for ThemeClock {}
+
+    fn visible_headers(view: &ColorView) -> Vec<(Ref<TabItem>, Ref<PathIcon>)> {
+        view.get_visual_descendants()
+            .filter_map(|visual| visual.cast::<TabItem>())
+            .filter(|tab| tab.is_effectively_visible())
+            .map(|tab| {
+                let icons: Vec<_> = tab
+                    .get_visual_descendants()
+                    .filter_map(|visual| visual.cast::<PathIcon>())
+                    .filter(|icon| icon.is_effectively_visible())
+                    .collect();
+                assert_eq!(icons.len(), 1, "one actual icon in each visible tab header");
+                (tab, icons.into_iter().next().unwrap())
+            })
+            .collect()
+    }
+
+    #[test]
+    fn color_picker_tab_icons_follow_winui_theme_changes() {
+        ferroui_markup_xaml::register_types();
+        ferroui_themes_winui::register_types();
+        let clock = Rc::new(ThemeClock {
+            ticks: LightweightSubject::new(),
+            state: Cell::new(PlayState::Run),
+        });
+        let services = TestServices::styled_window()
+            .with_global_clock(clock)
+            .with_theme(|| ferroui_themes_winui::WinUITheme::new().as_style());
+        let _application = UnitTestApplication::start(services);
+        ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::register();
+        let root = page();
+        let picker = root.get_control::<ColorView>("colorPicker");
+        let inputs = root.get_control::<ColorView>("ColorInputs");
+
+        // Realize a second native tab to exercise selected and unselected
+        // header brushes through normal selection, without forced pseudoclasses.
+        picker.set_is_color_components_visible(true);
+        let window = Window::new();
+        window.set_width(1280.0);
+        window.set_height(900.0);
+        window.set_requested_theme_variant(Some(ThemeVariant::light()));
+        window.set_content(Some(Control::boxed(&root)));
+        window.show();
+        window.update_layout();
+        let picker_headers = visible_headers(&picker);
+        let input_headers = visible_headers(&inputs);
+        assert_eq!(picker_headers.len(), 2);
+        assert_eq!(input_headers.len(), 1);
+
+        // Keep the same realized icons across switches, so replacing a view or
+        // resolving a static brush once cannot make this regression pass.
+        for (variant, component) in [
+            (ThemeVariant::light(), 0),
+            (ThemeVariant::dark(), 255),
+            (ThemeVariant::light(), 0),
+        ] {
+            window.set_requested_theme_variant(Some(variant));
+            for selected_index in [0, 2] {
+                picker.set_selected_index(selected_index);
+                window.update_layout();
+                assert_eq!(
+                    picker_headers.iter().filter(|(tab, _)| tab.is_selected()).count(),
+                    1
+                );
+                assert!(input_headers[0].0.is_selected());
+                for (tab, icon) in picker_headers.iter().chain(input_headers.iter()) {
+                    assert!(icon.is_effectively_visible());
+                    let expected = Color::new(
+                        if tab.is_selected() { 255 } else { 0x99 },
+                        component,
+                        component,
+                        component,
+                    );
+                    let foreground = icon.foreground().expect("the realized icon has a foreground");
+                    assert_eq!(foreground.as_solid_color_brush().unwrap().color(), expected);
+                    let paths: Vec<_> = icon
+                        .get_visual_descendants()
+                        .filter_map(|visual| visual.cast::<Path>())
+                        .collect();
+                    assert_eq!(paths.len(), 1, "the native icon template draws one path");
+                    assert!(paths[0].data().is_some());
+                    assert_eq!(
+                        paths[0].fill().unwrap().as_solid_color_brush().unwrap().color(),
+                        expected,
+                        "the drawn path follows its icon, including the dark theme"
+                    );
+                }
+            }
+        }
+        window.close();
+    }
+}

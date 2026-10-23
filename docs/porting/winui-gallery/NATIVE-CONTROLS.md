@@ -117,6 +117,14 @@ For native inline color markup, register
 ```
 
 The package dependency enables `document-assets` for that embedded style include.
+When the host uses `WinUITheme`, the [Gallery page](../../../samples/WinUIGallery/Pages/ColorPicker.xaml)
+also supplies six page-scoped `TabItemHeaderForeground...` brushes. The native
+ColorView Fluent template requests these keys, whereas the WinUI tab template
+uses `TabViewItem...` keys. Dynamic references to `SystemBaseHighColor` (selected),
+`SystemBaseMediumColor` (unselected) and `SystemBaseMediumHighColor` (pointer-over
+and pressed) let existing icon instances follow theme changes. This resource
+bridge preserves both native control templates and stays local to the composition.
+
 The source importer maps a WinUI `ColorPicker` to `ColorView` and emits `WXAML2006`.
 `IsColorSliderVisible` and `IsColorChannelTextInputVisible` map to the native
 `IsColorSpectrumSliderVisible` and `IsComponentTextInputVisible`. The importer

@@ -1922,7 +1922,7 @@
         "src/FerroUI.Controls.ColorPicker/color_view/color_view.rs",
         "src/FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml"
       ],
-      "notes": "The original inline ColorPicker maps to a composition of existing native ColorView, ColorSlider, TextBox, ToggleButton and RadioButtons controls; the native ColorPicker dropdown API remains unchanged. Two ColorViews present spectrum and component editing together. All seven source options, Box/Ring selection and the Rectangle preview are wired with weak Rust callbacks. Source x:Bind expressions and the single-control layout are explicit sample adaptations. Component text editing retains native NumericUpDown behavior. Exact visual layout, localization and host pointer, keyboard and accessibility acceptance remain pending. Named test anchors describe the intended logical coverage; this entry asserts no successful execution record or full page, rendering, input or accessibility parity.",
+      "notes": "The original inline ColorPicker maps to a composition of existing native ColorView, ColorSlider, TextBox, ToggleButton and RadioButtons controls; the native ColorPicker dropdown API remains unchanged. Two ColorViews present spectrum and component editing together. Page-scoped dynamic foreground resources bridge the existing ColorView Fluent tab theme to WinUITheme colors. A feature-gated test realizes the native icon paths across light/dark switches and native tab selection. All seven source options, Box/Ring selection and the Rectangle preview are wired with weak Rust callbacks. Source x:Bind expressions and the single-control layout are explicit sample adaptations. Component text editing retains native NumericUpDown behavior. Exact visual layout, localization and host pointer, keyboard and accessibility acceptance remain pending. Named test anchors describe the intended logical coverage; this entry asserts no successful execution record or full page, rendering, input or accessibility parity.",
       "requirements": [
         {
           "status": "source-candidate",
@@ -2005,6 +2005,10 @@
         },
         {
           "name": "color_picker_callbacks_do_not_retain_the_gallery_page",
+          "path": "samples/WinUIGallery/color_picker_samples_tests.rs"
+        },
+        {
+          "name": "color_picker_tab_icons_follow_winui_theme_changes",
           "path": "samples/WinUIGallery/color_picker_samples_tests.rs"
         }
       ],
@@ -2274,7 +2278,7 @@
         "src/FerroUI.Controls/animation/connected_animation.rs",
         "src/FerroUI.Controls/animation/connected_animation_service.rs"
       ],
-      "notes": "All four source compositions use native Frame/FramePage navigation and ConnectedAnimationService directly. Original collection, card and manual-item counts are 8, 13 and 13, with original landscape assets, item order, descriptions, selected data and randomized view/like ranges. Native StackPanel/WrapPanel plus Button compositions explicitly adapt ListView, GridView and ItemsRepeater containers; no container compatibility shims are introduced. Cache/history, configuration choices, coordinated detail elements, direct return animation, scroll/focus restoration and animation disposal have authored logical coverage. Container virtualization, full WinUI item-container semantics, acrylic, EntranceThemeTransition and exact native-host/input/rendering/accessibility parity remain pending. Named test anchors describe the intended logical coverage; this entry asserts no successful execution record or full page, rendering, input or accessibility parity.",
+      "notes": "All four source compositions use native Frame/FramePage navigation and ConnectedAnimationService directly. Original collection, card and manual-item counts are 8, 13 and 13, with original landscape assets, item order, descriptions, selected data and randomized view/like ranges. Native StackPanel/WrapPanel plus Button compositions explicitly adapt ListView, GridView and ItemsRepeater containers; no container compatibility shims are introduced. Native collection rows stretch their content, apply character ellipsis and use collapsed text-layout lines to conditionally expose full-description ToolTips. Cache/history, configuration choices, coordinated detail elements, direct return animation, scroll/focus restoration and animation disposal have authored logical coverage. Container virtualization, full WinUI item-container semantics, acrylic, EntranceThemeTransition and exact native-host/input/rendering/accessibility parity remain pending. Named test anchors describe the intended logical coverage; this entry asserts no successful execution record or full page, rendering, input or accessibility parity.",
       "requirements": [
         {
           "status": "source-candidate",
@@ -2341,6 +2345,10 @@
         },
         {
           "name": "connected_capture_decodes_original_landscapes_and_propagates_the_selected_bitmap",
+          "path": "samples/WinUIGallery/connected_animation_samples_tests.rs"
+        },
+        {
+          "name": "connected_collection_description_tooltip_tracks_real_trimming_and_releases_its_control",
           "path": "samples/WinUIGallery/connected_animation_samples_tests.rs"
         }
       ],

@@ -53,6 +53,10 @@ page composition, theme changes and source inspection. Only the selected page is
 created. The catalog stores a precomputed lowercase search index, so filtering does
 not allocate strings for every row. Handlers use weak references; replacing a page
 releases its control tree and callback state.
+Actual page navigation, including back and forward, starts the rebuilt page at
+its heading using the native outer ScrollViewer. Selecting the current page,
+rejecting an unknown page or changing the theme preserves the current position.
+Scroll state within a sample remains governed by that sample's own navigation.
 
 `Pages/*.xaml` contains reviewed adaptations to the existing framework API.
 `examples.rs` records each adaptation and supplies Rust event handlers. Examples
@@ -115,6 +119,9 @@ color; native ColorView's alpha-coercion contract is unchanged. The native alpha
 slider remains byte-valued (0–255); the percentage editor accepts integers 0–100.
 Native component editing, the two-view layout and Windows hex overflow quirks are
 explicit differences. The existing native `ColorPicker` remains a dropdown.
+Six page-scoped dynamic foreground resources connect the ColorView Fluent tab
+template to WinUITheme's base colors. The realized icon and drawn path regression
+checks selection and light/dark/light changes without replacing the native controls.
 
 `connected_animation_samples.rs` supplies all four original connected-animation
 compositions using the native `ConnectedAnimationService`, `Frame` and `FramePage`:
@@ -123,6 +130,11 @@ laid-out tiles. Original images, navigation keys, saved scroll/focus and forward
 return flows are preserved. Native buttons and WrapPanel replace source item
 containers; source virtualization, full XY focus, entrance transitions, acrylic
 and platform acceptance remain pending.
+Collection rows stretch their native button content to keep photo/text columns
+aligned. Native text trimming supplies character ellipsis, and a weak layout
+callback shows the full-description ToolTip only while actual text lines are
+collapsed, clearing it again when the text fits. The sample introduces no public
+`IsTextTrimmed` property or `IsTextTrimmedChanged` compatibility event.
 
 `media_samples.rs` uses native `Image`/`Bitmap` and `Carousel`/`PipsPager` for the
 Image and FlipView pages. Original JPEG/GIF bytes, decode-to-height, four stretch

@@ -21,7 +21,7 @@ use ferroui_controls::testing::{
 };
 use ferroui_controls::{
     Border, Button, Control, Frame, Grid, Image, Panel, RadioButtons, ScrollViewer, TextBlock,
-    Window,
+    ToolTip, Window,
 };
 use std::time::{Duration, Instant};
 
@@ -153,6 +153,75 @@ fn connected_collection_passes_selected_data_and_returns_to_the_cached_source_pa
             .text()
             .as_deref(),
         Some("Returned to Item 3")
+    );
+}
+
+#[test]
+fn connected_collection_description_tooltip_tracks_real_trimming_and_releases_its_control() {
+    let _application = start();
+    let weak_description = {
+        let root = page();
+        let collection = content(&root.get_control::<Frame>("ConnectedCollectionFrame")).unwrap();
+        let item = item_control::<Button>(&collection, "ConnectedItem5").unwrap();
+        let description = item
+            .get_logical_descendants()
+            .filter_map(|child| child.cast::<TextBlock>())
+            .find(|text| {
+                text.text()
+                    .is_some_and(|value| value.starts_with("Ut consequat magna"))
+            })
+            .expect("the original fifth item's description");
+        let full_text = description.text().unwrap();
+        assert!(ToolTip::get_tip(&description).is_none());
+
+        // Resize the actual wired sample description in a bounded native host;
+        // its real text layout determines each collapsed/fitting transition.
+        let parent = description
+            .get_logical_parent()
+            .unwrap()
+            .cast::<Panel>()
+            .unwrap();
+        parent.children().remove(&description);
+        let viewport = Border::new();
+        viewport.set_width(100.0);
+        viewport.set_height(80.0);
+        viewport.set_child(Some(description.clone().upcast()));
+        let window = Window::with_impl(MockWindowingPlatform::create_window_mock_with_size(
+            640.0, 160.0,
+        ));
+        window.set_content(Some(Control::boxed(viewport.clone())));
+        window.show();
+        Dispatcher::ui_thread().run_jobs(None);
+
+        for (width, expected_collapsed) in
+            [(100.0, true), (500.0, false), (100.0, true), (500.0, false)]
+        {
+            viewport.set_width(width);
+            window.update_layout();
+            let layout = description.text_layout();
+            assert!(!layout.text_lines().is_empty());
+            assert!(layout.text_lines().len() <= 2);
+            let collapsed = layout.text_lines().iter().any(|line| line.has_collapsed());
+            assert_eq!(
+                collapsed, expected_collapsed,
+                "actual text layout at width {width}"
+            );
+            let tooltip = ToolTip::get_tip(&description)
+                .map(|value| value.downcast_ref::<String>().unwrap().clone());
+            assert_eq!(
+                tooltip.as_deref(),
+                expected_collapsed.then_some(full_text.as_str()),
+                "the full description is available only while its rendered lines are collapsed",
+            );
+        }
+        let weak = description.downgrade();
+        window.close();
+        weak
+    };
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(
+        weak_description.upgrade().is_none(),
+        "the layout callback must not retain the description"
     );
 }
 

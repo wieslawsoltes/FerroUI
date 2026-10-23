@@ -28,7 +28,7 @@
         <ListBox x:Name="Pages" Grid.Row="3" AutomationProperties.Name="Gallery pages" />
       </Grid>
     </Border>
-    <ScrollViewer Grid.Row="1" Grid.Column="1" HorizontalScrollBarVisibility="Disabled"
+    <ScrollViewer x:Name="PageScroll" Grid.Row="1" Grid.Column="1" HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Auto">
       <StackPanel x:Name="PageBody" Margin="32,24" Spacing="16" />
     </ScrollViewer>

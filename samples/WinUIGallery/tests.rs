@@ -253,6 +253,69 @@ fn native_gallery_filters_navigates_and_retains_history() {
 }
 
 #[test]
+fn gallery_navigation_resets_measured_page_scroll_but_no_op_navigation_preserves_it() {
+    use ferroui_base::Vector;
+    use ferroui_base::styling::ThemeVariant;
+    use ferroui_base::threading::Dispatcher;
+    use ferroui_controls::presenters::ScrollContentPresenter;
+    use ferroui_controls::testing::{MockWindowingPlatform, create_split_view_list_box_theme};
+    use ferroui_controls::{Application, Control, ScrollViewer, Window};
+
+    ferroui_markup_xaml::register_types();
+    let _application = UnitTestApplication::start(
+        TestServices::styled_window().with_theme(create_split_view_list_box_theme),
+    );
+    let gallery = GalleryView::new().unwrap();
+    let scroll = gallery.root().get_control::<ScrollViewer>("PageScroll");
+    let window = Window::with_impl(MockWindowingPlatform::create_window_mock_with_size(
+        1280.0, 400.0,
+    ));
+    window.set_content(Some(Control::boxed(gallery.root())));
+    window.show();
+    Dispatcher::ui_thread().run_jobs(None);
+    window.update_layout();
+    assert!(scroll.presenter().unwrap().is::<ScrollContentPresenter>());
+
+    let scroll_page = || {
+        assert!(scroll.viewport().height > 0.0);
+        assert!(
+            scroll.extent().height > scroll.viewport().height,
+            "the page must have a measured scroll extent: {:?} / {:?}",
+            scroll.extent(),
+            scroll.viewport(),
+        );
+        scroll.set_offset(Vector::new(0.0, 120.0));
+        window.update_layout();
+        assert!(scroll.offset().y > 0.0);
+        scroll.offset()
+    };
+
+    let saved = scroll_page();
+    assert!(!gallery.navigate("Button"));
+    assert!(!gallery.navigate("NoSuchPage"));
+    window.update_layout();
+    assert_eq!(scroll.offset(), saved);
+    Application::current()
+        .unwrap()
+        .set_requested_theme_variant(Some(ThemeVariant::dark()));
+    window.update_layout();
+    assert_eq!(scroll.offset(), saved);
+
+    assert!(gallery.navigate("TextBox"));
+    window.update_layout();
+    assert_eq!(scroll.offset(), Vector::new(0.0, 0.0));
+    scroll_page();
+    assert!(gallery.go_back());
+    window.update_layout();
+    assert_eq!(scroll.offset(), Vector::new(0.0, 0.0));
+    scroll_page();
+    assert!(gallery.go_forward());
+    window.update_layout();
+    assert_eq!(scroll.offset(), Vector::new(0.0, 0.0));
+    window.close();
+}
+
+#[test]
 fn every_catalog_page_opens_in_the_native_shell() {
     let _application = start();
     let gallery = GalleryView::new().unwrap();

@@ -6,6 +6,23 @@
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
             xmlns:primitives="using:FerroUI.Controls.Primitives"
             x:Name="ColorPickerExample1" Spacing="12">
+  <StackPanel.Resources>
+    <!-- ColorView's Fluent tab theme uses these aliases. WinUITheme supplies
+         the underlying colors, but names its own tabs with TabViewItem keys.
+         Keep this bridge local and dynamic so existing views follow theme changes. -->
+    <SolidColorBrush x:Key="TabItemHeaderForegroundUnselected"
+                     Color="{DynamicResource SystemBaseMediumColor}" />
+    <SolidColorBrush x:Key="TabItemHeaderForegroundSelected"
+                     Color="{DynamicResource SystemBaseHighColor}" />
+    <SolidColorBrush x:Key="TabItemHeaderForegroundUnselectedPointerOver"
+                     Color="{DynamicResource SystemBaseMediumHighColor}" />
+    <SolidColorBrush x:Key="TabItemHeaderForegroundUnselectedPressed"
+                     Color="{DynamicResource SystemBaseMediumHighColor}" />
+    <SolidColorBrush x:Key="TabItemHeaderForegroundSelectedPointerOver"
+                     Color="{DynamicResource SystemBaseMediumHighColor}" />
+    <SolidColorBrush x:Key="TabItemHeaderForegroundSelectedPressed"
+                     Color="{DynamicResource SystemBaseMediumHighColor}" />
+  </StackPanel.Resources>
   <StackPanel.Styles>
     <StyleInclude Source="ferres://FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
   </StackPanel.Styles>

@@ -183,6 +183,11 @@ jobs:
         run: >-
           cargo test --locked -p winui-gallery --features capture --lib
           connected_capture_decodes_original_landscapes_and_propagates_the_selected_bitmap
+      - name: ColorView tab icons follow native WinUI theme changes
+        run: >-
+          cargo test --locked -p winui-gallery --features capture --lib
+          color_picker_samples_tests::themed::color_picker_tab_icons_follow_winui_theme_changes
+          -- --exact
       - name: Upload native rendering artifacts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

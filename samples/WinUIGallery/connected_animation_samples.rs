@@ -8,7 +8,7 @@
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, Orientation};
-use ferroui_base::media::{Stretch, TextWrapping};
+use ferroui_base::media::{Stretch, TextTrimming, TextWrapping};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Ref,
     StyledElementImpl, Thickness, Vector, Visual, VisualImpl, WeakRef,
@@ -23,7 +23,7 @@ use ferroui_controls::navigation::{NavigationCacheMode, NavigationError, Navigat
 use ferroui_controls::primitives::TemplatedControlImpl;
 use ferroui_controls::{
     Border, Button, ContentControlImpl, Control, ControlImpl, Frame, FramePage, FramePageImpl,
-    Grid, Image, Panel, RadioButtons, ScrollViewer, StackPanel, TextBlock, TopLevel,
+    Grid, Image, Panel, RadioButtons, ScrollViewer, StackPanel, TextBlock, ToolTip, TopLevel,
 };
 use ferroui_markup_xaml::XamlLoadException;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
@@ -186,6 +186,35 @@ fn text(value: &str) -> Ref<TextBlock> {
     result
 }
 
+/// The source's IsTextTrimmedChanged handler exposes the whole description only
+/// while it is truncated. Native layout already records collapsed text lines;
+/// no additional control property or compatibility event is needed.
+fn wire_trimmed_description(description: &Ref<TextBlock>) {
+    let weak_description = description.downgrade();
+    description.layout_updated(move || {
+        let Some(description) = weak_description.upgrade() else {
+            return;
+        };
+        if !description.is_measure_valid() || !description.is_arrange_valid() {
+            return;
+        }
+        let collapsed = description
+            .text_layout()
+            .text_lines()
+            .iter()
+            .any(|line| line.has_collapsed());
+        let tooltip = if collapsed { description.text() } else { None };
+        let current = ToolTip::get_tip(&description)
+            .and_then(|value| value.downcast_ref::<String>().cloned());
+        if current != tooltip {
+            ToolTip::set_tip(
+                &description,
+                tooltip.map(|text| Rc::new(text) as ferroui_base::BoxedValue),
+            );
+        }
+    });
+}
+
 fn item_button(
     item: &GalleryItem,
     index: usize,
@@ -196,6 +225,7 @@ fn item_button(
     button.set_tag(Some(Rc::new(index)));
     button.set_padding(Thickness::uniform(0.0));
     button.set_horizontal_alignment(HorizontalAlignment::Stretch);
+    button.set_horizontal_content_alignment(HorizontalAlignment::Stretch);
     AutomationProperties::set_name(&button, Some(&item.title));
     let image = Image::new();
     image.set_name(Some(format!("ConnectedImage{}", index + 1)));
@@ -231,6 +261,8 @@ fn item_button(
         description.set_max_width(500.0);
         description.set_max_lines(2);
         description.set_text_wrapping(TextWrapping::Wrap);
+        description.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+        wire_trimmed_description(&description);
         labels.children().add(description);
     } else {
         button.set_width(150.0);

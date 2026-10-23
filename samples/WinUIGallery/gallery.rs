@@ -11,7 +11,7 @@ use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::primitives::SelectingItemsControl;
 use ferroui_controls::{
     Application, Button, ComboBox, ContentControl, Control, Expander, HyperlinkButton, ListBox,
-    StackPanel, TextBlock, TextBox,
+    ScrollViewer, StackPanel, TextBlock, TextBox,
 };
 use ferroui_markup_xaml::XamlLoadException;
 use ferroui_markup_xaml_loader::winui::{migrate_winui_xaml, WinUIXamlOptions};
@@ -32,6 +32,7 @@ struct GalleryState {
     category: Ref<ComboBox>,
     pages: Ref<ListBox>,
     body: Ref<StackPanel>,
+    page_scroll: Ref<ScrollViewer>,
     results: Ref<TextBlock>,
     back: Ref<Button>,
     forward: Ref<Button>,
@@ -77,6 +78,7 @@ impl GalleryView {
             category,
             pages: root.get_control("Pages"),
             body: root.get_control("PageBody"),
+            page_scroll: root.get_control("PageScroll"),
             results: root.get_control("ResultCount"),
             back: root.get_control("Back"),
             forward: root.get_control("Forward"),
@@ -316,6 +318,10 @@ impl GalleryState {
         if entry.samples.is_empty() {
             self.body.children().add(text("This guidance page has no standalone snippets in the pinned upstream catalog. Use its documentation and source links above."));
         }
+        // Every actual navigation builds a fresh page. Start that page at its
+        // heading instead of retaining an unrelated page's outer scroll offset.
+        // Sample-owned scroll viewers keep their own navigation/state behavior.
+        self.page_scroll.scroll_to_home();
     }
 }
 
