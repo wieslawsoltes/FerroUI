@@ -1,0 +1,38 @@
+[package]
+name = "ferroui-controls-livecharts"
+description = "Native FerroUI chart controls using the LiveCharts2 Rust chart engines"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+build = "build.rs"
+links = "ferroui_controls_livecharts_xaml"
+
+[lib]
+path = "lib.rs"
+
+[features]
+markup-functions = ["ferroui-base/markup-functions", "ferroui-livecharts/markup-functions"]
+compiler-metadata = ["markup-functions", "ferroui-base/compiler-metadata", "ferroui-livecharts/compiler-metadata"]
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-livecharts.workspace = true
+bitflags.workspace = true
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
+
+[package.metadata.release]
+group = "controls"

@@ -866,6 +866,7 @@ dependencies = [
  "ferroui-browser",
  "ferroui-controls",
  "ferroui-controls-color-picker",
+ "ferroui-controls-livecharts",
  "ferroui-controls-treedatagrid",
  "ferroui-desktop",
  "ferroui-devtools",
@@ -874,6 +875,7 @@ dependencies = [
  "ferroui-dynamic-data",
  "ferroui-harfbuzz",
  "ferroui-headless",
+ "ferroui-livecharts",
  "ferroui-markup",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
@@ -1000,6 +1002,18 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
+]
+
+[[package]]
+name = "ferroui-controls-livecharts"
+version = "0.4.0"
+dependencies = [
+ "bitflags",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-livecharts",
+ "ferroui-markup-xaml-loader",
 ]
 
 [[package]]
@@ -1272,6 +1286,15 @@ dependencies = [
  "ferroui-skia",
  "ferroui-themes-simple",
  "libc",
+]
+
+[[package]]
+name = "ferroui-livecharts"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "serde_json",
 ]
 
 [[package]]
