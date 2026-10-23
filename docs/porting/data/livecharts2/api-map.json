@@ -5321,11 +5321,13 @@
       "signature": "IList<string>? Labels { get; set; }",
       "line": 197,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/axis.rs",
+        "src/FerroUI.Controls.LiveCharts/axis.rs"
+      ],
+      "reason": "Typed native axis property drives the measured forward/inverse scale and label/category calculation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/CoreAxis.cs::LiveChartsCore.CoreAxis<TTextGeometry, TLineGeometry>::IScalerProvider? ScalerProvider { get; set; }#L1140",
@@ -5711,11 +5713,13 @@
       "signature": "bool IsInverted { get; set; }",
       "line": 206,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/axis.rs",
+        "src/FerroUI.Controls.LiveCharts/axis.rs"
+      ],
+      "reason": "Typed native axis property drives the measured forward/inverse scale and label/category calculation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/CoreAxis.cs::LiveChartsCore.CoreAxis<TTextGeometry, TLineGeometry>::bool SeparatorsAtCenter { get; set; }#L209",
@@ -5876,11 +5880,13 @@
       "signature": "double UnitWidth { get; set; }",
       "line": 185,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/axis.rs",
+        "src/FerroUI.Controls.LiveCharts/axis.rs"
+      ],
+      "reason": "Typed native axis property drives the measured forward/inverse scale and label/category calculation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/CoreAxis.cs::LiveChartsCore.CoreAxis<TTextGeometry, TLineGeometry>::double? IInternalCartesianAxis.UserSetMaxLimit { get; }#L322",
@@ -5921,11 +5927,13 @@
       "signature": "double? MaxLimit { get; set; }",
       "line": 167,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/axis.rs",
+        "src/FerroUI.Controls.LiveCharts/axis.rs"
+      ],
+      "reason": "Typed native axis property drives the measured forward/inverse scale and label/category calculation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/CoreAxis.cs::LiveChartsCore.CoreAxis<TTextGeometry, TLineGeometry>::double? MinLimit { get; set; }#L143",
@@ -5936,11 +5944,13 @@
       "signature": "double? MinLimit { get; set; }",
       "line": 143,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/axis.rs",
+        "src/FerroUI.Controls.LiveCharts/axis.rs"
+      ],
+      "reason": "Typed native axis property drives the measured forward/inverse scale and label/category calculation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/CoreAxis.cs::LiveChartsCore.CoreAxis<TTextGeometry, TLineGeometry>::double? MinZoomDelta { get; set; }#L310",
@@ -7796,11 +7806,12 @@
       "signature": "PolarLabelsPosition DataLabelsPosition { get; set; }",
       "line": 112,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::label_position"
+      ],
+      "reason": "Chart center, start, end, middle and outer labels use source radius/angle and native horizontal alignment rules.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::RadialAlignment RadialAlign { get; set; }#L97",
@@ -7811,11 +7822,13 @@
       "signature": "RadialAlignment RadialAlign { get; set; }",
       "line": 97,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::radial_align",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::bool InvertedCornerRadius { get; set; }#L103",
@@ -7826,10 +7839,13 @@
       "signature": "bool InvertedCornerRadius { get; set; }",
       "line": 103,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::rounded_annular_sector_path"
+      ],
+      "reason": "Native cubic outlines support rounded/inverted radial corners.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Tiny wedges clamp corner overlap and full rings remain exactly closed; this is a documented geometry correction."
       ]
     },
     {
@@ -7841,11 +7857,13 @@
       "signature": "bool IsFillSeries { get; set; }",
       "line": 106,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::is_fill_series",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::bool IsRelativeToMinValue { get; set; }#L109",
@@ -7856,11 +7874,13 @@
       "signature": "bool IsRelativeToMinValue { get; set; }",
       "line": 109,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::is_relative_to_min_value",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double CornerRadius { get; set; }#L100",
@@ -7871,10 +7891,13 @@
       "signature": "double CornerRadius { get; set; }",
       "line": 100,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::rounded_annular_sector_path"
+      ],
+      "reason": "Native cubic outlines support rounded/inverted radial corners.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Tiny wedges clamp corner overlap and full rings remain exactly closed; this is a documented geometry correction."
       ]
     },
     {
@@ -7886,10 +7909,13 @@
       "signature": "double HoverPushout { get; set; }",
       "line": 85,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::hover_push_out"
+      ],
+      "reason": "Reserves normal pie layout space and correctly excludes gauges.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Pointer-driven hover pushout animation remains pending."
       ]
     },
     {
@@ -7901,11 +7927,13 @@
       "signature": "double InnerRadius { get; set; }",
       "line": 79,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::inner_radius",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double MaxRadialColumnWidth { get; set; }#L94",
@@ -7916,11 +7944,13 @@
       "signature": "double MaxRadialColumnWidth { get; set; }",
       "line": 94,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::max_radial_column_width",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double OuterRadiusOffset { get; set; }#L82",
@@ -7931,11 +7961,13 @@
       "signature": "double OuterRadiusOffset { get; set; }",
       "line": 82,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::outer_radius_offset",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double Pushout { get; set; }#L76",
@@ -7946,11 +7978,13 @@
       "signature": "double Pushout { get; set; }",
       "line": 76,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::push_out",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double RelativeInnerRadius { get; set; }#L88",
@@ -7961,11 +7995,13 @@
       "signature": "double RelativeInnerRadius { get; set; }",
       "line": 88,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::relative_inner_radius",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double RelativeOuterRadius { get; set; }#L91",
@@ -7976,11 +8012,13 @@
       "signature": "double RelativeOuterRadius { get; set; }",
       "line": 91,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::relative_outer_radius",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::override IDrawnElement GetMiniatureGeometry(ChartPoint? point)#L608",
@@ -21821,11 +21859,12 @@
       "signature": "ControlCoordinatesProjector(float mapWidth, float mapHeight, float offsetX, float offsetY)",
       "line": 58,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::new"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::ControlCoordinatesProjector(float mapWidth, float mapHeight, float offsetX, float offsetY, double minLatitudeDegrees, double maxLatitudeDegrees, double minLongitudeDegrees, double maxLongitudeDegrees)#L74",
@@ -21836,11 +21875,12 @@
       "signature": "ControlCoordinatesProjector(float mapWidth, float mapHeight, float offsetX, float offsetY, double minLatitudeDegrees, double maxLatitudeDegrees, double minLongitudeDegrees, double maxLongitudeDegrees)",
       "line": 74,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::new"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::const double DefaultMaxLatitudeDegrees#L37",
@@ -21851,11 +21891,12 @@
       "signature": "const double DefaultMaxLatitudeDegrees",
       "line": 37,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::DEFAULT_MAX_LATITUDE"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::const double DefaultMaxLongitudeDegrees#L43",
@@ -21866,11 +21907,12 @@
       "signature": "const double DefaultMaxLongitudeDegrees",
       "line": 43,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::DEFAULT_MAX_LONGITUDE"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::const double DefaultMinLatitudeDegrees#L34",
@@ -21881,11 +21923,12 @@
       "signature": "const double DefaultMinLatitudeDegrees",
       "line": 34,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::DEFAULT_MIN_LATITUDE"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::const double DefaultMinLongitudeDegrees#L40",
@@ -21896,11 +21939,12 @@
       "signature": "const double DefaultMinLongitudeDegrees",
       "line": 40,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::DEFAULT_MIN_LONGITUDE"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::override bool ToCoordinates(float screenX, float screenY, out double longitude, out double latitude)#L162",
@@ -21911,11 +21955,12 @@
       "signature": "override bool ToCoordinates(float screenX, float screenY, out double longitude, out double latitude)",
       "line": 162,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::to_coordinates"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::override float[] ToMap(double[] point)#L148",
@@ -21926,11 +21971,12 @@
       "signature": "override float[] ToMap(double[] point)",
       "line": 148,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::to_map"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::override void ToMap(double longitude, double latitude, out float x, out float y)#L155",
@@ -21941,11 +21987,12 @@
       "signature": "override void ToMap(double longitude, double latitude, out float x, out float y)",
       "line": 155,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::to_map"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::static float[] GetPreferredRatio(double minLatitudeDegrees, double maxLatitudeDegrees, double minLongitudeDegrees, double maxLongitudeDegrees)#L136",
@@ -21956,11 +22003,12 @@
       "signature": "static float[] GetPreferredRatio(double minLatitudeDegrees, double maxLatitudeDegrees, double minLongitudeDegrees, double maxLongitudeDegrees)",
       "line": 136,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::preferred_ratio"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::static float[] PreferredRatio { get; }#L127",
@@ -21971,11 +22019,12 @@
       "signature": "static float[] PreferredRatio { get; }",
       "line": 127,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::preferred_ratio"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/DrawnMap.cs::LiveChartsCore.Geo.DrawnMap::Dictionary<string, MapLayer> Layers { get; protected set; }#L73",
@@ -23606,11 +23655,12 @@
       "signature": "Default",
       "line": null,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjection::Default"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MapProjection.cs::LiveChartsCore.Geo.MapProjection::Mercator",
@@ -23621,11 +23671,12 @@
       "signature": "Mercator",
       "line": null,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjection::Mercator"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MapProjection.cs::LiveChartsCore.Geo.MapProjection::Orthographic",
@@ -23636,11 +23687,12 @@
       "signature": "Orthographic",
       "line": null,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjection::Orthographic"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MapProjector.cs::LiveChartsCore.Geo.MapProjector::abstract bool ToCoordinates(float screenX, float screenY, out double longitude, out double latitude)#L96",
@@ -23651,11 +23703,12 @@
       "signature": "abstract bool ToCoordinates(float screenX, float screenY, out double longitude, out double latitude)",
       "line": 96,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector::to_coordinates"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MapProjector.cs::LiveChartsCore.Geo.MapProjector::abstract float[] ToMap(double[] point)#L55",
@@ -23666,11 +23719,12 @@
       "signature": "abstract float[] ToMap(double[] point)",
       "line": 55,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector::to_map"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MapProjector.cs::LiveChartsCore.Geo.MapProjector::float MapHeight { get; protected set; }#L38",
@@ -23681,11 +23735,12 @@
       "signature": "float MapHeight { get; protected set; }",
       "line": 38,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector::map_bounds"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MapProjector.cs::LiveChartsCore.Geo.MapProjector::float MapWidth { get; protected set; }#L33",
@@ -23696,11 +23751,12 @@
       "signature": "float MapWidth { get; protected set; }",
       "line": 33,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector::map_bounds"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MapProjector.cs::LiveChartsCore.Geo.MapProjector::float XOffset { get; protected set; }#L43",
@@ -23711,11 +23767,12 @@
       "signature": "float XOffset { get; protected set; }",
       "line": 43,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector::map_bounds"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MapProjector.cs::LiveChartsCore.Geo.MapProjector::float YOffset { get; protected set; }#L48",
@@ -23726,11 +23783,12 @@
       "signature": "float YOffset { get; protected set; }",
       "line": 48,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector::map_bounds"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MapProjector.cs::LiveChartsCore.Geo.MapProjector::virtual bool IsVisible(double longitude, double latitude)#L83",
@@ -23741,11 +23799,12 @@
       "signature": "virtual bool IsVisible(double longitude, double latitude)",
       "line": 83,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector::is_visible"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MapProjector.cs::LiveChartsCore.Geo.MapProjector::virtual void ToMap(double longitude, double latitude, out float x, out float y)#L69",
@@ -23756,11 +23815,12 @@
       "signature": "virtual void ToMap(double longitude, double latitude, out float x, out float y)",
       "line": 69,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector::to_map"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MapShapeContext.cs::LiveChartsCore.Geo.MapShapeContext::Bounds Bounds { get; }#L65",
@@ -23921,11 +23981,12 @@
       "signature": "MercatorProjector(float mapWidth, float mapHeight, float offsetX, float offsetY)",
       "line": 74,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::new"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::MercatorProjector(float mapWidth, float mapHeight, float offsetX, float offsetY, double minLatitudeDegrees, double maxLatitudeDegrees, double minLongitudeDegrees, double maxLongitudeDegrees)#L90",
@@ -23936,11 +23997,12 @@
       "signature": "MercatorProjector(float mapWidth, float mapHeight, float offsetX, float offsetY, double minLatitudeDegrees, double maxLatitudeDegrees, double minLongitudeDegrees, double maxLongitudeDegrees)",
       "line": 90,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::new"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::const double DefaultMaxLatitudeDegrees#L45",
@@ -23951,11 +24013,12 @@
       "signature": "const double DefaultMaxLatitudeDegrees",
       "line": 45,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::DEFAULT_MAX_LATITUDE"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::const double DefaultMaxLongitudeDegrees#L57",
@@ -23966,11 +24029,12 @@
       "signature": "const double DefaultMaxLongitudeDegrees",
       "line": 57,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::DEFAULT_MAX_LONGITUDE"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::const double DefaultMinLatitudeDegrees#L38",
@@ -23981,11 +24045,12 @@
       "signature": "const double DefaultMinLatitudeDegrees",
       "line": 38,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::DEFAULT_MIN_LATITUDE"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::const double DefaultMinLongitudeDegrees#L51",
@@ -23996,11 +24061,12 @@
       "signature": "const double DefaultMinLongitudeDegrees",
       "line": 51,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::DEFAULT_MIN_LONGITUDE"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::override bool ToCoordinates(float screenX, float screenY, out double longitude, out double latitude)#L189",
@@ -24011,11 +24077,12 @@
       "signature": "override bool ToCoordinates(float screenX, float screenY, out double longitude, out double latitude)",
       "line": 189,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::to_coordinates"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::override float[] ToMap(double[] point)#L169",
@@ -24026,11 +24093,12 @@
       "signature": "override float[] ToMap(double[] point)",
       "line": 169,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::to_map"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::override void ToMap(double longitude, double latitude, out float x, out float y)#L176",
@@ -24041,11 +24109,12 @@
       "signature": "override void ToMap(double longitude, double latitude, out float x, out float y)",
       "line": 176,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::to_map"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::static float[] GetPreferredRatio(double minLatitudeDegrees, double maxLatitudeDegrees, double minLongitudeDegrees, double maxLongitudeDegrees)#L154",
@@ -24056,11 +24125,12 @@
       "signature": "static float[] GetPreferredRatio(double minLatitudeDegrees, double maxLatitudeDegrees, double minLongitudeDegrees, double maxLongitudeDegrees)",
       "line": 154,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::preferred_ratio"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::static float[] PreferredRatio { get; }#L145",
@@ -24071,11 +24141,12 @@
       "signature": "static float[] PreferredRatio { get; }",
       "line": 145,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::preferred_ratio"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/MultiPoligonGeometry.cs::LiveChartsCore.Geo.MultiPoligonGeometry::JsonElement? Coordinates { get; set; }#L49",
@@ -24116,11 +24187,12 @@
       "signature": "OrthographicProjector(float mapWidth, float mapHeight, float offsetX, float offsetY, double centerLon, double centerLat)",
       "line": 51,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::new"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::double CenterLatitude { get; }#L77",
@@ -24131,11 +24203,12 @@
       "signature": "double CenterLatitude { get; }",
       "line": 77,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::center"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::double CenterLongitude { get; }#L72",
@@ -24146,11 +24219,12 @@
       "signature": "double CenterLongitude { get; }",
       "line": 72,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::center"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::float Radius { get; }#L82",
@@ -24161,11 +24235,12 @@
       "signature": "float Radius { get; }",
       "line": 82,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::radius"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::float ScreenCenterX { get; }#L87",
@@ -24176,11 +24251,12 @@
       "signature": "float ScreenCenterX { get; }",
       "line": 87,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::screen_center"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::float ScreenCenterY { get; }#L92",
@@ -24191,11 +24267,12 @@
       "signature": "float ScreenCenterY { get; }",
       "line": 92,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::screen_center"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::override bool IsVisible(double longitude, double latitude)#L100",
@@ -24206,11 +24283,12 @@
       "signature": "override bool IsVisible(double longitude, double latitude)",
       "line": 100,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::is_visible"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::override bool ToCoordinates(float screenX, float screenY, out double longitude, out double latitude)#L137",
@@ -24221,11 +24299,12 @@
       "signature": "override bool ToCoordinates(float screenX, float screenY, out double longitude, out double latitude)",
       "line": 137,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::to_coordinates"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::override float[] ToMap(double[] point)#L112",
@@ -24236,11 +24315,12 @@
       "signature": "override float[] ToMap(double[] point)",
       "line": 112,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::to_map"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::override void ToMap(double longitude, double latitude, out float x, out float y)#L119",
@@ -24251,11 +24331,12 @@
       "signature": "override void ToMap(double longitude, double latitude, out float x, out float y)",
       "line": 119,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::to_map"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::static float[] PreferredRatio { get; }#L97",
@@ -24266,11 +24347,12 @@
       "signature": "static float[] PreferredRatio { get; }",
       "line": 97,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::PREFERRED_RATIO"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Geo/RotationTracker.cs::LiveChartsCore.Geo.RotationTracker::double X { get; set; }#L41",
@@ -28766,11 +28848,12 @@
       "signature": "static FindingStrategy GetFindingStrategy(this IEnumerable<ISeries> seriesCollection)",
       "line": 486,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs::CartesianChartEngine::measure_with_axes"
+      ],
+      "reason": "All visible-series preferences select X-closest, Y-closest, or all-dimensions-closest using the source all-series reduction.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/Kernel/Extensions.cs::LiveChartsCore.Kernel.Extensions::static IEnumerable<IEnumerable<ChartPoint>> SplitByNullGaps(this IEnumerable<ChartPoint> points, Action<ChartPoint> onDeleteNullPoint)#L605",
@@ -43616,11 +43699,12 @@
       "signature": "static ArcResult<TNode> ComputeBipartiteArc<TNode>(IEnumerable<TNode> nodes, IEnumerable<SankeyLink<TNode>> links, LvcRectangle rect, float nodeWidth, float nodePadding, float arcSpanDegrees, float labelMargin) where TNode : notnull",
       "line": 373,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs::SankeyChartEngine::layout"
+      ],
+      "reason": "Explicit function correspondence selected by SankeyLayoutKind: filtered DAG inputs, depth/value assignment, relaxation or proportional arcs and output bands are reviewed against pinned source. Result reports cycles and invalid finite arithmetic instead of throwing.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/SankeyLayout.cs::LiveChartsCore.SankeyLayout::static Result<TNode> Compute<TNode>(IEnumerable<TNode> nodes, IEnumerable<SankeyLink<TNode>> links, LvcRectangle rect, float nodeWidth, float nodePadding, int iterations) where TNode : notnull#L162",
@@ -43631,11 +43715,12 @@
       "signature": "static Result<TNode> Compute<TNode>(IEnumerable<TNode> nodes, IEnumerable<SankeyLink<TNode>> links, LvcRectangle rect, float nodeWidth, float nodePadding, int iterations) where TNode : notnull",
       "line": 162,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs::SankeyChartEngine::layout"
+      ],
+      "reason": "Explicit function correspondence selected by SankeyLayoutKind: filtered DAG inputs, depth/value assignment, relaxation or proportional arcs and output bands are reviewed against pinned source. Result reports cycles and invalid finite arithmetic instead of throwing.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/SankeyMeasureContext.cs::LiveChartsCore.SankeyMeasureContext::LvcPoint DrawLocation { get; }#L57",
@@ -46901,11 +46986,12 @@
       "signature": "static List<(T item, LvcRectangle rect)> Squarify<T>(List<(double weight, T item)> items, LvcRectangle rect)",
       "line": 44,
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs::squarify"
+      ],
+      "reason": "Explicit generic squarification function counterpart; valid weights preserve proportional areas, row ordering and nonoverlap. Rust borrows input instead of reordering the caller and normalizes extreme weights before summation.",
+      "remaining": []
     },
     {
       "id": "src/LiveChartsCore/TreemapMeasureContext.cs::LiveChartsCore.TreemapMeasureContext::LvcPoint DrawLocation { get; }#L55",

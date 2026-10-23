@@ -2509,11 +2509,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/cubic_bezier_easing_function.rs::tests::linear_shortcut_is_identity_curve"
+      ],
+      "reason": "The source six-curve matrix and 201 samples per curve are verified against an independent 80-iteration double-precision solve with source tolerances; the identity fixture is extended outside [0,1].",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/CubicBezierEasingTests.cs::CoreTests.CoreObjectsTests.CubicBezierEasingTests::void LutMatchesAnalyticAcrossDomain(float x1, float y1, float x2, float y2)#L62",
@@ -2531,11 +2532,12 @@
         "DataRow(0f, 0.6f, 0f, 1f)"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/cubic_bezier_easing_function.rs::tests::lut_matches_analytic_across_domain"
+      ],
+      "reason": "The source six-curve matrix and 201 samples per curve are verified against an independent 80-iteration double-precision solve with source tolerances; the identity fixture is extended outside [0,1].",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/DefaultsTesting.cs::CoreTests.CoreObjectsTests.DefaultsTesting::void BoxValueRaisesPropertyChanged()#L387",
@@ -3347,11 +3349,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BackInOutBoundary()#L157",
@@ -3363,11 +3366,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BackOutBoundary()#L149",
@@ -3379,11 +3383,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BounceInBoundary()#L165",
@@ -3395,11 +3400,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BounceInOutBoundary()#L181",
@@ -3411,11 +3417,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BounceOutBoundary()#L173",
@@ -3427,11 +3434,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BuildCubicBezierBoundary()#L341",
@@ -3443,11 +3451,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/cubic_bezier_easing_function.rs::tests::lut_matches_analytic_across_domain"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BuildFunctionUsingKeyFrames()#L349",
@@ -3459,11 +3468,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::key_frames_interpolate_and_extend_final_value"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BuildFunctionUsingKeyFramesAddsLastFrameIfNotAtOne()#L374",
@@ -3475,11 +3485,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::key_frames_interpolate_and_extend_final_value"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BuildFunctionUsingKeyFramesThrowsWithLessThanTwo()#L364",
@@ -3491,11 +3502,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::key_frames_use_destination_easing_and_reject_undefined_segments"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CircleInBoundary()#L69",
@@ -3507,11 +3519,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CircleInOutBoundary()#L85",
@@ -3523,11 +3536,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CircleOutBoundary()#L77",
@@ -3539,11 +3553,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CubicInBoundary()#L45",
@@ -3555,11 +3570,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CubicInOutBoundary()#L61",
@@ -3571,11 +3587,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CubicOutBoundary()#L53",
@@ -3587,11 +3604,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomBackInOutWithOvershoot()#L285",
@@ -3603,11 +3621,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomBackInWithOvershoot()#L269",
@@ -3619,11 +3638,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomBackOutWithOvershoot()#L277",
@@ -3635,11 +3655,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomElasticInOutWithAmplitudeAndPeriod()#L309",
@@ -3651,11 +3672,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomElasticInWithAmplitudeAndPeriod()#L293",
@@ -3667,11 +3689,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomElasticOutWithAmplitudeAndPeriod()#L301",
@@ -3683,11 +3706,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomPolinominalInOutWithExponent()#L333",
@@ -3699,11 +3723,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomPolinominalInWithExponent()#L317",
@@ -3715,11 +3740,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomPolinominalOutWithExponent()#L325",
@@ -3731,11 +3757,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void EaseBoundary()#L237",
@@ -3747,11 +3774,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void EaseInBoundary()#L245",
@@ -3763,11 +3791,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void EaseInOutBoundary()#L261",
@@ -3779,11 +3808,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void EaseOutBoundary()#L253",
@@ -3795,11 +3825,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void EasingFunctionsAreMonotonicForMostFunctions()#L388",
@@ -3811,11 +3842,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::customary_easing_curves_are_monotonic"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ElasticInBoundary()#L189",
@@ -3827,11 +3859,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ElasticInOutBoundary()#L205",
@@ -3843,11 +3876,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ElasticOutBoundary()#L197",
@@ -3859,11 +3893,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ExponentialInBoundary()#L93",
@@ -3875,11 +3910,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ExponentialInOutBoundary()#L109",
@@ -3891,11 +3927,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ExponentialOutBoundary()#L101",
@@ -3907,11 +3944,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void LinealIsIdentity()#L11",
@@ -3923,11 +3961,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void PolinominalInBoundary()#L213",
@@ -3939,11 +3978,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void PolinominalInOutBoundary()#L229",
@@ -3955,11 +3995,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void PolinominalOutBoundary()#L221",
@@ -3971,11 +4012,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void QuadraticInBoundary()#L20",
@@ -3987,11 +4029,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void QuadraticInOutBoundary()#L37",
@@ -4003,11 +4046,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void QuadraticOutBoundary()#L29",
@@ -4019,11 +4063,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void SinInBoundary()#L117",
@@ -4035,11 +4080,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void SinInOutBoundary()#L133",
@@ -4051,11 +4097,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void SinOutBoundary()#L125",
@@ -4067,11 +4114,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/FrameTickerTesting.cs::CoreTests.CoreObjectsTests.FrameTickerTesting::void AsyncLoopTicker_CanvasInvalidatedBeforeInitialize_StartsDrawingLoop()#L63",
@@ -4195,11 +4243,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::control_coordinates_projector_normalizes_degenerate_and_inverted_bounds"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void ControlCoordinatesProjectorRoundTrips()#L265",
@@ -4211,11 +4260,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::control_coordinates_projector_round_trips"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorIsAlwaysVisible()#L84",
@@ -4227,11 +4277,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_is_always_visible"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorNormalizesDegenerateAndInvertedBounds()#L97",
@@ -4243,11 +4294,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_normalizes_degenerate_and_inverted_bounds"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorPreferredRatio()#L62",
@@ -4259,11 +4311,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_preferred_ratio"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorProjectsOriginToCenter()#L10",
@@ -4275,11 +4328,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_projects_origin_to_center"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorProjectsTopLeft()#L23",
@@ -4291,11 +4345,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_projects_top_left"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorProjectsTopRight()#L33",
@@ -4307,11 +4362,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_projects_top_right"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorProperties()#L52",
@@ -4323,11 +4379,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_properties"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorRespectsOffset()#L43",
@@ -4339,11 +4396,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_respects_offset"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorRoundTrips()#L248",
@@ -4355,11 +4413,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_round_trips"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorCenterPointIsVisible()#L150",
@@ -4371,11 +4430,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_center_point_is_visible"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorOppositePointIsNotVisible()#L157",
@@ -4387,11 +4447,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_opposite_point_is_not_visible"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorPointJustBeforeHorizonIsVisible()#L171",
@@ -4403,11 +4464,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_point_just_before_horizon_is_visible"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorPointJustBeyondHorizonIsNotVisible()#L164",
@@ -4419,11 +4481,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_point_just_beyond_horizon_is_not_visible"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorPreferredRatio()#L191",
@@ -4435,11 +4498,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_preferred_ratio"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorProjectsCenterToScreenCenter()#L140",
@@ -4451,11 +4515,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_projects_center_to_screen_center"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorProperties()#L178",
@@ -4467,11 +4532,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_properties"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorRadiusIsHalfMinDimension()#L200",
@@ -4483,11 +4549,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_radius_is_half_min_dimension"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorRejectsClicksOutsideDisc()#L297",
@@ -4499,11 +4566,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_rejects_clicks_outside_disc"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorRoundTripsOnVisibleHemisphere()#L278",
@@ -4515,11 +4583,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_round_trips_on_visible_hemisphere"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorScreenCenter()#L207",
@@ -4531,11 +4600,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_screen_center"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorSymmetry()#L229",
@@ -4547,11 +4617,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_symmetry"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorVisibilityWithDifferentCenter()#L215",
@@ -4563,11 +4634,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_visibility_with_different_center"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/GestureHelpersTests.cs::CoreTests.CoreObjectsTests.GestureHelpersTests::void IsDoubleTap_AtThreshold_RejectsToAvoidEdgeCase()#L61",
@@ -4723,11 +4795,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::invalid_palette_is_rejected"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void BuildColorStopsThrowsWithFewerThanTwoColors()#L56",
@@ -4739,11 +4812,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::invalid_palette_is_rejected"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void BuildColorStopsWithExplicitStops()#L40",
@@ -4755,11 +4829,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::uniform_and_explicit_stops_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void BuildColorStopsWithNullStopsGeneratesUniformDistribution()#L12",
@@ -4771,11 +4846,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::uniform_and_explicit_stops_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void BuildColorStopsWithThreeColorsAndNullStops()#L23",
@@ -4787,11 +4863,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::uniform_and_explicit_stops_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorAtEnd()#L93",
@@ -4803,11 +4880,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::interpolation_clamps_and_truncates_channels"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorAtMidpoint()#L111",
@@ -4819,11 +4897,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::interpolation_clamps_and_truncates_channels"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorAtStart()#L75",
@@ -4835,11 +4914,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::interpolation_clamps_and_truncates_channels"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorClampsAbove()#L145",
@@ -4851,11 +4931,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::interpolation_clamps_and_truncates_channels"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorClampsBelow()#L129",
@@ -4867,11 +4948,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::interpolation_clamps_and_truncates_channels"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorHandlesZeroRange()#L161",
@@ -4883,11 +4965,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::zero_range_is_opaque_and_custom_stop_edges_are_bounded"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/LabelerTesting.cs::CoreTests.CoreObjectsTests.LabelerTesting::void Currency()#L69",
@@ -4963,11 +5046,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitValidateLimitsWhenBothDefined()#L174",
@@ -4979,11 +5063,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitValidateLimitsWhenNoneDefined()#L205",
@@ -4995,11 +5080,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitValidateLimitsWhenOnlyMaxDefined()#L195",
@@ -5011,11 +5097,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitValidateLimitsWhenOnlyMinDefined()#L185",
@@ -5027,11 +5114,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitValidateLimitsWithStep()#L215",
@@ -5043,11 +5131,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsAppendBounds()#L80",
@@ -5059,11 +5148,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_single_value_and_merge_metadata"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsAppendNegativeValues()#L97",
@@ -5075,11 +5165,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_append_values_and_delta"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsAppendSingleValue()#L59",
@@ -5091,11 +5182,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_single_value_and_merge_metadata"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsAppendValueUpdatesMinAndMax()#L46",
@@ -5107,11 +5199,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_append_values_and_delta"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsConstructorWithMinMax()#L24",
@@ -5123,11 +5216,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_constructor_and_copy"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsCopyConstructor()#L32",
@@ -5139,11 +5233,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_constructor_and_copy"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsDefaultIsEmpty()#L15",
@@ -5155,11 +5250,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_default_is_empty"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsDelta()#L70",
@@ -5171,11 +5267,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_append_values_and_delta"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateBoxConstructor()#L269",
@@ -5187,11 +5284,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateEmpty()#L276",
@@ -5203,11 +5301,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::empty_coordinate_and_zero_coordinate_are_distinct"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateFinancialConstructor()#L257",
@@ -5219,11 +5318,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateFullConstructor()#L292",
@@ -5235,11 +5335,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateToString()#L283",
@@ -5251,11 +5352,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateXYConstructor()#L238",
@@ -5267,11 +5369,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateXYWeightConstructor()#L247",
@@ -5283,11 +5386,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void DimensionalBoundsDefaultConstructor()#L313",
@@ -5299,11 +5403,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::dimensional_bounds_defaults"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void MarginAutoIsNaN()#L151",
@@ -6915,10 +7020,13 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs::tests::source_animation_complete_observes_next_frame_after_exact_endpoint"
+      ],
+      "reason": "Source time samples, values, retargeting and completion boundaries are directly verified with caller timestamps. The source drawing-object/registry and IsValid invalidation assertions have no counterpart in this numeric fixture.",
       "remaining": [
-        "No independently verified Rust test counterpart is recorded."
+        "Port source multi-property Animatable invalidation and property-registry assertions through native control integration."
       ]
     },
     {
@@ -6931,10 +7039,13 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs::tests::source_infinite_animation_exact_frames"
+      ],
+      "reason": "Source time samples, values, retargeting and completion boundaries are directly verified with caller timestamps. The source drawing-object/registry and IsValid invalidation assertions have no counterpart in this numeric fixture.",
       "remaining": [
-        "No independently verified Rust test counterpart is recorded."
+        "Port source multi-property Animatable invalidation and property-registry assertions through native control integration."
       ]
     },
     {
@@ -6947,11 +7058,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::source_key_frame_triangle_and_delayed_ramp"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/CoreObjectsTests/TransitionsTesting.cs::CoreTests.CoreObjectsTests.TransitionsTesting::void NotFinishedAnimation()#L184",
@@ -6963,10 +7075,13 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs::tests::source_not_finished_animation_retargets_at_eighty_milliseconds"
+      ],
+      "reason": "Source time samples, values, retargeting and completion boundaries are directly verified with caller timestamps. The source drawing-object/registry and IsValid invalidation assertions have no counterpart in this numeric fixture.",
       "remaining": [
-        "No independently verified Rust test counterpart is recorded."
+        "Port source multi-property Animatable invalidation and property-registry assertions through native control integration."
       ]
     },
     {
@@ -8531,11 +8646,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs::tests::import_built_in_world_map_still_loads"
+      ],
+      "reason": "Direct GeoJSON fixture/assertion port covering shape dispatch, name fallback/case, duplicates or the exact embedded world map. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/OtherTests/GeoJsonImportTests.cs::CoreTests.OtherTests.GeoJsonImportTests::void Import_CustomGeoJson_ParsesMixedPolygonShapes()#L59",
@@ -8547,11 +8663,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs::tests::import_custom_geo_json_parses_mixed_polygon_shapes"
+      ],
+      "reason": "Direct GeoJSON fixture/assertion port covering shape dispatch, name fallback/case, duplicates or the exact embedded world map. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/OtherTests/GeoJsonImportTests.cs::CoreTests.OtherTests.GeoJsonImportTests::void Import_DuplicateShortNames_DoNotAbortImport()#L136",
@@ -8563,11 +8680,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs::tests::import_duplicate_short_names_do_not_abort_import"
+      ],
+      "reason": "Direct GeoJSON fixture/assertion port covering shape dispatch, name fallback/case, duplicates or the exact embedded world map. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/OtherTests/GeoJsonImportTests.cs::CoreTests.OtherTests.GeoJsonImportTests::void Import_MixedCasePropertyKeys_ResolveCaseInsensitively()#L123",
@@ -8579,11 +8697,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs::tests::import_mixed_case_property_keys_resolve_case_insensitively"
+      ],
+      "reason": "Direct GeoJSON fixture/assertion port covering shape dispatch, name fallback/case, duplicates or the exact embedded world map. Passed in ferroui-livecharts tests.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/OtherTests/GeoMapReattachTests.cs::CoreTests.OtherTests.GeoMapReattachTests::void Load_BeforeAnyUnload_IsNoOpAndDoesNotThrow()#L45",
@@ -11267,11 +11386,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/upstream_regression_tests.rs::column_width_is_clamped_to_max_bar_width"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/SeriesTests/ColumnSeriesTest.cs::CoreTests.SeriesTests.ColumnSeriesTest::void ShouldPlaceDataLabel()#L196",
@@ -11507,10 +11627,13 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/upstream_regression_tests.rs::reassigned_shorter_line_values_remove_stale_points_and_shapes"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
       "remaining": [
-        "No independently verified Rust test counterpart is recorded."
+        "This verifies retained scene replacement; source DataFactory cached point disposal and animated exit lifecycle require native-host fixtures."
       ]
     },
     {
@@ -11539,10 +11662,13 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/upstream_regression_tests.rs::reassigned_shorter_scatter_values_remove_stale_points_and_shapes"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
       "remaining": [
-        "No independently verified Rust test counterpart is recorded."
+        "This verifies retained scene replacement; source DataFactory cached point disposal and animated exit lifecycle require native-host fixtures."
       ]
     },
     {
@@ -11603,11 +11729,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/upstream_regression_tests.rs::line_marker_color_matches_user_stroke"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/SeriesTests/LineSeriesTest.cs::CoreTests.SeriesTests.LineSeriesTest::void ShouldPlaceDataLabel()#L202",
@@ -11651,10 +11778,13 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/upstream_regression_tests.rs::line_series_scale_has_even_categories_and_exponential_values"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
       "remaining": [
-        "No independently verified Rust test counterpart is recorded."
+        "Source per-point animated Bezier endpoint storage is replaced by immutable path segments; full source segment checks are not yet duplicated."
       ]
     },
     {
@@ -11747,10 +11877,13 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::tests::source_label_positions_follow_slice_angles_and_native_text_metrics"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
       "remaining": [
-        "No independently verified Rust test counterpart is recorded."
+        "All five placements are exercised; the source thirteen-slice combinations of inner/outer offsets and rendering outputs remain incomplete."
       ]
     },
     {
@@ -11779,11 +11912,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::tests::source_should_scale_preserves_slice_angles_center_and_hover_reservation"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/SeriesTests/PolarLineSeriesAnimationTests.cs::CoreTests.SeriesTests.PolarLineSeriesAnimationTests::void PolarLineSeries_DataChange_MarkersMigrateOnPolarSurface()#L69",
@@ -12099,11 +12233,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/upstream_regression_tests.rs::range_column_series_auto_bounds_include_reversed_low_endpoint"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/SeriesTests/RangeSeriesAutoBoundsTests.cs::CoreTests.SeriesTests.RangeSeriesAutoBoundsTests::void RangeColumnSeries_AutoPadding_UsesFullSpanTick()#L178",
@@ -12131,11 +12266,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/upstream_regression_tests.rs::range_line_series_auto_bounds_include_lowest_low_endpoint"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/SeriesTests/RangeSeriesAutoBoundsTests.cs::CoreTests.SeriesTests.RangeSeriesAutoBoundsTests::void RangeLineSeries_AutoPadding_UsesFullSpanTick()#L203",
@@ -12163,11 +12299,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/upstream_regression_tests.rs::range_row_series_auto_bounds_include_lowest_low_endpoint"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
+      "remaining": []
     },
     {
       "id": "tests/CoreTests/SeriesTests/RangeSeriesAutoBoundsTests.cs::CoreTests.SeriesTests.RangeSeriesAutoBoundsTests::void RangeRowSeries_AutoPadding_UsesFullSpanTick()#L223",
@@ -15875,10 +16012,13 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::tests::tight_gauge_preserves_negative_offsets_and_does_not_reserve_hover_pushout"
+      ],
+      "reason": "Uses the reporter's exact 240x100 size, inner/relative offsets and maximum radial widths from source #2131.",
       "remaining": [
-        "No independently verified Rust test counterpart is recorded."
+        "Numerical geometry only; upstream snapshot PNG has not been compared."
       ]
     },
     {
@@ -16211,10 +16351,13 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs::tests::bipartite_arc_bands_follow_proportional_angular_spans"
+      ],
+      "reason": "Source weights verify angular distribution, padding and endpoint radius.",
       "remaining": [
-        "No independently verified Rust test counterpart is recorded."
+        "Upstream compares a rendered PNG; no matching FerroUI backend golden-image comparison is recorded."
       ]
     },
     {
@@ -16243,11 +16386,12 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No independently verified Rust test counterpart is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs::tests::bipartite_arc_throws_on_multicolumn"
+      ],
+      "reason": "The three-column source fixture is rejected for BipartiteArc with descriptive ChartError instead of InvalidOperationException. This source test asserts failure, not a raster image.",
+      "remaining": []
     },
     {
       "id": "tests/SnapshotTests/SankeySeriesTests.cs::SnapshotTests.SankeySeriesTests::void DefaultTheme_AppliesPaletteColor()#L381",
@@ -16339,10 +16483,13 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs::tests::two_level_flow_preserves_node_values_and_ribbon_thickness"
+      ],
+      "reason": "Source weights verify node values, nonoverlap and ribbon thickness.",
       "remaining": [
-        "No independently verified Rust test counterpart is recorded."
+        "Upstream compares a rendered PNG; no matching FerroUI backend golden-image comparison is recorded."
       ]
     },
     {
@@ -17011,10 +17158,13 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs::tests::flat_basic_tiles_preserve_relative_area_without_overlap"
+      ],
+      "reason": "Source weights verify area conservation, clipping and nonoverlap.",
       "remaining": [
-        "No independently verified Rust test counterpart is recorded."
+        "Upstream compares a rendered PNG; no matching FerroUI backend golden-image comparison is recorded."
       ]
     },
     {
@@ -17027,10 +17177,13 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs::tests::hierarchical_two_level_rolls_up_values_and_insets_every_level"
+      ],
+      "reason": "Source population hierarchy verifies rollup, padding and leaf-only hits.",
       "remaining": [
-        "No independently verified Rust test counterpart is recorded."
+        "Upstream compares a rendered PNG; no matching FerroUI backend golden-image comparison is recorded."
       ]
     },
     {
@@ -17043,10 +17196,13 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs::tests::hierarchical_two_level_rolls_up_values_and_insets_every_level"
+      ],
+      "reason": "Source population fixture and pointer (150,150) verify the China: 1400 leaf label.",
       "remaining": [
-        "No independently verified Rust test counterpart is recorded."
+        "Upstream compares a rendered PNG; no matching FerroUI backend golden-image comparison is recorded."
       ]
     },
     {
@@ -17059,10 +17215,13 @@
         "TestMethod"
       ],
       "profile_mask": 8191,
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs::tests::two_series_partition_by_total_and_hide_invisible_series"
+      ],
+      "reason": "Source series weights verify 153:92 partition and visible-series legend entries.",
       "remaining": [
-        "No independently verified Rust test counterpart is recorded."
+        "Upstream compares a rendered PNG; no matching FerroUI backend golden-image comparison is recorded."
       ]
     },
     {

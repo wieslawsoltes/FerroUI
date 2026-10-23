@@ -102,6 +102,161 @@ checklist and does not mark a feature complete.
 | Interaction | Pointer events and capture, nearest-point strategies, hover enter/leave, legends/tooltips, pan/zoom policies, programmatic interaction and coordinate conversion |
 | Native controls | Styling, binding, XAML, measurement, invalidation, attach/detach, accessibility, templates and host integration |
 
+## Advanced layout and geographic implementation
+
+The first advanced chart implementation separates immutable engine inputs and
+measured scenes in `FerroUI.LiveCharts` from native observable objects in
+`FerroUI.Controls.LiveCharts`. Both layers use FerroUI's `Point`, `Rect`, `Size`
+and `Color`; no second graphics runtime is introduced. The core algorithms can
+run without a window or dispatcher. Controls supply native drawing, text
+measurement, property bindings and collection observation.
+
+### Sankey
+
+[`sankey_chart_engine.rs`](../../src/FerroUI.LiveCharts/sankey_chart_engine.rs)
+implements the pinned `SankeyLayout.cs` algorithm. It filters missing endpoints,
+self links and nonpositive/nonfinite weights, deduplicates node identities, and
+uses Kahn's algorithm to assign each node its longest-path depth. Remaining
+unprocessed nodes produce a cycle error. Each node's value is the larger of its
+incoming and outgoing weight sums; isolated nodes retain a unit slot.
+
+Vertical layouts retain the upstream column assignment, common weight scale,
+target/source relaxation sweeps, 0.99 alpha decay, collision passes and
+source-order link-band accumulation. Bipartite layouts reject graphs with more
+than two depth columns, convert pixel padding to angular gaps and distribute
+node/ribbon spans proportionally. The retained scene contains rectangular or
+annular nodes and cubic ribbons, with corresponding node/link hit regions.
+
+The upstream `Auto`, `Outside` and `Inside` label modes are represented
+explicitly. Auto places pure source labels outside-left, sink labels
+outside-right and intermediate labels in the node. Arc labels follow the
+mid-angle and flip on the left half of the circle. Hosts can supply native text
+metrics to reserve margins. The backend-independent convenience entry point
+uses estimated text sizes; exact typography requires the native measurement
+callback.
+
+Rust snapshots use explicit `u64` node identities and link endpoint IDs. The
+native models assign an identity automatically and also accept references to
+native source/target nodes. A node's name does not determine its identity.
+Finite input weights whose sums overflow are reported through `ChartError`
+instead of letting infinities reach a rendering backend.
+
+The pure layout is mapped separately from the complete series and chart
+lifecycles. Generic mapper callbacks, all series-level customization and
+upstream raster equivalence remain partial. A successful two-level layout
+fixture does not certify a source PNG comparison.
+
+### Treemap
+
+[`treemap_chart_engine.rs`](../../src/FerroUI.LiveCharts/treemap_chart_engine.rs)
+contains the generic squarifier from `TreemapLayout.cs`, iterative hierarchy
+traversal and multi-series partitioning. Siblings are sorted by descending valid
+weight; rows grow while their worst aspect ratio improves, then consume the
+shorter side of the remaining rectangle. Normalizing weights before summation
+avoids overflow for large finite inputs. The final tile closes each row to avoid
+floating-point seams.
+
+The hierarchy preserves two easily lost source details. An explicit nonzero
+weight overrides the sum of the children, and `None` children denotes a leaf
+while `Some(empty)` denotes an empty internal node. Every level receives its
+padding inset. Only leaves produce hover regions and labels, so a parent and
+all its ancestors do not compete for the same pointer. Rebuilding the immutable
+scene after a leaf becomes internal removes its old hover/label state.
+
+Native text measurement can be supplied for label culling. The owned core tree
+cannot contain reference cycles. Native bindable trees can share references, so
+their snapshot operation checks the active ancestor path and returns a
+descriptive error for a cycle while accepting shared subtrees.
+
+### Geographic maps
+
+The [`geo`](../../src/FerroUI.LiveCharts/geo/mod.rs) module contains the
+equirectangular, Mercator and orthographic forward/inverse projections, aspect
+fitting and GeoJSON import. The Mercator default retains the source's asymmetric
+latitude range of −65° to +85°. Inverted limits swap; unspecified, nonfinite or
+equal limits use defaults. Pole inputs additionally clamp to ±89.999999° so a
+native scene remains finite. Projection calculations use `f64` rather than
+narrowing each output to a managed `float`.
+
+GeoJSON import dispatches on the geometry type, so a `MultiLineString` cannot
+accidentally become a polygon. It accepts Polygon and MultiPolygon, ignores
+non-area geometries, preserves holes, resolves metadata keys case-insensitively,
+uses lowercase scalar names and retains duplicate names with suffixes. A
+malformed import returns an error before mutating a destination layer. The
+pinned [`world.geojson`](../../src/FerroUI.LiveCharts/geo/world.geojson) is embedded
+byte-for-byte and needs no filesystem or network access at runtime.
+
+[`geo_map_chart.rs`](../../src/FerroUI.LiveCharts/geo_map_chart.rs) builds native
+paths and hole-aware hit regions, applies heat palettes, places geographic
+markers and exposes forward/inverse picking. Orthographic rings connect horizon
+exits and entries along the shorter globe-boundary arc, following the source
+MapFactory algorithm. Bisection uses double precision and keeps dateline
+crossings on the shorter longitude branch. Zoom preserves the coordinate under
+the pointer; pan, viewport settling and shortest rotation targets are pure
+operations for the native host to animate.
+
+The map remains an owned snapshot. The source's shallow-copy mutable layer
+sharing, arbitrary geographic visual elements, every custom series/tooltip
+contract and all rotation/bounce lifecycle behavior are not yet mapped. Flat
+map antimeridian topology and geographic raster equivalence remain unverified.
+File and asynchronous loading conveniences require a FerroUI application
+resource adapter; the mathematical crate does not create a filesystem or
+worker-thread service.
+
+### Observable advanced models
+
+[`advanced_models.rs`](../../src/FerroUI.Controls.LiveCharts/advanced_models.rs)
+defines native `SankeyNode`, `SankeyLink`, `TreemapNode`, `HeatLand` and
+`GeoMarker` classes with `ferro_class!`, `ferro_properties!` and markup metadata.
+Their collection wrappers share `FerroList` handles. `changed` subscriptions
+observe both collection replacement/mutation and descendant property changes,
+including Sankey endpoint references and nested treemap children. Shared nodes
+are subscribed once per observer. Source references are weak; explicit disposal
+or dropping the final subscription handle removes all subscriptions.
+
+Native regressions cover list replacement/removal, deep changes, reference
+cycles, shared subtrees, reentrant callbacks and observer cleanup. These are
+port-specific lifetime tests and are not counted as upstream test declarations.
+Optional collection conversions use FerroUI's registered nullable value bridge:
+the runtime loader can assign a constructed collection to `Children` without
+collapsing `None` and `Some(empty)`.
+The three advanced numeric `Value` properties use `set_numeric_value` as their
+Rust convenience setter. This follows the framework's `RangeBase` naming
+approach and leaves `FerroObject::set_value(property, value)` available to
+compiled markup; Rust does not support the source language's overloads.
+
+### Native gallery
+
+[`samples/LiveChartsDemo`](../../samples/LiveChartsDemo/README.md) integrates all
+six chart families in one compiled XAML document. The build uses
+`ferroui-build::Build` with `TypeSystem::Model` and the dependencies' native
+`.xamlmeta` models. The document declares controls, series, axes, a native linear
+gradient, Sankey nodes/links, nested treemap children and geographic overlays.
+Rust supplies deterministic numeric values, category labels and the embedded
+world map.
+
+The update action changes the existing native point, link, tree and map objects;
+the visual tree stays alive and each chart receives changes through its normal
+collection/property observation. The sample compares the compiled document with
+the runtime XAML loader and checks that the update action changes geometry in
+every family. A separate gradient test changes a native stop and checks chart
+invalidation.
+
+The optional desktop executable and the optional Vello CPU render executable
+load this same compiled document. The CPU capture traverses the native visual
+tree, including layout, text shaping, controls and brushes. It is an integration
+smoke capture and does not claim upstream golden-image parity. The sample's
+README records the commands and platform feature choices.
+
+### Evidence boundaries
+
+The 24 methods in `GeoProjectorsTesting.cs` and four methods in
+`GeoJsonImportTests.cs` have direct Rust assertion/fixture counterparts. The
+Sankey nonbipartite rejection test also has a direct counterpart. Sankey and
+treemap source image fixtures are recorded as **partial** when only their
+mathematical or hit-label assertions have been reproduced. The file, member and
+test maps keep these distinctions independently.
+
 ## Inventory and evidence
 
 The tracking files serve different purposes:

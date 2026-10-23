@@ -1,6 +1,2576 @@
 {
   "schema": 1,
   "description": "Reviewed exceptions to the default pending disposition. Every source is retained in the generated source map. A matching name or a file's existence is not evidence of behavioral equivalence.",
-  "files": {},
-  "tests": {}
+  "files": {
+    "src/LiveChartsCore/Drawing/Animation.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/animation.rs"
+      ],
+      "reason": "Owned animation options replace shared mutable animation state: duration uses caller clock milliseconds, Rc closure carries easing, Repeat enum expresses finite/infinite repeats. Repeat counters live on each motion property.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Drawing/KeyFrame.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::KeyFrame"
+      ],
+      "reason": "Time, Value and destination easing semantics are preserved in a Rust value with an Rc closure.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Easing/BackEasingFunction.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/back_easing_function.rs"
+      ],
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Easing/BounceEasingFunction.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/bounce_easing_function.rs"
+      ],
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Easing/CircleEasingFunction.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/circle_easing_function.rs"
+      ],
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Easing/CubicBezierEasingFunction.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/cubic_bezier_easing_function.rs"
+      ],
+      "reason": "The 257-sample LUT and bracketed Newton/bisection algorithm preserve source limits and identity shortcut, with finite-control validation and safe NaN sampling added.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Easing/CubicEasingFunction.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/cubic_easing_function.rs"
+      ],
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Easing/ElasticEasingFunction.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/elastic_easing_function.rs"
+      ],
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Easing/ExponentialEasingFunction.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/exponential_easing_function.rs"
+      ],
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Easing/PolinominalEasingFunction.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/polinominal_easing_function.rs"
+      ],
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/EasingFunctions.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs"
+      ],
+      "reason": "All predefined and parameterized easing functions plus keyframe composition are available as Rust functions/Rc closures. Ordered finite keyframe validation returns typed errors, and immutable Bezier presets are cached.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/HeatFunctions.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs"
+      ],
+      "reason": "Uniform/custom stops and truncating ARGB interpolation retain source results. Typed errors validate stops; values below the first custom stop clamp instead of extrapolating. HeatPalette caches validated stops for repeated sampling.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Kernel/Coordinate.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs"
+      ],
+      "reason": "Six-dimensional immutable Rust value preserves explicit empty versus implicit default semantics, error values, constructor coordinate ordering and formatting. Overloaded constructors become named associated functions.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Kernel/Drawing/BezierData.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/line_spline_math.rs::BezierData"
+      ],
+      "reason": "Six coordinate components use a copied Rust value; FerroUI Point accessors replace graphics-layer projections.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Kernel/Drawing/LineSplineMath.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/line_spline_math.rs"
+      ],
+      "reason": "Seed and segment calculations preserve source operation order, f32 segment-length ratios, and the upstream signed stack-offset expression. FerroUI Point replaces source LvcPoint.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Kernel/Error.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/error.rs"
+      ],
+      "reason": "Four directional error components and the explicit Empty marker retain source defaults; symmetric construction is an additional convenience.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Kernel/Extensions.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_tick.rs"
+      ],
+      "reason": "Cartesian and polar tick calculation is ported with rotated-label, density, unit-width and minimum-separator logic. Degenerate input gets a finite fallback and loop iterations are bounded.",
+      "remaining": [
+        "Other source extension methods are not mapped by this contribution."
+      ]
+    },
+    "src/LiveChartsCore/Kernel/StackedValue.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/stacker.rs::StackedValue"
+      ],
+      "reason": "Copied value carries positive, negative and cumulative tracks, including the sign-dependent Share formula.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Kernel/Stacker.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/stacker.rs::Stacker"
+      ],
+      "reason": "The source category stacking algorithm uses caller-provided unique series IDs and copied Coordinates. Rust HashMap keys canonicalize NaN and signed zero like Double.Equals. MaxLength reports actual maximum row length (upstream remains zero); invalid stack positions are rejected; get_stack supplies the coordinate sign for Share.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Measure/AxisLimit.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs"
+      ],
+      "reason": "Source sentinel defaults, explicit user pinning, scaling and validation are preserved.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Measure/AxisOrientation.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/scaler.rs::AxisOrientation"
+      ],
+      "reason": "Source Unknown, X and Y variants are retained.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Measure/AxisTick.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_tick.rs::AxisTick"
+      ],
+      "reason": "Source Value and Magnitude use f64 values. Calculation helpers are also supplied.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Measure/Bounds.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::Bounds"
+      ],
+      "reason": "Extrema, empty/default behavior, metadata aggregation, delta, and copying retain source behavior. Copy and Clone replace the copy constructor.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Measure/DimensionalBounds.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::DimensionalBounds"
+      ],
+      "reason": "All six bounds and initial minimum-limits behavior are preserved without nullable owned bounds.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Measure/PolarScaler.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/polar_scaler.rs"
+      ],
+      "reason": "Forward zero-origin angular convention and source radial scaling are retained using FerroUI Point/Rect. Inverse uses atan2 and signed revolution normalization, deliberately correcting upstream axis singularities and extra MinAngle; invalid/collapsed ranges return errors.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Measure/Scaler.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/scaler.rs::Scaler"
+      ],
+      "reason": "Affine conversion, Y inversion, explicit inversion and collapsed-slope behavior use a value-based constructor with Result errors. Numeric precision is f64; sentinel limits are normalized before inversion, correcting the source reversed validation arguments for an empty X range. An explicit logarithmic constructor replaces subclass specialization.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Motion/ByReferenceMotionProperty.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs::ByReferenceMotionProperty"
+      ],
+      "reason": "Noninterpolated reference values use Discrete<T>, snap to target and mark completion on sampling without synthetic object ownership.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Motion/ColorMotionProperty.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Motion/DoubleMotionProperty.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Motion/FloatArrayMotionProperty.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Motion/FloatMotionProperty.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Motion/IMotionProperty.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs"
+      ],
+      "reason": "Typed MotionProperty methods cover sampling, retargeting, completion and animation configuration; the source object-erased registry interface is not reproduced.",
+      "remaining": [
+        "Review source property-registry operations against the native control system."
+      ]
+    },
+    "src/LiveChartsCore/Motion/MotionProperty.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs",
+        "src/FerroUI.LiveCharts/motion/interpolate.rs"
+      ],
+      "reason": "Retargeting, exact endpoint completion timing, phase-continuous overshoot, finite/infinite repeats, completion and snapping use explicit caller timestamps. Invalid times snap safely. Source object invalidation and registered completion callbacks are not provided by this generic numeric value.",
+      "remaining": [
+        "Animatable property registry, per-property OnCompleted callbacks and source reflection/debug hooks require separate native integration."
+      ]
+    },
+    "src/LiveChartsCore/Motion/NullableDoubleMotionProperty.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Motion/PaddingMotionProperty.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Motion/PointMotionProperty.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Motion/SizeMotionProperty.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MapProjector.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector",
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs"
+      ],
+      "reason": "Projection bounds, forward/inverse mapping, hemisphere visibility and aspect behavior use native Rect/Point/GeoCoordinate values and a Rust trait/enum. The 24 source GeoProjectorsTesting assertions are directly ported. Calculations use f64; inverted/degenerate limits normalize as upstream and Mercator pole inputs are additionally clamped to a finite latitude.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MapProjection.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjection",
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs"
+      ],
+      "reason": "Projection bounds, forward/inverse mapping, hemisphere visibility and aspect behavior use native Rect/Point/GeoCoordinate values and a Rust trait/enum. The 24 source GeoProjectorsTesting assertions are directly ported. Calculations use f64; inverted/degenerate limits normalize as upstream and Mercator pole inputs are additionally clamped to a finite latitude.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector",
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs"
+      ],
+      "reason": "Projection bounds, forward/inverse mapping, hemisphere visibility and aspect behavior use native Rect/Point/GeoCoordinate values and a Rust trait/enum. The 24 source GeoProjectorsTesting assertions are directly ported. Calculations use f64; inverted/degenerate limits normalize as upstream and Mercator pole inputs are additionally clamped to a finite latitude.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MercatorProjector.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector",
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs"
+      ],
+      "reason": "Projection bounds, forward/inverse mapping, hemisphere visibility and aspect behavior use native Rect/Point/GeoCoordinate values and a Rust trait/enum. The 24 source GeoProjectorsTesting assertions are directly ported. Calculations use f64; inverted/degenerate limits normalize as upstream and Mercator pole inputs are additionally clamped to a finite latitude.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/OrthographicProjector.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector",
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs"
+      ],
+      "reason": "Projection bounds, forward/inverse mapping, hemisphere visibility and aspect behavior use native Rect/Point/GeoCoordinate values and a Rust trait/enum. The 24 source GeoProjectorsTesting assertions are directly ported. Calculations use f64; inverted/degenerate limits normalize as upstream and Mercator pole inputs are additionally clamped to a finite latitude.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/SankeyLayout.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs"
+      ],
+      "reason": "Reviewed longest-path Kahn depth assignment, first-ID deduplication, invalid/self/missing edge filtering, cycle and nonbipartite errors, max(in,out) node weights, source-order band accumulation, 0.99 sweep relaxation/collision resolution, proportional bipartite arcs and chord endpoints. Stable u64 identity replaces managed reference identity; numeric overflow reports InvalidData. Drawing/label parity is tracked separately.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/TreemapLayout.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs::squarify"
+      ],
+      "reason": "Reviewed descending valid-weight filtering, greedy worst-aspect row construction, shorter-side layout and rectangle reduction. Rust inputs are borrowed rather than reordered in place. Weight normalization avoids sum overflow; final row extents close rounding seams and underflowed positive weights receive zero-area rectangles.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/world.geojson": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/world.geojson",
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs::DrawnMap::world"
+      ],
+      "reason": "The pinned upstream world.geojson is copied byte-for-byte and embedded with include_str; the direct upstream import test verifies more than 100 lands and Brazil lookup.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MapLayer.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs::MapLayer"
+      ],
+      "reason": "Polygon/MultiPolygon dispatch, case-insensitive scalar metadata, lowercase keys, unnamed feature IDs, collision suffixes, bounds and layer visibility/order are implemented. Rings retain holes; imports validate before mutation.",
+      "remaining": [
+        "AddLandWhen and native observable layer/paint objects are not implemented.",
+        "Generic paint tasks and externally mutated geometry caches are not represented by the owned map snapshot."
+      ]
+    },
+    "src/LiveChartsCore/Geo/GeoJsonFeature.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs"
+      ],
+      "reason": "serde_json::Value and the typed polygon parser replace CLR DTO deserialization/source generation. Mixed property kinds, geometry dispatch and missing fields have direct import tests; no managed JSON generator is needed.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/GeoJsonFile.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs"
+      ],
+      "reason": "serde_json::Value and the typed polygon parser replace CLR DTO deserialization/source generation. Mixed property kinds, geometry dispatch and missing fields have direct import tests; no managed JSON generator is needed.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/GeoJsonFileSourceGenerationContext.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs"
+      ],
+      "reason": "serde_json::Value and the typed polygon parser replace CLR DTO deserialization/source generation. Mixed property kinds, geometry dispatch and missing fields have direct import tests; no managed JSON generator is needed.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/DrawnMap.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs::DrawnMap"
+      ],
+      "reason": "Owned map/layer snapshots, UTF-8 string/byte import, named-layer append, world loading and name lookup are implemented.",
+      "remaining": [
+        "File/resource and asynchronous loading need host adapters; no chart-owned filesystem or worker thread is introduced.",
+        "Managed shallow-copy shared Layers semantics are not reproduced by owned Rust snapshots; native observable map-layer handles remain to be designed.",
+        "Layer-specific FindLand and externally supplied paint factories remain unmapped."
+      ]
+    },
+    "src/LiveChartsCore/Geo/Maps.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::Projector::fit",
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs::DrawnMap"
+      ],
+      "reason": "Aspect-preserving subrectangle projector fitting, center/limits and embedded world/string/byte imports are implemented.",
+      "remaining": [
+        "Directory/StreamReader convenience members require host resource adapters and public loading member review."
+      ]
+    },
+    "src/LiveChartsCore/Geo/LandData.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs",
+        "src/FerroUI.LiveCharts/geo_map_chart.rs"
+      ],
+      "reason": "Owned polygons, separate hole rings, scalar metadata and geographic bounds feed native drawing and hit geometry.",
+      "remaining": [
+        "Mutable Shape caches and managed shared Land/DrawnMap ownership are not exposed as native observable objects."
+      ]
+    },
+    "src/LiveChartsCore/Geo/LandDefinition.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs",
+        "src/FerroUI.LiveCharts/geo_map_chart.rs"
+      ],
+      "reason": "Owned polygons, separate hole rings, scalar metadata and geographic bounds feed native drawing and hit geometry.",
+      "remaining": [
+        "Mutable Shape caches and managed shared Land/DrawnMap ownership are not exposed as native observable objects."
+      ]
+    },
+    "src/LiveChartsCore/GeoMapChart.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart.rs",
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs"
+      ],
+      "reason": "Retained paths, layer order, map clipping, hole hits, heat colors, markers, forward/inverse picking, viewport transforms and shorter-arc horizon closure are implemented. Bisection uses f64 precision and the shortest longitude branch.",
+      "remaining": [
+        "Full annotation layout, custom geographic series/tooltip contracts, hover lifecycle and public view commands need member/test review.",
+        "Cached path reuse during rotation, rotation/bounce scheduling and all upstream gesture sequences are not verified.",
+        "Flat-projection antimeridian topology and raster equivalence remain unverified."
+      ]
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/MapFactory.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart.rs",
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs"
+      ],
+      "reason": "Retained paths, layer order, map clipping, hole hits, heat colors, markers, forward/inverse picking, viewport transforms and shorter-arc horizon closure are implemented. Bisection uses f64 precision and the shortest longitude branch.",
+      "remaining": [
+        "Full annotation layout, custom geographic series/tooltip contracts, hover lifecycle and public view commands need member/test review.",
+        "Cached path reuse during rotation, rotation/bounce scheduling and all upstream gesture sequences are not verified.",
+        "Flat-projection antimeridian topology and raster equivalence remain unverified."
+      ]
+    },
+    "src/LiveChartsCore/CoreSankeySeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs"
+      ],
+      "reason": "Flow models, layouts, cubic ribbons, annular paths, node/link colors, label placement and hit regions use immutable scenes plus native property models.",
+      "remaining": [
+        "Generic node/link/label/tooltip mappers and complete series lifecycle/paint transitions remain unmapped.",
+        "Multiple Sankey series, title/legend/draw-margin negotiation and rendered golden-image equivalence need further review."
+      ]
+    },
+    "src/LiveChartsCore/SankeyChartEngine.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs"
+      ],
+      "reason": "Flow models, layouts, cubic ribbons, annular paths, node/link colors, label placement and hit regions use immutable scenes plus native property models.",
+      "remaining": [
+        "Generic node/link/label/tooltip mappers and complete series lifecycle/paint transitions remain unmapped.",
+        "Multiple Sankey series, title/legend/draw-margin negotiation and rendered golden-image equivalence need further review."
+      ]
+    },
+    "src/LiveChartsCore/SankeyMeasureContext.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs"
+      ],
+      "reason": "Flow models, layouts, cubic ribbons, annular paths, node/link colors, label placement and hit regions use immutable scenes plus native property models.",
+      "remaining": [
+        "Generic node/link/label/tooltip mappers and complete series lifecycle/paint transitions remain unmapped.",
+        "Multiple Sankey series, title/legend/draw-margin negotiation and rendered golden-image equivalence need further review."
+      ]
+    },
+    "src/LiveChartsCore/CoreTreemapSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs"
+      ],
+      "reason": "Iterative hierarchy, explicit-value/rollup precedence, Some(empty) internal nodes, per-level padding, series partitioning, leaf-only hover/labels and native text measurement injection are implemented.",
+      "remaining": [
+        "Generic value/children/label/tooltip mapper callbacks and per-node animated geometry lifecycle remain unmapped.",
+        "Native title/legend arrangement and rendered golden-image equivalence need further review."
+      ]
+    },
+    "src/LiveChartsCore/TreemapChartEngine.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs"
+      ],
+      "reason": "Iterative hierarchy, explicit-value/rollup precedence, Some(empty) internal nodes, per-level padding, series partitioning, leaf-only hover/labels and native text measurement injection are implemented.",
+      "remaining": [
+        "Generic value/children/label/tooltip mapper callbacks and per-node animated geometry lifecycle remain unmapped.",
+        "Native title/legend arrangement and rendered golden-image equivalence need further review."
+      ]
+    },
+    "src/LiveChartsCore/TreemapMeasureContext.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs"
+      ],
+      "reason": "Iterative hierarchy, explicit-value/rollup precedence, Some(empty) internal nodes, per-level padding, series partitioning, leaf-only hover/labels and native text measurement injection are implemented.",
+      "remaining": [
+        "Generic value/children/label/tooltip mapper callbacks and per-node animated geometry lifecycle remain unmapped.",
+        "Native title/legend arrangement and rendered golden-image equivalence need further review."
+      ]
+    },
+    "src/LiveChartsCore/Defaults/SankeyNode.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs::SankeyNode",
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs"
+      ],
+      "reason": "Native FerroObject/StyledProperty models, stable identity, disposable deep FerroList observation and owned snapshots are implemented. Treemap reference cycles report ChartError and shared subtrees remain valid.",
+      "remaining": [
+        "Native property/markup tests and all public member mappings must pass before promoting the whole model.",
+        "Nullable labels use empty native strings; generic user-model compatibility is not yet mapped."
+      ]
+    },
+    "src/LiveChartsCore/Defaults/SankeyLink.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs::SankeyLink",
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs"
+      ],
+      "reason": "Native FerroObject/StyledProperty models, stable identity, disposable deep FerroList observation and owned snapshots are implemented. Treemap reference cycles report ChartError and shared subtrees remain valid.",
+      "remaining": [
+        "Native property/markup tests and all public member mappings must pass before promoting the whole model.",
+        "Nullable labels use empty native strings; generic user-model compatibility is not yet mapped."
+      ]
+    },
+    "src/LiveChartsCore/Defaults/TreemapNode.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs::TreemapNode",
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs"
+      ],
+      "reason": "Native FerroObject/StyledProperty models, stable identity, disposable deep FerroList observation and owned snapshots are implemented. Treemap reference cycles report ChartError and shared subtrees remain valid.",
+      "remaining": [
+        "Native property/markup tests and all public member mappings must pass before promoting the whole model.",
+        "Nullable labels use empty native strings; generic user-model compatibility is not yet mapped."
+      ]
+    },
+    "src/LiveChartsCore/CartesianChartEngine.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
+      ],
+      "reason": "Pure measurement calculates independent axes, visible data bounds, signed stacks, grouped bars, sections and retained FerroUI geometry; native host supplies observed data, cached scenes and pointer zoom, pan and section selection.",
+      "remaining": [
+        "Source fit-to-data/bounce behavior and shared chart event synchronization are not implemented.",
+        "The full measuring/update lifecycle, throttling, draw-margin-defined callbacks and all source public methods are not yet represented.",
+        "Auto margins use fixed axis bands rather than the complete source text-measured separator/name layout."
+      ]
+    },
+    "src/LiveChartsCore/PieChartEngine.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
+      ],
+      "reason": "Native retained scenes measure category-keyed pie totals, concentric values and gauges; background fill series are excluded from hover; chart size, rotation, range, direction and explicit margins are preserved.",
+      "remaining": [
+        "Source per-point animation entry/deletion lifecycle and event dispatch are replaced only in part by native scene transitions.",
+        "All source chart measuring/tooltip placement contracts have not received direct upstream test counterparts."
+      ]
+    },
+    "src/LiveChartsCore/PolarChartEngine.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/polar_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
+      ],
+      "reason": "Polar/radar measurement supplies finite angular/radial scaling, named category slots, closed polygons, null-separated runs, axes and point hits.",
+      "remaining": [
+        "Only one angular and radial axis is currently consumed by the native engine.",
+        "Source FitToBounds, wedge separator configuration, crosshairs, source zoom and full axis-layout behavior remain pending."
+      ]
+    },
+    "src/LiveChartsCore/CoreAxis.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/axis.rs",
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs::draw_axes",
+        "src/FerroUI.Controls.LiveCharts/axis.rs"
+      ],
+      "reason": "Native axis snapshot preserves labels, named axes, limits, position, inversion, spacing, unit width, text styling and logarithmic scales; AxisScale handles extreme finite linear domains and inverse conversion.",
+      "remaining": [
+        "Source custom label callbacks, tick/subtick geometry, crosshairs, min/max zoom range and the full text-measured padding contract are not implemented."
+      ]
+    },
+    "src/LiveChartsCore/CorePolarAxis.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/polar_chart_engine.rs"
+      ],
+      "reason": "Polar axes render circular separators, spokes and numeric/named labels using the same typed axis snapshot.",
+      "remaining": [
+        "Source polar-only properties, multiple axes, separator wedges and precise label fitting remain pending."
+      ]
+    },
+    "src/LiveChartsCore/CoreLineSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Line/spline, filled and stacked area tracks, signed and 100% stacks, geometry markers, errors, null splitting, native style and category hover.",
+      "remaining": [
+        "Source generic custom visuals, per-point styling hooks, exact coordinate-space spline controls and all data-label placements remain pending."
+      ]
+    },
+    "src/LiveChartsCore/CoreStepLineSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Step paths, filled/stacked step areas, signed and 100% stacking, gaps, markers and category hover.",
+      "remaining": [
+        "Source generic custom visuals, per-point lifecycle hooks and complete label-placement options remain pending."
+      ]
+    },
+    "src/LiveChartsCore/CoreColumnSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Vertical bars use category widths, maximum pixel width, spacing, pivot, native rounded rectangles, clipping and full category hover.",
+      "remaining": [
+        "Source variable geometry factories and all label/series padding properties remain pending."
+      ]
+    },
+    "src/LiveChartsCore/CoreRowSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Horizontal bars swap category/value axes, preserve range bounds and use orientation-correct hover and error geometry.",
+      "remaining": [
+        "Source variable geometry factories and all label/series padding properties remain pending."
+      ]
+    },
+    "src/LiveChartsCore/CoreStackedColumnSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Vertical stacks retain independent positive/negative accumulators, category/axis/group keys and optional 100% normalization.",
+      "remaining": [
+        "Source custom visual lifecycle, every stack-position behavior and data label placement require further parity fixtures."
+      ]
+    },
+    "src/LiveChartsCore/CoreStackedRowSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Horizontal stacks preserve sign-specific accumulators, axis orientation, stack groups and optional 100% normalization.",
+      "remaining": [
+        "Source custom visual lifecycle, every stack-position behavior and data label placement require further parity fixtures."
+      ]
+    },
+    "src/LiveChartsCore/CoreRangeColumnSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Vertical range bars include both endpoints in bounds, including reversed ranges, and show both values in tooltip labels.",
+      "remaining": [
+        "Source full-span tick padding and all range data-label formatting/placement options remain pending."
+      ]
+    },
+    "src/LiveChartsCore/CoreRangeRowSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Horizontal/Gantt range bars include both endpoints, preserve the axis swap and support numeric/date-sized categories.",
+      "remaining": [
+        "Source automatic DateTime formatter integration and full-span tick padding remain pending."
+      ]
+    },
+    "src/LiveChartsCore/CoreRangeLineSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Dual high/low paths form a filled band, both endpoint markers are rendered, exact hits target either marker and category hover covers the entire band.",
+      "remaining": [
+        "Source full-span tick padding, complete data label layout, generic geometry and per-point lifecycle remain pending."
+      ]
+    },
+    "src/LiveChartsCore/CoreScatterSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Scatter bubbles interpolate diameter from tertiary weights, render native glyphs/errors and preserve hit identities across remeasurement.",
+      "remaining": [
+        "Shared source weight-bounds grouping, arbitrary geometry factories and complete per-point styling hooks remain pending."
+      ]
+    },
+    "src/LiveChartsCore/CoreHeatSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Heat cells infer numeric/date spacing, bound each series independently, interpolate uniform palettes and expose weight in data/tooltip labels.",
+      "remaining": [
+        "Source explicit color stops, cell padding, source weight-bound overrides and all data label styles remain pending."
+      ]
+    },
+    "src/LiveChartsCore/CoreFinancialSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "OHLC coordinates render candlesticks, wicks, bullish/bearish defaults, full category hover and all OHLC values in tooltip text.",
+      "remaining": [
+        "Separate UpFill/DownFill/UpStroke/DownStroke properties, generic financial visuals and all source data label placement behavior remain pending."
+      ]
+    },
+    "src/LiveChartsCore/CoreBoxSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Five-statistic boxes render extrema, quartiles, median and whiskers; hover includes the category slot and labels carry the statistics.",
+      "remaining": [
+        "Source independent box-series grouping and all whisker/label options remain pending."
+      ]
+    },
+    "src/LiveChartsCore/CorePolarLineSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/polar_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Radar lines and optional filled closed paths preserve named-angle categories, missing-value runs, markers and radial data labels.",
+      "remaining": [
+        "Source multi-axis selection, exact spline closure behavior, all label positions and generic visual lifecycle remain pending."
+      ]
+    },
+    "src/LiveChartsCore/CorePieSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Pie layout preserves the source absolute/relative minimum gauge branches, saturation, fill background, gauge hover-space exclusion, signed diameter offsets, concentric empty slots, relative radii, maximum radial width/alignment and five label positions using host font metrics. Native cubic paths support rounded and inverted corners.",
+      "remaining": [
+        "HoverPushout reserves the correct layout space but pointer-driven pushout animation is not yet wired.",
+        "Tangent/cotangent text-angle flags, all custom formatters and source generic geometry lifecycle remain pending.",
+        "Rounded tiny wedges clamp corners before edge overlap; full rings remain exactly closed instead of upstream 359.99-degree approximation. PNG equivalence has not been claimed."
+      ]
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/DoughnutGeometry.cs": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::rounded_annular_sector_path"
+      ],
+      "reason": "Classic and rounded/inverted doughnut outlines become FerroUI cubic path commands, with tangent arcs and quarter-circle segmentation; actual Pushout is applied to geometry and hit coordinates.",
+      "remaining": [
+        "Tiny-wedge corner limiting and exact full-circle closure intentionally differ from the upstream fallback.",
+        "This replaces native backend drawing; source Skia snapshot equality has not been established."
+      ]
+    },
+    "src/LiveChartsCore/BarSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs"
+      ],
+      "reason": "The shared Rust measurement pipeline implements orientation, bar grouping, pivot, signed stacks, range endpoints, errors, max width and exact-vs-category hover separation.",
+      "remaining": [
+        "Generic visual/lifecycle template hooks and the complete source label placement/padding contract remain pending."
+      ]
+    },
+    "src/LiveChartsCore/HorizontalBarSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs"
+      ],
+      "reason": "The shared Rust measurement pipeline implements orientation, bar grouping, pivot, signed stacks, range endpoints, errors, max width and exact-vs-category hover separation.",
+      "remaining": [
+        "Generic visual/lifecycle template hooks and the complete source label placement/padding contract remain pending."
+      ]
+    },
+    "src/LiveChartsCore/VerticalBarSeries.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs"
+      ],
+      "reason": "The shared Rust measurement pipeline implements orientation, bar grouping, pivot, signed stacks, range endpoints, errors, max width and exact-vs-category hover separation.",
+      "remaining": [
+        "Generic visual/lifecycle template hooks and the complete source label placement/padding contract remain pending."
+      ]
+    },
+    "src/LiveChartsCore/Kernel/Drawing/RectangleHoverArea.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::HitShape"
+      ],
+      "reason": "Normalized hover bounds distinguish painted geometry from category discovery; all closest strategies choose within each series, and zero-area plots reject interactions.",
+      "remaining": [
+        "All source SuggestedTooltipLocation/placement aggregation methods are not modeled one-to-one."
+      ]
+    },
+    "src/LiveChartsCore/Kernel/Drawing/AnnularSectorHoverArea.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::HitShape::AnnularSector"
+      ],
+      "reason": "Annular containment respects the inner hole, radius, sweep sign, wraparound and full-circle spans.",
+      "remaining": [
+        "Source tooltip-placement aggregation and full hover-class API remain pending."
+      ]
+    },
+    "src/LiveChartsCore/Kernel/Drawing/SemicircleHoverArea.cs": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::HitShape::AnnularSector"
+      ],
+      "reason": "Annular containment respects the inner hole, radius, sweep sign, wraparound and full-circle spans.",
+      "remaining": [
+        "Source tooltip-placement aggregation and full hover-class API remain pending."
+      ]
+    },
+    "src/LiveChartsCore/Measure/FindingStrategy.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::FindingStrategy"
+      ],
+      "reason": "All source enum alternatives are explicit Rust variants and registered FerroUI markup values.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Measure/AxisPosition.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/axis.rs::AxisPosition"
+      ],
+      "reason": "All source enum alternatives are explicit Rust variants and registered FerroUI markup values.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Measure/RadialAlignment.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::RadialAlignment"
+      ],
+      "reason": "All source enum alternatives are explicit Rust variants and registered FerroUI markup values.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Measure/PolarLabelsPosition.cs": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::PolarLabelsPosition"
+      ],
+      "reason": "All source enum alternatives are explicit Rust variants and registered FerroUI markup values.",
+      "remaining": []
+    }
+  },
+  "tests": {
+    "tests/CoreTests/CoreObjectsTests/CubicBezierEasingTests.cs::CoreTests.CoreObjectsTests.CubicBezierEasingTests::void LinearShortcutIsReturnedForIdentityCurve()#L96": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/cubic_bezier_easing_function.rs::tests::linear_shortcut_is_identity_curve"
+      ],
+      "reason": "The source six-curve matrix and 201 samples per curve are verified against an independent 80-iteration double-precision solve with source tolerances; the identity fixture is extended outside [0,1].",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/CubicBezierEasingTests.cs::CoreTests.CoreObjectsTests.CubicBezierEasingTests::void LutMatchesAnalyticAcrossDomain(float x1, float y1, float x2, float y2)#L62": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/cubic_bezier_easing_function.rs::tests::lut_matches_analytic_across_domain"
+      ],
+      "reason": "The source six-curve matrix and 201 samples per curve are verified against an independent 80-iteration double-precision solve with source tolerances; the identity fixture is extended outside [0,1].",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BackInBoundary()#L141": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BackInOutBoundary()#L157": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BackOutBoundary()#L149": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BounceInBoundary()#L165": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BounceInOutBoundary()#L181": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BounceOutBoundary()#L173": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BuildCubicBezierBoundary()#L341": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/cubic_bezier_easing_function.rs::tests::lut_matches_analytic_across_domain"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BuildFunctionUsingKeyFrames()#L349": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::key_frames_interpolate_and_extend_final_value"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BuildFunctionUsingKeyFramesAddsLastFrameIfNotAtOne()#L374": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::key_frames_interpolate_and_extend_final_value"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BuildFunctionUsingKeyFramesThrowsWithLessThanTwo()#L364": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::key_frames_use_destination_easing_and_reject_undefined_segments"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CircleInBoundary()#L69": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CircleInOutBoundary()#L85": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CircleOutBoundary()#L77": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CubicInBoundary()#L45": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CubicInOutBoundary()#L61": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CubicOutBoundary()#L53": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomBackInOutWithOvershoot()#L285": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomBackInWithOvershoot()#L269": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomBackOutWithOvershoot()#L277": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomElasticInOutWithAmplitudeAndPeriod()#L309": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomElasticInWithAmplitudeAndPeriod()#L293": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomElasticOutWithAmplitudeAndPeriod()#L301": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomPolinominalInOutWithExponent()#L333": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomPolinominalInWithExponent()#L317": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomPolinominalOutWithExponent()#L325": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void EaseBoundary()#L237": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void EaseInBoundary()#L245": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void EaseInOutBoundary()#L261": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void EaseOutBoundary()#L253": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void EasingFunctionsAreMonotonicForMostFunctions()#L388": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::customary_easing_curves_are_monotonic"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ElasticInBoundary()#L189": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ElasticInOutBoundary()#L205": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ElasticOutBoundary()#L197": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ExponentialInBoundary()#L93": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ExponentialInOutBoundary()#L109": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ExponentialOutBoundary()#L101": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void LinealIsIdentity()#L11": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void PolinominalInBoundary()#L213": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void PolinominalInOutBoundary()#L229": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void PolinominalOutBoundary()#L221": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void QuadraticInBoundary()#L20": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void QuadraticInOutBoundary()#L37": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void QuadraticOutBoundary()#L29": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void SinInBoundary()#L117": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void SinInOutBoundary()#L133": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void SinOutBoundary()#L125": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void BuildColorStopsThrowsWhenStopsLengthMismatch()#L63": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::invalid_palette_is_rejected"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void BuildColorStopsThrowsWithFewerThanTwoColors()#L56": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::invalid_palette_is_rejected"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void BuildColorStopsWithExplicitStops()#L40": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::uniform_and_explicit_stops_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void BuildColorStopsWithNullStopsGeneratesUniformDistribution()#L12": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::uniform_and_explicit_stops_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void BuildColorStopsWithThreeColorsAndNullStops()#L23": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::uniform_and_explicit_stops_match_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorAtEnd()#L93": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::interpolation_clamps_and_truncates_channels"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorAtMidpoint()#L111": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::interpolation_clamps_and_truncates_channels"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorAtStart()#L75": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::interpolation_clamps_and_truncates_channels"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorClampsAbove()#L145": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::interpolation_clamps_and_truncates_channels"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorClampsBelow()#L129": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::interpolation_clamps_and_truncates_channels"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/HeatFunctionsTesting.cs::CoreTests.CoreObjectsTests.HeatFunctionsTesting::void InterpolateColorHandlesZeroRange()#L161": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs::tests::zero_range_is_opaque_and_custom_stop_edges_are_bounded"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitStruct()#L225": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitValidateLimitsWhenBothDefined()#L174": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitValidateLimitsWhenNoneDefined()#L205": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitValidateLimitsWhenOnlyMaxDefined()#L195": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitValidateLimitsWhenOnlyMinDefined()#L185": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitValidateLimitsWithStep()#L215": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsAppendBounds()#L80": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_single_value_and_merge_metadata"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsAppendNegativeValues()#L97": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_append_values_and_delta"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsAppendSingleValue()#L59": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_single_value_and_merge_metadata"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsAppendValueUpdatesMinAndMax()#L46": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_append_values_and_delta"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsConstructorWithMinMax()#L24": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_constructor_and_copy"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsCopyConstructor()#L32": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_constructor_and_copy"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsDefaultIsEmpty()#L15": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_default_is_empty"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsDelta()#L70": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_append_values_and_delta"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateBoxConstructor()#L269": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateEmpty()#L276": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::empty_coordinate_and_zero_coordinate_are_distinct"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateFinancialConstructor()#L257": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateFullConstructor()#L292": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateToString()#L283": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateXYConstructor()#L238": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateXYWeightConstructor()#L247": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void DimensionalBoundsDefaultConstructor()#L313": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::dimensional_bounds_defaults"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/TransitionsTesting.cs::CoreTests.CoreObjectsTests.TransitionsTesting::void AnimationComplete()#L87": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs::tests::source_animation_complete_observes_next_frame_after_exact_endpoint"
+      ],
+      "reason": "Source time samples, values, retargeting and completion boundaries are directly verified with caller timestamps. The source drawing-object/registry and IsValid invalidation assertions have no counterpart in this numeric fixture.",
+      "remaining": [
+        "Port source multi-property Animatable invalidation and property-registry assertions through native control integration."
+      ]
+    },
+    "tests/CoreTests/CoreObjectsTests/TransitionsTesting.cs::CoreTests.CoreObjectsTests.TransitionsTesting::void InfiniteAnimation()#L13": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs::tests::source_infinite_animation_exact_frames"
+      ],
+      "reason": "Source time samples, values, retargeting and completion boundaries are directly verified with caller timestamps. The source drawing-object/registry and IsValid invalidation assertions have no counterpart in this numeric fixture.",
+      "remaining": [
+        "Port source multi-property Animatable invalidation and property-registry assertions through native control integration."
+      ]
+    },
+    "tests/CoreTests/CoreObjectsTests/TransitionsTesting.cs::CoreTests.CoreObjectsTests.TransitionsTesting::void KeyFramesTest()#L147": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::source_key_frame_triangle_and_delayed_ramp"
+      ],
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/TransitionsTesting.cs::CoreTests.CoreObjectsTests.TransitionsTesting::void NotFinishedAnimation()#L184": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs::tests::source_not_finished_animation_retargets_at_eighty_milliseconds"
+      ],
+      "reason": "Source time samples, values, retargeting and completion boundaries are directly verified with caller timestamps. The source drawing-object/registry and IsValid invalidation assertions have no counterpart in this numeric fixture.",
+      "remaining": [
+        "Port source multi-property Animatable invalidation and property-registry assertions through native control integration."
+      ]
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void ControlCoordinatesProjectorNormalizesDegenerateAndInvertedBounds()#L119": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::control_coordinates_projector_normalizes_degenerate_and_inverted_bounds"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void ControlCoordinatesProjectorRoundTrips()#L265": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::control_coordinates_projector_round_trips"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorIsAlwaysVisible()#L84": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_is_always_visible"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorNormalizesDegenerateAndInvertedBounds()#L97": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_normalizes_degenerate_and_inverted_bounds"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorPreferredRatio()#L62": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_preferred_ratio"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorProjectsOriginToCenter()#L10": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_projects_origin_to_center"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorProjectsTopLeft()#L23": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_projects_top_left"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorProjectsTopRight()#L33": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_projects_top_right"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorProperties()#L52": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_properties"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorRespectsOffset()#L43": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_respects_offset"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void MercatorProjectorRoundTrips()#L248": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::mercator_projector_round_trips"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorCenterPointIsVisible()#L150": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_center_point_is_visible"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorOppositePointIsNotVisible()#L157": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_opposite_point_is_not_visible"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorPointJustBeforeHorizonIsVisible()#L171": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_point_just_before_horizon_is_visible"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorPointJustBeyondHorizonIsNotVisible()#L164": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_point_just_beyond_horizon_is_not_visible"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorPreferredRatio()#L191": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_preferred_ratio"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorProjectsCenterToScreenCenter()#L140": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_projects_center_to_screen_center"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorProperties()#L178": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_properties"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorRadiusIsHalfMinDimension()#L200": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_radius_is_half_min_dimension"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorRejectsClicksOutsideDisc()#L297": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_rejects_clicks_outside_disc"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorRoundTripsOnVisibleHemisphere()#L278": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_round_trips_on_visible_hemisphere"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorScreenCenter()#L207": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_screen_center"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorSymmetry()#L229": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_symmetry"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/CoreObjectsTests/GeoProjectorsTesting.cs::CoreTests.CoreObjectsTests.GeoProjectorsTesting::void OrthographicProjectorVisibilityWithDifferentCenter()#L215": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs::orthographic_projector_visibility_with_different_center"
+      ],
+      "reason": "Direct port of every source assertion and coordinate fixture; source tolerances are retained and native values replace arrays/out parameters. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/OtherTests/GeoJsonImportTests.cs::CoreTests.OtherTests.GeoJsonImportTests::void Import_BuiltInWorldMap_StillLoads()#L79": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs::tests::import_built_in_world_map_still_loads"
+      ],
+      "reason": "Direct GeoJSON fixture/assertion port covering shape dispatch, name fallback/case, duplicates or the exact embedded world map. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/OtherTests/GeoJsonImportTests.cs::CoreTests.OtherTests.GeoJsonImportTests::void Import_CustomGeoJson_ParsesMixedPolygonShapes()#L59": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs::tests::import_custom_geo_json_parses_mixed_polygon_shapes"
+      ],
+      "reason": "Direct GeoJSON fixture/assertion port covering shape dispatch, name fallback/case, duplicates or the exact embedded world map. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/OtherTests/GeoJsonImportTests.cs::CoreTests.OtherTests.GeoJsonImportTests::void Import_DuplicateShortNames_DoNotAbortImport()#L136": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs::tests::import_duplicate_short_names_do_not_abort_import"
+      ],
+      "reason": "Direct GeoJSON fixture/assertion port covering shape dispatch, name fallback/case, duplicates or the exact embedded world map. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/CoreTests/OtherTests/GeoJsonImportTests.cs::CoreTests.OtherTests.GeoJsonImportTests::void Import_MixedCasePropertyKeys_ResolveCaseInsensitively()#L123": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs::tests::import_mixed_case_property_keys_resolve_case_insensitively"
+      ],
+      "reason": "Direct GeoJSON fixture/assertion port covering shape dispatch, name fallback/case, duplicates or the exact embedded world map. Passed in ferroui-livecharts tests.",
+      "remaining": []
+    },
+    "tests/SnapshotTests/SankeySeriesTests.cs::SnapshotTests.SankeySeriesTests::void BipartiteArc()#L185": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs::tests::bipartite_arc_bands_follow_proportional_angular_spans"
+      ],
+      "reason": "Source weights verify angular distribution, padding and endpoint radius.",
+      "remaining": [
+        "Upstream compares a rendered PNG; no matching FerroUI backend golden-image comparison is recorded."
+      ]
+    },
+    "tests/SnapshotTests/SankeySeriesTests.cs::SnapshotTests.SankeySeriesTests::void BipartiteArc_ThrowsOnMultiColumn()#L417": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs::tests::bipartite_arc_throws_on_multicolumn"
+      ],
+      "reason": "The three-column source fixture is rejected for BipartiteArc with descriptive ChartError instead of InvalidOperationException. This source test asserts failure, not a raster image.",
+      "remaining": []
+    },
+    "tests/SnapshotTests/SankeySeriesTests.cs::SnapshotTests.SankeySeriesTests::void TwoLevelFlow()#L14": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs::tests::two_level_flow_preserves_node_values_and_ribbon_thickness"
+      ],
+      "reason": "Source weights verify node values, nonoverlap and ribbon thickness.",
+      "remaining": [
+        "Upstream compares a rendered PNG; no matching FerroUI backend golden-image comparison is recorded."
+      ]
+    },
+    "tests/SnapshotTests/TreemapSeriesTests.cs::SnapshotTests.TreemapSeriesTests::void FlatBasic()#L16": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs::tests::flat_basic_tiles_preserve_relative_area_without_overlap"
+      ],
+      "reason": "Source weights verify area conservation, clipping and nonoverlap.",
+      "remaining": [
+        "Upstream compares a rendered PNG; no matching FerroUI backend golden-image comparison is recorded."
+      ]
+    },
+    "tests/SnapshotTests/TreemapSeriesTests.cs::SnapshotTests.TreemapSeriesTests::void HierarchicalTwoLevel()#L191": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs::tests::hierarchical_two_level_rolls_up_values_and_insets_every_level"
+      ],
+      "reason": "Source population hierarchy verifies rollup, padding and leaf-only hits.",
+      "remaining": [
+        "Upstream compares a rendered PNG; no matching FerroUI backend golden-image comparison is recorded."
+      ]
+    },
+    "tests/SnapshotTests/TreemapSeriesTests.cs::SnapshotTests.TreemapSeriesTests::void HoverTooltip()#L84": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs::tests::hierarchical_two_level_rolls_up_values_and_insets_every_level"
+      ],
+      "reason": "Source population fixture and pointer (150,150) verify the China: 1400 leaf label.",
+      "remaining": [
+        "Upstream compares a rendered PNG; no matching FerroUI backend golden-image comparison is recorded."
+      ]
+    },
+    "tests/SnapshotTests/TreemapSeriesTests.cs::SnapshotTests.TreemapSeriesTests::void TwoSeriesWithTitleAndLegend()#L129": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs::tests::two_series_partition_by_total_and_hide_invisible_series"
+      ],
+      "reason": "Source series weights verify 153:92 partition and visible-series legend entries.",
+      "remaining": [
+        "Upstream compares a rendered PNG; no matching FerroUI backend golden-image comparison is recorded."
+      ]
+    },
+    "tests/CoreTests/SeriesTests/ColumnMaxBarWidthTests.cs::CoreTests.SeriesTests.ColumnMaxBarWidthTests::void ColumnWidthIsClampedToMaxBarWidth()#L69": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/upstream_regression_tests.rs::column_width_is_clamped_to_max_bar_width"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
+      "remaining": []
+    },
+    "tests/CoreTests/SeriesTests/Issue1970Tests.cs::CoreTests.SeriesTests.Issue1970Tests::void LineSeries_ValuesReassignedToSmallerArray_PrunesOldPoints()#L32": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/upstream_regression_tests.rs::reassigned_shorter_line_values_remove_stale_points_and_shapes"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
+      "remaining": [
+        "This verifies retained scene replacement; source DataFactory cached point disposal and animated exit lifecycle require native-host fixtures."
+      ]
+    },
+    "tests/CoreTests/SeriesTests/Issue1970Tests.cs::CoreTests.SeriesTests.Issue1970Tests::void ScatterSeries_ValuesReassignedToSmallerArray_PrunesOldPoints()#L86": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/upstream_regression_tests.rs::reassigned_shorter_scatter_values_remove_stale_points_and_shapes"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
+      "remaining": [
+        "This verifies retained scene replacement; source DataFactory cached point disposal and animated exit lifecycle require native-host fixtures."
+      ]
+    },
+    "tests/CoreTests/SeriesTests/LineSeriesTest.cs::CoreTests.SeriesTests.LineSeriesTest::void MarkerColorMatchesUserStroke()#L538": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/upstream_regression_tests.rs::line_marker_color_matches_user_stroke"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
+      "remaining": []
+    },
+    "tests/CoreTests/SeriesTests/LineSeriesTest.cs::CoreTests.SeriesTests.LineSeriesTest::void ShouldScale()#L19": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/upstream_regression_tests.rs::line_series_scale_has_even_categories_and_exponential_values"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
+      "remaining": [
+        "Source per-point animated Bezier endpoint storage is replaced by immutable path segments; full source segment checks are not yet duplicated."
+      ]
+    },
+    "tests/CoreTests/SeriesTests/PieSeriesTest.cs::CoreTests.SeriesTests.PieSeriesTest::void ShouldPlaceDataLabel()#L132": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::tests::source_label_positions_follow_slice_angles_and_native_text_metrics"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
+      "remaining": [
+        "All five placements are exercised; the source thirteen-slice combinations of inner/outer offsets and rendering outputs remain incomplete."
+      ]
+    },
+    "tests/CoreTests/SeriesTests/PieSeriesTest.cs::CoreTests.SeriesTests.PieSeriesTest::void ShouldScale()#L19": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::tests::source_should_scale_preserves_slice_angles_center_and_hover_reservation"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
+      "remaining": []
+    },
+    "tests/CoreTests/SeriesTests/RangeSeriesAutoBoundsTests.cs::CoreTests.SeriesTests.RangeSeriesAutoBoundsTests::void RangeColumnSeries_AutoBounds_IncludeLowestLowEndpoint()#L76": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/upstream_regression_tests.rs::range_column_series_auto_bounds_include_reversed_low_endpoint"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
+      "remaining": []
+    },
+    "tests/CoreTests/SeriesTests/RangeSeriesAutoBoundsTests.cs::CoreTests.SeriesTests.RangeSeriesAutoBoundsTests::void RangeLineSeries_AutoBounds_IncludeLowestLowEndpoint()#L128": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/upstream_regression_tests.rs::range_line_series_auto_bounds_include_lowest_low_endpoint"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
+      "remaining": []
+    },
+    "tests/CoreTests/SeriesTests/RangeSeriesAutoBoundsTests.cs::CoreTests.SeriesTests.RangeSeriesAutoBoundsTests::void RangeRowSeries_AutoBounds_IncludeLowestLowEndpoint()#L22": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/upstream_regression_tests.rs::range_row_series_auto_bounds_include_lowest_low_endpoint"
+      ],
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
+      "remaining": []
+    },
+    "tests/SnapshotTests/PieChartTests.cs::SnapshotTests.PieChartTests::void GaugeInTightBounds()#L184": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::tests::tight_gauge_preserves_negative_offsets_and_does_not_reserve_hover_pushout"
+      ],
+      "reason": "Uses the reporter's exact 240x100 size, inner/relative offsets and maximum radial widths from source #2131.",
+      "remaining": [
+        "Numerical geometry only; upstream snapshot PNG has not been compared."
+      ]
+    }
+  },
+  "members": {
+    "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::ControlCoordinatesProjector(float mapWidth, float mapHeight, float offsetX, float offsetY)#L58": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::new"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::ControlCoordinatesProjector(float mapWidth, float mapHeight, float offsetX, float offsetY, double minLatitudeDegrees, double maxLatitudeDegrees, double minLongitudeDegrees, double maxLongitudeDegrees)#L74": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::new"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::const double DefaultMaxLatitudeDegrees#L37": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::DEFAULT_MAX_LATITUDE"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::const double DefaultMaxLongitudeDegrees#L43": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::DEFAULT_MAX_LONGITUDE"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::const double DefaultMinLatitudeDegrees#L34": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::DEFAULT_MIN_LATITUDE"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::const double DefaultMinLongitudeDegrees#L40": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::DEFAULT_MIN_LONGITUDE"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::override bool ToCoordinates(float screenX, float screenY, out double longitude, out double latitude)#L162": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::to_coordinates"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::override float[] ToMap(double[] point)#L148": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::to_map"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::override void ToMap(double longitude, double latitude, out float x, out float y)#L155": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::to_map"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::static float[] GetPreferredRatio(double minLatitudeDegrees, double maxLatitudeDegrees, double minLongitudeDegrees, double maxLongitudeDegrees)#L136": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::preferred_ratio"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs::LiveChartsCore.Geo.ControlCoordinatesProjector::static float[] PreferredRatio { get; }#L127": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector::preferred_ratio"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MapProjection.cs::LiveChartsCore.Geo.MapProjection::Default": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjection::Default"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MapProjection.cs::LiveChartsCore.Geo.MapProjection::Mercator": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjection::Mercator"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MapProjection.cs::LiveChartsCore.Geo.MapProjection::Orthographic": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjection::Orthographic"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MapProjector.cs::LiveChartsCore.Geo.MapProjector::abstract bool ToCoordinates(float screenX, float screenY, out double longitude, out double latitude)#L96": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector::to_coordinates"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MapProjector.cs::LiveChartsCore.Geo.MapProjector::abstract float[] ToMap(double[] point)#L55": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector::to_map"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MapProjector.cs::LiveChartsCore.Geo.MapProjector::float MapHeight { get; protected set; }#L38": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector::map_bounds"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MapProjector.cs::LiveChartsCore.Geo.MapProjector::float MapWidth { get; protected set; }#L33": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector::map_bounds"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MapProjector.cs::LiveChartsCore.Geo.MapProjector::float XOffset { get; protected set; }#L43": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector::map_bounds"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MapProjector.cs::LiveChartsCore.Geo.MapProjector::float YOffset { get; protected set; }#L48": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector::map_bounds"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MapProjector.cs::LiveChartsCore.Geo.MapProjector::virtual bool IsVisible(double longitude, double latitude)#L83": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector::is_visible"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MapProjector.cs::LiveChartsCore.Geo.MapProjector::virtual void ToMap(double longitude, double latitude, out float x, out float y)#L69": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector::to_map"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::MercatorProjector(float mapWidth, float mapHeight, float offsetX, float offsetY)#L74": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::new"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::MercatorProjector(float mapWidth, float mapHeight, float offsetX, float offsetY, double minLatitudeDegrees, double maxLatitudeDegrees, double minLongitudeDegrees, double maxLongitudeDegrees)#L90": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::new"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::const double DefaultMaxLatitudeDegrees#L45": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::DEFAULT_MAX_LATITUDE"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::const double DefaultMaxLongitudeDegrees#L57": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::DEFAULT_MAX_LONGITUDE"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::const double DefaultMinLatitudeDegrees#L38": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::DEFAULT_MIN_LATITUDE"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::const double DefaultMinLongitudeDegrees#L51": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::DEFAULT_MIN_LONGITUDE"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::override bool ToCoordinates(float screenX, float screenY, out double longitude, out double latitude)#L189": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::to_coordinates"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::override float[] ToMap(double[] point)#L169": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::to_map"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::override void ToMap(double longitude, double latitude, out float x, out float y)#L176": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::to_map"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::static float[] GetPreferredRatio(double minLatitudeDegrees, double maxLatitudeDegrees, double minLongitudeDegrees, double maxLongitudeDegrees)#L154": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::preferred_ratio"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/MercatorProjector.cs::LiveChartsCore.Geo.MercatorProjector::static float[] PreferredRatio { get; }#L145": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector::preferred_ratio"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::OrthographicProjector(float mapWidth, float mapHeight, float offsetX, float offsetY, double centerLon, double centerLat)#L51": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::new"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::double CenterLatitude { get; }#L77": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::center"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::double CenterLongitude { get; }#L72": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::center"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::float Radius { get; }#L82": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::radius"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::float ScreenCenterX { get; }#L87": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::screen_center"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::float ScreenCenterY { get; }#L92": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::screen_center"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::override bool IsVisible(double longitude, double latitude)#L100": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::is_visible"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::override bool ToCoordinates(float screenX, float screenY, out double longitude, out double latitude)#L137": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::to_coordinates"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::override float[] ToMap(double[] point)#L112": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::to_map"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::override void ToMap(double longitude, double latitude, out float x, out float y)#L119": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::to_map"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Geo/OrthographicProjector.cs::LiveChartsCore.Geo.OrthographicProjector::static float[] PreferredRatio { get; }#L97": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector::PREFERRED_RATIO"
+      ],
+      "reason": "Explicit member correspondence: Rect/Point/GeoCoordinate replace separate coordinate properties, arrays and out parameters; inverse returns None outside the disc. GeographicBounds::default() supplies constructor defaults. See the direct projector tests and documented f64/pole-clamp adaptation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/SankeyLayout.cs::LiveChartsCore.SankeyLayout::static ArcResult<TNode> ComputeBipartiteArc<TNode>(IEnumerable<TNode> nodes, IEnumerable<SankeyLink<TNode>> links, LvcRectangle rect, float nodeWidth, float nodePadding, float arcSpanDegrees, float labelMargin) where TNode : notnull#L373": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs::SankeyChartEngine::layout"
+      ],
+      "reason": "Explicit function correspondence selected by SankeyLayoutKind: filtered DAG inputs, depth/value assignment, relaxation or proportional arcs and output bands are reviewed against pinned source. Result reports cycles and invalid finite arithmetic instead of throwing.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/SankeyLayout.cs::LiveChartsCore.SankeyLayout::static Result<TNode> Compute<TNode>(IEnumerable<TNode> nodes, IEnumerable<SankeyLink<TNode>> links, LvcRectangle rect, float nodeWidth, float nodePadding, int iterations) where TNode : notnull#L162": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs::SankeyChartEngine::layout"
+      ],
+      "reason": "Explicit function correspondence selected by SankeyLayoutKind: filtered DAG inputs, depth/value assignment, relaxation or proportional arcs and output bands are reviewed against pinned source. Result reports cycles and invalid finite arithmetic instead of throwing.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/TreemapLayout.cs::LiveChartsCore.TreemapLayout::static List<(T item, LvcRectangle rect)> Squarify<T>(List<(double weight, T item)> items, LvcRectangle rect)#L44": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs::squarify"
+      ],
+      "reason": "Explicit generic squarification function counterpart; valid weights preserve proportional areas, row ordering and nonoverlap. Rust borrows input instead of reordering the caller and normalizes extreme weights before summation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/CoreAxis.cs::LiveChartsCore.CoreAxis<TTextGeometry, TLineGeometry>::IList<string>? Labels { get; set; }#L197": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/axis.rs",
+        "src/FerroUI.Controls.LiveCharts/axis.rs"
+      ],
+      "reason": "Typed native axis property drives the measured forward/inverse scale and label/category calculation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/CoreAxis.cs::LiveChartsCore.CoreAxis<TTextGeometry, TLineGeometry>::bool IsInverted { get; set; }#L206": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/axis.rs",
+        "src/FerroUI.Controls.LiveCharts/axis.rs"
+      ],
+      "reason": "Typed native axis property drives the measured forward/inverse scale and label/category calculation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/CoreAxis.cs::LiveChartsCore.CoreAxis<TTextGeometry, TLineGeometry>::double UnitWidth { get; set; }#L185": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/axis.rs",
+        "src/FerroUI.Controls.LiveCharts/axis.rs"
+      ],
+      "reason": "Typed native axis property drives the measured forward/inverse scale and label/category calculation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/CoreAxis.cs::LiveChartsCore.CoreAxis<TTextGeometry, TLineGeometry>::double? MaxLimit { get; set; }#L167": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/axis.rs",
+        "src/FerroUI.Controls.LiveCharts/axis.rs"
+      ],
+      "reason": "Typed native axis property drives the measured forward/inverse scale and label/category calculation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/CoreAxis.cs::LiveChartsCore.CoreAxis<TTextGeometry, TLineGeometry>::double? MinLimit { get; set; }#L143": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/axis.rs",
+        "src/FerroUI.Controls.LiveCharts/axis.rs"
+      ],
+      "reason": "Typed native axis property drives the measured forward/inverse scale and label/category calculation.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::PolarLabelsPosition DataLabelsPosition { get; set; }#L112": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::label_position"
+      ],
+      "reason": "Chart center, start, end, middle and outer labels use source radius/angle and native horizontal alignment rules.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::RadialAlignment RadialAlign { get; set; }#L97": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::radial_align",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::bool InvertedCornerRadius { get; set; }#L103": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::rounded_annular_sector_path"
+      ],
+      "reason": "Native cubic outlines support rounded/inverted radial corners.",
+      "remaining": [
+        "Tiny wedges clamp corner overlap and full rings remain exactly closed; this is a documented geometry correction."
+      ]
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::bool IsFillSeries { get; set; }#L106": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::is_fill_series",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::bool IsRelativeToMinValue { get; set; }#L109": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::is_relative_to_min_value",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double CornerRadius { get; set; }#L100": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::rounded_annular_sector_path"
+      ],
+      "reason": "Native cubic outlines support rounded/inverted radial corners.",
+      "remaining": [
+        "Tiny wedges clamp corner overlap and full rings remain exactly closed; this is a documented geometry correction."
+      ]
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double HoverPushout { get; set; }#L85": {
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::hover_push_out"
+      ],
+      "reason": "Reserves normal pie layout space and correctly excludes gauges.",
+      "remaining": [
+        "Pointer-driven hover pushout animation remains pending."
+      ]
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double InnerRadius { get; set; }#L79": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::inner_radius",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double MaxRadialColumnWidth { get; set; }#L94": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::max_radial_column_width",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double OuterRadiusOffset { get; set; }#L82": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::outer_radius_offset",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double Pushout { get; set; }#L76": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::push_out",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double RelativeInnerRadius { get; set; }#L88": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::relative_inner_radius",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double RelativeOuterRadius { get; set; }#L91": {
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::relative_outer_radius",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": []
+    },
+    "src/LiveChartsCore/Kernel/Extensions.cs::LiveChartsCore.Kernel.Extensions::static FindingStrategy GetFindingStrategy(this IEnumerable<ISeries> seriesCollection)#L486": {
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs::CartesianChartEngine::measure_with_axes"
+      ],
+      "reason": "All visible-series preferences select X-closest, Y-closest, or all-dimensions-closest using the source all-series reduction.",
+      "remaining": []
+    }
+  }
 }

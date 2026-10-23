@@ -257,10 +257,14 @@
     {
       "source": "src/LiveChartsCore/BarSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs"
+      ],
+      "reason": "The shared Rust measurement pipeline implements orientation, bar grouping, pivot, signed stacks, range endpoints, errors, max width and exact-vs-category hover separation.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Generic visual/lifecycle template hooks and the complete source label placement/padding contract remain pending."
       ]
     },
     {
@@ -293,10 +297,16 @@
     {
       "source": "src/LiveChartsCore/CartesianChartEngine.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
+      ],
+      "reason": "Pure measurement calculates independent axes, visible data bounds, signed stacks, grouped bars, sections and retained FerroUI geometry; native host supplies observed data, cached scenes and pointer zoom, pan and section selection.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source fit-to-data/bounce behavior and shared chart event synchronization are not implemented.",
+        "The full measuring/update lifecycle, throttling, draw-margin-defined callbacks and all source public methods are not yet represented.",
+        "Auto margins use fixed axis bands rather than the complete source text-measured separator/name layout."
       ]
     },
     {
@@ -329,37 +339,57 @@
     {
       "source": "src/LiveChartsCore/CoreAxis.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/axis.rs",
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs::draw_axes",
+        "src/FerroUI.Controls.LiveCharts/axis.rs"
+      ],
+      "reason": "Native axis snapshot preserves labels, named axes, limits, position, inversion, spacing, unit width, text styling and logarithmic scales; AxisScale handles extreme finite linear domains and inverse conversion.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source custom label callbacks, tick/subtick geometry, crosshairs, min/max zoom range and the full text-measured padding contract are not implemented."
       ]
     },
     {
       "source": "src/LiveChartsCore/CoreBoxSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Five-statistic boxes render extrema, quartiles, median and whiskers; hover includes the category slot and labels carry the statistics.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source independent box-series grouping and all whisker/label options remain pending."
       ]
     },
     {
       "source": "src/LiveChartsCore/CoreColumnSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Vertical bars use category widths, maximum pixel width, spacing, pivot, native rounded rectangles, clipping and full category hover.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source variable geometry factories and all label/series padding properties remain pending."
       ]
     },
     {
       "source": "src/LiveChartsCore/CoreFinancialSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "OHLC coordinates render candlesticks, wicks, bullish/bearish defaults, full category hover and all OHLC values in tooltip text.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Separate UpFill/DownFill/UpStroke/DownStroke properties, generic financial visuals and all source data label placement behavior remain pending."
       ]
     },
     {
@@ -374,100 +404,155 @@
     {
       "source": "src/LiveChartsCore/CoreHeatSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Heat cells infer numeric/date spacing, bound each series independently, interpolate uniform palettes and expose weight in data/tooltip labels.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source explicit color stops, cell padding, source weight-bound overrides and all data label styles remain pending."
       ]
     },
     {
       "source": "src/LiveChartsCore/CoreLineSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Line/spline, filled and stacked area tracks, signed and 100% stacks, geometry markers, errors, null splitting, native style and category hover.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source generic custom visuals, per-point styling hooks, exact coordinate-space spline controls and all data-label placements remain pending."
       ]
     },
     {
       "source": "src/LiveChartsCore/CorePieSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Pie layout preserves the source absolute/relative minimum gauge branches, saturation, fill background, gauge hover-space exclusion, signed diameter offsets, concentric empty slots, relative radii, maximum radial width/alignment and five label positions using host font metrics. Native cubic paths support rounded and inverted corners.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "HoverPushout reserves the correct layout space but pointer-driven pushout animation is not yet wired.",
+        "Tangent/cotangent text-angle flags, all custom formatters and source generic geometry lifecycle remain pending.",
+        "Rounded tiny wedges clamp corners before edge overlap; full rings remain exactly closed instead of upstream 359.99-degree approximation. PNG equivalence has not been claimed."
       ]
     },
     {
       "source": "src/LiveChartsCore/CorePolarAxis.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/polar_chart_engine.rs"
+      ],
+      "reason": "Polar axes render circular separators, spokes and numeric/named labels using the same typed axis snapshot.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source polar-only properties, multiple axes, separator wedges and precise label fitting remain pending."
       ]
     },
     {
       "source": "src/LiveChartsCore/CorePolarLineSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/polar_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Radar lines and optional filled closed paths preserve named-angle categories, missing-value runs, markers and radial data labels.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source multi-axis selection, exact spline closure behavior, all label positions and generic visual lifecycle remain pending."
       ]
     },
     {
       "source": "src/LiveChartsCore/CoreRangeColumnSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Vertical range bars include both endpoints in bounds, including reversed ranges, and show both values in tooltip labels.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source full-span tick padding and all range data-label formatting/placement options remain pending."
       ]
     },
     {
       "source": "src/LiveChartsCore/CoreRangeLineSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Dual high/low paths form a filled band, both endpoint markers are rendered, exact hits target either marker and category hover covers the entire band.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source full-span tick padding, complete data label layout, generic geometry and per-point lifecycle remain pending."
       ]
     },
     {
       "source": "src/LiveChartsCore/CoreRangeRowSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Horizontal/Gantt range bars include both endpoints, preserve the axis swap and support numeric/date-sized categories.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source automatic DateTime formatter integration and full-span tick padding remain pending."
       ]
     },
     {
       "source": "src/LiveChartsCore/CoreRowSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Horizontal bars swap category/value axes, preserve range bounds and use orientation-correct hover and error geometry.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source variable geometry factories and all label/series padding properties remain pending."
       ]
     },
     {
       "source": "src/LiveChartsCore/CoreSankeySeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs"
+      ],
+      "reason": "Flow models, layouts, cubic ribbons, annular paths, node/link colors, label placement and hit regions use immutable scenes plus native property models.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Generic node/link/label/tooltip mappers and complete series lifecycle/paint transitions remain unmapped.",
+        "Multiple Sankey series, title/legend/draw-margin negotiation and rendered golden-image equivalence need further review."
       ]
     },
     {
       "source": "src/LiveChartsCore/CoreScatterSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Scatter bubbles interpolate diameter from tertiary weights, render native glyphs/errors and preserve hit identities across remeasurement.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Shared source weight-bounds grouping, arbitrary geometry factories and complete per-point styling hooks remain pending."
       ]
     },
     {
@@ -491,19 +576,29 @@
     {
       "source": "src/LiveChartsCore/CoreStackedColumnSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Vertical stacks retain independent positive/negative accumulators, category/axis/group keys and optional 100% normalization.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source custom visual lifecycle, every stack-position behavior and data label placement require further parity fixtures."
       ]
     },
     {
       "source": "src/LiveChartsCore/CoreStackedRowSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Horizontal stacks preserve sign-specific accumulators, axis orientation, stack groups and optional 100% normalization.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source custom visual lifecycle, every stack-position behavior and data label placement require further parity fixtures."
       ]
     },
     {
@@ -518,19 +613,29 @@
     {
       "source": "src/LiveChartsCore/CoreStepLineSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs",
+        "src/FerroUI.Controls.LiveCharts/chart_series.rs"
+      ],
+      "reason": "Step paths, filled/stacked step areas, signed and 100% stacking, gaps, markers and category hover.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source generic custom visuals, per-point lifecycle hooks and complete label-placement options remain pending."
       ]
     },
     {
       "source": "src/LiveChartsCore/CoreTreemapSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs"
+      ],
+      "reason": "Iterative hierarchy, explicit-value/rollup precedence, Some(empty) internal nodes, per-level padding, series partitioning, leaf-only hover/labels and native text measurement injection are implemented.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Generic value/children/label/tooltip mapper callbacks and per-node animated geometry lifecycle remain unmapped.",
+        "Native title/legend arrangement and rendered golden-image equivalence need further review."
       ]
     },
     {
@@ -653,19 +758,29 @@
     {
       "source": "src/LiveChartsCore/Defaults/SankeyLink.cs",
       "family": "Observable data models",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs::SankeyLink",
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs"
+      ],
+      "reason": "Native FerroObject/StyledProperty models, stable identity, disposable deep FerroList observation and owned snapshots are implemented. Treemap reference cycles report ChartError and shared subtrees remain valid.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Native property/markup tests and all public member mappings must pass before promoting the whole model.",
+        "Nullable labels use empty native strings; generic user-model compatibility is not yet mapped."
       ]
     },
     {
       "source": "src/LiveChartsCore/Defaults/SankeyNode.cs",
       "family": "Observable data models",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs::SankeyNode",
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs"
+      ],
+      "reason": "Native FerroObject/StyledProperty models, stable identity, disposable deep FerroList observation and owned snapshots are implemented. Treemap reference cycles report ChartError and shared subtrees remain valid.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Native property/markup tests and all public member mappings must pass before promoting the whole model.",
+        "Nullable labels use empty native strings; generic user-model compatibility is not yet mapped."
       ]
     },
     {
@@ -680,10 +795,15 @@
     {
       "source": "src/LiveChartsCore/Defaults/TreemapNode.cs",
       "family": "Observable data models",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs::TreemapNode",
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs"
+      ],
+      "reason": "Native FerroObject/StyledProperty models, stable identity, disposable deep FerroList observation and owned snapshots are implemented. Treemap reference cycles report ChartError and shared subtrees remain valid.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Native property/markup tests and all public member mappings must pass before promoting the whole model.",
+        "Nullable labels use empty native strings; generic user-model compatibility is not yet mapped."
       ]
     },
     {
@@ -725,11 +845,12 @@
     {
       "source": "src/LiveChartsCore/Drawing/Animation.cs",
       "family": "Drawing abstractions and geometry",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/animation.rs"
+      ],
+      "reason": "Owned animation options replace shared mutable animation state: duration uses caller clock milliseconds, Rc closure carries easing, Repeat enum expresses finite/infinite repeats. Repeat counters live on each motion property.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Drawing/BaseArcGeometry.cs",
@@ -923,11 +1044,12 @@
     {
       "source": "src/LiveChartsCore/Drawing/KeyFrame.cs",
       "family": "Drawing abstractions and geometry",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::KeyFrame"
+      ],
+      "reason": "Time, Value and destination easing semantics are preserved in a Rust value with an Rc closure.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Drawing/Layouts/BaseContainer.cs",
@@ -1103,83 +1225,92 @@
     {
       "source": "src/LiveChartsCore/Easing/BackEasingFunction.cs",
       "family": "Easing functions",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/back_easing_function.rs"
+      ],
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Easing/BounceEasingFunction.cs",
       "family": "Easing functions",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/bounce_easing_function.rs"
+      ],
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Easing/CircleEasingFunction.cs",
       "family": "Easing functions",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/circle_easing_function.rs"
+      ],
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Easing/CubicBezierEasingFunction.cs",
       "family": "Easing functions",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/cubic_bezier_easing_function.rs"
+      ],
+      "reason": "The 257-sample LUT and bracketed Newton/bisection algorithm preserve source limits and identity shortcut, with finite-control validation and safe NaN sampling added.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Easing/CubicEasingFunction.cs",
       "family": "Easing functions",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/cubic_easing_function.rs"
+      ],
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Easing/ElasticEasingFunction.cs",
       "family": "Easing functions",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/elastic_easing_function.rs"
+      ],
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Easing/ExponentialEasingFunction.cs",
       "family": "Easing functions",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/exponential_easing_function.rs"
+      ],
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Easing/PolinominalEasingFunction.cs",
       "family": "Easing functions",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/polinominal_easing_function.rs"
+      ],
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/EasingFunctions.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs"
+      ],
+      "reason": "All predefined and parameterized easing functions plus keyframe composition are available as Rust functions/Rc closures. Ordered finite keyframe validation returns typed errors, and immutable Bezier presets are cached.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/FinancialLayout.cs",
@@ -1292,47 +1423,57 @@
     {
       "source": "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs",
       "family": "Geography and map data",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/control_coordinates_projector.rs::ControlCoordinatesProjector",
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs"
+      ],
+      "reason": "Projection bounds, forward/inverse mapping, hemisphere visibility and aspect behavior use native Rect/Point/GeoCoordinate values and a Rust trait/enum. The 24 source GeoProjectorsTesting assertions are directly ported. Calculations use f64; inverted/degenerate limits normalize as upstream and Mercator pole inputs are additionally clamped to a finite latitude.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Geo/DrawnMap.cs",
       "family": "Geography and map data",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs::DrawnMap"
+      ],
+      "reason": "Owned map/layer snapshots, UTF-8 string/byte import, named-layer append, world loading and name lookup are implemented.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "File/resource and asynchronous loading need host adapters; no chart-owned filesystem or worker thread is introduced.",
+        "Managed shallow-copy shared Layers semantics are not reproduced by owned Rust snapshots; native observable map-layer handles remain to be designed.",
+        "Layer-specific FindLand and externally supplied paint factories remain unmapped."
       ]
     },
     {
       "source": "src/LiveChartsCore/Geo/GeoJsonFeature.cs",
       "family": "Geography and map data",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs"
+      ],
+      "reason": "serde_json::Value and the typed polygon parser replace CLR DTO deserialization/source generation. Mixed property kinds, geometry dispatch and missing fields have direct import tests; no managed JSON generator is needed.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Geo/GeoJsonFile.cs",
       "family": "Geography and map data",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs"
+      ],
+      "reason": "serde_json::Value and the typed polygon parser replace CLR DTO deserialization/source generation. Mixed property kinds, geometry dispatch and missing fields have direct import tests; no managed JSON generator is needed.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Geo/GeoJsonFileSourceGenerationContext.cs",
       "family": "Geography and map data",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs"
+      ],
+      "reason": "serde_json::Value and the typed polygon parser replace CLR DTO deserialization/source generation. Mixed property kinds, geometry dispatch and missing fields have direct import tests; no managed JSON generator is needed.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Geo/GeoTooltipPoint.cs",
@@ -1409,19 +1550,27 @@
     {
       "source": "src/LiveChartsCore/Geo/LandData.cs",
       "family": "Geography and map data",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs",
+        "src/FerroUI.LiveCharts/geo_map_chart.rs"
+      ],
+      "reason": "Owned polygons, separate hole rings, scalar metadata and geographic bounds feed native drawing and hit geometry.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Mutable Shape caches and managed shared Land/DrawnMap ownership are not exposed as native observable objects."
       ]
     },
     {
       "source": "src/LiveChartsCore/Geo/LandDefinition.cs",
       "family": "Geography and map data",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs",
+        "src/FerroUI.LiveCharts/geo_map_chart.rs"
+      ],
+      "reason": "Owned polygons, separate hole rings, scalar metadata and geographic bounds feed native drawing and hit geometry.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Mutable Shape caches and managed shared Land/DrawnMap ownership are not exposed as native observable objects."
       ]
     },
     {
@@ -1445,29 +1594,37 @@
     {
       "source": "src/LiveChartsCore/Geo/MapLayer.cs",
       "family": "Geography and map data",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs::MapLayer"
+      ],
+      "reason": "Polygon/MultiPolygon dispatch, case-insensitive scalar metadata, lowercase keys, unnamed feature IDs, collision suffixes, bounds and layer visibility/order are implemented. Rings retain holes; imports validate before mutation.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "AddLandWhen and native observable layer/paint objects are not implemented.",
+        "Generic paint tasks and externally mutated geometry caches are not represented by the owned map snapshot."
       ]
     },
     {
       "source": "src/LiveChartsCore/Geo/MapProjection.cs",
       "family": "Geography and map data",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjection",
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs"
+      ],
+      "reason": "Projection bounds, forward/inverse mapping, hemisphere visibility and aspect behavior use native Rect/Point/GeoCoordinate values and a Rust trait/enum. The 24 source GeoProjectorsTesting assertions are directly ported. Calculations use f64; inverted/degenerate limits normalize as upstream and Mercator pole inputs are additionally clamped to a finite latitude.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Geo/MapProjector.cs",
       "family": "Geography and map data",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::MapProjector",
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs"
+      ],
+      "reason": "Projection bounds, forward/inverse mapping, hemisphere visibility and aspect behavior use native Rect/Point/GeoCoordinate values and a Rust trait/enum. The 24 source GeoProjectorsTesting assertions are directly ported. Calculations use f64; inverted/degenerate limits normalize as upstream and Mercator pole inputs are additionally clamped to a finite latitude.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Geo/MapShapeContext.cs",
@@ -1481,20 +1638,26 @@
     {
       "source": "src/LiveChartsCore/Geo/Maps.cs",
       "family": "Geography and map data",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/map_projector.rs::Projector::fit",
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs::DrawnMap"
+      ],
+      "reason": "Aspect-preserving subrectangle projector fitting, center/limits and embedded world/string/byte imports are implemented.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Directory/StreamReader convenience members require host resource adapters and public loading member review."
       ]
     },
     {
       "source": "src/LiveChartsCore/Geo/MercatorProjector.cs",
       "family": "Geography and map data",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/mercator_projector.rs::MercatorProjector",
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs"
+      ],
+      "reason": "Projection bounds, forward/inverse mapping, hemisphere visibility and aspect behavior use native Rect/Point/GeoCoordinate values and a Rust trait/enum. The 24 source GeoProjectorsTesting assertions are directly ported. Calculations use f64; inverted/degenerate limits normalize as upstream and Mercator pole inputs are additionally clamped to a finite latitude.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Geo/MultiPoligonGeometry.cs",
@@ -1508,11 +1671,13 @@
     {
       "source": "src/LiveChartsCore/Geo/OrthographicProjector.cs",
       "family": "Geography and map data",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/orthographic_projector.rs::OrthographicProjector",
+        "src/FerroUI.LiveCharts/geo/projector_tests.rs"
+      ],
+      "reason": "Projection bounds, forward/inverse mapping, hemisphere visibility and aspect behavior use native Rect/Point/GeoCoordinate values and a Rust trait/enum. The 24 source GeoProjectorsTesting assertions are directly ported. Calculations use f64; inverted/degenerate limits normalize as upstream and Mercator pole inputs are additionally clamped to a finite latitude.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Geo/RotationTracker.cs",
@@ -1535,29 +1700,38 @@
     {
       "source": "src/LiveChartsCore/Geo/world.geojson",
       "family": "Resources and build configuration",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo/world.geojson",
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs::DrawnMap::world"
+      ],
+      "reason": "The pinned upstream world.geojson is copied byte-for-byte and embedded with include_str; the direct upstream import test verifies more than 100 lands and Brazil lookup.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/GeoMapChart.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart.rs",
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs"
+      ],
+      "reason": "Retained paths, layer order, map clipping, hole hits, heat colors, markers, forward/inverse picking, viewport transforms and shorter-arc horizon closure are implemented. Bisection uses f64 precision and the shortest longitude branch.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Full annotation layout, custom geographic series/tooltip contracts, hover lifecycle and public view commands need member/test review.",
+        "Cached path reuse during rotation, rotation/bounce scheduling and all upstream gesture sequences are not verified.",
+        "Flat-projection antimeridian topology and raster equivalence remain unverified."
       ]
     },
     {
       "source": "src/LiveChartsCore/HeatFunctions.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/heat_functions.rs"
+      ],
+      "reason": "Uniform/custom stops and truncating ARGB interpolation retain source results. Typed errors validate stops; values below the first custom stop clamp instead of extrapolating. HeatPalette caches validated stops for repeated sampling.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/HeatLayout.cs",
@@ -1580,10 +1754,14 @@
     {
       "source": "src/LiveChartsCore/HorizontalBarSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs"
+      ],
+      "reason": "The shared Rust measurement pipeline implements orientation, bar grouping, pivot, signed stacks, range endpoints, errors, max width and exact-vs-category hover separation.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Generic visual/lifecycle template hooks and the complete source label placement/padding contract remain pending."
       ]
     },
     {
@@ -1688,29 +1866,34 @@
     {
       "source": "src/LiveChartsCore/Kernel/Coordinate.cs",
       "family": "Kernel, data, interaction and observers",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs"
+      ],
+      "reason": "Six-dimensional immutable Rust value preserves explicit empty versus implicit default semantics, error values, constructor coordinate ordering and formatting. Overloaded constructors become named associated functions.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Kernel/Drawing/AnnularSectorHoverArea.cs",
       "family": "Kernel, data, interaction and observers",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::HitShape::AnnularSector"
+      ],
+      "reason": "Annular containment respects the inner hole, radius, sweep sign, wraparound and full-circle spans.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source tooltip-placement aggregation and full hover-class API remain pending."
       ]
     },
     {
       "source": "src/LiveChartsCore/Kernel/Drawing/BezierData.cs",
       "family": "Kernel, data, interaction and observers",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/line_spline_math.rs::BezierData"
+      ],
+      "reason": "Six coordinate components use a copied Rust value; FerroUI Point accessors replace graphics-layer projections.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Kernel/Drawing/HoverArea.cs",
@@ -1724,38 +1907,46 @@
     {
       "source": "src/LiveChartsCore/Kernel/Drawing/LineSplineMath.cs",
       "family": "Kernel, data, interaction and observers",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/line_spline_math.rs"
+      ],
+      "reason": "Seed and segment calculations preserve source operation order, f32 segment-length ratios, and the upstream signed stack-offset expression. FerroUI Point replaces source LvcPoint.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Kernel/Drawing/RectangleHoverArea.cs",
       "family": "Kernel, data, interaction and observers",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::HitShape"
+      ],
+      "reason": "Normalized hover bounds distinguish painted geometry from category discovery; all closest strategies choose within each series, and zero-area plots reject interactions.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "All source SuggestedTooltipLocation/placement aggregation methods are not modeled one-to-one."
       ]
     },
     {
       "source": "src/LiveChartsCore/Kernel/Drawing/SemicircleHoverArea.cs",
       "family": "Kernel, data, interaction and observers",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::HitShape::AnnularSector"
+      ],
+      "reason": "Annular containment respects the inner hole, radius, sweep sign, wraparound and full-circle spans.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source tooltip-placement aggregation and full hover-class API remain pending."
       ]
     },
     {
       "source": "src/LiveChartsCore/Kernel/Error.cs",
       "family": "Kernel, data, interaction and observers",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/error.rs"
+      ],
+      "reason": "Four directional error components and the explicit Empty marker retain source defaults; symmetric construction is an additional convenience.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Kernel/Events/ChartCommandArgs.cs",
@@ -1868,10 +2059,13 @@
     {
       "source": "src/LiveChartsCore/Kernel/Extensions.cs",
       "family": "Kernel, data, interaction and observers",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_tick.rs"
+      ],
+      "reason": "Cartesian and polar tick calculation is ported with rotated-label, density, unit-width and minimum-separator logic. Degenerate input gets a finite fallback and loop iterations are bounded.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Other source extension methods are not mapped by this contribution."
       ]
     },
     {
@@ -2345,20 +2539,22 @@
     {
       "source": "src/LiveChartsCore/Kernel/StackedValue.cs",
       "family": "Kernel, data, interaction and observers",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/stacker.rs::StackedValue"
+      ],
+      "reason": "Copied value carries positive, negative and cumulative tracks, including the sign-dependent Share formula.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Kernel/Stacker.cs",
       "family": "Kernel, data, interaction and observers",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/stacker.rs::Stacker"
+      ],
+      "reason": "The source category stacking algorithm uses caller-provided unique series IDs and copied Coordinates. Rust HashMap keys canonicalize NaN and signed zero like Double.Equals. MaxLength reports actual maximum row length (upstream remains zero); invalid stack positions are rejected; get_stack supplies the coordinate sign for Share.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Kernel/TooltipPlacementContext.cs",
@@ -2408,47 +2604,52 @@
     {
       "source": "src/LiveChartsCore/Measure/AxisLimit.cs",
       "family": "Measurement, scales and policies",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs"
+      ],
+      "reason": "Source sentinel defaults, explicit user pinning, scaling and validation are preserved.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Measure/AxisOrientation.cs",
       "family": "Measurement, scales and policies",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/scaler.rs::AxisOrientation"
+      ],
+      "reason": "Source Unknown, X and Y variants are retained.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Measure/AxisPosition.cs",
       "family": "Measurement, scales and policies",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/axis.rs::AxisPosition"
+      ],
+      "reason": "All source enum alternatives are explicit Rust variants and registered FerroUI markup values.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Measure/AxisTick.cs",
       "family": "Measurement, scales and policies",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_tick.rs::AxisTick"
+      ],
+      "reason": "Source Value and Magnitude use f64 values. Calculation helpers are also supplied.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Measure/Bounds.cs",
       "family": "Measurement, scales and policies",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::Bounds"
+      ],
+      "reason": "Extrema, empty/default behavior, metadata aggregation, delta, and copying retain source behavior. Copy and Clone replace the copy constructor.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Measure/ClipMode.cs",
@@ -2471,11 +2672,12 @@
     {
       "source": "src/LiveChartsCore/Measure/DimensionalBounds.cs",
       "family": "Measurement, scales and policies",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::DimensionalBounds"
+      ],
+      "reason": "All six bounds and initial minimum-limits behavior are preserved without nullable owned bounds.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Measure/FindPointFor.cs",
@@ -2489,11 +2691,12 @@
     {
       "source": "src/LiveChartsCore/Measure/FindingStrategy.cs",
       "family": "Measurement, scales and policies",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::FindingStrategy"
+      ],
+      "reason": "All source enum alternatives are explicit Rust variants and registered FerroUI markup values.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Measure/LegendOrientation.cs",
@@ -2543,20 +2746,22 @@
     {
       "source": "src/LiveChartsCore/Measure/PolarLabelsPosition.cs",
       "family": "Measurement, scales and policies",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::PolarLabelsPosition"
+      ],
+      "reason": "All source enum alternatives are explicit Rust variants and registered FerroUI markup values.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Measure/PolarScaler.cs",
       "family": "Measurement, scales and policies",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/polar_scaler.rs"
+      ],
+      "reason": "Forward zero-origin angular convention and source radial scaling are retained using FerroUI Point/Rect. Inverse uses atan2 and signed revolution normalization, deliberately correcting upstream axis singularities and extra MinAngle; invalid/collapsed ranges return errors.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Measure/PopUpPlacement.cs",
@@ -2570,20 +2775,22 @@
     {
       "source": "src/LiveChartsCore/Measure/RadialAlignment.cs",
       "family": "Measurement, scales and policies",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::RadialAlignment"
+      ],
+      "reason": "All source enum alternatives are explicit Rust variants and registered FerroUI markup values.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Measure/Scaler.cs",
       "family": "Measurement, scales and policies",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/scaler.rs::Scaler"
+      ],
+      "reason": "Affine conversion, Y inversion, explicit inversion and collapsed-slope behavior use a value-based constructor with Result errors. Numeric precision is f64; sentinel limits are normalized before inversion, correcting the source reversed validation arguments for an empty X range. An explicit logarithmic constructor replaces subclass specialization.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Measure/SeriesBounds.cs",
@@ -2669,11 +2876,12 @@
     {
       "source": "src/LiveChartsCore/Motion/ByReferenceMotionProperty.cs",
       "family": "Motion and frame scheduling",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs::ByReferenceMotionProperty"
+      ],
+      "reason": "Noninterpolated reference values use Discrete<T>, snap to target and mark completion on sampling without synthetic object ownership.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Motion/CanvasRenderSettings.cs",
@@ -2696,11 +2904,13 @@
     {
       "source": "src/LiveChartsCore/Motion/ColorMotionProperty.cs",
       "family": "Motion and frame scheduling",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Motion/CoreMotionCanvas.cs",
@@ -2714,11 +2924,13 @@
     {
       "source": "src/LiveChartsCore/Motion/DoubleMotionProperty.cs",
       "family": "Motion and frame scheduling",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Motion/DropShadowMotionProperty.cs",
@@ -2732,20 +2944,24 @@
     {
       "source": "src/LiveChartsCore/Motion/FloatArrayMotionProperty.cs",
       "family": "Motion and frame scheduling",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Motion/FloatMotionProperty.cs",
       "family": "Motion and frame scheduling",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Motion/IFrameTicker.cs",
@@ -2759,10 +2975,13 @@
     {
       "source": "src/LiveChartsCore/Motion/IMotionProperty.cs",
       "family": "Motion and frame scheduling",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs"
+      ],
+      "reason": "Typed MotionProperty methods cover sampling, retargeting, completion and animation configuration; the source object-erased registry interface is not reproduced.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Review source property-registry operations against the native control system."
       ]
     },
     {
@@ -2786,38 +3005,48 @@
     {
       "source": "src/LiveChartsCore/Motion/MotionProperty.cs",
       "family": "Motion and frame scheduling",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs",
+        "src/FerroUI.LiveCharts/motion/interpolate.rs"
+      ],
+      "reason": "Retargeting, exact endpoint completion timing, phase-continuous overshoot, finite/infinite repeats, completion and snapping use explicit caller timestamps. Invalid times snap safely. Source object invalidation and registered completion callbacks are not provided by this generic numeric value.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Animatable property registry, per-property OnCompleted callbacks and source reflection/debug hooks require separate native integration."
       ]
     },
     {
       "source": "src/LiveChartsCore/Motion/NullableDoubleMotionProperty.cs",
       "family": "Motion and frame scheduling",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Motion/PaddingMotionProperty.cs",
       "family": "Motion and frame scheduling",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Motion/PointMotionProperty.cs",
       "family": "Motion and frame scheduling",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Motion/PropertyDefinition.cs",
@@ -2831,11 +3060,13 @@
     {
       "source": "src/LiveChartsCore/Motion/SizeMotionProperty.cs",
       "family": "Motion and frame scheduling",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/Painting/DrawnTask.cs",
@@ -2885,10 +3116,15 @@
     {
       "source": "src/LiveChartsCore/PieChartEngine.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
+      ],
+      "reason": "Native retained scenes measure category-keyed pie totals, concentric values and gauges; background fill series are excluded from hover; chart size, rotation, range, direction and explicit margins are preserved.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Source per-point animation entry/deletion lifecycle and event dispatch are replaced only in part by native scene transitions.",
+        "All source chart measuring/tooltip placement contracts have not received direct upstream test counterparts."
       ]
     },
     {
@@ -2912,10 +3148,15 @@
     {
       "source": "src/LiveChartsCore/PolarChartEngine.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/polar_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
+      ],
+      "reason": "Polar/radar measurement supplies finite angular/radial scaling, named category slots, closed polygons, null-separated runs, axes and point hits.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Only one angular and radial axis is currently consumed by the native engine.",
+        "Source FitToBounds, wedge separator configuration, crosshairs, source zoom and full axis-layout behavior remain pending."
       ]
     },
     {
@@ -2939,28 +3180,39 @@
     {
       "source": "src/LiveChartsCore/SankeyChartEngine.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs"
+      ],
+      "reason": "Flow models, layouts, cubic ribbons, annular paths, node/link colors, label placement and hit regions use immutable scenes plus native property models.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Generic node/link/label/tooltip mappers and complete series lifecycle/paint transitions remain unmapped.",
+        "Multiple Sankey series, title/legend/draw-margin negotiation and rendered golden-image equivalence need further review."
       ]
     },
     {
       "source": "src/LiveChartsCore/SankeyLayout.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs"
+      ],
+      "reason": "Reviewed longest-path Kahn depth assignment, first-ID deduplication, invalid/self/missing edge filtering, cycle and nonbipartite errors, max(in,out) node weights, source-order band accumulation, 0.99 sweep relaxation/collision resolution, proportional bipartite arcs and chord endpoints. Stable u64 identity replaces managed reference identity; numeric overflow reports InvalidData. Drawing/label parity is tracked separately.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/SankeyMeasureContext.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/sankey_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs"
+      ],
+      "reason": "Flow models, layouts, cubic ribbons, annular paths, node/link colors, label placement and hit regions use immutable scenes plus native property models.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Generic node/link/label/tooltip mappers and complete series lifecycle/paint transitions remain unmapped.",
+        "Multiple Sankey series, title/legend/draw-margin negotiation and rendered golden-image equivalence need further review."
       ]
     },
     {
@@ -3056,37 +3308,52 @@
     {
       "source": "src/LiveChartsCore/TreemapChartEngine.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs"
+      ],
+      "reason": "Iterative hierarchy, explicit-value/rollup precedence, Some(empty) internal nodes, per-level padding, series partitioning, leaf-only hover/labels and native text measurement injection are implemented.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Generic value/children/label/tooltip mapper callbacks and per-node animated geometry lifecycle remain unmapped.",
+        "Native title/legend arrangement and rendered golden-image equivalence need further review."
       ]
     },
     {
       "source": "src/LiveChartsCore/TreemapLayout.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
-      "remaining": [
-        "No reviewed Rust equivalent is recorded."
-      ]
+      "status": "ported",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs::squarify"
+      ],
+      "reason": "Reviewed descending valid-weight filtering, greedy worst-aspect row construction, shorter-side layout and rectangle reduction. Rust inputs are borrowed rather than reordered in place. Weight normalization avoids sum overflow; final row extents close rounding seams and underflowed positive weights receive zero-area rectangles.",
+      "remaining": []
     },
     {
       "source": "src/LiveChartsCore/TreemapMeasureContext.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/treemap_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/advanced_models.rs"
+      ],
+      "reason": "Iterative hierarchy, explicit-value/rollup precedence, Some(empty) internal nodes, per-level padding, series partitioning, leaf-only hover/labels and native text measurement injection are implemented.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Generic value/children/label/tooltip mapper callbacks and per-node animated geometry lifecycle remain unmapped.",
+        "Native title/legend arrangement and rendered golden-image equivalence need further review."
       ]
     },
     {
       "source": "src/LiveChartsCore/VerticalBarSeries.cs",
       "family": "Chart engines, axes and series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/cartesian_chart_engine.rs",
+        "src/FerroUI.LiveCharts/series.rs"
+      ],
+      "reason": "The shared Rust measurement pipeline implements orientation, bar grouping, pivot, signed stacks, range endpoints, errors, max width and exact-vs-category hover separation.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Generic visual/lifecycle template hooks and the complete source label placement/padding contract remain pending."
       ]
     },
     {
@@ -4244,10 +4511,14 @@
     {
       "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/DoughnutGeometry.cs",
       "family": "Drawing backend and concrete series",
-      "status": "pending",
-      "rust": [],
+      "status": "native-replacement",
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::rounded_annular_sector_path"
+      ],
+      "reason": "Classic and rounded/inverted doughnut outlines become FerroUI cubic path commands, with tangent arcs and quarter-circle segmentation; actual Pushout is applied to geometry and hit coordinates.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Tiny-wedge corner limiting and exact full-circle closure intentionally differ from the upstream fallback.",
+        "This replaces native backend drawing; source Skia snapshot equality has not been established."
       ]
     },
     {
@@ -4604,10 +4875,16 @@
     {
       "source": "src/skiasharp/LiveChartsCore.SkiaSharp/MapFactory.cs",
       "family": "Drawing backend and concrete series",
-      "status": "pending",
-      "rust": [],
+      "status": "partial",
+      "rust": [
+        "src/FerroUI.LiveCharts/geo_map_chart.rs",
+        "src/FerroUI.LiveCharts/geo/drawn_map.rs"
+      ],
+      "reason": "Retained paths, layer order, map clipping, hole hits, heat colors, markers, forward/inverse picking, viewport transforms and shorter-arc horizon closure are implemented. Bisection uses f64 precision and the shortest longitude branch.",
       "remaining": [
-        "No reviewed Rust equivalent is recorded."
+        "Full annotation layout, custom geographic series/tooltip contracts, hover lifecycle and public view commands need member/test review.",
+        "Cached path reuse during rotation, rotation/bounce scheduling and all upstream gesture sequences are not verified.",
+        "Flat-projection antimeridian topology and raster equivalence remain unverified."
       ]
     },
     {
