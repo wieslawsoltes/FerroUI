@@ -13,6 +13,33 @@ revision and hashes are recorded separately in the
 [integration validation record](../data/integration-validation.json). These earlier
 PNGs and their manifest have not been relabeled or replaced by that CI run.
 
+## Native reuse checkpoint: 183 verified outputs
+
+[Run 39947560966](https://github.com/wieslawsoltes/FerroUI/actions/runs/39947560966)
+at published `fe3d523e` produced **183 verified PNGs**: 126 light catalog pages,
+13 representative dark pages, 16 named NavigationView views and 28 named views for
+the 14 ColorPicker, ConnectedAnimation, Image and FlipView compositions. The
+[immutable manifest](../data/captures/native-reuse-39947560966.json) records every
+filename, byte count, hash and 1280 × 900 dimensions, plus the downloaded archive's
+matching GitHub digest. The [CI ledger](../data/native-reuse-ci-validation.json)
+retains the actual checkout/tree and logs, including the passing real-Skia image test.
+
+The Image captures show the original photos, the 100-pixel decode result, four
+stretch choices, fixed-size nine-grid drawings, the explicit SVG diagnostic and
+static GIF previews with disabled playback controls. FlipView shows original
+photos or bound image/caption content, selection indicators and navigation controls.
+ConnectedAnimation shows all initial collection/card/configuration/tile compositions;
+ColorPicker shows its explicit native spectrum/component/editor composition.
+These observations concern initial viewports; interaction and source equivalence
+remain separately bounded in the page ledger.
+
+Visual review also found three corrections: collection row content alignment and
+description ellipses, dark ColorView tab foregrounds, and the Gallery's outer scroll
+position after navigating from another page. This checkpoint records the images
+before those corrections. Follow-up source changes and regression tests do not
+retroactively change its results. The earlier retained PNGs below remain unchanged,
+and no page, API or full visual-parity status is promoted.
+
 ## NavigationView checkpoint: all eight source compositions
 
 The native implementation is published at `9ce7530c`, its Gallery compositions at

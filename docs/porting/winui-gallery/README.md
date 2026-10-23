@@ -110,8 +110,15 @@ boundaries. API behavior classifications are unchanged.
 The [native reuse CI ledger](data/native-reuse-ci-validation.json) separately records
 **653 passing contract tests and four intentional ignores**, including 80 Gallery
 tests and 53 importer tests, on that actual checkout. It also retains the rejected
-stale-lockfile comparison and failed capture compilation. Corrected rendering
-remains pending until the later run produces and validates its outputs.
+stale-lockfile comparison and failed capture compilation. The corrected
+[run at `fe3d523e`](https://github.com/wieslawsoltes/FerroUI/actions/runs/39947560966)
+passed all three jobs: the same 653 contracts, 47 scanner regressions, declarative
+compilation and the separate real-Skia selected-bitmap test. Its
+[capture manifest](data/captures/native-reuse-39947560966.json) verifies exactly
+183 PNGs, including all 14 new compositions in both themes. Visual review found
+collection row alignment/ellipsis, dark ColorView tab contrast and retained outer
+scroll offsets to correct. That immutable capture record predates these follow-up
+changes and does not certify them or promote page/API parity.
 
 The current source map identifies **320 type candidates and 1,554 member candidates**;
 the existing-API guard preserves **3,170 types, 28,435 declared member names and 458

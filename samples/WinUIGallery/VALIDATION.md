@@ -66,7 +66,7 @@ and the corrected failed attempt.
 | Source comparison | **47 scanner regressions passed**; exact maps and generated registries pass | Preserves 3,170 existing types, 28,435 declared member names and 458 registrations; 487 additional types remain separate. Events, Symbol values, builders and public Rust paths pass their freshness checks. |
 | Strict completeness | **Expected exit 2** | 1,544 types, 7,264 members and all 126 pages still lack complete behavioral evidence. The gate remains active. |
 | Original assets | **130 files reproducible**, registered at 132 paths | 108 original control PNGs plus 22 original media files; two existing path-case aliases are explicit. Six original page/code-behind hashes accompany the media manifest. |
-| Rendering and image decoding | Corrected CI execution pending | The first CI attempt failed to compile the capture binary before producing images; the two reference coercions are corrected in `07aa0120`. The workflow requests **183 PNGs** and the real-Skia JPEG/selected-image test. These requests are not recorded as passing output. |
+| Rendering and image decoding | **183 PNGs verified; one real-Skia test passed** at `fe3d523e` | The first CI attempt failed before producing images; `07aa0120` corrected its reference coercions. The later run and exact artifact are recorded below. This result predates the subsequent visual-review corrections. |
 
 ### CI integration with main `934b9ce1`
 
@@ -93,6 +93,55 @@ coercion into the verifier. No PNGs or rendering artifact were produced by the f
 attempt. Its scanner and rendering logs remain in the execution ledger. The corrected
 workflow requests 126 light pages, 13 dark pages, 16 named NavigationView views and
 28 named views for the 14 new compositions; a requested view is not rendering evidence.
+
+### Successful rendering checkpoint at `fe3d523e`
+
+[Run 39947560966](https://github.com/wieslawsoltes/FerroUI/actions/runs/39947560966)
+passed all three parity jobs. Its actual checkout was `37ea1252`, tree
+`0d7846902cb409d3e2469588d28f52924e894f88`, identical to published `fe3d523e`.
+The exact comparison and all 47 scanner regressions passed, along with 653 contract
+tests, four intentional ignores, zero failures and declarative compilation. The
+separate capture-feature test passed with real Skia decoding of all 13 landscape
+JPEGs and selected-image propagation.
+
+The [artifact manifest](../../docs/porting/winui-gallery/data/captures/native-reuse-39947560966.json)
+contains exactly **183 PNGs: 148 light and 35 dark**, matching both the workflow's
+expected path set and all 183 logged output paths. Every image passed integrity
+checks and is 1280 × 900. The ZIP is 26,085,388 bytes with SHA-256
+`195bd6fe80d3ce4060875c36283e109a7892864b839116915d396be367b6c3d1`.
+The CI ledger retains each job log and immutable source identities; it does not
+infer tested inputs from the subsequently edited working tree.
+
+Visual review of this checkpoint found collection photo/text columns that drifted,
+missing description ellipses, low-contrast dark ColorView tab icons and inconsistent
+whole-page scroll offsets. The follow-up uses native content alignment/text trimming,
+page-local dynamic foreground brushes and the Gallery's existing outer ScrollViewer
+to correct those behaviors. New hosted regressions exercise actual scrolling and
+realized icon foreground/path-fill theme changes. The source's conditional
+trimmed-description tooltip is adapted through native TextLayout and ToolTip APIs;
+its regression resizes actual source text through collapsed/fitting states and
+checks both tooltip clearing and control release. This earlier artifact remains a
+record of the pre-correction source; later execution is required for the corrections.
+No page or API status is promoted by rendering a viewport or a pending-feature diagnostic.
+
+### Local execution of the visual-review corrections
+
+The [follow-up execution record](../../docs/porting/winui-gallery/data/native-reuse-visual-validation.json)
+retains **82 passing default Gallery library tests** and **one separately passing
+theme-feature test**, with zero failures or ignored tests. The default run includes
+the measured outer-scroll navigation regression and conditional trimmed-description
+tooltip/resize/lifetime regression. The theme-feature test installs actual compiled
+WinUITheme resources and native ColorView templates, then checks the same realized
+PathIcon foregrounds and drawn Path fills through light/dark/light changes and
+selected/unselected tabs. Pointer-over and pressed input are not asserted by that test.
+
+The collector's selected Gallery/workspace Cargo hashes were unchanged before and
+after each run. The record lists the exact selected scope and excludes the capture
+binary, desktop host, unrelated importer inputs and unmeasured transitive dependency
+resources. A first theme attempt failed to download a dependency through the local
+proxy before any compilation or test execution; the network-enabled retry passed.
+These local results contain no new Skia frames. The CI rendering workflow also runs
+the new theme regression alongside its existing image test and 183-image sweep.
 
 The first local native build was killed under the shared memory limit before its
 tests ran. A second feature-variant build was stopped before tests to conserve shared
