@@ -60,6 +60,36 @@ immutable ARM64 record. That comparison retains the newer engine/provenance
 separately. It does not validate the later Rust tracking implementation; the
 local frozen-source runtime gate above does.
 
+### Final CI observation for the preceding 9a1a756b checkpoint
+
+The original 11:46:17 UTC interim snapshot is retained unchanged. A separate
+11:55:45 UTC final observation in
+[continuation-validation.json](continuation-validation.json) records both
+workflows as canceled after publication of the newer SetText checkpoint.
+Conformance [39946646931](https://github.com/wieslawsoltes/FerroUI/actions/runs/39946646931)
+has one successful ARM64 job and two canceled jobs; broad CI
+[39946646944](https://github.com/wieslawsoltes/FerroUI/actions/runs/39946646944)
+has seven successful and seven canceled jobs. Neither workflow is reported as
+fully passing.
+
+Before cancellation, Linux completed extractor 50, Base 4,640, Controls 5,301,
+Win32/WinUI host 329/50 and all three theme suites (Fluent 210 with two ignored,
+Simple 213 with three ignored, WinUI 301 with two ignored). XAML was canceled
+before a result. Native Windows completed WinUI 65, exact UTF-16 two, IMM32 23
+and system-MSFTEDIT eight; selected rich Controls had no completed result.
+The entire X11 job succeeded, including ContentType `(6,0)`, `(2,0)`, `(3,0)`
+and the subsequent catalog smoke. The successful ARM64 artifact and its
+measured checkout are described above.
+
+The saved final-report bytes have SHA-256
+`75076890d7fcab90e8ef63af0d1f4edbd9afd00718d1fd09e7e9730aedd7c36f`.
+Completed decoded job-log hashes in the embedded report describe normalized
+LF text, not original ZIP archives. The complete ARM64 job-log transport failed
+twice; its successful artifact is independently byte/SHA/CRC verified. These
+results belong to workflow head `9a1a756b` and measured PR merge
+`5a51a2f716291bbd32f2e18bd93079349979a2f7`, not the later SetText or
+read-only-menu changes.
+
 ## 2026-10-23 continuation: measured typing and hosted objects
 
 The continuation is integrated with main `0526a3ca17ec2da5b44489617393c382153678b8`

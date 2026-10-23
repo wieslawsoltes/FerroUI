@@ -1456,3 +1456,14 @@ ownership policies, source evidence and limits. RT-I36 and regenerated source/AP
 maps keep affected entries partial or reference-only. TypeText duplicate
 tracking, unobserved cache behavior, overlapping identical-text edits, native
 history and the other unmeasured engine boundaries remain open.
+
+## 2026-10-23 — Preserve the final preceding CI observation
+
+After the SetText publication, both workflows for fixture checkpoint 9a1a756b
+finished canceled. The final observation is appended separately from the
+unchanged interim snapshot in continuation-validation.json. It retains the
+successful entire X11 job and ARM64 oracle artifact, completed Linux and native
+Windows suites, canceled jobs and unfinished suites without promoting the runs
+to a full pass. TESTS.md records the exact scope and report hash. This evidence
+checkpoint changes no Rust behavior and does not validate the subsequent
+read-only-menu work.
